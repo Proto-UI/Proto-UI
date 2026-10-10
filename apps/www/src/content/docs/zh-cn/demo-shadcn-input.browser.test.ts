@@ -158,7 +158,7 @@ describe.sequential('Shadcn Input rendered preview acceptance', () => {
           disabled: false,
           readOnly: false,
           role: 'textbox',
-          height: 36,
+          height: 32,
           borderStyle: 'solid',
           cursor: 'text',
           transition: expect.stringContaining('color'),

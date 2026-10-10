@@ -1,0 +1,195 @@
+id: T-SELECT-DRAFT-PROJECTIONS-0001
+type: test
+title: Complete Bootstrap and Liquid Select projection evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Retain draft until native browser/GPUI and applicable optical paint evidence, independent review and stable admission complete.
+summary: Ten direct projected Select parts with explicitly separated source, runtime, compiler, composed Web and native evidence.
+cases:
+  - id: T-SELECT-DRAFT-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+    title: Complete single-selection protocol through direct Base consumers
+    covers:
+      - P-BOOTSTRAP-2-3-2-SELECT-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-SELECT-VALUE-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-SELECT-ITEM-BASE-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-BASE-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-TRIGGER-BASE-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-VALUE-BASE-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-CONTENT-BASE-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-ITEM-BASE-INHERITANCE
+    expectation: Controlled/uncontrolled requests, disabled suppression, selected-text derivation, accessible relationships, keyboard/typeahead, pointer active separation, dismissal, focus restoration and portal presence remain Base-owned.
+  - id: T-SELECT-DRAFT-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+    title: All five public source parts and four-Web CLI facades
+    covers:
+      - P-BOOTSTRAP-2-3-2-SELECT-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-SELECT-VALUE-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-SELECT-ITEM-DIRECT-ENTRY
+      - P-LIQUID-GLASS-SELECT-DIRECT-ENTRY
+      - P-LIQUID-GLASS-SELECT-TRIGGER-DIRECT-ENTRY
+      - P-LIQUID-GLASS-SELECT-VALUE-DIRECT-ENTRY
+      - P-LIQUID-GLASS-SELECT-CONTENT-DIRECT-ENTRY
+      - P-LIQUID-GLASS-SELECT-ITEM-DIRECT-ENTRY
+    expectation: All five private source exports and complete WC/React/Vue/Vue2 workspace facades resolve; installed-consumer mode and GPUI hosts reject unsupported use.
+  - id: T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    title: Bounded readable layout and real family toolbar
+    covers:
+      - P-BOOTSTRAP-2-3-2-SELECT-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-SELECT-VALUE-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-VISUAL-SAFETY
+      - P-BOOTSTRAP-2-3-2-SELECT-ITEM-VISUAL-SAFETY
+      - P-LIQUID-GLASS-SELECT-VISUAL-SAFETY
+      - P-LIQUID-GLASS-SELECT-TRIGGER-VISUAL-SAFETY
+      - P-LIQUID-GLASS-SELECT-VALUE-VISUAL-SAFETY
+      - P-LIQUID-GLASS-SELECT-CONTENT-VISUAL-SAFETY
+      - P-LIQUID-GLASS-SELECT-ITEM-VISUAL-SAFETY
+    expectation: Source checks establish logical alignment, shrinkability, full token closure and wrapping. Actual framework composition exercises native owner boundaries and family toolbar controls. Native browser geometry/input/paint must be separately executed.
+  - id: T-SELECT-DRAFT-PROJECTIONS-0001-CASE-MATERIAL-INTENT
+    title: Shared whole optical intent and view lifecycle
+    covers:
+      - P-LIQUID-GLASS-SELECT-TRIGGER-MATERIAL-INTENT
+      - P-LIQUID-GLASS-SELECT-CONTENT-MATERIAL-INTENT
+      - P-BASE-SELECT-TRIGGER-VIEW-LIFETIME
+    expectation: A real Runtime records mutually exclusive Trigger rest/pressed, Content open intent, disabled/cancel/withdrawal resets, view release/remount and opaque fallback without a visual sink; no optical paint or GPUI execution is inferred.
+implementations:
+  - id: projection-protocol
+    kind: adapter-test
+    status: passing
+    required: true
+    path: packages/prototypes/test-utils/test/select-projections.behavior.test.ts
+    consumesCases:
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises: &a1
+      - P-BOOTSTRAP-2-3-2-SELECT
+      - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER
+      - P-BOOTSTRAP-2-3-2-SELECT-VALUE
+      - P-BOOTSTRAP-2-3-2-SELECT-CONTENT
+      - P-BOOTSTRAP-2-3-2-SELECT-ITEM
+      - P-LIQUID-GLASS-SELECT
+      - P-LIQUID-GLASS-SELECT-TRIGGER
+      - P-LIQUID-GLASS-SELECT-VALUE
+      - P-LIQUID-GLASS-SELECT-CONTENT
+      - P-LIQUID-GLASS-SELECT-ITEM
+      - P-BASE-SELECT-TRIGGER
+      - P-BASE-SELECT-TRIGGER
+  - id: projection-compiler
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/cli/test/select-projections.test.ts
+    consumesCases:
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises: *a1
+  - id: real-framework-previewer
+    kind: adapter-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts
+    consumesCases:
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-DIRECT-ENTRY
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises: *a1
+  - id: liquid-material-intent
+    kind: runtime-test
+    status: passing
+    required: true
+    path: packages/prototypes/liquid-glass/test/select-material.test.ts
+    consumesCases:
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-MATERIAL-INTENT
+    exercises: *a1
+  - id: native-browser
+    kind: workspace-check
+    status: planned
+    required: true
+    path: apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts
+    consumesCases:
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-BASE-INHERITANCE
+      - T-SELECT-DRAFT-PROJECTIONS-0001-CASE-VISUAL-SAFETY
+    exercises: *a1
+verifies:
+  prototypes:
+    - id: P-BOOTSTRAP-2-3-2-SELECT
+      anchors:
+        - P-BOOTSTRAP-2-3-2-SELECT-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-SELECT-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-SELECT-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-SELECT-TRIGGER
+      anchors:
+        - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-SELECT-VALUE
+      anchors:
+        - P-BOOTSTRAP-2-3-2-SELECT-VALUE-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-SELECT-VALUE-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-SELECT-VALUE-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-SELECT-CONTENT
+      anchors:
+        - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-SELECT-CONTENT-VISUAL-SAFETY
+    - id: P-BOOTSTRAP-2-3-2-SELECT-ITEM
+      anchors:
+        - P-BOOTSTRAP-2-3-2-SELECT-ITEM-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-SELECT-ITEM-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-SELECT-ITEM-VISUAL-SAFETY
+    - id: P-LIQUID-GLASS-SELECT
+      anchors:
+        - P-LIQUID-GLASS-SELECT-BASE-INHERITANCE
+        - P-LIQUID-GLASS-SELECT-DIRECT-ENTRY
+        - P-LIQUID-GLASS-SELECT-VISUAL-SAFETY
+    - id: P-LIQUID-GLASS-SELECT-TRIGGER
+      anchors:
+        - P-LIQUID-GLASS-SELECT-TRIGGER-BASE-INHERITANCE
+        - P-LIQUID-GLASS-SELECT-TRIGGER-DIRECT-ENTRY
+        - P-LIQUID-GLASS-SELECT-TRIGGER-VISUAL-SAFETY
+        - P-LIQUID-GLASS-SELECT-TRIGGER-MATERIAL-INTENT
+    - id: P-LIQUID-GLASS-SELECT-VALUE
+      anchors:
+        - P-LIQUID-GLASS-SELECT-VALUE-BASE-INHERITANCE
+        - P-LIQUID-GLASS-SELECT-VALUE-DIRECT-ENTRY
+        - P-LIQUID-GLASS-SELECT-VALUE-VISUAL-SAFETY
+    - id: P-LIQUID-GLASS-SELECT-CONTENT
+      anchors:
+        - P-LIQUID-GLASS-SELECT-CONTENT-BASE-INHERITANCE
+        - P-LIQUID-GLASS-SELECT-CONTENT-DIRECT-ENTRY
+        - P-LIQUID-GLASS-SELECT-CONTENT-VISUAL-SAFETY
+        - P-LIQUID-GLASS-SELECT-CONTENT-MATERIAL-INTENT
+    - id: P-LIQUID-GLASS-SELECT-ITEM
+      anchors:
+        - P-LIQUID-GLASS-SELECT-ITEM-BASE-INHERITANCE
+        - P-LIQUID-GLASS-SELECT-ITEM-DIRECT-ENTRY
+        - P-LIQUID-GLASS-SELECT-ITEM-VISUAL-SAFETY
+    - id: P-BASE-SELECT-TRIGGER
+      anchors:
+        - P-BASE-SELECT-TRIGGER-VIEW-LIFETIME
+exercises:
+  prototypes: *a1
+openQuestions:
+  - id: T-SELECT-DRAFT-PROJECTIONS-0001-Q-NATIVE
+    question:
+      en: When do exact-source native browser input/paint, true GPUI Select host prerequisites and optical material realization pass?
+    blocks:
+      - activation:T-SELECT-DRAFT-PROJECTIONS-0001
+      - implementation:T-SELECT-DRAFT-PROJECTIONS-0001#native-browser
+sources:
+  - path: .github/workflows/select-draft-projections-evidence.yml
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Map full direct projection behavior and source consumers while leaving native/optical host proof and final admission open.
+tags:
+  - test
+  - select
+  - projection
+  - adapter
+  - compiler
+  - material

@@ -49,6 +49,7 @@ describe('adapter-react: Props normalization contract', () => {
           classifiedChild: { type: 'string', default: 'missing' },
           classifiedClass: { type: 'string', default: 'missing' },
           listenerType: { type: 'string', default: 'missing' },
+          dir: { type: 'string', default: 'ltr' },
         });
         def.lifecycle.onMounted((run) => {
           raw = { ...run.props.getRaw() };
@@ -61,6 +62,7 @@ describe('adapter-react: Props normalization contract', () => {
       proto,
       {
         label: 'input',
+        dir: 'rtl',
         children: 'selected-child',
         className: 'selected-class',
         onCheckedChange: () => {},
@@ -72,6 +74,7 @@ describe('adapter-react: Props normalization contract', () => {
             classifiedChild: String(props.children),
             classifiedClass: String(props.className),
             listenerType: typeof props.onCheckedChange,
+            dir: props.dir,
           };
         },
       }
@@ -82,7 +85,30 @@ describe('adapter-react: Props normalization contract', () => {
       classifiedChild: 'selected-child',
       classifiedClass: 'selected-class',
       listenerType: 'function',
+      dir: 'rtl',
     });
     mounted.unmount();
   });
+});
+
+// Compatibility control: preserve the existing Prototype-declared semantic `dir` input.
+it('preserves a declared dir with the default classifier', async () => {
+  let resolved: unknown;
+  const proto = definePrototype({
+    name: 'react-declared-dir-compatibility',
+    setup(def) {
+      def.props.define({ dir: { type: 'string', default: 'ltr' } });
+      def.lifecycle.onMounted((run) => {
+        resolved = run.props.get().dir;
+      });
+      return (r) => [String(r.read.props.get().dir)];
+    },
+  });
+  const mounted = createMountedReactAdapter(proto, { dir: 'rtl' });
+
+  try {
+    expect(resolved).toBe('rtl');
+  } finally {
+    mounted.unmount();
+  }
 });

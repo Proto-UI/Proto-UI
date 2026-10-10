@@ -5,6 +5,7 @@ beforeAll(() => {
 });
 afterAll(() => observerKeeper.restore());
 import { headerSurfaceParticipant } from './site-header-surface';
+import { quickStartOwnershipReady } from '../content/docs/zh-cn/quick-start-first-frame-ownership';
 import { renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
 import { afterAll, beforeAll, afterEach, describe, expect, it, vi } from 'vitest';
@@ -98,6 +99,12 @@ describe('batched real typography adapters and stable native semantic owners', (
       first.activate();
       await settle();
       expect(root.querySelector('h1')).toBe(heading);
+      expect(
+        heading.querySelector('[data-typography-prototype]')?.classList.contains('block')
+      ).toBe(true);
+      expect(
+        root.querySelector('label [data-typography-prototype]')?.classList.contains('block')
+      ).toBe(false);
       expect(root.querySelector('#body a')).toBe(link);
       expect(root.querySelector('em')).toBe(emphasis);
       expect(root.querySelector('#body [data-site-typography-slot]')!.firstChild).toBe(sourceText);
@@ -393,7 +400,7 @@ describe('Shadcn document reading composition', () => {
             <p class="starlight-aside__title" data-site-typography="label" id="note-title">Note title</p>
             <div class="starlight-aside__content"><p id="note-body">Note body</p></div>
           </aside>
-          <aside class="doc-stage-notice"><p id="stage-body">Stage notice</p></aside>
+          <aside class="doc-stage-notice"><p data-site-typography="notice-title" id="stage-title">Release title</p><p id="stage-body">Stage notice</p></aside>
         </div>
       </main>
     </div>`;
@@ -432,6 +439,9 @@ describe('Shadcn document reading composition', () => {
         expect(tokens(root, id)).toContain('text-foreground');
         expect(tokens(root, id)).not.toContain('text-inherit');
       }
+      expect(tokens(root, 'stage-title')).toEqual(
+        expect.arrayContaining(['text-base', 'font-semibold', 'leading-relaxed', 'text-foreground'])
+      );
       expect(tokens(root, 'note-title')).toEqual(
         expect.arrayContaining(['text-sm', 'font-medium', 'text-foreground'])
       );
@@ -510,4 +520,138 @@ describe('Shadcn document reading composition', () => {
       expect(tokens(root, 'prose')).toContain('text-foreground');
     });
   }
+});
+
+it('discovers native note-title intent before any asynchronous Surface bootstrap', () => {
+  document.body.innerHTML =
+    '<div data-doc-flow><aside class="starlight-aside--note"><p class="starlight-aside__title">Title</p><p>Body</p></aside></div>';
+  const collected = collectSiteTypographyTargets(document.body, true);
+  expect(collected.map((target) => target.role)).toEqual(['label', 'body']);
+});
+
+// A document-wide typography commit must not rewrite an untouched code
+// selection. Native Selection methods can run focus steps even when all four
+// endpoints remain identical. Happy DOM does not model those browser steps;
+// the controlled side effect below makes that source ownership boundary red.
+describe('startup typography and independent native selection owners', () => {
+  for (const focusOwner of ['button', 'a'] as const)
+    it(`does not reapply a retained code selection while ${focusOwner} owns focus`, async () => {
+      const root = fixture();
+      const command = document.createElement(focusOwner);
+      if (command instanceof HTMLAnchorElement) command.href = '/native';
+      command.textContent = 'Header command';
+      const code = document.createElement('pre');
+      code.tabIndex = 0;
+      code.textContent = 'npm create proto-ui';
+      root.prepend(command, code);
+      const text = code.firstChild!;
+      const selection = document.getSelection()!;
+      selection.setBaseAndExtent(text, 1, text, 1);
+      command.focus();
+      const setBaseAndExtent = selection.setBaseAndExtent.bind(selection);
+      const restore = vi.spyOn(selection, 'setBaseAndExtent').mockImplementation((...args) => {
+        setBaseAndExtent(...args);
+        code.focus(); // Controlled browser focus side effect, not fabricated evidence.
+      });
+      const participant = siteTypographyParticipant(root);
+      const candidate = await participant.materialize(request('react', 1));
+      candidates.push(candidate);
+      candidate.activate();
+      expect(restore).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(command);
+      expect(code.firstChild).toBe(text);
+      expect(selection.anchorNode).toBe(text);
+      expect(selection.anchorOffset).toBe(1);
+    });
+});
+
+// Header/Code readiness is injected fixture state; Typography publication is
+// produced by the real React participant and is held behind an explicit gate.
+it('keeps native ownership evidence pending while real React Typography publication is delayed', async () => {
+  document.body.innerHTML = `<header data-docs-site-header data-site-menu-ready></header>
+    <div data-site-code-surface="frame" data-code-surface-view="ready"></div>
+    <main data-doc-flow><p class="doc-stage-notice__title" data-site-typography="notice-title">Retained release text</p></main>`;
+  const root = document.querySelector<HTMLElement>('main')!;
+  const participant = siteTypographyParticipant(root, {
+    docsOnly: true,
+    ownerId: 'documentation-typography',
+  });
+  const candidate = await participant.materialize(request('react', 1));
+  candidates.push(candidate);
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const published = gate.then(() => candidate.activate());
+  try {
+    expect(
+      document.querySelector('[data-docs-site-header]')?.hasAttribute('data-site-menu-ready')
+    ).toBe(true);
+    expect(
+      document
+        .querySelector('[data-site-code-surface="frame"]')
+        ?.getAttribute('data-code-surface-view')
+    ).toBe('ready');
+    expect(
+      root.querySelector('.doc-stage-notice__title')?.hasAttribute('data-typography-runtime')
+    ).toBe(false);
+    expect(
+      quickStartOwnershipReady(),
+      'prepared Typography must not pass the native completion gate'
+    ).toBe(false);
+    release();
+    await published;
+    expect(
+      root.querySelector('.doc-stage-notice__title')?.getAttribute('data-typography-owner')
+    ).toBe('documentation-typography');
+    expect(quickStartOwnershipReady()).toBe(true);
+    const title = root.querySelector('.doc-stage-notice__title')!;
+    title.setAttribute('data-typography-runtime', 'vue');
+    expect(quickStartOwnershipReady(), 'another runtime is not the React owner under test').toBe(
+      false
+    );
+    title.setAttribute('data-typography-runtime', 'react');
+    title.setAttribute('data-typography-owner', 'another-typography-owner');
+    expect(
+      quickStartOwnershipReady(),
+      'another scope cannot certify documentation Typography'
+    ).toBe(false);
+    title.setAttribute('data-typography-owner', 'documentation-typography');
+    expect(quickStartOwnershipReady()).toBe(true);
+  } finally {
+    release();
+    await published;
+  }
+});
+
+describe('Library Card ownership before any runtime marker exists', () => {
+  for (const docsOnly of [false, true])
+    it(`does not recollect empty-token Base/Lucide parts (docsOnly=${docsOnly})`, () => {
+      document.body.innerHTML = `<main data-doc-flow>
+        <h2 id="ordinary-title">Ordinary documentation</h2><p id="ordinary-body">Ordinary prose</p>
+        ${['base', 'lucide']
+          .map(
+            (family) => `<article data-library="${family}">
+          <wc-library-base-surface data-library-part="base-surface">
+            <header><h2><wc-library-base-text data-library-part="base-text">${family}</wc-library-base-text></h2></header>
+            <p><wc-library-base-text data-library-part="base-text">Description</wc-library-base-text></p>
+            <p data-site-typography="body"><wc-library-base-text data-library-part="base-text">Caption</wc-library-base-text></p>
+          </wc-library-base-surface>
+        </article>`
+          )
+          .join('')}
+      </main>`;
+      const root = document.querySelector<HTMLElement>('main')!;
+      expect(root.querySelector('[data-pui-root],[data-pui-style]')).toBeNull();
+      const html = root.innerHTML;
+      const sources = [...root.querySelectorAll('[data-library] h2,[data-library] p')];
+      const collect = () =>
+        collectSiteTypographyTargets(root, docsOnly).map(({ native }) => native.id);
+      expect(collect()).toEqual(['ordinary-title', 'ordinary-body']);
+      expect(root.innerHTML).toBe(html);
+      expect([...root.querySelectorAll('[data-library] h2,[data-library] p')]).toEqual(sources);
+      for (const part of root.querySelectorAll('[data-library-part]'))
+        part.setAttribute('data-pui-root', '');
+      expect(collect()).toEqual(['ordinary-title', 'ordinary-body']);
+    });
 });

@@ -1,0 +1,23 @@
+---
+title: 'Popover'
+description: '用于少量交互内容的非模态锚定弹层。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+用于少量交互内容的非模态锚定弹层。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-popover"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content 相对 Trigger 定位，提供 side、align、sideOffset、alignOffset、collisionPadding。非模态内容不锁定背景滚动或限制 Tab；外部点击、焦点移出 Trigger 与 Content、Escape 与 Close 请求关闭。在 Trigger 和 Portal 中的内容之间移动焦点仍属于内部操作。焦点移出后关闭会保留外部控件上的焦点，不返回 Trigger。
+
+Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。拒绝 focus.outside 请求时 Content 保持显示且不限制外部焦点，后续交互仍可再次请求关闭。中立的焦点观察无法识别输入设备，因此纯焦点移出请求的 focusReason 为 programmatic。
+
+组成: Root, Trigger, Content, Title, Description, Close.
+
+当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。

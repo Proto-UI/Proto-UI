@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Toggle'
-description: '基于 Base Toggle 的持续状态 Neo-Brutalist 投影'
+description: '基于 Base Toggle 的 Neo-Brutalist 持续状态投射'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,7 +8,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-Toggle 保留 Base 的 activation 与 `aria-pressed` 所有权。锁存 active state 使用持续 inset ink frame 作为非颜色信号；瞬时 pointer press 仍使用独立的压入与释放反馈。
+Toggle 保留 Base 的 activation 与 `aria-pressed` 所有权。锁存 active state 使用持续 inset ink frame 作为非颜色无障碍扩展；瞬时 press 保持平面几何，不产生位移。固定 Neo 尺寸 recipe 为默认 40px、small 36px（0.8rem 文字）与 large 44px（text-sm）；上游 icon-size/side-padding 与 variants 仍不在此限定投射范围。当前真实浏览器视觉验证待完成。
 
 <div class="brutalist-demo-frame">
   <PrototypePreviewer demoId="demo-brutalist-toggle" initialRuntime="wc" />

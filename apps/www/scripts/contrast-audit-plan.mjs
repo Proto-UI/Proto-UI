@@ -107,3 +107,73 @@ export async function establishNativeItemPointerBaseline({
     throw new Error(`Invalid independent pointer baseline for ${identity}.`);
   return before;
 }
+
+// Mirror the existing demo-modules glob's unique basename contract, not a
+// second family/path registry. Routes must contain that exact literal recipe in
+// the current English Brutalist page. Unsupported dynamic MDX fails closed.
+export async function discoverContrastSources({ contentRoot, manifest, families }) {
+  const { readdir, readFile } = await import('node:fs/promises');
+  const { join } = await import('node:path');
+  const files = [];
+  let visited = 0;
+  async function walk(directory, prefix = '') {
+    const entries = await readdir(directory, { withFileTypes: true });
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (++visited > 20_000) throw new Error('Contrast source discovery exceeded its file bound.');
+      const path = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isSymbolicLink()) throw new Error(`Symlink in contrast source discovery: ${path}`);
+      if (entry.isDirectory()) await walk(join(directory, entry.name), path);
+      else if (entry.isFile()) files.push(path);
+    }
+  }
+  await walk(contentRoot);
+  const recipes = new Map();
+  for (const path of files.filter((path) => path.endsWith('.demo.ts'))) {
+    const id = path.split('/').at(-1).slice(0, -'.demo.ts'.length);
+    if (recipes.has(id)) throw new Error(`Duplicate demo ID ${id}: ${recipes.get(id)}, ${path}`);
+    recipes.set(id, path);
+  }
+  const pages = [];
+  for (const path of files.filter((path) =>
+    /^docs\/en\/ui-libraries\/brutalist\/.+\.mdx$/.test(path)
+  )) {
+    const source = await readFile(join(contentRoot, path), 'utf8');
+    // Code examples and comments cannot authorize an executable route binding.
+    const live = source
+      .replace(/^(`{3,}|~{3,})[^\n]*\n[\s\S]*?^\1\s*$/gm, '')
+      .replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+      .replace(/<!--[\s\S]*?-->/g, '');
+    const demos = [...live.matchAll(/<PrototypePreviewer\b([\s\S]*?)\/>/g)].map((match) => {
+      const ids = [...match[1].matchAll(/\bdemoId\s*=\s*(["'])([^"']+)\1/g)];
+      if (ids.length !== 1 || /\{\s*\.\.\./.test(match[1]))
+        throw new Error(`Unresolved literal Previewer recipe binding: ${path}`);
+      return ids[0][2];
+    });
+    pages.push({ path, source, demos });
+  }
+  return Object.fromEntries(
+    families.map((family) => {
+      const recipeId = manifest.families[family]?.recipeId;
+      const recipe = recipes.get(recipeId);
+      if (!recipe) throw new Error(`Missing unique authored recipe for ${family}: ${recipeId}`);
+      const bound = pages.filter((page) => page.demos.includes(recipeId));
+      if (bound.length !== 1 || bound[0].demos.filter((id) => id === recipeId).length !== 1)
+        throw new Error(
+          `Expected one source-bound route/Previewer for ${recipeId}; found ${bound.length}.`
+        );
+      const page = bound[0];
+      const frontmatter = /^---\s*\n([\s\S]*?)\n---/.exec(page.source)?.[1] ?? '';
+      if (/^\s*slug\s*:/m.test(frontmatter))
+        throw new Error(`Unsupported custom route slug in ${page.path}`);
+      return [
+        family,
+        {
+          recipeId,
+          recipePath: `apps/www/src/content/${recipe}`,
+          pagePath: `apps/www/src/content/${page.path}`,
+          route: `/${page.path.slice('docs/'.length, -'.mdx'.length)}/`,
+        },
+      ];
+    })
+  );
+}

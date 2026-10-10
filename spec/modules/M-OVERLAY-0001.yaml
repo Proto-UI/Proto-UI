@@ -25,6 +25,10 @@ criteria:
     text:
       en: Generic entry, restore, closeOnAnchorPress and closeOnTriggerPress are retained configuration, not implemented automatic policies. Focus-outside remains deferred. Consumer-specific focus and Root request protocols remain consumer-owned; Overlay does not implement Hit Participation, A11y or complete modal semantics.
       zh-CN: 通用 entry、restore、closeOnAnchorPress、closeOnTriggerPress 仅保留配置，尚非已实现自动策略。focus-outside deferred。消费者 focus 与 Root request 协议归消费者；Overlay 不实现 Hit Participation、A11y 或完整 modal 语义。
+  - id: M-OVERLAY-0001-TARGET
+    text:
+      en: Physical resource reconciliation resolves one current host target before acquiring output. A host-neutral resolver can supply a verified opaque object; missing or foreign targets withdraw previous output without changing logical open state. Native support cannot be inferred from the legacy guarded Web target path.
+      zh-CN: 物理资源协调在获取输出前解析当前宿主target；host-neutral resolver可提供经验证opaque object，缺失/foreign目标撤旧输出而不改变logical open。不能从兼容Web target路径推断native支持。
 satisfies:
   contracts:
     - C-AS-OVERLAY-0001
@@ -34,6 +38,10 @@ dependsOn:
     - M-BOUNDARY-0001
     - M-ANATOMY-0001
     - M-POSITIONING-0001
+relates:
+  hostCaps:
+    - id: HC-OVERLAY-TARGET-0001
+      since: 0.3.0-alpha.1
 requires:
   hostCaps:
     - id: HC-OVERLAY-PORTAL-0001

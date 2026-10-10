@@ -16,6 +16,7 @@ describe('composed Shadow prototype admission', () => {
     const artifact = renderProtoShadowSplitStyleArtifact([
       'fixed',
       'inset-0',
+      'bg-background',
       'bg-black/50',
       'backdrop-blur-xs',
       'hidden',

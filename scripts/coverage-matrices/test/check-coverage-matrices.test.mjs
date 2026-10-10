@@ -754,6 +754,10 @@ function writeReviewedPromotionConfig(
     new URL('../../../apps/www/scripts/contrast-provenance.mjs', import.meta.url),
     path.join(root, 'apps/www/scripts/contrast-provenance.mjs')
   );
+  fs.copyFileSync(
+    new URL('../../../apps/www/scripts/runtime-retry-urls.mjs', import.meta.url),
+    path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs')
+  );
 }
 
 function commitFixtureRoot(root) {
@@ -18047,7 +18051,49 @@ test('audit resolver profile: exact audited helper is mandatory evidence metadat
 
 test('audit resolver profile: reviewed standard profile remains independently admitted without audit helper', () => {
   const { root, config, plugin, target } = auditResolverFixture();
-  const original = fs
+  const original = fs.readFileSync(
+    new URL('./fixtures/promotion-resolver-original-857.txt', import.meta.url),
+    'utf8'
+  );
+  assert.equal(
+    createHash('sha256').update(original).digest('hex'),
+    'd96e4e9086541e713e95f1fa8cda44a7af04795f37f4a91f9f3f93de75ea9f30'
+  );
+  fs.writeFileSync(config, original);
+  fs.unlinkSync(plugin);
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(!metadata.has(plugin));
+});
+
+test('audit resolver profile: exact historical audit configuration remains admitted with its helper', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const historical = fs.readFileSync(
+    new URL('./fixtures/promotion-resolver-original-audit.txt', import.meta.url),
+    'utf8'
+  );
+  assert.equal(
+    createHash('sha256').update(historical).digest('hex'),
+    'b07dfc4350c16a8bee3b65717887cc5d592002f2cb492e134c60a3d18519a6de'
+  );
+  fs.writeFileSync(config, historical);
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(metadata.has(plugin));
+  fs.appendFileSync(plugin, '\n// unreviewed change');
+  assert.throws(
+    () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+    /audit resolver plugin.*unrecognized/
+  );
+});
+
+test('audit resolver profile: reviewed Finf non-audit counterpart needs no audit helper', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  fs.copyFileSync(
+    new URL('./fixtures/promotion-resolver-original-finf-audit.txt', import.meta.url),
+    config
+  );
+  const current = fs
     .readFileSync(config, 'utf8')
     .replace("import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n", '')
     .replace(
@@ -18062,10 +18108,10 @@ test('audit resolver profile: reviewed standard profile remains independently ad
       '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
     );
   assert.equal(
-    createHash('sha256').update(original).digest('hex'),
-    '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005'
+    createHash('sha256').update(current).digest('hex'),
+    '368441f22060c0a9adec23a98320e87fb68df4b64c1a3d8e7e3ff3877944f475'
   );
-  fs.writeFileSync(config, original);
+  fs.writeFileSync(config, current);
   fs.unlinkSync(plugin);
   const metadata = new Set();
   assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
@@ -18116,3 +18162,605 @@ for (const defect of [
     );
   });
 }
+
+test('Finf demo raw imports remain bounded to reviewed association and Bootstrap fixture paths', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    ['apps/www/src/components/PrototypePreviewer/demo-associations.ts', '@proto.ui/core', false],
+    ['apps/www/src/components/PrototypePreviewer/demo-associations.ts', '@proto.ui/runtime', true],
+    [
+      'apps/www/src/pages/en/test/bootstrap-state-controls.astro',
+      '@proto.ui/prototypes-bootstrap-2-3-2',
+      false,
+    ],
+    ['apps/www/src/pages/en/test/bootstrap-state-controls.astro', '@proto.ui/adapter-react', true],
+    ['apps/www/src/components/OrdinaryAssociationController.ts', '@proto.ui/core', true],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/prototypes-base/field', false],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/runtime', true],
+    ['apps/www/src/content/docs/field-demo.shared.ts', '@proto.ui/prototypes-base/select', true],
+    ['apps/www/src/content/docs/unreviewed-field.demo.ts', '@proto.ui/prototypes-base/field', true],
+  ];
+  for (const [sourcePath, specifier] of cases) {
+    const absolute = path.join(root, sourcePath);
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    const previous = fs.existsSync(absolute) ? fs.readFileSync(absolute, 'utf8') : '';
+    const code = `import * as observed from '${specifier}'; console.log(observed);`;
+    fs.writeFileSync(
+      absolute,
+      previous + (sourcePath.endsWith('.astro') ? `\n<script>${code}</script>\n` : `\n${code}\n`)
+    );
+  }
+  const message = validationMessage(root);
+  for (const [sourcePath, specifier, rejected] of cases) {
+    assert.equal(
+      message.includes(
+        `raw Proto UI import \`${specifier}\` in \`${sourcePath}\` escapes the website consumer-wall allowlist`
+      ),
+      rejected
+    );
+  }
+  // An import allowance does not classify or approve new surrounding UI owners.
+  assert.match(message, /OrdinaryAssociationController/);
+});
+
+test('retry resolver profile: exact helper is bound as immutable metadata', () => {
+  const { root, config, plugin, target } = auditResolverFixture();
+  const retry = path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs');
+  const metadata = new Set();
+  assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+  assert.ok(metadata.has(config));
+  assert.ok(metadata.has(plugin));
+  assert.ok(metadata.has(retry));
+});
+for (const defect of ['missing', 'changed', 'symlink', 'parent-symlink', 'directory']) {
+  test(`retry resolver profile: rejects ${defect} helper`, () => {
+    const { root } = auditResolverFixture();
+    const retry = path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs');
+    if (defect === 'missing') fs.unlinkSync(retry);
+    if (defect === 'changed') fs.appendFileSync(retry, '\n// changed closed URL map');
+    if (defect === 'symlink') {
+      fs.renameSync(retry, retry + '.copy');
+      fs.symlinkSync(retry + '.copy', retry);
+    }
+    if (defect === 'parent-symlink') {
+      const parent = path.dirname(retry);
+      fs.renameSync(parent, parent + '.copy');
+      fs.symlinkSync(parent + '.copy', parent, 'dir');
+    }
+    if (defect === 'directory') {
+      fs.unlinkSync(retry);
+      fs.mkdirSync(retry);
+    }
+    assert.throws(
+      () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+      /retry resolver plugin.*unrecognized|symlink.*unverified/
+    );
+  });
+}
+
+for (const scenario of [
+  'renderer',
+  'react',
+  'vue',
+  'vue2',
+  'foreign-owner',
+  'unknown-virtual',
+  'missing-plugin',
+  'changed-config',
+]) {
+  test(`Finf retry virtual boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    writeReviewedPromotionConfig(root);
+    const owner =
+      scenario === 'foreign-owner'
+        ? 'apps/www/src/components/ForeignRuntime.ts'
+        : ['react', 'vue', 'vue2'].includes(scenario)
+          ? `apps/www/src/components/PrototypePreviewer/runtimes/${scenario}-runtime.ts`
+          : 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts';
+    const specifier =
+      scenario === 'unknown-virtual'
+        ? 'virtual:proto-ui/foreign'
+        : 'virtual:proto-ui/runtime-retry-urls';
+    const absolute = path.join(root, owner);
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    fs.writeFileSync(absolute, `import urls from '${specifier}'; export const observed=urls;`);
+    if (scenario === 'missing-plugin')
+      fs.unlinkSync(path.join(root, 'apps/www/scripts/runtime-retry-urls.mjs'));
+    if (scenario === 'changed-config')
+      fs.appendFileSync(
+        path.join(root, 'apps/www/astro.config.mjs'),
+        '\n// changed virtual binding'
+      );
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    assert.equal(
+      message.includes(
+        `external executable script \`${specifier}\` in \`${owner}\` is not reviewed`
+      ),
+      ['foreign-owner', 'unknown-virtual', 'missing-plugin', 'changed-config'].includes(scenario)
+    );
+  });
+}
+for (const scenario of ['exact', 'changed-source', 'foreign-owner']) {
+  test(`Finf retry dynamic import boundary: ${scenario}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const owner =
+      scenario === 'foreign-owner'
+        ? 'apps/www/src/components/ForeignRetry.ts'
+        : 'apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts';
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL(
+        '../../../apps/www/src/components/PrototypePreviewer/runtimes/retryable-module.ts',
+        import.meta.url
+      ),
+      target
+    );
+    if (scenario === 'changed-source') fs.appendFileSync(target, '\n// changed import source');
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    assert.equal(
+      message.includes(`@vite-ignore dynamic import in \`${owner}\` is not reviewed`),
+      scenario !== 'exact'
+    );
+  });
+}
+test('Finf optical imports admit exact host helpers and reject unrelated runtime imports', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const cases = [
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts',
+      '@proto.ui/core',
+      false,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-provider.ts',
+      '@proto.ui/runtime',
+      true,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      '@proto.ui/adapter-base/web-material',
+      false,
+    ],
+    [
+      'apps/www/src/components/PrototypePreviewer/preview-material-scene.ts',
+      '@proto.ui/adapter-react',
+      true,
+    ],
+    ['apps/www/src/components/ForeignMaterial.ts', '@proto.ui/adapter-base/web-material', true],
+  ];
+  for (const [owner, specifier] of cases) {
+    const target = path.join(root, owner);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.appendFileSync(target, `import '${specifier}';\n`);
+  }
+  const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+  for (const [owner, specifier, rejected] of cases)
+    assert.equal(
+      message.includes(`raw Proto UI import \`${specifier}\` in \`${owner}\` escapes`),
+      rejected
+    );
+});
+
+for (const scenario of [
+  'exact',
+  'unrelated-path',
+  'changed-bytes',
+  'symlink',
+  'foreign-consumer',
+]) {
+  test(`Finf optical host binding: ${scenario}`, () => {
+    const root = createRoot();
+    const owner = 'www.demo.raw-adapter-runtimes';
+    const source =
+      scenario === 'unrelated-path'
+        ? 'packages/adapters/base/src/material/unreviewed.ts'
+        : 'packages/adapters/base/src/material/program-pool.ts';
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL('../../../packages/adapters/base/src/material/program-pool.ts', import.meta.url),
+      target
+    );
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[source, [owner]]] });
+    if (scenario === 'changed-bytes') fs.appendFileSync(target, '\n// changed host resource owner');
+    if (scenario === 'symlink') {
+      fs.renameSync(target, target + '.copy');
+      fs.symlinkSync(target + '.copy', target);
+    }
+    let foreign;
+    if (scenario === 'foreign-consumer') {
+      foreign = 'apps/www/src/components/ForeignOptical.ts';
+      const absolute = path.join(root, foreign);
+      fs.mkdirSync(path.dirname(absolute), { recursive: true });
+      let specifier = path.relative(path.dirname(absolute), target).replaceAll('\\', '/');
+      fs.writeFileSync(absolute, `import '${specifier}';`);
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'unrelated-path')
+      assert.match(message, /source binding must name exactly one/);
+    else if (scenario === 'changed-bytes' || scenario === 'symlink')
+      assert.match(message, /exact optical host source, digest and owner remain unverified/);
+    else if (scenario === 'foreign-consumer')
+      assert.ok(
+        message.includes(`in \`${foreign}\` escapes the website consumer-wall allowlist`),
+        message
+      );
+    else assert.equal(message, '');
+  });
+}
+
+for (const profile of [
+  {
+    name: '#875',
+    fixture: 'promotion-resolver-main-f64-audit.txt',
+    auditHash: 'f9736918dfcf0d1eaffc9205e562e18bedcbb61df085ebc20bdbb7ed36f716ee',
+    plainHash: '21c1a41e74c5ac1d03a9f71cd8c9feb401cc4e3d143df6eb7d1a03b4c510d377',
+  },
+  {
+    name: '#877',
+    fixture: 'promotion-resolver-main-877-audit.txt',
+    auditHash: '82110490011548595d5bc9c91bdf5edc4d8ff77e84ff0e8652c268aeb5fb51d4',
+    plainHash: '0625e633927c6cbbc24d62347e6407aff9a535f13a499cad17c336ad25534005',
+  },
+]) {
+  for (const audit of [true, false]) {
+    test(`main ${profile.name} profile remains exact and independently admitted (audit=${audit})`, () => {
+      const { root, config, plugin, target } = auditResolverFixture();
+      let source = fs.readFileSync(
+        new URL(`./fixtures/${profile.fixture}`, import.meta.url),
+        'utf8'
+      );
+      assert.equal(createHash('sha256').update(source).digest('hex'), profile.auditHash);
+      if (!audit) {
+        source = source
+          .replace(
+            "import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';\n",
+            ''
+          )
+          .replace(
+            `    plugins: [
+      ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
+        ? [contrastProvenancePlugin(repositoryRoot)]
+        : []),
+      protoUiSourcePlugin,
+      websiteBundleGraphPlugin(),
+      tailwindcss(),
+    ],`,
+            '    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],'
+          );
+        assert.equal(createHash('sha256').update(source).digest('hex'), profile.plainHash);
+        fs.unlinkSync(plugin);
+      }
+      fs.writeFileSync(config, source);
+      const metadata = new Set();
+      assert.deepEqual(promotionBarePackageTargets(root, '@proto.ui/core', metadata), [target]);
+      assert.equal(metadata.has(plugin), audit);
+      if (audit) {
+        fs.appendFileSync(plugin, '\n// unreviewed helper');
+        assert.throws(
+          () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+          /audit resolver plugin.*unrecognized/
+        );
+      } else {
+        fs.appendFileSync(config, '\n// unreviewed config');
+        assert.throws(
+          () => promotionBarePackageTargets(root, '@proto.ui/core', new Set()),
+          /configuration is unrecognized/
+        );
+      }
+    });
+  }
+}
+
+for (const name of ['acceptance', 's2', 's3', 's4', 's5']) {
+  test(`Shadow split exact import boundary: ${name}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/PrototypePreviewer/shadow-split-${name}.ts`;
+    const original = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const absolute = path.join(root, relative);
+    const copied = relative.replace('.ts', '-unreviewed.ts');
+    fs.mkdirSync(path.dirname(absolute), { recursive: true });
+    fs.writeFileSync(absolute, original);
+    fs.writeFileSync(path.join(root, copied), original);
+    const raw = (file, specifier = '@proto.ui/adapter-web-component') =>
+      `raw Proto UI import \`${specifier}\` in \`${file}\``;
+    const before = validationMessage(root);
+    assert.ok(!before.includes(raw(relative)), before);
+    assert.ok(before.includes(raw(copied)), before);
+    fs.writeFileSync(absolute, original + '\n// changed source requires another review\n');
+    assert.ok(validationMessage(root).includes(raw(relative)));
+    fs.writeFileSync(absolute, original + "\nimport '@proto.ui/runtime';\n");
+    assert.ok(validationMessage(root).includes(raw(relative, '@proto.ui/runtime')));
+  });
+}
+
+for (const source of ['site-startup-paint.ts', 'snapshot-prototype-style.ts']) {
+  for (const scenario of ['exact', 'foreign', 'changed', 'adjacent-import', 'dynamic-css']) {
+    test(`startup prerender import boundary: ${source} ${scenario}`, () => {
+      const root = createRoot();
+      writeValidMatrices(root);
+      const reviewed = `apps/www/src/components/${source}`;
+      const owner = scenario === 'foreign' ? `apps/www/src/components/Foreign-${source}` : reviewed;
+      const target = path.join(root, owner);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${reviewed}`, import.meta.url), target);
+      if (scenario === 'changed') fs.appendFileSync(target, '\n// unreviewed source change');
+      if (scenario === 'adjacent-import')
+        fs.appendFileSync(target, "\nimport '@proto.ui/prototypes-shadcn/checkbox';");
+      if (scenario === 'dynamic-css')
+        fs.appendFileSync(
+          target,
+          "\nconst link=document.createElement('link');link.rel='stylesheet';link.href=window.location.hash;"
+        );
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      const escaped = message.includes(
+        `in \`${owner}\` escapes the website consumer-wall allowlist`
+      );
+      assert.equal(escaped, scenario !== 'exact', message);
+      if (scenario === 'adjacent-import')
+        assert.ok(message.includes('prototypes-shadcn/checkbox'), message);
+      if (scenario === 'dynamic-css') assert.match(message, /dynamic stylesheet source/);
+    });
+  }
+}
+for (const scenario of [
+  'exact',
+  'wrong-owner',
+  'changed-bytes',
+  'adjacent-path',
+  'foreign-consumer',
+]) {
+  test(`startup prerender event source binding: ${scenario}`, () => {
+    const root = createRoot();
+    const source =
+      scenario === 'adjacent-path'
+        ? 'packages/modules/event/src/foreign-kernel.ts'
+        : 'packages/modules/event/src/kernel.ts';
+    const target = path.join(root, source);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.copyFileSync(
+      new URL('../../../packages/modules/event/src/kernel.ts', import.meta.url),
+      target
+    );
+    const owner = scenario === 'wrong-owner' ? 'www.search.launcher' : 'www.build.style-generation';
+    writeValidMatrices(root, {}, {}, { websiteBindings: [[source, [owner]]] });
+    if (scenario === 'changed-bytes') fs.appendFileSync(target, '\n// changed event semantics');
+    let foreign;
+    if (scenario === 'foreign-consumer') {
+      foreign = 'apps/www/src/components/ForeignStartup.ts';
+      const file = path.join(root, foreign);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, "import '../../../../packages/modules/event/src/kernel';");
+    }
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'adjacent-path') assert.match(message, /source binding must name exactly one/);
+    else if (scenario === 'wrong-owner' || scenario === 'changed-bytes')
+      assert.match(message, /exact startup event source, digest and build owner remain unverified/);
+    else if (scenario === 'foreign-consumer')
+      assert.ok(
+        message.includes(`in \`${foreign}\` escapes the website consumer-wall allowlist`),
+        message
+      );
+    else assert.equal(message, '');
+  });
+}
+
+for (const [source, allowed] of [
+  ['UiLibraryGallery.astro', '../../../../packages/prototypes/brutalist/src/theme'],
+  ['library-card-client.ts', '@proto.ui/adapter-web-component'],
+  ['library-card-prototypes.ts', '@proto.ui/prototypes-brutalist/card'],
+  ['library-card-prototypes.ts', '@proto.ui/prototypes-shadcn/card'],
+]) {
+  test(`library card import boundary remains exact and content-bound: ${source}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const relative = `apps/www/src/components/${source}`;
+    const file = path.join(root, relative);
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    fs.writeFileSync(file, reviewed);
+    const rawIssue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(
+      !collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(rawIssue),
+      'exact reviewed import is admitted'
+    );
+    const foreign = `apps/www/src/components/copied-${source}`;
+    fs.writeFileSync(path.join(root, foreign), reviewed);
+    assert.ok(
+      validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+    fs.writeFileSync(file, reviewed + '\n// Changed source bytes require review.\n');
+    assert.ok(
+      validationMessage(root).includes(rawIssue),
+      'same path with altered bytes is rejected'
+    );
+    const extra = source.endsWith('.astro')
+      ? "\n<script>import '@proto.ui/adapter-react';</script>"
+      : "\nimport '@proto.ui/adapter-react';";
+    fs.writeFileSync(file, reviewed + extra);
+    assert.ok(
+      validationMessage(root).includes(
+        `raw Proto UI import \`@proto.ui/adapter-react\` in \`${relative}\``
+      )
+    );
+  });
+}
+
+for (const scenario of ['exact', 'unreviewed-sibling', 'foreign-consumer', 'dynamic-css']) {
+  test(`Finf continuous optical closure: ${scenario}`, () => {
+    const root = createRoot();
+    const material = 'packages/adapters/base/src/material/';
+    const write = (name, source) => {
+      const target = path.join(root, material, name);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.writeFileSync(target, source);
+    };
+    for (const name of ['program-pool.ts', 'contact-carrier.ts'])
+      write(name, fs.readFileSync(new URL(`../../../${material}${name}`, import.meta.url), 'utf8'));
+    write('program.ts', "import './contact-profile'; import './source'; export {};");
+    write('contact-profile.ts', "import './liquidgl-kernel.generated'; export {};");
+    write('source.ts', "import './contact-carrier'; export {};");
+    for (const name of ['image-prepare.ts', 'liquidgl-kernel.generated.ts', 'paint-mutations.ts'])
+      write(name, 'export {};');
+    const entryPath = 'apps/www/src/pages/en/test/liquid-glass-material.astro';
+    const entry = path.join(root, entryPath);
+    fs.mkdirSync(path.dirname(entry), { recursive: true });
+    const entryImport = path
+      .relative(path.dirname(entry), path.join(root, material, 'program-pool'))
+      .replaceAll('\\', '/');
+    fs.writeFileSync(entry, `<script>import '${entryImport}';</script>`);
+    writeValidMatrices(
+      root,
+      { Path: entryPath, Evidence: entryPath },
+      {},
+      {
+        websiteBindings: [
+          [material + 'program-pool.ts', ['www.demo.raw-adapter-runtimes']],
+          [entryPath, ['www.shell.search']],
+        ],
+      }
+    );
+    if (scenario === 'unreviewed-sibling') {
+      fs.appendFileSync(path.join(root, material, 'source.ts'), "import './unreviewed';");
+      write('unreviewed.ts', 'export {};');
+    }
+    if (scenario === 'foreign-consumer') {
+      const foreign = path.join(root, 'apps/www/src/components/ForeignContact.ts');
+      fs.mkdirSync(path.dirname(foreign), { recursive: true });
+      fs.writeFileSync(foreign, `import '../../../../${material}contact-carrier';`);
+    }
+    if (scenario === 'dynamic-css')
+      write(
+        'contact-carrier.ts',
+        `export function install(document: Document, css: string) {
+        const node = document.createElement('style'); node.textContent = css;
+      }`
+      );
+    const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+    if (scenario === 'exact') assert.equal(message, '');
+    else if (scenario === 'dynamic-css') assert.match(message, /DOM style body.*unverified/);
+    else if (scenario === 'unreviewed-sibling')
+      assert.match(message, /raw Proto UI import `\.\/unreviewed`.*escapes/);
+    else assert.match(message, /ForeignContact\.ts.*escapes/);
+  });
+}
+
+test('Hero fixed-icon import remains exact, content-bound and owner-bound', () => {
+  const root = createRoot();
+  writeValidMatrices(root);
+  const relative = 'apps/www/src/components/Homepage/home-action-icons.ts';
+  const file = path.join(root, relative);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const reviewed = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+  const allowed = '@proto.ui/prototypes-lucide/icons/arrow-right';
+  const rawIssue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+  fs.writeFileSync(file, reviewed);
+  assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(rawIssue));
+  const foreign = 'apps/www/src/components/copied-home-action-icons.ts';
+  fs.writeFileSync(path.join(root, foreign), reviewed);
+  assert.ok(
+    validationMessage(root).includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+  );
+  fs.writeFileSync(file, reviewed + '\n// unreviewed bytes\n');
+  assert.ok(validationMessage(root).includes(rawIssue));
+  fs.writeFileSync(file, reviewed.replace(allowed, '@proto.ui/prototypes-lucide/icons/arrow-left'));
+  assert.ok(
+    validationMessage(root).includes(
+      'raw Proto UI import `@proto.ui/prototypes-lucide/icons/arrow-left`'
+    )
+  );
+});
+
+for (const source of [
+  'packages/adapters/base/src/material/geometry-watch.ts',
+  'packages/adapters/base/src/material/initial-paint-experiment.ts',
+  'packages/adapters/base/src/material/preferences.ts',
+])
+  for (const scenario of ['exact', 'wrong-owner', 'changed-bytes', 'adjacent-path']) {
+    test(`private Liquid Card interactive source binding: ${path.basename(source)} ${scenario}`, () => {
+      const root = createRoot();
+      const relative = scenario === 'adjacent-path' ? source.replace('.ts', '-foreign.ts') : source;
+      const target = path.join(root, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(new URL(`../../../${source}`, import.meta.url), target);
+      const owner =
+        scenario === 'wrong-owner'
+          ? 'www.demo.raw-adapter-runtimes'
+          : 'www.gallery.ui-library-cards';
+      writeValidMatrices(root, {}, {}, { websiteBindings: [[relative, [owner]]] });
+      if (scenario === 'changed-bytes')
+        fs.appendFileSync(target, '\n// Unreviewed private material bytes\n');
+      const message = collectCoverageMatrixIssues({ rootDir: root }).join('\n');
+      if (scenario === 'adjacent-path')
+        assert.match(message, /source binding must name exactly one/);
+      else if (scenario === 'wrong-owner' || scenario === 'changed-bytes')
+        assert.match(
+          message,
+          /exact private Card material source, digest and blocked Card owner remain unverified/
+        );
+      else assert.equal(message, '');
+    });
+  }
+for (const [relative, allowed] of [
+  ['apps/www/src/components/library-liquid-scene.ts', '@proto.ui/adapter-base/web-material'],
+  ['packages/adapters/base/src/material/initial-paint-experiment.ts', './sink'],
+  ['packages/adapters/base/src/material/sink.ts', './geometry-watch'],
+])
+  test(`private Liquid Card import stays source-bound: ${relative}`, () => {
+    const root = createRoot();
+    writeValidMatrices(root);
+    const target = path.join(root, relative);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    const bytes = fs.readFileSync(new URL(`../../../${relative}`, import.meta.url), 'utf8');
+    const importer = path.join(root, 'apps/www/src/components/CardImportProbe.ts');
+    fs.mkdirSync(path.dirname(importer), { recursive: true });
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), target).replaceAll('\\', '/')}';`
+    );
+    fs.writeFileSync(target, bytes);
+    const issue = `raw Proto UI import \`${allowed}\` in \`${relative}\``;
+    assert.ok(!collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    fs.writeFileSync(target, bytes + '\n// unreviewed bytes\n');
+    assert.ok(collectCoverageMatrixIssues({ rootDir: root }).join('\n').includes(issue));
+    const foreign = relative.replace('.ts', '-foreign.ts');
+    fs.writeFileSync(path.join(root, foreign), bytes);
+    fs.writeFileSync(
+      importer,
+      `import '${path.relative(path.dirname(importer), path.join(root, foreign)).replaceAll('\\', '/')}';`
+    );
+    assert.ok(
+      collectCoverageMatrixIssues({ rootDir: root })
+        .join('\n')
+        .includes(`raw Proto UI import \`${allowed}\` in \`${foreign}\``)
+    );
+  });
+
+test('Shadcn Card sidebar profile reverses exactly to the preceding reviewed resolver bytes', () => {
+  const source = fs.readFileSync(
+    new URL('../../../apps/www/astro.config.mjs', import.meta.url),
+    'utf8'
+  );
+  const entry = `                {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/shadcn/card',
+                  badge: inProgressBadge,
+                },
+`;
+  assert.equal(source.split(entry).length, 2, 'one bounded sidebar addition');
+  assert.equal(
+    createHash('sha256').update(source.replace(entry, '')).digest('hex'),
+    '428f9cbe0c5fe19f4d24a74afeebddcfcad0f00c929144df205a94c45e87f8ac'
+  );
+  assert.ok(
+    source.indexOf("slug: 'ui-libraries/shadcn/card'") >
+      source.indexOf("slug: 'ui-libraries/shadcn/button'")
+  );
+});

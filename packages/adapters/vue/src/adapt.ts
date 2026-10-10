@@ -1,4 +1,12 @@
 import {
+  NATIVE_LINK_DECLARATION,
+  resolveWebNativeLinkLocalName,
+} from '@proto.ui/module-native-link';
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
+import type { InstanceAssociations } from '@proto.ui/core';
+import {
   getModuleDeclaration,
   type Prototype,
   type ScrollProjectionPreference,
@@ -65,6 +73,7 @@ export type VueRuntime = VueRenderRuntime & {
   defineComponent: (opt: any) => any;
   h: (type: any, props?: any, children?: any) => any;
   Teleport?: any;
+  Fragment?: any;
   ref: <T>(v: T) => { value: T };
   shallowRef: <T>(v: T) => { value: T };
   watch: (source: any, cb: (...args: any[]) => void | Promise<void>, options?: any) => unknown;
@@ -82,6 +91,7 @@ export type { VueAdapterHandle } from './types';
 
 export type VueAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
     class?: string | string[] | Record<string, boolean>;
     hostClass?: string | string[] | Record<string, boolean>;
     surfaceClass?: string | string[] | Record<string, boolean>;
@@ -91,6 +101,8 @@ export type VueAdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface VueAdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: VueAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -120,6 +132,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     style,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -153,6 +166,7 @@ export function createVueAdapter(runtime: VueRuntime) {
     opt: VueAdapterOptions<ProtoAdapterProps<TProto>> = {}
   ): ProtoVueComponent<TProto> {
     type Props = ProtoAdapterProps<TProto>;
+    const createVisualSink = opt.createVisualSink;
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
@@ -170,14 +184,20 @@ export function createVueAdapter(runtime: VueRuntime) {
       : undefined;
     const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
     const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
-    if (textControlRootTag && imageViewRootTag) {
+    const nativeLink = getModuleDeclaration(proto, NATIVE_LINK_DECLARATION)?.config;
+    const nativeLinkRootTag = nativeLink ? resolveWebNativeLinkLocalName() : undefined;
+    if ([textControlRootTag, imageViewRootTag, nativeLinkRootTag].filter(Boolean).length > 1) {
       throw new Error(
-        '[Vue Adapter] text-control and image-view declarations cannot share a root.'
+        '[Vue Adapter] text-control, image-view and native-link declarations cannot share a root.'
       );
     }
-    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag ?? nativeLinkRootTag;
     if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
-      const declarationName = textControlRootTag ? 'text-control' : 'image-view';
+      const declarationName = textControlRootTag
+        ? 'text-control'
+        : imageViewRootTag
+          ? 'image-view'
+          : 'native-link';
       throw new Error(
         `[Vue Adapter] ${declarationName} declaration conflicts with rootTag: ${opt.rootTag}`
       );
@@ -203,6 +223,7 @@ export function createVueAdapter(runtime: VueRuntime) {
       name: `Proto(${proto.name})`,
       inheritAttrs: false,
       props: {
+        instanceAssociations: { type: Object, default: undefined },
         hostClass: { type: [String, Array, Object], default: undefined },
         surfaceClass: { type: [String, Array, Object], default: undefined },
         hostStyle: { type: [String, Array, Object], default: undefined },
@@ -210,6 +231,7 @@ export function createVueAdapter(runtime: VueRuntime) {
       },
       setup(props: any, ctx: any) {
         const rootRef = runtime.ref<HTMLElement | null>(null);
+        const portalOriginRef = runtime.ref<HTMLElement | null>(null);
         const renderChildren = runtime.shallowRef<any>(null);
         const commitVersion = runtime.ref(0);
         const hostTokens = runtime.shallowRef<string[]>([]);
@@ -263,7 +285,7 @@ export function createVueAdapter(runtime: VueRuntime) {
               ...(ctx.attrs ?? {}),
               ...(props ?? {}),
             } as VueAdapterProps<Props>);
-            return (nextProps ?? {}) as Readonly<Props & PropsBaseType>;
+            return withoutInstanceAssociations(nextProps) as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
             subs.add(cb);
@@ -286,6 +308,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             proto,
             schedule,
             rawPropsSource,
+            getInstanceAssociations: () => props.instanceAssociations ?? {},
             wiring,
             eventGate: {
               disable: () => eventGateRef.value?.disable(),
@@ -357,6 +380,7 @@ export function createVueAdapter(runtime: VueRuntime) {
 
         let lastHostProps = rawPropsSource.get();
         const notifyPropsChange = () => {
+          controllerRef.value?.applyInstanceAssociations(props.instanceAssociations ?? {});
           const nextHostProps = rawPropsSource.get();
           if (shallowEqualHostProps(lastHostProps, nextHostProps)) return;
           lastHostProps = nextHostProps;
@@ -445,6 +469,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           });
           bindLogicalEventTarget(instanceToken, router.rootTarget);
           let viewDisposed = false;
+          let ownedVisualStyle: string | null = null;
           let focusRetryGeneration = 0;
           let releaseRequestedTargetReady: (() => void) | undefined;
           const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -469,6 +494,13 @@ export function createVueAdapter(runtime: VueRuntime) {
             if (viewDisposed) return;
             viewDisposed = true;
             const releases = [
+              () => {
+                if (
+                  ownedVisualStyle !== null &&
+                  rootEl.getAttribute('data-pui-style') === ownedVisualStyle
+                )
+                  rootEl.removeAttribute('data-pui-style');
+              },
               () => eventGate.disable(),
               () => eventGate.dispose(),
               () => {
@@ -506,10 +538,20 @@ export function createVueAdapter(runtime: VueRuntime) {
           };
 
           const effectsPort = createVueEffectsPort((tokens) => {
+            if (viewDisposed || rootRef.value !== rootEl) return;
             hostTokens.value = tokens;
+            if (viewDisposed || rootRef.value !== rootEl) return;
+            // One physical owner commits provider style before optical sampling.
+            if (createVisualSink) {
+              ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
+              if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
+              else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
+                rootEl.setAttribute('data-pui-style', ownedVisualStyle);
+            }
           });
 
           const modules = createVueModules({
+            getPortalOrigin: () => portalOriginRef.value,
             el: rootEl,
             instanceToken,
             router,
@@ -518,6 +560,15 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             effectsPort,
+            visualFeedbackSink: createVisualSink
+              ? createDeferredViewVisualSink(
+                  () => createVisualSink!(rootEl, effectsPort),
+                  (frame) => {
+                    effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
+                    effectsPort.requestFlush();
+                  }
+                )
+              : undefined,
             getMeta,
             colorSchemeSource,
             preferenceSource,
@@ -723,16 +774,32 @@ export function createVueAdapter(runtime: VueRuntime) {
               },
               class: mergeHostClass([props.surfaceClass, props.hostClass, ctx.attrs.class]),
               style: mergeHostStyle([props.surfaceStyle, props.hostStyle, ctx.attrs.style]),
+              dir: ctx.attrs.dir ?? props.dir,
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
-              'data-pui-style': serializeStyleTokens(hostTokens.value),
+              ...(createVisualSink
+                ? {}
+                : { 'data-pui-style': serializeStyleTokens(hostTokens.value) }),
               'data-demo-ref': ctx.attrs['data-demo-ref'] as string | undefined,
             },
             rendered as any
           );
           if (present && overlayPort?.getConfig().portal === true && runtime.Teleport) {
-            return runtime.h(runtime.Teleport, { to: 'body' }, [content]);
+            const portal = runtime.h(runtime.Teleport, { to: 'body' }, [content]);
+            return runtime.Fragment
+              ? runtime.h(runtime.Fragment, null, [
+                  runtime.h('span', {
+                    ref: (el: HTMLElement | null) => {
+                      portalOriginRef.value = el;
+                    },
+                    hidden: true,
+                    'aria-hidden': true,
+                    'data-pui-portal-origin': '',
+                  }),
+                  portal,
+                ])
+              : portal;
           }
           return content;
         };

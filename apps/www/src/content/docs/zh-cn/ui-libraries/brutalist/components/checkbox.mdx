@@ -10,7 +10,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 这个 draft family 包含 Root 与 Indicator。controlled/uncontrolled `checked`、由 author 控制的 `indeterminate` display state、生效的 disabled behavior、pointer 与 Space activation、focus，以及包含 `aria-checked="mixed"` 的可访问 `checkbox` role 均由 Base Checkbox 所有。
 
-Brutalist 层只拥有呈现：方形两像素 ink border、硬偏移 shadow、成对的状态 fill，以及从可访问树隐藏的硬线 tick 或 dash。Indicator 从最近的 Root 派生状态，不拥有 value、focus、event、form 或 accessibility control surface。checked 与 indeterminate 同时为 true 时，mixed dash 优先。
+Brutalist 层只拥有呈现。checked 与 mixed 使用固定 Neo main/foreground 配对，glyph 为16px、2px圆笔画且 aria-hidden 的check或可区分mixed dash。暂保留既有20px Root与2px内部frame：源码16px外outline recipe需要受治理hit envelope和受支持outline-color翻译，才能在不减小命中范围前提下替换；outline paint本身不会扩大命中区域。Indicator仍从最近Root派生状态、不拥有control语义，mixed继续优先。当前真实浏览器glyph裁剪、命中与长label验证待完成。
 
 Root 与 Indicator 可从已经公开的 `@proto.ui/prototypes-brutalist` package root 或 `@proto.ui/prototypes-brutalist/checkbox` anatomy subpath 导入。该 family 刻意没有 `proto-ui add brutalist-checkbox` registry entry，也不产生单独的 publication 或 release 承诺。
 

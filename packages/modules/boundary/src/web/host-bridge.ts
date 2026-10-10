@@ -44,6 +44,17 @@ function isNodeRegion(region: BoundaryRegion): region is BoundaryRegion & { targ
 
 export function createWebBoundaryHostBridge(): BoundaryHostBridge {
   return {
+    sampleFocus(nativeEvent): BoundarySample | null {
+      if (!(nativeEvent instanceof FocusEvent) || nativeEvent.type !== 'focusin') return null;
+      const target = nativeEvent.composedPath()[0] ?? nativeEvent.target;
+      if (!(target instanceof Element)) return null;
+      let active = target.ownerDocument.activeElement;
+      // focusin may be retargeted at a shadow host. Use the deepest observable
+      // current focus, rather than a stale event target or scope focus history.
+      while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+      if (!active || (active !== target && !containsWithLinkedParents(target, active))) return null;
+      return { type: 'focusin', target: active, nativeEvent };
+    },
     classify(args: {
       regions: readonly BoundaryRegion[];
       sample?: BoundarySample;

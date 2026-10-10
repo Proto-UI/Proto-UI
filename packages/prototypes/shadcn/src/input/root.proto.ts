@@ -3,18 +3,17 @@ import { asInputRoot } from '@proto.ui/prototypes-base/input';
 import type { ShadcnInputRootExposes, ShadcnInputRootProps } from './types';
 
 const ROOT_BASE_TOKENS = [
-  'h-9',
+  'h-8',
   'w-full',
   'min-w-0',
-  'rounded-md',
+  'rounded-lg',
   'border',
   'border-input',
   'bg-transparent',
-  'px-3',
+  'px-2.5',
   'py-1',
   'text-base',
-  'shadow-xs',
-  'transition-[color,box-shadow]',
+  'transition-colors',
   'outline-none',
   'selection:bg-primary',
   'selection:text-primary-foreground',
@@ -30,7 +29,7 @@ export const ShadcnInputRoot = definePrototype<ShadcnInputRootProps, ShadcnInput
       throw new Error('[shadcn-input-root] asInputRoot must project Input state handles.');
     }
 
-    // P-SHADCN-INPUT-VISUAL-SURFACE: the expressible subset of the pinned v4 new-york Input.
+    // P-SHADCN-INPUT-VISUAL-SURFACE: the bounded subset of the content-pinned base-nova Input.
     def.feedback.style.use(tw(ROOT_BASE_TOKENS));
 
     // P-SHADCN-INPUT-STATE-PRESENTATION: all conditions consume inherited Base facts.
@@ -40,11 +39,17 @@ export const ShadcnInputRoot = definePrototype<ShadcnInputRootProps, ShadcnInput
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('pointer-events-none cursor-not-allowed opacity-50')),
+      intent: (i) =>
+        i.feedback.style.use(tw('pointer-events-none cursor-not-allowed opacity-50 bg-input/50')),
     });
     def.rule({
       when: (w) => w.meta('colorScheme').eq('dark'),
       intent: (i) => i.feedback.style.use(tw('bg-input/30')),
+    });
+
+    def.rule({
+      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(state.disabled).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('bg-input/80')),
     });
 
     // P-SHADCN-INPUT-CONTENTLESS: the caller owns its renderer; children are not another editor.

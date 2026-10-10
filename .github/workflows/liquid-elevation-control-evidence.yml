@@ -1,0 +1,94 @@
+name: Liquid Surface elevation control evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/liquid-elevation-control-evidence.yml'
+      - 'experiments/liquid-elevation-control/**'
+      - 'experiments/material-initial-paint/media-session.ts'
+      - 'apps/www/src/components/**'
+      - 'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - 'scripts/test/run-runtime-tests.test.mjs'
+      - 'packages/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - '.npmrc'
+      - 'tsconfig*.json'
+      - 'vitest.config.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: liquid-elevation-control-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  controlled-surface:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked tools and bind exact source
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/liquid-elevation-control"
+          "$CHROME" --version > "$RUNNER_TEMP/liquid-elevation-control/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/liquid-elevation-control/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/liquid-elevation-control/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/liquid-elevation-control/source-tree.txt"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/liquid-elevation-control/lock-sha256.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+      - name: Build isolated real-prototype experiment only
+        env:
+          ASTRO_TELEMETRY_DISABLED: '1'
+          PUI_LIQUID_CONTROL_DIST: ${{ runner.temp }}/liquid-elevation-control/dist
+        run: |
+          set -euo pipefail
+          mkdir -p experiments/liquid-elevation-control/node_modules
+          ln -s ../../../apps/www/node_modules/astro experiments/liquid-elevation-control/node_modules/astro
+          cd experiments/liquid-elevation-control
+          node ../../apps/www/node_modules/astro/astro.js build --config ./astro.config.mjs \
+            2>&1 | tee "$RUNNER_TEMP/liquid-elevation-control/build.log"
+          find "$PUI_LIQUID_CONTROL_DIST" -type f -print0 | sort -z | xargs -0 sha256sum \
+            > "$RUNNER_TEMP/liquid-elevation-control/bundle-sha256.txt"
+      - name: Run six guarded real-browser comparisons
+        env:
+          PUI_LIQUID_CONTROL_DIST: ${{ runner.temp }}/liquid-elevation-control/dist
+          PUI_LIQUID_CONTROL_EVIDENCE_DIR: ${{ runner.temp }}/liquid-elevation-control/evidence
+        run: |
+          set -euo pipefail
+          node --test scripts/test/run-runtime-tests.test.mjs
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/liquid-elevation-control/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/liquid-elevation-control/browser.log"
+          node --input-type=module - "$RUNNER_TEMP/liquid-elevation-control/vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 6);
+          assert.equal(report.numPassedTests, 6);
+          assert.equal(report.numFailedTests, 0);
+          JS
+      - name: Keep raw screenshots source binding and original failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: liquid-elevation-control-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/liquid-elevation-control
+          if-no-files-found: error
+          retention-days: 30

@@ -1,3 +1,4 @@
+import { COLLAPSIBLE_PROJECTIONS } from '../../base/test/fixtures/collapsible-projections';
 import * as React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -5,12 +6,13 @@ import { createReactAdapter } from '../src';
 import {
   collapsibleAdapterConformance,
   type CollapsibleTree,
+  type CollapsibleDriver,
 } from '../../base/test/fixtures/collapsible-conformance';
 
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT =
   true;
 
-collapsibleAdapterConformance('react', async (tree) => {
+const mount: CollapsibleDriver = async (tree) => {
   const host = document.createElement('div');
   document.body.append(host);
   const root = createRoot(host);
@@ -56,4 +58,9 @@ collapsibleAdapterConformance('react', async (tree) => {
       host.remove();
     },
   };
-});
+};
+
+collapsibleAdapterConformance('react', mount);
+for (const [family, projection] of COLLAPSIBLE_PROJECTIONS) {
+  collapsibleAdapterConformance(`react/${family}`, mount, projection);
+}

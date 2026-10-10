@@ -1,0 +1,16 @@
+---
+title: 'Date-Picker (WIP)'
+description: 'date-picker composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Date Picker is a composition of the real Popover and Calendar atoms. A date request selects through Calendar and requests Popover closure. open, value and month retain their original controlled/uncontrolled boundaries. Calendar grid, row, heading and navigation atoms can be used inside the content.
+
+WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+
+<PrototypePreviewer
+  demoId="demo-base-date-picker"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

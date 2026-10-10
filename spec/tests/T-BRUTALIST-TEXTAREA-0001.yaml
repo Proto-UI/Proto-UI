@@ -47,9 +47,12 @@ implementations:
     exercises:
       - P-BASE-TEXTAREA
       - P-BRUTALIST-TEXTAREA
+    notes:
+      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
+      - Three successor runtime tests verify the 80px source literal, 12/8px padding, existing value/native-state ownership and real CSS/selection output. Browser evidence remains planned.
   - id: docs-browser-brutalist-textarea-focus
     kind: adapter-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts
     required: true
     consumesCases:
@@ -57,6 +60,8 @@ implementations:
     exercises:
       - P-BASE-TEXTAREA
       - P-BRUTALIST-TEXTAREA
+    notes:
+      - Historical passing evidence predates this source-pinned presentation migration; current runtime/CSS/browser evidence must be verified separately.
 verifies:
   prototypes:
     - id: P-BRUTALIST-TEXTAREA
@@ -84,6 +89,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added executable Brutalist Textarea inheritance and visual coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Require source-pinned geometry and negative legacy-recipe controls; presentation evidence is planned until current execution.
 tags:
   - test
   - prototype

@@ -141,16 +141,26 @@ for (const family of ['shadcn', 'brutalist']) {
 
 describe('shared compact Header ownership and layout', () => {
   for (const path of ['Homepage/HomepageRuntime.astro', 'override/Header.astro']) {
-    it(`${path} provides one movable preference owner and one empty compact destination`, () => {
+    it(`${path} provides one movable preference owner with an explicit native startup location`, () => {
       const source = readFileSync(`apps/www/src/components/${path}`, 'utf8');
       expect(source.match(/data-site-header-preferences/g)).toHaveLength(1);
       expect(source.match(/data-site-header-compact-context/g)).toHaveLength(1);
       expect(source.indexOf('data-site-header-compact-context')).toBeGreaterThan(
         source.indexOf('data-site-header-panel-content')
       );
-      expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-        source.indexOf('data-site-header-context')
-      );
+      if (path === 'override/Header.astro') {
+        expect(source).toContain('data-site-header-wide-preferences');
+        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+          source.indexOf('data-site-header-compact-context')
+        );
+        expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
+          source.indexOf('data-site-header-context')
+        );
+      } else {
+        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+          source.indexOf('data-site-header-context')
+        );
+      }
       expect(source).not.toMatch(/role=["'](?:menu|dialog)["']/);
     });
   }
@@ -218,3 +228,50 @@ it('spaces unframed text separately from framed controls without changing compac
   expect(framed).toContain('--site-header-navigation-gap: 0.75rem');
   expect(framed).toContain('--site-header-brand-navigation-gap: 0.75rem');
 });
+
+it('keeps the compact docs header offset identical before and after enhancement', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(frame).toMatch(/@media \(max-width: 47\.999rem\)[\s\S]*?--header-height: 3\.5rem;/);
+  expect(css).toMatch(
+    /\.site-header\[data-docs-site-header\] \{\s*grid-template-areas: 'brand search theme menu';/
+  );
+  expect(css).toContain('.site-header[data-docs-site-header]:has(.site-header-docs-navigation)');
+});
+
+it('keeps the page-top anchor at the initial reading inset when deferred modules finish loading', () => {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  // Native fragment navigation runs again at document load. The first title's
+  // clearance must include its actual responsive reading inset, not the 1rem
+  // clearance used by section bookmarks farther down the document.
+  expect(columns).toContain('[--docs-reading-inset:1.5rem]');
+  expect(columns).toContain('lg:[--docs-reading-inset:2rem]');
+  expect(columns).toContain('py-[var(--docs-reading-inset)]');
+  expect(frame).toMatch(
+    /:global\(\.site-page-frame:has\(\[data-docs-site-header\]\) main h1\[data-site-typography='h1'\]\)\s*\{\s*scroll-margin-top: calc\(var\(--header-height\) \+ var\(--docs-reading-inset, 1rem\)\);/
+  );
+  // Ordinary section clearance stays independent of the page-top inset.
+  expect(frame).toContain('scroll-margin-top: calc(var(--header-height) + 1rem)');
+});
+
+it.each(['en', 'zh-cn'])(
+  'preserves the original page-title clearance on the %s nohero splash',
+  (locale) => {
+    const splash = readFileSync(
+      `apps/www/src/content/docs/${locale}/internal/demo-matrix.mdx`,
+      'utf8'
+    );
+    const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+    expect(splash).toContain('template: splash');
+    expect(splash).not.toMatch(/^hero:/m);
+    const splashClass = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'/)![1]!;
+    expect(splashClass).not.toContain('--docs-reading-inset');
+    const titleRule = frame.match(
+      /:global\(([^{}]*?h1\[data-site-typography='h1'\])\)\s*\{\s*scroll-margin-top:\s*([^;]+);/
+    )!;
+    document.body.innerHTML = `<div class="site-page-frame"><header data-docs-site-header></header><main><div data-layout="splash" class="${splashClass}"><h1 id="_top" data-site-typography="h1">Matrix</h1></div></main></div>`;
+    expect(document.querySelector(titleRule[1]!)).toBe(document.getElementById('_top'));
+    // A missing variable invalidates the winning declaration; it does not fall
+    // back to the lower-specificity section rule. Preserve that rule's 1rem.
+    expect(titleRule[2]).toBe('calc(var(--header-height) + var(--docs-reading-inset, 1rem))');
+  }
+);

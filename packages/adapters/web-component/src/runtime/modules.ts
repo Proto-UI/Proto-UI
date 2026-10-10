@@ -1,9 +1,21 @@
 import {
+  NATIVE_LINK_HOST_CAP,
+  NATIVE_LINK_RUN_IN_CALLBACK_CAP,
+  createWebNativeLinkHost,
+} from '@proto.ui/module-native-link';
+import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-axis-input';
+import { createWebAxisInputHost } from '@proto.ui/adapter-base';
+import { isWebFocusTargetActive, orderFocusTargetsByDocument } from '@proto.ui/adapter-base';
+import {
+  CONTROL_LABEL_HOST_CAP,
+  CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+  createWebControlLabelHost,
+} from '@proto.ui/module-control-label';
+import {
   cancelWebEventDefaultAction,
   createCapsWiring,
+  retainWebPortalDirection,
   createWebMoveGestureHost,
-  orderFocusTargetsByDocument,
-  resolveWebFocusEntryTarget,
   type HostSurfaceProjection,
   type LogicalInstanceToken,
 } from '@proto.ui/adapter-base';
@@ -32,7 +44,11 @@ import {
 import { A11Y_PROJECT_CAP, createWebA11yProjector } from '@proto.ui/module-a11y';
 import { createWebBoundaryHostBridge, BOUNDARY_HOST_BRIDGE_CAP } from '@proto.ui/module-boundary';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import {
+  EFFECTS_CAP,
+  VISUAL_FEEDBACK_SINK_CAP,
+  type VisualFeedbackSink,
+} from '@proto.ui/module-feedback';
 import {
   MATERIAL_BINDING_FACTORY_CAP,
   type MaterialBindingFactory,
@@ -58,6 +74,8 @@ import {
 } from '@proto.ui/module-expose-state-web';
 import {
   FOCUS_BLUR_CAP,
+  FOCUS_RELEASE_PENDING_CAP,
+  type FocusRequestKind,
   FOCUS_INSTANCE_TOKEN_CAP,
   FOCUS_IS_NATIVELY_FOCUSABLE_CAP,
   FOCUS_ORDER_CAP,
@@ -84,6 +102,11 @@ import {
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
+  CONTEXT_MENU_INPUT_HOST_CAP,
+  CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP,
+  createWebContextMenuInputHost,
+  AVAILABLE_SPACE_HOST_CAP,
+  createWebAvailableSpaceHost,
   ANCHORED_POSITION_HOST_CAP,
   createFloatingUiAnchoredPositionHost,
 } from '@proto.ui/module-positioning';
@@ -117,7 +140,6 @@ import {
 } from '../portal-mount';
 import {
   composedParentElement,
-  deepestActiveElement,
   observeWebComponentRadioFocus,
   sampleWebComponentScopeTargets,
 } from '../focus-scope-targets';
@@ -131,6 +153,8 @@ import {
   releaseTriggerSurface,
   mergeLogicalTriggerGroup,
   subscribeLogicalTriggerSurface,
+  subscribeFocusSurfaceReady,
+  isNativeFocusTargetReady,
 } from '../platform/instance-tree';
 
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
@@ -944,6 +968,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   rawPropsSource: RawPropsSource<Props>;
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
+  nativeLinkTarget?: HTMLAnchorElement | null;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -971,11 +996,14 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     styleSupportSource,
     setExposes,
   } = args;
-  const getTriggerSurface = () => {
+  const getControlLabelSurface = () => {
     if (args.textControlTarget) return args.textControlTarget;
     if (args.imageViewTarget) return args.imageViewTarget;
-    const target = getLogicalTriggerSurfaceRoot(instanceToken);
-    const surface = resolveWebComponentTriggerSurface(el, target);
+    if (args.nativeLinkTarget) return args.nativeLinkTarget;
+    return resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
+  };
+  const getTriggerSurface = () => {
+    const surface = getControlLabelSurface();
     return surface?.isConnected ? surface : null;
   };
   const normalizeOwnedSurface = () => {
@@ -990,12 +1018,20 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const physicalImage = () => args.imageViewTarget;
 
   return createCapsWiring()
+    .use('control-label', [
+      [CONTROL_LABEL_HOST_CAP, createWebControlLabelHost(getControlLabelSurface, undefined)],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [
         TEXT_CONTROL_HOST_CAP,
         createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [NATIVE_LINK_HOST_CAP, createWebNativeLinkHost(() => args.nativeLinkTarget ?? null)],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [
@@ -1096,6 +1132,12 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     .build();
 }
 
+// Kept by the logical Adapter owner, across replaceable view providers.
+export type FocusIntentState = {
+  options?: FocusRequestOptions;
+  kind?: FocusRequestKind;
+};
+
 export function createWebComponentModules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
   surfaceProjection: HostSurfaceProjection<HTMLElement>;
@@ -1106,10 +1148,13 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
+  visualFeedbackSink?: VisualFeedbackSink;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
   imageViewTarget: HTMLImageElement | null;
+  nativeLinkTarget?: HTMLAnchorElement | null;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -1122,6 +1167,11 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   setExposes: (record: Record<string, unknown>) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
+  isEntryAcquisitionReady?: (target: HTMLElement) => boolean;
+  focusIntentState?: FocusIntentState;
+  onFocusIntent?: () => void;
+  onFocusAcquired?: () => void;
+  onFocusPendingReleased?: () => void;
   subscribeTargetReady: (listener: () => void) => () => void;
   retryTargetReady: () => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
@@ -1142,13 +1192,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     setExposes,
   } = args;
 
+  const getPhysicalTriggerSurface = () =>
+    args.nativeLinkTarget ??
+    resolveWebComponentTriggerSurface(el, getLogicalTriggerSurfaceRoot(instanceToken));
   const getConnectedTriggerSurface = () => {
-    const target = getLogicalTriggerSurfaceRoot(instanceToken);
-    const surface = resolveWebComponentTriggerSurface(el, target);
+    const surface = getPhysicalTriggerSurface();
     return surface?.isConnected ? surface : null;
   };
   // A11y must project while the rematerialized host is still behind the reveal
   // barrier; focus remains gated until that host is ready for interaction.
+  const request = args.focusIntentState ?? {};
   const getTriggerSurface = () => (args.isViewReady() ? getConnectedTriggerSurface() : null);
   let entryObserver: MutationObserver | null = null;
   let entryImageObserver: MutationObserver | null = null;
@@ -1199,7 +1252,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       history.rebind();
       listener();
     });
-    const offSurface = subscribeLogicalTriggerSurface(instanceToken, listener);
+    const offSurface = subscribeFocusSurfaceReady(instanceToken, listener);
     radioFocusHistory = history;
     return () => {
       history.dispose();
@@ -1215,18 +1268,49 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   };
   const physicalControl = () => args.textControlTarget;
   const physicalImage = () => args.imageViewTarget;
+  const getAccessibilitySurface = () => {
+    const surface = args.surfaceProjection.getSurfaceTarget();
+    return surface === el ? getConnectedTriggerSurface() : surface;
+  };
+  const getControlLabelSurface = () => {
+    if (!args.isViewReady()) return null;
+    const surface = args.surfaceProjection.getSurfaceTarget();
+    return surface === el ? getPhysicalTriggerSurface() : surface;
+  };
+  const subscribeControlLabelSurface = (listener: () => void) => {
+    const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
+    const offReady = subscribeFocusTarget(listener);
+    return () => {
+      offSurface();
+      offReady();
+    };
+  };
   // Keep canonical instance-facing state markers on the custom-element
   // boundary while mirroring only the generated selector context needed by
   // translated feedback.style tokens on a split presentation surface.
-  const presentationSurface = args.textControlTarget ?? args.imageViewTarget ?? el;
+  const presentationSurface =
+    args.textControlTarget ?? args.imageViewTarget ?? args.nativeLinkTarget ?? el;
+  const portalMount = createWebComponentPortalMount();
+  let releasePortalDirection: (() => void) | null = null;
 
   return createCapsWiring()
+    .use('control-label', [
+      [
+        CONTROL_LABEL_HOST_CAP,
+        createWebControlLabelHost(getControlLabelSurface, subscribeControlLabelSurface),
+      ],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [
         TEXT_CONTROL_HOST_CAP,
         createWebTextControlHost(physicalControl, WEB_COMPONENT_TEXT_CONTROL_HOST_OPTIONS),
       ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [NATIVE_LINK_HOST_CAP, createWebNativeLinkHost(() => args.nativeLinkTarget ?? null)],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [
@@ -1238,6 +1322,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      ...(args.visualFeedbackSink
+        ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
+        : []),
       ...(args.materialBindingFactory
         ? [[MATERIAL_BINDING_FACTORY_CAP, args.materialBindingFactory] as const]
         : []),
@@ -1246,20 +1333,14 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
-        createWebA11yProjector(
-          () => {
-            const surface = args.surfaceProjection.getSurfaceTarget();
-            return surface === el ? getConnectedTriggerSurface() : surface;
-          },
-          (listener) => {
-            const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
-            const offTrigger = subscribeLogicalTriggerSurface(instanceToken, listener);
-            return () => {
-              offSurface();
-              offTrigger();
-            };
-          }
-        ),
+        createWebA11yProjector(getAccessibilitySurface, (listener) => {
+          const offSurface = args.surfaceProjection.subscribeSurfaceTarget(listener);
+          const offTrigger = subscribeLogicalTriggerSurface(instanceToken, listener);
+          return () => {
+            offSurface();
+            offTrigger();
+          };
+        }),
       ],
     ])
     .use('event', [
@@ -1286,6 +1367,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [FOCUS_INSTANCE_TOKEN_CAP, instanceToken],
       [FOCUS_PARENT_CAP, (inst: unknown) => getLogicalParent(inst as LogicalInstanceToken)],
       [FOCUS_TARGET_READY_CAP, subscribeFocusTarget],
+      [FOCUS_RELEASE_PENDING_CAP, () => args.onFocusPendingReleased?.()],
       [
         FOCUS_SAMPLE_SCOPE_TARGETS_CAP,
         (container: HTMLElement, direction?: 'next' | 'prev') =>
@@ -1932,17 +2014,30 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       ],
       [
         FOCUS_REQUEST_FOCUS_CAP,
-        (target: HTMLElement, options?: FocusRequestOptions) => {
+        (target: HTMLElement, options: FocusRequestOptions | undefined, kind: FocusRequestKind) => {
+          if (request.options !== options || request.kind !== kind) {
+            request.options = options;
+            request.kind = kind;
+            args.onFocusIntent?.();
+          }
+          if (
+            !target.isConnected ||
+            (kind === 'native' && !isNativeFocusTargetReady(target)) ||
+            (kind === 'entry' && args.isEntryAcquisitionReady?.(target) === false)
+          )
+            return false;
           target.focus(
             typeof options?.preventScroll === 'boolean'
               ? { preventScroll: options.preventScroll }
               : undefined
           );
-          // A focused editor inside an open ShadowRoot leaves
-          // document.activeElement on the host; only the deepest active
-          // element proves the request landed.
-          const applied = deepestActiveElement(target.ownerDocument) === target;
-          if (!applied) args.retryTargetReady();
+          const applied = isWebFocusTargetActive(target);
+          // Native focus can synchronously issue a newer request. Only the
+          // still-current intent owns success or retry-budget accounting.
+          if (request.options === options && request.kind === kind) {
+            if (applied) args.onFocusAcquired?.();
+            else args.retryTargetReady();
+          }
           return applied;
         },
       ],
@@ -2020,7 +2115,16 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
       [HOST_ELEMENT_CAP, el],
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
-    .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('positioning', [
+      [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
+      [CONTEXT_MENU_INPUT_HOST_CAP, createWebContextMenuInputHost()],
+      [CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+      [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
+    ])
+    .use('axis-input', [
+      [AXIS_INPUT_HOST_CAP, createWebAxisInputHost()],
+      [AXIS_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('scroll', [
       [
         SCROLL_SURFACE_HOST_CAP,
@@ -2032,7 +2136,34 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     ])
     .use('overlay', () => [
       [HOST_ELEMENT_CAP, el],
-      [OVERLAY_GLOBAL_MOUNT_CAP, createWebComponentPortalMount()],
+      [
+        OVERLAY_GLOBAL_MOUNT_CAP,
+        {
+          mount(target: HTMLElement) {
+            if (!releasePortalDirection && target.parentElement !== target.ownerDocument.body) {
+              const origin = target.parentNode;
+              releasePortalDirection = retainWebPortalDirection(target, () => origin);
+            }
+            try {
+              portalMount.mount(target);
+            } catch (error) {
+              const release = releasePortalDirection;
+              releasePortalDirection = null;
+              release?.();
+              throw error;
+            }
+          },
+          unmount(target: HTMLElement) {
+            const release = releasePortalDirection;
+            releasePortalDirection = null;
+            try {
+              release?.();
+            } finally {
+              portalMount.unmount(target);
+            }
+          },
+        },
+      ],
       [OVERLAY_MODAL_CAP, args.overlayModal ?? createWebOverlayModal(el.ownerDocument)],
       ...(args.overlayLayerScheduler
         ? [[OVERLAY_LAYER_SCHEDULER_CAP, args.overlayLayerScheduler] as const]

@@ -27,6 +27,11 @@
       "types": "./dist/material/runtime-cap.d.ts",
       "import": "./dist/material/runtime-cap.js",
       "default": "./dist/material/runtime-cap.js"
+    },
+    "./internal/shared-policy": {
+      "types": "./dist/material/shared-policy.d.ts",
+      "import": "./dist/material/shared-policy.js",
+      "default": "./dist/material/shared-policy.js"
     }
   },
   "description": "Proto UI module that provides feedback capability for adapters.",

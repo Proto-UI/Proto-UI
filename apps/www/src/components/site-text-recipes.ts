@@ -13,6 +13,7 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'h6',
   'body',
   'label',
+  'notice-title',
   'caption',
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
@@ -45,6 +46,7 @@ export function siteTextRecipe(
               h6: 'base',
               body: 'base',
               label: 'sm',
+              'notice-title': 'base',
               caption: 'sm',
             } as const
           )[role];
@@ -56,20 +58,23 @@ export function siteTextRecipe(
         : reading && role === 'body'
           ? 'inherit'
           : 'default',
-    weight: heading
-      ? family === 'brutalist'
-        ? 'bold'
-        : 'semibold'
-      : family === 'brutalist' || role === 'label'
-        ? 'medium'
-        : 'normal',
+    weight:
+      role === 'notice-title'
+        ? 'semibold'
+        : heading
+          ? family === 'brutalist'
+            ? 'bold'
+            : 'semibold'
+          : family === 'brutalist' || role === 'label'
+            ? 'medium'
+            : 'normal',
     font: heading && family === 'brutalist' ? 'heading' : 'body',
     leading:
       role === 'slogan' || role === 'h1' || role === 'h2'
         ? 'tight'
         : role === 'h3' || role === 'h4' || role === 'h5'
           ? 'snug'
-          : role === 'body' || role === 'tagline'
+          : role === 'body' || role === 'tagline' || role === 'notice-title'
             ? 'relaxed'
             : 'normal',
     tracking: role === 'slogan' || role === 'h1' || role === 'h2' ? 'tight' : 'normal',

@@ -1,0 +1,617 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "base": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "alert-dialog",
+      "prototypeExports": [
+        {
+          "export": "alertDialogRoot",
+          "name": "base-alert-dialog-root"
+        },
+        {
+          "export": "alertDialogTrigger",
+          "name": "base-alert-dialog-trigger"
+        },
+        {
+          "export": "alertDialogContent",
+          "name": "base-alert-dialog-content"
+        },
+        {
+          "export": "alertDialogTitle",
+          "name": "base-alert-dialog-title"
+        },
+        {
+          "export": "alertDialogDescription",
+          "name": "base-alert-dialog-description"
+        },
+        {
+          "export": "alertDialogCancel",
+          "name": "base-alert-dialog-cancel"
+        },
+        {
+          "export": "alertDialogAction",
+          "name": "base-alert-dialog-action"
+        },
+        {
+          "export": "alertDialogMask",
+          "name": "base-alert-dialog-mask"
+        }
+      ],
+      "demoId": "demo-base-alert-dialog",
+      "demoPath": "apps/www/src/content/docs/demo-base-alert-dialog.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/alert-dialog.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/alert-dialog.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "alert-dialog",
+      "prototypeExports": [
+        {
+          "export": "alertDialogRoot",
+          "name": "shadcn-alert-dialog-root"
+        },
+        {
+          "export": "alertDialogTrigger",
+          "name": "shadcn-alert-dialog-trigger"
+        },
+        {
+          "export": "alertDialogContent",
+          "name": "shadcn-alert-dialog-content"
+        },
+        {
+          "export": "alertDialogTitle",
+          "name": "shadcn-alert-dialog-title"
+        },
+        {
+          "export": "alertDialogDescription",
+          "name": "shadcn-alert-dialog-description"
+        },
+        {
+          "export": "alertDialogCancel",
+          "name": "shadcn-alert-dialog-cancel"
+        },
+        {
+          "export": "alertDialogAction",
+          "name": "shadcn-alert-dialog-action"
+        },
+        {
+          "export": "alertDialogMask",
+          "name": "shadcn-alert-dialog-mask"
+        }
+      ],
+      "demoId": "demo-shadcn-alert-dialog",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-alert-dialog.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/alert-dialog.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/alert-dialog.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "alert-dialog",
+      "prototypeExports": [
+        {
+          "export": "alertDialogRoot",
+          "name": "brutalist-alert-dialog-root"
+        },
+        {
+          "export": "alertDialogTrigger",
+          "name": "brutalist-alert-dialog-trigger"
+        },
+        {
+          "export": "alertDialogContent",
+          "name": "brutalist-alert-dialog-content"
+        },
+        {
+          "export": "alertDialogTitle",
+          "name": "brutalist-alert-dialog-title"
+        },
+        {
+          "export": "alertDialogDescription",
+          "name": "brutalist-alert-dialog-description"
+        },
+        {
+          "export": "alertDialogCancel",
+          "name": "brutalist-alert-dialog-cancel"
+        },
+        {
+          "export": "alertDialogAction",
+          "name": "brutalist-alert-dialog-action"
+        },
+        {
+          "export": "alertDialogMask",
+          "name": "brutalist-alert-dialog-mask"
+        }
+      ],
+      "demoId": "demo-brutalist-alert-dialog",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-alert-dialog.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/alert-dialog.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/alert-dialog.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "alert-dialog",
+      "prototypeExports": [
+        {
+          "export": "alertDialogRoot",
+          "name": "bootstrap-2-3-2-alert-dialog-root"
+        },
+        {
+          "export": "alertDialogTrigger",
+          "name": "bootstrap-2-3-2-alert-dialog-trigger"
+        },
+        {
+          "export": "alertDialogContent",
+          "name": "bootstrap-2-3-2-alert-dialog-content"
+        },
+        {
+          "export": "alertDialogTitle",
+          "name": "bootstrap-2-3-2-alert-dialog-title"
+        },
+        {
+          "export": "alertDialogDescription",
+          "name": "bootstrap-2-3-2-alert-dialog-description"
+        },
+        {
+          "export": "alertDialogCancel",
+          "name": "bootstrap-2-3-2-alert-dialog-cancel"
+        },
+        {
+          "export": "alertDialogAction",
+          "name": "bootstrap-2-3-2-alert-dialog-action"
+        },
+        {
+          "export": "alertDialogMask",
+          "name": "bootstrap-2-3-2-alert-dialog-mask"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-alert-dialog",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-alert-dialog.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/alert-dialog.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/alert-dialog.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "alert-dialog",
+      "prototypeExports": [
+        {
+          "export": "alertDialogRoot",
+          "name": "liquid-glass-alert-dialog-root"
+        },
+        {
+          "export": "alertDialogTrigger",
+          "name": "liquid-glass-alert-dialog-trigger"
+        },
+        {
+          "export": "alertDialogContent",
+          "name": "liquid-glass-alert-dialog-content"
+        },
+        {
+          "export": "alertDialogTitle",
+          "name": "liquid-glass-alert-dialog-title"
+        },
+        {
+          "export": "alertDialogDescription",
+          "name": "liquid-glass-alert-dialog-description"
+        },
+        {
+          "export": "alertDialogCancel",
+          "name": "liquid-glass-alert-dialog-cancel"
+        },
+        {
+          "export": "alertDialogAction",
+          "name": "liquid-glass-alert-dialog-action"
+        },
+        {
+          "export": "alertDialogMask",
+          "name": "liquid-glass-alert-dialog-mask"
+        }
+      ],
+      "demoId": "demo-liquid-glass-alert-dialog",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-alert-dialog.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/alert-dialog.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/alert-dialog.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerRoot",
+          "name": "base-drawer-root"
+        },
+        {
+          "export": "drawerTrigger",
+          "name": "base-drawer-trigger"
+        },
+        {
+          "export": "drawerContent",
+          "name": "base-drawer-content"
+        },
+        {
+          "export": "drawerTitle",
+          "name": "base-drawer-title"
+        },
+        {
+          "export": "drawerDescription",
+          "name": "base-drawer-description"
+        },
+        {
+          "export": "drawerClose",
+          "name": "base-drawer-close"
+        },
+        {
+          "export": "drawerMask",
+          "name": "base-drawer-mask"
+        }
+      ],
+      "demoId": "demo-base-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-base-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/drawer.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerRoot",
+          "name": "shadcn-drawer-root"
+        },
+        {
+          "export": "drawerTrigger",
+          "name": "shadcn-drawer-trigger"
+        },
+        {
+          "export": "drawerContent",
+          "name": "shadcn-drawer-content"
+        },
+        {
+          "export": "drawerTitle",
+          "name": "shadcn-drawer-title"
+        },
+        {
+          "export": "drawerDescription",
+          "name": "shadcn-drawer-description"
+        },
+        {
+          "export": "drawerClose",
+          "name": "shadcn-drawer-close"
+        },
+        {
+          "export": "drawerMask",
+          "name": "shadcn-drawer-mask"
+        }
+      ],
+      "demoId": "demo-shadcn-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/drawer.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerRoot",
+          "name": "brutalist-drawer-root"
+        },
+        {
+          "export": "drawerTrigger",
+          "name": "brutalist-drawer-trigger"
+        },
+        {
+          "export": "drawerContent",
+          "name": "brutalist-drawer-content"
+        },
+        {
+          "export": "drawerTitle",
+          "name": "brutalist-drawer-title"
+        },
+        {
+          "export": "drawerDescription",
+          "name": "brutalist-drawer-description"
+        },
+        {
+          "export": "drawerClose",
+          "name": "brutalist-drawer-close"
+        },
+        {
+          "export": "drawerMask",
+          "name": "brutalist-drawer-mask"
+        }
+      ],
+      "demoId": "demo-brutalist-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/drawer.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerRoot",
+          "name": "bootstrap-2-3-2-drawer-root"
+        },
+        {
+          "export": "drawerTrigger",
+          "name": "bootstrap-2-3-2-drawer-trigger"
+        },
+        {
+          "export": "drawerContent",
+          "name": "bootstrap-2-3-2-drawer-content"
+        },
+        {
+          "export": "drawerTitle",
+          "name": "bootstrap-2-3-2-drawer-title"
+        },
+        {
+          "export": "drawerDescription",
+          "name": "bootstrap-2-3-2-drawer-description"
+        },
+        {
+          "export": "drawerClose",
+          "name": "bootstrap-2-3-2-drawer-close"
+        },
+        {
+          "export": "drawerMask",
+          "name": "bootstrap-2-3-2-drawer-mask"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/drawer.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerRoot",
+          "name": "liquid-glass-drawer-root"
+        },
+        {
+          "export": "drawerTrigger",
+          "name": "liquid-glass-drawer-trigger"
+        },
+        {
+          "export": "drawerContent",
+          "name": "liquid-glass-drawer-content"
+        },
+        {
+          "export": "drawerTitle",
+          "name": "liquid-glass-drawer-title"
+        },
+        {
+          "export": "drawerDescription",
+          "name": "liquid-glass-drawer-description"
+        },
+        {
+          "export": "drawerClose",
+          "name": "liquid-glass-drawer-close"
+        },
+        {
+          "export": "drawerMask",
+          "name": "liquid-glass-drawer-mask"
+        }
+      ],
+      "demoId": "demo-liquid-glass-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/drawer.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverRoot",
+          "name": "base-popover-root"
+        },
+        {
+          "export": "popoverTrigger",
+          "name": "base-popover-trigger"
+        },
+        {
+          "export": "popoverContent",
+          "name": "base-popover-content"
+        },
+        {
+          "export": "popoverTitle",
+          "name": "base-popover-title"
+        },
+        {
+          "export": "popoverDescription",
+          "name": "base-popover-description"
+        },
+        {
+          "export": "popoverClose",
+          "name": "base-popover-close"
+        }
+      ],
+      "demoId": "demo-base-popover",
+      "demoPath": "apps/www/src/content/docs/demo-base-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/popover.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverRoot",
+          "name": "shadcn-popover-root"
+        },
+        {
+          "export": "popoverTrigger",
+          "name": "shadcn-popover-trigger"
+        },
+        {
+          "export": "popoverContent",
+          "name": "shadcn-popover-content"
+        },
+        {
+          "export": "popoverTitle",
+          "name": "shadcn-popover-title"
+        },
+        {
+          "export": "popoverDescription",
+          "name": "shadcn-popover-description"
+        },
+        {
+          "export": "popoverClose",
+          "name": "shadcn-popover-close"
+        }
+      ],
+      "demoId": "demo-shadcn-popover",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/popover.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverRoot",
+          "name": "brutalist-popover-root"
+        },
+        {
+          "export": "popoverTrigger",
+          "name": "brutalist-popover-trigger"
+        },
+        {
+          "export": "popoverContent",
+          "name": "brutalist-popover-content"
+        },
+        {
+          "export": "popoverTitle",
+          "name": "brutalist-popover-title"
+        },
+        {
+          "export": "popoverDescription",
+          "name": "brutalist-popover-description"
+        },
+        {
+          "export": "popoverClose",
+          "name": "brutalist-popover-close"
+        }
+      ],
+      "demoId": "demo-brutalist-popover",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/popover.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverRoot",
+          "name": "bootstrap-2-3-2-popover-root"
+        },
+        {
+          "export": "popoverTrigger",
+          "name": "bootstrap-2-3-2-popover-trigger"
+        },
+        {
+          "export": "popoverContent",
+          "name": "bootstrap-2-3-2-popover-content"
+        },
+        {
+          "export": "popoverTitle",
+          "name": "bootstrap-2-3-2-popover-title"
+        },
+        {
+          "export": "popoverDescription",
+          "name": "bootstrap-2-3-2-popover-description"
+        },
+        {
+          "export": "popoverClose",
+          "name": "bootstrap-2-3-2-popover-close"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-popover",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/popover.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverRoot",
+          "name": "liquid-glass-popover-root"
+        },
+        {
+          "export": "popoverTrigger",
+          "name": "liquid-glass-popover-trigger"
+        },
+        {
+          "export": "popoverContent",
+          "name": "liquid-glass-popover-content"
+        },
+        {
+          "export": "popoverTitle",
+          "name": "liquid-glass-popover-title"
+        },
+        {
+          "export": "popoverDescription",
+          "name": "liquid-glass-popover-description"
+        },
+        {
+          "export": "popoverClose",
+          "name": "liquid-glass-popover-close"
+        }
+      ],
+      "demoId": "demo-liquid-glass-popover",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/popover.mdx"
+      ]
+    }
+  ],
+  "tests": ["packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts"],
+  "remaining": [
+    "shared source/dist exports and build entries",
+    "CLI and demo registry; bilingual navigation",
+    "catalog contracts and lifecycle admission",
+    "real-input visual evidence",
+    "complete adapter/compiler/GPUI conformance",
+    "packed consumer / exact-head CI / independent review",
+    "Drawer drag, snap and swipe semantics"
+  ]
+}

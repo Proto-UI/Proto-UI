@@ -29,6 +29,14 @@ type Binding = {
   stateId?: string;
 };
 
+type ProjectionValue = { value: string | null; priority: string };
+type ProjectionLease = {
+  kind: 'attribute' | 'style';
+  name: string;
+  baseline: ProjectionValue;
+  last: ProjectionValue;
+};
+
 export class ExposeStateWebModuleImpl extends ModuleBase {
   private readonly exposeState: ExposeStatePort;
   private disposed = false;
@@ -36,6 +44,9 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
   private bindings: Binding[] = [];
   private active = false;
   private bindingGeneration = 0;
+  // View suspension retains snapshots and their original baselines. Only terminal
+  // disposal releases artifacts still equal to this module's most recent write.
+  private projections = new Map<HTMLElement, Map<string, ProjectionLease>>();
   private exposedByStateId = new Map<
     string,
     {
@@ -58,7 +69,6 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     if (phase !== 'detached' && phase !== 'unmounting') return;
     this.active = false;
     this.clearBindings();
-    this.exposedByStateId.clear();
   }
 
   afterRenderCommit(): void {
@@ -73,6 +83,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     if (this.disposed) return;
     this.disposed = true;
     this.clearBindings();
+    this.releaseProjections();
   }
 
   // -------------------------
@@ -102,17 +113,19 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
 
     const all = this.exposeState.getAll();
 
-    this.clearBindings();
+    const generation = this.clearBindings();
+    if (!this.isCurrent(generation)) return;
     this.active = true;
-    const generation = this.bindingGeneration;
 
     for (const [key, value] of Object.entries(all)) {
+      if (!this.isCurrent(generation)) return;
       if (!isExposeStateExternalHandle(value)) continue;
 
       const spec = value.spec as StateSpec;
       const semantic = (value as any).__stateSemantic || key;
       const stateId = String((value as any).__stateId ?? '');
       const mapping = nameMap(semantic);
+      if (!this.isCurrent(generation)) return;
 
       const binding: Binding = {
         key,
@@ -133,18 +146,23 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
         });
       }
 
-      this.applySnapshot(host, value, binding, mode);
+      this.applySnapshot(host, value, binding, mode, generation);
+      if (!this.isCurrent(generation)) return;
+      this.bindings.push(binding);
 
       const off = value.subscribe((e) => {
         // Unsubscription cannot retract a callback already queued by its source.
-        if (this.disposed || generation !== this.bindingGeneration) return;
-        if (this.mountPhase === 'detached' || this.mountPhase === 'unmounting') return;
+        if (!this.isCurrent(generation)) return;
         if (e.type === 'disconnect') return;
-        this.applyValue(host, e.next as any, binding, mode);
+        this.applyValue(host, e.next as any, binding, mode, generation);
       });
 
       binding.off = () => value.unsubscribe(off);
-      this.bindings.push(binding);
+      // subscribe may synchronously invoke a callback that disposes or rebinds.
+      if (!this.isCurrent(generation)) {
+        binding.off();
+        return;
+      }
     }
   }
 
@@ -152,13 +170,20 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     host: HTMLElement,
     h: ExposeStateExternalHandle<any>,
     binding: Binding,
-    mode: ExposeStateWebMode
+    mode: ExposeStateWebMode,
+    generation: number
   ) {
     const v = h.get();
-    this.applyValue(host, v, binding, mode);
+    this.applyValue(host, v, binding, mode, generation);
   }
 
-  private applyValue(host: HTMLElement, v: any, binding: Binding, mode: ExposeStateWebMode) {
+  private applyValue(
+    host: HTMLElement,
+    v: any,
+    binding: Binding,
+    mode: ExposeStateWebMode,
+    generation: number
+  ) {
     const kind = binding.kind;
     if (!kind) return;
 
@@ -168,16 +193,14 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     const setAttr = (val: string | null) => {
       if (!attr) return;
       for (const target of this.resolveProjectionTargets(host)) {
-        if (val === null) target.removeAttribute(attr);
-        else target.setAttribute(attr, val);
+        this.writeProjection(target, 'attribute', attr, val, generation);
       }
     };
 
     const setVar = (val: string | null) => {
       if (!cssVar) return;
       for (const target of this.resolveProjectionTargets(host)) {
-        if (val === null) target.style.removeProperty(cssVar);
-        else target.style.setProperty(cssVar, val);
+        this.writeProjection(target, 'style', cssVar, val, generation);
       }
     };
 
@@ -227,16 +250,100 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     return targets;
   }
 
-  private clearBindings(): void {
-    this.bindingGeneration++;
-    for (const b of this.bindings) {
+  private isCurrent(generation: number): boolean {
+    return (
+      !this.disposed &&
+      generation === this.bindingGeneration &&
+      this.mountPhase !== 'detached' &&
+      this.mountPhase !== 'unmounting'
+    );
+  }
+
+  private readProjection(
+    target: HTMLElement,
+    kind: ProjectionLease['kind'],
+    name: string
+  ): ProjectionValue {
+    return kind === 'attribute'
+      ? { value: target.getAttribute(name), priority: '' }
+      : {
+          value: target.style.getPropertyValue(name),
+          priority: target.style.getPropertyPriority(name),
+        };
+  }
+
+  private sameProjection(a: ProjectionValue, b: ProjectionValue): boolean {
+    return a.value === b.value && a.priority === b.priority;
+  }
+
+  private writeProjection(
+    target: HTMLElement,
+    kind: ProjectionLease['kind'],
+    name: string,
+    value: string | null,
+    generation: number
+  ): void {
+    if (!this.isCurrent(generation)) return;
+    const current = this.readProjection(target, kind, name);
+    let leases = this.projections.get(target);
+    if (!leases) this.projections.set(target, (leases = new Map()));
+    const key = `${kind}:${name}`;
+    const next = { value: kind === 'style' ? (value ?? '') : value, priority: '' };
+    let lease = leases.get(key);
+    if (!lease) {
+      lease = { kind, name, baseline: current, last: next };
+      leases.set(key, lease);
+    } else {
+      // A consumer write between projections becomes the next restoration
+      // baseline instead of being silently replaced by the original baseline.
+      if (!this.sameProjection(current, lease.last)) lease.baseline = current;
+      lease.last = next;
+    }
+    if (this.sameProjection(current, next)) return;
+    // Publish ownership before the DOM write: custom-element reactions may
+    // synchronously dispose this module while setAttribute is still on stack.
+    if (kind === 'attribute') {
+      if (value === null) target.removeAttribute(name);
+      else target.setAttribute(name, value);
+    } else {
+      if (value === null) target.style.removeProperty(name);
+      else target.style.setProperty(name, value);
+    }
+  }
+
+  private releaseProjections(): void {
+    const projections = this.projections;
+    this.projections = new Map();
+    for (const [target, leases] of projections) {
+      for (const lease of leases.values()) {
+        try {
+          const current = this.readProjection(target, lease.kind, lease.name);
+          if (!this.sameProjection(current, lease.last)) continue;
+          if (lease.kind === 'attribute') {
+            if (lease.baseline.value === null) target.removeAttribute(lease.name);
+            else target.setAttribute(lease.name, lease.baseline.value);
+          } else if (!lease.baseline.value) target.style.removeProperty(lease.name);
+          else target.style.setProperty(lease.name, lease.baseline.value, lease.baseline.priority);
+        } catch {
+          // One unavailable target must not prevent release of the remaining targets.
+        }
+      }
+    }
+  }
+
+  private clearBindings(): number {
+    const generation = ++this.bindingGeneration;
+    const bindings = this.bindings;
+    // Clear before callbacks so a reentrant refresh owns its new subscriptions.
+    this.bindings = [];
+    this.active = false;
+    this.exposedByStateId.clear();
+    for (const b of bindings) {
       try {
         b.off?.();
       } catch {}
     }
-    this.bindings = [];
-    this.active = false;
-    this.exposedByStateId.clear();
+    return generation;
   }
 
   private allowAttrForKind(kind: StateSpec['kind'], mode: ExposeStateWebMode): boolean {

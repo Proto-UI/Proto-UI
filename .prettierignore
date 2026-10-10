@@ -9,3 +9,17 @@ DCO.md
 native/gpui/fixtures/
 # Pinned MIT upstream artifacts; checksums bind their unmodified UTF-8 LF bytes.
 scripts/agent-operations/vendor/modeltrace/
+# Coverage views are generated and checked byte-for-byte by prototype-coverage.mjs.
+internal/coverage-matrices/prototype-coverage-matrix.md
+internal/coverage-matrices/finf-delivery-checklist.md
+# Exact pre-migration Issue body snapshots retain their original formatting.
+internal/coverage-matrices/snapshots/
+
+# Immutable reviewed upstream bytes are checked by provenance.test.mjs.
+experiments/liquidgl-baseline/vendor/
+
+# Historical resolver profiles retain their exact reviewed source fingerprints.
+scripts/coverage-matrices/test/fixtures/promotion-resolver-original-*.txt
+
+# Exact audited shader bytes and legal text are emitted by the checked generator.
+packages/adapters/base/src/material/liquidgl-kernel.generated.ts

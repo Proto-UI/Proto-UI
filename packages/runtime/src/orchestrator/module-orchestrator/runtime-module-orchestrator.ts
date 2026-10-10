@@ -183,7 +183,7 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
 
   private createDepsAccess(moduleName: string, spec: ModuleDepsSpec): ModuleDeps {
     const allow = new Set<string>([...spec.hard, ...spec.optional]);
-    const require = (name: string) => {
+    const assertDeclaredDependency = (name: string) => {
       if (!allow.has(name)) {
         throw new Error(
           `[Runtime] ${this.prototypeName}/${moduleName} tried to access undeclared dep: ${name}`
@@ -192,7 +192,7 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
     };
 
     const requireFacade = <T extends ModuleFacade>(name: string): T => {
-      require(name);
+      assertDeclaredDependency(name);
       const f = this.facades[name];
       if (!f) {
         throw new Error(
@@ -203,7 +203,7 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
     };
 
     const requirePort = <T>(name: string): T => {
-      require(name);
+      assertDeclaredDependency(name);
       const p = this.ports[name];
       if (!p) {
         throw new Error(`[Runtime] ${this.prototypeName}/${moduleName} missing dep port: ${name}`);
@@ -212,12 +212,12 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
     };
 
     const tryFacade = <T extends ModuleFacade>(name: string): T | undefined => {
-      require(name);
+      assertDeclaredDependency(name);
       return this.facades[name] as T | undefined;
     };
 
     const tryPort = <T>(name: string): T | undefined => {
-      require(name);
+      assertDeclaredDependency(name);
       return this.ports[name] as T | undefined;
     };
 

@@ -82,3 +82,57 @@ export function collectMatrixInteractiveFacts(
   });
   return result;
 }
+
+/** Read-only diagnostic facts. This does not participate in readiness or admission. */
+export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
+  const roots = [...document.querySelectorAll<HTMLElement>('[data-previewer-id]')];
+  const demos = document.querySelectorAll('.demo-matrix__item').length;
+  const unavailable = document.querySelectorAll('.demo-matrix__adapter[data-unavailable]').length;
+  const row = (root: HTMLElement) => {
+    const host = root.querySelector<HTMLElement>('.host');
+    const previewError = host?.textContent?.includes('[Preview Error]') === true;
+    const activeGenerations = host
+      ? Array.from(host.children).filter(
+          (child) => child.getAttribute('data-projection-generation-state') === 'active'
+        ).length
+      : 0;
+    const hostReady =
+      !!host &&
+      (previewError ||
+        (root.dataset.projectionMode === 'fixed-family'
+          ? root.dataset.projectionState === 'ready' && activeGenerations > 0
+          : host.childElementCount > 0));
+    return {
+      demoId: root.closest<HTMLElement>('.demo-matrix__item')?.id ?? null,
+      adapter: root.closest('.demo-matrix__adapter')?.getAttribute('aria-label') ?? null,
+      previewerId: root.dataset.previewerId ?? null,
+      initialized: root.dataset.inited === '1',
+      projectionMode: root.dataset.projectionMode ?? null,
+      projectionState: root.dataset.projectionState ?? null,
+      hostPresent: !!host,
+      hostChildCount: host?.childElementCount ?? 0,
+      activeGenerations,
+      hostReady,
+      previewError: previewError ? (host?.textContent ?? '').slice(0, 2000) : null,
+    };
+  };
+  const rows = roots.map(row);
+  const uninitialized = rows.filter((value) => !value.initialized);
+  const notReady = rows.filter((value) => !value.hostReady);
+  const errors = rows.filter((value) => value.previewError !== null);
+  return {
+    demos,
+    runtimeCount,
+    unavailable,
+    expectedPreviewers: demos * runtimeCount - unavailable,
+    previewers: roots.length,
+    initialized: roots.filter((root) => root.dataset.inited === '1').length,
+    hostCount: document.querySelectorAll('[data-previewer-id] .host').length,
+    uninitializedCount: uninitialized.length,
+    notReadyCount: notReady.length,
+    uninitializedRows: uninitialized.slice(0, 1000),
+    notReadyRows: notReady.slice(0, 1000),
+    previewErrors: errors.slice(0, 1000),
+    truncated: uninitialized.length > 1000 || notReady.length > 1000 || errors.length > 1000,
+  };
+}

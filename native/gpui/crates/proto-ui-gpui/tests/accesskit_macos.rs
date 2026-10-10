@@ -29,6 +29,10 @@ fn main() {
 }
 
 #[cfg(target_os = "macos")]
+#[path = "support/native_capture.rs"]
+mod native_capture;
+
+#[cfg(target_os = "macos")]
 mod macos {
     use std::cell::RefCell;
     use std::collections::HashMap;
@@ -345,6 +349,7 @@ mod macos {
         enabled: bool,
         /// The value, when it is a number, as a checkbox's is.
         number: Option<i64>,
+        text_value: Option<String>,
         object: *mut AnyObject,
     }
 
@@ -360,6 +365,9 @@ mod macos {
             let enabled: bool = msg_send![child, isAccessibilityEnabled];
             let value: *mut AnyObject = msg_send![child, accessibilityValue];
             let number = number(value);
+            let is_text: bool =
+                !value.is_null() && msg_send![value, isKindOfClass: objc2::class!(NSString)];
+            let text_value = if is_text { string(value) } else { None };
             into.push((
                 depth,
                 Seen {
@@ -368,6 +376,7 @@ mod macos {
                     title: string(title),
                     enabled,
                     number,
+                    text_value,
                     object: child,
                 },
             ));
@@ -380,6 +389,7 @@ mod macos {
     struct Run {
         window: WindowHandle<ProtoHostView>,
         passed: usize,
+        capture_failures: Vec<String>,
     }
 
     impl Run {
@@ -392,6 +402,43 @@ mod macos {
         fn draw(&self, cx: &mut AsyncApp) {
             cx.update_window(self.any(), |_, window, cx| window.draw(cx).clear(cx))
                 .expect("the window draws");
+        }
+
+        /// Capture only this test's own window, at the named current phase.
+        /// Node presence alone is not evidence that text is inside the frame;
+        /// the resulting PNG still requires pixel inspection.
+        async fn capture(&mut self, phase: &str, cx: &mut AsyncApp) {
+            let Ok(directory) = std::env::var("PROTO_GPUI_EVIDENCE_DIR") else {
+                return;
+            };
+            let path = Path::new(&directory).join(format!("control-label-{phase}.png"));
+            let result = async {
+                fs::create_dir_all(&directory).map_err(|error| error.to_string())?;
+                let target = cx
+                    .update_window(self.any(), |_, window, _| {
+                        // SAFETY: this is the main-thread, live view of our own
+                        // test window. No external window identifier is accepted.
+                        unsafe { super::native_capture::Target::from_view(content_view(window)) }
+                    })
+                    .map_err(|error| error.to_string())??;
+                super::native_capture::capture(target, &path, cx).await?;
+                println!("native capture target: {target:?}");
+                Ok::<(), String>(())
+            }
+            .await;
+            match result {
+                Ok(()) => {
+                    self.passed += 1;
+                    println!("native pixel evidence: {}", path.display());
+                }
+                Err(error) => {
+                    // Preserve the failure, but still exercise the actions
+                    // below. A missing screenshot must not erase AT evidence.
+                    let failure = format!("{phase}: {error}");
+                    println!("FAILED native pixel evidence: {failure}");
+                    self.capture_failures.push(failure);
+                }
+            }
         }
 
         fn tree(&self, cx: &mut AsyncApp) -> Vec<(usize, Seen)> {
@@ -598,7 +645,7 @@ mod macos {
                 .expect("the view replays the recording");
 
             cx.spawn(async move |cx| {
-                let mut run = Run { window, passed: 0 };
+                let mut run = Run { window, passed: 0, capture_failures: Vec::new() };
 
                 // The first question a screen reader asks starts AccessKit.
                 cx.update_window(run.any(), |_, window, _| {
@@ -921,8 +968,68 @@ mod macos {
                     &named,
                 );
 
-                println!("test result: ok. {} passed; 0 failed", run.passed);
-                process::exit(0);
+                // Replay the real Label peer's two source-bound recordings.
+                // A Label remains a single visible StaticText node; no Button
+                // role or Tab stop is invented to obtain an AccessKit action.
+                let passive = recorded("base-label-session.json", "passive").0;
+                let actionable = recorded("base-label-session.json", "actionable").0;
+                let active_plan = actionable.iter().find_map(|message| match message {
+                    PeerToHostMessage::ControlLabelPlan(plan) => plan.plan.clone(),
+                    _ => None,
+                }).expect("the real peer declares its Label lease");
+                run.window.update(cx, |view, window, cx| {
+                    // This window is 300px high. Earlier suites leave more
+                    // than a viewport of rows, so retire those fixtures before
+                    // capturing Labels rather than appending offscreen text.
+                    for session_id in view.rendered_sessions() {
+                        view.receive(PeerToHostMessage::SessionDisposed(proto_ui_host_protocol::messages::SessionDisposed { session_id }), window, cx);
+                    }
+                    view.open_session("label-passive", config("label-passive", "base-label-root", "Native passive label"), cx);
+                    view.open_session("label-actionable", config("label-actionable", "base-label-root", "Native actionable label"), cx);
+                    for message in passive.into_iter().chain(actionable) { view.receive(message, window, cx); }
+                    view.take_outbox();
+                }).expect("real Label projections replay");
+                run.draw(cx);
+                run.draw(cx);
+                let labels: Vec<Seen> = run.with_role("AXStaticText", cx).into_iter().filter(|seen| seen.text_value.as_deref().is_some_and(|value| value.starts_with("Native "))).collect();
+                run.check("Label is exactly one native text node for each caption", labels.len() == 2, &labels);
+                let sessions = run.window.update(cx, |view, _, _| view.rendered_sessions()).expect("current sessions");
+                run.check("the capture stage contains only the two Label fixtures", sessions.len() == 2 && sessions.iter().all(|id| id.starts_with("label-")), &sessions);
+                run.capture("action-enabled", cx).await;
+                // Capture yields to the main loop. Read fresh accessibility
+                // objects rather than reusing pointers from before that await.
+                run.draw(cx);
+                let labels: Vec<Seen> = run.with_role("AXStaticText", cx).into_iter().filter(|seen| seen.text_value.as_deref().is_some_and(|value| value.starts_with("Native "))).collect();
+                let passive = labels.iter().find(|seen| seen.text_value.as_deref() == Some("Native passive label")).expect("passive text");
+                let actionable = labels.iter().find(|seen| seen.text_value.as_deref() == Some("Native actionable label")).expect("actionable text");
+                let passive_accepted = run.press(passive, cx).await;
+                let passive_out = run.window.update(cx, |view, _, _| view.take_outbox()).expect("outbox");
+                run.check("passive Label offers no native press action", !passive_accepted && !passive_out.iter().any(|message| matches!(message, HostToPeerMessage::ControlLabelActivate(_))), &passive_out);
+                let accepted = run.press(actionable, cx).await;
+                let actions = run.window.update(cx, |view, _, _| view.take_outbox()).expect("outbox");
+                let label_actions: Vec<_> = actions.iter().filter_map(|message| match message { HostToPeerMessage::ControlLabelActivate(action) => Some(action), _ => None }).collect();
+                run.check("the native text action requests exactly one current Label activation", accepted && label_actions.len() == 1 && label_actions[0].session_id == "label-actionable" && label_actions[0].source == proto_ui_host_protocol::messages::ControlLabelActivationSource::Accessibility, &actions);
+                run.window.update(cx, |view, window, cx| {
+                    let mut plan = active_plan;
+                    plan.activation = false;
+                    view.receive(PeerToHostMessage::ControlLabelPlan(proto_ui_host_protocol::messages::ControlLabelPlanMessage { session_id: "label-actionable".into(), view_epoch: 1, plan: Some(plan) }), window, cx);
+                    view.take_outbox();
+                }).expect("activation is withdrawn");
+                run.draw(cx);
+                run.draw(cx);
+                let now_passive = run.with_role("AXStaticText", cx).into_iter().find(|seen| seen.text_value.as_deref() == Some("Native actionable label")).expect("same current visible caption");
+                let accepted = run.press(&now_passive, cx).await;
+                let actions = run.window.update(cx, |view, _, _| view.take_outbox()).expect("outbox");
+                run.check("disabling Label activation removes the native text action", !accepted && !actions.iter().any(|message| matches!(message, HostToPeerMessage::ControlLabelActivate(_))), &actions);
+                run.capture("action-disabled", cx).await;
+
+                if run.capture_failures.is_empty() {
+                    println!("test result: ok. {} passed; 0 failed", run.passed);
+                    process::exit(0);
+                }
+                println!("capture failures: {:?}", run.capture_failures);
+                println!("test result: FAILED. {} passed; {} failed", run.passed, run.capture_failures.len());
+                process::exit(1);
             })
             .detach();
         });

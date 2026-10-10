@@ -24,6 +24,7 @@ import {
   assertContrastCaseCoverage,
   classifyFlatTabPaint,
   establishNativeItemPointerBaseline,
+  discoverContrastSources,
 } from './contrast-audit-plan.mjs';
 import { compileContrastAnatomy, compareContrastAnatomy } from './contrast-anatomy.mjs';
 import { BRUTALIST_THEME } from '../../../packages/prototypes/brutalist/src/theme';
@@ -78,6 +79,10 @@ if (
   );
 }
 const selectedFamilies = requestedFamilies ?? families;
+let authoredSources: Record<
+  string,
+  { recipeId: string; recipePath: string; pagePath: string; route: string }
+> = {};
 const viewport = { width: 1440, height: 1000 };
 const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
 const baseline = execFileSync('git', ['rev-parse', 'HEAD'], {
@@ -148,6 +153,27 @@ async function releaseCaseSubject(page: Page): Promise<void> {
 }
 const passiveFamilies = new Set(['badge', 'card', 'skeleton', 'separator', 'spinner']);
 function plannedStates(family: string): string[] {
+  if (family === 'label')
+    return [
+      'rest',
+      'label-hover',
+      'label-pointer-down',
+      'label-activation-result',
+      'target-keyboard-focus',
+      'target-keyboard-activation',
+    ];
+  if (['collapsible', 'accordion'].includes(family))
+    return [
+      'rest',
+      'hover',
+      'pointer-down',
+      'open',
+      'closed',
+      'reopened',
+      'keyboard-focus',
+      'keyboard-closed',
+      'keyboard-open',
+    ];
   const states = ['rest'];
   if (passiveFamilies.has(family)) return states;
   states.push('hover', 'keyboard-focus');
@@ -206,7 +232,7 @@ function createCase(family: string, runtime: string, theme: string): Case {
     family,
     runtime,
     theme,
-    route: `/en/ui-libraries/brutalist/components/${family}/`,
+    route: authoredSources[family].route,
     status: 'pending',
     plannedStates: plannedStates(family),
     achievedTargets: [],
@@ -275,6 +301,8 @@ const report: Record<string, unknown> = {
     'Spinner snapshots request and observe the real reduced-motion preference only for Spinner cases. Normal-motion rotation/timing and parent composition interactions remain uncovered; no Spinner hover or keyboard-focus claim.',
     'Tooltip hover/focus observations target the first authored Root only. The second Root is structural anatomy coverage, not a sibling warm-window timing or Group handoff journey; dedicated Tooltip semantic/browser evidence remains separate.',
     'Dialog mask hit ownership is a paint-layer observation, not outside-press dismissal coverage under draft P-BASE-DIALOG-CONTENT-DISMISS. A dedicated native outside-press/focus-restoration journey remains follow-up.',
+    'Label audits the exact authored Checkbox association: its Label paint and native pointer activation, then keyboard focus/activation on the actual control. Label itself adds no Tab stop or keyboard target. Other authored Label pair interactions, assistive technology and complete family acceptance remain separate.',
+    'Collapsible and Accordion audit only the named uncontrolled default-L1 disclosure through native pointer open/close/reopen and keyboard close/reopen, exact live relations and paint. Full controlled, disabled, retained, navigation, nested, terminal, material and GPUI acceptance remains separate; other recipe instances receive anatomy observations only.',
     'Button captures pointer release and keyboard focus only; native Space/Enter command activation under draft P-BASE-BUTTON-KEYBOARD-ACTIVATION remains dedicated semantic/browser follow-up, not an achieved target here.',
     'Hover Card Trigger hover/focus and existing Escape retention do not exercise Trigger-to-Content pointer bridging under draft P-BASE-HOVER-CARD-CONTENT-HOVER-BRIDGE; that native journey remains follow-up.',
     'Hover Card focus-open observes the current one-Root zero-delay demo against draft P-BASE-HOVER-CARD-INTERACTION-INTENT after an independently closed non-hover baseline; not protocol conformance.',
@@ -495,7 +523,7 @@ async function anatomyObservation(page: Page, item: Case, state: string): Promis
       throw new Error('Anatomy recipe does not match the requested Brutalist family.');
     const demo = (
       await import(
-        new URL(`../src/content/docs/zh-cn/${manifest.recipeId}.demo.ts`, import.meta.url).href
+        new URL(authoredSources[item.family].recipePath, new URL('../../../', import.meta.url)).href
       )
     ).default as DemoSpec;
     assertDemoSpec(demo);
@@ -677,6 +705,26 @@ async function capture(
 }
 function primary(previewer: Locator, family: string): Locator | null {
   if (family === 'tabs') return previewer.getByRole('tab', { name: 'Details', exact: true });
+  if (family === 'field') {
+    const control =
+      '[data-pui-root][data-projection-prototype="brutalist-field-control"][data-demo-ref="requiredControl"]';
+    // WC exposes a direct owned native part; React/Vue roots are the input.
+    // No first(): missing or duplicate physical editors remain an audit error.
+    return previewer.locator(
+      `[data-projection-content] input${control}, [data-projection-content] ${control} > input[part="control"]:not([data-pui-root])`
+    );
+  }
+  const named = (
+    {
+      label:
+        '[data-pui-root][data-projection-prototype="brutalist-label-root"][data-demo-ref="label-checkbox"]',
+      collapsible:
+        '[data-pui-root][data-projection-prototype="brutalist-collapsible-root"][data-demo-ref="uncontrolled"] [data-pui-root][data-projection-prototype="brutalist-collapsible-trigger"]',
+      accordion:
+        '[data-pui-root][data-projection-prototype="brutalist-accordion-trigger"][data-demo-ref="single-lifetime-trigger"]',
+    } as Record<string, string>
+  )[family];
+  if (named) return previewer.locator(`[data-projection-content] ${named}`);
   const selector = (
     {
       button: '[data-demo-ref="solidMain"]',
@@ -692,7 +740,11 @@ function primary(previewer: Locator, family: string): Locator | null {
       tooltip: '[data-projection-prototype="brutalist-tooltip-trigger"][data-pui-root]',
     } as Record<string, string>
   )[family];
-  return selector ? previewer.locator(`[data-projection-content] ${selector}`).first() : null;
+  if (!selector) return null;
+  const targets = previewer.locator(`[data-projection-content] ${selector}`);
+  // Native editor identity is singular; keep Playwright strictness instead of
+  // choosing one live editor when a wrapper projection accidentally duplicates it.
+  return family === 'textarea' ? targets : targets.first();
 }
 async function passiveSurfaceObservation(
   page: Page,
@@ -711,13 +763,8 @@ async function passiveSurfaceObservation(
   if (!passiveFamilies.has(family) || !manifest)
     return { achieved: false, unsupportedCoverage: [{ reason: 'Unsupported passive family.' }] };
   const resolution = resolveProjectionRecipe(manifest.recipeId);
-  const recipePath = `apps/www/src/content/docs/zh-cn/${manifest.recipeId}.demo.ts`;
-  // loadDemo is the browser's Vite registry (import.meta.glob). Import the same
-  // exact authored recipe in Node without constructing a second recipe registry.
-  const recipeURL = new URL(
-    `../src/content/docs/zh-cn/${manifest.recipeId}.demo.ts`,
-    import.meta.url
-  );
+  const recipePath = authoredSources[family].recipePath;
+  const recipeURL = new URL(recipePath, new URL('../../../', import.meta.url));
   const demo = (await import(recipeURL.href)).default as DemoSpec;
   assertDemoSpec(demo);
   const recipeIdentities = new Set<string>();
@@ -1151,6 +1198,339 @@ async function requireTarget(
   const observation = await targetObservation(target);
   return { ...observation, achieved: observation.achieved && predicate(observation) };
 }
+// These observations are finite source-bound journeys. They do not infer
+// general protocol or accessibility conformance from a painted frame.
+async function labelAssociationObservation(
+  page: Page,
+  label: Locator,
+  checked: boolean
+): Promise<Observation> {
+  return label.evaluate(
+    (element, input) => {
+      const probe = (
+        globalThis as typeof globalThis & {
+          puiContrastProbe: typeof import('./contrast-probe.browser');
+        }
+      ).puiContrastProbe;
+      const boundary = probe.readContrastAuditSubject(input.subject);
+      const scope = boundary.retained;
+      const controls = [
+        ...(scope?.querySelectorAll<HTMLElement>(
+          '[data-pui-root][data-projection-prototype="base-checkbox-root"][data-demo-ref="checkbox"]'
+        ) ?? []),
+      ];
+      const target = controls.length === 1 ? controls[0] : null;
+      const checks = {
+        current(node: HTMLElement) {
+          return (
+            node.isConnected &&
+            node.dataset.projectionOwner === boundary.owner &&
+            node.dataset.projectionGeneration === boundary.generation
+          );
+        },
+      };
+      const labelPaint = probe.readContrastTargetObservation(element);
+      const targetPaint = target ? probe.readContrastTargetObservation(target) : null;
+      const naming = (target?.getAttribute('aria-labelledby') ?? '').split(/\s+/).filter(Boolean);
+      const idCount = element.id
+        ? [...document.querySelectorAll('[id]')].filter((node) => node.id === element.id).length
+        : 0;
+      const labelTabIndex = (element as HTMLElement).tabIndex;
+      const role = element.getAttribute('role');
+      const relationMatches =
+        !!target &&
+        !!element.id &&
+        idCount === 1 &&
+        naming.length === 1 &&
+        naming[0] === element.id;
+      return {
+        achieved:
+          boundary.observation.achieved &&
+          !!scope?.contains(element) &&
+          checks.current(element as HTMLElement) &&
+          !!target &&
+          checks.current(target) &&
+          relationMatches &&
+          labelTabIndex < 0 &&
+          role === null &&
+          target.getAttribute('role') === 'checkbox' &&
+          target.getAttribute('aria-checked') === String(input.checked) &&
+          labelPaint.achieved &&
+          targetPaint?.achieved === true,
+        owner: boundary.owner,
+        generation: boundary.generation,
+        relationMatches,
+        labelId: element.id,
+        naming,
+        labelTabIndex,
+        labelRole: role,
+        controlCount: controls.length,
+        expectedChecked: input.checked,
+        label: labelPaint,
+        target: targetPaint,
+        basis:
+          'Exact label-checkbox / checkbox authored naming relationship and native target state; Label itself is not a keyboard control.',
+      };
+    },
+    { subject: caseSubject(page), checked }
+  );
+}
+
+async function labelJourney(page: Page, item: Case, label: Locator): Promise<void> {
+  const target = casePreviewer(page).locator(
+    '[data-projection-content] [data-pui-root][data-projection-prototype="base-checkbox-root"][data-demo-ref="checkbox"]'
+  );
+  await label.hover();
+  await capture(page, item, 'label-hover', async () => {
+    const observation = await labelAssociationObservation(page, label, false);
+    return {
+      ...observation,
+      achieved: observation.achieved && (observation.label as Observation).hovered === true,
+    };
+  });
+  const bounds = await label.boundingBox();
+  if (!bounds) throw new Error('Authored Label has no native pointer bounds.');
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  try {
+    await capture(page, item, 'label-pointer-down', async () => {
+      const observation = await labelAssociationObservation(page, label, false);
+      return {
+        ...observation,
+        achieved: observation.achieved && (observation.label as Observation).nativeActive === true,
+      };
+    });
+  } finally {
+    await page.mouse.up();
+  }
+  await target.and(page.locator('[aria-checked="true"]')).waitFor();
+  await capture(page, item, 'label-activation-result', () =>
+    labelAssociationObservation(page, label, true)
+  );
+  await page.mouse.move(0, 0);
+  // Seed only the actual control, then observe native keyboard focus acquisition.
+  await target.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await capture(page, item, 'target-keyboard-focus', async () => {
+    const observation = await labelAssociationObservation(page, label, true);
+    const control = observation.target as Observation;
+    return {
+      ...observation,
+      achieved:
+        observation.achieved &&
+        control.focused === true &&
+        control.focusVisible === true &&
+        (observation.label as Observation).focused === false,
+    };
+  });
+  await page.keyboard.press('Space');
+  await target.and(page.locator('[aria-checked="false"]')).waitFor();
+  await capture(page, item, 'target-keyboard-activation', async () => {
+    const observation = await labelAssociationObservation(page, label, false);
+    return {
+      ...observation,
+      achieved: observation.achieved && (observation.target as Observation).focused === true,
+    };
+  });
+}
+
+async function disclosureObservation(
+  page: Page,
+  item: Case,
+  trigger: Locator,
+  open: boolean,
+  identity?: string
+): Promise<Observation> {
+  return trigger.evaluate(
+    (element, input) => {
+      const probe = (
+        globalThis as typeof globalThis & {
+          puiContrastProbe: typeof import('./contrast-probe.browser');
+        }
+      ).puiContrastProbe;
+      const boundary = probe.readContrastAuditSubject(input.subject);
+      const accordion = input.family === 'accordion';
+      const ownerPrototype = accordion ? 'brutalist-accordion-item' : 'brutalist-collapsible-root';
+      const ownerRef = accordion ? 'single-lifetime-item' : 'uncontrolled';
+      const owner = element.closest<HTMLElement>(
+        `[data-pui-root][data-projection-prototype="${ownerPrototype}"]`
+      );
+      const contentPrototype = `brutalist-${input.family}-content`;
+      const parts = [
+        ...(owner?.querySelectorAll<HTMLElement>(
+          `[data-pui-root][data-projection-prototype="${contentPrototype}"]`
+        ) ?? []),
+      ].filter(
+        (part) =>
+          part.closest(`[data-pui-root][data-projection-prototype="${ownerPrototype}"]`) === owner
+      );
+      const checks = {
+        current(node: HTMLElement) {
+          return (
+            node.isConnected &&
+            node.dataset.projectionOwner === boundary.owner &&
+            node.dataset.projectionGeneration === boundary.generation
+          );
+        },
+        uniqueIdentity(id: string) {
+          return (
+            !!id &&
+            [...document.querySelectorAll('[id]')].filter((node) => node.id === id).length === 1
+          );
+        },
+      };
+      const controls = (element.getAttribute('aria-controls') ?? '').split(/\s+/).filter(Boolean);
+      const triggerPaint = probe.readContrastTargetObservation(element);
+      const snapshots = parts.map((part) => ({
+        id: part.id,
+        ref: part.getAttribute('data-demo-ref'),
+        role: part.getAttribute('role'),
+        labelledBy: (part.getAttribute('aria-labelledby') ?? '').split(/\s+/).filter(Boolean),
+        tabIndex: part.tabIndex,
+        detached: part.hasAttribute('data-pui-view-detached'),
+        currentLease: checks.current(part),
+        visibility: probe.readContrastPaintedVisibility(part),
+      }));
+      const panel = parts.length === 1 ? parts[0] : null;
+      const panelState = snapshots.length === 1 ? snapshots[0] : null;
+      const exactOwner =
+        !!owner &&
+        owner.getAttribute('data-demo-ref') === ownerRef &&
+        checks.current(owner) &&
+        !!boundary.retained?.contains(owner);
+      const exactContent = !accordion || panelState?.ref === 'single-lifetime-content';
+      const relationMatches = input.open
+        ? !!panel &&
+          !!panelState &&
+          exactContent &&
+          checks.current(panel) &&
+          !panelState.detached &&
+          controls.length === 1 &&
+          controls[0] === panel.id &&
+          checks.uniqueIdentity(panel.id) &&
+          (!input.identity || panel.id === input.identity) &&
+          panelState.tabIndex < 0 &&
+          (accordion
+            ? panelState.role === 'region' &&
+              checks.uniqueIdentity(element.id) &&
+              panelState.labelledBy.length === 1 &&
+              panelState.labelledBy[0] === element.id
+            : panelState.role === null) &&
+          panelState.visibility.visible &&
+          panelState.visibility.classification === 'source-model-visible'
+        : controls.length === 0 &&
+          parts.length <= 1 &&
+          snapshots.every(
+            (part) =>
+              part.detached &&
+              part.id === '' &&
+              part.currentLease &&
+              !part.visibility.visible &&
+              part.visibility.classification === 'exempt-not-visible'
+          );
+      return {
+        achieved:
+          boundary.observation.achieved &&
+          exactOwner &&
+          checks.current(element as HTMLElement) &&
+          element.getAttribute('role') === 'button' &&
+          element.getAttribute('aria-expanded') === String(input.open) &&
+          element.getAttribute('aria-disabled') !== 'true' &&
+          triggerPaint.achieved &&
+          relationMatches,
+        owner: boundary.owner,
+        generation: boundary.generation,
+        ownerRef,
+        controls,
+        open: input.open,
+        identity: panel?.id ?? null,
+        relationMatches,
+        trigger: triggerPaint,
+        content: snapshots,
+        basis:
+          'Exact authored uncontrolled default-L1 domain, physical content view and live relation; closed anonymous WC owner shells are hidden structural observations only.',
+      };
+    },
+    { subject: caseSubject(page), family: item.family, open, identity }
+  );
+}
+
+async function disclosureJourney(page: Page, item: Case, trigger: Locator): Promise<void> {
+  const waitExpanded = async (open: boolean) => {
+    await trigger.and(page.locator(`[aria-expanded="${open}"]`)).waitFor();
+  };
+  await trigger.hover();
+  await capture(page, item, 'hover', async () => {
+    const observation = await disclosureObservation(page, item, trigger, false);
+    return {
+      ...observation,
+      achieved: observation.achieved && (observation.trigger as Observation).hovered === true,
+    };
+  });
+  const bounds = await trigger.boundingBox();
+  if (!bounds) throw new Error('Authored disclosure Trigger has no native pointer bounds.');
+  await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+  await page.mouse.down();
+  try {
+    await capture(page, item, 'pointer-down', async () => {
+      const observation = await disclosureObservation(page, item, trigger, false);
+      return {
+        ...observation,
+        achieved:
+          observation.achieved && (observation.trigger as Observation).nativeActive === true,
+      };
+    });
+  } finally {
+    await page.mouse.up();
+  }
+  await waitExpanded(true);
+  let identity = '';
+  await capture(page, item, 'open', async () => {
+    const observation = await disclosureObservation(page, item, trigger, true);
+    identity = observation.identity as string;
+    return observation;
+  });
+  await trigger.click();
+  await waitExpanded(false);
+  await capture(page, item, 'closed', () => disclosureObservation(page, item, trigger, false));
+  await trigger.click();
+  await waitExpanded(true);
+  await capture(page, item, 'reopened', () =>
+    disclosureObservation(page, item, trigger, true, identity)
+  );
+  await page.mouse.move(0, 0);
+  await trigger.focus();
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Shift+Tab');
+  await capture(page, item, 'keyboard-focus', async () => {
+    const observation = await disclosureObservation(page, item, trigger, true, identity);
+    const target = observation.trigger as Observation;
+    return {
+      ...observation,
+      achieved: observation.achieved && target.focused === true && target.focusVisible === true,
+    };
+  });
+  await page.keyboard.press('Space');
+  await waitExpanded(false);
+  await capture(page, item, 'keyboard-closed', async () => {
+    const observation = await disclosureObservation(page, item, trigger, false);
+    return {
+      ...observation,
+      achieved: observation.achieved && (observation.trigger as Observation).focused === true,
+    };
+  });
+  await page.keyboard.press('Enter');
+  await waitExpanded(true);
+  await capture(page, item, 'keyboard-open', async () => {
+    const observation = await disclosureObservation(page, item, trigger, true, identity);
+    return {
+      ...observation,
+      achieved: observation.achieved && (observation.trigger as Observation).focused === true,
+    };
+  });
+}
+
 async function pointerJourney(
   page: Page,
   item: Case,
@@ -1770,6 +2150,12 @@ try {
   if (cleanSource.head !== baseline) throw new Error('Source HEAD changed during audit startup.');
   await verifyServedSource();
   report.servedSource = servedSource;
+  authoredSources = await discoverContrastSources({
+    contentRoot: fileURLToPath(new URL('../src/content', import.meta.url)),
+    manifest: PROJECTION_FAMILY_MANIFESTS.brutalist,
+    families: selectedFamilies,
+  });
+  report.authoredSources = authoredSources;
   const sourceFiles = [
     ['runner', new URL('./audit-brutalist-contrast.mts', import.meta.url)],
     ['probe', new URL('./contrast-probe.browser.ts', import.meta.url)],
@@ -1794,9 +2180,15 @@ try {
       'textarea-live-props-setup',
       new URL('../src/content/docs/zh-cn/demo-base-textarea.demo.ts', import.meta.url),
     ],
-    ...selectedFamilies.map((family) => [
-      `recipe-${family}`,
-      new URL(`../src/content/docs/zh-cn/demo-brutalist-${family}.demo.ts`, import.meta.url),
+    ...selectedFamilies.flatMap((family) => [
+      [
+        `recipe-${family}`,
+        new URL(authoredSources[family].recipePath, new URL('../../../', import.meta.url)),
+      ],
+      [
+        `page-${family}`,
+        new URL(authoredSources[family].pagePath, new URL('../../../', import.meta.url)),
+      ],
     ]),
   ] as const;
   const sources: Record<string, unknown>[] = [];
@@ -1846,7 +2238,7 @@ try {
       const page = await context.newPage();
       page.setDefaultTimeout(20_000);
       page.setDefaultNavigationTimeout(30_000);
-      const route = `/en/ui-libraries/brutalist/components/${family}/`;
+      const route = authoredSources[family].route;
       const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
       if (
         !response?.ok() ||
@@ -1855,7 +2247,9 @@ try {
         throw new Error(
           'Runtime availability page is not from the current source-bound audit server.'
         );
-      const previewer = page.locator('[data-previewer-id]').first();
+      const previewer = page.locator(
+        `[data-previewer-id][data-demo-id=${JSON.stringify(authoredSources[family].recipeId)}]`
+      );
       await previewer.waitFor({ state: 'visible' });
       const recipeId = (PROJECTION_FAMILY_MANIFESTS.brutalist as ProjectionFamilyManifest).families[
         family
@@ -1927,7 +2321,9 @@ try {
         if (!item.motionContext.observedReducedMotion)
           throw new Error('Spinner reduced-motion preference was requested but not observed.');
       }
-      let previewer = page.locator('[data-previewer-id]').first();
+      let previewer = page.locator(
+        `[data-previewer-id][data-demo-id=${JSON.stringify(authoredSources[family].recipeId)}]`
+      );
       await previewer.waitFor({ state: 'visible' });
       await bindCaseSubject(page, previewer, item);
       previewer = casePreviewer(page);
@@ -1956,6 +2352,10 @@ try {
             item.motionContext.observedReducedMotion = observation.observedReducedMotion === true;
           return observation;
         }
+        if (family === 'label')
+          return labelAssociationObservation(page, primary(previewer, family)!, false);
+        if (['collapsible', 'accordion'].includes(family))
+          return disclosureObservation(page, item, primary(previewer, family)!, false);
         return projectionObservation(page, item);
       };
       await capture(page, item, 'rest', rest);
@@ -1990,6 +2390,17 @@ try {
       }
       if (!(await target.count()))
         throw new Error(`${family}: planned native target was not materialized.`);
+      if (family === 'label' || ['collapsible', 'accordion'].includes(family)) {
+        if (family === 'label') await labelJourney(page, item, target);
+        else await disclosureJourney(page, item, target);
+        const missing = item.plannedStates.filter((state) => !item.achievedTargets.includes(state));
+        if (missing.length) throw new Error(`Unachieved planned targets: ${missing.join(', ')}.`);
+        phase = 'source-provenance';
+        await verifyServedSource();
+        item.status = 'observed';
+        await persist('case', item);
+        continue;
+      }
       await target.hover();
       if (family === 'tooltip') await tooltipPortal(page, target);
       if (family === 'hover-card')

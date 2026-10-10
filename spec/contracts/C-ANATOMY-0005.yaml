@@ -30,6 +30,10 @@ criteria:
     text:
       zh-CN: 当前 instance 若无法解析到合法 root domain，默认 strict runtime 查询必须失败而不是静默返回空结构。
       en: If the current instance cannot resolve a valid root domain, default strict runtime queries must fail instead of silently returning empty structure.
+  - id: C-ANATOMY-0005-E
+    text:
+      zh-CN: Terminal disposal 撤销 owner claim 后，其尚未销毁的后代不得仅因祖先 teardown 顺序穿过退休边界加入外层同 family domain；实际逻辑 reparent 离开该边界仍可重新解析 domain。repeatable view detach 不建立退休边界。
+      en: After terminal owner claims are revoked, surviving descendants must not cross the retiring boundary into an outer same-family domain merely because ancestors tear down first. Actual logical reparenting out of that boundary may resolve a new domain; repeatable view detach does not establish a retiring boundary.
 sources:
   - path: internal/contracts/anatomy/base-text/01.terminology.v0.zh-CN.md
     sections:
@@ -44,6 +48,9 @@ relates:
   decisions:
     - D-ANATOMY-MISSING-POLICY-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Clarified nearest-valid-domain isolation during parent-first terminal disposal without changing retained view lifetime or author APIs.
   - version: 0.1.0
     change: introduced
     summary: Captured root-scoped anatomy domains and strict default query behavior.

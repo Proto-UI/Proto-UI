@@ -231,14 +231,48 @@ function renderPreset(
   ];
 }
 
+interface HostIndexOptions {
+  sourceMode?: 'installed' | 'workspace';
+  language?: GeneratedSourceLanguage;
+}
+
+function normalizeHostIndexOptions(
+  input: GeneratedSourceLanguage | HostIndexOptions
+): Required<HostIndexOptions> {
+  if (
+    typeof input !== 'string' &&
+    (input === null || typeof input !== 'object' || Array.isArray(input))
+  ) {
+    throw new Error('invalid generated source options');
+  }
+  const options = typeof input === 'string' ? { language: input } : input;
+  const language = options.language === undefined ? 'ts' : options.language;
+  const sourceMode = options.sourceMode === undefined ? 'installed' : options.sourceMode;
+  if (language !== 'js' && language !== 'ts') {
+    throw new Error('invalid generated source language; use js or ts');
+  }
+  if (sourceMode !== 'installed' && sourceMode !== 'workspace') {
+    throw new Error('invalid generated source mode; use installed or workspace');
+  }
+  return { language, sourceMode };
+}
+
 export function renderHostIndex(
   host: string,
   componentIds: string[],
-  language: GeneratedSourceLanguage = 'ts'
+  input: GeneratedSourceLanguage | HostIndexOptions = {}
 ): string {
+  const { language, sourceMode } = normalizeHostIndexOptions(input);
   const adapter = getAdapter(host);
   if (!adapter) throw new Error(`unsupported host "${host}"`);
 
+  for (const componentId of componentIds) {
+    if (getComponentEntry(componentId)?.sourceOnly && sourceMode !== 'workspace') {
+      throw new Error(
+        `${componentId} is workspace-source-only and has no installed-consumer package; use explicit workspace source generation`
+      );
+    }
+  }
   const lines = createFileHeader();
   if (componentIds.length === 0) {
     lines.push('export {};', '');

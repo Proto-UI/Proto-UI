@@ -28,8 +28,15 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
   const settings = root.querySelector<HTMLElement>('[data-site-header-settings]');
   const preferences = root.querySelector<HTMLElement>('[data-site-header-preferences]');
   const compactContext = root.querySelector<HTMLElement>('[data-site-header-compact-context]');
-  const preferencesParent = preferences?.parentElement;
-  const preferencesNext = preferences?.nextSibling ?? null;
+  const originalPreferencesParent = preferences?.parentElement;
+  const originalPreferencesNext = preferences?.nextSibling ?? null;
+  const preferencesParent =
+    root.querySelector<HTMLElement>('[data-site-header-wide-preferences]') ??
+    originalPreferencesParent;
+  const preferencesNext =
+    originalPreferencesParent === preferencesParent
+      ? originalPreferencesNext
+      : (preferencesParent?.firstChild ?? null);
   const compact = window?.matchMedia('(max-width: 47.999rem)');
   const buttons = new Set<HTMLElement>();
   const buttonLeases = new Map<HTMLElement, { observer: MutationObserver | null }>();
@@ -163,7 +170,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     if (navigation) navigation.hidden = !compact?.matches || (enhanced && !open);
     if (panel) panel.hidden = enhanced && !open;
     if (settings) settings.hidden = enhanced && !open;
-    movePreferences(compactLayout);
+    if (enhanced) movePreferences(compactLayout);
     if (focusInPreferences && focused?.isConnected && !focused.closest('[hidden], [inert]'))
       focused.focus({ preventScroll: true });
     for (const button of buttons) {
@@ -272,7 +279,15 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     window?.removeEventListener('scroll', positionPanel, true);
     window?.visualViewport?.removeEventListener('resize', positionPanel);
     window?.visualViewport?.removeEventListener('scroll', positionPanel);
-    movePreferences(false);
+    // Restore the authored native disclosure owner, which may already be
+    // compact in SSR. Do not leave a second row behind after teardown.
+    if (preferences && originalPreferencesParent)
+      originalPreferencesParent.insertBefore(
+        preferences,
+        originalPreferencesNext?.parentNode === originalPreferencesParent
+          ? originalPreferencesNext
+          : null
+      );
     for (const property of panelProperties) panel?.style.removeProperty(property);
     if (
       frame &&

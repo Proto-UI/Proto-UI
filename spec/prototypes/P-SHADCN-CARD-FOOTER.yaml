@@ -1,0 +1,38 @@
+id: P-SHADCN-CARD-FOOTER
+type: prototype
+title: Shadcn Card Footer passive styled region
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Source-aligned styled-only draft under bounded user-authorized Finf work. Stable admission awaits independent review and exact-candidate native visual, first-frame and host evidence; source and harness tests do not complete a Finf goal.
+summary: Passive four-part Card presentation with consumer-owned content semantics.
+statement:
+  en: This direct design-language surface has no Base Card counterpart and does not inherit Surface semantics. It follows the declared subset of shadcn/ui f31ed81983653919dd4fe77aee4b4859f610f1dc apps/v4/registry/new-york-v4/ui/card.tsx under its MIT notice. It is not an official shadcn component or a claim of complete upstream API compatibility.
+criteria:
+  - id: P-SHADCN-CARD-FOOTER-VISUAL
+    text:
+      en: Footer owns flex, items-center and px-6. It adds no compulsory separator or top padding; upstream border-presence selectors are outside this subset.
+dependsOn:
+  contracts:
+    - C-CORE-SYNTAX-0003
+    - C-TEMPLATE-0001
+    - C-FEEDBACK-STYLE-0002
+    - C-FEEDBACK-STYLE-0003
+verifies:
+  tests:
+    - T-SHADCN-CARD-0001
+sources:
+  - path: packages/prototypes/shadcn/src/card/footer.proto.ts
+  - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
+  - path: packages/prototypes/shadcn/test/card.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded four-part passive draft Card and real gallery consumption; no stable admission.
+tags:
+  - prototype
+  - shadcn
+  - card
+relates:
+  prototypes:
+    - P-SHADCN-CARD

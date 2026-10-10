@@ -8,7 +8,11 @@ import ts from 'typescript';
 import { canonicalizeLoweredVariants } from '../generated/lowered-variant-order.js';
 
 export async function collectProtoStyleTokens(root) {
-  const files = await collectSourceFiles(root);
+  return collectProtoStyleTokensFromFiles(await collectSourceFiles(root));
+}
+
+/** Explicit source graph entry for package preset generation; never executes prototype code. */
+export async function collectProtoStyleTokensFromFiles(files) {
   const tokens = new Set();
   const moduleCache = new Map();
 
@@ -1680,6 +1684,42 @@ function resolveKnownAsHookStateHandles(node) {
     hookName === 'asTooltipTrigger'
   ) {
     return new Map(COMMAND_STATE_VARIANTS);
+  }
+
+  if (hookName === 'asCollapsibleTrigger' || hookName === 'asAccordionTrigger') {
+    return new Map([
+      ...COMMAND_STATE_VARIANTS,
+      ['expanded', 'data-[expanded]'],
+      ...(hookName === 'asAccordionTrigger'
+        ? [['collapseBlocked', 'data-[collapse-blocked]']]
+        : []),
+    ]);
+  }
+
+  if (hookName === 'asFieldLabel') {
+    return new Map([
+      ['disabled', 'data-[disabled]'],
+      ['required', 'data-[required]'],
+    ]);
+  }
+
+  if (hookName === 'asFieldTextControl') {
+    // The binding's declared fieldRequired identity wins over its additional
+    // public `required` expose key, just as __stateSemantic does at runtime.
+    return new Map([
+      ['value', 'data-[value]'],
+      ['disabled', 'data-[disabled]'],
+      ['readOnly', 'data-[read-only]'],
+      ['focused', 'data-[focused]'],
+      ['focusVisible', 'data-[focus-visible]'],
+      ['composing', 'data-[composing]'],
+      ['fieldDisabled', 'data-[field-disabled]'],
+      ['fieldReadOnly', 'data-[field-read-only]'],
+      ['fieldRequired', 'data-[field-required]'],
+      ['required', 'data-[field-required]'],
+      ['invalid', 'data-[invalid]'],
+      ['pending', 'data-[pending]'],
+    ]);
   }
 
   if (hookName === 'asSelectTrigger') {

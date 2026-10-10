@@ -23,3 +23,11 @@ export { default as brutalistDropdownRoot } from './root.proto';
 export { default as brutalistDropdownTrigger } from './trigger.proto';
 export { default as brutalistDropdownContent } from './content.proto';
 export { default as brutalistDropdownItem } from './item.proto';
+
+export { default as dropdownGroup } from './group.proto';
+
+export { default as dropdownLabel } from './label.proto';
+
+export { default as dropdownSeparator } from './separator.proto';
+
+export { default as dropdownShortcut } from './shortcut.proto';

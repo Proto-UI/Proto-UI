@@ -52,7 +52,13 @@ The following prefixes define semantic groups:
 #### Color
 
 - `bg-`
-- `text-`
+- `text-` color values, excluding the independent size and alignment utilities
+
+Text size (`text-sm`, `text-lg`, etc.) and text alignment (`text-left`,
+`text-right`, `text-center`, `text-justify`, `text-start`, `text-end`) are
+separate semantic groups. Setting alignment must not remove a theme foreground
+or font size. The same distinction holds inside the allowlisted static
+`selection:` scope and during runtime patch/suppress operations.
 
 #### Spacing
 

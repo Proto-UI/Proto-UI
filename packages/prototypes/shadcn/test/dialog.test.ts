@@ -77,6 +77,8 @@ describe('prototypes/shadcn: dialog', () => {
     await Promise.resolve();
 
     expect(trigger.getAttribute('data-pui-style')).toBeNull();
+    // P-SHADCN-DIALOG-CLOSE-UNSTYLED-SURFACE also forbids layout tokens.
+    expect(close.getAttribute('data-pui-style')).toBeNull();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(mask.hasAttribute('data-pui-view-detached')).toBe(true);
 
@@ -90,12 +92,23 @@ describe('prototypes/shadcn: dialog', () => {
     expect(mask.getExposes().transitionState.get()).toBe('entering');
     expect(styleContains(content, 'hidden')).toBe(false);
     expect(styleContains(mask, 'hidden')).toBe(false);
+    expect(
+      styleContains(
+        content,
+        'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]'
+      )
+    ).toBe(true);
+    expect(styleContains(content, 'grid-cols-1')).toBe(true);
+    expect(styleContains(header, 'min-w-0')).toBe(true);
+    expect(styleContains(footer, 'flex-wrap-reverse')).toBe(true);
+    expect(styleContains(footer, 'justify-end')).toBe(true);
     expect(styleContains(content, 'rounded-lg')).toBe(true);
     expect(styleContains(content, 'shadow-lg')).toBe(true);
     expect(styleContains(content, 'data-[open]:animate-in')).toBe(true);
     expect(styleContains(content, 'data-[open]:fade-in-0')).toBe(true);
     expect(styleContains(content, 'data-[open]:zoom-in-95')).toBe(true);
     expect(styleContains(content, 'duration-200')).toBe(true);
+    expect(styleContains(content, 'transition-opacity')).toBe(true);
     // This Happy DOM fixture supplies no affirmative preference/support facts.
     // The safe fallback is opaque; the live material suite covers enhancement.
     expect(styleContains(mask, 'bg-background')).toBe(true);
@@ -106,6 +119,7 @@ describe('prototypes/shadcn: dialog', () => {
     expect(styleContains(description, 'text-muted-foreground')).toBe(true);
     expect(styleContains(header, 'flex-col')).toBe(true);
     expect(styleContains(footer, 'items-center')).toBe(true);
+    expect(close.getAttribute('data-pui-style')).toBeNull();
     expect(styleContains(close, 'rounded-lg')).toBe(false);
     expect(styleContains(close, 'bg-primary')).toBe(false);
     expect(styleContains(closeIcon, 'absolute')).toBe(true);

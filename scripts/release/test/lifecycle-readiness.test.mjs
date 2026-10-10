@@ -23,13 +23,46 @@ const report = (args) =>
     maxBuffer: 1 << 25,
   });
 const ids = 'D-IMAGE-VIEW-PROJECTION-0001,T-IMAGE-VIEW-0001';
+const version = readFileSync(path.join(root, 'VERSION'), 'utf8').trim();
+const plan = JSON.parse(
+  readFileSync(path.join(root, 'internal/releases', version, 'lifecycle-dispositions.json'), 'utf8')
+);
+
+function assertCurrentDraftDispositions(data) {
+  // Read the authored inventory independently of the report producer. A disposition
+  // records review of a draft; it does not implement or admit the entity as stable.
+  const expectedIds = plan.slices.flatMap((slice) => slice.entities).sort();
+  assert.equal(new Set(expectedIds).size, expectedIds.length);
+  assert.equal(data.version, version);
+  assert.deepEqual(data.issues, []);
+  assert.deepEqual(data.dispositionSlices, plan.slices);
+  assert.deepEqual(
+    data.rows
+      .filter((row) => row.disposition)
+      .map((row) => row.entityId)
+      .sort(),
+    expectedIds,
+    'reviewed entity inventory must match the authored plan exactly'
+  );
+  assert.equal(data.summary.reviewedDrafts, expectedIds.length);
+  for (const slice of plan.slices) {
+    assert.equal(slice.disposition, 'remain-draft');
+    for (const entityId of slice.entities) {
+      const row = data.rows.find((candidate) => candidate.entityId === entityId);
+      assert.deepEqual(row.disposition, slice, entityId);
+      assert.equal(row.status, 'draft', `${entityId} must remain draft`);
+      assert.equal(row.draftAtVersion, true, `${entityId} must be draft at the selected version`);
+      assert.equal(row.stableAtVersion, false, `${entityId} must not be admitted as stable`);
+    }
+  }
+}
 
 test('release lifecycle CLI distinguishes scoped review from full-inventory completion', () => {
   const scoped = report(['--check', '--entities', ids, '--json']);
   assert.equal(scoped.status, 0, scoped.stderr);
   const data = JSON.parse(scoped.stdout);
   assert.equal(data.basis, 'current-catalog');
-  assert.equal(data.summary.reviewedDrafts, 11);
+  assertCurrentDraftDispositions(data);
   assert.ok(data.unreviewedEntities.length > 0);
   assert.equal(
     data.rows
@@ -43,6 +76,47 @@ test('release lifecycle CLI distinguishes scoped review from full-inventory comp
   const wrongScope = report(['--check', '--entities', 'C-ABSENT-0001']);
   assert.equal(wrongScope.status, 1);
   assert.match(wrongScope.stderr, /outside the report scope/);
+});
+
+test('current disposition oracle rejects missing, extra, and incorrectly admitted rows', async (t) => {
+  const result = report(['--json']);
+  assert.equal(result.status, 0, result.stderr);
+  const original = JSON.parse(result.stdout);
+  assertCurrentDraftDispositions(original);
+  const reviewedId = plan.slices[0].entities[0];
+  const mutations = {
+    'missing row': (data) => {
+      data.rows = data.rows.filter((row) => row.entityId !== reviewedId);
+    },
+    'missing disposition': (data, row) => {
+      delete row.disposition;
+    },
+    'extra disposition': (data, row) => {
+      data.rows.find((candidate) => !candidate.disposition).disposition = row.disposition;
+    },
+    'wrong current status': (data, row) => {
+      row.status = 'active';
+    },
+    'wrong version status': (data, row) => {
+      row.draftAtVersion = false;
+    },
+    'incorrect stable admission': (data, row) => {
+      row.stableAtVersion = true;
+    },
+    'stale summary count': (data) => {
+      data.summary.reviewedDrafts = 11;
+    },
+  };
+  for (const [name, mutate] of Object.entries(mutations)) {
+    await t.test(name, () => {
+      const data = structuredClone(original);
+      mutate(
+        data,
+        data.rows.find((row) => row.entityId === reviewedId)
+      );
+      assert.throws(() => assertCurrentDraftDispositions(data), { code: 'ERR_ASSERTION' });
+    });
+  }
 });
 
 test('release lifecycle reports are reproducible and require a declared version', () => {

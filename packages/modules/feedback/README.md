@@ -21,6 +21,7 @@ npm install @proto.ui/module-feedback@0.3.0-alpha.1
 - `src/caps.ts`
 - `src/create.ts`
 - `src/index.ts`
+- `src/material/`
 - `src/types.ts`
 
 ## Related Internal Packages

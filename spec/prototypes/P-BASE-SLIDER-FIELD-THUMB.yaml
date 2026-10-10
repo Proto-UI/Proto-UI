@@ -1,0 +1,27 @@
+id: P-BASE-SLIDER-FIELD-THUMB
+type: prototype
+title: Base Slider FieldThumb interaction projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Bounded draft Thumb facts and existing Field binding. Synthetic evidence does not admit native, assistive technology or full Slider equivalence.
+summary: FieldThumb retains the existing Slider Thumb owner and Field control binding.
+statement:
+  en: FieldThumb inherits the same hovered, pressed and focus facts as standalone Thumb. Existing Field policy, reporting, label activation, form serialization and reset remain on the same owner.
+criteria:
+  - id: P-BASE-SLIDER-FIELD-THUMB-FACTS
+    text: Both direct and authored-asHook FieldThumb entries expose the same transient facts and lifetime as Thumb without creating a second value, gesture, focus or Field control owner.
+inherits:
+  prototypes: [P-BASE-SLIDER-THUMB]
+dependsOn:
+  contracts: [C-FIELD-0001]
+verifies:
+  tests: [T-BASE-SLIDER-THUMB-0001]
+sources:
+  - path: packages/prototypes/base/src/slider/field-thumb.proto.ts
+  - path: packages/prototypes/base/src/slider/part-setup.ts
+  - path: packages/prototypes/base/src/slider/types.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded the existing FieldThumb entry with shared transient facts and explicit draft limits.
+tags: [prototype, base, slider, field, draft]

@@ -11,11 +11,19 @@ import { AdaptToWebComponent, setElementProps } from '../../adapters/web-compone
 import baseText from '../../prototypes/base/src/text';
 import shadcnText from '../../prototypes/shadcn/src/text';
 import brutalistText from '../../prototypes/brutalist/src/text';
+import bootstrapText from '../../prototypes/bootstrap-2-3-2/src/text';
+import liquidText from '../../prototypes/liquid-glass/src/text';
 import type { TextRootProps } from '../../prototypes/base/src/text';
 import type { Prototype } from '../../core/src';
 
 const TEXT = 'Preserved 文本, emphasis & link';
-const families = { base: baseText, shadcn: shadcnText, brutalist: brutalistText };
+const families = {
+  base: baseText,
+  shadcn: shadcnText,
+  brutalist: brutalistText,
+  'bootstrap-2-3-2': bootstrapText,
+  'liquid-glass': liquidText,
+};
 const wcClasses = new Map(
   Object.values(families).map((proto) => [proto, AdaptToWebComponent(proto)])
 );
@@ -119,6 +127,12 @@ const options = {
   emphasis: { normal: 'not-italic', italic: 'italic' },
   decoration: { none: 'no-underline', underline: 'underline', 'line-through': 'line-through' },
 };
+const bootstrapFamilyTokens: Record<string, string> = {
+  'text-2xl': 'text-[1.53125rem]',
+  'leading-normal': 'leading-[1.4285714285714286]',
+};
+const familyToken = (family: string, token: string) =>
+  family === 'bootstrap-2-3-2' ? (bootstrapFamilyTokens[token] ?? token) : token;
 const defaults = [
   'text-base',
   'text-foreground',
@@ -133,7 +147,7 @@ const defaults = [
 describe.each(runtimes)('real %s Adapter Text', (runtime) => {
   describe.each(Object.entries(families))('%s projection', (family, proto) => {
     // T-TEXT-0001-CASE-CONTENT, T-TEXT-0001-CASE-PASSIVE, T-TEXT-0001-CASE-PROJECTION
-    it.each(['h1', 'p', 'label', 'a'])(
+    it.each(['h1', 'p', 'label', 'a', 'button'])(
       'preserves native %s ownership and updates one canonical presentation subject',
       async (tag) => {
         const owner = document.createElement(tag);
@@ -149,6 +163,13 @@ describe.each(runtimes)('real %s Adapter Text', (runtime) => {
           expect(element.getAttribute('role')).toBeNull();
           expect(element.getAttribute('tabindex')).toBeNull();
           expect(element.getAttribute('aria-live')).toBeNull();
+          expect(element.getAttribute('data-pui-style') ?? '').not.toMatch(
+            /select-(none|text|all|auto)/
+          );
+          if (tag === 'button') {
+            owner.style.userSelect = 'none';
+            expect(element.style.userSelect).toBe('');
+          }
           if (tag === 'label') expect(owner.getAttribute('for')).toBe('text-owned-input');
           if (tag === 'a') expect(owner.getAttribute('href')).toBe('/native-destination');
           for (const [prop, values] of Object.entries(options)) {
@@ -159,17 +180,21 @@ describe.each(runtimes)('real %s Adapter Text', (runtime) => {
               const tokens = (element.getAttribute('data-pui-style') ?? '').split(/\s+/);
               if (family === 'base') expect(tokens.filter(Boolean)).toEqual([]);
               else {
-                expect(tokens).toContain(token);
+                expect(tokens).toContain(familyToken(family, token));
                 expect(
-                  tokens.filter((candidate) => Object.values(values).includes(candidate))
-                ).toEqual([token]);
+                  tokens.filter((candidate) =>
+                    Object.values(values)
+                      .map((value) => familyToken(family, value))
+                      .includes(candidate)
+                  )
+                ).toEqual([familyToken(family, token)]);
               }
             }
           }
           await mounted.update({});
           if (family !== 'base')
             expect((element.getAttribute('data-pui-style') ?? '').split(/\s+/).sort()).toEqual(
-              [...defaults].sort()
+              defaults.map((token) => familyToken(family, token)).sort()
             );
           expect(owner.textContent).toBe(TEXT);
         } finally {

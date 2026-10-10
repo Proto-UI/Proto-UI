@@ -29,9 +29,17 @@ export type ContextFacade = {
     onChange?: ContextChangeCbOptional<T>
   ): Unsubscribe;
 
+  /** Optional nearest strict-ancestor dependency; independent of self-inclusive intent. */
+  trySubscribeAncestor<T extends JsonObject>(
+    key: ContextKey<T>,
+    onChange?: ContextChangeCbOptional<T>
+  ): Unsubscribe;
+
   // runtime-only
   read<T extends JsonObject>(key: ContextKey<T>): T;
   tryRead<T extends JsonObject>(key: ContextKey<T>): T | null;
+  /** Requires trySubscribeAncestor; excludes this instance's provider. */
+  tryReadAncestor<T extends JsonObject>(key: ContextKey<T>): T | null;
 
   update<T extends JsonObject>(key: ContextKey<T>, next: T | ((prev: T) => T)): void;
 
@@ -49,6 +57,8 @@ export type ContextSubscriptionEntry = {
   key: ContextKey<any>;
   mode: 'required' | 'optional';
   callbackCount: number;
+  /** Omitted for the existing self-inclusive channel. */
+  resolution?: 'ancestor';
 };
 
 export type ContextCallbackTask = {
@@ -57,6 +67,8 @@ export type ContextCallbackTask = {
   next: JsonObject | null;
   prev: JsonObject | null;
   callbackCount: number;
+  /** Omitted for the existing self-inclusive channel. */
+  resolution?: 'ancestor';
 };
 
 export type ContextPort = {

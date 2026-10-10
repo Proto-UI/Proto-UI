@@ -35,6 +35,7 @@ describe('gpui peer: stdio process', () => {
     if (hello.kind !== 'peer.hello') return;
     expect(hello.peer.name).toBe(PEER_NAME);
     expect(hello.bundle.entries).toEqual([
+      'base-label-root',
       'base-button',
       'base-toggle',
       'base-switch-root',

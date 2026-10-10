@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.workspace.json",
+  "include": ["range-projection.types.ts"],
+  "exclude": []
+}

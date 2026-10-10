@@ -359,6 +359,92 @@ describe('prototypes/base: select', () => {
     expect(outsideSelect.root.getExposes().value.get()).toBe('');
   });
 
+  it.each([false, true])(
+    'Tab from Trigger dismisses before deferred entry (shift=%s)',
+    async (shiftKey) => {
+      vi.useFakeTimers();
+      const { root, trigger, items } = createSelect({ root: { defaultValue: 'alpha' } });
+      await settle();
+      trigger.focus();
+      trigger.click();
+      await flush(); // Deliberately do not run the deferred open-focus timer.
+      expect(root.getExposes().open.get()).toBe(true);
+      expect(document.activeElement).toBe(trigger);
+      const event = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey,
+        bubbles: true,
+        cancelable: true,
+      });
+      trigger.dispatchEvent(event);
+      await flush();
+      expect(root.getExposes().open.get()).toBe(false);
+      expect(root.getExposes().value.get()).toBe('alpha');
+      expect(event.defaultPrevented).toBe(false);
+      await settle();
+      expect(items.some((item) => item === document.activeElement)).toBe(false);
+    }
+  );
+
+  it.each([false, true])(
+    'deferred Tab honors controlled rejection and does not dismiss another domain (shift=%s)',
+    async (shiftKey) => {
+      vi.useFakeTimers();
+      const a = createSelect({ root: { open: false, value: 'alpha' } });
+      const b = createSelect({ root: { open: false, value: 'beta' } });
+      await settle();
+      const requestsA: any[] = [];
+      const requestsB: any[] = [];
+      a.root.addEventListener('openChange', (event: any) => requestsA.push(event.detail));
+      b.root.addEventListener('openChange', (event: any) => requestsB.push(event.detail));
+      setElementProps(a.root, { open: true, value: 'alpha' });
+      setElementProps(b.root, { open: true, value: 'beta' });
+      await flush();
+      a.trigger.focus();
+      const tab = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey,
+        bubbles: true,
+        cancelable: true,
+      });
+      a.trigger.dispatchEvent(tab);
+      expect(tab.defaultPrevented).toBe(false);
+      await flush();
+      expect(requestsA).toEqual([expect.objectContaining({ open: false, reason: 'tab' })]);
+      expect(requestsB).toEqual([]);
+      expect(a.root.getExposes().open.get()).toBe(true);
+      expect(b.root.getExposes().open.get()).toBe(true);
+      expect(a.root.getExposes().value.get()).toBe('alpha');
+      const outside = document.createElement('button');
+      document.body.append(outside);
+      outside.focus();
+      // A late Item publication must not revive the cancelled entry of this open epoch.
+      const later = document.createElement('base-select-item');
+      setElementProps(later, { value: 'later', textValue: 'Later' });
+      a.content.appendChild(later);
+      await flush();
+      outside.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      await flush();
+      expect(requestsA).toHaveLength(1);
+      expect(requestsB).toHaveLength(0);
+      b.root.remove();
+      await settle();
+      await settle();
+      await settle();
+      expect(document.activeElement).toBe(outside);
+      expect(a.root.getExposes().open.get()).toBe(true);
+      expect(a.root.getExposes().value.get()).toBe('alpha');
+
+      // Cancelling this old entry must not disable a subsequent accepted open epoch.
+      setElementProps(a.root, { open: false, value: 'alpha' });
+      await settle();
+      setElementProps(a.root, { open: true, value: 'alpha' });
+      await settle();
+      await settle();
+      expect(document.activeElement).toBe(a.items[0]);
+    }
+  );
+
   it('uses Transition as Overlay presence and applies anchored positioning props', async () => {
     // T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION
     vi.useFakeTimers();

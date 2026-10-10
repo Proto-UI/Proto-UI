@@ -1,0 +1,18 @@
+---
+title: 'Resizable (WIP)'
+description: 'resizable functional composition and current verification limits.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Resizable 将两个比例面板与一个可聚焦分隔柄组合。value 表示第一个面板的百分比；上下界、折叠、受控值、方向键、Home/End 和 Shift 加速共用请求路径。指针输入依赖共享的无量纲 Axis Input 宿主能力。
+
+当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+
+Panel 通过既有 exposed-state 投影导出无量纲 size；Web CSS 使用读取 --pui-size 的静态 flex-basis 规则，不再依赖运行时动态百分比 token。
+
+<PrototypePreviewer
+  demoId="demo-base-resizable"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

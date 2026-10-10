@@ -1,0 +1,32 @@
+---
+title: 'Calendar (WIP)'
+description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
+
+默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
+
+## 组合与时钟所有权
+
+十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成最多六个带 index 的容量行，实际显示周数按上述规则同步。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
+
+host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、选中的 `value`/`defaultValue`、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
+
+## 显式月份/年份 caption 组合
+
+演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。两个 Select trigger 的 slot 内包含真实的 Month/Year 语义文本，为既有 Select 协议提供命名内容，演示不写入 Adapter 拥有的 ARIA 属性。当前 Web 内容命名投影是否产生符合角色要求的可访问名称，仍需相关 owner 验证。
+
+Base 拥有民用日期行为、可用性、受控值所有权和无障碍语义，不提供设计语言配方。
+
+## 验证边界
+
+当前仍为 WIP。Calendar 有实际 host 的局部行为测试，包含 WC、React、Vue、Vue2；公开 Props/Exposes/AsHook 的域另有独立负控。当前 CLI collector 会漏掉合法继承 Calendar / 嵌套 Button 状态的部分 token，因此状态样式的生成 CSS 与浏览器视觉保真尚未验收。Compiler 解释能力由另一 owner 负责，不能反过来约束合法 Prototype 语义。原生 GPUI/Qt、compiled/packed 一致性、绑定确切提交的浏览器证据和独立验收仍未完成。
+
+<PrototypePreviewer
+  demoId="demo-base-calendar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

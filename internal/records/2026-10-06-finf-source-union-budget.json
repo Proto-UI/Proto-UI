@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-06T18:56:00Z",
+  "subject": "Finf accepted source capability integration: separate numeric package-budget transaction",
+  "sourceCommit": "b47f5556f52de1684c6f20d73964cd7faa007a88",
+  "sourceTree": "1d6bf768b59a41c239f179808347e6935f93894a",
+  "sourceIncludes": [
+    "official #808 Bootstrap controls history",
+    "official #775 shared audit/Focus history",
+    "official #835 Collapsible history with current Runtime/WC reconciliation",
+    "Control Label reviewed tree076aa6d1 and initial-association cleanup repair",
+    "GPUI peer/protocol frozen tree2dd663c",
+    "frozen empty-roving and four contrast audit repairs"
+  ],
+  "command": "node scripts/analysis/package-budgets.mjs --json",
+  "priorOutcome": {
+    "exitCode": 1,
+    "failedWholeEntryCases": 4
+  },
+  "environment": {
+    "node": "v24.19.0",
+    "zlib": "1.3.2.1-motley-3246f1b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "beforeMeasurement": {
+    "environment": {
+      "node": "v24.19.0",
+      "zlib": "1.3.2.1-motley-3246f1b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "results": [
+      {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4669,
+        "minifiedSha256": "85e113d0cb75504605a147676a9064825e3b56adf7a647edd1efc01f81d96205",
+        "gzipBytes": 1736,
+        "budget": 3000,
+        "pass": true
+      },
+      {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4082888,
+        "minifiedSha256": "4c681b3bfc529576f6e2f431d15b720ee76f7d2bee13c51909177f4d459929c0",
+        "gzipBytes": 635510,
+        "budget": 700000,
+        "pass": true
+      },
+      {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 17181,
+        "minifiedSha256": "b0916b31472b9546e901bc510df9e1738cad1ca7540c288227936fb737d09f5f",
+        "gzipBytes": 5456,
+        "budget": 6600,
+        "pass": true
+      },
+      {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 281998,
+        "minifiedSha256": "cf6cebc7f85779cb6ee8dcc1d489edb85656b97f236bb409060a276736dd70b6",
+        "gzipBytes": 72118,
+        "budget": 69591,
+        "pass": false
+      },
+      {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 354503,
+        "minifiedSha256": "932554c55e812d3efcafdc3dacc37fa6811f48e94e057544f555ee708354822e",
+        "gzipBytes": 95485,
+        "budget": 91653,
+        "pass": false
+      },
+      {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 353429,
+        "minifiedSha256": "48239b709f87f5bc18273cb3bb0608c0796e38a60b2a535bbec533a7e2b561cc",
+        "gzipBytes": 95276,
+        "budget": 91396,
+        "pass": false
+      },
+      {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 384066,
+        "minifiedSha256": "7c5ee7900ba6fe0c23f818ced9cf2a4a0641759e91c5f4222071de038e514b37",
+        "gzipBytes": 104773,
+        "budget": 104500,
+        "pass": false
+      },
+      {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 12944,
+        "minifiedSha256": "560f359b960a17688c6a7181ceffa36ca9c50f06396b708e45151071351ff80c",
+        "gzipBytes": 3816,
+        "budget": 6000,
+        "pass": true
+      },
+      {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 16577,
+        "minifiedSha256": "868928cc794ad66854d5c986250ffd95da73ce37772db7ce4ada53d97662497a",
+        "gzipBytes": 4656,
+        "budget": 7000,
+        "pass": true
+      }
+    ],
+    "diagnostics": [
+      {
+        "name": "consumer light-dom button",
+        "entry": "scripts/analysis/fixtures/consumer-light-button.ts",
+        "minifiedBytes": 400158,
+        "minifiedSha256": "924b3b9415dafd32334f8ff46bf2c1801a8ebcf12fd1e8d68e36a70048049ef1",
+        "gzipBytes": 108860
+      },
+      {
+        "name": "consumer direct-shadow button",
+        "entry": "scripts/analysis/fixtures/consumer-shadow-button.ts",
+        "minifiedBytes": 400169,
+        "minifiedSha256": "fe2aa87ac4940fe5f2f21a767fea1d36fc007f96207cdd2d6c4b6a4a47d9c2dd",
+        "gzipBytes": 108864
+      }
+    ]
+  },
+  "transactions": [
+    {
+      "entry": "packages/runtime/src/index.ts",
+      "name": "runtime root",
+      "previousCeiling": 69591,
+      "newCeiling": 72118,
+      "headroom": 0,
+      "minifiedSha256": "cf6cebc7f85779cb6ee8dcc1d489edb85656b97f236bb409060a276736dd70b6"
+    },
+    {
+      "entry": "packages/adapters/react/src/index.ts",
+      "name": "adapter-react root",
+      "previousCeiling": 91653,
+      "newCeiling": 95485,
+      "headroom": 0,
+      "minifiedSha256": "932554c55e812d3efcafdc3dacc37fa6811f48e94e057544f555ee708354822e"
+    },
+    {
+      "entry": "packages/adapters/vue/src/index.ts",
+      "name": "adapter-vue root",
+      "previousCeiling": 91396,
+      "newCeiling": 95276,
+      "headroom": 0,
+      "minifiedSha256": "48239b709f87f5bc18273cb3bb0608c0796e38a60b2a535bbec533a7e2b561cc"
+    },
+    {
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "name": "adapter-web-component root",
+      "previousCeiling": 104500,
+      "newCeiling": 104773,
+      "headroom": 0,
+      "minifiedSha256": "7c5ee7900ba6fe0c23f818ced9cf2a4a0641759e91c5f4222071de038e514b37"
+    }
+  ],
+  "independentReview": {
+    "method": "root independently reran the same canonical command in the frozen source worktree",
+    "comparison": "complete JSON exactly equal, including all 11 artifact hashes, minified/gzip sizes and environment",
+    "formalGitHubApproval": false,
+    "postCeilingVerification": "root independently reran the adjusted exact source; all 9 whole-entry gates pass and all 11 artifact hashes/byte counts equal the original failure measurement"
+  },
+  "boundaries": [
+    "Only four numeric ceilings change; measurement inputs, compression, exports, diagnostic-only cases and enforcement remain unchanged.",
+    "This accepts measured delivery cost, not full family/GPUI/native conformance; all Finf completion boxes remain unchecked.",
+    "Existing #862 and earlier budget evidence remain unchanged. Final exact-head CI is still required."
+  ],
+  "Agent": "dot",
+  "ModelTrace": "not measured — owner-authorized dot exemption (2026-10-06)"
+}

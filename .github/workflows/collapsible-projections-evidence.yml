@@ -1,0 +1,57 @@
+name: Collapsible projection evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/collapsible-projections-evidence.yml'
+      - 'packages/prototypes/**/src/collapsible/**'
+      - 'packages/adapters/**'
+      - 'packages/modules/**'
+      - 'packages/runtime/**'
+      - 'packages/cli/src/**'
+      - 'apps/www/src/content/docs/**/collapsible.mdx'
+      - 'apps/www/src/content/docs/demo-*-collapsible.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+permissions:
+  contents: read
+concurrency:
+  group: collapsible-projections-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Use the supported Astro evidence surface
+        run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Capture actual four-family four-runtime disclosures
+        env:
+          PROTO_UI_COLLAPSIBLE_SCREENSHOT_DIR: ${{ runner.temp }}/collapsible-projections
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_COLLAPSIBLE_SCREENSHOT_DIR"
+          git rev-parse HEAD > "$PROTO_UI_COLLAPSIBLE_SCREENSHOT_DIR/source-sha.txt"
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Retain source-bound public evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: collapsible-projections-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/collapsible-projections
+          if-no-files-found: warn
+          retention-days: 30

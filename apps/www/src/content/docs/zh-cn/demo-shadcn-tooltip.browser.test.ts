@@ -131,12 +131,31 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
           await page.mouse.up();
         }
 
+        const openedContent = await content.elementHandle();
+        if (!openedContent) throw new Error(`${runtime}: Content identity missing.`);
+        const themePaints: string[] = [];
         for (const colorScheme of COLOR_SCHEMES) {
           await applyColorScheme(page, colorScheme);
+          expect(
+            await content.evaluate((element, original) => element === original, openedContent)
+          ).toBe(true);
           const paint = await content.evaluate((element) => {
             const style = getComputedStyle(element);
             const rect = element.getBoundingClientRect();
+            const probe = document.createElement('span');
+            probe.style.backgroundColor = 'var(--pui-foreground)';
+            probe.style.color = 'var(--pui-background)';
+            element.append(probe);
+            const expected = getComputedStyle(probe);
+            const expectedBackground = expected.backgroundColor;
+            const expectedColor = expected.color;
+            probe.remove();
             return {
+              expectedBackground,
+              expectedColor,
+              display: style.display,
+              maxWidth: style.maxWidth,
+              gap: style.gap,
               borderRadius: style.borderRadius,
               borderWidth: style.borderTopWidth,
               backgroundColor: style.backgroundColor,
@@ -150,19 +169,48 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
             };
           });
           expect(paint.borderRadius, `${runtime}/${colorScheme}/radius`).not.toBe('0px');
-          expect(paint.borderWidth, `${runtime}/${colorScheme}/border`).toBe('1px');
+          expect(paint.borderWidth, `${runtime}/${colorScheme}/border`).toBe('0px');
+          expect(paint.display).toBe('inline-flex');
+          expect(paint.maxWidth).toBe('320px');
+          expect(paint.gap).toBe('6px');
+          themePaints.push(paint.backgroundColor);
+          expect(paint.backgroundColor).toBe(paint.expectedBackground);
+          expect(paint.color).toBe(paint.expectedColor);
           expect(paint.backgroundColor, `${runtime}/${colorScheme}/background`).not.toBe(
             'rgba(0, 0, 0, 0)'
           );
           expect(paint.color, `${runtime}/${colorScheme}/color`).not.toBe(paint.backgroundColor);
-          expect(paint.boxShadow, `${runtime}/${colorScheme}/shadow`).not.toBe('none');
+          expect(paint.boxShadow, `${runtime}/${colorScheme}/shadow`).toBe('none');
           expect(paint.fontSize, `${runtime}/${colorScheme}/font-size`).toBe('12px');
           expect(paint.paddingInline, `${runtime}/${colorScheme}/padding-inline`).toBe('12px');
           expect(paint.paddingBlock, `${runtime}/${colorScheme}/padding-block`).toBe('6px');
           expect(paint.width, `${runtime}/${colorScheme}/width`).toBeGreaterThan(20);
           expect(paint.height, `${runtime}/${colorScheme}/height`).toBeGreaterThan(10);
+          expect(paint.width, `${runtime}/${colorScheme}/short-fit-width`).toBeLessThan(320);
+          const longPaint = await content.evaluate((element) => {
+            const description = document.createElement('span');
+            description.textContent =
+              'A supplementary tooltip description with several words that should wrap within the governed maximum width. '.repeat(
+                4
+              );
+            element.append(description);
+            const rect = element.getBoundingClientRect();
+            const result = {
+              width: rect.width,
+              height: rect.height,
+              scrollWidth: element.scrollWidth,
+              clientWidth: element.clientWidth,
+            };
+            description.remove();
+            return result;
+          });
+          expect(longPaint.width).toBeLessThanOrEqual(320);
+          expect(longPaint.height).toBeGreaterThan(paint.height);
+          expect(longPaint.scrollWidth).toBeLessThanOrEqual(longPaint.clientWidth);
         }
 
+        expect(new Set(themePaints).size).toBe(COLOR_SCHEMES.length);
+        await openedContent.dispose();
         await page.keyboard.press('Escape');
         await expect.poll(() => page.getByRole('tooltip').count(), { message: runtime }).toBe(0);
         expect(

@@ -1,0 +1,37 @@
+---
+title: 'Text'
+description: 'LiquidGlass passive Text with the complete Base typography vocabulary.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+`liquid-glass-text-root` 直接消费 `asTextRoot()`，完整保留 Base 八条独立表现轴、默认值与内容 slot。它是本体系真实文字原型，已用于预览工具栏标签，不增加 heading、link、label、button、focus、selection 或 editing owner。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Inputs
+
+- `size`: xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl (default base)
+- `tone`: default, muted, inherit (default default)
+- `weight`: normal, medium, semibold, bold (default normal)
+- `font`: body, heading, mono (default body)
+- `leading`: tight, snug, normal, relaxed (default normal)
+- `tracking`: normal, tight (default normal)
+- `emphasis`: normal, italic (default normal)
+- `decoration`: none, underline, line-through (default none)
+
+显式 leading 优先于 size 的复合行高；移除 prop 恢复默认。`tone="inherit"` 跟随外部 owner 文字颜色。Text 不设置 user-select：文档文字保留自然选择性，control 内文字遵循真实 control 的选择策略，不用 Text 强制解锁或禁用。原生 h1、p、label、a、button 继续拥有语义、for/href 与输入行为。
+
+## Workspace source
+
+```ts
+import { textRoot, LiquidGlassTextRoot } from '@proto.ui/prototypes-liquid-glass/text';
+```
+
+包保留 private/unreleased，CLI 的对应 Text 项只在 workspace source mode 下生成 WC、React、Vue、Vue 2 facade。family theme 提供 body/heading/mono 字体栈和 default/muted ink；不打包第三方字体。真实四 Adapter synthetic DOM 和编译映射是独立证据，不证明 native paint 或 GPUI typography parity。GPUI CLI host 仍显式拒绝。
+
+[Base Text](/zh-cn/ui-libraries/base/text/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/text)

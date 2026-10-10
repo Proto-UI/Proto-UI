@@ -1,0 +1,21 @@
+---
+title: 'Toast'
+description: 'Timed live notifications with pause, dismiss and explicit action intent.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Timed live notifications with pause, dismiss and explicit action intent.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-toast"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root defaults open for 5000ms. duration=0 remains open; hover and focus in Toast Action/Close pause the remaining duration. Controlled open emits one timeout request until the owner changes state. Close, focused Escape and Action request dismissal; action side effects belong to the app. Viewport provides the F8 focus shortcut. No global queue or external notification transport is implied.
+
+Parts: Root, Viewport, Title, Description, Action, Close.
+
+Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.

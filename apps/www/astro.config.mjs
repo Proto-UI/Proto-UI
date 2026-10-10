@@ -14,6 +14,7 @@ import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
 import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
 import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
 import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
+import { runtimeRetryUrlsPlugin } from './scripts/runtime-retry-urls.mjs';
 import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
 import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
 
@@ -84,6 +85,12 @@ function normalizedBundleModuleId(id) {
 function websiteManualChunk(id) {
   const normalizedId = normalizedBundleModuleId(id);
   const modulePath = normalizedId?.split('?', 1)[0];
+  // Only the lazy React/Vue/Vue2 adapters use this reserved-input helper.
+  // Do not pull it into every WC site shell through the broad Base grouping.
+  if (modulePath === 'packages/adapters/base/src/host/instance-associations.ts') return;
+  // Optional material providers already enter through the renderer's lazy scene.
+  // Preserve that boundary instead of folding shader/source code into every shell.
+  if (modulePath?.startsWith('packages/adapters/base/src/material/')) return;
   if (
     modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||
     /^packages\/adapters\/(?:base|web-component)\//u.test(modulePath ?? '')
@@ -497,6 +504,162 @@ export default defineConfig({
                   slug: 'ui-libraries/base/input',
                 },
                 {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/base/label',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/base/field',
+                },
+                {
+                  label: 'Autocomplete (Draft)',
+                  translations: { en: 'Autocomplete (Draft)', 'zh-CN': 'Autocomplete（草案）' },
+                  slug: 'ui-libraries/base/autocomplete',
+                },
+                {
+                  label: 'Combobox (Draft)',
+                  translations: { en: 'Combobox (Draft)', 'zh-CN': 'Combobox（草案）' },
+                  slug: 'ui-libraries/base/combobox',
+                },
+                {
+                  label: 'Command (Draft)',
+                  translations: { en: 'Command (Draft)', 'zh-CN': 'Command（草案）' },
+                  slug: 'ui-libraries/base/command',
+                },
+                {
+                  label: 'Menubar (Draft)',
+                  translations: { en: 'Menubar (Draft)', 'zh-CN': 'Menubar（草案）' },
+                  slug: 'ui-libraries/base/menubar',
+                },
+                {
+                  label: 'Navigation Menu (Draft)',
+                  translations: {
+                    en: 'Navigation Menu (Draft)',
+                    'zh-CN': 'Navigation Menu（草案）',
+                  },
+                  slug: 'ui-libraries/base/navigation-menu',
+                },
+                {
+                  label: 'Context Menu (Draft)',
+                  translations: { en: 'Context Menu (Draft)', 'zh-CN': 'Context Menu（草案）' },
+                  slug: 'ui-libraries/base/context-menu',
+                },
+                {
+                  label: 'Slider (Draft)',
+                  translations: { en: 'Slider (Draft)', 'zh-CN': 'Slider（草案）' },
+                  slug: 'ui-libraries/base/slider',
+                },
+                {
+                  label: 'Number Field (Draft)',
+                  translations: { en: 'Number Field (Draft)', 'zh-CN': 'Number Field（草案）' },
+                  slug: 'ui-libraries/base/number-field',
+                },
+                {
+                  label: 'Input Otp (Draft)',
+                  translations: { en: 'Input Otp (Draft)', 'zh-CN': 'Input Otp（草案）' },
+                  slug: 'ui-libraries/base/input-otp',
+                },
+                {
+                  label: 'Tree (Draft)',
+                  translations: { en: 'Tree (Draft)', 'zh-CN': 'Tree（草案）' },
+                  slug: 'ui-libraries/base/tree',
+                },
+                {
+                  label: 'Message Scroller (Draft)',
+                  translations: {
+                    en: 'Message Scroller (Draft)',
+                    'zh-CN': 'Message Scroller（草案）',
+                  },
+                  slug: 'ui-libraries/base/message-scroller',
+                },
+                {
+                  label: 'Resizable (Draft)',
+                  translations: { en: 'Resizable (Draft)', 'zh-CN': 'Resizable（草案）' },
+                  slug: 'ui-libraries/base/resizable',
+                },
+                {
+                  label: 'Carousel (Draft)',
+                  translations: { en: 'Carousel (Draft)', 'zh-CN': 'Carousel（草案）' },
+                  slug: 'ui-libraries/base/carousel',
+                },
+                {
+                  label: 'Virtual List (Draft)',
+                  translations: { en: 'Virtual List (Draft)', 'zh-CN': 'Virtual List（草案）' },
+                  slug: 'ui-libraries/base/virtual-list',
+                },
+                {
+                  label: 'Date Picker (Draft)',
+                  translations: { en: 'Date Picker (Draft)', 'zh-CN': 'Date Picker（草案）' },
+                  slug: 'ui-libraries/base/date-picker',
+                },
+                {
+                  label: 'Data Table (Draft)',
+                  translations: { en: 'Data Table (Draft)', 'zh-CN': 'Data Table（草案）' },
+                  slug: 'ui-libraries/base/data-table',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/base/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/base/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/base/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/base/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/base/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/base/checkbox-group',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/base/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/base/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/base/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/base/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/base/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/base/popover',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
@@ -574,6 +737,12 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/dropdown-menu',
                 },
                 {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/shadcn/card',
+                  badge: inProgressBadge,
+                },
+                {
                   label: 'Hover Card',
                   translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
                   slug: 'ui-libraries/shadcn/hover-card',
@@ -608,6 +777,162 @@ export default defineConfig({
                   label: 'Input',
                   translations: { en: 'Input', 'zh-CN': 'Input' },
                   slug: 'ui-libraries/shadcn/input',
+                },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/shadcn/label',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/shadcn/field',
+                },
+                {
+                  label: 'Autocomplete (Draft)',
+                  translations: { en: 'Autocomplete (Draft)', 'zh-CN': 'Autocomplete（草案）' },
+                  slug: 'ui-libraries/shadcn/autocomplete',
+                },
+                {
+                  label: 'Combobox (Draft)',
+                  translations: { en: 'Combobox (Draft)', 'zh-CN': 'Combobox（草案）' },
+                  slug: 'ui-libraries/shadcn/combobox',
+                },
+                {
+                  label: 'Command (Draft)',
+                  translations: { en: 'Command (Draft)', 'zh-CN': 'Command（草案）' },
+                  slug: 'ui-libraries/shadcn/command',
+                },
+                {
+                  label: 'Menubar (Draft)',
+                  translations: { en: 'Menubar (Draft)', 'zh-CN': 'Menubar（草案）' },
+                  slug: 'ui-libraries/shadcn/menubar',
+                },
+                {
+                  label: 'Navigation Menu (Draft)',
+                  translations: {
+                    en: 'Navigation Menu (Draft)',
+                    'zh-CN': 'Navigation Menu（草案）',
+                  },
+                  slug: 'ui-libraries/shadcn/navigation-menu',
+                },
+                {
+                  label: 'Context Menu (Draft)',
+                  translations: { en: 'Context Menu (Draft)', 'zh-CN': 'Context Menu（草案）' },
+                  slug: 'ui-libraries/shadcn/context-menu',
+                },
+                {
+                  label: 'Slider (Draft)',
+                  translations: { en: 'Slider (Draft)', 'zh-CN': 'Slider（草案）' },
+                  slug: 'ui-libraries/shadcn/slider',
+                },
+                {
+                  label: 'Number Field (Draft)',
+                  translations: { en: 'Number Field (Draft)', 'zh-CN': 'Number Field（草案）' },
+                  slug: 'ui-libraries/shadcn/number-field',
+                },
+                {
+                  label: 'Input Otp (Draft)',
+                  translations: { en: 'Input Otp (Draft)', 'zh-CN': 'Input Otp（草案）' },
+                  slug: 'ui-libraries/shadcn/input-otp',
+                },
+                {
+                  label: 'Tree (Draft)',
+                  translations: { en: 'Tree (Draft)', 'zh-CN': 'Tree（草案）' },
+                  slug: 'ui-libraries/shadcn/tree',
+                },
+                {
+                  label: 'Message Scroller (Draft)',
+                  translations: {
+                    en: 'Message Scroller (Draft)',
+                    'zh-CN': 'Message Scroller（草案）',
+                  },
+                  slug: 'ui-libraries/shadcn/message-scroller',
+                },
+                {
+                  label: 'Resizable (Draft)',
+                  translations: { en: 'Resizable (Draft)', 'zh-CN': 'Resizable（草案）' },
+                  slug: 'ui-libraries/shadcn/resizable',
+                },
+                {
+                  label: 'Carousel (Draft)',
+                  translations: { en: 'Carousel (Draft)', 'zh-CN': 'Carousel（草案）' },
+                  slug: 'ui-libraries/shadcn/carousel',
+                },
+                {
+                  label: 'Virtual List (Draft)',
+                  translations: { en: 'Virtual List (Draft)', 'zh-CN': 'Virtual List（草案）' },
+                  slug: 'ui-libraries/shadcn/virtual-list',
+                },
+                {
+                  label: 'Date Picker (Draft)',
+                  translations: { en: 'Date Picker (Draft)', 'zh-CN': 'Date Picker（草案）' },
+                  slug: 'ui-libraries/shadcn/date-picker',
+                },
+                {
+                  label: 'Data Table (Draft)',
+                  translations: { en: 'Data Table (Draft)', 'zh-CN': 'Data Table（草案）' },
+                  slug: 'ui-libraries/shadcn/data-table',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/shadcn/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/shadcn/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/shadcn/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/shadcn/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/shadcn/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/shadcn/checkbox-group',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/shadcn/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/shadcn/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/shadcn/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/shadcn/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/shadcn/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/shadcn/popover',
                 },
                 {
                   label: 'Textarea',
@@ -676,6 +1001,177 @@ export default defineConfig({
                   translations: { en: 'Separator', 'zh-CN': 'Separator' },
                   slug: 'ui-libraries/bootstrap-2-3-2/separator',
                 },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/label',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/select',
+                },
+                {
+                  label: 'Text',
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/text',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/field',
+                },
+                {
+                  label: 'Autocomplete (Draft)',
+                  translations: { en: 'Autocomplete (Draft)', 'zh-CN': 'Autocomplete（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/autocomplete',
+                },
+                {
+                  label: 'Combobox (Draft)',
+                  translations: { en: 'Combobox (Draft)', 'zh-CN': 'Combobox（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/combobox',
+                },
+                {
+                  label: 'Command (Draft)',
+                  translations: { en: 'Command (Draft)', 'zh-CN': 'Command（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/command',
+                },
+                {
+                  label: 'Menubar (Draft)',
+                  translations: { en: 'Menubar (Draft)', 'zh-CN': 'Menubar（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/menubar',
+                },
+                {
+                  label: 'Navigation Menu (Draft)',
+                  translations: {
+                    en: 'Navigation Menu (Draft)',
+                    'zh-CN': 'Navigation Menu（草案）',
+                  },
+                  slug: 'ui-libraries/bootstrap-2-3-2/navigation-menu',
+                },
+                {
+                  label: 'Context Menu (Draft)',
+                  translations: { en: 'Context Menu (Draft)', 'zh-CN': 'Context Menu（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/context-menu',
+                },
+                {
+                  label: 'Slider (Draft)',
+                  translations: { en: 'Slider (Draft)', 'zh-CN': 'Slider（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/slider',
+                },
+                {
+                  label: 'Number Field (Draft)',
+                  translations: { en: 'Number Field (Draft)', 'zh-CN': 'Number Field（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/number-field',
+                },
+                {
+                  label: 'Input Otp (Draft)',
+                  translations: { en: 'Input Otp (Draft)', 'zh-CN': 'Input Otp（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/input-otp',
+                },
+                {
+                  label: 'Tree (Draft)',
+                  translations: { en: 'Tree (Draft)', 'zh-CN': 'Tree（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/tree',
+                },
+                {
+                  label: 'Message Scroller (Draft)',
+                  translations: {
+                    en: 'Message Scroller (Draft)',
+                    'zh-CN': 'Message Scroller（草案）',
+                  },
+                  slug: 'ui-libraries/bootstrap-2-3-2/message-scroller',
+                },
+                {
+                  label: 'Resizable (Draft)',
+                  translations: { en: 'Resizable (Draft)', 'zh-CN': 'Resizable（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/resizable',
+                },
+                {
+                  label: 'Carousel (Draft)',
+                  translations: { en: 'Carousel (Draft)', 'zh-CN': 'Carousel（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/carousel',
+                },
+                {
+                  label: 'Virtual List (Draft)',
+                  translations: { en: 'Virtual List (Draft)', 'zh-CN': 'Virtual List（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/virtual-list',
+                },
+                {
+                  label: 'Date Picker (Draft)',
+                  translations: { en: 'Date Picker (Draft)', 'zh-CN': 'Date Picker（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/date-picker',
+                },
+                {
+                  label: 'Data Table (Draft)',
+                  translations: { en: 'Data Table (Draft)', 'zh-CN': 'Data Table（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/data-table',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/checkbox-group',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/meter',
+                },
+                {
+                  label: 'Dropdown Menu (Draft)',
+                  translations: { en: 'Dropdown Menu (Draft)', 'zh-CN': '下拉菜单（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/dropdown-menu',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/popover',
+                },
               ],
             },
             {
@@ -691,6 +1187,177 @@ export default defineConfig({
                   label: 'Button',
                   translations: { en: 'Button', 'zh-CN': 'Button' },
                   slug: 'ui-libraries/liquid-glass/button',
+                },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/liquid-glass/label',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/liquid-glass/select',
+                },
+                {
+                  label: 'Text',
+                  translations: { en: 'Text', 'zh-CN': 'Text' },
+                  slug: 'ui-libraries/liquid-glass/text',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/liquid-glass/field',
+                },
+                {
+                  label: 'Autocomplete (Draft)',
+                  translations: { en: 'Autocomplete (Draft)', 'zh-CN': 'Autocomplete（草案）' },
+                  slug: 'ui-libraries/liquid-glass/autocomplete',
+                },
+                {
+                  label: 'Combobox (Draft)',
+                  translations: { en: 'Combobox (Draft)', 'zh-CN': 'Combobox（草案）' },
+                  slug: 'ui-libraries/liquid-glass/combobox',
+                },
+                {
+                  label: 'Command (Draft)',
+                  translations: { en: 'Command (Draft)', 'zh-CN': 'Command（草案）' },
+                  slug: 'ui-libraries/liquid-glass/command',
+                },
+                {
+                  label: 'Menubar (Draft)',
+                  translations: { en: 'Menubar (Draft)', 'zh-CN': 'Menubar（草案）' },
+                  slug: 'ui-libraries/liquid-glass/menubar',
+                },
+                {
+                  label: 'Navigation Menu (Draft)',
+                  translations: {
+                    en: 'Navigation Menu (Draft)',
+                    'zh-CN': 'Navigation Menu（草案）',
+                  },
+                  slug: 'ui-libraries/liquid-glass/navigation-menu',
+                },
+                {
+                  label: 'Context Menu (Draft)',
+                  translations: { en: 'Context Menu (Draft)', 'zh-CN': 'Context Menu（草案）' },
+                  slug: 'ui-libraries/liquid-glass/context-menu',
+                },
+                {
+                  label: 'Slider (Draft)',
+                  translations: { en: 'Slider (Draft)', 'zh-CN': 'Slider（草案）' },
+                  slug: 'ui-libraries/liquid-glass/slider',
+                },
+                {
+                  label: 'Number Field (Draft)',
+                  translations: { en: 'Number Field (Draft)', 'zh-CN': 'Number Field（草案）' },
+                  slug: 'ui-libraries/liquid-glass/number-field',
+                },
+                {
+                  label: 'Input Otp (Draft)',
+                  translations: { en: 'Input Otp (Draft)', 'zh-CN': 'Input Otp（草案）' },
+                  slug: 'ui-libraries/liquid-glass/input-otp',
+                },
+                {
+                  label: 'Tree (Draft)',
+                  translations: { en: 'Tree (Draft)', 'zh-CN': 'Tree（草案）' },
+                  slug: 'ui-libraries/liquid-glass/tree',
+                },
+                {
+                  label: 'Message Scroller (Draft)',
+                  translations: {
+                    en: 'Message Scroller (Draft)',
+                    'zh-CN': 'Message Scroller（草案）',
+                  },
+                  slug: 'ui-libraries/liquid-glass/message-scroller',
+                },
+                {
+                  label: 'Resizable (Draft)',
+                  translations: { en: 'Resizable (Draft)', 'zh-CN': 'Resizable（草案）' },
+                  slug: 'ui-libraries/liquid-glass/resizable',
+                },
+                {
+                  label: 'Carousel (Draft)',
+                  translations: { en: 'Carousel (Draft)', 'zh-CN': 'Carousel（草案）' },
+                  slug: 'ui-libraries/liquid-glass/carousel',
+                },
+                {
+                  label: 'Virtual List (Draft)',
+                  translations: { en: 'Virtual List (Draft)', 'zh-CN': 'Virtual List（草案）' },
+                  slug: 'ui-libraries/liquid-glass/virtual-list',
+                },
+                {
+                  label: 'Date Picker (Draft)',
+                  translations: { en: 'Date Picker (Draft)', 'zh-CN': 'Date Picker（草案）' },
+                  slug: 'ui-libraries/liquid-glass/date-picker',
+                },
+                {
+                  label: 'Data Table (Draft)',
+                  translations: { en: 'Data Table (Draft)', 'zh-CN': 'Data Table（草案）' },
+                  slug: 'ui-libraries/liquid-glass/data-table',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/liquid-glass/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/liquid-glass/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/liquid-glass/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/liquid-glass/checkbox-group',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/liquid-glass/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/liquid-glass/meter',
+                },
+                {
+                  label: 'Dropdown Menu (Draft)',
+                  translations: { en: 'Dropdown Menu (Draft)', 'zh-CN': '下拉菜单（草案）' },
+                  slug: 'ui-libraries/liquid-glass/dropdown-menu',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/liquid-glass/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/liquid-glass/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/liquid-glass/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/liquid-glass/popover',
                 },
               ],
             },
@@ -742,6 +1409,162 @@ export default defineConfig({
                   translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
                   slug: 'ui-libraries/brutalist/components/checkbox',
                   badge: inProgressBadge,
+                },
+                {
+                  label: 'Label',
+                  translations: { en: 'Label', 'zh-CN': 'Label' },
+                  slug: 'ui-libraries/brutalist/components/label',
+                },
+                {
+                  label: 'Field (Draft)',
+                  translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
+                  slug: 'ui-libraries/brutalist/field',
+                },
+                {
+                  label: 'Autocomplete (Draft)',
+                  translations: { en: 'Autocomplete (Draft)', 'zh-CN': 'Autocomplete（草案）' },
+                  slug: 'ui-libraries/brutalist/components/autocomplete',
+                },
+                {
+                  label: 'Combobox (Draft)',
+                  translations: { en: 'Combobox (Draft)', 'zh-CN': 'Combobox（草案）' },
+                  slug: 'ui-libraries/brutalist/components/combobox',
+                },
+                {
+                  label: 'Command (Draft)',
+                  translations: { en: 'Command (Draft)', 'zh-CN': 'Command（草案）' },
+                  slug: 'ui-libraries/brutalist/components/command',
+                },
+                {
+                  label: 'Menubar (Draft)',
+                  translations: { en: 'Menubar (Draft)', 'zh-CN': 'Menubar（草案）' },
+                  slug: 'ui-libraries/brutalist/components/menubar',
+                },
+                {
+                  label: 'Navigation Menu (Draft)',
+                  translations: {
+                    en: 'Navigation Menu (Draft)',
+                    'zh-CN': 'Navigation Menu（草案）',
+                  },
+                  slug: 'ui-libraries/brutalist/components/navigation-menu',
+                },
+                {
+                  label: 'Context Menu (Draft)',
+                  translations: { en: 'Context Menu (Draft)', 'zh-CN': 'Context Menu（草案）' },
+                  slug: 'ui-libraries/brutalist/components/context-menu',
+                },
+                {
+                  label: 'Slider (Draft)',
+                  translations: { en: 'Slider (Draft)', 'zh-CN': 'Slider（草案）' },
+                  slug: 'ui-libraries/brutalist/slider',
+                },
+                {
+                  label: 'Number Field (Draft)',
+                  translations: { en: 'Number Field (Draft)', 'zh-CN': 'Number Field（草案）' },
+                  slug: 'ui-libraries/brutalist/number-field',
+                },
+                {
+                  label: 'Input Otp (Draft)',
+                  translations: { en: 'Input Otp (Draft)', 'zh-CN': 'Input Otp（草案）' },
+                  slug: 'ui-libraries/brutalist/input-otp',
+                },
+                {
+                  label: 'Tree (Draft)',
+                  translations: { en: 'Tree (Draft)', 'zh-CN': 'Tree（草案）' },
+                  slug: 'ui-libraries/brutalist/components/tree',
+                },
+                {
+                  label: 'Message Scroller (Draft)',
+                  translations: {
+                    en: 'Message Scroller (Draft)',
+                    'zh-CN': 'Message Scroller（草案）',
+                  },
+                  slug: 'ui-libraries/brutalist/components/message-scroller',
+                },
+                {
+                  label: 'Resizable (Draft)',
+                  translations: { en: 'Resizable (Draft)', 'zh-CN': 'Resizable（草案）' },
+                  slug: 'ui-libraries/brutalist/components/resizable',
+                },
+                {
+                  label: 'Carousel (Draft)',
+                  translations: { en: 'Carousel (Draft)', 'zh-CN': 'Carousel（草案）' },
+                  slug: 'ui-libraries/brutalist/components/carousel',
+                },
+                {
+                  label: 'Virtual List (Draft)',
+                  translations: { en: 'Virtual List (Draft)', 'zh-CN': 'Virtual List（草案）' },
+                  slug: 'ui-libraries/brutalist/components/virtual-list',
+                },
+                {
+                  label: 'Date Picker (Draft)',
+                  translations: { en: 'Date Picker (Draft)', 'zh-CN': 'Date Picker（草案）' },
+                  slug: 'ui-libraries/brutalist/components/date-picker',
+                },
+                {
+                  label: 'Data Table (Draft)',
+                  translations: { en: 'Data Table (Draft)', 'zh-CN': 'Data Table（草案）' },
+                  slug: 'ui-libraries/brutalist/components/data-table',
+                },
+                {
+                  label: 'Toggle Group (Draft)',
+                  translations: { en: 'Toggle Group (Draft)', 'zh-CN': 'Toggle Group（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toggle-group',
+                },
+                {
+                  label: 'Toolbar (Draft)',
+                  translations: { en: 'Toolbar (Draft)', 'zh-CN': 'Toolbar（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toolbar',
+                },
+                {
+                  label: 'Toast (Draft)',
+                  translations: { en: 'Toast (Draft)', 'zh-CN': 'Toast（草案）' },
+                  slug: 'ui-libraries/brutalist/components/toast',
+                },
+                {
+                  label: 'Fieldset (Draft)',
+                  translations: { en: 'Fieldset (Draft)', 'zh-CN': 'Fieldset（草案）' },
+                  slug: 'ui-libraries/brutalist/fieldset',
+                },
+                {
+                  label: 'Form (Draft)',
+                  translations: { en: 'Form (Draft)', 'zh-CN': 'Form（草案）' },
+                  slug: 'ui-libraries/brutalist/form',
+                },
+                {
+                  label: 'Checkbox Group (Draft)',
+                  translations: { en: 'Checkbox Group (Draft)', 'zh-CN': 'Checkbox Group（草案）' },
+                  slug: 'ui-libraries/brutalist/checkbox-group',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/brutalist/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/brutalist/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/brutalist/components/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/brutalist/components/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/brutalist/components/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/brutalist/components/popover',
                 },
                 {
                   label: 'Button',
@@ -1123,6 +1946,7 @@ export default defineConfig({
         ? [contrastProvenancePlugin(repositoryRoot)]
         : []),
       protoUiSourcePlugin,
+      runtimeRetryUrlsPlugin(),
       websiteBundleGraphPlugin(),
       tailwindcss(),
     ],

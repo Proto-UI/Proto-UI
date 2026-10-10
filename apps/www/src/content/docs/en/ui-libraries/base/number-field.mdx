@@ -1,0 +1,21 @@
+---
+title: base Number Field
+description: Draft portable input atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-base-number-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root owns a finite value/defaultValue, min/max (0/100), positive step (1), disabled/readOnly, name and ariaLabel. Input uses one existing TextControl host editor with decimal input hints and a spinbutton role. Incomplete draft text can remain while editing; blur/Enter commits a finite clamped snapped value or restores the canonical number. Increment/Decrement and ArrowUp/ArrowDown use the same step operation; Shift multiplies by ten, Home/End reach bounds. Controlled proposals do not overwrite owner value. Locale-specific formatting, empty/null numbers, scrub and wheel are not implemented.
+
+Use Control instead of Input inside Field/FormField: FieldLabel names and activates the actual editor; Field policy, canonical numeric validation, IME cancellation, Form serialization and reset are bridged. Standalone Input continues to use NumberFieldLabel.
+
+Parts: root, label, input, control, increment, decrement. All four styled families inherit Base behavior.
+
+Draft source work. Full native, assistive-technology, Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf completion is claimed.

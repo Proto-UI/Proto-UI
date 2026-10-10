@@ -4,15 +4,17 @@ import type { ShadcnTooltipContentExposes, ShadcnTooltipContentProps } from './t
 
 const CONTENT_SURFACE_TOKENS = [
   'z-50',
-  'overflow-hidden',
+  'inline-flex',
+  'w-fit',
+  'max-w-80',
+  'items-center',
+  'gap-1.5',
   'rounded-md',
-  'border',
-  'bg-popover',
+  'bg-foreground',
   'px-3',
   'py-1.5',
   'text-xs',
-  'text-popover-foreground',
-  'shadow-md',
+  'text-background',
 ].join(' ');
 
 const tooltipContent = definePrototype<ShadcnTooltipContentProps, ShadcnTooltipContentExposes>({

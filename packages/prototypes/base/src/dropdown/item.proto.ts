@@ -3,6 +3,7 @@ import { asAccessible, asCollectionItem } from '@proto.ui/hooks';
 import { setupDropdownCommand } from './command';
 import {
   DROPDOWN_CONTEXT,
+  DROPDOWN_ITEM_CONTEXT,
   DROPDOWN_FAMILY,
   requestDropdownOpen,
   type DropdownFocusReason,
@@ -14,6 +15,7 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
   // P-BASE-DROPDOWN-MENU-ITEM-DISABLED: disabled menu items remain focusable.
   const command = setupDropdownCommand(def, 'dropdown item', { focusableWhenDisabled: true });
   const active = def.state.bool('active', false);
+  def.context.provide(DROPDOWN_ITEM_CONTEXT, { active: false, disabled: false });
   const collectionItem = asCollectionItem();
   collectionItem.configure({
     family: DROPDOWN_FAMILY,
@@ -47,25 +49,37 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
     const ctx = run.context.read(DROPDOWN_CONTEXT);
     command.syncDisabled(!!run.props.get().disabled || ctx.disabled);
   };
-  const syncActive = (ctx: { open?: boolean; activeValue?: string }, ownValue: string) => {
+  const syncActive = (
+    run: any,
+    ctx: { open?: boolean; activeValue?: string },
+    ownValue: string
+  ) => {
     const nextActive =
       ctx.open !== false &&
       (command.focused.get() || (!!ownValue && ownValue === (ctx.activeValue ?? '')));
     active.set(nextActive, 'reason: dropdown active sync');
     command.setRovingStatus({ active: nextActive });
+    run.context.update(DROPDOWN_ITEM_CONTEXT, {
+      active: nextActive,
+      disabled: command.disabled.get(),
+    });
   };
   def.context.subscribe(DROPDOWN_CONTEXT, (run, next) => {
     syncDisabled(run);
-    syncActive(next, run.props.get().value ?? '');
+    syncActive(run, next, run.props.get().value ?? '');
   });
   def.lifecycle.onMounted((run) => {
     syncDisabled(run);
     const currentRun = run as any;
-    syncActive(currentRun.context.read(DROPDOWN_CONTEXT), currentRun.props.get().value ?? '');
+    syncActive(
+      currentRun,
+      currentRun.context.read(DROPDOWN_CONTEXT),
+      currentRun.props.get().value ?? ''
+    );
   });
   def.props.watch(['value', 'disabled'], (run, next) => {
     syncDisabled(run);
-    syncActive(run.context.read(DROPDOWN_CONTEXT), next.value ?? '');
+    syncActive(run, run.context.read(DROPDOWN_CONTEXT), next.value ?? '');
   });
 
   const updateActiveValue = (run: any) => {
@@ -100,7 +114,11 @@ function setupDropdownItem(def: DefHandle<DropdownItemProps, DropdownItemExposes
       return;
     }
     const currentRun = run as any;
-    syncActive(currentRun.context.read(DROPDOWN_CONTEXT), currentRun.props.get().value ?? '');
+    syncActive(
+      currentRun,
+      currentRun.context.read(DROPDOWN_CONTEXT),
+      currentRun.props.get().value ?? ''
+    );
   });
   def.event.on('pointer.enter', (run) => {
     if (command.disabled.get()) return;

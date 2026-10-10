@@ -34,8 +34,8 @@ criteria:
       en: Open Content must support ArrowDown, ArrowUp, Home, End, Enter and Space commit, and printable-character typeahead; typeahead expiry must consume the runtime delay policy, and disabled Items must be excluded from focus navigation and commit.
   - id: P-BASE-SELECT-CONTENT-DISMISS
     text:
-      zh-CN: Escape 必须 close 且不改变 selection，并把焦点返回 Trigger；Tab 必须 close 而不阻止宿主遍历；outside press 必须 close；Trigger activation 必须被 inside Boundary 识别以避免一次 pointer activation 产生二次 toggle。
-      en: Escape must close without changing selection and return focus to Trigger, Tab must close without preventing host traversal, outside press must close, and Trigger activation must be classified inside the Boundary to avoid a double toggle from one pointer activation.
+      zh-CN: Escape 必须 close 且不改变 selection，并把焦点返回 Trigger；Tab 必须 close 而不阻止宿主遍历，包括 deferred entry 尚未完成且焦点仍在同域唯一 Trigger 的阶段；outside press 必须 close；Trigger activation 必须被 inside Boundary 识别以避免一次 pointer activation 产生二次 toggle。
+      en: Escape must close without changing selection and return focus to Trigger, Tab must close without preventing host traversal, including deferred entry while the unique same-domain Trigger still owns focus, outside press must close, and Trigger activation must be classified inside the Boundary to avoid a double toggle from one pointer activation.
   - id: P-BASE-SELECT-CONTENT-DEFERRED-SURFACES
     text:
       zh-CN: item-aligned positioning、Viewport、scroll controls 与虚拟化不属于当前 Base Content 保证；下游只能对已实现的 anchored popper 行为声明兼容。
@@ -67,5 +67,8 @@ revisions:
   - version: 0.2.0-rc.0
     change: clarified
     summary: Required selected-option entry focus to wait for a stable synchronously mounted Item collection across adapters.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Tab dismissal covers Trigger focus during deferred entry and cancels the pending entry without preventing host traversal.
 tags:
   [prototype, base, select, content, listbox, focus-roving, overlay, transition, positioning, a11y]

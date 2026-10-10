@@ -1,0 +1,60 @@
+id: P-BASE-ACCORDION-TRIGGER
+type: prototype
+title: Base Accordion trigger
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Finf #872 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Finf #872. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Independent Accordion trigger protocol with JSON ownership and exact Anatomy boundaries.
+statement:
+  zh-CN: 独立编写的 Proto UI 协议。APG及风格库提供比较证据，不是实现授权或继承API。复用 Collection、Anatomy、Context、A11y、asTrigger、asFocusable及L1 lifecycle。
+  en: An independently authored Proto UI protocol. APG and design libraries provide comparison evidence, not implementation authority or inherited APIs. Shared capabilities are Collection, Anatomy, Context, A11y, asTrigger, asFocusable and L1 lifecycle.
+criteria:
+  - id: P-BASE-ACCORDION-TRIGGER-ACTIVATION
+    text:
+      zh-CN: button-like Trigger 复用 asTrigger/asFocusable；Enter/Space 或 pointer press commit 请求一次 toggle，取消/未完成按压不请求。所有启用 header 保留自然 Tab 顺序，单纯聚焦不改变选择。
+      en: Button-like Trigger reuses asTrigger and asFocusable. Enter/Space or pointer press commit requests a toggle once; cancel/incomplete press does not. Every enabled header stays in the natural Tab sequence; focus alone never changes selection.
+  - id: P-BASE-ACCORDION-TRIGGER-NAVIGATION
+    text:
+      zh-CN: Root orientation 默认 vertical、direction 默认 ltr。纵向上下键或横向左右键仅按当前 Anatomy 顺序移动 header 焦点并跳过 disabled，横向 RTL 反转；Home/End 聚焦首末目标。loop 默认 true，false 保持边界焦点；不相关/组合键及嵌套内容输入不受干预。
+      en: Root orientation defaults vertical and direction ltr. Vertical Up/Down or horizontal Left/Right move only header focus in current Anatomy order, skipping disabled; horizontal RTL reverses. Home/End select the first/last focus target. loop defaults true; false leaves focus at endpoints. Unrelated/modifier keys and nested content input remain untouched.
+  - id: P-BASE-ACCORDION-TRIGGER-A11Y
+    text:
+      zh-CN: Trigger 声明 button、内容命名、canonical expanded，以及 key=panel 的 item 域 controls。aria-disabled 包含最后必开 header 的 collapseBlocked，但单独 collapseBlocked 不移除焦点；disabled 与交互瞬态暴露分离。
+      en: Trigger declares button, content name, canonical expanded, and item-scoped controls with key panel. aria-disabled includes collapseBlocked for the final required open header, but collapseBlocked alone does not remove focus. Disabled and transient interaction exposes stay separate.
+dependsOn:
+  contracts:
+    - C-PROPS-0001
+    - C-CONTEXT-0006
+    - C-ANATOMY-0004
+    - C-A11Y-0001
+    - C-LIFECYCLE-0008
+    - C-A11Y-PART-RELATIONSHIP-0001
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+  prototypes:
+    - P-BASE-ACCORDION
+verifies:
+  tests:
+    - T-BASE-ACCORDION-0001
+sources:
+  - path: packages/prototypes/base/src/accordion/trigger.proto.ts
+  - path: packages/prototypes/base/src/accordion/types.ts
+  - path: packages/prototypes/base/src/accordion/shared.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
+openQuestions:
+  - id: P-BASE-ACCORDION-TRIGGER-Q-ADMISSION
+    question:
+      zh-CN: 何时完成精确head的浏览器/native、辅助技术、GPUI及独立审查并准入此draft？
+      en: When have exact-head browser/native, assistive-technology, GPUI and independent review evidence admitted this draft?
+    blocks:
+      - activation:P-BASE-ACCORDION-TRIGGER
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the bounded Accordion family independently; retained draft admission and explicit native evidence debt.
+tags:
+  - prototype
+  - base
+  - accordion

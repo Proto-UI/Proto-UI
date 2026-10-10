@@ -81,3 +81,21 @@ Radio Group composes its three parts explicitly. Base owns the selected value, C
 ## License
 
 The Proto UI integration code is MIT-licensed. The pinned shadcn/ui attribution and upstream MIT license are distributed in [`THIRD_PARTY_NOTICES.md`](./THIRD_PARTY_NOTICES.md); the Proto UI package license does not replace that upstream notice.
+
+### Wrapping action labels
+
+`ShadcnButtonProps.wrap` is an optional Proto UI presentation extension. It keeps the default single-line recipe when omitted or false. With `wrap: true`, text sizes use their original height as a minimum and allow the label to wrap within the containing inline width. `size: 'icon'` remains fixed-size. Activation, focus, disabled state and accessible names still come from Base Button.
+
+Dialog Footer uses intrinsic reverse wrapping, rather than reproducing the upstream `sm` media-query breakpoint. Footer does not restyle arbitrary child components. Use wrapping-capable actions when labels can exceed available space; the public Dialog example explicitly opts into Button wrapping. Custom wrappers must also supply a bounded inline size. This is not a guarantee that arbitrary unbounded or fixed-width descendants will fit every viewport.
+
+## Field (draft workspace source)
+
+The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
+
+This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Card (draft)
+
+`./card` exports ShadcnCardRoot/Header/Content/Footer and their `shadcnCard*` aliases. These direct styled-only parts have no Base Card dependency, role, focus or action protocol. The source comparison is `f31ed81983653919dd4fe77aee4b4859f610f1dc`, `apps/v4/registry/new-york-v4/ui/card.tsx`, covered by the MIT third-party notice above. Root uses card-specific fill/foreground, rounded-xl, border plus explicit border-border ink (the upstream global reset made self-contained), shadow-sm and vertical spacing; the other parts own local spacing. Surface outline retains its neutral meaning.
+
+Titles and descriptions remain ordinary content. Use native headings/paragraphs where appropriate, Shadcn Text `tone: 'inherit'` for nested title/body and explicit muted tone for captions. Upstream CardTitle/Description/Action, action-dependent header columns, header container-query markers, border-presence selectors and `asChild` are outside this bounded subset. Source/CLI/preview availability is not stable admission or a completed Finf goal; current native visual and first-frame evidence remains pending.

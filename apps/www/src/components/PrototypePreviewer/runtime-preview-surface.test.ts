@@ -135,7 +135,20 @@ describe('RuntimeBox canvas composition', () => {
         );
         expect(surface.demo.root.kind).toBe('box');
         expect(runtimePreviewRecipe(family, 'button').prototypeIds).toEqual([`${family}-button`]);
-        expect(() => runtimePreviewRecipe(family, 'select')).toThrow(/unavailable/);
+        expect(runtimePreviewRecipe(family, 'select').prototypeIds).toEqual([
+          `${family}-select-root`,
+          `${family}-select-trigger`,
+          `${family}-select-value`,
+          `${family}-select-content`,
+          `${family}-select-item`,
+          `${family}-button`,
+        ]);
+        expect(() =>
+          runtimePreviewRecipe(
+            family,
+            '__unregistered_component__' as Parameters<typeof runtimePreviewRecipe>[1]
+          )
+        ).toThrow(/unavailable/);
         const host = document.createElement('div');
         document.body.append(host);
         const result = await renderDemo({ runtime, host, demo: surface.demo });

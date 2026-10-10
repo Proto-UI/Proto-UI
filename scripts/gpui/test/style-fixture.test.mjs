@@ -59,6 +59,19 @@ test('the Spinner single border-color intent retains the existing native declara
   });
 });
 
+test('Card row sizing retains exact declarations despite the native grid gaps', () => {
+  const fixture = JSON.parse(readFileSync(FIXTURE, 'utf8'));
+  const cases = [
+    ['auto-rows-min', { 'grid-auto-rows': 'min-content' }],
+    ['grid-rows-[auto_auto]', { 'grid-template-rows': 'auto auto' }],
+  ];
+  for (const [token, declarations] of cases) {
+    assert.deepEqual(fixture.tokens[token], declarations);
+    assert.ok(fixture.order.includes(token));
+    assert.ok(!fixture.noDeclarations.includes(token));
+  }
+});
+
 test('a stale fixture fails the check', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 'proto-ui-style-fixture-'));
   const copy = path.join(dir, 'style-tokens.json');
@@ -97,6 +110,58 @@ test('a stale theme fixture fails the check', () => {
   assert.match(result.stderr, /theme-tokens\.json is stale/);
 });
 
+// Liquid declares all eighteen keys, including four radius variants, in its source.
+// Bootstrap declares fifteen keys; the renderer adds four derived radius variants.
+// The explicit contract rejects missing and unknown entries, not just bad colors.
+const sharedDraftVariables = [
+  'background',
+  'border',
+  'font-heading',
+  'font-mono',
+  'font-sans',
+  'foreground',
+  'muted',
+  'muted-foreground',
+  'primary',
+  'primary-foreground',
+  'radius',
+  'radius-lg',
+  'radius-md',
+  'radius-sm',
+  'radius-xl',
+  'ring',
+  'secondary',
+  'secondary-foreground',
+].map((name) => `--pui-${name}`);
+const requiredDraftVariables = {
+  'bootstrap-2-3-2': [...sharedDraftVariables, '--pui-destructive'].sort(),
+  'liquid-glass': [...sharedDraftVariables],
+};
+function assertDraftPaletteKeys(keys, family, label = family) {
+  assert.deepEqual([...keys].sort(), requiredDraftVariables[family], `${label} must be complete`);
+}
+
+test('draft palette key contract rejects every omission and any unowned key', () => {
+  const themes = JSON.parse(readFileSync(THEME, 'utf8')).themes;
+  for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
+    for (const mode of ['light', 'dark']) {
+      const keys = Object.keys(themes[family][mode]);
+      assert.doesNotThrow(() => assertDraftPaletteKeys(keys, family, `${family}/${mode}`));
+      for (const missing of requiredDraftVariables[family])
+        assert.throws(
+          () =>
+            assertDraftPaletteKeys(
+              keys.filter((key) => key !== missing),
+              family
+            ),
+          /must be complete/
+        );
+      for (const extra of ['--pui-unowned-fixture-key', '--pui-pui-font-sans'])
+        assert.throws(() => assertDraftPaletteKeys([...keys, extra], family), /must be complete/);
+    }
+  }
+});
+
 test('both draft family palettes come from source with exactly one variable prefix', () => {
   const themes = JSON.parse(readFileSync(THEME, 'utf8')).themes;
   assert.deepEqual(Object.keys(themes).sort(), [
@@ -109,29 +174,11 @@ test('both draft family palettes come from source with exactly one variable pref
   assert.deepEqual(themes['bootstrap-2-3-2'].light, themes['bootstrap-2-3-2'].dark);
   assert.equal(themes['liquid-glass'].light['--pui-secondary'], '#ffffff');
   assert.equal(themes['liquid-glass'].dark['--pui-secondary'], '#2c2c2e');
-  // Ten source variables plus the four shared derived radius variables.
-  // Checking the whole key set catches omissions outside the spot colors above.
-  const requiredVariables = [
-    'background',
-    'border',
-    'foreground',
-    'muted',
-    'primary',
-    'primary-foreground',
-    'radius',
-    'radius-lg',
-    'radius-md',
-    'radius-sm',
-    'radius-xl',
-    'ring',
-    'secondary',
-    'secondary-foreground',
-  ].map((name) => `--pui-${name}`);
   for (const name of ['bootstrap-2-3-2', 'liquid-glass']) {
     for (const mode of ['light', 'dark']) {
       const keys = Object.keys(themes[name][mode]);
       assert.ok(keys.every((key) => key.startsWith('--pui-') && !key.startsWith('--pui-pui-')));
-      assert.deepEqual(keys.sort(), requiredVariables, `${name}/${mode} must be complete`);
+      assertDraftPaletteKeys(keys, name, `${name}/${mode}`);
     }
   }
 });

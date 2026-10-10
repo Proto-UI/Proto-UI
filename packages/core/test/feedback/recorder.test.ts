@@ -3,6 +3,16 @@ import { FeedbackStyleRecorder } from '../../src/spec/feedback/recorder';
 import { tw } from '../../src/spec/feedback/style';
 
 describe('feedback.recorder.v0', () => {
+  it('patches and suppresses alignment without losing the style-owned fallback foreground', () => {
+    const fb = new FeedbackStyleRecorder();
+    fb.use(tw('text-sm text-foreground text-left'));
+    fb.patch(tw('text-right'));
+    expect(fb.export().tokens).toEqual(['text-sm', 'text-foreground', 'text-right']);
+    fb.suppress(tw('text-center'));
+    expect(fb.export().tokens).toEqual(['text-sm', 'text-foreground']);
+    fb.clearPatch();
+    expect(fb.export().tokens).toEqual(['text-sm', 'text-foreground', 'text-left']);
+  });
   it('accumulates use() and exports merged snapshot', () => {
     const fb = new FeedbackStyleRecorder();
 

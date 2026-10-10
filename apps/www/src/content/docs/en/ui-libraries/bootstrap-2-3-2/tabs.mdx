@@ -1,0 +1,22 @@
+---
+title: 'Tabs'
+description: 'Bootstrap 2.3.2 Tabs: four real Base protocol projections.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Root, List, Trigger and Content inherit the matching [Base Tabs protocol](/en/ui-libraries/base/tabs/). Root owns the selected value. Arrow keys and Home/End move through enabled triggers; Enter/Space activate a manually selected tab. Controlled requests wait for the owner's value.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+Import `tabsRoot`, `tabsList`, `tabsTrigger`, `tabsContent` from `@proto.ui/prototypes-bootstrap-2-3-2/tabs`. These remain private draft workspace source. No public registry release or native/Compiler support is implied.
+
+List and Trigger accept `appearance="underline"` for the Runtime Box's transparent, text-width underline recipe. The default recipe remains this family's own presentation. Root uses `value`/`defaultValue`, `activationMode` and `orientation`; Trigger uses `value`/`disabled`; Content uses `value`/`keepMounted`. Runtime selection uses manual activation, so arrow navigation does not remount a demo.
+
+Source and synthetic-DOM evidence are distinct from commit-bound native screenshots, narrow-screen geometry and independent visual acceptance. Those browser checks remain pending.
+
+Default recipe reference: [Bootstrap v2.3.2 navs.less](https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less). 12px/8px padding, 2px gaps and 4px upper corners scale through rem. Base Tabs replaces the jQuery plugin; focus indication and theme colors deliberately differ. The Apache 2.0 notice remains with source.

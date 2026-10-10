@@ -56,6 +56,10 @@ criteria:
         At the module boundary, all CR/LF line endings must first be canonicalized to LF before comparison, state projection, snapshots, and outward payloads. Single-line mode then removes LF so the portable value agrees with host single-line value sanitization; multiline mode retains LF. Web DOM sanitization alone is not sufficient.
 
 
+  - id: C-TEXT-CONTROL-0001-CHANGE-COMMIT
+    text:
+      en: Uncontrolled canonical values advance on a normalized input or change event, even without a preceding input. A controlled change remains a candidate until the owner accepts it through sync; the module never treats the event payload as controlled acceptance.
+      zh-CN: 非受控 canonical 值在标准化 input 或 change 时更新，即使之前没有 input。受控 change 在 owner 通过 sync 接受前仅为 candidate，模块不得将事件载荷视为受控接受。
 sources:
   - path: packages/core/src/text-control.ts
   - path: packages/modules/text-control/src/impl.ts

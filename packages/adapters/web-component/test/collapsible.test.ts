@@ -1,10 +1,12 @@
+import { COLLAPSIBLE_PROJECTIONS } from '../../base/test/fixtures/collapsible-projections';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import {
   collapsibleAdapterConformance,
   type CollapsibleTree,
+  type CollapsibleDriver,
 } from '../../base/test/fixtures/collapsible-conformance';
 
-collapsibleAdapterConformance('wc', async (tree) => {
+const mount: CollapsibleDriver = async (tree) => {
   const host = document.createElement('div');
   const elements = new Map<string, any>();
   const render = (node: CollapsibleTree): HTMLElement => {
@@ -51,4 +53,9 @@ collapsibleAdapterConformance('wc', async (tree) => {
       await flush();
     },
   };
-});
+};
+
+collapsibleAdapterConformance('wc', mount);
+for (const [family, projection] of COLLAPSIBLE_PROJECTIONS) {
+  collapsibleAdapterConformance(`wc/${family}`, mount, projection);
+}

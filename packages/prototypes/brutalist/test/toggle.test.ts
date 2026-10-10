@@ -18,6 +18,7 @@ import {
 import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
 import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import toggle from '../src/toggle';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import type { BrutalistToggleExposes, BrutalistToggleProps } from '../src/toggle';
 
 type TogglePrototype = Prototype<BrutalistToggleProps, BrutalistToggleExposes> & {
@@ -162,9 +163,21 @@ describe('prototypes/brutalist: toggle', () => {
   });
 
   it.each([
-    ['default', ['h-10', 'min-w-10', 'px-3', 'text-sm'], ['h-9', 'h-12']],
-    ['sm', ['h-9', 'min-w-9', 'px-2.5', 'text-xs'], ['h-10', 'h-12']],
-    ['lg', ['h-12', 'min-w-12', 'px-4', 'text-base'], ['h-10', 'h-9']],
+    [
+      'default',
+      ['h-10', 'min-w-10', 'px-3', 'text-sm'],
+      ['h-9', 'h-11', 'h-12', 'text-xs', 'text-base'],
+    ],
+    [
+      'sm',
+      ['h-9', 'min-w-9', 'px-2.5', 'text-[0.8rem]'],
+      ['h-10', 'h-11', 'h-12', 'text-xs', 'text-base'],
+    ],
+    [
+      'lg',
+      ['h-11', 'min-w-11', 'px-4', 'text-sm'],
+      ['h-10', 'h-9', 'h-12', 'min-w-12', 'text-base'],
+    ],
   ] as const)('maps size %s to one dimension-token set', (size, present, absent) => {
     // T-BRUTALIST-TOGGLE-0001-CASE-3
     const { controller, invokeUnmounted } = executeToggle({ size });
@@ -187,7 +200,7 @@ describe('prototypes/brutalist: toggle', () => {
     context.applyRawProps({ size: 'lg', disabled: true });
     controller.applyRawProps({ size: 'lg', disabled: true });
     expect(controller.getRuleStyleTokens()).toEqual(
-      expect.arrayContaining(['h-12', 'opacity-50', 'pointer-events-none'])
+      expect.arrayContaining(['h-11', 'opacity-50', 'pointer-events-none'])
     );
     expect(context.getExposes().disabled.get()).toBe(true);
 
@@ -195,6 +208,7 @@ describe('prototypes/brutalist: toggle', () => {
     controller.applyRawProps({});
     const restoredTokens = controller.getRuleStyleTokens();
     expect(restoredTokens).toContain('h-10');
+    expect(restoredTokens).not.toContain('h-11');
     expect(restoredTokens).not.toContain('h-12');
     expect(restoredTokens).not.toContain('opacity-50');
     expect(context.getExposes().disabled.get()).toBe(false);
@@ -297,5 +311,22 @@ describe('prototypes/brutalist: toggle', () => {
     expect(tokens).toContain('shadow-[inset_0_0_0_2px_#000]');
 
     invokeUnmounted();
+  });
+
+  it('emits the exact Neo small typography and large geometry through the actual CSS renderer', () => {
+    const small = executeToggle({ size: 'sm' });
+    const large = executeToggle({ size: 'lg' });
+    try {
+      const smallCss = renderProtoStyleTokenCss(small.controller.getRuleStyleTokens());
+      const largeCss = renderProtoStyleTokenCss(large.controller.getRuleStyleTokens());
+      expect(smallCss).not.toContain('Unsupported Proto UI style tokens');
+      expect(largeCss).not.toContain('Unsupported Proto UI style tokens');
+      expect(smallCss).toContain('font-size: 0.8rem;');
+      expect(largeCss).toContain('height: 2.75rem;');
+      expect(largeCss).toContain('min-width: 2.75rem;');
+    } finally {
+      small.invokeUnmounted();
+      large.invokeUnmounted();
+    }
   });
 });

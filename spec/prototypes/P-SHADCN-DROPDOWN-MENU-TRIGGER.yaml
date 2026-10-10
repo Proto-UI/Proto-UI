@@ -77,11 +77,13 @@ openQuestions:
 
     blocks: [shadcn dropdown trigger parity roadmap]
 sources:
+  - path: https://ui.shadcn.com/r/styles/base-nova/dropdown-menu.json
+    label: User-requested base-nova reference sha256 335c59dba30145f434a9cc9ccb0438a3c5e2afe857fc11b029de1ecb415224d7
   - path: packages/prototypes/shadcn/src/dropdown/trigger.proto.ts
   - path: packages/prototypes/shadcn/src/dropdown/types.ts
   - path: packages/prototypes/shadcn/test/dropdown.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx
-    label: shadcn/ui v4 new-york DropdownMenuTrigger pinned baseline
+    label: shadcn/ui v4 new-york DropdownMenuTrigger historical pinned baseline
 dependsOn:
   contracts:
     [
@@ -101,6 +103,9 @@ inherits:
       note: Default inherited command-trigger protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-DROPDOWN-MENU-TRIGGER-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Selected user-requested base-nova visual reference for this draft; historical source remains recorded and exact visual acceptance is pending.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Dropdown Menu Trigger delta cataloging with Base inheritance, visual surface, indicator extension, asChild omission, and centralized differences.

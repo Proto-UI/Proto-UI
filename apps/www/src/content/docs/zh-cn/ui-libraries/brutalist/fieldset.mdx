@@ -1,0 +1,19 @@
+---
+title: brutalist Fieldset
+description: 可移植 fieldset 原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-brutalist-fieldset"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 将 Field 聚合到 Legend 与 Description 下。disabled 与每层祖先 Fieldset 及 Field 本地状态取 OR，变化撤销过期校验；重新启用祖先不清除作者本地 disabled。祖先 Context 从当前 provider 外层解析，因此嵌套组不会遮挡外层禁用状态。这是可移植语义组，尚未实现 HTML 原生首 Legend 例外。
+
+四家族继承同一 Base 行为。部件： root, legend, description.
+
+当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。

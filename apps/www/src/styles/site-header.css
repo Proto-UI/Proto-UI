@@ -121,7 +121,7 @@
   height: 2.75rem;
 }
 .site-header :is(.site-header-theme, .site-header-menu) svg,
-.site-header .site-header-search [data-open-modal] svg {
+.site-header .site-header-search :is([data-open-modal], [data-search-startup-button]) svg {
   width: 1.125rem;
   height: 1.125rem;
   flex: none;
@@ -132,10 +132,16 @@
   --site-search-trigger-padding: 0.75rem;
   --site-search-trigger-justify: flex-start;
 }
-.site-header .site-header-search [data-open-modal] .site-search-label {
+.site-header
+  .site-header-search
+  :is([data-open-modal], [data-search-startup-button])
+  .site-search-label {
   display: inline;
 }
-.site-header .site-header-search [data-open-modal] .site-search-shortcut {
+.site-header
+  .site-header-search
+  :is([data-open-modal], [data-search-startup-button])
+  .site-search-shortcut {
   display: inline-flex;
 }
 .site-header-context {
@@ -321,7 +327,7 @@
   }
   .site-header
     .site-header-search
-    [data-open-modal]
+    :is([data-open-modal], [data-search-startup-button])
     :is(.site-search-label, .site-search-shortcut) {
     display: none !important;
   }
@@ -556,23 +562,27 @@
   display: none;
 }
 @media (max-width: 47.999rem) {
-  .site-header[data-site-menu-ready] {
+  .site-header[data-site-menu-ready],
+  .site-header[data-docs-site-header] {
     grid-template-areas: 'brand search theme menu';
     grid-template-rows: minmax(var(--site-header-row-height), auto);
   }
-  .site-header[data-site-menu-ready] > .site-header-context {
+  .site-header[data-site-menu-ready] > .site-header-context,
+  .site-header[data-docs-site-header] > .site-header-context {
     display: contents;
   }
-  .site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation) {
+  .site-header[data-docs-site-header]:has(.site-header-docs-navigation) {
     grid-template-columns: minmax(0, 1fr) repeat(4, 2.75rem);
     grid-template-areas: 'brand contents search theme menu';
   }
-  .site-header[data-site-menu-ready] .site-header-docs-navigation {
+  .site-header[data-site-menu-ready] .site-header-docs-navigation,
+  .site-header[data-docs-site-header] .site-header-docs-navigation {
     grid-area: contents;
     justify-content: center;
     width: 2.75rem;
   }
-  .site-header[data-site-menu-ready] .site-header-docs-navigation > span {
+  .site-header[data-site-menu-ready] .site-header-docs-navigation > span,
+  .site-header[data-docs-site-header] .site-header-docs-navigation > span {
     display: none;
   }
   .site-header [data-site-header-compact-context] .site-header-runtime {
@@ -598,14 +608,15 @@
 /* Text enlargement may reflow the toolbar itself. It must never bring back a
    second settings row or shrink the real PUI touch targets to fit. */
 @container docs-page (max-width: 15rem) {
-  .site-header[data-site-menu-ready] {
+  .site-header[data-site-menu-ready],
+  .site-header[data-docs-site-header] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas: 'brand brand brand' 'search theme menu';
     grid-template-rows: auto auto;
     padding-inline: 0.25rem;
     row-gap: 0.25rem;
   }
-  .site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation) {
+  .site-header[data-docs-site-header]:has(.site-header-docs-navigation) {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas: 'brand brand contents' 'search theme menu';
   }
@@ -664,7 +675,7 @@
     }
     .site-header[data-docs-site-header]
       .site-header-search
-      [data-open-modal]
+      :is([data-open-modal], [data-search-startup-button])
       :is(.site-search-label, .site-search-shortcut) {
       display: none !important;
     }
@@ -718,4 +729,11 @@
 }
 .site-header:not([data-site-menu-ready]) > .site-header-menu {
   visibility: hidden;
+}
+
+/* The native summary owns Docs startup. Keep the future Button unrendered
+   inside its reserved 44px cell: an already-rendered transition-all Button
+   would animate inherited visibility when this Header publishes readiness. */
+.site-header[data-docs-site-header]:not([data-site-menu-ready]) [data-site-menu-button] {
+  display: none !important;
 }

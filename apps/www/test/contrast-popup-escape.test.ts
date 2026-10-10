@@ -43,6 +43,11 @@ const browserBefore = (input: unknown) =>
   new Function('input', `return (${readContrastPopupEscapeBefore.toString()})(input)`)(input);
 const browserAfter = (input: unknown) =>
   new Function('input', `return (${readContrastPopupEscapeAfter.toString()})(input)`)(input);
+// Whole source-fixture budget includes bounded module preparation (5s), popup
+// setup (2s), observation and teardown. The default 5s test deadline can cancel
+// the test before its own setup bound and leak unfinished work into the next
+// case. This is not a native response-time or performance acceptance test.
+vi.setConfig({ testTimeout: 15_000 });
 // Keep the pinned happy-dom forwarding closures alive; delivery and records
 // remain the installed observer. Never use this test repair in native evidence.
 let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
@@ -66,11 +71,12 @@ beforeAll(() => {
   (globalThis as any).puiContrastProbe = new Function(compiled + ';return puiContrastProbe;')();
 });
 afterAll(() => {
+  vi.resetConfig();
   observerKeeper.restore();
   delete (globalThis as any).puiContrastProbe;
 });
 
-function measurements() {
+function measurements(withPaint = true) {
   const bounds = {
     x: 20,
     y: 20,
@@ -82,6 +88,11 @@ function measurements() {
     height: 40,
   };
   const defaults: Record<string, string> = {
+    // Synthetic paint input, like geometry below; this suite verifies Escape
+    // ownership/retirement, not the browser's actual CSS or optical rendering.
+    backgroundColor: withPaint ? 'rgb(255, 255, 255)' : 'rgba(0, 0, 0, 0)',
+    backgroundImage: 'none',
+    backgroundClip: 'border-box',
     visibility: 'visible',
     display: 'block',
     contentVisibility: 'visible',
@@ -172,7 +183,9 @@ async function preview(family: Family, runtime: Runtime = 'wc') {
     componentId: family,
     toolbar: true,
   });
-  await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'));
+  // Runtime-module preparation is not a paint/performance assertion. Keep a
+  // bounded readiness wait shared with the other real-adapter startup fixtures.
+  await vi.waitFor(() => expect(root.dataset.projectionState).toBe('ready'), { timeout: 5000 });
   const contentName =
     family === 'dropdown-menu' ? 'brutalist-dropdown-content' : `brutalist-${family}-content`;
   const triggerName =
@@ -686,6 +699,18 @@ for (const field of ['data-value', 'data-text-value'] as const) {
       expect(before.observation.achieved).toBe(false);
     } finally {
       await mounted.destroy();
+      restore();
+    }
+  });
+}
+
+for (const family of ['tooltip', 'dropdown-menu', 'select'] as const) {
+  it(`${family}: rejects an unpainted baseline despite valid geometry and open state`, async () => {
+    const restore = measurements(false);
+    // Establishing the baseline must reject before any Escape can be credited.
+    try {
+      await expect(preview(family)).rejects.toThrow('no-supported-nontransparent-paint');
+    } finally {
       restore();
     }
   });

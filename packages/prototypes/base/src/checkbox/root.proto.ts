@@ -1,5 +1,5 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import { asAccessible, asFocusable, asTrigger, asControlLabel } from '@proto.ui/hooks';
 import { CHECKBOX_CONTEXT, CHECKBOX_FAMILY } from './shared';
 import type { CheckboxRootAsHookContract, CheckboxRootExposes, CheckboxRootProps } from './types';
 
@@ -86,7 +86,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     disabled: false,
   });
 
-  const publishContext = (run: any) => {
+  const publishContext = (run: RunHandle<CheckboxRootProps>) => {
     // P-BASE-CHECKBOX-CONTEXT-SYNC, P-BASE-CHECKBOX-PART-CONTEXT-CONSUME
     checkedA11y.set(
       indeterminate.get() ? 'mixed' : checked.get() ? 'true' : 'false',
@@ -99,7 +99,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     });
   };
 
-  const emitCheckedChange = (run: any, detail: { checked: boolean; indeterminate: boolean }) => {
+  const emitCheckedChange = (run: RunHandle<CheckboxRootProps>, detail: { checked: boolean; indeterminate: boolean }) => {
     run.expose.emit('checkedChange', detail);
   };
 
@@ -108,7 +108,7 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
     pressed.set(false, reason);
   };
 
-  const syncDisabled = (run: any, nextDisabled: boolean) => {
+  const syncDisabled = (run: RunHandle<CheckboxRootProps>, nextDisabled: boolean) => {
     disabled.set(nextDisabled, 'reason: checkbox root sync disabled');
     focusable.setDisabled(nextDisabled);
     if (nextDisabled) {
@@ -201,17 +201,19 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
 
   // P-BASE-CHECKBOX-ACTIVATION-FLIPS-CHECKED, P-BASE-CHECKBOX-ACTIVATION-CLEARS-INDETERMINATE
   // P-BASE-CHECKBOX-DISABLED-SUPPRESS-ACTIVATION
-  def.event.on('press.commit', (run, ev) => {
+  const activate = (run: RunHandle<CheckboxRootProps>, isCurrent: () => boolean = () => true, event?: { key?: unknown }) => {
     pressed.set(false, 'reason: checkbox root press.commit => pressed');
-    if (disabled.get()) return;
-    if (isEnterKeyboardCommit(ev)) return;
+    if (disabled.get() || isEnterKeyboardCommit(event)) return;
+    if (!isCurrent()) return;
 
     const wasIndeterminate = indeterminate.get();
     if (wasIndeterminate) {
       if (!controlledIndeterminate) {
         indeterminate.set(false, 'reason: press.commit => clear indeterminate');
       }
+      if (!isCurrent()) return;
       run.expose.emit('indeterminateChange', { indeterminate: false });
+      if (!isCurrent() || disabled.get()) return;
     }
 
     const nextChecked = !checked.get();
@@ -219,13 +221,24 @@ function setupCheckboxRoot(def: DefHandle<CheckboxRootProps, CheckboxRootExposes
 
     if (controlledChecked) {
       emitCheckedChange(run, { checked: nextChecked, indeterminate: nextIndeterminate });
-      publishContext(run);
+      if (isCurrent()) publishContext(run);
       return;
     }
 
     checked.set(nextChecked, 'reason: press.commit => toggle checked');
+    if (!isCurrent()) return;
     emitCheckedChange(run, { checked: nextChecked, indeterminate: nextIndeterminate });
-    publishContext(run);
+    if (isCurrent()) publishContext(run);
+  };
+  def.event.on('press.commit', (run, ev) => {
+    activate(run, undefined, ev);
+  });
+  asControlLabel().target<CheckboxRootProps>((run, request) => {
+    if (disabled.get() || !request.isCurrent()) return;
+    const isCurrent = () => !disabled.get() && request.isCurrent();
+    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (!isCurrent()) return;
+    activate(run, isCurrent);
   });
 }
 

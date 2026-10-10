@@ -16,7 +16,7 @@ import { isRuntimeId } from './PrototypePreviewer/runtimes/ids';
 const ROLES = new Set<string>(SITE_TYPOGRAPHY_ROLES);
 const SEMANTIC_TARGETS = 'h1,h2,h3,h4,h5,h6,p,label,legend,figcaption';
 const COMPONENT_OWNED =
-  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-site-native-link],[data-site-native-button],pre,code,script,style,template';
+  '[data-previewer-id],[data-home-showcase],[data-homepage-actions],[data-library-part],[data-site-native-link],[data-site-native-button],pre,code,script,style,template';
 const PASSIVE_HEADER_FRAME =
   '.site-header-popup-surface:is([data-projection-prototype="shadcn-surface-root"],[data-projection-prototype="brutalist-surface-root"])';
 const MARKERS = [
@@ -78,11 +78,13 @@ export function collectSiteTypographyTargets(root: ParentNode, docsOnly = false)
         ? (explicit as SiteTypographyRole)
         : /^h[1-6]$/.test(tag)
           ? (tag as SiteTypographyRole)
-          : tag === 'label' || tag === 'legend'
+          : native.matches('.starlight-aside--note > .starlight-aside__title')
             ? 'label'
-            : tag === 'figcaption'
-              ? 'caption'
-              : 'body';
+            : tag === 'label' || tag === 'legend'
+              ? 'label'
+              : tag === 'figcaption'
+                ? 'caption'
+                : 'body';
     // Only phrasing content can pass through a span. Leaf paragraphs/headings
     // and authored label/legend keep native semantics; block compositions stay
     // with their separately inventoried owner instead of producing invalid DOM.
@@ -156,7 +158,19 @@ function preserveSelection(document: Document, move: () => void): void {
   if (focus?.isConnected && document.activeElement !== focus) focus.focus({ preventScroll: true });
   const nextAnchor = resolveBoundary(anchor);
   const nextExtent = resolveBoundary(extent);
-  if (selection && nextAnchor && nextExtent) {
+  // An unchanged selection may belong to code or another independent owner.
+  // Reapplying it is not a no-op in native browsers: Selection can run focus
+  // steps and take focus back from a header command. Restore only changed
+  // endpoints, while preserving directional source-boundary remapping.
+  if (
+    selection &&
+    nextAnchor &&
+    nextExtent &&
+    (selection.anchorNode !== nextAnchor.node ||
+      selection.anchorOffset !== nextAnchor.offset ||
+      selection.focusNode !== nextExtent.node ||
+      selection.focusOffset !== nextExtent.offset)
+  ) {
     try {
       selection.setBaseAndExtent(
         nextAnchor.node,
@@ -324,7 +338,7 @@ export function siteTypographyParticipant(
             kind: 'box',
             tag: 'span',
             ref: 'typography-batch',
-            children: selected.map(({ role, context }, index) => ({
+            children: selected.map(({ native, role, context }, index) => ({
               kind: 'box',
               tag: 'span',
               ref: `carrier-${index}`,
@@ -334,6 +348,10 @@ export function siteTypographyParticipant(
                   kind: 'proto',
                   prototypeId: `${family}-text-root`,
                   rootTag: 'span',
+                  // These native semantic owners are block reading units. WC
+                  // host fallback and inline React/Vue spans must not choose
+                  // different line boxes; labels/legends remain legal inline.
+                  className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
                   props: { ...siteTextRecipe(role, family, isCompact, context) },
                   surfaceStyle: theme,

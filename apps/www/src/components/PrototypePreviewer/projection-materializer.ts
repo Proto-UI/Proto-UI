@@ -45,6 +45,9 @@ export type MaterializedProjectionCandidate = ProjectionScopeCandidate &
     setThemeSurfaceStyle(theme: ProjectionThemeSurfaceStyle): void;
   }>;
 
+// A focus lease belongs to the exact materialized composition, not a DOM role.
+const compositionFocusRestorers = new WeakMap<HTMLElement, (key: ProjectionFocusKey) => boolean>();
+
 function nextPaint(element: HTMLElement): Promise<void> {
   return new Promise((resolve) => {
     const view = element.ownerDocument.defaultView;
@@ -405,6 +408,7 @@ export async function materializeProjectionCandidate(
     reconcileCandidateExternalPortals
   );
   const teardownCandidate = async (): Promise<void> => {
+    compositionFocusRestorers.delete(host);
     let teardownFailed = false;
     let teardownFailure: unknown;
     const recordFailure = (error: unknown): void => {
@@ -506,6 +510,10 @@ export async function materializeProjectionCandidate(
         await teardownCandidate();
       },
     };
+    compositionFocusRestorers.set(host, (key) => {
+      if (disposed || projectionLocked || !host.isConnected || host.inert) return false;
+      return composition.restoreFocus(key);
+    });
     return candidate;
   } catch (error) {
     disposed = true;
@@ -537,6 +545,7 @@ export function restoreProjectionControlFocus(
   const document = mount.ownerDocument;
   const controlId = CONTROL_BY_FOCUS_KEY[focusKey as ProjectionFocusKey];
   if (!controlId) return;
+  const ownerId = mount.dataset.projectionOwner ?? '';
   const activeElement = document.activeElement;
   const focusOriginOwner = focusOrigin
     ?.closest('[data-projection-owner]')
@@ -554,14 +563,13 @@ export function restoreProjectionControlFocus(
   const restore = () => {
     document.removeEventListener('focusin', handleFocusIn, true);
     if (newerFocusAcquired) return;
-    const activeHost = generationHosts(mount, mount.dataset.projectionOwner ?? '').find(
+    if (!mount.isConnected || mount.dataset.projectionOwner !== ownerId) return;
+    const activeHost = generationHosts(mount, ownerId).find(
       (host) =>
         host.dataset.projectionGenerationState === 'active' &&
         host.dataset.projectionGenerationHost === String(generation)
     );
-    activeHost
-      ?.querySelector<HTMLElement>(`[data-projection-control="${controlId}"] [role="combobox"]`)
-      ?.focus();
+    if (activeHost) compositionFocusRestorers.get(activeHost)?.(focusKey as ProjectionFocusKey);
   };
   const view = document.defaultView;
   if (view?.requestAnimationFrame) view.requestAnimationFrame(restore);

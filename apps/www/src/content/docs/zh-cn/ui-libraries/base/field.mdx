@@ -1,0 +1,70 @@
+---
+title: Base Field
+description: Atomic Field labeling, value reporting and controlled or consumer-validated errors.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Draft workspace family。六个 atoms 共享一个 Base 协议；native/AT/material/GPUI 完成门槛尚未全部通过。
+
+Unstyled semantics; the demo adds only a visible inspection frame.
+
+<PrototypePreviewer demoId="demo-base-field" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+## Anatomy 与所有权
+
+Root 下恰有一个 Control，可含一个 Label、Description、Error 及多个被动 Validity。嵌套 Root 建立独立域；名称、帮助和当前错误由 Anatomy/A11y 解析，不要求手写 DOM ID。重复唯一角色 fail closed。渐进挂载可暂缺 Control，但此时不能校验或接受旧结果。
+
+Root 拥有 validity、touched、dirty；Control 拥有值及物理编辑器。默认 Control 直接复用 TextControl/Focus 模块。asFieldControl 是通用登记、状态及关联桥：其他控件作者必须报告 canonical 值，并消费 disabled/readOnly/required，不从 DOM 或无关 expose 猜测值。asFieldTextControl 是可直接使用的单行编辑器入口。通用控件同时通过 asControlLabel().target(自身操作, FIELD_LABEL_PAIR) 声明 setup-only 配对，复用原生输入、physical scope 和 isCurrent 守卫；回调/引用不进入 Props。
+
+## JSON Props
+
+| Part | Props | 语义 |
+| --- | --- | --- |
+| Root | invalid, errors | 提供 invalid 即受控；errors 为 owner 的错误说明 |
+| Root | defaultInvalid, defaultErrors | 仅初始化非受控状态一次 |
+| Root | disabled, readOnly, required | 默认 false；与 Control 本地策略叠加 |
+| Root | minLength, maxLength | 默认 -1 不限；否则按 UTF-16 code units 计数，并投射默认编辑器 |
+| Root | validationMode | 默认 onBlur，可选 onChange/manual |
+| Root | externalValidation | 默认 false；true 在内置约束通过后发版本化请求 |
+| Control | value, defaultValue | TextControl 初始化时固定受控/非受控值所有权 |
+| Control | disabled, readOnly, required | 本地策略不能解除 Root 约束 |
+| Control | placeholder, name, autoComplete, inputMode, enterKeyHint, ariaLabel | 有限编辑提示，不透传任意原生属性 |
+| Label | activation | 默认 true；指针激活请求聚焦同一 enabled Control |
+| Description | 无 | 作者提供的被动、可选择帮助内容 |
+| Error | message, keepMounted | 本地化文本覆盖；keepMounted 默认 false |
+| Validity | 无 | 被动状态及 getValidity() 快照 |
+
+Props 只含 JSON-compatible 数据。框架 onValueChange/onValidationRequest/onValidityChange 是 Adapter 对 expose event 的投射，不是 Proto UI callback Props。没有 DOM ref、validate/render callback、Form 对象或字符串 ID 关联 Props。
+
+## 校验与受控结果
+
+Root 提供 validate(reason?)、resolveValidation(requestId, result)、cancelValidation()、resetValidation()、focusControl(options?)、getValidity()，以及 invalid/pending/dirty/touched/filled/focused/disabled/readOnly/required 状态。完成的检查发 validityChange，含 status、flags、errors 及状态快照。受控模式下这是提案，canonical invalid 在 owner 更新前不变；同步重入的新 owner 输入优先。快照及其数组均为防御性副本。
+
+required 把 null、false、空字符串、空数组视为空。0 和空白字符串有效，不隐式 trim；含空字符串的非空数组仍是 filled。通用桥只接受有限数值、boolean、string、string[]、null。可选空字符串跳过长度检查。长度按 UTF-16 code units 而非用户感知字符计数。内置 flags 是 valueMissing、tooShort、tooLong；外部错误使用 customError。
+
+除显式 default/owner validity 外，初始状态为 unvalidated；pending 不代表 valid。缺少当前 Control 时，即使受控 invalid=false 也保持 unvalidated。dirty 比较 canonical 值与 Control 初始基线，受控拒绝的编辑不置 dirty。blur 置 touched。resetValidation 仅清校验/touched，不改值/dirty 基线，也不是 form reset。
+
+## 消费者拥有的异步检查
+
+externalValidation=true 时，内置约束通过后发 validationRequest `{requestId,value,reason}`。消费者执行请求，再调用 `resolveValidation(requestId, {invalid,errors})`。只有当前 Root、Control lease 与值/策略修订接受该结果一次。值变化、新请求、替换/移除/detach、disabled/readOnly 切换、composition 开始、策略修改、cancel/reset 都使旧结果失效。畸形或跨 Root 结果被拒绝，不清除合法 pending 请求。
+
+onChange 等到 compositionend。readOnly 阻止编辑但保留焦点与显式校验；disabled 阻止编辑、焦点与校验，不改 owner 值。演示中的 timer 仅通过公开事件/方法模拟消费者请求，不在页面自建 Field 协议。
+
+## 无障碍、生命周期与边界
+
+唯一物理编辑器 labelledBy Label、describedBy Description；仅 canonical invalid=true 时以 aria-errormessage 关联 Error。Web 同步 aria-required/invalid/busy/readonly。Label/Root 不增加 Tab stop；键盘编辑与选择由现有编辑器拥有。Label 复用真实 ControlLabel 守卫，拒绝 drag/cancel、修改键/次要按钮、嵌套交互内容及已取消输入；只聚焦同一 Control。
+
+Error 优先显示显式 message，否则 errors，否则有限的内置英文提示；本地化由作者提供覆盖或外部错误文本。它不自动成为 alert/live region。默认关闭 Error 使用可重复 L1 detach，keepMounted 才保留隐藏视图。IDREF 随实际 lease 撤销/恢复。需要播报时，应用明确选择现有 LiveRegion。Description 保持被动可选择；只关联一个汇总 Error，不暗定多 Error 排序。
+
+通过 family 的 field subpath 导入 fieldRoot/Label/Control/Description/Error/Validity。Base 提供对应 authoring entries、通用 asFieldControl 桥和类型。CLI 为 React/Vue/Vue2/WC 提供全部六个 workspace-source parts，不声称 npm 已发布。
+
+这不是 Fieldset/Form：submission、hidden fields、form 序列化/reset、debounce、原生 validity forwarding、服务器请求实现均不在契约内。四种视觉投影使用同一完整 Field 语义。
+
+当前本地证据为 24 个 Base 测试及每个 Web Adapter 20 个测试（共 104），实际执行 Base 和四种风格 family。它们使用 synthetic DOM，不代替 native 键盘/绘制、AT、窄屏/大字号、光学材质或 GPUI。native-browser journey 已准备精确 source 的截图及真实指针/键盘路径；本地 Chromium 启动被 socket EPERM 阻止，不伪报通过。
+
+GPUI peer 尚无物理 TextControl host；required/invalid/busy/readOnly 与 describedBy/errorMessage 原生映射仍未建立。Liquid Glass 仅声明静态编辑表面的光学意图和 opaque fallback；token/JS transport 不能证明实际光学或原生渲染。
+
+[Base UI Field 比较](https://base-ui.com/react/components/field) · [shadcn Field 比较](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 表单参考](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple Text Fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
+
+这些仅是独立设计比较。Base UI 的 render/validate callback 和 Form submission 模式、shadcn 布局 API、Bootstrap DOM/classes、Apple 系统编辑 chrome 都不是继承 API 或 Proto UI 规范权威。

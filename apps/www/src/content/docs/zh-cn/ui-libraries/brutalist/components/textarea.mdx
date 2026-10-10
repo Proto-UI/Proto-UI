@@ -8,7 +8,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-> 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) 及其继承的 Base 协议仍为 `draft`；本页描述已发布并经过测试的 0.2 surface，不构成 active 协议保证。
+> 可用状态：`@proto.ui/prototypes-brutalist@0.2.0` 已通过 npm `latest` 随 [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0) 发布。生命周期：[P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) 及其继承的 Base 协议仍为 `draft`；以上为历史发布信息；下方预览使用后继draft recipe，不代表新版本已发布或active协议保证。
 
 `brutalist-textarea-root` 是 Base Textarea 上的直接视觉组合。它保留同一个物理原生 `<textarea>`，不新增 interaction、state、event、accessibility 或 ownership 协议。
 
@@ -28,7 +28,9 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 - 原生尺寸调整仍由 host 或 consumer 拥有，不进行自动高度测量
 - 5px 圆角几何
-- 平涂薰衣草紫表面
+- 最小高80px、水平12px/垂直8px内边距及text-sm行高
+- 静态main/main-foreground文字选择
+- 平涂中性表面
 - ink 文本与边框
 - DM Sans 500 文本，无外侧阴影
 
@@ -39,3 +41,5 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 - 原型：[P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml)
 - Base 协议：[P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
 - 源码：[packages/prototypes/brutalist/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/textarea)
+
+Recipe参考[Neo 3306a802 Textarea](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/textarea.tsx)。Placeholder/invalid样式仍不在当前投射范围；新浏览器像素与原生宿主证据待完成。

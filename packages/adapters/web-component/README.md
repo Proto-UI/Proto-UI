@@ -141,6 +141,7 @@ Canonical scope and evidence: [profile decision](../../../spec/decisions/D-WEB-C
 - `@proto.ui/module-as-trigger`
 - `@proto.ui/module-boundary`
 - `@proto.ui/module-context`
+- `@proto.ui/module-control-label`
 - `@proto.ui/module-event`
 - `@proto.ui/module-expose-event`
 - `@proto.ui/module-expose-state`

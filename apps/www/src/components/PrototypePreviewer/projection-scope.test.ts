@@ -1406,3 +1406,132 @@ describe('Website Prototype projection scope controller', () => {
     await controller.destroy();
   });
 });
+
+describe('explicit pending switch cancellation', () => {
+  it('keeps the committed candidate and disposes late work without remounting or losing owned state', async () => {
+    const pending = deferred<ProjectionScopeCandidate>();
+    const retained = { ...candidate('retained'), setLocked: vi.fn() };
+    const late = candidate('cancelled-late');
+    const materialize = vi
+      .fn()
+      .mockResolvedValueOnce(retained)
+      .mockReturnValueOnce(pending.promise);
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize,
+    });
+    await controller.start();
+    const changing = controller.request({ runtimeId: 'react' });
+    await Promise.resolve();
+    await expect(controller.cancelPending()).resolves.toMatchObject({
+      phase: 'ready',
+      generation: 1,
+      selection: selection('wc', 'shadcn'),
+    });
+    expect(retained.setLocked).toHaveBeenLastCalledWith(false);
+    expect(materialize).toHaveBeenCalledTimes(2);
+    pending.resolve(late);
+    await changing;
+    expect(late.activate).not.toHaveBeenCalled();
+    expect(late.dispose).toHaveBeenCalledTimes(1);
+    expect(retained.dispose).not.toHaveBeenCalled();
+    expect(retained.activate).toHaveBeenCalledTimes(1);
+    await controller.destroy();
+  });
+  it('does not let a cancelled late rejection hide a newer successful request', async () => {
+    const pending = deferred<ProjectionScopeCandidate>();
+    const retained = candidate('retained');
+    const newest = candidate('newest');
+    const controller = createProjectionScopeController({
+      initialSelection: selection('wc', 'shadcn'),
+      materialize: vi
+        .fn()
+        .mockResolvedValueOnce(retained)
+        .mockReturnValueOnce(pending.promise)
+        .mockResolvedValueOnce(newest),
+    });
+    await controller.start();
+    const cancelled = controller.request({ runtimeId: 'react' });
+    await Promise.resolve();
+    await controller.cancelPending();
+    await controller.request({ runtimeId: 'vue' });
+    pending.reject(new Error('late cancelled network failure'));
+    await cancelled;
+    expect(controller.getSnapshot()).toMatchObject({
+      phase: 'ready',
+      selection: selection('vue', 'shadcn'),
+    });
+    expect(newest.activate).toHaveBeenCalledTimes(1);
+    await controller.destroy();
+  });
+});
+
+it('makes a failed retained unlock retryable after cancellation without remounting', async () => {
+  const gate = deferred<ProjectionScopeCandidate>();
+  let rejectUnlock = true;
+  const retained = {
+    ...candidate('retained'),
+    setLocked: vi.fn((locked: boolean) => {
+      if (!locked && rejectUnlock) {
+        rejectUnlock = false;
+        return Promise.reject(new Error('unlock unavailable once'));
+      }
+    }),
+  };
+  const controller = createProjectionScopeController({
+    initialSelection: selection('wc', 'shadcn'),
+    materialize: vi.fn().mockResolvedValueOnce(retained).mockReturnValueOnce(gate.promise),
+  });
+  await controller.start();
+  const changing = controller.request({ runtimeId: 'react' });
+  await Promise.resolve();
+  await expect(controller.cancelPending()).rejects.toThrow('unlock unavailable once');
+  expect(controller.getSnapshot()).toMatchObject({
+    phase: 'ready',
+    generation: 1,
+    selection: selection('wc', 'shadcn'),
+  });
+  await controller.cancelPending();
+  expect(retained.setLocked).toHaveBeenLastCalledWith(false);
+  expect(retained.activate).toHaveBeenCalledTimes(1);
+  gate.resolve(candidate('late'));
+  await changing;
+  await controller.destroy();
+});
+
+it('does not report a double cancellation complete before a delayed failing unlock is retried', async () => {
+  const target = deferred<ProjectionScopeCandidate>();
+  const unlocking = deferred<void>();
+  let unlockCalls = 0;
+  const retained = {
+    ...candidate('retained'),
+    setLocked: vi.fn((locked: boolean) => {
+      if (!locked && ++unlockCalls === 1) return unlocking.promise;
+    }),
+  };
+  const controller = createProjectionScopeController({
+    initialSelection: selection('wc', 'shadcn'),
+    materialize: vi.fn().mockResolvedValueOnce(retained).mockReturnValueOnce(target.promise),
+  });
+  await controller.start();
+  const changing = controller.request({ runtimeId: 'react' });
+  await Promise.resolve();
+  const first = controller.cancelPending();
+  const firstFailure = expect(first).rejects.toThrow('delayed unlock failure');
+  let secondFinished = false;
+  const second = controller.cancelPending().then((snapshot) => {
+    secondFinished = true;
+    return snapshot;
+  });
+  await Promise.resolve();
+  await Promise.resolve();
+  expect(secondFinished).toBe(false);
+  unlocking.reject(new Error('delayed unlock failure'));
+  await firstFailure;
+  await expect(second).resolves.toMatchObject({ phase: 'ready', generation: 1 });
+  expect(unlockCalls).toBe(2);
+  target.resolve(candidate('stale'));
+  await changing;
+  expect(retained.activate).toHaveBeenCalledTimes(1);
+  await controller.destroy();
+});

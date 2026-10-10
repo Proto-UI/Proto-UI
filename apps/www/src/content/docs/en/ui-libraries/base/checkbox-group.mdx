@@ -1,0 +1,21 @@
+---
+title: base Checkbox Group
+description: Draft portable checkbox-group atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-base-checkbox-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root owns string-array value/defaultValue, disabled/readOnly and ariaLabel. Item has value/disabled; All toggles enabled registered items and derives checked/mixed while preserving disabled selections. Each item has a Tab stop and Space activation; Enter does not toggle. Controlled requests emit valueChange without overwriting owner state. getValue returns a copy; duplicate item values reject ambiguous toggles. Inside Field/FormField, Root reports the canonical array, group focus and local policy, supports label activation, required validation, Form serialization and reset. Native hidden HTML entries are not created.
+
+All four visual families inherit Base behavior. Parts: root, item, all.
+
+Styled Item/All include an aria-hidden decorative indicator: check for checked, dash for mixed, and an empty outline for unchecked. Color is not the only state signal. The SVG is passive and adds no role, tab stop or interaction owner.
+
+Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.

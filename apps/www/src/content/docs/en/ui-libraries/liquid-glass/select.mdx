@@ -1,0 +1,54 @@
+---
+title: 'Select'
+description: 'Liquid Glass Select: five direct Base parts, controlled selection and anchored popup.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Select provides Root, Trigger, Value, Content and Item. Each part directly consumes its matching Base hook. These are draft workspace sources; native host acceptance remains separate from source and synthetic-DOM tests.
+
+<PrototypePreviewer
+  class="select-content-preview"
+  demoId="demo-liquid-glass-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## Try it
+
+The four examples show an uncontrolled value, disabled control, controlled value and RTL long label. Select an option in the controlled example, then use **Accept selection** to provide the owner value. Its popup can close while the committed value remains unchanged. The preview toolbar uses this family's actual Select parts to switch among WC, React, Vue and Vue 2.
+
+## Five parts, one owner
+
+- Root owns `open`, `value`, selected text, collection and requests. `open`/`value` opt independently into controlled mode; `defaultOpen`/`defaultValue` initialize uncontrolled state. `disabled` and `closeOnSelect` remain inherited.
+- Trigger exposes combobox relationships, effective disabled and interaction states. Pointer activation toggles; Enter/Space opens; ArrowDown/ArrowUp opens at the selected or first/last enabled option.
+- Value displays selected text, raw value, placeholder or empty content in that order. It does not own input or focus.
+- Content owns the listbox, anchored fixed portal, collision handling and keyboard navigation. `side`, `align`, `sideOffset`, `alignOffset`, `avoidCollisions`, `collisionPadding` and Transition props remain available. This projection uses zero-duration presence.
+- Item owns its option identity and derived selected/active states. Pointer, Enter or Space commits an enabled option. Navigation and hover never commit a value. Disabled options are skipped.
+
+Escape closes without changing the value and restores Trigger focus. Tab closes without preventing traversal. Outside press closes. Root requests remain `openChange` and `valueChange`; Item also emits `select`. Changing the selected Item's `textValue` refreshes the displayed label.
+
+Long labels wrap rather than truncate; Trigger and Value can shrink, and Content is bounded by the host's available width/height. Text alignment and trailing indicators follow logical direction. Authors must leave space outside the Trigger for the focus ring. This is a select-only single-selection protocol; form submission, editable search, multi-select, virtualized options and item-aligned positioning are outside the current Base contract.
+
+## Use the workspace source
+
+```ts
+import {
+  selectRoot,
+  selectTrigger,
+  selectValue,
+  selectContent,
+  selectItem,
+} from '@proto.ui/prototypes-liquid-glass/select';
+```
+
+The source-only CLI component `liquid-glass-select` generates all five parts for WC, React, Vue or Vue 2 only when workspace source mode is explicit. The package is private and has not been published to the registry. GPUI facade generation is not implemented.
+
+## Material boundary
+
+Trigger and Content declare the shared typed `liquid-glass` optical intent with an opaque fill/foreground fallback. Trigger derives rest/pressed deformation from Base; Content requests glass only while open. Root, Value and Item add no material owner. Explicit glass is never replaced with `adaptive` native blur. Intent frames and lifecycle tests do not prove self-implemented refraction, native paint or GPUI parity. Missing material hosts retain complete opaque styling and report unavailability.
+
+- [Base Select](/en/ui-libraries/base/select/)
+- [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/select)
+- [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)

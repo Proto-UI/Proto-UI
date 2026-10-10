@@ -1,0 +1,45 @@
+id: P-BOOTSTRAP-2-3-2-ACCORDION-HEADING
+type: prototype
+title: bootstrap-2-3-2 Accordion heading projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Finf #872 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Finf #872. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Family-owned presentation consuming the corresponding Base Accordion atom.
+statement:
+  zh-CN: 此 Proto UI 独立投影原样消费对应 Base authoring entry，不安装另一选择、激活、焦点、heading或presence owner。
+  en: This Proto UI authored presentation consumes the matching Base authoring entry unchanged. It does not install another selection, activation, focus, heading or presence owner.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-ACCORDION-HEADING-INHERITANCE
+    text:
+      zh-CN: 调用 asAccordionHeading 并保留Base JSON Props/exposes及lifecycle。
+      en: Calls asAccordionHeading and retains the Base JSON Props/exposes and lifecycle.
+  - id: P-BOOTSTRAP-2-3-2-ACCORDION-HEADING-STYLE
+    text:
+      zh-CN: 拥有本family tokens，支持最小宽度收缩、标签折行、正常内容流与溢出容纳；Trigger焦点与展开视觉派生自Base。不定高裁剪，不自建激活回调。
+      en: Owns family tokens with min-width shrink safety, wrapping labels, normal content flow and overflow containment. Trigger focus and expanded visuals derive from Base. No fixed-height clipping or own activation callbacks.
+  - id: P-BOOTSTRAP-2-3-2-ACCORDION-HEADING-EVIDENCE
+    text:
+      zh-CN: 参考相似度、native交互、长标签/字号安全与GPUI parity分别提供证据；当前源码和synthetic DOM不认证native视觉同等。
+      en: Reference similarity, native interaction, long-label/text-scale safety and GPUI parity are separately evidenced. Current source and synthetic-DOM checks do not certify native visual parity.
+inherits:
+  prototypes:
+    - P-BASE-ACCORDION-HEADING
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0003
+verifies:
+  tests:
+    - T-BASE-ACCORDION-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/accordion/heading.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/accordion/index.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the independent Base-consuming presentation, without claiming release or complete material/native parity.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - accordion

@@ -6,6 +6,10 @@ Proto UI module that provides interaction-boundary capability.
 
 Provides boundary judgments such as click-outside and focus-outside so prototypes can react to interactions that happen beyond their own region.
 
+## Current focus observation
+
+`boundary.observe('focus.move')` requests host-proven current-focus samples. The Web bridge validates focusin against the current active element; Boundary reuses its disjoint-region classifier and emits `observation: 'focus.move'`. Pointer/focus samples share one press owner until release/cancel or a new key/press, without moving focus. Missing host support fails closed and reports a diagnostic. Native/Compiler focus sampling and browser-chrome focus loss are not implemented by this slice.
+
 ## Package Role
 
 Adapter-facing module package used by the Proto UI runtime and adapter layer.

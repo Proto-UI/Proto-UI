@@ -1,0 +1,31 @@
+---
+title: 'Drawer'
+description: 'An edge-attached modal panel with four placement choices.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+An edge-attached modal panel with four placement choices.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content.side accepts top, right, bottom or left. The panel uses the available host region, contains long-content scrolling, traps focus and restores the trigger on dismissal. Place Handle inside Content to drag only the dedicated grab surface; interactive panel content keeps its normal pointer and scroll behavior. Drag geometry is the panel itself and the public input is dimensionless. No velocity-based fling is claimed.
+
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+
+Partial snaps resize the real scrollable panel instead of translating controls outside the viewport. Top/bottom use up to 85% of the available host height; left/right use up to 20rem, bounded by the available width. Long content scrolls inside that current extent. A drag is normalized against its starting panel size and converted back to full-extent fractions.
+
+Parts: Root, Trigger, Content, Title, Description, Close, Mask, Handle.
+
+Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+
+Content.snapPoints is a sorted set of positive panel fractions up to 1, default [1]. Use defaultSnapPoint for local ownership or snapPoint plus snapPointChange for controlled ownership. Invalid points are ignored. A drag previews dragProgress separately from the committed snapPoint; release chooses the nearest point, preferring the more open point on ties. A refused controlled request restores the owner projection.
+
+A completed drag below dragDismissThreshold (default 0.25, limited by the smallest point) requests Root close. Content.dragDismissible=false disables handle/drag dismissal; explicit Close, Escape and outside dismissal retain the Root window protocol. The Handle is a named keyboard separator: arrows toward the center expand, opposite arrows collapse, Home chooses the smallest point and End the largest. Moving below the smallest point by keyboard requests close when dismissible. Content-side/owner changes, disabled state and pointer cancellation discard an unfinished drag.
+
+The demo exposes half/full snaps and announces committed changes. Browser visual projection, native input and compiler/packed-consumer parity remain acceptance work; host tests use synthetic panel geometry.

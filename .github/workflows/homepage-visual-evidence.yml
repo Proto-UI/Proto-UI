@@ -90,7 +90,7 @@ jobs:
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
       - name: Test evidence provenance and acceptance predicates
         working-directory: candidate
-        run: node --import tsx --test apps/www/scripts/homepage-evidence-contract.test.ts scripts/test/projection-scope-evidence.test.mjs scripts/test/run-runtime-tests.test.mjs
+        run: node --import tsx --test apps/www/scripts/homepage-evidence-contract.test.ts apps/www/scripts/label-selection-observer.test.ts scripts/test/projection-scope-evidence.test.mjs scripts/test/run-runtime-tests.test.mjs
       - name: Capture real baseline with the candidate-owned browser probe
         id: baseline_capture
         # Historical behavior may fail: preserve its red trace, then require
@@ -191,6 +191,8 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
       - name: Execute focused real-browser regressions on the exact candidate
+        env:
+          PROTO_UI_RUNTIME_EVIDENCE_DIR: ${{ runner.temp }}/homepage-evidence/runtime
         if: always() && !cancelled() && steps.install.outcome == 'success' && steps.chrome.outcome == 'success'
         timeout-minutes: 12
         working-directory: candidate

@@ -13,6 +13,10 @@ criteria:
     text:
       en: Each Web modal provider owns one idempotent body scroll lock. Concurrent owners share the original inline overflow value and priority; only the last owner restores it. Unlock uses the body captured at acquisition. This capability does not promise inertness, focus trapping, backdrop or A11y policy.
       zh-CN: 每个 Web modal provider 拥有一个幂等 body scroll lock；并发 owner 共享原 overflow 值与 priority，仅最后一个 owner 恢复。unlock 使用获取时的 body。本能力不承诺 inert、focus trap、backdrop 或 A11y policy。
+  - id: HC-OVERLAY-MODAL-0001-GUTTER
+    text:
+      en: Body locking compensates only the actual root client-width growth measured after overflow is hidden. Client-left change determines the removed left gutter; remaining growth belongs to the right. A retained root scrollbar or stable gutter adds no duplicate padding. Existing inline padding and priority are restored by the last lock owner. This bounded body capability does not certify scrolling policy of an explicitly independent root container.
+      zh-CN: body 隐藏 overflow 后仅按 root clientWidth 实际增量补偿；clientLeft 变化确定消失的左侧 gutter，剩余增量归右侧。仍存在的 root 滚动条或 stable gutter 不重复补偿。最后 owner 恢复原 padding 与 priority；本 body 能力不认证显式独立 root 容器的滚动策略。
 relates:
   contracts:
     - C-AS-OVERLAY-0001

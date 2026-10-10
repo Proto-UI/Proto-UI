@@ -46,6 +46,36 @@ function targetSlot(initial: HTMLElement | null) {
 }
 
 describe('Web A11y opaque semantic-object references', () => {
+  it('distinguishes authored names from owned derived Label IDREFs', () => {
+    const registry = createWebA11yProjectionRegistry();
+    const target = document.createElement('div');
+    const label = document.createElement('span');
+    const targetRef = createA11ySemanticObjectRef();
+    const labelRef = createA11ySemanticObjectRef();
+    const project = registry.createProjector(() => target);
+    const projectLabel = registry.createProjector(() => label);
+    projectLabel(semanticSnapshot(labelRef));
+    project(semanticSnapshot(targetRef));
+    expect(project.hasAuthoredName?.()).toBe(false);
+    project(semanticSnapshot(targetRef, { labelledBy: [labelRef] }, { labelledBy: 'append' }));
+    expect(target.getAttribute('aria-labelledby')).toBe(label.id);
+    expect(project.hasAuthoredName?.()).toBe(false);
+    target.setAttribute('aria-labelledby', `${label.id} consumer-name`);
+    expect(project.hasAuthoredName?.()).toBe(true);
+    project.dispose?.();
+    expect(target.getAttribute('aria-labelledby')).toContain('consumer-name');
+    projectLabel.dispose?.();
+  });
+
+  it('keeps the consumer aria-label baseline visible to Label conflict checks', () => {
+    const target = document.createElement('div');
+    target.setAttribute('aria-label', 'Consumer name');
+    const project = createWebA11yProjector(() => target);
+    project({ ...semanticSnapshot(createA11ySemanticObjectRef()), name: { kind: 'content' } });
+    expect(project.hasAuthoredName?.()).toBe(true);
+    project.dispose?.();
+    expect(target.getAttribute('aria-label')).toBe('Consumer name');
+  });
   it('projects ordered targets atomically across missing, removal, rematerialization, and disposal', () => {
     // T-A11Y-0001-CASE-OPAQUE-RELATION-PROJECTION
     const registry = createWebA11yProjectionRegistry({ idPrefix: 'test-a11y' });
@@ -1315,4 +1345,24 @@ describe('pending live identity at view revocation', () => {
       }
     }
   );
+});
+
+describe('active descendant semantic relationship', () => {
+  it('tracks option identity, withdrawal and host-owned baseline without a component DOM patch', () => {
+    const registry = createWebA11yProjectionRegistry();
+    const input = document.createElement('input');
+    input.setAttribute('aria-activedescendant', 'host-option');
+    const option = document.createElement('div');
+    const inputRef = createA11ySemanticObjectRef();
+    const optionRef = createA11ySemanticObjectRef();
+    const projectInput = registry.createProjector(() => input);
+    const projectOption = registry.createProjector(() => option);
+    projectOption(semanticSnapshot(optionRef));
+    projectInput(semanticSnapshot(inputRef, { activeDescendant: [optionRef] }));
+    expect(input.getAttribute('aria-activedescendant')).toBe(option.id);
+    projectOption.dispose?.();
+    expect(input.getAttribute('aria-activedescendant')).toBe('host-option');
+    projectInput.dispose?.();
+    expect(input.getAttribute('aria-activedescendant')).toBe('host-option');
+  });
 });

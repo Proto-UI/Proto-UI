@@ -1,3 +1,11 @@
+import {
+  NATIVE_LINK_DECLARATION,
+  resolveWebNativeLinkLocalName,
+} from '@proto.ui/module-native-link';
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
+import type { InstanceAssociations } from '@proto.ui/core';
 import { IMAGE_VIEW_DECLARATION, resolveWebImageLocalName } from '@proto.ui/module-image-view';
 import {
   getModuleDeclaration,
@@ -78,6 +86,7 @@ export { __VUE2_PROTO_INSTANCE } from './platform/instance-tree';
 
 export type Vue2AdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
     class?: string | string[] | Record<string, boolean>;
     hostClass?: string | string[] | Record<string, boolean>;
     surfaceClass?: string | string[] | Record<string, boolean>;
@@ -87,6 +96,8 @@ export type Vue2AdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface Vue2AdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: Vue2AdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -111,6 +122,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
   initOptions: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -157,6 +169,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     surfaceClass,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -190,6 +203,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
     opt: Vue2AdapterOptions<ProtoAdapterProps<TProto>> = {}
   ): ProtoVue2Component<TProto> {
     type Props = ProtoAdapterProps<TProto>;
+    const createVisualSink = opt.createVisualSink;
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
@@ -207,15 +221,17 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       : undefined;
     const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
     const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
-    if (textControlRootTag && imageViewRootTag) {
+    const nativeLink = getModuleDeclaration(proto, NATIVE_LINK_DECLARATION)?.config;
+    const nativeLinkRootTag = nativeLink ? resolveWebNativeLinkLocalName() : undefined;
+    if ([textControlRootTag, imageViewRootTag, nativeLinkRootTag].filter(Boolean).length > 1) {
       throw new Error(
-        '[Vue2 Adapter] text-control and image-view declarations cannot share a root.'
+        '[Vue2 Adapter] text-control, image-view and native-link declarations cannot share a root.'
       );
     }
-    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag ?? nativeLinkRootTag;
     if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
       throw new Error(
-        `[Vue2 Adapter] rootTag conflicts with the static ${textControlRootTag ? 'text-control' : 'image-view'} declaration.`
+        `[Vue2 Adapter] rootTag conflicts with the static ${textControlRootTag ? 'text-control' : imageViewRootTag ? 'image-view' : 'native-link'} declaration.`
       );
     }
     const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
@@ -239,6 +255,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       const state = {
         proto,
         initOptions: {
+          createVisualSink: createVisualSink,
           schedule,
           getMeta,
           colorSchemeSource,
@@ -291,6 +308,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         },
       },
       props: {
+        instanceAssociations: { type: Object, default: undefined },
         hostClass: { type: [String, Array, Object], default: undefined },
         surfaceClass: { type: [String, Array, Object], default: undefined },
         hostStyle: { type: [String, Array, Object], default: undefined },
@@ -327,7 +345,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           debugName: `${proto.name}#raw-props`,
           get() {
             const nextProps = getProps(collectAdapterInput<Props>(vm));
-            return (nextProps ?? {}) as Readonly<Props & PropsBaseType>;
+            return withoutInstanceAssociations(nextProps) as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
             state.subs.add(cb);
@@ -345,6 +363,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             proto,
             schedule,
             rawPropsSource,
+            getInstanceAssociations: () => vm.instanceAssociations ?? {},
             wiring,
             eventGate: {
               disable: () => state.eventGate?.disable(),
@@ -364,7 +383,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               setVmField(vm, '__puiRenderChildren', children);
               setVmField(vm, '__puiCommitVersion', ((vm as any).__puiCommitVersion ?? 0) + 1);
               forceUpdate(vm);
-              afterVueCommit(runtime, vm, () => finishPendingCommit(vm));
+              const commitVersion = (vm as any).__puiCommitVersion;
+              afterVueCommit(runtime, vm, () => finishPendingCommit(vm, commitVersion));
             },
             onAfterUnmount: () => {
               state.scopedExposesReader.invalidate();
@@ -422,6 +442,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         if (rootEl) installViewVisibilityRule(rootEl.ownerDocument);
         if ((this as any).__puiShouldExist) {
           initSession(runtime, this, proto, {
+            createVisualSink: createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -442,6 +463,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           afterVueCommit(runtime, this, () => {
             if (getRootElement(this) === target && (this as any).__puiShouldExist) {
               initSession(runtime, this, proto, {
+                createVisualSink: createVisualSink,
                 schedule,
                 getMeta,
                 colorSchemeSource,
@@ -467,6 +489,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         afterVueCommit(runtime, this, () => {
           if (state.terminalDisposed || activationVersion !== state.activationVersion) return;
           initSession(runtime, this, proto, {
+            createVisualSink: createVisualSink,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -534,6 +557,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           : slotNodes;
         const rootChildren = normalizeVue2Children(rendered);
         const attrs = this.$attrs ?? {};
+        const hostDirection = attrs.dir ?? (this as any).dir;
 
         return h(
           rootTag,
@@ -554,10 +578,14 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               attrs.style,
             ]),
             attrs: {
+              // An absent VNode attr must not claim consumer-owned native direction.
+              ...(hostDirection === undefined ? {} : { dir: hostDirection }),
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
               [PUI_VIEW_PENDING_ATTR]: state.viewReady ? undefined : '',
-              'data-pui-style': serializeStyleTokens((this as any).__puiHostTokens ?? []),
+              ...(createVisualSink
+                ? {}
+                : { 'data-pui-style': serializeStyleTokens((this as any).__puiHostTokens ?? []) }),
               'data-demo-ref': attrs['data-demo-ref'] as string | undefined,
             },
           },
@@ -593,6 +621,7 @@ function collectAdapterInput<Props extends PropsBaseType>(
     surfaceClass: vm.surfaceClass,
     hostStyle: vm.hostStyle,
     surfaceStyle: vm.surfaceStyle,
+    instanceAssociations: vm.instanceAssociations,
   } as Vue2AdapterProps<Props>;
 }
 
@@ -630,6 +659,7 @@ function initSession<Props extends PropsBaseType>(
   options: {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
+    createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -679,6 +709,7 @@ function initSession<Props extends PropsBaseType>(
   bindLogicalEventTarget(state.instanceToken, router.rootTarget);
   state.viewDisposed = false;
   let viewDisposed = false;
+  let ownedVisualStyle: string | null = null;
   let focusRetryGeneration = 0;
   let releaseRequestedTargetReady: (() => void) | undefined;
   const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -707,6 +738,10 @@ function initSession<Props extends PropsBaseType>(
     viewDisposed = true;
     state.viewDisposed = true;
     const releases = [
+      () => {
+        if (ownedVisualStyle !== null && rootEl.getAttribute('data-pui-style') === ownedVisualStyle)
+          rootEl.removeAttribute('data-pui-style');
+      },
       () => eventGate.disable(),
       () => eventGate.dispose(),
       () => {
@@ -744,8 +779,18 @@ function initSession<Props extends PropsBaseType>(
   };
 
   const effectsPort = createVue2EffectsPort((tokens) => {
+    if (viewDisposed || getRootElement(vm) !== rootEl) return;
     setVmField(vm, '__puiHostTokens', tokens);
     forceUpdate(vm);
+    if (viewDisposed || getRootElement(vm) !== rootEl) return;
+    // The VNode omits this owned attribute, including its undefined key: Vue 2
+    // otherwise removes it again on a later unrelated framework update.
+    if (targetOptions.createVisualSink) {
+      ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
+      if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
+      else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
+        rootEl.setAttribute('data-pui-style', ownedVisualStyle);
+    }
   });
 
   const modules = createVue2Modules({
@@ -757,6 +802,15 @@ function initSession<Props extends PropsBaseType>(
     },
     rawPropsSource: state.rawPropsSource,
     effectsPort,
+    visualFeedbackSink: targetOptions.createVisualSink
+      ? createDeferredViewVisualSink(
+          () => targetOptions.createVisualSink!(rootEl, effectsPort),
+          (frame) => {
+            effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
+            effectsPort.requestFlush();
+          }
+        )
+      : undefined,
     getMeta: targetOptions.getMeta,
     colorSchemeSource: targetOptions.colorSchemeSource,
     preferenceSource: targetOptions.preferenceSource,
@@ -847,6 +901,7 @@ function initSession<Props extends PropsBaseType>(
         proto: targetProto,
         schedule: targetOptions.schedule,
         rawPropsSource: state.rawPropsSource!,
+        getInstanceAssociations: () => vm.instanceAssociations ?? {},
         wiring,
         eventGate: {
           disable: () => state.eventGate?.disable(),
@@ -861,7 +916,8 @@ function initSession<Props extends PropsBaseType>(
           setVmField(vm, '__puiRenderChildren', children);
           setVmField(vm, '__puiCommitVersion', (vm.__puiCommitVersion ?? 0) + 1);
           forceUpdate(vm);
-          afterVueCommit(runtime, vm, () => finishPendingCommit(vm));
+          const commitVersion = vm.__puiCommitVersion;
+          afterVueCommit(runtime, vm, () => finishPendingCommit(vm, commitVersion));
         },
         onLifecycleCheckpoint: targetOptions.onLifecycleCheckpoint,
         onLifecycleEvent: (event) => {
@@ -900,6 +956,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 ): {
   schedule: (task: () => void) => void;
   getMeta: (key: string) => unknown;
+  createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;
@@ -915,6 +972,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
 function notifyPropsChange(vm: any, autoUpdate: boolean) {
   const state = getState(vm);
   if (!state.rawPropsSource) return;
+  state.controller?.applyInstanceAssociations(vm.instanceAssociations ?? {});
   const nextHostProps = state.rawPropsSource.get();
   if (state.lastHostProps && shallowEqualHostProps(state.lastHostProps, nextHostProps)) return;
   state.lastHostProps = nextHostProps;
@@ -929,15 +987,33 @@ function trackFocusIngress(vm: any, event: RuntimeLifecycleEvent) {
   if (state.focusIngressReady) notifyFocusTargetReady(vm);
 }
 
-function finishPendingCommit(vm: any) {
+function finishPendingCommit(vm: any, commitVersion: number) {
   const state = getState(vm);
-  if (!state.pendingCommit) return;
+  const root = getRootElement(vm);
+  const gate = state.eventGate;
+  const isCurrentView = () =>
+    commitVersion === vm.__puiCommitVersion &&
+    root !== null &&
+    getRootElement(vm) === root &&
+    state.boundRoot === root &&
+    state.eventGate === gate &&
+    !state.terminalDisposed &&
+    !state.viewDisposed &&
+    state.hostActive &&
+    vm.__puiShouldExist &&
+    state.owner.hasView;
+  if (!state.pendingCommit || !isCurrentView()) return;
   state.pendingCommit = false;
   const signal = state.pendingSignal;
   state.pendingSignal = null;
   state.viewReady = true;
   state.eventGate?.enable();
   signal?.done?.();
+  // Ready is intentionally non-reactive. A visual sink can consume the final
+  // style frame without another Vue render, so finish this owned DOM attribute
+  // explicitly. A lifecycle callback may replace, hide, or recommit the view.
+  if (!isCurrentView() || state.pendingCommit || !state.viewReady) return;
+  root!.removeAttribute(PUI_VIEW_PENDING_ATTR);
   // Remount event listeners and Runtime callback scope are live only after
   // acknowledgement. onUpdated retains Vue2's existing enabled-gate timing.
   notifyFocusTargetReady(vm);

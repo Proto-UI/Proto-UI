@@ -1,0 +1,130 @@
+{
+  "kind": "Finf source-stage checkpoint",
+  "date": "2026-10-06",
+  "Agent": "dot",
+  "ModelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "previousPublishedHead": "689c5614608b1ec0391a70f6c9f69c8b29361f32",
+  "complete": false,
+  "completedDeliveryItems": 0,
+  "scope": [
+    "Preserve #85859e and #86882f normal ancestry and reader/source ownership",
+    "Collapsible four projections: 12 identities, direct demos, compiler entries, source-bound 36 native journeys",
+    "Accordion Base plus four projections: 25 identities, controlled/dynamic semantics, docs and 25 native journeys",
+    "Shared typed material intents, Feedback/Rule contribution ownership, alignment/color independence, two Liquid family consumers",
+    "Measured classic-scrollbar root-space invalidation and actual removed-gutter compensation; paint-only Dialog transition",
+    "Label retry cleanup and interactive descendant boundary; exact Label/Text typography assertions",
+    "GPUI lease receipt hardening, actual screenshot viewport fixtures, finite native vocabulary corrections",
+    "Internal framework-only association transport entry with real package dist exports and actual website graph closure"
+  ],
+  "verification": {
+    "publicPackages": "45/45 build and JS entry smoke",
+    "workspaceTypes": "tsconfig.workspace.json passed",
+    "production": "327 pages, actual production bundle graph passed",
+    "familyMaterialTests": "25 suites / 413 passed",
+    "geometryMaterialConsumerTests": "9 suites / 70 passed",
+    "reviewFollowups": "10 suites / 179 passed",
+    "graphAndRunner": "513 passed",
+    "exportRootControls": "3 passed",
+    "matchedDialogBaselineValidator": "9 passed",
+    "prototypeCatalog": "213 declarations / 212 P identities; 0 known debt; all current P lifecycle remains draft",
+    "specAuthoring": "57 changed catalog inputs checked against 689c561",
+    "publicDocs": "129 bilingual primary routes / four inventories passed"
+  },
+  "retainedFailures": [
+    {
+      "source": "689c5614608b1ec0391a70f6c9f69c8b29361f32",
+      "workflow": 37521369232,
+      "status": "terminal failure",
+      "observations": "Actual 15px classic-scrollbar Select stale geometry and Dialog body compensation defects; seven initial 390px Dialog observations had 16px insets, but subsequent resize lag and one runtime-selection timeout kept all eight Dialog journeys red. Native Label T0 5/5 passed; macOS images/AccessKit were blocked by vocabulary assertions. These historical results are not new-head acceptance."
+    },
+    {
+      "stage": "integration controls",
+      "observation": "Two-family union initially omitted Accordion auxiliary expectations and then Collapsible in Bootstrap inventory; corrected exact sets, 413 passed. Duplicate identical border-t translator key removed, keeping one shared translation."
+    },
+    {
+      "stage": "command selection",
+      "observation": "Initial tsc without -p selected the repository root configuration including unprepared release consumer fixtures; canonical tsconfig.workspace.json rerun passed. Initial spec-authoring invocation without --base rejected usage; correct --base run passed."
+    },
+    {
+      "stage": "matrix source reconciliation",
+      "observation": "#858 brought five changed consumer source fields; old matrix controls correctly rejected them. Exact source fields are reconciled without changing consumer acceptance states."
+    },
+    {
+      "stage": "package budget",
+      "observation": "Four current canonical caps failed at 74348/99558/99352/108903 gzip bytes; independent root full JSON matched all eleven artifacts. The separately reviewed numeric transaction follows this source checkpoint."
+    }
+  ],
+  "pending": [
+    "Official exact-new-head Web input, images and independent review",
+    "Complete four-system and GPUI semantic parity, including real AccessKit relationships and asynchronous focus continuation",
+    "Actual Liquid Glass optical provider/paint, not fulfilled by the new intent/Rule layer",
+    "Same-condition native before/after pictures as each subitem becomes verified",
+    "Packaging/release readiness for private projection packages; registry publication not performed"
+  ],
+  "consumerFieldReconciliation": [
+    {
+      "id": "www.shell.language-select",
+      "field": "Evidence",
+      "before": "Current family WC Select supplies valueChange while localization owns cookie/storage and destination mapping; HomepageRuntime retains native locale links",
+      "after": "Current family WC Select supplies valueChange while localization owns cookie/storage and destination mapping; HomepageRuntime retains native locale links; documentation locale links remain available until successful Select enhancement"
+    },
+    {
+      "id": "www.shell.adapter-select",
+      "field": "Path",
+      "before": "apps/www/src/components/override/AdapterSelect.astro",
+      "after": "apps/www/src/components/override/AdapterSelect.astro`, `apps/www/src/styles/site-startup.css"
+    },
+    {
+      "id": "www.shell.mobile-menu-toggle",
+      "field": "Path",
+      "before": "apps/www/src/components/SiteContentsCommand.astro`, `apps/www/src/components/site-contents-command.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro",
+      "after": "apps/www/src/components/SiteContentsCommand.astro`, `apps/www/src/components/site-contents-command.ts`, `apps/www/src/components/site-header-disclosure.ts`, `apps/www/src/components/override/Header.astro`, `apps/www/src/styles/site-startup.css"
+    },
+    {
+      "id": "www.shell.mobile-menu-toggle",
+      "field": "WC host and SSR/no-JS strategy",
+      "before": "WC: generated website facades are required for owned primitives; SSR: the trigger name and navigation content are present; no-JS: navigation remains reachable in document flow",
+      "after": "WC: generated website facades are required for owned primitives; SSR: the trigger name and navigation content are present; no-JS: native disclosure keeps navigation reachable before enhancement and during script failure"
+    },
+    {
+      "id": "www.demo.prototype-previewer",
+      "field": "Path",
+      "before": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts` , `apps/www/src/components/PrototypePreviewer/demo-associations.ts",
+      "after": "apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro`, `apps/www/src/components/PrototypePreviewer/previewer-client.ts` , `apps/www/src/components/PrototypePreviewer/demo-associations.ts`, `apps/www/src/styles/site-startup.css"
+    }
+  ],
+  "localLogDigests": [
+    {
+      "name": "finf-third-public-build.log",
+      "sha256": "cd90a37f3001c1abb92726ba5be7daeb4ee1795eeff679ae7992cd07114b1084"
+    },
+    {
+      "name": "finf-third-workspace-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "finf-third-production.log",
+      "sha256": "d78aea0e72d9a8e5c063cb3c5f73a3fa86b5fa75d0b31a0c3f59faf332da6866"
+    },
+    {
+      "name": "finf-third-material-family-tests-final.log",
+      "sha256": "dd1f211e42623650e8db4d0fd4a696aa9c522acb39c2bcc701e97be11d985066"
+    },
+    {
+      "name": "finf-third-optical-geometry-tests.log",
+      "sha256": "db9fc1eae85a0613ddb279eceedffd1dcd04ff832c46ea78ce88206beb768207"
+    },
+    {
+      "name": "finf-third-graph-runner-tests.log",
+      "sha256": "be4e904038f2cdfec3135d05cfe7b8c3b9f75a12cd23c65cc79895499e9d469b"
+    },
+    {
+      "name": "finf-third-export-tests.log",
+      "sha256": "8f23560ac10ce7c2101e6d9cb6ececb6f8fa82d4df7d424581aab967caba3d9e"
+    },
+    {
+      "name": "finf-third-spec-final.log",
+      "sha256": "7b84474afacab08c2dd2dbeae3e4fec19dab3721da1c6ed807f0e69113d3e0c6"
+    }
+  ]
+}

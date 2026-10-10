@@ -1,3 +1,4 @@
+import { createRuntimeTabs, type RuntimeTabsFocusLease } from './runtime-tabs';
 // src/next-www/src/components/PrototypePreviewer/previewer-client.ts
 import { loadPrototype, loadPrototypes } from './prototype-modules';
 import { loadDemo } from './demo-modules';
@@ -22,6 +23,12 @@ import { initProjectedPreviewer } from './projected-previewer-client';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
+// Bind our one public preference event to its initiating logical request. A
+// synchronous newer request can invalidate the remaining outer event delivery.
+const runtimeBroadcastRequests = new WeakMap<
+  Event,
+  Readonly<{ source: HTMLElement; isCurrent(): boolean }>
+>();
 
 interface PreviewerOptions {
   root: HTMLElement;
@@ -94,6 +101,7 @@ export function initPreviewer(options: PreviewerOptions) {
     else if (nativeSelect) nativeSelect.value = value;
   };
   const setPreviewerSelectDisabled = (disabled: boolean) => {
+    runtimeTabs?.setDisabled(disabled);
     if (selectRoot) setSiteSelectDisabled(selectRoot, disabled);
     else if (nativeSelect) nativeSelect.disabled = disabled;
   };
@@ -109,6 +117,38 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   const selectedInitialRuntime = preferredRuntime();
+  const tabsMount = root.querySelector<HTMLElement>('[data-runtime-tabs-mount]');
+  const previewPanel = root.querySelector<HTMLElement>('[data-panel="preview"]');
+  const runtimeTabs =
+    tabsMount && previewPanel
+      ? createRuntimeTabs({
+          mount: tabsMount,
+          panel: previewPanel,
+          family: runtimePreviewFamily(root),
+          runtimes: runtimeList,
+          value: selectedInitialRuntime,
+          onValueChange(value) {
+            // Only this local activation owns focus return. The document broadcast
+            // still synchronizes other previews, without granting them a lease.
+            const requestVersion = version + 1;
+            void switchTo(value, { focusLease: runtimeTabs?.captureFocusLease(value) });
+            const isCurrent = () =>
+              !destroyed && version === requestVersion && requestedRuntime === value;
+            // destroy() can synchronously request a newer runtime before the
+            // async switch returns. That winner also owns storage/broadcast.
+            if (!isCurrent()) return;
+            try {
+              localStorage.setItem(PREFERRED_ADAPTER_KEY, value);
+            } catch {
+              /* optional storage */
+            }
+            if (!isCurrent()) return;
+            const event = new CustomEvent('proto-adapter:change', { detail: { adapter: value } });
+            runtimeBroadcastRequests.set(event, { source: root, isCurrent });
+            document.dispatchEvent(event);
+          },
+        })
+      : null;
   const nativeSelectUsesPagePreference = Boolean(nativeSelect?.closest('[data-adapter-select]'));
 
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
@@ -120,6 +160,7 @@ export function initPreviewer(options: PreviewerOptions) {
   let activeSurface: ReturnType<typeof createRuntimePreviewSurface> | null = null;
   let stopFamilyObserver: (() => void) | null = null;
   let destroyPromise: Promise<void> | null = null;
+  let activeFocusLease: RuntimeTabsFocusLease | null = null;
 
   const codeHighlights: Record<string, string> = root.dataset.codeHighlights
     ? JSON.parse(root.dataset.codeHighlights)
@@ -202,17 +243,28 @@ export function initPreviewer(options: PreviewerOptions) {
     return loaderPromise;
   }
 
-  async function switchTo(id: string, options: { force?: boolean } = {}) {
-    if (destroyed) return;
+  async function switchTo(
+    id: string,
+    options: { force?: boolean; focusLease?: RuntimeTabsFocusLease | null } = {}
+  ) {
+    if (destroyed) {
+      options.focusLease?.cancel();
+      return;
+    }
     const runtime = id as RuntimeId;
     const activeRuntime = currentDemo?.id ?? null;
     if (
       !options.force &&
       (requestedRuntime === runtime || (requestedRuntime === null && activeRuntime === runtime))
     ) {
+      options.focusLease?.cancel();
       writeSelectValue(runtime);
       return;
     }
+    activeFocusLease?.cancel();
+    const focusLease = options.focusLease ?? null;
+    activeFocusLease = focusLease;
+    let committed = false;
     requestedRuntime = runtime;
     const myVersion = ++version;
     // Invalidate a runtime that is still awaiting its loader before this
@@ -231,6 +283,7 @@ export function initPreviewer(options: PreviewerOptions) {
       if (previous) await previous.destroy();
       else host.replaceChildren();
       if (destroyed || myVersion !== version) return;
+      runtimeTabs?.select(runtime);
 
       let demo: DemoSpec;
       if (demoId) {
@@ -310,6 +363,7 @@ export function initPreviewer(options: PreviewerOptions) {
         mounted = true;
         dispatch('previewer:mounted', { runtime });
       }
+      committed = true;
     } catch (err) {
       if (destroyed || myVersion !== version) return;
       // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
@@ -329,6 +383,11 @@ export function initPreviewer(options: PreviewerOptions) {
       if (myVersion === version && !destroyed) {
         requestedRuntime = null;
         setPreviewerSelectDisabled(false);
+        if (activeFocusLease === focusLease) activeFocusLease = null;
+        if (committed) focusLease?.restore();
+        else focusLease?.cancel();
+      } else {
+        focusLease?.cancel();
       }
     }
   }
@@ -358,9 +417,15 @@ export function initPreviewer(options: PreviewerOptions) {
   }
 
   const onAdapterChange = (event: Event) => {
+    const request = runtimeBroadcastRequests.get(event);
+    if (request && !request.isCurrent()) return;
     const id = (event as CustomEvent<{ adapter?: unknown }>).detail?.adapter;
     if (typeof id !== 'string' || !runtimeList.includes(id as RuntimeId)) return;
+    const receivingVersion = version;
     writeSelectValue(id);
+    if (version !== receivingVersion || (request && !request.isCurrent())) return;
+    // The source already started this exact request; peers enter once here.
+    if (request?.source === root) return;
     void switchTo(id);
   };
   document.addEventListener('proto-adapter:change', onAdapterChange);
@@ -385,6 +450,8 @@ export function initPreviewer(options: PreviewerOptions) {
       if (destroyPromise) return destroyPromise;
       destroyed = true;
       version++;
+      activeFocusLease?.cancel();
+      activeFocusLease = null;
       stopThemeWatcher?.();
       stopFamilyObserver?.();
       stopThemeWatcher = null;
@@ -406,6 +473,7 @@ export function initPreviewer(options: PreviewerOptions) {
         } finally {
           host.replaceChildren();
           finishStartup();
+          runtimeTabs?.dispose();
         }
       })();
       return destroyPromise;

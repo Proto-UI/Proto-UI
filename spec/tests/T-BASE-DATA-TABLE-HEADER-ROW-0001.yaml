@@ -1,0 +1,90 @@
+id: T-BASE-DATA-TABLE-HEADER-ROW-0001
+type: test
+title: DataTable passive HeaderRow composition and legacy Trigger boundary
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Bounded actual WC and exact public-type source evidence exists; independent acceptance, full shared-entry integration and browser/native/packed journeys remain pending.
+  zh-CN: 已有有界实际 WC 与精确公共类型源码证据；独立验收、完整共享入口集成及 browser/native/packed 旅程待完成。
+summary: Bounds the additive HeaderRow composition across real WC instances and exact public types without claiming browser, native or packed acceptance.
+exercises:
+  prototypes:
+    - P-BASE-DATA-TABLE-HEADER-ROW
+    - P-SHADCN-DATA-TABLE-HEADER-ROW
+    - P-BRUTALIST-DATA-TABLE-HEADER-ROW
+    - P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW
+    - P-LIQUID-GLASS-DATA-TABLE-HEADER-ROW
+cases:
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-MOUNT
+    title: Two independent sortable headers mount below a passive row
+    covers:
+      [
+        P-BASE-DATA-TABLE-HEADER-ROW-STRUCTURE,
+        P-BASE-DATA-TABLE-HEADER-ROW-PASSIVE,
+        P-BASE-DATA-TABLE-HEADER-ROW-CHILDREN,
+      ]
+    expectation: two-independent-sortable-headers-mount-below-a-passive-row
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-OWNER
+    title: Controlled sort acceptance refusal and body selection remain root-owned
+    covers: [P-BASE-DATA-TABLE-HEADER-ROW-PASSIVE, P-BASE-DATA-TABLE-HEADER-ROW-CHILDREN]
+    expectation: controlled-sort-acceptance-refusal-and-body-selection-remain-root-owned
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-LIFECYCLE
+    title: Detach reconnect and header reorder retain topology without acquiring an activation owner
+    covers: [P-BASE-DATA-TABLE-HEADER-ROW-STRUCTURE, P-BASE-DATA-TABLE-HEADER-ROW-PASSIVE]
+    expectation: detach-reconnect-and-header-reorder-retain-topology-without-acquiring-an-activation-owner
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-PUBLIC
+    title: Exact public types and captured authored state remain empty
+    covers: [P-BASE-DATA-TABLE-HEADER-ROW-PUBLIC-CONTRACT]
+    expectation: exact-public-types-and-captured-authored-state-remain-empty
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-FAMILIES
+    title: All five concrete entries retain legal passive row behavior
+    covers:
+      [
+        P-BASE-DATA-TABLE-HEADER-ROW-FAMILIES,
+        P-SHADCN-DATA-TABLE-HEADER-ROW-INHERITANCE,
+        P-SHADCN-DATA-TABLE-HEADER-ROW-STYLE,
+        P-BRUTALIST-DATA-TABLE-HEADER-ROW-INHERITANCE,
+        P-BRUTALIST-DATA-TABLE-HEADER-ROW-STYLE,
+        P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW-INHERITANCE,
+        P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW-STYLE,
+        P-LIQUID-GLASS-DATA-TABLE-HEADER-ROW-INHERITANCE,
+        P-LIQUID-GLASS-DATA-TABLE-HEADER-ROW-STYLE,
+      ]
+    expectation: all-five-concrete-entries-retain-legal-passive-row-behavior
+  - id: T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-LEGACY
+    title: Legacy dynamic header changes record-slot policy but rejects sibling Trigger branches
+    covers: [P-BASE-DATA-TABLE-HEADER-ROW-COMPATIBILITY]
+    expectation: legacy-dynamic-header-changes-record-slot-policy-but-rejects-sibling-trigger-branches
+implementations:
+  - id: header-row-wc-source
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/data-table-header-row.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-MOUNT,
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-OWNER,
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-LIFECYCLE,
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-FAMILIES,
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-LEGACY,
+      ]
+  - id: header-row-public-types
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/data-table-header-row-public.types.ts
+    required: true
+    consumesCases: [T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-PUBLIC]
+  - id: header-row-real-browser-and-native
+    kind: runtime-test
+    status: planned
+    required: false
+    consumesCases:
+      [
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-MOUNT,
+        T-BASE-DATA-TABLE-HEADER-ROW-0001-CASE-LIFECYCLE,
+      ]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded evidence targets for a passive header-row composition without changing legacy Trigger rejection.

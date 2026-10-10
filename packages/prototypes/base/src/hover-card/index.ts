@@ -8,6 +8,8 @@ export type {
   HoverCardContentHandles,
   HoverCardAlign,
   HoverCardSide,
+  HoverCardInteractionPart,
+  HoverCardReleaseInteraction,
   HoverCardRootAsHookContract,
   HoverCardRootExposes,
   HoverCardRootProps,

@@ -9,6 +9,9 @@ import type { A11yProjector } from './caps';
 
 const ARIA_STATE_ATTRS: Record<string, string> = {
   atomic: 'aria-atomic',
+  autocomplete: 'aria-autocomplete',
+  current: 'aria-current',
+  sort: 'aria-sort',
   busy: 'aria-busy',
   checked: 'aria-checked',
   disabled: 'aria-disabled',
@@ -25,16 +28,33 @@ const ARIA_STATE_ATTRS: Record<string, string> = {
   rowSpan: 'aria-rowspan',
   columnSpan: 'aria-colspan',
   readOnly: 'aria-readonly',
+  required: 'aria-required',
   selected: 'aria-selected',
   modal: 'aria-modal',
+  valueMin: 'aria-valuemin',
+  valueMax: 'aria-valuemax',
+  valueNow: 'aria-valuenow',
+  valueText: 'aria-valuetext',
+  level: 'aria-level',
+  posInSet: 'aria-posinset',
+  setSize: 'aria-setsize',
 };
 
-const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount']);
-const POSITIVE_INTEGER_STATE_KEYS = new Set(['rowIndex', 'columnIndex', 'rowSpan', 'columnSpan']);
+const TABLE_COUNT_STATE_KEYS = new Set(['rowCount', 'columnCount', 'setSize']);
+const POSITIVE_INTEGER_STATE_KEYS = new Set([
+  'rowIndex',
+  'columnIndex',
+  'rowSpan',
+  'columnSpan',
+  'level',
+  'posInSet',
+]);
 
 const ARIA_RELATION_ATTRS: Record<string, string> = {
+  activeDescendant: 'aria-activedescendant',
   controls: 'aria-controls',
   describedBy: 'aria-describedby',
+  errorMessage: 'aria-errormessage',
   labelledBy: 'aria-labelledby',
 };
 
@@ -884,6 +904,20 @@ export function createWebA11yProjectionRegistry(
       };
       projector.detach = detach;
       projector.isBound = () => !record.disposed && !record.detached && record.target !== null;
+      projector.hasAuthoredName = () => {
+        const target = record.target;
+        if (!target) return true;
+        const scalar = scalarAttributeRefs.get(target)?.get('aria-label');
+        const currentName = target.getAttribute('aria-label');
+        const authoredName =
+          scalar && currentName === scalar.projectedValue ? scalar.baseline : currentName;
+        if (authoredName?.trim()) return true;
+        const relation = relationOwnerships.get(target)?.get('aria-labelledby');
+        const currentRelation = target.getAttribute('aria-labelledby');
+        if (relation && currentRelation === relation.projectedValue)
+          return relation.baseline.size > 0;
+        return !!currentRelation?.trim();
+      };
       projector.reactivate = () => {
         if (record.disposed || !record.detached) return;
         record.detached = false;
@@ -961,6 +995,8 @@ function projectedScalarAttributes(
   }
   for (const [key, attr] of Object.entries(ARIA_STATE_ATTRS)) {
     if (!Object.prototype.hasOwnProperty.call(snapshot.states, key)) continue;
+    // The existing explicit heading-level declaration wins when supplied.
+    if (key === 'level' && snapshot.level !== undefined) continue;
     attrs.set(attr, projectedStateAttributeValue(key, snapshot.states[key]));
   }
   if (Object.prototype.hasOwnProperty.call(snapshot.states, 'hidden')) {
@@ -1031,6 +1067,33 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
 }
 
 function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  if (key === 'autocomplete')
+    return typeof value === 'string' && ['none', 'inline', 'list', 'both'].includes(value)
+      ? value
+      : undefined;
+  if (key === 'sort')
+    return typeof value === 'string' && ['none', 'ascending', 'descending', 'other'].includes(value)
+      ? value
+      : undefined;
+  if (key === 'current')
+    return typeof value === 'boolean'
+      ? String(value)
+      : typeof value === 'string' &&
+          ['false', 'true', 'page', 'step', 'location', 'date', 'time'].includes(value)
+        ? value
+        : undefined;
+  // Range readouts use a string state so indeterminate can withdraw valueNow.
+  if (
+    key === 'valueNow' &&
+    typeof value === 'string' &&
+    /^-?(?:0|[1-9][0-9]*)(?:[.][0-9]+)?(?:[eE][+-]?[0-9]+)?$/.test(value) &&
+    Number.isFinite(Number(value))
+  )
+    return value;
+  if (key === 'valueMin' || key === 'valueMax' || key === 'valueNow') {
+    return typeof value === 'number' && Number.isFinite(value) ? String(value) : undefined;
+  }
+  if (key === 'valueText') return typeof value === 'string' && value !== '' ? value : undefined;
   if (TABLE_COUNT_STATE_KEYS.has(key)) {
     return typeof value === 'number' && Number.isSafeInteger(value) && (value === -1 || value > 0)
       ? String(value)

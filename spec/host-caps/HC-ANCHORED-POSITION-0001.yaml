@@ -7,8 +7,8 @@ summary: The host attaches a bounded positioning lease that measures anchor and 
 criteria:
   - id: HC-ANCHORED-POSITION-0001-A
     text:
-      en: 'The host translates opaque anchor/floating targets and placement policy into a lease with update, requestUpdate and dispose. The current Web realization accepts HTMLElement targets, uses Floating UI, and projects coordinates and size without owning transform. Invalid Web targets acquire no observation.'
-      zh-CN: 'host 将不透明 anchor/floating target 与 placement policy 翻译为含 update、requestUpdate、dispose 的 lease。当前 Web 实现接受 HTMLElement target，使用 Floating UI 投射坐标与尺寸且不拥有 transform；无效 Web target 不获取 observation。'
+      en: 'The host translates opaque anchor/floating targets and placement policy into a lease with update, requestUpdate and dispose. The current Web realization accepts HTMLElement targets or host-issued opaque input-origin anchor associations, uses Floating UI, and projects coordinates and size without owning transform. Invalid Web targets acquire no observation.'
+      zh-CN: 'host 将不透明 anchor/floating target 与 placement policy 翻译为含 update、requestUpdate、dispose 的 lease。当前 Web 实现接受 HTMLElement target 或 host 签发的不透明 input-origin anchor 关联，使用 Floating UI 投射坐标与尺寸且不拥有 transform；无效 Web target 不获取 observation。'
   - id: HC-ANCHORED-POSITION-0001-B
     text:
       en: 'Only the current computation of a live lease may publish geometry, size variables or resolved placement. Replacement, newer updates and disposal invalidate older work. Disposal revokes observation and cannot be undone by update; observation never enables animation-frame polling by default.'
@@ -22,6 +22,9 @@ sources:
   - path: packages/modules/positioning/src/caps.ts
   - path: packages/modules/positioning/src/web/floating-ui-host.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added host-issued revocable input-origin associations while retaining collision, Portal, and stale-computation boundaries.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Clarified current-computation ownership and terminal observation cleanup; retained the existing geometry and Portal contract.

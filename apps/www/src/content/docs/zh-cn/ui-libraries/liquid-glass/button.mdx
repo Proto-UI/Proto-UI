@@ -9,7 +9,7 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Liquid Glass 族的初阶段回退：实时偏好与宿主能力允许时使用半透明填充和 4px 背景模糊。这只是透明与模糊，不是 Apple Liquid Glass 的透镜效果；随形状变化的折射、高光、自适应外观与流体形变尚未实现。未知、减弱透明度、减弱动态效果或对比度偏好使用不透明回退。
+V2 Liquid Glass 意图已接入可选 Web 自实现光学 provider。Previewer 的可见动态应用 canvas 就是被采样的背景本体。当前不捕获任意 DOM 或浏览器 compositor：介入的其他绘制、跨 scope portal、来源或偏好不可用时保留可读回退。减弱动态效果使用静态光学路径。此 draft provider 仍需 exact-head 浏览器证据后才能接纳；native、Apple 私有实现、group/morph 与完整 Compiler 等价性仍未验证。
 
 用页面顶部的运行时选择器切换同一真实原型。点击 Back 可观察事件计数。
 
@@ -17,7 +17,7 @@ Liquid Glass 族的初阶段回退：实时偏好与宿主能力允许时使用�
   <PrototypePreviewer
     demoId="demo-liquid-glass-button"
     initialRuntime="wc"
-    toolbar={false}
+    toolbar={true}
     runtimes={['wc']}
     codePanel={false}
   />
@@ -26,7 +26,7 @@ Liquid Glass 族的初阶段回退：实时偏好与宿主能力允许时使用�
   <PrototypePreviewer
     demoId="demo-liquid-glass-button"
     initialRuntime="react"
-    toolbar={false}
+    toolbar={true}
     runtimes={['react']}
     codePanel={false}
   />
@@ -35,7 +35,7 @@ Liquid Glass 族的初阶段回退：实时偏好与宿主能力允许时使用�
   <PrototypePreviewer
     demoId="demo-liquid-glass-button"
     initialRuntime="vue"
-    toolbar={false}
+    toolbar={true}
     runtimes={['vue']}
     codePanel={false}
   />
@@ -44,7 +44,7 @@ Liquid Glass 族的初阶段回退：实时偏好与宿主能力允许时使用�
   <PrototypePreviewer
     demoId="demo-liquid-glass-button"
     initialRuntime="vue2"
-    toolbar={false}
+    toolbar={true}
     runtimes={['vue2']}
     codePanel={false}
   />

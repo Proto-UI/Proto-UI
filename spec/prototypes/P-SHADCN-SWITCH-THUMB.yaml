@@ -49,8 +49,8 @@ criteria:
             ]
   - id: P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: Thumb 必须提供当前已实现的尺寸、圆角、背景、边框、阴影与 transition tokens，并从 inherited checked state 在 `translate-x-0` 与 `translate-x-[calc(100%_-_2px)]` 间切换，使当前 44px track、20px Thumb、1px border 与 2px padding 在两端均保留 2px 内部净距；Thumb 必须用本地 `ring-0 ring-offset-0` 隔离从 Root 继承的 focus ring variables。Web 物理 CSS 必须在宿主没有全局 reset 时仍以 scoped border-box 保持声明的外部尺寸。这些是当前 passing surface，不表示与 upstream 全部 size variant 精确一致。
-      en: Thumb must provide the current size, radius, background, border, shadow, and transition tokens and switch between `translate-x-0` and `translate-x-[calc(100%_-_2px)]` from inherited checked state, leaving a 2px inner gap at both ends of the current 44px track with a 20px Thumb, 1px border, and 2px padding. The Thumb must isolate inherited Root focus-ring variables through local `ring-0 ring-offset-0`. Web physical CSS must preserve the declared outer dimensions through a scoped border-box baseline when the host has no global reset. These form the current passing surface and do not imply exact parity with every upstream size variant.
+      en: Default Thumb projects pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 transition-transform translate-x-0 with no border or shadow. Inherited checked selects translate-x-[calc(100%_-_2px)], giving 14px travel inside the 30px track interior and symmetric zero extra horizontal padding beyond the 1px border. The 18.4px outer height minus two 1px borders and the 16px Thumb leaves 0.4px vertical space, centered by flex alignment. Dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Local ring isolation and scoped border-box are retained; no second value or motion owner is added.
+      zh-CN: 默认 Thumb 投射 pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 transition-transform translate-x-0，无border或shadow。继承 checked 选择 translate-x-[calc(100%_-_2px)]，在30px轨道内宽中位移14px，在1px边框内侧水平两端保持对称零额外padding；18.4px外高减两个1px边框与16px Thumb仍有0.4px垂直余量，由flex居中。dark unchecked 为bg-foreground，dark checked为bg-primary-foreground。保留local ring隔离与scoped border-box，不增加value或motion owner。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -66,8 +66,8 @@ openQuestions:
       zh-CN: 当前公开 Thumb anatomy part 与固定 upstream 内部 Thumb 在组合、尺寸、状态位移和 surface 上应如何对齐？
       en: How should the current public Thumb anatomy part align with the pinned upstream internal Thumb in composition, sizing, state movement, and surface?
     context:
-      zh-CN: upstream 不单独导出 Thumb，而是在 `Switch` wrapper 内固定创建一个 Thumb，并按 Root size group 与 checked data-state 决定尺寸和 translate，dark mode 还区分 checked/unchecked surface。Proto UI 当前公开 `shadcn-switch-thumb`，固定 `size-5`，并从 inherited checked state 在 `translate-x-0` 与 `translate-x-[calc(100%_-_2px)]` 间切换，同时额外加入 border、shadow、duration、easing 与 will-change。公开 composition 是否保留、size variants 与 dark surface 是否对齐仍是待评审问题；具体 parity 通过实现与测试前不得宣称。
-      en: Upstream does not export Thumb separately; its `Switch` wrapper creates one internally and derives size and translation from the Root size group and checked data-state, with distinct checked and unchecked dark surfaces. Proto UI currently exposes `shadcn-switch-thumb`, fixes `size-5`, switches between `translate-x-0` and `translate-x-[calc(100%_-_2px)]` from inherited checked state, and adds border, shadow, duration, easing, and will-change. Whether public composition remains and whether size variants and dark surfaces align are pending review; exact parity must not be claimed before implementation and tests.
+      en: The default-size presentation follows the pinned base-nova recipe. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Smaller size, inherited size coordination, field-label/invalid/hit-target features and full API parity remain outside this slice. Extra borders, shadows and fixed duration/easing from the historical implementation are removed; real rendered travel and dark paint remain separately testable.
+      zh-CN: 默认尺寸呈现遵循固定base-nova recipe；保留公开可选same-domain Thumb，不照搬上游内部composition。sm尺寸、继承size协调、field-label/invalid/hit-target与完整API一致仍不属于本片。移除历史额外border、shadow及固定duration/easing；真实位移与dark paint仍需独立验证。
     blocks: [shadcn switch thumb parity roadmap]
 sources:
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
@@ -75,8 +75,8 @@ sources:
   - path: packages/prototypes/shadcn/src/switch/thumb.proto.ts
   - path: packages/prototypes/shadcn/src/switch/types.ts
   - path: packages/prototypes/shadcn/test/switch.test.ts
-  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/switch.tsx
-    label: shadcn/ui v4 new-york Switch Thumb pinned baseline
+  - path: https://ui.shadcn.com/r/styles/base-nova/switch.json
+    label: base-nova snapshot retrieved 2026-10-10; registry SHA256 1f22350ccbf358a3aa198305c41d91e146abc0a7d5b18a9a23488b8d6b264ab4; TSX SHA256 d232e2ffcfa122c59099872bcb8395eaad36d42fa9d2e0e40382ad19994065e2
 dependsOn:
   contracts:
     [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-CORE-SYNTAX-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
@@ -97,4 +97,7 @@ revisions:
   - version: 0.2.0-rc.6
     change: revised
     summary: Corrected checked travel for symmetric internal gaps and isolated the Thumb shadow from inherited focus-ring offsets.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
 tags: [prototype, shadcn, switch, thumb, upstream-derived, delta, compatibility, visual]

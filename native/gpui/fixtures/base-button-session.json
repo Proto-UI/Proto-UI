@@ -181,15 +181,20 @@
               {
                 "leaseId": "button-enabled:lease:9",
                 "scope": "root",
-                "type": "pointer.down"
+                "type": "press.cancel"
               },
               {
                 "leaseId": "button-enabled:lease:10",
                 "scope": "root",
-                "type": "pointer.up"
+                "type": "pointer.down"
               },
               {
                 "leaseId": "button-enabled:lease:11",
+                "scope": "root",
+                "type": "pointer.up"
+              },
+              {
+                "leaseId": "button-enabled:lease:12",
                 "scope": "root",
                 "type": "press.commit"
               }
@@ -418,15 +423,20 @@
               {
                 "leaseId": "button-disabled:lease:9",
                 "scope": "root",
-                "type": "pointer.down"
+                "type": "press.cancel"
               },
               {
                 "leaseId": "button-disabled:lease:10",
                 "scope": "root",
-                "type": "pointer.up"
+                "type": "pointer.down"
               },
               {
                 "leaseId": "button-disabled:lease:11",
+                "scope": "root",
+                "type": "pointer.up"
+              },
+              {
+                "leaseId": "button-disabled:lease:12",
                 "scope": "root",
                 "type": "press.commit"
               }

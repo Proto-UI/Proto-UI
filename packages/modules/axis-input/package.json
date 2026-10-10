@@ -1,0 +1,48 @@
+{
+  "name": "@proto.ui/module-axis-input",
+  "version": "0.3.0-alpha.1",
+  "private": false,
+  "type": "module",
+  "dependencies": {
+    "@proto.ui/core": "workspace:*",
+    "@proto.ui/module-anatomy": "workspace:*",
+    "@proto.ui/module-base": "workspace:*",
+    "@proto.ui/types": "workspace:*"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "description": "Experimental normalized axis input for host-mediated controls.",
+  "license": "MIT",
+  "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/axis-input",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Proto-UI/Proto-UI.git",
+    "directory": "packages/modules/axis-input"
+  },
+  "bugs": {
+    "url": "https://github.com/Proto-UI/Proto-UI/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "proto-ui",
+    "proto",
+    "ui",
+    "module",
+    "axis-input"
+  ],
+  "files": [
+    "dist/",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "node ../../../scripts/build/public-packages.mjs --package @proto.ui/module-axis-input",
+    "prepack": "pnpm run build"
+  }
+}

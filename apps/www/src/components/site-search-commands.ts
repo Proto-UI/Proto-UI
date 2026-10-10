@@ -1,3 +1,4 @@
+import { siteSearchShortcutLabel } from './site-search-shortcut';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
@@ -158,11 +159,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                   kind: 'box' as const,
                   attrs: { 'aria-hidden': 'true' },
                   className: 'site-search-shortcut sl-hidden md:sl-flex',
-                  children: [
-                    /(Mac|iPhone|iPod|iPad)/i.test(view.navigator.userAgent)
-                      ? '⌘ K'
-                      : `${root.dataset.ctrlLabel || 'Ctrl'} K`,
-                  ],
+                  children: [siteSearchShortcutLabel(root.dataset.ctrlLabel || 'Ctrl')],
                 },
               ]
             : []),

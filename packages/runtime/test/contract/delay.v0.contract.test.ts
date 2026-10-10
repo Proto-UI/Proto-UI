@@ -6,6 +6,7 @@ type ScheduledDelay = {
   durationMs: number;
   task: () => void;
   cancelled: boolean;
+  cancelCalls: number;
 };
 
 function createDelayHost(prototypeName: string): RuntimeHost<any> & {
@@ -28,11 +29,12 @@ function createDelayHost(prototypeName: string): RuntimeHost<any> & {
       task();
     },
     scheduleDelay(durationMs, task) {
-      const rec: ScheduledDelay = { durationMs, task, cancelled: false };
+      const rec: ScheduledDelay = { durationMs, task, cancelled: false, cancelCalls: 0 };
       delays.push(rec);
       return {
         cancel() {
           rec.cancelled = true;
+          rec.cancelCalls++;
         },
       };
     },
@@ -49,27 +51,96 @@ function createDelayHost(prototypeName: string): RuntimeHost<any> & {
 }
 
 describe('runtime contract: core delay primitive (v0)', () => {
-  it('forces failed-creation teardown when disposing diagnostics throw synchronously', () => {
-    const host = createDelayHost('x-delay-failed-creation-diagnostic');
+  it.each(['disposing', 'instance.dispose.begin', 'disposed', 'instance.dispose.done'])(
+    'finishes failed-creation teardown when diagnostics throw at %s',
+    (failurePoint) => {
+      const host = createDelayHost('x-delay-failed-creation-diagnostic');
+      const creationError = new Error('created failed');
+      const diagnosticError = new Error('terminal diagnostic failed');
+      const calls: string[] = [];
+      let state!: OwnedStateHandle<boolean>;
+      host.onLifecycleEvent = (event) => {
+        const point = event.type === 'instance.phase' ? event.phase : event.type;
+        if (point === failurePoint) {
+          // A host may synchronously flush already queued work during teardown.
+          host.flushAllDelays();
+          throw diagnosticError;
+        }
+      };
+      const proto: Prototype = {
+        name: host.prototypeName,
+        setup(def) {
+          state = def.state.bool('open', false);
+          def.lifecycle.onCreated(() => {
+            calls.push('created');
+            delay(0, () => calls.push('stale delay'));
+            throw creationError;
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            calls.push('beforeDispose');
+            expect(state.get()).toBe(false);
+            expect(() => delay(0, () => calls.push('revived delay'))).toThrow();
+          });
+        },
+      };
+
+      let thrown: unknown;
+      try {
+        createRuntimeSession(proto, host);
+      } catch (error) {
+        thrown = error;
+      }
+      expect(thrown).toBeInstanceOf(AggregateError);
+      const errors = (thrown as AggregateError).errors;
+      expect(errors).toHaveLength(2);
+      expect(errors[0]).toBe(creationError);
+      expect(errors[1]).toBe(diagnosticError);
+      expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
+      expect(host.delays.map((task) => task.cancelCalls)).toEqual([1]);
+      expect(() => state.get()).toThrow(/disposed/i);
+      host.flushAllDelays();
+      expect(calls).toEqual(['created', 'beforeDispose']);
+    }
+  );
+
+  it('retains both diagnostic and author cleanup errors after the creation error', () => {
+    const host = createDelayHost('x-delay-failed-creation-multiple-errors');
     const creationError = new Error('created failed');
+    const diagnosticError = new Error('disposing diagnostic failed');
+    const cleanupError = new Error('cleanup failed');
     let state!: OwnedStateHandle<boolean>;
     host.onLifecycleEvent = (event) => {
-      if (event.type === 'instance.phase' && event.phase === 'disposing') {
-        throw new Error('disposing diagnostic failed');
-      }
+      if (event.type === 'instance.phase' && event.phase === 'disposing') throw diagnosticError;
     };
-    const proto: Prototype = {
-      name: host.prototypeName,
-      setup(def) {
-        state = def.state.bool('open', false);
-        def.lifecycle.onCreated(() => {
-          delay(0, () => undefined);
-          throw creationError;
-        });
-      },
-    };
-
-    expect(() => createRuntimeSession(proto, host)).toThrow(creationError);
+    let thrown: unknown;
+    try {
+      createRuntimeSession(
+        {
+          name: host.prototypeName,
+          setup(def) {
+            state = def.state.bool('open', false);
+            def.lifecycle.onCreated(() => {
+              delay(0, () => undefined);
+              throw creationError;
+            });
+            def.lifecycle.onBeforeDispose(() => {
+              throw cleanupError;
+            });
+          },
+        },
+        host
+      );
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(AggregateError);
+    const errors = (thrown as AggregateError).errors;
+    expect(errors).toHaveLength(2);
+    expect(errors[0]).toBe(creationError);
+    expect(errors[1]).toBeInstanceOf(AggregateError);
+    expect(errors[1].errors).toHaveLength(2);
+    expect(errors[1].errors[0]).toBe(diagnosticError);
+    expect(errors[1].errors[1]).toBe(cleanupError);
     expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
     expect(() => state.get()).toThrow(/disposed/i);
   });
@@ -118,8 +189,17 @@ describe('runtime contract: core delay primitive (v0)', () => {
       } catch (error) {
         thrown = error;
       }
-      expect(thrown).toBe(creationError);
+      if (cleanupThrows) {
+        expect(thrown).toBeInstanceOf(AggregateError);
+        const errors = (thrown as AggregateError).errors;
+        expect(errors).toHaveLength(2);
+        expect(errors[0]).toBe(creationError);
+        expect(errors[1]).toBe(cleanupError);
+      } else {
+        expect(thrown).toBe(creationError);
+      }
       expect(host.delays.map((rec) => rec.cancelled)).toEqual([true, true]);
+      expect(host.delays.map((rec) => rec.cancelCalls)).toEqual([1, 1]);
       expect(callbacks).toEqual(['created:1', 'disposed:1']);
       expect(cleanupValues).toEqual([false]);
       expect(() => states[0].get()).toThrow(/disposed/i);

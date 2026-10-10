@@ -1,3 +1,4 @@
+import { validateInstanceAssociations } from '@proto.ui/core';
 import type {
   InstancePhase,
   MountPhase,
@@ -10,6 +11,7 @@ import type { PropsFacade, PropsPort } from '@proto.ui/module-props';
 import type { RulePort } from '@proto.ui/module-rule';
 import type { EventPort } from '@proto.ui/module-event';
 import type { PresencePort } from '@proto.ui/module-presence';
+import type { ControlLabelPort } from '@proto.ui/module-control-label';
 import type { A11yPort } from '@proto.ui/module-a11y';
 
 import { __RT_EVENT_CALLBACKS } from '../kernel/event';
@@ -115,10 +117,9 @@ export function createRuntimeSession<P extends PropsBaseType>(
       };
 
       const invoke = () => {
-        if (!active) return;
+        if (!active || instancePhase !== 'alive') return;
         active = false;
         pendingDelayTasks.delete(task);
-        if (instancePhase !== 'alive') return;
         callbackScope.run(run, callback);
       };
 
@@ -264,7 +265,19 @@ export function createRuntimeSession<P extends PropsBaseType>(
     }
   };
 
+  const applyInstanceAssociations = (input: unknown) => {
+    if (instancePhase === 'disposing' || instancePhase === 'disposed') return;
+    const associations = validateInstanceAssociations(input);
+    const port = moduleHub.getPort<ControlLabelPort>('control-label');
+    if (!port) {
+      if (associations.controlLabel)
+        throw new Error('[InstanceAssociations] Control Label module is unavailable');
+      return;
+    }
+    port.setReference(associations.controlLabel);
+  };
   const controller: RuntimeController = {
+    applyInstanceAssociations,
     applyRawProps(nextRaw) {
       if (instancePhase === 'disposed') return;
       propsPort.applyRaw({ ...(nextRaw ?? {}) });
@@ -286,13 +299,9 @@ export function createRuntimeSession<P extends PropsBaseType>(
   // Register before hosts subscribe: revoke relationship leases before a
   // ViewIntent can hide or remove its physical view. Terminal lock clears it.
   kernel.viewIntent.subscribe(({ present }) => {
+    moduleHub.getPort<ControlLabelPort>('control-label')?.prepareViewPresence(present);
     moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
   });
-  setInstancePhase('alive');
-  callbackScope.run(run, () => {
-    for (const cb of lifecycle.created) cb(run);
-  });
-  emit({ type: 'instance.created' });
 
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {
@@ -458,7 +467,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   const unmount = (): Promise<void> => unmountInternal(false);
 
-  const dispose = (): Promise<void> => {
+  const dispose = (failFast = false): Promise<void> => {
     if (disposePending) return disposePending;
     if (instancePhase === 'disposed') return Promise.resolve();
     // Publish the shared completion before any callback can reenter disposal.
@@ -469,6 +478,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       rejectDispose = reject;
     });
     disposePending = pending;
+    let synchronousFailure: { error: unknown } | undefined;
     const succeed = () => {
       disposePending = undefined;
       resolveDispose();
@@ -477,22 +487,29 @@ export function createRuntimeSession<P extends PropsBaseType>(
       disposePending = undefined;
       rejectDispose(error);
     };
+    // Diagnostic observers must not interrupt terminal resource release. Keep
+    // their failures observable through the same disposal completion.
+    const terminalErrors: unknown[] = [];
+    const notify = (action: () => void) => {
+      try {
+        action();
+      } catch (error) {
+        terminalErrors.push(error);
+      }
+    };
     try {
-      setInstancePhase('disposing');
+      notify(() => setInstancePhase('disposing'));
       cancelPendingDelayTasks();
       kernel.viewIntent.lockTerminal();
-      emit({ type: 'instance.dispose.begin' });
+      notify(() => emit({ type: 'instance.dispose.begin' }));
 
       const finalizeDispose = () => {
-        let failed = false;
-        let finalError: unknown;
         try {
           callbackScope.run(run, () => {
             for (const cb of lifecycle.beforeDispose) cb(run);
           });
         } catch (error) {
-          failed = true;
-          finalError = error;
+          terminalErrors.push(error);
         }
 
         const eventRegistry = (moduleHub as any)[__RT_EVENT_CALLBACKS] as
@@ -508,14 +525,14 @@ export function createRuntimeSession<P extends PropsBaseType>(
         try {
           inst.dispose();
         } catch (error) {
-          if (!failed) {
-            failed = true;
-            finalError = error;
-          }
+          terminalErrors.push(error);
         }
-        setInstancePhase('disposed');
-        emit({ type: 'instance.dispose.done' });
-        return { failed, error: finalError };
+        notify(() => setInstancePhase('disposed'));
+        notify(() => emit({ type: 'instance.dispose.done' }));
+        return {
+          failed: terminalErrors.length > 0,
+          error: terminalErrors.length > 1 ? new AggregateError(terminalErrors) : terminalErrors[0],
+        };
       };
 
       const unmountResult = unmountInternal(true);
@@ -525,6 +542,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
         // presence transition blocks unmount. The returned Promise still
         // carries callback errors to async-aware callers.
         const finalError = finalizeDispose();
+        if (finalError.failed) synchronousFailure = { error: finalError.error };
         completion = unmountResult.then(
           () => {
             if (finalError.failed) throw finalError.error;
@@ -548,10 +566,36 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
       completion.then(succeed, fail);
     } catch (error) {
+      synchronousFailure = { error };
       fail(error);
+    }
+    if (failFast && synchronousFailure) {
+      // Failed creation cannot return a session or its disposal promise. Keep
+      // shared reentrant completion intact while reporting synchronous cleanup
+      // failure to that same creation caller, including falsy thrown values.
+      void pending.catch(() => {});
+      throw synchronousFailure.error;
     }
     return pending;
   };
+
+  setInstancePhase('alive');
+  try {
+    applyInstanceAssociations(host.getInstanceAssociations?.());
+    callbackScope.run(run, () => {
+      for (const cb of lifecycle.created) cb(run);
+    });
+  } catch (error) {
+    // No session reaches the host on failure. Release logical resources while
+    // its owner capabilities still exist, before host wiring is revoked.
+    try {
+      void dispose(true);
+    } catch (cleanupError) {
+      throw new AggregateError([error, cleanupError]);
+    }
+    throw error;
+  }
+  emit({ type: 'instance.created' });
 
   if (host.presenceLifecycle === 'session') {
     moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver({

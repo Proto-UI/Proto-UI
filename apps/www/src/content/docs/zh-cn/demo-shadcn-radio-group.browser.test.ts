@@ -172,7 +172,7 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         observations.light = initial;
         expect(initial.map((item) => item.checked)).toEqual(['false', 'true', 'false']);
         expect(initial.map((item) => item.dotOpacity)).toEqual(['0', '1', '0']);
-        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('12px');
+        expect(await density.evaluate((element) => getComputedStyle(element).rowGap)).toBe('8px');
         for (const item of initial) {
           expect(item.width).toBeCloseTo(16, 1);
           expect(item.height).toBeCloseTo(16, 1);
@@ -186,9 +186,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
           expect(item.indicatorRole).toBeNull();
           expect(item.indicatorTabIndex).toBeNull();
           expect(item.indicatorControls).toBe(0);
-          expect(alpha(item.background)).toBe(0);
-          expect(item.transition).toBe('color, box-shadow');
-          expect(item.duration).toBe('0.15s');
+          expect(alpha(item.background)).toBe(item.checked === 'true' ? 1 : 0);
+          expect(item.duration).toBe('0s');
         }
         expect(initial[2]).toMatchObject({
           disabled: 'true',
@@ -298,9 +297,8 @@ describe.sequential('Shadcn Radio Group public browser acceptance', () => {
         ).toBe('true');
 
         await applyColorScheme(page, 'dark');
-        await expect
-          .poll(async () => alpha((await itemState(first)).background))
-          .toBeCloseTo(0.045, 3);
+        await expect.poll(async () => alpha((await itemState(first)).background)).toBe(1);
+        expect(alpha((await itemState(selected)).background)).toBeCloseTo(0.045, 3);
         expect(await value.textContent()).toBe('Value: default');
         observations.dark = await Promise.all([first, selected, compact].map(itemState));
         expect(

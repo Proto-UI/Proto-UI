@@ -44,6 +44,31 @@ cases:
       - P-BASE-HOVER-CARD-AUTHORING-ENTRIES
       - P-BASE-HOVER-CARD-PROTOCOL-INDEPENDENCE
     expectation: hover-card-root-authoring-entries-share-independent-protocol
+  - id: T-BASE-HOVER-CARD-0001-CASE-LIFECYCLE-OWNERSHIP
+    title: View-generation withdrawal preserves owner, replacement, and request boundaries
+    covers:
+      [
+        P-BASE-HOVER-CARD-INTERACTION-LIFETIME,
+        P-BASE-HOVER-CARD-INTERACTION-RELEASE,
+        P-BASE-HOVER-CARD-INTERACTION-OWNER-BINDING,
+      ]
+    expectation: With open=true controlled and closeDelay=20, remove the only hovered Content; after 20ms exactly one close request is emitted while owner open remains true.
+  - id: T-BASE-HOVER-CARD-0001-CASE-STALE-CONTRIBUTION
+    title: A new instance or retained generation replaces an old contribution
+    covers: [P-BASE-HOVER-CARD-INTERACTION-OWNER-BINDING]
+    expectation: Publish a new same-role ID after retiring an old instance or view generation; a later release of the old ID returns false, leaves the new hover true, and emits no close request. Rebuilding Root binds later releases only to the retired Root.
+  - id: T-BASE-HOVER-CARD-0001-CASE-RELEASE-NOOP
+    title: Invalid, duplicate and shutdown release cannot dispatch work
+    covers: [P-BASE-HOVER-CARD-INTERACTION-RELEASE]
+    expectation: For unknown role, non-positive, fractional, unsafe, stale or repeated IDs, release returns false and Context version, active delay and request counts remain unchanged; a previously borrowed callable still admitted after Root shutdown returns false without reading disposed Context; a revoked host surface retains its existing stale-handle failure and cannot revive Root.
+  - id: T-BASE-HOVER-CARD-0001-CASE-FALSE-RETIREMENT
+    title: Retiring a false source preserves the in-flight close deadline
+    covers: [P-BASE-HOVER-CARD-INTERACTION-LIFETIME]
+    expectation: With closeDelay=20 and open=true, pointerleave at t=0 schedules close; remove that already-false source at t=10. Root stays open at t=19 and requests closed at t=20, not t=30.
+  - id: T-BASE-HOVER-CARD-0001-CASE-IDENTITY-EXHAUSTION
+    title: Allocation never wraps or reuses an identity
+    covers: [P-BASE-HOVER-CARD-INTERACTION-RELEASE]
+    expectation: Initialize a deterministic allocator fixture at MAX_SAFE_INTEGER-1. Its first allocation is MAX_SAFE_INTEGER; every subsequent allocation fails explicitly before any contribution is published. Independently mounted same-role instances otherwise receive distinct IDs.
 implementations:
   - id: prototypes-base-hover-card-root-contract
     kind: module-test
@@ -100,6 +125,27 @@ implementations:
       - P-BASE-HOVER-CARD
       - P-BASE-HOVER-CARD-TRIGGER
       - P-BASE-HOVER-CARD-CONTENT
+  - id: prototypes-base-hover-card-root-lifecycle-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-HOVER-CARD-0001-CASE-LIFECYCLE-OWNERSHIP
+      - T-BASE-HOVER-CARD-0001-CASE-STALE-CONTRIBUTION
+      - T-BASE-HOVER-CARD-0001-CASE-RELEASE-NOOP
+      - T-BASE-HOVER-CARD-0001-CASE-FALSE-RETIREMENT
+      - T-BASE-HOVER-CARD-0001-CASE-IDENTITY-EXHAUSTION
+    exercises: [P-BASE-HOVER-CARD]
+  - id: prototypes-base-hover-card-release-public-types
+    kind: workspace-check
+    status: passing
+    path: packages/prototypes/base/test/hover-card-lifecycle-public.types.ts
+    required: true
+    consumesCases: [T-BASE-HOVER-CARD-0001-CASE-LIFECYCLE-OWNERSHIP]
+    exercises: [P-BASE-HOVER-CARD]
+    notes:
+      - Source TypeScript fixture checks Base, Shadcn and Brutalist releaseInteraction signatures and rejects unknown roles or callback identities; not packed-consumer or native evidence.
 verifies:
   prototypes:
     - id: P-BASE-HOVER-CARD
@@ -113,4 +159,10 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Base Hover Card Root and delayed request coverage.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added planned view-generation interaction cleanup, stale-owner, and controlled-request lifecycle evidence.
+  - version: 0.3.0-alpha.1
+    change: implemented
+    summary: Added executed source-bound lifecycle regressions and negative controls; prototype and test lifecycle remain draft.
 tags: [prototype, base, hover-card, test]

@@ -1,5 +1,5 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import { asAccessible, asFocusable, asTrigger, asControlLabel } from '@proto.ui/hooks';
 import { SWITCH_CONTEXT, SWITCH_FAMILY } from './shared';
 import type { SwitchRootAsHookContract, SwitchRootExposes, SwitchRootProps } from './types';
 
@@ -70,7 +70,7 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
 
   let controlled = false;
 
-  const publishContext = (run: any) => {
+  const publishContext = (run: RunHandle<SwitchRootProps>) => {
     // P-BASE-SWITCH-CONTEXT-SYNC, P-BASE-SWITCH-PART-CONTEXT-CONSUME
     run.context.update(SWITCH_CONTEXT, {
       checked: !!checked.get(),
@@ -83,7 +83,7 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
     pressed.set(false, reason);
   };
 
-  const syncDisabled = (run: any, nextDisabled: boolean) => {
+  const syncDisabled = (run: RunHandle<SwitchRootProps>, nextDisabled: boolean) => {
     disabled.set(nextDisabled, 'reason: switch root sync disabled');
     focusable.setDisabled(nextDisabled);
     if (nextDisabled) {
@@ -159,16 +159,28 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
 
   // P-BASE-SWITCH-ACTIVATION-FLIPS-CHECKED, P-BASE-SWITCH-DISABLED-SUPPRESS-ACTIVATION
   // P-BASE-SWITCH-UNCONTROLLED-UPDATES-CHECKED, P-BASE-SWITCH-CONTROLLED-EMITS-NEXT
-  def.event.on('press.commit', (run) => {
+  const activate = (run: RunHandle<SwitchRootProps>, isCurrent: () => boolean = () => true) => {
     pressed.set(false, 'reason: switch root press.commit => pressed');
     if (disabled.get()) return;
 
+    if (!isCurrent()) return;
     const nextChecked = !checked.get();
     if (!controlled) {
       checked.set(nextChecked, 'reason: switch root press.commit => checked');
     }
+    if (!isCurrent()) return;
     run.expose.emit('checkedChange', { checked: nextChecked });
-    publishContext(run);
+    if (isCurrent()) publishContext(run);
+  };
+  def.event.on('press.commit', (run) => {
+    activate(run);
+  });
+  asControlLabel().target<SwitchRootProps>((run, request) => {
+    if (disabled.get() || !request.isCurrent()) return;
+    const isCurrent = () => !disabled.get() && request.isCurrent();
+    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    if (!isCurrent()) return;
+    activate(run, isCurrent);
   });
 }
 

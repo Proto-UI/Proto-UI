@@ -17,6 +17,7 @@ export function createBaseBundle(): PrototypeBundle {
     // packaged bundle format.
     digest: 'catalog:0.3.0-alpha.1',
     entries: {
+      'base-label-root': () => import('@proto.ui/prototypes-base/label').then((m) => m.labelRoot),
       'base-button': () => import('@proto.ui/prototypes-base/button').then((m) => m.default),
       'base-toggle': () => import('@proto.ui/prototypes-base/toggle').then((m) => m.default),
       'base-switch-root': () =>

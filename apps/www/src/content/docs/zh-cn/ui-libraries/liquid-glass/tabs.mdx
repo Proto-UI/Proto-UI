@@ -1,0 +1,22 @@
+---
+title: 'Tabs'
+description: 'Liquid Glass Tabs：四个真实 Base 协议投影。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Root、List、Trigger、Content 分别消费 [Base Tabs 协议](/zh-cn/ui-libraries/base/tabs/)。Root 独占选中值；方向键和 Home/End 在可用标签间移动；手动模式下 Enter/Space 才激活。受控请求须等待 owner 更新 value。
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-tabs"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+从 `@proto.ui/prototypes-liquid-glass/tabs` 导入 `tabsRoot`、`tabsList`、`tabsTrigger`、`tabsContent`。当前仍是私有 draft workspace 源码，不表示公开发布或 native/Compiler 已贯通。
+
+List 与 Trigger 的 `appearance="underline"` 提供 Runtime Box 的透明背景、文字宽细下划线；默认仍保留本家外观。Root 接收 `value`/`defaultValue`、`activationMode`、`orientation`；Trigger 接收 `value`/`disabled`；Content 接收 `value`/`keepMounted`。Runtime 使用手动激活，因此方向键移动不会重挂示例。
+
+源码与模拟 DOM 证据不替代绑定新提交的原生截图、窄屏几何及独立视觉验收；这些浏览器检查仍待执行。
+
+默认圆角材质分段样式是本家独立创作，使用既有 material 声明及普通样式 fallback；不是 Apple 官方 Tabs 复刻。

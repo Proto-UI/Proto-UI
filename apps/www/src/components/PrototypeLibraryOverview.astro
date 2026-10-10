@@ -1,4 +1,5 @@
 ---
+import StaticFamilyIcon from './StaticFamilyIcon.astro';
 import PrototypePreviewer from './PrototypePreviewer/PrototypePreviewer.astro';
 
 type Locale = 'en' | 'zh-cn';
@@ -22,6 +23,24 @@ const isZh = locale === 'zh-cn';
 
 const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
   'bootstrap-2-3-2': [
+    {
+      id: 'select',
+      name: 'Select',
+      demoId: 'demo-bootstrap-2-3-2-select',
+      description: isZh
+        ? '完整五 part Base 单选协议，受控请求、键盘与 anchored popup。'
+        : 'Five direct Base parts with controlled selection, keyboard and anchored popup.',
+      href: './select/',
+    },
+    {
+      id: 'text',
+      name: 'Text',
+      demoId: 'demo-bootstrap-2-3-2-text',
+      description: isZh
+        ? '八条独立 typography 轴，保留内容和原生 owner 的选择策略。'
+        : 'Eight independent typography axes, preserving content and owner selection policy.',
+      href: './text/',
+    },
     {
       id: 'button',
       name: 'Button',
@@ -87,6 +106,24 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
     },
   ],
   'liquid-glass': [
+    {
+      id: 'select',
+      name: 'Select',
+      demoId: 'demo-liquid-glass-select',
+      description: isZh
+        ? '完整五 part Base 单选协议，受控请求、键盘与 anchored popup。'
+        : 'Five direct Base parts with controlled selection, keyboard and anchored popup.',
+      href: './select/',
+    },
+    {
+      id: 'text',
+      name: 'Text',
+      demoId: 'demo-liquid-glass-text',
+      description: isZh
+        ? '八条独立 typography 轴，保留内容和原生 owner 的选择策略。'
+        : 'Eight independent typography axes, preserving content and owner selection policy.',
+      href: './text/',
+    },
     {
       id: 'button',
       name: 'Button',
@@ -271,6 +308,15 @@ const entriesByLibrary: Record<LibraryId, PrototypeEntry[]> = {
     },
   ],
   shadcn: [
+    {
+      id: 'card',
+      name: 'Card',
+      demoId: 'demo-shadcn-card',
+      description: isZh
+        ? 'Draft 四部分被动 Card；标题与操作保留各自语义。'
+        : 'Draft four-part passive Card with consumer-owned title and action semantics.',
+      href: './card/',
+    },
     {
       id: 'button',
       name: 'Button',
@@ -589,7 +635,7 @@ const copy = isZh
             {entry.href && (
               <a href={entry.href} aria-label={`${copy.details}: ${entry.name}`}>
                 {copy.details}
-                <span aria-hidden="true">→</span>
+                <StaticFamilyIcon family={library} name="arrow-right" />
               </a>
             )}
           </header>

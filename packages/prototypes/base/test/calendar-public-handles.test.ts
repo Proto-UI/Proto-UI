@@ -1,0 +1,155 @@
+import { afterEach, expect, it } from 'vitest';
+import { definePrototype, type DefHandle } from '@proto.ui/core';
+import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  asCalendarRoot,
+  asCalendarDay,
+  asCalendarPrevious,
+  asCalendarCaption,
+  asCalendarWeekday,
+  asCalendarHeading,
+  asCalendarRow,
+} from '../src/calendar';
+import {
+  asDatePickerRoot,
+  asDatePickerDay,
+  asDatePickerContent,
+  asDatePickerValue,
+} from '../src/date-picker';
+const hooks = {
+  calendarRoot: asCalendarRoot,
+  calendarDay: asCalendarDay,
+  calendarPrevious: asCalendarPrevious,
+  calendarCaption: asCalendarCaption,
+  calendarWeekday: asCalendarWeekday,
+  calendarHeading: asCalendarHeading,
+  calendarRow: asCalendarRow,
+  datePickerRoot: asDatePickerRoot,
+  datePickerDay: asDatePickerDay,
+  datePickerContent: asDatePickerContent,
+  datePickerValue: asDatePickerValue,
+};
+for (const [name, hook] of Object.entries(hooks))
+  AdaptToWebComponent(
+    definePrototype({
+      name: `capture-${name.toLowerCase()}`,
+      setup(def: DefHandle<any, any>) {
+        const captured = hook();
+        def.expose.method('readCapture', () => captured);
+        return captured.render;
+      },
+    })
+  );
+const roots: HTMLElement[] = [];
+const flush = async () => {
+  for (let i = 0; i < 20; i++) await Promise.resolve();
+};
+afterEach(async () => {
+  for (const root of roots.splice(0)) root.remove();
+  await flush();
+});
+const node = (name: keyof typeof hooks, props: Record<string, unknown> = {}) => {
+  const el = document.createElement(`capture-${name.toLowerCase()}`) as any;
+  setElementProps(el, props);
+  return el;
+};
+it('matches Calendar declared direct capture keys and nested Button handles to real setup artifacts', async () => {
+  const root = node('calendarRoot', { defaultValue: '2026-10-10' });
+  const day = node('calendarDay', { date: '2026-10-10' });
+  const previous = node('calendarPrevious');
+  root.append(day, previous);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  const rootCapture = root.getExposes().readCapture();
+  expect(Object.keys(rootCapture.stateHandles).sort()).toEqual([
+    'a11yLabel',
+    'collectionCount',
+    'direction',
+    'disabled',
+    'month',
+    'value',
+    'weekCount',
+  ]);
+  expect(rootCapture.stateHandles.collectionCount.get()).toBe(1);
+  expect(rootCapture.stateHandles.value.get()).toBe('2026-10-10');
+  const dayCapture = day.getExposes().readCapture();
+  for (const name of [
+    'date',
+    'selected',
+    'disabled',
+    'outside',
+    'hidden',
+    'focused',
+    'focusVisible',
+  ])
+    expect(dayCapture.stateHandles[name]).toBeDefined();
+  expect(dayCapture.stateHandles.date.get()).toBe('2026-10-10');
+  const navigation = previous.getExposes().readCapture();
+  expect(Object.keys(navigation.stateHandles)).toEqual(['a11yLabel']);
+  expect(navigation.stateHandles.a11yLabel.get()).toBe('Previous month');
+  expect(navigation.getAsHookHandle('as-button').stateHandles.disabled.get()).toBe(false);
+});
+it('exposes Date Picker child handles through their real nested capture paths', async () => {
+  const root = node('datePickerRoot', { defaultValue: '2026-10-10', defaultOpen: true });
+  const day = node('datePickerDay', { date: '2026-10-10' });
+  const content = node('datePickerContent', { enterDuration: 0, leaveDuration: 0 });
+  const value = node('datePickerValue');
+  content.append(day);
+  root.append(content, value);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  const rootCapture = root.getExposes().readCapture();
+  expect(rootCapture.stateHandles).toBeUndefined();
+  expect(rootCapture.getAsHookHandle('as-calendar-root').stateHandles.value.get()).toBe(
+    '2026-10-10'
+  );
+  expect(
+    rootCapture
+      .getAsHookHandle('as-popover-root')
+      .getAsHookHandle('useOpenState')
+      .stateHandles.open.get()
+  ).toBe(true);
+  const dayCapture = day.getExposes().readCapture();
+  expect(dayCapture.stateHandles).toBeUndefined();
+  expect(dayCapture.getAsHookHandle('as-calendar-day').stateHandles.date.get()).toBe('2026-10-10');
+  const contentCapture = content.getExposes().readCapture();
+  expect(contentCapture.stateHandles).toBeUndefined();
+  expect(contentCapture.getAsHookHandle('as-popover-content').asTransition.controls).toBeDefined();
+  expect(value.getExposes().readCapture().stateHandles.displayValue.get()).toBe('2026-10-10');
+});
+
+it('captures exactly the authored caption, weekday and localized heading facts', async () => {
+  const root = node('calendarRoot', { defaultMonth: '2026-10', locale: 'en-US', weekStartsOn: 1 });
+  const caption = node('calendarCaption');
+  const weekday = node('calendarWeekday', { offset: 0 });
+  const heading = node('calendarHeading');
+  root.append(caption, weekday, heading);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  const c = caption.getExposes().readCapture();
+  expect(Object.keys(c.stateHandles)).toEqual(['a11yLabel']);
+  expect(c.getAsHookHandle('as-select-root')).toBeUndefined();
+  const w = weekday.getExposes().readCapture();
+  expect(Object.keys(w.stateHandles).sort()).toEqual(['description', 'label', 'weekday']);
+  expect(w.stateHandles.weekday.get()).toBe(1);
+  expect(w.stateHandles.label.get()).toBe('Mo');
+  const h = heading.getExposes().readCapture();
+  expect(Object.keys(h.stateHandles).sort()).toEqual(['displayValue', 'month']);
+  expect(h.stateHandles.month.get()).toBe('2026-10');
+  expect(h.stateHandles.displayValue.get()).toBe('October 2026');
+});
+
+it('captures the indexed row hidden state and numeric canonical week count', async () => {
+  const root = node('calendarRoot', { month: '2026-02' });
+  const row = node('calendarRow', { index: 4 });
+  root.append(row);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  expect(root.getExposes().readCapture().stateHandles.weekCount.get()).toBe(4);
+  expect(Object.keys(row.getExposes().readCapture().stateHandles)).toEqual(['hidden']);
+  expect(row.getExposes().readCapture().stateHandles.hidden.get()).toBe(true);
+});

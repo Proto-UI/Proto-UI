@@ -11,6 +11,7 @@ import type {
   A11yRelationSpec,
   A11yRole,
   A11ySemanticObjectSnapshot,
+  A11ySemanticObjectRef,
   A11yStateKey,
   A11yTextAlternative,
   A11yTreeBehavior,
@@ -52,6 +53,7 @@ class A11yModuleImpl extends ModuleBase {
   private partOwner: A11yPartOwner | null = null;
   private readonly partWatchOffs = new Map<State<unknown>, Unsubscribe>();
   private readonly familyWatchOffs = new Map<AnatomyFamily, Unsubscribe>();
+  private controlLabelName: { target: A11ySemanticObjectRef } | null = null;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -168,6 +170,39 @@ class A11yModuleImpl extends ModuleBase {
       if (!this.ir.relations.delete(key)) return;
       this.clearRelationWatch(key);
       this.applyProjection();
+    },
+    claimControlLabelName: (target) => {
+      this.sys.ensureNotDisposed('a11y.port.claimControlLabelName');
+      if (!isA11ySemanticObjectRef(target))
+        throw new TypeError('[A11y] invalid Label semantic reference');
+      const canName = () =>
+        !this.hasAuthoredControlLabelName() && this.activeProjector?.hasAuthoredName?.() === false;
+      if (this.controlLabelName || !canName()) return null;
+      const contribution = { target };
+      this.controlLabelName = contribution;
+      try {
+        this.applyProjection();
+      } catch (error) {
+        // No lease is returned on failure. Release this contribution now so a
+        // retry can claim naming; never erase a reentrantly installed successor.
+        if (this.controlLabelName === contribution) {
+          this.controlLabelName = null;
+          try {
+            this.applyProjection();
+          } catch {
+            // The original projection failure remains the observable error.
+          }
+        }
+        throw error;
+      }
+      return {
+        isActive: () => this.controlLabelName === contribution && canName(),
+        dispose: () => {
+          if (this.controlLabelName !== contribution) return;
+          this.controlLabelName = null;
+          this.applyProjection();
+        },
+      };
     },
   };
 
@@ -355,6 +390,19 @@ class A11yModuleImpl extends ModuleBase {
     if (this.stateWatchesInstalled) this.watchRelation(key);
     this.applyProjection();
   }
+
+  private hasAuthoredControlLabelName(): boolean {
+    const name = resolveTextAlternative(this.ir.name);
+    if (name?.kind === 'text' && String(name.value ?? '').trim()) return true;
+    const target = this.ir.relations.get('labelledBy')?.spec.target;
+    if (target === undefined) return false;
+    // Text Control declares empty State-backed inputs by default. An empty
+    // string is not an authored name; structured/part relationships still own
+    // their declared slot and cannot be replaced by a Label contribution.
+    if (isPartTarget(target)) return true;
+    const value = resolveRelationTarget(target);
+    return typeof value === 'string' ? value.trim().length > 0 : value != null;
+  }
   private installStateWatches(): void {
     if (this.stateWatchesInstalled) return;
 
@@ -467,6 +515,10 @@ class A11yModuleImpl extends ModuleBase {
         relationship.target ? [relationship.target] : []
       );
       relationModes[relationship.relation] = 'append';
+    }
+    if (this.controlLabelName && !this.hasAuthoredControlLabelName()) {
+      relations.labelledBy = Object.freeze([this.controlLabelName.target]);
+      relationModes.labelledBy = 'append';
     }
 
     const tree = this.ir.tree

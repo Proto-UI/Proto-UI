@@ -531,7 +531,77 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                           ),
                         }))
                       );
-                    expect(galleryText).toHaveLength(28);
+                    const labelNames =
+                      locale === 'zh-cn'
+                        ? ['选中', '产品更新', '新组件', '社区活动']
+                        : ['Select', 'Product updates', 'New components', 'Community events'];
+                    const controlRefs = [
+                      'gallery-checkbox',
+                      'choice-product',
+                      'choice-components',
+                      'choice-events',
+                    ];
+                    const galleryLabels = await page
+                      .locator(
+                        `[data-home-showcase] [data-projection-prototype="${family}-label-root"]`
+                      )
+                      .evaluateAll(
+                        (nodes, controlRefs) =>
+                          nodes.map((node) => {
+                            const showcase = node.closest('[data-home-showcase]')!;
+                            return {
+                              id: node.id,
+                              text: node.textContent?.trim(),
+                              prototype: node.getAttribute('data-projection-prototype'),
+                              runtime: node.getAttribute('data-projection-runtime'),
+                              family: node.getAttribute('data-projection-family'),
+                              generation: node.getAttribute('data-projection-generation'),
+                              passiveTextAncestor: !!node.closest('[data-home-text]'),
+                              controls: controlRefs.filter((ref) => {
+                                const control = showcase.querySelector(`[data-demo-ref="${ref}"]`);
+                                return (
+                                  !!node.id &&
+                                  control
+                                    ?.getAttribute('aria-labelledby')
+                                    ?.split(/\s+/)
+                                    .includes(node.id)
+                                );
+                              }),
+                            };
+                          }),
+                        controlRefs
+                      );
+                    // Retain the measured topology even when one ownership assertion fails.
+                    Object.assign(state, {
+                      slogan,
+                      tagline,
+                      geometry,
+                      generation,
+                      galleryText,
+                      galleryLabels,
+                    });
+                    expect(galleryText).toHaveLength(24);
+                    expect(galleryLabels).toHaveLength(4);
+                    expect(new Set(galleryLabels.map((label) => label.id)).size).toBe(4);
+                    for (let index = 0; index < labelNames.length; index++) {
+                      const label = galleryLabels.find((label) => label.text === labelNames[index]);
+                      expect(label).toMatchObject({
+                        prototype: `${family}-label-root`,
+                        runtime,
+                        family,
+                        generation: generation.page,
+                        passiveTextAncestor: false,
+                        controls: [controlRefs[index]],
+                      });
+                      expect(label?.id).toBeTruthy();
+                      const namedControl = page
+                        .locator('[data-home-showcase]')
+                        .getByRole('checkbox', { name: labelNames[index], exact: true });
+                      expect(await namedControl.count()).toBe(1);
+                      expect(await namedControl.getAttribute('data-demo-ref')).toBe(
+                        controlRefs[index]
+                      );
+                    }
                     for (const text of galleryText) {
                       expect(text.owners).toHaveLength(1);
                       expect(text.owners[0]).toMatchObject({
@@ -541,7 +611,6 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                         generation: generation.page,
                       });
                     }
-                    Object.assign(state, { slogan, tagline, geometry, generation, galleryText });
                     expect(slogan.text).toBe(SLOGANS[locale][0]);
                     expect(tagline.text).toBe(SLOGANS[locale][1]);
                     expect(slogan.size).toBeGreaterThan(tagline.size);

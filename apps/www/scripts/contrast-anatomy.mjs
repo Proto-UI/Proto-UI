@@ -9,6 +9,9 @@ const presence = new Map([
   ['P-BASE-TOOLTIP-CONTENT', 'description'],
   ['P-BASE-HOVER-CARD-CONTENT', 'intent'],
   ['P-BASE-TABS-CONTENT', 'selected'],
+  ['P-BASE-COLLAPSIBLE-CONTENT', 'inline-expanded'],
+  ['P-BASE-ACCORDION-CONTENT', 'inline-expanded'],
+  ['P-BASE-FIELD-ERROR', 'field-invalid'],
 ]);
 
 export function compileContrastAnatomy(demo, manifest) {
@@ -69,7 +72,16 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     surface.visibility.classification === 'exempt-not-visible';
   const ownerFor = (instance) => {
     let owner = byPath.get(instance.parent);
-    while (owner && owner.prototypeId !== plan.rootPrototypeId) owner = byPath.get(owner.parent);
+    const accordion = instance.basePrototypeId?.startsWith('P-BASE-ACCORDION-');
+    while (
+      owner &&
+      (accordion ? owner.part !== 'item' : owner.prototypeId !== plan.rootPrototypeId)
+    ) {
+      // A nested Accordion Root is a new domain, never a path back to an
+      // enclosing Item if an authored Trigger/Content lacks its own Item.
+      if (accordion && owner.part === 'root') return undefined;
+      owner = byPath.get(owner.parent);
+    }
     return owner;
   };
   const reject = (instance, reason, extra = {}) =>
@@ -151,6 +163,40 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     }
     const owner = ownerFor(instance);
     const ownerPhysical = owner && matched.get(owner.path);
+    if (instance.policy === 'field-invalid') {
+      const controls = owner
+        ? plan.instances.filter(
+            (node) =>
+              node.basePrototypeId === 'P-BASE-FIELD-CONTROL' && ownerFor(node)?.path === owner.path
+          )
+        : [];
+      const control = controls.length === 1 && matched.get(controls[0].path);
+      if (!ownerPhysical || !control || !['true', 'false'].includes(control.ariaInvalid)) {
+        reject(instance, 'No unambiguous authored Field control validity witness.');
+        continue;
+      }
+      const invalid = control.ariaInvalid === 'true';
+      const candidates = actual.filter(
+        (surface) =>
+          sameParent(surface, parent) &&
+          surface.prototypeId === instance.prototypeId &&
+          surface.ref === instance.ref
+      );
+      if (candidates.length > 1)
+        reject(instance, 'Ambiguous or duplicate materialized Field error.');
+      accept(instance, candidates, invalid || !!instance.props.keepMounted, 'field-invalid');
+      const error = matched.get(instance.path);
+      if (error && (!error.withinContent || error.currentLease !== true))
+        reject(instance, 'Field error escaped its current authored lease.');
+      if (error && (invalid ? !error.painted : !knownHidden(error)))
+        reject(
+          instance,
+          invalid
+            ? 'Invalid Field requires painted error content.'
+            : 'Valid Field error must remain hidden.'
+        );
+      continue;
+    }
     const triggers = owner
       ? plan.instances.filter(
           (node) => node.part === 'trigger' && ownerFor(node)?.path === owner.path
@@ -175,6 +221,24 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
       paintRequired = trigger.ariaSelected === 'true';
       required = paintRequired || instance.props.keepMounted === true;
       ids = trigger.controls;
+    } else if (instance.policy === 'inline-expanded') {
+      if (!['true', 'false'].includes(trigger.ariaExpanded)) {
+        reject(instance, 'Invalid inline disclosure expanded state.');
+        continue;
+      }
+      paintRequired = trigger.ariaExpanded === 'true';
+      required = paintRequired || instance.props.keepMounted === true;
+      ids = trigger.controls;
+      if (
+        ids.length !== (required ? 1 : 0) ||
+        (required && actual.filter((surface) => surface.id === ids[0]).length !== 1)
+      ) {
+        reject(
+          instance,
+          'Inline disclosure requires its exact live relation or no detached IDREF.'
+        );
+        continue;
+      }
     } else if (instance.policy.startsWith('expanded')) {
       if (!['true', 'false'].includes(trigger.ariaExpanded)) {
         reject(instance, 'Invalid trigger expanded state.');
@@ -254,7 +318,9 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
         // An ID relation never substitutes for the authored parent of
         // in-content structure. Tabs Content has no portal boundary;
         // only genuinely detached popup parts may lose physical parentage.
-        (surface.withinContent ? sameParent(surface, parent) : instance.policy !== 'selected') &&
+        (surface.withinContent
+          ? sameParent(surface, parent)
+          : !['selected', 'inline-expanded'].includes(instance.policy)) &&
         (retainedClosedShell(surface) ||
           retainedHiddenTooltip(surface) ||
           (!anonymousOwnerShell(surface) &&
@@ -269,7 +335,21 @@ export function compareContrastAnatomy(plan, observed, { requirePrimaryOpen = fa
     }
     accept(instance, candidates, required, instance.policy);
     const content = matched.get(instance.path);
-    if (content && (retainedClosedShell(content) || retainedHiddenTooltip(content)))
+    if (
+      instance.policy === 'inline-expanded' &&
+      content &&
+      !paintRequired &&
+      (content.currentLease !== true ||
+        !knownHidden(content) ||
+        (!required && !retainedClosedShell(content)))
+    )
+      reject(instance, 'Closed inline disclosure must be hidden under the exact current lease.');
+    if (
+      content &&
+      (retainedClosedShell(content) ||
+        retainedHiddenTooltip(content) ||
+        (instance.policy === 'inline-expanded' && !paintRequired))
+    )
       retainedShellBoundaries.add(instance.path);
     if (paintRequired && content && !content.painted)
       reject(

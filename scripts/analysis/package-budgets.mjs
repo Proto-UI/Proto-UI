@@ -3,13 +3,18 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { createHash } from 'node:crypto';
-import { gzipSync } from 'node:zlib';
 
 import { build, version as esbuildVersion } from 'esbuild';
+import {
+  collectBudgetReport,
+  measureBuildOutput,
+  parseBudgetArguments,
+  resolveBudgetPolicy,
+} from './package-budget-policy.mjs';
 
 const ROOT_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
-const json = process.argv.includes('--json');
+const { json, finfDevelopment } = parseBudgetArguments(process.argv.slice(2));
+const policy = resolveBudgetPolicy({ finfDevelopment, root: ROOT_DIR });
 // Provenance makes a ceiling change reviewable per the #654 policy: a number
 // is only comparable with the Node/zlib/esbuild/platform environment and the
 // minified artifact hash that produced it.
@@ -20,6 +25,10 @@ const environment = {
   platform: process.platform,
   arch: process.arch,
 };
+// Retained strict baselines for the exact main 495b338 + reviewed Finf/Shadow joint.
+// Finf development may report size overruns without blocking, never relabel them:
+// internal/governance/finf-package-budgets.md
+// internal/records/2026-10-07-finf-main-495b-budget.json
 const cases = [
   ['lucide/icons/x', 'packages/prototypes/lucide/src/icons/x.ts', 3_000],
   ['lucide root', 'packages/prototypes/lucide/src/index.ts', 700_000],
@@ -27,7 +36,7 @@ const cases = [
   // #652 capability growth. The blocking whole-entry gate and measurement
   // shape remain unchanged; see the exact Linux CI comparison and attribution:
   // internal/records/2026-09-27-shadow-split-budget-proposal.zh-CN.md
-  ['core root', 'packages/core/src/index.ts', 6_600],
+  ['core root', 'packages/core/src/index.ts', 7_600],
   // The prior 64,000 ceiling covered #621 Table Checkpoint B registering
   // module-table-structure in the eager runtime closure: +3,294 gzip bytes
   // over main 9eb93e9b (63,294 at Table head 2d305208 vs 60,000 on main).
@@ -53,7 +62,15 @@ const cases = [
   // internal/records/2026-10-06-focus-request-release-budget.json
   // Unified preflight and owned-shadow acquisition, exact integrated artifact:
   // internal/records/2026-10-06-focus-preflight-shadow-budget.json
-  ['runtime root', 'packages/runtime/src/index.ts', 71_500],
+  // Finf source union: exact measured ceilings, independently reproduced; no speculative headroom.
+  // internal/records/2026-10-06-finf-source-union-budget.json
+  // Follow-up Dialog/Label/native source batch, independently measured exact cost:
+  // internal/records/2026-10-06-finf-dialog-source-budget.json
+  // Reviewed Finf closure with <1% bounded margin; exact before/after receipts:
+  // internal/records/2026-10-07-finf-source-parity-budget.json
+  // Integrated Portal/opt-in sink/review repair closure and bounded margin:
+  // internal/records/2026-10-07-finf-web-optical-portal-budget.json
+  ['runtime root', 'packages/runtime/src/index.ts', 78_500],
   // #623 scroll end-follow, #625 direct-reference transport, and the earlier
   // #652 baseline proposal were measured on merge-ref main c473eae3 at React
   // 82,082 / Vue 81,804 gzip. The current #652 proposal and combined headroom:
@@ -74,8 +91,8 @@ const cases = [
   // Subsequent bounded request/owner-release repair measured as an actual union:
   // internal/records/2026-10-06-focus-request-release-budget.json
   // internal/records/2026-10-06-template-scroll-focus-budget.json
-  ['adapter-react root', 'packages/adapters/react/src/index.ts', 94_550],
-  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 94_350],
+  ['adapter-react root', 'packages/adapters/react/src/index.ts', 106_000],
+  ['adapter-vue root', 'packages/adapters/vue/src/index.ts', 106_000],
   // The earlier #652 shadow split baseline proposal measured 84,683 gzip at
   // head dd820b30 (main at ddac15da: 75,664 with the same toolchain). Its
   // prior 97,000 ceiling rationale is retained here; current proposal:
@@ -83,7 +100,7 @@ const cases = [
   // The same exact merge-ref measured 95,936 gzip after three accepted
   // capability slices. Current proposal evidence and headroom are in the
   // dated record above.
-  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 117_850],
+  ['adapter-web-component root', 'packages/adapters/web-component/src/index.ts', 132_000],
   ['prototypes-base/button', 'packages/prototypes/base/src/button/index.ts', 6_000],
   ['prototypes-shadcn/button', 'packages/prototypes/shadcn/src/button/index.ts', 7_000],
 ];
@@ -138,44 +155,19 @@ const measure = async (entry) => {
     external,
     logLevel: 'silent',
   });
-  const contents = Buffer.concat(result.outputFiles.map((file) => Buffer.from(file.contents)));
-  return contents;
+  return measureBuildOutput(result);
 };
 
-const results = [];
-for (const [name, entry, budget] of cases) {
-  const contents = await measure(entry);
-  const gzipBytes = gzipSync(contents, { level: 9 }).length;
-  results.push({
-    name,
-    entry,
-    minifiedBytes: contents.length,
-    minifiedSha256: createHash('sha256').update(contents).digest('hex'),
-    gzipBytes,
-    budget,
-    pass: gzipBytes <= budget,
-  });
-}
+const report = await collectBudgetReport({ cases, diagnostics, measure, environment, policy });
+const { results, diagnostics: diagnosticResults } = report;
 
-const diagnosticResults = [];
-for (const [name, entry] of diagnostics) {
-  const contents = await measure(entry);
-  diagnosticResults.push({
-    name,
-    entry,
-    minifiedBytes: contents.length,
-    minifiedSha256: createHash('sha256').update(contents).digest('hex'),
-    gzipBytes: gzipSync(contents, { level: 9 }).length,
-  });
-}
-
-if (json)
-  console.log(JSON.stringify({ environment, results, diagnostics: diagnosticResults }, null, 2));
+if (json) console.log(JSON.stringify(report, null, 2));
 else {
   console.log(`[package-budgets] ${JSON.stringify(environment)}`);
+  console.log(`[package-budgets] policy=${JSON.stringify(policy)}`);
   for (const result of results) {
     console.log(
-      `${result.pass ? 'PASS' : 'FAIL'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`
+      `${result.pass ? 'PASS' : result.blocking ? 'FAIL' : 'ADVISORY'} ${result.name}: ${result.gzipBytes} / ${result.budget} gzip bytes; overBudget=${result.overBudgetBytes}; minified=${result.minifiedBytes} sha256=${result.minifiedSha256}`
     );
   }
   for (const result of diagnosticResults) {
@@ -184,4 +176,4 @@ else {
     );
   }
 }
-if (results.some((result) => !result.pass)) process.exitCode = 1;
+process.exitCode = report.exitCode;

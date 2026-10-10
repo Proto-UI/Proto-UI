@@ -1,4 +1,12 @@
 import {
+  NATIVE_LINK_DECLARATION,
+  resolveWebNativeLinkLocalName,
+} from '@proto.ui/module-native-link';
+import type { EffectsPort } from '@proto.ui/core';
+import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui/module-feedback';
+import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
+import type { InstanceAssociations } from '@proto.ui/core';
+import {
   getModuleDeclaration,
   type Prototype,
   type ScrollProjectionPreference,
@@ -74,6 +82,7 @@ export type ReactRuntime = ReactRenderRuntime & {
   useImperativeHandle: (ref: any, create: () => any, deps?: any[]) => void;
   forwardRef: (render: (props: any, ref: any) => any) => any;
   createElement: (type: any, props?: any, ...children: any[]) => any;
+  Fragment?: any;
   createPortal?: (children: any, container: Element) => any;
   createContext?: <T>(defaultValue: T) => { Provider: any };
   // Context is an opaque runtime handle to the adapter. Keeping the input
@@ -86,6 +95,8 @@ export type { ReactAdapterHandle } from './types';
 
 export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   PropsBaseType & {
+    instanceAssociations?: InstanceAssociations;
+    dir?: 'ltr' | 'rtl' | 'auto';
     children?: any;
     className?: string;
     hostClassName?: string;
@@ -97,6 +108,8 @@ export type ReactAdapterProps<Props extends PropsBaseType> = Props &
   };
 
 export interface ReactAdapterOptions<Props extends PropsBaseType> {
+  /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
+  createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   schedule?: (task: () => void) => void;
   getProps?: (props: ReactAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -129,6 +142,7 @@ function defaultGetProps<Props extends PropsBaseType>(
     style,
     hostStyle,
     surfaceStyle,
+    instanceAssociations,
     ...rest
   } = (props ?? {}) as any;
   const filtered: Record<string, unknown> = {};
@@ -170,6 +184,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
     opt: ReactAdapterOptions<ProtoAdapterProps<TProto>> = {}
   ): ProtoReactComponent<TProto> {
     type Props = ProtoAdapterProps<TProto>;
+    const createVisualSink = opt.createVisualSink;
     const schedule = opt.schedule ?? ((task) => queueMicrotask(task));
     const getProps = opt.getProps ?? defaultGetProps;
     const getMeta = opt.getMeta ?? createDefaultMetaGetter();
@@ -187,14 +202,20 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       : undefined;
     const imageView = getModuleDeclaration(proto, IMAGE_VIEW_DECLARATION)?.config;
     const imageViewRootTag = imageView ? resolveWebImageLocalName() : undefined;
-    if (textControlRootTag && imageViewRootTag) {
+    const nativeLink = getModuleDeclaration(proto, NATIVE_LINK_DECLARATION)?.config;
+    const nativeLinkRootTag = nativeLink ? resolveWebNativeLinkLocalName() : undefined;
+    if ([textControlRootTag, imageViewRootTag, nativeLinkRootTag].filter(Boolean).length > 1) {
       throw new Error(
-        '[React Adapter] text-control and image-view declarations cannot share a root.'
+        '[React Adapter] text-control, image-view and native-link declarations cannot share a root.'
       );
     }
-    const declaredRootTag = textControlRootTag ?? imageViewRootTag;
+    const declaredRootTag = textControlRootTag ?? imageViewRootTag ?? nativeLinkRootTag;
     if (declaredRootTag && opt.rootTag && opt.rootTag !== declaredRootTag) {
-      const declarationName = textControlRootTag ? 'text-control' : 'image-view';
+      const declarationName = textControlRootTag
+        ? 'text-control'
+        : imageViewRootTag
+          ? 'image-view'
+          : 'native-link';
       throw new Error(
         `[React Adapter] ${declarationName} declaration conflicts with rootTag: ${opt.rootTag}`
       );
@@ -217,6 +238,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      const portalOriginRef = runtime.useRef<HTMLElement | null>(null);
       const instanceTokenRef = runtime.useRef(createLogicalInstance(proto as Prototype<any>));
       const parentToken =
         logicalOwnerContext && runtime.useContext
@@ -307,7 +329,9 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         rawPropsSourceRef.current = {
           debugName: `${proto.name}#raw-props`,
           get() {
-            const nextProps = getProps(propsRef.current) ?? ({} as Partial<Props>);
+            const nextProps = withoutInstanceAssociations(
+              getProps(propsRef.current)
+            ) as Partial<Props>;
             return nextProps as Readonly<Props & PropsBaseType>;
           },
           subscribe(cb) {
@@ -328,7 +352,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       );
 
       runtime.useEffect(() => {
-        const nextRawProps = snapshotRawProps(getProps(propsRef.current));
+        controllerRef.current?.applyInstanceAssociations(
+          propsRef.current.instanceAssociations ?? {}
+        );
+        const nextRawProps = snapshotRawProps(
+          withoutInstanceAssociations(getProps(propsRef.current))
+        );
         const previousRawProps = deliveredRawPropsRef.current;
         deliveredRawPropsRef.current = nextRawProps;
         if (previousRawProps && hasSameRawProps(previousRawProps, nextRawProps)) return;
@@ -345,6 +374,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           proto,
           schedule,
           rawPropsSource: rawPropsSourceRef.current as RawPropsSource<Props>,
+          getInstanceAssociations: () => propsRef.current.instanceAssociations ?? {},
           wiring,
           eventGate: {
             disable: () => eventGateRef.current?.disable(),
@@ -462,6 +492,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         });
         bindLogicalEventTarget(instanceTokenRef.current, router.rootTarget);
         let viewDisposed = false;
+        let ownedVisualStyle: string | null = null;
         let focusRetryGeneration = 0;
         let releaseRequestedTargetReady: (() => void) | undefined;
         const releaseNativeReadiness = registerNativeFocusReadiness(
@@ -485,6 +516,13 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           if (viewDisposed) return;
           viewDisposed = true;
           const releases = [
+            () => {
+              if (
+                ownedVisualStyle !== null &&
+                rootEl.getAttribute('data-pui-style') === ownedVisualStyle
+              )
+                rootEl.removeAttribute('data-pui-style');
+            },
             () => eventGate.disable(),
             () => eventGate.dispose(),
             () => {
@@ -522,11 +560,22 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         };
 
         const effectsPort = createReactEffectsPort((tokens) => {
+          if (viewDisposed || rootRef.current !== rootEl) return;
           setHostTokens(tokens);
+          if (viewDisposed || rootRef.current !== rootEl) return;
+          // The opted-in visual provider samples final style in this transaction.
+          // Keep this attribute out of React's deferred VDOM ownership below.
+          if (createVisualSink) {
+            ownedVisualStyle = serializeStyleTokens(tokens) ?? null;
+            if (ownedVisualStyle === null) rootEl.removeAttribute('data-pui-style');
+            else if (rootEl.getAttribute('data-pui-style') !== ownedVisualStyle)
+              rootEl.setAttribute('data-pui-style', ownedVisualStyle);
+          }
         });
 
         const rawPropsSource = rawPropsSourceRef.current as RawPropsSource<Props>;
         const modules = createReactModules({
+          getPortalOrigin: () => portalOriginRef.current,
           el: rootEl,
           instanceToken: instanceTokenRef.current,
           router,
@@ -535,6 +584,15 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           rawPropsSource,
           effectsPort,
+          visualFeedbackSink: createVisualSink
+            ? createDeferredViewVisualSink(
+                () => createVisualSink!(rootEl, effectsPort),
+                (frame) => {
+                  effectsPort.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
+                  effectsPort.requestFlush();
+                }
+              )
+            : undefined,
           getMeta,
           colorSchemeSource,
           preferenceSource,
@@ -806,18 +864,34 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
                   props.className,
                 ]),
                 style: mergeHostStyle([props.surfaceStyle, props.hostStyle, props.style]),
+                dir: props.dir,
                 'data-pui-root': '',
                 [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
                 [PUI_VIEW_PENDING_ATTR]: viewReadyRef.current ? undefined : '',
-                'data-pui-style': serializeStyleTokens(hostStyle.tokens),
+                ...(createVisualSink
+                  ? {}
+                  : { 'data-pui-style': serializeStyleTokens(hostStyle.tokens) }),
                 'data-demo-ref': props['data-demo-ref' as keyof typeof props] as string | undefined,
               },
               // Without a view there is no template to place the slot into, so the
               // authored children stand in for it.
               ...(shouldExist ? renderedChildren : [props.children])
             );
+      const portal = portalContainer ? runtime.createPortal!(content, portalContainer) : null;
       const projectedContent = portalContainer
-        ? runtime.createPortal!(content, portalContainer)
+        ? runtime.Fragment
+          ? runtime.createElement(
+              runtime.Fragment,
+              null,
+              runtime.createElement('span', {
+                ref: portalOriginRef,
+                hidden: true,
+                'aria-hidden': true,
+                'data-pui-portal-origin': '',
+              }),
+              portal
+            )
+          : portal
         : content;
       if (!logicalOwnerContext) return projectedContent;
       return runtime.createElement(

@@ -1,0 +1,28 @@
+id: P-LIQUID-GLASS-DROPDOWN-MENU-GROUP
+type: prototype
+title: liquid-glass Dropdown Menu group
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 组成语义和源码投影已明确；本家实际绘制、全宿主、native/GPUI、打包和独立审查尚未完成。
+  en: Composition semantics and source projection are bounded; family paint, all hosts, native/GPUI, packed consumers and independent review remain pending.
+summary: Family-owned passive paint over the explicit Dropdown group definition.
+statement:
+  zh-CN: 本原型只在共同的 group 定义上添加本家排版、间距与视觉反馈，不增加焦点、快捷键或press owner。
+  en: This prototype adds family typography, spacing and feedback to the common group definition without adding a focus, shortcut or press owner.
+criteria:
+  - id: P-LIQUID-GLASS-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+    text:
+      zh-CN: 保留对应Base定义的语义与生命周期；视觉源、偏差和未验证边界须显式记录。
+      en: Preserve the corresponding Base semantics and lifecycle; record the visual reference, deviations and unverified boundaries explicitly.
+dependsOn:
+  prototypes: [P-BASE-DROPDOWN-MENU-GROUP]
+verifies:
+  tests: [T-BASE-DROPDOWN-COMPOSITION-0001]
+sources:
+  - path: packages/prototypes/liquid-glass/src/dropdown/group.proto.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined the passive family projection without admitting unverified visual or platform parity.
+tags: [prototype, liquid-glass, dropdown-menu, composition]

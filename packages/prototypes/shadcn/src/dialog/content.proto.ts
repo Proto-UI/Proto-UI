@@ -15,7 +15,7 @@ const dialogContent = definePrototype<ShadcnDialogContentProps, ShadcnDialogCont
     // P-SHADCN-DIALOG-CONTENT-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'fixed left-1/2 top-1/2 grid w-full max-w-lg gap-4 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-6 shadow-lg duration-200 outline-none'
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid grid-cols-1 w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto gap-4 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-6 shadow-lg transition-opacity duration-200 outline-none'
       )
     );
 

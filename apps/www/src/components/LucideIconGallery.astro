@@ -1,4 +1,5 @@
 ---
+import StaticLucideIcon from './StaticLucideIcon.astro';
 import { LUCIDE_ICON_MANIFEST } from '@proto.ui/prototypes-lucide/manifest';
 
 type Locale = 'en' | 'zh-cn';
@@ -22,6 +23,7 @@ const copy =
         empty: '没有匹配的图标。',
         loadMore: '加载更多',
         close: '关闭',
+        noScript: '启用 JavaScript 后可加载图标预览、搜索和复制。当前显示图标名称。',
         importPath: '导入路径',
       }
     : {
@@ -35,6 +37,8 @@ const copy =
         empty: 'No icons match your query.',
         loadMore: 'Load more',
         close: 'Close',
+        noScript:
+          'Enable JavaScript for icon previews, search, and copy. Icon names are shown below.',
         importPath: 'Import path',
       };
 
@@ -50,6 +54,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
 ---
 
 <section class="lucide-gallery" data-lucide-gallery>
+  <noscript><p>{copy.noScript}</p></noscript>
   <div class="lucide-gallery__toolbar">
     <label class="lucide-gallery__search" for={`lucide-search-${locale}`}>
       <span>{copy.searchLabel}</span>
@@ -84,7 +89,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
           title={icon.name}
         >
           <span class="lucide-card__preview" data-icon-preview aria-hidden="true">
-            <span class="lucide-card__placeholder">{icon.name[0]?.toUpperCase()}</span>
+            <span class="lucide-card__placeholder">{icon.name}</span>
           </span>
         </button>
       ))
@@ -112,7 +117,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
       <header class="lucide-modal__header">
         <h3 id={`lucide-modal-title-${locale}`} data-modal-title></h3>
         <button type="button" class="lucide-modal__close" data-modal-close aria-label={copy.close}
-          >×</button
+          ><StaticLucideIcon name="x" size="1.25rem" /></button
         >
       </header>
 
@@ -249,6 +254,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
     svg.setAttribute('stroke-linecap', 'round');
     svg.setAttribute('stroke-linejoin', 'round');
     svg.setAttribute('aria-hidden', 'true');
+    svg.setAttribute('focusable', 'false');
 
     const nodes = shapeFactory(createShapeFactories());
     appendShapeNode(svg, nodes);
@@ -335,9 +341,15 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
     const shapeFactory = await getShapeFactory(iconName);
     preview.textContent = '';
     if (!shapeFactory) {
-      preview.textContent = '!';
+      preview.textContent = iconName;
+      preview.dataset.iconError = 'true';
+      preview.title = document.documentElement.lang.startsWith('zh')
+        ? '图标加载失败'
+        : 'Icon unavailable';
       return false;
     }
+    delete preview.dataset.iconError;
+    preview.removeAttribute('title');
     preview.appendChild(createIconSvg(shapeFactory, size));
     return true;
   }
@@ -352,6 +364,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
     card.dataset.iconLoading = '1';
     const ok = await fillPreview(preview, iconName, 20);
     card.dataset.iconLoaded = ok ? '1' : 'error';
+    card.setAttribute('aria-label', ok ? `icon ${iconName}` : `icon ${iconName}: ${preview.title}`);
     delete card.dataset.iconLoading;
   }
 
@@ -374,7 +387,7 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
     preview.setAttribute('aria-hidden', 'true');
     const placeholder = document.createElement('span');
     placeholder.className = 'lucide-card__placeholder';
-    placeholder.textContent = name[0]?.toUpperCase() || '?';
+    placeholder.textContent = name;
     preview.appendChild(placeholder);
     card.appendChild(preview);
     return card;
@@ -485,7 +498,11 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
         preview.textContent = '';
         const ok = await fillPreview(preview, iconName, 48);
         if (!ok) {
-          preview.textContent = '!';
+          preview.textContent = iconName;
+          preview.dataset.iconError = 'true';
+          preview.title = document.documentElement.lang.startsWith('zh')
+            ? '图标加载失败'
+            : 'Icon unavailable';
         }
       }
 
@@ -642,7 +659,9 @@ const serializedIconIndex = JSON.stringify(iconIndex).replaceAll('<', '\\u003c')
   }
 
   .lucide-card__placeholder {
-    font-size: 0.86rem;
+    font-size: 0.65rem;
+    overflow-wrap: anywhere;
+    text-align: center;
     color: var(--sl-color-text-tertiary);
     font-weight: 500;
   }

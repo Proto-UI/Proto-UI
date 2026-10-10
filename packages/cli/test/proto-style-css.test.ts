@@ -13,6 +13,114 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it.each([
+    ['w-72', 'width: 18rem;'],
+    ['text-[1.3125rem]', 'font-size: 1.3125rem;'],
+    ['border-[#e5e5e5]', 'border-color: #e5e5e5;'],
+    ['outline-border', 'outline-color: var(--pui-border);'],
+  ])(
+    'renders the existing physical vocabulary %s in document and Shadow output',
+    (token, declaration) => {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+        expect(css).toContain(declaration);
+      }
+    }
+  );
+  it('keeps malformed physical values outside the bounded resource vocabulary', () => {
+    for (const token of [
+      'w-NaN',
+      'w-Infinity',
+      'text-[1.3125rem;color:red]',
+      'border-[#e5e5e5;color:red]',
+      'outline-[url(javascript:bad)]',
+    ]) {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toMatch(/(?:^|\n)\s*(?:font-size|border-color|outline-color|width):/);
+      }
+    }
+  });
+  it.each([
+    ['-mx-1', 'margin-inline: -0.25rem;'],
+    ['duration-100', 'transition-duration: 100ms;'],
+    ['ring-1', '--pui-ring-width: 1px;'],
+    ['tracking-widest', 'letter-spacing: 0.1em;'],
+    ['text-[0.6875rem]', 'font-size: 0.6875rem;'],
+    ['bg-[#f5f5f5]', 'background-color: #f5f5f5;'],
+  ])('projects the bounded physical recipe %s without component dispatch', (token, declaration) => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([token]);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain(declaration);
+      if (token === 'duration-100') expect(css).toContain('--pui-animation-duration: 100ms;');
+      if (token === 'ring-1') expect(css).toContain('box-shadow: var(--pui-ring-offset-shadow');
+    }
+  });
+  it('keeps arbitrary color and font values outside the existing finite recipe table unsupported', () => {
+    for (const token of [
+      'text-[0.6875rem;color:red]',
+      'text-[Infinityrem]',
+      'bg-[#f5f5f5;color:red]',
+      'bg-[#f5f5f5ff]',
+      'duration-NaN',
+      'ring-Infinity',
+    ]) {
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toMatch(
+          /(?:^|\n)\s*(?:font-size|background-color):|(?:^|\n)\s*color:\s*red/
+        );
+      }
+    }
+  });
+  it('projects explicit logical text direction in document and shadow styles', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['direction-ltr', 'direction-rtl']);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('direction: ltr;');
+      expect(css).toContain('direction: rtl;');
+      expect(css).not.toContain('flex-direction:');
+    }
+    expect(renderProtoStyleTokenCss(['direction-sideways'])).toContain(
+      'Unsupported Proto UI style tokens'
+    );
+  });
+  it('keeps authored spaces and newlines without hanging preserved spaces into padding', () => {
+    const css = renderProtoStyleTokenCss(['whitespace-break-spaces']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('white-space: break-spaces;');
+  });
+  it('lowers intrinsic action wrapping and bounded grid tracks without media variants', () => {
+    const css = renderProtoStyleTokenCss([
+      'flex-wrap-reverse',
+      'grid-cols-1',
+      'min-w-0',
+      'h-auto',
+      'min-h-8',
+      'max-w-full',
+    ]);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('flex-wrap: wrap-reverse;');
+    expect(css).toContain('grid-template-columns: repeat(1, minmax(0, 1fr));');
+    expect(css).toContain('min-width: 0px;');
+  });
+  it('lowers logical available-region bounds without dropping max-width arithmetic', () => {
+    const css = renderProtoStyleTokenCss([
+      'left-[var(--proto-ui-available-region-center-x,50%)]',
+      'max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]',
+      'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',
+    ]);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('left: var(--proto-ui-available-region-center-x,50%);');
+    expect(css).toContain(
+      'max-width: min(32rem,calc(var(--proto-ui-available-region-width,100%) - 2rem));'
+    );
+    expect(css).toContain('max-height: calc(var(--proto-ui-available-region-height,100%) - 2rem);');
+  });
   it.each(['auto', 'text', 'none'])(
     'diagnoses selection:select-%s instead of emitting inert highlight CSS',
     (value) => {
@@ -221,26 +329,39 @@ describe('proto style css renderer', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
 
-  it('closes and renders the surface-paired frame tokens used by Brutalist Checkbox', () => {
-    expect(BRUTALIST_STYLE_TOKENS).toContain('border-main-foreground');
-    expect(BRUTALIST_STYLE_TOKENS).toContain(
+  it('closes and renders the current paired Checkbox fills without the superseded reversed frame', () => {
+    const tokens = [
+      'border-border',
+      'data-[checked]:not-[data-indeterminate]:bg-main',
+      'data-[checked]:not-[data-indeterminate]:text-main-foreground',
+      'data-[indeterminate]:bg-main',
+      'data-[indeterminate]:text-main-foreground',
+    ];
+    for (const token of tokens) expect(BRUTALIST_STYLE_TOKENS).toContain(token);
+    expect(BRUTALIST_STYLE_TOKENS).not.toContain(
       'data-[checked]:not-[data-indeterminate]:border-background'
     );
-
-    const css = renderProtoStyleTokenCss([
+    const css = renderProtoStyleTokenCss(tokens);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('border-color: var(--pui-border);');
+    expect(css).toContain('background-color: var(--pui-main);');
+    expect(css).toContain('color: var(--pui-main-foreground);');
+    expect(css).not.toContain('border-color: var(--pui-background);');
+    // Legacy generic utilities remain supported even though this component no
+    // longer uses the old state-swapped frame recipe.
+    const legacyCss = renderProtoStyleTokenCss([
       'text-current',
       'opacity-0',
       'opacity-100',
       'border-main-foreground',
       'border-background',
     ]);
-
-    expect(css).toContain('color: currentColor;');
-    expect(css).toContain('opacity: 0;');
-    expect(css).toContain('opacity: 1;');
-    expect(css).toContain('border-color: var(--pui-main-foreground);');
-    expect(css).toContain('border-color: var(--pui-background);');
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(legacyCss).toContain('color: currentColor;');
+    expect(legacyCss).toContain('opacity: 0;');
+    expect(legacyCss).toContain('opacity: 1;');
+    expect(legacyCss).toContain('border-color: var(--pui-main-foreground);');
+    expect(legacyCss).toContain('border-color: var(--pui-background);');
+    expect(legacyCss).not.toContain('Unsupported Proto UI style tokens');
   });
 
   it('resets composed custom properties inside the layer, below every token rule', () => {
@@ -548,4 +669,95 @@ describe('proto style css renderer', () => {
     expect(css).toContain('var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000)');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
   });
+});
+
+describe('normalized continuous layout projection', () => {
+  it('lowers static exposed-state flex basis and vertical slider positions', () => {
+    const tokens = [
+      'basis-2',
+      'basis-[calc(var(--pui-size)*1%)]',
+      'bottom-[calc(var(--pui-percentage)*1%)]',
+    ];
+    for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('flex-basis: 0.5rem;');
+      expect(css).toContain('flex-basis: calc(var(--pui-size)*1%);');
+      expect(css).toContain('bottom: calc(var(--pui-percentage)*1%);');
+    }
+  });
+});
+
+describe('Finf authored layout utility closure', () => {
+  it('realizes the collected component vocabulary in document and Shadow CSS', () => {
+    const tokens = [
+      'border-dashed',
+      'cursor-move',
+      'grid-cols-7',
+      'grow',
+      'grow-0',
+      'h-48',
+      'inline-grid',
+      'items-stretch',
+      'max-w-md',
+      'min-h-24',
+      'min-w-40',
+      'mx-0',
+      'mx-1',
+      'my-1',
+      'rounded',
+      'self-stretch',
+      'shadow-[2px_2px_0_0_var(--pui-border)]',
+      'shrink',
+      'tabular-nums',
+      'text-center',
+      'w-1/3',
+      'w-96',
+      'w-auto',
+    ];
+    for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('grid-template-columns: repeat(7, minmax(0, 1fr));');
+      expect(css).toContain('flex-grow: 0;');
+      expect(css).toContain('flex-shrink: 1;');
+      expect(css).toContain('margin-inline: 0.25rem;');
+      expect(css).toContain('margin-block: 0.25rem;');
+      expect(css).toContain('--pui-shadow: 2px 2px 0 0 var(--pui-border);');
+      expect(css).toContain('font-variant-numeric: tabular-nums;');
+      expect(css).toContain('width: 24rem;');
+    }
+  });
+});
+
+describe('Classic Drawer handle physical styling', () => {
+  it('lowers the three collected handle tokens without dropping the inset shadow', () => {
+    for (const css of [
+      renderProtoStyleTokenCss(['bg-[#ccc]', 'border-[#bbb]', 'shadow-inner']),
+      renderProtoShadowStyleTokenCss(['bg-[#ccc]', 'border-[#bbb]', 'shadow-inner']),
+    ]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('background-color: #ccc;');
+      expect(css).toContain('border-color: #bbb;');
+      expect(css).toContain('--pui-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);');
+    }
+  });
+});
+
+it('keeps bounded Drawer grid rows at the start of the actual scrollport', () => {
+  for (const css of [
+    renderProtoStyleTokenCss(['content-start']),
+    renderProtoShadowStyleTokenCss(['content-start']),
+  ]) {
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('align-content: flex-start;');
+  }
+});
+
+it('lowers the complete physical Drawer handle cursor and local stacking vocabulary', () => {
+  const tokens = ['cursor-ew-resize', 'cursor-ns-resize', 'z-10'];
+  for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('cursor: ew-resize;');
+    expect(css).toContain('cursor: ns-resize;');
+    expect(css).toContain('z-index: 10;');
+  }
 });

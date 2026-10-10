@@ -16,6 +16,30 @@ Text controls and Toggle use normal 14/20 typography at a 16px root. Checkbox/Sw
 
 All component paint lives in Prototype tokens, Rule contributions and the shared finite physical token translator. Load family `renderThemeCss()` plus CSS generated from its source by `collectProtoStyleTokens` / `renderProtoStyleTokenCss`. The generated draft preset uses that same source vocabulary. Consumers own fonts, outer layout and theme activation. [Attribution and deliberate changes](THIRD_PARTY_NOTICES.md) travel with the source; the public CLI archive independently contains the Apache license and notice for its derived values.
 
-The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose all seven implemented kinds and their genuine recipes. Their toolbar-free previews follow the page's four-Web runtime selector without requiring a missing Bootstrap Select. Missing kinds continue to fail explicitly, and the incomplete family is not offered by the eleven-kind homepage selector.
+The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose the implemented kinds and their genuine recipes. Their preview toolbars now use genuine Bootstrap Select parts and Text labels, while retaining the page's four-Web runtime preference. Missing kinds continue to fail explicitly, and the incomplete family is not offered by the eleven-kind homepage selector.
 
 The Button fixture is `/en/test/new-projection-families/`; the controls fixture is `/en/test/bootstrap-state-controls/`. A prepared read-only Actions workflow binds real browser evidence to the exact candidate SHA. Local simulated-host, physical CSS, source/preset and package checks do not establish real browser paint, general Prototype Compiler, GPUI, Flutter or Qt conformance. Source-derived GPUI token data preserves unsupported-property diagnostics and is not native component execution. #792 stays open for all remaining Base parts and host/compiler evidence.
+
+Select Root/Trigger/Value/Content/Item and Text now have independent direct Base consumers and private `/select` and `/text` source exports. Select is a button-dropdown design-language extension, not native HTML select or jQuery API parity. Both CLI entries require explicit workspace source mode. All eight Text axes are retained, with no user-selection override.
+
+## Field (draft workspace source)
+
+The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
+
+This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Text-capable Thumbnail composition
+
+The Library entry composes the existing passive Surface (`outline`, `raised`) and Text, following the archived 2.3.2 Thumbnail instead of a modern Card. Default Surface (`outline`, no elevation) remains neutral. The explicit raised recipe uses the #ddd frame and 0/1/3px shadow; native-link `solid` Surface shares Button's classic primary gradient and pressed paint without inheriting Button interaction. Its native anchor remains the navigation/focus owner.
+
+Text's `sm` + `normal` supplies 14/20 typography at a 16px root; `2xl` + `relaxed` supplies 24.5/40. Rem dimensions scale with text settings. The website supplies only composition spacing, while these family prototypes own paint/type and real Runtime server snapshots. This introduces no new component kind, public CLI entry, homepage eligibility or exact-browser acceptance claim.
+
+## Local draft artifacts
+
+`pnpm run build:draft` refreshes the public prerequisite `dist` trees in the workspace through the normal package compiler, then builds and stages the existing draft entries and dependency closure in a fresh temporary directory. `pnpm run pack:draft` additionally produces local tarballs. The JSON receipt identifies every artifact and its draft-only status. Both commands run from this package directory.
+
+These are private, release-excluded development artifacts, not public package admission or a registry publication. The checked-in source exports and public CLI rejection remain unchanged. The temporary manifests use `0.0.0-draft`, retain `private: true`, omit lifecycle scripts and bind workspace dependencies to the same local draft version. Install the complete returned tarball closure together with scripts disabled and offline resolution; no artifact should be uploaded to npm. Build/pack success alone does not establish consumer, host, visual, native, or full Finf G4 acceptance.
+
+Run `pnpm test:draft-packages` from the repository root for the complete offline tarball install, JavaScript ESM and strict NodeNext declaration smoke. Run this build-bearing suite separately from other package builds.
+
+The draft builder admits only the two named prototype families and their current dependency shape. It is not a general private-package build API; adding workspace dependencies that occur only in peer or optional fields requires extending and testing its closure planning first.

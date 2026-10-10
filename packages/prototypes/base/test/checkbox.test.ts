@@ -411,6 +411,7 @@ describe('prototypes/base: checkbox', () => {
     ctx.rootTarget.dispatchEvent(
       new CustomEvent('press.commit', { detail: new KeyboardEvent('keydown', { key: 'Enter' }) })
     );
+    expect(exposes.pressed.get()).toBe(false);
     expect(exposes.checked.get()).toBe(false);
     expect(exposes.indeterminate.get()).toBe(true);
 

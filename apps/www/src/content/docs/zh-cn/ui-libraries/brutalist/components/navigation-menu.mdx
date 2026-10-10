@@ -1,0 +1,25 @@
+---
+title: 'NavigationMenu'
+description: '具有原生目的地链接的命名导航展开面板。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+具有原生目的地链接的命名导航展开面板。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-navigation-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 是 navigation 地标，Trigger 是展开按钮，Content 是有名称的 region。Root.value 标识唯一展开面板。Item 发出命令；Link 投影带 href、target、rel 与当前页语义的真实锚点。URL 预览、Enter、修饰键/中键浏览及导航由浏览器持有，不合成 Space 激活或应用路由。
+
+组成: Root, Trigger, Content, Item, Link.
+
+草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+
+Link 在原生激活之后发出只读 navigate 观察，字段为 href、target、rel、modified；它不是可取消的路由请求。普通当前窗口激活会关闭面板，closeOnSelect=false 可保留；修饰键/中键及 \_blank 激活保留当前页面板。禁用 Link 会移除目标并阻止激活。current=true 通过 aria-current 标识当前页。
+
+React/Vue/Vue2 使用原生锚点根节点；Web Components 把调用方内容保留在其持有的局部锚点内，焦点、样式与无障碍投影跟随真实物理表面。演示使用同文档目标，仅观察浏览器导航。源码运行时检查之外的真实浏览器、打包、编译器与 native 验收仍待完成。

@@ -11,7 +11,8 @@ vi.mock('../PrototypePreviewer/projection-materializer', () => ({
   materializeProjectionCandidate: fakes.materialize,
   restoreProjectionControlFocus: fakes.restoreFocus,
 }));
-vi.mock('../PrototypePreviewer/projection-theme', () => ({
+vi.mock('../PrototypePreviewer/projection-theme', async (original) => ({
+  ...(await original<typeof import('../PrototypePreviewer/projection-theme')>()),
   resolveProjectionThemeSurfaceStyle: fakes.resolveTheme,
   watchProjectionThemeSurfaceStyle: fakes.watchTheme,
 }));
@@ -700,4 +701,60 @@ it('reads one page-owned theme before updating nested language/social candidates
       });
     expect(handle!.getSnapshot().generation).toBe(generation);
   }
+});
+
+describe('stable local preview switching mask', () => {
+  it('cancels through its real public Button without replacing the retained generation or publishing stale preference', async () => {
+    localStorage.setItem('preferred-prototypes-adapter', 'wc');
+    const root = fixture(true);
+    handle = initHomepageRuntime(root);
+    await settle();
+    await vi.waitFor(() =>
+      expect(document.querySelector('[data-runtime-mask-ready="true"]')).not.toBeNull()
+    );
+    const before = handle!.getSnapshot();
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    const gate = deferred<ReturnType<typeof candidate>>();
+    fakes.materialize.mockImplementationOnce(() => gate.promise);
+    controls.runtime.onValueChange('react');
+    await settle();
+    const mask = document.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
+    expect(mask.hidden).toBe(false);
+    const calls = fakes.materialize.mock.calls.length;
+    mask.querySelector<HTMLElement>('[data-demo-ref="cancel"]')!.click();
+    await settle();
+    expect(handle!.getSnapshot()).toEqual(before);
+    expect(root.dataset.runtimeState).toBe('ready');
+    expect(mask.hidden).toBe(true);
+    expect(fakes.materialize.mock.calls.length).toBe(calls);
+    const late = candidate();
+    gate.resolve(late);
+    await settle();
+    expect(late.activate).not.toHaveBeenCalled();
+    expect(late.dispose).toHaveBeenCalledOnce();
+    expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('wc');
+  });
+  it('keeps a failed target retryable through a real Button and removes the mask after success', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const root = fixture(true);
+    handle = initHomepageRuntime(root);
+    await settle();
+    await vi.waitFor(() =>
+      expect(document.querySelector('[data-runtime-mask-ready="true"]')).not.toBeNull()
+    );
+    const controls = fakes.materialize.mock.calls[0]![1].controls;
+    fakes.materialize.mockRejectedValueOnce(new Error('temporary target preparation failure'));
+    controls.runtime.onValueChange('react');
+    await settle();
+    expect(root.dataset.runtimeState).toBe('error');
+    const mask = document.querySelector<HTMLElement>('[data-runtime-loading-mask]')!;
+    expect(mask.dataset.state).toBe('error');
+    expect(mask.hidden).toBe(false);
+    mask.querySelector<HTMLElement>('[data-demo-ref="retry"]')!.click();
+    await settle();
+    expect(handle!.getSnapshot().selection.runtimeId).toBe('react');
+    expect(root.dataset.runtimeState).toBe('ready');
+    expect(mask.hidden).toBe(true);
+    expect(localStorage.getItem('preferred-prototypes-adapter')).toBe('react');
+  });
 });

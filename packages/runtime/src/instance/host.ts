@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 // packages/runtime/src/instance/host.ts
 import type { TemplateChildren } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -46,6 +47,9 @@ export interface RuntimeHost<P extends PropsBaseType> {
 
   /** host must provide raw props snapshot (may include undeclared keys) */
   getRawProps(): Readonly<P & PropsBaseType>;
+
+  /** Explicit bounded association channel; excluded from raw and resolved Props. */
+  getInstanceAssociations?(): InstanceAssociations;
 
   /**
    * CP1 hook: called after runtime binds to the host and initial raw props hydration is done,

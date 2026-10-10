@@ -5,13 +5,13 @@ status: draft
 since: 0.3.0-alpha.0
 summary: The standard Context module owns JSON scope values, subscription intent, nearest-owner resolution and callback dispatch; adapters supply opaque instance identity and current logical ancestry.
 statement:
-  en: 'Context is the standard Runtime module for the Component-to-Component channel. Its per-instance facade records setup-time providers and required/optional subscriptions, then exposes runtime reads and callback-only updates. The privileged port supplies callback-dispatch integration, opaque scope lookup and diagnostics, never ordinary author access to host identity. A shared coordinator does not make provider or subscription resources global-lifetime resources: they belong to the component instance and survive repeatable view epochs. This first catalog slice remains draft; it neither introduces a new author API nor admits non-Web Adapter conformance.'
-  zh-CN: Context 是 standard Runtime 的组件间信息通路 Module。每实例 facade 记录 setup-time provider 与 required/optional subscription，再提供 runtime read 与 callback-only update；特权 port 提供 callback dispatcher 接入、opaque scope 查询和诊断，不向普通作者开放宿主身份。共享 coordinator 不改变 provider/subscription 的实例资源归属，它们跨 repeatable view epoch 保留。本轮编目保持 draft，不增加作者 API，也不宣称非 Web Adapter conformance。
+  en: 'Context is the standard Runtime module for the Component-to-Component channel. Its per-instance facade records setup-time providers and required/optional subscriptions, then exposes runtime reads and callback-only updates. The privileged port supplies callback-dispatch integration, opaque scope lookup and diagnostics, never ordinary author access to host identity. A shared coordinator does not make provider or subscription resources global-lifetime resources: they belong to the component instance and survive repeatable view epochs. This slice remains draft; the explicit optional ancestor read/subscription extension has bounded Web Runtime evidence and does not admit Compiler or non-Web conformance.'
+  zh-CN: Context 是 standard Runtime 的组件间信息通路 Module。每实例 facade 记录 setup-time provider 与 required/optional subscription，再提供 runtime read 与 callback-only update；特权 port 提供 callback dispatcher 接入、opaque scope 查询和诊断，不向普通作者开放宿主身份。共享 coordinator 不改变 provider/subscription 的实例资源归属，它们跨 repeatable view epoch 保留。本轮保持 draft；显式 optional ancestor 读订阅扩展仅有窄范围 Web Runtime 证据，不宣称 Compiler 或非 Web Adapter conformance。
 criteria:
   - id: M-CONTEXT-0001-A
     text:
-      en: The author facade exposes provide/subscribe/trySubscribe only in setup, read/tryRead at runtime including readonly render, and update/tryUpdate only in callback scope.
-      zh-CN: 作者 facade 仅在 setup 提供 provide/subscribe/trySubscribe，在 runtime（包括 readonly render）提供 read/tryRead，并仅在 callback scope 提供 update/tryUpdate。
+      en: The author facade exposes provide/subscribe/trySubscribe/trySubscribeAncestor only in setup, read/tryRead at runtime including readonly render, and update/tryUpdate only in callback scope.
+      zh-CN: 作者 facade 仅在 setup 提供 provide/subscribe/trySubscribe/trySubscribeAncestor，在 runtime（包括 readonly render）提供 read/tryRead，并仅在 callback scope 提供 update/tryUpdate。
   - id: M-CONTEXT-0001-B
     text:
       en: Callback dispatcher installation, resolveScope and provider/subscription/queue diagnostics belong to the privileged port; opaque scope tokens never become Context values or author handles.
@@ -26,8 +26,8 @@ criteria:
       zh-CN: 宿主提供的身份标识参与实例且独立于当前 view；ContextKey 引用身份独立标识通路。
   - id: M-CONTEXT-0001-E
     text:
-      en: Resolution is self-inclusive and selects the nearest provider using current supplied ancestry. Later reads, updates and notification recipient selection re-resolve; ancestry change alone emits no value callback.
-      zh-CN: resolution 从自身开始，使用当前宿主 ancestry 选择最近 provider。后续 read/update 与通知接收者选择重新解析；ancestry 改变本身不派发 value callback。
+      en: Ordinary resolution is self-inclusive and selects the nearest provider using current supplied ancestry. Later reads, updates and notification recipient selection re-resolve; ancestry change alone emits no value callback.
+      zh-CN: 普通 resolution 从自身开始，使用当前宿主 ancestry 选择最近 provider。后续 read/update 与通知接收者选择重新解析；ancestry 改变本身不派发 value callback。
   - id: M-CONTEXT-0001-F
     text:
       en: A provider may update its own value without subscribing. Other update callers need prior subscription; tryUpdate always needs optional subscription, while read/tryRead retain their declared subscription modes.
@@ -44,6 +44,10 @@ criteria:
     text:
       en: Operations requiring missing identity or ancestry fail diagnostically rather than guessing a scope. Declaration-only paths need not acquire an unused traversal capability.
       zh-CN: 需要 identity 或 ancestry 的操作在能力缺失时给出诊断并失败，不猜测 scope；纯声明路径不必索取尚未使用的遍历能力。
+  - id: M-CONTEXT-0001-J
+    text:
+      en: Explicit optional ancestor subscription/read excludes self, keeps independent intent and current-ancestry routing, and rejects stale callbacks after unsubscribe, disposal, provider replacement or reparenting, including deferred dispatcher execution. Existing self-inclusive participation and writes remain unchanged.
+      zh-CN: 显式 optional ancestor 订阅读取排除 self，保留独立意图与当前 ancestry 路由；在 unsubscribe、销毁、provider 替换或 reparent 后拒绝旧 callback，包括延后 dispatcher 执行。原 self-inclusive 参与及写操作不变。
 satisfies:
   contracts:
     - C-CONTEXT-0001
@@ -96,6 +100,9 @@ openQuestions:
     blocks:
       - configurable-runtime-module-selection
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added explicit optional strict-ancestor participation for nested same-key providers with bounded Web Runtime and unsupported-Compiler evidence.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged the existing Context vertical slice and the maintainer-approved provider self-update exception.

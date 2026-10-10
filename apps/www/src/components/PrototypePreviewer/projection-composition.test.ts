@@ -1011,7 +1011,7 @@ describe('Website native-only content recipes', () => {
 
 describe('toolbar-free partial-family compositions', () => {
   for (const family of ['bootstrap-2-3-2', 'liquid-glass'] as const) {
-    it(`${family} needs no Select when controls are absent, but refuses requested controls`, () => {
+    it(`${family} needs only content when controls are absent and uses its real Select/Text when requested`, () => {
       const options = {
         ownerId: `partial-${family}`,
         runtimeId: 'wc' as const,
@@ -1035,8 +1035,19 @@ describe('toolbar-free partial-family compositions', () => {
         if (node.kind === 'proto') ids.push(node.prototypeId);
       });
       expect(ids).toEqual([`${family}-button`]);
-      expect(() => createProjectionComposition({ ...options, controlIds: ['runtime'] })).toThrow(
-        /no family select/
+      const withToolbar = createProjectionComposition({ ...options, controlIds: ['runtime'] });
+      const toolbarIds = new Set<string>();
+      walk(withToolbar.demo.root, (node) => {
+        if (node.kind === 'proto') toolbarIds.add(node.prototypeId);
+      });
+      expect(toolbarIds).toEqual(
+        new Set([
+          `${family}-button`,
+          `${family}-text-root`,
+          ...['root', 'trigger', 'value', 'content', 'item'].map(
+            (part) => `${family}-select-${part}`
+          ),
+        ])
       );
     });
   }

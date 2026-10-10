@@ -1,4 +1,4 @@
-// Neutral opaque Surface projection. No material/glass or extra family component parity claim.
+// Static optical surface intent. Unavailable or nonopaque source/style inputs preserve the ordinary Surface presentation.
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asSurfaceRoot,
@@ -9,6 +9,21 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
   name: 'liquid-glass-surface-root',
   setup(def) {
     asSurfaceRoot();
+    def.feedback.material.declare({
+      version: 2,
+      shape: { kind: 'rounded-rect', geometry: 'style' },
+      source: { kind: 'in-app-backdrop' },
+      fallback: { fill: 'style', foreground: 'style' },
+    });
+    def.rule({
+      when: (w) =>
+        w.any(
+          w.prop('variant').eq('outline'),
+          w.prop('variant').eq('secondary'),
+          w.prop('variant').eq('muted')
+        ),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
+    });
     def.rule({
       when: (w) => w.prop('variant').eq('scrim'),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),

@@ -28,32 +28,36 @@ criteria:
   - id: P-BRUTALIST-TABS-TRIGGER-SELECTED-PAIR-INVARIANT
     text:
       en: >-
-        Selected co-selects bg-main/text-main-foreground and border-black. Selection never adds elevation; the pair and frame persist through press without changing Base selected or aria-selected ownership.
+        With appearance=default, selected co-selects bg-main/text-main-foreground and border-black. Selection never adds elevation; the pair and frame persist through press without changing Base selected or aria-selected ownership.
 
 
       zh-CN: >-
-        selected 同时选择 bg-main/text-main-foreground 与 border-black，不增加 elevation；色对与 frame 在 press 时保持，Base selected 与 aria-selected owner 不变。
+        appearance=default 时，selected 同时选择 bg-main/text-main-foreground 与 border-black，不增加 elevation；色对与 frame 在 press 时保持，Base selected 与 aria-selected owner 不变。
 
 
   - id: P-BRUTALIST-TABS-TRIGGER-INTERACTION
     text:
       en: >-
-        Hover on an unselected, released Trigger applies bg-secondary-background and border-black. Press retains border-black without movement or shadow. Focus-visible and disabled retain their ring and gate rules.
+        With appearance=default, hover on an unselected, released Trigger applies bg-secondary-background and border-black. Press retains border-black without movement or shadow. Focus-visible and disabled retain their ring and gate rules.
 
 
       zh-CN: >-
-        未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。
+        appearance=default 时，未选中且未 pressed 的 Trigger hover 使用 bg-secondary-background 与 border-black；press 保持 border-black，无位移或阴影；focus-visible 与 disabled 保留 ring/gate 规则。
 
 
   - id: P-BRUTALIST-TABS-TRIGGER-VISUAL-GRAMMAR
     text:
       en: >-
-        Trigger uses rounded-base 5px, border-2 with transparent resting border, font-heading font-bold text-sm, authored casing and text-foreground. It has no shadow or translation; selection is the main fill pair plus black border.
+        With appearance=default, trigger uses rounded-base 5px, border-2 with transparent resting border, font-heading font-bold text-sm, authored casing and text-foreground. It has no shadow or translation; selection is the main fill pair plus black border.
 
 
       zh-CN: >-
-        Trigger 使用 rounded-base 5px、静止透明 border-2、font-heading font-bold text-sm、作者大小写与 text-foreground，无 shadow 或 translation；selected 由 main 色对与黑边表达。
+        appearance=default 时，Trigger 使用 rounded-base 5px、静止透明 border-2、font-heading font-bold text-sm、作者大小写与 text-foreground，无 shadow 或 translation；selected 由 main 色对与黑边表达。
 
+
+  - id: P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -68,8 +72,12 @@ dependsOn:
 inherits:
   prototypes:
     - id: P-BASE-TABS-TRIGGER
-verifies: { tests: [T-BRUTALIST-TABS-0001] }
+verifies:
+  { tests: [T-BRUTALIST-TABS-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.

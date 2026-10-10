@@ -1,0 +1,28 @@
+id: P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT
+type: prototype
+title: bootstrap-2-3-2 Dropdown Menu content
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 补齐既有动作菜单定义的家族映射；视觉、所有宿主、native/GPUI、打包和独立审查尚未完成。
+  en: Completes the family mapping of the existing action-menu definition; visual, all-host, native/GPUI, packed and independent acceptance remain pending.
+summary: Independent family projection of the existing Dropdown content definition.
+statement:
+  zh-CN: 保留 P-BASE-DROPDOWN-MENU-CONTENT 的可观察语义，只拥有本家绘制和材料反馈，不新增动作或状态所有者。
+  en: Preserve observable P-BASE-DROPDOWN-MENU-CONTENT semantics while owning family paint/material feedback without a second action or state owner.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT-SEMANTICS-AND-PAINT
+    text:
+      zh-CN: 全部行为继续遵守共同定义；本家源码配方和实际绘制证据分开验收，不能用fallback冒充光学效果完成。
+      en: All behavior follows the common definition; source recipes and actual paint require separate acceptance, and fallback does not prove optical material completion.
+dependsOn:
+  prototypes: [P-BASE-DROPDOWN-MENU-CONTENT]
+verifies:
+  tests: [T-BASE-DROPDOWN-COMPOSITION-0001]
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/dropdown/content.proto.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the missing family projection without broader compatibility or platform admission.
+tags: [prototype, bootstrap-2-3-2, dropdown-menu]

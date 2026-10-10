@@ -1,0 +1,54 @@
+---
+title: 'Select'
+description: 'Liquid Glass Select: five direct Base parts, controlled selection and anchored popup.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Liquid Glass Select 提供 Root、Trigger、Value、Content、Item 五个真实原型，每个 part 直接消费对应 Base hook。当前是 draft workspace 源码；源码和 synthetic DOM 测试不等于原生宿主验收通过。
+
+<PrototypePreviewer
+  class="select-content-preview"
+  demoId="demo-liquid-glass-select"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+## 体验
+
+四个例子分别展示非受控 value、禁用、受控 value、RTL 长标签。受控示例选择一个选项后，需要点击 **Accept selection** 才会提供新的 owner value；popup 可以先关闭，已提交值保持原状。预览工具栏使用本体系真实 Select parts 切换 WC、React、Vue、Vue 2。
+
+## 五个 part，一个 owner
+
+- Root 持有 `open`、`value`、selected text、collection 和请求。分别传入 `open`/`value` 时进入独立受控模式；`defaultOpen`/`defaultValue` 初始化非受控状态。保留 `disabled` 与 `closeOnSelect`。
+- Trigger 投射 combobox 关系、effective disabled 和交互状态。指针激活 toggle；Enter/Space 打开；ArrowDown/ArrowUp 从已选项或首/末可用项进入。
+- Value 按 selected text、raw value、placeholder、空内容回退，不拥有输入或 focus。
+- Content 持有 listbox、fixed anchored portal、碰撞处理和键盘导航。保留 `side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 和 Transition props；本投影使用零时长 presence。
+- Item 持有 option identity 与派生 selected/active。指针、Enter、Space 提交可用项；导航和 hover 不提交 value，禁用项从导航中跳过。
+
+Escape 取消并返回 Trigger focus，Tab 关闭但不阻止遍历，outside press 关闭。Root 请求仍为 `openChange` 与 `valueChange`，Item 另发出 `select`。更新已选 Item 的 `textValue` 会刷新显示标签。
+
+长标签换行且可收缩；Content 受宿主 available width/height 约束，文字对齐和尾部指示符遵循逻辑方向。外部需给 Trigger focus ring 留白。此处是 select-only 单选协议；form submission、editable search、multi-select、虚拟化和 item-aligned positioning 不属于当前 Base 保证。
+
+## 使用 workspace 源码
+
+```ts
+import {
+  selectRoot,
+  selectTrigger,
+  selectValue,
+  selectContent,
+  selectItem,
+} from '@proto.ui/prototypes-liquid-glass/select';
+```
+
+source-only CLI 项 `liquid-glass-select` 仅在显式 workspace source mode 下生成四种 Web facade 的完整五 part。包仍是 private、未发布；GPUI facade generation 尚未实现。
+
+## 材质边界
+
+Trigger 与 Content 使用共享 typed `liquid-glass` 光学意图，并保留完整不透明 fill/foreground fallback。Trigger 从 Base 派生 rest/pressed deformation，Content 只在打开时请求玻璃；Root、Value、Item 不增加材质 owner。显式玻璃不得换成 `adaptive` native blur。意图帧与生命周期测试不证明自实现折射、native paint 或 GPUI parity；缺少材质 host 时保留不透明表现并报告 unavailable。
+
+- [Base Select](/zh-cn/ui-libraries/base/select/)
+- [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/select)
+- [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)

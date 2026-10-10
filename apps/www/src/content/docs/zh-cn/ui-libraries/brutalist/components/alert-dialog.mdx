@@ -1,0 +1,23 @@
+---
+title: 'AlertDialog'
+description: '带主要说明、安全取消焦点与明确操作意图的模态确认窗口。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+带主要说明、安全取消焦点与明确操作意图的模态确认窗口。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-alert-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 固定 alert 语义。Mask 管理模态遮罩；Content 约束焦点、拒绝外部点击关闭并优先聚焦 Cancel。Action 先发出 action，再请求关闭，实际操作由应用处理。Escape 与 Cancel 请求关闭。
+
+Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
+
+组成: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+
+当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。

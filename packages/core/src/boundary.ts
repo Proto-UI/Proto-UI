@@ -2,7 +2,7 @@ import type { PropsBaseType } from '@proto.ui/types';
 
 export type BoundaryClassification = 'inside' | 'outside' | 'unknown';
 
-export type BoundaryObservation = 'pointer.press';
+export type BoundaryObservation = 'pointer.press' | 'focus.move';
 
 export type BoundaryRegionRole = 'trigger' | 'anchor' | 'content' | (string & {});
 
@@ -36,6 +36,8 @@ export type BoundarySample = Readonly<{
 
 export type BoundaryOutsideEvent = Readonly<{
   classification: 'outside';
+  /** Present for runtime-owned observations; manual notify may omit it. */
+  observation?: BoundaryObservation;
   sample?: BoundarySample;
 }>;
 

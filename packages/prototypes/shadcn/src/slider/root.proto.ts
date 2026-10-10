@@ -1,0 +1,15 @@
+import type { SliderRootProps, SliderRootExposes } from '@proto.ui/prototypes-base/slider';
+import { definePrototype, tw } from '@proto.ui/core';
+import { asSliderRoot } from '@proto.ui/prototypes-base/slider';
+export default definePrototype<SliderRootProps, SliderRootExposes>({
+  name: 'shadcn-slider-root',
+  setup(def) {
+    const inherited = asSliderRoot();
+    def.feedback.style.use(tw('flex w-full min-w-0 flex-wrap items-center gap-3 text-foreground'));
+    def.rule({
+      when: (w) => w.state(inherited.stateHandles!.orientation).eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('h-full w-auto flex-col flex-nowrap')),
+    });
+    return inherited.render;
+  },
+});

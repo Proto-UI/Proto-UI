@@ -1,0 +1,96 @@
+name: Finf representative feature screenshots
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/finf-representative-features-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'apps/www/src/content/docs/**'
+      - 'apps/www/src/styles/**'
+      - 'apps/www/astro.config.mjs'
+      - 'scripts/styles/**'
+      - 'scripts/test/server-readiness.mjs'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  representative-features:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        group:
+          - forms
+          - calendar
+          - disclosure-overlays
+          - modal-overlays
+          - runtime-tabs
+          - slider
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and retain source identity
+        id: setup
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          mkdir -p "$RUNNER_TEMP/finf-feature-evidence"
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/finf-feature-evidence/font-environment.txt"
+          fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn' >> "$RUNNER_TEMP/finf-feature-evidence/font-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/finf-feature-evidence/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/finf-feature-evidence/source-tree.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/finf-feature-evidence/browser.txt"
+      - name: Check the actual preset generation boundary
+        id: presets
+        run: |
+          set -o pipefail
+          corepack pnpm@10.32.1 check:styles:preset 2>&1 | tee "$RUNNER_TEMP/finf-feature-evidence/preset-check.log"
+      - name: Use the existing real documentation surface
+        id: surface
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Capture independent current-source component group
+        if: ${{ !cancelled() && steps.setup.outcome == 'success' && steps.surface.outcome == 'success' }}
+        env:
+          PUI_FINF_FEATURE_GROUP: ${{ matrix.group }}
+          PUI_FINF_PRESET_CHECK: ${{ steps.presets.outcome }}
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-feature-evidence
+        run: |
+          set -euo pipefail
+          TEST_FILE=apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
+          if [ "$PUI_FINF_FEATURE_GROUP" = slider ]; then
+            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts
+          fi
+          corepack pnpm@10.32.1 exec vitest run \
+            "$TEST_FILE" \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
+            2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
+      - name: Retain actual source-bound images and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finf-features-${{ matrix.group }}-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/finf-feature-evidence
+          if-no-files-found: warn
+          retention-days: 30

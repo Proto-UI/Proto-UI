@@ -1,6 +1,6 @@
 // Negative evidence for the session fixture gate. The check runs the real
 // peer again and compares every whole recording, so a stale or missing
-// fixture must fail it through the CLI the repository runs.
+// fixture must fail it through the generator entry point the repository runs.
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { copyFileSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -13,15 +13,16 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const SCRIPT = path.join(ROOT, 'scripts/gpui/generate-session-fixtures.mts');
 const FIXTURES = path.join(ROOT, 'native/gpui/fixtures');
 const FILES = [
+  'base-label-session.json',
   'base-button-session.json',
   'base-toggle-session.json',
   'base-switch-session.json',
   'base-checkbox-session.json',
 ];
-const TSX = path.join(ROOT, 'node_modules/.bin/tsx');
-
 function runCheck(dir = FIXTURES) {
-  return spawnSync(TSX, [SCRIPT, '--check', '--dir', dir], {
+  // The generator owns this contract, not tsx's CLI IPC server. Node's tsx
+  // loader runs the same entry point in environments without local sockets.
+  return spawnSync(process.execPath, ['--import', 'tsx', SCRIPT, '--check', '--dir', dir], {
     cwd: ROOT,
     encoding: 'utf8',
   });
@@ -37,6 +38,10 @@ function copies() {
 test('the committed recordings are current', () => {
   const result = runCheck();
   assert.equal(result.status, 0, result.stderr || result.stdout);
+  assert.match(
+    result.stdout,
+    /base-label-session\.json is current \(passive: \d+ messages, actionable: \d+ messages\)/
+  );
   assert.match(
     result.stdout,
     /base-button-session\.json is current \(enabled: \d+ messages, disabled: \d+ messages\)/

@@ -21,6 +21,11 @@ cases:
     covers:
       - M-EXPOSE-STATE-WEB-0001-D
     expectation: web-projection-lifetime
+  - id: T-EXPOSE-STATE-WEB-0001-CASE-TERMINAL
+    title: Owned artifacts restore conditionally at terminal disposal
+    covers:
+      - M-EXPOSE-STATE-WEB-0001-D
+    expectation: terminal-owned-projection-restoration
   - id: T-EXPOSE-STATE-WEB-0001-CASE-MAPPING
     title: Web projection mapping
     covers:
@@ -63,6 +68,13 @@ implementations:
       - T-EXPOSE-STATE-WEB-0001-CASE-REBIND
       - T-EXPOSE-STATE-WEB-0001-CASE-LIFETIME
       - T-EXPOSE-STATE-WEB-0001-CASE-MAPPING
+  - id: terminal-ownership
+    kind: module-test
+    status: passing
+    path: packages/modules/expose-state-web/test/terminal-ownership.test.ts
+    required: true
+    consumesCases:
+      - T-EXPOSE-STATE-WEB-0001-CASE-TERMINAL
   - id: runtime
     kind: runtime-test
     status: passing

@@ -25,10 +25,158 @@
     "./surface": {
       "types": "./src/surface/index.ts",
       "default": "./src/surface/index.ts"
+    },
+    "./label": {
+      "types": "./src/label/index.ts",
+      "default": "./src/label/index.ts"
+    },
+    "./collapsible": {
+      "types": "./src/collapsible/index.ts",
+      "default": "./src/collapsible/index.ts"
+    },
+    "./accordion": {
+      "types": "./src/accordion/index.ts",
+      "default": "./src/accordion/index.ts"
+    },
+    "./select": {
+      "types": "./src/select/index.ts",
+      "default": "./src/select/index.ts"
+    },
+    "./text": {
+      "types": "./src/text/index.ts",
+      "default": "./src/text/index.ts"
+    },
+    "./field": {
+      "types": "./src/field/index.ts",
+      "default": "./src/field/index.ts"
+    },
+    "./alert-dialog": {
+      "types": "./src/alert-dialog/index.ts",
+      "default": "./src/alert-dialog/index.ts"
+    },
+    "./drawer": {
+      "types": "./src/drawer/index.ts",
+      "default": "./src/drawer/index.ts"
+    },
+    "./popover": {
+      "types": "./src/popover/index.ts",
+      "default": "./src/popover/index.ts"
+    },
+    "./progress": {
+      "types": "./src/progress/index.ts",
+      "default": "./src/progress/index.ts"
+    },
+    "./meter": {
+      "types": "./src/meter/index.ts",
+      "default": "./src/meter/index.ts"
+    },
+    "./calendar": {
+      "types": "./src/calendar/index.ts",
+      "default": "./src/calendar/index.ts"
+    },
+    "./toggle-group": {
+      "types": "./src/toggle-group/index.ts",
+      "default": "./src/toggle-group/index.ts"
+    },
+    "./toolbar": {
+      "types": "./src/toolbar/index.ts",
+      "default": "./src/toolbar/index.ts"
+    },
+    "./toast": {
+      "types": "./src/toast/index.ts",
+      "default": "./src/toast/index.ts"
+    },
+    "./fieldset": {
+      "types": "./src/fieldset/index.ts",
+      "default": "./src/fieldset/index.ts"
+    },
+    "./form": {
+      "types": "./src/form/index.ts",
+      "default": "./src/form/index.ts"
+    },
+    "./checkbox-group": {
+      "types": "./src/checkbox-group/index.ts",
+      "default": "./src/checkbox-group/index.ts"
+    },
+    "./autocomplete": {
+      "types": "./src/autocomplete/index.ts",
+      "default": "./src/autocomplete/index.ts"
+    },
+    "./combobox": {
+      "types": "./src/combobox/index.ts",
+      "default": "./src/combobox/index.ts"
+    },
+    "./command": {
+      "types": "./src/command/index.ts",
+      "default": "./src/command/index.ts"
+    },
+    "./menubar": {
+      "types": "./src/menubar/index.ts",
+      "default": "./src/menubar/index.ts"
+    },
+    "./navigation-menu": {
+      "types": "./src/navigation-menu/index.ts",
+      "default": "./src/navigation-menu/index.ts"
+    },
+    "./context-menu": {
+      "types": "./src/context-menu/index.ts",
+      "default": "./src/context-menu/index.ts"
+    },
+    "./slider": {
+      "types": "./src/slider/index.ts",
+      "default": "./src/slider/index.ts"
+    },
+    "./number-field": {
+      "types": "./src/number-field/index.ts",
+      "default": "./src/number-field/index.ts"
+    },
+    "./input-otp": {
+      "types": "./src/input-otp/index.ts",
+      "default": "./src/input-otp/index.ts"
+    },
+    "./tree": {
+      "types": "./src/tree/index.ts",
+      "default": "./src/tree/index.ts"
+    },
+    "./message-scroller": {
+      "types": "./src/message-scroller/index.ts",
+      "default": "./src/message-scroller/index.ts"
+    },
+    "./resizable": {
+      "types": "./src/resizable/index.ts",
+      "default": "./src/resizable/index.ts"
+    },
+    "./carousel": {
+      "types": "./src/carousel/index.ts",
+      "default": "./src/carousel/index.ts"
+    },
+    "./virtual-list": {
+      "types": "./src/virtual-list/index.ts",
+      "default": "./src/virtual-list/index.ts"
+    },
+    "./date-picker": {
+      "types": "./src/date-picker/index.ts",
+      "default": "./src/date-picker/index.ts"
+    },
+    "./data-table": {
+      "types": "./src/data-table/index.ts",
+      "default": "./src/data-table/index.ts"
+    },
+    "./dropdown": {
+      "types": "./src/dropdown/index.ts",
+      "default": "./src/dropdown/index.ts"
+    },
+    "./tabs": {
+      "types": "./src/tabs/index.ts",
+      "default": "./src/tabs/index.ts"
     }
   },
   "dependencies": {
     "@proto.ui/core": "workspace:*",
     "@proto.ui/prototypes-base": "workspace:*"
+  },
+  "scripts": {
+    "build:draft": "node ../../../scripts/build/draft-prototype-packages.mjs --package @proto.ui/prototypes-liquid-glass",
+    "pack:draft": "node ../../../scripts/build/draft-prototype-packages.mjs --package @proto.ui/prototypes-liquid-glass --pack"
   }
 }

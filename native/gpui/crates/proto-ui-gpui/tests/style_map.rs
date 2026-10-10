@@ -85,20 +85,20 @@ fn feedback_refines_the_host_root_without_inventing_a_position() {
 
 #[test]
 fn feedback_insets_need_an_authored_supported_position() {
-    let unspecified = style_for_feedback_tokens(["left-1/2"], None, LengthContext::default());
+    let unspecified = style_for_feedback_tokens(["left-[100%]"], None, LengthContext::default());
     assert_eq!(unspecified.refinement.position, None);
     assert_eq!(unspecified.refinement.inset.left, None);
     assert_eq!(
         unspecified.issues,
         [StyleIssue::Unmapped {
             property: "left".into(),
-            value: "50%".into(),
+            value: "100%".into(),
             reason: Unmapped::UnsupportedValue,
         }]
     );
 
     let absolute =
-        style_for_feedback_tokens(["absolute", "left-1/2"], None, LengthContext::default());
+        style_for_feedback_tokens(["absolute", "left-[100%]"], None, LengthContext::default());
     assert!(
         absolute.issues.is_empty(),
         "unexpected: {:?}",
@@ -107,7 +107,7 @@ fn feedback_insets_need_an_authored_supported_position() {
     assert_eq!(absolute.refinement.position, Some(Position::Absolute));
     assert_eq!(
         absolute.refinement.inset.left,
-        Some(Length::Definite(DefiniteLength::Fraction(0.5)))
+        Some(Length::Definite(DefiniteLength::Fraction(1.0)))
     );
 }
 
@@ -182,7 +182,9 @@ fn maps_layout_and_box_properties() {
 #[test]
 fn maps_a_percentage_to_a_fraction_and_keeps_position() {
     let mapped = map(
-        &resolve(&["absolute", "w-full", "left-1/2"], "shadcn"),
+        // Preserve percentage semantics independently of source inventory:
+        // current Dialog tokens no longer emit the former left-1/2 spelling.
+        &declared(&[("position", "absolute"), ("width", "100%"), ("left", "50%")]),
         LengthContext::default(),
     );
     let style = &mapped.refinement;
@@ -391,13 +393,20 @@ fn reports_a_property_it_cannot_express() {
 ///
 /// Every entry here is deliberate, not an oversight: each needs work beyond a
 /// property assignment, and each is named in the plan as its own slice.
-const EXPECTED_UNMAPPED: [&str; 32] = [
+const EXPECTED_UNMAPPED: [&str; 33] = [
     // Composed paint that needs BoxShadow construction from the ring/shadow
     // custom properties rather than a single declaration.
     "box-shadow",
     // Bootstrap's recorded gradient has a flat fallback, but no image lowering.
     "background-image",
     "border-top-color",
+    // Shadcn Card Header's implicit min-content rows have no Style field at
+    // GPUI 62e5991. Explicit `auto auto` rows cannot be represented by its
+    // GridTemplate either: it only lowers repeat/minmax tracks, not auto.
+    // Keep both runtime diagnostics; see the Card row regression below and
+    // internal/records/2026-10-09-gpui-card-grid-row-gaps.md for pinned evidence.
+    "grid-auto-rows",
+    "grid-template-rows",
     "outline",
     "outline-color",
     "outline-offset",
@@ -409,9 +418,6 @@ const EXPECTED_UNMAPPED: [&str; 32] = [
     "z-index",
     "pointer-events",
     "touch-action",
-    "user-select",
-    // WebKit's compatibility declaration does not add native selection support.
-    "-webkit-user-select",
     "resize",
     "will-change",
     "background-clip",
@@ -431,28 +437,73 @@ const EXPECTED_UNMAPPED: [&str; 32] = [
     "text-decoration-line",
     "text-underline-offset",
     "white-space",
+    "overflow-wrap",
 ];
 
 #[test]
-fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
-    // Use a supported positioning context; implicit static-position diagnostics
-    // are covered separately and must not be mistaken for selection properties.
-    let mapped = map(
-        &resolve(&["relative", "select-none"], "shadcn"),
-        LengthContext::default(),
-    );
-    let actual: BTreeSet<&str> = mapped
-        .unmapped
-        .iter()
-        .map(|(property, value, reason)| {
-            assert_eq!(value, "none");
-            assert_eq!(*reason, Unmapped::UnknownProperty);
-            property.as_str()
-        })
-        .collect();
-    let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
-    assert_eq!(actual, expected);
-    assert!(!mapped.is_complete());
+fn card_grid_rows_remain_diagnostic_instead_of_becoming_fractional_tracks() {
+    for (token, property, value) in [
+        ("auto-rows-min", "grid-auto-rows", "min-content"),
+        ("grid-rows-[auto_auto]", "grid-template-rows", "auto auto"),
+    ] {
+        let resolved = resolve(&["relative", "grid", "grid-cols-1", token], "shadcn");
+        assert!(resolved.unknown.is_empty());
+        assert_eq!(
+            resolved.declarations.get(property).map(String::as_str),
+            Some(value)
+        );
+        let mapped = map(&resolved, LengthContext::default());
+        assert_eq!(mapped.refinement.display, Some(Display::Grid));
+        assert!(mapped.refinement.grid_cols.is_some());
+        assert_eq!(mapped.refinement.grid_rows, None);
+        assert_eq!(
+            mapped.unmapped,
+            vec![(property.into(), value.into(), Unmapped::UnknownProperty)]
+        );
+        assert!(!mapped.is_complete());
+
+        // The host-facing path must preserve the same gap, not silently
+        // treat the token as a declaration-free marker or accept a fallback.
+        let feedback = style_for_feedback_tokens([token], None, LengthContext::default());
+        assert_eq!(feedback.refinement.grid_rows, None);
+        assert_eq!(
+            feedback.issues,
+            [StyleIssue::Unmapped {
+                property: property.into(),
+                value: value.into(),
+                reason: Unmapped::UnknownProperty,
+            }]
+        );
+    }
+}
+
+#[test]
+fn selectable_text_affordances_remain_explicitly_unmapped() {
+    // Current prototypes emit none, which plain native Text honors. Keep
+    // selectable text/all as independent negative controls, not fake source
+    // inventory entries or evidence that passive native selection is complete.
+    for value in ["text", "all"] {
+        let mapped = map(
+            &declared(&[
+                ("position", "relative"),
+                ("user-select", value),
+                ("-webkit-user-select", value),
+            ]),
+            LengthContext::default(),
+        );
+        let actual: BTreeSet<&str> = mapped
+            .unmapped
+            .iter()
+            .map(|(property, actual, reason)| {
+                assert_eq!(actual, value);
+                assert_eq!(*reason, Unmapped::UnknownProperty);
+                property.as_str()
+            })
+            .collect();
+        let expected: BTreeSet<&str> = ["-webkit-user-select", "user-select"].into_iter().collect();
+        assert_eq!(actual, expected);
+        assert!(!mapped.is_complete());
+    }
 }
 
 /// The inventory of values a property this layer *does* implement cannot take.
@@ -460,7 +511,25 @@ fn selection_affordances_keep_both_web_properties_explicitly_unmapped() {
 /// This is a separate list from the property inventory on purpose. `width` is
 /// mapped; `width: fit-content` is not. Recording the pair keeps the property
 /// inventory from claiming that `width` never reaches a surface.
-const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
+const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 13] = [
+    (
+        "overflow-x",
+        "auto",
+        "Accordion's long-line scroll policy needs conditional horizontal scrolling. \
+         GPUI's Scroll mode is not evidence for CSS Auto overflow parity.",
+    ),
+    (
+        "max-height",
+        "calc(100% - 2rem)",
+        "Dialog's available-space height requires the live logical content region and gutter. \
+         A fraction minus a length cannot be represented by a GPUI definite length alone.",
+    ),
+    (
+        "max-width",
+        "min(32rem,calc(100% - 2rem))",
+        "Dialog's available-space width requires a live layout basis before min can choose. \
+         The Web variable fallback does not implement the native available-space lease.",
+    ),
     (
         "color",
         "inherit",
@@ -525,6 +594,72 @@ const EXPECTED_UNMAPPED_VALUES: [(&str, &str, &str); 10] = [
         "GPUI has no Auto overflow mode and Scroll reserves scrollbar space even when content fits.",
     ),
 ];
+
+#[test]
+fn prefixed_none_selection_matches_the_existing_native_text_policy() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("user-select", "none"),
+            ("-webkit-user-select", "none"),
+        ]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete());
+    for property in ["user-select", "-webkit-user-select"] {
+        let unsupported = map(
+            &declared(&[("position", "relative"), (property, "text")]),
+            LengthContext::default(),
+        );
+        assert!(!unsupported.is_complete());
+    }
+}
+
+#[test]
+fn margin_zero_resets_every_edge_without_claiming_other_margin_forms() {
+    let mapped = map(
+        &declared(&[("position", "relative"), ("margin", "0")]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete());
+    let zero = Some(Length::Definite(DefiniteLength::Absolute(
+        AbsoluteLength::Pixels(gpui::px(0.0)),
+    )));
+    assert_eq!(mapped.refinement.margin.top, zero);
+    assert_eq!(mapped.refinement.margin.right, zero);
+    assert_eq!(mapped.refinement.margin.bottom, zero);
+    assert_eq!(mapped.refinement.margin.left, zero);
+    for value in ["auto", "1px", "0 1px", "100%"] {
+        let unsupported = map(
+            &declared(&[("position", "relative"), ("margin", value)]),
+            LengthContext::default(),
+        );
+        assert!(!unsupported.is_complete());
+        assert_eq!(unsupported.refinement.margin.top, None);
+        assert_eq!(unsupported.refinement.margin.right, None);
+        assert_eq!(unsupported.refinement.margin.bottom, None);
+        assert_eq!(unsupported.refinement.margin.left, None);
+    }
+}
+
+#[test]
+fn available_space_expressions_are_not_truncated_to_a_fraction() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("max-height", "calc(100% - 2rem)"),
+            ("max-width", "min(32rem,calc(100% - 2rem))"),
+        ]),
+        LengthContext::default(),
+    );
+    assert_eq!(mapped.refinement.max_size.width, None);
+    assert_eq!(mapped.refinement.max_size.height, None);
+    assert_eq!(mapped.unmapped.len(), 2);
+    assert!(mapped
+        .unmapped
+        .iter()
+        .all(|(_, _, reason)| *reason == Unmapped::UnsupportedValue));
+}
 
 /// The source-aligned Brutalist theme gives its ordinary surfaces a 5px radius.
 /// This positive projection check is independent of the invalid-calc negatives.
@@ -889,4 +1024,66 @@ fn text_inherited_tone_reports_unsupported_value_without_parent_style() {
         property == "color" && value == "inherit" && *reason == Unmapped::UnsupportedValue
     }));
     assert!(!mapped.is_complete());
+}
+
+#[test]
+fn explicit_no_selection_matches_plain_native_text_without_claiming_selection_support() {
+    let mut resolved = resolve(&["select-none"], "shadcn");
+    // Isolate selection from the separate implicit-position gap.
+    resolved
+        .declarations
+        .insert("position".into(), "relative".into());
+    assert!(map(&resolved, LengthContext::default()).is_complete());
+    resolved
+        .declarations
+        .insert("user-select".into(), "text".into());
+    assert!(map(&resolved, LengthContext::default())
+        .unmapped_properties()
+        .contains(&"user-select"));
+}
+
+#[test]
+fn intrinsic_dialog_tokens_reach_the_exact_public_gpui_fields() {
+    let mapped = map(
+        &declared(&[
+            ("position", "relative"),
+            ("height", "auto"),
+            ("flex-wrap", "wrap-reverse"),
+            ("grid-template-columns", "repeat(1, minmax(0, 1fr))"),
+        ]),
+        LengthContext::default(),
+    );
+    assert!(mapped.is_complete(), "{:?}", mapped.unmapped);
+    assert_eq!(mapped.refinement.size.height, Some(Length::Auto));
+    assert_eq!(
+        mapped.refinement.flex_wrap,
+        Some(gpui::FlexWrap::WrapReverse)
+    );
+    let columns = mapped
+        .refinement
+        .grid_cols
+        .expect("one canonical fractional column");
+    assert_eq!(columns.repeat, 1);
+    assert!(matches!(columns.min_size, gpui::GridTemplateMinSize::Zero));
+}
+
+#[test]
+fn intrinsic_token_mapping_does_not_guess_other_keywords_or_grid_forms() {
+    for (property, value) in [
+        ("height", "fit-content"),
+        ("height", "max-content"),
+        ("flex-wrap", "invented-wrap"),
+        ("grid-template-columns", "repeat(2, minmax(0, 1fr))"),
+        ("grid-template-columns", "minmax(auto, 1fr)"),
+        ("grid-template-columns", "subgrid"),
+    ] {
+        let mapped = map(
+            &declared(&[("position", "relative"), (property, value)]),
+            LengthContext::default(),
+        );
+        assert!(!mapped.is_complete(), "{property}: {value}");
+        assert_eq!(mapped.refinement.size.height, None);
+        assert_eq!(mapped.refinement.flex_wrap, None);
+        assert!(mapped.refinement.grid_cols.is_none());
+    }
 }

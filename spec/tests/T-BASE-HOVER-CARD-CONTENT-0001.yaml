@@ -27,6 +27,10 @@ cases:
       - P-BASE-HOVER-CARD-CONTENT-PORTAL
       - P-BASE-HOVER-CARD-CONTENT-DEFERRED-EXTENSIONS
     expectation: hover-card-content-portals-and-positions-from-trigger-with-collision-policy
+  - id: T-BASE-HOVER-CARD-CONTENT-0001-CASE-LIFECYCLE
+    title: View-generation withdrawal preserves owner, replacement, and request boundaries
+    covers: [P-BASE-HOVER-CARD-CONTENT-INTERACTION-LIFETIME]
+    expectation: With openDelay=0 and closeDelay=20, enter Trigger, enter Content, leave Trigger, and remove Content without pointerleave. Root remains open at 19ms and closes at 20ms. Repeat with actual retained L1 unmount/remount and terminal replacement; neither remount replays hover, and an old ID cannot release a new contribution. A still-hovered Trigger independently keeps Root open.
 implementations:
   - id: prototypes-base-hover-card-content-contract
     kind: module-test
@@ -48,6 +52,13 @@ implementations:
       - T-BASE-HOVER-CARD-CONTENT-0001-CASE-HOVER-BRIDGE
       - T-BASE-HOVER-CARD-CONTENT-0001-CASE-POSITION
     exercises: [P-BASE-HOVER-CARD-CONTENT]
+  - id: prototypes-base-hover-card-content-lifecycle-contract
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/hover-card-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-HOVER-CARD-CONTENT-0001-CASE-LIFECYCLE]
+    exercises: [P-BASE-HOVER-CARD-CONTENT]
 verifies:
   prototypes:
     - id: P-BASE-HOVER-CARD-CONTENT
@@ -67,4 +78,10 @@ revisions:
   - version: 0.2.0-rc.0
     change: extended
     summary: Added Trigger PartView anchor, collision-aware host positioning, offsets, and Portal escape coverage.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added planned view-generation interaction cleanup, stale-owner, and controlled-request lifecycle evidence.
+  - version: 0.3.0-alpha.1
+    change: implemented
+    summary: Added executed source-bound lifecycle regressions and negative controls; prototype and test lifecycle remain draft.
 tags: [prototype, base, hover-card, content, positioning, portal, test]

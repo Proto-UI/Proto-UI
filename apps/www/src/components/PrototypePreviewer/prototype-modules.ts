@@ -2,6 +2,7 @@
 // 原型模块映射表 - 按需动态导入
 
 import { registerPrototype } from './registry';
+import { finfPrototypeModules } from './finf-prototype-modules';
 
 export type PrototypeModuleLoader = () => Promise<any>;
 
@@ -23,6 +24,375 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  ...finfPrototypeModules,
+  'liquid-glass-text-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/text');
+    registerPrototype('liquid-glass-text-root', mod.textRoot);
+  },
+  'bootstrap-2-3-2-text-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/text');
+    registerPrototype('bootstrap-2-3-2-text-root', mod.textRoot);
+  },
+  'bootstrap-2-3-2-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-root', mod.tabsRoot);
+  },
+  'bootstrap-2-3-2-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-list', mod.tabsList);
+  },
+  'bootstrap-2-3-2-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-trigger', mod.tabsTrigger);
+  },
+  'bootstrap-2-3-2-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerPrototype('bootstrap-2-3-2-tabs-content', mod.tabsContent);
+  },
+  'liquid-glass-tabs-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-root', mod.tabsRoot);
+  },
+  'liquid-glass-tabs-list': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-list', mod.tabsList);
+  },
+  'liquid-glass-tabs-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-trigger', mod.tabsTrigger);
+  },
+  'liquid-glass-tabs-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerPrototype('liquid-glass-tabs-content', mod.tabsContent);
+  },
+  'bootstrap-2-3-2-select-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-root', mod.selectRoot);
+  },
+  'bootstrap-2-3-2-select-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-trigger', mod.selectTrigger);
+  },
+  'bootstrap-2-3-2-select-value': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-value', mod.selectValue);
+  },
+  'bootstrap-2-3-2-select-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-content', mod.selectContent);
+  },
+  'bootstrap-2-3-2-select-item': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerPrototype('bootstrap-2-3-2-select-item', mod.selectItem);
+  },
+  'liquid-glass-select-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-root', mod.selectRoot);
+  },
+  'liquid-glass-select-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-trigger', mod.selectTrigger);
+  },
+  'liquid-glass-select-value': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-value', mod.selectValue);
+  },
+  'liquid-glass-select-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-content', mod.selectContent);
+  },
+  'liquid-glass-select-item': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerPrototype('liquid-glass-select-item', mod.selectItem);
+  },
+  'base-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-root', mod.fieldRoot);
+  },
+  'base-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-label', mod.fieldLabel);
+  },
+  'base-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-control', mod.fieldControl);
+  },
+  'base-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-description', mod.fieldDescription);
+  },
+  'base-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-error', mod.fieldError);
+  },
+  'base-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-base/field');
+    registerPrototype('base-field-validity', mod.fieldValidity);
+  },
+  'shadcn-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-root', mod.fieldRoot);
+  },
+  'shadcn-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-label', mod.fieldLabel);
+  },
+  'shadcn-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-control', mod.fieldControl);
+  },
+  'shadcn-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-description', mod.fieldDescription);
+  },
+  'shadcn-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-error', mod.fieldError);
+  },
+  'shadcn-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-validity', mod.fieldValidity);
+  },
+  'brutalist-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-root', mod.fieldRoot);
+  },
+  'brutalist-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-label', mod.fieldLabel);
+  },
+  'brutalist-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-control', mod.fieldControl);
+  },
+  'brutalist-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-description', mod.fieldDescription);
+  },
+  'brutalist-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-error', mod.fieldError);
+  },
+  'brutalist-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/field');
+    registerPrototype('brutalist-field-validity', mod.fieldValidity);
+  },
+  'bootstrap-2-3-2-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-root', mod.fieldRoot);
+  },
+  'bootstrap-2-3-2-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-label', mod.fieldLabel);
+  },
+  'bootstrap-2-3-2-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-control', mod.fieldControl);
+  },
+  'bootstrap-2-3-2-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-description', mod.fieldDescription);
+  },
+  'bootstrap-2-3-2-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-error', mod.fieldError);
+  },
+  'bootstrap-2-3-2-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerPrototype('bootstrap-2-3-2-field-validity', mod.fieldValidity);
+  },
+  'liquid-glass-field-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-root', mod.fieldRoot);
+  },
+  'liquid-glass-field-label': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-label', mod.fieldLabel);
+  },
+  'liquid-glass-field-control': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-control', mod.fieldControl);
+  },
+  'liquid-glass-field-description': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-description', mod.fieldDescription);
+  },
+  'liquid-glass-field-error': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-error', mod.fieldError);
+  },
+  'liquid-glass-field-validity': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerPrototype('liquid-glass-field-validity', mod.fieldValidity);
+  },
+  'base-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-root', mod.accordionRoot);
+  },
+  'base-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-item', mod.accordionItem);
+  },
+  'base-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-heading', mod.accordionHeading);
+  },
+  'base-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-trigger', mod.accordionTrigger);
+  },
+  'base-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/accordion');
+    registerPrototype('base-accordion-content', mod.accordionContent);
+  },
+  'shadcn-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-root', mod.accordionRoot);
+  },
+  'shadcn-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-item', mod.accordionItem);
+  },
+  'shadcn-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-heading', mod.accordionHeading);
+  },
+  'shadcn-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-trigger', mod.accordionTrigger);
+  },
+  'shadcn-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/accordion');
+    registerPrototype('shadcn-accordion-content', mod.accordionContent);
+  },
+  'brutalist-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-root', mod.accordionRoot);
+  },
+  'brutalist-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-item', mod.accordionItem);
+  },
+  'brutalist-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-heading', mod.accordionHeading);
+  },
+  'brutalist-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-trigger', mod.accordionTrigger);
+  },
+  'brutalist-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/accordion');
+    registerPrototype('brutalist-accordion-content', mod.accordionContent);
+  },
+  'bootstrap-2-3-2-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-root', mod.accordionRoot);
+  },
+  'bootstrap-2-3-2-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-item', mod.accordionItem);
+  },
+  'bootstrap-2-3-2-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-heading', mod.accordionHeading);
+  },
+  'bootstrap-2-3-2-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-trigger', mod.accordionTrigger);
+  },
+  'bootstrap-2-3-2-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/accordion');
+    registerPrototype('bootstrap-2-3-2-accordion-content', mod.accordionContent);
+  },
+  'liquid-glass-accordion-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-root', mod.accordionRoot);
+  },
+  'liquid-glass-accordion-item': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-item', mod.accordionItem);
+  },
+  'liquid-glass-accordion-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-heading', mod.accordionHeading);
+  },
+  'liquid-glass-accordion-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-trigger', mod.accordionTrigger);
+  },
+  'liquid-glass-accordion-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/accordion');
+    registerPrototype('liquid-glass-accordion-content', mod.accordionContent);
+  },
+  'shadcn-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-root', mod.collapsibleRoot);
+  },
+  'shadcn-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'shadcn-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/collapsible');
+    registerPrototype('shadcn-collapsible-content', mod.collapsibleContent);
+  },
+  'brutalist-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-root', mod.collapsibleRoot);
+  },
+  'brutalist-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'brutalist-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/collapsible');
+    registerPrototype('brutalist-collapsible-content', mod.collapsibleContent);
+  },
+  'bootstrap-2-3-2-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-root', mod.collapsibleRoot);
+  },
+  'bootstrap-2-3-2-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'bootstrap-2-3-2-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/collapsible');
+    registerPrototype('bootstrap-2-3-2-collapsible-content', mod.collapsibleContent);
+  },
+  'liquid-glass-collapsible-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-root', mod.collapsibleRoot);
+  },
+  'liquid-glass-collapsible-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-trigger', mod.collapsibleTrigger);
+  },
+  'liquid-glass-collapsible-content': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/collapsible');
+    registerPrototype('liquid-glass-collapsible-content', mod.collapsibleContent);
+  },
+  'base-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/label');
+    registerPrototype('base-label-root', mod.default);
+  },
+  'shadcn-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/label');
+    registerPrototype('shadcn-label-root', mod.default);
+  },
+  'brutalist-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-brutalist/label');
+    registerPrototype('brutalist-label-root', mod.default);
+  },
+  'bootstrap-2-3-2-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-bootstrap-2-3-2/label');
+    registerPrototype('bootstrap-2-3-2-label-root', mod.default);
+  },
+  'liquid-glass-label-root': async () => {
+    const mod = await import('@proto.ui/prototypes-liquid-glass/label');
+    registerPrototype('liquid-glass-label-root', mod.default);
+  },
   'base-surface-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/surface');
     registerPrototype('base-surface-root', mod.default);
@@ -155,6 +525,22 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'brutalist-badge-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/badge');
     registerPrototype('brutalist-badge-root', mod.BrutalistBadgeRoot);
+  },
+  'shadcn-card-root': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-root', mod.ShadcnCardRoot);
+  },
+  'shadcn-card-header': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-header', mod.ShadcnCardHeader);
+  },
+  'shadcn-card-content': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-content', mod.ShadcnCardContent);
+  },
+  'shadcn-card-footer': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/card');
+    registerPrototype('shadcn-card-footer', mod.ShadcnCardFooter);
   },
   'brutalist-card-root': async () => {
     const mod = await import('@proto.ui/prototypes-brutalist/card');
@@ -443,6 +829,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
   'lucide-list-icon': async () => {
     const mod = await import('@proto.ui/prototypes-lucide/icons/list');
     registerPrototype('lucide-list-icon', mod.default);
+  },
+  'lucide-chevron-down-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-down');
+    registerPrototype('lucide-chevron-down-icon', mod.default);
+  },
+  'lucide-chevron-left-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-left');
+    registerPrototype('lucide-chevron-left-icon', mod.default);
+  },
+  'lucide-chevron-right-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-right');
+    registerPrototype('lucide-chevron-right-icon', mod.default);
   },
   'lucide-x-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/x');

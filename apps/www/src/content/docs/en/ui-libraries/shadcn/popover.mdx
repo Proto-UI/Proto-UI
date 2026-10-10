@@ -1,0 +1,23 @@
+---
+title: 'Popover'
+description: 'An anchored non-modal dialog for small interactive content.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+An anchored non-modal dialog for small interactive content.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-popover"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content is positioned against Trigger, with side, align, sideOffset, alignOffset and collisionPadding. It is not modal and does not lock background scrolling or trap Tab. Outside press, focus moving beyond Trigger and Content, Escape and Close request dismissal. Moving focus between Trigger and portalled content stays inside. A focus-outside close leaves focus on the outside control; it does not restore focus to Trigger.
+
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value. Refusing a focus.outside request keeps Content present and does not trap focus. A later interaction can request dismissal again. Focus-only requests report focusReason as programmatic because the neutral focus observation does not identify an input device.
+
+Parts: Root, Trigger, Content, Title, Description, Close.
+
+Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

@@ -53,15 +53,15 @@ type SurfacePaint = {
 };
 
 const RESTING_SURFACE = {
-  background: '--pui-main',
-  color: '--pui-main-foreground',
-  border: '--pui-main-foreground',
+  background: 'transparent',
+  color: '--pui-foreground',
+  border: '--pui-border',
 } as const;
 
 const CHECKED_SURFACE = {
-  background: '--pui-foreground',
-  color: '--pui-background',
-  border: '--pui-background',
+  background: '--pui-main',
+  color: '--pui-main-foreground',
+  border: '--pui-border',
 } as const;
 
 async function surfacePaint(locator: Locator, variables: SurfaceVariables): Promise<SurfacePaint> {
@@ -91,7 +91,11 @@ async function surfacePaint(locator: Locator, variables: SurfaceVariables): Prom
       borderRadius: style.borderTopLeftRadius,
       boxShadow: style.boxShadow,
       variables: {
-        background: paint(style.getPropertyValue(expectedVariables.background).trim()),
+        background: paint(
+          expectedVariables.background.startsWith('--')
+            ? style.getPropertyValue(expectedVariables.background).trim()
+            : expectedVariables.background
+        ),
         color: paint(style.getPropertyValue(expectedVariables.color).trim()),
         border: paint(style.getPropertyValue(expectedVariables.border).trim()),
       },

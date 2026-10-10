@@ -6,6 +6,7 @@
   "dependencies": {
     "@floating-ui/dom": "^1.7.4",
     "@proto.ui/core": "workspace:*",
+    "@proto.ui/module-anatomy": "workspace:*",
     "@proto.ui/module-base": "workspace:*"
   },
   "exports": {

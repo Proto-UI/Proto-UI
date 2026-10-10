@@ -1,0 +1,65 @@
+id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+type: prototype
+title: liquid-glass Collapsible Content inherits Base disclosure semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft implementation projection pending exact-source native browser evidence, independent review and explicit stable admission. Base draft dependencies remain draft.
+  zh-CN: 实现投影保留 draft，等待精确源码 native browser evidence、独立审查与明确稳定准入；Base draft 依赖仍是 draft。
+summary: liquid-glass presentation over independent Base Collapsible content.
+statement:
+  zh-CN: liquid-glass content 直接消费 asCollapsibleContent，完整保留 Base content 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。 当前只是不透明表面；显式自实现光学材质与 adaptive native blur 属于不同共享意图，此处均未完成且不能互相替换。
+  en: The liquid-glass content directly consumes asCollapsibleContent and retains the full Base content protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries. The current surface is opaque only. Explicit self-implemented optical material and adaptive native blur are different shared intents; neither is implemented here or interchangeable.
+criteria:
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-BASE-INHERITANCE
+    text:
+      en: The liquid-glass content directly consumes asCollapsibleContent and retains the full Base content protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries.
+      zh-CN: liquid-glass content 直接消费 asCollapsibleContent，完整保留 Base content 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-DIRECT-ENTRY
+    text:
+      en: Expose liquid-glass-collapsible-content through @proto.ui/prototypes-liquid-glass/collapsible with unchanged Base props and exposes. Private workspace packages must not be represented as registry-published.
+      zh-CN: 从 @proto.ui/prototypes-liquid-glass/collapsible 提供 liquid-glass-collapsible-content，保留 Base props/exposes；private workspace package 不得表述为 registry 已发布。
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-VISUAL-SAFETY
+    text:
+      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height.
+      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。
+openQuestions:
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-Q-ADMISSION
+    question:
+      en: When do complete source-bound host evidence and independent review justify stable admission?
+      zh-CN: 何时由完整源码绑定宿主证据与独立审查支持稳定准入？
+    blocks:
+      - activation:P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-CONTENT-Q-MATERIAL
+    question:
+      en: How will the shared typed optical-material intent, host provider and GPUI evidence complete this part without replacing explicit glass with native blur?
+      zh-CN: 共享 typed 光学材质意图、host provider 与 GPUI 证据如何补全此 part，且不以 native blur 替代显式玻璃？
+    blocks:
+      - activation:P-LIQUID-GLASS-COLLAPSIBLE-CONTENT
+sources:
+  - path: packages/prototypes/liquid-glass/src/collapsible/content.proto.ts
+  - path: packages/prototypes/liquid-glass/src/collapsible/types.ts
+  - path: packages/prototypes/liquid-glass/src/collapsible/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Design reference only; not Proto UI semantic authority or an implementation dependency
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-COLLAPSIBLE-CONTENT
+verifies:
+  tests:
+    - T-COLLAPSIBLE-PROJECTIONS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the direct family projection with complete Base inheritance, safe layout, source/package boundaries and explicitly unexecuted native/material evidence.
+tags:
+  - prototype
+  - liquid-glass
+  - collapsible
+  - content
+  - draft
+  - projection

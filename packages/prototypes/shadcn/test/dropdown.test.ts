@@ -60,18 +60,20 @@ describe('prototypes/shadcn: dropdown-menu', () => {
     const { root, trigger, content, item, destructive } = createDropdown();
     await flush();
 
-    expect(styleContains(trigger, 'rounded-md')).toBe(true);
+    expect(styleContains(trigger, 'rounded-lg')).toBe(true);
     expect(trigger.querySelector('svg')).toBeNull();
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-    expect(styleContains(item, 'rounded-sm')).toBe(true);
+    expect(styleContains(item, 'rounded-md')).toBe(true);
     expect(styleContains(destructive, 'text-destructive')).toBe(true);
 
     trigger.click();
     await settle();
     expect(root.getExposes().open.get()).toBe(true);
     expect(content.parentElement).toBe(document.body);
-    expect(styleContains(content, 'rounded-md')).toBe(true);
+    expect(styleContains(content, 'rounded-lg')).toBe(true);
     expect(styleContains(content, 'bg-popover')).toBe(true);
+    expect(styleContains(content, 'ring-foreground/10')).toBe(true);
+    expect(styleContains(content, 'duration-100')).toBe(true);
     expect(styleContains(content, 'transition-none')).toBe(true);
     expect(styleContains(content, 'animate-in')).toBe(true);
     expect(document.activeElement).toBe(item);

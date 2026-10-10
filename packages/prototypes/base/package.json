@@ -9,7 +9,8 @@
     "@proto.ui/hooks": "workspace:*",
     "@proto.ui/module-text-control": "workspace:*",
     "@proto.ui/module-table-structure": "workspace:*",
-    "@proto.ui/module-image-view": "workspace:*"
+    "@proto.ui/module-image-view": "workspace:*",
+    "@proto.ui/module-native-link": "workspace:*"
   },
   "devDependencies": {
     "@proto.ui/module-anatomy": "workspace:*",
@@ -150,6 +151,166 @@
       "types": "./dist/surface/index.d.ts",
       "import": "./dist/surface/index.js",
       "default": "./dist/surface/index.js"
+    },
+    "./label": {
+      "types": "./dist/label/index.d.ts",
+      "import": "./dist/label/index.js",
+      "default": "./dist/label/index.js"
+    },
+    "./accordion": {
+      "types": "./dist/accordion/index.d.ts",
+      "import": "./dist/accordion/index.js",
+      "default": "./dist/accordion/index.js"
+    },
+    "./field": {
+      "types": "./dist/field/index.d.ts",
+      "import": "./dist/field/index.js",
+      "default": "./dist/field/index.js"
+    },
+    "./alert-dialog": {
+      "types": "./dist/alert-dialog/index.d.ts",
+      "import": "./dist/alert-dialog/index.js",
+      "default": "./dist/alert-dialog/index.js"
+    },
+    "./drawer": {
+      "types": "./dist/drawer/index.d.ts",
+      "import": "./dist/drawer/index.js",
+      "default": "./dist/drawer/index.js"
+    },
+    "./popover": {
+      "types": "./dist/popover/index.d.ts",
+      "import": "./dist/popover/index.js",
+      "default": "./dist/popover/index.js"
+    },
+    "./progress": {
+      "types": "./dist/progress/index.d.ts",
+      "import": "./dist/progress/index.js",
+      "default": "./dist/progress/index.js"
+    },
+    "./meter": {
+      "types": "./dist/meter/index.d.ts",
+      "import": "./dist/meter/index.js",
+      "default": "./dist/meter/index.js"
+    },
+    "./calendar": {
+      "types": "./dist/calendar/index.d.ts",
+      "import": "./dist/calendar/index.js",
+      "default": "./dist/calendar/index.js"
+    },
+    "./toggle-group": {
+      "types": "./dist/toggle-group/index.d.ts",
+      "import": "./dist/toggle-group/index.js",
+      "default": "./dist/toggle-group/index.js"
+    },
+    "./toolbar": {
+      "types": "./dist/toolbar/index.d.ts",
+      "import": "./dist/toolbar/index.js",
+      "default": "./dist/toolbar/index.js"
+    },
+    "./toast": {
+      "types": "./dist/toast/index.d.ts",
+      "import": "./dist/toast/index.js",
+      "default": "./dist/toast/index.js"
+    },
+    "./fieldset": {
+      "types": "./dist/fieldset/index.d.ts",
+      "import": "./dist/fieldset/index.js",
+      "default": "./dist/fieldset/index.js"
+    },
+    "./form": {
+      "types": "./dist/form/index.d.ts",
+      "import": "./dist/form/index.js",
+      "default": "./dist/form/index.js"
+    },
+    "./checkbox-group": {
+      "types": "./dist/checkbox-group/index.d.ts",
+      "import": "./dist/checkbox-group/index.js",
+      "default": "./dist/checkbox-group/index.js"
+    },
+    "./autocomplete": {
+      "types": "./dist/autocomplete/index.d.ts",
+      "import": "./dist/autocomplete/index.js",
+      "default": "./dist/autocomplete/index.js"
+    },
+    "./combobox": {
+      "types": "./dist/combobox/index.d.ts",
+      "import": "./dist/combobox/index.js",
+      "default": "./dist/combobox/index.js"
+    },
+    "./command": {
+      "types": "./dist/command/index.d.ts",
+      "import": "./dist/command/index.js",
+      "default": "./dist/command/index.js"
+    },
+    "./menubar": {
+      "types": "./dist/menubar/index.d.ts",
+      "import": "./dist/menubar/index.js",
+      "default": "./dist/menubar/index.js"
+    },
+    "./navigation-menu": {
+      "types": "./dist/navigation-menu/index.d.ts",
+      "import": "./dist/navigation-menu/index.js",
+      "default": "./dist/navigation-menu/index.js"
+    },
+    "./context-menu": {
+      "types": "./dist/context-menu/index.d.ts",
+      "import": "./dist/context-menu/index.js",
+      "default": "./dist/context-menu/index.js"
+    },
+    "./slider": {
+      "types": "./dist/slider/index.d.ts",
+      "import": "./dist/slider/index.js",
+      "default": "./dist/slider/index.js"
+    },
+    "./number-field": {
+      "types": "./dist/number-field/index.d.ts",
+      "import": "./dist/number-field/index.js",
+      "default": "./dist/number-field/index.js"
+    },
+    "./input-otp": {
+      "types": "./dist/input-otp/index.d.ts",
+      "import": "./dist/input-otp/index.js",
+      "default": "./dist/input-otp/index.js"
+    },
+    "./tree": {
+      "types": "./dist/tree/index.d.ts",
+      "import": "./dist/tree/index.js",
+      "default": "./dist/tree/index.js"
+    },
+    "./message-scroller": {
+      "types": "./dist/message-scroller/index.d.ts",
+      "import": "./dist/message-scroller/index.js",
+      "default": "./dist/message-scroller/index.js"
+    },
+    "./resizable": {
+      "types": "./dist/resizable/index.d.ts",
+      "import": "./dist/resizable/index.js",
+      "default": "./dist/resizable/index.js"
+    },
+    "./carousel": {
+      "types": "./dist/carousel/index.d.ts",
+      "import": "./dist/carousel/index.js",
+      "default": "./dist/carousel/index.js"
+    },
+    "./virtual-list": {
+      "types": "./dist/virtual-list/index.d.ts",
+      "import": "./dist/virtual-list/index.js",
+      "default": "./dist/virtual-list/index.js"
+    },
+    "./date-picker": {
+      "types": "./dist/date-picker/index.d.ts",
+      "import": "./dist/date-picker/index.js",
+      "default": "./dist/date-picker/index.js"
+    },
+    "./data-table": {
+      "types": "./dist/data-table/index.d.ts",
+      "import": "./dist/data-table/index.js",
+      "default": "./dist/data-table/index.js"
+    },
+    "./virtual-list/web": {
+      "types": "./dist/virtual-list/web/index.d.ts",
+      "import": "./dist/virtual-list/web/index.js",
+      "default": "./dist/virtual-list/web/index.js"
     }
   },
   "description": "Base Proto UI prototype library for reusable interaction prototypes.",

@@ -1,6 +1,5 @@
 ---
 import { AdapterIds, InternalAdapterIds, selectRuntimeIds, type RuntimeId } from './runtimes/ids';
-import AdapterSelect from '../override/AdapterSelect.astro';
 import CodePanel from './CodePanel.astro';
 import { highlightCode, type CodeLang } from './code-highlight';
 import { tryResolveProjectionRecipe } from './projection-families';
@@ -127,6 +126,12 @@ if (prototypeId && demoId) {
 
 assertJsonLike(protoProps);
 
+const runtimeLabels: Record<string, string> = {
+  wc: 'Web Components',
+  react: 'React',
+  vue: 'Vue',
+  vue2: 'Vue 2',
+};
 const rid = `pp-${Math.random().toString(36).slice(2)}`;
 const isZh = Astro.url.pathname.startsWith('/zh-cn/');
 ---
@@ -149,22 +154,19 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
 >
   {
     toolbar && !projectionRecipe && (
-      <div class="proto-previewer__header">
-        <div class="proto-previewer__toolbar">
-          <label class="proto-previewer__label">Runtime</label>
-          <AdapterSelect />
+      <div class="proto-previewer__runtime-tabs" data-runtime-tabs-mount>
+        <div class="proto-previewer__runtime-fallback" aria-label="Runtime">
+          {effectiveRuntimes.map((runtime) => (
+            <span aria-current={runtime === effectiveInitialRuntime ? 'true' : undefined}>
+              {runtimeLabels[runtime] ?? runtime}
+            </span>
+          ))}
         </div>
       </div>
     )
   }
 
-  <div
-    id={`${rid}-preview`}
-    role="tabpanel"
-    aria-labelledby={hasCode ? `${rid}-preview-tab` : undefined}
-    class="proto-previewer__preview-panel"
-    data-panel="preview"
-  >
+  <div id={`${rid}-preview`} class="proto-previewer__preview-panel" data-panel="preview">
     <div class="proto-previewer__preview" role="region" aria-live="polite">
       <div class="host">
         <div class="proto-previewer__skeleton" role="status">
@@ -207,6 +209,21 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
       grid-template-columns: minmax(0, 1fr);
       gap: 0.75rem;
       min-width: 0;
+    }
+
+    .proto-previewer__runtime-tabs {
+      min-width: 0;
+    }
+    .proto-previewer__runtime-fallback {
+      display: flex;
+      gap: 1.5rem;
+      overflow-x: auto;
+      color: var(--sl-color-gray-2);
+      white-space: nowrap;
+    }
+    .proto-previewer__runtime-fallback [aria-current] {
+      color: var(--sl-color-text);
+      border-bottom: 2px solid currentColor;
     }
 
     .proto-previewer__header {
@@ -295,6 +312,15 @@ const isZh = Astro.url.pathname.startsWith('/zh-cn/');
       flex-wrap: nowrap;
       gap: 0.75rem;
       min-width: 0;
+    }
+
+    .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-runtime-tabs-controls) {
+      padding: 0;
+      width: 100%;
+    }
+    .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-runtime-tabs-control) {
+      width: 100%;
+      max-width: 100%;
     }
 
     .proto-previewer[data-projection-mode='fixed-family'] :global(.pui-projection-content) {

@@ -77,6 +77,7 @@ export class TextControlModuleImpl extends ModuleBase {
     return {
       on: (type, callback) => this.on(type, callback),
       sync: (patch) => this.sync(patch),
+      resetValue: (value) => this.resetValue(value),
       snapshot: () => this.snapshot(),
     };
   }
@@ -126,6 +127,23 @@ export class TextControlModuleImpl extends ModuleBase {
     });
     if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
     this.syncLease();
+  }
+
+  private resetValue(value?: string): boolean {
+    this.sys.ensureCallback('textControl.resetValue');
+    if (!this.declared || !this.initialized || this.mountPhase !== 'mounted') return false;
+    if (value !== undefined && typeof value !== 'string') return false;
+    const controlled = this.valueMode === 'controlled';
+    const next = controlled
+      ? this.value
+      : this.canonicalize(value ?? this.patch.defaultValue ?? '');
+    // Retire composition, queued restoration and reentrant old callbacks before the new value.
+    this.eventGeneration += 1;
+    this.callbackPrelude = null;
+    this.value = next;
+    this.composing = false;
+    this.attachLease();
+    return !controlled;
   }
 
   snapshot(): TextControlSnapshot | null {
@@ -208,7 +226,10 @@ export class TextControlModuleImpl extends ModuleBase {
     // from those stale owner values until the actual event callback begins.
     this.composing ||= canonicalEvent.composing;
     try {
-      if (this.valueMode === 'uncontrolled' && canonicalEvent.type === 'input') {
+      if (
+        this.valueMode === 'uncontrolled' &&
+        (canonicalEvent.type === 'input' || canonicalEvent.type === 'change')
+      ) {
         this.value = canonicalEvent.value;
       }
 
@@ -218,8 +239,9 @@ export class TextControlModuleImpl extends ModuleBase {
       const inCurrentCallback = (callback: () => void) => {
         const previousPrelude = this.callbackPrelude;
         const prelude = { epoch };
-        // Change has no deferred native-candidate restoration. Let queued owner
-        // patches project normally; active composition remains protected separately.
+        // Change lets queued owner patches project immediately; unlike input and
+        // composition boundaries, it needs no native-candidate prelude guard.
+        // Unaccepted changes still restore below; active composition stays protected.
         if (canonicalEvent.type !== 'change') this.callbackPrelude = prelude;
         const releasePrelude = () => {
           if (this.callbackPrelude === prelude) this.callbackPrelude = previousPrelude;
@@ -257,13 +279,15 @@ export class TextControlModuleImpl extends ModuleBase {
         const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
         if (!run) return;
         for (const listener of this.listeners) {
+          if (generation !== this.eventGeneration || epoch !== this.leaseEpoch) break;
           if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
         }
       });
 
       const mustRestoreControlledValue =
         this.valueMode === 'controlled' &&
-        ((event.type === 'input' && !event.composing) || event.type === 'compositionend');
+        (((event.type === 'input' || event.type === 'change') && !event.composing) ||
+          event.type === 'compositionend');
       if (!mustRestoreControlledValue) return;
       queueMicrotask(() => {
         // Re-enter the current callback boundary so pending accepted owner props

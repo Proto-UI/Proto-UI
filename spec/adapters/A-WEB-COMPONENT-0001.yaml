@@ -20,6 +20,17 @@ statement:
 
 
 criteria:
+  - id: A-WEB-COMPONENT-0001-CONTROL-LABEL
+    text:
+      en: The bounded draft Control Label slice transports typed instance associations separately from portable Props, including custom getProps projections. WC uses setElementAssociations; framework facades reserve instanceAssociations. Only opted-in semantic subjects accept a branded reference. Host-private tree scope, eligible input intent and target callback wiring are supplied; no attribute serialization or native-platform support is inferred. Harness results and real-browser admission remain distinct.
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
+  - id: A-WEB-COMPONENT-0001-AVAILABLE
+    text:
+      en: 'The Web Adapter installs the shared available-space host alongside anchored positioning; only opted-in active Overlay content leases it. Simulated geometry tests verify wiring and cleanup without claiming native viewport fidelity.'
+      zh-CN: 'Web Adapter 在锚定定位旁安装共享 available-space host；仅主动 opt-in 的活跃 Overlay content 获取租约。模拟几何测试证明连接和清理，不冒认原生 viewport fidelity。'
   - id: A-WEB-COMPONENT-0001-SHADOW-MODES
     text:
       zh-CN: 同一 Adapter identity 保留 Light（shadow omitted/false）和 direct Shadow（true），显式 object split 受 draft D-WEB-COMPONENT-SHADOW-PROFILE-0001 与 D-WEB-COMPONENT-SHADOW-STYLE-0001 限定。下列 Module 安装/provision 不代表每种 presentation mode 均已准入；split 仅接受已治理的 Root 与 plain-text editor recipe，拒绝 Image View。Adapter identity 的 active 状态不提升这些 draft 语义。
@@ -173,6 +184,10 @@ criteria:
       zh-CN: 在 C-RULE-COLOR-SCHEME-0001 的有界 draft 默认同文档 light-DOM 域内，实际 mixed 与 eligible lowered 配方须经既有 presentation/reveal 跟随显式/system 变化。不新增 custom/subtree/ShadowRoot/跨文档等价、通用 Meta 响应或 Transition retiming；完整 browser case 与 token integration 分开跟踪。
 supports:
   modules:
+    - id: M-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Bounded draft independent Label pairing; installed Module does not mean every Prototype opts in.
     - id: M-RULE-META-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -262,6 +277,13 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Same-tree Web lease and eligible activation request bridge; native/AT admission remains separate.
+    - id: HC-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
     - id: HC-A11Y-0001
       since: 0.3.0-alpha.1
       role: translated-capability
@@ -371,6 +393,10 @@ relates:
       since: 0.3.0-alpha.0
 verifies:
   tests:
+    - id: T-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+    - id: T-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
     - id: T-WEB-COMPONENT-SHADOW-PROFILE-0001
       since: 0.3.0-alpha.0
     - id: T-WEB-COMPONENT-SHADOW-STYLE-0001
@@ -469,6 +495,9 @@ sources:
   - path: packages/adapters/web-component/test/context.integration.test.ts
   - path: packages/adapters/web-component/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added the explicitly separate instance-association channel and bounded draft Control Label Web provider links.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Qualified presentation-mode admission and linked bounded draft split evidence without promoting lifecycle or adding an Adapter identity.

@@ -1,6 +1,6 @@
 ---
 title: 'Brutalist Textarea'
-description: 'Square lavender Textarea projection over Base Textarea'
+description: 'Source-aligned draft Neo Textarea projection over Base Textarea'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
@@ -8,7 +8,7 @@ import BrutalistPageStyle from '@/components/BrutalistPageStyle.astro';
 
 <BrutalistPageStyle />
 
-> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) and its inherited Base protocol remain `draft`; this page describes the released and tested 0.2 surface, not an active protocol guarantee.
+> Availability: `@proto.ui/prototypes-brutalist@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml) and its inherited Base protocol remain `draft`; that is historical release information. The preview below is the successor draft recipe and does not claim a new release or an active protocol guarantee.
 
 `brutalist-textarea-root` is a direct visual composition over Base Textarea. It keeps the same single physical native `<textarea>` and adds no new interaction, state, event, accessibility, or ownership protocol.
 
@@ -28,6 +28,8 @@ The entire delta is visual:
 
 - native resizing remains host- or consumer-owned, with no automatic height measurement
 - 5px rounded geometry
+- an 80px minimum height, 12px horizontal / 8px vertical padding and text-sm line height
+- static main/main-foreground text selection
 - a flat neutral surface
 - ink text and border
 - DM Sans 500 text without an outer shadow
@@ -39,3 +41,5 @@ These styles are applied directly to the Base-backed native textarea. They do no
 - Prototype: [P-BRUTALIST-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BRUTALIST-TEXTAREA.yaml)
 - Base protocol: [P-BASE-TEXTAREA](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-BASE-TEXTAREA.yaml)
 - Source: [packages/prototypes/brutalist/src/textarea](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/brutalist/src/textarea)
+
+The recipe follows [Neo 3306a802 Textarea](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/textarea.tsx). Placeholder/invalid styling remains outside the current projection; fresh browser pixels and native-host evidence remain pending.

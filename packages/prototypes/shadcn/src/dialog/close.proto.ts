@@ -8,6 +8,7 @@ const dialogClose = definePrototype<ShadcnDialogCloseProps, ShadcnDialogCloseExp
     // P-SHADCN-DIALOG-CLOSE-BASE-INHERITANCE,
     // P-SHADCN-DIALOG-CLOSE-CURRENT-BASE-DEVIATIONS
     asDialogClose();
+    // P-SHADCN-DIALOG-CLOSE-UNSTYLED-SURFACE: consumers own layout bounds.
   },
 });
 

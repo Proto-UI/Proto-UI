@@ -1,0 +1,11 @@
+# Initial optical plane replacement ownership
+
+Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This is a role declaration, not authenticated identity, permission, independent review or acceptance.
+
+Independent review of 581e0139d4be553ab6f05af827f7fa80117e0a38 preserved the prior 210 passing tests and found two directions of the same pending ownership defect: replacing a paint property could leave the old important SSR selector active, while an already foreign marker could be mistaken for this receipt's owner. The frozen commit and its red controls are retained.
+
+Preparation now establishes ownership only when the original marker equals the parsed receipt image hash. A changed marker does not grant permission to clean another plane. While that own marker still exists, revocation removes its selector regardless of unrelated style changes and removes each old tuple property only if its current value/priority is still the owned value. The initial tuple is checked before subscription or hashing, preserving preexisting author replacements. Verification rejection follows the same marker/property rules.
+
+SSR fallback CSS also follows the same ownership boundary. Default/accessibility rules target only this receipt's exact marker or its hash-qualified rejected status, not every marker or the bare host ID. Thus replacing/removing the marker actually relinquishes the old server stylesheet, including its important fallback declarations. Reduced transparency and forced colors still select their opaque/system fallback from the initial server HTML while this receipt owns the plane; after live adoption the normal sink owns preference handling.
+
+The original two reviewer cases, six paint properties replaced both before and during verification, foreign-marker rejection and actual generated-selector matching controls pass. The complete focused material suite passes 226 tests across sixteen files, including 72 seed controls and eight fixture-byte binding controls. Final targeted experiment types exit 0. No browser/native GPU or Card visual result is claimed, and the production Liquid Card remains unwired pending source review and real profile assets.

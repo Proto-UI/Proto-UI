@@ -1,0 +1,4 @@
+[7:7:1010/051412.915959:ERROR:third_party/crashpad/crashpad/util/file/filesystem_posix.cc:63] mkdir : No such file or directory (2)
+chrome_crashpad_handler: --database is required
+Try 'chrome_crashpad_handler --help' for more information.
+[7:7:1010/051412.959251:FATAL:chrome/browser/process_singleton_posix.cc:297] Check failed: . socket() failed: Operation not permitted (1)

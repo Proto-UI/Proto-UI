@@ -263,7 +263,7 @@ describe('RuntimeBox single actual Prototype surface', () => {
     }
   }
 
-  it('keeps a fixed-family toolbar outside the canvas and its popup usable at 390px', async () => {
+  it('keeps Runtime Tabs outside the canvas and the demonstrated Select popup usable at 390px', async () => {
     const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
     try {
       await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/select/`, {
@@ -273,18 +273,19 @@ describe('RuntimeBox single actual Prototype surface', () => {
       await ready(root, 'wc');
       const paint = await measure(root, 'brutalist', [20, 16, 20, 16]);
       expect(runtimePreviewEvidenceIssues(paint)).toEqual([]);
-      const trigger = root.locator('[data-projection-control="runtime"] [role="combobox"]');
+      const trigger = root
+        .locator(
+          '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
+        )
+        .getByRole('tab', { name: 'React', exact: true });
       expect(
         await trigger.evaluate((element) => !!element.closest('.pui-runtime-preview-surface'))
       ).toBe(false);
       await trigger.focus();
       expect(await trigger.evaluate((element) => document.activeElement === element)).toBe(true);
       await trigger.press('Enter');
-      const popupId = await trigger.getAttribute('aria-controls');
-      const popup = page.locator(`[id=${JSON.stringify(popupId)}]`);
-      await popup.waitFor({ state: 'visible' });
-      await popup.getByRole('option', { name: 'React', exact: true }).click();
       await ready(root, 'react');
+      expect(await trigger.getAttribute('aria-selected')).toBe('true');
       const demoTrigger = root.locator('.pui-runtime-preview-surface [role="combobox"]');
       await demoTrigger.click();
       const demoPopupId = await demoTrigger.getAttribute('aria-controls');

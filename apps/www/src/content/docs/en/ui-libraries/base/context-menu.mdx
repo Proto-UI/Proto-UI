@@ -1,0 +1,25 @@
+---
+title: 'ContextMenu'
+description: 'A context-triggered command menu with keyboard access.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+A context-triggered command menu with keyboard access.
+
+<PrototypePreviewer
+  demoId="demo-base-context-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root supports open/defaultOpen, disabled and closeOnItemCommit. Trigger opens on context.menu or ContextMenu/Shift+F10 and suppresses the native context menu for that handled request; ordinary left click does not open it. Content inherits real Overlay/Focus/Transition navigation, typeahead and controlled dismissal. Right-click and accepted touch/pen holds open at their input point. ContextMenu/Shift+F10 uses the trigger region. The shared host keeps position geometry private and supplies only an opaque input-origin association; no DOM coordinates enter portable props, state or JSON context.
+
+Parts: Root, Trigger, Content, Item.
+
+Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+
+A touch/pen contact must remain held for 600 ms within the host movement tolerance. Movement, release, cancellation, disabled state and disposal cancel a pending hold. Accepted keyboard/long-press input suppresses its duplicate native context menu; an accepted hold also suppresses its compatibility click. Ordinary clicks and scrolling are left to the host. Default placement is bottom/start with no gap.
+
+Controlled open requests remain requests: the native context menu is prevented when the enabled Root accepts delivery, while the owner may keep open=false. A later owner-open uses the latest live input anchor; programmatic openContextMenu uses the trigger fallback. Escape and selection restore the original trigger according to the existing focus policy. Shared source-runtime coverage does not establish compiler/native admission or real-device long-press acceptance.

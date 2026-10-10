@@ -1,0 +1,70 @@
+{
+  "base": "5d96eb345ecc6e5e4b4831189d384f03a56d24c9",
+  "scope": "Same current physical renderer on prior and current finite resource inventories; not package-budget admission or selector completeness.",
+  "families": {
+    "shadcn": {
+      "before": {
+        "tokens": 410,
+        "documentBytes": 57374,
+        "documentGzip": 6171,
+        "documentSha256": "5722e5f55773a06ed816b68520cf1679c4f617032a2a7a44b24b75543fa4e339",
+        "unsupported": false
+      },
+      "after": {
+        "tokens": 447,
+        "documentBytes": 62494,
+        "documentGzip": 6660,
+        "documentSha256": "a027e88370dec167e054b3bc047371efd75f410235e43cd5dbee917a50cfd642",
+        "unsupported": false
+      }
+    },
+    "brutalist": {
+      "before": {
+        "tokens": 401,
+        "documentBytes": 47205,
+        "documentGzip": 5586,
+        "documentSha256": "c56e5131c1ab1ed15a1c19311fa3f0bc906c6d4a61b654ee4ada25aadd6ae8b8",
+        "unsupported": false
+      },
+      "after": {
+        "tokens": 431,
+        "documentBytes": 50931,
+        "documentGzip": 5972,
+        "documentSha256": "efa7a117c094c0bb8392ded7746b65e63c721bdc32c98b67187e6a38d41e2817",
+        "unsupported": false
+      }
+    },
+    "bootstrap-2-3-2": {
+      "before": {
+        "tokens": 294,
+        "documentBytes": 33842,
+        "documentGzip": 4353,
+        "documentSha256": "12aaffca7b51c6ee8cd138afd118110623015d32489a51e341820fc868c468c3",
+        "unsupported": false
+      },
+      "after": {
+        "tokens": 339,
+        "documentBytes": 39030,
+        "documentGzip": 4945,
+        "documentSha256": "daba78b8f8fe70cfdb25ad3a5d442b3eeab81a9f752c6bc91a1ed02bd29965c7",
+        "unsupported": false
+      }
+    },
+    "liquid-glass": {
+      "before": {
+        "tokens": 229,
+        "documentBytes": 24822,
+        "documentGzip": 3479,
+        "documentSha256": "f3c002185c1649c81690699e6495b69ba86df979e4b78b8a7ecebc2543ebb2ef",
+        "unsupported": false
+      },
+      "after": {
+        "tokens": 270,
+        "documentBytes": 29749,
+        "documentGzip": 3968,
+        "documentSha256": "317962b4275bc288deb2a8a03575f20f12893ecc3fdbfaef065955860e084c32",
+        "unsupported": false
+      }
+    }
+  }
+}

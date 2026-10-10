@@ -17,13 +17,17 @@ serde_json.workspace = true
 # Builds `tests/accesskit_macos.rs`, which opens a real window and reads it
 # through the platform's accessibility API. Off by default: it needs a window
 # server, and the platform backends take a while to build.
-macos-accessibility-test = ["dep:gpui_platform", "dep:objc2", "dep:raw-window-handle"]
+macos-accessibility-test = ["dep:gpui_platform", "dep:objc2", "dep:raw-window-handle", "dep:block2", "dep:objc2-foundation"]
 
 [target.'cfg(target_os = "macos")'.dependencies]
 gpui_platform = { workspace = true, optional = true }
 # The versions AccessKit's macOS adapter already uses.
 objc2 = { version = "0.5.2", optional = true }
 raw-window-handle = { version = "0.6", optional = true }
+# Both versions are already in this workspace lockfile through GPUI/AccessKit.
+# Used only by the own-window, evidence-only ScreenCaptureKit callback.
+block2 = { version = "=0.5.1", optional = true }
+objc2-foundation = { version = "=0.2.2", optional = true, features = ["NSGeometry", "NSProcessInfo"] }
 
 [dev-dependencies]
 # `test-support` brings GPUI's headless harness: a window that runs a real

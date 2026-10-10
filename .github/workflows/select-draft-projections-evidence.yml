@@ -1,0 +1,66 @@
+name: Select draft projection evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/select-draft-projections-evidence.yml'
+      - 'packages/prototypes/**/src/select/**'
+      - 'packages/prototypes/**/src/text/**'
+      - 'packages/prototypes/**/src/theme.ts'
+      - 'packages/adapters/**'
+      - 'packages/modules/**'
+      - 'packages/runtime/**'
+      - 'packages/cli/src/**'
+      - 'apps/www/src/content/docs/**/select.mdx'
+      - 'apps/www/src/content/docs/demo-*-select.demo.ts'
+      - 'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'apps/www/astro.config.mjs'
+      - 'apps/www/package.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+permissions:
+  contents: read
+concurrency:
+  group: select-draft-projections-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Use the supported Astro evidence surface
+        run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Capture actual two-family four-runtime selections
+        env:
+          PROTO_UI_SELECT_SCREENSHOT_DIR: ${{ runner.temp }}/select-draft-projections
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_SELECT_SCREENSHOT_DIR"
+          git rev-parse HEAD > "$PROTO_UI_SELECT_SCREENSHOT_DIR/source-sha.txt"
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1
+      - name: Retain source-bound public evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: select-draft-projections-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/select-draft-projections
+          if-no-files-found: warn
+          retention-days: 30

@@ -16,7 +16,12 @@ describe('Search command ownership', () => {
     expect(commands).toContain('prototypeId: `${family}-button`');
     expect(commands).toContain("const commands: SearchCommand[] = ['open', 'close', 'retry']");
     expect(source).toContain('data-search-command-mount="open"');
-    expect(source).not.toMatch(/<button\b|HTMLButtonElement/);
+    // The one server button is a truthful disabled prerender, never a second
+    // activation owner. Actual command behavior still belongs to prototypes.
+    expect(source.match(/<button\b/g)).toHaveLength(1);
+    expect(source).toMatch(/disabled\s+aria-disabled="true"/);
+    expect(source).toContain('data-search-startup-button');
+    expect(source).not.toContain('HTMLButtonElement');
     expect(homepage).toContain('search?.materialize(request)');
     expect(homepage).toContain('searchPublication?.rollback()');
     expect(commands).toContain('Homepage Search must use its page transaction');

@@ -1,16 +1,63 @@
-/* The native Aside owns meaning, icon and authored content. Once its passive
-   public Surface is ready, remove only Starlight's competing fallback paint. */
+/* First-frame inputs mirror initNoteSurface's public outline/all/no-elevation
+   recipe. Family boundaries inherit naturally, including local preview scopes;
+   the projection family takes precedence over site family on the same node. */
+:root,
+[data-site-library-family='shadcn']:not([data-projection-family='brutalist']),
+[data-projection-family='shadcn'] {
+  --site-note-background: var(--pui-background);
+  --site-note-foreground: var(--pui-foreground);
+  --site-note-border: var(--pui-border);
+  --site-note-border-width: 1px;
+  --site-note-radius: var(--pui-radius-lg);
+  --site-note-font: var(--font-sans, ui-sans-serif, system-ui, sans-serif);
+  --site-note-body-weight: 400;
+}
+[data-site-library-family='brutalist']:not([data-projection-family='shadcn']),
+[data-projection-family='brutalist'],
+.brutalist-demo-frame:not([data-projection-family='shadcn']):not(
+    [data-site-library-family='shadcn']
+  ) {
+  --site-note-background: var(--site-brutalist-background);
+  --site-note-foreground: var(--site-brutalist-foreground);
+  --site-note-border: #000;
+  --site-note-border-width: 2px;
+  --site-note-radius: var(--site-brutalist-radius);
+  --site-note-font: var(--site-brutalist-font-sans);
+  --site-note-body-weight: 500;
+}
+
+/* The native Aside always owns meaning, icon, content and flow geometry.
+   Its fallback and real Surface paint in matching absolute border-box planes,
+   so replacing Starlight's 4px flow border cannot shift the authored content. */
 .starlight-aside--note {
   position: relative;
   isolation: isolate;
-}
-.starlight-aside--note[data-note-surface-view='ready'],
-.starlight-aside--note[data-note-surface-view='retained'] {
   border: 0;
   background: none;
-  color: inherit;
+  color: var(--site-note-foreground);
+  font-family: var(--site-note-font);
+  font-size: 1rem;
+  font-weight: var(--site-note-body-weight);
+  line-height: 1.625;
 }
-.starlight-aside--note[data-note-surface-view] > :not(.site-note-surface-mount) {
+.starlight-aside--note::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  border: var(--site-note-border-width) solid var(--site-note-border);
+  border-radius: var(--site-note-radius);
+  background: var(--site-note-background);
+  pointer-events: none;
+  z-index: 0;
+}
+/* Failed startup and no-JS keep the readable native fallback. A retained
+   generation already owns real paint; never overlay it with a second skin. */
+.starlight-aside--note[data-note-surface-view='ready']::before,
+.starlight-aside--note[data-note-surface-view='retained']::before {
+  content: none;
+}
+.starlight-aside--note > :not(.site-note-surface-mount) {
   position: relative;
   z-index: 1;
 }
@@ -37,14 +84,30 @@
 .site-note-surface-mount .pui-projection-controls:empty {
   display: none;
 }
-.starlight-aside--note[data-note-surface-view] .starlight-aside__title [data-site-typography-slot] {
+.starlight-aside--note .starlight-aside__title {
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--site-note-foreground);
+}
+/* Match the label's native flex line box through all three inline projection
+   wrappers. This is Note composition only, not a global Text display rule. */
+.starlight-aside--note
+  .starlight-aside__title
+  :is([data-site-typography-carrier], [data-typography-prototype], [data-site-typography-slot]) {
   display: inline-flex;
   align-items: center;
+  min-width: 0;
+}
+.starlight-aside--note .starlight-aside__title [data-site-typography-slot] {
   gap: 0.5rem;
 }
-.starlight-aside--note[data-note-surface-view] .starlight-aside__icon {
+.starlight-aside--note .starlight-aside__icon {
   flex: none;
+  font-size: 1.333em;
+  width: 1em;
+  height: 1em;
 }
-.starlight-aside--note[data-note-surface-view] .starlight-aside__content a {
+.starlight-aside--note .starlight-aside__content a {
   color: inherit;
 }

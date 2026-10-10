@@ -38,6 +38,8 @@ export type OverlayConfigPatch = Readonly<{
   sideOffset?: number;
   alignOffset?: number;
   anchored?: boolean;
+  /** Project a host-root available region without choosing placement or visual gutters. */
+  availableSpace?: boolean;
   strategy?: AnchoredPositionStrategy;
   avoidCollisions?: boolean;
   collisionBoundary?: AnchoredCollisionBoundary;
@@ -64,6 +66,7 @@ export type OverlayConfig = Readonly<{
   sideOffset: number;
   alignOffset: number;
   anchored: boolean;
+  availableSpace?: boolean;
   strategy: AnchoredPositionStrategy;
   avoidCollisions: boolean;
   collisionBoundary: AnchoredCollisionBoundary;
@@ -123,6 +126,8 @@ export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
 
   registerTrigger(target: unknown): void;
   registerAnchor(target: unknown): void;
+  /** Position only; existing anatomy still owns dismissal and focus restoration. */
+  registerInputAnchor(anchor: import('./context-menu-input').InputOriginAnchor | null): void;
   registerAnchorPart(part: AnatomyPartView): void;
   registerContent(target: unknown): void;
   getPositionSnapshot(): AnchoredPositionSnapshot | null;

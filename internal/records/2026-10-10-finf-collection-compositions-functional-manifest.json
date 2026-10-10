@@ -1,0 +1,386 @@
+{
+  "status": "WIP functional source; no full acceptance or lifecycle claim",
+  "families": [
+    {
+      "family": "base",
+      "subpath": "resizable",
+      "exports": {
+        "resizableRoot": "base-resizable-root",
+        "resizablePanel": "base-resizable-panel",
+        "resizableHandle": "base-resizable-handle"
+      },
+      "demoId": "demo-base-resizable",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-resizable.demo.ts",
+      "docSlug": "ui-libraries/base/resizable"
+    },
+    {
+      "family": "base",
+      "subpath": "carousel",
+      "exports": {
+        "carouselRoot": "base-carousel-root",
+        "carouselViewport": "base-carousel-viewport",
+        "carouselSlide": "base-carousel-slide",
+        "carouselPrevious": "base-carousel-previous",
+        "carouselNext": "base-carousel-next"
+      },
+      "demoId": "demo-base-carousel",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-carousel.demo.ts",
+      "docSlug": "ui-libraries/base/carousel"
+    },
+    {
+      "family": "base",
+      "subpath": "virtual-list",
+      "exports": {
+        "virtualListRoot": "base-virtual-list-root",
+        "virtualListViewport": "base-virtual-list-viewport",
+        "virtualListContent": "base-virtual-list-content"
+      },
+      "demoId": "demo-base-virtual-list",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-virtual-list.demo.ts",
+      "docSlug": "ui-libraries/base/virtual-list"
+    },
+    {
+      "family": "base",
+      "subpath": "date-picker",
+      "exports": {
+        "datePickerRoot": "base-date-picker-root",
+        "datePickerTrigger": "base-date-picker-trigger",
+        "datePickerContent": "base-date-picker-content",
+        "datePickerDay": "base-date-picker-day",
+        "datePickerValue": "base-date-picker-value"
+      },
+      "demoId": "demo-base-date-picker",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-date-picker.demo.ts",
+      "docSlug": "ui-libraries/base/date-picker"
+    },
+    {
+      "family": "base",
+      "subpath": "data-table",
+      "exports": {
+        "dataTableRoot": "base-data-table-root",
+        "dataTableRow": "base-data-table-row",
+        "dataTableCell": "base-data-table-cell",
+        "dataTableHeader": "base-data-table-header",
+        "dataTableCaption": "base-data-table-caption",
+        "dataTablePrevious": "base-data-table-previous",
+        "dataTableNext": "base-data-table-next"
+      },
+      "demoId": "demo-base-data-table",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-data-table.demo.ts",
+      "docSlug": "ui-libraries/base/data-table"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "resizable",
+      "exports": {
+        "resizableRoot": "shadcn-resizable-root",
+        "resizablePanel": "shadcn-resizable-panel",
+        "resizableHandle": "shadcn-resizable-handle"
+      },
+      "demoId": "demo-shadcn-resizable",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-resizable.demo.ts",
+      "docSlug": "ui-libraries/shadcn/resizable"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "carousel",
+      "exports": {
+        "carouselRoot": "shadcn-carousel-root",
+        "carouselViewport": "shadcn-carousel-viewport",
+        "carouselSlide": "shadcn-carousel-slide",
+        "carouselPrevious": "shadcn-carousel-previous",
+        "carouselNext": "shadcn-carousel-next"
+      },
+      "demoId": "demo-shadcn-carousel",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-carousel.demo.ts",
+      "docSlug": "ui-libraries/shadcn/carousel"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "virtual-list",
+      "exports": {
+        "virtualListRoot": "shadcn-virtual-list-root",
+        "virtualListViewport": "shadcn-virtual-list-viewport",
+        "virtualListContent": "shadcn-virtual-list-content"
+      },
+      "demoId": "demo-shadcn-virtual-list",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-virtual-list.demo.ts",
+      "docSlug": "ui-libraries/shadcn/virtual-list"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "date-picker",
+      "exports": {
+        "datePickerRoot": "shadcn-date-picker-root",
+        "datePickerTrigger": "shadcn-date-picker-trigger",
+        "datePickerContent": "shadcn-date-picker-content",
+        "datePickerDay": "shadcn-date-picker-day",
+        "datePickerValue": "shadcn-date-picker-value"
+      },
+      "demoId": "demo-shadcn-date-picker",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-date-picker.demo.ts",
+      "docSlug": "ui-libraries/shadcn/date-picker"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "data-table",
+      "exports": {
+        "dataTableRoot": "shadcn-data-table-root",
+        "dataTableRow": "shadcn-data-table-row",
+        "dataTableCell": "shadcn-data-table-cell",
+        "dataTableHeader": "shadcn-data-table-header",
+        "dataTableCaption": "shadcn-data-table-caption",
+        "dataTablePrevious": "shadcn-data-table-previous",
+        "dataTableNext": "shadcn-data-table-next"
+      },
+      "demoId": "demo-shadcn-data-table",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-data-table.demo.ts",
+      "docSlug": "ui-libraries/shadcn/data-table"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "resizable",
+      "exports": {
+        "resizableRoot": "brutalist-resizable-root",
+        "resizablePanel": "brutalist-resizable-panel",
+        "resizableHandle": "brutalist-resizable-handle"
+      },
+      "demoId": "demo-brutalist-resizable",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-resizable.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/resizable"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "carousel",
+      "exports": {
+        "carouselRoot": "brutalist-carousel-root",
+        "carouselViewport": "brutalist-carousel-viewport",
+        "carouselSlide": "brutalist-carousel-slide",
+        "carouselPrevious": "brutalist-carousel-previous",
+        "carouselNext": "brutalist-carousel-next"
+      },
+      "demoId": "demo-brutalist-carousel",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-carousel.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/carousel"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "virtual-list",
+      "exports": {
+        "virtualListRoot": "brutalist-virtual-list-root",
+        "virtualListViewport": "brutalist-virtual-list-viewport",
+        "virtualListContent": "brutalist-virtual-list-content"
+      },
+      "demoId": "demo-brutalist-virtual-list",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-virtual-list.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/virtual-list"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "date-picker",
+      "exports": {
+        "datePickerRoot": "brutalist-date-picker-root",
+        "datePickerTrigger": "brutalist-date-picker-trigger",
+        "datePickerContent": "brutalist-date-picker-content",
+        "datePickerDay": "brutalist-date-picker-day",
+        "datePickerValue": "brutalist-date-picker-value"
+      },
+      "demoId": "demo-brutalist-date-picker",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-date-picker.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/date-picker"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "data-table",
+      "exports": {
+        "dataTableRoot": "brutalist-data-table-root",
+        "dataTableRow": "brutalist-data-table-row",
+        "dataTableCell": "brutalist-data-table-cell",
+        "dataTableHeader": "brutalist-data-table-header",
+        "dataTableCaption": "brutalist-data-table-caption",
+        "dataTablePrevious": "brutalist-data-table-previous",
+        "dataTableNext": "brutalist-data-table-next"
+      },
+      "demoId": "demo-brutalist-data-table",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-data-table.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/data-table"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "resizable",
+      "exports": {
+        "resizableRoot": "bootstrap-2-3-2-resizable-root",
+        "resizablePanel": "bootstrap-2-3-2-resizable-panel",
+        "resizableHandle": "bootstrap-2-3-2-resizable-handle"
+      },
+      "demoId": "demo-bootstrap-2-3-2-resizable",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-resizable.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/resizable"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "carousel",
+      "exports": {
+        "carouselRoot": "bootstrap-2-3-2-carousel-root",
+        "carouselViewport": "bootstrap-2-3-2-carousel-viewport",
+        "carouselSlide": "bootstrap-2-3-2-carousel-slide",
+        "carouselPrevious": "bootstrap-2-3-2-carousel-previous",
+        "carouselNext": "bootstrap-2-3-2-carousel-next"
+      },
+      "demoId": "demo-bootstrap-2-3-2-carousel",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-carousel.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/carousel"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "virtual-list",
+      "exports": {
+        "virtualListRoot": "bootstrap-2-3-2-virtual-list-root",
+        "virtualListViewport": "bootstrap-2-3-2-virtual-list-viewport",
+        "virtualListContent": "bootstrap-2-3-2-virtual-list-content"
+      },
+      "demoId": "demo-bootstrap-2-3-2-virtual-list",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-virtual-list.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/virtual-list"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "date-picker",
+      "exports": {
+        "datePickerRoot": "bootstrap-2-3-2-date-picker-root",
+        "datePickerTrigger": "bootstrap-2-3-2-date-picker-trigger",
+        "datePickerContent": "bootstrap-2-3-2-date-picker-content",
+        "datePickerDay": "bootstrap-2-3-2-date-picker-day",
+        "datePickerValue": "bootstrap-2-3-2-date-picker-value"
+      },
+      "demoId": "demo-bootstrap-2-3-2-date-picker",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-date-picker.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/date-picker"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "data-table",
+      "exports": {
+        "dataTableRoot": "bootstrap-2-3-2-data-table-root",
+        "dataTableRow": "bootstrap-2-3-2-data-table-row",
+        "dataTableCell": "bootstrap-2-3-2-data-table-cell",
+        "dataTableHeader": "bootstrap-2-3-2-data-table-header",
+        "dataTableCaption": "bootstrap-2-3-2-data-table-caption",
+        "dataTablePrevious": "bootstrap-2-3-2-data-table-previous",
+        "dataTableNext": "bootstrap-2-3-2-data-table-next"
+      },
+      "demoId": "demo-bootstrap-2-3-2-data-table",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-data-table.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/data-table"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "resizable",
+      "exports": {
+        "resizableRoot": "liquid-glass-resizable-root",
+        "resizablePanel": "liquid-glass-resizable-panel",
+        "resizableHandle": "liquid-glass-resizable-handle"
+      },
+      "demoId": "demo-liquid-glass-resizable",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-resizable.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/resizable"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "carousel",
+      "exports": {
+        "carouselRoot": "liquid-glass-carousel-root",
+        "carouselViewport": "liquid-glass-carousel-viewport",
+        "carouselSlide": "liquid-glass-carousel-slide",
+        "carouselPrevious": "liquid-glass-carousel-previous",
+        "carouselNext": "liquid-glass-carousel-next"
+      },
+      "demoId": "demo-liquid-glass-carousel",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-carousel.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/carousel"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "virtual-list",
+      "exports": {
+        "virtualListRoot": "liquid-glass-virtual-list-root",
+        "virtualListViewport": "liquid-glass-virtual-list-viewport",
+        "virtualListContent": "liquid-glass-virtual-list-content"
+      },
+      "demoId": "demo-liquid-glass-virtual-list",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-virtual-list.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/virtual-list"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "date-picker",
+      "exports": {
+        "datePickerRoot": "liquid-glass-date-picker-root",
+        "datePickerTrigger": "liquid-glass-date-picker-trigger",
+        "datePickerContent": "liquid-glass-date-picker-content",
+        "datePickerDay": "liquid-glass-date-picker-day",
+        "datePickerValue": "liquid-glass-date-picker-value"
+      },
+      "demoId": "demo-liquid-glass-date-picker",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-date-picker.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/date-picker"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "data-table",
+      "exports": {
+        "dataTableRoot": "liquid-glass-data-table-root",
+        "dataTableRow": "liquid-glass-data-table-row",
+        "dataTableCell": "liquid-glass-data-table-cell",
+        "dataTableHeader": "liquid-glass-data-table-header",
+        "dataTableCaption": "liquid-glass-data-table-caption",
+        "dataTablePrevious": "liquid-glass-data-table-previous",
+        "dataTableNext": "liquid-glass-data-table-next"
+      },
+      "demoId": "demo-liquid-glass-data-table",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-data-table.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/data-table"
+    }
+  ],
+  "additionalSubpaths": [
+    {
+      "package": "@proto.ui/prototypes-base",
+      "subpath": "virtual-list/web",
+      "source": "packages/prototypes/base/src/virtual-list/web/index.ts",
+      "exports": ["attachWebVirtualList"]
+    }
+  ],
+  "dependencies": [
+    "Calendar 9d306b27594e5e7503476fb6ec3ea90e682ba7a9 and Tree/MessageScroller fe5f543a8ae48585749aa7945654e69ce58d2f8d",
+    "Popover ae4a1b5d18aeb2996117aef9b15f3fb448fb9f95",
+    "Axis Input fe5f7552b978beaca7ef9718f932578035da9361 plus MoveHost follow-ups 9415c16bfe8cf7ce966f2527fc8c658950fe6ed0 and 5723e028e3d2bf1b1527f0ebceb7fc6aabb52058",
+    "Generic range/tree Web A11y 055f9219 and 8fc72616; aria-sort follow-up owned by shared integrator"
+  ],
+  "tests": [
+    "packages/prototypes/base/test/finf-collection-compositions.test.ts",
+    "packages/prototypes/base/test/finf-collection-projections.test.ts",
+    "packages/prototypes/base/test/virtual-list.test.ts"
+  ],
+  "validation": {
+    "focused": "Final focused run pending at record preparation; 46 tests passed in the preceding checkpoint. Final result appended in source-validation record.",
+    "types": "Scoped component + four projection + 40 DemoSpec TypeScript check passed. Whole workspace has two missing ignored proto-ui-shadow-style.generated.js inputs; no full workspace type pass claimed."
+  },
+  "boundaries": [
+    "Resizable current composition is a two-panel split; multi-panel constraint solving remains follow-up",
+    "Carousel provides explicit navigation and one active slide; autoplay is absent",
+    "Virtual List complete logical IDs and generation settlement are implemented in an isolated prerequisite model; integration with existing Collection provider and all Adapter/Compiler/native materializers remains WIP",
+    "Virtual List variable-size measurement and keyed materialization run only through explicit Web helper, never portable pixel props/state",
+    "Data Table is a Table/data-operation composition; row presentation slots derive content from current sorted/filtered page; fetch/edit/column reorder remain App/other owners",
+    "Date Picker is actual Calendar + Popover composition; overlay-wide coordinate and focus-exit verification still shared acceptance debt"
+  ],
+  "remaining": [
+    "Resizable physical sizing: current runtime percentage basis token is not yet proven to have CSS closure; shared dynamic proportional-layout projection is an explicit source blocker, even though ratios and input requests pass.",
+    "Shared exports/package manifests/CLI/catalog/registry/navigation integration",
+    "All applicable Adapter/Compiler and actual native GPUI behavior",
+    "Browser pointer/touch/keyboard/IME and mount/interruption/a11y journeys",
+    "Exact-commit visual evidence and family spacing/optical audit",
+    "Packed consumers, exact-head CI/DCO, independent review and lifecycle admission"
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

@@ -1,0 +1,109 @@
+{
+  "task": "Runtime Box underline Tabs",
+  "base": "c2cbb8d6fce71e949f84f0358189184783505989",
+  "status": "review-candidate-not-visual-admission",
+  "physicalCssCommit": "4ba4dfec99bc2b0211bc29c50b94c20677c7ddd4",
+  "newEntries": [
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "@proto.ui/prototypes-bootstrap-2-3-2/tabs",
+      "exports": [
+        {
+          "export": "tabsRoot",
+          "name": "bootstrap-2-3-2-tabs-root",
+          "basePrototypeId": "P-BASE-TABS",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS"
+        },
+        {
+          "export": "tabsList",
+          "name": "bootstrap-2-3-2-tabs-list",
+          "basePrototypeId": "P-BASE-TABS-LIST",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-LIST"
+        },
+        {
+          "export": "tabsTrigger",
+          "name": "bootstrap-2-3-2-tabs-trigger",
+          "basePrototypeId": "P-BASE-TABS-TRIGGER",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-TRIGGER"
+        },
+        {
+          "export": "tabsContent",
+          "name": "bootstrap-2-3-2-tabs-content",
+          "basePrototypeId": "P-BASE-TABS-CONTENT",
+          "prototypeId": "P-BOOTSTRAP-2-3-2-TABS-CONTENT"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-tabs",
+      "demoPath": "apps/www/src/content/docs/demo_components/tabs/demo-bootstrap-2-3-2-tabs.demo.ts",
+      "docSlugs": [
+        "en/ui-libraries/bootstrap-2-3-2/tabs",
+        "zh-cn/ui-libraries/bootstrap-2-3-2/tabs"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "@proto.ui/prototypes-liquid-glass/tabs",
+      "exports": [
+        {
+          "export": "tabsRoot",
+          "name": "liquid-glass-tabs-root",
+          "basePrototypeId": "P-BASE-TABS",
+          "prototypeId": "P-LIQUID-GLASS-TABS"
+        },
+        {
+          "export": "tabsList",
+          "name": "liquid-glass-tabs-list",
+          "basePrototypeId": "P-BASE-TABS-LIST",
+          "prototypeId": "P-LIQUID-GLASS-TABS-LIST"
+        },
+        {
+          "export": "tabsTrigger",
+          "name": "liquid-glass-tabs-trigger",
+          "basePrototypeId": "P-BASE-TABS-TRIGGER",
+          "prototypeId": "P-LIQUID-GLASS-TABS-TRIGGER"
+        },
+        {
+          "export": "tabsContent",
+          "name": "liquid-glass-tabs-content",
+          "basePrototypeId": "P-BASE-TABS-CONTENT",
+          "prototypeId": "P-LIQUID-GLASS-TABS-CONTENT"
+        }
+      ],
+      "demoId": "demo-liquid-glass-tabs",
+      "demoPath": "apps/www/src/content/docs/demo_components/tabs/demo-liquid-glass-tabs.demo.ts",
+      "docSlugs": ["en/ui-libraries/liquid-glass/tabs", "zh-cn/ui-libraries/liquid-glass/tabs"]
+    }
+  ],
+  "sharedPaths": [
+    "apps/www/src/components/PrototypePreviewer/prototype-modules.ts",
+    "apps/www/src/components/PrototypePreviewer/projection-families.ts",
+    "packages/cli/src/registry/components.ts"
+  ],
+  "openGates": [
+    "new exact-source same-state browser screenshots and native interaction/geometry",
+    "proper three-preset generation and real packed consumer before further integration/push",
+    "independent follow-up review and resource/native admission",
+    "Liquid optical-host realization separately unverified"
+  ],
+  "focusFollowupCommit": "2a8ce0c267fb1078881e620961d7642795fe3f92",
+  "definitionEvidenceCommit": "e9866a697cd0ba1cc4eb5df9793a2feb4776f865",
+  "verification": {
+    "reviewedBaseline": {
+      "commit": "6d2d983fd0fafa13d694c683e91f093f84180057",
+      "total": 179,
+      "passed": 173,
+      "failed": 6
+    },
+    "exactFollowup": {
+      "commit": "e9866a697cd0ba1cc4eb5df9793a2feb4776f865",
+      "total": 286,
+      "passed": 285,
+      "failed": 1,
+      "remainingFailure": "projection-composition.test.ts: undeclared shadcn Dropdown Group/Label/Shortcut/Separator in frozen manifest"
+    },
+    "scopedTypes": "passing",
+    "lifecycleAuthoring": "13 inputs pass after same-HEAD materialization of three pre-existing native test files; no Rust execution",
+    "newTabsCatalog": "all eight identities cataloged; 559 unrelated global findings remain, no debt baseline change",
+    "stateRepresentation": "five legacy assertions migrated only after four-family all-state roundtrip/withdrawal proof; underlying lowering tests unchanged"
+  }
+}

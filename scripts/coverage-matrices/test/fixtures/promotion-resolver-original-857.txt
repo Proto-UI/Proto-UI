@@ -1,0 +1,1118 @@
+// @ts-check
+import { defineConfig } from 'astro/config';
+import mdx from '@astrojs/mdx';
+import starlight from '@astrojs/starlight';
+import remarkDirective from 'remark-directive';
+import starlightLlmsTxt from 'starlight-llms-txt';
+
+import tailwindcss from '@tailwindcss/vite';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { rehypeScrollableTables } from './src/utils/rehype-scrollable-tables.js';
+import { rehypeEnhancedImage } from './src/utils/rehype-enhanced-image.js';
+import { whitepaperRedirectFragments } from './src/utils/whitepaper-redirect-fragments.mjs';
+import { remarkConceptDirective } from './src/utils/remark-concept-directive.js';
+import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
+import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
+
+const PROTO_UI_PREFIX = '@proto.ui/';
+const repositoryRoot = fileURLToPath(new URL('../..', import.meta.url));
+
+/** @param {string} id */
+function resolveProtoUiSource(id) {
+  if (!id.startsWith(PROTO_UI_PREFIX)) return null;
+  const [packageSegment, ...rest] = id.slice(PROTO_UI_PREFIX.length).split('/');
+  const packageDirectory = packageSegment.startsWith('module-')
+    ? path.join('modules', packageSegment.slice('module-'.length))
+    : packageSegment.startsWith('adapter-')
+      ? path.join('adapters', packageSegment.slice('adapter-'.length))
+      : packageSegment.startsWith('prototypes-')
+        ? path.join('prototypes', packageSegment.slice('prototypes-'.length))
+        : packageSegment;
+  const packageRoot = path.join(repositoryRoot, 'packages', packageDirectory);
+  const manifestPath = path.join(packageRoot, 'package.json');
+  if (!fs.existsSync(manifestPath)) return null;
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const subpath = rest.length ? `./${rest.join('/')}` : '.';
+
+  for (const [key, value] of Object.entries(manifest.exports ?? {})) {
+    const match = key.includes('*')
+      ? subpath.match(
+          new RegExp(`^${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace('\\*', '(.+)')}$`)
+        )
+      : key === subpath
+        ? []
+        : null;
+    if (!match) continue;
+    const exportTarget =
+      typeof value === 'string' ? value : (value.import ?? value.default ?? value.types);
+    if (!exportTarget) continue;
+    const sourceTarget = exportTarget
+      .replace('*', match[1] ?? '')
+      .replace('./dist/', './src/')
+      .replace(/\.d\.ts$/, '.ts')
+      .replace(/\.js$/, '.ts');
+    const sourcePath = path.resolve(packageRoot, sourceTarget);
+    if (fs.existsSync(sourcePath)) return sourcePath.split(path.sep).join('/');
+  }
+  return null;
+}
+
+/** @type {{ name: string; enforce: 'pre'; resolveId: (id: string) => string | null }} */
+const protoUiSourcePlugin = {
+  name: 'proto-ui-source',
+  enforce: 'pre',
+  resolveId: resolveProtoUiSource,
+};
+
+/** @param {string | null} id */
+function normalizedBundleModuleId(id) {
+  if (id === null) return null;
+  const withoutNullPrefix = id.startsWith('\0') ? `virtual:${id.slice(1)}` : id;
+  const queryIndex = withoutNullPrefix.indexOf('?');
+  const filePart = queryIndex === -1 ? withoutNullPrefix : withoutNullPrefix.slice(0, queryIndex);
+  const queryPart = queryIndex === -1 ? '' : withoutNullPrefix.slice(queryIndex);
+  const normalizedFilePart = path.isAbsolute(filePart)
+    ? path.relative(repositoryRoot, filePart).replaceAll('\\', '/')
+    : filePart.replaceAll('\\', '/');
+  return `${normalizedFilePart}${queryPart}`;
+}
+
+/** @param {string} id */
+function websiteManualChunk(id) {
+  const normalizedId = normalizedBundleModuleId(id);
+  const modulePath = normalizedId?.split('?', 1)[0];
+  if (
+    modulePath === 'apps/www/src/components/site-shadcn-controls.ts' ||
+    /^packages\/adapters\/(?:base|web-component)\//u.test(modulePath ?? '')
+  ) {
+    return 'site-shadcn-controls';
+  }
+  return undefined;
+}
+
+/** @typedef {{ type: 'chunk'; fileName: string; name: string; isEntry: boolean; isDynamicEntry: boolean; facadeModuleId: string | null; imports: string[]; dynamicImports: string[]; modules: Record<string, unknown> }} BundleChunk */
+/** @typedef {{ type: 'asset'; fileName: string; source: string | Uint8Array }} BundleAsset */
+/** @typedef {BundleChunk | BundleAsset} BundleOutput */
+/** @typedef {{ emitFile: (asset: { type: 'asset'; fileName: string; source: string }) => string; getModuleIds: () => IterableIterator<string>; getModuleInfo: (id: string) => { importedIds: readonly string[]; dynamicallyImportedIds: readonly string[] } | null }} BundlePluginContext */
+/** @typedef {{ name: string; apply: 'build'; configResolved: (config: { build: { ssr?: boolean | string } }) => void; generateBundle: (this: BundlePluginContext, options: unknown, bundle: Record<string, BundleOutput>) => void }} WebsiteBundlePlugin */
+/** @returns {WebsiteBundlePlugin} */
+function websiteBundleGraphPlugin() {
+  let isClientBuild = false;
+  /**
+   * @type {{
+   *   name: string;
+   *   apply: 'build';
+   *   configResolved: (config: { build: { ssr?: unknown } }) => void;
+   *   generateBundle: (
+   *     this: BundlePluginContext,
+   *     options: unknown,
+   *     bundle: Record<string, any>
+   *   ) => void;
+   * }}
+   */
+  const plugin = {
+    name: 'proto-ui-website-bundle-graph',
+    apply: 'build',
+    configResolved(config) {
+      isClientBuild = !config.build.ssr;
+    },
+    generateBundle(_options, bundle) {
+      if (!isClientBuild) return;
+      const chunks = Object.values(bundle)
+        .filter((output) => output.type === 'chunk')
+        .map((chunk) => ({
+          fileName: chunk.fileName.replaceAll('\\', '/'),
+          name: chunk.name,
+          isEntry: chunk.isEntry,
+          isDynamicEntry: chunk.isDynamicEntry,
+          facadeModuleId: normalizedBundleModuleId(chunk.facadeModuleId),
+          imports: [...chunk.imports].map((id) => id.replaceAll('\\', '/')).sort(),
+          dynamicImports: [...chunk.dynamicImports].map((id) => id.replaceAll('\\', '/')).sort(),
+          moduleRenderInfo: Object.fromEntries(
+            Object.keys(chunk.modules).map((id) => [
+              normalizedBundleModuleId(id),
+              {
+                renderedLength: chunk.modules[id].renderedLength,
+                renderedExports: chunk.modules[id].renderedExports,
+                removedExports: chunk.modules[id].removedExports,
+              },
+            ])
+          ),
+          moduleIds: Object.keys(chunk.modules)
+            .map((id) => normalizedBundleModuleId(id))
+            .filter((id) => id !== null)
+            .sort(),
+        }))
+        .sort((left, right) => left.fileName.localeCompare(right.fileName));
+      // Chunk co-location is not module ownership. Preserve resolved Rollup
+      // importer edges so an unrelated module sharing the renderer chunk cannot
+      // inherit its permission to load Adapter runtimes.
+      const modules = [...this.getModuleIds()]
+        .map((id) => {
+          const info = this.getModuleInfo(id);
+          return {
+            id: normalizedBundleModuleId(id),
+            imports: (info?.importedIds ?? []).map(normalizedBundleModuleId).sort(),
+            dynamicImports: (info?.dynamicallyImportedIds ?? [])
+              .map(normalizedBundleModuleId)
+              .sort(),
+          };
+        })
+        .sort((left, right) => (left.id ?? '').localeCompare(right.id ?? ''));
+      this.emitFile({
+        type: 'asset',
+        fileName: 'proto-ui-bundle-graph.json',
+        source: `${JSON.stringify({ version: 1, chunks, modules }, null, 2)}\n`,
+      });
+    },
+  };
+  return plugin;
+}
+
+const inProgressBadge = {
+  text: { en: 'WIP', 'zh-CN': '施工中' },
+  class: 'docs-wip-badge',
+};
+const whitepaperRedirects = {
+  '/en/whitepaper/component-as-protocol': '/en/whitepaper/1-components-before-code/',
+  '/en/whitepaper/information-flow-model': '/en/whitepaper/2-interaction-relations/',
+  '/en/whitepaper/prototype-boundary': '/en/whitepaper/3-component-boundary/',
+  '/en/whitepaper/execution-semantics': '/en/whitepaper/4-semantics-beyond-channels/',
+  '/en/whitepaper/translation-layer': '/en/whitepaper/5-translation-layer/',
+  '/en/whitepaper/design-constraints': '/en/whitepaper/6-consistency-boundary/',
+  '/en/whitepaper/evolution-path': '/en/whitepaper/7-evolving-within-boundaries/',
+  '/en/whitepaper/faq': '/en/whitepaper/0-preface/',
+  '/zh-cn/whitepaper/component-as-protocol': '/zh-cn/whitepaper/1-components-before-code/',
+  '/zh-cn/whitepaper/information-flow-model': '/zh-cn/whitepaper/2-interaction-relations/',
+  '/zh-cn/whitepaper/prototype-boundary': '/zh-cn/whitepaper/3-component-boundary/',
+  '/zh-cn/whitepaper/execution-semantics': '/zh-cn/whitepaper/4-semantics-beyond-channels/',
+  '/zh-cn/whitepaper/translation-layer': '/zh-cn/whitepaper/5-translation-layer/',
+  '/zh-cn/whitepaper/design-constraints': '/zh-cn/whitepaper/6-consistency-boundary/',
+  '/zh-cn/whitepaper/evolution-path': '/zh-cn/whitepaper/7-evolving-within-boundaries/',
+  '/zh-cn/whitepaper/faq': '/zh-cn/whitepaper/0-preface/',
+};
+
+// https://astro.build/config
+export default defineConfig({
+  site: 'https://www.proto-ui.com',
+  redirects: {
+    '/en/prototypes/shadcn/dialog': '/en/ui-libraries/shadcn/dialog/',
+    '/zh-cn/prototypes/shadcn/dialog': '/zh-cn/ui-libraries/shadcn/dialog/',
+    ...whitepaperRedirects,
+  },
+  integrations: [
+    whitepaperRedirectFragments(whitepaperRedirects),
+    starlight({
+      title: 'Proto UI',
+      plugins: [
+        starlightLlmsTxt({
+          exclude: [
+            '*/demo-*',
+            '*/contribute/*',
+            '*/ui-libraries/*/components/*',
+            '*/reference/*',
+            '*/guides/*',
+          ],
+          description:
+            'Proto UI is an open-source project exploring unified human-computer interaction protocols across platforms, frameworks, and interaction media.',
+          rawContent: true,
+        }),
+      ],
+      expressiveCode: {
+        frames: { showCopyToClipboardButton: false },
+        plugins: [siteCopyPlugin()],
+        themes: Object.values(codeThemes),
+        useStarlightUiThemeColors: false,
+        useDarkModeMediaQuery: false,
+        minSyntaxHighlightingColorContrast: 0,
+        styleOverrides: {
+          borderRadius: 'calc(var(--docs-code-radius) - 1px)',
+          borderColor: 'var(--docs-code-border)',
+          codeFontFamily: 'var(--docs-code-font)',
+          codeFontSize: 'var(--docs-code-size)',
+          codeLineHeight: 'var(--docs-code-line-height)',
+          codeBackground: 'var(--docs-code-background)',
+          frames: {
+            editorBackground: 'var(--docs-code-background)',
+            terminalBackground: 'var(--docs-code-background)',
+          },
+        },
+      },
+
+      defaultLocale: 'zh-cn',
+      locales: {
+        en: {
+          label: 'English',
+        },
+
+        'zh-cn': {
+          label: '简体中文',
+          lang: 'zh-CN',
+        },
+      },
+      head: [
+        {
+          tag: 'style',
+          content: '@layer theme, base, starlight, proto-ui, components, utilities, code-surfaces;',
+        },
+        // 双 theme-color
+        {
+          tag: 'script',
+          attrs: {
+            type: 'importmap',
+          },
+          content: `
+          {
+            "imports": {
+              "react": "https://esm.sh/react@18",
+              "react-dom/client": "https://esm.sh/react-dom@18/client",
+              "vue": "https://esm.sh/vue@3"
+            }
+          }
+          `,
+        },
+        {
+          tag: 'meta',
+          attrs: {
+            name: 'theme-color',
+            content: '#ffffff',
+            media: '(prefers-color-scheme: light)',
+          },
+        },
+        {
+          tag: 'meta',
+          attrs: { name: 'theme-color', content: '#0a0a0a', media: '(prefers-color-scheme: dark)' },
+        },
+      ],
+      social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/Proto-UI/Proto-UI' }],
+      sidebar: [
+        {
+          label: 'Start Here',
+          translations: { en: 'Start Here', 'zh-CN': '从这里开始' },
+          items: [
+            {
+              label: '认识 Proto UI',
+              translations: { en: 'Meet Proto UI', 'zh-CN': '认识 Proto UI' },
+              slug: 'start-here/what-you-saw',
+            },
+            {
+              label: 'Why Proto UI',
+              translations: {
+                en: 'Why Proto UI',
+                'zh-CN': '为什么关注 Proto UI',
+              },
+              slug: 'start-here/why-proto-ui',
+            },
+            {
+              label: '它是怎么工作的？',
+              translations: {
+                en: 'How It Works',
+                'zh-CN': '它是怎么工作的？',
+              },
+              slug: 'start-here/how-it-works',
+            },
+            {
+              label: '快速开始',
+              translations: {
+                en: 'Quick Start',
+                'zh-CN': '快速开始',
+              },
+              slug: 'start-here/quick-start',
+            },
+          ],
+        },
+        {
+          label: 'Whitepaper',
+          translations: { en: 'Whitepaper', 'zh-CN': '白皮书' },
+          items: [
+            {
+              label: '序章',
+              translations: { en: 'Preface', 'zh-CN': '序章' },
+              slug: 'whitepaper/0-preface',
+            },
+            {
+              label: '第一部 · 原型',
+              translations: { en: 'Part I · Prototype', 'zh-CN': '第一部 · 原型' },
+              items: [
+                {
+                  label: '代码之前的组件',
+                  translations: {
+                    en: 'Components Before Code',
+                    'zh-CN': '代码之前的组件',
+                  },
+                  slug: 'whitepaper/1-components-before-code',
+                },
+                {
+                  label: '从交互关系出发',
+                  translations: {
+                    en: 'Starting from Interaction Relations',
+                    'zh-CN': '从交互关系出发',
+                  },
+                  slug: 'whitepaper/2-interaction-relations',
+                },
+                {
+                  label: '组件的边界',
+                  translations: { en: 'Component Boundaries', 'zh-CN': '组件的边界' },
+                  slug: 'whitepaper/3-component-boundary',
+                },
+                {
+                  label: '通路之外的语义',
+                  translations: {
+                    en: 'Semantics Beyond Channels',
+                    'zh-CN': '通路之外的语义',
+                  },
+                  slug: 'whitepaper/4-semantics-beyond-channels',
+                },
+              ],
+            },
+            {
+              label: '第二部 · 翻译',
+              translations: { en: 'Part II · Translation', 'zh-CN': '第二部 · 翻译' },
+              items: [
+                {
+                  label: '翻译层',
+                  translations: { en: 'Translation Layer', 'zh-CN': '翻译层' },
+                  slug: 'whitepaper/5-translation-layer',
+                },
+                {
+                  label: '一致性的边界',
+                  translations: {
+                    en: 'The Boundaries of Consistency',
+                    'zh-CN': '一致性的边界',
+                  },
+                  slug: 'whitepaper/6-consistency-boundary',
+                },
+              ],
+            },
+            {
+              label: '第三部 · 演进',
+              translations: { en: 'Part III · Evolution', 'zh-CN': '第三部 · 演进' },
+              items: [
+                {
+                  label: '在边界中演进',
+                  translations: {
+                    en: 'Evolving Within Boundaries',
+                    'zh-CN': '在边界中演进',
+                  },
+                  slug: 'whitepaper/7-evolving-within-boundaries',
+                },
+              ],
+            },
+            {
+              label: '结语',
+              translations: { en: 'Conclusion', 'zh-CN': '结语' },
+              slug: 'whitepaper/8-conclusion',
+            },
+          ],
+        },
+        {
+          label: 'UI Libraries',
+          translations: { en: 'UI Libraries', 'zh-CN': 'UI Libraries' },
+          items: [
+            {
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'ui-libraries',
+            },
+            {
+              label: 'Base',
+              translations: { en: 'Base', 'zh-CN': 'Base' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/base',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/base/button',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/base/toggle',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/base/switch',
+                },
+                {
+                  label: 'Tabs',
+                  translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
+                  slug: 'ui-libraries/base/tabs',
+                },
+                {
+                  label: 'Hover Card',
+                  translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
+                  slug: 'ui-libraries/base/hover-card',
+                },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/base/tooltip',
+                },
+                {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/base/dialog',
+                },
+                {
+                  label: 'Dropdown Menu',
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
+                  slug: 'ui-libraries/base/dropdown-menu',
+                },
+                {
+                  label: 'Transition',
+                  translations: { en: 'Transition', 'zh-CN': 'Transition' },
+                  slug: 'ui-libraries/base/transition',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/base/select',
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/base/checkbox',
+                },
+                {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/base/radio-group',
+                },
+                {
+                  label: 'Input',
+                  translations: { en: 'Input', 'zh-CN': 'Input' },
+                  slug: 'ui-libraries/base/input',
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/base/textarea',
+                },
+                {
+                  label: 'Image',
+                  translations: { en: 'Image', 'zh-CN': 'Image' },
+                  slug: 'ui-libraries/base/image',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/base/separator',
+                },
+                {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/base/scroll-area',
+                },
+                {
+                  label: 'Live Region',
+                  translations: { en: 'Live Region', 'zh-CN': 'Live Region' },
+                  slug: 'ui-libraries/base/live-region',
+                },
+                {
+                  label: 'Async Region',
+                  translations: { en: 'Async Region', 'zh-CN': 'Async Region' },
+                  slug: 'ui-libraries/base/async-region',
+                },
+                {
+                  label: 'Table (Draft)',
+                  translations: { en: 'Table (Draft)', 'zh-CN': 'Table（Draft）' },
+                  slug: 'ui-libraries/base/table',
+                },
+              ],
+            },
+            {
+              label: 'Shadcn',
+              translations: { en: 'Shadcn', 'zh-CN': 'Shadcn' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/shadcn',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/shadcn/button',
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/shadcn/checkbox',
+                },
+                {
+                  label: 'Radio Group',
+                  translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
+                  slug: 'ui-libraries/shadcn/radio-group',
+                },
+                {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/shadcn/scroll-area',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/shadcn/dialog',
+                },
+                {
+                  label: 'Dropdown Menu',
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
+                  slug: 'ui-libraries/shadcn/dropdown-menu',
+                },
+                {
+                  label: 'Hover Card',
+                  translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
+                  slug: 'ui-libraries/shadcn/hover-card',
+                },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/shadcn/tooltip',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/shadcn/select',
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/shadcn/separator',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/shadcn/switch',
+                },
+                {
+                  label: 'Tabs',
+                  translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
+                  slug: 'ui-libraries/shadcn/tabs',
+                },
+                {
+                  label: 'Input',
+                  translations: { en: 'Input', 'zh-CN': 'Input' },
+                  slug: 'ui-libraries/shadcn/input',
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/shadcn/textarea',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/shadcn/toggle',
+                },
+              ],
+            },
+            {
+              label: 'Lucide',
+              translations: { en: 'Lucide', 'zh-CN': 'Lucide' },
+              items: [
+                {
+                  label: 'Icon Library',
+                  translations: { en: 'Icon Library', 'zh-CN': '图标库' },
+                  slug: 'ui-libraries/lucide',
+                },
+              ],
+            },
+            {
+              label: 'Bootstrap 2.3.2',
+              translations: { en: 'Bootstrap 2.3.2', 'zh-CN': 'Bootstrap 2.3.2' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/bootstrap-2-3-2',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/button',
+                },
+              ],
+            },
+            {
+              label: 'Liquid Glass',
+              translations: { en: 'Liquid Glass', 'zh-CN': 'Liquid Glass' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/liquid-glass',
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/liquid-glass/button',
+                },
+              ],
+            },
+            {
+              label: 'Brutalist',
+              translations: { en: 'Brutalist', 'zh-CN': 'Brutalist' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'ui-libraries/brutalist',
+                },
+                {
+                  label: 'Design Contract',
+                  translations: { en: 'Design Contract', 'zh-CN': '设计合约' },
+                  slug: 'ui-libraries/brutalist/design-contract',
+                },
+                {
+                  label: 'Badge',
+                  translations: { en: 'Badge', 'zh-CN': 'Badge' },
+                  slug: 'ui-libraries/brutalist/components/badge',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Card',
+                  translations: { en: 'Card', 'zh-CN': 'Card' },
+                  slug: 'ui-libraries/brutalist/components/card',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Separator',
+                  translations: { en: 'Separator', 'zh-CN': 'Separator' },
+                  slug: 'ui-libraries/brutalist/components/separator',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Skeleton',
+                  translations: { en: 'Skeleton', 'zh-CN': 'Skeleton' },
+                  slug: 'ui-libraries/brutalist/components/skeleton',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Textarea',
+                  translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
+                  slug: 'ui-libraries/brutalist/components/textarea',
+                },
+                {
+                  label: 'Checkbox',
+                  translations: { en: 'Checkbox', 'zh-CN': 'Checkbox' },
+                  slug: 'ui-libraries/brutalist/components/checkbox',
+                  badge: inProgressBadge,
+                },
+                {
+                  label: 'Button',
+                  translations: { en: 'Button', 'zh-CN': 'Button' },
+                  slug: 'ui-libraries/brutalist/components/button',
+                },
+                {
+                  label: 'Toggle',
+                  translations: { en: 'Toggle', 'zh-CN': 'Toggle' },
+                  slug: 'ui-libraries/brutalist/components/toggle',
+                },
+                {
+                  label: 'Switch',
+                  translations: { en: 'Switch', 'zh-CN': 'Switch' },
+                  slug: 'ui-libraries/brutalist/components/switch',
+                },
+                {
+                  label: 'Tabs',
+                  translations: { en: 'Tabs', 'zh-CN': 'Tabs' },
+                  slug: 'ui-libraries/brutalist/components/tabs',
+                },
+                {
+                  label: 'Hover Card',
+                  translations: { en: 'Hover Card', 'zh-CN': 'Hover Card' },
+                  slug: 'ui-libraries/brutalist/components/hover-card',
+                },
+                {
+                  label: 'Dropdown Menu',
+                  translations: { en: 'Dropdown Menu', 'zh-CN': 'Dropdown Menu' },
+                  slug: 'ui-libraries/brutalist/components/dropdown-menu',
+                },
+                {
+                  label: 'Select',
+                  translations: { en: 'Select', 'zh-CN': 'Select' },
+                  slug: 'ui-libraries/brutalist/components/select',
+                },
+                {
+                  label: 'Dialog',
+                  translations: { en: 'Dialog', 'zh-CN': 'Dialog' },
+                  slug: 'ui-libraries/brutalist/components/dialog',
+                },
+                {
+                  label: 'Scroll Area',
+                  translations: { en: 'Scroll Area', 'zh-CN': 'Scroll Area' },
+                  slug: 'ui-libraries/brutalist/components/scroll-area',
+                },
+                {
+                  label: 'Tooltip',
+                  translations: { en: 'Tooltip', 'zh-CN': 'Tooltip' },
+                  slug: 'ui-libraries/brutalist/components/tooltip',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Build',
+          translations: { en: 'Build', 'zh-CN': '构建' },
+          items: [
+            {
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'build',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Prototypes',
+              translations: { en: 'Prototypes', 'zh-CN': '原型专题' },
+              items: [
+                {
+                  label: 'Overview',
+                  translations: { en: 'Overview', 'zh-CN': '概览' },
+                  slug: 'build/prototypes',
+                },
+                {
+                  label: 'Maintaining an Existing Prototype',
+                  translations: {
+                    en: 'Maintaining an Existing Prototype',
+                    'zh-CN': '维护已有 Prototype',
+                  },
+                  slug: 'build/prototypes/maintaining-an-existing-prototype',
+                },
+                {
+                  label: 'Projecting Base into a Design Language',
+                  translations: {
+                    en: 'Projecting Base into a Design Language',
+                    'zh-CN': '从 Base 投射风格化 Prototype',
+                  },
+                  slug: 'build/prototypes/projecting-base-into-a-design-language',
+                },
+                {
+                  label: 'Implementing an Approved Base Slice',
+                  translations: {
+                    en: 'Implementing an Approved Base Slice',
+                    'zh-CN': '实现已批准的 Base Slice',
+                  },
+                  slug: 'build/prototypes/implementing-an-approved-base-slice',
+                },
+                {
+                  label: 'When Not To Write A New Prototype',
+                  translations: {
+                    en: 'When Not To Write A New Prototype',
+                    'zh-CN': '为什么你通常不需要新写一个原型？',
+                  },
+                  slug: 'build/prototypes/when-not-to-write-a-new-prototype',
+                },
+                {
+                  label: 'Writing A Custom Primitive Prototype',
+                  translations: {
+                    en: 'Writing A Custom Primitive Prototype',
+                    'zh-CN': '编写一个定制的单体原型',
+                  },
+                  slug: 'build/prototypes/writing-a-custom-primitive-prototype',
+                },
+                {
+                  label: 'Writing A Compound Prototype',
+                  translations: {
+                    en: 'Writing A Compound Prototype',
+                    'zh-CN': '编写一个定制的复合原型',
+                  },
+                  slug: 'build/prototypes/writing-a-compound-prototype',
+                },
+                {
+                  label: 'Building A Styled Library On Top Of Base',
+                  translations: {
+                    en: 'Building A Styled Library On Top Of Base',
+                    'zh-CN': '基于 Base 长出一个带风格的原型库',
+                  },
+                  slug: 'build/prototypes/building-a-styled-library-on-top-of-base',
+                },
+                {
+                  label: 'Checklist',
+                  translations: { en: 'Checklist', 'zh-CN': '原型作者检查清单' },
+                  slug: 'build/prototypes/checklist',
+                },
+                {
+                  label: 'Reference Patterns',
+                  translations: { en: 'Reference Patterns', 'zh-CN': '参考实现应该怎么看' },
+                  slug: 'build/prototypes/reference-patterns',
+                },
+              ],
+            },
+            {
+              label: 'Runtime Architecture',
+              translations: { en: 'Runtime Architecture', 'zh-CN': 'Runtime 架构' },
+              slug: 'build/runtime-architecture',
+            },
+            {
+              label: 'Adapter Guide',
+              translations: { en: 'Adapter Guide', 'zh-CN': 'Adapter 指南' },
+              slug: 'build/adapter-guide',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Compiler Guide',
+              translations: { en: 'Compiler Guide', 'zh-CN': 'Compiler 指南' },
+              slug: 'build/compiler-guide',
+            },
+            {
+              label: 'Host Caps',
+              translations: { en: 'Host Caps', 'zh-CN': 'Host Caps' },
+              slug: 'build/host-caps',
+            },
+            {
+              label: 'Module & Extension Architecture',
+              translations: { en: 'Module & Extension Architecture', 'zh-CN': '模块与扩展架构' },
+              slug: 'build/module-extension-architecture',
+            },
+            {
+              label: 'Contracts & Tests',
+              translations: { en: 'Contracts & Tests', 'zh-CN': '契约与测试' },
+              slug: 'build/contracts-and-tests',
+            },
+          ],
+        },
+        {
+          label: 'Contribute',
+          translations: { en: 'Contribute', 'zh-CN': '参与贡献' },
+          items: [
+            {
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'contribute',
+            },
+            {
+              label: 'Collaboration model',
+              translations: { en: 'Collaboration model', 'zh-CN': '协作模型' },
+              slug: 'contribute/collaboration',
+            },
+            {
+              label: 'Deliver a change',
+              translations: { en: 'Deliver a change', 'zh-CN': '交付一个改动' },
+              slug: 'contribute/deliver',
+            },
+            {
+              label: 'Contributor Agents',
+              translations: { en: 'Contributor Agents', 'zh-CN': '贡献者 Agent' },
+              slug: 'contribute/agents',
+            },
+            {
+              label: 'Agent Skill Catalog',
+              translations: { en: 'Agent Skill Catalog', 'zh-CN': 'Agent Skill 目录' },
+              slug: 'contribute/skills',
+            },
+            {
+              label: 'Agent Automation',
+              translations: { en: 'Agent Automation', 'zh-CN': 'Agent 自动化' },
+              slug: 'contribute/automation',
+            },
+          ],
+        },
+        {
+          label: 'Specifications',
+          translations: { en: 'Specifications', 'zh-CN': '规范（契约）' },
+          items: [
+            {
+              label: 'Introduction',
+              translations: { en: 'Introduction', 'zh-CN': '规范导读' },
+              slug: 'specifications/introduction',
+            },
+            {
+              label: 'Core',
+              translations: { en: 'Core', 'zh-CN': '核心' },
+              slug: 'specifications/core',
+            },
+            {
+              label: 'Lifecycle',
+              translations: { en: 'Lifecycle', 'zh-CN': 'Lifecycle' },
+              slug: 'specifications/lifecycle',
+            },
+            {
+              label: 'Template',
+              translations: { en: 'Template', 'zh-CN': 'Template' },
+              slug: 'specifications/template',
+            },
+            {
+              label: 'Props',
+              translations: { en: 'Props', 'zh-CN': 'Props' },
+              slug: 'specifications/props',
+            },
+            {
+              label: 'Event',
+              translations: { en: 'Event', 'zh-CN': 'Event' },
+              slug: 'specifications/event',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Expose',
+              translations: { en: 'Expose', 'zh-CN': 'Expose' },
+              slug: 'specifications/expose',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'State',
+              translations: { en: 'State', 'zh-CN': 'State' },
+              slug: 'specifications/state',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Context',
+              translations: { en: 'Context', 'zh-CN': 'Context' },
+              slug: 'specifications/context',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Anatomy',
+              translations: { en: 'Anatomy', 'zh-CN': 'Anatomy' },
+              slug: 'specifications/anatomy',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Feedback',
+              translations: { en: 'Feedback', 'zh-CN': 'Feedback' },
+              slug: 'specifications/feedback',
+            },
+            {
+              label: 'asHook',
+              translations: { en: 'asHook', 'zh-CN': 'asHook' },
+              slug: 'specifications/as-hook',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Rule',
+              translations: { en: 'Rule', 'zh-CN': 'Rule' },
+              slug: 'specifications/rule',
+              badge: inProgressBadge,
+            },
+          ],
+        },
+        {
+          label: 'Reference',
+          translations: { en: 'Reference', 'zh-CN': '参考' },
+          items: [
+            {
+              label: 'Overview',
+              translations: { en: 'Overview', 'zh-CN': '概览' },
+              slug: 'reference',
+              badge: inProgressBadge,
+            },
+            {
+              label: 'Prototype API',
+              translations: { en: 'Prototype API', 'zh-CN': 'Prototype API' },
+              slug: 'reference/prototype-api',
+            },
+            {
+              label: 'Compatibility',
+              translations: { en: 'Compatibility', 'zh-CN': '兼容性' },
+              slug: 'reference/compatibility',
+            },
+          ],
+        },
+        {
+          label: 'Project',
+          translations: { en: 'Project', 'zh-CN': '项目' },
+          items: [
+            {
+              label: '项目介绍',
+              translations: { en: 'About', 'zh-CN': '项目介绍' },
+              slug: 'project/about',
+            },
+            {
+              label: '当前状态',
+              translations: { en: 'Status', 'zh-CN': '当前状态' },
+              slug: 'project/status',
+            },
+            {
+              label: '路线图',
+              translations: { en: 'Roadmap', 'zh-CN': '路线图' },
+              slug: 'project/roadmap',
+            },
+            {
+              label: '相关链接',
+              translations: { en: 'Links', 'zh-CN': '相关链接' },
+              slug: 'project/links',
+            },
+          ],
+        },
+      ],
+      components: {
+        Hero: './src/components/override/Hero.astro',
+        ContentPanel: './src/components/override/ContentPanel.astro',
+        Header: './src/components/override/Header.astro',
+        Search: './src/components/override/Search.astro',
+        PageFrame: './src/components/override/PageFrame.astro',
+        SiteTitle: './src/components/override/SiteTitle.astro',
+        ThemeProvider: './src/components/override/ThemeProvider.astro',
+        TableOfContents: './src/components/override/TableOfContents/TableOfContents.astro',
+        TwoColumnContent: './src/components/override/TwoColumnContent.astro',
+        PageTitle: './src/components/override/PageTitle.astro',
+        MarkdownContent: './src/components/override/MarkdownContent.astro',
+        LanguageSelect: './src/components/override/LanguageSelect.astro',
+      },
+    }),
+    mdx(),
+  ],
+  markdown: {
+    remarkPlugins: [remarkDirective, remarkConceptDirective],
+    rehypePlugins: [rehypeEnhancedImage, rehypeScrollableTables],
+  },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: websiteManualChunk,
+        },
+      },
+    },
+    resolve: {
+      alias: {
+        '@': fileURLToPath(new URL('./src', import.meta.url)),
+      },
+    },
+    server: {
+      // 允许 dev server 读取到仓库根（否则访问 workspace 包会被拦）
+      fs: { allow: ['../..'] },
+    },
+    plugins: [protoUiSourcePlugin, websiteBundleGraphPlugin(), tailwindcss()],
+    optimizeDeps: {
+      exclude: [
+        '@proto.ui/core',
+        '@proto.ui/runtime',
+        '@proto.ui/types',
+        '@proto.ui/adapter-base',
+        '@proto.ui/adapter-react',
+        '@proto.ui/adapter-vue',
+        '@proto.ui/adapter-web-component',
+        '@proto.ui/prototypes-base',
+        '@proto.ui/prototypes-shadcn',
+        '@proto.ui/prototypes-brutalist',
+        '@proto.ui/hooks',
+        '@proto.ui/module-overlay',
+        '@proto.ui/module-presence',
+        '@proto.ui/module-feedback',
+        '@proto.ui/module-props',
+        '@proto.ui/module-event',
+        '@proto.ui/module-expose',
+        '@proto.ui/module-expose-event',
+        '@proto.ui/module-expose-state-web',
+        '@proto.ui/module-rule-expose-state-web',
+        '@proto.ui/module-rule-meta',
+        '@proto.ui/module-context',
+        '@proto.ui/module-anatomy',
+        '@proto.ui/module-as-trigger',
+        '@proto.ui/module-focus',
+        '@proto.ui/module-base',
+        '@proto.ui/module-test-sys',
+      ],
+    },
+  },
+});

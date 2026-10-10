@@ -21,6 +21,17 @@ statement:
 
 
 criteria:
+  - id: A-REACT-18-19-0001-CONTROL-LABEL
+    text:
+      en: The bounded draft Control Label slice transports typed instance associations separately from portable Props, including custom getProps projections. WC uses setElementAssociations; framework facades reserve instanceAssociations. Only opted-in semantic subjects accept a branded reference. Host-private tree scope, eligible input intent and target callback wiring are supplied; no attribute serialization or native-platform support is inferred. Harness results and real-browser admission remain distinct.
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
+  - id: A-REACT-18-19-0001-AVAILABLE
+    text:
+      en: 'The Web Adapter installs the shared available-space host alongside anchored positioning; only opted-in active Overlay content leases it. Simulated geometry tests verify wiring and cleanup without claiming native viewport fidelity.'
+      zh-CN: 'Web Adapter 在锚定定位旁安装共享 available-space host；仅主动 opt-in 的活跃 Overlay content 获取租约。模拟几何测试证明连接和清理，不冒认原生 viewport fidelity。'
   - id: A-REACT-18-19-0001-POSITIONING
     text:
       en: 'The Web Adapter installs Positioning and translates anchored geometry through the shared Floating UI host. Active Overlay placement, resize updates, non-transform projection and cleanup have executable Adapter evidence; this slice does not claim native browser layout fidelity.'
@@ -170,6 +181,10 @@ criteria:
       zh-CN: React Web profile 将 draft Table Structure graph 投射为 Web table、row、header、cell semantics、one-based count/index/span、caption naming 与有序显式 header refs。结构无效时清理所拥有的 Table 投射，恢复后重建当前 facts。此为有界 Web DOM 证据，不认证 React Native 或 assistive technology。
 supports:
   modules:
+    - id: M-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+      role: required-module
+      note: Bounded draft independent Label pairing; installed Module does not mean every Prototype opts in.
     - id: M-RULE-META-0001
       since: 0.3.0-alpha.0
       role: required-module
@@ -259,6 +274,13 @@ supports:
       role: required-module
 provides:
   hostCaps:
+    - id: HC-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
+      note: Same-tree Web lease and eligible activation request bridge; native/AT admission remains separate.
+    - id: HC-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
+      role: translated-capability
     - id: HC-A11Y-0001
       since: 0.3.0-alpha.1
       role: translated-capability
@@ -363,6 +385,10 @@ relates:
     - D-ADAPTER-PROFILE-0001
 verifies:
   tests:
+    - id: T-CONTROL-LABEL-0001
+      since: 0.3.0-alpha.1
+    - id: T-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
     - id: T-RULE-COLOR-SCHEME-0001
       since: 0.3.0-alpha.0
     - id: T-ANCHORED-POSITIONING-0001
@@ -447,6 +473,9 @@ sources:
   - path: packages/adapters/react/test/context.integration.test.ts
   - path: packages/adapters/react/test/expose-state-web.integration.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added the explicitly separate instance-association channel and bounded draft Control Label Web provider links.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Bound the existing vertical end-follow policy, facts and request journey to precise Adapter evidence without admitting the draft contract as stable.

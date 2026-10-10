@@ -1,6 +1,6 @@
 // packages/modules/rule/src/eval.ts
 import type { RuleIR, RulePlanV0, RuleEvalCtx, WhenExpr, WhenValue } from './types';
-import { mergeTwTokensV0 } from '@proto.ui/core';
+import { mergeTwTokensV0, snapshotMaterialCandidate, type MaterialCandidate } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
 
 function evalValue<Props extends PropsBaseType>(v: WhenValue<Props>, ctx: RuleEvalCtx<Props>): any {
@@ -53,9 +53,12 @@ export function evaluateRulesToPlan<Props extends PropsBaseType>(
     .sort((a, b) => a.idx - b.idx);
 
   const tokens: string[] = [];
+  const materials: MaterialCandidate[] = [];
   for (const { r } of active) {
     if (r.intent.kind !== 'ops') continue;
     for (const op of r.intent.ops) {
+      if (op.kind === 'feedback.material.use')
+        materials.push(snapshotMaterialCandidate(op.candidate));
       if (op.kind === 'feedback.style.use') {
         for (const h of op.handles) {
           if (!h || h.kind !== 'tw') {
@@ -68,5 +71,9 @@ export function evaluateRulesToPlan<Props extends PropsBaseType>(
   }
 
   const merged = mergeTwTokensV0(tokens);
-  return { kind: 'style.tokens', tokens: merged.tokens };
+  return {
+    kind: 'style.tokens',
+    tokens: merged.tokens,
+    ...(materials.length ? { materials: Object.freeze(materials) } : {}),
+  };
 }

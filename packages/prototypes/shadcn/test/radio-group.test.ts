@@ -15,6 +15,7 @@ import {
   AS_TRIGGER_PARENT_CAP,
 } from '@proto.ui/module-as-trigger';
 import { styleContains } from '../../test-utils/style';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import * as ShadcnPackage from '../src';
 import * as radioGroupFamily from '../src/radio-group';
 
@@ -273,9 +274,10 @@ describe('prototypes/shadcn: radio group', () => {
     document.body.append(root);
     await flushReconciliation();
 
-    for (const token of ['grid', 'gap-3']) expect(styleContains(root, token), token).toBe(true);
+    for (const token of ['grid', 'w-full', 'gap-2'])
+      expect(styleContains(root, token), token).toBe(true);
     for (const token of [
-      'inline-flex',
+      'flex',
       'items-center',
       'justify-center',
       'aspect-square',
@@ -285,11 +287,12 @@ describe('prototypes/shadcn: radio group', () => {
       'border',
       'border-input',
       'bg-transparent',
-      'text-primary',
-      'shadow-xs',
-      'transition-[color,box-shadow]',
       'outline-none',
       'dark:bg-input/30',
+      'data-[checked]:bg-primary',
+      'data-[checked]:text-primary-foreground',
+      'data-[checked]:border-primary',
+      'dark:data-[checked]:bg-primary',
       'data-[focus-visible]:border-ring',
       'data-[focus-visible]:ring-3',
       'data-[focus-visible]:ring-ring/50',
@@ -312,12 +315,28 @@ describe('prototypes/shadcn: radio group', () => {
       'items-center',
       'justify-center',
       'opacity-0',
+      'text-primary-foreground',
       'data-[checked]:opacity-100',
     ]) {
       expect(styleContains(firstIndicator, token), token).toBe(true);
     }
     expect(firstIndicator.querySelectorAll('svg')).toHaveLength(1);
     expect(firstIndicator.querySelectorAll('svg circle')).toHaveLength(1);
+    expect(firstIndicator.querySelector('svg circle')?.getAttribute('r')).toBe('12');
+    expect(firstIndicator.querySelector('svg')?.getAttribute('stroke')).toBe('none');
+    for (const legacy of ['text-primary', 'shadow-xs', 'transition-[color,box-shadow]']) {
+      expect(styleContains(first, legacy), legacy).toBe(false);
+    }
+    expect(styleContains(root, 'gap-3')).toBe(false);
+    const css = renderProtoStyleTokenCss(
+      [root, first, firstIndicator].flatMap((el) =>
+        (el.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean)
+      )
+    );
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('background-color: var(--pui-primary);');
+    expect(css).toContain('color: var(--pui-primary-foreground);');
+    expect(css).toContain('gap: 0.5rem;');
     expect(firstIndicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
     expect(firstIndicator.hasAttribute('data-checked')).toBe(false);
     expect(root.getAttribute('aria-label')).toBe('Delivery method');

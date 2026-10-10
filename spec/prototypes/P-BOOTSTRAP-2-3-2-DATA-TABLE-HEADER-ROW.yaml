@@ -1,0 +1,33 @@
+id: P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW
+type: prototype
+title: bootstrap-2-3-2 passive DataTable HeaderRow projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Additive draft presentation of the Base Table Row-derived composition; independent implementation and browser/native/visual acceptance remain pending.
+  zh-CN: Base Table Row 派生组合的新增 draft 样式投影；独立实现审查及 browser/native/视觉验收待完成。
+summary: Family static row presentation without its own Trigger selection or focus owner.
+statement:
+  en: Consume asDataTableHeaderRow and return its inherited slot render, adding only this family's existing static DataTable row recipe.
+  zh-CN: 消费 asDataTableHeaderRow 并返回其继承的 slot render，仅增加本家既有 DataTable 行的静态 recipe。
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW-INHERITANCE
+    text:
+      en: Preserve the exact empty Base Props/Exposes, passive single-row topology and lifecycle without installing Trigger, selection, focus, or data-slot state.
+      zh-CN: 保留 Base 精确空 Props/Exposes、被动单行 topology 与 lifecycle，不安装 Trigger、selection、focus 或数据槽 state。
+  - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-HEADER-ROW-STYLE
+    text:
+      en: Apply only family-owned static row tokens; do not copy selected, focus or pressed rules or claim upstream/browser visual equivalence from source tests.
+      zh-CN: 仅应用本家静态行 tokens，不复制 selected、focus 或 pressed 规则，不凭源码测试宣称上游/browser 视觉相等。
+inherits:
+  prototypes: [P-BASE-DATA-TABLE-HEADER-ROW]
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-0003]
+verifies:
+  tests: [T-BASE-DATA-TABLE-HEADER-ROW-0001]
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/data-table/header-row.proto.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added static family presentation of a passive structural HeaderRow.

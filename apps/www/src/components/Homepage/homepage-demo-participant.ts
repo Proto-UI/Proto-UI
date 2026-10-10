@@ -1,3 +1,4 @@
+import { createRuntimeLoadingMask } from '../PrototypePreviewer/runtime-loading-mask';
 import type {
   ProjectionFamilyId,
   SharedBaseFamilyId,
@@ -6,7 +7,14 @@ import type { ProjectionScopeCommit } from '../PrototypePreviewer/projection-sco
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
 
-export function homepageDemoParticipant(document: Document) {
+export function homepageDemoParticipant(
+  document: Document,
+  actions?: {
+    retry(): void;
+    cancel(): void;
+    restoreFocus?(origin: Element): void;
+  }
+) {
   const root = document.querySelector<HTMLElement>('[data-home-showcase]');
   if (!root) return null;
   const mount = root.querySelector<HTMLElement>('[data-home-demo-host]');
@@ -14,10 +22,24 @@ export function homepageDemoParticipant(document: Document) {
   const ownerId = root.dataset.projectionOwner || root.id || 'homepage-live-example';
   mount.dataset.projectionOwner = ownerId;
   const status = root.querySelector<HTMLElement>('[data-home-demo-status]');
-  const setStatus = (state: 'loading' | 'ready' | 'error', runtime: RuntimeId) => {
+  const mask = actions
+    ? createRuntimeLoadingMask({
+        root,
+        content: mount,
+        status,
+        family: () => (root.dataset.projectionFamily === 'brutalist' ? 'brutalist' : 'shadcn'),
+        ...actions,
+      })
+    : null;
+  const setStatus = (
+    state: 'loading' | 'ready' | 'error',
+    runtime: RuntimeId,
+    maskRuntime: RuntimeId = runtime
+  ) => {
     root.dataset.runnerState = state;
     root.dataset.runnerRuntime = runtime;
     mount.setAttribute('aria-busy', String(state === 'loading'));
+    mask?.setState(state, maskRuntime, Number(root.dataset.projectionGeneration ?? 0) > 0);
     if (status)
       status.textContent = `${runtime === 'wc' ? 'Web Components' : runtime === 'vue2' ? 'Vue 2' : runtime === 'react' ? 'React' : 'Vue'} · ${root.dataset[`status${state[0]!.toUpperCase()}${state.slice(1)}`] || state}`;
   };
@@ -25,6 +47,7 @@ export function homepageDemoParticipant(document: Document) {
     root,
     mount,
     ownerId,
+    destroy: () => mask?.destroy(),
     // The existing materializer requires a known lane member even when an explicit
     // app recipe supplies all content. No component picker is rendered for this task.
     initialFamily: 'shadcn' as ProjectionFamilyId,

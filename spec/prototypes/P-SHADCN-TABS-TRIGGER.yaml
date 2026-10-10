@@ -45,9 +45,9 @@ criteria:
       en: The default horizontal, default-variant Trigger must translate the pinned v4 relative, inline-flex, height, flex-growth, alignment, gap, rounded-md, transparent-border, px-2/py-1, typography, foreground-opacity, transition, and outline surface; it must not retain the former rounded-lg, px-3/py-1.5, or extra pressed scaling.
   - id: P-SHADCN-TABS-TRIGGER-STATE-DRIVEN-STYLES
     text:
-      zh-CN: selected、hovered、focusVisible 与 disabled rules 必须从 inherited Trigger state 派生：selected 投射 background/foreground/shadow-sm，hovered 非 selected 只提升 foreground，focusVisible 投射 border/ring/outline，disabled 抑制 pointer 并降低 opacity；不得创建第二套 selection 或 interaction truth。
+      zh-CN: appearance=default 时，selected、hovered、focusVisible 与 disabled rules 必须从 inherited Trigger state 派生：selected 投射 background/foreground/shadow-sm，hovered 非 selected 只提升 foreground，focusVisible 投射 border/ring/outline，disabled 抑制 pointer 并降低 opacity；不得创建第二套 selection 或 interaction truth。
       en: >-
-        Selected, hovered, focusVisible, and disabled rules must derive from inherited Trigger state: selected projects background, foreground, and shadow-sm; hovered non-selected raises only the foreground; focusVisible projects border, ring, and outline; disabled suppresses pointer input and lowers opacity. They must not create a second selection or interaction source of truth.
+        With appearance=default, selected, hovered, focusVisible, and disabled rules must derive from inherited Trigger state: selected projects background, foreground, and shadow-sm; hovered non-selected raises only the foreground; focusVisible projects border, ring, and outline; disabled suppresses pointer input and lowers opacity. They must not create a second selection or interaction source of truth.
 
 
     references:
@@ -70,6 +70,10 @@ criteria:
       en: The `asChild` member of upstream Trigger props is intentionally omitted under the shared decision.
     dependsOn:
       decisions: [D-AS-CHILD-OMISSION-0001]
+  - id: P-SHADCN-TABS-TRIGGER-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+
 openQuestions:
   - id: P-SHADCN-TABS-TRIGGER-Q-UPSTREAM-DIFFERENCES
     question:
@@ -106,8 +110,15 @@ inherits:
   prototypes:
     - id: P-BASE-TABS-TRIGGER
       note: Default inherited tab protocol; explicit setup-time negative patches must be declared.
-verifies: { tests: [T-SHADCN-TABS-TRIGGER-0001] }
+verifies:
+  {
+    tests:
+      [T-SHADCN-TABS-TRIGGER-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }],
+  }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Tabs Trigger delta cataloging with Base inheritance, state-driven styles, intentional asChild omission, and centralized parity gaps.

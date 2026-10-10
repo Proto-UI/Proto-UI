@@ -427,7 +427,7 @@ class FocusModuleImpl extends ModuleBase {
     }
   }
 
-  private beginFocusOperation(kind: FocusOperation['kind']): FocusOperation {
+  private beginFocusOperation(kind: FocusOperation['kind'], replay = false): FocusOperation {
     // Execution ownership is separate from the stable request-options identity.
     // Readiness replay keeps its intent while getting a new guarded execution.
     const operation: FocusOperation = {
@@ -438,7 +438,7 @@ class FocusModuleImpl extends ModuleBase {
     };
     this.focusOperation = operation;
     // An enabled target request supersedes older intent before Center admission.
-    if (kind === 'target') this.clearPendingFocus();
+    if (kind === 'target') this.clearPendingFocus(!replay);
     return operation;
   }
 
@@ -559,7 +559,10 @@ class FocusModuleImpl extends ModuleBase {
             options,
             (snapshot) => {
               intent = snapshot;
-              operation = this.beginFocusOperation('target');
+              operation = this.beginFocusOperation(
+                'target',
+                this.pendingFocusRequest?.options === snapshot
+              );
             },
             retainFocusRequestIntent
           );
@@ -840,7 +843,7 @@ class FocusModuleImpl extends ModuleBase {
         const request = this.caps.get(FOCUS_REQUEST_FOCUS_CAP);
         for (let attempts = targets.length; attempts > 0; attempts -= 1) {
           const target = targets[next]!;
-          if (request(target, { reason: 'keyboard' }, 'native') !== false) {
+          if (request(target, { reason: 'keyboard' }, 'entry') !== false) {
             this.lastScopeTarget = target;
             return;
           }
@@ -1021,9 +1024,10 @@ class FocusModuleImpl extends ModuleBase {
     this.pendingFocusRequest = { kind: 'target', options, syncFacts };
   }
 
-  private clearPendingFocus(): void {
+  private clearPendingFocus(releaseHost = true): void {
     this.pendingFocusRequest = undefined;
-    if (this.caps.has(FOCUS_RELEASE_PENDING_CAP)) this.caps.get(FOCUS_RELEASE_PENDING_CAP)();
+    if (releaseHost && this.caps.has(FOCUS_RELEASE_PENDING_CAP))
+      this.caps.get(FOCUS_RELEASE_PENDING_CAP)();
   }
 
   private fulfillPendingFocus(): boolean {
@@ -1063,7 +1067,8 @@ class FocusModuleImpl extends ModuleBase {
     const operation = prepared ?? this.beginFocusOperation('target');
     const applicationVersion = this.focusApplicationVersion;
     const current = () => this.focusOperation === operation && !operation.cancelled;
-    this.clearPendingFocus();
+    // Replacing the Module slot during an attempt does not cancel its queued host retry.
+    this.clearPendingFocus(false);
     let failed = false;
     try {
       if (!syncFacts) {
@@ -1124,7 +1129,7 @@ class FocusModuleImpl extends ModuleBase {
 
   private applyTargetFocus(options: FocusRequestOptions, syncFacts: boolean, replay = false): void {
     if (!this.focusableDeclared || this.focusableConfig.disabled) return;
-    const operation = this.beginFocusOperation('target');
+    const operation = this.beginFocusOperation('target', replay);
     const applicationVersion = this.focusApplicationVersion;
     let failed = false;
     try {
@@ -1194,7 +1199,7 @@ class FocusModuleImpl extends ModuleBase {
         return;
       }
       operation.admitted = true;
-      this.clearPendingFocus();
+      this.clearPendingFocus(!intent?.replay);
       operation.preflight = false;
       this.focusApplicationVersion += 1;
       const applied = this.caps.get(FOCUS_REQUEST_FOCUS_CAP)(resolved, options, 'entry');

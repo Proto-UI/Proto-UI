@@ -50,6 +50,11 @@ cases:
     covers:
       - C-ANCHORED-POSITIONING-0001-F
     expectation: portaled-hover-card-escapes-previewer-clipping-with-logical-owner-intact
+  - id: T-ANCHORED-POSITIONING-0001-CASE-INPUT-ORIGIN
+    title: Opaque host input-origin references position at the point and revoke stale computations
+    covers:
+      [C-ANCHORED-POSITIONING-0001-H, HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B]
+    expectation: zero-area-pointer-reference-or-keyboard-element-without-portable-geometry-and-no-writes-after-revocation
 implementations:
   - id: positioning-module-lifetime
     kind: module-test
@@ -62,7 +67,8 @@ implementations:
     status: passing
     path: packages/modules/positioning/test/lease-generation.test.ts
     required: true
-    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-GENERATION]
+    consumesCases:
+      [T-ANCHORED-POSITIONING-0001-CASE-GENERATION, T-ANCHORED-POSITIONING-0001-CASE-INPUT-ORIGIN]
   - id: react-positioning-catalog
     kind: adapter-test
     status: passing
@@ -96,6 +102,7 @@ implementations:
       - T-ANCHORED-POSITIONING-0001-CASE-OFFSET
       - T-ANCHORED-POSITIONING-0001-CASE-COLLISION
       - T-ANCHORED-POSITIONING-0001-CASE-ANCHOR-TRANSLATION
+      - T-ANCHORED-POSITIONING-0001-CASE-INPUT-ORIGIN
   - id: runtime-overlay-positioning-contract
     kind: runtime-test
     status: passing

@@ -1,3 +1,5 @@
+import { resolveWebInputOriginAnchor } from './input-origin-anchor';
+import { observeRootSpace } from './root-space-observer';
 import {
   autoUpdate,
   computePosition,
@@ -109,14 +111,24 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
       let disposed = false;
       let generation = 0;
       let cleanup: (() => void) | null = null;
+      const referenceFor = (anchor: unknown, config: AnchoredPositionConfig) => {
+        if (isElement(anchor))
+          return {
+            element: anchor,
+            reference: positionReference(anchor, config),
+            isLive: () => true,
+          };
+        return resolveWebInputOriginAnchor(anchor);
+      };
 
       const position = async () => {
         const current = connection;
         const { anchor, floating, config } = current;
         const version = ++generation;
-        const isCurrent = () => !disposed && version === generation;
-        if (disposed || !isElement(anchor) || !isElement(floating)) return;
-        const result = await computePosition(positionReference(anchor, config), floating, {
+        const reference = referenceFor(anchor, config);
+        const isCurrent = () => !disposed && version === generation && !!reference?.isLive();
+        if (disposed || !reference || !isElement(floating)) return;
+        const result = await computePosition(reference.reference, floating, {
           placement: toPlacement(config),
           strategy: config.strategy,
           middleware: middlewareFor(config, isCurrent),
@@ -137,8 +149,24 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
         cleanup?.();
         cleanup = null;
         const { anchor, floating } = connection;
-        if (!isElement(anchor) || !isElement(floating)) return;
-        cleanup = autoUpdate(anchor, floating, position, { animationFrame: false });
+        const reference = referenceFor(anchor, connection.config);
+        if (!reference || !isElement(floating)) return;
+        const stopAuto = autoUpdate(reference.reference, floating, position, {
+          animationFrame: false,
+        });
+        const stopRoot = observeRootSpace(reference.element.ownerDocument, () => {
+          void position();
+        });
+        const stopInvalidation = resolveWebInputOriginAnchor(anchor)?.subscribeInvalidation(() => {
+          generation++;
+          cleanup?.();
+          cleanup = null;
+        });
+        cleanup = () => {
+          stopAuto();
+          stopRoot();
+          stopInvalidation?.();
+        };
       };
 
       restart();

@@ -1,0 +1,23 @@
+---
+title: 'Autocomplete'
+description: 'Editable suggestions with free-text completion.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Editable suggestions with free-text completion.
+
+<PrototypePreviewer
+  demoId="demo-base-autocomplete"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root.value is committed text, while inputValue is the query. Selecting a suggestion commits its textValue; Enter without an active match may commit free text.
+
+The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+
+Parts: Root, Input, Content, Item, Empty, Trigger.
+
+Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.

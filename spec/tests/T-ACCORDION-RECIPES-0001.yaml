@@ -1,0 +1,65 @@
+id: T-ACCORDION-RECIPES-0001
+type: test
+title: Accordion family recipe and decorative glyph regressions
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Bounded source/host regressions; exact-source native pixels, four-host narrow layout, material and GPUI acceptance remain incomplete.
+  zh-CN: 仅源码/宿主回归；精确源码native像素、四host窄屏、材质与GPUI验收未完整，保持draft。
+summary: Checks source-specific recipes and non-shrinking decorative glyphs without adding a disclosure owner.
+cases:
+  - id: T-ACCORDION-RECIPES-0001-CASE-RECIPE
+    title: Component-specific recipe positive and superseded-shell negative controls
+    covers:
+      - P-SHADCN-ACCORDION-TRIGGER-STYLE
+      - P-SHADCN-ACCORDION-CONTENT-STYLE
+      - P-BRUTALIST-ACCORDION-TRIGGER-STYLE
+      - P-BRUTALIST-ACCORDION-ITEM-STYLE
+      - P-BRUTALIST-ACCORDION-CONTENT-STYLE
+      - P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER-STYLE
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER-STYLE
+    expectation: Shadcn uses compact trigger/content spacing and a 3px focus ring; Neo retains main Trigger fill, rounded clipped Item and secondary small-text Content. Four family chevrons have a passive non-shrinking wrapper; Neo uses 20px, others 16px. Existing Base activation and disabled suppression remain single-owner. Token and synthetic-DOM checks do not establish native paint.
+implementations:
+  - id: source-host-recipes
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/prototypes/test-utils/test/accordion-recipes.test.ts
+    consumesCases:
+      - T-ACCORDION-RECIPES-0001-CASE-RECIPE
+    exercises: &a1
+      - P-SHADCN-ACCORDION-TRIGGER
+      - P-SHADCN-ACCORDION-CONTENT
+      - P-BRUTALIST-ACCORDION-TRIGGER
+      - P-BRUTALIST-ACCORDION-ITEM
+      - P-BRUTALIST-ACCORDION-CONTENT
+      - P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER
+    notes:
+      - Nine regressions fail against c2cbb8 before the repair. A source collector and CSS renderer are exercised without changing their semantics.
+  - id: native-narrow-glyph
+    kind: workspace-check
+    status: planned
+    required: true
+    path: apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts
+    consumesCases:
+      - T-ACCORDION-RECIPES-0001-CASE-RECIPE
+    exercises: *a1
+    notes:
+      - Registered 320px/200% React long-label glyph dimensions and non-shrink assertions. No new exact-source browser execution or screenshot in this repair. Four-host narrow coverage remains separate debt.
+exercises:
+  prototypes: *a1
+sources:
+  - path: https://ui.shadcn.com/r/styles/base-nova/accordion.json
+    label: Static snapshot fetched 2026-10-10; deployed Git SHA not established; design reference only
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/accordion.tsx
+    label: MIT source; static inspection only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded bounded source recipe and decorative glyph regressions; no stable admission.
+tags:
+  - accordion
+  - projection
+  - recipe
+  - draft

@@ -25,3 +25,4 @@ pub use wire::{
     ProjectionAck, ProjectionAckStatus, ProjectionTransaction, RawEventRegistration, SlotPlan,
     HOST_PROTOCOL_VERSION,
 };
+pub mod available_space;

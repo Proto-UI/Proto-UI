@@ -14,6 +14,10 @@ statement:
 
 
 criteria:
+  - id: P-SHADCN-DIALOG-CONTENT-AVAILABLE
+    text:
+      en: 'The centered panel reserves at least one rem on each side of the available region, caps width at 32rem and permits internal vertical scrolling. This bounded geometry does not assert complete upstream composition or responsive-breakpoint parity.'
+      zh-CN: '居中 panel 在可用区域四侧至少保留一 rem，宽度上限 32rem，允许内部纵向滚动。本有界几何不声称上游组合和响应式断点完全对齐。'
   - id: P-SHADCN-DIALOG-CONTENT-UPSTREAM-IDENTITY
     text:
       {
@@ -98,9 +102,10 @@ openQuestions:
         and exact panel parity converge?,
       }
     context:
-      zh-CN: intentional deviations 是省略 `asChild` 与当前受限 public types。upstream Content 自动组合 Portal/Overlay，提供 `showCloseButton` 默认 true、内置 X/sr-only Close，使用 z-50、responsive max width；当前要求调用者组合独立 Mask/Close，固定 max-w-lg、额外 border-border。className/native/data-slot forwarding 及内部 controls 运行时可见性也待治理。
-      en: Intentional deviations are omission of `asChild` and limited public types. Upstream Content composes Portal and Overlay, defaults showCloseButton to true, includes X and sr-only Close, and uses z-50 and responsive max width; current code requires separate Mask and Close, fixes max-w-lg, and adds border-border. Forwarding and runtime visibility of internal controls also need governance.
-    blocks: [shadcn dialog content parity roadmap]
+      zh-CN: intentional deviations 是省略 `asChild` 与当前受限 public types。upstream Content 自动组合 Portal/Overlay，提供 `showCloseButton` 默认 true、内置 X/sr-only Close，使用 z-50、responsive max width；当前要求调用者组合独立 Mask/Close，可用区域减去两 rem 且上限 32rem（中间断点宽度仍不同）、额外 border-border。className/native/data-slot forwarding 及内部 controls 运行时可见性也待治理。
+      en: Intentional deviations are omission of `asChild` and limited public types. Upstream Content composes Portal and Overlay, defaults showCloseButton to true, includes X and sr-only Close, and uses z-50 and responsive max width; current code requires separate Mask and Close, caps width at 32rem within the available region minus two rem (the intermediate responsive breakpoint remains different), and adds border-border. Forwarding and runtime visibility of internal controls also need governance.
+    blocks: [activation:P-SHADCN-DIALOG-CONTENT]
+
 sources:
   - path: packages/prototypes/shadcn/src/dialog/content.proto.ts
   - path: packages/prototypes/shadcn/src/dialog/types.ts
@@ -119,7 +124,8 @@ inherits:
         note: Runtime Base Content protocol is inherited; the Shadcn public type boundary explicitly claims a narrower supported subset.,
       },
     ]
-verifies: { tests: [T-SHADCN-DIALOG-CONTENT-0001] }
+verifies:
+  { tests: [{ id: T-AVAILABLE-SPACE-0001, since: 0.3.0-alpha.1 }, T-SHADCN-DIALOG-CONTENT-0001] }
 revisions:
   [
     {
