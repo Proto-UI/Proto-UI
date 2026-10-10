@@ -51,6 +51,7 @@ type CalendarContext = {
   readOnly: boolean;
   weekStartsOn: number;
   active: string;
+  focusRequest: { id: number; date: string } | null;
 };
 export const CALENDAR_CONTEXT = createContextKey<CalendarContext>('base-calendar');
 const initial: CalendarContext = {
@@ -63,6 +64,7 @@ const initial: CalendarContext = {
   readOnly: false,
   weekStartsOn: 0,
   active: '',
+  focusRequest: null,
 };
 function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'root' });
@@ -106,6 +108,8 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('monthChange', { payload: 'json' });
   let owner: RunHandle<CalendarRootProps> | null = null;
+  let pendingNavigation: { month: string; date: string; fromMonth: string } | null = null;
+  let focusRequestId = 0;
   const publish = (run: RunHandle<CalendarRootProps>, active?: string) => {
     const p = run.props.get(),
       old = run.context.read(CALENDAR_CONTEXT);
@@ -121,7 +125,13 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
         ? ((Math.trunc(p.weekStartsOn!) % 7) + 7) % 7
         : 0,
       active: active ?? old.active,
+      focusRequest: null,
     };
+    const navigation = pendingNavigation;
+    const acceptedNavigation = navigation?.month === next.month && !next.disabled;
+    if (acceptedNavigation) next.active = navigation!.date;
+    if (navigation && (acceptedNavigation || next.disabled || next.month !== navigation.fromMonth))
+      pendingNavigation = null;
     if (
       !next.active ||
       next.active.slice(0, 7) !== next.month ||
@@ -136,11 +146,30 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
                 date.slice(0, 7) === next.month &&
                 dateAvailable(date, next.min, next.max, next.unavailable)
             ) ?? '');
+    if (
+      acceptedNavigation &&
+      next.active &&
+      run.anatomy
+        .partsOf(CALENDAR_FAMILY, 'day')
+        .some((part) => readPartState(part, 'focused') === true)
+    )
+      next.focusRequest = { id: ++focusRequestId, date: next.active };
     if (JSON.stringify(old) !== JSON.stringify(next)) run.context.update(CALENDAR_CONTEXT, next);
   };
-  const requestMonth = (next: string) => {
-    if (!owner || owner.props.get().disabled || !parseDate(`${next}-01`) || next === month.get())
-      return false;
+  const requestMonth = (next: string, navigationDate?: string) => {
+    if (!owner || owner.props.get().disabled || !parseDate(`${next}-01`)) return false;
+    const c = owner.context.read(CALENDAR_CONTEXT);
+    const validNavigation =
+      navigationDate &&
+      navigationDate.slice(0, 7) === next &&
+      dateAvailable(navigationDate, c.min, c.max, c.unavailable);
+    pendingNavigation = validNavigation
+      ? { month: next, date: navigationDate, fromMonth: month.get() }
+      : null;
+    if (next === month.get()) {
+      if (validNavigation) publish(owner);
+      return !!validNavigation;
+    }
     if (!owner.props.isProvided('month')) month.set(next, 'calendar month request');
     publish(owner);
     owner.expose.emit('monthChange', { month: next });
@@ -157,6 +186,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       next === value.get()
     )
       return false;
+    pendingNavigation = null;
     if (!owner.props.isProvided('value')) value.set(next, 'calendar date request');
     publish(owner, next);
     requestMonth(next.slice(0, 7));
@@ -183,6 +213,7 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
   def.lifecycle.onMounted((run) => sync(run));
   def.props.watchAll((run) => sync(run));
   def.lifecycle.onUnmounted(() => {
+    pendingNavigation = null;
     owner = null;
   });
 }
@@ -228,6 +259,7 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
     if (!disabled.get()) focus.focusSelf(options);
   });
   let mounted = false;
+  let handledFocusRequest = 0;
   const sync = (run: RunHandle<CalendarDayProps>) => {
     const c = run.context.read(CALENDAR_CONTEXT),
       p = run.props.get();
@@ -243,6 +275,16 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
     focus.setDisabled(disabled.get());
     focus.setNavParticipation(!disabled.get() && next === c.active ? 'auto' : 'none');
     if (mounted && changed) run.update();
+    if (
+      mounted &&
+      !disabled.get() &&
+      c.active === next &&
+      c.focusRequest?.date === next &&
+      c.focusRequest.id !== handledFocusRequest
+    ) {
+      handledFocusRequest = c.focusRequest.id;
+      focus.focusSelf({ reason: 'keyboard' });
+    }
   };
   def.context.subscribe(CALENDAR_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
@@ -292,14 +334,7 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
       reason: 'calendar.date-navigation',
       source: 'base-calendar-day',
     });
-    callOwner(run, CALENDAR_FAMILY, 'requestMonth', target.slice(0, 7));
-    const latest = run.context.read(CALENDAR_CONTEXT);
-    run.context.update(CALENDAR_CONTEXT, { ...latest, active: target });
-    const part = run.anatomy
-      .partsOf(CALENDAR_FAMILY, 'day')
-      .find((p) => readPartState(p, 'date') === target && !readPartState(p, 'disabled'));
-    const method = part?.getExpose('focusSelf');
-    if (typeof method === 'function') method({ reason: 'keyboard' });
+    callOwner(run, CALENDAR_FAMILY, 'requestMonth', target.slice(0, 7), target);
   });
   return () => (date.get() ? [String(Number(date.get().slice(-2)))] : null);
 }
@@ -355,10 +390,24 @@ export const calendarHeading = definePrototype({
 });
 function navigationSetup(direction: -1 | 1) {
   return (def: DefHandle<any, any>) => {
-    asButton();
+    const button = asButton();
+    const focus = asFocusable();
     def.anatomy.claim(CALENDAR_FAMILY, { role: direction < 0 ? 'previous' : 'next' });
-    def.context.subscribe(CALENDAR_CONTEXT);
+    const sync = (run: RunHandle<any>) => {
+      const disabled = run.context.read(CALENDAR_CONTEXT).disabled || !!run.props.get().disabled;
+      button.stateHandles?.disabled.set(disabled, 'calendar navigation disabled');
+      focus.setDisabled(disabled);
+      if (disabled) {
+        button.stateHandles?.hovered.set(false, 'calendar disabled reset');
+        button.stateHandles?.pressed.set(false, 'calendar disabled reset');
+      }
+    };
+    def.context.subscribe(CALENDAR_CONTEXT, sync);
+    def.lifecycle.onCreated(sync);
+    def.lifecycle.onMounted(sync);
+    def.props.watchAll(sync);
     def.event.on('press.commit', (run) => {
+      if (button.stateHandles?.disabled.get()) return;
       const c = run.context.read(CALENDAR_CONTEXT);
       callOwner(
         run,

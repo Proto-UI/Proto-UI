@@ -11,6 +11,8 @@ This functional checkpoint is WIP. Native GPUI, complete Adapter/Compiler parity
 
 Without month or defaultMonth, the initial displayed month follows value or defaultValue; an empty selection uses 1970-01. Explicit month wins over defaultMonth. unavailable accepts an array of date strings; malformed values are rejected by the Props boundary, retaining its prior valid value or the empty default.
 
+Controlled month navigation retains the current valid tab entry until the owner accepts the requested month. Synchronous and delayed acceptance apply the pending keyboard target only after its date is available; focus stays outside the Calendar if the reader has already left. Root disabled policy is combined with each Previous/Next control’s local disabled prop.
+
 <PrototypePreviewer
   demoId="demo-base-calendar"
   initialRuntime="wc"
