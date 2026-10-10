@@ -180,6 +180,8 @@ const staticUtilities: Record<string, string[]> = {
   'grid-rows-[auto_auto]': ['grid-template-rows: auto auto;'],
   hidden: ['display: none;'],
   'flex-1': ['flex: 1 1 0%;'],
+  'flex-none': ['flex: none;'],
+  'flex-nowrap': ['flex-wrap: nowrap;'],
   'flex-col': ['flex-direction: column;'],
   'flex-row': ['flex-direction: row;'],
   'flex-wrap': ['flex-wrap: wrap;'],
@@ -334,6 +336,8 @@ const staticUtilities: Record<string, string[]> = {
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-current': ['border-color: currentColor;'],
   'border-t-transparent': ['border-top-color: transparent;'],
+  'border-b-transparent': ['border-bottom-color: transparent;'],
+  'rounded-t-[0.25rem]': ['border-top-left-radius: 0.25rem;', 'border-top-right-radius: 0.25rem;'],
   // One v0 border-color intent, lowered to the existing declaration vocabulary.
   'border-[transparent_currentColor_currentColor_currentColor]': [
     'border-color: currentColor;',
