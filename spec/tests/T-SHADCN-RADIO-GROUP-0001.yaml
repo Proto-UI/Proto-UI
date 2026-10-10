@@ -81,7 +81,7 @@ cases:
 implementations:
   - id: prototypes-shadcn-radio-group-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/radio-group.test.ts
     required: true
     consumesCases:
@@ -98,10 +98,11 @@ implementations:
       - P-SHADCN-RADIO-GROUP-ITEM
       - P-SHADCN-RADIO-GROUP-INDICATOR
     notes:
-      - Eight unit tests pass for their Runtime setup and WC Adapter observables; non-first-selected initial Tab entry is verified separately by the browser implementation.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Eight unit tests pass for their Runtime setup and WC Adapter observables; non-first-selected initial Tab entry is verified separately by the browser implementation.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: cli-shadcn-radio-group-facade
     kind: workspace-check
-    status: passing
+    status: planned
     path: packages/cli/test/cli.test.ts
     required: true
     consumesCases:
@@ -109,35 +110,39 @@ implementations:
       - T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE
     exercises: *radio-group-prototypes
     notes:
-      - Verifies exactly three compound facade parts with no preset-injected Indicator and the checked opacity selector in initialized CSS; it does not execute those generated facades in a browser.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Verifies exactly three compound facade parts with no preset-injected Indicator and the checked opacity selector in initialized CSS; it does not execute those generated facades in a browser.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: cli-shadcn-radio-group-style-closure
     kind: module-test
-    status: passing
+    status: planned
     path: packages/cli/test/prototype-style-tokens.test.ts
     required: true
     consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE]
     exercises: *radio-group-prototypes
     notes:
-      - The isolated Radio Group scan failed on the missing data-[checked]:opacity-100 token before the Base Item and Indicator hook-state mappings were added to the CLI resolver, then passed with those mappings.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: The isolated Radio Group scan failed on the missing data-[checked]:opacity-100 token before the Base Item and Indicator hook-state mappings were added to the CLI resolver, then passed with those mappings.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: cli-shadcn-radio-group-lowered-hooks
     kind: workspace-check
-    status: passing
+    status: planned
     path: packages/cli/test/lowered-hook-coverage.test.ts
     required: true
     consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-TOKEN-CLOSURE]
     exercises: *radio-group-prototypes
     notes:
-      - Production-source traversal checks that the inherited Item and Indicator states read by shipped Rule conditions resolve to lowerable data variants; this is not rendered-state evidence.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Production-source traversal checks that the inherited Item and Indicator states read by shipped Rule conditions resolve to lowerable data variants; this is not rendered-state evidence.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: www-shadcn-radio-group-browser
     kind: adapter-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.browser.test.ts
     required: true
     consumesCases: [T-SHADCN-RADIO-GROUP-0001-CASE-BROWSER]
     exercises: *radio-group-prototypes
     notes:
-      - All eight required public-page cases pass in WC, React, Vue and Vue 2 after consuming the independently reviewed Base entry repair in https://github.com/Proto-UI/Proto-UI/pull/669. The four non-first-selected initial-entry cases retain their pre-input tabindex and native Tab assertions.
-      - Four separate interaction cases pass after real pointer selections establish current. Executed evidence includes native Shift+Tab/Tab re-entry, both arrow axes and Home/End, empty-group Tab/Enter no-selection and Space selection, pointer cancellation and commit, disabled controls, computed geometry and focus feedback, light/dark changes and a 320px layout. These public previews do not establish external tarball-consumer acceptance.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: All eight required public-page cases pass in WC, React, Vue and Vue 2 after consuming the independently reviewed Base entry repair in https://github.com/Proto-UI/Proto-UI/pull/669. The four non-first-selected initial-entry cases retain their pre-input tabindex and native Tab assertions.'
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Four separate interaction cases pass after real pointer selections establish current. Executed evidence includes native Shift+Tab/Tab re-entry, both arrow axes and Home/End, empty-group Tab/Enter no-selection and Space selection, pointer cancellation and commit, disabled controls, computed geometry and focus feedback, light/dark changes and a 320px layout. These public previews do not establish external tarball-consumer acceptance.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   prototypes:
     - P-SHADCN-RADIO-GROUP
@@ -149,4 +154,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the draft Shadcn Radio Group evidence map for inherited behavior, exact surfaces and separate rendered verification.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Specify content-pinned base-nova default geometry and state palettes; retain semantic ownership and planned fresh evidence.
 tags: [test, shadcn, radio-group, projection, interaction, focus, accessibility]

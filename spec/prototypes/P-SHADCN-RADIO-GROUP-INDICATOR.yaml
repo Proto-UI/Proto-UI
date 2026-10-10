@@ -19,8 +19,8 @@ criteria:
       zh-CN: Indicator direct entry 为 shadcn-radio-group-indicator，props 为空，仅保留继承自 Base 的 checked、disabled 与 isChecked exposes；不增加 authored asHook 或 event。
   - id: P-SHADCN-RADIO-GROUP-INDICATOR-CURRENT-VISUAL-SURFACE
     text:
-      en: Indicator projects flex size-2 items-center justify-center and renders exactly one 8px circular SVG glyph with primary fill. The SVG is aria-hidden and does not supply an additional accessible name or control.
-      zh-CN: Indicator 投射 flex size-2 items-center justify-center，并渲染恰好一个 primary fill 的 8px 圆形 SVG glyph。SVG 为 aria-hidden，不提供额外 accessible name 或 control。
+      en: Indicator keeps an 8px flex-centered box and renders exactly one full 8px circular SVG glyph in primary-foreground ink, replacing the old primary-colored dot. This host-neutral circle retains the upstream white-dot role without copying the upstream 16px internal Indicator and absolute span composition. Its SVG remains aria-hidden and supplies no name or control.
+      zh-CN: Indicator保留8px flex居中box，绘制恰好一个填满8px的primary-foreground圆形SVG glyph，替换旧primary dot。此host-neutral圆形保留上游白点角色，不照搬上游16px内部Indicator与absolute span composition；SVG继续aria-hidden，不提供name或control。
   - id: P-SHADCN-RADIO-GROUP-INDICATOR-DERIVED-VISIBILITY
     text:
       en: Rule projects opacity-0 for inherited checked=false and opacity-100 for checked=true. Repeated value updates reuse one glyph; no local checked prop, selection request, forceMount or presence state controls it.
@@ -45,4 +45,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced explicit passive Shadcn Indicators with Item-derived checked opacity and decorative circular glyphs.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
 tags: [prototype, shadcn, radio-group, indicator, passive, visual]
