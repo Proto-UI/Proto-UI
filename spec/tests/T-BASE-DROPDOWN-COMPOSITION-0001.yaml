@@ -5,25 +5,25 @@ status: draft
 since: 0.3.0-alpha.1
 summary: Checks live group naming, passive separators and shortcut hints, collection isolation and lifecycle without adding an input owner.
 cases:
-  - id: T-BASE-DROPDOWN-COMPOSITION-0001-GROUP
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-GROUP
     title: Group owns only its defined passive semantics
     covers: [P-BASE-DROPDOWN-MENU-GROUP-GROUP-ROLE, P-BASE-DROPDOWN-MENU-GROUP-LIFECYCLE]
     expectation: live-identity-and-passive-action-boundary-survive-remount
-  - id: T-BASE-DROPDOWN-COMPOSITION-0001-LABEL
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-LABEL
     title: Label owns only its defined passive semantics
     covers: [P-BASE-DROPDOWN-MENU-LABEL-LABEL-RELATION, P-BASE-DROPDOWN-MENU-LABEL-LIFECYCLE]
     expectation: live-identity-and-passive-action-boundary-survive-remount
-  - id: T-BASE-DROPDOWN-COMPOSITION-0001-SEPARATOR
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SEPARATOR
     title: Separator owns only its defined passive semantics
     covers:
       [P-BASE-DROPDOWN-MENU-SEPARATOR-SEPARATOR-PASSIVE, P-BASE-DROPDOWN-MENU-SEPARATOR-LIFECYCLE]
     expectation: live-identity-and-passive-action-boundary-survive-remount
-  - id: T-BASE-DROPDOWN-COMPOSITION-0001-SHORTCUT
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SHORTCUT
     title: Shortcut owns only its defined passive semantics
     covers:
       [P-BASE-DROPDOWN-MENU-SHORTCUT-SHORTCUT-PASSIVE, P-BASE-DROPDOWN-MENU-SHORTCUT-LIFECYCLE]
     expectation: live-identity-and-passive-action-boundary-survive-remount
-  - id: T-BASE-DROPDOWN-COMPOSITION-0001-FAMILY-SOURCE
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-FAMILY-SOURCE
     title: Family source preserves passive semantics and closes complete CSS token input
     covers:
       - P-SHADCN-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
@@ -58,11 +58,11 @@ implementations:
     path: packages/prototypes/base/test/navigation-overlays/dropdown-composition.test.ts
     required: true
     consumesCases:
-      - T-BASE-DROPDOWN-COMPOSITION-0001-GROUP
-      - T-BASE-DROPDOWN-COMPOSITION-0001-LABEL
-      - T-BASE-DROPDOWN-COMPOSITION-0001-SEPARATOR
-      - T-BASE-DROPDOWN-COMPOSITION-0001-SHORTCUT
-      - T-BASE-DROPDOWN-COMPOSITION-0001-FAMILY-SOURCE
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-GROUP
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-LABEL
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SEPARATOR
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SHORTCUT
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-FAMILY-SOURCE
     exercises:
       [
         P-BASE-DROPDOWN-MENU-GROUP,
