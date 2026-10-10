@@ -1,3 +1,15 @@
+import type {
+  DatePickerRootProps,
+  DatePickerRootExposes,
+  DatePickerTriggerProps,
+  DatePickerTriggerExposes,
+  DatePickerContentProps,
+  DatePickerContentExposes,
+  DatePickerDayProps,
+  DatePickerDayExposes,
+  DatePickerValueProps,
+  DatePickerValueExposes,
+} from '@proto.ui/prototypes-base/date-picker';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asDatePickerRoot,
@@ -7,7 +19,7 @@ import {
   asDatePickerValue,
 } from '@proto.ui/prototypes-base/date-picker';
 export type * from '@proto.ui/prototypes-base/date-picker';
-export const datePickerRoot = definePrototype({
+export const datePickerRoot = definePrototype<DatePickerRootProps, DatePickerRootExposes>({
   name: 'brutalist-date-picker-root',
   setup(def) {
     const behavior = asDatePickerRoot();
@@ -28,7 +40,7 @@ export const datePickerRoot = definePrototype({
   },
 });
 export { datePickerRoot as brutalistDatePickerRoot };
-export const datePickerTrigger = definePrototype({
+export const datePickerTrigger = definePrototype<DatePickerTriggerProps, DatePickerTriggerExposes>({
   name: 'brutalist-date-picker-trigger',
   setup(def) {
     const behavior = asDatePickerTrigger();
@@ -53,7 +65,7 @@ export const datePickerTrigger = definePrototype({
   },
 });
 export { datePickerTrigger as brutalistDatePickerTrigger };
-export const datePickerContent = definePrototype({
+export const datePickerContent = definePrototype<DatePickerContentProps, DatePickerContentExposes>({
   name: 'brutalist-date-picker-content',
   setup(def) {
     const behavior = asDatePickerContent();
@@ -78,7 +90,7 @@ export const datePickerContent = definePrototype({
   },
 });
 export { datePickerContent as brutalistDatePickerContent };
-export const datePickerDay = definePrototype({
+export const datePickerDay = definePrototype<DatePickerDayProps, DatePickerDayExposes>({
   name: 'brutalist-date-picker-day',
   setup(def) {
     const behavior = asDatePickerDay();
@@ -103,7 +115,7 @@ export const datePickerDay = definePrototype({
   },
 });
 export { datePickerDay as brutalistDatePickerDay };
-export const datePickerValue = definePrototype({
+export const datePickerValue = definePrototype<DatePickerValueProps, DatePickerValueExposes>({
   name: 'brutalist-date-picker-value',
   setup(def) {
     const behavior = asDatePickerValue();

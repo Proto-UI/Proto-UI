@@ -1,3 +1,19 @@
+import type {
+  CalendarRootProps,
+  CalendarRootExposes,
+  CalendarGridProps,
+  CalendarGridExposes,
+  CalendarRowProps,
+  CalendarRowExposes,
+  CalendarDayProps,
+  CalendarDayExposes,
+  CalendarHeadingProps,
+  CalendarHeadingExposes,
+  CalendarPreviousProps,
+  CalendarPreviousExposes,
+  CalendarNextProps,
+  CalendarNextExposes,
+} from '@proto.ui/prototypes-base/calendar';
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asCalendarRoot,
@@ -9,7 +25,7 @@ import {
   asCalendarNext,
 } from '@proto.ui/prototypes-base/calendar';
 export type * from '@proto.ui/prototypes-base/calendar';
-export const calendarRoot = definePrototype({
+export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExposes>({
   name: 'liquid-glass-calendar-root',
   setup(def) {
     asCalendarRoot();
@@ -28,7 +44,7 @@ export const calendarRoot = definePrototype({
   },
 });
 export { calendarRoot as liquidGlassCalendarRoot };
-export const calendarGrid = definePrototype({
+export const calendarGrid = definePrototype<CalendarGridProps, CalendarGridExposes>({
   name: 'liquid-glass-calendar-grid',
   setup(def) {
     asCalendarGrid();
@@ -36,7 +52,7 @@ export const calendarGrid = definePrototype({
   },
 });
 export { calendarGrid as liquidGlassCalendarGrid };
-export const calendarRow = definePrototype({
+export const calendarRow = definePrototype<CalendarRowProps, CalendarRowExposes>({
   name: 'liquid-glass-calendar-row',
   setup(def) {
     asCalendarRow();
@@ -44,7 +60,7 @@ export const calendarRow = definePrototype({
   },
 });
 export { calendarRow as liquidGlassCalendarRow };
-export const calendarDay = definePrototype({
+export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>({
   name: 'liquid-glass-calendar-day',
   setup(def) {
     const state = asCalendarDay().stateHandles;
@@ -75,7 +91,7 @@ export const calendarDay = definePrototype({
   },
 });
 export { calendarDay as liquidGlassCalendarDay };
-export const calendarHeading = definePrototype({
+export const calendarHeading = definePrototype<CalendarHeadingProps, CalendarHeadingExposes>({
   name: 'liquid-glass-calendar-heading',
   setup(def) {
     const state = asCalendarHeading().stateHandles;
@@ -85,7 +101,7 @@ export const calendarHeading = definePrototype({
   },
 });
 export { calendarHeading as liquidGlassCalendarHeading };
-export const calendarPrevious = definePrototype({
+export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarPreviousExposes>({
   name: 'liquid-glass-calendar-previous',
   setup(def) {
     asCalendarPrevious();
@@ -97,7 +113,7 @@ export const calendarPrevious = definePrototype({
   },
 });
 export { calendarPrevious as liquidGlassCalendarPrevious };
-export const calendarNext = definePrototype({
+export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExposes>({
   name: 'liquid-glass-calendar-next',
   setup(def) {
     asCalendarNext();

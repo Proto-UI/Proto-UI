@@ -1,3 +1,19 @@
+import type {
+  CalendarRootProps,
+  CalendarRootExposes,
+  CalendarGridProps,
+  CalendarGridExposes,
+  CalendarRowProps,
+  CalendarRowExposes,
+  CalendarDayProps,
+  CalendarDayExposes,
+  CalendarHeadingProps,
+  CalendarHeadingExposes,
+  CalendarPreviousProps,
+  CalendarPreviousExposes,
+  CalendarNextProps,
+  CalendarNextExposes,
+} from '@proto.ui/prototypes-base/calendar';
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asCalendarRoot,
@@ -9,7 +25,7 @@ import {
   asCalendarNext,
 } from '@proto.ui/prototypes-base/calendar';
 export type * from '@proto.ui/prototypes-base/calendar';
-export const calendarRoot = definePrototype({
+export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExposes>({
   name: 'brutalist-calendar-root',
   setup(def) {
     asCalendarRoot();
@@ -21,7 +37,7 @@ export const calendarRoot = definePrototype({
   },
 });
 export { calendarRoot as brutalistCalendarRoot };
-export const calendarGrid = definePrototype({
+export const calendarGrid = definePrototype<CalendarGridProps, CalendarGridExposes>({
   name: 'brutalist-calendar-grid',
   setup(def) {
     asCalendarGrid();
@@ -29,7 +45,7 @@ export const calendarGrid = definePrototype({
   },
 });
 export { calendarGrid as brutalistCalendarGrid };
-export const calendarRow = definePrototype({
+export const calendarRow = definePrototype<CalendarRowProps, CalendarRowExposes>({
   name: 'brutalist-calendar-row',
   setup(def) {
     asCalendarRow();
@@ -37,7 +53,7 @@ export const calendarRow = definePrototype({
   },
 });
 export { calendarRow as brutalistCalendarRow };
-export const calendarDay = definePrototype({
+export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>({
   name: 'brutalist-calendar-day',
   setup(def) {
     const state = asCalendarDay().stateHandles;
@@ -68,7 +84,7 @@ export const calendarDay = definePrototype({
   },
 });
 export { calendarDay as brutalistCalendarDay };
-export const calendarHeading = definePrototype({
+export const calendarHeading = definePrototype<CalendarHeadingProps, CalendarHeadingExposes>({
   name: 'brutalist-calendar-heading',
   setup(def) {
     const state = asCalendarHeading().stateHandles;
@@ -78,7 +94,7 @@ export const calendarHeading = definePrototype({
   },
 });
 export { calendarHeading as brutalistCalendarHeading };
-export const calendarPrevious = definePrototype({
+export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarPreviousExposes>({
   name: 'brutalist-calendar-previous',
   setup(def) {
     asCalendarPrevious();
@@ -90,7 +106,7 @@ export const calendarPrevious = definePrototype({
   },
 });
 export { calendarPrevious as brutalistCalendarPrevious };
-export const calendarNext = definePrototype({
+export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExposes>({
   name: 'brutalist-calendar-next',
   setup(def) {
     asCalendarNext();

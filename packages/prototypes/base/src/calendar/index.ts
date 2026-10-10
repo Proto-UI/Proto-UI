@@ -22,6 +22,17 @@ import type {
   CalendarDayProps,
   CalendarDayExposes,
   CalendarDayContract,
+  CalendarRootAsHookContract,
+  CalendarGridProps,
+  CalendarGridExposes,
+  CalendarRowProps,
+  CalendarRowExposes,
+  CalendarHeadingProps,
+  CalendarHeadingExposes,
+  CalendarHeadingAsHookContract,
+  CalendarPreviousProps,
+  CalendarPreviousExposes,
+  CalendarNavigationAsHookContract,
 } from './types';
 export * from './model';
 export type * from './types';
@@ -217,7 +228,11 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
     owner = null;
   });
 }
-export const asCalendarRoot = defineAsHook<CalendarRootProps, CalendarRootExposes>({
+export const asCalendarRoot = defineAsHook<
+  CalendarRootProps,
+  CalendarRootExposes,
+  CalendarRootAsHookContract
+>({
   name: 'as-calendar-root',
   setup: setupRoot,
 });
@@ -344,15 +359,15 @@ export const asCalendarDay = defineAsHook<
   CalendarDayContract
 >({ name: 'as-calendar-day', setup: setupDay });
 export const calendarDay = definePrototype({ name: 'base-calendar-day', setup: setupDay });
-function setupGrid(def: DefHandle<any, any>) {
+function setupGrid(def: DefHandle<CalendarGridProps, CalendarGridExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'grid' });
   asAccessible().role('grid');
 }
-function setupRow(def: DefHandle<any, any>) {
+function setupRow(def: DefHandle<CalendarRowProps, CalendarRowExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'row' });
   asAccessible().role('row');
 }
-function setupHeading(def: DefHandle<any, any>) {
+function setupHeading(def: DefHandle<CalendarHeadingProps, CalendarHeadingExposes>) {
   def.anatomy.claim(CALENDAR_FAMILY, { role: 'heading' });
   const value = def.state.string('month', '');
   def.expose.state('month', value);
@@ -378,9 +393,9 @@ function setupHeading(def: DefHandle<any, any>) {
 export const asCalendarGrid = defineAsHook({ name: 'as-calendar-grid', setup: setupGrid });
 export const asCalendarRow = defineAsHook({ name: 'as-calendar-row', setup: setupRow });
 export const asCalendarHeading = defineAsHook<
-  {},
-  { month: import('@proto.ui/core').ExposeState<string> },
-  { state: { month: import('@proto.ui/core').State<string> } }
+  CalendarHeadingProps,
+  CalendarHeadingExposes,
+  CalendarHeadingAsHookContract
 >({ name: 'as-calendar-heading', setup: setupHeading });
 export const calendarGrid = definePrototype({ name: 'base-calendar-grid', setup: setupGrid });
 export const calendarRow = definePrototype({ name: 'base-calendar-row', setup: setupRow });
@@ -389,7 +404,7 @@ export const calendarHeading = definePrototype({
   setup: setupHeading,
 });
 function navigationSetup(direction: -1 | 1) {
-  return (def: DefHandle<any, any>) => {
+  return (def: DefHandle<CalendarPreviousProps, CalendarPreviousExposes>) => {
     const button = asButton();
     const focus = asFocusable();
     def.anatomy.claim(CALENDAR_FAMILY, { role: direction < 0 ? 'previous' : 'next' });
@@ -418,11 +433,19 @@ function navigationSetup(direction: -1 | 1) {
     });
   };
 }
-export const asCalendarPrevious = defineAsHook({
+export const asCalendarPrevious = defineAsHook<
+  CalendarPreviousProps,
+  CalendarPreviousExposes,
+  CalendarNavigationAsHookContract
+>({
   name: 'as-calendar-previous',
   setup: navigationSetup(-1),
 });
-export const asCalendarNext = defineAsHook({ name: 'as-calendar-next', setup: navigationSetup(1) });
+export const asCalendarNext = defineAsHook<
+  CalendarPreviousProps,
+  CalendarPreviousExposes,
+  CalendarNavigationAsHookContract
+>({ name: 'as-calendar-next', setup: navigationSetup(1) });
 export const calendarPrevious = definePrototype({
   name: 'base-calendar-previous',
   setup: navigationSetup(-1),

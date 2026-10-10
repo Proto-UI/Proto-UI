@@ -4,6 +4,8 @@ import type {
   ExposeState,
   State,
   FocusRequestOptions,
+  CollectionExposes,
+  CollectionItemExposes,
 } from '@proto.ui/core';
 export interface CalendarRootProps {
   value?: string;
@@ -18,7 +20,7 @@ export interface CalendarRootProps {
   weekStartsOn?: number;
   a11yLabel?: string;
 }
-export type CalendarRootExposes = {
+export type CalendarRootExposes = CollectionExposes & {
   value: ExposeState<string>;
   month: ExposeState<string>;
   valueChange: ExposeEvent<{ value: string }>;
@@ -31,7 +33,7 @@ export interface CalendarDayProps {
   offset?: number;
   disabled?: boolean;
 }
-export type CalendarDayExposes = {
+export type CalendarDayExposes = CollectionItemExposes & {
   date: ExposeState<string>;
   selected: ExposeState<boolean>;
   disabled: ExposeState<boolean>;
@@ -42,6 +44,10 @@ export type CalendarDayExposes = {
 };
 export type CalendarDayContract = {
   state: {
+    collectionIndex: State<number>;
+    collectionTotal: State<number>;
+    collectionFirst: State<boolean>;
+    collectionLast: State<boolean>;
     date: State<string>;
     selected: State<boolean>;
     disabled: State<boolean>;
@@ -49,4 +55,27 @@ export type CalendarDayContract = {
     focused: State<boolean>;
     focusVisible: State<boolean>;
   };
+};
+
+export type CalendarRootAsHookContract = {
+  state: {
+    collectionCount: State<number>;
+    value: State<string>;
+    month: State<string>;
+    a11yLabel: State<string>;
+  };
+};
+export type CalendarGridProps = Record<string, never>;
+export type CalendarGridExposes = {};
+export type CalendarRowProps = Record<string, never>;
+export type CalendarRowExposes = {};
+export type CalendarHeadingProps = Record<string, never>;
+export type CalendarHeadingExposes = { month: ExposeState<string> };
+export type CalendarHeadingAsHookContract = { state: { month: State<string> } };
+export type CalendarPreviousProps = import('../button').ButtonProps;
+export type CalendarPreviousExposes = import('../button').ButtonExposes;
+export type CalendarNextProps = CalendarPreviousProps;
+export type CalendarNextExposes = CalendarPreviousExposes;
+export type CalendarNavigationAsHookContract = {
+  asHooks: { 'as-button': ReturnType<typeof import('../button').asButton> };
 };

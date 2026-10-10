@@ -1,3 +1,15 @@
+import type {
+  DatePickerRootProps,
+  DatePickerRootExposes,
+  DatePickerTriggerProps,
+  DatePickerTriggerExposes,
+  DatePickerContentProps,
+  DatePickerContentExposes,
+  DatePickerDayProps,
+  DatePickerDayExposes,
+  DatePickerValueProps,
+  DatePickerValueExposes,
+} from '@proto.ui/prototypes-base/date-picker';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asDatePickerRoot,
@@ -7,7 +19,7 @@ import {
   asDatePickerValue,
 } from '@proto.ui/prototypes-base/date-picker';
 export type * from '@proto.ui/prototypes-base/date-picker';
-export const datePickerRoot = definePrototype({
+export const datePickerRoot = definePrototype<DatePickerRootProps, DatePickerRootExposes>({
   name: 'liquid-glass-date-picker-root',
   setup(def) {
     const behavior = asDatePickerRoot();
@@ -28,7 +40,7 @@ export const datePickerRoot = definePrototype({
   },
 });
 export { datePickerRoot as liquidGlassDatePickerRoot };
-export const datePickerTrigger = definePrototype({
+export const datePickerTrigger = definePrototype<DatePickerTriggerProps, DatePickerTriggerExposes>({
   name: 'liquid-glass-date-picker-trigger',
   setup(def) {
     const behavior = asDatePickerTrigger();
@@ -53,7 +65,7 @@ export const datePickerTrigger = definePrototype({
   },
 });
 export { datePickerTrigger as liquidGlassDatePickerTrigger };
-export const datePickerContent = definePrototype({
+export const datePickerContent = definePrototype<DatePickerContentProps, DatePickerContentExposes>({
   name: 'liquid-glass-date-picker-content',
   setup(def) {
     const behavior = asDatePickerContent();
@@ -85,7 +97,7 @@ export const datePickerContent = definePrototype({
   },
 });
 export { datePickerContent as liquidGlassDatePickerContent };
-export const datePickerDay = definePrototype({
+export const datePickerDay = definePrototype<DatePickerDayProps, DatePickerDayExposes>({
   name: 'liquid-glass-date-picker-day',
   setup(def) {
     const behavior = asDatePickerDay();
@@ -110,7 +122,7 @@ export const datePickerDay = definePrototype({
   },
 });
 export { datePickerDay as liquidGlassDatePickerDay };
-export const datePickerValue = definePrototype({
+export const datePickerValue = definePrototype<DatePickerValueProps, DatePickerValueExposes>({
   name: 'liquid-glass-date-picker-value',
   setup(def) {
     const behavior = asDatePickerValue();
