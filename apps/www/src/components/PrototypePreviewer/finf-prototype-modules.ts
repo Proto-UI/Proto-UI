@@ -194,6 +194,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/drawer');
     registerExactPrototype('base-drawer-mask', module.drawerMask);
   },
+  'base-drawer-handle': async () => {
+    const module = await import('@proto.ui/prototypes-base/drawer');
+    registerExactPrototype('base-drawer-handle', module.drawerHandle);
+  },
   'shadcn-drawer-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/drawer');
     registerExactPrototype('shadcn-drawer-root', module.drawerRoot);
@@ -221,6 +225,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'shadcn-drawer-mask': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/drawer');
     registerExactPrototype('shadcn-drawer-mask', module.drawerMask);
+  },
+  'shadcn-drawer-handle': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/drawer');
+    registerExactPrototype('shadcn-drawer-handle', module.drawerHandle);
   },
   'brutalist-drawer-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/drawer');
@@ -250,6 +258,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/drawer');
     registerExactPrototype('brutalist-drawer-mask', module.drawerMask);
   },
+  'brutalist-drawer-handle': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/drawer');
+    registerExactPrototype('brutalist-drawer-handle', module.drawerHandle);
+  },
   'bootstrap-2-3-2-drawer-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
     registerExactPrototype('bootstrap-2-3-2-drawer-root', module.drawerRoot);
@@ -278,6 +290,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
     registerExactPrototype('bootstrap-2-3-2-drawer-mask', module.drawerMask);
   },
+  'bootstrap-2-3-2-drawer-handle': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
+    registerExactPrototype('bootstrap-2-3-2-drawer-handle', module.drawerHandle);
+  },
   'liquid-glass-drawer-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/drawer');
     registerExactPrototype('liquid-glass-drawer-root', module.drawerRoot);
@@ -305,6 +321,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'liquid-glass-drawer-mask': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/drawer');
     registerExactPrototype('liquid-glass-drawer-mask', module.drawerMask);
+  },
+  'liquid-glass-drawer-handle': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/drawer');
+    registerExactPrototype('liquid-glass-drawer-handle', module.drawerHandle);
   },
   'base-popover-root': async () => {
     const module = await import('@proto.ui/prototypes-base/popover');
