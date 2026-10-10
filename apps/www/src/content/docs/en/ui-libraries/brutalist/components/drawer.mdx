@@ -1,0 +1,23 @@
+---
+title: 'Drawer'
+description: 'An edge-attached modal panel with four placement choices.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+An edge-attached modal panel with four placement choices.
+
+<PrototypePreviewer
+  demoId="demo-brutalist-drawer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content.side accepts top, right, bottom or left. The panel uses the available host region, contains long-content scrolling, traps focus and restores the trigger on dismissal. This initial source does not yet implement dragging, snapping or swipe dismissal.
+
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+
+Parts: Root, Trigger, Content, Title, Description, Close, Mask.
+
+Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

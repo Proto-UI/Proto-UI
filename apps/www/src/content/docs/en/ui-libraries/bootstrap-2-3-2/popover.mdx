@@ -1,0 +1,23 @@
+---
+title: 'Popover'
+description: 'An anchored non-modal dialog for small interactive content.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+An anchored non-modal dialog for small interactive content.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-popover"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content is positioned against Trigger, with side, align, sideOffset, alignOffset and collisionPadding. It is not modal and does not lock background scrolling or trap Tab. Outside press, Escape and Close request dismissal.
+
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+
+Parts: Root, Trigger, Content, Title, Description, Close.
+
+Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

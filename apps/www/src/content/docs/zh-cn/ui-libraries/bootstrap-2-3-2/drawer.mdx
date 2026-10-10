@@ -1,0 +1,23 @@
+---
+title: 'Drawer'
+description: '可从四个边缘显示的模态面板。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+可从四个边缘显示的模态面板。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-drawer"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Content.side 接受 top、right、bottom、left。面板受宿主可用区域约束，支持长内容滚动、焦点约束及关闭后恢复触发器焦点。当前源码尚未实现拖动、吸附点或滑动关闭。
+
+Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
+
+组成: Root, Trigger, Content, Title, Description, Close, Mask.
+
+当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
