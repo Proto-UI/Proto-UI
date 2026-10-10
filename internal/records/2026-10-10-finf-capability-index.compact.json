@@ -1,0 +1,1990 @@
+{
+  "upstream_sources": {
+    "u1": "https://ui.shadcn.com/docs/components/base/accordion",
+    "u2": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/accordion.tsx",
+    "u3": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/accordion.less",
+    "u4": "https://developer.apple.com/videos/play/wwdc2025/219/",
+    "u5": "https://developer.apple.com/design/human-interface-guidelines/materials",
+    "u6": "https://ui.shadcn.com/docs/components/base/alert-dialog",
+    "u7": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/alert-dialog.tsx",
+    "u8": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/modals.less",
+    "u9": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/buttons.less",
+    "u10": "https://ui.shadcn.com/docs/components",
+    "u11": "https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4/src/components/ui",
+    "u12": "https://getbootstrap.com/2.3.2/",
+    "u13": "https://ui.shadcn.com/docs/components/base/combobox",
+    "u14": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/combobox.tsx",
+    "u15": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/dropdowns.less",
+    "u16": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/forms.less",
+    "u17": "https://ui.shadcn.com/docs/components/base/button",
+    "u18": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/button.tsx",
+    "u19": "https://ui.shadcn.com/docs/components/base/calendar",
+    "u20": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/calendar.tsx",
+    "u21": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/tables.less",
+    "u22": "https://ui.shadcn.com/docs/components/base/carousel",
+    "u23": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/carousel.tsx",
+    "u24": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/carousel.less",
+    "u25": "https://ui.shadcn.com/docs/components/base/checkbox",
+    "u26": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/checkbox.tsx",
+    "u27": "https://ui.shadcn.com/docs/components/base/field",
+    "u28": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/field.tsx",
+    "u29": "https://ui.shadcn.com/docs/components/base/collapsible",
+    "u30": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx",
+    "u31": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/component-animations.less",
+    "u32": "https://ui.shadcn.com/docs/components/base/command",
+    "u33": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/command.tsx",
+    "u34": "https://ui.shadcn.com/docs/components/base/context-menu",
+    "u35": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/context-menu.tsx",
+    "u36": "https://ui.shadcn.com/docs/components/base/data-table",
+    "u37": "https://ui.shadcn.com/docs/components/base/table",
+    "u38": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/data-table.tsx",
+    "u39": "https://ui.shadcn.com/docs/components/base/date-picker",
+    "u40": "https://ui.shadcn.com/docs/components/base/popover",
+    "u41": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/popover.tsx",
+    "u42": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/popovers.less",
+    "u43": "https://ui.shadcn.com/docs/components/base/dialog",
+    "u44": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/dialog.tsx",
+    "u45": "https://ui.shadcn.com/docs/components/base/drawer",
+    "u46": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/drawer.tsx",
+    "u47": "https://ui.shadcn.com/docs/components/base/dropdown-menu",
+    "u48": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/dropdown-menu.tsx",
+    "u49": "https://ui.shadcn.com/r/styles/base-nova/form.json",
+    "u50": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/form.tsx",
+    "u51": "https://ui.shadcn.com/docs/components/base/hover-card",
+    "u52": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/hover-card.tsx",
+    "u53": "https://ui.shadcn.com/docs/components/base/aspect-ratio",
+    "u54": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/image-card.tsx",
+    "u55": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/thumbnails.less",
+    "u56": "https://ui.shadcn.com/docs/components/base/input",
+    "u57": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/input.tsx",
+    "u58": "https://ui.shadcn.com/docs/components/base/input-otp",
+    "u59": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/input-otp.tsx",
+    "u60": "https://ui.shadcn.com/docs/components/base/label",
+    "u61": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/label.tsx",
+    "u62": "https://ui.shadcn.com/docs/components/base/menubar",
+    "u63": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/menubar.tsx",
+    "u64": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/navbar.less",
+    "u65": "https://ui.shadcn.com/r/styles/base-nova/message-scroller.json",
+    "u66": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/message-scroller.tsx",
+    "u67": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/scaffolding.less",
+    "u68": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/type.less",
+    "u69": "https://ui.shadcn.com/docs/components/base/progress",
+    "u70": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/progress.tsx",
+    "u71": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/progress-bars.less",
+    "u72": "https://ui.shadcn.com/docs/components/base/navigation-menu",
+    "u73": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/navigation-menu.tsx",
+    "u74": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less",
+    "u75": "https://ui.shadcn.com/docs/components/base/input-group",
+    "u76": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/input-group.tsx",
+    "u77": "https://ui.shadcn.com/docs/components/base/radio-group",
+    "u78": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/radio-group.tsx",
+    "u79": "https://ui.shadcn.com/docs/components/base/resizable",
+    "u80": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/resizable.tsx",
+    "u81": "https://ui.shadcn.com/docs/components/base/scroll-area",
+    "u82": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/scroll-area.tsx",
+    "u83": "https://ui.shadcn.com/docs/components/base/select",
+    "u84": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx",
+    "u85": "https://ui.shadcn.com/docs/components/base/separator",
+    "u86": "https://ui.shadcn.com/docs/components/base/slider",
+    "u87": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/slider.tsx",
+    "u88": "https://ui.shadcn.com/docs/components/base/card",
+    "u89": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/card.tsx",
+    "u90": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/wells.less",
+    "u91": "https://ui.shadcn.com/docs/components/base/switch",
+    "u92": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx",
+    "u93": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/table.tsx",
+    "u94": "https://ui.shadcn.com/docs/components/base/tabs",
+    "u95": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/tabs.tsx",
+    "u96": "https://ui.shadcn.com/docs/components/base/textarea",
+    "u97": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/textarea.tsx",
+    "u98": "https://ui.shadcn.com/docs/components/base/toast",
+    "u99": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/toast.tsx",
+    "u100": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/alerts.less",
+    "u101": "https://ui.shadcn.com/docs/components/base/toggle",
+    "u102": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/toggle.tsx",
+    "u103": "https://ui.shadcn.com/docs/components/base/toggle-group",
+    "u104": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/toggle-group.tsx",
+    "u105": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/button-groups.less",
+    "u106": "https://ui.shadcn.com/docs/components/base/button-group",
+    "u107": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/button-group.tsx",
+    "u108": "https://ui.shadcn.com/docs/components/base/tooltip",
+    "u109": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/tooltip.tsx",
+    "u110": "https://github.com/twbs/bootstrap/blob/v2.3.2/less/tooltip.less",
+    "u111": "https://ui.shadcn.com/docs/components/base/item",
+    "u112": "https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/item.tsx"
+  },
+  "schema_version": 1,
+  "record": "Finf capability audit v4 / 2026-10-10",
+  "status": "non-normative read-only breadth audit; public handoff",
+  "baseline": {
+    "repository": "Proto-UI/Proto-UI",
+    "commit": "2a67cb6173020c487591724538ca56e03f14a1ea",
+    "tree": "af287fdbda0bc5ab21e7a0ed59f328e51f5d7e86",
+    "source_url_prefix": "https://github.com/Proto-UI/Proto-UI/blob/2a67cb6173020c487591724538ca56e03f14a1ea/"
+  },
+  "counts": {
+    "focused_static_components": 32,
+    "bounded_partial_components": 20,
+    "existing_owner_handoffs": 2,
+    "entirely_unreviewed_components": 0,
+    "component_union": 54,
+    "cross_component_regressions_not_reaudited": 1,
+    "core_union": 55,
+    "prior_closeouts": 13,
+    "tracker_total": 68,
+    "tracker_done": 5,
+    "tracker_unfinished": 63,
+    "core_accepted_by_this_audit": 0
+  },
+  "feature_status_counts": {
+    "existing_unverified": 74,
+    "unknown_pending": 72,
+    "confirmed_missing": 55,
+    "not_applicable_reference_scope": 1,
+    "confirmed_missing_optional_not_required": 2
+  },
+  "scope": "54 component rows +1 separately tracked cross-component regression; no runtime/native/compiler execution by this audit; missing target != violation of current draft",
+  "source_policy": {
+    "neo_commit": "3306a802724874a85f93079702b2795370a279d4",
+    "shadcn": "Base UI route and dated registry source inspected 2026-10-10; no repository SHA or resolved dependency lock claimed; public documentation links are in upstream_sources",
+    "base_ui": "live docs displayed 1.9.0 on 2026-10-10, supplemental target; dependency ranges do not fix resolved versions",
+    "bootstrap": "2.3.2 historical source, not modern Bootstrap",
+    "liquid_glass": "Apple public design principles, no same-name public implementation parity claim"
+  },
+  "components": [
+    {
+      "id": "deliver.accordion",
+      "component": "accordion",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "多开/allowEmpty/RTL已有；过渡与State表示另核。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["accordion.multi-control"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["accordion.presence-animation"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/accordion/types.ts", "lines": [8, 29] },
+        { "path": "packages/prototypes/base/src/accordion/root.proto.ts", "lines": [80, 139] },
+        { "path": "spec/prototypes/P-BASE-ACCORDION.yaml", "lines": [13, 37] },
+        { "path": "packages/prototypes/base/src/accordion/content.proto.ts", "lines": [15, 49] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u1"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u2"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u3"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.alert-dialog",
+      "component": "alert-dialog",
+      "depth": "owner_handoff",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "2a67基线缺口；0cca已含Neo结构修复，移动端/native仍未验收。",
+      "feature_status": {
+        "confirmed_missing": ["alert-dialog.neo-family-structure"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["alert-dialog.owner-candidate"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/brutalist/src/alert-dialog/index.ts", "lines": [1, 27] },
+        {
+          "path": "packages/prototypes/brutalist/src/alert-dialog/content.proto.ts",
+          "lines": [1, 19]
+        },
+        { "path": "packages/prototypes/base/src/alert-dialog/types.ts", "lines": [1, 149] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u6"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u7"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u8", "u9"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.async-region",
+      "component": "async-region",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "只拥有busy；无直接视觉上游，reader证据待验。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["async-region.governed-semantics"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["async-region.host-at-evidence"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/async-region/types.ts", "lines": [1, 16] },
+        { "path": "packages/prototypes/base/src/async-region/root.proto.ts", "lines": [1, 53] },
+        { "path": "spec/prototypes/P-BASE-ASYNC-REGION.yaml", "lines": [1, 51] },
+        { "path": "packages/prototypes/base/test/async-region.test.ts", "lines": [1, 95] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "无独立视觉对应", "refs": ["u10"] },
+        { "family": "brutalist", "relation": "无独立视觉对应", "refs": ["u11"] },
+        { "family": "bootstrap-2-3-2", "relation": "无独立视觉对应", "refs": ["u12"] },
+        { "family": "liquid-glass", "relation": "无独立视觉对应", "refs": ["u4", "u5"] }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.autocomplete",
+      "component": "autocomplete",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "自由文本已有；group、inline/grid先定目标。",
+      "feature_status": {
+        "confirmed_missing": ["autocomplete.completion-grid", "autocomplete.groups"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["autocomplete.free-text-list"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["autocomplete.async-fuzzy-virtualization"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [141, 175] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [204, 224] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [365, 400] },
+        { "path": "packages/prototypes/base/src/search-primitives/types.ts", "lines": [9, 21] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u13"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u14"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u15", "u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.button",
+      "component": "button",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "交互已有；FormSubmit/Reset存在，普通form props后延。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["button.press-focus"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["button.form-composition"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/button/types.ts", "lines": [1, 38] },
+        { "path": "packages/prototypes/base/src/button/button.proto.ts", "lines": [8, 58] },
+        { "path": "spec/prototypes/P-BASE-BUTTON.yaml", "lines": [242, 278] },
+        { "path": "packages/prototypes/base/src/form/index.ts", "lines": [1, 6] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u17"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u18"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u9"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.calendar",
+      "component": "calendar",
+      "depth": "focused_static",
+      "definition_status": "uncataloged_full_protocol",
+      "next": "先定义range/multiple；caption月年组合已有。",
+      "feature_status": {
+        "confirmed_missing": ["calendar.range-multiple"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["calendar.caption-controls", "calendar.controlled-keyboard-a11y"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["calendar.extended-options"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/calendar/types.ts", "lines": [10, 38] },
+        { "path": "packages/prototypes/base/src/calendar/index.ts", "lines": [244, 258] },
+        { "path": "packages/prototypes/base/src/calendar/index.ts", "lines": [310, 365] },
+        { "path": "packages/prototypes/base/src/calendar/caption-composition.ts", "lines": [1, 40] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u19"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u20"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u21", "u9", "u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.carousel",
+      "component": "carousel",
+      "depth": "focused_static",
+      "definition_status": "Family-specific P absent; bounded collection-control regression draft; no full guarantee",
+      "next": "orientation/direction已有；连续drag/snap/多slide视窗待定义。",
+      "feature_status": {
+        "confirmed_missing": [
+          "carousel.api.2",
+          "carousel.api.3",
+          "carousel.state_facts.2",
+          "carousel.interaction_keyboard.2",
+          "carousel.controlled_dynamic.2",
+          "carousel.responsive.1",
+          "carousel.accessibility.2"
+        ],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [
+          "carousel.api.1",
+          "carousel.state_facts.1",
+          "carousel.interaction_keyboard.1",
+          "carousel.controlled_dynamic.1",
+          "carousel.rtl_vertical.1",
+          "carousel.accessibility.1"
+        ],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": [
+          "carousel.controlled_dynamic.3",
+          "carousel.rtl_vertical.2",
+          "carousel.responsive.2",
+          "carousel.accessibility.3"
+        ]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/carousel/index.ts", "lines": [32, 99] },
+        { "path": "packages/prototypes/base/src/carousel/types.ts", "lines": [1, 48] },
+        { "path": "packages/prototypes/base/src/carousel/index.ts", "lines": [159, 202] },
+        { "path": "packages/prototypes/base/src/carousel/index.ts", "lines": [216, 246] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u22"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u23"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u24"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.checkbox",
+      "component": "checkbox",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "mixed已有；readonly/form目标与当前负边界分开。",
+      "feature_status": {
+        "confirmed_missing": ["checkbox.readonly-form"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["checkbox.checked-control"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": []
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/checkbox/types.ts", "lines": [1, 63] },
+        { "path": "packages/prototypes/base/src/checkbox/root.proto.ts", "lines": [120, 176] },
+        { "path": "spec/prototypes/P-BASE-CHECKBOX.yaml", "lines": [509, 512] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u25"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u26"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.checkbox-group",
+      "component": "checkbox-group",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "多选/all/mixed已有；嵌套parent/form组合待证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [
+          "checkbox-group.multi-all-mixed",
+          "checkbox-group.field-controlled"
+        ],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["checkbox-group.nested-parent-submission"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/checkbox-group/types.ts", "lines": [8, 48] },
+        { "path": "packages/prototypes/base/src/checkbox-group/root.proto.ts", "lines": [49, 88] },
+        {
+          "path": "packages/prototypes/base/src/checkbox-group/root.proto.ts",
+          "lines": [138, 157]
+        },
+        { "path": "packages/prototypes/base/src/checkbox-group/root.proto.ts", "lines": [19, 20] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u27", "u25"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u28", "u26"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.collapsible",
+      "component": "collapsible",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "controlled/keepMounted已有；extent过渡待定义/组合。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["collapsible.controlled-presence"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["collapsible.height-transition"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/collapsible/types.ts", "lines": [1, 66] },
+        { "path": "packages/prototypes/base/src/collapsible/content.proto.ts", "lines": [13, 42] },
+        { "path": "packages/prototypes/base/src/collapsible/content.proto.ts", "lines": [25, 42] },
+        { "path": "spec/prototypes/P-BASE-COLLAPSIBLE.yaml", "lines": [122, 127] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u29"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u30"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u31"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.combobox",
+      "component": "combobox",
+      "depth": "focused_static",
+      "definition_status": "uncataloged_full_protocol",
+      "next": "先定义多选、chips与分组；async先验证recipe。",
+      "feature_status": {
+        "confirmed_missing": ["combobox.multiple-chips", "combobox.group-clear-parts"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["combobox.keyboard-controlled"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["combobox.external-async-composition"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/search-primitives/types.ts", "lines": [9, 45] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [204, 224] },
+        { "path": "packages/prototypes/base/src/combobox/index.ts", "lines": [1, 36] },
+        { "path": "packages/prototypes/base/src/search-primitives/types.ts", "lines": [75, 109] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u13"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u14"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u15", "u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.command",
+      "component": "command",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "补Group与controlled active；Dialog/async/rank先验recipe。",
+      "feature_status": {
+        "confirmed_missing": ["command.groups", "command.controlled-active"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["command.execute-search"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["command.dialog-ranking-async"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/command/index.ts", "lines": [1, 31] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [157, 160] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [204, 224] },
+        { "path": "packages/prototypes/base/src/search-primitives/family.ts", "lines": [41, 56] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u32"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u33"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u15", "u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.context-menu",
+      "component": "context-menu",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "子菜单与check/radio先定义。",
+      "feature_status": {
+        "confirmed_missing": [
+          "context-menu.nested-selection-parts",
+          "context-menu.group-static-parts"
+        ],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["context-menu.origins"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["context-menu.rtl-native"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/context-menu/index.ts", "lines": [20, 25] },
+        { "path": "packages/prototypes/base/src/context-menu/types.ts", "lines": [103, 120] },
+        { "path": "packages/prototypes/base/src/context-menu/trigger.proto.ts", "lines": [35, 69] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u34"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u35"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u15"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.data-table",
+      "component": "data-table",
+      "depth": "focused_static",
+      "definition_status": "Root/family-specific P absent; Base DataTableHeaderRow draft only",
+      "next": "排序/过滤/分页/选中已有；列功能先验公共recipe。",
+      "feature_status": {
+        "confirmed_missing": ["data-table.state_facts.2", "data-table.responsive.1"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [
+          "data-table.api.1",
+          "data-table.state_facts.1",
+          "data-table.interaction_keyboard.1",
+          "data-table.controlled_dynamic.1",
+          "data-table.accessibility.1"
+        ],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": [
+          "data-table.api.2",
+          "data-table.api.3",
+          "data-table.api.4",
+          "data-table.api.5",
+          "data-table.interaction_keyboard.2",
+          "data-table.controlled_dynamic.2",
+          "data-table.rtl_vertical.1",
+          "data-table.responsive.2",
+          "data-table.accessibility.2"
+        ]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/data-table/types.ts", "lines": [18, 92] },
+        { "path": "packages/prototypes/base/src/data-table/model.ts", "lines": [1, 63] },
+        { "path": "packages/prototypes/base/src/data-table/index.ts", "lines": [145, 232] },
+        { "path": "spec/prototypes/P-BASE-DATA-TABLE-HEADER-ROW.yaml", "lines": [1, 75] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u36", "u37"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u38"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u21", "u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.date-picker",
+      "component": "date-picker",
+      "depth": "focused_static",
+      "definition_status": "uncataloged_composition",
+      "next": "range关闭为未来Calendar range组合依赖，非单日期bug。",
+      "feature_status": {
+        "confirmed_missing": ["datepicker.range-close"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": []
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/date-picker/index.ts", "lines": [20, 33] },
+        { "path": "packages/prototypes/base/src/date-picker/index.ts", "lines": [64, 78] },
+        { "path": "packages/prototypes/base/src/date-picker/index.ts", "lines": [87, 107] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u39", "u19", "u40", "u17"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u20", "u41", "u18"] },
+        {
+          "family": "bootstrap-2-3-2",
+          "relation": "参考组合",
+          "refs": ["u21", "u9", "u16", "u42"]
+        },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.dialog",
+      "component": "dialog",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "modal已有；nonmodal/dismissal/focus策略先准入。",
+      "feature_status": {
+        "confirmed_missing": ["dialog.modal-dismiss-policy"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["dialog.modal-core"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["dialog.nested-async-multitrigger"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/dialog/types.ts", "lines": [11, 31] },
+        { "path": "packages/prototypes/base/src/dialog/content.proto.ts", "lines": [37, 74] },
+        { "path": "packages/prototypes/base/src/dialog/content.proto.ts", "lines": [99, 158] },
+        { "path": "packages/prototypes/base/src/dialog/content.proto.ts", "lines": [211, 237] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u43"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u44"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u8"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.drawer",
+      "component": "drawer",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "drag/snap已有；nonmodal/dismissal策略先定义。",
+      "feature_status": {
+        "confirmed_missing": ["drawer.nonmodal-dismissal", "drawer.snap-units"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["drawer.snap-drag"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["drawer.gesture-scope-nesting"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/drawer/snap.ts", "lines": [5, 16] },
+        { "path": "packages/prototypes/base/src/drawer/snap.ts", "lines": [76, 125] },
+        { "path": "packages/prototypes/base/src/drawer/snap.ts", "lines": [126, 162] },
+        { "path": "packages/prototypes/base/src/drawer/types.ts", "lines": [12, 17] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u45"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u46"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u8"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.dropdown",
+      "component": "dropdown",
+      "depth": "focused_static",
+      "definition_status": "draft_action_menu_explicit_negative_boundary",
+      "next": "先定义子菜单、checkbox/radio及组语义。",
+      "feature_status": {
+        "confirmed_missing": ["dropdown.submenu-checkbox-radio"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["dropdown.passive-and-action"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": []
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/dropdown/types.ts", "lines": [18, 40] },
+        { "path": "packages/prototypes/base/src/dropdown/types.ts", "lines": [101, 134] },
+        { "path": "packages/prototypes/base/src/dropdown/item.proto.ts", "lines": [40, 46] },
+        { "path": "packages/prototypes/base/src/dropdown/index.ts", "lines": [1, 37] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u47"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u48"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u15"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.field",
+      "component": "field",
+      "depth": "bounded_partial",
+      "definition_status": "draft",
+      "next": "异步request/resolve已有；完整constraint/schema范围待查。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["field.async-controlled-validation"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["field.full-upstream"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/field/types.ts", "lines": [9, 65] },
+        { "path": "spec/prototypes/P-BASE-FIELD.yaml", "lines": [1, 24] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u27"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u28"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.fieldset",
+      "component": "fieldset",
+      "depth": "bounded_partial",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "disabled/legend/description已有；表单范围待组合证据。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["fieldset.group-relations"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["fieldset.native-disabled-scope"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/fieldset/root.proto.ts", "lines": [15, 38] },
+        { "path": "packages/prototypes/base/src/fieldset/index.ts", "lines": [1, 5] },
+        { "path": "packages/prototypes/base/src/fieldset/root.proto.ts", "lines": [25, 38] },
+        { "path": "packages/prototypes/base/src/fieldset/types.ts", "lines": [1, 8] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u27"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u28"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.form",
+      "component": "form",
+      "depth": "focused_static",
+      "definition_status": "uncataloged_form_protocol_field_draft_exists",
+      "next": "已有Field异步/提交状态；校验器/数据逻辑先验组合。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["form.async-reset-existing"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["form.central-policy-errors", "form.reference-layer"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/form/root.proto.ts", "lines": [49, 125] },
+        { "path": "packages/prototypes/base/src/form/root.proto.ts", "lines": [127, 188] },
+        { "path": "packages/prototypes/base/src/field/types.ts", "lines": [15, 65] },
+        { "path": "packages/prototypes/base/test/form-primitives.test.ts", "lines": [106, 150] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u49"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u50"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.hover-card",
+      "component": "hover-card",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "视觉preview已有；多trigger及link/a11y边界待补。",
+      "feature_status": {
+        "confirmed_missing": ["hover-card.multiple-trigger-source"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["hover-card.preview-delays"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["hover-card.link-a11y-lifecycle"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/hover-card/root.proto.ts", "lines": [1, 260] },
+        { "path": "packages/prototypes/base/src/hover-card/trigger.proto.ts", "lines": [59, 109] },
+        { "path": "packages/prototypes/base/src/hover-card/content.proto.ts", "lines": [31, 77] },
+        { "path": "spec/prototypes/P-BASE-HOVER-CARD-CONTENT.yaml", "lines": [1, 85] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u51"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u52"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u42"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.image",
+      "component": "image",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "native image已有；Neo ImageCard需独立family recipe。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["image.native-presentation"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["image.image-card-recipe", "image.responsive-loading"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/image/root.proto.ts", "lines": [1, 99] },
+        { "path": "packages/prototypes/base/src/image/types.ts", "lines": [1, 29] },
+        { "path": "spec/prototypes/P-BASE-IMAGE.yaml", "lines": [1, 62] },
+        { "path": "packages/prototypes/base/src/image/index.ts", "lines": [1, 2] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u53"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u54"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u55"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.input",
+      "component": "input",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "plain-text已有；file/type目标先补native协议。",
+      "feature_status": {
+        "confirmed_missing": ["input.native-input-modes"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["input.text-editor"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["input.validation-form-composition"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/input/types.ts", "lines": [1, 75] },
+        { "path": "packages/prototypes/base/src/input/root.proto.ts", "lines": [25, 49] },
+        { "path": "packages/prototypes/base/src/input/root.proto.ts", "lines": [65, 90] },
+        { "path": "spec/prototypes/P-BASE-INPUT.yaml", "lines": [1, 73] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u56"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u57"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.input-otp",
+      "component": "input-otp",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "原生editor已有；选区/active slot先补通用selection事实。",
+      "feature_status": {
+        "confirmed_missing": ["input-otp.selection-slot", "input-otp.pattern-transform"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["input-otp.editor-completion"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["input-otp.family-one-field"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/input-otp/input.proto.ts", "lines": [48, 66] },
+        { "path": "packages/prototypes/base/src/input-otp/input.proto.ts", "lines": [88, 128] },
+        { "path": "packages/prototypes/base/src/input-otp/root.proto.ts", "lines": [1, 169] },
+        { "path": "packages/prototypes/base/src/input-otp/slot.proto.ts", "lines": [23, 35] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u58"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u59"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.label",
+      "component": "label",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "typed关联已有；跨控件命名/激活待真宿主。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["label.typed-pair"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["label.cross-host-targets"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/label/root.proto.ts", "lines": [4, 19] },
+        { "path": "spec/prototypes/P-BASE-LABEL.yaml", "lines": [1, 44] },
+        { "path": "packages/prototypes/base/src/label/types.ts", "lines": [1, 5] },
+        { "path": "packages/prototypes/base/src/label/root.proto.ts", "lines": [1, 28] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u60"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u61"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.live-region",
+      "component": "live-region",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "politeness/atomic已有；不强加queue，reader证据待验。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["live-region.governed-semantics"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["live-region.host-at-evidence"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/live-region/types.ts", "lines": [1, 13] },
+        { "path": "packages/prototypes/base/src/live-region/root.proto.ts", "lines": [1, 60] },
+        { "path": "spec/prototypes/P-BASE-LIVE-REGION.yaml", "lines": [1, 52] },
+        { "path": "packages/prototypes/base/test/live-region.test.ts", "lines": [1, 110] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "无独立视觉对应", "refs": ["u10"] },
+        { "family": "brutalist", "relation": "无独立视觉对应", "refs": ["u11"] },
+        { "family": "bootstrap-2-3-2", "relation": "无独立视觉对应", "refs": ["u12"] },
+        { "family": "liquid-glass", "relation": "无独立视觉对应", "refs": ["u4", "u5"] }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.menubar",
+      "component": "menubar",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "子菜单与check/radio先定义。",
+      "feature_status": {
+        "confirmed_missing": ["menubar.nested-selection-parts", "menubar.group-static-parts"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["menubar.existing-navigation"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["menubar.rtl-native"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/menubar/index.ts", "lines": [1, 26] },
+        { "path": "packages/prototypes/base/src/menu-primitives/types.ts", "lines": [9, 76] },
+        { "path": "packages/prototypes/base/src/menu-primitives/family.ts", "lines": [250, 283] },
+        { "path": "packages/prototypes/base/src/menu-primitives/family.ts", "lines": [350, 415] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u62"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u63"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u15", "u64"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.message-scroller",
+      "component": "message-scroller",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "末端跟随已有；消息锚点/初始位置先补定义。",
+      "feature_status": {
+        "confirmed_missing": [
+          "message-scroller.message-anchor",
+          "message-scroller.initial-and-policy"
+        ],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["message-scroller.end-follow"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["message-scroller.prepend-native-evidence"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/message-scroller/index.ts", "lines": [24, 62] },
+        { "path": "packages/prototypes/base/src/message-scroller/index.ts", "lines": [79, 113] },
+        { "path": "packages/prototypes/base/src/message-scroller/index.ts", "lines": [127, 144] },
+        { "path": "packages/prototypes/base/src/message-scroller/index.ts", "lines": [24, 29] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u65"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u66"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u67", "u68"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.meter",
+      "component": "meter",
+      "depth": "bounded_partial",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "low/high/optimum已有；readout格式/几何待证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["meter.range-readout"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["meter.format-responsive"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/meter/types.ts", "lines": [1, 23] },
+        { "path": "packages/prototypes/base/src/meter/root.proto.ts", "lines": [55, 88] },
+        { "path": "packages/prototypes/base/src/meter/value.proto.ts", "lines": [1, 33] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u69"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u70"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u71"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.navigation-menu",
+      "component": "navigation-menu",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "hover/vertical/shared viewport目标先准入。",
+      "feature_status": {
+        "confirmed_missing": ["navigation-menu.hover-vertical", "navigation-menu.shared-viewport"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["navigation-menu.links-scroll"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["navigation-menu.nested-responsive"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/menu-primitives/types.ts", "lines": [9, 15] },
+        { "path": "packages/prototypes/base/src/menu-primitives/family.ts", "lines": [69, 86] },
+        { "path": "packages/prototypes/base/src/menu-primitives/family.ts", "lines": [260, 283] },
+        { "path": "packages/prototypes/base/src/navigation-menu/index.ts", "lines": [1, 31] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u72"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u73"] },
+        {
+          "family": "bootstrap-2-3-2",
+          "relation": "直接对应经典控件/样式",
+          "refs": ["u74", "u64"]
+        },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.number-field",
+      "component": "number-field",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "locale/empty/scrub等为补充目标，先确认来源范围。",
+      "feature_status": {
+        "confirmed_missing": ["number-field.empty-locale", "number-field.scrub-repeat"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["number-field.finite-editing"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["number-field.format-recipe"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/number-field/root.proto.ts", "lines": [92, 143] },
+        { "path": "packages/prototypes/base/src/number-field/input.proto.ts", "lines": [50, 74] },
+        { "path": "packages/prototypes/base/src/number-field/input.proto.ts", "lines": [141, 166] },
+        { "path": "packages/prototypes/base/src/number-field/types.ts", "lines": [1, 12] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u75", "u56", "u17"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u76", "u57", "u18"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u16", "u9"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.popover",
+      "component": "popover",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "nonmodal已有；modal/hover策略先准入。",
+      "feature_status": {
+        "confirmed_missing": ["popover.modal-hover-policy"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["popover.anchored-nonmodal"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["popover.multi-trigger-arrow"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/popover/types.ts", "lines": [12, 29] },
+        { "path": "packages/prototypes/base/src/popover/types.ts", "lines": [68, 78] },
+        { "path": "packages/prototypes/base/src/popover/content.proto.ts", "lines": [31, 111] },
+        {
+          "path": "packages/prototypes/base/test/navigation-overlays/popover-focus-outside.test.ts",
+          "lines": [1, 218]
+        }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u40"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u41"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u42"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.progress",
+      "component": "progress",
+      "depth": "bounded_partial",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "indeterminate/范围已有；format/valueText组合待证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["progress.range-readout"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["progress.format-responsive"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/progress/types.ts", "lines": [1, 21] },
+        { "path": "packages/prototypes/base/src/progress/root.proto.ts", "lines": [53, 76] },
+        { "path": "packages/prototypes/base/src/progress/value.proto.ts", "lines": [1, 35] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u69"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u70"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u71"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.radio-group",
+      "component": "radio-group",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "readonly/form目标先准入；typed Label已存在。",
+      "feature_status": {
+        "confirmed_missing": ["radio-group.readonly-form"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["radio-group.selection-roving"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["radio-group.toolbar-direction"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/radio-group/types.ts", "lines": [1, 45] },
+        { "path": "packages/prototypes/base/src/radio-group/root.proto.ts", "lines": [42, 85] },
+        { "path": "packages/prototypes/base/src/radio-group/item.proto.ts", "lines": [1, 222] },
+        { "path": "spec/prototypes/P-BASE-RADIO-GROUP-ITEM.yaml", "lines": [1, 148] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u77"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u78"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.resizable",
+      "component": "resizable",
+      "depth": "focused_static",
+      "definition_status": "Family-specific P absent; bounded collection-control regression draft; no full guarantee",
+      "next": "分清同group多panel与嵌套groups；drag/constraints逐项核。",
+      "feature_status": {
+        "confirmed_missing": [
+          "resizable.api.2",
+          "resizable.state_facts.2",
+          "resizable.interaction_keyboard.2",
+          "resizable.responsive.2",
+          "resizable.accessibility.2"
+        ],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [
+          "resizable.api.1",
+          "resizable.state_facts.1",
+          "resizable.interaction_keyboard.1",
+          "resizable.controlled_dynamic.1",
+          "resizable.rtl_vertical.1",
+          "resizable.responsive.1",
+          "resizable.accessibility.1"
+        ],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": [
+          "resizable.api.3",
+          "resizable.interaction_keyboard.3",
+          "resizable.controlled_dynamic.2",
+          "resizable.rtl_vertical.2",
+          "resizable.responsive.3",
+          "resizable.accessibility.3"
+        ]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/resizable/index.ts", "lines": [24, 68] },
+        { "path": "packages/prototypes/base/src/resizable/types.ts", "lines": [1, 29] },
+        { "path": "packages/prototypes/base/src/resizable/index.ts", "lines": [193, 209] },
+        {
+          "path": "apps/www/src/content/docs/zh-cn/ui-libraries/base/resizable.mdx",
+          "lines": [1, 18]
+        }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u79"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u80"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u67"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.scroll-area",
+      "component": "scroll-area",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "双轴/host drag已有；visibility/corner先验family。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["scroll-area.host-scroll-control", "scroll-area.focus-overflow"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["scroll-area.visibility-corner-rtl"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/scroll-area/viewport.proto.ts", "lines": [15, 23] },
+        { "path": "packages/prototypes/base/src/scroll-area/thumb.proto.ts", "lines": [1, 31] },
+        { "path": "spec/contracts/C-SCROLL-COMPOSED-CONTROL-0001.yaml", "lines": [1, 49] },
+        { "path": "packages/core/src/scroll.ts", "lines": [50, 82] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u81"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u82"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u67"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.select",
+      "component": "select",
+      "depth": "focused_static",
+      "definition_status": "draft_single_only_explicit_negative_boundary",
+      "next": "单选已有；multiple/语义分组先准入，别混Radix目标。",
+      "feature_status": {
+        "confirmed_missing": ["select.multiple", "select.grouped-parts"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["select.single-controlled"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["select.version-boundary"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/select/types.ts", "lines": [17, 51] },
+        { "path": "packages/prototypes/base/src/select/root.proto.ts", "lines": [25, 38] },
+        { "path": "packages/prototypes/base/src/select/root.proto.ts", "lines": [140, 157] },
+        { "path": "packages/prototypes/base/src/select/index.ts", "lines": [1, 39] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u83"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u84"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.separator",
+      "component": "separator",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "orientation/decorative已有；真实extent待证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["separator.orientation-decorative"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["separator.extent-family"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/separator/types.ts", "lines": [1, 20] },
+        { "path": "packages/prototypes/base/src/separator/root.proto.ts", "lines": [1, 69] },
+        { "path": "spec/prototypes/P-BASE-SEPARATOR.yaml", "lines": [1, 48] },
+        { "path": "packages/prototypes/brutalist/src/separator/root.proto.ts", "lines": [1, 34] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u85"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u11"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u67"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.slider",
+      "component": "slider",
+      "depth": "owner_handoff",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "正式baseline为单值；多值目标已列专门后续。",
+      "feature_status": {
+        "confirmed_missing": ["slider.multi-values"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": [],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["slider.owner-pending"]
+      },
+      "source_refs": [{ "path": "packages/prototypes/base/src/slider/types.ts", "lines": [1, 36] }],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u86"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u87"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.surface",
+      "component": "surface",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "passive shell已有；Card/material属独立组合/范围。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["surface.passive-shell"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["surface.material-host"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/surface/types.ts", "lines": [1, 17] },
+        { "path": "packages/prototypes/base/src/surface/root.proto.ts", "lines": [1, 53] },
+        { "path": "spec/prototypes/P-BASE-SURFACE.yaml", "lines": [1, 35] },
+        { "path": "packages/prototypes/liquid-glass/src/surface/root.proto.ts", "lines": [1, 145] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u88"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u89"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u90"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.switch",
+      "component": "switch",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "readonly/form目标与当前负边界分开。",
+      "feature_status": {
+        "confirmed_missing": ["switch.readonly-form"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["switch.checked-control"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": []
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/switch/types.ts", "lines": [1, 50] },
+        { "path": "packages/prototypes/base/src/switch/root.proto.ts", "lines": [95, 134] },
+        { "path": "spec/prototypes/P-BASE-SWITCH.yaml", "lines": [562, 565] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u91"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u92"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.table",
+      "component": "table",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "spans/header已有；分区parts和responsive先分层准入。",
+      "feature_status": {
+        "confirmed_missing": ["table.sections-target"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["table.structure-spans"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["table.responsive-data-recipe"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/table/types.ts", "lines": [1, 29] },
+        { "path": "packages/prototypes/base/src/table/header-cell.proto.ts", "lines": [1, 44] },
+        { "path": "packages/prototypes/base/test/table.test.ts", "lines": [1, 193] },
+        { "path": "packages/prototypes/base/src/table/index.ts", "lines": [1, 17] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u37"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u93"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u21"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.tabs",
+      "component": "tabs",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "activation/vertical/Indicator已有；几何/RTL待实证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["tabs.activation-presence"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["tabs.indicator-geometry"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/tabs/types.ts", "lines": [4, 44] },
+        { "path": "packages/prototypes/base/src/tabs/types.ts", "lines": [98, 121] },
+        { "path": "packages/prototypes/base/src/tabs/content.proto.ts", "lines": [60, 80] },
+        { "path": "packages/prototypes/base/src/tabs/indicator.proto.ts", "lines": [16, 54] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u94"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u95"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u74"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.text",
+      "component": "text",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "passive typography已有；不接管heading/link语义。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["text.passive-typography"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["text.native-visual"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/text/types.ts", "lines": [1, 13] },
+        { "path": "packages/prototypes/base/src/text/root.proto.ts", "lines": [1, 44] },
+        { "path": "spec/prototypes/P-BASE-TEXT.yaml", "lines": [1, 44] },
+        { "path": "packages/prototypes/shadcn/src/text/root.proto.ts", "lines": [1, 132] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u27"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u28"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u68"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.textarea",
+      "component": "textarea",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "多行/IME已有；invalid/Field/尺寸组合待证。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["textarea.native-multiline"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["textarea.field-invalid-sizing"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/textarea/types.ts", "lines": [1, 77] },
+        { "path": "packages/prototypes/base/src/textarea/root.proto.ts", "lines": [1, 211] },
+        { "path": "spec/prototypes/P-BASE-TEXTAREA.yaml", "lines": [1, 88] },
+        { "path": "packages/prototypes/shadcn/src/textarea/root.proto.ts", "lines": [5, 23] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u96"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u97"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u16"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.toast",
+      "component": "toast",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "timer/pause已有；swipe先定义，manager/queue先验recipe。",
+      "feature_status": {
+        "confirmed_missing": ["toast.swipe"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["toast.timer-focus"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["toast.manager-stack-recipe", "toast.focus-loss-timer"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/toast/root.proto.ts", "lines": [37, 95] },
+        { "path": "packages/prototypes/base/src/toast/root.proto.ts", "lines": [117, 172] },
+        { "path": "packages/prototypes/base/src/toast/viewport.proto.ts", "lines": [8, 32] },
+        { "path": "packages/prototypes/base/src/toast/types.ts", "lines": [3, 24] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u98"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u99"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u100"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.toggle",
+      "component": "toggle",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "active/瞬时pressed已有；family变体与组合待核。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["toggle.pressed-owner"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["toggle.full-family-target"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/toggle/types.ts", "lines": [1, 34] },
+        { "path": "packages/prototypes/base/src/toggle/toggle.proto.ts", "lines": [1, 174] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u101"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u102"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u9"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.toggle-group",
+      "component": "toggle-group",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "single/multiple/vertical已有；variant/size/spacing属family。",
+      "feature_status": {
+        "confirmed_missing": ["toggle-group.family-variants"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["toggle-group.selection-orientation"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["toggle-group.full-admission"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/toggle-group/types.ts", "lines": [8, 29] },
+        { "path": "packages/prototypes/base/src/toggle-group/root.proto.ts", "lines": [72, 110] },
+        {
+          "path": "packages/prototypes/brutalist/src/toggle-group/root.proto.ts",
+          "lines": [8, 21]
+        },
+        { "path": "packages/prototypes/brutalist/src/toggle-group/item.proto.ts", "lines": [8, 29] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u103"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u104"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u105"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.toolbar",
+      "component": "toolbar",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "button roving已有；mixed input/link/group先定参与协议。",
+      "feature_status": {
+        "confirmed_missing": ["toolbar.mixed-controls"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["toolbar.button-roving"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["toolbar.toggle-toolbar-recipe"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/toolbar/root.proto.ts", "lines": [5, 27] },
+        { "path": "packages/prototypes/base/src/toolbar/root.proto.ts", "lines": [33, 71] },
+        { "path": "packages/prototypes/base/src/toolbar/types.ts", "lines": [1, 39] },
+        { "path": "packages/prototypes/base/src/toolbar/index.ts", "lines": [1, 5] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u106", "u17"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u107", "u18"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u105"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.tooltip",
+      "component": "tooltip",
+      "depth": "focused_static",
+      "definition_status": "draft_bounded",
+      "next": "delay group已有；click-close/cursor策略先定义。",
+      "feature_status": {
+        "confirmed_missing": ["tooltip.click-cursor-policy"],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["tooltip.delay-group"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["tooltip.dynamic-release"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/tooltip/group.proto.ts", "lines": [1, 133] },
+        { "path": "packages/prototypes/base/src/tooltip/root.proto.ts", "lines": [136, 182] },
+        { "path": "packages/prototypes/base/src/tooltip/trigger.proto.ts", "lines": [19, 65] },
+        { "path": "packages/prototypes/base/src/tooltip/content.proto.ts", "lines": [118, 165] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "直接上游组件", "refs": ["u108"] },
+        { "family": "brutalist", "relation": "直接上游组件", "refs": ["u109"] },
+        { "family": "bootstrap-2-3-2", "relation": "直接对应经典控件/样式", "refs": ["u110"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "baseline.transition",
+      "component": "transition",
+      "depth": "bounded_partial",
+      "definition_status": "draft_bounded",
+      "next": "phase/interrupt/reduced-motion已有；host motion仍待验。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["transition.phase-lifecycle"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["transition.animation-composition"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/transition/types.ts", "lines": [1, 67] },
+        {
+          "path": "packages/prototypes/base/src/transition/as-transition.proto.ts",
+          "lines": [53, 105]
+        },
+        { "path": "packages/prototypes/base/src/transition/machine.ts", "lines": [1, 199] },
+        { "path": "spec/prototypes/P-BASE-TRANSITION.yaml", "lines": [1, 137] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "无独立视觉对应", "refs": ["u10"] },
+        { "family": "brutalist", "relation": "无独立视觉对应", "refs": ["u11"] },
+        { "family": "bootstrap-2-3-2", "relation": "无独立视觉对应", "refs": ["u12"] },
+        { "family": "liquid-glass", "relation": "无独立视觉对应", "refs": ["u4", "u5"] }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.tree",
+      "component": "tree",
+      "depth": "focused_static",
+      "definition_status": "Family-specific P absent; bounded collection-control regression draft; no full guarantee",
+      "next": "单选/层级键盘已有；typeahead与RTL缩进待补，多选非必修。",
+      "feature_status": {
+        "confirmed_missing": ["tree.interaction_keyboard.2", "tree.rtl_vertical.2"],
+        "confirmed_missing_optional_not_required": ["tree.api.3", "tree.rtl_vertical.1"],
+        "existing_unverified": [
+          "tree.api.1",
+          "tree.state_facts.1",
+          "tree.interaction_keyboard.1",
+          "tree.controlled_dynamic.1",
+          "tree.accessibility.1"
+        ],
+        "not_applicable_reference_scope": ["tree.api.2"],
+        "unknown_pending": [
+          "tree.state_facts.2",
+          "tree.controlled_dynamic.2",
+          "tree.responsive.1",
+          "tree.accessibility.2"
+        ]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/tree/types.ts", "lines": [12, 88] },
+        { "path": "packages/prototypes/shadcn/src/tree/index.ts", "lines": [1, 114] },
+        { "path": "packages/prototypes/brutalist/src/tree/index.ts", "lines": [1, 116] },
+        { "path": "packages/prototypes/bootstrap-2-3-2/src/tree/index.ts", "lines": [1, 115] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u111"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u112"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u74"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    },
+    {
+      "id": "deliver.virtual-list",
+      "component": "virtual-list",
+      "depth": "focused_static",
+      "definition_status": "full_component_protocol_not_located",
+      "next": "变高/generation/Web桥已有；portable窗口定义待准入。",
+      "feature_status": {
+        "confirmed_missing": [],
+        "confirmed_missing_optional_not_required": [],
+        "existing_unverified": ["virtual-list.window-generation", "virtual-list.web-variable-size"],
+        "not_applicable_reference_scope": [],
+        "unknown_pending": ["virtual-list.portable-definition-admission"]
+      },
+      "source_refs": [
+        { "path": "packages/prototypes/base/src/virtual-list/index.ts", "lines": [31, 67] },
+        { "path": "packages/prototypes/base/src/virtual-list/model.ts", "lines": [1, 155] },
+        { "path": "packages/prototypes/base/src/virtual-list/web.ts", "lines": [1, 40] },
+        { "path": "packages/prototypes/base/src/virtual-list/web.ts", "lines": [100, 155] }
+      ],
+      "upstream": [
+        { "family": "shadcn", "relation": "参考组合", "refs": ["u81"] },
+        { "family": "brutalist", "relation": "参考组合", "refs": ["u82"] },
+        { "family": "bootstrap-2-3-2", "relation": "参考组合", "refs": ["u67"] },
+        {
+          "family": "liquid-glass",
+          "relation": "参考设计原则（无同名公开源码）",
+          "refs": ["u4", "u5"]
+        }
+      ],
+      "accepted": false,
+      "full_upstream_coverage_proven": false
+    }
+  ],
+  "cross_component": [
+    { "id": "repair.overlay-scrollbar-coordinate", "status": "not_reaudited", "accepted": false }
+  ],
+  "source_reference_resolution": {
+    "source_refs": "Join baseline.source_url_prefix + path; append #Lstart-Lend using lines.",
+    "upstream_refs": "Resolve each component upstream[].refs key using upstream_sources.",
+    "external_local_artifact_dependency": false
+  },
+  "published_delta": {
+    "baseline_audit_unchanged": true,
+    "integrated_commit": "0ccaee462458ed8988baa50a95d174a34dfb0b99",
+    "integrated_tree": "dbcec984b59ef6984498d8e5771f3e23c1255323",
+    "repair_commit": "fb7004d5f0c95ad0df00b72b988104c3d72979b0",
+    "repair_commit_is_ancestor_of_integrated_commit": true,
+    "scope": "Neo AlertDialog passive Header/Footer and source-aligned desktop styling; Base ownership retained",
+    "source_comments": [
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/872#issuecomment-6100327897",
+        "reported_at": "2026-10-10T17:36:39Z",
+        "reported_checks": "219 independent tests passed; 9 baseline-failing source checks became green"
+      },
+      {
+        "url": "https://github.com/Proto-UI/Proto-UI/pull/872#issuecomment-6100329696",
+        "reported_at": "2026-10-10T17:36:51Z",
+        "reported_checks": "577/577 focused tests, 125/125 planner checks and type checking passed; 5 accepted/63 unfinished retained"
+      }
+    ],
+    "native_evidence_run": "https://github.com/Proto-UI/Proto-UI/actions/runs/38072250355",
+    "native_run_result_independently_verified_by_this_record": false,
+    "verification_boundary": "Comments reported screenshots pending at their publication time. Source/desktop styling checks are not pixel acceptance. Mobile responsiveness, animation and native/upstream parity remain unaccepted by this audit. No whole-matrix re-review at 0cca."
+  }
+}
