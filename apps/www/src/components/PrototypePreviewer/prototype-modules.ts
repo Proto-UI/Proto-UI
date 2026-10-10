@@ -2,6 +2,7 @@
 // 原型模块映射表 - 按需动态导入
 
 import { registerPrototype } from './registry';
+import { finfPrototypeModules } from './finf-prototype-modules';
 
 export type PrototypeModuleLoader = () => Promise<any>;
 
@@ -23,6 +24,7 @@ function getPrototypeIdFromPath(path: string): string | null {
  * value: 动态导入函数
  */
 const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
+  ...finfPrototypeModules,
   'liquid-glass-text-root': async () => {
     const mod = await import('@proto.ui/prototypes-liquid-glass/text');
     registerPrototype('liquid-glass-text-root', mod.textRoot);

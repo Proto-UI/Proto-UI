@@ -1,3 +1,4 @@
+import { FINF_WORKSPACE_COMPONENT_ENTRIES } from './finf-components';
 import { SHADCN_COMPONENT_PRESET_RECIPES } from './shadcn-component-presets.generated.js';
 
 export interface ComponentItem {
@@ -210,6 +211,7 @@ const baseCompound = (
   );
 
 const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
+  ...FINF_WORKSPACE_COMPONENT_ENTRIES,
   'base-field': {
     ...defineCompound(
       'base-field',

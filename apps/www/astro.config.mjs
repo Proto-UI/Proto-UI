@@ -514,6 +514,36 @@ export default defineConfig({
                   slug: 'ui-libraries/base/field',
                 },
                 {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/base/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/base/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/base/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/base/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/base/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/base/popover',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/base/textarea',
@@ -643,6 +673,36 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/field',
                 },
                 {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/shadcn/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/shadcn/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/shadcn/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/shadcn/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/shadcn/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/shadcn/popover',
+                },
+                {
                   label: 'Textarea',
                   translations: { en: 'Textarea', 'zh-CN': 'Textarea' },
                   slug: 'ui-libraries/shadcn/textarea',
@@ -729,6 +789,36 @@ export default defineConfig({
                   translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
                   slug: 'ui-libraries/bootstrap-2-3-2/field',
                 },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/bootstrap-2-3-2/popover',
+                },
               ],
             },
             {
@@ -764,6 +854,36 @@ export default defineConfig({
                   label: 'Field (Draft)',
                   translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
                   slug: 'ui-libraries/liquid-glass/field',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/liquid-glass/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/liquid-glass/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/liquid-glass/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/liquid-glass/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/liquid-glass/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/liquid-glass/popover',
                 },
               ],
             },
@@ -825,6 +945,36 @@ export default defineConfig({
                   label: 'Field (Draft)',
                   translations: { en: 'Field (Draft)', 'zh-CN': 'Field（草案）' },
                   slug: 'ui-libraries/brutalist/field',
+                },
+                {
+                  label: 'Progress (Draft)',
+                  translations: { en: 'Progress (Draft)', 'zh-CN': 'Progress（草案）' },
+                  slug: 'ui-libraries/brutalist/progress',
+                },
+                {
+                  label: 'Meter (Draft)',
+                  translations: { en: 'Meter (Draft)', 'zh-CN': 'Meter（草案）' },
+                  slug: 'ui-libraries/brutalist/meter',
+                },
+                {
+                  label: 'Calendar (Draft)',
+                  translations: { en: 'Calendar (Draft)', 'zh-CN': 'Calendar（草案）' },
+                  slug: 'ui-libraries/brutalist/components/calendar',
+                },
+                {
+                  label: 'Alert Dialog (Draft)',
+                  translations: { en: 'Alert Dialog (Draft)', 'zh-CN': 'Alert Dialog（草案）' },
+                  slug: 'ui-libraries/brutalist/components/alert-dialog',
+                },
+                {
+                  label: 'Drawer (Draft)',
+                  translations: { en: 'Drawer (Draft)', 'zh-CN': 'Drawer（草案）' },
+                  slug: 'ui-libraries/brutalist/components/drawer',
+                },
+                {
+                  label: 'Popover (Draft)',
+                  translations: { en: 'Popover (Draft)', 'zh-CN': 'Popover（草案）' },
+                  slug: 'ui-libraries/brutalist/components/popover',
                 },
                 {
                   label: 'Button',

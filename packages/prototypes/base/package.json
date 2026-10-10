@@ -165,6 +165,36 @@
       "types": "./dist/field/index.d.ts",
       "import": "./dist/field/index.js",
       "default": "./dist/field/index.js"
+    },
+    "./alert-dialog": {
+      "types": "./dist/alert-dialog/index.d.ts",
+      "import": "./dist/alert-dialog/index.js",
+      "default": "./dist/alert-dialog/index.js"
+    },
+    "./drawer": {
+      "types": "./dist/drawer/index.d.ts",
+      "import": "./dist/drawer/index.js",
+      "default": "./dist/drawer/index.js"
+    },
+    "./popover": {
+      "types": "./dist/popover/index.d.ts",
+      "import": "./dist/popover/index.js",
+      "default": "./dist/popover/index.js"
+    },
+    "./progress": {
+      "types": "./dist/progress/index.d.ts",
+      "import": "./dist/progress/index.js",
+      "default": "./dist/progress/index.js"
+    },
+    "./meter": {
+      "types": "./dist/meter/index.d.ts",
+      "import": "./dist/meter/index.js",
+      "default": "./dist/meter/index.js"
+    },
+    "./calendar": {
+      "types": "./dist/calendar/index.d.ts",
+      "import": "./dist/calendar/index.js",
+      "default": "./dist/calendar/index.js"
     }
   },
   "description": "Base Proto UI prototype library for reusable interaction prototypes.",

@@ -73,6 +73,30 @@
     "./field": {
       "types": "./src/field/index.ts",
       "default": "./src/field/index.ts"
+    },
+    "./alert-dialog": {
+      "types": "./src/alert-dialog/index.ts",
+      "default": "./src/alert-dialog/index.ts"
+    },
+    "./drawer": {
+      "types": "./src/drawer/index.ts",
+      "default": "./src/drawer/index.ts"
+    },
+    "./popover": {
+      "types": "./src/popover/index.ts",
+      "default": "./src/popover/index.ts"
+    },
+    "./progress": {
+      "types": "./src/progress/index.ts",
+      "default": "./src/progress/index.ts"
+    },
+    "./meter": {
+      "types": "./src/meter/index.ts",
+      "default": "./src/meter/index.ts"
+    },
+    "./calendar": {
+      "types": "./src/calendar/index.ts",
+      "default": "./src/calendar/index.ts"
     }
   },
   "dependencies": {
