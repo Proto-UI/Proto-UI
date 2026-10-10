@@ -1,0 +1,99 @@
+{
+  "status": "Five independently accepted bounded prior items; remaining full Finf acceptance open",
+  "base": "14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92",
+  "sourceCommit": "89ef421765a9f769c79daa6189023e2d24dff467",
+  "sourceTree": "a842c1866d5f3609025157d5848b348a9e8ae189",
+  "orderedSourceCommits": [
+    "141c3728e647c2835b374997760766f44e21a253",
+    "3ca565a2d144d25f1e10d5c8f01431d2601d7273",
+    "3dd6a088002850a959cb425eb52869aff0e7ac32",
+    "557dfa20b4ad2fe161f570c68245add9c731d282",
+    "648b15246153cd50f88b6c0c4b22d7045fa1f4cc",
+    "c8aae754bc903c86fe8dfe53785781cc0bac1543",
+    "38e3169411cffb3e74f3289c2187908a6a92be59",
+    "82659f1a7e29d4aabdc4e5f64189d6675f3e5129",
+    "1ecfae19ac1bf75a9c9e18110e78378cf1cc70ff",
+    "89ef421765a9f769c79daa6189023e2d24dff467"
+  ],
+  "familyComponentEntries": 140,
+  "namedPrototypeAtoms": 690,
+  "userWeightedProgress": {
+    "done": 5,
+    "inProgress": 63,
+    "notStarted": 0,
+    "points": 36.5,
+    "denominator": 68,
+    "percentage": 53.7,
+    "rule": "Done=1; partial source implementation=0.5. Only accepted original scopes count as done."
+  },
+  "closedThisBatch": [
+    {
+      "id": "prior-pr.862",
+      "item": 63,
+      "reviewedRevision": "8989403a6d3668948c7394f4a370d8269ba1a6ec",
+      "recordCommit": "557dfa20b4ad2fe161f570c68245add9c731d282",
+      "record": "internal/records/2026-10-10-finf-pr862-budget-closeout.md",
+      "scope": "Original bounded Template/Scroll/Focus numerical transaction only; later budget overages remain open."
+    },
+    {
+      "id": "prior-pr.855",
+      "item": 62,
+      "reviewedRevision": "8989403a6d3668948c7394f4a370d8269ba1a6ec",
+      "recordCommit": "82659f1a7e29d4aabdc4e5f64189d6675f3e5129",
+      "record": "internal/records/2026-10-10-finf-pr855-material-closeout.md",
+      "scope": "Original finite padding-box/border/composed-blend repair only; broader Liquid optical/native work remains open."
+    }
+  ],
+  "scope": [
+    "Actual native NavigationMenu anchors on four Web Adapters, browser-owned default activation and bounded readonly observation",
+    "Current focus Boundary observation and controlled Popover outside-focus close requests; owned regions and user focus preserved",
+    "Independent record and separate one-row ledger for each accepted prior task",
+    "Dedicated representative image suite inventory ownership and official CJK font provisioning"
+  ],
+  "verification": {
+    "combinedFocused": "196/196 passed in 25 files on code-bearing 4cb6e8e5; later commits contain only acceptance records/ledgers and dedicated workflow/inventory maintenance, with six corresponding targeted node checks passed.",
+    "types": "Workspace TypeScript passed on the complete code-bearing composition; no implementation source changed afterward.",
+    "styles": "Proper website generator emitted 621 source tokens and document/Shadow sheets. All Shadcn/Brutalist/Draft preset checks current.",
+    "inventory": "Frozen final source central browser inventory passed; six dedicated-owner/production-plan cases passed without a browser or server.",
+    "prior862": "Independent reviewer matched all eleven official integrated package hashes, lengths and gzip measurements; original nine strict entries passed. No current-head size success is inferred.",
+    "prior855": "Independent reviewer verified exact898 source/packed official results, artifact digest, 46 byte-identical PNG pairs and six inspected original frames. Scope stays finite."
+  },
+  "baselineOnlyImages": {
+    "revision": "14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92",
+    "run": 38036693145,
+    "artifact": 11663817331,
+    "result": "Form and Calendar journeys passed. Drawer screenshot was captured but required Close click timed out because 50% snap put the control outside the viewport. Form lacked CJK glyphs; official font environment repaired in this source. Images are not relabeled as this candidate."
+  },
+  "retainedFailures": [
+    "Drawer half-snap layout is a real open product defect being repaired in a separate successor; the Close test remains intact.",
+    "Actual14ce runtime inventory failed on the unregistered new representative suite before browser work; explicit executable ownership now added, no gate bypass.",
+    "Native-link worker retains existing broad docs/catalog blockers and unavailable backend boundaries.",
+    "Boundary/Overlay catalog report retains 559 existing Finf debts and three absent GPUI submodule evidence files; no new catalog lifecycle admission.",
+    "First native-link importer check failed at absent default pnpm store; configured existing workspace store passed frozen/offline lock-only validation. Registry resolution failures are not called full-install success.",
+    "Later strict package overages and all historical failures remain unchanged."
+  ],
+  "remaining": [
+    "Drawer physical snap-layout repair and official Close interaction rerun",
+    "Native browser default-navigation/focus timing, full Compiler/native/GPUI and Shadow-split support where applicable",
+    "Complete catalog contracts/admission, packed consumers beyond the specific855 profile, homepage exhibition and independent full-item acceptance",
+    "Prior-pr.869 original HIG artifacts are under separate ownership/integration review; not counted complete"
+  ],
+  "publicationIdentity": "Preserve all ten ordered independent commits. Rebind candidateSource revision/sourceBindingsObject/sourceObjectProof, deliveryPlan.candidateObservation.currentClosures20261010.sourceCommit, this current packet sourceCommit/orderedSourceCommits plus explicit localSourceProvenance, and only the two new closeout independentReview.source URLs / corresponding current packet recordCommit fields to actual record objects. Keep their reviewed revision898, verdict/evidence, all earlier closeouts and historical packets unchanged.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "localSourceProvenance": {
+    "sourceCommit": "402f195ca3742cba02a3c1870eadc4b952a81548",
+    "orderedSourceCommits": [
+      "c86b756dc1d60997f9ae8741670cb703e7cdee41",
+      "f599327297cf070cf0af565606a8b5accb3948b7",
+      "1463c2ddd377ffc2ff9192e8c403eccedc672e46",
+      "66836ffb8be7c6fb51bf623fa50898d99eab8f80",
+      "800cb9641f2c3ff7ad2a18ed514b85533c59eb09",
+      "1f1dbc4f7528082a776d00790c3d2682eb6470d2",
+      "4cb6e8e51babfe3e179dbe62471c794ae7f4c368",
+      "204e4a552603236dc74aee4af60b92bbc3baca80",
+      "c160ca3f9f7b37d02dbca0329630aa237103a14e",
+      "402f195ca3742cba02a3c1870eadc4b952a81548"
+    ]
+  }
+}
