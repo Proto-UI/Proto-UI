@@ -4,24 +4,46 @@ import {
   type AlertDialogCancelProps,
   type AlertDialogCancelExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+import {
+  BRUTALIST_STRUCTURE_TOKENS,
+  BRUTALIST_HOVER_LIFT_TOKENS,
+  BRUTALIST_PRESS_TOKENS,
+  BRUTALIST_MOTION_HIT_TOKENS,
+  BRUTALIST_FOCUS_TOKENS,
+  BRUTALIST_DISABLED_TOKENS,
+} from '../style';
 
+// Passive family Button paint; the inherited AlertDialog command keeps sole action ownership.
+// Keep the valid borrowed getState pattern. Source collector coverage is a separate owner.
 export default definePrototype<AlertDialogCancelProps, AlertDialogCancelExposes>({
   name: 'brutalist-alert-dialog-cancel',
   setup(def) {
     const behavior = asAlertDialogCancel();
+    const state = behavior.getState!;
     def.feedback.style.use(
       tw(
-        'inline-flex items-center justify-center rounded-none border-2 border-foreground bg-background px-3 py-2 text-sm font-bold outline-none'
+        'inline-flex shrink-0 items-center justify-center gap-2 select-none font-sans font-medium min-h-10 px-4 py-2 text-sm min-w-0 max-w-full whitespace-normal wrap-anywhere'
       )
     );
-    const state = behavior.getState!;
+    def.feedback.style.use(tw(BRUTALIST_STRUCTURE_TOKENS));
+    def.feedback.style.use(tw('bg-secondary-background text-foreground'));
+    def.rule({
+      when: (w) => w.state(state('hovered')!).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw(`${BRUTALIST_HOVER_LIFT_TOKENS} ${BRUTALIST_MOTION_HIT_TOKENS}`)),
+    });
+    def.rule({
+      when: (w) => w.state(state('pressed')!).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw(`${BRUTALIST_PRESS_TOKENS} ${BRUTALIST_MOTION_HIT_TOKENS}`)),
+    });
     def.rule({
       when: (w) => w.state(state('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_FOCUS_TOKENS)),
     });
     def.rule({
       when: (w) => w.state(state('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw(BRUTALIST_DISABLED_TOKENS)),
     });
   },
 });

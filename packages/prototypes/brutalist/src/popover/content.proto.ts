@@ -11,7 +11,7 @@ export default definePrototype<PopoverContentProps, PopoverContentExposes>({
     const behavior = asPopoverContent();
     def.feedback.style.use(
       tw(
-        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[4px_4px_0_0_var(--pui-foreground)] p-4 z-50 w-80 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto grid gap-3'
+        'rounded-base border-2 border-border bg-background text-foreground font-sans font-medium p-4 z-50 w-72 max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-y-auto flex flex-col gap-4'
       )
     );
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
