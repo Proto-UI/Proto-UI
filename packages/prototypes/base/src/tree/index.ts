@@ -283,6 +283,12 @@ function setupItem(def: DefHandle<TreeItemProps, any>) {
     when: (w) => w.state(hidden).eq(true),
     intent: (i) => i.feedback.style.use(tw('hidden')),
   });
+  focus.focused.watch((run, event) => {
+    if (event.type !== 'next' || !event.next || hidden.get() || disabled.get()) return;
+    const c = run.context.read(TREE_CONTEXT),
+      key = run.props.get().nodeKey ?? '';
+    if (c.active !== key) run.context.update(TREE_CONTEXT, { ...c, active: key });
+  });
   def.event.on('press.commit', (run) => {
     if (!disabled.get() && !hidden.get())
       callOwner(run, TREE_FAMILY, 'requestValue', run.props.get().nodeKey);

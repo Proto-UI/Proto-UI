@@ -1,0 +1,16 @@
+---
+title: 'Data-Table (WIP)'
+description: 'data-table composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合。行是当前页按 index 编排的显示槽；单元格按 columnKey 显示当前记录，排序会更新真实内容，不用 CSS 顺序冒充 Table 结构排序。应用 rows 的 id 必须唯一。本组合不管理请求、编辑或列重排。
+
+当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-data-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

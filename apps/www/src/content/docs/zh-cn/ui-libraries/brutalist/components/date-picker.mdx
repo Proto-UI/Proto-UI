@@ -1,0 +1,16 @@
+---
+title: 'Date-Picker (WIP)'
+description: 'date-picker composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Date Picker 组合真实 Popover 与 Calendar 原子。日期请求通过 Calendar 选择，并请求关闭 Popover。open、value 与 month 保留各自受控/非受控边界。内容区可使用 Calendar 的网格、行、标题与月份导航原子。
+
+当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-date-picker"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

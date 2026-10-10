@@ -1,0 +1,16 @@
+---
+title: 'Data-Table (WIP)'
+description: 'data-table composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Data Table composes passive Table topology with stable record IDs, stable sorting, global filtering, pagination and row selection. Rows are authored presentation slots indexed within the current page; cells render their columnKey from the current record, so sort changes update actual content without pretending CSS order changed Table structure. App-owned rows must have unique id values. The composition does not own fetching, editing or column reordering.
+
+WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-data-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

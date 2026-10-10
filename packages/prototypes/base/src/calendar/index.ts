@@ -115,11 +115,25 @@ function setupRoot(def: DefHandle<CalendarRootProps, CalendarRootExposes>) {
       unavailable: [...(p.unavailable ?? [])],
       disabled: !!p.disabled,
       readOnly: !!p.readOnly,
-      weekStartsOn: p.weekStartsOn ?? 0,
+      weekStartsOn: Number.isFinite(p.weekStartsOn)
+        ? ((Math.trunc(p.weekStartsOn!) % 7) + 7) % 7
+        : 0,
       active: active ?? old.active,
     };
-    if (!next.active || next.active.slice(0, 7) !== next.month)
-      next.active = next.value.slice(0, 7) === next.month ? next.value : `${next.month}-01`;
+    if (
+      !next.active ||
+      next.active.slice(0, 7) !== next.month ||
+      !dateAvailable(next.active, next.min, next.max, next.unavailable)
+    )
+      next.active =
+        next.value.slice(0, 7) === next.month &&
+        dateAvailable(next.value, next.min, next.max, next.unavailable)
+          ? next.value
+          : (monthDays(next.month, next.weekStartsOn).find(
+              (date) =>
+                date.slice(0, 7) === next.month &&
+                dateAvailable(date, next.min, next.max, next.unavailable)
+            ) ?? '');
     if (JSON.stringify(old) !== JSON.stringify(next)) run.context.update(CALENDAR_CONTEXT, next);
   };
   const requestMonth = (next: string) => {
@@ -260,6 +274,18 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
     if (event.key === 'PageUp') target = addMonths(date.get(), event.shiftKey ? -12 : -1);
     if (event.key === 'PageDown') target = addMonths(date.get(), event.shiftKey ? 12 : 1);
     if (!target) return;
+    const direction = target < date.get() ? -1 : 1;
+    const stride = event.key === 'ArrowUp' || event.key === 'ArrowDown' ? 7 : 1;
+    for (
+      let attempts = 0;
+      !dateAvailable(target, c.min, c.max, c.unavailable) && attempts < 366;
+      attempts++
+    ) {
+      if ((c.min && target < c.min && direction < 0) || (c.max && target > c.max && direction > 0))
+        return;
+      target = addDays(target, direction * stride);
+    }
+    if (!dateAvailable(target, c.min, c.max, c.unavailable)) return;
     event.control.requestDefaultActionPrevention({
       reason: 'calendar.date-navigation',
       source: 'base-calendar-day',
