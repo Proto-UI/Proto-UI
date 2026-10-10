@@ -26,7 +26,16 @@ const prototypes = [
   dataTableCell,
   dataTableHeader,
 ];
-for (const p of prototypes) AdaptToWebComponent(p, { registerAs: `test-${p.name}` });
+const lives = { disposed: 0 };
+for (const p of prototypes)
+  AdaptToWebComponent(p, {
+    registerAs: `test-${p.name}`,
+    diagnostics: {
+      onLifecycleEvent(event) {
+        if (event.type === 'instance.dispose.done') lives.disposed++;
+      },
+    },
+  });
 const node = (name: string, props: Record<string, unknown> = {}) => {
   const el = document.createElement(`test-base-${name}`) as any;
   setElementProps(el, props);
@@ -51,10 +60,15 @@ it('resizes actual panels with constrained ratio and honors readOnly requests', 
   expect(left.style.getPropertyValue('--pui-size')).toBe('80');
   expect(left.getAttribute('data-pui-style')).toContain('basis-[calc(var(--pui-size)*1%)]');
   left.remove();
-  await flush();
+  expect(left.style.getPropertyValue('--pui-size')).toBe('80');
+  root.prepend(left);
   root.getExposes().requestValue(40);
   await flush();
-  expect(left.style.getPropertyValue('--pui-size')).toBe('80');
+  expect(left.style.getPropertyValue('--pui-size')).toBe('40');
+  const disposedBefore = lives.disposed;
+  left.remove();
+  await expect.poll(() => lives.disposed).toBeGreaterThan(disposedBefore);
+  expect(left.style.getPropertyValue('--pui-size')).toBe('');
   root.prepend(left);
   await flush();
   expect(left.style.getPropertyValue('--pui-size')).toBe('40');

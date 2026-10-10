@@ -22,8 +22,8 @@ criteria:
       zh-CN: bool true 输出空 attribute，false 移除；enum/string 输出 attribute；discrete number 输出 attribute 与 CSS variable；range number 仅输出 CSS variable。可选 allowStringVar、allowContinuousAttr 扩展相应映射。默认投影不输出 ARIA，State 更新不要求 structural render。
   - id: M-EXPOSE-STATE-WEB-0001-D
     text:
-      en: Current values are replayed on an eligible host-capability change or render commit, with one active subscription per projected entry. Missing/null hosts, unmounting, detach and terminal disposal revoke subscriptions and invalidate old callbacks; remount replays current values without recreating upstream State.
-      zh-CN: 有效 host capability 变化或 render commit 重放当前值，每个投影 entry 保持一份活动 subscription。host 缺失/null、unmounting、detach 与 terminal dispose 撤销 subscription 并使旧回调失效；remount 重放当前值而不重建上游 State。
+      en: Current values are replayed on an eligible host-capability change or render commit, with one active subscription per projected entry. Missing/null hosts, unmounting, detach and terminal disposal revoke subscriptions and invalidate old callbacks; remount replays current values without recreating upstream State. Terminal disposal restores the baseline attribute or CSS value and priority only while the target still equals the last value emitted by this Module; later consumer writes are preserved.
+      zh-CN: 有效 host capability 变化或 render commit 重放当前值，每个投影 entry 保持一份活动 subscription。host 缺失/null、unmounting、detach 与 terminal dispose 撤销 subscription 并使旧回调失效；remount 重放当前值而不重建上游 State。terminal dispose 仅在 target 仍等于本 Module 最后输出时恢复原 attribute 或 CSS value 及 priority；保留之后的 consumer 写入。
   - id: M-EXPOSE-STATE-WEB-0001-E
     text:
       en: The canonical target and optional distinct presentation mirrors receive equivalent emitted values; null and duplicate mirrors are ignored. Mirroring copies neither adapter identity nor State ownership and follows the split-surface contract.
@@ -51,11 +51,11 @@ relates:
 openQuestions:
   - id: M-EXPOSE-STATE-WEB-0001-Q-OWNERSHIP
     question:
-      en: How should collisions and removal/restoration of emitted DOM artifacts be governed?
-      zh-CN: 名称冲突及已输出 DOM artifact 的撤销/恢复应如何治理？
+      en: How should cross-owner collisions and non-terminal removal/restoration of emitted DOM artifacts be governed?
+      zh-CN: 跨 owner 名称冲突及非终止时已输出 DOM artifact 的撤销/恢复应如何治理？
     context:
-      en: Current cleanup revokes subscriptions and future writes; it does not erase old attributes or variables on former targets, detach, changed mappings or changed modes. Default normalization may collide or produce an empty suffix. Ownership arbitration with consumer attributes/styles, validation of custom maps and transactional projection failures require separate decisions.
-      zh-CN: 当前 cleanup 撤销 subscription 和后续写入，不会因 target 替换、detach、mapping/mode 变化抹除旧 attribute/variable。默认归一化可能冲突或产生空后缀。与 consumer attribute/style 的归属协调、自定义 map 校验及投影失败事务性需单独决定。
+      en: Non-terminal cleanup revokes subscriptions and future writes while retaining snapshots on former targets, detach, changed mappings or changed modes. Terminal disposal now conditionally restores this Module's owned artifacts, including original CSS priority; a consumer overwrite observed before a subsequent Module write becomes the new baseline. Equality-based restoration does not arbitrate indistinguishable same-value writes or cross-owner collisions. Default normalization may collide or produce an empty suffix. Cross-owner arbitration, custom-map validation and transactional projection failures remain open.
+      zh-CN: 非终止 cleanup 撤销 subscription 和后续写入，在 target 替换、detach、mapping/mode 变化时保留快照。terminal dispose 现会条件恢复本 Module 拥有的 artifact（含原 CSS priority）；后续 Module 写入前观察到的 consumer 覆盖成为新的 baseline。基于值相等的恢复无法仲裁不可区分的同值写入或跨 owner 冲突。默认归一化仍可能冲突或产生空后缀；跨 owner 仲裁、自定义 map 校验及投影失败事务性继续开放。
 sources:
   - path: packages/modules/expose-state-web/src/create.ts
   - path: packages/modules/expose-state-web/src/impl.ts

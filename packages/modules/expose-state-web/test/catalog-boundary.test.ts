@@ -97,7 +97,8 @@ it('T-EXPOSE-STATE-WEB-0001-CASE-LIFETIME: suspends on unmounting, replays on re
   impl.dispose();
   set(3);
   impl.afterRenderCommit();
-  expect(host.getAttribute('data-list-count')).toBe('2');
+  expect(host.getAttribute('data-list-count')).toBe(null);
+  expect(host.style.getPropertyValue('--pui-list-count')).toBe('');
   expect(listeners.size).toBe(0);
   expect(impl.port.getExposedStateMap().size).toBe(0);
 });
