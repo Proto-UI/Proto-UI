@@ -1330,6 +1330,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/form');
     registerExactPrototype('base-form-submit', module.formSubmit);
   },
+  'base-form-reset': async () => {
+    const module = await import('@proto.ui/prototypes-base/form');
+    registerExactPrototype('base-form-reset', module.formReset);
+  },
   'base-checkbox-group-root': async () => {
     const module = await import('@proto.ui/prototypes-base/checkbox-group');
     registerExactPrototype('base-checkbox-group-root', module.checkboxGroupRoot);
@@ -1366,6 +1370,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/slider');
     registerExactPrototype('base-slider-value', module.sliderValue);
   },
+  'base-slider-field-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-field-thumb', module.sliderFieldThumb);
+  },
   'base-number-field-root': async () => {
     const module = await import('@proto.ui/prototypes-base/number-field');
     registerExactPrototype('base-number-field-root', module.numberFieldRoot);
@@ -1386,6 +1394,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/number-field');
     registerExactPrototype('base-number-field-decrement', module.numberFieldDecrement);
   },
+  'base-number-field-control': async () => {
+    const module = await import('@proto.ui/prototypes-base/number-field');
+    registerExactPrototype('base-number-field-control', module.numberFieldControl);
+  },
   'base-input-otp-root': async () => {
     const module = await import('@proto.ui/prototypes-base/input-otp');
     registerExactPrototype('base-input-otp-root', module.inputOtpRoot);
@@ -1401,6 +1413,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'base-input-otp-separator': async () => {
     const module = await import('@proto.ui/prototypes-base/input-otp');
     registerExactPrototype('base-input-otp-separator', module.inputOtpSeparator);
+  },
+  'base-input-otp-control': async () => {
+    const module = await import('@proto.ui/prototypes-base/input-otp');
+    registerExactPrototype('base-input-otp-control', module.inputOtpControl);
   },
   'shadcn-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/progress');
@@ -1466,6 +1482,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/form');
     registerExactPrototype('shadcn-form-submit', module.formSubmit);
   },
+  'shadcn-form-reset': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/form');
+    registerExactPrototype('shadcn-form-reset', module.formReset);
+  },
   'shadcn-checkbox-group-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/checkbox-group');
     registerExactPrototype('shadcn-checkbox-group-root', module.checkboxGroupRoot);
@@ -1502,6 +1522,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/slider');
     registerExactPrototype('shadcn-slider-value', module.sliderValue);
   },
+  'shadcn-slider-field-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-field-thumb', module.sliderFieldThumb);
+  },
   'shadcn-number-field-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/number-field');
     registerExactPrototype('shadcn-number-field-root', module.numberFieldRoot);
@@ -1522,6 +1546,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/number-field');
     registerExactPrototype('shadcn-number-field-decrement', module.numberFieldDecrement);
   },
+  'shadcn-number-field-control': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/number-field');
+    registerExactPrototype('shadcn-number-field-control', module.numberFieldControl);
+  },
   'shadcn-input-otp-root': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/input-otp');
     registerExactPrototype('shadcn-input-otp-root', module.inputOtpRoot);
@@ -1537,6 +1565,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'shadcn-input-otp-separator': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/input-otp');
     registerExactPrototype('shadcn-input-otp-separator', module.inputOtpSeparator);
+  },
+  'shadcn-input-otp-control': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/input-otp');
+    registerExactPrototype('shadcn-input-otp-control', module.inputOtpControl);
   },
   'brutalist-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/progress');
@@ -1602,6 +1634,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/form');
     registerExactPrototype('brutalist-form-submit', module.formSubmit);
   },
+  'brutalist-form-reset': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/form');
+    registerExactPrototype('brutalist-form-reset', module.formReset);
+  },
   'brutalist-checkbox-group-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/checkbox-group');
     registerExactPrototype('brutalist-checkbox-group-root', module.checkboxGroupRoot);
@@ -1638,6 +1674,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/slider');
     registerExactPrototype('brutalist-slider-value', module.sliderValue);
   },
+  'brutalist-slider-field-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/slider');
+    registerExactPrototype('brutalist-slider-field-thumb', module.sliderFieldThumb);
+  },
   'brutalist-number-field-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/number-field');
     registerExactPrototype('brutalist-number-field-root', module.numberFieldRoot);
@@ -1658,6 +1698,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/number-field');
     registerExactPrototype('brutalist-number-field-decrement', module.numberFieldDecrement);
   },
+  'brutalist-number-field-control': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/number-field');
+    registerExactPrototype('brutalist-number-field-control', module.numberFieldControl);
+  },
   'brutalist-input-otp-root': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/input-otp');
     registerExactPrototype('brutalist-input-otp-root', module.inputOtpRoot);
@@ -1673,6 +1717,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'brutalist-input-otp-separator': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/input-otp');
     registerExactPrototype('brutalist-input-otp-separator', module.inputOtpSeparator);
+  },
+  'brutalist-input-otp-control': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/input-otp');
+    registerExactPrototype('brutalist-input-otp-control', module.inputOtpControl);
   },
   'bootstrap-2-3-2-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/progress');
@@ -1738,6 +1786,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/form');
     registerExactPrototype('bootstrap-2-3-2-form-submit', module.formSubmit);
   },
+  'bootstrap-2-3-2-form-reset': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/form');
+    registerExactPrototype('bootstrap-2-3-2-form-reset', module.formReset);
+  },
   'bootstrap-2-3-2-checkbox-group-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/checkbox-group');
     registerExactPrototype('bootstrap-2-3-2-checkbox-group-root', module.checkboxGroupRoot);
@@ -1774,6 +1826,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
     registerExactPrototype('bootstrap-2-3-2-slider-value', module.sliderValue);
   },
+  'bootstrap-2-3-2-slider-field-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-field-thumb', module.sliderFieldThumb);
+  },
   'bootstrap-2-3-2-number-field-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/number-field');
     registerExactPrototype('bootstrap-2-3-2-number-field-root', module.numberFieldRoot);
@@ -1794,6 +1850,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/number-field');
     registerExactPrototype('bootstrap-2-3-2-number-field-decrement', module.numberFieldDecrement);
   },
+  'bootstrap-2-3-2-number-field-control': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/number-field');
+    registerExactPrototype('bootstrap-2-3-2-number-field-control', module.numberFieldControl);
+  },
   'bootstrap-2-3-2-input-otp-root': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/input-otp');
     registerExactPrototype('bootstrap-2-3-2-input-otp-root', module.inputOtpRoot);
@@ -1809,6 +1869,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'bootstrap-2-3-2-input-otp-separator': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/input-otp');
     registerExactPrototype('bootstrap-2-3-2-input-otp-separator', module.inputOtpSeparator);
+  },
+  'bootstrap-2-3-2-input-otp-control': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/input-otp');
+    registerExactPrototype('bootstrap-2-3-2-input-otp-control', module.inputOtpControl);
   },
   'liquid-glass-progress-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/progress');
@@ -1874,6 +1938,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/form');
     registerExactPrototype('liquid-glass-form-submit', module.formSubmit);
   },
+  'liquid-glass-form-reset': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/form');
+    registerExactPrototype('liquid-glass-form-reset', module.formReset);
+  },
   'liquid-glass-checkbox-group-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/checkbox-group');
     registerExactPrototype('liquid-glass-checkbox-group-root', module.checkboxGroupRoot);
@@ -1910,6 +1978,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/slider');
     registerExactPrototype('liquid-glass-slider-value', module.sliderValue);
   },
+  'liquid-glass-slider-field-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-field-thumb', module.sliderFieldThumb);
+  },
   'liquid-glass-number-field-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/number-field');
     registerExactPrototype('liquid-glass-number-field-root', module.numberFieldRoot);
@@ -1930,6 +2002,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-liquid-glass/number-field');
     registerExactPrototype('liquid-glass-number-field-decrement', module.numberFieldDecrement);
   },
+  'liquid-glass-number-field-control': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/number-field');
+    registerExactPrototype('liquid-glass-number-field-control', module.numberFieldControl);
+  },
   'liquid-glass-input-otp-root': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/input-otp');
     registerExactPrototype('liquid-glass-input-otp-root', module.inputOtpRoot);
@@ -1945,6 +2021,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'liquid-glass-input-otp-separator': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/input-otp');
     registerExactPrototype('liquid-glass-input-otp-separator', module.inputOtpSeparator);
+  },
+  'liquid-glass-input-otp-control': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/input-otp');
+    registerExactPrototype('liquid-glass-input-otp-control', module.inputOtpControl);
   },
   'base-calendar-root': async () => {
     const module = await import('@proto.ui/prototypes-base/calendar');
