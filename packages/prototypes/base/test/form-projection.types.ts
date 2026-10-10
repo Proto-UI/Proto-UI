@@ -1,4 +1,4 @@
-/** Compile-only Base/family source-consumer parity and negative contract checks. */
+/** Compile-only real consumer capabilities plus Base/family parity and negative contracts. */
 import type { Prototype, ExposeOf } from '@proto.ui/core';
 import type { ProtoAdapterExposes } from '@proto.ui/adapter-base';
 type PropsOf<T> = T extends Prototype<infer P, any> ? P : never;
@@ -176,7 +176,24 @@ type f3fieldsetSurface = Assert<Equal<Surface<typeof f3fieldset>, Surface<typeof
 const f3fieldsetBad: PropsOf<typeof f3fieldset.fieldsetRoot> = { disabled: 'wrong' };
 void f3fieldsetBad;
 import * as f3form from '../../liquid-glass/src/form';
-type f3formSurface = Assert<Equal<Surface<typeof f3form>, Surface<typeof baseform>>>;
+type f3formSurface = Assert<
+  Equal<
+    Surface<Omit<typeof f3form, 'formSubmit' | 'formReset'>>,
+    Surface<Omit<typeof baseform, 'formSubmit' | 'formReset'>>
+  >
+>;
+type LiquidActionProps = { disabled?: boolean; material?: 'auto' | 'opaque' };
+type LiquidSubmitProps = Assert<Equal<PropsOf<typeof f3form.formSubmit>, LiquidActionProps>>;
+type LiquidResetProps = Assert<Equal<PropsOf<typeof f3form.formReset>, LiquidActionProps>>;
+type LiquidSubmitExposes = Assert<
+  Equal<ExposeOf<typeof f3form.formSubmit>, ExposeOf<typeof baseform.formSubmit>>
+>;
+type LiquidResetExposes = Assert<
+  Equal<ExposeOf<typeof f3form.formReset>, ExposeOf<typeof baseform.formReset>>
+>;
+// @ts-expect-error material preference is a finite family-owned domain
+const badMaterial: PropsOf<typeof f3form.formSubmit> = { material: 'transparent' };
+void badMaterial;
 // @ts-expect-error canonical Base prop domain is retained
 const f3formBad: PropsOf<typeof f3form.formRoot> = { disabled: 'wrong' };
 void f3formBad;
@@ -221,3 +238,158 @@ function f3Methods(
   return [result, value, values, invalid];
 }
 void f3Methods;
+
+function baseformSubmitAction(a: ProtoAdapterExposes<typeof baseform.formSubmit>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void baseformSubmitAction;
+
+function baseformResetAction(a: ProtoAdapterExposes<typeof baseform.formReset>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void baseformResetAction;
+
+function f0formSubmitAction(a: ProtoAdapterExposes<typeof f0form.formSubmit>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f0formSubmitAction;
+
+function f0formResetAction(a: ProtoAdapterExposes<typeof f0form.formReset>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f0formResetAction;
+
+function f1formSubmitAction(a: ProtoAdapterExposes<typeof f1form.formSubmit>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f1formSubmitAction;
+
+function f1formResetAction(a: ProtoAdapterExposes<typeof f1form.formReset>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f1formResetAction;
+
+function f2formSubmitAction(a: ProtoAdapterExposes<typeof f2form.formSubmit>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f2formSubmitAction;
+
+function f2formResetAction(a: ProtoAdapterExposes<typeof f2form.formReset>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f2formResetAction;
+
+function f3formSubmitAction(a: ProtoAdapterExposes<typeof f3form.formSubmit>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f3formSubmitAction;
+
+function f3formResetAction(a: ProtoAdapterExposes<typeof f3form.formReset>) {
+  const focus: boolean = a.focusVisible.get();
+  const hover: boolean = a.hovered.get();
+  const disabled: boolean = a.disabled.get();
+  const pressed: boolean = a.pressed.get();
+  a.focusSelf({ reason: 'programmatic' });
+  // @ts-expect-error action state is boolean, not string
+  const bad: string = a.focusVisible.get();
+  // @ts-expect-error action does not expose arbitrary methods
+  a.invented();
+  return [focus, hover, disabled, pressed, bad];
+}
+void f3formResetAction;
+
+// Hook consumers need typed borrowed handles as well as typed adapter exposes.
+function formActionHookConsumer() {
+  for (const hook of [baseform.asFormSubmit, baseform.asFormReset]) {
+    const result = hook();
+    const focused: boolean = result.stateHandles!.focusVisible.get();
+    const pressed: boolean = result.stateHandles!.pressed.get();
+    // @ts-expect-error borrowed state is boolean, not string
+    const bad: string = result.stateHandles!.disabled.get();
+    // @ts-expect-error no invented borrowed state
+    result.stateHandles!.invented.get();
+    void [focused, pressed, bad];
+  }
+}
+void formActionHookConsumer;

@@ -1,4 +1,10 @@
-import type { ExposeEvent, ExposeMethod, ExposeState, State } from '@proto.ui/core';
+import type {
+  ExposeEvent,
+  ExposeMethod,
+  ExposeState,
+  State,
+  FocusRequestOptions,
+} from '@proto.ui/core';
 import type { FieldRootProps, FieldRootExposes, FieldValue } from '../field/types';
 import type { FormFieldSnapshot } from './shared';
 export interface FormRootProps {
@@ -33,3 +39,20 @@ export type FormFieldExposes = FieldRootExposes & {
 export interface FormActionProps {
   disabled?: boolean;
 }
+
+export type FormActionStates = {
+  disabled: State<boolean>;
+  hovered: State<boolean>;
+  pressed: State<boolean>;
+  focused: State<boolean>;
+  focusVisible: State<boolean>;
+};
+export type FormActionExposes = {
+  disabled: ExposeState<boolean>;
+  hovered: ExposeState<boolean>;
+  pressed: ExposeState<boolean>;
+  focused: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
+  focusSelf: ExposeMethod<(options?: FocusRequestOptions) => void>;
+};
+export type FormActionAsHookContract = { state: FormActionStates };

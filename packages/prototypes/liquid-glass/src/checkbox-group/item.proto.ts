@@ -1,3 +1,4 @@
+import { checkboxGroupGlyph } from './indicator-paint';
 import type {
   CheckboxGroupItemProps,
   CheckboxGroupItemExposes,
@@ -14,6 +15,10 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       )
     );
     const state = inherited.stateHandles!;
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+    });
     def.rule({
       when: (w) => w.state(state.checked).eq(true),
       intent: (i) => i.feedback.style.use(tw('border-primary bg-primary text-primary-foreground')),
@@ -33,6 +38,7 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.feedback.material.use({ intent: 'liquid-glass' });
-    return inherited.render;
+    const glyph = checkboxGroupGlyph(def, state);
+    return (renderer) => [glyph(renderer), renderer.r.slot()];
   },
 });

@@ -16,4 +16,6 @@ Root gathers explicitly registered FormField atoms, validates their canonical Fi
 
 All four visual families inherit Base behavior. Parts: root, field, submit, reset.
 
+FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and focusVisible states plus focusSelf. Their single Form activation owner is independent of Button; styled projections use each family’s existing passive Button recipe for focus, hover, press and disabled feedback.
+
 Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
