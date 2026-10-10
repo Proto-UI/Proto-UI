@@ -138,24 +138,6 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
   host.addEventListener('monthChange', onDomProposal);
   host.addEventListener('valueChange', onDomProposal);
 
-  // Select's current public naming protocol derives names from content. This
-  // host-only demo labels its own two triggers, without changing Select source.
-  const nameTriggers = () => {
-    for (const [ref, name] of [
-      ['month-trigger', 'Month'],
-      ['year-trigger', 'Year'],
-    ]) {
-      const trigger = refs[ref];
-      if (trigger && trigger.getAttribute('aria-label') !== name)
-        trigger.setAttribute('aria-label', name);
-    }
-  };
-  nameTriggers();
-  const naming = new MutationObserver(nameTriggers);
-  for (const ref of ['month-trigger', 'year-trigger']) {
-    if (refs[ref]) naming.observe(refs[ref], { attributes: true, attributeFilter: ['aria-label'] });
-  }
-
   const refreshClock = () => {
     if (!active) return;
     clearTimeout(midnightTimer);
@@ -177,7 +159,6 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
     document.removeEventListener('visibilitychange', refreshClock);
     host.removeEventListener('monthChange', onDomProposal);
     host.removeEventListener('valueChange', onDomProposal);
-    naming.disconnect();
     binding?.dispose();
   };
 }
@@ -217,6 +198,14 @@ export function createCalendarDemo(family: CalendarFamily): DemoSpec {
           width: field === 'month' ? '60px' : '64px',
         },
         children: [
+          {
+            // Real authored content supplies the existing Select nameFromContent
+            // protocol. The demo never writes an Adapter-owned ARIA attribute.
+            kind: 'box',
+            tag: 'span',
+            className: 'sr-only',
+            children: [field === 'month' ? 'Month ' : 'Year '],
+          },
           {
             kind: 'proto',
             prototypeId: proto('select-value'),

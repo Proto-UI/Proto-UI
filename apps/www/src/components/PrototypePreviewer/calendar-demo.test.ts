@@ -122,13 +122,15 @@ describe('Real family Calendar caption demos', () => {
         expect(host.querySelector('[aria-label="Previous month"]')).not.toBeNull();
         expect(host.querySelector('[aria-label="Next month"]')).not.toBeNull();
         await vi.waitFor(() => {
-          expect(
-            host.querySelector('[data-demo-ref="month-trigger"]')?.getAttribute('aria-label')
-          ).toBe('Month');
-          expect(
-            host.querySelector('[data-demo-ref="year-trigger"]')?.getAttribute('aria-label')
-          ).toBe('Year');
+          expect(host.querySelector('[data-demo-ref="month-trigger"]')?.textContent).toMatch(
+            /^Month\s+\S/
+          );
+          expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
+            `Year ${today.slice(0, 4)}`
+          );
         });
+        // Content is a naming input, not proof of the real browser's computed
+        // combobox name. That accessibility-tree check remains a separate gate.
         expect(host.querySelectorAll('select')).toHaveLength(0);
 
         const nextMonth = today.slice(5, 7) === '03' ? '4' : '3';
@@ -172,6 +174,9 @@ describe('Real family Calendar caption demos', () => {
         await vi.waitFor(() => {
           expect(read('calendar', 'month')).toBe('1800-01');
           expect(read('year-select')).toBe('1800');
+          expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent?.trim()).toBe(
+            'Year 1800'
+          );
           expect(host.querySelector('[data-demo-ref="year-trigger"]')?.textContent).toContain(
             '1800'
           );
@@ -215,6 +220,8 @@ it('supplies local today at setup, refreshes at midnight, preserves controlled r
       }
     },
   };
+  const monthAttributes = vi.spyOn(refs['month-trigger'], 'setAttribute');
+  const yearAttributes = vi.spyOn(refs['year-trigger'], 'setAttribute');
   const dispose = setupCalendarCaptionDemo({ host, refs, api });
   cleanup.push(dispose);
   await Promise.resolve();
@@ -236,6 +243,8 @@ it('supplies local today at setup, refreshes at midnight, preserves controlled r
     disabled: false,
     onValueChange: expect.any(Function),
   });
+  expect(monthAttributes).not.toHaveBeenCalledWith('aria-label', expect.anything());
+  expect(yearAttributes).not.toHaveBeenCalledWith('aria-label', expect.anything());
   expect(vi.getTimerCount()).toBe(1);
   vi.advanceTimersByTime(1_000);
   expect(records.get('calendar')).toMatchObject({

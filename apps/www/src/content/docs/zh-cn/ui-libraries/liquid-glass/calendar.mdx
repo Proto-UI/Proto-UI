@@ -15,7 +15,7 @@ host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时�
 
 ## 显式月份/年份 caption 组合
 
-演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有 显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。现有 Select 协议从内容取名，因此演示在 host 层为两个 trigger 命名。
+演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。两个 Select trigger 的 slot 内包含真实的 Month/Year 语义文本，为既有 Select 协议提供命名内容，演示不写入 Adapter 拥有的 ARIA 属性。当前 Web 内容命名投影是否产生符合角色要求的可访问名称，仍需相关 owner 验证。
 
 Liquid Glass 是参考 Apple 材质原则的投影，不是一对一公开 Calendar 实现。光学材质能力和不透明 fallback 必须分别验证。
 
