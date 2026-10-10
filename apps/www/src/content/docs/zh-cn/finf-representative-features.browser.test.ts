@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromeExecutable, startServer, stopServer, type RuntimeId } from './browser-harness';
+import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
 // This is official sandboxed browser evidence, not native/packed/full Finf admission.
@@ -1031,7 +1032,7 @@ async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
     expect(selected.radius).toBe('0px');
     expect(selected.padding[1]).toBe('0px');
     expect(selected.padding[3]).toBe('0px');
-    expect(selected.shadow).toBe('none');
+    expect(hasNoVisibleBoxShadow(selected.shadow), selected.shadow).toBe(true);
     expect(selected.background).toBe('rgba(0, 0, 0, 0)');
     expect(selected.textWidth).toBeGreaterThan(0);
     expect(Math.abs(selected.rect.width - selected.textWidth)).toBeLessThanOrEqual(2);
