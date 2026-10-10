@@ -87,7 +87,7 @@ export type DrawerMaskHandles = {
 
 export type DrawerContentProps = TransitionProps & {
   side?: 'top' | 'right' | 'bottom' | 'left';
-  /** Fractions of the full panel; invalid entries are ignored. Defaults to [1]. */
+  /** Fractions of the available full scrollport extent; invalid entries are ignored. Defaults to [1]. */
   snapPoints?: number[];
   snapPoint?: number;
   defaultSnapPoint?: number;

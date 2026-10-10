@@ -95,21 +95,49 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   const syncSide = (run: any) => side.set(run.props.get().side ?? 'bottom', 'reason: drawer edge');
   def.lifecycle.onCreated(syncSide);
   def.props.watch(['side'], syncSide);
+  // Snap changes the scrollport's real extent instead of moving part of an
+  // intrinsically sized panel outside the viewport. The host owns available
+  // region geometry (including visual viewport/safe-area changes); these fixed
+  // recipes only combine that geometry with our dimensionless preview state.
   def.feedback.style.use(
-    tw(
-      'fixed overflow-y-auto max-w-[var(--proto-ui-available-region-width,100%)] max-h-[var(--proto-ui-available-region-height,100%)]'
-    )
+    tw('fixed overflow-y-auto overflow-x-hidden min-w-0 min-h-0 content-start wrap-anywhere')
   );
-  for (const [edge, classes] of Object.entries({
-    bottom: 'inset-x-0 bottom-0 w-full max-h-[85vh]',
-    top: 'inset-x-0 top-0 w-full max-h-[85vh]',
-    left: 'inset-y-0 left-0 w-80',
-    right: 'inset-y-0 right-0 w-80',
-  }))
-    def.rule({
-      when: (w) => w.state(side).eq(edge),
-      intent: (i) => i.feedback.style.use(tw(classes)),
-    });
+  def.rule({
+    when: (w) => w.state(side).eq('bottom'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw(
+          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_+_var(--proto-ui-available-region-height,100vh)/2_-_var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))] w-[var(--proto-ui-available-region-width,100vw)] h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
+        )
+      ),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('top'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw(
+          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[var(--proto-ui-available-region-width,100vw)] h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
+        )
+      ),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('left'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw(
+          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] h-[var(--proto-ui-available-region-height,100vh)]'
+        )
+      ),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('right'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw(
+          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_+_var(--proto-ui-available-region-width,100vw)/2_-_min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))] h-[var(--proto-ui-available-region-height,100vh)]'
+        )
+      ),
+  });
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
 

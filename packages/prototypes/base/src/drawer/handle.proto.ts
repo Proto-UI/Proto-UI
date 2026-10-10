@@ -128,16 +128,26 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
     when: (w) => w.state(focus.focusVisible).eq(true),
     intent: (i) => i.feedback.style.use(tw('ring-2')),
   });
-  for (const [edge, styles] of Object.entries({
-    bottom: 'top-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize',
-    top: 'bottom-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize',
-    left: 'right-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize',
-    right: 'left-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize',
-  }))
-    def.rule({
-      when: (w) => w.state(side).eq(edge),
-      intent: (i) => i.feedback.style.use(tw(styles)),
-    });
+  def.rule({
+    when: (w) => w.state(side).eq('bottom'),
+    intent: (i) =>
+      i.feedback.style.use(tw('top-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('top'),
+    intent: (i) =>
+      i.feedback.style.use(tw('bottom-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('left'),
+    intent: (i) =>
+      i.feedback.style.use(tw('right-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('right'),
+    intent: (i) =>
+      i.feedback.style.use(tw('left-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')),
+  });
 }
 export const asDrawerHandle = defineAsHook<
   DrawerHandleProps,

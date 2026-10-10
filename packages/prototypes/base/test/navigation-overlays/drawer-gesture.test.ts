@@ -1,16 +1,21 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as drawer from '../../src/drawer';
+import * as shadcn from '../../../shadcn/src/drawer';
+import * as brutalist from '../../../brutalist/src/drawer';
+import * as bootstrap from '../../../bootstrap-2-3-2/src/drawer';
+import * as liquid from '../../../liquid-glass/src/drawer';
+const families = [drawer, shadcn, brutalist, bootstrap, liquid];
 
 const owned = new Set<HTMLElement>();
 const lives = { created: 0, disposed: 0 };
-for (const proto of [
-  drawer.drawerRoot,
-  drawer.drawerContent,
-  drawer.drawerHandle,
-  drawer.drawerTitle,
-  drawer.drawerClose,
-]) {
+for (const proto of families.flatMap((family) => [
+  family.drawerRoot,
+  family.drawerContent,
+  family.drawerHandle,
+  family.drawerTitle,
+  family.drawerClose,
+])) {
   AdaptToWebComponent(proto, {
     diagnostics: {
       onLifecycleEvent(event) {
@@ -30,13 +35,14 @@ afterEach(async () => {
 });
 function fixture(
   contentProps: Record<string, unknown> = {},
-  rootProps: Record<string, unknown> = {}
+  rootProps: Record<string, unknown> = {},
+  family = drawer
 ) {
-  const root = document.createElement(drawer.drawerRoot.name) as any;
-  const content = document.createElement(drawer.drawerContent.name) as any;
-  const handle = document.createElement(drawer.drawerHandle.name) as any;
-  const close = document.createElement(drawer.drawerClose.name) as any;
-  const title = document.createElement(drawer.drawerTitle.name) as any;
+  const root = document.createElement(family.drawerRoot.name) as any;
+  const content = document.createElement(family.drawerContent.name) as any;
+  const handle = document.createElement(family.drawerHandle.name) as any;
+  const close = document.createElement(family.drawerClose.name) as any;
+  const title = document.createElement(family.drawerTitle.name) as any;
   for (const node of [root, content, handle, title, close]) owned.add(node);
   title.textContent = 'Drawer settings';
   close.textContent = 'Close';
@@ -71,6 +77,35 @@ function key(target: HTMLElement, key: string) {
   target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }));
 }
 
+describe.each(families.map((family) => [family.drawerContent.name, family] as const))(
+  '%s bounded scrollport',
+  (_name, family) => {
+    it.each(['bottom', 'top', 'left', 'right'] as const)(
+      'owns the actual %s extent and keeps Close operational at half snap',
+      async (side) => {
+        const p = fixture({ side, defaultSnapPoint: 0.5 }, {}, family);
+        await flush();
+        const styles = p.content.getAttribute('data-pui-style') ?? '';
+        expect(styles).toContain('overflow-y-auto');
+        expect(styles).toContain('content-start');
+        expect(styles).not.toContain('translate-y-[calc(var(--pui-offset-percentage)');
+        expect(styles).not.toContain('translate-x-[calc(var(--pui-offset-percentage)');
+        expect(styles).toContain(
+          side === 'bottom' || side === 'top'
+            ? 'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
+            : 'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]'
+        );
+        expect(styles).toContain('--proto-ui-available-region-center-x');
+        expect(styles).toContain('--proto-ui-available-region-center-y');
+        expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.5');
+        p.close.click();
+        await flush();
+        expect(p.root.getExposes().open.get()).toBe(false);
+      }
+    );
+  }
+);
+
 describe('Drawer Handle normalized input', () => {
   it('snaps after drag while keeping committed extent separate from preview', async () => {
     const p = fixture();
@@ -87,7 +122,7 @@ describe('Drawer Handle normalized input', () => {
     expect(p.content.getExposes().dragProgress.get()).toBeCloseTo(0.55);
     expect(p.content.style.getPropertyValue('--pui-offset-percentage')).toBe('45');
     expect(p.content.getAttribute('data-pui-style')).toContain(
-      'translate-y-[calc(var(--pui-offset-percentage)*1%)]'
+      'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
     );
     pointer(p.handle, 'pointerup', 100, 190);
     await flush();
@@ -120,6 +155,27 @@ describe('Drawer Handle normalized input', () => {
     expect(p.root.getExposes().open.get()).toBe(true);
     expect(p.content.getExposes().dragProgress.get()).toBe(1);
   });
+  it('restores a refused half-snap size after drag and dismissal requests', async () => {
+    const p = fixture({ snapPoint: 0.5 }, { open: true });
+    await flush();
+    const snaps: unknown[] = [],
+      opens: unknown[] = [];
+    p.content.addEventListener('snapPointChange', (event: CustomEvent) => snaps.push(event.detail));
+    p.root.addEventListener('openChange', (event: CustomEvent) => opens.push(event.detail));
+    pointer(p.handle, 'pointerdown');
+    pointer(p.handle, 'pointerup', 100, 0);
+    await flush();
+    expect(snaps).toEqual([{ snapPoint: 1, reason: 'drag.snap' }]);
+    expect(p.content.getExposes().snapPoint.get()).toBe(0.5);
+    expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.5');
+    pointer(p.handle, 'pointerdown');
+    pointer(p.handle, 'pointerup', 100, 400);
+    await flush();
+    expect(opens).toEqual([expect.objectContaining({ open: false, reason: 'drag.dismiss' })]);
+    expect(p.root.getExposes().open.get()).toBe(true);
+    expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.5');
+    expect(p.content.getExposes().dragging.get()).toBe(false);
+  });
   it.each([
     ['bottom', 100, 190, 'ArrowUp', 'ArrowDown'],
     ['top', 100, 10, 'ArrowDown', 'ArrowUp'],
@@ -142,6 +198,39 @@ describe('Drawer Handle normalized input', () => {
       await flush();
       expect(p.content.getExposes().snapPoint.get()).toBe(0.5);
       key(p.handle, collapse);
+      await flush();
+      expect(p.root.getExposes().open.get()).toBe(false);
+    }
+  );
+  it.each([
+    ['bottom', 100, 0],
+    ['top', 100, 200],
+    ['left', 200, 100],
+    ['right', 0, 100],
+  ] as const)(
+    'converts a half-sized %s contact against the full extent once',
+    async (side, x, y) => {
+      const p = fixture({ side, defaultSnapPoint: 0.5 });
+      await flush();
+      pointer(p.handle, 'pointerdown');
+      pointer(p.handle, 'pointermove', x, y);
+      await flush();
+      // 100px / the fixed 200px start geometry is a half-panel movement;
+      // from a .5 snap it contributes .25, not .5, of full extent.
+      expect(p.content.getExposes().dragProgress.get()).toBeCloseTo(0.75);
+      expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.75');
+      p.content.getBoundingClientRect = () =>
+        ({ left: 0, top: 0, width: 400, height: 400 }) as DOMRect;
+      pointer(p.handle, 'pointermove', x, y);
+      await flush();
+      expect(p.content.getExposes().dragProgress.get()).toBeCloseTo(0.75);
+      pointer(p.handle, 'pointerup', x, y);
+      await flush();
+      expect(p.content.getExposes().snapPoint.get()).toBe(1);
+      key(p.handle, 'Home');
+      await flush();
+      expect(p.content.getExposes().snapPoint.get()).toBe(0.5);
+      p.close.click();
       await flush();
       expect(p.root.getExposes().open.get()).toBe(false);
     }
@@ -197,23 +286,42 @@ import {
   renderProtoStyleTokenCss,
   renderProtoShadowStyleTokenCss,
 } from '../../../../cli/src/services/proto-style-css';
-it('collects and lowers fixed continuous translation recipes, rather than enumerating positions', async () => {
+it('collects and lowers fixed scrollport extent recipes instead of hiding translated controls', async () => {
   const tokens = await collectProtoStyleTokens(
     path.resolve(process.cwd(), 'packages/prototypes/base/src/drawer')
   );
   const recipes = [
-    'translate-x-[calc(var(--pui-offset-percentage)*1%)]',
-    'translate-x-[calc(var(--pui-offset-percentage)*-1%)]',
-    'translate-y-[calc(var(--pui-offset-percentage)*1%)]',
-    'translate-y-[calc(var(--pui-offset-percentage)*-1%)]',
+    'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]',
+    'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
+    'w-[var(--proto-ui-available-region-width,100vw)]',
+    'h-[var(--proto-ui-available-region-height,100vh)]',
+    'overflow-y-auto',
+    'overflow-x-hidden',
+    'content-start',
+    'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)]',
+    'top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)]',
+    'top-[calc(var(--proto-ui-available-region-center-y,50vh)_+_var(--proto-ui-available-region-height,100vh)/2_-_var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]',
+    'left-[calc(var(--proto-ui-available-region-center-x,50vw)_+_var(--proto-ui-available-region-width,100vw)/2_-_min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
+    'bottom-1',
+    'right-1',
   ];
   for (const recipe of recipes) expect(tokens).toContain(recipe);
-  for (const css of [renderProtoStyleTokenCss(recipes), renderProtoShadowStyleTokenCss(recipes)]) {
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
-    expect(css).toContain('--pui-translate-x: calc(var(--pui-offset-percentage)*1%);');
-    expect(css).toContain('--pui-translate-y: calc(var(--pui-offset-percentage)*-1%);');
+  expect(
+    tokens.some((token) => token.startsWith('translate-') && token.includes('offset-percentage'))
+  ).toBe(false);
+  for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
+    expect(css.match(/Unsupported Proto UI style tokens:[\s\S]*?\*\//)?.[0]).toBeUndefined();
+    expect(css).toContain(
+      'height: calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress));'
+    );
+    expect(css).toContain(
+      'width: calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress));'
+    );
+    expect(css).toContain('overflow-y: auto;');
+    expect(css).toContain('align-content: flex-start;');
   }
 });
+
 it('releases a detached contact and removes continuous state projection on disposal', async () => {
   const p = fixture();
   await flush();

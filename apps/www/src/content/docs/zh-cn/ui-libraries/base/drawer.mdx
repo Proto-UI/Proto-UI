@@ -18,6 +18,8 @@ Content.side 接受 top、right、bottom、left。面板受宿主可用区域约
 
 Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
 
+部分 snap 直接改变可滚动面板的实际尺寸，不把控件平移到视口外。上/下侧完整尺寸为可用宿主高度的 85%；左/右侧为至多 20rem，并受可用宽度限制。长内容在当前尺寸内滚动。拖动先按接触开始时的面板尺寸归一化，再转换成完整尺寸的比例。
+
 组成: Root, Trigger, Content, Title, Description, Close, Mask, Handle.
 
 当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。

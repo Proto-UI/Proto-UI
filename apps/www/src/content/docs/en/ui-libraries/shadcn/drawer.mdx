@@ -18,6 +18,8 @@ Content.side accepts top, right, bottom or left. The panel uses the available ho
 
 Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
 
+Partial snaps resize the real scrollable panel instead of translating controls outside the viewport. Top/bottom use up to 85% of the available host height; left/right use up to 20rem, bounded by the available width. Long content scrolls inside that current extent. A drag is normalized against its starting panel size and converted back to full-extent fractions.
+
 Parts: Root, Trigger, Content, Title, Description, Close, Mask, Handle.
 
 Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

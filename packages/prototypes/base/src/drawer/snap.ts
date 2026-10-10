@@ -1,10 +1,4 @@
-import {
-  tw,
-  type AxisInputSample,
-  type DefHandle,
-  type RunHandle,
-  type State,
-} from '@proto.ui/core';
+import { type AxisInputSample, type DefHandle, type RunHandle, type State } from '@proto.ui/core';
 import { DRAWER_CONTEXT, DRAWER_CONTENT_CONTEXT, requestDrawerOpen } from './shared';
 import type { DrawerContentProps, DrawerContentExposes } from './types';
 
@@ -55,23 +49,6 @@ export function setupDrawerSnap(
     snapPoint: 1,
     snapPoints: [1],
     dismissible: true,
-  });
-  def.feedback.style.use(tw('translate-x-0 translate-y-0'));
-  def.rule({
-    when: (w) => w.state(side).eq('bottom'),
-    intent: (i) => i.feedback.style.use(tw('translate-y-[calc(var(--pui-offset-percentage)*1%)]')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('top'),
-    intent: (i) => i.feedback.style.use(tw('translate-y-[calc(var(--pui-offset-percentage)*-1%)]')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('left'),
-    intent: (i) => i.feedback.style.use(tw('translate-x-[calc(var(--pui-offset-percentage)*-1%)]')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('right'),
-    intent: (i) => i.feedback.style.use(tw('translate-x-[calc(var(--pui-offset-percentage)*1%)]')),
   });
   let currentRun: RunHandle<DrawerContentProps> | null = null;
   let points = [1];
@@ -126,7 +103,10 @@ export function setupDrawerSnap(
     const lowerBound = run.props.get().dragDismissible === false ? points[0] : 0;
     const next = Math.max(
       lowerBound,
-      Math.min(points[points.length - 1], start + sample.totalDelta)
+      // AxisInput normalizes against the panel's size at contact start.
+      // Since that panel is already snapped, convert its delta back to a
+      // fraction of the full extent. Later preview resizing must not compound.
+      Math.min(points[points.length - 1], start + sample.totalDelta * start)
     );
     dragProgress.set(next, 'reason: drawer normalized drag preview');
     render(run);
