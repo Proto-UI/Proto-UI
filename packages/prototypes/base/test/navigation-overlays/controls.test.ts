@@ -183,3 +183,34 @@ it('toast viewport hotkey focuses the notification and pauses until focus leaves
   await vi.advanceTimersByTimeAsync(1001);
   expect(root.getExposes().open.get()).toBe(false);
 });
+it('toast discards transient hover when a closed view reopens with a fresh timeout', async () => {
+  vi.useFakeTimers();
+  const { root, close } = makeToast({ duration: 1000 });
+  await flush();
+  await vi.advanceTimersByTimeAsync(400);
+  root.dispatchEvent(new PointerEvent('pointerenter'));
+  await flush();
+  expect(root.getExposes().paused.get()).toBe(true);
+  close.click();
+  await flush();
+  root.getExposes().openToast();
+  await flush();
+  expect(root.getExposes().paused.get()).toBe(false);
+  await vi.advanceTimersByTimeAsync(1001);
+  expect(root.getExposes().open.get()).toBe(false);
+});
+it('toast retains an explicit owner pause across close and reopen', async () => {
+  vi.useFakeTimers();
+  const { root, close } = makeToast({ duration: 100, paused: true });
+  await flush();
+  close.click();
+  await flush();
+  root.getExposes().openToast();
+  await flush();
+  expect(root.getExposes().paused.get()).toBe(true);
+  await vi.advanceTimersByTimeAsync(500);
+  expect(root.getExposes().open.get()).toBe(true);
+  setElementProps(root, { duration: 100, paused: false });
+  await vi.advanceTimersByTimeAsync(101);
+  expect(root.getExposes().open.get()).toBe(false);
+});

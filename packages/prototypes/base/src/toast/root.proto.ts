@@ -90,6 +90,9 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       }
     } else {
       cancel();
+      hovered = false;
+      focusedItems.clear();
+      syncPaused();
       transition.controls.leave();
     }
   };
@@ -136,6 +139,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     currentRun = run;
     mounted = true;
     relations(run);
+    syncPaused();
     schedule();
   });
   def.lifecycle.onUnmounted(() => {
@@ -157,12 +161,13 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     syncPaused();
   });
   def.expose.method('__setFocused', (id, focused) => {
-    if (!mounted) return;
+    if (!mounted || !open.get()) return;
     if (focused) focusedItems.add(id);
     else focusedItems.delete(id);
     syncPaused();
   });
   def.event.on('pointer.enter', () => {
+    if (!open.get()) return;
     hovered = true;
     syncPaused();
   });

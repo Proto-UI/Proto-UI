@@ -270,10 +270,8 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     requestPopoverOpen(run, false, 'outside.press', returnFocusReason);
   });
 
-  focusScope.hasFocused.watch((run, event) => {
-    if (event.type !== 'next' || event.next || !open.get() || !mountedRun) return;
-    requestPopoverOpen(run, false, 'focus.outside', 'keyboard');
-  });
+  // hasFocused is scope history, not current descendant focus. Outside-focus
+  // dismissal requires the shared Overlay/Boundary focus observation capability.
 
   def.rule({
     when: (w) => w.state(transition.isPresent).eq(false),
