@@ -1,0 +1,21 @@
+---
+title: 'Toast'
+description: '可暂停、关闭并发出明确操作意图的限时实时通知。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+可暂停、关闭并发出明确操作意图的限时实时通知。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toast"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 默认显示 5000ms，duration=0 持续显示。悬停以及 Toast Action/Close 焦点会暂停剩余时长。受控 open 只发出一次超时关闭请求，等待调用方更新。Close、有焦点时的 Escape、Action 请求关闭；实际副作用归应用处理。Viewport 提供 F8 聚焦快捷键；不包含全局队列或系统通知传输。
+
+组成: Root, Viewport, Title, Description, Action, Close.
+
+草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。

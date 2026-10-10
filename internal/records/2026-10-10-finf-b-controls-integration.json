@@ -1,0 +1,414 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "toggle-group",
+      "prototypeExports": [
+        {
+          "export": "toggleGroupRoot",
+          "name": "base-toggle-group-root"
+        },
+        {
+          "export": "toggleGroupItem",
+          "name": "base-toggle-group-item"
+        }
+      ],
+      "demoId": "demo-base-toggle-group",
+      "demoPath": "apps/www/src/content/docs/demo-base-toggle-group.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/toggle-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/toggle-group.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "toggle-group",
+      "prototypeExports": [
+        {
+          "export": "toggleGroupRoot",
+          "name": "shadcn-toggle-group-root"
+        },
+        {
+          "export": "toggleGroupItem",
+          "name": "shadcn-toggle-group-item"
+        }
+      ],
+      "demoId": "demo-shadcn-toggle-group",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-toggle-group.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/toggle-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toggle-group.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "toggle-group",
+      "prototypeExports": [
+        {
+          "export": "toggleGroupRoot",
+          "name": "brutalist-toggle-group-root"
+        },
+        {
+          "export": "toggleGroupItem",
+          "name": "brutalist-toggle-group-item"
+        }
+      ],
+      "demoId": "demo-brutalist-toggle-group",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-toggle-group.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/toggle-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/toggle-group.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "toggle-group",
+      "prototypeExports": [
+        {
+          "export": "toggleGroupRoot",
+          "name": "bootstrap-2-3-2-toggle-group-root"
+        },
+        {
+          "export": "toggleGroupItem",
+          "name": "bootstrap-2-3-2-toggle-group-item"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-toggle-group",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-toggle-group.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/toggle-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/toggle-group.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "toggle-group",
+      "prototypeExports": [
+        {
+          "export": "toggleGroupRoot",
+          "name": "liquid-glass-toggle-group-root"
+        },
+        {
+          "export": "toggleGroupItem",
+          "name": "liquid-glass-toggle-group-item"
+        }
+      ],
+      "demoId": "demo-liquid-glass-toggle-group",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-toggle-group.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/toggle-group.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/toggle-group.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "toolbar",
+      "prototypeExports": [
+        {
+          "export": "toolbarRoot",
+          "name": "base-toolbar-root"
+        },
+        {
+          "export": "toolbarButton",
+          "name": "base-toolbar-button"
+        },
+        {
+          "export": "toolbarSeparator",
+          "name": "base-toolbar-separator"
+        }
+      ],
+      "demoId": "demo-base-toolbar",
+      "demoPath": "apps/www/src/content/docs/demo-base-toolbar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/toolbar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/toolbar.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "toolbar",
+      "prototypeExports": [
+        {
+          "export": "toolbarRoot",
+          "name": "shadcn-toolbar-root"
+        },
+        {
+          "export": "toolbarButton",
+          "name": "shadcn-toolbar-button"
+        },
+        {
+          "export": "toolbarSeparator",
+          "name": "shadcn-toolbar-separator"
+        }
+      ],
+      "demoId": "demo-shadcn-toolbar",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-toolbar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/toolbar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toolbar.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "toolbar",
+      "prototypeExports": [
+        {
+          "export": "toolbarRoot",
+          "name": "brutalist-toolbar-root"
+        },
+        {
+          "export": "toolbarButton",
+          "name": "brutalist-toolbar-button"
+        },
+        {
+          "export": "toolbarSeparator",
+          "name": "brutalist-toolbar-separator"
+        }
+      ],
+      "demoId": "demo-brutalist-toolbar",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-toolbar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/toolbar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/toolbar.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "toolbar",
+      "prototypeExports": [
+        {
+          "export": "toolbarRoot",
+          "name": "bootstrap-2-3-2-toolbar-root"
+        },
+        {
+          "export": "toolbarButton",
+          "name": "bootstrap-2-3-2-toolbar-button"
+        },
+        {
+          "export": "toolbarSeparator",
+          "name": "bootstrap-2-3-2-toolbar-separator"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-toolbar",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-toolbar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/toolbar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/toolbar.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "toolbar",
+      "prototypeExports": [
+        {
+          "export": "toolbarRoot",
+          "name": "liquid-glass-toolbar-root"
+        },
+        {
+          "export": "toolbarButton",
+          "name": "liquid-glass-toolbar-button"
+        },
+        {
+          "export": "toolbarSeparator",
+          "name": "liquid-glass-toolbar-separator"
+        }
+      ],
+      "demoId": "demo-liquid-glass-toolbar",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-toolbar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/toolbar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/toolbar.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "toast",
+      "prototypeExports": [
+        {
+          "export": "toastRoot",
+          "name": "base-toast-root"
+        },
+        {
+          "export": "toastViewport",
+          "name": "base-toast-viewport"
+        },
+        {
+          "export": "toastTitle",
+          "name": "base-toast-title"
+        },
+        {
+          "export": "toastDescription",
+          "name": "base-toast-description"
+        },
+        {
+          "export": "toastAction",
+          "name": "base-toast-action"
+        },
+        {
+          "export": "toastClose",
+          "name": "base-toast-close"
+        }
+      ],
+      "demoId": "demo-base-toast",
+      "demoPath": "apps/www/src/content/docs/demo-base-toast.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/toast.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/toast.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "toast",
+      "prototypeExports": [
+        {
+          "export": "toastRoot",
+          "name": "shadcn-toast-root"
+        },
+        {
+          "export": "toastViewport",
+          "name": "shadcn-toast-viewport"
+        },
+        {
+          "export": "toastTitle",
+          "name": "shadcn-toast-title"
+        },
+        {
+          "export": "toastDescription",
+          "name": "shadcn-toast-description"
+        },
+        {
+          "export": "toastAction",
+          "name": "shadcn-toast-action"
+        },
+        {
+          "export": "toastClose",
+          "name": "shadcn-toast-close"
+        }
+      ],
+      "demoId": "demo-shadcn-toast",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-toast.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/toast.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/toast.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "toast",
+      "prototypeExports": [
+        {
+          "export": "toastRoot",
+          "name": "brutalist-toast-root"
+        },
+        {
+          "export": "toastViewport",
+          "name": "brutalist-toast-viewport"
+        },
+        {
+          "export": "toastTitle",
+          "name": "brutalist-toast-title"
+        },
+        {
+          "export": "toastDescription",
+          "name": "brutalist-toast-description"
+        },
+        {
+          "export": "toastAction",
+          "name": "brutalist-toast-action"
+        },
+        {
+          "export": "toastClose",
+          "name": "brutalist-toast-close"
+        }
+      ],
+      "demoId": "demo-brutalist-toast",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-toast.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/toast.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/toast.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "toast",
+      "prototypeExports": [
+        {
+          "export": "toastRoot",
+          "name": "bootstrap-2-3-2-toast-root"
+        },
+        {
+          "export": "toastViewport",
+          "name": "bootstrap-2-3-2-toast-viewport"
+        },
+        {
+          "export": "toastTitle",
+          "name": "bootstrap-2-3-2-toast-title"
+        },
+        {
+          "export": "toastDescription",
+          "name": "bootstrap-2-3-2-toast-description"
+        },
+        {
+          "export": "toastAction",
+          "name": "bootstrap-2-3-2-toast-action"
+        },
+        {
+          "export": "toastClose",
+          "name": "bootstrap-2-3-2-toast-close"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-toast",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-toast.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/toast.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/toast.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "toast",
+      "prototypeExports": [
+        {
+          "export": "toastRoot",
+          "name": "liquid-glass-toast-root"
+        },
+        {
+          "export": "toastViewport",
+          "name": "liquid-glass-toast-viewport"
+        },
+        {
+          "export": "toastTitle",
+          "name": "liquid-glass-toast-title"
+        },
+        {
+          "export": "toastDescription",
+          "name": "liquid-glass-toast-description"
+        },
+        {
+          "export": "toastAction",
+          "name": "liquid-glass-toast-action"
+        },
+        {
+          "export": "toastClose",
+          "name": "liquid-glass-toast-close"
+        }
+      ],
+      "demoId": "demo-liquid-glass-toast",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-toast.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/toast.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/toast.mdx"
+      ]
+    }
+  ],
+  "tests": ["packages/prototypes/base/test/navigation-overlays/controls.test.ts"],
+  "remaining": [
+    "shared source/dist exports, registry and navigation",
+    "catalog contracts/lifecycle admission",
+    "real-input visual and accessibility evidence",
+    "native/GPUI/compiler and packed consumer acceptance",
+    "full exact-head CI and independent review"
+  ]
+}
