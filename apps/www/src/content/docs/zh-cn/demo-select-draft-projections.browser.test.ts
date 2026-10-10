@@ -108,15 +108,84 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             const trigger = demo.locator('[data-demo-ref="uncontrolledTrigger"]');
             expect(await trigger.getAttribute('aria-expanded')).toBe('false');
             expect((await trigger.textContent())?.trim()).toBe('Alpha');
+            // Runtime chrome is the active family's real Tabs recipe, separate
+            // from the demonstrated Select and its popup below.
+            const runtimeRoot = previewer.locator(
+              `[data-projection-scope][data-projection-state="ready"] [data-projection-prototype="${family}-tabs-root"]`
+            );
+            expect(await runtimeRoot.count()).toBe(1);
             const toolbar = previewer.locator('[data-projection-control="runtime"]');
+            expect(await toolbar.count()).toBe(1);
             expect(
-              await toolbar
-                .locator(`[data-projection-prototype="${family}-select-trigger"]`)
+              await runtimeRoot
+                .locator('[data-projection-control="runtime"][data-runtime-tabs]')
                 .count()
             ).toBe(1);
             expect(
-              await toolbar.locator(`[data-projection-prototype="${family}-text-root"]`).count()
+              await toolbar.getByRole('tablist', { name: 'Runtime', exact: true }).count()
             ).toBe(1);
+            expect(
+              await toolbar.locator(`[data-projection-prototype="${family}-tabs-list"]`).count()
+            ).toBe(1);
+            expect(await toolbar.getByRole('tab').count()).toBe(RUNTIMES.length);
+            expect(await toolbar.locator('[role="tab"][aria-selected="true"]').count()).toBe(1);
+            const selected = runtimeSelectTrigger(previewer);
+            expect(await selected.getAttribute('data-projection-prototype')).toBe(
+              `${family}-tabs-trigger`
+            );
+            expect(await selected.getAttribute('data-projection-runtime')).toBe(runtime);
+            expect((await selected.textContent())?.trim()).toBe(
+              { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' }[runtime]
+            );
+            const panelId = await selected.getAttribute('aria-controls');
+            if (!panelId) throw new Error('Runtime Tab has no stable Content relationship.');
+            const panel = runtimeRoot.locator(`[id=${JSON.stringify(panelId)}]`);
+            expect(await panel.count()).toBe(1);
+            expect(await panel.getAttribute('role')).toBe('tabpanel');
+            expect(await panel.getAttribute('data-projection-prototype')).toBe(
+              `${family}-tabs-content`
+            );
+            expect(await panel.getAttribute('aria-labelledby')).toBe(
+              await selected.getAttribute('id')
+            );
+            // Linked keepMounted panels can still be inactive or locked.
+            expect(await panel.isVisible()).toBe(true);
+            expect(
+              await panel.evaluate((element) => {
+                if (!element.isConnected) return false;
+                for (
+                  let node: HTMLElement | null = element as HTMLElement;
+                  node;
+                  node = node.parentElement
+                ) {
+                  if (
+                    node.inert ||
+                    node.matches('[hidden], [inert], [aria-hidden="true"], [aria-busy="true"]')
+                  )
+                    return false;
+                  const style = getComputedStyle(node);
+                  if (
+                    style.display === 'none' ||
+                    style.visibility === 'hidden' ||
+                    style.visibility === 'collapse'
+                  )
+                    return false;
+                }
+                return true;
+              })
+            ).toBe(true);
+            expect(await previewer.locator('.pui-runtime-preview-surface').count()).toBe(1);
+            expect(await panel.locator('.pui-runtime-preview-surface').count()).toBe(1);
+            expect(await panel.locator('[data-projection-content]').count()).toBe(1);
+            expect(
+              await previewer.evaluate((root) =>
+                (
+                  root as HTMLElement & {
+                    __previewer__?: { getCurrentRuntime?: () => string | null };
+                  }
+                ).__previewer__?.getCurrentRuntime?.()
+              )
+            ).toBe(runtime);
             await trigger.focus();
             await page.keyboard.press('ArrowDown');
             await popup(page, trigger);

@@ -37,6 +37,58 @@ afterEach(async () => {
   localStorage.clear();
 });
 const runtimes = ['wc', 'react', 'vue', 'vue2'] as const;
+const runtimeLabels = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
+type Runtime = (typeof runtimes)[number];
+type Previewer = HTMLElement & {
+  __previewer__?: { getCurrentRuntime?: () => string | null };
+};
+
+function expectRuntimeToolbar(root: Previewer, family: string, runtime: Runtime) {
+  const roots = root.querySelectorAll<HTMLElement>(
+    `[data-projection-scope][data-projection-state="ready"] [data-projection-prototype="${family}-tabs-root"]`
+  );
+  expect(roots).toHaveLength(1);
+  const toolbar = root.querySelectorAll<HTMLElement>('[data-projection-control="runtime"]');
+  expect(toolbar).toHaveLength(1);
+  expect(
+    roots[0]!.querySelectorAll('[data-projection-control="runtime"][data-runtime-tabs]')
+  ).toHaveLength(1);
+  expect(toolbar[0]!.querySelectorAll('[role="tablist"][aria-label="Runtime"]')).toHaveLength(1);
+  expect(
+    toolbar[0]!.querySelectorAll(`[data-projection-prototype="${family}-tabs-list"]`)
+  ).toHaveLength(1);
+  const tabs = toolbar[0]!.querySelectorAll<HTMLElement>('[role="tab"]');
+  expect(tabs).toHaveLength(runtimes.length);
+  const selected = toolbar[0]!.querySelectorAll<HTMLElement>('[role="tab"][aria-selected="true"]');
+  expect(selected).toHaveLength(1);
+  expect(selected[0]!.dataset.projectionPrototype).toBe(`${family}-tabs-trigger`);
+  expect(selected[0]!.dataset.projectionRuntime).toBe(runtime);
+  expect(selected[0]!.textContent?.trim()).toBe(runtimeLabels[runtime]);
+  const panelId = selected[0]!.getAttribute('aria-controls');
+  expect(panelId).toBeTruthy();
+  const panels = roots[0]!.querySelectorAll<HTMLElement>(`[id=${JSON.stringify(panelId)}]`);
+  expect(panels).toHaveLength(1);
+  const panel = panels[0]!;
+  expect(panel.getAttribute('role')).toBe('tabpanel');
+  expect(panel.dataset.projectionPrototype).toBe(`${family}-tabs-content`);
+  expect(panel.getAttribute('aria-labelledby')).toBe(selected[0]!.id);
+  // P-BASE-TABS-CONTENT: a linked retained panel is not necessarily current.
+  // Emulated DOM proves eligibility only; native coverage checks visibility too.
+  expect(panel.isConnected).toBe(true);
+  for (let node: HTMLElement | null = panel; node; node = node.parentElement) {
+    expect(node.matches('[hidden], [inert], [aria-hidden="true"], [aria-busy="true"]')).toBe(false);
+    expect(Boolean(node.inert)).toBe(false);
+    const style = getComputedStyle(node);
+    expect(style.display).not.toBe('none');
+    expect(['hidden', 'collapse']).not.toContain(style.visibility);
+  }
+  expect(root.querySelectorAll('.pui-runtime-preview-surface')).toHaveLength(1);
+  expect(panel.querySelectorAll('.pui-runtime-preview-surface')).toHaveLength(1);
+  expect(panel.querySelectorAll('[data-projection-content]')).toHaveLength(1);
+  expect(root.__previewer__?.getCurrentRuntime?.()).toBe(runtime);
+  return { selected: selected[0]!, tabs, panel };
+}
+
 for (const [family, demo] of [
   ['bootstrap-2-3-2', bootstrap],
   ['liquid-glass', glass],
@@ -133,12 +185,73 @@ for (const [family, demo] of [
         query('accept').click();
         await vi.waitFor(() => expect(controlled.textContent).toContain('Beta'));
         expect(query('rtlTrigger').textContent).toContain('VeryLongUnbrokenOptionLabels');
-        const toolbar = root.querySelector<HTMLElement>('[data-projection-control="runtime"]')!;
-        expect(toolbar).not.toBeNull();
-        const controlIds = Array.from(toolbar.querySelectorAll('[data-projection-prototype]')).map(
-          (node) => node.getAttribute('data-projection-prototype')
+        const initial = expectRuntimeToolbar(root, family, runtime);
+        const next = runtime === 'react' ? 'vue' : 'react';
+        const nextTab = [...initial.tabs].find((tab) => tab.textContent === runtimeLabels[next])!;
+        nextTab.click();
+        await vi.waitFor(() => {
+          expect(root.dataset.projectionState).toBe('ready');
+          expect(root.dataset.projectionRuntime).toBe(next);
+        });
+        const current = expectRuntimeToolbar(root, family, next);
+
+        // These are deliberate negative mutations of the real adapter DOM/API,
+        // restored synchronously; none supplies the positive fixture's identity.
+        const rejectAttribute = (node: HTMLElement, name: string, value: string) => {
+          const previous = node.getAttribute(name);
+          try {
+            node.setAttribute(name, value);
+            expect(() => expectRuntimeToolbar(root, family, next)).toThrow();
+          } finally {
+            if (previous === null) node.removeAttribute(name);
+            else node.setAttribute(name, previous);
+          }
+        };
+        // A matching relationship is insufficient when the panel or an ancestor
+        // is hidden/locked. These are DOM/CSS eligibility controls, not pixel proof.
+        for (const node of [current.panel, current.panel.parentElement!]) {
+          rejectAttribute(node, 'aria-hidden', 'true');
+          rejectAttribute(node, 'hidden', '');
+          rejectAttribute(node, 'inert', '');
+          rejectAttribute(node, 'aria-busy', 'true');
+          rejectAttribute(node, 'style', 'display: none');
+          rejectAttribute(node, 'style', 'visibility: hidden');
+        }
+        rejectAttribute(current.selected, 'aria-selected', 'false');
+        rejectAttribute(
+          [...current.tabs].find((tab) => tab !== current.selected)!,
+          'aria-selected',
+          'true'
         );
-        expect(controlIds.some((id) => id?.startsWith(`${family}-select-`))).toBe(true);
+        rejectAttribute(current.selected, 'data-projection-prototype', 'unrelated-tabs-trigger');
+        rejectAttribute(current.selected, 'data-projection-runtime', 'uncommitted');
+        rejectAttribute(current.selected, 'aria-controls', 'missing-runtime-panel');
+        const surface = current.panel.querySelector<HTMLElement>('.pui-runtime-preview-surface')!;
+        rejectAttribute(surface, 'class', 'not-the-runtime-surface');
+        const duplicateSurface = document.createElement('div');
+        duplicateSurface.className = 'pui-runtime-preview-surface';
+        current.panel.append(duplicateSurface);
+        try {
+          expect(() => expectRuntimeToolbar(root, family, next)).toThrow();
+        } finally {
+          duplicateSurface.remove();
+        }
+        const previewer = root as Previewer;
+        const controller = previewer.__previewer__;
+        try {
+          for (const invalid of [
+            undefined,
+            {},
+            { getCurrentRuntime: () => null },
+            { getCurrentRuntime: () => runtime },
+          ]) {
+            previewer.__previewer__ = invalid;
+            expect(() => expectRuntimeToolbar(root, family, next)).toThrow();
+          }
+        } finally {
+          previewer.__previewer__ = controller;
+        }
+        expectRuntimeToolbar(root, family, next);
       }, 20_000);
     }
   });
