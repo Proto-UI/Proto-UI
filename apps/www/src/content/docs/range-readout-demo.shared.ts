@@ -1,6 +1,9 @@
 import type { DemoSpec, DemoNode } from '@/components/PrototypePreviewer/demo-types';
+
+type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
+
 export function createRangeReadoutDemo(family: string, component: 'progress' | 'meter'): DemoSpec {
-  const atom = (part: string, children: DemoNode['children'] = []): DemoNode => ({
+  const atom = (part: string, children: DemoProtoNode['children'] = []): DemoProtoNode => ({
     kind: 'proto',
     prototypeId: `${family}-${component}-${part}`,
     children,

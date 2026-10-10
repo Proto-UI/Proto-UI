@@ -1,4 +1,7 @@
 import type { DemoSpec, DemoNode } from '@/components/PrototypePreviewer/demo-types';
+
+type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
+
 export function createNumericInputDemo(
   family: string,
   component: 'slider' | 'number-field' | 'input-otp'
@@ -6,8 +9,8 @@ export function createNumericInputDemo(
   const atom = (
     part: string,
     props: Record<string, unknown> = {},
-    children: DemoNode['children'] = []
-  ): DemoNode => ({
+    children: DemoProtoNode['children'] = []
+  ): DemoProtoNode => ({
     kind: 'proto',
     prototypeId: `${family}-${component}-${part}`,
     props,

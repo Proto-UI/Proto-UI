@@ -1,4 +1,7 @@
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+
+type DemoProtoNode = Extract<DemoNode, { kind: 'proto' }>;
+
 export function createFormPrimitivesDemo(
   family: string,
   component: 'fieldset' | 'form' | 'checkbox-group'
@@ -7,9 +10,9 @@ export function createFormPrimitivesDemo(
     name: string,
     part: string,
     props: Record<string, unknown> = {},
-    children: DemoNode['children'] = [],
+    children: DemoProtoNode['children'] = [],
     ref?: string
-  ): DemoNode => ({
+  ): DemoProtoNode => ({
     kind: 'proto',
     prototypeId: `${family}-${name}-${part}`,
     props,
