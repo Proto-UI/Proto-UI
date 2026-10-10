@@ -175,6 +175,7 @@ export async function synchronizePreviews({
   const context = { repo: { owner: 'Proto-UI', repo: 'Proto-UI' } };
   let staging;
   let expiredManualAttempts = new Set();
+  let withheldManualAttempts = new Map();
   try {
     let previous;
     try {
@@ -194,6 +195,12 @@ export async function synchronizePreviews({
     expiredManualAttempts = new Set(
       (previous.expiredManualAttempts || []).filter((key) => manualKeys.has(key))
     );
+    withheldManualAttempts = new Map(
+      (previous.withheldManualAttempts || []).filter(
+        ([key, expires]) =>
+          manualKeys.has(key) && expires > startedAt && expires <= startedAt + 300_000
+      )
+    );
     const previews = prs.map((pr) => ({
       pr: String(pr.number),
       head_sha: pr.head.sha,
@@ -206,6 +213,7 @@ export async function synchronizePreviews({
       checkedAt: new Date(startedAt).toISOString(),
       previews,
       expiredManualAttempts: [...expiredManualAttempts],
+      withheldManualAttempts: [...withheldManualAttempts],
     };
     const heads = new Map(prs.map((pr) => [String(pr.number), pr.head.sha]));
     const retainedDuringScan = (previous.previews || []).filter((row) => {
@@ -230,6 +238,7 @@ export async function synchronizePreviews({
       checkedAt: previous.checkedAt || manifest.checkedAt,
       previews: retainedDuringScan,
       expiredManualAttempts: [...expiredManualAttempts],
+      withheldManualAttempts: [...withheldManualAttempts],
     });
     await mkdir(join(root, 'sites'), { recursive: true, mode: 0o755 });
     staging = join(root, '.staging');
@@ -247,9 +256,16 @@ export async function synchronizePreviews({
       if (now() - startedAt > 240_000)
         throw new Error('Publication scan exceeded its freshness window');
       const key = `${run.id}:${run.run_attempt}`;
-      if (expiredManualAttempts.has(key)) continue;
+      if (expiredManualAttempts.has(key) || withheldManualAttempts.has(key)) continue;
       try {
         const artifacts = await listPreviewBuildArtifacts(github, context.repo, run);
+        if (artifacts.length === 0) {
+          // Complete absence can be deletion or transient API visibility. It
+          // never admits Ready and is retried within five minutes; a fresh
+          // attempt bypasses this bounded negative discovery entry immediately.
+          withheldManualAttempts.set(key, startedAt + 300_000);
+          continue;
+        }
         if (artifacts.length > 0 && artifacts.every((artifact) => artifact.expired === true)) {
           // Expiration is terminal for an immutable completed attempt. Cache
           // only this negative discovery fact, never an authorization. A fresh
@@ -265,7 +281,7 @@ export async function synchronizePreviews({
         });
         if (!manual.has(resolved.binding.pr)) manual.set(resolved.binding.pr, resolved);
       } catch {
-        /* Not an admissible current-head producer; never publish it. */
+        withheldManualAttempts.set(key, startedAt + 300_000);
       }
     }
     for (let index = 0; index < prs.length; index++) {
@@ -374,6 +390,7 @@ export async function synchronizePreviews({
     );
     manifest.previews = previews.filter((row) => live.get(row.pr) === row.head_sha);
     manifest.expiredManualAttempts = [...expiredManualAttempts];
+    manifest.withheldManualAttempts = [...withheldManualAttempts];
     await saveManifest(root, manifest);
     const retained = new Set(
       manifest.previews.filter((row) => row.status === 'ready').map((row) => row.generation)
@@ -390,6 +407,7 @@ export async function synchronizePreviews({
       checkedAt: new Date(startedAt).toISOString(),
       previews: [],
       expiredManualAttempts: [...expiredManualAttempts],
+      withheldManualAttempts: [...withheldManualAttempts],
       error: 'Synchronization failed',
     }).catch(() => {});
     throw error;

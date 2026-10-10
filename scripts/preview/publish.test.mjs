@@ -38,9 +38,20 @@ async function fixture(t) {
     head_sha: pr.head.sha,
     pull_requests: [],
   };
-  const state = { open: true, fail: false, runs: [run], downloads: 0, onDownload: null };
+  const state = {
+    open: true,
+    fail: false,
+    runs: [run],
+    downloads: 0,
+    onDownload: null,
+    clock: Date.now(),
+    apiReads: 0,
+    apiBudget: Infinity,
+    missingArtifacts: new Set(),
+  };
   const response = (value) => {
     if (state.fail) throw new Error('GitHub unavailable');
+    if (++state.apiReads > state.apiBudget) throw new Error('GitHub read quota exhausted');
     return { data: structuredClone(value) };
   };
   const github = {
@@ -64,6 +75,8 @@ async function fixture(t) {
           return response({ total_count: values.length, workflow_runs: values });
         },
         listWorkflowRunArtifacts: async ({ run_id }) => {
+          if (state.missingArtifacts.has(run_id))
+            return response({ total_count: 0, artifacts: [] });
           const current = state.runs.find((item) => item.id === run_id);
           return response({
             total_count: 2,
@@ -76,7 +89,7 @@ async function fixture(t) {
                 id: current.id,
                 head_sha: current.head_sha,
                 repository_id: base.id,
-                head_repository_id: pr.head.repo.id,
+                head_repository_id: current.head_repository.id,
               },
             })),
           });
@@ -89,7 +102,8 @@ async function fixture(t) {
     await state.onDownload?.();
     return archive;
   };
-  const sync = () => synchronizePreviews({ root, github, token: 'test-identity', download });
+  const sync = () =>
+    synchronizePreviews({ root, github, token: 'test-identity', download, now: () => state.clock });
   const manifest = async () => JSON.parse(await readFile(join(root, 'current.json'), 'utf8'));
   return { root, pr, run, state, sync, manifest };
 }
@@ -154,4 +168,39 @@ test('a fresh rerun of an older run can publish its new attempt', async (t) => {
   const result = await f.sync();
   assert.equal(result.previews[0].status, 'ready');
   assert.equal(result.previews[0].binding.run_attempt, '2');
+});
+
+test('deleted manual-artifact history cannot exhaust the quota and revoke a current preview', async (t) => {
+  const f = await fixture(t);
+  for (let id = 1; id <= 34; id++) {
+    f.state.runs.push({
+      ...f.run,
+      id,
+      run_number: id,
+      event: 'workflow_dispatch',
+      head_branch: 'main',
+      head_repository: { id: 1 },
+    });
+    f.state.missingArtifacts.add(id);
+  }
+  f.state.apiBudget = 250;
+  for (let cycle = 0; cycle < 6; cycle++) {
+    assert.equal((await f.sync()).previews[0].status, 'ready');
+    f.state.clock += 120_000;
+  }
+});
+
+test('transient missing artifacts are withheld, then reconsidered without an unsafe Ready cache', async (t) => {
+  const f = await fixture(t);
+  Object.assign(f.run, {
+    event: 'workflow_dispatch',
+    head_branch: 'main',
+    head_repository: { id: 1 },
+    head_sha: 'b'.repeat(40),
+  });
+  f.state.missingArtifacts.add(f.run.id);
+  assert.equal((await f.sync()).previews[0].status, 'unavailable');
+  f.state.missingArtifacts.delete(f.run.id);
+  f.state.clock += 300_001;
+  assert.equal((await f.sync()).previews[0].status, 'ready');
 });
