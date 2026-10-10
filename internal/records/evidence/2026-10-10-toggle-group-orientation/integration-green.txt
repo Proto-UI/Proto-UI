@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 /workspace/scratch/3ca1e20addac/finf-togglegroup-orientation
+
+ ✓ packages/prototypes/base/test/navigation-overlays/drawer-gesture.test.ts (35 tests) 1394ms
+ ✓ packages/prototypes/base/test/navigation-overlays/controls.test.ts (12 tests) 340ms
+stderr | packages/prototypes/base/test/navigation-overlays/popover-focus-outside.test.ts > preserves Alert Dialog outside-dismiss protection
+[base-alert-dialog-content] Alert AlertDialog requires a AlertDialog Description containing its primary message.
+
+ ✓ packages/prototypes/base/test/navigation-overlays/popover-focus-outside.test.ts (10 tests) 526ms
+ ✓ packages/prototypes/base/test/navigation-overlays/navigation-link.test.ts (8 tests) 365ms
+ ✓ packages/prototypes/base/test/navigation-overlays/context-menu-input.test.ts (5 tests) 305ms
+ ✓ packages/prototypes/base/test/navigation-overlays/dropdown-composition.test.ts (10 tests) 625ms
+ ✓ packages/prototypes/base/test/navigation-overlays/search.test.ts (9 tests) 604ms
+ ✓ packages/prototypes/base/test/navigation-overlays/menus.test.ts (7 tests) 484ms
+stderr | packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts > 'alert-dialog' window protocol > opens and closes its own context and accessible relationships
+[base-alert-dialog-content] Alert AlertDialog requires a AlertDialog Description containing its primary message.
+
+stderr | packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts > 'alert-dialog' window protocol > emits a controlled close request without changing owner state
+[base-alert-dialog-content] Alert AlertDialog requires a AlertDialog Description containing its primary message.
+
+stderr | packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts > alert blocks outside dismissal and focuses the cancel command
+[base-alert-dialog-content] Alert AlertDialog requires a AlertDialog Description containing its primary message.
+
+ ✓ packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts (10 tests) 478ms
+ ✓ packages/prototypes/base/test/toggle-group-orientation.test.ts (36 tests) 832ms
+ ✓ packages/prototypes/base/test/navigation-overlays/root-capture.test.ts (4 tests) 96ms
+
+ Test Files  11 passed (11)
+      Tests  146 passed (146)
+   Start at  05:16:34
+   Duration  18.58s (transform 3.00s, setup 0ms, collect 8.06s, tests 6.05s, environment 2.32s, prepare 625ms)

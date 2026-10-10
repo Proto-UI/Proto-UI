@@ -14,5 +14,9 @@ export default definePrototype<ToggleGroupRootProps, ToggleGroupRootExposes>({
         'rounded border border-border bg-background text-foreground shadow-md p-2 flex min-w-0 gap-1'
       )
     );
+    def.rule({
+      when: (w) => w.state(behavior.stateHandles!.orientation).eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('flex-col')),
+    });
   },
 });

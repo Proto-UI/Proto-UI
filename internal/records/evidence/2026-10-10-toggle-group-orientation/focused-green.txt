@@ -1,0 +1,10 @@
+
+ RUN  v2.1.9 /workspace/scratch/3ca1e20addac/finf-togglegroup-orientation
+
+ ✓ packages/prototypes/base/test/navigation-overlays/controls.test.ts (12 tests) 301ms
+ ✓ packages/prototypes/base/test/toggle-group-orientation.test.ts (36 tests) 616ms
+
+ Test Files  2 passed (2)
+      Tests  48 passed (48)
+   Start at  05:15:21
+   Duration  3.86s (transform 1.38s, setup 0ms, collect 2.11s, tests 916ms, environment 386ms, prepare 102ms)

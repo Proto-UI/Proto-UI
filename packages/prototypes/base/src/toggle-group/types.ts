@@ -25,7 +25,9 @@ export type ToggleGroupRootExposes = {
   focusLast: ExposeMethod<() => void>;
   valueChange: ExposeEvent<{ value: readonly string[] }>;
 };
-export type ToggleGroupRootAsHookContract = { state: { disabled: State<boolean> } };
+export type ToggleGroupRootAsHookContract = {
+  state: { disabled: State<boolean>; orientation: State<string> };
+};
 export interface ToggleGroupItemProps {
   value: string;
   disabled?: boolean;
