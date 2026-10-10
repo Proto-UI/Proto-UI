@@ -132,6 +132,148 @@ async function genericFixture() {
 }
 
 describe('Field payload normalization precedes any retained mutation', () => {
+  it.each([
+    ['inherited value', () => Object.create({ value: 'inherited' })],
+    ['missing value', () => ({ focused: true })],
+    ['undefined own value', () => ({ value: undefined })],
+    ['enumerable foreign field', () => ({ value: 'owned', foreign: true })],
+  ] as const)(
+    'rejects report %s without changing canonical facts or spending pending validation',
+    async (_name, payload) => {
+      const f = await genericFixture();
+      const pristine = f.control.__fieldSnapshot();
+      expect(f.control.reportField(payload())).toBe(false);
+      expect(f.control.__fieldSnapshot()).toEqual(pristine);
+      expect(f.control.reportField({ value: 'baseline' })).toBe(true);
+      const request = f.root.validate();
+      const before = f.control.__fieldSnapshot();
+      expect(f.control.reportField(payload())).toBe(false);
+      expect(f.control.__fieldSnapshot()).toEqual(before);
+      expect(f.root.pending.get()).toBe(true);
+      expect(f.root.dirty.get()).toBe(false);
+      expect(f.root.resolveValidation(request, { invalid: false })).toBe(true);
+    }
+  );
+  it.each([
+    [
+      'custom-prototype report',
+      () => Object.assign(Object.create({ metadata: 'ignored' }), { value: 'owned' }),
+    ],
+    ['array record', () => Object.assign([], { value: 'owned' })],
+    ['symbol field', () => ({ value: 'owned', [Symbol('foreign')]: true })],
+    [
+      'hidden foreign field',
+      () => Object.defineProperty({ value: 'owned' }, 'foreign', { value: true }),
+    ],
+  ] as const)('preserves existing admission of %s with an own value', async (_name, payload) => {
+    const f = await genericFixture();
+    expect(f.control.reportField(payload())).toBe(true);
+    expect(f.control.__fieldSnapshot()).toMatchObject({ value: 'owned', initialValue: 'owned' });
+  });
+  it('ignores optional fields inherited from a custom report prototype', async () => {
+    const f = await genericFixture();
+    const report = Object.assign(
+      Object.create({
+        initialValue: 'inherited',
+        focused: true,
+        composing: true,
+        reason: 'invalid',
+      }),
+      { value: 'owned' }
+    );
+    expect(f.control.reportField(report)).toBe(true);
+    expect(f.control.__fieldSnapshot()).toMatchObject({
+      value: 'owned',
+      initialValue: 'owned',
+      focused: false,
+      composing: false,
+    });
+  });
+  it('accepts a null-prototype report with an own value and optional fields', async () => {
+    const f = await genericFixture();
+    expect(
+      f.control.reportField(
+        Object.assign(Object.create(null), {
+          value: 'owned',
+          initialValue: 'baseline',
+          focused: true,
+          composing: false,
+          reason: 'sync',
+        })
+      )
+    ).toBe(true);
+    expect(f.control.__fieldSnapshot()).toMatchObject({
+      value: 'owned',
+      initialValue: 'baseline',
+      focused: true,
+      composing: false,
+    });
+    expect(f.root.dirty.get()).toBe(true);
+  });
+  it('does not read optional report fields inherited from Object.prototype', async () => {
+    const f = await genericFixture();
+    const keys = ['initialValue', 'focused', 'composing', 'reason'] as const;
+    const previous = keys.map((key) => Object.getOwnPropertyDescriptor(Object.prototype, key));
+    let reads = 0;
+    for (const key of keys)
+      Object.defineProperty(Object.prototype, key, {
+        configurable: true,
+        get() {
+          reads++;
+          throw new Error('inherited report field must not be read');
+        },
+      });
+    try {
+      expect(f.control.reportField({ value: 'owned' })).toBe(true);
+      expect(f.control.__fieldSnapshot()).toMatchObject({
+        value: 'owned',
+        initialValue: 'owned',
+        focused: false,
+        composing: false,
+      });
+      expect(reads).toBe(0);
+    } finally {
+      keys.forEach((key, index) => {
+        if (previous[index]) Object.defineProperty(Object.prototype, key, previous[index]!);
+        else Reflect.deleteProperty(Object.prototype, key);
+      });
+    }
+  });
+  it('captures own report accessors exactly once without changing the accessor contract', async () => {
+    const f = await genericFixture();
+    const reads = { value: 0, initialValue: 0, focused: 0, composing: 0, reason: 0 };
+    expect(
+      f.control.reportField({
+        get value() {
+          reads.value++;
+          return 'owned';
+        },
+        get initialValue() {
+          reads.initialValue++;
+          return 'baseline';
+        },
+        get focused() {
+          reads.focused++;
+          return true;
+        },
+        get composing() {
+          reads.composing++;
+          return false;
+        },
+        get reason() {
+          reads.reason++;
+          return 'sync';
+        },
+      })
+    ).toBe(true);
+    expect(reads).toEqual({ value: 1, initialValue: 1, focused: 1, composing: 1, reason: 1 });
+    expect(f.control.__fieldSnapshot()).toMatchObject({
+      value: 'owned',
+      initialValue: 'baseline',
+      focused: true,
+      composing: false,
+    });
+  });
   it('rejects sparse initialValue before first report and after initialization without poisoning the baseline', async () => {
     const f = await genericFixture();
     const before = f.root.getValidity();

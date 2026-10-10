@@ -69,6 +69,7 @@ export function normalizeFieldControlReport(input: unknown): FieldControlReport 
   if (
     !input ||
     typeof input !== 'object' ||
+    !Object.hasOwn(input, 'value') ||
     Object.keys(input).some(
       (key) => !['value', 'initialValue', 'focused', 'composing', 'reason'].includes(key)
     )
@@ -77,13 +78,15 @@ export function normalizeFieldControlReport(input: unknown): FieldControlReport 
   const candidate = input as Record<string, unknown>;
   const value = normalizeFieldValue(candidate.value);
   if (value === undefined) return undefined;
-  const rawInitialValue = candidate.initialValue;
+  const rawInitialValue = Object.hasOwn(candidate, 'initialValue')
+    ? candidate.initialValue
+    : undefined;
   const initialValue =
     rawInitialValue === undefined ? undefined : normalizeFieldValue(rawInitialValue);
   if (rawInitialValue !== undefined && initialValue === undefined) return undefined;
-  const focused = candidate.focused;
-  const composing = candidate.composing;
-  const reason = candidate.reason;
+  const focused = Object.hasOwn(candidate, 'focused') ? candidate.focused : undefined;
+  const composing = Object.hasOwn(candidate, 'composing') ? candidate.composing : undefined;
+  const reason = Object.hasOwn(candidate, 'reason') ? candidate.reason : undefined;
   if (
     (focused !== undefined && typeof focused !== 'boolean') ||
     (composing !== undefined && typeof composing !== 'boolean') ||
