@@ -53,6 +53,10 @@ criteria:
       en: The `asChild` member of upstream List props is intentionally omitted under the shared decision.
     dependsOn:
       decisions: [D-AS-CHILD-OMISSION-0001]
+  - id: P-SHADCN-TABS-LIST-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
+
 openQuestions:
   - id: P-SHADCN-TABS-LIST-Q-UPSTREAM-DIFFERENCES
     question:
@@ -83,8 +87,12 @@ inherits:
   prototypes:
     - id: P-BASE-TABS-LIST
       note: Default inherited collection protocol; explicit setup-time negative patches must be declared.
-verifies: { tests: [T-SHADCN-TABS-LIST-0001] }
+verifies:
+  { tests: [T-SHADCN-TABS-LIST-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Tabs List delta cataloging with Base inheritance, current surface, intentional asChild omission, and variant parity gaps.

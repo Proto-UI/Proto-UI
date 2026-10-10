@@ -1,0 +1,53 @@
+id: P-LIQUID-GLASS-TABS-TRIGGER
+type: prototype
+title: Liquid Glass Tabs trigger directly projects the Base Tabs protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft extension inherits the existing draft Base Tabs definition; exact-commit native interaction/paint, generated preset and packed-consumer resource proof, and independent admission remain incomplete. Cataloging does not promote Base or family guarantees.
+summary: Direct Liquid Glass trigger with inherited Base ownership and a separately bounded family appearance.
+statement:
+  en: The Trigger is a value-matched tab, consuming asTabsTrigger once. Preserve Base selected derivation, value/disabled inputs, interaction states, accessible name and controls relation, focus methods, manual versus automatic activation and disabled suppression. A single Base activation owner handles click/Enter/Space; appearance must neither request selection nor add a Button protocol.
+criteria:
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-BASE-INHERITANCE
+    text:
+      en: The Trigger is a value-matched tab, consuming asTabsTrigger once. Preserve Base selected derivation, value/disabled inputs, interaction states, accessible name and controls relation, focus methods, manual versus automatic activation and disabled suppression. A single Base activation owner handles click/Enter/Space; appearance must neither request selection nor add a Button protocol.
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-DIRECT-ENTRY
+    text:
+      en: Expose the independently defined liquid-glass-tabs-trigger prototype and typed tabsTrigger export through @proto.ui/prototypes-liquid-glass/tabs. This is a private source-only entry; registry publication or unsupported Compiler/non-Web admission must not be inferred.
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-VISUAL-DEFAULT
+    text:
+      en: With appearance=default, provide rounded medium-weight labels on the material strip. Selected uses a legible raised surface and foreground; hover, focus-visible and disabled appearance consumes Base facts without introducing selection or press truth. Underline must remove the segment fill, radius and elevation. Native optical fidelity remains separately unverified.
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+openQuestions:
+  - id: P-LIQUID-GLASS-TABS-TRIGGER-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction and same-state screenshots, generated/published-resource closure and independent review support admission?
+    blocks:
+      - activation:P-LIQUID-GLASS-TABS-TRIGGER
+sources:
+  - path: spec/prototypes/P-BASE-TABS-TRIGGER.yaml
+  - path: packages/prototypes/liquid-glass/src/tabs/trigger.proto.ts
+  - path: packages/prototypes/liquid-glass/src/tabs/index.ts
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-TRIGGER
+verifies:
+  tests:
+    - T-RUNTIME-TABS-APPEARANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.
+tags:
+  - prototype
+  - liquid-glass
+  - tabs
+  - trigger
+  - projection

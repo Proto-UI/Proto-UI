@@ -1,0 +1,243 @@
+id: T-RUNTIME-TABS-APPEARANCE-0001
+type: test
+title: Family Tabs appearance and Runtime consumer evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Retain draft: source and emulated-host checks are bounded evidence; committed preset regeneration, real packed-consumer closure, exact-source native screenshots and independent admission are still required.'
+summary: Separate Base protocol inheritance, direct-entry coverage, appearance-state equivalence, generation ownership and uncompleted resource/native gates.
+cases:
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-BASE-INHERITANCE
+    title: Base-owned Tabs responsibilities
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-BASE-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT-BASE-INHERITANCE
+      - P-LIQUID-GLASS-TABS-BASE-INHERITANCE
+      - P-LIQUID-GLASS-TABS-LIST-BASE-INHERITANCE
+      - P-LIQUID-GLASS-TABS-TRIGGER-BASE-INHERITANCE
+      - P-LIQUID-GLASS-TABS-CONTENT-BASE-INHERITANCE
+    expectation: Actual family consumers preserve controlled request rejection/acceptance, manual navigation versus activation, disabled exclusion, selected/panel relationships and teardown. Source reuse alone is not complete Base conformance.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-DIRECT-ENTRY
+    title: Eight direct named and typed entries
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-DIRECT-ENTRY
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT-DIRECT-ENTRY
+      - P-LIQUID-GLASS-TABS-DIRECT-ENTRY
+      - P-LIQUID-GLASS-TABS-LIST-DIRECT-ENTRY
+      - P-LIQUID-GLASS-TABS-TRIGGER-DIRECT-ENTRY
+      - P-LIQUID-GLASS-TABS-CONTENT-DIRECT-ENTRY
+    expectation: Each Bootstrap/Liquid part has its own definition, public family entry and matching projection registration; source-only admission remains explicit.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-DEFAULT-SURFACE
+    title: Family default surface boundaries
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-LIST-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-TRIGGER-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-CONTENT-VISUAL-DEFAULT
+    expectation: Exercise default layout and state contributions independently from underline; keep Bootstrap deviations and Liquid optical-host proof explicit. Source/CSS checks alone do not establish pixel fidelity.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-STATE-ROUNDTRIP
+    title: Four-family appearance and state withdrawal
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+      - P-LIQUID-GLASS-TABS-LIST-APPEARANCE
+      - P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+      - P-SHADCN-TABS-LIST-APPEARANCE
+      - P-SHADCN-TABS-TRIGGER-APPEARANCE
+      - P-BRUTALIST-TABS-LIST-APPEARANCE
+      - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+    expectation: Default to underline and back preserves Base selection/hover/press/focus-visible/disabled facts and exactly restores previous List/Trigger current-state paint. Inactive text, selected underline, focus visibility, disabled request suppression and post-destroy callbacks receive negative controls.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-GENERATION-FOCUS
+    title: Consumer activation with exact-generation focus
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+      - P-LIQUID-GLASS-TABS-LIST-APPEARANCE
+      - P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+      - P-SHADCN-TABS-LIST-APPEARANCE
+      - P-SHADCN-TABS-TRIGGER-APPEARANCE
+      - P-BRUTALIST-TABS-LIST-APPEARANCE
+      - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+    expectation: In the Runtime consumer, manual arrows/Home/End only move focus; Enter/Space request once and focus the new selected Trigger after a real switch. External/newer focus, stale owners/generations/callbacks, locked hosts, interrupted switches and destruction must win over restoration.
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-CASE-RESOURCE-NATIVE
+    title: Generated resources and same-state native evidence
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-LIST-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-TRIGGER-VISUAL-DEFAULT
+      - P-LIQUID-GLASS-TABS-CONTENT-VISUAL-DEFAULT
+      - P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+      - P-LIQUID-GLASS-TABS-LIST-APPEARANCE
+      - P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+      - P-SHADCN-TABS-LIST-APPEARANCE
+      - P-SHADCN-TABS-TRIGGER-APPEARANCE
+      - P-BRUTALIST-TABS-LIST-APPEARANCE
+      - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+    expectation: Before delivery, proper preset generators must be current and a real packed consumer must retain all family/state resources. Native same-state screenshots bound to the exact source must establish narrow layout, underline geometry, keyboard focus and switching; optical-host evidence is separate. These gates remain incomplete.
+implementations:
+  - id: family-runtime
+    kind: adapter-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/runtime-tabs.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-BASE-INHERITANCE
+    exercises: &a1
+      - P-BOOTSTRAP-2-3-2-TABS
+      - P-BOOTSTRAP-2-3-2-TABS-LIST
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT
+      - P-LIQUID-GLASS-TABS
+      - P-LIQUID-GLASS-TABS-LIST
+      - P-LIQUID-GLASS-TABS-TRIGGER
+      - P-LIQUID-GLASS-TABS-CONTENT
+      - P-SHADCN-TABS-LIST
+      - P-SHADCN-TABS-TRIGGER
+      - P-BRUTALIST-TABS-LIST
+      - P-BRUTALIST-TABS-TRIGGER
+  - id: direct-entry
+    kind: module-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/runtime-tabs-registration.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-DIRECT-ENTRY
+    exercises: *a1
+  - id: appearance-roundtrip
+    kind: adapter-test
+    status: passing
+    required: true
+    path: packages/prototypes/base/test/runtime-tabs-appearance.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-DEFAULT-SURFACE
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-STATE-ROUNDTRIP
+    exercises: *a1
+  - id: source-css
+    kind: module-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/runtime-tabs-style.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-DEFAULT-SURFACE
+    exercises: *a1
+  - id: four-adapter-consumer
+    kind: adapter-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/projected-previewer-shell.integration.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-BASE-INHERITANCE
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-GENERATION-FOCUS
+    exercises: *a1
+  - id: focus-lease-guards
+    kind: adapter-test
+    status: passing
+    required: true
+    path: apps/www/src/components/PrototypePreviewer/projection-materializer.test.ts
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-GENERATION-FOCUS
+    exercises: *a1
+  - id: resource-native-admission
+    kind: workspace-check
+    status: planned
+    required: true
+    path: internal/records/2026-10-10-runtime-box-tabs.md
+    consumesCases:
+      - T-RUNTIME-TABS-APPEARANCE-0001-CASE-RESOURCE-NATIVE
+    exercises: *a1
+verifies:
+  prototypes:
+    - id: P-BOOTSTRAP-2-3-2-TABS
+      anchors:
+        - P-BOOTSTRAP-2-3-2-TABS-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-TABS-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-TABS-VISUAL-DEFAULT
+    - id: P-BOOTSTRAP-2-3-2-TABS-LIST
+      anchors:
+        - P-BOOTSTRAP-2-3-2-TABS-LIST-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-TABS-LIST-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-TABS-LIST-VISUAL-DEFAULT
+        - P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+    - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER
+      anchors:
+        - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VISUAL-DEFAULT
+        - P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+    - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT
+      anchors:
+        - P-BOOTSTRAP-2-3-2-TABS-CONTENT-BASE-INHERITANCE
+        - P-BOOTSTRAP-2-3-2-TABS-CONTENT-DIRECT-ENTRY
+        - P-BOOTSTRAP-2-3-2-TABS-CONTENT-VISUAL-DEFAULT
+    - id: P-LIQUID-GLASS-TABS
+      anchors:
+        - P-LIQUID-GLASS-TABS-BASE-INHERITANCE
+        - P-LIQUID-GLASS-TABS-DIRECT-ENTRY
+        - P-LIQUID-GLASS-TABS-VISUAL-DEFAULT
+    - id: P-LIQUID-GLASS-TABS-LIST
+      anchors:
+        - P-LIQUID-GLASS-TABS-LIST-BASE-INHERITANCE
+        - P-LIQUID-GLASS-TABS-LIST-DIRECT-ENTRY
+        - P-LIQUID-GLASS-TABS-LIST-VISUAL-DEFAULT
+        - P-LIQUID-GLASS-TABS-LIST-APPEARANCE
+    - id: P-LIQUID-GLASS-TABS-TRIGGER
+      anchors:
+        - P-LIQUID-GLASS-TABS-TRIGGER-BASE-INHERITANCE
+        - P-LIQUID-GLASS-TABS-TRIGGER-DIRECT-ENTRY
+        - P-LIQUID-GLASS-TABS-TRIGGER-VISUAL-DEFAULT
+        - P-LIQUID-GLASS-TABS-TRIGGER-APPEARANCE
+    - id: P-LIQUID-GLASS-TABS-CONTENT
+      anchors:
+        - P-LIQUID-GLASS-TABS-CONTENT-BASE-INHERITANCE
+        - P-LIQUID-GLASS-TABS-CONTENT-DIRECT-ENTRY
+        - P-LIQUID-GLASS-TABS-CONTENT-VISUAL-DEFAULT
+    - id: P-SHADCN-TABS-LIST
+      anchors:
+        - P-SHADCN-TABS-LIST-APPEARANCE
+    - id: P-SHADCN-TABS-TRIGGER
+      anchors:
+        - P-SHADCN-TABS-TRIGGER-APPEARANCE
+    - id: P-BRUTALIST-TABS-LIST
+      anchors:
+        - P-BRUTALIST-TABS-LIST-APPEARANCE
+    - id: P-BRUTALIST-TABS-TRIGGER
+      anchors:
+        - P-BRUTALIST-TABS-TRIGGER-APPEARANCE
+exercises:
+  prototypes: *a1
+openQuestions:
+  - id: T-RUNTIME-TABS-APPEARANCE-0001-Q-RESOURCE-NATIVE
+    question:
+      en: When do correct committed preset generators, an actual packed consumer and exact-source native same-state screenshots pass together? Direct source collection and empty SSR do not answer this.
+    blocks:
+      - activation:T-RUNTIME-TABS-APPEARANCE-0001
+      - implementation:T-RUNTIME-TABS-APPEARANCE-0001#resource-native-admission
+sources:
+  - path: spec/modules/M-RULE-EXPOSE-STATE-WEB-0001.yaml
+    label: Props/state Rule expressions use default runtime evaluation; static-selector representation is not mandatory
+  - path: internal/records/2026-10-10-runtime-box-tabs.md
+    label: Non-normative fixed-reference, discrepancy and evidence ledger
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Add bounded four-family appearance/Runtime evidence without promoting unrun native or resource gates.
+tags:
+  - test
+  - tabs
+  - projection
+  - appearance
+  - focus
+  - runtime-consumer

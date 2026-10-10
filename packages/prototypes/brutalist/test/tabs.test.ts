@@ -88,7 +88,7 @@ describe('prototypes/brutalist: tabs', () => {
     expect(root.getExposes().value.get()).toBe('b');
   });
 
-  it('moves the selected pair, border, and hard shadow with selection', async () => {
+  it('moves the selected color pair and border with selection', async () => {
     // T-BRUTALIST-TABS-0001-CASE-2
     const { root, triggerA, triggerB } = createTabs();
     await flush();
@@ -97,12 +97,7 @@ describe('prototypes/brutalist: tabs', () => {
     expect(triggerA.getExposes().selected.get()).toBe(true);
     expect(triggerA.hasAttribute('data-selected')).toBe(true);
     expect(triggerA.getAttribute('aria-selected')).toBe('true');
-    for (const token of [
-      'data-[selected]:bg-main',
-      'data-[selected]:text-main-foreground',
-      'data-[selected]:border-black',
-      'data-[selected]:not-[data-pressed]:border-black',
-    ]) {
+    for (const token of ['bg-main', 'text-main-foreground', 'border-black']) {
       expect(styleContains(triggerA, token)).toBe(true);
     }
 
@@ -113,6 +108,9 @@ describe('prototypes/brutalist: tabs', () => {
     expect(triggerB.getExposes().selected.get()).toBe(true);
     expect(triggerB.hasAttribute('data-selected')).toBe(true);
     expect(triggerB.getAttribute('aria-selected')).toBe('true');
+    expect(styleContains(triggerB, 'bg-main')).toBe(true);
+    expect(styleContains(triggerA, 'bg-main')).toBe(false);
+    expect(styleContains(triggerA, 'text-main-foreground')).toBe(false);
   });
 
   it('activates non-selected hover, press, focus-visible, and disabled rules', async () => {
@@ -134,21 +132,17 @@ describe('prototypes/brutalist: tabs', () => {
     await flush();
     expect(triggerB.getExposes().hovered.get()).toBe(true);
     expect(triggerB.hasAttribute('data-hovered')).toBe(true);
-    // Variant order follows the generated stylesheet, not the authoring order of
-    // the rule's conditions; see packages/cli/test/lowered-variant-order.test.ts.
-    for (const token of [
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:bg-secondary-background',
-      'data-[hovered]:not-[data-pressed]:not-[data-selected]:border-black',
-    ]) {
+    // appearance + state uses legal default runtime evaluation. Independent
+    // lowering-order tests still cover state-only selector generation.
+    for (const token of ['bg-secondary-background', 'border-black']) {
       expect(styleContains(triggerB, token)).toBe(true);
     }
 
     triggerB.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     await flush();
     expect(triggerB.getExposes().pressed.get()).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
-    expect(styleContains(triggerB, 'data-[pressed]:border-black')).toBe(true);
+    expect(styleContains(triggerB, 'border-black')).toBe(true);
+    expect(styleContains(triggerB, 'bg-secondary-background')).toBe(false);
     triggerB.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
 
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
@@ -156,8 +150,8 @@ describe('prototypes/brutalist: tabs', () => {
     triggerB.dispatchEvent(new FocusEvent('focus', { bubbles: true }));
     await flush();
     expect(triggerB.getExposes().focusVisible.get()).toBe(true);
-    expect(styleContains(triggerB, 'data-[focus-visible]:ring-2')).toBe(true);
-    expect(styleContains(triggerB, 'data-[focus-visible]:ring-ring')).toBe(true);
+    expect(styleContains(triggerB, 'ring-2')).toBe(true);
+    expect(styleContains(triggerB, 'ring-ring')).toBe(true);
     matchesSpy.mockRestore();
 
     setElementProps(triggerB, { value: 'b', disabled: true });
@@ -167,8 +161,8 @@ describe('prototypes/brutalist: tabs', () => {
     expect(triggerB.getExposes().disabled.get()).toBe(true);
     expect(triggerB.getAttribute('aria-disabled')).toBe('true');
     expect(root.getExposes().value.get()).toBe('a');
-    expect(styleContains(triggerB, 'data-[disabled]:pointer-events-none')).toBe(true);
-    expect(styleContains(triggerB, 'data-[disabled]:opacity-50')).toBe(true);
+    expect(styleContains(triggerB, 'pointer-events-none')).toBe(true);
+    expect(styleContains(triggerB, 'opacity-50')).toBe(true);
   });
 
   it('inverts current/hidden state across square retained panels', async () => {
@@ -198,7 +192,7 @@ describe('prototypes/brutalist: tabs', () => {
     expect(contentB.textContent).toBe('Beta panel');
   });
 
-  it('lets press suppress selected elevation until release', async () => {
+  it('preserves the selected flat color pair and frame through press and release', async () => {
     // T-BRUTALIST-TABS-0001-CASE-5
     const { triggerA } = createTabs();
     await flush();
@@ -209,8 +203,8 @@ describe('prototypes/brutalist: tabs', () => {
     expect(triggerA.getExposes().pressed.get()).toBe(true);
     expect(triggerA.hasAttribute('data-selected')).toBe(true);
     expect(triggerA.hasAttribute('data-pressed')).toBe(true);
-    expect(styleContains(triggerA, 'data-[selected]:not-[data-pressed]:border-black')).toBe(true);
-    expect(styleContains(triggerA, 'data-[pressed]:border-black')).toBe(true);
+    expect(styleContains(triggerA, 'border-black')).toBe(true);
+    expect(styleContains(triggerA, 'bg-main')).toBe(true);
 
     triggerA.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     await flush();

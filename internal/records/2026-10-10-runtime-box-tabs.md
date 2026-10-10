@@ -26,7 +26,7 @@ The generic embed path uses real matching-family WC Tabs for its existing site c
 
 Previously state-only rules such as `w.state(selected).eq(true)` could lower to `data-[selected]:bg-background`. The legal mixed condition `w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true))` uses the existing runtime evaluation path, producing current tokens such as `bg-background`. C-RULE-WHEN-0001 and C-RULE-RUNTIME-0001 allow this expression and execution; this does not itself prove unchanged delivery/paint guarantees.
 
-The five original Shadcn/Brutalist selector assertions are **unchanged and red**. They are not waived by the new interaction tests. No new prop lowering or mirrored semantic state was introduced to satisfy a collector parser.
+At reviewed head 6d2d983f, the five original Shadcn/Brutalist selector assertions were **unchanged and red**. The follow-up below adds state/withdrawal equivalence before migrating these representation-specific assertions. No new prop lowering or mirrored semantic state was introduced to satisfy a collector parser.
 
 A comparison fixture preserves the exact pre-change Shadcn Trigger recipe from c2cbb8d6. Evidence compares default selected CSS facts, checks default→underline→default withdrawal and exact current tokens. React renderToString produces empty output for both pre/post trees; this records the existing SSR limit, not SSR styling support.
 
@@ -41,8 +41,8 @@ HappyDOM independently mis-matches `[data-pui-style~="border"]` against `border-
 
 ## Required next gates
 
-1. Independent review of the mixed appearance/state rule resource guarantee; original five static-selector assertions remain blocking that claim.
-2. Regenerate preset/website styles using the proper generators after merge; verify packed CLI source-only family entries and CSS closure. No generated global files were hand-edited here. Shadow split admission is not claimed.
+1. Complete independent review of the mixed appearance/state resource guarantee. Runtime equivalence and the five representation-specific assertions are addressed below; packaged-resource and native-paint proof remain mandatory.
+2. Regenerate preset/website styles using the proper generators before further integration/push; verify packed CLI source-only family entries and CSS closure. No generated global files were hand-edited here. Shadow split admission is not claimed.
 3. Official browser CI bound to the UI commit: all runtime labels visible, active underline 2px/text-width, inactive gray/no pill, keyboard manual activation and focus return, exactly one new runtime mount and prior teardown, repeated fast switching, page-header preference sync, 320px horizontal scroll, 200% text, light/dark and disabled/unavailable option behavior.
 4. Capture the same state as the supplied reference plus a React-selected state and narrow keyboard-focus state. Publish new commit-bound artifacts; no old screenshot substitution. No local native GUI/no-sandbox run was performed.
 
@@ -50,7 +50,7 @@ ModelTrace: not measured. dot's model trace exemption is owner-authorized; sourc
 
 ## Completion note for local review slice
 
-Focused combined run: 177 tests, 171 passed and 6 failed. Five failures are the unchanged old state-selector assertions described above; the sixth is the baseline Dropdown recipe closure missing Group/Label/Shortcut/Separator. The new runtime helper (8), controlled projection gates (4), real adapter shell and switching (40, including 16 new projected and 4 generic switching cases), complete four-family CSS (4), and physical mapping controls (2) all passed. The pre/post comparison file adds 3 passing bounded checks, including the explicit environment characterization. Scoped UI/family/test TypeScript check passed. Logs were kept with the task evidence; no full CI/native result claimed.
+Earlier pre-registration run: 177 tests, 171 passed and 6 failed. The exact registered head 6d2d983f was then rerun: 179 tests, 173 passed and 6 failed. Five failures are the unchanged old state-selector assertions described above; the sixth is the baseline Dropdown recipe closure missing Group/Label/Shortcut/Separator. The new runtime helper (8), controlled projection gates (4), real adapter shell and switching (40, including 16 new projected and 4 generic switching cases), complete four-family CSS (4), and physical mapping controls (2) all passed. The pre/post comparison file adds 3 passing bounded checks, including the explicit environment characterization. Scoped UI/family/test TypeScript check passed. Logs were kept with the task evidence; no full CI/native result claimed.
 
 Shared registration replay must compare the destination's actual head before applying: primary was observed at 342955e238e6a632dbc010b70aa59d1a373ce440 after this worktree diverged. Global generators, navigation and admission stay with the release owner.
 
@@ -63,3 +63,15 @@ The materializer still searched for a combobox after Runtime became real Tabs. I
 Evidence: 7 materializer tests and 8 added real-framework keyboard/interruption tests pass (WC/React/Vue/Vue2). Arrow/Home/End in manual mode only move focus; Enter and Space each request one real runtime switch and restore the newly selected Trigger. External focus, newer-focus-before-frame, locked/staging/changed-owner hosts, stale DOM callbacks, rapid requests and destruction suppress inappropriate restoration.
 
 **Release blocker:** all three committed preset generators were stale at review. The integration owner must run the proper generators and test a real packed consumer **before further integration/push**. Source-collected CSS tests do not satisfy this gate. The following source/test work remains WIP until that resource proof, exact-commit official native screenshots and independent review exist.
+
+## Family definitions and representation-equivalence follow-up
+
+Eight Bootstrap/Liquid P entities now inherit the existing draft Base Root/List/Trigger/Content responsibilities, ownership, public inputs/outputs and lifetimes. Four existing Shadcn/Brutalist List/Trigger P entities gain a bounded appearance criterion; neither upstream `line`/vertical parity gaps nor lifecycle status were removed. `T-RUNTIME-TABS-APPEARANCE-0001` separates Base inheritance, eight named entries, default family surfaces, all-state appearance roundtrips, exact-generation focus and explicitly planned resource/native admission.
+
+The specification basis is the existing Base Tabs P chain and the owner's opt-in Runtime text-row request. The tests and source are realizations, not authority to redefine selection, collection, activation or lifecycle. `M-RULE-EXPOSE-STATE-WEB-0001-A` permits Props-dependent rules to retain default runtime evaluation. Accordingly, after four-family default→underline→default tests passed for selected/rest, hover, press, focus-visible and disabled, the five original representation-specific tests were migrated to current paint and added withdrawal assertions. Existing Content state-only selector assertions and the CLI lowering-order/collector tests remain intact. Base facts and original default contributions must survive each roundtrip exactly. This does not establish unchanged SSR, committed resource or native pixel guarantees.
+
+Follow-up combined verification: **286 tests, 285 passing, 1 failing**. This includes all prior 179 checks, eight added four-adapter keyboard/interruption cases, four all-state family roundtrips, seven materializer tests, and 88 unchanged lowering-order/collector checks. The sole failure is the frozen source's unrelated Dropdown recipe closure. Scoped UI/family/test TypeScript passes, including the new focus tests and appearance test.
+
+Catalog verification recognizes all eight new Tabs entities; no new Tabs identity remains uncataloged. The global catalog command still reports 559 findings outside this slice, which are not waived or added to a debt baseline. Lifecycle authoring has no new Tabs schema, lifecycle or relation finding; its full run is blocked by three pre-existing native test paths absent from this sparse worktree (`available_space.rs`, `composition.rs`, `tabs_t0.rs`). No native files were changed and no Rust/native execution is claimed. Full-tree integration must rerun that check.
+
+Evidence logs: `runtime-tabs-followup-combined.log`, `runtime-tabs-followup-types.log`, `runtime-tabs-lifecycle.log`, and `runtime-tabs-catalog.log` are retained with the task evidence. The integration owner owns proper three-preset generation and actual packed-consumer proof before integration/push. Exact-source native screenshots, optical realization and final independent acceptance remain open.

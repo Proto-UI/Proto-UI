@@ -1,0 +1,55 @@
+id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER
+type: prototype
+title: Bootstrap 2.3.2 Tabs trigger directly projects the Base Tabs protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft extension inherits the existing draft Base Tabs definition; exact-commit native interaction/paint, generated preset and packed-consumer resource proof, and independent admission remain incomplete. Cataloging does not promote Base or family guarantees.
+summary: Direct Bootstrap 2.3.2 trigger with inherited Base ownership and a separately bounded family appearance.
+statement:
+  en: The Trigger is a value-matched tab, consuming asTabsTrigger once. Preserve Base selected derivation, value/disabled inputs, interaction states, accessible name and controls relation, focus methods, manual versus automatic activation and disabled suppression. A single Base activation owner handles click/Enter/Space; appearance must neither request selection nor add a Button protocol.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-BASE-INHERITANCE
+    text:
+      en: The Trigger is a value-matched tab, consuming asTabsTrigger once. Preserve Base selected derivation, value/disabled inputs, interaction states, accessible name and controls relation, focus methods, manual versus automatic activation and disabled suppression. A single Base activation owner handles click/Enter/Space; appearance must neither request selection nor add a Button protocol.
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-DIRECT-ENTRY
+    text:
+      en: Expose the independently defined bootstrap-2-3-2-tabs-trigger prototype and typed tabsTrigger export through @proto.ui/prototypes-bootstrap-2-3-2/tabs. This is a private source-only entry; registry publication or unsupported Compiler/non-Web admission must not be inferred.
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-VISUAL-DEFAULT
+    text:
+      en: 'With appearance=default, use the Bootstrap 2.3.2 nav-tabs label proportions: 12px horizontal and 8px vertical padding, 2px inter-label separation, reserved thin border and 4px upper corners. Selected background/foreground and top/side border form a tab continuous with the panel; hover, focus-visible and disabled feedback derive only from Base facts. The historical negative bottom overlap and complete upstream pixel parity remain unverified.'
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-TABS-TRIGGER-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction and same-state screenshots, generated/published-resource closure and independent review support admission?
+    blocks:
+      - activation:P-BOOTSTRAP-2-3-2-TABS-TRIGGER
+sources:
+  - path: spec/prototypes/P-BASE-TABS-TRIGGER.yaml
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/trigger.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less
+    label: Fixed Apache-2.0 historical visual reference; no third-party code executed or full plugin compatibility claimed
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-TRIGGER
+verifies:
+  tests:
+    - T-RUNTIME-TABS-APPEARANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - tabs
+  - trigger
+  - projection
