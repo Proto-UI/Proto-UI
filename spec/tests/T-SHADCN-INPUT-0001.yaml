@@ -47,7 +47,7 @@ cases:
 implementations:
   - id: prototypes-shadcn-input-contract
     kind: module-test
-    status: planned
+    status: passing
     path: packages/prototypes/shadcn/test/input.test.ts
     required: true
     consumesCases:
@@ -61,8 +61,7 @@ implementations:
       ]
     exercises: &inputPrototypes [P-SHADCN-INPUT, P-BASE-INPUT]
     notes:
-      - Remaining style-channel limitations and absent Base invalid/className/data-slot ownership are recorded as compatibility differences, not silently implemented with an extra protocol.
-      - Existing historical passing evidence predates the base-nova draft migration. Current implementation and real-browser evidence must be rerun; this definition-only change does not claim a pass.
+      - Six successor module tests passed for source-pinned geometry, explicit selection extension, real CSS generation, state-marker colocation, repeated disabled updates, contentless editor and unchanged public ownership. This is happy-dom and CSS-output evidence; the separate browser implementation remains planned.
   - id: prototypes-shadcn-input-browser
     kind: runtime-test
     status: planned
