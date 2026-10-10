@@ -5,6 +5,10 @@ import * as shadcn from '../../../shadcn/src/drawer';
 import * as brutalist from '../../../brutalist/src/drawer';
 import * as bootstrap from '../../../bootstrap-2-3-2/src/drawer';
 import * as liquid from '../../../liquid-glass/src/drawer';
+type DrawerFixtureFamily = Record<
+  'drawerRoot' | 'drawerContent' | 'drawerHandle' | 'drawerTitle' | 'drawerClose',
+  { readonly name: string }
+>;
 const families = [drawer, shadcn, brutalist, bootstrap, liquid];
 
 const owned = new Set<HTMLElement>();
@@ -36,7 +40,7 @@ afterEach(async () => {
 function fixture(
   contentProps: Record<string, unknown> = {},
   rootProps: Record<string, unknown> = {},
-  family = drawer
+  family: DrawerFixtureFamily = drawer
 ) {
   const root = document.createElement(family.drawerRoot.name) as any;
   const content = document.createElement(family.drawerContent.name) as any;
@@ -287,9 +291,13 @@ import {
   renderProtoShadowStyleTokenCss,
 } from '../../../../cli/src/services/proto-style-css';
 it('collects and lowers fixed scrollport extent recipes instead of hiding translated controls', async () => {
-  const tokens = await collectProtoStyleTokens(
+  const collected = await collectProtoStyleTokens(
     path.resolve(process.cwd(), 'packages/prototypes/base/src/drawer')
   );
+  if (!collected.every((token): token is string => typeof token === 'string')) {
+    throw new Error('Drawer collector returned a non-string token');
+  }
+  const tokens = collected;
   const recipes = [
     'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]',
     'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',

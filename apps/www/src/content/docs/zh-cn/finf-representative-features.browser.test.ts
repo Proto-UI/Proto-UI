@@ -179,10 +179,56 @@ describe('Finf source-bound representative feature screenshots', () => {
           )
         )
         .toBe('50');
-      const rect = await panel.boundingBox();
-      expect(rect?.height).toBeGreaterThan(0);
-      await capture(page, 'drawer', { snapPoint: 0.5, offsetPercentage: 50, panel: rect });
-      await panel.getByRole('button', { name: 'Close', exact: true }).click();
+      const geometry = await panel.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const style = getComputedStyle(element);
+        const availableHeight =
+          Number.parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) ||
+          window.visualViewport?.height ||
+          window.innerHeight;
+        return {
+          x: rect.x,
+          y: rect.y,
+          width: rect.width,
+          height: rect.height,
+          right: rect.right,
+          bottom: rect.bottom,
+          availableHeight,
+          viewportWidth: window.innerWidth,
+          viewportHeight: window.innerHeight,
+        };
+      });
+      expect(geometry.height).toBeGreaterThan(0);
+      expect(Math.abs(geometry.height - geometry.availableHeight * 0.85 * 0.5)).toBeLessThanOrEqual(
+        2
+      );
+      expect(geometry.x).toBeGreaterThanOrEqual(-1);
+      expect(geometry.y).toBeGreaterThanOrEqual(-1);
+      expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
+      expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight + 1);
+      const close = panel.getByRole('button', { name: 'Close', exact: true });
+      await close.scrollIntoViewIfNeeded();
+      const closeRect = await close.boundingBox();
+      const panelRect = await panel.boundingBox();
+      expect(closeRect).not.toBeNull();
+      expect(panelRect).not.toBeNull();
+      const centerX = closeRect!.x + closeRect!.width / 2;
+      const centerY = closeRect!.y + closeRect!.height / 2;
+      expect(centerX).toBeGreaterThanOrEqual(Math.max(0, panelRect!.x));
+      expect(centerX).toBeLessThanOrEqual(
+        Math.min(geometry.viewportWidth, panelRect!.x + panelRect!.width)
+      );
+      expect(centerY).toBeGreaterThanOrEqual(Math.max(0, panelRect!.y));
+      expect(centerY).toBeLessThanOrEqual(
+        Math.min(geometry.viewportHeight, panelRect!.y + panelRect!.height)
+      );
+      await capture(page, 'drawer', {
+        snapPoint: 0.5,
+        offsetPercentage: 50,
+        panel: geometry,
+        close: closeRect,
+      });
+      await close.click();
       await expect.poll(() => panel.isVisible()).toBe(false);
     });
   }, 90_000);
