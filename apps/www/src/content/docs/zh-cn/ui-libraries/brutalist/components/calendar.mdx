@@ -1,0 +1,16 @@
+---
+title: 'Calendar (WIP)'
+description: 'Gregorian date selection with controlled value and keyboard navigation.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Calendar 使用公历日期字符串。选中值与显示月份可分别受控；日期原子支持方向键、Home/End、PageUp/PageDown、不可选日期和只读选择。日期格式为 YYYY-MM-DD，月份为 YYYY-MM。应用通过 0–41 的 offset 组合六行日期原子。
+
+当前为功能代码 WIP。原生 GPUI、完整 Adapter/Compiler 一致性、视觉证据与生命周期验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-calendar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

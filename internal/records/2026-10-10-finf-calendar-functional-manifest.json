@@ -1,0 +1,94 @@
+{
+  "status": "WIP functional source; no acceptance or lifecycle claim",
+  "baseline": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+  "families": [
+    {
+      "family": "base",
+      "subpath": "calendar",
+      "exports": {
+        "calendarRoot": "base-calendar-root",
+        "calendarGrid": "base-calendar-grid",
+        "calendarRow": "base-calendar-row",
+        "calendarDay": "base-calendar-day",
+        "calendarHeading": "base-calendar-heading",
+        "calendarPrevious": "base-calendar-previous",
+        "calendarNext": "base-calendar-next"
+      },
+      "demoId": "demo-base-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-calendar.demo.ts",
+      "docSlug": "ui-libraries/base/calendar"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "calendar",
+      "exports": {
+        "calendarRoot": "shadcn-calendar-root",
+        "calendarGrid": "shadcn-calendar-grid",
+        "calendarRow": "shadcn-calendar-row",
+        "calendarDay": "shadcn-calendar-day",
+        "calendarHeading": "shadcn-calendar-heading",
+        "calendarPrevious": "shadcn-calendar-previous",
+        "calendarNext": "shadcn-calendar-next"
+      },
+      "demoId": "demo-shadcn-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-calendar.demo.ts",
+      "docSlug": "ui-libraries/shadcn/calendar"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "calendar",
+      "exports": {
+        "calendarRoot": "brutalist-calendar-root",
+        "calendarGrid": "brutalist-calendar-grid",
+        "calendarRow": "brutalist-calendar-row",
+        "calendarDay": "brutalist-calendar-day",
+        "calendarHeading": "brutalist-calendar-heading",
+        "calendarPrevious": "brutalist-calendar-previous",
+        "calendarNext": "brutalist-calendar-next"
+      },
+      "demoId": "demo-brutalist-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-calendar.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/calendar"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "calendar",
+      "exports": {
+        "calendarRoot": "bootstrap-2-3-2-calendar-root",
+        "calendarGrid": "bootstrap-2-3-2-calendar-grid",
+        "calendarRow": "bootstrap-2-3-2-calendar-row",
+        "calendarDay": "bootstrap-2-3-2-calendar-day",
+        "calendarHeading": "bootstrap-2-3-2-calendar-heading",
+        "calendarPrevious": "bootstrap-2-3-2-calendar-previous",
+        "calendarNext": "bootstrap-2-3-2-calendar-next"
+      },
+      "demoId": "demo-bootstrap-2-3-2-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-calendar.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/calendar"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "calendar",
+      "exports": {
+        "calendarRoot": "liquid-glass-calendar-root",
+        "calendarGrid": "liquid-glass-calendar-grid",
+        "calendarRow": "liquid-glass-calendar-row",
+        "calendarDay": "liquid-glass-calendar-day",
+        "calendarHeading": "liquid-glass-calendar-heading",
+        "calendarPrevious": "liquid-glass-calendar-previous",
+        "calendarNext": "liquid-glass-calendar-next"
+      },
+      "demoId": "demo-liquid-glass-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-calendar.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/calendar"
+    }
+  ],
+  "tests": ["packages/prototypes/base/test/calendar.test.ts"],
+  "remaining": [
+    "Catalog/exports/CLI/registry/nav integration owned by Finf integrator",
+    "Full browser keyboard, pointer/touch, controlled month and remount matrix",
+    "Native GPUI, Compiler/Adapter parity, package consumer, visual evidence, independent review, lifecycle admission"
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

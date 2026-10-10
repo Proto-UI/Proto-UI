@@ -1,0 +1,16 @@
+---
+title: 'Calendar (WIP)'
+description: 'Gregorian date selection with controlled value and keyboard navigation.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Calendar is a date-only Gregorian control. Value and visible month can each be controlled; the day cells support arrow, Home/End and PageUp/PageDown navigation, unavailable dates and read-only selection. Date values use YYYY-MM-DD; months use YYYY-MM. The application supplies six rows of day atoms with offsets 0–41.
+
+This functional checkpoint is WIP. Native GPUI, complete Adapter/Compiler parity, visual evidence and lifecycle admission are still pending.
+
+<PrototypePreviewer
+  demoId="demo-base-calendar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
