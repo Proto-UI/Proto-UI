@@ -8,7 +8,11 @@ import ts from 'typescript';
 import { canonicalizeLoweredVariants } from '../generated/lowered-variant-order.js';
 
 export async function collectProtoStyleTokens(root) {
-  const files = await collectSourceFiles(root);
+  return collectProtoStyleTokensFromFiles(await collectSourceFiles(root));
+}
+
+/** Explicit source graph entry for package preset generation; never executes prototype code. */
+export async function collectProtoStyleTokensFromFiles(files) {
   const tokens = new Set();
   const moduleCache = new Map();
 

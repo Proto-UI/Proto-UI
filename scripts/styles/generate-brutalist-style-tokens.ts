@@ -4,7 +4,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { format, resolveConfig } from 'prettier';
 
-import { collectProtoStyleTokens } from '../../packages/cli/src/services/prototype-style-tokens.js';
+import { collectFamilyStyleClosure } from './family-style-closure.js';
 
 const root = path.resolve(fileURLToPath(new URL('../..', import.meta.url)));
 const inputPath = path.join(root, 'packages/prototypes/brutalist/src');
@@ -12,7 +12,10 @@ const outputPath = path.join(root, 'packages/cli/src/generated/brutalist-style-t
 const themeInputPath = path.join(root, 'packages/prototypes/brutalist/src/theme.ts');
 const themeOutputPath = path.join(root, 'packages/cli/src/generated/brutalist-theme.ts');
 const checkOnly = process.argv.slice(2).includes('--check');
-const tokens = (await collectProtoStyleTokens(inputPath)) as string[];
+const { tokens } = await collectFamilyStyleClosure(
+  inputPath,
+  path.join(root, 'packages/prototypes/base/src')
+);
 const themeModule = await import(`${pathToFileURL(themeInputPath).href}?t=${Date.now()}`);
 const themeManifest = themeModule.BRUTALIST_THEME as Readonly<{
   light: Readonly<Record<string, string>>;
