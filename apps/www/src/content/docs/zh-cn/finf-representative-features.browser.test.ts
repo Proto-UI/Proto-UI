@@ -6,13 +6,7 @@ import path from 'node:path';
 import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import {
-  chromeExecutable,
-  startServer,
-  stopServer,
-  waitForPreviewRuntime,
-  type RuntimeId,
-} from './browser-harness';
+import { chromeExecutable, startServer, stopServer, type RuntimeId } from './browser-harness';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
 // This is official sandboxed browser evidence, not native/packed/full Finf admission.
@@ -193,12 +187,136 @@ async function hasFocus(locator: Locator) {
   });
 }
 
-function runtimeTab(previewer: Locator, runtime: RuntimeId) {
-  return previewer
-    .locator(
-      '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"]'
+// Suite-local: fixed projections and generic embeds own different real Tabs shells.
+// Do not fall back to the obsolete Select control or change the shared harness.
+async function runtimeControls(previewer: Locator) {
+  const fixed = (await previewer.getAttribute('data-projection-mode')) === 'fixed-family';
+  return previewer.locator(
+    fixed
+      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
+      : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
+  );
+}
+
+async function runtimeTab(previewer: Locator, runtime: RuntimeId) {
+  return (await runtimeControls(previewer)).getByRole('tab', {
+    name: RUNTIME_LABELS[runtime],
+    exact: true,
+  });
+}
+
+// This function is serialized into the page; keep every dependency inside it.
+function inspectRuntime(
+  root: HTMLElement,
+  request: { runtime: RuntimeId; label: string; readySelector: string; count: number }
+) {
+  const { runtime, label, readySelector, count } = request;
+  const fixed = root.dataset.projectionMode === 'fixed-family';
+  const scopes = root.querySelectorAll<HTMLElement>('[data-projection-scope]');
+  const scope = scopes.length === 1 ? scopes[0] : null;
+  const hosts = root.querySelectorAll<HTMLElement>('.host');
+  const host = hosts.length === 1 ? hosts[0] : null;
+  const controls = root.querySelectorAll<HTMLElement>(
+    fixed
+      ? '[data-projection-scope][data-projection-state="ready"] [data-projection-control="runtime"][data-runtime-tabs]'
+      : '[data-runtime-tabs-mount] [data-runtime-tabs-root]'
+  );
+  const control = controls.length === 1 ? controls[0] : null;
+  const selected = control?.querySelectorAll<HTMLElement>('[role="tab"][aria-selected="true"]');
+  const tab = selected?.length === 1 ? selected[0] : null;
+  const content = fixed ? scope?.querySelector<HTMLElement>('[data-projection-content]') : host;
+  const committed = fixed
+    ? scope?.dataset.projectionRuntime
+    : (
+        root as HTMLElement & { __previewer__?: { getCurrentRuntime(): string | null } }
+      ).__previewer__?.getCurrentRuntime();
+  const surfaces = content?.querySelectorAll<HTMLElement>(
+    '.pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+  );
+  const surface = surfaces?.length === 1 ? surfaces[0] : null;
+  const firstRoot = surface?.querySelector<HTMLElement>('[data-pui-root]');
+  const unavailable = (element: HTMLElement | null | undefined) => {
+    if (!element?.isConnected) return true;
+    for (let current: HTMLElement | null = element; current; current = current.parentElement) {
+      if (
+        current.inert ||
+        current.matches(
+          '[inert], [hidden], [aria-hidden="true"], [aria-busy="true"], [aria-disabled="true"], [data-previewer-startup-pending], [data-previewer-startup-shell]'
+        )
+      )
+        return true;
+      const style = getComputedStyle(current);
+      if (style.display === 'none' || style.visibility === 'hidden') return true;
+    }
+    return false;
+  };
+  const framework = !firstRoot
+    ? null
+    : firstRoot.tagName.startsWith('WC-')
+      ? 'wc'
+      : (firstRoot as HTMLElement & { __vue__?: unknown }).__vue__
+        ? 'vue2'
+        : host?.hasAttribute('data-v-app') || firstRoot.closest('[data-v-app]')
+          ? 'vue'
+          : Object.keys(surface!).some((key) => key.startsWith('__reactFiber$'))
+            ? 'react'
+            : null;
+  const targetCount = surface?.querySelectorAll(readySelector).length ?? 0;
+  const problems: string[] = [];
+  if (!host || !content || controls.length !== 1) problems.push('missing-or-ambiguous-shell');
+  if (fixed && (scopes.length !== 1 || scope?.dataset.projectionState !== 'ready'))
+    problems.push('projection-not-ready');
+  if (!fixed && scopes.length) problems.push('unexpected-fixed-scope');
+  if (committed !== runtime) problems.push('runtime-not-committed');
+  if (!tab || tab.textContent?.trim() !== label || (!fixed && tab.dataset.runtimeTab !== runtime))
+    problems.push('runtime-tab-not-selected');
+  if (unavailable(host) || unavailable(control) || unavailable(tab) || unavailable(surface))
+    problems.push('shell-not-interactive');
+  if (
+    root.querySelector(
+      '[data-previewer-startup-pending], [data-previewer-startup-shell], .proto-previewer__skeleton'
     )
-    .getByRole('tab', { name: RUNTIME_LABELS[runtime], exact: true });
+  )
+    problems.push('startup-pending');
+  if (
+    !surface?.hasAttribute('data-pui-root') ||
+    Array.from(content?.querySelectorAll('[data-pui-root]') ?? []).some(
+      (element) => element !== surface && !surface?.contains(element)
+    )
+  )
+    problems.push('missing-or-extra-demo-surface');
+  if (framework !== runtime) problems.push('wrong-framework');
+  if (!firstRoot || targetCount !== count) problems.push('target-controls-not-ready');
+  return {
+    ready: problems.length === 0,
+    shell: fixed ? 'fixed-family' : 'generic',
+    committedRuntime: committed ?? null,
+    selectedLabel: tab?.textContent?.trim() ?? null,
+    surfaceCount: surfaces?.length ?? 0,
+    framework,
+    targetCount,
+    problems,
+  };
+}
+
+async function waitForRealRuntime(
+  previewer: Locator,
+  runtime: RuntimeId,
+  readySelector: string,
+  count: number
+) {
+  await expect
+    .poll(
+      () =>
+        previewer.evaluate(inspectRuntime, {
+          runtime,
+          label: RUNTIME_LABELS[runtime],
+          readySelector,
+          count,
+        }),
+      { timeout: 20_000 }
+    )
+    .toMatchObject({ ready: true });
 }
 
 async function selectRealRuntime(
@@ -208,12 +326,12 @@ async function selectRealRuntime(
   readySelector: string,
   count: number
 ) {
-  const tab = runtimeTab(previewer, runtime);
+  const tab = await runtimeTab(previewer, runtime);
   await tab.waitFor({ state: 'visible' });
   if ((await tab.getAttribute('aria-selected')) !== 'true') await tab.click();
-  await waitForPreviewRuntime(page, runtime, readySelector, count);
+  await waitForRealRuntime(previewer, runtime, readySelector, count);
   await expect
-    .poll(() => runtimeTab(previewer, runtime).getAttribute('aria-selected'))
+    .poll(async () => (await runtimeTab(previewer, runtime)).getAttribute('aria-selected'))
     .toBe('true');
 }
 
@@ -227,6 +345,31 @@ async function keyboardReach(page: Page, target: Locator) {
 
 async function writeJson(file: string, value: unknown) {
   await writeFile(path.join(output, file), JSON.stringify(value, null, 2));
+}
+
+async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
+  const previewer = page.locator('[data-previewer-id]').first();
+  if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
+  const files: Record<string, string> = {};
+  const errors: string[] = [];
+  for (const [kind, collect] of [
+    ['dom', () => previewer.evaluate((root) => root.outerHTML)],
+    ['aria', () => previewer.ariaSnapshot()],
+  ] as const) {
+    try {
+      const file = `${id}-failed-${kind}.txt`;
+      await writeFile(path.join(output, file), await collect());
+      files[kind] = file;
+    } catch (error) {
+      errors.push(`${kind}: ${String(error)}`);
+    }
+  }
+  try {
+    await capture('failed-previewer', { diagnostic: 'Exact failed previewer region' }, previewer);
+  } catch (error) {
+    errors.push(`region: ${String(error)}`);
+  }
+  return { files, errors };
 }
 
 async function runCase(testCase: Case) {
@@ -294,6 +437,11 @@ async function runCase(testCase: Case) {
   } finally {
     // A failed assertion cannot suppress either the current pixels or the receipt.
     await capture(failure ? 'failed' : 'final').catch((error) => captureErrors.push(String(error)));
+    const failureDiagnostics = failure
+      ? await captureFailureDiagnostics(page, testCase.id, capture).catch((error) => ({
+          error: String(error),
+        }))
+      : null;
     const environment = await page
       .evaluate(() => ({
         locale: navigator.language,
@@ -328,6 +476,7 @@ async function runCase(testCase: Case) {
             : null,
       screenshots,
       captureErrors,
+      failureDiagnostics,
       pageErrors,
       blockedRequests,
       acceptance:
@@ -727,71 +876,109 @@ async function alertDialogJourney({ page, previewer, capture }: Journey) {
 
 async function runtimeTabsJourney({ page, previewer, capture }: Journey) {
   await selectRealRuntime(page, previewer, 'wc', '[data-demo-ref="form"]', 1);
-  const generation = () =>
-    previewer
-      .locator('[data-projection-scope][data-projection-state="ready"]')
-      .getAttribute('data-projection-generation');
-  const labels = () =>
-    previewer.locator('[data-projection-control="runtime"] [role="tab"]').allTextContents();
-  await capture('wc-rest', { labels: await labels(), generation: await generation() }, previewer);
-  expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
-  const snapshots = [];
-  for (const [from, to, key] of [
-    ['wc', 'react', 'Enter'],
-    ['react', 'vue', 'Space'],
-    ['vue', 'vue2', 'Enter'],
-    ['vue2', 'wc', 'Space'],
-  ] as const) {
-    const before = Number(await generation());
-    await runtimeTab(previewer, from).focus();
-    await page.keyboard.press('ArrowRight');
-    await expect.poll(() => hasFocus(runtimeTab(previewer, to))).toBe(true);
-    expect(Number(await generation())).toBe(before);
-    expect(await runtimeTab(previewer, from).getAttribute('aria-selected')).toBe('true');
-    await page.keyboard.press(key);
-    await waitForPreviewRuntime(page, to, '[data-demo-ref="form"]', 1);
-    await expect.poll(() => hasFocus(runtimeTab(previewer, to))).toBe(true);
-    expect(Number(await generation())).toBe(before + 1);
-    const selected = await paint(runtimeTab(previewer, to));
-    const inactive = await paint(runtimeTab(previewer, from));
-    snapshots.push({
-      from,
-      to,
-      key,
-      before,
-      after: Number(await generation()),
-      selected,
-      inactive,
-    });
-    await capture(`${to}-selected`, snapshots.at(-1), previewer);
-    expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
-    expect(
-      await previewer
-        .locator('[data-projection-control="runtime"] [role="tab"][aria-selected="true"]')
-        .count()
-    ).toBe(1);
-  }
-  const before = await generation();
-  await page.keyboard.press('End');
-  await expect.poll(() => hasFocus(runtimeTab(previewer, 'vue2'))).toBe(true);
-  await page.keyboard.press('Home');
-  await expect.poll(() => hasFocus(runtimeTab(previewer, 'wc'))).toBe(true);
-  expect(await generation()).toBe(before);
-  await page.setViewportSize({ width: 320, height: 1000 });
-  const list = previewer.locator('[data-projection-control="runtime"]').getByRole('tablist');
-  await page.keyboard.press('End');
-  await expect.poll(() => hasFocus(runtimeTab(previewer, 'vue2'))).toBe(true);
-  await capture('narrow-keyboard-focus', {
-    list: await paint(list),
-    last: await paint(runtimeTab(previewer, 'vue2')),
-    viewport: page.viewportSize(),
+  // These Form pages are generic embeds. Observe their real public commit event
+  // and DOM ownership, rather than inventing a fixed-family generation counter.
+  expect(await previewer.getAttribute('data-projection-mode')).not.toBe('fixed-family');
+  const observation = await previewer.evaluateHandle((root) => {
+    const events: string[] = [];
+    const listener = (event: Event) => {
+      if (event.target === root) events.push((event as CustomEvent<{ id: string }>).detail.id);
+    };
+    root.addEventListener('runtime:changed', listener);
+    return { events, stop: () => root.removeEventListener('runtime:changed', listener) };
   });
-  const narrowList = await paint(list);
-  const lastTab = await paint(runtimeTab(previewer, 'vue2'));
-  expect(narrowList.overflowX).toBe('auto');
-  expect(narrowList.scrollWidth).toBeGreaterThan(narrowList.clientWidth);
-  expect(lastTab.rect.x).toBeGreaterThanOrEqual(narrowList.rect.x - 1);
-  expect(lastTab.rect.right).toBeLessThanOrEqual(narrowList.rect.right + 1);
+  const publications = () => observation.evaluate((state) => [...state.events]);
+  const labels = async () => (await runtimeControls(previewer)).getByRole('tab').allTextContents();
+  const surface = () =>
+    previewer
+      .locator(
+        '.host .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"]'
+      )
+      .elementHandle();
+  const snapshots = [];
+  try {
+    await capture('wc-rest', { labels: await labels(), events: await publications() }, previewer);
+    expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
+    const expectedEvents: string[] = [];
+    for (const [from, to, key] of [
+      ['wc', 'react', 'Enter'],
+      ['react', 'vue', 'Space'],
+      ['vue', 'vue2', 'Enter'],
+      ['vue2', 'wc', 'Space'],
+    ] as const) {
+      const previousSurface = await surface();
+      expect(previousSurface).not.toBeNull();
+      try {
+        await (await runtimeTab(previewer, from)).focus();
+        await page.keyboard.press('ArrowRight');
+        await expect.poll(async () => hasFocus(await runtimeTab(previewer, to))).toBe(true);
+        expect(await publications()).toEqual(expectedEvents);
+        expect(await previousSurface!.evaluate((element) => element.isConnected)).toBe(true);
+        await waitForRealRuntime(previewer, from, '[data-demo-ref="form"]', 1);
+        expect(await (await runtimeTab(previewer, from)).getAttribute('aria-selected')).toBe(
+          'true'
+        );
+        await page.keyboard.press(key);
+        await waitForRealRuntime(previewer, to, '[data-demo-ref="form"]', 1);
+        expectedEvents.push(to);
+        await expect.poll(publications).toEqual(expectedEvents);
+        expect(await previousSurface!.evaluate((element) => element.isConnected)).toBe(false);
+        await expect.poll(async () => hasFocus(await runtimeTab(previewer, to))).toBe(true);
+        const selected = await paint(await runtimeTab(previewer, to));
+        const inactive = await paint(await runtimeTab(previewer, from));
+        snapshots.push({
+          from,
+          to,
+          key,
+          events: await publications(),
+          oldSurfaceDisconnected: true,
+          selected,
+          inactive,
+        });
+        await capture(`${to}-selected`, snapshots.at(-1), previewer);
+        expect(await labels()).toEqual(Object.values(RUNTIME_LABELS));
+        expect(
+          await (await runtimeControls(previewer))
+            .locator('[role="tab"][aria-selected="true"]')
+            .count()
+        ).toBe(1);
+      } finally {
+        await previousSurface?.dispose();
+      }
+    }
+    const finalSurface = await surface();
+    try {
+      await page.keyboard.press('End');
+      await expect.poll(async () => hasFocus(await runtimeTab(previewer, 'vue2'))).toBe(true);
+      await page.keyboard.press('Home');
+      await expect.poll(async () => hasFocus(await runtimeTab(previewer, 'wc'))).toBe(true);
+      expect(await publications()).toEqual(expectedEvents);
+      expect(await finalSurface!.evaluate((element) => element.isConnected)).toBe(true);
+      await page.setViewportSize({ width: 320, height: 1000 });
+      const list = (await runtimeControls(previewer)).getByRole('tablist');
+      await page.keyboard.press('End');
+      await expect.poll(async () => hasFocus(await runtimeTab(previewer, 'vue2'))).toBe(true);
+      await capture('narrow-keyboard-focus', {
+        list: await paint(list),
+        last: await paint(await runtimeTab(previewer, 'vue2')),
+        viewport: page.viewportSize(),
+      });
+      const narrowList = await paint(list);
+      const lastTab = await paint(await runtimeTab(previewer, 'vue2'));
+      expect(narrowList.overflowX).toBe('auto');
+      expect(narrowList.scrollWidth).toBeGreaterThan(narrowList.clientWidth);
+      expect(lastTab.rect.x).toBeGreaterThanOrEqual(narrowList.rect.x - 1);
+      expect(lastTab.rect.right).toBeLessThanOrEqual(narrowList.rect.right + 1);
+      expect(await publications()).toEqual(expectedEvents);
+      expect(await finalSurface!.evaluate((element) => element.isConnected)).toBe(true);
+      await waitForRealRuntime(previewer, 'wc', '[data-demo-ref="form"]', 1);
+    } finally {
+      await finalSurface?.dispose();
+    }
+  } finally {
+    await observation.evaluate((state) => state.stop());
+    await observation.dispose();
+  }
   // Geometry follows the inspected underline reference; screenshots still need human inspection.
   for (const { selected, inactive } of snapshots) {
     expect(selected.border[2]).toBe('2px');
