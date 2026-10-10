@@ -76,7 +76,13 @@ class AxisInputModuleImpl extends ModuleBase {
       },
       sync: (patch) => {
         this.sys.ensureCallback('axisInput.sync');
-        const next = Object.freeze({ ...this.config, ...patch });
+        const next: AxisInputConfig = Object.freeze({
+          axis: patch.axis ?? this.config.axis,
+          direction: patch.direction ?? this.config.direction,
+          disabled: patch.disabled ?? this.config.disabled,
+          readOnly: patch.readOnly ?? this.config.readOnly,
+          reverse: patch.reverse ?? this.config.reverse,
+        });
         if (
           Object.keys(INITIAL_CONFIG).every(
             (key) =>

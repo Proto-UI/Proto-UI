@@ -192,4 +192,34 @@ describe('axis-input module ownership', () => {
     expect(h.samples.map((s) => s.phase)).toEqual(['start', 'end']);
     h.module.hooks.dispose?.();
   });
+  it('does not enable input or reverse direction when optional sync keys are undefined', () => {
+    const h = harness();
+    h.callback(() =>
+      h.input.sync({ disabled: undefined, reverse: undefined, direction: undefined })
+    );
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    expect(h.records[0].binding.config).toEqual({
+      axis: 'horizontal',
+      direction: 'ltr',
+      disabled: true,
+      readOnly: false,
+      reverse: false,
+    });
+    h.records[0].binding.onSample(sample('start'));
+    expect(h.samples).toEqual([]);
+    h.module.hooks.dispose?.();
+  });
+  it('invalidates the old stream when a start callback disposes its logical owner', () => {
+    const h = harness();
+    h.input.on((_run, event) => {
+      if (event.phase === 'start') h.module.hooks.dispose?.();
+    });
+    h.mount();
+    const binding = h.records[0].binding;
+    binding.onSample(sample('start'));
+    binding.onSample(sample('move'));
+    binding.onSample(sample('end'));
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel']);
+    expect(h.records[0].disposed).toBe(true);
+  });
 });
