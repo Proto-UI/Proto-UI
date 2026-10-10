@@ -28,7 +28,7 @@ export default {
                 'kind': 'proto',
                 'prototypeId': 'shadcn-popover-description',
                 'children': [
-                  'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                  'Tab between the trigger and content, then move to the outside control. Outside focus closes without moving focus back.',
                 ],
               },
               {
@@ -47,6 +47,11 @@ export default {
           'a11yLabel': 'Popover',
         },
         'ref': 'root',
+      },
+      {
+        'kind': 'proto',
+        'prototypeId': 'shadcn-button',
+        'children': ['Outside focus target'],
       },
       {
         'kind': 'box',

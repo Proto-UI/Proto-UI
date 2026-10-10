@@ -72,6 +72,7 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
 
   const boundary = asBoundary();
   boundary.observe('pointer.press');
+  boundary.observe('focus.move');
 
   const focusScope = asFocusScope<PopoverContentProps>();
   focusScope.configure({ trap: false, loop: false, restore: 'none' });
@@ -257,9 +258,12 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     if (currentContext?.controlled && currentContext.open) overlay.openOverlay('controlled.sync');
   });
 
-  boundary.subscribeOutside(() => {
+  boundary.subscribeOutside((event) => {
     if (!overlay.isOpen()) return;
-    const returnFocusReason: PopoverOpenFocusReason = 'pointer';
+    const focusOutside = event.observation === 'focus.move';
+    // A verified focus movement does not identify its input device. Do not
+    // infer keyboard origin from focusin or inspect host events in the consumer.
+    const returnFocusReason: PopoverOpenFocusReason = focusOutside ? 'programmatic' : 'pointer';
     const run = mountedRun;
     if (!run) return;
     const ctx = currentContext;
@@ -267,11 +271,16 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     if (!ctx.open) return;
     if (alertProp.get()) return;
 
-    requestPopoverOpen(run, false, 'outside.press', returnFocusReason);
+    // Keep the owner's committed open fact authoritative: observing an outside
+    // focus must not close Presence or restore focus before a controlled owner
+    // accepts the request. Boundary also retains trigger/portalled child regions.
+    requestPopoverOpen(
+      run,
+      false,
+      focusOutside ? 'focus.outside' : 'outside.press',
+      returnFocusReason
+    );
   });
-
-  // hasFocused is scope history, not current descendant focus. Outside-focus
-  // dismissal requires the shared Overlay/Boundary focus observation capability.
 
   def.rule({
     when: (w) => w.state(transition.isPresent).eq(false),
