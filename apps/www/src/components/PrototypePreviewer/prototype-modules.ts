@@ -834,6 +834,14 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-down');
     registerPrototype('lucide-chevron-down-icon', mod.default);
   },
+  'lucide-chevron-left-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-left');
+    registerPrototype('lucide-chevron-left-icon', mod.default);
+  },
+  'lucide-chevron-right-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/chevron-right');
+    registerPrototype('lucide-chevron-right-icon', mod.default);
+  },
   'lucide-x-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/x');
     registerPrototype('lucide-x-icon', mod.default);
