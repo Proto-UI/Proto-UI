@@ -77,6 +77,7 @@ export class TextControlModuleImpl extends ModuleBase {
     return {
       on: (type, callback) => this.on(type, callback),
       sync: (patch) => this.sync(patch),
+      resetValue: (value) => this.resetValue(value),
       snapshot: () => this.snapshot(),
     };
   }
@@ -126,6 +127,23 @@ export class TextControlModuleImpl extends ModuleBase {
     });
     if (this.valueMode === 'controlled') this.value = this.canonicalize(this.patch.value ?? '');
     this.syncLease();
+  }
+
+  private resetValue(value?: string): boolean {
+    this.sys.ensureCallback('textControl.resetValue');
+    if (!this.declared || !this.initialized || this.mountPhase !== 'mounted') return false;
+    if (value !== undefined && typeof value !== 'string') return false;
+    const controlled = this.valueMode === 'controlled';
+    const next = controlled
+      ? this.value
+      : this.canonicalize(value ?? this.patch.defaultValue ?? '');
+    // Retire composition, queued restoration and reentrant old callbacks before the new value.
+    this.eventGeneration += 1;
+    this.callbackPrelude = null;
+    this.value = next;
+    this.composing = false;
+    this.attachLease();
+    return !controlled;
   }
 
   snapshot(): TextControlSnapshot | null {
@@ -261,6 +279,7 @@ export class TextControlModuleImpl extends ModuleBase {
         const run = this.sys.getCallbackCtx() as RunHandle<PropsBaseType> | undefined;
         if (!run) return;
         for (const listener of this.listeners) {
+          if (generation !== this.eventGeneration || epoch !== this.leaseEpoch) break;
           if (listener.type === canonicalEvent.type) listener.callback(run, canonicalEvent);
         }
       });

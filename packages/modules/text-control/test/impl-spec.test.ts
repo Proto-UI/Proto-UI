@@ -1185,3 +1185,48 @@ describe.each(['single', 'multiline'] as const)('Web %s change-only restoration'
     }
   );
 });
+
+describe('TextControl bounded reset', () => {
+  it('resets uncontrolled canonical value, retires composition and rejects old events', () => {
+    const h = createHarness(),
+      control = h.module.facade.declare();
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ valueMode: 'uncontrolled', defaultValue: 'initial' });
+    const old = h.connectionBox.current!;
+    old.onEvent(event('compositionstart', 'dirty', true));
+    expect(control.resetValue('restored\r\nvalue')).toBe(true);
+    expect(control.snapshot()).toEqual({ value: 'restored\nvalue', composing: false });
+    old.onEvent(event('input', 'stale'));
+    expect(control.snapshot()?.value).toBe('restored\nvalue');
+    expect(h.getPatchValue()).toBe('restored\nvalue');
+    h.module.hooks.onMountPhase?.('detached', 1);
+    expect(control.resetValue('detached')).toBe(false);
+  });
+  it('does not change controlled owner state and does not deliver the old event after reentrant reset', () => {
+    const h = createHarness(),
+      control = h.module.facade.declare();
+    let called = 0;
+    control.on('input', () => {
+      control.resetValue('reset');
+    });
+    control.on('input', () => called++);
+    h.module.hooks.onMountPhase?.('mounted', 1);
+    h.sys.phase = 'callback';
+    control.sync({ defaultValue: 'initial' });
+    h.connectionBox.current!.onEvent(event('input', 'candidate'));
+    expect(called).toBe(0);
+    expect(control.snapshot()?.value).toBe('reset');
+    const other = createHarness(),
+      controlled = other.module.facade.declare();
+    other.module.hooks.onMountPhase?.('mounted', 1);
+    other.sys.phase = 'callback';
+    controlled.sync({ valueMode: 'controlled', value: 'owner' });
+    const old = other.connectionBox.current!;
+    old.onEvent(event('compositionstart', 'candidate', true));
+    expect(controlled.resetValue('attempt')).toBe(false);
+    expect(controlled.snapshot()).toEqual({ value: 'owner', composing: false });
+    old.onEvent(event('compositionend', 'stale'));
+    expect(controlled.snapshot()?.value).toBe('owner');
+  });
+});
