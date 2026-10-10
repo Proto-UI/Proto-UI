@@ -1,0 +1,41 @@
+{
+  "kind": "bounded-diagnostics-and-prototype-validation",
+  "baseCommit": "2a67cb6173020c487591724538ca56e03f14a1ea",
+  "sourceTree": "49f39a1b6fc88c5efcf759f7bcb938d5383285fa",
+  "commitBinding": "The sole parent of this record-only commit must be the actual source commit with this tree; publication checks raw commits, parents and all changed blobs.",
+  "layers": [
+    "Slider native error diagnostic receipt only",
+    "Neo-Brutalist AlertDialog passive Header/Footer and desktop paint",
+    "Select family-toolbar test readiness with restored negative controls",
+    "RuntimeTabs visible-shadow observation instead of exact serialization"
+  ],
+  "validation": {
+    "localExecutionHead": "2a67cb6173020c487591724538ca56e03f14a1ea",
+    "stagedTree": "49f39a1b6fc88c5efcf759f7bcb938d5383285fa",
+    "focusedFiles": 19,
+    "focusedPass": 577,
+    "focusedFail": 0,
+    "plannerPass": 125,
+    "plannerFail": 0,
+    "completeCheckTypesExit": 0,
+    "docsFiles": 814,
+    "docsErrors": 0,
+    "docsWarnings": 0,
+    "docsHints": 11,
+    "normalPrecommitExit": 0,
+    "sourceMessageHooksExit": 0,
+    "boundary": "Checks executed on this staged source tree, not independently on each later replay commit. Same-head tracked shared/links.json was materialized and normal style generation produced ignored Shadow artifacts; earlier setup failures remain in local receipts."
+  },
+  "preservedLimits": {
+    "slider": "Diagnostic-only: previous exact2a67 native4/4 failures remain. Pending-commit event gates, host-surface/style transport and Field Context errors are not repaired here. Full error arrays, assertions, awaits and timeouts remain unchanged.",
+    "neoAlertDialog": "Source-aligned passive grouping/desktop paint only. Strict mobile breakpoint, responsive/animation/native parity and full CLI surface remain open. Catalog550 errors matched the independently checked base; no catalog green claim.",
+    "select": "Two families x four starting runtimes. Each of eight cases executed23 rejecting mutations and restored the positive control (184 total); after-switch negative-control targets are React or Vue, not all four target adapters. Native follow-on journeys require fresh exact-head evidence.",
+    "runtimeTabs": "No-visible-shadow observation accepts none or fully transparent supported shadow layers. The16 earlier raw observations and1336 independent parser assertions are not a new browser run; actual focus/geometry/color/error assertions remain.",
+    "acceptance": "No new acceptance:5 historical closeouts done,63 unfinished. The inherited coverage matrix is an older source snapshot; this compact record does not rewrite it or expand accepted scope."
+  },
+  "disclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ]
+}
