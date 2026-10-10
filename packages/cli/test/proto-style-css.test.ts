@@ -13,6 +13,18 @@ import {
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('projects explicit logical text direction in document and shadow styles', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['direction-ltr', 'direction-rtl']);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('direction: ltr;');
+      expect(css).toContain('direction: rtl;');
+      expect(css).not.toContain('flex-direction:');
+    }
+    expect(renderProtoStyleTokenCss(['direction-sideways'])).toContain(
+      'Unsupported Proto UI style tokens'
+    );
+  });
   it('keeps authored spaces and newlines without hanging preserved spaces into padding', () => {
     const css = renderProtoStyleTokenCss(['whitespace-break-spaces']);
     expect(css).not.toContain('Unsupported Proto UI style tokens');

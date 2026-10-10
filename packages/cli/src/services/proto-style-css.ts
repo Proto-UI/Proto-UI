@@ -137,6 +137,8 @@ const staticUtilities: Record<string, string[]> = {
   ],
   // Bounded layout-safety vocabulary used by Accordion and other authored controls.
   'text-start': ['text-align: start;'],
+  'direction-ltr': ['direction: ltr;'],
+  'direction-rtl': ['direction: rtl;'],
   'whitespace-normal': ['white-space: normal;'],
   'break-words': ['overflow-wrap: break-word;'],
   'overflow-x-auto': ['overflow-x: auto;'],
