@@ -108,11 +108,15 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       published = next;
       run.context.update(context, next);
     };
+    let requestRevision = 0;
     const request = (next: string, reason = 'programmatic') => {
       const run = runNow;
       if (!run || disabled.get() || next === value.get()) return false;
       const matches = triggers(run).filter((t) => t.data.value === next);
       if (next && (matches.length !== 1 || matches[0].data.disabled)) return false;
+      // Record the actual intent before notifying synchronous owner callbacks.
+      // Rejected controlled requests still count; distinct later requests remain valid.
+      requestRevision++;
       if (!run.props.isProvided('value')) value.set(next, 'reason: menu active value request');
       publish(run);
       run.expose.emit('valueChange', { value: next, reason });
@@ -136,7 +140,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       if (!run || disabled.get()) return;
       const enabled = triggers(run).filter((t) => !t.data.disabled);
       if (!enabled.length) return;
-      const index = enabled.findIndex((t) => t.data.value === value.get() || t.data.id === current);
+      // Content navigation starts from its open owner, not an earlier stale
+      // roving member left by initial registration or a rejected request.
+      const openIndex = enabled.findIndex((t) => t.data.value === value.get());
+      const index = openIndex >= 0 ? openIndex : enabled.findIndex((t) => t.data.id === current);
       let i = index + direction;
       i =
         run.props.get().loop === false
@@ -144,7 +151,12 @@ export function createMenuFamily(slug: string, navigation: boolean) {
           : (i + enabled.length) % enabled.length;
       const next = enabled[i];
       const focus = next.part.getExpose('focusSelf');
+      const beforeFocus = requestRevision;
       if (typeof focus === 'function') focus({ reason: 'keyboard' });
+      // Applied focus can synchronously request this switch or let the owner
+      // choose another value/focus. Do not repeat that intent or overwrite the
+      // newer current member; this guard is local to this navigation call.
+      if (runNow !== run || requestRevision !== beforeFocus) return;
       current = next.data.id;
       publish(run);
       if (value.get()) request(next.data.value, 'horizontal-navigation');
