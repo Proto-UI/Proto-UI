@@ -1,3 +1,15 @@
+import type {
+  CarouselRootProps,
+  CarouselRootExposes,
+  CarouselViewportProps,
+  CarouselViewportExposes,
+  CarouselSlideProps,
+  CarouselSlideExposes,
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselNextProps,
+  CarouselNextExposes,
+} from '@proto.ui/prototypes-base/carousel';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asCarouselRoot,
@@ -7,7 +19,7 @@ import {
   asCarouselNext,
 } from '@proto.ui/prototypes-base/carousel';
 export type * from '@proto.ui/prototypes-base/carousel';
-export const carouselRoot = definePrototype({
+export const carouselRoot = definePrototype<CarouselRootProps, CarouselRootExposes>({
   name: 'liquid-glass-carousel-root',
   setup(def) {
     const behavior = asCarouselRoot();
@@ -38,7 +50,7 @@ export const carouselRoot = definePrototype({
   },
 });
 export { carouselRoot as liquidGlassCarouselRoot };
-export const carouselViewport = definePrototype({
+export const carouselViewport = definePrototype<CarouselViewportProps, CarouselViewportExposes>({
   name: 'liquid-glass-carousel-viewport',
   setup(def) {
     const behavior = asCarouselViewport();
@@ -60,7 +72,7 @@ export const carouselViewport = definePrototype({
   },
 });
 export { carouselViewport as liquidGlassCarouselViewport };
-export const carouselSlide = definePrototype({
+export const carouselSlide = definePrototype<CarouselSlideProps, CarouselSlideExposes>({
   name: 'liquid-glass-carousel-slide',
   setup(def) {
     const behavior = asCarouselSlide();
@@ -80,7 +92,7 @@ export const carouselSlide = definePrototype({
   },
 });
 export { carouselSlide as liquidGlassCarouselSlide };
-export const carouselPrevious = definePrototype({
+export const carouselPrevious = definePrototype<CarouselPreviousProps, CarouselPreviousExposes>({
   name: 'liquid-glass-carousel-previous',
   setup(def) {
     const behavior = asCarouselPrevious();
@@ -104,7 +116,7 @@ export const carouselPrevious = definePrototype({
   },
 });
 export { carouselPrevious as liquidGlassCarouselPrevious };
-export const carouselNext = definePrototype({
+export const carouselNext = definePrototype<CarouselNextProps, CarouselNextExposes>({
   name: 'liquid-glass-carousel-next',
   setup(def) {
     const behavior = asCarouselNext();

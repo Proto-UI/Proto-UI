@@ -1,3 +1,16 @@
+import type {
+  CarouselRootExposes,
+  CarouselViewportProps,
+  CarouselViewportExposes,
+  CarouselSlideExposes,
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselRootAsHookContract,
+  CarouselViewportAsHookContract,
+  CarouselSlideAsHookContract,
+  CarouselNavigationAsHookContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   createContextKey,
@@ -46,7 +59,7 @@ type Context = {
   direction: 'ltr' | 'rtl';
 };
 export const CAROUSEL_CONTEXT = createContextKey<Context>('base-carousel');
-function setupRoot(def: DefHandle<CarouselRootProps, any>) {
+function setupRoot(def: DefHandle<CarouselRootProps, CarouselRootExposes>) {
   def.anatomy.claim(CAROUSEL_FAMILY, { role: 'root' });
   asCollection().configure({ family: CAROUSEL_FAMILY, itemRole: 'slide' });
   def.props.define({
@@ -137,9 +150,13 @@ function setupRoot(def: DefHandle<CarouselRootProps, any>) {
     owner = null;
   });
 }
-export const asCarouselRoot = defineAsHook({ name: 'as-carousel-root', setup: setupRoot });
+export const asCarouselRoot = defineAsHook<
+  CarouselRootProps,
+  CarouselRootExposes,
+  CarouselRootAsHookContract
+>({ name: 'as-carousel-root', setup: setupRoot });
 export const carouselRoot = definePrototype({ name: 'base-carousel-root', setup: setupRoot });
-function setupViewport(def: DefHandle<Record<string, never>, any>) {
+function setupViewport(def: DefHandle<CarouselViewportProps, CarouselViewportExposes>) {
   def.anatomy.claim(CAROUSEL_FAMILY, { role: 'viewport' });
   const focus = asFocusable();
   focus.configure({ disabled: false });
@@ -184,7 +201,11 @@ function setupViewport(def: DefHandle<Record<string, never>, any>) {
     callOwner(run, CAROUSEL_FAMILY, 'requestIndex', next);
   });
 }
-export const asCarouselViewport = defineAsHook({
+export const asCarouselViewport = defineAsHook<
+  CarouselViewportProps,
+  CarouselViewportExposes,
+  CarouselViewportAsHookContract
+>({
   name: 'as-carousel-viewport',
   setup: setupViewport,
 });
@@ -192,7 +213,7 @@ export const carouselViewport = definePrototype({
   name: 'base-carousel-viewport',
   setup: setupViewport,
 });
-function setupSlide(def: DefHandle<CarouselSlideProps, any>) {
+function setupSlide(def: DefHandle<CarouselSlideProps, CarouselSlideExposes>) {
   def.props.define({ index: { type: 'number' } });
   def.props.setDefaults({ index: 0 });
   asCollectionItem().configure({
@@ -224,10 +245,14 @@ function setupSlide(def: DefHandle<CarouselSlideProps, any>) {
     intent: (i) => i.feedback.style.use(tw('hidden')),
   });
 }
-export const asCarouselSlide = defineAsHook({ name: 'as-carousel-slide', setup: setupSlide });
+export const asCarouselSlide = defineAsHook<
+  CarouselSlideProps,
+  CarouselSlideExposes,
+  CarouselSlideAsHookContract
+>({ name: 'as-carousel-slide', setup: setupSlide });
 export const carouselSlide = definePrototype({ name: 'base-carousel-slide', setup: setupSlide });
 function navigation(delta: number) {
-  return (def: DefHandle<any, any>) => {
+  return (def: DefHandle<CarouselPreviousProps, CarouselPreviousExposes>) => {
     const button = asButton();
     const focus = asFocusable();
     def.anatomy.claim(CAROUSEL_FAMILY, { role: delta < 0 ? 'previous' : 'next' });
@@ -246,7 +271,11 @@ function navigation(delta: number) {
     });
   };
 }
-export const asCarouselPrevious = defineAsHook({
+export const asCarouselPrevious = defineAsHook<
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselNavigationAsHookContract
+>({
   name: 'as-carousel-previous',
   setup: navigation(-1),
 });
@@ -254,5 +283,9 @@ export const carouselPrevious = definePrototype({
   name: 'base-carousel-previous',
   setup: navigation(-1),
 });
-export const asCarouselNext = defineAsHook({ name: 'as-carousel-next', setup: navigation(1) });
+export const asCarouselNext = defineAsHook<
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselNavigationAsHookContract
+>({ name: 'as-carousel-next', setup: navigation(1) });
 export const carouselNext = definePrototype({ name: 'base-carousel-next', setup: navigation(1) });

@@ -1,3 +1,15 @@
+import type {
+  CarouselRootProps,
+  CarouselRootExposes,
+  CarouselViewportProps,
+  CarouselViewportExposes,
+  CarouselSlideProps,
+  CarouselSlideExposes,
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselNextProps,
+  CarouselNextExposes,
+} from '@proto.ui/prototypes-base/carousel';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asCarouselRoot,
@@ -7,7 +19,7 @@ import {
   asCarouselNext,
 } from '@proto.ui/prototypes-base/carousel';
 export type * from '@proto.ui/prototypes-base/carousel';
-export const carouselRoot = definePrototype({
+export const carouselRoot = definePrototype<CarouselRootProps, CarouselRootExposes>({
   name: 'shadcn-carousel-root',
   setup(def) {
     const behavior = asCarouselRoot();
@@ -31,7 +43,7 @@ export const carouselRoot = definePrototype({
   },
 });
 export { carouselRoot as shadcnCarouselRoot };
-export const carouselViewport = definePrototype({
+export const carouselViewport = definePrototype<CarouselViewportProps, CarouselViewportExposes>({
   name: 'shadcn-carousel-viewport',
   setup(def) {
     const behavior = asCarouselViewport();
@@ -53,7 +65,7 @@ export const carouselViewport = definePrototype({
   },
 });
 export { carouselViewport as shadcnCarouselViewport };
-export const carouselSlide = definePrototype({
+export const carouselSlide = definePrototype<CarouselSlideProps, CarouselSlideExposes>({
   name: 'shadcn-carousel-slide',
   setup(def) {
     const behavior = asCarouselSlide();
@@ -73,7 +85,7 @@ export const carouselSlide = definePrototype({
   },
 });
 export { carouselSlide as shadcnCarouselSlide };
-export const carouselPrevious = definePrototype({
+export const carouselPrevious = definePrototype<CarouselPreviousProps, CarouselPreviousExposes>({
   name: 'shadcn-carousel-previous',
   setup(def) {
     const behavior = asCarouselPrevious();
@@ -97,7 +109,7 @@ export const carouselPrevious = definePrototype({
   },
 });
 export { carouselPrevious as shadcnCarouselPrevious };
-export const carouselNext = definePrototype({
+export const carouselNext = definePrototype<CarouselNextProps, CarouselNextExposes>({
   name: 'shadcn-carousel-next',
   setup(def) {
     const behavior = asCarouselNext();

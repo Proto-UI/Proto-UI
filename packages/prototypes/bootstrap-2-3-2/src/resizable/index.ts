@@ -1,3 +1,11 @@
+import type {
+  ResizableRootProps,
+  ResizableRootExposes,
+  ResizablePanelProps,
+  ResizablePanelExposes,
+  ResizableHandleProps,
+  ResizableHandleExposes,
+} from '@proto.ui/prototypes-base/resizable';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asResizableRoot,
@@ -5,7 +13,7 @@ import {
   asResizableHandle,
 } from '@proto.ui/prototypes-base/resizable';
 export type * from '@proto.ui/prototypes-base/resizable';
-export const resizableRoot = definePrototype({
+export const resizableRoot = definePrototype<ResizableRootProps, ResizableRootExposes>({
   name: 'bootstrap-2-3-2-resizable-root',
   setup(def) {
     const behavior = asResizableRoot();
@@ -29,7 +37,7 @@ export const resizableRoot = definePrototype({
   },
 });
 export { resizableRoot as bootstrap232ResizableRoot };
-export const resizablePanel = definePrototype({
+export const resizablePanel = definePrototype<ResizablePanelProps, ResizablePanelExposes>({
   name: 'bootstrap-2-3-2-resizable-panel',
   setup(def) {
     const behavior = asResizablePanel();
@@ -49,7 +57,7 @@ export const resizablePanel = definePrototype({
   },
 });
 export { resizablePanel as bootstrap232ResizablePanel };
-export const resizableHandle = definePrototype({
+export const resizableHandle = definePrototype<ResizableHandleProps, ResizableHandleExposes>({
   name: 'bootstrap-2-3-2-resizable-handle',
   setup(def) {
     const behavior = asResizableHandle();

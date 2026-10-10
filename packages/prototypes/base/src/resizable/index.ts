@@ -1,3 +1,13 @@
+import type {
+  ResizableRootExposes,
+  ResizablePanelExposes,
+  ResizableHandleProps,
+  ResizableHandleExposes,
+  ResizableRootAsHookContract,
+  ResizablePanelAsHookContract,
+  ResizableHandleAsHookContract,
+} from './types';
+export type * from './types';
 import {
   createAnatomyFamily,
   createContextKey,
@@ -56,7 +66,7 @@ const initial: Context = {
   orientation: 'horizontal',
   direction: 'ltr',
 };
-function setupRoot(def: DefHandle<ResizableRootProps, any>) {
+function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
   def.anatomy.claim(RESIZABLE_FAMILY, { role: 'root' });
   def.context.provide(RESIZABLE_CONTEXT, initial);
   def.context.subscribe(RESIZABLE_CONTEXT);
@@ -145,9 +155,13 @@ function setupRoot(def: DefHandle<ResizableRootProps, any>) {
     owner = null;
   });
 }
-export const asResizableRoot = defineAsHook({ name: 'as-resizable-root', setup: setupRoot });
+export const asResizableRoot = defineAsHook<
+  ResizableRootProps,
+  ResizableRootExposes,
+  ResizableRootAsHookContract
+>({ name: 'as-resizable-root', setup: setupRoot });
 export const resizableRoot = definePrototype({ name: 'base-resizable-root', setup: setupRoot });
-function setupPanel(def: DefHandle<ResizablePanelProps, any>) {
+function setupPanel(def: DefHandle<ResizablePanelProps, ResizablePanelExposes>) {
   def.anatomy.claim(RESIZABLE_FAMILY, { role: 'panel' });
   def.props.define({ index: { type: 'number' } });
   def.props.setDefaults({ index: 0 });
@@ -165,9 +179,13 @@ function setupPanel(def: DefHandle<ResizablePanelProps, any>) {
   def.lifecycle.onCreated(sync);
   def.props.watchAll(sync);
 }
-export const asResizablePanel = defineAsHook({ name: 'as-resizable-panel', setup: setupPanel });
+export const asResizablePanel = defineAsHook<
+  ResizablePanelProps,
+  ResizablePanelExposes,
+  ResizablePanelAsHookContract
+>({ name: 'as-resizable-panel', setup: setupPanel });
 export const resizablePanel = definePrototype({ name: 'base-resizable-panel', setup: setupPanel });
-function setupHandle(def: DefHandle<Record<string, never>, any>) {
+function setupHandle(def: DefHandle<ResizableHandleProps, ResizableHandleExposes>) {
   def.anatomy.claim(RESIZABLE_FAMILY, { role: 'handle' });
   const focus = asFocusable();
   focus.configure({ disabled: false });
@@ -246,7 +264,11 @@ function setupHandle(def: DefHandle<Record<string, never>, any>) {
     callOwner(run, RESIZABLE_FAMILY, 'requestValue', next, true);
   });
 }
-export const asResizableHandle = defineAsHook({ name: 'as-resizable-handle', setup: setupHandle });
+export const asResizableHandle = defineAsHook<
+  ResizableHandleProps,
+  ResizableHandleExposes,
+  ResizableHandleAsHookContract
+>({ name: 'as-resizable-handle', setup: setupHandle });
 export const resizableHandle = definePrototype({
   name: 'base-resizable-handle',
   setup: setupHandle,

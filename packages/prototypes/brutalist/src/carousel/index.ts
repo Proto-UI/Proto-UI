@@ -1,3 +1,15 @@
+import type {
+  CarouselRootProps,
+  CarouselRootExposes,
+  CarouselViewportProps,
+  CarouselViewportExposes,
+  CarouselSlideProps,
+  CarouselSlideExposes,
+  CarouselPreviousProps,
+  CarouselPreviousExposes,
+  CarouselNextProps,
+  CarouselNextExposes,
+} from '@proto.ui/prototypes-base/carousel';
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import {
   asCarouselRoot,
@@ -7,7 +19,7 @@ import {
   asCarouselNext,
 } from '@proto.ui/prototypes-base/carousel';
 export type * from '@proto.ui/prototypes-base/carousel';
-export const carouselRoot = definePrototype({
+export const carouselRoot = definePrototype<CarouselRootProps, CarouselRootExposes>({
   name: 'brutalist-carousel-root',
   setup(def) {
     const behavior = asCarouselRoot();
@@ -31,7 +43,7 @@ export const carouselRoot = definePrototype({
   },
 });
 export { carouselRoot as brutalistCarouselRoot };
-export const carouselViewport = definePrototype({
+export const carouselViewport = definePrototype<CarouselViewportProps, CarouselViewportExposes>({
   name: 'brutalist-carousel-viewport',
   setup(def) {
     const behavior = asCarouselViewport();
@@ -53,7 +65,7 @@ export const carouselViewport = definePrototype({
   },
 });
 export { carouselViewport as brutalistCarouselViewport };
-export const carouselSlide = definePrototype({
+export const carouselSlide = definePrototype<CarouselSlideProps, CarouselSlideExposes>({
   name: 'brutalist-carousel-slide',
   setup(def) {
     const behavior = asCarouselSlide();
@@ -73,7 +85,7 @@ export const carouselSlide = definePrototype({
   },
 });
 export { carouselSlide as brutalistCarouselSlide };
-export const carouselPrevious = definePrototype({
+export const carouselPrevious = definePrototype<CarouselPreviousProps, CarouselPreviousExposes>({
   name: 'brutalist-carousel-previous',
   setup(def) {
     const behavior = asCarouselPrevious();
@@ -97,7 +109,7 @@ export const carouselPrevious = definePrototype({
   },
 });
 export { carouselPrevious as brutalistCarouselPrevious };
-export const carouselNext = definePrototype({
+export const carouselNext = definePrototype<CarouselNextProps, CarouselNextExposes>({
   name: 'brutalist-carousel-next',
   setup(def) {
     const behavior = asCarouselNext();
