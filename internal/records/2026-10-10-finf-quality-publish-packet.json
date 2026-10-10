@@ -1,0 +1,167 @@
+{
+  "status": "WIP prototype quality source; collector-selector failures retained; no new completion admission",
+  "base": "5d96eb345ecc6e5e4b4831189d384f03a56d24c9",
+  "sourceCommit": "c2cbb8d6fce71e949f84f0358189184783505989",
+  "sourceTree": "21deede869afddec39131b65af63e593460193a4",
+  "orderedSourceCommits": [
+    "cbc7e262db2d001c42588b56aed9f3b7d74f7ed7",
+    "b07a91ff6274a31b3a16ccb71df0b2c99a088efb",
+    "353556bd5bdcff04ab3957d4374c549b6ad93dd8",
+    "0b4fced976562b6a00e3cf40596737195fc2a513",
+    "9b85760c3b916ea1e84afb4620a1c78ccc6537d4",
+    "04ae3e103aa92d26b3e760661e19be338c8e34e2",
+    "c1582b318387cf5ac194dfc6bdc1a88ccebb4c4b",
+    "a3f16457702f8fdb28be6d6a46f3455ccb4ff9cc",
+    "dd37830e059b725e58e0065c86d877070b3760e9",
+    "3279c544a5aa2cf0b52d2073d69d7fa2829b0b3b",
+    "3aa7f8eb7fb3658db70b3e62673f4c1a4009b605",
+    "3f48c175327ec67681c4196aff6e9789fa225290",
+    "c509f1ccbf4ce398b7c34d74f2b2ec7a7b93162c",
+    "2c9065ad49e702931834ecd67ccbaf402e585334",
+    "59c4c6ca1a25e71d2484df808657ee95dc2309dc",
+    "620fcd63211c9e31e2e3df5bb737b3660ad9191e",
+    "bb063eafa96f52786508a1a0dc6fd21220e6b027",
+    "8747c092e993bc36557d64b1a126cbe2b8064fc6",
+    "0b01d0614b1cc45b95f811a8b0eb5099f63e0731",
+    "15f4c5c918a6603d0c2b0c11ca8857eca21a8bb1",
+    "36f01f66c251df69f172d302688b866f1e5fd89c",
+    "9da8bf5750834f87c81b09a2b3668b769dac05a1",
+    "a62cf57102f5cad2c3413ac9a80b0cf43c3e8dad",
+    "7f6bd587732c6bc5c3821eb70cb1fe2727878bf6",
+    "c2cbb8d6fce71e949f84f0358189184783505989"
+  ],
+  "familyComponentEntries": 145,
+  "namedPrototypeAtoms": 733,
+  "userWeightedProgress": {
+    "done": 5,
+    "inProgress": 63,
+    "notStarted": 0,
+    "points": 36.5,
+    "denominator": 68,
+    "percentage": 53.7,
+    "rule": "Done=1; partial implementation=0.5. Only five previously independently accepted original scopes count as done."
+  },
+  "scope": [
+    "Definition-first independent implementation rule; no Compiler/IR or prototype semantic-interpreter extension",
+    "Actual bounded Drawer snap scrollport, complete static physical resources, and retained native Close interaction proof",
+    "Calendar owner-controlled navigation and disabled handling, genuine weekday/caption/today/locale/RTL semantics, public Select composition and host-only clock",
+    "Typed Form action and all collection public APIs, passive family feedback/glyphs, truthful nested Overlay captures",
+    "Real grouped Dropdown parts with draft P/T criteria and new private family projections; workspace-only entry wiring",
+    "Finite extreme Progress percentage repair without reducing legal prototype syntax"
+  ],
+  "exclusions": [
+    {
+      "commit": "fdbbfb2918d048ce66c2bcef9b7e48a775c1b4fa",
+      "reason": "Unpublished known-hook semantic whitelist explicitly excluded and retained for the other owner."
+    },
+    {
+      "commit": "498c50be8689938ac37b8fce875cc3466601e70a",
+      "reason": "Its local generated inventories and green assertions depended on the excluded collector mapping; this source generated fresh inventories."
+    },
+    "All isolated Compiler/IR WIP",
+    "Unready nested Dropdown successor and unapproved Progress/Meter definition refinements"
+  ],
+  "verification": {
+    "codeAfterTests": "Only two one-file Dropdown test-definition metadata repairs follow the tested code-bearing revision; no implementation, test-code, or generated CSS changes follow it.",
+    "focused": {
+      "files": 25,
+      "tests": 515,
+      "passed": 507,
+      "failed": 8,
+      "exitCode": 1,
+      "failureScope": "Exactly four Form and four CheckboxGroup conditional-selector assertions fail without the excluded known-hook whitelist. No failing assertion was weakened or deleted.",
+      "log": "finf-fifth-frozen-focused.log"
+    },
+    "types": {
+      "workspace": "passed",
+      "rangeSourceConsumer": "passed",
+      "nativeBrowserProof": "typechecked; not locally executed"
+    },
+    "catalogAuthoring": {
+      "status": "passed",
+      "changedInputs": 33,
+      "base": "5d96eb345ecc6e5e4b4831189d384f03a56d24c9",
+      "scope": "Final source definition authoring, with existing same-HEAD native files materialized for path checks; no Rust run."
+    },
+    "agentProjection": "Passed after the sparse-checkout paths were materialized; original absent-worktree-file failures retained and correctly reclassified.",
+    "manifests": "47 public package manifests checked; private source-only Dropdown subpaths verified by actual object/registry tests.",
+    "styles": {
+      "generator": "Normal style preset generation plus real CLI build and website generator completed without unsupported physical-token diagnostics.",
+      "websiteTokens": 654,
+      "presetChecks": "All four current.",
+      "presetTokens": {
+        "shadcn": 447,
+        "brutalist": 431,
+        "bootstrap-2-3-2": 339,
+        "liquid-glass": 270
+      },
+      "selectorCompleteness": "Not complete. Four isolated Calendar collectors emit zero conditional data-state tokens. Form/Group eight corresponding assertions remain red."
+    },
+    "calendarIsolatedCollector": [
+      {
+        "family": "shadcn",
+        "allTokens": 54,
+        "stateVariants": []
+      },
+      {
+        "family": "brutalist",
+        "allTokens": 54,
+        "stateVariants": []
+      },
+      {
+        "family": "bootstrap-2-3-2",
+        "allTokens": 63,
+        "stateVariants": []
+      },
+      {
+        "family": "liquid-glass",
+        "allTokens": 60,
+        "stateVariants": []
+      }
+    ],
+    "browserAndNative": "No new official screenshot, GPUI/Rust execution, or complete non-Web acceptance is claimed by these local checks.",
+    "historicalChecks": "The definition-rule agent-operations run passed 1632 tests on its earlier bound source. Earlier packed CLI physical-closure evidence stays tied to its recorded source; neither is relabeled as a fresh fifth-candidate full-suite or package-consumer pass.",
+    "localTestedCodeRevision": "a62cf57102f5cad2c3413ac9a80b0cf43c3e8dad",
+    "localFinalSourceRevision": "c2cbb8d6fce71e949f84f0358189184783505989",
+    "revisionIdentity": "The two local revision fields are immutable local test/source provenance, not current publication identities."
+  },
+  "styleMeasurements": "internal/records/2026-10-10-finf-quality-style-measurements.json",
+  "retainedFailures": [
+    "Eight Form/CheckboxGroup conditional-selector tests fail on this actual whitelist-free source and are not waived or rewritten.",
+    "Calendar four-family capture/state-selector collection is incomplete; component-style visual completion remains blocked.",
+    "The initial overlapping generator/test invocation imported one old Brutalist inventory; its real failure remains recorded, with final checks performed after generation and freeze.",
+    "201-year Select initialization exceeded the observed 20-second window; the caption demo explicitly uses 21 years, while Calendar itself remains unbounded by that example.",
+    "Historical strict package-budget comparisons, earlier actual14ce Drawer Close failure, and all other recorded source/native failures remain unchanged."
+  ],
+  "remaining": [
+    "Official exact-head browser screenshots, real Drawer Close reachability, and actual caption combobox accessible-name queries",
+    "Independent prototype-definition review and full family upstream comparison, without treating draft catalog presence as acceptance",
+    "Collector owner implementation of shared capture/state interpretation; no component whitelist workaround",
+    "Real packed prototype consumers and applicable Compiler/non-Web/GPUI host evidence",
+    "Unready nested Dropdown and definition refinements continue separately"
+  ],
+  "priorCloseouts": "All five existing acceptance flags, reviewed revisions, independent review URLs, and historical packets remain byte-for-byte unchanged in the current matrix ledger.",
+  "publicationIdentity": "Rebind only candidateSource revision/sourceBindingsObject/sourceObjectProof, deliveryPlan.candidateObservation.currentQuality20261010.sourceCommit, and this current packet sourceCommit/orderedSourceCommits with explicit localSourceProvenance. Preserve sourceTree, all historical observations/packets/closeout URLs/revisions and every acceptance flag. No new review-record URL is introduced.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "sourceScopeUpdate": {
+    "item": "baseline.dropdown",
+    "before": [
+      "P-BASE-DROPDOWN-MENU",
+      "P-BASE-DROPDOWN-MENU-CONTENT",
+      "P-BASE-DROPDOWN-MENU-ITEM",
+      "P-BASE-DROPDOWN-MENU-TRIGGER"
+    ],
+    "after": [
+      "P-BASE-DROPDOWN-MENU",
+      "P-BASE-DROPDOWN-MENU-CONTENT",
+      "P-BASE-DROPDOWN-MENU-GROUP",
+      "P-BASE-DROPDOWN-MENU-ITEM",
+      "P-BASE-DROPDOWN-MENU-LABEL",
+      "P-BASE-DROPDOWN-MENU-SEPARATOR",
+      "P-BASE-DROPDOWN-MENU-SHORTCUT",
+      "P-BASE-DROPDOWN-MENU-TRIGGER"
+    ],
+    "reason": "Four genuine draft Base composition entities entered the catalog. Scope tracking only; complete=false and every acceptance gate remain unchanged."
+  }
+}

@@ -168,7 +168,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 280 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 296 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -251,7 +251,11 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-DIALOG-TRIGGER | P-SHADCN-DIALOG-TRIGGER | P-BRUTALIST-DIALOG-TRIGGER | required missing | required missing |
 | P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU | P-BRUTALIST-DROPDOWN-MENU | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
+| P-BASE-DROPDOWN-MENU-GROUP | required missing | required missing | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-ITEM | P-SHADCN-DROPDOWN-MENU-ITEM | P-BRUTALIST-DROPDOWN-MENU-ITEM | required missing | required missing |
+| P-BASE-DROPDOWN-MENU-LABEL | required missing | required missing | required missing | required missing |
+| P-BASE-DROPDOWN-MENU-SEPARATOR | required missing | required missing | required missing | required missing |
+| P-BASE-DROPDOWN-MENU-SHORTCUT | required missing | required missing | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-TRIGGER | P-SHADCN-DROPDOWN-MENU-TRIGGER | P-BRUTALIST-DROPDOWN-MENU-TRIGGER | required missing | required missing |
 | P-BASE-FIELD | P-SHADCN-FIELD | P-BRUTALIST-FIELD | P-BOOTSTRAP-2-3-2-FIELD | P-LIQUID-GLASS-FIELD |
 | P-BASE-FIELD-CONTROL | P-SHADCN-FIELD-CONTROL | P-BRUTALIST-FIELD-CONTROL | P-BOOTSTRAP-2-3-2-FIELD-CONTROL | P-LIQUID-GLASS-FIELD-CONTROL |
