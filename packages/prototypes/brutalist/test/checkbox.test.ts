@@ -8,6 +8,8 @@ import {
   brutalistCheckboxRoot,
 } from '../src/checkbox';
 import * as BrutalistPackage from '../src';
+import * as CheckboxEntry from '../src/checkbox';
+import * as CheckboxGroupEntry from '../src/checkbox-group';
 import type { BrutalistCheckboxRootProps } from '../src/checkbox';
 
 type HasUnsupportedRootApi =
@@ -75,6 +77,31 @@ function prototypeName(value: unknown): string | null {
   return typeof value.name === 'string' ? value.name : null;
 }
 
+// CheckboxGroup is a separately governed composition, not an extra Checkbox
+// anatomy part. Keep the package-wide set exact instead of excluding Group or
+// selecting only already-known keys, which could hide new accidental exports.
+const EXPECTED_CHECKBOX_EXPORTS = {
+  BrutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
+  BrutalistCheckboxRoot: 'brutalist-checkbox-root',
+  brutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
+  brutalistCheckboxRoot: 'brutalist-checkbox-root',
+  checkboxGroupAll: 'brutalist-checkbox-group-all',
+  checkboxGroupItem: 'brutalist-checkbox-group-item',
+  checkboxGroupRoot: 'brutalist-checkbox-group-root',
+};
+
+function checkboxExports(entry: Record<string, unknown>) {
+  return Object.fromEntries(
+    Object.entries(entry)
+      .filter(
+        ([name, value]) =>
+          name.toLowerCase().includes('checkbox') ||
+          prototypeName(value)?.startsWith('brutalist-checkbox-')
+      )
+      .map(([name, value]) => [name, prototypeName(value)])
+  );
+}
+
 afterEach(async () => {
   document.body.replaceChildren();
   await settle();
@@ -86,19 +113,32 @@ describe('prototypes/brutalist: checkbox', () => {
     expect(brutalistCheckboxIndicator).toBe(BrutalistCheckboxIndicator);
     expect(BrutalistCheckboxRoot.name).toBe('brutalist-checkbox-root');
     expect(BrutalistCheckboxIndicator.name).toBe('brutalist-checkbox-indicator');
-    expect(
-      Object.fromEntries(
-        Object.entries(BrutalistPackage)
-          .filter(([name]) => name.toLowerCase().includes('checkbox'))
-          .map(([name, value]) => [name, prototypeName(value)])
-      )
-    ).toEqual({
-      BrutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
-      BrutalistCheckboxRoot: 'brutalist-checkbox-root',
-      brutalistCheckboxIndicator: 'brutalist-checkbox-indicator',
-      brutalistCheckboxRoot: 'brutalist-checkbox-root',
-    });
+    expect(checkboxExports(BrutalistPackage)).toEqual(EXPECTED_CHECKBOX_EXPORTS);
+    expect(Object.keys(CheckboxEntry).sort()).toEqual([
+      'BrutalistCheckboxIndicator',
+      'BrutalistCheckboxRoot',
+      'brutalistCheckboxIndicator',
+      'brutalistCheckboxRoot',
+    ]);
+    expect(Object.keys(CheckboxGroupEntry).sort()).toEqual([
+      'checkboxGroupAll',
+      'checkboxGroupItem',
+      'checkboxGroupRoot',
+    ]);
+    for (const [name, value] of Object.entries({ ...CheckboxEntry, ...CheckboxGroupEntry })) {
+      expect(BrutalistPackage[name as keyof typeof BrutalistPackage]).toBe(value);
+    }
     expectTypeOf<HasUnsupportedRootApi>().toEqualTypeOf<false>();
+  });
+
+  it.each([
+    ['unexpectedCheckboxExport', { name: 'brutalist-checkbox-extra' }],
+    ['checkboxGroupExtra', { name: 'brutalist-checkbox-group-extra' }],
+    ['unexpectedAlias', BrutalistCheckboxRoot],
+  ])('rejects an unexpected package export %s', (name, value) => {
+    const observed = checkboxExports({ ...BrutalistPackage, [name]: value });
+    expect(observed).toHaveProperty(name);
+    expect(observed).not.toEqual(EXPECTED_CHECKBOX_EXPORTS);
   });
 
   it('projects the square resting surface and preserves mixed precedence', async () => {
