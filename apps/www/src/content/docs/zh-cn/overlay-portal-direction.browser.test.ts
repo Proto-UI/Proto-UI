@@ -152,7 +152,7 @@ for (const runtime of RUNTIMES) {
         expect(responsiveRestored.authorDirection).toBe(bodyDirection);
         expect(responsiveRestored.popupDirection).toBe(bodyDirection);
         expect(responsiveRestored.popupDirAttribute).toBe(bodyDirection);
-        await responsiveStyle.evaluate((element) => element.remove());
+        await responsiveStyle.evaluate((element) => element.parentNode?.removeChild(element));
         await author.evaluate(
           (element, direction) => element.setAttribute('dir', direction),
           opposite
