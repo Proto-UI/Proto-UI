@@ -642,6 +642,7 @@ function createProtoEventPayload(type: string, native: any) {
     nativeEvent: native,
     target: native?.target,
     key: typeof native?.key === 'string' ? native.key : undefined,
+    repeat: typeof native?.repeat === 'boolean' ? native.repeat : undefined,
     shiftKey: typeof native?.shiftKey === 'boolean' ? native.shiftKey : undefined,
     altKey: typeof native?.altKey === 'boolean' ? native.altKey : undefined,
     ctrlKey: typeof native?.ctrlKey === 'boolean' ? native.ctrlKey : undefined,
