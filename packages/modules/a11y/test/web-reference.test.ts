@@ -1346,3 +1346,23 @@ describe('pending live identity at view revocation', () => {
     }
   );
 });
+
+describe('active descendant semantic relationship', () => {
+  it('tracks option identity, withdrawal and host-owned baseline without a component DOM patch', () => {
+    const registry = createWebA11yProjectionRegistry();
+    const input = document.createElement('input');
+    input.setAttribute('aria-activedescendant', 'host-option');
+    const option = document.createElement('div');
+    const inputRef = createA11ySemanticObjectRef();
+    const optionRef = createA11ySemanticObjectRef();
+    const projectInput = registry.createProjector(() => input);
+    const projectOption = registry.createProjector(() => option);
+    projectOption(semanticSnapshot(optionRef));
+    projectInput(semanticSnapshot(inputRef, { activeDescendant: [optionRef] }));
+    expect(input.getAttribute('aria-activedescendant')).toBe(option.id);
+    projectOption.dispose?.();
+    expect(input.getAttribute('aria-activedescendant')).toBe('host-option');
+    projectInput.dispose?.();
+    expect(input.getAttribute('aria-activedescendant')).toBe('host-option');
+  });
+});

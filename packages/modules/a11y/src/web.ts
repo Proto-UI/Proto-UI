@@ -9,6 +9,9 @@ import type { A11yProjector } from './caps';
 
 const ARIA_STATE_ATTRS: Record<string, string> = {
   atomic: 'aria-atomic',
+  autocomplete: 'aria-autocomplete',
+  current: 'aria-current',
+  sort: 'aria-sort',
   busy: 'aria-busy',
   checked: 'aria-checked',
   disabled: 'aria-disabled',
@@ -48,6 +51,7 @@ const POSITIVE_INTEGER_STATE_KEYS = new Set([
 ]);
 
 const ARIA_RELATION_ATTRS: Record<string, string> = {
+  activeDescendant: 'aria-activedescendant',
   controls: 'aria-controls',
   describedBy: 'aria-describedby',
   errorMessage: 'aria-errormessage',
@@ -1063,6 +1067,21 @@ export function clearWebA11ySnapshot(el: HTMLElement, snapshot: A11ySemanticObje
 }
 
 function projectedStateAttributeValue(key: string, value: unknown): string | undefined {
+  if (key === 'autocomplete')
+    return typeof value === 'string' && ['none', 'inline', 'list', 'both'].includes(value)
+      ? value
+      : undefined;
+  if (key === 'sort')
+    return typeof value === 'string' && ['none', 'ascending', 'descending', 'other'].includes(value)
+      ? value
+      : undefined;
+  if (key === 'current')
+    return typeof value === 'boolean'
+      ? String(value)
+      : typeof value === 'string' &&
+          ['false', 'true', 'page', 'step', 'location', 'date', 'time'].includes(value)
+        ? value
+        : undefined;
   // Range readouts use a string state so indeterminate can withdraw valueNow.
   if (
     key === 'valueNow' &&
