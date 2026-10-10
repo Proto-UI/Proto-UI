@@ -86,6 +86,7 @@ criteria:
       en: >-
         Trigger/Content must borrow releaseInteraction from the same-domain Root PartView while attached, retire their local borrowed reference before cleanup invokes that owner-bound operation, and never resolve another Root after removal or obtain the target run, instance, or host. Root terminal shutdown must first invalidate the operation: an invocation still admitted by the host returns false; an already-revoked calling surface follows existing stale-handle failure rules and never revives the owner. Later child cleanup cannot access its disposed Context. Context retains only JSON contribution identity, never callbacks or state/host handles; old cleanup cannot withdraw a newer contribution and does not change the existing at-most-one Trigger/Content cardinality.
 
+
   - id: P-BASE-HOVER-CARD-CONTEXT
     text:
       zh-CN: Root 必须通过同域 Context 发布 open、controlled、disabled、delay、interaction 与 request facts。
