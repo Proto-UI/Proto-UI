@@ -209,3 +209,5 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
   },
 });
 export { dataTableNext as liquidGlassDataTableNext };
+
+export { dataTableHeaderRow, liquidGlassDataTableHeaderRow } from './header-row.proto';

@@ -412,3 +412,10 @@ export const dataTableNext = definePrototype({
   name: 'base-data-table-next',
   setup: pageControl(1),
 });
+
+export { asDataTableHeaderRow, dataTableHeaderRow } from './header-row.proto';
+export type {
+  DataTableHeaderRowProps,
+  DataTableHeaderRowExposes,
+  DataTableHeaderRowAsHookContract,
+} from './header-row.proto';

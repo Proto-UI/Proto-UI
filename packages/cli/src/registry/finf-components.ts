@@ -5457,6 +5457,13 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'elementName': 'proto-ui-base-data-table-row',
       },
       {
+        'prototypeImport': 'dataTableHeaderRow',
+        'reactExport': 'BaseDataTableHeaderRow',
+        'vueExport': 'BaseDataTableHeaderRow',
+        'wcExport': 'BaseDataTableHeaderRowElement',
+        'elementName': 'proto-ui-base-data-table-header-row',
+      },
+      {
         'prototypeImport': 'dataTableCell',
         'reactExport': 'BaseDataTableCell',
         'vueExport': 'BaseDataTableCell',
@@ -5666,6 +5673,13 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'vueExport': 'ShadcnDataTableRow',
         'wcExport': 'ShadcnDataTableRowElement',
         'elementName': 'proto-ui-shadcn-data-table-row',
+      },
+      {
+        'prototypeImport': 'dataTableHeaderRow',
+        'reactExport': 'ShadcnDataTableHeaderRow',
+        'vueExport': 'ShadcnDataTableHeaderRow',
+        'wcExport': 'ShadcnDataTableHeaderRowElement',
+        'elementName': 'proto-ui-shadcn-data-table-header-row',
       },
       {
         'prototypeImport': 'dataTableCell',
@@ -5879,6 +5893,13 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'elementName': 'proto-ui-brutalist-data-table-row',
       },
       {
+        'prototypeImport': 'dataTableHeaderRow',
+        'reactExport': 'BrutalistDataTableHeaderRow',
+        'vueExport': 'BrutalistDataTableHeaderRow',
+        'wcExport': 'BrutalistDataTableHeaderRowElement',
+        'elementName': 'proto-ui-brutalist-data-table-header-row',
+      },
+      {
         'prototypeImport': 'dataTableCell',
         'reactExport': 'BrutalistDataTableCell',
         'vueExport': 'BrutalistDataTableCell',
@@ -6090,6 +6111,13 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'elementName': 'proto-ui-bootstrap-2-3-2-data-table-row',
       },
       {
+        'prototypeImport': 'dataTableHeaderRow',
+        'reactExport': 'Bootstrap232DataTableHeaderRow',
+        'vueExport': 'Bootstrap232DataTableHeaderRow',
+        'wcExport': 'Bootstrap232DataTableHeaderRowElement',
+        'elementName': 'proto-ui-bootstrap-2-3-2-data-table-header-row',
+      },
+      {
         'prototypeImport': 'dataTableCell',
         'reactExport': 'Bootstrap232DataTableCell',
         'vueExport': 'Bootstrap232DataTableCell',
@@ -6299,6 +6327,13 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'vueExport': 'LiquidGlassDataTableRow',
         'wcExport': 'LiquidGlassDataTableRowElement',
         'elementName': 'proto-ui-liquid-glass-data-table-row',
+      },
+      {
+        'prototypeImport': 'dataTableHeaderRow',
+        'reactExport': 'LiquidGlassDataTableHeaderRow',
+        'vueExport': 'LiquidGlassDataTableHeaderRow',
+        'wcExport': 'LiquidGlassDataTableHeaderRowElement',
+        'elementName': 'proto-ui-liquid-glass-data-table-header-row',
       },
       {
         'prototypeImport': 'dataTableCell',

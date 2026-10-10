@@ -203,3 +203,5 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
   },
 });
 export { dataTableNext as bootstrap232DataTableNext };
+
+export { dataTableHeaderRow, bootstrap232DataTableHeaderRow } from './header-row.proto';

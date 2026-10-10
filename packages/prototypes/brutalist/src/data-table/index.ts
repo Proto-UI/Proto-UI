@@ -203,3 +203,5 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
   },
 });
 export { dataTableNext as brutalistDataTableNext };
+
+export { dataTableHeaderRow, brutalistDataTableHeaderRow } from './header-row.proto';

@@ -1,0 +1,89 @@
+{
+  "status": "implemented local candidate; shared export/CLI/Previewer integration pending owner",
+  "baseAsHook": "asDataTableHeaderRow",
+  "baseAsHookName": "as-data-table-header-row",
+  "publicTypes": [
+    "DataTableHeaderRowProps",
+    "DataTableHeaderRowExposes",
+    "DataTableHeaderRowAsHookContract"
+  ],
+  "families": [
+    {
+      "family": "base",
+      "subpath": "data-table",
+      "source": "packages/prototypes/base/src/data-table/header-row.proto.ts",
+      "demo": "apps/www/src/content/docs/zh-cn/demo-base-data-table.demo.ts",
+      "docSlugs": ["en/ui-libraries/base/data-table", "zh-cn/ui-libraries/base/data-table"],
+      "anatomy": "existing TABLE_STRUCTURE_FAMILY role row; no new Table role",
+      "exports": {
+        "dataTableHeaderRow": "base-data-table-header-row"
+      },
+      "asHookExports": {
+        "asDataTableHeaderRow": "as-data-table-header-row"
+      }
+    },
+    {
+      "family": "shadcn",
+      "subpath": "data-table",
+      "source": "packages/prototypes/shadcn/src/data-table/header-row.proto.ts",
+      "demo": "apps/www/src/content/docs/zh-cn/demo-shadcn-data-table.demo.ts",
+      "docSlugs": ["en/ui-libraries/shadcn/data-table", "zh-cn/ui-libraries/shadcn/data-table"],
+      "anatomy": "existing TABLE_STRUCTURE_FAMILY role row; no new Table role",
+      "exports": {
+        "dataTableHeaderRow": "shadcn-data-table-header-row",
+        "shadcnDataTableHeaderRow": "shadcn-data-table-header-row"
+      }
+    },
+    {
+      "family": "brutalist",
+      "subpath": "data-table",
+      "source": "packages/prototypes/brutalist/src/data-table/header-row.proto.ts",
+      "demo": "apps/www/src/content/docs/zh-cn/demo-brutalist-data-table.demo.ts",
+      "docSlugs": [
+        "en/ui-libraries/brutalist/components/data-table",
+        "zh-cn/ui-libraries/brutalist/components/data-table"
+      ],
+      "anatomy": "existing TABLE_STRUCTURE_FAMILY role row; no new Table role",
+      "exports": {
+        "dataTableHeaderRow": "brutalist-data-table-header-row",
+        "brutalistDataTableHeaderRow": "brutalist-data-table-header-row"
+      }
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "data-table",
+      "source": "packages/prototypes/bootstrap-2-3-2/src/data-table/header-row.proto.ts",
+      "demo": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-data-table.demo.ts",
+      "docSlugs": [
+        "en/ui-libraries/bootstrap-2-3-2/data-table",
+        "zh-cn/ui-libraries/bootstrap-2-3-2/data-table"
+      ],
+      "anatomy": "existing TABLE_STRUCTURE_FAMILY role row; no new Table role",
+      "exports": {
+        "dataTableHeaderRow": "bootstrap-2-3-2-data-table-header-row",
+        "bootstrap232DataTableHeaderRow": "bootstrap-2-3-2-data-table-header-row"
+      }
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "data-table",
+      "source": "packages/prototypes/liquid-glass/src/data-table/header-row.proto.ts",
+      "demo": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-data-table.demo.ts",
+      "docSlugs": [
+        "en/ui-libraries/liquid-glass/data-table",
+        "zh-cn/ui-libraries/liquid-glass/data-table"
+      ],
+      "anatomy": "existing TABLE_STRUCTURE_FAMILY role row; no new Table role",
+      "exports": {
+        "dataTableHeaderRow": "liquid-glass-data-table-header-row",
+        "liquidGlassDataTableHeaderRow": "liquid-glass-data-table-header-row"
+      }
+    }
+  ],
+  "sharedIntegrationAfterReview": [
+    "five family root index named exports",
+    "existing data-table CLI family parts and dependencies",
+    "Previewer exact prototype loaders",
+    "no new package subpath or mandatory Head/RowGroup role"
+  ]
+}

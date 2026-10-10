@@ -12,7 +12,7 @@ export default {
       },
       {
         'kind': 'proto',
-        'prototypeId': 'liquid-glass-data-table-row',
+        'prototypeId': 'liquid-glass-data-table-header-row',
         'children': [
           {
             'kind': 'proto',
@@ -33,9 +33,6 @@ export default {
             },
           },
         ],
-        'props': {
-          'header': true,
-        },
         'className': 'grid grid-cols-2',
       },
       {

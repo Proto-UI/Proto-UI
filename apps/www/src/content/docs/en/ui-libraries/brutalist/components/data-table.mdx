@@ -9,6 +9,8 @@ Data Table composes passive Table topology with stable record IDs, stable sortin
 
 WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
 
+Sorting headers belong inside the static `DataTableHeaderRow` composition. It inherits passive Table Row topology, has no props or instance exposes, and creates no selection, focus or Trigger owner. Body rows remain `DataTableRow` record slots. The legacy `DataTableRow.header` prop still changes record-slot policy at runtime; it does not remove that row's setup-time Trigger identity and cannot contain multiple direct Trigger children. The examples use the new static composition without relaxing Trigger-chain rules.
+
 <PrototypePreviewer
   demoId="demo-brutalist-data-table"
   initialRuntime="wc"

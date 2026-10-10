@@ -12,7 +12,7 @@ export default {
       },
       {
         'kind': 'proto',
-        'prototypeId': 'bootstrap-2-3-2-data-table-row',
+        'prototypeId': 'bootstrap-2-3-2-data-table-header-row',
         'children': [
           {
             'kind': 'proto',
@@ -33,9 +33,6 @@ export default {
             },
           },
         ],
-        'props': {
-          'header': true,
-        },
         'className': 'grid grid-cols-2',
       },
       {

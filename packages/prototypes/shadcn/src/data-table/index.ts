@@ -200,3 +200,5 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
   },
 });
 export { dataTableNext as shadcnDataTableNext };
+
+export { dataTableHeaderRow, shadcnDataTableHeaderRow } from './header-row.proto';

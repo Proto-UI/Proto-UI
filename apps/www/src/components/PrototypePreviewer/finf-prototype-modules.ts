@@ -2384,6 +2384,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/data-table');
     registerExactPrototype('base-data-table-row', module.dataTableRow);
   },
+  'base-data-table-header-row': async () => {
+    const module = await import('@proto.ui/prototypes-base/data-table');
+    registerExactPrototype('base-data-table-header-row', module.dataTableHeaderRow);
+  },
   'base-data-table-cell': async () => {
     const module = await import('@proto.ui/prototypes-base/data-table');
     registerExactPrototype('base-data-table-cell', module.dataTableCell);
@@ -2475,6 +2479,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'shadcn-data-table-row': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/data-table');
     registerExactPrototype('shadcn-data-table-row', module.dataTableRow);
+  },
+  'shadcn-data-table-header-row': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/data-table');
+    registerExactPrototype('shadcn-data-table-header-row', module.dataTableHeaderRow);
   },
   'shadcn-data-table-cell': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/data-table');
@@ -2568,6 +2576,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-brutalist/data-table');
     registerExactPrototype('brutalist-data-table-row', module.dataTableRow);
   },
+  'brutalist-data-table-header-row': async () => {
+    const module = await import('@proto.ui/prototypes-brutalist/data-table');
+    registerExactPrototype('brutalist-data-table-header-row', module.dataTableHeaderRow);
+  },
   'brutalist-data-table-cell': async () => {
     const module = await import('@proto.ui/prototypes-brutalist/data-table');
     registerExactPrototype('brutalist-data-table-cell', module.dataTableCell);
@@ -2660,6 +2672,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/data-table');
     registerExactPrototype('bootstrap-2-3-2-data-table-row', module.dataTableRow);
   },
+  'bootstrap-2-3-2-data-table-header-row': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/data-table');
+    registerExactPrototype('bootstrap-2-3-2-data-table-header-row', module.dataTableHeaderRow);
+  },
   'bootstrap-2-3-2-data-table-cell': async () => {
     const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/data-table');
     registerExactPrototype('bootstrap-2-3-2-data-table-cell', module.dataTableCell);
@@ -2751,6 +2767,10 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
   'liquid-glass-data-table-row': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/data-table');
     registerExactPrototype('liquid-glass-data-table-row', module.dataTableRow);
+  },
+  'liquid-glass-data-table-header-row': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/data-table');
+    registerExactPrototype('liquid-glass-data-table-header-row', module.dataTableHeaderRow);
   },
   'liquid-glass-data-table-cell': async () => {
     const module = await import('@proto.ui/prototypes-liquid-glass/data-table');
