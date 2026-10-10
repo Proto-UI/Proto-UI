@@ -67,11 +67,17 @@ function nodes(run: RunHandle<any>): TreeNode[] {
 function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
   def.anatomy.claim(TREE_FAMILY, { role: 'root' });
   asCollection().configure({ family: TREE_FAMILY, itemRole: 'item' });
+  const stringArray = (value: unknown) => {
+    if (!Array.isArray(value)) return false;
+    for (let index = 0; index < value.length; index++)
+      if (!Object.hasOwn(value, index) || typeof value[index] !== 'string') return false;
+    return true;
+  };
   def.props.define({
     value: { type: 'string' },
     defaultValue: { type: 'string' },
-    expandedKeys: { type: 'object' },
-    defaultExpandedKeys: { type: 'object' },
+    expandedKeys: { type: 'object', validator: stringArray, empty: 'fallback' },
+    defaultExpandedKeys: { type: 'object', validator: stringArray, empty: 'fallback' },
     disabled: { type: 'boolean' },
     readOnly: { type: 'boolean' },
     a11yLabel: { type: 'string' },

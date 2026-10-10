@@ -89,6 +89,12 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
   tableRootBehavior();
   def.anatomy.claim(DATA_TABLE_FAMILY, { role: 'root' });
   asCollection().configure({ family: DATA_TABLE_FAMILY, itemRole: 'row' });
+  const stringArray = (value: unknown) => {
+    if (!Array.isArray(value)) return false;
+    for (let index = 0; index < value.length; index++)
+      if (!Object.hasOwn(value, index) || typeof value[index] !== 'string') return false;
+    return true;
+  };
   def.props.define({
     rows: { type: 'object' },
     sortKey: { type: 'string' },
@@ -99,8 +105,8 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     page: { type: 'number' },
     defaultPage: { type: 'number' },
     pageSize: { type: 'number' },
-    selectedKeys: { type: 'object' },
-    defaultSelectedKeys: { type: 'object' },
+    selectedKeys: { type: 'object', validator: stringArray, empty: 'fallback' },
+    defaultSelectedKeys: { type: 'object', validator: stringArray, empty: 'fallback' },
     disabled: { type: 'boolean' },
     readOnly: { type: 'boolean' },
   });
