@@ -29,17 +29,17 @@ cases:
       [P-SHADCN-INPUT-BASE-INHERITANCE, P-SHADCN-INPUT-BASE-GUARANTEES, P-SHADCN-INPUT-BOUNDARY]
     expectation: shadcn-input-materializes-one-base-owned-text-editor-without-extra-protocol
   - id: T-SHADCN-INPUT-0001-CASE-VISUAL-SURFACE
-    title: Root projects the bounded upstream visual token subset
+    title: Root projects content-pinned base-nova geometry and rejects superseded new-york geometry
     covers: [P-SHADCN-INPUT-VISUAL-SURFACE, P-SHADCN-INPUT-COMPATIBILITY-SUBSET]
-    expectation: shadcn-input-applies-only-the-verified-single-line-surface-subset
+    expectation: shadcn-input-base-nova-h8-rounded-lg-px2-5-without-legacy-shadow
   - id: T-SHADCN-INPUT-0001-CASE-SELECTION-PRESENTATION
-    title: Native text selection uses the pinned upstream primary palette
+    title: Native text selection retains the explicit Proto UI primary-palette extension
     covers: [P-SHADCN-INPUT-SELECTION-PRESENTATION]
     expectation: native-input-selection-renders-primary-background-and-foreground
   - id: T-SHADCN-INPUT-0001-CASE-STATE-PRESENTATION
-    title: Focus, disabled, and dark presentation is condition-driven
+    title: Inherited focus and disabled plus host dark metadata preserve base-nova state-palette precedence
     covers: [P-SHADCN-INPUT-STATE-PRESENTATION]
-    expectation: shadcn-input-uses-inherited-state-and-host-theme-metadata
+    expectation: shadcn-input-disabled-and-dark-intersection-overrides-single-condition-palette
   - id: T-SHADCN-INPUT-0001-CASE-CONTENTLESS
     title: Projection drops authored children and adds no content renderer
     covers: [P-SHADCN-INPUT-CONTENTLESS, P-SHADCN-INPUT-BOUNDARY]
@@ -47,7 +47,7 @@ cases:
 implementations:
   - id: prototypes-shadcn-input-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/input.test.ts
     required: true
     consumesCases:
@@ -62,9 +62,10 @@ implementations:
     exercises: &inputPrototypes [P-SHADCN-INPUT, P-BASE-INPUT]
     notes:
       - Remaining style-channel limitations and absent Base invalid/className/data-slot ownership are recorded as compatibility differences, not silently implemented with an extra protocol.
+      - Existing historical passing evidence predates the base-nova draft migration. Current implementation and real-browser evidence must be rerun; this definition-only change does not claim a pass.
   - id: prototypes-shadcn-input-browser
     kind: runtime-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-shadcn-input.browser.test.ts
     required: true
     consumesCases:
@@ -76,6 +77,7 @@ implementations:
     exercises: *inputPrototypes
     notes:
       - Planned four-runtime rendered behavior and style evidence through Web Component, React, Vue, and Vue 2 previews; manual visual verification remains a separate human gate.
+      - Existing historical passing evidence predates the base-nova draft migration. Current implementation and real-browser evidence must be rerun; this definition-only change does not claim a pass.
 verifies:
   prototypes: [P-SHADCN-INPUT]
 exercises:
@@ -84,3 +86,6 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added draft conformance cases and implementation mappings for the Shadcn Input projection and native selection presentation.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Specified base-nova geometry and dark-disabled precedence; marked affected evidence planned until the successor implementation is verified.
