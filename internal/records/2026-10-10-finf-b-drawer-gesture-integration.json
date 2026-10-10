@@ -1,0 +1,100 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "sourceBase": "3cff1ebecc63427c2dd947847be13a9f9e861cb9",
+  "dependencies": [
+    "fe5f7552b978beaca7ef9718f932578035da9361",
+    "9415c16bfe8cf7ce966f2527fc8c658950fe6ed0",
+    "5723e028e3d2bf1b1527f0ebceb7fc6aabb52058"
+  ],
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerHandle",
+          "name": "base-drawer-handle"
+        }
+      ],
+      "demoId": "demo-base-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-base-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/drawer.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerHandle",
+          "name": "shadcn-drawer-handle"
+        }
+      ],
+      "demoId": "demo-shadcn-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/drawer.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerHandle",
+          "name": "brutalist-drawer-handle"
+        }
+      ],
+      "demoId": "demo-brutalist-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/drawer.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerHandle",
+          "name": "bootstrap-2-3-2-drawer-handle"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/drawer.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerHandle",
+          "name": "liquid-glass-drawer-handle"
+        }
+      ],
+      "demoId": "demo-liquid-glass-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/drawer.mdx"
+      ]
+    }
+  ],
+  "baseHook": "asDrawerHandle",
+  "tests": ["packages/prototypes/base/test/navigation-overlays/drawer-gesture.test.ts"],
+  "integration": [
+    "Add drawerHandle to five family root indexes, prototype registry and CLI components part list. Existing /drawer package subpaths remain unchanged.",
+    "Preserve AxisInput module inclusion for runtime adapters and add compiler/native lowering only with real evidence.",
+    "Static translation recipes consume exposed offsetPercentage via --pui-offset-percentage; confirm real browser appearance in later visual acceptance.",
+    "Full catalog/contract, consumer, browser, native/GPUI, CI and independent acceptance pending."
+  ]
+}

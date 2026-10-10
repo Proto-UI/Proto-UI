@@ -1,6 +1,9 @@
 import drawerRoot from './root.proto';
 
 export type {
+  DrawerHandleProps,
+  DrawerHandleExposes,
+  DrawerHandleAsHookContract,
   DrawerCloseAsHookContract,
   DrawerCloseExposes,
   DrawerCloseProps,
@@ -35,5 +38,7 @@ export { asDrawerContent, default as drawerContent } from './content.proto';
 export { asDrawerTitle, default as drawerTitle } from './title.proto';
 export { asDrawerDescription, default as drawerDescription } from './description.proto';
 export { asDrawerClose, default as drawerClose } from './close.proto';
+
+export { asDrawerHandle, default as drawerHandle } from './handle.proto';
 
 export default drawerRoot;

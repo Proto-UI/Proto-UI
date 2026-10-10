@@ -14,10 +14,16 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Content.side 接受 top、right、bottom、left。面板受宿主可用区域约束，支持长内容滚动、焦点约束及关闭后恢复触发器焦点。当前源码尚未实现拖动、吸附点或滑动关闭。
+Content.side 接受 top、right、bottom、left。面板受宿主可用区域约束，支持长内容滚动、焦点约束及关闭后恢复触发器焦点。在 Content 内放置 Handle 后，仅专属把手接管拖动；面板内交互控件保留正常指针与滚动行为。拖动几何取自面板本身，公开输入为无量纲比例；尚未提供按速度抛动。
 
 Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
 
-组成: Root, Trigger, Content, Title, Description, Close, Mask.
+组成: Root, Trigger, Content, Title, Description, Close, Mask, Handle.
 
 当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+
+Content.snapPoints 是大于 0 且不超过 1 的面板比例集合，默认 [1]，自动去重排序并忽略无效项。defaultSnapPoint 由组件持有状态；snapPoint 与 snapPointChange 由调用方持有。拖动预览 dragProgress 与已提交 snapPoint 分开，释放时选择最近吸附点，等距离时优先展开点；受控请求被拒绝后恢复调用方实际状态。
+
+拖动结束时若可见比例低于 dragDismissThreshold（默认 0.25，上限为最小吸附点），则向 Root 请求关闭。Content.dragDismissible=false 禁用把手/拖动关闭；显式 Close、Escape 与外部点击仍遵循 Root 窗口协议。Handle 提供有名称的键盘 separator：向面板内侧的方向键展开，反向收起，Home 选择最小点，End 选择最大点；允许关闭时从最小点继续收起会请求关闭。side/受控值更新、禁用与指针取消会丢弃未完成拖动。
+
+演示支持半开/全开吸附并播报已提交变化。浏览器视觉投影、native 输入及编译/打包消费者仍待验收；host 测试使用合成面板几何。

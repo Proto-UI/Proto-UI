@@ -22,7 +22,13 @@ export default {
           {
             'kind': 'proto',
             'prototypeId': 'shadcn-drawer-content',
+            'ref': 'panel',
             'children': [
+              {
+                'kind': 'proto',
+                'prototypeId': 'shadcn-drawer-handle',
+                'props': { 'a11yLabel': 'Resize drawer' },
+              },
               {
                 'kind': 'proto',
                 'prototypeId': 'shadcn-drawer-title',
@@ -32,7 +38,7 @@ export default {
                 'kind': 'proto',
                 'prototypeId': 'shadcn-drawer-description',
                 'children': [
-                  'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                  'Drag the handle to half size or expand it with Arrow Up. Drag further down to close. Changes remain in this demonstration.',
                 ],
               },
               {
@@ -44,7 +50,9 @@ export default {
             'props': {
               'enterDuration': 0,
               'leaveDuration': 0,
-              'side': 'right',
+              'side': 'bottom',
+              'snapPoints': [0.5, 1],
+              'defaultSnapPoint': 1,
             },
           },
         ],
@@ -64,6 +72,11 @@ export default {
     ],
   },
   setup({ refs, api }) {
+    api.setProps('panel', {
+      onSnapPointChange: (detail: { snapPoint: number }) => {
+        refs.status.textContent = `Drawer extent: ${Math.round(detail.snapPoint * 100)}%`;
+      },
+    });
     api.setProps('root', {
       onOpenChange: (detail: { open: boolean; reason: string }) => {
         refs.status.textContent = `${detail.open ? 'Opened' : 'Closed'}: ${detail.reason}`;

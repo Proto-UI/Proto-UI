@@ -85,14 +85,34 @@ export type DrawerMaskHandles = {
   asTransition: TransitionHandles;
 };
 
-export type DrawerContentProps = TransitionProps & { side?: 'top' | 'right' | 'bottom' | 'left' };
+export type DrawerContentProps = TransitionProps & {
+  side?: 'top' | 'right' | 'bottom' | 'left';
+  /** Fractions of the full panel; invalid entries are ignored. Defaults to [1]. */
+  snapPoints?: number[];
+  snapPoint?: number;
+  defaultSnapPoint?: number;
+  dragDismissible?: boolean;
+  /** Visible fraction below which a completed drag requests close. Default 0.25. */
+  dragDismissThreshold?: number;
+};
 
 export type DrawerContentExposes = TransitionExposes & {
   open: ExposeState<boolean>;
+  snapPoint: ExposeState<number>;
+  dragging: ExposeState<boolean>;
+  dragProgress: ExposeState<number>;
+  offsetPercentage: ExposeState<number>;
+  requestSnapPoint: ExposeMethod<(value: number, reason?: string) => void>;
+  snapPointChange: ExposeEvent<{ snapPoint: number; reason: string }>;
+  __onAxisInput: ExposeMethod<(sample: import('@proto.ui/core').AxisInputSample) => void>;
 };
 
 export type DrawerContentStateHandles = {
   open: State<boolean>;
+  snapPoint: State<number>;
+  dragging: State<boolean>;
+  dragProgress: State<number>;
+  offsetPercentage: State<number>;
 };
 
 export type DrawerContentAsHookContract = {
@@ -105,6 +125,10 @@ export type DrawerContentAsHookContract = {
 export type DrawerContentHandles = {
   stateHandles: {
     open: BorrowedStateHandle<boolean, DrawerContentProps>;
+    snapPoint: BorrowedStateHandle<number, DrawerContentProps>;
+    dragging: BorrowedStateHandle<boolean, DrawerContentProps>;
+    dragProgress: BorrowedStateHandle<number, DrawerContentProps>;
+    offsetPercentage: BorrowedStateHandle<number, DrawerContentProps>;
   };
   asTransition: TransitionHandles;
 };
@@ -136,4 +160,22 @@ export type DrawerCloseExposes = {
 
 export type DrawerCloseAsHookContract = {
   state: DrawerCommandStateHandles;
+};
+
+export interface DrawerHandleProps {
+  disabled?: boolean;
+  a11yLabel?: string;
+}
+export type DrawerHandleExposes = {
+  disabled: ExposeState<boolean>;
+  focused: ExposeState<boolean>;
+  focusVisible: ExposeState<boolean>;
+  focusSelf: ExposeMethod<(options?: { reason?: 'programmatic' | 'keyboard' | 'pointer' }) => void>;
+};
+export type DrawerHandleAsHookContract = {
+  state: {
+    disabled: State<boolean>;
+    focused: State<boolean>;
+    focusVisible: State<boolean>;
+  };
 };

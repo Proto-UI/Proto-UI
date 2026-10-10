@@ -66,6 +66,7 @@ export const DRAWER_FAMILY = createAnatomyFamily('base-drawer', {
     header: { cardinality: { min: 0, max: 1 } },
     footer: { cardinality: { min: 0, max: 1 } },
     close: { cardinality: { min: 0, max: 100 } },
+    handle: { cardinality: { min: 0, max: 1 } },
   },
   relations: [
     { kind: 'contains', parent: 'root', child: 'trigger' },
@@ -76,7 +77,19 @@ export const DRAWER_FAMILY = createAnatomyFamily('base-drawer', {
     { kind: 'contains', parent: 'content', child: 'header' },
     { kind: 'contains', parent: 'content', child: 'footer' },
     { kind: 'contains', parent: 'content', child: 'close' },
+    { kind: 'contains', parent: 'content', child: 'handle' },
   ],
 });
 
 export const DRAWER_CONTEXT = createContextKey<DrawerContextValue>('base-drawer');
+
+export type DrawerContentContextValue = {
+  side: 'top' | 'right' | 'bottom' | 'left';
+  open: boolean;
+  disabled: boolean;
+  snapPoint: number;
+  snapPoints: number[];
+  dismissible: boolean;
+};
+export const DRAWER_CONTENT_CONTEXT =
+  createContextKey<DrawerContentContextValue>('base-drawer-content');

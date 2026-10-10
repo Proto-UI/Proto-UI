@@ -1,6 +1,7 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
 import { asAccessible, asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
+import { setupDrawerSnap } from './snap';
 import {
   DRAWER_CONTEXT,
   DRAWER_FAMILY,
@@ -26,7 +27,16 @@ function projectDrawerContentHandle(
   if (!open || !asTransition) {
     throw new Error('[as-drawer-content] missing captured Drawer or Transition handles.');
   }
-  return { stateHandles: { open }, asTransition };
+  const snapPoint = result.getState?.('snapPoint');
+  const dragging = result.getState?.('dragging');
+  const dragProgress = result.getState?.('dragProgress');
+  const offsetPercentage = result.getState?.('offsetPercentage');
+  if (!snapPoint || !dragging || !dragProgress || !offsetPercentage)
+    throw new Error('[as-drawer-content] missing snap handles.');
+  return {
+    stateHandles: { open, snapPoint, dragging, dragProgress, offsetPercentage },
+    asTransition,
+  };
 }
 
 function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExposes>): void {
@@ -248,6 +258,8 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
 
     requestDrawerOpen(run, false, 'outside.press', returnFocusReason);
   });
+
+  setupDrawerSnap(def, side);
 
   def.rule({
     when: (w) => w.state(transition.isPresent).eq(false),
