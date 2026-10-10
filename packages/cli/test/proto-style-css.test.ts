@@ -638,3 +638,17 @@ describe('Finf authored layout utility closure', () => {
     }
   });
 });
+
+describe('Classic Drawer handle physical styling', () => {
+  it('lowers the three collected handle tokens without dropping the inset shadow', () => {
+    for (const css of [
+      renderProtoStyleTokenCss(['bg-[#ccc]', 'border-[#bbb]', 'shadow-inner']),
+      renderProtoShadowStyleTokenCss(['bg-[#ccc]', 'border-[#bbb]', 'shadow-inner']),
+    ]) {
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('background-color: #ccc;');
+      expect(css).toContain('border-color: #bbb;');
+      expect(css).toContain('--pui-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);');
+    }
+  });
+});

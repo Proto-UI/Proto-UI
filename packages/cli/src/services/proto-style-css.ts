@@ -113,6 +113,9 @@ const colorVars = new Set([
 ]);
 
 const staticUtilities: Record<string, string[]> = {
+  'bg-[#ccc]': ['background-color: #ccc;'],
+  'border-[#bbb]': ['border-color: #bbb;'],
+  'shadow-inner': ['--pui-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);', ...composedShadow()],
   // Bounded vocabulary authored by the source-first Finf component families.
   'border-dashed': ['border-style: dashed;'],
   'cursor-move': ['cursor: move;'],
