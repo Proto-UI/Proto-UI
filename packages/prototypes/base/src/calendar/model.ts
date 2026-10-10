@@ -42,3 +42,29 @@ export function dateAvailable(
     !unavailable.includes(date)
   );
 }
+
+/** Localized civil-date labels; the caller supplies the clock and locale boundary. */
+export function calendarDateLabel(
+  date: string,
+  locale = 'en-US',
+  options: Intl.DateTimeFormatOptions = { dateStyle: 'full' }
+): string {
+  const parsed = parseDate(date);
+  if (!parsed) return '';
+  try {
+    return new Intl.DateTimeFormat(locale, { ...options, timeZone: 'UTC' }).format(parsed);
+  } catch {
+    return new Intl.DateTimeFormat('en-US', { ...options, timeZone: 'UTC' }).format(parsed);
+  }
+}
+export function calendarWeekdayInfo(offset: number, weekStartsOn = 0, locale = 'en-US') {
+  const start = Math.trunc(Number.isFinite(weekStartsOn) ? weekStartsOn : 0);
+  const weekday = (((Math.trunc(Number.isFinite(offset) ? offset : 0) + start) % 7) + 7) % 7;
+  const date = addDays('2023-01-01', weekday);
+  const short = calendarDateLabel(date, locale, { weekday: 'short' });
+  return {
+    weekday,
+    label: /^en(?:-|$)/i.test(locale) ? short.slice(0, 2) : short,
+    description: calendarDateLabel(date, locale, { weekday: 'long' }),
+  };
+}

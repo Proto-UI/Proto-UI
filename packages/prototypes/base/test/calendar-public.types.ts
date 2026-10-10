@@ -663,3 +663,203 @@ datePickerTransition?.configure({ enterDuration: '25' });
 const datePickerDisplay: string | undefined = hDatePickerValue.stateHandles?.displayValue.get();
 // @ts-expect-error Date Picker does not flatten child Calendar state handles.
 hDatePickerRoot.stateHandles?.value.get();
+
+// Calendar localization, clock boundary and pure caption/weekday atoms.
+type f0calendarCaptionNewProps = ProtoAdapterProps<typeof f0calendar.calendarCaption>;
+const validf0calendarCaption: f0calendarCaptionNewProps = { a11yLabel: 'Navigation' };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf0calendarCaption: f0calendarCaptionNewProps = { a11yLabel: 23 };
+declare const f0calendarCaptionNew: ProtoAdapterExposes<typeof f0calendar.calendarCaption>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f0calendarCaptionNew.missingMethod();
+type f0calendarWeekdaysNewProps = ProtoAdapterProps<typeof f0calendar.calendarWeekdays>;
+const validf0calendarWeekdays: f0calendarWeekdaysNewProps = {};
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf0calendarWeekdays: f0calendarWeekdaysNewProps = { offset: 0 };
+declare const f0calendarWeekdaysNew: ProtoAdapterExposes<typeof f0calendar.calendarWeekdays>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f0calendarWeekdaysNew.missingMethod();
+type f0calendarWeekdayNewProps = ProtoAdapterProps<typeof f0calendar.calendarWeekday>;
+const validf0calendarWeekday: f0calendarWeekdayNewProps = { offset: 0 };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf0calendarWeekday: f0calendarWeekdayNewProps = { offset: '0' };
+declare const f0calendarWeekdayNew: ProtoAdapterExposes<typeof f0calendar.calendarWeekday>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f0calendarWeekdayNew.missingMethod();
+const f0calendarWeekdayLabel: string = f0calendarWeekdayNew.label.get();
+const f0calendarWeekdayNumber: number = f0calendarWeekdayNew.weekday.get();
+const f0calendarToday: boolean = f0calendarDay.today.get();
+const f0calendarHovered: boolean = f0calendarDay.hovered.get();
+const f0calendarPressed: boolean = f0calendarDay.pressed.get();
+const f0calendarHeadingDisplay: string = f0calendarHeading.displayValue.get();
+const f0calendarDisabled: boolean = f0calendarRoot.disabled.get();
+const f0calendarLocalizedProps: f0calendarRootProps = {
+  today: '2026-10-10',
+  locale: 'zh-CN',
+  direction: 'rtl',
+};
+// @ts-expect-error Direction is a closed public domain.
+const f0calendarWrongDirection: f0calendarRootProps = { direction: 'up' };
+// @ts-expect-error Today accepts a civil-date string, never a host Date object.
+const f0calendarWrongToday: f0calendarRootProps = { today: new Date() };
+type f1calendarCaptionNewProps = ProtoAdapterProps<typeof f1calendar.calendarCaption>;
+const validf1calendarCaption: f1calendarCaptionNewProps = { a11yLabel: 'Navigation' };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf1calendarCaption: f1calendarCaptionNewProps = { a11yLabel: 23 };
+declare const f1calendarCaptionNew: ProtoAdapterExposes<typeof f1calendar.calendarCaption>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f1calendarCaptionNew.missingMethod();
+type f1calendarWeekdaysNewProps = ProtoAdapterProps<typeof f1calendar.calendarWeekdays>;
+const validf1calendarWeekdays: f1calendarWeekdaysNewProps = {};
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf1calendarWeekdays: f1calendarWeekdaysNewProps = { offset: 0 };
+declare const f1calendarWeekdaysNew: ProtoAdapterExposes<typeof f1calendar.calendarWeekdays>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f1calendarWeekdaysNew.missingMethod();
+type f1calendarWeekdayNewProps = ProtoAdapterProps<typeof f1calendar.calendarWeekday>;
+const validf1calendarWeekday: f1calendarWeekdayNewProps = { offset: 0 };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf1calendarWeekday: f1calendarWeekdayNewProps = { offset: '0' };
+declare const f1calendarWeekdayNew: ProtoAdapterExposes<typeof f1calendar.calendarWeekday>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f1calendarWeekdayNew.missingMethod();
+const f1calendarWeekdayLabel: string = f1calendarWeekdayNew.label.get();
+const f1calendarWeekdayNumber: number = f1calendarWeekdayNew.weekday.get();
+const f1calendarToday: boolean = f1calendarDay.today.get();
+const f1calendarHovered: boolean = f1calendarDay.hovered.get();
+const f1calendarPressed: boolean = f1calendarDay.pressed.get();
+const f1calendarHeadingDisplay: string = f1calendarHeading.displayValue.get();
+const f1calendarDisabled: boolean = f1calendarRoot.disabled.get();
+const f1calendarLocalizedProps: f1calendarRootProps = {
+  today: '2026-10-10',
+  locale: 'zh-CN',
+  direction: 'rtl',
+};
+// @ts-expect-error Direction is a closed public domain.
+const f1calendarWrongDirection: f1calendarRootProps = { direction: 'up' };
+// @ts-expect-error Today accepts a civil-date string, never a host Date object.
+const f1calendarWrongToday: f1calendarRootProps = { today: new Date() };
+type f2calendarCaptionNewProps = ProtoAdapterProps<typeof f2calendar.calendarCaption>;
+const validf2calendarCaption: f2calendarCaptionNewProps = { a11yLabel: 'Navigation' };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf2calendarCaption: f2calendarCaptionNewProps = { a11yLabel: 23 };
+declare const f2calendarCaptionNew: ProtoAdapterExposes<typeof f2calendar.calendarCaption>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f2calendarCaptionNew.missingMethod();
+type f2calendarWeekdaysNewProps = ProtoAdapterProps<typeof f2calendar.calendarWeekdays>;
+const validf2calendarWeekdays: f2calendarWeekdaysNewProps = {};
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf2calendarWeekdays: f2calendarWeekdaysNewProps = { offset: 0 };
+declare const f2calendarWeekdaysNew: ProtoAdapterExposes<typeof f2calendar.calendarWeekdays>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f2calendarWeekdaysNew.missingMethod();
+type f2calendarWeekdayNewProps = ProtoAdapterProps<typeof f2calendar.calendarWeekday>;
+const validf2calendarWeekday: f2calendarWeekdayNewProps = { offset: 0 };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf2calendarWeekday: f2calendarWeekdayNewProps = { offset: '0' };
+declare const f2calendarWeekdayNew: ProtoAdapterExposes<typeof f2calendar.calendarWeekday>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f2calendarWeekdayNew.missingMethod();
+const f2calendarWeekdayLabel: string = f2calendarWeekdayNew.label.get();
+const f2calendarWeekdayNumber: number = f2calendarWeekdayNew.weekday.get();
+const f2calendarToday: boolean = f2calendarDay.today.get();
+const f2calendarHovered: boolean = f2calendarDay.hovered.get();
+const f2calendarPressed: boolean = f2calendarDay.pressed.get();
+const f2calendarHeadingDisplay: string = f2calendarHeading.displayValue.get();
+const f2calendarDisabled: boolean = f2calendarRoot.disabled.get();
+const f2calendarLocalizedProps: f2calendarRootProps = {
+  today: '2026-10-10',
+  locale: 'zh-CN',
+  direction: 'rtl',
+};
+// @ts-expect-error Direction is a closed public domain.
+const f2calendarWrongDirection: f2calendarRootProps = { direction: 'up' };
+// @ts-expect-error Today accepts a civil-date string, never a host Date object.
+const f2calendarWrongToday: f2calendarRootProps = { today: new Date() };
+type f3calendarCaptionNewProps = ProtoAdapterProps<typeof f3calendar.calendarCaption>;
+const validf3calendarCaption: f3calendarCaptionNewProps = { a11yLabel: 'Navigation' };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf3calendarCaption: f3calendarCaptionNewProps = { a11yLabel: 23 };
+declare const f3calendarCaptionNew: ProtoAdapterExposes<typeof f3calendar.calendarCaption>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f3calendarCaptionNew.missingMethod();
+type f3calendarWeekdaysNewProps = ProtoAdapterProps<typeof f3calendar.calendarWeekdays>;
+const validf3calendarWeekdays: f3calendarWeekdaysNewProps = {};
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf3calendarWeekdays: f3calendarWeekdaysNewProps = { offset: 0 };
+declare const f3calendarWeekdaysNew: ProtoAdapterExposes<typeof f3calendar.calendarWeekdays>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f3calendarWeekdaysNew.missingMethod();
+type f3calendarWeekdayNewProps = ProtoAdapterProps<typeof f3calendar.calendarWeekday>;
+const validf3calendarWeekday: f3calendarWeekdayNewProps = { offset: 0 };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf3calendarWeekday: f3calendarWeekdayNewProps = { offset: '0' };
+declare const f3calendarWeekdayNew: ProtoAdapterExposes<typeof f3calendar.calendarWeekday>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f3calendarWeekdayNew.missingMethod();
+const f3calendarWeekdayLabel: string = f3calendarWeekdayNew.label.get();
+const f3calendarWeekdayNumber: number = f3calendarWeekdayNew.weekday.get();
+const f3calendarToday: boolean = f3calendarDay.today.get();
+const f3calendarHovered: boolean = f3calendarDay.hovered.get();
+const f3calendarPressed: boolean = f3calendarDay.pressed.get();
+const f3calendarHeadingDisplay: string = f3calendarHeading.displayValue.get();
+const f3calendarDisabled: boolean = f3calendarRoot.disabled.get();
+const f3calendarLocalizedProps: f3calendarRootProps = {
+  today: '2026-10-10',
+  locale: 'zh-CN',
+  direction: 'rtl',
+};
+// @ts-expect-error Direction is a closed public domain.
+const f3calendarWrongDirection: f3calendarRootProps = { direction: 'up' };
+// @ts-expect-error Today accepts a civil-date string, never a host Date object.
+const f3calendarWrongToday: f3calendarRootProps = { today: new Date() };
+type f4calendarCaptionNewProps = ProtoAdapterProps<typeof f4calendar.calendarCaption>;
+const validf4calendarCaption: f4calendarCaptionNewProps = { a11yLabel: 'Navigation' };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf4calendarCaption: f4calendarCaptionNewProps = { a11yLabel: 23 };
+declare const f4calendarCaptionNew: ProtoAdapterExposes<typeof f4calendar.calendarCaption>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f4calendarCaptionNew.missingMethod();
+type f4calendarWeekdaysNewProps = ProtoAdapterProps<typeof f4calendar.calendarWeekdays>;
+const validf4calendarWeekdays: f4calendarWeekdaysNewProps = {};
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf4calendarWeekdays: f4calendarWeekdaysNewProps = { offset: 0 };
+declare const f4calendarWeekdaysNew: ProtoAdapterExposes<typeof f4calendar.calendarWeekdays>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f4calendarWeekdaysNew.missingMethod();
+type f4calendarWeekdayNewProps = ProtoAdapterProps<typeof f4calendar.calendarWeekday>;
+const validf4calendarWeekday: f4calendarWeekdayNewProps = { offset: 0 };
+// @ts-expect-error New Calendar atom rejects invalid public props.
+const invalidf4calendarWeekday: f4calendarWeekdayNewProps = { offset: '0' };
+declare const f4calendarWeekdayNew: ProtoAdapterExposes<typeof f4calendar.calendarWeekday>;
+// @ts-expect-error No arbitrary instance method is admitted.
+f4calendarWeekdayNew.missingMethod();
+const f4calendarWeekdayLabel: string = f4calendarWeekdayNew.label.get();
+const f4calendarWeekdayNumber: number = f4calendarWeekdayNew.weekday.get();
+const f4calendarToday: boolean = f4calendarDay.today.get();
+const f4calendarHovered: boolean = f4calendarDay.hovered.get();
+const f4calendarPressed: boolean = f4calendarDay.pressed.get();
+const f4calendarHeadingDisplay: string = f4calendarHeading.displayValue.get();
+const f4calendarDisabled: boolean = f4calendarRoot.disabled.get();
+const f4calendarLocalizedProps: f4calendarRootProps = {
+  today: '2026-10-10',
+  locale: 'zh-CN',
+  direction: 'rtl',
+};
+// @ts-expect-error Direction is a closed public domain.
+const f4calendarWrongDirection: f4calendarRootProps = { direction: 'up' };
+// @ts-expect-error Today accepts a civil-date string, never a host Date object.
+const f4calendarWrongToday: f4calendarRootProps = { today: new Date() };
+import { asCalendarCaption, asCalendarWeekday, asCalendarHeading } from '../src/calendar';
+declare const captionHook: ReturnType<typeof asCalendarCaption>;
+declare const weekdayHook: ReturnType<typeof asCalendarWeekday>;
+declare const headingHook: ReturnType<typeof asCalendarHeading>;
+const captionName: string | undefined = captionHook.stateHandles?.a11yLabel.get();
+const weekdayDescription: string | undefined = weekdayHook.stateHandles?.description.get();
+const headingText: string | undefined = headingHook.stateHandles?.displayValue.get();
+// @ts-expect-error Weekday number is a number, not a textual date.
+weekdayHook.stateHandles?.weekday.set('Monday');
+// @ts-expect-error The localized heading is not a Date object.
+headingHook.stateHandles?.displayValue.set(new Date());
+// @ts-expect-error Caption is semantic grouping and does not capture a Select protocol.
+captionHook.getAsHookHandle('as-select-root');

@@ -1,17 +1,27 @@
 ---
 title: 'Calendar (WIP)'
-description: 'Gregorian date selection with controlled value and keyboard navigation.'
+description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Calendar is a date-only Gregorian control. Value and visible month can each be controlled; the day cells support arrow, Home/End and PageUp/PageDown navigation, unavailable dates and read-only selection. Date values use YYYY-MM-DD; months use YYYY-MM. The application supplies six rows of day atoms with offsets 0–41.
+Calendar is a single-date Gregorian control. `value` uses YYYY-MM-DD; the canonical visible `month` uses YYYY-MM. Selection and month can each be controlled. A successful `requestMonth` means a proposal was emitted, not that the owner accepted it. Refused or pending cross-month keyboard navigation keeps the current valid Tab entry; accepted navigation materializes and focuses only after canonical month changes and current availability is checked. Focus is not stolen back from an external control.
 
-This functional checkpoint is WIP. Native GPUI, complete Adapter/Compiler parity, visual evidence and lifecycle admission are still pending.
+## Composition and clock ownership
 
-Without month or defaultMonth, the initial displayed month follows value or defaultValue; an empty selection uses 1970-01. Explicit month wins over defaultMonth. unavailable accepts an array of date strings; malformed values are rejected by the Props boundary, retaining its prior valid value or the empty default.
+The ten atoms are Root, Caption, Heading, Previous, Next, Grid, Weekdays, Weekday, Row and Day. Compose seven Weekday atoms with offsets 0–6 inside Weekdays, then six Rows of Day atoms with offsets 0–41. Weekday labels and date order follow Root `weekStartsOn` (0 = Sunday) and `locale`; full localized civil dates name the grid cells. `direction="rtl"` mirrors Left/Right navigation, leaving Up/Down and week boundaries unchanged. Navigation controls accept `a11yLabel` for icon-only accessible naming.
 
-Controlled month navigation retains the current valid tab entry until the owner accepts the requested month. Synchronous and delayed acceptance apply the pending keyboard target only after its date is available; focus stays outside the Calendar if the reader has already left. Root disabled policy is combined with each Previous/Next control’s local disabled prop.
+The host supplies `today` as a civil-date string. Base never reads a clock or timezone: no `today` means no current-date marker. Today and selected are independent, including unavailable dates; today projects `aria-current="date"`. Initial month priority is explicit `month`, explicit `defaultMonth`, selected `value`/`defaultValue`, supplied `today`, then deterministic 1970-01. Later clock updates do not silently navigate. `unavailable` is a string array; invalid inputs retain their prior valid value/default. Root disabled combines with local Day/Previous/Next disabled policy; readOnly blocks selection while allowing browsing.
+
+## Explicit month/year caption composition
+
+The demo uses real family Select controls and `bindCalendarCaption(source, {month, year})` through public Calendar month/disabled state and `requestMonth`. Caption itself is only a semantic group. Month and year selectors are application composition, not an internal Calendar Select dependency. The helper always restores canonical control values after rejection or pending acceptance, subscribes to later commits, and exposes `dispose()` for teardown. The demo owns an explicit bounded year option list (not a Calendar limit), local-clock today, midnight/visibility refresh and complete controlled prop records. Its Select trigger labels are host-side demo naming because the existing Select protocol derives names from content.
+
+Base owns civil-date behavior, availability, canonical controlled ownership and accessibility. It supplies no design-language recipe.
+
+## Verification boundary
+
+This remains WIP. Calendar behavior has focused actual-host tests including WC, React, Vue and Vue2; public Props/Exposes/AsHook domains are checked independently. The current CLI collector misses some legitimate inherited Calendar/nested Button state tokens, so stateful generated CSS and browser visual fidelity are not accepted. Compiler interpretation is a separate owner’s responsibility, not a reason to constrain valid Prototype semantics. Native GPUI/Qt, compiled and packed parity, exact-commit browser evidence and independent acceptance remain open.
 
 <PrototypePreviewer
   demoId="demo-base-calendar"

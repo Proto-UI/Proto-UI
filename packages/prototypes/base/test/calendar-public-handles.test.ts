@@ -1,7 +1,14 @@
 import { afterEach, expect, it } from 'vitest';
 import { definePrototype, type DefHandle } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { asCalendarRoot, asCalendarDay, asCalendarPrevious } from '../src/calendar';
+import {
+  asCalendarRoot,
+  asCalendarDay,
+  asCalendarPrevious,
+  asCalendarCaption,
+  asCalendarWeekday,
+  asCalendarHeading,
+} from '../src/calendar';
 import {
   asDatePickerRoot,
   asDatePickerDay,
@@ -12,6 +19,9 @@ const hooks = {
   calendarRoot: asCalendarRoot,
   calendarDay: asCalendarDay,
   calendarPrevious: asCalendarPrevious,
+  calendarCaption: asCalendarCaption,
+  calendarWeekday: asCalendarWeekday,
+  calendarHeading: asCalendarHeading,
   datePickerRoot: asDatePickerRoot,
   datePickerDay: asDatePickerDay,
   datePickerContent: asDatePickerContent,
@@ -53,6 +63,8 @@ it('matches Calendar declared direct capture keys and nested Button handles to r
   expect(Object.keys(rootCapture.stateHandles).sort()).toEqual([
     'a11yLabel',
     'collectionCount',
+    'direction',
+    'disabled',
     'month',
     'value',
   ]);
@@ -63,7 +75,8 @@ it('matches Calendar declared direct capture keys and nested Button handles to r
     expect(dayCapture.stateHandles[name]).toBeDefined();
   expect(dayCapture.stateHandles.date.get()).toBe('2026-10-10');
   const navigation = previous.getExposes().readCapture();
-  expect(navigation.stateHandles).toBeUndefined();
+  expect(Object.keys(navigation.stateHandles)).toEqual(['a11yLabel']);
+  expect(navigation.stateHandles.a11yLabel.get()).toBe('Previous month');
   expect(navigation.getAsHookHandle('as-button').stateHandles.disabled.get()).toBe(false);
 });
 it('exposes Date Picker child handles through their real nested capture paths', async () => {
@@ -94,4 +107,26 @@ it('exposes Date Picker child handles through their real nested capture paths', 
   expect(contentCapture.stateHandles).toBeUndefined();
   expect(contentCapture.getAsHookHandle('as-popover-content').asTransition.controls).toBeDefined();
   expect(value.getExposes().readCapture().stateHandles.displayValue.get()).toBe('2026-10-10');
+});
+
+it('captures exactly the authored caption, weekday and localized heading facts', async () => {
+  const root = node('calendarRoot', { defaultMonth: '2026-10', locale: 'en-US', weekStartsOn: 1 });
+  const caption = node('calendarCaption');
+  const weekday = node('calendarWeekday', { offset: 0 });
+  const heading = node('calendarHeading');
+  root.append(caption, weekday, heading);
+  roots.push(root);
+  document.body.append(root);
+  await flush();
+  const c = caption.getExposes().readCapture();
+  expect(Object.keys(c.stateHandles)).toEqual(['a11yLabel']);
+  expect(c.getAsHookHandle('as-select-root')).toBeUndefined();
+  const w = weekday.getExposes().readCapture();
+  expect(Object.keys(w.stateHandles).sort()).toEqual(['description', 'label', 'weekday']);
+  expect(w.stateHandles.weekday.get()).toBe(1);
+  expect(w.stateHandles.label.get()).toBe('Mo');
+  const h = heading.getExposes().readCapture();
+  expect(Object.keys(h.stateHandles).sort()).toEqual(['displayValue', 'month']);
+  expect(h.stateHandles.month.get()).toBe('2026-10');
+  expect(h.stateHandles.displayValue.get()).toBe('October 2026');
 });

@@ -1,17 +1,27 @@
 ---
 title: 'Calendar (WIP)'
-description: 'Gregorian date selection with controlled value and keyboard navigation.'
+description: 'Gregorian date selection, localized weekdays and explicit caption composition.'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Calendar 使用公历日期字符串。选中值与显示月份可分别受控；日期原子支持方向键、Home/End、PageUp/PageDown、不可选日期和只读选择。日期格式为 YYYY-MM-DD，月份为 YYYY-MM。应用通过 0–41 的 offset 组合六行日期原子。
+Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
 
-当前为功能代码 WIP。原生 GPUI、完整 Adapter/Compiler 一致性、视觉证据与生命周期验收仍待补齐。
+## 组合与时钟所有权
 
-未传 month 或 defaultMonth 时，初始显示月份取自 value 或 defaultValue；无选中日期时回退到 1970-01。显式 month 优先于 defaultMonth。unavailable 接受日期字符串数组；非法形状由 Props 边界拒绝，保留上一个有效值或默认空数组。
+十个原子为 Root、Caption、Heading、Previous、Next、Grid、Weekdays、Weekday、Row、Day。在 Weekdays 中放置 offset 为 0–6 的七个 Weekday，再通过 offset 为 0–41 的 Day 组成六行。星期标签与日期顺序随 Root 的 `weekStartsOn`（0 为周日）和 `locale` 同步；日期格使用完整本地化民用日期作为无障碍名称。`direction="rtl"` 镜像左右键，保留上下键和周边界语义。导航原子支持 `a11yLabel`，为纯图标提供名称。
 
-受控月份导航在 owner 接受请求前保留当前有效 Tab 入口；同步或延迟接受后才提交键盘目标，并重新检查日期可用性。焦点已离开 Calendar 时不会被抢回。Root disabled 与 Previous/Next 自身 disabled 共同决定禁用状态。
+host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时钟或时区；未传 today 就不标记今天。today 与 selected 独立，包括不可用日期；today 映射 `aria-current="date"`。初始月份优先级为显式 `month`、显式 `defaultMonth`、选中的 `value`/`defaultValue`、传入的 `today`，最后是确定性回退 1970-01。时钟后续变化不会自动翻月。`unavailable` 为字符串数组；非法输入保留上一个有效值或默认值。Root disabled 与各 Day/Previous/Next 的局部 disabled 合并；readOnly 禁止选择但允许浏览。
+
+## 显式月份/年份 caption 组合
+
+演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有 显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。现有 Select 协议从内容取名，因此演示在 host 层为两个 trigger 命名。
+
+Base 拥有民用日期行为、可用性、受控值所有权和无障碍语义，不提供设计语言配方。
+
+## 验证边界
+
+当前仍为 WIP。Calendar 有实际 host 的局部行为测试，包含 WC、React、Vue、Vue2；公开 Props/Exposes/AsHook 的域另有独立负控。当前 CLI collector 会漏掉合法继承 Calendar / 嵌套 Button 状态的部分 token，因此状态样式的生成 CSS 与浏览器视觉保真尚未验收。Compiler 解释能力由另一 owner 负责，不能反过来约束合法 Prototype 语义。原生 GPUI/Qt、compiled/packed 一致性、绑定确切提交的浏览器证据和独立验收仍未完成。
 
 <PrototypePreviewer
   demoId="demo-base-calendar"
