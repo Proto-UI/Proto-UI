@@ -1,6 +1,7 @@
+import type { SliderPartProps } from '@proto.ui/prototypes-base/slider';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSliderFieldThumb } from '@proto.ui/prototypes-base/slider';
-export default definePrototype({
+export default definePrototype<SliderPartProps, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-slider-field-thumb',
   setup(def) {
     const inherited = asSliderFieldThumb();

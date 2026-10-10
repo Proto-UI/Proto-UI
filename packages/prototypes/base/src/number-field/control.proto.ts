@@ -20,7 +20,7 @@ export const asNumberFieldControl = defineAsHook<
   modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
   setup: (def) => setupNumberFieldInput(def, true),
 });
-export default definePrototype({
+export default definePrototype<NumberFieldPartProps>({
   name: 'base-number-field-control',
   modules: asNumberFieldControl.modules,
   setup: (def) => setupNumberFieldInput(def, true),

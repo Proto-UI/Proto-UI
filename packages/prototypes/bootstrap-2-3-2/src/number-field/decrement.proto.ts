@@ -1,6 +1,7 @@
+import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldDecrement } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype({
+export default definePrototype<NumberFieldPartProps, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-number-field-decrement',
   setup(def) {
     const inherited = asNumberFieldDecrement();

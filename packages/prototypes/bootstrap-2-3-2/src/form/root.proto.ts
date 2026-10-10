@@ -1,6 +1,7 @@
+import type { FormRootProps, FormRootExposes } from '@proto.ui/prototypes-base/form';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asFormRoot } from '@proto.ui/prototypes-base/form';
-export default definePrototype({
+export default definePrototype<FormRootProps, FormRootExposes>({
   name: 'bootstrap-2-3-2-form-root',
   setup(def) {
     const inherited = asFormRoot();

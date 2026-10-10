@@ -1,6 +1,7 @@
+import type { SliderRootProps, SliderRootExposes } from '@proto.ui/prototypes-base/slider';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSliderRoot } from '@proto.ui/prototypes-base/slider';
-export default definePrototype({
+export default definePrototype<SliderRootProps, SliderRootExposes>({
   name: 'brutalist-slider-root',
   setup(def) {
     const inherited = asSliderRoot();

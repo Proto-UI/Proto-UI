@@ -1,6 +1,7 @@
+import type { FormActionProps } from '@proto.ui/prototypes-base/form';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asFormReset } from '@proto.ui/prototypes-base/form';
-export default definePrototype({
+export default definePrototype<FormActionProps, Record<string, unknown>>({
   name: 'liquid-glass-form-reset',
   setup(def) {
     const inherited = asFormReset();

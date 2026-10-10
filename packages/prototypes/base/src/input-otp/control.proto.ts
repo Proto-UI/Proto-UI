@@ -12,7 +12,7 @@ export const asInputOtpControl = defineAsHook<
   modules: [declareTextControl({ content: 'plain-text', lineMode: 'single', engine: 'host' })],
   setup: (def) => setupInputOtpInput(def, true),
 });
-export default definePrototype({
+export default definePrototype<InputOtpInputProps>({
   name: 'base-input-otp-control',
   modules: asInputOtpControl.modules,
   setup: (def) => setupInputOtpInput(def, true),

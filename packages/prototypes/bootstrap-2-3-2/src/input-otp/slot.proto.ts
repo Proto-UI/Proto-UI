@@ -1,6 +1,7 @@
+import type { InputOtpSlotProps } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpSlot } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype({
+export default definePrototype<InputOtpSlotProps, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-input-otp-slot',
   setup(def) {
     const inherited = asInputOtpSlot();

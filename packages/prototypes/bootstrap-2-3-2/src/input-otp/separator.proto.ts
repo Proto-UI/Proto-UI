@@ -1,6 +1,6 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpSeparator } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype({
+export default definePrototype<{}, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-input-otp-separator',
   setup(def) {
     const inherited = asInputOtpSeparator();

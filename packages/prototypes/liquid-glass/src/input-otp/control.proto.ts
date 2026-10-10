@@ -1,6 +1,7 @@
+import type { InputOtpInputProps } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpControl } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype({
+export default definePrototype<InputOtpInputProps, Record<string, unknown>>({
   name: 'liquid-glass-input-otp-control',
   modules: asInputOtpControl.modules,
   setup(def) {

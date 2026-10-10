@@ -1,6 +1,7 @@
+import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldInput } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype({
+export default definePrototype<NumberFieldPartProps, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-number-field-input',
   modules: asNumberFieldInput.modules,
   setup(def) {

@@ -1,6 +1,10 @@
+import type {
+  CheckboxGroupItemProps,
+  CheckboxGroupItemExposes,
+} from '@proto.ui/prototypes-base/checkbox-group';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asCheckboxGroupAll } from '@proto.ui/prototypes-base/checkbox-group';
-export default definePrototype({
+export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>({
   name: 'bootstrap-2-3-2-checkbox-group-all',
   setup(def) {
     const inherited = asCheckboxGroupAll();

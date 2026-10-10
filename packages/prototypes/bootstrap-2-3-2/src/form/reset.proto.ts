@@ -1,6 +1,7 @@
+import type { FormActionProps } from '@proto.ui/prototypes-base/form';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asFormReset } from '@proto.ui/prototypes-base/form';
-export default definePrototype({
+export default definePrototype<FormActionProps, Record<string, unknown>>({
   name: 'bootstrap-2-3-2-form-reset',
   setup(def) {
     const inherited = asFormReset();

@@ -1,6 +1,7 @@
+import type { FieldsetRootProps, FieldsetRootExposes } from '@proto.ui/prototypes-base/fieldset';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asFieldsetRoot } from '@proto.ui/prototypes-base/fieldset';
-export default definePrototype({
+export default definePrototype<FieldsetRootProps, FieldsetRootExposes>({
   name: 'bootstrap-2-3-2-fieldset-root',
   setup(def) {
     const inherited = asFieldsetRoot();

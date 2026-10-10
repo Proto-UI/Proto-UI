@@ -1,6 +1,7 @@
+import type { InputOtpRootProps, InputOtpRootExposes } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpRoot } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype({
+export default definePrototype<InputOtpRootProps, InputOtpRootExposes>({
   name: 'bootstrap-2-3-2-input-otp-root',
   setup(def) {
     const inherited = asInputOtpRoot();

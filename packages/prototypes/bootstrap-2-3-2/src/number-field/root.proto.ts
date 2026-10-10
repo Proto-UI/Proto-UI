@@ -1,6 +1,10 @@
+import type {
+  NumberFieldRootProps,
+  NumberFieldRootExposes,
+} from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldRoot } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype({
+export default definePrototype<NumberFieldRootProps, NumberFieldRootExposes>({
   name: 'bootstrap-2-3-2-number-field-root',
   setup(def) {
     const inherited = asNumberFieldRoot();
