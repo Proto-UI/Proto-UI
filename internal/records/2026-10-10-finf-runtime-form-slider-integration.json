@@ -1,0 +1,108 @@
+{
+  "kind": "bounded-current-source-validation",
+  "baseCommit": "ce9b96d0f18e9635552efb3a075753bc38486d2c",
+  "sourceTree": "d65e8a4d957560894b34dfe534e7dd503cc53cff",
+  "commitBinding": "This record-only commit must have the actual source commit with the above tree as its sole parent. The publication verifies that parent, raw commit and full tree.",
+  "sourceLayers": [
+    "Shared runtime readiness test harness",
+    "Inherited FormField invalid feedback",
+    "Runtime Tabs focus lease and synchronous reentrancy",
+    "Bounded Collection request lifetime repairs",
+    "Website preview Portal theme and shell composition",
+    "Shadcn Slider pure-prototype paint and gesture lease repair"
+  ],
+  "localExecution": {
+    "head": "ce9b96d0f18e9635552efb3a075753bc38486d2c",
+    "initialStagedSourceTree": "ffe2a262c48eddd10a861a3889cc78b0221f2d3f",
+    "finalStagedSourceTree": "d65e8a4d957560894b34dfe534e7dd503cc53cff",
+    "boundary": "Product and test bytes were identical throughout the combined run. The final tree additionally corrects one geometry-source record and applies normal hook whitespace formatting; no local commit was created.",
+    "files": 81,
+    "passed": 1304,
+    "failed": 9,
+    "knownFailures": "Eight independently reproduced baseline Select projection cases plus one deliberately unskipped Slider borrowed-state conditional CSS closure test (eight missing Rule variants).",
+    "newUnattributedFailures": 0,
+    "unhandledErrors": 0,
+    "workspaceTypesExit": 0,
+    "scopedTypeProjects": 9,
+    "scopedTypesExit": 0,
+    "presetCheckExit": 0,
+    "normalPrecommitExit": 0,
+    "sixCommitMessageHooksExit": 0,
+    "websiteGeneration": "Official generation completed with 684 package/website tokens and its Shadow companion. This is not proof of standalone Slider conditional CSS closure."
+  },
+  "sharedOwnerHandoffs": {
+    "kind": "bounded-owner-handoffs-not-repairs",
+    "calendar": {
+      "observedCommit": "ce9b96d0f18e9635552efb3a075753bc38486d2c",
+      "officialRun": "https://github.com/Proto-UI/Proto-UI/actions/runs/38063650953",
+      "job": 114246797228,
+      "failedCases": 5,
+      "finding": "Month/Year triggers rendered as unnamed author-only comboboxes despite authored child text; the host projection does not fulfill nameFromContent intent for this role. The failures precede month/year/focus interactions.",
+      "requestedOwnerWork": "Define and implement the generic host naming projection according to role naming rules and existing semantic ownership. Preserve explicit name/relationship precedence; no component-name or route special case.",
+      "fixedByThisBatch": false,
+      "semanticSource": "Select Trigger uses asAccessible(), accessible.role(\"combobox\") and accessible.nameFromContent(); def.a11y is not the current API."
+    },
+    "formConditionalCss": {
+      "reviewedSourceTree": "71eccacf14a9d446796d8057ebf9ab32de0f2dfa",
+      "finding": "Legal nested imported asHook borrowed invalid state reaches the runtime, but the static semantic collector does not retain the matching conditional token. The exact token renderer supports it; generated CSS lacks it.",
+      "requestedOwnerWork": "Follow actual imported/nested hook identities and returned borrowed state handles without adding a second state owner or a component-name special case.",
+      "rows": [
+        {
+          "file": "packages/prototypes/shadcn/src/field/root.proto.ts",
+          "sha256": "9ca399fe693371b66dcc444853379608f57ddd5d6e596da2da03f0931ec1a034",
+          "runtimeToken": "data-[invalid]:text-destructive",
+          "collectedRuntimeToken": false,
+          "rendererSupportsExactToken": true,
+          "actualGeneratedCssContainsRuntimeToken": false
+        },
+        {
+          "file": "packages/prototypes/shadcn/src/form/field.proto.ts",
+          "sha256": "9e153ffdd12251fc44bf84a83d5c0a49ac6c29c8ec08b9025aa62bc02fd35f5d",
+          "runtimeToken": "data-[invalid]:text-destructive",
+          "collectedRuntimeToken": false,
+          "rendererSupportsExactToken": true,
+          "actualGeneratedCssContainsRuntimeToken": false
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/field/root.proto.ts",
+          "sha256": "c6252d64a985d67eca1859c7f9cb25c5d2316bb402defc9ec972e3584c9273bd",
+          "runtimeToken": "data-[invalid]:text-destructive-ink",
+          "collectedRuntimeToken": false,
+          "rendererSupportsExactToken": true,
+          "actualGeneratedCssContainsRuntimeToken": false
+        },
+        {
+          "file": "packages/prototypes/brutalist/src/form/field.proto.ts",
+          "sha256": "c776888d068fedfa167d09102bb85f72588bf70ef25bbf8ae33f205601c73a07",
+          "runtimeToken": "data-[invalid]:text-destructive-ink",
+          "collectedRuntimeToken": false,
+          "rendererSupportsExactToken": true,
+          "actualGeneratedCssContainsRuntimeToken": false
+        }
+      ],
+      "fixedByThisBatch": false
+    },
+    "acceptance": "No new accepted item; historical 5/63 ledger unchanged."
+  },
+  "sliderBoundaries": {
+    "paint": "4px rail and12px visible Thumb; current hit owners remain28px Thumb and12px Track.",
+    "upstreamGeometry": "Pinned source-level CSS suggests26px pseudo hit bounds and4px horizontal Control base size under stated defaults; not measured upstream native equivalence. See the corrected Shadcn Slider record.",
+    "collector": "Static Slider-only CSS dimensions/ring/forced-colors pass, but eight borrowed-state Rule variants for orientation, RTL and disabled behavior remain absent. Whole-site token coincidence does not establish independent package closure. Same generic hook-state collection owner as the Form gap; no component-name workaround.",
+    "open": "Exact-version native pointer boundaries, edge alignment, range/multiple thumbs, full theme/high-contrast/AT/adapter parity remain unverified."
+  },
+  "collectionBoundaries": "Only the reviewed request-history/disabled-trigger subset is included. Carousel initial default99 and leaf/missing TreeToggle/Alert behavior remain unresolved; full R4 is not closed.",
+  "acceptance": {
+    "done": 5,
+    "inProgress": 63,
+    "notStarted": 0,
+    "newlyAccepted": 0,
+    "nativeOnThisRevision": "Not run locally; use official exact-head CI and retain genuine failures.",
+    "matrix": "The inherited large matrix remains its historical source snapshot. This compact tree-bound record does not refresh that inventory or promote acceptance."
+  },
+  "disclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "retainedEarlierEvidence": "The shared runtime helper earlier extended run had433 passes/289 failures plus one unhandled error; only one WC Badge failure was independently confirmed on clean f090. This batch does not retroactively attribute or clear the remaining288 failures or that error. Earlier Form recipe failures and catalog debt also remain outside any new acceptance claim."
+}
