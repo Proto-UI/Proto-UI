@@ -247,12 +247,12 @@ importers:
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../../core
-      '@proto.ui/module-feedback':
-        specifier: workspace:*
-        version: link:../../modules/feedback
       '@proto.ui/module-expose-state':
         specifier: workspace:*
         version: link:../../modules/expose-state
+      '@proto.ui/module-feedback':
+        specifier: workspace:*
+        version: link:../../modules/feedback
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -326,9 +326,6 @@ importers:
 
   packages/adapters/react:
     dependencies:
-      '@proto.ui/module-axis-input':
-        specifier: workspace:*
-        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -347,6 +344,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/module-boundary':
         specifier: workspace:*
         version: link:../../modules/boundary
@@ -429,9 +429,6 @@ importers:
 
   packages/adapters/vue:
     dependencies:
-      '@proto.ui/module-axis-input':
-        specifier: workspace:*
-        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -450,6 +447,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/module-boundary':
         specifier: workspace:*
         version: link:../../modules/boundary
@@ -523,9 +523,6 @@ importers:
 
   packages/adapters/vue2:
     dependencies:
-      '@proto.ui/module-axis-input':
-        specifier: workspace:*
-        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -544,6 +541,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/module-boundary':
         specifier: workspace:*
         version: link:../../modules/boundary
@@ -617,9 +617,6 @@ importers:
 
   packages/adapters/web-component:
     dependencies:
-      '@proto.ui/module-axis-input':
-        specifier: workspace:*
-        version: link:../../modules/axis-input
       '@proto.ui/adapter-base':
         specifier: workspace:*
         version: link:../base
@@ -638,6 +635,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../../modules/as-trigger
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../../modules/axis-input
       '@proto.ui/module-boundary':
         specifier: workspace:*
         version: link:../../modules/boundary
@@ -1285,6 +1285,9 @@ importers:
       '@proto.ui/module-image-view':
         specifier: workspace:*
         version: link:../../modules/image-view
+      '@proto.ui/module-native-link':
+        specifier: workspace:*
+        version: link:../../modules/native-link
       '@proto.ui/module-table-structure':
         specifier: workspace:*
         version: link:../../modules/table-structure
@@ -1424,9 +1427,6 @@ importers:
 
   packages/runtime:
     dependencies:
-      '@proto.ui/module-axis-input':
-        specifier: workspace:*
-        version: link:../modules/axis-input
       '@proto.ui/core':
         specifier: workspace:*
         version: link:../core
@@ -1442,6 +1442,9 @@ importers:
       '@proto.ui/module-as-trigger':
         specifier: workspace:*
         version: link:../modules/as-trigger
+      '@proto.ui/module-axis-input':
+        specifier: workspace:*
+        version: link:../modules/axis-input
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../modules/base
