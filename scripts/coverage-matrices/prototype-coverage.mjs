@@ -610,7 +610,10 @@ function candidateView(data) {
         entityIds: f?.entityIds ?? [],
         sourceFiles: f?.sourceFiles ?? [],
       };
-      if (f) lifecycles.push(f.lifecycle);
+      // Source-only projection helpers do not create a catalog lifecycle.
+      // Match the validator's catalog-identity aggregation, including when a
+      // composition Base lives in index.ts rather than a .proto.ts declaration.
+      if (f?.entityIds.length) lifecycles.push(f.lifecycle);
     }
     row.lifecycle =
       row.base?.lifecycle ??

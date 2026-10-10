@@ -1107,3 +1107,20 @@ for (const project of ['shadcn/ui', 'Base UI']) {
     assert(validate(data).some((error) => error.includes('Reference snapshot pin mismatch')));
   });
 }
+
+test('source-only projections do not invent a comparison catalog lifecycle', () => {
+  const d = sameSourceCandidate();
+  const families = ['autocomplete', 'combobox', 'command', 'menubar', 'navigation-menu'];
+  for (const family of families) {
+    assert.equal(d.candidateSource.prototypeInventory.base[family], undefined);
+    for (const library of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
+      const projection = d.candidateSource.prototypeInventory[library][family];
+      assert(projection.sourceFiles.length > 0);
+      assert.deepEqual(projection.entityIds, []);
+      assert.equal(projection.lifecycle, 'none');
+    }
+  }
+  assert.deepEqual(validate(d), []);
+  assert.deepEqual(d.comparisonRows, baseline.comparisonRows);
+  assert.deepEqual(d.deliveryPlan, baseline.deliveryPlan);
+});
