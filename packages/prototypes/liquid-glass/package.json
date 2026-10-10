@@ -97,6 +97,70 @@
     "./checkbox-group": {
       "types": "./src/checkbox-group/index.ts",
       "default": "./src/checkbox-group/index.ts"
+    },
+    "./autocomplete": {
+      "types": "./src/autocomplete/index.ts",
+      "default": "./src/autocomplete/index.ts"
+    },
+    "./combobox": {
+      "types": "./src/combobox/index.ts",
+      "default": "./src/combobox/index.ts"
+    },
+    "./command": {
+      "types": "./src/command/index.ts",
+      "default": "./src/command/index.ts"
+    },
+    "./menubar": {
+      "types": "./src/menubar/index.ts",
+      "default": "./src/menubar/index.ts"
+    },
+    "./navigation-menu": {
+      "types": "./src/navigation-menu/index.ts",
+      "default": "./src/navigation-menu/index.ts"
+    },
+    "./context-menu": {
+      "types": "./src/context-menu/index.ts",
+      "default": "./src/context-menu/index.ts"
+    },
+    "./slider": {
+      "types": "./src/slider/index.ts",
+      "default": "./src/slider/index.ts"
+    },
+    "./number-field": {
+      "types": "./src/number-field/index.ts",
+      "default": "./src/number-field/index.ts"
+    },
+    "./input-otp": {
+      "types": "./src/input-otp/index.ts",
+      "default": "./src/input-otp/index.ts"
+    },
+    "./tree": {
+      "types": "./src/tree/index.ts",
+      "default": "./src/tree/index.ts"
+    },
+    "./message-scroller": {
+      "types": "./src/message-scroller/index.ts",
+      "default": "./src/message-scroller/index.ts"
+    },
+    "./resizable": {
+      "types": "./src/resizable/index.ts",
+      "default": "./src/resizable/index.ts"
+    },
+    "./carousel": {
+      "types": "./src/carousel/index.ts",
+      "default": "./src/carousel/index.ts"
+    },
+    "./virtual-list": {
+      "types": "./src/virtual-list/index.ts",
+      "default": "./src/virtual-list/index.ts"
+    },
+    "./date-picker": {
+      "types": "./src/date-picker/index.ts",
+      "default": "./src/date-picker/index.ts"
+    },
+    "./data-table": {
+      "types": "./src/data-table/index.ts",
+      "default": "./src/data-table/index.ts"
     }
   },
   "dependencies": {

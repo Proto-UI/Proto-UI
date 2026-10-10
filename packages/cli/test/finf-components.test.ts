@@ -32,3 +32,23 @@ describe('Finf workspace-source facade boundaries', () => {
     });
   }
 });
+
+describe('explicit Virtual List Web materialization boundary', () => {
+  it('exports the opt-in Web subpath without pulling it into the portable root', () => {
+    const manifest = JSON.parse(fs.readFileSync('packages/prototypes/base/package.json', 'utf8'));
+    expect(manifest.exports['./virtual-list/web']).toEqual({
+      types: './dist/virtual-list/web/index.d.ts',
+      import: './dist/virtual-list/web/index.js',
+      default: './dist/virtual-list/web/index.js',
+    });
+    expect(
+      fs.readFileSync('packages/prototypes/base/src/virtual-list/web/index.ts', 'utf8')
+    ).toContain('attachWebVirtualList');
+    expect(
+      fs.readFileSync('packages/prototypes/base/src/virtual-list/index.ts', 'utf8')
+    ).not.toMatch(/(?:from|import)\s*['"]\.\/web/);
+    expect(fs.readFileSync('packages/prototypes/base/src/index.ts', 'utf8')).not.toContain(
+      'virtual-list/web'
+    );
+  });
+});
