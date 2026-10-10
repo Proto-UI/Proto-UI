@@ -11,7 +11,14 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 export function percentage(value: number, min: number, max: number) {
-  return max === min ? 0 : clamp(((value - min) / (max - min)) * 100, 0, 100);
+  if (max === min) return 0;
+  const span = max - min;
+  // Finite endpoints can still overflow their difference. Scale both axes only
+  // in that case, preserving the ordinary/subnormal path and finite State values.
+  if (!Number.isFinite(span)) {
+    return clamp(((value / 2 - min / 2) / (max / 2 - min / 2)) * 100, 0, 100);
+  }
+  return clamp(((value - min) / span) * 100, 0, 100);
 }
 export function quantize(value: number, min: number, max: number, step: number) {
   const bounded = clamp(value, min, max);

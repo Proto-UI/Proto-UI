@@ -239,3 +239,357 @@ function f3MeterExposed(e: ProtoAdapterExposes<typeof f3Meter.meterRoot>) {
   return [numeric, state, invalid];
 }
 void f3MeterExposed;
+
+import * as baseProgress from '../src/progress';
+
+// Actual base Root consumer, not parity with a potentially erased Base type.
+function baseProgressRootConsumer(e: ProtoAdapterExposes<typeof baseProgress.progressRoot>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void baseProgressRootConsumer;
+
+// Actual base Label consumer, not parity with a potentially erased Base type.
+function baseProgressLabelConsumer(e: ProtoAdapterExposes<typeof baseProgress.progressLabel>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void baseProgressLabelConsumer;
+
+// Actual base Track consumer, not parity with a potentially erased Base type.
+function baseProgressTrackConsumer(e: ProtoAdapterExposes<typeof baseProgress.progressTrack>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void baseProgressTrackConsumer;
+
+// Actual base Indicator consumer, not parity with a potentially erased Base type.
+function baseProgressIndicatorConsumer(
+  e: ProtoAdapterExposes<typeof baseProgress.progressIndicator>
+) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void baseProgressIndicatorConsumer;
+
+// Actual base Value consumer, not parity with a potentially erased Base type.
+function baseProgressValueConsumer(e: ProtoAdapterExposes<typeof baseProgress.progressValue>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void baseProgressValueConsumer;
+
+// Actual f0 Root consumer, not parity with a potentially erased Base type.
+function f0ProgressRootConsumer(e: ProtoAdapterExposes<typeof f0Progress.progressRoot>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f0ProgressRootConsumer;
+
+// Actual f0 Label consumer, not parity with a potentially erased Base type.
+function f0ProgressLabelConsumer(e: ProtoAdapterExposes<typeof f0Progress.progressLabel>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f0ProgressLabelConsumer;
+
+// Actual f0 Track consumer, not parity with a potentially erased Base type.
+function f0ProgressTrackConsumer(e: ProtoAdapterExposes<typeof f0Progress.progressTrack>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f0ProgressTrackConsumer;
+
+// Actual f0 Indicator consumer, not parity with a potentially erased Base type.
+function f0ProgressIndicatorConsumer(e: ProtoAdapterExposes<typeof f0Progress.progressIndicator>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f0ProgressIndicatorConsumer;
+
+// Actual f0 Value consumer, not parity with a potentially erased Base type.
+function f0ProgressValueConsumer(e: ProtoAdapterExposes<typeof f0Progress.progressValue>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f0ProgressValueConsumer;
+
+// Actual f1 Root consumer, not parity with a potentially erased Base type.
+function f1ProgressRootConsumer(e: ProtoAdapterExposes<typeof f1Progress.progressRoot>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f1ProgressRootConsumer;
+
+// Actual f1 Label consumer, not parity with a potentially erased Base type.
+function f1ProgressLabelConsumer(e: ProtoAdapterExposes<typeof f1Progress.progressLabel>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f1ProgressLabelConsumer;
+
+// Actual f1 Track consumer, not parity with a potentially erased Base type.
+function f1ProgressTrackConsumer(e: ProtoAdapterExposes<typeof f1Progress.progressTrack>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f1ProgressTrackConsumer;
+
+// Actual f1 Indicator consumer, not parity with a potentially erased Base type.
+function f1ProgressIndicatorConsumer(e: ProtoAdapterExposes<typeof f1Progress.progressIndicator>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f1ProgressIndicatorConsumer;
+
+// Actual f1 Value consumer, not parity with a potentially erased Base type.
+function f1ProgressValueConsumer(e: ProtoAdapterExposes<typeof f1Progress.progressValue>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f1ProgressValueConsumer;
+
+// Actual f2 Root consumer, not parity with a potentially erased Base type.
+function f2ProgressRootConsumer(e: ProtoAdapterExposes<typeof f2Progress.progressRoot>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f2ProgressRootConsumer;
+
+// Actual f2 Label consumer, not parity with a potentially erased Base type.
+function f2ProgressLabelConsumer(e: ProtoAdapterExposes<typeof f2Progress.progressLabel>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f2ProgressLabelConsumer;
+
+// Actual f2 Track consumer, not parity with a potentially erased Base type.
+function f2ProgressTrackConsumer(e: ProtoAdapterExposes<typeof f2Progress.progressTrack>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f2ProgressTrackConsumer;
+
+// Actual f2 Indicator consumer, not parity with a potentially erased Base type.
+function f2ProgressIndicatorConsumer(e: ProtoAdapterExposes<typeof f2Progress.progressIndicator>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f2ProgressIndicatorConsumer;
+
+// Actual f2 Value consumer, not parity with a potentially erased Base type.
+function f2ProgressValueConsumer(e: ProtoAdapterExposes<typeof f2Progress.progressValue>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f2ProgressValueConsumer;
+
+// Actual f3 Root consumer, not parity with a potentially erased Base type.
+function f3ProgressRootConsumer(e: ProtoAdapterExposes<typeof f3Progress.progressRoot>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f3ProgressRootConsumer;
+
+// Actual f3 Label consumer, not parity with a potentially erased Base type.
+function f3ProgressLabelConsumer(e: ProtoAdapterExposes<typeof f3Progress.progressLabel>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f3ProgressLabelConsumer;
+
+// Actual f3 Track consumer, not parity with a potentially erased Base type.
+function f3ProgressTrackConsumer(e: ProtoAdapterExposes<typeof f3Progress.progressTrack>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f3ProgressTrackConsumer;
+
+// Actual f3 Indicator consumer, not parity with a potentially erased Base type.
+function f3ProgressIndicatorConsumer(e: ProtoAdapterExposes<typeof f3Progress.progressIndicator>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f3ProgressIndicatorConsumer;
+
+// Actual f3 Value consumer, not parity with a potentially erased Base type.
+function f3ProgressValueConsumer(e: ProtoAdapterExposes<typeof f3Progress.progressValue>) {
+  const value: number = e.value.get();
+  const percentage: number = e.percentage.get();
+  const indeterminate: boolean = e.indeterminate.get();
+  const status: string = e.status.get();
+  // @ts-expect-error Progress is a readout, not an editable control
+  e.requestValue(20);
+  // @ts-expect-error percentage is numeric
+  const invalid: string = e.percentage.get();
+  return [value, percentage, indeterminate, status, invalid];
+}
+void f3ProgressValueConsumer;
