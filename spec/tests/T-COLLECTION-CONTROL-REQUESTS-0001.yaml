@@ -5,11 +5,11 @@ status: draft
 since: 0.3.0-alpha.0
 lifecycleRationale:
   en: >-
-    This is a bounded regression ledger, not family-level acceptance. Resizable, Carousel and Tree do not yet have family-specific Prototype definitions. Button and the relevant focus/capture contracts are draft. Resizable proposal expectations are recorded explicitly without claiming nonexistent normative criterion coverage; other Adapters, native input and rendered paint remain unverified.
+    This is a bounded regression ledger, not family-level acceptance. Resizable, Carousel and Tree do not yet have family-specific Prototype definitions; DataTable pagination also has no complete Prototype definition. Button and the relevant focus/capture contracts are draft. Resizable proposal expectations are recorded explicitly without claiming nonexistent normative criterion coverage; other Adapters, native input and rendered paint remain unverified.
 
 
 summary: >-
-  Exercises controlled Resizable proposal history and existing nested Button disabled semantics in Carousel navigation and TreeToggle. It leaves Carousel initial collection convergence and leaf/missing TreeToggle focus policy unresolved.
+  Exercises controlled Resizable proposal history and existing nested Button disabled semantics in Carousel navigation, TreeToggle and DataTable pagination. It leaves Carousel initial collection convergence and leaf/missing TreeToggle focus policy unresolved.
 
 
 cases:
@@ -41,6 +41,19 @@ cases:
     expectation: retained-owner-remount-can-repeat-a-rejected-proposal-without-committing-it
     notes:
       - The Runtime fixture checks setup once, detach request rejection and remount retry. It does not claim a new Resizable lifecycle guarantee beyond this bounded observation.
+  - id: T-COLLECTION-CONTROL-REQUESTS-0001-CASE-DATA-TABLE-DISABLED
+    title: DataTable pagination merges local and Root disabled without inventing page-boundary focus policy
+    covers:
+      - P-BASE-BUTTON-PROP-DISABLED-CONTROLLED
+      - P-BASE-BUTTON-DISABLED-EXPOSE
+      - P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT
+      - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
+      - P-BASE-BUTTON-DISABLED-REJECT-FOCUS
+    expectation: existing-local-and-root-disabled-sources-share-one-button-feedback-and-wrapper-request-gate
+    notes:
+      - Both directions cover initial/dynamic changes, omission, controlled rejection/acceptance, synchronous outward-click disable and positive/negative Enter/Space routes.
+      - Root remains the page owner and readOnly permits paging. First/last-page no-op requests remain no-ops; their disabled/tabstop presentation policy is not added.
+      - This does not define DataTable sortable-header Space behavior, Carousel/Panel identity, or Tree collapsed-descendant focus recovery.
 implementations:
   - id: collection-control-wc-requests
     kind: adapter-test
@@ -59,6 +72,15 @@ implementations:
     path: packages/prototypes/base/test/resizable-request-lifetime.test.ts
     required: true
     consumesCases: [T-COLLECTION-CONTROL-REQUESTS-0001-CASE-LIFETIME]
+  - id: data-table-page-disabled
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/data-table-page-disabled.test.ts
+    required: true
+    consumesCases: [T-COLLECTION-CONTROL-REQUESTS-0001-CASE-DATA-TABLE-DISABLED]
+    exercises: [P-BASE-BUTTON]
+    notes:
+      - Actual Web Component Adapter with synthetic Happy DOM events; no native-browser, rendered-paint or whole-family conformance claim.
 exercises:
   prototypes:
     - id: P-BASE-BUTTON
@@ -69,6 +91,7 @@ exercises:
         - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
         - P-BASE-BUTTON-DISABLED-REJECT-FOCUS
 sources:
+  - path: internal/records/2026-10-10-collection-followup-data-table-disabled.md
   - path: internal/records/2026-10-10-collection-control-request-repair.md
 openQuestions:
   - id: T-COLLECTION-CONTROL-REQUESTS-0001-Q-FAMILY-AUTHORITY
@@ -81,4 +104,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Recorded bounded request-history and effective-disabled regressions without inventing complete family acceptance.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added existing local and Root disabled ownership checks for DataTable pagination while leaving other collection interaction definitions open.
 tags: [prototype, collection, disabled, controlled, lifecycle, regression]

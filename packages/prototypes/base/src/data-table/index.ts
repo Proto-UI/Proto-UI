@@ -382,10 +382,26 @@ export const dataTableCaption = definePrototype({
 });
 function pageControl(delta: number) {
   return (def: DefHandle<DataTablePreviousProps, DataTablePreviousExposes>) => {
-    asButton();
+    const button = asButton();
+    const focus = asFocusable();
     def.anatomy.claim(DATA_TABLE_FAMILY, { role: delta < 0 ? 'previous' : 'next' });
-    def.context.subscribe(DATA_TABLE_CONTEXT);
+    const isDisabled = (run: RunHandle<DataTablePreviousProps>) =>
+      !!run.props.get().disabled || run.context.read(DATA_TABLE_CONTEXT).disabled;
+    const sync = (run: RunHandle<DataTablePreviousProps>) => {
+      const disabled = isDisabled(run);
+      const states = button.stateHandles!;
+      states.disabled.set(disabled, 'data table page control availability');
+      focus.setDisabled(disabled);
+      if (disabled) {
+        states.hovered.set(false, 'data table page control disabled');
+        states.pressed.set(false, 'data table page control disabled');
+      }
+    };
+    def.context.subscribe(DATA_TABLE_CONTEXT, sync);
+    def.lifecycle.onMounted(sync);
+    def.props.watchAll(sync);
     def.event.on('press.commit', (run) => {
+      if (isDisabled(run)) return;
       const c = run.context.read(DATA_TABLE_CONTEXT);
       callOwner(run, DATA_TABLE_FAMILY, 'requestPage', c.page + delta);
     });

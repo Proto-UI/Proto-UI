@@ -1,5 +1,9 @@
 {
   "extends": "../../../../tsconfig.json",
-  "include": ["collection-control-requests.test.ts", "resizable-request-lifetime.test.ts"],
+  "include": [
+    "collection-control-requests.test.ts",
+    "resizable-request-lifetime.test.ts",
+    "data-table-page-disabled.test.ts"
+  ],
   "exclude": []
 }
