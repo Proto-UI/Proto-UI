@@ -182,6 +182,7 @@ const staticUtilities: Record<string, string[]> = {
   'flex-col-reverse': ['flex-direction: column-reverse;'],
   'items-center': ['align-items: center;'],
   'items-start': ['align-items: flex-start;'],
+  'content-start': ['align-content: flex-start;'],
   'items-end': ['align-items: flex-end;'],
   'justify-start': ['justify-content: flex-start;'],
   'justify-center': ['justify-content: center;'],

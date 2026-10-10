@@ -652,3 +652,13 @@ describe('Classic Drawer handle physical styling', () => {
     }
   });
 });
+
+it('keeps bounded Drawer grid rows at the start of the actual scrollport', () => {
+  for (const css of [
+    renderProtoStyleTokenCss(['content-start']),
+    renderProtoShadowStyleTokenCss(['content-start']),
+  ]) {
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('align-content: flex-start;');
+  }
+});
