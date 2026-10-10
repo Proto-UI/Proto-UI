@@ -104,6 +104,10 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
     intent: (i) => i.feedback.style.use(tw('flex-col')),
   });
   let owner: RunHandle<ResizableRootProps> | null = null;
+  // Request history is not a committed value: the owner still controls value/context.
+  let proposal: number | undefined;
+  let requestRevision = 0;
+  let ownerInputs: unknown[] | null = null;
   const publish = (run: RunHandle<ResizableRootProps>) => {
     const p = run.props.get();
     orientation.set(p.orientation ?? 'horizontal', 'resize orientation');
@@ -121,20 +125,43 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
   };
   def.expose.method('requestValue', (next: number, commit = false) => {
     if (!owner) return false;
-    const p = owner.props.get();
+    const run = owner;
+    const p = run.props.get();
     if (p.disabled || p.readOnly || !Number.isFinite(next)) return false;
     next = resizeValue(next, p.min, p.max, p.collapsible);
-    if (next !== value.get()) {
-      if (!owner.props.isProvided('value')) value.set(next, 'resize request');
-      publish(owner);
-      owner.expose.emit('valueChange', { value: next });
+    const changed = next !== (proposal ?? value.get());
+    const revision = ++requestRevision;
+    // Advance before outward callbacks, which may synchronously accept or request again.
+    proposal = next;
+    if (changed) {
+      if (!run.props.isProvided('value')) value.set(next, 'resize request');
+      publish(run);
+      run.expose.emit('valueChange', { value: next });
     }
-    if (commit) owner.expose.emit('valueCommit', { value: next });
+    if (commit && owner === run) {
+      // A nested request owns its newer cursor. A completed rejected interaction may retry.
+      if (revision === requestRevision) proposal = undefined;
+      run.expose.emit('valueCommit', { value: next });
+    }
     return true;
   });
   const sync = (run: RunHandle<ResizableRootProps>, created = false) => {
     owner = run;
     const p = run.props.get();
+    const inputs = [
+      run.props.isProvided('value'),
+      p.value,
+      p.min,
+      p.max,
+      !!p.collapsible,
+      !!p.disabled,
+      !!p.readOnly,
+    ];
+    if (!ownerInputs || inputs.some((input, i) => !Object.is(input, ownerInputs![i]))) {
+      proposal = undefined;
+      requestRevision++;
+    }
+    ownerInputs = inputs;
     if (created || run.props.isProvided('value'))
       value.set(
         resizeValue(
@@ -153,6 +180,8 @@ function setupRoot(def: DefHandle<ResizableRootProps, ResizableRootExposes>) {
   def.props.watchAll((run) => sync(run));
   def.lifecycle.onUnmounted(() => {
     owner = null;
+    proposal = undefined;
+    requestRevision++;
   });
 }
 export const asResizableRoot = defineAsHook<

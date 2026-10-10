@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": ["collection-control-requests.test.ts", "resizable-request-lifetime.test.ts"],
+  "exclude": []
+}

@@ -369,11 +369,34 @@ export const asTreeGroup = defineAsHook<TreeGroupProps, TreeGroupExposes, TreeGr
 });
 export const treeGroup = definePrototype({ name: 'base-tree-group', setup: setupGroup });
 function setupToggle(def: DefHandle<TreeToggleProps, TreeToggleExposes>) {
-  asButton();
+  const button = asButton();
+  const focus = asFocusable();
   def.anatomy.claim(TREE_FAMILY, { role: 'toggle' });
   def.props.define({ nodeKey: { type: 'string' } });
-  def.context.subscribe(TREE_CONTEXT);
+  const isDisabled = (run: RunHandle<TreeToggleProps>) => {
+    const entries = callOwner(run, TREE_FAMILY, 'getTree') as TreeEntry[] | false;
+    const entry = entries
+      ? entries.find((node) => node.key === run.props.get().nodeKey)
+      : undefined;
+    return (
+      !!run.props.get().disabled || run.context.read(TREE_CONTEXT).disabled || !!entry?.disabled
+    );
+  };
+  const sync = (run: RunHandle<TreeToggleProps>) => {
+    const disabled = isDisabled(run);
+    const states = button.stateHandles!;
+    states.disabled.set(disabled, 'tree toggle availability');
+    focus.setDisabled(disabled);
+    if (disabled) {
+      states.hovered.set(false, 'tree toggle disabled');
+      states.pressed.set(false, 'tree toggle disabled');
+    }
+  };
+  def.context.subscribe(TREE_CONTEXT, sync);
+  def.lifecycle.onMounted(sync);
+  def.props.watchAll(sync);
   def.event.on('press.commit', (run) => {
+    if (isDisabled(run)) return;
     const key = run.props.get().nodeKey ?? '';
     callOwner(
       run,

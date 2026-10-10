@@ -1,0 +1,82 @@
+id: T-COLLECTION-CONTROL-REQUESTS-0001
+type: test
+title: Bounded collection control request and disabled regressions
+status: draft
+since: 0.3.0-alpha.0
+lifecycleRationale:
+  en: >-
+    This is a bounded regression ledger, not family-level acceptance. Resizable, Carousel and Tree do not yet have family-specific Prototype definitions. Button and the relevant focus/capture contracts are draft. Resizable proposal expectations are recorded explicitly without claiming nonexistent normative criterion coverage; other Adapters, native input and rendered paint remain unverified.
+
+summary: >-
+  Exercises controlled Resizable proposal history and existing nested Button disabled semantics in Carousel navigation and TreeToggle. It leaves Carousel initial collection convergence and leaf/missing TreeToggle focus policy unresolved.
+
+cases:
+  - id: T-COLLECTION-CONTROL-REQUESTS-0001-CASE-PROPOSALS
+    title: Distinct normalized Resizable proposals remain request-only while the owner delays or rejects them
+    covers: []
+    expectation: controlled-50-to-60-to-50-emits-both-distinct-proposals-without-committing-owner-value
+    notes:
+      - No family-specific Prototype criterion exists. This is an owner-directed bounded regression expectation, not inferred family conformance.
+      - Repeated normalized proposals are deduplicated within an unfinished request stream; every accepted commit request emits valueCommit. Completion releases the cursor so a rejected interaction can be attempted again.
+      - Owner value/mode/constraints and disabled/readOnly changes reset the cursor; unrelated props do not. Synchronous acceptance and newer reentrant requests remain owner-owned.
+  - id: T-COLLECTION-CONTROL-REQUESTS-0001-CASE-DISABLED
+    title: Existing ButtonProps consumers merge effective disabled and guard their own request dispatch
+    covers:
+      - P-BASE-BUTTON-PROP-DISABLED-CONTROLLED
+      - P-BASE-BUTTON-DISABLED-EXPOSE
+      - P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT
+      - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
+      - P-BASE-BUTTON-DISABLED-REJECT-FOCUS
+    expectation: local-and-root-or-target-disabled-agree-on-feedback-focus-and-request-suppression
+    notes:
+      - Carousel merges local, Root and navigation-boundary disabled. TreeToggle merges local, Root and existing target-node disabled.
+      - The existing nested as-button owns the interaction states. Wrapper press.commit listeners separately recheck the same effective predicate before requesting their owner.
+      - Synthetic WC click and positive/negative Enter/Space routes are covered, including synchronous disabled changes from the outward Button click.
+      - Tree readOnly still permits expansion. Leaf, missing and invalid graph requests do not expand; no new disabled or tabstop expectation is asserted for them.
+  - id: T-COLLECTION-CONTROL-REQUESTS-0001-CASE-LIFETIME
+    title: A detached Resizable view releases proposal history without replacing its controlled owner
+    covers: []
+    expectation: retained-owner-remount-can-repeat-a-rejected-proposal-without-committing-it
+    notes:
+      - The Runtime fixture checks setup once, detach request rejection and remount retry. It does not claim a new Resizable lifecycle guarantee beyond this bounded observation.
+implementations:
+  - id: collection-control-wc-requests
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/collection-control-requests.test.ts
+    required: true
+    consumesCases:
+      - T-COLLECTION-CONTROL-REQUESTS-0001-CASE-PROPOSALS
+      - T-COLLECTION-CONTROL-REQUESTS-0001-CASE-DISABLED
+    exercises: [P-BASE-BUTTON]
+    notes:
+      - Real Web Component Adapter in Happy DOM with synthetic inputs; this is not a native browser, accessibility-tree or rendered-paint claim.
+  - id: resizable-request-view-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/resizable-request-lifetime.test.ts
+    required: true
+    consumesCases: [T-COLLECTION-CONTROL-REQUESTS-0001-CASE-LIFETIME]
+exercises:
+  prototypes:
+    - id: P-BASE-BUTTON
+      anchors:
+        - P-BASE-BUTTON-PROP-DISABLED-CONTROLLED
+        - P-BASE-BUTTON-DISABLED-EXPOSE
+        - P-BASE-BUTTON-DISABLED-CLEAR-TRANSIENT
+        - P-BASE-BUTTON-DISABLED-SUPPRESS-ACTIVATION
+        - P-BASE-BUTTON-DISABLED-REJECT-FOCUS
+sources:
+  - path: internal/records/2026-10-10-collection-control-request-repair.md
+openQuestions:
+  - id: T-COLLECTION-CONTROL-REQUESTS-0001-Q-FAMILY-AUTHORITY
+    question:
+      en: Which complete family definitions and cross-Adapter evidence will govern these request and initialization semantics?
+    context:
+      en: Family-specific P entities are absent; this bounded passing ledger cannot activate their behaviors or define Carousel collection completion or Tree leaf/missing focus policy.
+    blocks: [activation:T-COLLECTION-CONTROL-REQUESTS-0001]
+revisions:
+  - version: 0.3.0-alpha.0
+    change: introduced
+    summary: Recorded bounded request-history and effective-disabled regressions without inventing complete family acceptance.
+tags: [prototype, collection, disabled, controlled, lifecycle, regression]

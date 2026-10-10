@@ -256,16 +256,30 @@ function navigation(delta: number) {
     const button = asButton();
     const focus = asFocusable();
     def.anatomy.claim(CAROUSEL_FAMILY, { role: delta < 0 ? 'previous' : 'next' });
-    const sync = (run: RunHandle<any>) => {
+    const isDisabled = (run: RunHandle<CarouselPreviousProps>) => {
       const c = run.context.read(CAROUSEL_CONTEXT);
-      const disabled =
-        c.disabled || !c.count || (!c.loop && (delta < 0 ? c.index <= 0 : c.index >= c.count - 1));
-      button.stateHandles?.disabled.set(disabled, 'carousel control boundary');
+      return (
+        !!run.props.get().disabled ||
+        c.disabled ||
+        !c.count ||
+        (!c.loop && (delta < 0 ? c.index <= 0 : c.index >= c.count - 1))
+      );
+    };
+    const sync = (run: RunHandle<CarouselPreviousProps>) => {
+      const disabled = isDisabled(run);
+      const states = button.stateHandles!;
+      states.disabled.set(disabled, 'carousel control availability');
       focus.setDisabled(disabled);
+      if (disabled) {
+        states.hovered.set(false, 'carousel control disabled');
+        states.pressed.set(false, 'carousel control disabled');
+      }
     };
     def.context.subscribe(CAROUSEL_CONTEXT, sync);
     def.lifecycle.onMounted(sync);
+    def.props.watchAll(sync);
     def.event.on('press.commit', (run) => {
+      if (isDisabled(run)) return;
       const c = run.context.read(CAROUSEL_CONTEXT);
       callOwner(run, CAROUSEL_FAMILY, 'requestIndex', c.index + delta);
     });
