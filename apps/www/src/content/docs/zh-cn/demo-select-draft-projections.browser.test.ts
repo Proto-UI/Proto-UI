@@ -11,6 +11,7 @@ import {
 } from './select-overflow-observation';
 import {
   RUNTIMES,
+  runtimeSelectTrigger,
   choosePreviewRuntime,
   launchBrowser,
   openRoute,
@@ -326,13 +327,11 @@ describe.sequential('actual family Text selection and typography', () => {
           ).toBe(1.875);
           expect(await text.evaluate((node) => node.getAttribute('role'))).toBeNull();
           expect(await text.evaluate((node) => (node as HTMLElement).tabIndex)).toBe(-1);
-          const trigger = previewer.locator(
-            '[data-projection-control="runtime"] [role="combobox"]'
-          );
+          const trigger = runtimeSelectTrigger(previewer);
           expect(await trigger.evaluate((node) => getComputedStyle(node).userSelect)).toBe('none');
           await page.evaluate(() => getSelection()?.removeAllRanges());
           const triggerBox = await trigger.boundingBox();
-          if (!triggerBox) throw new Error('Actual family Select has no painted bounds.');
+          if (!triggerBox) throw new Error('Actual selected Runtime Tab has no painted bounds.');
           await page.mouse.move(triggerBox.x + 4, triggerBox.y + triggerBox.height / 2);
           await page.mouse.down();
           await page.mouse.move(
