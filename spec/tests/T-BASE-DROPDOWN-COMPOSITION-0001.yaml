@@ -1,0 +1,87 @@
+id: T-BASE-DROPDOWN-COMPOSITION-0001
+type: test
+title: Dropdown passive composition and single action-owner checks
+status: draft
+since: 0.3.0-alpha.1
+summary: Checks live group naming, passive separators and shortcut hints, collection isolation and lifecycle without adding an input owner.
+cases:
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-GROUP
+    title: Group owns only its defined passive semantics
+    covers: [P-BASE-DROPDOWN-MENU-GROUP-GROUP-ROLE, P-BASE-DROPDOWN-MENU-GROUP-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-LABEL
+    title: Label owns only its defined passive semantics
+    covers: [P-BASE-DROPDOWN-MENU-LABEL-LABEL-RELATION, P-BASE-DROPDOWN-MENU-LABEL-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-SEPARATOR
+    title: Separator owns only its defined passive semantics
+    covers:
+      [P-BASE-DROPDOWN-MENU-SEPARATOR-SEPARATOR-PASSIVE, P-BASE-DROPDOWN-MENU-SEPARATOR-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-SHORTCUT
+    title: Shortcut owns only its defined passive semantics
+    covers:
+      [P-BASE-DROPDOWN-MENU-SHORTCUT-SHORTCUT-PASSIVE, P-BASE-DROPDOWN-MENU-SHORTCUT-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-FAMILY-SOURCE
+    title: Family source preserves passive semantics and closes complete CSS token input
+    covers:
+      - P-SHADCN-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-ITEM-SEMANTICS-AND-PAINT
+    expectation: source-host-semantics-and-complete-css-lowering-with-visual-acceptance-explicitly-pending
+implementations:
+  - id: dropdown-passive-source-host
+    kind: module-test
+    status: failing
+    path: packages/prototypes/base/test/navigation-overlays/dropdown-composition.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-DROPDOWN-COMPOSITION-0001-GROUP
+      - T-BASE-DROPDOWN-COMPOSITION-0001-LABEL
+      - T-BASE-DROPDOWN-COMPOSITION-0001-SEPARATOR
+      - T-BASE-DROPDOWN-COMPOSITION-0001-SHORTCUT
+      - T-BASE-DROPDOWN-COMPOSITION-0001-FAMILY-SOURCE
+    exercises:
+      [
+        P-BASE-DROPDOWN-MENU-GROUP,
+        P-BASE-DROPDOWN-MENU-LABEL,
+        P-BASE-DROPDOWN-MENU-SEPARATOR,
+        P-BASE-DROPDOWN-MENU-SHORTCUT,
+      ]
+exercises:
+  {
+    prototypes:
+      [
+        P-BASE-DROPDOWN-MENU-GROUP,
+        P-BASE-DROPDOWN-MENU-LABEL,
+        P-BASE-DROPDOWN-MENU-SEPARATOR,
+        P-BASE-DROPDOWN-MENU-SHORTCUT,
+      ],
+  }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded composition checks, with full native/browser/style acceptance remaining separate.
+tags: [prototype, dropdown-menu, composition, test]

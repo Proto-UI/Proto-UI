@@ -24,7 +24,7 @@ Content 组合 overlay、transition、collection navigation、typeahead 与 anch
 
 ## Accessibility 边界
 
-这个 family 表示由按钮打开的一组 action/function。它不得把普通导航、任意 form 或 persistent selection 伪装成 menu。Group、Label、Separator、Checkbox Item、Radio Item 与 Submenu 不属于当前 Base guarantee。
+这个 family 表示由按钮打开的一组 action/function。它不得把普通导航、任意 form 或 persistent selection 伪装成 menu。Group、Label、Separator 与 Shortcut 是下述有界草稿扩展。Checkbox Item、Radio Item 与 Submenu 不在本片交付范围。
 
 ## 0.2 交付与证据
 
@@ -41,3 +41,7 @@ Content 组合 overlay、transition、collection navigation、typeahead 与 anch
 - [Dropdown source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/dropdown)
 - [Dropdown evidence](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/dropdown.test.ts)
 - 风格化投射：[Brutalist Dropdown Menu](/zh-cn/ui-libraries/brutalist/components/dropdown-menu/)
+
+## 分组动作组成（草稿）
+
+Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。

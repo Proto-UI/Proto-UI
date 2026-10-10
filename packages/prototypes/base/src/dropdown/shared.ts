@@ -70,12 +70,31 @@ export const DROPDOWN_FAMILY = createAnatomyFamily('base-dropdown', {
     trigger: { cardinality: { min: 0, max: 1 } },
     content: { cardinality: { min: 0, max: 1 } },
     item: { cardinality: { min: 0, max: 100 } },
+    group: { cardinality: { min: 0, max: 100 } },
+    label: { cardinality: { min: 0, max: 100 } },
+    separator: { cardinality: { min: 0, max: 100 } },
+    shortcut: { cardinality: { min: 0, max: 100 } },
   },
   relations: [
     { kind: 'contains', parent: 'root', child: 'trigger' },
     { kind: 'contains', parent: 'root', child: 'content' },
     { kind: 'contains', parent: 'content', child: 'item' },
+    { kind: 'contains', parent: 'content', child: 'group' },
+    { kind: 'contains', parent: 'group', child: 'label' },
+    { kind: 'contains', parent: 'content', child: 'separator' },
+    { kind: 'contains', parent: 'item', child: 'shortcut' },
   ],
 });
 
 export const DROPDOWN_CONTEXT = createContextKey<DropdownContextValue>('base-dropdown');
+
+// Label ownership is group-local even when several groups share one menu level.
+export const DROPDOWN_GROUP_FAMILY = createAnatomyFamily('base-dropdown-group', {
+  roles: { root: { cardinality: { min: 1, max: 1 } }, label: { cardinality: { min: 0, max: 1 } } },
+  relations: [{ kind: 'contains', parent: 'root', child: 'label' }],
+});
+export const DROPDOWN_GROUP_CONTEXT = createContextKey<{ labelId: string }>('base-dropdown-group');
+
+export const DROPDOWN_ITEM_CONTEXT = createContextKey<{ active: boolean; disabled: boolean }>(
+  'base-dropdown-item'
+);

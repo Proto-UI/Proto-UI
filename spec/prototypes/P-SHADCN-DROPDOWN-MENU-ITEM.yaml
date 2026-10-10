@@ -60,8 +60,10 @@ criteria:
       zh-CN: >-
         destructive variant 的现有 token 断言只是 projection-covered 的投影证据；在文档实例、跨运行时渲染与该 Dropdown surface 自身的对比度测量证据落地前，该 surface 保持 render-undemonstrated。Button #454 仅是相邻组件观察，不属于 Dropdown Item 的实测证据。
 
+
       en: >-
         The destructive variant's existing token assertion is projection evidence only; without a docs instance, cross-runtime rendered evidence, and contrast measurement of this Dropdown surface itself, the surface remains render-undemonstrated. Button #454 is a related component observation, not measured evidence for Dropdown Item.
+
 
   - id: P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION
     text:
@@ -85,11 +87,13 @@ openQuestions:
 
     blocks: [shadcn dropdown item parity roadmap]
 sources:
+  - path: https://ui.shadcn.com/r/styles/base-nova/dropdown-menu.json
+    label: User-requested base-nova reference sha256 335c59dba30145f434a9cc9ccb0438a3c5e2afe857fc11b029de1ecb415224d7
   - path: packages/prototypes/shadcn/src/dropdown/item.proto.ts
   - path: packages/prototypes/shadcn/src/dropdown/types.ts
   - path: packages/prototypes/shadcn/test/dropdown.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx
-    label: shadcn/ui v4 new-york DropdownMenuItem pinned baseline
+    label: shadcn/ui v4 new-york DropdownMenuItem historical pinned baseline
 dependsOn:
   contracts:
     [
@@ -109,10 +113,14 @@ inherits:
       note: Default inherited menu-item protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-DROPDOWN-MENU-ITEM-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Selected user-requested base-nova visual reference for this draft; historical source remains recorded and exact visual acceptance is pending.
   - version: 0.3.0-alpha.0
     change: refined
     summary: >-
       Recorded the destructive surface's evidence boundary on the owning Item entity as projection-covered but render-undemonstrated; Button #454 remains only a related observation and not Dropdown measurement evidence.
+
 
   - version: 0.2.0-rc.0
     change: introduced

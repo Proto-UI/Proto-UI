@@ -3,7 +3,7 @@ import { asDropdownItem } from '@proto.ui/prototypes-base/dropdown';
 import type { ShadcnDropdownItemExposes, ShadcnDropdownItemProps } from './types';
 
 const ITEM_BASE_TOKENS =
-  'relative flex w-full cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm outline-none transition-colors';
+  'relative flex w-full cursor-default select-none items-center gap-1.5 rounded-md px-1.5 py-1 text-left text-sm outline-none transition-colors';
 
 const dropdownItem = definePrototype<ShadcnDropdownItemProps, ShadcnDropdownItemExposes>({
   name: 'shadcn-dropdown-item',
@@ -28,7 +28,7 @@ const dropdownItem = definePrototype<ShadcnDropdownItemProps, ShadcnDropdownItem
     // P-SHADCN-DROPDOWN-MENU-ITEM-STATE-DRIVEN-STYLES
     def.rule({
       when: (w) => w.prop('inset').eq(true),
-      intent: (i) => i.feedback.style.use(tw('pl-8')),
+      intent: (i) => i.feedback.style.use(tw('pl-7')),
     });
     def.rule({
       when: (w) => w.prop('variant').eq('destructive'),

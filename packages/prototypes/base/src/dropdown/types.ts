@@ -1,3 +1,4 @@
+import type { useOpenState } from '../tools/use-open-state';
 import type {
   BorrowedStateHandle,
   ExposeEvent,
@@ -39,7 +40,10 @@ export type DropdownRootExposes = {
 } & CollectionExposes;
 
 export type DropdownRootStateHandles = { open: State<boolean> };
-export type DropdownRootAsHookContract = { state: DropdownRootStateHandles };
+export type DropdownRootAsHookContract = {
+  state: { collectionCount: State<number> };
+  asHooks: { useOpenState: ReturnType<typeof useOpenState> };
+};
 
 export interface DropdownTriggerProps {
   disabled?: boolean;
@@ -121,3 +125,10 @@ export type DropdownOpenEntry = 'active-or-first' | 'first' | 'last' | 'value-or
 
 export type DropdownMenuItemSnapshot = CollectionItemSnapshot &
   Readonly<{ value: string; textValue: string; disabled: boolean }>;
+
+export interface DropdownGroupProps {
+  a11yLabel?: string;
+}
+export interface DropdownLabelProps {}
+export interface DropdownSeparatorProps {}
+export interface DropdownShortcutProps {}
