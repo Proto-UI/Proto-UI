@@ -20,10 +20,10 @@ cases:
       - P-BRUTALIST-TOGGLE-PAIR-INVARIANT
     expectation: p-brutalist-toggle-active-pair
   - id: T-BRUTALIST-TOGGLE-0001-CASE-3
-    title: Every size option maps to dimension tokens
+    title: Every size follows exact pinned Neo dimensions and typography and rejects legacy sizes
     covers:
       - P-BRUTALIST-TOGGLE-SIZE-PROP
-    expectation: p-brutalist-toggle-sizes
+    expectation: p-brutalist-toggle-source-pinned-size-and-legacy-size-negative-boundaries
   - id: T-BRUTALIST-TOGGLE-0001-CASE-4
     title: Reactive defaults restore after prop removal and defaultActive initializes false
     covers:
@@ -62,7 +62,7 @@ cases:
 implementations:
   - id: prototypes-brutalist-toggle-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/brutalist/test/toggle.test.ts
     required: true
     consumesCases:
@@ -77,15 +77,19 @@ implementations:
     exercises:
       - P-BASE-TOGGLE
       - P-BRUTALIST-TOGGLE
+    notes:
+      - Historical passing evidence predates the source-pinned size migration. Successor size assertions, legacy-size negative controls and current browser evidence must be verified before the corresponding implementation is marked passing again.
   - id: website-brutalist-remaining-browser-toggle
     kind: adapter-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-brutalist-remaining.browser.test.ts
     required: true
     consumesCases:
       - T-BRUTALIST-TOGGLE-0001-CASE-BROWSER
     exercises:
       - P-BRUTALIST-TOGGLE
+    notes:
+      - Historical passing evidence predates the source-pinned size migration. Successor size assertions, legacy-size negative controls and current browser evidence must be verified before the corresponding implementation is marked passing again.
 verifies:
   prototypes:
     - id: P-BRUTALIST-TOGGLE
@@ -109,6 +113,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Added required cross-runtime browser evidence for exact resting/active pairs, state re-projection, and structural borders.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Require exact source-pinned Toggle size geometry while retaining inherited semantics and persistent non-color active-state coverage.
 
 tags:
   - test

@@ -4,7 +4,7 @@ title: 'Brutalist Toggle inherits Base Toggle and layers a rounded active-contro
 
 status: draft
 since: 0.2.0-rc.7
-summary: 'Brutalist Toggle inherits Base Toggle interaction semantics and projects a style-family visual API: a constrained size enum, component-owned rounded geometry, hard offset shadows, flat paired fills, and an active accent pair reinforced by a persistent non-color inset frame.'
+summary: 'Brutalist Toggle preserves Base Toggle interaction and the admitted size enum while projecting the pinned Neo size recipe, flat paired fills, rounded geometry and an explicit persistent non-color active inset extension.'
 
 statement:
   en: P-BRUTALIST-TOGGLE preserves its declared semantic, anatomy and API ownership. Its draft visual projection follows the component-specific typography, geometry, fill, depth and state criteria below, aligned with neobrutalism-components 3306a802. This does not admit new Base semantics, host support or upstream API compatibility.
@@ -27,8 +27,8 @@ criteria:
       zh-CN: 直接 prototype 入口名为 `brutalist-toggle`。
   - id: P-BRUTALIST-TOGGLE-SIZE-PROP
     text:
-      en: Public `size` is the enum `default | sm | lg` with default `default`, mapping to distinct height/min-width/padding/typography tokens.
-      zh-CN: 公开 `size` 为枚举 `default | sm | lg`，默认 `default`，对应不同的高度/最小宽度/内边距/排版 token。
+      en: Public size remains default | sm | lg, defaulting to default. The pinned 3306a802 toggle.tsx maps default to h-10 min-w-10 px-3 text-sm, sm to h-9 min-w-9 px-2.5 text-[0.8rem], and lg to h-11 min-w-11 px-4 text-sm. Removing size restores default. These geometry and type tokens add no public variant or icon API.
+      zh-CN: 公开 size 仍为 default | sm | lg，默认 default。固定 3306a802 toggle.tsx 将 default 映射到 h-10 min-w-10 px-3 text-sm、sm 映射到 h-9 min-w-9 px-2.5 text-[0.8rem]、lg 映射到 h-11 min-w-11 px-4 text-sm；移除 size 恢复 default。这些几何与排版 token 不增加公开 variant 或 icon API。
   - id: P-BRUTALIST-TOGGLE-DEFAULTS
     text:
       en: >-
@@ -85,6 +85,8 @@ sources:
   - path: packages/prototypes/brutalist/src/toggle/types.ts
   - path: packages/prototypes/brutalist/test/toggle.test.ts
   - path: packages/prototypes/brutalist/src/style.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/toggle.tsx
+    label: Pinned Neo Toggle size recipe; source SHA256 a3b108a08f4d9127b4862216f7d188a0df8866fb9edae759c27f8855aa44e705
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
@@ -108,5 +110,9 @@ revisions:
     summary: >-
       Added a geometry-stable inset ink frame as the persistent non-color active signal and made transient press precedence explicit.
 
+
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Specified the source-pinned default/sm/lg size recipe; preserved the existing non-color active inset accessibility extension.
 
 tags: [prototype, brutalist, neo-brutalist, visual, delta, toggle]
