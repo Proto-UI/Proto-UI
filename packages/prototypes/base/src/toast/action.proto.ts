@@ -4,6 +4,12 @@ import { TOAST_FAMILY, dismissToast, createToastId } from './shared';
 import type { ToastActionProps, ToastActionExposes, ToastActionAsHookContract } from './types';
 function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
   const focusId = createToastId();
+  let mounted = false,
+    viewEpoch = 0;
+  def.lifecycle.onMounted(() => {
+    mounted = true;
+    viewEpoch++;
+  });
   def.anatomy.claim(TOAST_FAMILY, { role: 'action' });
   asTrigger();
   def.props.define({
@@ -39,6 +45,8 @@ function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
     if (event.type === 'next') notifyFocus(run, event.next);
   });
   def.lifecycle.onUnmounted((run) => {
+    mounted = false;
+    viewEpoch++;
     try {
       notifyFocus(run, false);
     } catch (error) {
@@ -57,8 +65,10 @@ function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
       });
   });
   def.event.on('press.commit', (run) => {
-    if (disabled.get()) return;
+    if (!mounted || disabled.get()) return;
+    const epoch = viewEpoch;
     run.expose.emit('action');
+    if (!mounted || epoch !== viewEpoch) return;
     dismissToast(run, 'action');
   });
 }

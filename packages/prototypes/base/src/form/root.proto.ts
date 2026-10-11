@@ -32,6 +32,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   def.context.provide(FORM_CONTEXT, { disabled: false, pending: false, submitted: false });
   let run: RunHandle<FormRootProps> | null = null,
     sequence = 0,
+    cancellation = 0,
     waiting: { id: number; key: string } | null = null,
     validating = false;
   const parts = () => run?.anatomy.order.partsOf(FORM_FAMILY, 'field') ?? [];
@@ -46,9 +47,9 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
         (x): x is { part: AnatomyPartView; snapshot: FormFieldSnapshot } =>
           !!x.snapshot && !x.snapshot.disabled
       );
-  const values = (): FormValues => {
+  const valuesFrom = (snapshot: ReturnType<typeof entries>): FormValues => {
     const result: FormValues = Object.create(null);
-    for (const { snapshot: s } of entries()) {
+    for (const { snapshot: s } of snapshot) {
       if (!s.name || !s.available) continue;
       if (Object.hasOwn(result, s.name)) throw new Error('FORM_DUPLICATE_NAME: ' + s.name);
       Object.defineProperty(result, s.name, {
@@ -60,6 +61,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
     }
     return result;
   };
+  const values = (): FormValues => valuesFrom(entries());
   const publish = () => {
     if (run)
       run.context.update(FORM_CONTEXT, {
@@ -69,6 +71,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
       });
   };
   const cancel = () => {
+    cancellation++;
     waiting = null;
     pending.set(false, 'reason: form submission canceled');
     publish();
@@ -76,7 +79,8 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   const finish = () => {
     if (!run || !waiting || validating) return;
     const snapshot = entries();
-    if (JSON.stringify(values()) !== waiting.key) {
+    const validatedValues = valuesFrom(snapshot);
+    if (JSON.stringify(validatedValues) !== waiting.key) {
       cancel();
       return;
     }
@@ -88,16 +92,26 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
         x.snapshot.validity.invalid
     );
     const id = waiting.id;
-    cancel();
+    const current = run;
+    const generation = cancellation;
+    const ownsCompletion = () => run === current && cancellation === generation && sequence === id;
+    waiting = null;
+    pending.set(false, 'reason: form validation completed');
+    if (!ownsCompletion()) return;
+    publish();
+    if (!ownsCompletion()) return;
     if (invalid.length) {
       run.expose.emit('invalid', { names: invalid.map((x) => x.snapshot.name) });
+      if (!ownsCompletion()) return;
       const focus = invalid[0].part.getExpose('focusControl');
       if (typeof focus === 'function') focus();
       return;
     }
     submitted.set(true, 'reason: form validated submit');
+    if (!ownsCompletion()) return;
     publish();
-    run.expose.emit('submit', { values: values(), submissionId: id });
+    if (!ownsCompletion()) return;
+    current.expose.emit('submit', { values: validatedValues, submissionId: id });
   };
   def.expose.method('__fieldChanged', finish);
   def.expose.method('getValues', values);
