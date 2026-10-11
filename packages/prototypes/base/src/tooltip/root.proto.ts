@@ -74,9 +74,14 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   };
   def.context.provide(TOOLTIP_CONTEXT, initialContext);
 
+  let mounted = false;
+  let disposed = false;
+  let mountEpoch = 0;
+
   const openState = useOpenState({
     exposeOpenMethodKey: 'openTooltip',
     requestOpen(run, nextOpen, reason) {
+      if (disposed) return;
       const ctx = run.context.read(TOOLTIP_CONTEXT);
       if (ctx.disabled) return;
       requestTooltipOpen(run, nextOpen, reason);
@@ -120,9 +125,11 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   };
 
   def.context.trySubscribe(TOOLTIP_GROUP_CONTEXT, (run, group) => {
-    if (!group) return;
+    if (!group || disposed) return;
+    const epoch = mountEpoch;
     syncContext(run);
-    const ctx = run.context.read(TOOLTIP_CONTEXT);
+    if (!mounted || disposed || epoch !== mountEpoch) return;
+    const ctx = snapshot;
     // The request frame reaches consumers before Group promotes it to active.
     // Treat that frame as the effective owner so the incoming Tooltip does not
     // close itself against the previous active id.
@@ -150,7 +157,7 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
     reason: string
   ) => {
     cancelPending();
-    if (snapshot.disabled || nextOpen === (open?.get() ?? false)) return;
+    if (!mounted || disposed || snapshot.disabled || nextOpen === (open?.get() ?? false)) return;
     pendingIntent = nextOpen;
     pendingDelay = delay(interactionDelay(run, nextOpen, reason), () => {
       if (pendingIntent !== nextOpen) return;
@@ -167,7 +174,9 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
     published = next;
     if (next.requestVersion !== lastRequestVersion) {
       lastRequestVersion = next.requestVersion;
+      const epoch = mountEpoch;
       if (!next.controlled) open?.set(next.requestedOpen, 'reason: tooltip request');
+      if (disposed || epoch !== mountEpoch) return;
       run.expose.emit('openChange', { open: next.requestedOpen, reason: next.requestReason });
       return;
     }
@@ -182,6 +191,8 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   });
 
   const syncProps = (run: RunHandle<TooltipRootProps>) => {
+    if (disposed) return;
+    const epoch = mountEpoch;
     const props = run.props.get();
     snapshot = {
       ...snapshot,
@@ -190,6 +201,7 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
       ...resolveDelays(run),
     };
     syncContext(run);
+    if (disposed || epoch !== mountEpoch) return;
     if (snapshot.disabled) {
       cancelPending();
       if (open?.get()) requestTooltipOpen(run, false, 'disabled');
@@ -200,9 +212,11 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
   def.props.watch(['open', 'disabled', 'openDelay', 'closeDelay'], (run) => syncProps(run));
 
   open?.watch((run, event) => {
-    if (event.type !== 'next') return;
+    if (event.type !== 'next' || disposed) return;
+    const epoch = mountEpoch;
     if (pendingIntent === event.next) cancelPending();
     syncContext(run);
+    if (!mounted || disposed || epoch !== mountEpoch) return;
     announceTooltipToGroup(
       run,
       rootId,
@@ -211,8 +225,38 @@ function setupTooltipRoot(def: DefHandle<TooltipRootProps, TooltipRootExposes>):
     );
   });
 
-  def.lifecycle.onBeforeDispose(() => {
+  const releaseGroup = (run: RunHandle<TooltipRootProps>) => {
+    mounted = false;
+    mountEpoch += 1;
     cancelPending();
+    // Do not even publish a request for a Root that no longer owns the Group.
+    if (run.context.tryRead(TOOLTIP_GROUP_CONTEXT)?.activeTooltipId !== rootId) return;
+    run.context.tryUpdate(TOOLTIP_GROUP_CONTEXT, (group) =>
+      group.activeTooltipId === rootId
+        ? {
+            ...group,
+            activeTooltipId: null,
+            warm: false,
+            requestTooltipId: null,
+            requestOpen: false,
+            requestReason: 'root.retired',
+            requestVersion: group.requestVersion + 1,
+          }
+        : group
+    );
+  };
+
+  def.lifecycle.onMounted((run) => {
+    mounted = true;
+    const epoch = ++mountEpoch;
+    syncContext(run);
+    if (disposed || !mounted || epoch !== mountEpoch || !open?.get()) return;
+    announceTooltipToGroup(run, rootId, true, 'root.mounted');
+  });
+  def.lifecycle.onUnmounted(releaseGroup);
+  def.lifecycle.onBeforeDispose((run) => {
+    disposed = true;
+    releaseGroup(run);
   });
 }
 

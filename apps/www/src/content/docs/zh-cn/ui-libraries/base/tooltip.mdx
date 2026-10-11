@@ -14,6 +14,7 @@ Base Tooltip 由 Root、Trigger 与 Content 组成；Tooltip Group 是同族的�
 - Trigger 只在 open 时以 additive `aria-describedby` 引用 `role="tooltip"` 的 Content。
 - Escape 进入 Root 的统一 close request channel。
 - Group warm window 内切换到 sibling Tooltip 时立即打开；前一个非受控 Tooltip 同步结束感知 presence，不保留可见退场重叠，`skipDelay` 到期后恢复首次延迟。
+- Draft 生命周期规则：当前 active Root 卸载或终止销毁时，Group 立即恢复 cold 延迟；普通关闭仍保留 `skipDelay` window。保留 open fact 的 Root 重新挂载时再次登记；旧 cleanup 不得清除新 active Root，拒绝关闭的受控 Root 也不会被自动重新选主。
 
 当前 Portal 由 Content 的 Overlay/renderer projection 持有，不单独提供 Base Portal 原型。Arrow 需要受治理的 geometry/positioning 通道，暂不属于当前 Base 保证。
 
