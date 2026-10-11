@@ -158,6 +158,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
@@ -172,6 +173,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts':
