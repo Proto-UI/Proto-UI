@@ -5,6 +5,10 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Hit Participation owns region declarations and host synchronization.
 criteria:
+  - id: M-HIT-PARTICIPATION-0001-STATIC-INSET
+    text:
+      en: 'configure accepts staticHitInset only during setup, validates and freezes its plain-data lengths before any host change, and null clears the configured default. Explicit regions snapshot the configured default at registration, may supply their own inset, or null to omit expansion; implicit root uses the current configured inset. Failed configuration/region replacement rolls back logical state. Host bridges explicitly advertise supportsStaticHitInset; unsupported bridges reject inset-bearing regions rather than silently ignoring them. Missing host bridges retain only logical declarations. View detach and terminal disposal release projections; remount replays retained declarations.'
+      zh-CN: 'configure 仅在 setup 接受 staticHitInset，任何宿主改动前校验并冻结 plain-data 长度，null 清除默认值。显式 region 注册时快照默认值，可提供自身 inset 或用 null 省略扩张；隐式 root 使用当前默认值。配置/region 替换失败回滚逻辑状态。bridge 显式声明 supportsStaticHitInset，不支持者拒绝含 inset 的 region 而非静默忽略；缺少 bridge 时仅保留逻辑声明。detach/disposal 释放投射，remount 重放声明。'
   - id: M-HIT-PARTICIPATION-0001-A
     text:
       en: 'The instance-scoped Module has mixed instance/view ownership and no semantic Module dependencies. asHitParticipation returns its privileged singleton handle; configure merges setup patches with override diagnostics. Region options capture the configured default mode at registration.'
@@ -25,7 +29,7 @@ relates:
   contracts: [C-BOUNDARY-0001]
   decisions: [D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001]
 verifies:
-  tests: [T-HIT-PARTICIPATION-0001]
+  tests: [T-HIT-PARTICIPATION-0001, { id: T-HIT-INSET-0001, since: 0.3.0-alpha.1 }]
 sources:
   - path: packages/modules/hit-participation/src/create.ts
   - path: packages/modules/hit-participation/src/impl.ts
@@ -34,3 +38,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Added bounded typed static hit insets with native same-root realization and explicit unactivated consumer evidence.

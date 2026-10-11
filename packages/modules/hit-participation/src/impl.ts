@@ -8,7 +8,7 @@ import type {
   MountPhase,
   ProtoPhase,
 } from '@proto.ui/core';
-import { HOST_ELEMENT_CAP, illegalPhase } from '@proto.ui/core';
+import { HOST_ELEMENT_CAP, illegalPhase, snapshotStaticHitInset } from '@proto.ui/core';
 import { ModuleBase } from '@proto.ui/module-base';
 import { HIT_PARTICIPATION_HOST_BRIDGE_CAP, type HitParticipationHostBridge } from './caps';
 
@@ -110,7 +110,16 @@ export class HitParticipationModuleImpl extends ModuleBase {
     const previous = this.config;
     const warningCount = this.warnings.length;
     try {
+      const inset =
+        patch.staticHitInset === null
+          ? undefined
+          : typeof patch.staticHitInset === 'undefined'
+            ? this.config.staticHitInset
+            : snapshotStaticHitInset(patch.staticHitInset);
       this.patchMode(patch.mode);
+      if (typeof patch.staticHitInset !== 'undefined') {
+        this.config = Object.freeze({ ...this.config, staticHitInset: inset });
+      }
 
       if (typeof patch.debugLabel !== 'undefined') {
         pushOverrideWarning(this.warnings, 'debugLabel', this.config.debugLabel, patch.debugLabel);
@@ -144,6 +153,14 @@ export class HitParticipationModuleImpl extends ModuleBase {
           target,
           role: options.role,
           mode: options.mode ?? this.config.mode,
+          ...(options.staticHitInset === null
+            ? {}
+            : {
+                staticHitInset:
+                  typeof options.staticHitInset === 'undefined'
+                    ? this.config.staticHitInset
+                    : snapshotStaticHitInset(options.staticHitInset),
+              }),
           meta: options.meta,
         }),
       ])
@@ -181,10 +198,11 @@ export class HitParticipationModuleImpl extends ModuleBase {
   }
 
   private buildRegions(): readonly HitParticipationRegion[] {
-    return this.regions.map(({ target, role, mode, meta }) =>
+    return this.regions.map(({ target, role, mode, meta, staticHitInset }) =>
       Object.freeze({
         target,
         mode,
+        ...(staticHitInset ? { staticHitInset } : {}),
         ...(typeof role === 'undefined' ? {} : { role }),
         ...(typeof meta === 'undefined' ? {} : { meta }),
       })
@@ -200,7 +218,12 @@ export class HitParticipationModuleImpl extends ModuleBase {
       !explicit.some((region) => Object.is(region.target, this.hostElement))
     ) {
       return Object.freeze([
-        { target: this.hostElement, role: 'content' as any, mode: this.config.mode },
+        {
+          target: this.hostElement,
+          role: 'content' as any,
+          mode: this.config.mode,
+          ...(this.config.staticHitInset ? { staticHitInset: this.config.staticHitInset } : {}),
+        },
         ...explicit,
       ]);
     }
@@ -216,10 +239,14 @@ export class HitParticipationModuleImpl extends ModuleBase {
       this.mountPhase === 'unmounting'
     )
       return;
-    this.hostBridge.sync({
-      config: this.config,
-      regions: this.getEffectiveRegions(true),
-    });
+    const regions = this.getEffectiveRegions(true);
+    if (
+      regions.some((region) => region.staticHitInset) &&
+      !this.hostBridge.supportsStaticHitInset
+    ) {
+      throw new Error('[HitParticipation] host does not support staticHitInset.');
+    }
+    this.hostBridge.sync({ config: this.config, regions });
   }
 
   private clearHostBridge(): void {

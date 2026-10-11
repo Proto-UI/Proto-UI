@@ -1,0 +1,69 @@
+id: T-HIT-INSET-0001
+type: test
+title: Static same-root hit inset declaration and native host evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Portable and Web lease tests are implemented; exact-head native browser geometry/event evidence remains required before activating the Switch size consumer.'
+  zh-CN: '已有可移植及 Web lease 测试，激活 Switch 尺寸消费者前仍须 exact-head 原生浏览器几何/事件证据。'
+summary: Typed static hit geometry, ownership and native routing are validated separately.
+cases:
+  - id: T-HIT-INSET-0001-CASE-DATA
+    title: Finite immutable plain-data lengths and omitted zero edges
+    covers: [C-HIT-PARTICIPATION-0001-STATIC-INSET]
+    expectation: static-hit-data
+  - id: T-HIT-INSET-0001-CASE-LIFETIME
+    title: Setup configuration, region inheritance, rollback and repeatable lifecycle
+    covers: [M-HIT-PARTICIPATION-0001-STATIC-INSET]
+    expectation: static-hit-lifetime
+  - id: T-HIT-INSET-0001-CASE-HOST
+    title: Native pseudo reservation, unsupported preflight and shared leases
+    covers: [HC-HIT-PARTICIPATION-0001-STATIC-INSET, HC-HIT-PARTICIPATION-0001-STATIC-OWNERSHIP]
+    expectation: static-hit-host
+  - id: T-HIT-INSET-0001-CASE-NATIVE
+    title: Native hit extension, same-root events, clipping, obstruction and disabled/focus/cancel behavior
+    covers: [C-HIT-PARTICIPATION-0001-STATIC-BOUNDARIES]
+    expectation: static-hit-native
+implementations:
+  - id: static-hit-data
+    kind: runtime-test
+    status: passing
+    path: packages/core/test/static-hit-inset.test.ts
+    required: true
+    consumesCases: [T-HIT-INSET-0001-CASE-DATA]
+  - id: static-hit-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/static-hit-inset.contract.test.ts
+    required: true
+    consumesCases: [T-HIT-INSET-0001-CASE-LIFETIME]
+  - id: static-hit-host
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/static-hit-inset-host-bridge.test.ts
+    required: true
+    consumesCases: [T-HIT-INSET-0001-CASE-HOST]
+  - id: static-hit-native
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/static-hit-inset-browser.mjs
+    required: true
+    consumesCases: [T-HIT-INSET-0001-CASE-NATIVE]
+verifies:
+  contracts: [C-HIT-PARTICIPATION-0001]
+  modules: [M-HIT-PARTICIPATION-0001]
+  hostCaps: [HC-HIT-PARTICIPATION-0001]
+openQuestions:
+  - id: T-HIT-INSET-0001-Q-NATIVE-EVIDENCE
+    question:
+      en: 'Exact-head native browser evidence is required before the smaller Switch recipe is activated.'
+      zh-CN: '激活较小 Switch recipe 前需 exact-head 原生浏览器证据。'
+    blocks:
+      [
+        activation:T-HIT-INSET-0001,
+        'criterion:C-HIT-PARTICIPATION-0001#C-HIT-PARTICIPATION-0001-STATIC-BOUNDARIES',
+      ]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined bounded static hit inset evidence independently from movement envelopes and Switch size activation.

@@ -5,6 +5,14 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Hit Participation declares region eligibility independently from interaction policy.
 criteria:
+  - id: C-HIT-PARTICIPATION-0001-STATIC-INSET
+    text:
+      en: 'Optional staticHitInset expands the same target hit region outward from its padding-box physical top/right/bottom/left edges. Distances are finite nonnegative logical host pixels (px, not physical display pixels) or root text units (rem), with omitted edges zero. The normal border-box remains hittable. This static declaration is independent of translation/movement envelopes and of interaction state; no compiler/component dispatch, synthetic activation, additional semantic control, tab stop or accessibility node is implied.'
+      zh-CN: '可选 staticHitInset 从同一 target padding-box 的物理上下左右边向外扩张命中区域。距离为有限非负宿主逻辑像素（px，非屏幕物理像素）或根文字单位（rem），省略边为零；原 border-box 仍可命中。静态声明独立于位移包络和交互状态，不引入编译器/组件特判、合成激活、额外语义控件、tab stop 或可访问节点。'
+  - id: C-HIT-PARTICIPATION-0001-STATIC-BOUNDARIES
+    text:
+      en: 'Static expansion preserves the target owner and native event/default-action route, including disabled, focus, label activation and cancellation. It does not change the subject or sibling flow layout boxes or paint. Native clipping, obstruction and hit ordering still apply; no portal, global point picking or raised stacking layer may evade them. Native scrollable overflow may change as with an absolute expanded hit box and is not promised invariant.'
+      zh-CN: '静态扩张保留 target owner 和原生事件/默认动作路线，包括 disabled、focus、label 激活和取消；不改变主体或兄弟 flow 布局盒及 paint。原生裁切、遮挡和命中顺序继续适用，不得以 portal、全局拾取或提层绕开；绝对扩张命中盒可能影响原生 scrollable overflow，不承诺其不变。'
   - id: C-HIT-PARTICIPATION-0001-A
     text:
       en: 'Hit Participation describes region hit eligibility before Event consumption. participating, disabled and passthrough remain distinct semantic modes even when a host shares their physical projection. It does not define event delivery, Boundary outside classification, dismiss, modal, focus or blocking policy.'
@@ -26,7 +34,7 @@ dependsOn:
 relates:
   decisions: [D-AS-HOOK-PRIVILEGED-NO-ARG-MIGRATION-0001]
 verifies:
-  tests: [T-HIT-PARTICIPATION-0001]
+  tests: [T-HIT-PARTICIPATION-0001, { id: T-HIT-INSET-0001, since: 0.3.0-alpha.1 }]
 sources:
   - path: packages/core/src/hit-participation.ts
   - path: packages/modules/hit-participation/src/impl.ts
@@ -36,3 +44,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Added bounded typed static hit insets with native same-root realization and explicit unactivated consumer evidence.

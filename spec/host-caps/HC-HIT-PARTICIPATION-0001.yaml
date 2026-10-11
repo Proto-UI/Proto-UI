@@ -5,6 +5,14 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Host projects Hit Participation claims per owner and restores shared targets.
 criteria:
+  - id: HC-HIT-PARTICIPATION-0001-STATIC-INSET
+    text:
+      en: 'A static inset realization uses the existing owner target. The Web bridge reserves an unpainted native ::after inset-only ring with a padding-box hole (native evenodd clip-path support is required), preserving internal descendant hit targets and inherited visibility/cursor in the target stylesheet scope, using an already-positioned padding-box; static positioning, replaced elements or non-principal/fragmented display boxes, occupied author ::after content, non-HTMLElement targets and occupied projection attributes diagnose unsupported before any accepted claim is changed. It does not change root positioning/dimensions/padding/transform/z-index, create a semantic node, synthesize events, or bypass native clipping and stacking. The root author is responsible for a positioned principal box; the bridge does not silently create a containing block.'
+      zh-CN: '静态 inset 在已有 owner target 上实现。Web bridge 在目标 stylesheet scope 预留无绘制的原生 ::after inset-only 环，要求原生 evenodd clip-path，在 padding-box 留孔保留内部后代命中并继承 visibility/cursor，基于已有定位 padding-box；static 定位、replaced 元素或非主盒/碎片 display、作者占用的 ::after content、非 HTMLElement target 或已占用投射属性，在改动既有 claim 前诊断 unsupported。不修改 root 定位/尺寸/padding/transform/z-index，不创建语义节点、合成事件或绕过原生裁切层叠；root 作者负责定位主盒，bridge 不暗建 containing block。'
+  - id: HC-HIT-PARTICIPATION-0001-STATIC-OWNERSHIP
+    text:
+      en: 'Shared owners must agree on both mode and normalized static inset; whole replacement preflight revalidates ownership and current host prerequisites on every synchronization, even for unchanged values, and precedes writes. Releasing one owner retains the shared projection. The last owner releases its pseudo reservation and restores only values still owned by the projection, preserving external later style/attribute/CSSOM writes. Ownership covers stylesheet rule identity/text, disabled/media/type state and placement as well as the projection attribute. A changed inset or stylesheet scope reacquires only after preflight. Detach releases view-specific styles; remount resolves current host/root units again.'
+      zh-CN: '共享 owner 的 mode 与归一化 inset 均须一致，每次同步（包括同值）整批重验所有权与当前宿主前提，先预检后写入。释放单 owner 保留共享投射，最后 owner 释放伪元素预留，仅还原仍属自身的值，保留外部后写 style/attribute/CSSOM；所有权检查覆盖 stylesheet 规则身份/文本、disabled/media/type 状态与放置位置及投射属性。inset 或 stylesheet scope 改变需预检后重建；detach 释放 view 样式，remount 重新按当前宿主/root 单位解析。'
   - id: HC-HIT-PARTICIPATION-0001-A
     text:
       en: 'Each bridge synchronizes one owner contribution across all currently supplied regions. Shared target claims agree on one mode; conflict preflight covers the whole replacement before any release or projection write. Empty synchronization releases only that bridge contribution.'
@@ -16,7 +24,7 @@ criteria:
 dependsOn:
   contracts: [C-HIT-PARTICIPATION-0001]
 verifies:
-  tests: [T-HIT-PARTICIPATION-0001]
+  tests: [T-HIT-PARTICIPATION-0001, { id: T-HIT-INSET-0001, since: 0.3.0-alpha.1 }]
 sources:
   - path: packages/modules/hit-participation/src/caps.ts
   - path: packages/modules/hit-participation/src/web/host-bridge.ts
@@ -24,3 +32,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged Hit Participation and approved shared-target ownership with executable evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Added bounded typed static hit insets with native same-root realization and explicit unactivated consumer evidence.
