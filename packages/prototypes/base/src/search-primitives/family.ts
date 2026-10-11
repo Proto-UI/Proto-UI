@@ -126,6 +126,8 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     let active = '';
     let queryEdited = false;
     let currentRun: RunHandle<T.SearchRootProps> | null = null;
+    let viewEpoch = 0;
+    let selectionSequence = 0;
     let published: SearchContext = {
       id,
       value: '',
@@ -208,6 +210,10 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       const candidate = matching.length === 1 && !matching[0].disabled ? matching[0] : null;
       const free = mode === 'autocomplete' && reason === 'free-text' && !!selectedValue;
       if (!candidate && !free) return false;
+      const epoch = viewEpoch;
+      const selection = ++selectionSequence;
+      const isCurrent = () =>
+        currentRun !== null && viewEpoch === epoch && selectionSequence === selection;
       const text = candidate?.text ?? selectedValue;
       const result = mode === 'autocomplete' ? text : selectedValue;
       if (mode !== 'command' && !run.props.isProvided('value'))
@@ -217,8 +223,10 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       publish(run);
       const detail = { value: result, textValue: text, reason };
       run.expose.emit(mode === 'command' ? 'execute' : 'valueChange', detail);
+      if (!isCurrent()) return true;
       if (!inline) {
         requestOpen(false, 'select');
+        if (!isCurrent()) return true;
         inputFocus(run);
       }
       return true;
@@ -298,10 +306,16 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       publish(run);
     };
     def.lifecycle.onCreated((run) => sync(run, true));
-    def.lifecycle.onMounted((run) => sync(run));
-    def.lifecycle.onUnmounted(() => {
-      currentRun = null;
+    def.lifecycle.onMounted((run) => {
+      viewEpoch++;
+      sync(run);
     });
+    const retireView = () => {
+      viewEpoch++;
+      currentRun = null;
+    };
+    def.lifecycle.onUnmounted(retireView);
+    def.lifecycle.onBeforeDispose(retireView);
     def.props.watchAll((run) => sync(run));
     def.anatomy.subscribeParts(family, 'item', (run) => publish(run));
   }
