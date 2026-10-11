@@ -335,23 +335,25 @@ async function renderDemoReact(
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = new Map<string, Record<string, unknown>>();
   const surfaceStyles = new Map<string, DemoSurfaceStyle>();
-  // DemoBoxAttrs are native string attributes, not React boolean props. Keep
-  // global presence attributes (including hidden="until-found") byte-exact in
-  // the initial commit, before setup or the first animation-frame boundary.
-  const presenceAttributes = new Set(['hidden', 'inert', 'itemscope']);
+  // DemoBoxAttrs are native string attributes, not React boolean/style props.
+  // Keep presence values and native CSS declaration strings in the initial
+  // commit before Demo setup. Native style preserves order and !important;
+  // the Prototype surfaceStyle map converter intentionally cannot carry priority.
+  const nativeStringAttributes = new Set(['hidden', 'inert', 'itemscope', 'style']);
   const boxAttributeRefs = new WeakMap<object, (element: HTMLElement | null) => void>();
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
     if (node.kind === 'box') {
-      const presence = Object.entries(node.attrs ?? {}).filter(([name]) =>
-        presenceAttributes.has(name.toLowerCase())
+      const nativeAttributes = Object.entries(node.attrs ?? {}).filter(([name]) =>
+        nativeStringAttributes.has(name.toLowerCase())
       );
-      if (presence.length) {
+      if (nativeAttributes.length) {
         // A stable ref runs on mount, not on every prototype props update:
-        // setup may subsequently own hidden/inert state, as Copy does.
+        // setup may subsequently own native state/style, as Copy does.
         boxAttributeRefs.set(node, (element) => {
-          if (element) for (const [name, value] of presence) element.setAttribute(name, value);
+          if (element)
+            for (const [name, value] of nativeAttributes) element.setAttribute(name, value);
         });
       }
     }
@@ -372,7 +374,7 @@ async function renderDemoReact(
         {
           ...Object.fromEntries(
             Object.entries(node.attrs ?? {}).filter(
-              ([name]) => !presenceAttributes.has(name.toLowerCase())
+              ([name]) => !nativeStringAttributes.has(name.toLowerCase())
             )
           ),
           className: node.className,
