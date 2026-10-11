@@ -1,42 +1,105 @@
 id: P-BASE-SLIDER-VALUES
 type: prototype
-title: Base Slider multi-value definition proposal
+title: Base Slider Values additive owner and indexed-keyboard draft
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale: Definition and pure-model evidence only. No multi-value Root, Track, Thumb, FieldThumb or family runtime is implemented; generic collection State and typed API compatibility are unresolved prerequisites.
-summary: Proposed Root, Track, Thumb and Indicator responsibilities for range and multiple-thumb Slider composition, preserving the existing scalar capture owner.
+lifecycleRationale: New reconstruction in progress using an independently rebuilt number-list prerequisite. Only fresh exact-source checks may admit the bounded owner/keyboard slice. Pointer session association, grouped Field, visual families, native input and Compiler translation remain unimplemented.
+summary: Six static Values entries preserve the old scalar family while exposing a sole unwrapped owner and derived indexed display.
 statement:
-  en: Root is the sole accepted-value and cancellation owner. Track remains the only AxisInput and capture owner. Thumb instance identity is stable while its explicit index denotes one sorted value slot; focus transfers between existing Thumb instances after an accepted swap. Indicator and Value are read-only projections. This proposal does not change the current one-Thumb runtime anatomy.
+  en: The additive SLIDER_VALUES_FAMILY uses Root as sole current-value and logical completion owner. Thumb instances select sorted display slots without owning values. Track is structural until public input-origin association is available. Parts and hooks share the same definitions; no generator or host-specific component branch is allowed.
 criteria:
   - id: P-BASE-SLIDER-VALUES-ANATOMY
-    text: Proposed anatomy has exactly one Root and Track, one or more Thumb parts, and zero or more Indicator parts. Each current value slot requires exactly one live Thumb with a unique integer index; an omitted index is permitted only for the legacy scalar one-Thumb composition. Duplicate, missing and out-of-range indices reject editing with a diagnostic. Mount order does not define explicit index identity. Membership or index changes during interaction cancel before reuse.
+    text: A new static family has one Root, optional one structural Track, zero or more Thumbs and Indicators, optional Label and Value. It does not loosen or inherit the existing scalar family cardinality. Each editable value slot requires exactly one live Thumb. Explicit integer indices or public Anatomy order select sorted slots; indices are not host-node keys. Duplicate, missing or out-of-range mappings reject indexed edits and disable unmapped composition until repaired. [] means zero editable slots, with no manufactured Thumb. Membership/index changes invalidate the old logical session.
   - id: P-BASE-SLIDER-VALUES-ROOT
-    text: Root retains one accepted vector State owner, scalar compatibility projections, effective policy, active index and immutable start/reset snapshots. Existing requestValue(number) remains a scalar operation; vector and indexed editing require explicitly typed capabilities. Widened Props, methods, events and hook handles need separate source-compatibility tests before implementation. No array closure, JSON-string State or per-Thumb owner is admitted.
+    text: The real number-list current slot stores only unwrapped owner data. Scalar/array shape, readiness, effective policy, phase, revision and logical proposal state are separately declared facts. Creation/reset and session/proposal lists are history, not display owners. Resolved Props get/watchAll is the only input path. Non-null resolved value selects fixed controlled mode, including legal hook defaults. Omitted defaultValue initializes from resolved min. Public getValue and getDisplayValue name raw-owner and display reads explicitly. Scalar and whole-array methods are shape-specific; indexed edits require a complete mapping. Existing scalar callbacks/exports remain unchanged; the new same-named events have union-valued payloads and need actual type evidence.
   - id: P-BASE-SLIDER-VALUES-TRACK
-    text: Track maps one normalized AxisInput position to an eligible Thumb and requests a Root session. Track-origin presses seek; Thumb-origin presses preserve the accepted start value instead of jumping the Thumb center to an off-center contact. Later logical totalDelta moves from that same Root-owned start value without another geometry reader or recognizer. Start-time geometry changes, cancellation and lost ownership require separate native evidence. It owns the only real capture lease and revokes it through public AxisInput eligibility on Root cancellation, policy change, required-part retirement, index/membership invalidation or teardown. An ended lease cannot accept late move/end samples. Restored anatomy requires a fresh start. Existing strict live-anatomy diagnostics must remain intact.
+    text: Values Track renders a structural slot only in this A/B slice. It does not install AxisInput, independently recognize Thumb pointer events, seek, capture or claim pointer parity. Future pointer implementation needs public origin/session association and one Track capture owner, plus Track seek versus off-center Thumb no-jump semantics and retirement/cancel evidence. Missing capability is explicit rather than emulated with DOM events, closure flags or component-special Compiler cases.
   - id: P-BASE-SLIDER-VALUES-THUMB
-    text: Each Thumb has independent scalar value/percentage, own accessible label/value text, disabled and readOnly policy, focus and pointer-origin facts derived from its accepted Root slot. Tab reaches every enabled Thumb; accepted swap transfers focus/active index to the existing target instance without reordering or recreating host nodes. A proposal alone cannot change focus. Cancellation, lost ownership and disabled clear pressed; captured leave clears hover only. Field integration must report one whole accepted value through a single Field control binding, not register one competing form owner per Thumb.
+    text: Each Thumb derives finite scalar value/percentage, root ARIA min/max, local name/value text and disabled/readOnly from its selected Root display slot. Ordinary Tab reaches every enabled Thumb; readOnly may remain focused. Keyboard routes through Root and completes a changed uncanceled proposal without requiring controlled owner echo. Retained nodes can be reindexed or moved between Roots; they must route to the current live owner. Public Anatomy retirement may guard invalidated callbacks, but a live required-context error cannot be swallowed. Values has no pointer pressed/hover-to-origin surrogate. Root inherits Field policy only; grouped Field control ownership remains missing.
   - id: P-BASE-SLIDER-VALUES-PROJECTION
-    text: Indicator exposes startPercentage, endPercentage and extent as read-only numeric projections; repeated Indicators may select explicit ordered index intervals. Value formats accepted values. Orientation, RTL and disabled paint read Root facts. Multiple family paint mappings and native/Compiler evidence are separate missing work. Existing endpoint centers remain unchanged until a generic geometry contract aligns paint and input together.
+    text: Indicator startPercentage/endPercentage/extent and Value text derive from current display. Multiple Indicators may select ordered start/end slot indices. Orientation, direction and policy are Root projections; family styling and native geometry remain separate. Matching Values parts and hooks compose only with Values Root. Ordinary source-only CLI registry metadata may map these static entries; no generator special case is permitted.
   - id: P-BASE-SLIDER-VALUES-NO-ADMISSION
-    text: Range, multiple thumbs and controlled decimal arrays remain architecture-blocked in the shipped runtime. A pure function test cannot count as any of those examples or as whole Slider completion. Existing scalar behavior is preserved and remains bounded by its prior evidence.
+    text: Fresh bounded owner/keyboard tests do not mark Range, Multiple Thumbs, any visual family, native host or Compiler complete. Historical pure-model and lost local R4 checks are not current evidence. New candidate scope, prerequisites, known failures and exact tree must be independently reverified.
 dependsOn:
-  contracts: [C-SLIDER-VALUE-0001, C-AS-HOOK-0001, C-ANATOMY-0001, C-A11Y-0001]
-  prototypes: [P-BASE-SLIDER-THUMB, P-BASE-SLIDER-FIELD-THUMB]
+  contracts:
+    - C-SLIDER-VALUE-0001
+    - C-AS-HOOK-0001
+    - C-ANATOMY-0001
+    - C-A11Y-0001
 verifies:
-  tests: [T-SLIDER-VALUE-MODEL-0001]
+  tests:
+    - T-SLIDER-VALUES-RUNTIME-0001
 openQuestions:
   - id: P-BASE-SLIDER-VALUES-Q-IMPLEMENTATION
-    question: When do a governed collection State, compatible typed API and single Field binding permit implementation and independent Runtime/native/Compiler verification?
-    blocks: [activation:P-BASE-SLIDER-VALUES]
+    question: Which fresh exact-source evidence admits owner/keyboard reconstruction, and which separate public-input, Field, native/family and Compiler work completes the remaining Slider scope?
+    blocks:
+      - activation:P-BASE-SLIDER-VALUES
 sources:
-  - path: internal/records/2026-10-10-base-slider-value-definition.md
-  - path: packages/prototypes/base/src/slider/root.proto.ts
-  - path: packages/prototypes/base/src/slider/track.proto.ts
-  - path: packages/prototypes/base/src/slider/part-setup.ts
-  - path: packages/prototypes/base/src/slider/types.ts
+  - path: packages/prototypes/base/src/slider/values-root.proto.ts
+  - path: packages/prototypes/base/src/slider/values-track.proto.ts
+  - path: packages/prototypes/base/src/slider/values-thumb.proto.ts
+  - path: packages/prototypes/base/src/slider/values-indicator.proto.ts
+  - path: packages/prototypes/base/src/slider/values-label.proto.ts
+  - path: packages/prototypes/base/src/slider/values-value.proto.ts
+  - path: packages/prototypes/base/src/slider/values-shared.ts
+  - path: internal/records/2026-10-11-slider-values-reconstruction-plan.md
+  - path: packages/prototypes/base/src/slider/VALUES.md
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Defined proposed part responsibilities without changing or admitting multi-value runtime anatomy.
-tags: [base, slider, draft, architecture-blocked]
+  - version: 0.3.0-alpha.1
+    change: updated
+    summary: Reconstructed additive Values anatomy and portable unwrapped-owner/keyboard semantics; new implementation evidence required.
+tags:
+  - base
+  - slider
+  - values
+  - draft
+anatomy:
+  family: base-slider-values
+  roles:
+    root:
+      cardinality:
+        min: 1
+        max: 1
+    track:
+      cardinality:
+        min: 0
+        max: 1
+    thumb:
+      cardinality:
+        min: 0
+        max: '*'
+    indicator:
+      cardinality:
+        min: 0
+        max: '*'
+    label:
+      cardinality:
+        min: 0
+        max: 1
+    value:
+      cardinality:
+        min: 0
+        max: 1
+  relations:
+    - kind: contains
+      parent: root
+      child: track
+    - kind: contains
+      parent: root
+      child: thumb
+    - kind: contains
+      parent: root
+      child: indicator
+    - kind: contains
+      parent: root
+      child: label
+    - kind: contains
+      parent: root
+      child: value
+references:
+  prototypes:
+    - P-BASE-SLIDER-THUMB
+    - P-BASE-SLIDER-FIELD-THUMB
