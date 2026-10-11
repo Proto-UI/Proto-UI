@@ -123,7 +123,9 @@
     "benchmark:validate": "node scripts/benchmark/benchmark.mjs validate",
     "benchmark:test": "node --test scripts/benchmark/test/*.test.mjs scripts/benchmark/browser-calibration.test.mjs",
     "benchmark:dry-run": "node scripts/benchmark/benchmark.mjs dry-run",
-    "test:draft-packages": "node --test scripts/release/test/draft-prototype-packages.test.mjs scripts/build/test/draft-prototype-consumer.test.mjs"
+    "test:draft-packages": "node --test scripts/release/test/draft-prototype-packages.test.mjs scripts/build/test/draft-prototype-consumer.test.mjs",
+    "lint:material-composition": "node scripts/analysis/material-composition-lint.mjs",
+    "test:material-composition-lint": "node --test scripts/analysis/test/material-composition-lint.test.mjs"
   },
   "lint-staged": {
     "*.{js,mjs,cjs,ts,mts,json,css,md,mdx,astro,yaml,yml}": "prettier --write"
