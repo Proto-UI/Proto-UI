@@ -160,6 +160,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'runtime-tabs': 4,
       slider: 0, // Separate suites register their own runtime cases.
       'drawer-command-density': 0,
+      'drawer-intrinsic': 0,
       dropdown: 0,
       'neo-popover-title': 0,
       'popover-command-density': 0,
