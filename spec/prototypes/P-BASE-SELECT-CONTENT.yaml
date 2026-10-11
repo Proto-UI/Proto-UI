@@ -36,11 +36,16 @@ criteria:
     text:
       zh-CN: Escape 必须 close 且不改变 selection，并把焦点返回 Trigger；Tab 必须 close 而不阻止宿主遍历，包括 deferred entry 尚未完成且焦点仍在同域唯一 Trigger 的阶段；outside press 必须 close；Trigger activation 必须被 inside Boundary 识别以避免一次 pointer activation 产生二次 toggle。
       en: Escape must close without changing selection and return focus to Trigger, Tab must close without preventing host traversal, including deferred entry while the unique same-domain Trigger still owns focus, outside press must close, and Trigger activation must be classified inside the Boundary to avoid a double toggle from one pointer activation.
+  - id: P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT
+    text:
+      en: 'The internal S1 resolver accepts explicit mode, committed value with an unset distinction, ordered semantic records with associated row/text PartView identities, reference identities and an initial-collection settlement phase. Explicit popper preserves edge config. In a settled ordinary initial collection, a unique enabled match wins; unset or unmatched value uses the first enabled record. Duplicate values, disabled selected compatibility, missing associated targets, empty/all-disabled collections, unsettled collections and already-open updates remain named unresolved results, not automatic popper policy. No focus candidate, speculative controlled request, geometry or host query selects targets. Neutral constraints are immutable and explicit. This resolver is not wired into Content and does not complete runtime item-aligned behavior.'
   - id: P-BASE-SELECT-CONTENT-DEFERRED-SURFACES
     text:
       zh-CN: item-aligned positioning、Viewport、scroll controls 与虚拟化不属于当前 Base Content 保证；下游只能对已实现的 anchored popper 行为声明兼容。
       en: Item-aligned positioning, Viewport, scroll controls, and virtualization are outside the current Base Content guarantee; downstream layers may claim compatibility only for implemented anchored popper behavior.
 sources:
+  - path: packages/prototypes/base/src/select/alignment-intent.ts
+    label: Internal unwired S1 initial semantic alignment intent
   - path: packages/prototypes/base/src/select/content.proto.ts
   - path: packages/prototypes/base/test/select.test.ts
   - path: https://www.w3.org/WAI/ARIA/apg/patterns/listbox/
@@ -56,11 +61,19 @@ dependsOn:
       C-AS-OVERLAY-0001,
       C-AS-TRANSITION-0001,
       C-ANCHORED-POSITIONING-0001,
+      { id: C-TARGET-ALIGNMENT-PLAN-0001, since: 0.3.0-alpha.1 },
       C-DELAY-0001,
     ]
   decisions: [D-USE-FOCUS-ROVING-DEPRECATION-0001]
-verifies: { tests: [T-BASE-SELECT-CONTENT-0001] }
+verifies:
+  tests:
+    - T-BASE-SELECT-CONTENT-0001
+    - id: T-TARGET-ALIGNMENT-PLAN-0001
+      since: 0.3.0-alpha.1
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Defined an internal initial-alignment intent resolver as an unwired S1 slice, preserving the runtime item-aligned gap and unresolved compatibility boundaries.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Content listbox semantics, asFocusRoving ownership, Overlay and Transition presence, positioning, keyboard behavior, and dismissal.

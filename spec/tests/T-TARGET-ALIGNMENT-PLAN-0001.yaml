@@ -1,0 +1,60 @@
+id: T-TARGET-ALIGNMENT-PLAN-0001
+type: test
+title: Initial semantic alignment intent and neutral numerical plan vectors
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Internal pure-function evidence is bounded to S1; no host binding, final layout, focus, animation or four-Adapter production behavior is verified.
+summary: Fixed Radix 2.2.6 source-derived arithmetic vectors and negative semantic boundaries for the independently reviewed S1.
+cases:
+  - id: T-TARGET-ALIGNMENT-PLAN-0001-CASE-INTENT
+    title: Settled initial collections select semantic targets without geometry or implicit fallback
+    covers: [P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT]
+    expectation: explicit-edge-or-associated-target-pair-or-named-unresolved
+  - id: T-TARGET-ALIGNMENT-PLAN-0001-CASE-INITIAL
+    title: Initial frame plans preserve logical inset and normal surface alignment
+    covers:
+      [
+        C-TARGET-ALIGNMENT-PLAN-0001-OWNERSHIP,
+        C-TARGET-ALIGNMENT-PLAN-0001-INITIAL,
+        C-TARGET-ALIGNMENT-PLAN-0001-SCOPE,
+      ]
+    expectation: fixed-source-vectors-not-final-used-rectangles
+  - id: T-TARGET-ALIGNMENT-PLAN-0001-CASE-EXPANSION
+    title: Scroll expansion distinguishes actual samples from requested corrections
+    covers: [C-TARGET-ALIGNMENT-PLAN-0001-EXPANSION]
+    expectation: opt-in-expansion-with-end-pin-correction-and-host-readback-boundary
+  - id: T-TARGET-ALIGNMENT-PLAN-0001-CASE-INVALID
+    title: Invalid numeric inputs fail without fabricated geometry
+    covers: [C-TARGET-ALIGNMENT-PLAN-0001-INVALID]
+    expectation: invalid-nonfinite-and-negative-facts-but-preserve-finite-overflow-plans
+implementations:
+  - id: initial-select-alignment-intent
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/select-alignment-intent.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-PLAN-0001-CASE-INTENT]
+    exercises: [P-BASE-SELECT-CONTENT]
+  - id: target-alignment-numerical-plans
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/target-alignment.test.ts
+    required: true
+    consumesCases:
+      [
+        T-TARGET-ALIGNMENT-PLAN-0001-CASE-INITIAL,
+        T-TARGET-ALIGNMENT-PLAN-0001-CASE-EXPANSION,
+        T-TARGET-ALIGNMENT-PLAN-0001-CASE-INVALID,
+      ]
+verifies:
+  contracts: [C-TARGET-ALIGNMENT-PLAN-0001]
+  prototypes:
+    - id: P-BASE-SELECT-CONTENT
+      anchors: [P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT]
+exercises: { prototypes: [P-BASE-SELECT-CONTENT] }
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added independently bounded source arithmetic and initial intent cases; no runtime positioning acceptance.
+tags: [positioning, select, conformance, unit-test]
