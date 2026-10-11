@@ -1,0 +1,11 @@
+# Search selection completion (draft)
+
+Status: draft, uncataloged prototype slice. Autocomplete and Combobox Root own selection requests, popup-close requests, and focus restoration through the Input part. Command owns an inline execute intent and has no post-selection close or focus request. Application event listeners own their side effects; controlled value, query, and open remain owner facts.
+
+An accepted selection emits its intent before its normal popup-close/focus continuation. That continuation belongs to the accepting Root view epoch and accepted selection invocation. If a synchronous valueChange or openChange listener unmounts or disposes Root, its old continuation ends. A remount does not revive it. A newer accepted nested select is allowed and owns its own continuation; a rejected nested selection does not cancel the valid outer continuation. Returning true reports that the original selection was accepted, not that its retired close/focus work ran.
+
+The same live selection preserves existing uncontrolled updates and controlled proposals. It must not suppress legal nested calls with a blanket busy flag. The prototype must not catch and hide Runtime, Anatomy, or focus invocation failures to implement retirement. Existing ExposeEvent host-sink error handling remains outside this slice.
+
+Acceptance: synchronous valueChange and openChange retirement cause no stale Anatomy query or focus; fresh selection after remount works; a nested accepted selection completes exactly once without duplicate outer focus; invalid nested selection leaves outer completion intact; controlled owner facts remain unchanged when the owner rejects the proposal; Command performs no popup-close/focus. Ordinary DOM removal is not synonymous with synchronous Runtime retirement; host-specific timing is separate evidence.
+
+Related definitions: C-LIFECYCLE-0001, C-LIFECYCLE-0002, C-LIFECYCLE-0005, C-ANATOMY-0008 (draft), and C-LIFECYCLE-0008 (active). This bounded portable responsibility adds no shared API or Compiler/IR/Adapter special case. State/context subscriber reentry before the application event, unrelated query/navigation callbacks, Input-only replacement while Root remains live, and broader owner-command precedence are not certified by this slice.
