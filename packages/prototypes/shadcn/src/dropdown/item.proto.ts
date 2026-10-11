@@ -36,20 +36,50 @@ const dropdownItem = definePrototype<ShadcnDropdownItemProps, ShadcnDropdownItem
     });
     def.rule({
       when: (w) =>
-        w.any(
-          w.state(active).eq(true),
-          w.state(hovered).eq(true),
-          w.state(focused).eq(true),
-          w.state(focusVisible).eq(true)
+        w.all(
+          w.prop('variant').eq('default'),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true)
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
+    // P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE: retain the Nova tint
+    // during the existing local press feedback; Base remains the state owner.
     def.rule({
-      when: (w) => w.all(w.state(active).eq(true), w.prop('variant').eq('destructive')),
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('destructive'),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true),
+            w.state(pressed).eq(true)
+          )
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/10 text-destructive')),
     });
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
+      when: (w) =>
+        w.all(
+          w.meta('colorScheme').eq('dark'),
+          w.prop('variant').eq('destructive'),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true),
+            w.state(pressed).eq(true)
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('variant').eq('default'), w.state(pressed).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-accent/80')),
     });
     def.rule({
