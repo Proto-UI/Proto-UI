@@ -132,7 +132,7 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
         stateId,
         kind: spec.kind,
         attr: this.allowAttrForKind(spec.kind, mode) ? mapping.dataAttr : undefined,
-        cssVar: mapping.cssVar,
+        cssVar: spec.kind === 'number.list' ? undefined : mapping.cssVar,
       };
 
       if (stateId) {
@@ -205,6 +205,9 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
     };
 
     switch (kind) {
+      case 'number.list':
+        // External get/subscribe remains available; there is no scalar DOM encoding.
+        break;
       case 'bool': {
         if (v) setAttr('');
         else setAttr(null);
@@ -355,6 +358,8 @@ export class ExposeStateWebModuleImpl extends ModuleBase {
         return true;
       case 'number.range':
         return !!mode.allowContinuousAttr;
+      case 'number.list':
+        return false;
       default:
         return false;
     }

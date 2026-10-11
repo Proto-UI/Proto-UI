@@ -1,0 +1,71 @@
+id: C-STATE-NUMBER-LIST-0001
+type: contract
+title: Immutable finite-number sequence State
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: A generic runtime extension under independent admission review; fresh package and host evidence is required, and Compiler support is not provided by this contract implementation.
+  zh-CN: 通用运行态扩展仍待独立 admission 审查与新的 package、host 证据；本实现不提供 Compiler 支持。
+summary: number.list stores immutable canonical finite-number snapshots with content equality and no implicit scalar host projection.
+statement:
+  en: >-
+    State admits the host-neutral descriptor `{ kind: 'number.list' }` and setup facade `def.state.numberList(name, initial)` returning `OwnedStateHandle<readonly number[]>`. The existing get, setDefault and set capabilities operate on complete snapshots. This generic value kind owns no sorting, spacing, quantization or component policy and adds no cross-slot transaction.
+
+
+  zh-CN: >-
+    State 增加 host-neutral descriptor `{ kind: 'number.list' }` 与 setup facade `def.state.numberList(name, initial)`，返回 `OwnedStateHandle<readonly number[]>`。既有 get、setDefault、set 能力操作完整快照；此通用 kind 不承担排序、间距、量化或组件策略，不增加跨 slot transaction。
+
+
+criteria:
+  - id: C-STATE-NUMBER-LIST-0001-A
+    text:
+      en: Inputs must satisfy Array.isArray and contain only length plus dense own index data descriptors holding finite numbers. Empty arrays, duplicates and arbitrary order are valid. Holes, undefined, NaN, infinities, nested values, non-arrays including typed arrays, extra own string or symbol properties, and accessor descriptors are rejected without evaluating ordinary getters.
+      zh-CN: 输入必须满足 Array.isArray，且自有属性只能是 length 与稠密索引的 finite number data descriptor。允许空数组、重复与任意顺序；拒绝 holes、undefined、NaN、无穷、嵌套值、非数组（包括 typed array）、额外自有 string/symbol 属性与 accessor，不求值普通 getter。
+  - id: C-STATE-NUMBER-LIST-0001-B
+    text:
+      en: Define, setDefault and set must validate and copy the entire input into an ordinary frozen internal array before publication, without freezing the caller input. Normalize -0 to +0. Cross-realm arrays and pure-data Array subclasses are admitted but their prototypes, methods and class identity are not retained. The internal descriptor is a copied frozen number.list descriptor. These canonical values and descriptors are JSON-compatible; this does not constrain unknown StateSetReason or claim whole StateEvents are JSON. Non-array class instances remain invalid.
+      zh-CN: Define、setDefault 与 set 必须完整校验并复制为普通冻结内部数组后才发布，不冻结调用方输入；-0 归一化为 +0。允许跨 realm 数组与纯数据 Array subclass，但不保留 prototype、方法或 class identity。内部 descriptor 复制为冻结 number.list descriptor。规范化值与 descriptor 满足 JSON 边界，不限制 unknown StateSetReason，也不声称整个 StateEvent 可 JSON；非数组 class instance 仍非法。
+  - id: C-STATE-NUMBER-LIST-0001-C
+    text:
+      en: Equal normalized lengths and per-index Object.is values retain the existing snapshot identity and emit nothing. A changed set records exactly one complete prev-to-next slot transition; setDefault never emits. Ordering is significant; immutable historical snapshots cannot be changed through later caller mutations.
+      zh-CN: 规范化后长度相等且逐项 Object.is 相等时保留原快照 identity，不发事件。变化的 set 只记录一次完整 prev-to-next slot 转换；setDefault 不发事件。顺序有意义，调用方后续修改不得改变历史快照。
+  - id: C-STATE-NUMBER-LIST-0001-D
+    text:
+      en: Rejected values must not allocate the attempted slot or alter its value, identity or pending event queue. Re-entrant valid writes preserve the existing deterministic transition order. No cross-slot rollback, watcher-exception recovery policy change, or guarantee that arbitrary Proxy reflection is side-effect-free is added.
+      zh-CN: 非法值不得分配该次 slot 或改变其值、identity、待发事件队列。合法重入写入遵循既有确定性转换顺序；不增加跨 slot 回滚、不改变 watcher 异常恢复策略，也不保证任意 Proxy 反射没有副作用。
+  - id: C-STATE-NUMBER-LIST-0001-E
+    text:
+      en: Owned views still have no watch. Borrowed, observed and exposed views preserve the existing source identity and applicable metadata projection, including the number.list kind/spec. Existing setup and callback phase restrictions, current-run watcher scope, repeatable detach retention and terminal invalidation apply, with no implicit render or flush. Readonly snapshots may be explicitly copied when a mutable Context JsonValue is required; no general JSON type widening is implied. The frozen descriptor guarantee concerns the internal source, not a new deep-freezing guarantee for Adapter public clones.
+      zh-CN: Owned view 仍无 watch；borrowed、observed、exposed view 保留既有 source identity 与适用 metadata 投影，包括 number.list kind/spec。既有 setup/callback phase、watcher 当前 run scope、repeatable detach 保留与 terminal 失效规则继续适用，不隐式 render/flush。需要可变 Context JsonValue 时可显式复制 readonly 快照，不扩大通用 JSON 类型。descriptor 冻结保证针对内部 source，不新增 Adapter 公有 clone 的深冻结保证。
+  - id: C-STATE-NUMBER-LIST-0001-F
+    text:
+      en: Exposed number.list values support public get and subscribe on Web without automatic data-attribute or CSS-variable mapping. Permissive scalar projection modes do not opt this kind in. Rule scalar eq rejects number.list at both type and runtime boundaries; scalar behavior remains unchanged. No component-name dispatch or silent scalar fallback is allowed.
+      zh-CN: Web 上 exposed number.list 支持公有 get/subscribe，但不自动映射 data attribute 或 CSS variable；宽松标量投影 mode 也不启用此 kind。Rule scalar eq 在类型与运行态均拒绝 number.list，旧标量行为不变；禁止组件名分派或静默标量 fallback。
+dependsOn:
+  contracts:
+    - C-STATE-0003
+    - C-STATE-0004
+    - C-STATE-0005
+    - C-STATE-0006
+    - C-STATE-0010
+    - C-STATE-0011
+    - C-STATE-0012
+sources:
+  - path: packages/types/src/state.ts
+  - path: packages/modules/state/src/kernel.ts
+  - path: packages/modules/state/src/validate.ts
+  - path: packages/runtime/src/kernel/handles/def.ts
+  - path: packages/modules/expose-state-web/src/impl.ts
+  - path: packages/modules/rule/src/when-builder.ts
+openQuestions:
+  - id: C-STATE-NUMBER-LIST-0001-Q-ADMISSION
+    question:
+      en: When do independently reviewed runtime, package and host evidence justify stable admission of this extension?
+      zh-CN: 何时由独立审查的 runtime、package 与 host 证据支持此扩展的稳定 admission？
+    blocks:
+      - activation:C-STATE-NUMBER-LIST-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Draft generic immutable finite-number sequences; Compiler support remains separate.
+tags: [state, immutable, number-list, json]

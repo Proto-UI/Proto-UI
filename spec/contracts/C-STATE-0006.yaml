@@ -16,8 +16,8 @@ statement:
 criteria:
   - id: C-STATE-0006-A
     text:
-      zh-CN: v0 承认的 state kind 必须限定为 `bool`、`enum`、`string`、`number.range` 与 `number.discrete`。
-      en: The v0 admitted state kinds must be limited to `bool`, `enum`, `string`, `number.range`, and `number.discrete`.
+      zh-CN: v0 承认的 state kind 必须限定为 `bool`、`enum`、`string`、`number.range`、`number.discrete` 与 draft `number.list`。
+      en: The v0 admitted state kinds must be limited to `bool`, `enum`, `string`, `number.range`, `number.discrete`, and draft `number.list`.
   - id: C-STATE-0006-B
     text:
       zh-CN: State value 必须满足 JSON-compatible value 边界，不得要求 function、symbol、class instance、host object 或其他非 portable 值。
@@ -37,11 +37,11 @@ criteria:
 openQuestions:
   - id: C-STATE-0006-Q-VALIDATION
     question:
-      zh-CN: v0 是否应强制所有 state definition、`setDefault` 与 `set` 调用执行 value-domain validation？
-      en: Should v0 require value-domain validation for every state definition, `setDefault`, and `set` call?
+      zh-CN: v0 是否应强制所有旧 scalar state definition、`setDefault` 与 `set` 调用执行 value-domain validation？
+      en: Should v0 require value-domain validation for every legacy scalar state definition, `setDefault`, and `set` call?
     context:
-      zh-CN: 当前存在 validator helper，但尚未完整接入 state module；先将其作为 debt 记录，不把运行时校验当作已完成保证。
-      en: Validator helpers exist today, but they are not fully wired into the state module; this remains recorded as debt rather than treated as an implemented runtime guarantee.
+      zh-CN: 当前存在 validator helper，但尚未完整接入 state module；旧 scalar validation 仍为 debt；新 number.list 按 C-STATE-NUMBER-LIST-0001 独立要求完整校验。
+      en: Validator helpers exist today, but they are not fully wired into the state module; legacy scalar validation remains debt. The new number.list kind requires complete validation independently under C-STATE-NUMBER-LIST-0001.
     blocks:
       - state value validation implementation
 sources:
@@ -62,6 +62,9 @@ explains:
   decisions:
     - D-STATE-VALIDATION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added draft number.list without closing legacy scalar validation debt.
   - version: 0.1.0
     change: introduced
     summary: Captured finite state kinds and JSON-compatible value boundaries.

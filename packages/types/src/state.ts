@@ -6,7 +6,8 @@ export type StateSpec =
   | EnumStateSpec<readonly string[]>
   | StringStateSpec
   | NumberRangeStateSpec
-  | NumberDiscreteStateSpec;
+  | NumberDiscreteStateSpec
+  | NumberListStateSpec;
 
 export type BoolStateSpec = { kind: 'bool' };
 
@@ -35,6 +36,9 @@ export type NumberDiscreteStateSpec = {
   step?: number;
 };
 
+/** Canonical immutable dense finite-number sequence. */
+export type NumberListStateSpec = { kind: 'number.list' };
+
 /** Reason is intentionally unknown (policy/shape is up to app/framework). */
 export type StateSetReason = unknown;
 
@@ -56,14 +60,17 @@ export type StateValueOfSpec<S extends StateSpec> = S['kind'] extends 'bool'
       ? string
       : S['kind'] extends 'number.range' | 'number.discrete'
         ? number
-        : never;
+        : S['kind'] extends 'number.list'
+          ? readonly number[]
+          : never;
 
 export type StateDefineSpec =
   | BoolStateDefineSpec
   | EnumStateDefineSpec<readonly string[]>
   | StringStateDefineSpec
   | NumberRangeStateDefineSpec
-  | NumberDiscreteStateDefineSpec;
+  | NumberDiscreteStateDefineSpec
+  | NumberListStateDefineSpec;
 
 // define spec 不带 kind（因为 kind 由 def.state.xxx 决定）
 export type BoolStateDefineSpec = {}; // bool 无参数
@@ -89,8 +96,11 @@ export type NumberDiscreteStateDefineSpec = {
   step?: number;
 };
 
+export type NumberListStateDefineSpec = {};
+
 // 给 module/kernel 用的 normalize 工具（types 层也可以只给类型，不给函数）
 export type NormalizeStateSpec =
+  | { kind: 'number.list' }
   | { kind: 'bool' }
   | { kind: 'enum'; options: readonly string[] }
   | { type: 'string'; options?: readonly string[] }

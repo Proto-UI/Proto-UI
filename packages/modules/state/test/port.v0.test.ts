@@ -339,3 +339,39 @@ describe('module-state port (v0)', () => {
     expect(() => owned.get()).toThrow();
   });
 });
+
+it('number.list port views share immutable snapshots and preserve metadata, phase and disposal', () => {
+  const mock = createMockSys();
+  const impl = new StateModuleImpl(mock.sys);
+  mock.setPhase('setup');
+  const owned = impl.facade.numberList('coordinates', [1, 9]);
+  const borrowed = impl.port.createBorrowedHandle(owned);
+  const observed = impl.port.createObservedHandle(owned);
+  expect((owned as any).watch).toBeUndefined();
+  expect((observed as any).set).toBeUndefined();
+  for (const view of [borrowed, observed]) {
+    expect(view.get()).toBe(owned.get());
+    for (const key of ['__stateId', '__stateName', '__stateSemantic', '__stateKind', '__stateSpec'])
+      expect((view as any)[key]).toBe((owned as any)[key]);
+  }
+  const events: unknown[] = [];
+  borrowed.watch((_ctx, event) => events.push(event));
+  observed.watch((_ctx, event) => events.push(event));
+  const input = [2, 8];
+  impl.port.setDefault(owned, input);
+  input[0] = 99;
+  expect(owned.get()).toEqual([2, 8]);
+  expect(events).toHaveLength(0);
+  mock.setPhase('callback');
+  expect(() => observed.watch(() => {})).toThrow();
+  expect(() => borrowed.setDefault([])).toThrow();
+  const snapshot = owned.get();
+  expect(() => impl.port.set(owned, [NaN])).toThrow();
+  expect(() => impl.port.setDefault(owned, [Infinity])).toThrow();
+  expect(owned.get()).toBe(snapshot);
+  borrowed.set([3, 7], Symbol('reason'));
+  expect(events).toHaveLength(2);
+  impl.dispose();
+  for (const view of [owned, borrowed, observed]) expect(() => view.get()).toThrow();
+  expect(() => observed.watch(() => {})).toThrow();
+});

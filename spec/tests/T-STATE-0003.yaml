@@ -26,6 +26,12 @@ cases:
     covers:
       - C-STATE-0006-E
     expectation: host-neutral-metadata
+  - id: T-STATE-0003-CASE-NUMBER-LIST-INPUT
+    title: Dense finite immutable sequence input normalization
+    covers:
+      - C-STATE-NUMBER-LIST-0001-A
+      - C-STATE-NUMBER-LIST-0001-B
+    expectation: number-list-input
 implementations:
   - id: module-state-value-spec-contract
     kind: module-test
@@ -37,6 +43,13 @@ implementations:
       - T-STATE-0003-CASE-ENUM-SPEC
       - T-STATE-0003-CASE-NUMBER-RANGE-SPEC
       - T-STATE-0003-CASE-HOST-NEUTRAL-METADATA
+  - id: t-state-0003-number-list
+    kind: module-test
+    status: passing
+    path: packages/modules/state/test/number-list.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0003-CASE-NUMBER-LIST-INPUT
 verifies:
   contracts:
     - id: C-STATE-0006
@@ -46,6 +59,11 @@ verifies:
         - C-STATE-0006-C
         - C-STATE-0006-D
         - C-STATE-0006-E
+    - id: C-STATE-NUMBER-LIST-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - C-STATE-NUMBER-LIST-0001-A
+        - C-STATE-NUMBER-LIST-0001-B
 exercises:
   contracts:
     - id: C-STATE-0006
@@ -56,6 +74,9 @@ revisions:
   - version: 0.1.0
     change: introduced
     summary: Added finite state value spec test mapping.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped fresh draft number.list runtime evidence with bounded host claims.
 tags:
   - state
   - value

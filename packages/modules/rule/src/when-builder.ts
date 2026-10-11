@@ -29,8 +29,11 @@ export function createWhenBuilder<Props extends PropsBaseType>(opts?: {
     deps.push(d);
   };
 
-  const makeSignal = (left: any): WhenSignal<Props, any> => ({
+  const makeSignal = (left: any, stateKind?: string): WhenSignal<Props, any> => ({
     eq(lit: WhenLiteral): WhenExpr<Props> {
+      if (stateKind === 'number.list') {
+        throw new Error('[Rule] number.list does not support scalar eq comparisons');
+      }
       return { type: 'eq', left, right: lit };
     },
   });
@@ -44,7 +47,7 @@ export function createWhenBuilder<Props extends PropsBaseType>(opts?: {
       const id = s?.__stateId ?? s?.id ?? s;
       pushDep({ kind: 'state', id });
       if (opts?.onStateHandle) opts.onStateHandle(id, s);
-      return makeSignal({ type: 'state', id });
+      return makeSignal({ type: 'state', id }, s?.__stateSpec?.kind ?? s?.__stateKind);
     },
     ctx(key: any) {
       pushDep({ kind: 'context', key });

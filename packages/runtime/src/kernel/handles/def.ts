@@ -338,6 +338,13 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         recordCaptured(def, 'state', handle);
         return handle;
       },
+      numberList(semantic, defaultValue) {
+        ensureSetup('def.state.numberList');
+        const handle = state.numberList(semantic, defaultValue);
+        registerStateHandle(def, handle);
+        recordCaptured(def, 'state', handle);
+        return handle;
+      },
       numberDiscrete(semantic, defaultValue, spec) {
         ensureSetup('def.state.numberDiscrete');
         const handle = state.numberDiscrete(semantic, defaultValue, spec);

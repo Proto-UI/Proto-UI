@@ -111,7 +111,7 @@ function buildVariant(
 
   const binding = map.get(String(condition.stateId));
   if (!binding) return null;
-  if (binding.kind === 'number.range') return null;
+  if (binding.kind === 'number.range' || binding.kind === 'number.list') return null;
 
   // CSS attribute values are strings; lowering must preserve Rule strict equality.
   if (binding.kind === 'bool' && typeof condition.literal !== 'boolean') return null;

@@ -68,8 +68,13 @@ export type RuleDep<Props extends PropsBaseType> =
   | { kind: 'meta'; key: string };
 
 export type WhenLiteral = string | number | boolean | null;
-export type WhenComparable<T> =
-  Extract<T, WhenLiteral> extends never ? WhenLiteral : Extract<T, WhenLiteral>;
+export type WhenComparable<T> = 0 extends 1 & T
+  ? any
+  : [T] extends [readonly number[]]
+    ? never
+    : Extract<T, WhenLiteral> extends never
+      ? WhenLiteral
+      : Extract<T, WhenLiteral>;
 
 export type WhenValue<Props extends PropsBaseType> =
   | { type: 'prop'; key: keyof Props }

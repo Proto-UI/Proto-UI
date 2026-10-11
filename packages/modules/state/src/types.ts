@@ -90,6 +90,11 @@ export type StateFacade = {
     spec: NumberRangeStateDefineSpec
   ) => OwnedStateHandle<number>;
 
+  numberList: (
+    semantic: string,
+    defaultValue: readonly number[]
+  ) => OwnedStateHandle<readonly number[]>;
+
   numberDiscrete: (
     semantic: string,
     defaultValue: number,
