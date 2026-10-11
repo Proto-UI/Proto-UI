@@ -163,3 +163,5 @@ export function setupDrawerSnap(
   });
   return { snapPoint, dragging, dragProgress, offsetPercentage };
 }
+
+export { drawerExtentModel } from './extent-model';

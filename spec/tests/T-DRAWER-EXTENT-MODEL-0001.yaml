@@ -1,0 +1,38 @@
+id: T-DRAWER-EXTENT-MODEL-0001
+type: test
+title: Drawer extent model boundaries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Pure normalization evidence is not live prototype or native acceptance.
+summary: Distinguishes empty point sets, active owner selection and neutral extent validation.
+cases:
+  - id: T-DRAWER-EXTENT-MODEL-0001-CASE-INPUT
+    title: Empty, explicit, malformed and owner-controlled input normalization
+    covers:
+      [
+        C-DRAWER-EXTENT-MODEL-0001-MODE,
+        C-DRAWER-EXTENT-MODEL-0001-VALIDATION,
+        C-DRAWER-EXTENT-MODEL-0001-LENGTH,
+        C-DRAWER-EXTENT-MODEL-0001-BOUNDARY,
+      ]
+    expectation: pure-input-normalization-without-production-activation
+implementations:
+  - id: drawer-extent-model-inputs
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/navigation-overlays/drawer-extent-model.test.ts
+    required: true
+    consumesCases: [T-DRAWER-EXTENT-MODEL-0001-CASE-INPUT]
+    notes:
+      - Pure model only; production Content and Handle are not activated and native geometry is not inferred.
+verifies:
+  contracts: [C-DRAWER-EXTENT-MODEL-0001]
+openQuestions:
+  - id: T-DRAWER-EXTENT-MODEL-0001-Q-NATIVE
+    question: Which separate tests establish actual intrinsic geometry and interaction after integration?
+    blocks: [activation:T-DRAWER-EXTENT-MODEL-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Record isolated model evidence scope.
+tags: [drawer, extent, model]
