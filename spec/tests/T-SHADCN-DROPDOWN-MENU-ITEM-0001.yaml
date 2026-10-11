@@ -32,6 +32,15 @@ cases:
     covers: [P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE]
     expectation: real-base-state-shadcn-destructive-recipe-and-complete-css-closure
 implementations:
+  - id: www-shadcn-dropdown-item-native-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-DESTRUCTIVE-PALETTE]
+    exercises: [P-SHADCN-DROPDOWN-MENU-ITEM]
+    notes:
+      - Planned exact-head Actions-only journey for the real public demo across WC, React, Vue and Vue 2 in light/dark. Definition and type checks do not establish executed browser paint, native GPUI/Qt, contrast or upstream pixel equivalence.
   - id: shadcn-dropdown-destructive-palette
     kind: module-test
     status: passing
