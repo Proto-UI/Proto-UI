@@ -11,7 +11,7 @@ export default definePrototype<PopoverTriggerProps, PopoverTriggerExposes>({
     const behavior = asPopoverTrigger();
     def.feedback.style.use(
       tw(
-        'inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium outline-none'
+        'inline-flex h-8 items-center justify-center rounded-lg border border-input bg-background px-2.5 text-sm font-medium outline-none'
       )
     );
     const state = behavior.getState!;

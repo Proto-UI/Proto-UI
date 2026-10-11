@@ -38,6 +38,7 @@ jobs:
           - slider
           - dropdown
           - popover-title
+          - popover-command-density
           - neo-popover-title
     steps:
       - uses: actions/checkout@v4
@@ -87,6 +88,8 @@ jobs:
             TEST_FILE=apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts
           elif [ "$PUI_FINF_FEATURE_GROUP" = popover-title ]; then
             TEST_FILE=apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts
+          elif [ "$PUI_FINF_FEATURE_GROUP" = popover-command-density ]; then
+            TEST_FILE=apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts
           elif [ "$PUI_FINF_FEATURE_GROUP" = neo-popover-title ]; then
             TEST_FILE=apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts
           fi
