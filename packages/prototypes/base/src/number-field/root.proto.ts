@@ -164,15 +164,22 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     run = current;
     publish();
   });
-  def.props.watchAll((current) => {
+  def.props.watchAll((current, next, previous) => {
     run = current;
-    value.set(
-      normalize(
-        current.props.isProvided('value') ? finite(current.props.get().value, 0) : value.get()
-      ),
-      'reason: number controlled or bounds'
-    );
-    draft.set(String(value.get()), 'reason: number owner text');
+    const valueChanged =
+      next.value !== previous.value ||
+      next.min !== previous.min ||
+      next.max !== previous.max ||
+      next.step !== previous.step;
+    if (valueChanged) {
+      value.set(
+        normalize(
+          current.props.isProvided('value') ? finite(current.props.get().value, 0) : value.get()
+        ),
+        'reason: number controlled or bounds'
+      );
+      draft.set(String(value.get()), 'reason: number owner text');
+    }
     publish();
   });
   def.lifecycle.onUnmounted(() => {

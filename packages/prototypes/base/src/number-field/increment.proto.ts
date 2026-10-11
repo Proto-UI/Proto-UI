@@ -29,6 +29,13 @@ function setup(def: DefHandle<NumberFieldPartProps>) {
   };
   def.context.subscribe(NUMBER_FIELD_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
+  def.event.onGlobal('key.down', (_run, event) => {
+    if (disabled.get() || !focus.focused.get() || event.key !== ' ') return;
+    event.control.requestDefaultActionPrevention({
+      reason: 'number-field.step-space',
+      source: 'base-number-field-increment',
+    });
+  });
   def.event.on('press.commit', (run) => {
     if (!disabled.get()) numberFieldMethod(run, 'stepBy', 1);
   });

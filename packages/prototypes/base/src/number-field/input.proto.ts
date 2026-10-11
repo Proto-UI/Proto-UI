@@ -126,7 +126,6 @@ export function setupNumberFieldInput(def: DefHandle<NumberFieldPartProps>, fiel
       reason: 'compositionend',
     });
   });
-  control.on('change', (run) => numberFieldMethod(run, 'commitValue'));
   focus.focused.watch((run, e) => {
     if (e.type === 'next') {
       if (!e.next) numberFieldMethod(run, 'commitValue');
