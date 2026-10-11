@@ -339,6 +339,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'px-3',
   'px-4',
   'px-6',
+  'py-0',
   'py-1',
   'py-1.5',
   'py-2',

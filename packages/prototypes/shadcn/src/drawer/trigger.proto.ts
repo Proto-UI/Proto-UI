@@ -11,7 +11,7 @@ export default definePrototype<DrawerTriggerProps, DrawerTriggerExposes>({
     const behavior = asDrawerTrigger();
     def.feedback.style.use(
       tw(
-        'inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-medium outline-none'
+        'inline-flex items-center justify-center rounded-lg border border-input bg-background min-h-8 px-2.5 py-0 text-sm font-medium min-w-0 max-w-full whitespace-normal wrap-anywhere text-center outline-none'
       )
     );
     const state = behavior.getState!;
