@@ -331,64 +331,54 @@ async function mountLongLabel(
         return node;
       }
       demo.root = transform(demo.root) as typeof demo.root;
-      const surface = document.querySelector('[data-previewer-id] [data-projection-content]');
-      if (!surface) throw new Error('Public preview theme surface missing');
+      // Drawer is a generic demo, not a cataloged fixed-family projection.
+      // Match previewer-client.ts: read the real public preview root and use
+      // its normal RuntimeBox composition; it has no data-projection-content.
+      const previewer = document.querySelector<HTMLElement>(
+        `[data-previewer-id][data-demo-id="demo-${family}-drawer"]`
+      );
+      if (!previewer) throw new Error('Public Drawer preview root missing');
       const host = document.createElement('div');
       host.dataset.drawerDensityFixture = '';
       // A documented consumer viewport lane avoids the documentation article's
       // own enlarged-text padding consuming the promised 160/240px test width.
       // Only this host box changes; command and panel recipes are untouched.
-      host.style.cssText = 'width: calc(100% - 32px); margin: 16px; min-width: 0';
+      host.style.cssText =
+        'width: calc(100% - 32px); margin: 16px; min-width: 0; --runtime-box-content-padding: 0';
       document.body.append(host);
       if (demo.root.kind === 'box')
         demo.root.attrs = { ...demo.root.attrs, style: 'padding: 0; min-width: 0; width: 100%' };
-      const { createProjectionComposition } = (await browserImport(
-        '/src/components/PrototypePreviewer/projection-composition.ts'
-      )) as typeof import('../../../components/PrototypePreviewer/projection-composition');
+      const { createRuntimePreviewSurface, runtimePreviewFamily } = (await browserImport(
+        '/src/components/PrototypePreviewer/runtime-preview-surface.ts'
+      )) as typeof import('../../../components/PrototypePreviewer/runtime-preview-surface');
       const { resolveProjectionThemeSurfaceStyle } = (await browserImport(
         '/src/components/PrototypePreviewer/projection-theme.ts'
       )) as typeof import('../../../components/PrototypePreviewer/projection-theme');
       const { collectPrototypeIds } = (await browserImport(
         '/src/components/PrototypePreviewer/demo-types.ts'
       )) as typeof import('../../../components/PrototypePreviewer/demo-types');
+      const { loadPrototypes } = (await browserImport(
+        '/src/components/PrototypePreviewer/prototype-modules.ts'
+      )) as typeof import('../../../components/PrototypePreviewer/prototype-modules');
+      if (runtimePreviewFamily(previewer) !== family)
+        throw new Error('Public Drawer preview family does not match the requested fixture');
+      const surface = createRuntimePreviewSurface(
+        demo,
+        family,
+        resolveProjectionThemeSurfaceStyle(family, previewer),
+        runtime
+      );
       const prototypeIds = new Set<string>();
-      collectPrototypeIds(demo.root, prototypeIds);
-      // The normal Website contentRecipe channel supplies all portal theme and
-      // family coordinates. Button is only the existing registered scope shell;
-      // this explicit recipe contains real Drawer prototypes, never Button logic.
-      const composition = createProjectionComposition({
-        ownerId: 'drawer-density-fixture',
-        runtimeId: runtime,
-        projectionFamilyId: family,
-        generation: 1,
-        componentId: 'button',
-        childDemo: demo,
-        controlIds: [],
-        contentRecipe: {
-          id: `demo-${family}-drawer-density`,
-          prototypeIds: [...prototypeIds],
-          rootPrototypeId: `${family}-drawer-root`,
-        },
-        themeSurfaceStyle: resolveProjectionThemeSurfaceStyle(family, surface),
-        controls: {
-          runtime: {
-            label: 'Runtime',
-            options: [{ label: runtime, value: runtime }],
-            onValueChange() {},
-          },
-          family: {
-            label: 'Family',
-            options: [{ label: family, value: family }],
-            onValueChange() {},
-          },
-          component: {
-            label: 'Component',
-            options: [{ label: 'Drawer content recipe', value: 'button' }],
-            onValueChange() {},
-          },
-        },
-      });
-      const view = await renderDemo({ host, demo: composition.demo, runtime });
+      collectPrototypeIds(surface.demo.root, prototypeIds);
+      await loadPrototypes([...prototypeIds]);
+      const view = await renderDemo({ host, demo: surface.demo, runtime });
+      try {
+        await surface.ready;
+      } catch (error) {
+        await view.destroy();
+        host.remove();
+        throw error;
+      }
       return {
         destroy: async () => {
           await view.destroy();
