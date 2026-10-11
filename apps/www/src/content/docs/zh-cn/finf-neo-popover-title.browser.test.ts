@@ -23,7 +23,7 @@ import {
   applyColorScheme,
 } from './browser-harness';
 
-const route = '/en/ui-libraries/brutalist/popover/';
+const route = '/en/ui-libraries/brutalist/components/popover/';
 const demoId = 'demo-brutalist-popover';
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-neo-popover-title');
