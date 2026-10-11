@@ -2,6 +2,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { collectLiquidMaterialObservation } from './liquid-material-observation';
 import { withLiquidCardFailureObservation } from './library-liquid-card-observation';
 import {
   collectAccordionPendingObservation,
@@ -153,6 +154,14 @@ async function capture(
             encoding: 'utf8',
           }).trim().length > 0,
         layout: await observeLayout(previewer.page()),
+        material:
+          subject.family === 'liquid-glass'
+            ? await Promise.all(
+                (await previewer.locator('[aria-expanded]').all()).map((node) =>
+                  node.evaluate(collectLiquidMaterialObservation)
+                )
+              )
+            : [],
         fixture: 'demo-accordion-family.browser.test.ts',
         name,
         ...subject,

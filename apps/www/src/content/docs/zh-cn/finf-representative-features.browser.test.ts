@@ -7,6 +7,7 @@ import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromeExecutable, startServer, stopServer, type RuntimeId } from './browser-harness';
+import { collectLiquidMaterialObservation } from './liquid-material-observation';
 import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
@@ -412,7 +413,24 @@ async function runCase(testCase: Case) {
       sha256: createHash('sha256')
         .update(await readFile(path.join(output, file)))
         .digest('hex'),
-      observation,
+      observation:
+        testCase.family === 'liquid-glass' &&
+        ['accordion', 'alert-dialog'].includes(testCase.component)
+          ? {
+              journey: observation,
+              material: await Promise.all(
+                (
+                  await page
+                    .locator(
+                      testCase.component === 'alert-dialog'
+                        ? '[role="alertdialog"]'
+                        : '[data-demo-ref$="-trigger"][aria-expanded]'
+                    )
+                    .all()
+                ).map((subject) => subject.evaluate(collectLiquidMaterialObservation))
+              ),
+            }
+          : observation,
     });
   };
   page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -836,11 +854,43 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
   await capture('reopen-escape-closed', { panelVisible: await panel.isVisible() }, previewer);
 }
 
-async function accordionJourney({ page, previewer, capture }: Journey) {
+async function accordionJourney({ page, previewer, capture, family }: Journey) {
   await selectRealRuntime(page, previewer, 'react', '[data-demo-ref="single"]', 1);
   const trigger = previewer.locator('[data-demo-ref="single-lifetime-trigger"]');
   const content = previewer.locator('[data-demo-ref="single-lifetime-content"]');
   await capture('rest', {}, previewer);
+  if (family === 'liquid-glass') {
+    const item = previewer.locator('[data-demo-ref="single-lifetime-item"]');
+    const nested = previewer.locator('[data-demo-ref="nested-overview-trigger"]');
+    // Opaque body content deliberately bounds nested enhancement; this is not a whole-family optical claim.
+    await expect
+      .poll(() => nested.getAttribute('data-material-reason'))
+      .toBe('source-painted-ancestor');
+    expect(await nested.getAttribute('data-material-quality')).toBe('opaque-fallback');
+    await expect.poll(() => trigger.getAttribute('data-material-quality')).toBe('self-optical');
+    expect(await trigger.evaluate((el) => getComputedStyle(el).backgroundImage)).toMatch(
+      /data:image\/png/
+    );
+    const original = await item.getAttribute('style');
+    try {
+      // Restore only the old painted-ancestor defect; do not alter admission guards.
+      await item.evaluate((el) =>
+        (el as HTMLElement).style.setProperty('background-color', '#fff')
+      );
+      await expect
+        .poll(() => trigger.getAttribute('data-material-reason'))
+        .toBe('source-painted-ancestor');
+      expect(await trigger.getAttribute('data-material-quality')).toBe('opaque-fallback');
+      await capture('painted-item-negative-control', {}, previewer);
+    } finally {
+      await item.evaluate((el, previous) => {
+        if (previous === null) el.removeAttribute('style');
+        else el.setAttribute('style', previous);
+      }, original);
+    }
+    await expect.poll(() => trigger.getAttribute('data-material-quality')).toBe('self-optical');
+    await capture('transparent-item-recovered', {}, previewer);
+  }
   await trigger.click();
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
   await content.waitFor({ state: 'visible' });

@@ -47,8 +47,8 @@ criteria:
 
   - id: P-BRUTALIST-BUTTON-SIZE-PROP
     text:
-      en: Public `size` is the enum `default | sm | lg | icon` with default `default`.
-      zh-CN: 公开 `size` 为枚举 `default | sm | lg | icon`，默认 `default`。
+      en: Public `size` is the enum `default | sm | lg | icon` with default `default`. Text sizes follow the pinned 3306a802 recipe; default h-10 px-4, sm h-9 px-3, and lg h-11 px-8, all text-sm (14px/20px). Icon remains size-10.
+      zh-CN: 公开 `size` 为枚举 `default | sm | lg | icon`，默认 `default`。文字尺寸对齐固定 3306a802 配方：default 为 h-10 px-4，sm 为 h-9 px-3，lg 为 h-11 px-8，均为 text-sm（14px/20px）；icon 保持 size-10。
   - id: P-BRUTALIST-BUTTON-DEFAULTS
     text:
       en: >-
@@ -130,7 +130,7 @@ verifies: { tests: [T-BRUTALIST-BUTTON-0001] }
 revisions:
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; corrected earlier local sm text-xs and lg h-12 px-6 text-base choices to the pinned source. Base semantics and Proto UI API extensions remain unchanged.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

@@ -19,7 +19,25 @@ cases:
       - P-BOOTSTRAP-2-3-2-ACCORDION-TRIGGER-STYLE
       - P-LIQUID-GLASS-ACCORDION-TRIGGER-STYLE
     expectation: Shadcn uses compact trigger/content spacing and a 3px focus ring; Neo retains main Trigger fill, rounded clipped Item and secondary small-text Content. Four family chevrons have a passive non-shrinking wrapper; Neo uses 20px, others 16px. Existing Base activation and disabled suppression remain single-owner. Token and synthetic-DOM checks do not establish native paint.
+  - id: T-ACCORDION-RECIPES-0001-CASE-LIQUID-COMPOSITION
+    title: Liquid structural Item does not obscure its own Trigger material source
+    covers:
+      - P-LIQUID-GLASS-ACCORDION-ITEM-EVIDENCE
+      - P-LIQUID-GLASS-ACCORDION-CONTENT-EVIDENCE
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER-MATERIAL
+    expectation: Item remains transparent with no material candidate; Trigger retains existing optical intent and opaque fallback; Content retains its own opaque background and corner radius. Runtime style evidence is not optical pixel acceptance.
 implementations:
+  - id: liquid-composition-runtime
+    kind: module-test
+    status: passing
+    required: true
+    path: packages/prototypes/liquid-glass/test/accordion-material.test.ts
+    consumesCases:
+      - T-ACCORDION-RECIPES-0001-CASE-LIQUID-COMPOSITION
+    exercises:
+      - P-LIQUID-GLASS-ACCORDION-ITEM
+      - P-LIQUID-GLASS-ACCORDION-CONTENT
+      - P-LIQUID-GLASS-ACCORDION-TRIGGER
   - id: source-host-recipes
     kind: module-test
     status: passing
@@ -58,6 +76,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded bounded source recipe and decorative glyph regressions; no stable admission.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Add transparent structural Item and independently painted Content runtime coverage; native optical proof remains pending.
 tags:
   - accordion
   - projection

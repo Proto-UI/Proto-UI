@@ -302,6 +302,7 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'px-3',
   'px-4',
   'px-6',
+  'px-8',
   'py-0.5',
   'py-1.5',
   'py-2',

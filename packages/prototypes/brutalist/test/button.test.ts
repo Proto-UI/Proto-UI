@@ -85,7 +85,7 @@ describe('prototypes/brutalist: button', () => {
 
     let tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('bg-secondary-background');
-    expect(tokens).toContain('h-12');
+    expect(tokens).toContain('h-11');
     expect(tokens).toContain('opacity-50');
 
     rawPropsRef.current = {};
@@ -224,16 +224,19 @@ describe('prototypes/brutalist: button', () => {
     const { host } = createButtonHost(rawPropsRef);
     const { controller } = executeWithHost(button as any, host as any);
 
-    const expected: Record<string, string> = {
-      default: 'h-10',
-      sm: 'h-9',
-      lg: 'h-12',
-      icon: 'size-10',
+    const expected: Record<string, string[]> = {
+      default: ['h-10', 'px-4', 'text-sm'],
+      sm: ['h-9', 'px-3', 'text-sm'],
+      lg: ['h-11', 'px-8', 'text-sm'],
+      icon: ['size-10'],
     };
-    for (const [size, token] of Object.entries(expected)) {
+    for (const [size, tokens] of Object.entries(expected)) {
       rawPropsRef.current = { size };
       controller.applyRawProps(rawPropsRef.current as any);
-      expect(controller.getRuleStyleTokens()).toContain(token);
+      for (const token of tokens) expect(controller.getRuleStyleTokens()).toContain(token);
+      expect(controller.getRuleStyleTokens()).not.toContain('text-xs');
+      expect(controller.getRuleStyleTokens()).not.toContain('text-base');
+      expect(controller.getRuleStyleTokens()).not.toContain('h-12');
     }
   });
 });

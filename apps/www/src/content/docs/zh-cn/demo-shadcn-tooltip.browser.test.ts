@@ -38,6 +38,58 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('shadcn Tooltip browser acceptance', () => {
+  it('blockifies positioned inline-flex boxes without changing their inner layout', async () => {
+    const context = await browser.newContext();
+    try {
+      // Self-authored CSS characterization, independent of Tooltip implementation.
+      // https://www.w3.org/TR/2025/WD-css-position-3-20251007/#position-property
+      // https://www.w3.org/TR/2026/CRD-css-display-3-20260605/#transformations
+      await context.route('**/*', (route) => route.abort());
+      const page = await context.newPage();
+      await page.setContent(`<!doctype html>
+        <style>
+          html { font-size: 16px; }
+          .surface {
+            display: inline-flex;
+            width: fit-content;
+            max-width: 20rem;
+            align-items: center;
+            gap: 0.375rem;
+          }
+          #absolute { position: absolute; }
+          #fixed { position: fixed; }
+        </style>
+        <div style="display: block">
+          <div class="surface" id="static"><span>First</span><span>Second</span></div>
+          <div class="surface" id="absolute"><span>First</span><span>Second</span></div>
+          <div class="surface" id="fixed"><span>First</span><span>Second</span></div>
+        </div>`);
+      for (const position of ['static', 'absolute', 'fixed']) {
+        const paint = await page.locator(`#${position}`).evaluate((element) => {
+          const style = getComputedStyle(element);
+          const first = element.children[0].getBoundingClientRect();
+          const second = element.children[1].getBoundingClientRect();
+          return {
+            position: style.position,
+            display: style.display,
+            maxWidth: style.maxWidth,
+            gap: style.gap,
+            alignItems: style.alignItems,
+            physicalGap: second.left - first.right,
+          };
+        });
+        expect(paint.position).toBe(position);
+        expect(paint.display).toBe(position === 'static' ? 'inline-flex' : 'flex');
+        expect(paint.maxWidth).toBe('320px');
+        expect(paint.gap).toBe('6px');
+        expect(paint.alignItems).toBe('center');
+        expect(paint.physicalGap).toBeCloseTo(6, 5);
+      }
+    } finally {
+      await context.close();
+    }
+  });
+
   it('renders state feedback and a supplementary body portal in every public runtime', async () => {
     const context = await browser.newContext({ viewport: { width: 320, height: 844 } });
     const page = await context.newPage();
@@ -153,6 +205,7 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
             return {
               expectedBackground,
               expectedColor,
+              position: style.position,
               display: style.display,
               maxWidth: style.maxWidth,
               gap: style.gap,
@@ -170,7 +223,10 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
           });
           expect(paint.borderRadius, `${runtime}/${colorScheme}/radius`).not.toBe('0px');
           expect(paint.borderWidth, `${runtime}/${colorScheme}/border`).toBe('0px');
-          expect(paint.display).toBe('inline-flex');
+          // CSS Position 3 §2 blockifies an absolute/fixed positioned box.
+          // Preserve the authored inline-flex recipe; verify its computed value.
+          expect(paint.position).toBe('fixed');
+          expect(paint.display).toBe('flex');
           expect(paint.maxWidth).toBe('320px');
           expect(paint.gap).toBe('6px');
           themePaints.push(paint.backgroundColor);

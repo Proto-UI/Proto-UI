@@ -10,7 +10,7 @@ import type { BrutalistSelectTriggerExposes, BrutalistSelectTriggerProps } from 
 function renderChevron(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>) {
   return renderer.el(
     'span',
-    { style: tw('pointer-events-none flex shrink-0 items-center opacity-50') },
+    { style: tw('pointer-events-none flex shrink-0 items-center') },
     renderer.svg.root(
       {
         viewBox: '0 0 24 24',
@@ -54,7 +54,7 @@ const selectTrigger = definePrototype<BrutalistSelectTriggerProps, BrutalistSele
     // P-BRUTALIST-SELECT-TRIGGER-INTERACTION rules (size→h tokens, placeholder→paired ink, flat hover/press, focus-visible ring, disabled fade).
     def.rule({
       when: (w) => w.prop('size').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('h-9')),
+      intent: (i) => i.feedback.style.use(tw('h-10')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('sm'),

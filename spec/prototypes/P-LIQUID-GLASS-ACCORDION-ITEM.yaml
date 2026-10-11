@@ -21,8 +21,8 @@ criteria:
       en: Owns family tokens with min-width shrink safety, wrapping labels, normal content flow and overflow containment. Trigger focus and expanded visuals derive from Base. No fixed-height clipping or own activation callbacks.
   - id: P-LIQUID-GLASS-ACCORDION-ITEM-EVIDENCE
     text:
-      zh-CN: 当前源码是opaque视觉基线。显式LiquidGlass光学自实现与adaptive nativeblur是共享材质工作拥有的独立意图；真实材质和GPUI证据通过前本draft不完整。
-      en: Current source is the opaque visual baseline. Explicit LiquidGlass optical self rendering and adaptive native blur are separate intents owned by shared material work; this draft is incomplete until real material and GPUI evidence pass.
+      zh-CN: Item 保持透明结构与边框，不遮挡 Trigger 的显式材质背景；Trigger 保留自身不透明回退，Content 单独拥有普通不透明底色。显式LiquidGlass光学自实现与adaptive nativeblur是共享材质工作拥有的独立意图；真实材质和GPUI证据通过前本draft不完整。
+      en: Item retains transparent structure and border without obscuring the Trigger material backdrop. Trigger retains its own opaque fallback; Content owns its separate ordinary opaque fill. Explicit LiquidGlass optical self rendering and adaptive native blur are separate intents owned by shared material work; this draft is incomplete until real material and GPUI evidence pass.
 inherits:
   prototypes:
     - P-BASE-ACCORDION-ITEM
@@ -32,6 +32,7 @@ dependsOn:
 verifies:
   tests:
     - T-BASE-ACCORDION-0001
+    - T-ACCORDION-RECIPES-0001
 sources:
   - path: packages/prototypes/liquid-glass/src/accordion/item.proto.ts
   - path: packages/prototypes/liquid-glass/src/accordion/index.ts
@@ -39,6 +40,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the independent Base-consuming presentation, without claiming release or complete material/native parity.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Keep the structural Item transparent so the existing Trigger material can reach its source, while preserving Content opacity and host admission guards.
 tags:
   - prototype
   - liquid-glass
