@@ -177,7 +177,10 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     if (!mountedRun) return;
     if (nextOpen) {
       if (!prevOpen || !focusScope.isActive()) {
-        focusScope.activate({ reason: options?.focusReason ?? 'programmatic' });
+        focusScope.activate({
+          reason: options?.focusReason ?? 'programmatic',
+          preventScroll: true,
+        });
       }
     } else {
       if (prevOpen) {
