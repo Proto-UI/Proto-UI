@@ -31,6 +31,7 @@ import {
 } from '../src/accordion';
 
 async function fixture(withSink = true) {
+  const partStyles: StyleHandle[][] = Array.from({ length: 5 }, () => []);
   const frames: VisualFeedbackFrame[] = [],
     styles: StyleHandle[] = [],
     release = vi.fn();
@@ -93,13 +94,19 @@ async function fixture(withSink = true) {
             },
           ],
         ]);
+        wiring.attach('feedback', [
+          [
+            EFFECTS_CAP,
+            {
+              queueStyle: (style: StyleHandle) => {
+                partStyles[index].push(style);
+                if (index === 3) styles.push(style);
+              },
+              requestFlush() {},
+            },
+          ],
+        ]);
         if (index === 3) {
-          wiring.attach('feedback', [
-            [
-              EFFECTS_CAP,
-              { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush() {} },
-            ],
-          ]);
           if (withSink)
             wiring.attach('feedback', [
               [
@@ -116,6 +123,7 @@ async function fixture(withSink = true) {
   return {
     frames,
     styles,
+    partStyles,
     release,
     port,
     sessions,
@@ -131,6 +139,21 @@ async function fixture(withSink = true) {
   };
 }
 describe('Accordion explicit material consumer, without native paint claims', () => {
+  it('keeps Item transparent while Trigger and Content retain their own fallback paint', async () => {
+    const f = await fixture(false);
+    try {
+      expect(f.partStyles[1].at(-1)?.tokens).toContain('bg-transparent');
+      expect(f.partStyles[1].at(-1)?.tokens).not.toContain('bg-background');
+      expect(f.partStyles[3].at(-1)?.tokens).toContain('bg-background');
+      expect(f.partStyles[4].at(-1)?.tokens).toContain('bg-background');
+      expect(f.partStyles[4].at(-1)?.tokens).toContain('rounded-2xl');
+      expect(
+        f.sessions[1].caps.getPort<FeedbackPort>('feedback')?.exportMaterialFrame?.().candidates
+      ).toEqual([]);
+    } finally {
+      await f.dispose();
+    }
+  });
   it('declares a shared slot and submits one explicit optical candidate through rest, press, release and disabled', async () => {
     const f = await fixture();
     try {
