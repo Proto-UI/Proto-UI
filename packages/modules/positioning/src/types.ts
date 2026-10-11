@@ -7,6 +7,7 @@ export type PositioningFacade = {
 };
 
 export type PositioningPort = {
+  setCallbackDispatcher(dispatch: (callback: () => void) => void): void;
   getAnchoredPosition(): AnchoredPositionHandle;
   getAvailableSpace(): AvailableSpaceHandle;
 };

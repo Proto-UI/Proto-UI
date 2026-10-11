@@ -46,6 +46,10 @@ criteria:
     text:
       en: 'An optional input-origin association may select a host-local point or element reference. It must expose no geometry or contact identity to portable props, State, or Context JSON. Revocation invalidates pending geometry writes; the association affects positioning only, without replacing the logical anchor used for boundary and focus.'
       zh-CN: '可选 input-origin 关联可选择宿主本地点或元素参考；不得向可移植 props、State 或 Context JSON 暴露几何及 contact identity。撤销必须使待完成几何写入失效；该关联只影响定位，不替代 boundary 与 focus 的逻辑 anchor。'
+  - id: C-ANCHORED-POSITIONING-0001-I
+    text:
+      zh-CN: 宿主完成回调必须先进入实例的 Runtime callback 作用域，再调用消费者回调。Module 在分发前和进入分发后都必须拒绝已替换连接、provider epoch、已断开或终止 owner 的结果。重入的 lease attach/update/dispose 不得安装或恢复旧租约。断开会清除分类 snapshot；终止后 reconnect 不得复活。该保护补充而不替代宿主的几何写入取消。
+      en: Host completion must pass through the instance Runtime callback scope before invoking consumer callbacks. Both before dispatch and inside dispatch, the module must reject replaced connections, provider epochs, disconnected or terminal owners. Reentrant lease attach, update or disposal must not install or restore an obsolete lease. Disconnect clears the categorical snapshot and terminal disposal cannot be revived by reconnect. This guard supplements rather than replaces host-side geometry-write cancellation.
 sources:
   - path: packages/core/src/positioning.ts
   - path: packages/modules/positioning/src/impl.ts
@@ -59,7 +63,7 @@ verifies:
 revisions:
   - version: 0.3.0-alpha.1
     change: refined
-    summary: Added revocable host-local input-origin associations without exporting geometry or replacing logical anchor ownership.
+    summary: Added revocable host-local input-origin associations and current-connection callback-phase delivery with reentrant lease cancellation, without exporting geometry or replacing logical anchor ownership.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Made rendered-anchor geometry the positioning default and added the explicit excludeAnchorTranslation opt-in for decorative interaction transforms.

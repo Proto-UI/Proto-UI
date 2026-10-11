@@ -27,7 +27,7 @@ import { FocusModuleDef } from '@proto.ui/module-focus';
 import { BoundaryModuleDef } from '@proto.ui/module-boundary';
 import { HitParticipationModuleDef } from '@proto.ui/module-hit-participation';
 import { OverlayModuleDef } from '@proto.ui/module-overlay';
-import { PositioningModuleDef } from '@proto.ui/module-positioning';
+import { PositioningModuleDef, type PositioningPort } from '@proto.ui/module-positioning';
 import { AxisInputModuleDef } from '@proto.ui/module-axis-input';
 import { ScrollModuleDef } from '@proto.ui/module-scroll';
 import { PresenceModuleDef } from '@proto.ui/module-presence';
@@ -155,6 +155,10 @@ export function createRuntimeInstance<P extends PropsBaseType>(
   const contextPort = moduleHub.getPort<ContextPort>('context');
   contextPort?.setCallbackDispatcher?.((fn) => {
     callbackScope.runNoSync(kernel.run, () => fn(kernel.run));
+  });
+  const positioningPort = moduleHub.getPort<PositioningPort>('positioning');
+  positioningPort?.setCallbackDispatcher?.((fn) => {
+    callbackScope.runNoSync(kernel.run, fn);
   });
   const anatomyPort = moduleHub.getPort<AnatomyPort>('anatomy');
   anatomyPort?.setOrderCallbackDispatcher?.((fn) => {

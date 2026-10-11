@@ -22,13 +22,17 @@ export function createPositioningModule(ctx: ModuleFactoryArgs): PositioningModu
         getAvailableSpace: () => impl.availableHandle,
       },
       port: {
+        setCallbackDispatcher: (dispatch) => impl.setCallbackDispatcher(dispatch),
         getAnchoredPosition: () => impl.handle,
         getAvailableSpace: () => impl.availableHandle,
       },
       hooks: {
         onProtoPhase: (phase) => impl.onProtoPhase(phase),
         onMountPhase: (phase, epoch) => input.onMountPhase(phase, epoch),
-        dispose: () => input.dispose(),
+        dispose: () => {
+          input.dispose();
+          impl.dispose();
+        },
       },
     }),
   }) as PositioningModule;

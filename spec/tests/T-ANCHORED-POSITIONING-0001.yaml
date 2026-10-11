@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers host-mediated offsets, collision resolution, non-transform coordinate projection, Overlay lease lifetime, and Hover Card adapter integration.
 cases:
+  - id: T-ANCHORED-POSITIONING-0001-CASE-CALLBACK
+    title: Current lease completion enters Runtime callback scope
+    covers: [C-ANCHORED-POSITIONING-0001-I]
+    expectation: stale-completions-cancelled-before-and-inside-dispatch
   - id: T-ANCHORED-POSITIONING-0001-CASE-MODULE
     title: Module connection and host capability lifetime
     covers: ['M-POSITIONING-0001-A', 'M-POSITIONING-0001-B', 'M-POSITIONING-0001-C']
@@ -56,6 +60,18 @@ cases:
       [C-ANCHORED-POSITIONING-0001-H, HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B]
     expectation: zero-area-pointer-reference-or-keyboard-element-without-portable-geometry-and-no-writes-after-revocation
 implementations:
+  - id: positioning-callback-delivery
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/callback-delivery.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-CALLBACK]
+  - id: positioning-runtime-callback
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/positioning.callback.contract.test.ts
+    required: true
+    consumesCases: [T-ANCHORED-POSITIONING-0001-CASE-CALLBACK]
   - id: positioning-module-lifetime
     kind: module-test
     status: passing
@@ -147,10 +163,14 @@ verifies:
         - C-ANCHORED-POSITIONING-0001-E
         - C-ANCHORED-POSITIONING-0001-F
         - C-ANCHORED-POSITIONING-0001-G
+        - C-ANCHORED-POSITIONING-0001-I
 exercises:
   modules: [M-POSITIONING-0001]
   hostCaps: [HC-ANCHORED-POSITION-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added actual Runtime callback-phase State-write evidence and module stale/reentrant completion cancellation cases.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Added module, async lease retirement and four-Adapter bounded geometry evidence; simulated DOM is not browser layout certification.

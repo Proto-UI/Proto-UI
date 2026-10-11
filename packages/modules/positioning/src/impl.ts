@@ -27,6 +27,12 @@ export class PositioningModuleImpl extends ModuleBase {
   private availableEpoch = 0;
   private availableVersion = 0;
   private terminal = false;
+  private connectionVersion = 0;
+  private dispatchCallback: (callback: () => void) => void = (callback) => callback();
+
+  setCallbackDispatcher(dispatch: (callback: () => void) => void): void {
+    if (!this.terminal) this.dispatchCallback = dispatch;
+  }
 
   protected override onCapsEpoch(): void {
     if (this.terminal) return;
@@ -102,57 +108,86 @@ export class PositioningModuleImpl extends ModuleBase {
       : null;
   }
 
-  private bridge(connection: AnchoredPositionConnection): AnchoredPositionConnection {
-    const authoredResolved = connection.onResolved;
+  private bridge(
+    connection: AnchoredPositionConnection,
+    version: number
+  ): AnchoredPositionConnection {
+    const current = () =>
+      !this.terminal && version === this.connectionVersion && this.connection === connection;
     return {
       ...connection,
       onResolved: (snapshot) => {
-        this.snapshot = Object.freeze({ ...snapshot });
-        authoredResolved?.(this.snapshot);
+        if (!current()) return;
+        const resolved = Object.freeze({ ...snapshot });
+        this.dispatchCallback(() => {
+          if (!current()) return;
+          this.snapshot = resolved;
+          connection.onResolved?.(resolved);
+        });
       },
     };
   }
 
   private attach(connection: AnchoredPositionConnection): void {
-    this.lease?.dispose();
+    const version = ++this.connectionVersion;
+    const previous = this.lease;
     this.lease = null;
+    this.snapshot = null;
+    previous?.dispose();
+    if (this.terminal || version !== this.connectionVersion || this.connection !== connection)
+      return;
     const host = this.getHost();
     if (!host) return;
-    this.lease = host.attach(this.bridge(connection));
+    const lease = host.attach(this.bridge(connection, version));
+    if (this.terminal || version !== this.connectionVersion || this.connection !== connection)
+      lease.dispose();
+    else this.lease = lease;
   }
 
   readonly handle: AnchoredPositionHandle = {
     connect: (connection) => {
+      if (this.terminal) return;
       const sameTargets =
         this.connection &&
         Object.is(this.connection.anchor, connection.anchor) &&
         Object.is(this.connection.floating, connection.floating);
       this.connection = connection;
       if (sameTargets && this.lease) {
-        this.lease.update(this.bridge(connection));
+        this.lease.update(this.bridge(connection, ++this.connectionVersion));
         return;
       }
       this.snapshot = null;
       this.attach(connection);
     },
     update: (config: AnchoredPositionConfig) => {
-      if (!this.connection) return;
+      if (this.terminal || !this.connection) return;
       this.connection = { ...this.connection, config };
       if (this.lease) {
-        this.lease.update(this.bridge(this.connection));
+        this.lease.update(this.bridge(this.connection, ++this.connectionVersion));
         return;
       }
       this.attach(this.connection);
     },
-    requestUpdate: () => this.lease?.requestUpdate(),
+    requestUpdate: () => {
+      if (!this.terminal) this.lease?.requestUpdate();
+    },
     disconnect: () => this.disconnect(),
     getSnapshot: () => this.snapshot,
   };
 
   disconnect(): void {
-    this.lease?.dispose();
+    this.connectionVersion++;
+    const previous = this.lease;
     this.lease = null;
     this.connection = null;
     this.snapshot = null;
+    previous?.dispose();
+  }
+
+  dispose(): void {
+    this.terminal = true;
+    this.disconnect();
+    this.availableHandle.disconnect();
+    this.dispatchCallback = () => {};
   }
 }
