@@ -11,6 +11,7 @@ const oldScalar: ProtoReactProps<typeof sliderRoot> = {
 };
 const vector: ProtoReactProps<typeof sliderValuesRoot> = {
   value: Object.freeze([20, 80]),
+  thumbCollisionBehavior: 'swap',
   onValueChange: (event) => {
     const value: number | readonly number[] = event.value;
     void value;
@@ -29,6 +30,13 @@ const narrowCallback: ProtoReactProps<typeof sliderValuesRoot> = {
 };
 declare const api: ProtoAdapterExposes<typeof sliderValuesRoot>;
 api.requestValue(20);
+api.requestInteractionValue(30);
+// @ts-expect-error Logical collision input is a numerical intent, not a host event.
+api.requestInteractionValue({ clientX: 30 });
+const wrongCollision: ProtoReactProps<typeof sliderValuesRoot> = {
+  // @ts-expect-error Unknown collision modes are not public policy values.
+  thumbCollisionBehavior: 'cross',
+};
 api.requestValues([20, 80]);
 // @ts-expect-error Scalar operation rejects arrays at the public type boundary.
 api.requestValue([20, 80]);

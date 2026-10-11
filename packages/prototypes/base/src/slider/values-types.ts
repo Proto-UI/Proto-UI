@@ -1,5 +1,7 @@
 import type { ExposeEvent, ExposeMethod, ExposeState, State } from '@proto.ui/core';
 
+import type { SliderValuesCollisionBehavior } from './values-collision';
+
 export type SliderValuesValue = number | readonly number[];
 export type SliderValuesShape = 'scalar' | 'array';
 export interface SliderValuesRootProps {
@@ -10,6 +12,7 @@ export interface SliderValuesRootProps {
   step?: number;
   largeStep?: number;
   minStepsBetweenValues?: number;
+  thumbCollisionBehavior?: SliderValuesCollisionBehavior;
   disabled?: boolean;
   readOnly?: boolean;
   orientation?: 'horizontal' | 'vertical';
@@ -35,6 +38,7 @@ export type SliderValuesRootExposes = {
   getDisplayValue: ExposeMethod<() => SliderValuesValue | null>;
   requestValue: ExposeMethod<(value: number) => boolean>;
   requestValues: ExposeMethod<(values: readonly number[]) => boolean>;
+  requestInteractionValue: ExposeMethod<(value: number) => boolean>;
   requestThumbValue: ExposeMethod<(index: number, value: number) => boolean>;
   requestKeyboardValue: ExposeMethod<(index: number, key: string, shift?: boolean) => boolean>;
   beginInteraction: ExposeMethod<(index?: number) => boolean>;

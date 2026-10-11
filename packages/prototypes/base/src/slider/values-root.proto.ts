@@ -16,6 +16,7 @@ import {
   constrainValuesRequest,
   sliderValuesKeyboard,
 } from './values-numeric';
+import { resolveValuesCollision, type SliderValuesCollisionBehavior } from './values-collision';
 import type {
   SliderValuesRootProps,
   SliderValuesRootExposes,
@@ -34,6 +35,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     step: { type: 'number', empty: 'fallback' },
     largeStep: { type: 'number', empty: 'fallback' },
     minStepsBetweenValues: { type: 'number', empty: 'fallback' },
+    thumbCollisionBehavior: { type: 'enum', options: ['push', 'swap', 'none'], empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
     readOnly: { type: 'boolean', empty: 'fallback' },
     orientation: { type: 'enum', options: ['horizontal', 'vertical'], empty: 'fallback' },
@@ -48,6 +50,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     step: 1,
     largeStep: 10,
     minStepsBetweenValues: 0,
+    thumbCollisionBehavior: 'push',
     disabled: false,
     readOnly: false,
     orientation: 'horizontal',
@@ -85,6 +88,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     step = def.state.numberDiscrete('step', 1);
   const largeStep = def.state.numberDiscrete('largeStep', 10),
     minSteps = def.state.numberDiscrete('minStepsBetweenValues', 0);
+  const collisionBehavior = def.state.string('thumbCollisionBehavior', 'push');
   const orientation = def.state.string('orientation', 'horizontal'),
     direction = def.state.string('direction', 'ltr'),
     label = def.state.string('label', '');
@@ -247,6 +251,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       step.get() !== nextPolicy.step ||
       largeStep.get() !== nextPolicy.largeStep ||
       minSteps.get() !== nextPolicy.minStepsBetweenValues ||
+      collisionBehavior.get() !== p.thumbCollisionBehavior ||
       orientation.get() !== p.orientation ||
       direction.get() !== p.direction ||
       changedFlags;
@@ -259,6 +264,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     step.set(nextPolicy.step);
     largeStep.set(nextPolicy.largeStep);
     minSteps.set(nextPolicy.minStepsBetweenValues);
+    collisionBehavior.set(p.thumbCollisionBehavior!);
     disabled.set(nextDisabled);
     if (!live()) return;
     readOnly.set(nextReadOnly);
@@ -401,8 +407,16 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       if (!controlled.get()) {
         values.set(owner.rawValues);
         if (!live()) return false;
+        if (!reconcilePending() || !eligible() || revision.get() !== before) {
+          settle();
+          return false;
+        }
         valueShape.set(owner.shape);
         if (!live()) return false;
+        if (!reconcilePending() || !eligible() || revision.get() !== before) {
+          settle();
+          return false;
+        }
       }
       proposalValues.set(owner.rawValues);
       proposalShape.set(owner.shape);
@@ -456,6 +470,49 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       ? request(next, -1, 'imperative')
       : false
   );
+  // Logical numerical input only. A future input owner must establish origin,
+  // capture and conversion outside this entry; no host event is synthesized.
+  def.expose.method('requestInteractionValue', (next) => {
+    if (!eligible() || working.get() || !interacting.get()) return false;
+    const before = revision.get();
+    const index = activeIndex.get();
+    if (index < 0 || !mapping(index)) {
+      if (live()) diagnostic.set('invalid-thumb-mapping');
+      return false;
+    }
+    if (!eligible() || !interacting.get() || revision.get() !== before) return false;
+    const latest = pendingCommit.get()
+      ? projectValuesOwner(
+          { rawValues: proposalValues.get(), shape: proposalShape.get() as SliderValuesShape },
+          min.get(),
+          max.get()
+        )
+      : display();
+    if (!latest.ok) {
+      diagnostic.set(latest.reason);
+      return false;
+    }
+    const result = resolveValuesCollision({
+      behavior: collisionBehavior.get() as SliderValuesCollisionBehavior,
+      values: latest.values,
+      sessionStart: sessionStart.get(),
+      index,
+      nextValue: next,
+      policy: policy(),
+    });
+    if (!result.ok) {
+      diagnostic.set(result.reason);
+      return false;
+    }
+    // A swap also needs an editable target. The public mapping is checked
+    // again after notifications by the existing dirty/revision drain.
+    if (!mapping(result.index)) {
+      if (live()) diagnostic.set('invalid-thumb-mapping');
+      return false;
+    }
+    if (!eligible() || !interacting.get() || revision.get() !== before) return false;
+    return request(unwrap(result.values, valueShape.get()), result.index, 'interaction');
+  });
   def.expose.method('requestThumbValue', (index, next) => requestIndex(index, next, 'input'));
   def.expose.method('requestKeyboardValue', (index, key, shift = false) => {
     if (!eligible() || working.get() || !mapping(index)) return false;
@@ -482,16 +539,27 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
       (index >= 0 && !mapping(index))
     )
       return false;
+    if (!eligible() || interacting.get()) return false;
     const d = display();
     if (!d.ok) return false;
-    sessionStart.set(d.values);
-    interacting.set(true);
-    if (!live()) return false;
-    pendingCommit.set(false);
-    activeIndex.set(index);
-    if (!live()) return false;
-    flush();
-    return live() && interacting.get();
+    const before = revision.get();
+    working.set(true);
+    try {
+      sessionStart.set(d.values);
+      pendingCommit.set(false);
+      interacting.set(true);
+      if (!live()) return false;
+      if (!reconcilePending() || !eligible() || revision.get() !== before) {
+        settle();
+        return false;
+      }
+      activeIndex.set(index);
+      if (!live()) return false;
+      const settled = settle();
+      return settled && eligible() && interacting.get() && revision.get() === before;
+    } finally {
+      if (live()) working.set(false);
+    }
   });
   def.expose.method('commitValue', () => {
     if (!eligible() || working.get()) return false;
@@ -511,10 +579,14 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
   });
   def.expose.method('cancelInteraction', () => {
     if (!live() || working.get()) return false;
-    if (!clearSession()) return false;
-    bump();
-    flush();
-    return true;
+    working.set(true);
+    try {
+      bump();
+      if (!clearSession()) return false;
+      return settle();
+    } finally {
+      if (live()) working.set(false);
+    }
   });
   def.expose.method('resetValue', () =>
     live() ? request(unwrap(creationValues.get(), creationShape.get()), -1, 'reset') : false
