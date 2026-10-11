@@ -8,6 +8,12 @@ Before claiming upstream alignment, pin the official source for each component a
 
 Inventory the complete applicable semantic surface: props and defaults, controlled and uncontrolled state, events and cancellation, all constituent parts and compositions, selection modes, disabled/readOnly, keyboard/pointer/touch/IME, direction and orientation, focus and accessibility, presence and state motion, interruption/reversal and reduced-motion behavior. Compare semantic coverage, not identical Web prop names. Map framework or DOM-specific APIs to an explicit portable semantic equivalent or a governed boundary; never silently drop them.
 
+## PR #872 upstream sizing decision
+
+For every prototype in PR #872, the confirmed corresponding upstream version is authoritative for dimensions. If a Proto definition conflicts with that version's sizing, revise the definition to match the upstream version and update implementation and tests together; do not preserve the conflicting size by treating the current Proto definition as an exemption.
+
+Preserve the upstream units and their behavior, including font-relative sizing, font scaling and spacing. Do not replace relative values with hardcoded pixel results calculated at the default font size. Bind sizing evidence to the confirmed upstream version; explicitly record and review any version change before applying its sizing baseline.
+
 ## Mandatory prototype-first closure
 
 A missing capability is work to complete, not a permanent audit disposition. Close the loop:
