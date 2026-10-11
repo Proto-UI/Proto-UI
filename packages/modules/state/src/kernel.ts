@@ -1,7 +1,8 @@
 import type { OwnedStateHandle } from '@proto.ui/core';
 import type { StateEvent, StateSetReason, StateSpec } from '@proto.ui/types';
+import { normalizeNumberList, numberListEqual } from './validate';
 
-export type StateKind = 'bool' | 'enum' | 'string' | 'number.range' | 'number.discrete';
+export type StateKind = StateSpec['kind'];
 
 export type StateId = number;
 
@@ -29,13 +30,16 @@ export class StateKernel {
     if (typeof name !== 'string' || name.length === 0) {
       throw new Error(`[State] state name must be a non-empty string.`);
     }
+    const value =
+      spec.kind === 'number.list' ? (normalizeNumberList(defaultValue) as V) : defaultValue;
+    if (spec.kind === 'number.list') spec = Object.freeze({ kind: 'number.list' });
     const id = this.nextId++;
     const rec: StateRecord<V> = {
       id,
       name,
       semantic: name,
       spec,
-      value: defaultValue,
+      value,
       subscribers: new Set(),
     };
     this.records.set(id, rec);
@@ -103,13 +107,22 @@ export class StateKernel {
   private setDefaultById<V>(id: StateId, v: V): void {
     // setDefault never emits in v0 (setup semantics)
     const rec = this.getRecord<V>(id);
-    rec.value = v;
+    const next = rec.spec.kind === 'number.list' ? (normalizeNumberList(v) as V) : v;
+    if (
+      rec.spec.kind === 'number.list' &&
+      numberListEqual(rec.value as readonly number[], next as readonly number[])
+    )
+      return;
+    rec.value = next;
   }
 
   private setById<V>(id: StateId, next: V, reason?: StateSetReason): void {
     const rec = this.getRecord<V>(id);
     const prev = rec.value;
-    if (Object.is(prev, next)) return;
+    if (rec.spec.kind === 'number.list') {
+      next = normalizeNumberList(next) as V;
+      if (numberListEqual(prev as readonly number[], next as readonly number[])) return;
+    } else if (Object.is(prev, next)) return;
 
     rec.value = next;
 

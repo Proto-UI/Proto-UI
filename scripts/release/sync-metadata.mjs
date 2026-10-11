@@ -90,6 +90,17 @@ const PACKAGE_RULES = {
     preserveReadme: true,
   },
   '@proto.ui/module-context': moduleRule('context capability'),
+  '@proto.ui/module-control-label': {
+    description: 'Proto UI explicit independent control-label association protocol.',
+    kind: 'module',
+    capability: 'explicit independent control-label association',
+    purpose:
+      'Owns explicit label/control association leases while preserving target activation, naming, focus, and disabled-state ownership.',
+    role: 'Adapter-facing dependency for explicitly associated labels and opt-in controls.',
+    // Preserve the authored association, host-boundary, and draft-admission constraints.
+    preserveReadme: true,
+    extraKeywords: ['label', 'accessibility'],
+  },
   '@proto.ui/module-event': {
     ...moduleRule('event capability'),
     preserveReadme: true,

@@ -134,7 +134,10 @@ const baselineFontSelectors = [
 ];
 const candidateFontSelectors = [
   { name: 'task-preview-title', selector: `${HOME} .home-gallery__title` },
-  { name: 'task-result-title', selector: `${HOME} .home-gallery__choice-label` },
+  {
+    name: 'task-result-title',
+    selector: `${HOME} .home-gallery__choice [data-projection-prototype$="-label-root"]`,
+  },
   { name: 'task-result-detail', selector: `${HOME} .home-gallery__caption` },
   {
     name: 'task-note-control',

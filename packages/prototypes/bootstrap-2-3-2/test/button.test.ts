@@ -74,6 +74,10 @@ describe('bootstrap-2-3-2 Button draft projection', () => {
       path.resolve('packages/prototypes/bootstrap-2-3-2/src')
     )) as string[];
     expect(tokens.length).toBeGreaterThan(15);
+    for (const state of ['hovered', 'pressed', 'disabled']) {
+      expect(tokens).toContain(`data-[${state}]:bg-[#04c]`);
+      expect(tokens).toContain(`data-[${state}]:bg-[#e6e6e6]`);
+    }
     const css = renderProtoStyleTokenCss(tokens);
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     expect(css).toContain('box-sizing: border-box');

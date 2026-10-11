@@ -1,20 +1,34 @@
-interface SsrOptions { className: string; tagName: string; binding: string }
+interface SsrOptions {
+  className: string;
+  tagName: string;
+  binding: string;
+  artifacts?: { source: string; helpers: string; css: string; environment: string };
+  environmentCssText?: string;
+  cssText?: string;
+}
 
 /** Ordinary presentation nodes, not semantic IR. Server owns no DOM objects or browser globals. */
 export function webComponentSsrSupport(options: SsrOptions) {
-  const {className, tagName, binding} = options;
-  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\n`;
+  const {
+    className,
+    tagName,
+    binding,
+    artifacts = { source: '', helpers: '', css: '', environment: '' },
+    environmentCssText = '',
+    cssText = '',
+  } = options;
+  const imports = `import {type HostPort, type Presentation, type Carrier, type ServerOptions, type ServerParent, presentationElement, presentationChildren, isPresentation, withServerOwner} from './.proto-ui/web-component/ssr-v1';\nexport type {Carrier, ServerOptions, ServerParent} from './.proto-ui/web-component/ssr-v1';\nexport const hydrationBinding = ${JSON.stringify(binding)};\nexport const defaultTagName = ${JSON.stringify(tagName)};\nexport const hydrationArtifacts = ${JSON.stringify(artifacts)};\nexport const hydrationCssText = ${JSON.stringify(cssText)};\nexport const hydrationEnvironmentCssText = ${JSON.stringify(environmentCssText)};\n`;
   const server = `export function renderToString(props: GeneratedProps & Record<string, unknown> = {}, options: ServerOptions = {}): {html: string; carrier: Carrier} {
   return renderWithScope(props, options, result => result);
 }
 /** Descendants render inside this callback while this request's actual provider owner is live. */
 export function renderWithScope<T>(props: GeneratedProps & Record<string, unknown>, options: ServerOptions, consume: (result: {html: string; carrier: Carrier}, parent: ServerParent) => T): T {
-  return withServerOwner(createHydrationOwner, props, options, hydrationBinding, defaultTagName, consume);
+  return withServerOwner(createHydrationOwner, props, options, hydrationBinding, defaultTagName, consume, hydrationArtifacts);
 }
 `;
   const client = `// Browser-only entry. Import Component.ts on the server, never this module.
-import {createHydrationOwner, hydrationBinding, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
-import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
+import {createHydrationOwner, hydrationBinding, hydrationArtifacts, hydrationCssText, hydrationEnvironmentCssText, defaultTagName, type GeneratedProps, type GeneratedExposes, type HydrationOwner} from './Component';
+import {type Carrier, type BrowserPort, createBrowserPort, readCarrier, checkCarrier, decodeRaw, pendingProviderDefinition, checkInitialProps, checkStylesheet, checkCarrierHost, HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export {HydrationMismatch} from './.proto-ui/web-component/ssr-v1';
 export class ${className} extends HTMLElement {
   private owner: HydrationOwner | null = null;
@@ -26,6 +40,7 @@ export class ${className} extends HTMLElement {
   private disconnectVersion = 0;
   private recovering = false;
   private initializedCarrier = false;
+  private acceptedMode: 'light' | 'shadow' | null = null;
   private failedCarrier: Carrier | null = null;
   hydrationStatus: 'pending' | 'adopted' | 'recovered' | 'client' | 'mismatch' = 'pending';
   hydrationDiagnostic: HydrationMismatch | null = null;
@@ -48,8 +63,13 @@ export class ${className} extends HTMLElement {
     try {
       const carrier = this.recovering ? this.failedCarrier : this.carrier ?? (!this.initializedCarrier ? readCarrier(this) : null);
       this.failedCarrier = carrier;
-      if (carrier && !this.recovering) checkCarrier(carrier, hydrationBinding, this.localName);
-      let mode = carrier?.mode ?? 'light';
+      if (carrier && !this.recovering) checkCarrier(carrier, hydrationBinding, this.localName, hydrationArtifacts);
+      if (carrier && !this.recovering) {
+        if (this.hasRaw) checkInitialProps(this.raw, carrier);
+        checkStylesheet(this, hydrationArtifacts.css, hydrationCssText);
+        checkStylesheet(this, hydrationArtifacts.environment, hydrationEnvironmentCssText, 'consumer environment');
+      }
+      let mode = carrier?.mode ?? this.acceptedMode ?? 'light';
       if (this.recovering) mode = carrier?.mode === 'shadow' || this.shadowRoot || this.querySelector(':scope > template[shadowrootmode="open"]') ? 'shadow' : 'light';
       const port = createBrowserPort(this, mode, carrier && !this.recovering ? carrier : null, this.recovering);
       this.port = port;
@@ -58,10 +78,11 @@ export class ${className} extends HTMLElement {
       if (!pending) this.raw = {...initial};
       const owner = createHydrationOwner(port, initial);
       this.owner = owner;
-      try { owner.reconcile(); }
+      try { owner.validateHydration(); owner.reconcile(); }
       catch (error) { this.owner = null; try { owner.dispose(); } catch (cleanup) { throw new AggregateError([error, cleanup], 'Hydration and cleanup failed'); } throw error; }
       port.accept();
       if (this.closed || this.owner !== owner) return;
+      this.acceptedMode = mode;
       this.initializedCarrier = true;
       this.carrier = null;
       this.failedCarrier = null;
@@ -95,7 +116,7 @@ export class ${className} extends HTMLElement {
   getExposes(): Partial<GeneratedExposes> { return this.isConnected && this.owner ? {...this.owner.exposes} as Partial<GeneratedExposes> : {}; }
   hydrate(next: Carrier): void {
     if (this.closed) throw new Error('Custom element is disposed');
-    checkCarrier(next, hydrationBinding, this.localName);
+    checkCarrier(next, hydrationBinding, this.localName, hydrationArtifacts);
     if (this.owner) throw new Error('Custom element already owns a committed instance');
     if (this.initializedCarrier) throw new Error('Carrier has already been adopted');
     this.carrier = next;
@@ -126,7 +147,7 @@ export function register(tagName = defaultTagName, registry: CustomElementRegist
 /** Define first; server carriers auto-adopt on upgrade. This entry also accepts an explicit carrier on a detached element. */
 export function hydrate(element: ${className}, carrier?: Carrier): ${className} {
   if (!(element instanceof ${className})) throw new Error('Register the generated Custom Element before hydrating');
-  if (carrier) checkCarrier(carrier, hydrationBinding, element.localName);
+  if (carrier !== undefined) { checkCarrier(carrier, hydrationBinding, element.localName, hydrationArtifacts); checkCarrierHost(element, carrier); }
   if (element.hydrationStatus === 'mismatch') throw element.hydrationDiagnostic;
   if (carrier && element.hydrationStatus === 'pending') element.hydrate(carrier);
   else if (!element.logicalOwner && element.isConnected) element.connectedCallback();
@@ -134,10 +155,18 @@ export function hydrate(element: ${className}, carrier?: Carrier): ${className} 
 }
 export default ${className};
 `;
-  return {imports, server, files: [
-    {path: '.proto-ui/web-component/ssr-v1.ts', kind: 'source' as const, contents: runtimeSource},
-    {path: 'Component.client.ts', kind: 'source' as const, contents: client},
-  ]};
+  return {
+    imports,
+    server,
+    files: [
+      {
+        path: '.proto-ui/web-component/ssr-v1.ts',
+        kind: 'source' as const,
+        contents: runtimeSource,
+      },
+      { path: 'Component.client.ts', kind: 'source' as const, contents: client },
+    ],
+  };
 }
 
 const runtimeSource = String.raw`// Standalone WC presentation/serialization/adoption helper. Not an IR interpreter.
@@ -147,12 +176,14 @@ import {ownerScopes, type ContextScope} from '../context/scope-v1';
 export type Presentation = {kind: 'element'; tag: string; style?: string; children: Presentation[]} | {kind: 'text'; text: string} | {kind: 'slot'};
 export type RawData = [string, {kind: 'undefined'} | {kind: 'value'; value: unknown}][];
 export type ControlProjection = {tag: string; properties: Readonly<Record<string, string | number | boolean | null>>; attributes: Record<string, string>};
-export type Carrier = {version: 1; profile: 'web-component-ssr-v1'; binding: string; tagName: string; mode: 'light' | 'shadow'; raw: RawData; presentation: Presentation[]; control: ControlProjection | null; attributes: Record<string, string>; interactionAttributes: Record<string, string | null>; baselines: Record<string, string>; present: boolean};
+export type ArtifactVersions = {source: string; helpers: string; css: string; environment: string};
+export type Carrier = {instanceId: string; artifacts: ArtifactVersions; version: 1; profile: 'web-component-ssr-v1'; binding: string; tagName: string; mode: 'light' | 'shadow'; raw: RawData; presentation: Presentation[]; control: ControlProjection | null; attributes: Record<string, string>; interactionAttributes: Record<string, string | null>; baselines: Record<string, string>; present: boolean};
 export type InteractionOptions<R> = Parameters<typeof createNativeInteraction<R>>[0];
 export type HostPort = {
   readonly server: boolean; readonly isConnected: boolean; readonly root: HTMLElement | null;
   readonly host: HTMLElement | null;
   readonly hydrationAttributes?: Readonly<Record<string, string | null>>;
+  validateInitial?(snapshot: {present: boolean; attributes: Record<string, string | null>}): void;
   readonly hydrationBaselines?: Readonly<Record<string, string | null>>;
   createInteraction<R>(options: InteractionOptions<R>): NativeInteraction<R>;
   projectRoot(tag: string | null, properties: Readonly<Record<string, string | number | boolean | null>>, portal: HTMLElement | null): void;
@@ -218,9 +249,18 @@ function encodeRaw(raw: Record<string, unknown>): RawData {
     const array = Array.isArray(value), proto = Object.getPrototypeOf(value);
     if (array ? proto !== Array.prototype : proto !== Object.prototype && proto !== null) throw new TypeError('Capabilities cannot enter initial data');
     seen.add(value);
-    try { return array ? ['array', value.map(item => encode(item, seen))] : ['record', Object.entries(value).map(([key,item]) => [key,encode(item, seen)])]; }
-    finally { seen.delete(value); }
+    try {
+      if (array && Object.keys(value).length !== value.length) throw new TypeError('SSR transport rejects sparse arrays');
+      for (const key of Reflect.ownKeys(value)) {
+        if (array && key === 'length') continue;
+        const field = Object.getOwnPropertyDescriptor(value, key)!;
+        if (typeof key !== 'string' || !field.enumerable || !('value' in field)) throw new TypeError('SSR transport rejects accessor/symbol fields');
+      }
+      return array ? ['array', value.map(item => encode(item, seen))] : ['record', Object.entries(value).map(([key,item]) => [key,encode(item, seen)])];
+    } finally { seen.delete(value); }
   }
+  // Validate before any getter can run, including top-level props.
+  encode(raw);
   return Object.keys(raw).map(key => [key, {kind:'value',value:encode(raw[key])}]);
 }
 export function decodeRaw(data: RawData): Record<string, unknown> {
@@ -239,11 +279,13 @@ export function decodeRaw(data: RawData): Record<string, unknown> {
   }
   return raw;
 }
-export function checkCarrier(carrier: Carrier, binding: string, tag: string): void {
+export function checkCarrier(carrier: Carrier, binding: string, tag: string, artifacts?: ArtifactVersions): void {
   try { checkData(carrier); } catch { throw new HydrationMismatch('carrier contains non-transport data'); }
   if (!carrier || typeof carrier !== 'object') throw new HydrationMismatch('invalid carrier');
   if (carrier.version !== 1 || carrier.profile !== 'web-component-ssr-v1' || carrier.binding !== binding || carrier.tagName !== tag)
     throw new HydrationMismatch('source/profile/tag binding differs');
+  if (!carrier.artifacts || artifacts && ['source', 'helpers', 'css', 'environment'].some(key => carrier.artifacts[key as keyof ArtifactVersions] !== artifacts[key as keyof ArtifactVersions])) throw new HydrationMismatch('source/helper/CSS artifact version differs');
+  if (typeof carrier.instanceId !== 'string' || !/^[a-z0-9-]+$/i.test(carrier.instanceId)) throw new HydrationMismatch('invalid instance identity');
   if (!['light', 'shadow'].includes(carrier.mode) || typeof carrier.present !== 'boolean' || !Array.isArray(carrier.raw) || !Array.isArray(carrier.presentation)) throw new HydrationMismatch('invalid carrier');
   for (const entry of carrier.raw) {
     if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== 'string' || !entry[1] || typeof entry[1] !== 'object' || !['undefined','value'].includes(entry[1].kind) || entry[1].kind === 'value' && !Object.hasOwn(entry[1], 'value')) throw new HydrationMismatch('invalid raw Prop entry');
@@ -264,7 +306,15 @@ export function checkCarrier(carrier: Carrier, binding: string, tag: string): vo
     }
   }
   checkChildren(carrier.presentation);
-  decodeRaw(carrier.raw);
+  try { decodeRaw(carrier.raw); } catch (error) { if (error instanceof HydrationMismatch) throw error; throw new HydrationMismatch('invalid initial data encoding'); }
+}
+export function checkInitialProps(raw: Record<string, unknown>, carrier: Carrier): void {
+  if (JSON.stringify(encodeRaw(raw)) !== JSON.stringify(carrier.raw)) throw new HydrationMismatch('client initial props differ from server props');
+}
+export function checkStylesheet(host: HTMLElement, version: string, cssText: string, subject = 'component'): void {
+  if (!cssText) return;
+  const styles = Array.from(host.ownerDocument.querySelectorAll('style[data-pui-ssr-css]'));
+  if (!styles.some(style => style.getAttribute('data-pui-ssr-css') === version && style.textContent === cssText)) throw new HydrationMismatch('bound first-frame ' + subject + ' CSS artifact is absent or differs');
 }
 function escapeText(value: string): string { return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 function escapeAttribute(value: string): string { return escapeText(value).replace(/"/g, '&quot;'); }
@@ -301,15 +351,22 @@ export function createServerPort(options: ServerOptions): ServerPort {
   };
   return port;
 }
-export function finishServer(port: ServerPort, props: Record<string, unknown>, options: ServerOptions, binding: string, tagName: string): {html: string; carrier: Carrier} {
+export function finishServer(port: ServerPort, props: Record<string, unknown>, options: ServerOptions, binding: string, tagName: string, artifacts: ArtifactVersions): {html: string; carrier: Carrier} {
   const mode = options.mode ?? 'light';
   if (mode !== 'light' && mode !== 'shadow') throw new TypeError('Invalid server rendering mode');
+  const instanceId = 'pui-' + globalThis.crypto.randomUUID();
   const attributes = {...port.attributes};
+  for (const name of ['data-pui-instance', 'data-pui-props', 'data-pui-ssr']) if (Object.hasOwn(attributes, name)) throw new TypeError('Reserved SSR attribute: ' + name);
+  attributes.id ??= instanceId;
+  attributes['data-pui-instance'] = instanceId;
+  attributes['data-pui-props'] = JSON.stringify(encodeRaw(props));
+  attributes['data-pui-ssr'] = binding;
   for (const [name, value] of Object.entries(attributes)) {
     if (!/^[A-Za-z_:][A-Za-z0-9_.:-]*$/.test(name) || typeof value !== 'string') throw new TypeError('Invalid serialized Root attribute: ' + name);
   }
   if (!port.present) attributes.style = (attributes.style ? attributes.style + ';' : '') + 'display:none!important';
-  const carrier: Carrier = {version: 1, profile: 'web-component-ssr-v1', binding, tagName, mode, raw: encodeRaw(props), presentation: JSON.parse(JSON.stringify(port.presentation)), control: port.control, attributes, interactionAttributes: {...port.interactionAttributes}, baselines: {...options.rootAttributes}, present: port.present};
+  const control = port.control ? {...port.control, properties: {...port.control.properties}, attributes: {...port.control.attributes}} : null;
+  const carrier: Carrier = {instanceId, artifacts: {...artifacts}, version: 1, profile: 'web-component-ssr-v1', binding, tagName, mode, raw: encodeRaw(props), presentation: JSON.parse(JSON.stringify(port.presentation)), control, attributes, interactionAttributes: {...port.interactionAttributes}, baselines: {...options.rootAttributes}, present: port.present};
   const tokens = Object.entries(attributes).map(([name, value]) => ' ' + name + '="' + escapeAttribute(value) + '"').join('');
   const slotHtml = typeof options.slotHtml === 'function' ? options.slotHtml(port.parent) : options.slotHtml ?? '';
   if (typeof slotHtml !== 'string') throw new TypeError('Native server slot must serialize to HTML');
@@ -334,8 +391,9 @@ export function finishServer(port: ServerPort, props: Record<string, unknown>, o
   return {html: '<' + tagName + tokens + '>' + projection + '<script type="application/json" data-pui-carrier="' + binding + '">' + json + '</script></' + tagName + '>', carrier};
 }
 type ServerOwner = {serialize(): void; dispose(): void};
-export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPort, raw: Record<string, unknown>) => O, props: Record<string, unknown>, options: ServerOptions, binding: string, tag: string, consume: (result: {html: string; carrier: Carrier}, parent: ServerParent) => T): T {
+export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPort, raw: Record<string, unknown>) => O, props: Record<string, unknown>, options: ServerOptions, binding: string, tag: string, consume: (result: {html: string; carrier: Carrier}, parent: ServerParent) => T, artifacts: ArtifactVersions): T {
   options.signal?.throwIfAborted();
+  encodeRaw(props); // No non-data inputs or accessor side effects enter generated setup.
   const port = createServerPort(options);
   let owner: O | undefined, failure: unknown, result: T, failed = false;
   let abortFailure: unknown, abortFailed = false;
@@ -351,7 +409,7 @@ export function withServerOwner<O extends ServerOwner, T>(factory: (port: HostPo
     options.signal?.throwIfAborted();
     owner.serialize();
     options.signal?.throwIfAborted();
-    result = consume(finishServer(port, props, {...options, slotHtml}, binding, tag), port.parent);
+    result = consume(finishServer(port, props, {...options, slotHtml}, binding, tag, artifacts), port.parent);
     if (result && typeof (result as {then?: unknown}).then === 'function') throw new TypeError('Server logical scope callback must be synchronous');
     options.signal?.throwIfAborted();
   } catch (error) { failure = error; failed = true; }
@@ -373,9 +431,26 @@ function carrierNode(host: HTMLElement): HTMLScriptElement | null {
 }
 export function readCarrier(host: HTMLElement): Carrier | null {
   const node = carrierNode(host);
-  if (!node) return null;
-  try { return JSON.parse(node.textContent ?? '') as Carrier; }
-  catch (error) { throw new HydrationMismatch('invalid carrier JSON'); }
+  // A marked server frame must never fall through to client-only reconstruction.
+  // Check independent markers too, so removing one attribute cannot erase SSR intent.
+  const marked = ['data-pui-ssr', 'data-pui-instance', 'data-pui-props'].some(name => host.hasAttribute(name)) ||
+    Array.from(host.childNodes).some(node => marker(node, 'pui-root-start') || marker(node, 'pui-root-end'));
+  if (!node) {
+    if (marked) throw new HydrationMismatch('SSR-marked host is missing its carrier');
+    return null;
+  }
+  if (node.getAttribute('type') !== 'application/json') throw new HydrationMismatch('carrier script type differs');
+  let parsed: unknown;
+  try { parsed = JSON.parse(node.textContent ?? ''); }
+  catch { throw new HydrationMismatch('invalid carrier JSON'); }
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new HydrationMismatch('carrier must be an object');
+  const carrier = parsed as Carrier;
+  if (node.getAttribute('data-pui-carrier') !== carrier.binding) throw new HydrationMismatch('carrier script binding differs');
+  return carrier;
+}
+export function checkCarrierHost(host: HTMLElement, carrier: Carrier): void {
+  if (host.getAttribute('data-pui-instance') !== carrier.instanceId || host.getAttribute('data-pui-ssr') !== carrier.binding) throw new HydrationMismatch('physical instance/source binding differs');
+  if (host.getAttribute('data-pui-props') !== JSON.stringify(carrier.raw)) throw new HydrationMismatch('physical initial props differ from carrier');
 }
 function logicalParent(host: HTMLElement): ContextScope | null {
   if (!host.isConnected) return null;
@@ -403,6 +478,20 @@ export function pendingProviderDefinition(host: HTMLElement): Promise<CustomElem
 }
 export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', carrier: Carrier | null, recovery: boolean): BrowserPort {
   const doc = host.ownerDocument;
+  const initialAttributes = Array.from(host.attributes, attribute => [attribute.name, attribute.value] as const);
+  const projectedAttributes = carrier?.control?.attributes ?? carrier?.attributes;
+  // rootAttributes belong to the host; physical baselines come only from its serialized properties.
+  const projectionBaselines: Readonly<Record<string, string>> | undefined = carrier?.control
+    ? Object.fromEntries(Object.entries(carrier.control.properties)
+      .filter(([name, value]) => value !== null && value !== false && !(carrier.control!.tag === 'textarea' && name === 'value'))
+      .map(([name, value]) => [name.toLowerCase(), value === true ? '' : String(value)]))
+    : carrier?.baselines;
+  let initialControlAttributes: readonly (readonly [string, string])[] | null = null;
+  if (carrier) {
+    checkCarrierHost(host, carrier);
+    if (Array.from(doc.querySelectorAll('[data-pui-instance]')).filter(node => node.getAttribute('data-pui-instance') === carrier.instanceId).length > 1) throw new HydrationMismatch('duplicate instance identity');
+    for (const [name, value] of Object.entries(carrier.attributes)) if (host.getAttribute(name) !== value) throw new HydrationMismatch('Root attribute differs: ' + name);
+  }
   let root: HTMLElement | ShadowRoot = host;
   if (recovery) for (const node of Array.from(host.children)) if (node.localName === 'script' && node.hasAttribute('data-pui-carrier')) node.remove();
   const script = carrierNode(host);
@@ -473,12 +562,17 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
     }
     if (carrier && (!rootStart || !rootEnd)) throw new HydrationMismatch('light Root ownership markers are absent');
   }
+  function matchControl(): HTMLElement {
+    const candidate = mode === 'light' ? rootStart!.nextSibling : root.firstChild;
+    if (candidate?.nodeType !== 1 || (candidate as Element).localName !== carrier!.control!.tag || candidate.nextSibling !== (mode === 'light' ? rootEnd : null) || control && candidate !== control) throw new HydrationMismatch('physical control Root differs');
+    for (const [name, value] of Object.entries(carrier!.control!.attributes)) if ((candidate as Element).getAttribute(name) !== value) throw new HydrationMismatch('physical control attribute differs: ' + name);
+    return candidate as HTMLElement;
+  }
   locateRange();
   if (carrier) {
     if (carrier.control && carrier.present) {
-      const candidate = mode === 'light' ? rootStart!.nextSibling : root.firstChild;
-      if (candidate?.nodeType !== 1 || (candidate as Element).localName !== carrier.control.tag || candidate.nextSibling !== (mode === 'light' ? rootEnd : null)) throw new HydrationMismatch('physical control Root differs');
-      control = candidate as HTMLElement; owned.add(control);
+      control = matchControl(); owned.add(control);
+      initialControlAttributes = Array.from(control.attributes, attribute => [attribute.name, attribute.value] as const);
     } else matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, carrier.presentation, 'Root', true);
     expected = carrier.presentation;
   }
@@ -541,8 +635,13 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
   }
   const port: BrowserPort = {
     server: false, get isConnected() { return host.isConnected && !disposed; }, host, get root() { return control ?? host; },
+    validateInitial(snapshot) {
+      if (!carrier) return;
+      if (snapshot.present !== carrier.present) throw new HydrationMismatch('initial presence differs');
+      for (const [name, value] of Object.entries(snapshot.attributes)) if ((projectedAttributes?.[name] ?? null) !== value) throw new HydrationMismatch('fresh client attribute differs: ' + name);
+    },
     hydrationAttributes: carrier?.interactionAttributes,
-    hydrationBaselines: carrier?.baselines,
+    hydrationBaselines: projectionBaselines,
     createInteraction: createNativeInteraction,
     projectRoot(tag, properties, portal) {
       if (tag && !['input','textarea','img'].includes(tag)) throw new Error('Unsupported physical Root tag');
@@ -567,8 +666,8 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       const target = control ?? host;
       const current = target.getAttribute(name);
       if (!entry) {
-        const projectedByServer = carrier && Object.hasOwn(carrier.attributes, name) && current === carrier.attributes[name];
-        entry = {baseline: projectedByServer ? carrier.baselines[name] ?? null : current, projected: current}; attributes.set(name, entry);
+        const projectedByServer = projectedAttributes && Object.hasOwn(projectedAttributes, name) && current === projectedAttributes[name];
+        entry = {baseline: projectedByServer ? projectionBaselines?.[name] ?? null : current, projected: current}; attributes.set(name, entry);
       }
       else if (current !== entry.projected) entry.baseline = current;
       if (current !== value) { if (value === null) target.removeAttribute(name); else target.setAttribute(name, value); }
@@ -579,7 +678,8 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       if (hydrating) {
         if (JSON.stringify(children) !== JSON.stringify(expected)) throw new HydrationMismatch('fresh client presentation differs from server projection');
         // Validate a second time immediately before semantic commit; never clear on matching adoption.
-        if (!control) matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, children, 'Root', false);
+        if (control) matchControl();
+        else matchList(root, mode === 'light' ? rootStart!.nextSibling : root.firstChild, mode === 'light' ? rootEnd : null, children, 'Root', false);
         hydrating = false; projectNewChildren(); observe(); return;
       }
       if (control) {
@@ -608,7 +708,7 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       }
     },
     clear() {
-      if (!accepted && hydrating) return; // Failed matching checks must not destroy server output.
+      if (!accepted && carrier) return; // Any failed initial commit must preserve the server tree, even after matching.
       const slotPool = mode === 'light' ? pool().filter(node => node !== control) : [];
       for (const node of slotPool) node.parentNode?.removeChild(node);
       observer?.disconnect(); observer = null;
@@ -643,6 +743,14 @@ export function createBrowserPort(host: HTMLElement, mode: 'light' | 'shadow', c
       attributes.clear(); ownerScopes.delete(host);
       if (portalAnchor) { portalAnchor.parentNode?.insertBefore(host, portalAnchor); portalAnchor.remove(); portalAnchor = null; }
       if (display) { if (display.value) host.style.setProperty('display', display.value, display.priority); else host.style.removeProperty('display'); display = null; }
+      if (carrier && !accepted) {
+        for (const attribute of Array.from(host.attributes)) host.removeAttribute(attribute.name);
+        for (const [name, value] of initialAttributes) host.setAttribute(name, value);
+        if (control && initialControlAttributes) {
+          for (const attribute of Array.from(control.attributes)) control.removeAttribute(attribute.name);
+          for (const [name, value] of initialControlAttributes) control.setAttribute(name, value);
+        }
+      }
     },
   };
   if (recovery) {

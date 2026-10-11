@@ -203,6 +203,34 @@ it('registers every discovered browser suite exactly once in its explicit browse
   }
 });
 
+it('keeps the existing Liquid candidate producer in its dedicated workflow, never shared dev', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  const owner = '.github/workflows/liquid-card-candidate-evidence.yml';
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(workflow.includes('pull_request:'));
+  assert.ok(workflow.includes('corepack pnpm@10.32.1 exec vitest run'));
+  assert.ok(!workflow.includes('docs:build'));
+  const plan = createRuntimeTestPlan([]);
+  assert.ok(plan[0].args.includes(suite));
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+  assert.ok(!plan[1].args.includes(suite));
+  // An accidental registration in both buckets fails closed rather than running it twice.
+  assert.throws(
+    () =>
+      assertBrowserInventory(
+        [...BROWSER_SUITES, ...PRODUCTION_BROWSER_SUITES],
+        [...BROWSER_SUITES, suite],
+        PRODUCTION_BROWSER_SUITES
+      ),
+    /Duplicate browser suite registration/
+  );
+});
+
 describe('runtime test plan', () => {
   it('warms both Table locales before shared-server browser navigation', () => {
     for (const route of ['/en/ui-libraries/base/table/', '/zh-cn/ui-libraries/base/table/']) {
@@ -1683,4 +1711,40 @@ it('the executable runtime runner parses before any test phase starts', () => {
     { encoding: 'utf8' }
   );
   assert.equal(result.status, 0, result.stderr);
+});
+
+it('assigns Liquid elevation control to its dedicated source-bound experiment workflow', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts';
+  const owner = '.github/workflows/liquid-elevation-control-evidence.yml';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('workflow_dispatch:'));
+  assert.ok(workflow.includes('pull_request:'));
+  assert.ok(workflow.includes('assert.equal(report.numTotalTests, 6)'));
+  assert.ok(workflow.includes('assert.equal(report.numPassedTests, 6)'));
+  const plan = createRuntimeTestPlan([]);
+  assert.ok(!plan[1].args.includes(suite));
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+});
+
+it('owns representative Finf image journeys in their explicit sandboxed evidence workflow', () => {
+  const suite = 'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts';
+  const owner = '.github/workflows/finf-representative-features-evidence.yml';
+  assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
+  assert.ok(!BROWSER_SUITES.includes(suite));
+  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
+  const workflow = readFileSync(owner, 'utf8');
+  assert.ok(workflow.includes(suite));
+  assert.ok(workflow.includes('check:styles:preset'));
+  assert.ok(workflow.includes('fonts-noto-cjk'));
+  assert.ok(workflow.includes('font-environment.txt'));
+  const source = readFileSync(suite, 'utf8');
+  assert.ok(source.includes('chromiumSandbox: true'));
+  assert.ok(source.includes("name: 'Close', exact: true"));
+  const plan = createRuntimeTestPlan([]);
+  assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
+  assert.ok(!plan[1].args.includes(suite));
 });

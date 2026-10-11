@@ -1,0 +1,255 @@
+{
+  "scope": "Draft Dropdown passive composition and missing family projections; no Sub yet",
+  "newPrototypeCount": 28,
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "@proto.ui/prototypes-base/dropdown",
+      "entry": "packages/prototypes/base/src/dropdown/index.ts",
+      "newPrototypes": [
+        {
+          "export": "dropdownGroup",
+          "name": "base-dropdown-group",
+          "path": "packages/prototypes/base/src/dropdown/group.proto.ts"
+        },
+        {
+          "export": "dropdownLabel",
+          "name": "base-dropdown-label",
+          "path": "packages/prototypes/base/src/dropdown/label.proto.ts"
+        },
+        {
+          "export": "dropdownSeparator",
+          "name": "base-dropdown-separator",
+          "path": "packages/prototypes/base/src/dropdown/separator.proto.ts"
+        },
+        {
+          "export": "dropdownShortcut",
+          "name": "base-dropdown-shortcut",
+          "path": "packages/prototypes/base/src/dropdown/shortcut.proto.ts"
+        }
+      ],
+      "demo": {
+        "id": "demo-base-dropdown-menu",
+        "path": "apps/www/src/content/docs/zh-cn/demo-base-dropdown-menu.demo.ts"
+      },
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/dropdown-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/dropdown-menu.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "@proto.ui/prototypes-shadcn/dropdown",
+      "entry": "packages/prototypes/shadcn/src/dropdown/index.ts",
+      "newPrototypes": [
+        {
+          "export": "dropdownGroup",
+          "name": "shadcn-dropdown-group",
+          "path": "packages/prototypes/shadcn/src/dropdown/group.proto.ts"
+        },
+        {
+          "export": "dropdownLabel",
+          "name": "shadcn-dropdown-label",
+          "path": "packages/prototypes/shadcn/src/dropdown/label.proto.ts"
+        },
+        {
+          "export": "dropdownSeparator",
+          "name": "shadcn-dropdown-separator",
+          "path": "packages/prototypes/shadcn/src/dropdown/separator.proto.ts"
+        },
+        {
+          "export": "dropdownShortcut",
+          "name": "shadcn-dropdown-shortcut",
+          "path": "packages/prototypes/shadcn/src/dropdown/shortcut.proto.ts"
+        }
+      ],
+      "demo": {
+        "id": "demo-shadcn-dropdown-menu",
+        "path": "apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts"
+      },
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/dropdown-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/dropdown-menu.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "@proto.ui/prototypes-brutalist/dropdown",
+      "entry": "packages/prototypes/brutalist/src/dropdown/index.ts",
+      "newPrototypes": [
+        {
+          "export": "dropdownGroup",
+          "name": "brutalist-dropdown-group",
+          "path": "packages/prototypes/brutalist/src/dropdown/group.proto.ts"
+        },
+        {
+          "export": "dropdownLabel",
+          "name": "brutalist-dropdown-label",
+          "path": "packages/prototypes/brutalist/src/dropdown/label.proto.ts"
+        },
+        {
+          "export": "dropdownSeparator",
+          "name": "brutalist-dropdown-separator",
+          "path": "packages/prototypes/brutalist/src/dropdown/separator.proto.ts"
+        },
+        {
+          "export": "dropdownShortcut",
+          "name": "brutalist-dropdown-shortcut",
+          "path": "packages/prototypes/brutalist/src/dropdown/shortcut.proto.ts"
+        }
+      ],
+      "demo": {
+        "id": "demo-brutalist-dropdown-menu",
+        "path": "apps/www/src/content/docs/zh-cn/demo-brutalist-dropdown-menu.demo.ts"
+      },
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/dropdown-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/dropdown-menu.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "@proto.ui/prototypes-bootstrap-2-3-2/dropdown",
+      "entry": "packages/prototypes/bootstrap-2-3-2/src/dropdown/index.ts",
+      "newPrototypes": [
+        {
+          "export": "dropdownGroup",
+          "name": "bootstrap-2-3-2-dropdown-group",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/group.proto.ts"
+        },
+        {
+          "export": "dropdownLabel",
+          "name": "bootstrap-2-3-2-dropdown-label",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/label.proto.ts"
+        },
+        {
+          "export": "dropdownSeparator",
+          "name": "bootstrap-2-3-2-dropdown-separator",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/separator.proto.ts"
+        },
+        {
+          "export": "dropdownShortcut",
+          "name": "bootstrap-2-3-2-dropdown-shortcut",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/shortcut.proto.ts"
+        },
+        {
+          "export": "dropdownRoot",
+          "name": "bootstrap-2-3-2-dropdown-root",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/root.proto.ts"
+        },
+        {
+          "export": "dropdownTrigger",
+          "name": "bootstrap-2-3-2-dropdown-trigger",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/trigger.proto.ts"
+        },
+        {
+          "export": "dropdownContent",
+          "name": "bootstrap-2-3-2-dropdown-content",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/content.proto.ts"
+        },
+        {
+          "export": "dropdownItem",
+          "name": "bootstrap-2-3-2-dropdown-item",
+          "path": "packages/prototypes/bootstrap-2-3-2/src/dropdown/item.proto.ts"
+        }
+      ],
+      "demo": {
+        "id": "demo-bootstrap-2-3-2-dropdown-menu",
+        "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-dropdown-menu.demo.ts"
+      },
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/dropdown-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/dropdown-menu.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "@proto.ui/prototypes-liquid-glass/dropdown",
+      "entry": "packages/prototypes/liquid-glass/src/dropdown/index.ts",
+      "newPrototypes": [
+        {
+          "export": "dropdownGroup",
+          "name": "liquid-glass-dropdown-group",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/group.proto.ts"
+        },
+        {
+          "export": "dropdownLabel",
+          "name": "liquid-glass-dropdown-label",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/label.proto.ts"
+        },
+        {
+          "export": "dropdownSeparator",
+          "name": "liquid-glass-dropdown-separator",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/separator.proto.ts"
+        },
+        {
+          "export": "dropdownShortcut",
+          "name": "liquid-glass-dropdown-shortcut",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/shortcut.proto.ts"
+        },
+        {
+          "export": "dropdownRoot",
+          "name": "liquid-glass-dropdown-root",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/root.proto.ts"
+        },
+        {
+          "export": "dropdownTrigger",
+          "name": "liquid-glass-dropdown-trigger",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/trigger.proto.ts"
+        },
+        {
+          "export": "dropdownContent",
+          "name": "liquid-glass-dropdown-content",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/content.proto.ts"
+        },
+        {
+          "export": "dropdownItem",
+          "name": "liquid-glass-dropdown-item",
+          "path": "packages/prototypes/liquid-glass/src/dropdown/item.proto.ts"
+        }
+      ],
+      "demo": {
+        "id": "demo-liquid-glass-dropdown-menu",
+        "path": "apps/www/src/content/docs/demo-liquid-glass-dropdown-menu.demo.ts"
+      },
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/dropdown-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/dropdown-menu.mdx"
+      ]
+    }
+  ],
+  "baseNewHookExports": [
+    "asDropdownGroup",
+    "asDropdownLabel",
+    "asDropdownSeparator",
+    "asDropdownShortcut"
+  ],
+  "dependencies": "Existing Base hooks, core, Overlay/Focus/Positioning; no new package dependencies; Liquid existing material module",
+  "integration": [
+    "Add 28 atoms to family root exports, module/CLI registry and family dropdown component bundles",
+    "Add Bootstrap/Liquid dropdown subpath and docs navigation; refresh global catalog/generated assets only through owned generators",
+    "Preserve existing demo IDs; source demos now genuinely use passive Proto parts",
+    "Next independent Sub/SubTrigger/SubContent slice will add 15 more atoms, not included here"
+  ],
+  "verification": {
+    "host": "30/30 source host and prior Base/Shadcn cases pass",
+    "fullCss": "4/4 full-directory CSS tests fail on old isolated shared baseline; retain red assertions until lowering integrates",
+    "types": "Focused source and new test tsc completed, see source record",
+    "schema": "tsx CLI internal IPC listen /tmp/tsx-1000/19.pipe failed EPERM; no workaround attempted, target P/T schema admission pending"
+  },
+  "knownSharedCssMissingAtMain5a874f": [
+    "-mx-1",
+    "duration-100",
+    "ring-1",
+    "tracking-widest",
+    "text-[0.6875rem]"
+  ],
+  "pendingGates": [
+    "True nested submenu and complete Invite users demo",
+    "Commit-bound four-family screenshots of actual open/hover/keyboard/disabled/submenus",
+    "Real current four-Web-host interactions and controlled acceptance/rejection",
+    "Generated CSS, packed CLI/build consumers",
+    "Compiler/non-Web independent owner",
+    "Full native/GPUI geometry/input/a11y/paint and independent review"
+  ]
+}

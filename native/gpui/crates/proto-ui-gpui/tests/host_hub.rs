@@ -1205,3 +1205,105 @@ fn selection_targets_refuse_replacement_with_token_diagnostics(cx: &mut TestAppC
         }
     }
 }
+#[gpui::test]
+fn available_space_requires_the_exact_lease_and_releases_rendered_geometry(
+    cx: &mut TestAppContext,
+) {
+    let mut hub = Hub::open(cx);
+    hub.outbox();
+    let mut transaction = recorded_transaction();
+    transaction.style = vec!["max-w-[var(--proto-ui-available-region-width,100%)]".into()];
+    let install = |transaction: ProjectionTransaction| {
+        PeerToHostMessage::ProjectionInstall(Box::new(
+            proto_ui_host_protocol::messages::ProjectionInstall { transaction },
+        ))
+    };
+    hub.receive([install(transaction.clone())]);
+    assert!(hub.outbox().iter().any(|message| matches!(message,
+        HostToPeerMessage::ProjectionAck(ack) if ack.ack.diagnostics.iter().any(|entry| entry.code == "available-space-required"))));
+    let lease = |module_epoch, id: &str, active| {
+        peer(json!({
+            "kind": "available-space.lease", "sessionId": SESSION, "viewEpoch": transaction.view_epoch,
+            "moduleEpoch": module_epoch, "leaseId": id, "root": "proto-surface", "boundary": "root-content", "active": active,
+        }))
+    };
+    hub.receive([lease(1, "region:1", true), install(transaction.clone())]);
+    let messages = hub.outbox();
+    assert!(messages.iter().any(|message| matches!(message,
+        HostToPeerMessage::ProjectionAck(ack) if ack.ack.status == ProjectionAckStatus::Applied)));
+    assert!(messages.iter().any(|message| matches!(message,
+        HostToPeerMessage::AvailableSpaceFrame(frame) if frame.lease_id == "region:1" && frame.rect.is_some())));
+    let rendered = |hub: &mut Hub| {
+        hub.window
+            .update(&mut hub.cx, |view, _, _| view.rendered_sessions())
+            .unwrap()
+    };
+    assert_eq!(rendered(&mut hub), vec![SESSION.to_string()]);
+    hub.receive([lease(2, "region:2", true), lease(1, "region:1", false)]);
+    assert_eq!(rendered(&mut hub), vec![SESSION.to_string()]);
+    hub.receive([lease(2, "region:2", false)]);
+    assert!(rendered(&mut hub).is_empty());
+    hub.receive([lease(2, "region:2", true)]);
+    assert!(
+        rendered(&mut hub).is_empty(),
+        "retired lease must not resurrect geometry"
+    );
+    hub.receive([lease(3, "region:3", true)]);
+    assert_eq!(rendered(&mut hub), vec![SESSION.to_string()]);
+}
+
+#[gpui::test]
+fn available_space_root_region_checks_the_actual_window_entity(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.window
+        .update(&mut hub.cx, |_, window, cx| {
+            assert!(proto_ui_gpui::available_space::root_region(window, cx.entity_id()).is_some());
+            let unrelated = cx.new(|_| ());
+            assert!(
+                proto_ui_gpui::available_space::root_region(window, unrelated.entity_id())
+                    .is_none()
+            );
+        })
+        .unwrap();
+}
+
+#[gpui::test]
+fn available_space_follows_actual_window_resize_without_duplicate_frames(cx: &mut TestAppContext) {
+    let mut hub = Hub::open(cx);
+    hub.outbox();
+    let mut transaction = recorded_transaction();
+    transaction.style = vec!["max-w-[var(--proto-ui-available-region-width,100%)]".into()];
+    let lease = peer(
+        json!({ "kind": "available-space.lease", "sessionId": SESSION,
+        "viewEpoch": transaction.view_epoch, "moduleEpoch": 1, "leaseId": "resize:1",
+        "root": "proto-surface", "boundary": "root-content", "active": true }),
+    );
+    hub.receive([
+        lease,
+        PeerToHostMessage::ProjectionInstall(Box::new(
+            proto_ui_host_protocol::messages::ProjectionInstall { transaction },
+        )),
+    ]);
+    let frames = |messages: Vec<HostToPeerMessage>| {
+        messages
+            .into_iter()
+            .filter_map(|message| match message {
+                HostToPeerMessage::AvailableSpaceFrame(frame) => Some(frame),
+                _ => None,
+            })
+            .collect::<Vec<_>>()
+    };
+    let first = frames(hub.outbox()).pop().expect("initial root region");
+    assert_eq!(first.rect.unwrap().width, 300.);
+    hub.cx.simulate_resize(size(px(640.), px(480.)));
+    hub.draw();
+    let second = frames(hub.outbox()).pop().expect("resized root region");
+    assert_eq!(second.rect.unwrap().width, 640.);
+    assert_eq!(second.rect.unwrap().height, 480.);
+    assert!(second.revision > first.revision);
+    hub.draw();
+    assert!(
+        frames(hub.outbox()).is_empty(),
+        "unchanged frame must not keep publishing"
+    );
+}

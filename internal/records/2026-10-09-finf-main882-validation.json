@@ -1,0 +1,264 @@
+{
+  "source": "521b2c90ab9013ca9989e3f8003d83396af34f33",
+  "tree": "1d21136c1c075d35dbff17ef39dd6a8871a20078",
+  "parents": [
+    "19b1d076a36a8556e0141a45a1eab72c988fe340",
+    "ea19727838d85c05af5e4bca8d5fc235cb44e288"
+  ],
+  "commands": [
+    {
+      "name": "cli-full",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/cli/test",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full.json"
+      ],
+      "exitCode": 1,
+      "sourceEquivalentTree": null,
+      "total": 443,
+      "passed": 442,
+      "failed": 1,
+      "startTime": 1791562806393,
+      "note": "Before correction of the stale index.ts companion assertion; same production bytes."
+    },
+    {
+      "name": "cli-full-corrected",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/cli/test",
+        "--maxWorkers=1",
+        "--minWorkers=1",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full-corrected.json"
+      ],
+      "exitCode": 0,
+      "sourceEquivalentTree": "1d21136c1c075d35dbff17ef39dd6a8871a20078",
+      "total": 443,
+      "passed": 443,
+      "failed": 0,
+      "startTime": 1791562868641
+    },
+    {
+      "name": "workspace-types",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.workspace.json",
+        "--noEmit"
+      ],
+      "startedAt": "2026-10-09T16:21:59.413654+00:00",
+      "finishedAt": "2026-10-09T16:22:21.643031+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "cli-build",
+      "command": ["node", "scripts/build/public-packages.mjs", "--package", "@proto.ui/cli"],
+      "startedAt": "2026-10-09T16:22:21.643403+00:00",
+      "finishedAt": "2026-10-09T16:22:23.144760+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "canonical",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T16:23:24.024860+00:00",
+      "finishedAt": "2026-10-09T16:23:25.188313+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "source-wall",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-10-09T16:23:25.188615+00:00",
+      "finishedAt": "2026-10-09T16:25:35.400523+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "proof-negative",
+      "command": ["node", "--test", "scripts/coverage-matrices/test/prototype-coverage.test.mjs"],
+      "startedAt": "2026-10-09T16:25:35.400837+00:00",
+      "finishedAt": "2026-10-09T16:27:50.162532+00:00",
+      "exitCode": 0
+    },
+    {
+      "name": "fixture-build",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "experiments/material-initial-paint/build-browser.mjs",
+        "../finf-main882-evidence/initial-paint-fixture"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "fixture": {
+    "source": "521b2c90ab9013ca9989e3f8003d83396af34f33",
+    "tree": "1d21136c1c075d35dbff17ef39dd6a8871a20078",
+    "dirty": false,
+    "trackedSourceObjectsVerified": 337,
+    "installedDependencyInputsVerified": 4,
+    "assetsVerified": 4,
+    "nativeExecuted": false
+  },
+  "proof": {
+    "source": "521b2c90ab9013ca9989e3f8003d83396af34f33",
+    "bindingCount": 4206,
+    "changedCandidateKeys": ["revision", "sourceBindingsObject", "sourceObjectProof"],
+    "bindingsEqual": true,
+    "otherTopLevelFieldsEqual": true
+  },
+  "unchangedProductOrigins": [
+    {
+      "path": "experiments/material-initial-paint/browser-entry.ts",
+      "sha256": "0b973f3aae09c82909a846d54c03aa57d38a29606ed229cebc294ba906dec988",
+      "origin": "0ca14164c31773f31df138965af4579eb1068c8f"
+    },
+    {
+      "path": "experiments/material-initial-paint/browser.test.mjs",
+      "sha256": "11e4378b49c3d35d3ce614d93bd94adfd39a79d229d04f0e55f7781ac049ccc3",
+      "origin": "0ca14164c31773f31df138965af4579eb1068c8f"
+    },
+    {
+      "path": "experiments/material-initial-paint/scene.ts",
+      "sha256": "f963108ad85b6b959c5b4cd7ccc0ba5665829e693a51f620ad0657d7f0eb1a07",
+      "origin": "0ca14164c31773f31df138965af4579eb1068c8f"
+    },
+    {
+      "path": "internal/records/2026-10-09-initial-paint-dark-source-calibration.md",
+      "sha256": "793c7e926f924ce76b139db88269466704879345af107366b7a6a5e95b65f070",
+      "origin": "0ca14164c31773f31df138965af4579eb1068c8f"
+    },
+    {
+      "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+      "sha256": "0c3b724e2c9bdc293790f4e75763ceaa419e6be1361cb3edfe869ce56a450601",
+      "origin": "0ca14164c31773f31df138965af4579eb1068c8f"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+      "sha256": "a3a8e4a3cdec9f6beba3cd30c146813f0db0bf377e3c4936eb3badc03e981dbb",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+      "sha256": "5514f686af74e6d971633b2649b5314724544603d17e8c7ac0aeba672c42455f",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+      "sha256": "3a431f08e43a2172c4629cbc2a1fd8b86d11d45839aaf3ce622a8798f586857e",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+      "sha256": "53cfa74cde44268578e4c30145a700acd587fec8b76b4445885bc120ff1bcb08",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.ts",
+      "sha256": "34d7ef8b09dd10906346420c4d4a7e3104a3d2fa6a2949d1a9d0b9e853c16f1a",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "internal/records/2026-10-09-select-demo-intrinsic-width-repair.md",
+      "sha256": "d54b56238f136a091c060b8fc430a1db3b198517fd399092ec8ed59f07f1693d",
+      "origin": "d955ef8b218ad4747a6a744e0837f69747b1e47d"
+    },
+    {
+      "path": "apps/www/src/content/docs/field-demo.shared.ts",
+      "sha256": "cea7363876a91fd4548dd5e41738ff200f2dc5ca3bcd2c6e819617be57be9798",
+      "origin": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec"
+    },
+    {
+      "path": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+      "sha256": "e32114629d64e6d6e79244bc58db26de087d1e9c53557e4ca58401090012a2e2",
+      "origin": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec"
+    },
+    {
+      "path": "apps/www/src/content/docs/field-demo-layout.test.ts",
+      "sha256": "4a5bc9bf29fb03a4fcb461605fd34d4402b375cee8df5d61891cb83a0448f7a4",
+      "origin": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+      "sha256": "b0883fbe15c6c7cff90aceffbee3ee14cc0dae710198c894b163e941f8903213",
+      "origin": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec"
+    },
+    {
+      "path": "internal/records/2026-10-09-field-demo-command-flow.md",
+      "sha256": "b4ff0f68496dfb8fbcaa5beb7faecf55455265a160238512ae13ced78e9c6357",
+      "origin": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec"
+    }
+  ],
+  "logs": [
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/language-admission.log",
+      "sha256": "618251550388361cf372f1a113a15ddcccc0ad9641b4eb58345371795d7b809d",
+      "bytes": 327
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full.log",
+      "sha256": "40d9cf9744a81f0f80db0a48c513524b3a77d892376e769d185efecdef3d85d1",
+      "bytes": 91
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full.json",
+      "sha256": "5d8c3d86da46460dcd0f34f3ba9d6f5eadc2a49f0d37036034383461e8816056",
+      "bytes": 154585
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full-corrected.log",
+      "sha256": "82a0b5812fbb35ba0e804d46057c18c145f70afca41a39f8e490c68182ce6bb8",
+      "bytes": 101
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-full-corrected.json",
+      "sha256": "a1332c45650dca31120e48cac171a3c4972c87effda418790a1adff3b94a34e1",
+      "bytes": 152725
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/workspace-types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/cli-build.log",
+      "sha256": "1ca92f7711924af6987adec5a0af2fce48e6bce0a4be94bed7b79c0e43ed0926",
+      "bytes": 95
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/canonical.log",
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca",
+      "bytes": 113
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/source-wall.log",
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4",
+      "bytes": 36
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/proof-negative.log",
+      "sha256": "1a0b5bfeb2193c575e79b3bfb01a8c480b2f6f7309cdafd06520d0a7505c108c",
+      "bytes": 10714
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/source-hooks.log",
+      "sha256": "3e11117b44f9dcc69bff7280165d85c64bad8657c67267adbb1b16e81810f3ed",
+      "bytes": 876
+    },
+    {
+      "path": "/workspace/scratch/3ca1e20addac/finf-main882-evidence/fixture-build.log",
+      "sha256": "39931572c2935d1ae66a0e37d2122b48ad15d5e07e964ab22140a56bf418049d",
+      "bytes": 173
+    }
+  ],
+  "nativeExecuted": false,
+  "fullAcceptance": "0/68",
+  "budgetRerun": false
+}

@@ -1,0 +1,27 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "collection-nested*.ts",
+    "../../shadcn/src/carousel/**/*.ts",
+    "../../brutalist/src/carousel/**/*.ts",
+    "../../bootstrap-2-3-2/src/carousel/**/*.ts",
+    "../../liquid-glass/src/carousel/**/*.ts",
+    "../../shadcn/src/tree/**/*.ts",
+    "../../brutalist/src/tree/**/*.ts",
+    "../../bootstrap-2-3-2/src/tree/**/*.ts",
+    "../../liquid-glass/src/tree/**/*.ts",
+    "../../shadcn/src/message-scroller/**/*.ts",
+    "../../brutalist/src/message-scroller/**/*.ts",
+    "../../bootstrap-2-3-2/src/message-scroller/**/*.ts",
+    "../../liquid-glass/src/message-scroller/**/*.ts",
+    "../../shadcn/src/data-table/**/*.ts",
+    "../../brutalist/src/data-table/**/*.ts",
+    "../../bootstrap-2-3-2/src/data-table/**/*.ts",
+    "../../liquid-glass/src/data-table/**/*.ts",
+    "../../shadcn/src/date-picker/**/*.ts",
+    "../../brutalist/src/date-picker/**/*.ts",
+    "../../bootstrap-2-3-2/src/date-picker/**/*.ts",
+    "../../liquid-glass/src/date-picker/**/*.ts"
+  ],
+  "exclude": []
+}

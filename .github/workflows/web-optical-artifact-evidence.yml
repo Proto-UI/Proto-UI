@@ -1,0 +1,72 @@
+name: V2 Web optical artifact evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/web-optical-artifact-evidence.yml'
+      - 'experiments/material-v2/**'
+      - 'packages/**'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'scripts/build/**'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig*.json'
+permissions:
+  contents: read
+concurrency:
+  group: web-optical-artifact-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  four-web-source-and-artifact:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked tools
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Verify direct consumer semantics and graph boundary
+        run: |
+          node node_modules/vitest/vitest.mjs run --config experiments/material-v2/vitest.config.ts --minWorkers=1 --maxWorkers=1
+          node experiments/material-v2/typecheck.mjs
+      - name: Build actual public runtime artifacts
+        run: |
+          node scripts/build/generate-web-material-kernel.mjs --check
+          corepack pnpm@10.32.1 build:packages --package @proto.ui/cli --package @proto.ui/prototypes-base --package @proto.ui/adapter-web-component --package @proto.ui/adapter-react --package @proto.ui/adapter-vue --package @proto.ui/adapter-vue2
+          corepack pnpm@10.32.1 check:package-manifests
+      - name: Exercise source consumer with owned local content only
+        run: |
+          node --import tsx experiments/material-v2/build-browser.mjs /tmp/pui-material-v2-source
+          node --import tsx experiments/material-v2/browser.test.mjs /tmp/pui-material-v2-source /tmp/pui-material-v2-source-evidence
+      - name: Exercise continuous source contact and optical lifetime
+        if: ${{ !cancelled() }}
+        run: node --import tsx experiments/material-v2/continuous-browser.test.mjs /tmp/pui-material-v2-source /tmp/pui-material-v2-source-continuous
+      - name: Exercise emitted public package consumer
+        if: ${{ !cancelled() }}
+        run: |
+          node --import tsx experiments/material-v2/build-browser.mjs /tmp/pui-material-v2-packed --packed
+          node --import tsx experiments/material-v2/browser.test.mjs /tmp/pui-material-v2-packed /tmp/pui-material-v2-packed-evidence
+      - name: Exercise continuous emitted package contact and optical lifetime
+        if: ${{ !cancelled() }}
+        run: node --import tsx experiments/material-v2/continuous-browser.test.mjs /tmp/pui-material-v2-packed /tmp/pui-material-v2-packed-continuous
+      - name: Retain exact-head real output and consumer graph
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-optical-v2-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: |
+            /tmp/pui-material-v2-source/source.json
+            /tmp/pui-material-v2-source-evidence/
+            /tmp/pui-material-v2-source-continuous/
+            /tmp/pui-material-v2-packed/source.json
+            /tmp/pui-material-v2-packed-evidence/
+            /tmp/pui-material-v2-packed-continuous/
+          if-no-files-found: warn
+          retention-days: 30

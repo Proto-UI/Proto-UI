@@ -1,0 +1,505 @@
+{
+  "status": "WIP source integration; known failures retained; no new full-delivery admission",
+  "base": "fabf2d2b2e971060243e3843df7dde91d27e4440",
+  "sourceCommit": "98c858f24aa834cc66fdb45b8241bc58076524e9",
+  "sourceTree": "11057275e1df49d24f0ba417bc8d03d209b5b293",
+  "orderedSourceCommits": [
+    "4ff2ad740c38eff4faee8f4430e34d41e99de626",
+    "aedb4da53c119519e869a2ac57ed6d6cb22b5fbc",
+    "bb4d785971945e9b9837eae3bbe9b43797d00acf",
+    "f28fdf206b35dd21ebaeb7193febca2bc161b671",
+    "848da871c7bab300d078d042c88c67e236779f57",
+    "6bd9375b9fed8e0056cc56b89158ba1128bccdb0",
+    "8a8f6fc9e84c25fb9a5f24d4278ec671c39d900d",
+    "1971783c0218457ab5c3f61dfe6ff56ef7105992",
+    "e4bb15adf15bae9483148ef29ec3fecf021eccb2",
+    "498c96ee6a6a2854f38c31dd2e949f4e337de0c1",
+    "d4049e124ddc0e6cfac3258ae13ed4d6c41aa8de",
+    "19d8955e0302af620aed874f8b533b9fe6b293fb",
+    "804277e696d9066578c6178e54635c3bf0ceedfb",
+    "6be27611c1f30e64c8ec575cbe3ac73ee9b75514",
+    "d21ef4c924be6927d6489df40befa7aa7bfa5c30",
+    "458b35e48b24a1e6b9f101e633b1405485cbc3dc",
+    "bc5d1624d6231620269d88280f195afa8d591413",
+    "9aaf42cf23b79ee7e9363aeaff8bc22061f4e919",
+    "8fd2ff2bdbdd66607346b1ec8c73537a62082905",
+    "26c430775cec3e57e2fbc0d28a45e825494ea966",
+    "4b059435ff4fd0f4e33c08edd8e21a45fa4e1c7f",
+    "2ff136803af1fda8f0af0893d78227e432ff7db3",
+    "136026dd659d269a5f4dcba344288d2910059dda",
+    "a0ff98aa837b3dc74d8d4cd7c7dc1cef77d2d07d",
+    "584730289242e69a9b01b3d9aaeef1bc56dac1fd",
+    "f27f244680f57e76ab1ffbd778b5ae5e61e74508",
+    "7284c6d7c0503c92dfd250bc478a017256b749d9",
+    "90b8807fccd4749a79de53054241db8df6f54654",
+    "e0a180e76ec98b471b3caed312ab370392e138e5",
+    "f8922c4f92aee9fac52854be9aac9541639a2931",
+    "3353f9227b58b2513519fb76ed1daccad4d96100",
+    "79bbdada40d28ec15d9c0986dff204ff657154f9",
+    "512ba54b90a1042015c2b2a0fec8d65f7b39596f",
+    "b2461fc32afc546759b1d73105f482ddc8df718e",
+    "d8db467ced130b4a7722852318fd92a2660bec0c",
+    "8b36987efa519a57c6b439f44cf4f472dd7a3f11",
+    "3c874195ae5db4f85c4afc9dc86e32998368cbc1",
+    "6f6b799bac90937405e6a2b873ac5e02bf54839d",
+    "05ad54af95ba3aa723715d084ad6718f87456f0b",
+    "d52bbf07e6e8d045e9a270362bc9ee3b02c4e1f9",
+    "1a68c35141628929d2720e538333882cfc095e33",
+    "742ad0b86886ee4869f810105b665468c94fc1ff",
+    "4db37d94df8b794195b73a606c0ec001c0236fd1",
+    "8beaed0752f259c585a807a8dad6bf85ba5cb9a8",
+    "f836cb76f119f5f9a6c9710a03c6e06f0056b1af",
+    "98c858f24aa834cc66fdb45b8241bc58076524e9"
+  ],
+  "bindingState": "Actual 46-node source DAG and source tree verified locally from real publisher objects. No actual-commit test rerun or ref update is implied.",
+  "userWeightedProgress": {
+    "done": 5,
+    "inProgress": 63,
+    "notStarted": 0,
+    "points": 36.5,
+    "denominator": 68,
+    "percentage": 53.7,
+    "acceptancePromotion": false
+  },
+  "scope": [
+    "Integrate the separately reviewed sixth, seventh and eighth bounded repair slices on the published fifth base",
+    "Preserve portable prototype definitions and ownership, family-specific recipes, typed public surfaces and real runtime-selection/focus transactions",
+    "Static Calendar Lucide loaders and passive DataTable HeaderRow with exact five-family entry/demo closure",
+    "No Compiler, Rule/capture semantic interpreter, shared Runtime/Focus authority or acceptance-policy extension"
+  ],
+  "localValidation": {
+    "identityPolicy": "Local staged-tree executions remain identified by their actual local trees. Equal uploaded source trees do not turn them into official CI or actual-commit reruns.",
+    "unified45": {
+      "stagedTree": "ebe17788fc6ecf83cab342b7e55456896e382daf",
+      "focused": {
+        "files": 81,
+        "tests": 1162,
+        "passed": 1154,
+        "failed": 8
+      },
+      "officialTypes": {
+        "astroFiles": 802,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 10
+      },
+      "scopedTypes": 12,
+      "authoringInputs": 53,
+      "positioningPublicBuild": {
+        "passed": 6,
+        "totalPublicInventory": 47,
+        "freshDts": true,
+        "notFull47Build": true
+      },
+      "packetSha256": "cfa53e4f27c2956e02eac1256dd97f26975e97726a052add4ac1f3cb51e996c4"
+    },
+    "headerRowWide": {
+      "stagedTree": "585ecbf9fd8d8eb0cffa59520f8550158475f597",
+      "focused": {
+        "tree": "585ecbf9fd8d8eb0cffa59520f8550158475f597",
+        "files": 84,
+        "tests": 1192,
+        "passed": 1184,
+        "failed": 8,
+        "sameEightSelectorFailuresAs45": true
+      },
+      "officialTypes": {
+        "tree": "585ecbf9fd8d8eb0cffa59520f8550158475f597",
+        "command": "corepack pnpm@10.32.1 check:types",
+        "exit": 0,
+        "astroFiles": 803,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 10
+      },
+      "sourceAndRegistrationScopedTypes": "passed with the repository source TypeScript configuration"
+    },
+    "headerRowFinal": {
+      "stagedTree": "11057275e1df49d24f0ba417bc8d03d209b5b293",
+      "focused": {
+        "tree": "11057275e1df49d24f0ba417bc8d03d209b5b293",
+        "files": 6,
+        "tests": 38,
+        "passed": 38,
+        "exit": 0
+      },
+      "authoring": {
+        "changedCatalogInputs": 59,
+        "exit": 0
+      },
+      "afterWideChanges": [
+        "internal/records/2026-10-10-data-table-header-row-entry-integration.md",
+        "spec/tests/T-BASE-DATA-TABLE-HEADER-ROW-0001.yaml"
+      ],
+      "allImplementationTestTypeAndStyleResourceBlobsUnchangedAfterWideRun": true,
+      "catalog": {
+        "failed": 554,
+        "newDiagnostics": 0
+      },
+      "publicDocs": {
+        "failed": 82,
+        "newDiagnostics": 0
+      },
+      "normalPrecommitAndMessageDisclosure": "passed; no local commit created",
+      "packetSha256": "39ec89db37f92b1c800353731514661363facea3b5fb01bc26611a86af3258c6"
+    },
+    "resources": "Normal Shadcn/Brutalist/draft-family generation and checks passed. HeaderRow introduces no new generated token bytes.",
+    "historicalPacked": "The sixth 61fb report remains its original execution. Its later attempted repeat returned Unknown process id and is not promoted to a successful repeat. No new HeaderRow packed/native/browser result is claimed.",
+    "retainedFailureHistory": [
+      "HeaderRow unwired entry regression 10/10 failed before actual static registration, then the same assertions passed",
+      "HeaderRow missing exercises caused five new catalog diagnostics; an initial incorrect wrapper also failed; final governed exercises.prototypes links restore the exact prior 554 diagnostics",
+      "An extra ad hoc Astro-config tsc invocation failed on imported dependency configuration diagnostics; the repository source-config fixture and official check:types passed",
+      "Original authoring CLI IPC EPERM and sparse materialization failures remain in source-owner records with separately identified successful supported-entry runs"
+    ]
+  },
+  "remaining": [
+    "Eight unchanged Form/CheckboxGroup selector failures; collector semantic coverage remains with its existing owner",
+    "Catalog 554 and public-doc 82 current diagnostics",
+    "Actual final-source browser journeys, screenshots, accessibility/native/Compiler/packed and complete component acceptance",
+    "Published fifth official CI failures include browser focus/portal/S4/S5/ring/Collapsible assertions and three 900-second shard timeouts; their baseline attribution is unresolved. Calendar loader and DataTable topology fixes have local evidence only until the next official run."
+  ],
+  "historicalPublishedCI": {
+    "sourceCommit": "fabf2d2b2e971060243e3843df7dde91d27e4440",
+    "run": "38054606599",
+    "status": "completed/failure",
+    "jobs": {
+      "success": 7,
+      "failure": 15
+    },
+    "featureScreenshotsRun": "38054606588",
+    "featureStatus": {
+      "form": "passed",
+      "drawer": "passed",
+      "calendar": "failed: missing lucide-chevron-left-icon loader"
+    },
+    "notCandidateCI": true
+  },
+  "historicalProofPolicy": "Inherit all fifth proof observations, records, item acceptance and five original closeouts unchanged. Only the new current source binding and this current observation are generated.",
+  "provenancePolicy": "Original 42 source commit metadata remains provenance. Actual service-authored commit timestamps and new staged-slice commits must come from the real publisher; standalone local hooks are not local commits.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "sourceProvenance": [
+    {
+      "step": 1,
+      "actualCommit": "4ff2ad740c38eff4faee8f4430e34d41e99de626",
+      "actualAuthorDate": "2026-10-10T13:27:22Z",
+      "originalCommit": "48aa109928ec229924ec279b605a7d6ddf0d3390",
+      "originalAuthorDate": "2026-10-10T02:44:02-07:00"
+    },
+    {
+      "step": 2,
+      "actualCommit": "aedb4da53c119519e869a2ac57ed6d6cb22b5fbc",
+      "actualAuthorDate": "2026-10-10T13:28:28Z",
+      "originalCommit": "4696ee0d9d29bfd46dae91c76199330434219215",
+      "originalAuthorDate": "2026-10-10T02:46:57-07:00"
+    },
+    {
+      "step": 3,
+      "actualCommit": "bb4d785971945e9b9837eae3bbe9b43797d00acf",
+      "actualAuthorDate": "2026-10-10T13:29:17Z",
+      "originalCommit": "e2d777e755a14e3dbd4b087e8354153728453f89",
+      "originalAuthorDate": "2026-10-10T02:53:53-07:00"
+    },
+    {
+      "step": 4,
+      "actualCommit": "f28fdf206b35dd21ebaeb7193febca2bc161b671",
+      "actualAuthorDate": "2026-10-10T13:30:11Z",
+      "originalCommit": "eb61475c4013bdaedb0171b507b0f10986bcdd4d",
+      "originalAuthorDate": "2026-10-10T03:15:52-07:00"
+    },
+    {
+      "step": 5,
+      "actualCommit": "848da871c7bab300d078d042c88c67e236779f57",
+      "actualAuthorDate": "2026-10-10T13:31:01Z",
+      "originalCommit": "023b9f160a1824034e564c241e4fa782dd9a6418",
+      "originalAuthorDate": "2026-10-10T03:07:25-07:00"
+    },
+    {
+      "step": 6,
+      "actualCommit": "6bd9375b9fed8e0056cc56b89158ba1128bccdb0",
+      "actualAuthorDate": "2026-10-10T13:31:48Z",
+      "originalCommit": "105b821e3ccce6c935b77f5dde5f04f223e38e83",
+      "originalAuthorDate": "2026-10-10T03:13:30-07:00"
+    },
+    {
+      "step": 7,
+      "actualCommit": "8a8f6fc9e84c25fb9a5f24d4278ec671c39d900d",
+      "actualAuthorDate": "2026-10-10T13:32:36Z",
+      "originalCommit": "60e19e7fff35c15d044716c18b9a030cbbf4c6bd",
+      "originalAuthorDate": "2026-10-10T03:18:21-07:00"
+    },
+    {
+      "step": 8,
+      "actualCommit": "1971783c0218457ab5c3f61dfe6ff56ef7105992",
+      "actualAuthorDate": "2026-10-10T13:33:23Z",
+      "originalCommit": "57933274eb84bc3023656e77c9118d32629c1906",
+      "originalAuthorDate": "2026-10-10T03:22:57-07:00"
+    },
+    {
+      "step": 9,
+      "actualCommit": "e4bb15adf15bae9483148ef29ec3fecf021eccb2",
+      "actualAuthorDate": "2026-10-10T13:34:11Z",
+      "originalCommit": "401e281bcd9ab5fa998fb3897e75943fe625cf42",
+      "originalAuthorDate": "2026-10-10T03:18:02-07:00"
+    },
+    {
+      "step": 10,
+      "actualCommit": "498c96ee6a6a2854f38c31dd2e949f4e337de0c1",
+      "actualAuthorDate": "2026-10-10T13:34:59Z",
+      "originalCommit": "6d662ef0913c578ed3cae921439fa13c80a81295",
+      "originalAuthorDate": "2026-10-10T03:23:16-07:00"
+    },
+    {
+      "step": 11,
+      "actualCommit": "d4049e124ddc0e6cfac3258ae13ed4d6c41aa8de",
+      "actualAuthorDate": "2026-10-10T13:35:46Z",
+      "originalCommit": "f760eedb8100ccf816988d14c110cbabb9a0c563",
+      "originalAuthorDate": "2026-10-10T03:01:32-07:00"
+    },
+    {
+      "step": 12,
+      "actualCommit": "19d8955e0302af620aed874f8b533b9fe6b293fb",
+      "actualAuthorDate": "2026-10-10T13:37:36Z",
+      "originalCommit": "e376b46354858064d5e5010152165340dd163a4a",
+      "originalAuthorDate": "2026-10-10T03:02:37-07:00"
+    },
+    {
+      "step": 13,
+      "actualCommit": "804277e696d9066578c6178e54635c3bf0ceedfb",
+      "actualAuthorDate": "2026-10-10T13:38:51Z",
+      "originalCommit": "935366e238eddeba84e055c90d7b5bdeba7ab1be",
+      "originalAuthorDate": "2026-10-10T03:07:38-07:00"
+    },
+    {
+      "step": 14,
+      "actualCommit": "6be27611c1f30e64c8ec575cbe3ac73ee9b75514",
+      "actualAuthorDate": "2026-10-10T13:39:38Z",
+      "originalCommit": "3e1a4321b6198570355c9ee8a729f5ec652567bf",
+      "originalAuthorDate": "2026-10-10T03:10:00-07:00"
+    },
+    {
+      "step": 15,
+      "actualCommit": "d21ef4c924be6927d6489df40befa7aa7bfa5c30",
+      "actualAuthorDate": "2026-10-10T13:40:27Z",
+      "originalCommit": "cee10fc9bf6dfa04a81123877247534926924df9",
+      "originalAuthorDate": "2026-10-10T03:10:02-07:00"
+    },
+    {
+      "step": 16,
+      "actualCommit": "458b35e48b24a1e6b9f101e633b1405485cbc3dc",
+      "actualAuthorDate": "2026-10-10T13:41:17Z",
+      "originalCommit": "62ebf63d2cb9ca31d7656a7da3e66379bb61201b",
+      "originalAuthorDate": "2026-10-10T03:11:33-07:00"
+    },
+    {
+      "step": 17,
+      "actualCommit": "bc5d1624d6231620269d88280f195afa8d591413",
+      "actualAuthorDate": "2026-10-10T13:42:06Z",
+      "originalCommit": "2d8a86d58a7e199437fb484c5039094d8ff6e63a",
+      "originalAuthorDate": "2026-10-10T03:15:40-07:00"
+    },
+    {
+      "step": 18,
+      "actualCommit": "9aaf42cf23b79ee7e9363aeaff8bc22061f4e919",
+      "actualAuthorDate": "2026-10-10T13:43:00Z",
+      "originalCommit": "3a537bb3a1e617f22f75ca95475ae7eb33fc80e6",
+      "originalAuthorDate": "2026-10-10T03:17:26-07:00"
+    },
+    {
+      "step": 19,
+      "actualCommit": "8fd2ff2bdbdd66607346b1ec8c73537a62082905",
+      "actualAuthorDate": "2026-10-10T13:43:48Z",
+      "originalCommit": "8d9b09f08cb5aed62ac6000f9fbefeb32d0e7baa",
+      "originalAuthorDate": "2026-10-10T03:19:56-07:00"
+    },
+    {
+      "step": 20,
+      "actualCommit": "26c430775cec3e57e2fbc0d28a45e825494ea966",
+      "actualAuthorDate": "2026-10-10T13:44:37Z",
+      "originalCommit": "9969996bfa41df188a7f143e2d03d035cd288e6a",
+      "originalAuthorDate": "2026-10-10T03:26:50-07:00"
+    },
+    {
+      "step": 21,
+      "actualCommit": "4b059435ff4fd0f4e33c08edd8e21a45fa4e1c7f",
+      "actualAuthorDate": "2026-10-10T13:45:26Z",
+      "originalCommit": "086618cd2005de41637af0acb17cee1a77923e83",
+      "originalAuthorDate": "2026-10-10T03:26:51-07:00"
+    },
+    {
+      "step": 22,
+      "actualCommit": "2ff136803af1fda8f0af0893d78227e432ff7db3",
+      "actualAuthorDate": "2026-10-10T13:46:15Z",
+      "originalCommit": "3d8fb1f9f5637ac2841acd07ca2c70703939fe1f",
+      "originalAuthorDate": "2026-10-10T03:29:00-07:00"
+    },
+    {
+      "step": 23,
+      "actualCommit": "136026dd659d269a5f4dcba344288d2910059dda",
+      "actualAuthorDate": "2026-10-10T13:47:04Z",
+      "originalCommit": "190ac41c8913c2bf631fdd0339024c28257fbe42",
+      "originalAuthorDate": "2026-10-10T03:28:20-07:00"
+    },
+    {
+      "step": 24,
+      "actualCommit": "a0ff98aa837b3dc74d8d4cd7c7dc1cef77d2d07d",
+      "actualAuthorDate": "2026-10-10T13:47:51Z",
+      "originalCommit": "dd61bce7beb57048562e7df0ecf64f1870186160",
+      "originalAuthorDate": "2026-10-10T03:01:22-07:00"
+    },
+    {
+      "step": 25,
+      "actualCommit": "584730289242e69a9b01b3d9aaeef1bc56dac1fd",
+      "actualAuthorDate": "2026-10-10T13:48:41Z",
+      "originalCommit": "23a0975c477eaf6c8097f860ccdfa2121e80cb9e",
+      "originalAuthorDate": "2026-10-10T03:11:39-07:00"
+    },
+    {
+      "step": 26,
+      "actualCommit": "f27f244680f57e76ab1ffbd778b5ae5e61e74508",
+      "actualAuthorDate": "2026-10-10T13:49:30Z",
+      "originalCommit": "2ec690f0257e508db8b77440c929df0882fddb91",
+      "originalAuthorDate": "2026-10-10T03:12:08-07:00"
+    },
+    {
+      "step": 27,
+      "actualCommit": "7284c6d7c0503c92dfd250bc478a017256b749d9",
+      "actualAuthorDate": "2026-10-10T13:50:17Z",
+      "originalCommit": "4c3dd2fdf2851d8a6d9f0fa38db939cdb36e0b2f",
+      "originalAuthorDate": "2026-10-10T03:28:35-07:00"
+    },
+    {
+      "step": 28,
+      "actualCommit": "90b8807fccd4749a79de53054241db8df6f54654",
+      "actualAuthorDate": "2026-10-10T13:52:01Z",
+      "originalCommit": "551313a351a07358b850f9c4af3065609edb4690",
+      "originalAuthorDate": "2026-10-10T03:32:01-07:00"
+    },
+    {
+      "step": 29,
+      "actualCommit": "e0a180e76ec98b471b3caed312ab370392e138e5",
+      "actualAuthorDate": "2026-10-10T13:53:10Z",
+      "originalCommit": "7f01d154bc751f8d0117ab4ead68081fb80f27f6",
+      "originalAuthorDate": "2026-10-10T03:32:56-07:00"
+    },
+    {
+      "step": 30,
+      "actualCommit": "f8922c4f92aee9fac52854be9aac9541639a2931",
+      "actualAuthorDate": "2026-10-10T13:53:57Z",
+      "originalCommit": "289c88599cb2af24e0d4324865356f77cc420e61",
+      "originalAuthorDate": "2026-10-10T03:36:34-07:00"
+    },
+    {
+      "step": 31,
+      "actualCommit": "3353f9227b58b2513519fb76ed1daccad4d96100",
+      "actualAuthorDate": "2026-10-10T14:14:10Z",
+      "originalCommit": "8f937f087f68335b17f7243aaa45549e23945526",
+      "originalAuthorDate": "2026-10-10T03:34:49-07:00"
+    },
+    {
+      "step": 32,
+      "actualCommit": "79bbdada40d28ec15d9c0986dff204ff657154f9",
+      "actualAuthorDate": "2026-10-10T14:15:32Z",
+      "originalCommit": "52175a8f539291bf83726c63992644a5a012e5a2",
+      "originalAuthorDate": "2026-10-10T03:43:11-07:00"
+    },
+    {
+      "step": 33,
+      "actualCommit": "512ba54b90a1042015c2b2a0fec8d65f7b39596f",
+      "actualAuthorDate": "2026-10-10T14:16:27Z",
+      "originalCommit": "61fb1d5bd643305f531a109af9f4bbcdcd9ead82",
+      "originalAuthorDate": "2026-10-10T03:43:48-07:00"
+    },
+    {
+      "step": 34,
+      "actualCommit": "b2461fc32afc546759b1d73105f482ddc8df718e",
+      "actualAuthorDate": "2026-10-10T14:17:50Z",
+      "originalCommit": "38ade334590daeb9e4cf54724c1cfc3321c0cde5",
+      "originalAuthorDate": "2026-10-10T03:49:55-07:00"
+    },
+    {
+      "step": 35,
+      "actualCommit": "d8db467ced130b4a7722852318fd92a2660bec0c",
+      "actualAuthorDate": "2026-10-10T14:19:32Z",
+      "originalCommit": "ed78803f1d527a2385baf41970474b77ba93fe71",
+      "originalAuthorDate": "2026-10-10T03:53:44-07:00"
+    },
+    {
+      "step": 36,
+      "actualCommit": "8b36987efa519a57c6b439f44cf4f472dd7a3f11",
+      "actualAuthorDate": "2026-10-10T14:20:30Z",
+      "originalCommit": "c9a13d6d1a3673f86b050b7325927345c153a5e4",
+      "originalAuthorDate": "2026-10-10T03:52:54-07:00"
+    },
+    {
+      "step": 37,
+      "actualCommit": "3c874195ae5db4f85c4afc9dc86e32998368cbc1",
+      "actualAuthorDate": "2026-10-10T14:21:51Z",
+      "originalCommit": "01f157ebb0283c03017b0484b4034f8e5180b3fb",
+      "originalAuthorDate": "2026-10-10T03:57:25-07:00"
+    },
+    {
+      "step": 38,
+      "actualCommit": "6f6b799bac90937405e6a2b873ac5e02bf54839d",
+      "actualAuthorDate": "2026-10-10T14:22:46Z",
+      "originalCommit": "0f35364407fc834bded103a8586403a90a31e7b0",
+      "originalAuthorDate": "2026-10-10T03:51:09-07:00"
+    },
+    {
+      "step": 39,
+      "actualCommit": "05ad54af95ba3aa723715d084ad6718f87456f0b",
+      "actualAuthorDate": "2026-10-10T14:24:06Z",
+      "originalCommit": "3c25ec90cb3262dfbc76dec3ab7ab0c729ff52cb",
+      "originalAuthorDate": "2026-10-10T03:41:15-07:00"
+    },
+    {
+      "step": 40,
+      "actualCommit": "d52bbf07e6e8d045e9a270362bc9ee3b02c4e1f9",
+      "actualAuthorDate": "2026-10-10T14:25:02Z",
+      "originalCommit": "c07fa4155866733c8c94fcd497137d1541a81c69",
+      "originalAuthorDate": "2026-10-10T03:47:30-07:00"
+    },
+    {
+      "step": 41,
+      "actualCommit": "1a68c35141628929d2720e538333882cfc095e33",
+      "actualAuthorDate": "2026-10-10T14:25:52Z",
+      "originalCommit": "11a82159b5171e33f4a01a6e51227afb5d7df672",
+      "originalAuthorDate": "2026-10-10T04:04:10-07:00"
+    },
+    {
+      "step": 42,
+      "actualCommit": "742ad0b86886ee4869f810105b665468c94fc1ff",
+      "actualAuthorDate": "2026-10-10T14:26:41Z",
+      "originalCommit": "c3bf1ead94facbd199d246b25ef1b5949921c9f7",
+      "originalAuthorDate": "2026-10-10T05:18:00-07:00"
+    },
+    {
+      "step": 43,
+      "actualCommit": "4db37d94df8b794195b73a606c0ec001c0236fd1",
+      "actualAuthorDate": "2026-10-10T14:27:43Z",
+      "originalCommit": null,
+      "originalAuthorDate": null
+    },
+    {
+      "step": 44,
+      "actualCommit": "8beaed0752f259c585a807a8dad6bf85ba5cb9a8",
+      "actualAuthorDate": "2026-10-10T14:28:35Z",
+      "originalCommit": null,
+      "originalAuthorDate": null
+    },
+    {
+      "step": 45,
+      "actualCommit": "f836cb76f119f5f9a6c9710a03c6e06f0056b1af",
+      "actualAuthorDate": "2026-10-10T14:29:37Z",
+      "originalCommit": null,
+      "originalAuthorDate": null
+    },
+    {
+      "step": 46,
+      "actualCommit": "98c858f24aa834cc66fdb45b8241bc58076524e9",
+      "actualAuthorDate": "2026-10-10T14:31:02Z",
+      "originalCommit": null,
+      "originalAuthorDate": null
+    }
+  ]
+}

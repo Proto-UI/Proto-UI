@@ -1,0 +1,165 @@
+{
+  "date": "2026-10-11",
+  "scope": "Generic number.list own-output snapshot repair; non-normative evidence",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "0b65111ec484571b39894fc7466b91793b782090",
+  "sourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+  "parentBinding": "The sole parent of this record-only commit must have sourceTree.",
+  "finding": "STATE-LIST-SNAPSHOT-OWN-ELEMENT-002",
+  "bindings": [
+    {
+      "path": "packages/modules/state/src/validate.ts",
+      "blob": "b00ec0cf0a77dd7b500106d3d45f964f4cd70ede",
+      "sha256": "37ada71faf2c4ce36ffe3d18b5ef1799fb26839d530ed741a7d93e2a551c993a"
+    },
+    {
+      "path": "packages/modules/state/test/number-list.test.ts",
+      "blob": "d778eb0713c90884cab94afab23c9196539db5a2",
+      "sha256": "db7d5caf964b1d0877872031afda0bcc8905dfc17eb6eaab72e51231a2377595"
+    }
+  ],
+  "correction": "The previously published checkpoint could produce a frozen hole when Array push encountered an inherited numeric setter. Snapshot construction now defines own numeric data properties using a null-prototype property descriptor before freezing. Existing input validation and scalar behavior are unchanged.",
+  "supersededClaim": "Earlier local checkpoint passes did not cover this newly discovered output-side case; they do not establish absence of this finding. The failure and correction are preserved rather than rewriting prior records.",
+  "authorValidation": {
+    "originalNewCounterexample": {
+      "failed": 1,
+      "passed": 9,
+      "inheritedSetterCalls": 3
+    },
+    "kernelAfterRepair": 14,
+    "affectedAfterRepair": 113,
+    "typeContracts": "pass"
+  },
+  "independentValidation": {
+    "boundedOwnOutputAndRegressionTests": 22,
+    "workspaceTypes": "pass",
+    "typeContracts": "pass",
+    "exactTwoFileHashesVerified": true
+  },
+  "publisherValidation": {
+    "combined": {
+      "files": 28,
+      "passed": 225,
+      "failed": 0,
+      "stateTests": 113,
+      "inheritedReadyTests": 112
+    },
+    "workspaceTypesExit": 0,
+    "typeContractsExit": 0,
+    "normalHooks": "pass; source tree unchanged"
+  },
+  "budgetComparison": {
+    "base": "0b65111ec484571b39894fc7466b91793b782090",
+    "tree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+    "environment": {
+      "node": "v24.19.0",
+      "zlib": "1.3.2.1-motley-3246f1b",
+      "esbuild": "0.25.12",
+      "platform": "linux",
+      "arch": "x64"
+    },
+    "measurement": {
+      "bundle": true,
+      "minify": true,
+      "treeShaking": true,
+      "format": "esm",
+      "platform": "browser",
+      "target": ["es2020"],
+      "gzipLevel": 9
+    },
+    "results": [
+      {
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "base": 1737,
+        "candidate": 1737,
+        "delta": 0,
+        "pass": true,
+        "budget": 3000,
+        "unchangedMinifiedHash": true
+      },
+      {
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "base": 635722,
+        "candidate": 635722,
+        "delta": 0,
+        "pass": true,
+        "budget": 700000,
+        "unchangedMinifiedHash": true
+      },
+      {
+        "entry": "packages/core/src/index.ts",
+        "base": 7499,
+        "candidate": 7499,
+        "delta": 0,
+        "pass": true,
+        "budget": 7600,
+        "unchangedMinifiedHash": true
+      },
+      {
+        "entry": "packages/runtime/src/index.ts",
+        "base": 82767,
+        "candidate": 82795,
+        "delta": 28,
+        "pass": false,
+        "budget": 78500,
+        "unchangedMinifiedHash": false
+      },
+      {
+        "entry": "packages/adapters/react/src/index.ts",
+        "base": 115035,
+        "candidate": 115065,
+        "delta": 30,
+        "pass": false,
+        "budget": 106000,
+        "unchangedMinifiedHash": false
+      },
+      {
+        "entry": "packages/adapters/vue/src/index.ts",
+        "base": 114854,
+        "candidate": 114884,
+        "delta": 30,
+        "pass": false,
+        "budget": 106000,
+        "unchangedMinifiedHash": false
+      },
+      {
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "base": 140931,
+        "candidate": 140961,
+        "delta": 30,
+        "pass": false,
+        "budget": 132000,
+        "unchangedMinifiedHash": false
+      },
+      {
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "base": 3931,
+        "candidate": 3931,
+        "delta": 0,
+        "pass": true,
+        "budget": 6000,
+        "unchangedMinifiedHash": true
+      },
+      {
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "base": 4911,
+        "candidate": 4911,
+        "delta": 0,
+        "pass": true,
+        "budget": 7000,
+        "unchangedMinifiedHash": true
+      }
+    ]
+  },
+  "limits": [
+    "Four strict budget failures remain; advisory execution is not a within-budget pass, and no ceiling was raised.",
+    "Fresh packed-consumer results for this repaired source are not claimed; previous packed evidence does not automatically cover changed product bytes.",
+    "The four deferred documentation/budget-record files are not part of this repair.",
+    "Native browser, AT, Compiler support and Slider integration remain unverified or unimplemented here.",
+    "No new full-delivery acceptance: 5 complete / 63 unfinished, core 0 / 55."
+  ]
+}

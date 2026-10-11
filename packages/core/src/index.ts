@@ -25,3 +25,10 @@ export * from './text-control';
 
 export * from './caps';
 export * from './image-view';
+export * from './control-label';
+export * from './material';
+export * from './axis-input';
+
+export * from './context-menu-input';
+
+export * from './native-link';

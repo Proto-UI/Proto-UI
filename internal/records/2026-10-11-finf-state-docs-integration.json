@@ -1,0 +1,73 @@
+{
+  "date": "2026-10-11",
+  "scope": "Remaining three State documentation projections and one budget/validation record; non-normative evidence",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "d2d3ea63c485fbfe4a4a794dc797e28cf665db80",
+  "sourceTree": "1438bfca3c1d2aafed49b3dab611230f5d11cf62",
+  "parentBinding": "The sole parent of this record-only commit must have sourceTree.",
+  "bindings": [
+    {
+      "path": "apps/www/src/content/docs/en/specifications/state.mdx",
+      "blob": "ea28224cae1bcb3ed846238558928c9361a73dc1",
+      "sha256": "add7fc44fd58f520162218461e2876fc83d9885f8e2431c5b6172e4995b4c172"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/specifications/state.mdx",
+      "blob": "99f85518ac28801b5a05e25f5b25adf86f77bfdb",
+      "sha256": "7124b69bffb92d30e1f64fbdaebbbb99abd6873f0597ff89503e9a77fea8d6e7"
+    },
+    {
+      "path": "internal/contracts/state/state-v0.md",
+      "blob": "f4a8be01b09e57ff024bb0bc3ed065ab5b7d847b",
+      "sha256": "738b1cfa026256049d7f028dfc26e55ae0865c74c021d5d04088baf376277ba1"
+    },
+    {
+      "path": "internal/records/2026-10-11-state-number-list-budget.json",
+      "blob": "d855e3ed9d09750bcea6ab44aaa542598779ac23",
+      "sha256": "e1e1d3761396b3091c50eb75e92605750f5c779c409eac59798777840cffa46a"
+    }
+  ],
+  "productBytesUnchanged": true,
+  "publishedRuntimeRepair": {
+    "source": "d523c51e2b37752552b868e013384808958a6419",
+    "proof": "d2d3ea63c485fbfe4a4a794dc797e28cf665db80",
+    "testedSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01"
+  },
+  "publisherValidation": {
+    "normalSourceHookExit": 0,
+    "sourceTreeUnchangedByHook": true,
+    "bilingualMDXParse": "pass",
+    "publicDocsTests": {
+      "tests": 378,
+      "passed": 370,
+      "failed": 8,
+      "exitCode": 1,
+      "failureNamesMatchIndependentExactBaseline": true
+    },
+    "publicDocsCheck": {
+      "diagnostics": 82,
+      "exitCode": 1,
+      "entireOutputMatchesIndependentBaseline": true
+    }
+  },
+  "independentScope": {
+    "fourFileHashes": "matched",
+    "catalog": {
+      "diagnostics": 550,
+      "matchesBaseline": true
+    },
+    "budget": "Three-point exact measurements checked; four strict failures remain and no ceiling changes.",
+    "packed": "Author repaired-source 37 local public tarballs plus three locked dependencies passed JS/types; reviewer checked 40 archive hashes and 758 installed files, but did not execute the independent packed consumer."
+  },
+  "limits": [
+    "All applicable number.list entities remain draft; documentation does not promote them.",
+    "Compiler/native-host support and Slider Range/Multiple integration are not delivered by these documentation changes.",
+    "Public-doc tests/check and catalog retain their observed failures. No all-green aggregate or within-budget claim.",
+    "No native paint, AT, full-delivery or merge acceptance is added; 5 complete / 63 unfinished, core 0 / 55.",
+    "Historical blocked tree18b is not represented as the repaired implementation."
+  ]
+}

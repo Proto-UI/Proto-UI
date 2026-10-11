@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "observedAt": "2026-10-07T11:44:00Z",
+  "parents": [
+    "a592abec0e8f4005011d73943bd5eb7b9898dd63",
+    "c8d0ca8cecd6ac12b27678df40a86722d4795068"
+  ],
+  "reason": "The live main ref had advanced through #835 and #596 while the PR REST base cached a575. An actual Git merge-tree exposed six conflicts and prevented a mergeable PR check target. This is one necessary normal main integration, not an empty event trigger.",
+  "unchangedSourceCommit": "7881f90bd22a56fd8b5771d33064a4ca981fe2ba",
+  "resolution": {
+    "wcAndRuntime": "Both files are byte-identical between actual main c8 and a575. Preserve a592 exact bytes: logical adoption rollback/ControlLabel and guarded failed-created cleanup. Recursive merge-base output would otherwise silently remove these newer Finf semantics and duplicate created callbacks.",
+    "overview": "Retain the existing draft Collapsible overview entry.",
+    "runtimePlan": "Preserve every Finf browser suite and one unique Base Collapsible registration; discard only a duplicate inserted by merge.",
+    "budget": "Preserve measured a592 ceilings; no package source or diagnostic byte changes.",
+    "otherMainChanges": "All 36 changed pre-existing files equal the corresponding main c8 blobs exactly; includes preview containment governance/integration, historical records and vendor formatting. No third-party experiment was executed."
+  },
+  "verification": {
+    "actualMergeTreeUiTests": {
+      "files": 9,
+      "passed": 169
+    },
+    "runtimePlanControls": {
+      "passed": 121
+    },
+    "previewSourceControls": {
+      "tests": 129,
+      "passed": 128,
+      "skipped": 1,
+      "failed": 0
+    },
+    "packageBudgets": {
+      "passed": 9,
+      "allElevenArtifactsAndEnvironmentFullJsonIdenticalToA592": true
+    },
+    "vendorFormat": "TypeScript parsed AST equal after removing formatting-only parenthesized wrappers; no source execution",
+    "prototypeMatrix": "exact source7881 proof remains unchanged; native/optical acceptance not promoted"
+  },
+  "debt": [
+    "No new native browser result exists until this exact merged head runs in Actions.",
+    "Full source-stage Finf feature union remains separate; 0/68 complete.",
+    "Reference snapshot pin identity review remains unresolved."
+  ],
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)"
+}

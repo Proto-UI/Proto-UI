@@ -25,6 +25,8 @@ jobs:
             families: dropdown-menu,select,dialog
           - shard: intent-and-tabs
             families: tooltip,hover-card,tabs
+          - shard: naming-and-disclosures
+            families: label,collapsible,accordion,field
           - shard: passive-and-editors
             families: badge,card,skeleton,separator,spinner,textarea,scroll-area
     runs-on: ubuntu-24.04
@@ -56,6 +58,7 @@ jobs:
           node --test apps/www/scripts/contrast-report-journal.test.mjs \
             apps/www/scripts/contrast-audit-plan.test.mjs \
             apps/www/scripts/contrast-anatomy.test.mjs \
+            scripts/test/contrast-stroke-calibration.test.mjs \
             scripts/test/brutalist-contrast-toolbar.test.mjs
           corepack pnpm@10.32.1 exec vitest run \
             apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts \

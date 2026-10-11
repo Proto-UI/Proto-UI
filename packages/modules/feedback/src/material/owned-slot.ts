@@ -5,9 +5,10 @@ import {
   type PrototypeModuleDeclaration,
 } from '@proto.ui/core';
 import type { ModuleDeps } from '@proto.ui/module-base';
+import { OWNED_MATERIAL_ID } from './declaration-id';
 
 /** Private finite declaration shared by the source specializer and Feedback. */
-export const OWNED_MATERIAL_ID = 'experimental/feedback-material-v1';
+export { OWNED_MATERIAL_ID } from './declaration-id';
 export type OwnedMaterialConfig = Readonly<{
   version: 1;
   material: Readonly<{ kind: 'refractive'; variant: 'regular' }>;

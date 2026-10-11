@@ -308,3 +308,17 @@ const manualPrototypeModules = {
   },
 };
 ```
+
+## Generic preview 的 Portal 主题
+
+主题值属于 Website consumer。Generic preview 继续使用 `resolveProjectionThemeSurfaceStyle` / `watchProjectionThemeSurfaceStyle` 的同一份完整输入；普通内容从 canvas 继承，不会按 `prototypeId` 猜测或自动搬运主题。
+
+明确由 demo 拥有、离开 canvas 物理祖先的 Portal Content/Mask，可在对应 `kind: 'proto'` 节点写 `previewTheme: 'portal'`，并声明唯一非空 `ref`。这只是 Website composition 描述，不是 Prototype Props 或新的 Adapter 保证。目前只有 Brutalist AlertDialog demo 的 Content/Mask 使用该标记。
+
+Composition 把 theme map 放在节点自有 `surfaceStyle` 之前；显式样式按原有顺序后置覆盖。仅这个 opt-in merge 会用 CSSOM 解析字符串，并逐项规范化 camelCase / kebab-case 等价属性；重复声明移到它最后出现的位置，保留 shorthand / longhand 顺序。CSS custom property 保留大小写；对象中的空字符串用于撤销，CSS 字符串中的空声明按 CSSOM 忽略。`!important` 仍不受支持。这样避免 Vue 2 将 mixed-array 字符串项当作数字属性；未标记节点保持原 renderer 路径，不宣称全局 mixed-array 支持。
+
+四个 Website renderer 的独立 `api.setSurfaceStyle` 更新现有 normalized surface channel，不改变 `api.setProps` 的语义。框架挂载期间的新 appearance、已打开 Portal 及再次打开的物理面都使用当前值；销毁或宿主替换后的旧 API 不得再投影。不要直接写 DOM ref 来代替这个通道，尤其不能把 Web Component boundary 当作任意 profile 的 presentation surface。
+
+Website passive shell 的可选 `prepareAppearance` 返回同步 publish / rollback lease。它与既有 scope controller 的真实 commit 边界共享同一 theme map 和 generation receipt：publish 在内容迁移及其同步回调之前更新 owned normalized 输入；失败时先恢复 retained 输入，再归还内容。候选仅加载完成不发布主题，Promise 完成顺序不决定可见 family。同 family 的更新依据 controller 当前已提交的 receipt，嵌套更新和失败回滚不得覆盖更新的持有者。没有此 callback 的既有调用保持原路径；这只是 Website composition 的事务参与，不是跨 renderer 原生绘制的原子性保证。
+
+`C-HOST-SURFACE-PROJECTION-0001`、`C-PROTOTYPE-STYLE-CLOSURE-0001`、`D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001` 仍为 draft；本功能没有改变它们的生命周期或通用 Portal 自动继承承诺。真实浏览器的颜色、圆角、字体与焦点行程仍须独立验证。

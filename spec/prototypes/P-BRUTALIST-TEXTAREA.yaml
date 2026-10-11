@@ -21,13 +21,8 @@ criteria:
       en: Brutalist styling must project directly to the same contentless Base-backed native textarea without adding a wrapper control, child renderer, or second target.
   - id: P-BRUTALIST-TEXTAREA-VISUAL-GRAMMAR
     text:
-      en: >-
-        Root uses block w-full min-h-28 resize-y, rounded-base 5px, 2px theme-foreground border, bg-secondary-background/text-foreground, p-3 and font-sans font-medium text-sm leading-6 with no shadow. Focus-visible ring and disabled cursor/opacity remain unchanged.
-
-
-      zh-CN: >-
-        Root 使用 block w-full min-h-28 resize-y、rounded-base 5px、2px theme-foreground 边框、bg-secondary-background/text-foreground、p-3 与 font-sans font-medium text-sm leading-6，无阴影；focus-visible ring 与 disabled cursor/opacity 不变。
-
+      en: Root projects flex w-full min-h-[80px] resize-y, rounded-base 5px, border-2 border-border, bg-secondary-background text-foreground, px-3 py-2 and font-sans font-medium text-sm with no explicit leading-6 override or shadow. Native selection uses selection:bg-main selection:text-main-foreground. Existing focus-visible ring, disabled cursor/opacity and host-owned resize remain unchanged. Placeholder and invalid styling remain unimplemented differences under the existing style-syntax and Base ownership boundaries.
+      zh-CN: Root 投射 flex w-full min-h-[80px] resize-y、rounded-base 5px、border-2 border-border、bg-secondary-background text-foreground、px-3 py-2 与 font-sans font-medium text-sm，不加 leading-6 override 或阴影；原生选择使用 selection:bg-main selection:text-main-foreground。既有 focus-visible ring、disabled cursor/opacity 与 host-owned resize 保持不变。placeholder 与 invalid 样式仍是既有 style-syntax/Base ownership 边界下未实现的差异。
 
   - id: P-BRUTALIST-TEXTAREA-NO-PROTOCOL-DELTA
     text:
@@ -37,6 +32,8 @@ sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/textarea/root.proto.ts
   - path: packages/prototypes/brutalist/src/textarea/types.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/textarea.tsx
+    label: Pinned Neo source; SHA256 6734f7c84352fb50bbdf1ececcfb3f8f8e21cdcc16b3f463e8a5d1808e3720c9
 relates:
   knowledge:
     - K-BRUTALIST-0001
@@ -58,6 +55,9 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged the Brutalist Textarea visual projection over the complete Base protocol.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Reconciled this draft presentation with exact pinned Neo source; retained Base semantics and explicitly bounded remaining parity and accessibility extensions.
 tags:
   - prototype
   - brutalist

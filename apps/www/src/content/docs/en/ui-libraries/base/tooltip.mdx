@@ -14,6 +14,7 @@ Base Tooltip consists of Root, Trigger, and Content. Tooltip Group is an adjacen
 - Trigger additively references the `role="tooltip"` Content through `aria-describedby` only while open.
 - Escape enters Root's unified close request channel.
 - Moving to a sibling during the Group warm window opens it immediately; the previous uncontrolled Tooltip ends perceptual presence without a visible exit overlap, and initial delay returns after `skipDelay`.
+- Draft lifetime rule: when the current active Root unmounts or is disposed, its Group immediately returns to cold delay. Ordinary closure keeps the `skipDelay` window. A retained open Root registers again on remount; cleanup never clears a newer active Root, and a controlled Root that refused closure is not automatically reselected.
 
 Portal is currently owned by Content's Overlay and renderer projection rather than a separate Base Portal prototype. Arrow remains outside the current Base guarantee until a governed geometry and positioning channel exists.
 

@@ -22,6 +22,10 @@ describe('collectProtoStyleTokens', () => {
 
     for (const token of [
       'data-[checked]:opacity-100',
+      'data-[checked]:bg-primary',
+      'data-[checked]:border-primary',
+      'data-[checked]:text-primary-foreground',
+      'dark:data-[checked]:bg-primary',
       'data-[focus-visible]:border-ring',
       'data-[focus-visible]:ring-3',
       'data-[focus-visible]:ring-ring/50',
@@ -30,6 +34,9 @@ describe('collectProtoStyleTokens', () => {
       'dark:bg-input/30',
     ]) {
       expect(tokens).toContain(token);
+    }
+    for (const legacy of ['gap-3', 'shadow-xs', 'text-primary', 'transition-[color,box-shadow]']) {
+      expect(tokens).not.toContain(legacy);
     }
   });
 

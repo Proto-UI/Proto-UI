@@ -44,3 +44,17 @@ export interface AnchoredPositionHandle {
   disconnect(): void;
   getSnapshot(): AnchoredPositionSnapshot | null;
 }
+
+/** A host-logical root-content region; no browser or platform objects cross this boundary. */
+export type AvailableSpaceRect = Readonly<{ x: number; y: number; width: number; height: number }>;
+export type AvailableSpaceFrame = Readonly<{
+  rect: AvailableSpaceRect | null;
+  revision: number;
+  viewEpoch: number;
+}>;
+export type AvailableSpaceConnection = Readonly<{ target: unknown; boundary: 'root-content' }>;
+export interface AvailableSpaceHandle {
+  connect(connection: AvailableSpaceConnection): void;
+  requestUpdate(): void;
+  disconnect(): void;
+}

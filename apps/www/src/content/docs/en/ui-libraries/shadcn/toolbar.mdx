@@ -1,0 +1,21 @@
+---
+title: 'Toolbar'
+description: 'Keyboard-roving commands with an accessible toolbar name and separator.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Keyboard-roving commands with an accessible toolbar name and separator.
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toolbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root owns disabled, orientation, loop and a11yLabel. Button emits action with its value on enabled activation. Only one enabled command participates in Tab; arrows move within the toolbar. Separator follows the cross axis.
+
+Parts: Root, Button, Separator.
+
+Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.

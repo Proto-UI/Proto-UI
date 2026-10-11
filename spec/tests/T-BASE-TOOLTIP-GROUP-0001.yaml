@@ -22,7 +22,18 @@ cases:
     title: Uncontrolled sibling handoff ends the previous Content presence immediately
     covers: [P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF]
     expectation: tooltip-group-handoff-has-no-visible-overlap
+  - id: T-BASE-TOOLTIP-GROUP-0001-CASE-LIFETIME
+    title: Active retirement restores cold immediately without clearing newer ownership
+    covers: [P-BASE-TOOLTIP-GROUP-LIFETIME]
+    expectation: tooltip-group-owner-only-retirement-retained-remount-and-synchronous-reentry
 implementations:
+  - id: prototypes-base-tooltip-group-runtime-lifetime
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/tooltip-group-lifecycle.test.ts
+    required: true
+    consumesCases: [T-BASE-TOOLTIP-GROUP-0001-CASE-LIFETIME]
+    exercises: [P-BASE-TOOLTIP-GROUP, P-BASE-TOOLTIP]
   - id: prototypes-base-tooltip-group-contract
     kind: module-test
     status: passing
@@ -45,10 +56,14 @@ verifies:
           P-BASE-TOOLTIP-GROUP-WARMTH,
           P-BASE-TOOLTIP-GROUP-ACTIVE-OWNER,
           P-BASE-TOOLTIP-GROUP-INSTANT-HANDOFF,
+          P-BASE-TOOLTIP-GROUP-LIFETIME,
           P-BASE-TOOLTIP-GROUP-NO-NEW-MODULE,
         ]
 exercises: { prototypes: [P-BASE-TOOLTIP-GROUP, P-BASE-TOOLTIP] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Added real Runtime retirement, remount, controlled ownership, pending intent, and callback reentry evidence for the forward-defined draft lifecycle.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added Tooltip Group warm-window and active-owner coordination coverage.

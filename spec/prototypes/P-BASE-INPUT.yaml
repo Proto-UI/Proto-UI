@@ -8,6 +8,13 @@ statement:
   zh-CN: Base Input 通过 Text Control host boundary 拥有一个 single-line plain-text editor；当前 Web profile 使用一个原生 input[type=text]。它不拥有 form submission、validation、search command 或 arbitrary native input types。
   en: Base Input owns one single-line plain-text editor through the Text Control host boundary; the current Web profile uses one native input[type=text]. It does not own form submission, validation, search commands, or arbitrary native input types.
 criteria:
+  - id: P-BASE-INPUT-EXTERNAL-LABEL
+    text:
+      en: An independent Base Label may associate through the explicit typed InstanceAssociations.controlLabel input and C-CONTROL-LABEL-0001. This is not a Props value, label text Prop or new Anatomy part. A qualifying label request shares the focus-only operation, leaving native editing, value, selection and composition unchanged. Naming and activation remain independent, and a stale pair cannot perform subsequent target effects.
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-INPUT-AUTHORING-ENTRIES
     text:
       zh-CN: '`base-input-root` 与 `asInputRoot` 必须是同一 Root protocol 的 direct 与 authored-asHook entries，并复用同一冻结 single-line Text Control requirement。'
@@ -57,6 +64,9 @@ verifies:
   tests:
     - T-BASE-INPUT-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged Base Input as the accepted single-line plain-text leaf protocol after Text Control Checkpoint B.

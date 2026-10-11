@@ -15,6 +15,8 @@ export function validateSemantic(semantic: string): void {
 export function validateAndNormalizeDefaultValue(spec: StateSpec, defaultValue: unknown): any {
   // 这里返回“可能被 clamp 修正后的默认值”
   switch (spec.kind) {
+    case 'number.list':
+      return normalizeNumberList(defaultValue);
     case 'bool': {
       if (typeof defaultValue !== 'boolean')
         throw new Error(`[State] bool defaultValue must be boolean`);
@@ -78,6 +80,9 @@ export function validateAndNormalizeDefaultValue(spec: StateSpec, defaultValue: 
 export function validateValue(spec: StateSpec, next: unknown): void {
   // set / setDefault 时校验（不做 clamp；clamp 只用于 range 的默认值 define 时）
   switch (spec.kind) {
+    case 'number.list':
+      normalizeNumberList(next);
+      return;
     case 'bool':
       if (typeof next !== 'boolean') throwSpec(`[State] bool value must be boolean`);
       return;
@@ -116,4 +121,45 @@ export function validateValue(spec: StateSpec, next: unknown): void {
 
 function throwSpec(msg: string): never {
   throw new Error(msg);
+}
+
+/** Own descriptors avoid evaluating ordinary element or extra-property accessors. */
+export function normalizeNumberList(value: unknown): readonly number[] {
+  if (!Array.isArray(value)) {
+    throwSpec('[State] number.list value must be a dense finite-number array');
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value as object);
+  const length = descriptors.length.value as number;
+  if (Reflect.ownKeys(descriptors).length !== length + 1) {
+    throwSpec('[State] number.list value must have only dense indices and length');
+  }
+  const snapshot: number[] = [];
+  for (let index = 0; index < length; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(descriptors, String(index))?.value;
+    if (
+      !descriptor ||
+      !Object.hasOwn(descriptor, 'value') ||
+      typeof descriptor.value !== 'number' ||
+      !Number.isFinite(descriptor.value)
+    ) {
+      throwSpec('[State] number.list elements must be own finite-number data values');
+    }
+    // Define own elements: assignment/push can invoke an inherited numeric setter.
+    // The descriptor itself must not inherit get/set/value fields either.
+    const element = {
+      __proto__: null,
+      value: Object.is(descriptor.value, -0) ? 0 : descriptor.value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    };
+    Object.defineProperty(snapshot, String(index), element);
+  }
+  return Object.freeze(snapshot);
+}
+
+export function numberListEqual(left: readonly number[], right: readonly number[]): boolean {
+  return (
+    left.length === right.length && left.every((value, index) => Object.is(value, right[index]))
+  );
 }

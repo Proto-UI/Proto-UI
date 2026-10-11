@@ -8,9 +8,9 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
-Stage-0 fallback for the planned Liquid Glass family: translucent fill and 4px backdrop blur, gated by live preferences and explicit host support. This is ordinary translucency and blur, not Apple Liquid Glass lensing. Shape-dependent refraction, responsive highlights, adaptive appearance and liquid shape transitions remain unimplemented. Unknown or reduced/contrast settings restore an opaque surface.
+V2 Liquid Glass intent is connected to an opt-in self-optical Web provider. The Previewer supplies a visible, dynamic application-owned canvas as the exact sampled background. Arbitrary DOM and browser-compositor capture are not supported: intervening paint, cross-scope portals or unavailable source/preferences retain readable fallback. Reduced motion uses static optics. Exact-head browser evidence is required before admitting this draft provider; native, Apple-private, group/morph and full Compiler equivalence remain unverified.
 
-Button is registered now. Other Base parts are being added explicitly, never aliased to another family. General Compiler and full GPUI/Flutter/Qt realization remain unverified. The source package is private and unreleased.
+Button, Surface, Text, Label, Collapsible, Accordion and the five-part Select now have separate direct Base projections. Select Trigger/Content declare shared explicit optical intent with opaque fallback; exact-head optical painting still requires accepted browser evidence. Other Base parts are being added explicitly, never aliased to another family. General Compiler and full GPUI/Flutter/Qt realization remain unverified. The source package is private and unreleased.
 
 <PrototypeLibraryOverview library="liquid-glass" locale="en" />
 
@@ -21,3 +21,7 @@ Button is registered now. Other Base parts are being added explicitly, never ali
 ## Passive atoms
 
 [Surface](/en/ui-libraries/liquid-glass/surface/) is a draft reusable presentation atom in this workspace. It preserves the existing semantic owner and does not establish complete family or native/Compiler coverage.
+
+[Collapsible (Draft)](/en/ui-libraries/liquid-glass/collapsible/) provides Root, Trigger and Content projections over the shared Base disclosure protocol.
+
+[Select (Draft)](/en/ui-libraries/liquid-glass/select/) · [Text (Draft)](/en/ui-libraries/liquid-glass/text/)

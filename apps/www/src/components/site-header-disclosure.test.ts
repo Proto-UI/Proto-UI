@@ -649,3 +649,32 @@ it.each([true, false])(
     expect(root.dataset.siteMenuOpen).toBe(String(latestOpen));
   }
 );
+
+describe('server-authored compact preferences', () => {
+  it.each([true, false])(
+    'preserves one native owner until enhancement and restores it at teardown (compact=%s)',
+    (mobile) => {
+      const target = new EventTarget();
+      query = Object.assign(target, { matches: mobile }) as MediaQueryList;
+      vi.spyOn(window, 'matchMedia').mockReturnValue(query);
+      document.body.innerHTML = `<header data-site-header data-docs-site-header>
+      <details data-site-header-panel><summary>Settings</summary><div data-site-header-compact-context><div data-site-header-preferences><input value="retained" /></div></div></details>
+      <div data-site-header-context data-site-header-wide-preferences><button data-contents>Contents</button></div><button data-menu>Menu</button>
+    </header>`;
+      const root = document.querySelector<HTMLElement>('header')!;
+      const compact = root.querySelector('[data-site-header-compact-context]')!;
+      const wide = root.querySelector('[data-site-header-wide-preferences]')!;
+      const preferences = root.querySelector('[data-site-header-preferences]')!;
+      const input = preferences.querySelector('input')!;
+      disclosure = initSiteHeaderDisclosure(root);
+      disclosure.bindButton(root.querySelector<HTMLElement>('[data-menu]')!);
+      expect(preferences.parentElement).toBe(compact);
+      disclosure.enhance();
+      expect(preferences.parentElement).toBe(mobile ? compact : wide);
+      expect(input.value).toBe('retained');
+      expect(root.querySelectorAll('[data-site-header-preferences]')).toHaveLength(1);
+      disclosure.destroy();
+      expect(preferences.parentElement).toBe(compact);
+    }
+  );
+});

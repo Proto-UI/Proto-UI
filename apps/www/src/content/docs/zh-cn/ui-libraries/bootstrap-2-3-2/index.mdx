@@ -10,7 +10,7 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 固定 2.3.2 的经典渐变、凸起控件、输入框与分隔线视觉语言；交互与值归属全部继承 Base。
 
-当前已实现的 draft 子集包括 Button、Checkbox Root / Indicator、Switch Root / Thumb、Toggle、Input、Textarea 与 Separator，共七类组件、九个原型部件。这仍是 partial family，不等于完整 Bootstrap 或 Base 组件集，也不接入首页的完整族选择器。
+当前已实现的 draft 子集包括 Button、Checkbox Root / Indicator、Switch Root / Thumb、Toggle、Input、Textarea、Separator、Surface、Text、Label、Collapsible、Accordion 与五 part Select。这仍是 partial family，不等于完整 Bootstrap 或 Base 组件集，也不接入首页的完整族选择器。
 
 Switch 与 Toggle 是设计语言扩展（design-language extensions），不是 Bootstrap 2.3.2 的原版组件。Checkbox 使用自定义 Root / Indicator 部件，不冒充归档版本的原生 checkbox 实现。不引入旧版 jQuery 运行时或 Glyphicons。
 
@@ -23,3 +23,11 @@ Switch 与 Toggle 是设计语言扩展（design-language extensions），不是
 ## 被动原子
 
 [Surface](/zh-cn/ui-libraries/bootstrap-2-3-2/surface/) 是当前工作区的 draft 可复用呈现原子。它们保留原有语义 owner，不代表完整家族或原生/Compiler 覆盖。
+
+[Collapsible (Draft)](/zh-cn/ui-libraries/bootstrap-2-3-2/collapsible/) 提供共享 Base disclosure 协议的 Root、Trigger、Content 投影。
+
+[Select (Draft)](/zh-cn/ui-libraries/bootstrap-2-3-2/select/) · [Text (Draft)](/zh-cn/ui-libraries/bootstrap-2-3-2/text/)
+
+## Thumbnail 组合
+
+库入口通过现有 Surface 与 Text 原型组合历史版本的文字型 Thumbnail，并使用经典蓝色渐变行动外观；导航与焦点仍由原生链接拥有。这是现有原型的组合，不是新增现代 Card 组件，也不代表完整体系已通过验收。

@@ -1612,6 +1612,78 @@ describe('lowered hook coverage', () => {
     }
   });
 
+  it('lowers declared disclosure and Field state identities through the real extractor', async () => {
+    const expected = {
+      asCollapsibleTrigger: {
+        expanded: 'expanded',
+        hovered: 'hovered',
+        focusVisible: 'focus-visible',
+        pressed: 'pressed',
+        disabled: 'disabled',
+      },
+      asAccordionTrigger: {
+        expanded: 'expanded',
+        collapseBlocked: 'collapse-blocked',
+        hovered: 'hovered',
+        focusVisible: 'focus-visible',
+        pressed: 'pressed',
+        disabled: 'disabled',
+      },
+      asFieldLabel: { disabled: 'disabled', required: 'required' },
+      asFieldTextControl: {
+        disabled: 'disabled',
+        focusVisible: 'focus-visible',
+        invalid: 'invalid',
+        pending: 'pending',
+        fieldRequired: 'field-required',
+        required: 'field-required',
+      },
+    };
+    const dir = await mkdtemp(path.join(tmpdir(), 'lowered-disclosure-field-'));
+    try {
+      for (const [hook, states] of Object.entries(expected)) {
+        const source = [
+          `const state = ${hook}().stateHandles;`,
+          ...Object.keys(states).map((state) => rule(`w.state(state.${state}).eq(true)`)),
+        ].join('\n');
+        await writeFile(path.join(dir, `${hook}.proto.ts`), source);
+        const scan = scanRuleStateReads(source);
+        expect(scan.unresolved).toEqual([]);
+        expect(scan.usages).toEqual(Object.keys(states).map((state) => ({ hook, state })));
+        for (const [state, attribute] of Object.entries(states)) {
+          expect(loweredHookStates(hook)?.get(state)).toBe(`data-[${attribute}]`);
+        }
+      }
+      const tokens = await collectProtoStyleTokens(dir);
+      for (const states of Object.values(expected)) {
+        for (const attribute of Object.values(states))
+          expect(tokens).toContain(`data-[${attribute}]:bg-primary`);
+      }
+      expect(loweredHookStates('asFieldTextControl')?.has('madeUpState')).toBe(false);
+      expect(loweredHookStates('asUnknownField')).toBeNull();
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it('keeps Field required aliases bound to the declared fieldRequired state', async () => {
+    const dir = await mkdtemp(path.join(tmpdir(), 'lowered-field-required-'));
+    try {
+      await writeFile(
+        path.join(dir, 'control.proto.ts'),
+        [
+          'const { required } = asFieldTextControl().stateHandles;',
+          rule('w.state(required).eq(true)'),
+        ].join('\n')
+      );
+      const tokens = await collectProtoStyleTokens(dir);
+      expect(tokens).toContain('data-[field-required]:bg-primary');
+      expect(tokens).not.toContain('data-[required]:bg-primary');
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
   it('resolves every hook state a shipped rule condition reads', async () => {
     const found: Array<{ file: string; hook: string; state: string }> = [];
     const blind: string[] = [];

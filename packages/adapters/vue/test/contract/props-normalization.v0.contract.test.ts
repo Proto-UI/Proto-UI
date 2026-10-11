@@ -49,6 +49,7 @@ describe('adapter-vue: Props normalization contract', () => {
           classifiedClass: { type: 'string', default: 'missing' },
           classifiedHostClass: { type: 'string', default: 'missing' },
           listenerType: { type: 'string', default: 'missing' },
+          dir: { type: 'string', default: 'ltr' },
         });
         def.lifecycle.onMounted((run) => {
           raw = { ...run.props.getRaw() };
@@ -66,11 +67,13 @@ describe('adapter-vue: Props normalization contract', () => {
             classifiedClass: String(props.class),
             classifiedHostClass: String(props.hostClass),
             listenerType: typeof props.onCheckedChange,
+            dir: props.dir,
           };
         },
       },
       {
         label: 'input',
+        dir: 'rtl',
         class: 'selected-class',
         hostClass: 'selected-host-class',
         onCheckedChange: () => {},
@@ -83,7 +86,30 @@ describe('adapter-vue: Props normalization contract', () => {
       classifiedClass: 'selected-class',
       classifiedHostClass: 'selected-host-class',
       listenerType: 'function',
+      dir: 'rtl',
     });
     mounted.unmount();
   });
+});
+
+// Compatibility control: preserve the existing Prototype-declared semantic `dir` input.
+it('preserves a declared dir with the default classifier', async () => {
+  let resolved: unknown;
+  const proto = definePrototype({
+    name: 'vue-declared-dir-compatibility',
+    setup(def) {
+      def.props.define({ dir: { type: 'string', default: 'ltr' } });
+      def.lifecycle.onMounted((run) => {
+        resolved = run.props.get().dir;
+      });
+      return (r) => [String(r.read.props.get().dir)];
+    },
+  });
+  const mounted = createMountedVueAdapterWithOptions(proto, {}, { dir: 'rtl' });
+  await flushVue();
+  try {
+    expect(resolved).toBe('rtl');
+  } finally {
+    mounted.unmount();
+  }
 });

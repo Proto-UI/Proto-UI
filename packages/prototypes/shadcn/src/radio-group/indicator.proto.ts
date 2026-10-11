@@ -15,7 +15,9 @@ const radioGroupIndicator = definePrototype<
       );
     }
     def.feedback.style.use(
-      tw('flex size-2 shrink-0 items-center justify-center opacity-0 transition-none')
+      tw(
+        'flex size-2 shrink-0 items-center justify-center opacity-0 text-primary-foreground transition-none'
+      )
     );
     def.rule({
       when: (when) => when.state(state.checked).eq(true),
@@ -31,10 +33,9 @@ const radioGroupIndicator = definePrototype<
           width: '100%',
           height: '100%',
           fill: 'currentColor',
-          stroke: 'currentColor',
-          strokeWidth: 2,
+          stroke: 'none',
         },
-        renderer.svg.circle({ cx: 12, cy: 12, r: 10 })
+        renderer.svg.circle({ cx: 12, cy: 12, r: 12 })
       ),
     ];
   },

@@ -1,0 +1,52 @@
+id: P-BOOTSTRAP-2-3-2-TABS-CONTENT
+type: prototype
+title: Bootstrap 2.3.2 Tabs content directly projects the Base Tabs protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft extension inherits the existing draft Base Tabs definition; exact-commit native interaction/paint, generated preset and packed-consumer resource proof, and independent admission remain incomplete. Cataloging does not promote Base or family guarantees.
+summary: Direct Bootstrap 2.3.2 content with inherited Base ownership and a separately bounded family appearance.
+statement:
+  en: The Content is a value-matched tabpanel, consuming asTabsContent once. Preserve Base current/hidden derivation, value/keepMounted inputs, default inactive L1 view detachment, explicit retained-view policy, focus entry, labelled-by relation and teardown. Content must not own selection or duplicate panel visibility state.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT-BASE-INHERITANCE
+    text:
+      en: The Content is a value-matched tabpanel, consuming asTabsContent once. Preserve Base current/hidden derivation, value/keepMounted inputs, default inactive L1 view detachment, explicit retained-view policy, focus entry, labelled-by relation and teardown. Content must not own selection or duplicate panel visibility state.
+  - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT-DIRECT-ENTRY
+    text:
+      en: Expose the independently defined bootstrap-2-3-2-tabs-content prototype and typed tabsContent export through @proto.ui/prototypes-bootstrap-2-3-2/tabs. This is a private source-only entry; registry publication or unsupported Compiler/non-Web admission must not be inferred.
+  - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT-VISUAL-DEFAULT
+    text:
+      en: Provide a shrinkable panel without an imposed card, fixed height or suppressed native focus indication. Base current/hidden and presence policy, rather than paint, control visibility.
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-TABS-CONTENT-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction and same-state screenshots, generated/published-resource closure and independent review support admission?
+    blocks:
+      - activation:P-BOOTSTRAP-2-3-2-TABS-CONTENT
+sources:
+  - path: spec/prototypes/P-BASE-TABS-CONTENT.yaml
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/content.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less
+    label: Fixed Apache-2.0 historical visual reference; no third-party code executed or full plugin compatibility claimed
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-CONTENT
+verifies:
+  tests:
+    - T-RUNTIME-TABS-APPEARANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - tabs
+  - content
+  - projection

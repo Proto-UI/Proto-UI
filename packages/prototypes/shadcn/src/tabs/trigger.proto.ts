@@ -27,6 +27,10 @@ const BASE_TOKENS = [
 const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExposes>({
   name: 'shadcn-tabs-trigger',
   setup(def) {
+    def.props.define({
+      appearance: { type: 'enum', options: ['default', 'underline'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ appearance: 'default' });
     // P-SHADCN-TABS-TRIGGER-BASE-INHERITANCE,
     // P-SHADCN-TABS-TRIGGER-CURRENT-BASE-DEVIATIONS
     const triggerState = asTabsTrigger().stateHandles;
@@ -38,28 +42,60 @@ const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExp
     const { disabled, hovered, focusVisible, selected } = triggerState;
 
     // P-SHADCN-TABS-TRIGGER-CURRENT-VISUAL-SURFACE
-    def.feedback.style.use(tw(BASE_TOKENS));
+    def.rule({
+      when: (w) => w.prop('appearance').eq('default'),
+      intent: (i) => i.feedback.style.use(tw(BASE_TOKENS)),
+    });
 
     // P-SHADCN-TABS-TRIGGER-STATE-DRIVEN-STYLES
     def.rule({
-      when: (w) => w.state(focusVisible).eq(true),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(focusVisible).eq(true)),
       intent: (i) =>
         i.feedback.style.use(tw('border-ring ring-3 ring-ring/50 outline-1 outline-ring')),
     });
 
     def.rule({
-      when: (w) => w.state(selected).eq(true),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-background text-foreground shadow-sm')),
     });
 
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.state(selected).eq(false)),
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.all(w.state(hovered).eq(true), w.state(selected).eq(false))
+        ),
       intent: (i) => i.feedback.style.use(tw('text-foreground')),
     });
 
     def.rule({
-      when: (w) => w.state(disabled).eq(true),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(disabled).eq(true)),
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
+    });
+    def.rule({
+      when: (w) => w.prop('appearance').eq('underline'),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'relative inline-flex flex-none h-auto items-center justify-center gap-1 whitespace-nowrap rounded-none border-0 border-b-2 border-transparent bg-transparent px-0 pt-1 pb-1 text-base font-medium text-muted-foreground shadow-none select-none outline-none'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('underline'), w.state(selected).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('border-foreground text-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('underline'), w.state(hovered).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('text-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('underline'), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('outline-2 outline-ring outline-offset-2')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('underline'), w.state(disabled).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
     });
   },
 });

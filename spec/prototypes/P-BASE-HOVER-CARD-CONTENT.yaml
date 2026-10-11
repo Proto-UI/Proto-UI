@@ -58,6 +58,10 @@ criteria:
     text:
       zh-CN: Arrow、forceMount、自定义 Element collision boundary、sticky 与 hideWhenDetached 不属于当前 Base Content 保证；下游原型不得把缺失能力宣称为兼容。
       en: Arrow, forceMount, custom Element collision boundaries, sticky positioning, and hideWhenDetached are not current Base Content guarantees; downstream prototypes must not claim compatibility for missing capabilities.
+  - id: P-BASE-HOVER-CARD-CONTENT-INTERACTION-LIFETIME
+    text:
+      zh-CN: Content 必须遵循 Root 的 view-generation contribution identity、owner-bound release 与 remount 规则，在实际 unmount/terminal teardown 撤销自身 transient intent；不得清除其他当前贡献、替代 Root open owner 或修改共享 Focus/Runtime lifetime。
+      en: Content must follow Root view-generation contribution identity, owner-bound release, and remount rules, withdrawing its own transient intent on actual unmount or terminal teardown without clearing another current contribution, replacing Root open ownership, or changing shared Focus/Runtime lifetime.
 sources:
   - path: packages/prototypes/base/src/hover-card/content.proto.ts
   - path: packages/prototypes/base/test/hover-card.test.ts
@@ -75,4 +79,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: extended
     summary: Added Trigger PartView anchoring, host-mediated offsets and collision handling, Portal escape, and fixed positioning.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Defined owner-bound withdrawal of this part's view-generation interaction contribution; draft retained.
 tags: [prototype, base, hover-card, content, overlay, transition, positioning, portal]

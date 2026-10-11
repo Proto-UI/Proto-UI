@@ -51,6 +51,15 @@ cases:
       - A-WEB-COMPONENT-0001-ANATOMY
     expectation: anatomy-adapter-conforms
 implementations:
+  - id: anatomy-web-component-rejected-adoption
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/anatomy-reparent-rollback.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0004-CASE-ADAPTER
+    notes:
+      - Actual WC L1 view hiding retains the custom-element logical root. Accepted moves and subscriber-rejected moves preserve the intended token, Context and Anatomy domain; no native browser or detached-marker lifetime claim.
   - id: anatomy-existing-core
     kind: module-test
     status: passing
@@ -159,6 +168,9 @@ verifies:
 sources:
   - path: packages/adapters/base/test/fixtures/anatomy-conformance.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added WC accepted and rejected adoption controls across retained L1 view hiding without changing logical lifetime semantics.
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Mapped existing and new evidence without promoting deferred Anatomy semantics.

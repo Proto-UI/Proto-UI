@@ -14,6 +14,10 @@ statement:
 
 
 criteria:
+  - id: P-SHADCN-BUTTON-WRAP-PROP
+    text:
+      zh-CN: 可选 wrap 布尔呈现选项默认 false；非 icon size 启用后在容器可用宽度内换行、以原 size 高度为最小高度，不改变 Base activation、焦点或 accessible name。icon size 保持固定尺寸。该选项是 Proto UI 扩展，不属于上游逐字 API 兼容承诺；容器及自定义后代仍须提供可用宽度，不能推断任意嵌套内容都可自动修复。
+      en: Optional boolean wrap defaults to false. For non-icon sizes it wraps labels within the containing width and uses the original size height as a minimum, without changing Base activation, focus or accessible names. Icon size retains fixed dimensions. This Proto UI extension is not a literal upstream API parity claim; containers and custom descendants must still provide usable width, and arbitrary nested content is not automatically repaired.
   - id: P-SHADCN-BUTTON-UPSTREAM-IDENTITY
     text:
       zh-CN: Shadcn Button 必须明确标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并以固定 upstream revision/path 作为兼容比较基线；P 实体只治理 Proto UI 投射，不主张上游所有权或认证。

@@ -1,0 +1,21 @@
+---
+title: 'ToggleGroup'
+description: 'Independent single or multiple pressed-value selection with roving focus.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Independent single or multiple pressed-value selection with roving focus.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-toggle-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+value/defaultValue are arrays. multiple=false keeps at most one value; clicking it again clears selection. Controlled valueChange requests never mutate the owner. Disabled, readOnly and duplicate-valued items do not commit. Arrow navigation changes focus without selecting.
+
+Parts: Root, Item.
+
+Draft source; native/GPUI, compiler, packed consumer, screenshots and full independent acceptance remain pending.

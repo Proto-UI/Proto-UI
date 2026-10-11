@@ -8,6 +8,10 @@ statement:
   zh-CN: Dialog Content 是至多一个的 active modal surface。它从 Root open 派生 Overlay/Transition presence，active 时包含 focus，并把 Escape/outside 转换为 Root request。普通模式投射 dialog；alert 模式投射 alertdialog 且不允许 outside dismiss。
   en: Dialog Content is an optional, at-most-one active modal surface. It derives Overlay/Transition presence from Root open, contains focus while active, and converts Escape/outside interactions into Root requests. Normal mode projects dialog; alert mode projects alertdialog and disallows outside dismissal.
 criteria:
+  - id: P-BASE-DIALOG-CONTENT-AVAILABLE
+    text:
+      en: 'Active Dialog Content opts into the logical available-space lease. The direct Base projection centers and bounds the content within that region with scrollable overflow. Styled families own visual insets; Mask remains full-window and edge-attached Sheet policy is not inferred. Unknown host support does not claim safe-area coverage.'
+      zh-CN: 'active Dialog Content 获取逻辑可用空间租约。direct Base 投射在该区域居中并限制内容尺寸，溢出可滚动；样式体系拥有视觉留白，Mask 仍满窗口，不推导贴边 Sheet 策略。未知 host 能力不声称安全区覆盖。'
   - id: P-BASE-DIALOG-CONTENT-AUTHORING-ENTRIES
     text:
       zh-CN: '`base-dialog-content` 与 `asDialogContent` 是同一 protocol 的 authoring entries。'
@@ -36,6 +40,7 @@ criteria:
     text:
       zh-CN: Title 存在时，Content 必须通过稳定同域 identity 被其 labelled，并忽略 Root a11yLabel；Title 不存在时必须移除 labelledBy，并在 Root a11yLabel 非空时将其投射为 accessible name。Description 存在时必须投射 describedBy，不存在时必须移除该关系，任何关系都不得指向缺失 part。
       en: When Title exists, Content must be labelled by its stable same-domain identity and ignore Root a11yLabel; when Title is absent, it must remove labelledBy and project Root a11yLabel as the accessible name when non-empty. It must project describedBy when Description exists and remove the relation when absent; no relation may target a missing part.
+
 sources:
   - path: packages/prototypes/base/src/dialog/content.proto.ts
   - path: packages/adapters/web-component/test/dialog-overlay.test.ts
@@ -54,7 +59,8 @@ dependsOn:
       C-AS-TRANSITION-0001,
       C-BOUNDARY-0001,
     ]
-verifies: { tests: [T-BASE-DIALOG-CONTENT-0001] }
+verifies:
+  { tests: [{ id: T-AVAILABLE-SPACE-0001, since: 0.3.0-alpha.1 }, T-BASE-DIALOG-CONTENT-0001] }
 revisions:
   - version: 0.2.0-rc.0
     change: introduced

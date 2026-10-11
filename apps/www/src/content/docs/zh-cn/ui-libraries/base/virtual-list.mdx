@@ -1,0 +1,16 @@
+---
+title: 'Virtual-List (WIP)'
+description: 'virtual-list composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Virtual List 将完整稳定逻辑标识序列与物理视图区分。按项 overscan、最大物化数量、修订号与 generation 绑定的提交由宿主无关模型负责。显式 virtual-list/web 入口测量可变项尺寸、管理占位与 Web 节点、保留键对应视图、定位项并清理监听。此 demo 使用该 Web 宿主边界，不代表原生 GPUI 或 Compiler 一致性。应用内容仅按有界可见区间创建。
+
+当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-base-virtual-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

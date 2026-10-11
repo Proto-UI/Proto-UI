@@ -64,6 +64,7 @@ describe('website command icon dependency boundary', () => {
   it.each([
     ['lucide-search-icon', ['search']],
     ['lucide-x-icon', ['x']],
+    ['lucide-chevron-down-icon', ['chevron-down']],
     ['lucide-copy-icon', ['copy']],
     ['lucide-loader-circle-icon', ['loader-circle']],
     ['lucide-check-icon', ['check']],

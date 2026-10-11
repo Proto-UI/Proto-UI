@@ -35,7 +35,7 @@ cases:
 implementations:
   - id: prototypes-shadcn-switch-root-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/switch.test.ts
     required: true
     consumesCases:
@@ -46,14 +46,17 @@ implementations:
       ]
     exercises: [P-SHADCN-SWITCH, P-BASE-SWITCH]
     notes:
-      - Positive tests cover only the current Proto UI guarantee; asChild omission and remaining parity gaps are bounded by the decision, declared surface, source review, and centralized compatibility question.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Positive tests cover only the current Proto UI guarantee; asChild omission and remaining parity gaps are bounded by the decision, declared surface, source review, and centralized compatibility question.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: cli-shadcn-switch-component-preset
     kind: module-test
-    status: passing
+    status: planned
     path: packages/cli/test/cli.test.ts
     required: true
     consumesCases: [T-SHADCN-SWITCH-0001-CASE-COMPONENT-PRESET]
     exercises: [P-SHADCN-SWITCH]
+    notes:
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: prototypes-shadcn-switch-component-preset-recipe
     kind: module-test
     status: passing
@@ -63,11 +66,13 @@ implementations:
     exercises: [P-SHADCN-SWITCH]
   - id: release-packed-cli-switch-component-preset
     kind: workspace-check
-    status: passing
+    status: planned
     path: scripts/release/consumer-smoke-cli.mjs
     required: true
     consumesCases: [T-SHADCN-SWITCH-0001-CASE-COMPONENT-PRESET]
     exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   contracts:
     - id: C-FEEDBACK-STYLE-0003
@@ -105,4 +110,7 @@ revisions:
   - version: 0.2.0-rc.6
     change: expanded
     summary: Added corrected checked geometry and component-local direct-child preset recipe coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Specify content-pinned base-nova default geometry and state palettes; retain semantic ownership and planned fresh evidence.
 tags: [prototype, shadcn, switch, root, delta, compatibility, test]

@@ -97,7 +97,8 @@ it('T-EXPOSE-STATE-WEB-0001-CASE-LIFETIME: suspends on unmounting, replays on re
   impl.dispose();
   set(3);
   impl.afterRenderCommit();
-  expect(host.getAttribute('data-list-count')).toBe('2');
+  expect(host.getAttribute('data-list-count')).toBe(null);
+  expect(host.style.getPropertyValue('--pui-list-count')).toBe('');
   expect(listeners.size).toBe(0);
   expect(impl.port.getExposedStateMap().size).toBe(0);
 });
@@ -127,4 +128,51 @@ it('T-EXPOSE-STATE-WEB-0001-CASE-MAPPING: applies custom names and mirrors witho
   expect(createExposeStateWebNameMap('@focus/focusVisible').dataAttr).toBe('data-focus-visible');
   expect(createExposeStateWebNameMap('constructor').dataAttr).toBe('data-constructor');
   impl.dispose();
+});
+
+it('number.list remains externally readable and subscribed without scalar host mapping, even with custom permissive mapping', () => {
+  const caps = new CapsVault();
+  const listeners = new Set<(event: any) => void>();
+  let value: readonly number[] = Object.freeze([1, 9]);
+  const handle = {
+    [EXPOSE_STATE_EXTERNAL_HANDLE]: true,
+    __stateId: 1,
+    __stateSemantic: 'coordinates',
+    spec: Object.freeze({ kind: 'number.list' }),
+    get: () => value,
+    subscribe(cb: (event: any) => void) {
+      listeners.add(cb);
+      return () => listeners.delete(cb);
+    },
+    unsubscribe(off: () => void) {
+      off();
+    },
+  };
+  const impl = new ExposeStateWebModuleImpl(caps, {
+    requirePort: () => ({ getAll: () => ({ coordinates: handle }) }),
+  } as any);
+  const host = document.createElement('div');
+  impl.onMountPhase('mounted', 1);
+  caps.attach([
+    [HOST_ELEMENT_CAP, host],
+    [EXPOSE_STATE_WEB_MODE_CAP, { allowContinuousAttr: true, allowStringVar: true }],
+    [EXPOSE_STATE_WEB_MAP_CAP, () => ({ dataAttr: 'data-custom', cssVar: '--custom' })],
+  ]);
+  impl.afterRenderCommit();
+  expect(listeners.size).toBe(1);
+  expect(handle.get()).toBe(value);
+  expect(impl.port.getExposedStateMap().get('1')).toMatchObject({
+    kind: 'number.list',
+    attr: undefined,
+    cssVar: undefined,
+  });
+  value = Object.freeze([2, 8]);
+  for (const callback of listeners) callback({ type: 'next', prev: [1, 9], next: value });
+  expect(handle.get()).toEqual([2, 8]);
+  expect(host.hasAttribute('data-custom')).toBe(false);
+  expect(host.style.getPropertyValue('--custom')).toBe('');
+  expect(host.hasAttribute('data-coordinates')).toBe(false);
+  expect(host.style.getPropertyValue('--pui-coordinates')).toBe('');
+  impl.dispose();
+  expect(listeners.size).toBe(0);
 });

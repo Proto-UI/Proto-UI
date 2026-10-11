@@ -315,6 +315,15 @@ export class StateModuleImpl {
       return this.wrapOwnedHandle(raw, semantic);
     },
 
+    numberList: (semantic, defaultValue) => {
+      const raw = this.kernel.define<readonly number[]>(
+        semantic,
+        { kind: 'number.list' },
+        defaultValue
+      );
+      return this.wrapOwnedHandle(raw, semantic);
+    },
+
     numberDiscrete: (semantic, defaultValue, spec = {}) => {
       const raw = this.kernel.define<number>(
         semantic,

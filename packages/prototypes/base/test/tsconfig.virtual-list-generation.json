@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "../src/virtual-list/**/*.ts",
+    "virtual-list-generation.test.ts",
+    "virtual-list.test.ts"
+  ],
+  "exclude": []
+}

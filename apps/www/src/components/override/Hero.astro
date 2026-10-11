@@ -9,15 +9,17 @@ const whitepaperHref =
   locale && locale !== 'root' ? `/${locale}/whitepaper/0-preface/` : '/whitepaper/0-preface/';
 const whitepaperLabel =
   locale === 'zh-cn'
-    ? '我们还要发明多少次 Button？ →'
-    : 'How many more times must we reinvent the Button? →';
+    ? '我们还要发明多少次 Button？'
+    : 'How many more times must we reinvent the Button?';
 ---
 
 <section class="homepage-hero" aria-labelledby={PAGE_TITLE_ID}>
   <HomeActions
     id="homepage-whitepaper"
     class="homepage-hero__eyebrow"
-    actions={[{ text: whitepaperLabel, link: whitepaperHref, variant: 'minimal' }]}
+    actions={[
+      { text: whitepaperLabel, link: whitepaperHref, variant: 'minimal', icon: 'arrow-right' },
+    ]}
   />
   <h1 id={PAGE_TITLE_ID} data-page-title data-site-typography="slogan" set:html={title} />
   {

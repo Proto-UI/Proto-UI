@@ -1,0 +1,156 @@
+id: T-SLIDER-VALUES-RUNTIME-0001
+type: test
+title: Reconstructed Slider Values bounded Runtime evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Fresh numerical, owner/keyboard, publication and synchronous Adapter-harness checks exist for the new reconstruction; independent review is pending. Pointer/Field/native/family/Compiler completion remains explicitly missing.
+summary: Separates newly executed evidence from unavailable historical local artifacts.
+cases:
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-NUMERIC
+    title: Safe owner copies, derived display and bounded keyboard requests
+    covers:
+      - C-SLIDER-VALUE-0001-VALUES
+      - C-SLIDER-VALUE-0001-NUMERIC-CLOSURE
+      - C-SLIDER-VALUE-0001-KEYBOARD
+    expectation: independent-operational-number-helper-with-explicit-diagnostics
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-OWNER
+    title: Portable mode, raw ownership, initialization and recovery
+    covers:
+      - C-SLIDER-VALUE-0001-OWNER
+      - C-SLIDER-VALUE-0001-CONTROLLED
+      - P-BASE-SLIDER-VALUES-ROOT
+    expectation: resolved-only-input-and-sole-current-list-owner
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-PUBLICATION
+    title: Synchronous veto, authoritative Props and logical commit
+    covers:
+      - C-SLIDER-VALUE-0001-BOUNDARY
+      - C-SLIDER-VALUE-0001-SESSION
+    expectation: no-causal-ack-or-rollback-and-no-stale-completion
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-PARTS
+    title: Indexed parts, projection, keyboard and retirement
+    covers:
+      - P-BASE-SLIDER-VALUES-ANATOMY
+      - P-BASE-SLIDER-VALUES-THUMB
+      - P-BASE-SLIDER-VALUES-PROJECTION
+    expectation: live-current-owner-routing-and-strict-required-context
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-COMPATIBILITY
+    title: Actual scalar and union API types and generated facades
+    covers:
+      - P-BASE-SLIDER-VALUES-ROOT
+    expectation: old-scalar-remains-narrow-and-new-static-entry-is-union
+  - id: T-SLIDER-VALUES-RUNTIME-0001-CASE-MISSING
+    title: Pointer, Field, families, native and Compiler remain separate
+    covers:
+      - P-BASE-SLIDER-VALUES-TRACK
+      - P-BASE-SLIDER-VALUES-NO-ADMISSION
+    expectation: no-full-slider-or-cross-host-admission
+implementations:
+  - id: slider-values-numeric-rebuild
+    kind: fixture
+    status: passing
+    path: packages/prototypes/base/test/slider-values-numeric.test.ts
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-NUMERIC
+    exercises:
+      - C-SLIDER-VALUE-0001
+    notes:
+      - New candidate numerical tests; no mounted owner admission.
+  - id: slider-values-owner
+    kind: runtime-test
+    status: passing
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-OWNER
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+    path: packages/prototypes/base/test/slider-values-runtime.test.ts
+  - id: slider-values-publication
+    kind: runtime-test
+    status: passing
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-PUBLICATION
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+    path: packages/prototypes/base/test/slider-values-publication.test.ts
+  - id: slider-values-parts
+    kind: runtime-test
+    status: passing
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-PARTS
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+    path: packages/prototypes/base/test/slider-values-runtime.test.ts
+  - id: slider-values-compatibility
+    kind: workspace-check
+    status: passing
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-COMPATIBILITY
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+    path: internal/contracts/types/slider-value-entry-boundary.type-test.ts
+    notes:
+      - Actual old scalar and new union public types; generated-facade carrier checks remain separate.
+  - id: slider-values-missing
+    kind: runtime-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-MISSING
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+  - id: slider-values-synchronous-veto-carriers
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/base/test/slider-values-adapter-veto.test.ts
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-PUBLICATION
+    exercises:
+      - C-SLIDER-VALUE-0001
+    notes:
+      - Framework/happy-dom harnesses including fake React; no native-browser or async-host claim.
+  - id: slider-values-list-owner-boundary
+    kind: runtime-test
+    status: passing
+    path: internal/contracts/__tests__/slider-state-integration-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-OWNER
+    exercises:
+      - C-SLIDER-VALUE-0001
+  - id: slider-values-static-facades
+    kind: workspace-check
+    status: planned
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUES-RUNTIME-0001-CASE-COMPATIBILITY
+    exercises:
+      - P-BASE-SLIDER-VALUES
+    notes:
+      - Ordinary registry/codegen tests and actual generated facade strict checks required; generic Vue2 behavior is a separate observed boundary.
+exercises:
+  contracts:
+    - C-SLIDER-VALUE-0001
+  prototypes:
+    - P-BASE-SLIDER-VALUES
+sources:
+  - path: packages/prototypes/base/test/slider-values-numeric.test.ts
+  - path: internal/records/2026-10-11-slider-values-reconstruction-plan.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Reconstructed the current test boundary without reusing lost Runtime evidence.
+tags:
+  - slider
+  - values
+  - test
+  - draft

@@ -43,7 +43,9 @@ describe('Context capability boundary', () => {
         'read',
         'subscribe',
         'tryRead',
+        'tryReadAncestor',
         'trySubscribe',
+        'trySubscribeAncestor',
         'tryUpdate',
         'update',
       ]);

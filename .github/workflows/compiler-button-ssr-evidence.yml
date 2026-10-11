@@ -1,0 +1,103 @@
+name: Experimental Compiler Button SSR evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compiler-button-ssr-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/package.json'
+      - 'apps/www/scripts/runtime-retry-urls.mjs'
+      - 'scripts/test/server-readiness.mjs'
+      - '.npmrc'
+      - 'spec/**'
+      - 'vitest.config.ts'
+      - 'tsconfig*.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compiler-button-ssr-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  source-and-browser-evidence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and identify the native browser
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          mkdir -p "$RUNNER_TEMP/compiler-button-ssr"
+          "$CHROME" --version > "$RUNNER_TEMP/compiler-button-ssr/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/compiler-button-ssr/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/compiler-button-ssr/source-sha.txt"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/compiler-button-ssr/source-tree.txt"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/compiler-button-ssr/lockfile.sha256"
+      - name: Run source lowering, generated server, types and mismatch controls
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/compiler/test/button-ssr.test.ts \
+            packages/compiler/test/button-ssr-server.test.ts \
+            packages/compiler/src/web-component-ssr-style.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/compiler-button-ssr/source-vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/compiler-button-ssr/source.log"
+          node --input-type=module - "$RUNNER_TEMP/compiler-button-ssr/source-vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 91, 'All source and server controls must run.');
+          assert.equal(report.numPassedTests, 91);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.numPendingTests, 0);
+          assert.equal(report.success, true);
+          JS
+      - name: Run actual HTTP, no-script, adoption, interaction and first-frame journeys
+        timeout-minutes: 12
+        env:
+          COMPILER_EVIDENCE_DIR: ${{ runner.temp }}/compiler-button-ssr/browser
+          COMPILER_EVIDENCE_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/compiler/test/browser-button-ssr.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/compiler-button-ssr/browser-vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/compiler-button-ssr/browser.log"
+          node --input-type=module - "$RUNNER_TEMP/compiler-button-ssr/browser-vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numTotalTests, 21, 'All 21 native browser journeys must run.');
+          assert.equal(report.numPassedTests, 21);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.numPendingTests, 0);
+          assert.equal(report.success, true);
+          JS
+      # Generated .proto-ui helpers are allowlisted into non-hidden generated/helpers/
+      # with logical-path/SHA mapping; do not enable broad hidden-file uploads.
+      - name: Retain exact-source artifacts, screenshots, traces and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-button-ssr-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-button-ssr
+          if-no-files-found: error
+          retention-days: 30

@@ -13,12 +13,51 @@ type ActiveMove = {
   input: MoveGestureInput;
   start: MoveGesturePoint;
   last: MoveGesturePoint;
+  target: HTMLElement;
+  binding: MoveGestureHostBinding;
+  started: boolean;
 };
 
 type TargetStyleSnapshot = Readonly<{
   touchAction: string;
   userSelect: string;
 }>;
+
+// Shared across host factories: one physical contact and one target have one owner.
+// Distinct targets may accept distinct contacts. A consumed down event cannot be
+// reacquired by an ancestor even if the first owner ends reentrantly.
+const contactOwners = new WeakMap<Document, Map<number, ActiveMove>>();
+const targetOwners = new WeakMap<HTMLElement, ActiveMove>();
+const acceptedDownEvents = new WeakSet<Event>();
+const targetStyles = new WeakMap<HTMLElement, { count: number; original: TargetStyleSnapshot }>();
+
+function contacts(target: HTMLElement): Map<number, ActiveMove> {
+  let owners = contactOwners.get(target.ownerDocument);
+  if (!owners) {
+    owners = new Map();
+    contactOwners.set(target.ownerDocument, owners);
+  }
+  return owners;
+}
+function retainStyles(target: HTMLElement): () => void {
+  let entry = targetStyles.get(target);
+  if (entry) entry.count++;
+  else {
+    entry = {
+      count: 1,
+      original: { touchAction: target.style.touchAction, userSelect: target.style.userSelect },
+    };
+    targetStyles.set(target, entry);
+    target.style.touchAction = 'none';
+    target.style.userSelect = 'none';
+  }
+  return () => {
+    if (--entry!.count !== 0) return;
+    target.style.touchAction = entry!.original.touchAction;
+    target.style.userSelect = entry!.original.userSelect;
+    targetStyles.delete(target);
+  };
+}
 
 function point(event: PointerEvent): MoveGesturePoint {
   return Object.freeze({ x: event.clientX, y: event.clientY });
@@ -67,9 +106,12 @@ export function createWebMoveGestureHost(): MoveGestureHost {
       let binding = initialBinding;
       let target = requireWebTarget(binding.target);
       let disposed = false;
+      let revision = 0;
+      const handledSamples = new WeakSet<Event>();
       let active: ActiveMove | null = null;
       let detachObserver: MutationObserver | null = null;
-      let styleSnapshot: TargetStyleSnapshot | null = null;
+      let releaseStyles: (() => void) | null = null;
+      let releaseGlobalListeners: (() => void) | null = null;
 
       const stopDetachObserver = () => {
         detachObserver?.disconnect();
@@ -79,12 +121,20 @@ export function createWebMoveGestureHost(): MoveGestureHost {
       const releaseCapture = (current: ActiveMove | null) => {
         if (!current) return;
         try {
-          if (target.hasPointerCapture?.(current.pointerId)) {
-            target.releasePointerCapture(current.pointerId);
+          if (current.target.hasPointerCapture?.(current.pointerId)) {
+            current.target.releasePointerCapture(current.pointerId);
           }
         } catch {
           // The host may already have released ownership during teardown.
         }
+      };
+
+      const releaseOwner = (current: ActiveMove) => {
+        const owners = contacts(current.target);
+        if (owners.get(current.pointerId) === current) owners.delete(current.pointerId);
+        if (targetOwners.get(current.target) === current) targetOwners.delete(current.target);
+        releaseGlobalListeners?.();
+        releaseGlobalListeners = null;
       };
 
       const cancel = (reason: MoveGestureCancelReason) => {
@@ -92,8 +142,9 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         if (!current) return;
         active = null;
         stopDetachObserver();
+        releaseOwner(current);
         releaseCapture(current);
-        binding.onCancel(reason);
+        if (current.started) current.binding.onCancel(reason);
       };
 
       const observeDetach = () => {
@@ -108,17 +159,58 @@ export function createWebMoveGestureHost(): MoveGestureHost {
       };
 
       const onPointerDown = (event: PointerEvent) => {
-        if (disposed || active || !target.isConnected || !isPrimaryContact(event)) return;
+        if (
+          disposed ||
+          active ||
+          !target.isConnected ||
+          !isPrimaryContact(event) ||
+          acceptedDownEvents.has(event) ||
+          targetOwners.has(target) ||
+          contacts(target).has(event.pointerId)
+        )
+          return;
         const startSample = sampleOf(event);
-        if (binding.shouldStart && !binding.shouldStart(startSample)) return;
+        const startingRevision = revision;
+        const startingBinding = binding;
+        if (startingBinding.shouldStart && !startingBinding.shouldStart(startSample)) return;
+        if (
+          disposed ||
+          active ||
+          startingRevision !== revision ||
+          !target.isConnected ||
+          acceptedDownEvents.has(event) ||
+          targetOwners.has(target) ||
+          contacts(target).has(event.pointerId)
+        )
+          return;
 
         event.preventDefault();
+        acceptedDownEvents.add(event);
         const start = startSample.position;
-        active = {
+        const current: ActiveMove = {
           pointerId: event.pointerId,
           input: startSample.input,
           start,
           last: start,
+          target,
+          binding: startingBinding,
+          started: false,
+        };
+        active = current;
+        targetOwners.set(target, current);
+        contacts(target).set(event.pointerId, current);
+        const doc = target.ownerDocument;
+        const win = doc.defaultView;
+        const onBlur = () => cancel('lost-ownership');
+        doc.addEventListener('pointermove', onPointerMove, true);
+        doc.addEventListener('pointerup', onPointerUp, true);
+        doc.addEventListener('pointercancel', onPointerCancel, true);
+        win?.addEventListener('blur', onBlur);
+        releaseGlobalListeners = () => {
+          doc.removeEventListener('pointermove', onPointerMove, true);
+          doc.removeEventListener('pointerup', onPointerUp, true);
+          doc.removeEventListener('pointercancel', onPointerCancel, true);
+          win?.removeEventListener('blur', onBlur);
         };
         try {
           target.setPointerCapture?.(event.pointerId);
@@ -126,13 +218,21 @@ export function createWebMoveGestureHost(): MoveGestureHost {
           // Capture is a Web strategy, not a portable precondition. Continue
           // with the stream the host can provide and cancel if ownership is lost.
         }
+        if (active !== current || disposed) return;
+        if (startingRevision !== revision) {
+          cancel('target-replaced');
+          return;
+        }
         observeDetach();
-        binding.onStart(startSample);
+        current.started = true;
+        current.binding.onStart(startSample);
       };
 
       const onPointerMove = (event: PointerEvent) => {
         const current = active;
-        if (!current || event.pointerId !== current.pointerId) return;
+        if (!current?.started || event.pointerId !== current.pointerId || handledSamples.has(event))
+          return;
+        handledSamples.add(event);
         if (!target.isConnected) {
           cancel('target-detached');
           return;
@@ -140,12 +240,14 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         event.preventDefault();
         const next = sampleOf(event, current);
         current.last = next.position;
-        binding.onMove(next);
+        current.binding.onMove(next);
       };
 
       const onPointerUp = (event: PointerEvent) => {
         const current = active;
-        if (!current || event.pointerId !== current.pointerId) return;
+        if (!current?.started || event.pointerId !== current.pointerId || handledSamples.has(event))
+          return;
+        handledSamples.add(event);
         if (!target.isConnected) {
           cancel('target-detached');
           return;
@@ -154,8 +256,9 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         const endSample = sampleOf(event, current);
         active = null;
         stopDetachObserver();
+        releaseOwner(current);
         releaseCapture(current);
-        binding.onEnd(endSample);
+        current.binding.onEnd(endSample);
       };
 
       const onPointerCancel = (event: PointerEvent) => {
@@ -171,12 +274,7 @@ export function createWebMoveGestureHost(): MoveGestureHost {
       const onNativeDragStart = (event: DragEvent) => event.preventDefault();
 
       const connect = () => {
-        styleSnapshot = Object.freeze({
-          touchAction: target.style.touchAction,
-          userSelect: target.style.userSelect,
-        });
-        target.style.touchAction = 'none';
-        target.style.userSelect = 'none';
+        releaseStyles = retainStyles(target);
         target.addEventListener('pointerdown', onPointerDown);
         target.addEventListener('pointermove', onPointerMove);
         target.addEventListener('pointerup', onPointerUp);
@@ -192,11 +290,8 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         target.removeEventListener('pointercancel', onPointerCancel);
         target.removeEventListener('lostpointercapture', onLostPointerCapture);
         target.removeEventListener('dragstart', onNativeDragStart);
-        if (styleSnapshot) {
-          target.style.touchAction = styleSnapshot.touchAction;
-          target.style.userSelect = styleSnapshot.userSelect;
-        }
-        styleSnapshot = null;
+        releaseStyles?.();
+        releaseStyles = null;
       };
 
       connect();
@@ -205,11 +300,13 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         update(nextBinding) {
           if (disposed) return;
           const nextTarget = requireWebTarget(nextBinding.target);
+          const currentRevision = ++revision;
           if (nextTarget === target) {
             binding = nextBinding;
             return;
           }
           cancel('target-replaced');
+          if (disposed || currentRevision !== revision) return;
           disconnect();
           binding = nextBinding;
           target = nextTarget;
@@ -217,8 +314,9 @@ export function createWebMoveGestureHost(): MoveGestureHost {
         },
         dispose() {
           if (disposed) return;
-          cancel('disposed');
           disposed = true;
+          revision++;
+          cancel('disposed');
           stopDetachObserver();
           disconnect();
         },

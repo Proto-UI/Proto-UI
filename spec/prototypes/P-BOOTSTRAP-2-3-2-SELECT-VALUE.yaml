@@ -1,0 +1,48 @@
+id: P-BOOTSTRAP-2-3-2-SELECT-VALUE
+type: prototype
+title: Bootstrap 2.3.2 Select Value directly projects Base selection semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft pending exact-source native browser and GPUI evidence, optical host proof where applicable, independent review and stable admission.
+  zh-CN: 等待精确源码 native browser/GPUI 证据、适用的光学 host 绘制验证、独立审查与稳定准入，保留 draft。
+summary: Bootstrap 2.3.2 presentation of the independent Base Select Value protocol.
+statement:
+  en: 'Directly consume asSelectValue exactly once, retaining all Base Value props, exposes, requests, anatomy and lifetimes. No other family or Button protocol may own Select semantics.'
+  zh-CN: '直接且仅消费一次 asSelectValue，保留完整 Base Value props、exposes、请求、anatomy 与生命周期；不得由其他体系或 Button 协议持有 Select 语义。'
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-SELECT-VALUE-BASE-INHERITANCE
+    text:
+      en: 'Directly consume asSelectValue exactly once, retaining all Base Value props, exposes, requests, anatomy and lifetimes. No other family or Button protocol may own Select semantics.'
+      zh-CN: '直接且仅消费一次 asSelectValue，保留完整 Base Value props、exposes、请求、anatomy 与生命周期；不得由其他体系或 Button 协议持有 Select 语义。'
+  - id: P-BOOTSTRAP-2-3-2-SELECT-VALUE-DIRECT-ENTRY
+    text:
+      en: 'Expose bootstrap-2-3-2-select-value and typed public source exports through @proto.ui/prototypes-bootstrap-2-3-2/select; private workspace source requires explicit workspace CLI generation and is not a registry publication.'
+      zh-CN: '通过 @proto.ui/prototypes-bootstrap-2-3-2/select 提供 bootstrap-2-3-2-select-value 与完整类型；private workspace 源码只允许显式 workspace CLI 生成，不代表 registry 已发布。'
+  - id: P-BOOTSTRAP-2-3-2-SELECT-VALUE-VISUAL-SAFETY
+    text:
+      en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
+      zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-SELECT-VALUE-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction/paint evidence and independent review justify stable admission?
+      zh-CN: 何时由精确源码原生交互/绘制证据和独立审查支持稳定准入？
+    blocks: [activation:P-BOOTSTRAP-2-3-2-SELECT-VALUE]
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/select/value.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/select/types.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/select/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/v2.3.2/less/dropdowns.less
+    label: Historical design reference only; custom Select semantics are a Proto UI extension
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes: [P-BASE-SELECT-VALUE]
+verifies:
+  tests: [T-SELECT-DRAFT-PROJECTIONS-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the complete direct Base consumer with source-only package/compiler entries and separately bounded native evidence.
+tags: [prototype, bootstrap-2-3-2, select, value, projection]

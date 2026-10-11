@@ -8,17 +8,11 @@ const tokens = [...new Set(Object.values(DRAFT_FAMILY_STYLE_TOKENS).flat())];
 <style is:global data-draft-projection-css set:html={renderProtoStyleTokenCss(tokens)}></style>
 
 <style is:global>
-  /* Consumer-owned backdrop behind a functional demo, never component paint. */
+  /* The Previewer owns the visible canvas backdrop. Keep this content carrier
+     transparent so no unrepresented CSS paint sits between it and the controls. */
   .liquid-functional-demo {
     padding: 24px;
     border-radius: 20px;
-    background: repeating-linear-gradient(
-      105deg,
-      #fa9cce 0 9px,
-      #b4daf7 9px 18px,
-      #f9e4a3 18px 27px,
-      #a5d9ce 27px 36px
-    );
   }
   .liquid-functional-demo [role='status'] {
     background: #ffffff;

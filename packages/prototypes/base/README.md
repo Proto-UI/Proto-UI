@@ -81,3 +81,11 @@ The root package export remains available for compatibility. Compound anatomy pa
 ## License
 
 MIT
+
+## Field (draft workspace source)
+
+The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
+
+`asFieldControl` is the generic finite-value reporting/association bridge; `asFieldTextControl` is the default text-editor authoring entry. A custom control explicitly consumes the effective policy and reports its canonical value; it declares its existing focus/activation operation with `asControlLabel().target(callback, FIELD_LABEL_PAIR)` to reuse the actual native-input and lifecycle guards. The pair is setup-only, never a Prop or Context value.
+
+This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.

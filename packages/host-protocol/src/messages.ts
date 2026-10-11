@@ -73,6 +73,80 @@ export type SessionOpenMessage = {
   readonly parentSessionId?: SessionId;
 };
 
+/** Renderer-owned association keys are not Prototype Props or serialized opaque refs. */
+export type InstanceAssociationsSetMessage = {
+  readonly kind: 'instance.associations';
+  readonly sessionId: SessionId;
+  readonly associations: { readonly controlLabel?: string | null };
+};
+
+/** One current native ControlLabel lease, not a semantic activation operation. */
+export type ControlLabelPlan = {
+  readonly leaseId: string;
+  readonly kind: 'label' | 'target';
+  readonly activation: boolean;
+};
+
+export type ControlLabelPlanMessage = {
+  readonly kind: 'control-label.plan';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly plan: ControlLabelPlan | null;
+};
+
+/** Actual native surface/tree identity, issued by the host and revoked on detach. */
+export type ControlLabelViewMessage = {
+  readonly kind: 'control-label.view';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly leaseId: string;
+  readonly revision: number;
+  readonly view: {
+    readonly identity: string;
+    readonly scope: string;
+    readonly authoredName: boolean;
+  } | null;
+};
+
+/** A qualified native input request bound to the exact published surface lease. */
+export type ControlLabelActivateMessage = {
+  readonly kind: 'control-label.activate';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly leaseId: string;
+  readonly viewRevision: number;
+  readonly sequence: number;
+  readonly source: 'pointer' | 'accessibility';
+};
+
+/** The exact peer view and Module lease permitted to use its host root region. */
+export type AvailableSpaceLeaseMessage = {
+  readonly kind: 'available-space.lease';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly moduleEpoch: number;
+  readonly leaseId: string;
+  readonly root: 'proto-surface';
+  readonly boundary: 'root-content';
+  readonly active: boolean;
+};
+
+/** Host-logical facts for diagnostics; production layout consumes the same frame locally. */
+export type AvailableSpaceFrameMessage = {
+  readonly kind: 'available-space.frame';
+  readonly sessionId: SessionId;
+  readonly viewEpoch: ViewEpoch;
+  readonly moduleEpoch: number;
+  readonly leaseId: string;
+  readonly revision: number;
+  readonly rect: {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+  } | null;
+};
+
 export type SessionOpenedMessage = {
   readonly kind: 'session.opened';
   readonly sessionId: SessionId;
@@ -259,6 +333,10 @@ export type DiagnosticMessage = {
 export type HostToPeerMessage =
   | HostHelloMessage
   | MetaSetMessage
+  | InstanceAssociationsSetMessage
+  | ControlLabelViewMessage
+  | ControlLabelActivateMessage
+  | AvailableSpaceFrameMessage
   | SessionOpenMessage
   | PropsSetMessage
   | ProjectionAckMessage
@@ -270,6 +348,8 @@ export type HostToPeerMessage =
 
 export type PeerToHostMessage =
   | PeerHelloMessage
+  | ControlLabelPlanMessage
+  | AvailableSpaceLeaseMessage
   | SessionOpenedMessage
   | ProjectionInstallMessage
   | ProjectionActivateMessage

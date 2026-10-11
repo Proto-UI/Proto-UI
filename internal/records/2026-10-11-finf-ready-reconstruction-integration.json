@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-11",
+  "scope": "Rebuilt Website-local Ready ordering; non-normative bounded source evidence",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+  "testedSourceTree": "46e87e67cbbdd85ac77af99cc2ff5be49a041e84",
+  "sourceBinding": "The sole parent of this record-only commit must have testedSourceTree. Product and test bytes are bound below.",
+  "bindings": [
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ready-publication.test.ts",
+      "blob": "cec929019d8548835a3ee3a0a99c2128cd087673",
+      "sha256": "e568c9af5322ec1fdc7e735004e55dcaa76fd43617daf0619aab3b11f0a427b8"
+    },
+    {
+      "path": "apps/www/src/components/PrototypePreviewer/previewer-client.ts",
+      "blob": "b4c5c8320c2d217e2ac5dcf181835698de2e44a4",
+      "sha256": "816ffb7a9d4d000461347d926b85a4bf31522783a6794ff6601f8adda2ff8756"
+    }
+  ],
+  "reconstruction": {
+    "oldWorkspaceUnavailable": true,
+    "oldTestResultsUsedAsCurrent": false
+  },
+  "verification": {
+    "author": {
+      "baseline": {
+        "passed": 3,
+        "failed": 12
+      },
+      "unlockOnlyMutation": {
+        "passed": 13,
+        "failed": 2
+      },
+      "candidate": {
+        "passed": 15,
+        "failed": 0
+      },
+      "affectedGraph": {
+        "passed": 112,
+        "failed": 0
+      },
+      "nodeContracts": {
+        "passed": 132,
+        "failed": 0
+      },
+      "workspaceTypes": "exit 0",
+      "astro": {
+        "files": 815,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 11
+      }
+    },
+    "independent": {
+      "affectedGraph": {
+        "passed": 112,
+        "failed": 0
+      },
+      "additionalHostControls": {
+        "passed": 12,
+        "baselineIntendedFailures": 4
+      },
+      "finallyByteIdentical": true,
+      "errorBodyASTIdentical": true,
+      "focusExceptionPropagationPreserved": true,
+      "workspaceTypes": "exit 0",
+      "astro": {
+        "files": 815,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 11
+      },
+      "reviewSha256": "2adc3d68d92bf88aa2643118180c419ededc1dfff7c9c702174b860a27123af4"
+    },
+    "publisher": {
+      "affectedGraph": {
+        "passed": 112,
+        "failed": 0
+      },
+      "nodeContracts": {
+        "passed": 132,
+        "failed": 0
+      },
+      "normalPrecommit": "exit 0; source tree unchanged"
+    }
+  },
+  "limits": [
+    "Native browser, focus and paint verification remain pending on the actual published head.",
+    "The unchanged official 80-case browser source is not a current pass: published 764d had 16 passing and 64 failing cases.",
+    "HappyDOM host controls emulate inert-induced blur; exception controls use extracted code with synthetic lexical stubs.",
+    "No State, Values, Collection, Compiler, Adapter, Runtime, workflow or acceptance-ledger changes.",
+    "Full delivery stays 5 complete / 63 incomplete; core 0 / 55."
+  ],
+  "official80SourceSha256": "0bedbbe5a666b85955df6463e83c9475966d2de4effaee23ceb978fd4b3a939b"
+}

@@ -18,7 +18,7 @@ export const BrutalistTextareaRoot = definePrototype<
 
     def.feedback.style.use(
       tw(
-        'block min-h-28 w-full resize-y rounded-base border-2 border-foreground bg-secondary-background p-3 font-sans font-medium text-sm leading-6 text-foreground outline-none'
+        'flex min-h-[80px] w-full resize-y rounded-base border-2 border-border bg-secondary-background px-3 py-2 font-sans font-medium text-sm text-foreground outline-none selection:bg-main selection:text-main-foreground'
       )
     );
     def.rule({

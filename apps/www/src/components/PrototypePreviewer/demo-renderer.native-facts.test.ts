@@ -1,21 +1,26 @@
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { createHomepageContent } from '../Homepage/homepage-runtime-client';
 import { renderDemo } from './demo-renderer';
 import { loadPrototypes } from './prototype-modules';
-import type { DemoRuntimeApi } from './demo-types';
+import { assertDemoSpec, type DemoRuntimeApi, type DemoSpec } from './demo-types';
+import { createCopyCommandDemo } from '../site-copy-command';
+import { createCopyController } from '../site-copy-controller';
+const reactSource = vi.hoisted(() => ({ path: 'apps/www/package.json' }));
 // Only CDN acquisition is replaced. Frameworks, adapters, the renderer and
 // Prototypes are real installed implementations; this is host-unit, not browser evidence.
 vi.mock('./runtimes/react-runtime', async (original) => {
   const actual = await original<typeof import('./runtimes/react-runtime')>();
   const { createRequire } = await import('node:module');
   const { resolve } = await import('node:path');
-  const require = createRequire(resolve('packages/adapters/react/package.json'));
   return {
     ...actual,
-    loadReact: async () => ({
-      React: require('react'),
-      ReactDOM: { ...require('react-dom'), ...require('react-dom/client') },
-    }),
+    loadReact: async () => {
+      const require = createRequire(resolve(reactSource.path));
+      return {
+        React: require('react'),
+        ReactDOM: { ...require('react-dom'), ...require('react-dom/client') },
+      };
+    },
   };
 });
 vi.mock('./runtimes/vue-runtime', async (original) => {
@@ -227,3 +232,109 @@ describe('configured hero action glyph', () => {
         expect(host.querySelectorAll('a')).toHaveLength(1);
       }, 20_000);
 });
+
+describe.each(['apps/www/package.json', 'packages/adapters/react/package.json'])(
+  'React host-box native presence before setup (%s)',
+  (source) => {
+    beforeEach(() => {
+      reactSource.path = source;
+    });
+    for (const value of [false, true]) {
+      it(`retains the string-only contract rather than coercing boolean ${value}`, () => {
+        expect(() =>
+          assertDemoSpec({
+            type: 'demo',
+            root: {
+              kind: 'box',
+              attrs: { hidden: value } as unknown as Record<string, string>,
+            },
+          })
+        ).toThrow(/字符串/);
+      });
+    }
+    for (const value of ['', 'hidden', 'false', 'until-found']) {
+      it(`preserves hidden=${JSON.stringify(value)} before setup without coercing aria/data`, async () => {
+        const host = document.createElement('div');
+        document.body.append(host);
+        const demo: DemoSpec = {
+          type: 'demo',
+          root: {
+            kind: 'box',
+            ref: 'box',
+            attrs: {
+              hidden: value,
+              inert: '',
+              itemscope: '',
+              'aria-hidden': 'false',
+              'data-hidden': '',
+              draggable: 'false',
+              spellcheck: 'false',
+            },
+          },
+          setup({ refs }) {
+            expect(refs.box!.getAttribute('hidden')).toBe(value);
+            expect(refs.box!.hasAttribute('inert')).toBe(true);
+            expect(refs.box!.hasAttribute('itemscope')).toBe(true);
+            expect(refs.box!.getAttribute('aria-hidden')).toBe('false');
+            expect(refs.box!.getAttribute('data-hidden')).toBe('');
+            expect(refs.box!.getAttribute('draggable')).toBe('false');
+            expect(refs.box!.getAttribute('spellcheck')).toBe('false');
+          },
+        };
+        const view = await renderDemo({ runtime: 'react', host, demo });
+        cleanups.push(() => view.destroy());
+      });
+    }
+
+    it('omits absent presence attributes', async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      const view = await renderDemo({
+        runtime: 'react',
+        host,
+        demo: {
+          type: 'demo',
+          root: { kind: 'box', ref: 'box', attrs: { 'data-hidden': 'false' } },
+        },
+      });
+      cleanups.push(() => view.destroy());
+      const box = host.querySelector('[data-demo-ref="box"]')!;
+      for (const attr of ['hidden', 'inert', 'itemscope'])
+        expect(box.hasAttribute(attr)).toBe(false);
+      expect(box.getAttribute('data-hidden')).toBe('false');
+    });
+
+    it('renders only the idle Copy glyph in the initial commit, before effect setup', async () => {
+      await loadPrototypes([
+        'shadcn-button',
+        'shadcn-surface-root',
+        'base-live-region-root',
+        'lucide-copy-icon',
+        'lucide-loader-circle-icon',
+        'lucide-check-icon',
+        'lucide-circle-alert-icon',
+      ]);
+      const host = document.createElement('div');
+      document.body.append(host);
+      const owner = createCopyController({ readText: () => 'source', writeText: async () => {} });
+      const demo = createCopyCommandDemo(host, owner, 'react', 'shadcn', () => true);
+      // Do not let the later Copy effect repair the initial renderer mistake.
+      demo.setup = ({ refs, api }) => {
+        expect(
+          ['idle', 'pending', 'success', 'error'].filter(
+            (state) => !refs[`copy-glyph-${state}`]!.hasAttribute('hidden')
+          )
+        ).toEqual(['idle']);
+        // The later effect owns visibility. An unrelated React props refresh
+        // must not reapply the initial native attributes and undo that state.
+        refs['copy-glyph-idle']!.hidden = true;
+        refs['copy-glyph-pending']!.hidden = false;
+        api.setProps('copy-button', { title: 'Copying' });
+        expect(refs['copy-glyph-idle']!.hidden).toBe(true);
+        expect(refs['copy-glyph-pending']!.hidden).toBe(false);
+      };
+      const view = await renderDemo({ runtime: 'react', host, demo });
+      cleanups.push(() => view.destroy());
+    });
+  }
+);

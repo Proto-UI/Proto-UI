@@ -11,6 +11,10 @@ statement:
   zh-CN: P-BRUTALIST-DIALOG-CONTENT 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-DIALOG-CONTENT-AVAILABLE
+    text:
+      en: 'The centered panel reserves at least one rem on each side of the available region, caps width at 32rem and permits internal vertical scrolling. This bounded geometry does not assert complete upstream composition or responsive-breakpoint parity.'
+      zh-CN: '居中 panel 在可用区域四侧至少保留一 rem，宽度上限 32rem，允许内部纵向滚动。本有界几何不声称上游组合和响应式断点完全对齐。'
   - id: P-BRUTALIST-DIALOG-CONTENT-BASE-INHERITANCE
     text:
       en: >-
@@ -48,11 +52,11 @@ criteria:
   - id: P-BRUTALIST-DIALOG-CONTENT-VISUAL-GRAMMAR
     text:
       en: >-
-        The content uses BRUTALIST_PANEL_TOKENS: rounded-base (5px), border-2 border-black, bg-background/text-foreground, font-sans font-medium. Dialog adds a 4px 4px hard black shadow and retains prototype-owned fixed centering, max-w-lg, grid gap-4 and p-6. Rounded children own their own radius; the parent must not globally zero or override child geometry.
+        The content uses BRUTALIST_PANEL_TOKENS: rounded-base (5px), border-2 border-black, bg-background/text-foreground, font-sans font-medium. Dialog adds a 4px 4px hard black shadow and retains prototype-owned fixed centering, 32rem width ceiling within the available region, grid gap-4 and p-6. Rounded children own their own radius; the parent must not globally zero or override child geometry.
 
 
       zh-CN: >-
-        Content 使用 BRUTALIST_PANEL_TOKENS：rounded-base（5px）、border-2 border-black、bg-background/text-foreground、font-sans font-medium。Dialog 增加 4px 4px 黑色硬阴影，保留 prototype 自有 fixed 居中、max-w-lg、grid gap-4 与 p-6。圆角 child 各自拥有 radius；父级不得全局清零或覆盖 child 几何。
+        Content 使用 BRUTALIST_PANEL_TOKENS：rounded-base（5px）、border-2 border-black、bg-background/text-foreground、font-sans font-medium。Dialog 增加 4px 4px 黑色硬阴影，保留 prototype 自有 fixed 居中、32rem width ceiling within the available region、grid gap-4 与 p-6。圆角 child 各自拥有 radius；父级不得全局清零或覆盖 child 几何。
 
 
 sources:
@@ -67,7 +71,7 @@ dependsOn:
 inherits:
   prototypes:
     - id: P-BASE-DIALOG-CONTENT
-verifies: { tests: [T-BRUTALIST-DIALOG-0001] }
+verifies: { tests: [{ id: T-AVAILABLE-SPACE-0001, since: 0.3.0-alpha.1 }, T-BRUTALIST-DIALOG-0001] }
 revisions:
   - version: 0.3.0-alpha.1
     change: revised

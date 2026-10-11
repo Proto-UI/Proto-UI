@@ -17,12 +17,12 @@
       "dark": 43
     },
     "bootstrap-2-3-2": {
-      "light": 14,
-      "dark": 14
+      "light": 19,
+      "dark": 19
     },
     "liquid-glass": {
-      "light": 14,
-      "dark": 14
+      "light": 18,
+      "dark": 18
     }
   },
   "themes": {
@@ -216,6 +216,10 @@
     },
     "bootstrap-2-3-2": {
       "light": {
+        "--pui-muted-foreground": "#666666",
+        "--pui-font-sans": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "--pui-font-heading": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "--pui-font-mono": "Monaco, Menlo, Consolas, \"Courier New\", monospace",
         "--pui-background": "#ffffff",
         "--pui-foreground": "#333333",
         "--pui-secondary": "#f5f5f5",
@@ -225,6 +229,7 @@
         "--pui-border": "#cccccc",
         "--pui-muted": "#e6e6e6",
         "--pui-ring": "#0055aa",
+        "--pui-destructive": "#b94a48",
         "--pui-radius": "4px",
         "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
         "--pui-radius-lg": "var(--pui-radius)",
@@ -232,6 +237,10 @@
         "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
       },
       "dark": {
+        "--pui-muted-foreground": "#666666",
+        "--pui-font-sans": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "--pui-font-heading": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
+        "--pui-font-mono": "Monaco, Menlo, Consolas, \"Courier New\", monospace",
         "--pui-background": "#ffffff",
         "--pui-foreground": "#333333",
         "--pui-secondary": "#f5f5f5",
@@ -241,6 +250,7 @@
         "--pui-border": "#cccccc",
         "--pui-muted": "#e6e6e6",
         "--pui-ring": "#0055aa",
+        "--pui-destructive": "#b94a48",
         "--pui-radius": "4px",
         "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
         "--pui-radius-lg": "var(--pui-radius)",
@@ -250,6 +260,10 @@
     },
     "liquid-glass": {
       "light": {
+        "--pui-muted-foreground": "#626267",
+        "--pui-font-sans": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "--pui-font-heading": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "--pui-font-mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
         "--pui-background": "#f5f5f7",
         "--pui-foreground": "#1d1d1f",
         "--pui-secondary": "#ffffff",
@@ -260,12 +274,16 @@
         "--pui-muted": "#e8e8ed",
         "--pui-ring": "#0061cc",
         "--pui-radius": "9999px",
-        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
-        "--pui-radius-lg": "var(--pui-radius)",
-        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
-        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
+        "--pui-radius-xl": "12px",
+        "--pui-radius-lg": "8px",
+        "--pui-radius-md": "6px",
+        "--pui-radius-sm": "4px"
       },
       "dark": {
+        "--pui-muted-foreground": "#b8b8be",
+        "--pui-font-sans": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "--pui-font-heading": "-apple-system, BlinkMacSystemFont, \"Segoe UI\", sans-serif",
+        "--pui-font-mono": "ui-monospace, SFMono-Regular, Menlo, monospace",
         "--pui-background": "#1c1c1e",
         "--pui-foreground": "#f5f5f7",
         "--pui-secondary": "#2c2c2e",
@@ -276,10 +294,10 @@
         "--pui-muted": "#3a3a3c",
         "--pui-ring": "#78b7ff",
         "--pui-radius": "9999px",
-        "--pui-radius-xl": "calc(var(--pui-radius) + 4px)",
-        "--pui-radius-lg": "var(--pui-radius)",
-        "--pui-radius-md": "max(calc(var(--pui-radius) - 2px), 0px)",
-        "--pui-radius-sm": "max(calc(var(--pui-radius) - 4px), 0px)"
+        "--pui-radius-xl": "12px",
+        "--pui-radius-lg": "8px",
+        "--pui-radius-md": "6px",
+        "--pui-radius-sm": "4px"
       }
     }
   }

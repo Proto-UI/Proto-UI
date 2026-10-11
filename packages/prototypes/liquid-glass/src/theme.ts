@@ -1,6 +1,10 @@
 /** Family-owned semantic palette. The consumer owns font resources and theme activation. */
 export const THEME = {
   'light': {
+    'muted-foreground': '#626267',
+    'font-sans': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    'font-heading': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    'font-mono': 'ui-monospace, SFMono-Regular, Menlo, monospace',
     'background': '#f5f5f7',
     'foreground': '#1d1d1f',
     'secondary': '#ffffff',
@@ -11,8 +15,16 @@ export const THEME = {
     'muted': '#e8e8ed',
     'ring': '#0061cc',
     'radius': '9999px',
+    'radius-xl': '12px',
+    'radius-lg': '8px',
+    'radius-md': '6px',
+    'radius-sm': '4px',
   },
   'dark': {
+    'muted-foreground': '#b8b8be',
+    'font-sans': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    'font-heading': '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    'font-mono': 'ui-monospace, SFMono-Regular, Menlo, monospace',
     'background': '#1c1c1e',
     'foreground': '#f5f5f7',
     'secondary': '#2c2c2e',
@@ -23,6 +35,10 @@ export const THEME = {
     'muted': '#3a3a3c',
     'ring': '#78b7ff',
     'radius': '9999px',
+    'radius-xl': '12px',
+    'radius-lg': '8px',
+    'radius-md': '6px',
+    'radius-sm': '4px',
   },
 } as const;
 

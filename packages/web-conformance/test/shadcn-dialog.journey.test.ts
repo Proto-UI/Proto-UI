@@ -12,6 +12,11 @@ import {
   type RuntimeId,
 } from '../../../apps/www/src/components/PrototypePreviewer/runtimes/ids';
 import shadcnDialogDemo from '../../../apps/www/src/content/docs/zh-cn/demo-shadcn-dialog.demo';
+import type {
+  DemoChild,
+  DemoSpec,
+} from '../../../apps/www/src/components/PrototypePreviewer/demo-types';
+import { styleContains } from '../../prototypes/test-utils/style';
 
 vi.mock('../../../apps/www/src/components/PrototypePreviewer/runtimes/react-runtime', () => ({
   loadReact: vi.fn(async () => ({
@@ -125,6 +130,23 @@ function expectTransparentSemanticParent(target: HTMLElement): void {
   expect(parentRoot?.hasAttribute('data-pui-style')).toBe(false);
 }
 
+function expectConsumerActionLayout(target: HTMLElement): HTMLElement {
+  expectTransparentSemanticParent(target);
+  const close = target.parentElement?.closest<HTMLElement>('[data-pui-root]');
+  const layout = close?.parentElement;
+  expect(layout?.tagName).toBe('DIV');
+  expect(layout?.classList.contains('min-w-0')).toBe(true);
+  expect(layout?.classList.contains('max-w-full')).toBe(true);
+  expect(layout?.hasAttribute('data-pui-root')).toBe(false);
+  expect(layout?.hasAttribute('role')).toBe(false);
+  expect(layout?.tabIndex).toBe(-1);
+  expect(styleContains(layout!.parentElement!, 'flex-wrap-reverse')).toBe(true);
+  for (const token of ['min-w-0', 'max-w-full', 'h-auto', 'whitespace-normal', 'break-words']) {
+    expect(styleContains(target, token), `Button retains its ${token} opt-in`).toBe(true);
+  }
+  return layout!;
+}
+
 beforeAll(async () => {
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -187,6 +209,8 @@ describe('Web adapter conformance / Shadcn Dialog keyboard journey', () => {
         const closeIcon = findCloseIcon();
         expectTransparentSemanticParent(cancel);
         expectTransparentSemanticParent(save);
+        expectConsumerActionLayout(cancel);
+        expectConsumerActionLayout(save);
         expectVisibleFocus(cancel);
 
         const cancelSemanticParent = cancel.parentElement?.closest<HTMLElement>('[data-pui-root]');
@@ -234,6 +258,61 @@ describe('Web adapter conformance / Shadcn Dialog keyboard journey', () => {
         beforePageStart.remove();
         host.remove();
         outside.remove();
+        document.body.style.overflow = '';
+      }
+    },
+    20_000
+  );
+});
+
+// Happy DOM proves ownership and the real consumer recipe, not native geometry.
+// dialog-available-space.browser.test.ts supplies the 320px / 200% text oracle.
+describe('Web adapter conformance / Shadcn Dialog long-action composition', () => {
+  it.each(WEB_ADAPTERS)(
+    '%s keeps long labels on the sole Button surface',
+    async (runtime) => {
+      const cancelLabel = '取消此次个人资料修改并返回上一页';
+      const saveLabel = '保存全部个人资料更改并继续下一步';
+      const demo = structuredClone(shadcnDialogDemo) as DemoSpec;
+      const localize = (node: DemoChild): void => {
+        if (typeof node === 'string' || node.kind === 'text') return;
+        if (node.kind === 'proto' && node.prototypeId === 'shadcn-button') {
+          if (node.children?.[0] === 'Cancel') node.children = [cancelLabel];
+          if (node.children?.[0] === 'Save changes') node.children = [saveLabel];
+        }
+        node.children?.forEach(localize);
+      };
+      localize(demo.root);
+      const host = document.createElement('div');
+      document.body.append(host);
+      const session = await renderDemo({ runtime, demo, host });
+      try {
+        await settle();
+        const trigger = findButton('Open Dialog', host);
+        await press(document, 'Tab');
+        trigger.focus();
+        await press(trigger, 'Enter');
+        await waitFor(dialogIsOpen);
+        const cancel = findButton(cancelLabel);
+        const save = findButton(saveLabel);
+        const cancelLayout = expectConsumerActionLayout(cancel);
+        expectConsumerActionLayout(save);
+        expect(findDialog()!.querySelectorAll('[role="button"]')).toHaveLength(3);
+        expectVisibleFocus(cancel);
+        await click(cancelLayout);
+        expect(dialogIsOpen()).toBe(true);
+        await press(cancel, 'Tab');
+        expectVisibleFocus(save);
+        await press(save, 'Tab');
+        expectVisibleFocus(findCloseIcon());
+        await press(findCloseIcon(), 'Tab');
+        expectVisibleFocus(cancel);
+        await press(cancel, 'Enter');
+        await waitFor(dialogIsClosed);
+        expectVisibleFocus(trigger);
+      } finally {
+        await session.destroy();
+        host.remove();
         document.body.style.overflow = '';
       }
     },

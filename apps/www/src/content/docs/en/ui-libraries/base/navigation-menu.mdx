@@ -1,0 +1,25 @@
+---
+title: 'NavigationMenu'
+description: 'Named navigation disclosures with native destination links.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Named navigation disclosures with native destination links.
+
+<PrototypePreviewer
+  demoId="demo-base-navigation-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root is a navigation landmark, Trigger is a disclosure button and Content is a labelled region. Root.value identifies one open panel. Item emits a command; Link projects a real anchor with href, target, rel and current-page semantics. The browser owns URL previews, Enter activation, modifier/middle-click browsing and navigation. Link does not synthesize Space activation or call an application router.
+
+Parts: Root, Trigger, Content, Item, Link.
+
+Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+
+Link emits a read-only navigate observation containing href, target, rel and modified after native activation. It is not a cancellable routing request. A normal same-window activation closes the open panel unless closeOnSelect=false; modified/middle-button or \_blank activation keeps the current page’s panel open. Disabled Link removes its destination and prevents activation. Current=true identifies the current page with aria-current.
+
+React/Vue/Vue2 use a native anchor root. Web Components retain caller content in an owned local anchor, and focus/style/accessibility projection follows that physical surface. The demo uses a same-document destination and only observes the navigation. Real-browser/packed/compiler/native acceptance remains pending beyond source-runtime checks.

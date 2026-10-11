@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.workspace.json",
+  "include": ["field-projection.types.ts"],
+  "exclude": []
+}

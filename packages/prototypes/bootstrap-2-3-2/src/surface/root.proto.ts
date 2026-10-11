@@ -1,6 +1,12 @@
 // Neutral opaque Surface projection. No material/glass or extra family component parity claim.
 import { definePrototype, tw } from '@proto.ui/core';
 import {
+  bootstrapButtonFill,
+  bootstrapButtonActiveFill,
+  bootstrapButtonRaised,
+  bootstrapButtonPressed,
+} from '../button/paint';
+import {
   asSurfaceRoot,
   type SurfaceRootProps,
   type SurfaceRootExposes,
@@ -62,8 +68,26 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
       intent: (i) => i.feedback.style.use(tw('rounded-full')),
     });
     def.rule({
-      when: (w) => w.prop('border').eq('all'),
+      when: (w) =>
+        w.all(
+          w.prop('border').eq('all'),
+          w.not(w.prop('variant').eq('solid')),
+          w.not(w.all(w.prop('variant').eq('outline'), w.prop('elevation').eq('raised')))
+        ),
       intent: (i) => i.feedback.style.use(tw('border border-border')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('border').eq('all'),
+          w.prop('variant').eq('outline'),
+          w.prop('elevation').eq('raised')
+        ),
+      intent: (i) => i.feedback.style.use(tw('border border-[#ddd]')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('border').eq('all'), w.prop('variant').eq('solid')),
+      intent: (i) => i.feedback.style.use(tw('border')),
     });
     def.rule({
       when: (w) => w.prop('border').eq('bottom'),
@@ -95,11 +119,32 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
     });
     def.rule({
       when: (w) => w.prop('variant').eq('solid'),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonFill.primary)),
     });
     def.rule({
-      when: (w) => w.prop('elevation').eq('raised'),
+      when: (w) =>
+        w.all(
+          w.prop('elevation').eq('raised'),
+          w.not(w.any(w.prop('variant').eq('solid'), w.prop('variant').eq('outline')))
+        ),
       intent: (i) => i.feedback.style.use(tw('shadow-sm')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('variant').eq('outline'), w.prop('elevation').eq('raised')),
+      intent: (i) => i.feedback.style.use(tw('shadow-[0_1px_3px_rgb(0_0_0/5.5%)]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('solid'),
+          w.prop('elevation').eq('raised'),
+          w.prop('pressed').eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonRaised)),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('variant').eq('solid'), w.prop('pressed').eq(true)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
     });
     def.rule({
       when: (w) => w.prop('focusVisible').eq(true),
@@ -109,11 +154,15 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
         ),
     });
     def.rule({
-      when: (w) => w.all(w.prop('variant').eq('solid'), w.prop('hovered').eq(true)),
-      intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
+      when: (w) =>
+        w.all(
+          w.prop('variant').eq('solid'),
+          w.any(w.prop('hovered').eq(true), w.prop('pressed').eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonActiveFill.primary)),
     });
     def.rule({
-      when: (w) => w.prop('pressed').eq(true),
+      when: (w) => w.all(w.prop('pressed').eq(true), w.not(w.prop('variant').eq('solid'))),
       intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
     });
     def.rule({

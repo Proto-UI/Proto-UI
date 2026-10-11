@@ -1,0 +1,459 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "menubar",
+      "prototypeExports": [
+        {
+          "export": "menubarRoot",
+          "name": "base-menubar-root"
+        },
+        {
+          "export": "menubarTrigger",
+          "name": "base-menubar-trigger"
+        },
+        {
+          "export": "menubarContent",
+          "name": "base-menubar-content"
+        },
+        {
+          "export": "menubarItem",
+          "name": "base-menubar-item"
+        }
+      ],
+      "demoId": "demo-base-menubar",
+      "demoPath": "apps/www/src/content/docs/demo-base-menubar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/menubar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/menubar.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "menubar",
+      "prototypeExports": [
+        {
+          "export": "menubarRoot",
+          "name": "shadcn-menubar-root"
+        },
+        {
+          "export": "menubarTrigger",
+          "name": "shadcn-menubar-trigger"
+        },
+        {
+          "export": "menubarContent",
+          "name": "shadcn-menubar-content"
+        },
+        {
+          "export": "menubarItem",
+          "name": "shadcn-menubar-item"
+        }
+      ],
+      "demoId": "demo-shadcn-menubar",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-menubar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/menubar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/menubar.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "menubar",
+      "prototypeExports": [
+        {
+          "export": "menubarRoot",
+          "name": "brutalist-menubar-root"
+        },
+        {
+          "export": "menubarTrigger",
+          "name": "brutalist-menubar-trigger"
+        },
+        {
+          "export": "menubarContent",
+          "name": "brutalist-menubar-content"
+        },
+        {
+          "export": "menubarItem",
+          "name": "brutalist-menubar-item"
+        }
+      ],
+      "demoId": "demo-brutalist-menubar",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-menubar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/menubar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/menubar.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "menubar",
+      "prototypeExports": [
+        {
+          "export": "menubarRoot",
+          "name": "bootstrap-2-3-2-menubar-root"
+        },
+        {
+          "export": "menubarTrigger",
+          "name": "bootstrap-2-3-2-menubar-trigger"
+        },
+        {
+          "export": "menubarContent",
+          "name": "bootstrap-2-3-2-menubar-content"
+        },
+        {
+          "export": "menubarItem",
+          "name": "bootstrap-2-3-2-menubar-item"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-menubar",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-menubar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/menubar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/menubar.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "menubar",
+      "prototypeExports": [
+        {
+          "export": "menubarRoot",
+          "name": "liquid-glass-menubar-root"
+        },
+        {
+          "export": "menubarTrigger",
+          "name": "liquid-glass-menubar-trigger"
+        },
+        {
+          "export": "menubarContent",
+          "name": "liquid-glass-menubar-content"
+        },
+        {
+          "export": "menubarItem",
+          "name": "liquid-glass-menubar-item"
+        }
+      ],
+      "demoId": "demo-liquid-glass-menubar",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-menubar.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/menubar.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/menubar.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "base-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "base-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "base-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "base-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "base-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-base-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-base-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "shadcn-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "shadcn-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "shadcn-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "shadcn-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "shadcn-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-shadcn-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "brutalist-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "brutalist-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "brutalist-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "brutalist-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "brutalist-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-brutalist-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "bootstrap-2-3-2-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "bootstrap-2-3-2-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "bootstrap-2-3-2-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "bootstrap-2-3-2-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "bootstrap-2-3-2-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "liquid-glass-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "liquid-glass-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "liquid-glass-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "liquid-glass-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "liquid-glass-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-liquid-glass-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "base-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "base-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "base-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "base-context-menu-item"
+        }
+      ],
+      "demoId": "demo-base-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-base-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "shadcn-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "shadcn-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "shadcn-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "shadcn-context-menu-item"
+        }
+      ],
+      "demoId": "demo-shadcn-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "brutalist-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "brutalist-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "brutalist-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "brutalist-context-menu-item"
+        }
+      ],
+      "demoId": "demo-brutalist-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "bootstrap-2-3-2-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "bootstrap-2-3-2-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "bootstrap-2-3-2-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "bootstrap-2-3-2-context-menu-item"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "liquid-glass-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "liquid-glass-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "liquid-glass-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "liquid-glass-context-menu-item"
+        }
+      ],
+      "demoId": "demo-liquid-glass-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/context-menu.mdx"
+      ]
+    }
+  ],
+  "privateSourceDependency": "packages/prototypes/base/src/menu-primitives",
+  "tests": ["packages/prototypes/base/test/navigation-overlays/menus.test.ts"],
+  "sharedRequirements": [
+    "Web A11y current to aria-current",
+    "exports/build/CLI/registry/navigation"
+  ],
+  "remaining": [
+    "nested submenus",
+    "ContextMenu pointer-location virtual anchor and long-press capability",
+    "NavigationMenu native link href projection / browser behaviors",
+    "catalog/lifecycle",
+    "native/GPUI/compiler/packed consumer/visual and independent acceptance"
+  ]
+}

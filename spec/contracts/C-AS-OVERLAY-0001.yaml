@@ -48,8 +48,8 @@ criteria:
       en: '`keepMounted()` must explicitly retain the structural view and must not coexist with an external Presence binding as an effective policy.'
   - id: C-AS-OVERLAY-0001-I
     text:
-      zh-CN: Dismiss 策略必须显式 opt-in；outside press 通过 Boundary observation/classification，Escape 直接消费 Event，Focus outside 在可靠的中立 sample 契约出现前不得伪造实现。
-      en: Dismiss policies must be explicitly opted in; outside press uses Boundary observation/classification, Escape consumes Event directly, and focus outside must not be fabricated before a reliable neutral sample contract exists.
+      zh-CN: Dismiss 策略必须显式 opt-in；outside press 通过 Boundary observation/classification，Escape 直接消费 Event，Focus outside 必须消费 Boundary 的 focus.move 当前焦点分类，并只在 closeOnFocusOutside opt-in 时以 focus.outside 关闭；不得移动焦点，缺少宿主当前焦点证明时不得伪造关闭。
+      en: Dismiss policies must be explicitly opted in; outside press uses Boundary observation/classification, Escape consumes Event directly, and focus outside consumes Boundary focus.move current-focus classification only with closeOnFocusOutside opt-in, closing with focus.outside without moving focus; hosts without current-focus proof must not fabricate dismissal.
   - id: C-AS-OVERLAY-0001-J
     text:
       zh-CN: 对 React/Vue 等 renderer-owned host，portal 必须由宿主 renderer 的 portal/teleport primitive 投射；Overlay bridge 不得在 renderer 背后直接移动其拥有的 DOM node。
@@ -134,6 +134,9 @@ revisions:
   - version: 0.3.0-alpha.0
     change: extended
     summary: Added scope-bound single-sample Escape coordination without changing portable author payloads.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Realized opt-in focus-outside dismissal through Boundary current-focus evidence, preserving pointer separation and synchronous controlled-owner reopen.
 tags:
   - overlay
   - as-hook

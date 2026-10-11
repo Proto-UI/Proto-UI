@@ -342,10 +342,13 @@ describe('prototypes/base: radio group', () => {
 
     itemA.getExposes().focusSelf();
     await flushReconciliation();
+    itemA.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
+    expect(itemA.getExposes().pressed.get()).toBe(true);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter' }));
     await flushReconciliation();
     expect(root.getExposes().value.get()).toBe('b');
+    expect(itemA.getExposes().pressed.get()).toBe(false);
 
     itemA.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }));
     itemA.dispatchEvent(new PointerEvent('pointercancel', { bubbles: true }));

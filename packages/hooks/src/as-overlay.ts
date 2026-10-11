@@ -92,6 +92,7 @@ const installOverlay = definePrivilegedAsHook<PropsBaseType, OverlayHandle<Props
       updatePosition: (patch) => raw.updatePosition(patch),
       registerTrigger: (target) => raw.registerTrigger(target),
       registerAnchor: (target) => raw.registerAnchor(target),
+      registerInputAnchor: (anchor) => raw.registerInputAnchor(anchor),
       registerAnchorPart: (part) => raw.registerAnchorPart(part),
       registerContent: (target) => raw.registerContent(target),
       getPositionSnapshot: () => raw.getPositionSnapshot(),

@@ -4,7 +4,10 @@
   "slices": [
     {
       "id": "alpha.1-image-view-and-release-preparation",
-      "entities": ["D-IMAGE-VIEW-PROJECTION-0001", "T-IMAGE-VIEW-0001"],
+      "entities": [
+        "D-IMAGE-VIEW-PROJECTION-0001",
+        "T-IMAGE-VIEW-0001"
+      ],
       "disposition": "remain-draft",
       "rationale": "D-IMAGE-VIEW-PROJECTION-0001 and T-IMAGE-VIEW-0001 remain draft because both catalog entries still lack the lifecycleRationale required for stable admission; this alpha.1 review reconciles their bounded Web evidence but does not supply that admission rationale.",
       "evidence": [
@@ -43,6 +46,53 @@
         "packages/adapters/vue2/test/tabs.test.ts",
         "https://github.com/Proto-UI/Proto-UI/issues/549#issuecomment-5546535682",
         "https://github.com/Proto-UI/Proto-UI/pull/553#pullrequestreview-5120524917"
+      ]
+    },
+    {
+      "id": "finf-field-independent-family",
+      "entities": [
+        "C-FIELD-0001",
+        "T-BASE-FIELD-0001",
+        "P-BASE-FIELD",
+        "P-BASE-FIELD-LABEL",
+        "P-BASE-FIELD-CONTROL",
+        "P-BASE-FIELD-DESCRIPTION",
+        "P-BASE-FIELD-ERROR",
+        "P-BASE-FIELD-VALIDITY",
+        "P-SHADCN-FIELD",
+        "P-SHADCN-FIELD-LABEL",
+        "P-SHADCN-FIELD-CONTROL",
+        "P-SHADCN-FIELD-DESCRIPTION",
+        "P-SHADCN-FIELD-ERROR",
+        "P-SHADCN-FIELD-VALIDITY",
+        "P-BRUTALIST-FIELD",
+        "P-BRUTALIST-FIELD-LABEL",
+        "P-BRUTALIST-FIELD-CONTROL",
+        "P-BRUTALIST-FIELD-DESCRIPTION",
+        "P-BRUTALIST-FIELD-ERROR",
+        "P-BRUTALIST-FIELD-VALIDITY",
+        "P-BOOTSTRAP-2-3-2-FIELD",
+        "P-BOOTSTRAP-2-3-2-FIELD-LABEL",
+        "P-BOOTSTRAP-2-3-2-FIELD-CONTROL",
+        "P-BOOTSTRAP-2-3-2-FIELD-DESCRIPTION",
+        "P-BOOTSTRAP-2-3-2-FIELD-ERROR",
+        "P-BOOTSTRAP-2-3-2-FIELD-VALIDITY",
+        "P-LIQUID-GLASS-FIELD",
+        "P-LIQUID-GLASS-FIELD-LABEL",
+        "P-LIQUID-GLASS-FIELD-CONTROL",
+        "P-LIQUID-GLASS-FIELD-DESCRIPTION",
+        "P-LIQUID-GLASS-FIELD-ERROR",
+        "P-LIQUID-GLASS-FIELD-VALIDITY"
+      ],
+      "disposition": "remain-draft",
+      "rationale": "Full Field source and bounded Web semantic tests are present. Stable admission awaits independent review and exact integrated-head native input/layout/AT, actual TextControl host and accessibility mappings on GPUI, and real optical renderer evidence. Transport and synthetic-DOM passes do not satisfy those gates.",
+      "evidence": [
+        "spec/contracts/C-FIELD-0001.yaml",
+        "spec/tests/T-BASE-FIELD-0001.yaml",
+        "packages/prototypes/base/test/field.test.ts",
+        "packages/adapters/gpui-peer/test/field-projections.test.ts",
+        "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+        "internal/records/2026-10-07-finf-field-family.md"
       ]
     }
   ]

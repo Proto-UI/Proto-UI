@@ -3,7 +3,7 @@ title: 'Material 实验'
 description: 'Base Button 与自有场景材质实验组合的执行边界，以及它与 Liquid Glass 的关系。'
 ---
 
-本页记录 [PR #809](https://github.com/Proto-UI/Proto-UI/pull/809) 的实验组合，与 [stage-0 Liquid Glass Button](/zh-cn/ui-libraries/liquid-glass/button/) 分开。`experimental-owned-material-button` 只是 Base Button 加候选通用材质能力的测试身份，不是新增获准的 Button 协议、公开包 import 或永久私有组件 API。
+本页记录 [PR #809](https://github.com/Proto-UI/Proto-UI/pull/809) 的实验组合，与当前 [Liquid Glass Button](/zh-cn/ui-libraries/liquid-glass/button/) 分开。`experimental-owned-material-button` 只是 Base Button 加候选通用材质能力的测试身份，不是新增获准的 Button 协议、公开包 import 或永久私有组件 API。
 
 ## 实验组合声明什么
 
@@ -35,7 +35,7 @@ Base Button 继续拥有事件、disabled、focus 与 press。实验研究的是
 - 形状融合、共享组、morph 或完整 Liquid Glass 家族；
 - 材质已经稳定准入、包已发布，或包预算回归已被接受。
 
-本页不提供公开 RuntimeBox：私有实验 consumer 尚未进入网站公开原型注册表。现有 Button 预览仍是已记录的 stage-0 回退，不能冒充 GPU fixture 输出。[PR #807 的隔离上游基准](https://github.com/Proto-UI/Proto-UI/pull/807) 是另一个 fixture，也不能替代本组合的验证。
+本页不提供公开 RuntimeBox：私有实验 consumer 尚未进入网站公开原型注册表。此历史 V1 fixture 与当前公共 Previewer 的 V2 可见 canvas 光学路径不同，后者必须提供自己的 exact-head 证据。[PR #807 的隔离上游基准](https://github.com/Proto-UI/Proto-UI/pull/807) 是另一个 fixture，也不能替代本组合的验证。
 
 ## 精确检查点画面
 

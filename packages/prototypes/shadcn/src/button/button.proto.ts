@@ -20,7 +20,6 @@ const BUTTON_BASE_TOKENS = [
   'bg-clip-padding',
   'text-sm',
   'font-medium',
-  'whitespace-nowrap',
   'transition-all',
   'outline-none',
   'select-none',
@@ -43,11 +42,17 @@ const VARIANT_TOKENS: Record<ShadcnButtonVariant, string> = {
 // also contain xs-style variants, but those are not part of this prototype API
 // yet, so they are intentionally left out here.
 const SIZE_TOKENS: Record<ShadcnButtonSize, string> = {
-  default: 'h-8 gap-1.5 px-2.5',
-  sm: 'h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem]',
-  lg: 'h-9 gap-1.5 px-2.5',
-  icon: 'size-8',
+  default: 'h-8 gap-1.5 px-2.5 whitespace-nowrap',
+  sm: 'h-7 gap-1 rounded-[min(var(--radius-md),12px)] px-2.5 text-[0.8rem] whitespace-nowrap',
+  lg: 'h-9 gap-1.5 px-2.5 whitespace-nowrap',
+  icon: 'size-8 whitespace-nowrap',
 };
+
+const WRAP_SIZE_TOKENS = {
+  default: 'min-h-8 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal break-words',
+  sm: 'min-h-7 h-auto gap-1 px-2.5 py-1 rounded-[min(var(--radius-md),12px)] text-[0.8rem] min-w-0 max-w-full whitespace-normal break-words',
+  lg: 'min-h-9 h-auto gap-1.5 px-2.5 py-1 min-w-0 max-w-full whitespace-normal break-words',
+} as const;
 
 const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
   name: 'shadcn-button',
@@ -61,11 +66,13 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
       },
       size: { type: 'enum', empty: 'fallback', options: ['default', 'sm', 'lg', 'icon'] },
       disabled: { type: 'boolean', empty: 'fallback' },
+      wrap: { type: 'boolean', empty: 'fallback' },
     });
     def.props.setDefaults({
       variant: 'default',
       size: 'default',
       disabled: false,
+      wrap: false,
     });
 
     // P-SHADCN-BUTTON-BASE-INHERITANCE,
@@ -93,11 +100,28 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
     // Size rules are isolated so later icon-density refinements can layer on
     // top without re-encoding every variant.
     (Object.keys(SIZE_TOKENS) as ShadcnButtonSize[]).forEach((size) => {
+      // Keep each rule callback in the statically modeled DSL shape. The
+      // setup-time size branch must not hide rule dependencies in a ternary.
+      if (size === 'icon') {
+        def.rule({
+          when: (w) => w.prop('size').eq(size),
+          intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
+        });
+        return;
+      }
       def.rule({
-        when: (w) => w.prop('size').eq(size),
+        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(false)),
         intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
       });
     });
+
+    // Optional, reusable label wrapping. Fixed icon density is deliberately unchanged.
+    for (const size of ['default', 'sm', 'lg'] as const) {
+      def.rule({
+        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(true)),
+        intent: (i) => i.feedback.style.use(tw(WRAP_SIZE_TOKENS[size])),
+      });
+    }
 
     // P-SHADCN-BUTTON-INTERACTION-STYLES
     // Focus/press are shared interaction states exposed by `asButton()`, so

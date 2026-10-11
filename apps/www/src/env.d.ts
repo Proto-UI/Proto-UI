@@ -1,3 +1,4 @@
+/// <reference path="../../../types/runtime-retry-urls.d.ts" />
 /// <reference types="astro/client" />
 /// <reference types="astro/astro-jsx" />
 /// <reference types="vite/client" />

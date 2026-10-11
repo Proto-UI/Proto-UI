@@ -1,0 +1,164 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "dependencies": ["6e90ae6a7cd25a840fe01abcd834809fd3678e35"],
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "base-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "base-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "base-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "base-context-menu-item"
+        }
+      ],
+      "demoId": "demo-base-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-base-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "shadcn-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "shadcn-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "shadcn-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "shadcn-context-menu-item"
+        }
+      ],
+      "demoId": "demo-shadcn-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "brutalist-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "brutalist-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "brutalist-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "brutalist-context-menu-item"
+        }
+      ],
+      "demoId": "demo-brutalist-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "bootstrap-2-3-2-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "bootstrap-2-3-2-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "bootstrap-2-3-2-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "bootstrap-2-3-2-context-menu-item"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/context-menu.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "context-menu",
+      "prototypeExports": [
+        {
+          "export": "contextMenuRoot",
+          "name": "liquid-glass-context-menu-root"
+        },
+        {
+          "export": "contextMenuTrigger",
+          "name": "liquid-glass-context-menu-trigger"
+        },
+        {
+          "export": "contextMenuContent",
+          "name": "liquid-glass-context-menu-content"
+        },
+        {
+          "export": "contextMenuItem",
+          "name": "liquid-glass-context-menu-item"
+        }
+      ],
+      "demoId": "demo-liquid-glass-context-menu",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-context-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/context-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/context-menu.mdx"
+      ]
+    }
+  ],
+  "newPrototypeExports": [],
+  "integration": [
+    "No new family/package/registry part names. All four projections directly consume the updated Base hooks.",
+    "Source-runtime ContextMenuInput/Floating UI hooks require the shared dependency; compiler/native admission remains explicitly unsupported rather than silently emitted.",
+    "Root openContextMenu now matches its declared public method; previous unintended openDropdown name is removed.",
+    "InputOriginAnchor is a host association retained only in Root private memory and obtained through an anatomy method; JSON context contains only inputAnchorVersion."
+  ],
+  "tests": [
+    "packages/prototypes/base/test/navigation-overlays/context-menu-input.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/menus.test.ts"
+  ],
+  "remainingGates": [
+    "Nested submenu composition",
+    "Real-device longpress/browser visual evidence",
+    "Compiler/native/GPUI implementation and acceptance",
+    "Packed consumers/full CI/independent lifecycle acceptance"
+  ]
+}

@@ -34,7 +34,7 @@ The returned handle exposes setup-only options such as `modal`, `closeOnOutsideP
 Normative direction:
 
 - `modal` should be treated as a **policy declaration**
-- outside press consumes Boundary classification; focus-outside awaits a reliable neutral sample
+- outside press consumes Boundary classification; focus-outside consumes host-proven `focus.move` observation with `closeOnFocusOutside` opt-in, without moving focus. A missing host focus sampler fails closed; this slice does not claim native/Compiler support
 - overlay should remain a consumer of those semantics rather than the foundational owner of them
 
 This means:

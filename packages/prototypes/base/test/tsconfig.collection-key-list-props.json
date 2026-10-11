@@ -1,0 +1,9 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "../src/tree/**/*.ts",
+    "../src/data-table/**/*.ts",
+    "collection-key-list-props.test.ts"
+  ],
+  "exclude": []
+}

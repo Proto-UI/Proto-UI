@@ -1,0 +1,74 @@
+---
+title: Liquid Glass Field
+description: Atomic Field labeling, value reporting and controlled or consumer-validated errors.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Draft workspace family. All six atoms share one Base protocol; native/AT/material/GPUI completion is not yet established.
+
+Rounded editing surfaces with static optical intent, explicit opaque fallback and comfortable text spacing.
+
+<PrototypePreviewer demoId="demo-liquid-glass-field" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+
+## Anatomy and ownership
+
+Root groups exactly one Control with an optional Label, Description and Error, plus passive Validity readers. Nested Roots have independent domains. Names, help and the current error resolve through Anatomy and A11y; no caller-supplied DOM IDs are needed. Duplicate singleton parts fail closed. Progressive mounting may temporarily have no Control, but that state cannot validate or accept an old reply.
+
+Root owns validity, touched and dirty. Control owns its value and physical editor. The default Control uses the existing TextControl and Focus modules directly. For other value-bearing controls, asFieldControl is a generic registration/relationship bridge: the author reports the canonical value and consumes effective disabled/readOnly/required. It does not inspect arbitrary DOM or an unrelated expose named value. asFieldTextControl is the ready-to-use single-line authoring entry. Custom controls also explicitly declare asControlLabel().target(theirExistingOperation, FIELD_LABEL_PAIR); this setup-only pair reuses native input, same-physical-scope and isCurrent guards without putting a callback/reference in Props.
+
+## JSON Props
+
+| Part | Props | Meaning |
+| --- | --- | --- |
+| Root | invalid, errors | Supplying invalid makes validity controlled; errors are its messages |
+| Root | defaultInvalid, defaultErrors | Initialization-only uncontrolled defaults |
+| Root | disabled, readOnly, required | false; Root policy combines with local Control policy |
+| Root | minLength, maxLength | -1 disables the bound; otherwise nonnegative integer UTF-16 string length, also projected to the default editor |
+| Root | validationMode | onBlur (default), onChange or manual |
+| Root | externalValidation | false; true emits a versioned request after built-in checks pass |
+| Control | value, defaultValue | Controlled or uncontrolled string ownership is fixed when TextControl initializes |
+| Control | disabled, readOnly, required | Local policy cannot override an enabled Root constraint |
+| Control | placeholder, name, autoComplete, inputMode, enterKeyHint, ariaLabel | Existing finite text-editor hints; not arbitrary native prop forwarding |
+| Label | activation | true; pointer activation requests focus on the same enabled Control |
+| Description | none | Selectable help text from authored content |
+| Error | message, keepMounted | Explicit localized message override; otherwise current errors/built-in text. keepMounted defaults false |
+| Validity | none | Passive state and getValidity() snapshot reader |
+
+Proto UI Props contain JSON-compatible data. Framework onValueChange/onValidationRequest/onValidityChange callbacks are Adapter projections of expose events, not callback-valued Proto UI Props. There are no DOM refs, validate callbacks, render callbacks, Form objects or string-ID association Props.
+
+## Validation and controlled results
+
+Root exposes validate(reason?), resolveValidation(requestId, result), cancelValidation(), resetValidation(), focusControl(options?), getValidity(), and invalid/pending/dirty/touched/filled/focused/disabled/readOnly/required states. A completed check emits validityChange with status, invalid, pending, dirty, touched, filled, focused, flags and errors. In controlled mode this is a proposal; the canonical invalid value stays unchanged until the owner supplies new Props. A synchronous owner response takes precedence. getValidity() and its arrays are defensive copies.
+
+required considers null, false, an empty string and an empty array empty. Zero and whitespace are valid filled values; no implicit trimming occurs. A nonempty string array is filled even if an element is empty. Only finite numbers, booleans, strings, string arrays and null may cross the generic bridge. Optional empty strings bypass minLength/maxLength. Bounds count UTF-16 code units, not grapheme clusters. Built-in flags are valueMissing, tooShort and tooLong; external errors use customError.
+
+The initial state is unvalidated unless an explicit default/owner validity was supplied. Pending never implies valid. Without a current Control the status is unvalidated even when the owner supplied invalid=false. dirty compares the canonical value with the Control's initial value; rejected controlled edits do not dirty the field. blur marks touched. resetValidation clears validation/touched only; it neither changes the value nor redefines its dirty baseline and is not a form reset.
+
+## Consumer-owned asynchronous checks
+
+With externalValidation=true, a passed built-in check emits validationRequest with requestId, value and reason. The consumer runs the request and calls `resolveValidation(requestId, { invalid, errors })`. A result is accepted at most once for the current Root, Control lease and value/policy revision. A new value, newer request, Control replacement/removal, detach, disable/readOnly transition, composition start, policy change, cancellation or reset invalidates old work. Malformed and cross-root results are rejected without clearing a legitimate pending request.
+
+onChange waits through composition until compositionend. Read-only Controls remain focusable and may be explicitly validated; disabled Controls suppress editing, focus requests and validation without changing owner values. The demo's timer is an ordinary consumer that uses the public request/result bridge. It implements no Field protocol in page code.
+
+## Accessibility and lifetime
+
+The one physical editor is named by Label, described by Description, and linked to Error through aria-errormessage only while canonical invalid is true. Web also projects aria-required, aria-invalid, aria-busy and aria-readonly. Label and Root add no Tab stop. Keyboard editing and selection belong to the control's existing host editor. Label pointer activation uses the actual ControlLabel guard, rejecting drag/cancel, modified/secondary clicks, nested interactive content and already-prevented input. It focuses the same Control; it does not create a second input.
+
+Error uses explicit message, current error strings or a finite built-in English explanation. Authors supply localized overrides or localized external error messages. It creates no implicit alert/live region. Closed Error uses repeatable L1 detach by default; keepMounted retains it with hidden accessibility and style. IDREF contributions are withdrawn and restored with their actual target leases. An application may choose an existing LiveRegion for announcements according to its interaction needs.
+
+Description stays passive and selectable. One aggregate Error is linked, avoiding undocumented ordering among multiple error parts. Value-specific composite controls use the generic bridge; their own keyboard and selection semantics remain their responsibility.
+
+## Consumption and evidence boundary
+
+Import fieldRoot, fieldLabel, fieldControl, fieldDescription, fieldError and fieldValidity from the family field subpath. Base also exports the corresponding authoring entries, the generic asFieldControl bridge, finite types and anatomy/context vocabulary. The CLI facade includes all six parts for React, Vue, Vue 2 and Web Components as a workspace-source family; this is not a statement that an npm release already includes them.
+
+This is not Fieldset or Form. Submission, hidden fields, form serialization/reset, debounce, native constraint-validity forwarding and server request implementations are outside this explicit contract. The same full Field semantics are used by every visual projection.
+
+The current local evidence is 24 Base tests plus 20 tests per Web Adapter (104 total), using the actual Base and four styled families in synthetic DOM. Native browser keyboard/paint, assistive-technology output, narrow/large-text geometry, optical material realization and GPUI remain separately required gates. The native-browser journey is wired for exact-source screenshots and real pointer/keyboard input. Local Chromium startup is blocked by socket EPERM; no native pass is inferred.
+
+The GPUI peer currently has no physical TextControl host. It also reports or omits several needed native mappings: required/invalid/busy/readOnly and describedBy/errorMessage are not established native equivalents. Liquid Glass declares one static editing-surface optical intent with an opaque fallback; neither an intent token nor JS transport proves optical/native rendering.
+
+[Base UI Field comparison](https://base-ui.com/react/components/field) · [shadcn Field comparison](https://ui.shadcn.com/docs/components/base/field) · [Bootstrap 2.3.2 forms reference](https://getbootstrap.com/2.3.2/base-css.html#forms) · [Apple text-fields HIG](https://developer.apple.com/design/human-interface-guidelines/text-fields)
+
+These are independent design comparisons. Base UI's render callbacks, validators and Form submission mode, shadcn's layout wrapper/API, Bootstrap's DOM/classes and Apple system editing chrome are not inherited APIs or Proto UI authority.

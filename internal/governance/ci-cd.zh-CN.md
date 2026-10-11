@@ -111,6 +111,9 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 - `pnpm build:packages`
 - `pnpm check:package-manifests`
 - `pnpm check:package-budgets`
+- `pnpm check:package-budgets:strict`
 - `pnpm analysis:monorepo --benchmark --out <path>`
 
 仓库不提供局部真实发布快捷命令；package 局部修复进入下一次全局 release train。
+
+在已明确授权的 Finf 快速开发阶段，`check:package-budgets` 保留原阈值和真实失败比较，仅将尺寸超量作为 advisory；构建与测量错误仍阻断。`check:package-budgets:strict` 保持严格检查。详见[适用范围、68 项目标到期条件与恢复义务](finf-package-budgets.md)。

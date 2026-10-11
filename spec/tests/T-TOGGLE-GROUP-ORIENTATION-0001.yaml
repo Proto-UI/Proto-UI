@@ -1,0 +1,101 @@
+id: T-TOGGLE-GROUP-ORIENTATION-0001
+type: test
+title: ToggleGroup orientation projection regression and admission boundaries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Emulated-host and type coverage are bounded checks; native geometry, screenshots and native and Compiler composition remain unassessed.
+summary: Exercise Base orientation normalization and four-family reversible layout without adding a second interaction owner.
+cases:
+  - id: T-TOGGLE-GROUP-ORIENTATION-0001-CASE-AXIS
+    title: Initial, reversible and normalized axes
+    covers:
+      [
+        P-BASE-TOGGLE-GROUP-OWNER,
+        P-BASE-TOGGLE-GROUP-LAYOUT,
+        P-SHADCN-TOGGLE-GROUP-ORIENTATION,
+        P-BRUTALIST-TOGGLE-GROUP-ORIENTATION,
+        P-BOOTSTRAP-2-3-2-TOGGLE-GROUP-ORIENTATION,
+        P-LIQUID-GLASS-TOGGLE-GROUP-ORIENTATION,
+      ]
+    expectation: Each family preserves omitted and explicit horizontal, projects initial vertical and horizontal-to-vertical-to-horizontal, and follows C-PROPS-0009 for empty or invalid provided values. Fresh invalid/null resolves horizontal; vertical followed by invalid/null preserves vertical; vertical followed by missing restores horizontal. Direction changes preserve selection, membership and orientation-aware keyboard behavior.
+  - id: T-TOGGLE-GROUP-ORIENTATION-0001-CASE-TYPES
+    title: Typed borrowed hook state
+    covers: [P-BASE-TOGGLE-GROUP-OWNER]
+    expectation: The hook orientation state matches the existing string state; string reads and existing borrowed operations are typed, wrong values and unknown state keys fail compilation. No new AppMaker expose or hook read-only capability is claimed.
+  - id: T-TOGGLE-GROUP-ORIENTATION-0001-CASE-NATIVE
+    title: Separate real-host layout and composition
+    covers: [P-BASE-TOGGLE-GROUP-EVIDENCE]
+    expectation: Exact-source host geometry, same-state screenshots and native and Compiler composition must be collected separately; synthetic styles and events do not satisfy this case.
+implementations:
+  - id: emulated-axis
+    kind: adapter-test
+    status: passing
+    required: true
+    path: packages/prototypes/base/test/toggle-group-orientation.test.ts
+    consumesCases: [T-TOGGLE-GROUP-ORIENTATION-0001-CASE-AXIS]
+    exercises:
+      [
+        P-BASE-TOGGLE-GROUP,
+        P-SHADCN-TOGGLE-GROUP,
+        P-BRUTALIST-TOGGLE-GROUP,
+        P-BOOTSTRAP-2-3-2-TOGGLE-GROUP,
+        P-LIQUID-GLASS-TOGGLE-GROUP,
+      ]
+  - id: typed-hook
+    kind: workspace-check
+    status: passing
+    required: true
+    path: packages/prototypes/base/test/toggle-group-orientation.types.ts
+    consumesCases: [T-TOGGLE-GROUP-ORIENTATION-0001-CASE-TYPES]
+    exercises: [P-BASE-TOGGLE-GROUP]
+  - id: native-admission
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases: [T-TOGGLE-GROUP-ORIENTATION-0001-CASE-NATIVE]
+    exercises:
+      [
+        P-BASE-TOGGLE-GROUP,
+        P-SHADCN-TOGGLE-GROUP,
+        P-BRUTALIST-TOGGLE-GROUP,
+        P-BOOTSTRAP-2-3-2-TOGGLE-GROUP,
+        P-LIQUID-GLASS-TOGGLE-GROUP,
+      ]
+    notes:
+      - No native test implementation or execution exists yet. Real-host geometry, screenshots and native and Compiler composition remain required and unassessed; the evidence record is not an implementation.
+verifies:
+  prototypes:
+    - id: P-BASE-TOGGLE-GROUP
+      anchors: [P-BASE-TOGGLE-GROUP-OWNER, P-BASE-TOGGLE-GROUP-LAYOUT, P-BASE-TOGGLE-GROUP-EVIDENCE]
+    - id: P-SHADCN-TOGGLE-GROUP
+      anchors: [P-SHADCN-TOGGLE-GROUP-ORIENTATION]
+    - id: P-BRUTALIST-TOGGLE-GROUP
+      anchors: [P-BRUTALIST-TOGGLE-GROUP-ORIENTATION]
+    - id: P-BOOTSTRAP-2-3-2-TOGGLE-GROUP
+      anchors: [P-BOOTSTRAP-2-3-2-TOGGLE-GROUP-ORIENTATION]
+    - id: P-LIQUID-GLASS-TOGGLE-GROUP
+      anchors: [P-LIQUID-GLASS-TOGGLE-GROUP-ORIENTATION]
+exercises:
+  prototypes:
+    [
+      P-BASE-TOGGLE-GROUP,
+      P-SHADCN-TOGGLE-GROUP,
+      P-BRUTALIST-TOGGLE-GROUP,
+      P-BOOTSTRAP-2-3-2-TOGGLE-GROUP,
+      P-LIQUID-GLASS-TOGGLE-GROUP,
+    ]
+openQuestions:
+  - id: T-TOGGLE-GROUP-ORIENTATION-0001-Q-NATIVE
+    question:
+      en: When are actual layout, screenshots and native and Compiler-host evidence available for this exact source?
+    blocks:
+      [
+        activation:T-TOGGLE-GROUP-ORIENTATION-0001,
+        'criterion:P-BASE-TOGGLE-GROUP#P-BASE-TOGGLE-GROUP-EVIDENCE',
+      ]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Preserve negative controls and separate emulated/type checks from real-host admission.
+tags: [test, toggle-group, orientation, projection]

@@ -1,0 +1,537 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "autocomplete",
+      "prototypeExports": [
+        {
+          "export": "autocompleteRoot",
+          "name": "base-autocomplete-root"
+        },
+        {
+          "export": "autocompleteInput",
+          "name": "base-autocomplete-input"
+        },
+        {
+          "export": "autocompleteContent",
+          "name": "base-autocomplete-content"
+        },
+        {
+          "export": "autocompleteItem",
+          "name": "base-autocomplete-item"
+        },
+        {
+          "export": "autocompleteEmpty",
+          "name": "base-autocomplete-empty"
+        },
+        {
+          "export": "autocompleteTrigger",
+          "name": "base-autocomplete-trigger"
+        }
+      ],
+      "demoId": "demo-base-autocomplete",
+      "demoPath": "apps/www/src/content/docs/demo-base-autocomplete.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/autocomplete.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/autocomplete.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "autocomplete",
+      "prototypeExports": [
+        {
+          "export": "autocompleteRoot",
+          "name": "shadcn-autocomplete-root"
+        },
+        {
+          "export": "autocompleteInput",
+          "name": "shadcn-autocomplete-input"
+        },
+        {
+          "export": "autocompleteContent",
+          "name": "shadcn-autocomplete-content"
+        },
+        {
+          "export": "autocompleteItem",
+          "name": "shadcn-autocomplete-item"
+        },
+        {
+          "export": "autocompleteEmpty",
+          "name": "shadcn-autocomplete-empty"
+        },
+        {
+          "export": "autocompleteTrigger",
+          "name": "shadcn-autocomplete-trigger"
+        }
+      ],
+      "demoId": "demo-shadcn-autocomplete",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-autocomplete.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/autocomplete.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/autocomplete.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "autocomplete",
+      "prototypeExports": [
+        {
+          "export": "autocompleteRoot",
+          "name": "brutalist-autocomplete-root"
+        },
+        {
+          "export": "autocompleteInput",
+          "name": "brutalist-autocomplete-input"
+        },
+        {
+          "export": "autocompleteContent",
+          "name": "brutalist-autocomplete-content"
+        },
+        {
+          "export": "autocompleteItem",
+          "name": "brutalist-autocomplete-item"
+        },
+        {
+          "export": "autocompleteEmpty",
+          "name": "brutalist-autocomplete-empty"
+        },
+        {
+          "export": "autocompleteTrigger",
+          "name": "brutalist-autocomplete-trigger"
+        }
+      ],
+      "demoId": "demo-brutalist-autocomplete",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-autocomplete.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/autocomplete.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/autocomplete.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "autocomplete",
+      "prototypeExports": [
+        {
+          "export": "autocompleteRoot",
+          "name": "bootstrap-2-3-2-autocomplete-root"
+        },
+        {
+          "export": "autocompleteInput",
+          "name": "bootstrap-2-3-2-autocomplete-input"
+        },
+        {
+          "export": "autocompleteContent",
+          "name": "bootstrap-2-3-2-autocomplete-content"
+        },
+        {
+          "export": "autocompleteItem",
+          "name": "bootstrap-2-3-2-autocomplete-item"
+        },
+        {
+          "export": "autocompleteEmpty",
+          "name": "bootstrap-2-3-2-autocomplete-empty"
+        },
+        {
+          "export": "autocompleteTrigger",
+          "name": "bootstrap-2-3-2-autocomplete-trigger"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-autocomplete",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-autocomplete.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/autocomplete.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/autocomplete.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "autocomplete",
+      "prototypeExports": [
+        {
+          "export": "autocompleteRoot",
+          "name": "liquid-glass-autocomplete-root"
+        },
+        {
+          "export": "autocompleteInput",
+          "name": "liquid-glass-autocomplete-input"
+        },
+        {
+          "export": "autocompleteContent",
+          "name": "liquid-glass-autocomplete-content"
+        },
+        {
+          "export": "autocompleteItem",
+          "name": "liquid-glass-autocomplete-item"
+        },
+        {
+          "export": "autocompleteEmpty",
+          "name": "liquid-glass-autocomplete-empty"
+        },
+        {
+          "export": "autocompleteTrigger",
+          "name": "liquid-glass-autocomplete-trigger"
+        }
+      ],
+      "demoId": "demo-liquid-glass-autocomplete",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-autocomplete.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/autocomplete.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/autocomplete.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "combobox",
+      "prototypeExports": [
+        {
+          "export": "comboboxRoot",
+          "name": "base-combobox-root"
+        },
+        {
+          "export": "comboboxInput",
+          "name": "base-combobox-input"
+        },
+        {
+          "export": "comboboxContent",
+          "name": "base-combobox-content"
+        },
+        {
+          "export": "comboboxItem",
+          "name": "base-combobox-item"
+        },
+        {
+          "export": "comboboxEmpty",
+          "name": "base-combobox-empty"
+        },
+        {
+          "export": "comboboxTrigger",
+          "name": "base-combobox-trigger"
+        }
+      ],
+      "demoId": "demo-base-combobox",
+      "demoPath": "apps/www/src/content/docs/demo-base-combobox.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/combobox.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/combobox.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "combobox",
+      "prototypeExports": [
+        {
+          "export": "comboboxRoot",
+          "name": "shadcn-combobox-root"
+        },
+        {
+          "export": "comboboxInput",
+          "name": "shadcn-combobox-input"
+        },
+        {
+          "export": "comboboxContent",
+          "name": "shadcn-combobox-content"
+        },
+        {
+          "export": "comboboxItem",
+          "name": "shadcn-combobox-item"
+        },
+        {
+          "export": "comboboxEmpty",
+          "name": "shadcn-combobox-empty"
+        },
+        {
+          "export": "comboboxTrigger",
+          "name": "shadcn-combobox-trigger"
+        }
+      ],
+      "demoId": "demo-shadcn-combobox",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-combobox.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/combobox.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/combobox.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "combobox",
+      "prototypeExports": [
+        {
+          "export": "comboboxRoot",
+          "name": "brutalist-combobox-root"
+        },
+        {
+          "export": "comboboxInput",
+          "name": "brutalist-combobox-input"
+        },
+        {
+          "export": "comboboxContent",
+          "name": "brutalist-combobox-content"
+        },
+        {
+          "export": "comboboxItem",
+          "name": "brutalist-combobox-item"
+        },
+        {
+          "export": "comboboxEmpty",
+          "name": "brutalist-combobox-empty"
+        },
+        {
+          "export": "comboboxTrigger",
+          "name": "brutalist-combobox-trigger"
+        }
+      ],
+      "demoId": "demo-brutalist-combobox",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-combobox.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/combobox.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/combobox.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "combobox",
+      "prototypeExports": [
+        {
+          "export": "comboboxRoot",
+          "name": "bootstrap-2-3-2-combobox-root"
+        },
+        {
+          "export": "comboboxInput",
+          "name": "bootstrap-2-3-2-combobox-input"
+        },
+        {
+          "export": "comboboxContent",
+          "name": "bootstrap-2-3-2-combobox-content"
+        },
+        {
+          "export": "comboboxItem",
+          "name": "bootstrap-2-3-2-combobox-item"
+        },
+        {
+          "export": "comboboxEmpty",
+          "name": "bootstrap-2-3-2-combobox-empty"
+        },
+        {
+          "export": "comboboxTrigger",
+          "name": "bootstrap-2-3-2-combobox-trigger"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-combobox",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-combobox.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/combobox.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/combobox.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "combobox",
+      "prototypeExports": [
+        {
+          "export": "comboboxRoot",
+          "name": "liquid-glass-combobox-root"
+        },
+        {
+          "export": "comboboxInput",
+          "name": "liquid-glass-combobox-input"
+        },
+        {
+          "export": "comboboxContent",
+          "name": "liquid-glass-combobox-content"
+        },
+        {
+          "export": "comboboxItem",
+          "name": "liquid-glass-combobox-item"
+        },
+        {
+          "export": "comboboxEmpty",
+          "name": "liquid-glass-combobox-empty"
+        },
+        {
+          "export": "comboboxTrigger",
+          "name": "liquid-glass-combobox-trigger"
+        }
+      ],
+      "demoId": "demo-liquid-glass-combobox",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-combobox.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/combobox.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/combobox.mdx"
+      ]
+    },
+    {
+      "family": "base",
+      "subpath": "command",
+      "prototypeExports": [
+        {
+          "export": "commandRoot",
+          "name": "base-command-root"
+        },
+        {
+          "export": "commandInput",
+          "name": "base-command-input"
+        },
+        {
+          "export": "commandContent",
+          "name": "base-command-content"
+        },
+        {
+          "export": "commandItem",
+          "name": "base-command-item"
+        },
+        {
+          "export": "commandEmpty",
+          "name": "base-command-empty"
+        }
+      ],
+      "demoId": "demo-base-command",
+      "demoPath": "apps/www/src/content/docs/demo-base-command.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/command.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/command.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "command",
+      "prototypeExports": [
+        {
+          "export": "commandRoot",
+          "name": "shadcn-command-root"
+        },
+        {
+          "export": "commandInput",
+          "name": "shadcn-command-input"
+        },
+        {
+          "export": "commandContent",
+          "name": "shadcn-command-content"
+        },
+        {
+          "export": "commandItem",
+          "name": "shadcn-command-item"
+        },
+        {
+          "export": "commandEmpty",
+          "name": "shadcn-command-empty"
+        }
+      ],
+      "demoId": "demo-shadcn-command",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-command.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/command.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/command.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "command",
+      "prototypeExports": [
+        {
+          "export": "commandRoot",
+          "name": "brutalist-command-root"
+        },
+        {
+          "export": "commandInput",
+          "name": "brutalist-command-input"
+        },
+        {
+          "export": "commandContent",
+          "name": "brutalist-command-content"
+        },
+        {
+          "export": "commandItem",
+          "name": "brutalist-command-item"
+        },
+        {
+          "export": "commandEmpty",
+          "name": "brutalist-command-empty"
+        }
+      ],
+      "demoId": "demo-brutalist-command",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-command.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/command.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/command.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "command",
+      "prototypeExports": [
+        {
+          "export": "commandRoot",
+          "name": "bootstrap-2-3-2-command-root"
+        },
+        {
+          "export": "commandInput",
+          "name": "bootstrap-2-3-2-command-input"
+        },
+        {
+          "export": "commandContent",
+          "name": "bootstrap-2-3-2-command-content"
+        },
+        {
+          "export": "commandItem",
+          "name": "bootstrap-2-3-2-command-item"
+        },
+        {
+          "export": "commandEmpty",
+          "name": "bootstrap-2-3-2-command-empty"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-command",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-command.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/command.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/command.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "command",
+      "prototypeExports": [
+        {
+          "export": "commandRoot",
+          "name": "liquid-glass-command-root"
+        },
+        {
+          "export": "commandInput",
+          "name": "liquid-glass-command-input"
+        },
+        {
+          "export": "commandContent",
+          "name": "liquid-glass-command-content"
+        },
+        {
+          "export": "commandItem",
+          "name": "liquid-glass-command-item"
+        },
+        {
+          "export": "commandEmpty",
+          "name": "liquid-glass-command-empty"
+        }
+      ],
+      "demoId": "demo-liquid-glass-command",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-command.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/command.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/command.mdx"
+      ]
+    }
+  ],
+  "privateSourceDependency": "packages/prototypes/base/src/search-primitives",
+  "tests": ["packages/prototypes/base/test/navigation-overlays/search.test.ts"],
+  "sharedRequirements": [
+    "packages/modules/a11y/src/web.ts: autocomplete to aria-autocomplete and activeDescendant to aria-activedescendant",
+    "shared exports, builds, registry, CLI and navigation"
+  ],
+  "remaining": [
+    "catalog contracts and lifecycle admission",
+    "native/GPUI/compiler/consumer evidence",
+    "visual/accessibility and complete independent acceptance"
+  ]
+}

@@ -33,6 +33,26 @@ cases:
     title: Web membership follows linked Proto ownership and Shadow DOM with unknown preservation
     covers: [HC-BOUNDARY-CLASSIFICATION-0001-B]
     expectation: host-proven-region-membership
+  - id: T-BOUNDARY-0002-CASE-FOCUS
+    title: Current focus preserves disjoint regions, owned children, unknown and stale-sample rejection
+    covers: [C-BOUNDARY-0001-H, HC-BOUNDARY-CLASSIFICATION-0001-C]
+    expectation: only-proven-current-outside-focus-produces-focus-move
+  - id: T-BOUNDARY-0002-CASE-FOCUS-POLICY
+    title: Focus policy opt-out stays distinct from outside press
+    covers: [C-AS-OVERLAY-0001-I]
+    expectation: focus-observation-cannot-activate-pointer-only-policy
+  - id: T-BOUNDARY-0002-CASE-FOCUS-STACK
+    title: Pointer default focus and synchronous reentrant focus preserve one top owner
+    covers: [C-BOUNDARY-0001-H, M-BOUNDARY-0001-C]
+    expectation: one-press-focus-sequence-cannot-dismiss-lower-overlays
+  - id: T-BOUNDARY-0002-CASE-FOCUS-CONTROLLED
+    title: Controlled rejection preserves stack ownership and permits later fresh requests
+    covers: [C-BOUNDARY-0001-H, C-AS-OVERLAY-0001-I]
+    expectation: reject-close-without-duplicate-pointer-focus-intent
+  - id: T-BOUNDARY-0002-CASE-FOCUS-LIFETIME
+    title: Detach, reconnect, terminal disposal and reentrant providers reject stale focus
+    covers: [C-BOUNDARY-0001-F, HC-BOUNDARY-CLASSIFICATION-0001-C]
+    expectation: no-focus-notification-from-unavailable-or-stale-host-evidence
 implementations:
   - id: web-boundary-proof
     kind: adapter-test
@@ -64,8 +84,62 @@ implementations:
     path: packages/adapters/web-component/test/boundary.integration.test.ts
     required: true
     consumesCases: [T-BOUNDARY-0002-CASE-ADAPTER, T-BOUNDARY-0002-CASE-STACK]
+  - id: web-component-boundary-focus
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BOUNDARY-0002-CASE-FOCUS,
+        T-BOUNDARY-0002-CASE-FOCUS-POLICY,
+        T-BOUNDARY-0002-CASE-FOCUS-STACK,
+        T-BOUNDARY-0002-CASE-FOCUS-CONTROLLED,
+      ]
+  - id: react-boundary-focus
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BOUNDARY-0002-CASE-FOCUS,
+        T-BOUNDARY-0002-CASE-FOCUS-POLICY,
+        T-BOUNDARY-0002-CASE-FOCUS-STACK,
+        T-BOUNDARY-0002-CASE-FOCUS-CONTROLLED,
+      ]
+  - id: vue-boundary-focus
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BOUNDARY-0002-CASE-FOCUS,
+        T-BOUNDARY-0002-CASE-FOCUS-POLICY,
+        T-BOUNDARY-0002-CASE-FOCUS-STACK,
+        T-BOUNDARY-0002-CASE-FOCUS-CONTROLLED,
+      ]
+  - id: vue2-boundary-focus
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/overlay-focus.integration.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BOUNDARY-0002-CASE-FOCUS,
+        T-BOUNDARY-0002-CASE-FOCUS-POLICY,
+        T-BOUNDARY-0002-CASE-FOCUS-STACK,
+        T-BOUNDARY-0002-CASE-FOCUS-CONTROLLED,
+      ]
+  - id: boundary-focus-lifetime
+    kind: module-test
+    status: passing
+    path: packages/modules/boundary/test/focus-observation.test.ts
+    required: true
+    consumesCases: [T-BOUNDARY-0002-CASE-FOCUS-LIFETIME]
 verifies:
-  contracts: [C-BOUNDARY-0001]
+  contracts: [C-BOUNDARY-0001, C-AS-OVERLAY-0001]
   modules: [M-BOUNDARY-0001]
   hostCaps: [HC-BOUNDARY-CLASSIFICATION-0001]
   adapters: [A-REACT-18-19-0001, A-VUE-3-0001, A-VUE-2-0001, A-WEB-COMPONENT-0001]
@@ -73,3 +147,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Added real Adapter classification and synchronous stack-close regression evidence.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added four Web Adapter current-focus, pointer deduplication and controlled-owner tests plus Module lifetime and fail-closed tests.

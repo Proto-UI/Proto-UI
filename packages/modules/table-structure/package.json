@@ -17,7 +17,7 @@
       "default": "./dist/index.js"
     }
   },
-  "description": "Proto UI module for passive two-dimensional Table topology and header relationships.",
+  "description": "Proto UI module that provides passive table structure capability for adapters.",
   "license": "MIT",
   "homepage": "https://github.com/Proto-UI/Proto-UI/tree/main/packages/modules/table-structure",
   "repository": {
@@ -33,9 +33,11 @@
   },
   "keywords": [
     "proto-ui",
+    "proto",
+    "ui",
     "module",
     "table",
-    "accessibility",
+    "structure",
     "topology"
   ],
   "files": [

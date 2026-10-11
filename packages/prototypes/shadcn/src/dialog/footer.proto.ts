@@ -5,7 +5,7 @@ const dialogFooter = definePrototype({
   name: 'shadcn-dialog-footer',
   setup(def) {
     def.anatomy.claim(DIALOG_FAMILY, { role: 'footer' });
-    def.feedback.style.use(tw('flex gap-2 items-center'));
+    def.feedback.style.use(tw('flex min-w-0 flex-wrap-reverse gap-2 items-center justify-end'));
     return (renderer) => renderer.r.slot();
   },
 });

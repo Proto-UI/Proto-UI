@@ -43,26 +43,41 @@ export default {
             kind: 'proto',
             prototypeId: 'shadcn-dialog-footer',
             children: [
+              // Passive consumer layout boxes bound flex items without styling
+              // Close or interrupting the continuous Close > Button trigger group.
               {
-                kind: 'proto',
-                prototypeId: 'shadcn-dialog-close',
+                kind: 'box',
+                className: 'min-w-0 max-w-full',
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'shadcn-button',
-                    props: { variant: 'outline' },
-                    children: ['Cancel'],
+                    prototypeId: 'shadcn-dialog-close',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        props: { variant: 'outline', wrap: true },
+                        children: ['Cancel'],
+                      },
+                    ],
                   },
                 ],
               },
               {
-                kind: 'proto',
-                prototypeId: 'shadcn-dialog-close',
+                kind: 'box',
+                className: 'min-w-0 max-w-full',
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'shadcn-button',
-                    children: ['Save changes'],
+                    prototypeId: 'shadcn-dialog-close',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-button',
+                        props: { wrap: true },
+                        children: ['Save changes'],
+                      },
+                    ],
                   },
                 ],
               },

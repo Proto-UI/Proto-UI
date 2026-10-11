@@ -552,26 +552,43 @@ describe('Website projection materializer', () => {
     expect(mount.querySelector('[data-projection-generation-host]')).toBeNull();
   });
 
-  it('distinguishes newer focus from teardown blur before restoration', () => {
+  it('distinguishes newer focus from teardown blur before restoration', async () => {
+    const mount = document.createElement('div');
+    mount.dataset.projectionOwner = 'focus-owner';
+    const source = document.createElement('button');
+    const newerFocus = document.createElement('button');
+    const runtimeControl = document.createElement('button');
+    runtimeControl.setAttribute('role', 'tab');
+    runtimeControl.setAttribute('aria-selected', 'true');
+    const restoreFocus = vi.fn(() => {
+      runtimeControl.focus();
+      return true;
+    });
+    document.body.append(source, newerFocus, mount);
+    fakes.createComposition.mockReturnValue({
+      demo: childDemo,
+      setLocked: vi.fn(),
+      setEventGateOpen: vi.fn(),
+      setThemeSurfaceStyle: vi.fn(),
+      restoreFocus,
+    });
+    fakes.renderDemo.mockImplementation(async ({ host }: { host: HTMLElement }) => {
+      const scope = document.createElement('section');
+      scope.dataset.projectionScope = 'focus-owner';
+      scope.append(runtimeControl);
+      host.append(scope);
+      return { destroy: fakes.destroyRender };
+    });
+    const candidate = await materializeProjectionCandidate(
+      { selection: { runtimeId: 'wc', projectionFamilyId: 'shadcn' }, generation: 2 },
+      { mount, ownerId: 'focus-owner', componentId: 'button', controls: controls() }
+    );
+    candidate.activate();
     const frames: FrameRequestCallback[] = [];
     vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
       frames.push(callback);
       return frames.length;
     });
-    const mount = document.createElement('div');
-    mount.dataset.projectionOwner = 'focus-owner';
-    const activeHost = document.createElement('div');
-    activeHost.dataset.projectionOwnerHost = 'focus-owner';
-    activeHost.dataset.projectionGenerationHost = '2';
-    activeHost.dataset.projectionGenerationState = 'active';
-    activeHost.innerHTML =
-      '<div data-projection-control="runtime"><button role="combobox">Runtime</button></div>';
-    mount.appendChild(activeHost);
-    const source = document.createElement('button');
-    const newerFocus = document.createElement('button');
-    document.body.append(source, newerFocus, mount);
-    const runtimeControl = activeHost.querySelector<HTMLElement>('[role="combobox"]')!;
-
     source.focus();
     restoreProjectionControlFocus(mount, 'runtime-select', 2);
     newerFocus.focus();
@@ -607,5 +624,28 @@ describe('Website projection materializer', () => {
     expect(document.activeElement).toBe(document.body);
     frames.shift()!(0);
     expect(document.activeElement).toBe(runtimeControl);
+
+    // A pending frame may not revive a retired generation or cross owner IDs.
+    const calls = restoreFocus.mock.calls.length;
+    source.focus();
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, source);
+    candidate.setLocked?.(true);
+    frames.shift()!(0);
+    expect(restoreFocus).toHaveBeenCalledTimes(calls);
+    candidate.setLocked?.(false);
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, source);
+    mount.dataset.projectionOwner = 'other-owner';
+    frames.shift()!(0);
+    expect(restoreFocus).toHaveBeenCalledTimes(calls);
+    mount.dataset.projectionOwner = 'focus-owner';
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, source);
+    candidate.host.dataset.projectionGenerationState = 'staging';
+    frames.shift()!(0);
+    expect(restoreFocus).toHaveBeenCalledTimes(calls);
+    candidate.activate();
+    restoreProjectionControlFocus(mount, 'runtime-select', 2, source);
+    await candidate.dispose();
+    frames.shift()!(0);
+    expect(restoreFocus).toHaveBeenCalledTimes(calls);
   });
 });

@@ -1,0 +1,23 @@
+---
+title: 'AlertDialog'
+description: 'A modal decision with a primary message, safe cancel target and explicit action intent.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+A modal decision with a primary message, safe cancel target and explicit action intent.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-alert-dialog"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root fixes alert semantics. Mask owns modality; Content traps focus, blocks outside dismissal and starts at Cancel when available. Action emits action before requesting close. Application code owns the effect; no destructive operation is performed by the prototype. Escape and Cancel request dismissal.
+
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+
+Parts: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+
+Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.

@@ -19,13 +19,8 @@ criteria:
       zh-CN: Item direct entry 为 shadcn-radio-group-item，保留精确的 Base Item props、exposes 与 events，不增加 authored asHook。
   - id: P-SHADCN-RADIO-GROUP-ITEM-CURRENT-VISUAL-SURFACE
     text:
-      en: >-
-        Item projects inline-flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input text-primary bg-transparent shadow-xs transition-[color,box-shadow] outline-none, with dark:bg-input/30 and the default 150ms color and box-shadow transition. The 16px circular surface uses flex centering for its explicit Indicator instead of the pinned upstream absolutely positioned internal glyph.
-
-
-      zh-CN: >-
-        Item 投射 inline-flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input text-primary bg-transparent shadow-xs transition-[color,box-shadow] outline-none，以及 dark:bg-input/30 和默认 150ms color/box-shadow transition。16px 圆形表面以 flex 居中显式 Indicator，区别于固定 upstream 内部 glyph 的 absolute positioning。
-
+      en: Item projects flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input bg-transparent outline-none, without shadow-xs, text-primary or the previous color/box-shadow transition. Unchecked dark surface is bg-input/30. Inherited checked co-selects border-primary bg-primary text-primary-foreground in both color schemes. The 16px circular surface keeps host-neutral centering of the explicit Indicator; upstream field-label, invalid and expanded-hit-target selectors remain unimplemented.
+      zh-CN: Item投射flex items-center justify-center aspect-square size-4 shrink-0 rounded-full border border-input bg-transparent outline-none，不含shadow-xs、text-primary或旧color/box-shadow transition。unchecked dark为bg-input/30；继承checked在两种color scheme均共同选择border-primary bg-primary text-primary-foreground。16px圆形保持显式Indicator的host-neutral居中；上游field-label、invalid与扩大hit-target selectors仍未实现。
 
   - id: P-SHADCN-RADIO-GROUP-ITEM-FOCUS-FEEDBACK
     text:
@@ -49,4 +44,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced the circular Shadcn Item surface with inherited focus and effective-disabled feedback.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
 tags: [prototype, shadcn, radio-group, item, focus, disabled, visual]

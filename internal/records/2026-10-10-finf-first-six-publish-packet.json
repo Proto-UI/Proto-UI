@@ -1,0 +1,60 @@
+{
+  "status": "WIP functional source for publication; not full Finf acceptance or merge approval",
+  "base": "5dab3a9ea0e5a6eccd2ae24d60050c2fa14c2654",
+  "sourceCommit": "d2c8a37404f600b85d5758bb40e513d269ce62b1",
+  "sourceTree": "6e563f51d3c3737cc366f341e021fca6ee4db85b",
+  "orderedSourceCommits": [
+    "9395d2deb012934976ab155b9461aa0356583247",
+    "e0f170a2f4c8f9dc742af80d419a4ae5b5244605",
+    "2dcc25c39f2a7255ce4112eb659bb9278780d827",
+    "7fc7cd28967b80987b2b0a0c05fd3bd57d19c0f1",
+    "320ee7eefaca2878442d20a1a648e5acedc3998c",
+    "055f92195b8a460aacbc09d7d3689a518e333457",
+    "c9a6c9edca948e13ae097ff78a788b7768aaf8fb",
+    "d2c8a37404f600b85d5758bb40e513d269ce62b1"
+  ],
+  "functionFamilies": ["calendar", "progress", "meter", "popover", "alert-dialog", "drawer"],
+  "userWeightedProgress": {
+    "done": 3,
+    "inProgress": 43,
+    "notStarted": 22,
+    "points": 24.5,
+    "denominator": 68,
+    "rule": "Done=1; actual partial implementation=0.5. Source is not full acceptance."
+  },
+  "verification": {
+    "sourceBehaviorAndEntryPoints": "87/87 passed",
+    "sharedRangeA11yAndGeneratedDOM": "20/20 passed",
+    "privateDraftCLIRecheck": "30/30 passed",
+    "combinedNoScriptInteraction": "66/66 passed",
+    "closedPriorWorkSnapshot": "113/113 matrix tests passed at frozen e0f170a2",
+    "sourceOnlyProof": "Generated from exact combined source; schemas/counts/path/hash validator passed",
+    "types": "Workspace TypeScript passed before no-script integration; final combined rerun recorded by publisher handoff"
+  },
+  "noScriptOriginal": "811f49d5590622b52112b964a710f76dff7e9696",
+  "noScriptFileEvidence": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts",
+      "sha256": "eebfe7d10007e0422d3747046ad86e01f4cd18535a41febe51c8331e71f43da7"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/library-no-script-interaction.ts",
+      "sha256": "0dee79a3489d3e72455eacbe17e42880897fefe479141f9af295cf7f04658b59"
+    },
+    {
+      "path": "scripts/test/no-script-interaction.test.mjs",
+      "sha256": "0d2122ed4b50d5bc0b01d0cd683049e57d71f3001491284d8b79d77967e80020"
+    }
+  ],
+  "remaining": [
+    "Current commit-bound native screenshots and interaction traces",
+    "Complete semantic contracts and lifecycle admission",
+    "Four-family and cross-Adapter/Compiler/GPUI full conformance",
+    "Packed consumer checks and exact-head trusted CI / independent review",
+    "Drawer drag/snap/swipe and remaining 22 feature implementations"
+  ],
+  "retainedFailure": "An earlier matrix test ran while new sources entered its worktree (94 passed/19 object-worktree drift failures); the closeout-only immutable snapshot rerun passed 113/113. No validator was weakened.",
+  "publicationIdentity": "Local commit URLs are locators until source commits are published; publisher must rebind actual GitHub commit identities if transport changes SHAs, retaining source tree equality and the prior evidence.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)"
+}

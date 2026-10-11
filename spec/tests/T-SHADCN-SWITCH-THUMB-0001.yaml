@@ -26,7 +26,7 @@ cases:
 implementations:
   - id: prototypes-shadcn-switch-thumb-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/switch.test.ts
     required: true
     consumesCases:
@@ -37,7 +37,8 @@ implementations:
       ]
     exercises: [P-SHADCN-SWITCH-THUMB, P-BASE-SWITCH-THUMB]
     notes:
-      - Positive tests cover direct identity, inherited context-driven state, and current tokens; public-composition and upstream-token gaps remain bounded by source review and the centralized question.
+      - 'Historical evidence note before the 2026-10-10 recipe migration: Positive tests cover direct identity, inherited context-driven state, and current tokens; public-composition and upstream-token gaps remain bounded by source review and the centralized question.'
+      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   prototypes:
     - id: P-SHADCN-SWITCH-THUMB
@@ -63,4 +64,7 @@ revisions:
   - version: 0.2.0-rc.6
     change: expanded
     summary: Added executable coverage for symmetric checked travel and inherited focus-ring isolation.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Specify content-pinned base-nova default geometry and state palettes; retain semantic ownership and planned fresh evidence.
 tags: [prototype, shadcn, switch, thumb, delta, compatibility, test]

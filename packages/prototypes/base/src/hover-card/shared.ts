@@ -1,4 +1,6 @@
-import { createAnatomyFamily, createContextKey } from '@proto.ui/core';
+import { createAnatomyFamily, createContextKey, type RunHandle } from '@proto.ui/core';
+import { allocateHoverCardInteractionId } from './interaction-id';
+import type { HoverCardInteractionPart, HoverCardReleaseInteraction } from './types';
 
 export type HoverCardInteractionReason =
   | 'trigger.pointerenter'
@@ -18,6 +20,8 @@ export type HoverCardContextValue = {
   triggerHovered: boolean;
   triggerFocused: boolean;
   contentHovered: boolean;
+  triggerInteractionOwner: number | null;
+  contentInteractionOwner: number | null;
   interactionReason: HoverCardInteractionReason | null;
   interactionVersion: number;
   requestedOpen: boolean;
@@ -30,17 +34,65 @@ export function deriveHoverCardInteractionOpen(ctx: HoverCardContextValue): bool
   return ctx.triggerHovered || ctx.triggerFocused || ctx.contentHovered;
 }
 
+type InteractionRole = HoverCardInteractionPart;
+type InteractionPatch = Partial<
+  Pick<HoverCardContextValue, 'triggerHovered' | 'triggerFocused' | 'contentHovered'>
+>;
+
+/** Borrow the current Root's cleanup operation before the part leaves its domain. */
+export function createHoverCardInteraction(role: InteractionRole) {
+  let owner: number | null = null;
+  let releaseOwner: HoverCardReleaseInteraction | null = null;
+  return {
+    mount(run: RunHandle<any>) {
+      const release = run.anatomy
+        .partsOf(HOVER_CARD_FAMILY, 'root')[0]
+        ?.getExpose('releaseInteraction');
+      if (typeof release !== 'function')
+        throw new Error('[HoverCard] Root releaseInteraction capability missing');
+      owner = allocateHoverCardInteractionId();
+      releaseOwner = release as HoverCardReleaseInteraction;
+    },
+    update(run: RunHandle<any>, patch: InteractionPatch, reason: HoverCardInteractionReason) {
+      if (owner === null) return;
+      let current: HoverCardContextValue;
+      try {
+        current = run.context.read(HOVER_CARD_CONTEXT);
+      } catch (error) {
+        if ((error as { code?: string })?.code === 'CONTEXT_DISCONNECTED') return;
+        throw error;
+      }
+      const recordedOwner =
+        role === 'trigger' ? current.triggerInteractionOwner : current.contentInteractionOwner;
+      // A superseded publisher's leave/blur cannot clear a replacement's input.
+      if (recordedOwner !== null && recordedOwner !== owner && !Object.values(patch).some(Boolean))
+        return;
+      updateHoverCardInteraction(run, patch, reason, role, owner);
+    },
+    release() {
+      const previousOwner = owner;
+      const release = releaseOwner;
+      // Retire before calling the owner: request subscribers may synchronously remount.
+      owner = null;
+      releaseOwner = null;
+      if (previousOwner !== null) release?.(role, previousOwner);
+    },
+  };
+}
+
 export function updateHoverCardInteraction(
   run: any,
-  patch: Partial<
-    Pick<HoverCardContextValue, 'triggerHovered' | 'triggerFocused' | 'contentHovered'>
-  >,
-  reason: HoverCardInteractionReason
+  patch: InteractionPatch,
+  reason: HoverCardInteractionReason,
+  role?: InteractionRole,
+  owner?: number
 ): boolean {
   try {
     run.context.update(HOVER_CARD_CONTEXT, (prev: HoverCardContextValue) => ({
       ...prev,
       ...patch,
+      ...(role === 'trigger' ? { triggerInteractionOwner: owner ?? null } : {}),
+      ...(role === 'content' ? { contentInteractionOwner: owner ?? null } : {}),
       interactionReason: reason,
       interactionVersion: prev.interactionVersion + 1,
     }));

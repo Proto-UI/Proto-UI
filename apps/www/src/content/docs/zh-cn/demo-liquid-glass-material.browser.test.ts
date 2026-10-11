@@ -4,15 +4,20 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
-
+import {
+  launchBrowser,
+  startServer,
+  stopServer,
+  RUNTIMES,
+  choosePreviewRuntime,
+} from './browser-harness';
 const ROUTE = '/en/test/liquid-glass-material/';
 const evidence = process.env.PROTO_UI_MATERIAL_EVIDENCE_DIR;
-let browser: Browser;
-let context: BrowserContext;
-let page: Page;
-let cdp: CDPSession;
-let baseUrl = '';
+let browser: Browser,
+  context: BrowserContext,
+  page: Page,
+  cdp: CDPSession,
+  baseUrl = '';
 const observations: unknown[] = [];
 const safe = {
   'prefers-reduced-motion': 'no-preference',
@@ -28,32 +33,47 @@ async function preference(theme: string, overrides: Record<string, string> = {})
   });
 }
 async function capture(name: string) {
-  if (!evidence) return;
-  await mkdir(evidence, { recursive: true });
-  await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
+  if (evidence) {
+    await mkdir(evidence, { recursive: true });
+    await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
+  }
 }
-async function waitForBlur(blur: string) {
+async function quality(value: string) {
   await page.waitForFunction(
-    (expected) => {
-      const hosts = Array.from(document.querySelectorAll('[data-material-host]'));
-      return (
-        hosts.length === 4 &&
-        hosts.every((host) => {
-          const button = Array.from(host.querySelectorAll('[role="button"],button')).find(
-            (el) => el.textContent === 'Regular action'
-          );
-          return button && getComputedStyle(button).backdropFilter === expected;
-        })
-      );
-    },
-    blur,
-    { timeout: 10000 }
+    (expected) =>
+      Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).length ===
+        4 &&
+      Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).every(
+        (el) => el.dataset.materialQuality === expected
+      ),
+    value,
+    { timeout: 20000 }
   );
 }
 beforeAll(async () => {
   baseUrl = await startServer(ROUTE);
   browser = await launchBrowser();
   context = await browser.newContext({ viewport: { width: 1440, height: 1050 } });
+  // Only this owned fixture and its same-origin assets may be requested.
+  await context.route('**/*', (route) =>
+    new URL(route.request().url()).origin === new URL(baseUrl).origin
+      ? route.continue()
+      : route.abort()
+  );
+  await context.addInitScript(() => {
+    const original = HTMLCanvasElement.prototype.getContext;
+    const contexts: WebGLRenderingContext[] = [];
+    (window as any).materialContexts = contexts;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      kind: string,
+      ...args: any[]
+    ): any {
+      const result = (original as any).call(this, kind, ...args);
+      if (kind === 'webgl' && result && !contexts.includes(result)) contexts.push(result);
+      return result;
+    } as typeof original;
+  });
   page = await context.newPage();
   cdp = await context.newCDPSession(page);
 }, 150000);
@@ -70,7 +90,7 @@ afterAll(async () => {
           browser: browser?.version(),
           runtimes: RUNTIMES,
           scope:
-            'Regular functional Button: 80% source color + 4px backdrop blur, live preference fallback. No refraction, native Apple engine, Compiler or non-Web claim.',
+            'V2 self-optical over visible dynamic app-owned canvas. No arbitrary DOM/compositor capture, native or Apple equivalence.',
           observations,
         },
         null,
@@ -82,322 +102,281 @@ afterAll(async () => {
   await browser?.close();
   await stopServer();
 }, 60000);
-
-describe.sequential('Liquid Glass bounded material on real Web hosts', () => {
+describe.sequential('V2 optical paint through four real Web Adapter runtimes', () => {
   for (const theme of ['light', 'dark'] as const)
-    it(`${theme}: real blur, opt-out, and live safe fallback`, async () => {
+    it(`${theme}: visible dynamic source, optical pixels, motion, input and revocation`, async () => {
       await preference(theme);
       await page.goto(`${baseUrl}${ROUTE}?theme=${theme}`, { waitUntil: 'networkidle' });
       await page.waitForFunction(() => document.documentElement.dataset.materialReady, undefined, {
         timeout: 60000,
       });
-      expect(await page.locator('html').getAttribute('data-material-error')).toBeNull();
-      await page.mouse.move(0, 0);
-      await waitForBlur('blur(4px)');
-      await capture(`material-${theme}`);
+      await quality('self-optical');
+      await page.evaluate(() => (window as any).liquidMaterialFixture.pause(true));
+      await capture(`${theme}-four-web-optics`);
       for (const runtime of RUNTIMES) {
-        const host = page.locator(`[data-material-host="${runtime}"]`);
-        const regular = host.getByRole('button', { name: 'Regular action', exact: true });
-        const facts = await regular.evaluate((el) => {
-          const style = getComputedStyle(el);
-          return {
-            background: style.backgroundColor,
-            secondary: style.getPropertyValue('--pui-secondary').trim(),
-            blur: style.backdropFilter,
-            animation: style.animationName,
-            transition: style.transitionDuration,
-            tokens: el.getAttribute('data-pui-style'),
-            alphaSyntax: CSS.supports(
-              'background-color',
-              'color-mix(in oklab, var(--pui-secondary) 80%, transparent)'
-            ),
-            backdropSyntax: CSS.supports('backdrop-filter', 'blur(4px)'),
-          };
-        });
-        expect(facts.background).toMatch(/(?:\/\s*0\.8\s*\)|,\s*0\.8\s*\))/);
-        expect(facts.blur).toBe('blur(4px)');
-        expect(facts.secondary).toBe(theme === 'light' ? '#ffffff' : '#2c2c2e');
-        expect(facts.animation).toBe('none');
-        expect(facts.transition).toBe('0s');
-        expect(facts.alphaSyntax && facts.backdropSyntax).toBe(true);
+        const host = page.locator(`[data-material-host="${runtime}"]`),
+          button = host.getByRole('button', { name: 'Regular action', exact: true });
+        const first = await button.evaluate((el) => ({
+          image: (el as HTMLElement).style.backgroundImage,
+          quality: (el as HTMLElement).dataset.materialQuality,
+          source: (el as HTMLElement).dataset.materialSource,
+          blur: getComputedStyle(el).backdropFilter,
+          canvas: el.querySelectorAll('canvas').length,
+        }));
+        expect(first.quality).toBe('self-optical');
+        expect(first.source).toBe('visible-app-canvas');
+        expect(first.blur).toBe('none');
+        expect(first.canvas).toBe(0);
+        expect(first.image).toContain('data:image/png');
+        const zero = await page.evaluate(
+          (runtime) => (window as any).liquidMaterialFixture.zeroRefraction(runtime),
+          runtime
+        );
+        expect(first.image).not.toContain(zero);
+        if (evidence) {
+          await writeFile(
+            path.join(evidence, `${theme}-${runtime}-optical-rest.png`),
+            Buffer.from(first.image.slice(5, -2).split(',')[1], 'base64')
+          );
+          await writeFile(
+            path.join(evidence, `${theme}-${runtime}-zero-refraction.png`),
+            Buffer.from(zero.split(',')[1], 'base64')
+          );
+          await host
+            .getByRole('button', { name: 'Opaque action', exact: true })
+            .screenshot({ path: path.join(evidence, `${theme}-${runtime}-opaque.png`) });
+        }
+
         expect(
           await host
             .getByRole('button', { name: 'Opaque action', exact: true })
-            .evaluate((el) => getComputedStyle(el).backdropFilter)
-        ).toBe('none');
-        expect(
-          await host
-            .getByRole('button', { name: 'Accent', exact: true })
-            .evaluate((el) => getComputedStyle(el).backdropFilter)
-        ).toBe('none');
-
-        // Same physical control and backdrop, remove only blur for a negative
-        // control. Decode actual screenshots and compare pixels, not PNG metadata.
-        const withBlur = await regular.screenshot();
-        const original = await regular.getAttribute('data-pui-style');
-        expect(original).toContain('backdrop-blur-xs');
-        await regular.evaluate((el) =>
-          el.setAttribute(
-            'data-pui-style',
-            (el.getAttribute('data-pui-style') ?? '')
-              .split(/\s+/)
-              .filter((token) => token !== 'backdrop-blur-xs')
-              .join(' ')
-          )
+            .getAttribute('data-material-quality')
+        ).toBe('opaque-fallback');
+        await button.hover();
+        await page.mouse.down();
+        await button.waitFor({ state: 'visible' });
+        await page.waitForFunction(
+          (selector) =>
+            document.querySelector<HTMLElement>(selector)?.dataset.materialPhase === 'pressed',
+          `[data-material-host="${runtime}"] [data-demo-ref="regular"]`
         );
-        expect(await regular.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe('none');
-        const withoutBlur = await regular.screenshot();
-        await regular.evaluate(
-          (el, tokens) => el.setAttribute('data-pui-style', tokens!),
-          original
-        );
-        const changedPixels = await page.evaluate(
-          async ({ first, second }) => {
-            async function pixels(base64: string) {
+        const pressed = await button.evaluate((el) => (el as HTMLElement).style.backgroundImage);
+        expect(pressed).not.toBe(first.image);
+        const changed = await page.evaluate(
+          async ({ a, b }) => {
+            async function decode(css: string) {
               const image = new Image();
-              image.src = `data:image/png;base64,${base64}`;
+              image.src = css.slice(5, -2);
               await image.decode();
               const canvas = document.createElement('canvas');
-              canvas.width = image.naturalWidth;
-              canvas.height = image.naturalHeight;
+              canvas.width = image.width;
+              canvas.height = image.height;
               const ctx = canvas.getContext('2d')!;
               ctx.drawImage(image, 0, 0);
               return ctx.getImageData(0, 0, canvas.width, canvas.height).data;
             }
-            const a = await pixels(first),
-              b = await pixels(second);
-            let changed = 0;
-            if (a.length !== b.length) throw new Error('negative-control dimensions changed');
-            for (let i = 0; i < a.length; i += 4)
+            const x = await decode(a),
+              y = await decode(b);
+            let count = 0;
+            if (x.length !== y.length) throw new Error('Optical image dimensions changed');
+            for (let i = 0; i < x.length; i += 4)
               if (
-                Math.abs(a[i] - b[i]) +
-                  Math.abs(a[i + 1] - b[i + 1]) +
-                  Math.abs(a[i + 2] - b[i + 2]) >
+                Math.abs(x[i] - y[i]) +
+                  Math.abs(x[i + 1] - y[i + 1]) +
+                  Math.abs(x[i + 2] - y[i + 2]) >
                 3
               )
-                changed++;
-            return changed;
+                count++;
+            return count;
           },
-          { first: withBlur.toString('base64'), second: withoutBlur.toString('base64') }
+          { a: first.image, b: pressed }
         );
-        expect(changedPixels).toBeGreaterThan(20);
-        if (evidence) {
-          await writeFile(path.join(evidence, `${theme}-${runtime}-blur.png`), withBlur);
-          await writeFile(
-            path.join(evidence, `${theme}-${runtime}-negative-no-blur.png`),
-            withoutBlur
-          );
-        }
-        observations.push({ theme, runtime, facts, negativeControlChangedPixels: changedPixels });
-        await regular.hover();
-        expect(await regular.evaluate((el) => getComputedStyle(el).backgroundColor)).toMatch(
-          /(?:\/\s*0\.8\s*\)|,\s*0\.8\s*\))/
-        );
-        expect(await regular.evaluate((el) => getComputedStyle(el).backdropFilter)).toBe(
-          'blur(4px)'
-        );
-        await page.mouse.move(0, 0);
-      }
-
-      // The support fact is not proof that a consumer installed CSS. Remove
-      // this fixture's generated sheet and verify the paint claim stops holding.
-      await page.locator('style[data-draft-projection-css]').evaluate((el) => {
-        (el as HTMLStyleElement).sheet!.disabled = true;
-      });
-      await waitForBlur('none');
-      await page.locator('style[data-draft-projection-css]').evaluate((el) => {
-        (el as HTMLStyleElement).sheet!.disabled = false;
-      });
-      await waitForBlur('blur(4px)');
-      observations.push({
-        theme,
-        missingStylesheetNegativeControl: 'paint absent until source CSS restored',
-      });
-
-      for (const [key, value] of [
-        ['prefers-reduced-transparency', 'reduce'],
-        ['prefers-reduced-motion', 'reduce'],
-        ['prefers-contrast', 'more'],
-        ['forced-colors', 'active'],
-      ] as const) {
-        const handles = await Promise.all(
-          RUNTIMES.map((runtime) =>
-            page
-              .locator(`[data-material-host="${runtime}"]`)
-              .getByRole('button', { name: 'Regular action', exact: true })
-              .elementHandle()
-          )
-        );
-        await preference(theme, { [key]: value });
-        await waitForBlur('none');
-        for (const handle of handles) {
-          expect(await handle!.evaluate((el) => el.isConnected)).toBe(true);
-          expect(await handle!.evaluate((el) => el.getAttribute('data-pui-style'))).not.toContain(
-            'bg-secondary/80'
-          );
-        }
-        await capture(`${theme}-${key}-${value}`);
-        await preference(theme);
-        await waitForBlur('blur(4px)');
-        for (const handle of handles)
-          expect(await handle!.evaluate((el) => el.isConnected)).toBe(true);
-        observations.push({
-          theme,
-          preference: key,
-          value,
-          fallback: 'opaque',
-          restored: true,
-          sameHosts: true,
-        });
-      }
-      for (const runtime of RUNTIMES) {
-        const regular = page
-          .locator(`[data-material-host="${runtime}"]`)
-          .getByRole('button', { name: 'Regular action', exact: true });
-        await regular.click();
-        await regular.focus();
-        await page.keyboard.press('Space');
-        await expect
-          .poll(() => page.locator(`[data-activations="${runtime}"]`).textContent())
-          .toBe('2 activations');
-      }
-      await page.mouse.move(0, 0);
-      await capture(`${theme}-restored-interaction`);
-    }, 120000);
-
-  it('paints the actual opaque control when the browser preference API is unavailable', async () => {
-    await preference('light');
-    await page.goto(`${baseUrl}${ROUTE}?unknown=1`, { waitUntil: 'networkidle' });
-    await page.waitForFunction(() => document.documentElement.dataset.materialReady);
-    await waitForBlur('none');
-    for (const runtime of RUNTIMES) {
-      const button = page
-        .locator(`[data-material-host="${runtime}"]`)
-        .getByRole('button', { name: 'Regular action', exact: true });
-      const facts = await button.evaluate((el) => ({
-        background: getComputedStyle(el).backgroundColor,
-        tokens: el.getAttribute('data-pui-style'),
-      }));
-      expect(facts.background).toBe('rgb(255, 255, 255)');
-      expect(facts.tokens).not.toContain('backdrop-blur-xs');
-      observations.push({ runtime, unavailablePreferenceApi: true, facts });
-    }
-    await capture('unknown-preference-api-opaque');
-  }, 60000);
-
-  it('registers both libraries and bilingual Button pages with operable four-runtime demos', async () => {
-    await preference('light');
-    await page.setViewportSize({ width: 1440, height: 1050 });
-    const labels = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
-    for (const locale of ['en', 'zh-cn']) {
-      await page.goto(`${baseUrl}/${locale}/ui-libraries/`, { waitUntil: 'networkidle' });
-      // Pick before lazy cards mount: they must read the current preference,
-      // not silently instantiate WC and require a later correction.
-      const galleryPicker = page.locator('[data-adapter-select-root]').first();
-      await galleryPicker.getByRole('combobox').click();
-      await page.getByRole('option', { name: 'React', exact: true }).last().click();
-      for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
-        const card = page.locator(`.library-card--${family}`);
-        const button = card.getByRole('button', { name: 'Back', exact: true });
-        // The SSR card exists before its lazy Prototype is mounted. Scrolling a
-        // not-yet-created Button would wait forever without waking the observer.
-        await card.scrollIntoViewIfNeeded();
-        await expect
-          .poll(() =>
-            card.locator('[data-projection-scope]').getAttribute('data-projection-runtime')
-          )
-          .toBe('react');
-        expect(
-          await button.evaluate((element) => {
-            const bounds = element.getBoundingClientRect();
-            const hit = document.elementFromPoint(
-              bounds.x + bounds.width / 2,
-              bounds.y + bounds.height / 2
-            );
-            return !!hit && (hit === element || element.contains(hit));
-          })
-        ).toBe(true);
-        const galleryUrl = page.url();
-        await button.click();
-        await expect.poll(() => card.getByRole('status').textContent()).toBe('1 activations');
+        expect(changed).toBeGreaterThan(20);
+        await capture(`${theme}-${runtime}-pressed`);
+        await page.mouse.up();
         await button.focus();
         await page.keyboard.press('Space');
-        await expect.poll(() => card.getByRole('status').textContent()).toBe('2 activations');
-        expect(page.url()).toBe(galleryUrl);
-        expect(await card.locator(`a[href="./${family}/"]`).count()).toBe(1);
-      }
-      // Both mounted cards follow the same page event on an actual control change.
-      await galleryPicker.getByRole('combobox').click();
-      await page.getByRole('option', { name: 'Vue 2', exact: true }).last().click();
-      for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
-        const card = page.locator(`.library-card--${family}`);
+        await page.keyboard.press('Enter');
         await expect
-          .poll(() =>
-            card.locator('[data-projection-scope]').getAttribute('data-projection-runtime')
-          )
-          .toBe('vue2');
-        await card.getByRole('button', { name: 'Back', exact: true }).click();
-        await expect.poll(() => card.getByRole('status').textContent()).toBe('1 activations');
-      }
-      await capture(`library-${locale}`);
-      for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
-        await page.goto(`${baseUrl}/${locale}/ui-libraries/${family}/`, {
-          waitUntil: 'networkidle',
-        });
-        await page.locator('a[href="./button/"]').click();
-        await page.waitForURL(`**/${locale}/ui-libraries/${family}/button/`);
-        for (const runtime of RUNTIMES) {
-          const picker = page.locator('[data-adapter-select-root]').first();
-          await picker.getByRole('combobox').click();
-          await page.getByRole('option', { name: labels[runtime], exact: true }).last().click();
-          // Bootstrap uses one preview following the actual page runtime control;
-          // Liquid still has the existing fixed-runtime adapter panels.
-          const panel =
-            family === 'bootstrap-2-3-2'
-              ? page.locator('[data-demo-id="demo-bootstrap-2-3-2-button"]')
-              : page.locator(`[data-adapter-panel="${runtime}"]`);
-          if (family === 'bootstrap-2-3-2') expect(await panel.count()).toBe(1);
-          await expect.poll(() => panel.isVisible()).toBe(true);
-          await expect
-            .poll(() =>
-              panel.locator('[data-projection-scope]').getAttribute('data-projection-runtime')
-            )
-            .toBe(runtime);
-          const button = panel.getByRole('button', { name: 'Back', exact: true });
-          await button.click();
-          await expect.poll(() => panel.getByRole('status').textContent()).toBe('1 activations');
-          expect(
-            await panel
-              .getByRole('button', { name: 'Unavailable', exact: true })
-              .getAttribute('aria-disabled')
-          ).toBe('true');
-          observations.push({
-            locale,
-            family,
-            runtime,
-            libraryAndDocsDemo: 'operable',
-            url: page.url(),
+          .poll(() => page.locator(`[data-activations="${runtime}"]`).textContent())
+          .not.toBe('0 activations');
+        await page.evaluate(
+          (runtime) => (window as any).liquidMaterialFixture.source(runtime, false),
+          runtime
+        );
+        await expect
+          .poll(() => button.getAttribute('data-material-quality'))
+          .toBe('opaque-fallback');
+        expect(await button.evaluate((el) => (el as HTMLElement).style.backgroundImage)).toBe(
+          'none'
+        );
+        await capture(`${theme}-${runtime}-source-lost`);
+        await page.evaluate(
+          (runtime) => (window as any).liquidMaterialFixture.source(runtime, true),
+          runtime
+        );
+        await expect.poll(() => button.getAttribute('data-material-quality')).toBe('self-optical');
+        // A sibling overlay is not present in the source canvas and must reject sampling.
+        await button.evaluate((el) => {
+          const block = document.createElement('div');
+          block.dataset.materialNegative = '';
+          const r = el.getBoundingClientRect(),
+            root = el.closest('[data-material-scene]')!,
+            s = root.getBoundingClientRect();
+          Object.assign(block.style, {
+            position: 'absolute',
+            left: `${r.left - s.left}px`,
+            top: `${r.top - s.top}px`,
+            width: '20px',
+            height: '20px',
+            background: 'red',
           });
-        }
-        await capture(`docs-${locale}-${family}`);
+          root.append(block);
+        });
+        await expect
+          .poll(() => button.getAttribute('data-material-reason'))
+          .toBe('source-overlapping-content');
+        await host.locator('[data-material-negative]').evaluate((el) => el.remove());
+        await expect.poll(() => button.getAttribute('data-material-quality')).toBe('self-optical');
+        observations.push({
+          theme,
+          runtime,
+          requested: 'liquid-glass',
+          backend: 'self-optical',
+          source: 'visible-app-canvas',
+          pressPixelsChanged: true,
+          sourceLossRecovered: true,
+          overlapRejected: true,
+        });
       }
-    }
-  }, 180000);
-
-  it('keeps the functional layer within mobile width and disposes all real controls', async () => {
+      await preference(theme, { 'prefers-reduced-motion': 'reduce' });
+      await quality('self-optical');
+      await expect
+        .poll(() =>
+          page.locator('[data-demo-ref="regular"]').first().getAttribute('data-material-motion')
+        )
+        .toBe('static');
+      await preference(theme, { 'prefers-reduced-transparency': 'reduce' });
+      await quality('opaque-fallback');
+      await capture(`${theme}-reduced-transparency`);
+      await preference(theme);
+      await quality('self-optical');
+      // Moving the same controls must resample the same visible source coordinates.
+      const firstImage = await page
+        .locator('[data-demo-ref="regular"]')
+        .first()
+        .evaluate((el) => (el as HTMLElement).style.backgroundImage);
+      await page
+        .locator('[data-demo-ref="regular"]')
+        .first()
+        .evaluate((el) => {
+          (el as HTMLElement).style.position = 'relative';
+          (el as HTMLElement).style.left = '5px';
+        });
+      await expect
+        .poll(() =>
+          page
+            .locator('[data-demo-ref="regular"]')
+            .first()
+            .evaluate((el) => (el as HTMLElement).style.backgroundImage)
+        )
+        .not.toBe(firstImage);
+      await page.setViewportSize({ width: 1100, height: 1000 });
+      await quality('self-optical');
+      await cdp.send('Emulation.setDeviceMetricsOverride', {
+        width: 1100,
+        height: 1000,
+        deviceScaleFactor: 2,
+        mobile: false,
+      });
+      await quality('self-optical');
+      await capture(`${theme}-dpr-two`);
+      await cdp.send('Emulation.clearDeviceMetricsOverride');
+      await quality('self-optical');
+      await page.setViewportSize({ width: 1440, height: 1050 });
+      await quality('self-optical');
+      // Same-generation inputs are shared, and >16 surfaces keep one live rendering context.
+      const beforeStress = await page.evaluate(() =>
+        (window as any).liquidMaterialFixture.metrics()
+      );
+      await page.evaluate(() => (window as any).liquidMaterialFixture.stress(20));
+      await expect
+        .poll(() =>
+          page.locator('[data-material-stress] [data-material-quality="self-optical"]').count()
+        )
+        .toBe(20);
+      const afterStress = await page.evaluate(() =>
+        (window as any).liquidMaterialFixture.metrics()
+      );
+      expect(afterStress.contexts).toBe(1);
+      expect(afterStress.consumers).toBeGreaterThan(16);
+      expect(afterStress.pendingImages + afterStress.decodedImages).toBeLessThanOrEqual(
+        afterStress.consumers
+      );
+      expect(afterStress.peakPendingImages).toBeLessThanOrEqual(afterStress.consumers);
+      expect(afterStress.sourceUploads - beforeStress.sourceUploads).toBeLessThan(8);
+      await page.waitForTimeout(300); // Let the finite DOM/ResizeObserver delivery settle.
+      const staticStart = await page.evaluate(() =>
+        (window as any).liquidMaterialFixture.metrics()
+      );
+      await page.waitForTimeout(500);
+      const staticEnd = await page.evaluate(() => (window as any).liquidMaterialFixture.metrics());
+      expect(staticEnd.renders).toBe(staticStart.renders);
+      await capture(`${theme}-twenty-surface-shared-context`);
+      const canLose = await page.evaluate(() => {
+        const extension = (window as any).materialContexts[0].getExtension('WEBGL_lose_context');
+        (window as any).materialLoss = extension;
+        extension?.loseContext();
+        return !!extension;
+      });
+      expect(canLose).toBe(true);
+      await quality('opaque-fallback');
+      await page.evaluate(() => (window as any).materialLoss.restoreContext());
+      await quality('self-optical');
+      observations.push({
+        theme,
+        beforeStress,
+        afterStress,
+        staticStart,
+        staticEnd,
+        sharedContextLossRecovered: true,
+      });
+      await page.evaluate(() => (window as any).liquidMaterialFixture.dispose());
+      expect(await page.locator('[data-material-backdrop]').count()).toBe(0);
+      expect(
+        await page.evaluate(() => (window as any).liquidMaterialFixture.metrics())
+      ).toMatchObject({ contexts: 0, pendingImages: 0, decodedImages: 0 });
+    }, 150000);
+  it('the actual public Button documentation uses the same optical path on all four runtime panels', async () => {
     await preference('light');
-    await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'networkidle' });
-    await page.waitForFunction(() => document.documentElement.dataset.materialReady);
-    await waitForBlur('blur(4px)');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-      true
-    );
-    await capture('material-mobile');
-    expect(await page.locator('[data-material-host]').getByRole('button').count()).toBe(12);
-    await page.evaluate(async () => {
-      await (window as any).liquidMaterialFixture.dispose();
+    await page.goto(`${baseUrl}/en/ui-libraries/liquid-glass/button/`, {
+      waitUntil: 'networkidle',
     });
-    expect(await page.locator('[data-material-host]').getByRole('button').count()).toBe(0);
-  }, 60000);
+    const headerRuntime = page.locator('.site-header-runtime').first();
+    for (const runtime of RUNTIMES) {
+      await choosePreviewRuntime(page, headerRuntime, runtime);
+      const panel = page.locator(`[data-adapter-panel="${runtime}"]`);
+      await panel.waitFor({ state: 'visible' });
+      const button = panel.getByRole('button', { name: 'Back', exact: true });
+      await expect
+        .poll(() => button.getAttribute('data-material-quality'), { timeout: 30000 })
+        .toBe('self-optical');
+      expect(
+        await panel
+          .locator('.liquid-functional-demo')
+          .evaluate((el) => getComputedStyle(el).backgroundImage)
+      ).toBe('none');
+      expect(await panel.locator('[data-material-backdrop]').count()).toBeGreaterThan(0);
+      await button.click();
+      await expect.poll(() => panel.getByRole('status').textContent()).not.toBe('0 activations');
+      await capture(`public-button-${runtime}`);
+      observations.push({
+        publicRoute: '/en/ui-libraries/liquid-glass/button/',
+        runtime,
+        quality: 'self-optical',
+        actualPreviewer: true,
+        baseActivation: true,
+      });
+    }
+  }, 150000);
 });

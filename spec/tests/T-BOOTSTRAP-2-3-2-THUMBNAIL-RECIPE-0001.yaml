@@ -1,0 +1,38 @@
+id: T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001
+type: test
+title: Existing Bootstrap Surface and Text Thumbnail recipes
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Source and actual Adapter controls for a user-directed visual repair; exact-source browser imagery and independent acceptance remain pending.
+summary: Verifies existing passive recipes without a new component or interaction owner.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001-CASE-SURFACE
+    title: Explicit paint and native slot ownership
+    covers: [P-BOOTSTRAP-2-3-2-SURFACE-PASSIVE, P-BOOTSTRAP-2-3-2-SURFACE-PROJECTION]
+    expectation: Explicit outline-raised selects the historical border and depth; defaults remain neutral and source native nodes survive without role or tabindex.
+  - id: T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001-CASE-TEXT
+    title: Historical scalable body and heading metrics
+    covers: [P-BOOTSTRAP-2-3-2-TEXT-PROJECTION]
+    expectation: Actual family Text and physical CSS map sm-normal to 14/20 and 2xl-relaxed to 24.5/40 at a 16px root.
+implementations:
+  - id: bootstrap-existing-thumbnail-recipe
+    kind: module-test
+    status: passing
+    path: packages/prototypes/bootstrap-2-3-2/test/thumbnail.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001-CASE-SURFACE,
+        T-BOOTSTRAP-2-3-2-THUMBNAIL-RECIPE-0001-CASE-TEXT,
+      ]
+    exercises: [P-BOOTSTRAP-2-3-2-SURFACE, P-BOOTSTRAP-2-3-2-TEXT]
+verifies:
+  prototypes: [P-BOOTSTRAP-2-3-2-SURFACE, P-BOOTSTRAP-2-3-2-TEXT]
+exercises:
+  prototypes: [P-BOOTSTRAP-2-3-2-SURFACE, P-BOOTSTRAP-2-3-2-TEXT]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added finite existing-recipe and native-owner controls; native pixels remain separate.
+tags: [test, bootstrap-2-3-2, surface, text, visual]

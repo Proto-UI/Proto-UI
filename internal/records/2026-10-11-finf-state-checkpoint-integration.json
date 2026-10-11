@@ -1,0 +1,216 @@
+{
+  "date": "2026-10-11",
+  "scope": "Generic number.list State reconstruction checkpoint; non-normative progress record",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "215f7649c205c1e509b06fd5fed5311e29ccdf78",
+  "reviewedSlice": {
+    "base": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+    "tree": "a4e9623ae2ea3be98dd44239e151807c2f4ab538",
+    "patchSha256": "e0403f70dab4f5c317d155f6968121fabd5a5d29edbf5d0e75ab9c129dc269c9"
+  },
+  "sourceTree": "1128026b6abfc526a0196b5ff0e0acc0dc7ca813",
+  "parentBinding": "The sole parent of this record-only commit must have sourceTree.",
+  "bindings": [
+    {
+      "path": "internal/contracts/types/state-number-list.type-test.ts",
+      "blob": "65d158abdd823bac6954195ec2550ed4e452c551",
+      "sha256": "17e8c7d4009075daebf0ab3ed63e4e05920994ed8446223122980272a81b5550"
+    },
+    {
+      "path": "internal/records/2026-10-11-state-number-list-runtime-draft.md",
+      "blob": "64c72ea98b87c8593f57fdcc832ffa0997054b96",
+      "sha256": "df87b3f4ac2a64cd5dee8195007498a6ba1bc9387cadbff29109af0e97528a5f"
+    },
+    {
+      "path": "packages/adapters/react/test/contract/state-number-list.contract.test.ts",
+      "blob": "06bf61ed2a37b81f1c9c19039afdf3103ee112dd",
+      "sha256": "54b84e9ed80f1f35213e289f6181df7119316debf5456207c5f93e4391b0590d"
+    },
+    {
+      "path": "packages/adapters/vue/test/contract/state-number-list.contract.test.ts",
+      "blob": "3eae778bd5eea89d34f3735491d7f60d691349aa",
+      "sha256": "c2bca37a25c00f5a3093de9cade7dbe243113eb3b665ea5b862ca78da000f0cb"
+    },
+    {
+      "path": "packages/adapters/vue2/test/state-number-list.test.ts",
+      "blob": "a0d490c1c0185f093dbce88df0c0332ece17f028",
+      "sha256": "9dbaa158835a07c58ad1cfa7a1894fd5dcf66aa6e856725b3e3e16298af9c6f7"
+    },
+    {
+      "path": "packages/adapters/web-component/test/state-number-list.test.ts",
+      "blob": "40e18ed675cbdb5010a3918b630ef44f766ed4c7",
+      "sha256": "14eee0ec6efb2999c3caed8ea330199321b16c6621f9a15c19bacfa98ae49499"
+    },
+    {
+      "path": "packages/core/src/handles.ts",
+      "blob": "9539108fc8606f019822e28a131306f84dc84aab",
+      "sha256": "f8535d3e4d766dd549553521894f6e2130b7a28c0f9dcd7491e38889434a0681"
+    },
+    {
+      "path": "packages/core/src/state.ts",
+      "blob": "23c28110fb5d45c29a430d4685a7888278976ae5",
+      "sha256": "234bd9923e31a60d9872c46fda137b49d63de9e9df1dca6225ed28ebee53978f"
+    },
+    {
+      "path": "packages/modules/expose-state-web/src/impl.ts",
+      "blob": "c7d86e13917e1d2f13a6e3480eb7e7d3b9f804d7",
+      "sha256": "fbd445bbda4d24454a57d9e7dbd713694bf44d1646420c2b40e74f471fd96ff2"
+    },
+    {
+      "path": "packages/modules/expose-state-web/test/catalog-boundary.test.ts",
+      "blob": "b6a47ac9bace4dc7fcb7666f9d53fd499e88c42f",
+      "sha256": "dc76efec2aba3020d9e489797ff4a48528bb459a02c6e6eab513a6779ac25d4d"
+    },
+    {
+      "path": "packages/modules/rule-expose-state-web/src/create.ts",
+      "blob": "c99e4ac64e95b2382788dd27575360a77ddc8299",
+      "sha256": "421c7981aa98f2c494f564ea97c4eb12e5d143f20046f82c51cc797b69c26e6a"
+    },
+    {
+      "path": "packages/modules/rule/src/when-builder.ts",
+      "blob": "2ed3948964c3c88667e6303eeb1067952bf58edc",
+      "sha256": "85007c55c05399382c9fa181de8cd050ae82f446194cdf83b93869f118c8f339"
+    },
+    {
+      "path": "packages/modules/state/src/impl.ts",
+      "blob": "9c2bc00b96a626a4fb8268c801a5d2b4e92e0453",
+      "sha256": "5dcfc477d75f3767f7fa0d6c28228fbb10378949c3af467900be44104d22b512"
+    },
+    {
+      "path": "packages/modules/state/src/kernel.ts",
+      "blob": "dd38585f7c81c17bdb89bab6fdeb2c1a3311bbdf",
+      "sha256": "d86c3d13069b42337aa725a4dbeb99de40d2eb213f24716627166ae8eada8f6a"
+    },
+    {
+      "path": "packages/modules/state/src/types.ts",
+      "blob": "d17c89a517075246e7a4dcd34009631f98c744d0",
+      "sha256": "f3c0c1ec9a98db7c4f0a696c6bdb798d3b3e598d29a2693ca3b26ec628067c3d"
+    },
+    {
+      "path": "packages/modules/state/src/validate.ts",
+      "blob": "2f9523801880c7ce644ab06cf5bea9d9b7d3e970",
+      "sha256": "2de0e3eae929be19571b5aebffd0d7657087e11a7432015316c14976c39f9faf"
+    },
+    {
+      "path": "packages/modules/state/test/number-list.test.ts",
+      "blob": "fd460c62d17bd2eaee2bcd076418b314da45726b",
+      "sha256": "01adc97fb167b7c9e222465587386022d19a132145d82b1a1657478f6987ac2d"
+    },
+    {
+      "path": "packages/modules/state/test/port.v0.test.ts",
+      "blob": "e701548f41957aba936580691832f98632d3b689",
+      "sha256": "779dff48da3754c1129da324cf87efed3d806d40d47dc6848b1533f6549fa5b8"
+    },
+    {
+      "path": "packages/runtime/src/kernel/handles/def.ts",
+      "blob": "958591eab09f78be2f13f098edd97aeb06e52415",
+      "sha256": "2faa5fb3417f5ad25fc5cf472ed22387d486beb3a2bb67baabc24c85d338972d"
+    },
+    {
+      "path": "packages/runtime/test/contract/state-number-list.contract.test.ts",
+      "blob": "bd498dddcb7b8df9ddf73984eb23ca21f6798350",
+      "sha256": "9ad9c113398054ea5e8e39bb933fc88dd2a89152e4dc4ac668b61fe540597130"
+    },
+    {
+      "path": "packages/types/src/state.ts",
+      "blob": "f2463caaf467f790cd96fbda0aee4a61bbb4e5d2",
+      "sha256": "2628b0cab94fcb27e88b3df4e0e293ef52db0f408a6f2a18bff416754bffe9fa"
+    },
+    {
+      "path": "spec/contracts/C-STATE-0006.yaml",
+      "blob": "b49c98835a3cb9e444f44e2e373a55b78f605e88",
+      "sha256": "a3017b6857e1d369780e9dbb65908fa3be34df3e8fc72cb2a5cf1f36c87bb923"
+    },
+    {
+      "path": "spec/contracts/C-STATE-0011.yaml",
+      "blob": "dfed7edc8d974ab9f7fa702f74bc957444e6ada7",
+      "sha256": "447f755b1abff5a5652ff427a6a64af1fdc90f2f4806d8f04111661caca2f2ac"
+    },
+    {
+      "path": "spec/contracts/C-STATE-NUMBER-LIST-0001.yaml",
+      "blob": "96d80150808687f37f3d5a5b50a6658789612970",
+      "sha256": "3b3101357d5eb9e83fa95589f08f1fd679b7ae4b9f296e1a0ffadecba2e1c937"
+    },
+    {
+      "path": "spec/modules/M-STATE-0001.yaml",
+      "blob": "2d1f75cf777c5b00d890ffa0315195118ef497f0",
+      "sha256": "855d05c96665145575c770d6ad844f9e6cbf93923e94829b317a1e63393155e6"
+    },
+    {
+      "path": "spec/tests/T-STATE-0003.yaml",
+      "blob": "ab5ffa0873714599e690588302fdc848ef01b510",
+      "sha256": "297696bc3124f2f192132f89339eb0fc893821ecc0849c429d9df0870be07dde"
+    },
+    {
+      "path": "spec/tests/T-STATE-0004.yaml",
+      "blob": "1d74a77304ce98e095ab1405a5b152bb5eb1eaac",
+      "sha256": "88660c22e08bae496b3feee8757a453491994a4bcf9d09e1d65cd4de22b7865b"
+    },
+    {
+      "path": "spec/tests/T-STATE-0005.yaml",
+      "blob": "edf0ede26fb5931254748cc5da0cf9ee222485b6",
+      "sha256": "cca62e83be37d87098e73748eeae1438bb2e6561eb42c0bdd9a6672d447fb53c"
+    }
+  ],
+  "integration": {
+    "newExecutionTree": "165e1ccdec969973845dffda8718e8bac1a31964",
+    "finalDifference": "Only blank paragraphs separate the unchanged three disclosure sentences in the draft record; all tested implementation/test/spec bytes are identical.",
+    "normalHookFormatting": "Markdown wrapping and YAML whitespace only, independently compared as values/text.",
+    "stateAndReadyOverlap": false,
+    "previousReadySourceUnchanged": true
+  },
+  "newValidation": {
+    "combined": {
+      "files": 28,
+      "passed": 224,
+      "failed": 0,
+      "stateTests": 112,
+      "inheritedReadyTests": 112
+    },
+    "spec": {
+      "files": 24,
+      "passed": 161,
+      "failed": 0
+    },
+    "authoringChangedInputs": 7,
+    "workspaceTypesExit": 0,
+    "contractTypesExit": 0,
+    "generation": "Normal CLI single-package build and website style generator; not a 47-package build claim.",
+    "hooks": "Normal source precommit passed."
+  },
+  "independent": {
+    "checkpoint2": {
+      "tests": 112,
+      "specTests": 161,
+      "additionalControls": 10,
+      "typeContracts": "pass"
+    },
+    "checkpoint3": {
+      "runtimeAndControls": 11,
+      "workspaceTypes": "pass",
+      "typeContracts": "pass",
+      "oneLineNonNullAssertionJavaScriptEquivalent": true
+    }
+  },
+  "preservedFailures": [
+    "Initial rebuilt checkpoint c8aeee failed two descriptor-prototype-inheritance counterexamples; both checks were repaired and independently re-tested.",
+    "Checkpoint89dab passed focused type contracts but exposed a strict workspace test typing error; checkpoint a4 adds a non-null assertion without changing emitted JavaScript.",
+    "Missing generated Shadow declarations were resolved through the normal generator, not handwritten files.",
+    "Earlier reconstruction fixture/schema failures remain in the author/reviewer evidence."
+  ],
+  "open": [
+    "This checkpoint contains 28 of the planned 32 reconstruction files; remaining public documentation and measurement-record updates are separate.",
+    "A new 37-package packed consumer and exact-base budget/public-doc result are not claimed by this checkpoint. Existing strict budget and documentation failures are not closed.",
+    "Native browser/AT/paint, Compiler/CLI compilation support and Slider Range/Multiple integration remain unverified or unimplemented here.",
+    "Legacy mutable public descriptor-clone behavior is not expanded into an internal State/Rule/DOM integrity claim.",
+    "No new full-delivery acceptance: 5 complete / 63 unfinished, core 0 / 55."
+  ],
+  "reconstruction": {
+    "missingHistoricalSourceReused": false,
+    "historical787Claimed": false
+  }
+}

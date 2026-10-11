@@ -5,6 +5,10 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Opaque host facts, facade/port authority, Runtime instance resources and four Web Adapter scope journeys establish the bounded Context catalog slice.
 cases:
+  - id: T-CONTEXT-0003-CASE-ANCESTOR
+    title: Explicit ancestor intent excludes self and rejects stale deliveries without broadening writes
+    covers: [C-CONTEXT-0004-F, C-CONTEXT-0006-F, C-CONTEXT-0007-F, M-CONTEXT-0001-J]
+    expectation: strict-ancestor-runtime-participation
   - id: T-CONTEXT-0003-CASE-SURFACE
     title: Author facade and privileged port remain distinct
     covers:
@@ -76,6 +80,28 @@ cases:
       - A-WEB-COMPONENT-0001-CONTEXT
     expectation: context-adapter-conforms
 implementations:
+  - id: context-ancestor-module
+    kind: module-test
+    status: passing
+    path: packages/modules/context/test/ancestor.test.ts
+    required: true
+    consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
+  - id: context-ancestor-framework-consumers
+    kind: fixture
+    status: passing
+    path: packages/modules/context/test/utils/ancestor-conformance.ts
+    required: true
+    consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
+    notes:
+      - Driven by context-ancestor.test.ts in the four Web Adapters; real Runtime owner composition, derived DOM text, cleanup and fresh generations in Happy DOM. No native-browser visual or non-Web support claim.
+  - id: context-ancestor-compiler-refusal
+    kind: module-test
+    status: passing
+    path: packages/modules/context/test/ancestor-compiler-boundary.test.ts
+    required: true
+    consumesCases: [T-CONTEXT-0003-CASE-ANCESTOR]
+    notes:
+      - Existing Compiler profiles reject both ancestor operations as unsupported source operations. This negative evidence does not implement them in Compiler/GPUI/Qt/Flutter.
   - id: context-module-catalog
     kind: module-test
     status: passing
@@ -152,6 +178,7 @@ verifies:
         - M-CONTEXT-0001-G
         - M-CONTEXT-0001-H
         - M-CONTEXT-0001-I
+        - M-CONTEXT-0001-J
   hostCaps:
     - id: HC-CONTEXT-IDENTITY-0001
       anchors:
@@ -178,16 +205,24 @@ verifies:
       anchors:
         - A-WEB-COMPONENT-0001-CONTEXT
   contracts:
+    - id: C-CONTEXT-0006
+      anchors: [C-CONTEXT-0006-F]
+    - id: C-CONTEXT-0007
+      anchors: [C-CONTEXT-0007-F]
     - id: C-CONTEXT-0004
       anchors:
         - C-CONTEXT-0004-B
         - C-CONTEXT-0004-E
+        - C-CONTEXT-0004-F
     - id: C-CONTEXT-0012
       anchors:
         - C-CONTEXT-0012-A
         - C-CONTEXT-0012-B
         - C-CONTEXT-0012-C
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added strict-ancestor module, real Web Runtime and explicit Compiler refusal evidence without activating the draft slice.
   - version: 0.3.0-alpha.0
     change: strengthened
     summary: Added actual-port explicit-consumer and composed Scroll opaque identity integration regressions.

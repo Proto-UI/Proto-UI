@@ -1,0 +1,66 @@
+name: Private initial optical paint evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/material-initial-paint-evidence.yml'
+      - 'experiments/material-initial-paint/**'
+      - 'packages/**'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/src/content/docs/zh-cn/library-card-capture.ts'
+      - 'scripts/test/server-readiness.mjs'
+      - 'scripts/build/**'
+      - 'scripts/release/test/material-initial-paint-workflow.test.mjs'
+      - '.npmrc'
+      - 'pnpm-workspace.yaml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'tsconfig*.json'
+permissions:
+  contents: read
+concurrency:
+  group: material-initial-paint-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  finite-rest-source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Verify exact pull request head
+        env:
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+        run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked tools
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Check the private source contract
+        run: |
+          node --test scripts/release/test/material-initial-paint-workflow.test.mjs
+          node scripts/build/generate-web-material-kernel.mjs --check
+          node node_modules/vitest/vitest.mjs run packages/adapters/base/test/web-material-initial-paint.test.ts packages/adapters/base/test/web-material-initial-binding.test.ts packages/adapters/base/test/initial-paint-media-session.test.ts --minWorkers=1 --maxWorkers=1
+          node experiments/material-initial-paint/typecheck.mjs
+      - name: Build the finite source fixture
+        run: |
+          corepack pnpm@10.32.1 build:packages --package @proto.ui/cli
+          node --import tsx experiments/material-initial-paint/build-browser.mjs /tmp/pui-initial-paint
+      - name: Exercise real producer and static consumers
+        run: node --import tsx experiments/material-initial-paint/browser.test.mjs /tmp/pui-initial-paint /tmp/pui-initial-paint-evidence
+      - name: Retain exact-source assets and native observations
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: material-initial-paint-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: |
+            /tmp/pui-initial-paint/
+            /tmp/pui-initial-paint-evidence/
+          if-no-files-found: warn
+          retention-days: 30

@@ -46,8 +46,9 @@ jobs:
           git rev-parse HEAD
           node --version
           node --import tsx --test experiments/material-specializer/source.test.mjs
+          node --test experiments/material-specializer/shared-intent.test.mjs
           node --test experiments/material-specializer/tree-shake.test.mjs
-          corepack pnpm@10.32.1 exec vitest run packages/modules/feedback/test packages/modules/rule-expose-state-web/test packages/adapters/web-component/test/material-feedback.integration.test.ts
+          corepack pnpm@10.32.1 exec vitest run packages/core/test/material.test.ts packages/modules/feedback/test packages/modules/rule-expose-state-web/test packages/adapters/web-component/test/material-feedback.integration.test.ts
 
       - name: Build isolated real Prototype material fixture
         run: |

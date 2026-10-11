@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "bounded-source-tree-integration-record",
+  "date": "2026-10-10",
+  "repository": "Proto-UI/Proto-UI",
+  "pullRequest": 872,
+  "baseRevision": "0ccaee462458ed8988baa50a95d174a34dfb0b99",
+  "sourceTree": "dfb56b098e292d7260eaf2c7d04f4c0e50bf2ce8",
+  "binding": "The publication commit carrying only this record has one source parent; that parent tree must exactly equal sourceTree. Historical matrix snapshots are not refreshed by this record.",
+  "testedProductTree": "0d82709b5049bb5efdf7955d8b980dc06b17367a",
+  "testEquivalence": "Final source adds only two static capability-audit documents to testedProductTree; all product, test, tool and spec bytes are identical.",
+  "layers": [
+    {
+      "name": "DataTable pager local and Root disabled",
+      "reviewedTree": "5f8bf5281543a990d86523d3d90113dee9c495d9",
+      "scope": "One production file plus bounded tests, draft test metadata and record; controlled ownership and readOnly paging retained."
+    },
+    {
+      "name": "Slider draft definitions and pure model",
+      "reviewedTree": "e678302d3dcc6a9acb921c67f2a3b1341cea2ca3",
+      "scope": "Seven additions; no mounted runtime, public API, family or Compiler activation."
+    },
+    {
+      "name": "Text two-family native coverage",
+      "reviewedTree": "5c4f293fa5b637b3c930fb511b3e42b1e13a2586",
+      "scope": "Two test files; existing cases, timeouts, runtime planner and assertions retained."
+    },
+    {
+      "name": "Upstream capability audit",
+      "scope": "Static 2a67 baseline and separately bounded 0cca Neo structural progress; target gaps and unknown facts do not alter draft contracts or acceptance."
+    }
+  ],
+  "integrationValidation": {
+    "focused": {
+      "files": 27,
+      "passed": 516,
+      "failed": 0
+    },
+    "plannerAndContract": {
+      "passed": 132,
+      "failed": 0
+    },
+    "fullOfficialTypes": {
+      "exitCode": 0,
+      "docsFiles": 814,
+      "errors": 0,
+      "warnings": 0,
+      "hints": 11
+    },
+    "normalPrecommit": "passed; only two audit documents reformatted by the normal hook",
+    "messageChecks": "normal hook passed for each prepared source message",
+    "native": "not run locally; 80 Text native cases require new exact-commit CI"
+  },
+  "retainedEvidence": {
+    "pager": "Exact baseline fixture 15 failed/5 passed; reviewed candidate 185 tests and nine independent controls passed. Broader collection diagnostic retains seven failures/six passes. Catalog retains 550 baseline diagnostics.",
+    "slider": "R3 independently closes SLV-001 through SLV-004 within pure-model scope. Old blocked snapshots remain historical. Generic collection State, portable precision, scalar/vector public compatibility, mounted request attribution, native/AT/family/Compiler realization remain open.",
+    "environmentAttempts": [
+      "Unscoped default-project TypeScript command exhausted the default heap; retained as a failed noncanonical attempt.",
+      "Initial official workspace types lacked two generated Shadow stylesheet imports; normal website generation resolved them.",
+      "Additional integration spec-authoring attempt could not launch the official tsx IPC server in the sandbox. No bypass or passing claim; separate author/independent spec checks retain their own source binding."
+    ]
+  },
+  "acceptance": {
+    "acceptedOriginalScopeCloseouts": 5,
+    "unfinished": 63,
+    "total": 68,
+    "coreAccepted": 0,
+    "coreTotal": 55,
+    "changed": false
+  },
+  "logsSha256": {
+    "step3-tests.log": "093735cbc7bf41ac1a31dd529ee009853f6801f4e3640b350c326de430b0151a",
+    "step3-planner-contract.log": "5bffb4fcf875cf7990b029f5f5fef7f1dc2337441d7fae8311948e1e1f41e3e6",
+    "step3-full-types.log": "72ac32aed6ee3d9126cfa116011381ab07fb29ff7fafc72b43d3e667b7501d52",
+    "step3-messagehook.log": "f2aad5d17864ab649d68121efa025909149b18ab7b4258a67fe23ab5f709c017",
+    "step3-precommit.log": "a9dca812dd04ecda901b8907f632c641276b1987c151627790092dc4eca71f5c"
+  },
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ]
+}

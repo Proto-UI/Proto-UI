@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": ["carousel-resizable-public.types.ts", "carousel-resizable-public-handles.test.ts"],
+  "exclude": []
+}

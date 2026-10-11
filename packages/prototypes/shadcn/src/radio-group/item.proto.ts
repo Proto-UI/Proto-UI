@@ -3,7 +3,7 @@ import { asRadioGroupItem } from '@proto.ui/prototypes-base/radio-group';
 import type { ShadcnRadioGroupItemExposes, ShadcnRadioGroupItemProps } from './types';
 
 const ITEM_TOKENS = [
-  'inline-flex',
+  'flex',
   'items-center',
   'justify-center',
   'aspect-square',
@@ -13,9 +13,6 @@ const ITEM_TOKENS = [
   'border',
   'border-input',
   'bg-transparent',
-  'text-primary',
-  'shadow-xs',
-  'transition-[color,box-shadow]',
   'outline-none',
 ].join(' ');
 
@@ -30,6 +27,11 @@ const radioGroupItem = definePrototype<ShadcnRadioGroupItemProps, ShadcnRadioGro
     }
     def.feedback.style.use(tw(ITEM_TOKENS));
     def.rule({
+      when: (when) => when.state(state.checked).eq(true),
+      intent: (intent) =>
+        intent.feedback.style.use(tw('border-primary bg-primary text-primary-foreground')),
+    });
+    def.rule({
       when: (when) => when.state(state.focusVisible).eq(true),
       intent: (intent) => intent.feedback.style.use(tw('border-ring ring-3 ring-ring/50')),
     });
@@ -40,6 +42,11 @@ const radioGroupItem = definePrototype<ShadcnRadioGroupItemProps, ShadcnRadioGro
     def.rule({
       when: (when) => when.meta('colorScheme').eq('dark'),
       intent: (intent) => intent.feedback.style.use(tw('bg-input/30')),
+    });
+    def.rule({
+      when: (when) =>
+        when.all(when.meta('colorScheme').eq('dark'), when.state(state.checked).eq(true)),
+      intent: (intent) => intent.feedback.style.use(tw('bg-primary')),
     });
   },
 });

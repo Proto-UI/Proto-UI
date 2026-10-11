@@ -86,17 +86,17 @@ export const contractPreviews = [
     id: 'C-STATE-0006',
     title: 'State definitions use finite host-neutral value specs',
     summary:
-      'v0 admits only `bool`, `enum`, `string`, `number.range`, and `number.discrete`, with values kept inside JSON-compatible boundaries.',
+      'v0 admits only `bool`, `enum`, `string`, `number.range`, `number.discrete`, and draft `number.list`, with values kept inside JSON-compatible boundaries.',
     quote:
       'State definition admits only a finite set of host-neutral state kinds, and values remain within JSON-compatible boundaries.',
     criteria: [
-      'v0 state kinds are limited to bool, enum, string, number.range, and number.discrete.',
+      'v0 state kinds are limited to bool, enum, string, number.range, number.discrete, and draft number.list.',
       'Enum definitions must provide options.',
       'Number range definitions must provide min and max.',
       'Metadata must remain host-neutral.',
     ],
     tests:
-      'T-STATE-0003 covers finite kinds and spec metadata; value-domain validation remains a recorded gap.',
+      'T-STATE-0003 covers finite kinds and spec metadata; legacy scalar value-domain validation remains a recorded gap; number.list requires complete validation.',
     source: 'spec/contracts/C-STATE-0006.yaml',
   },
   {
@@ -164,7 +164,7 @@ export const contractPreviews = [
     quote: 'StateEvent is the portable event shape for state-change records.',
     criteria: [
       'Value transitions dispatch `{ type: "next", prev, next, reason? }`.',
-      'When `Object.is(prev, next)` is true, the write is not a state change.',
+      'Scalar writes use Object.is; number.list uses normalized length and per-item Object.is content equality.',
       '`setDefault(...)` must not dispatch `next` events.',
       'StateEvents caused by re-entrant `set(...)` calls must be delivered deterministically.',
     ],
@@ -327,12 +327,23 @@ State definition admits only a finite set of host-neutral state kinds:
 | `def.state.string` | `string` | may describe the domain with metadata such as `options` |
 | `def.state.numberRange` | `number.range` | must declare `min` and `max` |
 | `def.state.numberDiscrete` | `number.discrete` | may describe the domain with metadata such as `min`, `max`, and `step` |
+| `def.state.numberList` | `number.list` | draft immutable dense finite-number snapshots |
 
 State values still stay within JSON-compatible value boundaries. State must not require functions, symbols, class instances, DOM objects, or other host objects to express its semantics.
 
 Metadata must also remain host-neutral. Enum options, number ranges, and steps are portable value-domain descriptions; they should not bind state semantics to a particular host control or host object.
 
-Value-domain validation is still a governance gap. The contracts define the value domains, but full validation for every definition, `setDefault`, and `set` call is not yet treated as an implemented guarantee.
+Legacy scalar value-domain validation remains a governance gap. The draft number.list extension requires complete validation at definition, setDefault, and set; it does not close that scalar debt.
+
+### Draft immutable number sequences
+
+`def.state.numberList(name, initial)` returns `OwnedStateHandle<readonly number[]>`. Each input is copied to a frozen internal snapshot. Empty arrays, duplicates and input order are preserved; -0 becomes +0. Only dense arrays of finite numbers with own data elements and no extra own properties are accepted. Holes, accessors, nested values, NaN and infinities are rejected. Ordinary getters are not evaluated. Cross-realm arrays and pure-data Array subclasses are normalized without retaining their prototype or class identity; caller arrays are never frozen.
+
+Equal normalized contents preserve the existing snapshot identity and emit no event. Changed writes record one complete immutable prev/next transition. The generic State kind does not sort, quantize or impose spacing. Existing phase, capability and lifecycle rules apply; mutation never renders implicitly.
+
+Exposed get/subscribe remains available on Web, without automatic data-attribute or CSS-variable projection. Scalar Rule eq does not support number.list. Copy with `[...state.get()]` when a mutable Context JSON value is required. Only values and descriptors have this JSON guarantee; StateSetReason remains unknown. Internal descriptors are copied/frozen; Adapter public clones have no new deep-freezing guarantee.
+
+This is the draft `C-STATE-NUMBER-LIST-0001` runtime surface. Compiler support is separate and is not implemented or implied by this extension.
 
 ## Watch and StateEvent
 
@@ -358,7 +369,7 @@ When a state value really changes from `prev` to `next`, watchers receive:
 { type: 'next', prev, next, reason? }
 ```
 
-If `Object.is(prev, next)` is true, the write is not an actual state change. `setDefault()` also does not dispatch `next`, because it only changes the default-value plan; it is not a runtime value transition.
+For legacy scalars, `Object.is(prev, next)` suppresses unchanged writes. For number.list, equal normalized length and per-item Object.is values suppress the write and retain the snapshot. `setDefault()` also does not dispatch `next`, because it only changes the default-value plan; it is not a runtime value transition.
 
 When lifecycle disconnects a watcher from a state slot during unmount or dispose, the watcher may receive:
 

@@ -1,0 +1,44 @@
+id: P-BASE-LABEL
+type: prototype
+title: Base Label is an independent explicitly associated control label
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The explicit bounded association direction has owning-layer and Web Adapter harness evidence. Stable admission remains blocked on independent review, complete native input/lifetime and assistive-technology evidence.
+summary: Naming and activation are separate; the target retains its state and action ownership.
+statement:
+  en: Base Label preserves authored content and opts into C-CONTROL-LABEL-0001 through the separately typed instance-association channel. It is independent of Checkbox, Switch, Radio and Text Control anatomy. It does not turn passive descriptions into actions.
+criteria:
+  - id: P-BASE-LABEL-ENTRIES
+    text:
+      en: Public /label and package-root entries expose labelRoot, asLabelRoot, LabelRootProps and LabelRootExposes. The direct Prototype and authored hook share one implementation.
+  - id: P-BASE-LABEL-OPTIONS
+    text:
+      en: JSON Props naming and activation default to true and false. Either can change independently; removal restores its default. Association identity is not a Prop and must use InstanceAssociations.controlLabel.
+  - id: P-BASE-LABEL-CONTENT
+    text:
+      en: The default slot preserves text and children, with no added role, Tab stop, keyboard action, checked value or outward value event. Long descriptions remain separate selectable content.
+  - id: P-BASE-LABEL-ACTION
+    text:
+      en: Only an explicitly actionable Label declares subject-local select-none. Pointer eligibility and target operation reuse follow C-CONTROL-LABEL-0001; no synthetic click or local value mutation is introduced.
+dependsOn:
+  contracts:
+    - C-CONTROL-LABEL-0001
+    - C-PROPS-0003
+    - C-AS-HOOK-0001
+verifies:
+  tests:
+    - T-CONTROL-LABEL-0001
+sources:
+  - path: packages/prototypes/base/src/label/root.proto.ts
+  - path: packages/prototypes/base/src/label/types.ts
+  - path: packages/prototypes/base/src/label/index.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added independent Label identity, separate naming/activation and typed association consumption without stable admission.
+tags:
+  - prototype
+  - base
+  - label
+  - accessibility

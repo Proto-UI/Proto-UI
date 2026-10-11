@@ -1,0 +1,21 @@
+---
+title: bootstrap-2-3-2 Form
+description: 可移植 form 原子草稿。
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 汇总显式 FormField，通过规范 Field 控件校验后才发出命名值快照 submit。禁用项被排除，重复名称拒绝序列化；异步校验等待当前结果，值变化、移除、取消及卸载撤销旧提交。Form disabled 同时传递到内部 Field。FormSubmit 与 FormReset 支持键盘/指针激活。聚焦的单行 Field、Number Field 和 OTP 编辑器支持隐式 Enter，排除组合输入、修饰键及重复 keydown。requestReset 恢复挂载初值，受控值仅向作者发提议，同时取消编辑和过期校验并发出 reset；resetValidation 只清理校验。不自动联网、原生导航或创建隐藏 HTML 表单项。
+
+四家族继承同一 Base 行为。部件： root, field, submit, reset.
+
+FormSubmit 与 FormReset 提供明确类型的 disabled、hovered、pressed、focused、focusVisible 及 focusSelf。Form 独立拥有唯一激活语义；四家投影复用各自既有 Button 的被动视觉规则，呈现焦点、悬停、按压和禁用反馈。
+
+当前为 Draft 源码阶段。原生、辅助技术、完整 Adapter/Compiler/GPUI、包消费及独立验收仍未完成，不据此勾选 Finf。

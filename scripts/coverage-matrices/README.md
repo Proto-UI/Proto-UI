@@ -1,6 +1,18 @@
 # Coverage matrix validation
 
+The independent prototype/projection portfolio is [documented here](../../internal/coverage-matrices/README.md). Validate its JSON/source/consumer links with `node scripts/coverage-matrices/prototype-coverage.mjs --check`; regenerate the readable view with `--write`. Its negative controls run with the existing test glob. This source inventory is separate from the Website/Harness runtime ownership checks below.
+
 `node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
+
+## Verified GPUI rows and portable native source proofs
+
+A GPUI row may be `verified` only when every mapped projection has a passing implementation receipt at that row's main/candidate snapshot revision, with no unresolved blockers, and the row has a passing HTTPS-linked native receipt at the same revision. Delivery-item completion reuses these gates; leaving the item unchecked does not relax row verification. Native and implementation receipt links must be strings with a parseable HTTPS URL, a nonempty host and no credentials; malformed authorities, whitespace/control characters and backslash normalization are rejected. This is URL syntax validation, not authentication of the linked native execution.
+
+Each implementation receipt retains `baseIdentity`, `projectionIdentity`, `revision`, `result`, `source` and nonempty `paths`, and now requires its own `sourceObjectProof`. Its shape is the existing self-verifying Git proof: `objectType` (`commit` or `tree`), `rootTree`, `commitBase64` for a commit only, and `trees` containing `{ sha, contentBase64 }` entries for every traversed tree. The receipt proof is separate from the Prototype candidate inventory proof; its path set does not expand or rewrite that inventory. `captureGitObjectProof(repoRoot, revision, paths)` in `prototype-coverage.mjs` can collect the proof from available Git objects. Capture creates source evidence only, never implementation or native acceptance.
+
+Validation recomputes commit/tree object hashes, binds the exact snapshot object/type, and resolves each allowed native/GPUI-peer source path to a regular Git blob. Historical main rows use that immutable proof rather than unrelated current file bytes. Candidate rows additionally require current source bytes to match the proven blob; missing files and symlinked path components fail closed. Proof validation does not invoke Git or require older objects in a shallow/offline checkout. A present worktree path, arbitrary revision-shaped string, missing proof, or a native receipt at another revision cannot verify a row.
+
+This tightens the admission shape for `verified` receipts. Existing `required-unassessed` rows need no new proof, and this change neither generates acceptance records nor changes portfolio counts. HTTPS receipt links and declared identity/scope still require independent review of actual native evidence: the checker does not fetch those URLs, authenticate an execution, prove semantic capability from source presence, or certify full GPUI parity.
 
 ## Static resource and dependency scope
 

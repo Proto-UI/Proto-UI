@@ -50,7 +50,7 @@ describe('collapsed Root role compatibility', () => {
   });
 
   it.each([undefined, false, true])(
-    'keeps WC shadow=%s Root on the host without activating Template style',
+    'keeps WC shadow=%s Root on the host without routing Template style as Root',
     async (shadow) => {
       const proto = definePrototype({
         name: `root-role-compat-${String(shadow)}`,
@@ -69,9 +69,11 @@ describe('collapsed Root role compatibility', () => {
         'consumer-token w-full bg-white flex translate-x-2'
       );
       const child = (el.shadowRoot ?? el).querySelector('span')!;
-      // Existing WC Template behavior: without a resolver, tw style is ignored.
+      // The accepted Template style carrier remains local to the Template node.
       // Root provenance must not accidentally enroll this child in Root delivery.
-      expect(child.getAttribute('data-pui-style')).toBeNull();
+      expect(child.getAttribute('data-pui-style')).toBe('w-4');
+      expect(child.hasAttribute('data-pui-split-root-style')).toBe(false);
+      expect(child.hasAttribute('data-pui-split-surface')).toBe(false);
       expect(child.getAttribute('style')).toBeNull();
       expect(child.hasAttribute('entries')).toBe(false);
       el.remove();

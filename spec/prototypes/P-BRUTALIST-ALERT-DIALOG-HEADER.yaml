@@ -1,0 +1,46 @@
+id: P-BRUTALIST-ALERT-DIALOG-HEADER
+type: prototype
+title: Neo-Brutalist AlertDialog Header is a passive text grouping part
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The existing AlertDialog header role permits a bounded passive presentation part. Independent review, cross-runtime visual evidence and a governed responsive layout input remain pending; upstream breakpoint parity is not admitted.
+  zh-CN: 既有 AlertDialog header role 允许有界被动样式部件。独立审查、跨 runtime 视觉证据与受治理响应式布局输入仍待完成；未准入上游断点一致性。
+summary: Optional slot-preserving text grouping using the existing AlertDialog anatomy role, without a new interaction owner.
+statement:
+  en: Header claims only the existing ALERT_DIALOG_FAMILY header role and presents authored Title and Description children. Its bounded static layout follows the desktop grouping of neobrutalism-components 3306a802 while retaining an explicit mobile breakpoint gap.
+  zh-CN: Header 仅声明既有 ALERT_DIALOG_FAMILY header role，并投射作者提供的 Title、Description 子项。有界静态布局遵循 neobrutalism-components 3306a802 的桌面分组，明确保留移动断点缺口。
+criteria:
+  - id: P-BRUTALIST-ALERT-DIALOG-HEADER-PASSIVE
+    text:
+      en: Export alertDialogHeader as brutalist-alert-dialog-header. Claim the existing header role and preserve the anonymous slot with empty Props and Exposes; do not own state, events, focus, open requests, accessibility control roles or Base behavior hooks.
+      zh-CN: 导出 alertDialogHeader，名称为 brutalist-alert-dialog-header。声明既有 header role，保留匿名 slot 与空 Props、Exposes；不拥有 state、event、focus、open request、可访问控件 role 或 Base behavior hook。
+  - id: P-BRUTALIST-ALERT-DIALOG-HEADER-LAYOUT
+    text:
+      en: Use a minimum-width-zero vertical flex group with gap-2 and left-aligned text. Title and Description retain their own font roles. No extra fill, border, shadow or state selector is added. This does not satisfy the upstream text-center below 640px requirement.
+      zh-CN: 使用 min-w-0 纵向 flex 分组、gap-2 与左对齐文本。Title、Description 保留各自字体职责。不增加 fill、border、shadow 或 state selector；此实现不满足上游 640px 以下 text-center 要求。
+  - id: P-BRUTALIST-ALERT-DIALOG-HEADER-COMPOSITION
+    text:
+      en: The reference demo groups Title and Description under this part; their accessibility relations and inherited AlertDialog ownership remain unchanged after grouping and reopen.
+      zh-CN: 参考 demo 在该部件内组合 Title 与 Description；分组与重新打开后仍保留其可访问关系及继承的 AlertDialog ownership。
+openQuestions:
+  - id: P-BRUTALIST-ALERT-DIALOG-HEADER-Q-RESPONSIVE
+    question: Which governed cross-host layout input and real rendering evidence will support the upstream 640px text-alignment switch?
+    blocks: ['activation:P-BRUTALIST-ALERT-DIALOG-HEADER']
+relates:
+  knowledge: [K-BRUTALIST-0001]
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-FEEDBACK-STYLE-0002, C-FEEDBACK-STYLE-0004]
+verifies:
+  tests: [T-BRUTALIST-ALERT-DIALOG-0001]
+sources:
+  - path: packages/prototypes/brutalist/src/alert-dialog/header.proto.ts
+  - path: packages/prototypes/base/src/alert-dialog/shared.ts
+  - path: packages/prototypes/brutalist/test/alert-dialog.test.ts
+  - path: packages/prototypes/brutalist/THIRD_PARTY_NOTICES.md
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/alert-dialog.tsx
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added passive text grouping with source-aligned desktop spacing and explicit responsive/visual acceptance debt.
+tags: [prototype, brutalist, alert-dialog, presentation]

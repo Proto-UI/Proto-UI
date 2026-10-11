@@ -34,6 +34,11 @@ export class TableStructureModuleImpl extends ModuleBase {
   private stopTargets: (() => void) | null = null;
   private readonly states: TableStructureStateHandles;
   private instanceIdentity: unknown | null = null;
+  private recomputeRevision = 0;
+  private membershipRevision = 0;
+  private projectionRevision = 0;
+  private projecting = false;
+  private pendingProjection: ((current: () => boolean) => void) | null = null;
 
   constructor(
     caps: ModuleFactoryArgs['caps'],
@@ -74,8 +79,16 @@ export class TableStructureModuleImpl extends ModuleBase {
 
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
-    if (phase !== 'unmounted') return;
-    this.release();
+    if (
+      phase === 'updated' &&
+      this.role &&
+      !Object.is(this.domainScope, this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY))
+    ) {
+      // A retained renderer can reparent the logical owner without another
+      // mount epoch. Revoke the old domain before publishing its new facts.
+      this.notifyRoot();
+    }
+    if (phase === 'unmounted') this.release();
   }
 
   dispose(): void {
@@ -83,6 +96,10 @@ export class TableStructureModuleImpl extends ModuleBase {
   }
 
   private release(): void {
+    this.recomputeRevision++;
+    this.membershipRevision++;
+    this.projectionRevision++;
+    this.pendingProjection = null;
     const oldRoot = this.domainScope === null ? null : rootsByDomain.get(this.domainScope);
     this.stopOrder?.();
     this.stopOrder = null;
@@ -137,7 +154,7 @@ export class TableStructureModuleImpl extends ModuleBase {
   }
 
   private bindDomain(): void {
-    if (!this.role) return;
+    if (!this.role || partsByInstance.get(this.instanceIdentity) !== this) return;
     const next = this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY);
     const previous = this.domainScope;
     const previousRoot = previous === null ? null : rootsByDomain.get(previous);
@@ -145,8 +162,21 @@ export class TableStructureModuleImpl extends ModuleBase {
       if (previous !== null && rootsByDomain.get(previous) === this) {
         rootsByDomain.delete(previous);
       }
-      this.clearProjection();
       this.domainScope = next;
+      const revision = ++this.membershipRevision;
+      this.clearProjection();
+      // Cleanup can call a host callback which rebinds this retained part again.
+      // The original old root still needs a current-inventory refresh.
+      if (
+        revision !== this.membershipRevision ||
+        !Object.is(this.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY), next)
+      ) {
+        // A retained renderer may defer its next updated phase while a host
+        // callback moves the part again. Re-read its actual logical ancestry.
+        this.bindDomain();
+        if (previousRoot && previousRoot !== this) previousRoot.recompute();
+        return;
+      }
     }
     if (next !== null) {
       const registered = rootsByDomain.get(next);
@@ -178,6 +208,18 @@ export class TableStructureModuleImpl extends ModuleBase {
       rootsByDomain.get(this.domainScope) !== this
     )
       return;
+    const revision = ++this.recomputeRevision;
+    const domain = this.domainScope;
+    const current = () =>
+      this.recomputeRevision === revision &&
+      this.mountPhase === 'mounted' &&
+      Object.is(this.domainScope, domain) &&
+      rootsByDomain.get(domain) === this;
+    const memberCurrent = (impl: TableStructureModuleImpl) => () =>
+      current() &&
+      Object.is(impl.domainScope, domain) &&
+      Object.is(impl.anatomy.resolveDomainScope(TABLE_STRUCTURE_FAMILY), domain) &&
+      partsByInstance.get(impl.instanceIdentity) === impl;
     const ordered = this.anatomy.order.parts(TABLE_STRUCTURE_FAMILY);
     const domainRecords = ordered
       .map((part) => ({ part, impl: this.readPart(part) }))
@@ -217,7 +259,6 @@ export class TableStructureModuleImpl extends ModuleBase {
       });
     }
 
-    for (const { impl } of domainRecords) impl.clearProjection();
     const next = projectTableStructure({
       root: this.a11y.getObjectRef(),
       captions: captions.map(({ impl }) => impl.a11y.getObjectRef()),
@@ -225,72 +266,148 @@ export class TableStructureModuleImpl extends ModuleBase {
       unmatchedCells,
       roleMismatches: roleMismatches.map(({ impl }) => impl.a11y.getObjectRef()),
     });
+    // Valid topology updates its current facts directly. Withdrawing every
+    // part first emits false invalid states on ordinary target notifications.
+    // Invalid topology still clears the whole previous semantic projection.
+    if (!current()) return;
     this.snapshot = next;
-    this.applyTable(next);
-    if (!next.valid) return;
+    if (!next.valid) {
+      for (const { impl } of domainRecords) {
+        if (!current()) return;
+        impl.clearProjection(memberCurrent(impl));
+      }
+    }
+    if (!current()) return;
+    this.applyTable(next, current);
+    if (!next.valid || !current()) return;
 
     const byRef = new Map(records.map(({ impl }) => [impl.a11y.getObjectRef(), impl]));
-    if (next.caption) byRef.get(next.caption)?.applyCaption(true);
+    const caption = next.caption ? byRef.get(next.caption) : undefined;
+    caption?.applyCaption(true, memberCurrent(caption));
     for (const row of next.rows) {
-      byRef.get(row.ref)?.applyRow(row.index);
-      for (const cell of row.cells) byRef.get(cell.ref)?.applyCell(cell);
+      if (!current()) return;
+      const rowImpl = byRef.get(row.ref);
+      rowImpl?.applyRow(row.index, memberCurrent(rowImpl));
+      for (const cell of row.cells) {
+        if (!current()) return;
+        const cellImpl = byRef.get(cell.ref);
+        cellImpl?.applyCell(cell, memberCurrent(cellImpl));
+      }
     }
   }
 
-  private clearProjection(): void {
+  /** Serialize writes for one part, including reentry from synchronous host
+   * attribute callbacks. A newer projection invalidates the old continuation;
+   * it runs only after the current external setter has completely returned. */
+  private project(write: (current: () => boolean) => void, live: () => boolean): void {
+    if (!live()) return;
+    this.projectionRevision++;
+    this.pendingProjection = (current) => write(() => current() && live());
+    if (this.projecting) return;
+    this.projecting = true;
+    try {
+      while (this.pendingProjection) {
+        const next = this.pendingProjection;
+        const revision = this.projectionRevision;
+        this.pendingProjection = null;
+        next(() => this.projectionRevision === revision);
+      }
+    } finally {
+      this.projecting = false;
+    }
+  }
+
+  private clearProjection(live: () => boolean = () => true): void {
     if (this.role === null) return;
-    this.applyRow(null);
-    this.applyCell(null);
-    if (this.role === 'root') this.applyTable(null);
-    else if (this.role === 'caption') this.applyCaption(false);
-    else if (this.role === 'row') this.applyRow(null);
-    else if (this.role === 'headerCell' || this.role === 'cell') this.applyCell(null);
+    this.project((current) => {
+      const set = (handle: Parameters<StatePort['set']>[0], value: string | number) => {
+        if (current()) this.state.set(handle, value, 'table.structure');
+      };
+      set(this.states.a11yRole, '');
+      set(this.states.row, 0);
+      set(this.states.column, 0);
+      set(this.states.rowSpan, 0);
+      set(this.states.columnSpan, 0);
+      for (const key of ['columnHeaders', 'rowHeaders', 'labelledBy'] as const) {
+        if (current()) this.a11y.setRelation(key, { target: [] });
+      }
+      if (this.role === 'root') {
+        set(this.states.rowCount, 0);
+        set(this.states.columnCount, 0);
+        if (current()) this.a11y.setRelation('caption', { target: [] });
+      }
+    }, live);
   }
 
-  private applyTable(snapshot: TableStructureSnapshot | null): void {
+  private applyTable(snapshot: TableStructureSnapshot | null, live: () => boolean): void {
     const valid = snapshot?.valid === true;
-    this.state.set(this.states.a11yRole, valid ? 'table' : '', 'table.structure');
-    this.state.set(this.states.rowCount, valid ? snapshot.rowCount : 0, 'table.structure');
-    this.state.set(this.states.columnCount, valid ? snapshot.columnCount : 0, 'table.structure');
-    this.a11y.setRelation('caption', {
-      target: valid && snapshot.caption ? [snapshot.caption] : [],
-    });
-    this.a11y.setRelation('labelledBy', {
-      target: valid && snapshot.caption ? [snapshot.caption] : [],
-    });
+    this.project((current) => {
+      if (current()) this.state.set(this.states.a11yRole, valid ? 'table' : '', 'table.structure');
+      if (current())
+        this.state.set(this.states.rowCount, valid ? snapshot.rowCount : 0, 'table.structure');
+      if (current())
+        this.state.set(
+          this.states.columnCount,
+          valid ? snapshot.columnCount : 0,
+          'table.structure'
+        );
+      if (current())
+        this.a11y.setRelation('caption', {
+          target: valid && snapshot.caption ? [snapshot.caption] : [],
+        });
+      if (current())
+        this.a11y.setRelation('labelledBy', {
+          target: valid && snapshot.caption ? [snapshot.caption] : [],
+        });
+    }, live);
   }
 
-  private applyCaption(active: boolean): void {
-    this.state.set(this.states.a11yRole, active ? 'caption' : '', 'table.structure');
+  private applyCaption(active: boolean, live: () => boolean): void {
+    this.project((current) => {
+      if (current())
+        this.state.set(this.states.a11yRole, active ? 'caption' : '', 'table.structure');
+    }, live);
   }
 
-  private applyRow(index: number | null): void {
-    this.state.set(this.states.a11yRole, index === null ? '' : 'row', 'table.structure');
-    this.state.set(this.states.row, index === null ? 0 : index + 1, 'table.structure');
+  private applyRow(index: number | null, live: () => boolean): void {
+    this.project((current) => {
+      if (current())
+        this.state.set(this.states.a11yRole, index === null ? '' : 'row', 'table.structure');
+      if (current())
+        this.state.set(this.states.row, index === null ? 0 : index + 1, 'table.structure');
+    }, live);
   }
 
-  private applyCell(snapshot: TableStructureCellSnapshot | null): void {
-    this.state.set(
-      this.states.a11yRole,
-      snapshot
-        ? snapshot.kind === 'column-header'
-          ? 'columnheader'
-          : snapshot.kind === 'row-header'
-            ? 'rowheader'
-            : 'cell'
-        : '',
-      'table.structure'
-    );
-    this.state.set(this.states.row, snapshot ? snapshot.row + 1 : 0, 'table.structure');
-    this.state.set(this.states.column, snapshot ? snapshot.column + 1 : 0, 'table.structure');
-    this.state.set(this.states.rowSpan, snapshot?.rowSpan ?? 0, 'table.structure');
-    this.state.set(this.states.columnSpan, snapshot?.columnSpan ?? 0, 'table.structure');
-    this.a11y.setRelation('columnHeaders', { target: snapshot?.columnHeaders ?? [] });
-    this.a11y.setRelation('rowHeaders', { target: snapshot?.rowHeaders ?? [] });
-    const labels = snapshot?.orderedHeaders ?? [];
-    this.a11y.setRelation('labelledBy', {
-      target: snapshot && labels.length > 0 ? [...labels, snapshot.ref] : [],
-    });
+  private applyCell(snapshot: TableStructureCellSnapshot | null, live: () => boolean): void {
+    this.project((current) => {
+      if (current())
+        this.state.set(
+          this.states.a11yRole,
+          snapshot
+            ? snapshot.kind === 'column-header'
+              ? 'columnheader'
+              : snapshot.kind === 'row-header'
+                ? 'rowheader'
+                : 'cell'
+            : '',
+          'table.structure'
+        );
+      if (current())
+        this.state.set(this.states.row, snapshot ? snapshot.row + 1 : 0, 'table.structure');
+      if (current())
+        this.state.set(this.states.column, snapshot ? snapshot.column + 1 : 0, 'table.structure');
+      if (current()) this.state.set(this.states.rowSpan, snapshot?.rowSpan ?? 0, 'table.structure');
+      if (current())
+        this.state.set(this.states.columnSpan, snapshot?.columnSpan ?? 0, 'table.structure');
+      if (current())
+        this.a11y.setRelation('columnHeaders', { target: snapshot?.columnHeaders ?? [] });
+      if (current()) this.a11y.setRelation('rowHeaders', { target: snapshot?.rowHeaders ?? [] });
+      const labels = snapshot?.orderedHeaders ?? [];
+      if (current())
+        this.a11y.setRelation('labelledBy', {
+          target: snapshot && labels.length > 0 ? [...labels, snapshot.ref] : [],
+        });
+    }, live);
   }
 }
 

@@ -1,0 +1,84 @@
+id: P-BRUTALIST-COLLAPSIBLE
+type: prototype
+title: brutalist Collapsible Root inherits Base disclosure semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft implementation projection pending exact-source native browser evidence, independent review and explicit stable admission. Base draft dependencies remain draft.
+  zh-CN: 实现投影保留 draft，等待精确源码 native browser evidence、独立审查与明确稳定准入；Base draft 依赖仍是 draft。
+summary: brutalist presentation over independent Base Collapsible root.
+statement:
+  zh-CN: brutalist root 直接消费 asCollapsibleRoot，完整保留 Base root 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。 固定设计参考的 Collapsible primitives 本来 unstyled；当前 host 表面与间距是明确的 Proto UI 差异，不依赖参考 runtime。
+  en: The brutalist root directly consumes asCollapsibleRoot and retains the full Base root protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries. The pinned design-reference Collapsible primitives are unstyled; current host surfaces and spacing are declared Proto UI deltas, not reference-runtime dependencies.
+criteria:
+  - id: P-BRUTALIST-COLLAPSIBLE-BASE-INHERITANCE
+    text:
+      en: The brutalist root directly consumes asCollapsibleRoot and retains the full Base root protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries.
+      zh-CN: brutalist root 直接消费 asCollapsibleRoot，完整保留 Base root 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。
+  - id: P-BRUTALIST-COLLAPSIBLE-DIRECT-ENTRY
+    text:
+      en: Expose brutalist-collapsible-root through @proto.ui/prototypes-brutalist/collapsible with unchanged Base props and exposes. Private workspace packages must not be represented as registry-published.
+      zh-CN: 从 @proto.ui/prototypes-brutalist/collapsible 提供 brutalist-collapsible-root，保留 Base props/exposes；private workspace package 不得表述为 registry 已发布。
+  - id: P-BRUTALIST-COLLAPSIBLE-VISUAL-SAFETY
+    text:
+      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height. Root reserves right and bottom space equal to the Trigger translation so hover/press does not enlarge Root scroll bounds; retain the existing transparent hit envelope rather than clipping it.
+      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。 Root 在右侧和底部保留与 Trigger translation 等量的空间，避免 hover/press 扩大 Root scroll bounds；保留现有透明 hit envelope，不以裁切掩盖它。
+openQuestions:
+  - id: P-BRUTALIST-COLLAPSIBLE-Q-ADMISSION
+    question:
+      en: When do complete source-bound host evidence and independent review justify stable admission?
+      zh-CN: 何时由完整源码绑定宿主证据与独立审查支持稳定准入？
+    blocks:
+      - activation:P-BRUTALIST-COLLAPSIBLE
+sources:
+  - path: packages/prototypes/brutalist/src/collapsible/root.proto.ts
+  - path: packages/prototypes/brutalist/src/collapsible/types.ts
+  - path: packages/prototypes/brutalist/src/collapsible/index.ts
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/collapsible.tsx
+    label: Design reference only; not Proto UI semantic authority or an implementation dependency
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-COLLAPSIBLE
+verifies:
+  tests:
+    - T-COLLAPSIBLE-PROJECTIONS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the direct family projection with complete Base inheritance, safe layout, source/package boundaries and explicitly unexecuted native/material evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Reserve scalable Trigger displacement after exact-source native evidence measured 8px Root overflow at 200% root text size.
+tags:
+  - prototype
+  - brutalist
+  - collapsible
+  - root
+  - draft
+  - projection
+anatomy:
+  family: base-collapsible
+  roles:
+    root:
+      cardinality:
+        min: 1
+        max: 1
+    trigger:
+      cardinality:
+        min: 1
+        max: 1
+    content:
+      cardinality:
+        min: 1
+        max: 1
+  relations:
+    - kind: contains
+      parent: root
+      child: trigger
+    - kind: contains
+      parent: root
+      child: content

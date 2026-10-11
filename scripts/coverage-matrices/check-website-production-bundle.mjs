@@ -2,9 +2,22 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
+// Build-time source evaluation must never be shipped as a browser fallback.
+// Runtime modules already owned by real Adapters retain their existing rules;
+// these exact prerender/stylesheet-compiler roots have no browser owner.
+const SERVER_ONLY_PRERENDER_MODULES = new Set([
+  'apps/www/src/components/snapshot-prototype-style.ts',
+  'apps/www/src/components/site-startup-paint.ts',
+  'packages/cli/src/services/proto-style-css.ts',
+]);
 const DEFAULT_GRAPH_PATH = 'apps/www/dist/proto-ui-bundle-graph.json';
 const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
+  // Private full-Card producer; normal Library roots must not reach its material entry.
+  'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/new-projection-families.astro?astro&type=script&index=0&lang.ts',
+  // The #808 route renders its actual eight Base-derived parts through the
+  // reviewed demo-renderer and keeps React/Vue/Vue2 in dynamic runtime edges.
+  'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-material.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/HomeDemoPreviewer.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/components/PrototypePreviewer/PrototypePreviewer.astro?astro&type=script&index=0&lang.ts',
@@ -18,6 +31,10 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
 // Sitewide runtime consumers are admitted as exact entry/owner pairs, never
 // by a directory, filename prefix, or arbitrary reachability to shared chunks.
 const REVIEWED_SITE_RUNTIME_OWNERS = new Map([
+  [
+    'apps/www/src/components/UiLibraryGallery.astro?astro&type=script&index=0&lang.ts',
+    'apps/www/src/components/library-card-client.ts',
+  ],
   [
     'apps/www/src/components/Homepage/HomepageRuntime.astro?astro&type=script&index=0&lang.ts',
     'apps/www/src/components/Homepage/homepage-runtime-client.ts',
@@ -66,6 +83,7 @@ const REVIEWED_WEBSITE_CONTROL_MODULE = 'apps/www/src/components/site-shadcn-con
 // Existing exact source owners in WEBSITE_RAW_IMPORT_ALLOWLIST. Native links
 // have their own Surface/Text WC bridge; neither boundary admits React/Vue.
 const REVIEWED_WEBSITE_CONTROL_APIS = new Set([
+  'apps/www/src/components/library-card-client.ts',
   REVIEWED_WEBSITE_CONTROL_MODULE,
   'apps/www/src/components/site-native-controls.ts',
 ]);
@@ -76,6 +94,8 @@ const REVIEWED_WEBSITE_CONTROL_APIS = new Set([
 const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/events/web-default-action.ts',
   'packages/adapters/base/src/events/web-event-router.ts',
+  // The existing router owns this finite sample cell; it imports no optical renderer.
+  'packages/adapters/base/src/events/pointer-contact.ts',
   'packages/adapters/base/src/gate/event-gate.ts',
   'packages/adapters/base/src/gestures/web-move-gesture-host.ts',
   'packages/adapters/base/src/host/adapter-host.ts',
@@ -98,6 +118,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/base/src/wiring/caps-builder.ts',
   'packages/adapters/base/src/wiring/host-wiring.ts',
   'packages/adapters/web-component/src/adapt.ts',
+  // Rebindable provider imported only by the reviewed public WC adapt entry.
+  'packages/adapters/web-component/src/color-scheme-source.ts',
   'packages/adapters/web-component/src/commit.ts',
   'packages/adapters/web-component/src/debug/hooks.ts',
   'packages/adapters/web-component/src/feedback-style.ts',
@@ -117,8 +139,8 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/slot-projector.ts',
   'packages/adapters/web-component/src/style.ts',
   'packages/adapters/web-component/src/types.ts',
-  // Merged #652 host resources; exact WC closure only, not shell import APIs.
-  'packages/adapters/web-component/src/color-scheme-source.ts',
+  // Current public WC entry's exact portal, Meta and Shadow profile helpers.
+  'packages/adapters/base/src/platform/portal-direction.ts',
   'packages/adapters/web-component/src/focus-scope-targets.ts',
   'packages/adapters/web-component/src/keyed-meta-sources.ts',
   'packages/adapters/web-component/src/portal-conceal.ts',
@@ -335,6 +357,15 @@ export function collectWebsiteProductionBundleIssues({
     }
   }
 
+  for (const chunk of chunks) {
+    for (const moduleId of chunk.moduleIds ?? []) {
+      if (SERVER_ONLY_PRERENDER_MODULES.has(moduleIdWithoutQuery(moduleId)))
+        issues.push(
+          `server-only prerender module \`${moduleId}\` leaked into client chunk \`${chunk.fileName}\``
+        );
+    }
+  }
+
   const approvedDemoRoots = chunks.filter(
     (chunk) =>
       (chunk.isEntry || chunk.isDynamicEntry) &&
@@ -489,6 +520,32 @@ export function collectWebsiteProductionBundleIssues({
       'imports',
       'dynamicImports',
     ]);
+    if (
+      demoRoot.facadeModuleId ===
+      'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts'
+    ) {
+      const modules = [...completeClosure]
+        .flatMap((fileName) => chunksByFileName.get(fileName)?.moduleIds ?? [])
+        .map(moduleIdWithoutQuery);
+      if (
+        !modules.includes('apps/www/src/components/library-liquid-card-client.ts') ||
+        !modules.includes('apps/www/src/components/library-liquid-scene.ts') ||
+        !modules.some(isWebComponentAdapterModule)
+      )
+        issues.push(
+          'private Liquid Card entry requires its exact client, owned scene and actual WC Adapter'
+        );
+      if (
+        runtimeFamilyModulesInClosure(chunksByFileName, demoRoot.fileName, [
+          'imports',
+          'dynamicImports',
+        ]).size > 0
+      )
+        issues.push(
+          'private Liquid Card producer admits only WC; framework expansion requires separate review'
+        );
+      continue;
+    }
     for (const family of dynamicAdapterFamilies) {
       const owners = dynamicRuntimeChunksForFamily(chunks, family);
       if (!owners.some((owner) => completeClosure.has(owner.fileName))) {

@@ -88,6 +88,12 @@ export interface StateDefAPI {
     spec: NumberRangeStateDefineSpec
   ): OwnedStateHandle<number>;
 
+  /** Draft immutable finite-number snapshots; empty values and duplicates are valid. */
+  numberList(
+    semantic: string,
+    defaultValue: readonly number[]
+  ): OwnedStateHandle<readonly number[]>;
+
   numberDiscrete(
     semantic: string,
     defaultValue: number,

@@ -27,5 +27,8 @@ export const BrutalistSeparatorRoot = definePrototype<
       when: (w) => w.state(orientation).eq('vertical'),
       intent: (i) => i.feedback.style.use(tw('h-full w-0.5')),
     });
+    // P-BASE-SEPARATOR-CONTENTLESS: hook composition does not install the
+    // caller's renderer, so this projection must discard authored descendants.
+    return () => null;
   },
 });

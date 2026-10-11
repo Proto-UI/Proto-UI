@@ -1,0 +1,21 @@
+---
+title: 'Toolbar'
+description: '带可访问名称、分隔线及键盘游走操作的工具栏。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+带可访问名称、分隔线及键盘游走操作的工具栏。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-toolbar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 管理 disabled、orientation、loop、a11yLabel。Button 激活时发出带 value 的 action。仅一个启用命令参与 Tab；箭头在工具栏内移动。Separator 沿交叉轴显示。
+
+组成: Root, Button, Separator.
+
+草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。

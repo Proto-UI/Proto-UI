@@ -1,0 +1,21 @@
+---
+title: 'ToggleGroup'
+description: '带游走焦点的单选或多选按下状态组。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+带游走焦点的单选或多选按下状态组。
+
+<PrototypePreviewer
+  demoId="demo-shadcn-toggle-group"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+value/defaultValue 为数组。multiple=false 最多保留一个值，再次点击可以清除。受控 valueChange 不修改调用方状态。禁用、只读以及重复值选项不能提交；箭头导航仅移动焦点。
+
+组成: Root, Item.
+
+草稿源码；native/GPUI、编译器、打包消费、截图及完整独立验收仍待完成。

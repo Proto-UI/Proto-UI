@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import type { AsHookCaller, ExposeEvent, ExposeOf, Prototype } from '@proto.ui/core';
 import type { ProtoAdapterExposes } from '@proto.ui/adapter-base';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -32,6 +33,8 @@ type ReactPortableProps<TProto extends ProtoLike> =
     : never;
 
 export type ProtoReactProps<TProto extends ProtoLike> = ReactPortableProps<TProto> & {
+  instanceAssociations?: InstanceAssociations;
+  dir?: 'ltr' | 'rtl' | 'auto';
   children?: any;
   className?: string;
   hostClassName?: string;

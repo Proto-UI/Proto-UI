@@ -1,0 +1,128 @@
+{
+  "baseline": "f8c86392a340978d30e7e9e05602e51ab1e6ff67",
+  "layer": "CLI static collector after repaired runtime Prototype registration",
+  "result": "failed",
+  "rows": [
+    {
+      "family": "shadcn",
+      "component": "carousel",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "shadcn",
+      "component": "tree",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "shadcn",
+      "component": "message-scroller",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "shadcn",
+      "component": "data-table",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "shadcn",
+      "component": "date-picker",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "brutalist",
+      "component": "carousel",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "brutalist",
+      "component": "tree",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "brutalist",
+      "component": "message-scroller",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "brutalist",
+      "component": "data-table",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "brutalist",
+      "component": "date-picker",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "component": "carousel",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "component": "tree",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "component": "message-scroller",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "component": "data-table",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "component": "date-picker",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "liquid-glass",
+      "component": "carousel",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "liquid-glass",
+      "component": "tree",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "liquid-glass",
+      "component": "message-scroller",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "liquid-glass",
+      "component": "data-table",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    },
+    {
+      "family": "liquid-glass",
+      "component": "date-picker",
+      "conditional": [],
+      "missing": ["data-[disabled]:opacity-50", "data-[focus-visible]:ring-2"]
+    }
+  ],
+  "limit": "No Compiler or CLI semantic interpretation source edited. Native/browser/packed/compiled acceptance not established."
+}

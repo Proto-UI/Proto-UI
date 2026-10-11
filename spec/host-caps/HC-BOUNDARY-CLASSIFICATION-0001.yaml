@@ -13,6 +13,10 @@ criteria:
     text:
       en: 'The bounded Web bridge recognizes Node regions, physical parents, shadow-root hosts and explicit linked Proto parents with cycle protection. Non-Node samples, empty regions and unresolved regions remain unknown unless another region proves inside. This is host evidence, not author-side DOM containment policy.'
       zh-CN: '有界 Web bridge 识别 Node region、physical parent、shadow-root host 与显式 linked Proto parent，并保护循环。非 Node sample、空 regions 与未解析 region 保持 unknown，除非其他 region 证明 inside。这是宿主证据，不是作者侧 DOM containment policy。'
+  - id: HC-BOUNDARY-CLASSIFICATION-0001-C
+    text:
+      en: 'An optional sampleFocus method proves a current focus destination without installing native listeners. The Web bridge consumes focusin, resolves open-shadow current active elements, and rejects stale or unproven targets. Missing support emits no focus sample and Boundary reports an unavailable-host diagnostic. No native/Compiler backend is implied by the Web implementation.'
+      zh-CN: '可选 sampleFocus 方法在不安装 native listener 的前提下证明当前焦点目标。Web bridge 消费 focusin，解析 open-shadow 当前 active element，拒绝过期或无法证明的 target。缺少支持时不发布 focus sample，Boundary 给出宿主不可用诊断。Web 实现不暗示 Native/Compiler backend 支持。'
 dependsOn:
   contracts: [C-BOUNDARY-0001]
 verifies:
@@ -25,3 +29,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged the bounded Boundary slice and executable evidence.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added optional current-focus proof for Event-transported focusin with explicit unsupported-host behavior.

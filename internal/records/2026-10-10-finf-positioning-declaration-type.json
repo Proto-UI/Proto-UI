@@ -1,0 +1,108 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "identityLimitation": "This role declaration is not authenticated model identity, permission, independent review, or acceptance.",
+  "recordedAt": "2026-10-10T09:46:21Z",
+  "baseline": "60e94b0ebbf0ef94a1fa41d6f954a6c7f0bfd062",
+  "precedingIndependentFix": "72e8542eba8628fcb27238a58f37530d6c7e64c5",
+  "phase": "Independent follow-up after frozen fifth batch; no change to the frozen batch or its acceptance.",
+  "change": "Explicitly annotate the host factory return as { anchor: InputOriginAnchor; dispose(): void }. This names the existing public opaque type instead of forcing declaration emit to expand its private unique-symbol brand. Core branding, factory implementation, revocation and geometry stay unchanged.",
+  "authority": [
+    "C-ANCHORED-POSITIONING-0001-H (draft)",
+    "HC-ANCHORED-POSITION-0001-A/B (draft)",
+    "T-ANCHORED-POSITIONING-0001-CASE-INPUT-ORIGIN (draft)",
+    "packages/core/src/context-menu-input.ts existing public InputOriginAnchor"
+  ],
+  "validation": [
+    {
+      "command": "node scripts/build/public-packages.mjs --package @proto.ui/module-positioning",
+      "before": {
+        "exitCode": 1,
+        "diagnostic": "TS4058: inferred exported return uses private inputOriginAnchorBrand from the worktree own core dist."
+      },
+      "after": {
+        "exitCode": 0,
+        "builtPublicPackages": 6,
+        "availablePublicPackages": 47,
+        "positioningOutputFiles": 22
+      },
+      "note": "Real dependency closure and each public package JavaScript import smoke passed; no stale primary core dist used."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/modules/positioning/test",
+      "before": "New declaration regression failed with TS4058 against the unchanged baseline source.",
+      "after": "9 files, 54/54 passed; includes in-memory declaration emit, host geometry, opacity, revocation, lease generations and input admission."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec vitest run packages/adapters/react/test/positioning.integration.test.ts packages/adapters/vue/test/positioning.integration.test.ts packages/adapters/vue2/test/positioning.integration.test.ts packages/adapters/web-component/test/positioning.integration.test.ts packages/runtime/test/contract/overlay.v0.contract.test.ts packages/prototypes/base/test/hover-card.test.ts",
+      "after": "6 files, 24/24 passed. Simulated DOM evidence only."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 -s check:types",
+      "after": {
+        "exitCode": 0,
+        "astroFiles": 794,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 10
+      },
+      "note": "Final combined candidate; unchanged existing hints retained."
+    },
+    {
+      "command": "TypeScript transpileModule at ES2022/module ES2022 compared with baseline",
+      "result": "Factory emitted JavaScript is byte-identical, SHA-256 5e1828661e4a33f52600d34d2104ee3aec8760834345fa24e2ea856604950384."
+    }
+  ],
+  "environment": {
+    "node": "24.19.0",
+    "pnpm": "10.32.1",
+    "typescript": "5.9.3",
+    "ASTRO_TELEMETRY_DISABLED": "1",
+    "COREPACK_ENABLE_NETWORK": "0",
+    "dependencyIsolation": "Disposable node_modules scaffolds point all project packages to this worktree; no primary/snapshot dependency or source modification."
+  },
+  "evidenceBundle": "finf-post-freeze-fix-evidence (raw retained logs; archive alongside the publication handoff)",
+  "evidenceFiles": [
+    {
+      "file": "positioning-before.log",
+      "sha256": "97deaa5f4e5ffb737d593a28f4ed84c9ec27a07f5ba094662c6b60e885d2ec75"
+    },
+    {
+      "file": "positioning-focused-before.log",
+      "sha256": "284a5800a25bf37a1dd205709d14e5d9b76675a1670cd16fc5646f489627b018"
+    },
+    {
+      "file": "positioning-tests-after.log",
+      "sha256": "6f91a6d0aea0966411fbae56949f9d1a44cbe2b10aa1185de22c8a0564fdb101"
+    },
+    {
+      "file": "positioning-after-public-build.log",
+      "sha256": "6497837cb35a86fae2f52390a3051f9f7d1a802362ac84e73277c579d635e579"
+    },
+    {
+      "file": "positioning-integration-after.log",
+      "sha256": "b351628621640b3894d51d378ede603688594e3af8efb58403bb4de397a542a5"
+    },
+    {
+      "file": "positioning-runtime-equivalence.json",
+      "sha256": "cf0f3e9ec9c1c7f3cd663e2fa4544d380fe59e825643891ca55f36ddeb82b02d"
+    },
+    {
+      "file": "input-origin-anchor.d.ts",
+      "sha256": "e3618083a845aa31ef54da068f30c013f66e74b3eddf4a40b0e67b5af031e943"
+    },
+    {
+      "file": "final-official-types.log",
+      "sha256": "b8f0df121e27af75bc68873d1c6ffb09c2ecf5cf6bd9ead96be3d62020d776a2"
+    },
+    {
+      "file": "validated-source-hashes.json",
+      "sha256": "ff6f4c703c901e2167991b278ea9fef62ffdc9664b7aad2f93e14b2ea3a8eac3"
+    }
+  ],
+  "limits": [
+    "No core branding, compiler, IR, CLI semantics, Focus, Runtime, session or delay implementation edits.",
+    "No native/browser screenshot, production deployment, push, PR comment or merge.",
+    "No full CI, independently reviewed admission or complete Finf acceptance claim."
+  ]
+}

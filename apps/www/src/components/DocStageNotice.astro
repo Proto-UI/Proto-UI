@@ -8,7 +8,7 @@ const { title, body } = Astro.props;
 ---
 
 <aside class="doc-stage-notice" role="note" aria-label={title}>
-  <p class="doc-stage-notice__title">{title}</p>
+  <p class="doc-stage-notice__title" data-site-typography="notice-title">{title}</p>
   <p class="doc-stage-notice__body">{body}</p>
 </aside>
 
@@ -27,16 +27,16 @@ const { title, body } = Astro.props;
   }
 
   .doc-stage-notice__title {
-    font-size: 0.98rem;
-    line-height: 1.35;
+    font-size: 1rem;
+    line-height: 1.625;
     font-weight: 600;
     color: var(--color-foreground);
   }
 
   .doc-stage-notice__body {
     margin-top: 0.35rem;
-    font-size: 0.92rem;
-    line-height: 1.55;
-    color: color-mix(in oklch, var(--color-foreground) 82%, var(--color-muted-foreground) 18%);
+    font-size: 1rem;
+    line-height: 1.625;
+    color: var(--color-foreground);
   }
 </style>

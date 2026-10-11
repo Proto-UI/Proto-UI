@@ -1,0 +1,40 @@
+id: P-BASE-FIELD-DESCRIPTION
+type: prototype
+title: Base Field description
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: Finf Field 的 draft 契约及投影。稳定准入仍需独立审查、精确 head 的原生输入、辅助技术、视觉/材质与 GPUI 证据；synthetic DOM 测试不建立这些保证。
+  en: Draft Finf Field contract and projections. Stable admission requires independent review and exact-head
+    native input, assistive technology, visual/material and GPUI evidence; synthetic DOM checks do not
+    establish those guarantees.
+summary: Governed atomic Field description and public authoring entry.
+statement:
+  zh-CN: The description realizes its exact part of C-FIELD-0001, without a second state owner or host escape.
+  en: The description realizes its exact part of C-FIELD-0001, without a second state owner or host escape.
+criteria:
+  - id: P-BASE-FIELD-DESCRIPTION-SEMANTICS
+    text:
+      zh-CN: Implements C-FIELD-0001-PARTS, C-FIELD-0001-RELATIONS for the description atom; preserves its
+        documented JSON Props, exposes and lifecycle.
+      en: Implements C-FIELD-0001-PARTS, C-FIELD-0001-RELATIONS for the description atom; preserves its documented
+        JSON Props, exposes and lifecycle.
+dependsOn:
+  contracts:
+    - C-FIELD-0001
+  prototypes:
+    - P-BASE-FIELD
+verifies:
+  tests:
+    - T-BASE-FIELD-0001
+sources:
+  - path: packages/prototypes/base/src/field/description.proto.ts
+  - path: packages/prototypes/base/src/field/types.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the independent Field atom with explicit source and native evidence boundaries.
+tags:
+  - prototype
+  - base
+  - field

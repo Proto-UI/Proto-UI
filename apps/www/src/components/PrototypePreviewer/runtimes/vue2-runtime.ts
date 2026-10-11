@@ -1,6 +1,10 @@
+import runtimeUrls from 'virtual:proto-ui/runtime-retry-urls';
+import { retryableModule } from './retryable-module';
 import type { RuntimeAPI } from './ids';
 import type { Vue2Runtime as AdapterVue2Runtime } from '@proto.ui/adapter-vue2';
 import { claimHostMount, releaseHostMount } from './host-mount';
+
+const vue2Module = retryableModule(() => import('vue2-runtime'), runtimeUrls.vue2);
 
 // The same pinned Vue 2.6.14 implementation is served by the application's
 // lazy asset graph, not an external CDN needed for each reader's mount.
@@ -13,7 +17,7 @@ type Vue2Constructor = {
 };
 
 export async function loadVue2(): Promise<Vue2Constructor> {
-  const mod = (await import('vue2-runtime')) as any;
+  const mod = (await vue2Module()) as any;
   return (mod.default ?? mod) as Vue2Constructor;
 }
 
@@ -35,7 +39,13 @@ type Vue2ComponentData = {
   style?: unknown;
 };
 
-const DECLARED_HOST_PROPS = new Set(['hostClass', 'surfaceClass', 'hostStyle', 'surfaceStyle']);
+const DECLARED_HOST_PROPS = new Set([
+  'hostClass',
+  'surfaceClass',
+  'hostStyle',
+  'surfaceStyle',
+  'instanceAssociations',
+]);
 
 export function toVue2ComponentData(input: Record<string, unknown> = {}): Vue2ComponentData {
   const props: Record<string, unknown> = {};

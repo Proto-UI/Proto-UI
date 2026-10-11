@@ -4,8 +4,7 @@
    is simulated. Each selector stops owning paint on successful enhancement. */
 .proto-previewer__skeleton,
 .site-header:not([data-site-menu-ready]) .site-header-runtime-placeholder,
-[data-site-select-root]:not([data-site-shadcn-initialized='1']) [data-site-select-trigger],
-.site-header:not([data-site-menu-ready]) [data-site-header-fallback-summary] {
+[data-site-select-root]:not([data-site-shadcn-initialized='1']) [data-site-select-trigger] {
   box-sizing: border-box;
   border: var(--site-surface-border-width, 1px) solid var(--color-border);
   border-radius: var(--site-surface-radius, var(--pui-radius-md));

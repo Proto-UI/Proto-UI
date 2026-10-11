@@ -70,7 +70,7 @@ function preferredRuntime(
 /**
  * Mount a cataloged demo as one fixed-family projection generation.
  *
- * Runtime selection is rendered by that family's Select Prototype and a
+ * Runtime selection is rendered by that family's controlled Tabs Prototypes and a
  * switch rematerializes both the control and child recipe atomically. Family
  * and component coordinates are intentionally fixed by the caller.
  */
@@ -229,6 +229,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   const controls = (): ProjectionCompositionControls => ({
     runtime: {
       label: 'Runtime',
+      presentation: 'tabs',
       options: runtimeList.map((runtimeId) => ({
         value: runtimeId,
         label: RUNTIME_LABELS[runtimeId],

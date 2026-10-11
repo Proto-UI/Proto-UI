@@ -56,6 +56,14 @@ cases:
       - A-VUE-2-0001-J
       - A-WEB-COMPONENT-0001-J
     expectation: state-mutation-does-not-render-until-adapter-update
+  - id: T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+    title: Public list source identity, capabilities, phases and scalar Rule refusal
+    covers:
+      - C-STATE-NUMBER-LIST-0001-E
+      - C-STATE-NUMBER-LIST-0001-F
+    expectation: number-list-views
+    notes:
+      - Module, Runtime and four Web Adapter tests cover immutable reads/subscriptions and no automatic scalar projection. Browser paint, native hosts and Compiler remain outside this evidence.
 implementations:
   - id: module-state-boundary-types
     kind: workspace-check
@@ -150,6 +158,64 @@ implementations:
     consumesCases:
       - T-STATE-0005-CASE-INSTANCE-LIFETIME
       - T-STATE-0005-CASE-EXPLICIT-RENDER
+  - id: runtime-state-number-list
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/state-number-list.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: state-number-list-types
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/state-number-list.type-test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+    notes:
+      - Readonly values, external mutation refusal and scalar eq refusal only; not host evidence.
+  - id: number-list-port
+    kind: module-test
+    status: passing
+    path: packages/modules/state/test/port.v0.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: number-list-web-projection
+    kind: module-test
+    status: passing
+    path: packages/modules/expose-state-web/test/catalog-boundary.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: number-list-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/contract/state-number-list.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: number-list-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/contract/state-number-list.contract.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: number-list-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/state-number-list.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
+  - id: number-list-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/state-number-list.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0005-CASE-NUMBER-LIST-VIEWS
 verifies:
   modules:
     - id: M-STATE-0001
@@ -176,6 +242,12 @@ verifies:
     - id: A-WEB-COMPONENT-0001
       anchors:
         - A-WEB-COMPONENT-0001-J
+  contracts:
+    - id: C-STATE-NUMBER-LIST-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - C-STATE-NUMBER-LIST-0001-E
+        - C-STATE-NUMBER-LIST-0001-F
 exercises:
   contracts:
     - id: C-STATE-0001
@@ -201,4 +273,7 @@ revisions:
   - version: 0.2.0-rc.7
     change: introduced
     summary: Added State Module, required official Adapter support, no-host-cap, explicit-render, capability-view, compatibility-bridge, and instance-lifecycle conformance mappings.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped draft number.list runtime evidence with bounded host claims.
 tags: [state, module, adapter, lifecycle, conformance]

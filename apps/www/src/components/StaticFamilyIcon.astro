@@ -1,0 +1,54 @@
+---
+import StaticLucideIcon from './StaticLucideIcon.astro';
+
+interface Props {
+  family?: 'base' | 'shadcn' | 'lucide' | 'brutalist' | 'bootstrap-2-3-2' | 'liquid-glass';
+  name: 'arrow-right' | 'arrow-up-right';
+  size?: string;
+}
+const { family = 'base', name, size = '1em' } = Astro.props;
+const lucide = family === 'base' || family === 'shadcn' || family === 'lucide';
+// Original website artwork, not Glyphicons, SF Symbols, or other official assets.
+// Compact filled Bootstrap, squared heavy Brutalist, softly rounded Liquid Glass.
+const bootstrap = family === 'bootstrap-2-3-2';
+const brutalist = family === 'brutalist';
+const path = bootstrap
+  ? name === 'arrow-right'
+    ? 'M3 10h12V6l7 6-7 6v-4H3z'
+    : 'M6 3h15v15h-4V10L6 21l-3-3L14 7H6z'
+  : name === 'arrow-right'
+    ? 'M4 12h15M12 5l7 7-7 7'
+    : 'M5 19 19 5M6 5h13v13';
+---
+
+{
+  lucide ? (
+    <StaticLucideIcon name={name} size={size} inline />
+  ) : (
+    <svg
+      class="static-family-icon"
+      data-icon-family={family}
+      style={{ '--family-icon-size': size }}
+      viewBox="0 0 24 24"
+      fill={bootstrap ? 'currentColor' : 'none'}
+      stroke={bootstrap ? 'none' : 'currentColor'}
+      stroke-width={brutalist ? 3 : 2.25}
+      stroke-linecap={brutalist ? 'square' : 'round'}
+      stroke-linejoin={brutalist ? 'miter' : 'round'}
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d={path} />
+    </svg>
+  )
+}
+
+<style>
+  .static-family-icon {
+    display: inline-block;
+    flex: none;
+    vertical-align: -0.125em;
+    width: var(--family-icon-size);
+    height: var(--family-icon-size);
+  }
+</style>

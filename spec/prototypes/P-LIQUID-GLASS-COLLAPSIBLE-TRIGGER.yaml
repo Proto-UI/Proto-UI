@@ -1,0 +1,75 @@
+id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+type: prototype
+title: liquid-glass Collapsible Trigger inherits Base disclosure semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft implementation projection pending exact-source native browser evidence, independent review and explicit stable admission. Base draft dependencies remain draft.
+  zh-CN: 实现投影保留 draft，等待精确源码 native browser evidence、独立审查与明确稳定准入；Base draft 依赖仍是 draft。
+summary: liquid-glass presentation over independent Base Collapsible trigger.
+statement:
+  zh-CN: liquid-glass Trigger 直接消费 asCollapsibleTrigger，保留完整 Base 协议。它声明一个共享 rounded-rect/style material slot，来源为 in-app backdrop，fallback fill/foreground 来自最终不透明 style。两条互斥规则消费已有 Base pressed 状态，请求 liquid-glass rest 或 pressed deformation。不增加第二个语义 owner 或组件私有 material flag，也不以 adaptive native blur 替换。当前只提供 typed 光学意图；实际自实现 host paint、preferences、source provenance 与 GPUI 证据仍独立且未完成。
+  en: 'The liquid-glass Trigger directly consumes asCollapsibleTrigger and retains the complete Base protocol. It declares one shared rounded-rect/style material slot sourced from the in-app backdrop, with final-style opaque fill and foreground fallback. Two mutually exclusive rules consume the existing Base pressed state to request liquid-glass rest or pressed deformation. The projection introduces no second semantic owner or component-private material flag and never substitutes adaptive native blur. This is typed optical intent only: actual self-implemented host paint, preferences, source provenance and GPUI evidence remain separate and unfinished.'
+criteria:
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE
+    text:
+      en: The liquid-glass trigger directly consumes asCollapsibleTrigger and retains the full Base trigger protocol. No second Button, Toggle, Accordion or Overlay owner is composed. This projection adds only family presentation and public source entries.
+      zh-CN: liquid-glass trigger 直接消费 asCollapsibleTrigger，完整保留 Base trigger 协议。不复合第二个 Button、Toggle、Accordion 或 Overlay owner；只增加体系表现与公开源码入口。
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-DIRECT-ENTRY
+    text:
+      en: Expose liquid-glass-collapsible-trigger through @proto.ui/prototypes-liquid-glass/collapsible with unchanged Base props and exposes. Private workspace packages must not be represented as registry-published.
+      zh-CN: 从 @proto.ui/prototypes-liquid-glass/collapsible 提供 liquid-glass-collapsible-trigger，保留 Base props/exposes；private workspace package 不得表述为 registry 已发布。
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY
+    text:
+      en: Preserve min-width zero, bounded max-width, long-word wrapping for text-bearing parts, scalable padding and focus-ring space. Hidden retained Content must remain actually hidden; style does not overwrite canonical state or introduce fixed content height.
+      zh-CN: 保留 min-width zero、有界 max-width、文字 part 长词换行、可缩放 padding 与 focus ring 空间。关闭保留的 Content 必须实际隐藏；样式不得改写 canonical state 或引入固定内容高度。
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-MATERIAL-INTENT
+    text:
+      en: Declare a single shared material slot with final-style fallback and mutually exclusive liquid-glass rest/pressed candidates from Base pressed. Disabled and view withdrawal follow Base clearing; no adaptive-blur substitution or new state owner is allowed. A missing visual host preserves ordinary opaque styling and reports unavailability, not a paint success.
+      zh-CN: 声明单个共享 material slot，其 fallback 来自最终 style，liquid-glass rest/pressed candidates 由 Base pressed 互斥选择。disabled 与 view withdrawal 遵循 Base 清理，不允许 adaptive-blur 替代或新增状态 owner。缺少 visual host 时保留普通不透明样式并报告 unavailable，不能称作绘制成功。
+openQuestions:
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-Q-ADMISSION
+    question:
+      en: When do complete source-bound host evidence and independent review justify stable admission?
+      zh-CN: 何时由完整源码绑定宿主证据与独立审查支持稳定准入？
+    blocks:
+      - activation:P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+  - id: P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER-Q-MATERIAL
+    question:
+      en: How will the shared typed optical-material intent, host provider and GPUI evidence complete this part without replacing explicit glass with native blur?
+      zh-CN: 共享 typed 光学材质意图、host provider 与 GPUI 证据如何补全此 part，且不以 native blur 替代显式玻璃？
+    blocks:
+      - activation:P-LIQUID-GLASS-COLLAPSIBLE-TRIGGER
+sources:
+  - path: packages/prototypes/liquid-glass/src/collapsible/trigger.proto.ts
+  - path: packages/prototypes/liquid-glass/src/collapsible/types.ts
+  - path: packages/prototypes/liquid-glass/src/collapsible/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Design reference only; not Proto UI semantic authority or an implementation dependency
+  - path: packages/prototypes/liquid-glass/test/collapsible-material.test.ts
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+inherits:
+  prototypes:
+    - P-BASE-COLLAPSIBLE-TRIGGER
+verifies:
+  tests:
+    - T-COLLAPSIBLE-PROJECTIONS-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced the direct family projection with complete Base inheritance, safe layout, source/package boundaries and explicitly unexecuted native/material evidence.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Consume the shared typed material facade using Base pressed state while keeping native paint and GPUI activation blockers explicit.
+tags:
+  - prototype
+  - liquid-glass
+  - collapsible
+  - trigger
+  - draft
+  - projection

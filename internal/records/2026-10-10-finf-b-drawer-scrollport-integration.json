@@ -1,0 +1,147 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "dependencies": [
+    "da31bf03cb8349f2799bdf3c861c842de28ae6e3",
+    "d73ee81e2a5f8366b2ae4e1083237530502c9f4b",
+    "Earlier integrated style lowering for bottom-1/cursor-ew-resize/cursor-ns-resize/z-10"
+  ],
+  "sourceFailure": {
+    "revision": "14ce5ddee6311b3b8e807f8b5ac24e1ba4173c92",
+    "run": "38036693145",
+    "artifact": "11663817331",
+    "viewport": {
+      "width": 1365,
+      "height": 1000
+    },
+    "panel": {
+      "y": 924,
+      "height": 152
+    },
+    "failure": "Close click timed out outside viewport at half snap"
+  },
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerContent",
+          "name": "base-drawer-content"
+        },
+        {
+          "export": "drawerHandle",
+          "name": "base-drawer-handle"
+        }
+      ],
+      "exportScope": "Existing modified atoms; no new identities.",
+      "demoId": "demo-base-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-base-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/drawer.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerContent",
+          "name": "shadcn-drawer-content"
+        },
+        {
+          "export": "drawerHandle",
+          "name": "shadcn-drawer-handle"
+        }
+      ],
+      "exportScope": "Existing modified atoms; no new identities.",
+      "demoId": "demo-shadcn-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/drawer.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerContent",
+          "name": "brutalist-drawer-content"
+        },
+        {
+          "export": "drawerHandle",
+          "name": "brutalist-drawer-handle"
+        }
+      ],
+      "exportScope": "Existing modified atoms; no new identities.",
+      "demoId": "demo-brutalist-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/drawer.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerContent",
+          "name": "bootstrap-2-3-2-drawer-content"
+        },
+        {
+          "export": "drawerHandle",
+          "name": "bootstrap-2-3-2-drawer-handle"
+        }
+      ],
+      "exportScope": "Existing modified atoms; no new identities.",
+      "demoId": "demo-bootstrap-2-3-2-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/drawer.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "drawer",
+      "prototypeExports": [
+        {
+          "export": "drawerContent",
+          "name": "liquid-glass-drawer-content"
+        },
+        {
+          "export": "drawerHandle",
+          "name": "liquid-glass-drawer-handle"
+        }
+      ],
+      "exportScope": "Existing modified atoms; no new identities.",
+      "demoId": "demo-liquid-glass-drawer",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-drawer.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/drawer.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/drawer.mdx"
+      ]
+    }
+  ],
+  "tests": [
+    "packages/prototypes/base/test/navigation-overlays/drawer-gesture.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts"
+  ],
+  "verification": {
+    "focusedHost": "43 passed, 2 prerequisite failures retained",
+    "focusedTypes": "passed",
+    "realBrowserGeometry": "pending official follow-up; no local browser/native launch"
+  },
+  "integrationNeeds": [
+    "No new exports, identities, package dependencies or demo IDs.",
+    "Regenerate all presets and website CSS through their supported generators; Content and Handle edge rules are now collectible literals.",
+    "Run full Drawer tokens through document and Shadow lowering.",
+    "Keep official Close click; assert panel inside available viewport and Close scrolls into panel intersection before actual activation.",
+    "Capture and inspect new exact-source geometry/screenshots; retain prior failure."
+  ],
+  "status": "WIP repair source, not visual/native acceptance"
+}

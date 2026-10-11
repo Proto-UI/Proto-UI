@@ -16,6 +16,7 @@ import type {
   WhenLiteral,
   WhenSignal,
   WhenValue,
+  MaterialCandidate,
 } from '@proto.ui/core';
 
 export type RuleIR<Props extends PropsBaseType> = {
@@ -31,6 +32,8 @@ export type RuleIR<Props extends PropsBaseType> = {
 export type RulePlanV0 = {
   kind: 'style.tokens';
   tokens: string[];
+  /** Whole material contributions; absent only for a style-only plan. */
+  materials?: readonly MaterialCandidate[];
 };
 
 export type RuleEvalCtx<Props extends PropsBaseType> = {

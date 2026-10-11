@@ -34,6 +34,10 @@ criteria:
     text:
       zh-CN: 订阅 API 返回的 unsubscribe 必须停用对应 callback delivery。
       en: The unsubscribe returned by a subscription API must deactivate the corresponding callback delivery.
+  - id: C-CONTEXT-0006-F
+    text:
+      en: trySubscribeAncestor is setup-only optional strict-ancestor intent, independent of ordinary required/optional intent for the same key. Absence is allowed. Unsubscribe removes only its callback; intent lasts until terminal disposal. Ancestor intent grants neither ordinary read nor consumer update authority.
+      zh-CN: trySubscribeAncestor 是 setup-only 的 optional 严格祖先意图，与同 key 的普通 required/optional 意图独立。允许缺少 provider。unsubscribe 仅移除对应 callback，意图保留到终端销毁；祖先意图不授予普通 read 或 consumer update 权限。
 sources:
   - path: internal/contracts/context/with-tree.v0.md
     sections:
@@ -46,6 +50,9 @@ dependsOn:
   contracts:
     - C-CONTEXT-0004
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added independent optional strict-ancestor subscription intent with callback cleanup and no implicit write authority.
   - version: 0.1.0
     change: introduced
     summary: Captured required and optional context dependency intent.

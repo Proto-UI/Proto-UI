@@ -1,0 +1,22 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "../src/calendar/**/*.ts",
+    "../src/date-picker/**/*.ts",
+    "../../shadcn/src/calendar/**/*.ts",
+    "../../shadcn/src/date-picker/**/*.ts",
+    "../../brutalist/src/calendar/**/*.ts",
+    "../../brutalist/src/date-picker/**/*.ts",
+    "../../bootstrap-2-3-2/src/calendar/**/*.ts",
+    "../../bootstrap-2-3-2/src/date-picker/**/*.ts",
+    "../../liquid-glass/src/calendar/**/*.ts",
+    "../../liquid-glass/src/date-picker/**/*.ts",
+    "calendar*.ts",
+    "../../../web-conformance/test/calendar.journey.test.ts",
+    "../../../../apps/www/src/components/PrototypePreviewer/calendar-demo.test.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/calendar-demo.shared.ts",
+    "../../../../apps/www/src/content/docs/zh-cn/demo-*-calendar.demo.ts",
+    "../../../../types/runtime-retry-urls.d.ts"
+  ],
+  "exclude": []
+}

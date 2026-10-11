@@ -26,6 +26,28 @@
     min-width: 0;
   }
 
+  /* Static prototype paint remains until an atomic command publication. The
+     disabled native button honestly exposes loading; it never swallows an
+     apparently available action. Only readiness opacity may change. */
+  site-search [data-search-startup-button] {
+    width: var(--site-search-trigger-width, 2.75rem);
+    min-width: 0;
+    max-width: 100%;
+    height: 2.75rem;
+    min-height: 2.75rem;
+    padding-inline: var(--site-search-trigger-padding, 0);
+    justify-content: var(--site-search-trigger-justify, center);
+  }
+  site-search:is([data-search-view='ready'], [data-search-view='retained']) [data-search-startup] {
+    display: none;
+  }
+  site-search:not([data-search-view='ready']):not([data-search-view='retained'])
+    [data-search-command-mount='open'] {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
   /* ------------------------------------------------------------------ */
   /* Trigger                                                            */
   /* ------------------------------------------------------------------ */
@@ -45,11 +67,11 @@
     }
   }
 
-  site-search [data-open-modal] svg {
+  site-search :is([data-open-modal], [data-search-startup-button]) svg {
     flex: none;
   }
 
-  site-search [data-open-modal] .site-search-shortcut {
+  site-search :is([data-open-modal], [data-search-startup-button]) .site-search-shortcut {
     margin-inline-start: auto;
     gap: 0.25em;
   }

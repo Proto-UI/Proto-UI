@@ -1,24 +1,24 @@
 id: T-LIQUID-GLASS-MATERIAL-0001
 type: test
-title: Liquid Glass family stage-0 translucent fallback evidence
+title: Liquid Glass V2 optical intent and four-Web source evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: Bounded material policy is experimental. Unit evidence does not establish optical or cross-host conformance; actual four-Web consumer evidence must be collected.
-summary: Source-policy and lease-loss tests plus planned real Web alpha/blur, pixel negative controls and live preference fallback.
+summary: Real Prototype V2 intent tests plus planned four-Web optical pixel, visible-source revocation, overlap and preference evidence.
 cases:
   - id: T-LIQUID-GLASS-MATERIAL-0001-CASE-POLICY
-    title: Affirmative finite inputs, opt-out, unknown/source-loss and restoration
+    title: Base press candidates, opt-out, opaque ordinary style and view remount
     covers:
       - P-LIQUID-GLASS-BUTTON-MATERIAL
       - P-LIQUID-GLASS-BUTTON-API
     expectation: source-rule-safe-material-policy
   - id: T-LIQUID-GLASS-MATERIAL-0001-CASE-PAINT
-    title: Actual same-control blur pixels and live four-host fallback
+    title: Actual same-control optical pixels and four-host source fallback
     covers:
       - P-LIQUID-GLASS-BUTTON-MATERIAL
       - P-LIQUID-GLASS-BUTTON-VISUAL
       - P-LIQUID-GLASS-BUTTON-CLOSURE
-    expectation: real-web-bounded-alpha-blur-and-live-fallback
+    expectation: real-web-visible-canvas-optics-and-live-fallback
 implementations:
   - id: liquid-glass-material-policy
     kind: module-test
@@ -28,7 +28,7 @@ implementations:
     consumesCases:
       - T-LIQUID-GLASS-MATERIAL-0001-CASE-POLICY
     notes:
-      - Twelve focused cases on the real Prototype and Runtime; prop intent is observed separately from the minimal host effects sink. No browser result is inferred.
+      - Five focused cases on the real Prototype and Runtime; provider presence is distinct from committed paint. No browser result is inferred.
   - id: liquid-glass-material-browser
     kind: runtime-test
     status: planned
@@ -37,8 +37,8 @@ implementations:
     consumesCases:
       - T-LIQUID-GLASS-MATERIAL-0001-CASE-PAINT
     notes:
-      - Must run on the exact combined source head after primitive review. Captures and decodes real screenshots for a same-control blur-removed negative control.
-      - Source-loss/rebind is covered in the real Runtime unit path; native browser preference changes are covered across all four Web adapters. No native Apple, GPUI, Compiler, Flutter or Qt claim.
+      - Must run on the exact combined source head after primitive review. Captures actual four-runtime controls and decodes their GPU output for the same-source press negative control.
+      - Visible canvas source-loss/recovery and overlap refusal are exercised on the real browser consumers, together with static reduced-motion and opaque reduced-transparency paths. No native Apple, GPUI, Compiler, Flutter or Qt claim.
 exercises:
   prototypes:
     - P-LIQUID-GLASS-BUTTON

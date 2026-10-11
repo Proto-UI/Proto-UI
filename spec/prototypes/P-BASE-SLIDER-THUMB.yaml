@@ -1,0 +1,32 @@
+id: P-BASE-SLIDER-THUMB
+type: prototype
+title: Base Slider Thumb interaction facts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Bounded draft source and synthetic Web evidence only. Native input, all host profiles, assistive technology, independent acceptance and full Slider semantics remain unadmitted.
+summary: A single Slider Thumb owns focus and transient pointer facts while the existing Root and Track retain value and accepted gesture ownership.
+statement:
+  en: The existing Thumb owner exposes hovered and pressed through both its direct and authored-asHook entries. It borrows focus from asFocusable and derives accepted pointer pressing from the Root session already driven by Track AxisInput; it adds no Trigger, independent recognizer, geometry reader or second value owner.
+criteria:
+  - id: P-BASE-SLIDER-THUMB-FACTS
+    text: Hover follows semantic pointer enter/leave while enabled. Pressed requires a pointer origin on this Thumb and an accepted Root interaction session. Keyboard edits and rejected disabled/readOnly input do not activate pressed. ReadOnly remains focusable and hoverable.
+  - id: P-BASE-SLIDER-THUMB-LIFETIME
+    text: A captured session preserves pressed after pointer leave while hover ends. Track end, cancel or lost ownership, disabled/readOnly policy, input cancellation and view teardown clear pressed. Cancellation and disabled clear hover. Root remains the cancellation owner when a required part retires. Track revokes the actual AxisInput gesture/capture lease through public input eligibility configuration and rejects every remaining sample from that lease. Required parts must be live before a new session can begin; restoring a part admits only a fresh start. Root reset or cancellation also revokes the accepted Track lease. Cancellation stops querying once the observed Root lease has ended. Ordinary live input retains strict anatomy queries.
+  - id: P-BASE-SLIDER-THUMB-BOUNDARY
+    text: Thumb and FieldThumb retain one focus target and Base value ownership. Styled passive Template containers can consume facts and carry paint. Explicit paint refresh must stop when any required provider-root anatomy lease ends, even before the child itself finishes unmounting; it must not weaken inherited Context validation or manually unregister State watches. Paint cannot add roles, focus targets, listeners, host payloads, selectors, hidden inputs or component owners. These facts do not admit multi-thumb semantics, edge-aligned coordinates or upstream-wide equivalence.
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-EXPOSE-STATE-0001, C-EVENT-0002, C-TEMPLATE-0002, C-TEMPLATE-0003]
+verifies:
+  tests: [T-BASE-SLIDER-THUMB-0001]
+sources:
+  - path: packages/prototypes/base/src/slider/root.proto.ts
+  - path: packages/prototypes/base/src/slider/track.proto.ts
+  - path: packages/prototypes/base/src/slider/thumb.proto.ts
+  - path: packages/prototypes/base/src/slider/part-setup.ts
+  - path: packages/prototypes/base/src/slider/types.ts
+  - path: packages/prototypes/base/src/slider/shared.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged only same-owner transient pointer facts and lifecycle; no stable Slider or host-fidelity admission.
+tags: [prototype, base, slider, draft]

@@ -5,6 +5,7 @@ import {
   type WebComponentAdapterElement,
 } from '@proto.ui/adapter-web-component';
 import { styleContains } from '../../test-utils/style';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import { BrutalistTextareaRoot } from '../src/textarea';
 
 type TextareaElement = WebComponentAdapterElement<typeof BrutalistTextareaRoot>;
@@ -45,24 +46,37 @@ describe('prototypes/brutalist: textarea', () => {
     expect(target.disabled).toBe(true);
     expect(target.getAttribute('role')).toBe('textbox');
     expect(target.getAttribute('aria-label')).toBe('Message');
-    expect(styleContains(target, 'block')).toBe(true);
-    expect(styleContains(target, 'min-h-28')).toBe(true);
+    expect(styleContains(target, 'flex')).toBe(true);
+    expect(styleContains(target, 'min-h-[80px]')).toBe(true);
     expect(styleContains(target, 'w-full')).toBe(true);
     expect(styleContains(target, 'rounded-base')).toBe(true);
     expect(styleContains(target, 'resize-y')).toBe(true);
     expect(styleContains(target, 'border-2')).toBe(true);
-    expect(styleContains(target, 'border-foreground')).toBe(true);
+    expect(styleContains(target, 'border-border')).toBe(true);
     expect(styleContains(target, 'bg-secondary-background')).toBe(true);
     expect(styleContains(target, 'text-foreground')).toBe(true);
-    expect(styleContains(target, 'p-3')).toBe(true);
+    expect(styleContains(target, 'px-3')).toBe(true);
+    expect(styleContains(target, 'py-2')).toBe(true);
+    expect(styleContains(target, 'p-3')).toBe(false);
+    expect(styleContains(target, 'selection:bg-main')).toBe(true);
+    expect(styleContains(target, 'selection:text-main-foreground')).toBe(true);
     expect(styleContains(target, 'font-sans')).toBe(true);
     expect(styleContains(target, 'text-sm')).toBe(true);
-    expect(styleContains(target, 'leading-6')).toBe(true);
+    expect(styleContains(target, 'leading-6')).toBe(false);
+    expect(styleContains(target, 'min-h-28')).toBe(false);
     expect(styleContains(target, 'shadow-[3px_3px_0_0_var(--pui-foreground)]')).toBe(false);
     expect(styleContains(target, 'data-[focus-visible]:ring-2')).toBe(true);
     expect(styleContains(target, 'data-[focus-visible]:ring-ring')).toBe(true);
     expect(styleContains(target, 'data-[disabled]:cursor-not-allowed')).toBe(true);
     expect(styleContains(target, 'data-[disabled]:opacity-50')).toBe(true);
+    const css = renderProtoStyleTokenCss(
+      (target.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean)
+    );
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('min-height: 80px;');
+    expect(css).toContain('padding-inline: 0.75rem;');
+    expect(css).toContain('padding-block: 0.5rem;');
+    expect(css).toContain('::selection');
     expect(target.children).toHaveLength(0);
     element.remove();
   });

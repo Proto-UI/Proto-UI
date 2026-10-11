@@ -1,0 +1,132 @@
+id: T-BASE-DROPDOWN-COMPOSITION-0001
+type: test
+title: Dropdown passive composition and single action-owner checks
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 被动组成的有限host语义与完整CSS收集证据已建立；隔离基线仍有共享lowering失败，完整四Web宿主、原生输入与视觉、打包消费者和独立验收未完成，保持draft，不将局部通过晋级为稳定保证。
+  en: Bounded host semantics and whole-directory CSS collection evidence exist; the isolated baseline retains shared lowering failures, while complete four-Web-host, native input/visual, packed-consumer and independent acceptance remain unfinished. Keep draft without promoting local passes to stable guarantees.
+summary: Checks live group naming, passive separators and shortcut hints, collection isolation and lifecycle without adding an input owner.
+cases:
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-GROUP
+    title: Group owns only its defined passive semantics
+    covers: [P-BASE-DROPDOWN-MENU-GROUP-GROUP-ROLE, P-BASE-DROPDOWN-MENU-GROUP-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-LABEL
+    title: Label owns only its defined passive semantics
+    covers: [P-BASE-DROPDOWN-MENU-LABEL-LABEL-RELATION, P-BASE-DROPDOWN-MENU-LABEL-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SEPARATOR
+    title: Separator owns only its defined passive semantics
+    covers:
+      [P-BASE-DROPDOWN-MENU-SEPARATOR-SEPARATOR-PASSIVE, P-BASE-DROPDOWN-MENU-SEPARATOR-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SHORTCUT
+    title: Shortcut owns only its defined passive semantics
+    covers:
+      [P-BASE-DROPDOWN-MENU-SHORTCUT-SHORTCUT-PASSIVE, P-BASE-DROPDOWN-MENU-SHORTCUT-LIFECYCLE]
+    expectation: live-identity-and-passive-action-boundary-survive-remount
+  - id: T-BASE-DROPDOWN-COMPOSITION-0001-CASE-FAMILY-SOURCE
+    title: Family source preserves passive semantics and closes complete CSS token input
+    covers:
+      - P-SHADCN-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-SHADCN-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-BRUTALIST-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT-SEMANTICS-AND-PAINT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-GROUP-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-LABEL-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEPARATOR-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SHORTCUT-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT-SEMANTICS-AND-PAINT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-ITEM-SEMANTICS-AND-PAINT
+    expectation: source-host-semantics-and-complete-css-lowering-with-visual-acceptance-explicitly-pending
+implementations:
+  - id: dropdown-passive-source-host
+    kind: module-test
+    status: failing
+    path: packages/prototypes/base/test/navigation-overlays/dropdown-composition.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-GROUP
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-LABEL
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SEPARATOR
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-SHORTCUT
+      - T-BASE-DROPDOWN-COMPOSITION-0001-CASE-FAMILY-SOURCE
+    exercises:
+      - P-BASE-DROPDOWN-MENU-GROUP
+      - P-BASE-DROPDOWN-MENU-LABEL
+      - P-BASE-DROPDOWN-MENU-SEPARATOR
+      - P-BASE-DROPDOWN-MENU-SHORTCUT
+      - P-SHADCN-DROPDOWN-MENU-GROUP
+      - P-SHADCN-DROPDOWN-MENU-LABEL
+      - P-SHADCN-DROPDOWN-MENU-SEPARATOR
+      - P-SHADCN-DROPDOWN-MENU-SHORTCUT
+      - P-BRUTALIST-DROPDOWN-MENU-GROUP
+      - P-BRUTALIST-DROPDOWN-MENU-LABEL
+      - P-BRUTALIST-DROPDOWN-MENU-SEPARATOR
+      - P-BRUTALIST-DROPDOWN-MENU-SHORTCUT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-GROUP
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-LABEL
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEPARATOR
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SHORTCUT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM
+      - P-LIQUID-GLASS-DROPDOWN-MENU-GROUP
+      - P-LIQUID-GLASS-DROPDOWN-MENU-LABEL
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEPARATOR
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SHORTCUT
+      - P-LIQUID-GLASS-DROPDOWN-MENU
+      - P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER
+      - P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT
+      - P-LIQUID-GLASS-DROPDOWN-MENU-ITEM
+exercises:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU-GROUP
+    - P-BASE-DROPDOWN-MENU-LABEL
+    - P-BASE-DROPDOWN-MENU-SEPARATOR
+    - P-BASE-DROPDOWN-MENU-SHORTCUT
+    - P-SHADCN-DROPDOWN-MENU-GROUP
+    - P-SHADCN-DROPDOWN-MENU-LABEL
+    - P-SHADCN-DROPDOWN-MENU-SEPARATOR
+    - P-SHADCN-DROPDOWN-MENU-SHORTCUT
+    - P-BRUTALIST-DROPDOWN-MENU-GROUP
+    - P-BRUTALIST-DROPDOWN-MENU-LABEL
+    - P-BRUTALIST-DROPDOWN-MENU-SEPARATOR
+    - P-BRUTALIST-DROPDOWN-MENU-SHORTCUT
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-GROUP
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-LABEL
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SEPARATOR
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-SHORTCUT
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-TRIGGER
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-CONTENT
+    - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU-ITEM
+    - P-LIQUID-GLASS-DROPDOWN-MENU-GROUP
+    - P-LIQUID-GLASS-DROPDOWN-MENU-LABEL
+    - P-LIQUID-GLASS-DROPDOWN-MENU-SEPARATOR
+    - P-LIQUID-GLASS-DROPDOWN-MENU-SHORTCUT
+    - P-LIQUID-GLASS-DROPDOWN-MENU
+    - P-LIQUID-GLASS-DROPDOWN-MENU-TRIGGER
+    - P-LIQUID-GLASS-DROPDOWN-MENU-CONTENT
+    - P-LIQUID-GLASS-DROPDOWN-MENU-ITEM
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded composition checks, with full native/browser/style acceptance remaining separate.
+tags: [prototype, dropdown-menu, composition, test]

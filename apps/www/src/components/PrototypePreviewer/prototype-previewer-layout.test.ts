@@ -24,3 +24,12 @@ describe('PrototypePreviewer fixed-family consumer layout', () => {
     }
   });
 });
+
+it('keeps readable no-JS runtime labels without a fake interactive tab or dropdown', () => {
+  expect(source).toContain('data-runtime-tabs-mount');
+  expect(source).toContain('proto-previewer__runtime-fallback');
+  expect(source).toContain('overflow-x: auto');
+  expect(source).toContain('<noscript>');
+  expect(source).not.toContain('<AdapterSelect');
+  expect(source).not.toContain('role="tab"');
+});

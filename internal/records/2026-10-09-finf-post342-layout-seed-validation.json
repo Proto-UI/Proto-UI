@@ -1,0 +1,374 @@
+{
+  "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+  "sourceTree": "7423e840d96866b9aaddf29f88ba34bee58bbb62",
+  "productValidationSource": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+  "productBytesUnchangedBySourcePinCommit": true,
+  "base": "342955e238e6a632dbc010b70aa59d1a373ce440",
+  "scope": "16 reviewed source paths through true two-parent merges; bounded WIP, 0/68 full acceptance",
+  "functional": {
+    "files": 16,
+    "tests": 271,
+    "nativeExecuted": false
+  },
+  "logs": {
+    "functional.log": {
+      "name": "functional",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "apps/www/src/components/PrototypePreviewer/demo-narrow-reflow.test.ts",
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.native-facts.test.ts",
+        "apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts",
+        "apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts",
+        "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+        "apps/www/src/content/docs/field-demo-layout.test.ts",
+        "apps/www/src/content/docs/zh-cn/field-browser-oracle.test.ts",
+        "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+        "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+        "packages/adapters/base/test/initial-paint-media-session.test.ts",
+        "packages/adapters/base/test/web-material-initial-binding.test.ts",
+        "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "packages/adapters/react/test/select-keyboard.integration.test.ts",
+        "packages/adapters/react/test/select.test.ts",
+        "packages/adapters/vue/test/select.test.ts",
+        "packages/adapters/vue2/test/select.test.ts",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/3ca1e20addac/finf-post342-union-evidence/functional-report.json"
+      ],
+      "startedAt": "2026-10-09T15:20:14.354938+00:00",
+      "finishedAt": "2026-10-09T15:20:39.974355+00:00",
+      "exitCode": 0,
+      "bytes": 5650,
+      "sha256": "e3f9679dc82154c910ed20606695a7ef9a183be3eec44a063580a091bf63d93b"
+    },
+    "governance.log": {
+      "name": "governance",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": [
+        "node",
+        "--test",
+        "scripts/test/run-runtime-tests.test.mjs",
+        "scripts/release/test/material-initial-paint-workflow.test.mjs"
+      ],
+      "startedAt": "2026-10-09T15:20:39.974706+00:00",
+      "finishedAt": "2026-10-09T15:20:46.797582+00:00",
+      "exitCode": 0,
+      "bytes": 12266,
+      "sha256": "9a4c0206a02f339dbe9e3c06b89cac5866ea5367f926e7eab0271a06cac0900d"
+    },
+    "website-tokens.log": {
+      "name": "website-tokens",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "apps/www/scripts/generate-website-prototype-tokens.mjs"],
+      "startedAt": "2026-10-09T15:20:46.797982+00:00",
+      "finishedAt": "2026-10-09T15:20:51.546544+00:00",
+      "exitCode": 0,
+      "bytes": 106,
+      "sha256": "dae9f0219c51ea4fc2bd6478fffda685c6265a14c3f2b882142f90b66f95a984"
+    },
+    "workspace-types.log": {
+      "name": "workspace-types",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.workspace.json",
+        "--noEmit"
+      ],
+      "startedAt": "2026-10-09T15:20:51.546896+00:00",
+      "finishedAt": "2026-10-09T15:21:13.589729+00:00",
+      "exitCode": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "docs-build.log": {
+      "name": "docs-build",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["corepack", "pnpm@10.32.1", "--filter", "apps-www", "build"],
+      "startedAt": "2026-10-09T15:21:13.590091+00:00",
+      "finishedAt": "2026-10-09T15:23:29.944926+00:00",
+      "exitCode": 1,
+      "bytes": 2467,
+      "sha256": "d699f046560602d2e0748acc91db5bbb90e5d4a6e32f9f3a9bf693f0a6cd757d"
+    },
+    "docs-build-restored.log": {
+      "name": "docs-build-restored",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["corepack", "pnpm@10.32.1", "--filter", "apps-www", "build"],
+      "startedAt": "2026-10-09T15:23:59.995486+00:00",
+      "finishedAt": "2026-10-09T15:24:43.131589+00:00",
+      "exitCode": 0,
+      "bytes": 316027,
+      "sha256": "8bce8e76a3cf20720e0de9c0799ef3b270b6599c4c852decc04cc40c2229351a"
+    },
+    "production-bundle.log": {
+      "name": "production-bundle",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "scripts/coverage-matrices/check-website-production-bundle.mjs"],
+      "startedAt": "2026-10-09T15:24:43.132237+00:00",
+      "finishedAt": "2026-10-09T15:24:43.452848+00:00",
+      "exitCode": 0,
+      "bytes": 171,
+      "sha256": "ccf37f16b0641edb78217985447c7acbc121b122941efdf3e419dc7a2c889294"
+    },
+    "initial-paint-build.log": {
+      "name": "initial-paint-build",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "experiments/material-initial-paint/build-browser.mjs",
+        "/workspace/scratch/3ca1e20addac/finf-post342-union-evidence/initial-paint-fixture"
+      ],
+      "startedAt": "2026-10-09T15:24:43.453310+00:00",
+      "finishedAt": "2026-10-09T15:24:44.355670+00:00",
+      "exitCode": 0,
+      "bytes": 185,
+      "sha256": "0504cd87649208f687d5d8c1993c515f338d3d3558ae26daceee07153405407d"
+    },
+    "budgets-strict.log": {
+      "name": "budgets-strict",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json"],
+      "startedAt": "2026-10-09T15:24:44.356034+00:00",
+      "finishedAt": "2026-10-09T15:24:45.357940+00:00",
+      "exitCode": 1,
+      "bytes": 4212,
+      "sha256": "9b6c64abaf7c941e02e881d7de4bcc974855cd850861bf613a0a8a05c169a45d"
+    },
+    "budgets-finf.log": {
+      "name": "budgets-finf",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json", "--finf-development"],
+      "startedAt": "2026-10-09T15:24:45.358459+00:00",
+      "finishedAt": "2026-10-09T15:24:46.342290+00:00",
+      "exitCode": 0,
+      "bytes": 5117,
+      "sha256": "713f56db36809da38acd61cf5ba1ed6e2940724a4407f4e8b91d59c644f0db0a"
+    },
+    "canonical.log": {
+      "name": "canonical",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T15:25:41.023196+00:00",
+      "finishedAt": "2026-10-09T15:25:41.960240+00:00",
+      "exitCode": 0,
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    "source-wall.log": {
+      "name": "source-wall",
+      "source": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-10-09T15:25:41.960560+00:00",
+      "finishedAt": "2026-10-09T15:27:51.296693+00:00",
+      "exitCode": 1,
+      "bytes": 588,
+      "sha256": "501ea4768cc108d0aaa65e7b426ac095643970ab075b81b84a0a21d562b4a055"
+    },
+    "canonical-corrected.log": {
+      "name": "canonical-corrected",
+      "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T15:31:15.700629+00:00",
+      "finishedAt": "2026-10-09T15:31:16.903709+00:00",
+      "exitCode": 0,
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    "source-wall-corrected.log": {
+      "name": "source-wall-corrected",
+      "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-10-09T15:31:16.904078+00:00",
+      "finishedAt": "2026-10-09T15:33:26.775106+00:00",
+      "exitCode": 0,
+      "bytes": 36,
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "proof-negative.log": {
+      "name": "proof-negative",
+      "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+      "command": ["node", "--test", "scripts/coverage-matrices/test/prototype-coverage.test.mjs"],
+      "startedAt": "2026-10-09T15:33:26.775474+00:00",
+      "finishedAt": "2026-10-09T15:35:44.107032+00:00",
+      "exitCode": 0,
+      "bytes": 10722,
+      "sha256": "2f014dca6e3607d4d7a6ad06b096dafd00b193852686a916965daae13b467e69"
+    },
+    "pinned-initial-paint-build.log": {
+      "name": "pinned-initial-paint-build",
+      "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+      "command": [
+        "node",
+        "--import",
+        "tsx",
+        "experiments/material-initial-paint/build-browser.mjs",
+        "../finf-post342-union-evidence/pinned-initial-paint-fixture"
+      ],
+      "exitCode": 0,
+      "bytes": 199,
+      "sha256": "727432751f567af7a9feb3a55016a50482f91db405b582cb771715127dd9254a"
+    }
+  },
+  "sourceProvenance": {
+    "sourceA": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+    "tree": "7423e840d96866b9aaddf29f88ba34bee58bbb62",
+    "base": "342955e238e6a632dbc010b70aa59d1a373ce440",
+    "paths": [
+      {
+        "path": "experiments/material-initial-paint/browser-entry.ts",
+        "source": "0ca14164c31773f31df138965af4579eb1068c8f",
+        "blob": "73b46b702359260c6d74e89352b2d9c95aa5f367",
+        "sha256": "0b973f3aae09c82909a846d54c03aa57d38a29606ed229cebc294ba906dec988"
+      },
+      {
+        "path": "experiments/material-initial-paint/browser.test.mjs",
+        "source": "0ca14164c31773f31df138965af4579eb1068c8f",
+        "blob": "630a6404797c29042937e6792f07ec4b8e7a60a0",
+        "sha256": "11e4378b49c3d35d3ce614d93bd94adfd39a79d229d04f0e55f7781ac049ccc3"
+      },
+      {
+        "path": "experiments/material-initial-paint/scene.ts",
+        "source": "0ca14164c31773f31df138965af4579eb1068c8f",
+        "blob": "868cac9116a23323139f4ca0b476cbaade40292b",
+        "sha256": "f963108ad85b6b959c5b4cd7ccc0ba5665829e693a51f620ad0657d7f0eb1a07"
+      },
+      {
+        "path": "internal/records/2026-10-09-initial-paint-dark-source-calibration.md",
+        "source": "0ca14164c31773f31df138965af4579eb1068c8f",
+        "blob": "c7bf75d1f8960de3321e4843c56d6095ee4227c5",
+        "sha256": "793c7e926f924ce76b139db88269466704879345af107366b7a6a5e95b65f070"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "source": "0ca14164c31773f31df138965af4579eb1068c8f",
+        "blob": "aee39f2ef9be7c4edd6771f06f25fc4188b9af24",
+        "sha256": "0c3b724e2c9bdc293790f4e75763ceaa419e6be1361cb3edfe869ce56a450601"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "d59282fedd0d189c91258a1a48c263b183c8353e",
+        "sha256": "a3a8e4a3cdec9f6beba3cd30c146813f0db0bf377e3c4936eb3badc03e981dbb"
+      },
+      {
+        "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "92de8fbba3d2ab833c5cc371ce73a4ec120d3afa",
+        "sha256": "5514f686af74e6d971633b2649b5314724544603d17e8c7ac0aeba672c42455f"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/select-demo-layout.test.ts",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "023ac0b8c170e77c4772bf00ad5790251b29a100",
+        "sha256": "3a431f08e43a2172c4629cbc2a1fd8b86d11d45839aaf3ce622a8798f586857e"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "16fca657dc19f0128f0d634599cec7168751d923",
+        "sha256": "53cfa74cde44268578e4c30145a700acd587fec8b76b4445885bc120ff1bcb08"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.ts",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "19b938350c57094cb03fd04d34fdc8ee99f276c5",
+        "sha256": "34d7ef8b09dd10906346420c4d4a7e3104a3d2fa6a2949d1a9d0b9e853c16f1a"
+      },
+      {
+        "path": "internal/records/2026-10-09-select-demo-intrinsic-width-repair.md",
+        "source": "d955ef8b218ad4747a6a744e0837f69747b1e47d",
+        "blob": "b6179a6fb75e062e344f17191aab1a994106bb32",
+        "sha256": "d54b56238f136a091c060b8fc430a1db3b198517fd399092ec8ed59f07f1693d"
+      },
+      {
+        "path": "apps/www/src/content/docs/field-demo.shared.ts",
+        "source": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec",
+        "blob": "b5f6643cf2ff3aacfd41850c3da9feced9417a84",
+        "sha256": "cea7363876a91fd4548dd5e41738ff200f2dc5ca3bcd2c6e819617be57be9798"
+      },
+      {
+        "path": "apps/www/src/content/docs/field-demo-cancellation.test.ts",
+        "source": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec",
+        "blob": "9215e66ac2a965535684c9b3659ea148654e7a99",
+        "sha256": "e32114629d64e6d6e79244bc58db26de087d1e9c53557e4ca58401090012a2e2"
+      },
+      {
+        "path": "apps/www/src/content/docs/field-demo-layout.test.ts",
+        "source": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec",
+        "blob": "c599bba9de151428e3a8bec07f32d91bedc30a3e",
+        "sha256": "4a5bc9bf29fb03a4fcb461605fd34d4402b375cee8df5d61891cb83a0448f7a4"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts",
+        "source": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec",
+        "blob": "fb633f21d7628358c2aa582dd14590e0884a58bd",
+        "sha256": "b0883fbe15c6c7cff90aceffbee3ee14cc0dae710198c894b163e941f8903213"
+      },
+      {
+        "path": "internal/records/2026-10-09-field-demo-command-flow.md",
+        "source": "1ca1ae465427f810a6f0bd91f397f62f2d1201ec",
+        "blob": "21c3b027a82303c70b5f119a2befcaa5a089c79c",
+        "sha256": "b4ff0f68496dfb8fbcaa5beb7faecf55455265a160238512ae13ced78e9c6357"
+      }
+    ],
+    "productValidationSource": "5458eedfb6a7793ea83ac3645edc034aab9c54ad",
+    "metadataOnlyFollowup": {
+      "path": "internal/website/self-hosting-coverage-matrix.md",
+      "pins": [
+        {
+          "path": "apps/www/src/content/docs/demo-bootstrap-2-3-2-select.demo.ts",
+          "previous": "00275623d399292a5c57e1eceb1ebc3be8bd49a56398ab95bab7c24b8e456b41",
+          "reviewed": "a3a8e4a3cdec9f6beba3cd30c146813f0db0bf377e3c4936eb3badc03e981dbb"
+        },
+        {
+          "path": "apps/www/src/content/docs/demo-liquid-glass-select.demo.ts",
+          "previous": "55eb24acce9b08d2d682c32253d50fffb96524368b9b852e5b41094914c34262",
+          "reviewed": "5514f686af74e6d971633b2649b5314724544603d17e8c7ac0aeba672c42455f"
+        },
+        {
+          "path": "apps/www/src/content/docs/field-demo.shared.ts",
+          "previous": "34f875b743d60441737fe0cd6b476e4d888d5f5cb11a16a9ad9ff36c0ab65cb9",
+          "reviewed": "cea7363876a91fd4548dd5e41738ff200f2dc5ca3bcd2c6e819617be57be9798"
+        }
+      ],
+      "commit": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae"
+    }
+  },
+  "canonicalRefresh": {
+    "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+    "bindingCount": 4206,
+    "changedCandidateKeys": ["revision", "sourceBindingsObject", "sourceObjectProof"],
+    "bindingsEqual": true,
+    "otherTopLevelFieldsEqual": true
+  },
+  "initialPaintBuild": {
+    "source": "55d41e9b22dacd57a6b2b07bdb404ab8b42b4cae",
+    "tree": "7423e840d96866b9aaddf29f88ba34bee58bbb62",
+    "dirtyAtBuild": false,
+    "assetsVerified": 4,
+    "trackedSourceObjectsVerified": 337,
+    "installedDependencyInputsVerified": 4,
+    "nativeExecuted": false,
+    "command": [
+      "node",
+      "--import",
+      "tsx",
+      "experiments/material-initial-paint/build-browser.mjs",
+      "../finf-post342-union-evidence/pinned-initial-paint-fixture"
+    ],
+    "exitCode": 0
+  },
+  "native": "Next exact-head native Field, Select and initial-paint runs required. Existing baseline342 failures remain recorded; no new screenshots claimed.",
+  "budget": "Strict failed; authorized advisory exit0 retains withinBudgets false; no ceiling changes.",
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

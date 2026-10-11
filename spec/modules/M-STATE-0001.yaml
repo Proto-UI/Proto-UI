@@ -6,18 +6,18 @@ since: 0.1.0
 summary: The required host-neutral State module owns instance-lifetime state slots, controlled capability views, portable change records, and privileged view projection without host capabilities.
 statement:
   zh-CN: >-
-    State module 是 standard Proto UI runtime 与 official Adapter 的必装 instance module。它拥有有限 host-neutral value spec 的 state slot、owned view facade、portable StateEvent、watch registration 与 deterministic mutation record；runtime 将 facade 投影为 setup-time `def.state.bool`、`enum`、`string`、`numberRange` 与 `numberDiscrete`。Privileged port 供 runtime、其它 Module 与特权 asHook 进行 internal mutation、watch、disconnect 以及 observed/borrowed view projection，不进入普通作者 surface。State logical resources 属于 instance lifetime，跨 repeatable view detach/remount 保留并在 terminal disposal 失效。Module 不投射宿主效果、不隐式 render，也不索取 host-cap。
+    State module 是 standard Proto UI runtime 与 official Adapter 的必装 instance module。它拥有有限 host-neutral value spec 的 state slot、owned view facade、portable StateEvent、watch registration 与 deterministic mutation record；runtime 将 facade 投影为 setup-time `def.state.bool`、`enum`、`string`、`numberRange`、`numberDiscrete` 与 draft `numberList`。Privileged port 供 runtime、其它 Module 与特权 asHook 进行 internal mutation、watch、disconnect 以及 observed/borrowed view projection，不进入普通作者 surface。State logical resources 属于 instance lifetime，跨 repeatable view detach/remount 保留并在 terminal disposal 失效。Module 不投射宿主效果、不隐式 render，也不索取 host-cap。
 
 
   en: >-
-    The State module is a required instance module for the standard Proto UI runtime and official Adapters. It owns state slots with finite host-neutral value specs, an owned-view facade, portable StateEvents, watch registrations, and deterministic mutation records; the runtime projects its facade as the setup-time `def.state.bool`, `enum`, `string`, `numberRange`, and `numberDiscrete` APIs. Its privileged port lets the runtime, other Modules, and privileged asHooks perform internal mutation, watch, disconnection, and observed or borrowed view projection without entering the ordinary author surface. State logical resources belong to the instance lifetime, survive repeatable view detachment and remounting, and become invalid on terminal disposal. The Module projects no host effects, never renders implicitly, and requires no host capability.
+    The State module is a required instance module for the standard Proto UI runtime and official Adapters. It owns state slots with finite host-neutral value specs, an owned-view facade, portable StateEvents, watch registrations, and deterministic mutation records; the runtime projects its facade as the setup-time `def.state.bool`, `enum`, `string`, `numberRange`, `numberDiscrete`, and draft `numberList` APIs. Its privileged port lets the runtime, other Modules, and privileged asHooks perform internal mutation, watch, disconnection, and observed or borrowed view projection without entering the ordinary author surface. State logical resources belong to the instance lifetime, survive repeatable view detachment and remounting, and become invalid on terminal disposal. The Module projects no host effects, never renders implicitly, and requires no host capability.
 
 
 criteria:
   - id: M-STATE-0001-A
     text:
-      zh-CN: Module facade 必须提供 `bool`、`enum`、`string`、`numberRange` 与 `numberDiscrete` state definition，并返回 owned view；runtime 必须把这些定义 API 仅投影到 setup-time `def.state`，不得建立普通 `run.state` mutation surface。
-      en: The module facade must provide `bool`, `enum`, `string`, `numberRange`, and `numberDiscrete` state definitions returning owned views; the runtime must project these definition APIs only onto setup-time `def.state` and must not create an ordinary `run.state` mutation surface.
+      zh-CN: Module facade 必须提供 `bool`、`enum`、`string`、`numberRange`、`numberDiscrete` 与 draft `numberList` state definition，并返回 owned view；runtime 必须把这些定义 API 仅投影到 setup-time `def.state`，不得建立普通 `run.state` mutation surface。
+      en: The module facade must provide `bool`, `enum`, `string`, `numberRange`, `numberDiscrete`, and draft `numberList` state definitions returning owned views; the runtime must project these definition APIs only onto setup-time `def.state` and must not create an ordinary `run.state` mutation surface.
   - id: M-STATE-0001-B
     text:
       zh-CN: Module port 必须为 runtime、其它 Module 与特权 asHook 提供 internal `watch`、`disconnect`、`set`、`setDefault`、`setCallbackDispatcher` 以及 observed/borrowed view creation；runtime-owned callback dispatcher 必须让 privileged mutation 触发的 watcher 在所属 instance 的 callback scope 中接收当前 `run handle`。这些能力必须维持 capability view 与 phase boundary，不得直接暴露给普通作者。
@@ -60,6 +60,8 @@ satisfies:
     - C-STATE-0010
     - C-STATE-0011
     - C-STATE-0012
+    - id: C-STATE-NUMBER-LIST-0001
+      since: 0.3.0-alpha.1
 verifies:
   tests:
     - T-STATE-0001
@@ -97,8 +99,8 @@ openQuestions:
       zh-CN: 何时应把现有 validator helper 接入 define、`setDefault` 与 `set`，并决定 range clamp 与 invalid mutation 的统一诊断语义？
       en: When should the existing validator helpers be wired into definition, `setDefault`, and `set`, with unified diagnostics for range clamping and invalid mutation?
     context:
-      zh-CN: 当前 Module 保存有限 spec metadata，但 kernel 尚未执行完整 value-domain validation；`C-STATE-0006-Q-VALIDATION` 仍是明确债务，本轮不把 helper 的存在冒充 runtime guarantee。
-      en: The Module currently preserves finite spec metadata, but the kernel does not yet enforce complete value-domain validation; `C-STATE-0006-Q-VALIDATION` remains explicit debt, and this pass does not treat the helper's existence as a runtime guarantee.
+      zh-CN: 当前 Module 保存有限 spec metadata，但 kernel 尚未执行完整 legacy scalar value-domain validation；`C-STATE-0006-Q-VALIDATION` 仍是明确债务，本轮不把 helper 的存在冒充 runtime guarantee。
+      en: The Module currently preserves finite spec metadata, but the kernel does not yet enforce complete legacy scalar value-domain validation; `C-STATE-0006-Q-VALIDATION` remains explicit debt, and this pass does not treat the helper's existence as a runtime guarantee.
     blocks: [state-value-validation-implementation]
   - id: M-STATE-0001-Q-REQUIRED-MODULE-VALIDATION
     question:
@@ -109,6 +111,9 @@ openQuestions:
       en: The current Runtime installs StateModuleDef unconditionally and the three official Adapters have no normal missing path; a future generic module-selection mechanism still needs to enforce required status.
     blocks: [configurable-runtime-module-selection]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added draft numberList facade and mandatory immutable sequence validation; legacy scalar debt remains.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Cataloged the runtime-owned State callback dispatcher and current-run binding for privileged watcher dispatch.

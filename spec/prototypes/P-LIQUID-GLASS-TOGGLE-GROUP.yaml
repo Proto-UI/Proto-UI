@@ -1,0 +1,32 @@
+id: P-LIQUID-GLASS-TOGGLE-GROUP
+type: prototype
+title: Liquid Glass ToggleGroup root projects the Base orientation axis
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Only the bounded orientation slice is cataloged; remaining Root semantics, full family recipes, real-host layout and native and Compiler admission remain incomplete.
+summary: A bounded orientation definition for the existing liquid-glass-toggle-group-root identity, not full ToggleGroup admission.
+statement:
+  en: Compose asToggleGroupRoot once. Read its borrowed orientation state to project the family layout axis without adding another interaction or state owner. Preserve the existing family surface and horizontal default.
+criteria:
+  - id: P-LIQUID-GLASS-TOGGLE-GROUP-ORIENTATION
+    text:
+      en: Read Base orientation without calling set or setDefault. Project vertical as a column; withdraw that contribution when horizontal is restored. Keep selection, collection, focus and prop normalization in Base. No DOM-derived orientation or independent keyboard owner is allowed. Full upstream appearance and unsupported hosts are not admitted by this slice.
+inherits:
+  prototypes: [P-BASE-TOGGLE-GROUP]
+dependsOn:
+  contracts: [C-AS-HOOK-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+verifies:
+  tests: [T-TOGGLE-GROUP-ORIENTATION-0001]
+sources:
+  - path: packages/prototypes/liquid-glass/src/toggle-group/root.proto.ts
+openQuestions:
+  - id: P-LIQUID-GLASS-TOGGLE-GROUP-Q-ADMISSION
+    question:
+      en: When are the remaining Root definition, family recipes, exact-source native layout and native and Compiler evidence ready for independent admission?
+    blocks: [activation:P-LIQUID-GLASS-TOGGLE-GROUP]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog only the existing root's bounded orientation projection and preserve remaining admission gates.
+tags: [prototype, liquid-glass, toggle-group, orientation, projection]

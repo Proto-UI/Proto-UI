@@ -1,0 +1,65 @@
+{
+  "date": "2026-10-11",
+  "scope": "Prototype-only Message Scroller Jump disabled guard and Toolbar Separator initialization",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "c7fd2b2185907b47ee793e9c1104081021a9c52f",
+  "sourceTree": "15cbf6d5efdd38bddf415501af0dd3b74dd22b45",
+  "parentBinding": "The sole parent of this record-only commit must have sourceTree.",
+  "reviewedSliceTree": "624bcfa2766c0bc2d1695c4da00a7c5ea9b04894",
+  "bindings": [
+    {
+      "path": "internal/records/2026-10-11-finf-collection-guard-rebuild.md",
+      "blob": "c3a6e54905862712a699337da58782d13c1661ae",
+      "sha256": "471ade328687c7ce7bbb60d80cae73a3c755bddf3fd4d57c22e0abcc398f43b9"
+    },
+    {
+      "path": "packages/prototypes/base/src/message-scroller/index.ts",
+      "blob": "26cedca704587d759a09139769edeec6539ca368",
+      "sha256": "2bf77937a9ea2d2fd1d532d05ead9da9ed166b1bbde72458c9e555f81464e390"
+    },
+    {
+      "path": "packages/prototypes/base/src/toolbar/separator.proto.ts",
+      "blob": "3bbb48e282cc9e0085adc5cf0a71a47a49b2f818",
+      "sha256": "a43d497fc42068a37e4c00e3ef8085940e0f030467e18c192e58617ca7a7d3a4"
+    },
+    {
+      "path": "packages/prototypes/base/test/collection-initialization-guards.test.ts",
+      "blob": "6b8993e6ec2962e3407adb2f3b0352ab5d306527",
+      "sha256": "6e4d72d2af380a811af139a9963b8a701896e3fa1c1c5c431041a9079b13ce9e"
+    }
+  ],
+  "integration": "Exact two production files and new five-case test are unchanged from the independent review. Only the author record gains the required complete three-sentence disclosure. The published State documentation is inherited without changes.",
+  "newPublisherValidation": {
+    "combined": {
+      "files": 13,
+      "passed": 123,
+      "failed": 0
+    },
+    "workspaceTypesExit": 0,
+    "sourcePrecommitExit": 0,
+    "generation": "Normal one-package CLI build and website generator; no full public-package build claim."
+  },
+  "independent": {
+    "suiteTests": 123,
+    "additionalUniqueBoundaryTests": 5,
+    "uniqueTotal": 128,
+    "baseline": {
+      "failed": 4,
+      "passed": 1
+    },
+    "focusedTypes": "pass"
+  },
+  "behavior": "Jump consults the current borrowed Button disabled state inside its extra press.commit handler, including synchronous click-listener reentry. Separator reads the current required Toolbar Context at creation and mount while keeping value-change subscription.",
+  "limitations": [
+    "HappyDOM WC accessibility attributes and anatomy-command requests are not native focus/paint or physical scrolling evidence.",
+    "Retained cross-root movement without a mount or Context value update remains unresolved.",
+    "No Compiler, IR, Runtime, Adapter or protocol activation changes.",
+    "Full aggregate CI, packed consumers, native/GPUI and screenshot validation remain separate.",
+    "No completed-item increment: 5 accepted / 63 unfinished, core 0 / 55."
+  ],
+  "reconstruction": "This is newly reconstructed and tested source; missing historical patches or pass counts are not reused."
+}

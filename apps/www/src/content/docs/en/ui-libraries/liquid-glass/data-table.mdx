@@ -1,0 +1,18 @@
+---
+title: 'Data-Table (WIP)'
+description: 'data-table composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Data Table composes passive Table topology with stable record IDs, stable sorting, global filtering, pagination and row selection. Rows are authored presentation slots indexed within the current page; cells render their columnKey from the current record, so sort changes update actual content without pretending CSS order changed Table structure. App-owned rows must have unique id values. The composition does not own fetching, editing or column reordering.
+
+WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+
+Sorting headers belong inside the static `DataTableHeaderRow` composition. It inherits passive Table Row topology, has no props or instance exposes, and creates no selection, focus or Trigger owner. Body rows remain `DataTableRow` record slots. The legacy `DataTableRow.header` prop still changes record-slot policy at runtime; it does not remove that row's setup-time Trigger identity and cannot contain multiple direct Trigger children. The examples use the new static composition without relaxing Trigger-chain rules.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-data-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

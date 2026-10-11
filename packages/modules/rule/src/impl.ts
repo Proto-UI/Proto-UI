@@ -39,6 +39,9 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
   private instancePhase: InstancePhase = 'setup';
   private mountPhase: MountPhase = 'detached';
   private unUseRuleStyle: FeedbackRuntimeStyleDisposer | null = null;
+  private applyingVisual = false;
+  private reevaluatePending = false;
+  private resyncPropsPending = false;
 
   define(spec: RuleSpec<Props>): RuleHandle {
     this.ensureAlive();
@@ -215,6 +218,28 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
 
   private evaluateAndApply(syncProps = true): void {
     if (!this.driverActive) return;
+    if (this.applyingVisual) {
+      this.reevaluatePending = true;
+      this.resyncPropsPending ||= syncProps;
+      return;
+    }
+    this.applyingVisual = true;
+    try {
+      do {
+        this.reevaluatePending = false;
+        this.resyncPropsPending = false;
+        this.applyVisualPlan(syncProps);
+        syncProps = this.resyncPropsPending;
+      } while (this.reevaluatePending && this.driverActive && !this.disposed);
+    } finally {
+      this.applyingVisual = false;
+      this.reevaluatePending = false;
+      this.resyncPropsPending = false;
+    }
+  }
+
+  private applyVisualPlan(syncProps: boolean): void {
+    if (!this.driverActive) return;
 
     this.ensureDeps();
     const { propsFacade, propsPort, feedbackPort, contextFacade } = this.deps;
@@ -233,13 +258,30 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
 
     if (res.kind !== 'plan' || res.plan.kind !== 'style.tokens') {
       if (this.unUseRuleStyle) {
-        this.unUseRuleStyle = feedbackPort.replaceStyleRuntime(this.unUseRuleStyle);
+        this.unUseRuleStyle = feedbackPort.replaceVisualRuntime
+          ? feedbackPort.replaceVisualRuntime(this.unUseRuleStyle, [], [])
+          : feedbackPort.replaceStyleRuntime(this.unUseRuleStyle);
       }
       return;
     }
 
     const tokens = res.plan.tokens ?? [];
-    if (tokens.length === 0 && !this.unUseRuleStyle) return;
+    const materials = res.plan.materials ?? [];
+    if (tokens.length === 0 && materials.length === 0 && !this.unUseRuleStyle) return;
+
+    if (feedbackPort.replaceVisualRuntime) {
+      const next = feedbackPort.replaceVisualRuntime(
+        this.unUseRuleStyle,
+        tokens.length ? [{ kind: 'tw', tokens }] : [],
+        materials
+      );
+      if (!this.driverActive || this.disposed) {
+        next?.();
+        this.unUseRuleStyle = null;
+      } else this.unUseRuleStyle = next;
+      return;
+    }
+    if (materials.length) throw new Error('Feedback port cannot consume material intent');
 
     this.unUseRuleStyle = feedbackPort.replaceStyleRuntime(
       this.unUseRuleStyle,

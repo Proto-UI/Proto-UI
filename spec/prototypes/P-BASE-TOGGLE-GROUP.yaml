@@ -1,0 +1,49 @@
+id: P-BASE-TOGGLE-GROUP
+type: prototype
+title: ToggleGroup orientation remains Base-owned across family layout projections
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Bounded draft orientation slice; complete ToggleGroup cataloging, real-host layout, native and Compiler composition and independent admission remain incomplete.
+summary: One Base orientation drives accessibility, keyboard navigation and four family layout axes without defining additional ToggleGroup capabilities.
+statement:
+  en: ToggleGroup Root owns the effective orientation, horizontal when omitted. Existing Props normalization remains authoritative. Accessibility orientation, roving axis and the typed asToggleGroupRoot orientation state describe the same effective value. Family recipes only read this borrowed state; this is a recipe constraint, not a new read-only hook capability. No AppMaker orientation expose is introduced.
+criteria:
+  - id: P-BASE-TOGGLE-GROUP-OWNER
+    text:
+      en: Preserve the existing horizontal-or-vertical prop and its normalization. Extend the typed hook state contract with orientation matching the existing string state. Borrowed state operations retain C-AS-HOOK-0007 semantics. Family recipes compose Base once and only read its orientation; they must not infer it from DOM or install independent orientation, keyboard or collection ownership.
+  - id: P-BASE-TOGGLE-GROUP-LAYOUT
+    text:
+      en: Shadcn, Brutalist, Bootstrap 2.3.2 and Liquid Glass root projections arrange vertical items in a column and retain the existing horizontal row when omitted or horizontal. Reversible prop changes withdraw the previous direction contribution without resetting selection, membership or focus ownership. This slice adds no selection, size, variant or spacing behavior and does not claim complete upstream visual parity.
+  - id: P-BASE-TOGGLE-GROUP-EVIDENCE
+    text:
+      en: Verify initial and dynamic axes, default horizontal preservation, invalid and empty prop normalization, typed hook boundaries, selection retention and orientation-aware navigation separately from real-host geometry and screenshots. Synthetic host checks alone cannot admit complete visual or native and Compiler conformance.
+openQuestions:
+  - id: P-BASE-TOGGLE-GROUP-Q-ADMISSION
+    question:
+      en: When do complete ToggleGroup definitions, exact-source real-host layout and screenshots, native and Compiler composition and independent review support admission?
+    blocks:
+      - activation:P-BASE-TOGGLE-GROUP
+sources:
+  - path: packages/prototypes/base/src/toggle-group/root.proto.ts
+  - path: packages/prototypes/base/src/toggle-group/types.ts
+  - path: packages/prototypes/shadcn/src/toggle-group/root.proto.ts
+  - path: packages/prototypes/brutalist/src/toggle-group/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/toggle-group/root.proto.ts
+  - path: packages/prototypes/liquid-glass/src/toggle-group/root.proto.ts
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0007
+    - C-PROPS-0001
+    - C-PROPS-0009
+    - C-AS-FOCUS-ROVING-0001
+    - C-A11Y-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+verifies:
+  tests:
+    - T-TOGGLE-GROUP-ORIENTATION-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define bounded Base-owned orientation and read-only recipe use of borrowed state, retaining native and full-catalog gates.
+tags: [prototype, base, toggle-group, orientation, projection]

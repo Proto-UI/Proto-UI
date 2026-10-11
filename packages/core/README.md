@@ -24,6 +24,7 @@ npm install @proto.ui/core@0.3.0-alpha.1
 - `src/caps/`
 - `src/collection.ts`
 - `src/context.ts`
+- `src/control-label.ts`
 - `src/delay.ts`
 - `src/effects/`
 - `src/errors/`
@@ -33,6 +34,7 @@ npm install @proto.ui/core@0.3.0-alpha.1
 - `src/image-view.ts`
 - `src/index.ts`
 - `src/internal.ts`
+- `src/material.ts`
 - `src/module/`
 - `src/move.ts`
 - `src/overlay.ts`

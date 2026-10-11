@@ -40,6 +40,7 @@ export const createRunHandle = <P extends PropsBaseType>(
     context: {
       read: (key) => context.read(key),
       tryRead: (key) => context.tryRead(key),
+      tryReadAncestor: (key) => context.tryReadAncestor(key),
       update: (key, next) => context.update(key, next),
       tryUpdate: (key, next) => context.tryUpdate(key, next),
     },

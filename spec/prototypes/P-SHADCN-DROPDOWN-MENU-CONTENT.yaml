@@ -1,6 +1,6 @@
 id: P-SHADCN-DROPDOWN-MENU-CONTENT
 type: prototype
-title: Shadcn Dropdown Menu Content inherits Base menu overlay behavior and adds the current animated surface
+title: Shadcn Dropdown Menu Content inherits Base menu overlay behavior and adds the base-nova draft animated surface
 status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Dropdown Menu Content inherits Base menu accessibility, overlay, presence, positioning, portal, keyboard, and dismissal behavior and adds current transition and surface styling.
@@ -42,8 +42,8 @@ criteria:
       en: The current Content protocol is exposed as the `shadcn-dropdown-content` direct prototype.
   - id: P-SHADCN-DROPDOWN-MENU-CONTENT-TRANSITION
     text:
-      zh-CN: Content 必须通过 inherited Transition handle 配置 enterDuration=150ms、leaveDuration=100ms，并在 leave 完成前保留 portaled surface。
-      en: Content must configure enterDuration=150ms and leaveDuration=100ms through the inherited Transition handle and retain the portaled surface until leave completion.
+      zh-CN: Content 必须通过 inherited Transition handle 配置 enterDuration=100ms、leaveDuration=100ms，并在 leave 完成前保留 portaled surface。
+      en: Content must configure enterDuration=100ms and leaveDuration=100ms through the inherited Transition handle and retain the portaled surface until leave completion.
   - id: P-SHADCN-DROPDOWN-MENU-CONTENT-CURRENT-VISUAL-SURFACE
     text:
       zh-CN: Content 必须提供当前 height/width constraints、overflow、popover colors、radius、border、padding、shadow、outline 与 duration tokens。
@@ -81,8 +81,10 @@ sources:
   - path: packages/prototypes/shadcn/src/dropdown/content.proto.ts
   - path: packages/prototypes/shadcn/test/dropdown.test.ts
   - path: spec/prototypes/P-BASE-TRANSITION.yaml
+  - path: https://ui.shadcn.com/r/styles/base-nova/dropdown-menu.json
+    label: Read-only base-nova reference sha256 335c59dba30145f434a9cc9ccb0438a3c5e2afe857fc11b029de1ecb415224d7
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx
-    label: shadcn/ui v4 new-york DropdownMenuContent pinned baseline
+    label: shadcn/ui v4 new-york DropdownMenuContent historical pinned baseline
 dependsOn:
   contracts:
     [
@@ -100,6 +102,9 @@ inherits:
       note: Default inherited menu-overlay protocol; explicit setup-time negative patches must be declared.
 verifies: { tests: [T-SHADCN-DROPDOWN-MENU-CONTENT-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Selected user-requested base-nova visual reference for this draft; historical source remains recorded and exact visual acceptance is pending.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Dropdown Menu Content delta cataloging with Base inheritance, configured transitions, current animations, asChild omission, and centralized differences.

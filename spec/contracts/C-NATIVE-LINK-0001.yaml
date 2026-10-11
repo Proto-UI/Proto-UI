@@ -1,0 +1,42 @@
+id: C-NATIVE-LINK-0001
+type: contract
+title: Native Link retains host-owned navigation on one declared target
+status: draft
+since: 0.3.0-alpha.1
+summary: Narrow native destination projection without extending Template props or replacing browser navigation with requests.
+lifecycleRationale:
+  en: The owner authorized this bounded Web implementation; native-browser and assistive-technology evidence and Compiler/native profiles remain incomplete, so this is not a stable guarantee.
+statement:
+  en: A static native-link declaration selects one real navigation target before rendering. A setup handle replaces its bounded destination configuration in callback scope. The host owns native activation and default navigation; observations cannot become a second navigation engine.
+criteria:
+  - id: C-NATIVE-LINK-0001-A
+    text:
+      en: React, Vue and Vue2 select one anchor root. Web Component light and ordinary Shadow profiles retain the logical custom-element owner and project content, focus and accessibility to a local anchor. Conflicting physical declarations and unsupported Shadow-split must diagnose. Template props remain style-only.
+  - id: C-NATIVE-LINK-0001-B
+    text:
+      en: Complete sync replaces href, target, rel and disabled. Relative routes and HTTP, HTTPS, mailto, tel, sms, FTP and FTPS are admitted; other schemes and URL controls fail closed. Blank targeting includes noopener while retaining explicit rel tokens.
+  - id: C-NATIVE-LINK-0001-C
+    text:
+      en: Enabled native navigation preserves default activation, modifiers and middle clicks without synthetic clicks or routing. Read-only navigate observations use a later task after default processing. Space is not synthesized into activation. Disabled suppresses native click and auxiliary-click defaults, removes href and native tab participation, and carries aria-disabled.
+  - id: C-NATIVE-LINK-0001-D
+    text:
+      en: Replacement, detach and disposal retire the old lease and pending observations. Reentrant attachment, updates and disposal cannot revive a stale lease or overwrite a successor. Cleanup restores only still-owned host attributes and preserves caller content.
+  - id: C-NATIVE-LINK-0001-E
+    text:
+      en: Compiler-produced Web, Flutter, Qt and GPUI remain unsupported. Synthetic adapter tests do not establish native-browser context menus, URL preview, new-tab or assistive-technology acceptance.
+dependsOn:
+  contracts:
+    - C-TEMPLATE-0003
+sources:
+  - path: packages/core/src/native-link.ts
+  - path: packages/hooks/src/as-native-link.ts
+  - path: packages/modules/native-link/src/create.ts
+  - path: packages/modules/native-link/src/web.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the bounded native-link declaration, replacement and Web host ownership draft.
+tags:
+  - navigation
+  - native-link
+  - web

@@ -58,6 +58,11 @@ export function composeHomepageText(node: DemoNode, family: ProjectionFamilyId):
           kind: 'proto',
           prototypeId: `${family}-text-root`,
           rootTag: 'span',
+          // These owners are standalone block text. Declare their formatting
+          // context through the normalized surface channel: WC's default block
+          // host and a framework's inline span otherwise produce different
+          // parent line boxes even with identical family typography and gaps.
+          surfaceStyle: { display: 'block' },
           ...(node.ref ? { ref: `${node.ref}-text` } : {}),
           props: { ...props },
           children: [

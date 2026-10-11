@@ -63,10 +63,11 @@ describe('prototypes/shadcn: tabs', () => {
     expect(styleContains(triggerA, 'rounded-md')).toBe(true);
     expect(styleContains(triggerA, 'px-2')).toBe(true);
     expect(styleContains(triggerA, 'py-1')).toBe(true);
-    expect(styleContains(triggerA, 'text-foreground/60')).toBe(true);
-    expect(styleContains(triggerA, 'data-[selected]:bg-background')).toBe(true);
-    expect(styleContains(triggerA, 'data-[selected]:text-foreground')).toBe(true);
-    expect(styleContains(triggerA, 'data-[selected]:shadow-sm')).toBe(true);
+    expect(styleContains(triggerB, 'text-foreground/60')).toBe(true);
+    expect(styleContains(triggerA, 'text-foreground/60')).toBe(false);
+    expect(styleContains(triggerA, 'bg-background')).toBe(true);
+    expect(styleContains(triggerA, 'text-foreground')).toBe(true);
+    expect(styleContains(triggerA, 'shadow-sm')).toBe(true);
 
     expect(styleContains(contentA, 'flex-1')).toBe(true);
     expect(styleContains(contentA, 'outline-none')).toBe(true);
@@ -80,7 +81,7 @@ describe('prototypes/shadcn: tabs', () => {
     expect(contentA.getExposes().current.get()).toBe(true);
     expect(triggerA.hasAttribute('data-selected')).toBe(true);
     expect(triggerA.getAttribute('aria-selected')).toBe('true');
-    expect(styleContains(triggerA, 'data-[selected]:bg-background')).toBe(true);
+    expect(styleContains(triggerA, 'bg-background')).toBe(true);
     expect(styleContains(contentA, 'flex-1')).toBe(true);
     expect(styleContains(contentB, 'data-[hidden]:hidden')).toBe(false);
     expect(contentB.hasAttribute('hidden')).toBe(false);
@@ -94,7 +95,9 @@ describe('prototypes/shadcn: tabs', () => {
     expect(contentB.getExposes().current.get()).toBe(true);
     expect(triggerB.hasAttribute('data-selected')).toBe(true);
     expect(triggerB.getAttribute('aria-selected')).toBe('true');
-    expect(styleContains(triggerB, 'data-[selected]:bg-background')).toBe(true);
+    expect(styleContains(triggerB, 'bg-background')).toBe(true);
+    expect(styleContains(triggerA, 'bg-background')).toBe(false);
+    expect(styleContains(triggerA, 'shadow-sm')).toBe(false);
     expect(styleContains(contentB, 'flex-1')).toBe(true);
     expect(styleContains(contentA, 'data-[hidden]:hidden')).toBe(false);
     expect(contentA.hasAttribute('hidden')).toBe(true);
@@ -126,14 +129,18 @@ describe('prototypes/shadcn: tabs', () => {
     await Promise.resolve();
 
     expect(trigger.getExposes().focusVisible.get()).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:ring-3')).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:ring-ring/50')).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:border-ring')).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:outline-1')).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:outline-ring')).toBe(true);
-    expect(styleContains(trigger, 'data-[focus-visible]:ring-offset-2')).toBe(false);
-    expect(styleContains(trigger, 'data-[focus-visible]:shadow-xs')).toBe(false);
+    expect(styleContains(trigger, 'ring-3')).toBe(true);
+    expect(styleContains(trigger, 'ring-ring/50')).toBe(true);
+    expect(styleContains(trigger, 'border-ring')).toBe(true);
+    expect(styleContains(trigger, 'outline-1')).toBe(true);
+    expect(styleContains(trigger, 'outline-ring')).toBe(true);
+    expect(styleContains(trigger, 'ring-offset-2')).toBe(false);
+    expect(styleContains(trigger, 'shadow-xs')).toBe(false);
 
+    trigger.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    await Promise.resolve();
+    expect(styleContains(trigger, 'ring-3')).toBe(false);
+    matchesSpy.mockRestore();
     root.remove();
     await Promise.resolve();
   });

@@ -30,7 +30,7 @@ v0 explicitly does **not** provide or guarantee:
 
 - **Automatic render/update scheduling**: state mutation MUST NOT implicitly trigger render or commit.
 - **Dependency tracking or implicit subscriptions**: reading state MUST NOT establish dependencies.
-- **Value-domain validation**: spec metadata may exist, but enforcement is not required in v0.
+- **Legacy scalar value-domain validation**: spec metadata may exist, but enforcement is not required in v0. Draft number.list independently requires complete validation.
 - **Cross-channel projections**: Borrowed / Observed / App-side views are not defined here.
 - **Interaction signals**: interaction-derived or fromInteraction state is not defined here.
 - **Watch semantics**: watch behavior (delivery, ordering, re-entrancy) is not specified in this contract.
@@ -66,8 +66,9 @@ v0 explicitly does **not** provide or guarantee:
 - `def.state.string(semantic, defaultValue, spec?)`
 - `def.state.numberRange(semantic, defaultValue, spec)`
 - `def.state.numberDiscrete(semantic, defaultValue, spec?)`
+- Draft `def.state.numberList(semantic, initial: readonly number[])` (`C-STATE-NUMBER-LIST-0001`)
 
-> Note: In v0, spec metadata (e.g. options/min/max/step/clamp) may exist as descriptive information, but implementations are not required to enforce validation.
+> Note: For legacy scalar v0 kinds, spec metadata (e.g. options/min/max/step/clamp) may exist as descriptive information, but implementations are not required to enforce validation.
 
 ---
 
@@ -182,3 +183,7 @@ Implementations MUST be validated for at least:
 - asHook projections: `role/asHook*.v0.md`
 - Interaction signals / fromInteraction: `interaction-signals/*.v0.md`
 - Execution-phase guard: `runtime/exec-phase-guard.v0.md`
+
+## Draft number.list extension
+
+`C-STATE-NUMBER-LIST-0001` owns the current draft direction: dense finite-number array inputs are validated by own data descriptors, copied into ordinary frozen snapshots, and normalized from -0 to +0. Empty values, duplicates, cross-realm arrays and pure-data Array subclasses are admitted without retaining prototypes. Extra own properties, accessors, holes and non-finite elements are rejected. Caller inputs are never frozen. Equal normalized contents retain identity and emit nothing; changed set emits one full immutable transition, while setDefault remains silent. Existing phases, capability views and instance lifecycle apply. Public exposed get/subscribe is available without automatic scalar DOM/CSS mapping. Scalar Rule eq rejects this kind; Compiler support remains separate and unimplemented here. StateSetReason remains unknown, and Context mutable JSON consumers explicitly copy readonly snapshots. No sorting, quantization, spacing or cross-slot transaction is introduced; legacy scalar Object.is and validation behavior remain unchanged.

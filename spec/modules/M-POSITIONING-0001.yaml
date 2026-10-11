@@ -17,14 +17,22 @@ criteria:
     text:
       en: 'Disconnect and terminal prototype unmount dispose the lease and clear connection and snapshot. requestUpdate delegates only to a live lease. This Module does not own open state, Portal, focus, or perceptual transition policy.'
       zh-CN: 'disconnect 和 terminal prototype unmount 释放 lease 并清空 connection 与 snapshot。requestUpdate 仅委托当前 lease。本 Module 不拥有 open state、Portal、focus 或感知 transition policy。'
+  - id: M-POSITIONING-0001-AVAILABLE
+    text:
+      en: 'A parallel AvailableSpaceHandle retains an opaque root-content target declaration, acquires at most one current host lease, and replaces it on capability or target changes. Disconnect and terminal unmount revoke it independently of anchored positioning.'
+      zh-CN: '并列 AvailableSpaceHandle 保留不透明 root-content 目标声明，至多拥有一个当前 host 租约，能力或目标变化时替换；disconnect 和 terminal unmount 独立撤销该租约。'
 satisfies:
   contracts:
     - C-ANCHORED-POSITIONING-0001
 requires:
   hostCaps:
+    - id: HC-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
     - HC-ANCHORED-POSITION-0001
 verifies:
   tests:
+    - id: T-AVAILABLE-SPACE-0001
+      since: 0.3.0-alpha.1
     - T-ANCHORED-POSITIONING-0001
 sources:
   - path: packages/modules/positioning/src/create.ts

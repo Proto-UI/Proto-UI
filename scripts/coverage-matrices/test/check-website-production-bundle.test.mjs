@@ -1,5 +1,10 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import ts from 'typescript';
+import { fileURLToPath } from 'node:url';
 import {
   collectWebsiteProductionBundleIssues,
   validateWebsiteProductionBundle,
@@ -36,6 +41,23 @@ function chunk(
     moduleIds,
   };
 }
+
+test('pointer contact is an actual router-owned leaf with no optical dependency', async () => {
+  const { readFileSync } = await import('node:fs');
+  const router = readFileSync(
+    new URL('../../../packages/adapters/base/src/events/web-event-router.ts', import.meta.url),
+    'utf8'
+  );
+  const contact = readFileSync(
+    new URL('../../../packages/adapters/base/src/events/pointer-contact.ts', import.meta.url),
+    'utf8'
+  );
+  assert.match(
+    router,
+    /import \{ createWebPointerContactWriter, type WebPointerContact \} from '\.\/pointer-contact'/
+  );
+  assert.doesNotMatch(contact, /^\s*import\b|\bimport\s*\(|\bfrom\s*['"]/m);
+});
 
 function graphFixture() {
   return {
@@ -87,6 +109,24 @@ function graphFixture() {
         imports: ['_astro/wc-host.js'],
         dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
         moduleIds: ['apps/www/src/pages/en/test/new-projection-families.astro'],
+      }),
+      chunk('_astro/bootstrap-state-controls.js', {
+        isEntry: true,
+        facadeModuleId:
+          'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/wc-host.js'],
+        dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+        moduleIds: ['apps/www/src/pages/en/test/bootstrap-state-controls.astro'],
+      }),
+      chunk('_astro/liquid-library-card.js', {
+        isEntry: true,
+        facadeModuleId:
+          'apps/www/src/components/LibraryLiquidCandidatePage.astro?astro&type=script&index=0&lang.ts',
+        imports: ['_astro/wc-host.js'],
+        moduleIds: [
+          'apps/www/src/components/library-liquid-card-client.ts',
+          'apps/www/src/components/library-liquid-scene.ts',
+        ],
       }),
       chunk('_astro/liquid-glass-material.js', {
         isEntry: true,
@@ -145,17 +185,10 @@ test('Bootstrap state-control fixture keeps framework runtimes lazy in its exact
   const graph = graphFixture();
   const facade =
     'apps/www/src/pages/en/test/bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts';
-  graph.chunks.push(
-    chunk('_astro/bootstrap-state-controls.js', {
-      isEntry: true,
-      facadeModuleId: facade,
-      imports: ['_astro/wc-host.js'],
-      dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
-      moduleIds: ['apps/www/src/pages/en/test/bootstrap-state-controls.astro'],
-    })
-  );
+  const entry = graph.chunks.find((candidate) => candidate.facadeModuleId === facade);
+  assert.ok(entry, 'the canonical graph already includes the approved Bootstrap fixture');
   assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
-  graph.chunks.at(-1).imports.push('_astro/react.js');
+  entry.imports.push('_astro/react.js');
   assert.ok(
     collectWebsiteProductionBundleIssues({ graph }).some(
       (issue) => issue.includes(facade) && issue.includes('statically includes the react Adapter')
@@ -233,6 +266,8 @@ test('rejects a graph without route-owned Web Component host provenance', () => 
     '_astro/home-demo.js',
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
+    '_astro/bootstrap-state-controls.js',
+    '_astro/liquid-library-card.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -251,6 +286,8 @@ test('does not mistake an orphaned WC runtime for primary host provenance', () =
     '_astro/home-demo.js',
     '_astro/new-projection-families.js',
     '_astro/liquid-glass-material.js',
+    '_astro/bootstrap-state-controls.js',
+    '_astro/liquid-library-card.js',
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -392,6 +429,9 @@ test('allows Adapter modules only in the exact reviewed site-control bridge chun
 test('rejects unreviewed Adapter modules inside the reviewed bridge chunk', () => {
   const graph = graphFixture();
   const unreviewedModules = [
+    // This helper belongs to lazy framework adapters, not the sitewide WC
+    // bridge. Do not make a barrel/chunk regression pass by admitting it here.
+    'packages/adapters/base/src/host/instance-associations.ts',
     'packages/adapters/base/src/host/unreviewed-extension.ts',
     'packages/adapters/web-component/src/unreviewed-extension.ts',
   ];
@@ -731,7 +771,26 @@ for (const family of ['react', 'vue', 'vue2', 'wc'])
       else assert.deepEqual(issues, []);
     });
 
+const reviewedWcHelpers = [
+  'packages/adapters/base/src/platform/portal-direction.ts',
+  'packages/adapters/web-component/src/focus-scope-targets.ts',
+  'packages/adapters/web-component/src/keyed-meta-sources.ts',
+  'packages/adapters/web-component/src/portal-conceal.ts',
+  'packages/adapters/web-component/src/portal-mount.ts',
+  'packages/adapters/web-component/src/shadow-color-scheme-environment.ts',
+  'packages/adapters/web-component/src/shadow-inner-surface.ts',
+  'packages/adapters/web-component/src/shadow-owner-shell.ts',
+  'packages/adapters/web-component/src/shadow-profile.ts',
+  'packages/adapters/web-component/src/shadow-split-effects.ts',
+  'packages/adapters/web-component/src/shadow-split-meta.ts',
+  'packages/adapters/web-component/src/shadow-split-resources.ts',
+  'packages/adapters/web-component/src/shadow-style-artifact.ts',
+  'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
+  'packages/adapters/web-component/src/shadow-text-control-surface.ts',
+];
+
 const siteOwners = [
+  ['UiLibraryGallery.astro', 'library-card-client.ts'],
   ['Homepage/HomepageRuntime.astro', 'Homepage/homepage-runtime-client.ts'],
   ['override/Header.astro', 'site-header-surface.ts'],
   ['override/Search.astro', 'site-search-commands.ts'],
@@ -787,7 +846,49 @@ for (const [entry, owner] of siteOwners) {
       .imports.push(target);
     return bridge;
   }
+  test(`bridge origin: ${entry} admits router-owned pointer contact transitively`, () => {
+    const { graph } = siteGraph();
+    const router = 'packages/adapters/base/src/events/web-event-router.ts';
+    const contact = 'packages/adapters/base/src/events/pointer-contact.ts';
+    const bridge = addReviewedBridgeTarget(graph, router);
+    bridge.moduleIds.push(contact);
+    graph.modules.push({ id: contact, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === router).imports.push(contact);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    const unknown = 'packages/adapters/base/src/events/pointer-contact-unreviewed.ts';
+    bridge.moduleIds.push(unknown);
+    graph.modules.push({ id: unknown, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === router).imports.push(unknown);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(unknown)
+      )
+    );
+  });
+  test(`bridge origin: ${entry} admits the exact WC-owned color scheme provider transitively`, () => {
+    const { graph } = siteGraph();
+    const adapter = 'packages/adapters/web-component/src/adapt.ts';
+    const source = 'packages/adapters/web-component/src/color-scheme-source.ts';
+    const bridge = addReviewedBridgeTarget(graph, adapter);
+    bridge.moduleIds.push(source);
+    graph.modules.push({ id: source, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === adapter).imports.push(source);
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    // Reviewing this exact provider never admits adjacent or similarly named helpers.
+    const unknown = 'packages/adapters/web-component/src/color-scheme-source-unreviewed.ts';
+    bridge.moduleIds.push(unknown);
+    graph.modules.push({ id: unknown, imports: [], dynamicImports: [] });
+    graph.modules.find((item) => item.id === adapter).imports.push(unknown);
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes('unowned importer edge') && issue.includes(unknown)
+      )
+    );
+  });
   for (const target of [
+    'packages/adapters/base/src/events/pointer-contact.ts',
+    ...reviewedWcHelpers,
+    'packages/adapters/web-component/src/color-scheme-source.ts',
     'packages/adapters/web-component/src/adapt.ts',
     'packages/adapters/web-component/src/material/owned-texture-sink.ts',
     'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
@@ -820,7 +921,11 @@ for (const [entry, owner] of siteOwners) {
       }
     }
   }
-  for (const api of ['site-shadcn-controls.ts', 'site-native-controls.ts']) {
+  for (const api of [
+    'site-shadcn-controls.ts',
+    'site-native-controls.ts',
+    'library-card-client.ts',
+  ]) {
     test(`bridge origin: ${entry} accepts exact ${api} and its helper but rejects helper bypass`, () => {
       const { graph, root } = siteGraph();
       const target = 'packages/adapters/web-component/src/adapt.ts';
@@ -1097,6 +1202,7 @@ test('rejects a runtime facade paired with another runtime source identity', () 
 });
 
 for (const moduleId of [
+  ...reviewedWcHelpers,
   'packages/adapters/web-component/src/material/owned-texture-sink.ts',
   'packages/adapters/web-component/src/runtime/experimental-visual-consumer.ts',
   'packages/adapters/web-component/src/visual-surface.ts',
@@ -1130,3 +1236,203 @@ for (const moduleId of [
     });
   }
 }
+
+test('Bootstrap state-controls admission is exact and keeps frameworks lazy', () => {
+  const graph = graphFixture();
+  const route = graph.chunks.find(
+    (entry) => entry.fileName === '_astro/bootstrap-state-controls.js'
+  );
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+  route.imports.push('_astro/react.js');
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('statically includes the react Adapter')
+    )
+  );
+  route.imports.pop();
+  route.facadeModuleId =
+    'apps/www/src/pages/en/test/copied-bootstrap-state-controls.astro?astro&type=script&index=0&lang.ts';
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph }).some((issue) =>
+      issue.includes('Website shell entry')
+    )
+  );
+});
+
+const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const configSource = ts.createSourceFile(
+  'astro.config.mjs',
+  fs.readFileSync(path.join(repositoryRoot, 'apps/www/astro.config.mjs'), 'utf8'),
+  ts.ScriptTarget.Latest,
+  true,
+  ts.ScriptKind.JS
+);
+const chunkFunction = configSource.statements.find(
+  (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'websiteManualChunk'
+);
+assert.ok(chunkFunction);
+const classifyChunk = vm.runInNewContext(`(${chunkFunction.getText(configSource)})`, {
+  normalizedBundleModuleId: (id) => id,
+});
+const materialBoundary = chunkFunction.body.statements.find(
+  (node) =>
+    ts.isIfStatement(node) &&
+    node.getText(configSource).includes('packages/adapters/base/src/material/')
+);
+assert.ok(materialBoundary);
+const regroupMaterial = vm.runInNewContext(
+  `(${chunkFunction.getText(configSource).replace(materialBoundary.getText(configSource), '')})`,
+  { normalizedBundleModuleId: (id) => id }
+);
+const optionalMaterialSources = fs
+  .readdirSync(path.join(repositoryRoot, 'packages/adapters/base/src/material'))
+  .filter((name) => name.endsWith('.ts'))
+  .map((name) => `packages/adapters/base/src/material/${name}`);
+for (const moduleId of optionalMaterialSources) {
+  test(`manual chunk preserves existing lazy material boundary: ${moduleId}`, () => {
+    assert.equal(classifyChunk(moduleId), undefined);
+    assert.equal(
+      regroupMaterial(moduleId),
+      'site-shadcn-controls',
+      'Removing the precise exclusion must reproduce eager regrouping.'
+    );
+  });
+  for (const via of ['same bridge chunk', 'static dependency chunk']) {
+    test(`material remains forbidden in ordinary shells through ${via}: ${moduleId}`, () => {
+      const graph = graphFixture();
+      const bridge = graph.chunks.find(
+        (item) => item.fileName === '_astro/site-shadcn-controls.js'
+      );
+      if (via === 'same bridge chunk') bridge.moduleIds.push(moduleId);
+      else {
+        graph.chunks.push(chunk('_astro/forbidden-material.js', { moduleIds: [moduleId] }));
+        bridge.imports.push('_astro/forbidden-material.js');
+      }
+      assert.ok(
+        collectWebsiteProductionBundleIssues({ graph }).some(
+          (issue) => issue.includes('statically reaches forbidden') && issue.includes(moduleId)
+        )
+      );
+    });
+  }
+}
+test('manual chunk keeps reviewed WC controls grouped and framework-only associations outside', () => {
+  for (const id of [
+    'apps/www/src/components/site-shadcn-controls.ts',
+    'packages/adapters/web-component/src/adapt.ts',
+    ...reviewedWcHelpers,
+  ])
+    assert.equal(classifyChunk(id), 'site-shadcn-controls');
+  assert.equal(
+    classifyChunk('packages/adapters/base/src/host/instance-associations.ts'),
+    undefined
+  );
+});
+test('all additionally reviewed WC helpers are statically owned by the actual public entry', () => {
+  const seen = new Set();
+  const queue = ['packages/adapters/web-component/src/index.ts'];
+  while (queue.length) {
+    const id = queue.shift();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    const file = path.join(repositoryRoot, id);
+    const source = ts.createSourceFile(
+      id,
+      fs.readFileSync(file, 'utf8'),
+      ts.ScriptTarget.Latest,
+      true
+    );
+    for (const node of source.statements) {
+      if (
+        !(ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) ||
+        !node.moduleSpecifier ||
+        !ts.isStringLiteral(node.moduleSpecifier)
+      )
+        continue;
+      if (node.isTypeOnly || (ts.isImportDeclaration(node) && node.importClause?.isTypeOnly))
+        continue;
+      const specifier = node.moduleSpecifier.text;
+      let target;
+      if (specifier.startsWith('.')) target = path.resolve(path.dirname(file), specifier);
+      else if (specifier === '@proto.ui/adapter-base')
+        target = path.join(repositoryRoot, 'packages/adapters/base/src/index');
+      else continue;
+      const resolved = [`${target}.ts`, path.join(target, 'index.ts')].find((candidate) =>
+        fs.existsSync(candidate)
+      );
+      if (resolved) queue.push(path.relative(repositoryRoot, resolved));
+    }
+  }
+  for (const id of reviewedWcHelpers)
+    assert.ok(seen.has(id), `Missing actual public Adapter ownership: ${id}`);
+});
+
+for (const source of [
+  'apps/www/src/components/snapshot-prototype-style.ts',
+  'apps/www/src/components/site-startup-paint.ts',
+  'packages/cli/src/services/proto-style-css.ts',
+]) {
+  for (const dynamic of [false, true]) {
+    for (const [form, moduleId] of [
+      ['plain', source],
+      ['query', `${source}?used`],
+      ['windows', source.replaceAll('/', '\\')],
+      ['windows-query', `${source.replaceAll('/', '\\')}?used`],
+    ]) {
+      test(`startup prerender stays server-only: ${source} dynamic=${dynamic} ${form}`, () => {
+        const graph = graphFixture();
+        graph.chunks.push(
+          chunk('_astro/prerender-leak.js', {
+            isEntry: !dynamic,
+            isDynamicEntry: dynamic,
+            moduleIds: [moduleId],
+          })
+        );
+        assert.ok(
+          collectWebsiteProductionBundleIssues({ graph }).some(
+            (issue) => issue.includes('server-only prerender module') && issue.includes(moduleId)
+          )
+        );
+      });
+    }
+  }
+}
+
+// A new private route is an exact entry, never a directory-wide shell exemption.
+test('Liquid Card producer requires its exact route facade and stays outside ordinary shells', () => {
+  const good = graphFixture();
+  assert.deepEqual(collectWebsiteProductionBundleIssues({ graph: good }), []);
+  const missing = structuredClone(good);
+  missing.chunks = missing.chunks.filter(
+    (chunk) => chunk.fileName !== '_astro/liquid-library-card.js'
+  );
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missing }).some((issue) =>
+      issue.includes('LibraryLiquidCandidatePage.astro')
+    )
+  );
+  const renamed = structuredClone(good);
+  renamed.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).facadeModuleId =
+    'apps/www/src/pages/[locale]/test/foreign-card.astro?astro&type=script&index=0&lang.ts';
+  assert.ok(collectWebsiteProductionBundleIssues({ graph: renamed }).length > 0);
+  const missingOwner = structuredClone(good);
+  missingOwner.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).moduleIds = [];
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: missingOwner }).some((issue) =>
+      issue.includes('exact client')
+    )
+  );
+  const foreignRuntime = structuredClone(good);
+  foreignRuntime.chunks.find(
+    (chunk) => chunk.fileName === '_astro/liquid-library-card.js'
+  ).dynamicImports = ['_astro/react.js'];
+  assert.ok(
+    collectWebsiteProductionBundleIssues({ graph: foreignRuntime }).some((issue) =>
+      issue.includes('only WC')
+    )
+  );
+});

@@ -1,0 +1,18 @@
+---
+title: 'Data-Table (WIP)'
+description: 'data-table composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Data Table 将被动 Table 结构与稳定记录 ID、稳定排序、全局过滤、分页及行选择组合。行是当前页按 index 编排的显示槽；单元格按 columnKey 显示当前记录，排序会更新真实内容，不用 CSS 顺序冒充 Table 结构排序。应用 rows 的 id 必须唯一。本组合不管理请求、编辑或列重排。
+
+当前为功能源码 WIP。完整运行时、Compiler、原生、打包、浏览器与视觉验收仍待补齐。
+
+排序表头应放在静态 `DataTableHeaderRow` 组合内。它继承被动 Table Row topology，没有 Props 或 instance exposes，不创建 selection、focus 或 Trigger owner；正文数据槽仍使用 `DataTableRow`。旧 `DataTableRow.header` prop 保留 runtime 数据槽策略，但不会移除该行 setup 期的 Trigger 身份，不能包含多个直接 Trigger 子项。示例已迁移到新静态组合，连续链规则没有放宽。
+
+<PrototypePreviewer
+  demoId="demo-base-data-table"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

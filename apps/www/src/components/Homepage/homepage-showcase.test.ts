@@ -81,7 +81,9 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     const ids = new Set<string>();
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
-    expect(ids.size).toBe(36);
+    // The closed recipe now includes the actual family Label relation owner.
+    expect(ids.size).toBe(37);
+    expect(ids.has(`${family}-label-root`)).toBe(true);
     expect(
       [...ids].every((id) => id.startsWith(`${family}-`) || id === PREVIEW_SURFACE_ID(family))
     ).toBe(true);
@@ -256,7 +258,9 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
   it(`${runtime}: gallery compositions have real independent task results and revoke stale work`, async () => {
     const gallery = mount(runtime);
     gallery.event('gallery-primary', 'click');
-    expect(gallery.refs['gallery-controls-feedback']!.textContent).toBe('Primary button ✓');
+    expect(gallery.refs['gallery-controls-feedback']!.textContent).toBe(
+      'Primary button: Activated'
+    );
     gallery.event('editor-text', 'valueChange', { value: 'Editable result' });
     gallery.event('editor-bold', 'activeChange', { active: true });
     await Promise.resolve();

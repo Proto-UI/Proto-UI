@@ -130,6 +130,7 @@ function configuredPlugins(root, flag) {
     'contrastProvenancePlugin',
     'repositoryRoot',
     'protoUiSourcePlugin',
+    'runtimeRetryUrlsPlugin',
     'websiteBundleGraphPlugin',
     'tailwindcss',
     `return (${expression});`
@@ -138,6 +139,7 @@ function configuredPlugins(root, flag) {
     contrastProvenancePlugin,
     root,
     { name: 'source-control' },
+    () => ({ name: 'runtime-retry-control' }),
     () => ({ name: 'bundle-graph-control' }),
     () => ({ name: 'tailwind-control' })
   );
@@ -150,9 +152,10 @@ describe('contrast source provenance', () => {
       const plugins = configuredPlugins(root, flag);
       const audit = plugins.filter((plugin) => plugin.name === contrastProvenancePlugin(root).name);
       assert.equal(audit.length, flag === '1' ? 1 : 0);
+      assert.equal(plugins.length, flag === '1' ? 5 : 4);
       assert.deepEqual(
-        plugins.slice(-3).map((plugin) => plugin.name),
-        ['source-control', 'bundle-graph-control', 'tailwind-control']
+        plugins.slice(-4).map((plugin) => plugin.name),
+        ['source-control', 'runtime-retry-control', 'bundle-graph-control', 'tailwind-control']
       );
       if (audit.length) {
         assert.equal(audit[0].apply, 'serve');

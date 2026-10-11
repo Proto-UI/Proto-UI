@@ -1,0 +1,13 @@
+{
+  "extends": "../../../../tsconfig.json",
+  "include": [
+    "../src/data-table/**/*.ts",
+    "../../shadcn/src/data-table/**/*.ts",
+    "../../brutalist/src/data-table/**/*.ts",
+    "../../bootstrap-2-3-2/src/data-table/**/*.ts",
+    "../../liquid-glass/src/data-table/**/*.ts",
+    "data-table-header-row.test.ts",
+    "data-table-header-row-public.types.ts"
+  ],
+  "exclude": []
+}

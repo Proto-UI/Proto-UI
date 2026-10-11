@@ -45,6 +45,7 @@ npm install @proto.ui/adapter-react@0.3.0-alpha.1
 - `@proto.ui/module-as-trigger`
 - `@proto.ui/module-boundary`
 - `@proto.ui/module-context`
+- `@proto.ui/module-control-label`
 - `@proto.ui/module-event`
 - `@proto.ui/module-expose-event`
 - `@proto.ui/module-expose-state`

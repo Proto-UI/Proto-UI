@@ -1,4 +1,16 @@
 import {
+  NATIVE_LINK_HOST_CAP,
+  NATIVE_LINK_RUN_IN_CALLBACK_CAP,
+  createWebNativeLinkHost,
+} from '@proto.ui/module-native-link';
+import { AXIS_INPUT_HOST_CAP, AXIS_INPUT_RUN_IN_CALLBACK_CAP } from '@proto.ui/module-axis-input';
+import { createWebAxisInputHost } from '@proto.ui/adapter-base';
+import {
+  CONTROL_LABEL_HOST_CAP,
+  CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+  createWebControlLabelHost,
+} from '@proto.ui/module-control-label';
+import {
   IMAGE_VIEW_HOST_CAP,
   IMAGE_VIEW_RUN_IN_CALLBACK_CAP,
   createWebImageViewHost,
@@ -11,6 +23,7 @@ import {
 } from '@proto.ui/adapter-base';
 import {
   createCapsWiring,
+  retainWebPortalDirection,
   createWebMoveGestureHost,
   type LogicalInstanceToken,
 } from '@proto.ui/adapter-base';
@@ -38,7 +51,11 @@ import {
 import { A11Y_PROJECT_CAP, createWebA11yProjector } from '@proto.ui/module-a11y';
 import { createWebBoundaryHostBridge, BOUNDARY_HOST_BRIDGE_CAP } from '@proto.ui/module-boundary';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import {
+  EFFECTS_CAP,
+  VISUAL_FEEDBACK_SINK_CAP,
+  type VisualFeedbackSink,
+} from '@proto.ui/module-feedback';
 import {
   EVENT_CANCEL_DEFAULT_ACTION_CAP,
   type EventDefaultActionCancelRequest,
@@ -77,6 +94,11 @@ import {
   type OverlayLayerScheduler,
 } from '@proto.ui/module-overlay';
 import {
+  CONTEXT_MENU_INPUT_HOST_CAP,
+  CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP,
+  createWebContextMenuInputHost,
+  AVAILABLE_SPACE_HOST_CAP,
+  createWebAvailableSpaceHost,
   ANCHORED_POSITION_HOST_CAP,
   createFloatingUiAnchoredPositionHost,
 } from '@proto.ui/module-positioning';
@@ -134,14 +156,23 @@ type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
 };
 
 export function createVue2OverlayGlobalMount(
-  instanceToken: LogicalInstanceToken
-): OverlayGlobalMount {
+  instanceToken: LogicalInstanceToken,
+  getPortalOrigin?: () => Node | null
+): OverlayGlobalMount<HTMLElement> {
+  const directionLeases = new WeakMap<HTMLElement, () => void>();
   const anchors = new WeakMap<HTMLElement, Comment>();
 
   return {
     mount(hostEl: HTMLElement) {
       const parentToken = getLogicalParent(instanceToken);
       setProtoParent(hostEl, parentToken ? getLogicalRoot(parentToken) : null);
+      if (!directionLeases.has(hostEl)) {
+        const originalParent = hostEl.parentNode;
+        directionLeases.set(
+          hostEl,
+          retainWebPortalDirection(hostEl, () => getPortalOrigin?.() ?? originalParent)
+        );
+      }
 
       const document = hostEl.ownerDocument;
       const body = document?.body;
@@ -154,6 +185,9 @@ export function createVue2OverlayGlobalMount(
       anchors.set(hostEl, anchor);
     },
     unmount(hostEl: HTMLElement) {
+      const releaseDirection = directionLeases.get(hostEl);
+      directionLeases.delete(hostEl);
+      releaseDirection?.();
       const anchor = anchors.get(hostEl);
       anchors.delete(hostEl);
       // Only a host this mount moved is ours to put back. Returning it to the
@@ -268,6 +302,8 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
   emit: (key: string, payload?: unknown, options?: Record<string, unknown>) => void;
   rawPropsSource: RawPropsSource<Props>;
   effectsPort: EffectsPort;
+  /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
+  visualFeedbackSink?: VisualFeedbackSink;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -308,6 +344,9 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     const target = getLogicalTriggerSurfaceRoot(instanceToken);
     return args.isViewReady() && target?.isConnected ? target : null;
   };
+  // Label owns physical-detachment discovery; focus still requires connection.
+  const getControlLabelSurface = () =>
+    args.isViewReady() ? getLogicalTriggerSurfaceRoot(instanceToken) : null;
   const subscribeFocusTarget = (listener: () => void) => {
     const offReady = args.subscribeTargetReady(listener);
     const offSurface = subscribeFocusSurfaceReady(instanceToken, listener);
@@ -319,9 +358,23 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
   const physicalControl = () => args.getCurrentElement() as WebTextControl | null;
 
   return createCapsWiring()
+    .use('control-label', [
+      [
+        CONTROL_LABEL_HOST_CAP,
+        createWebControlLabelHost(getControlLabelSurface, subscribeFocusTarget),
+      ],
+      [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('text-control', [
       [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
+    .use('native-link', [
+      [
+        NATIVE_LINK_HOST_CAP,
+        createWebNativeLinkHost(() => args.getCurrentElement() as HTMLAnchorElement | null),
+      ],
+      [NATIVE_LINK_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('image-view', [
       [
@@ -331,7 +384,12 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       [IMAGE_VIEW_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
-    .use('feedback', [[EFFECTS_CAP, effectsPort]])
+    .use('feedback', [
+      [EFFECTS_CAP, effectsPort],
+      ...(args.visualFeedbackSink
+        ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
+        : []),
+    ])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
@@ -484,7 +542,16 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
       [HOST_ELEMENT_CAP, el],
       [BOUNDARY_HOST_BRIDGE_CAP, createWebBoundaryHostBridge()],
     ])
-    .use('positioning', [[ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()]])
+    .use('positioning', [
+      [ANCHORED_POSITION_HOST_CAP, createFloatingUiAnchoredPositionHost()],
+      [CONTEXT_MENU_INPUT_HOST_CAP, createWebContextMenuInputHost()],
+      [CONTEXT_MENU_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+      [AVAILABLE_SPACE_HOST_CAP, createWebAvailableSpaceHost()],
+    ])
+    .use('axis-input', [
+      [AXIS_INPUT_HOST_CAP, createWebAxisInputHost()],
+      [AXIS_INPUT_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+    ])
     .use('scroll', [
       [
         SCROLL_SURFACE_HOST_CAP,

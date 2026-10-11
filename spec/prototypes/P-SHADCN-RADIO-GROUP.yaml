@@ -6,13 +6,8 @@ lifecycleRationale: This three-part presentation inherits the draft Base Radio G
 since: 0.3.0-alpha.1
 summary: Shadcn Radio Group is an unofficial Proto UI-maintained projection that preserves the Base value, Collection, roving-focus and accessibility owners while adding the grid presentation.
 statement:
-  en: >-
-    Root, Item and Indicator project the existing Base Radio Group anatomy. Root remains the sole selected-value, Collection, Focus Roving and radiogroup owner. This unofficial projection compares against shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc, apps/v4/registry/new-york-v4/ui/radio-group.tsx, without claiming upstream endorsement or Radix API compatibility.
-
-
-  zh-CN: >-
-    Root、Item 与 Indicator 投射既有 Base Radio Group anatomy。Root 继续作为唯一 selected-value、Collection、Focus Roving 与 radiogroup owner。该非官方投射的比较基线固定为 shadcn-ui/ui revision f31ed81983653919dd4fe77aee4b4859f610f1dc 的 apps/v4/registry/new-york-v4/ui/radio-group.tsx，不主张上游认可或 Radix API 兼容。
-
+  en: Root, Item and Indicator preserve the existing Base Radio Group anatomy, with Root the sole value, Collection, Focus Roving and radiogroup owner. The unofficial draft presentation compares against the content-pinned 2026-10-10 base-nova RadioGroup registry snapshot in sources. It replaces the historical new-york reference without implying Git revision, upstream endorsement, Base UI or Radix API compatibility.
+  zh-CN: Root、Item与Indicator保留既有Base Radio Group anatomy，Root是唯一value、Collection、Focus Roving与radiogroup owner。非官方draft呈现比较sources中内容hash固定的2026-10-10 base-nova RadioGroup registry snapshot，替换历史new-york参考，不推断Git revision、上游认可、Base UI或Radix API兼容。
 
 criteria:
   - id: P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
@@ -35,8 +30,8 @@ criteria:
 
   - id: P-SHADCN-RADIO-GROUP-CURRENT-VISUAL-SURFACE
     text:
-      en: Root projects grid gap-3; consumer content and layout determine the authored choices and outer dimensions.
-      zh-CN: Root 投射 grid gap-3；authored choices 与外部尺寸由 consumer content 和 layout 决定。
+      en: Root projects grid w-full gap-2; consumer content determines choices and the containing layout determines the available full width.
+      zh-CN: Root投射grid w-full gap-2；选项内容由consumer所有，可用满宽由包含它的布局决定。
   - id: P-SHADCN-RADIO-GROUP-OWNERSHIP-BOUNDARY
     text:
       en: The projection must add no second value, selection, Collection, focus, activation, disabled or accessibility owner; Indicator remains an explicit optional and repeatable Item child.
@@ -58,8 +53,8 @@ sources:
   - path: packages/prototypes/shadcn/test/radio-group.test.ts
   - path: https://github.com/Proto-UI/Proto-UI/issues/662
     label: Bounded Shadcn Radio Group projection admission
-  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/radio-group.tsx
-    label: Pinned shadcn/ui v4 new-york Radio Group comparison
+  - path: https://ui.shadcn.com/r/styles/base-nova/radio-group.json
+    label: base-nova snapshot retrieved 2026-10-10; registry SHA256 874b30662ba338d06362491b663cae9198281a4bc385b6be6425f2de442384d7; TSX SHA256 f779542f2370b82fcbb91278fb94f7ad4af59d0f36512633492604b27da48e8d
 inherits:
   prototypes: [P-BASE-RADIO-GROUP]
 dependsOn:
@@ -72,4 +67,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced the draft three-part Shadcn Radio Group projection and exact inherited public boundary.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
 tags: [prototype, shadcn, radio-group, selection, focus, visual, compatibility]

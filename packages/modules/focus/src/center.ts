@@ -57,6 +57,7 @@ export class FocusCenter {
   private readonly lastFocusedByScope = new Map<FocusInstanceToken, FocusInstanceToken>();
   private currentFocused: FocusInstanceToken | null = null;
   private ownerEpoch = 0;
+  private requestEpoch = 0;
   private readonly pendingRovingEntries = new Map<
     FocusInstanceToken,
     {
@@ -247,6 +248,7 @@ export class FocusCenter {
     options?: FocusRequestOptions,
     behavior?: FocusRequestBehavior
   ): FocusRequestOutcome {
+    this.requestEpoch += 1;
     const execution = entry.prepareFocusRequest?.(options, behavior);
     if (!execution) options = retainFocusRequestIntent(options);
     const current = () => execution?.isCurrent() ?? true;
@@ -294,6 +296,7 @@ export class FocusCenter {
   }
 
   noteFocused(entry: FocusCenterEntry): void {
+    this.requestEpoch += 1;
     const epoch = ++this.ownerEpoch;
     // Claim the transfer before callbacks: a nested owner must stop old cleanup.
     this.currentFocused = entry.instance;
@@ -455,15 +458,17 @@ export class FocusCenter {
       entryRequest?: FocusRovingEntryRequestOptions;
     }
   ): boolean {
-    return this.applyFocusInRoving(
-      provider,
-      op,
-      options,
-      createFocusRequestIntent({
-        reason: options?.entryRequest?.reason ?? 'keyboard',
-        preventScroll: options?.entryRequest?.preventScroll,
-      })
-    );
+    // Reserve before reading author options, including when no member exists.
+    // A nested target/native/roving request owns the later intent, not this snapshot.
+    const epoch = ++this.requestEpoch;
+    const request = options?.entryRequest;
+    const intent = createFocusRequestIntent({
+      reason: request?.reason ?? 'keyboard',
+      preventScroll: request?.preventScroll,
+    });
+    const entryRequest = request ? { ...intent, defer: request.defer } : undefined;
+    if (epoch !== this.requestEpoch) return false;
+    return this.applyFocusInRoving(provider, op, { ...options, entryRequest }, intent);
   }
 
   private applyFocusInRoving(

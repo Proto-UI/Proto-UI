@@ -34,6 +34,10 @@ criteria:
     text:
       zh-CN: render-time `renderer.read.context` 只能暴露 `read` 与 `tryRead`，不得暴露 update surface。
       en: Render-time `renderer.read.context` may expose only `read` and `tryRead`, and must not expose update surfaces.
+  - id: C-CONTEXT-0007-F
+    text:
+      en: run.context.tryReadAncestor requires prior trySubscribeAncestor for that key, returns the nearest current strict-ancestor value or null on absence, and rejects setup use. This extension does not expand the renderer read facade or add an ancestor write API.
+      zh-CN: run.context.tryReadAncestor 要求同 key 的 prior trySubscribeAncestor，返回当前最近严格祖先值或缺失时 null，并拒绝 setup 调用。该扩展不扩大 renderer read facade，也不新增 ancestor 写 API。
 sources:
   - path: internal/contracts/context/with-tree.v0.md
     sections:
@@ -47,6 +51,9 @@ dependsOn:
     - C-CONTEXT-0006
     - C-CORE-SYNTAX-0006
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added a separately authorized Runtime strict-ancestor optional read without changing existing render reads.
   - version: 0.1.0
     change: introduced
     summary: Captured required and optional context read semantics, including render-time readonly reads.

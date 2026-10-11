@@ -1,0 +1,189 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "dependencies": [
+    "0e2d0c78df063d856d9a61c43c1dae167af4616f",
+    "bafd08cbeb1f3b08362fc0954230f22d68b0bbf5"
+  ],
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "base-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "base-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "base-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "base-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "base-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-base-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-base-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "shadcn-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "shadcn-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "shadcn-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "shadcn-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "shadcn-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-shadcn-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "brutalist-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "brutalist-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "brutalist-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "brutalist-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "brutalist-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-brutalist-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "bootstrap-2-3-2-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "bootstrap-2-3-2-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "bootstrap-2-3-2-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "bootstrap-2-3-2-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "bootstrap-2-3-2-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-bootstrap-2-3-2-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/navigation-menu.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "navigation-menu",
+      "prototypeExports": [
+        {
+          "export": "navigationMenuRoot",
+          "name": "liquid-glass-navigation-menu-root"
+        },
+        {
+          "export": "navigationMenuTrigger",
+          "name": "liquid-glass-navigation-menu-trigger"
+        },
+        {
+          "export": "navigationMenuContent",
+          "name": "liquid-glass-navigation-menu-content"
+        },
+        {
+          "export": "navigationMenuItem",
+          "name": "liquid-glass-navigation-menu-item"
+        },
+        {
+          "export": "navigationMenuLink",
+          "name": "liquid-glass-navigation-menu-link"
+        }
+      ],
+      "demoId": "demo-liquid-glass-navigation-menu",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-navigation-menu.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/navigation-menu.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/navigation-menu.mdx"
+      ]
+    }
+  ],
+  "newPrototypeExports": [],
+  "privateSourceDependency": "packages/prototypes/base/src/menu-primitives",
+  "integration": [
+    "Add @proto.ui/module-native-link workspace dependency to packages/prototypes/base/package.json and its lock importer. Shared manifest owner only; this consumer does not edit them.",
+    "Existing five navigation-menu subpaths/IDs remain unchanged. Native-link declaration propagates through asNavigationMenuLink.modules and all four styled projections.",
+    "navigate event now observes browser activation after a later task and includes href/target/rel/modified. Do not route it again or call preventDefault in portable source.",
+    "Rerun aria-current physical-anchor test on integrated shared A11y patch; older isolated source keeps its known missing-current assertion red.",
+    "Compiler/native capability admission intentionally remains unsupported for native-link; no native or compiled link semantics may be silently claimed."
+  ],
+  "tests": [
+    "packages/prototypes/base/test/navigation-overlays/navigation-link.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/menus.test.ts"
+  ],
+  "remainingGates": [
+    "Real-browser navigation/URL-preview visual receipts",
+    "Compiler/native/GPUI implementation and acceptance",
+    "Packed consumers/full CI/independent lifecycle acceptance",
+    "Nested submenu composition"
+  ]
+}

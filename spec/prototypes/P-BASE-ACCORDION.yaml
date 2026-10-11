@@ -1,0 +1,92 @@
+id: P-BASE-ACCORDION
+type: prototype
+title: Base Accordion root
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Finf #872 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Finf #872. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Independent Accordion root protocol with JSON ownership and exact Anatomy boundaries.
+statement:
+  zh-CN: 独立编写的 Proto UI 协议。APG及风格库提供比较证据，不是实现授权或继承API。复用 Collection、Anatomy、Context、A11y、asTrigger、asFocusable及L1 lifecycle。
+  en: An independently authored Proto UI protocol. APG and design libraries provide comparison evidence, not implementation authority or inherited APIs. Shared capabilities are Collection, Anatomy, Context, A11y, asTrigger, asFocusable and L1 lifecycle.
+criteria:
+  - id: P-BASE-ACCORDION-OWNER
+    text:
+      zh-CN: Root 独占一个规范化 JSON string-key 集合。single 接受首个唯一键，multiple 保留去重后的输入顺序；其他 part 不拥有选择，不引入 callback Props 或其他 Base 协议专属依赖。
+      en: Root owns one normalized JSON string-key set. mode=single admits the first supplied unique key; multiple preserves unique insertion order. No other part owns selection; no callback Props or Base-protocol-specific dependencies are introduced.
+  - id: P-BASE-ACCORDION-CONTROLLED
+    text:
+      zh-CN: 是否提供 openItems 决定受控所有权。请求只发一次 openChange {openItems,value,open,reason}，不乐观改写；owner 更新、初始化、default 变更、结构协调不发请求。defaultOpenItems 仅初始化一次，重入时新的 owner 输入优先。
+      en: openItems presence controls ownership. Requests emit openChange {openItems,value,open,reason} once without optimistic mutation. Owner updates, initialization, default changes and structural reconciliation emit no requests. defaultOpenItems initializes once. Reentrant newer owner inputs win.
+  - id: P-BASE-ACCORDION-MINIMUM
+    text:
+      zh-CN: allowEmpty 默认 true；false 时请求不得关闭最后一个选择键。非受控初始空集或已知选择被移除后选首个可用登记 Item，空组仍为空；受控空输入不违背 owner 自动修复。
+      en: allowEmpty defaults true. When false, a request cannot close the last selected key; an uncontrolled initially empty or emptied known selection picks the first enabled registered Item. An empty group stays empty. Controlled empty input is not repaired against the owner.
+  - id: P-BASE-ACCORDION-KEYS
+    text:
+      zh-CN: 键必须为非空字符串。输入重复键去重；未知 owner/default 键保留待登记，兼容宿主逐步挂载。向缺失键发请求拒绝；非受控曾登记后移除的键退役，改名视为删除与新增。disabled 不改写选择。getOpenItems 返回副本，openCount 计 canonical 键，含休眠 owner 键。
+      en: Keys are non-empty strings. Supplied duplicates normalize once; unknown supplied/default keys remain dormant until an Item registers, accommodating progressive host mounting. Requests to absent keys are rejected. Uncontrolled keys previously registered then removed are retired; renaming is remove/add. Disabled selection is retained. getOpenItems returns a defensive copy and openCount counts canonical keys, including dormant owner keys.
+  - id: P-BASE-ACCORDION-DISABLED
+    text:
+      zh-CN: Root 或 Item disabled 抑制该 Item 的激活、顺序聚焦及命令请求，不改写 canonical 展开也不移动焦点；owner 显式更新仍生效。
+      en: Root or Item disabled suppresses that Item activation and sequential focus, including imperative requests, without changing canonical expansion or moving focus. Explicit owner updates still apply.
+  - id: P-BASE-ACCORDION-ANATOMY
+    text:
+      zh-CN: 一个 Root 在自身组域中允许零个或多个 Item 及其后代 Trigger；每个 Item 建立 heading/trigger/content 子域。嵌套 Root 的集合、状态、请求、焦点导航与关系隔离。
+      en: One Root permits zero or more Items and descendant header Triggers in its group domain. Each Item anchors its own heading/trigger/content family. Nested Root domains isolate collection, state, requests, focus navigation and relationships.
+dependsOn:
+  contracts:
+    - C-PROPS-0001
+    - C-CONTEXT-0006
+    - C-ANATOMY-0004
+    - C-A11Y-0001
+    - C-LIFECYCLE-0008
+    - C-A11Y-PART-RELATIONSHIP-0001
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+verifies:
+  tests:
+    - T-BASE-ACCORDION-0001
+sources:
+  - path: packages/prototypes/base/src/accordion/root.proto.ts
+  - path: packages/prototypes/base/src/accordion/types.ts
+  - path: packages/prototypes/base/src/accordion/shared.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
+openQuestions:
+  - id: P-BASE-ACCORDION-Q-ADMISSION
+    question:
+      zh-CN: 何时完成精确head的浏览器/native、辅助技术、GPUI及独立审查并准入此draft？
+      en: When have exact-head browser/native, assistive-technology, GPUI and independent review evidence admitted this draft?
+    blocks:
+      - activation:P-BASE-ACCORDION
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the bounded Accordion family independently; retained draft admission and explicit native evidence debt.
+tags:
+  - prototype
+  - base
+  - accordion
+anatomy:
+  family: base-accordion
+  roles:
+    root:
+      cardinality:
+        min: 1
+        max: 1
+    item:
+      cardinality:
+        min: 0
+        max: '*'
+    trigger:
+      cardinality:
+        min: 0
+        max: '*'
+  relations:
+    - kind: contains
+      parent: root
+      child: item
+    - kind: contains
+      parent: item
+      child: trigger

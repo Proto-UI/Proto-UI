@@ -58,6 +58,12 @@ cases:
     notes:
       - Both normal render return and the exact caught render exception are exercised inside the owning callback. The subsequent owned State set changes the observable value to true.
       - After callback exit, idle set(false) must throw and leave the observed value true. This is a preserved phase boundary, not a weakened guard or a run-handle forwarding assertion.
+  - id: T-STATE-0004-CASE-NUMBER-LIST-TRANSITIONS
+    title: Immutable snapshots, content no-op and deterministic re-entry
+    covers:
+      - C-STATE-NUMBER-LIST-0001-C
+      - C-STATE-NUMBER-LIST-0001-D
+    expectation: number-list-transitions
 implementations:
   - id: module-state-port-watch-contract
     kind: module-test
@@ -103,6 +109,13 @@ implementations:
       - T-STATE-0004-CASE-NESTED-RENDER-CALLBACK
     notes:
       - "Nested-render selector: it.each([false, true]) 'preserves state mutation admission after a nested render (throws=%s)'. Both throws=false and throws=true passed in the retained PR #811 final affected run, following the retained two-case red/green reproduction; this catalog edit is not a fresh execution."
+  - id: t-state-0004-number-list
+    kind: module-test
+    status: passing
+    path: packages/modules/state/test/number-list.test.ts
+    required: true
+    consumesCases:
+      - T-STATE-0004-CASE-NUMBER-LIST-TRANSITIONS
 verifies:
   contracts:
     - id: C-CORE-SYNTAX-0002
@@ -136,6 +149,11 @@ verifies:
         - C-STATE-0012-C
         - C-STATE-0012-D
         - C-STATE-0012-E
+    - id: C-STATE-NUMBER-LIST-0001
+      since: 0.3.0-alpha.1
+      anchors:
+        - C-STATE-NUMBER-LIST-0001-C
+        - C-STATE-NUMBER-LIST-0001-D
   modules:
     - id: M-STATE-0001
       since: 0.3.0-alpha.1
@@ -160,6 +178,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: refined
     summary: Mapped retained normal-return and caught-exception nested-render regressions to owned State callback-only mutation admission and wrapper phase boundaries, including post-callback idle rejection without value mutation.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Mapped fresh draft number.list runtime evidence with bounded host claims.
 tags:
   - state
   - watch

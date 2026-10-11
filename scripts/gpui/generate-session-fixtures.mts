@@ -19,7 +19,9 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { Prototype } from '@proto.ui/core';
+import { createControlLabelRef, type Prototype } from '@proto.ui/core';
+import { labelRoot } from '@proto.ui/prototypes-base/label';
+import { createNativeScopeLedger } from '../../packages/adapters/gpui-peer/src/control-label';
 import button from '@proto.ui/prototypes-base/button';
 import { checkboxIndicator, checkboxRoot } from '@proto.ui/prototypes-base/checkbox';
 import { switchRoot, switchThumb } from '@proto.ui/prototypes-base/switch';
@@ -40,6 +42,7 @@ type SessionSpec = {
   readonly props: WireRecord;
   /** The session, by name, that this one opens inside. It is recorded first. */
   readonly parent?: string;
+  readonly nativeLabel?: boolean;
 };
 
 type Recording = {
@@ -51,6 +54,20 @@ type Recording = {
 };
 
 const RECORDINGS: readonly Recording[] = [
+  {
+    file: 'base-label-session.json',
+    name: 'Base Label',
+    module: '@proto.ui/prototypes-base/label',
+    sessions: {
+      passive: { id: 'label-passive', prototype: labelRoot, props: {}, nativeLabel: true },
+      actionable: {
+        id: 'label-actionable',
+        prototype: labelRoot,
+        props: { activation: true },
+        nativeLabel: true,
+      },
+    },
+  },
   {
     file: 'base-button-session.json',
     name: 'Base Button',
@@ -137,6 +154,7 @@ async function record(
     prototype: spec.prototype,
     props: spec.props,
     parent,
+    ...(spec.nativeLabel ? { nativeScope: createNativeScopeLedger() } : {}),
     send: (message) => {
       sent.push(message);
       if (message.kind !== 'projection.install') return;
@@ -158,6 +176,7 @@ async function record(
     },
     schedule: (task) => task(),
   });
+  if (spec.nativeLabel) peer.setAssociations({ controlLabel: createControlLabelRef() });
   await peer.mount();
   while (pending.length > 0) pending.shift()!();
   return { sent, peer };

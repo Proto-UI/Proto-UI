@@ -5,11 +5,44 @@ import { fileURLToPath } from 'node:url';
 export const READY_ROUTES = Object.freeze([
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
+  '/en/test/bootstrap-state-controls/',
   '/en/test/liquid-glass-material/',
   '/en/ui-libraries/base/image/',
+  '/en/ui-libraries/base/collapsible/',
+  '/en/ui-libraries/shadcn/collapsible/',
+  '/zh-cn/ui-libraries/shadcn/collapsible/',
+  '/en/ui-libraries/brutalist/components/collapsible/',
+  '/zh-cn/ui-libraries/brutalist/components/collapsible/',
+  '/en/ui-libraries/bootstrap-2-3-2/collapsible/',
+  '/zh-cn/ui-libraries/bootstrap-2-3-2/collapsible/',
+  '/en/ui-libraries/liquid-glass/collapsible/',
+  '/zh-cn/ui-libraries/liquid-glass/collapsible/',
+  '/en/ui-libraries/base/field/',
+  '/en/ui-libraries/shadcn/field/',
+  '/en/ui-libraries/brutalist/field/',
+  '/en/ui-libraries/bootstrap-2-3-2/field/',
+  '/en/ui-libraries/liquid-glass/field/',
+  '/zh-cn/ui-libraries/base/field/',
+  '/zh-cn/ui-libraries/shadcn/field/',
+  '/zh-cn/ui-libraries/brutalist/field/',
+  '/zh-cn/ui-libraries/bootstrap-2-3-2/field/',
+  '/zh-cn/ui-libraries/liquid-glass/field/',
+  '/en/ui-libraries/base/accordion/',
+  '/en/ui-libraries/shadcn/accordion/',
+  '/en/ui-libraries/brutalist/accordion/',
+  '/en/ui-libraries/bootstrap-2-3-2/accordion/',
+  '/en/ui-libraries/liquid-glass/accordion/',
+  '/zh-cn/ui-libraries/base/accordion/',
+  '/zh-cn/ui-libraries/shadcn/accordion/',
+  '/zh-cn/ui-libraries/brutalist/accordion/',
+  '/zh-cn/ui-libraries/bootstrap-2-3-2/accordion/',
+  '/zh-cn/ui-libraries/liquid-glass/accordion/',
+
+  '/zh-cn/ui-libraries/base/collapsible/',
   '/en/ui-libraries/base/table/',
   '/zh-cn/ui-libraries/base/table/',
   '/en/start-here/quick-start/',
+  '/en/ui-libraries/shadcn/card/',
   '/en/ui-libraries/shadcn/input/',
   '/en/ui-libraries/shadcn/select/',
   '/en/ui-libraries/base/scroll-area/',
@@ -59,9 +92,13 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-base-image.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-table.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/table-react19.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
-  'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-collapsible.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-field-family.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-passive-atoms.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-card.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-base-controls.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-base-input.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-button.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-brutalist-controls.browser.test.ts',
@@ -93,8 +130,18 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/overlay-portal-direction.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/runtime-layout-parity.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/runtime-loading-mask.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/base-accordion-layout-parity.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/quick-start-first-frame.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/quick-start-first-frame-fragment-control.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/library-cards-first-frame.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-dogfood.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-typography.browser.test.ts',
@@ -107,14 +154,28 @@ export const BROWSER_SUITES = Object.freeze([
   'packages/adapters/web-component/test/shadow-closeout.browser.test.ts',
 ]);
 
-// Production-specific evidence uses dedicated built-site owners, never the dev server.
+// Dedicated evidence uses its existing owner, never the ordinary shared-dev phase.
+// The historical PRODUCTION_* names include built-site checks and the private
+// Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
 ]);
 
-// Each production-only suite has an executable owner; exclusion is never a skip.
+// Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts':
+    '.github/workflows/liquid-elevation-control-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts':
+    '.github/workflows/liquid-card-candidate-evidence.yml',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts':
     'apps/www/scripts/run-search-production-evidence.mjs',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':

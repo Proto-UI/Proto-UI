@@ -4,7 +4,7 @@ type InlineStyleSnapshot = { value: string; priority: string };
 type Lock = {
   owners: Set<object>;
   overflow: InlineStyleSnapshot;
-  paddingRight: InlineStyleSnapshot | null;
+  padding: Map<string, InlineStyleSnapshot>;
 };
 const locks = new WeakMap<HTMLElement, Lock>();
 
@@ -24,21 +24,19 @@ function restoreInlineStyle(
   else el.style.removeProperty(property);
 }
 
-/**
- * Width of the viewport scrollbar that disappears when body overflow is hidden.
- * Returns 0 when no scrollbar is present (overlay scrollbars, non-scrollable page).
- */
-function measureScrollbarWidth(doc: Document): number {
-  const view = doc.defaultView;
-  const root = doc.documentElement;
-  if (!view || !root) return 0;
-  const width = view.innerWidth - root.clientWidth;
-  return width > 0 ? width : 0;
+// Root clientWidth is the viewport width in standards mode and may grow even
+// when scrollbar-gutter:stable still reserves space inside the root border box.
+// Intersect both measurements instead of equating scrollbar disappearance with
+// newly usable page width. The rectangle also preserves the actual gutter side.
+function readPageInlineSpace(root: HTMLElement) {
+  const rect = root.getBoundingClientRect();
+  const width = Math.max(0, Math.min(root.clientWidth, rect.width));
+  return { width, left: rect.left + root.clientLeft };
 }
 
 /**
  * Web scroll-lock realization; one owner cannot release another owner's lock.
- * Compensates the removed scrollbar with body padding-right so the page does
+ * Compensates only the measured removed gutter on its actual side so the page does
  * not shift horizontally when the lock engages.
  */
 export function createWebOverlayModal(doc: Document): OverlayModal {
@@ -50,20 +48,40 @@ export function createWebOverlayModal(doc: Document): OverlayModal {
       body = doc.body;
       let lock = locks.get(body);
       if (!lock) {
-        const scrollbarWidth = measureScrollbarWidth(doc);
+        const root = doc.documentElement;
+        const before = readPageInlineSpace(root);
+        const computed = doc.defaultView?.getComputedStyle(body);
+        const originalPadding = {
+          left: Number.parseFloat(computed?.paddingLeft ?? ''),
+          right: Number.parseFloat(computed?.paddingRight ?? ''),
+        };
         lock = {
           owners: new Set(),
           overflow: snapshotInlineStyle(body, 'overflow'),
-          paddingRight: scrollbarWidth > 0 ? snapshotInlineStyle(body, 'padding-right') : null,
+          padding: new Map(),
         };
         locks.set(body, lock);
-        if (scrollbarWidth > 0) {
-          const computed = doc.defaultView?.getComputedStyle(body).paddingRight ?? '';
-          const base = Number.parseFloat(computed);
-          const total = (Number.isFinite(base) ? base : 0) + scrollbarWidth;
-          body.style.setProperty('padding-right', `${total}px`);
-        }
         body.style.setProperty('overflow', 'hidden', lock.overflow.priority);
+        // Reading after the lock flushes real layout. A root scrollbar or a
+        // stable gutter may survive body overflow:hidden and need no padding.
+        const after = readPageInlineSpace(root);
+        const gained = Math.max(0, after.width - before.width);
+        const left = Math.min(gained, Math.max(0, before.left - after.left));
+        for (const [side, amount] of [
+          ['left', left],
+          ['right', gained - left],
+        ] as const) {
+          if (!Number.isFinite(amount) || amount <= 0) continue;
+          const property = `padding-${side}`;
+          const snapshot = snapshotInlineStyle(body, property);
+          lock.padding.set(property, snapshot);
+          const base = originalPadding[side];
+          body.style.setProperty(
+            property,
+            `${(Number.isFinite(base) ? base : 0) + amount}px`,
+            snapshot.priority
+          );
+        }
       }
       lock.owners.add(owner);
     },
@@ -76,7 +94,8 @@ export function createWebOverlayModal(doc: Document): OverlayModal {
       lock.owners.delete(owner);
       if (lock.owners.size) return;
       restoreInlineStyle(target, 'overflow', lock.overflow);
-      if (lock.paddingRight) restoreInlineStyle(target, 'padding-right', lock.paddingRight);
+      for (const [property, snapshot] of lock.padding)
+        restoreInlineStyle(target, property, snapshot);
       locks.delete(target);
     },
   };

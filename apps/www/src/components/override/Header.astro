@@ -12,6 +12,8 @@ import AdapterSelect from './AdapterSelect.astro';
 import HomepageRuntime from '../Homepage/HomepageRuntime.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 import '../../styles/site-header.css';
+import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
+import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
 
 const shouldRenderSearch =
   config.pagefind || config.components.Search !== '@astrojs/starlight/components/Search.astro';
@@ -22,6 +24,7 @@ const localizedPath = (path: string) =>
   localizedUrl(new URL(path, Astro.url), currentLocale, context.trailingSlash).pathname;
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(family);
+const menuTokens = await snapshotStartupStyle(`${family}-button`, startupButtonProps(family));
 const menuLabel = zh ? '导航与设置' : 'Navigation and settings';
 const navigation = [
   { label: zh ? '文档' : 'Docs', href: localizedPath('/start-here/what-you-saw/') },
@@ -38,6 +41,10 @@ const navigation = [
     </HomepageRuntime>
   ) : (
     <div class="site-header" data-site-header data-docs-site-header>
+      <style
+        is:inline
+        set:html={renderSnapshotTokenCss(menuTokens, '[data-site-header-fallback-summary]')}
+      />
       <div class="site-header-brand">
         <SiteTitle />
       </div>
@@ -55,6 +62,8 @@ const navigation = [
       <details class="site-header-panel" id="site-header-panel" data-site-header-panel>
         <summary
           data-site-header-fallback-summary
+          data-pui-style={menuTokens.join(' ')}
+          data-site-control-family={family}
           aria-label={zh ? '导航与设置' : 'Navigation and settings'}
         >
           <span class="site-header-menu-icon" aria-hidden="true" />
@@ -74,7 +83,14 @@ const navigation = [
                 </a>
               ))}
             </nav>
-            <div data-site-header-compact-context />
+            <div data-site-header-compact-context>
+              <div class="site-header-runtime" data-site-header-preferences>
+                <span class="site-header-runtime-label">
+                  {zh ? '预览 Runtime' : 'Preview runtime'}
+                </span>
+                <AdapterSelect brutalistTriggerAppearance="elevated" />
+              </div>
+            </div>
             <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
               <span class="site-header-group-label">
                 {zh ? '偏好与社区' : 'Preferences and community'}
@@ -91,11 +107,7 @@ const navigation = [
           </div>
         </div>
       </details>
-      <div class="site-header-context" data-site-header-context>
-        <div class="site-header-runtime" data-site-header-preferences>
-          <span class="site-header-runtime-label">{zh ? '预览 Runtime' : 'Preview runtime'}</span>
-          <AdapterSelect brutalistTriggerAppearance="elevated" />
-        </div>
+      <div class="site-header-context" data-site-header-context data-site-header-wide-preferences>
         {Astro.locals.starlightRoute.hasSidebar && (
           <div
             class="site-header-docs-navigation"

@@ -116,5 +116,8 @@ export interface TextControlHandle<
     callback: (run: RunHandle<P>, event: TextControlEvent) => void
   ): Unsubscribe;
   sync(patch: TextControlPatch<Mode>): void;
+  /** Reset mounted editing, replacing the old composition/event lease. Uncontrolled values reset to the supplied or default value.
+   * Controlled canonical ownership is never mutated; false asks the consumer to request owner Props. */
+  resetValue(value?: string): boolean;
   snapshot(): TextControlSnapshot | null;
 }

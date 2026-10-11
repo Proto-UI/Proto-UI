@@ -1,0 +1,5 @@
+{
+  "extends": "../../../../tsconfig.workspace.json",
+  "include": ["form-projection.types.ts"],
+  "exclude": []
+}

@@ -1,5 +1,5 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { asAccessible, asFocusable, asTextControl } from '@proto.ui/hooks';
+import { asAccessible, asFocusable, asTextControl, asControlLabel } from '@proto.ui/hooks';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import type {
   TextareaCompositionDetail,
@@ -79,6 +79,9 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
     if (!disabled.get()) focusable.focusSelf(options);
   });
   def.expose.method('blurSelf', () => focusable.blur());
+  asControlLabel().target((_, request) => {
+    if (!disabled.get() && request.isCurrent()) focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+  });
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('change', { payload: 'json' });
   def.expose.event('compositionStart', { payload: 'json' });

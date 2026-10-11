@@ -1,9 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { BrutalistSeparatorRoot } from '../src/separator';
 
 AdaptToWebComponent(BrutalistSeparatorRoot);
+
+async function settle() {
+  for (let index = 0; index < 4; index += 1) await Promise.resolve();
+}
+
+afterEach(() => document.body.replaceChildren());
 
 describe('prototypes/brutalist: separator', () => {
   it('inherits decorative defaults and projects horizontal Brutalist geometry', async () => {
@@ -59,4 +65,47 @@ describe('prototypes/brutalist: separator', () => {
     }
     el.remove();
   });
+
+  it.each([true, false])(
+    'discards authored interactive descendants in decorative=%s mode',
+    async (decorative) => {
+      // P-BASE-SEPARATOR-CONTENTLESS, P-BASE-SEPARATOR-NO-INTERACTION
+      const el = document.createElement('brutalist-separator-root');
+      const child = document.createElement('button');
+      child.textContent = 'Must not become hidden interactive content';
+      setElementProps(el, { decorative });
+      el.appendChild(child);
+      document.body.appendChild(el);
+      await settle();
+
+      expect(el.childNodes).toHaveLength(0);
+      expect(child.isConnected).toBe(false);
+      expect(el.contains(child)).toBe(false);
+      expect(el.getAttribute('aria-hidden')).toBe(String(decorative));
+      expect(el.hasAttribute('tabindex')).toBe(false);
+      expect(el.hasAttribute('data-pui-a11y-actions')).toBe(false);
+
+      // Neither live mode changes nor reconnecting the same author-supplied
+      // button may restore a hidden descendant or a second interaction owner.
+      for (const nextDecorative of [!decorative, decorative]) {
+        setElementProps(el, { decorative: nextDecorative, orientation: 'vertical' });
+        await settle();
+        expect(el.childNodes).toHaveLength(0);
+        expect(el.getAttribute('aria-hidden')).toBe(String(nextDecorative));
+        expect(el.getAttribute('role')).toBe(nextDecorative ? null : 'separator');
+        expect(el.getAttribute('aria-orientation')).toBe(nextDecorative ? null : 'vertical');
+      }
+
+      for (let cycle = 0; cycle < 2; cycle += 1) {
+        el.remove();
+        await settle();
+        el.appendChild(child);
+        document.body.appendChild(el);
+        await settle();
+        expect(el.childNodes).toHaveLength(0);
+        expect(child.isConnected).toBe(false);
+        expect(el.hasAttribute('tabindex')).toBe(false);
+      }
+    }
+  );
 });

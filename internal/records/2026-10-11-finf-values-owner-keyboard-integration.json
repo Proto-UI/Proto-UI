@@ -1,0 +1,185 @@
+{
+  "date": "2026-10-11",
+  "scope": "Draft Base Slider Values resolved owner and indexed keyboard checkpoint; non-normative progress evidence",
+  "agentDisclosure": [
+    "Agent: dot",
+    "ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "baseCommit": "ade19387385a4f0de23b220e57bfb81a43e2c70e",
+  "sourceTree": "50fcc5111f0ba9b5d4d9d1acbfc6087923966017",
+  "parentBinding": "The sole parent of this record-only commit must have sourceTree.",
+  "reviewedSliceTree": "07e92a8fc1c0d765ea893db70c0688cc82a8ca33",
+  "bindings": [
+    {
+      "path": "internal/contracts/__tests__/slider-state-integration-boundary.test.ts",
+      "blob": "66f764ce2d19d67a08a9bbb4729b14ff67da1c24",
+      "sha256": "653eb177c548b0a3ee68aec3a6aef7b9af8a6d1714b9d2064ab294861d8f98c9"
+    },
+    {
+      "path": "internal/contracts/types/slider-value-entry-boundary.type-test.ts",
+      "blob": "a4f1f0cf634bd2a02558c810665d5e64f36051be",
+      "sha256": "809a7749d20661c17db695c0ec50f0cb683c3801e35bdf09427f165e426b5c8b"
+    },
+    {
+      "path": "internal/records/2026-10-11-slider-values-reconstruction-plan.md",
+      "blob": "916287ba81f35d8e5b1076c78066fc99377bd1dd",
+      "sha256": "fffc8cdf981290bc2ffba712119419f3abd902c4e8fa252ef7a528f2da65feac"
+    },
+    {
+      "path": "packages/cli/src/registry/finf-components.ts",
+      "blob": "92daccddeb90eca65c2dce2e9b6f2525a66a15ff",
+      "sha256": "56d122061f9c64a0431b2e803ad734eef469e9bbad8670dd903d07af9dc0e88d"
+    },
+    {
+      "path": "packages/cli/test/slider-values-entry.test.ts",
+      "blob": "b35477873d30adeb185cd33e961121470373b18e",
+      "sha256": "3032d82d00a43df3a0f0ca2d0b2535f998cbfa99d9fd0e2844080bb13fa1d8b5"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/VALUES.md",
+      "blob": "027d820f4b8687aef4dfe3d0ace00d14e8dcfc8b",
+      "sha256": "7c3d0684d7f747d44082fe006440ee0a6a5d4a90c1d468baf745a6c50d160c53"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/index.ts",
+      "blob": "3334173bdf5c838d593fa2afa4ebcf5939ed4731",
+      "sha256": "a72fece38c8f82a088121986301b0bffc0f684c26916769069c241f1d41e1c60"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-indicator.proto.ts",
+      "blob": "9899d99adf1af54104b93d84be4a14f690e4fafa",
+      "sha256": "80e7fd9323e9fe5855068e15cdb50712e21449966b04e2acffa704d49d27f2a3"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-label.proto.ts",
+      "blob": "983e015ac9ded166f2746902de9f20dcb22c4f36",
+      "sha256": "4f24e25460aef9a1008cd432c60fbcb809e2edde726ffcd08831211297486c44"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-numeric.ts",
+      "blob": "42f9bd055a0e3fd30b8861fd18f30b0b9aa264db",
+      "sha256": "ff684f19a25cb6e3952417ef112af8af72ae676eff264b0a76645d59a4fa385e"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-part-setup.ts",
+      "blob": "4dc43cf150c2facd5aa226578afaf768567e9c61",
+      "sha256": "612e09f6d10af309c74c1912e36562024e8827efa5228ccd21f8fd55e004a472"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-root.proto.ts",
+      "blob": "247595c0ce373e9a182a9735e336e95edf3cf1dc",
+      "sha256": "efea8e4d5caa3c206021f69c2ca7c45b736900d729d0e7833bdcdd6be29a23cd"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-shared.ts",
+      "blob": "6b7121074d6833760820a2b6e4168abac0e7e882",
+      "sha256": "df8f9c3295358d2a6786cd40e767a7cfca692351694e66e80e2bab297e9e5231"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-thumb.proto.ts",
+      "blob": "9c586d5ecba1f82d634024d442e940a67112ec0e",
+      "sha256": "24a447a4ffcb904b7a8832d8e83717e1b8cf9d4c5e0559d4b07c8e5dc36f6dad"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-track.proto.ts",
+      "blob": "48818328084ceb5c3c2d8cd42df1f00fb1d5d00a",
+      "sha256": "cd95639523ebb8a5d4b45a727c17dd51e77cff064e69674c82926574458d7b37"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-types.ts",
+      "blob": "b4480ee3230805a89a98ea319517cec1ccacd4ac",
+      "sha256": "d73936053d54d00c4625e258a3d58cc9f57ff5fbf1f1cbe84120630e3f2c0436"
+    },
+    {
+      "path": "packages/prototypes/base/src/slider/values-value.proto.ts",
+      "blob": "b4b64db61f1374b639be99f198a96fb6918fba24",
+      "sha256": "c2643e9bbe6121f8c309c4bb99ae44a53388b7197aa82251772d2a77601b025b"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-adapter-veto.test.ts",
+      "blob": "0a11a7b5ca34f433b2d6e5ee756403c91a71560b",
+      "sha256": "0d567f28200addede86320ae644ee7a901e03c7a8df180c481f4454f3615af4b"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-numeric.test.ts",
+      "blob": "48280032778312ec77640ed38983adec698d14cf",
+      "sha256": "4e3a605d7708a5c72f264d4b072a81fe7ee1656670fd0b6e29fc1c33f66d4285"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-publication.test.ts",
+      "blob": "00303f4d8dcae8331568c7075bbb17d4f1ac724d",
+      "sha256": "22bad3f0d87d4fc3dc59c7aa682a310a2583c5a4c45f2fa2a98715e624b0a10c"
+    },
+    {
+      "path": "packages/prototypes/base/test/slider-values-runtime.test.ts",
+      "blob": "2dd1bea8c298c28d8a495d469f3d57111ac0df52",
+      "sha256": "119d13fc3c3a456445bb212a226af88653b4f1520a6910fc44c3d0149a050191"
+    },
+    {
+      "path": "spec/contracts/C-SLIDER-VALUE-0001.yaml",
+      "blob": "7e306e9aacae220f3ad8355514244f9c99656892",
+      "sha256": "01e724a4eb50ebf00f4fac27224c769a757cbf0aefa48c69e7912f9ab810d816"
+    },
+    {
+      "path": "spec/prototypes/P-BASE-SLIDER-VALUES.yaml",
+      "blob": "de66c30752adafd6d979b96566d65809f5a19d6e",
+      "sha256": "ee7a851e82b6336cfd7db26cee991d8b107bb00a5aa0297a7a2687e2dc13d34a"
+    },
+    {
+      "path": "spec/tests/T-SLIDER-VALUE-MODEL-0001.yaml",
+      "blob": "8dbdde77db079bf3253c59d1e7b7b9f75598c8b3",
+      "sha256": "49f3f6cd6368302bd7450e29c0a95aa0ff4a2506133dae1f8eb58209eeace4d9"
+    },
+    {
+      "path": "spec/tests/T-SLIDER-VALUES-RUNTIME-0001.yaml",
+      "blob": "e929e4ba7f6a7d3167c21f8a89a0922956791f3c",
+      "sha256": "6114bcc65e8744702d5c2050366c5a57375cd282d32703748069bdcd2498994d"
+    }
+  ],
+  "integration": "All 25 reviewed leaves are unchanged except paragraph spacing around the same complete disclosure in the reconstruction record. Published State and collection fixes are inherited; no overlap was resolved by rewriting product code.",
+  "newPublisherValidation": {
+    "combined": {
+      "files": 27,
+      "passed": 521,
+      "failed": 0,
+      "valuesAndPrerequisiteTests": 398,
+      "inheritedCollectionTests": 123
+    },
+    "workspaceTypesExit": 0,
+    "publicTypeContractsExit": 0,
+    "catalogAuthoringInputs": 4,
+    "normalSourceHookExit": 0
+  },
+  "independent": {
+    "sliceTests": 398,
+    "additionalSidecarTests": 35,
+    "workspaceTypes": "pass",
+    "publicTypeContracts": "pass",
+    "actualGeneratedFacadeTypes": {
+      "react": "pass",
+      "vue": "pass",
+      "webComponent": "pass",
+      "vue2": "old scalar and new Values both fail TS2322"
+    },
+    "resolvedFindings": [
+      "commit callback eligibility",
+      "fail-closed disabled projection",
+      "Root retirement",
+      "part retirement",
+      "stale cross-Root projection frame",
+      "nonfinite interaction index"
+    ]
+  },
+  "sourceBoundary": "Additive six-entry Values family and public hooks use resolved Props and the published generic number.list State. One accepted current owner is separate from creation/session/proposal history. Ordinary static registry metadata changes do not change CLI generator or Compiler semantics.",
+  "remaining": [
+    "Pointer origin/session association, nearest-Thumb seeking, off-center grabbing, pointer collisions and focus/capture cleanup are not delivered.",
+    "Grouped Field integration, visual families, native browser/AT and Compiler translation remain unfinished or unverified.",
+    "Track is structural; four test carriers, including fake React, are not four native Adapter acceptance.",
+    "Existing scalar asynchronous delayed-owner behavior is unchanged.",
+    "Vue2 generated-facade TS2322 remains a real failure. Catalog retains 550 baseline diagnostics.",
+    "Existing nine-entry strict budgets remain false; advisory exit 0 is not within-budget acceptance and does not measure Values as a standalone entry.",
+    "No new exact-commit native screenshot exists for this checkpoint. No full Slider/Range/Multiple/family acceptance or count increase: 5 complete / 63 unfinished."
+  ],
+  "reconstruction": "Only freshly reconstructed and reviewed source is used. Historical pre-reset R4 bytes and results do not certify this candidate."
+}

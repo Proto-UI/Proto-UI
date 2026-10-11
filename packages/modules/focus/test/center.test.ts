@@ -163,3 +163,122 @@ describe('FocusCenter retained owner entry', () => {
     expect(requests).toEqual([{ reason: 'pointer', preventScroll: true }]);
   });
 });
+
+describe('FocusCenter roving options ownership', () => {
+  for (const op of ['first', 'last', 'selected'] as const) {
+    for (const field of ['reason', 'preventScroll', 'defer'] as const) {
+      it(`${op} does not queue stale entry after ${field} requests a newer target`, () => {
+        const center = new FocusCenter();
+        const providerToken = {};
+        const provider = createEntry({ instance: providerToken, roving: true });
+        const focused: string[] = [];
+        const newer = createEntry({ instance: { id: 'newer' }, focused });
+        center.upsert(provider);
+        center.upsert(newer);
+        const request = { defer: true, reason: 'keyboard' as const, preventScroll: false };
+        let reads = 0;
+        Object.defineProperty(request, field, {
+          get() {
+            reads++;
+            center.requestFocus(newer, { reason: 'pointer', preventScroll: true });
+            return field === 'reason' ? 'keyboard' : true;
+          },
+        });
+        expect(center.focusInRoving(provider, op, { entryRequest: request })).toBe(false);
+        center.upsert(createEntry({ instance: { id: 'late' }, parent: providerToken, focused }));
+        expect(reads).toBe(1);
+        expect(focused).toEqual(['newer']);
+      });
+    }
+  }
+
+  it('retains the newer empty roving request issued by an options getter', () => {
+    const center = new FocusCenter();
+    const providerToken = {};
+    const provider = createEntry({ instance: providerToken, roving: true });
+    const requests: Array<{ reason?: string; preventScroll?: boolean }> = [];
+    center.upsert(provider);
+    expect(
+      center.focusInRoving(provider, 'first', {
+        entryRequest: {
+          defer: true,
+          get reason(): 'keyboard' {
+            center.focusInRoving(provider, 'last', {
+              entryRequest: { defer: true, reason: 'pointer', preventScroll: true },
+            });
+            return 'keyboard';
+          },
+        },
+      })
+    ).toBe(false);
+    center.upsert(createEntry({ instance: {}, parent: providerToken, requests }));
+    expect(requests).toEqual([{ reason: 'pointer', preventScroll: true }]);
+  });
+
+  it('does not supersede direct native focus reported during the snapshot', () => {
+    const center = new FocusCenter();
+    const providerToken = {};
+    const provider = createEntry({ instance: providerToken, roving: true });
+    const focused: string[] = [];
+    const newer = createEntry({ instance: {}, focused });
+    center.upsert(provider);
+    center.upsert(newer);
+    expect(
+      center.focusInRoving(provider, 'first', {
+        entryRequest: {
+          defer: true,
+          get reason(): 'keyboard' {
+            center.noteFocused(newer);
+            return 'keyboard';
+          },
+        },
+      })
+    ).toBe(false);
+    center.upsert(createEntry({ instance: { id: 'late' }, parent: providerToken, focused }));
+    expect(focused).toEqual([]);
+  });
+
+  it('snapshots a non-reentrant deferred request once and preserves its native options', () => {
+    const center = new FocusCenter();
+    const providerToken = {};
+    const provider = createEntry({ instance: providerToken, roving: true });
+    const requests: Array<{ reason?: string; preventScroll?: boolean }> = [];
+    let reads = 0;
+    const request = {
+      defer: true,
+      get reason() {
+        reads++;
+        return 'pointer' as const;
+      },
+      preventScroll: true,
+    };
+    center.upsert(provider);
+    expect(center.focusInRoving(provider, 'first', { entryRequest: request })).toBe(true);
+    request.defer = false;
+    request.preventScroll = false;
+    center.upsert(createEntry({ instance: {}, parent: providerToken, requests }));
+    expect(reads).toBe(1);
+    expect(requests).toEqual([{ reason: 'pointer', preventScroll: true }]);
+  });
+
+  it('preserves a thrown options error without installing deferred intent', () => {
+    const center = new FocusCenter();
+    const providerToken = {};
+    const provider = createEntry({ instance: providerToken, roving: true });
+    const focused: string[] = [];
+    const error = new Error('options');
+    center.upsert(provider);
+    expect(() =>
+      center.focusInRoving(provider, 'first', {
+        entryRequest: {
+          defer: true,
+          get reason(): never {
+            throw error;
+          },
+        },
+      })
+    ).toThrow(error);
+    center.upsert(createEntry({ instance: { id: 'late' }, parent: providerToken, focused }));
+    expect(focused).toEqual([]);
+  });
+});

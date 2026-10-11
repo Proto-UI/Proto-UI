@@ -127,7 +127,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         .toBe('已保存到本页 · 邮件 · 隐藏每周摘要 · 备注 0 字');
       expect(task.dataset.dirty).toBe('false');
       ref('gallery-primary').click();
-      await expect.poll(() => ref('gallery-controls-feedback').textContent).toContain('✓');
+      await expect.poll(() => ref('gallery-controls-feedback').textContent).toContain('已触发');
       const editorRoot = ref('editor-text');
       const editorText = (
         editorRoot.matches('textarea') ? editorRoot : editorRoot.querySelector('textarea')

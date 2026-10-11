@@ -1,0 +1,21 @@
+---
+title: bootstrap-2-3-2 Form
+description: Draft portable form atoms.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-form"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root gathers explicitly registered FormField atoms, validates their canonical Field controls and emits submit with named value snapshots only when all enabled fields are valid. Disabled fields are omitted; duplicate names fail closed. Async validation waits for current results and rejects changed values, removal, cancellation and detach. Form disabled also reaches contained Fields. FormSubmit and FormReset own keyboard/pointer activation. Focused single-line Field, Number Field and OTP editors support implicit Enter submission, excluding IME composition, modifiers and repeated keydown. requestReset restores mounted initial uncontrolled values, requests controlled-owner changes without overwriting them, cancels editing and pending validation, then emits reset. resetValidation only clears validation. No network submission, native navigation or hidden HTML inputs are created.
+
+All four visual families inherit Base behavior. Parts: root, field, submit, reset.
+
+FormSubmit and FormReset expose typed disabled, hovered, pressed, focused and focusVisible states plus focusSelf. Their single Form activation owner is independent of Button; styled projections use each family’s existing passive Button recipe for focus, hover, press and disabled feedback.
+
+Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.

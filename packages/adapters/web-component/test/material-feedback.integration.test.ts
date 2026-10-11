@@ -533,10 +533,23 @@ describe('private material through real WC and Feedback', () => {
       expect(beforeDispose).toHaveBeenCalledOnce();
       expect(() => states[0].get()).toThrow(/disposed/);
       expect(host.querySelector('[data-pui-style]')).toBeNull();
-      // The consumer failed before the view's Focus capabilities were created.
-      expect(
-        add.mock.calls.filter(([type]) => ['focus', 'blur'].includes(String(type)))
-      ).toHaveLength(0);
+      // Finf binds physical ingress before provider construction. A failed
+      // provider must retire those exact eager listeners before returning.
+      const failedFocusAdds = add.mock.calls
+        .map((args, i) => ({ args, target: add.mock.contexts[i] }))
+        .filter(
+          ({ args, target }) =>
+            ['focus', 'blur'].includes(String(args[0])) && target instanceof HTMLInputElement
+        );
+      expect(failedFocusAdds).toHaveLength(2);
+      for (const { args, target } of failedFocusAdds)
+        expect(
+          remove.mock.calls.some(
+            (call, i) =>
+              remove.mock.contexts[i] === target && call[0] === args[0] && call[1] === args[1]
+          )
+        ).toBe(true);
+      const failedAddCount = add.mock.calls.length;
       host.remove();
       await settle();
       expect(beforeDispose).toHaveBeenCalledOnce();
@@ -547,6 +560,7 @@ describe('private material through real WC and Feedback', () => {
       expect(states[1].get()).toBe(true);
       const focusAdds = add.mock.calls
         .map((args, i) => ({ args, target: add.mock.contexts[i] }))
+        .slice(failedAddCount)
         .filter(
           ({ args, target }) =>
             ['focus', 'blur'].includes(String(args[0])) && target instanceof HTMLInputElement

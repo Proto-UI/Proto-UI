@@ -23,6 +23,35 @@ describe('feedback.semantic-merge.v0', () => {
     expect(mergeTwTokensV0(['select-none', 'select-text']).tokens).toEqual(['select-text']);
   });
 
+  it.each(['left', 'right', 'center', 'justify', 'start', 'end'])(
+    'keeps foreground and font size when text-%s sets independent alignment',
+    (alignment) => {
+      expect(mergeTwTokensV0(['text-sm', 'text-foreground', `text-${alignment}`]).tokens).toEqual([
+        'text-sm',
+        'text-foreground',
+        `text-${alignment}`,
+      ]);
+      expect(mergeTwTokensV0([`text-${alignment}`, 'text-sm', 'text-foreground']).tokens).toEqual([
+        `text-${alignment}`,
+        'text-sm',
+        'text-foreground',
+      ]);
+    }
+  );
+
+  it('replaces alignment without erasing current theme foreground, including selection scope', () => {
+    expect(
+      mergeTwTokensV0(['text-left', 'text-foreground', 'text-right', 'text-primary']).tokens
+    ).toEqual(['text-right', 'text-primary']);
+    expect(
+      mergeTwTokensV0([
+        'selection:text-left',
+        'selection:text-primary',
+        'text-center',
+        'selection:text-end',
+      ]).tokens
+    ).toEqual(['selection:text-end', 'selection:text-primary', 'text-center']);
+  });
   it('last-wins within same semantic group', () => {
     const r = mergeTwTokensV0(['bg-red-500', 'bg-blue-500']);
     expect(r.tokens).toEqual(['bg-blue-500']);

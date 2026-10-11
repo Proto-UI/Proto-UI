@@ -1,0 +1,82 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "identityLimitation": "This role declaration is not authenticated model identity, permission, independent review, or acceptance.",
+  "recordedAt": "2026-10-10T09:43:28Z",
+  "baseline": "60e94b0ebbf0ef94a1fa41d6f954a6c7f0bfd062",
+  "phase": "Independent follow-up after frozen fifth batch; does not revise the fifth-batch evidence or acceptance.",
+  "change": "Each local atom helper is explicitly the proto discriminant of DemoNode. Its children use that same variant, so text nodes remain childless and ref/props spreads cannot become text nodes. No any or assertion added.",
+  "authority": "Existing DemoNode/DemoChild definitions in apps/www/src/components/PrototypePreviewer/demo-types.ts; no semantics or lifecycle change.",
+  "validation": [
+    {
+      "command": "corepack pnpm@10.32.1 -s check:types",
+      "before": {
+        "exitCode": 1,
+        "astroFiles": 794,
+        "errors": 5,
+        "warnings": 0,
+        "hints": 10
+      },
+      "after": {
+        "exitCode": 0,
+        "astroFiles": 794,
+        "errors": 0,
+        "warnings": 0,
+        "hints": 10
+      },
+      "note": "Full official chain, including workspace TypeScript and Astro. The same-HEAD shared/links.json was materialized; missing primary-workspace dependency links were repaired only in the disposable worktree. Two earlier setup failures are retained."
+    },
+    {
+      "command": "corepack pnpm@10.32.1 exec vitest run apps/www/src/content/docs/shared-demo-types.test.ts",
+      "before": "1 failed type test with exactly the same five diagnostics; 40 valid DemoSpec cases passed.",
+      "after": "41/41 passed; includes all eight demo variants across five style families."
+    },
+    {
+      "command": "TypeScript transpileModule at ES2022/module ES2022 compared with baseline",
+      "result": "All three emitted JavaScript outputs are byte-identical; hashes in docs-runtime-equivalence.json."
+    }
+  ],
+  "environment": {
+    "node": "24.19.0",
+    "pnpm": "10.32.1",
+    "ASTRO_TELEMETRY_DISABLED": "1",
+    "COREPACK_ENABLE_NETWORK": "0",
+    "dependencyIsolation": "All project links resolve to this worktree; external installed dependencies are reused without modifying primary dependencies."
+  },
+  "evidenceBundle": "finf-post-freeze-fix-evidence (raw retained logs; archive alongside the publication handoff)",
+  "evidenceFiles": [
+    {
+      "file": "docs-before.log",
+      "sha256": "93bf2fa43299da78572e42d168fd17c95314c9846c820df4fa61ec64b199b942"
+    },
+    {
+      "file": "docs-before-complete-dependencies.log",
+      "sha256": "68e9a73e9a203cc4872be95636a5197f82f195f22be409b7c366f8c1828e152d"
+    },
+    {
+      "file": "docs-before-isolated-workspace.log",
+      "sha256": "c925828dc017805c8f57bbce36e82372e41650ddfcc7562ec7fcf9af5e9dd678"
+    },
+    {
+      "file": "docs-focused-before.log",
+      "sha256": "2330cd0f1f25f5cc1ec5687ea7443a71a75e89954c373e06ee51ffd9f9d7f9c4"
+    },
+    {
+      "file": "docs-focused-after.log",
+      "sha256": "6fde7207e16b21a7a6bb4a5d0ae2a5e90e15f72a60304df16271e499986a0dcb"
+    },
+    {
+      "file": "docs-after-official.log",
+      "sha256": "81ebd7fd0a19fd6e6042ce02c1feef150d2c92c85a4ddd7debd0beb2b115ca4a"
+    },
+    {
+      "file": "docs-runtime-equivalence.json",
+      "sha256": "cbbe2cabd8f51dc94ee419536f3852f29f5c023df6227efe166f358cc80f7cb2"
+    }
+  ],
+  "limits": [
+    "No runtime or visible layout change; no native browser screenshot claimed.",
+    "Positioning TS4058 is a separate subsequent fix.",
+    "No push, PR comment, merge, full CI, packed-consumer acceptance, or independent review is claimed."
+  ]
+}

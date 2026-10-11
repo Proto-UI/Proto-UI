@@ -20,10 +20,18 @@ anatomy:
     trigger: { cardinality: { min: 0, max: 1 } }
     content: { cardinality: { min: 0, max: 1 } }
     item: { cardinality: { min: 0, max: 100 } }
+    group: { cardinality: { min: 0, max: 100 } }
+    label: { cardinality: { min: 0, max: 100 } }
+    separator: { cardinality: { min: 0, max: 100 } }
+    shortcut: { cardinality: { min: 0, max: 100 } }
   relations:
     - { kind: contains, parent: root, child: trigger }
     - { kind: contains, parent: root, child: content }
     - { kind: contains, parent: content, child: item }
+    - { kind: contains, parent: content, child: group }
+    - { kind: contains, parent: group, child: label }
+    - { kind: contains, parent: content, child: separator }
+    - { kind: contains, parent: item, child: shortcut }
 criteria:
   - id: P-BASE-DROPDOWN-MENU-ROLE-ACTION-MENU
     text:
@@ -67,8 +75,8 @@ criteria:
       en: Canonical Root, Trigger, Content, and Item roles, cardinalities, and contains relations must be defined by the top-level anatomy field.
   - id: P-BASE-DROPDOWN-MENU-DEFERRED-EXTENSIONS
     text:
-      zh-CN: Group、Label、Separator、CheckboxItem、RadioItem 与 Submenu 不属于当前 Base 保证；下游原型不得把缺失能力宣称为兼容。
-      en: Group, Label, Separator, CheckboxItem, RadioItem, and Submenu are not current Base guarantees; downstream prototypes must not claim compatibility for missing capabilities.
+      zh-CN: CheckboxItem、RadioItem 与 Submenu 不属于当前 Base 保证；Group、Label、Separator 与 Shortcut 仅由各自新 draft P 定义承接；下游原型不得把缺失能力宣称为兼容。
+      en: CheckboxItem, RadioItem, and Submenu are not current Base guarantees; Group, Label, Separator, and Shortcut are governed only by their new draft P definitions; downstream prototypes must not claim compatibility for missing capabilities.
 sources:
   - path: packages/prototypes/base/src/dropdown/root.proto.ts
   - path: packages/prototypes/base/src/dropdown/shared.ts
@@ -89,4 +97,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: refined
     summary: Replaced versioned Context request envelopes with a Root-owned same-domain request entry.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: User-requested passive composition is now separately draft-defined; submenu/check/radio and all final acceptance remain open.
 tags: [prototype, base, dropdown-menu, action-menu, compound]

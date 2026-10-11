@@ -128,7 +128,9 @@ function installShellRecorder() {
 }
 
 const subjects = [
-  ...(['base', 'shadcn', 'brutalist'] as const).map((family) => ({ family, atom: 'text' })),
+  ...(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const).map(
+    (family) => ({ family, atom: 'text' })
+  ),
   ...(['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const).map(
     (family) => ({ family, atom: 'surface' })
   ),

@@ -1,0 +1,25 @@
+---
+title: 'ContextMenu'
+description: '支持键盘访问的上下文命令菜单。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+支持键盘访问的上下文命令菜单。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-context-menu"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root 提供 open/defaultOpen、disabled、closeOnItemCommit。Trigger 在 context.menu 或 ContextMenu/Shift+F10 时打开，并阻止已处理请求的原生菜单；普通左键不打开。Content 使用真实 Overlay/Focus/Transition 导航、文字跳转与受控关闭。右键与已接受的触摸/笔长按使用输入位置锚点，ContextMenu/Shift+F10 使用触发区域锚点。共享宿主私有保存几何，只提供不透明的输入来源关联；DOM 坐标不进入可移植 props、state 或 JSON context。
+
+组成: Root, Trigger, Content, Item.
+
+草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。
+
+触摸/笔需要在宿主移动容差内持续按住 600 ms。移动、释放、取消、禁用与卸载均取消待完成长按。已接受的键盘/长按会抑制其重复原生菜单事件，长按还抑制其兼容点击；普通点击与滚动仍由宿主处理。默认 bottom/start 放置且无额外间距。
+
+受控 open 仍是请求：启用的 Root 接受请求传递时才阻止原生菜单，调用方可以继续保留 open=false。之后调用方打开时使用最近仍有效的输入锚点；程序方法 openContextMenu 使用触发器后备锚点。Escape 与选择完成按现有焦点策略恢复触发器。共享源码运行时覆盖不代表 compiler/native 准入或真实设备长按验收。

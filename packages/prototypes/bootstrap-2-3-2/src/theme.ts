@@ -1,6 +1,10 @@
 /** Family-owned semantic palette. The consumer owns font resources and theme activation. */
 export const THEME = {
   'light': {
+    'muted-foreground': '#666666',
+    'font-sans': '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    'font-heading': '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    'font-mono': 'Monaco, Menlo, Consolas, "Courier New", monospace',
     'background': '#ffffff',
     'foreground': '#333333',
     'secondary': '#f5f5f5',
@@ -10,9 +14,14 @@ export const THEME = {
     'border': '#cccccc',
     'muted': '#e6e6e6',
     'ring': '#0055aa',
+    'destructive': '#b94a48',
     'radius': '4px',
   },
   'dark': {
+    'muted-foreground': '#666666',
+    'font-sans': '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    'font-heading': '"Helvetica Neue", Helvetica, Arial, sans-serif',
+    'font-mono': 'Monaco, Menlo, Consolas, "Courier New", monospace',
     'background': '#ffffff',
     'foreground': '#333333',
     'secondary': '#f5f5f5',
@@ -22,6 +31,7 @@ export const THEME = {
     'border': '#cccccc',
     'muted': '#e6e6e6',
     'ring': '#0055aa',
+    'destructive': '#b94a48',
     'radius': '4px',
   },
 } as const;

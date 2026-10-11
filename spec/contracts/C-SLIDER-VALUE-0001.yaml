@@ -1,0 +1,101 @@
+id: C-SLIDER-VALUE-0001
+type: contract
+title: Slider unwrapped owner, display projection and interaction proposal
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft semantics reconstructed after loss of the local A/B candidate. A new generic number-list State prerequisite and fresh bounded Runtime evidence are required. Pointer origin/session association, grouped Field, family rendering, native interaction and Compiler realization remain separate activation blockers.
+summary: Separates the unwrapped scalar/vector owner, derived ordered display, synchronous proposal/veto and logical completion; the historical mathematical model is not the production numeric policy.
+statement:
+  en: One Root owns unwrapped current values using the public number-list State descriptor. Display is a fresh sorted-array or clamped-scalar projection. Parts submit requests and never own competing business values. Resolved Props remain the controlled authority; uncanceled proposals may complete without owner echo. The additive Values family preserves existing scalar exports and behavior.
+criteria:
+  - id: C-SLIDER-VALUE-0001-VALUES
+    text: Portable resolved inputs are a finite number or a dense finite-number array, including empty and one-item arrays with distinct array shape. The sole current owner copies the unwrapped scalar or array in original order and normalizes negative zero according to number-list State. Owner admission does not quantize, clamp, sort or repair initial spacing. Display alone clamps a scalar to Root bounds or sorts an array copy. Caller input is never mutated. Empty arrays contain zero editable slots; consumers render zero Thumbs, while a retained unmapped Thumb is disabled rather than automatically removed. Root reads only resolved Props in the existing JSON domain and diagnoses wrong shapes such as objects or arrays of booleans. Non-JSON host values may already resolve through the generic Props fallback; Root does not reconstruct raw NaN, holes or accessors. The local owner-copy helper and direct methods inspect own data descriptors without invoking ordinary getters or inherited iterators; this guarantee does not cover earlier Adapter/Props validation.
+  - id: C-SLIDER-VALUE-0001-COLLISION
+    text: 'Logical collision numerical intents support push, swap and none independently of physical input. Inputs are the latest uncanceled proposal or current display when no proposal exists, an immutable session-start display, a selected integer slot, a finite already-rounded requested value, and Root policy. They return a fresh vector and selected slot or a diagnostic without mutation. Physical pointer origin/capture/geometry/focus association remains planned. Keyboard continues its existing same-slot constraints and never uses these collision modes.'
+  - id: C-SLIDER-VALUE-0001-COLLISION-PUSH
+    text: Let gap be step times minStepsBetweenValues. Reserve index times gap below the selected slot and remaining-slot count times gap above it, clamp the request into that feasible interval, propagate right against the preceding result plus gap and left against the following result minus gap, bounded by the corresponding reserved Root interval. Ordinary push uses the latest interaction vector as restoration history, so pulling back never automatically restores previously pushed neighbors. Push retains the selected index. The operation rejects infeasible reserved intervals rather than manufacturing a crossed or nonfinite vector.
+  - id: C-SLIDER-VALUE-0001-COLLISION-SWAP
+    text: A sample first constrains the selected slot between adjacent current values plus/minus gap. It crosses forward only if the request is greater than the selected current value and at least the next current value; backward is symmetric. Threshold comparisons are exact Number comparisons, without an epsilon. A crossing migrates at most one adjacent index per sample, even when the request crosses several values. Push the target slot using session-start values as restoration history for all other slots except the departing slot, which uses its just-constrained value. Right restoration chooses the smaller of current and historical values before enforcing the preceding result plus gap; left restoration chooses the larger before enforcing the following result minus gap. Finally constrain the departing slot again against its resulting neighbors and its reserved Root interval. Return the proposed adjacent index without modifying session selection or focusing a host node.
+  - id: C-SLIDER-VALUE-0001-COLLISION-NONE
+    text: None changes only the selected slot, constraining it between its previous current neighbor plus gap or Root minimum, and its next current neighbor minus gap or Root maximum. It preserves the selected index. It is deliberately distinct from keyboard's existing Root-then-neighbor clamping and subsequent distance validation.
+  - id: C-SLIDER-VALUE-0001-COLLISION-DOMAIN
+    text: Collision intents consume dense finite ordered vectors and a same-cardinality ordered session-start vector with a valid integer index. Incoming ordered owner/proposal and start values may lie outside Root bounds or initially lack gap, preserving owner admission; push can repair them, while none or swap rejects when its bounded operation leaves any final slot or gap invalid. There is no projected-step-grid closure guarantee; gap propagation may produce off-grid values. They do not quantize owner or intent inputs, apply fixed-decimal rounding, borrow the historical decimal oracle, or use an arbitrary epsilon. Every computed interval and result must be finite and feasible; every final value must lie in Root bounds and every computed adjacent distance must meet gap. Unsupported intermediate arithmetic or representational distance failure returns an explicit diagnostic, not a repaired result or a claim of upstream bit equivalence. This bounded pure operation does not establish Runtime session, focus, host or Compiler conformance.
+  - id: C-SLIDER-VALUE-0001-COLLISION-PUBLICATION
+    text: Root requestInteractionValue(value) requires a live logical session begun with beginInteraction(index), a valid selected index and complete live mapping with editable selected and proposed target slots (pushed neighbors need not be individually editable), and derives collision inputs from its sole owner and named session-start/last-uncanceled-proposal history, never accept a replacement current owner from a part. An accepted proposal may migrate selected index only after synchronous veto and policy/membership/retirement revalidation. A veto leaves the preceding proposal, selected index and focus unchanged. Controlled non-echo preserves displayed Props ownership while subsequent samples use the prior uncanceled proposal as interaction history. Commit retains last changed uncanceled proposal semantics. Numerical success alone is not permission to focus or manufacture pointer/session identity; This logical entry migrates only activeIndex; it never calls host Focus or claims physical swap focus parity. Root thumbCollisionBehavior is push by default and accepts push, swap or none; a strategy change invalidates the current session like other policy changes. Scalar/vector imperative methods, direct same-slot requestThumbValue and keyboard retain their existing semantics. Owner-equivalent results remain no-ops, even when the pure reducer proposed a different selected index; a no-op does not erase an earlier completion proposal. Existing synchronous busy/revision and retirement gates protect begin, proposal publication and completion from nested edits or callback-invalidated frames.
+  - id: C-SLIDER-VALUE-0001-NUMERIC-CLOSURE
+    text: The historical pure oracle retains its bounded shortest-decimal arithmetic, exact endpoints, projected-grid closure and 4096-iteration inclusive search tests as historical mathematics. Production numerical requests must be independently implemented from the operational Slider definition, not import that oracle. Runtime owner acceptance and display are separate from request rounding. Runtime numerical support must explicitly diagnose invalid policies, nonfinite intermediate results or unsupported decimal precision instead of using arbitrary epsilon or promising all finite computations succeed.
+  - id: C-SLIDER-VALUE-0001-GRAB-ORIGIN
+    text: The planned single Track input owner distinguishes Track seek from Thumb off-center grabbing. A Thumb-origin press preserves the start value; later already-direction-adjusted totalDelta moves from the declared start percentage. No movement must not seek. RTL and vertical change coordinates, not value ordering. Public origin/session association, real capture, geometry-change cancellation and host focus are missing prerequisites; structural Values Track does not install an input recognizer.
+  - id: C-SLIDER-VALUE-0001-PROJECTION
+    text: Each Thumb derives its sorted slot value, percentage, accessible name/value text and policy from Root display. Its accessible valueMin/valueMax follow Root bounds, as in the inspected upstream native range input; neighbor constraints belong to keyboard request processing. Ordinary Tab reaches each enabled Thumb. Default Indicator spans minimum-to-value for scalar/single arrays and first-to-last for multiple values. Additional explicit ordered start/end indices are a Proto segment extension. Value formats the display projection. None of these read-only facts becomes an accepted-value owner.
+  - id: C-SLIDER-VALUE-0001-KEYBOARD
+    text: Up increases and Down decreases; RTL reverses only Left/Right, including in vertical orientation. Home/End request an adjacent value plus/minus the minimum gap when that neighbor exists, otherwise the Root endpoint, then apply Root/neighbor constraints; Page and Shift+Arrow use absolute largeStep, default10. Step requests use operational min-relative Number rounding, then Root/neighbor constraints and minimum-distance validation. Fractional nonnegative minStepsBetweenValues is allowed. Alt/Ctrl/Meta and unrelated keys make no request. Each changed uncanceled keyboard proposal completes immediately, even if a controlled owner does not echo it. Pointer collision modes do not change keyboard behavior.
+  - id: C-SLIDER-VALUE-0001-OWNER
+    text: Root declares one public number-list State slot for unwrapped current values and scalar shape/policy/interaction facts. Creation/reset, session-start and last-uncanceled-proposal lists are explicitly named historical or interaction facts, never second display owners. Context, JSON events, closure arrays, encoded strings, preallocated scalar slots and child-owned values cannot substitute for current State. No component-specific Core, Compiler, Adapter or CLI generator exception is admitted. Cross-slot atomicity is not implied by an atomic list replacement.
+  - id: C-SLIDER-VALUE-0001-CONTROLLED
+    text: Controlled ownership mode is fixed at creation solely by non-null resolved value, including a value supplied by legal asHook default layers; canonical null is empty. Do not use raw providing metadata. A composed value default is controlled constant input, unlike defaultValue which initializes an uncontrolled owner. Capture mode before validating policy or owner. Capture safe resolved creation input even when initial policy is invalid; if initial resolved input has wrong JSON shape, the first later safe owner establishes the reset snapshot. Later uncontrolled defaults are ignored. Valid repairs must recover without a false mode switch. A real ownership mode transition is explicitly unsupported. Root uses resolved get/watchAll only. A changed proposal is compared with the unwrapped current owner shape/order, before display sorting or clamping. Controlled proposals never write current values; uncanceled proposals advance interaction history and may commit without Props echo. Ignored or delayed updates are not cancellation, and no receipt token or equality-based causal ACK is required. When no resolved defaultValue exists, uncontrolled initialization uses resolved min; test positive and negative nonzero min explicitly.
+  - id: C-SLIDER-VALUE-0001-SESSION
+    text: An explicit logical session captures start display as history, not capture ownership. Its optional index is either the omitted/-1 no-selection sentinel or a nonnegative integer with valid live mapping; invalid indices are rejected before session writes. The last changed uncanceled proposal is eligible for one commit; a return to the start may still commit. A later veto or same-owner no-op does not erase an earlier eligible proposal. Logical cancellation clears pending completion without rolling back current uncontrolled values. Reset is a separately vetoable request for the creation snapshot. Policy, cardinality, orientation/direction, membership or index invalidation cancels an existing logical session before reuse. Repeatable unmount ends the interaction and clears the selected slot while retaining the sole current owner for a later mount. Terminal disposal invalidates old callback frames before subsequent State access or notification, including instances with no mounted epoch. Live required-context errors remain errors. Real Track capture retirement remains unimplemented in Values.
+  - id: C-SLIDER-VALUE-0001-BOUNDARY
+    text: valueChange is a pre-publication JSON proposal notification. Receiver-scoped cancelValueChange is valid only during that Root synchronous notifying window and records a declared veto fact. Late cancellation and nested edits are rejected; callback false or throw is not veto. Calling a receiver method does not authenticate caller origin. Four synchronous Adapter carriers require fresh evidence; asynchronous decision-return hosts remain unadmitted. Props received during notifying or publishing stay authoritative and are reconciled rather than discarded. Declared phase/dirty/revision facts control publication; individual State observers may see publishing, with idle only a quiescent boundary, not a cross-slot transaction. Re-check policy/revision/parts after callbacks before completion/focus. Each part declares a scalar projection revision, never a second business-value owner. Starting a new projection or disabling a retired mapping invalidates older projection frames. After each public State or Focus notification, a frame must still match that revision and observed Root availability before publishing more derived facts; this includes a retained node synchronously moving to another Root. Nonconvergent synchronous feedback must produce a bounded diagnostic and disable editing. No passing pure model, isolated Root or Web harness can admit full Slider, family, native host or Compiler support.
+openQuestions:
+  - id: C-SLIDER-VALUE-0001-Q-STATE
+    question: What new exact-source evidence binds the generic number-list prerequisite to this reconstructed owner implementation without implying cross-slot transactions?
+    blocks:
+      - activation:C-SLIDER-VALUE-0001
+  - id: C-SLIDER-VALUE-0001-Q-COMPATIBILITY
+    question: Do real static additive Values entries preserve old scalar callbacks and expose the new union payloads through unchanged generated facades?
+    blocks:
+      - activation:C-SLIDER-VALUE-0001
+  - id: C-SLIDER-VALUE-0001-Q-NUMERIC
+    question: Does the independently implemented bounded operational Number policy match the declared Slider request domain and explicitly reject unsupported intermediates without importing the historical oracle?
+    blocks:
+      - activation:C-SLIDER-VALUE-0001
+  - id: C-SLIDER-VALUE-0001-Q-REALIZATION
+    question: What exact-source Runtime, native-host, assistive-technology and generic Compiler evidence admits the proposed owner, session and focus transitions?
+    blocks:
+      - activation:C-SLIDER-VALUE-0001
+dependsOn:
+  contracts:
+    - C-STATE-0001
+    - C-STATE-0002
+    - C-PROPS-0003
+    - C-CONTEXT-0001
+    - C-CONTEXT-0009
+    - C-EXPOSE-0007
+    - C-EXPOSE-EVENT-0001
+    - C-EXPOSE-EVENT-0002
+    - C-EXPOSE-STATE-0001
+    - C-PROPS-0008
+    - C-PROPS-0009
+    - C-PROPS-0012
+    - C-STATE-NUMBER-LIST-0001
+    - C-LIFECYCLE-0002
+    - C-LIFECYCLE-0005
+verifies:
+  tests:
+    - T-SLIDER-VALUE-MODEL-0001
+    - T-SLIDER-VALUES-RUNTIME-0001
+    - T-SLIDER-COLLISION-INTENTS-0001
+sources:
+  - path: internal/models/slider-value-model.ts
+  - path: internal/records/2026-10-10-base-slider-value-definition.md
+  - path: internal/records/2026-10-11-slider-values-reconstruction-plan.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Proposed the complete value/ownership boundary while recording the architecture blocker and limiting evidence to a pure model.
+  - version: 0.3.0-alpha.1
+    change: updated
+    summary: Reconstructed the forward unwrapped-owner and portable resolved-input semantics; historical oracle and former local review are not current Runtime evidence.
+  - version: 0.3.0-alpha.1
+    change: updated
+    summary: Defined bounded logical push, adjacent-swap and none operations independently of pointer host realization and keyboard requests.
+  - version: 0.3.0-alpha.1
+    change: updated
+    summary: Added a logical Root interaction entry with veto-aware selected-index migration and controlled proposal history, explicitly without host focus or pointer capture.
+tags:
+  - slider
+  - values
+  - ownership
+  - draft

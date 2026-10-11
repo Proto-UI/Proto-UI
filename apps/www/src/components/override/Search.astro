@@ -2,6 +2,10 @@
 import project from 'virtual:starlight/project-context';
 import { localizedUrl } from '../../utils/localizedUrl';
 import { resolveSiteLibraryFamily } from '../site-library-family';
+import { siteSearchShortcutLabel } from '../site-search-shortcut';
+import StaticLucideIcon from '../StaticLucideIcon.astro';
+import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
+import { snapshotStartupStyle, startupButtonProps } from '../site-startup-paint';
 
 const documentationUrl = localizedUrl(
   new URL('/ui-libraries/', Astro.url),
@@ -9,6 +13,10 @@ const documentationUrl = localizedUrl(
   project.trailingSlash
 ).pathname;
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
+const startupTokens = await snapshotStartupStyle(`${family}-button`, {
+  ...startupButtonProps(family, 'default'),
+  disabled: true,
+});
 
 const pagefindTranslations = {
   placeholder: Astro.locals.t('search.label'),
@@ -42,6 +50,29 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
   data-retry-label={retryLabel}
   data-ctrl-label={Astro.locals.t('search.ctrlKey')}
 >
+  <style is:inline set:html={renderSnapshotTokenCss(startupTokens, '[data-search-startup-button]')}
+  ></style>
+  <div data-search-startup>
+    <button
+      type="button"
+      disabled
+      aria-disabled="true"
+      data-search-startup-button
+      data-site-control-family={family}
+      data-pui-style={startupTokens.join(' ')}
+      aria-label={loadingLabel}
+      title={loadingLabel}
+    >
+      <span aria-hidden="true"><StaticLucideIcon name="search" size="16px" /></span>
+      <span class="sr-only">{loadingLabel}</span>
+      <span aria-hidden="true" class="site-search-label sl-hidden md:sl-block"
+        >{Astro.locals.t('search.label')}</span
+      >
+      <span aria-hidden="true" class="site-search-shortcut sl-hidden md:sl-flex"
+        >{siteSearchShortcutLabel(Astro.locals.t('search.ctrlKey'))}</span
+      >
+    </button>
+  </div>
   <div data-search-command-mount="open"></div>
   <noscript
     ><a href={documentationUrl}>{isChinese ? '浏览文档' : 'Browse documentation'}</a></noscript

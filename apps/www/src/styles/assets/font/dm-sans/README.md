@@ -10,3 +10,5 @@ Unmodified `DMSans[opsz,wght].ttf` from google/fonts commit `5b35b7208dd41005713
 - The PUI prototype package only owns the declared family/fallback tokens; it does not fetch or bundle these bytes
 
 The full copyright/OFL is also shipped as `apps/www/public/fonts/dm-sans-OFL.txt` at `/fonts/dm-sans-OFL.txt`. An executable checksum/byte-equality test prevents source and public-license drift; browser evidence reads that public endpoint.
+
+The UI Libraries gallery aliases these same bytes as `Library DM Sans` and inlines them into its render-blocking CSS with Vite's `?inline` asset query. `font-display: swap` keeps text visible; the gallery does not defer its family font to a separate network request. The global `DM Sans` face remains unchanged. This adds the complete 240,164-byte TTF (320,241-byte data URL, about 135 kB gzip) to the gallery stylesheet. No subset, font substitution or security-policy change is introduced. The source checksum and complete public OFL remain the same; real first-frame glyph selection is gated separately by Chromium CDP.

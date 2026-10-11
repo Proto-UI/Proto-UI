@@ -1,4 +1,9 @@
-import { setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  createPreviewMaterialSink,
+  findPreviewMaterialProvider,
+} from './preview-material-provider';
+import { createDemoAssociationScope } from './demo-associations';
+import { setElementProps, setElementAssociations } from '@proto.ui/adapter-web-component';
 import type { ReactRuntime } from '@proto.ui/adapter-react';
 import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
 import type { Prototype } from '@proto.ui/core';
@@ -14,27 +19,30 @@ import type {
 import { ensurePreviewWcRegistered } from './wc-registry';
 import type { RuntimeId } from './runtimes/ids';
 
-// Share acquisition across concurrently prepared commands/surfaces. Failed
-// acquisition remains retryable; successful module namespaces are stable.
-function lazyModules<T>(load: () => Promise<T>): () => Promise<T> {
-  let pending: Promise<T> | undefined;
-  return () => {
-    pending ??= load().catch((error) => {
-      pending = undefined;
-      throw error;
-    });
-    return pending;
-  };
-}
-const reactModules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-react'), import('./runtimes/react-runtime')])
+import runtimeUrls from 'virtual:proto-ui/runtime-retry-urls';
+import { retryableModule } from './runtimes/retryable-module';
+
+const reactAdapter = retryableModule(
+  () => import('@proto.ui/adapter-react'),
+  runtimeUrls.reactAdapter
 );
-const vueModules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-vue'), import('./runtimes/vue-runtime')])
+const reactRuntime = retryableModule(
+  () => import('./runtimes/react-runtime'),
+  runtimeUrls.reactRuntime
 );
-const vue2Modules = lazyModules(() =>
-  Promise.all([import('@proto.ui/adapter-vue2'), import('./runtimes/vue2-runtime')])
+const vueAdapter = retryableModule(() => import('@proto.ui/adapter-vue'), runtimeUrls.vueAdapter);
+const vueRuntime = retryableModule(() => import('./runtimes/vue-runtime'), runtimeUrls.vueRuntime);
+const vue2Adapter = retryableModule(
+  () => import('@proto.ui/adapter-vue2'),
+  runtimeUrls.vue2Adapter
 );
+const vue2Runtime = retryableModule(
+  () => import('./runtimes/vue2-runtime'),
+  runtimeUrls.vue2Runtime
+);
+const reactModules = () => Promise.all([reactAdapter(), reactRuntime()]);
+const vueModules = () => Promise.all([vueAdapter(), vueRuntime()]);
+const vue2Modules = () => Promise.all([vue2Adapter(), vue2Runtime()]);
 
 type PropsBaseType = Record<string, unknown>;
 
@@ -165,7 +173,12 @@ function callInScope(inst: DemoInstance, fn: () => void) {
   return fn();
 }
 
-function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLElement[]) {
+function renderDemoNodeWc(
+  node: DemoChild,
+  parent: HTMLElement,
+  instances: HTMLElement[],
+  associations: ReturnType<typeof createDemoAssociationScope>
+) {
   if (typeof node === 'string') {
     parent.appendChild(document.createTextNode(node));
     return;
@@ -183,7 +196,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
     const kids = node.children ?? [];
-    for (const child of kids) renderDemoNodeWc(child, el, instances);
+    for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
     return;
   }
 
@@ -198,6 +211,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
     surfaceStyle: node.surfaceStyle,
   };
   wcSurfaceProps.set(el, surfaceProps);
+  setElementAssociations(el, associations.resolve(node.associations) ?? {});
   setElementProps(el, {
     ...(node.props ?? {}),
     ...surfaceProps,
@@ -206,7 +220,7 @@ function renderDemoNodeWc(node: DemoChild, parent: HTMLElement, instances: HTMLE
   // Materialize authored children before connecting the custom element so the
   // Web Component adapter can project slots or reject contentless children.
   const kids = node.children ?? [];
-  for (const child of kids) renderDemoNodeWc(child, el, instances);
+  for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
   parent.appendChild(el);
 }
 
@@ -233,11 +247,20 @@ async function renderDemoWc(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
   const instances: HTMLElement[] = [];
-  renderDemoNodeWc(demo.root, host, instances);
+  renderDemoNodeWc(demo.root, host, instances, associations);
 
   const refs = collectDemoRefs(host);
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref];
+      const surface = el && wcSurfaceProps.get(el);
+      if (!surface) return;
+      surface.surfaceStyle = next;
+      api.setProps(ref, {});
+    },
     call(ref, path, ...args) {
       const el = refs[ref] as DemoInstance & HTMLElement;
       if (!el) return;
@@ -277,6 +300,7 @@ async function renderDemoWc(
         const instance = instances[index];
         if (instance) cleanupSteps.push(() => instance.remove());
       }
+      cleanupSteps.push(() => associations.dispose());
       runCleanupSteps(cleanupSteps);
     })
   ) {
@@ -295,6 +319,7 @@ async function renderDemoReact(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   // Non-WC modules join the graph only when this runtime is selected. A
   // superseded owner must not proceed to CDN loading after that import boundary.
@@ -309,9 +334,27 @@ async function renderDemoReact(
 
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = new Map<string, Record<string, unknown>>();
+  const surfaceStyles = new Map<string, DemoSurfaceStyle>();
+  // DemoBoxAttrs are native string attributes, not React boolean props. Keep
+  // global presence attributes (including hidden="until-found") byte-exact in
+  // the initial commit, before setup or the first animation-frame boundary.
+  const presenceAttributes = new Set(['hidden', 'inert', 'itemscope']);
+  const boxAttributeRefs = new WeakMap<object, (element: HTMLElement | null) => void>();
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'box') {
+      const presence = Object.entries(node.attrs ?? {}).filter(([name]) =>
+        presenceAttributes.has(name.toLowerCase())
+      );
+      if (presence.length) {
+        // A stable ref runs on mount, not on every prototype props update:
+        // setup may subsequently own hidden/inert state, as Copy does.
+        boxAttributeRefs.set(node, (element) => {
+          if (element) for (const [name, value] of presence) element.setAttribute(name, value);
+        });
+      }
+    }
     if (node.kind === 'proto' && node.ref) {
       propsMap.set(node.ref, { ...(node.props ?? {}) });
     }
@@ -326,7 +369,16 @@ async function renderDemoReact(
       const kids = (node.children ?? []).map((child) => renderNode(child));
       return React.createElement(
         node.tag ?? 'div',
-        { ...node.attrs, className: node.className, 'data-demo-ref': node.ref },
+        {
+          ...Object.fromEntries(
+            Object.entries(node.attrs ?? {}).filter(
+              ([name]) => !presenceAttributes.has(name.toLowerCase())
+            )
+          ),
+          className: node.className,
+          'data-demo-ref': node.ref,
+          ref: boxAttributeRefs.get(node),
+        },
         ...kids
       );
     }
@@ -336,7 +388,10 @@ async function renderDemoReact(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
@@ -349,9 +404,11 @@ async function renderDemoReact(
         else componentRefs.delete(node.ref!);
       };
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClassName = node.className;
-    if (node.surfaceStyle) {
-      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(node.surfaceStyle, host.ownerDocument);
+    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
+    if (surfaceStyle) {
+      mergedProps.surfaceStyle = normalizeReactSurfaceStyle(surfaceStyle, host.ownerDocument);
     }
     return React.createElement(Component, mergedProps as Record<string, unknown>, ...kids);
   }
@@ -374,6 +431,7 @@ async function renderDemoReact(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => root.unmount(),
+        () => associations.dispose(),
       ]);
     })
   ) {
@@ -398,6 +456,11 @@ async function renderDemoReact(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
+      surfaceStyles.set(ref, next);
+      api.setProps(ref, {});
+    },
     call(ref, path, ...args) {
       const inst = componentRefs.get(ref);
       if (!inst) return;
@@ -451,6 +514,7 @@ async function renderDemoVue(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   const [{ createVueAdapter }, { loadVue }] = await vueModules();
   if (!ownsLease(opt, lease)) return abandonLease(lease);
@@ -460,6 +524,7 @@ async function renderDemoVue(
 
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = Vue.reactive<Record<string, Record<string, unknown>>>({});
+  const surfaceStyles = Vue.reactive<Record<string, DemoSurfaceStyle>>({});
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
@@ -496,7 +561,10 @@ async function renderDemoVue(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child));
@@ -508,8 +576,10 @@ async function renderDemoVue(
         if (el) componentRefs.set(node.ref!, el as DemoInstance);
       };
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    const surfaceStyle = (node.ref && surfaceStyles[node.ref]) || node.surfaceStyle;
+    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
     return Vue.h(Component, mergedProps, () => kids);
   }
 
@@ -530,6 +600,7 @@ async function renderDemoVue(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.unmount(),
+        () => associations.dispose(),
       ]);
     })
   ) {
@@ -541,6 +612,10 @@ async function renderDemoVue(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap[ref]) return;
+      surfaceStyles[ref] = next;
+    },
     call(ref, path, ...args) {
       const inst = componentRefs.get(ref);
       if (!inst) return;
@@ -579,6 +654,7 @@ async function renderDemoVue2(
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
+  const associations = createDemoAssociationScope();
 
   const [{ createVue2Adapter }, { loadVue2, toVue2ComponentData, toVue2Runtime }] =
     await vue2Modules();
@@ -589,6 +665,7 @@ async function renderDemoVue2(
 
   const componentRefs = new Map<string, DemoInstance>();
   const componentRefNames = new Set<string>();
+  const surfaceStyles = new Map<string, DemoSurfaceStyle>();
   const propsMap = ((Vue as any).observable ? (Vue as any).observable({}) : {}) as Record<
     string,
     Record<string, unknown>
@@ -631,7 +708,10 @@ async function renderDemoVue2(
     const componentKey = `${node.prototypeId}:${node.rootTag ?? 'div'}`;
     let Component = scopedCache.get(componentKey);
     if (!Component) {
-      Component = adapter(proto as Prototype<PropsBaseType>, { rootTag: node.rootTag });
+      Component = adapter(proto as Prototype<PropsBaseType>, {
+        rootTag: node.rootTag,
+        createVisualSink: createPreviewMaterialSink,
+      });
       scopedCache.set(componentKey, Component);
     }
     const kids = (node.children ?? []).map((child) => renderNode(child, h));
@@ -641,8 +721,10 @@ async function renderDemoVue2(
       Object.assign(mergedProps, propsMap[node.ref] ?? {});
       mergedProps['data-demo-ref'] = node.ref;
     }
+    mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    if (node.surfaceStyle) mergedProps.surfaceStyle = node.surfaceStyle;
+    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
+    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
 
     const data = toVue2ComponentData(mergedProps);
     if (node.ref) data.ref = node.ref;
@@ -664,8 +746,12 @@ async function renderDemoVue2(
     },
   });
 
-  const app = new Root().$mount();
-  host.appendChild(app.$el);
+  // Vue2 runs descendant mounted hooks inside $mount. Attach its replacement
+  // point first so first-commit host capabilities see the actual owner ancestry.
+  // Vue2 replaces this point with the authored root; no extra wrapper remains.
+  const mountPoint = host.ownerDocument.createElement('div');
+  host.appendChild(mountPoint);
+  const app = new Root().$mount(mountPoint);
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
@@ -676,6 +762,7 @@ async function renderDemoVue2(
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.$destroy(),
+        () => associations.dispose(),
       ]);
     })
   ) {
@@ -689,6 +776,11 @@ async function renderDemoVue2(
   const refs = collectDemoRefs(host);
 
   const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease) || !propsMap[ref]) return;
+      surfaceStyles.set(ref, next);
+      app.$forceUpdate?.();
+    },
     call(ref, path, ...args) {
       refreshComponentRefs(app);
       const inst = componentRefs.get(ref);
@@ -734,20 +826,58 @@ function nextVue2(Vue: { nextTick: (fn?: () => void) => Promise<void> | void }) 
   });
 }
 
+function hasLiquidSurface(node: DemoChild): boolean {
+  return (
+    typeof node !== 'string' &&
+    node.kind !== 'text' &&
+    ((node.kind === 'proto' && node.prototypeId.startsWith('liquid-glass-')) ||
+      (node.children ?? []).some(hasLiquidSurface))
+  );
+}
 export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResult> {
   if (opt.isCurrent?.() === false) return EMPTY_DEMO_RENDER;
-  const lease = claimHostMount(opt.host);
-  switch (opt.runtime) {
-    case 'wc':
-      return renderDemoWc(opt, lease);
-    case 'react':
-      return renderDemoReact(opt, lease);
-    case 'vue':
-      return renderDemoVue(opt, lease);
-    case 'vue2':
-      return renderDemoVue2(opt, lease);
-    default:
-      lease.release();
-      throw unsupportedRuntime(opt.runtime);
+  let lease = claimHostMount(opt.host);
+  let scene: ReturnType<
+    typeof import('./preview-material-scene').createPreviewMaterialScene
+  > | null = null;
+  if (hasLiquidSurface(opt.demo.root) && !findPreviewMaterialProvider(opt.host)) {
+    const { createPreviewMaterialScene } = await import('./preview-material-scene');
+    if (!ownsLease(opt, lease)) return abandonLease(lease);
+    scene = createPreviewMaterialScene(opt.host);
+    const original = lease;
+    lease = {
+      ...original,
+      commit(cleanup) {
+        return original.commit(() => {
+          try {
+            cleanup();
+          } finally {
+            scene?.dispose();
+          }
+        });
+      },
+    };
+    const retiringScene = scene;
+    original.commit(() => retiringScene.dispose());
+    opt = { ...opt, host: scene.mount };
+  }
+  try {
+    switch (opt.runtime) {
+      case 'wc':
+        return await renderDemoWc(opt, lease);
+      case 'react':
+        return await renderDemoReact(opt, lease);
+      case 'vue':
+        return await renderDemoVue(opt, lease);
+      case 'vue2':
+        return await renderDemoVue2(opt, lease);
+      default:
+        lease.release();
+        throw unsupportedRuntime(opt.runtime);
+    }
+  } catch (error) {
+    scene?.dispose();
+    lease.release();
+    throw error;
   }
 }

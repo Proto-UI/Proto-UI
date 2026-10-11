@@ -45,13 +45,15 @@ export function createHomepageGalleryParts(
     id: string,
     children: DemoChild[] = [],
     props: Record<string, unknown> = {},
-    ref?: string
+    ref?: string,
+    associationKey?: string
   ): DemoNode => {
     ids.add(id);
     if (ref) authoredProps.set(ref, { ...props });
     return {
       kind: 'proto',
       prototypeId: id,
+      ...(associationKey ? { associations: { controlLabel: associationKey } } : {}),
       props,
       children,
       ...(ref ? { ref } : {}),
@@ -114,11 +116,18 @@ export function createHomepageGalleryParts(
     box('home-gallery__choice', [
       p(
         `${family}-checkbox-root`,
-        [p(`${family}-checkbox-indicator`), box('sr-only', [label])],
+        [p(`${family}-checkbox-indicator`)],
         { defaultChecked: checked },
-        ref
+        ref,
+        `choice:${ref}`
       ),
-      box('home-gallery__choice-label', [label]),
+      p(
+        `${family}-label-root`,
+        [label],
+        { naming: true, activation: true },
+        undefined,
+        `choice:${ref}`
+      ),
     ]);
   const status = (value: string, ref: string) =>
     box('home-gallery__status', [value], ref, { role: 'status', 'aria-live': 'polite' });
@@ -413,12 +422,14 @@ export function createHomepageGalleryParts(
         ['gallery-secondary', zh ? '次要按钮' : 'Secondary button'],
         ['gallery-danger', zh ? '危险按钮示例' : 'Destructive button example'],
       ])
-        bind(ref!, 'click', () => feedback('gallery-controls-feedback', `${label} ✓`));
+        bind(ref!, 'click', () =>
+          feedback('gallery-controls-feedback', `${label}: ${zh ? '已触发' : 'Activated'}`)
+        );
       for (const ref of ['gallery-bold', 'gallery-italic'])
         bind(ref, 'activeChange', ({ active }) =>
           feedback(
             'gallery-controls-feedback',
-            `${ref.endsWith('bold') ? (zh ? '粗体' : 'Bold') : zh ? '斜体' : 'Italic'} ${active === true ? '✓' : '—'}`
+            `${ref.endsWith('bold') ? (zh ? '粗体' : 'Bold') : zh ? '斜体' : 'Italic'} ${active === true ? (zh ? '已开启' : 'On') : zh ? '已关闭' : 'Off'}`
           )
         );
       for (const ref of ['gallery-checkbox', 'gallery-switch'])

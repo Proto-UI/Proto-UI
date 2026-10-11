@@ -1,0 +1,94 @@
+{
+  "status": "WIP functional strengthening; no full Finf acceptance or merge approval",
+  "base": "8989403a6d3668948c7394f4a370d8269ba1a6ec",
+  "sourceCommit": "6b7cdbd3aac95836ffa699547b35936c258c4d99",
+  "sourceTree": "de87c02310a4a324dd669a7016af95bef160630d",
+  "orderedSourceCommits": [
+    "fe1f7feeae12e99bbe58af70cc15d72cb0673945",
+    "a4048d9b704cc8af9f5d38dec362e3ebbc00a78f",
+    "12361b562870715c384109de03f185d499585dd4",
+    "5a41247785e191b47225b5186d0d831deb8949ae",
+    "6d5121ce22e37e8faef430e4fc708c3295fed932",
+    "db839747a3e7b2606cc0f8968132942a518fdb2b",
+    "a66f07323eb7eea2f778ef5d73fa5783112309f1",
+    "8f576f06417b85f0d3224b99acd918d02873be8c",
+    "413638969602673dbe74263aafa4ef3bc07cd9c5",
+    "7b67893b9d92a5ef0525bba2e4b9998595d96522",
+    "a3597246890c025b93f63328bd9dca53830c8847",
+    "b93821d8280f13bc4165ee79e4b8c42c8926655e",
+    "e0e98065f5917396eda5a9f1165b1854893a1c5c",
+    "ccd802662e273c1226028b7837904d427fb906b5",
+    "ed5fcd82a30f1e62337d39daf05bf0b611dacb3f",
+    "4ad8b8ede6eb01560e941dcda55d5b9f11c34246",
+    "6b7cdbd3aac95836ffa699547b35936c258c4d99"
+  ],
+  "familyComponentEntries": 140,
+  "namedPrototypeAtoms": 690,
+  "userWeightedProgress": {
+    "done": 3,
+    "inProgress": 65,
+    "notStarted": 0,
+    "points": 35.5,
+    "denominator": 68,
+    "percentage": 52.2,
+    "rule": "Done=1; partial source implementation=0.5. Source progress is not full acceptance."
+  },
+  "scope": [
+    "Form reset and implicit Enter, TextControl resetValue, nested Fieldset and explicit Field-bound Slider/NumberField/InputOTP controls; twenty new family atoms",
+    "Drawer normalized physical handles and controlled snaps, five new handle atoms and static continuous CSS projection",
+    "ContextMenu opaque host-local pointer anchors, keyboard fallback and held-input lifecycle; no portable coordinates",
+    "152 styled form/range atom contracts retain declared Base Props and Exposes",
+    "Toast reopen pause state and Toolbar metadata-current corrections; remove false Popover focus-exit observation",
+    "Label swallowed-click receipt retirement; ExposeStateWeb terminal-only conditional owned-artifact restoration",
+    "Calendar initial month inference and malformed unavailable-date rejection with actual family/DatePicker consumers",
+    "Properly regenerated preset manifests plus finite Classic Drawer utilities; official sandboxed Form/Calendar/Drawer image workflow source"
+  ],
+  "verification": {
+    "frozenFocused": "640/640 tests passed across 29 files on source 2f77255f9c5391a2dde8cf25b19392fb085cdcbc",
+    "types": "Workspace TypeScript and two dedicated range/form consumer positive/negative type fixtures passed on the frozen source.",
+    "styles": "Proper website generator produced 621 package and website tokens plus document/Shadow sheets. Shadcn 410, Brutalist 401 and Draft preset checks all current.",
+    "ownerEvidence": "Additional original-owner bounded evidence remains in independent source records; it is not a substitute for full native or exact-head acceptance.",
+    "screenshots": "Three official-CI journeys are committed with source/tree and PNG hashes. Native execution and images remain pending; no local native launch occurred."
+  },
+  "retainedFailures": [
+    "Official actual898 screenshots failed before browser startup at the stale preset manifest gate (run38035138248/job114163902340; Draft run38035138272). Adjacent generator repair passes locally; historical runs remain failed.",
+    "Calendar selected-date initialization and malformed unavailable input negative controls first failed 5 cases; owner Calendar15/15 and GroupC57/57 then passed.",
+    "Drawer terminal CSS variable residue was a real failure. Owning Module restoration fixes it; the unchanged Drawer assertion passes in this snapshot.",
+    "Range projection consumer fixture first showed 72 diagnostics; projected Props/Exposes repairs pass both dedicated compile fixtures.",
+    "Label intercepted compatibility click first reproduced one failed case; owning receipt retirement and bounded tests pass. Native browser gesture ordering still needs real-browser evidence.",
+    "C spec-authoring command was blocked before validation by tsx Unix IPC EPERM. No permissions bypass or full spec success is claimed.",
+    "Offline resolver misses for preexisting registry metadata remain; deterministic workspace-only importers passed frozen/offline lock-only validation, not a full clean installation.",
+    "New uncataloged prototype source remains catalog/admission debt; no placeholder entities or validator weakening were introduced."
+  ],
+  "remaining": [
+    "Native NavigationMenu link source and consumer are a separate successor batch, not part of this frozen source.",
+    "Popover and other non-modal overlays still need genuine close-on-focus-outside observation; the former historical-focus workaround was removed.",
+    "Full native input/visual evidence, packed consumption, Compiler and non-Web/GPUI conformance, catalog contracts/admission, homepage exhibition, independent exact-head acceptance remain pending.",
+    "Virtual List materialization remains a bounded Web implementation; cross-backend materialization is not certified."
+  ],
+  "publicationIdentity": "Publisher may map these seventeen source commits to actual remote objects preserving author, message and tree. Rebind only candidateSource commit/proof/binding identity; functionalStrengthening20261010 sourceCommit; and this current packet sourceCommit/orderedSourceCommits with explicit localSourceProvenance. Historical observations, previous packets and three accepted prior-closeout URLs remain unchanged.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "localSourceProvenance": {
+    "sourceCommit": "2f77255f9c5391a2dde8cf25b19392fb085cdcbc",
+    "orderedSourceCommits": [
+      "7356c89337f94b568114c255b8c474671abbb8bb",
+      "afb279e602c3db642a82b69212688c86baad5f5d",
+      "fdc63c0ccebad2bc93059e278e6af3a3df26a0bb",
+      "c2e36450c7cd27f7a1f91f30bfc0769f8d1288a0",
+      "4e3313c813a10a064a325e16025b2d46ba11a247",
+      "fadffa4511ba81fa70374ea4795625e16ebf1b65",
+      "63bdcf37510a821309c1310367a6680100479160",
+      "93ec7d433c3ed215489d38f9aeea3c2c048bbc4c",
+      "4b55a2f68392be22a1c450dc682da85c50a9e8a0",
+      "2bda023dbf0d39212d504c4209945ce32118adcb",
+      "8b563c1526c96e32ef3c857dbc0e0a730d2ef88b",
+      "f5020f6cb517d4e51b5a63c9621ada5118365e46",
+      "0939be6bff080b9d1966441282fe54460ce98801",
+      "b482847ef6a6ca0ea2054905fde22f148110e8f3",
+      "53345bdd9ea0693946f23983fef0b5e21050c290",
+      "6318e382186a63225f44b270a875b1261a39cc6d",
+      "2f77255f9c5391a2dde8cf25b19392fb085cdcbc"
+    ]
+  }
+}

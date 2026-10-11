@@ -1,0 +1,21 @@
+---
+title: 'Menubar'
+description: '具有键盘协调与独立命令面板的菜单栏。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+具有键盘协调与独立命令面板的菜单栏。
+
+<PrototypePreviewer
+  demoId="demo-base-menubar"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Root.value 标识一个打开的面板；Trigger.value 与 Content.value 配对。菜单栏提供单一 Tab 入口、左右移动、上下箭头进入、命令纵向导航及文字跳转。Escape 恢复触发器焦点；外部点击与命令选择关闭。受控 value 只发出请求。
+
+组成: Root, Trigger, Content, Item.
+
+草稿源码。嵌套子菜单、完整 native/GPUI/编译器证据、消费/视觉验收与独立生命周期准入仍未完成。

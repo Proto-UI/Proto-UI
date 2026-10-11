@@ -1,0 +1,16 @@
+---
+interface Props {
+  bootstrap: boolean;
+}
+const { bootstrap } = Astro.props;
+---
+
+{
+  bootstrap ? (
+    <div class="library-card__thumbnail-caption">
+      <slot />
+    </div>
+  ) : (
+    <slot />
+  )
+}

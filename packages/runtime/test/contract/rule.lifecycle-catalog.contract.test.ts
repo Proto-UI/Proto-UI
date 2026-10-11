@@ -114,6 +114,76 @@ describe('Rule Runtime catalog', () => {
     await session.mount();
     expect(styles.at(-1)?.tokens).toEqual(['bg-red-500', 'w-64']);
     await session.dispose();
+    expect(subscribers.size).toBe(0);
+    styles.length = 0;
+    events.length = 0;
+    session.controller.applyRawProps({ accent: false });
+    expect(events).toEqual([]);
+    expect(styles).toEqual([]);
+  });
+
+  it('uses the latest accepted Props after synchronous author-watch reentry and stops at disposal', async () => {
+    // C-PROPS-0011-C/I/J: resolved changes and shared watcher order remain
+    // authoritative when an author callback synchronously supplies a newer value.
+    const styles: StyleHandle[] = [];
+    let replace = false;
+    let terminate = false;
+    let disposal: Promise<void> | undefined;
+    const session = createRuntimeSession<{ accent: boolean }>(
+      {
+        name: 'rule-catalog-props-reentry',
+        setup(def) {
+          def.props.define({ accent: { type: 'boolean', default: false } });
+          def.props.watchAll((_run, next) => {
+            if (terminate) disposal = session.dispose();
+            else if (replace && next.accent) {
+              replace = false;
+              session.controller.applyRawProps({ accent: false });
+            }
+          });
+          def.feedback.style.use(tw('bg-green-500'));
+          def.rule({
+            when: (w) => w.prop('accent').eq(true),
+            intent: (i) => i.feedback.style.use(tw('bg-red-500')),
+          });
+          return (r) => r.el('span', 'stable');
+        },
+      },
+      {
+        prototypeName: 'rule-catalog-props-reentry',
+        getRawProps: () => ({ accent: false }),
+        schedule: (task) => task(),
+        commit: (_children, signal) => signal?.done(),
+        onRuntimeReady: (wiring) =>
+          wiring.attach('feedback', [
+            [
+              EFFECTS_CAP,
+              { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush: () => {} },
+            ],
+          ]),
+      }
+    );
+    await session.mount();
+    session.controller.applyRawProps({ accent: true });
+    expect(styles.at(-1)?.tokens).toEqual(['bg-red-500']);
+    session.controller.applyRawProps({ accent: false });
+    expect(styles.at(-1)?.tokens).toEqual(['bg-green-500']);
+    styles.length = 0;
+    replace = true;
+    session.controller.applyRawProps({ accent: true });
+    expect(session.kernel.run.props.get().accent).toBe(false);
+    // The final green projection is unchanged: no transient red frame and no
+    // duplicate green commit should escape the reentrant delivery window.
+    expect(styles).toEqual([]);
+
+    styles.length = 0;
+    terminate = true;
+    expect(() => session.controller.applyRawProps({ accent: true })).not.toThrow();
+    await disposal;
+    expect(session.instancePhase).toBe('disposed');
+    expect(styles).toEqual([]);
+    session.controller.applyRawProps({ accent: false });
+    expect(styles).toEqual([]);
   });
 
   it('T-RULE-0002-CASE-LIFETIME: deduplicates state subscriptions, rebinds per epoch and ends at terminal disposal', async () => {

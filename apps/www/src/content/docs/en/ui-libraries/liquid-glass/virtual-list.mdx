@@ -1,0 +1,16 @@
+---
+title: 'Virtual-List (WIP)'
+description: 'virtual-list composition and explicit implementation boundary.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Virtual List separates a complete stable logical key sequence from physical views. Item-count overscan, maximum materialized count, revisions and generation-bound commits live in a host-neutral model. The explicit virtual-list/web entry measures variable item extents, owns spacers and Web nodes, preserves keyed views, scrolls to a key and disposes listeners. This demo uses that Web host boundary; it is not native GPUI or Compiler conformance. App-owned content is created only for the bounded visible range.
+
+WIP functional source. Full runtime/Compiler/native, packaging, browser and visual acceptance remain pending.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-virtual-list"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

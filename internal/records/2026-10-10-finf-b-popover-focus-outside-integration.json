@@ -1,0 +1,113 @@
+{
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "dependencies": ["3858dc594f80e7c43f5944dcc922781564769c13"],
+  "entries": [
+    {
+      "family": "base",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverContent",
+          "name": "base-popover-content"
+        }
+      ],
+      "prototypeExportScope": "Existing modified semantic consumer; other Popover exports unchanged.",
+      "demoId": "demo-base-popover",
+      "demoPath": "apps/www/src/content/docs/demo-base-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/base/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/base/popover.mdx"
+      ]
+    },
+    {
+      "family": "shadcn",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverContent",
+          "name": "shadcn-popover-content"
+        }
+      ],
+      "prototypeExportScope": "Existing modified semantic consumer; other Popover exports unchanged.",
+      "demoId": "demo-shadcn-popover",
+      "demoPath": "apps/www/src/content/docs/demo-shadcn-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/shadcn/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/popover.mdx"
+      ]
+    },
+    {
+      "family": "brutalist",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverContent",
+          "name": "brutalist-popover-content"
+        }
+      ],
+      "prototypeExportScope": "Existing modified semantic consumer; other Popover exports unchanged.",
+      "demoId": "demo-brutalist-popover",
+      "demoPath": "apps/www/src/content/docs/demo-brutalist-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/brutalist/components/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/popover.mdx"
+      ]
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverContent",
+          "name": "bootstrap-2-3-2-popover-content"
+        }
+      ],
+      "prototypeExportScope": "Existing modified semantic consumer; other Popover exports unchanged.",
+      "demoId": "demo-bootstrap-2-3-2-popover",
+      "demoPath": "apps/www/src/content/docs/demo-bootstrap-2-3-2-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/bootstrap-2-3-2/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/bootstrap-2-3-2/popover.mdx"
+      ]
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "popover",
+      "prototypeExports": [
+        {
+          "export": "popoverContent",
+          "name": "liquid-glass-popover-content"
+        }
+      ],
+      "prototypeExportScope": "Existing modified semantic consumer; other Popover exports unchanged.",
+      "demoId": "demo-liquid-glass-popover",
+      "demoPath": "apps/www/src/content/docs/demo-liquid-glass-popover.demo.ts",
+      "docs": [
+        "apps/www/src/content/docs/en/ui-libraries/liquid-glass/popover.mdx",
+        "apps/www/src/content/docs/zh-cn/ui-libraries/liquid-glass/popover.mdx"
+      ]
+    }
+  ],
+  "tests": [
+    "packages/prototypes/base/test/navigation-overlays/popover-focus-outside.test.ts",
+    "packages/prototypes/base/test/navigation-overlays/overlay-windows.test.ts"
+  ],
+  "verification": {
+    "focusedHost": "20/20 passed",
+    "focusedTypes": "passed for 15 overlay source directories and imported dependencies",
+    "priorFailure": "Before shared prerequisite, first 9-case suite had 8 missing-observation failures and 1 Alert Dialog pass; assertions retained and synchronous controlled acceptance subsequently added."
+  },
+  "integrationNeeds": [
+    "Apply shared prerequisite before this consumer.",
+    "No new export names/subpaths, registry/CLI atoms, dependencies or DemoSpec IDs. Existing styles inherit the Base consumer.",
+    "Existing demo IDs now additionally use each family existing Button atom as an outside focus target."
+  ],
+  "remainingGates": [
+    "Real-browser sequential Tab/input and visual evidence",
+    "Native/GPUI and compiler projection",
+    "Packed consumer and complete CI",
+    "Catalog lifecycle and independent acceptance"
+  ],
+  "status": "WIP source increment; no Finf admission"
+}

@@ -1,0 +1,55 @@
+id: P-BOOTSTRAP-2-3-2-TABS-LIST
+type: prototype
+title: Bootstrap 2.3.2 Tabs list directly projects the Base Tabs protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft extension inherits the existing draft Base Tabs definition; exact-commit native interaction/paint, generated preset and packed-consumer resource proof, and independent admission remain incomplete. Cataloging does not promote Base or family guarantees.
+summary: Direct Bootstrap 2.3.2 list with inherited Base ownership and a separately bounded family appearance.
+statement:
+  en: The List is the Base trigger collection and roving-focus host, not a selected-value owner. Consume asTabsList once. Preserve orientation-aware arrows, Home/End, loop, disabled-member exclusion, focus methods, a11yLabel and same-domain tablist relationships. Appearance must not install a second keyboard or collection owner.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TABS-LIST-BASE-INHERITANCE
+    text:
+      en: The List is the Base trigger collection and roving-focus host, not a selected-value owner. Consume asTabsList once. Preserve orientation-aware arrows, Home/End, loop, disabled-member exclusion, focus methods, a11yLabel and same-domain tablist relationships. Appearance must not install a second keyboard or collection owner.
+  - id: P-BOOTSTRAP-2-3-2-TABS-LIST-DIRECT-ENTRY
+    text:
+      en: Expose the independently defined bootstrap-2-3-2-tabs-list prototype and typed tabsList export through @proto.ui/prototypes-bootstrap-2-3-2/tabs. This is a private source-only entry; registry publication or unsupported Compiler/non-Web admission must not be inferred.
+  - id: P-BOOTSTRAP-2-3-2-TABS-LIST-VISUAL-DEFAULT
+    text:
+      en: 'With appearance=default, provide the Bootstrap 2.3.2 nav-tabs horizontal baseline: bottom structural rule and bottom-aligned labels. Theme-token colors and focus indication are Proto UI adaptations; no complete Bootstrap markup, plugin or pixel parity is claimed.'
+  - id: P-BOOTSTRAP-2-3-2-TABS-LIST-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-TABS-LIST-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction and same-state screenshots, generated/published-resource closure and independent review support admission?
+    blocks:
+      - activation:P-BOOTSTRAP-2-3-2-TABS-LIST
+sources:
+  - path: spec/prototypes/P-BASE-TABS-LIST.yaml
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/list.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/v2.3.2/less/navs.less
+    label: Fixed Apache-2.0 historical visual reference; no third-party code executed or full plugin compatibility claimed
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-LIST
+verifies:
+  tests:
+    - T-RUNTIME-TABS-APPEARANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - tabs
+  - list
+  - projection

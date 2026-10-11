@@ -1,0 +1,46 @@
+id: P-LIQUID-GLASS-SELECT-VALUE
+type: prototype
+title: Liquid Glass Select Value directly projects Base selection semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft pending exact-source native browser and GPUI evidence, optical host proof where applicable, independent review and stable admission.
+  zh-CN: 等待精确源码 native browser/GPUI 证据、适用的光学 host 绘制验证、独立审查与稳定准入，保留 draft。
+summary: Liquid Glass presentation of the independent Base Select Value protocol.
+statement:
+  en: 'Directly consume asSelectValue exactly once, retaining all Base Value props, exposes, requests, anatomy and lifetimes. No other family or Button protocol may own Select semantics.'
+  zh-CN: '直接且仅消费一次 asSelectValue，保留完整 Base Value props、exposes、请求、anatomy 与生命周期；不得由其他体系或 Button 协议持有 Select 语义。'
+criteria:
+  - id: P-LIQUID-GLASS-SELECT-VALUE-BASE-INHERITANCE
+    text:
+      en: 'Directly consume asSelectValue exactly once, retaining all Base Value props, exposes, requests, anatomy and lifetimes. No other family or Button protocol may own Select semantics.'
+      zh-CN: '直接且仅消费一次 asSelectValue，保留完整 Base Value props、exposes、请求、anatomy 与生命周期；不得由其他体系或 Button 协议持有 Select 语义。'
+  - id: P-LIQUID-GLASS-SELECT-VALUE-DIRECT-ENTRY
+    text:
+      en: 'Expose liquid-glass-select-value and typed public source exports through @proto.ui/prototypes-liquid-glass/select; private workspace source requires explicit workspace CLI generation and is not a registry publication.'
+      zh-CN: '通过 @proto.ui/prototypes-liquid-glass/select 提供 liquid-glass-select-value 与完整类型；private workspace 源码只允许显式 workspace CLI 生成，不代表 registry 已发布。'
+  - id: P-LIQUID-GLASS-SELECT-VALUE-VISUAL-SAFETY
+    text:
+      en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
+      zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
+openQuestions:
+  - id: P-LIQUID-GLASS-SELECT-VALUE-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction/paint evidence and independent review justify stable admission?
+      zh-CN: 何时由精确源码原生交互/绘制证据和独立审查支持稳定准入？
+    blocks: [activation:P-LIQUID-GLASS-SELECT-VALUE]
+sources:
+  - path: packages/prototypes/liquid-glass/src/select/value.proto.ts
+  - path: packages/prototypes/liquid-glass/src/select/types.ts
+  - path: packages/prototypes/liquid-glass/src/select/index.ts
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+inherits:
+  prototypes: [P-BASE-SELECT-VALUE]
+verifies:
+  tests: [T-SELECT-DRAFT-PROJECTIONS-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the complete direct Base consumer with source-only package/compiler entries and separately bounded native evidence.
+tags: [prototype, liquid-glass, select, value, projection]

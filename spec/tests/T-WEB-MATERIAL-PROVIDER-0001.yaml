@@ -1,0 +1,64 @@
+id: T-WEB-MATERIAL-PROVIDER-0001
+type: test
+title: Four Web Adapter typed material provider lease
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Physical-view provider wiring is a prerequisite; GPU paint, source acquisition, native screenshots and public demo integration remain unverified.
+summary: Explicit Adapter providers receive final V2 intent on all four Web runtimes and release their physical-view lease without inventing optical support.
+cases:
+  - id: T-WEB-MATERIAL-PROVIDER-0001-CASE-WIRING
+    title: Preserve exact provider identity and ordinary style without eager resource allocation
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-SEMANTICS
+    expectation: All four real module factories forward VISUAL_FEEDBACK_SINK_CAP only when supplied and retain the ordinary EffectsPort.
+  - id: T-WEB-MATERIAL-PROVIDER-0001-CASE-LIFETIME
+    title: One deferred provider per physical view with stale and retired completion guards
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-SEMANTICS
+    expectation: No allocation before commit, no paint after retirement, no stale frame regression, exact failures remain visible and current failed frames remain retryable.
+  - id: T-WEB-MATERIAL-PROVIDER-0001-CASE-INTEGRATION
+    title: State-derived material intent through four actual Web Adapters
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-SEMANTICS
+    expectation: A host click changes the semantic owner's intent, one provider receives final frames, and unmount releases exactly once. This establishes no browser GPU paint.
+  - id: T-WEB-MATERIAL-PROVIDER-0001-CASE-CONTACT
+    title: Existing router owns bounded visual contact independently of activation
+    covers:
+      - C-FEEDBACK-MATERIAL-0001-CONTACT
+    expectation: Frozen down geometry, finite normalized samples, one primary pointer, outside drag, no capture or activation, cancellation and stale-router retirement are exercised as source-level tests, not GPU visual evidence.
+implementations:
+  - id: web-material-pointer-contact
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/pointer-contact.test.ts
+    required: true
+    consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-CONTACT]
+  - id: web-material-provider-wiring
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/material-sink-wiring.test.ts
+    required: true
+    consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-WIRING]
+  - id: web-material-provider-lifetime
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/deferred-view-sink.test.ts
+    required: true
+    consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-LIFETIME]
+  - id: web-material-provider-integration
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/react/test/material-provider.integration.test.ts
+    required: true
+    consumesCases: [T-WEB-MATERIAL-PROVIDER-0001-CASE-INTEGRATION]
+exercises:
+  contracts:
+    - C-FEEDBACK-MATERIAL-0001
+sources:
+  - path: packages/modules/feedback/src/material/deferred-view-sink.ts
+  - path: packages/adapters/web-component/src/runtime/modules.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added real four-Adapter provider admission and view-lease tests without claiming optics or native acceptance.
+tags: [material, adapter, draft]

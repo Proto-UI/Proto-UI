@@ -672,5 +672,76 @@ export function focusIntentRetryConformance(
         await mounted.unmount();
       }
     });
+
+    for (const kind of ['programmatic', 'native', 'entry'] as const) {
+      for (const cancel of [false, true]) {
+        it(`preserves queued ${kind} layout retry through a readiness burst; cancel=${cancel}`, async () => {
+          const options = Object.freeze({ reason: 'keyboard' as const, preventScroll: true });
+          const proto = definePrototype({
+            name: `retry-burst-${adapter}-${kind}-${cancel}`,
+            setup(def) {
+              const target = asFocusable();
+              const entry = asFocusEntry();
+              entry.configure({ strategy: 'descendant-first', fallback: 'none' });
+              def.expose.method('request', () => {
+                if (kind === 'entry') entry.focus(options);
+                else if (kind === 'native') target.focusSelf(options);
+                else target.focus(options);
+              });
+              def.expose.method('cancel', () => target.blur());
+              return (r) => r.el('button', 'Delayed physical acquisition');
+            },
+          });
+          const mounted = await mount(proto);
+          const target = kind === 'entry' ? mounted.root.querySelector('button')! : mounted.root;
+          const nativeFocus = target.focus.bind(target);
+          const frames: FrameRequestCallback[] = [];
+          const raf = vi.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
+            frames.push(fn);
+            return frames.length;
+          });
+          let accepts = false;
+          const attempts: Array<{ accepted: boolean; options: FocusOptions | undefined }> = [];
+          const focus = vi.spyOn(target, 'focus').mockImplementation((forwarded) => {
+            attempts.push({ accepted: accepts, options: forwarded });
+            if (accepts) nativeFocus(forwarded);
+          });
+          try {
+            await mounted.act(() => mounted.getExposes().request());
+            expect(attempts).toHaveLength(1);
+            // Real surface notifications can precede physical acquisition in a
+            // portal/Transition commit. They are replays, not new intent or cancellation.
+            for (let i = 0; i < 8; i++) {
+              await mounted.act(() => {
+                const token = tree.getLogicalEventRouteSurfaceForTarget(mounted.root);
+                tree.markProtoInstance(mounted.root, proto, token);
+              });
+            }
+            expect(document.activeElement).not.toBe(target);
+            const beforeLayout = attempts.length;
+            if (cancel) await mounted.act(() => mounted.getExposes().cancel());
+            accepts = true;
+            for (let i = 0; frames.length && i < 12; i++) {
+              const pending = frames.splice(0);
+              await mounted.act(() => pending.forEach((fn) => fn(performance.now())));
+            }
+            expect(frames).toHaveLength(0);
+            if (cancel) {
+              expect(attempts).toHaveLength(beforeLayout);
+              expect(document.activeElement).not.toBe(target);
+            } else {
+              expect(document.activeElement).toBe(target);
+              expect(attempts.slice(beforeLayout)).toEqual([
+                { accepted: true, options: { preventScroll: true } },
+              ]);
+            }
+          } finally {
+            focus.mockRestore();
+            raf.mockRestore();
+            await mounted.unmount();
+          }
+        });
+      }
+    }
   });
 }

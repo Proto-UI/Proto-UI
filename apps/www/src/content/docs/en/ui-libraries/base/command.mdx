@@ -1,0 +1,23 @@
+---
+title: 'Command'
+description: 'An inline searchable list of executable commands.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+An inline searchable list of executable commands.
+
+<PrototypePreviewer
+  demoId="demo-base-command"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+The list stays inline and open. Enter or pointer activation emits execute with the selected command. The application owns the action; query state does not execute anything.
+
+The host owns the real single-line editor. Input retains focus during Arrow navigation; IME composition never selects. Filtering is case/diacritic insensitive over textValue and keywords. Empty reflects actual matches; disabled options cannot commit. open, value and inputValue are independently controlled with corresponding change requests. filter=false supports owner-filtered children. Duplicate-valued choices are rejected.
+
+Parts: Root, Input, Content, Item, Empty.
+
+Draft source; shared Web A11y active-descendant projection, native/GPUI, compiler, consumer, visual and independent acceptance remain separate requirements.

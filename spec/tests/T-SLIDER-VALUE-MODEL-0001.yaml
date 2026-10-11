@@ -1,0 +1,85 @@
+id: T-SLIDER-VALUE-MODEL-0001
+type: test
+title: Historical Slider decimal-oracle evidence, not Runtime ownership conformance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Pure deterministic mathematics is tested. Runtime ownership, State continuity, part identity, capture, Field, native rendering and Compiler behavior are not exercised and remain explicitly missing.
+summary: Preserves the original pure mathematics tests while distinguishing the forward owner/commit definition.
+cases:
+  - id: T-SLIDER-VALUE-MODEL-0001-CASE-VALUES
+    title: Immutable finite scalar/vector normalization and collision policies
+    covers:
+      - C-SLIDER-VALUE-0001-NUMERIC-CLOSURE
+    expectation: immutable-shape-preserving-normalization-and-finite-ordered-spaced-proposals
+  - id: T-SLIDER-VALUE-MODEL-0001-CASE-PROJECTION
+    title: Nearest eligible index, indicator intervals and inclusive projected-grid keyboard bounds
+    covers:
+      - C-SLIDER-VALUE-0001-NUMERIC-CLOSURE
+    expectation: inclusive-legal-projected-domain-bounds-contain-current-values-and-preserve-same-value-requests-without-host-side-effects
+  - id: T-SLIDER-VALUE-MODEL-0001-CASE-GRAB-REFERENCE
+    title: Pure Track seek versus Thumb off-center no-jump reference
+    covers:
+      - C-SLIDER-VALUE-0001-GRAB-ORIGIN
+    expectation: exact-start-value-on-thumb-press-and-logical-relative-delta-without-host-acceptance
+  - id: T-SLIDER-VALUE-MODEL-0001-CASE-COMMIT-PREDICATE
+    title: Pure commit eligibility cannot certify runtime acknowledgement
+    covers:
+      - C-SLIDER-VALUE-0001-BOUNDARY
+    expectation: no-change-rejected-and-canceled-inputs-return-false-without-claiming-a-runtime-commit
+  - id: T-SLIDER-VALUE-MODEL-0001-CASE-INTEGRATION
+    title: Separate fresh owner/keyboard reconstruction and remaining host integration
+    covers:
+      - C-SLIDER-VALUE-0001-OWNER
+      - C-SLIDER-VALUE-0001-CONTROLLED
+      - C-SLIDER-VALUE-0001-SESSION
+      - P-BASE-SLIDER-VALUES-ANATOMY
+      - P-BASE-SLIDER-VALUES-ROOT
+      - P-BASE-SLIDER-VALUES-TRACK
+      - P-BASE-SLIDER-VALUES-THUMB
+      - P-BASE-SLIDER-VALUES-PROJECTION
+      - P-BASE-SLIDER-VALUES-NO-ADMISSION
+    expectation: fresh-runtime-evidence-required-separately-from-historical-oracle
+implementations:
+  - id: slider-pure-value-model
+    kind: fixture
+    status: passing
+    path: internal/contracts/__tests__/slider-value-model.test.ts
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUE-MODEL-0001-CASE-VALUES
+      - T-SLIDER-VALUE-MODEL-0001-CASE-PROJECTION
+      - T-SLIDER-VALUE-MODEL-0001-CASE-COMMIT-PREDICATE
+      - T-SLIDER-VALUE-MODEL-0001-CASE-GRAB-REFERENCE
+    exercises:
+      - C-SLIDER-VALUE-0001
+    notes:
+      - Historical decimal model only; stricter normalized owner/grid/commit predicates do not define current unwrapped owner or proposal completion.
+      - No component mounts or third-party runtime execution.
+  - id: slider-multi-value-runtime
+    kind: runtime-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-SLIDER-VALUE-MODEL-0001-CASE-INTEGRATION
+    exercises:
+      - C-SLIDER-VALUE-0001
+      - P-BASE-SLIDER-VALUES
+    notes:
+      - Current bounded reconstruction is tracked by T-SLIDER-VALUES-RUNTIME-0001; full pointer/Field/native/Compiler integration remains planned.
+exercises:
+  contracts:
+    - C-SLIDER-VALUE-0001
+  prototypes:
+    - P-BASE-SLIDER-VALUES
+sources:
+  - path: internal/contracts/__tests__/slider-value-model.test.ts
+  - path: internal/models/slider-value-model.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added executable model evidence and a separate missing multi-value integration requirement.
+tags:
+  - slider
+  - test
+  - draft
+  - model-only

@@ -3,7 +3,7 @@ import { asCheckboxIndicator } from '@proto.ui/prototypes-base/checkbox';
 import type { BrutalistCheckboxIndicatorExposes, BrutalistCheckboxIndicatorProps } from './types';
 
 const INDICATOR_SURFACE_TOKENS =
-  'inline-flex size-3.5 items-center justify-center text-current transition-none';
+  'flex size-4 items-center justify-center text-main-foreground transition-none';
 
 function glyphPath(checked: boolean, indeterminate: boolean): string | null {
   if (indeterminate) return 'M5 12h14';
@@ -21,9 +21,9 @@ function renderGlyph(renderer: Pick<RendererHandle<any>, 'svg'>, path: string | 
       height: '100%',
       fill: 'none',
       stroke: 'currentColor',
-      strokeWidth: 3,
-      strokeLinecap: 'square',
-      strokeLinejoin: 'miter',
+      strokeWidth: 2,
+      strokeLinecap: 'round',
+      strokeLinejoin: 'round',
     },
     renderer.svg.path({ d: path })
   );

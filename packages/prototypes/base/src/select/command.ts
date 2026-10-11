@@ -84,6 +84,11 @@ export function setupSelectCommand(
   });
   def.event.on('pointer.up', () => pressed.set(false, `reason: ${reasonPrefix} pointer.up`));
   def.event.on('press.commit', () => pressed.set(false, `reason: ${reasonPrefix} press.commit`));
+  // A logical instance may survive view withdrawal. Never replay a previous
+  // pointer interaction (or its material deformation) into the replacement view.
+  def.lifecycle.onUnmounted(() =>
+    clearTransient(`reason: ${reasonPrefix} view unmounted => reset interaction`)
+  );
 
   return {
     disabled,

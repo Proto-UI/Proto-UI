@@ -1,0 +1,53 @@
+id: T-FIELD-VALIDATION-INTERRUPTIONS-0001
+type: test
+title: Field composition termination and initialization-only validity defaults
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Focused synthetic Web Component and generic bridge regression evidence. Native IME, assistive technology, GPUI and exact integrated-head acceptance remain separate.
+  zh-CN: 仅为 Web Component 合成事件与通用报告桥的 focused 回归证据；原生 IME、辅助技术、GPUI 和精确集成 head 验收仍为独立门槛。
+summary: Preserve composition termination without admitting blocked edits, and retain pending validation across initialization-only default changes.
+cases:
+  - id: T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-END
+    title: Policy-interrupted composition terminates independently of blocked edits
+    covers:
+      - C-FIELD-0001-VALIDATION
+      - C-FIELD-0001-ASYNC
+    expectation: A normalized compositionend with composing false retires composing under effective readOnly or disabled without admitting a rejected value, initial baseline or focus report and without automatic onChange validation. Explicit readOnly validation resumes; disabled validation stays blocked. Old requests remain rejected and later editable input creates current work.
+  - id: T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-DEFAULTS
+    title: Later validity defaults do not revise current validity or its pending lease
+    covers:
+      - C-FIELD-0001-OWNERSHIP
+      - C-FIELD-0001-ASYNC
+    expectation: Changes only to defaultInvalid and defaultErrors preserve an existing request and completed validity. A concurrent real policy or controlled-validity update still invalidates the old request.
+  - id: T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-ATOMIC
+    title: Rejected payload and duplicate termination preserve their negative boundaries
+    covers:
+      - C-FIELD-0001-ASYNC
+    expectation: Invalid whole reports, blocked input/change and compositionend still reporting composing true do not clear composition. A duplicate completed end does not retire a new explicit readOnly request. A newer composition started by the public end callback remains authoritative and blocks validation.
+verifies:
+  contracts:
+    - C-FIELD-0001
+implementations:
+  - id: field-validation-interruption-regressions
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/field-validation-interruptions.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-END
+      - T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-DEFAULTS
+      - T-FIELD-VALIDATION-INTERRUPTIONS-0001-CASE-ATOMIC
+    notes:
+      - Twenty tests. The unchanged 63a8d424 baseline fails twelve intended assertions and passes eight real-policy negative controls. This is synthetic DOM evidence, not native IME execution.
+sources:
+  - path: packages/prototypes/base/src/field/control-binding.proto.ts
+  - path: packages/prototypes/base/src/field/root.proto.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Reproduced and repaired two independent validation interruptions without changing the draft Field contract or its lifecycle.
+tags:
+  - field
+  - validation
+  - regression

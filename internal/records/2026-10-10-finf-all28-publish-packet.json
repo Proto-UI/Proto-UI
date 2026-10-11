@@ -1,0 +1,112 @@
+{
+  "status": "WIP functional source, not full Finf acceptance or merge approval",
+  "base": "668fc0da88ba67ecee478d171d0d7e27bb5d1db6",
+  "sourceCommit": "4905bdcf89f241f7167d554f10cd2fa4d399db70",
+  "sourceTree": "85cd870a8a6008eb9654e0127ec2079bca5babed",
+  "orderedSourceCommits": [
+    "6e34ec8225b1d50477bd06eaf6b96f3684a81038",
+    "97f9837e2d1444e80b652ed5d46d44e1a5daf27c",
+    "bb7adfe777933c36eb6bf7b60e33079b3f0576ed",
+    "2c1a22b194fcffd4f2c7b267fdacdf60a1ca6ec0",
+    "2b40cc766698124e4feb29cc249d2e01368ce85f",
+    "439303d3df6dd9b483b9ccc7c16bb50b7b1c61a9",
+    "557d2086cf1312e2b0bf67f962077da524b8730d",
+    "c944cbfaf31d68b85081f73e8b318cb34682e90b",
+    "0b3fded3d47641b15bc721e5cf2448a425eed1f0",
+    "41c285ed1129e8eb5d63b46c30c3c89bffd4aebc",
+    "ff9ad62f4286261d5d9ac8654a4087607b4b27a4",
+    "8314413b6b108ee3bf359870866e7d55abd980dd",
+    "2932612bd9c32bf67d86cce2ae7ff0aaa74c0290",
+    "80b2cff5ec6809fcb9f5f4f7815ded8041b1787f",
+    "7fb0e4683d6b693939c65ff002fb1d55134a196b",
+    "d4d7c6329aef9964351c6328c19bc26cff94eaa2",
+    "99500dd5fb9537488263069d7c84eb20749055e0",
+    "3cba7a74bb32a810b5bcdba775974d1aadd76bef",
+    "9ac7d35e4a1baba891fb88b3269de087c6a718e0",
+    "970df6ce4c4f17c4c8036a026d884c5b2454b3c9",
+    "4905bdcf89f241f7167d554f10cd2fa4d399db70"
+  ],
+  "sourceSlices": 28,
+  "familyComponentEntries": 140,
+  "namedPrototypeAtoms": 665,
+  "userWeightedProgress": {
+    "done": 3,
+    "inProgress": 65,
+    "notStarted": 0,
+    "points": 35.5,
+    "denominator": 68,
+    "percentage": 52.2,
+    "rule": "Done=1; actual partial source implementation=0.5. This is source progress, not acceptance."
+  },
+  "verification": {
+    "initialAllEntryPointsAndBehavior": "379/379 passed; explicit Web-subpath CLI rerun 141/141 passed",
+    "groupCWithRepairs": "49/49 passed on this combined snapshot, including actual DataTable aria-sort and Resizable variable/lease updates",
+    "types": "Workspace TypeScript passed on this frozen source",
+    "generatedStyles": "609 collected tokens; successful CLI build, document and Shadow stylesheet generation; zero unsupported-token diagnostics",
+    "contextAncestor": "82/82 owner tests, including four real Web runtime hosts; final integrated four-host rerun recorded below",
+    "cssLowering": "54/54 CSS and Shadow-split tests",
+    "finalFrozenSmoke": "518/518 passed across 17 files on exact source7d5d9b88",
+    "sourceProof": "Original generator source/schema/count/path/hash validation passed after the five-row derivation repair; targeted real-source lifecycle regression passed 1/1."
+  },
+  "noScriptBoundary": "All three already-published no-script files are byte-identical to actual base668. No duplicate noJS commit or range-value repair is replayed.",
+  "remaining": [
+    "Form reset, implicit Enter and Field composite bridge integration",
+    "Drawer drag/snap and ContextMenu host-local point/long-press source follow-up",
+    "Native NavigationMenu link projection",
+    "Complete catalog contracts/admission and homepage exhibition",
+    "Packed consumption and full cross-Adapter/Compiler/GPUI conformance",
+    "Commit-bound native input/visual evidence, exact-head CI and independent acceptance",
+    "ExposeStateWeb terminal disposal still leaves owned CSS variables; newly exposed by the separate forthcoming Drawer test. Existing panel checks prove disconnected-write suppression/remount sync only. Shared ownership repair is queued as a later source commit."
+  ],
+  "retainedFailures": [
+    "B search owner originally had three missing-active-descendant failures; all nine pass after integrated shared mapping.",
+    "C follow-up originally had one actual aria-sort failure on its shared-mapping-free worker branch; integrated 49/49 passes.",
+    "Whole-source CSS generation initially recorded 26 unsupported utilities and noncanonical theme shadow variables; finite vocabulary and actual source variables are repaired, final unsupported count zero.",
+    "Prototype catalog still reports newly uncataloged feature source; no placeholder entities or checker relaxation hides this debt.",
+    "The first proof generation exposed five uncataloged projection lifecycle view mismatches. A narrow derivation-only fix follows actual catalog IDs; no validator or acceptance condition was weakened."
+  ],
+  "publicationIdentity": "Publisher may map the twenty-one original local commits to actual remote objects while preserving author, message, tree and source provenance, then rebind only current source proof/observation identities. Already-published closeout URLs and historical source records remain unchanged.",
+  "agent": "dot",
+  "modelTrace": "not measured — owner-authorized dot exemption (2026-10-06)",
+  "baselineOnlyNativeEvidence": {
+    "revision": "668fc0da88ba67ecee478d171d0d7e27bb5d1db6",
+    "tree": "32053c3a9c38725da26f056e5ce7df7f808a08d3",
+    "source": "Parent verified checkout/tree identity and official terminal results; these results do not apply to the new 28-source head.",
+    "liquidNoScript": {
+      "passed": 12,
+      "total": 12,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38033727486"
+    },
+    "firstFrame": {
+      "passed": 9,
+      "total": 9,
+      "url": "https://github.com/Proto-UI/Proto-UI/actions/runs/38033727432"
+    }
+  },
+  "localSourceProvenance": {
+    "sourceCommit": "cce020c474734abcf19ebd2ab6502a632e197703",
+    "orderedSourceCommits": [
+      "8c2d92ab7d16839d5bd1e0d4ed80316cf4d79a63",
+      "d1fd4b9938c014d7248ec9c089a1404339b82315",
+      "7dc9802d092d9348c28d76436ac838f18ad67090",
+      "0e38b93e500726e73fdd69661d23415969cd7b4c",
+      "af086e7e82287b474c43a74c041d57915148eeb9",
+      "37760747717bf64e93154ee3db505aaf7bc8ea18",
+      "62980702d8ab6183d66c3367d59eefa04b955645",
+      "98d816ab2dbfa7446bda4defd1b39ba71400ab1f",
+      "081a3d9a0b08ae42e7ed22dc9d69813706fc2754",
+      "af77d1c39e3524493b5733b969e77d05a7ec61b7",
+      "d44ab9bc29c68d32c160ccec501425c4ea54cc6b",
+      "87a4dadf011577e12e5a5fed7bf2d8e3d7b4a510",
+      "9204e0940a16faaa261465b114686340e6283944",
+      "13e2bfc6d5bbc3651b24dfcca7e8329fe884d6f7",
+      "da36a771206cfa7c4da12dcd3e67b591736d0dd3",
+      "7d43526a3538cc7faeda019612728ec3f6d7cbe7",
+      "36c21b5223ce9cf02a1248a397b04ea89158b3e6",
+      "23105440848c9ffb3d30a5432ec3d83733a399ef",
+      "217d8dafdd3915338ca0678293184a182a74596d",
+      "7d5d9b889752e0b4d16c58d280b3791d7f05c8fb",
+      "cce020c474734abcf19ebd2ab6502a632e197703"
+    ]
+  }
+}

@@ -1,5 +1,7 @@
 # Agent Harness dogfood coverage matrix
 
+Portfolio navigation: [active prototype and four-family matrix](../coverage-matrices/prototype-coverage-matrix.md), tracked by [#870](https://github.com/Proto-UI/Proto-UI/issues/870). This Harness ledger retains all 63 consumer row IDs and #513/#514 completion rules. Private Message/Code Block or generic end-follow implementation does not imply completed Harness consumption.
+
 Status: authoritative for Agent Harness dogfood planning at repository commit ddac15dae7016d995fcb0cb5afb334b495c0a842; non-normative for Proto UI semantics.
 
 Parent tracker: [#513](https://github.com/Proto-UI/Proto-UI/issues/513). Matrix task: [#514](https://github.com/Proto-UI/Proto-UI/issues/514).

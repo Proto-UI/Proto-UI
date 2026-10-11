@@ -9,6 +9,8 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`。upstream Provider 的 pointer delay 默认为 0ms；Proto UI 有意保留 Base Group 的 700ms open、100ms close 与 300ms skip defaults。upstream Content 的 `sideOffset` 默认为 0，Proto UI 继承 Base 默认值 4。Portal 继续是 renderer projection；当前没有受治理的 arrow geometry channel，因此 Arrow 缺席。
 
+Content 静态 surface 另参考 2026-10-10 获取的 [base-nova registry snapshot](https://ui.shadcn.com/r/styles/base-nova/tooltip.json)（JSON SHA256 `2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395`；MIT）。部署 Git SHA 未取得；这是内容固定的视觉参考，不替换 API baseline。该 snapshot 的 `sideOffset` 为 4。surface 使用主题 `foreground` 作底色、`background` 作文字色，Light/Dark 可反转，不固定为黑白；采用 inline-flex、fit-content、20rem 最大宽度与 6px gap，不再添加旧 border、shadow 或 overflow clipping。既有 `max-w-80` 表达 upstream 默认 `max-w-xs` 上限。Arrow、transform-origin、方向 enter/exit motion 与 kbd descendant styling 仍未对齐；这次静态配方迁移不代表完整 Tooltip parity。
+
 从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add react shadcn-tooltip` 生成 React facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
 
 <PrototypePreviewer demoId="demo-shadcn-tooltip" initialRuntime="wc" />

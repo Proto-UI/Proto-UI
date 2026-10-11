@@ -28,12 +28,16 @@ criteria:
   - id: P-BRUTALIST-TABS-LIST-VISUAL-GRAMMAR
     text:
       en: >-
-        List is an h-12 rounded-base 5px strip with border-2 border-black, bg-background/text-foreground, inline-flex items-center p-1 and no shadow. Nested Trigger owns its own rounded-base radius.
+        With appearance=default, list is an h-12 rounded-base 5px strip with border-2 border-black, bg-background/text-foreground, inline-flex items-center p-1 and no shadow. Nested Trigger owns its own rounded-base radius.
 
 
       zh-CN: >-
-        List 是 h-12、rounded-base 5px strip，带 border-2 border-black、bg-background/text-foreground、inline-flex items-center p-1，无阴影；嵌套 Trigger 独立拥有 rounded-base radius。
+        appearance=default 时，List 是 h-12、rounded-base 5px strip，带 border-2 border-black、bg-background/text-foreground、inline-flex items-center p-1，无阴影；嵌套 Trigger 独立拥有 rounded-base radius。
 
+
+  - id: P-BRUTALIST-TABS-LIST-APPEARANCE
+    text:
+      en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -48,8 +52,12 @@ dependsOn:
 inherits:
   prototypes:
     - id: P-BASE-TABS-LIST
-verifies: { tests: [T-BRUTALIST-TABS-0001] }
+verifies:
+  { tests: [T-BRUTALIST-TABS-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.

@@ -7,8 +7,8 @@ summary: Boundary classifies shared interaction regions and coordinates outside 
 criteria:
   - id: M-BOUNDARY-0001-A
     text:
-      en: 'Boundary is instance-scoped with mixed instance/view resource ownership and depends on Event. The no-argument privileged asBoundary hook reuses one handle; configure and idempotent pointer.press observation are setup-only. Event owns native registration, lifecycle gating and callback scope.'
-      zh-CN: 'Boundary 为 instance scope、mixed instance/view resource ownership，依赖 Event。无参数特权 asBoundary hook 复用同一 handle；configure 与幂等 pointer.press observation 仅限 setup。Event 拥有 native registration、lifecycle gating、callback scope。'
+      en: 'Boundary is instance-scoped with mixed instance/view resource ownership and depends on Event. The no-argument privileged asBoundary hook reuses one handle; configure and idempotent pointer.press/focus.move observation are setup-only. Event owns native registration, lifecycle gating and callback scope.'
+      zh-CN: 'Boundary 为 instance scope、mixed instance/view resource ownership，依赖 Event。无参数特权 asBoundary hook 复用同一 handle；configure 与幂等 pointer.press/focus.move observation 仅限 setup。Event 拥有 native registration、lifecycle gating、callback scope。'
   - id: M-BOUNDARY-0001-B
     text:
       en: 'The Module maintains explicit disjoint regions and includes the current host boundary as an implicit content region. Exact explicit identity can prove inside; otherwise host classification preserves inside/outside/unknown, and lack of proof cannot become outside. Registration cleanup removes only its own claim; unregisterRegion removes matching targets.'
@@ -38,3 +38,6 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Cataloged the bounded Boundary slice and executable evidence.
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added optional host-proven focus observation, observation discrimination and input-scope pointer/focus deduplication with view-lifetime cleanup.

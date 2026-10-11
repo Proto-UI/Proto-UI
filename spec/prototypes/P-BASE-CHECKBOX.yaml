@@ -35,6 +35,13 @@ anatomy:
       parent: root
       child: indicator
 criteria:
+  - id: P-BASE-CHECKBOX-EXTERNAL-LABEL
+    text:
+      en: An independent Base Label may associate through the explicit typed InstanceAssociations.controlLabel input and C-CONTROL-LABEL-0001. This is not a Props value, label text Prop or new Anatomy part. A qualifying label request shares the existing value-request operation, retaining disabled, controlled value and outward-signal ownership. Naming and activation remain independent, and a stale pair cannot perform subsequent target effects.
+    dependsOn:
+      contracts:
+        - id: C-CONTROL-LABEL-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-CHECKBOX-ROLE-CHECKED-INPUT
     text:
       zh-CN: Checkbox 表示 checked input control，而不是 command control、button-like active control 或 on/off setting value control。
@@ -652,6 +659,9 @@ verifies:
         - T-BASE-CHECKBOX-0001-CASE-CONTEXT
         - T-BASE-CHECKBOX-0001-CASE-A11Y-AND-DEFERRED-SURFACES
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.
   - version: 0.1.0
     change: introduced
     summary: Introduced the first Base Checkbox root prototype contract draft with checked input value, author-controllable indeterminate display state, root/indicator anatomy, accessibility mixed projection, and deferred form integration.

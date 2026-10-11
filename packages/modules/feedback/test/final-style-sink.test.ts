@@ -176,11 +176,11 @@ describe('private Feedback final-style sink', () => {
       ...tw('rounded-lg'),
       entries: [
         {
+          token: 'rounded-lg',
           authorToken: 'rounded-lg',
           origin: 'setup',
           role: 'surface',
           roleSource: 'canonical',
-          token: 'rounded-lg',
         },
       ],
     });

@@ -27,7 +27,7 @@ cases:
     covers: [P-BASE-SELECT-CONTENT-KEYBOARD]
     expectation: select-listbox-keyboard-navigation-and-typeahead-skip-disabled-options
   - id: T-BASE-SELECT-CONTENT-0001-CASE-DISMISS
-    title: Escape, Tab, outside press, and Trigger boundary behavior preserve or commit selection correctly
+    title: Escape, Tab including deferred Trigger focus, outside press, and Trigger boundary behavior preserve or commit selection correctly
     covers: [P-BASE-SELECT-CONTENT-DISMISS, P-BASE-SELECT-CONTENT-DEFERRED-SURFACES]
     expectation: select-dismiss-paths-close-once-without-accidental-selection
 implementations:
@@ -51,6 +51,13 @@ implementations:
     path: packages/adapters/react/test/select.test.ts
     required: true
     consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-ENTRY-STABILITY]
+    exercises: [P-BASE-SELECT-CONTENT]
+  - id: adapter-vue2-select-content-deferred-tab
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/select.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-CONTENT-0001-CASE-DISMISS]
     exercises: [P-BASE-SELECT-CONTENT]
   - id: prototypes-shadcn-select-content-composition
     kind: module-test

@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { parse } from 'yaml';
 import ts from 'typescript';
-import { BROWSER_SUITES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
+import { BROWSER_SUITES, READY_ROUTES, createRuntimeTestPlan } from './runtime-test-plan.mjs';
 
 const fixturePath = 'apps/www/src/pages/en/test/bootstrap-state-controls.astro';
 const browserPath = 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts';
@@ -127,9 +127,10 @@ test('registered browser suite stays out of the no-server phase', () => {
   const excluded = phases[0].args.indexOf(browserPath);
   assert.ok(excluded > 0);
   assert.equal(phases[0].args[excluded - 1], '--exclude');
+  assert.equal(READY_ROUTES.filter((route) => route === '/en/test/bootstrap-state-controls/').length, 1);
   assert.match(
     readFileSync('scripts/test/run-runtime-tests.mjs', 'utf8'),
-    /'\/en\/test\/bootstrap-state-controls\/'/
+    /import \{[^}]*READY_ROUTES[^}]*\} from '\.\/runtime-test-plan\.mjs'/
   );
 });
 

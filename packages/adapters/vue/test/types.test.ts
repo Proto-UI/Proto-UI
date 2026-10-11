@@ -1,3 +1,4 @@
+import type { InstanceAssociations } from '@proto.ui/core';
 import { describe, expectTypeOf, it } from 'vitest';
 import { definePrototype, type ExposeEvent, type ExposeState } from '@proto.ui/core';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
@@ -36,6 +37,8 @@ describe('adapter-vue: type helpers', () => {
 
   it('combines proto props with host props and listener props', () => {
     expectTypeOf<ProtoVueProps<typeof proto>>().toEqualTypeOf<{
+      instanceAssociations?: InstanceAssociations;
+      dir?: 'ltr' | 'rtl' | 'auto';
       label?: string;
       disabled?: boolean;
       class?: string | string[] | Record<string, boolean>;

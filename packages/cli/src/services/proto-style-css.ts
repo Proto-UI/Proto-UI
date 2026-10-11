@@ -66,8 +66,13 @@ const spacing: Record<string, string> = {
   '11': '2.75rem',
   '12': '3rem',
   '16': '4rem',
+  '24': '6rem',
+  '40': '10rem',
+  '48': '12rem',
+  '96': '24rem',
   '32': '8rem',
   '64': '16rem',
+  '72': '18rem',
   '28': '7rem',
   '56': '14rem',
   '80': '20rem',
@@ -109,6 +114,43 @@ const colorVars = new Set([
 ]);
 
 const staticUtilities: Record<string, string[]> = {
+  'bg-[#ccc]': ['background-color: #ccc;'],
+  'bg-[#f5f5f5]': ['background-color: #f5f5f5;'],
+  'border-[#bbb]': ['border-color: #bbb;'],
+  'border-[#e5e5e5]': ['border-color: #e5e5e5;'],
+  'text-[1.3125rem]': ['font-size: 1.3125rem;'],
+  'shadow-inner': ['--pui-shadow: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);', ...composedShadow()],
+  // Bounded vocabulary authored by the source-first Finf component families.
+  'border-dashed': ['border-style: dashed;'],
+  'cursor-move': ['cursor: move;'],
+  'grid-cols-7': ['grid-template-columns: repeat(7, minmax(0, 1fr));'],
+  grow: ['flex-grow: 1;'],
+  'grow-0': ['flex-grow: 0;'],
+  shrink: ['flex-shrink: 1;'],
+  'inline-grid': ['display: inline-grid;'],
+  'items-stretch': ['align-items: stretch;'],
+  'self-stretch': ['align-self: stretch;'],
+  'max-w-md': ['max-width: 28rem;'],
+  'w-auto': ['width: auto;'],
+  rounded: ['border-radius: 0.25rem;'],
+  'tabular-nums': ['font-variant-numeric: tabular-nums;'],
+  'text-center': ['text-align: center;'],
+  'shadow-[2px_2px_0_0_var(--pui-border)]': [
+    '--pui-shadow: 2px 2px 0 0 var(--pui-border);',
+    ...composedShadow(),
+  ],
+  // Bounded layout-safety vocabulary used by Accordion and other authored controls.
+  'text-start': ['text-align: start;'],
+  'direction-ltr': ['direction: ltr;'],
+  'direction-rtl': ['direction: rtl;'],
+  'whitespace-normal': ['white-space: normal;'],
+  'break-words': ['overflow-wrap: break-word;'],
+  'overflow-x-auto': ['overflow-x: auto;'],
+  'm-0': ['margin: 0;'],
+  '-mx-1': ['margin-inline: -0.25rem;'],
+  'outline-2': ['outline-style: solid;', 'outline-width: 2px;'],
+  'outline-offset-2': ['outline-offset: 2px;'],
+  'rounded-2xl': ['border-radius: 1rem;'],
   'forced-colors-focus-outline': ['outline: 2px solid transparent;', 'outline-offset: 2px;'],
   'surface-fade': [
     'transition-property: opacity;',
@@ -134,14 +176,22 @@ const staticUtilities: Record<string, string[]> = {
   'inline-flex': ['display: inline-flex;'],
   'inline-block': ['display: inline-block;'],
   grid: ['display: grid;'],
+  'auto-rows-min': ['grid-auto-rows: min-content;'],
+  'grid-rows-[auto_auto]': ['grid-template-rows: auto auto;'],
   hidden: ['display: none;'],
   'flex-1': ['flex: 1 1 0%;'],
+  'flex-none': ['flex: none;'],
+  'flex-nowrap': ['flex-wrap: nowrap;'],
   'flex-col': ['flex-direction: column;'],
   'flex-row': ['flex-direction: row;'],
   'flex-wrap': ['flex-wrap: wrap;'],
+  'h-auto': ['height: auto;'],
+  'flex-wrap-reverse': ['flex-wrap: wrap-reverse;'],
+  'grid-cols-1': ['grid-template-columns: repeat(1, minmax(0, 1fr));'],
   'flex-col-reverse': ['flex-direction: column-reverse;'],
   'items-center': ['align-items: center;'],
   'items-start': ['align-items: flex-start;'],
+  'content-start': ['align-content: flex-start;'],
   'items-end': ['align-items: flex-end;'],
   'justify-start': ['justify-content: flex-start;'],
   'justify-center': ['justify-content: center;'],
@@ -154,6 +204,8 @@ const staticUtilities: Record<string, string[]> = {
   'pointer-events-none': ['pointer-events: none;'],
   'cursor-not-allowed': ['cursor: not-allowed;'],
   'cursor-default': ['cursor: default;'],
+  'cursor-ew-resize': ['cursor: ew-resize;'],
+  'cursor-ns-resize': ['cursor: ns-resize;'],
   'cursor-pointer': ['cursor: pointer;'],
   'select-auto': ['-webkit-user-select: auto;', 'user-select: auto;'],
   'select-text': ['-webkit-user-select: text;', 'user-select: text;'],
@@ -161,6 +213,7 @@ const staticUtilities: Record<string, string[]> = {
   'outline-none': ['outline: 2px solid transparent;', 'outline-offset: 2px;'],
   'outline-1': ['outline-style: solid;', 'outline-width: 1px;'],
   'outline-ring': ['outline-color: var(--pui-ring);'],
+  'outline-border': ['outline-color: var(--pui-border);'],
   'aspect-square': ['aspect-ratio: 1 / 1;'],
   'overflow-auto': ['overflow: auto;'],
   'touch-none': ['touch-action: none;'],
@@ -172,6 +225,7 @@ const staticUtilities: Record<string, string[]> = {
   'resize-y': ['resize: vertical;'],
   'whitespace-nowrap': ['white-space: nowrap;'],
   'whitespace-pre-wrap': ['white-space: pre-wrap;'],
+  'whitespace-break-spaces': ['white-space: break-spaces;'],
   'wrap-anywhere': ['overflow-wrap: anywhere;'],
   'bg-clip-padding': ['background-clip: padding-box;'],
   'will-change-transform': ['will-change: transform;'],
@@ -228,6 +282,7 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
+  'duration-100': ['transition-duration: 100ms;', '--pui-animation-duration: 100ms;'],
   'duration-150': ['transition-duration: 150ms;', '--pui-animation-duration: 150ms;'],
   'duration-200': ['transition-duration: 200ms;', '--pui-animation-duration: 200ms;'],
   'ease-in-out': ['transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);'],
@@ -251,6 +306,7 @@ const staticUtilities: Record<string, string[]> = {
   'leading-normal': ['line-height: 1.5;'],
   'tracking-tight': ['letter-spacing: -0.025em;'],
   'tracking-normal': ['letter-spacing: 0;'],
+  'tracking-widest': ['letter-spacing: 0.1em;'],
   italic: ['font-style: italic;'],
   'not-italic': ['font-style: normal;'],
   'text-left': ['text-align: left;'],
@@ -259,6 +315,7 @@ const staticUtilities: Record<string, string[]> = {
   'text-base': ['font-size: 1rem;', 'line-height: 1.5rem;'],
   'text-lg': ['font-size: 1.125rem;', 'line-height: 1.75rem;'],
   'text-[0.8rem]': ['font-size: 0.8rem;'],
+  'text-[0.6875rem]': ['font-size: 0.6875rem;'],
   'text-xl': ['font-size: 1.25rem;', 'line-height: 1.75rem;'],
   'text-2xl': ['font-size: 1.5rem;', 'line-height: 2rem;'],
   'text-3xl': ['font-size: 1.875rem;', 'line-height: 2.25rem;'],
@@ -274,10 +331,13 @@ const staticUtilities: Record<string, string[]> = {
   'border-b-2': ['border-bottom-width: 2px;', 'border-bottom-style: solid;'],
   'border-t-2': ['border-top-width: 2px;', 'border-top-style: solid;'],
   'border-b': ['border-bottom-width: 1px;', 'border-bottom-style: solid;'],
+  'border-t': ['border-top-width: 1px;', 'border-top-style: solid;'],
   'border-l-2': ['border-left-width: 2px;', 'border-left-style: solid;'],
   'border-ink': ['border-color: var(--pui-foreground);'],
   'border-current': ['border-color: currentColor;'],
   'border-t-transparent': ['border-top-color: transparent;'],
+  'border-b-transparent': ['border-bottom-color: transparent;'],
+  'rounded-t-[0.25rem]': ['border-top-left-radius: 0.25rem;', 'border-top-right-radius: 0.25rem;'],
   // One v0 border-color intent, lowered to the existing declaration vocabulary.
   'border-[transparent_currentColor_currentColor_currentColor]': [
     'border-color: currentColor;',
@@ -315,11 +375,21 @@ const staticUtilities: Record<string, string[]> = {
   'opacity-50': ['opacity: 0.5;'],
   'ring-inset': ['--pui-ring-inset: inset;'],
   'ring-0': ['--pui-ring-width: 0px;', ...ringShadow()],
+  'ring-1': ['--pui-ring-width: 1px;', ...ringShadow()],
   'ring-2': ['--pui-ring-width: 2px;', ...ringShadow()],
   'ring-3': ['--pui-ring-width: 3px;', ...ringShadow()],
   'ring-offset-0': ['--pui-ring-offset-width: 0px;'],
   'ring-offset-2': ['--pui-ring-offset-width: 2px;'],
   'ring-offset-background': ['--pui-ring-offset-color: var(--pui-background);'],
+  // Bootstrap 2.3.2 text-capable thumbnail and type scale.
+  'border-[#ddd]': ['border-color: #ddd;'],
+  'shadow-[0_1px_3px_rgb(0_0_0/5.5%)]': [
+    '--pui-shadow: 0 1px 3px rgb(0 0 0 / 0.055);',
+    ...composedShadow(),
+  ],
+  'text-[1.53125rem]': ['font-size: 1.53125rem;'],
+  'leading-[1.4285714285714286]': ['line-height: 1.4285714285714286;'],
+  'leading-[2.5rem]': ['line-height: 2.5rem;'],
   // Controlled v2.3.2 paint vocabulary: one bg token owns both fallback and image.
   'bg-[#e6e6e6]': ['background-color: #e6e6e6;', 'background-image: none;'],
   'bg-[#04c]': ['background-color: #04c;', 'background-image: none;'],
@@ -330,6 +400,15 @@ const staticUtilities: Record<string, string[]> = {
   'bg-[linear-gradient(#08c,#04c)]': [
     'background-color: #006dcc;',
     'background-image: linear-gradient(to bottom, #08c, #04c);',
+  ],
+  // Bootstrap 2.3.2 dropdown option highlight and popup elevation.
+  'bg-[linear-gradient(#0077b3,#005580)]': [
+    'background-color: #006699;',
+    'background-image: linear-gradient(to bottom, #0077b3, #005580);',
+  ],
+  'shadow-[0_5px_10px_rgb(0_0_0/20%)]': [
+    '--pui-shadow: 0 5px 10px rgb(0 0 0 / 0.2);',
+    ...composedShadow(),
   ],
   'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]': [
     '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075);',
@@ -388,6 +467,7 @@ const staticUtilities: Record<string, string[]> = {
   'shadow-none': ['--pui-shadow: 0 0 #0000;', ...composedShadow()],
   'shadow-hard': ['--pui-shadow: 2px 2px 0 0 var(--pui-foreground);', ...composedShadow()],
   'backdrop-blur-xs': ['backdrop-filter: blur(4px);'],
+  'z-10': ['z-index: 10;'],
   'z-40': ['z-index: 40;'],
   'z-50': ['z-index: 50;'],
   'max-w-lg': ['max-width: 32rem;'],
@@ -1028,7 +1108,7 @@ function renderUtility(utility: string): string[] | null {
 
 function renderSpacingUtility(utility: string): string[] | null {
   const spacingMatch = utility.match(
-    /^(gap|h|w|min-h|min-w|max-h|size|p|px|py|pl|pr|pt|pb|mt|mb|ml|mr|top|left|right)-(.+)$/
+    /^(gap|basis|h|w|min-h|min-w|max-h|max-w|size|p|px|py|pl|pr|pt|pb|mx|my|mt|mb|ml|mr|top|bottom|left|right)-(.+)$/
   );
   if (!spacingMatch) return null;
   const [, kind, rawValue] = spacingMatch;
@@ -1036,11 +1116,13 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (!value) return null;
 
   if (kind === 'gap') return [`gap: ${value};`];
+  if (kind === 'basis') return [`flex-basis: ${value};`];
   if (kind === 'h') return [`height: ${value};`];
   if (kind === 'w') return [`width: ${value};`];
   if (kind === 'min-h') return [`min-height: ${value};`];
   if (kind === 'min-w') return [`min-width: ${value};`];
   if (kind === 'max-h') return [`max-height: ${value};`];
+  if (kind === 'max-w') return [`max-width: ${value};`];
   if (kind === 'size') return [`width: ${value};`, `height: ${value};`];
   if (kind === 'p') return [`padding: ${value};`];
   if (kind === 'px') return [`padding-inline: ${value};`];
@@ -1049,11 +1131,14 @@ function renderSpacingUtility(utility: string): string[] | null {
   if (kind === 'pr') return [`padding-right: ${value};`];
   if (kind === 'pt') return [`padding-top: ${value};`];
   if (kind === 'pb') return [`padding-bottom: ${value};`];
+  if (kind === 'mx') return [`margin-inline: ${value};`];
+  if (kind === 'my') return [`margin-block: ${value};`];
   if (kind === 'mt') return [`margin-top: ${value};`];
   if (kind === 'mb') return [`margin-bottom: ${value};`];
   if (kind === 'ml') return [`margin-left: ${value};`];
   if (kind === 'mr') return [`margin-right: ${value};`];
   if (kind === 'top') return [`top: ${value};`];
+  if (kind === 'bottom') return [`bottom: ${value};`];
   if (kind === 'right') return [`right: ${value};`];
   if (kind === 'left') return [`left: ${value};`];
   return null;
@@ -1086,6 +1171,7 @@ function renderRoundedUtility(utility: string): string[] | null {
   if (utility === 'rounded-md') return ['border-radius: var(--pui-radius-md);'];
   if (utility === 'rounded-sm') return ['border-radius: var(--pui-radius-sm);'];
   if (utility === 'rounded-[4px]') return ['border-radius: 4px;'];
+  if (utility === 'rounded-[6px]') return ['border-radius: 6px;'];
   if (utility === 'rounded-[min(var(--radius-md),12px)]') {
     return ['border-radius: min(var(--pui-radius-md), 12px);'];
   }
@@ -1245,6 +1331,7 @@ function spacingValue(raw: string): string | null {
   if (raw === 'fit') return 'fit-content';
   if (raw === 'full') return '100%';
   if (raw === '1/2') return '50%';
+  if (raw === '1/3') return '33.333333333333%';
   if (raw.startsWith('[') && raw.endsWith(']')) return raw.slice(1, -1).replaceAll('_', ' ');
   return spacing[raw] ?? null;
 }

@@ -1,0 +1,37 @@
+---
+title: 'Text'
+description: 'Bootstrap232 passive Text with the complete Base typography vocabulary.'
+---
+
+import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
+
+`bootstrap-2-3-2-text-root` directly consumes `asTextRoot()`, retaining all eight independent Base presentation axes, defaults and content slots. This real family Text prototype also renders toolbar labels. It introduces no heading, link, label, button, focus, selection or editing owner.
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-text"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>
+
+## Inputs
+
+- `size`: xs, sm, base, lg, xl, 2xl, 3xl, 4xl, 5xl (default base)
+- `tone`: default, muted, inherit (default default)
+- `weight`: normal, medium, semibold, bold (default normal)
+- `font`: body, heading, mono (default body)
+- `leading`: tight, snug, normal, relaxed (default normal)
+- `tracking`: normal, tight (default normal)
+- `emphasis`: normal, italic (default normal)
+- `decoration`: none, underline, line-through (default none)
+
+Explicit leading takes precedence over composite size line-height; removing props restores defaults. `tone="inherit"` follows the surrounding owner ink. Text never sets user-select: document content retains natural selection and text inside a control follows that actual control’s policy. Native h1, p, label, a and button elements retain semantics, for/href and input behavior.
+
+## Workspace source
+
+```ts
+import { textRoot, Bootstrap232TextRoot } from '@proto.ui/prototypes-bootstrap-2-3-2/text';
+```
+
+The package remains private/unreleased; its CLI Text entry requires workspace source mode for WC, React, Vue and Vue 2 facades. The family theme provides body/heading/mono font stacks and default/muted ink without bundling third-party fonts. Real four-Adapter synthetic-DOM checks and compiler mappings are separate evidence; they do not prove native paint or GPUI typography parity. The GPUI CLI host remains explicitly unsupported.
+
+[Base Text](/en/ui-libraries/base/text/) · [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/bootstrap-2-3-2/src/text)

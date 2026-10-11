@@ -1,0 +1,16 @@
+---
+title: 'Carousel (WIP)'
+description: 'carousel functional composition and current verification limits.'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+Carousel 组合当前幻灯片、视口与有界前后控制。index 支持受控，loop 可选。键盘与达到阈值的滑动共用选择请求。本切片不自动播放，也不启动定时器。
+
+当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
+
+<PrototypePreviewer
+  demoId="demo-brutalist-carousel"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+/>

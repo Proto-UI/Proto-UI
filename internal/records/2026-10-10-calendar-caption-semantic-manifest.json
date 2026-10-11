@@ -1,0 +1,87 @@
+{
+  "status": "WIP source; static capture collection and complete visual/native/compiled/packed acceptance remain open",
+  "sourceBaseline": "59218c40",
+  "families": [
+    {
+      "family": "base",
+      "subpath": "calendar",
+      "exports": {
+        "calendarCaption": "base-calendar-caption",
+        "calendarWeekdays": "base-calendar-weekdays",
+        "calendarWeekday": "base-calendar-weekday"
+      },
+      "demoId": "demo-base-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-base-calendar.demo.ts",
+      "docSlug": "ui-libraries/base/calendar"
+    },
+    {
+      "family": "shadcn",
+      "subpath": "calendar",
+      "exports": {
+        "calendarCaption": "shadcn-calendar-caption",
+        "calendarWeekdays": "shadcn-calendar-weekdays",
+        "calendarWeekday": "shadcn-calendar-weekday"
+      },
+      "demoId": "demo-shadcn-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-shadcn-calendar.demo.ts",
+      "docSlug": "ui-libraries/shadcn/calendar"
+    },
+    {
+      "family": "brutalist",
+      "subpath": "calendar",
+      "exports": {
+        "calendarCaption": "brutalist-calendar-caption",
+        "calendarWeekdays": "brutalist-calendar-weekdays",
+        "calendarWeekday": "brutalist-calendar-weekday"
+      },
+      "demoId": "demo-brutalist-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-brutalist-calendar.demo.ts",
+      "docSlug": "ui-libraries/brutalist/components/calendar"
+    },
+    {
+      "family": "bootstrap-2-3-2",
+      "subpath": "calendar",
+      "exports": {
+        "calendarCaption": "bootstrap-2-3-2-calendar-caption",
+        "calendarWeekdays": "bootstrap-2-3-2-calendar-weekdays",
+        "calendarWeekday": "bootstrap-2-3-2-calendar-weekday"
+      },
+      "demoId": "demo-bootstrap-2-3-2-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-bootstrap-2-3-2-calendar.demo.ts",
+      "docSlug": "ui-libraries/bootstrap-2-3-2/calendar"
+    },
+    {
+      "family": "liquid-glass",
+      "subpath": "calendar",
+      "exports": {
+        "calendarCaption": "liquid-glass-calendar-caption",
+        "calendarWeekdays": "liquid-glass-calendar-weekdays",
+        "calendarWeekday": "liquid-glass-calendar-weekday"
+      },
+      "demoId": "demo-liquid-glass-calendar",
+      "demoPath": "apps/www/src/content/docs/zh-cn/demo-liquid-glass-calendar.demo.ts",
+      "docSlug": "ui-libraries/liquid-glass/calendar"
+    }
+  ],
+  "baseHookExports": ["asCalendarCaption", "asCalendarWeekdays", "asCalendarWeekday"],
+  "basePublicCompositionExports": ["bindCalendarCaption"],
+  "anatomyRoles": ["caption", "weekdays", "weekday"],
+  "updatedPublicSurface": {
+    "CalendarRootProps": ["today?:string", "locale?:string", "direction?:ltr|rtl"],
+    "CalendarRootExposes": ["disabled", "direction"],
+    "CalendarDayExposes": ["today", "hovered", "pressed"],
+    "CalendarHeadingExposes": ["displayValue"],
+    "CalendarPreviousProps": ["a11yLabel?:string"],
+    "CalendarNextProps": ["a11yLabel?:string"]
+  },
+  "tests": [
+    "packages/prototypes/base/test/calendar-semantics.test.ts",
+    "packages/prototypes/base/test/calendar-caption-composition.test.ts",
+    "packages/prototypes/base/test/calendar-family-recipes.test.ts",
+    "packages/prototypes/base/test/calendar-public-handles.test.ts",
+    "packages/prototypes/base/test/calendar-public.types.ts",
+    "packages/prototypes/base/test/tsconfig.calendar-public.json",
+    "packages/web-conformance/test/calendar.journey.test.ts",
+    "apps/www/src/components/PrototypePreviewer/calendar-demo.test.ts"
+  ]
+}

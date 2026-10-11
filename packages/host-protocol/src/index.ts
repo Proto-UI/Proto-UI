@@ -47,6 +47,13 @@ export {
 } from './model';
 
 export type {
+  InstanceAssociationsSetMessage,
+  ControlLabelPlan,
+  ControlLabelPlanMessage,
+  ControlLabelViewMessage,
+  ControlLabelActivateMessage,
+  AvailableSpaceLeaseMessage,
+  AvailableSpaceFrameMessage,
   A11ySnapshotMessage,
   StyleApplyMessage,
   DefaultActionPreventMessage,

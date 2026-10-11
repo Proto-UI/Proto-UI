@@ -6,11 +6,11 @@ since: 0.1.0
 summary: Context resolution binds a participant to the nearest provider or equivalent scope owner for the requested ContextKey.
 statement:
   zh-CN: >-
-    Context resolution 必须基于 runtime/adapter 提供的 scope ancestry。常见 UI 宿主中，这个 ancestry 通常表现为 logical tree 或 component tree；若宿主没有树形结构，只要 adapter 能提供等价的 scope resolution 逻辑，Context 仍然可以成立。对于同一个 ContextKey，从参与者自身开始解析，最近的 scope owner wins；自身提供该 Key 时优先于祖先。
+    Context resolution 必须基于 runtime/adapter 提供的 scope ancestry。常见 UI 宿主中，这个 ancestry 通常表现为 logical tree 或 component tree；若宿主没有树形结构，只要 adapter 能提供等价的 scope resolution 逻辑，Context 仍然可以成立。对于同一个 ContextKey，普通 API 从参与者自身开始解析，最近的 scope owner wins；自身提供该 Key 时优先于祖先。显式 ancestor 读订阅从逻辑 parent 开始，排除 self。
 
 
   en: >-
-    Context resolution must be based on scope ancestry supplied by the runtime/adapter. In common UI hosts this ancestry usually appears as a logical tree or component tree; if a host is not tree-shaped, Context may still work when the adapter provides equivalent scope-resolution logic. For the same ContextKey, resolution starts at the participant itself and the nearest scope owner wins; a self-provided key takes precedence over ancestors.
+    Context resolution must be based on scope ancestry supplied by the runtime/adapter. In common UI hosts this ancestry usually appears as a logical tree or component tree; if a host is not tree-shaped, Context may still work when the adapter provides equivalent scope-resolution logic. For the same ContextKey, ordinary API resolution starts at the participant itself and the nearest scope owner wins; a self-provided key takes precedence over ancestors. Explicit ancestor read/subscription resolution starts at the logical parent and excludes self.
 
 
 criteria:
@@ -20,8 +20,8 @@ criteria:
       en: Context resolution must use scope ancestry provided by the runtime/adapter.
   - id: C-CONTEXT-0004-B
     text:
-      zh-CN: 在树形宿主中，resolution 必须从参与者自身开始，再沿 ancestry 向上查找最近 provider；自身提供该 Key 时必须选择自身。
-      en: In tree-shaped hosts, resolution must start at the participant itself, then follow ancestry to the nearest provider; a participant providing the key must resolve to itself.
+      zh-CN: 在树形宿主中，普通 API resolution 必须从参与者自身开始，再沿 ancestry 向上查找最近 provider；自身提供该 Key 时必须选择自身。
+      en: In tree-shaped hosts, ordinary API resolution must start at the participant itself, then follow ancestry to the nearest provider; a participant providing the key must resolve to itself.
   - id: C-CONTEXT-0004-C
     text:
       zh-CN: 同一 ContextKey 可以由不同组件实例同时提供；绑定结果按参与者所在 scope 决定。
@@ -34,6 +34,10 @@ criteria:
     text:
       zh-CN: Module-internal 协调器可以把 nearest provider identity 作为 opaque scope token 使用，但该 token 不属于 Context value，也不得暴露给 prototype author。
       en: A module-internal coordinator may use nearest-provider identity as an opaque scope token, but that token is not part of the Context value and must not be exposed to prototype authors.
+  - id: C-CONTEXT-0004-F
+    text:
+      en: Explicit trySubscribeAncestor/tryReadAncestor selects the nearest strict-ancestor provider using supplied logical ancestry even when self provides the same key. Reads and notification delivery re-resolve current ancestry; provider removal/reparenting alone emits no value callback and retired bindings receive no stale delivery.
+      zh-CN: 显式 trySubscribeAncestor/tryReadAncestor 使用宿主逻辑 ancestry 选择最近严格祖先 provider，即使 self 提供同 key 也排除自身。read 与通知派发重新解析当前 ancestry；移除 provider 或 reparent 本身不发 value callback，已失效绑定不得收到旧通知。
 sources:
   - path: internal/contracts/context/with-tree.v0.md
     sections:
@@ -51,6 +55,9 @@ dependsOn:
   contracts:
     - C-CONTEXT-0002
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added an explicit strict-ancestor optional read/subscription exception while preserving ordinary self-inclusive resolution.
   - version: 0.3.0-alpha.0
     change: clarified
     summary: Made nearest-provider resolution explicitly self-inclusive, aligning the contract with the existing provider-self decision, Module criterion and executable evidence.

@@ -87,3 +87,42 @@ describe('passive shell ancestor boundary ownership', () => {
     expect(restore).not.toHaveBeenCalled();
   });
 });
+
+describe('synchronous owner-to-owner Selection freshness', () => {
+  it('reads a Selection created by the preceding owner move before leasing the next owner', () => {
+    const first = fixture(true);
+    const second = fixture(true);
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    const restore = vi.spyOn(selection, 'setBaseAndExtent');
+    withNativeContentLease(first.link, () => {
+      first.move();
+      // Models a synchronous connection callback, not a user event between tasks.
+      selection.setBaseAndExtent(second.oldSurface, 0, second.oldSurface, 1);
+    });
+    // HappyDOM 15's known focusOffset alias is isolated to this getter fixture.
+    vi.spyOn(selection, 'focusOffset', 'get').mockReturnValue(1);
+    withNativeContentLease(second.link, second.move);
+    expect(restore).toHaveBeenLastCalledWith(second.nextText, 0, second.nextText, 1);
+    expect(second.source.isConnected).toBe(true);
+  });
+
+  it('does not reuse an empty snapshot after an interrupted owner creates a Selection', () => {
+    const first = fixture(true);
+    const second = fixture(true);
+    const selection = document.getSelection()!;
+    selection.removeAllRanges();
+    const failure = new Error('interrupted native composition');
+    expect(() =>
+      withNativeContentLease(first.link, () => {
+        selection.setBaseAndExtent(second.oldSurface, 0, second.oldSurface, 1);
+        throw failure;
+      })
+    ).toThrow(failure);
+    vi.spyOn(selection, 'focusOffset', 'get').mockReturnValue(1);
+    const restore = vi.spyOn(selection, 'setBaseAndExtent');
+    withNativeContentLease(second.link, second.move);
+    expect(restore).toHaveBeenLastCalledWith(second.nextText, 0, second.nextText, 1);
+    expect(first.oldSurface.isConnected).toBe(true);
+  });
+});

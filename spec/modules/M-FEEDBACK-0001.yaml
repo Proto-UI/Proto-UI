@@ -1,12 +1,12 @@
 id: M-FEEDBACK-0001
 type: module
-title: Feedback owns visual style intent and per-instance runtime patches
+title: Feedback owns final visual style and typed material contributions
 status: draft
 since: 0.3.0-alpha.0
 summary: The standard Feedback module merges setup and internal contributions, applies a final runtime patch layer, and delegates visual realization to a host style sink.
 statement:
-  en: This slice catalogs the existing visual style realization of the Component-to-User Feedback channel and the exact bounded content-selection affordance exception in C-CONTENT-SELECTION-AFFORDANCE-0001. Feedback owns per-instance semantic style state; the host owns materialization. Runtime installs the module with mixed resource ownership. This draft does not admit auditory or tactile feedback, new author APIs, or a general rendering policy.
-  zh-CN: 本 slice 编目 Component-to-User Feedback 通路已有的视觉样式实现与 C-CONTENT-SELECTION-AFFORDANCE-0001 的精确有界内容选择可供性例外。Feedback 拥有每实例语义样式状态，宿主拥有物化；Runtime 以 mixed resource ownership 安装该 Module。本 draft 不接纳听觉或触觉能力、新作者 API 或通用渲染策略。
+  en: This slice catalogs the existing visual style realization of the Component-to-User Feedback channel and the exact bounded content-selection affordance exception in C-CONTENT-SELECTION-AFFORDANCE-0001. Feedback owns per-instance semantic style state; the host owns materialization. Runtime installs the module with mixed resource ownership. A separate draft typed material surface declares one slot and complete static/Rule candidates under C-RULE-INTENT-FEEDBACK-MATERIAL-0001; it does not imply host paint support. Auditory/tactile feedback and general rendering policies remain outside this slice.
+  zh-CN: 本 slice 编目 Component-to-User Feedback 通路已有的视觉样式实现与 C-CONTENT-SELECTION-AFFORDANCE-0001 的精确有界内容选择可供性例外。Feedback 拥有每实例语义样式状态，宿主拥有物化；Runtime 以 mixed resource ownership 安装该 Module。独立 draft typed material surface 依 C-RULE-INTENT-FEEDBACK-MATERIAL-0001 声明单 slot 和完整静态/Rule候选，不意味着host paint支持。听觉/触觉与通用渲染策略仍在本slice之外。
 criteria:
   - id: M-FEEDBACK-0001-A
     text:
@@ -32,9 +32,15 @@ criteria:
     text:
       en: Absent host style capability does not discard logical style changes or invent a host. Pending logical state is projected when capability becomes available in an attached view. Terminal disposal clears style state and prevents retained internal handles from reviving host effects.
       zh-CN: 宿主 style capability 缺失时不丢弃逻辑样式变化，也不虚构宿主。attached view 的 capability 可用时投影待应用逻辑状态。terminal disposal 清理样式状态，保存的内部句柄不得复活 host effect。
+  - id: M-FEEDBACK-0001-MATERIAL
+    text:
+      en: Shared typed material contributions retain instance lifetime independently of host support. Rule style and material replace together before one projection; static surfaces have no implicit button binding. The shared sink supersedes style-only writes for that projection; absent support preserves legal style and exposes a diagnostic.
+      zh-CN: 共享 typed material contribution 独立于host支持保留实例生命周期；Rule style/material在一次projection前共同替换，静态surface没有隐式Button绑定。共享sink替代同次style-only输出；缺失支持保留合法style并暴露诊断。
 satisfies:
   contracts:
     - C-FEEDBACK-0002
+    - id: C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+      since: 0.3.0-alpha.1
     - C-FEEDBACK-STYLE-0001
     - C-FEEDBACK-STYLE-0002
     - C-FEEDBACK-STYLE-0003
@@ -50,12 +56,17 @@ dependsOn:
     - C-LIFECYCLE-0006
     - C-LIFECYCLE-0007
 relates:
+  hostCaps:
+    - id: HC-FEEDBACK-VISUAL-SINK-0001
+      since: 0.3.0-alpha.1
   contracts:
     - C-FEEDBACK-0001
     - C-RULE-INTENT-FEEDBACK-STYLE-0001
 verifies:
   tests:
     - T-FEEDBACK-0001
+    - id: T-MATERIAL-VISUAL-RESULT-0001
+      since: 0.3.0-alpha.1
     - T-FEEDBACK-STYLE-0001
     - T-FEEDBACK-STYLE-0002
     - T-RULE-INTENT-FEEDBACK-STYLE-0001

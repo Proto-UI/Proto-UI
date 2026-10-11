@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { collectMatrixInteractiveFacts, matrixHostsReady } from './demo-matrix-observation';
+import {
+  collectMatrixInteractiveFacts,
+  matrixHostsReady,
+  collectMatrixReadinessDiagnostics,
+} from './demo-matrix-observation';
 
 const roles = ['button', 'textbox'];
 
@@ -128,5 +132,61 @@ describe('Demo Matrix committed projection observations', () => {
     expect(matrixHostsReady()).toBe(true);
     host.replaceChildren();
     expect(matrixHostsReady()).toBe(false);
+  });
+});
+
+describe('Demo Matrix read-only failure diagnostics', () => {
+  it('identifies uninitialized and skeleton rows without changing readiness', () => {
+    const { root, host } = cell('loading');
+    root.dataset.inited = '0';
+    const before = document.body.innerHTML;
+    const facts = collectMatrixReadinessDiagnostics(4);
+    expect(facts).toMatchObject({
+      demos: 1,
+      expectedPreviewers: 4,
+      previewers: 1,
+      initialized: 0,
+      uninitializedCount: 1,
+      notReadyCount: 1,
+    });
+    expect(facts.notReadyRows[0]).toMatchObject({
+      demoId: 'textarea',
+      previewerId: 'fixture',
+      hostPresent: true,
+      activeGenerations: 0,
+      projectionState: 'loading',
+    });
+    expect(matrixHostsReady()).toBe(false);
+    expect(host.childElementCount).toBe(1);
+    expect(document.body.innerHTML).toBe(before);
+  });
+  it('separates initialized staging, committed active, unavailable and rendered errors', () => {
+    const a = cell('ready');
+    generation(a.host, 'staging');
+    const b = cell('ready');
+    generation(b.host, 'active');
+    const c = cell('error');
+    c.host.textContent = '[Preview Error] exact fixture failure';
+    const unavailable = document.createElement('div');
+    unavailable.className = 'demo-matrix__adapter';
+    unavailable.dataset.unavailable = 'unsupported';
+    document.body.append(unavailable);
+    const facts = collectMatrixReadinessDiagnostics(4);
+    expect(facts).toMatchObject({
+      initialized: 3,
+      expectedPreviewers: 3,
+      unavailable: 1,
+      uninitializedCount: 0,
+      notReadyCount: 1,
+    });
+    expect(facts.notReadyRows[0].activeGenerations).toBe(0);
+    expect(facts.previewErrors[0].previewError).toContain('exact fixture failure');
+    expect(facts.notReadyRows.some((row) => row.previewError !== null)).toBe(false);
+    expect(matrixHostsReady()).toBe(false);
+    a.host.querySelector<HTMLElement>(
+      '[data-projection-generation-state]'
+    )!.dataset.projectionGenerationState = 'active';
+    expect(collectMatrixReadinessDiagnostics(4).notReadyCount).toBe(0);
+    expect(matrixHostsReady()).toBe(true);
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import { styleContains } from '../../test-utils/style';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { inputRoot } from '@proto.ui/prototypes-base/input';
 import shadcnInputRoot, { shadcnInputRoot as namedShadcnInputRoot } from '../src/input';
@@ -11,18 +12,17 @@ type HasNativeType<Props> = 'type' extends keyof Props ? true : false;
 AdaptToWebComponent(shadcnInputRoot);
 
 const SURFACE_TOKENS = [
-  'h-9',
+  'h-8',
   'w-full',
   'min-w-0',
-  'rounded-md',
+  'rounded-lg',
   'border',
   'border-input',
   'bg-transparent',
-  'px-3',
+  'px-2.5',
   'py-1',
   'text-base',
-  'shadow-xs',
-  'transition-[color,box-shadow]',
+  'transition-colors',
   'outline-none',
   'selection:bg-primary',
   'selection:text-primary-foreground',
@@ -35,6 +35,8 @@ const WEB_STATE_TOKENS = [
   'data-[disabled]:pointer-events-none',
   'data-[disabled]:cursor-not-allowed',
   'data-[disabled]:opacity-50',
+  'data-[disabled]:bg-input/50',
+  'dark:data-[disabled]:bg-input/80',
   'dark:bg-input/30',
 ];
 
@@ -128,6 +130,15 @@ describe('prototypes/shadcn: input', () => {
         `${token} :: ${target.getAttribute('data-pui-style')}`
       ).toBe(true);
     }
+    for (const legacy of [
+      'h-9',
+      'rounded-md',
+      'px-3',
+      'shadow-xs',
+      'transition-[color,box-shadow]',
+    ]) {
+      expect(styleContains(target, legacy), legacy).toBe(false);
+    }
     el.remove();
   });
 
@@ -143,6 +154,37 @@ describe('prototypes/shadcn: input', () => {
         styleContains(target, token),
         `${token} :: ${target.getAttribute('data-pui-style')}`
       ).toBe(true);
+    }
+    el.remove();
+  });
+
+  it('emits base-nova geometry and the combined dark-disabled palette through the real CSS path', async () => {
+    const el = document.createElement('shadcn-input-root');
+    document.body.appendChild(el);
+    await flush();
+    const target = control(el);
+    const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+    const css = renderProtoStyleTokenCss(tokens);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('height: 2rem;');
+    expect(css).toContain('padding-inline: 0.625rem;');
+    expect(css).toContain('data-[disabled]:bg-input/50');
+    expect(css).toContain('dark:data-[disabled]:bg-input/80');
+    expect(css).toContain('dark:bg-input/30');
+    expect(css).toContain('var(--pui-input) 80%, transparent');
+    expect(css.indexOf('dark:data-[disabled]:bg-input/80')).toBeGreaterThan(
+      css.indexOf('dark:bg-input/30')
+    );
+
+    // The same physical editor retains disabled ownership through repeated
+    // prop updates; CSS output above is not a browser-computed color claim.
+    for (const disabled of [true, false, true, false]) {
+      setElementProps(el, { disabled });
+      await flush();
+      expect(control(el)).toBe(target);
+      expect(target.disabled).toBe(disabled);
+      expect(target.hasAttribute('data-disabled')).toBe(disabled);
+      expect(el.querySelectorAll('[part="control"]')).toHaveLength(1);
     }
     el.remove();
   });

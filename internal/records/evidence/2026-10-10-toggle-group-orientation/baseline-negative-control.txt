@@ -1,0 +1,66 @@
+
+ RUN  v2.1.9 /workspace/scratch/3ca1e20addac/finf-togglegroup-orientation
+
+stdout | packages/prototypes/base/test/toggle-group-orientation.test.ts > public ToggleGroupRoot count expose exists as declared
+toggle-group expose keys: [
+  'count',
+  'getCollectionItems',
+  'getCollectionCount',
+  'disabled',
+  'focusFirst',
+  'focusLast',
+  'getValue',
+  'setCurrent',
+  'requestToggle'
+]
+
+stdout | packages/prototypes/base/test/toggle-group-orientation.test.ts > 'shadcn-toggle-group-root' vertical prop has a vertical authored layout class
+shadcn-toggle-group-root vertical rounded-md border border-border bg-background text-foreground shadow-sm p-2 flex min-w-0 gap-1
+
+stdout | packages/prototypes/base/test/toggle-group-orientation.test.ts > 'brutalist-toggle-group-root' vertical prop has a vertical authored layout class
+brutalist-toggle-group-root vertical rounded-none border-2 border-foreground bg-background text-foreground shadow-[3px_3px_0_0_var(--pui-foreground)] p-2 flex min-w-0 gap-1
+
+stdout | packages/prototypes/base/test/toggle-group-orientation.test.ts > 'bootstrap-2-3-2-toggle-group-root' vertical prop has a vertical authored layout class
+bootstrap-2-3-2-toggle-group-root vertical rounded border border-border bg-background text-foreground shadow-md p-2 flex min-w-0 gap-1
+
+stdout | packages/prototypes/base/test/toggle-group-orientation.test.ts > 'liquid-glass-toggle-group-root' vertical prop has a vertical authored layout class
+liquid-glass-toggle-group-root vertical rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md p-2 flex min-w-0 gap-1
+
+ ❯ packages/prototypes/base/test/toggle-group-orientation.test.ts (6 tests | 4 failed) 197ms
+   × 'shadcn-toggle-group-root' vertical prop has a vertical authored layout class 30ms
+     → expected false to be true // Object.is equality
+   × 'brutalist-toggle-group-root' vertical prop has a vertical authored layout class 20ms
+     → expected false to be true // Object.is equality
+   × 'bootstrap-2-3-2-toggle-group-root' vertical prop has a vertical authored layout class 25ms
+     → expected false to be true // Object.is equality
+   × 'liquid-glass-toggle-group-root' vertical prop has a vertical authored layout class 20ms
+     → expected false to be true // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  packages/prototypes/base/test/toggle-group-orientation.test.ts > 'shadcn-toggle-group-root' vertical prop has a vertical authored layout class
+ FAIL  packages/prototypes/base/test/toggle-group-orientation.test.ts > 'brutalist-toggle-group-root' vertical prop has a vertical authored layout class
+ FAIL  packages/prototypes/base/test/toggle-group-orientation.test.ts > 'bootstrap-2-3-2-toggle-group-root' vertical prop has a vertical authored layout class
+ FAIL  packages/prototypes/base/test/toggle-group-orientation.test.ts > 'liquid-glass-toggle-group-root' vertical prop has a vertical authored layout class
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ packages/prototypes/base/test/toggle-group-orientation.test.ts:25:86
+     23|  console.log(p.name,root.getAttribute('aria-orientation'),root.getAttr…
+     24|  expect(root.getAttribute('aria-orientation')).toBe('vertical');
+     25|  expect((root.getAttribute('data-pui-style') ?? '').split(' ').include…
+       |                                                                                      ^
+     26| });
+     27| it('combobox disabled metadata update preserves selected value and rej…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 2 passed (6)
+   Start at  05:11:06
+   Duration  2.78s (transform 1.56s, setup 0ms, collect 2.13s, tests 197ms, environment 200ms, prepare 57ms)

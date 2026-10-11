@@ -3,7 +3,7 @@ title: 'Material Experiment'
 description: 'The experimental Base Button and owned-scene material fixture, its execution boundary, and its relationship to Liquid Glass.'
 ---
 
-This page records the experimental composition in [PR #809](https://github.com/Proto-UI/Proto-UI/pull/809). It is separate from the [stage-0 Liquid Glass Button](/en/ui-libraries/liquid-glass/button/). The fixture's name, `experimental-owned-material-button`, is a test identity for Base Button plus a candidate generic material capability. It is not an additional admitted Button protocol, a public package import, or a permanent private component API.
+This page records the experimental composition in [PR #809](https://github.com/Proto-UI/Proto-UI/pull/809). It is a historical V1 experiment, separate from the current [Liquid Glass Button](/en/ui-libraries/liquid-glass/button/). The fixture's name, `experimental-owned-material-button`, is a test identity for Base Button plus a candidate generic material capability. It is not an additional admitted Button protocol, a public package import, or a permanent private component API.
 
 ## What the fixture declares
 
@@ -35,7 +35,7 @@ A bounded WebGL execution result does not establish:
 - shape fusion, shared groups, morphing, or a complete Liquid Glass family;
 - stable material admission, published package availability, or acceptance of package-budget regressions.
 
-The experiment has no public RuntimeBox here: its private consumer is not part of this website's public prototype registry. The existing Button preview remains the documented stage-0 fallback and must not be presented as the GPU fixture's output. The original [isolated upstream benchmark in PR #807](https://github.com/Proto-UI/Proto-UI/pull/807) is another fixture and cannot stand in for this composition's evidence.
+The experiment has no public RuntimeBox here: its private consumer is not part of this website's public prototype registry. That historical V1 fixture is distinct from the current V2 public Previewer path, whose visible-canvas source and optical provider require their own exact-head evidence. The original [isolated upstream benchmark in PR #807](https://github.com/Proto-UI/Proto-UI/pull/807) is another fixture and cannot stand in for this composition's evidence.
 
 ## Exact-checkpoint images
 

@@ -1,0 +1,21 @@
+---
+title: liquid-glass Meter
+description: A bounded numerical measurement with shared Base semantics.
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-meter"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+Draft implementation. Root owns the finite range; Label names it, Track contains Indicator, and Value displays valueText or the canonical number. All styled atoms inherit the same Base protocol.
+
+Props: value, min (0), max (100), ariaLabel and valueText. Values clamp to ordered finite bounds; an equal min/max has zero percentage. low/high/optimum classify the measured value as optimal, suboptimal or critical; they do not change the numerical value.
+
+Root and parts expose value, percentage, indeterminate and status. These are passive readouts with no keyboard stop or editing event. Updating Props updates every part. Range states use portable A11y declarations; exact native and assistive-technology mappings still need verification.
+
+Import meterRoot, meterLabel, meterTrack, meterIndicator and meterValue from the meter subpath after shared package registration. Source tests are incremental evidence. Full Adapter/Compiler/GPUI, native input/paint, package consumer and independent acceptance remain open; this page does not mark the Finf item complete.

@@ -1,0 +1,48 @@
+---
+import { createHash } from 'node:crypto';
+import { libraryCardPrototypes, type LibraryPart } from './library-card-prototypes';
+import { snapshotLibraryPart } from './library-card-snapshot';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
+interface Props {
+  part: LibraryPart;
+  props?: Record<string, unknown>;
+  class?: string;
+  /** Private Card experiment alias; it adds no Prototype or public entry. */
+  candidateTag?: boolean;
+}
+const { part, props = {}, class: className, candidateTag = false } = Astro.props;
+if (candidateTag && part !== 'liquid-glass-surface')
+  throw new Error('The private optical tag only consumes the actual Liquid Surface');
+// Astro's intrinsic typing has no dynamic custom-element union; the host
+// accepts ordinary HTML attributes while keeping its actual runtime tag.
+const Tag = (candidateTag ? 'wc-library-liquid-optical-surface' : `wc-library-${part}`) as 'div';
+const tokens = await snapshotLibraryPart(part, props);
+const stateTokens = part.endsWith('-surface')
+  ? (
+      await Promise.all(
+        [{ hovered: true }, { focusVisible: true }, { pressed: true }].map((facts) =>
+          snapshotLibraryPart(part, { ...props, ...facts })
+        )
+      )
+    ).flat()
+  : [];
+const cssTokens = [...new Set([...tokens, ...stateTokens])];
+// Each distinct recipe/token set owns only its exact hosts. Later Card parts
+// must not re-emit global text-size rules over earlier explicit line heights.
+const snapshotId = createHash('sha256')
+  .update(part)
+  .update('\0')
+  .update(cssTokens.join('\0'))
+  .digest('hex');
+const snapshotScope = `[data-library-snapshot="${snapshotId}"]`;
+---
+
+<style is:inline set:html={renderSnapshotTokenCss(cssTokens, snapshotScope)}></style>
+<Tag
+  class={className}
+  data-library-part={part}
+  data-library-snapshot={snapshotId}
+  data-library-props={JSON.stringify(props)}
+  data-library-prototype={libraryCardPrototypes[part].name}
+  data-pui-style={tokens.length ? tokens.join(' ') : undefined}><slot /></Tag
+>

@@ -28,11 +28,23 @@ criteria:
     text:
       zh-CN: 非受控 sibling handoff 必须在同一次协调后的 view reconciliation 中使前一个 Content 结束感知 presence，不得保留可见的 leave duration；普通关闭仍可运行其 Transition。受控 owner 仅接收关闭请求，并保留最终 open authority。
       en: An uncontrolled sibling handoff must end the previous Content's perceptual presence in the view reconciliation following the same coordination and must not preserve a visible leave duration; ordinary closure may still run its Transition. A controlled owner only receives a close request and retains final open authority.
+  - id: P-BASE-TOOLTIP-GROUP-LIFETIME
+    text:
+      zh-CN: >-
+        Group active ownership 属于 Root 当前 mounted view。当前 active Root unmount 或 terminal dispose 必须立即释放自己的 active 归属并恢复 cold；普通 close 仍保留 skipDelay warm window。旧 Root 或旧 view 的 cleanup 不得清除新 owner 或重启其 cooldown。结束的 view 必须取消 pending pointer intent，旧 callback 不得重新声明 ownership。retained Root 的 open fact 不因 unmount 被改写；新 view mount 时，若当前 open fact 为 true，必须向当时最近的 Group 重新声明 active ownership。Group 只持有一个协调 owner，不是所有 controlled open Root 的注册表；旧受控 Root 拒绝关闭不触发自动重新选主。
+
+
+      en: >-
+        Group active ownership belongs to a Root's current mounted view. Unmount or terminal disposal of the current active Root must release only its own active ownership and immediately restore cold delay; ordinary closure retains the skipDelay warm window. Cleanup from an old Root or view must not clear a newer owner or restart its cooldown. An ended view must cancel pending pointer intent, and stale callbacks must not reannounce ownership. Unmount must not rewrite a retained Root's open fact; on a new view mount, a true current open fact must announce active ownership to the then-nearest Group. Group holds one coordination owner, not a registry of every controlled open Root; an older controlled Root refusing closure does not cause automatic re-election.
+
+
   - id: P-BASE-TOOLTIP-GROUP-NO-NEW-MODULE
     text:
       zh-CN: 当前 Group 语义必须由现有 Context 与 Delay 能力表达，不得仅为 Tooltip 新增专用 core/module substrate。
       en: Current Group semantics must be expressed through existing Context and Delay capabilities and must not introduce a Tooltip-specific core or module substrate.
 sources:
+  - path: https://github.com/mui/base-ui/blob/ad7ecda5296b0295b41a51ecb01fce6204acd099/packages/react/src/floating-ui-react/components/FloatingDelayGroup.tsx
+    label: Fixed Base UI Group ownership cleanup comparison
   - path: packages/prototypes/base/src/tooltip/group.proto.ts
   - path: packages/prototypes/base/src/tooltip/root.proto.ts
   - path: packages/prototypes/base/test/tooltip.test.ts
@@ -41,11 +53,14 @@ sources:
   - path: https://www.radix-ui.com/primitives/docs/components/tooltip#provider
     label: Radix UI Tooltip Provider
 dependsOn:
-  contracts: [C-CONTEXT-0001, C-DELAY-0001]
+  contracts: [C-CONTEXT-0001, C-DELAY-0001, C-LIFECYCLE-0002, C-LIFECYCLE-0005]
   decisions: [D-TOOLTIP-PROTOTYPE-BOUNDARY-0001]
 relates: { prototypes: [P-BASE-TOOLTIP] }
 verifies: { tests: [T-BASE-TOOLTIP-GROUP-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Forward-defined draft mounted-view ownership, owner-only retirement to cold, and retained remount registration; the earlier draft did not define these retirement choices.
   - version: 0.2.0-rc.7
     change: introduced
     summary: Cataloged shared delay defaults, warm-window behavior, and active Tooltip coordination.

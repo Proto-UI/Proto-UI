@@ -11,6 +11,7 @@ on:
       - 'apps/www/src/content/docs/zh-cn/demo-composed-style-isolation.browser.test.ts'
       - 'apps/www/src/content/docs/zh-cn/prototype-projection-scope.browser.test.ts'
       - '.github/workflows/brutalist-design-evidence.yml'
+      - 'scripts/test/brutalist-design-toolbar.test.mjs'
 permissions:
   contents: read
 concurrency:
@@ -93,6 +94,15 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile
           CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
           echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Verify evidence input-surface contract
+        run: node --test scripts/test/brutalist-design-toolbar.test.mjs
+      - name: Disable the development toolbar before native family input
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+          TOOLBAR_SETTING=$(NO_COLOR=1 corepack pnpm@10.32.1 --filter apps-www exec astro preferences get devToolbar.enabled)
+          printf '%s\n' "$TOOLBAR_SETTING"
+          grep -Eq '^◉ devToolbar\.enabled is set to[[:space:]]+false[[:space:]]*$' <<< "$TOOLBAR_SETTING"
       - name: Verify actual family component regression suite
         env:
           ASTRO_TELEMETRY_DISABLED: '1'

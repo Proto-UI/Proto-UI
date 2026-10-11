@@ -1,3 +1,4 @@
+import { runtimeRetryUrlsPlugin } from './apps/www/scripts/runtime-retry-urls.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createRequire } from 'node:module';
@@ -69,6 +70,7 @@ function resolveProtoUiImport(id: string): string | null {
 
 export default defineConfig({
   plugins: [
+    runtimeRetryUrlsPlugin(path.resolve(__dirname, 'apps/www')),
     {
       name: 'proto-ui-alias',
       enforce: 'pre',

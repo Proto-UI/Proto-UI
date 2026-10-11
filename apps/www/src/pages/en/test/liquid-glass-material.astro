@@ -9,7 +9,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
     <meta name="robots" content="noindex, nofollow" />
-    <title>Liquid Glass family: stage-0 fallback evidence</title>
+    <title>Liquid Glass: V2 optical provider evidence</title>
     <DraftProjectionStyle />
     <style is:global data-material-theme set:html={renderThemeCss()}></style>
     <script is:inline>
@@ -19,15 +19,15 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
   </head>
   <body>
     <main>
-      <h1>Liquid Glass family: translucent fallback</h1>
+      <h1>Liquid Glass: visible application backdrop</h1>
       <p>
-        One Base Button. Source-authored alpha and 4px backdrop blur when live preferences and
-        explicit Web support allow it.
+        One Base Button on each Web Adapter. The fixed liquidGL optical kernel samples the visible
+        application-owned canvas behind the controls.
       </p>
       <p>
-        This stage uses ordinary translucency and blur, not Liquid Glass lensing. Refraction,
-        adaptive optics and liquid shape transitions remain unimplemented. Page content stays
-        readable.
+        The live canvas is the only admitted source plane. This does not capture arbitrary DOM or
+        the browser compositor. Source loss, overlapping content and unavailable preferences
+        preserve readable fallback. No native or Apple-private equivalence is claimed.
       </p>
       <div class="grid">
         {
@@ -55,6 +55,11 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
     </main>
     <script>
       import button from '@proto.ui/prototypes-liquid-glass/button';
+      import { createPreviewMaterialScene } from '../../../components/PrototypePreviewer/preview-material-scene';
+      import { inspectCanvasBackdrop } from '@proto.ui/adapter-base/web-material';
+      import { inspectWebOpticalResources } from '../../../../../../packages/adapters/base/src/material/program-pool';
+      import { createWebOpticalProgram } from '../../../../../../packages/adapters/base/src/material/program';
+      import { resolvePaletteColor } from '../../../../../../packages/adapters/base/src/material/style';
       import { registerPrototype } from '../../../components/PrototypePreviewer/registry';
       import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
       import type {
@@ -66,14 +71,35 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
         Object.defineProperty(window, 'matchMedia', { value: undefined, configurable: true });
       registerPrototype('liquid-glass-button', button);
       const records: DemoRenderResult[] = [];
+      const scenes = new Map<string, ReturnType<typeof createPreviewMaterialScene>>();
       (window as any).liquidMaterialFixture = {
+        metrics() { return inspectWebOpticalResources(document); },
+        async stress(count: number) {
+          const host = document.createElement('section'); host.dataset.materialStress = ''; document.querySelector('main')!.append(host);
+          const scene = createPreviewMaterialScene(host); scene.pause(true); scenes.set('stress', scene);
+          records.push(await renderDemo({ runtime: 'wc', host: scene.mount, demo: { type: 'demo', root: { kind: 'box', className: 'material-controls', children: Array.from({ length: count }, (_, i) => ({ kind: 'proto', prototypeId: 'liquid-glass-button', children: [`Stress ${i}`] })) } } }));
+        },
+        pause(value: boolean) { for (const scene of scenes.values()) scene.pause(value); },
+        source(runtime: string, value: boolean) { scenes.get(runtime)?.sourceAvailable(value); },
+        redraw() { for (const scene of scenes.values()) scene.redraw(); },
+        zeroRefraction(runtime: string) {
+          const scene = scenes.get(runtime)!, host = scene.scope.querySelector<HTMLElement>('[data-demo-ref="regular"]')!;
+          const source = scene.lease.current()!, admission = inspectCanvasBackdrop(host, source);
+          if (!admission.valid) throw new Error(admission.reason);
+          const css = getComputedStyle(host), rect = host.getBoundingClientRect(), canvas = document.createElement('canvas');
+          const program = createWebOpticalProgram(canvas, 'zero-refraction');
+          try { return program.render({ source, geometry: { width: rect.width, height: rect.height, radius: Math.min(parseFloat(css.borderTopLeftRadius), rect.width / 2, rect.height / 2), dpr: devicePixelRatio, bounds: admission.bounds }, pressed: false, variant: 'regular', fill: resolvePaletteColor(css.getPropertyValue('--pui-secondary').trim(), {})!, foreground: resolvePaletteColor(css.color, {})! }); }
+          finally { program.clear(); }
+        },
         async dispose() {
           for (const record of records.splice(0).reverse()) await record.destroy();
+          for (const scene of scenes.values()) scene.dispose(); scenes.clear();
         },
       };
       async function mount() {
         for (const runtime of ['wc', 'react', 'vue', 'vue2'] as RuntimeId[]) {
           const host = document.querySelector<HTMLElement>(`[data-material-host="${runtime}"]`)!;
+          const scene = createPreviewMaterialScene(host); scenes.set(runtime, scene);
           const demo: DemoSpec = {
             type: 'demo',
             root: {
@@ -116,7 +142,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
               return () => refs.regular.removeEventListener('click', event);
             },
           };
-          records.push(await renderDemo({ runtime, demo, host }));
+          records.push(await renderDemo({ runtime, demo, host: scene.mount }));
         }
         document.documentElement.dataset.materialReady = 'true';
       }

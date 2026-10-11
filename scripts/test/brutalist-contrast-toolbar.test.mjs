@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
+import ts from 'typescript';
 import YAML from 'yaml';
 
 const workflowPath = '.github/workflows/brutalist-contrast-evidence.yml';
@@ -138,7 +139,7 @@ for (const mode of ['normal', 'disable-fails', 'get-fails', 'still-enabled', 'un
   });
 }
 
-test('toolbar setup preserves all 17 families, bounded jobs and exact-head evidence', () => {
+test('toolbar setup preserves all current manifest families, bounded jobs and exact-head evidence', () => {
   const workflow = readWorkflow();
   const audit = job(workflow);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
@@ -149,6 +150,7 @@ test('toolbar setup preserves all 17 families, bounded jobs and exact-head evide
     { shard: 'binary-and-buttons', families: 'button,toggle,switch,checkbox' },
     { shard: 'popup-boundaries', families: 'dropdown-menu,select,dialog' },
     { shard: 'intent-and-tabs', families: 'tooltip,hover-card,tabs' },
+    { shard: 'naming-and-disclosures', families: 'label,collapsible,accordion,field' },
     {
       shard: 'passive-and-editors',
       families: 'badge,card,skeleton,separator,spinner,textarea,scroll-area',
@@ -173,11 +175,32 @@ test('toolbar setup preserves all 17 families, bounded jobs and exact-head evide
 // deadline remain unchanged. This contract runs before native calibration.
 const calibrationPath = 'apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts';
 function assertCalibrationStartupBound(source) {
-  const hook = source.match(/beforeAll\(async \(\) => \{([\s\S]*?)\n\}, ([\d_]+)\);/);
-  assert.ok(hook, 'The instrument startup hook must have an explicit finite allowance.');
-  assert.equal(Number(hook[2].replaceAll('_', '')), 30_000);
-  assert.equal((source.match(/beforeAll\(/g) ?? []).length, 1);
-  assert.equal((hook[1].match(/await launchBrowser\(\)/g) ?? []).length, 1);
+  const file = ts.createSourceFile(calibrationPath, source, ts.ScriptTarget.Latest, true);
+  assert.equal(file.parseDiagnostics.length, 0, 'The calibration source must parse.');
+  const hooks = [];
+  const visit = (node) => {
+    if (
+      ts.isCallExpression(node) &&
+      ts.isIdentifier(node.expression) &&
+      node.expression.text === 'beforeAll'
+    ) {
+      hooks.push(node);
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(file);
+  assert.equal(hooks.length, 1);
+  // Parse the actual call boundary: a regex can consume a later timed test
+  // when the startup timeout is missing, incorrectly accepting that mutation.
+  const hook = hooks[0];
+  assert.equal(hook.arguments.length, 2, 'The startup hook must have its own finite allowance.');
+  const [callback, timeout] = hook.arguments;
+  assert.ok(ts.isArrowFunction(callback) && ts.isBlock(callback.body));
+  assert.ok(callback.modifiers?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword));
+  assert.equal(callback.parameters.length, 0);
+  assert.ok(ts.isNumericLiteral(timeout));
+  assert.equal(Number(timeout.text), 30_000);
+  assert.equal((callback.body.getText(file).match(/await launchBrowser\(\)/g) ?? []).length, 1);
   assert.doesNotMatch(source, /hookTimeout\s*:|vi\.setConfig|testTimeout\s*:/);
 }
 
@@ -191,9 +214,22 @@ for (const [label, change] of [
   ['global hook override', (s) => `${s}\nvi.setConfig({ hookTimeout: 30_000 });`],
 ]) {
   test(`instrument startup contract rejects ${label}`, () => {
-    assert.throws(
-      () => assertCalibrationStartupBound(change(readFileSync(calibrationPath, 'utf8'))),
-      assert.AssertionError
-    );
+    const source = readFileSync(calibrationPath, 'utf8');
+    const changed = change(source);
+    assert.notEqual(changed, source, 'The negative control must actually mutate the source.');
+    assert.throws(() => assertCalibrationStartupBound(changed), assert.AssertionError);
   });
 }
+
+test('a later timed test cannot supply the missing startup-hook allowance', () => {
+  const source = `beforeAll(async () => {
+  await launchBrowser();
+}, 30_000);
+it('a separately bounded calibration', async () => {
+}, 30_000);`;
+  assertCalibrationStartupBound(source);
+  assert.throws(
+    () => assertCalibrationStartupBound(source.replace('}, 30_000);', '});')),
+    assert.AssertionError
+  );
+});

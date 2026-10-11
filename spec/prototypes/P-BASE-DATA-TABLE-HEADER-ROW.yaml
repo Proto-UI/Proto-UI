@@ -1,0 +1,75 @@
+id: P-BASE-DATA-TABLE-HEADER-ROW
+type: prototype
+title: Data Table Header Row is a passive single-row structural composition
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft additive identity for a passive sorting-header container. The bounded design has independent review; source, exact types and five-family WC evidence are present. Independent implementation acceptance, shared entry integration and real-browser/native acceptance remain pending. Existing Base Table Row and Trigger definitions remain draft; this proposal promotes neither.
+  zh-CN: 新增 draft 被动排序表头容器身份，有界设计已独审，已有源码、精确类型及五家族 WC 证据；独立实现验收、共享入口集成与真实 browser/native 验收待完成。既有 Base Table Row 与 Trigger 定义仍为 draft，本提案不提升其生命周期。
+summary: A Table Row structural composition contains independent sorting-header controls without participating in their Trigger groups.
+statement:
+  en: DataTableHeaderRow is a passive single-row composition of the existing Base Table Row protocol. This is explicitly a derived Table Row composition, not a separate foundational protocol using a renamed protocol hook as generic substrate. D-BASE-PROTOTYPE-INDEPENDENCE-0001 remains draft and the derivation boundary requires independent review. Its current same-domain authored children determine topology. Sorting is owned by its DataTableHeader children and their DataTable root. It is not a Head, Body or RowGroup topology identity and installs no Trigger, selection, focus or record-slot behavior of its own.
+  zh-CN: DataTableHeaderRow 是既有 Base Table Row 协议的被动单行组合，它明确属于 Table Row 的派生组合，不是将协议 hook 改名当通用 substrate 的独立基础协议；D-BASE-PROTOTYPE-INDEPENDENCE-0001 仍为 draft，此派生边界须独立审查。同域 authored children 决定 topology。排序由子 DataTableHeader 与其 DataTable root 拥有。它不是 Head、Body 或 RowGroup topology 身份，也不安装自己的 Trigger、selection、focus 或 record-slot 行为。
+criteria:
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-STRUCTURE
+    text:
+      en: Reuse the existing Table Row prototype specification through the public defineAsHook setup mechanism; the Runtime owns invocation/capture/lifecycle and the caller explicitly returns the inherited render fragment. Do not directly invoke another prototype's setup, mutate its trace, or recreate its topology algorithm.
+      zh-CN: 通过公开 defineAsHook setup 机制复用既有 Table Row 原型定义，由 Runtime 负责 invocation/capture/lifecycle，调用者显式返回继承的 render fragment；不得直接调用另一个原型的 setup、改写 trace 或重写 topology 算法。
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-PASSIVE
+    text:
+      en: Claim only the inherited TABLE_STRUCTURE_FAMILY row role. Do not claim a selectable DATA_TABLE_FAMILY row slot, install asTrigger/asFocusable, or register selection/activation callbacks. Do not expose selected, focused, focusVisible or rowKey state.
+      zh-CN: 仅保留继承的 TABLE_STRUCTURE_FAMILY row role；不认领可选择的 DATA_TABLE_FAMILY row slot，不安装 asTrigger/asFocusable，不注册 selection/activation callback，不暴露 selected、focused、focusVisible 或 rowKey 状态。
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-CHILDREN
+    text:
+      en: Preserve the anonymous authored slot. Two or more sibling DataTableHeader controls form independent Trigger groups below this non-Trigger parent; each sorts only through its existing root-owned request. Never relax the continuous-chain rejection rule.
+      zh-CN: 保留匿名 authored slot。两个及以上并列 DataTableHeader 在此非 Trigger parent 下形成独立 Trigger group，各自仅通过既有 root-owned request 排序；不得放宽连续链拒绝规则。
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-PUBLIC-CONTRACT
+    text:
+      en: Props and Exposes are the existing empty TableRowProps/TableRowExposes shapes. The ordinary asHook public contract declares no authored state, event or nested authored hook handles. Dynamic header, index and selectedKeys inputs are not declared by this identity.
+      zh-CN: Props 与 Exposes 沿用既有空 TableRowProps/TableRowExposes 形状；普通 asHook public contract 不声明 authored state、event 或 nested authored hook handle。本身份不声明动态 header、index 或 selectedKeys 输入。
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-FAMILIES
+    text:
+      en: Each styled family applies only its own existing static row recipe to this passive behavior. Selection, focus and pressed conditional recipes from selectable rows must not be copied. No Web markup, geometry or inline DOM mutation enters the Base protocol.
+      zh-CN: 各样式家族仅投影本家现有静态 row recipe，不复制可选择行的 selection、focus 或 pressed 条件样式；Base 协议不引入 Web markup、geometry 或 inline DOM mutation。
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-COMPATIBILITY
+    text:
+      en: Existing DataTableRow.header remains a runtime record-slot policy with its existing key/selection/focus behavior; it never retracts that Row's setup-time Trigger identity. It cannot serve as a container for multiple direct Trigger children. Migrate official examples/docs to the new static composition and explicitly document this legacy limitation rather than claiming the old input is repaired or silently freezing its value.
+      zh-CN: 既有 DataTableRow.header 保留 runtime record-slot policy 及原 key/selection/focus 行为，不撤销 Row 的 setup-time Trigger 身份；它不能承载多个直接 Trigger 子项。官方示例/文档迁移到新静态组合，并明确旧用法限制，不宣称该旧输入已修好，也不静默冻结其值。
+inherits:
+  prototypes: [P-BASE-TABLE-ROW]
+relates:
+  decisions: [D-BASE-PROTOTYPE-INDEPENDENCE-0001]
+dependsOn:
+  prototypes: [P-BASE-TABLE-ROW]
+  contracts:
+    [
+      C-TABLE-STRUCTURE-0001,
+      C-AS-HOOK-0001,
+      C-AS-HOOK-0002,
+      C-AS-HOOK-0003,
+      C-AS-HOOK-0004,
+      C-AS-HOOK-0008,
+      C-AS-TRIGGER-0001,
+      C-PROPS-0002,
+    ]
+  modules: [M-TABLE-STRUCTURE-0001]
+openQuestions:
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-Q-ACCEPTANCE
+    question:
+      en: Have legal asHook reuse, exact empty public handles, all five family entries and two-header real-browser journeys received independent acceptance?
+      zh-CN: 合法 asHook 复用、准确空 public handle、五家族入口与双表头真实浏览器旅程是否完成独立验收？
+    blocks: [activation:P-BASE-DATA-TABLE-HEADER-ROW]
+  - id: P-BASE-DATA-TABLE-HEADER-ROW-Q-PARENT-CATALOG
+    question:
+      en: The existing DataTable root/header/row composition has no cataloged prototype identity in the audited tree. How will its broader controlled and compatibility semantics be admitted separately without claiming this narrow structural repair covers them?
+      zh-CN: 被审树中的 DataTable root/header/row 组合尚无 cataloged prototype identity，其更广受控及兼容语义如何另行准入，且不将本窄结构修复冒称为覆盖这些语义？
+    blocks: [activation:P-BASE-DATA-TABLE-HEADER-ROW]
+verifies:
+  tests: [T-BASE-DATA-TABLE-HEADER-ROW-0001]
+sources:
+  - path: packages/prototypes/base/src/data-table/header-row.proto.ts
+  - path: packages/prototypes/base/test/data-table-header-row.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Proposed a passive header-row composition after actual two-column Trigger-branch failure; independent review and implementation pending.

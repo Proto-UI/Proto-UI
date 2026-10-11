@@ -52,7 +52,8 @@ export function allowOwnRequest(url, baseUrl) {
 
 /** Fetch only the admitted request; never let Chromium or APIRequest follow a redirect. */
 export async function routeOwnResponse(route, baseUrl, recordFailure) {
-  const url = route.request().url();
+  const request = route.request();
+  const url = request.url();
   if (!allowOwnRequest(url, baseUrl) || !/^https?:/.test(url)) {
     recordFailure({ kind: 'external-request', url: safeEvidenceURL(url) });
     await route.abort('blockedbyclient');
@@ -62,7 +63,20 @@ export async function routeOwnResponse(route, baseUrl, recordFailure) {
   try {
     // Route.continue() does not re-enter this handler for redirected requests.
     // The locked Playwright API returns the original 30x when maxRedirects=0.
-    response = await route.fetch({ maxRedirects: 0, maxRetries: 0, timeout: 30_000 });
+    // Each admitted asset owns one connection. The shared Playwright HTTP pool
+    // must not reuse an idle socket closed by the owned preview. Preserve the
+    // original request headers, replacing every case spelling of Connection.
+    const headers = Object.fromEntries(
+      Object.entries(await request.allHeaders()).filter(
+        ([name]) => name.toLowerCase() !== 'connection'
+      )
+    );
+    response = await route.fetch({
+      headers: { ...headers, connection: 'close' },
+      maxRedirects: 0,
+      maxRetries: 0,
+      timeout: 30_000,
+    });
     const status = response.status();
     if (status >= 300 && status < 400) {
       recordFailure({

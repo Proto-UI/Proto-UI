@@ -1,6 +1,6 @@
 // packages/modules/rule/src/intent-builder.ts
 import type { IntentBuilder, RuleIntent, RuleOp, StateIntentBuilder } from './types';
-import { assertTwTokenV0 } from '@proto.ui/core';
+import { assertTwTokenV0, snapshotMaterialCandidate } from '@proto.ui/core';
 import type { StyleHandle, OwnedStateHandle, BorrowedStateHandle } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
 
@@ -9,6 +9,14 @@ export function createIntentBuilder<Props extends PropsBaseType = PropsBaseType>
 
   const builder: IntentBuilder<Props> = {
     feedback: {
+      material: {
+        use(candidate) {
+          ops.push({
+            kind: 'feedback.material.use',
+            candidate: snapshotMaterialCandidate(candidate),
+          });
+        },
+      },
       style: {
         use: (...handles: StyleHandle[]) => {
           for (const handle of handles) {

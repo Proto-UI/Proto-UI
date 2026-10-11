@@ -1,0 +1,15 @@
+# Field public boundary and MDX repair
+
+Date: 2026-10-07. Separate successor to frozen Field/R1R2 and forms packets; no original packet or joint integration worktree was modified.
+
+The integrator's broad exact-candidate run found three real failures: private package entries in the public CLI registry despite sourceOnly flags, the unmapped Field BOUNDS evidence case, and an ordinary Brutalist Field validity readout introducing font-mono. Root's actual documentation route additionally exposed malformed MDX literal JSON. Repair retained every existing gate.
+
+- Partition the complete inventory into public COMPONENT_REGISTRY and explicit WORKSPACE_COMPONENT_REGISTRY using the existing sourceOnly admission flag. The general resolver still finds source-only entries so default/installed generation gives its explicit refusal instead of silently treating them as unknown. Workspace generation remains complete for all four Web adapters. The unchanged public package gate passes; future sourceOnly forms entries follow the same partition automatically.
+- Verified Brutalist Accordion, Collapsible and Label remain public (sourceOnly=false); Brutalist Field remains workspace-only. Private Bootstrap/Liquid Field, Select and Text remain unavailable to installed generation.
+- Map the BOUNDS case to two new actual Field tests: no Form submission/reset/serialization/hidden controls; validation reset retains the value, and asynchronous execution waits for a consumer result without making a network call.
+- Ordinary Field validity uses font-sans and Field Label does not force uppercase. The unchanged Brutalist reference gate exposed uppercase immediately after the monospace fix, so that drift was repaired too. The forms follow-on removes forced uppercase from its Legend/group Label. Generic Text's explicit monospace option remains intact.
+- Compile all thirty bilingual Field/Fieldset/CheckboxGroup MDX pages with the actual @mdx-js/mdx parser. Twenty initially failed parse; the other JSON-shaped expressions were also encoded as literal inline code to prevent runtime evaluation. All thirty now parse. A dedicated documentation test preserves imports/JSX and requires these literal protocol examples to be code. Field pages are mandatory now; forms pages become mandatory when their Base sources are present.
+
+Verification: forty targeted tests across eight suites pass with an isolated temporary Git index that includes the candidate's new source paths (catalog evidence checks require tracked inventory). Public Surface, source-only default rejection, Select/Text/Field facades, Brutalist reference tokens, Field boundary tests and catalog evidence integrity all retain their original assertions. MDX compilation/literal checks pass thirty of thirty. Generated Brutalist inventories were regenerated using the canonical generator, not hand-edited; the final integrated union must regenerate them again after forms joins.
+
+The packet is source/evidence repair only. Native browser/AT, physical GPUI and optical acceptance remain open; the verified local Chromium socket EPERM was not bypassed. No Form submission/reset claim is made.

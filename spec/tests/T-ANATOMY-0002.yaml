@@ -34,7 +34,30 @@ cases:
     covers:
       - C-ANATOMY-0009-E
     expectation: target-bound-part-view-method-invocation
+  - id: T-ANATOMY-0002-CASE-TERMINAL-ISOLATION
+    title: Parent-first terminal disposal cannot transiently adopt nested parts into an outer domain
+    covers:
+      - C-ANATOMY-0005-B
+      - C-ANATOMY-0005-C
+      - C-ANATOMY-0005-E
+    expectation: terminal-domain-boundary-isolation
 implementations:
+  - id: module-anatomy-terminal-domain
+    kind: module-test
+    status: passing
+    path: packages/modules/anatomy/test/terminal-domain-retirement.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0002-CASE-TERMINAL-ISOLATION
+  - id: website-accordion-terminal-domain
+    kind: adapter-test
+    status: passing
+    path: apps/www/src/content/docs/accordion-demo-teardown.test.ts
+    required: true
+    consumesCases:
+      - T-ANATOMY-0002-CASE-TERMINAL-ISOLATION
+    notes:
+      - Uses all four real Adapter renderers with the original p-3 demo recipe; repeated parent teardown and reopening must produce no unhandled lifecycle errors. Native geometry is separate evidence.
   - id: module-anatomy-impl-spec
     kind: module-test
     status: passing
@@ -68,6 +91,7 @@ verifies:
         - C-ANATOMY-0005-B
         - C-ANATOMY-0005-C
         - C-ANATOMY-0005-D
+        - C-ANATOMY-0005-E
     - id: C-ANATOMY-0008
       anchors:
         - C-ANATOMY-0008-A
@@ -82,6 +106,9 @@ verifies:
         - C-ANATOMY-0009-D
         - C-ANATOMY-0009-E
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added terminal domain isolation and four-Adapter nested teardown regression mapping.
   - version: 0.1.0
     change: introduced
     summary: Added anatomy domain, runtime query, expose-read, and PartView safety test mapping.

@@ -3,6 +3,9 @@ import fs from 'node:fs';
 import { parse as parseYaml } from 'yaml';
 import { test } from 'node:test';
 import {
+  BODY_HASH_NORMALIZATION,
+  governanceBodyHash,
+  normalizeLivePullRequest,
   collectDependencyOwners,
   governanceFacts,
   hasGovernanceDrift,
@@ -216,6 +219,7 @@ test('live Issues endpoint rejects every own pull_request marker while retaining
     node_id: 'I_fixture',
     html_url: 'https://github.com/Proto-UI/Proto-UI/issues/420',
     title: 'Website',
+    body: null,
     state: 'open',
     state_reason: null,
     updated_at: '2026-10-01T00:00:00Z',
@@ -228,6 +232,7 @@ test('live Issues endpoint rejects every own pull_request marker while retaining
     nodeId: 'I_fixture',
     url: raw.html_url,
     title: 'Website',
+    bodySha256: governanceBodyHash(null),
     state: 'OPEN',
     stateReason: null,
     updatedAt: raw.updated_at,
@@ -246,6 +251,7 @@ test('live Issues endpoint rejects every own pull_request marker while retaining
 function comparisonFixture() {
   return {
     schemaVersion: 1,
+    bodyHashNormalization: BODY_HASH_NORMALIZATION,
     repository: 'Proto-UI/Proto-UI',
     issues: [
       {
@@ -253,6 +259,7 @@ function comparisonFixture() {
         nodeId: 'I-377',
         url: 'https://github.com/Proto-UI/Proto-UI/issues/377',
         title: 'Coverage',
+        bodySha256: governanceBodyHash('Coverage criteria'),
         state: 'OPEN',
         stateReason: null,
         updatedAt: '2026-09-27T00:53:27Z',
@@ -268,6 +275,7 @@ function comparisonFixture() {
         nodeId: 'PR-580',
         url: 'https://github.com/Proto-UI/Proto-UI/pull/580',
         title: 'Docs',
+        bodySha256: governanceBodyHash('Docs acceptance'),
         state: 'MERGED',
         updatedAt: '2026-09-01T00:00:00Z',
         headSha: 'a'.repeat(40),
@@ -367,4 +375,56 @@ test('explicit reconciliation retains the real new observation timestamp', () =>
   });
   assert.equal(result.issues[0].updatedAt, '2026-10-06T17:14:14Z');
   assert.equal(hasGovernanceDrift(current, result), false);
+});
+
+test('body hashing normalizes only CRLF and explicit null/empty, preserving Markdown bytes', () => {
+  assert.equal(governanceBodyHash(null), governanceBodyHash(''));
+  assert.equal(governanceBodyHash('a\r\nb'), governanceBodyHash('a\nb'));
+  for (const body of ['a\nb ', ' a\nb', 'a\n\nb', 'a\rb'])
+    assert.notEqual(governanceBodyHash(body), governanceBodyHash('a\nb'));
+  for (const body of [undefined, 1, {}, false])
+    assert.throws(() => governanceBodyHash(body), /string or null/);
+});
+for (const collection of ['issues', 'pullRequests']) {
+  test(`${collection} body edits fail even at an unchanged observation timestamp`, () => {
+    const current = comparisonFixture();
+    const live = structuredClone(current);
+    live[collection][0].bodySha256 = governanceBodyHash('New acceptance criteria');
+    assert.equal(hasGovernanceDrift(current, live), true);
+  });
+}
+test('legacy snapshots require explicit body-baseline migration without inventing prior coverage', () => {
+  const current = comparisonFixture();
+  const legacy = structuredClone(current);
+  delete legacy.bodyHashNormalization;
+  for (const row of [...legacy.issues, ...legacy.pullRequests]) delete row.bodySha256;
+  assert.equal(hasGovernanceDrift(legacy, current), true);
+  assert.equal(hasGovernanceDrift(legacy, legacy), true);
+  assert.equal(hasGovernanceDrift(current, current), false);
+});
+test('body digest and normalization metadata fail closed when malformed', () => {
+  for (const digest of [undefined, null, '', 'a'.repeat(63), 'A'.repeat(64)]) {
+    const current = comparisonFixture();
+    current.issues[0].bodySha256 = digest;
+    assert.throws(() => governanceFacts(current), /body digest/);
+  }
+  const current = comparisonFixture();
+  current.bodyHashNormalization = 'trimmed';
+  assert.throws(() => governanceFacts(current), /normalization/);
+});
+test('raw pull request normalization includes its body rather than relying on updatedAt', () => {
+  const raw = {
+    number: 580,
+    node_id: 'PR580',
+    html_url: 'https://github.com/Proto-UI/Proto-UI/pull/580',
+    title: 'Docs',
+    body: 'Acceptance\r\n- Keep criteria',
+    state: 'closed',
+    merged_at: '2026-09-01T00:00:00Z',
+    updated_at: '2026-09-01T00:00:00Z',
+    head: { sha: 'a'.repeat(40) },
+    merge_commit_sha: 'b'.repeat(40),
+  };
+  assert.equal(normalizeLivePullRequest(580, raw).bodySha256, governanceBodyHash(raw.body));
+  assert.throws(() => normalizeLivePullRequest(580, { ...raw, body: undefined }), /missing body/);
 });

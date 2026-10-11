@@ -8,6 +8,8 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { validateSpecEntity } from '@proto.ui/spec-schema';
+import { getSpecLifecycleReport } from '@proto.ui/spec-engine';
+import { loadSpecLifecyclePlan, loadSpecWorkspaceFromDirectory } from '@proto.ui/spec-engine/node';
 import { launchBrowser } from '../../www/src/content/docs/zh-cn/browser-harness';
 
 type Browser = Awaited<ReturnType<typeof launchBrowser>>;
@@ -18,8 +20,15 @@ let output = '';
 const contractId = 'C-A11Y-PART-RELATIONSHIP-0001';
 const testId = 'T-A11Y-PART-RELATIONSHIP-0001';
 const version = '0.3.0-alpha.1';
+let expectedRecordedDispositions: string;
 
 beforeAll(async () => {
+  // The UI reports the current version's full catalog, not the original 11-row slice.
+  const workspace = await loadSpecWorkspaceFromDirectory(path.join(process.cwd(), 'spec'));
+  const plan = await loadSpecLifecyclePlan(process.cwd(), version);
+  const { summary } = getSpecLifecycleReport(workspace, version, plan);
+  expect(workspace.issues).toEqual([]);
+  expectedRecordedDispositions = `${summary.reviewedDrafts} / ${summary.drafts}`;
   baseUrl = process.env.PROTO_UI_WORKSPACE_BASE_URL ?? '';
   if (!baseUrl) {
     const port = await new Promise<number>((resolve, reject) => {
@@ -190,7 +199,7 @@ describe.sequential('Workspace lifecycle review projection', () => {
         expect(await panel.innerText()).toContain('未评审草案');
         expect(await panel.innerText()).toContain('保留 draft，等待对应 contract 的独立稳定准入');
         expect(await panel.innerText()).toContain('不等于测试执行结果或稳定性批准');
-        expect(await panel.locator('dd').first().innerText()).toMatch(/^11 \/ \d+$/);
+        expect(await panel.locator('dd').first().innerText()).toBe(expectedRecordedDispositions);
         const screenshotDir = process.env.PROTO_UI_LIFECYCLE_SCREENSHOT_DIR;
         if (screenshotDir) {
           await mkdir(screenshotDir, { recursive: true });
@@ -219,7 +228,9 @@ describe.sequential('Workspace lifecycle review projection', () => {
         await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^0 \/ \d+$/);
         expect(await panel.innerText()).not.toContain('Remain draft');
         await page.getByRole('combobox', { name: 'To', exact: true }).selectOption(version);
-        await expect.poll(() => panel.locator('dd').first().innerText()).toMatch(/^11 \/ \d+$/);
+        await expect
+          .poll(() => panel.locator('dd').first().innerText())
+          .toBe(expectedRecordedDispositions);
         expect(await panel.innerText()).toContain('Unreviewed drafts');
         expect(await panel.evaluate((el) => el.scrollWidth - el.clientWidth)).toBeLessThanOrEqual(
           0

@@ -1,0 +1,50 @@
+id: P-LIQUID-GLASS-TABS
+type: prototype
+title: Liquid Glass Tabs root directly projects the Base Tabs protocol
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Draft extension inherits the existing draft Base Tabs definition; exact-commit native interaction/paint, generated preset and packed-consumer resource proof, and independent admission remain incomplete. Cataloging does not promote Base or family guarantees.
+summary: Direct Liquid Glass root with inherited Base ownership and a separately bounded family appearance.
+statement:
+  en: The Root is the sole selected-value and request owner. Preserve Base value/defaultValue, orientation, activationMode, value/valueChange exposes, controlled request versus accepted truth, same-domain context, anatomy and teardown. Consume asTabsRoot once; do not introduce a second selection owner or a cross-family fallback.
+criteria:
+  - id: P-LIQUID-GLASS-TABS-BASE-INHERITANCE
+    text:
+      en: The Root is the sole selected-value and request owner. Preserve Base value/defaultValue, orientation, activationMode, value/valueChange exposes, controlled request versus accepted truth, same-domain context, anatomy and teardown. Consume asTabsRoot once; do not introduce a second selection owner or a cross-family fallback.
+  - id: P-LIQUID-GLASS-TABS-DIRECT-ENTRY
+    text:
+      en: Expose the independently defined liquid-glass-tabs-root prototype and typed tabsRoot export through @proto.ui/prototypes-liquid-glass/tabs. This is a private source-only entry; registry publication or unsupported Compiler/non-Web admission must not be inferred.
+  - id: P-LIQUID-GLASS-TABS-VISUAL-DEFAULT
+    text:
+      en: Provide a shrinkable vertical grouping of the List and Content with readable inherited foreground. The Root has no activation surface.
+openQuestions:
+  - id: P-LIQUID-GLASS-TABS-Q-ADMISSION
+    question:
+      en: When do exact-source native interaction and same-state screenshots, generated/published-resource closure and independent review support admission?
+    blocks:
+      - activation:P-LIQUID-GLASS-TABS
+sources:
+  - path: spec/prototypes/P-BASE-TABS.yaml
+  - path: packages/prototypes/liquid-glass/src/tabs/root.proto.ts
+  - path: packages/prototypes/liquid-glass/src/tabs/index.ts
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS
+verifies:
+  tests:
+    - T-RUNTIME-TABS-APPEARANCE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Catalog inherited Base responsibilities and family appearance independently from source realization; retain draft evidence gates.
+tags:
+  - prototype
+  - liquid-glass
+  - tabs
+  - root
+  - projection

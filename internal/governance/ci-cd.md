@@ -111,6 +111,9 @@ These tiers do not control the real npm publish set. Global exact-version govern
 - `pnpm build:packages`
 - `pnpm check:package-manifests`
 - `pnpm check:package-budgets`
+- `pnpm check:package-budgets:strict`
 - `pnpm analysis:monorepo --benchmark --out <path>`
 
 There is no package-local real-publish shortcut. Package-local fixes enter the next global release train.
+
+During the explicitly authorized Finf rapid-development phase, `check:package-budgets` reports size overruns as advisory while retaining the original budgets and failed comparisons. Build/measurement errors still fail. Use `check:package-budgets:strict` for strict enforcement; see the [scope, 68-goal expiry and restoration duty](finf-package-budgets.md).

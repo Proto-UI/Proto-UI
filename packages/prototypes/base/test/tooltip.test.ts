@@ -206,6 +206,28 @@ describe('prototypes/base: tooltip group', () => {
     expect(second.content.getExposes().isPresent.get()).toBe(false);
   });
 
+  it('restores cold delay after the active root is removed', async () => {
+    vi.useFakeTimers();
+    const group = new TooltipGroupElement();
+    setElementProps(group, { openDelay: 100, closeDelay: 0, skipDelay: 50 });
+    document.body.appendChild(group);
+    const first = appendTooltip(group);
+    const second = appendTooltip(group);
+    await flushViewReconciliation();
+    first.root.getExposes().openTooltip();
+    await advance(0);
+    expect(first.root.getExposes().open.get()).toBe(true);
+    first.root.remove();
+    await advance(0);
+    second.trigger.dispatchEvent(new Event('pointerenter'));
+    await advance(0);
+    expect(second.root.getExposes().open.get()).toBe(false);
+    await advance(99);
+    expect(second.root.getExposes().open.get()).toBe(false);
+    await advance(1);
+    expect(second.root.getExposes().open.get()).toBe(true);
+  });
+
   it('requests the previous controlled owner to close without mutating it', async () => {
     vi.useFakeTimers();
     const group = new TooltipGroupElement();

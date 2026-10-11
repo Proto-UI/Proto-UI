@@ -1,0 +1,300 @@
+{
+  "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+  "sourceTree": "04e0d02550fe59cf60ed5a7d2f711f44ed8a20ab",
+  "base": "48b6f1bf6def5ffe1d1a7c34be91d670b1e7a077",
+  "scope": "19 reviewed source paths; bounded WIP, 0/68 full acceptance",
+  "recovery": "These executions occurred after the 2026-10-09 14:03 UTC workspace replacement; old missing logs are not reconstructed as execution evidence.",
+  "functional": {
+    "files": 186,
+    "tests": 1355,
+    "nativeExclusions": ["packages/adapters/web-component/test/shadow-closeout.browser.test.ts"]
+  },
+  "logs": {
+    "governance.log": {
+      "name": "governance",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": [
+        "node",
+        "--test",
+        "scripts/test/run-runtime-tests.test.mjs",
+        "scripts/release/test/liquid-card-candidate-workflow.test.mjs"
+      ],
+      "startedAt": "2026-10-09T14:23:08.125419+00:00",
+      "finishedAt": "2026-10-09T14:23:15.122655+00:00",
+      "exitCode": 0,
+      "bytes": 11327,
+      "sha256": "895f3e42926077096bae16e165c6e0f4c709202e49ef711f09ae50fd2fd8e2d5"
+    },
+    "functional.log": {
+      "name": "functional",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "packages/adapters/web-component/test",
+        "packages/adapters/vue2/test",
+        "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "packages/modules/feedback/test/deferred-view-sink.test.ts",
+        "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+        "apps/www/src/components/library-liquid-scene.test.ts",
+        "--exclude",
+        "packages/adapters/web-component/test/shadow-closeout.browser.test.ts",
+        "--minWorkers=1",
+        "--maxWorkers=1",
+        "--reporter=default",
+        "--reporter=json",
+        "--outputFile=/workspace/scratch/3ca1e20addac/finf-post48b-union-evidence/functional-report.json"
+      ],
+      "startedAt": "2026-10-09T14:23:15.122944+00:00",
+      "finishedAt": "2026-10-09T14:25:25.987358+00:00",
+      "exitCode": 0,
+      "bytes": 38151,
+      "sha256": "1dbb1ffb11fee95522537ce757e038c21003299a877303c34b5ab7956a756519"
+    },
+    "workspace-types.log": {
+      "name": "workspace-types",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": [
+        "node",
+        "node_modules/typescript/bin/tsc",
+        "-p",
+        "tsconfig.workspace.json",
+        "--noEmit"
+      ],
+      "startedAt": "2026-10-09T14:25:25.987803+00:00",
+      "finishedAt": "2026-10-09T14:25:51.020412+00:00",
+      "exitCode": 0,
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "public-build.log": {
+      "name": "public-build",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/build/public-packages.mjs"],
+      "startedAt": "2026-10-09T14:25:51.020737+00:00",
+      "finishedAt": "2026-10-09T14:26:57.231742+00:00",
+      "exitCode": 0,
+      "bytes": 2686,
+      "sha256": "f6d388829d0eb730d98ca40dedca88fa3f4520b9ec8c06c5ad293fa45c269012"
+    },
+    "budgets-strict.log": {
+      "name": "budgets-strict",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json"],
+      "startedAt": "2026-10-09T14:26:57.232039+00:00",
+      "finishedAt": "2026-10-09T14:26:58.201440+00:00",
+      "exitCode": 1,
+      "bytes": 4212,
+      "sha256": "9b6c64abaf7c941e02e881d7de4bcc974855cd850861bf613a0a8a05c169a45d"
+    },
+    "budgets-finf.log": {
+      "name": "budgets-finf",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/analysis/package-budgets.mjs", "--json", "--finf-development"],
+      "startedAt": "2026-10-09T14:26:58.201805+00:00",
+      "finishedAt": "2026-10-09T14:26:59.144647+00:00",
+      "exitCode": 0,
+      "bytes": 5117,
+      "sha256": "f087c4d1b664fd6e1cd56e26218b0280113d32782ee77a1aaadb639170eeb079"
+    },
+    "canonical.log": {
+      "name": "canonical",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T14:28:21.458134+00:00",
+      "finishedAt": "2026-10-09T14:28:22.544639+00:00",
+      "exitCode": 0,
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    },
+    "source-wall.log": {
+      "name": "source-wall",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "startedAt": "2026-10-09T14:28:22.544915+00:00",
+      "finishedAt": "2026-10-09T14:30:28.325404+00:00",
+      "exitCode": 1,
+      "bytes": 206,
+      "sha256": "d43acd9d555c7980898b783c1050aba00b4869a89a60d65484218d140ca9dab4"
+    },
+    "liquid-build.log": {
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": [
+        "node",
+        "../../apps/www/node_modules/astro/astro.js",
+        "build",
+        "--config",
+        "./astro.config.mjs"
+      ],
+      "startedAt": "2026-10-09T14:27:22.882849+00:00",
+      "finishedAt": "2026-10-09T14:27:26.374910+00:00",
+      "exitCode": 0,
+      "bytes": 1375,
+      "sha256": "9dbc92f0970c0404b0b5bc834ad7c74affad762d1f04d3b5b5fa17a83cbe5aaa"
+    },
+    "contrast-controls.log": {
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": [
+        "node",
+        "--test",
+        "apps/www/scripts/contrast-report-journal.test.mjs",
+        "apps/www/scripts/contrast-audit-plan.test.mjs",
+        "apps/www/scripts/contrast-anatomy.test.mjs",
+        "scripts/test/contrast-stroke-calibration.test.mjs",
+        "scripts/test/brutalist-contrast-toolbar.test.mjs"
+      ],
+      "startedAt": "2026-10-09T14:32:13.289582+00:00",
+      "finishedAt": "2026-10-09T14:32:15.371552+00:00",
+      "exitCode": 0,
+      "bytes": 16643,
+      "sha256": "256344915e9845f10c8d6a65143a83aaa620dda1a0da20f317a262389e992465"
+    },
+    "source-wall-restored.log": {
+      "name": "source-wall-restored",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/coverage-matrices/check-coverage-matrices.mjs"],
+      "exitCode": 0,
+      "recovery": "Exact tracked eight-file docs evidence directory restored through git sparse-checkout add; no source edits or exemptions.",
+      "toolStartObservedBy": "2026-10-09T14:30:50Z",
+      "toolCompletionObservedAt": "2026-10-09T14:32:57Z",
+      "bytes": 36,
+      "sha256": "ca10fa4dfc2b0a4cbf64685d8f103240a45be832ebe16355f5eb17dca16361f4"
+    },
+    "proof-negative.log": {
+      "name": "proof-negative",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "--test", "scripts/coverage-matrices/test/prototype-coverage.test.mjs"],
+      "startedAt": "2026-10-09T14:33:08.545012+00:00",
+      "finishedAt": "2026-10-09T14:35:21.721754+00:00",
+      "exitCode": 0,
+      "bytes": 10712,
+      "sha256": "9560d84144a42e16408b2c505f7f1f350d7b61581877196dc670ad70580d4408"
+    },
+    "canonical-final.log": {
+      "name": "canonical-final",
+      "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+      "command": ["node", "scripts/coverage-matrices/prototype-coverage.mjs", "--check"],
+      "startedAt": "2026-10-09T14:35:21.722050+00:00",
+      "finishedAt": "2026-10-09T14:35:22.751273+00:00",
+      "exitCode": 0,
+      "bytes": 113,
+      "sha256": "51ee2fe3ba5dda9a8fc3574d616a638f541f98cf4689b75c50193c395a25dbca"
+    }
+  },
+  "sourceProvenance": {
+    "sourceA": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+    "sourceTree": "04e0d02550fe59cf60ed5a7d2f711f44ed8a20ab",
+    "base": "48b6f1bf6def5ffe1d1a7c34be91d670b1e7a077",
+    "paths": [
+      {
+        "path": ".github/workflows/liquid-elevation-control-evidence.yml",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "d0152ceb6e7c5050b72e64bb9b318c56efa303d6"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "5d64c1a6efdeff5309ecccb093e131134d07c2f0"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "5920931937064e30b0df0b6cfdd7d82a22d1f5cd"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.test.ts",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "96c687e6a77d9c9b6a529caeee2fba09454e8cda"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/select-overflow-observation.ts",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "9a5558b512a9c77375f65ff0b9405a90054891d6"
+      },
+      {
+        "path": "experiments/liquid-elevation-control/README.md",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "835e96d8c44e4856f012600f42896f324002293e"
+      },
+      {
+        "path": "experiments/liquid-elevation-control/app/pages/index.astro",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "ef4a1eb6d82a7d2e6949c6eb8beb766d496fb5e9"
+      },
+      {
+        "path": "experiments/liquid-elevation-control/astro.config.mjs",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "429d91d02088c5502ca51fb0828b5d27fcdb1c80"
+      },
+      {
+        "path": "scripts/test/run-runtime-tests.test.mjs",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "8040b5d3dd6a86fb8fe81a0248d939d704d16b66"
+      },
+      {
+        "path": "scripts/test/runtime-test-plan.mjs",
+        "source": "858462c0c83a3d61c15c8d8462fbde912f8cfe94",
+        "blob": "88b0841d1838c037e8f55d9474c7e8a8c80374d2"
+      },
+      {
+        "path": "internal/records/2026-10-09-vue2-pending-visibility-repair.md",
+        "source": "66b8c845f0b467e79a8e059e6079f2f16bef21ca",
+        "blob": "30f93ba3bce824d429d8bc7885f1fc64b119c4b1"
+      },
+      {
+        "path": "packages/adapters/vue2/src/adapt.ts",
+        "source": "66b8c845f0b467e79a8e059e6079f2f16bef21ca",
+        "blob": "aed9a41a51e6d98a85d7dffef2d32d8e87307af3"
+      },
+      {
+        "path": "packages/adapters/vue2/test/view-ready-reopen.test.ts",
+        "source": "66b8c845f0b467e79a8e059e6079f2f16bef21ca",
+        "blob": "c5b1c12dd30f757461c62b2c5895479ec0749fe0"
+      },
+      {
+        "path": "apps/www/src/content/docs/zh-cn/contrast-probe.browser.test.ts",
+        "source": "d2c3479a3d7ecf32c3e6134ede43cad3a464e3de",
+        "blob": "343160200bff1ffe9430a2fa610992508c3c4459"
+      },
+      {
+        "path": "scripts/test/contrast-stroke-calibration.test.mjs",
+        "source": "d2c3479a3d7ecf32c3e6134ede43cad3a464e3de",
+        "blob": "a5cbeec779263c75bbdf367f5c342d01bc61a78c"
+      },
+      {
+        "path": "internal/records/2026-10-09-wc-initial-paint-acquisition-transaction.md",
+        "source": "365f6deafda39038e3b03fc6b1d54df956104420",
+        "blob": "e81125326aab44c55ab68a47bf972260636038fb"
+      },
+      {
+        "path": "packages/adapters/base/test/web-material-initial-paint.test.ts",
+        "source": "365f6deafda39038e3b03fc6b1d54df956104420",
+        "blob": "c660c4cf56b24879230ee6c4938cbf71e987b03c"
+      },
+      {
+        "path": "packages/adapters/web-component/src/adapt.ts",
+        "source": "365f6deafda39038e3b03fc6b1d54df956104420",
+        "blob": "f48af945d0869e6209a00c2d95ce3c27a1705555"
+      },
+      {
+        "path": "packages/adapters/web-component/test/visual-acquisition-transaction.test.ts",
+        "source": "365f6deafda39038e3b03fc6b1d54df956104420",
+        "blob": "9fa8e31ce03b240327a0edc31a0493f61500ee08"
+      }
+    ],
+    "sourceUnionExact": true,
+    "clean": true
+  },
+  "canonicalRefresh": {
+    "source": "567c5ef2389da40956ee58f6fcf4eb8be4ca4639",
+    "bindingCount": 4206,
+    "changedCandidateKeys": ["revision", "sourceBindingsObject", "sourceObjectProof"],
+    "bindingsEqual": true,
+    "otherTopLevelFieldsEqual": true
+  },
+  "native": "Not run for this source; official exact-head runs and screenshots remain required.",
+  "budget": "Strict failed, authorized advisory exit 0 retains withinBudgets false; no ceiling changes.",
+  "agent": "dot",
+  "modelTrace": "not measured \u2014 owner-authorized dot exemption (2026-10-06)"
+}

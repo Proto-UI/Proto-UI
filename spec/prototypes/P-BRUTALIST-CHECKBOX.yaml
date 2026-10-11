@@ -4,17 +4,12 @@ title: Brutalist Checkbox Root inherits Base Checkbox and layers a square check 
 status: draft
 since: 0.3.0-alpha.0
 summary: >-
-  Brutalist Checkbox Root inherits Base Checkbox ownership and projects the current square, hard-bordered control surface without creating a second value, activation, focus, event, form, or accessibility owner.
+  Brutalist Checkbox retains Base ownership and projects the pinned 16px outlined Neo control, with main-colored checked/mixed fill and a derived passive glyph.
 
 
 statement:
-  en: >-
-    Brutalist Checkbox Root is a draft semantic projection over Base Checkbox. Base retains checked and indeterminate ownership, activation, disabled behavior, focus, events, and accessibility. This layer adds only the current square geometry, paired fills, hard shadow, press, focus-visible, and disabled presentation. The already-public Brutalist package exports the family and its anatomy subpath, while proto-ui add intentionally has no Checkbox entry.
-
-
-  zh-CN: >-
-    Brutalist Checkbox Root 是 Base Checkbox 之上的 draft 语义投射。checked 与 indeterminate 所有权、activation、disabled、focus、event 与 accessibility 仍由 Base 持有；本层只增加当前 方形几何、成对 fill、硬阴影、pressed、focus-visible 与 disabled 呈现。已经公开的 Brutalist package 导出该 family 与 anatomy subpath，但 proto-ui add 刻意不提供 Checkbox 入口。
-
+  en: This draft inherits the single Base Checkbox value, activation, disabled, focus, event and accessibility owners. The pinned Neo 3306a802 checkbox.tsx supplies the 16px outline-based geometry and checked/mixed main fill. Root/Indicator public anatomy remains unchanged. Existing Proto UI disabled suppression and theme-aware focus ring are retained; no exact upstream API or complete visual parity is claimed.
+  zh-CN: 该 draft 继承唯一 Base Checkbox value、activation、disabled、focus、event 与 accessibility owner。固定 Neo 3306a802 checkbox.tsx 提供 16px outline 几何及 checked/mixed main fill；Root/Indicator 公开 anatomy 不变。保留既有 Proto UI disabled suppression 与 theme-aware focus ring，不声称完整上游 API 或视觉一致。
 
 criteria:
   - id: P-BRUTALIST-CHECKBOX-BASE-INHERITANCE
@@ -51,23 +46,13 @@ criteria:
 
   - id: P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE
     text:
-      en: >-
-        Root must project inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground outline-none select-none transition-none. The resting fill, content ink, and frame ink form one surface-paired bundle. It must use no gradient, glass, rounded-card, or soft-elevation treatment.
-
-
-      zh-CN: >-
-        Root 必须投射 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none border-2 bg-main text-main-foreground border-main-foreground outline-none select-none transition-none。静止态 fill、内容 ink 与 frame ink 构成同一个 surface-paired bundle。不得使用 gradient、glass、rounded-card 或 soft-elevation 处理。
-
+      en: Root projects flex size-4 shrink-0 items-center justify-center rounded-none outline-2 outline-border bg-transparent select-none transition-none. The 16px box uses an external 2px outline rather than an internal border; it has no resting main fill, outer shadow, gradient, glass or rounded-card treatment.
+      zh-CN: Root 投射 flex size-4 shrink-0 items-center justify-center rounded-none outline-2 outline-border bg-transparent select-none transition-none。16px box 使用外侧 2px outline，而非内部 border；静止态无 main fill、外侧阴影、gradient、glass 或 rounded-card。
 
   - id: P-BRUTALIST-CHECKBOX-STATE-PRESENTATION
     text:
-      en: >-
-        Checked while not indeterminate must atomically select bg-foreground text-background border-background; indeterminate takes visual precedence and retains the paired bg-main text-main-foreground border-main-foreground surface. No state may replace fill, content ink, or frame ink independently. Pressed removes the shadow, focus-visible applies the shared hard ring, and disabled applies pointer-events-none opacity-50.
-
-
-      zh-CN: >-
-        checked 且非 indeterminate 时必须原子选择 bg-foreground text-background border-background；indeterminate 在视觉上优先，并保留配对的 bg-main text-main-foreground border-main-foreground surface。任何 state 都不得独立替换 fill、内容 ink 或 frame ink。pressed 移除 shadow，focus-visible 使用共享硬 ring，disabled 使用 pointer-events-none opacity-50。
-
+      en: Checked or indeterminate selects bg-main text-main-foreground together; the Indicator retains mixed-glyph precedence. Unchecked returns to a transparent surface with the same outline. The existing theme-aware hard focus ring replaces the resting outline while visible. Disabled retains pointer-events-none opacity-50 and adds cursor-not-allowed. Press changes no geometry or shadow and owns no additional state. Upstream invalid styles remain omitted because this layer adds no validation owner.
+      zh-CN: checked 或 indeterminate 同时选择 bg-main text-main-foreground；Indicator 保留 mixed glyph 优先级。unchecked 回到透明底与相同 outline；既有 theme-aware 硬 focus ring 在可见时替换静止 outline。disabled 保留 pointer-events-none opacity-50 并加 cursor-not-allowed；press 不改变几何或阴影、不新增状态。因本层不新增 validation owner，仍不投射上游 invalid 样式。
 
   - id: P-BRUTALIST-CHECKBOX-ADMITTED-ANATOMY
     text:
@@ -89,6 +74,8 @@ sources:
   - path: packages/prototypes/brutalist/test/checkbox.test.ts
   - path: apps/www/src/content/docs/en/ui-libraries/brutalist/components/checkbox.mdx
   - path: apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/checkbox.mdx
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/checkbox.tsx
+    label: Pinned Neo source; SHA256 2b864431334ef4bcc47742deb03d5b8d0b8710d3c8d17cf5174ea73ad9cc0259
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
@@ -107,4 +94,18 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Introduced the draft Brutalist Checkbox Root projection with its public-package/no-CLI boundary.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Reconciled this draft presentation with exact pinned Neo source; retained Base semantics and explicitly bounded remaining parity and accessibility extensions.
 tags: [prototype, brutalist, neo-brutalist, visual, delta, checkbox]
+openQuestions:
+  - id: P-BRUTALIST-CHECKBOX-Q-HIT-AND-OUTLINE
+    question:
+      en: How can the source 16px outlined visual box preserve the existing activation target and supported cross-host frame color?
+      zh-CN: 源码16px outline视觉box如何保留现有activation target及受支持的跨宿主frame颜色？
+    context:
+      en: The successor retains the existing 20px hit box and 2px internal frame while colors and the passive glyph converge. Outline paint does not enlarge pointer hit testing. Direct shrink would reduce the target, and outline-border is currently reported unsupported by the real CSS service. A movement-only hit-envelope token is not a substitute. The 16px outline criterion stays planned until the owning capability is governed and actual geometry, hit testing and long-label composition are verified.
+      zh-CN: 后继在修配色和被动glyph时保留既有20px hit box与2px内部frame；outline paint不会扩大pointer命中，直接缩小会减小目标，且实际CSS service报告outline-border不受支持。movement-only hit-envelope token不能替代。owner能力治理并验证真实几何、命中与长label组合前，16px outline准则保持planned。
+    blocks:
+      - activation:P-BRUTALIST-CHECKBOX
+      - criterion:P-BRUTALIST-CHECKBOX#P-BRUTALIST-CHECKBOX-CURRENT-VISUAL-SURFACE

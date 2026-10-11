@@ -1,0 +1,23 @@
+---
+title: 'Command'
+description: '可搜索并发出操作意图的内联命令列表。'
+---
+
+import { PrototypePreviewer } from '@/components/PrototypePreviewer';
+
+可搜索并发出操作意图的内联命令列表。
+
+<PrototypePreviewer
+  demoId="demo-bootstrap-2-3-2-command"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+列表保持内联显示。Enter 或指针激活发出带选项的 execute；实际操作归应用处理，输入搜索不会执行操作。
+
+宿主管理真实单行编辑器。箭头导航保持输入焦点；IME 组合期间不选择。过滤依据 textValue 与 keywords，忽略大小写及重音。Empty 反映真实匹配数；禁用项不可提交。open、value、inputValue 分别支持受控请求；filter=false 允许调用方提供已过滤子项。重复值选项拒绝提交。
+
+组成: Root, Input, Content, Item, Empty.
+
+草稿源码；共享 Web A11y 活动后代投影、native/GPUI、编译器、消费、视觉及独立验收仍是独立要求。

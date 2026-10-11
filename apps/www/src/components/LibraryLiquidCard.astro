@@ -1,0 +1,219 @@
+---
+import LibraryCardPart from './LibraryCardPart.astro';
+import LibraryLiquidScene from './LibraryLiquidScene.astro';
+import StaticFamilyIcon from './StaticFamilyIcon.astro';
+import {
+  libraryHeadingProps,
+  libraryBodyProps,
+  libraryCaptionProps,
+} from './library-card-prototypes';
+
+interface Props {
+  library: {
+    name: string;
+    type: string;
+    status?: string;
+    description: string;
+    bestFor: string;
+    sourceLabel: string;
+    source: string;
+    sourceHref?: string;
+    author: string;
+    authorHref: string;
+    cta: string;
+    href: string;
+  };
+  bestForLabel: string;
+  prototypeAuthorLabel: string;
+}
+
+const { library, bestForLabel, prototypeAuthorLabel } = Astro.props;
+const contentSurfaceProps = {
+  variant: 'transparent',
+  radius: 'xl',
+  border: 'none',
+  elevation: 'none',
+} as const;
+const actionSurfaceProps = {
+  variant: 'outline',
+  radius: 'full',
+  border: 'none',
+  elevation: 'none',
+} as const;
+---
+
+<article
+  class="library-card library-card--liquid-candidate"
+  data-library="liquid-glass"
+  data-library-liquid-candidate
+  aria-labelledby="library-liquid-glass"
+>
+  <LibraryCardPart
+    part="liquid-glass-surface"
+    props={contentSurfaceProps}
+    class="library-card__surface"
+  >
+    <header class="library-card__header">
+      <LibraryCardPart
+        part="liquid-glass-text"
+        props={libraryCaptionProps}
+        class="library-card__kind"
+      >
+        {library.type}
+        {library.status && ` · ${library.status}`}
+      </LibraryCardPart>
+      <h2 id="library-liquid-glass">
+        <LibraryCardPart part="liquid-glass-text" props={libraryHeadingProps}>
+          {library.name}
+        </LibraryCardPart>
+      </h2>
+    </header>
+    <div class="library-card__content">
+      <p>
+        <LibraryCardPart part="liquid-glass-text" props={libraryBodyProps}>
+          {library.description}
+        </LibraryCardPart>
+      </p>
+      <p>
+        <LibraryCardPart part="liquid-glass-text" props={libraryCaptionProps}>
+          {bestForLabel} · {library.bestFor}
+        </LibraryCardPart>
+      </p>
+      <LibraryCardPart part="liquid-glass-text" props={{ ...libraryCaptionProps, tone: 'inherit' }}>
+        <dl class="library-card__credits">
+          <div>
+            <dt>{library.sourceLabel}</dt>
+            <dd>
+              {
+                library.sourceHref ? (
+                  <a href={library.sourceHref} target="_blank" rel="noreferrer">
+                    {library.source}{' '}
+                    <StaticFamilyIcon family="liquid-glass" name="arrow-up-right" />
+                  </a>
+                ) : (
+                  library.source
+                )
+              }
+            </dd>
+          </div>
+          <div>
+            <dt>{prototypeAuthorLabel}</dt>
+            <dd>
+              <a href={library.authorHref} target="_blank" rel="noreferrer">
+                {library.author}
+                <StaticFamilyIcon family="liquid-glass" name="arrow-up-right" />
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </LibraryCardPart>
+    </div>
+    <footer class="library-card__footer">
+      <LibraryLiquidScene>
+        <a href={library.href} data-library-action>
+          <!-- The wrapper identifies the actual Surface without adding a new
+               public attribute-forwarding API to LibraryCardPart. -->
+          <span class="library-card__optical" data-library-liquid-optical>
+            <LibraryCardPart
+              part="liquid-glass-surface"
+              candidateTag={true}
+              props={actionSurfaceProps}
+              class="library-card__action"
+            >
+              <LibraryCardPart
+                part="liquid-glass-text"
+                props={{ size: 'sm', weight: 'medium', tone: 'inherit' }}
+              >
+                {library.cta}
+                <StaticFamilyIcon family="liquid-glass" name="arrow-right" />
+              </LibraryCardPart>
+            </LibraryCardPart>
+          </span>
+        </a>
+      </LibraryLiquidScene>
+    </footer>
+  </LibraryCardPart>
+</article>
+
+<style>
+  /* This component owns its layout scope. Surface/Text own paint and type;
+     Gallery's scoped selectors do not cross this component boundary. */
+  .library-card {
+    container-type: inline-size;
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .library-card :global([data-library-part]) {
+    display: block;
+    min-width: 0;
+  }
+  .library-card :global(.library-card__surface) {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+  .library-card__header,
+  .library-card__content,
+  .library-card__footer {
+    min-width: 0;
+  }
+  .library-card :global(.library-card__kind) {
+    margin-bottom: 0.5rem;
+  }
+  h2,
+  p {
+    margin: 0;
+  }
+  .library-card__content {
+    display: grid;
+    gap: 1rem;
+  }
+  .library-card__credits {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+  }
+  .library-card__credits div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+  }
+  .library-card__credits dd {
+    margin: 0;
+  }
+  a {
+    color: inherit;
+    text-underline-offset: 0.2em;
+  }
+  [data-library-action] {
+    position: relative;
+    z-index: 1;
+    display: inline-block;
+    min-width: 0;
+    max-width: 100%;
+    text-decoration: none;
+  }
+  .library-card__optical {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .library-card :global(.library-card__action) {
+    padding: 0.75rem 1rem;
+    min-height: 2.75rem;
+  }
+  a:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 4px;
+  }
+  @container (max-width: 18rem) {
+    .library-card :global(.library-card__surface) {
+      padding-inline: min(1.5rem, 5cqi);
+    }
+    .library-card :global(.library-card__action) {
+      padding-inline: min(1rem, 5cqi);
+    }
+  }
+</style>

@@ -1,6 +1,15 @@
+import runtimeUrls from 'virtual:proto-ui/runtime-retry-urls';
+import { retryableModule } from './retryable-module';
 import type { RuntimeAPI } from './ids';
 import type * as ReactTypes from 'react';
 import { claimHostMount, releaseHostMount } from './host-mount';
+
+const importReact = retryableModule(() => import('react'), runtimeUrls.react);
+const reactDomModule = retryableModule(() => import('react-dom'), runtimeUrls.reactDom);
+const reactDomClientModule = retryableModule(
+  () => import('react-dom/client'),
+  runtimeUrls.reactDomClient
+);
 
 // Keep the React 18 reader runtime, but deliver the pinned pair through
 // the application's lazy assets. ReactDOM's peer resolves the same React
@@ -11,14 +20,17 @@ export async function loadReact(): Promise<{
   ReactDOM: any;
 }> {
   const [reactModule, reactDOMModule, reactDOMClient] = await Promise.all([
-    import('react'),
-    import('react-dom'),
-    import('react-dom/client'),
+    importReact(),
+    reactDomModule(),
+    reactDomClientModule(),
   ]);
   const React = (reactModule.default ?? reactModule) as unknown as typeof ReactTypes;
   // Client roots do not export commit/portal APIs. Keep the public DOM APIs
   // used by composed demos, with client createRoot/hydrateRoot entry points.
-  const ReactDOM = { ...reactDOMModule, ...reactDOMClient };
+  const ReactDOM = {
+    ...(reactDOMModule.default ?? reactDOMModule),
+    ...(reactDOMClient.default ?? reactDOMClient),
+  };
   return { React, ReactDOM };
 }
 

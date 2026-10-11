@@ -7,6 +7,15 @@ import * as tree from '../src/platform/instance-tree';
 const flush = async () => {
   for (let i = 0; i < 30; i++) await Promise.resolve();
 };
+const settlePortalConceal = async () => {
+  // The admitted portal paint barrier owns two rendering opportunities before
+  // view-epoch teardown; microtasks alone do not exercise that boundary.
+  await flush();
+  await new Promise<void>((resolve) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+  );
+  await flush();
+};
 for (const mode of [
   'normal',
   'old-focus-throw',
@@ -271,7 +280,8 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
         if (mode === 'close-to-detached-parent') host.remove();
         content.getExposes().actions.close();
       }
-      await flush();
+      if (mode === 'external-remove') await flush();
+      else await settlePortalConceal();
       if (mode === 'external-remove') {
         expect(content.isConnected).toBe(false);
         expect(Array.from(host.children)).not.toContain(content);

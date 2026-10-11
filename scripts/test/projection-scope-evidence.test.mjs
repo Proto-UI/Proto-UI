@@ -239,7 +239,7 @@ for (const family of ['shadcn', 'brutalist']) {
             `${family}-text-root`,
           ].sort()
         );
-        assert.equal(value.task.recipe.prototypeIds.length, 36);
+        assert.equal(value.task.recipe.prototypeIds.length, 37);
         await verify(value);
       } finally {
         value.close();
@@ -275,6 +275,22 @@ for (const family of ['shadcn', 'brutalist']) {
       }
     });
   }
+}
+
+for (const family of ['shadcn', 'brutalist']) {
+  test(`${family}: replacing a choice Label with old Text cannot satisfy the exact inventory`, async () => {
+    const value = fixture(family);
+    try {
+      const label = value.element.querySelector(
+        `[data-projection-prototype="${family}-label-root"]`
+      );
+      assert.ok(label);
+      label.setAttribute('data-projection-prototype', `${family}-text-root`);
+      await assert.rejects(() => verify(value));
+    } finally {
+      value.close();
+    }
+  });
 }
 
 for (const attribute of [
@@ -359,6 +375,67 @@ for (const mutation of [
         control.setAttribute('data-projection-generation', '6');
       if (mutation === 'detached-physical-control') control.remove();
       await assert.rejects(() => verify(value));
+    } finally {
+      value.close();
+    }
+  });
+}
+
+// Use the actual candidate capture selectors against the same source-built,
+// renderer-annotated gallery as the inventory controls above. This is a selector
+// contract check; visibility and font painting remain native-browser evidence.
+const captureSource = ts.createSourceFile(
+  'capture-homepage-evidence.ts',
+  fs.readFileSync(path.join(root, 'apps/www/scripts/capture-homepage-evidence.ts'), 'utf8'),
+  ts.ScriptTarget.Latest,
+  true
+);
+const selectorNames = new Set([
+  'HOME',
+  'commonFontSelectors',
+  'baselineFontSelectors',
+  'candidateFontSelectors',
+  'fontSelectors',
+]);
+const selectorDeclarations = captureSource.statements
+  .filter(
+    (node) =>
+      ts.isVariableStatement(node) &&
+      node.declarationList.declarations.some(
+        (declaration) =>
+          ts.isIdentifier(declaration.name) && selectorNames.has(declaration.name.text)
+      )
+  )
+  .map((node) => node.getText(captureSource))
+  .join('\n');
+const fontSelectorApi = vm.runInNewContext(
+  `${ts.transpileModule(selectorDeclarations, { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText}\n({ fontSelectors });`,
+  { revisionKind: 'candidate' }
+);
+for (const family of ['shadcn', 'brutalist']) {
+  test(`${family}: all 20 font probes include the actual migrated choice Labels`, () => {
+    const value = fixture(family, 'wc');
+    try {
+      assert.equal(fontSelectorApi.fontSelectors.length, 20);
+      const sample = fontSelectorApi.fontSelectors.find(
+        (sample) => sample.name === 'task-result-title'
+      );
+      assert.ok(sample);
+      const scopeElement = value.scope.elements[0];
+      scopeElement.parentElement.setAttribute('data-home-showcase', 'website-component-gallery');
+      const doc = scopeElement.ownerDocument;
+      const labels = [...doc.querySelectorAll(sample.selector)];
+      assert.equal(labels.length, 4, 'Every choice Label remains represented by the font probe.');
+      for (const label of labels) {
+        assert.equal(label.getAttribute('data-projection-prototype'), `${family}-label-root`);
+        assert.ok(label.textContent.trim().length > 0);
+        label.remove();
+      }
+      assert.equal(
+        doc.querySelectorAll(sample.selector).length,
+        0,
+        'Unrelated Text must not substitute for missing Labels.'
+      );
     } finally {
       value.close();
     }

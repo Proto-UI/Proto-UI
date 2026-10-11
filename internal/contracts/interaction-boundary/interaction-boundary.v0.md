@@ -167,7 +167,7 @@ The concrete API shape may vary, but its observable result must preserve:
 
 ### 4.2 Observation API
 
-`boundary.observe('pointer.press')` is a setup-only, idempotent request for a host pointer sample stream.
+`boundary.observe('pointer.press')` and `boundary.observe('focus.move')` are setup-only, idempotent requests for host pointer and proven-current-focus samples. Outside notifications identify their `observation`; manual `notify` may omit it. Web focus sampling uses focusin and current active-element proof, preserving multiple regions and owned children. Unsupported hosts produce no focus sample. Pointer/focus deduplication is scoped to a press until release/cancel or a fresh key/press; it never moves focus or treats historical FocusScope.hasFocused as current focus.
 
 The layering is normative:
 

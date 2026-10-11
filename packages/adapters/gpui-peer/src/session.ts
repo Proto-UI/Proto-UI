@@ -9,6 +9,7 @@ import {
   mergeTwTokensV0,
   type A11ySemanticObjectSnapshot,
   type EffectsPort,
+  type InstanceAssociations,
   type FocusRequestOptions,
   type Prototype,
   type StyleHandle,
@@ -55,7 +56,13 @@ import {
   FOCUS_SET_FOCUSABLE_CAP,
   FOCUS_TARGET_READY_CAP,
 } from '@proto.ui/module-focus';
+import {
+  CONTROL_LABEL_HOST_CAP,
+  CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-control-label';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { AVAILABLE_SPACE_HOST_CAP } from '@proto.ui/module-positioning';
+import { OVERLAY_TARGET_HOST_CAP } from '@proto.ui/module-overlay';
 import {
   HOST_PROTOCOL_VERSION,
   WireBoundaryError,
@@ -75,6 +82,8 @@ import {
 
 import { createPeerEventBus, type PeerBusEvent, type PeerBusRegistration } from './bus';
 import { serializeTemplate } from './template';
+import { createPeerControlLabelHost, type NativeScopeLookup } from './control-label';
+import { createPeerAvailableSpaceHost } from './available-space';
 
 export type PeerSessionArgs = {
   readonly sessionId: string;
@@ -91,6 +100,9 @@ export type PeerSessionArgs = {
   readonly schedule?: (task: () => void) => void;
   /** Reads the environment the host reported, for rules to read as meta. */
   readonly getMeta?: (key: string) => unknown;
+  /** Actual native tree identities, shared only by sessions on this connection. */
+  readonly nativeScope?: NativeScopeLookup;
+  readonly nativeA11yId?: (ref: object) => string;
   /** The order the host last reported it shows the sessions' views in. */
   readonly getOrder?: () => readonly string[];
 };
@@ -117,6 +129,7 @@ export type PeerSession = {
   readonly token: object;
   mount(): Promise<void>;
   setProps(props: WireRecord): void;
+  setAssociations(associations: InstanceAssociations): void;
   handle(message: HostToPeerMessage): void;
   /** Ends the session, after every session opened inside it, the latest first. */
   dispose(): Promise<void>;
@@ -187,6 +200,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   const schedule = args.schedule ?? ((task: () => void) => queueMicrotask(task));
 
   let raw: Record<string, unknown> = { ...args.props };
+  let associations: InstanceAssociations = {};
   let viewEpoch = 0;
   let commitId = 0;
   let activated = false;
@@ -285,6 +299,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   const inheritedA11yIdOf = args.parent ? recordOf(args.parent.token)!.a11yIdOf : undefined;
 
   const a11yIdOf = (ref: object): string => {
+    if (args.nativeA11yId) return args.nativeA11yId(ref);
     if (inheritedA11yIdOf) return inheritedA11yIdOf(ref);
     let id = a11yIds.get(ref);
     if (!id) {
@@ -396,6 +411,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
         latestA11y = null;
       },
       clearHeadingLevel() {},
+      hasAuthoredName: () => controlLabelHost?.hasAuthoredName() ?? true,
     }
   );
 
@@ -487,6 +503,61 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   // The session of the trigger group's anchor, when this instance is a trigger.
   let triggerAnchor: string | null = null;
 
+  const controlLabelHost = args.nativeScope
+    ? createPeerControlLabelHost({
+        sessionId,
+        epoch: () => viewEpoch,
+        live: () => viewInstalled && activated && acceptingInbound,
+        scope: args.nativeScope,
+        publish(plan) {
+          if (flushingCommit || !viewInstalled || disposed) return;
+          send({ kind: 'control-label.plan', sessionId, viewEpoch, plan });
+        },
+      })
+    : null;
+
+  const rootEntity = Object.freeze({});
+  let lastCommit: { children: TemplateChildren } | null = null;
+  let waitingForAvailableLease = false;
+  let retriedAvailableLease: string | null = null;
+  const retryAvailableSpace = () => {
+    const plan = availableSpaceHost.plan();
+    if (
+      !waitingForAvailableLease ||
+      !plan ||
+      pendingAck ||
+      !lastCommit ||
+      retriedAvailableLease === plan.leaseId
+    )
+      return;
+    retriedAvailableLease = plan.leaseId;
+    const expectedEpoch = viewEpoch;
+    schedule(() => {
+      if (
+        !acceptingInbound ||
+        !viewInstalled ||
+        viewEpoch !== expectedEpoch ||
+        pendingAck ||
+        availableSpaceHost.plan()?.leaseId !== plan.leaseId ||
+        !lastCommit
+      )
+        return;
+      waitingForAvailableLease = false;
+      commit(lastCommit.children);
+    });
+  };
+  const availableSpaceHost = createPeerAvailableSpaceHost({
+    sessionId,
+    root: rootEntity,
+    epoch: () => viewEpoch,
+    live: () => viewInstalled && acceptingInbound,
+    publish(message) {
+      if (flushingCommit || disposed) return;
+      send(message);
+      if (message.active) retryAvailableSpace();
+    },
+  });
+
   const attachCaps = (wiring: ModuleWiring) => {
     wiring.attach('event', [
       [EVENT_ROOT_TARGET_CAP, () => rootBus as unknown as EventTarget],
@@ -527,6 +598,25 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     ]);
     wiring.attach('expose-state', [[EXPOSES_RECORD_SINK_CAP, publishExposes]]);
     wiring.attach('a11y', [[A11Y_PROJECT_CAP, projector]]);
+    wiring.attach('positioning', [[AVAILABLE_SPACE_HOST_CAP, availableSpaceHost.host]]);
+    wiring.attach('overlay', [
+      [
+        OVERLAY_TARGET_HOST_CAP,
+        {
+          root: () => (viewInstalled && acceptingInbound ? rootEntity : null),
+          resolve: (target: unknown) =>
+            target === rootEntity && viewInstalled && acceptingInbound ? rootEntity : null,
+        },
+      ],
+    ]);
+    if (controlLabelHost)
+      wiring.attach('control-label', [
+        [CONTROL_LABEL_HOST_CAP, controlLabelHost.host],
+        [
+          CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
+          (fn: () => void) => hostSession?.invokeInCallbackScope(fn),
+        ],
+      ]);
     wiring.attach('feedback', [[EFFECTS_CAP, effects]]);
     if (args.getMeta) wiring.attach('rule-meta', [[RULE_META_GET_CAP, args.getMeta]]);
     wiring.attach('as-trigger', [
@@ -639,6 +729,8 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
   // Commit: one epoch transaction per Runtime commit.
   // ---------------------------------------------------------------------
   const commit = (children: TemplateChildren, signal?: { done(): void }) => {
+    lastCommit = { children };
+    waitingForAvailableLease = false;
     const serialized = serializeTemplate(children);
     commitId += 1;
     viewInstalled = true;
@@ -670,17 +762,29 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     a11yDirtyDuringCommit = false;
     pendingAck = { viewEpoch, commitId };
     flushReleases();
+    // The host needs this exact lease before lowering root-relative style.
+    // Reattachment renews its opaque ID without changing semantic ownership.
+    availableSpaceHost.resume();
     send({ kind: 'projection.install', transaction });
+    if (controlLabelHost?.plan())
+      send({ kind: 'control-label.plan', sessionId, viewEpoch, plan: controlLabelHost.plan() });
   };
 
   const onLifecycleEvent = (event: RuntimeLifecycleEvent) => {
     if (event.type === 'mount.render') {
+      controlLabelHost?.revoke();
+      availableSpaceHost.revoke();
+      waitingForAvailableLease = false;
+      retriedAvailableLease = null;
       viewEpoch = event.epoch;
       commitId = 0;
       activated = false;
       targetReady = false;
     }
     if (event.type === 'unmount.begin') {
+      controlLabelHost?.revoke();
+      availableSpaceHost.revoke();
+      waitingForAvailableLease = false;
       viewInstalled = false;
       activated = false;
       targetReady = false;
@@ -692,6 +796,7 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     prototype,
     {
       getRawProps: () => raw as any,
+      getInstanceAssociations: () => associations,
       commit,
       schedule,
       onLifecycleEvent,
@@ -757,10 +862,14 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     }
     pendingAck = null;
     if (ack.status !== 'applied') {
+      waitingForAvailableLease = ack.diagnostics.some(
+        (entry) => entry.code === 'available-space-required'
+      );
       diagnose('projection-rejected', `host answered ${ack.status}`, {
         viewEpoch: ack.viewEpoch,
         commitId: ack.commitId,
       });
+      retryAvailableSpace();
       return;
     }
     // A view whose intent went while it attached is detached next; it does
@@ -773,6 +882,9 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       commitId: ack.commitId,
     });
     activated = true;
+    // Re-publish after activation so the host supplies the current view lease.
+    if (controlLabelHost?.plan())
+      send({ kind: 'control-label.plan', sessionId, viewEpoch, plan: controlLabelHost.plan() });
     // Readiness is a fact of the current projection, not a latch. A later
     // commit whose acknowledgement omits the surface withdraws it, and Focus
     // must go back to retaining requests rather than reporting them applied
@@ -828,6 +940,11 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       started = true;
       return reconcileView();
     },
+    setAssociations(next) {
+      if (!acceptingInbound) return;
+      hostSession?.controller.applyInstanceAssociations(next);
+      associations = next;
+    },
     setProps(props) {
       raw = { ...props };
       hostSession?.controller.applyRawProps(raw as any);
@@ -839,6 +956,15 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
     handle(message) {
       if (!acceptingInbound) return;
       switch (message.kind) {
+        case 'available-space.frame':
+          availableSpaceHost.frame(message);
+          return;
+        case 'control-label.view':
+          controlLabelHost?.view(message);
+          return;
+        case 'control-label.activate':
+          controlLabelHost?.activate(message);
+          return;
         case 'projection.ack':
           handleAck(message.ack);
           return;
@@ -901,6 +1027,8 @@ export function createPeerSession(args: PeerSessionArgs): PeerSession {
       // that finished.
       disposal ??= (async () => {
         acceptingInbound = false;
+        controlLabelHost?.revoke();
+        availableSpaceHost.dispose();
         offViewIntent();
         await reconciling;
         // A step that fails does not stop the rest of the teardown, and the

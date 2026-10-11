@@ -1,0 +1,52 @@
+id: P-BASE-ACCORDION-HEADING
+type: prototype
+title: Base Accordion heading
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Finf #872 的 draft 实现方向。稳定准入需要独立审查及当前浏览器/native、材质与 GPUI 证据；synthetic DOM 通过不等于九维完成。'
+  en: 'Draft implementation direction for Finf #872. Stable admission requires independent review and current browser/native, material and GPUI evidence; synthetic DOM success is not nine-dimension completion.'
+summary: Independent Accordion heading protocol with JSON ownership and exact Anatomy boundaries.
+statement:
+  zh-CN: 独立编写的 Proto UI 协议。APG及风格库提供比较证据，不是实现授权或继承API。复用 Collection、Anatomy、Context、A11y、asTrigger、asFocusable及L1 lifecycle。
+  en: An independently authored Proto UI protocol. APG and design libraries provide comparison evidence, not implementation authority or inherited APIs. Shared capabilities are Collection, Anatomy, Context, A11y, asTrigger, asFocusable and L1 lifecycle.
+criteria:
+  - id: P-BASE-ACCORDION-HEADING-SEMANTICS
+    text:
+      zh-CN: 每个 Item 的一个 Heading 包裹唯一 Trigger，声明 heading 与 1..6 整数 level（默认3）。作者选择页面层级，持续显示的次级操作放在 Heading 外；Heading 不新增动作或焦点目标。
+      en: One Heading per Item wraps the sole Trigger and declares heading with integer level 1..6, default 3. The author chooses the page hierarchy; persistent secondary actions belong outside Heading. Heading adds no action or focus target.
+dependsOn:
+  contracts:
+    - C-PROPS-0001
+    - C-CONTEXT-0006
+    - C-ANATOMY-0004
+    - C-A11Y-0001
+    - C-LIFECYCLE-0008
+    - C-A11Y-PART-RELATIONSHIP-0001
+  decisions:
+    - D-BASE-PROTOTYPE-INDEPENDENCE-0001
+  prototypes:
+    - P-BASE-ACCORDION
+verifies:
+  tests:
+    - T-BASE-ACCORDION-0001
+sources:
+  - path: packages/prototypes/base/src/accordion/heading.proto.ts
+  - path: packages/prototypes/base/src/accordion/types.ts
+  - path: packages/prototypes/base/src/accordion/shared.ts
+  - path: https://www.w3.org/WAI/ARIA/apg/patterns/accordion/
+openQuestions:
+  - id: P-BASE-ACCORDION-HEADING-Q-ADMISSION
+    question:
+      zh-CN: 何时完成精确head的浏览器/native、辅助技术、GPUI及独立审查并准入此draft？
+      en: When have exact-head browser/native, assistive-technology, GPUI and independent review evidence admitted this draft?
+    blocks:
+      - activation:P-BASE-ACCORDION-HEADING
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the bounded Accordion family independently; retained draft admission and explicit native evidence debt.
+tags:
+  - prototype
+  - base
+  - accordion

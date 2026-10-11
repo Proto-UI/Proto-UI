@@ -37,3 +37,11 @@
 .pui-runtime-box .pui-projection-control > [data-pui-root] {
   flex: 1 1 auto;
 }
+
+/* Select's long-value demonstrations opt in; other preview shells keep their
+ * defaults. The existing real Surface consumes this layout variable. */
+@media (max-width: 640px) {
+  .pui-runtime-box.select-content-preview {
+    --runtime-box-content-padding: 1.25rem 0;
+  }
+}
