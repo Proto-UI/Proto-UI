@@ -29,8 +29,8 @@ criteria:
       contracts: [C-TEMPLATE-0001, C-AS-TRANSITION-0001]
   - id: P-BASE-TRANSITION-PERCEPTUAL-OWNER
     text:
-      zh-CN: Transition 只拥有 closed、entering、entered、leaving 感知 phase 与由其派生的 isPresent；不得把感知状态伪装成实际 mount、DOM 存在或 Proto instance disposal 的真相。
-      en: Transition owns only the closed, entering, entered, and leaving perceptual phases and the isPresent fact derived from them; it must not disguise perceptual state as the truth of actual mount, DOM existence, or Proto instance disposal.
+      zh-CN: Transition 只拥有 closed、entering、entered、leaving phase、显式冷准备的 preparing，以及由其派生的资源保留投射 isPresent；不得把感知状态伪装成实际 mount、DOM 存在或 Proto instance disposal 的真相。
+      en: Transition owns only the closed, entering, entered, and leaving phases, explicit cold preparing, and the derived isPresent resource-retention projection; it must not disguise perceptual state as the truth of actual mount, DOM existence, or Proto instance disposal.
     dependsOn:
       contracts: [C-AS-TRANSITION-0001, C-LIFECYCLE-0008, C-STATE-0001]
   - id: P-BASE-TRANSITION-PROPS
@@ -127,10 +127,16 @@ dependsOn:
     ]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
 relates:
+  contracts:
+    - id: C-TRANSITION-COLD-PREPARATION-0001
+      since: 0.3.0-alpha.1
   prototypes: [P-BASE-DIALOG-CONTENT, P-BASE-HOVER-CARD-CONTENT, P-BASE-SELECT-CONTENT]
   decisions: [D-AS-HOOK-NO-ARG-ONCE-0001, D-AS-HOOK-CALLER-NAME-0001]
 verifies: { tests: [T-BASE-TRANSITION-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Distinguished optional cold preparation and resource-retention projection from actual view mount and from unchanged default phases.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged standalone and authored-asHook Transition entries, perceptual phase and ViewIntent boundaries, public controls, interruption, fallback completion, host neutrality, and reduced-motion behavior.

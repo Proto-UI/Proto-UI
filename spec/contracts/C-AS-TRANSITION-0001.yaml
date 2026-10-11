@@ -20,12 +20,12 @@ criteria:
       en: '`asTransition()` must be a no-argument ordinary once hook defined through `defineAsHook`; repeated calls in one setup chain must skip installation and return the exact same projected handle.'
   - id: C-AS-TRANSITION-0001-B
     text:
-      zh-CN: transitionState 必须限定为 closed、entering、entered、leaving；isPresent 只表示感知存在性，不得作为结构 mount fact。
-      en: transitionState must be limited to closed, entering, entered, and leaving; isPresent represents perceptual presence only and must not be treated as a structural mount fact.
+      zh-CN: 默认 transitionState 限定为 closed、entering、entered、leaving；具名冷准备扩展另由 C-TRANSITION-COLD-PREPARATION-0001 定义。isPresent 默认表示感知存在性，扩展期间可表示待揭示 view 的资源保留；两者都不是实际 mount、DOM 或测量就绪事实。
+      en: By default transitionState is limited to closed, entering, entered, and leaving; the named cold-preparation extension is separately defined by C-TRANSITION-COLD-PREPARATION-0001. isPresent normally represents perceptual presence and may represent unrevealed view-resource retention during that extension; neither is actual mount, DOM existence or measurement readiness.
   - id: C-AS-TRANSITION-0001-C
     text:
-      zh-CN: 初始关闭必须允许 Proto setup 与 created 在无 view 的情况下完成；初始打开且 appear=false 必须直接从 entered 开始。
-      en: Initial close must allow Proto setup and created to complete without a view; initial open with appear=false must begin directly at entered.
+      zh-CN: 初始关闭必须允许 Proto setup 与 created 在无 view 的情况下完成；初始打开且 appear=false 默认直接从 entered 开始；显式冷准备时先 preparing，release 后直接 entered，不合成动画事件或计时。
+      en: Initial close must allow Proto setup and created to complete without a view; initial open with appear=false begins directly at entered by default; explicit cold preparation first enters preparing and releases directly to entered without synthetic animation events or timers.
   - id: C-AS-TRANSITION-0001-D
     text:
       zh-CN: 初始打开且 appear=true，或从 detached closed 执行 enter 时，必须先请求 ViewIntent present，并仅在 view epoch mounted 后进入 entering。
@@ -104,10 +104,17 @@ dependsOn:
     - C-LIFECYCLE-0008
   decisions:
     - D-AS-HOOK-NO-ARG-ONCE-0001
+relates:
+  contracts:
+    - id: C-TRANSITION-COLD-PREPARATION-0001
+      since: 0.3.0-alpha.1
 verifies:
   tests:
     - T-AS-TRANSITION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Preserved default four-phase behavior and identified the separately draft opt-in cold-preparation extension without making isPresent an actual mount fact.
   - version: 0.1.0
     change: introduced
     summary: Replaced the legacy Presence-bridge transition model with a no-arg state machine coordinated through lifecycle ViewIntent and Core delay.

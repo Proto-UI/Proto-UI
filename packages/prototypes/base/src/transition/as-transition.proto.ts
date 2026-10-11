@@ -57,13 +57,14 @@ export const asTransition = defineAsHook<
     def.expose.event('beforeLeave', { payload: 'void' });
     def.expose.event('afterLeave', { payload: 'void' });
 
-    const transitionState = def.state.enum<['closed', 'entering', 'entered', 'leaving']>(
-      'transitionState',
-      'closed',
-      { options: ['closed', 'entering', 'entered', 'leaving'] }
-    );
+    const transitionState = def.state.enum<
+      ['closed', 'preparing', 'entering', 'entered', 'leaving']
+    >('transitionState', 'closed', {
+      options: ['closed', 'preparing', 'entering', 'entered', 'leaving'],
+    });
     const isPresent = def.state.bool('isPresent', false);
     const appearDefault = def.state.bool('transitionAppearDefault', false);
+    const coldEntryPreparation = def.state.bool('transitionColdEntryPreparation', false);
     const enterDurationDefault = def.state.numberDiscrete('transitionEnterDurationDefault', 300);
     const leaveDurationDefault = def.state.numberDiscrete('transitionLeaveDurationDefault', 200);
     const interruptDefault = def.state.enum<['reverse', 'wait', 'immediate']>(
@@ -107,8 +108,16 @@ export const asTransition = defineAsHook<
       getState: () => transitionState.get(),
       setState(state: TransitionState) {
         transitionState.set(state, `reason: asTransition => ${state}`);
-        isPresent.set(state !== 'closed', `reason: asTransition presence => ${state}`);
+        // A synchronous State watcher may dispose this owner before projection resumes.
+        if (!currentRun) return;
+        // State watchers may synchronously drive another transition. Project its final phase.
+        const currentState = transitionState.get();
+        isPresent.set(
+          currentState !== 'closed',
+          `reason: asTransition presence => ${currentState}`
+        );
       },
+      requiresColdPreparation: () => coldEntryPreparation.get(),
       getInterrupt: () =>
         currentRun?.props.isProvided('interrupt')
           ? ((getProps()?.interrupt as TransitionInterrupt | undefined) ?? interruptDefault.get())
@@ -143,6 +152,11 @@ export const asTransition = defineAsHook<
       enter: () => machine.enter(),
       leave: () => machine.leave(),
       complete: () => machine.complete(),
+      capturePreparation: () => {
+        if (!currentRun)
+          throw new Error('[asTransition] preparation capture requires a live runtime.');
+        return machine.capturePreparation();
+      },
     };
 
     def.lifecycle.onCreated((run) => {
@@ -188,6 +202,7 @@ export const asTransition = defineAsHook<
     def.expose.method('enter', controls.enter);
     def.expose.method('leave', controls.leave);
     def.expose.method('complete', controls.complete);
+    def.expose.method('capturePreparation', controls.capturePreparation);
     def.expose.value('controls', controls);
   },
   projectHandle(result) {
@@ -197,6 +212,10 @@ export const asTransition = defineAsHook<
     );
     const isPresent = requireProjectedHandle(result.getState?.('isPresent'), 'isPresent');
     const controls: TransitionControls = {
+      capturePreparation: requireProjectedHandle(
+        result.getMethod?.('capturePreparation') as (() => (() => void) | null) | undefined,
+        'capturePreparation'
+      ),
       enter: requireProjectedHandle(
         result.getMethod?.('enter') as (() => void) | undefined,
         'enter'
@@ -228,8 +247,17 @@ export const asTransition = defineAsHook<
       'transitionInterruptDefault'
     );
 
+    const coldEntryPreparation = requireProjectedHandle(
+      result.getState?.('transitionColdEntryPreparation'),
+      'transitionColdEntryPreparation'
+    );
+
     const configure = (config: TransitionConfig) => {
       let configured = false;
+      if (typeof config.coldEntryPreparation !== 'undefined') {
+        coldEntryPreparation.setDefault(config.coldEntryPreparation);
+        configured = true;
+      }
       if (typeof config.appear !== 'undefined') {
         appearDefault.setDefault(config.appear);
         configured = true;

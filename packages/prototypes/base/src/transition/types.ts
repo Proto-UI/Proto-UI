@@ -8,7 +8,7 @@ import type {
   State,
 } from '@proto.ui/core';
 
-export type TransitionState = 'closed' | 'entering' | 'entered' | 'leaving';
+export type TransitionState = 'closed' | 'preparing' | 'entering' | 'entered' | 'leaving';
 export type TransitionInterrupt = 'reverse' | 'wait' | 'immediate';
 
 export type TransitionProps = {
@@ -34,9 +34,13 @@ export type TransitionControls = {
   enter(): void;
   leave(): void;
   complete(): void;
+  /** Current cold attempt only; null outside preparing. */
+  capturePreparation(): (() => void) | null;
 };
 
 export type TransitionConfig = {
+  /** Opt-in cold entry only; no warm animation freeze. */
+  coldEntryPreparation?: boolean;
   appear?: boolean;
   enterDuration?: number;
   leaveDuration?: number;
@@ -51,17 +55,18 @@ export type TransitionExposes = {
   beforeLeave: ExposeEvent<void>;
   afterLeave: ExposeEvent<void>;
   transitionState: ExposeState<TransitionState>;
-  /** Perceptual presence. Structural view presence remains owned by lifecycle ViewIntent. */
+  /** View-resource retention, including preparation; never an actual mount fact. */
   isPresent: ExposeState<boolean>;
   enter: ExposeMethod<() => void>;
   leave: ExposeMethod<() => void>;
   complete: ExposeMethod<() => void>;
+  capturePreparation: ExposeMethod<() => (() => void) | null>;
   controls: ExposeValue<TransitionControls>;
 };
 
 export type TransitionHandles = {
   transitionState: BorrowedStateHandle<TransitionState, TransitionProps>;
-  /** Perceptual presence. This must not be used as a second mount-phase fact. */
+  /** View-resource retention, including preparation; never a second mount-phase fact. */
   isPresent: BorrowedStateHandle<boolean, TransitionProps>;
   controls: TransitionControls;
   /** Sets setup-time defaults. Explicit host props take precedence at runtime. */
@@ -75,6 +80,7 @@ export type TransitionAsHookContract = {
     transitionState: State<TransitionState>;
     isPresent: State<boolean>;
     transitionAppearDefault: State<boolean>;
+    transitionColdEntryPreparation: State<boolean>;
     transitionEnterDurationDefault: State<number>;
     transitionLeaveDurationDefault: State<number>;
     transitionInterruptDefault: State<TransitionInterrupt>;
