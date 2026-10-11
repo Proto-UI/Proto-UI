@@ -53,6 +53,8 @@ If a task exposes a real contradiction, do not silently choose the most convenie
 
 ## Definition-first implementation
 
+For every prototype and selected family, follow [prototype upstream conformance and completion](internal/agent-operations/prototype-upstream-conformance.md). Missing upstream semantics must be defined, prototyped and fed back into real consumers; neither page-specific substitutes nor platform-specific component implementations satisfy completion.
+
 The highest engineering principle for prototype work is independent implementation from a shared public definition. A prototype and a compiler must each implement the applicable Proto definitions; their composition checks whether those implementations agree. Neither implementation is the authority for the other. This principle operates within the authority, lifecycle, safety, and permission rules above.
 
 - Before implementing or changing a prototype, identify its applicable core syntax, prototype, module, host capability, Adapter profile, and test definitions and their lifecycle status. When a behavioral definition is missing or contradictory, make the intended responsibilities, inputs, outputs, ownership, lifecycle, and acceptance criteria reviewable through the existing definition process first. Do not transcribe current code into a document and call that independent conformance. An uncataloged prototype may have real behavior; missing catalog coverage is a definition gap to resolve, not proof that no implementation exists.
