@@ -1,6 +1,13 @@
 // @vitest-environment node
 
-import type { Browser } from 'playwright-core';
+import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import type { Browser, JSHandle, Page } from 'playwright-core';
+import { observeTooltipPress } from './tooltip-pressed-observation';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   COLOR_SCHEMES,
@@ -22,6 +29,108 @@ if (requestedRuntime && TEST_RUNTIMES.length === 0) {
   throw new Error(
     `PROTO_UI_SHADCN_TOOLTIP_BROWSER_RUNTIME must be one of ${RUNTIMES.join(', ')}; received ${requestedRuntime}.`
   );
+}
+
+type PressObservation = JSHandle<ReturnType<typeof observeTooltipPress>>;
+
+async function capturePressFailure(
+  page: Page,
+  observation: PressObservation | null,
+  runtime: string,
+  error: unknown,
+  triggerBox: { x: number; y: number; width: number; height: number } | null
+) {
+  try {
+    // Freeze failure facts in one browser turn, before metadata, I/O or release.
+    const captured = await page
+      .evaluate((observer) => {
+        const evidence = observer?.freeze() ?? null;
+        const previewer = Array.from(document.querySelectorAll('[data-previewer-id]')).find(
+          (element) =>
+            evidence?.previewerId == null ||
+            element.getAttribute('data-previewer-id') === evidence.previewerId
+        );
+        const rect = previewer?.getBoundingClientRect();
+        const x = Math.max(0, rect?.x ?? 0);
+        const y = Math.max(0, rect?.y ?? 0);
+        const width = Math.min(innerWidth, rect?.right ?? 0) - x;
+        const height = Math.min(innerHeight, rect?.bottom ?? 0) - y;
+        return {
+          evidence,
+          // Omit URL credentials, query and fragment from saved public evidence.
+          pageUrl: `${location.origin}${location.pathname}`,
+          screenshotClip: width > 0 && height > 0 ? { x, y, width, height } : null,
+        };
+      }, observation)
+      .catch((failure) => ({
+        evidence: null,
+        pageUrl: null,
+        screenshotClip: null,
+        observationError: String(failure),
+      }));
+    const source = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+    const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { encoding: 'utf8' }).trim();
+    const sourceDirty = Boolean(
+      execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim()
+    );
+    const diagnosticFiles = Object.fromEntries(
+      ['demo-shadcn-tooltip.browser.test.ts', 'tooltip-pressed-observation.ts'].map((file) => [
+        file,
+        createHash('sha256')
+          .update(readFileSync(new URL(file, import.meta.url)))
+          .digest('hex'),
+      ])
+    );
+    const directory = path.join(
+      process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ?? path.join(tmpdir(), 'proto-ui-runtime-evidence'),
+      'tooltip-pressed',
+      `${source.slice(0, 12)}-${runtime}-${Date.now()}`
+    );
+    await mkdir(directory, { recursive: true });
+    const configured = new URL(baseUrl);
+    const serverMode = process.env.PROTO_UI_BROWSER_BASE_URL
+      ? 'caller-provided-base-url'
+      : 'test-owned-server';
+    await writeFile(
+      path.join(directory, 'failure.json'),
+      JSON.stringify(
+        {
+          testCheckout: { head: source, headTree: tree, dirty: sourceDirty, diagnosticFiles },
+          pageSourceRevision: null,
+          pageSourceBinding:
+            'Local test checkout is recorded; served-page revision is not attested by this diagnostic.',
+          configuredBaseUrl: `${configured.origin}${configured.pathname}`,
+          serverMode,
+          runtime,
+          route: ROUTE,
+          browser: browser.version(),
+          capturedAt: new Date().toISOString(),
+          failure: String(error),
+          sampledTriggerBox: triggerBox,
+          ...captured,
+          screenshotScope:
+            'Visible previewer intersection only; no full-page or unrelated screen capture.',
+          screenshotUnavailable: captured.screenshotClip
+            ? null
+            : 'No observed visible previewer clip.',
+        },
+        null,
+        2
+      )
+    );
+    console.info(`[tooltip-pressed] failure evidence: ${directory}`);
+    // Persist DOM facts first. A screenshot failure must not hide the assertion.
+    if (captured.screenshotClip) {
+      await page.screenshot({
+        path: path.join(directory, 'failure.png'),
+        clip: captured.screenshotClip,
+        caret: 'initial',
+        timeout: 2000,
+      });
+    }
+  } catch (captureError) {
+    console.warn('[tooltip-pressed] failure capture incomplete', captureError);
+  }
 }
 
 let browser: Browser;
@@ -166,21 +275,44 @@ describe.sequential('shadcn Tooltip browser acceptance', () => {
           `${runtime}/focus-ring`
         ).not.toBe('none');
 
-        const triggerBox = await account.boundingBox();
-        if (!triggerBox) throw new Error(`${runtime}: Trigger has no rendered geometry.`);
-        await page.mouse.move(
-          triggerBox.x + triggerBox.width / 2,
-          triggerBox.y + triggerBox.height / 2
-        );
-        await page.mouse.down();
+        const pressObservation = await account
+          .evaluateHandle(observeTooltipPress)
+          .catch((error) => {
+            console.warn('[tooltip-pressed] observer installation failed', error);
+            return null;
+          });
+        let triggerBox: { x: number; y: number; width: number; height: number } | null = null;
+        let pressFailed = false;
         try {
+          triggerBox = await account.boundingBox();
+          if (!triggerBox) throw new Error(`${runtime}: Trigger has no rendered geometry.`);
+          await page.mouse.move(
+            triggerBox.x + triggerBox.width / 2,
+            triggerBox.y + triggerBox.height / 2
+          );
+          await page.mouse.down();
           await expect
             .poll(() => account.evaluate((element) => getComputedStyle(element).transform), {
               message: `${runtime}/pressed-scale`,
             })
             .not.toBe('none');
+        } catch (error) {
+          pressFailed = true;
+          await capturePressFailure(page, pressObservation, runtime, error, triggerBox);
+          throw error;
         } finally {
-          await page.mouse.up();
+          try {
+            await page.mouse.up();
+          } catch (releaseError) {
+            if (!pressFailed) throw releaseError;
+            console.warn(
+              '[tooltip-pressed] mouse release also failed; preserving original failure',
+              releaseError
+            );
+          } finally {
+            await pressObservation?.evaluate((observer) => observer.stop()).catch(() => {});
+            await pressObservation?.dispose().catch(() => {});
+          }
         }
 
         const openedContent = await content.elementHandle();
