@@ -30,7 +30,7 @@ function length(value: unknown): AvailableLayoutLength | null {
     return null;
   return { unit: unit as AvailableLayoutLength['unit'], value: coefficient };
 }
-/** Pure draft model. Production Content/Handle do not consume this yet. */
+/** Pure draft model; live consumer admission and host geometry are verified separately. */
 export function drawerExtentModel(
   raw: Readonly<Record<string, unknown>>,
   defaultMaximum: AvailableLayoutLength = { unit: 'available', value: 1 }

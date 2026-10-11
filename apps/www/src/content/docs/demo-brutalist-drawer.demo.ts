@@ -39,7 +39,7 @@ export default {
                 'kind': 'proto',
                 'prototypeId': 'brutalist-drawer-description',
                 'children': [
-                  'Drag the handle to half size or expand it with Arrow Up. Drag further down to close. Changes remain in this demonstration.',
+                  'This panel fits its content. Drag the handle outward to dismiss, or choose Close.',
                 ],
               },
               {
@@ -52,8 +52,6 @@ export default {
               'enterDuration': 0,
               'leaveDuration': 0,
               'side': 'bottom',
-              'snapPoints': [0.5, 1],
-              'defaultSnapPoint': 1,
             },
           },
         ],

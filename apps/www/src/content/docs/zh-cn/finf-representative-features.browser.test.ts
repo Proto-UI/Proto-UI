@@ -353,7 +353,11 @@ async function writeJson(file: string, value: unknown) {
 }
 
 async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
-  const previewer = page.locator('[data-previewer-id]').first();
+  const previewer = page
+    .locator(
+      id === 'shadcn-drawer' ? '[data-demo-id="demo-shadcn-drawer-snap"]' : '[data-previewer-id]'
+    )
+    .first();
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
@@ -386,7 +390,13 @@ async function runCase(testCase: Case) {
   });
   const page = await context.newPage();
   page.setDefaultTimeout(15_000);
-  const previewer = page.locator('[data-previewer-id]').first();
+  const previewer = page
+    .locator(
+      testCase.component === 'drawer'
+        ? '[data-demo-id="demo-shadcn-drawer-snap"]'
+        : '[data-previewer-id]'
+    )
+    .first();
   const screenshots: Screenshot[] = [];
   const pageErrors: string[] = [];
   const captureErrors: string[] = [];
@@ -843,6 +853,7 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       height: rect.height,
       right: rect.right,
       bottom: rect.bottom,
+      rootTextSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
       availableHeight:
         Number.parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) ||
         window.visualViewport?.height ||
@@ -853,7 +864,11 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
   });
   await capture('half-open', { snapPoint: 0.5, offsetPercentage: 50, panel: geometry });
   expect(geometry.height).toBeGreaterThan(0);
-  expect(Math.abs(geometry.height - geometry.availableHeight * 0.85 * 0.5)).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(
+      geometry.height - Math.max(0, geometry.availableHeight - 6 * geometry.rootTextSize) * 0.5
+    )
+  ).toBeLessThanOrEqual(2);
   expect(geometry.x).toBeGreaterThanOrEqual(-1);
   expect(geometry.y).toBeGreaterThanOrEqual(-1);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);

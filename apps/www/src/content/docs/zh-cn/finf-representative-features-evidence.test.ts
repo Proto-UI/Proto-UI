@@ -142,7 +142,7 @@ function mockedCase(
 }
 
 describe('Finf representative evidence harness, no native browser', () => {
-  it('registers the existing suite with one official owner and five existing groups plus the separately owned Slider suite', () => {
+  it('registers the existing suite with one official owner and five representative groups plus separately owned suites', () => {
     expect(PRODUCTION_BROWSER_OWNERS[filename]).toBe(workflowFile);
     expect(manifest.cases).toHaveLength(34);
     expect(new Set(manifest.cases.map(({ id }) => id)).size).toBe(34);
@@ -158,7 +158,13 @@ describe('Finf representative evidence harness, no native browser', () => {
       'disclosure-overlays': 8,
       'modal-overlays': 5,
       'runtime-tabs': 4,
-      slider: 0, // Four runtime cases live in finf-slider-upstream.browser.test.ts.
+      slider: 0, // Separate suites register their own runtime cases.
+      'drawer-command-density': 0,
+      dropdown: 0,
+      'neo-popover-title': 0,
+      'popover-command-density': 0,
+      'popover-title': 0,
+      'resident-motion-capability': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
@@ -316,7 +322,9 @@ describe('Finf representative evidence harness, no native browser', () => {
     const drawer = statements(['drawerJourney']);
     expect(drawer).toContain('await close.click()');
     expect(drawer).toMatch(/capture\(\s*'actually-closed'/);
-    expect(drawer).toContain('geometry.availableHeight * 0.85 * 0.5');
+    expect(drawer).toContain(
+      'Math.max(0, geometry.availableHeight - 6 * geometry.rootTextSize) * 0.5'
+    );
   });
 });
 

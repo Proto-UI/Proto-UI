@@ -84,6 +84,9 @@ export const DRAWER_FAMILY = createAnatomyFamily('base-drawer', {
 export const DRAWER_CONTEXT = createContextKey<DrawerContextValue>('base-drawer');
 
 export type DrawerContentContextValue = {
+  extentMode: 'intrinsic' | 'fraction';
+  extentValid: boolean;
+  contactRevision: number;
   side: 'top' | 'right' | 'bottom' | 'left';
   open: boolean;
   disabled: boolean;

@@ -31,10 +31,11 @@ function projectDrawerContentHandle(
   const dragging = result.getState?.('dragging');
   const dragProgress = result.getState?.('dragProgress');
   const offsetPercentage = result.getState?.('offsetPercentage');
-  if (!snapPoint || !dragging || !dragProgress || !offsetPercentage)
+  const extentValid = result.getState?.('extentValid');
+  if (!snapPoint || !dragging || !dragProgress || !offsetPercentage || !extentValid)
     throw new Error('[as-drawer-content] missing snap handles.');
   return {
-    stateHandles: { open, snapPoint, dragging, dragProgress, offsetPercentage },
+    stateHandles: { open, snapPoint, dragging, dragProgress, offsetPercentage, extentValid },
     asTransition,
   };
 }
@@ -92,34 +93,12 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   const side = def.state.string('drawerSide', 'bottom', {
     options: ['top', 'right', 'bottom', 'left'],
   });
-  const syncSide = (run: any) => side.set(run.props.get().side ?? 'bottom', 'reason: drawer edge');
-  def.lifecycle.onCreated(syncSide);
-  def.props.watch(['side'], syncSide);
-  // Snap changes the scrollport's real extent instead of moving part of an
-  // intrinsically sized panel outside the viewport. The host owns available
-  // region geometry (including visual viewport/safe-area changes); these fixed
-  // recipes only combine that geometry with our dimensionless preview state.
+  // Initial model admission precedes this Content's open/focus lifecycle callbacks.
+  const sizing = setupDrawerSnap(def, side);
+  overlay.configure({ availableLayout: sizing.layout });
   def.feedback.style.use(
     tw('fixed overflow-y-auto overflow-x-hidden min-w-0 min-h-0 content-start wrap-anywhere')
   );
-  def.rule({
-    when: (w) => w.state(side).eq('bottom'),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw(
-          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_+_var(--proto-ui-available-region-height,100vh)/2_-_var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))] w-[var(--proto-ui-available-region-width,100vw)] h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
-        )
-      ),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('top'),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw(
-          'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)] top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)] w-[var(--proto-ui-available-region-width,100vw)] h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
-        )
-      ),
-  });
   def.rule({
     when: (w) => w.state(side).eq('left'),
     intent: (i) =>
@@ -193,6 +172,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     reason?: string,
     options?: { focusReason?: DrawerOpenFocusReason | null }
   ) => {
+    if (nextOpen && !sizing.hasAccepted()) return;
     const prevOpen = open.get();
     open.set(nextOpen, reason ?? 'reason: drawer content sync => open');
     if (nextOpen) {
@@ -286,8 +266,6 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
 
     requestDrawerOpen(run, false, 'outside.press', returnFocusReason);
   });
-
-  setupDrawerSnap(def, side);
 
   def.rule({
     when: (w) => w.state(transition.isPresent).eq(false),

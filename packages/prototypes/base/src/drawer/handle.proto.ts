@@ -42,12 +42,18 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
   const controlled = def.state.string('controls', '');
   const side = def.state.string('side', 'bottom');
   const a11y = asAccessible();
-  a11y.role('separator');
+  const snapMode = def.state.bool('snapHandle', false);
+  const decorative = def.state.bool('decorativeHandle', true);
+  const role = def.state.enum('handleRole', 'presentation', {
+    options: ['presentation', 'separator'] as const,
+  });
+  a11y.role(role);
+  a11y.tree({ hidden: decorative });
   a11y.name(label);
-  a11y.state('valueNow', value);
-  a11y.state('valueMin', min);
-  a11y.state('valueMax', max);
-  a11y.state('orientation', orientation);
+  a11y.state('valueNow', value, { when: snapMode });
+  a11y.state('valueMin', min, { when: snapMode });
+  a11y.state('valueMax', max, { when: snapMode });
+  a11y.state('orientation', orientation, { when: snapMode });
   a11y.state('disabled', disabled);
   a11y.relation('controls', { target: controlled });
   def.expose.state('disabled', disabled);
@@ -58,11 +64,21 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
   });
   const input = asAxisInput<DrawerHandleProps>();
   input.configure({ anatomy: DRAWER_FAMILY, inputRole: 'handle', geometryRole: 'content' });
+  let contactRevision = -1;
   const sync = (run: RunHandle<DrawerHandleProps>) => {
     const c = run.context.read(DRAWER_CONTENT_CONTEXT);
-    const off = !c.open || c.disabled || !!run.props.get().disabled;
+    const auto = c.extentMode === 'intrinsic';
+    const off =
+      !c.open ||
+      c.disabled ||
+      !c.extentValid ||
+      !!run.props.get().disabled ||
+      (auto && !c.dismissible);
+    snapMode.set(!auto, 'reason: drawer handle range applicability');
+    decorative.set(auto, 'reason: drawer intrinsic drag affordance');
+    role.set(auto ? 'presentation' : 'separator', 'reason: drawer handle mode');
     disabled.set(off, 'reason: drawer handle policy');
-    focus.setDisabled(off);
+    focus.setDisabled(off || auto);
     label.set(run.props.get().a11yLabel ?? 'Resize drawer', 'reason: drawer handle label');
     value.set(c.snapPoint * 100, 'reason: drawer handle size');
     min.set(c.dismissible ? 0 : c.snapPoints[0] * 100, 'reason: drawer handle minimum');
@@ -74,7 +90,12 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
       createDrawerPartId(run.context.read(DRAWER_CONTEXT).rootId, 'content'),
       'reason: drawer handle control'
     );
+    if (contactRevision !== c.contactRevision) {
+      contactRevision = c.contactRevision;
+      input.sync({ disabled: true });
+    }
     input.sync({
+      contactBasis: auto ? 'cancel-on-extent-change' : 'preserve-start',
       axis: horizontal ? 'horizontal' : 'vertical',
       direction: 'ltr',
       disabled: off,
@@ -87,11 +108,18 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
   def.lifecycle.onMounted(sync);
   def.props.watch(['disabled', 'a11yLabel'], sync);
   input.on((run, sample) => {
-    if (sample.phase === 'start') focus.focusSelf({ reason: 'pointer' });
+    if (sample.phase === 'start' && snapMode.get()) focus.focusSelf({ reason: 'pointer' });
     contentMethod(run, '__onAxisInput', sample);
   });
   def.event.onGlobal('key.down', (run, event) => {
-    if (!focus.focused.get() || disabled.get() || event.altKey || event.ctrlKey || event.metaKey)
+    if (
+      !snapMode.get() ||
+      !focus.focused.get() ||
+      disabled.get() ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey
+    )
       return;
     const c = run.context.read(DRAWER_CONTENT_CONTEXT);
     const index = c.snapPoints.indexOf(c.snapPoint);

@@ -9,6 +9,7 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
   name: 'brutalist-drawer-content',
   setup(def) {
     const behavior = asDrawerContent();
+    def.props.setDefaults({ maxExtent: { unit: 'available-minus-root-text', value: 6 } });
     def.feedback.style.use(
       tw(
         'rounded-none border-2 border-foreground bg-background text-foreground shadow-[4px_4px_0_0_var(--pui-foreground)] p-4 grid gap-4'
