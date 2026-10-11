@@ -13,6 +13,7 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, expect, it } from 'vitest';
+import { startPopoverDomProbe, type PopoverDomProbe } from './popover-public-dom-probe';
 import {
   RUNTIMES,
   COLOR_SCHEMES,
@@ -67,6 +68,7 @@ beforeAll(async () => {
     'packages/prototypes/shadcn/src/popover/trigger.proto.ts',
     'packages/prototypes/shadcn/src/popover/close.proto.ts',
     'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts',
+    'apps/www/src/content/docs/zh-cn/popover-public-dom-probe.ts',
   ])
     sourceHashes[file] = createHash('sha256')
       .update(await readFile(file))
@@ -245,8 +247,16 @@ async function hitSamples(locator: Locator) {
     });
   });
 }
-async function clickTopInset(page: Page, locator: Locator, receipts: unknown[], stage: string) {
+async function clickTopInset(
+  page: Page,
+  locator: Locator,
+  receipts: unknown[],
+  stage: string,
+  probe?: PopoverDomProbe
+) {
+  await probe?.mark(`${stage}.beforeControlScroll`);
   await locator.scrollIntoViewIfNeeded();
+  await probe?.mark(`${stage}.afterControlScroll-beforeHitAndPointer`);
   const hit = (await hitSamples(locator)).find((sample) => sample.name === 'top-inset');
   const receipt = {
     stage,
@@ -265,6 +275,7 @@ async function clickTopInset(page: Page, locator: Locator, receipts: unknown[], 
   // border-box point directly so the hit sample and actual input are identical.
   await page.mouse.click(hit.x, hit.y);
   receipt.completed = true;
+  await probe?.mark(`${stage}.afterPointer`);
 }
 async function panelFor(page: Page, trigger: Locator) {
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
@@ -282,6 +293,7 @@ for (const runtime of RUNTIMES)
       id,
       async () => {
         let context: BrowserContext | undefined, page: Page | undefined;
+        let domProbe: PopoverDomProbe | undefined;
         let stage = 'created',
           result = 'failed',
           failure: string | undefined;
@@ -336,6 +348,7 @@ for (const runtime of RUNTIMES)
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
+          domProbe = await startPopoverDomProbe(page, trigger);
           stage = 'default-trigger';
           const defaultTrigger = await metrics(trigger);
           observations.trigger = defaultTrigger;
@@ -346,7 +359,7 @@ for (const runtime of RUNTIMES)
             if (hit.name.endsWith('inset') || hit.name === 'center')
               expect(hit.belongsToControl).toBe(true);
           await capture('trigger', observations.trigger);
-          await clickTopInset(page, trigger, pointerInputs, stage);
+          await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
           const panel = await panelFor(page, trigger),
             close = panel.getByRole('button', { name: 'Close', exact: true });
           stage = 'default-close';
@@ -384,10 +397,10 @@ for (const runtime of RUNTIMES)
             }, previous);
           }
           stage = 'close-reopen-escape';
-          await clickTopInset(page, close, pointerInputs, stage);
+          await clickTopInset(page, close, pointerInputs, stage, domProbe);
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await panel.waitFor({ state: 'hidden' });
-          await clickTopInset(page, trigger, pointerInputs, stage);
+          await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
           await panelFor(page, trigger);
           observations.reopenedClose = await metrics(close);
           assertDensity(observations.reopenedClose as Awaited<ReturnType<typeof metrics>>);
@@ -397,18 +410,23 @@ for (const runtime of RUNTIMES)
           observations.inputJourney =
             'Native top-inset Trigger and Close pointer activation, reopen and Escape completed. No single-Tab order assumption.';
           stage = 'root32';
+          await domProbe.mark('root32.beforeFontChange');
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '32px';
           });
+          await domProbe.mark('root32.afterFontChange-beforeTriggerScroll');
           await trigger.scrollIntoViewIfNeeded();
+          await domProbe.mark('root32.afterTriggerScroll');
           const scaledTrigger = await metrics(trigger);
           observations.root32Trigger = scaledTrigger;
           assertDensity(scaledTrigger);
           expect(scaledTrigger.rootFont).toBe('32px');
-          await clickTopInset(page, trigger, pointerInputs, stage);
+          await clickTopInset(page, trigger, pointerInputs, stage, domProbe);
           await panelFor(page, trigger);
+          await domProbe.mark('root32.afterPanelVisible');
           const scaledClose = await metrics(close);
           observations.root32Close = scaledClose;
+          await domProbe.mark('root32.afterCloseMetrics');
           expect(scaledClose.rootFont).toBe('32px');
           assertDensity(scaledClose);
           observations.root32 = {
@@ -416,14 +434,18 @@ for (const runtime of RUNTIMES)
             close: scaledClose,
             limit: 'Root-text scaling only, not physical browser zoom.',
           };
+          await domProbe.mark('root32.beforeScreenshot');
           await capture('root32', observations.root32);
+          await domProbe.mark('root32.afterScreenshot-beforeFinalCloseClick');
           await close.click();
+          await domProbe.mark('root32.afterFinalCloseClick');
           await panel.waitFor({ state: 'hidden' });
           expect(errors).toEqual([]);
           expect(deniedRequests).toEqual([]);
           result = 'passed';
         } catch (error) {
           failure = String(error);
+          await domProbe?.mark(`${stage}.journeyRejected`);
           if (page)
             try {
               const file = `${id}-failure.png`,
@@ -440,6 +462,7 @@ for (const runtime of RUNTIMES)
           throw error;
         } finally {
           try {
+            observations.publicDomTimeline = await domProbe?.finish();
             await writeJson(`${id}.json`, {
               candidate,
               references,
