@@ -1,6 +1,6 @@
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
+import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAccessible } from '@proto.ui/hooks';
-import { TOOLBAR_CONTEXT, TOOLBAR_FAMILY } from './shared';
+import { TOOLBAR_CONTEXT, TOOLBAR_FAMILY, type ToolbarContext } from './shared';
 import type {
   ToolbarSeparatorProps,
   ToolbarSeparatorExposes,
@@ -12,12 +12,14 @@ function setup(def: DefHandle<ToolbarSeparatorProps, ToolbarSeparatorExposes>) {
   const a11y = asAccessible();
   a11y.role('separator');
   a11y.state('orientation', orientation);
-  def.context.subscribe(TOOLBAR_CONTEXT, (_run, ctx) =>
+  const sync = (_run: RunHandle<ToolbarSeparatorProps>, ctx: ToolbarContext) =>
     orientation.set(
       ctx.orientation === 'horizontal' ? 'vertical' : 'horizontal',
       'reason: toolbar separator cross axis'
-    )
-  );
+    );
+  def.context.subscribe(TOOLBAR_CONTEXT, sync);
+  def.lifecycle.onCreated((run) => sync(run, run.context.read(TOOLBAR_CONTEXT)));
+  def.lifecycle.onMounted((run) => sync(run, run.context.read(TOOLBAR_CONTEXT)));
   return () => null;
 }
 export const asToolbarSeparator = defineAsHook<

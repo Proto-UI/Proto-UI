@@ -125,7 +125,7 @@ export const messageScrollerViewport = definePrototype({
   setup: setupViewport,
 });
 function setupJump(def: DefHandle<MessageScrollerJumpProps, MessageScrollerJumpExposes>) {
-  asButton();
+  const button = asButton();
   def.anatomy.claim(MESSAGE_SCROLLER_FAMILY, { role: 'jump' });
   const atEnd = def.state.bool('atEnd', true),
     count = def.state.numberDiscrete('newContentCount', 0);
@@ -139,6 +139,7 @@ function setupJump(def: DefHandle<MessageScrollerJumpProps, MessageScrollerJumpE
   def.context.subscribe(MESSAGE_SCROLLER_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
   def.event.on('press.commit', (run) => {
+    if (button.stateHandles!.disabled.get()) return;
     const fn = run.anatomy.partsOf(MESSAGE_SCROLLER_FAMILY, 'viewport')[0]?.getExpose('jumpToEnd');
     if (typeof fn === 'function') fn();
   });
