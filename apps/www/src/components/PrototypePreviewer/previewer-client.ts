@@ -243,6 +243,18 @@ export function initPreviewer(options: PreviewerOptions) {
     return loaderPromise;
   }
 
+  const reportSwitchError = (err: unknown) => {
+    host.innerHTML = '';
+    const pre = document.createElement('pre');
+    pre.textContent =
+      '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
+    pre.style.whiteSpace = 'pre-wrap';
+    host.appendChild(pre);
+    finishStartup();
+    console.error(err);
+    dispatch('error', { error: err });
+  };
+
   async function switchTo(
     id: string,
     options: { force?: boolean; focusLease?: RuntimeTabsFocusLease | null } = {}
@@ -358,11 +370,6 @@ export function initPreviewer(options: PreviewerOptions) {
       }
       stopFamilyObserver = () => familyObserver.disconnect();
       updateCodePanel(runtime);
-      dispatch('runtime:changed', { id: runtime });
-      if (!mounted) {
-        mounted = true;
-        dispatch('previewer:mounted', { runtime });
-      }
       committed = true;
     } catch (err) {
       if (destroyed || myVersion !== version) return;
@@ -370,15 +377,7 @@ export function initPreviewer(options: PreviewerOptions) {
       // 旧的重试逻辑已被更可靠的动态加载机制取代
 
       // 显示错误信息
-      host.innerHTML = '';
-      const pre = document.createElement('pre');
-      pre.textContent =
-        '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
-      pre.style.whiteSpace = 'pre-wrap';
-      host.appendChild(pre);
-      finishStartup();
-      console.error(err);
-      dispatch('error', { error: err });
+      reportSwitchError(err);
     } finally {
       if (myVersion === version && !destroyed) {
         requestedRuntime = null;
@@ -389,6 +388,21 @@ export function initPreviewer(options: PreviewerOptions) {
       } else {
         focusLease?.cancel();
       }
+    }
+    // The actual panel is inside Runtime Tabs. Complete its temporary input
+    // gate and focus lease before notifying synchronous ready observers.
+    // Either completion or a ready listener may supersede this generation.
+    if (!committed || destroyed || myVersion !== version) return;
+    try {
+      dispatch('runtime:changed', { id: runtime });
+      if (destroyed || myVersion !== version) return;
+      if (!mounted) {
+        mounted = true;
+        dispatch('previewer:mounted', { runtime });
+      }
+    } catch (err) {
+      if (destroyed || myVersion !== version) return;
+      reportSwitchError(err);
     }
   }
 
