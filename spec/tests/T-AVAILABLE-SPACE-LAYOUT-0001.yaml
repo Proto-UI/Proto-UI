@@ -1,0 +1,53 @@
+id: T-AVAILABLE-SPACE-LAYOUT-0001
+type: test
+title: Constrained available-space layout acceptance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: New definition-stage cases need executable model, binding and host evidence; native layout and Compiler realization remain independent.
+summary: Checks neutral unit resolution, cap precedence, intrinsic versus fractional size, independent displacement and lease safety.
+cases:
+  - id: T-AVAILABLE-SPACE-LAYOUT-0001-CASE-MODEL
+    title: Portable extent algebra resolves root text and available units with a hard cap
+    covers: [C-AVAILABLE-SPACE-LAYOUT-0001-INPUT, C-AVAILABLE-SPACE-LAYOUT-0001-RESOLUTION]
+    expectation: finite-validation-root16-root32-min-cap-fraction-and-intrinsic-boundaries
+  - id: T-AVAILABLE-SPACE-LAYOUT-0001-CASE-LEASE
+    title: State binding and independent displacement preserve current target and source ownership
+    covers: [C-AVAILABLE-SPACE-LAYOUT-0001-PLACEMENT, C-AVAILABLE-SPACE-LAYOUT-0001-LIFETIME]
+    expectation: current-binding-replay-and-owned-property-cleanup-with-stale-callback-rejection
+  - id: T-AVAILABLE-SPACE-LAYOUT-0001-CASE-SAFETY
+    title: Unknown or infeasible geometry refuses unsafe visual interaction and recovers without recreating logical ownership
+    covers: [C-AVAILABLE-SPACE-LAYOUT-0001-UNKNOWN]
+    expectation: no-zero-or-viewport-substitution-owned-visibility-withdrawal-and-external-writer-preservation
+implementations:
+  - id: available-layout-pure-model
+    kind: runtime-test
+    status: passing
+    path: packages/modules/positioning/test/available-layout-model.test.ts
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-LAYOUT-0001-CASE-MODEL]
+  - id: available-layout-binding-lifetime
+    kind: runtime-test
+    status: passing
+    path: packages/modules/positioning/test/available-layout-binding.test.ts
+    required: true
+    consumesCases: [T-AVAILABLE-SPACE-LAYOUT-0001-CASE-LEASE]
+  - id: available-layout-web-projection
+    kind: adapter-test
+    status: passing
+    path: packages/modules/positioning/test/available-layout-host.test.ts
+    required: true
+    consumesCases:
+      [T-AVAILABLE-SPACE-LAYOUT-0001-CASE-LEASE, T-AVAILABLE-SPACE-LAYOUT-0001-CASE-SAFETY]
+    notes:
+      - Happy DOM CSSOM and synthetic region observations establish owned projection and refusal, not native intrinsic geometry, scrolling or complete accessibility recovery.
+verifies:
+  contracts: [C-AVAILABLE-SPACE-LAYOUT-0001]
+openQuestions:
+  - id: T-AVAILABLE-SPACE-LAYOUT-0001-Q-EVIDENCE
+    question: Which independent host and native evidence proves intrinsic geometry and fail-closed interaction rather than only token or model output?
+    blocks: [activation:T-AVAILABLE-SPACE-LAYOUT-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Record constrained-layout acceptance without assigning new cases to unrelated passing implementations.
+tags: [test, layout, extent, lifecycle]

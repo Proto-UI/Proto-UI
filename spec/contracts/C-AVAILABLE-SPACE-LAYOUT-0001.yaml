@@ -1,0 +1,53 @@
+id: C-AVAILABLE-SPACE-LAYOUT-0001
+type: contract
+title: Available root space admits constrained edge-attached extent intent
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: New neutral intent needs independent model, module, host and consumer evidence; Compiler and non-Web lowering are not yet admitted.
+summary: A bounded layout binding expresses intrinsic or fractional extent, logical length constraints, edge attachment and independent normalized displacement without exposing host geometry to prototypes.
+statement:
+  en: Existing available-space leases may carry one optional constrained layout binding. Prototype consumers own mode, extent constraints and displacement State; Positioning resolves the binding and owns the lease, and the host resolves its current available region, root text unit and intrinsic layout. No measured natural or available size becomes author State, and no CSS variable, DOM object or component name is part of the author intent.
+  zh-CN: 既有 available-space lease 可携带一个可选 constrained layout binding。原型消费者拥有 mode、extent 约束与位移 State；Positioning 解析绑定并拥有 lease，host 解析当前 available region、root text unit 与 intrinsic layout。不将 natural 或 available 测量值变为作者 State，作者意图不包含 CSS variable、DOM object 或组件名。
+criteria:
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-INPUT
+    text:
+      en: Setup Overlay configuration may declare an availableLayout binding requiring availableSpace. The binding contains enabled, edge (top/right/bottom/left), extent (intrinsic/fraction), fraction, minimum, maximum and displacement; scalar fields are static values or typed State handles, while displacement is a numeric State handle. Lengths contain a finite nonnegative coefficient and unit logical, root-text, available, or available-minus-root-text. A length is a record whose unit is a static enum or enum State and whose coefficient is a number or numeric State; no object-valued State constructor is required. Available ratios and extent fractions are in [0,1]. Default minimum is logical zero, maximum is available one, fraction is one and displacement is zero. Invalid declarations reject before replacing an existing binding; later invalid State snapshots withdraw layout without mutating the source. Source read/subscription errors are not converted into valid geometry.
+      zh-CN: setup Overlay 配置可声明要求 availableSpace 的 availableLayout 绑定。字段仅 enabled、edge（top/right/bottom/left）、extent（intrinsic/fraction）、fraction、minimum、maximum 与 displacement；scalar 为静态值或 typed State handle，displacement 为 numeric State handle。Length 包含有限非负 coefficient 及 logical、root-text、available 或 available-minus-root-text 单位；此 record 的 unit 为静态 enum 或 enum State，coefficient 为 number 或 numeric State，不要求 object-valued State constructor。available ratio 与 extent fraction 在 [0,1]。默认 minimum 为 logical zero、maximum 为 available one、fraction 为 one、displacement 为 zero。非法声明在替换原绑定前拒绝；后续非法 State snapshot 撤销布局且不修改源。源读取/订阅错误不得转换为有效几何。
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-RESOLUTION
+    text:
+      en: Along the chosen edge axis let A be the known safe available extent and R the host root text unit. Resolve logical v to v, root-text v to v*R, available v to v*A, and available-minus-root-text v to max(0,A-v*R). For maximum U and minimum L, C=max(0,min(A,U)) and effective minimum=min(L,C). Intrinsic extent is min(C,max(N,effective minimum)), where N is the natural border-box extent under the resolved cross-axis available extent. Fractional extent is fraction*C and ignores minimum. The opposite cross-axis fills the available region. Minimum never overrides the maximum or safe cap; no hidden scaling factor is added.
+      zh-CN: 沿所选 edge 轴，A 为已知安全 available extent，R 为 host root text unit。logical v 解析为 v，root-text v 为 v*R，available v 为 v*A，available-minus-root-text v 为 max(0,A-v*R)。maximum U 与 minimum L 给出 C=max(0,min(A,U))、effective minimum=min(L,C)。intrinsic extent 为 min(C,max(N,effective minimum))，N 为已解析 cross-axis available extent 下的自然 border-box extent；fractional extent 为 fraction*C，忽略 minimum。另一轴填满 available region。minimum 不得胜过 maximum 或安全 cap，不增加隐藏倍率。
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-PLACEMENT
+    text:
+      en: The resting border box attaches to the declared available-region edge. Displacement is a separate finite fraction in [0,1], directed outward along that edge and relative to the target's own resting extent; zero restores rest. Displacement cannot resize content, change intrinsic sizing or overwrite independently owned transform effects. The host must preserve the normalization agreement with the target used by Axis Input; unsupported transformed composition is explicitly unsupported rather than silently mixing physical and logical spans. The binding does not own overflow, scrolling, snapping, dismissal, focus or accessibility role.
+      zh-CN: resting border box 贴靠声明的 available-region edge。位移是单独的 [0,1] 有限 fraction，沿该 edge 向外、相对 target 自身 resting extent，zero 恢复 rest。位移不得缩放内容、改变 intrinsic sizing 或覆盖独立拥有的 transform effect。host 必须保持与 Axis Input 所用 target 的归一化一致；未支持的 transformed composition 须明确 unsupported，不得混用 physical 与 logical span。绑定不拥有 overflow、滚动、snap、关闭、焦点或 accessibility role。
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-LIFETIME
+    text:
+      en: Binding observation belongs to the live available-space lease. Same-target updates preserve logical ownership and apply current State values; target/capability/view replacement, detach and disposal release subscriptions and projections before replay on a new lease. Old callbacks or reentrant measurement cannot revive a revoked target. Cleanup restores only still-owned host properties and preserves host-authored baselines and later host writes. Web realization may own the independent translate property, not transform; a later external translate writer supersedes that projection and is retained across subsequent State refreshes and cleanup rather than overwritten; that field stays relinquished for the remainder of the lease. Independent displacement updates do not redefine the resting constraints. An absent or disabled layout binding preserves the original available-space-only behavior. Initial declaration validates all fields even when disabled. Runtime reads every source first and propagates reading errors; a valid false enabled value then disables projection even if another runtime value is temporarily invalid. An invalid enabled value withdraws projection.
+      zh-CN: 绑定观察归活跃 available-space lease 所有。同 target 更新保留逻辑所有权并应用当前 State；target/capability/view 替换、detach 与 disposal 在新 lease replay 前释放订阅与投射。旧回调或重入测量不得复活已撤销 target。cleanup 只恢复仍归本 owner 的宿主属性，保留宿主原始值及后写。Web 实现可拥有独立 translate 属性而不是 transform；外部后写 translate 覆盖该投射，后续 State 刷新及 cleanup 均保留而不覆盖；该字段在本 lease 余下期间持续退让。独立位移更新不重定义 resting constraints。缺少或停用 layout binding 时保留原 available-space-only 行为。初始声明即使停用也校验全部字段。运行期先读全部源并传播读取错误；合法 false enabled 随后停用投射，不因其他运行值暂非法而阻止恢复。enabled 非法时撤销投射。
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-UNKNOWN
+    text:
+      en: Unknown available region, unknown required root-text metric, invalid binding, or a region smaller than unavoidable border/padding chrome is not replaced with zero or a viewport guess. While it still owns the required projection fields, layout realization must fail closed for visibility and interaction while retaining logical instance/open ownership and independent dismissal routes. Existing modal/focus ownership may remain active; hidden interaction is not proof of complete zero-space accessibility recovery. A host without this capability rejects the requested layout explicitly. Diagnostics remain host/module facts; no new author measurement State or complete zero-space accessibility guarantee is introduced. Recovery from valid facts reapplies current intent without recreating the logical component. A later external writer takes precedence; lost projection ownership is explicitly unsupported realization, not a guarantee of hidden interaction, and never authorizes taking over hidden/inert attributes.
+      zh-CN: unknown available region、所需 root-text metric 未知、binding 非法或区域小于不可避免 border/padding chrome 时，不得伪造 zero 或 viewport 猜测。仍持有所需投射字段时，布局实现须对可见性与交互 fail closed，同时保留逻辑实例/open 所有权及独立关闭通路；既有 modal/focus 所有权可能仍活跃，隐藏交互不表示已证明完整 zero-space accessibility recovery。不具备能力的 host 明确拒绝所请求 layout。诊断仍是 host/module 事实，不增加作者测量 State 或完整 zero-space accessibility 保证。恢复有效事实时重放当前意图，不重建逻辑组件。外部后写优先；丢失投射所有权属于明确 unsupported realization，不能保证隐藏交互，也不授权接管 hidden/inert 属性。
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-WEB-BOUNDARY
+    text:
+      en: The draft Web realization supports untransformed fixed-coordinate compositions only. At each application it rejects target transform/scale/rotate and composed ancestors that alter physical coordinates or fixed containing blocks. Diagnostics describe the last application; continuous CSS animations and arbitrary ancestor style changes are not completely observed and remain unsupported. Target box resize and the root-text probe have lease-owned observation. CSSOM projection tests do not establish native intrinsic layout, scrolling, or complete dynamic composition conformance.
+      zh-CN: 当前 draft Web realization 仅支持无变换的 fixed 坐标组合。每次 apply 拒绝 target transform/scale/rotate 及改变物理坐标或 fixed containing block 的 composed ancestors。诊断描述最后一次 apply；连续 CSS 动画和任意祖先样式变化未完整观察，仍属 unsupported。target box resize 与 root-text probe 使用 lease 所有的观察。CSSOM 投射测试不证明 native intrinsic layout、scrolling 或完整动态组合符合性。
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-0003, C-FEEDBACK-STYLE-0004]
+  hostCaps: [HC-AVAILABLE-SPACE-0001]
+verifies:
+  tests: [T-AVAILABLE-SPACE-LAYOUT-0001]
+sources:
+  - path: packages/core/src/positioning.ts
+  - path: packages/modules/positioning/src/impl.ts
+  - path: packages/modules/positioning/src/web/available-space-host.ts
+openQuestions:
+  - id: C-AVAILABLE-SPACE-LAYOUT-0001-Q-ADMISSION
+    question: Which independent source, intrinsic-layout, native host, transformed-composition and Compiler evidence admits this capability beyond its bounded draft realization?
+    blocks: [activation:C-AVAILABLE-SPACE-LAYOUT-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define neutral constrained extent and edge attachment over existing available-space leases without exposing host artifacts to prototypes.
+tags: [layout, available-space, extent, positioning]

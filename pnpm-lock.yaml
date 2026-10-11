@@ -1090,6 +1090,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
 
   packages/modules/presence:
     dependencies:

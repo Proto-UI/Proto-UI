@@ -40,6 +40,7 @@ export type OverlayConfigPatch = Readonly<{
   anchored?: boolean;
   /** Project a host-root available region without choosing placement or visual gutters. */
   availableSpace?: boolean;
+  availableLayout?: import('./positioning').AvailableLayoutBinding;
   strategy?: AnchoredPositionStrategy;
   avoidCollisions?: boolean;
   collisionBoundary?: AnchoredCollisionBoundary;
@@ -67,6 +68,7 @@ export type OverlayConfig = Readonly<{
   alignOffset: number;
   anchored: boolean;
   availableSpace?: boolean;
+  availableLayout?: import('./positioning').AvailableLayoutBinding;
   strategy: AnchoredPositionStrategy;
   avoidCollisions: boolean;
   collisionBoundary: AnchoredCollisionBoundary;

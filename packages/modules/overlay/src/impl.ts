@@ -612,6 +612,16 @@ export class OverlayModuleImpl extends ModuleBase {
   configure(patch: OverlayConfigPatch): void {
     this.ensureSetup('overlay.configure');
 
+    const layout = patch.availableLayout ?? this.config.availableLayout;
+    const hasAvailableSpace = patch.availableSpace ?? this.config.availableSpace;
+    if (layout && !hasAvailableSpace)
+      throw new Error('[Overlay] availableLayout requires availableSpace.');
+    if (patch.availableLayout !== undefined) {
+      if (!this.availableSpace?.bindLayout)
+        throw new Error('[Overlay] available layout capability unavailable.');
+      this.availableSpace.bindLayout(patch.availableLayout);
+    }
+
     this.patchValue('defaultOpen', patch.defaultOpen);
     this.patchValue('closeOnEscape', patch.closeOnEscape);
     this.patchValue('closeOnOutsidePress', patch.closeOnOutsidePress);
@@ -624,6 +634,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.patchValue('alignOffset', patch.alignOffset);
     this.patchValue('anchored', patch.anchored);
     this.patchValue('availableSpace', patch.availableSpace);
+    this.patchValue('availableLayout', patch.availableLayout);
     this.patchValue('strategy', patch.strategy);
     this.patchValue('avoidCollisions', patch.avoidCollisions);
     this.patchValue('collisionBoundary', patch.collisionBoundary);

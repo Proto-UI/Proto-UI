@@ -1,3 +1,4 @@
+import type { State } from './state';
 export type AnchoredPositionSide = 'top' | 'right' | 'bottom' | 'left';
 export type AnchoredPositionAlign = 'start' | 'center' | 'end';
 export type AnchoredPositionStrategy = 'absolute' | 'fixed';
@@ -54,7 +55,44 @@ export type AvailableSpaceFrame = Readonly<{
 }>;
 export type AvailableSpaceConnection = Readonly<{ target: unknown; boundary: 'root-content' }>;
 export interface AvailableSpaceHandle {
+  /** Setup-only; resolved and observed by Positioning, never by the prototype host. */
+  bindLayout?(binding: AvailableLayoutBinding): void;
   connect(connection: AvailableSpaceConnection): void;
   requestUpdate(): void;
   disconnect(): void;
 }
+
+/** Neutral constrained layout intent; host measurements never become author State. */
+export type AvailableLayoutEdge = 'top' | 'right' | 'bottom' | 'left';
+export type AvailableLayoutExtent = 'intrinsic' | 'fraction';
+export type AvailableLayoutUnit =
+  | 'logical'
+  | 'root-text'
+  | 'available'
+  | 'available-minus-root-text';
+export type AvailableLayoutValue<T> = T | State<T>;
+export type AvailableLayoutLengthBinding = Readonly<{
+  unit: AvailableLayoutValue<AvailableLayoutUnit>;
+  value: AvailableLayoutValue<number>;
+}>;
+export type AvailableLayoutLength = Readonly<{ unit: AvailableLayoutUnit; value: number }>;
+export type AvailableLayoutBinding = Readonly<{
+  enabled?: AvailableLayoutValue<boolean>;
+  edge: AvailableLayoutValue<AvailableLayoutEdge>;
+  extent: AvailableLayoutValue<AvailableLayoutExtent>;
+  fraction?: AvailableLayoutValue<number>;
+  minimum?: AvailableLayoutLengthBinding;
+  maximum?: AvailableLayoutLengthBinding;
+  displacement?: State<number>;
+}>;
+export type AvailableLayoutSnapshot = Readonly<{
+  edge: AvailableLayoutEdge;
+  extent: AvailableLayoutExtent;
+  fraction: number;
+  minimum: AvailableLayoutLength;
+  maximum: AvailableLayoutLength;
+  displacement: number;
+}>;
+export type AvailableLayoutFrame =
+  | Readonly<{ status: 'ready'; value: AvailableLayoutSnapshot }>
+  | Readonly<{ status: 'disabled' | 'invalid' }>;

@@ -1,4 +1,7 @@
+import type { StatePort } from '@proto.ui/module-state';
+import { availableLayoutStates, readAvailableLayout } from './available-layout';
 import type {
+  AvailableLayoutBinding,
   AvailableSpaceConnection,
   AvailableSpaceHandle,
   AnchoredPositionConfig,
@@ -33,6 +36,54 @@ export class PositioningModuleImpl extends ModuleBase {
   setCallbackDispatcher(dispatch: (callback: () => void) => void): void {
     if (!this.terminal) this.dispatchCallback = dispatch;
   }
+  private layoutBinding: AvailableLayoutBinding | null = null;
+  private layoutWatchOffs: (() => void)[] = [];
+  private layoutWatchEpoch = 0;
+
+  constructor(
+    caps: CapsVaultView,
+    private readonly statePort?: StatePort
+  ) {
+    super(caps);
+  }
+
+  private clearLayoutWatches(): void {
+    this.layoutWatchEpoch++;
+    this.layoutWatchOffs.splice(0).forEach((off) => off());
+  }
+
+  private watchLayout(): void {
+    this.clearLayoutWatches();
+    const binding = this.layoutBinding;
+    if (!binding || !this.availableConnection) return;
+    const handles = availableLayoutStates(binding);
+    if (handles.length && !this.statePort)
+      throw new Error('[Positioning] layout State observation unavailable.');
+    const epoch = this.layoutWatchEpoch;
+    const lease = this.availableLease;
+    const current = () =>
+      !this.terminal &&
+      epoch === this.layoutWatchEpoch &&
+      this.availableLease === lease &&
+      this.layoutBinding === binding;
+    try {
+      for (const handle of handles) {
+        const off = this.statePort!.watch(handle as any, () => {
+          if (!current()) return;
+          const frame = readAvailableLayout(binding);
+          if (current()) lease?.updateLayout?.(frame);
+        });
+        if (!current()) {
+          off();
+          return;
+        }
+        this.layoutWatchOffs.push(off);
+      }
+    } catch (error) {
+      if (epoch === this.layoutWatchEpoch) this.clearLayoutWatches();
+      throw error;
+    }
+  }
 
   protected override onCapsEpoch(): void {
     if (this.terminal) return;
@@ -42,6 +93,7 @@ export class PositioningModuleImpl extends ModuleBase {
 
   private attachAvailable(connection: AvailableSpaceConnection): void {
     const version = ++this.availableVersion;
+    this.clearLayoutWatches();
     const previous = this.availableLease;
     this.availableLease = null;
     previous?.dispose();
@@ -55,17 +107,71 @@ export class PositioningModuleImpl extends ModuleBase {
     if (!this.caps.has(AVAILABLE_SPACE_HOST_CAP)) return;
     const host = this.caps.get(AVAILABLE_SPACE_HOST_CAP);
     if (!host) return;
-    const lease = host.attach({ ...connection, viewEpoch });
+    if (this.layoutBinding && !host.supportsLayout) {
+      throw new Error('[Positioning] Host does not support constrained available layout.');
+    }
+    const layout = this.layoutBinding ? readAvailableLayout(this.layoutBinding) : undefined;
+    if (
+      this.terminal ||
+      version !== this.availableVersion ||
+      this.availableConnection !== connection
+    )
+      return;
+    const lease = host.attach({ ...connection, viewEpoch, layout });
+    if (this.layoutBinding && !lease.updateLayout) {
+      lease.dispose();
+      throw new Error('[Positioning] Host lease does not support constrained available layout.');
+    }
     if (
       this.terminal ||
       version !== this.availableVersion ||
       this.availableConnection !== connection
     )
       lease.dispose();
-    else this.availableLease = lease;
+    else {
+      this.availableLease = lease;
+      try {
+        this.watchLayout();
+      } catch (error) {
+        if (this.availableLease === lease) {
+          this.availableLease = null;
+          lease.dispose();
+        }
+        throw error;
+      }
+    }
   }
 
   readonly availableHandle: AvailableSpaceHandle = {
+    bindLayout: (binding) => {
+      this.sys.ensureSetup('availableSpace.bindLayout');
+      if (readAvailableLayout(binding, true).status === 'invalid')
+        throw new TypeError('[Positioning] Invalid available layout binding.');
+      if (this.terminal) return;
+      if (this.availableLease && !this.availableLease.updateLayout)
+        throw new Error('[Positioning] Host lease does not support constrained available layout.');
+      this.layoutBinding = binding;
+      const priorLease = this.availableLease;
+      try {
+        this.watchLayout();
+      } catch (error) {
+        if (priorLease && this.availableLease === priorLease) {
+          this.availableLease = null;
+          priorLease.dispose();
+        }
+        throw error;
+      }
+      const lease = this.availableLease;
+      const epoch = this.layoutWatchEpoch;
+      const frame = readAvailableLayout(binding);
+      if (
+        !this.terminal &&
+        epoch === this.layoutWatchEpoch &&
+        this.layoutBinding === binding &&
+        this.availableLease === lease
+      )
+        lease?.updateLayout?.(frame);
+    },
     connect: (connection) => {
       if (this.terminal) return;
       const same =
@@ -85,6 +191,7 @@ export class PositioningModuleImpl extends ModuleBase {
     disconnect: () => {
       this.availableVersion++;
       this.availableEpoch++;
+      this.clearLayoutWatches();
       const previous = this.availableLease;
       this.availableLease = null;
       this.availableConnection = null;
@@ -191,3 +298,5 @@ export class PositioningModuleImpl extends ModuleBase {
     this.dispatchCallback = () => {};
   }
 }
+
+export { resolveAvailableExtent } from './available-layout';
