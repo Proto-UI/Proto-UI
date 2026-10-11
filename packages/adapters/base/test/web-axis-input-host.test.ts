@@ -189,3 +189,242 @@ describe('Web normalized axis input', () => {
     expect(replacement.style.touchAction).toBe('');
   });
 });
+
+// T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-EXTENT
+// T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME
+describe('opt-in physical extent basis', () => {
+  const leases: { dispose(): void }[] = [];
+  afterEach(() => {
+    leases.splice(0).forEach((lease) => lease.dispose());
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+  function frames() {
+    let id = 0;
+    const pending = new Map<number, FrameRequestCallback>();
+    const seen: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((fn) => {
+      seen.push(fn);
+      pending.set(++id, fn);
+      return id;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((key) => {
+      pending.delete(key);
+    });
+    return {
+      pending,
+      seen,
+      tick() {
+        const jobs = [...pending.values()];
+        pending.clear();
+        jobs.forEach((fn) => fn(0));
+      },
+    };
+  }
+  function fixture(extra: Partial<AxisInputConfig> = {}) {
+    const input = target();
+    const samples: AxisInputSample[] = [];
+    let rect = { left: 10, top: 20, width: 200, height: 100 };
+    input.getBoundingClientRect = () => rect as DOMRect;
+    const binding: AxisInputHostBinding = {
+      inputTarget: input,
+      geometryTarget: input,
+      config: { ...config, contactBasis: 'cancel-on-extent-change', ...extra },
+      onSample: (s) => samples.push(s),
+    };
+    const lease = createWebAxisInputHost().attach(binding);
+    leases.push(lease);
+    return {
+      input,
+      samples,
+      binding,
+      lease,
+      set: (patch: Partial<typeof rect>) => {
+        rect = { ...rect, ...patch };
+      },
+    };
+  }
+  it.each([200.0001, 400])(
+    'cancels an idle captured contact for strict span change to %s',
+    (width) => {
+      const f = frames();
+      const h = fixture();
+      expect(f.pending.size).toBe(0);
+      pointer(h.input, 'pointerdown');
+      expect(h.input.hasPointerCapture(1)).toBe(true);
+      h.set({ width });
+      f.tick();
+      expect(h.samples).toHaveLength(2);
+      expect(h.samples[1]).toEqual({ phase: 'cancel', reason: 'basis-changed' });
+      expect(h.input.hasPointerCapture(1)).toBe(false);
+      expect(f.pending.size).toBe(0);
+      pointer(h.input, 'pointerup');
+      expect(h.samples).toHaveLength(2);
+      h.lease.dispose();
+    }
+  );
+  it('keeps translation and same-span frames live, with fixed start normalization', () => {
+    const f = frames();
+    const h = fixture();
+    pointer(h.input, 'pointerdown');
+    h.set({ left: 90, top: 250 });
+    f.tick();
+    f.tick();
+    expect(h.samples.map((s) => s.phase)).toEqual(['start']);
+    pointer(h.input, 'pointermove', 160);
+    expect(h.samples[1]).toMatchObject({ phase: 'move', delta: 0.5 });
+    pointer(h.input, 'pointerup', 160);
+    expect(f.pending.size).toBe(0);
+    h.lease.dispose();
+  });
+  it.each(['pointermove', 'pointerup'])(
+    'checks extent before %s even before the next frame',
+    (type) => {
+      const f = frames();
+      const h = fixture();
+      pointer(h.input, 'pointerdown');
+      h.set({ width: 300 });
+      pointer(h.input, type, 160);
+      expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel']);
+      expect(h.samples[1]).toEqual({ phase: 'cancel', reason: 'basis-changed' });
+      expect(f.pending.size).toBe(0);
+      h.lease.dispose();
+    }
+  );
+  it.each([{ axis: 'vertical', reverse: true }, { direction: 'rtl' }] as const)(
+    'keeps direction policy independent (%s)',
+    (extra) => {
+      const f = frames();
+      const h = fixture(extra);
+      pointer(h.input, 'pointerdown');
+      h.set('axis' in extra && extra.axis === 'vertical' ? { height: 100.1 } : { width: 200.1 });
+      f.tick();
+      expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
+      h.lease.dispose();
+    }
+  );
+  it('rejects unsupported sampling before accepting a contact', () => {
+    const descriptor = Object.getOwnPropertyDescriptor(window, 'requestAnimationFrame');
+    Object.defineProperty(window, 'requestAnimationFrame', {
+      configurable: true,
+      value: undefined,
+    });
+    try {
+      const h = fixture();
+      pointer(h.input, 'pointerdown');
+      pointer(h.input, 'pointerup');
+      expect(h.samples).toEqual([]);
+      expect(h.input.hasPointerCapture(1)).toBe(false);
+      h.lease.dispose();
+    } finally {
+      if (descriptor) Object.defineProperty(window, 'requestAnimationFrame', descriptor);
+      else Reflect.deleteProperty(window, 'requestAnimationFrame');
+    }
+  });
+  it('does not let an old frame cancel a fresh contact and cleans up reentrant disposal', () => {
+    const f = frames();
+    const h = fixture();
+    pointer(h.input, 'pointerdown');
+    const stale = f.seen[0];
+    pointer(h.input, 'pointerup');
+    pointer(h.input, 'pointerdown');
+    h.set({ width: 300 });
+    stale?.(0);
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'end', 'start']);
+    h.lease.update({
+      ...h.binding,
+      onSample(s) {
+        h.samples.push(s);
+        if (s.phase === 'cancel') h.lease.dispose();
+      },
+    });
+    // The accepted contact keeps its start callback; use a fresh contact for the new callback.
+    pointer(h.input, 'pointerup');
+    pointer(h.input, 'pointerdown');
+    h.set({ width: 400 });
+    f.tick();
+    expect(f.pending.size).toBe(0);
+    expect(h.input.hasPointerCapture(1)).toBe(false);
+    const count = h.samples.length;
+    pointer(h.input, 'pointerdown');
+    expect(h.samples).toHaveLength(count);
+    h.lease.dispose();
+  });
+  it('ignores an equal policy, rejects invalid updates and cancels a changed policy once', () => {
+    const f = frames();
+    const h = fixture();
+    pointer(h.input, 'pointerdown');
+    h.lease.update({ ...h.binding, config: { ...h.binding.config } });
+    expect(h.samples).toHaveLength(1);
+    expect(f.pending.size).toBe(1);
+    expect(() =>
+      h.lease.update({ ...h.binding, config: { ...h.binding.config, contactBasis: 'bad' as any } })
+    ).toThrow(/contactBasis/);
+    expect(h.samples).toHaveLength(1);
+    expect(f.pending.size).toBe(1);
+    h.lease.update({
+      ...h.binding,
+      config: { ...h.binding.config, contactBasis: 'preserve-start' },
+    });
+    expect(h.samples[1]).toEqual({ phase: 'cancel', reason: 'configuration-changed' });
+    expect(f.pending.size).toBe(0);
+    pointer(h.input, 'pointerup');
+    expect(h.samples).toHaveLength(2);
+    h.lease.dispose();
+  });
+  it('cancels detached or invalid geometry on a held frame without a stale end', () => {
+    const f = frames();
+    const h = fixture();
+    pointer(h.input, 'pointerdown');
+    h.set({ width: 0 });
+    f.tick();
+    expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'invalid-geometry' });
+    h.set({ width: 200 });
+    pointer(h.input, 'pointerdown');
+    h.input.remove();
+    f.tick();
+    expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'target-detached' });
+    expect(f.pending.size).toBe(0);
+    expect(h.input.hasPointerCapture(1)).toBe(false);
+    h.lease.dispose();
+  });
+  it('ignores a queued detach observer from a previous contact', () => {
+    const observers: { callback: MutationCallback; observer: MutationObserver }[] = [];
+    vi.stubGlobal(
+      'MutationObserver',
+      class {
+        constructor(callback: MutationCallback) {
+          observers.push({ callback, observer: this as unknown as MutationObserver });
+        }
+        observe() {}
+        disconnect() {}
+      }
+    );
+    frames();
+    const h = fixture();
+    pointer(h.input, 'pointerdown');
+    // Move owns its own first observer; AxisInput installs the second observer at onStart.
+    expect(observers).toHaveLength(2);
+    const old = observers[1];
+    pointer(h.input, 'pointerup');
+    pointer(h.input, 'pointerdown');
+    expect(observers).toHaveLength(4);
+    h.input.remove();
+    old.callback([], old.observer);
+    expect(h.samples.map((s) => s.phase)).toEqual(['start', 'end', 'start']);
+    const current = observers[3];
+    current.callback([], current.observer);
+    expect(h.samples.at(-1)).toEqual({ phase: 'cancel', reason: 'target-detached' });
+    h.lease.dispose();
+  });
+  it('preserves default resizing without allocating contact frames', () => {
+    const f = frames();
+    const h = fixture({ contactBasis: undefined });
+    pointer(h.input, 'pointerdown');
+    h.set({ width: 400 });
+    pointer(h.input, 'pointermove', 160);
+    expect(h.samples[1]).toMatchObject({ phase: 'move', delta: 0.5 });
+    expect(f.pending.size).toBe(0);
+    h.lease.dispose();
+  });
+});

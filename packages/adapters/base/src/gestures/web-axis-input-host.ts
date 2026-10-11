@@ -52,8 +52,19 @@ function sameConfig(a: AxisInputConfig, b: AxisInputConfig): boolean {
     a.direction === b.direction &&
     a.reverse === b.reverse &&
     a.disabled === b.disabled &&
-    a.readOnly === b.readOnly
+    a.readOnly === b.readOnly &&
+    (a.contactBasis ?? 'preserve-start') === (b.contactBasis ?? 'preserve-start')
   );
+}
+
+function validateContactBasis(config: AxisInputConfig): void {
+  if (
+    config.contactBasis !== undefined &&
+    config.contactBasis !== 'preserve-start' &&
+    config.contactBasis !== 'cancel-on-extent-change'
+  ) {
+    throw new TypeError('[AxisInput] Invalid contactBasis policy.');
+  }
 }
 
 /** Web-only conversion. DOM geometry and Move samples never leave this host. */
@@ -62,6 +73,7 @@ export function createWebAxisInputHost(
 ): AxisInputHost {
   return {
     attach(initial): AxisInputHostLease {
+      validateContactBasis(initial.config);
       let binding = initial;
       let input = webTarget(binding.inputTarget);
       let geometryTarget = webTarget(binding.geometryTarget);
@@ -69,11 +81,14 @@ export function createWebAxisInputHost(
       let session: Session | null = null;
       let pending: Geometry | null = null;
       let observer: MutationObserver | null = null;
+      let basisFrame: { window: Window; id: number } | null = null;
       let epoch = 0;
       let disposed = false;
       const stopObserver = () => {
         observer?.disconnect();
         observer = null;
+        if (basisFrame) basisFrame.window.cancelAnimationFrame(basisFrame.id);
+        basisFrame = null;
       };
       const terminate = (reason: AxisInputCancelReason) => {
         const old = session;
@@ -91,6 +106,15 @@ export function createWebAxisInputHost(
           activation: 'immediate',
           shouldStart(sample) {
             if (disposed || currentEpoch !== epoch || !input.isConnected) return false;
+            if (binding.config.contactBasis === 'cancel-on-extent-change') {
+              const win = geometryTarget.ownerDocument.defaultView;
+              if (
+                !win ||
+                typeof win.requestAnimationFrame !== 'function' ||
+                typeof win.cancelAnimationFrame !== 'function'
+              )
+                return false;
+            }
             pending = geometryOf(geometryTarget, binding.config);
             return !!pending && !!normalized(sample, binding.config, pending, 'start');
           },
@@ -103,9 +127,14 @@ export function createWebAxisInputHost(
               restart('invalid-geometry');
               return;
             }
+            const current = session;
             if (typeof MutationObserver === 'function') {
               observer = new MutationObserver(() => {
-                if (session && (!input.isConnected || !geometryTarget.isConnected))
+                if (
+                  session === current &&
+                  currentEpoch === epoch &&
+                  (!input.isConnected || !geometryTarget.isConnected)
+                )
                   restart('target-detached');
               });
               observer.observe(geometryTarget.ownerDocument.documentElement, {
@@ -113,7 +142,8 @@ export function createWebAxisInputHost(
                 subtree: true,
               });
             }
-            session.onSample(event);
+            observeBasis(current, currentEpoch);
+            current.onSample(event);
           },
           onMove(sample) {
             receive(sample, 'move', currentEpoch);
@@ -136,17 +166,42 @@ export function createWebAxisInputHost(
         terminate(reason);
         if (currentEpoch === epoch) connect();
       };
-      const receive = (sample: MoveGestureSample, phase: 'move' | 'end', currentEpoch: number) => {
-        const current = session;
-        if (disposed || currentEpoch !== epoch || !current) return;
+      const validBasis = (current: Session, currentEpoch: number): boolean => {
+        if (disposed || currentEpoch !== epoch || session !== current) return false;
         if (!input.isConnected || !geometryTarget.isConnected) {
           restart('target-detached');
-          return;
+          return false;
         }
-        if (!geometryOf(geometryTarget, binding.config)) {
+        const live = geometryOf(geometryTarget, binding.config);
+        if (disposed || currentEpoch !== epoch || session !== current) return false;
+        if (!live) {
           restart('invalid-geometry');
-          return;
+          return false;
         }
+        if (
+          binding.config.contactBasis === 'cancel-on-extent-change' &&
+          live.span !== current.geometry.span
+        ) {
+          restart('basis-changed');
+          return false;
+        }
+        return true;
+      };
+      const observeBasis = (current: Session, currentEpoch: number) => {
+        if (binding.config.contactBasis !== 'cancel-on-extent-change') return;
+        const win = geometryTarget.ownerDocument.defaultView!;
+        const tick = () => {
+          // A cancelled callback can still arrive; it belongs to this contact, not the next one.
+          if (disposed || currentEpoch !== epoch || session !== current) return;
+          basisFrame = null;
+          if (!validBasis(current, currentEpoch)) return;
+          basisFrame = { window: win, id: win.requestAnimationFrame(tick) };
+        };
+        basisFrame = { window: win, id: win.requestAnimationFrame(tick) };
+      };
+      const receive = (sample: MoveGestureSample, phase: 'move' | 'end', currentEpoch: number) => {
+        const current = session;
+        if (!current || !validBasis(current, currentEpoch)) return;
         const event = normalized(sample, binding.config, current.geometry, phase);
         if (!event) {
           restart('invalid-geometry');
@@ -162,6 +217,7 @@ export function createWebAxisInputHost(
       return {
         update(next) {
           if (disposed) return;
+          validateContactBasis(next.config);
           const nextInput = webTarget(next.inputTarget);
           const nextGeometry = webTarget(next.geometryTarget);
           const replaced = input !== nextInput || geometryTarget !== nextGeometry;

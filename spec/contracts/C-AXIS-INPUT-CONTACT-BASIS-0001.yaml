@@ -1,0 +1,44 @@
+id: C-AXIS-INPUT-CONTACT-BASIS-0001
+type: contract
+title: Axis Input can interrupt a contact when its normalization extent changes
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: A bounded generic extension awaiting independent source and host evidence; safe-region dependencies, root-text dependencies and Compiler conformance are separate unresolved capabilities.
+summary: Optional extent-sensitive interruption preserves existing start-normalized input while preventing a changed layout extent from committing a stale contact.
+statement:
+  en: Axis Input keeps domain value, snapping, dismissal and controlled-state policy in its consumer. Its optional contactBasis policy only governs validity of the host geometry span used for dimensionless samples; it adds no layout state or component-specific host operation.
+  zh-CN: Axis Input 将领域值、snap、关闭与受控状态策略留给消费者。可选 contactBasis 策略只治理无量纲 sample 所用宿主几何 span 的有效性，不增加布局 State 或组件专属宿主操作。
+criteria:
+  - id: C-AXIS-INPUT-CONTACT-BASIS-0001-POLICY
+    text:
+      en: The optional contactBasis configuration accepts preserve-start and cancel-on-extent-change. In a complete initial binding, omitted or undefined means preserve-start, preserving start-time normalization and intentional resizing including explicit snap consumers. In a partial sync patch, omitted or undefined retains the current policy; resetting requires explicit preserve-start. An invalid supplied value is rejected without replacing the previous configuration. Changing the policy during an accepted contact cancels through the existing configuration-changed path; a same-value sync is inert.
+      zh-CN: 可选 contactBasis 配置接受 preserve-start 与 cancel-on-extent-change。完整初始 binding 中省略或 undefined 表示 preserve-start，保留既有 start-time 归一化及主动缩放（包括显式 snap 消费者）。partial sync patch 中省略或 undefined 保留当前策略；重置须显式传 preserve-start。非法显式值须拒绝且不替换原配置。已接受接触期间更改策略沿既有 configuration-changed 路径取消；相同值 sync 无作用。
+  - id: C-AXIS-INPUT-CONTACT-BASIS-0001-EXTENT
+    text:
+      en: For cancel-on-extent-change, the baseline is the same finite positive axis span used to normalize the accepted start. A different finite positive span observed during the contact terminates it with basis-changed before publishing another move or end. Compare finite span by exact numeric equality with no implicit epsilon; an unchanged span with a changed origin, including the consumer's own translation, is not invalidation. Repeated notifications with equal span are inert. New contacts establish a new baseline. Nonfinite or nonpositive geometry retains invalid-geometry; detached or replaced targets retain their existing reasons.
+      zh-CN: cancel-on-extent-change 的基准是 accepted start 归一化所用的同一有限正轴 span。接触期间观察到不同有限正 span，须在发布下一 move 或 end 前以 basis-changed 终止。有限 span 使用严格数值相等比较，不隐含 epsilon；origin 改变而 span 不变（包括消费者自身 translation）不构成失效。相同 span 的重复通知无作用。新接触建立新基准。非有限或非正几何保留 invalid-geometry；target 脱离或替换保留既有 reason。
+  - id: C-AXIS-INPUT-CONTACT-BASIS-0001-OBSERVATION
+    text:
+      en: An opted-in host rechecks the physical span at its rendering cadence while an accepted contact is active, including a held contact without further pointer movement, and synchronously before every move or end. Bounded active-contact frame sampling is allowed and covers changing scale as well as layout size; observers may accelerate checks but do not replace this guarantee. No timer or frame sampling remains when there is no accepted contact. A host unable to provide that observation refuses before accepting the opted-in contact, emitting neither start nor a fabricated terminal sample, rather than silently providing preserve-start. This bounded policy does not promise direct invalidation from root-text metrics or available-region changes that leave measured span unchanged; such dependencies need a separately defined generic path. Safe-region or text changes that actually change span follow the same extent rule.
+      zh-CN: opt-in 宿主在 accepted contact 活跃期间按宿主渲染节奏复核 physical span，包括不再移动指针的 held contact，并在每个 move 或 end 前同步复核。允许有界 active-contact frame sampling，覆盖 scale 与布局尺寸变化；observer 可加速检查但不能替代此保证。无 accepted contact 时不得保留 timer 或 frame sampling。宿主无法提供此观察时须在接受 opt-in 接触前拒绝，不发 start 或伪造 terminal sample，不得悄悄降为 preserve-start。本有界策略不保证直接感知 measured span 未变化的 root-text metric 或 available-region 变化；这些依赖须另有通用定义路径。实际改变 span 的安全区或文本变化遵循同一 extent 规则。
+  - id: C-AXIS-INPUT-CONTACT-BASIS-0001-LIFETIME
+    text:
+      en: First termination wins. Cancellation releases input capture, contact observers and active stream listeners, invalidates stale callbacks and prevents a later end from committing. Observer callbacks belonging to a prior contact cannot terminate a new contact on the same attachment. Target, capability, view or lease replacement, detach and terminal disposal preserve existing cleanup and at-most-one terminal sample. Callback reentrancy cannot reconnect a disposed lease or revive a cancelled session. The consumer owns restoring preview and handling controlled refusal; cancellation does not request or mutate its domain value.
+      zh-CN: 首个终止结果生效。取消释放 input capture、接触 observer 与活跃流 listener，使 stale callback 失效并阻止后续 end 提交。旧接触 observer 回调不得终止同一 attachment 上的新接触。target、capability、view 或 lease 替换、detach 与 terminal disposal 保留既有清理与最多一次 terminal sample。回调重入不得重连已释放 lease 或复活已取消 session。消费者负责恢复 preview 与受控拒绝；取消不请求或修改领域值。
+dependsOn:
+  contracts: [C-MOVE-GESTURE-0001]
+verifies:
+  tests: [T-AXIS-INPUT-CONTACT-BASIS-0001]
+sources:
+  - path: packages/core/src/axis-input.ts
+  - path: packages/modules/axis-input/src/create.ts
+  - path: packages/adapters/base/src/gestures/web-axis-input-host.ts
+openQuestions:
+  - id: C-AXIS-INPUT-CONTACT-BASIS-0001-Q-ADMISSION
+    question: When do independent module, host lifecycle, real-input and Compiler evidence justify stable admission of this bounded capability?
+    blocks: [activation:C-AXIS-INPUT-CONTACT-BASIS-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define opt-in observed-extent interruption without changing default normalization or admitting unimplemented root-metric and safe-region dependency observation.
+tags: [axis-input, gesture, geometry, lifecycle]

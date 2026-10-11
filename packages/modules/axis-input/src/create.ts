@@ -25,6 +25,7 @@ const INITIAL_CONFIG: AxisInputConfig = Object.freeze({
   disabled: true,
   readOnly: false,
   reverse: false,
+  contactBasis: 'preserve-start',
 });
 type Listener = (run: RunHandle<PropsBaseType>, sample: AxisInputSample) => void;
 
@@ -76,12 +77,20 @@ class AxisInputModuleImpl extends ModuleBase {
       },
       sync: (patch) => {
         this.sys.ensureCallback('axisInput.sync');
+        if (
+          patch.contactBasis !== undefined &&
+          patch.contactBasis !== 'preserve-start' &&
+          patch.contactBasis !== 'cancel-on-extent-change'
+        ) {
+          throw new TypeError('[AxisInput] Invalid contactBasis policy.');
+        }
         const next: AxisInputConfig = Object.freeze({
           axis: patch.axis ?? this.config.axis,
           direction: patch.direction ?? this.config.direction,
           disabled: patch.disabled ?? this.config.disabled,
           readOnly: patch.readOnly ?? this.config.readOnly,
           reverse: patch.reverse ?? this.config.reverse,
+          contactBasis: patch.contactBasis ?? this.config.contactBasis,
         });
         if (
           Object.keys(INITIAL_CONFIG).every(

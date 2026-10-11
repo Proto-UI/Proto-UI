@@ -1,0 +1,83 @@
+id: T-AXIS-INPUT-CONTACT-BASIS-0001
+type: test
+title: Axis Input contact-basis interruption evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Definition-stage cases need executable source, lifecycle and independent host evidence; no real-input or Compiler acceptance is inferred.
+summary: Checks compatible default normalization, opt-in held-contact size interruption, translation stability and terminal cleanup.
+cases:
+  - id: T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-POLICY
+    title: Policy configuration preserves defaults, validates updates and revokes changed contact policy
+    covers: [C-AXIS-INPUT-CONTACT-BASIS-0001-POLICY]
+    expectation: default-compatible-explicit-policy-invalid-update-rejected-same-update-inert
+  - id: T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-EXTENT
+    title: Changed extent cancels held contacts and preempts stale move or end while translation stays live
+    covers: [C-AXIS-INPUT-CONTACT-BASIS-0001-EXTENT, C-AXIS-INPUT-CONTACT-BASIS-0001-OBSERVATION]
+    expectation: idle-layout-change-cancels-once-origin-only-change-does-not-cancel
+  - id: T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME
+    title: Cancellation releases capture and stale session callbacks across host and view lifecycles
+    covers: [C-AXIS-INPUT-CONTACT-BASIS-0001-LIFETIME]
+    expectation: first-terminal-wins-old-observer-inert-fresh-contact-admitted-no-lease-resurrection
+implementations:
+  - id: axis-input-policy-module
+    kind: module-test
+    status: passing
+    path: packages/modules/axis-input/test/axis-input.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-POLICY]
+  - id: axis-input-web-extent-host
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/web-axis-input-host.test.ts
+    required: true
+    consumesCases:
+      [
+        T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-POLICY,
+        T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-EXTENT,
+        T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME,
+      ]
+  - id: axis-input-web-component-extent-composition
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/axis-input.integration.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME]
+    notes:
+      - Actual Adapter/runtime routing with synthetic geometry and simulated Pointer Events; this does not establish native layout, native input, non-Web or Compiler conformance.
+  - id: axis-input-react-extent-composition
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/axis-input.integration.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME]
+    notes:
+      - Actual Adapter/runtime routing with synthetic geometry and simulated Pointer Events; this does not establish native layout, native input, non-Web or Compiler conformance.
+  - id: axis-input-vue-extent-composition
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/axis-input.integration.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME]
+    notes:
+      - Actual Adapter/runtime routing with synthetic geometry and simulated Pointer Events; this does not establish native layout, native input, non-Web or Compiler conformance.
+  - id: axis-input-vue2-extent-composition
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/axis-input.integration.test.ts
+    required: true
+    consumesCases: [T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME]
+    notes:
+      - Actual Adapter/runtime routing with synthetic geometry and simulated Pointer Events; this does not establish native layout, native input, non-Web or Compiler conformance.
+verifies:
+  contracts: [C-AXIS-INPUT-CONTACT-BASIS-0001]
+sources:
+  - path: packages/adapters/base/test/web-axis-input-host.test.ts
+openQuestions:
+  - id: T-AXIS-INPUT-CONTACT-BASIS-0001-Q-EVIDENCE
+    question: Which source, four-runtime composition and native host evidence establishes each case without treating simulated observation as real layout?
+    blocks: [activation:T-AXIS-INPUT-CONTACT-BASIS-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define extent-interruption acceptance cases without declaring pre-existing tests as evidence of the new option.
+tags: [test, axis-input, geometry, cancellation]
