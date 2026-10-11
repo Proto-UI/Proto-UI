@@ -1,3 +1,4 @@
+import type { ContextKey, JsonObject } from '@proto.ui/types';
 import { defineAsHook, delay, type RunHandle } from '@proto.ui/core';
 import { createTransitionMachine, type TransitionMachineDriver } from './machine';
 import type {
@@ -7,6 +8,7 @@ import type {
   TransitionExposes,
   TransitionHandles,
   TransitionInterrupt,
+  TransitionInitialOpenBinding,
   TransitionProps,
   TransitionState,
 } from './types';
@@ -70,6 +72,34 @@ export const asTransition = defineAsHook<
       { options: ['reverse', 'wait', 'immediate'] }
     );
 
+    let initialOpenSource: Readonly<{ context: ContextKey<JsonObject>; field: string }> | null =
+      null;
+    const bindInitialOpen: TransitionInitialOpenBinding = (source) => {
+      // Match configure's setup-only default guard, before even an idempotent return.
+      appearDefault.setDefault(appearDefault.get());
+      if (
+        !source ||
+        typeof source.field !== 'string' ||
+        !source.field ||
+        !source.context ||
+        source.context.__brand !== 'ContextKey'
+      ) {
+        throw new Error(
+          '[asTransition] initial open source requires a ContextKey and direct field.'
+        );
+      }
+      if (initialOpenSource) {
+        if (
+          initialOpenSource.context === source.context &&
+          initialOpenSource.field === source.field
+        )
+          return;
+        throw new Error('[asTransition] initial open source is already bound.');
+      }
+      initialOpenSource = Object.freeze({ context: source.context, field: source.field });
+    };
+    def.expose.method('bindInitialOpen', bindInitialOpen);
+
     let currentRun: RunHandle<TransitionProps> | null = null;
     const getProps = () => currentRun?.props.get();
 
@@ -119,7 +149,15 @@ export const asTransition = defineAsHook<
       currentRun = run;
       const props = run.props.get();
       const controlled = run.props.isProvided('open');
-      const open = controlled ? !!props.open : !!props.defaultOpen;
+      let open = controlled ? !!props.open : !!props.defaultOpen;
+      if (!controlled && !run.props.isProvided('defaultOpen') && initialOpenSource) {
+        const value = run.context.read(initialOpenSource.context);
+        const initialOpen = value[initialOpenSource.field];
+        if (!Object.hasOwn(value, initialOpenSource.field) || typeof initialOpen !== 'boolean') {
+          throw new Error('[asTransition] initial open context field must be a required boolean.');
+        }
+        open = initialOpen;
+      }
       const appear = run.props.isProvided('appear') ? !!props.appear : appearDefault.get();
       machine.initialize(open, appear);
     });
@@ -218,6 +256,10 @@ export const asTransition = defineAsHook<
       if (!configured) appearDefault.setDefault(appearDefault.get());
     };
 
-    return { transitionState, isPresent, controls, configure };
+    const bindInitialOpen = requireProjectedHandle(
+      result.getMethod?.('bindInitialOpen') as TransitionInitialOpenBinding | undefined,
+      'bindInitialOpen'
+    );
+    return { transitionState, isPresent, controls, configure, bindInitialOpen };
   },
 });

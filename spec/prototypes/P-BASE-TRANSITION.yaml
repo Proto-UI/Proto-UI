@@ -41,8 +41,8 @@ criteria:
       contracts: [C-PROPS-0001, C-PROPS-0003, C-AS-TRANSITION-0001]
   - id: P-BASE-TRANSITION-PUBLIC-SURFACE
     text:
-      zh-CN: Transition 必须 expose `transitionState`、`isPresent`、`enter`、`leave`、`complete`、分组 `controls`，以及 `beforeEnter`、`afterEnter`、`beforeLeave`、`afterLeave` signals；authored asHook handle 必须投射对应 state、controls 与 setup-only `configure`。
-      en: Transition must expose `transitionState`, `isPresent`, `enter`, `leave`, `complete`, grouped `controls`, and the `beforeEnter`, `afterEnter`, `beforeLeave`, and `afterLeave` signals; the authored-asHook handle must project the corresponding state, controls, and setup-only `configure`.
+      zh-CN: Transition 必须 expose `transitionState`、`isPresent`、`enter`、`leave`、`complete`、分组 `controls`，以及 `beforeEnter`、`afterEnter`、`beforeLeave`、`afterLeave` signals；authored asHook handle 必须投射对应 state、controls 与 setup-only `configure` 与 `bindInitialOpen`；后者通过捕获 method 投射，任何 runtime route 调用仍必须拒绝。
+      en: Transition must expose `transitionState`, `isPresent`, `enter`, `leave`, `complete`, grouped `controls`, and the `beforeEnter`, `afterEnter`, `beforeLeave`, and `afterLeave` signals; the authored-asHook handle must project the corresponding state, controls, and setup-only `configure` and `bindInitialOpen`; the latter is projected through a captured method and must still reject calls through every runtime route.
     dependsOn:
       contracts: [C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001, C-EXPOSE-0002, C-AS-TRANSITION-0001]
   - id: P-BASE-TRANSITION-ENTER-SEQUENCING
@@ -134,4 +134,7 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged standalone and authored-asHook Transition entries, perceptual phase and ViewIntent boundaries, public controls, interruption, fallback completion, host neutrality, and reduced-motion behavior.
+  - version: 0.2.0-rc.0
+    change: refined
+    summary: Added the setup-only initial boolean context-source binding to the authored handle without changing the phase machine.
 tags: [prototype, base, transition, as-hook, lifecycle, view-intent, reduced-motion, accessibility]

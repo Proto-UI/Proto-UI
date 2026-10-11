@@ -4,7 +4,8 @@ export type LifecycleCallbackOrderExpectation =
   | 'queued-mounted-callback-invalidated-after-unmount'
   | 'update-render-commit-updated'
   | 'repeatable-unmounted-preserves-instance-until-terminal-dispose'
-  | 'setup-created-once-mounted-unmounted-per-epoch';
+  | 'setup-created-once-mounted-unmounted-per-epoch'
+  | 'direct-and-hook-callbacks-run-in-registration-order';
 
 export type LifecycleTracePoint =
   | 'setup'
@@ -27,10 +28,22 @@ export type LifecycleCallbackOrderCase = {
   covers: readonly string[];
   expectation: LifecycleCallbackOrderExpectation;
   expectedOrder?: readonly LifecycleTracePoint[];
+  expectedCallbackOrder?: readonly string[];
   notes?: readonly string[];
 };
 
 export const LIFECYCLE_CALLBACK_ORDER_CASES = [
+  {
+    id: 'same-checkpoint-authored-registration-order',
+    title: 'direct and once-hook callbacks share the successful setup registration sequence',
+    specCase: 'T-LIFECYCLE-0001-CASE-SAME-CHECKPOINT-FIFO',
+    covers: ['C-LIFECYCLE-0002-I'],
+    expectation: 'direct-and-hook-callbacks-run-in-registration-order',
+    expectedCallbackOrder: ['A', 'B', 'C', 'D'],
+    notes: [
+      'Setup registers outer A, once-hook B, outer C, the same hook again, then outer D. Normal RuntimeSession evidence is separate from this portable expectation.',
+    ],
+  },
   {
     id: 'setup-registration-setup-only',
     title: 'lifecycle callback registration defers invocation to runtime flow',

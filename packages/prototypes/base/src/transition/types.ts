@@ -1,3 +1,4 @@
+import type { ContextKey, JsonObject } from '@proto.ui/types';
 import type {
   BorrowedStateHandle,
   ExposeEvent,
@@ -19,6 +20,16 @@ export type TransitionProps = {
   interrupt?: TransitionInterrupt;
 };
 
+/** Setup-only initial fallback; no selector callback or ongoing context subscription. */
+export type TransitionInitialOpenSource<T extends JsonObject> = Readonly<{
+  context: ContextKey<T>;
+  field: { [K in keyof T]-?: T[K] extends boolean ? K : never }[keyof T] & string;
+}>;
+
+export type TransitionInitialOpenBinding = <T extends JsonObject>(
+  source: TransitionInitialOpenSource<T>
+) => void;
+
 export type TransitionControls = {
   enter(): void;
   leave(): void;
@@ -33,6 +44,8 @@ export type TransitionConfig = {
 };
 
 export type TransitionExposes = {
+  /** Authored capture/projection entry; always setup-only, never a runtime command. */
+  bindInitialOpen: ExposeMethod<TransitionInitialOpenBinding>;
   beforeEnter: ExposeEvent<void>;
   afterEnter: ExposeEvent<void>;
   beforeLeave: ExposeEvent<void>;
@@ -53,6 +66,8 @@ export type TransitionHandles = {
   controls: TransitionControls;
   /** Sets setup-time defaults. Explicit host props take precedence at runtime. */
   configure(config: TransitionConfig): void;
+  /** Samples a boolean context field once at created only without explicit own open/defaultOpen. */
+  bindInitialOpen: TransitionInitialOpenBinding;
 };
 
 export type TransitionAsHookContract = {

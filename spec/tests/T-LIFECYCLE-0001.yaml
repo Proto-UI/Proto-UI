@@ -51,13 +51,28 @@ cases:
       - C-LIFECYCLE-0006-B
       - C-LIFECYCLE-0006-D
     expectation: setup-created-once-mounted-unmounted-per-epoch
+  - id: T-LIFECYCLE-0001-CASE-SAME-CHECKPOINT-FIFO
+    title: Authored callbacks share setup registration order across once-hook composition
+    covers:
+      - C-LIFECYCLE-0002-I
+    expectation: direct-and-hook-callbacks-run-in-registration-order
+    notes:
+      - Normal RuntimeSession executes A, hook B, C, repeated hook B, D as A/B/C/D across all authored checkpoints and two view epochs, preserving synchronous State visibility.
 implementations:
+  - id: runtime-lifecycle-same-checkpoint-order
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-0001-CASE-SAME-CHECKPOINT-FIFO
   - id: lifecycle-callback-order-fixture
     kind: fixture
     status: active
     path: packages/spec/fixtures/src/lifecycle/callback-order.ts
     required: true
     consumesCases:
+      - T-LIFECYCLE-0001-CASE-SAME-CHECKPOINT-FIFO
       - T-LIFECYCLE-0001-CASE-SETUP-REGISTRATION
       - T-LIFECYCLE-0001-CASE-INITIAL-ORDER
       - T-LIFECYCLE-0001-CASE-MOUNTED-CANCELLED-AFTER-UNMOUNT

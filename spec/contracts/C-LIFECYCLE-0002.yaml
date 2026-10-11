@@ -46,7 +46,12 @@ criteria:
     text:
       zh-CN: 同一 Proto instance 可以经历多个 mount epoch，后续 mount 不得重新执行 setup 或 created。
       en: One Proto instance may experience multiple mount epochs; later mounts must not rerun setup or created.
+  - id: C-LIFECYCLE-0002-I
+    text:
+      zh-CN: 同一实例、同一次 lifecycle checkpoint 中，正常返回的 authored callback 必须按 setup chain 中成功注册的先后顺序调用；直接注册与 hook 内注册共享序列，once hook 重复调用不得重复注册。前一 callback 的同步部分返回后才调用下一个，已完成的同步 State 写入按 State 契约对后者可见。本规则不扩展异步 await、抛错恢复、跨实例顺序或私有 Module teardown 语义。
+      en: For one instance and one occurrence of a lifecycle checkpoint, normally returning authored callbacks must be invoked in successful setup-chain registration order. Direct and hook registrations share that sequence, and repeated once-hook calls must not register again. The next callback starts after the previous synchronous body returns, with completed synchronous State writes visible under the State contract. This rule adds no async awaiting, error recovery, cross-instance order, or private Module teardown semantics.
 sources:
+  - path: packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts
   - path: internal/contracts/lifecycle/component-lifecycle.v0.md
     sections:
       - Lifecycle Callbacks
@@ -94,6 +99,9 @@ revisions:
   - version: 0.1.0
     change: revised
     summary: Separated repeatable mount epochs from terminal instance disposal.
+  - version: 0.1.0
+    change: revised
+    summary: Defined same-checkpoint authored registration order across direct and once-hook contributions without expanding error or asynchronous semantics.
 tags:
   - lifecycle
   - callbacks

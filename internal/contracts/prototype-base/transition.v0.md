@@ -30,6 +30,7 @@ The returned handle contains:
 - `controls.leave()`
 - `controls.complete()`
 - `configure({ appear, enterDuration, leaveDuration, interrupt })`
+- `bindInitialOpen<T>({ context, field })`
 
 `configure(...)` is setup-only. It changes hook-owned defaults without adding parameters to the asHook caller. Multiple setup-time calls patch only the supplied fields; the latest supplied value wins. An explicit host prop always takes precedence over the corresponding configured default.
 
@@ -47,6 +48,14 @@ The hook declares these props:
 The component exposes the two states, the three methods, the grouped `controls` value, and `beforeEnter`, `afterEnter`, `beforeLeave`, `afterLeave` events.
 
 Higher-level authored asHooks may selectively re-export this handle (for example, `asDialogContent().asTransition`) while keeping Transition's captured artifacts nested. Design-language prototype libraries should use that nested setup handle for fixed motion policy instead of adding Transition tuning fields to their intended public component API.
+
+## Context-owned initial fallback
+
+Draft `C-AS-TRANSITION-0001-O/P/Q` admits a setup-only declarative initial binding to a typed ContextKey and a required boolean direct field. No callback, nested path, or selector is accepted. Explicit `open` and explicitly supplied `defaultOpen` keep precedence and skip the source read. Otherwise Transition reads the field once in its existing created initialization. The composition must already declare the required context subscription; the binding neither adds a subscription nor observes later provider updates.
+
+The descriptor is copied immutably. Binding the same key identity and field during setup is idempotent; a different source fails. Every call checks setup phase before idempotence, including a call through the captured/exposed binding method. Missing context admission/provider or missing/nonboolean fields fail without silent fallback. Detach/remount does not resample, and the existing controls remain responsible for later targets. The state machine, appear, completion, durations and ViewIntent sequencing are unchanged.
+
+The binding method is captured for authored hook projection and remains setup-only through all access routes. ContextKey's current generic type representation may require an explicit type argument to retain the required-boolean field constraint. This source feature's Compiler coverage, packed consumers and host profiles require independent evidence; normal runtime success is not a claim of compiled support.
 
 ## State and view sequencing
 
