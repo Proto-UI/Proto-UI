@@ -10,6 +10,7 @@
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "playwright-core": "1.58.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "vue": "^3.5.13"

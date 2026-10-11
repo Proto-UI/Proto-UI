@@ -8,6 +8,9 @@ on:
       - 'packages/modules/**'
       - 'packages/prototypes/base/src/select/**'
       - 'packages/prototypes/base/src/transition/**'
+      - 'packages/web-conformance/package.json'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
       - 'packages/web-conformance/test/fixtures/select-target-alignment-native.ts'
       - 'packages/web-conformance/test/select-target-alignment.browser.test.ts'
 permissions:

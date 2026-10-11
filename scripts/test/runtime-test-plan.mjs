@@ -170,6 +170,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
   'packages/adapters/base/test/resident-motion.browser.test.ts',
+  'packages/web-conformance/test/select-target-alignment.browser.test.ts',
 ]);
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
@@ -198,6 +199,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/site-startup-theme-evidence.yml',
   'packages/adapters/base/test/resident-motion.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
+  'packages/web-conformance/test/select-target-alignment.browser.test.ts':
+    '.github/workflows/select-target-alignment-evidence.yml',
 });
 
 // Bound each CI worker to a deterministic share of the complete development inventory.

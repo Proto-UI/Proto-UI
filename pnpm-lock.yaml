@@ -1575,6 +1575,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.0
         version: 19.2.3(@types/react@19.2.14)
+      playwright-core:
+        specifier: 1.58.2
+        version: 1.58.2
       react:
         specifier: ^19.2.0
         version: 19.2.6
