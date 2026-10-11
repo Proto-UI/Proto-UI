@@ -80,6 +80,9 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
     trigger: { cardinality: { min: 0, max: 1 } },
     value: { cardinality: { min: 0, max: 1 } },
     content: { cardinality: { min: 0, max: 1 } },
+    surface: { cardinality: { min: 0, max: 1 } },
+    viewport: { cardinality: { min: 0, max: 1 } },
+    'item-text': { cardinality: { min: 0, max: 100 } },
     item: { cardinality: { min: 0, max: 100 } },
   },
   relations: [
@@ -87,7 +90,25 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
     { kind: 'contains', parent: 'root', child: 'value' },
     { kind: 'contains', parent: 'root', child: 'content' },
     { kind: 'contains', parent: 'content', child: 'item' },
+    { kind: 'contains', parent: 'content', child: 'surface' },
+    { kind: 'contains', parent: 'surface', child: 'viewport' },
+    { kind: 'contains', parent: 'item', child: 'item-text' },
   ],
+  profiles: {
+    'item-aligned': {
+      roles: {
+        trigger: { cardinality: { min: 1 } },
+        value: { cardinality: { min: 1 } },
+        content: { cardinality: { min: 1 } },
+        surface: { cardinality: { min: 1 } },
+        viewport: { cardinality: { min: 1 } },
+      },
+      relations: [
+        { kind: 'contains', parent: 'trigger', child: 'value' },
+        { kind: 'contains', parent: 'viewport', child: 'item' },
+      ],
+    },
+  },
 });
 
 export const SELECT_CONTEXT = createContextKey<SelectContextValue>('base-select');

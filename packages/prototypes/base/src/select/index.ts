@@ -37,3 +37,7 @@ export { asSelectContent, default as selectContent } from './content.proto';
 export { asSelectItem, default as selectItem } from './item.proto';
 
 export default selectRoot;
+
+export { asSelectSurface, default as selectSurface } from './surface.proto';
+export { asSelectViewport, default as selectViewport } from './viewport.proto';
+export { asSelectItemText, default as selectItemText } from './item-text.proto';

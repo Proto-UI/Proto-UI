@@ -208,6 +208,12 @@ export interface RunHandle<Props extends PropsBaseType> {
     has(family: AnatomyFamily, role: string): boolean;
     parts(family: AnatomyFamily): ReadonlyArray<AnatomyPartView>;
     partsOf(family: AnatomyFamily, role: string): ReadonlyArray<AnatomyPartView>;
+    /** Current-domain strict logical descendants; never host targets or readiness. */
+    descendantsOf(
+      family: AnatomyFamily,
+      ancestor: AnatomyPartView,
+      role: string
+    ): ReadonlyArray<AnatomyPartView>;
     order: AnatomyOrderView;
   };
 }

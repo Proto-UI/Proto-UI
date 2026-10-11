@@ -26,6 +26,7 @@ export function createAnatomyModule(ctx: ModuleFactoryArgs): AnatomyModule {
             impl.parts(family, options as any)) as AnatomyFacade['parts'],
           partsOf: ((family, role, options) =>
             impl.partsOf(family, role, options as any)) as AnatomyFacade['partsOf'],
+          descendantsOf: (family, ancestor, role) => impl.descendantsOf(family, ancestor, role),
           order: {
             version: ((family, options) =>
               impl.orderVersion(family, options as any)) as AnatomyFacade['order']['version'],

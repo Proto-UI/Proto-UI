@@ -1,0 +1,36 @@
+id: P-BASE-SELECT-ALIGNMENT-PARTS
+type: prototype
+title: Select alignment surface viewport and item text structural parts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: This slice adds real structural parts and an opt-in profile only. Content is not yet migrated to a frame; positioning, appearance, preparation, focus and production defaults remain unwired.
+summary: Legal external composition supplies actual safe part identities for a future item-aligned binding without a renderer or platform special case.
+criteria:
+  - id: P-BASE-SELECT-ALIGNMENT-PARTS-STRUCTURE
+    text:
+      en: Surface, Viewport and ItemText are genuine same-family prototypes, with matching asHook entries and slot-preserving renderers. Surface is under Content, Viewport under Surface, and each ItemText under its own Item. They install no selection, overlay, presence, focus, input or geometry owner. ItemText's slot contains the actual visible label; indicators are not its text geometry target.
+  - id: P-BASE-SELECT-ALIGNMENT-PARTS-PROFILE
+    text:
+      en: The family baseline permits the new optional roles and leaves existing edge compositions valid. The opt-in item-aligned profile requires one Trigger, Value, Content, Surface and Viewport, places Value under Trigger and Items under Viewport. ItemText domain cardinality cannot prove exactly one text per Item; binding must separately query and validate each item's current scoped descendants and classify missing or ambiguous associations.
+  - id: P-BASE-SELECT-ALIGNMENT-PARTS-OWNERSHIP
+    text:
+      en: The connected design retains Content as the sole portal and lifecycle owner and frame, Surface as paint/animation surface and Viewport as scrollport. This structural slice does not relocate current Content recipes or activate that binding, and adds no geometry or guessed dimensions to the new Base parts. Source-derived size/style migration must be reviewed with binding against the pinned upstream version.
+  - id: P-BASE-SELECT-ALIGNMENT-PARTS-COMPOSITION
+    text:
+      en: Parts are instantiated by legal outer composition and preserve actual slots. Template PrototypeRef nesting, DOM selectors, host-side component dispatch and website-owned behavior are not permitted substitutes. The structural query alone does not certify host target availability, subtree commit completion or a successful item-aligned placement.
+dependsOn:
+  prototypes: [P-BASE-SELECT]
+  contracts: [C-ANATOMY-SCOPED-QUERY-0001, C-ANATOMY-0006, C-TEMPLATE-0006]
+verifies:
+  tests: [T-SELECT-ALIGNMENT-PARTS-0001]
+sources:
+  - path: packages/prototypes/base/src/select/surface.proto.ts
+  - path: packages/prototypes/base/src/select/viewport.proto.ts
+  - path: packages/prototypes/base/src/select/item-text.proto.ts
+  - path: packages/prototypes/base/src/select/shared.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced optional structural parts and an explicit alignment refinement without changing production positioning.
+tags: [prototype, base, select, anatomy]

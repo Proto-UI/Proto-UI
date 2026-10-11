@@ -491,6 +491,15 @@ export class AnatomyModuleImpl extends ModuleBase {
     return this.toPartView(claims[index + 1]!);
   }
 
+  descendantsOf(
+    family: AnatomyFamily,
+    ancestor: AnatomyPartView,
+    role: string
+  ): readonly AnatomyPartView[] {
+    this.ensureRuntime('run.anatomy.descendantsOf');
+    return this.port.descendantsOf(family, ancestor, role);
+  }
+
   readonly port = {
     syncStructure: (): void => {
       for (const family of this.claimFamilies) {

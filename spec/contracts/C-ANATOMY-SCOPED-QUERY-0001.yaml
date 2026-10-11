@@ -1,0 +1,30 @@
+id: C-ANATOMY-SCOPED-QUERY-0001
+type: contract
+title: Safe current-domain strict-descendant queries
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Bounded author query admitted independently of Select runtime alignment; native target readiness and geometry remain separate capabilities.
+summary: Runtime and render readers may query logical descendants of a current safe PartView without receiving host targets.
+criteria:
+  - id: C-ANATOMY-SCOPED-QUERY-0001-SCOPE
+    text:
+      en: descendantsOf(family, ancestor, role) returns only strict logical descendants of that ancestor in the caller's current same-family domain, in the existing Anatomy order. The ancestor itself and nested same-family domains are excluded. It is a current structural query, not a DOM-containment or layout-readiness query.
+  - id: C-ANATOMY-SCOPED-QUERY-0001-SAFETY
+    text:
+      en: An unknown, forged, retired, other-family or out-of-current-domain ancestor returns an empty array. A retained PartView does not keep membership alive. Reparenting is evaluated against current logical ancestry. Results expose only existing safe PartView operations, never instance tokens or host targets.
+  - id: C-ANATOMY-SCOPED-QUERY-0001-PHASE
+    text:
+      en: The author query is available on callback RunHandle and readonly RenderReadHandle, is runtime-only like ordinary Anatomy queries, and uses the existing module implementation. No Adapter, component or compiler branch supplies the query.
+dependsOn:
+  contracts: [C-ANATOMY-0001, C-ANATOMY-0002]
+verifies:
+  tests: [T-SELECT-ALIGNMENT-PARTS-0001]
+sources:
+  - path: packages/modules/anatomy/src/impl.ts
+  - path: packages/core/src/handles.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added the bounded author-safe form of the existing privileged strict-descendant query.
+tags: [anatomy, query, ownership]

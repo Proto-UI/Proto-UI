@@ -33,6 +33,11 @@ export type AnatomyFacade = {
   has(family: AnatomyFamily, role: string): boolean;
   parts: AnatomyQueryOrderView['parts'];
   partsOf: AnatomyQueryOrderView['partsOf'];
+  descendantsOf(
+    family: AnatomyFamily,
+    ancestor: AnatomyPartView,
+    role: string
+  ): readonly AnatomyPartView[];
   order: AnatomyQueryOrderView;
 };
 
