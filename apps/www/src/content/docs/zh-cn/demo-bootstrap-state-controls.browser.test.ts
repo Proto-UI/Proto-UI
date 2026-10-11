@@ -7,6 +7,7 @@ import type { Browser, BrowserContext, Locator, Page } from 'playwright-core';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer, RUNTIMES } from './browser-harness';
 import { assertNativeValueChangeSequence, type NativeEditorInput } from './native-editor-evidence';
+import { isUnpaintedBootstrapBoxShadow } from './bootstrap-disabled-paint';
 
 const ROUTE = '/en/test/bootstrap-state-controls/';
 const VIEWPORT = { width: 1440, height: 1100 };
@@ -147,6 +148,40 @@ async function paint(control: Locator) {
       ring: style.getPropertyValue('--pui-ring-width').trim(),
     };
   });
+}
+
+// Observe the disabled surface itself, never the earlier enabled shadow delta.
+// The finite oracle permits only the renderer's exact no-paint serializations.
+async function captureDisabledTogglePaint(
+  runtime: string,
+  theme: 'light' | 'dark',
+  ref: string,
+  phase: string
+) {
+  const control = part(runtime, ref);
+  let disabledPaint: Awaited<ReturnType<typeof paint>>;
+  try {
+    await expect
+      .poll(async () => {
+        const current = await paint(control);
+        return {
+          image: current.image,
+          unpaintedShadow: isUnpaintedBootstrapBoxShadow(current.shadow),
+        };
+      })
+      .toEqual({ image: 'none', unpaintedShadow: true });
+  } finally {
+    // Preserve the raw computed values and this still-disabled frame on failure too.
+    disabledPaint = await paint(control);
+    observations.push({ runtime, theme, ref, phase, disabledPaint });
+    await capture(
+      `${runtime}-${theme}-${ref}-${phase}`,
+      page.locator(`[data-runtime-card="${runtime}"]`)
+    );
+  }
+  // The persisted observation must satisfy the same oracle as the successful poll.
+  expect(disabledPaint.image).toBe('none');
+  expect(isUnpaintedBootstrapBoxShadow(disabledPaint.shadow)).toBe(true);
 }
 
 // Capture at the physical editor before its runtime restores a controlled owner value.
@@ -465,6 +500,7 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
         ] as const) {
           const control = part(runtime, ref);
           const before = (await requests(runtime, ref, event)).length;
+          let disabledCycle = 0;
           for (const disabled of [true, false, true, false]) {
             await setProps(runtime, ref, { disabled });
             await expect.poll(() => control.getAttribute('aria-disabled')).toBe(String(disabled));
@@ -472,6 +508,13 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
               .poll(async () => (await paint(control)).opacity)
               .toBe(disabled ? '0.65' : '1');
             if (disabled) {
+              if (ref === 'toggle')
+                await captureDisabledTogglePaint(
+                  runtime,
+                  theme,
+                  ref,
+                  `disabled-inactive-${++disabledCycle}`
+                );
               await control.click({ force: true });
               await control.press('Space');
               expect((await requests(runtime, ref, event)).length).toBe(before);
@@ -482,6 +525,26 @@ describe.skipIf(!enabled).sequential('Bootstrap state-controls exact-head browse
           await expect.poll(() => control.getAttribute(attribute)).toBe('true');
           expect((await requests(runtime, ref, event)).length).toBe(before + 1);
         }
+        // A disabled persistent-active Toggle must also lose its inset depth.
+        // Keep controlled ownership and request suppression while capturing it.
+        const controlledToggle = part(runtime, 'toggleControlled');
+        const controlledRequests = (await requests(runtime, 'toggleControlled', 'activeChange'))
+          .length;
+        await setProps(runtime, 'toggleControlled', { disabled: true });
+        await expect.poll(() => controlledToggle.getAttribute('aria-disabled')).toBe('true');
+        await expect.poll(async () => (await paint(controlledToggle)).opacity).toBe('0.65');
+        await captureDisabledTogglePaint(runtime, theme, 'toggleControlled', 'disabled-active');
+        await controlledToggle.click({ force: true });
+        await controlledToggle.press('Space');
+        expect(await controlledToggle.getAttribute('aria-pressed')).toBe('true');
+        expect((await requests(runtime, 'toggleControlled', 'activeChange')).length).toBe(
+          controlledRequests
+        );
+        await setProps(runtime, 'toggleControlled', { disabled: false });
+        await expect.poll(() => controlledToggle.getAttribute('aria-disabled')).toBe('false');
+        await expect.poll(async () => (await paint(controlledToggle)).opacity).toBe('1');
+        await expect.poll(async () => (await paint(controlledToggle)).shadow).toContain('inset');
+
         expect(pageErrors).toEqual([]);
         observations.push({
           runtime,
