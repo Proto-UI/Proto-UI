@@ -20,6 +20,9 @@ function setup(def: DefHandle<ToolbarSeparatorProps, ToolbarSeparatorExposes>) {
   def.context.subscribe(TOOLBAR_CONTEXT, sync);
   def.lifecycle.onCreated((run) => sync(run, run.context.read(TOOLBAR_CONTEXT)));
   def.lifecycle.onMounted((run) => sync(run, run.context.read(TOOLBAR_CONTEXT)));
+  def.anatomy.subscribeParts(TOOLBAR_FAMILY, 'root', (run, parts) => {
+    if (parts.length) sync(run, run.context.read(TOOLBAR_CONTEXT));
+  });
   return () => null;
 }
 export const asToolbarSeparator = defineAsHook<

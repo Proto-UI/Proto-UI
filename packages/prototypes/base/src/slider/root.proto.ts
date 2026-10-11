@@ -76,19 +76,24 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     return quantize(v, b.min, b.max, finite(run?.props.get().step, 1));
   };
   const publish = () => {
-    if (!run) return;
+    if (!run) return false;
+    const current = run;
     const p = run.props.get(),
       b = bounds();
     disabled.set(
       !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
       'reason: slider policy'
     );
+    if (run !== current) return false;
     readOnly.set(
       !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
       'reason: slider policy'
     );
+    if (run !== current) return false;
     orientation.set(p.orientation ?? 'horizontal', 'reason: slider orientation');
+    if (run !== current) return false;
     percentageState.set(percentage(value.get(), b.min, b.max), 'reason: slider ratio');
+    if (run !== current) return false;
     run.context.update(SLIDER_CONTEXT, {
       value: value.get(),
       interactionPhase,
@@ -104,6 +109,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
       valueText: p.valueText || String(value.get()),
       label: p.ariaLabel ?? '',
     });
+    return run === current;
   };
   const cancel = () => {
     if (!dragging.get()) return;
@@ -111,8 +117,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     interactionPhase = 'cancel';
     if (run && !run.props.isProvided('value')) {
       value.set(normalize(initial), 'reason: slider cancel restores start');
-      publish();
-      run.expose.emit('valueChange', { value: value.get() });
+      if (publish()) run.expose.emit('valueChange', { value: value.get() });
     } else publish();
   };
   // A removed input part cannot finish its own session after its anatomy lease
@@ -131,16 +136,17 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     initial = value.get();
     dragging.set(true, 'reason: slider interaction start');
     interactionPhase = 'active';
-    publish();
-    return true;
+    return publish();
   });
   def.expose.method('requestValue', (next) => {
     if (!run || disabled.get() || readOnly.get() || !Number.isFinite(next)) return false;
+    const current = run;
     next = normalize(next);
     if (next === value.get()) return false;
     if (!run.props.isProvided('value')) value.set(next, 'reason: slider accepted value');
-    publish();
+    if (run !== current || !publish()) return false;
     run.expose.emit('valueChange', { value: next });
+    if (run !== current) return false;
     const report = run?.anatomy.partsOf(SLIDER_FAMILY, 'thumb')[0]?.getExpose('__fieldInput');
     if (typeof report === 'function') report();
     return true;
@@ -149,7 +155,7 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     if (!run || disabled.get() || readOnly.get()) return;
     dragging.set(false, 'reason: slider commit');
     interactionPhase = 'commit';
-    publish();
+    if (!publish()) return;
     run.expose.emit('valueCommit', { value: value.get() });
   });
   def.expose.method('cancelInteraction', cancel);
@@ -159,11 +165,13 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
   let initialValue: number = 0;
   def.expose.method('resetValue', () => {
     if (!run) return false;
+    const current = run;
     const next = normalize(initialValue);
     if (!run.props.isProvided('value')) value.set(next, 'reason: slider value reset');
+    if (run !== current) return false;
     dragging.set(false, 'reason: slider reset cancels gesture');
     interactionPhase = 'cancel';
-    publish();
+    if (!publish()) return false;
     if (run.props.isProvided('value')) run.expose.emit('valueChange', { value: next });
     return true;
   });
@@ -189,11 +197,15 @@ function setup(def: DefHandle<SliderRootProps, SliderRootExposes>) {
     if (current.props.isProvided('value'))
       value.set(normalize(finite(current.props.get().value, 0)), 'reason: slider controlled value');
     else value.set(normalize(value.get()), 'reason: slider new bounds');
+    if (run !== current) return;
     if (current.props.get().disabled || current.props.get().readOnly) cancel();
     publish();
   });
   def.lifecycle.onUnmounted(() => {
     cancel();
+    run = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     run = null;
   });
   return (r: RendererHandle<any>) => r.slot();
