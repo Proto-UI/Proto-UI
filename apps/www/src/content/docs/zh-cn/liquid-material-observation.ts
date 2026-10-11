@@ -83,3 +83,25 @@ export function collectLiquidMaterialObservation(element: Element) {
     })),
   };
 }
+
+/** Diagnostic subject selection only; never infers material support or a fallback reason. */
+export function liquidMaterialSubjectSelector(component: string, contentId: string | null = null) {
+  if (component === 'accordion') return '[data-demo-ref$="-trigger"][aria-expanded]';
+  if (component === 'alert-dialog') return '[role="alertdialog"]';
+  if (component !== 'popover' || !contentId) return null;
+  // aria-controls names IDREF tokens, not an arbitrary CSS selector or multiple IDs.
+  // NUL and unpaired surrogates cannot round-trip through CSS without substitution.
+  if (/[\u0000\t\n\f\r ]/.test(contentId)) return null;
+  if (
+    Array.from(contentId).some((character) => {
+      const value = character.codePointAt(0)!;
+      return value >= 0xd800 && value <= 0xdfff;
+    })
+  )
+    return null;
+  const escaped = contentId.replace(
+    /[\u0001-\u001f\u007f"\\]/g,
+    (character) => `\\${character.codePointAt(0)!.toString(16)} `
+  );
+  return `[id="${escaped}"][role="dialog"]`;
+}
