@@ -1143,6 +1143,8 @@ export type FocusIntentState = {
 export function createWebComponentModules<Props extends PropsBaseType>(args: {
   el: HTMLElement;
   surfaceProjection: HostSurfaceProjection<HTMLElement>;
+  /** Presentation surface may differ from the accessibility/event target in Shadow. */
+  feedbackSurfaceProjection?: HostSurfaceProjection<HTMLElement>;
   instanceToken: LogicalInstanceToken;
   router: {
     rootTarget: EventTarget;
@@ -1333,7 +1335,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
         {
           diagnostics: () => motionSink?.diagnostics?.() ?? [],
           commit(frame: import('@proto.ui/module-feedback').ResidentMotionFrame) {
-            const surface = args.surfaceProjection.getSurfaceTarget();
+            const surface = (
+              args.feedbackSurfaceProjection ?? args.surfaceProjection
+            ).getSurfaceTarget();
             if (!surface) {
               effectsPort.queueStyle(frame.style);
               effectsPort.requestFlush();

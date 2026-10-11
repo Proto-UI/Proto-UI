@@ -11,25 +11,17 @@ import {
 } from '../../../cli/src/services/proto-style-css';
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-resident-motion-evidence');
-const tokens = [
-  'block',
-  'w-4',
-  'h-4',
-  'rounded-full',
-  'translate-x-0',
-  'translate-x-[calc(100%_-_2px)]',
-  'bg-input',
-  'bg-primary',
-];
+import { RESIDENT_FIXTURE_TOKENS as tokens } from './fixtures/resident-motion';
+
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string;
 beforeAll(async () => {
   await mkdir(output, { recursive: true });
   const result = await build({
     stdin: {
       contents: `
-  export {definePrototype as define,tw} from '@proto.ui/core';
+  export {createResidentMotionFixture} from './packages/adapters/base/test/fixtures/resident-motion';
   export {AdaptToWebComponent as adapt} from './packages/adapters/web-component/src/adapt';
-  export {setElementProps} from './packages/adapters/web-component/src/props';
+  export {setElementProps,getElementProps} from './packages/adapters/web-component/src/props';
  `,
       resolveDir: process.cwd(),
       loader: 'ts',
@@ -53,6 +45,8 @@ describe('resident motion own-source physical browser fixture', () => {
     async (scope) => {
       const page = await browser.newPage();
       const samples: unknown[] = [];
+      const pageErrors: string[] = [];
+      page.on('pageerror', (error) => pageErrors.push(String(error)));
       try {
         await page.route('**/*', (route) => route.abort());
         await page.emulateMedia({ reducedMotion: 'no-preference' });
@@ -68,24 +62,15 @@ describe('resident motion own-source physical browser fixture', () => {
             const sheet = document.createElement('style');
             sheet.textContent = css;
             document.head.append(sheet);
-            const proto = p.define({
-              name: 'resident-owned-fixture',
-              setup(def: any) {
-                def.feedback.style.use(p.tw('block w-4 h-4 rounded-full translate-x-0 bg-input'));
-                def.feedback.style.transition({
-                  properties: ['translate', 'background-color'],
-                  durationMs: 400,
-                  easing: [0, 0, 1, 1],
-                });
-                def.rule({
-                  when: (w: any) => w.prop('active').eq(true),
-                  intent: (i: any) =>
-                    i.feedback.style.use(p.tw('translate-x-[calc(100%_-_2px)] bg-primary')),
-                });
-              },
-            });
+            const proto = p.createResidentMotionFixture('resident-owned-fixture');
+            (window as any).residentDiagnostics = [];
             const options: any = {
               residentMotion: {
+                diagnostics: (reasons: readonly string[]) =>
+                  (window as any).residentDiagnostics.push({
+                    now: performance.now(),
+                    reasons: [...reasons],
+                  }),
                 palette: { current: () => ({ revision: 1, colors }), subscribe: () => () => {} },
               },
             };
@@ -121,14 +106,24 @@ describe('resident motion own-source physical browser fixture', () => {
               translate: css.translate,
               color: css.backgroundColor,
               inline: surface.style.getPropertyValue('translate'),
+              hostInline: el.style.getPropertyValue('translate'),
+              visualIsHost: surface === el,
+              raw: (window as any).ResidentFixture.getElementProps(el) ?? {},
+              resolved: (el as any).getExposes().readResolved(),
+              hostTokens: el.getAttribute('data-pui-style'),
+              boundaryTokens: el.getAttribute('data-pui-split-root-style'),
+              surfaceTokens: surface.getAttribute('data-pui-style'),
+              rootFont: getComputedStyle(document.documentElement).fontSize,
+              reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
+              diagnostics: [...(window as any).residentDiagnostics],
             };
           });
         const target = (active: boolean) =>
-          page.evaluate(
-            (active) =>
-              (window as any).ResidentFixture.setElementProps((window as any).subject, { active }),
-            active
-          );
+          page.evaluate((active) => {
+            const issuedAt = performance.now();
+            (window as any).ResidentFixture.setElementProps((window as any).subject, { active });
+            return { issuedAt, active };
+          }, active);
         await page.waitForTimeout(120);
         const initial = await sample();
         samples.push({ stage: 'initial', ...initial });
@@ -136,10 +131,14 @@ describe('resident motion own-source physical browser fixture', () => {
           path: path.join(output, `resident-${scope}-initial.png`),
           fullPage: true,
         });
-        await target(true);
+        samples.push({ stage: 'target-issued', ...(await target(true)) });
         await page.waitForTimeout(120);
         const middle = await sample();
         samples.push({ stage: 'forward-midpoint', ...middle });
+        expect(middle.raw).toEqual({ active: true });
+        expect(middle.resolved).toEqual({ active: true });
+        expect(middle.surfaceTokens).toContain('bg-primary');
+        if (scope === 'shadow') expect(middle.hostInline).toBe('');
         expect(middle.x - initial.x).toBeGreaterThan(0);
         expect(middle.x - initial.x).toBeLessThan(14);
         expect(middle.color).not.toBe(initial.color);
@@ -191,7 +190,7 @@ describe('resident motion own-source physical browser fixture', () => {
       } finally {
         await writeFile(
           path.join(output, `resident-${scope}-samples.json`),
-          JSON.stringify({ scope, samples }, null, 2)
+          JSON.stringify({ scope, samples, pageErrors }, null, 2)
         );
         await page.close();
       }

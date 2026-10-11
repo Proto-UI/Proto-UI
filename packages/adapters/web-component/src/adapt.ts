@@ -972,6 +972,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             modules: createWebComponentModules({
               el: thisEl,
               surfaceProjection: this._a11yProjection,
+              feedbackSurfaceProjection: this._surfaceProjection,
               instanceToken: instanceToken,
               router,
               rawPropsSource,
