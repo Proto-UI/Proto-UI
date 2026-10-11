@@ -1,0 +1,796 @@
+{
+  "status": "fresh local canonical-parameter diagnostics; repository CI remains separate",
+  "baseCommit": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+  "baseTree": "42bfed3039b3c28a135695a0a1fbd9ae6837cb30",
+  "candidateSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+  "command": "node scripts/analysis/package-budgets.mjs --finf-development --json",
+  "environment": {
+    "node": "v24.19.0",
+    "zlib": "1.3.2.1-motley-3246f1b",
+    "esbuild": "0.25.12",
+    "platform": "linux",
+    "arch": "x64"
+  },
+  "measurement": {
+    "bundle": true,
+    "minify": true,
+    "treeShaking": true,
+    "format": "esm",
+    "platform": "browser",
+    "target": ["es2020"],
+    "gzipLevel": 9
+  },
+  "policy": {
+    "mode": "finf-development-advisory",
+    "scope": "Proto-UI/Proto-UI Finf #870/#872: current nine whole-entry measurements only",
+    "advisoryEntries": [
+      "packages/prototypes/lucide/src/icons/x.ts",
+      "packages/prototypes/lucide/src/index.ts",
+      "packages/core/src/index.ts",
+      "packages/runtime/src/index.ts",
+      "packages/adapters/react/src/index.ts",
+      "packages/adapters/vue/src/index.ts",
+      "packages/adapters/web-component/src/index.ts",
+      "packages/prototypes/base/src/button/index.ts",
+      "packages/prototypes/shadcn/src/button/index.ts"
+    ],
+    "expiresWhen": "All 68 full-delivery/closeout items are recorded complete, or the explicit Finf opt-in is removed",
+    "ledger": "internal/coverage-matrices/prototype-coverage-matrix.json",
+    "ledgerSha256": "14195b286bcb62a80e0703fcd2113d76519fa30b5231aa9a4d7151013e75e8c9",
+    "recordedCompleteItems": 5,
+    "totalItems": 68,
+    "completionIsAcceptance": false
+  },
+  "unchangedInputs": [
+    {
+      "path": "apps/workspace/package.json",
+      "sha256": "62d18480ecf4bcde5df2eb9c25b0cab47d57a65b1858903c97a0113cd956e6f7"
+    },
+    {
+      "path": "apps/www/package.json",
+      "sha256": "ace267f129e4dd637762db452c213165f9b2875a628302974792e955f60b2316"
+    },
+    {
+      "path": "integrations/proto-ui-preview/package.json",
+      "sha256": "268764544b5df7d4f036294307223007324bdba3685e15d2e469911764c8a999"
+    },
+    {
+      "path": "package.json",
+      "sha256": "91b28257c6a315ee054256543d751ef836cf75a312d2c7d5fafcacc6df94f1a0"
+    },
+    {
+      "path": "packages/adapters/base/package.json",
+      "sha256": "af7f1026a231dc0626f9f136c3e0ca32395b2cb73d8f9c57673d74f768075e4f"
+    },
+    {
+      "path": "packages/adapters/gpui-peer/package.json",
+      "sha256": "00dc145260ed40104839342db05773cb90f73bcaa964d0b147789be6c1db2c68"
+    },
+    {
+      "path": "packages/adapters/react/package.json",
+      "sha256": "be02e314ee10a3a8c1bf5f5df3ea42d281110678ba17299cc47e66a7bf5148d8"
+    },
+    {
+      "path": "packages/adapters/vue/package.json",
+      "sha256": "479a967f958b30553909b89276fc3196696fadacea8f1cfd1037b41add2703a6"
+    },
+    {
+      "path": "packages/adapters/vue2/package.json",
+      "sha256": "dae90a43d475edbc34db4a0b7d7fe8f314499615a142135ad77b7b55bb2acbd1"
+    },
+    {
+      "path": "packages/adapters/web-component/package.json",
+      "sha256": "f9ae45ceca34f277c2c2c5ac754181fcac5113546cb84209a387db7f758c462e"
+    },
+    {
+      "path": "packages/cli/package.json",
+      "sha256": "dad7f5baa711f21a929e13cf6ebc7a1dc1352531ead3d7d66128624f998aa982"
+    },
+    {
+      "path": "packages/compiler/package.json",
+      "sha256": "4d81f10128f809c79a3f7730d1f936171f9bff2713846333c88c56524483258e"
+    },
+    {
+      "path": "packages/compositions/chatui/package.json",
+      "sha256": "373a17e51c6615bd2feca0d7ae0d731bcb8004847261c95ec366fb413b256626"
+    },
+    {
+      "path": "packages/core/package.json",
+      "sha256": "a4cf764cdafede3923ac8724f72d9d6855cd38947ed2231f5fe4969f98f76783"
+    },
+    {
+      "path": "packages/hooks/package.json",
+      "sha256": "d1bc45217e1409348f0a7eaf52b4bf9169119416564f08fedc0e01f2cca7243d"
+    },
+    {
+      "path": "packages/host-protocol/package.json",
+      "sha256": "7376841c27994b495cf623a9e0be0c868dd4f28e813d3913a60a7a5f52ffa9f6"
+    },
+    {
+      "path": "packages/modules/a11y/package.json",
+      "sha256": "d14e280f05a8c8d37883e17fc40771c28ab4be6f454aee7373a6455de96b37e4"
+    },
+    {
+      "path": "packages/modules/anatomy/package.json",
+      "sha256": "407ab8b5efecd0f6faa789b4244fa02ef0fcb20e2504d95dd21e406cb53beac6"
+    },
+    {
+      "path": "packages/modules/as-trigger/package.json",
+      "sha256": "e67618b0207e57e30fecb7211481159c5252b5b23519ad7d3c0794397f02342a"
+    },
+    {
+      "path": "packages/modules/axis-input/package.json",
+      "sha256": "448473cc5c468f23256bf07c066453b382152c3423010d53e7c3813052a627b0"
+    },
+    {
+      "path": "packages/modules/base/package.json",
+      "sha256": "567e7eaf0eb4b8b296250ec6d89493a179e88e6b68e744c0083c1bd37cfb4d20"
+    },
+    {
+      "path": "packages/modules/boundary/package.json",
+      "sha256": "5d0092afb76be8fdb28f298b28d0ae7cba71be709c3ed9400943aadaf0bfc151"
+    },
+    {
+      "path": "packages/modules/collection/package.json",
+      "sha256": "0ad9cebaeccc666419dc1e90ff68c834f5dbd769f912cf37dd015c4fcff5bc85"
+    },
+    {
+      "path": "packages/modules/context/package.json",
+      "sha256": "5aae487fff6ffe8b000c22dda73ce2d9bbbf3918f65e827335334bba33666219"
+    },
+    {
+      "path": "packages/modules/control-label/package.json",
+      "sha256": "8a263f70ef4568cc3fd2a7f56ffbac3c1f191cf897643147db94913f8ee7bb7e"
+    },
+    {
+      "path": "packages/modules/event/package.json",
+      "sha256": "846f51a60e4c8a24e22f3507462ce79b6e63610a2813e4e049c8631e2a1ac21e"
+    },
+    {
+      "path": "packages/modules/expose-event/package.json",
+      "sha256": "552e4e152426bc6661492b59d2b4a5129eddb84cee68cb18e1050b1caf6e10bb"
+    },
+    {
+      "path": "packages/modules/expose-state-web/package.json",
+      "sha256": "ddf0876caea6d7455c4fa11fbdbc4c23c3b09ef7b31b14de36ce5a28aa6c0996"
+    },
+    {
+      "path": "packages/modules/expose-state/package.json",
+      "sha256": "1bd50bcb7170ac5a0b128b19acba8fc3bc1e06ab15b210b88f4f10aa54e0afd6"
+    },
+    {
+      "path": "packages/modules/expose/package.json",
+      "sha256": "ca995f2148a2865430fcaa7298fa5ee4845c70f86cc87387fb03395ae154c929"
+    },
+    {
+      "path": "packages/modules/feedback/package.json",
+      "sha256": "b6d0241c91522c0eff8f5dd38b8d9bd566245d51a735befcd9642b7463600d31"
+    },
+    {
+      "path": "packages/modules/focus/package.json",
+      "sha256": "919ac087dee85100ae4ed84ac9a9ed9ccf2836ab4049bf1ba33f5aaec7ac3ae6"
+    },
+    {
+      "path": "packages/modules/hit-participation/package.json",
+      "sha256": "8a06dc7f1917691549c157b1b5896495856365333aa8abc73ca81c6372275224"
+    },
+    {
+      "path": "packages/modules/image-view/package.json",
+      "sha256": "758d01cc1bbb4b611a3b5a07b85e9dc6fc1e999b721d6ac11403cbb1dfda9b06"
+    },
+    {
+      "path": "packages/modules/native-link/package.json",
+      "sha256": "f8de246cae52ab82ee620c8973383aedcf81f5115981c05bebbe8ecd0ee697d8"
+    },
+    {
+      "path": "packages/modules/overlay/package.json",
+      "sha256": "7206a3cec1795c820ddb6424e8de7b564e52d844163189769aba1872375e755c"
+    },
+    {
+      "path": "packages/modules/positioning/package.json",
+      "sha256": "76a2472b4f5f77ed3997d5867dc844664321de84883899fff8fc30a9233be564"
+    },
+    {
+      "path": "packages/modules/presence/package.json",
+      "sha256": "574ec6447e3898941652029c8e682bf38d00c9e901f9f4b5187d2ebd6e71aa71"
+    },
+    {
+      "path": "packages/modules/props/package.json",
+      "sha256": "10a27cc40353604fda6cf7eb2a5ec8c32b3933616ad1224f2c1c936d520f92f1"
+    },
+    {
+      "path": "packages/modules/rule-expose-state-web/package.json",
+      "sha256": "704cdf69188c795af5670697aa28e81512c8968b456c6bea42c86472441413ec"
+    },
+    {
+      "path": "packages/modules/rule-meta/package.json",
+      "sha256": "0aeb24d8579987212168d3529d2bb4c770c37bbf045fe66b1a3bf048233a230f"
+    },
+    {
+      "path": "packages/modules/rule/package.json",
+      "sha256": "14a9dcad92e308a81c095fca30f98ccede489aae2d60b60af6649a9f8ae79204"
+    },
+    {
+      "path": "packages/modules/scroll/package.json",
+      "sha256": "c8610ae4e6043e7f6a5f3081df57a2a55bcf3e65a384d155741edb226a9e5fda"
+    },
+    {
+      "path": "packages/modules/state-accessibility/package.json",
+      "sha256": "37cd3686e1e35bf4e7fc67414a6450168307a3ce2a35742f91b36e0d73e8c762"
+    },
+    {
+      "path": "packages/modules/state-interaction/package.json",
+      "sha256": "97c1acbe927af3753ec609267b2d6de1ea71a77bf68f7468a22a27e1cc1643b4"
+    },
+    {
+      "path": "packages/modules/state/package.json",
+      "sha256": "1a1430049cffe9ce2a244e4eedfa65d9b0b81d3f485ac85a83e5fd0c94459b3c"
+    },
+    {
+      "path": "packages/modules/table-structure/package.json",
+      "sha256": "ca21e12a7f4ef8d098d04f5e12ba669c8f7bc67f6b148e82c45ecf2edf2a8d43"
+    },
+    {
+      "path": "packages/modules/test-sys/package.json",
+      "sha256": "1b7a6b83dd0ee17df8e7674c93763ec505387a37ea56620820ccdbf0de09efbd"
+    },
+    {
+      "path": "packages/modules/text-control/package.json",
+      "sha256": "b270ca243c52b045c29d4f4d45d2de0e3557013228661258a49dc26ec6a934ad"
+    },
+    {
+      "path": "packages/prototypes/base/package.json",
+      "sha256": "61bb5ca74dad79ab6d5de536a5fddad9087629fd4c9821ed45a024489e6300da"
+    },
+    {
+      "path": "packages/prototypes/bootstrap-2-3-2/package.json",
+      "sha256": "76f5ae9bf07681f1a239507bc7e3e9dfb5bbe81214b1fc7fe45c4deeaf429f87"
+    },
+    {
+      "path": "packages/prototypes/brutalist/package.json",
+      "sha256": "f70384594467ab1ec225fdb5d99d9a8f7a379f98cd3c864ebce3cc0c75150dde"
+    },
+    {
+      "path": "packages/prototypes/liquid-glass/package.json",
+      "sha256": "d33a5ff493b84d8bc7f9718b0ff7e6294eca3b1d25917bc0885ac92ce1ae967e"
+    },
+    {
+      "path": "packages/prototypes/lucide/package.json",
+      "sha256": "19ddbaa796e72423141a8dffa9d11a509c64c3fd81ab1eca3fc18b46629375c3"
+    },
+    {
+      "path": "packages/prototypes/shadcn/package.json",
+      "sha256": "5fa2b68c05f4c080c5ddb71e4b27960b561adcd20223842674480eb424ba276c"
+    },
+    {
+      "path": "packages/runtime/package.json",
+      "sha256": "4816a9099540990e6b9f25311dd78d01a155271a569697fed06f5a1bf8b5db0e"
+    },
+    {
+      "path": "packages/spec/engine/package.json",
+      "sha256": "5855f6867161cff13cf26140cc7a319b381f14c9ee75c7844ed904ceb4491fc5"
+    },
+    {
+      "path": "packages/spec/fixtures/package.json",
+      "sha256": "bc58590971fb9bcb3730fa9e41b7af1d4198edd32f416d3fdf61cc65228c37a4"
+    },
+    {
+      "path": "packages/spec/graph/package.json",
+      "sha256": "a18110f82f34f5b68de39caa10495627cfe377e24d1ecc5700f23501f43f8822"
+    },
+    {
+      "path": "packages/spec/schema/package.json",
+      "sha256": "ad9be7fc3179c1108e3fdcaebb64499f19e047df43e7f4ec11b735f619b5d65c"
+    },
+    {
+      "path": "packages/types/package.json",
+      "sha256": "40e90f23faad57abf6dd966fe01cfa7648404e28813ced0ee6420f274bb68b86"
+    },
+    {
+      "path": "packages/web-conformance/package.json",
+      "sha256": "5b56ecadfa2e10b47c7831ba86bffe1e36cae7f2856c67c8387b2dd3227b9f10"
+    },
+    {
+      "path": "pnpm-lock.yaml",
+      "sha256": "8fd4224494420b5c5a9939c9fb3742da52e1218ef83b145807c5d42a64a71bd9"
+    },
+    {
+      "path": "scripts/analysis/package-budget-policy.mjs",
+      "sha256": "e66c7d8b475d05d349a9fe44db97737b3b42b9361919883b221064d3aa964feb"
+    },
+    {
+      "path": "scripts/analysis/package-budgets.mjs",
+      "sha256": "01e4987b4552c2284741a5d9945d990f8798ca7a601b170ded968f3a2feb9c31"
+    },
+    {
+      "path": "tsconfig.json",
+      "sha256": "e6f7056658927ceeb193e95fb23900786527f57292bc7bae0ce7e2060d65fce9"
+    }
+  ],
+  "results": [
+    {
+      "name": "lucide/icons/x",
+      "entry": "packages/prototypes/lucide/src/icons/x.ts",
+      "baseline": {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4670,
+        "minifiedSha256": "ad450832dd6cddabb58fad2d969486fa320f6e2b763fc91b40bcad8be88ac708",
+        "gzipBytes": 1737,
+        "budget": 3000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4670,
+        "minifiedSha256": "ad450832dd6cddabb58fad2d969486fa320f6e2b763fc91b40bcad8be88ac708",
+        "gzipBytes": 1737,
+        "budget": 3000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "lucide/icons/x",
+        "entry": "packages/prototypes/lucide/src/icons/x.ts",
+        "minifiedBytes": 4670,
+        "minifiedSha256": "ad450832dd6cddabb58fad2d969486fa320f6e2b763fc91b40bcad8be88ac708",
+        "gzipBytes": 1737,
+        "budget": 3000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "deltaGzipBytes": 0,
+      "deltaMinifiedBytes": 0,
+      "repairDeltaGzipBytes": 0,
+      "repairDeltaMinifiedBytes": 0
+    },
+    {
+      "name": "lucide root",
+      "entry": "packages/prototypes/lucide/src/index.ts",
+      "baseline": {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4083133,
+        "minifiedSha256": "4441f0833881233ef44b923f111dbe280594de3bf605e48eda88f0b8423c2177",
+        "gzipBytes": 635722,
+        "budget": 700000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4083133,
+        "minifiedSha256": "4441f0833881233ef44b923f111dbe280594de3bf605e48eda88f0b8423c2177",
+        "gzipBytes": 635722,
+        "budget": 700000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "lucide root",
+        "entry": "packages/prototypes/lucide/src/index.ts",
+        "minifiedBytes": 4083133,
+        "minifiedSha256": "4441f0833881233ef44b923f111dbe280594de3bf605e48eda88f0b8423c2177",
+        "gzipBytes": 635722,
+        "budget": 700000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "deltaGzipBytes": 0,
+      "deltaMinifiedBytes": 0,
+      "repairDeltaGzipBytes": 0,
+      "repairDeltaMinifiedBytes": 0
+    },
+    {
+      "name": "core root",
+      "entry": "packages/core/src/index.ts",
+      "baseline": {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 23270,
+        "minifiedSha256": "6228e1ce1061fc12ff5fbced4fe46271af96a119345cdbf59d1ed8bc1faa3927",
+        "gzipBytes": 7499,
+        "budget": 7600,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 23270,
+        "minifiedSha256": "6228e1ce1061fc12ff5fbced4fe46271af96a119345cdbf59d1ed8bc1faa3927",
+        "gzipBytes": 7499,
+        "budget": 7600,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "core root",
+        "entry": "packages/core/src/index.ts",
+        "minifiedBytes": 23270,
+        "minifiedSha256": "6228e1ce1061fc12ff5fbced4fe46271af96a119345cdbf59d1ed8bc1faa3927",
+        "gzipBytes": 7499,
+        "budget": 7600,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "deltaGzipBytes": 0,
+      "deltaMinifiedBytes": 0,
+      "repairDeltaGzipBytes": 0,
+      "repairDeltaMinifiedBytes": 0
+    },
+    {
+      "name": "runtime root",
+      "entry": "packages/runtime/src/index.ts",
+      "baseline": {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 320304,
+        "minifiedSha256": "85b5f0389497c091af80437e62c35298a773f96cd78e351a68997e375ae6c370",
+        "gzipBytes": 82355,
+        "budget": 78500,
+        "pass": false,
+        "overBudgetBytes": 3855,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 321688,
+        "minifiedSha256": "20c944096901f1d90bf6e9206b13cfad38abf187f54a1782408e06c8b301eced",
+        "gzipBytes": 82767,
+        "budget": 78500,
+        "pass": false,
+        "overBudgetBytes": 4267,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "runtime root",
+        "entry": "packages/runtime/src/index.ts",
+        "minifiedBytes": 321788,
+        "minifiedSha256": "8bb882ac2f16849ea991fd2b0143d2cd12e9c94c7a210328a8611d9de24fc836",
+        "gzipBytes": 82795,
+        "budget": 78500,
+        "pass": false,
+        "overBudgetBytes": 4295,
+        "blocking": false
+      },
+      "deltaGzipBytes": 440,
+      "deltaMinifiedBytes": 1484,
+      "repairDeltaGzipBytes": 28,
+      "repairDeltaMinifiedBytes": 100
+    },
+    {
+      "name": "adapter-react root",
+      "entry": "packages/adapters/react/src/index.ts",
+      "baseline": {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 417432,
+        "minifiedSha256": "7c0479f527f51d50e18ecfbdcf40150165897b634449f22193e83ca0c1d0df35",
+        "gzipBytes": 114644,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 8644,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 418816,
+        "minifiedSha256": "52a04f88fea7790dcb794e92ef485d62773d1316c6b850871ea879cc92c70fe6",
+        "gzipBytes": 115035,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 9035,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "adapter-react root",
+        "entry": "packages/adapters/react/src/index.ts",
+        "minifiedBytes": 418916,
+        "minifiedSha256": "9ff22137b3cd8bc58740b139c77d991f97055bb6a4b13806e9d5aa758b5fbe64",
+        "gzipBytes": 115065,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 9065,
+        "blocking": false
+      },
+      "deltaGzipBytes": 421,
+      "deltaMinifiedBytes": 1484,
+      "repairDeltaGzipBytes": 30,
+      "repairDeltaMinifiedBytes": 100
+    },
+    {
+      "name": "adapter-vue root",
+      "entry": "packages/adapters/vue/src/index.ts",
+      "baseline": {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 416275,
+        "minifiedSha256": "0fa5da5fa87dd3883553ef37fe55091ee063623128718a5ee12c94ce48a14111",
+        "gzipBytes": 114438,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 8438,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 417659,
+        "minifiedSha256": "7a1498946095e87cd78cc4dc5308e6bbbb6e251e5e811021bf988563ab422df6",
+        "gzipBytes": 114854,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 8854,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "adapter-vue root",
+        "entry": "packages/adapters/vue/src/index.ts",
+        "minifiedBytes": 417759,
+        "minifiedSha256": "088f27c555be1c56cf3c31c797ab44b9b8eb71d12dde4f49060bf26d272ba388",
+        "gzipBytes": 114884,
+        "budget": 106000,
+        "pass": false,
+        "overBudgetBytes": 8884,
+        "blocking": false
+      },
+      "deltaGzipBytes": 446,
+      "deltaMinifiedBytes": 1484,
+      "repairDeltaGzipBytes": 30,
+      "repairDeltaMinifiedBytes": 100
+    },
+    {
+      "name": "adapter-web-component root",
+      "entry": "packages/adapters/web-component/src/index.ts",
+      "baseline": {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 495472,
+        "minifiedSha256": "c34f47be682395397e106a3c9301842dcfccad4602a7ad712bac5ebc566a01f7",
+        "gzipBytes": 140560,
+        "budget": 132000,
+        "pass": false,
+        "overBudgetBytes": 8560,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 496856,
+        "minifiedSha256": "5a11c2aee574f695c7c3448ec7317b46925e46b19741cd877a68b4f9fbcbb555",
+        "gzipBytes": 140931,
+        "budget": 132000,
+        "pass": false,
+        "overBudgetBytes": 8931,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "adapter-web-component root",
+        "entry": "packages/adapters/web-component/src/index.ts",
+        "minifiedBytes": 496956,
+        "minifiedSha256": "f9a16d2836595ffc05c8f3614f2226a62ee2580e24a79dea5250a221d2c1344a",
+        "gzipBytes": 140961,
+        "budget": 132000,
+        "pass": false,
+        "overBudgetBytes": 8961,
+        "blocking": false
+      },
+      "deltaGzipBytes": 401,
+      "deltaMinifiedBytes": 1484,
+      "repairDeltaGzipBytes": 30,
+      "repairDeltaMinifiedBytes": 100
+    },
+    {
+      "name": "prototypes-base/button",
+      "entry": "packages/prototypes/base/src/button/index.ts",
+      "baseline": {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 13651,
+        "minifiedSha256": "e97fc3ea706e524e8b387beb945453dd4ba9094c2d25a4d38db8425cf16d2027",
+        "gzipBytes": 3931,
+        "budget": 6000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 13651,
+        "minifiedSha256": "e97fc3ea706e524e8b387beb945453dd4ba9094c2d25a4d38db8425cf16d2027",
+        "gzipBytes": 3931,
+        "budget": 6000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "prototypes-base/button",
+        "entry": "packages/prototypes/base/src/button/index.ts",
+        "minifiedBytes": 13651,
+        "minifiedSha256": "e97fc3ea706e524e8b387beb945453dd4ba9094c2d25a4d38db8425cf16d2027",
+        "gzipBytes": 3931,
+        "budget": 6000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "deltaGzipBytes": 0,
+      "deltaMinifiedBytes": 0,
+      "repairDeltaGzipBytes": 0,
+      "repairDeltaMinifiedBytes": 0
+    },
+    {
+      "name": "prototypes-shadcn/button",
+      "entry": "packages/prototypes/shadcn/src/button/index.ts",
+      "baseline": {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 17979,
+        "minifiedSha256": "e058f756097dea6ac8b4272a51afb4e8b621003a1111f116de5848fa676237ae",
+        "gzipBytes": 4911,
+        "budget": 7000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "publishedBaseline": {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 17979,
+        "minifiedSha256": "e058f756097dea6ac8b4272a51afb4e8b621003a1111f116de5848fa676237ae",
+        "gzipBytes": 4911,
+        "budget": 7000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "candidate": {
+        "name": "prototypes-shadcn/button",
+        "entry": "packages/prototypes/shadcn/src/button/index.ts",
+        "minifiedBytes": 17979,
+        "minifiedSha256": "e058f756097dea6ac8b4272a51afb4e8b621003a1111f116de5848fa676237ae",
+        "gzipBytes": 4911,
+        "budget": 7000,
+        "pass": true,
+        "overBudgetBytes": 0,
+        "blocking": false
+      },
+      "deltaGzipBytes": 0,
+      "deltaMinifiedBytes": 0,
+      "repairDeltaGzipBytes": 0,
+      "repairDeltaMinifiedBytes": 0
+    }
+  ],
+  "notes": [
+    "All nine entries measured on exact764 baseline and repaired candidate in same process toolchain environment.",
+    "Shared node_modules contains external dependencies; repository budget tsconfig aliases select each worktree source.",
+    "No ceilings, measurement settings, dependency manifests, lockfile or timeout changed.",
+    "False pass values remain real failed size comparisons despite advisory process exit zero.",
+    "No Compiler support implied.",
+    "Separate exact published-base-to-repair deltas retain the output-own-element correction cost; original764 baseline is not replaced by the later baseline."
+  ],
+  "agentDeclaration": [
+    "Agent: dot",
+    "ModelTrace: not measured \u2014 owner-authorized dot exemption (2026-10-06)",
+    "This role declaration is not authenticated model identity, permission, independent review, or acceptance."
+  ],
+  "validation": {
+    "runtimeSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+    "checkpoint3Tree": "a4e9623ae2ea3be98dd44239e151807c2f4ab538",
+    "checkpoint3Delta": "Only a TypeScript non-null assertion on the new runtime test getState result; no runtime-source change.",
+    "newAffectedTests": {
+      "files": 23,
+      "tests": 113,
+      "log": "06-affected.log"
+    },
+    "specTests": {
+      "files": 24,
+      "tests": 161,
+      "log": "18-spec.log",
+      "status": "PASS"
+    },
+    "typeContracts": "07-types.log PASS",
+    "workspaceTypes": "12-workspace-types.log PASS after ignored style generation",
+    "packed": {
+      "publicPackages": 37,
+      "externalLockedPackages": 3,
+      "workspaceSymlinks": 0,
+      "js": "PASS",
+      "strictNodeNextTypes": "PASS",
+      "receipt": "packed-receipt.json",
+      "receiptSha256": "fcc9a27578d551706ee248aa1198459452f8165d25f9e8da5c71ce13dbeee669",
+      "execution": "Fresh 37-package build and real local tarballs on repaired source; npm pack/install --offline --ignore-scripts with three fixed installed locked external dependencies.",
+      "sourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+      "outputInheritedSetterRegression": "14-packed-output-setter.log PASS via public packed StateKernel; define/default/set preserve own dense frozen snapshots and event history",
+      "independentRerun": "Unavailable; not counted as independent packed execution. These receipts are author evidence."
+    },
+    "baselineComparisons": {
+      "public-docs": {
+        "command": "corepack pnpm@10.32.1 test:public-docs",
+        "originBase": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+        "repairedSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+        "sameFailureLines": true,
+        "failureCount": 8,
+        "candidateLog": "15-public-docs.log",
+        "baselineLog": "40-baseline-public-docs.log",
+        "candidateSha256": "92cdd2a02a3faf1db36ed092028fc04f3bb0d98f5d10b4f55856c57d23d5bf39",
+        "baselineSha256": "e696d393e91732f7cdc99ee5022bb1280fdae92207a259b23b1fcb3bea611ec7"
+      },
+      "check-public-docs": {
+        "command": "corepack pnpm@10.32.1 check:public-docs",
+        "originBase": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+        "repairedSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+        "sameFailureLines": true,
+        "failureCount": 82,
+        "candidateLog": "16-check-public-docs.log",
+        "baselineLog": "44-check-public-docs-baseline.log",
+        "candidateSha256": "2b016776981b5ea04937a214f2cfdcb92b6e4ecca50b7ec2b8aa2ce82dd860c4",
+        "baselineSha256": "d7381f1eda1d49067e17308c62ee6c01f1cfe7fce065d0a95a0f4759e24fb0b7"
+      },
+      "catalog": {
+        "command": "corepack pnpm@10.32.1 check:prototype-catalog",
+        "originBase": "764d02f6554bc7b9974b6941fd87fdc657604ad3",
+        "repairedSourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+        "sameFailureLines": true,
+        "failureCount": 550,
+        "candidateLog": "17-catalog.log",
+        "baselineLog": "42-catalog-baseline.log",
+        "candidateSha256": "e5094b808fbf15042ec7dbb879df3a6d71c8ca8abb12a5693dc9feaf60fea9d1",
+        "baselineSha256": "aa35867c5ce664a2f226c03e2f62c5526c14c188dba3e7c902f17d2f3642e3b1"
+      }
+    },
+    "limitations": [
+      "All applicable State entities remain draft.",
+      "Compiler and native-host support unimplemented by this slice.",
+      "Four Adapter results are happy-dom/test-runtime evidence, not browser paint or accessibility-device acceptance.",
+      "Canonical repository CI and normal publication hooks belong to the subsequent exact integration; local evidence does not impersonate them."
+    ],
+    "supersededCandidate": {
+      "tree": "18b10f1e803b7161997b101c666a8d3fb8693eb2",
+      "status": "Blocked by inherited numeric setter creating sparse output snapshots; not accepted as the repaired implementation."
+    },
+    "outputOwnElementRepair": {
+      "finding": "STATE-LIST-SNAPSHOT-OWN-ELEMENT-002",
+      "base": "0b65111ec484571b39894fc7466b91793b782090",
+      "sourceTree": "37934baae3675ca88b0038e3a3acfd7be9d7fe01",
+      "files": [
+        "packages/modules/state/src/validate.ts",
+        "packages/modules/state/test/number-list.test.ts"
+      ],
+      "red": "01-red.log: one failed / nine passed; inherited setter observed three writes",
+      "green": "03-green.log: fourteen passed; full affected suite113 and workspace types passed",
+      "method": "Explicit own data-property array elements using a null-prototype descriptor; no input prototype or inherited numeric setter controls output storage.",
+      "independentReview": "Bounded source, regression, types and nine-budget review passed; independent packed execution remains unavailable."
+    },
+    "repairPublication": "The minimal output repair is published in source d523c51e2b37752552b868e013384808958a6419 and proof d2d3ea63c485fbfe4a4a794dc797e28cf665db80; package source is byte-identical to tested37934baa."
+  },
+  "rawBudgetLogs": {
+    "candidate": "09-budget-repair.json",
+    "publishedBaseline": "10-budget-published-base.json",
+    "originBaseline": "00-budget-origin-764.json",
+    "candidateSha256": "c8aaa340bac68887d90b96ef85fb12d30031a4c3b6eedea6e97f2a71bf572c3b",
+    "publishedBaselineSha256": "7d77eeb379c948c1544b1de34a2821dcd344e4994ac88b5f725f0108a1ddd482",
+    "originBaselineSha256": "ebbb6251dd3642a45a7e7f430335310ff2a5255c66cd3fabb3e592ced1e49e87"
+  },
+  "publishedBaselineCommit": "0b65111ec484571b39894fc7466b91793b782090",
+  "publishedBaselineTree": "89383e870ab003b7169edd47ae429145dc0513e6",
+  "publishedRepairCommit": "d2d3ea63c485fbfe4a4a794dc797e28cf665db80",
+  "publishedRepairTree": "9bccfad39400c49e0ce0112a491ec33957bd93f8"
+}

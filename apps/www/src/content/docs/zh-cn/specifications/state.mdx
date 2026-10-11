@@ -83,16 +83,17 @@ export const contractPreviews = [
     id: 'C-STATE-0006',
     title: 'State definition 使用有限 host-neutral value spec',
     summary:
-      'v0 只承认 `bool`、`enum`、`string`、`number.range` 与 `number.discrete`，且值域保持 JSON-compatible。',
+      'v0 只承认 `bool`、`enum`、`string`、`number.range`、`number.discrete` 与 draft `number.list`，且值域保持 JSON-compatible。',
     quote:
       'State definition admits only a finite set of host-neutral state kinds, and values remain within JSON-compatible boundaries.',
     criteria: [
-      'v0 state kind 限定为 bool、enum、string、number.range 与 number.discrete。',
+      'v0 state kind 限定为 bool、enum、string、number.range、number.discrete 与 draft number.list。',
       'enum 必须声明 options。',
       'numberRange 必须声明 min 与 max。',
       'metadata 仍必须保持 host-neutral。',
     ],
-    tests: 'T-STATE-0003 覆盖有限 kind 与 spec metadata；value-domain validation 仍是记录的断口。',
+    tests:
+      'T-STATE-0003 覆盖有限 kind 与 spec metadata；旧 scalar value-domain validation 仍是记录的断口；number.list 要求完整校验。',
     source: 'spec/contracts/C-STATE-0006.yaml',
   },
   {
@@ -157,7 +158,7 @@ export const contractPreviews = [
     quote: 'StateEvent is the portable event shape for state-change records.',
     criteria: [
       'value transition 必须派发 `{ type: "next", prev, next, reason? }`。',
-      '`Object.is(prev, next)` 为 true 时不得视为实际 state change。',
+      '旧 scalar 沿用 Object.is；number.list 按规范化长度与逐项 Object.is 比较内容。',
       '`setDefault(...)` 不得派发 `next` event。',
       're-entrant `set(...)` 触发的 StateEvent 必须以确定性顺序派发。',
     ],
@@ -319,12 +320,23 @@ State definition 只承认有限的 host-neutral state kind：
 | `def.state.string`         | `string`          | 可用 `options` 等 metadata 描述值域            |
 | `def.state.numberRange`    | `number.range`    | 必须声明 `min` 与 `max`                        |
 | `def.state.numberDiscrete` | `number.discrete` | 可用 `min`、`max`、`step` 等 metadata 描述值域 |
+| `def.state.numberList`     | `number.list`     | draft 不可变稠密 finite-number 快照            |
 
 这些 state value 仍然需要满足 JSON-compatible value 边界。State 不要求 function、symbol、class instance、DOM object 或其他 host object 才能表达语义。
 
 metadata 也必须保持 host-neutral。比如 enum options、number range、step 都是 portable value-domain 描述；它们不应该绑定到某个宿主控件或宿主对象。
 
-当前 value-domain validation 仍是治理断口：契约已经要求定义值域，但运行期是否对所有 definition、`setDefault` 与 `set` 执行完整校验，还没有被当作已完成保证。
+旧 scalar value-domain validation 仍是治理断口。draft number.list 独立要求 definition、setDefault 与 set 完整校验，不因此关闭旧 scalar 债务。
+
+### Draft 不可变数列
+
+`def.state.numberList(name, initial)` 返回 `OwnedStateHandle<readonly number[]>`。每次输入复制为冻结内部快照，不冻结调用方数组；允许空数组、重复与任意顺序，-0 归一化为 +0。输入必须是稠密有限数字数组，自有属性只有 length 与索引 data descriptor。拒绝 holes、accessor、额外自有属性、嵌套值、NaN 和无穷，不求值普通 getter。跨 realm 数组与纯数据 Array subclass 可规范化，但不保留 prototype 或 class identity。
+
+规范化内容相等时保留原快照 identity、不发事件；变化写入只记录一次完整不可变 prev/next 转换。此通用 State kind 不承担排序、量化或间距。既有 phase、capability 与 lifecycle 规则继续适用，不隐式 render。
+
+Web 的 exposed get/subscribe 可用，但不自动输出 data attribute 或 CSS variable；Rule scalar eq 不支持 number.list。需要可变 Context JSON 值时显式用 `[...state.get()]` 复制。只有数列值与 descriptor 满足此 JSON 保证，StateSetReason 仍为 unknown。内部 descriptor 复制并冻结；不新增 Adapter 公有 clone 的深冻结保证。
+
+这是 `C-STATE-NUMBER-LIST-0001` 的 draft runtime surface。Compiler 支持独立，本扩展未实现也不暗示编译已支持。
 
 ## Watch 与 StateEvent
 
@@ -350,7 +362,7 @@ state.watch((run, event) => {
 { type: 'next', prev, next, reason? }
 ```
 
-如果 `Object.is(prev, next)` 为 true，这次写入不构成实际 state change。`setDefault()` 也不派发 `next` event，因为它只改变默认值计划，不代表 runtime value transition。
+旧 scalar 通过 `Object.is(prev, next)` 抑制相等写入；number.list 通过规范化后长度与逐项 Object.is 比较，相等时保留原快照且不发事件。`setDefault()` 也不派发 `next` event，因为它只改变默认值计划，不代表 runtime value transition。
 
 实例 unmount/dispose 造成 state slot 与 watcher 断开时，watcher 可以收到：
 
