@@ -66,7 +66,10 @@ class A11yModuleImpl extends ModuleBase {
   override onInstancePhase(phase: InstancePhase): void {
     super.onInstancePhase(phase);
     if (phase === 'alive' && isState(this.ir.level)) resolveA11yLevel(this.ir.level);
-    if (phase === 'alive') this.refreshParts();
+    if (phase === 'alive') {
+      for (const binding of this.ir.states.values()) validateStateCondition(binding.when);
+      this.refreshParts();
+    }
     if (phase !== 'disposing' || this.projectionDisposed) return;
     this.projectionDisposed = true;
     this.projectionActive = false;
@@ -107,9 +110,11 @@ class A11yModuleImpl extends ModuleBase {
       this.ir.description = { kind: 'text', value };
       this.applyProjection();
     },
-    state: <V>(key: A11yStateKey, handle: State<V>) => {
+    state: <V>(key: A11yStateKey, handle: State<V>, options?: { when?: State<boolean> }) => {
       this.ensureSetup('asAccessible.state');
-      this.ir.states.set(key, { key, handle: handle as State<unknown> });
+      const when = options?.when;
+      validateStateCondition(when);
+      this.ir.states.set(key, { key, handle: handle as State<unknown>, when });
       this.applyProjection();
     },
     action: (key: A11yActionKey, spec: A11yActionSpec = {}) => {
@@ -411,6 +416,13 @@ class A11yModuleImpl extends ModuleBase {
         this.applyProjection();
       });
       this.stateWatchOffs.push(off);
+      if (binding.when) {
+        this.stateWatchOffs.push(
+          this.statePort.watch(binding.when as OwnedStateHandle<boolean>, () => {
+            this.applyProjection();
+          })
+        );
+      }
     }
 
     if (isState(this.ir.id)) {
@@ -499,7 +511,9 @@ class A11yModuleImpl extends ModuleBase {
   private getSnapshot(): A11ySemanticObjectSnapshot {
     const states: Record<string, unknown> = {};
     for (const [key, binding] of this.ir.states) {
-      states[key] = binding.handle.get();
+      // Read the source even when inactive; applicability must not mask State errors.
+      const value = binding.handle.get();
+      if (binding.when === undefined || binding.when.get() === true) states[key] = value;
     }
 
     const relations: A11ySemanticObjectSnapshot['relations'] = {};
@@ -605,6 +619,13 @@ function isState(value: unknown): value is State<unknown> {
   return (
     !!value && typeof value === 'object' && typeof (value as State<unknown>).get === 'function'
   );
+}
+
+function validateStateCondition(when: State<boolean> | undefined): void {
+  if (when === undefined) return;
+  if (!isState(when) || typeof when.get() !== 'boolean') {
+    throw new TypeError('[A11y] state condition when must be a Boolean State');
+  }
 }
 
 function resolveA11yLevel(value: number | State<number>): number {

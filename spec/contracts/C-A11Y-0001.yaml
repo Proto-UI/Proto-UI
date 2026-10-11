@@ -22,6 +22,36 @@ criteria:
     text:
       en: All AccessibleHandle declaration methods are setup-only, including calls through a retained handle. The last setup declaration wins for a scalar field or the same state/action/relation key; tree patches merge by field. Runtime changes follow bound State values. The handle exposes no dispose or generic runtime mutation; view detach releases projection resources without discarding instance declarations, and remount projects current facts.
       zh-CN: AccessibleHandle 的所有声明方法仅限 setup，包括通过保存的 handle 调用。单值字段及相同 state/action/relation key 以 setup 最后一次声明为准；tree patch 按字段合并。runtime 变化跟随绑定的 State。handle 不提供 dispose 或通用 runtime mutation；view detach 释放投影资源但保留实例声明，remount 投影当前事实。
+  - id: C-A11Y-0001-STATE-CONDITION
+    text:
+      en: >-
+        A setup state declaration may bind an optional Boolean State condition through state(key, value, { when }). Omitting when preserves the unconditional two-argument behavior. Only a condition resolving to true makes the key applicable; false omits the key from the semantic snapshot rather than publishing a false, null, empty-string or invalid-number substitute. Reactivation reads the current value, including changes while inactive. Applicability does not change source State ownership or value validation, role, actions, focus, layout or keyboard behavior. The last setup declaration for a key replaces its value and condition together; no runtime declaration or removal API is added.
+
+
+      zh-CN: >-
+        setup state 声明可通过 state(key, value, { when }) 绑定可选 Boolean State 条件。省略 when 保留双参数无条件行为。只有条件解析为 true 时该 key 才适用；false 从语义 snapshot 省略 key，而不是发布 false、null、空字符串或无效数字替代值。恢复适用时读取当前值，包括停用期间的变化。适用性不改变源 State 所有权或值校验、role、action、焦点、布局或键盘行为。同一 key 的最后一次 setup 声明同时替换 value 和 condition；不新增 runtime 声明或删除 API。
+
+
+  - id: C-A11Y-0001-STATE-CONDITION-VALIDITY
+    text:
+      en: >-
+        The condition must use a State handle accepted by the existing State binding and subscription path, not a callback, raw Boolean, fabricated handle or numeric sentinel. Reject a non-State condition or an initially non-Boolean condition before accepting that declaration; revalidate the final setup value before the instance becomes alive. A later non-Boolean value fails closed by omitting the key without mutating, vetoing or rolling back the source; a later true value restores current projection. Snapshot collection reads the bound value before testing applicability, so a false condition cannot hide an existing State read error. State read or subscription errors retain their existing error semantics and must not be swallowed as false. Projection-specific value coercion applies only to keys present in the snapshot; this extension adds no universal value validator. This extension neither expands cross-instance State access nor claims stronger handle authentication than the State domain provides.
+
+
+      zh-CN: >-
+        condition 必须使用现有 State 绑定与订阅路径接受的 State handle，不得使用 callback、原始 Boolean、伪造 handle 或数字哨兵。非 State 条件或初始非 Boolean 条件须在接受该声明前拒绝；实例进入 alive 前须再次校验最终 setup 值。后续非 Boolean 值通过省略 key fail closed，不修改、否决或回滚源；后续 true 恢复当前投影。snapshot 收集先读取绑定 value 再判断适用性，因此 false 条件不得掩盖现有 State 读取错误。State 读取或订阅错误保留现有错误语义，不得吞为 false。投影专属值转换只作用于 snapshot 中存在的 key；此扩展不新增通用 value validator。此扩展不扩大跨实例 State 访问，也不声称比 State 域更强的 handle 身份认证。
+
+
+  - id: C-A11Y-0001-STATE-CONDITION-LIFECYCLE
+    text:
+      en: >-
+        Mounted projection observes both the winning value binding and its condition, including condition changes while false. Repeated mount or update must not accumulate subscriptions; replaced setup bindings must not drive projection. View detach releases these view-scoped subscriptions and owned projection, retains declarations, and remount resolves current values and conditions before replay. Terminal disposal releases subscriptions and prevents stale callbacks from projecting. Omission withdraws only this semantic object's contribution under existing projector ownership rules; host-authored values, subsequent host rewrites and other semantic owners remain preserved. No atomic multi-field transaction or complete accessibility certification is implied.
+
+
+      zh-CN: >-
+        mounted 投影同时观察最终 value 绑定及其 condition，包括 false 期间的条件变化。重复 mount 或 update 不得累积订阅；被替换的 setup 绑定不得驱动投影。view detach 释放这些 view-scoped 订阅与自有投影，保留声明；remount 在 replay 前解析当前值及条件。terminal disposal 释放订阅并阻止 stale callback 投影。省略只按既有 projector 所有权规则撤销该语义对象的贡献；保留宿主原有值、后续宿主改写与其他语义 owner。不隐含多字段原子事务或完整无障碍认证。
+
+
   - id: C-A11Y-0001-DOMAIN-BOUNDARY
     text:
       en: AccessibleHandle declares host-projectable accessibility semantics, not complete accessibility certification. It does not create State ownership, keyboard or focus behavior, layout visibility, or arbitrary host targets. Anatomy and domain modules resolve structural targets; A11y expresses their relationships. Internal relation mutation ports are not author APIs.
@@ -129,6 +159,9 @@ verifies:
   tests:
     - T-A11Y-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Define optional State-backed applicability for setup state bindings with snapshot omission and existing ownership and lifecycle preservation.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Linked structured same-domain part declarations to their accepted dedicated contract while preserving string and direct-reference transport.

@@ -61,6 +61,7 @@ export type A11yPartRelationshipSnapshot = {
 export type A11yStateBinding<V = unknown> = {
   key: A11yStateKey;
   state: State<V>;
+  when?: State<boolean>;
 };
 
 export type A11yActionSpec = {
@@ -121,7 +122,7 @@ export type AccessibleHandle = {
   name(value: A11yTextTarget): void;
   nameFromContent(): void;
   description(value: A11yTextTarget): void;
-  state<V>(key: A11yStateKey, handle: State<V>): void;
+  state<V>(key: A11yStateKey, handle: State<V>, options?: { when?: State<boolean> }): void;
   action(key: A11yActionKey, spec?: A11yActionSpec): void;
   relation(key: A11yRelationKey, spec: A11yRelationSpec): void;
   tree(patch: A11yTreeBehavior): void;
