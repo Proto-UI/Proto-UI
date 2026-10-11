@@ -9,6 +9,6 @@ export default definePrototype<PopoverTitleProps, PopoverTitleExposes>({
   name: 'shadcn-popover-title',
   setup(def) {
     const behavior = asPopoverTitle();
-    def.feedback.style.use(tw('text-lg font-semibold'));
+    def.feedback.style.use(tw('font-medium'));
   },
 });
