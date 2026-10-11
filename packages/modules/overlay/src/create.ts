@@ -54,6 +54,7 @@ export function createOverlayModule(ctx: ModuleFactoryArgs): OverlayModule {
           registerAnchor: (target) => impl.registerAnchor(target),
           registerAnchorPart: (part) => impl.registerAnchorPart(part),
           registerContent: (target) => impl.registerContent(target),
+          registerTargetAlignment: (binding) => impl.registerTargetAlignment(binding),
           updatePosition: (patch) => impl.updatePosition(patch),
           setViewActive: (active) => impl.setViewActive(active),
           markPresenceBound: () => impl.markPresenceBound(),

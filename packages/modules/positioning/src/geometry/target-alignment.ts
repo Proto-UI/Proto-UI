@@ -1,14 +1,9 @@
 /** Internal, platform-independent numerical plans. C-TARGET-ALIGNMENT-PLAN-0001.
  * Hosts supply facts and apply/read back constraints; this file never measures a host.
- * Deliberately unwired and absent from public package exports in S1.
+ * Internal mechanism; target hosts supply facts and consume its plans.
  */
-export type TargetAlignmentConstraints = Readonly<{
-  boundary: 'layout-viewport';
-  margin: number;
-  minimumTargetSpanCount: number;
-  inlineOverflow: 'preserve-start';
-  expandOnScroll: boolean;
-}>;
+import type { TargetAlignmentConstraints } from '@proto.ui/core';
+export type { TargetAlignmentConstraints } from '@proto.ui/core';
 
 export type TargetAlignmentMetrics = Readonly<{
   direction: 'ltr' | 'rtl';

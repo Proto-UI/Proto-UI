@@ -223,8 +223,15 @@ export class PositioningModuleImpl extends ModuleBase {
       !this.terminal && version === this.connectionVersion && this.connection === connection;
     return {
       ...connection,
-      onResolved: (snapshot) => {
+      onAlignment: (status) => {
         if (!current()) return;
+        const resolved = Object.freeze({ ...status });
+        this.dispatchCallback(() => {
+          if (current()) connection.onAlignment?.(resolved);
+        });
+      },
+      onResolved: (snapshot) => {
+        if (!current() || connection.targetAlignment) return;
         const resolved = Object.freeze({ ...snapshot });
         this.dispatchCallback(() => {
           if (!current()) return;
@@ -244,6 +251,13 @@ export class PositioningModuleImpl extends ModuleBase {
     if (this.terminal || version !== this.connectionVersion || this.connection !== connection)
       return;
     const host = this.getHost();
+    if (connection.targetAlignment && !host?.supportsTargetAlignment) {
+      this.bridge(connection, version).onAlignment?.({
+        status: 'unavailable',
+        reason: 'unsupported-host',
+      });
+      return;
+    }
     if (!host) return;
     const lease = host.attach(this.bridge(connection, version));
     if (this.terminal || version !== this.connectionVersion || this.connection !== connection)
@@ -257,8 +271,10 @@ export class PositioningModuleImpl extends ModuleBase {
       const sameTargets =
         this.connection &&
         Object.is(this.connection.anchor, connection.anchor) &&
-        Object.is(this.connection.floating, connection.floating);
+        Object.is(this.connection.floating, connection.floating) &&
+        Boolean(this.connection.targetAlignment) === Boolean(connection.targetAlignment);
       this.connection = connection;
+      if (connection.targetAlignment) this.snapshot = null;
       if (sameTargets && this.lease) {
         this.lease.update(this.bridge(connection, ++this.connectionVersion));
         return;

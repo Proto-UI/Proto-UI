@@ -115,6 +115,21 @@ export type OverlayPresenceBinding<P extends PropsBaseType = PropsBaseType> = Re
   present: ObservedStateHandle<boolean, any>;
 }>;
 
+/** Runtime-only safe-part association; no host target reaches the author. */
+export type OverlayTargetAlignmentBinding = Readonly<{
+  family: import('./anatomy').AnatomyFamily;
+  surface: AnatomyPartView;
+  scrollport: AnatomyPartView;
+  blockReference: AnatomyPartView;
+  inlineReference: AnatomyPartView;
+  blockTarget: AnatomyPartView;
+  inlineTarget: AnatomyPartView;
+  atStart: boolean;
+  atEnd: boolean;
+  constraints: import('./positioning').TargetAlignmentConstraints;
+  onAlignment(status: import('./positioning').TargetAlignmentStatus): void;
+}>;
+
 export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   open: ObservedStateHandle<boolean, P>;
 
@@ -132,6 +147,7 @@ export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   registerInputAnchor(anchor: import('./context-menu-input').InputOriginAnchor | null): void;
   registerAnchorPart(part: AnatomyPartView): void;
   registerContent(target: unknown): void;
+  registerTargetAlignment(binding: OverlayTargetAlignmentBinding | null): void;
   getPositionSnapshot(): AnchoredPositionSnapshot | null;
 }
 

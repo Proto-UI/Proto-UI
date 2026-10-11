@@ -35,6 +35,8 @@ export type BoundaryPort = ModulePort & {
   getConfig(): BoundaryConfig;
   getWarnings(): readonly string[];
   getRegions(): readonly BoundaryRegion[];
+  /** Privileged current-view replacement of the automatic owner-root region. */
+  replaceImplicitRoot(target: unknown | null): () => void;
 };
 
 export type BoundaryModule = ModuleInstance<BoundaryFacade> & {

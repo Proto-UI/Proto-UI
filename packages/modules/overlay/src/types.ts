@@ -35,6 +35,9 @@ export type OverlayPort = {
   registerAnchor(target: unknown): void;
   registerAnchorPart(part: import('@proto.ui/core').AnatomyPartView): void;
   registerContent(target: unknown): void;
+  registerTargetAlignment(
+    binding: import('@proto.ui/core').OverlayTargetAlignmentBinding | null
+  ): void;
   updatePosition(patch: OverlayPositionPatch): void;
   setViewActive(active: boolean): void;
   markPresenceBound(): void;

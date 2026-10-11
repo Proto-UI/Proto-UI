@@ -40,6 +40,7 @@ export function createBoundaryModule(ctx: ModuleFactoryArgs) {
           getConfig: () => impl.getConfig(),
           getWarnings: () => impl.getWarnings(),
           getRegions: () => impl.getRegions(),
+          replaceImplicitRoot: (target) => impl.replaceImplicitRoot(target),
         },
       };
     },

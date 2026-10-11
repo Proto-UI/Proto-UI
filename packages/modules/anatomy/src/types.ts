@@ -47,6 +47,8 @@ export type AnatomyPort = ModulePort & {
   syncStructure(): void;
   /** Module-internal bridge. Never expose the returned host target to prototype authors. */
   resolvePartTarget(part: AnatomyPartView): unknown | null;
+  /** Current family/domain membership, without exporting private identities. */
+  isCurrentPart(family: AnatomyFamily, part: AnatomyPartView): boolean;
   /** Opaque logical instance identity for module-to-module coordination; never author-facing. */
   resolvePartInstance(part: AnatomyPartView): unknown | null;
   /** Opaque identity of the current logical instance; never a host target. */

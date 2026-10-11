@@ -1,0 +1,45 @@
+id: C-TARGET-ALIGNMENT-BINDING-0001
+type: contract
+title: Scoped target alignment binds neutral geometry and a painted interaction region
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Connected cold-entry slice with an isolated real prototype consumer. Production Shadcn defaults, www migration, warm reversal and invalid-association disposition remain separately gated.'
+summary: Prototype semantics select safe parts, Overlay validates current logical associations, and a shared host applies the existing numerical plan without component dispatch.
+criteria:
+  - id: C-TARGET-ALIGNMENT-BINDING-0001-OWNERSHIP
+    text:
+      zh-CN: '作者声明同域安全 PartView 的 block/inline reference、block/inline target、surface 与 scrollport，以及显式 S1 约束和首末项事实；Overlay 验证当前 family/domain 与逻辑祖先后解析私有目标。宿主只接不透明几何目标，禁止组件/框架名、value/index 或 selector 参与语义选择。PartView 包装对象相等不是身份依据。completion 交付时再核本 resolve 代次、当前 membership/ancestry 及六个私有 target 身份，不能沿用采样时的 valid=true。'
+      en: 'Authors declare same-domain safe PartViews for block/inline references, block/inline targets, surface and scrollport, plus explicit S1 constraints and first/last facts. Overlay validates current family/domain and logical ancestry before resolving private targets. Hosts receive opaque geometry targets, never component/framework names, values/indices or selectors for semantic selection. PartView wrapper equality is not identity. Completion delivery rechecks this resolution generation, current membership/ancestry and all six private target identities instead of retaining sampled validity.'
+  - id: C-TARGET-ALIGNMENT-BINDING-0001-HOST
+    text:
+      zh-CN: '同一 AnchoredPosition host 的可选 target policy 使用共享 S1 solver，采用 layout viewport、明确 offset 原点和固定来源的 CSS 数值转换。frame 承布局，surface 承 paint，scrollport 承实际 scroll；初始 normal，扩高只按 S1 end-pin 规则。先写 inline 约束再重采 block，写 block/scroll 后再读事实验证；最多四次同步约束验证且数值稳定误差小于 0.01px 才可 applied，不收敛返回 invalid-geometry，不以稍后 ResizeObserver 修正代替首帧准入。写入前核当前 request，scroll 要实际读回；style lease 只恢复仍由自己拥有的字段，不覆盖后续作者写入。'
+      en: 'The optional target policy on the same AnchoredPosition host uses the shared S1 solver, layout viewport, explicit offset origins and fixed-source CSS numeric conversion. Frame owns layout, surface paint and scrollport actual scroll; initial alignment is normal and expansion follows only the S1 end-pin rule. Write inline constraints before resampling block facts, then resample after block/scroll writes. At most four synchronous verification passes must stabilize numerical plans within 0.01px before applied; nonconvergence returns invalid-geometry, and a later ResizeObserver correction cannot qualify initial delivery. Validate the request before writes and read back actual scroll. Style leases restore only fields they still own and do not overwrite subsequent author writes.'
+  - id: C-TARGET-ALIGNMENT-BINDING-0001-STATUS
+    text:
+      zh-CN: 'target 模式返回 applied、pending-target 或具名 unavailable 分类，不伪造 edge side/align。回调沿已审 current-connection callback dispatcher；不支持的 host 必须明确 unavailable，不得忽略 policy 后跑 popper。Transition release 还须核当前 attempt 与定位 request；无 geometry 的状态不是成功。'
+      en: 'Target mode returns applied, pending-target or named unavailable classifications without fabricating edge side/align. Delivery uses the reviewed current-connection callback dispatcher. An unsupported host reports unavailable rather than ignoring the policy and running popper. Transition release additionally checks the current attempt and positioning request; absent geometry is not success.'
+  - id: C-TARGET-ALIGNMENT-BINDING-0001-BOUNDARY
+    text:
+      zh-CN: 'frame 保持唯一 Overlay/Portal owner。当前 view 的中立 implicit-root replacement lease 用 surface 替换自动 owner-root region，保留 trigger/anchor 和其它显式 region。classify 快捷路径与 host 必须读取同一 getRegions 快照；frame 空白 outside，surface inside。旧 release 不得撤销新 lease，detach/dispose 撤当前 surface，重开只重放当前绑定。'
+      en: 'Frame remains the single Overlay/Portal owner. A neutral current-view implicit-root replacement lease substitutes surface for the automatic owner-root region while preserving trigger/anchor and other explicit regions. Fast classification and host classification use the same getRegions snapshot: frame blank space is outside and surface inside. An old release cannot remove a new lease; detach/disposal retires surface and reopening replays only current binding.'
+  - id: C-TARGET-ALIGNMENT-BINDING-0001-SCOPE
+    text:
+      zh-CN: '本切片必须由隔离的真实原型组合消费并验证冷打开中间选项覆盖 trigger；测试页面只做组合、输入与测量。不得借此启用未经准入的全站默认、warm 冻结、缺 part 自动 popper 或无穷 hidden pending。隔离静态 proof 在其明确 settled 的组合缺失或歧义 parts/语义 intent 时记录具名失败并关闭；目标尚未 mounted 的几何 pending 则保留 owner 取消，不将此 proof 策略升级为生产 fallback。已有 Base/Brutalist edge 默认与显式 popper 不变。'
+      en: 'An isolated real prototype composition must consume this slice and verify a middle selected option over its trigger on cold opening. Test pages only compose, drive input and measure. This does not admit a site-wide default switch, warm freeze, missing-part automatic popper or endless hidden pending. The isolated static proof records a named failure and closes for missing/ambiguous parts or unresolved semantic intent after its declared settled composition; not-yet-mounted geometry remains owner-cancellable pending. This proof policy does not establish a production fallback. Existing Base/Brutalist edge defaults and explicit popper remain unchanged.'
+dependsOn:
+  contracts:
+    [
+      C-TARGET-ALIGNMENT-PLAN-0001,
+      C-ANATOMY-SCOPED-QUERY-0001,
+      C-TRANSITION-COLD-PREPARATION-0001,
+      C-ANCHORED-POSITIONING-0001,
+    ]
+sources:
+  - path: packages/modules/positioning/src/web/target-alignment-host.ts
+  - path: packages/modules/overlay/src/target-alignment-binding.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined a connected cold target-alignment and painted-boundary slice without promoting production defaults.
+tags: [positioning, overlay, boundary, anatomy, select]

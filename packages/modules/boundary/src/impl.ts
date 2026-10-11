@@ -98,6 +98,7 @@ export class BoundaryModuleImpl extends ModuleBase {
   private nextRegionId = 1;
   private regions: BoundaryRegionRecord[] = [];
   private stackActive = false;
+  private rootReplacement: { target: unknown | null } | null = null;
   private observingPointerDown = false;
   private pointerSamplingInstalled = false;
   private observingFocusMove = false;
@@ -126,12 +127,14 @@ export class BoundaryModuleImpl extends ModuleBase {
     this.syncPointerScope();
     this.setStackActive(false);
     this.regions = [];
+    this.rootReplacement = null;
     this.outsideSubscribers.clear();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
     super.onMountPhase(phase, epoch);
     if (phase === 'unmounting' || phase === 'detached') {
+      this.rootReplacement = null;
       this.stackEntry.suspended = true;
       this.syncPointerScope();
       // View suspension removes eligibility, not the logical activation rank.
@@ -210,6 +213,14 @@ export class BoundaryModuleImpl extends ModuleBase {
     this.regions = this.regions.filter((region) => region.target !== target);
   }
 
+  replaceImplicitRoot(target: unknown | null): () => void {
+    const lease = { target };
+    this.rootReplacement = lease;
+    return () => {
+      if (this.rootReplacement === lease) this.rootReplacement = null;
+    };
+  }
+
   getRegions(): readonly BoundaryRegion[] {
     const explicit = this.regions.map(({ target, role, meta }) =>
       Object.freeze({
@@ -219,6 +230,12 @@ export class BoundaryModuleImpl extends ModuleBase {
       })
     );
 
+    if (this.rootReplacement) {
+      const target = this.rootReplacement.target;
+      return target === null || explicit.some((region) => Object.is(region.target, target))
+        ? Object.freeze(explicit)
+        : Object.freeze([{ target, role: 'content' as const }, ...explicit]);
+    }
     if (
       this.hostElement &&
       !explicit.some((region) => Object.is(region.target, this.hostElement))
@@ -233,7 +250,7 @@ export class BoundaryModuleImpl extends ModuleBase {
     const target = sample?.target;
     if (
       typeof target !== 'undefined' &&
-      this.regions.some((region) => Object.is(region.target, target))
+      this.getRegions().some((region) => Object.is(region.target, target))
     ) {
       return 'inside';
     }

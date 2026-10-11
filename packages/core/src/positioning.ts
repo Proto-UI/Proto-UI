@@ -31,11 +31,42 @@ export type AnchoredPositionSnapshot = Readonly<{
   strategy: AnchoredPositionStrategy;
 }>;
 
+export type TargetAlignmentConstraints = Readonly<{
+  boundary: 'layout-viewport';
+  margin: number;
+  minimumTargetSpanCount: number;
+  inlineOverflow: 'preserve-start';
+  expandOnScroll: boolean;
+}>;
+
+export type TargetAlignmentStatus =
+  | Readonly<{ status: 'applied' }>
+  | Readonly<{ status: 'pending-target'; reason: 'missing-target' | 'detached-target' }>
+  | Readonly<{
+      status: 'unavailable';
+      reason: 'unsupported-host' | 'invalid-association' | 'invalid-geometry' | 'ownership-lost';
+    }>;
+
+/** Opaque host geometry roles. Semantic selection remains with the declaring prototype. */
+export type TargetAlignmentConnection = Readonly<{
+  surface: unknown;
+  scrollport: unknown;
+  blockReference: unknown;
+  inlineReference: unknown;
+  blockTarget: unknown;
+  inlineTarget: unknown;
+  atStart: boolean;
+  atEnd: boolean;
+  constraints: TargetAlignmentConstraints;
+}>;
+
 export type AnchoredPositionConnection = Readonly<{
   anchor: unknown;
   floating: unknown;
   config: AnchoredPositionConfig;
   onResolved?(snapshot: AnchoredPositionSnapshot): void;
+  targetAlignment?: TargetAlignmentConnection;
+  onAlignment?(status: TargetAlignmentStatus): void;
 }>;
 
 export interface AnchoredPositionHandle {

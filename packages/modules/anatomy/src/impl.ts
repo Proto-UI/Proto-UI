@@ -515,6 +515,12 @@ export class AnatomyModuleImpl extends ModuleBase {
       }
       return out;
     },
+    isCurrentPart: (family: AnatomyFamily, part: AnatomyPartView): boolean => {
+      const claim = CLAIM_BY_PART_VIEW.get(part);
+      if (!claim || claim.family !== family) return false;
+      const domain = this.resolveCurrentDomain(family, false);
+      return !!domain.rootInstance && domain.claims.includes(claim);
+    },
     resolvePartTarget: (part: AnatomyPartView): unknown | null => {
       const claim = CLAIM_BY_PART_VIEW.get(part);
       return claim?.getRootTarget(claim.instance) ?? null;

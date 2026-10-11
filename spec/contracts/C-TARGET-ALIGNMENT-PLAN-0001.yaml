@@ -22,7 +22,7 @@ criteria:
       en: Nonfinite facts, negative physical dimensions or insets, nonpositive viewport or target block extents and invalid constraints return a named invalid result without a plan. Zero inline text span is valid when its edges exist. Finite offscreen references and positive tiny viewports retain source plans, including minimum span greater than maximum span; neither is falsely called exact final placement. Nonfinite computed plans are rejected.
   - id: C-TARGET-ALIGNMENT-PLAN-0001-SCOPE
     text:
-      en: S1 functions remain internal and unwired. This contract neither introduces a public host connection API nor defines missing-target popper fallback, disabled selection compatibility, lifecycle readiness, focus, animation, Adapter behavior or consumer migration. These remain explicitly owned next steps, not completed or waived capabilities.
+      en: S1 functions remain internal numerical mechanisms. Their separately gated cold host binding is specified by C-TARGET-ALIGNMENT-BINDING-0001; this numerical contract does not define missing-target popper fallback, disabled selection compatibility, lifecycle readiness, focus, animation, Adapter behavior or consumer migration. These remain explicitly owned next steps, not completed or waived capabilities.
 dependsOn:
   contracts: [C-ANCHORED-POSITIONING-0001]
 verifies:

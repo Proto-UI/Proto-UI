@@ -1,0 +1,51 @@
+name: Select target alignment evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/select-target-alignment-evidence.yml'
+      - 'packages/core/src/**'
+      - 'packages/hooks/src/**'
+      - 'packages/modules/**'
+      - 'packages/prototypes/base/src/select/**'
+      - 'packages/prototypes/base/src/transition/**'
+      - 'packages/web-conformance/test/fixtures/select-target-alignment-native.ts'
+      - 'packages/web-conformance/test/select-target-alignment.browser.test.ts'
+permissions:
+  contents: read
+concurrency:
+  group: select-target-alignment-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  native-cold-alignment:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Verify native cold alignment with the normal Chromium sandbox
+        env:
+          PROTO_UI_TARGET_ALIGNMENT_EVIDENCE: ${{ runner.temp }}/select-target-alignment
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE"
+          git rev-parse HEAD > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/source-sha.txt"
+          corepack pnpm@10.32.1 exec vitest run packages/web-conformance/test/select-target-alignment.browser.test.ts --maxWorkers=1 --minWorkers=1 2>&1 | tee "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/native.log"
+      - name: Retain commit-bound isolated prototype evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: select-target-alignment-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          path: ${{ runner.temp }}/select-target-alignment
+          if-no-files-found: warn
+          retention-days: 30
