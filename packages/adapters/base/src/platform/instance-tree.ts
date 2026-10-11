@@ -163,6 +163,8 @@ export function createInstanceTreeMarkers(
   const INSTANCE_BY_TOKEN = new WeakMap<LogicalInstanceToken, HTMLElement>();
   const PROTO_BY_TOKEN = new WeakMap<LogicalInstanceToken, Prototype<any>>();
   const PARENT_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
+  // A supplied owner root (null) is distinct from absent ownership information.
+  const OWNER_PARENT_TOKENS = new WeakSet<LogicalInstanceToken>();
   const CHILDREN_BY_TOKEN = new WeakMap<LogicalInstanceToken, Set<LogicalInstanceToken>>();
   const TRIGGER_GROUP_ANCHOR_BY_TOKEN = new WeakMap<LogicalInstanceToken, LogicalInstanceToken>();
   const EVENT_TARGET_BY_TOKEN = new WeakMap<LogicalInstanceToken, RebindableEventTarget>();
@@ -384,8 +386,18 @@ export function createInstanceTreeMarkers(
 
   function bindLogicalParent(
     token: LogicalInstanceToken,
-    parent: LogicalInstanceToken | null
+    parent: LogicalInstanceToken | null,
+    options?: { authority: 'owner' }
   ): void {
+    if (options?.authority === 'owner') {
+      const previous = PARENT_BY_TOKEN.get(token);
+      // Validate before publishing authority, but publish before recomputation
+      // can notify synchronous observers that mark or project this same token.
+      if (previous !== parent && (previous || parent) && isRegisteredTrigger(token)) {
+        assertContinuousTriggerChain(token, parent);
+      }
+      OWNER_PARENT_TOKENS.add(token);
+    }
     setLogicalParentInternal(token, parent);
   }
 
@@ -398,7 +410,12 @@ export function createInstanceTreeMarkers(
     const parentRoot = getProtoParent(el);
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     if (TRIGGER_TOKENS.has(token)) {
-      assertContinuousTriggerChain(token, parentToken ?? PARENT_BY_TOKEN.get(token));
+      assertContinuousTriggerChain(
+        token,
+        OWNER_PARENT_TOKENS.has(token)
+          ? PARENT_BY_TOKEN.get(token)
+          : (parentToken ?? PARENT_BY_TOKEN.get(token))
+      );
     }
     (el as any)[PROTO_INSTANCE] = true;
     PROTO_BY_INSTANCE.set(el, proto);
@@ -414,10 +431,12 @@ export function createInstanceTreeMarkers(
       notifyInstanceLifecycle(token);
     }
 
-    if (parentToken || clearMissingParent) setLogicalParentInternal(token, parentToken ?? null);
+    if (!OWNER_PARENT_TOKENS.has(token) && (parentToken || clearMissingParent)) {
+      setLogicalParentInternal(token, parentToken ?? null);
+    }
     for (const descendant of el.querySelectorAll<HTMLElement>('*')) {
       const descendantToken = TOKEN_BY_INSTANCE.get(descendant);
-      if (!descendantToken) continue;
+      if (!descendantToken || OWNER_PARENT_TOKENS.has(descendantToken)) continue;
       const nearestParent = getProtoParent(descendant);
       if (nearestParent !== el) continue;
       setLogicalParentInternal(descendantToken, token);
@@ -612,7 +631,7 @@ export function createInstanceTreeMarkers(
     }
 
     const token = TOKEN_BY_INSTANCE.get(instance);
-    if (!token) return;
+    if (!token || OWNER_PARENT_TOKENS.has(token)) return;
     const parentRoot = parent ? (isProtoInstance(parent) ? parent : getProtoParent(parent)) : null;
     const parentToken = parentRoot ? TOKEN_BY_INSTANCE.get(parentRoot) : undefined;
     setLogicalParentInternal(token, parentToken ?? null);

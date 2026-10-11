@@ -323,7 +323,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           state.instanceToken,
           ((this as any).__puiLogicalParent ?? null) as ReturnType<
             typeof createLogicalInstance
-          > | null
+          > | null,
+          { authority: 'owner' }
         );
         return {
           __puiShouldExist: false,

@@ -5,6 +5,14 @@ status: draft
 since: 0.3.0-alpha.0
 summary: Opaque host facts, facade/port authority, Runtime instance resources and four Web Adapter scope journeys establish the bounded Context catalog slice.
 cases:
+  - id: T-CONTEXT-0003-CASE-OWNER-AUTHORITY
+    title: Owner ancestry survives physical projection, absent views and synchronous marker reentry
+    covers: [HC-CONTEXT-ANCESTRY-0001-B, HC-CONTEXT-ANCESTRY-0001-E, C-CONTEXT-0011-A]
+    expectation: explicit-owner-relation-precedes-physical-discovery
+  - id: T-CONTEXT-0003-CASE-RETAINED-OWNER
+    title: Retained providers preserve slotted Context consumers and Anatomy domains without a mounted parent view
+    covers: [HC-CONTEXT-ANCESTRY-0001-E, C-CONTEXT-0012-A, C-CONTEXT-0012-B]
+    expectation: viewless-owner-scope-remains-current
   - id: T-CONTEXT-0003-CASE-ANCESTOR
     title: Explicit ancestor intent excludes self and rejects stale deliveries without broadening writes
     covers: [C-CONTEXT-0004-F, C-CONTEXT-0006-F, C-CONTEXT-0007-F, M-CONTEXT-0001-J]
@@ -80,6 +88,14 @@ cases:
       - A-WEB-COMPONENT-0001-CONTEXT
     expectation: context-adapter-conforms
 implementations:
+  - id: context-owner-authority-markers
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/logical-parent-authority.test.ts
+    required: true
+    consumesCases: [T-CONTEXT-0003-CASE-OWNER-AUTHORITY]
+    notes:
+      - Generic token/DOM tests cover explicit-null versus physical fallback, Portal projection, late ancestors, view replacement, effective Trigger continuity and synchronous subscriber reentry. No browser or non-Web conformance claim.
   - id: context-ancestor-module
     kind: module-test
     status: passing
@@ -136,6 +152,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTEXT-0003-CASE-ADAPTER
+      - T-CONTEXT-0003-CASE-RETAINED-OWNER
     notes:
       - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
   - id: context-vue-adapter
@@ -145,6 +162,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTEXT-0003-CASE-ADAPTER
+      - T-CONTEXT-0003-CASE-RETAINED-OWNER
     notes:
       - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
   - id: context-vue2-adapter
@@ -154,6 +172,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTEXT-0003-CASE-ADAPTER
+      - T-CONTEXT-0003-CASE-RETAINED-OWNER
     notes:
       - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
   - id: context-web-component-adapter
@@ -163,6 +182,7 @@ implementations:
     required: true
     consumesCases:
       - T-CONTEXT-0003-CASE-ADAPTER
+      - T-CONTEXT-0003-CASE-RETAINED-OWNER
     notes:
       - Uses the shared real-owner scenario in packages/adapters/base/test/fixtures/context-conformance.ts. This is Web-host DOM evidence, not non-Web conformance or browser geometry.
 verifies:
@@ -232,6 +252,10 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Mapped bounded Module, Runtime and real four-Adapter executable Context evidence.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Mapped generic owner-authority marker reentry and real retained-provider Context/Anatomy Adapter evidence; no native-browser claim.
+
 tags:
   - context
   - adapter

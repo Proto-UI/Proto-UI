@@ -250,7 +250,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             )
           : null;
         if (supportsOwnerContext) {
-          bindLogicalParent(instanceToken, parentToken);
+          bindLogicalParent(instanceToken, parentToken, { authority: 'owner' });
           runtime.provide!(logicalOwnerKey, instanceToken);
         }
         const shouldExist = runtime.ref(!supportsOwnerContext);

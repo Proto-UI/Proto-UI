@@ -248,7 +248,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           : null;
       const supportsOwnerContext = !!logicalOwnerContext && !!runtime.useContext;
       if (logicalOwnerContext && runtime.useContext) {
-        bindLogicalParent(instanceTokenRef.current, parentToken);
+        bindLogicalParent(instanceTokenRef.current, parentToken, { authority: 'owner' });
       }
       const [renderChildren, setRenderChildren] = runtime.useState<any>(null);
       const hostTokenRevisionRef = runtime.useRef(0);
