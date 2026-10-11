@@ -552,11 +552,21 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         'reason: search selection'
       );
     };
+    let mounted = false,
+      viewEpoch = 0;
     def.context.subscribe(context, sync);
     def.lifecycle.onMounted((run) => {
+      mounted = true;
+      viewEpoch++;
       sync(run, run.context.read(context));
       invoke(run, '__refresh');
     });
+    const retireView = () => {
+      mounted = false;
+      viewEpoch++;
+    };
+    def.lifecycle.onUnmounted(retireView);
+    def.lifecycle.onBeforeDispose(retireView);
     def.props.watchAll((run) => {
       invoke(run, '__refresh');
       sync(run, run.context.read(context));
@@ -572,10 +582,14 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       if (visible.get() && !disabled.get()) invoke(run, '__activate', id);
     });
     def.event.on('press.commit', (run) => {
+      if (!mounted) return;
+      const epoch = viewEpoch;
       if (
         visible.get() &&
         !disabled.get() &&
-        invoke(run, 'select', run.props.get().value, 'pointer')
+        invoke(run, 'select', run.props.get().value, 'pointer') &&
+        mounted &&
+        epoch === viewEpoch
       )
         run.expose.emit('select', { value: run.props.get().value });
     });

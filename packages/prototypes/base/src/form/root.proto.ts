@@ -31,6 +31,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   a.state('disabled', disabled);
   def.context.provide(FORM_CONTEXT, { disabled: false, pending: false, submitted: false });
   let run: RunHandle<FormRootProps> | null = null,
+    viewEpoch = 0,
     sequence = 0,
     cancellation = 0,
     waiting: { id: number; key: string } | null = null,
@@ -167,20 +168,27 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   });
   def.expose.method('requestReset', () => {
     if (!run) return false;
+    const current = run,
+      epoch = viewEpoch;
+    const isCurrent = () => run === current && viewEpoch === epoch;
     cancel();
+    if (!isCurrent()) return false;
     validating = true;
     let complete = true;
     try {
       for (const part of parts()) {
         const reset = part.getExpose('__formReset');
         if (typeof reset !== 'function' || reset() !== true) complete = false;
+        if (!isCurrent()) return false;
       }
     } finally {
       validating = false;
     }
     submitted.set(false, 'reason: form reset');
+    if (!isCurrent()) return false;
     publish();
-    run?.expose.emit('reset', {});
+    if (!isCurrent()) return false;
+    current.expose.emit('reset', {});
     return complete;
   });
   const sync = (current: RunHandle<FormRootProps>) => {
@@ -191,12 +199,18 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
     publish();
   };
   def.lifecycle.onCreated(sync);
-  def.lifecycle.onMounted(sync);
-  def.props.watchAll(sync);
-  def.lifecycle.onUnmounted(() => {
-    cancel();
-    run = null;
+  def.lifecycle.onMounted((run) => {
+    viewEpoch++;
+    sync(run);
   });
+  def.props.watchAll(sync);
+  const retireView = () => {
+    viewEpoch++;
+    run = null;
+    cancel();
+  };
+  def.lifecycle.onUnmounted(retireView);
+  def.lifecycle.onBeforeDispose(retireView);
   def.anatomy.subscribeParts(FORM_FAMILY, 'field', () => {
     if (waiting) cancel();
   });
