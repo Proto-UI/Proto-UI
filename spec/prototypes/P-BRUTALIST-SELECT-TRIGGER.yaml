@@ -28,11 +28,11 @@ criteria:
   - id: P-BRUTALIST-SELECT-TRIGGER-SIZE-PROP
     text:
       en: >-
-        Public `size` is the enum `sm | default` with default `default`. `default` maps to `h-9`; `sm` maps to `h-8`. There is no `lg` or `icon` size for Select Trigger.
+        Public `size` is the enum `sm | default` with default `default`. `default` maps to `h-10`; `sm` maps to `h-8`. There is no `lg` or `icon` size for Select Trigger.
 
 
       zh-CN: >-
-        公开 `size` 为枚举 `sm | default`，默认 `default`。`default` 对应 `h-9`；`sm` 对应 `h-8`。Select Trigger 不提供 `lg` 或 `icon` 尺寸。
+        公开 `size` 为枚举 `sm | default`，默认 `default`。`default` 对应 `h-10`；`sm` 对应 `h-8`。Select Trigger 不提供 `lg` 或 `icon` 尺寸。
 
 
   - id: P-BRUTALIST-SELECT-TRIGGER-DEFAULTS
@@ -58,11 +58,11 @@ criteria:
   - id: P-BRUTALIST-SELECT-TRIGGER-CHEVRON
     text:
       en: >-
-        The trigger renders a trailing chevron icon (a 16×16 SVG path `m6 9 6 6 6-6`) after its slot, with `pointer-events-none` so the icon never captures pointer interaction.
+        The trigger renders a trailing chevron icon (a 16×16 SVG path `m6 9 6 6 6-6`) after its slot at full opacity (disabled fading remains on the whole trigger), with `pointer-events-none` so the icon never captures pointer interaction.
 
 
       zh-CN: >-
-        trigger 在其 slot 之后渲染尾部 chevron 图标（16×16 SVG 路径 `m6 9 6 6 6-6`），并设置 `pointer-events-none`，使图标永不捕获指针交互。
+        trigger 在其 slot 之后渲染尾部 chevron 图标（16×16 SVG 路径 `m6 9 6 6 6-6`），图标本身保持完全不透明（disabled 淡化仍施加于整个 trigger），并设置 `pointer-events-none`，使图标永不捕获指针交互。
 
 
   - id: P-BRUTALIST-SELECT-TRIGGER-INTERACTION
@@ -113,7 +113,7 @@ revisions:
     summary: Added opt-in elevated Trigger appearance for command groups while preserving the upstream-aligned flat default and flat popup.
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
+    summary: Aligned draft visual grammar with neobrutalism-components 3306a802; replaced the earlier local default h-9 and chevron opacity-50 choices with upstream h-10 and full icon opacity. The sm and elevated Proto UI extensions remain unchanged.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-

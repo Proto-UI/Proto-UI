@@ -58,11 +58,8 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
     });
 
-    // P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT: selected → bg-main text-main-foreground.
-    def.rule({
-      when: (w) => w.state(selected).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-main text-main-foreground border-black')),
-    });
+    // P-BRUTALIST-SELECT-ITEM-SELECTED-PAIR-INVARIANT: selection owns only the check;
+    // the pinned upstream applies the accent pair on highlight/hover/focus, not selection.
 
     let renderTask: { cancel(): void } | null = null;
     // P-BRUTALIST-SELECT-ITEM-SELECTED-INDICATOR

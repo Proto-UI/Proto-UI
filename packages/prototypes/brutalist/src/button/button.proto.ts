@@ -58,8 +58,8 @@ const VARIANT_FILL_TOKENS: Record<Exclude<BrutalistButtonVariant, 'solid'>, stri
 // P-BRUTALIST-BUTTON-SIZE-PROP
 const SIZE_TOKENS: Record<BrutalistButtonSize, string> = {
   default: 'h-10 px-4 text-sm',
-  sm: 'h-9 px-3 text-xs',
-  lg: 'h-12 px-6 text-base',
+  sm: 'h-9 px-3 text-sm',
+  lg: 'h-11 px-8 text-sm',
   icon: 'size-10',
 };
 
