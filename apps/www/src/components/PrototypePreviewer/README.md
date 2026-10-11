@@ -313,7 +313,7 @@ const manualPrototypeModules = {
 
 主题值属于 Website consumer。Generic preview 继续使用 `resolveProjectionThemeSurfaceStyle` / `watchProjectionThemeSurfaceStyle` 的同一份完整输入；普通内容从 canvas 继承，不会按 `prototypeId` 猜测或自动搬运主题。
 
-明确由 demo 拥有、离开 canvas 物理祖先的 Portal Content/Mask，可在对应 `kind: 'proto'` 节点写 `previewTheme: 'portal'`，并声明唯一非空 `ref`。这只是 Website composition 描述，不是 Prototype Props 或新的 Adapter 保证。目前 Brutalist AlertDialog demo 的 Content/Mask 和 Popover demo 的 Content 使用该标记。
+明确由 demo 拥有、离开 canvas 物理祖先的 Portal Content/Mask，可在对应 `kind: 'proto'` 节点写 `previewTheme: 'portal'`，并声明唯一非空 `ref`。这只是 Website composition 描述，不是 Prototype Props 或新的 Adapter 保证。目前 Brutalist AlertDialog demo 的 Content/Mask 、Popover demo 的 Content 和 Drawer demo 的 panel Content 使用该标记。
 
 Composition 把 theme map 放在节点自有 `surfaceStyle` 之前；显式样式按原有顺序后置覆盖。仅这个 opt-in merge 会用 CSSOM 解析字符串，并逐项规范化 camelCase / kebab-case 等价属性；重复声明移到它最后出现的位置，保留 shorthand / longhand 顺序。CSS custom property 保留大小写；对象中的空字符串用于撤销，CSS 字符串中的空声明按 CSSOM 忽略。`!important` 仍不受支持。这样避免 Vue 2 将 mixed-array 字符串项当作数字属性；未标记节点保持原 renderer 路径，不宣称全局 mixed-array 支持。
 

@@ -31,3 +31,11 @@ Keep exactly one `asDrawerTrigger()` or `asDrawerClose()`; no `asButton()`, new 
 Mapping: `packages/prototypes/brutalist/src/drawer/{trigger,close}.proto.ts`; planned `packages/prototypes/brutalist/test/drawer-command-density.test.ts`. No demo or Finf completion-count changes.
 
 Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+
+## Separately authorized Website consumer follow-up (2026-10-11)
+
+The original density-only implementation above excluded demo changes. Its subsequent official `6e82e3e8be3b9fc49ce8c9c173cc4a2d7bd41061` native run observed Trigger radius `5px` but portal Close radius `10px` at root16 and `20px` at root32 in all four runtimes and both schemes. Close inherited the page's `--pui-radius: 0.625rem` after leaving the family canvas. These 24 native failures remain baseline evidence; they do not redefine the expected family radius or prove later input steps passed.
+
+This separately authorized consumer correction opts only the existing public Neo Drawer Content (`ref: 'panel'`) into the existing Website `previewTheme: 'portal'` API. The existing preview composition projects the complete selected family theme through the normalized surface channel, including updates while portaled, close/reopen and disposal. The missing consumer metadata is the defect; there is no new theme rule, public API, automatic inheritance guarantee, Prototype constant or Adapter/Compiler change. Existing paint tokens remain unchanged, although supplying their intended theme may change rendered colors as well as radius. Full upstream paint equivalence remains unclaimed.
+
+The real public-demo four-runtime source-host regression checks the complete theme map, the independently expected `5px` radius input, light/dark updates, physical portal migration, reopening and stale API cleanup without mutating page theme variables. Those checks prove consumer ownership and realization inputs, not native computed paint. The native `5px` oracle stays intact; the repaired candidate still requires fresh official native evidence.

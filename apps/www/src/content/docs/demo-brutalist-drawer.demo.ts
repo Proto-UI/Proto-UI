@@ -23,6 +23,7 @@ export default {
             'kind': 'proto',
             'prototypeId': 'brutalist-drawer-content',
             'ref': 'panel',
+            'previewTheme': 'portal',
             'children': [
               {
                 'kind': 'proto',

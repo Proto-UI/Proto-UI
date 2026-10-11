@@ -714,4 +714,93 @@ describe('generic preview owned portal theme', () => {
       expect(cleanup).toHaveBeenCalledTimes(1);
     });
   }
+  it('marks only the actual Neo Drawer panel as a preview-owned portal surface', async () => {
+    const { default: demo } = await import('../../content/docs/demo-brutalist-drawer.demo');
+    assertDemoSpec(demo);
+    const owned: Array<{ prototypeId: string; ref: string | undefined }> = [];
+    const visit = (node: DemoChild) => {
+      if (typeof node === 'string' || node.kind === 'text') return;
+      if (node.kind === 'proto' && node.previewTheme === 'portal')
+        owned.push({ prototypeId: node.prototypeId, ref: node.ref });
+      node.children?.forEach(visit);
+    };
+    visit(demo.root);
+    expect(owned).toEqual([{ prototypeId: 'brutalist-drawer-content', ref: 'panel' }]);
+  });
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`${runtime}: the public Neo Drawer projects, updates and releases its own theme`, async () => {
+      const { default: publicDemo } = await import('../../content/docs/demo-brutalist-drawer.demo');
+      assertDemoSpec(publicDemo);
+      const host = document.createElement('div');
+      host.dataset.theme = 'light';
+      document.body.style.setProperty('--pui-radius', '0.625rem');
+      document.body.append(host);
+      const light = resolveProjectionThemeSurfaceStyle('brutalist', host);
+      let context!: DemoSetupContext;
+      const cleanup = vi.fn();
+      const original: DemoSpec = {
+        ...publicDemo,
+        setup(next) {
+          context = next;
+          const release: unknown = publicDemo.setup?.(next);
+          return () => {
+            if (typeof release === 'function') release();
+            cleanup();
+          };
+        },
+      };
+      const surface = createRuntimePreviewSurface(original, 'brutalist', light, runtime);
+      const ids = new Set<string>();
+      collectPrototypeIds(surface.demo.root, ids);
+      await loadPrototypes([...ids]);
+      const rendered = await renderDemo({ runtime, host, demo: surface.demo });
+      let stop = () => {};
+      let lastContent: HTMLElement | undefined;
+      const current = () => {
+        // A closed React/Vue surface no longer carries role=dialog. The public
+        // ref tracks its normalized surface; role also locates the pre-fix red.
+        const boundary =
+          document.querySelector<HTMLElement>('[data-demo-ref="panel"]') ??
+          document.querySelector<HTMLElement>('[role="dialog"]');
+        expect(boundary).not.toBeNull();
+        return actualSurface(boundary!);
+      };
+      const assertTheme = (expected: Readonly<Record<string, string>>) => {
+        const target = current();
+        expect(target.style.getPropertyValue('--pui-radius')).toBe('5px');
+        for (const [name, value] of Object.entries(expected))
+          expect(target.style.getPropertyValue(name), name).toBe(value);
+      };
+      try {
+        await surface.ready;
+        stop = watchProjectionThemeSurfaceStyle('brutalist', host, (theme) => {
+          void surface.setAppearance('brutalist', theme);
+        });
+        context.api.call('root', 'openDrawer');
+        await vi.waitFor(() => expect(host.contains(current())).toBe(false));
+        await vi.waitFor(() => assertTheme(light));
+        host.dataset.theme = 'dark';
+        const dark = resolveProjectionThemeSurfaceStyle('brutalist', host);
+        await vi.waitFor(() => assertTheme(dark));
+        context.api.call('root', 'close');
+        await vi.waitFor(() => expect(host.contains(current())).toBe(true));
+        context.api.call('root', 'openDrawer');
+        await vi.waitFor(() => expect(host.contains(current())).toBe(false));
+        await vi.waitFor(() => assertTheme(dark));
+        expect(document.body.style.getPropertyValue('--pui-radius')).toBe('0.625rem');
+        expect(document.body.style.getPropertyValue('--pui-background')).toBe('');
+        lastContent = current();
+      } finally {
+        stop();
+        await rendered.destroy();
+      }
+      const lastStyle = lastContent?.getAttribute('style');
+      await surface.setAppearance('brutalist', light);
+      context.api.setSurfaceStyle!('panel', { '--pui-radius': '99px' });
+      await new Promise<void>((resolve) => queueMicrotask(resolve));
+      expect(document.querySelector('[role="dialog"]')).toBeNull();
+      expect(lastContent?.getAttribute('style')).toBe(lastStyle);
+      expect(cleanup).toHaveBeenCalledTimes(1);
+    });
+  }
 });
