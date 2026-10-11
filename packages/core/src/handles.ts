@@ -1,3 +1,4 @@
+import type { ResidentMotionDeclaration } from './resident-motion';
 // packages/core/src/handles.ts
 import type { MaterialCandidate, MaterialSlot } from './material';
 import {
@@ -248,6 +249,7 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
     };
     style: {
       use: (...handles: StyleHandle[]) => UnUse;
+      transition: (declaration: ResidentMotionDeclaration) => UnUse;
     };
   };
 

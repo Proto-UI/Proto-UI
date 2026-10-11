@@ -68,6 +68,7 @@ describe('Feedback catalog boundary', () => {
       'exportMerged',
       'patch',
       'suppress',
+      'transition',
       'use',
     ]);
     const remove = f.style.use(tw('opacity-50'));

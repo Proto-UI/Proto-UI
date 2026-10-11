@@ -1,5 +1,6 @@
 import type {
   StyleHandle,
+  ResidentMotionDeclaration,
   ModuleInstance,
   MaterialSlot,
   MaterialCandidate,
@@ -16,6 +17,8 @@ export interface FeedbackFacade extends ModuleFacade {
     use(candidate: MaterialCandidate): () => void;
   };
   style: {
+    /** setup-only; presentation never owns State or presence */
+    transition: (declaration: ResidentMotionDeclaration) => () => void;
     /** setup-only */
     use: (...handles: StyleHandle[]) => () => void;
 
@@ -42,6 +45,7 @@ export type FeedbackPort = {
   ) => FeedbackRuntimeStyleDisposer | null;
   exportMaterialFrame?: () => MaterialIntentFrame;
   materialDiagnostics?: () => readonly string[];
+  motionDiagnostics?: () => readonly string[];
   /** Private material integration: keep relevant Rules in the evaluator. */
   shouldRetainStyleRule?: (tokens: readonly string[]) => boolean;
   /**

@@ -67,6 +67,9 @@ export function getSemanticGroupKeyV0(token: string): string {
     return `${selectionPrefix}${getSemanticGroupKeyV0(token.slice(selectionPrefix.length))}`;
   }
 
+  const translateAxis = token.match(/^-?translate-([xy])-/);
+  if (translateAxis) return `translate-${translateAxis[1]}-`;
+
   // One content-selection affordance per subject. This is independent of
   // selection:* paint and never owns a selection range or control state.
   if (token === 'select-auto' || token === 'select-text' || token === 'select-none') {

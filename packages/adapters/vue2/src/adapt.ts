@@ -1,3 +1,4 @@
+import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
   resolveWebNativeLinkLocalName,
@@ -98,6 +99,7 @@ export type Vue2AdapterProps<Props extends PropsBaseType> = Props &
 export interface Vue2AdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
+  residentMotion?: WebResidentMotionOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: Vue2AdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -123,6 +125,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
+    residentMotion?: WebResidentMotionOptions;
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -256,6 +259,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         proto,
         initOptions: {
           createVisualSink: createVisualSink,
+          residentMotion: opt.residentMotion,
           schedule,
           getMeta,
           colorSchemeSource,
@@ -444,6 +448,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         if ((this as any).__puiShouldExist) {
           initSession(runtime, this, proto, {
             createVisualSink: createVisualSink,
+            residentMotion: opt.residentMotion,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -465,6 +470,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             if (getRootElement(this) === target && (this as any).__puiShouldExist) {
               initSession(runtime, this, proto, {
                 createVisualSink: createVisualSink,
+                residentMotion: opt.residentMotion,
                 schedule,
                 getMeta,
                 colorSchemeSource,
@@ -491,6 +497,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           if (state.terminalDisposed || activationVersion !== state.activationVersion) return;
           initSession(runtime, this, proto, {
             createVisualSink: createVisualSink,
+            residentMotion: opt.residentMotion,
             schedule,
             getMeta,
             colorSchemeSource,
@@ -661,6 +668,7 @@ function initSession<Props extends PropsBaseType>(
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
+    residentMotion?: WebResidentMotionOptions;
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
@@ -803,6 +811,7 @@ function initSession<Props extends PropsBaseType>(
     },
     rawPropsSource: state.rawPropsSource,
     effectsPort,
+    residentMotion: targetOptions.residentMotion,
     visualFeedbackSink: targetOptions.createVisualSink
       ? createDeferredViewVisualSink(
           () => targetOptions.createVisualSink!(rootEl, effectsPort),
@@ -958,6 +967,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
   schedule: (task: () => void) => void;
   getMeta: (key: string) => unknown;
   createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
+  residentMotion?: WebResidentMotionOptions;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;

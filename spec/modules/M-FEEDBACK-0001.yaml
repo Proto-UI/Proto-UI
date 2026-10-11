@@ -36,6 +36,9 @@ criteria:
     text:
       en: Shared typed material contributions retain instance lifetime independently of host support. Rule style and material replace together before one projection; static surfaces have no implicit button binding. The shared sink supersedes style-only writes for that projection; absent support preserves legal style and exposes a diagnostic.
       zh-CN: 共享 typed material contribution 独立于host支持保留实例生命周期；Rule style/material在一次projection前共同替换，静态surface没有隐式Button绑定。共享sink替代同次style-only输出；缺失支持保留合法style并暴露诊断。
+  - id: M-FEEDBACK-0001-RESIDENT-MOTION
+    text:
+      en: Setup-only style.transition records snapshotted typed channel timing under C-FEEDBACK-RESIDENT-MOTION-0001. Motion-bound style Rules remain evaluated and their final patched targets flow through one motion sink when available; presentation never writes the recorder. Missing capability is diagnosed, and optical material requires an explicitly combined owner.
 satisfies:
   contracts:
     - C-FEEDBACK-0002
@@ -46,6 +49,7 @@ satisfies:
     - C-FEEDBACK-STYLE-0003
     - C-FEEDBACK-STYLE-0004
     - C-FEEDBACK-STYLE-0005
+    - C-FEEDBACK-RESIDENT-MOTION-0001
     - id: C-CONTENT-SELECTION-AFFORDANCE-0001
       since: 0.3.0-alpha.1
 requires:
@@ -57,6 +61,7 @@ dependsOn:
     - C-LIFECYCLE-0007
 relates:
   hostCaps:
+    - HC-FEEDBACK-RESIDENT-MOTION-0001
     - id: HC-FEEDBACK-VISUAL-SINK-0001
       since: 0.3.0-alpha.1
   contracts:

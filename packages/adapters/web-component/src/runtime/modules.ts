@@ -1,3 +1,5 @@
+import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
+import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   NATIVE_LINK_HOST_CAP,
   NATIVE_LINK_RUN_IN_CALLBACK_CAP,
@@ -1150,6 +1152,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   effectsPort: EffectsPort;
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
+  residentMotion?: WebResidentMotionOptions;
   finalStyleSink?: FinalStyleSink;
   materialBindingFactory?: MaterialBindingFactory;
   textControlTarget: WebTextControl | null;
@@ -1177,6 +1180,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   overlayLayerScheduler?: OverlayLayerScheduler;
   overlayModal?: OverlayModal;
 }) {
+  let motionSurface: HTMLElement | null = null;
+  let motionSink: import('@proto.ui/module-feedback').ResidentMotionSink | null = null;
+  let motionView: number | null = null;
   const {
     el,
     instanceToken,
@@ -1322,6 +1328,33 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      [
+        RESIDENT_MOTION_SINK_CAP,
+        {
+          diagnostics: () => motionSink?.diagnostics?.() ?? [],
+          commit(frame: import('@proto.ui/module-feedback').ResidentMotionFrame) {
+            const surface = args.surfaceProjection.getSurfaceTarget();
+            if (!surface) {
+              effectsPort.queueStyle(frame.style);
+              effectsPort.requestFlush();
+              return;
+            }
+            if (motionSurface !== surface) {
+              if (motionSink && motionView !== null) motionSink.release(motionView);
+              motionSurface = surface;
+              motionSink = createWebResidentMotionSink(surface, effectsPort, args.residentMotion);
+            }
+            motionView = frame.view;
+            motionSink!.commit(frame);
+          },
+          release(view: number) {
+            motionSink?.release(view);
+            motionSink = null;
+            motionSurface = null;
+            motionView = null;
+          },
+        },
+      ],
       ...(args.visualFeedbackSink
         ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
         : []),

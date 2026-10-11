@@ -1,3 +1,5 @@
+import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
+import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   NATIVE_LINK_HOST_CAP,
   NATIVE_LINK_RUN_IN_CALLBACK_CAP,
@@ -287,6 +289,7 @@ export function createVueModules<Props extends PropsBaseType>(args: {
   effectsPort: EffectsPort;
   /** Optional V2 visual provider for this physical view; absence retains ordinary style. */
   visualFeedbackSink?: VisualFeedbackSink;
+  residentMotion?: WebResidentMotionOptions;
   getMeta: (key: string) => unknown;
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
@@ -369,6 +372,10 @@ export function createVueModules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      [
+        RESIDENT_MOTION_SINK_CAP,
+        createWebResidentMotionSink(args.el, effectsPort, args.residentMotion),
+      ],
       ...(args.visualFeedbackSink
         ? [[VISUAL_FEEDBACK_SINK_CAP, args.visualFeedbackSink] as const]
         : []),
