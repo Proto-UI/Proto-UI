@@ -39,3 +39,15 @@ Keyboard requests use a separate operational Number implementation, not the hist
 Real pointer origin/session association, nearest-Thumb seek, off-center grabbing, pointer push/swap/none collisions, swap focus, capture cleanup, grouped Field registration, family styling, native browser/assistive-technology behavior and Compiler translation remain unimplemented or unverified. Four-Adapter tests use framework/happy-dom harnesses, including fake React; they are not native-browser evidence. This draft cannot mark Slider, Range, Multiple Thumbs or a visual family complete.
 
 This source is a new reconstruction. Former local R4 review results are historical and cannot certify its bytes.
+
+## Bounded collision numerical operation
+
+`values-collision.ts` implements the draft `C-SLIDER-VALUE-0001-COLLISION-*` operation independently of Root wiring. It is an internal pure helper, not a new public host or input API. Inputs name the latest uncanceled proposal (or initial display), the session-start display, an index, an already-converted numeric request, and policy. Output is a fresh proposal and index. No State, focus, DOM, coordinates, event-origin identity or capture is created or mutated.
+
+- `push` preserves the selected index and displaces neighbors to keep the gap. Pulling back uses the last proposal, so displaced neighbors stay displaced.
+- `none` constrains the selected value by adjacent values plus/minus gap. It does not replace the keyboard's distinct same-slot validation path.
+- `swap` crosses at most one adjacent index per call; restoration uses the session-start vector. A result is only a proposal, never an accepted selection.
+
+The source-informed references are Base UI v1.6.0 [resolveThumbCollision](https://github.com/mui/base-ui/blob/v1.6.0/packages/react/src/slider/utils/resolveThumbCollision.ts) and [getPushedThumbValues](https://github.com/mui/base-ui/blob/v1.6.0/packages/react/src/slider/utils/getPushedThumbValues.ts). Their MIT notice is retained in `licenses/base-ui-MIT.txt`. They were inspected statically, not run. This independent bounded operation uses exact crossing comparisons and no fixed-decimal quantization; it does not promise upstream floating-point equivalence. Unlike the reference helper, this operation always returns a vector (including a clamped singleton), rejects empty selection and unknown modes rather than falling back, and validates history/cardinality and final bounds/gaps. Finite arithmetic, feasible reserved intervals, final Root bounds and every adjacent gap are checked. A floating-point gap shortfall is diagnosed rather than hidden by an epsilon. Fractional minimum steps can produce off-step-grid results; no projected-grid closure is promised. Incoming owner vectors may be outside bounds or initially lack the gap. Push can repair those values; any final invalid value or gap is rejected in every mode.
+
+Root session entry, controlled non-echo sequencing, veto-aware index/focus migration and retirement for this operation are still unimplemented. The existing structural Track remains unchanged, and no pointer support is implied.

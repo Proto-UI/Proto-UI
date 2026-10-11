@@ -1,0 +1,58 @@
+id: T-SLIDER-COLLISION-INTENTS-0001
+type: test
+title: Bounded logical Slider collision numerical intents
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: The pure numerical slice has independent operational cases and counterexamples. Root session wiring, veto, selection/focus migration, controlled reentrancy and real host input remain separate evidence obligations.
+summary: Tests source-informed push, one-neighbor swap, none and explicit numerical failure boundaries without executing upstream code or claiming pointer support.
+cases:
+  - id: T-SLIDER-COLLISION-INTENTS-0001-CASE-PUSH
+    title: Push propagates from latest proposal and does not undo displaced neighbors on pullback
+    covers:
+      - C-SLIDER-VALUE-0001-COLLISION
+      - C-SLIDER-VALUE-0001-COLLISION-PUSH
+    expectation: fresh-ordered-vector-with-stable-index-and-latest-proposal-history
+  - id: T-SLIDER-COLLISION-INTENTS-0001-CASE-SWAP
+    title: Swap migrates at most one adjacent slot and restores from the session-start history
+    covers:
+      - C-SLIDER-VALUE-0001-COLLISION-SWAP
+    expectation: one-adjacent-index-and-history-sensitive-values-with-exact-crossing
+  - id: T-SLIDER-COLLISION-INTENTS-0001-CASE-NONE
+    title: None constrains one slot by adjacent gap without adopting keyboard semantics
+    covers:
+      - C-SLIDER-VALUE-0001-COLLISION-NONE
+      - C-SLIDER-VALUE-0001-KEYBOARD
+    expectation: only-selected-slot-changes-and-keyboard-path-stays-distinct
+  - id: T-SLIDER-COLLISION-INTENTS-0001-CASE-DOMAIN
+    title: Invalid shape, history, index and infeasible or nonfinite arithmetic reject without mutation
+    covers:
+      - C-SLIDER-VALUE-0001-COLLISION-DOMAIN
+    expectation: explicit-diagnostic-and-no-side-effects-or-owner-publication
+implementations:
+  - id: slider-collision-numerical-intents
+    kind: fixture
+    status: passing
+    path: packages/prototypes/base/test/slider-values-collision.test.ts
+    required: true
+    consumesCases:
+      - T-SLIDER-COLLISION-INTENTS-0001-CASE-PUSH
+      - T-SLIDER-COLLISION-INTENTS-0001-CASE-SWAP
+      - T-SLIDER-COLLISION-INTENTS-0001-CASE-NONE
+      - T-SLIDER-COLLISION-INTENTS-0001-CASE-DOMAIN
+    notes:
+      - No Root session, focus, pointer capture, native host or Compiler admission.
+verifies:
+  contracts:
+    - C-SLIDER-VALUE-0001
+sources:
+  - path: packages/prototypes/base/test/slider-values-collision.test.ts
+  - path: packages/prototypes/base/src/slider/values-collision.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded numerical collision intents and negative-domain cases separately from host and Runtime admission.
+tags:
+  - slider
+  - collision
+  - draft
+  - numerical-intent
