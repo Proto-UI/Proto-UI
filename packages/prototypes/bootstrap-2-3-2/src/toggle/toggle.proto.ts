@@ -11,22 +11,33 @@ export default definePrototype<ToggleProps, ToggleExposes>({
     if (!state) throw new Error('[bootstrap-2-3-2-toggle] Base state handles required.');
     def.feedback.style.use(
       tw(
-        'inline-flex items-center justify-center border border-border select-none cursor-pointer whitespace-nowrap rounded-[4px] px-3 py-1 text-sm font-normal leading-5 bg-[linear-gradient(#fff,#e6e6e6)] text-foreground shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]'
+        'inline-flex items-center justify-center border border-border select-none cursor-pointer whitespace-nowrap rounded-[4px] px-3 py-1 text-sm font-normal leading-5 text-foreground'
       )
     );
+    // Bootstrap 2.3.2 buttons.less: disabled removes the gradient and depth.
+    // Keep enabled paint out of disabled + active/hover/press combinations.
     def.rule({
-      when: (w) => w.state(state.hovered).eq(true),
+      when: (w) => w.state(state.disabled).eq(false),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            'bg-[linear-gradient(#fff,#e6e6e6)] shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]'
+          )
+        ),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.hovered).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-[#e6e6e6]')),
     });
     def.rule({
-      when: (w) => w.state(state.pressed).eq(true),
+      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.pressed).eq(true)),
       intent: (i) =>
         i.feedback.style.use(
           tw('bg-[#e6e6e6] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]')
         ),
     });
     def.rule({
-      when: (w) => w.state(state.active).eq(true),
+      when: (w) => w.all(w.state(state.disabled).eq(false), w.state(state.active).eq(true)),
       intent: (i) =>
         i.feedback.style.use(
           tw('bg-[#e6e6e6] shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]')
@@ -41,7 +52,8 @@ export default definePrototype<ToggleProps, ToggleExposes>({
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-65 cursor-not-allowed')),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-[#e6e6e6] shadow-none opacity-65 cursor-not-allowed')),
     });
   },
 });
