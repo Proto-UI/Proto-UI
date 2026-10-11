@@ -22,9 +22,12 @@ import {
   selectRuntime,
   applyColorScheme,
 } from './browser-harness';
+import { startPopoverDomProbe, type PopoverDomProbe } from './popover-public-dom-probe';
 
 const route = '/en/ui-libraries/brutalist/components/popover/';
 const demoId = 'demo-brutalist-popover';
+// The public Neo preview promises this heading/body role in both color schemes.
+const expectedNeoFamily = '"DM Sans", ui-sans-serif, system-ui, sans-serif';
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-neo-popover-title');
 const revision = execFileSync('git', ['rev-parse', 'HEAD']).toString().trim();
@@ -144,13 +147,16 @@ async function focusSnapshot(page: Page) {
   });
 }
 
-async function open(page: Page, trigger: Locator) {
+async function open(page: Page, trigger: Locator, domProbe?: PopoverDomProbe) {
+  await domProbe?.mark('open.beforeTriggerClick');
   await trigger.click();
+  await domProbe?.mark('open.afterTriggerClick');
   await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('true');
   const id = await trigger.getAttribute('aria-controls');
   if (!id) throw new Error('Popover trigger must identify its content.');
   const panel = page.locator(`[id=${JSON.stringify(id)}][role="dialog"]`);
   await panel.waitFor({ state: 'visible' });
+  await domProbe?.mark('open.afterPanelVisible');
   return panel;
 }
 
@@ -163,14 +169,12 @@ async function titleFor(page: Page, panel: Locator) {
 }
 
 async function typography(locator: Locator) {
-  return locator.evaluate((element) => {
+  return locator.evaluate((element, expectedFamily) => {
     const style = getComputedStyle(element);
     const box = element.getBoundingClientRect();
-    const headingRole =
-      style.getPropertyValue('--pui-font-heading').trim() || 'ui-sans-serif, system-ui, sans-serif';
     // Independent browser-normalized oracle; never overwrite the Title under test.
     const probe = document.createElement('span');
-    probe.style.fontFamily = headingRole;
+    probe.style.fontFamily = expectedFamily;
     document.body.append(probe);
     const expectedHeadingFamily = getComputedStyle(probe).fontFamily;
     probe.remove();
@@ -221,7 +225,7 @@ async function typography(locator: Locator) {
       scrollWidth: element.scrollWidth,
       clientWidth: element.clientWidth,
     };
-  });
+  }, expectedNeoFamily);
 }
 
 async function defaultTypography(title: Locator, panel: Locator) {
@@ -231,7 +235,17 @@ async function defaultTypography(title: Locator, panel: Locator) {
   expect(Number.parseFloat(actual.fontSize)).toBeCloseTo(rem, 5);
   expect(Number.parseFloat(actual.lineHeight)).toBeCloseTo(Number.parseFloat(actual.fontSize), 5);
   expect(actual.fontWeight).toBe('700');
-  expect(actual.fontFamily).toBe(actual.expectedHeadingFamily);
+  // Resource availability is required, but remains distinct from glyph usage.
+  expect(actual.fonts.status).toBe('loaded');
+  expect(actual.fonts.dmSansCheck).toBe(true);
+  expect(actual.fonts.faces).toEqual(
+    expect.arrayContaining([expect.objectContaining({ family: 'DM Sans', status: 'loaded' })])
+  );
+  for (const surface of [actual, container]) {
+    expect(surface.resolvedHeadingFamily).toBe(expectedNeoFamily);
+    expect(surface.resolvedBodyFamily).toBe(expectedNeoFamily);
+    expect(surface.fontFamily).toBe(surface.expectedHeadingFamily);
+  }
   expect(actual.fontSize).toBe(container.fontSize);
   return { title: actual, content: container };
 }
@@ -244,6 +258,7 @@ for (const runtime of RUNTIMES)
       async () => {
         let context: BrowserContext | undefined;
         let page: Page | undefined;
+        let domProbe: PopoverDomProbe | undefined;
         let stage = 'created';
         let result = 'failed';
         let failure: string | undefined;
@@ -278,6 +293,7 @@ for (const runtime of RUNTIMES)
           await applyColorScheme(page, scheme);
           await page.evaluate(() => document.fonts.ready);
           const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
+          domProbe = await startPopoverDomProbe(page, trigger);
           const capture = async (state: string, observation: unknown) => {
             const file = `${id}-${state}.png`;
             const bytes = await page!.screenshot({ path: path.join(output, file) });
@@ -298,7 +314,7 @@ for (const runtime of RUNTIMES)
             });
           };
           stage = 'default-title';
-          let panel = await open(page, trigger);
+          let panel = await open(page, trigger, domProbe);
           let title = await titleFor(page, panel);
           expect(await panel.getAttribute('aria-modal')).toBe('false');
           expect(await title.getAttribute('tabindex')).toBeNull();
@@ -310,7 +326,7 @@ for (const runtime of RUNTIMES)
           };
           observations.themeScope = {
             boundary:
-              'Portal theme/family propagation is observed separately, not repaired by this Title recipe.',
+              'The public demo opts Content into Preview-owned portal theme projection; the Title recipe remains independent.',
             titleHeadingVariablePresent: Boolean(
               (observations.default as { title: { resolvedHeadingFamily: string } }).title
                 .resolvedHeadingFamily
@@ -320,7 +336,7 @@ for (const runtime of RUNTIMES)
             debt: (observations.default as { title: { resolvedHeadingFamily: string } }).title
               .resolvedHeadingFamily
               ? null
-              : 'The Title heading variable is absent in the portal; fallback typography is observed. Neo theme propagation remains separate debt.',
+              : 'Missing portal heading variable violates the public demo theme expectation; fallback alone cannot pass.',
           };
           await capture('default', observations.default);
           await defaultTypography(title, panel);
@@ -352,7 +368,7 @@ for (const runtime of RUNTIMES)
           stage = 'close-and-pointer-reopen';
           await panel.getByRole('button', { name: 'Close', exact: true }).click();
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
-          panel = await open(page, trigger);
+          panel = await open(page, trigger, domProbe);
           title = await titleFor(page, panel);
           observations.reopened = await defaultTypography(title, panel);
           await capture('reopened', observations.reopened);
@@ -360,12 +376,17 @@ for (const runtime of RUNTIMES)
           await panel.waitFor({ state: 'hidden' });
 
           stage = 'narrow-200-percent-root-text';
+          await domProbe.mark('narrow.beforeViewportChange');
           await page.setViewportSize({ width: 320, height: 1000 });
+          await domProbe.mark('narrow.afterViewportChange-beforeFontChange');
           await page.evaluate(() => {
             document.documentElement.style.fontSize = '200%';
           });
+          await domProbe.mark('narrow.afterFontChange-beforeTriggerScroll');
           await trigger.scrollIntoViewIfNeeded();
-          panel = await open(page, trigger);
+          await domProbe.mark('narrow.afterTriggerScroll-beforeOpen');
+          panel = await open(page, trigger, domProbe);
+          await domProbe.mark('narrow.afterOpen');
           title = await titleFor(page, panel);
           await title.evaluate((element) => {
             element.textContent = 'Long Popover settings title for readable narrow screen layout';
@@ -373,23 +394,28 @@ for (const runtime of RUNTIMES)
           observations.narrowText = await defaultTypography(title, panel);
           const narrow = await typography(title);
           const bounds = await typography(panel);
+          await domProbe.mark('narrow.afterNarrowMetrics');
           expect(bounds.bounds.x).toBeGreaterThanOrEqual(-1);
           expect(bounds.bounds.right).toBeLessThanOrEqual(321);
           expect(narrow.bounds.x).toBeGreaterThanOrEqual(bounds.bounds.x - 1);
           expect(narrow.bounds.right).toBeLessThanOrEqual(bounds.bounds.right + 1);
           expect(narrow.scrollWidth).toBeLessThanOrEqual(narrow.clientWidth + 1);
+          await domProbe.mark('narrow.beforeScreenshot');
           await capture('320px-200-percent-root-text', {
             ...(observations.narrowText as object),
             limit:
               '200% root text-size fixture, not physical browser zoom or upstream pixel parity.',
           });
+          await domProbe.mark('narrow.afterScreenshot-beforeFinalCloseClick');
           await panel.getByRole('button', { name: 'Close', exact: true }).click();
+          await domProbe.mark('narrow.afterFinalCloseClick');
           await panel.waitFor({ state: 'hidden' });
           expect(errors).toEqual([]);
           expect(deniedRequests).toEqual([]);
           result = 'passed';
         } catch (error) {
           failure = String(error);
+          await domProbe?.mark(`${stage}.journeyRejected`);
           if (page) {
             try {
               observations.failureFocus = await focusSnapshot(page);
@@ -412,6 +438,7 @@ for (const runtime of RUNTIMES)
           throw error;
         } finally {
           try {
+            observations.publicDomTimeline = await domProbe?.finish();
             await writeJson(`${id}.json`, {
               revision,
               tree,

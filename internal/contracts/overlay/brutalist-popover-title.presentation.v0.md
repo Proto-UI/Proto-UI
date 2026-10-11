@@ -53,4 +53,14 @@ GPUI anchored overlays, compiler composition, generated and packed consumers, Re
 - The dedicated `neo-popover-title` group in `.github/workflows/finf-representative-features-evidence.yml` owns eight typography cases plus four independent light-theme interaction diagnostics and retains exact-commit JSON/PNG artifacts. `scripts/test/runtime-test-plan.mjs` registers that executable owner.
 - The actual local browser invocation stops at the official GitHub Actions / clean exact-head gate before opening a browser. All twelve cases and their screenshots are therefore **not run** here. Prepared assertions, source-host passes and generated CSS are not native acceptance. The default and custom computed sizes, native interactions, portal theme observations, narrow/200%-text bounds and screenshots require the dedicated official run before they can be reported as passing.
 
+## Separately authorized Website consumer follow-up (2026-10-11)
+
+The original Title-only scope and local-run boundary above describe that implementation slice. The subsequent official `5c5b2e440e98405c0ee8f60140575c4dfc89589d` run resolved the public route but observed missing portal heading/body variables and fallback computed families in all eight typography cases. This authorizes no change to the passive Title definition.
+
+The separate Website consumer repair explicitly opts the existing public demo Content into the existing `ref` + `previewTheme: 'portal'` composition API. Preview owns the complete theme input, updates and cleanup through normalized `surfaceStyle`; no Prototype, Base, Compiler, IR, Adapter, automatic DOM inheritance or new public API is introduced. The generic preview README and real four-runtime public-demo tests map this opt-in.
+
+For this consumer follow-up, the browser oracle requires Title and Content heading/body variables to equal the default Neo `"DM Sans", ui-sans-serif, system-ui, sans-serif` stack and their computed families to match an independent browser-normalized copy of that fixed stack. An absent variable or fallback-only family is a failure. The existing DM Sans resource must also be loaded; its availability remains separately recorded and does not establish the font used by every glyph. New real-browser evidence is still required for the repaired candidate.
+
+The shared public-DOM timeline probe only observes existing typography journeys, including the 320px/root-200% transition and final real Close click. It retains the original assertions and timeouts; no coordinate, focus, scroll or production behavior is repaired by the probe. The prior React/Vue off-viewport Close failures and independent interaction debts remain open until new evidence resolves them.
+
 Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
