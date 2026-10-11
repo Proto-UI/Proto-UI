@@ -27,6 +27,8 @@ on:
       - 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts'
       - 'apps/www/src/content/docs/zh-cn/native-editor-evidence.ts'
       - 'apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.ts'
+      - 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
       - 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts'
       - 'scripts/test/bootstrap-state-controls-evidence.test.mjs'
@@ -89,6 +91,7 @@ jobs:
           corepack pnpm@10.32.1 exec vitest run \
             packages/prototypes/bootstrap-2-3-2/test/controls.test.ts \
             apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts \
+            apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts \
             apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts \
             --maxWorkers=1 --minWorkers=1
       - name: Preserve terminal status even when setup or browser launch fails

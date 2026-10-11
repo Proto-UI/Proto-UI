@@ -127,7 +127,10 @@ test('registered browser suite stays out of the no-server phase', () => {
   const excluded = phases[0].args.indexOf(browserPath);
   assert.ok(excluded > 0);
   assert.equal(phases[0].args[excluded - 1], '--exclude');
-  assert.equal(READY_ROUTES.filter((route) => route === '/en/test/bootstrap-state-controls/').length, 1);
+  assert.equal(
+    READY_ROUTES.filter((route) => route === '/en/test/bootstrap-state-controls/').length,
+    1
+  );
   assert.match(
     readFileSync('scripts/test/run-runtime-tests.mjs', 'utf8'),
     /import \{[^}]*READY_ROUTES[^}]*\} from '\.\/runtime-test-plan\.mjs'/
@@ -195,4 +198,23 @@ test('opt-in browser evidence follows its shared renderer and execution dependen
   ]) {
     assert.ok(paths.includes(dependency), `${dependency} must wake the opt-in fixture`);
   }
+});
+
+test('disabled-paint oracle and its negative controls run in exact-head browser evidence', () => {
+  const helper = 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.ts';
+  const tests = 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts';
+  for (const file of [helper, tests])
+    assert.ok(workflow.on.pull_request.paths.includes(file), `${file} must wake the fixture`);
+  const execution = workflow.jobs['browser-evidence'].steps.find(
+    (step) => step.env?.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE
+  );
+  assert.ok(
+    execution.run.includes(tests),
+    'the exact-head job must execute no-paint negative controls'
+  );
+  assert.match(browser, /captureDisabledTogglePaint/);
+  assert.match(browser, /isUnpaintedBootstrapBoxShadow/);
+  assert.match(browser, /disabled-inactive-\$\{\+\+disabledCycle\}/);
+  assert.match(browser, /'toggleControlled', 'disabled-active'/);
+  assert.match(browser, /observations\.push\(\{ runtime, theme, ref, phase, disabledPaint \}\)/);
 });
