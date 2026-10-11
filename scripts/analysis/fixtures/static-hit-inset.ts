@@ -26,7 +26,8 @@ const probe = definePrototype({
     });
   },
 });
-const events: { type: string; target: string; trusted: boolean }[] = [];
+const events: { type: string; target: string; trusted: boolean; path?: string[] }[] = [];
+const checkedChanges: { root: string; checked: boolean }[] = [];
 const roots: HTMLElement[] = [];
 let scope: Document | ShadowRoot = document;
 const append = (node: Node) => (scope === document ? document.body : scope).appendChild(node);
@@ -55,9 +56,30 @@ export async function mount(shadow = false) {
     roots.push(root);
     if (kind === 'hidden') root.style.visibility = 'hidden';
     if (kind === 'disabled') setElementProps(root, { disabled: true });
+    root.addEventListener('checkedChange', (event) =>
+      checkedChanges.push({
+        root: root.id,
+        checked: Boolean((event as CustomEvent).detail.checked),
+      })
+    );
     for (const type of ['pointerdown', 'pointerup', 'click', 'pointercancel'])
       root.addEventListener(type, (e) =>
-        events.push({ type, target: (e.target as HTMLElement).id, trusted: e.isTrusted })
+        events.push({
+          type,
+          target: (e.target as HTMLElement).id,
+          trusted: e.isTrusted,
+          path: e
+            .composedPath()
+            .map((node) =>
+              node instanceof Element
+                ? node.id || node.localName
+                : node instanceof ShadowRoot
+                  ? '#shadow-root'
+                  : node === window
+                    ? 'window'
+                    : 'document'
+            ),
+        })
       );
     if (kind === 'clipped') {
       const clip = document.createElement('div');
@@ -131,6 +153,7 @@ export function sample(id = 'normal-root') {
     pressed: exposes.pressed.get(),
     active: scope.activeElement?.id,
     events: events.slice(),
+    checkedChanges: checkedChanges.filter((event) => event.root === id),
     children: root.querySelectorAll('[role=switch],button,input').length,
   };
 }
@@ -140,6 +163,7 @@ export async function setDisabled(value: boolean) {
 }
 export function clearEvents() {
   events.length = 0;
+  checkedChanges.length = 0;
 }
 export async function remount() {
   const root = roots[0];
@@ -197,4 +221,30 @@ export function cssomNegativeControls() {
     target.remove();
   }
   return outcomes;
+}
+
+/** Read-only native diagnostics; never used to decide or redirect an input route. */
+export function inspectPoint(x: number, y: number) {
+  const root = roots[0];
+  const pseudo = getComputedStyle(root, '::after');
+  const describe = (node: Element | null) => (node ? { tag: node.localName, id: node.id } : null);
+  return {
+    x,
+    y,
+    root: describe(root),
+    marker: root.getAttribute('data-pui-static-hit'),
+    documentHit: describe(document.elementFromPoint(x, y)),
+    scopeHit: describe(scope.elementFromPoint(x, y)),
+    pseudo: {
+      content: pseudo.content,
+      display: pseudo.display,
+      visibility: pseudo.visibility,
+      pointerEvents: pseudo.pointerEvents,
+      left: pseudo.left,
+      top: pseudo.top,
+      right: pseudo.right,
+      bottom: pseudo.bottom,
+      clipPath: pseudo.clipPath,
+    },
+  };
 }

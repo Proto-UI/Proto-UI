@@ -65,9 +65,13 @@ await fs.mkdir(out, { recursive: true });
 const { chromium } = createRequire(path.join(repo, 'apps/www/package.json'))('playwright-core');
 const browser = await chromium.launch({ headless: true, executablePath: process.env.CHROME_PATH });
 const results = [];
+const attempts = [];
+let activeScope = 'unmounted';
+let lastPoint = null;
 let page;
 try {
   for (const scope of ['document', 'shadow']) {
+    activeScope = scope;
     page = await browser.newPage({
       viewport: { width: 700, height: 1000 },
       deviceScaleFactor: 1,
@@ -85,6 +89,7 @@ try {
     assert.equal(initial.children, 0);
     const point = (s, dx, dy) => [s.x + dx, s.y + dy];
     const click = async (x, y) => {
+      lastPoint = { x, y };
       await page.mouse.click(x, y);
       await page.evaluate(() => StaticHitProbe.flush());
     };
@@ -99,8 +104,19 @@ try {
       await page.evaluate(() => StaticHitProbe.clearEvents());
       await click(...point(initial, dx, dy));
       const after = await page.evaluate(() => StaticHitProbe.sample());
+      const diagnostic = await page.evaluate(
+        ({ x, y }) => StaticHitProbe.inspectPoint(x, y),
+        lastPoint
+      );
+      attempts.push({ scope, edge, before, after, diagnostic });
+      // Persist the failing sample before its assertion, not only completed cases.
+      await fs.writeFile(
+        path.join(out, 'native-attempts.json'),
+        JSON.stringify({ candidate: process.env.CANDIDATE_SHA, attempts }, null, 2)
+      );
       assert.notEqual(after.checked, before.checked, `${edge} expansion activates once`);
       assert.equal(after.events.filter((e) => e.type === 'click').length, 1);
+      assert.deepEqual(after.checkedChanges, [{ root: 'normal-root', checked: after.checked }]);
       assert.ok(after.events.every((e) => e.target === 'normal-root' && e.trusted));
       assert.equal(after.width, initial.width);
       assert.equal(after.height, initial.height);
@@ -208,6 +224,25 @@ try {
     page = undefined;
   }
 } finally {
+  if (page) {
+    const state = await page
+      .evaluate(
+        (point) => ({
+          sample: StaticHitProbe.sample(),
+          diagnostic: point ? StaticHitProbe.inspectPoint(point.x, point.y) : null,
+        }),
+        lastPoint
+      )
+      .catch((error) => ({ diagnosticError: String(error) }));
+    await fs.writeFile(
+      path.join(out, 'native-final-state.json'),
+      JSON.stringify(
+        { candidate: process.env.CANDIDATE_SHA, scope: activeScope, ...state },
+        null,
+        2
+      )
+    );
+  }
   if (page)
     await page
       .screenshot({ path: path.join(out, 'static-hit-inset-final.png'), fullPage: true })
