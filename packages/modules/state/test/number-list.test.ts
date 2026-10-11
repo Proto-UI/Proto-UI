@@ -109,6 +109,59 @@ describe('draft number.list snapshots', () => {
     expect((valid as any).__stateId).toBe(1);
   });
 
+  it('creates own output elements despite inherited numeric setters for define, default and set', () => {
+    const kernel = new StateKernel();
+    const initialInput = [3];
+    const defaultInput = [4];
+    const nextInput = [5];
+    const previous = Object.getOwnPropertyDescriptor(Object.prototype, '0');
+    let setterCalls = 0;
+    let initial!: readonly number[];
+    let defaults!: readonly number[];
+    let next!: readonly number[];
+    let transition: StateEvent<readonly number[]> | undefined;
+    try {
+      Object.defineProperty(Object.prototype, '0', {
+        configurable: true,
+        get() {
+          return 99;
+        },
+        set() {
+          setterCalls++;
+        },
+      });
+      const state = kernel.define<readonly number[]>('coordinates', spec, initialInput);
+      initial = state.get();
+      state.setDefault(defaultInput);
+      defaults = state.get();
+      kernel.subscribe(state, (event) => {
+        transition = event;
+      });
+      state.set(nextInput);
+      next = state.get();
+    } finally {
+      if (previous) Object.defineProperty(Object.prototype, '0', previous);
+      else delete (Object.prototype as any)[0];
+    }
+    initialInput[0] = 30;
+    defaultInput[0] = 40;
+    nextInput[0] = 50;
+    expect(setterCalls).toBe(0);
+    expect(initial).toEqual([3]);
+    expect(defaults).toEqual([4]);
+    expect(next).toEqual([5]);
+    for (const snapshot of [initial, defaults, next]) {
+      expect(Object.hasOwn(snapshot, '0')).toBe(true);
+      expect(Object.isFrozen(snapshot)).toBe(true);
+      expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
+    }
+    expect(transition).toEqual({ type: 'next', prev: [4], next: [5], reason: undefined });
+    if (transition?.type === 'next') {
+      expect(transition.prev).toBe(defaults);
+      expect(transition.next).toBe(next);
+    }
+  });
+
   it('copies and freezes the source descriptor independently from the caller', () => {
     const kernel = new StateKernel();
     const callerSpec: StateSpec = { kind: 'number.list' };

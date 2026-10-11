@@ -144,7 +144,16 @@ export function normalizeNumberList(value: unknown): readonly number[] {
     ) {
       throwSpec('[State] number.list elements must be own finite-number data values');
     }
-    snapshot.push(Object.is(descriptor.value, -0) ? 0 : descriptor.value);
+    // Define own elements: assignment/push can invoke an inherited numeric setter.
+    // The descriptor itself must not inherit get/set/value fields either.
+    const element = {
+      __proto__: null,
+      value: Object.is(descriptor.value, -0) ? 0 : descriptor.value,
+      enumerable: true,
+      writable: true,
+      configurable: true,
+    };
+    Object.defineProperty(snapshot, String(index), element);
   }
   return Object.freeze(snapshot);
 }
