@@ -15,13 +15,24 @@ criteria:
     text:
       zh-CN: 保留对应Base定义的语义与生命周期；视觉源、偏差和未验证边界须显式记录。
       en: Preserve the corresponding Base semantics and lifecycle; record the visual reference, deviations and unverified boundaries explicitly.
+  - id: P-SHADCN-DROPDOWN-MENU-LABEL-INSET
+    text:
+      zh-CN: 本家 inset 视觉 prop 默认 false；true 投射固定 Nova 的 pl-7，动态变更不改变 Base 的最近 Group 命名、被动焦点边界或生命周期。
+      en: The family-only inset visual prop defaults to false; true projects the fixed Nova pl-7 recipe. Dynamic changes do not alter Base nearest-Group naming, passive focus boundaries or lifecycle.
 dependsOn:
   prototypes: [P-BASE-DROPDOWN-MENU-LABEL]
 verifies:
-  tests: [T-BASE-DROPDOWN-COMPOSITION-0001]
+  tests: [T-BASE-DROPDOWN-COMPOSITION-0001, T-SHADCN-DROPDOWN-MENU-LABEL-0001]
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css
+    label: Fixed Nova Label inset recipe; historical registry snapshot byte equivalence not claimed.
+  - path: packages/prototypes/shadcn/src/dropdown/types.ts
+  - path: packages/prototypes/shadcn/test/dropdown-label.test.ts
   - path: packages/prototypes/shadcn/src/dropdown/label.proto.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added the bounded family-only inset visual prop over unchanged Base label semantics; complete host and visual acceptance remains pending.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Defined the passive family projection without admitting unverified visual or platform parity.
