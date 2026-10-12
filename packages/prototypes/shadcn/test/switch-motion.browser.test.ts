@@ -267,17 +267,8 @@ describe('New York default Switch with no authored hit expansion and native touc
                 },
                 readAuthoredBoundary() {
                   const r = root.getBoundingClientRect();
-                  const outsidePoints = [
-                    ['left', r.x - 0.5, r.y + r.height / 2],
-                    ['right', r.right + 0.5, r.y + r.height / 2],
-                    ['top', r.x + r.width / 2, r.y - 0.5],
-                    ['bottom', r.x + r.width / 2, r.bottom + 0.5],
-                  ] as const;
-                  const snapshot = {
-                    now: performance.now(),
-                    snapshotTiming: 'settled-before-input',
-                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
-                    outsidePoints: outsidePoints.map(([label, x, y]) => {
+                  const read = (points: readonly (readonly [string, number, number])[]) =>
+                    points.map(([label, x, y]) => {
                       const hit = document.elementFromPoint(x, y);
                       return {
                         label,
@@ -286,7 +277,49 @@ describe('New York default Switch with no authored hit expansion and native touc
                         target: describeTarget(hit),
                         ownedHit: hit === root || (!!hit && root.contains(hit)),
                       };
-                    }),
+                    });
+                  const style = getComputedStyle(root);
+                  const pseudo = (name: string) => {
+                    const value = getComputedStyle(root, name);
+                    return {
+                      content: value.content,
+                      position: value.position,
+                      inset: value.getPropertyValue('inset'),
+                      pointerEvents: value.pointerEvents,
+                    };
+                  };
+                  const snapshot = {
+                    now: performance.now(),
+                    snapshotTiming: 'settled-before-input',
+                    rootBox: { x: r.x, y: r.y, width: r.width, height: r.height },
+                    sampling: 'chromium-1-css-pixel-footprint',
+                    samplingScope:
+                      'No authored expansion detected at these four 1 CSS pixel footprints; not an arbitrary subpixel guarantee.',
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                    style: {
+                      pseudoBefore: pseudo('::before'),
+                      pseudoAfter: pseudo('::after'),
+                      cssText: root.style.cssText,
+                      height: style.height,
+                      width: style.width,
+                      boxSizing: style.boxSizing,
+                      transform: style.transform,
+                      zoom: style.zoom,
+                    },
+                    // Retain the original observations: these half-pixel queries may
+                    // overlap the border through Blink's one-pixel query footprint.
+                    diagnosticHalfPixelPoints: read([
+                      ['left', r.x - 0.5, r.y + r.height / 2],
+                      ['right', r.right + 0.5, r.y + r.height / 2],
+                      ['top', r.x + r.width / 2, r.y - 0.5],
+                      ['bottom', r.x + r.width / 2, r.bottom + 0.5],
+                    ]),
+                    outsidePoints: read([
+                      ['left', r.x - 1, r.y + r.height / 2],
+                      ['right', r.right, r.y + r.height / 2],
+                      ['top', r.x + r.width / 2, r.y - 1],
+                      ['bottom', r.x + r.width / 2, r.bottom],
+                    ]),
                   };
                   authoredHitSnapshots.push(snapshot);
                   return snapshot;
@@ -631,6 +664,8 @@ describe('Independent native HTML button touch-target control', () => {
         expect(result.measurementError).toBeNull();
         expect(result.errors).toEqual([]);
         const evidence = result.evidence;
+        expect(evidence.baselineBoundary.rootBox).toEqual(box);
+        assertNoAuthoredOutsideHit(evidence.baselineBoundary);
         for (const stage of ['near-touch', 'far-touch']) {
           const checkpoint = evidence.checkpoints.find((entry: any) => entry.stage === stage);
           expect(checkpoint.box).toEqual(box);
@@ -649,5 +684,11 @@ describe('Independent native HTML button touch-target control', () => {
         // A real author-created ::after extension is detected at the same x−4 point.
         expect(result.mutation?.ownedPointHit).toBe(true);
         expect(result.mutation?.box).toEqual(box);
+        expect(result.mutation?.boundary.outsidePoints.every((point: any) => point.ownedHit)).toBe(
+          true
+        );
+        expect(() => assertNoAuthoredOutsideHit(result.mutation!.boundary)).toThrow(
+          /extends outside/
+        );
       }, 30000);
 });

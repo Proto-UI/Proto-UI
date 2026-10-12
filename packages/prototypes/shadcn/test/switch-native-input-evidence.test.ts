@@ -47,7 +47,14 @@ function trace(owned = true, shadow = false): TapTrace {
 }
 const emptyOutside = () => ({
   staticHitAttribute: null as string | null,
-  outsidePoints: ['left', 'right', 'top', 'bottom'].map((label) => ({ label, ownedHit: false })),
+  rootBox: { x: 148, y: 206.4375, width: 32, height: 18.390625 },
+  sampling: 'chromium-1-css-pixel-footprint' as const,
+  outsidePoints: [
+    { label: 'left', x: 147, y: 215.6328125, ownedHit: false },
+    { label: 'right', x: 180, y: 215.6328125, ownedHit: false },
+    { label: 'top', x: 164, y: 205.4375, ownedHit: false },
+    { label: 'bottom', x: 164, y: 224.828125, ownedHit: false },
+  ],
 });
 
 describe('Switch authored-hit and native-route evidence predicates', () => {
@@ -104,6 +111,14 @@ describe('Switch authored-hit and native-route evidence predicates', () => {
       expanded.outsidePoints[edge].ownedHit = true;
       expect(() => assertNoAuthoredOutsideHit(expanded)).toThrow(/extends outside/);
     }
+  });
+  it('rejects a half-pixel query whose one-pixel footprint overlaps the border', () => {
+    const overlapping = emptyOutside();
+    overlapping.outsidePoints[0].x = 147.5;
+    expect(() => assertNoAuthoredOutsideHit(overlapping)).toThrow(/footprint overlaps/);
+    const top = emptyOutside();
+    top.outsidePoints[2].y = 205.9375;
+    expect(() => assertNoAuthoredOutsideHit(top)).toThrow(/footprint overlaps/);
   });
   it('rejects an inset declaration even when point probes happen to miss it', () => {
     const declared = emptyOutside();
