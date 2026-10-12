@@ -5,7 +5,13 @@ import {
   type RunHandle,
   type OwnedStateHandle,
 } from '@proto.ui/core';
-import { DRAWER_CONTEXT, DRAWER_CONTENT_CONTEXT, requestDrawerOpen } from './shared';
+import {
+  DRAWER_CONTEXT,
+  DRAWER_CONTENT_CONTEXT,
+  DRAWER_FAMILY,
+  createDrawerContentInstanceId,
+  requestDrawerOpen,
+} from './shared';
 import type { DrawerContentProps, DrawerContentExposes } from './types';
 import { drawerExtentModel } from './extent-model';
 export { drawerExtentModel } from './extent-model';
@@ -25,7 +31,8 @@ function nearest(points: number[], value: number): number {
 }
 export function setupDrawerSnap(
   def: DefHandle<DrawerContentProps, DrawerContentExposes>,
-  side: OwnedStateHandle<string>
+  side: OwnedStateHandle<string>,
+  onAdmissionChange: (admitted: boolean) => void
 ) {
   def.props.define({
     snapPoints: { type: 'object', empty: 'fallback' },
@@ -50,6 +57,67 @@ export function setupDrawerSnap(
     clamp: true,
   });
   const extentValid = def.state.bool('extentValid', false);
+  const admitted = def.state.bool('contentAdmitted', false);
+  const instanceId = createDrawerContentInstanceId();
+  let ownerId: string | null = null;
+  let leaseGeneration = 0;
+  let releaseMethod: ((id: string, generation: number) => void) | null = null;
+  let initialized = false;
+  let registering = false;
+  let declarationDisposed = false;
+  const releaseAdmission = () => {
+    const release = releaseMethod,
+      oldGeneration = leaseGeneration;
+    releaseMethod = null;
+    leaseGeneration = 0;
+    ownerId = null;
+    let failed = false;
+    let failure: unknown;
+    try {
+      admitted.set(false, 'reason: drawer declaration released');
+      onAdmissionChange(false);
+    } catch (error) {
+      failed = true;
+      failure = error;
+    }
+    try {
+      release?.(instanceId, oldGeneration);
+    } catch (error) {
+      if (failed)
+        throw new AggregateError([failure, error], '[Drawer] Content and Root release failed.');
+      throw error;
+    }
+    if (failed) throw failure;
+  };
+  const admit = (run: RunHandle<DrawerContentProps>) => {
+    if (declarationDisposed) throw new Error('[Drawer] Disposed Content cannot acquire admission.');
+    const rootId = run.context.read(DRAWER_CONTEXT).rootId;
+    if (registering || (ownerId === rootId && leaseGeneration > 0)) return;
+    const root = run.anatomy.partsOf(DRAWER_FAMILY, 'root')[0];
+    const register = root?.getExpose('__admitContent');
+    const release = root?.getExpose('__releaseContent');
+    if (typeof register !== 'function' || typeof release !== 'function')
+      throw new Error('[Drawer] Content requires its Root admission methods.');
+    registering = true;
+    ownerId = rootId;
+    try {
+      leaseGeneration = register(instanceId) as number;
+      releaseMethod = release as (id: string, generation: number) => void;
+      if (declarationDisposed || run.context.read(DRAWER_CONTEXT).rootId !== rootId)
+        throw new Error('[Drawer] Content owner changed during admission.');
+      admitted.set(true, 'reason: drawer declaration admitted');
+      onAdmissionChange(true);
+    } catch (error) {
+      try {
+        releaseAdmission();
+      } catch (releaseError) {
+        throw new AggregateError([error, releaseError], '[Drawer] Admission and cleanup failed.');
+      }
+      throw error;
+    } finally {
+      registering = false;
+    }
+  };
   const vertical = def.state.bool('verticalExtent', true);
   const extent = def.state.enum('extentMode', 'intrinsic', {
     options: ['intrinsic', 'fraction'] as const,
@@ -239,21 +307,32 @@ export function setupDrawerSnap(
       snapPoint.set(selection, 'reason: drawer accepted snap owner');
     }
     accepted = true;
+    if (initialized) admit(run);
     extentValid.set(true, 'reason: drawer valid extent configuration');
     cancel();
   };
   def.context.subscribe(DRAWER_CONTEXT, (run, next) => {
     currentRun = run;
-    rootOpen = next.open;
+    if (initialized && ownerId !== null && ownerId !== next.rootId) {
+      releaseAdmission();
+      accepted = false;
+      sync(run, true);
+    }
+    rootOpen = next.open && next.contentAdmitted;
     rootDisabled = next.disabled;
     if (!rootOpen || rootDisabled) cancel();
     else render(run);
   });
   def.lifecycle.onCreated((run) => {
     const root = run.context.read(DRAWER_CONTEXT);
-    rootOpen = root.open;
+    initialized = true;
+    rootOpen = root.open && root.contentAdmitted;
     rootDisabled = root.disabled;
     sync(run, true);
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    declarationDisposed = true;
+    releaseAdmission();
   });
   def.lifecycle.onMounted((run) => {
     currentRun = run;
@@ -286,6 +365,7 @@ export function setupDrawerSnap(
     dragProgress,
     offsetPercentage,
     extentValid,
+    admitted,
     layout,
     hasAccepted: () => accepted,
   };

@@ -24,7 +24,7 @@ snapPoints 缺省、null 或空数组时按内容高度显示；非空有效数�
 
 内容自适应模式的 Handle 是 aria-hidden 的专用指针把手，不提供键盘 resize，也不会因 Enter/Space 变成 Close。显式 snap 保留有名称的 separator、方向键、Home/End 和范围值。Content.dragDismissible=false 禁止拖动关闭；独立 Close、Escape 和外部关闭仍遵循既有协议。接触中断和受控请求拒绝会恢复已接受的呈现。
 
-运行中非法尺寸更新令 extentValid=false，取消 Handle 输入并保留最后有效意图，宿主仍按当前安全约束重算。初始非法输入尚不支持：Content 会拒绝，但独立 Root/Mask 的清理仍未闭合。这些示例使用静态验证的合法输入；本草稿不宣称任意输入安全，也不代表 native、编译器、打包消费或完整 Finf 验收完成。
+运行中非法尺寸更新令 extentValid=false，取消 Handle 输入并保留最后有效意图，宿主仍按当前安全约束重算。初始非法输入会在呈现前被拒绝：Root 保留逻辑 open 值，Mask 等待唯一有效的 Content 声明。这些示例使用静态验证的合法输入；本草稿不宣称任意输入安全，也不代表 native、编译器、打包消费或完整 Finf 验收完成。
 
 ### 长内容
 

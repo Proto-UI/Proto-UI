@@ -1,9 +1,9 @@
 id: T-DRAWER-AUTO-CONSUMER-0001
 type: test
-title: Drawer valid auto integration and retained invalid-family negative control
+title: Drawer valid auto integration and invalid-family negative control
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale: The whole suite intentionally retains a failing initial-invalid Mask cleanup case; native acceptance is separate.
+lifecycleRationale: The initial-invalid Mask negative control is retained and now passes through logical Content admission; native acceptance is separate.
 summary: Exercises portable mode changes, host intent, controlled refusal and static demo preflight without inferring native layout.
 cases:
   - id: T-DRAWER-AUTO-CONSUMER-0001-CASE-RUNTIME
@@ -22,12 +22,12 @@ cases:
 implementations:
   - id: drawer-auto-runtime
     kind: runtime-test
-    status: failing
+    status: passing
     path: packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts
     required: true
     consumesCases: [T-DRAWER-AUTO-CONSUMER-0001-CASE-RUNTIME]
     notes:
-      - Initial-invalid Content rejects, but separately mounted Mask remains present; do not delete or skip this negative control.
+      - Initial-invalid Content rejects and logical Content admission keeps Mask absent; the original negative control remains unchanged.
       - Passing valid-input cases use synthetic host geometry, not native intrinsic evidence.
   - id: drawer-auto-demo-preflight
     kind: runtime-test

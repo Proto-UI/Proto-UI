@@ -1,0 +1,40 @@
+id: C-DRAWER-CONTENT-ADMISSION-0001
+type: contract
+title: Drawer single logical Content admission
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Portable source and synthetic runtime evidence do not replace exact-source native modal and focus verification.
+summary: Gate Drawer presentation on one validated logical Content without changing Root open ownership.
+statement:
+  en: Root owns a single validated Content declaration; effective presentation is logical open and current admission, independently of ordinary presence detach.
+  zh-CN: Root 拥有唯一有效 Content 逻辑声明；有效呈现为 logical open 与当前 admission 的交集，不随普通 presence detach 撤销。
+criteria:
+  - id: C-DRAWER-CONTENT-ADMISSION-0001-OWNERSHIP
+    text:
+      en: Root starts without admission. Content validates its initial accepted extent configuration before registering its unique instance identity through Root-owned internal Anatomy exposed methods. Context carries only JSON facts. Root open, controlled ownership and openChange remain unchanged; pending or invalid initial Content cannot activate Mask or Content Overlay/Focus. Trigger expanded reflects effective presentation. A second distinct registration is rejected without replacing the first valid Content owner; the existing max-one anatomy restriction remains.
+      zh-CN: Root 初始无 admission。Content 校验初始已接受尺寸后，通过 Root 拥有的内部 Anatomy exposed methods 登记唯一实例身份；Context 仅承载 JSON 事实。Root open、受控归属及 openChange 不变；pending 或初始非法 Content 不激活 Mask 或 Content Overlay/Focus。Trigger expanded 反映有效呈现。第二个不同登记明确拒绝且不替换第一个有效 owner；保留 anatomy 最多一个限制。
+  - id: C-DRAWER-CONTENT-ADMISSION-0001-LIFETIME
+    text:
+      en: Admission belongs to the logical declaration, not its view. Ordinary close, Transition leave and L1 detach preserve it so reopen cannot deadlock. Content terminal disposal releases its identity-and-generation-bound lease through a retained owner-scoped Anatomy method wrapper, without reading a disconnected Context. Root terminal disposal marks dead before clearing its identity; stale releases cannot write or clear a new owner. A true Root identity change releases the old owner, revalidates current inputs and requests fresh admission. Invalid runtime updates under the same logical owner retain the last accepted intent and admission while disabling Handle input.
+      zh-CN: admission 属于逻辑声明，不属于视图。普通关闭、Transition leave 与 L1 detach 保留它，避免重开死锁。Content 终结销毁通过保留的 owner-scope Anatomy method wrapper 释放身份/代际 lease，不读取已断联 Context。Root 终结先标 dead 再清身份；旧 release 不写入或清除新 owner。真实 Root 身份变化先撤旧、重验当前输入并重新登记。同一逻辑 owner 的运行中非法更新仍保留最后有效意图及 admission，同时禁用 Handle 输入。
+  - id: C-DRAWER-CONTENT-ADMISSION-0001-TRANSACTION
+    text:
+      en: Registration is idempotent for the same active identity. A synchronous admission-publication error rolls back only a still-current identity and generation, then propagates the source error; rollback errors are preserved as well. Reentrant release or disposal cannot return a live lease for an obsolete generation. No cleanup may erase a replacement admission. Withdrawal uses existing Overlay/Focus/Transition lifecycle, including nonzero leave duration, rather than direct host hiding.
+      zh-CN: 同一活跃身份重复登记幂等。同步 admission 发布错误仅回滚仍为当前身份和代际的登记并传播源错误，回滚错误也保留。重入释放或销毁不能返回失效代际的有效 lease，清理不能抹除替换后的 admission。撤销走现有 Overlay/Focus/Transition 生命周期，包括非零离场时长，不直接操作宿主隐藏。
+  - id: C-DRAWER-CONTENT-ADMISSION-0001-BOUNDARY
+    text:
+      en: Admission certifies accepted component configuration, not host geometry readiness or native accessibility. Shared available-layout safety and unknown-region behavior remain separate. The internal registration methods are component coordination, not a public replacement for authoring Content. Initial-invalid rejection, logical disposal, controlled refusal and normal close/reopen require real prototype tests; native verification remains distinct.
+      zh-CN: admission 仅表示组件配置已接受，不代表宿主几何就绪或 native 可访问性。共享 available-layout 安全与未知区域行为仍独立。内部登记方法仅用于组件协调，不是替代 Content 作者接口。初始非法拒绝、逻辑销毁、受控拒绝及正常重开需要真实原型测试，native 验证仍独立。
+dependsOn:
+  contracts: [C-DRAWER-AUTO-CONSUMER-0001]
+verifies:
+  tests: [T-DRAWER-CONTENT-ADMISSION-0001]
+openQuestions:
+  - id: C-DRAWER-CONTENT-ADMISSION-0001-Q-NATIVE
+    question: Which exact-source native receipts verify modal and focus release during rejected initial configuration and structural Content removal?
+    blocks: [activation:C-DRAWER-CONTENT-ADMISSION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define single logical Content admission without changing controlled open or adding shared readiness.
+tags: [drawer, admission, lifecycle, safety]

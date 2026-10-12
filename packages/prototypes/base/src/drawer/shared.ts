@@ -5,6 +5,7 @@ export type DrawerOpenFocusReason = 'programmatic' | 'keyboard' | 'pointer';
 export type DrawerContextValue = {
   rootId: string;
   open: boolean;
+  contentAdmitted: boolean;
   openFocusReason: DrawerOpenFocusReason | null;
   returnFocusReason: DrawerOpenFocusReason | null;
   controlled: boolean;
@@ -18,6 +19,10 @@ export type DrawerContextValue = {
 };
 
 let nextDrawerRootId = 0;
+let nextDrawerContentId = 0;
+export function createDrawerContentInstanceId(): string {
+  return `pui-drawer-content-instance-${++nextDrawerContentId}`;
+}
 
 export function createDrawerRootId(): string {
   nextDrawerRootId += 1;

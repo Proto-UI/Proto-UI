@@ -24,7 +24,7 @@ Omitted, null or empty snapPoints selects content-fit mode. A nonempty valid arr
 
 In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
 
-Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is unsupported: Content rejects it, but separately mounted Root/Mask cleanup is not yet complete. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
+Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
 
 ### Long content
 

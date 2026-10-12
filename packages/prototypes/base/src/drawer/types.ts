@@ -18,6 +18,8 @@ export interface DrawerRootProps {
 }
 
 export type DrawerRootExposes = {
+  __admitContent: ExposeMethod<(instanceId: string) => number>;
+  __releaseContent: ExposeMethod<(instanceId: string, generation: number) => void>;
   open: ExposeState<boolean>;
   openDrawer: ExposeMethod<(reason?: string) => void>;
   close: ExposeMethod<(reason?: string) => void>;

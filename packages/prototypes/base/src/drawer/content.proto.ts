@@ -94,7 +94,12 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     options: ['top', 'right', 'bottom', 'left'],
   });
   // Initial model admission precedes this Content's open/focus lifecycle callbacks.
-  const sizing = setupDrawerSnap(def, side);
+  const sizing = setupDrawerSnap(def, side, (admitted) => {
+    updateOpen(
+      admitted && !!currentContext?.open && !!currentContext?.contentAdmitted,
+      'reason: drawer declaration admission changed'
+    );
+  });
   overlay.configure({ availableLayout: sizing.layout });
   def.feedback.style.use(
     tw('fixed overflow-y-auto overflow-x-hidden min-w-0 min-h-0 content-start wrap-anywhere')
@@ -172,7 +177,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     reason?: string,
     options?: { focusReason?: DrawerOpenFocusReason | null }
   ) => {
-    if (nextOpen && !sizing.hasAccepted()) return;
+    if (nextOpen && (!sizing.hasAccepted() || !sizing.admitted.get())) return;
     const prevOpen = open.get();
     open.set(nextOpen, reason ?? 'reason: drawer content sync => open');
     if (nextOpen) {
@@ -208,7 +213,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     syncIdentity(next);
     syncAlert(next);
     syncA11yRelations(run, next);
-    updateOpen(next.open, 'reason: drawer context sync => content', {
+    updateOpen(next.open && next.contentAdmitted, 'reason: drawer context sync => content', {
       focusReason: next.open ? next.openFocusReason : next.returnFocusReason,
     });
   });
@@ -219,9 +224,13 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     syncIdentity(ctx);
     syncAlert(ctx);
     syncA11yRelations(run, ctx);
-    updateOpen(ctx.open, 'reason: lifecycle.onCreated => drawer content open sync', {
-      focusReason: ctx.open ? ctx.openFocusReason : ctx.returnFocusReason,
-    });
+    updateOpen(
+      ctx.open && ctx.contentAdmitted,
+      'reason: lifecycle.onCreated => drawer content open sync',
+      {
+        focusReason: ctx.open ? ctx.openFocusReason : ctx.returnFocusReason,
+      }
+    );
   });
 
   def.lifecycle.onMounted((run) => {
@@ -231,9 +240,13 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     syncIdentity(ctx);
     syncAlert(ctx);
     syncA11yRelations(run, ctx);
-    updateOpen(ctx.open, 'reason: lifecycle.onMounted => drawer content open sync', {
-      focusReason: ctx.open ? ctx.openFocusReason : ctx.returnFocusReason,
-    });
+    updateOpen(
+      ctx.open && ctx.contentAdmitted,
+      'reason: lifecycle.onMounted => drawer content open sync',
+      {
+        focusReason: ctx.open ? ctx.openFocusReason : ctx.returnFocusReason,
+      }
+    );
   });
 
   def.lifecycle.onUnmounted(() => {

@@ -3,7 +3,7 @@ type: contract
 title: Drawer valid vertical content-fit consumer
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale: Valid-input prototype integration is isolated from initial-invalid family cleanup and native geometry acceptance.
+lifecycleRationale: Portable integration now includes logical Content admission; native geometry and modal/focus acceptance remain separate.
 summary: Connects the pure Drawer extent model to shared available layout, pointer dismissal and mode-appropriate accessibility.
 statement:
   en: Drawer owns mode, accepted input and gesture policy in the portable prototype; the generic host realizes constrained extent and independent displacement.
@@ -19,21 +19,18 @@ criteria:
       zh-CN: intrinsic Handle 为 aria-hidden 指针把手，排除键盘焦点，不提供 separator 范围或 Enter/Space 关闭。fraction 保留有名称 separator 与既有 resize 键。已聚焦 Handle 切 intrinsic 时同时撤销焦点及范围。intrinsic 拖动改变向外位移并用 cancel-on-extent-change；snap 保留 preserve-start resize。模式、配置、非法更新及禁用取消接触并释放 capture。受控拒绝恢复已接受状态。
   - id: C-DRAWER-AUTO-CONSUMER-0001-INVALID
     text:
-      en: Runtime malformed extent or side input sets readonly extentValid false, cancels Handle input and retains the complete last accepted edge, mode, lengths, points and selection. Current host safety facts still constrain that intent. Close and Root dismissal remain independent. Later valid input restores validity. Initial malformed input throws before Content's own Overlay/Focus activation, but this does not guarantee cleanup of an independently mounted Mask; that failing full-family boundary blocks complete admission. No NaN sentinel, forced full-height fallback or hidden unique Close may substitute for rejection.
-      zh-CN: 运行中非法尺寸或 side 令只读 extentValid=false，取消 Handle 输入并保留完整已接受 edge、mode、lengths、points 与 selection，宿主仍按当前安全事实约束。Close 与 Root 关闭独立保留；有效输入恢复 validity。初始非法输入在 Content 自身 Overlay/Focus 激活前抛错，但不保证独立 Mask 清理；该整族失败边界阻塞完整准入。不能用 NaN、强制满高度或隐藏唯一 Close 代替拒绝。
+      en: Runtime malformed extent or side input sets readonly extentValid false, cancels Handle input and retains the complete last accepted edge, mode, lengths, points and selection. Current host safety facts still constrain that intent. Close and Root dismissal remain independent. Later valid input restores validity. Initial malformed input throws before Content's own Overlay/Focus activation. C-DRAWER-CONTENT-ADMISSION-0001 gates the independently mounted Mask on a validated logical Content; native modal/focus verification remains separate. No NaN sentinel, forced full-height fallback or hidden unique Close may substitute for rejection.
+      zh-CN: 运行中非法尺寸或 side 令只读 extentValid=false，取消 Handle 输入并保留完整已接受 edge、mode、lengths、points 与 selection，宿主仍按当前安全事实约束。Close 与 Root 关闭独立保留；有效输入恢复 validity。初始非法输入在 Content 自身 Overlay/Focus 激活前抛错；C-DRAWER-CONTENT-ADMISSION-0001 将独立 Mask 呈现约束于有效逻辑 Content，native modal/focus 验证仍独立。不能用 NaN、强制满高度或隐藏唯一 Close 代替拒绝。
   - id: C-DRAWER-AUTO-CONSUMER-0001-EVIDENCE
     text:
-      en: Public examples use legal statically preflighted input and separate short intrinsic, long scrolling and explicit snap cases. Source and synthetic CSSOM evidence cannot certify native content height, current cap, actual scrollTop or Close reachability. Initial-invalid family cleanup, native/GPUI mappings, Compiler and packed-consumer composition remain separately blocking acceptance work.
-      zh-CN: 公开示例使用静态预检合法输入，分开短内容 intrinsic、长内容滚动及显式 snap。源码与合成 CSSOM 不证明 native 内容高度、当前 cap、真实 scrollTop 或 Close 可达。初始非法整族清理、native/GPUI、Compiler 与打包组合仍分别阻塞验收。
+      en: Public examples use legal statically preflighted input and separate short intrinsic, long scrolling and explicit snap cases. Source and synthetic CSSOM evidence cannot certify native content height, current cap, actual scrollTop or Close reachability. Native/GPUI mappings, Compiler and packed-consumer composition remain separately blocking acceptance work.
+      zh-CN: 公开示例使用静态预检合法输入，分开短内容 intrinsic、长内容滚动及显式 snap。源码与合成 CSSOM 不证明 native 内容高度、当前 cap、真实 scrollTop 或 Close 可达。native/GPUI、Compiler 与打包组合仍分别阻塞验收。
 dependsOn:
   contracts:
     [C-DRAWER-EXTENT-MODEL-0001, C-AVAILABLE-SPACE-LAYOUT-0001, C-AXIS-INPUT-CONTACT-BASIS-0001]
 verifies:
   tests: [T-DRAWER-AUTO-CONSUMER-0001]
 openQuestions:
-  - id: C-DRAWER-AUTO-CONSUMER-0001-Q-INITIAL
-    question: Which portable composition boundary rejects initial invalid Content inputs before an independently authored controlled Root/Mask can remain active?
-    blocks: [activation:C-DRAWER-AUTO-CONSUMER-0001]
   - id: C-DRAWER-AUTO-CONSUMER-0001-Q-NATIVE
     question: Which exact-source native receipts establish short/long geometry, safety cap, scrolling and Close reachability across supported runtimes?
     blocks: [activation:C-DRAWER-AUTO-CONSUMER-0001]
