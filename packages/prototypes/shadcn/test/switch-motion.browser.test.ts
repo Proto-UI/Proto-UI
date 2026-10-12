@@ -17,7 +17,10 @@ const output =
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 beforeAll(async () => {
   await mkdir(output, { recursive: true });
-  tokens = await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch');
+  tokens = (await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch')).map((token) => {
+    if (typeof token !== 'string') throw new TypeError('Expected a collected style token string');
+    return token;
+  });
   const built = await build({
     stdin: {
       contents: `
