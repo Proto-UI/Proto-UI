@@ -724,3 +724,30 @@ it('leaving item-aligned mode invalidates the prior unset fallback', async () =>
   await settle();
   expect(f.content.getExposes().transitionState.get()).toBe('closed');
 });
+
+it('item-aligned paint never invents data-side slides or popper translations', async () => {
+  vi.useFakeTimers();
+  facts();
+  const f = full({ controlled: true });
+  await settle();
+  setElementProps(f.root, { open: true, value: 'beta' });
+  await settle();
+  for (const side of ['top', 'right', 'bottom', 'left'] as const) {
+    setElementProps(f.content, { side });
+    await settle();
+    const { styleContains } = await import('../../test-utils/style');
+    for (const token of [
+      'slide-in-from-top-2',
+      'slide-in-from-bottom-2',
+      'slide-in-from-right-2',
+      'slide-in-from-left-2',
+      'translate-y-1',
+      '-translate-y-1',
+      'translate-x-1',
+      '-translate-x-1',
+    ])
+      expect(styleContains(f.surface, token)).toBe(false);
+    expect(styleContains(f.surface, 'fade-in-0')).toBe(true);
+    expect(styleContains(f.surface, 'zoom-in-95')).toBe(true);
+  }
+});

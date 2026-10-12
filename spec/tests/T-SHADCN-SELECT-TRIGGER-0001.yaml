@@ -3,10 +3,10 @@ type: test
 title: Shadcn Select Trigger delta protocol contract tests
 status: draft
 since: 0.2.0-rc.0
-summary: Covers Trigger Base inheritance, size, state styles including Adapter-projected one-pixel press feedback, chevron, asChild omission, and bounded parity.
+summary: Covers Trigger Base inheritance, size, pinned default state styles and colorScheme meta, chevron, asChild omission, and bounded parity.
 cases:
   - id: T-SHADCN-SELECT-TRIGGER-0001-CASE-CURRENT-PROTOCOL
-    title: Trigger inherits combobox behavior and projects current size, state, one-pixel press, and chevron surface
+    title: Trigger inherits combobox behavior and projects current size, state, default no-displacement, and chevron surface
     covers:
       [
         P-SHADCN-SELECT-TRIGGER-UPSTREAM-IDENTITY,
@@ -20,7 +20,7 @@ cases:
         P-SHADCN-SELECT-TRIGGER-COMPATIBILITY-SUBSET,
         P-SHADCN-SELECT-TRIGGER-AS-CHILD-OMISSION,
       ]
-    expectation: shadcn-select-trigger-current-combobox-surface-with-adapter-press-feedback
+    expectation: shadcn-select-trigger-current-combobox-surface-with-pinned-default-feedback
   - id: T-SHADCN-SELECT-TRIGGER-0001-CASE-GHOST
     title: Ghost presentation and default restoration preserve inherited command ownership
     covers:
@@ -29,6 +29,13 @@ cases:
       - P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
     expectation: select-trigger-ghost-restores-default-without-stale-paint-or-motion
 implementations:
+  - id: shadcn-select-dark-meta
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-dark.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-TRIGGER-0001-CASE-CURRENT-PROTOCOL]
+    exercises: [P-SHADCN-SELECT-TRIGGER]
   - id: prototypes-shadcn-select-trigger-contract
     kind: module-test
     status: passing
@@ -43,7 +50,7 @@ implementations:
         placeholder,
         default and sm size,
         chevron,
-        inherited pressed state and Adapter-projected one-pixel displacement,
+        inherited pressed state without default displacement,
         open requests,
         keyboard entry,
         and current tokens; remaining gaps stay centralized.,

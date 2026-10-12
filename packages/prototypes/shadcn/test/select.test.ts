@@ -74,6 +74,13 @@ describe('prototypes/shadcn: select', () => {
     expect(styleContains(trigger, 'border-input')).toBe(true);
     expect(styleContains(trigger, 'h-9')).toBe(true);
     expect(styleContains(trigger, 'justify-between')).toBe(true);
+    expect(styleContains(trigger, 'w-fit')).toBe(true);
+    expect(styleContains(trigger, 'transition-[color,box-shadow]')).toBe(true);
+    expect(styleContains(value, 'line-clamp-1')).toBe(true);
+    expect(styleContains(value, 'flex')).toBe(true);
+    expect(styleContains(value, 'items-center')).toBe(true);
+    expect(styleContains(value, 'gap-2')).toBe(true);
+    expect(styleContains(trigger.querySelector('span')!, 'text-muted-foreground')).toBe(true);
     expect(trigger.hasAttribute('data-placeholder')).toBe(true);
     expect(value.textContent).toBe('Select a framework');
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
@@ -105,8 +112,8 @@ describe('prototypes/shadcn: select', () => {
     await flush();
     expect(trigger.getExposes().pressed.get()).toBe(true);
     expect(trigger.hasAttribute('data-pressed')).toBe(true);
-    expect(styleContains(trigger, 'bg-input/70')).toBe(true);
-    expect(styleContains(trigger, 'translate-y-px')).toBe(true);
+    expect(styleContains(trigger, 'bg-input/70')).toBe(false);
+    expect(styleContains(trigger, 'translate-y-px')).toBe(false);
 
     trigger.dispatchEvent(new PointerEvent('pointerup', { bubbles: true }));
     await flush();
@@ -242,8 +249,8 @@ it('supports ghost presentation and restores default while inherited states stay
   await flush();
   expect(trigger.getExposes().pressed.get()).toBe(true);
   expect(styleContains(trigger, 'border-input')).toBe(true);
-  expect(styleContains(trigger, 'bg-input/70')).toBe(true);
-  expect(styleContains(trigger, 'translate-y-px')).toBe(true);
+  expect(styleContains(trigger, 'bg-input/70')).toBe(false);
+  expect(styleContains(trigger, 'translate-y-px')).toBe(false);
   trigger.setProps({ appearance: 'ghost' });
   await flush();
   expect(styleContains(trigger, 'translate-y-px')).toBe(false);
@@ -256,5 +263,5 @@ it('supports ghost presentation and restores default while inherited states stay
   trigger.setProps({ appearance: 'ghost', disabled: true });
   await settle();
   expect(trigger.getAttribute('aria-disabled')).toBe('true');
-  expect(styleContains(trigger, 'data-[disabled]:pointer-events-none')).toBe(true);
+  expect(styleContains(trigger, 'data-[disabled]:cursor-not-allowed')).toBe(true);
 });

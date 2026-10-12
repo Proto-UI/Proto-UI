@@ -34,7 +34,7 @@ export function setupSelectPaint(def: DefHandle<{}>) {
     ['right', tw('slide-in-from-left-2'), tw('translate-x-1')],
   ] as const) {
     def.rule({
-      when: (w) => w.state(side).eq(value),
+      when: (w) => w.all(w.state(position).eq('popper'), w.state(side).eq(value)),
       intent: (i) => i.feedback.style.use(animation),
     });
     def.rule({

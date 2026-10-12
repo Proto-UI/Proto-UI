@@ -5,8 +5,8 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Select Trigger inherits Base combobox behavior and adds size, compatible default or opt-in ghost appearance, state-driven styling and a fixed chevron. Ghost is a Proto UI extension, not pinned-upstream parity.
 statement:
-  zh-CN: 'Shadcn Select Trigger 是 P-BASE-SELECT-TRIGGER 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior；增加 size: sm | default、appearance: default | ghost、继承状态的 visual feedback 与固定 chevron。default 保留现有外观；ghost 是 Proto UI 自有呈现扩展，不声称来自固定 upstream。asChild 仍不提供。'
-  en: 'Shadcn Select Trigger is a direct part over P-BASE-SELECT-TRIGGER, retaining combobox command/accessibility, open request, placeholder and disabled behavior. It adds size: sm | default, appearance: default | ghost, state-derived visual feedback and a fixed chevron. Default remains compatible; ghost is a Proto UI presentation extension, not pinned-upstream parity. asChild remains unavailable.'
+  zh-CN: 'Shadcn Select Trigger 是 P-BASE-SELECT-TRIGGER 之上的 direct part，保留 combobox command/a11y、open request、placeholder 与 disabled behavior；增加 size: sm | default、appearance: default | ghost、继承状态的 visual feedback 与固定 chevron。default 对齐固定 upstream 的普通与 dark 外观；ghost 是 Proto UI 自有呈现扩展，不声称来自固定 upstream。asChild 仍不提供。'
+  en: 'Shadcn Select Trigger is a direct part over P-BASE-SELECT-TRIGGER, retaining combobox command/accessibility, open request, placeholder and disabled behavior. It adds size: sm | default, appearance: default | ghost, state-derived visual feedback and a fixed chevron. Default matches the pinned ordinary and dark recipe; ghost is a Proto UI presentation extension, not pinned-upstream parity. asChild remains unavailable.'
 
 criteria:
   - id: P-SHADCN-SELECT-TRIGGER-UPSTREAM-IDENTITY
@@ -57,17 +57,17 @@ criteria:
       }
   - id: P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
     text:
-      en: Both appearances retain flex layout, rounded-md geometry, spacing, typography and outline policy. Default retains border-input and shadow-xs. Ghost uses border-transparent and shadow-none without changing the border-box dimensions.
-      zh-CN: 两种外观保留 flex 布局、rounded-md 几何、间距、字体与 outline 规则。default 保留 border-input 与 shadow-xs；ghost 使用 border-transparent 与 shadow-none，不改变 border-box 尺寸。
+      en: Both appearances retain w-fit, transition-[color,box-shadow], flex layout, rounded-md geometry, spacing, typography and outline policy. Default retains border-input and shadow-xs. Ghost uses border-transparent and shadow-none without changing the border-box dimensions.
+      zh-CN: 两种外观保留 w-fit、transition-[color,box-shadow]、flex 布局、rounded-md 几何、间距、字体与 outline 规则。default 保留 border-input 与 shadow-xs；ghost 使用 border-transparent 与 shadow-none，不改变 border-box 尺寸。
   - id: P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
     text:
-      en: Placeholder, hover, focusVisible, pressed and disabled visuals derive only from inherited states. Default hover uses bg-input/50; default pressed projects bg-input/70 and translate-y-px together. Ghost hover/press uses the bg-accent/text-accent-foreground pair without displacement. Both retain the visible focus ring and disabled opacity/pointer gate; changing appearance withdraws the previous appearance and motion tokens.
-      zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 仅从继承状态派生。default hover 使用 bg-input/50，default pressed 同时投射 bg-input/70 与 translate-y-px；ghost hover/press 使用 bg-accent/text-accent-foreground 配对且无位移。二者保留清晰 focus ring 与 disabled opacity/pointer gate，切换 appearance 须撤回旧外观与位移 tokens。
+      en: Placeholder, hover, focusVisible, pressed and disabled visuals derive only from inherited states. Default has no light hover fill or pressed displacement; dark colorScheme uses bg-input/30 and hovered bg-input/50. Ghost hover/press uses the bg-accent/text-accent-foreground pair without displacement. Both retain the visible focus ring and disabled opacity and cursor-not-allowed; changing appearance withdraws the previous appearance and motion tokens.
+      zh-CN: placeholder、hover、focusVisible、pressed 与 disabled visuals 仅从继承状态派生。default 没有 light hover 填充或 pressed 位移；dark colorScheme 使用 bg-input/30，hover 时使用 bg-input/50；ghost hover/press 使用 bg-accent/text-accent-foreground 配对且无位移。二者保留清晰 focus ring 与 disabled opacity 与 cursor-not-allowed，切换 appearance 须撤回旧外观与位移 tokens。
   - id: P-SHADCN-SELECT-TRIGGER-CHEVRON
     text:
       {
-        zh-CN: renderer 必须保留 slot content 并追加固定 16px、strokeWidth 2 的 chevron-down SVG。,
-        en: The renderer must preserve slot content and append a fixed 16px chevron-down SVG with strokeWidth 2.,
+        zh-CN: renderer 必须保留 slot content 并追加固定 16px、strokeWidth 2、muted foreground、不收缩且不接收 pointer 的 chevron-down SVG。,
+        en: 'The renderer must preserve slot content and append a fixed 16px chevron-down SVG with strokeWidth 2, muted foreground, no shrinking and no pointer participation.',
       }
   - id: P-SHADCN-SELECT-TRIGGER-COMPATIBILITY-SUBSET
     text:

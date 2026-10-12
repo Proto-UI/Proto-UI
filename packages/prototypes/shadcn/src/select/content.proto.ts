@@ -8,9 +8,17 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
   setup(def) {
     const select = asSelectContent();
     // Override Base neutral policy only after its defaults are registered.
-    def.props.setDefaults({ position: 'item-aligned', align: 'center', sideOffset: 0 });
+    def.props.setDefaults({
+      position: 'item-aligned',
+      align: 'center',
+      sideOffset: 0,
+    });
     // P-SHADCN-SELECT-CONTENT-TRANSITION
-    select.asTransition.configure({ enterDuration: 150, leaveDuration: 0, interrupt: 'reverse' });
+    select.asTransition.configure({
+      enterDuration: 150,
+      leaveDuration: 0,
+      interrupt: 'reverse',
+    });
     const { open, alignmentFull } = select.stateHandles;
     const { transitionState } = select.asTransition;
 
@@ -23,7 +31,7 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
       const props = run.props.get();
       run.context.update(SELECT_VISUAL, {
         phase: transitionState.get(),
-        side: props.side ?? 'bottom',
+        side: props.position === 'popper' ? (props.side ?? 'bottom') : '',
         position: props.position ?? 'item-aligned',
       });
     };
@@ -82,23 +90,39 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
         w.all(
           w.state(alignmentFull).eq(false),
           w.state(open).eq(true),
+          w.prop('position').eq('popper'),
           w.prop('side').eq('bottom')
         ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-top-2')),
     });
     def.rule({
       when: (w) =>
-        w.all(w.state(alignmentFull).eq(false), w.state(open).eq(true), w.prop('side').eq('top')),
+        w.all(
+          w.state(alignmentFull).eq(false),
+          w.state(open).eq(true),
+          w.prop('position').eq('popper'),
+          w.prop('side').eq('top')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-bottom-2')),
     });
     def.rule({
       when: (w) =>
-        w.all(w.state(alignmentFull).eq(false), w.state(open).eq(true), w.prop('side').eq('left')),
+        w.all(
+          w.state(alignmentFull).eq(false),
+          w.state(open).eq(true),
+          w.prop('position').eq('popper'),
+          w.prop('side').eq('left')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-right-2')),
     });
     def.rule({
       when: (w) =>
-        w.all(w.state(alignmentFull).eq(false), w.state(open).eq(true), w.prop('side').eq('right')),
+        w.all(
+          w.state(alignmentFull).eq(false),
+          w.state(open).eq(true),
+          w.prop('position').eq('popper'),
+          w.prop('side').eq('right')
+        ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-left-2')),
     });
   },
