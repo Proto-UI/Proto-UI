@@ -10,4 +10,6 @@ The current implementations may notify observers before their caller returns. Re
 
 A returning Toast view reconciles its retained accepted open State with Context and the transition target before starting that view's transition. Stopping the retired application must not leave the new view describing the old open value.
 
-Executable evidence: `packages/prototypes/base/test/notification-retirement-lifecycle.test.ts`. Its RuntimeSession tests use public subscription and request boundaries, with synthetic EventTarget, role fixtures, and a Text Control host connection; they do not establish physical browser focus or complete Adapter parity.
+Menu Root value requests and Drawer Content snap requests retain the calling owner/view epoch across State and Context publication. Their navigation/axis-input callers stop before old completion work after retirement; accepted requests keep their original return conventions. Drawer admission release and snap/extent/gesture numeric policy remain unchanged.
+
+Executable evidence: `packages/prototypes/base/test/notification-retirement-lifecycle.test.ts` and `packages/prototypes/base/test/popup-snap-validation-lifecycle.test.ts`. Their RuntimeSession tests use public subscription and request boundaries, with synthetic EventTarget, role fixtures, a Text Control host connection and a Drawer snap helper/admission fixture; they do not establish physical browser focus, native gesture geometry or complete Adapter parity.

@@ -148,6 +148,9 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
         if (typeof validate === 'function') validate('manual');
         if (!isCurrent()) return true;
       }
+    } catch (error) {
+      if (isCurrent()) cancel();
+      throw error;
     } finally {
       validating = false;
     }

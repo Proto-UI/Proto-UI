@@ -147,6 +147,7 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       );
     };
     const publish = (run: RunHandle<T.SearchRootProps>) => {
+      const epoch = viewEpoch;
       if (
         !queryEdited &&
         !run.props.isProvided('inputValue') &&
@@ -156,10 +157,12 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         const initial = itemsOf(run).find((i) => i.value === value.get());
         if (initial) query.set(initial.text, 'reason: search initial label');
       }
+      if (currentRun !== run || viewEpoch !== epoch) return;
       const items = visibleItems(run);
       if (!items.some((i) => i.id === active && !i.disabled))
         active = inline ? (items.find((i) => !i.disabled)?.id ?? '') : '';
       count.set(items.length, 'reason: search filtered count');
+      if (currentRun !== run || viewEpoch !== epoch) return;
       const next = {
         id,
         value: value.get(),
@@ -185,21 +188,28 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         next === open.get()
       )
         return;
+      const epoch = viewEpoch;
       if (!run.props.isProvided('open')) open.set(next, 'reason: search open request');
+      if (currentRun !== run || viewEpoch !== epoch) return;
       if (!next) active = '';
       publish(run);
+      if (currentRun !== run || viewEpoch !== epoch) return;
       run.expose.emit('openChange', { open: next, reason });
     };
     const requestQuery = (next: string, composing = false) => {
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return;
+      const epoch = viewEpoch;
       queryEdited = true;
       if (!composing && !run.props.isProvided('inputValue'))
         query.set(next, 'reason: search query request');
+      if (currentRun !== run || viewEpoch !== epoch) return;
       if (!composing) {
         active = '';
         publish(run);
+        if (currentRun !== run || viewEpoch !== epoch) return;
         requestOpen(true, 'input');
+        if (currentRun !== run || viewEpoch !== epoch) return;
       }
       run.expose.emit('inputValueChange', { value: next, composing });
     };
@@ -218,9 +228,12 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       const result = mode === 'autocomplete' ? text : selectedValue;
       if (mode !== 'command' && !run.props.isProvided('value'))
         value.set(result, 'reason: search accepted selection');
+      if (!isCurrent()) return true;
       if (mode !== 'command' && !run.props.isProvided('inputValue'))
         query.set(text, 'reason: search selected label');
+      if (!isCurrent()) return true;
       publish(run);
+      if (!isCurrent()) return true;
       const detail = { value: result, textValue: text, reason };
       run.expose.emit(mode === 'command' ? 'execute' : 'valueChange', detail);
       if (!isCurrent()) return true;
@@ -248,6 +261,7 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     def.expose.method('__navigate', (direction) => {
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return;
+      const epoch = viewEpoch;
       const choices = visibleItems(run).filter((i) => !i.disabled);
       if (direction === 'commit') {
         const item = choices.find((i) => i.id === active);
@@ -260,6 +274,7 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         return;
       }
       requestOpen(true, 'keyboard');
+      if (currentRun !== run || viewEpoch !== epoch) return;
       if (!choices.length) return;
       const index = choices.findIndex((i) => i.id === active);
       const raw =

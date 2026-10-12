@@ -168,6 +168,7 @@ export function setupDrawerSnap(
     contactRevision: 0,
   });
   let currentRun: RunHandle<DrawerContentProps> | null = null;
+  let viewEpoch = 0;
   let points = [1],
     start = 1,
     rootOpen = false,
@@ -176,10 +177,12 @@ export function setupDrawerSnap(
     controlled = false,
     contactRevision = 0;
   const render = (run: RunHandle<DrawerContentProps>) => {
+    const epoch = viewEpoch;
     offsetPercentage.set(
       Math.round((1 - dragProgress.get()) * 100000) / 1000,
       'reason: drawer continuous percentage projection'
     );
+    if (currentRun !== run || viewEpoch !== epoch) return;
     run.context.update(DRAWER_CONTENT_CONTEXT, {
       side: side.get() as 'top' | 'right' | 'bottom' | 'left',
       open: rootOpen && accepted,
@@ -193,29 +196,39 @@ export function setupDrawerSnap(
     });
   };
   const cancel = () => {
+    const run = currentRun,
+      epoch = viewEpoch;
     dragging.set(false, 'reason: drawer drag cancelled');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     dragProgress.set(
       extent.get() === 'intrinsic' ? 1 : snapPoint.get(),
       'reason: drawer return to owner extent'
     );
+    if (currentRun !== run || viewEpoch !== epoch) return;
     displacement.set(0, 'reason: drawer return to resting position');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     if (currentRun) render(currentRun);
   };
   const request = (next: number, reason: string) => {
     const run = currentRun;
     if (!run || !rootOpen || rootDisabled || !extentValid.get() || extent.get() !== 'fraction')
       return;
+    const epoch = viewEpoch;
     const value = nearest(points, next);
     if (value === snapPoint.get()) return;
     if (!controlled) snapPoint.set(value, 'reason: drawer snap request');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     dragProgress.set(snapPoint.get(), 'reason: drawer snap owner projection');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     render(run);
+    if (currentRun !== run || viewEpoch !== epoch) return;
     run.expose.emit('snapPointChange', { snapPoint: value, reason });
   };
   def.expose.method('requestSnapPoint', (next, reason = 'programmatic') => request(next, reason));
   def.expose.method('__onAxisInput', (sample: AxisInputSample) => {
     const run = currentRun;
     if (!run) return;
+    const epoch = viewEpoch;
     if (sample.phase === 'cancel' || !rootOpen || rootDisabled || !extentValid.get()) {
       cancel();
       return;
@@ -228,6 +241,7 @@ export function setupDrawerSnap(
     if (sample.phase === 'start') {
       start = intrinsic ? 1 : snapPoint.get();
       dragging.set(true, 'reason: drawer drag start');
+      if (currentRun !== run || viewEpoch !== epoch) return;
     }
     if (!dragging.get()) return;
     const lowerBound = intrinsic ? 0 : run.props.get().dragDismissible === false ? points[0] : 0;
@@ -236,10 +250,14 @@ export function setupDrawerSnap(
       Math.min(intrinsic ? 1 : points[points.length - 1], start + sample.totalDelta * start)
     );
     dragProgress.set(next, 'reason: drawer normalized drag preview');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     if (intrinsic) displacement.set(1 - next, 'reason: drawer intrinsic drag displacement');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     render(run);
+    if (currentRun !== run || viewEpoch !== epoch) return;
     if (sample.phase !== 'end') return;
     dragging.set(false, 'reason: drawer drag end');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     const configured = run.props.get().dragDismissThreshold;
     const ceiling = intrinsic ? 1 : points[0];
     const threshold =
@@ -249,6 +267,7 @@ export function setupDrawerSnap(
     if (run.props.get().dragDismissible !== false && next < threshold)
       requestDrawerOpen(run, false, 'drag.dismiss', 'pointer');
     else if (!intrinsic) request(next, 'drag.snap');
+    if (currentRun !== run || viewEpoch !== epoch) return;
     cancel();
   });
   const sync = (run: RunHandle<DrawerContentProps>, created = false) => {
@@ -331,10 +350,17 @@ export function setupDrawerSnap(
     sync(run, true);
   });
   def.lifecycle.onBeforeDispose(() => {
+    viewEpoch++;
+    currentRun = null;
     declarationDisposed = true;
-    releaseAdmission();
+    try {
+      releaseAdmission();
+    } finally {
+      currentRun = null;
+    }
   });
   def.lifecycle.onMounted((run) => {
+    viewEpoch++;
     currentRun = run;
     render(run);
   });
@@ -351,13 +377,16 @@ export function setupDrawerSnap(
     (run) => sync(run)
   );
   def.lifecycle.onUnmounted(() => {
+    const epoch = ++viewEpoch;
+    currentRun = null;
     dragging.set(false, 'reason: drawer view detached');
+    if (viewEpoch !== epoch) return;
     dragProgress.set(
       extent.get() === 'intrinsic' ? 1 : snapPoint.get(),
       'reason: drawer detach preview reset'
     );
+    if (viewEpoch !== epoch) return;
     displacement.set(0, 'reason: drawer detach displacement reset');
-    currentRun = null;
   });
   return {
     snapPoint,

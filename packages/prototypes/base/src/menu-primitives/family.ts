@@ -96,6 +96,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     const id = 'pui-' + slug + '-' + ++nextId;
     let current = '';
     let runNow: RunHandle<T.MenuRootProps> | null = null;
+    let viewEpoch = 0;
     let published: Context = { id, value: '', current, disabled: false };
     def.context.provide(context, published);
     const publish = (run: RunHandle<T.MenuRootProps>) => {
@@ -112,13 +113,16 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     const request = (next: string, reason = 'programmatic') => {
       const run = runNow;
       if (!run || disabled.get() || next === value.get()) return false;
+      const epoch = viewEpoch;
       const matches = triggers(run).filter((t) => t.data.value === next);
       if (next && (matches.length !== 1 || matches[0].data.disabled)) return false;
       // Record the actual intent before notifying synchronous owner callbacks.
       // Rejected controlled requests still count; distinct later requests remain valid.
       requestRevision++;
       if (!run.props.isProvided('value')) value.set(next, 'reason: menu active value request');
+      if (runNow !== run || viewEpoch !== epoch) return true;
       publish(run);
+      if (runNow !== run || viewEpoch !== epoch) return true;
       run.expose.emit('valueChange', { value: next, reason });
       return true;
     };
@@ -138,6 +142,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     def.expose.method('__navigate', (direction) => {
       const run = runNow;
       if (!run || disabled.get()) return;
+      const epoch = viewEpoch;
       const enabled = triggers(run).filter((t) => !t.data.disabled);
       if (!enabled.length) return;
       // Content navigation starts from its open owner, not an earlier stale
@@ -156,9 +161,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       // Applied focus can synchronously request this switch or let the owner
       // choose another value/focus. Do not repeat that intent or overwrite the
       // newer current member; this guard is local to this navigation call.
-      if (runNow !== run || requestRevision !== beforeFocus) return;
+      if (runNow !== run || viewEpoch !== epoch || requestRevision !== beforeFocus) return;
       current = next.data.id;
       publish(run);
+      if (runNow !== run || viewEpoch !== epoch) return;
       if (value.get()) request(next.data.value, 'horizontal-navigation');
     });
     const sync = (run: RunHandle<T.MenuRootProps>, initial = false) => {
@@ -177,6 +183,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     def.lifecycle.onCreated((run) => sync(run, true));
     def.lifecycle.onMounted((run) => sync(run));
     def.lifecycle.onUnmounted(() => {
+      viewEpoch++;
+      runNow = null;
+    });
+    def.lifecycle.onBeforeDispose(() => {
       runNow = null;
     });
     def.props.watchAll((run) => sync(run));
