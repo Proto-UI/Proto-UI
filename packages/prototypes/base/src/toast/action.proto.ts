@@ -22,6 +22,7 @@ function setup(def: DefHandle<ToastActionProps, ToastActionExposes>) {
   focus.configure({ disabled: false });
   const a11y = asAccessible();
   a11y.role('button');
+  a11y.action('activate', { event: 'press.commit' });
   a11y.nameFromContent();
   a11y.state('disabled', disabled);
   def.expose.state('disabled', disabled);
