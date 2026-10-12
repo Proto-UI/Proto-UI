@@ -338,3 +338,27 @@ export {
   default as selectItemText,
   default as shadcnSelectItemText,
 } from './select/item-text.proto';
+
+export { default as selectGroup, default as shadcnSelectGroup } from './select/group.proto';
+export type {
+  ShadcnSelectGroupProps,
+  ShadcnSelectGroupExposes,
+  ShadcnSelectGroupAsHookContract,
+} from './select/types';
+
+export { default as selectLabel, default as shadcnSelectLabel } from './select/label.proto';
+export type {
+  ShadcnSelectLabelProps,
+  ShadcnSelectLabelExposes,
+  ShadcnSelectLabelAsHookContract,
+} from './select/types';
+
+export {
+  default as selectSeparator,
+  default as shadcnSelectSeparator,
+} from './select/separator.proto';
+export type {
+  ShadcnSelectSeparatorProps,
+  ShadcnSelectSeparatorExposes,
+  ShadcnSelectSeparatorAsHookContract,
+} from './select/types';

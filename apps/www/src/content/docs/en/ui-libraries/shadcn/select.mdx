@@ -11,14 +11,16 @@ This entry composes the shadcn visual and API surface over the cataloged Base Se
 
 ## Current scope
 
-- `Root`, `Trigger`, `Value`, `Content`, and `Item`
+- `Root`, `Trigger`, `Value`, `Content`, `Item`, `Surface`, `Viewport`, `ItemText`, `Group`, `Label`, and `Separator`
 - `defaultValue` / `value`, `defaultOpen` / `open`, and their change events
 - `Trigger.size="sm | default"`
 - `Trigger.appearance="default | ghost"`
 - `Content.position="item-aligned | popper"`, defaulting to shadcn/ui's `item-aligned`
 - single selection, disabled items, keyboard navigation, typeahead, popup dismissal, and focus restoration
 
-`Group`, `Label`, `Separator`, `Viewport`, scroll buttons, `ItemText`, `ItemIndicator`, and form submission remain deferred. Content dynamically matches Trigger width through anchor-size CSS variables projected by the Anchored Position host. The current `item-aligned` option preserves the official API and default, but its geometry still uses Base anchor positioning rather than Radix's per-item alignment algorithm.
+`Group` is a passive option container; its `Label` names only that group. Multiple groups and ungrouped items can coexist without changing selection order. `Separator` is decorative and contentless. The grouped demo uses these real parts. Their visual recipe is pinned to [shadcn/ui revision 02cad611](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx).
+
+The full `Surface` → `Viewport` → `Item` → `ItemText` composition supplies explicit parts for item-aligned positioning; legacy compositions and explicit `popper` remain supported. This does not establish complete Radix positioning parity. Scroll buttons, `ItemIndicator`, and form submission remain open. GPUI peer group-name relationships have transport evidence, but its current wire format omits the Separator's hidden-tree contribution; native accessibility acceptance remains unverified.
 
 ## Trigger appearance
 

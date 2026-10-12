@@ -5,6 +5,7 @@ import {
   createSelectRootId,
   SELECT_CONTEXT,
   SELECT_FAMILY,
+  SELECT_GROUP_FAMILY,
   type SelectContextValue,
   type SelectOpenRequest,
   type SelectValueRequest,
@@ -19,6 +20,8 @@ function sameContext(a: SelectContextValue, b: SelectContextValue): boolean {
 
 function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): void {
   def.anatomy.claim(SELECT_FAMILY, { role: 'root' });
+  // A nested Select must not lend its orphan Label to an outer Group.
+  def.anatomy.claim(SELECT_GROUP_FAMILY, { role: 'root' });
   const collection = asCollection();
   collection.configure({ family: SELECT_FAMILY });
 

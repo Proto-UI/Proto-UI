@@ -27,6 +27,13 @@ It follows the APG select-only combobox pattern: Trigger projects `combobox`, Co
 - `select-content`: composes `asOverlay`, `asTransition`, `asFocusRoving`, and anchor positioning
 - `select-item`: projects an option, separates transient `active` from persistent `selected`, and submits selection requests
 
+- `select-surface`, `select-viewport`, and `select-item-text`: explicit optional alignment structure
+- `select-group`: passive container with its own accessible naming scope
+- `select-label`: slot-preserving name for its nearest Group; it is not a control label or activation target
+- `select-separator`: hidden, decorative, contentless separation
+
+Group/Label/Separator also expose `asSelectGroup`, `asSelectLabel`, and `asSelectSeparator`. Hooks inherit semantic declarations; a caller using `asSelectSeparator` must return an empty renderer itself. Naming fails closed for missing or duplicate labels and remains isolated across nested Select roots. These parts do not own selection, collection or focus. Native accessibility acceptance is still pending; the GPUI peer currently omits Separator hidden-tree transport.
+
 ## Why It Matters
 
 This family is not only an addition to the base library. It is also a probe for Proto UI's current value-component path:
@@ -54,7 +61,7 @@ It does not yet include:
 - form semantics
 - native `<select>` parity
 - editable combobox/search behavior
-- `Group`, `Label`, `Separator`, `Viewport`, and scroll buttons
+- scroll buttons and `ItemIndicator`
 - form submission and hidden inputs
 - multi-select
 

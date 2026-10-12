@@ -1,0 +1,101 @@
+id: T-SELECT-STRUCTURAL-PARTS-0001
+type: test
+title: Select passive grouping and decorative parts conformance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Runtime and real framework/peer integration evidence remains distinct from native assistive-technology and screenshot acceptance.
+summary: Group-local names, negative scope and lifetime cases, collection invariants, public entries and source-derived family recipes.
+cases:
+  - id: T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS
+    title: Passive groups retain ordered single-selection and contentless decorative separation
+    covers:
+      [
+        P-BASE-SELECT-STRUCTURAL-PARTS-OWNERSHIP,
+        P-BASE-SELECT-STRUCTURAL-PARTS-SEPARATOR,
+        P-BASE-SELECT-STRUCTURAL-PARTS-ENTRIES,
+      ]
+    expectation: only-root-owns-selection-and-collection
+  - id: T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING
+    title: Two groups, nested Select boundaries and relationship lifetime fail closed correctly
+    covers: [P-BASE-SELECT-STRUCTURAL-PARTS-SCOPE, P-BASE-SELECT-STRUCTURAL-PARTS-NAME]
+    expectation: current-unique-group-local-label-only
+  - id: T-SELECT-STRUCTURAL-PARTS-0001-CASE-RECIPE
+    title: Shadcn uses inherited semantics and fixed upstream relative recipes
+    covers:
+      [
+        P-SHADCN-SELECT-STRUCTURAL-PARTS-INHERITANCE,
+        P-SHADCN-SELECT-STRUCTURAL-PARTS-RECIPE,
+        P-SHADCN-SELECT-STRUCTURAL-PARTS-CONSUMER,
+      ]
+    expectation: inherited-grouping-with-canonical-source-closure
+implementations:
+  - id: select-structural-wc
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/select-structural-parts.test.ts
+    required: true
+    consumesCases:
+      [T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS, T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING]
+  - id: select-structural-types
+    kind: workspace-check
+    status: passing
+    path: internal/contracts/types/select-structural-parts.type-test.ts
+    required: true
+    consumesCases: [T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS]
+  - id: select-structural-shadcn
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-structural-parts.test.ts
+    required: true
+    consumesCases: [T-SELECT-STRUCTURAL-PARTS-0001-CASE-RECIPE]
+  - id: select-structural-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/select-structural.integration.test.ts
+    required: true
+    consumesCases:
+      [T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS, T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING]
+  - id: select-structural-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/select-structural.test.ts
+    required: true
+    consumesCases:
+      [T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS, T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING]
+  - id: select-structural-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/select-structural.test.ts
+    required: true
+    consumesCases:
+      [T-SELECT-STRUCTURAL-PARTS-0001-CASE-SEMANTICS, T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING]
+  - id: select-group-peer-relations
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/gpui-peer/test/select-structural-projections.test.ts
+    required: true
+    consumesCases: [T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING]
+  - id: select-structural-native-browser
+    kind: adapter-test
+    status: planned
+    path: packages/web-conformance/test/select-group.browser.test.ts
+    required: true
+    consumesCases:
+      - T-SELECT-STRUCTURAL-PARTS-0001-CASE-NAMING
+      - T-SELECT-STRUCTURAL-PARTS-0001-CASE-RECIPE
+  - id: select-structural-consumer
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/select-structural-demo.test.ts
+    required: true
+    consumesCases: [T-SELECT-STRUCTURAL-PARTS-0001-CASE-RECIPE]
+verifies:
+  prototypes: [P-BASE-SELECT-STRUCTURAL-PARTS, P-SHADCN-SELECT-STRUCTURAL-PARTS]
+exercises:
+  prototypes: [P-BASE-SELECT-STRUCTURAL-PARTS, P-SHADCN-SELECT-STRUCTURAL-PARTS]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added scoped structural parts, lifecycle, real framework projections and fixed recipe acceptance tests.
+tags: [select, anatomy, a11y, conformance]

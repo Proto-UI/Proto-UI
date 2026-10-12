@@ -175,6 +175,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'packages/adapters/base/test/resident-motion.browser.test.ts',
   'packages/prototypes/shadcn/test/switch-motion.browser.test.ts',
   'packages/web-conformance/test/select-target-alignment.browser.test.ts',
+  'packages/web-conformance/test/select-group.browser.test.ts',
 ]);
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
@@ -207,6 +208,8 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     '.github/workflows/finf-representative-features-evidence.yml',
   'packages/adapters/base/test/resident-motion.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
+  'packages/web-conformance/test/select-group.browser.test.ts':
+    '.github/workflows/select-target-alignment-evidence.yml',
   'packages/web-conformance/test/select-target-alignment.browser.test.ts':
     '.github/workflows/select-target-alignment-evidence.yml',
 });

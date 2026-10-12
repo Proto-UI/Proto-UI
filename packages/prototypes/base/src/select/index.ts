@@ -29,7 +29,7 @@ export type {
   SelectValueRequest,
 } from './shared';
 
-export { SELECT_CONTEXT, SELECT_FAMILY } from './shared';
+export { SELECT_CONTEXT, SELECT_FAMILY, SELECT_GROUP_FAMILY } from './shared';
 export { asSelectRoot, default as selectRoot } from './root.proto';
 export { asSelectTrigger, default as selectTrigger } from './trigger.proto';
 export { asSelectValue, default as selectValue } from './value.proto';
@@ -41,3 +41,16 @@ export default selectRoot;
 export { asSelectSurface, default as selectSurface } from './surface.proto';
 export { asSelectViewport, default as selectViewport } from './viewport.proto';
 export { asSelectItemText, default as selectItemText } from './item-text.proto';
+
+export { asSelectGroup, default as selectGroup } from './group.proto';
+export type { SelectGroupProps, SelectGroupExposes, SelectGroupAsHookContract } from './types';
+
+export { asSelectLabel, default as selectLabel } from './label.proto';
+export type { SelectLabelProps, SelectLabelExposes, SelectLabelAsHookContract } from './types';
+
+export { asSelectSeparator, default as selectSeparator } from './separator.proto';
+export type {
+  SelectSeparatorProps,
+  SelectSeparatorExposes,
+  SelectSeparatorAsHookContract,
+} from './types';

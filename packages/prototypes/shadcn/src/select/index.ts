@@ -30,3 +30,24 @@ export type {
 export { default as selectSurface, default as shadcnSelectSurface } from './surface.proto';
 export { default as selectViewport, default as shadcnSelectViewport } from './viewport.proto';
 export { default as selectItemText, default as shadcnSelectItemText } from './item-text.proto';
+
+export { default as selectGroup, default as shadcnSelectGroup } from './group.proto';
+export type {
+  ShadcnSelectGroupProps,
+  ShadcnSelectGroupExposes,
+  ShadcnSelectGroupAsHookContract,
+} from './types';
+
+export { default as selectLabel, default as shadcnSelectLabel } from './label.proto';
+export type {
+  ShadcnSelectLabelProps,
+  ShadcnSelectLabelExposes,
+  ShadcnSelectLabelAsHookContract,
+} from './types';
+
+export { default as selectSeparator, default as shadcnSelectSeparator } from './separator.proto';
+export type {
+  ShadcnSelectSeparatorProps,
+  ShadcnSelectSeparatorExposes,
+  ShadcnSelectSeparatorAsHookContract,
+} from './types';

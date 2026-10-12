@@ -41,3 +41,21 @@ export type ShadcnSelectContentAsHookContract = SelectContentAsHookContract;
 export type ShadcnSelectItemProps = SelectItemProps;
 export type ShadcnSelectItemExposes = SelectItemExposes;
 export type ShadcnSelectItemAsHookContract = SelectItemAsHookContract;
+
+export type {
+  SelectGroupProps as ShadcnSelectGroupProps,
+  SelectGroupExposes as ShadcnSelectGroupExposes,
+  SelectGroupAsHookContract as ShadcnSelectGroupAsHookContract,
+} from '@proto.ui/prototypes-base/select';
+
+export type {
+  SelectLabelProps as ShadcnSelectLabelProps,
+  SelectLabelExposes as ShadcnSelectLabelExposes,
+  SelectLabelAsHookContract as ShadcnSelectLabelAsHookContract,
+} from '@proto.ui/prototypes-base/select';
+
+export type {
+  SelectSeparatorProps as ShadcnSelectSeparatorProps,
+  SelectSeparatorExposes as ShadcnSelectSeparatorExposes,
+  SelectSeparatorAsHookContract as ShadcnSelectSeparatorAsHookContract,
+} from '@proto.ui/prototypes-base/select';
