@@ -6,11 +6,11 @@ since: 0.2.0-rc.0
 summary: Shadcn Switch Thumb inherits the Base context-driven indicator protocol and adds the currently implemented thumb shape, sizing, surface, and motion tokens.
 statement:
   zh-CN: >-
-    Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 transition tokens。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。
+    Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 resident translate timing declaration。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。
 
 
   en: >-
-    Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and transition tokens. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences.
+    Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and resident translate timing declaration. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences.
 
 
 criteria:
@@ -49,8 +49,8 @@ criteria:
             ]
   - id: P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Thumb projects pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 transition-transform translate-x-0 with no border or shadow. Inherited checked selects translate-x-[calc(100%_-_2px)], giving 14px travel inside the 30px track interior and symmetric zero extra horizontal padding beyond the 1px border. The 18.4px outer height minus two 1px borders and the 16px Thumb leaves 0.4px vertical space, centered by flex alignment. Dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Local ring isolation and scoped border-box are retained; no second value or motion owner is added.
-      zh-CN: 默认 Thumb 投射 pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 transition-transform translate-x-0，无border或shadow。继承 checked 选择 translate-x-[calc(100%_-_2px)]，在30px轨道内宽中位移14px，在1px边框内侧水平两端保持对称零额外padding；18.4px外高减两个1px边框与16px Thumb仍有0.4px垂直余量，由flex居中。dark unchecked 为bg-foreground，dark checked为bg-primary-foreground。保留local ring隔离与scoped border-box，不增加value或motion owner。
+      en: Default Thumb projects pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Inherited checked selects translate-x-[calc(100%_-_2px)], at a 16px root font giving 14px travel inside the 30px track interior and symmetric zero extra horizontal padding beyond the 1px border. At that root font, the 18.4px outer height minus two 1px borders and the 16px Thumb leaves 0.4px vertical space, centered by flex alignment. At a 32px root font, size-4 declares 32px while the track stays 32 by 18.4px; do not normalize this mixed-unit source into uniformly scaled geometry. Actual flex shrink, overflow and travel remain a rendered-evidence gate. Dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Local ring isolation and scoped border-box are retained; no second value owner is added. Translate timing follows C-FEEDBACK-RESIDENT-MOTION-0001 and host/Compiler coverage remains an explicit gap.
+      zh-CN: 默认 Thumb 投射 pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border或shadow。继承 checked 选择 translate-x-[calc(100%_-_2px)]，在16px root font下，于30px轨道内宽中位移14px，在1px边框内侧水平两端保持对称零额外padding；18.4px外高减两个1px边框与16px Thumb仍有0.4px垂直余量，由flex居中。在32px root font下size-4声明32px而轨道仍32×18.4px，不得将源混合单位改成统一缩放；实际flex shrink、overflow和位移另作渲染验证。dark unchecked 为bg-foreground，dark checked为bg-primary-foreground。保留local ring隔离与scoped border-box，不增加value或motion owner。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -70,6 +70,10 @@ openQuestions:
       zh-CN: 默认尺寸呈现遵循固定base-nova recipe；保留公开可选same-domain Thumb，不照搬上游内部composition。sm尺寸、继承size协调、field-label/invalid/hit-target与完整API一致仍不属于本片。移除历史额外border、shadow及固定duration/easing；真实位移与dark paint仍需独立验证。
     blocks: [shadcn switch thumb parity roadmap]
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L1249-L1264
+    label: Fixed Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39
+  - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/ui/switch.tsx
+    label: Fixed Base wrapper; Root transition-all, Thumb transition-transform and expanded hit area; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: internal/records/2026-07-25-rc4-dialog-close-icon-and-switch-trial-regressions.zh-CN.md
   - path: packages/prototypes/shadcn/src/switch/thumb.proto.ts

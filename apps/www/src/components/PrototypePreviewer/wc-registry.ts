@@ -1,3 +1,4 @@
+import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import { createPreviewMaterialSink } from './preview-material-provider';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 import type { Prototype } from '@proto.ui/core';
@@ -14,6 +15,7 @@ export function ensurePreviewWcRegistered(prototypeId: string, proto: Prototype<
     const Ctor = AdaptToWebComponent(proto, {
       register: false,
       createVisualSink: createPreviewMaterialSink,
+      residentMotion: { palette: createCanonicalMotionPalette },
       registerAs: wcName,
     });
     customElements.define(wcName, Ctor);

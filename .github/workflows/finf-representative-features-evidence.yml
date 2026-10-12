@@ -43,6 +43,7 @@ jobs:
           - popover-command-density
           - neo-popover-title
           - resident-motion-capability
+          - shadcn-switch-consumer
     steps:
       - uses: actions/checkout@v4
         with:
@@ -87,6 +88,8 @@ jobs:
           TEST_FILE=apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts
           if [ "$PUI_FINF_FEATURE_GROUP" = resident-motion-capability ]; then
             TEST_FILE=packages/adapters/base/test/resident-motion.browser.test.ts
+          elif [ "$PUI_FINF_FEATURE_GROUP" = shadcn-switch-consumer ]; then
+            TEST_FILE=packages/prototypes/shadcn/test/switch-motion.browser.test.ts
           elif [ "$PUI_FINF_FEATURE_GROUP" = slider ]; then
             TEST_FILE=apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts
           elif [ "$PUI_FINF_FEATURE_GROUP" = dropdown ]; then

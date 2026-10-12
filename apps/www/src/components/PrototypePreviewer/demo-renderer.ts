@@ -1,3 +1,4 @@
+import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import {
   createPreviewMaterialSink,
   findPreviewMaterialProvider,
@@ -393,6 +394,7 @@ async function renderDemoReact(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }
@@ -566,6 +568,7 @@ async function renderDemoVue(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }
@@ -713,6 +716,7 @@ async function renderDemoVue2(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }
