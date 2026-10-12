@@ -44,6 +44,11 @@ export const publicDocPolicy = {
           kind: 'non-component',
           reason: 'Prototype authoring tools are utilities, not a component family.',
         },
+        './virtual-list/web': {
+          kind: 'non-component',
+          reason:
+            'attachWebVirtualList owns Web materialization, DOM nodes, spacers and measurements; it is a host helper, not a component family.',
+        },
       },
     },
     {
