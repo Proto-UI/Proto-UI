@@ -383,10 +383,10 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     if (compareValuesOwnerInput(input, unwrap(values.get(), valueShape.get()))) return false;
     const before = revision.get();
     working.set(true);
-    veto.set(false);
-    phase.set('notifying');
-    if (!live()) return false;
     try {
+      veto.set(false);
+      phase.set('notifying');
+      if (!live()) return false;
       run.expose.emit('valueChange', {
         value: unwrap(owner.rawValues, owner.shape),
         activeThumbIndex: index,
@@ -573,7 +573,7 @@ function setup(def: DefHandle<SliderValuesRootProps, SliderValuesRootExposes>) {
     }
   });
   def.expose.method('cancelValueChange', () => {
-    if (!live() || phase.get() !== 'notifying') return false;
+    if (!live() || !working.get() || phase.get() !== 'notifying') return false;
     veto.set(true);
     return true;
   });

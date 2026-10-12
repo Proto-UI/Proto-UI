@@ -21,6 +21,33 @@ async function fixture(props: Record<string, unknown>) {
   await flush();
   return { root, x: root.getExposes() };
 }
+for (const throws of [false, true])
+  it(`releases the request guard after a notifying observer throws=${throws}`, async () => {
+    const f = await fixture({ defaultValue: 10 });
+    const failure = new Error('notifying observer failure');
+    const stop = f.x.phase.subscribe((event: any) => {
+      if (throws && event.type === 'next' && event.next === 'notifying') throw failure;
+    });
+    try {
+      if (throws) {
+        let thrown: unknown;
+        try {
+          f.x.requestValue(20);
+        } catch (error) {
+          thrown = error;
+        }
+        expect(thrown).toBe(failure);
+        expect(f.x.getValue()).toBe(10);
+      } else expect(f.x.requestValue(20)).toBe(true);
+    } finally {
+      stop();
+    }
+    expect(f.x.ready.get()).toBe(true);
+    expect(f.x.cancelValueChange()).toBe(false);
+    expect(f.x.requestValue(30)).toBe(true);
+    expect(f.x.getValue()).toBe(30);
+    expect(f.x.phase.get()).toBe('idle');
+  });
 it('synchronous controlled Props feedback is authoritative before idle and does not require receipt attribution', async () => {
   const f = await fixture({ value: [20, 80] }),
     commits: any[] = [];
