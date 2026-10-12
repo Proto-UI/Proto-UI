@@ -2,6 +2,22 @@ import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.u
 export type MotionVector = readonly number[];
 const same = (a: MotionVector, b: MotionVector) =>
   a.length === b.length && a.every((v, i) => v === b[i]);
+const snapshotVector = (input: MotionVector): MotionVector => {
+  if (!Array.isArray(input) || !input.length) throw new Error('[feedback.motion] Invalid value');
+  const values: number[] = [];
+  for (let i = 0; i < input.length; i++) {
+    const entry = Object.getOwnPropertyDescriptor(input, String(i));
+    if (
+      !entry ||
+      !('value' in entry) ||
+      typeof entry.value !== 'number' ||
+      !Number.isFinite(entry.value)
+    )
+      throw new Error('[feedback.motion] Invalid value');
+    values.push(entry.value);
+  }
+  return Object.freeze(values);
+};
 const clamp = (n: number) => Math.max(0, Math.min(1, n));
 /** Invert cubic x, then evaluate cubic y. No clock, host or side effects. */
 export function cubicProgress(x: number, curve: ResidentMotionDeclaration['easing']): number {
@@ -46,12 +62,10 @@ export function createResidentMotionSampler(
     return value;
   }
   return {
-    target(next: MotionVector, now: number, animate = true) {
+    target(next: MotionVector, now: number, animate = true, presented?: MotionVector) {
       if (disposed) return null;
       time(now);
-      if (!next.length || next.some((v) => !Number.isFinite(v)))
-        throw new Error('[feedback.motion] Invalid value');
-      next = Object.freeze([...next]);
+      next = snapshotVector(next);
       if (!target || !animate || !config.durationMs || target.length !== next.length) {
         target = next;
         from = next;
@@ -60,11 +74,26 @@ export function createResidentMotionSampler(
         factor = 1;
         return next;
       }
-      const current = read(now)!;
+      if (presented && presented.length !== next.length)
+        throw new Error('[feedback.motion] Invalid presented value');
+      // Only typed, immutable samples acknowledged by the projection owner qualify.
+      const current = presented ? snapshotVector(presented) : read(now)!;
       if (same(target, next)) return current;
       let nextFactor = 1;
       if (active && same(reversingStart, next)) {
-        const e = cubicProgress(clamp((now - start) / duration), config.easing);
+        let axis = -1,
+          largest = 0;
+        target.forEach((v, i) => {
+          const delta = Math.abs(v - from[i]);
+          if (delta > largest) {
+            largest = delta;
+            axis = i;
+          }
+        });
+        const e =
+          presented && axis >= 0
+            ? (current[axis] - from[axis]) / (target[axis] - from[axis])
+            : cubicProgress(clamp((now - start) / duration), config.easing);
         nextFactor = clamp(Math.abs(e * factor + 1 - factor));
         reversingStart = target;
       } else reversingStart = current;

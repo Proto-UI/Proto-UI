@@ -117,3 +117,50 @@ it('rejects a second timing writer and negative transform composition', () => {
     reason: 'transform-composition-unavailable',
   });
 });
+
+it('typed acknowledged interruption preserves displayed progress and default mathematical mode', () => {
+  const s = createResidentMotionSampler(linear);
+  s.target([0], 0);
+  s.target([10], 0);
+  const painted = s.sample(20)!;
+  expect(s.target([0], 180, true, painted)).toEqual(painted);
+  expect(s.sample(190)![0]).toBeCloseTo(1);
+  expect(s.sample(200)).toEqual([0]);
+  const defaultMode = createResidentMotionSampler(linear);
+  defaultMode.target([0], 0);
+  defaultMode.target([10], 0);
+  expect(defaultMode.target([0], 80)![0]).toBeCloseTo(8, 12);
+});
+it('typed interruption anchors reject sparse/accessor/nonfinite coordinates without executing getters', () => {
+  for (const bad of [new Array(1), [NaN], [Infinity]]) {
+    const s = createResidentMotionSampler(linear);
+    s.target([0], 0);
+    s.target([10], 0);
+    expect(() => s.target([0], 20, true, bad)).toThrow();
+  }
+  let reads = 0;
+  const anchor = [2];
+  Object.defineProperty(anchor, 0, {
+    get() {
+      reads++;
+      return 2;
+    },
+  });
+  const s = createResidentMotionSampler(linear);
+  s.target([0], 0);
+  s.target([10], 0);
+  expect(() => s.target([0], 20, true, anchor)).toThrow();
+  expect(reads).toBe(0);
+});
+
+it('dimension replacement settles and typed anchors are copied', () => {
+  const s = createResidentMotionSampler(linear);
+  s.target([0], 0);
+  s.target([10], 0);
+  const anchor = [2];
+  expect(s.target([0], 80, true, anchor)).toEqual([2]);
+  anchor[0] = 9;
+  expect(s.sample(90)![0]).toBeCloseTo(1, 12);
+  expect(s.target([1, 2], 95, true, [1])).toEqual([1, 2]);
+  expect(s.active).toBe(false);
+});

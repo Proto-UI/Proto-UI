@@ -101,3 +101,33 @@ it('reacquisition snapshots external priority and preserves a later external wri
   h.sink.release(1);
   expect(h.el.style.getPropertyValue('translate')).toBe('9px 0px');
 });
+
+it.each(['value', 'priority'] as const)(
+  'external inline %s takeover suspends only the leased channel until a fresh view',
+  (kind) => {
+    const h = harness();
+    h.commit(['translate-x-[1px]']);
+    const old = h.el.style.getPropertyValue('translate');
+    h.el.style.setProperty('translate', kind === 'value' ? '9px 0px' : old, 'important');
+    h.commit(['translate-x-[2px]']);
+    expect(h.el.style.getPropertyValue('translate')).toBe(kind === 'value' ? '9px 0px' : old);
+    expect(h.el.style.getPropertyPriority('translate')).toBe('important');
+    expect(h.sink.diagnostics?.()).toContain('translate:external-inline-owner');
+    h.commit(['translate-x-[3px]']);
+    expect(h.el.style.getPropertyPriority('translate')).toBe('important');
+    h.sink.release(1);
+    expect(h.el.style.getPropertyValue('translate')).toBe(kind === 'value' ? '9px 0px' : old);
+  }
+);
+it('takeover during effects flush rejects the attempted sample without overwriting external value', () => {
+  const h = harness();
+  h.commit(['translate-x-[1px]']);
+  h.setFlush(() => {
+    h.el.style.setProperty('translate', '9px 0px', 'important');
+  });
+  h.commit(['translate-x-[2px]']);
+  expect(h.el.style.getPropertyValue('translate')).toBe('9px 0px');
+  expect(h.sink.diagnostics?.()).toContain('translate:projection-rejected');
+  h.sink.release(1);
+  expect(h.el.style.getPropertyPriority('translate')).toBe('important');
+});
