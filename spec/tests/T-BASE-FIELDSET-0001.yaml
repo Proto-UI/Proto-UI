@@ -1,0 +1,386 @@
+id: T-BASE-FIELDSET-0001
+type: test
+title: Fieldset policy, relationships and projection acceptance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 可移植分组的 draft 方向。原生无障碍、跨 Adapter 实现、关系生命周期与独立精确 head 验收仍阻塞稳定准入；synthetic DOM 与源码 token 不建立这些保证。
+  en: Draft portable grouping direction. Native accessibility, cross-Adapter realization, relation lifetime and independent exact-head acceptance remain activation blockers; synthetic DOM and source tokens do not establish them.
+summary: Source-bound evidence plan distinguishing synthetic runtime checks from native acceptance.
+statement:
+  zh-CN: 检验被动分组及真实 family atoms；不将 smoke tests、style tokens 或类型兼容当作完整一致性验收。
+  en: Exercise the passive group and actual family atoms without treating smoke tests, style tokens or type compatibility as full conformance.
+cases:
+  - id: T-BASE-FIELDSET-0001-CASE-OWNER
+    title: Fieldset owner
+    covers:
+      - C-FIELDSET-0001-OWNER
+    expectation: Root is a passive semantic group, not a Field or Form owner. It accepts disabled and ariaLabel and exposes effective disabled; it owns no control value, editor, validation, submission, reset or additional focus target.
+  - id: T-BASE-FIELDSET-0001-CASE-DISABLED
+    title: Fieldset disabled
+    covers:
+      - C-FIELDSET-0001-DISABLED
+    expectation: Effective disabled is local disabled OR the enclosing Fieldset policy. Nested Roots must not hide ancestors; removing an ancestor restriction preserves every descendant local restriction. Participating Fields consume that policy through their own contract; Fieldset does not infer arbitrary descendant controls or rewrite values.
+  - id: T-BASE-FIELDSET-0001-CASE-ANATOMY
+    title: Fieldset anatomy
+    covers:
+      - C-FIELDSET-0001-ANATOMY
+    expectation: One Root establishes a group with at most one Legend and one Description. Nested group naming and description targets remain scoped to their own Root. Legend and Description are passive slotted content and expose inherited disabled without adding an input, activation action or tab stop.
+  - id: T-BASE-FIELDSET-0001-CASE-RELATIONS
+    title: Fieldset relations
+    covers:
+      - C-FIELDSET-0001-RELATIONS
+    expectation: Root declares group role, ariaLabel naming and exact Anatomy labelledBy Legend / describedBy Description relationships through A11y. No authored DOM IDs or direct DOM discovery. Hosts own accessible-name computation and relationship projection. Absent, replaced or detached parts must not leave stale or cross-group references; duplicate exact targets fail closed under C-A11Y-PART-RELATIONSHIP-0001 rather than selecting the first. Full terminal/remount and host evidence remain explicitly open.
+  - id: T-BASE-FIELDSET-0001-CASE-BOUNDS
+    title: Fieldset bounds
+    covers:
+      - C-FIELDSET-0001-BOUNDS
+    expectation: This portable group does not adopt the native HTML first-Legend disabled exemption. A participating Field inside Legend follows the same inherited disabled policy. No native fieldset/form serialization, validation forwarding, second editing/keyboard owner or host-specific bypass is admitted. C-FIELD-0001 excludes Fieldset and is not its definition.
+  - id: T-BASE-FIELDSET-0001-CASE-BASE-ROOT
+    title: base root semantic and presentation conformance
+    covers:
+      - P-BASE-FIELDSET-SEMANTICS
+    expectation: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BASE-LEGEND
+    title: base legend semantic and presentation conformance
+    covers:
+      - P-BASE-FIELDSET-LEGEND-SEMANTICS
+    expectation: Contribute the visible group name as the scoped legend part; mirror inherited disabled and render passive slot content. Do not install control-label activation or a first-Legend exception. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BASE-DESCRIPTION
+    title: base description semantic and presentation conformance
+    covers:
+      - P-BASE-FIELDSET-DESCRIPTION-SEMANTICS
+    expectation: Contribute passive descriptive content to the same Root through the scoped description relationship, mirror inherited disabled, and create no live region, editor or validation state. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-SHADCN-ROOT
+    title: shadcn root semantic and presentation conformance
+    covers:
+      - P-SHADCN-FIELDSET-SEMANTICS
+      - P-SHADCN-FIELDSET-INHERITANCE
+      - P-SHADCN-FIELDSET-PRESENTATION
+    expectation: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership. Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Unboxed flexible vertical grouping with gap-4 and min-width shrink safety. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-SHADCN-LEGEND
+    title: shadcn legend semantic and presentation conformance
+    covers:
+      - P-SHADCN-FIELDSET-LEGEND-SEMANTICS
+      - P-SHADCN-FIELDSET-LEGEND-INHERITANCE
+      - P-SHADCN-FIELDSET-LEGEND-PRESENTATION
+    expectation: Contribute the visible group name as the scoped legend part; mirror inherited disabled and render passive slot content. Do not install control-label activation or a first-Legend exception. Consume asFieldsetLegend once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Medium-weight base text with bottom spacing; no uppercase transformation. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-SHADCN-DESCRIPTION
+    title: shadcn description semantic and presentation conformance
+    covers:
+      - P-SHADCN-FIELDSET-DESCRIPTION-SEMANTICS
+      - P-SHADCN-FIELDSET-DESCRIPTION-INHERITANCE
+      - P-SHADCN-FIELDSET-DESCRIPTION-PRESENTATION
+    expectation: Contribute passive descriptive content to the same Root through the scoped description relationship, mirror inherited disabled, and create no live region, editor or validation state. Consume asFieldsetDescription once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Small normal-weight muted wrapping help text. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BRUTALIST-ROOT
+    title: brutalist root semantic and presentation conformance
+    covers:
+      - P-BRUTALIST-FIELDSET-SEMANTICS
+      - P-BRUTALIST-FIELDSET-INHERITANCE
+      - P-BRUTALIST-FIELDSET-PRESENTATION
+    expectation: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership. Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Unboxed gap-4 vertical group with sans medium-weight foreground text. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BRUTALIST-LEGEND
+    title: brutalist legend semantic and presentation conformance
+    covers:
+      - P-BRUTALIST-FIELDSET-LEGEND-SEMANTICS
+      - P-BRUTALIST-FIELDSET-LEGEND-INHERITANCE
+      - P-BRUTALIST-FIELDSET-LEGEND-PRESENTATION
+    expectation: Contribute the visible group name as the scoped legend part; mirror inherited disabled and render passive slot content. Do not install control-label activation or a first-Legend exception. Consume asFieldsetLegend once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Bold sans base-size legend with bottom spacing, without uppercase transformation. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BRUTALIST-DESCRIPTION
+    title: brutalist description semantic and presentation conformance
+    covers:
+      - P-BRUTALIST-FIELDSET-DESCRIPTION-SEMANTICS
+      - P-BRUTALIST-FIELDSET-DESCRIPTION-INHERITANCE
+      - P-BRUTALIST-FIELDSET-DESCRIPTION-PRESENTATION
+    expectation: Contribute passive descriptive content to the same Root through the scoped description relationship, mirror inherited disabled, and create no live region, editor or validation state. Consume asFieldsetDescription once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Small medium-weight foreground help text with wrapping, not a muted-color substitution. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-ROOT
+    title: bootstrap-2-3-2 root semantic and presentation conformance
+    covers:
+      - P-BOOTSTRAP-2-3-2-FIELDSET-SEMANTICS
+      - P-BOOTSTRAP-2-3-2-FIELDSET-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-FIELDSET-PRESENTATION
+    expectation: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership. Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Block group with zero margin, padding and border; no card shell. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-LEGEND
+    title: bootstrap-2-3-2 legend semantic and presentation conformance
+    covers:
+      - P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND-SEMANTICS
+      - P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND-PRESENTATION
+    expectation: Contribute the visible group name as the scoped legend part; mirror inherited disabled and render passive slot content. Do not install control-label activation or a first-Legend exception. Consume asFieldsetLegend once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Full-width normal-weight 1.3125rem legend with 2.5rem line height, bottom border and spacing. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-DESCRIPTION
+    title: bootstrap-2-3-2 description semantic and presentation conformance
+    covers:
+      - P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION-SEMANTICS
+      - P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION-PRESENTATION
+    expectation: Contribute passive descriptive content to the same Root through the scoped description relationship, mirror inherited disabled, and create no live region, editor or validation state. Consume asFieldsetDescription once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Block small normal-weight muted help text with leading-5 and wrapping. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-ROOT
+    title: liquid-glass root semantic and presentation conformance
+    covers:
+      - P-LIQUID-GLASS-FIELDSET-SEMANTICS
+      - P-LIQUID-GLASS-FIELDSET-INHERITANCE
+      - P-LIQUID-GLASS-FIELDSET-PRESENTATION
+    expectation: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership. Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Rounded bordered padded group with gap-3 and a version-2 in-app-backdrop material declaration, style fallback and liquid-glass intent. Material intent does not prove optical rendering. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-LEGEND
+    title: liquid-glass legend semantic and presentation conformance
+    covers:
+      - P-LIQUID-GLASS-FIELDSET-LEGEND-SEMANTICS
+      - P-LIQUID-GLASS-FIELDSET-LEGEND-INHERITANCE
+      - P-LIQUID-GLASS-FIELDSET-LEGEND-PRESENTATION
+    expectation: Contribute the visible group name as the scoped legend part; mirror inherited disabled and render passive slot content. Do not install control-label activation or a first-Legend exception. Consume asFieldsetLegend once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Semibold base-size passive legend. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+  - id: T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-DESCRIPTION
+    title: liquid-glass description semantic and presentation conformance
+    covers:
+      - P-LIQUID-GLASS-FIELDSET-DESCRIPTION-SEMANTICS
+      - P-LIQUID-GLASS-FIELDSET-DESCRIPTION-INHERITANCE
+      - P-LIQUID-GLASS-FIELDSET-DESCRIPTION-PRESENTATION
+    expectation: Contribute passive descriptive content to the same Root through the scoped description relationship, mirror inherited disabled, and create no live region, editor or validation state. Consume asFieldsetDescription once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner. Small muted passive description. Full mapping is planned acceptance, not evidence supplied by a smoke or token check.
+verifies:
+  contracts:
+    - C-FIELDSET-0001
+exercises:
+  prototypes:
+    - P-BASE-FIELDSET
+    - P-BASE-FIELDSET-LEGEND
+    - P-BASE-FIELDSET-DESCRIPTION
+    - P-SHADCN-FIELDSET
+    - P-SHADCN-FIELDSET-LEGEND
+    - P-SHADCN-FIELDSET-DESCRIPTION
+    - P-BRUTALIST-FIELDSET
+    - P-BRUTALIST-FIELDSET-LEGEND
+    - P-BRUTALIST-FIELDSET-DESCRIPTION
+    - P-BOOTSTRAP-2-3-2-FIELDSET
+    - P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND
+    - P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION
+    - P-LIQUID-GLASS-FIELDSET
+    - P-LIQUID-GLASS-FIELDSET-LEGEND
+    - P-LIQUID-GLASS-FIELDSET-DESCRIPTION
+implementations:
+  - id: policy
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/form-primitives.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-DISABLED
+      - T-BASE-FIELDSET-0001-CASE-RELATIONS
+    notes:
+      - Existing Fieldset case checks inherited policy, stale Field validation rejection and one legend IDREF; other cases concern Form/Checkbox Group.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: nested-policy
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/form-composite-controls.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-DISABLED
+    notes:
+      - Nested Fieldset case checks ancestor OR local policy; composite controls remain owned by their own contracts.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: boundaries
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/fieldset-boundaries.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-OWNER
+      - T-BASE-FIELDSET-0001-CASE-ANATOMY
+      - T-BASE-FIELDSET-0001-CASE-RELATIONS
+      - T-BASE-FIELDSET-0001-CASE-BOUNDS
+    notes:
+      - Focused new negative and lifecycle tests; synthetic WebComponent DOM only.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: family-smoke
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/form-family-projections.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-OWNER
+    notes:
+      - Four Fieldset smoke cases observe actual atoms, disabled default and child retention, not full behavior.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: paint
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/base/test/form-upstream-paint.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-RELATIONS
+    notes:
+      - Three Fieldset cases check source style tokens and IDREFs, not pixels; Liquid Glass optical acceptance is not covered.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: types
+    kind: workspace-check
+    status: planned
+    path: packages/prototypes/base/test/form-projection.types.ts
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-OWNER
+    notes:
+      - Type-only public Props/expose parity; no runtime or native acceptance.
+      - Execution evidence is recorded separately for the exact candidate; this draft does not declare a passing implementation.
+  - id: base-root-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BASE-ROOT
+    exercises:
+      - P-BASE-FIELDSET
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: base-legend-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BASE-LEGEND
+    exercises:
+      - P-BASE-FIELDSET-LEGEND
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: base-description-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BASE-DESCRIPTION
+    exercises:
+      - P-BASE-FIELDSET-DESCRIPTION
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: shadcn-root-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-SHADCN-ROOT
+    exercises:
+      - P-SHADCN-FIELDSET
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: shadcn-legend-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-SHADCN-LEGEND
+    exercises:
+      - P-SHADCN-FIELDSET-LEGEND
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: shadcn-description-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-SHADCN-DESCRIPTION
+    exercises:
+      - P-SHADCN-FIELDSET-DESCRIPTION
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: brutalist-root-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BRUTALIST-ROOT
+    exercises:
+      - P-BRUTALIST-FIELDSET
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: brutalist-legend-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BRUTALIST-LEGEND
+    exercises:
+      - P-BRUTALIST-FIELDSET-LEGEND
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: brutalist-description-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BRUTALIST-DESCRIPTION
+    exercises:
+      - P-BRUTALIST-FIELDSET-DESCRIPTION
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: bootstrap-2-3-2-root-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-ROOT
+    exercises:
+      - P-BOOTSTRAP-2-3-2-FIELDSET
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: bootstrap-2-3-2-legend-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-LEGEND
+    exercises:
+      - P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: bootstrap-2-3-2-description-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-BOOTSTRAP-2-3-2-DESCRIPTION
+    exercises:
+      - P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: liquid-glass-root-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-ROOT
+    exercises:
+      - P-LIQUID-GLASS-FIELDSET
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: liquid-glass-legend-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-LEGEND
+    exercises:
+      - P-LIQUID-GLASS-FIELDSET-LEGEND
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+  - id: liquid-glass-description-acceptance
+    kind: adapter-test
+    status: planned
+    required: true
+    consumesCases:
+      - T-BASE-FIELDSET-0001-CASE-LIQUID-GLASS-DESCRIPTION
+    exercises:
+      - P-LIQUID-GLASS-FIELDSET-DESCRIPTION
+    notes:
+      - Native browser and non-Web host acceptance remains unimplemented. No executable path or passing result is claimed for this planned acceptance.
+openQuestions:
+  - id: T-BASE-FIELDSET-0001-Q-ACCEPTANCE
+    question:
+      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。
+      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these.
+    blocks:
+      - activation:T-BASE-FIELDSET-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced draft Fieldset definition with explicit evidence limits; no stable admission.
+tags:
+  - fieldset
+  - draft

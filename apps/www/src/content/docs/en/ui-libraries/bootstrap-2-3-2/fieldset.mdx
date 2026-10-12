@@ -12,8 +12,38 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Root semantically groups Fields under one Legend and Description. disabled combines with every enclosing Fieldset and each Field local policy, invalidating pending validation. Re-enabling ancestors preserves explicitly disabled descendants. Ancestor Context resolution starts outside the current provider, so nested groups do not hide outer disabled state. This is a portable semantic group; the native HTML first-Legend exemption is not implemented.
+## Draft definition and ownership
 
-All four visual families inherit Base behavior. Parts: root, legend, description.
+C-FIELDSET-0001 defines this passive group separately from C-FIELD-0001, which explicitly excludes Fieldset. P-BOOTSTRAP-2-3-2-FIELDSET, P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND and P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION are draft since 0.3.0-alpha.1; catalog presence is not stable admission. T-BASE-FIELDSET-0001 records the acceptance plan and its limits.
 
-Draft source delivery. Native, assistive-technology, full Adapter/Compiler/GPUI, package consumer and independent acceptance remain open. No Finf checklist item is marked complete.
+Root owns group semantics and effective disabled: local disabled OR the enclosing Fieldset policy. Nested groups do not hide ancestors, and re-enabling an ancestor preserves local restrictions. Participating Fields consume that policy and own their own validation invalidation. Fieldset does not discover arbitrary controls or own values, editors, validation, submission, reset or an extra focus target.
+
+## Public API and nested policy
+
+Root Props: disabled?: boolean (default false), ariaLabel?: string (default empty string). Legend and Description have no declared Props. All three expose read-only effective disabled state; change policy through Root Props, not the exposed state.
+
+For outer → middle → inner Roots:
+
+- With only outer disabled, all three are disabled.
+- Set middle disabled, then enable outer: middle and inner remain disabled.
+- Enable middle too: inner enables unless its own disabled remains true.
+
+## Parts and accessible relationships
+
+- Root accepts disabled and ariaLabel, exposes effective disabled, and renders its children.
+- Legend is optional passive naming content; Description is optional passive help content. Each exposes inherited disabled. Neither adds a tab stop or activation behavior.
+- Root declares group role and scoped labelledBy/describedBy Anatomy relationships. A11y and the host project those relationships; authors do not manufacture DOM IDs. Native accessible-name computation, including ariaLabel with Legend, still needs assistive-technology acceptance.
+- A group permits at most one Legend and one Description. Duplicate exact relationship targets fail closed rather than selecting the first. Complete terminal/remount acceptance remains open. Nested groups must not borrow each other's naming or description targets.
+- The portable definition does not adopt the native HTML first-Legend disabled exemption. A participating Field inside Legend inherits disabled too.
+
+## Evidence boundary
+
+Base and the four visual families share the same semantic atoms. Synthetic WebComponent tests cover policy and scoped relationship cases; family smoke tests and source-token checks are narrower evidence, not full Adapter or pixel acceptance. Type checks cover public projection compatibility. Native keyboard, assistive technology, cross-Adapter/Compiler composition, GPUI, generated CSS/visual and package-consumer acceptance remain open. No Finf completion is claimed.
+
+## Family presentation
+
+- Root: Block group with zero margin, padding and border; no card shell.
+- Legend: Full-width normal-weight 1.3125rem legend with 2.5rem line height, bottom border and spacing.
+- Description: Block small normal-weight muted help text with leading-5 and wrapping.
+
+These are draft presentation criteria, not a pixel-parity claim.
