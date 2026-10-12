@@ -7,6 +7,18 @@ import type {
 import type { AnatomyPort } from '@proto.ui/module-anatomy';
 import type { BoundaryPort } from '@proto.ui/module-boundary';
 
+type TargetAlignmentAnatomyPort = Pick<
+  AnatomyPort,
+  | 'subscribeTargets'
+  | 'isCurrentPart'
+  | 'resolvePartInstance'
+  | 'descendantsOf'
+  | 'resolveSelfRole'
+  | 'resolveAncestorInstance'
+  | 'resolveSelfInstance'
+  | 'resolvePartTarget'
+>;
+
 /** Private structural binding. Semantic target selection remains with the prototype. */
 export class OverlayTargetAlignment {
   private binding: OverlayTargetAlignmentBinding | null = null;
@@ -16,7 +28,7 @@ export class OverlayTargetAlignment {
   private resolution = 0;
 
   constructor(
-    private readonly anatomy: AnatomyPort,
+    private readonly anatomy: TargetAlignmentAnatomyPort,
     private readonly boundary: BoundaryPort,
     private readonly changed: () => void
   ) {}

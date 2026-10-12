@@ -23,7 +23,7 @@ function layoutTop(node: HTMLElement): number {
   let current: HTMLElement | null = node;
   while (current) {
     top += current.offsetTop;
-    const parent = current.offsetParent;
+    const parent: Element | null = current.offsetParent;
     if (!element(parent)) break;
     top += parent.clientTop;
     current = parent;

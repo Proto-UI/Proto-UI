@@ -227,21 +227,22 @@ export async function mountAlignmentProof(
     Viewport = adapt(viewport),
     Item = adapt(selectItem),
     Text = adapt(text, { rootTag: 'span' });
-  const items = Array.from({ length: count }, (_, i) =>
-    React.createElement(
+  const items = Array.from({ length: count }, (_, i) => {
+    const itemProps: React.ComponentProps<typeof Item> & { 'data-demo-ref': string } = {
+      className: 'proof-item',
+      value: `v${i}`,
+      textValue: `Option ${i}`,
+      key: i,
+      'data-demo-ref': `item-${i}`,
+    };
+    return React.createElement(
       Item,
-      {
-        className: 'proof-item',
-        value: `v${i}`,
-        textValue: `Option ${i}`,
-        key: i,
-        'data-demo-ref': `item-${i}`,
-      },
+      itemProps,
       options.omitPart === 'item-text' && i === selected
         ? `Option ${i}`
         : React.createElement(Text, { 'data-demo-ref': `text-${i}` }, `Option ${i}`)
-    )
-  );
+    );
+  });
   const rows = React.createElement(
     Viewport,
     { className: 'proof-viewport', 'data-demo-ref': 'viewport' },
@@ -255,14 +256,17 @@ export async function mountAlignmentProof(
           { className: 'proof-surface', 'data-demo-ref': 'surface' },
           rows
         );
+  const triggerProps: React.ComponentProps<typeof Trigger> & { 'data-demo-ref': string } = {
+    className: 'proof-trigger',
+    'data-demo-ref': 'trigger',
+  };
+  const valueProps: React.ComponentProps<typeof Value> & { 'data-demo-ref': string } = {
+    'data-demo-ref': 'value',
+  };
   const tree = React.createElement(
     Root,
     { className: 'proof-root', dir: options.direction ?? 'ltr', defaultValue: `v${selected}` },
-    React.createElement(
-      Trigger,
-      { className: 'proof-trigger', 'data-demo-ref': 'trigger' },
-      React.createElement(Value, { 'data-demo-ref': 'value' })
-    ),
+    React.createElement(Trigger, triggerProps, React.createElement(Value, valueProps)),
     React.createElement(Content, { className: 'proof-content', 'data-demo-ref': 'frame' }, painted)
   );
   await act(async () => root.render(tree));
