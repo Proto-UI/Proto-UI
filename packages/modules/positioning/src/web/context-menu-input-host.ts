@@ -17,8 +17,8 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
       const target = binding.target;
       if (!(target instanceof HTMLElement))
         throw new TypeError('[ContextMenuInput] Web host requires an HTMLElement.');
-      const doc = target.ownerDocument;
-      const win = doc.defaultView;
+      let doc = target.ownerDocument;
+      let win = doc.defaultView;
       let disabled = binding.disabled;
       let disposed = false;
       let revision = 0;
@@ -28,7 +28,10 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
       let suppression: { id: number | null; click: boolean; context: boolean } | null = null;
       let activeAnchor: ReturnType<typeof createWebInputOriginAnchor> | null = null;
       let observer: MutationObserver | null = null;
-      const live = () => !disposed && !disabled && target.isConnected;
+      const live = () => {
+        refreshDocument();
+        return !disposed && !disabled && target.isConnected;
+      };
       const stopPending = () => {
         pending = null;
         const task = pendingTask;
@@ -43,18 +46,28 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
       };
       const reset = () => {
         revision++;
-        stopPending();
-        stopSuppression();
+        const previousPending = pendingTask;
+        const previousSuppression = suppressionTask;
         const anchor = activeAnchor;
+        const previousObserver = observer;
+        pending = null;
+        pendingTask = null;
+        suppression = null;
+        suppressionTask = null;
         activeAnchor = null;
-        anchor?.dispose();
-        observer?.disconnect();
         observer = null;
+        previousObserver?.disconnect();
+        // Cancel/invalidation callbacks may reenter and acquire fresh resources.
+        // Clear only the captured generation before invoking those callbacks.
+        previousPending?.cancel();
+        previousSuppression?.cancel();
+        anchor?.dispose();
       };
       const observeDetach = () => {
         if (observer || typeof MutationObserver !== 'function') return;
         observer = new MutationObserver(() => {
           if (!target.isConnected) reset();
+          else refreshDocument();
         });
         observer.observe(doc.documentElement, { childList: true, subtree: true });
       };
@@ -123,6 +136,7 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
         pending = contact;
         observeDetach();
         const task = binding.scheduleDelay(LONG_PRESS_MS, () => {
+          refreshDocument();
           if (pending !== contact || !live()) return;
           pending = null;
           pendingTask = null;
@@ -199,18 +213,44 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
       target.addEventListener('contextmenu', onContextMenu);
       target.addEventListener('keydown', onKey);
       target.addEventListener('click', onClick, true);
-      doc.addEventListener('pointerdown', onDocumentDown, true);
-      doc.addEventListener('pointermove', onMove, true);
-      doc.addEventListener('pointerup', onRelease, true);
-      doc.addEventListener('pointercancel', onRelease, true);
-      doc.addEventListener('scroll', onAbort, true);
-      doc.addEventListener('visibilitychange', onVisibility);
-      win?.addEventListener('blur', onAbort);
+      const attachDocument = () => {
+        doc.addEventListener('pointerdown', onDocumentDown, true);
+        doc.addEventListener('pointermove', onMove, true);
+        doc.addEventListener('pointerup', onRelease, true);
+        doc.addEventListener('pointercancel', onRelease, true);
+        doc.addEventListener('scroll', onAbort, true);
+        doc.addEventListener('visibilitychange', onVisibility);
+        win?.addEventListener('blur', onAbort);
+      };
+      const detachDocument = () => {
+        doc.removeEventListener('pointerdown', onDocumentDown, true);
+        doc.removeEventListener('pointermove', onMove, true);
+        doc.removeEventListener('pointerup', onRelease, true);
+        doc.removeEventListener('pointercancel', onRelease, true);
+        doc.removeEventListener('scroll', onAbort, true);
+        doc.removeEventListener('visibilitychange', onVisibility);
+        win?.removeEventListener('blur', onAbort);
+      };
+      const refreshDocument = () => {
+        if (disposed || target.ownerDocument === doc) return;
+        // Adoption retains element identity, but cancels the old document's
+        // contact/anchor ownership before acquiring its new event environment.
+        detachDocument();
+        doc = target.ownerDocument;
+        win = doc.defaultView;
+        // Reentrant input during old-resource cleanup needs its new document's
+        // release/cancellation listeners already installed; dispose can remove them.
+        attachDocument();
+        reset();
+      };
+      attachDocument();
       return {
         update(config) {
-          if (disposed || disabled === config.disabled) return;
+          if (disposed) return;
+          const changed = disabled !== config.disabled;
           disabled = config.disabled;
-          reset();
+          refreshDocument();
+          if (changed) reset();
         },
         dispose() {
           if (disposed) return;
@@ -220,13 +260,7 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
           target.removeEventListener('contextmenu', onContextMenu);
           target.removeEventListener('keydown', onKey);
           target.removeEventListener('click', onClick, true);
-          doc.removeEventListener('pointerdown', onDocumentDown, true);
-          doc.removeEventListener('pointermove', onMove, true);
-          doc.removeEventListener('pointerup', onRelease, true);
-          doc.removeEventListener('pointercancel', onRelease, true);
-          doc.removeEventListener('scroll', onAbort, true);
-          doc.removeEventListener('visibilitychange', onVisibility);
-          win?.removeEventListener('blur', onAbort);
+          detachDocument();
         },
       };
     },

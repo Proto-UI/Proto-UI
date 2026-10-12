@@ -211,3 +211,28 @@ describe('static same-root hit inset generic Web projection', () => {
     expect(el.hasAttribute('data-pui-static-hit')).toBe(false);
   });
 });
+
+it.each(['fresh', 'existing'])(
+  'rejects display:none %s claims before any projection mutation',
+  (kind) => {
+    const accepted = root();
+    const hidden = root();
+    const fresh = root();
+    const bridge = createWebHitParticipationHostBridge();
+    bridge.sync({
+      config: { mode: 'participating' },
+      regions: [arg(accepted).regions[0], ...(kind === 'existing' ? arg(hidden).regions : [])],
+    });
+    hidden.style.display = 'none';
+    const before = document.documentElement.outerHTML;
+    expect(() =>
+      bridge.sync({
+        config: { mode: 'disabled' },
+        regions: [arg(fresh, 'disabled').regions[0], arg(hidden, 'disabled').regions[0]],
+      })
+    ).toThrow(/non-replaced single principal box/);
+    expect(document.documentElement.outerHTML).toBe(before);
+    expect(fresh.hasAttribute('data-pui-static-hit')).toBe(false);
+    bridge.sync({ config: { mode: 'participating' }, regions: [] });
+  }
+);
