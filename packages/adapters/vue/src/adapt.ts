@@ -1,3 +1,4 @@
+import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
   resolveWebNativeLinkLocalName,
@@ -103,6 +104,7 @@ export type VueAdapterProps<Props extends PropsBaseType> = Props &
 export interface VueAdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
+  residentMotion?: WebResidentMotionOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: VueAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -250,7 +252,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             )
           : null;
         if (supportsOwnerContext) {
-          bindLogicalParent(instanceToken, parentToken);
+          bindLogicalParent(instanceToken, parentToken, { authority: 'owner' });
           runtime.provide!(logicalOwnerKey, instanceToken);
         }
         const shouldExist = runtime.ref(!supportsOwnerContext);
@@ -560,6 +562,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             rawPropsSource,
             effectsPort,
+            residentMotion: opt.residentMotion,
             visualFeedbackSink: createVisualSink
               ? createDeferredViewVisualSink(
                   () => createVisualSink!(rootEl, effectsPort),

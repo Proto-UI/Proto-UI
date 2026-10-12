@@ -491,6 +491,15 @@ export class AnatomyModuleImpl extends ModuleBase {
     return this.toPartView(claims[index + 1]!);
   }
 
+  descendantsOf(
+    family: AnatomyFamily,
+    ancestor: AnatomyPartView,
+    role: string
+  ): readonly AnatomyPartView[] {
+    this.ensureRuntime('run.anatomy.descendantsOf');
+    return this.port.descendantsOf(family, ancestor, role);
+  }
+
   readonly port = {
     syncStructure: (): void => {
       for (const family of this.claimFamilies) {
@@ -505,6 +514,12 @@ export class AnatomyModuleImpl extends ModuleBase {
         out.push(...this.computeDiagnostics(family));
       }
       return out;
+    },
+    isCurrentPart: (family: AnatomyFamily, part: AnatomyPartView): boolean => {
+      const claim = CLAIM_BY_PART_VIEW.get(part);
+      if (!claim || claim.family !== family) return false;
+      const domain = this.resolveCurrentDomain(family, false);
+      return !!domain.rootInstance && domain.claims.includes(claim);
     },
     resolvePartTarget: (part: AnatomyPartView): unknown | null => {
       const claim = CLAIM_BY_PART_VIEW.get(part);

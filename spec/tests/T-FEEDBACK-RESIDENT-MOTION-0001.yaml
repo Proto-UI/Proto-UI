@@ -1,0 +1,68 @@
+id: T-FEEDBACK-RESIDENT-MOTION-0001
+type: test
+title: Resident targets, interruption and projection lifetime
+status: draft
+since: 0.2.0-rc.0
+lifecycleRationale:
+  en: Deterministic model, runtime and CSSOM tests provide bounded evidence; actual frame timing, browser pixels, native and Compiler composition are not certified.
+summary: Checks typed motion without conflating logical State, retained target and presentation.
+cases:
+  - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-MODEL
+    title: Pure target changes and interruptions preserve continuity and retire stale samples
+    covers:
+      [
+        C-FEEDBACK-RESIDENT-MOTION-0001-A,
+        C-FEEDBACK-RESIDENT-MOTION-0001-C,
+        C-FEEDBACK-RESIDENT-MOTION-0001-E,
+      ]
+    expectation: deterministic-interruption-and-cancellation
+  - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-TARGET
+    title: Typed targets follow axis merge and the final runtime patch without host reverse engineering
+    covers:
+      [
+        C-FEEDBACK-RESIDENT-MOTION-0001-B,
+        C-FEEDBACK-RESIDENT-MOTION-0001-F,
+        C-FEEDBACK-RESIDENT-MOTION-0001-AXIS-MERGE,
+      ]
+    expectation: final-target-ownership-preserved
+  - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROJECT
+    title: One host owner receives typed presentation and releases stale frames
+    covers:
+      [
+        C-FEEDBACK-RESIDENT-MOTION-0001-G,
+        C-FEEDBACK-RESIDENT-MOTION-0001-H,
+        C-FEEDBACK-RESIDENT-MOTION-0001-PALETTE-LIFETIME,
+        C-FEEDBACK-RESIDENT-MOTION-0001-COLOR-LEASE,
+      ]
+    expectation: shared-host-projection-with-explicit-missing-inputs
+implementations:
+  - id: resident-model
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/resident-motion.test.ts
+    required: true
+    consumesCases:
+      [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-MODEL, T-FEEDBACK-RESIDENT-MOTION-0001-CASE-TARGET]
+  - id: resident-projector
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/resident-motion-projector.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROJECT]
+  - id: resident-cssom
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-resident-motion.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROJECT]
+verifies:
+  contracts:
+    - C-FEEDBACK-RESIDENT-MOTION-0001
+sources:
+  - path: packages/modules/feedback/test/final-style-sink.test.ts
+  - path: packages/core/test/feedback/semantic-merge.test.ts
+  - path: packages/prototypes/shadcn/test/switch.test.ts
+revisions:
+  - version: 0.2.0-rc.0
+    change: introduced
+    summary: Added bounded motion evidence with explicit physical and compiler evidence debt.

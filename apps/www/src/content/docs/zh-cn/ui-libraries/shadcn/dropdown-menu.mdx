@@ -12,3 +12,25 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 ## 分组动作组成（草稿）
 
 Group 与 Label 建立实时辅助技术命名关系；Separator 和 Shortcut 是真实的被动部件。Shortcut 只显示提示，不注册全局快捷键。装饰部件不进入动作集合，也不增加 press owner。示例使用160px菜单、账户与资源分组和禁用的 API 动作。Invite users 的真实子菜单属于随后单独实现的协议片，不用演示盒子模拟。Checkbox/Radio变体及完整native/GPUI、Compiler、打包、视觉和独立验收仍未完成。
+
+## Destructive 动作（草稿）
+
+<PrototypePreviewer demoId="demo-shadcn-dropdown-destructive" initialRuntime="wc" />
+
+Edit/Pencil、Share/Share、Archive/Archive、Delete/Trash 沿用固定上游 `DropdownMenuWithDestructive` 的组成。每个图标都使用真实的 Lucide 固定原型并显式设置 `size: 16`；Delete 使用 `variant: 'destructive'`。最后的 **Delete (disabled)** 是与上游动作分隔的本地验证扩展，保留 Base 的禁用项可聚焦行为，不会触发选择或关闭菜单。Destructive 交互保留 destructive 前景色，浅色模式使用 10% 底色，深色模式使用 20% 底色。按压期间保留同一配色，是在上游 focus 配方之上的本地反馈扩展。
+
+## Inset 动作（草稿）
+
+<PrototypePreviewer demoId="demo-shadcn-dropdown-inset" initialRuntime="wc" />
+
+第一组沿用上游 Copy/Cut/Paste 动作组成：Copy 和 Cut 使用真实的 16px Lucide Copy、Scissors 图标，Paste 使用 `inset: true`。Actions Label 显式设置 `inset: false`。本地 **More actions** 分组使用 inset Label 和普通 Rename Item，展示 Label 的两种设置，不把普通动作冒充上游 Checkbox、Radio 或 Submenu 部件。Item 和 Label 的 inset 默认值均为 `false`；在本 Shadcn recipe 中，`true` 添加 `pl-7`。
+
+这两个示例只在 Base 行为上展示有界视觉 recipe。Root、Trigger、Content、Item、Group、Label、Separator 都是真实原型，示例没有增加 Web 专用事件逻辑。Group/Label 命名、动作选择、焦点导航和禁用行为仍归 Base 所有。上方现有 My Account 示例独立保留。
+
+## 参考与证据边界
+
+这是非官方的 Proto UI 投影。动作组成参考静态检查过的 [shadcn 固定源码 c2a67849be260701852b0977ba15eb5f3a0ce2a4](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/examples/dropdown-menu-example.tsx)，具体为 `DropdownMenuWithDestructive` 和 `DropdownMenuWithInset` 中有界的动作部分。Inset 上游示例中的 Checkbox、Radio 和 Submenu 区段不在本次实现范围。
+
+Recipe 加载、结构检查和源码宿主 renderer 检查不代表真实渲染的视觉一致性。跨运行时浏览器绘制、实际 Dropdown surface 的明暗主题对比度、真实输入与辅助技术、native/GPUI、Compiler、打包消费者及独立验收仍未完成。其他组件的截图或 token 断言不能替代这些证据。
+
+可阅读的 recipe：[My Account](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/zh-cn/demo-shadcn-dropdown-menu.demo.ts)、[destructive 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-destructive.demo.ts)、[inset 动作](https://github.com/Proto-UI/Proto-UI/blob/main/apps/www/src/content/docs/demo-shadcn-dropdown-inset.demo.ts)。

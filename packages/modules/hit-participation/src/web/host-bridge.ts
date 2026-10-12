@@ -1,43 +1,88 @@
-import type { HitParticipationMode } from '@proto.ui/core';
+import {
+  snapshotStaticHitInset,
+  type HitParticipationMode,
+  type StaticHitInset,
+} from '@proto.ui/core';
 import type { HitParticipationHostBridge } from '../caps';
+import {
+  prepareStaticHitInset,
+  staticHitInsetRootChanged,
+  type StaticHitInsetLease,
+} from './static-hit-inset';
 
 const HIT_PARTICIPATION_MODE_MARK = Symbol.for('@proto.ui/module-hit-participation/__mode');
 type HostElement = HTMLElement & Record<symbol, unknown>;
+type Claim = { mode: HitParticipationMode; inset?: StaticHitInset };
 type TargetClaims = {
-  owners: Map<object, HitParticipationMode>;
+  owners: Map<object, Claim>;
   previousValue: string;
   previousPriority: string;
+  projectedValue?: string;
+  projectedPriority?: string;
+  insetLease?: StaticHitInsetLease;
 };
 const claimsByTarget = new WeakMap<HostElement, TargetClaims>();
+const sameInset = (a?: StaticHitInset, b?: StaticHitInset) =>
+  JSON.stringify(a) === JSON.stringify(b);
 
 function restore(target: HostElement, claims: TargetClaims): void {
-  if (claims.previousValue) {
+  // Restore only our last projection; never erase a host author's later declaration.
+  if (
+    claims.projectedValue === undefined ||
+    target.style.getPropertyValue('pointer-events') !== claims.projectedValue ||
+    target.style.getPropertyPriority('pointer-events') !== claims.projectedPriority
+  )
+    return;
+  if (claims.previousValue)
     target.style.setProperty('pointer-events', claims.previousValue, claims.previousPriority);
-  } else {
-    target.style.removeProperty('pointer-events');
-  }
+  else target.style.removeProperty('pointer-events');
+  claims.projectedValue = undefined;
+  claims.projectedPriority = undefined;
 }
 
 export function createWebHitParticipationHostBridge(): HitParticipationHostBridge {
   const owner = {};
-  let applied = new Map<HostElement, HitParticipationMode>();
+  let applied = new Map<HostElement, Claim>();
   return {
+    supportsStaticHitInset: true,
     sync({ regions }) {
-      const next = new Map<HostElement, HitParticipationMode>();
+      const next = new Map<HostElement, Claim>();
       for (const region of regions) {
         if (region.target instanceof HTMLElement) {
-          // Preserve same-owner region precedence; sharing is checked between owners.
-          next.set(region.target as HostElement, region.mode);
+          next.set(region.target as HostElement, {
+            mode: region.mode,
+            ...(region.staticHitInset
+              ? { inset: snapshotStaticHitInset(region.staticHitInset) }
+              : {}),
+          });
+        } else if (region.staticHitInset) {
+          throw new Error(
+            '[HitParticipation] staticHitInset unsupported: target is not an HTMLElement.'
+          );
         }
       }
-      // Validate the entire replacement before releasing or writing any target.
-      for (const [target, mode] of next) {
-        for (const [other, otherMode] of claimsByTarget.get(target)?.owners ?? []) {
-          if (other !== owner && otherMode !== mode) {
+      const acquire = new Map<HostElement, () => StaticHitInsetLease>();
+      // Validate the whole replacement, including physical prerequisites, before writes.
+      for (const [target, claim] of next) {
+        const existing = claimsByTarget.get(target);
+        for (const [other, otherClaim] of existing?.owners ?? []) {
+          if (
+            other !== owner &&
+            (otherClaim.mode !== claim.mode || !sameInset(otherClaim.inset, claim.inset))
+          ) {
             throw new Error(
-              `[HitParticipation] conflicting modes on a shared target: ${otherMode} and ${mode}.`
+              '[HitParticipation] conflicting modes or staticHitInset on a shared target.'
             );
           }
+        }
+        if (claim.inset) {
+          const prepared = prepareStaticHitInset(target, claim.inset, existing?.insetLease);
+          if (
+            !existing?.insetLease ||
+            !sameInset(existing.insetLease.inset, claim.inset) ||
+            staticHitInsetRootChanged(target, existing.insetLease)
+          )
+            acquire.set(target, prepared);
         }
       }
       for (const [target] of applied) {
@@ -47,11 +92,13 @@ export function createWebHitParticipationHostBridge(): HitParticipationHostBridg
         claims.owners.delete(owner);
         if (claims.owners.size === 0) {
           restore(target, claims);
-          delete target[HIT_PARTICIPATION_MODE_MARK];
+          claims.insetLease?.release();
+          if (target[HIT_PARTICIPATION_MODE_MARK] === applied.get(target)?.mode)
+            delete target[HIT_PARTICIPATION_MODE_MARK];
           claimsByTarget.delete(target);
         }
       }
-      for (const [target, mode] of next) {
+      for (const [target, claim] of next) {
         let claims = claimsByTarget.get(target);
         if (!claims) {
           claims = {
@@ -61,10 +108,32 @@ export function createWebHitParticipationHostBridge(): HitParticipationHostBridg
           };
           claimsByTarget.set(target, claims);
         }
-        claims.owners.set(owner, mode);
-        target[HIT_PARTICIPATION_MODE_MARK] = mode;
-        if (mode === 'participating') restore(target, claims);
-        else target.style.setProperty('pointer-events', 'none');
+        claims.owners.set(owner, claim);
+        if (!claim.inset && claims.insetLease) {
+          claims.insetLease.release();
+          claims.insetLease = undefined;
+        }
+        const activate = acquire.get(target);
+        if (activate) {
+          claims.insetLease?.release();
+          claims.insetLease = activate();
+        }
+        target[HIT_PARTICIPATION_MODE_MARK] = claim.mode;
+        if (claim.mode === 'participating') restore(target, claims);
+        else {
+          const value = target.style.getPropertyValue('pointer-events');
+          const priority = target.style.getPropertyPriority('pointer-events');
+          if (
+            claims.projectedValue !== undefined &&
+            (value !== claims.projectedValue || priority !== claims.projectedPriority)
+          ) {
+            claims.previousValue = value;
+            claims.previousPriority = priority;
+          }
+          target.style.setProperty('pointer-events', 'none');
+          claims.projectedValue = 'none';
+          claims.projectedPriority = '';
+        }
       }
       applied = next;
     },

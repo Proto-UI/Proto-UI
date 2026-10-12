@@ -108,7 +108,7 @@ function setupDrawerMask(def: DefHandle<DrawerMaskProps, DrawerMaskExposes>): vo
   };
 
   def.context.subscribe(DRAWER_CONTEXT, (_run, next) => {
-    updateOpen(next.open, 'reason: drawer context sync => mask open');
+    updateOpen(next.open && next.contentAdmitted, 'reason: drawer context sync => mask open');
   });
 
   def.props.watch(['passthrough'], (run) => {
@@ -117,7 +117,10 @@ function setupDrawerMask(def: DefHandle<DrawerMaskProps, DrawerMaskExposes>): vo
 
   def.lifecycle.onCreated((run) => {
     const ctx = run.context.read(DRAWER_CONTEXT);
-    updateOpen(ctx.open, 'reason: lifecycle.onCreated => drawer mask open sync');
+    updateOpen(
+      ctx.open && ctx.contentAdmitted,
+      'reason: lifecycle.onCreated => drawer mask open sync'
+    );
   });
 
   def.lifecycle.onMounted((run) => {

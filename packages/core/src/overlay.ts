@@ -40,6 +40,7 @@ export type OverlayConfigPatch = Readonly<{
   anchored?: boolean;
   /** Project a host-root available region without choosing placement or visual gutters. */
   availableSpace?: boolean;
+  availableLayout?: import('./positioning').AvailableLayoutBinding;
   strategy?: AnchoredPositionStrategy;
   avoidCollisions?: boolean;
   collisionBoundary?: AnchoredCollisionBoundary;
@@ -67,6 +68,7 @@ export type OverlayConfig = Readonly<{
   alignOffset: number;
   anchored: boolean;
   availableSpace?: boolean;
+  availableLayout?: import('./positioning').AvailableLayoutBinding;
   strategy: AnchoredPositionStrategy;
   avoidCollisions: boolean;
   collisionBoundary: AnchoredCollisionBoundary;
@@ -113,6 +115,21 @@ export type OverlayPresenceBinding<P extends PropsBaseType = PropsBaseType> = Re
   present: ObservedStateHandle<boolean, any>;
 }>;
 
+/** Runtime-only safe-part association; no host target reaches the author. */
+export type OverlayTargetAlignmentBinding = Readonly<{
+  family: import('./anatomy').AnatomyFamily;
+  surface: AnatomyPartView;
+  scrollport: AnatomyPartView;
+  blockReference: AnatomyPartView;
+  inlineReference: AnatomyPartView;
+  blockTarget: AnatomyPartView;
+  inlineTarget: AnatomyPartView;
+  atStart: boolean;
+  atEnd: boolean;
+  constraints: import('./positioning').TargetAlignmentConstraints;
+  onAlignment(status: import('./positioning').TargetAlignmentStatus): void;
+}>;
+
 export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   open: ObservedStateHandle<boolean, P>;
 
@@ -130,6 +147,7 @@ export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   registerInputAnchor(anchor: import('./context-menu-input').InputOriginAnchor | null): void;
   registerAnchorPart(part: AnatomyPartView): void;
   registerContent(target: unknown): void;
+  registerTargetAlignment(binding: OverlayTargetAlignmentBinding | null): void;
   getPositionSnapshot(): AnchoredPositionSnapshot | null;
 }
 

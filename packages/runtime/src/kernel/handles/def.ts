@@ -187,6 +187,15 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       style: {
+        transition(declaration) {
+          ensureSetup('def.feedback.style.transition');
+          const off = feedback.style.transition(declaration);
+          recordCaptured(def, 'feedback', off);
+          return () => {
+            ensureSetup('def.feedback.style.transition:dispose');
+            off();
+          };
+        },
         use: (...handles: StyleHandle[]) => {
           ensureSetup(`def.feedback.style.use`);
           const unUse = feedback.style.use(...handles);

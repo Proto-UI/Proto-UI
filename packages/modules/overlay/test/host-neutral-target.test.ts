@@ -24,7 +24,12 @@ function fixture(provider?: OverlayTargetHost) {
     ],
   ]);
   const root = Object.freeze({ nativeRoot: true });
-  const available = { connect: vi.fn(), requestUpdate: vi.fn(), disconnect: vi.fn() };
+  const available = {
+    bindLayout: vi.fn(),
+    connect: vi.fn(),
+    requestUpdate: vi.fn(),
+    disconnect: vi.fn(),
+  };
   const host = {
     mount: vi.fn(),
     unmount: vi.fn(),
@@ -167,4 +172,33 @@ describe('host-neutral Overlay physical target boundary', () => {
     expect(f.available.connect).not.toHaveBeenCalled();
     expect(f.host.lock).not.toHaveBeenCalled();
   });
+});
+
+it('validates layout binding before mutating related Overlay configuration', () => {
+  const f = fixture();
+  f.module.configure({
+    availableSpace: true,
+    availableLayout: { edge: 'bottom', extent: 'intrinsic' },
+  });
+  const previous = f.module.getConfig();
+  f.available.bindLayout.mockImplementation(() => {
+    throw Error('invalid layout');
+  });
+  expect(() =>
+    f.module.configure({
+      defaultOpen: true,
+      availableLayout: { edge: 'bottom', extent: 'intrinsic', fraction: NaN },
+    })
+  ).toThrow('invalid layout');
+  expect(f.module.getConfig()).toBe(previous);
+});
+it('rejects disabling available space underneath an existing layout binding', () => {
+  const f = fixture();
+  f.module.configure({
+    availableSpace: true,
+    availableLayout: { edge: 'bottom', extent: 'intrinsic' },
+  });
+  const previous = f.module.getConfig();
+  expect(() => f.module.configure({ availableSpace: false })).toThrow(/requires availableSpace/);
+  expect(f.module.getConfig()).toBe(previous);
 });

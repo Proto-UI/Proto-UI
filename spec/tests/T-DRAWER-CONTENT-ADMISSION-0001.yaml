@@ -1,0 +1,47 @@
+id: T-DRAWER-CONTENT-ADMISSION-0001
+type: test
+title: Drawer Content admission and lifetime
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Source tests include real adapters with synthetic DOM; they do not certify native focus or geometry.
+summary: Preserve initial-invalid negative control and verify owner-bound declaration lifetime.
+cases:
+  - id: T-DRAWER-CONTENT-ADMISSION-0001-CASE-OWNER
+    title: Initial validation, singleton ownership, disposal and transactional publication
+    covers:
+      [
+        C-DRAWER-CONTENT-ADMISSION-0001-OWNERSHIP,
+        C-DRAWER-CONTENT-ADMISSION-0001-LIFETIME,
+        C-DRAWER-CONTENT-ADMISSION-0001-TRANSACTION,
+      ]
+    expectation: no-orphan-mask-or-stale-admission-and-unchanged-logical-open
+  - id: T-DRAWER-CONTENT-ADMISSION-0001-CASE-RUNTIME
+    title: Four runtime close and reopen preserve the logical declaration
+    covers: [C-DRAWER-CONTENT-ADMISSION-0001-LIFETIME, C-DRAWER-CONTENT-ADMISSION-0001-BOUNDARY]
+    expectation: no-presence-detach-admission-deadlock
+implementations:
+  - id: drawer-admission-owner
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/navigation-overlays/drawer-admission.test.ts
+    required: true
+    consumesCases: [T-DRAWER-CONTENT-ADMISSION-0001-CASE-OWNER]
+  - id: drawer-admission-capability
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/navigation-overlays/drawer-admission-capability.test.ts
+    required: true
+    consumesCases: [T-DRAWER-CONTENT-ADMISSION-0001-CASE-OWNER]
+  - id: drawer-admission-four-runtime
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/drawer-admission-lifecycle.test.ts
+    required: true
+    consumesCases: [T-DRAWER-CONTENT-ADMISSION-0001-CASE-RUNTIME]
+verifies:
+  contracts: [C-DRAWER-CONTENT-ADMISSION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Verify declaration ownership separately from native modal and focus realization.
+tags: [drawer, admission, lifecycle]

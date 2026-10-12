@@ -19,7 +19,8 @@ export type AxisInputCancelReason =
   | MoveGestureCancelReason
   | 'disabled'
   | 'configuration-changed'
-  | 'invalid-geometry';
+  | 'invalid-geometry'
+  | 'basis-changed';
 
 export type AxisInputConfig = Readonly<{
   axis: 'horizontal' | 'vertical';
@@ -28,6 +29,8 @@ export type AxisInputConfig = Readonly<{
   readOnly: boolean;
   /** Additional reversal, useful for a vertical value axis increasing upwards. */
   reverse: boolean;
+  /** Omitted initial policy preserves start geometry; partial sync keeps the current policy. */
+  contactBasis?: 'preserve-start' | 'cancel-on-extent-change';
 }>;
 
 export type AxisInputBinding = Readonly<{

@@ -1,0 +1,43 @@
+id: T-SHADCN-DROPDOWN-MENU-LABEL-0001
+type: test
+title: Shadcn Dropdown Label inset projection over passive Base semantics
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 本家 inset 类型、动态视觉投射和源码宿主命名关系已有有界测试；完整真实输入、所有宿主、native/GPUI 和独立验收仍待完成。
+  en: Bounded tests cover family inset typing, dynamic projection and source-host naming; complete real input, all hosts, native/GPUI and independent acceptance remain pending.
+summary: Checks the optional family inset prop without introducing another focus or action owner.
+cases:
+  - id: T-SHADCN-DROPDOWN-MENU-LABEL-0001-CASE-INSET
+    title: Inset changes preserve passive label ownership and live Group naming
+    covers: [P-SHADCN-DROPDOWN-MENU-LABEL-INSET]
+    expectation: optional-inset-default-false-dynamic-pl7-and-unchanged-base-label-relations
+implementations:
+  - id: www-shadcn-dropdown-label-native-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-LABEL-0001-CASE-INSET]
+    exercises: [P-SHADCN-DROPDOWN-MENU-LABEL]
+    notes:
+      - Planned exact-head Actions-only journey for the real public demo across WC, React, Vue and Vue 2 in light/dark. Definition and type checks do not establish executed browser paint, native GPUI/Qt, contrast or upstream pixel equivalence.
+  - id: shadcn-dropdown-label-inset
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/dropdown-label.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-LABEL-0001-CASE-INSET]
+    exercises: [P-SHADCN-DROPDOWN-MENU-LABEL, P-BASE-DROPDOWN-MENU-LABEL]
+    notes: [Source-host and type evidence only; no complete native or pixel-equivalence claim.]
+verifies:
+  prototypes:
+    - id: P-SHADCN-DROPDOWN-MENU-LABEL
+      anchors: [P-SHADCN-DROPDOWN-MENU-LABEL-INSET]
+exercises:
+  prototypes: [P-SHADCN-DROPDOWN-MENU-LABEL, P-BASE-DROPDOWN-MENU-LABEL]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bounded the family inset projection without promoting visual or platform parity.
+tags: [prototype, shadcn, dropdown-menu, label, test]

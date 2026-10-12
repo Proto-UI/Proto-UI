@@ -1,3 +1,4 @@
+import { OverlayTargetAlignment } from './target-alignment-binding';
 import { joinEscapeScope, ownsEscapeSample } from './escape-coordinator';
 import type {
   BoundaryHandle,
@@ -144,6 +145,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private reconcilingView = false;
   private reconcileViewAgain = false;
   private anchorPart: AnatomyPartView | null = null;
+  private readonly targetAlignment: OverlayTargetAlignment;
   private inputAnchor: import('@proto.ui/core').InputOriginAnchor | null = null;
   private layerLease: HostResourceLease | null = null;
   private modalLease: HostResourceLease | null = null;
@@ -183,6 +185,9 @@ export class OverlayModuleImpl extends ModuleBase {
     private readonly availableSpace: AvailableSpaceHandle | null = null
   ) {
     super(caps);
+    this.targetAlignment = new OverlayTargetAlignment(anatomyPort, boundaryPort, () => {
+      if (this.viewActive) this.reconcileViewResourcesAfterCallback();
+    });
     this.prototypeName = prototypeName;
     this.boundary = boundary;
     this.refreshHostCaps();
@@ -232,6 +237,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.teardownMountedViewSideEffects();
     this.clearBoundaryRegistrations();
     this.offBoundaryOutside?.();
+    this.targetAlignment.dispose();
   }
 
   override onMountPhase(phase: MountPhase, epoch: number): void {
@@ -452,6 +458,8 @@ export class OverlayModuleImpl extends ModuleBase {
     if (!validView()) return;
     this.syncAnchorPartRegistration();
     if (!validView()) return;
+    this.targetAlignment.syncSurface();
+    if (!validView()) return;
     const registration = this.registration;
     const config = this.config;
     const current = () =>
@@ -487,6 +495,7 @@ export class OverlayModuleImpl extends ModuleBase {
 
   private deactivateViewSideEffects(): void {
     this.deferResourceReentry(() => {
+      this.targetAlignment.clearPhysical();
       this.anchoredPosition.disconnect();
       this.availableSpace?.disconnect();
       this.unlockModalIfNeeded();
@@ -496,6 +505,7 @@ export class OverlayModuleImpl extends ModuleBase {
   private teardownMountedViewSideEffects(): void {
     this.deferResourceReentry(() => {
       this.clearLayer();
+      this.targetAlignment.clearPhysical();
       this.anchoredPosition.disconnect();
       this.availableSpace?.disconnect();
       this.unmountGlobalIfNeeded();
@@ -584,6 +594,11 @@ export class OverlayModuleImpl extends ModuleBase {
     prevTarget: unknown,
     nextTarget: unknown
   ) {
+    if (role === 'content' && this.targetAlignment.hasBinding()) {
+      this.boundaryDisposers.content?.();
+      this.boundaryDisposers.content = null;
+      return;
+    }
     if (Object.is(prevTarget, nextTarget)) return;
     this.boundaryDisposers[role]?.();
     this.boundaryDisposers[role] = null;
@@ -612,6 +627,16 @@ export class OverlayModuleImpl extends ModuleBase {
   configure(patch: OverlayConfigPatch): void {
     this.ensureSetup('overlay.configure');
 
+    const layout = patch.availableLayout ?? this.config.availableLayout;
+    const hasAvailableSpace = patch.availableSpace ?? this.config.availableSpace;
+    if (layout && !hasAvailableSpace)
+      throw new Error('[Overlay] availableLayout requires availableSpace.');
+    if (patch.availableLayout !== undefined) {
+      if (!this.availableSpace?.bindLayout)
+        throw new Error('[Overlay] available layout capability unavailable.');
+      this.availableSpace.bindLayout(patch.availableLayout);
+    }
+
     this.patchValue('defaultOpen', patch.defaultOpen);
     this.patchValue('closeOnEscape', patch.closeOnEscape);
     this.patchValue('closeOnOutsidePress', patch.closeOnOutsidePress);
@@ -624,6 +649,7 @@ export class OverlayModuleImpl extends ModuleBase {
     this.patchValue('alignOffset', patch.alignOffset);
     this.patchValue('anchored', patch.anchored);
     this.patchValue('availableSpace', patch.availableSpace);
+    this.patchValue('availableLayout', patch.availableLayout);
     this.patchValue('strategy', patch.strategy);
     this.patchValue('avoidCollisions', patch.avoidCollisions);
     this.patchValue('collisionBoundary', patch.collisionBoundary);
@@ -739,9 +765,12 @@ export class OverlayModuleImpl extends ModuleBase {
       this.anchoredPosition.disconnect();
       return;
     }
+    const alignment = this.targetAlignment.resolve();
+    if (!current()) return;
     this.anchoredPosition.connect({
       anchor,
       floating,
+      ...(alignment ?? {}),
       config: {
         side: this.config.placement,
         align: this.config.align,
@@ -779,6 +808,18 @@ export class OverlayModuleImpl extends ModuleBase {
     if (this.viewActive) this.reconcileViewResourcesAfterCallback();
   }
 
+  registerTargetAlignment(
+    binding: import('@proto.ui/core').OverlayTargetAlignmentBinding | null
+  ): void {
+    this.sys?.ensureRuntime('overlay.registerTargetAlignment');
+    if (this.protoPhase === 'unmounted') return;
+    this.targetAlignment.set(binding);
+    this.boundaryDisposers.content?.();
+    this.boundaryDisposers.content = null;
+    if (!binding) this.syncBoundaryRegistration('content', null, this.registration.content);
+    if (this.viewActive) this.reconcileViewResourcesAfterCallback();
+  }
+
   registerContent(target: unknown): void {
     this.replaceRegistration({ content: target });
 
@@ -799,6 +840,7 @@ export class OverlayModuleImpl extends ModuleBase {
     registerInputAnchor: (anchor) => this.registerInputAnchor(anchor),
     registerAnchorPart: (part: AnatomyPartView) => this.registerAnchorPart(part),
     registerContent: (target: unknown) => this.registerContent(target),
+    registerTargetAlignment: (binding) => this.registerTargetAlignment(binding),
     getPositionSnapshot: () => this.getPositionSnapshot(),
   };
 }

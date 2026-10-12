@@ -5,6 +5,7 @@ import type {
   DropdownItemAsHookContract,
   DropdownItemExposes,
   DropdownItemProps,
+  DropdownLabelProps,
   DropdownRootAsHookContract,
   DropdownRootExposes,
   DropdownRootProps,
@@ -38,3 +39,7 @@ export interface ShadcnDropdownItemProps extends DropdownItemProps {
 }
 export type ShadcnDropdownItemExposes = DropdownItemExposes;
 export type ShadcnDropdownItemAsHookContract = DropdownItemAsHookContract;
+
+export interface ShadcnDropdownLabelProps extends DropdownLabelProps {
+  inset?: boolean;
+}

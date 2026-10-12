@@ -27,7 +27,42 @@ cases:
         P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
       ]
     expectation: shadcn-dropdown-item-current-variants-and-command-styles
+  - id: T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-DESTRUCTIVE-PALETTE
+    title: Destructive interactions retain their light/dark palette without altering Base disabled or value semantics
+    covers: [P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE]
+    expectation: real-base-state-shadcn-destructive-recipe-and-complete-css-closure
 implementations:
+  - id: www-shadcn-dropdown-item-native-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-DESTRUCTIVE-PALETTE]
+    exercises: [P-SHADCN-DROPDOWN-MENU-ITEM]
+    notes:
+      - Planned exact-head Actions-only journey for the real public demo across WC, React, Vue and Vue 2 in light/dark. Definition and type checks do not establish executed browser paint, native GPUI/Qt, contrast or upstream pixel equivalence.
+  - id: shadcn-dropdown-destructive-palette
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/dropdown-destructive.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-DESTRUCTIVE-PALETTE]
+    exercises: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]
+    notes:
+      [
+        Source-host state and token evidence; synthetic inputs are not native browser or cross-host visual acceptance.,
+      ]
+  - id: shadcn-dropdown-complete-style-closure
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/dropdown-style-closure.test.ts
+    required: true
+    consumesCases: [T-SHADCN-DROPDOWN-MENU-ITEM-0001-CASE-DESTRUCTIVE-PALETTE]
+    exercises: [P-SHADCN-DROPDOWN-MENU-ITEM]
+    notes:
+      [
+        Complete Dropdown directory document and Shadow CSS generation; not computed browser paint or native parity.,
+      ]
   - id: prototypes-shadcn-dropdown-item-contract
     kind: module-test
     status: passing
@@ -42,6 +77,7 @@ implementations:
     notes:
       - >-
         Positive tests cover collection focus entry, item selection closing the menu, base tokens, and the destructive surface; remaining gaps stay centralized. The destructive assertion is projection evidence only: without a docs instance, cross-runtime rendered evidence, and this surface's own contrast measurement it stays render-undemonstrated. Button #454 is only a related component observation, not measured evidence for Dropdown Item.
+
 
 verifies:
   prototypes:
@@ -58,6 +94,7 @@ verifies:
           P-SHADCN-DROPDOWN-MENU-ITEM-COMPATIBILITY-SUBSET,
           P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-EVIDENCE-BOUNDARY,
           P-SHADCN-DROPDOWN-MENU-ITEM-AS-CHILD-OMISSION,
+          P-SHADCN-DROPDOWN-MENU-ITEM-DESTRUCTIVE-PALETTE,
         ]
 exercises:
   prototypes: [P-SHADCN-DROPDOWN-MENU-ITEM, P-BASE-DROPDOWN-MENU-ITEM]

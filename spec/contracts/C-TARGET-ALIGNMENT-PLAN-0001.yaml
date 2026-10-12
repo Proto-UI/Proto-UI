@@ -1,0 +1,37 @@
+id: C-TARGET-ALIGNMENT-PLAN-0001
+type: contract
+title: Neutral target-alignment numerical plans preserve semantic ownership
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The independently reviewed S1 admits pure numerical plans only. Host binding, view settlement, reveal, focus coordination and native geometry evidence remain open; this does not activate item-aligned runtime positioning.
+summary: A shared platform-independent numerical mechanism consumes host-local facts and consumer-declared constraints, without selecting semantic items or measuring and writing geometry.
+notes: ./C-TARGET-ALIGNMENT-PLAN-0001.md
+criteria:
+  - id: C-TARGET-ALIGNMENT-PLAN-0001-OWNERSHIP
+    text:
+      en: The pure mechanism receives immutable single-coordinate-space reference, painted-surface, frame and scrollport facts plus explicit constraints. It cannot measure or mutate a host, select values, focus, close, schedule work or create observers. No component, framework or platform name selects its algorithm. Facts and plans must never flow through portable prototype props, State or Context.
+  - id: C-TARGET-ALIGNMENT-PLAN-0001-INITIAL
+    text:
+      en: The initial plan follows the equations in the linked contract, including logical starting-edge inline clamping with permitted ending overflow, target-extent-based minimum block span, start/end pinned frame allocation and optional initial scroll. Constants belong to the consumer declaration. Output is requested constraints, not final used rectangles; initial content alignment is normal, never end. RTL retains its logical right inset until actual layout can resolve a physical coordinate.
+  - id: C-TARGET-ALIGNMENT-PLAN-0001-EXPANSION
+    text:
+      en: The scroll reducer expands only when explicitly enabled, actual scroll changes and the previous requested/minimum span is below available span. It caps expansion at available span; only end pin requests overflow scroll correction and end content alignment. A requested scroll correction is not actual readback; the returned previous-scroll sample remains the supplied actual sample until the host supplies its corrected actual sample.
+  - id: C-TARGET-ALIGNMENT-PLAN-0001-INVALID
+    text:
+      en: Nonfinite facts, negative physical dimensions or insets, nonpositive viewport or target block extents and invalid constraints return a named invalid result without a plan. Zero inline text span is valid when its edges exist. Finite offscreen references and positive tiny viewports retain source plans, including minimum span greater than maximum span; neither is falsely called exact final placement. Nonfinite computed plans are rejected.
+  - id: C-TARGET-ALIGNMENT-PLAN-0001-SCOPE
+    text:
+      en: S1 functions remain internal numerical mechanisms. Their separately gated cold host binding is specified by C-TARGET-ALIGNMENT-BINDING-0001; this numerical contract does not define missing-target popper fallback, disabled selection compatibility, lifecycle readiness, focus, animation, Adapter behavior or consumer migration. These remain explicitly owned next steps, not completed or waived capabilities.
+dependsOn:
+  contracts: [C-ANCHORED-POSITIONING-0001]
+verifies:
+  tests: [T-TARGET-ALIGNMENT-PLAN-0001]
+sources:
+  - path: packages/modules/positioning/src/geometry/target-alignment.ts
+  - path: packages/modules/positioning/test/target-alignment.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Admitted internal numerical initial-frame and scroll-expansion plans without runtime wiring or native parity claims.
+tags: [positioning, geometry, target-alignment, draft]

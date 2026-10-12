@@ -158,16 +158,37 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-search-production.browser.test.ts',
+  'packages/adapters/base/test/resident-motion.browser.test.ts',
+  'packages/prototypes/shadcn/test/switch-motion.browser.test.ts',
+  'packages/web-conformance/test/select-target-alignment.browser.test.ts',
 ]);
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-slider-upstream.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-representative-features.browser.test.ts':
@@ -180,6 +201,12 @@ export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
     'apps/www/scripts/run-search-production-evidence.mjs',
   'apps/www/src/content/docs/zh-cn/site-startup-theme.browser.test.ts':
     '.github/workflows/site-startup-theme-evidence.yml',
+  'packages/prototypes/shadcn/test/switch-motion.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'packages/adapters/base/test/resident-motion.browser.test.ts':
+    '.github/workflows/finf-representative-features-evidence.yml',
+  'packages/web-conformance/test/select-target-alignment.browser.test.ts':
+    '.github/workflows/select-target-alignment-evidence.yml',
 });
 
 // Bound each CI worker to a deterministic share of the complete development inventory.

@@ -95,6 +95,7 @@ const installOverlay = definePrivilegedAsHook<PropsBaseType, OverlayHandle<Props
       registerInputAnchor: (anchor) => raw.registerInputAnchor(anchor),
       registerAnchorPart: (part) => raw.registerAnchorPart(part),
       registerContent: (target) => raw.registerContent(target),
+      registerTargetAlignment: (binding) => raw.registerTargetAlignment(binding),
       getPositionSnapshot: () => raw.getPositionSnapshot(),
       keepMounted() {
         rt.ensureSetup('overlay.keepMounted');

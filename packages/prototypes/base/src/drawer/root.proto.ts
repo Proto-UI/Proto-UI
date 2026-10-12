@@ -13,6 +13,7 @@ function sameContext(a: DrawerContextValue, b: DrawerContextValue): boolean {
   return (
     a.rootId === b.rootId &&
     a.open === b.open &&
+    a.contentAdmitted === b.contentAdmitted &&
     a.openFocusReason === b.openFocusReason &&
     a.returnFocusReason === b.returnFocusReason &&
     a.controlled === b.controlled &&
@@ -45,6 +46,7 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
   def.context.provide(DRAWER_CONTEXT, {
     rootId,
     open: false,
+    contentAdmitted: false,
     openFocusReason: null,
     returnFocusReason: null,
     controlled: false,
@@ -72,6 +74,7 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
   const initialContext: DrawerContextValue = {
     rootId,
     open: false,
+    contentAdmitted: false,
     openFocusReason: null,
     returnFocusReason: null,
     controlled: false,
@@ -87,16 +90,64 @@ function setupDrawerRoot(def: DefHandle<DrawerRootProps, DrawerRootExposes>): vo
   let published: DrawerContextValue = initialContext;
   let lastRequestVersion = 0;
 
+  let currentRun: any = null;
+  let contentId: string | null = null;
+  let generation = 0;
+  let dead = false;
   const syncContext = (run: any) => {
+    if (dead) return;
+    currentRun = run;
     const next = {
       ...snapshot,
       open: open?.get() ?? false,
+      contentAdmitted: contentId !== null,
     };
     snapshot = next;
     if (sameContext(published, next)) return;
     published = next;
     run.context.update(DRAWER_CONTEXT, next);
   };
+
+  def.expose.method('__admitContent', (instanceId) => {
+    if (dead || !currentRun) throw new Error('[Drawer] Content admission requires a live Root.');
+    if (contentId !== null && contentId !== instanceId)
+      throw new Error('[Drawer] Only one live Content may be admitted by a Root.');
+    if (contentId === instanceId) return generation;
+    contentId = instanceId;
+    const acceptedGeneration = ++generation;
+    try {
+      syncContext(currentRun);
+    } catch (error) {
+      if (!dead && contentId === instanceId && generation === acceptedGeneration) {
+        contentId = null;
+        generation++;
+        try {
+          syncContext(currentRun);
+        } catch (rollbackError) {
+          throw new AggregateError(
+            [error, rollbackError],
+            '[Drawer] Admission publication and rollback failed.'
+          );
+        }
+      }
+      throw error;
+    }
+    if (dead || contentId !== instanceId || generation !== acceptedGeneration)
+      throw new Error('[Drawer] Content admission was interrupted.');
+    return acceptedGeneration;
+  });
+  def.expose.method('__releaseContent', (instanceId, leaseGeneration) => {
+    if (dead || contentId !== instanceId || generation !== leaseGeneration) return;
+    contentId = null;
+    generation++;
+    syncContext(currentRun);
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    dead = true;
+    contentId = null;
+    generation++;
+    currentRun = null;
+  });
 
   def.context.subscribe(DRAWER_CONTEXT, (run, next) => {
     snapshot = next;

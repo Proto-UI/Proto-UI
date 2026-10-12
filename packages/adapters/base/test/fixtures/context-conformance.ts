@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { createContextKey, definePrototype, type Prototype } from '@proto.ui/core';
+import {
+  createAnatomyFamily,
+  createContextKey,
+  definePrototype,
+  type Prototype,
+  type RunHandle,
+} from '@proto.ui/core';
+import { asOverlay } from '@proto.ui/hooks';
+import { asTransition } from '../../../../prototypes/base/src/transition/as-transition.proto';
 
 export type ContextTree = { proto: Prototype; children?: ContextTree[] };
 export type ContextMount = {
@@ -16,6 +24,82 @@ export function contextAdapterConformance(
   mount: (tree: ContextTree[]) => Promise<ContextMount>
 ) {
   describe(`${name}: Context owner and ancestry translation`, () => {
+    it('preserves a retained owner scope and Anatomy while its view is absent but slots mount', async () => {
+      const key = createContextKey<{ value: number }>('retained-owner-scope');
+      const family = createAnatomyFamily('retained-owner-family', {
+        roles: {
+          root: { cardinality: { min: 1, max: 1 } },
+          item: { cardinality: { min: 0, max: '*' } },
+        },
+      });
+      const reads: number[] = [];
+      let outerRun!: RunHandle<any>;
+      let parentRun!: RunHandle<any>;
+      let parentMounted = 0;
+      const outer = definePrototype({
+        name: `retained-${name}-outer`,
+        setup(def) {
+          def.context.provide(key, { value: -1 });
+          def.anatomy.claim(family, { role: 'root' });
+          def.lifecycle.onCreated((run) => {
+            outerRun = run;
+          });
+          return (r) => r.slot();
+        },
+      });
+      const parent = definePrototype({
+        name: `retained-${name}-provider`,
+        setup(def) {
+          def.context.provide(key, { value: 10 });
+          def.lifecycle.onMounted(() => {
+            parentMounted++;
+          });
+          def.anatomy.claim(family, { role: 'root' });
+          const overlay = asOverlay();
+          overlay.configure({ defaultOpen: false, portal: true });
+          const transition = asTransition();
+          transition.configure({ enterDuration: 0, leaveDuration: 0 });
+          def.lifecycle.onCreated((run) => {
+            parentRun = run;
+          });
+          overlay.bindPresence({
+            present: transition.isPresent,
+            enter: transition.controls.enter,
+            leave: transition.controls.leave,
+          });
+          return (r) => r.slot();
+        },
+      });
+      const child = definePrototype({
+        name: `retained-${name}-consumer`,
+        setup(def) {
+          def.anatomy.claim(family, { role: 'item' });
+          def.expose.value('label', 'owned-child');
+          def.context.subscribe(key);
+          def.lifecycle.onCreated((run) => {
+            reads.push(run.context.read(key).value);
+          });
+          def.lifecycle.onMounted((run) => {
+            reads.push(run.context.read(key).value);
+          });
+          return (r) => r.el('span', 'retained child');
+        },
+      });
+      const mounted = await mount([
+        { proto: outer, children: [{ proto: parent, children: [{ proto: child }] }] },
+      ]);
+      try {
+        await mounted.flush();
+        expect(reads).toEqual([10, 10]);
+        expect(parentMounted).toBe(0);
+        expect(
+          parentRun.anatomy.order.partsOf(family, 'item').map((part) => part.getExpose('label'))
+        ).toEqual(['owned-child']);
+        expect(outerRun.anatomy.order.partsOf(family, 'item')).toHaveLength(0);
+      } finally {
+        await mounted.unmount();
+      }
+    });
     it('T-CONTEXT-0003-CASE-ADAPTER: resolves nested scopes and isolates fresh owners after teardown', async () => {
       const key = createContextKey<{ value: number }>('shared-context');
       const otherKey = createContextKey<{ value: number }>('shared-context');

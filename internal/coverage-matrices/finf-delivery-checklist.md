@@ -8,6 +8,8 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 ## One checkbox means all acceptance gates
 
+Apply [prototype upstream conformance and completion](../agent-operations/prototype-upstream-conformance.md) to every item and family. A missing capability remains implementation work: definition → neutral capability when needed → Base/family prototype → real consumer → exact-revision evidence. Platform-specific component substitutes do not close an item.
+
 1. Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done
 
 2. Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass

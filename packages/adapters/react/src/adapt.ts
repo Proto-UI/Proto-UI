@@ -1,3 +1,4 @@
+import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
   resolveWebNativeLinkLocalName,
@@ -110,6 +111,7 @@ export type ReactAdapterProps<Props extends PropsBaseType> = Props &
 export interface ReactAdapterOptions<Props extends PropsBaseType> {
   /** Draft V2 host provider; one fresh sink per physical view. No provider means ordinary style. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
+  residentMotion?: WebResidentMotionOptions;
   schedule?: (task: () => void) => void;
   getProps?: (props: ReactAdapterProps<Props>) => Partial<Props> | null | undefined;
   getMeta?: (key: string) => unknown;
@@ -248,7 +250,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           : null;
       const supportsOwnerContext = !!logicalOwnerContext && !!runtime.useContext;
       if (logicalOwnerContext && runtime.useContext) {
-        bindLogicalParent(instanceTokenRef.current, parentToken);
+        bindLogicalParent(instanceTokenRef.current, parentToken, { authority: 'owner' });
       }
       const [renderChildren, setRenderChildren] = runtime.useState<any>(null);
       const hostTokenRevisionRef = runtime.useRef(0);
@@ -584,6 +586,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           },
           rawPropsSource,
           effectsPort,
+          residentMotion: opt.residentMotion,
           visualFeedbackSink: createVisualSink
             ? createDeferredViewVisualSink(
                 () => createVisualSink!(rootEl, effectsPort),

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as drawer from '../../src/drawer';
 import * as shadcn from '../../../shadcn/src/drawer';
@@ -11,6 +11,9 @@ type DrawerFixtureFamily = Record<
 >;
 const families = [drawer, shadcn, brutalist, bootstrap, liquid];
 
+const rootDimensions = ['clientWidth', 'clientHeight', 'clientLeft'].map(
+  (key) => [key, Object.getOwnPropertyDescriptor(document.documentElement, key)] as const
+);
 const owned = new Set<HTMLElement>();
 const lives = { created: 0, disposed: 0 };
 for (const proto of families.flatMap((family) => [
@@ -36,12 +39,51 @@ afterEach(async () => {
   for (const node of owned) node.remove();
   await expect.poll(() => lives.disposed).toBe(lives.created);
   owned.clear();
+  vi.restoreAllMocks();
+  document.documentElement.style.removeProperty('font-size');
+  for (const [key, original] of rootDimensions) {
+    if (original) Object.defineProperty(document.documentElement, key, original);
+    else Reflect.deleteProperty(document.documentElement, key);
+  }
 });
 function fixture(
   contentProps: Record<string, unknown> = {},
   rootProps: Record<string, unknown> = {},
   family: DrawerFixtureFamily = drawer
 ) {
+  // The DOM harness injects known available geometry; this is not native layout evidence.
+  document.documentElement.style.fontSize = '16px';
+  Object.defineProperties(document.documentElement, {
+    clientWidth: { configurable: true, value: 390 },
+    clientHeight: { configurable: true, value: 800 },
+    clientLeft: { configurable: true, value: 0 },
+  });
+  vi.spyOn(document.documentElement, 'getBoundingClientRect').mockReturnValue({
+    x: 0,
+    y: 0,
+    left: 0,
+    top: 0,
+    right: 390,
+    bottom: 800,
+    width: 390,
+    height: 800,
+    toJSON() {},
+  });
+  const originalStyle = window.getComputedStyle.bind(window);
+  vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+    const actual = originalStyle(element, pseudo);
+    return element.hasAttribute('data-pui-available-space-probe')
+      ? new Proxy(actual, {
+          get(target, key) {
+            return ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'].includes(
+              String(key)
+            )
+              ? '0px'
+              : Reflect.get(target, key, target);
+          },
+        })
+      : actual;
+  });
   const root = document.createElement(family.drawerRoot.name) as any;
   const content = document.createElement(family.drawerContent.name) as any;
   const handle = document.createElement(family.drawerHandle.name) as any;
@@ -94,13 +136,19 @@ describe.each(families.map((family) => [family.drawerContent.name, family] as co
         expect(styles).toContain('content-start');
         expect(styles).not.toContain('translate-y-[calc(var(--pui-offset-percentage)');
         expect(styles).not.toContain('translate-x-[calc(var(--pui-offset-percentage)');
-        expect(styles).toContain(
-          side === 'bottom' || side === 'top'
-            ? 'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
-            : 'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]'
-        );
-        expect(styles).toContain('--proto-ui-available-region-center-x');
-        expect(styles).toContain('--proto-ui-available-region-center-y');
+        if (side === 'top' || side === 'bottom') {
+          const cap = family === shadcn || family === brutalist ? 704 : 800;
+          expect(p.content.style.maxHeight).toBe(`${cap}px`);
+          expect(p.content.style.height).toBe(`${cap * 0.5}px`);
+          expect(styles).not.toContain('0.85');
+          expect(styles).not.toContain('--proto-ui-available-region');
+        } else {
+          expect(styles).toContain(
+            'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]'
+          );
+          expect(styles).toContain('--proto-ui-available-region-center-x');
+          expect(styles).toContain('--proto-ui-available-region-center-y');
+        }
         expect(p.content.style.getPropertyValue('--pui-drag-progress')).toBe('0.5');
         p.close.click();
         await flush();
@@ -125,9 +173,8 @@ describe('Drawer Handle normalized input', () => {
     expect(p.content.getExposes().snapPoint.get()).toBe(1);
     expect(p.content.getExposes().dragProgress.get()).toBeCloseTo(0.55);
     expect(p.content.style.getPropertyValue('--pui-offset-percentage')).toBe('45');
-    expect(p.content.getAttribute('data-pui-style')).toContain(
-      'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]'
-    );
+    expect(Number.parseFloat(p.content.style.height)).toBeCloseTo(440);
+    expect(p.content.style.maxHeight).toBe('800px');
     pointer(p.handle, 'pointerup', 100, 190);
     await flush();
     expect(p.content.getExposes().snapPoint.get()).toBe(0.5);
@@ -290,7 +337,7 @@ import {
   renderProtoStyleTokenCss,
   renderProtoShadowStyleTokenCss,
 } from '../../../../cli/src/services/proto-style-css';
-it('collects and lowers fixed scrollport extent recipes instead of hiding translated controls', async () => {
+it('keeps horizontal compatibility tokens while vertical geometry moves to neutral layout intent', async () => {
   const collected = await collectProtoStyleTokens(
     path.resolve(process.cwd(), 'packages/prototypes/base/src/drawer')
   );
@@ -299,16 +346,13 @@ it('collects and lowers fixed scrollport extent recipes instead of hiding transl
   }
   const tokens = collected;
   const recipes = [
-    'h-[calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]',
     'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
-    'w-[var(--proto-ui-available-region-width,100vw)]',
     'h-[var(--proto-ui-available-region-height,100vh)]',
     'overflow-y-auto',
     'overflow-x-hidden',
     'content-start',
     'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)]',
     'top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)]',
-    'top-[calc(var(--proto-ui-available-region-center-y,50vh)_+_var(--proto-ui-available-region-height,100vh)/2_-_var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress))]',
     'left-[calc(var(--proto-ui-available-region-center-x,50vw)_+_var(--proto-ui-available-region-width,100vw)/2_-_min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
     'bottom-1',
     'right-1',
@@ -319,9 +363,7 @@ it('collects and lowers fixed scrollport extent recipes instead of hiding transl
   ).toBe(false);
   for (const css of [renderProtoStyleTokenCss(tokens), renderProtoShadowStyleTokenCss(tokens)]) {
     expect(css.match(/Unsupported Proto UI style tokens:[\s\S]*?\*\//)?.[0]).toBeUndefined();
-    expect(css).toContain(
-      'height: calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress));'
-    );
+    expect(css).not.toContain('0.85');
     expect(css).toContain(
       'width: calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress));'
     );

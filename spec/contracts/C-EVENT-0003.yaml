@@ -32,8 +32,8 @@ criteria:
       en: Host mapping and replacement strategy for root/global targets are runtime/adapter responsibilities, not prototype-author APIs.
   - id: C-EVENT-0003-E
     text:
-      zh-CN: 对同时存在 root 与 global 解释路径的语义事件，adapter 必须只把 root-scoped 事件路由给拥有该宿主交互的组件 root；原型作者不得通过读取宿主 target 或 containment 自行判断归属。
-      en: For semantic events with both root and global interpretation paths, the adapter must route the root-scoped event only to the component root that owns the host interaction; prototype authors must not inspect host targets or containment to determine ownership themselves.
+      zh-CN: 对同时存在 root 与 global 解释路径的语义事件，adapter 必须只把 root-scoped 事件路由给拥有该宿主交互的组件 root；原型作者不得通过读取宿主 target 或 containment 自行判断归属。已从物理 root 投递的同一原生事件，不得仅因 Shadow 边界 retarget 而再次作为 global fallback 投递；未从物理 root 投递的真实外部 Portal 或 slot fallback 仍可路由。
+      en: For semantic events with both root and global interpretation paths, the adapter must route the root-scoped event only to the component root that owns the host interaction; prototype authors must not inspect host targets or containment to determine ownership themselves. A native event already delivered through its physical root must not be delivered again as a global fallback merely because a Shadow boundary retargets its target; genuine external Portal or slot fallback with no physical root delivery remains eligible.
 sources:
   - path: internal/contracts/event/event.v0.md
     sections:

@@ -239,6 +239,94 @@ describe.each(['apps/www/package.json', 'packages/adapters/react/package.json'])
     beforeEach(() => {
       reactSource.path = source;
     });
+    for (const value of [
+      '',
+      'width: 160px; max-width: 100%; min-width: 0;',
+      'padding: 0; min-width: 0; width: 100%;',
+      'padding-left: 3px; padding: 1px 2px !important; --drawer-sample: a:b; float: left;',
+    ]) {
+      it(`preserves legal native style=${JSON.stringify(value)} before setup`, async () => {
+        const host = document.createElement('div');
+        document.body.append(host);
+        const reference = document.createElement('div');
+        reference.setAttribute('style', value);
+        const demo: DemoSpec = {
+          type: 'demo',
+          root: { kind: 'box', ref: 'box', attrs: { style: value } },
+          setup({ refs }) {
+            expect(refs.box!.hasAttribute('style')).toBe(true);
+            expect(refs.box!.style.cssText).toBe(reference.style.cssText);
+            for (let index = 0; index < reference.style.length; index++) {
+              const property = reference.style.item(index);
+              expect(refs.box!.style.getPropertyValue(property)).toBe(
+                reference.style.getPropertyValue(property)
+              );
+              expect(refs.box!.style.getPropertyPriority(property)).toBe(
+                reference.style.getPropertyPriority(property)
+              );
+            }
+          },
+        };
+        assertDemoSpec(demo);
+        const view = await renderDemo({ runtime: 'react', host, demo });
+        cleanups.push(() => view.destroy());
+      });
+    }
+
+    it('keeps setup-owned style through props refresh, reapplies replacement style, and disposes', async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      let api!: DemoRuntimeApi;
+      let box!: HTMLElement;
+      const demo: DemoSpec = {
+        type: 'demo',
+        root: {
+          kind: 'box',
+          ref: 'box',
+          attrs: { style: 'width: 240px; padding: 0;' },
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-text-root',
+              ref: 'text',
+              children: ['Style owner'],
+            },
+          ],
+        },
+        setup(context) {
+          api = context.api;
+          box = context.refs.box!;
+          expect(box.style.width).toBe('240px');
+          box.style.setProperty('padding', '9px', 'important');
+        },
+      };
+      const first = await renderDemo({ runtime: 'react', host, demo });
+      cleanups.push(() => first.destroy());
+      api.setProps('text', {});
+      expect(host.querySelector('[data-demo-ref="box"]')).toBe(box);
+      expect(box.style.padding).toBe('9px');
+      expect(box.style.getPropertyPriority('padding')).toBe('important');
+      const replacement = await renderDemo({
+        runtime: 'react',
+        host,
+        demo: {
+          type: 'demo',
+          root: { kind: 'box', ref: 'box', attrs: { style: 'width: 160px; padding: 0;' } },
+          setup({ refs }) {
+            expect(refs.box).not.toBe(box);
+            expect(refs.box!.style.width).toBe('160px');
+            expect(refs.box!.style.padding).toBe('0px');
+          },
+        },
+      });
+      cleanups.push(() => replacement.destroy());
+      expect(box.isConnected).toBe(false);
+      await first.destroy();
+      expect(host.childNodes.length).toBeGreaterThan(0);
+      await replacement.destroy();
+      expect(host.childNodes.length).toBe(0);
+    });
+
     for (const value of [false, true]) {
       it(`retains the string-only contract rather than coercing boolean ${value}`, () => {
         expect(() =>
@@ -299,7 +387,7 @@ describe.each(['apps/www/package.json', 'packages/adapters/react/package.json'])
       });
       cleanups.push(() => view.destroy());
       const box = host.querySelector('[data-demo-ref="box"]')!;
-      for (const attr of ['hidden', 'inert', 'itemscope'])
+      for (const attr of ['hidden', 'inert', 'itemscope', 'style'])
         expect(box.hasAttribute(attr)).toBe(false);
       expect(box.getAttribute('data-hidden')).toBe('false');
     });
@@ -334,6 +422,37 @@ describe.each(['apps/www/package.json', 'packages/adapters/react/package.json'])
         expect(refs['copy-glyph-pending']!.hidden).toBe(false);
       };
       const view = await renderDemo({ runtime: 'react', host, demo });
+      cleanups.push(() => view.destroy());
+    });
+  }
+);
+
+// The repair is at the Website's native Box boundary, not a Drawer-only rule.
+describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
+  'native Box style parity (%s)',
+  (runtime) => {
+    beforeEach(() => {
+      reactSource.path = 'apps/www/package.json';
+    });
+    it('retains native declaration values and priority before Demo setup', async () => {
+      const host = document.createElement('div');
+      document.body.append(host);
+      const value =
+        'width: 240px; max-width: 100%; min-width: 0; padding-left: 3px; padding: 0 !important; --box-sample: 17px;';
+      const reference = document.createElement('div');
+      reference.setAttribute('style', value);
+      const demo: DemoSpec = {
+        type: 'demo',
+        root: { kind: 'box', ref: 'box', attrs: { style: value }, children: ['Native box'] },
+        setup({ refs }) {
+          expect(refs.box!.style.cssText).toBe(reference.style.cssText);
+          expect(refs.box!.style.width).toBe('240px');
+          expect(refs.box!.style.getPropertyPriority('padding')).toBe('important');
+          expect(refs.box!.style.getPropertyValue('--box-sample')).toBe('17px');
+        },
+      };
+      assertDemoSpec(demo);
+      const view = await renderDemo({ runtime, host, demo });
       cleanups.push(() => view.destroy());
     });
   }

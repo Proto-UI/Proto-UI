@@ -82,6 +82,15 @@ cases:
       - M-EVENT-0001-H
     expectation: event-facade-and-wiring-exclude-the-standalone-expose-event-bridge
 implementations:
+  - id: shadow-retarget-router-regression
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/base/test/shadow-retarget-routing.test.ts
+    required: true
+    consumesCases: [T-EVENT-0003-CASE-SCOPED-TRANSLATION]
+    notes:
+      - Models the native outer-listener Shadow target-retarget boundary explicitly because Happy DOM omits it; verifies root/global dedup, nested owner isolation, same-owner controls and retained external Portal fallback.
+      - Official static-hit-inset native evidence remains the real browser oracle; a passing model does not certify Shadow geometry or prove the cause of an earlier native failure.
   - id: shared-web-router-work-regression
     kind: adapter-test
     status: passing

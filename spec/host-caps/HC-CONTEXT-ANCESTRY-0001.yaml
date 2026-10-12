@@ -24,6 +24,10 @@ criteria:
     text:
       en: Traversal is required when resolution is used; missing traversal fails diagnostically, while a valid null parent is an ordinary root or disconnected boundary.
       zh-CN: 进行 resolution 时必须提供遍历能力；缺失能力给出诊断并失败，合法 null parent 则是普通 root 或 disconnected 边界。
+  - id: HC-CONTEXT-ANCESTRY-0001-E
+    text:
+      en: An explicit owner-supplied parent, including a null root boundary, takes precedence over physical discovery and temporary host projections. View detach, remount, Portal projection and late ancestor marking do not replace that relation; explicit owner rebinding may change it. Hosts without owner facts retain their physical-ancestry translation.
+      zh-CN: 显式 owner 提供的 parent（包括 null 根边界）优先于物理发现与临时宿主投影。view detach、remount、Portal 投影及晚到祖先标记不得替换该关系；显式 owner 重绑可以改变它。没有 owner 事实的宿主保留其物理祖先翻译。
 relates:
   contracts:
     - C-CONTEXT-0004
@@ -40,6 +44,10 @@ revisions:
   - version: 0.3.0-alpha.0
     change: introduced
     summary: Separated the existing Context host identity and ancestry responsibilities without changing cap tokens.
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Clarified explicit owner ancestry precedence, including null boundaries, without changing physical fallback for hosts lacking owner facts.
+
 tags:
   - context
   - host-capability

@@ -1,3 +1,4 @@
+import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
   resolveWebNativeLinkLocalName,
@@ -135,6 +136,7 @@ function assertKebabCase(tag: string) {
 }
 
 export interface WebComponentAdapterOptions<Props extends PropsBaseType = PropsBaseType> {
+  residentMotion?: WebResidentMotionOptions;
   /** Draft V2 host provider; one fresh sink per physical view. */
   createVisualSink?: (host: HTMLElement, effects: EffectsPort) => VisualFeedbackSink | null;
   shadow?: boolean | WebComponentShadowSplitOptions;
@@ -970,11 +972,13 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
             modules: createWebComponentModules({
               el: thisEl,
               surfaceProjection: this._a11yProjection,
+              feedbackSurfaceProjection: this._surfaceProjection,
               instanceToken: instanceToken,
               router,
               rawPropsSource,
               effectsPort,
               visualFeedbackSink,
+              residentMotion: opt.residentMotion,
               materialBindingFactory: proto.modules?.some(
                 (declaration) => declaration.id === OWNED_MATERIAL_ID
               )

@@ -67,6 +67,10 @@ export const createRunHandle = <P extends PropsBaseType>(
         if (!anatomy) throw new Error(`[Anatomy] module unavailable`);
         return anatomy.partsOf(family, role, options as any);
       }) as RunHandle<P>['anatomy']['partsOf'],
+      descendantsOf: (family, ancestor, role) => {
+        if (!anatomy) throw new Error(`[Anatomy] module unavailable`);
+        return anatomy.descendantsOf(family, ancestor, role);
+      },
       order: {
         version: ((family: any, options: any) => {
           if (!anatomy) throw new Error(`[Anatomy] module unavailable`);

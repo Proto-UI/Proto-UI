@@ -1,0 +1,47 @@
+id: T-TRANSITION-COLD-PREPARATION-0001
+type: test
+title: Cold transition attempt and authored hook conformance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Pure lifecycle and actual Runtime hook evidence; no native geometry, warm freeze or first-visible-frame guarantee.
+summary: Mounted readiness, stale closures, event ordering, default compatibility and cancellation at reentrant driver boundaries.
+cases:
+  - id: T-TRANSITION-COLD-PREPARATION-0001-CASE-ATTEMPT
+    title: Only the current mounted cold attempt can enter
+    covers: [C-TRANSITION-COLD-PREPARATION-0001-ATTEMPT]
+    expectation: current-mounted-readiness-or-no-entry
+  - id: T-TRANSITION-COLD-PREPARATION-0001-CASE-SCOPE
+    title: Default and warm paths remain unchanged without claiming geometry readiness
+    covers: [C-TRANSITION-COLD-PREPARATION-0001-LIMITS]
+    expectation: explicit-cold-only-protocol
+implementations:
+  - id: cold-machine
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/transition-cold-preparation.test.ts
+    required: true
+    consumesCases:
+      [
+        T-TRANSITION-COLD-PREPARATION-0001-CASE-ATTEMPT,
+        T-TRANSITION-COLD-PREPARATION-0001-CASE-SCOPE,
+      ]
+  - id: cold-hook
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/transition-cold-hook.test.ts
+    required: true
+    consumesCases:
+      [
+        T-TRANSITION-COLD-PREPARATION-0001-CASE-ATTEMPT,
+        T-TRANSITION-COLD-PREPARATION-0001-CASE-SCOPE,
+      ]
+verifies:
+  contracts: [C-TRANSITION-COLD-PREPARATION-0001]
+exercises:
+  prototypes: [P-BASE-TRANSITION]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added cold attempt lifecycle coverage without native or warm behavior claims.
+tags: [transition, preparation, conformance]

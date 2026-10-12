@@ -18,6 +18,8 @@ export default {
           {
             'kind': 'proto',
             'prototypeId': 'brutalist-popover-content',
+            'ref': 'content',
+            'previewTheme': 'portal',
             'children': [
               {
                 'kind': 'proto',

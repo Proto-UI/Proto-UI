@@ -5,18 +5,12 @@ import type { ShadcnSwitchThumbExposes, ShadcnSwitchThumbProps } from './types';
 const THUMB_TOKENS = [
   'pointer-events-none',
   'block',
-  'size-5',
+  'size-4',
   'rounded-full',
   'bg-background',
-  'border',
-  'border-border/50',
-  'shadow-lg',
   'ring-0',
   'ring-offset-0',
-  'transition-all',
-  'duration-200',
-  'ease-in-out',
-  'will-change-transform',
+
   'translate-x-0',
 ].join(' ');
 
@@ -34,10 +28,23 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
     }
     const { checked } = switchState;
     // P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
+    def.feedback.style.transition({
+      properties: ['translate'],
+      durationMs: 150,
+      easing: [0.4, 0, 0.2, 1],
+    });
     def.feedback.style.use(tw(THUMB_TOKENS));
     def.rule({
       when: (w) => w.state(checked).eq(true),
       intent: (i) => i.feedback.style.use(tw('translate-x-[calc(100%_-_2px)]')),
+    });
+    def.rule({
+      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(checked).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(checked).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('bg-primary-foreground')),
     });
   },
 });

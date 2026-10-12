@@ -67,6 +67,7 @@ export function createWebProtoEventRouter(opt: {
   // proto semantic bus: press.*, pointer.*, key.*, context.menu...
   const protoRootBus = new EventTarget();
   const protoGlobalBus = new EventTarget();
+  const physicalRootDeliveries = new WeakSet<Event>();
 
   const rootEl = opt.rootEl;
   const globalEl = opt.globalEl ?? window;
@@ -156,6 +157,11 @@ export function createWebProtoEventRouter(opt: {
       sampleContact(native);
     const ev = new CustomEvent(type, { detail: createProtoEventPayload(type, native) });
     target.dispatchEvent(ev);
+  }
+
+  function emitFromPhysicalRoot(type: string, native: Event) {
+    if (GLOBAL_ROOT_EVENT_TYPES[native.type] === type) physicalRootDeliveries.add(native);
+    emit(protoRootBus, type, native);
   }
 
   function emitPressCommitOnce(native: Event) {
@@ -355,6 +361,17 @@ export function createWebProtoEventRouter(opt: {
     // ordinary no-demand fast path. Unrelated routes cannot consume the flag.
     const consumesPendingPressCommit = native.type === 'click' && suppressFollowupDirectClick;
     if (!hasMappedListener && !resetsPressCommit && !consumesPendingPressCommit) return false;
+    // A Shadow boundary retargets native.target for the global listener. Skip
+    // only input already delivered by this physical root; a path-only check
+    // would incorrectly consume a real global/slot fallback with no root ingress.
+    if (
+      physicalRootDeliveries.has(native) &&
+      typeof native.composedPath === 'function' &&
+      native.composedPath().includes(rootEl)
+    ) {
+      physicalRootDeliveries.delete(native);
+      return false;
+    }
     if (isWithinRoot(native.target)) return false;
     return shouldRouteToCurrentRoot(native, options);
   }
@@ -409,25 +426,25 @@ export function createWebProtoEventRouter(opt: {
       // global/portal fallback. A descendant owner's input is not our input.
       if (!shouldRouteToCurrentRoot(e, { includeActiveFallback: false })) return;
       suppressFollowupDirectClick = false;
-      emit(protoRootBus, 'pointer.down', e);
+      emitFromPhysicalRoot('pointer.down', e);
     })
   );
   unsubs.push(
     listen(rootEl, 'pointermove', (e) => {
       if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.move', e);
+      emitFromPhysicalRoot('pointer.move', e);
     })
   );
   unsubs.push(
     listen(rootEl, 'pointerup', (e) => {
       if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.up', e);
+      emitFromPhysicalRoot('pointer.up', e);
     })
   );
   unsubs.push(
     listen(rootEl, 'pointercancel', (e) => {
       if (!isEnabled()) return;
-      emit(protoRootBus, 'pointer.cancel', e);
+      emitFromPhysicalRoot('pointer.cancel', e);
     })
   );
   unsubs.push(
@@ -564,7 +581,7 @@ export function createWebProtoEventRouter(opt: {
       if (!isNativeMouseClick(e)) return;
       if (!shouldRouteToCurrentRoot(e)) return;
       if (shouldSuppressFollowupClick(e)) return;
-      emit(protoRootBus, 'press.commit', e);
+      emitFromPhysicalRoot('press.commit', e);
     })
   );
 
@@ -582,7 +599,7 @@ export function createWebProtoEventRouter(opt: {
   unsubs.push(
     listen(rootEl, 'contextmenu', (e) => {
       if (!isEnabled()) return;
-      emit(protoRootBus, 'context.menu', e);
+      emitFromPhysicalRoot('context.menu', e);
     })
   );
 

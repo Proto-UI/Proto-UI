@@ -129,6 +129,7 @@ export type {
   ShadcnDropdownItemProps,
   ShadcnDropdownItemExposes,
   ShadcnDropdownItemAsHookContract,
+  ShadcnDropdownLabelProps,
 } from './dropdown/types';
 export type {
   ShadcnSelectRootProps,

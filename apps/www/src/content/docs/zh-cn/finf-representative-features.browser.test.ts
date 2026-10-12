@@ -7,7 +7,10 @@ import { tmpdir } from 'node:os';
 import { chromium, type Browser, type Page, type Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { chromeExecutable, startServer, stopServer, type RuntimeId } from './browser-harness';
-import { collectLiquidMaterialObservation } from './liquid-material-observation';
+import {
+  collectLiquidMaterialObservation,
+  liquidMaterialSubjectSelector,
+} from './liquid-material-observation';
 import { hasNoVisibleBoxShadow } from './finf-box-shadow-observation';
 
 // Each case gets a fresh context and a terminal receipt, including failed states.
@@ -350,7 +353,11 @@ async function writeJson(file: string, value: unknown) {
 }
 
 async function captureFailureDiagnostics(page: Page, id: string, capture: Journey['capture']) {
-  const previewer = page.locator('[data-previewer-id]').first();
+  const previewer = page
+    .locator(
+      id === 'shadcn-drawer' ? '[data-demo-id="demo-shadcn-drawer-snap"]' : '[data-previewer-id]'
+    )
+    .first();
   if ((await previewer.count()) !== 1) return { unavailable: 'No previewer mounted.' };
   const files: Record<string, string> = {};
   const errors: string[] = [];
@@ -383,6 +390,13 @@ async function runCase(testCase: Case) {
   });
   const page = await context.newPage();
   page.setDefaultTimeout(15_000);
+  const previewer = page
+    .locator(
+      testCase.component === 'drawer'
+        ? '[data-demo-id="demo-shadcn-drawer-snap"]'
+        : '[data-previewer-id]'
+    )
+    .first();
   const screenshots: Screenshot[] = [];
   const pageErrors: string[] = [];
   const captureErrors: string[] = [];
@@ -407,30 +421,63 @@ async function runCase(testCase: Case) {
         animations: 'disabled',
         timeout: 10_000,
       });
+    let capturedObservation = observation;
+    if (
+      testCase.family === 'liquid-glass' &&
+      ['accordion', 'alert-dialog', 'popover'].includes(testCase.component)
+    ) {
+      let triggerCount: number | null = null;
+      let ariaControls: string | null = null;
+      let contentId: string | null = null;
+      if (testCase.component === 'popover') {
+        // Follow the current demo's relationship across its body portal; never
+        // substitute another dialog or silently select one of several triggers.
+        const trigger = previewer.getByRole('button', { name: 'Open Popover', exact: true });
+        triggerCount = await trigger.count();
+        if (triggerCount === 1) ariaControls = await trigger.getAttribute('aria-controls');
+        const ids = ariaControls?.split(/[\t\n\f\r ]+/).filter(Boolean) ?? [];
+        if (ids.length === 1) contentId = ids[0];
+      }
+      const selector = liquidMaterialSubjectSelector(testCase.component, contentId);
+      const subjects = selector ? await page.locator(selector).all() : [];
+      const matchedCount = subjects.length;
+      // Absence or ambiguity is not a subject with null material attributes.
+      const materialSubjects =
+        testCase.component === 'popover' && matchedCount !== 1 ? [] : subjects;
+      capturedObservation = {
+        journey: observation,
+        ...(testCase.component === 'popover'
+          ? {
+              materialTarget: {
+                selection: 'current-previewer-trigger-aria-controls',
+                observationTiming: 'after-screenshot',
+                triggerCount,
+                ariaControls,
+                contentId,
+                selector,
+                matchedCount,
+                status: !selector
+                  ? 'unresolved-relationship'
+                  : matchedCount === 0
+                    ? 'absent'
+                    : matchedCount === 1
+                      ? 'unique'
+                      : 'ambiguous',
+              },
+            }
+          : {}),
+        material: await Promise.all(
+          materialSubjects.map((subject) => subject.evaluate(collectLiquidMaterialObservation))
+        ),
+      };
+    }
     screenshots.push({
       state,
       file,
       sha256: createHash('sha256')
         .update(await readFile(path.join(output, file)))
         .digest('hex'),
-      observation:
-        testCase.family === 'liquid-glass' &&
-        ['accordion', 'alert-dialog'].includes(testCase.component)
-          ? {
-              journey: observation,
-              material: await Promise.all(
-                (
-                  await page
-                    .locator(
-                      testCase.component === 'alert-dialog'
-                        ? '[role="alertdialog"]'
-                        : '[data-demo-ref$="-trigger"][aria-expanded]'
-                    )
-                    .all()
-                ).map((subject) => subject.evaluate(collectLiquidMaterialObservation))
-              ),
-            }
-          : observation,
+      observation: capturedObservation,
     });
   };
   page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -447,7 +494,6 @@ async function runCase(testCase: Case) {
     await page.clock.setFixedTime(HOST_CLOCK);
     const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
     expect(response?.status()).toBe(200);
-    const previewer = page.locator('[data-previewer-id]').first();
     await previewer.waitFor({ state: 'visible' });
     await testCase.run({ page, previewer, family: testCase.family, capture });
     expect(pageErrors).toEqual([]);
@@ -807,6 +853,7 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
       height: rect.height,
       right: rect.right,
       bottom: rect.bottom,
+      rootTextSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
       availableHeight:
         Number.parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) ||
         window.visualViewport?.height ||
@@ -817,7 +864,11 @@ async function drawerJourney({ page, previewer, capture }: Journey) {
   });
   await capture('half-open', { snapPoint: 0.5, offsetPercentage: 50, panel: geometry });
   expect(geometry.height).toBeGreaterThan(0);
-  expect(Math.abs(geometry.height - geometry.availableHeight * 0.85 * 0.5)).toBeLessThanOrEqual(2);
+  expect(
+    Math.abs(
+      geometry.height - Math.max(0, geometry.availableHeight - 6 * geometry.rootTextSize) * 0.5
+    )
+  ).toBeLessThanOrEqual(2);
   expect(geometry.x).toBeGreaterThanOrEqual(-1);
   expect(geometry.y).toBeGreaterThanOrEqual(-1);
   expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth + 1);
@@ -927,6 +978,7 @@ async function popoverJourney({ page, previewer, family, capture }: Journey) {
   await capture('closed', { triggerFocused: await hasFocus(trigger) }, previewer);
   await trigger.click();
   await panel.waitFor({ state: 'visible' });
+  if (family === 'liquid-glass') await capture('reopened', { panel: await paint(panel) });
   await page.keyboard.press('Escape');
   await expect.poll(() => panel.isVisible()).toBe(false);
   if (family === 'shadcn' || family === 'brutalist') {

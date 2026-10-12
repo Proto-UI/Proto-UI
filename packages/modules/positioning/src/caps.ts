@@ -7,6 +7,7 @@ export interface AnchoredPositionHostLease {
 }
 
 export interface AnchoredPositionHost {
+  readonly supportsTargetAlignment?: boolean;
   attach(connection: AnchoredPositionConnection): AnchoredPositionHostLease;
 }
 
@@ -16,14 +17,19 @@ export const ANCHORED_POSITION_HOST_CAP = cap<AnchoredPositionHost>(
 
 export type AvailableSpaceHostConnection = import('@proto.ui/core').AvailableSpaceConnection & {
   readonly viewEpoch: number;
+  readonly layout?: import('@proto.ui/core').AvailableLayoutFrame;
 };
 export interface AvailableSpaceHostLease {
+  /** Host diagnostics only, never an author geometry State. */
+  getLayoutStatus?(): string;
+  updateLayout?(layout: import('@proto.ui/core').AvailableLayoutFrame): void;
   /** Host diagnostics, never a Proto state surface. null means no active/known frame. */
   getFrame?(): import('@proto.ui/core').AvailableSpaceFrame | null;
   requestUpdate(): void;
   dispose(): void;
 }
 export interface AvailableSpaceHost {
+  readonly supportsLayout?: boolean;
   attach(connection: AvailableSpaceHostConnection): AvailableSpaceHostLease;
 }
 export const AVAILABLE_SPACE_HOST_CAP = cap<AvailableSpaceHost>(

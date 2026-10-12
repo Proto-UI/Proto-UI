@@ -1,3 +1,4 @@
+import type { ContextKey, JsonObject } from '@proto.ui/types';
 import { defineAsHook, delay, type RunHandle } from '@proto.ui/core';
 import { createTransitionMachine, type TransitionMachineDriver } from './machine';
 import type {
@@ -7,6 +8,7 @@ import type {
   TransitionExposes,
   TransitionHandles,
   TransitionInterrupt,
+  TransitionInitialOpenBinding,
   TransitionProps,
   TransitionState,
 } from './types';
@@ -55,13 +57,14 @@ export const asTransition = defineAsHook<
     def.expose.event('beforeLeave', { payload: 'void' });
     def.expose.event('afterLeave', { payload: 'void' });
 
-    const transitionState = def.state.enum<['closed', 'entering', 'entered', 'leaving']>(
-      'transitionState',
-      'closed',
-      { options: ['closed', 'entering', 'entered', 'leaving'] }
-    );
+    const transitionState = def.state.enum<
+      ['closed', 'preparing', 'entering', 'entered', 'leaving']
+    >('transitionState', 'closed', {
+      options: ['closed', 'preparing', 'entering', 'entered', 'leaving'],
+    });
     const isPresent = def.state.bool('isPresent', false);
     const appearDefault = def.state.bool('transitionAppearDefault', false);
+    const coldEntryPreparation = def.state.bool('transitionColdEntryPreparation', false);
     const enterDurationDefault = def.state.numberDiscrete('transitionEnterDurationDefault', 300);
     const leaveDurationDefault = def.state.numberDiscrete('transitionLeaveDurationDefault', 200);
     const interruptDefault = def.state.enum<['reverse', 'wait', 'immediate']>(
@@ -70,6 +73,34 @@ export const asTransition = defineAsHook<
       { options: ['reverse', 'wait', 'immediate'] }
     );
 
+    let initialOpenSource: Readonly<{ context: ContextKey<JsonObject>; field: string }> | null =
+      null;
+    const bindInitialOpen: TransitionInitialOpenBinding = (source) => {
+      // Match configure's setup-only default guard, before even an idempotent return.
+      appearDefault.setDefault(appearDefault.get());
+      if (
+        !source ||
+        typeof source.field !== 'string' ||
+        !source.field ||
+        !source.context ||
+        source.context.__brand !== 'ContextKey'
+      ) {
+        throw new Error(
+          '[asTransition] initial open source requires a ContextKey and direct field.'
+        );
+      }
+      if (initialOpenSource) {
+        if (
+          initialOpenSource.context === source.context &&
+          initialOpenSource.field === source.field
+        )
+          return;
+        throw new Error('[asTransition] initial open source is already bound.');
+      }
+      initialOpenSource = Object.freeze({ context: source.context, field: source.field });
+    };
+    def.expose.method('bindInitialOpen', bindInitialOpen);
+
     let currentRun: RunHandle<TransitionProps> | null = null;
     const getProps = () => currentRun?.props.get();
 
@@ -77,8 +108,16 @@ export const asTransition = defineAsHook<
       getState: () => transitionState.get(),
       setState(state: TransitionState) {
         transitionState.set(state, `reason: asTransition => ${state}`);
-        isPresent.set(state !== 'closed', `reason: asTransition presence => ${state}`);
+        // A synchronous State watcher may dispose this owner before projection resumes.
+        if (!currentRun) return;
+        // State watchers may synchronously drive another transition. Project its final phase.
+        const currentState = transitionState.get();
+        isPresent.set(
+          currentState !== 'closed',
+          `reason: asTransition presence => ${currentState}`
+        );
       },
+      requiresColdPreparation: () => coldEntryPreparation.get(),
       getInterrupt: () =>
         currentRun?.props.isProvided('interrupt')
           ? ((getProps()?.interrupt as TransitionInterrupt | undefined) ?? interruptDefault.get())
@@ -113,13 +152,26 @@ export const asTransition = defineAsHook<
       enter: () => machine.enter(),
       leave: () => machine.leave(),
       complete: () => machine.complete(),
+      capturePreparation: () => {
+        if (!currentRun)
+          throw new Error('[asTransition] preparation capture requires a live runtime.');
+        return machine.capturePreparation();
+      },
     };
 
     def.lifecycle.onCreated((run) => {
       currentRun = run;
       const props = run.props.get();
       const controlled = run.props.isProvided('open');
-      const open = controlled ? !!props.open : !!props.defaultOpen;
+      let open = controlled ? !!props.open : !!props.defaultOpen;
+      if (!controlled && !run.props.isProvided('defaultOpen') && initialOpenSource) {
+        const value = run.context.read(initialOpenSource.context);
+        const initialOpen = value[initialOpenSource.field];
+        if (!Object.hasOwn(value, initialOpenSource.field) || typeof initialOpen !== 'boolean') {
+          throw new Error('[asTransition] initial open context field must be a required boolean.');
+        }
+        open = initialOpen;
+      }
       const appear = run.props.isProvided('appear') ? !!props.appear : appearDefault.get();
       machine.initialize(open, appear);
     });
@@ -150,6 +202,7 @@ export const asTransition = defineAsHook<
     def.expose.method('enter', controls.enter);
     def.expose.method('leave', controls.leave);
     def.expose.method('complete', controls.complete);
+    def.expose.method('capturePreparation', controls.capturePreparation);
     def.expose.value('controls', controls);
   },
   projectHandle(result) {
@@ -159,6 +212,10 @@ export const asTransition = defineAsHook<
     );
     const isPresent = requireProjectedHandle(result.getState?.('isPresent'), 'isPresent');
     const controls: TransitionControls = {
+      capturePreparation: requireProjectedHandle(
+        result.getMethod?.('capturePreparation') as (() => (() => void) | null) | undefined,
+        'capturePreparation'
+      ),
       enter: requireProjectedHandle(
         result.getMethod?.('enter') as (() => void) | undefined,
         'enter'
@@ -190,8 +247,17 @@ export const asTransition = defineAsHook<
       'transitionInterruptDefault'
     );
 
+    const coldEntryPreparation = requireProjectedHandle(
+      result.getState?.('transitionColdEntryPreparation'),
+      'transitionColdEntryPreparation'
+    );
+
     const configure = (config: TransitionConfig) => {
       let configured = false;
+      if (typeof config.coldEntryPreparation !== 'undefined') {
+        coldEntryPreparation.setDefault(config.coldEntryPreparation);
+        configured = true;
+      }
       if (typeof config.appear !== 'undefined') {
         appearDefault.setDefault(config.appear);
         configured = true;
@@ -218,6 +284,10 @@ export const asTransition = defineAsHook<
       if (!configured) appearDefault.setDefault(appearDefault.get());
     };
 
-    return { transitionState, isPresent, controls, configure };
+    const bindInitialOpen = requireProjectedHandle(
+      result.getMethod?.('bindInitialOpen') as TransitionInitialOpenBinding | undefined,
+      'bindInitialOpen'
+    );
+    return { transitionState, isPresent, controls, configure, bindInitialOpen };
   },
 });

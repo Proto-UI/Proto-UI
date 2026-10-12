@@ -1,13 +1,29 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { beforeAll, afterAll, afterEach, describe, expect, it } from 'vitest';
 import { classifyTwTokenApplicationRoleV0 } from '../../../core/src/spec/feedback/application-role';
 import {
   collectProtoRootStyleTokenOccurrences,
   collectProtoStyleTokens,
 } from '../../../cli/src/services/prototype-style-tokens';
-import { renderProtoShadowSplitStyleArtifact } from '../../../cli/src/services/proto-style-css';
+import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowSplitStyleArtifact,
+} from '../../../cli/src/services/proto-style-css';
 import button from '../../../prototypes/shadcn/src/button';
 import { switchRoot, switchThumb } from '../../../prototypes/shadcn/src/switch';
 import { AdaptToWebComponent, setElementProps } from '../src';
+
+// Happy DOM does not project @layer/:host stylesheet geometry; materialize only the
+// declared physical prerequisites here. Real Shadow geometry remains a browser gate.
+const recipeSheet = document.createElement('style');
+beforeAll(() => {
+  recipeSheet.textContent =
+    renderProtoStyleTokenCss(['relative', 'inline-flex'])
+      .replace('@layer proto-ui {', '')
+      .replace(/}\s*$/, '') +
+    '\n[data-pui-split-root-style~="inline-flex"]{display:inline-flex}[data-pui-split-root-style~="relative"]{position:relative}';
+  document.head.append(recipeSheet);
+});
+afterAll(() => recipeSheet.remove());
 
 // Complete public prototype admission after H1. This proves lifecycle/wiring,
 // not rendered geometry: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 L-O needs Chrome.
@@ -51,7 +67,10 @@ describe('S2 current public admission boundary', () => {
             .map((occurrence) => occurrence.token)
         ),
       ];
-      expect(tokens).toContain('transition-all');
+      if (entry.proto === switchThumb || entry.proto === switchRoot) {
+        expect(tokens).not.toContain('transition-all');
+        expect(tokens).not.toContain('transition-transform');
+      } else expect(tokens).toContain('transition-all');
       expect(
         tokens
           .filter((token) => classifyTwTokenApplicationRoleV0(token).role === 'unresolved')

@@ -52,7 +52,30 @@ cases:
     covers:
       - C-AS-TRANSITION-0001-N
     expectation: reduced-motion-zero-duration-fallback-preserves-transition-ordering
+  - id: T-AS-TRANSITION-0001-CASE-INITIAL-CONTEXT
+    title: Declarative context source supplies one initial fallback without becoming a target owner
+    covers:
+      - C-AS-TRANSITION-0001-O
+      - C-AS-TRANSITION-0001-P
+      - C-AS-TRANSITION-0001-Q
+    expectation: context-field-initial-fallback-is-setup-only-and-sampled-once
 implementations:
+  - id: transition-initial-context-source
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/transition-initial-context.test.ts
+    required: true
+    consumesCases:
+      - T-AS-TRANSITION-0001-CASE-INITIAL-CONTEXT
+  - id: popover-initial-context-composition
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/popover-motion-gap.test.ts
+    required: true
+    consumesCases:
+      - T-AS-TRANSITION-0001-CASE-INITIAL-CONTEXT
+    notes:
+      - Normal source-runtime execution of the same Shadcn Popover; not browser-native paint or compiled conformance evidence.
   - id: base-transition-state-machine
     kind: runtime-test
     status: passing
@@ -96,6 +119,9 @@ verifies:
         - C-AS-TRANSITION-0001-D
         - C-AS-TRANSITION-0001-E
         - C-AS-TRANSITION-0001-N
+        - C-AS-TRANSITION-0001-O
+        - C-AS-TRANSITION-0001-P
+        - C-AS-TRANSITION-0001-Q
 exercises:
   contracts:
     - id: C-DELAY-0001
@@ -111,6 +137,9 @@ revisions:
   - version: 0.2.0-rc.0
     change: refined
     summary: Added reduced-motion fallback coverage and explicit contract anchors.
+  - version: 0.2.0-rc.0
+    change: refined
+    summary: Added initial context-source and actual Popover composition coverage.
 tags:
   - transition
   - view-intent

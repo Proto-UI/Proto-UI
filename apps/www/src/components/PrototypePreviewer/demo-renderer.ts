@@ -1,3 +1,4 @@
+import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import {
   createPreviewMaterialSink,
   findPreviewMaterialProvider,
@@ -49,6 +50,7 @@ type PropsBaseType = Record<string, unknown>;
 const reactComponentCache = new WeakMap<object, Map<string, any>>();
 const vueComponentCache = new WeakMap<object, Map<string, any>>();
 const wcSurfaceProps = new WeakMap<HTMLElement, Record<string, unknown>>();
+const wcRawProps = new WeakMap<HTMLElement, Record<string, unknown>>();
 
 const EMPTY_DEMO_RENDER: DemoRenderResult = { destroy: () => {} };
 
@@ -211,6 +213,7 @@ function renderDemoNodeWc(
     surfaceStyle: node.surfaceStyle,
   };
   wcSurfaceProps.set(el, surfaceProps);
+  wcRawProps.set(el, { ...(node.props ?? {}) });
   setElementAssociations(el, associations.resolve(node.associations) ?? {});
   setElementProps(el, {
     ...(node.props ?? {}),
@@ -277,7 +280,12 @@ async function renderDemoWc(
       const el = refs[ref] as DemoInstance &
         HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
       if (!el) return;
-      el.setProps?.({ ...next, ...(wcSurfaceProps.get(el) ?? {}) });
+      const current = wcRawProps.get(el);
+      if (!current) return;
+      // DemoRuntimeApi updates are patches. The WC adapter deliberately accepts
+      // full snapshots, so retain the authored props before projecting one.
+      Object.assign(current, next);
+      el.setProps?.({ ...current, ...(wcSurfaceProps.get(el) ?? {}) });
       el.update?.();
     },
   };
@@ -335,23 +343,25 @@ async function renderDemoReact(
   const componentRefs = new Map<string, DemoInstance>();
   const propsMap = new Map<string, Record<string, unknown>>();
   const surfaceStyles = new Map<string, DemoSurfaceStyle>();
-  // DemoBoxAttrs are native string attributes, not React boolean props. Keep
-  // global presence attributes (including hidden="until-found") byte-exact in
-  // the initial commit, before setup or the first animation-frame boundary.
-  const presenceAttributes = new Set(['hidden', 'inert', 'itemscope']);
+  // DemoBoxAttrs are native string attributes, not React boolean/style props.
+  // Keep presence values and native CSS declaration strings in the initial
+  // commit before Demo setup. Native style preserves order and !important;
+  // the Prototype surfaceStyle map converter intentionally cannot carry priority.
+  const nativeStringAttributes = new Set(['hidden', 'inert', 'itemscope', 'style']);
   const boxAttributeRefs = new WeakMap<object, (element: HTMLElement | null) => void>();
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
     if (node.kind === 'box') {
-      const presence = Object.entries(node.attrs ?? {}).filter(([name]) =>
-        presenceAttributes.has(name.toLowerCase())
+      const nativeAttributes = Object.entries(node.attrs ?? {}).filter(([name]) =>
+        nativeStringAttributes.has(name.toLowerCase())
       );
-      if (presence.length) {
+      if (nativeAttributes.length) {
         // A stable ref runs on mount, not on every prototype props update:
-        // setup may subsequently own hidden/inert state, as Copy does.
+        // setup may subsequently own native state/style, as Copy does.
         boxAttributeRefs.set(node, (element) => {
-          if (element) for (const [name, value] of presence) element.setAttribute(name, value);
+          if (element)
+            for (const [name, value] of nativeAttributes) element.setAttribute(name, value);
         });
       }
     }
@@ -372,7 +382,7 @@ async function renderDemoReact(
         {
           ...Object.fromEntries(
             Object.entries(node.attrs ?? {}).filter(
-              ([name]) => !presenceAttributes.has(name.toLowerCase())
+              ([name]) => !nativeStringAttributes.has(name.toLowerCase())
             )
           ),
           className: node.className,
@@ -391,6 +401,7 @@ async function renderDemoReact(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }
@@ -564,6 +575,7 @@ async function renderDemoVue(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }
@@ -711,6 +723,7 @@ async function renderDemoVue2(
       Component = adapter(proto as Prototype<PropsBaseType>, {
         rootTag: node.rootTag,
         createVisualSink: createPreviewMaterialSink,
+        residentMotion: { palette: createCanonicalMotionPalette },
       });
       scopedCache.set(componentKey, Component);
     }

@@ -1,0 +1,44 @@
+id: T-DRAWER-AUTO-CONSUMER-0001
+type: test
+title: Drawer valid auto integration and invalid-family negative control
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: The initial-invalid Mask negative control is retained and now passes through logical Content admission; native acceptance is separate.
+summary: Exercises portable mode changes, host intent, controlled refusal and static demo preflight without inferring native layout.
+cases:
+  - id: T-DRAWER-AUTO-CONSUMER-0001-CASE-RUNTIME
+    title: Valid modes, root units, input cancellation and initial-invalid family cleanup
+    covers:
+      [
+        C-DRAWER-AUTO-CONSUMER-0001-LAYOUT,
+        C-DRAWER-AUTO-CONSUMER-0001-HANDLE,
+        C-DRAWER-AUTO-CONSUMER-0001-INVALID,
+      ]
+    expectation: valid-path-conformance-and-explicit-initial-invalid-rejection-without-orphan-mask
+  - id: T-DRAWER-AUTO-CONSUMER-0001-CASE-DEMO
+    title: Preflight all static short, long and snap examples
+    covers: [C-DRAWER-AUTO-CONSUMER-0001-EVIDENCE]
+    expectation: all-public-demo-inputs-are-valid-and-mode-distinct
+implementations:
+  - id: drawer-auto-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/navigation-overlays/drawer-auto.test.ts
+    required: true
+    consumesCases: [T-DRAWER-AUTO-CONSUMER-0001-CASE-RUNTIME]
+    notes:
+      - Initial-invalid Content rejects and logical Content admission keeps Mask absent; the original negative control remains unchanged.
+      - Passing valid-input cases use synthetic host geometry, not native intrinsic evidence.
+  - id: drawer-auto-demo-preflight
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/drawer-auto-demo.test.ts
+    required: true
+    consumesCases: [T-DRAWER-AUTO-CONSUMER-0001-CASE-DEMO]
+verifies:
+  contracts: [C-DRAWER-AUTO-CONSUMER-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Preserve valid-input evidence and the blocking negative control together.
+tags: [drawer, intrinsic, consumer]

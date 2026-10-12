@@ -93,4 +93,91 @@ export function axisInputConformance(
       if (!unmounted) await m.unmount();
     }
   });
+  it(`${name}: extent cancellation restores a consumer preview without committing and releases frames`, async () => {
+    // T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-LIFETIME: synthetic geometry, actual runtime routing.
+    const frame = () =>
+      new Promise<void>((resolve) => window.requestAnimationFrame(() => resolve()));
+    const family = createAnatomyFamily(`axis-basis-${name}`, {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        track: { cardinality: { min: 1, max: 1 } },
+      },
+    });
+    const samples: AxisInputSample[] = [];
+    const accepted = 0.4;
+    let preview = accepted;
+    let requests = 0;
+    const root = definePrototype({
+      name: `basis-root-${name}`,
+      setup(def) {
+        def.anatomy.claim(family, { role: 'root' });
+      },
+    });
+    const track = definePrototype({
+      name: `basis-track-${name}`,
+      setup(def) {
+        def.anatomy.claim(family, { role: 'track' });
+        const value = def.state.numberRange('preview', accepted, { min: 0, max: 1, clamp: true });
+        const input = asAxisInput();
+        input.configure({ anatomy: family, inputRole: 'track', geometryRole: 'root' });
+        input.on((_run, sample) => {
+          samples.push(sample);
+          if (sample.phase === 'cancel') value.set(accepted);
+          else if (sample.phase === 'end') {
+            requests++;
+            value.set(accepted);
+          } else value.set(sample.position);
+          preview = value.get();
+        });
+        def.lifecycle.onMounted(() =>
+          input.sync({ disabled: false, contactBasis: 'cancel-on-extent-change' })
+        );
+      },
+    });
+    let m: ScrollMount | undefined;
+    let unmounted = false;
+    try {
+      m = await mount([{ proto: root, children: [{ proto: track }] }]);
+      await m.flush();
+      const [geometry, input] = Array.from(m.host.querySelectorAll<HTMLElement>('[data-pui-root]'));
+      let width = 200;
+      geometry.getBoundingClientRect = () => ({ left: 0, top: 0, width, height: 100 }) as DOMRect;
+      const event = (type: string, x: number) =>
+        new PointerEvent(type, {
+          bubbles: true,
+          cancelable: true,
+          pointerId: 9,
+          pointerType: 'mouse',
+          isPrimary: true,
+          button: 0,
+          clientX: x,
+        });
+      await m.dispatch(input, event('pointerdown', 100));
+      expect(preview).toBe(0.5);
+      width = 300;
+      await frame();
+      await frame();
+      await m.flush();
+      expect(samples.at(-1)).toEqual({ phase: 'cancel', reason: 'basis-changed' });
+      expect(preview).toBe(accepted);
+      expect(requests).toBe(0);
+      await m.dispatch(input, event('pointerup', 250));
+      expect(requests).toBe(0);
+      await m.dispatch(input, event('pointerdown', 150));
+      await m.dispatch(input, event('pointerup', 250));
+      expect(requests).toBe(1);
+      expect(preview).toBe(accepted);
+      await m.dispatch(input, event('pointerdown', 150));
+      await m.unmount();
+      unmounted = true;
+      const count = samples.length;
+      width = 400;
+      await frame();
+      await frame();
+      input.dispatchEvent(event('pointerup', 260));
+      expect(samples).toHaveLength(count);
+    } finally {
+      if (m && !unmounted) await m.unmount();
+    }
+  });
 }

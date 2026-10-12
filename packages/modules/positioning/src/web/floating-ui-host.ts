@@ -1,3 +1,4 @@
+import { createTargetAlignmentLease } from './target-alignment-host';
 import { resolveWebInputOriginAnchor } from './input-origin-anchor';
 import { observeRootSpace } from './root-space-observer';
 import {
@@ -104,7 +105,7 @@ function middlewareFor(config: AnchoredPositionConfig, isCurrent: () => boolean)
   return middleware;
 }
 
-export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
+function createEdgeAnchoredPositionHost(): AnchoredPositionHost {
   return {
     attach(initial): AnchoredPositionHostLease {
       let connection = initial;
@@ -190,6 +191,52 @@ export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
           generation += 1;
           cleanup?.();
           cleanup = null;
+        },
+      };
+    },
+  };
+}
+
+/** Both policies share one host capability; the descriptor selects geometry, not a component. */
+export function createFloatingUiAnchoredPositionHost(): AnchoredPositionHost {
+  const edge = createEdgeAnchoredPositionHost();
+  return {
+    supportsTargetAlignment: true,
+    attach(initial) {
+      let connection = initial;
+      let disposed = false;
+      const acquire = (next: AnchoredPositionConnection) =>
+        next.targetAlignment ? createTargetAlignmentLease(next) : edge.attach(next);
+      let lease: ReturnType<typeof acquire> | null = acquire(initial);
+      let generation = 0;
+      return {
+        update(next) {
+          if (disposed) return;
+          const changed = Boolean(connection.targetAlignment) !== Boolean(next.targetAlignment);
+          connection = next;
+          if (!changed && lease) {
+            lease.update(next);
+            return;
+          }
+          const request = ++generation;
+          const previous = lease;
+          lease = null;
+          previous?.dispose();
+          if (disposed || request !== generation || connection !== next) return;
+          const acquired = acquire(next);
+          if (disposed || request !== generation || connection !== next) acquired.dispose();
+          else lease = acquired;
+        },
+        requestUpdate() {
+          if (!disposed) lease?.requestUpdate();
+        },
+        dispose() {
+          if (disposed) return;
+          disposed = true;
+          generation++;
+          const previous = lease;
+          lease = null;
+          previous?.dispose();
         },
       };
     },

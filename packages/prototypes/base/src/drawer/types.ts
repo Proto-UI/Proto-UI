@@ -1,6 +1,7 @@
 import type { useOpenState } from '../tools/use-open-state';
 import type {
   BorrowedStateHandle,
+  AvailableLayoutLength,
   ExposeEvent,
   ExposeMethod,
   ExposeState,
@@ -17,6 +18,8 @@ export interface DrawerRootProps {
 }
 
 export type DrawerRootExposes = {
+  __admitContent: ExposeMethod<(instanceId: string) => number>;
+  __releaseContent: ExposeMethod<(instanceId: string, generation: number) => void>;
   open: ExposeState<boolean>;
   openDrawer: ExposeMethod<(reason?: string) => void>;
   close: ExposeMethod<(reason?: string) => void>;
@@ -91,8 +94,10 @@ export type DrawerMaskHandles = {
 
 export type DrawerContentProps = TransitionProps & {
   side?: 'top' | 'right' | 'bottom' | 'left';
-  /** Fractions of the available full scrollport extent; invalid entries are ignored. Defaults to [1]. */
+  /** Vertical: absent/empty points fit content; explicit points are fractions of the capped full extent. */
   snapPoints?: number[];
+  minExtent?: AvailableLayoutLength;
+  maxExtent?: AvailableLayoutLength;
   snapPoint?: number;
   defaultSnapPoint?: number;
   dragDismissible?: boolean;
@@ -106,6 +111,7 @@ export type DrawerContentExposes = TransitionExposes & {
   dragging: ExposeState<boolean>;
   dragProgress: ExposeState<number>;
   offsetPercentage: ExposeState<number>;
+  extentValid: ExposeState<boolean>;
   requestSnapPoint: ExposeMethod<(value: number, reason?: string) => void>;
   snapPointChange: ExposeEvent<{ snapPoint: number; reason: string }>;
   __onAxisInput: ExposeMethod<(sample: import('@proto.ui/core').AxisInputSample) => void>;
@@ -117,6 +123,7 @@ export type DrawerContentStateHandles = {
   dragging: State<boolean>;
   dragProgress: State<number>;
   offsetPercentage: State<number>;
+  extentValid: State<boolean>;
 };
 
 export type DrawerContentAsHookContract = {
@@ -133,6 +140,7 @@ export type DrawerContentHandles = {
     dragging: BorrowedStateHandle<boolean, DrawerContentProps>;
     dragProgress: BorrowedStateHandle<number, DrawerContentProps>;
     offsetPercentage: BorrowedStateHandle<number, DrawerContentProps>;
+    extentValid: BorrowedStateHandle<boolean, DrawerContentProps>;
   };
   asTransition: TransitionHandles;
 };

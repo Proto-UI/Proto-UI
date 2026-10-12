@@ -25,6 +25,7 @@ export type A11yFacade = AccessibleHandle;
 export type A11yStateBinding = {
   key: A11yStateKey;
   handle: State<unknown>;
+  when?: State<boolean>;
 };
 
 export type A11yRelationBinding = {

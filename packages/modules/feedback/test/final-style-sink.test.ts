@@ -1,3 +1,4 @@
+import { RESIDENT_MOTION_SINK_CAP, type ResidentMotionFrame } from '../src/motion/sink';
 import { describe, expect, it, vi } from 'vitest';
 import { tw } from '@proto.ui/core';
 import { CapsVault, SYS_CAP } from '@proto.ui/module-base';
@@ -225,5 +226,53 @@ describe('private Feedback final-style sink', () => {
     expect(f.effects.queueStyle).not.toHaveBeenCalled();
     f.hooks.flushIfPossible();
     expect(f.frames.at(-1)?.style.tokens).toEqual(['rounded-full']);
+  });
+});
+
+describe('resident motion final target boundary', () => {
+  it('retains Rules and gives runtime patch final precedence without mutating target snapshots', () => {
+    const f = fixture();
+    const frames: ResidentMotionFrame[] = [];
+    f.style.transition({ properties: ['translate'], durationMs: 150, easing: [0.4, 0, 0.2, 1] });
+    f.style.use(tw('translate-x-0'));
+    expect(f.port.shouldRetainStyleRule?.(['translate-x-4'])).toBe(true);
+    f.caps.attach([
+      [
+        RESIDENT_MOTION_SINK_CAP,
+        { commit: (frame: ResidentMotionFrame) => frames.push(frame), release() {} },
+      ],
+    ]);
+    f.mount();
+    const off = f.port.useStyleRuntime(tw('translate-x-4'));
+    expect(frames.at(-1)?.style.tokens).toEqual(['translate-x-4']);
+    f.style.patch(tw('translate-x-2'));
+    expect(frames.at(-1)?.style.tokens).toEqual(['translate-x-2']);
+    off();
+    expect(frames.at(-1)?.style.tokens).toEqual(['translate-x-2']);
+    f.style.suppress(tw('translate-x-0'));
+    expect(frames.at(-1)?.style.tokens).toEqual([]);
+    f.style.clearPatch();
+    expect(frames.at(-1)?.style.tokens).toEqual(['translate-x-0']);
+    expect(() =>
+      f.style.transition({ properties: ['translate'], durationMs: 0, easing: [0, 0, 1, 1] })
+    ).toThrow();
+  });
+  it('rejects overlapping channels and makes stale callbacks terminal on unmount', () => {
+    const f = fixture();
+    const release = vi.fn();
+    f.style.transition({ properties: ['translate'], durationMs: 100, easing: [0, 0, 1, 1] });
+    expect(() =>
+      f.style.transition({ properties: ['translate'], durationMs: 1, easing: [0, 0, 1, 1] })
+    ).toThrow(/Overlapping/);
+    const commit = vi.fn();
+    f.caps.attach([[RESIDENT_MOTION_SINK_CAP, { commit, release }]]);
+    f.mount();
+    f.hooks.onMountPhase?.('detached', 1);
+    expect(release).toHaveBeenCalledWith(1);
+    const count = commit.mock.calls.length;
+    f.style.patch(tw('translate-x-4'));
+    expect(commit).toHaveBeenCalledTimes(count);
+    f.hooks.dispose?.();
+    expect(() => f.style.patch(tw('translate-x-0'))).toThrow(/disposed/);
   });
 });

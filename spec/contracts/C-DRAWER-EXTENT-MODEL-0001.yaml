@@ -1,0 +1,40 @@
+id: C-DRAWER-EXTENT-MODEL-0001
+type: contract
+title: Drawer vertical intrinsic and explicit snap input model
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Pure input normalization is a bounded prerequisite; live Drawer integration, gestures, accessibility, Compiler and native geometry require separate evidence.
+summary: Defines upstream-aligned empty-point mode selection and strict neutral extent inputs without activating a consumer.
+statement:
+  en: Drawer owns its portable extent input model independently of host realization; this slice does not activate production behavior.
+  zh-CN: Drawer 独立于宿主实现拥有可移植尺寸输入模型；本切片不启用生产行为。
+criteria:
+  - id: C-DRAWER-EXTENT-MODEL-0001-MODE
+    text:
+      en: Top and bottom select intrinsic extent when snapPoints is omitted, undefined, null or an empty array. A nonempty valid point array selects fractional extent. This matches the fixed Shadcn c2a67849 and Neo 3306a802 wrapper predicate snapPoints != null and length greater than zero. snapPoint or defaultSnapPoint alone never enables snapping; their selection is inactive in intrinsic mode. Left and right retain the existing fractional default with point one in this vertical-only slice. This changes the previous vertical implicit full-point default.
+      zh-CN: top/bottom 在 snapPoints 缺省、undefined、null 或空数组时选择 intrinsic，非空有效数组选择 fraction，遵循固定 Shadcn c2a67849 和 Neo 3306a802 wrapper 的非 null 且 length 大于零判定。单独 snapPoint/defaultSnapPoint 不开启 snap，intrinsic 模式不应用其选择。此次仅改纵向，left/right 保留既有 fraction 和默认点 one。纵向旧隐式满高度默认因此发生迁移。
+  - id: C-DRAWER-EXTENT-MODEL-0001-VALIDATION
+    text:
+      en: A supplied non-array point set or any point that is non-finite, nonnumeric, nonpositive or greater than one produces an explicit invalid result. Never manufacture point one from malformed vertical input. Valid arrays are sorted and deduplicated. Active finite selections choose the nearest point with ties toward the more-open point. A non-null supplied snapPoint owns the active selection; omitted, undefined or null is uncontrolled and uses defaultSnapPoint or the largest point. Invalid active selections remain invalid rather than transferring ownership.
+      zh-CN: 已提供的非数组 points 或任何非有限、非数字、不大于零或大于一的 point 返回明确 invalid，不能以 malformed 纵向输入制造满高度点 one。有效数组排序去重。有效有限选择取最近点，等距偏更开放点。非 null 的 snapPoint 控制有效 snap 选择；缺省/undefined/null 为非受控，采用 defaultSnapPoint 或最大点。非法有效选择返回 invalid，不转移所有权。
+  - id: C-DRAWER-EXTENT-MODEL-0001-LENGTH
+    text:
+      en: Component minExtent and maxExtent are static shared neutral length records. Missing, undefined or null minimum uses logical zero and maximum uses an explicitly supplied valid family default. Malformed explicit records produce an invalid result rather than silent fallback. Base maximum defaults to available one; the two fixed vertical family defaults are available-minus-root-text six. Valid minimum is ignored in fraction mode. The model reads no host metrics and contains no family-name dispatch; the shared layout contract owns geometry and hard-cap resolution.
+      zh-CN: minExtent/maxExtent 使用静态共享中立长度记录。缺省/undefined/null minimum 为 logical zero，maximum 为明确传入且有效的 family 默认。显式非法记录返回 invalid，不静默回退。Base maximum 默认 available one；两固定纵向 family 默认 available-minus-root-text six。fraction 模式不应用有效 minimum。模型不读宿主测量、不按 family 名称分派；共享 layout 契约负责几何与安全硬 cap。
+  - id: C-DRAWER-EXTENT-MODEL-0001-BOUNDARY
+    text:
+      en: This model does not activate production Content or Handle. The fixed wrapper swipe handle is an aria-hidden div, not a Close action; no Enter/Space dismissal is introduced by this definition. Logical open, controlled refusal, drag translation, range withdrawal, scrolling composition, transformed layout and native realization remain separate acceptance work. Malformed-point rejection intentionally replaces the old ignored-entry/full-point fallback only when the new model is later integrated.
+      zh-CN: 本模型不启用生产 Content/Handle。固定 wrapper swipe handle 为 aria-hidden div，不是 Close；本定义不新增 Enter/Space 关闭。logical open、受控拒绝、drag translation、range 撤销、滚动组合、变换布局与 native realization 均需后续独立验收。未来接入新模型时，malformed point 拒绝明确取代旧忽略条目/满高度回退。
+dependsOn:
+  contracts: [C-AVAILABLE-SPACE-LAYOUT-0001]
+verifies:
+  tests: [T-DRAWER-EXTENT-MODEL-0001]
+openQuestions:
+  - id: C-DRAWER-EXTENT-MODEL-0001-Q-INTEGRATION
+    question: Which separately reviewed prototype and native evidence admits live mode transitions, safe intrinsic extent, drag cancellation, accessibility and internal scrolling?
+    blocks: [activation:C-DRAWER-EXTENT-MODEL-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Separate pure upstream-aligned vertical sizing inputs from unverified live integration.
+tags: [drawer, layout, intrinsic, snap]

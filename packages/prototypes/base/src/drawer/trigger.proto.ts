@@ -29,7 +29,7 @@ function setupDrawerTrigger(def: DefHandle<DrawerTriggerProps, DrawerTriggerExpo
   accessible.relation('controls', { target: controls });
 
   const syncDrawerFacts = (ctx: DrawerContextValue) => {
-    expanded.set(ctx.open, 'reason: drawer trigger expanded sync');
+    expanded.set(ctx.open && ctx.contentAdmitted, 'reason: drawer trigger expanded sync');
     controls.set(createDrawerPartId(ctx.rootId, 'content'), 'reason: drawer trigger controls sync');
   };
 

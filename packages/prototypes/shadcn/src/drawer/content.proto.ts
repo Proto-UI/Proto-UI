@@ -9,6 +9,7 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
   name: 'shadcn-drawer-content',
   setup(def) {
     const behavior = asDrawerContent();
+    def.props.setDefaults({ maxExtent: { unit: 'available-minus-root-text', value: 6 } });
     def.feedback.style.use(
       tw(
         'rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-4 grid gap-4'

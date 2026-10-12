@@ -5,6 +5,22 @@ status: draft
 since: 0.1.0
 summary: Contract tests for a11y semantic object IR, Button consumption, identity/relation projection, Web adapter projection, portable heading-level validation, role coherence, target rebinding, cross-adapter lifecycle behavior, and bounded React referenced-identity replay.
 cases:
+  - id: T-A11Y-0001-CASE-STATE-CONDITION
+    title: Conditional state bindings omit inactive keys and restore fresh values without altering source ownership
+    covers:
+      - C-A11Y-0001-STATE-CONDITION
+      - C-A11Y-0001-STATE-CONDITION-VALIDITY
+    expectation: true-false-inactive-value-change-true-with-current-value-and-strict-condition-validation
+    notes:
+      - Cover omitted condition, false-valued state with true condition, shared and independent conditions, last setup declaration, runtime declaration rejection, invalid initial and final setup condition, invalid runtime condition recovery, and preserved State errors.
+  - id: T-A11Y-0001-CASE-STATE-CONDITION-LIFECYCLE
+    title: Conditional state projection retains current bindings across detach and remount and withdraws only owned host contributions
+    covers:
+      - C-A11Y-0001-STATE-CONDITION-LIFECYCLE
+      - C-A11Y-0001-DECLARATION-LIFETIME
+    expectation: bounded-subscriptions-current-remount-stale-callback-rejection-and-owned-attribute-release
+    notes:
+      - Cover repeated update, inactive changes while detached, remount, target replacement, terminal disposal, all three range keys, host baseline restoration, later host rewrite preservation, competing owners, and unchanged unconditional consumers.
   - id: T-A11Y-0001-CASE-ACCESSIBLE-HANDLE
     title: Shared setup handle, removed legacy entry, guarded declarations and both name-collision orders
     covers:
@@ -112,6 +128,16 @@ cases:
       - No heading level is declared or asserted in this fixture; this case is reference identity and dependent IDREF projection evidence, not additional aria-level coverage.
       - Bounded installed-React replay evidence only; this does not establish every React version, replacement document, terminal-disposal branch, or complete accessibility conformance.
 implementations:
+  - id: runtime-a11y-state-condition
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/a11y-state-condition.contract.test.ts
+    required: true
+    consumesCases:
+      - T-A11Y-0001-CASE-STATE-CONDITION
+      - T-A11Y-0001-CASE-STATE-CONDITION-LIFECYCLE
+    notes:
+      - Source runtime and existing generic Web projector evidence; this is not native browser, non-Web host or Compiler conformance.
   - id: runtime-accessible-handle
     kind: runtime-test
     status: passing

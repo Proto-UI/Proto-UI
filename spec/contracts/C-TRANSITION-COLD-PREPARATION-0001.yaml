@@ -1,0 +1,29 @@
+id: C-TRANSITION-COLD-PREPARATION-0001
+type: contract
+title: Opt-in cold entry preparation retains one view intent
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Cold-attempt protocol only. Connected Select geometry, first-visible-frame focus, warm reversal, host failures and native evidence remain separate admission gates.
+summary: A setup-only preparation gate delays cold entry until current readiness and actual mount, without a second presence driver or global clock.
+criteria:
+  - id: C-TRANSITION-COLD-PREPARATION-0001-ATTEMPT
+    text:
+      zh-CN: setup-only coldEntryPreparation 默认为 false；启用后初始 open 或 closed 到 open 先建立 owner 私有 attempt 并进入 preparing，请求唯一 ViewIntent present，但不发 entry signal、不计时。capturePreparation 返回当前 attempt 的幂等 release 闭包或 null。release 仅在当前 attempt、open target 与 preparing 仍有效时生效；mounted 前或本 attempt 的 present 请求尚未返回时只记录 ready；请求返回且 mounted 后才能进入目标。complete 在 preparing 时无效，重复 enter 不重建 attempt 或清 ready。关闭、detach、dispose、新 initialize 使旧 ready 和闭包失效；仍为 open 的 remount 建新 attempt。准备路径的 setState、setViewPresent、emit 同步边界后须重验，beforeEnter 重入关闭不得再启动 entering 或 timer。isPresent 必须从同步 State watcher 执行后的当前最终 phase 派生，不得按已失效的入参 phase 覆写；若 watcher 同步 dispose owner，必须在任何后续 State 读写前停止。
+      en: Setup-only coldEntryPreparation defaults to false. When enabled, initial open or closed-to-open creates an owner-private attempt in preparing and requests the sole ViewIntent present without entry signals or timers. capturePreparation returns an idempotent release closure for the current attempt or null. Release applies only while that attempt, open target and preparing state remain current; before mounted or before that attempt’s present request returns, it records readiness only. Entry requires both the returned present request and mounted view. complete is a no-op during preparing and repeated enter neither replaces the attempt nor clears readiness. Close, detach, disposal and new initialization retire readiness and captured closures; an open remount creates a new attempt. The preparation path must recheck synchronous setState, setViewPresent and emit boundaries, so closing reentrantly from beforeEnter cannot start entering or its timer. isPresent must derive from the current final phase after synchronous State watchers, never overwrite it from a superseded input phase. If a watcher synchronously disposes the owner, projection must stop before any further State read or write.
+  - id: C-TRANSITION-COLD-PREPARATION-0001-LIMITS
+    text:
+      zh-CN: 冷准备闭包只证明 Transition attempt；消费者必须在合法 callback 内另验当前定位 lease/request。mounted 前 release 仅适用于声明不再变更的单请求准备，不能把旧 ready 带入变更目标；实际定位消费者须在 mounted 后测量和 release。warm leave/reopen 保留既有 interrupt 路径，本能力不冻结 CSS、不证明 warm 对齐。准备只等待几何和显式 scroll，不等待隐藏目标 focus；reveal 后的 focus/首帧由消费者单独验证。
+      en: A cold preparation closure proves only its Transition attempt; the consumer must separately verify the current positioning lease/request inside a legal callback. Pre-mount release is restricted to a single preparation request whose declaration will not change; stale readiness cannot authorize a changed target. Geometry consumers must measure and release after mount. Warm leave/reopen preserves the existing interrupt paths; this capability neither freezes CSS nor proves warm alignment. Preparation waits for geometry and explicit scroll, not focus on hidden targets; post-reveal focus and first visible paint require separate consumer evidence.
+dependsOn:
+  contracts: [C-AS-TRANSITION-0001]
+verifies:
+  tests: [T-TRANSITION-COLD-PREPARATION-0001]
+sources:
+  - path: packages/prototypes/base/src/transition/machine.ts
+  - path: packages/prototypes/base/src/transition/as-transition.proto.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added a bounded cold-attempt release protocol; warm freeze and production Select alignment are not admitted.
+tags: [transition, preparation, lifecycle]

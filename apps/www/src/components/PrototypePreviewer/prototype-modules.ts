@@ -818,6 +818,26 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/copy');
     registerPrototype('lucide-copy-icon', mod.default);
   },
+  'lucide-pencil-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/pencil');
+    registerPrototype('lucide-pencil-icon', mod.default);
+  },
+  'lucide-share-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/share');
+    registerPrototype('lucide-share-icon', mod.default);
+  },
+  'lucide-archive-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/archive');
+    registerPrototype('lucide-archive-icon', mod.default);
+  },
+  'lucide-trash-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/trash');
+    registerPrototype('lucide-trash-icon', mod.default);
+  },
+  'lucide-scissors-icon': async () => {
+    const mod = await import('@proto.ui/prototypes-lucide/icons/scissors');
+    registerPrototype('lucide-scissors-icon', mod.default);
+  },
   'lucide-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);

@@ -116,3 +116,37 @@ describe('feedback.semantic-merge.v0', () => {
     expect(r.tokens).toEqual([]);
   });
 });
+
+describe('resident translate-axis groups', () => {
+  it('same-axis positive negative and affine targets replace without erasing the other axis', () => {
+    expect(
+      mergeTwTokensV0([
+        'translate-x-0',
+        'translate-y-2',
+        '-translate-x-4',
+        'translate-x-[calc(100%_-_2px)]',
+      ]).tokens
+    ).toEqual(['translate-x-[calc(100%_-_2px)]', 'translate-y-2']);
+    expect(mergeTwTokensV0(['translate-y-full', '-translate-y-2', 'translate-x-1']).tokens).toEqual(
+      ['-translate-y-2', 'translate-x-1']
+    );
+  });
+  it('does not erase differently scoped variants or general transform channels', () => {
+    expect(
+      mergeTwTokensV0([
+        'translate-x-0',
+        'data-[checked]:translate-x-4',
+        'hover:translate-x-2',
+        '-translate-x-2',
+        'rotate-45',
+        'scale-95',
+      ]).tokens
+    ).toEqual([
+      '-translate-x-2',
+      'data-[checked]:translate-x-4',
+      'hover:translate-x-2',
+      'rotate-45',
+      'scale-95',
+    ]);
+  });
+});

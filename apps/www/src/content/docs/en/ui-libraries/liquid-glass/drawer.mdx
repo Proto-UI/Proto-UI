@@ -14,18 +14,34 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
-Content.side accepts top, right, bottom or left. The panel uses the available host region, contains long-content scrolling, traps focus and restores the trigger on dismissal. Place Handle inside Content to drag only the dedicated grab surface; interactive panel content keeps its normal pointer and scroll behavior. Drag geometry is the panel itself and the public input is dimensionless. No velocity-based fling is claimed.
+Top/bottom Content fits its content by default. Its maximum is the available height, always bounded by the safe available region. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right retain the existing capped 20rem presentation in this vertical-only draft.
 
-Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Supplying open leaves the committed value with the owner; listen to openChange and provide the next value.
+The project composes Content as an overflow-y-auto scrollport. This differs from the fixed Shadcn/Neo reference wrappers' overflow-hidden Content with an explicitly authored scrolling body. The long example keeps Close inside the same scrollport.
 
-Partial snaps resize the real scrollable panel instead of translating controls outside the viewport. Top/bottom use up to 85% of the available host height; left/right use up to 20rem, bounded by the available width. Long content scrolls inside that current extent. A drag is normalized against its starting panel size and converted back to full-extent fractions.
+Root supports controlled open or uncontrolled defaultOpen. Disabled commands do not activate. Controlled close requests can be refused; drag preview then returns to the accepted owner state.
 
-Parts: Root, Trigger, Content, Title, Description, Close, Mask, Handle.
+Omitted, null or empty snapPoints selects content-fit mode. A nonempty valid array selects explicit snaps: positive fractions up to one, sorted and deduplicated. snapPoint alone does not enable snapping. Explicit snap fractions use the full capped extent, not an implicit 85% multiplier. defaultSnapPoint is local; snapPoint with snapPointChange is owner-controlled. Invalid vertical point arrays or length records are rejected, not converted to full height.
 
-Draft source implementation. Full native/GPUI, compiler, packed-consumer, visual and independent acceptance remain pending; this page does not claim Finf completion.
+In content-fit mode Handle is a pointer-only, aria-hidden drag affordance, without keyboard resizing or an Enter/Space close action. Explicit snaps retain the named separator, arrows, Home/End and range values. Content.dragDismissible=false prevents drag dismissal; independent Close, Escape and outside dismissal retain their existing protocol. Interrupted gestures and rejected controlled requests restore the accepted presentation.
 
-Content.snapPoints is a sorted set of positive panel fractions up to 1, default [1]. Use defaultSnapPoint for local ownership or snapPoint plus snapPointChange for controlled ownership. Invalid points are ignored. A drag previews dragProgress separately from the committed snapPoint; release chooses the nearest point, preferring the more open point on ties. A refused controlled request restores the owner projection.
+Runtime invalid extent updates expose extentValid=false, cancel Handle input and retain the last valid intent while current safety constraints still apply. Initial malformed input is rejected before presentation: Root keeps its logical open value, while Mask waits for one valid Content declaration. These examples use statically validated legal inputs. This draft does not claim arbitrary-input safety or native, compiler, packed-consumer or full Finf acceptance.
 
-A completed drag below dragDismissThreshold (default 0.25, limited by the smallest point) requests Root close. Content.dragDismissible=false disables handle/drag dismissal; explicit Close, Escape and outside dismissal retain the Root window protocol. The Handle is a named keyboard separator: arrows toward the center expand, opposite arrows collapse, Home chooses the smallest point and End the largest. Moving below the smallest point by keyboard requests close when dismissible. Content-side/owner changes, disabled state and pointer cancellation discard an unfinished drag.
+### Long content
 
-The demo exposes half/full snaps and announces committed changes. Browser visual projection, native input and compiler/packed-consumer parity remain acceptance work; host tests use synthetic panel geometry.
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-scroll"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
+
+### Explicit half/full snaps
+
+This example retains the explicit resizing interaction and announces committed changes.
+
+<PrototypePreviewer
+  demoId="demo-liquid-glass-drawer-snap"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>

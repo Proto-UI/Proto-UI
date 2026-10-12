@@ -204,6 +204,7 @@ describe('axis-input module ownership', () => {
       disabled: true,
       readOnly: false,
       reverse: false,
+      contactBasis: 'preserve-start',
     });
     h.records[0].binding.onSample(sample('start'));
     expect(h.samples).toEqual([]);
@@ -222,4 +223,33 @@ describe('axis-input module ownership', () => {
     expect(h.samples.map((s) => s.phase)).toEqual(['start', 'cancel']);
     expect(h.records[0].disposed).toBe(true);
   });
+});
+
+// T-AXIS-INPUT-CONTACT-BASIS-0001-CASE-POLICY
+describe('contact basis policy configuration', () => {
+  it('defaults to preserve-start and preserves the policy through partial or undefined sync', () => {
+    const h = harness();
+    h.mount();
+    expect(h.records[0].binding.config.contactBasis).toBe('preserve-start');
+    h.callback(() => h.input.sync({ contactBasis: 'cancel-on-extent-change' }));
+    expect(h.records[0].binding.config.contactBasis).toBe('cancel-on-extent-change');
+    h.callback(() => h.input.sync({ reverse: true, contactBasis: undefined }));
+    expect(h.records[0].binding.config.contactBasis).toBe('cancel-on-extent-change');
+    h.callback(() => h.input.sync({ contactBasis: 'preserve-start' }));
+    expect(h.records[0].binding.config.contactBasis).toBe('preserve-start');
+    h.module.hooks.dispose?.();
+  });
+  it.each([null, '', 'unknown', 0])(
+    'rejects invalid policy %s without changing the binding',
+    (value) => {
+      const h = harness();
+      h.mount();
+      const before = h.records[0].binding;
+      expect(() => h.callback(() => h.input.sync({ contactBasis: value as any }))).toThrow(
+        /contactBasis/
+      );
+      expect(h.records[0].binding).toBe(before);
+      h.module.hooks.dispose?.();
+    }
+  );
 });

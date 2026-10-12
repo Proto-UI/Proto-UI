@@ -1,0 +1,52 @@
+id: T-SELECT-ALIGNMENT-PARTS-0001
+type: test
+title: Safe scoped Anatomy queries and real Select structural parts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Structural and Runtime query evidence only; no native geometry or production default alignment claim.
+summary: Current-domain ancestry, safe query routing and slot-preserving optional Select parts.
+cases:
+  - id: T-SELECT-ALIGNMENT-PARTS-0001-CASE-QUERY
+    title: Current-domain query excludes invalid ancestors and nested domains
+    covers:
+      [
+        C-ANATOMY-SCOPED-QUERY-0001-SCOPE,
+        C-ANATOMY-SCOPED-QUERY-0001-SAFETY,
+        C-ANATOMY-SCOPED-QUERY-0001-PHASE,
+      ]
+    expectation: safe-current-strict-descendants
+  - id: T-SELECT-ALIGNMENT-PARTS-0001-CASE-PARTS
+    title: Real parts preserve slots and optional baseline structure
+    covers:
+      [
+        P-BASE-SELECT-ALIGNMENT-PARTS-STRUCTURE,
+        P-BASE-SELECT-ALIGNMENT-PARTS-PROFILE,
+        P-BASE-SELECT-ALIGNMENT-PARTS-OWNERSHIP,
+        P-BASE-SELECT-ALIGNMENT-PARTS-COMPOSITION,
+      ]
+    expectation: scoped-slot-parts-without-runtime-alignment
+implementations:
+  - id: scoped-query
+    kind: module-test
+    status: passing
+    path: packages/modules/anatomy/test/scoped-query.test.ts
+    required: true
+    consumesCases: [T-SELECT-ALIGNMENT-PARTS-0001-CASE-QUERY]
+  - id: select-parts-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/select-alignment-parts.test.ts
+    required: true
+    consumesCases:
+      [T-SELECT-ALIGNMENT-PARTS-0001-CASE-PARTS, T-SELECT-ALIGNMENT-PARTS-0001-CASE-QUERY]
+verifies:
+  contracts: [C-ANATOMY-SCOPED-QUERY-0001]
+  prototypes: [P-BASE-SELECT-ALIGNMENT-PARTS]
+exercises:
+  prototypes: [P-BASE-SELECT-ALIGNMENT-PARTS]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded query and structural-part conformance cases.
+tags: [anatomy, select, conformance]

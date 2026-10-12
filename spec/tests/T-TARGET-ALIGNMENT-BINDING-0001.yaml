@@ -1,0 +1,83 @@
+id: T-TARGET-ALIGNMENT-BINDING-0001
+type: test
+title: Scoped target binding, painted boundary and cold prototype integration
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Unit and injected-fact Runtime evidence do not substitute for native pixel/first-visible-frame evidence; the native fixture awaits normal-sandbox official CI.
+summary: Verify shared target association, current callback delivery, frame style ownership and an isolated real prototype consumer.
+cases:
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-ASSOCIATION
+    title: Only current logically associated safe parts resolve private targets
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-OWNERSHIP]
+    expectation: valid-targets-or-invalid-association-with-stale-callback-cancellation
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-HOST
+    title: Neutral measured facts apply source plans with style and scroll ownership
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-HOST]
+    expectation: current-plan-application-scroll-readback-and-external-writer-preservation
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-STATUS
+    title: Unsupported and stale requests cannot fabricate successful edge or target results
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-STATUS]
+    expectation: explicit-unavailable-and-dispatch-time-current-request-check
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-BOUNDARY
+    title: Painted surface substitutes the automatic root region with view-owned lifetime
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-BOUNDARY]
+    expectation: frame-blank-outside-surface-and-anchor-inside-stale-release-inert
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-RUNTIME
+    title: Real prototype and Adapter integration consumes injected host facts
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-SCOPE]
+    expectation: registered-target-parts-cold-release-and-selected-focus-without-pixel-claim
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-CASE-NATIVE
+    title: Native LTR and RTL cold first-visible frames align the selected row and inline text
+    covers: [C-TARGET-ALIGNMENT-BINDING-0001-SCOPE, C-TARGET-ALIGNMENT-BINDING-0001-BOUNDARY]
+    expectation: first-visible-target-alignment-selected-focus-and-blank-frame-dismissal
+implementations:
+  - id: target-association
+    kind: module-test
+    status: passing
+    path: packages/modules/overlay/test/target-alignment-binding.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-ASSOCIATION]
+  - id: target-host
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/target-alignment-host.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-HOST]
+  - id: target-status
+    kind: module-test
+    status: passing
+    path: packages/modules/positioning/test/target-alignment-delivery.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-STATUS]
+  - id: painted-boundary
+    kind: module-test
+    status: passing
+    path: packages/modules/boundary/test/root-replacement.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-BOUNDARY]
+  - id: cold-runtime-consumer
+    kind: runtime-test
+    status: passing
+    path: packages/web-conformance/test/select-target-alignment-fixture.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-RUNTIME]
+  - id: cold-native-consumer
+    kind: adapter-test
+    status: planned
+    path: packages/web-conformance/test/select-target-alignment.browser.test.ts
+    required: true
+    consumesCases: [T-TARGET-ALIGNMENT-BINDING-0001-CASE-NATIVE]
+    notes:
+      - Local Chromium launch failed at its process socket before loading any page. Normal-sandbox official CI and commit-bound screenshots remain required.
+verifies:
+  contracts: [C-TARGET-ALIGNMENT-BINDING-0001]
+openQuestions:
+  - id: T-TARGET-ALIGNMENT-BINDING-0001-Q-NATIVE
+    question: Does normal-sandbox official CI verify native first-visible geometry, focus and blank-frame dismissal?
+    blocks: [activation:T-TARGET-ALIGNMENT-BINDING-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded connected cold evidence without claiming production defaults or warm behavior.
+tags: [select, positioning, boundary, conformance]

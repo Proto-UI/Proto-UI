@@ -1,3 +1,4 @@
+import { createWebAvailableLayout } from './available-layout-host';
 import { observeRootSpace } from './root-space-observer';
 import type { AvailableSpaceFrame, AvailableSpaceRect } from '@proto.ui/core';
 import type { AvailableSpaceHost, AvailableSpaceHostConnection } from '../caps';
@@ -73,6 +74,8 @@ type Lease = {
   relinquished: Set<string>;
   dispose(): void;
   update(): void;
+  layout: ReturnType<typeof createWebAvailableLayout>;
+  layoutFrame: AvailableSpaceHostConnection['layout'];
 };
 const owners = new WeakMap<HTMLElement, Lease>();
 const trackers = new WeakMap<Document, Map<Reader, Tracker>>();
@@ -89,11 +92,12 @@ function trackerFor(document: Document, read: Reader): Tracker {
   probe.setAttribute('data-pui-available-space-probe', '');
   probe.inert = true;
   probe.style.cssText =
-    'all:initial!important;position:fixed!important;visibility:hidden!important;pointer-events:none!important;width:0!important;height:0!important;top:0!important;left:0!important;contain:strict!important;padding-top:env(safe-area-inset-top,0px)!important;padding-right:env(safe-area-inset-right,0px)!important;padding-bottom:env(safe-area-inset-bottom,0px)!important;padding-left:env(safe-area-inset-left,0px)!important;';
+    'all:initial!important;position:fixed!important;visibility:hidden!important;pointer-events:none!important;width:1rem!important;height:1rem!important;top:0!important;left:0!important;contain:strict!important;padding-top:env(safe-area-inset-top,0px)!important;padding-right:env(safe-area-inset-right,0px)!important;padding-bottom:env(safe-area-inset-bottom,0px)!important;padding-left:env(safe-area-inset-left,0px)!important;';
   (document.body ?? document.documentElement).append(probe);
   const view = document.defaultView;
   const viewport = view?.visualViewport;
   let stopRoot = () => {};
+  let stopMetric = () => {};
   const tracker: Tracker = {
     document,
     probe,
@@ -106,6 +110,7 @@ function trackerFor(document: Document, read: Reader): Tracker {
       viewport?.removeEventListener('resize', tracker.update);
       viewport?.removeEventListener('scroll', tracker.update);
       stopRoot();
+      stopMetric();
       probe.remove();
       byReader!.delete(read);
       if (!byReader!.size) trackers.delete(document);
@@ -113,6 +118,11 @@ function trackerFor(document: Document, read: Reader): Tracker {
   };
   byReader.set(read, tracker);
   stopRoot = observeRootSpace(document, tracker.update);
+  if (typeof ResizeObserver === 'function') {
+    const metric = new ResizeObserver(tracker.update);
+    metric.observe(probe);
+    stopMetric = () => metric.disconnect();
+  }
   view?.addEventListener('resize', tracker.update);
   viewport?.addEventListener('resize', tracker.update);
   viewport?.addEventListener('scroll', tracker.update);
@@ -144,6 +154,7 @@ export function createWebAvailableSpaceHost(
 ): AvailableSpaceHost {
   const read = options.readRegion ?? readWebRegion;
   return {
+    supportsLayout: true,
     attach(connection) {
       const target = connection.target as HTMLElement | null;
       const ElementType = target?.ownerDocument?.defaultView?.HTMLElement;
@@ -169,17 +180,23 @@ export function createWebAvailableSpaceHost(
           ];
         })
       );
+      let targetObserver: ResizeObserver | null = null;
       const lease: Lease = {
         target,
         connection,
         original,
+        layout: createWebAvailableLayout(target),
+        layoutFrame: connection.layout,
         projected: new Map(),
         relinquished: new Set(),
         dispose() {
           if (lease.disposed) return;
           lease.disposed = true;
+          targetObserver?.disconnect();
+          targetObserver = null;
           leaveTracker(lease);
           restore(lease);
+          lease.layout.dispose();
           lease.frame = null;
           if (owners.get(target) === lease) owners.delete(target);
         },
@@ -217,6 +234,7 @@ export function createWebAvailableSpaceHost(
             revision: ++lease.revision,
             viewEpoch: connection.viewEpoch,
           });
+          lease.layout.apply(lease.layoutFrame, rect);
           if (!rect) {
             restore(lease);
             return;
@@ -252,7 +270,22 @@ export function createWebAvailableSpaceHost(
       owners.set(target, lease);
       lease.tracker.leases.add(lease);
       lease.update();
+      if (
+        !lease.disposed &&
+        owners.get(target) === lease &&
+        connection.layout &&
+        typeof ResizeObserver === 'function'
+      ) {
+        targetObserver = new ResizeObserver(() => lease.update());
+        targetObserver.observe(target);
+      }
       return {
+        updateLayout: (layout) => {
+          if (lease.disposed) return;
+          lease.layoutFrame = layout;
+          lease.update();
+        },
+        getLayoutStatus: () => lease.layout.getStatus(),
         requestUpdate: () => lease.update(),
         getFrame: () => lease.frame,
         dispose: () => lease.dispose(),

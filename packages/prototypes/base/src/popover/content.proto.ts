@@ -78,11 +78,7 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
   focusScope.configure({ trap: false, loop: false, restore: 'none' });
 
   const transition = asTransition();
-  overlay.bindPresence({
-    enter: transition.controls.enter,
-    leave: transition.controls.leave,
-    present: transition.isPresent,
-  });
+  transition.bindInitialOpen<PopoverContextValue>({ context: POPOVER_CONTEXT, field: 'open' });
 
   def.props.define({
     side: { type: 'string', empty: 'fallback' },
@@ -177,7 +173,10 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     if (!mountedRun) return;
     if (nextOpen) {
       if (!prevOpen || !focusScope.isActive()) {
-        focusScope.activate({ reason: options?.focusReason ?? 'programmatic' });
+        focusScope.activate({
+          reason: options?.focusReason ?? 'programmatic',
+          preventScroll: true,
+        });
       }
     } else {
       if (prevOpen) {
@@ -222,6 +221,14 @@ function setupPopoverContent(def: DefHandle<PopoverContentProps, PopoverContentE
     updateOpen(ctx.open, 'reason: lifecycle.onCreated => popover content open sync', {
       focusReason: ctx.open ? ctx.openFocusReason : ctx.returnFocusReason,
     });
+  });
+
+  // C-LIFECYCLE-0002-I: reconcile only after created has synchronized Root's
+  // initial open into Overlay; an earlier reconciliation would drive stale false.
+  overlay.bindPresence({
+    enter: transition.controls.enter,
+    leave: transition.controls.leave,
+    present: transition.isPresent,
   });
 
   def.lifecycle.onMounted((run) => {

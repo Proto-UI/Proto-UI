@@ -6,6 +6,8 @@ export type {
   TransitionProps,
   TransitionConfig,
   TransitionControls,
+  TransitionInitialOpenSource,
+  TransitionInitialOpenBinding,
   TransitionExposes,
   TransitionHandles,
   TransitionAsHookContract,

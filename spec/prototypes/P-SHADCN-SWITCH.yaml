@@ -5,14 +5,14 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Switch Root is an unofficial Proto UI-maintained projection that inherits Base Switch root semantics and adds the currently implemented shadcn-style track and state-driven visual surface.
 statement:
-  en: This unofficial direct projection preserves all Base Switch on/off value, activation, focus, disabled, accessibility, context and checkedChange ownership. Its draft default-size presentation now uses the content-pinned 2026-10-10 base-nova Switch registry snapshot in sources, replacing the historical new-york reference without inferring a Git revision. Public Root/Thumb composition and preset ownership are unchanged.
-  zh-CN: 此非官方 direct projection 保留全部 Base Switch on/off value、activation、focus、disabled、accessibility、context 与 checkedChange owner。draft 默认尺寸呈现改用 sources 中以内容 hash 固定的 2026-10-10 base-nova Switch registry snapshot，替换历史 new-york 参考，不推断 Git revision；公开 Root/Thumb composition 与 preset owner 不变。
+  en: This unofficial direct projection preserves all Base Switch on/off value, activation, focus, disabled, accessibility, context and checkedChange ownership. Its draft default-size presentation now uses the explicitly adopted shadcn/ui c2a67849be260701852b0977ba15eb5f3a0ce2a4 Base+Nova sources; the 2026-10-10 content-hashed registry snapshot and new-york reference remain historical evidence only. Public Root/Thumb composition and preset ownership are unchanged.
+  zh-CN: 此非官方 direct projection 保留全部 Base Switch on/off value、activation、focus、disabled、accessibility、context 与 checkedChange owner。draft 默认尺寸呈现改用 本次明确采用的 shadcn/ui c2a67849be260701852b0977ba15eb5f3a0ce2a4 Base+Nova source；2026-10-10 registry 内容 hash 与 new-york 仅保留为历史证据；公开 Root/Thumb composition 与 preset owner 不变。
 
 criteria:
   - id: P-SHADCN-SWITCH-UPSTREAM-IDENTITY
     text:
-      en: The unofficial Proto UI projection must pin the base-nova registry URL, retrieval date and content hashes in sources, without inferring upstream ownership, endorsement or Git revision.
-      zh-CN: 非官方 Proto UI 投射必须在 sources 固定 base-nova registry URL、抓取日期与内容 hash，不推断上游所有权、认证或 Git revision。
+      en: The unofficial Proto UI projection pins the adopted c2a67849be260701852b0977ba15eb5f3a0ce2a4 Base+Nova source URLs and Git blob identities; registry retrieval dates and content hashes are historical evidence, not a second current pin. This implies no upstream ownership or endorsement.
+      zh-CN: 非官方 Proto UI 投射在 sources 固定本次采用的 c2a67849be260701852b0977ba15eb5f3a0ce2a4 Base+Nova source URL 与 Git blob；registry 抓取日期与内容 hash 仅为历史证据，不构成第二现行 pin，不暗示上游所有权或认证。
   - id: P-SHADCN-SWITCH-BASE-INHERITANCE
     text:
       zh-CN: '`shadcn-switch-root` 必须通过 `inherits.prototypes` 指向 `P-BASE-SWITCH`，并通过 `asSwitchRoot()` 默认引入其 guarantee；若以 setup-only 负向补丁放弃或改写 Base 能力，必须在本实体中声明具体偏离和替代语义。'
@@ -30,8 +30,8 @@ criteria:
       contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
   - id: P-SHADCN-SWITCH-CURRENT-BASE-DEVIATIONS
     text:
-      zh-CN: 当前实现不对 `asSwitchRoot()` 引入的 value、activation、focus、disabled、a11y、context、interaction state 或 outward signal 施加负向补丁；新增 style rules 仅构成视觉增量。
-      en: The current implementation applies no negative patch to value, activation, focus, disabled, accessibility, context, interaction state, or outward signals introduced by `asSwitchRoot()`; its added style rules are visual deltas only.
+      zh-CN: 当前实现不对 `asSwitchRoot()` 引入的 value、activation、focus、disabled、a11y、context、interaction state 或 outward signal 施加负向补丁；style rules 构成视觉增量；staticHitInset 只扩展同一语义 Root 的 acquisition，不增加 value owner。
+      en: The current implementation applies no negative patch to value, activation, focus, disabled, accessibility, context, interaction state, or outward signals introduced by `asSwitchRoot()`; its style rules are visual deltas and staticHitInset expands acquisition on the same semantic Root without adding a value owner.
   - id: P-SHADCN-SWITCH-DIRECT-ENTRY
     text:
       zh-CN: 当前 Root protocol 以 `shadcn-switch-root` direct prototype 公开；本层不额外提供 authored asHook。
@@ -40,13 +40,21 @@ criteria:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Root projects inline-flex h-[18.4px] w-8 shrink-0 items-center rounded-full border border-transparent p-0 bg-input transition-all outline-none. It has no shadow, extra padding, hover tint or press scale. The Web scoped border-box baseline preserves the 32px outer width and 18.4px outer height without a global reset; Thumb owns its translation. The smaller upstream size is not admitted by this slice.
-      zh-CN: 默认 Root 投射 inline-flex h-[18.4px] w-8 shrink-0 items-center rounded-full border border-transparent p-0 bg-input transition-all outline-none，无阴影、额外内边距、hover tint 或 press scale。Web scoped border-box 在无全局 reset 时保持32px外宽与18.4px外高；位移由 Thumb 所有。本片不准入上游 smaller size。
+      en: Default Root projects relative inline-flex h-[18.4px] w-[32px] shrink-0 items-center rounded-full border border-transparent p-0 bg-input outline-none. It has no shadow, extra padding, hover tint or press scale. The Web scoped border-box baseline preserves the 32px outer width and 18.4px outer height without a global reset; Thumb owns its translation. Resident background-color timing is declared through C-FEEDBACK-RESIDENT-MOTION-0001; the Website static light/dark palette is generated from the same canonical SHADCN_THEME_CSS with live source validation; user overrides without matching typed facts settle. Actual consumer browser evidence and native/Compiler realization remain independent gates. The fixed upstream track dimensions remain px at root font sizes 16px and 32px; do not replace width with w-8 or height with h-[1.15rem]. Thumb size-4 remains rem and its large-font used geometry requires separate evidence. The smaller upstream size is not admitted by this slice.
+      zh-CN: 默认 Root 投射 relative inline-flex h-[18.4px] w-[32px] shrink-0 items-center rounded-full border border-transparent p-0 bg-input outline-none，无阴影、额外内边距、hover tint 或 press scale。Web scoped border-box 在无全局 reset 时保持32px外宽与18.4px外高；位移由 Thumb 所有。固定上游轨道尺寸在root font为16px和32px时均保留px，不得替换为w-8或h-[1.15rem]；Thumb size-4仍为rem，其大字体used geometry须另验。本片不准入上游 smaller size。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
         - id: D-WEB-STYLE-BASELINE-0001
           since: 0.2.0-rc.1
+  - id: P-SHADCN-SWITCH-STATIC-ACQUISITION
+    text:
+      en: Root declares physical padding-box staticHitInset of 0.5rem top/bottom and 0.75rem left/right through the existing HitParticipation owner. The ordinary border box remains hittable. Native clipping, overlap order, disabled state, focus, cancellation and child-control arbitration are preserved; no extra semantic element or upstream label-coordination claim is introduced. This is independent of movement compensation.
+      zh-CN: Root 通过既有 HitParticipation owner 声明相对 padding-box 的静态命中扩展：上下0.5rem、左右0.75rem，保留原 border-box 命中；原生裁切、重叠顺序、disabled、focus、cancel与子控件仲裁继续有效，不增语义节点或声称上游label联动；与movement补偿独立。
+    dependsOn:
+      contracts:
+        - id: C-HIT-PARTICIPATION-0001
+          since: 0.3.0-alpha.1
   - id: P-SHADCN-SWITCH-STATE-DRIVEN-STYLES
     text:
       en: Checked projects bg-primary. Unchecked uses bg-input, or bg-input/80 in dark colorScheme. Inherited focusVisible projects border-ring ring-3 ring-ring/50 without an added ring offset; disabled retains pointer-events-none opacity-50 and adds cursor-not-allowed. State and metadata are inherited only; hover and press retain Base behavior without adding source-absent visual effects.
@@ -88,8 +96,8 @@ openQuestions:
       zh-CN: 相较固定 shadcn/ui Switch baseline，当前全部差异分别是有意偏离还是待实现 gap，应按什么顺序收敛？
       en: Against the pinned shadcn/ui Switch baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
     context:
-      en: This bounded migration implements only the default-size recipe. Upstream sm size, field-label coordination, expanded pseudo-element hit target, invalid styling, className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. Existing disabled pointer suppression and explicit Root/Thumb facade/preset composition are retained Proto UI differences. Fresh source, CSS and real-browser evidence are independent gates.
-      zh-CN: 本限定迁移只实现默认尺寸 recipe；上游 sm、field-label联动、pseudo-element扩大命中区、invalid样式、className/native prop forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。既有 disabled pointer suppression、显式Root/Thumb facade/preset composition为保留的Proto UI差异；新source、CSS与真实浏览器证据分别验收。
+      en: This bounded migration implements only the default-size recipe. Upstream sm size, field-label coordination, invalid styling, className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. Existing disabled pointer suppression and explicit Root/Thumb facade/preset composition are retained Proto UI differences. Fresh source, CSS and real-browser evidence are independent gates.
+      zh-CN: 本限定迁移只实现默认尺寸 recipe；上游 sm、field-label联动、invalid样式、className/native prop forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。既有 disabled pointer suppression、显式Root/Thumb facade/preset composition为保留的Proto UI差异；新source、CSS与真实浏览器证据分别验收。
 
     blocks: [shadcn switch parity roadmap]
   - id: P-SHADCN-SWITCH-Q-HIT-ENVELOPE
@@ -97,12 +105,16 @@ openQuestions:
       en: How can the 32 by 18.4px visual recipe retain at least the existing activation target through a governed cross-host hit envelope?
       zh-CN: 32×18.4px视觉recipe如何通过受治理的跨宿主hit envelope至少保留现有activation target？
     context:
-      en: The current Root remains 44 by 24px. Shrinking it directly would reduce the pointer target; the upstream expanded pseudo-element hit area is not implemented. Existing hit-envelope-translate-1 is movement compensation, not a general static target-size capability, and must not be repurposed. Keep this draft target unimplemented and fresh evidence planned until the owning host/style capability is governed and validated.
-      zh-CN: 当前Root仍44×24px，直接缩小会减小pointer target；上游expanded pseudo-element hit area未实现。既有hit-envelope-translate-1是movement补偿，不是一般静态target-size能力，不得挪用。相关host/style能力治理并验证前，此draft目标保持未实施且新证据planned。
+      en: The owner-directed source-size correction implements the 32 by 18.4px visual recipe rather than retaining the historical 44 by 24px size. Root now declares governed staticHitInset (top/bottom 0.5rem, left/right 0.75rem) via C-HIT-PARTICIPATION-0001; relative Root with after:-inset-x-3 and after:-inset-y-2 expands the padding-box interaction region independently of layout. This same-root static acquisition preserves the ordinary border box and expands from the padding box; clipping, overlap order, disabled behavior, focus, cancellation and nested controls remain owned by native input routing. It creates no extra semantic control and adds no label-coordination claim. Existing hit-envelope-translate-1 is movement compensation and must not be repurposed. Keep consumer activation acceptance blocked until its own exact-version browser hit tests are completed; visual recipe tests alone do not close it.
+      zh-CN: 按用户要求实现32×18.4px源尺寸，不再保留历史44×24px掩盖差异。上游relative Root配after:-inset-x-3与after:-inset-y-2，独立于布局扩大padding-box交互区；Root现声明staticHitInset上下0.5rem、左右0.75rem，同一语义节点承接native命中、裁切、重叠、disabled、focus/cancel与嵌套控件，不新增控件或声称label联动。不得挪用movement-only hit-envelope-translate-1。该消费者自身固定版本真实命中验证完成前，activation验收继续阻塞，视觉recipe测试不等于关闭缺口。
     blocks:
       - activation:P-SHADCN-SWITCH
       - criterion:P-SHADCN-SWITCH#P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L1249-L1264
+    label: Fixed Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39
+  - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/ui/switch.tsx
+    label: Fixed Base wrapper; Root transition-all, Thumb transition-transform and expanded hit area; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: internal/records/2026-07-25-rc4-dialog-close-icon-and-switch-trial-regressions.zh-CN.md
   - path: packages/prototypes/shadcn/src/switch/root.proto.ts

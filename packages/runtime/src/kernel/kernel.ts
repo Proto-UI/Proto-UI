@@ -148,6 +148,10 @@ export function createKernel<P extends PropsBaseType>(
         if (!anatomyFacade) throw new Error(`[Anatomy] module unavailable`);
         return anatomyFacade.partsOf(family, role, options as any);
       }) as RenderReadHandle<P>['anatomy']['partsOf'],
+      descendantsOf: (family, ancestor, role) => {
+        if (!anatomyFacade) throw new Error(`[Anatomy] module unavailable`);
+        return anatomyFacade.descendantsOf(family, ancestor, role);
+      },
       order: {
         version: ((family: any, options: any) => {
           if (!anatomyFacade) throw new Error(`[Anatomy] module unavailable`);

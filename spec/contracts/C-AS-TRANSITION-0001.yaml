@@ -20,12 +20,12 @@ criteria:
       en: '`asTransition()` must be a no-argument ordinary once hook defined through `defineAsHook`; repeated calls in one setup chain must skip installation and return the exact same projected handle.'
   - id: C-AS-TRANSITION-0001-B
     text:
-      zh-CN: transitionState 必须限定为 closed、entering、entered、leaving；isPresent 只表示感知存在性，不得作为结构 mount fact。
-      en: transitionState must be limited to closed, entering, entered, and leaving; isPresent represents perceptual presence only and must not be treated as a structural mount fact.
+      zh-CN: 默认 transitionState 限定为 closed、entering、entered、leaving；具名冷准备扩展另由 C-TRANSITION-COLD-PREPARATION-0001 定义。isPresent 默认表示感知存在性，扩展期间可表示待揭示 view 的资源保留；两者都不是实际 mount、DOM 或测量就绪事实。
+      en: By default transitionState is limited to closed, entering, entered, and leaving; the named cold-preparation extension is separately defined by C-TRANSITION-COLD-PREPARATION-0001. isPresent normally represents perceptual presence and may represent unrevealed view-resource retention during that extension; neither is actual mount, DOM existence or measurement readiness.
   - id: C-AS-TRANSITION-0001-C
     text:
-      zh-CN: 初始关闭必须允许 Proto setup 与 created 在无 view 的情况下完成；初始打开且 appear=false 必须直接从 entered 开始。
-      en: Initial close must allow Proto setup and created to complete without a view; initial open with appear=false must begin directly at entered.
+      zh-CN: 初始关闭必须允许 Proto setup 与 created 在无 view 的情况下完成；初始打开且 appear=false 默认直接从 entered 开始；显式冷准备时先 preparing，release 后直接 entered，不合成动画事件或计时。
+      en: Initial close must allow Proto setup and created to complete without a view; initial open with appear=false begins directly at entered by default; explicit cold preparation first enters preparing and releases directly to entered without synthetic animation events or timers.
   - id: C-AS-TRANSITION-0001-D
     text:
       zh-CN: 初始打开且 appear=true，或从 detached closed 执行 enter 时，必须先请求 ViewIntent present，并仅在 view epoch mounted 后进入 entering。
@@ -70,6 +70,18 @@ criteria:
     text:
       zh-CN: 当宿主 environment meta 声明 reducedMotion=reduce 时，自动 fallback completion 必须以 0ms delay 调度，在不保留非必要持续运动等待的同时保留 entering/leaving phase、before/after event 与 ViewIntent sequencing；meta 的最终实体归属由后续 Module/HC/Adapter 编目决定。
       en: When host environment meta declares reducedMotion=reduce, automatic fallback completion must be scheduled with a 0ms delay, preserving entering and leaving phases, before and after events, and ViewIntent sequencing without retaining non-essential sustained-motion waits; final entity ownership of the meta source is left to later Module, HC, and Adapter cataloging.
+  - id: C-AS-TRANSITION-0001-O
+    text:
+      zh-CN: authored handle 可通过 setup-only bindInitialOpen 绑定 ContextKey 与 required boolean 直接字段的初始 fallback source，不接受回调、path 或 selector。绑定必须保存不可变 descriptor 副本；同 ContextKey identity 与字段在 setup 重复绑定幂等，不同来源必须显式报冲突；先检查 setup phase 再判断幂等。
+      en: The authored handle may bind an initial fallback source through setup-only bindInitialOpen using a ContextKey and required boolean direct field, never a callback, path, or selector. Binding must retain an immutable descriptor copy; the same ContextKey identity and field are idempotent during setup, while a different source must fail explicitly. Check setup phase before idempotence.
+  - id: C-AS-TRANSITION-0001-P
+    text:
+      zh-CN: 初始化保持显式 open、显式 defaultOpen、已绑定初始 source、未绑定 defaultOpen fallback 的优先级；显式输入分支不得读取 source。source 只在既有 created 初始化内同步读取一次，必须经组合已有 required context subscription 获得普通读取准入；缺失 provider、未声明读取、缺失字段或非 boolean 值必须按 context 或绑定错误传播，不得吞错或强转 false。
+      en: Initialization precedence is explicit open, explicit defaultOpen, bound initial source, then the unbound defaultOpen fallback; explicit-input branches must not read the source. Read the source synchronously once within existing created initialization, under ordinary context admission through the composition's existing required subscription. Missing provider, undeclared read, missing field, and nonboolean values must propagate context or binding errors, never be swallowed or coerced to false.
+  - id: C-AS-TRANSITION-0001-Q
+    text:
+      zh-CN: 初始 source 绑定不得新增持续 subscription、target watcher、timer、ViewIntent writer 或运行时重绑定；detach/remount 不重新采样。后续目标继续由既有 open/controls 协议驱动；machine.initialize、appear、duration、interrupt 与 reduced-motion 语义保持独立，不得依赖调用者先后安装 once hook 的某一种顺序。
+      en: Initial source binding must not introduce an ongoing subscription, target watcher, timer, ViewIntent writer, or runtime rebinding, and detach/remount must not resample it. Later targets remain governed by existing open/controls. Machine initialization, appear, duration, interrupt, and reduced-motion semantics remain independent and must not depend on one preferred installation order of once hooks.
 sources:
   - path: internal/contracts/prototype-base/transition.v0.md
   - path: packages/prototypes/base/src/transition/as-transition.proto.ts
@@ -84,15 +96,25 @@ sources:
 dependsOn:
   contracts:
     - C-AS-HOOK-0004
+    - C-CONTEXT-0003
+    - C-CONTEXT-0006
+    - C-CONTEXT-0007
     - C-AS-HOOK-0009
     - C-DELAY-0001
     - C-LIFECYCLE-0008
   decisions:
     - D-AS-HOOK-NO-ARG-ONCE-0001
+relates:
+  contracts:
+    - id: C-TRANSITION-COLD-PREPARATION-0001
+      since: 0.3.0-alpha.1
 verifies:
   tests:
     - T-AS-TRANSITION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Preserved default four-phase behavior and identified the separately draft opt-in cold-preparation extension without making isPresent an actual mount fact.
   - version: 0.1.0
     change: introduced
     summary: Replaced the legacy Presence-bridge transition model with a no-arg state machine coordinated through lifecycle ViewIntent and Core delay.
@@ -105,6 +127,9 @@ revisions:
   - version: 0.2.0-rc.0
     change: revised
     summary: Added reduced-motion consumption semantics while deferring final environment capability ownership.
+  - version: 0.2.0-rc.0
+    change: refined
+    summary: Defined a setup-only declarative context-field initial fallback without a second target owner or callback capability.
 tags:
   - transition
   - as-hook
