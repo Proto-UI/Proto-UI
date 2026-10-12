@@ -119,6 +119,153 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
                   diagnostics: [...diagnostics],
                 };
               };
+              // Diagnostic observers only: retain the native input, timing and assertions.
+              // `precedingStage` names the last sample, not an inferred native action.
+              const nativeEvents: unknown[] = [],
+                checkpoints: unknown[] = [];
+              let precedingStage = 'setup';
+              let precedingCheckpointId = 0;
+              let requestedInput: unknown = null;
+              let nextEventId = 0;
+              const eventIds = new WeakMap<Event, number>();
+              const describeTarget = (target: EventTarget | null): string => {
+                if (target === window) return 'window';
+                if (target === document) return 'document';
+                if (target instanceof ShadowRoot)
+                  return '#shadow-root:' + describeTarget(target.host);
+                if (target instanceof Element)
+                  return (
+                    target.localName +
+                    (target.id ? '#' + target.id : '') +
+                    (target.hasAttribute('part')
+                      ? '[part=' + target.getAttribute('part') + ']'
+                      : '')
+                  );
+                return target instanceof Node ? target.nodeName : String(target);
+              };
+              const rect = (element: Element) => {
+                const r = element.getBoundingClientRect();
+                return { x: r.x, y: r.y, width: r.width, height: r.height };
+              };
+              const geometry = () => ({
+                rootHost: rect(root),
+                rootSurface: rect(root.shadowRoot?.querySelector('[part="surface"]') ?? root),
+                thumbHost: rect(thumb),
+                thumbSurface: rect(thumb.shadowRoot?.querySelector('[part="surface"]') ?? thumb),
+              });
+              const pointHit = (x: number, y: number) => ({
+                x,
+                y,
+                document: describeTarget(document.elementFromPoint(x, y)),
+                documentStack: document.elementsFromPoint(x, y).map(describeTarget),
+                rootShadow: root.shadowRoot
+                  ? describeTarget(root.shadowRoot.elementFromPoint(x, y))
+                  : null,
+              });
+              const recordNative = (event: Event) => {
+                let eventId = eventIds.get(event);
+                if (eventId === undefined) {
+                  eventId = ++nextEventId;
+                  eventIds.set(event, eventId);
+                }
+                const pointer = event as PointerEvent;
+                const touch = event as TouchEvent;
+                const changedTouches = Array.from(touch.changedTouches ?? []).map((point) => ({
+                  identifier: point.identifier,
+                  clientX: point.clientX,
+                  clientY: point.clientY,
+                  radiusX: point.radiusX,
+                  radiusY: point.radiusY,
+                  force: point.force,
+                  target: describeTarget(point.target),
+                }));
+                nativeEvents.push({
+                  eventId,
+                  type: event.type,
+                  eventPhase: event.eventPhase,
+                  precedingStage,
+                  precedingCheckpointId,
+                  requestedInput,
+                  now: performance.now(),
+                  timeStamp: event.timeStamp,
+                  isTrusted: event.isTrusted,
+                  cancelable: event.cancelable,
+                  defaultPrevented: event.defaultPrevented,
+                  target: describeTarget(event.target),
+                  composedPath: event.composedPath().map(describeTarget),
+                  clientX: pointer.clientX,
+                  clientY: pointer.clientY,
+                  pointerType: pointer.pointerType,
+                  pointerId: pointer.pointerId,
+                  isPrimary: pointer.isPrimary,
+                  width: pointer.width,
+                  height: pointer.height,
+                  button: pointer.button,
+                  detail: pointer.detail,
+                  firesTouchEvents: (event as any).sourceCapabilities?.firesTouchEvents ?? null,
+                  changedTouches,
+                  checked: root.getExposes().checked.get(),
+                });
+              };
+              const eventTypes = [
+                'pointerdown',
+                'pointerup',
+                'pointercancel',
+                'touchstart',
+                'touchend',
+                'touchcancel',
+                'mousedown',
+                'mouseup',
+                'click',
+              ];
+              for (const type of eventTypes) {
+                window.addEventListener(type, recordNative, { capture: true, passive: true });
+                window.addEventListener(type, recordNative, { capture: false, passive: true });
+              }
+              (window as any).switchInputTrace = {
+                checkpoint(stage: string, input: unknown, checked: boolean) {
+                  precedingStage = stage;
+                  precedingCheckpointId += 1;
+                  requestedInput = input;
+                  const requested = input as { x?: number; y?: number } | null;
+                  checkpoints.push({
+                    stage,
+                    checkpointId: precedingCheckpointId,
+                    requestedInput,
+                    checked,
+                    now: performance.now(),
+                    // These are pre-request facts, never dispatch-time hit-test claims.
+                    snapshotTiming: requested ? 'pre-request-checkpoint' : 'after-original-sample',
+                    geometry: requested ? geometry() : null,
+                    pointHit:
+                      requested &&
+                      typeof requested.x === 'number' &&
+                      typeof requested.y === 'number'
+                        ? pointHit(requested.x, requested.y)
+                        : null,
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                  });
+                },
+                finish() {
+                  for (const type of eventTypes) {
+                    window.removeEventListener(type, recordNative, true);
+                    window.removeEventListener(type, recordNative, false);
+                  }
+                  return {
+                    nativeEvents,
+                    checkpoints,
+                    environment: {
+                      userAgent: navigator.userAgent,
+                      devicePixelRatio,
+                      viewport: {
+                        width: innerWidth,
+                        height: innerHeight,
+                        scale: visualViewport?.scale ?? null,
+                      },
+                    },
+                  };
+                },
+              };
             },
             {
               scope,
@@ -128,8 +275,19 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
               artifact: renderProtoShadowSplitStyleArtifact(tokens),
             }
           );
-          const sample = async (stage: string) => {
-            const value = await page.evaluate(() => (window as any).sampleSwitch());
+          const sample = async (
+            stage: string,
+            requestedInput: { kind: string; x: number; y: number } | null = null
+          ) => {
+            const value = await page.evaluate(
+              ({ stage, requestedInput }) => {
+                const w = window as any;
+                const value = w.sampleSwitch();
+                w.switchInputTrace.checkpoint(stage, requestedInput, value.checked);
+                return value;
+              },
+              { stage, requestedInput }
+            );
             samples.push({ stage, ...value });
             return value;
           };
@@ -197,26 +355,38 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
             ['top', initial.root.x + 16, initial.root.y - 3],
             ['bottom', initial.root.x + 16, initial.root.y + initial.root.height + 4],
           ] as const) {
-            const before = await sample('before-' + edge);
+            const before = await sample('before-' + edge, { kind: 'mouse-click', x, y });
             await page.mouse.click(x, y);
             await page.waitForTimeout(190);
             expect((await sample('outside-' + edge)).checked).toBe(before.checked);
           }
-          const centerBefore = await sample('before-center-pointer');
+          const centerBefore = await sample('before-center-pointer', {
+            kind: 'mouse-click',
+            x: initial.root.x + initial.root.width / 2,
+            y: initial.root.y + initial.root.height / 2,
+          });
           await page.mouse.click(
             initial.root.x + initial.root.width / 2,
             initial.root.y + initial.root.height / 2
           );
           await page.waitForTimeout(190);
           expect((await sample('center-pointer')).checked).toBe(!centerBefore.checked);
-          const touchCenterBefore = await sample('before-center-touch');
+          const touchCenterBefore = await sample('before-center-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x + initial.root.width / 2,
+            y: initial.root.y + initial.root.height / 2,
+          });
           await page.touchscreen.tap(
             initial.root.x + initial.root.width / 2,
             initial.root.y + initial.root.height / 2
           );
           await page.waitForTimeout(190);
           expect((await sample('center-touch')).checked).toBe(!touchCenterBefore.checked);
-          const beforeTouch = await sample('before-touch');
+          const beforeTouch = await sample('before-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x - 4,
+            y: initial.root.y + 9,
+          });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
           await page.waitForTimeout(190);
           expect((await sample('touch-outside')).checked).toBe(beforeTouch.checked);
@@ -297,11 +467,27 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
             )
           ).toBe(true);
         } finally {
-          await writeFile(
-            path.join(output, `switch-${scope}-${font}-samples.json`),
-            JSON.stringify({ scope, font, samples, errors }, null, 2)
-          );
-          await page.close();
+          try {
+            const nativeInput = await page
+              .evaluate(() => (window as any).switchInputTrace?.finish() ?? null)
+              .catch((error) => ({ collectionError: String(error) }));
+            await Promise.all([
+              writeFile(
+                path.join(output, `switch-${scope}-${font}-samples.json`),
+                JSON.stringify({ scope, font, samples, errors }, null, 2)
+              ),
+              writeFile(
+                path.join(output, `switch-${scope}-${font}-native-events.json`),
+                JSON.stringify(
+                  { scope, font, browserVersion: browser.version(), nativeInput },
+                  null,
+                  2
+                )
+              ),
+            ]);
+          } finally {
+            await page.close();
+          }
         }
       }, 30000);
 });
