@@ -43,6 +43,7 @@ npm install @proto.ui/adapter-react@0.3.0-alpha.1
 - `@proto.ui/module-a11y`
 - `@proto.ui/module-anatomy`
 - `@proto.ui/module-as-trigger`
+- `@proto.ui/module-axis-input`
 - `@proto.ui/module-boundary`
 - `@proto.ui/module-context`
 - `@proto.ui/module-control-label`
@@ -54,6 +55,7 @@ npm install @proto.ui/adapter-react@0.3.0-alpha.1
 - `@proto.ui/module-focus`
 - `@proto.ui/module-hit-participation`
 - `@proto.ui/module-image-view`
+- `@proto.ui/module-native-link`
 - `@proto.ui/module-overlay`
 - `@proto.ui/module-positioning`
 - `@proto.ui/module-props`

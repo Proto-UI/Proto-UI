@@ -71,6 +71,16 @@ const PACKAGE_RULES = {
   },
   '@proto.ui/module-anatomy': { ...moduleRule('anatomy capability'), preserveReadme: true },
   '@proto.ui/module-as-trigger': moduleRule('as-trigger capability'),
+  '@proto.ui/module-axis-input': {
+    description: 'Experimental normalized axis input for host-mediated controls.',
+    kind: 'module',
+    capability: 'experimental normalized axis input',
+    purpose:
+      'Converts a bounded host-mediated Move Gesture into dimensionless logical input; consumer and catalog admission remain pending.',
+    role: 'Experimental adapter-facing module; consumers retain domain value and commit policy.',
+    preserveReadme: true,
+    extraKeywords: ['axis-input'],
+  },
   '@proto.ui/module-boundary': {
     description: 'Proto UI module that provides interaction-boundary capability.',
     kind: 'module',
@@ -127,6 +137,16 @@ const PACKAGE_RULES = {
     role: 'Adapter-facing module package used by the Proto UI runtime and adapter layer.',
     preserveReadme: true,
     extraKeywords: ['hit-participation'],
+  },
+  '@proto.ui/module-native-link': {
+    description: 'Proto UI portable native-link host protocol.',
+    kind: 'module',
+    capability: 'draft native navigation target',
+    purpose:
+      'Declares and binds draft native navigation targets while leaving navigation behavior with the host.',
+    role: 'Draft adapter-facing module; compiler and non-Web navigation remain unimplemented.',
+    preserveReadme: true,
+    extraKeywords: ['native', 'link', 'native-link'],
   },
   '@proto.ui/module-overlay': moduleRule('overlay capability'),
   '@proto.ui/module-positioning': {
