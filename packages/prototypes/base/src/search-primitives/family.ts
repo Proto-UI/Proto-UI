@@ -636,8 +636,20 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
       expanded.set(ctx.open, 'reason: search trigger expanded');
       focus.setDisabled(disabled.get());
     };
+    let mounted = false,
+      viewEpoch = 0;
     def.context.subscribe(context, sync);
     def.lifecycle.onCreated((run) => sync(run, run.context.read(context)));
+    def.lifecycle.onMounted(() => {
+      mounted = true;
+      viewEpoch++;
+    });
+    const retireView = () => {
+      mounted = false;
+      viewEpoch++;
+    };
+    def.lifecycle.onUnmounted(retireView);
+    def.lifecycle.onBeforeDispose(retireView);
     def.props.watchAll((run) => sync(run, run.context.read(context)));
     def.event.onGlobal('key.down', (_run, event) => {
       if (event.key === ' ' && focus.focused.get() && !disabled.get())
@@ -647,8 +659,10 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
         });
     });
     def.event.on('press.commit', (run) => {
-      if (disabled.get()) return;
+      if (!mounted || disabled.get()) return;
+      const epoch = viewEpoch;
       invoke(run, expanded.get() ? 'close' : 'openPopup');
+      if (!mounted || epoch !== viewEpoch) return;
       inputFocus(run);
     });
   }

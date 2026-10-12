@@ -13,6 +13,17 @@ import { TOAST_CONTEXT, TOAST_FAMILY, createToastId } from './shared';
 import type { ToastRootProps, ToastRootExposes, ToastRootAsHookContract } from './types';
 function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   def.anatomy.claim(TOAST_FAMILY, { role: 'root' });
+  // Reconcile retained facts before Transition starts the new view.
+  def.lifecycle.onMounted((run) => {
+    currentRun = run;
+    const view = viewEpoch,
+      next = open.get();
+    if (run.context.read(TOAST_CONTEXT).open !== next)
+      run.context.update(TOAST_CONTEXT, { id, open: next });
+    if (currentRun !== run || viewEpoch !== view) return;
+    if (next) transition.controls.enter();
+    else transition.controls.leave();
+  });
   const transition = asTransition();
   transition.configure({ enterDuration: 0, leaveDuration: 0 });
   def.props.define({
@@ -32,6 +43,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   a11y.state('atomic', atomic);
   const id = createToastId();
   def.context.provide(TOAST_CONTEXT, { id, open: true });
+  def.context.subscribe(TOAST_CONTEXT);
   const labelledBy = def.state.string('labelledBy', ''),
     describedBy = def.state.string('describedBy', '');
   a11y.relation('labelledBy', { target: labelledBy });
@@ -48,6 +60,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     manualPause = false,
     expired = false;
   let epoch = 0;
+  let viewEpoch = 0;
   const focusedItems = new Set<string>();
   const duration = () => {
     const n = currentRun?.props.get().duration;
@@ -62,7 +75,9 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
   const request = (next: boolean, reason: string) => {
     const run = currentRun;
     if (!run || open.get() === next) return;
+    const view = viewEpoch;
     if (!run.props.isProvided('open')) apply(next);
+    if (currentRun !== run || viewEpoch !== view) return;
     run.expose.emit('openChange', { open: next, reason });
   };
   const schedule = () => {
@@ -78,9 +93,13 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     });
   };
   const apply = (next: boolean) => {
+    const run = currentRun,
+      view = viewEpoch;
     const changed = open.get() !== next;
     open.set(next, 'reason: toast open owner');
+    if (currentRun !== run || viewEpoch !== view) return;
     currentRun?.context.update(TOAST_CONTEXT, { id, open: next });
+    if (currentRun !== run || viewEpoch !== view) return;
     if (next) {
       transition.controls.enter();
       if (changed) {
@@ -93,6 +112,7 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
       hovered = false;
       focusedItems.clear();
       syncPaused();
+      if (currentRun !== run || viewEpoch !== view) return;
       transition.controls.leave();
     }
   };
@@ -100,7 +120,10 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     const next =
       manualPause || hovered || focusedItems.size > 0 || !!currentRun?.props.get().paused;
     if (next === paused.get()) return;
+    const run = currentRun,
+      view = viewEpoch;
     paused.set(next, 'reason: toast interaction pause');
+    if (currentRun !== run || viewEpoch !== view) return;
     if (next) cancel(true);
     else schedule();
   };
@@ -143,10 +166,14 @@ function setup(def: DefHandle<ToastRootProps, ToastRootExposes>) {
     schedule();
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     mounted = false;
     hovered = false;
     focusedItems.clear();
     cancel();
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    currentRun = null;
   });
   def.props.watch(['open', 'duration', 'paused', 'politeness'], (run, next, prev) => {
     currentRun = run;

@@ -219,6 +219,8 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     def.expose.method('focusSelf', (options) => {
       if (!disabled.get()) focus.focusSelf(options);
     });
+    let mounted = false,
+      viewEpoch = 0;
     const sync = (run: RunHandle<T.MenuTriggerProps>, ctx: Context) => {
       disabled.set(ctx.disabled || !!run.props.get().disabled, 'reason: menu trigger disabled');
       expanded.set(
@@ -232,8 +234,13 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     };
     def.context.subscribe(context, sync);
     def.lifecycle.onMounted((run) => {
+      mounted = true;
       sync(run, run.context.read(context));
       invoke(run, '__refresh');
+    });
+    def.lifecycle.onUnmounted(() => {
+      mounted = false;
+      viewEpoch++;
     });
     def.props.watchAll((run) => {
       sync(run, run.context.read(context));
@@ -248,7 +255,9 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       }
     });
     const enterContent = (run: RunHandle<T.MenuTriggerProps>, last = false) => {
+      const epoch = viewEpoch;
       invoke(run, 'requestValue', run.props.get().value, 'keyboard');
+      if (!mounted || viewEpoch !== epoch) return;
       const panels = run.anatomy.partsOf(family, 'content');
       const panel = panels.find((p) => {
         const state = p.getExpose('open') as { get?(): boolean } | undefined;
@@ -259,8 +268,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     };
     def.event.on('press.commit', (run) => {
       if (disabled.get()) return;
+      const epoch = viewEpoch;
       const wasOpen = expanded.get();
       invoke(run, 'requestValue', wasOpen ? '' : run.props.get().value, 'trigger');
+      if (!mounted || viewEpoch !== epoch) return;
       if (!navigation && !wasOpen) enterContent(run);
     });
     def.event.on('pointer.enter', (run) => {

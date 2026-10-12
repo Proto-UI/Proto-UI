@@ -72,9 +72,13 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
       });
   };
   const cancel = () => {
+    const current = run,
+      epoch = viewEpoch;
     cancellation++;
+    const generation = cancellation;
     waiting = null;
     pending.set(false, 'reason: form submission canceled');
+    if (run !== current || viewEpoch !== epoch || cancellation !== generation) return;
     publish();
   };
   const finish = () => {
@@ -119,11 +123,22 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
   def.expose.method('cancelSubmit', cancel);
   const requestSubmit = () => {
     if (!run || disabled.get()) return false;
+    const current = run,
+      epoch = viewEpoch,
+      generation = cancellation + 1;
+    let id = sequence;
+    const isCurrent = () =>
+      run === current && viewEpoch === epoch && cancellation === generation && sequence === id;
     cancel();
+    if (!isCurrent()) return true;
     submitted.set(false, 'reason: form new submission');
-    waiting = { id: ++sequence, key: JSON.stringify(values()) };
+    if (!isCurrent()) return true;
+    id = ++sequence;
+    waiting = { id, key: JSON.stringify(values()) };
     pending.set(true, 'reason: form validating');
+    if (!isCurrent()) return true;
     publish();
+    if (!isCurrent()) return true;
     validating = true;
     try {
       for (const part of parts()) {
@@ -131,6 +146,7 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
         if (snapshot?.disabled) continue;
         const validate = part.getExpose('validate');
         if (typeof validate === 'function') validate('manual');
+        if (!isCurrent()) return true;
       }
     } finally {
       validating = false;
@@ -158,12 +174,18 @@ function setup(def: DefHandle<FormRootProps, FormRootExposes>) {
     requestSubmit();
   });
   def.expose.method('resetValidation', () => {
+    const current = run,
+      epoch = viewEpoch;
+    const isCurrent = () => run === current && viewEpoch === epoch;
     cancel();
+    if (!isCurrent()) return;
     for (const part of parts()) {
       const reset = part.getExpose('resetValidation');
       if (typeof reset === 'function') reset();
+      if (!isCurrent()) return;
     }
     submitted.set(false, 'reason: form reset validation');
+    if (!isCurrent()) return;
     publish();
   });
   def.expose.method('requestReset', () => {

@@ -60,6 +60,7 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     name: '',
   });
   let run: RunHandle<NumberFieldRootProps> | null = null;
+  let viewEpoch = 0;
   const normalize = (v: number) => {
     const p = run?.props.get(),
       b = range(p?.min, p?.max);
@@ -67,15 +68,19 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   };
   const publish = () => {
     if (!run) return;
+    const current = run,
+      epoch = viewEpoch;
     const p = run.props.get();
     disabled.set(
       !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
       'reason: number policy'
     );
+    if (run !== current || viewEpoch !== epoch) return;
     readOnly.set(
       !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
       'reason: number policy'
     );
+    if (run !== current || viewEpoch !== epoch) return;
     run.context.update(NUMBER_FIELD_CONTEXT, {
       value: value.get(),
       draft: draft.get(),
@@ -91,34 +96,52 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   };
   const request = (next: number, notify = true) => {
     if (!run || disabled.get() || readOnly.get() || !Number.isFinite(next)) return false;
+    const current = run,
+      epoch = viewEpoch;
     next = normalize(next);
     if (next === value.get()) return false;
     if (!run.props.isProvided('value')) value.set(next, 'reason: number accepted value');
+    if (run !== current || viewEpoch !== epoch) return true;
     publish();
+    if (run !== current || viewEpoch !== epoch) return true;
     run.expose.emit('valueChange', { value: next });
+    if (run !== current || viewEpoch !== epoch) return true;
     const report =
       notify && run?.anatomy.partsOf(NUMBER_FIELD_FAMILY, 'input')[0]?.getExpose('__fieldInput');
     if (typeof report === 'function') report();
     return true;
   };
   def.expose.method('requestValue', (next) => {
+    const current = run,
+      epoch = viewEpoch;
     const changed = request(next);
+    if (run !== current || viewEpoch !== epoch) return changed;
     draft.set(String(value.get()), 'reason: number public request text');
+    if (run !== current || viewEpoch !== epoch) return changed;
     publish();
     return changed;
   });
   const commit = () => {
     if (!run || disabled.get() || readOnly.get()) return;
+    const current = run,
+      epoch = viewEpoch;
     const text = draft.get().trim();
     if (text !== '' && Number.isFinite(Number(text))) request(Number(text));
+    if (run !== current || viewEpoch !== epoch) return;
     draft.set(String(value.get()), 'reason: number canonical commit');
+    if (run !== current || viewEpoch !== epoch) return;
     publish();
+    if (run !== current || viewEpoch !== epoch) return;
     run.expose.emit('valueCommit', { value: value.get() });
   };
   def.expose.method('requestInput', (text, composing = false) => {
     if (!run || disabled.get() || readOnly.get() || typeof text !== 'string') return false;
+    const current = run,
+      epoch = viewEpoch;
     draft.set(text, 'reason: number draft input');
+    if (run !== current || viewEpoch !== epoch) return true;
     publish();
+    if (run !== current || viewEpoch !== epoch) return true;
     if (!composing && text.trim() !== '' && Number.isFinite(Number(text)))
       request(Number(text), false);
     return true;
@@ -126,9 +149,14 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
   def.expose.method('commitValue', commit);
   def.expose.method('stepBy', (direction) => {
     if (!Number.isFinite(direction)) return false;
+    const current = run,
+      epoch = viewEpoch;
     const changed = request(value.get() + direction * finite(run?.props.get().step, 1));
+    if (run !== current || viewEpoch !== epoch) return changed;
     draft.set(String(value.get()), 'reason: number step');
+    if (run !== current || viewEpoch !== epoch) return changed;
     publish();
+    if (run !== current || viewEpoch !== epoch) return changed;
     if (changed) run?.expose.emit('valueCommit', { value: value.get() });
     return changed;
   });
@@ -183,6 +211,10 @@ function setup(def: DefHandle<NumberFieldRootProps, NumberFieldRootExposes>) {
     publish();
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
+    run = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     run = null;
   });
   return (r: RendererHandle<any>) => r.slot();

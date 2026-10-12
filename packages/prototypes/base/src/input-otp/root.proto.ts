@@ -60,20 +60,26 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
   });
   let run: RunHandle<InputOtpRootProps> | null = null,
     lastComplete = '';
+  let viewEpoch = 0;
   const normalize = (text: string) =>
     normalizeOtp(text, run?.props.get().length ?? 6, run?.props.get().pattern ?? 'numeric');
   const publish = () => {
     if (!run) return;
+    const current = run,
+      epoch = viewEpoch;
     const p = run.props.get();
     disabled.set(
       !!p.disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
       'reason: OTP policy'
     );
+    if (run !== current || viewEpoch !== epoch) return;
     readOnly.set(
       !!p.readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
       'reason: OTP policy'
     );
+    if (run !== current || viewEpoch !== epoch) return;
     complete.set(value.get().length === (p.length ?? 6), 'reason: OTP completion');
+    if (run !== current || viewEpoch !== epoch) return;
     if (!complete.get()) lastComplete = '';
     run.context.update(INPUT_OTP_CONTEXT, {
       value: value.get(),
@@ -96,9 +102,14 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
       publish();
       return false;
     }
+    const current = run,
+      epoch = viewEpoch;
     if (!run.props.isProvided('value')) value.set(next, 'reason: OTP accepted input');
+    if (run !== current || viewEpoch !== epoch) return true;
     publish();
+    if (run !== current || viewEpoch !== epoch) return true;
     run.expose.emit('valueChange', { value: next });
+    if (run !== current || viewEpoch !== epoch) return true;
     if (complete.get() && value.get() === next && lastComplete !== next) {
       lastComplete = next;
       run.expose.emit('completed', { value: next });
@@ -156,7 +167,11 @@ function setup(def: DefHandle<InputOtpRootProps, InputOtpRootExposes>) {
     publish();
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     focused.set(false, 'reason: OTP detach');
+    run = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     run = null;
   });
   return (r: RendererHandle<any>) => r.slot();

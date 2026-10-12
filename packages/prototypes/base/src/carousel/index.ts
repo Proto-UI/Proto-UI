@@ -98,15 +98,19 @@ function setupRoot(def: DefHandle<CarouselRootProps, CarouselRootExposes>) {
   def.expose.state('slideCount', count);
   def.expose.event('indexChange', { payload: 'json' });
   let owner: RunHandle<CarouselRootProps> | null = null;
+  let viewEpoch = 0;
   const publish = (run: RunHandle<CarouselRootProps>) => {
+    const epoch = viewEpoch;
     const p = run.props.get();
     const previousCount = count.get();
     count.set(run.anatomy.partsOf(CAROUSEL_FAMILY, 'slide').length, 'carousel slide count');
+    if (owner !== run || viewEpoch !== epoch) return;
     if (!run.props.isProvided('index') && count.get() < previousCount)
       index.set(
         Math.max(0, Math.min(Math.max(0, count.get() - 1), index.get())),
         'carousel reconcile'
       );
+    if (owner !== run || viewEpoch !== epoch) return;
     run.context.update(CAROUSEL_CONTEXT, {
       index: index.get(),
       count: count.get(),
@@ -124,8 +128,12 @@ function setupRoot(def: DefHandle<CarouselRootProps, CarouselRootExposes>) {
       ? ((next % count.get()) + count.get()) % count.get()
       : Math.max(0, Math.min(count.get() - 1, next));
     if (next === index.get()) return false;
+    const current = owner,
+      epoch = viewEpoch;
     if (!owner.props.isProvided('index')) index.set(next, 'carousel request');
+    if (owner !== current || viewEpoch !== epoch) return true;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('indexChange', { index: next });
     return true;
   });
@@ -147,6 +155,10 @@ function setupRoot(def: DefHandle<CarouselRootProps, CarouselRootExposes>) {
     if (owner) publish(run);
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
+    owner = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     owner = null;
   });
 }

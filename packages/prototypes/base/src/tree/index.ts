@@ -105,7 +105,9 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
   let expanded: string[] = [],
     owner: RunHandle<TreeRootProps> | null = null,
     snapshot: TreeEntry[] = [];
+  let viewEpoch = 0;
   const publish = (run: RunHandle<TreeRootProps>) => {
+    const epoch = viewEpoch;
     const p = run.props.get(),
       old = run.context.read(TREE_CONTEXT);
     try {
@@ -115,6 +117,7 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
       snapshot = [];
       invalid.set(true, 'tree invalid graph');
     }
+    if (owner !== run || viewEpoch !== epoch) return;
     const enabled = snapshot.filter((n) => n.visible && !n.disabled);
     const active = enabled.some((n) => n.key === old.active)
       ? old.active
@@ -143,8 +146,12 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
       key === value.get()
     )
       return false;
+    const current = owner,
+      epoch = viewEpoch;
     if (!owner.props.isProvided('value')) value.set(key, 'tree selection request');
+    if (owner !== current || viewEpoch !== epoch) return true;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('valueChange', { value: key });
     return true;
   });
@@ -158,8 +165,11 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
       return false;
     const next = open ? [...new Set([...expanded, key])] : expanded.filter((k) => k !== key);
     if (JSON.stringify(next) === JSON.stringify(expanded)) return false;
+    const current = owner,
+      epoch = viewEpoch;
     if (!owner.props.isProvided('expandedKeys')) expanded = next;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('expandedChange', { expandedKeys: next });
     return true;
   });
@@ -185,6 +195,10 @@ function setupRoot(def: DefHandle<TreeRootProps, TreeRootExposes>) {
     if (owner) publish(run);
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
+    owner = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     owner = null;
   });
 }

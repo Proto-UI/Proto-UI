@@ -57,6 +57,7 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
   def.expose.event('openChange', { payload: 'json' });
   let values: string[] = [];
   let currentRun: RunHandle<AccordionRootProps> | undefined;
+  let viewEpoch = 0;
   let initialized = false;
   const knownValues = new Set<string>();
   const initial: AccordionContext = {
@@ -79,6 +80,7 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
 
   const sync = (run: RunHandle<AccordionRootProps>, structural = false) => {
     if (!initialized) return;
+    const epoch = viewEpoch;
     const props = run.props.get();
     const controlled = run.props.isProvided('openItems');
     values = normalize(controlled ? props.openItems : values, props.mode !== 'multiple');
@@ -107,6 +109,7 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
     const previous = run.context.read(ACCORDION_CONTEXT);
     if (JSON.stringify(previous) !== JSON.stringify(next))
       run.context.update(ACCORDION_CONTEXT, next);
+    if (currentRun !== run || viewEpoch !== epoch) return;
     // Reentrant owner acceptance wins over the older publication.
     openCount.set(
       run.context.read(ACCORDION_CONTEXT).openItems.length,
@@ -116,6 +119,7 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
   const request = (value: string, open: boolean, reason: AccordionReason = 'programmatic') => {
     if (!currentRun) return false;
     const run = currentRun;
+    const epoch = viewEpoch;
     const props = run.props.get();
     const items = accordionItems(run);
     const target = items.find((item) => item.value === value);
@@ -130,6 +134,7 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
     if (!props.allowEmpty && next.length === 0) return false;
     if (!run.props.isProvided('openItems')) values = next;
     sync(run);
+    if (currentRun !== run || viewEpoch !== epoch) return true;
     run.expose.emit('openChange', {
       openItems: [...next],
       value,
@@ -163,6 +168,9 @@ function setupAccordionRoot(def: DefHandle<AccordionRootProps, AccordionRootExpo
   });
   def.lifecycle.onBeforeDispose(() => {
     currentRun = undefined;
+  });
+  def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
   });
   def.anatomy.subscribeParts(ACCORDION_FAMILY, 'item', (run) => sync(run, true));
   def.props.watch(

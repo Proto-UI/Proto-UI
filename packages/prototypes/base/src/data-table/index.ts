@@ -139,10 +139,12 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     selected: string[] = [],
     view = dataView([]);
   const rowCount = def.state.numberDiscrete('filteredCount', 0);
+  let viewEpoch = 0;
   def.expose.state('filteredCount', rowCount);
   for (const name of ['sortChange', 'pageChange', 'selectionChange'] as const)
     def.expose.event(name, { payload: 'json' });
   const publish = (run: RunHandle<DataTableRootProps>) => {
+    const epoch = viewEpoch;
     const p = run.props.get();
     view = dataView(p.rows ?? [], {
       sortKey,
@@ -153,6 +155,7 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     });
     page = view.page;
     rowCount.set(view.filteredCount, 'data table filtered rows');
+    if (owner !== run || viewEpoch !== epoch) return;
     const c = run.context.read(DATA_TABLE_CONTEXT);
     run.context.update(DATA_TABLE_CONTEXT, {
       revision: c.revision + 1,
@@ -172,6 +175,8 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
   );
   def.expose.method('requestSort', (key: string) => {
     if (!owner || owner.props.get().disabled || !key) return false;
+    const current = owner,
+      epoch = viewEpoch;
     const direction: SortDirection =
       sortKey !== key || sortDirection === 'none'
         ? 'ascending'
@@ -181,15 +186,19 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
     if (!owner.props.isProvided('sortKey')) sortKey = key;
     if (!owner.props.isProvided('sortDirection')) sortDirection = direction;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('sortChange', { sortKey: key, sortDirection: direction });
     return true;
   });
   def.expose.method('requestPage', (next: number) => {
     if (!owner || owner.props.get().disabled || !Number.isFinite(next)) return false;
+    const current = owner,
+      epoch = viewEpoch;
     next = Math.max(0, Math.min(view.pageCount - 1, Math.trunc(next)));
     if (next === page) return false;
     if (!owner.props.isProvided('page')) page = next;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('pageChange', { page: next });
     return true;
   });
@@ -201,9 +210,12 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
       !owner.props.get().rows?.some((row) => row.id === id)
     )
       return false;
+    const current = owner,
+      epoch = viewEpoch;
     const next = selected.includes(id) ? selected.filter((key) => key !== id) : [...selected, id];
     if (!owner.props.isProvided('selectedKeys')) selected = next;
     publish(owner);
+    if (owner !== current || viewEpoch !== epoch) return true;
     owner.expose.emit('selectionChange', { selectedKeys: next });
     return true;
   });
@@ -228,6 +240,10 @@ function setupRoot(def: DefHandle<DataTableRootProps, DataTableRootExposes>) {
   def.lifecycle.onMounted((run) => sync(run));
   def.props.watchAll((run) => sync(run));
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
+    owner = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     owner = null;
   });
 }

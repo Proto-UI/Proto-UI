@@ -5,7 +5,7 @@ import * as combobox from '../src/combobox';
 import * as command from '../src/command';
 import { datePickerRoot, datePickerDay } from '../src/date-picker';
 import { formRoot } from '../src/form';
-import { FORM_FAMILY } from '../src/form/shared';
+import { FORM_FAMILY, FORM_CONTEXT } from '../src/form/shared';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
@@ -88,7 +88,12 @@ function runtimeHarness() {
             EXPOSE_EVENT_SINK_CAP,
             (name: string) => {
               actions.push(name);
-              if (name === 'valueChange' || name === 'execute' || name === 'openChange')
+              if (
+                name === 'valueChange' ||
+                name === 'execute' ||
+                name === 'openChange' ||
+                name === 'validationRequest'
+              )
                 actionCallback(name);
             },
           ],
@@ -315,6 +320,210 @@ it.each([false, true])(
       await second.session.dispose();
       await field.session.dispose();
       await form.session.dispose();
+    }
+  }
+);
+
+for (const method of ['requestSubmit', 'resetValidation'] as const)
+  it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
+    `Form ${method} stops the old Field traversal after %s`,
+    async (operation) => {
+      const { make, actions, setActionCallback } = runtimeHarness();
+      const calls: number[] = [];
+      const fields = [0, 1].map((index) =>
+        definePrototype({
+          name: 'form-callback-field-' + index,
+          setup(def) {
+            def.anatomy.claim(FORM_FAMILY, { role: 'field' });
+            const dirty = def.state.bool('dirty', true);
+            def.expose.state('dirty', dirty);
+            def.expose.method('__formField', () => ({
+              name: 'field-' + index,
+              value: 'valid',
+              disabled: false,
+              available: true,
+              implicitSubmit: false,
+              validity: {
+                status: 'valid',
+                invalid: false,
+                pending: false,
+                dirty: false,
+                touched: false,
+                filled: true,
+                focused: false,
+                flags: [],
+                errors: [],
+              },
+            }));
+            def.expose.event('validationRequest', { payload: 'json' });
+            let current: any;
+            def.lifecycle.onCreated((run) => {
+              current = run;
+            });
+            def.expose.method('validate', () => {
+              calls.push(index);
+              current.expose.emit('validationRequest', { value: 'valid', reason: 'manual' });
+            });
+            def.expose.method('resetValidation', () => {
+              calls.push(index);
+              dirty.set(false, 'validation reset');
+            });
+          },
+        })
+      );
+      const form = make(formRoot),
+        first = make(fields[0], form.target),
+        second = make(fields[1], form.target);
+      for (const part of [form, first, second]) await part.session.mount();
+      let retired = false;
+      const retire = () => {
+        if (operation === 'normal' || retired) return;
+        retired = true;
+        void form.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+        if (operation === 'remount') void form.session.mount();
+      };
+      if (method === 'requestSubmit')
+        setActionCallback((name) => {
+          if (name === 'validationRequest') retire();
+        });
+      else
+        first.exposes.dirty.subscribe((event: any) => {
+          if (event.type === 'next') retire();
+        });
+      try {
+        const result = form.session.invokeInCallbackScope(() => form.exposes[method]());
+        if (method === 'requestSubmit') expect(result).toBe(true);
+        expect(retired).toBe(operation !== 'normal');
+        expect(calls).toEqual(operation === 'normal' ? [0, 1] : [0]);
+        expect(actions.filter((name) => name === 'submit')).toHaveLength(
+          method === 'requestSubmit' && operation === 'normal' ? 1 : 0
+        );
+      } finally {
+        for (const part of [second, first, form]) await part.session.dispose();
+      }
+    }
+  );
+
+for (const [slug, module] of Object.entries({ autocomplete, combobox }))
+  for (const initiallyOpen of [false, true])
+    it.each(['normal', 'unmount', 'dispose', 'remount'] as const)(
+      `${slug} Trigger focus stops retired open=${initiallyOpen} activation after %s`,
+      async (operation) => {
+        const { make, actions, setActionCallback } = runtimeHarness();
+        const family = (module as any)[slug.toUpperCase() + '_FAMILY'];
+        let focused = 0;
+        const inputProto = definePrototype({
+          name: 'trigger-focus-input-' + slug,
+          setup(def) {
+            def.anatomy.claim(family, { role: 'input' });
+            def.expose.method('focusSelf', () => {
+              focused++;
+            });
+          },
+        });
+        const root = make((module as any)[slug + 'Root'], null, { defaultOpen: initiallyOpen });
+        const input = make(inputProto, root.target),
+          trigger = make((module as any)[slug + 'Trigger'], root.target);
+        for (const part of [root, input, trigger]) await part.session.mount();
+        let retired = false;
+        setActionCallback((name) => {
+          if (name !== 'openChange' || operation === 'normal') return;
+          retired = true;
+          void trigger.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+          void root.session[operation === 'dispose' ? 'dispose' : 'unmount']();
+          if (operation === 'remount') {
+            void root.session.mount();
+            void trigger.session.mount();
+          }
+        });
+        try {
+          expect(() => trigger.target.dispatchEvent(new Event('press.commit'))).not.toThrow();
+          expect(retired).toBe(operation !== 'normal');
+          expect(actions).toEqual(['openChange']);
+          expect(focused).toBe(operation === 'normal' ? 1 : 0);
+        } finally {
+          for (const part of [trigger, input, root]) await part.session.dispose();
+        }
+      }
+    );
+
+it.each(['remount', 'nested'] as const)(
+  'Form stops a superseded cancellation publication: %s',
+  async (operation) => {
+    const { make, actions } = runtimeHarness();
+    const form = make(formRoot);
+    const fields = [0, 1].map((index) =>
+      make(
+        definePrototype({
+          name: 'pending-cancel-field-' + index,
+          setup(def) {
+            def.anatomy.claim(FORM_FAMILY, { role: 'field' });
+            const pending = def.state.bool('pending', true);
+            def.expose.method('complete', () => pending.set(false, 'completed control'));
+            def.expose.method('__formField', () => ({
+              name: 'field-' + index,
+              value: 'valid',
+              disabled: false,
+              available: true,
+              implicitSubmit: false,
+              validity: {
+                status: 'valid',
+                invalid: false,
+                pending: pending.get(),
+                dirty: false,
+                touched: false,
+                filled: true,
+                focused: false,
+                flags: [],
+                errors: [],
+              },
+            }));
+            def.expose.method('validate', () => {});
+          },
+        }),
+        form.target
+      )
+    );
+    let afterCallback = false,
+      lateNotifications = 0,
+      observed = false,
+      nested: unknown;
+    const observer = make(
+      definePrototype({
+        name: 'pending-cancel-observer',
+        setup(def) {
+          def.context.subscribe(FORM_CONTEXT, () => {
+            if (afterCallback) lateNotifications++;
+          });
+        },
+      }),
+      form.target
+    );
+    for (const part of [form, ...fields, observer]) await part.session.mount();
+    expect(form.session.invokeInCallbackScope(() => form.exposes.requestSubmit())).toBe(true);
+    expect(form.exposes.pending.get()).toBe(true);
+    form.exposes.pending.subscribe((e: any) => {
+      if (e.type !== 'next' || e.next !== false || observed) return;
+      observed = true;
+      if (operation === 'remount') {
+        void form.session.unmount();
+        void form.session.mount();
+      } else {
+        for (const field of fields)
+          field.session.invokeInCallbackScope(() => field.exposes.complete());
+        nested = form.session.invokeInCallbackScope(() => form.exposes.requestSubmit());
+      }
+      afterCallback = true;
+    });
+    actions.length = 0;
+    try {
+      expect(form.session.invokeInCallbackScope(() => form.exposes.requestSubmit())).toBe(true);
+      expect(observed).toBe(true);
+      expect(lateNotifications).toBe(0);
+      expect(actions).toEqual(operation === 'nested' ? ['submit'] : []);
+      if (operation === 'nested') expect(nested).toBe(true);
+    } finally {
+      for (const part of [observer, ...fields.reverse(), form]) await part.session.dispose();
     }
   }
 );

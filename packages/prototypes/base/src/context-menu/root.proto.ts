@@ -80,6 +80,7 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
   let snapshot = initialContext;
   let published = initialContext;
   let currentRun: any = null;
+  let viewEpoch = 0;
   let inputAnchor: InputOriginAnchor | null = null;
   const replaceInputAnchor = (next: InputOriginAnchor | null) => {
     if (inputAnchor === next) return;
@@ -104,6 +105,7 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
 
   submitRequest = (run, request) => {
     if (snapshot.disabled) return false;
+    const epoch = viewEpoch;
     if (request.open) replaceInputAnchor(request.inputAnchor ?? null);
     else if (!snapshot.controlled) replaceInputAnchor(null);
     snapshot = {
@@ -116,7 +118,9 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
     if (!snapshot.controlled) {
       open?.set(request.open, 'reason: contextMenu root accepted request');
     }
+    if (currentRun !== run || viewEpoch !== epoch) return true;
     syncContext(run);
+    if (currentRun !== run || viewEpoch !== epoch) return true;
     run.expose.emit('openChange', {
       open: request.open,
       reason: request.reason,
@@ -150,8 +154,12 @@ function setupContextMenuRoot(def: DefHandle<ContextMenuRootProps, ContextMenuRo
   });
 
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     currentRun = null;
     inputAnchor = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    currentRun = null;
   });
 
   def.props.watch(

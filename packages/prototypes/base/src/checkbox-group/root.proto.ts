@@ -55,16 +55,23 @@ function setup(def: DefHandle<CheckboxGroupRootProps, CheckboxGroupRootExposes>)
     }) ?? [];
   let initialValue: string[] = [],
     previousFocused = false;
+  let viewEpoch = 0;
   const publish = () => {
     if (!run) return;
+    const current = run,
+      epoch = viewEpoch;
     const p = run.props.get();
     disabled.set(binding.state.fieldDisabled.get(), 'reason: group policy');
+    if (run !== current || viewEpoch !== epoch) return;
     readOnly.set(binding.state.fieldReadOnly.get(), 'reason: group policy');
+    if (run !== current || viewEpoch !== epoch) return;
     label.set(p.ariaLabel ?? '', 'reason: group name');
     const enabled = items().filter((i) => !i.disabled);
     const count = enabled.filter((i) => value.includes(i.value)).length;
     checked.set(enabled.length > 0 && count === enabled.length, 'reason: group aggregate');
+    if (run !== current || viewEpoch !== epoch) return;
     indeterminate.set(count > 0 && count < enabled.length, 'reason: group aggregate');
+    if (run !== current || viewEpoch !== epoch) return;
     run.context.update(CHECKBOX_GROUP_CONTEXT, {
       value: [...value],
       disabled: disabled.get(),
@@ -72,6 +79,7 @@ function setup(def: DefHandle<CheckboxGroupRootProps, CheckboxGroupRootExposes>)
       checked: checked.get(),
       indeterminate: indeterminate.get(),
     });
+    if (run !== current || viewEpoch !== epoch) return;
     binding.report({
       value: [...value],
       initialValue: [...initialValue],
@@ -82,9 +90,13 @@ function setup(def: DefHandle<CheckboxGroupRootProps, CheckboxGroupRootExposes>)
   const request = (next: string[]) => {
     if (!run || disabled.get() || readOnly.get()) return false;
     if (JSON.stringify(value) === JSON.stringify(next)) return false;
+    const current = run,
+      epoch = viewEpoch;
     if (!run.props.isProvided('value')) value = next;
     publish();
+    if (run !== current || viewEpoch !== epoch) return true;
     run.expose.emit('valueChange', { value: [...next] });
+    if (run !== current || viewEpoch !== epoch) return true;
     binding.report({ value: [...value], focused: previousFocused, reason: 'change' });
     return true;
   };
@@ -173,9 +185,13 @@ function setup(def: DefHandle<CheckboxGroupRootProps, CheckboxGroupRootExposes>)
   });
   def.lifecycle.onUpdated(publish);
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     focusTask?.cancel();
     focusTask = null;
     previousFocused = false;
+    run = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
     run = null;
   });
   def.props.watchAll((current) => {

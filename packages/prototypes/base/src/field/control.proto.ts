@@ -84,6 +84,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
 
   let initialValue = '',
     resetRun: RunHandle<FieldControlProps> | null = null;
+  let viewEpoch = 0;
   def.expose.method(
     '__implicitSubmitEligible',
     () => focused.get() && !composing.get() && !control.snapshot()?.composing
@@ -112,6 +113,7 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     resetRun = run;
   });
   def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
     resetRun = null;
   });
   let minLength = -1,
@@ -194,8 +196,11 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
   );
 
   control.on('input', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: field control value');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     composing.set(event.composing, 'reason: field control composing');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     const detail: FieldControlValueChangeDetail = Object.freeze({
       value: event.value,
       composing: event.composing,
@@ -203,8 +208,10 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
       inputType: event.inputType,
     });
     run.expose.emit('valueChange', detail);
+    if (resetRun !== run || viewEpoch !== epoch) return;
     // Re-read the module after a synchronous controlled-owner response.
     value.set(control.snapshot()?.value ?? value.get(), 'reason: field canonical owner value');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     binding.report({
       value: value.get(),
       composing: event.composing,
@@ -213,10 +220,14 @@ function setupFieldControl(def: DefHandle<FieldControlProps, FieldControlExposes
     });
   });
   control.on('change', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: field control change value');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     run.expose.emit('change', Object.freeze({ value: event.value }));
+    if (resetRun !== run || viewEpoch !== epoch) return;
     // A change-only commit is canonical input too. Re-read after the controlled owner's callback.
     value.set(control.snapshot()?.value ?? value.get(), 'reason: field change owner value');
+    if (resetRun !== run || viewEpoch !== epoch) return;
     binding.report({
       value: value.get(),
       composing: event.composing,
