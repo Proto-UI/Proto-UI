@@ -200,6 +200,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'font-semibold',
   'forced-colors-focus-outline',
   'gap-0',
+  'gap-0.5',
   'gap-1',
   'gap-1.5',
   'gap-2',
