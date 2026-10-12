@@ -12,6 +12,11 @@ import {
   renderPrefixedThemeCss,
 } from '../../../cli/src/services/proto-style-css';
 import { SHADCN_THEME_CSS } from '../../../cli/src/legacy/type';
+import {
+  assertNativeTapRoute,
+  assertNoAuthoredOutsideHit,
+  measureNativeButtonControl,
+} from './switch-native-input-evidence';
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-switch-consumer-evidence');
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
@@ -43,7 +48,7 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 30000);
 afterAll(async () => browser?.close());
-describe('New York default Switch with canonical typed theme and unexpanded hit box', () => {
+describe('New York default Switch with no authored hit expansion and native touch targeting', () => {
   for (const scope of ['document', 'shadow'] as const)
     for (const font of [16, 32])
       it(`${scope} root ${font}px records actual consumer motion and activation`, async () => {
@@ -123,11 +128,34 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
               // `precedingStage` names the last sample, not an inferred native action.
               const nativeEvents: unknown[] = [],
                 checkpoints: unknown[] = [];
+              const stateChanges: unknown[] = [],
+                exposedChanges: unknown[] = [],
+                authoredHitSnapshots: unknown[] = [];
               let precedingStage = 'setup';
               let precedingCheckpointId = 0;
               let requestedInput: unknown = null;
               let nextEventId = 0;
               const eventIds = new WeakMap<Event, number>();
+              const checkedHandle = root.getExposes().checked;
+              const offChecked = checkedHandle.subscribe(
+                (change: { type: string; prev?: boolean; next?: boolean }) => {
+                  if (change.type === 'next')
+                    stateChanges.push({
+                      precedingCheckpointId,
+                      now: performance.now(),
+                      prev: change.prev,
+                      next: change.next,
+                    });
+                }
+              );
+              const recordCheckedChange = (event: Event) => {
+                exposedChanges.push({
+                  precedingCheckpointId,
+                  now: performance.now(),
+                  checked: (event as CustomEvent).detail.checked,
+                });
+              };
+              root.addEventListener('checkedChange', recordCheckedChange, { passive: true });
               const describeTarget = (target: EventTarget | null): string => {
                 if (target === window) return 'window';
                 if (target === document) return 'document';
@@ -223,6 +251,46 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
                 window.addEventListener(type, recordNative, { capture: false, passive: true });
               }
               (window as any).switchInputTrace = {
+                readStage(stage: string) {
+                  const checkpoint = (checkpoints as any[])
+                    .filter((entry) => entry.stage === stage)
+                    .at(-1);
+                  if (!checkpoint) throw new Error('Missing input checkpoint: ' + stage);
+                  const inStage = (entry: any) =>
+                    entry.precedingCheckpointId === checkpoint.checkpointId;
+                  return {
+                    checkpoint,
+                    nativeEvents: nativeEvents.filter(inStage),
+                    stateChanges: stateChanges.filter(inStage),
+                    exposedChanges: exposedChanges.filter(inStage),
+                  };
+                },
+                readAuthoredBoundary() {
+                  const r = root.getBoundingClientRect();
+                  const outsidePoints = [
+                    ['left', r.x - 0.5, r.y + r.height / 2],
+                    ['right', r.right + 0.5, r.y + r.height / 2],
+                    ['top', r.x + r.width / 2, r.y - 0.5],
+                    ['bottom', r.x + r.width / 2, r.bottom + 0.5],
+                  ] as const;
+                  const snapshot = {
+                    now: performance.now(),
+                    snapshotTiming: 'settled-before-input',
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                    outsidePoints: outsidePoints.map(([label, x, y]) => {
+                      const hit = document.elementFromPoint(x, y);
+                      return {
+                        label,
+                        x,
+                        y,
+                        target: describeTarget(hit),
+                        ownedHit: hit === root || (!!hit && root.contains(hit)),
+                      };
+                    }),
+                  };
+                  authoredHitSnapshots.push(snapshot);
+                  return snapshot;
+                },
                 checkpoint(stage: string, input: unknown, checked: boolean) {
                   precedingStage = stage;
                   precedingCheckpointId += 1;
@@ -247,13 +315,29 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
                   });
                 },
                 finish() {
+                  const cleanupErrors: string[] = [];
+                  const release = (cleanup: () => void) => {
+                    try {
+                      cleanup();
+                    } catch (error) {
+                      cleanupErrors.push(String(error));
+                    }
+                  };
+                  // The original exposed handle is invalid after the remount test;
+                  // subscribe returns an unwrapped disposer that remains releasable.
+                  release(offChecked);
+                  release(() => root.removeEventListener('checkedChange', recordCheckedChange));
                   for (const type of eventTypes) {
-                    window.removeEventListener(type, recordNative, true);
-                    window.removeEventListener(type, recordNative, false);
+                    release(() => window.removeEventListener(type, recordNative, true));
+                    release(() => window.removeEventListener(type, recordNative, false));
                   }
                   return {
                     nativeEvents,
                     checkpoints,
+                    stateChanges,
+                    exposedChanges,
+                    authoredHitSnapshots,
+                    cleanupErrors,
                     environment: {
                       userAgent: navigator.userAgent,
                       devicePixelRatio,
@@ -349,6 +433,9 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
           await page.mouse.move(2, 2);
           await page.mouse.up();
           // New York does not declare the Nova pseudo-element acquisition area.
+          assertNoAuthoredOutsideHit(
+            await page.evaluate(() => (window as any).switchInputTrace.readAuthoredBoundary())
+          );
           for (const [edge, x, y] of [
             ['left', initial.root.x - 4, initial.root.y + 9],
             ['right', initial.root.x + initial.root.width + 4, initial.root.y + 9],
@@ -382,6 +469,14 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
           );
           await page.waitForTimeout(190);
           expect((await sample('center-touch')).checked).toBe(!touchCenterBefore.checked);
+          const readStage = (stage: string) =>
+            page.evaluate((stage) => (window as any).switchInputTrace.readStage(stage), stage);
+          assertNativeTapRoute(
+            await readStage('before-center-touch'),
+            'shadcn-switch-root#subject',
+            !touchCenterBefore.checked,
+            true
+          );
           const beforeTouch = await sample('before-touch', {
             kind: 'touchscreen-tap',
             x: initial.root.x - 4,
@@ -389,7 +484,31 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
           });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
           await page.waitForTimeout(190);
-          expect((await sample('touch-outside')).checked).toBe(beforeTouch.checked);
+          const afterTouch = await sample('touch-outside');
+          const nearTouchTrace = await readStage('before-touch');
+          expect(nearTouchTrace.checkpoint.checked).toBe(beforeTouch.checked);
+          expect(nearTouchTrace.checkpoint.pointHit.documentStack).not.toContain(
+            'shadcn-switch-root#subject'
+          );
+          expect(nearTouchTrace.checkpoint.staticHitAttribute).toBeNull();
+          // 0718 recorded a trusted UA-retargeted click here. Raw x outside the
+          // border box must not override the browser's native activation target.
+          assertNativeTapRoute(nearTouchTrace, 'shadcn-switch-root#subject', afterTouch.checked);
+          const farTouchBefore = await sample('before-far-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x - 40,
+            y: initial.root.y + 9,
+          });
+          await page.touchscreen.tap(initial.root.x - 40, initial.root.y + 9);
+          await page.waitForTimeout(190);
+          const farTouchAfter = await sample('far-touch-outside');
+          expect(farTouchAfter.checked).toBe(farTouchBefore.checked);
+          assertNativeTapRoute(
+            await readStage('before-far-touch'),
+            'shadcn-switch-root#subject',
+            farTouchAfter.checked,
+            false
+          );
           await page.evaluate(() => {
             const w = window as any;
             w.SwitchConsumer.setElementProps(w.subject, { checked: false });
@@ -485,9 +604,50 @@ describe('New York default Switch with canonical typed theme and unexpanded hit 
                 )
               ),
             ]);
+            expect(nativeInput).not.toBeNull();
+            expect(nativeInput).not.toHaveProperty('collectionError');
+            expect((nativeInput as any).cleanupErrors).toEqual([]);
           } finally {
             await page.close();
           }
         }
+      }, 30000);
+});
+
+describe('Independent native HTML button touch-target control', () => {
+  for (const scope of ['document', 'shadow'] as const)
+    for (const font of [16, 32])
+      it(`${scope} root ${font}px records UA targeting and an authored-expansion negative control`, async () => {
+        // Match the exact 0718 consumer boxes without importing or executing an upstream widget.
+        const box =
+          font === 16
+            ? { x: 148, y: 206.4375, width: 32, height: 18.390625 }
+            : { x: 148, y: 264.875, width: 64, height: 36.796875 };
+        const result = await measureNativeButtonControl(browser, scope, box);
+        await writeFile(
+          path.join(output, `native-button-${scope}-${font}-control.json`),
+          JSON.stringify(result, null, 2)
+        );
+        expect(result.measurementError).toBeNull();
+        expect(result.errors).toEqual([]);
+        const evidence = result.evidence;
+        for (const stage of ['near-touch', 'far-touch']) {
+          const checkpoint = evidence.checkpoints.find((entry: any) => entry.stage === stage);
+          expect(checkpoint.box).toEqual(box);
+          expect(checkpoint.ownedPointHit).toBe(false);
+          const clicks = evidence.events.filter(
+            (event: any) =>
+              event.stage === stage && event.type === 'click' && event.eventPhase === 3
+          );
+          expect(clicks).toHaveLength(1);
+          expect(clicks[0].isTrusted).toBe(true);
+          expect(clicks[0].pointerType).toBe('touch');
+          const changes = evidence.changes.filter((change: any) => change.stage === stage);
+          expect(changes).toHaveLength(clicks[0].ownerInPath ? 1 : 0);
+          if (stage === 'far-touch') expect(clicks[0].ownerInPath).toBe(false);
+        }
+        // A real author-created ::after extension is detected at the same x−4 point.
+        expect(result.mutation?.ownedPointHit).toBe(true);
+        expect(result.mutation?.box).toEqual(box);
       }, 30000);
 });
