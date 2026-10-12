@@ -43,7 +43,7 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 30000);
 afterAll(async () => browser?.close());
-describe('actual Shadcn prototype with canonical typed theme and static hit inset', () => {
+describe('New York default Switch with canonical typed theme and unexpanded hit box', () => {
   for (const scope of ['document', 'shadow'] as const)
     for (const font of [16, 32])
       it(`${scope} root ${font}px records actual consumer motion and activation`, async () => {
@@ -135,10 +135,10 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
           };
           await page.waitForTimeout(100);
           const initial = await sample('initial');
-          expect(initial.root.width).toBeCloseTo(32, 1);
-          expect(initial.root.height).toBeCloseTo(18.4, 1);
+          expect(initial.root.width).toBeCloseTo(font * 2, 1);
+          expect(initial.root.height).toBeCloseTo(font * 1.15, 1);
           expect(initial.thumb.height).toBeCloseTo(font, 1);
-          expect(initial.thumb.width).toBeCloseTo(font === 16 ? 16 : 30, 1);
+          expect(initial.thumb.width).toBeCloseTo(font, 1);
           expect(initial.inlineColor).toBe('');
           expect(initial.checked).toBe(false);
           await page.screenshot({
@@ -190,22 +190,36 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
           expect(pressed.transform).toBe(end.transform);
           await page.mouse.move(2, 2);
           await page.mouse.up();
-          // Every inset edge remains the same semantic switch, including native touch.
+          // New York does not declare the Nova pseudo-element acquisition area.
           for (const [edge, x, y] of [
             ['left', initial.root.x - 4, initial.root.y + 9],
-            ['right', initial.root.x + 36, initial.root.y + 9],
+            ['right', initial.root.x + initial.root.width + 4, initial.root.y + 9],
             ['top', initial.root.x + 16, initial.root.y - 3],
-            ['bottom', initial.root.x + 16, initial.root.y + 22],
+            ['bottom', initial.root.x + 16, initial.root.y + initial.root.height + 4],
           ] as const) {
             const before = await sample('before-' + edge);
             await page.mouse.click(x, y);
             await page.waitForTimeout(190);
-            expect((await sample('hit-' + edge)).checked).toBe(!before.checked);
+            expect((await sample('outside-' + edge)).checked).toBe(before.checked);
           }
+          const centerBefore = await sample('before-center-pointer');
+          await page.mouse.click(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
+          await page.waitForTimeout(190);
+          expect((await sample('center-pointer')).checked).toBe(!centerBefore.checked);
+          const touchCenterBefore = await sample('before-center-touch');
+          await page.touchscreen.tap(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
+          await page.waitForTimeout(190);
+          expect((await sample('center-touch')).checked).toBe(!touchCenterBefore.checked);
           const beforeTouch = await sample('before-touch');
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
           await page.waitForTimeout(190);
-          expect((await sample('touch-expanded')).checked).toBe(!beforeTouch.checked);
+          expect((await sample('touch-outside')).checked).toBe(beforeTouch.checked);
           await page.evaluate(() => {
             const w = window as any;
             w.SwitchConsumer.setElementProps(w.subject, { checked: false });
@@ -234,7 +248,7 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
             w.SwitchConsumer.setElementProps(w.subject, { checked: true, disabled: true });
           });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
-          expect((await sample('disabled-expanded')).checked).toBe(true);
+          expect((await sample('disabled-outside')).checked).toBe(true);
           await page.evaluate(() => {
             const el = (window as any).subject;
             el.remove();

@@ -20,6 +20,7 @@ cases:
     covers:
       [
         P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE,
+        P-SHADCN-SWITCH-STATIC-ACQUISITION,
         P-SHADCN-SWITCH-STATE-DRIVEN-STYLES,
         C-FEEDBACK-STYLE-0003-E,
       ]
@@ -33,6 +34,15 @@ cases:
     covers: [P-SHADCN-SWITCH-COMPONENT-PRESET, D-COMPONENT-PRESET-MATERIALIZATION-0001-F]
     expectation: shadcn-switch-generated-facades-support-context-safe-default-replacement-and-omission
 implementations:
+  - id: prototypes-shadcn-switch-new-york-browser
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-motion.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-FAMILY-AND-VISUALS]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - New York default root-16/root-32 browser evidence must be collected afresh for document and shadow surfaces; source/token assertions are not rendered geometry or native activation acceptance.
   - id: prototypes-shadcn-switch-root-contract
     kind: module-test
     status: planned
@@ -47,7 +57,7 @@ implementations:
     exercises: [P-SHADCN-SWITCH, P-BASE-SWITCH]
     notes:
       - 'Historical evidence note before the 2026-10-10 recipe migration: Positive tests cover only the current Proto UI guarantee; asChild omission and remaining parity gaps are bounded by the decision, declared surface, source review, and centralized compatibility question.'
-      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
+      - Historical passing evidence predates the 2026-10-12 New York presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: cli-shadcn-switch-component-preset
     kind: module-test
     status: planned
@@ -56,7 +66,7 @@ implementations:
     consumesCases: [T-SHADCN-SWITCH-0001-CASE-COMPONENT-PRESET]
     exercises: [P-SHADCN-SWITCH]
     notes:
-      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
+      - Historical passing evidence predates the 2026-10-12 New York presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
   - id: prototypes-shadcn-switch-component-preset-recipe
     kind: module-test
     status: passing
@@ -72,7 +82,7 @@ implementations:
     consumesCases: [T-SHADCN-SWITCH-0001-CASE-COMPONENT-PRESET]
     exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
     notes:
-      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
+      - Historical passing evidence predates the 2026-10-12 New York presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   contracts:
     - id: C-FEEDBACK-STYLE-0003
@@ -90,6 +100,7 @@ verifies:
           P-SHADCN-SWITCH-CURRENT-BASE-DEVIATIONS,
           P-SHADCN-SWITCH-DIRECT-ENTRY,
           P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE,
+          P-SHADCN-SWITCH-STATIC-ACQUISITION,
           P-SHADCN-SWITCH-STATE-DRIVEN-STYLES,
           P-SHADCN-SWITCH-COMPATIBILITY-SUBSET,
           P-SHADCN-SWITCH-AS-CHILD-OMISSION,

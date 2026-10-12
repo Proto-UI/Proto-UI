@@ -58,14 +58,15 @@ describe('prototypes/shadcn: switch', () => {
     root.appendChild(thumb);
     document.body.appendChild(root);
     for (let i = 0; i < 6; i++) await Promise.resolve();
-    for (const token of ['h-[18.4px]', 'w-[32px]', 'p-0', 'rounded-full', 'bg-input']) {
+    for (const token of ['h-[1.15rem]', 'w-8', 'p-0', 'rounded-full', 'bg-input', 'shadow-xs']) {
       expect(styleContains(root, token)).toBe(true);
     }
     for (const token of [
       'h-6',
       'w-11',
       'px-0.5',
-      'shadow-xs',
+      'h-[18.4px]',
+      'w-[32px]',
       'duration-200',
       'ring-offset-2',
       'scale-[0.98]',
@@ -122,6 +123,23 @@ describe('prototypes/shadcn: switch', () => {
     root.remove();
   });
 
+  it('emits source rem dimensions rather than the root-16 pixel coincidence', () => {
+    const css = renderProtoStyleTokenCss(['h-[1.15rem]', 'w-8', 'size-4']);
+    expect(css).toMatch(/height:\s*1\.15rem/);
+    expect(css).toMatch(/width:\s*2rem/);
+    expect(css).not.toMatch(/height:\s*18\.4px|width:\s*32px/);
+  });
+
+  it('does not acquire the old Nova pseudo-element hit envelope', async () => {
+    const root = document.createElement('shadcn-switch-root') as any;
+    document.body.append(root);
+    for (let i = 0; i < 6; i++) await Promise.resolve();
+    expect(root.getAttribute('style') ?? '').not.toContain('static-hit');
+    expect(root.getAttribute('data-pui-static-hit')).toBeNull();
+    expect(styleContains(root, 'relative')).toBe(false);
+    root.remove();
+  });
+
   it('applies focus-visible ring styles when keyboard focus reaches the root', async () => {
     const root = document.createElement('shadcn-switch-root') as any;
     const thumb = document.createElement('shadcn-switch-thumb') as any;
@@ -174,6 +192,28 @@ describe('prototypes/shadcn: switch', () => {
     root.remove();
   });
 
+  it.each([false, true])('preserves dark source paint with checked=%s', async (checked) => {
+    const previousTheme = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = 'dark';
+    const root = document.createElement('shadcn-switch-root') as any;
+    const thumb = document.createElement('shadcn-switch-thumb') as any;
+    try {
+      setElementProps(root, { checked });
+      root.append(thumb);
+      document.body.append(root);
+      for (let i = 0; i < 8; i++) await Promise.resolve();
+      expect(styleContains(root, checked ? 'bg-primary' : 'bg-input/80')).toBe(true);
+      expect(styleContains(thumb, checked ? 'bg-primary-foreground' : 'bg-foreground')).toBe(true);
+      expect(root.getAttribute('role')).toBe('switch');
+      expect(root.getAttribute('aria-checked')).toBe(String(checked));
+      expect(thumb.hasAttribute('role')).toBe(false);
+    } finally {
+      root.remove();
+      if (previousTheme === undefined) delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = previousTheme;
+    }
+  });
+
   it('disabled shadcn switch suppresses checked changes', async () => {
     const root = document.createElement('shadcn-switch-root') as any;
     const thumb = document.createElement('shadcn-switch-thumb') as any;
@@ -189,6 +229,9 @@ describe('prototypes/shadcn: switch', () => {
     expect(root.getExposes().checked.get()).toBe(false);
     expect(thumb.getExposes().isChecked()).toBe(false);
     expect(root.hasAttribute('data-disabled')).toBe(true);
+    for (const token of ['pointer-events-none', 'opacity-50', 'cursor-not-allowed']) {
+      expect(styleContains(root, token)).toBe(true);
+    }
 
     root.remove();
     await Promise.resolve();

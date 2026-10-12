@@ -1,22 +1,21 @@
-import { asHitParticipation } from '@proto.ui/hooks';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSwitchRoot } from '@proto.ui/prototypes-base/switch';
 import type { ShadcnSwitchRootExposes, ShadcnSwitchRootProps } from './types';
 
-// Fixed Base+Nova c2a67849: track dimensions are px; Thumb size remains rem.
-// Padding-box static acquisition follows the fixed upstream pseudo-element inset.
+// Fixed New York 02cad611: preserve upstream rem units at every root font size.
+// This default-size slice does not claim sm-size coordination or transition-all parity.
 const ROOT_BASE_TOKENS = [
   'peer',
-  'relative',
   'inline-flex',
-  'h-[18.4px]',
-  'w-[32px]',
+  'h-[1.15rem]',
+  'w-8',
   'shrink-0',
   'items-center',
   'rounded-full',
   'border',
   'border-transparent',
   'p-0',
+  'shadow-xs',
 
   'outline-none',
   'bg-input',
@@ -33,14 +32,6 @@ const switchRoot = definePrototype<ShadcnSwitchRootProps, ShadcnSwitchRootExpose
       throw new Error('[shadcn-switch-root] asSwitchRoot must project Switch root state handles.');
     }
     const { checked, disabled, focusVisible } = switchState;
-    asHitParticipation().configure({
-      staticHitInset: {
-        top: { value: 0.5, unit: 'rem' },
-        bottom: { value: 0.5, unit: 'rem' },
-        left: { value: 0.75, unit: 'rem' },
-        right: { value: 0.75, unit: 'rem' },
-      },
-    });
     // P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
     def.feedback.style.transition({
       properties: ['background-color'],
