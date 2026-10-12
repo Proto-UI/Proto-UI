@@ -27,13 +27,23 @@ criteria:
       zh-CN: 直接 prototype 入口名为 `brutalist-switch-thumb`，且是本 foundation 切片中唯一公开的 Switch Thumb 入口。
   - id: P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
     text:
-      en: 'Thumb is absolutely placed at left-1 top-1/2 with -translate-y-1/2. It alone moves from translate-x-0 to translate-x-5 (20px). Both endpoints retain 6px outer inset and vertical centering within the 48x24 track. Placement is physically left-to-right even in an RTL ancestor; mirrored semantics are not claimed.'
-      zh-CN: 'Thumb 绝对定位于 left-1 top-1/2 并使用 -translate-y-1/2；只有它从 translate-x-0 移动到 translate-x-5（20px）。两个端点均保留 6px 外侧留白并在 48×24 track 内垂直居中。RTL 祖先下仍采用物理从左到右定位，不声称镜像语义。'
+      en: 'Thumb is absolutely placed at left-1 top-1/2 with translate-y-[-50%] (equivalent to -translate-y-1/2). It alone moves from translate-x-0 to translate-x-5 (20px). Both endpoints retain 6px outer inset and vertical centering within the 48x24 track. Placement is physically left-to-right even in an RTL ancestor; mirrored semantics are not claimed.'
+      zh-CN: 'Thumb 绝对定位于 left-1 top-1/2 并使用 translate-y-[-50%]（与 -translate-y-1/2 等价）；只有它从 translate-x-0 移动到 translate-x-5（20px）。两个端点均保留 6px 外侧留白并在 48×24 track 内垂直居中。RTL 祖先下仍采用物理从左到右定位，不声称镜像语义。'
 
   - id: P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
     text:
       en: 'Thumb is a rounded-full size-4 white disc with border-2 border-black and no shadow. The 150ms transform transition has cubic-bezier(0.4,0,0.2,1) easing; reduced motion disables it. White fill and 16px size remain unchanged throughout checked, unchecked and intermediate animation frames.'
       zh-CN: 'Thumb 是 rounded-full size-4 白色圆盘，带 border-2 border-black、无阴影。transform transition 为 150ms、cubic-bezier(0.4,0,0.2,1)；reduced motion 下关闭。checked、unchecked 与中间 animation frame 均保持白色和 16px 尺寸。'
+
+  - id: P-BRUTALIST-SWITCH-THUMB-RESIDENT-MOTION
+    text:
+      en: >-
+        Thumb declares only the neutral resident translate channel for 150ms with cubic-bezier(0.4,0,0.2,1), as already selected by this draft visual grammar; the upstream switch source itself does not explicitly select that duration. Checked targets are 0 and 1.25rem on x, with constant -50% own-box y. Root padding, white fill and Base checked/disabled ownership do not change. A single presentation owner follows final accepted targets, without a second CSS translate/transform transition. Initial commits settle without replay; reversal uses the last current acknowledged presentation. Controlled refusal and disabled activation do not change targets; input cancel cannot undo an accepted checked value. Detach/remount, reduce or unknown preference settle and discard stale work, and returning to no-preference never replays. Actual root-font and own-box measurements supply the rem and percentage bases; 16px and 32px root fonts imply 20px and 40px checked travel respectively. Root color resident motion, small sizing, native and Compiler realization are outside this bounded projection and remain separately unverified.
+
+
+      zh-CN: >-
+        Thumb 只声明中立 resident translate 通道，采用本 draft 视觉准则已有的 150ms 与 cubic-bezier(0.4,0,0.2,1)，不声称上游 switch 源码显式规定时长。 checked 的 x 目标为 0 与 1.25rem，y 恒为自身尺寸的 -50%。Root padding、 白色填充及 Base checked/disabled owner 不变；单一投射 owner 跟随已接受的最终目标， 不叠加 CSS translate/transform transition。初始化不重播；反转从当前已确认呈现继续。 controlled 拒绝及 disabled 激活不改目标，取消输入不撤销已接受值。卸载重挂、reduce 或未知偏好直接收敛并清理旧任务，恢复 no-preference 不重播。rem 与百分比依赖实际 root-font 和自身尺寸；16px/32px 根字号对应 20px/40px 位移。Root 颜色 resident、 small 尺寸、native 和 Compiler 实现不属于此切片，仍需分别验证。
+
 
 sources:
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
@@ -44,12 +54,21 @@ sources:
 relates:
   knowledge: [K-BRUTALIST-0001]
 dependsOn:
-  contracts: [C-CORE-SYNTAX-0003, C-AS-HOOK-0001, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  contracts:
+    [
+      C-CORE-SYNTAX-0003,
+      C-AS-HOOK-0001,
+      C-RULE-INTENT-FEEDBACK-STYLE-0001,
+      C-FEEDBACK-RESIDENT-MOTION-0001,
+    ]
 inherits:
   prototypes:
     - id: P-BASE-SWITCH-THUMB
 verifies: { tests: [T-BRUTALIST-SWITCH-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Bind existing draft Thumb timing and rem travel to neutral resident translation, single-owner projection and lifecycle acceptance; physical evidence remains separate.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; preserved Base semantics and documented Proto UI extensions.
