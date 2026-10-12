@@ -43,19 +43,14 @@ describe('resident own fixture actual Runtime to Web surface', () => {
       document.body.append(el);
       await flush();
       const surface = (el.shadowRoot?.querySelector('[part="surface"]') ?? el) as HTMLElement;
-      expect(surface.style.getPropertyValue('background-color')).toMatch(
-        /^rgba?\(0, 0, 0(?:, 1)?\)$/
-      );
+      expect(surface.style.getPropertyValue('background-color')).toBe('');
+      expect(surface.getAttribute('data-pui-style')).toContain('bg-input');
       setElementProps(el, { active: true });
       await flush();
       expect((el.getExposes() as any).readResolved()).toEqual({ active: true });
       expect(surface.getAttribute('data-pui-style')).toContain('bg-primary');
-      const rgb = surface.style
-        .getPropertyValue('background-color')
-        .match(/[\d.]+/g)!
-        .map(Number);
-      expect(rgb.length).toBeGreaterThanOrEqual(3);
-      for (const channel of rgb.slice(0, 3)) expect(channel).toBeCloseTo(255, 3);
+      // This DOM harness has unknown motion preference; target CSS owns settled paint.
+      expect(surface.style.getPropertyValue('background-color')).toBe('');
       if (scope === 'shadow') expect(el.style.getPropertyValue('background-color')).toBe('');
       expect(diagnostics).not.toEqual([]);
     }

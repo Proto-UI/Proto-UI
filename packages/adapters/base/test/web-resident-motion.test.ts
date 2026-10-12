@@ -84,6 +84,10 @@ describe('Web resident motion physical projection (DOM harness, not browser timi
         [{ target: el, borderBoxSize: [{ inlineSize: 16, blockSize: 16 }] }] as any,
         {} as any
       );
+      for (const [id, cb] of [...scheduled]) {
+        scheduled.delete(id);
+        cb(now);
+      }
       commit(['translate-x-[calc(100%_-_2px)]', 'bg-primary'], 2);
       now = 50;
       for (const [id, cb] of [...scheduled]) {
@@ -97,6 +101,22 @@ describe('Web resident motion physical projection (DOM harness, not browser timi
       expect(el.style.backgroundColor).not.toBe('rgb(0, 0, 0)');
       expect(el.style.backgroundColor).not.toBe('rgb(255, 255, 255)');
       const late = [...all.values()].at(-1)!;
+      now = 100;
+      for (const [id, cb] of [...scheduled]) {
+        scheduled.delete(id);
+        cb(now);
+      }
+      expect(el.style.getPropertyValue('background-color')).toBe('');
+      expect(scheduled.size).toBe(0);
+      // Idle author input survives; the next active lease captures this new baseline.
+      el.style.setProperty('background-color', 'red');
+      commit(['translate-x-0', 'bg-input'], 3);
+      now = 200;
+      for (const [id, cb] of [...scheduled]) {
+        scheduled.delete(id);
+        cb(now);
+      }
+      expect(el.style.getPropertyValue('background-color')).toBe('red');
       sink.release(1);
       expect(scheduled.size).toBe(0);
       expect(el.style.getPropertyValue('translate')).toBe('');

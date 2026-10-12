@@ -9,12 +9,17 @@ import {
   readWebPreference,
 } from '../platform/web-preference-source';
 export type ResidentMotionPaletteSource = {
-  current(): Readonly<{ revision: number; colors: Readonly<Record<string, MotionRgba>> }>;
+  current(): Readonly<{
+    revision: number;
+    colors: Readonly<Record<string, MotionRgba>>;
+    diagnostics?: readonly string[];
+  }>;
   subscribe(invalidate: () => void): () => void;
 };
 /** Host environment input, not a component-specific styling escape hatch. */
 export type WebResidentMotionOptions = {
-  palette?: ResidentMotionPaletteSource;
+  /** Fresh source per physical surface. Its subscribe cleanup is owned by that view. */
+  palette?: ResidentMotionPaletteSource | ((surface: HTMLElement) => ResidentMotionPaletteSource);
   diagnostics?: (reasons: readonly string[]) => void;
 };
 /** One physical surface; replacement gets a fresh lease. No semantic DOM reads. */
@@ -23,6 +28,8 @@ export function createWebResidentMotionSink(
   effects: EffectsPort,
   options: WebResidentMotionOptions = {}
 ): ResidentMotionSink {
+  const paletteSource =
+    typeof options.palette === 'function' ? options.palette(el) : options.palette;
   const doc = el.ownerDocument,
     win = doc.defaultView;
   let width: number | null = null,
@@ -76,7 +83,7 @@ export function createWebResidentMotionSink(
     now: () => win?.performance.now() ?? 0,
     environment: () => {
       const preference = readWebPreference(doc, 'preference.reducedMotion');
-      const palette = options.palette?.current();
+      const palette = paletteSource?.current();
       // Root font is a host unit basis, never a recovered style target.
       const font = win
         ? Number.parseFloat(win.getComputedStyle(doc.documentElement).fontSize)
@@ -96,6 +103,7 @@ export function createWebResidentMotionSink(
         rootFontPx: Number.isFinite(font) ? font : null,
         palette: palette?.colors ?? {},
         paletteRevision: palette?.revision ?? 0,
+        paletteDiagnostics: palette?.diagnostics ?? [],
       };
     },
     subscribe(invalidate) {
@@ -104,7 +112,7 @@ export function createWebResidentMotionSink(
         ['preference.reducedMotion'],
         invalidate
       );
-      const offPalette = options.palette?.subscribe(invalidate);
+      const offPalette = paletteSource?.subscribe(invalidate);
       // ResizeObserver borderBoxSize supplies layout-space (not transformed viewport) units.
       const resize =
         typeof win?.ResizeObserver === 'function'
@@ -156,7 +164,8 @@ export function createWebResidentMotionSink(
           : undefined
       );
       if (!isCurrent()) return;
-      const c = presentation.backgroundColor;
+      const c =
+        presentation.backgroundColorState === 'active' ? presentation.backgroundColor : undefined;
       write(
         'background-color',
         c ? `rgba(${c[0] * 255}, ${c[1] * 255}, ${c[2] * 255}, ${c[3]})` : undefined

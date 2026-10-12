@@ -154,6 +154,7 @@ describe('resident motion own-source physical browser fixture', () => {
         const end = await sample();
         samples.push({ stage: 'settled', ...end });
         expect(end.x - initial.x).toBeCloseTo(14, 1);
+        expect(end.color).toBe('rgb(255, 255, 255)');
         await page.screenshot({
           path: path.join(output, `resident-${scope}-settled.png`),
           fullPage: true,
@@ -165,6 +166,7 @@ describe('resident motion own-source physical browser fixture', () => {
         const reduced = await sample();
         samples.push({ stage: 'reduced', ...reduced });
         expect(reduced.x).toBeCloseTo(initial.x, 1);
+        expect(reduced.color).toBe('rgb(0, 0, 0)');
         await page.evaluate(() => {
           (window as any).subject.hidden = true;
         });
@@ -178,6 +180,7 @@ describe('resident motion own-source physical browser fixture', () => {
         const revealed = await sample();
         samples.push({ stage: 'reveal-settled', ...revealed });
         expect(revealed.x - initial.x).toBeCloseTo(14, 1);
+        expect(revealed.color).toBe('rgb(255, 255, 255)');
         await page.evaluate(() => {
           const el = (window as any).subject;
           el.remove();
@@ -187,6 +190,7 @@ describe('resident motion own-source physical browser fixture', () => {
         const reopened = await sample();
         samples.push({ stage: 'reopen', ...reopened });
         expect(reopened.x - initial.x).toBeCloseTo(14, 1);
+        expect(reopened.color).toBe('rgb(255, 255, 255)');
       } finally {
         await writeFile(
           path.join(output, `resident-${scope}-samples.json`),

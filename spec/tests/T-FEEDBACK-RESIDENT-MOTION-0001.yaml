@@ -27,7 +27,13 @@ cases:
     expectation: final-target-ownership-preserved
   - id: T-FEEDBACK-RESIDENT-MOTION-0001-CASE-PROJECT
     title: One host owner receives typed presentation and releases stale frames
-    covers: [C-FEEDBACK-RESIDENT-MOTION-0001-G, C-FEEDBACK-RESIDENT-MOTION-0001-H]
+    covers:
+      [
+        C-FEEDBACK-RESIDENT-MOTION-0001-G,
+        C-FEEDBACK-RESIDENT-MOTION-0001-H,
+        C-FEEDBACK-RESIDENT-MOTION-0001-PALETTE-LIFETIME,
+        C-FEEDBACK-RESIDENT-MOTION-0001-COLOR-LEASE,
+      ]
     expectation: shared-host-projection-with-explicit-missing-inputs
 implementations:
   - id: resident-model

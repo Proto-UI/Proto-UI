@@ -8,26 +8,40 @@ export type ResidentMotionDeclaration = Readonly<{
 export function snapshotResidentMotion(
   value: ResidentMotionDeclaration
 ): ResidentMotionDeclaration {
-  if (
-    !value ||
-    !Array.isArray(value.properties) ||
-    !value.properties.length ||
-    new Set(value.properties).size !== value.properties.length ||
-    value.properties.some((p) => p !== 'translate' && p !== 'background-color') ||
-    !Number.isFinite(value.durationMs) ||
-    value.durationMs < 0 ||
-    !Array.isArray(value.easing) ||
-    value.easing.length !== 4 ||
-    value.easing.some((n) => !Number.isFinite(n)) ||
-    value.easing[0] < 0 ||
-    value.easing[0] > 1 ||
-    value.easing[2] < 0 ||
-    value.easing[2] > 1
-  )
+  const fail = (): never => {
     throw new Error('[feedback.motion] Invalid declaration');
+  };
+  const field = (object: object, key: PropertyKey): unknown => {
+    const descriptor = Object.getOwnPropertyDescriptor(object, key);
+    if (!descriptor || !('value' in descriptor)) return fail();
+    return descriptor.value;
+  };
+  if (!value || typeof value !== 'object') return fail();
+  const dense = (input: unknown): unknown[] => {
+    if (!Array.isArray(input)) return fail();
+    return Array.from({ length: input.length }, (_, i) => field(input, String(i)));
+  };
+  const properties = dense(field(value, 'properties'));
+  const easing = dense(field(value, 'easing'));
+  const durationMs = field(value, 'durationMs');
+  if (
+    !properties.length ||
+    new Set(properties).size !== properties.length ||
+    properties.some((p) => p !== 'translate' && p !== 'background-color') ||
+    typeof durationMs !== 'number' ||
+    !Number.isFinite(durationMs) ||
+    durationMs < 0 ||
+    easing.length !== 4 ||
+    easing.some((n) => typeof n !== 'number' || !Number.isFinite(n)) ||
+    (easing[0] as number) < 0 ||
+    (easing[0] as number) > 1 ||
+    (easing[2] as number) < 0 ||
+    (easing[2] as number) > 1
+  )
+    return fail();
   return Object.freeze({
-    properties: Object.freeze([...value.properties]),
-    durationMs: value.durationMs,
-    easing: Object.freeze([...value.easing]) as unknown as ResidentMotionDeclaration['easing'],
+    properties: Object.freeze(properties) as readonly ResidentMotionProperty[],
+    durationMs,
+    easing: Object.freeze(easing) as unknown as ResidentMotionDeclaration['easing'],
   });
 }

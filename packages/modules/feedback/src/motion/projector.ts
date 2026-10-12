@@ -22,10 +22,13 @@ export type MotionEnvironment = Readonly<{
   height: number | null;
   palette: Readonly<Record<string, MotionRgba>>;
   paletteRevision: number;
+  paletteDiagnostics?: readonly string[];
 }>;
 export type MotionPresentation = Readonly<{
   translate?: readonly number[];
   backgroundColor?: MotionRgba;
+  /** Settled color is carried for non-Web hosts; Web releases its paint lease. */
+  backgroundColorState?: 'active' | 'settled';
 }>;
 export type ResidentMotionHost = {
   now(): number;
@@ -48,6 +51,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     off: (() => void) | null = null;
   let diagnostics: readonly string[] = Object.freeze([]);
   let subscribing = false;
+  let presented = false;
   let wasVisible = false,
     wasAllowed = false;
   const samplers = new Map<
@@ -67,6 +71,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     declarationKeys.clear();
     wasVisible = false;
     wasAllowed = false;
+    presented = false;
   }
   function render() {
     if (retired || !last) return;
@@ -79,12 +84,16 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         env.visible &&
         !frame.style.tokens.some((t) => t === 'hidden' || t === 'invisible') &&
         env.preference === 'no-preference';
-    const animate = allowed && wasAllowed && wasVisible;
+    const animate = presented && allowed && wasAllowed && wasVisible;
     wasVisible = env.visible;
     wasAllowed = allowed;
-    const presentation: { translate?: readonly number[]; backgroundColor?: MotionRgba } = {};
+    const presentation: {
+      translate?: readonly number[];
+      backgroundColor?: MotionRgba;
+      backgroundColorState?: 'active' | 'settled';
+    } = {};
     const omitted = new Set<string>(),
-      reasons: string[] = [];
+      reasons: string[] = [...(env.paletteDiagnostics ?? [])];
     let active = false;
     for (const declaration of frame.declarations)
       for (const property of declaration.properties) {
@@ -129,7 +138,10 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         if (property === 'translate') {
           presentation.translate = sample;
           if (target.supported) for (const token of target.ownedTokens) omitted.add(token);
-        } else presentation.backgroundColor = motionVectorToColor(sample);
+        } else {
+          presentation.backgroundColor = motionVectorToColor(sample);
+          presentation.backgroundColorState = sampler!.active ? 'active' : 'settled';
+        }
         active ||= sampler!.active;
       }
     diagnostics = Object.freeze(reasons);
@@ -142,11 +154,25 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
       Object.freeze(presentation),
       () => !retired && last === frame && generation === currentGeneration
     );
-    if (active && allowed && !retired && last === frame && generation === currentGeneration) {
-      ticket = host.requestFrame(() => {
-        ticket = null;
-        if (!retired && generation === currentGeneration) render();
+    if (
+      (!presented || (active && allowed)) &&
+      !retired &&
+      last === frame &&
+      generation === currentGeneration
+    ) {
+      let delivered = false;
+      const requested = host.requestFrame(() => {
+        delivered = true;
+        if (!retired && generation === currentGeneration) {
+          ticket = null;
+          presented = true;
+          render();
+        }
       });
+      // Scheduling itself may synchronously reenter, release, or replace this view.
+      if (!delivered && !retired && last === frame && generation === currentGeneration)
+        ticket = requested;
+      else if (!delivered) host.cancelFrame(requested);
     }
   }
   return {
