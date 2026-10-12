@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { Window } from 'happy-dom';
 import {
-  assertPositionedSwitch,
+  assertStyledSwitch,
   loadConsumerStyles,
   unwrapGeneratedTokenLayer,
 } from '../consumer-smoke-css.mjs';
@@ -82,14 +82,30 @@ function fixture(t) {
   return { directory, stylesDir, window };
 }
 
+// Independent recipe expectations from P-SHADCN-SWITCH[-THUMB]-CURRENT-VISUAL-SURFACE.
+function switchFixture(document) {
+  const element = document.createElement('div');
+  element.setAttribute(
+    'data-pui-style',
+    'inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs'
+  );
+  const thumb = document.createElement('span');
+  thumb.setAttribute(
+    'data-pui-style',
+    'pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 data-[checked]:translate-x-[calc(100%_-_2px)]'
+  );
+  element.appendChild(thumb);
+  document.body.appendChild(element);
+  return element;
+}
+
 test('loads actual complete CLI output, preserves original bytes/hash, and observes structural CSS', (t) => {
   const { directory, stylesDir, window } = fixture(t);
-  const element = window.document.createElement('div');
-  element.setAttribute('data-pui-style', 'relative inline-flex w-[32px]');
-  window.document.body.appendChild(element);
-  assert.throws(() => assertPositionedSwitch(element, 'zero CSS'), /structural CSS not applied/);
+  const element = switchFixture(window.document);
+  assert.throws(() => assertStyledSwitch(element, 'zero CSS'), /structural CSS not applied/);
   const result = loadConsumerStyles(window.document, { root: directory });
-  assertPositionedSwitch(element, 'generated CSS');
+  assertStyledSwitch(element, 'generated CSS');
+  assert.notEqual(window.getComputedStyle(element).position, 'relative');
   assert.equal(result.styles[0].textContent, css['shadcn-theme.css']);
   assert.equal(result.styles[1].textContent, body);
   const manifest = JSON.parse(readFileSync(join(result.evidenceDir, 'manifest.json'), 'utf8'));
@@ -103,8 +119,201 @@ test('loads actual complete CLI output, preserves original bytes/hash, and obser
     manifest.limitation,
     /No cascade-layer, width\/layout, paint, or native hit-testing equivalence/
   );
-  // Deliberately no width/geometry assertion: HappyDOM is not a layout engine.
+  // Rem declarations are checked above; rendered geometry and motion need a browser.
 });
+
+test('rejects theme-only CSS, dropped token CSS and the historical Nova recipe', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  const result = loadConsumerStyles(window.document, { root: directory });
+  const tokenSheet = result.styles[1];
+  tokenSheet.remove();
+  assert.throws(() => assertStyledSwitch(element, 'theme only'), /structural CSS not applied/);
+  window.document.head.appendChild(tokenSheet);
+  assertStyledSwitch(element, 'restored CSS');
+  element.setAttribute(
+    'data-pui-style',
+    element
+      .getAttribute('data-pui-style')
+      .replace('h-[1.15rem] w-8', 'relative h-[18.4px] w-[32px]')
+      .replace('shadow-xs', '')
+  );
+  assert.throws(() => assertStyledSwitch(element, 'old Nova'), /current recipe token is missing/);
+});
+
+for (const [name, token, from, to] of [
+  ['root rem height', 'h-[1.15rem]', 'height: 1.15rem;', 'height: 18.4px;'],
+  ['root rem width', 'w-8', 'width: 2rem;', 'width: 32px;'],
+  [
+    'root shadow size',
+    'shadow-xs',
+    '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+  ],
+  ['root shadow application', 'shadow-xs', 'box-shadow:', '--unused-shadow:'],
+  ['thumb rem width', 'size-4', 'width: 1rem;', 'width: 16px;'],
+  ['thumb rem height', 'size-4', 'height: 1rem;', 'height: 16px;'],
+  ['unchecked travel', 'translate-x-0', '--pui-translate-x: 0px;', '--pui-translate-x: 2px;'],
+  ['checked travel', 'data-[checked]:translate-x-[calc(100%_-_2px)]', 'calc(100% - 2px)', '14px'],
+  [
+    'checked transform',
+    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    'transform:',
+    '--unused-transform:',
+  ],
+]) {
+  test(`rejects missing or stale ${name} declaration in installed generated CSS`, (t) => {
+    const { directory, window } = fixture(t);
+    const element = switchFixture(window.document);
+    const { styles } = loadConsumerStyles(window.document, { root: directory });
+    const text = styles[1].textContent;
+    const start = text.indexOf(`:where([data-pui-style~="${token}"])`);
+    assert.ok(start >= 0);
+    const end = text.indexOf('}', start) + 1;
+    const rule = text.slice(start, end);
+    assert.ok(rule.includes(from));
+    styles[1].textContent = text.slice(0, start) + rule.replace(from, to) + text.slice(end);
+    assert.throws(() => assertStyledSwitch(element, name), /generated CSS declaration is missing/);
+  });
+}
+
+test('rejects a missing checked selector and a missing or unstyled default Thumb', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  const { styles } = loadConsumerStyles(window.document, { root: directory });
+  const text = styles[1].textContent;
+  styles[1].textContent = text.replace(
+    ':where([data-pui-style~="data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-checked]',
+    ':where([data-pui-style~="data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-unchecked]'
+  );
+  assert.throws(() => assertStyledSwitch(element, 'wrong state'), /generated CSS rule is missing/);
+  styles[1].textContent = text;
+  const thumb = element.firstElementChild;
+  thumb.removeAttribute('data-pui-style');
+  assert.throws(
+    () => assertStyledSwitch(element, 'unstyled Thumb'),
+    /Thumb structural CSS not applied/
+  );
+  thumb.remove();
+  assert.throws(() => assertStyledSwitch(element, 'missing Thumb'), /Thumb is missing/);
+});
+
+for (const [name, mutate] of [
+  ['last declaration wins', (rule) => rule.replace('width: 2rem;', 'width: 2rem; width: 99px;')],
+  ['duplicate selector', (rule) => rule + rule.replace('width: 2rem;', 'width: 99px;')],
+  ['commented rule', (rule) => `/* ${rule} */`],
+  ['inactive media', (rule) => `@media (min-width: 99999px) { ${rule} }`],
+]) {
+  test(`rejects ${name} as evidence for the default width`, (t) => {
+    const { directory, window } = fixture(t);
+    const element = switchFixture(window.document);
+    const { styles } = loadConsumerStyles(window.document, { root: directory });
+    const text = styles[1].textContent;
+    const start = text.indexOf(':where([data-pui-style~="w-8"])');
+    const end = text.indexOf('}', start) + 1;
+    styles[1].textContent = text.slice(0, start) + mutate(text.slice(start, end)) + text.slice(end);
+    assert.throws(
+      () => assertStyledSwitch(element, name),
+      /generated CSS (rule|declaration) is missing/
+    );
+  });
+}
+
+test('rejects computed width and shadow-variable overrides', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  loadConsumerStyles(window.document, { root: directory });
+  element.style.width = '99px';
+  assert.throws(
+    () => assertStyledSwitch(element, 'inline width'),
+    /computed CSS mismatch: Root width/
+  );
+  element.style.removeProperty('width');
+  element.style.setProperty('--pui-shadow', 'none');
+  assert.throws(
+    () => assertStyledSwitch(element, 'inline shadow'),
+    /computed CSS mismatch: Root shadow variable/
+  );
+});
+
+test('preserves simple rem computation at a larger root font without claiming layout', (t) => {
+  const { directory, window } = fixture(t);
+  window.document.documentElement.style.fontSize = '32px';
+  const element = switchFixture(window.document);
+  loadConsumerStyles(window.document, { root: directory });
+  assertStyledSwitch(element, 'root 32px');
+});
+
+test('requires current Thumb travel tokens and same-domain checked state', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  loadConsumerStyles(window.document, { root: directory });
+  const thumb = element.firstElementChild;
+  const original = thumb.getAttribute('data-pui-style');
+  thumb.setAttribute('data-pui-style', original.replace('translate-x-0', ''));
+  assert.throws(
+    () => assertStyledSwitch(element, 'missing unchecked travel'),
+    /current recipe token is missing/
+  );
+  element.setAttribute('aria-checked', 'true');
+  assert.throws(() => assertStyledSwitch(element, 'state drift'), /checked state is out of sync/);
+  thumb.setAttribute('data-checked', '');
+  assertStyledSwitch(element, 'checked lowered recipe');
+  thumb.setAttribute(
+    'data-pui-style',
+    original.replace('data-[checked]:translate-x-[calc(100%_-_2px)]', '')
+  );
+  assert.throws(
+    () => assertStyledSwitch(element, 'missing checked travel'),
+    /current recipe token is missing/
+  );
+  thumb.setAttribute('data-pui-style', original.replace('data-[checked]:', ''));
+  assertStyledSwitch(element, 'checked active recipe');
+});
+
+for (const [name, token, mutate] of [
+  [
+    'comment-trivia duplicate',
+    'h-[1.15rem]',
+    (rule, text) =>
+      text + '\n/* appended rule */\n' + rule.replace('height: 1.15rem;', 'height: 99px;'),
+  ],
+  [
+    'earlier important height',
+    'h-[1.15rem]',
+    (rule, text) =>
+      text.replace(
+        rule,
+        rule.replace('height: 1.15rem;', 'height: 99px !important; height: 1.15rem;')
+      ),
+  ],
+  [
+    'uppercase height override',
+    'h-[1.15rem]',
+    (rule, text) =>
+      text.replace(rule, rule.replace('height: 1.15rem;', 'height: 1.15rem; HEIGHT: 99px;')),
+  ],
+  [
+    'important checked transform',
+    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    (rule, text) =>
+      text.replace(rule, rule.replace('transform:', 'transform: scale(99) !important; transform:')),
+  ],
+]) {
+  test(`rejects ${name} through the host CSSOM`, (t) => {
+    const { directory, window } = fixture(t);
+    const element = switchFixture(window.document);
+    const { styles } = loadConsumerStyles(window.document, { root: directory });
+    const text = styles[1].textContent;
+    const start = text.indexOf(`:where([data-pui-style~="${token}"])`);
+    const end = text.indexOf('}', start) + 1;
+    styles[1].textContent = mutate(text.slice(start, end), text);
+    assert.throws(
+      () => assertStyledSwitch(element, name),
+      /generated CSS (rule|declaration) is missing/
+    );
+  });
+}
 
 test('rejects unexpected import order and never partially installs CSS', (t) => {
   const { directory, stylesDir, window } = fixture(t);
@@ -146,6 +355,6 @@ test('keeps styled/no-styles cases separate and browser entry on the original CS
       'utf8'
     );
     assert.ok(source.includes('loadConsumerStyles(document'));
-    assert.ok(source.includes('assertPositionedSwitch('));
+    assert.ok(source.includes('assertStyledSwitch('));
   }
 });

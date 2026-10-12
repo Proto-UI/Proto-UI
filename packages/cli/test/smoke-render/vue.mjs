@@ -22,7 +22,7 @@
 // asFocusable via asButton, so the focus module stamps `tabindex="0"`, and
 // shadcn's feedback.style stamps the `group/button` token chain.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'cli-vue' });
@@ -87,7 +87,7 @@ presetApp.mount(presetContainer);
 await flush();
 
 const switchRoot = presetContainer.querySelector('.consumer-switch');
-assertPositionedSwitch(switchRoot, 'vue smoke');
+assertStyledSwitch(switchRoot, 'vue smoke');
 const switchThumb = switchRoot?.firstElementChild;
 if (
   switchRoot?.getAttribute('aria-checked') !== 'true' ||

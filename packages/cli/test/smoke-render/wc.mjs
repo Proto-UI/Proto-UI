@@ -5,7 +5,7 @@
 // reachable through customElements. happy-dom provides the DOM globals that the
 // adapter and the registry need.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'cli-wc' });
@@ -30,7 +30,7 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 const switchElement = document.createElement('proto-ui-shadcn-switch');
 document.body.appendChild(switchElement);
 await flush();
-assertPositionedSwitch(switchElement, 'wc smoke');
+assertStyledSwitch(switchElement, 'wc smoke');
 const switchThumb = switchElement.firstElementChild;
 if (switchThumb?.localName !== 'proto-ui-shadcn-switch-thumb') {
   throw new Error('wc smoke: Switch preset did not materialize its default Thumb');

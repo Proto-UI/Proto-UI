@@ -11,4 +11,4 @@ export function loadConsumerStyles(
   files: { name: string; bytes: number; sha256: string }[];
   evidenceDir: string;
 };
-export function assertPositionedSwitch(element: Element | null, label: string): void;
+export function assertStyledSwitch(element: Element | null, label: string): void;

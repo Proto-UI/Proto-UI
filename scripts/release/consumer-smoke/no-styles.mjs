@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -39,50 +39,45 @@ await React.act(async () => {
 });
 assert.equal(base.getAttribute('aria-checked'), 'false', 'Base Switch toggles without CSS');
 // No consumer CSS is supplied. The Adapter's existing view-lifecycle sheet
-// is independent of theme/token generation and does not position the Switch.
+// is independent of theme/token generation and does not supply the Switch visual recipe.
 for (const style of document.querySelectorAll('style, link[rel="stylesheet"]')) {
   assert.equal(style.id, 'proto-ui-view-visibility', 'Base must not inject a preset stylesheet');
 }
 await React.act(async () => root.unmount());
 
-const stylesBeforeUnsupported = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map(
+const stylesBeforeUnstyled = [...document.querySelectorAll('style, link[rel="stylesheet"]')].map(
   (style) => style.outerHTML
 );
-const caught = [];
-class Boundary extends React.Component {
-  state = { failed: false };
-  static getDerivedStateFromError() {
-    return { failed: true };
-  }
-  render() {
-    return this.state.failed ? null : this.props.children;
-  }
-}
-const unsupported = createRoot(container, { onCaughtError: (error) => caught.push(error) });
+// New York has no staticHitInset prerequisite. Missing CSS is a visual failure,
+// not a mount failure or a reason for the Adapter to inject substitute styles.
+const unstyled = createRoot(container);
 await React.act(async () => {
-  unsupported.render(React.createElement(Boundary, null, React.createElement(ShadcnSwitch)));
+  unstyled.render(React.createElement(ShadcnSwitch, { defaultChecked: true }));
   await flush();
 });
-assert.ok(caught.length > 0, 'unstyled Shadcn Switch must reject missing structural CSS');
-for (const error of caught) {
-  assert.equal(
-    error.message,
-    '[HitParticipation] staticHitInset unsupported: root needs an existing positioned padding-box.'
-  );
-}
-assert.equal(
-  document.querySelector('[data-pui-static-hit]'),
-  null,
-  'rejection must not accept a hit projection'
+const unstyledSwitch = container.querySelector('[role="switch"]');
+assert.equal(unstyledSwitch?.getAttribute('aria-checked'), 'true');
+const unstyledThumb = unstyledSwitch.firstElementChild;
+assert.ok(unstyledThumb?.hasAttribute('data-checked'));
+assert.throws(
+  () => assertStyledSwitch(unstyledSwitch, 'Shadcn zero CSS'),
+  /structural CSS not applied/
 );
+await React.act(async () => {
+  unstyledSwitch.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  await flush();
+});
+assert.equal(unstyledSwitch.getAttribute('aria-checked'), 'false');
+assert.equal(unstyledThumb.hasAttribute('data-checked'), false);
+assert.equal(document.querySelector('[data-pui-static-hit]'), null);
 assert.deepEqual(
   [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((style) => style.outerHTML),
-  stylesBeforeUnsupported,
-  'rejection must not install fallback CSS'
+  stylesBeforeUnstyled,
+  'unstyled Switch must not install fallback CSS'
 );
-await React.act(async () => unsupported.unmount());
+await React.act(async () => unstyled.unmount());
 console.log(
-  'no-styles consumer: facade import + Base zero-consumer-CSS positive + Shadcn missing-CSS negative ok'
+  'no-styles consumer: Base and Shadcn semantics usable; Shadcn visual negative without fallback CSS ok'
 );
 
 loadConsumerStyles(document, {
@@ -96,7 +91,7 @@ for (const label of ['consumer-owned mount', 'consumer-owned remount']) {
     await flush();
   });
   const element = container.querySelector('[role="switch"]');
-  assertPositionedSwitch(element, label);
+  assertStyledSwitch(element, label);
   assert.equal(element.getAttribute('aria-checked'), 'true');
   await React.act(async () => {
     element.dispatchEvent(new MouseEvent('click', { bubbles: true }));

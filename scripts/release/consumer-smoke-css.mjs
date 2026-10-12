@@ -69,7 +69,10 @@ export function loadConsumerStyles(
   document,
   { root = process.cwd(), stylesDir = join(root, 'src', 'styles'), evidenceName = 'styled' } = {}
 ) {
-  const originals = FILES.map((name) => ({ name, bytes: readFileSync(join(stylesDir, name)) }));
+  const originals = FILES.map((name) => ({
+    name,
+    bytes: readFileSync(join(stylesDir, name)),
+  }));
   if (originals[0].bytes.toString('utf8') !== ENTRY) {
     throw new Error('consumer CSS smoke: unsupported generated entry/import order');
   }
@@ -80,7 +83,11 @@ export function loadConsumerStyles(
   mkdirSync(evidenceDir, { recursive: true });
   const files = originals.map(({ name, bytes }) => {
     writeFileSync(join(evidenceDir, name), bytes);
-    return { name, bytes: bytes.length, sha256: createHash('sha256').update(bytes).digest('hex') };
+    return {
+      name,
+      bytes: bytes.length,
+      sha256: createHash('sha256').update(bytes).digest('hex'),
+    };
   });
   const limitation =
     'HappyDOM only: explicit theme then token load; single outer proto-ui layer removed. ' +
@@ -103,12 +110,134 @@ export function loadConsumerStyles(
   return { styles, files, evidenceDir };
 }
 
-export function assertPositionedSwitch(element, label) {
+// P-SHADCN-SWITCH[-THUMB]-CURRENT-VISUAL-SURFACE: fixed New York
+// 02cad611 default recipe. There is no positioned-box or staticHitInset prerequisite.
+// Computed structure proves CSS installation. Exact installed declarations retain
+// rem units and state travel; HappyDOM is not evidence of layout, paint or motion.
+export function assertStyledSwitch(element, label) {
   if (!element) throw new Error(`${label}: Switch host is missing`);
-  const style = element.ownerDocument.defaultView.getComputedStyle(element);
-  if (style.position !== 'relative' || style.display !== 'inline-flex') {
-    throw new Error(
-      `${label}: generated Switch structural CSS not applied: position=${style.position}, display=${style.display}`
+  const view = element.ownerDocument.defaultView;
+  const style = view.getComputedStyle(element);
+  const structural = {
+    display: 'inline-flex',
+    flexShrink: '0',
+    alignItems: 'center',
+    boxSizing: 'border-box',
+    borderWidth: '1px',
+    borderRadius: '9999px',
+    padding: '0px',
+  };
+  for (const [property, expected] of Object.entries(structural)) {
+    if (style[property] !== expected) {
+      throw new Error(
+        `${label}: generated Switch structural CSS not applied: ${property}=${style[property]}, expected=${expected}`
+      );
+    }
+  }
+  const thumb = element.firstElementChild;
+  if (!thumb) throw new Error(`${label}: Switch Thumb is missing`);
+  const thumbStyle = view.getComputedStyle(thumb);
+  if (thumbStyle.display !== 'block' || thumbStyle.pointerEvents !== 'none') {
+    throw new Error(`${label}: generated Switch Thumb structural CSS not applied`);
+  }
+  const generatedStyles = [
+    ...element.ownerDocument.querySelectorAll('style[data-consumer-smoke-css="tokens"]'),
+  ]
+    .map((sheet) => sheet.textContent)
+    .join('\n');
+  const requireRule = (host, token, declarations, suffix = '') => {
+    if (host && !host.getAttribute('data-pui-style')?.split(/\s+/).includes(token)) {
+      throw new Error(`${label}: Switch current recipe token is missing: ${token}`);
+    }
+    // Match the exact bounded generator rule, not a CSSOM-normalized px result.
+    // HappyDOM does not reliably resolve arbitrary-value selectors or transforms.
+    const selector = `:where([data-pui-style~="${token}"])${suffix}`;
+    // Parse with the host's CSSOM, not a handwritten declaration/cascade parser.
+    // HappyDOM 15 cannot parse some arbitrary-value selectors. Substitute only
+    // this exact selector in a detached parsing copy; the installed CSS and DOM
+    // are untouched. Comments and inactive/nested rules retain their meaning.
+    const marker = '[data-consumer-smoke-rule="target"]';
+    if (generatedStyles.includes(marker)) throw new Error(`${label}: reserved CSS smoke selector`);
+    const parsed = new view.CSSStyleSheet();
+    parsed.replaceSync(generatedStyles.replaceAll(selector, marker));
+    const matches = [];
+    const visit = (rules, depth = 0) => {
+      for (const rule of rules) {
+        if (rule.selectorText === marker) matches.push({ rule, depth });
+        if (rule.cssRules) visit(rule.cssRules, depth + 1);
+      }
+    };
+    visit(parsed.cssRules);
+    if (matches.length !== 1 || matches[0].depth !== 0) {
+      throw new Error(`${label}: Switch generated CSS rule is missing or duplicated: ${token}`);
+    }
+    const expected = new view.CSSStyleSheet();
+    expected.replaceSync(`${marker} { ${declarations.join('; ')}; }`);
+    // Accept only this generator's canonical declaration set. CSSOM resolves
+    // declaration priority; unexpected property casing, priorities and extra
+    // declarations fail closed rather than emulating a general cascade here.
+    if (matches[0].rule.style.cssText !== expected.cssRules[0].style.cssText) {
+      throw new Error(
+        `${label}: Switch generated CSS declaration is missing or noncanonical: ${token}`
+      );
+    }
+  };
+  requireRule(element, 'h-[1.15rem]', ['height: 1.15rem']);
+  requireRule(element, 'w-8', ['width: 2rem']);
+  requireRule(element, 'shadow-xs', [
+    '--pui-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    'box-shadow: var(--pui-ring-offset-shadow, 0 0 #0000), var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000)',
+  ]);
+  requireRule(thumb, 'size-4', ['width: 1rem', 'height: 1rem']);
+  const transform =
+    'transform: translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-scale-x, 1), var(--pui-scale-y, 1))';
+  requireRule(null, 'translate-x-0', ['--pui-translate-x: 0px', transform]);
+  requireRule(
+    null,
+    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    ['--pui-translate-x: calc(100% - 2px)', transform],
+    '[data-checked]'
+  );
+  const checked = element.getAttribute('aria-checked') === 'true';
+  if (thumb.hasAttribute('data-checked') !== checked) {
+    throw new Error(`${label}: Switch Thumb checked state is out of sync`);
+  }
+  // At initial mount the current endpoint must have a real token recipe. This
+  // helper is not sampled during a resident-motion handoff or interpolation.
+  const thumbTokens = thumb.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
+  if (checked && thumbTokens.includes('translate-x-[calc(100%_-_2px)]')) {
+    requireRule(thumb, 'translate-x-[calc(100%_-_2px)]', [
+      '--pui-translate-x: calc(100% - 2px)',
+      transform,
+    ]);
+  } else if (checked) {
+    requireRule(
+      thumb,
+      'data-[checked]:translate-x-[calc(100%_-_2px)]',
+      ['--pui-translate-x: calc(100% - 2px)', transform],
+      '[data-checked]'
     );
+  } else {
+    requireRule(thumb, 'translate-x-0', ['--pui-translate-x: 0px', transform]);
+  }
+  // These simple rem properties are resolved by this host. This is computed CSS,
+  // not measured layout. Arbitrary height/transform selectors need browser QA.
+  const rootFont =
+    Number.parseFloat(view.getComputedStyle(element.ownerDocument.documentElement).fontSize) || 16;
+  for (const [part, actual, expected] of [
+    ['Root width', style.width, `${2 * rootFont}px`],
+    ['Thumb width', thumbStyle.width, `${rootFont}px`],
+    ['Thumb height', thumbStyle.height, `${rootFont}px`],
+    [
+      'Root shadow variable',
+      style.getPropertyValue('--pui-shadow'),
+      '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    ],
+  ]) {
+    if (actual !== expected) {
+      throw new Error(
+        `${label}: Switch computed CSS mismatch: ${part}=${actual}, expected=${expected}`
+      );
+    }
   }
 }

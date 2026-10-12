@@ -23,7 +23,7 @@
 // onto the host. Shadcn additionally stamps its feedback.style class tokens,
 // so we assert `group/button` only on the shadcn host.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'cli-react' });
@@ -91,7 +91,7 @@ const switchRoot = ReactDOMClient.createRoot(switchContainer);
 switchRoot.render(React.createElement(ShadcnSwitch, { defaultChecked: true }));
 await flush();
 const switchHost = switchContainer.querySelector('[role="switch"]');
-assertPositionedSwitch(switchHost, 'react smoke');
+assertStyledSwitch(switchHost, 'react smoke');
 if (switchHost.getAttribute('aria-checked') !== 'true') {
   throw new Error('react smoke: Switch initial state missing');
 }

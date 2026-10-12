@@ -1,5 +1,5 @@
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'react-vite' });
@@ -33,7 +33,7 @@ async function mountAndAssert(label: string) {
   );
 
   const switchRoot = container.querySelector('.consumer-switch');
-  assertPositionedSwitch(switchRoot, label);
+  assertStyledSwitch(switchRoot, label);
   assert(switchRoot?.getAttribute('role') === 'switch', `${label}: Switch role is missing`);
   assert(switchRoot?.getAttribute('aria-checked') === 'true', `${label}: Switch state is missing`);
   const switchThumb = switchRoot?.firstElementChild;
