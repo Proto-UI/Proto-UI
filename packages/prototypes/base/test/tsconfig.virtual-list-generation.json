@@ -3,6 +3,7 @@
   "include": [
     "../src/virtual-list/**/*.ts",
     "virtual-list-generation.test.ts",
+    "virtual-list-resize.test.ts",
     "virtual-list.test.ts"
   ],
   "exclude": []
