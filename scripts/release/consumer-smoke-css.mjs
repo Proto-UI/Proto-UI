@@ -192,34 +192,17 @@ export function assertStyledSwitch(element, label) {
   const transform =
     'transform: translate(var(--pui-translate-x, 0), var(--pui-translate-y, 0)) scale(var(--pui-scale-x, 1), var(--pui-scale-y, 1))';
   requireRule(null, 'translate-x-0', ['--pui-translate-x: 0px', transform]);
+  requireRule(null, 'translate-x-[calc(100%_-_2px)]', [
+    '--pui-translate-x: calc(100% - 2px)',
+    transform,
+  ]);
   requireRule(
     null,
     'data-[checked]:translate-x-[calc(100%_-_2px)]',
     ['--pui-translate-x: calc(100% - 2px)', transform],
     '[data-checked]'
   );
-  const checked = element.getAttribute('aria-checked') === 'true';
-  if (thumb.hasAttribute('data-checked') !== checked) {
-    throw new Error(`${label}: Switch Thumb checked state is out of sync`);
-  }
-  // At initial mount the current endpoint must have a real token recipe. This
-  // helper is not sampled during a resident-motion handoff or interpolation.
-  const thumbTokens = thumb.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
-  if (checked && thumbTokens.includes('translate-x-[calc(100%_-_2px)]')) {
-    requireRule(thumb, 'translate-x-[calc(100%_-_2px)]', [
-      '--pui-translate-x: calc(100% - 2px)',
-      transform,
-    ]);
-  } else if (checked) {
-    requireRule(
-      thumb,
-      'data-[checked]:translate-x-[calc(100%_-_2px)]',
-      ['--pui-translate-x: calc(100% - 2px)', transform],
-      '[data-checked]'
-    );
-  } else {
-    requireRule(thumb, 'translate-x-0', ['--pui-translate-x: 0px', transform]);
-  }
+  assertSwitchThumbState(element, element.getAttribute('aria-checked') === 'true', label);
   // These simple rem properties are resolved by this host. This is computed CSS,
   // not measured layout. Arbitrary height/transform selectors need browser QA.
   const rootFont =
@@ -240,4 +223,76 @@ export function assertStyledSwitch(element, label) {
       );
     }
   }
+}
+
+// C-FEEDBACK-RESIDENT-MOTION-0001-A/F: relevant Rules stay in the runtime.
+// With no delivered reference-box measurement, checked percentage travel must
+// retain its active semantic token. Zero travel needs no measurement, so the
+// resident sink may instead own exactly the inline 0px endpoint. This is a
+// layoutless smoke assertion, not a native motion or measured-travel oracle.
+export function assertSwitchThumbState(element, expectedChecked, label) {
+  const thumb = element?.firstElementChild;
+  const checked = element?.getAttribute('aria-checked');
+  const rootChecked = element?.hasAttribute('data-checked');
+  const thumbChecked = thumb?.hasAttribute('data-checked');
+  const tokens = thumb?.getAttribute('data-pui-style')?.split(/\s+/) ?? [];
+  const inline = thumb?.style?.getPropertyValue('translate') ?? '';
+  const priority = thumb?.style?.getPropertyPriority('translate') ?? '';
+  const transform = thumb?.style?.getPropertyValue('transform') ?? '';
+  const inlineVariables = [
+    '--pui-translate-x',
+    '--pui-translate-y',
+    '--pui-scale-x',
+    '--pui-scale-y',
+  ]
+    .map((property) => [property, thumb?.style?.getPropertyValue(property) ?? ''])
+    .filter(([, value]) => value !== '');
+  const detail = JSON.stringify({
+    checked,
+    rootChecked,
+    thumbChecked,
+    tokens,
+    inline,
+    priority,
+    transform,
+    inlineVariables,
+  });
+  if (
+    !thumb ||
+    checked !== String(expectedChecked) ||
+    rootChecked !== expectedChecked ||
+    thumbChecked !== expectedChecked
+  ) {
+    throw new Error(`${label}: Switch Root/Thumb checked state mismatch: ${detail}`);
+  }
+  const ownedTokens = tokens.filter((token) => /^-?translate-[xy]-/.test(token));
+  const selectorTarget = tokens.some((token) => /:-?translate-[xy]-/.test(token));
+  const expectedToken = expectedChecked ? 'translate-x-[calc(100%_-_2px)]' : 'translate-x-0';
+  const runtimeToken =
+    ownedTokens.length === 1 && ownedTokens[0] === expectedToken && inline === '';
+  // CSSOM may serialize the zero Y coordinate implicitly; both are exactly zero.
+  const inlineZero =
+    !expectedChecked && ownedTokens.length === 0 && (inline === '0px 0px' || inline === '0px');
+  if (
+    selectorTarget ||
+    inlineVariables.length > 0 ||
+    priority !== '' ||
+    transform !== '' ||
+    (!runtimeToken && !inlineZero)
+  ) {
+    throw new Error(
+      `${label}: Switch Thumb effective translate endpoint is missing or conflicting: ${detail}`
+    );
+  }
+  console.log(
+    `consumer Switch Thumb: ${label}; ${JSON.stringify({
+      checked,
+      rootChecked,
+      thumbChecked,
+      channel: runtimeToken ? 'token' : 'inline',
+      translateTokens: ownedTokens,
+      inline,
+      priority,
+    })}`
+  );
 }

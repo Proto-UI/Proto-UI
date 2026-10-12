@@ -12,3 +12,8 @@ export function loadConsumerStyles(
   evidenceDir: string;
 };
 export function assertStyledSwitch(element: Element | null, label: string): void;
+export function assertSwitchThumbState(
+  element: Element | null,
+  expectedChecked: boolean,
+  label: string
+): void;

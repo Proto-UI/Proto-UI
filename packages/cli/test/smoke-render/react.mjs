@@ -23,7 +23,11 @@
 // onto the host. Shadcn additionally stamps its feedback.style class tokens,
 // so we assert `group/button` only on the shadcn host.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import {
+  assertStyledSwitch,
+  assertSwitchThumbState,
+  loadConsumerStyles,
+} from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'cli-react' });
@@ -85,23 +89,32 @@ if (!shadcnClass.includes('user-added')) {
 
 const base = await renderHost('base BaseButton', BaseButton);
 
+// Act drains the React commit/effect boundary before inspecting the motion channel.
+const previousActEnvironment = globalThis.IS_REACT_ACT_ENVIRONMENT;
+globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 const switchContainer = document.createElement('div');
 document.body.appendChild(switchContainer);
 const switchRoot = ReactDOMClient.createRoot(switchContainer);
-switchRoot.render(React.createElement(ShadcnSwitch, { defaultChecked: true }));
-await flush();
+await React.act(async () => {
+  switchRoot.render(React.createElement(ShadcnSwitch, { defaultChecked: true }));
+  await flush();
+});
 const switchHost = switchContainer.querySelector('[role="switch"]');
 assertStyledSwitch(switchHost, 'react smoke');
 if (switchHost.getAttribute('aria-checked') !== 'true') {
   throw new Error('react smoke: Switch initial state missing');
 }
-switchHost.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-await flush();
+await React.act(async () => {
+  switchHost.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+  await flush();
+});
 if (switchHost.getAttribute('aria-checked') !== 'false') {
   throw new Error('react smoke: Switch click failed');
 }
-switchRoot.unmount();
+assertSwitchThumbState(switchHost, false, 'react smoke: after click');
+await React.act(async () => switchRoot.unmount());
 switchContainer.remove();
+globalThis.IS_REACT_ACT_ENVIRONMENT = previousActEnvironment;
 
 const imageContainer = document.createElement('div');
 document.body.appendChild(imageContainer);

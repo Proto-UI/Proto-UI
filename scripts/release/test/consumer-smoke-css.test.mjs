@@ -9,6 +9,7 @@ import test from 'node:test';
 import { Window } from 'happy-dom';
 import {
   assertStyledSwitch,
+  assertSwitchThumbState,
   loadConsumerStyles,
   unwrapGeneratedTokenLayer,
 } from '../consumer-smoke-css.mjs';
@@ -85,6 +86,7 @@ function fixture(t) {
 // Independent recipe expectations from P-SHADCN-SWITCH[-THUMB]-CURRENT-VISUAL-SURFACE.
 function switchFixture(document) {
   const element = document.createElement('div');
+  element.setAttribute('aria-checked', 'false');
   element.setAttribute(
     'data-pui-style',
     'inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs'
@@ -92,7 +94,7 @@ function switchFixture(document) {
   const thumb = document.createElement('span');
   thumb.setAttribute(
     'data-pui-style',
-    'pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 data-[checked]:translate-x-[calc(100%_-_2px)]'
+    'pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0'
   );
   element.appendChild(thumb);
   document.body.appendChild(element);
@@ -154,6 +156,13 @@ for (const [name, token, from, to] of [
   ['thumb rem width', 'size-4', 'width: 1rem;', 'width: 16px;'],
   ['thumb rem height', 'size-4', 'height: 1rem;', 'height: 16px;'],
   ['unchecked travel', 'translate-x-0', '--pui-translate-x: 0px;', '--pui-translate-x: 2px;'],
+  ['active checked travel', 'translate-x-[calc(100%_-_2px)]', 'calc(100% - 2px)', '14px'],
+  [
+    'active checked transform',
+    'translate-x-[calc(100%_-_2px)]',
+    'transform:',
+    '--unused-transform:',
+  ],
   ['checked travel', 'data-[checked]:translate-x-[calc(100%_-_2px)]', 'calc(100% - 2px)', '14px'],
   [
     'checked transform',
@@ -244,7 +253,7 @@ test('preserves simple rem computation at a larger root font without claiming la
   assertStyledSwitch(element, 'root 32px');
 });
 
-test('requires current Thumb travel tokens and same-domain checked state', (t) => {
+test('requires runtime-evaluated Thumb travel and explicit Root/Thumb checked agreement', (t) => {
   const { directory, window } = fixture(t);
   const element = switchFixture(window.document);
   loadConsumerStyles(window.document, { root: directory });
@@ -253,23 +262,79 @@ test('requires current Thumb travel tokens and same-domain checked state', (t) =
   thumb.setAttribute('data-pui-style', original.replace('translate-x-0', ''));
   assert.throws(
     () => assertStyledSwitch(element, 'missing unchecked travel'),
-    /current recipe token is missing/
+    /effective translate endpoint/
   );
   element.setAttribute('aria-checked', 'true');
-  assert.throws(() => assertStyledSwitch(element, 'state drift'), /checked state is out of sync/);
+  element.setAttribute('data-checked', '');
+  assert.throws(() => assertStyledSwitch(element, 'state drift'), /checked state mismatch/);
   thumb.setAttribute('data-checked', '');
-  assertStyledSwitch(element, 'checked lowered recipe');
   thumb.setAttribute(
     'data-pui-style',
-    original.replace('data-[checked]:translate-x-[calc(100%_-_2px)]', '')
+    original.replace('translate-x-0', 'data-[checked]:translate-x-[calc(100%_-_2px)]')
   );
   assert.throws(
-    () => assertStyledSwitch(element, 'missing checked travel'),
-    /current recipe token is missing/
+    () => assertStyledSwitch(element, 'old lowered recipe'),
+    /effective translate endpoint/
   );
-  thumb.setAttribute('data-pui-style', original.replace('data-[checked]:', ''));
+  thumb.setAttribute(
+    'data-pui-style',
+    original.replace('translate-x-0', 'translate-x-[calc(100%_-_2px)]')
+  );
   assertStyledSwitch(element, 'checked active recipe');
+  assert.throws(
+    () => assertSwitchThumbState(element, false, 'wrong expected state'),
+    /checked state mismatch/
+  );
 });
+
+for (const [name, checked, token, inline] of [
+  ['unchecked active token', false, 'translate-x-0', ''],
+  ['checked active token', true, 'translate-x-[calc(100%_-_2px)]', ''],
+  ['unchecked resident endpoint', false, '', '0px 0px'],
+  ['unchecked canonical zero', false, '', '0px'],
+]) {
+  test(`accepts the exact ${name} channel`, (t) => {
+    const { window } = fixture(t);
+    const element = switchFixture(window.document);
+    element.setAttribute('aria-checked', String(checked));
+    element.toggleAttribute('data-checked', checked);
+    const thumb = element.firstElementChild;
+    thumb.toggleAttribute('data-checked', checked);
+    thumb.setAttribute('data-pui-style', token);
+    thumb.style.setProperty('translate', inline);
+    assertSwitchThumbState(element, checked, name);
+  });
+}
+
+for (const [name, checked, token, inline, priority = '', transform = ''] of [
+  ['missing zero channel', false, '', ''],
+  ['missing checked channel', true, '', ''],
+  ['stale unchecked token', true, 'translate-x-0', ''],
+  ['stale checked token', false, 'translate-x-[calc(100%_-_2px)]', ''],
+  ['old lowered checked token', true, 'data-[checked]:translate-x-[calc(100%_-_2px)]', ''],
+  ['nonzero unchecked inline', false, '', '1px 0px'],
+  ['unmeasured checked inline', true, '', '14px 0px'],
+  ['competing token and inline', false, 'translate-x-0', '0px 0px'],
+  ['extra translation axis', false, 'translate-x-0 translate-y-1', ''],
+  ['external inline priority', false, '', '0px 0px', 'important'],
+  ['competing inline transform', false, '', '0px 0px', '', 'scale(2)'],
+]) {
+  test(`rejects ${name} instead of accepting an arbitrary nonempty style`, (t) => {
+    const { window } = fixture(t);
+    const element = switchFixture(window.document);
+    element.setAttribute('aria-checked', String(checked));
+    element.toggleAttribute('data-checked', checked);
+    const thumb = element.firstElementChild;
+    thumb.toggleAttribute('data-checked', checked);
+    thumb.setAttribute('data-pui-style', token);
+    thumb.style.setProperty('translate', inline, priority);
+    thumb.style.setProperty('transform', transform);
+    assert.throws(
+      () => assertSwitchThumbState(element, checked, name),
+      /effective translate endpoint/
+    );
+  });
+}
 
 for (const [name, token, mutate] of [
   [
@@ -314,6 +379,65 @@ for (const [name, token, mutate] of [
     );
   });
 }
+
+test('rejects a missing active checked CSS rule even while the unused lowered rule remains', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  loadConsumerStyles(window.document, { root: directory });
+  const style = window.document.querySelector('style[data-consumer-smoke-css="tokens"]');
+  const text = style.textContent;
+  const start = text.indexOf(':where([data-pui-style~="translate-x-[calc(100%_-_2px)]"])');
+  assert.ok(start >= 0);
+  const end = text.indexOf('}', start) + 1;
+  style.textContent = text.slice(0, start) + text.slice(end);
+  element.setAttribute('aria-checked', 'true');
+  element.setAttribute('data-checked', '');
+  const thumb = element.firstElementChild;
+  thumb.setAttribute('data-checked', '');
+  thumb.setAttribute(
+    'data-pui-style',
+    thumb.getAttribute('data-pui-style').replace('translate-x-0', 'translate-x-[calc(100%_-_2px)]')
+  );
+  assert.throws(
+    () => assertStyledSwitch(element, 'missing active recipe'),
+    /generated CSS rule is missing/
+  );
+});
+
+for (const property of [
+  '--pui-translate-x',
+  '--pui-translate-y',
+  '--pui-scale-x',
+  '--pui-scale-y',
+]) {
+  test(`rejects inline ${property} overriding the token channel`, (t) => {
+    const { directory, window } = fixture(t);
+    const element = switchFixture(window.document);
+    loadConsumerStyles(window.document, { root: directory });
+    element.firstElementChild.style.setProperty(property, '99px');
+    assert.throws(
+      () => assertStyledSwitch(element, 'inline variable override'),
+      /effective translate endpoint/
+    );
+    assert.throws(
+      () => assertSwitchThumbState(element, false, 'inline variable override'),
+      /effective translate endpoint/
+    );
+  });
+}
+
+test('rejects Root marker drift independently of aria and Thumb markers', (t) => {
+  const { window } = fixture(t);
+  const element = switchFixture(window.document);
+  element.setAttribute('aria-checked', 'true');
+  const thumb = element.firstElementChild;
+  thumb.setAttribute('data-checked', '');
+  thumb.setAttribute('data-pui-style', 'translate-x-[calc(100%_-_2px)]');
+  assert.throws(
+    () => assertSwitchThumbState(element, true, 'missing Root marker'),
+    /checked state mismatch/
+  );
+});
 
 test('rejects unexpected import order and never partially installs CSS', (t) => {
   const { directory, stylesDir, window } = fixture(t);

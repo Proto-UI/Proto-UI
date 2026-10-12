@@ -1,5 +1,9 @@
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import {
+  assertStyledSwitch,
+  assertSwitchThumbState,
+  loadConsumerStyles,
+} from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 loadConsumerStyles(document, { evidenceName: 'react-vite' });
@@ -38,18 +42,14 @@ async function mountAndAssert(label: string) {
   assert(switchRoot?.getAttribute('aria-checked') === 'true', `${label}: Switch state is missing`);
   const switchThumb = switchRoot?.firstElementChild;
   assert(switchThumb?.hasAttribute('data-checked'), `${label}: Switch Thumb state is missing`);
-  assert(
-    switchThumb
-      ?.getAttribute('data-pui-style')
-      ?.includes('data-[checked]:translate-x-[calc(100%_-_2px)]'),
-    `${label}: Switch Thumb checked translation is missing`
-  );
+  assertSwitchThumbState(switchRoot, true, `${label}: initial checked`);
   await React.act(async () => {
     switchRoot?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     await flush();
   });
   assert(switchRoot?.getAttribute('aria-checked') === 'false', `${label}: Switch click failed`);
   assert(!switchThumb?.hasAttribute('data-checked'), `${label}: Switch Thumb did not update`);
+  assertSwitchThumbState(switchRoot, false, `${label}: after click`);
 
   const selectTrigger = container.querySelector('.consumer-select-trigger');
   assert(selectTrigger?.getAttribute('role') === 'combobox', `${label}: Select role is missing`);

@@ -1,7 +1,11 @@
 import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
-import { assertStyledSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
+import {
+  assertStyledSwitch,
+  assertSwitchThumbState,
+  loadConsumerStyles,
+} from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 globalThis.IS_REACT_ACT_ENVIRONMENT = true;
@@ -69,6 +73,7 @@ await React.act(async () => {
 });
 assert.equal(unstyledSwitch.getAttribute('aria-checked'), 'false');
 assert.equal(unstyledThumb.hasAttribute('data-checked'), false);
+assertSwitchThumbState(unstyledSwitch, false, 'Shadcn zero CSS: after click');
 assert.equal(document.querySelector('[data-pui-static-hit]'), null);
 assert.deepEqual(
   [...document.querySelectorAll('style, link[rel="stylesheet"]')].map((style) => style.outerHTML),
@@ -98,6 +103,7 @@ for (const label of ['consumer-owned mount', 'consumer-owned remount']) {
     await flush();
   });
   assert.equal(element.getAttribute('aria-checked'), 'false');
+  assertSwitchThumbState(element, false, `${label}: after click`);
   await React.act(async () => styled.unmount());
 }
 container.remove();
