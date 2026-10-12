@@ -11,6 +11,10 @@ statement:
   zh-CN: P-BRUTALIST-SELECT-CONTENT 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-SELECT-CONTENT-CURRENT-PIN-RECIPE
+    text:
+      zh-CN: Neo 默认保持 popper、bottom、sideOffset 4，并将 align 对齐固定源 center；不继承 Shadcn 的 item-aligned 默认。
+      en: Neo keeps popper, bottom and sideOffset 4, with align center matching its fixed source; it does not inherit the Shadcn item-aligned default.
   - id: P-BRUTALIST-SELECT-CONTENT-BASE-INHERITANCE
     text:
       en: >-
@@ -46,6 +50,8 @@ criteria:
 
 
 sources:
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+    label: Current fixed Neo Select source; visual adaptation retains Base protocol ownership
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/select/content.proto.ts
   - path: packages/prototypes/brutalist/src/style.ts

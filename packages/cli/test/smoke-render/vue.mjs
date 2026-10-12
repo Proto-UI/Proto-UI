@@ -22,8 +22,14 @@
 // asFocusable via asButton, so the focus module stamps `tabindex="0"`, and
 // shadcn's feedback.style stamps the `group/button` token chain.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import {
+  assertStyledSwitch,
+  assertSwitchThumbState,
+  loadConsumerStyles,
+} from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
+loadConsumerStyles(document, { evidenceName: 'cli-vue' });
 
 const Vue = await import('vue');
 const { ShadcnButton, ShadcnDialogContent, ShadcnDialogRoot, ShadcnSwitch, BaseImageRoot } =
@@ -85,16 +91,18 @@ presetApp.mount(presetContainer);
 await flush();
 
 const switchRoot = presetContainer.querySelector('.consumer-switch');
+assertStyledSwitch(switchRoot, 'vue smoke');
 const switchThumb = switchRoot?.firstElementChild;
+assertSwitchThumbState(switchRoot, true, 'vue smoke: initial checked');
+switchRoot.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+await flush();
 if (
-  switchRoot?.getAttribute('aria-checked') !== 'true' ||
-  !switchThumb
-    ?.getAttribute('data-pui-style')
-    ?.includes('data-[checked]:translate-x-[calc(100%_-_2px)]') ||
-  !switchThumb.hasAttribute('data-checked')
+  switchRoot.getAttribute('aria-checked') !== 'false' ||
+  switchThumb.hasAttribute('data-checked')
 ) {
-  throw new Error('vue smoke: Switch preset did not mount a state-driven default Thumb');
+  throw new Error('vue smoke: Switch click did not update Root and Thumb');
 }
+assertSwitchThumbState(switchRoot, false, 'vue smoke: after click');
 const closeIcon = document.body.querySelector('.consumer-dialog-content [aria-label="Close"]');
 if (!closeIcon) {
   throw new Error('vue smoke: Dialog Content preset did not mount its default CloseIcon');

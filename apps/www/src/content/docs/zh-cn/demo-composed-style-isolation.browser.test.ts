@@ -1,5 +1,7 @@
 // @vitest-environment node
 
+import { mkdir, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 import type { Browser, Locator, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
@@ -16,11 +18,8 @@ import {
 
 /** Source-aligned Brutalist has a flat Thumb; Root alone owns the focus ring. */
 const BRUTALIST_SWITCH_ROUTE = '/en/ui-libraries/brutalist/components/switch/';
-/** Shadcn scales the pressed root, which is what the thumb applied a second time. */
+/** Fixed c2a67849 Base+Nova has no hover/press scale on Root or Thumb. */
 const SHADCN_SWITCH_ROUTE = '/en/ui-libraries/shadcn/switch/';
-
-/** `data-[pressed]:scale-[0.98]` on the Shadcn Switch Root. */
-const PRESSED_SCALE = 0.98;
 
 let browser: Browser;
 let baseUrl = '';
@@ -124,22 +123,6 @@ async function switchScales(page: Page): Promise<{ root: number; thumb: number }
   });
 }
 
-/**
- * Samples until two consecutive reads agree. The Root assertion that follows is
- * what makes a premature settle fail loudly rather than pass on a frame where
- * both elements are still at 1.
- */
-async function settledScales(page: Page): Promise<{ root: number; thumb: number }> {
-  let last = await switchScales(page);
-  for (let attempt = 0; attempt < 60; attempt += 1) {
-    await page.waitForTimeout(20);
-    const next = await switchScales(page);
-    if (next.root === last.root && next.thumb === last.thumb) return next;
-    last = next;
-  }
-  throw new Error('The Switch transform never settled.');
-}
-
 function paintedLayers(layers: ShadowLayer[]): ShadowLayer[] {
   return layers.filter((layer) => layer.alpha > 0);
 }
@@ -193,56 +176,194 @@ describe.sequential('composed style isolation browser regressions', () => {
     }
   }, 240_000);
 
-  it('scales the pressed Switch once, not again on its thumb', async () => {
-    const { context, page, previewer } = await openRoute(browser, baseUrl, SHADCN_SWITCH_ROUTE, {
-      width: 1440,
-      height: 900,
+  it('keeps source-aligned pressed Root and Thumb unscaled in both checked states', async () => {
+    type Frame = {
+      elapsed: number;
+      root: number;
+      thumb: number;
+      pressed: boolean;
+      checked: string | null;
+    };
+    type Record = {
+      runtime: string;
+      expectedChecked: boolean;
+      observedChecked: string | null;
+      phase: string;
+      frames: Frame[];
+      error?: string;
+    };
+    const records: Record[] = [];
+    const pageErrors: string[] = [];
+    const cleanupErrors: string[] = [];
+    let failure: string | undefined;
+    let phase = 'navigation';
+    let current: Record | undefined;
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await context.newPage();
+    page.on('pageerror', (error) => pageErrors.push(error.stack ?? error.message));
+    // Stream each completed sample to Node so a later page failure cannot erase it.
+    await page.exposeFunction('__recordSwitchPressFrame', (frame: Frame) => {
+      current?.frames.push(frame);
     });
-
     try {
+      await page.goto(`${baseUrl}${SHADCN_SWITCH_ROUTE}`, { waitUntil: 'networkidle' });
+      const previewer = page.locator('[data-previewer-id]').first();
+      await previewer.waitFor({ state: 'visible' });
       await previewer.scrollIntoViewIfNeeded();
       for (const runtime of RUNTIMES) {
+        current = undefined;
+        phase = `select-runtime:${runtime}`;
         await selectRuntime(page, previewer, runtime, '[role="switch"]', 3);
         await applyColorScheme(page, 'light');
-
-        const resting = await switchScales(page);
-        expect(resting.root, `${runtime}/resting-root`).toBeCloseTo(1, 3);
-        expect(resting.thumb, `${runtime}/resting-thumb`).toBeCloseTo(1, 3);
-
-        const box = await previewer.getByRole('switch').first().boundingBox();
-        if (!box) throw new Error('The Switch Root must be laid out.');
-
-        await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-        await page.mouse.down();
-
-        try {
-          // The Root transitions into the pressed scale over 200ms. Sampling on
-          // the attribute alone catches both elements still at 1, where the
-          // comparison below would hold for either behaviour, so wait until the
-          // transition has actually moved the Root before settling on it.
-          await page.waitForFunction(
-            () => {
-              const root = document.querySelector<HTMLElement>(
-                '[data-previewer-id] [role="switch"]'
-              );
-              if (!root?.hasAttribute('data-pressed')) return false;
-              return new DOMMatrixReadOnly(getComputedStyle(root).transform).a < 0.999;
-            },
-            undefined,
-            { timeout: 10_000 }
-          );
-
-          const pressed = await settledScales(page);
-          expect(pressed.root, `${runtime}/pressed-root`).toBeCloseTo(PRESSED_SCALE, 3);
-          // The Root transform already scales its subtree, so a Thumb that also
-          // scales lands the same factor twice.
-          expect(pressed.thumb, `${runtime}/pressed-thumb`).toBeCloseTo(1, 3);
-        } finally {
-          await page.mouse.up();
+        const root = previewer.getByRole('switch').first();
+        for (const checked of [false, true]) {
+          current = {
+            runtime,
+            expectedChecked: checked,
+            observedChecked: null,
+            phase: 'checked-state',
+            frames: [],
+          };
+          records.push(current);
+          if ((await root.getAttribute('aria-checked')) !== String(checked)) await root.click();
+          await expect
+            .poll(async () => {
+              current!.observedChecked = await root.getAttribute('aria-checked');
+              return current!.observedChecked;
+            })
+            .toBe(String(checked));
+          current.phase = 'resting';
+          await page.waitForTimeout(180);
+          const resting = await switchScales(page);
+          expect(resting.root, `${runtime}/${checked}/resting-root`).toBeCloseTo(1, 3);
+          expect(resting.thumb, `${runtime}/${checked}/resting-thumb`).toBeCloseTo(1, 3);
+          const box = await root.boundingBox();
+          if (!box) throw new Error('The Switch Root must be laid out.');
+          current.phase = 'pointer-down';
+          await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+          await page.mouse.down();
+          try {
+            current.phase = 'wait-pressed';
+            await page.waitForFunction(
+              () =>
+                document
+                  .querySelector('[data-previewer-id] [role="switch"]')
+                  ?.hasAttribute('data-pressed'),
+              undefined,
+              { timeout: 10_000 }
+            );
+            current.phase = 'sample-pressed';
+            // True RAF samples beyond the old 200ms transition. Sample exceptions
+            // reject immediately; the bounded watchdog also preserves partial data.
+            await page.evaluate(
+              () =>
+                new Promise<void>((resolve, reject) => {
+                  let ticket = 0;
+                  let stopped = false;
+                  let count = 0;
+                  const deliveries: Promise<void>[] = [];
+                  const start = performance.now();
+                  const finish = (error?: unknown) => {
+                    if (stopped) return;
+                    stopped = true;
+                    cancelAnimationFrame(ticket);
+                    clearTimeout(timeout);
+                    if (error) reject(error);
+                    else resolve();
+                  };
+                  const timeout = setTimeout(
+                    () => finish(new Error('Pressed RAF sampling timed out')),
+                    5000
+                  );
+                  const collect = () => {
+                    if (stopped) return;
+                    try {
+                      const root = document.querySelector<HTMLElement>(
+                        '[data-previewer-id] [role="switch"]'
+                      );
+                      const thumb = root?.querySelector<HTMLElement>('[data-pui-style]');
+                      if (!root || !thumb)
+                        throw new Error('Switch Root/Thumb disappeared during pressed sampling');
+                      const frame = {
+                        elapsed: performance.now() - start,
+                        root: new DOMMatrixReadOnly(getComputedStyle(root).transform).a,
+                        thumb: new DOMMatrixReadOnly(getComputedStyle(thumb).transform).a,
+                        pressed: root.hasAttribute('data-pressed'),
+                        checked: root.getAttribute('aria-checked'),
+                      };
+                      const delivery = (
+                        window as unknown as {
+                          __recordSwitchPressFrame(sample: typeof frame): Promise<void>;
+                        }
+                      ).__recordSwitchPressFrame(frame);
+                      deliveries.push(delivery);
+                      void delivery.catch(finish);
+                      count++;
+                      if (count >= 3 && frame.elapsed >= 240) {
+                        void Promise.all(deliveries).then(() => finish(), finish);
+                      } else ticket = requestAnimationFrame(collect);
+                    } catch (error) {
+                      finish(error);
+                    }
+                  };
+                  ticket = requestAnimationFrame(collect);
+                })
+            );
+            current.phase = 'assert-pressed';
+            expect(current.frames.length).toBeGreaterThanOrEqual(3);
+            expect(
+              Math.max(...current.frames.map((frame) => frame.elapsed))
+            ).toBeGreaterThanOrEqual(240);
+            for (const frame of current.frames) {
+              expect(frame.checked, `${runtime}/${checked}/actual-checked`).toBe(String(checked));
+              expect(frame.pressed, `${runtime}/${checked}/pressed-state`).toBe(true);
+              expect(frame.root, `${runtime}/${checked}/pressed-root`).toBeCloseTo(1, 3);
+              expect(frame.thumb, `${runtime}/${checked}/pressed-thumb`).toBeCloseTo(1, 3);
+            }
+            current.phase = 'passed';
+          } finally {
+            await page.mouse.up().catch((error) => cleanupErrors.push(String(error)));
+          }
         }
       }
+    } catch (error) {
+      failure = error instanceof Error ? (error.stack ?? error.message) : String(error);
+      if (current) current.error = failure;
+      throw error;
     } finally {
-      await context.close();
+      await page.mouse.up().catch((error) => cleanupErrors.push(String(error)));
+      const artifactRoot = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+      try {
+        if (artifactRoot) {
+          const dir = path.join(artifactRoot, 'switch-press-source-oracle');
+          await mkdir(dir, { recursive: true });
+          await writeFile(
+            path.join(dir, 'run.json'),
+            JSON.stringify(
+              {
+                sourcePin: 'c2a67849be260701852b0977ba15eb5f3a0ce2a4',
+                phase,
+                failure,
+                records,
+                pageErrors,
+                cleanupErrors,
+              },
+              null,
+              2
+            ) + '\n'
+          );
+        }
+      } catch (error) {
+        if (!failure) throw error;
+        console.error('Unable to persist pressed failure evidence', error);
+      } finally {
+        try {
+          await context.close();
+        } catch (error) {
+          if (!failure) throw error;
+          console.error('Unable to close failed pressed oracle context', error);
+        }
+      }
     }
   }, 240_000);
 });

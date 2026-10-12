@@ -9,7 +9,13 @@ import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
 // Source units, not a layout-engine assertion. Actual used geometry is a separate browser gate.
 describe('fixed Base Nova Switch recipe delivery', () => {
   it('preserves px track, rem Thumb and percentage travel in document and split delivery', async () => {
-    const tokens = await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch');
+    const tokens = (await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch')).map(
+      (token) => {
+        if (typeof token !== 'string')
+          throw new TypeError('Expected a collected style token string');
+        return token;
+      }
+    );
     for (const token of ['h-[18.4px]', 'w-[32px]', 'size-4', 'p-0', 'rounded-full']) {
       expect(tokens).toContain(token);
       expect(SHADCN_STYLE_TOKENS).toContain(token);

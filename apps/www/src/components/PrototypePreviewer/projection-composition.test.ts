@@ -128,8 +128,12 @@ describe('Website projection composition', () => {
           width: '100%',
           minWidth: '0',
           maxWidth: '100%',
-          minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
-          paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
+          ...(projectionFamilyId === 'shadcn'
+            ? {}
+            : {
+                minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
+                paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
+              }),
         },
       });
       expect(part('value')).toMatchObject({
@@ -142,7 +146,16 @@ describe('Website projection composition', () => {
       });
       expect(part('item')).toMatchObject({
         props: { value: 'wc', textValue: 'Web Components' },
-        children: ['Web Components'],
+        children:
+          projectionFamilyId === 'shadcn'
+            ? [
+                expect.objectContaining({
+                  kind: 'proto',
+                  prototypeId: 'shadcn-select-item-text',
+                  children: ['Web Components'],
+                }),
+              ]
+            : ['Web Components'],
       });
     }
   );
@@ -1082,11 +1095,14 @@ it('keeps full-value wrapping an explicit consumer opt-in rather than changing p
       },
     });
     expect(trigger).toMatchObject({
-      surfaceStyle: {
-        minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
-        paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
-      },
+      surfaceStyle: { width: '100%', minWidth: '0', maxWidth: '100%' },
     });
+    expect((trigger as Extract<DemoNode, { kind: 'proto' }>).surfaceStyle).not.toHaveProperty(
+      'minHeight'
+    );
+    expect((trigger as Extract<DemoNode, { kind: 'proto' }>).surfaceStyle).not.toHaveProperty(
+      'paddingBlock'
+    );
     if (wrapValue) {
       expect(value).toMatchObject({
         surfaceStyle: { overflowWrap: 'anywhere', overflow: 'visible' },

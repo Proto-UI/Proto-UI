@@ -11,6 +11,10 @@ statement:
   zh-CN: P-BRUTALIST-SELECT-TRIGGER 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-SELECT-TRIGGER-CURRENT-PIN-RECIPE
+    text:
+      zh-CN: 默认 Trigger 使用 w-full；flat/elevated 扩展保留。
+      en: The default Trigger uses w-full; existing flat/elevated extensions remain.
   - id: P-BRUTALIST-SELECT-TRIGGER-BASE-INHERITANCE
     text:
       en: >-
@@ -96,6 +100,8 @@ criteria:
 
 
 sources:
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+    label: Current fixed Neo Select source; visual adaptation retains Base protocol ownership
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/select/trigger.proto.ts
   - path: packages/prototypes/brutalist/test/select.test.ts

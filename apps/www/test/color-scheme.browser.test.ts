@@ -1,7 +1,7 @@
 // @vitest-environment node
 
 import { createServer, type Server } from 'node:http';
-import { mkdtemp, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +20,10 @@ let baseUrl = '';
 let evidenceDir = '';
 
 beforeAll(async () => {
-  evidenceDir = await mkdtemp(path.join(tmpdir(), 'proto-color-scheme-browser-'));
+  // CI uploads this entire governed root even when browser assertions fail.
+  const artifactRoot = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+  if (artifactRoot) await mkdir(artifactRoot, { recursive: true });
+  evidenceDir = await mkdtemp(path.join(artifactRoot ?? tmpdir(), 'proto-color-scheme-browser-'));
   vite = await createViteServer({
     cacheDir: path.join(evidenceDir, 'vite-cache'),
     configFile: fileURLToPath(new URL('./fixtures/color-scheme/vite.config.ts', import.meta.url)),
@@ -116,6 +119,13 @@ describe.sequential('default-document colorScheme browser contract', () => {
         const customEditor = page.locator('[data-case="customTextarea"] textarea');
         const checkbox = page.locator('[data-demo-ref="checkbox"]');
         const switchRoot = page.locator('[data-demo-ref="switch"]');
+        observations.initialFrames = await page.evaluate(
+          () => (window as any).colorSchemeFixture.initialFrames
+        );
+        observations.mountedElements = await page.evaluate(() => ({
+          textareas: document.querySelectorAll('[data-case="textarea"] textarea').length,
+          switches: document.querySelectorAll('[data-demo-ref="switch"]').length,
+        }));
         observations.initialEditorValues = {
           native: await textarea.inputValue(),
           customNative: await customEditor.inputValue(),
@@ -146,7 +156,8 @@ describe.sequential('default-document colorScheme browser contract', () => {
         const lightCheckbox = await paint(checkbox);
         const lightSwitch = await paint(switchRoot);
         expect(alpha(lightCheckbox.background)).toBe(0);
-        expect(alpha(lightSwitch.background)).toBe(0.8);
+        // c2a67849 Base+Nova unchecked light Root is bg-input, without an opacity suffix.
+        expect(alpha(lightSwitch.background)).toBe(1);
         expect((await paint(outline)).background).toBe(
           await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
         );
@@ -490,10 +501,19 @@ describe.sequential('default-document colorScheme browser contract', () => {
         colorScheme: 'light',
       });
       const page = await context.newPage();
+      const errors: string[] = [];
+      let capturedFrames: unknown = null;
+      page.on('pageerror', (error) => errors.push(error.message));
       try {
         await page.goto(`${baseUrl}/?runtime=${runtime}&initial=dark`);
         await page.waitForSelector('body[data-ready="true"]', { timeout: 20_000 });
         const frames = await page.evaluate(() => (window as any).colorSchemeFixture.initialFrames);
+        capturedFrames = frames;
+        // Preserve every id before any assertion so a failed oracle cannot hide its input.
+        await writeFile(
+          path.join(evidenceDir, `${runtime}-initial-dark.json`),
+          JSON.stringify(frames, null, 2) + '\n'
+        );
         for (const [id, expected] of Object.entries({
           button: 0.2,
           outline: 0.045,
@@ -502,12 +522,14 @@ describe.sequential('default-document colorScheme browser contract', () => {
           textarea: 0.045,
           probe: 0.2,
         })) {
-          expect(frames[id].length).toBeGreaterThan(0);
+          expect(frames[id], `${runtime}/${id}: initial frame group`).toBeDefined();
+          expect(frames[id].length, `${runtime}/${id}: initial samples`).toBeGreaterThan(0);
           expect(
             frames[id].every(
               (sample: { background: string; pending: boolean }) =>
                 !sample.pending && alpha(sample.background) === expected
-            )
+            ),
+            `${runtime}/${id}: expected alpha ${expected}; frames=${JSON.stringify(frames[id])}`
           ).toBe(true);
         }
         await activeResources(page);
@@ -521,6 +543,14 @@ describe.sequential('default-document colorScheme browser contract', () => {
           .toMatchObject({ rootObservers: 0, colorSchemeListeners: 0 });
         await page.evaluate(() => (window as any).colorSchemeFixture.restoreInstrumentation());
       } finally {
+        await writeFile(
+          path.join(evidenceDir, `${runtime}-initial-dark-diagnostics.json`),
+          JSON.stringify(
+            { runtime, browser: browser.version(), frames: capturedFrames, errors },
+            null,
+            2
+          ) + '\n'
+        );
         await context.close();
       }
     },

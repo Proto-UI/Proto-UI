@@ -49,8 +49,8 @@ criteria:
             ]
   - id: P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Thumb projects pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Inherited checked selects translate-x-[calc(100%_-_2px)], at a 16px root font giving 14px travel inside the 30px track interior and symmetric zero extra horizontal padding beyond the 1px border. At that root font, the 18.4px outer height minus two 1px borders and the 16px Thumb leaves 0.4px vertical space, centered by flex alignment. At a 32px root font, size-4 declares 32px while the track stays 32 by 18.4px; do not normalize this mixed-unit source into uniformly scaled geometry. Actual flex shrink, overflow and travel remain a rendered-evidence gate. Dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Local ring isolation and scoped border-box are retained; no second value owner is added. Translate timing follows C-FEEDBACK-RESIDENT-MOTION-0001 and host/Compiler coverage remains an explicit gap.
-      zh-CN: 默认 Thumb 投射 pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border或shadow。继承 checked 选择 translate-x-[calc(100%_-_2px)]，在16px root font下，于30px轨道内宽中位移14px，在1px边框内侧水平两端保持对称零额外padding；18.4px外高减两个1px边框与16px Thumb仍有0.4px垂直余量，由flex居中。在32px root font下size-4声明32px而轨道仍32×18.4px，不得将源混合单位改成统一缩放；实际flex shrink、overflow和位移另作渲染验证。dark unchecked 为bg-foreground，dark checked为bg-primary-foreground。保留local ring隔离与scoped border-box，不增加value或motion owner。
+      en: Default Thumb uses pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Checked uses translate-x-[calc(100%_-_2px)]; dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Source size-4 remains 1rem, corresponding to 16px or 32px at those root fonts; translation is the used Thumb width minus 2px. Root now scales in rem too; declarations are not rendered geometry evidence. Local ring isolation and scoped border-box remain disclosed extensions. Existing resident translate timing is preserved; full transform-channel support and sm same-domain sizing remain gaps. No value or interaction owner is added.
+      zh-CN: 默认Thumb使用pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border/shadow。checked为translate-x-[calc(100%_-_2px)]，dark unchecked为bg-foreground、checked为bg-primary-foreground。size-4保持1rem，在两种根字体下声明为16px/32px；位移为实际Thumb宽减2px。Root也按rem缩放，声明不是渲染实测。local ring isolation与scoped border-box为已披露扩展；保留resident translate动画，完整transform通道与sm同域尺寸仍是缺口，不新增值或交互owner。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -66,14 +66,16 @@ openQuestions:
       zh-CN: 当前公开 Thumb anatomy part 与固定 upstream 内部 Thumb 在组合、尺寸、状态位移和 surface 上应如何对齐？
       en: How should the current public Thumb anatomy part align with the pinned upstream internal Thumb in composition, sizing, state movement, and surface?
     context:
-      en: The default-size presentation follows the pinned base-nova recipe. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Smaller size, inherited size coordination, field-label/invalid/hit-target features and full API parity remain outside this slice. Extra borders, shadows and fixed duration/easing from the historical implementation are removed; real rendered travel and dark paint remain separately testable.
-      zh-CN: 默认尺寸呈现遵循固定base-nova recipe；保留公开可选same-domain Thumb，不照搬上游内部composition。sm尺寸、继承size协调、field-label/invalid/hit-target与完整API一致仍不属于本片。移除历史额外border、shadow及固定duration/easing；真实位移与dark paint仍需独立验证。
+      en: The default-size presentation follows the pinned New York wrapper. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Smaller size, inherited size coordination, full transition-transform channels and full API parity remain outside this slice. Extra borders and shadows are absent; existing governed resident timing remains; real rendered travel and dark paint remain separately testable.
+      zh-CN: 默认尺寸呈现遵循固定New York wrapper；保留公开可选same-domain Thumb，不照搬上游内部composition。sm尺寸、继承size协调、完整transition-transform通道与API一致仍不属于本片。不加入额外border/shadow，保留既有受治理resident timing；真实位移与dark paint仍需独立验证。
     blocks: [shadcn switch thumb parity roadmap]
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx
+    label: Current New York Switch wrapper; inspected 2026-10-12; Git blob c45932afe4e484c900aa916e81d0e0d67137bedc; SHA256 743676f33f823ffa8008bbd5eb94cb68e227599447d60e132a202291a395f8e4
   - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L1249-L1264
-    label: Fixed Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39
+    label: Historical Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39
   - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/ui/switch.tsx
-    label: Fixed Base wrapper; Root transition-all, Thumb transition-transform and expanded hit area; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7
+    label: Historical Base wrapper; Root transition-all, Thumb transition-transform and expanded hit area; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: internal/records/2026-07-25-rc4-dialog-close-icon-and-switch-trial-regressions.zh-CN.md
   - path: packages/prototypes/shadcn/src/switch/thumb.proto.ts
@@ -104,4 +106,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Migrated only draft presentation to content-pinned base-nova; retained Base and public anatomy ownership; fresh runtime/CSS/browser evidence remains required.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Update the fixed New York source target and rem geometry relation; retain sm and full motion-channel gaps.
 tags: [prototype, shadcn, switch, thumb, upstream-derived, delta, compatibility, visual]

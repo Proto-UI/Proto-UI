@@ -38,7 +38,7 @@ implementations:
     exercises: [P-SHADCN-SWITCH-THUMB, P-BASE-SWITCH-THUMB]
     notes:
       - 'Historical evidence note before the 2026-10-10 recipe migration: Positive tests cover direct identity, inherited context-driven state, and current tokens; public-composition and upstream-token gaps remain bounded by source review and the centralized question.'
-      - Historical passing evidence predates this base-nova presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
+      - Historical passing evidence predates the 2026-10-12 New York presentation migration; new source, CSS, packed consumer and browser evidence must be verified separately.
 verifies:
   prototypes:
     - id: P-SHADCN-SWITCH-THUMB

@@ -1,6 +1,6 @@
 import type { AnatomyPartView, AnchoredPositionConfig } from '@proto.ui/core';
 
-/** P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT. Internal S1, not runtime wiring. */
+/** P-BASE-SELECT-CONTENT-INITIAL-ALIGNMENT-INTENT. Pure initial-registration policy used by the private Content owner. */
 export type InitialSelectAlignmentInput = Readonly<{
   mode: 'popper' | 'item-aligned';
   edge: AnchoredPositionConfig;
@@ -84,4 +84,22 @@ export function resolveInitialSelectAlignment(
     }),
     constraints: INITIAL_SELECT_ALIGNMENT_CONSTRAINTS,
   });
+}
+
+/** P-BASE-SELECT-CONTENT-CURRENT-ALIGNMENT-INTENT.
+ * A represented value replacement is not another initial-registration fallback.
+ */
+export function resolveCurrentSelectAlignment(
+  input: InitialSelectAlignmentInput
+): InitialSelectAlignmentIntent {
+  if (input.mode === 'popper') return Object.freeze({ kind: 'edge', config: input.edge });
+  if (input.phase !== 'open-update') return unresolved('unsettled');
+  const committed = input.committed;
+  if (
+    committed.kind !== 'value' ||
+    !input.records.some((record) => record.value === committed.value)
+  ) {
+    return unresolved('open-update-compatibility');
+  }
+  return resolveInitialSelectAlignment({ ...input, phase: 'initial-settled' });
 }

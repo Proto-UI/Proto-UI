@@ -252,7 +252,11 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       if (logicalOwnerContext && runtime.useContext) {
         bindLogicalParent(instanceTokenRef.current, parentToken, { authority: 'owner' });
       }
-      const [renderChildren, setRenderChildren] = runtime.useState<any>(null);
+      // Keep the template and its acknowledgment identity in one React update.
+      const [renderCommit, setRenderCommit] = runtime.useState<{
+        children: any;
+        version: number;
+      }>({ children: null, version: 0 });
       const hostTokenRevisionRef = runtime.useRef(0);
       const [hostStyle, setHostStyle] = runtime.useState<{ tokens: string[]; revision: number }>({
         tokens: [],
@@ -306,10 +310,15 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const rawPropsSourceRef = runtime.useRef<RawPropsSource<Props> | null>(null);
       const deliveredRawPropsRef = runtime.useRef<Record<string, unknown> | null>(null);
 
-      const pendingCommitRef = runtime.useRef(false);
-      const pendingSignalRef = runtime.useRef<CommitSignal | null>(null);
+      const viewGenerationRef = runtime.useRef(0);
+      const pendingCommitRef = runtime.useRef<{
+        signal: CommitSignal | null;
+        version: number;
+        viewGeneration: number;
+        root: HTMLElement | null;
+        styleRevision: number;
+      } | null>(null);
       const commitVersionRef = runtime.useRef(0);
-      const [commitVersion, setCommitVersion] = runtime.useState(0);
       const pendingRevealStyleRevisionRef = runtime.useRef<number | null>(null);
       const revealGenerationRef = runtime.useRef(0);
       const hostSessionRef = runtime.useRef<ReturnType<
@@ -388,11 +397,15 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           onCommit: (children, signal) => {
-            pendingCommitRef.current = true;
-            pendingSignalRef.current = signal;
-            setRenderChildren(children);
-            commitVersionRef.current += 1;
-            setCommitVersion(commitVersionRef.current);
+            const version = ++commitVersionRef.current;
+            pendingCommitRef.current = {
+              signal,
+              version,
+              viewGeneration: viewGenerationRef.current,
+              root: rootRef.current,
+              styleRevision: hostTokenRevisionRef.current,
+            };
+            setRenderCommit({ children, version });
           },
           onAfterUnmount: () => {
             scopedExposesReaderRef.current.invalidate();
@@ -493,6 +506,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           isEnabled: () => eventGate.isEnabled?.() ?? true,
         });
         bindLogicalEventTarget(instanceTokenRef.current, router.rootTarget);
+        const viewGeneration = ++viewGenerationRef.current;
         let viewDisposed = false;
         let ownedVisualStyle: string | null = null;
         let focusRetryGeneration = 0;
@@ -517,6 +531,13 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         const disposeView = () => {
           if (viewDisposed) return;
           viewDisposed = true;
+          if (viewGenerationRef.current === viewGeneration) {
+            viewGenerationRef.current += 1;
+            pendingCommitRef.current = null;
+            pendingRevealStyleRevisionRef.current = null;
+            projectionReadyRef.current = false;
+            viewReadyRef.current = false;
+          }
           const releases = [
             () => {
               if (
@@ -760,18 +781,39 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       }, []);
 
       runtime.useLayoutEffect(() => {
-        if (pendingCommitRef.current) {
-          pendingCommitRef.current = false;
+        const pending = pendingCommitRef.current;
+        if (pending) {
+          // An earlier layout effect can enqueue a Runtime commit after this
+          // render completed. Only the DOM commit containing that template and
+          // its baseline style may acknowledge it, including style-free renders.
+          if (
+            renderCommit.version !== pending.version ||
+            viewGenerationRef.current !== pending.viewGeneration ||
+            rootRef.current !== pending.root ||
+            !pending.root ||
+            hostStyle.revision < pending.styleRevision
+          ) {
+            return;
+          }
+          pendingCommitRef.current = null;
           const wasReady = viewReadyRef.current;
-          const signal = pendingSignalRef.current;
-          pendingSignalRef.current = null;
           projectionReadyRef.current = true;
 
           // Runtime finalizes rule-driven view effects from CommitSignal.done().
           // Keep a newly attached root pending until that flush has reached a
           // later React DOM commit; otherwise the base style becomes visible
           // before its variant, size, and state tokens.
-          signal?.done?.();
+          pending.signal?.done();
+
+          // done can synchronously retire the view or enqueue another template.
+          // Never publish readiness on behalf of that newer transaction.
+          if (
+            viewGenerationRef.current !== pending.viewGeneration ||
+            rootRef.current !== pending.root ||
+            pendingCommitRef.current
+          ) {
+            return;
+          }
 
           if (wasReady) {
             if (!pendingCommitRef.current) {
@@ -816,7 +858,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         }
         eventGateRef.current?.enable();
         notifyFocusTargetReady();
-      }, [commitVersion, hostStyle.revision]);
+      }, [renderCommit.version, hostStyle.revision]);
 
       // A renderer can replace the host element after the Proto commit that
       // first announced readiness. Re-advertise the current ref after every
@@ -831,7 +873,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         });
       });
 
-      const rendered = renderTemplateToReact(runtime, renderChildren, {
+      const rendered = renderTemplateToReact(runtime, renderCommit.children, {
         slot: props.children,
       });
       // Template roots are a static child list. Passing that list as one array

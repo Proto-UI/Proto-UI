@@ -40,31 +40,62 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'shadcn-select-content',
-        props: { position: 'popper', align: 'start' },
         children: [
           {
             kind: 'proto',
-            prototypeId: 'shadcn-select-item',
-            props: { value: 'react', textValue: 'React' },
-            children: ['React'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'shadcn-select-item',
-            props: { value: 'vue', textValue: 'Vue' },
-            children: ['Vue'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'shadcn-select-item',
-            props: { value: 'wc', textValue: 'Web Components' },
-            children: ['Web Components'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'shadcn-select-item',
-            props: { value: 'solid', textValue: 'Solid', disabled: true },
-            children: ['Solid (Soon)'],
+            prototypeId: 'shadcn-select-surface',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'shadcn-select-viewport',
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-select-item',
+                    props: { value: 'react', textValue: 'React' },
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item-text',
+                        children: ['React'],
+                      },
+                    ],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-select-item',
+                    props: { value: 'vue', textValue: 'Vue' },
+                    children: [
+                      { kind: 'proto', prototypeId: 'shadcn-select-item-text', children: ['Vue'] },
+                    ],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-select-item',
+                    props: { value: 'wc', textValue: 'Web Components' },
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item-text',
+                        children: ['Web Components'],
+                      },
+                    ],
+                  },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'shadcn-select-item',
+                    props: { value: 'solid', textValue: 'Solid', disabled: true },
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item-text',
+                        children: ['Solid (Soon)'],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

@@ -34,6 +34,13 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
   let pendingTask: DelayTask | null = null;
   let generation = 0;
   let terminal = false;
+  let operationVersion = 0;
+  let starting: { kind: TransitionIntent; version: number } | null = null;
+  const currentOperation = (version: number) => !terminal && operationVersion === version;
+  const updateTarget = (open: boolean) => {
+    if (targetOpen !== open) operationVersion += 1;
+    targetOpen = open;
+  };
   type Preparation = {
     ready: boolean;
     finishing: boolean;
@@ -81,6 +88,7 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
   };
 
   const beginPreparation = (animate: boolean) => {
+    operationVersion += 1;
     invalidateCompletion();
     queuedIntent = null;
     const attempt: Preparation = {
@@ -119,23 +127,46 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
   };
 
   const beginEnter = (cold = true) => {
+    if (terminal || !targetOpen) return;
+    if (starting?.kind === 'enter' && currentOperation(starting.version)) return;
     if (cold && driver.requiresColdPreparation?.()) {
       beginPreparation(true);
       return;
     }
-    driver.setViewPresent(true);
-    if (!viewMounted) return;
-    queuedIntent = null;
-    driver.emit('beforeEnter');
-    setState('entering');
-    armCompletion('entering');
+    const operation = { kind: 'enter' as const, version: ++operationVersion };
+    starting = operation;
+    const current = () => currentOperation(operation.version) && targetOpen;
+    try {
+      driver.setViewPresent(true);
+      if (!current() || !viewMounted) return;
+      queuedIntent = null;
+      driver.emit('beforeEnter');
+      if (!current() || !viewMounted) return;
+      invalidateCompletion();
+      setState('entering');
+      if (!current() || !viewMounted || driver.getState() !== 'entering') return;
+      armCompletion('entering');
+    } finally {
+      if (starting === operation) starting = null;
+    }
   };
 
   const beginLeave = () => {
-    queuedIntent = null;
-    driver.emit('beforeLeave');
-    setState('leaving');
-    armCompletion('leaving');
+    if (terminal || targetOpen) return;
+    const operation = { kind: 'leave' as const, version: ++operationVersion };
+    starting = operation;
+    const current = () => currentOperation(operation.version) && !targetOpen;
+    try {
+      queuedIntent = null;
+      driver.emit('beforeLeave');
+      if (!current()) return;
+      invalidateCompletion();
+      setState('leaving');
+      if (!current() || driver.getState() !== 'leaving') return;
+      armCompletion('leaving');
+    } finally {
+      if (starting === operation) starting = null;
+    }
   };
 
   const consumeQueuedIntent = () => {
@@ -147,24 +178,30 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
 
   const completeCurrent = (consumeQueue: boolean) => {
     const current = driver.getState();
-    if (current !== 'entering' && current !== 'leaving') return;
+    if (current !== 'entering' && current !== 'leaving') return false;
     invalidateCompletion();
+    const operation = ++operationVersion;
 
     if (current === 'entering') {
       setState('entered');
+      if (!currentOperation(operation) || driver.getState() !== 'entered') return false;
       driver.emit('afterEnter');
     } else {
       setState('closed');
+      if (!currentOperation(operation) || driver.getState() !== 'closed') return false;
       driver.emit('afterLeave');
+      if (!currentOperation(operation) || driver.getState() !== 'closed') return false;
       driver.setViewPresent(false);
     }
 
-    if (consumeQueue) consumeQueuedIntent();
+    if (consumeQueue && currentOperation(operation)) consumeQueuedIntent();
+    return currentOperation(operation);
   };
 
   const enter = () => {
     if (terminal) return;
-    targetOpen = true;
+    updateTarget(true);
+    if (starting?.kind === 'enter' && currentOperation(starting.version)) return;
     const current = driver.getState();
     if (current === 'entered' || current === 'preparing') return;
 
@@ -182,17 +219,16 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
     if (interrupt === 'wait') {
       queuedIntent = 'enter';
     } else if (interrupt === 'immediate') {
-      completeCurrent(false);
-      beginEnter(false);
+      if (completeCurrent(false)) beginEnter(false);
     } else {
-      invalidateCompletion();
       beginEnter(false);
     }
   };
 
   const leave = () => {
     if (terminal) return;
-    targetOpen = false;
+    updateTarget(false);
+    if (starting?.kind === 'leave' && currentOperation(starting.version)) return;
     const current = driver.getState();
     if (current === 'preparing') {
       cancelPreparation();
@@ -222,16 +258,15 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
     if (interrupt === 'wait') {
       queuedIntent = 'leave';
     } else if (interrupt === 'immediate') {
-      completeCurrent(false);
-      beginLeave();
+      if (completeCurrent(false)) beginLeave();
     } else {
-      invalidateCompletion();
       beginLeave();
     }
   };
 
   const initialize = (open: boolean, appear: boolean) => {
     if (terminal) return;
+    const operation = ++operationVersion;
     cancelPreparation();
     targetOpen = open;
     queuedIntent = null;
@@ -239,6 +274,7 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
 
     if (!open) {
       setState('closed');
+      if (!currentOperation(operation) || targetOpen) return;
       driver.setViewPresent(false);
       return;
     }
@@ -248,6 +284,7 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
       return;
     }
     driver.setViewPresent(true);
+    if (!currentOperation(operation) || !targetOpen) return;
     if (!appear) setState('entered');
   };
 
@@ -262,6 +299,7 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
   };
 
   const unmounted = () => {
+    operationVersion += 1;
     cancelPreparation();
     viewMounted = false;
     invalidateCompletion();
@@ -271,6 +309,7 @@ export function createTransitionMachine(driver: TransitionMachineDriver): Transi
 
   const dispose = () => {
     terminal = true;
+    operationVersion += 1;
     cancelPreparation();
     viewMounted = false;
     queuedIntent = null;

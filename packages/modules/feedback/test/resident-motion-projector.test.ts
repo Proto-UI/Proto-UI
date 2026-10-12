@@ -10,6 +10,8 @@ function harness() {
   let now = 0,
     revision = 0;
   let listener = () => {};
+  let projectReceipt = () =>
+    ['translate', 'background-color'] as readonly ('translate' | 'background-color')[];
   let next = 0;
   let schedule: ((cb: () => void) => number) | null = null;
   const callbacks = new Map<number, () => void>(),
@@ -44,7 +46,10 @@ function harness() {
     cancelFrame: (id) => {
       callbacks.delete(id as number);
     },
-    project: (s, p) => writes.push({ tokens: s.tokens, p }),
+    project: (s, p) => {
+      writes.push({ tokens: s.tokens, p });
+      return projectReceipt();
+    },
     diagnostics: (r) => {
       reasons = r;
     },
@@ -60,6 +65,9 @@ function harness() {
     });
   return {
     sink,
+    receipt(fn: typeof projectReceipt) {
+      projectReceipt = fn;
+    },
     scheduling(fn: (cb: () => void) => number) {
       schedule = fn;
     },
@@ -69,6 +77,9 @@ function harness() {
     callbacks,
     get reasons() {
       return reasons;
+    },
+    clock: (n: number) => {
+      now = n;
     },
     time: (n: number) => {
       now = n;
@@ -245,4 +256,85 @@ it('a cancelled old first frame cannot erase the replacement view pending ticket
   expect(h.callbacks.size).toBe(1);
   h.sink.release(2);
   expect(h.callbacks.size).toBe(0);
+});
+
+it('retargets between delayed RAFs from last presented translate and color', () => {
+  const h = harness();
+  h.commit(['translate-x-0', 'bg-input']);
+  h.time(0);
+  h.commit(['translate-x-4', 'bg-primary']);
+  h.time(30);
+  const before = h.last.p;
+  h.clock(70);
+  h.commit(['translate-x-0', 'bg-input']);
+  expect(h.last.p.translate).toEqual(before.translate);
+  expect(h.last.p.backgroundColor).toEqual(before.backgroundColor);
+  h.time(80);
+  expect(h.last.p.translate![0]).toBeLessThan(before.translate![0]);
+});
+it('same-target commits do not advance paint between RAFs or restart motion', () => {
+  const h = harness();
+  h.commit(['translate-x-0', 'bg-input']);
+  h.time(0);
+  h.commit(['translate-x-4', 'bg-primary']);
+  h.time(30);
+  const before = h.last.p;
+  h.clock(70);
+  h.commit(['translate-x-4', 'bg-primary', 'rounded-full']);
+  expect(h.last.p.translate).toEqual(before.translate);
+  expect(h.last.p.backgroundColor).toEqual(before.backgroundColor);
+  h.time(100);
+  expect(h.last.p.translate).toEqual([16, 0]);
+  expect(h.last.p.backgroundColorState).toBe('settled');
+});
+
+it('a rejected channel loses its cache and stops scheduling while admitted channels continue', () => {
+  const h = harness();
+  h.commit(['translate-x-0', 'bg-input']);
+  h.time(0);
+  h.commit(['translate-x-4', 'bg-primary']);
+  h.time(20);
+  h.receipt(() => ['background-color']);
+  h.clock(60);
+  h.commit(['translate-x-0', 'bg-input']);
+  expect(h.callbacks.size).toBe(1);
+  expect(h.reasons).toContain('translate:projection-rejected');
+  h.receipt(() => []);
+  h.time(70);
+  expect(h.callbacks.size).toBe(0);
+  h.receipt(() => ['translate', 'background-color']);
+  h.commit(['translate-x-4', 'bg-primary']);
+  expect(h.last.p.translate).toEqual([16, 0]);
+  expect(h.last.p.backgroundColorState).toBe('settled');
+});
+it('same-frame third targets and overdue reverse keep the last acknowledged sample', () => {
+  const h = harness();
+  h.commit(['translate-x-0', 'bg-input']);
+  h.time(0);
+  h.commit(['translate-x-4', 'bg-primary']);
+  h.time(20);
+  const before = h.last.p;
+  h.clock(180);
+  h.commit(['translate-x-8', 'bg-input']);
+  expect(h.last.p.translate).toEqual(before.translate);
+  h.commit(['translate-x-0', 'bg-primary']);
+  expect(h.last.p.translate).toEqual(before.translate);
+  expect(h.last.p.backgroundColor).toEqual(before.backgroundColor);
+});
+it('reentrant retirement cannot acknowledge the attempted frame or retain scheduling', () => {
+  const h = harness();
+  h.commit(['translate-x-0', 'bg-input']);
+  h.time(0);
+  h.commit(['translate-x-4', 'bg-primary']);
+  h.time(20);
+  h.receipt(() => {
+    h.sink.release(1);
+    return ['translate', 'background-color'];
+  });
+  h.clock(70);
+  h.commit(['translate-x-0', 'bg-input']);
+  expect(h.callbacks.size).toBe(0);
+  const count = h.writes.length;
+  h.time(100);
+  expect(h.writes.length).toBe(count);
 });

@@ -42,3 +42,9 @@ export { asDrawerClose, default as drawerClose } from './close.proto';
 export { asDrawerHandle, default as drawerHandle } from './handle.proto';
 
 export default drawerRoot;
+
+export { asDrawerHeader, default as drawerHeader } from './header.proto';
+export type { DrawerHeaderProps, DrawerHeaderExposes, DrawerHeaderAsHookContract } from './types';
+
+export { asDrawerFooter, default as drawerFooter } from './footer.proto';
+export type { DrawerFooterProps, DrawerFooterExposes, DrawerFooterAsHookContract } from './types';

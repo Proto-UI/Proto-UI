@@ -48,8 +48,8 @@ criteria:
   - id: P-SHADCN-SELECT-VALUE-DISPLAY-RENDER
     text:
       {
-        zh-CN: renderer 必须在 displayValue 非空时输出该文本，否则返回空 view；displayValue 继续由 Base context/fallback 决定。,
-        en: The renderer must output non-empty displayValue text and otherwise return an empty view; Base context and fallback continue to determine displayValue.,
+        zh-CN: Value 自有 part 必须投射 line-clamp-1、flex、items-center、gap-2；renderer 必须在 displayValue 非空时输出该文本，否则返回空 view；displayValue 继续由 Base context/fallback 决定。,
+        en: 'The Value part must project line-clamp-1, flex, items-center and gap-2; the renderer must output non-empty displayValue text and otherwise return an empty view; Base context and fallback continue to determine displayValue.',
       }
   - id: P-SHADCN-SELECT-VALUE-COMPATIBILITY-SUBSET
     text:

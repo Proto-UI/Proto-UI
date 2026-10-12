@@ -26,3 +26,7 @@ export type {
   ShadcnSelectItemExposes,
   ShadcnSelectItemAsHookContract,
 } from './types';
+
+export { default as selectSurface, default as shadcnSelectSurface } from './surface.proto';
+export { default as selectViewport, default as shadcnSelectViewport } from './viewport.proto';
+export { default as selectItemText, default as shadcnSelectItemText } from './item-text.proto';

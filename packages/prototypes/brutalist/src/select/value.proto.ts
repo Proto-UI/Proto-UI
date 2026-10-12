@@ -1,10 +1,11 @@
-import { definePrototype } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import { asSelectValue } from '@proto.ui/prototypes-base/select';
 import type { BrutalistSelectValueExposes, BrutalistSelectValueProps } from './types';
 
 const selectValue = definePrototype<BrutalistSelectValueProps, BrutalistSelectValueExposes>({
   name: 'brutalist-select-value',
-  setup() {
+  setup(def) {
+    def.feedback.style.use(tw('flex flex-1 items-center gap-2 text-left'));
     // P-BRUTALIST-SELECT-VALUE-BASE-INHERITANCE: inherit Base Select Value displayValue state once.
     const value = asSelectValue().stateHandles;
     if (!value) throw new Error('[brutalist-select-value] Select Value must project displayValue.');

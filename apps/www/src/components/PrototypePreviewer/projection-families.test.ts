@@ -287,6 +287,9 @@ const EXPECTED_RECIPE_PROTOTYPE_IDS = {
       'shadcn-select-trigger',
       'shadcn-select-value',
       'shadcn-select-content',
+      'shadcn-select-surface',
+      'shadcn-select-viewport',
+      'shadcn-select-item-text',
       'shadcn-select-item',
     ],
     dialog: [
@@ -494,6 +497,18 @@ const EXPECTED_SELECT_PARTS = {
       prototypeId: 'shadcn-select-content',
     },
     item: { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'shadcn-select-item' },
+    surface: {
+      basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+      prototypeId: 'shadcn-select-surface',
+    },
+    viewport: {
+      basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+      prototypeId: 'shadcn-select-viewport',
+    },
+    itemText: {
+      basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+      prototypeId: 'shadcn-select-item-text',
+    },
   },
   brutalist: {
     root: { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'brutalist-select-root' },
@@ -578,7 +593,14 @@ describe('Website projection-family manifests', () => {
         expect(
           Object.keys(actual.parts).sort(),
           `${projectionFamilyId}/${familyId}/required parts`
-        ).toEqual([...EXPECTED_REQUIRED_PART_IDS[familyId]].sort());
+        ).toEqual(
+          [
+            ...EXPECTED_REQUIRED_PART_IDS[familyId],
+            ...(projectionFamilyId === 'shadcn' && familyId === 'select'
+              ? ['surface', 'viewport', 'itemText']
+              : []),
+          ].sort()
+        );
       }
 
       expect(JSON.stringify(manifest.families)).not.toContain('--pui-');
@@ -652,13 +674,9 @@ describe('Website projection-family manifests', () => {
   it('declares every required Base Select part with a concrete same-lane Prototype identity', () => {
     for (const projectionFamilyId of ['shadcn', 'brutalist'] as const) {
       const select = PROJECTION_FAMILY_MANIFESTS[projectionFamilyId].families.select;
-      expect(Object.keys(select.parts).sort()).toEqual([
-        'content',
-        'item',
-        'root',
-        'trigger',
-        'value',
-      ]);
+      expect(Object.keys(select.parts).sort()).toEqual(
+        Object.keys(EXPECTED_SELECT_PARTS[projectionFamilyId]).sort()
+      );
       expect(select.parts).toEqual(EXPECTED_SELECT_PARTS[projectionFamilyId]);
 
       for (const partId of Object.keys(EXPECTED_SELECT_PARTS[projectionFamilyId])) {

@@ -37,7 +37,18 @@ cases:
     covers:
       - P-BASE-TRANSITION-REDUCED-MOTION
     expectation: reduced-motion-uses-zero-duration-fallback-and-preserves-phase-events
+  - id: T-BASE-TRANSITION-0001-CASE-REENTRANT-CONTINUATION
+    title: Synchronous target replacement and disposal cancel obsolete phase continuations
+    covers: [P-BASE-TRANSITION-REENTRANT-CONTINUATION]
+    expectation: latest-target-and-owner-retain-authority-across-phase-boundaries
 implementations:
+  - id: prototypes-base-transition-reentrant
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/transition-reentrant.test.ts
+    required: true
+    consumesCases: [T-BASE-TRANSITION-0001-CASE-REENTRANT-CONTINUATION]
+    exercises: [P-BASE-TRANSITION]
   - id: prototypes-base-transition-contract
     kind: module-test
     status: passing

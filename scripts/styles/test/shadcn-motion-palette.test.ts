@@ -12,7 +12,7 @@ import {
   parseStaticLab,
   SHADCN_PALETTE_OUTPUT,
   SHADCN_THEME_SOURCE,
-} from '../generate-shadcn-motion-palette.ts';
+} from '../generate-shadcn-motion-palette.js';
 
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const theme = (light: string, dark = '') =>

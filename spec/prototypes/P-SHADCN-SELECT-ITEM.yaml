@@ -49,16 +49,8 @@ criteria:
       }
   - id: P-SHADCN-SELECT-ITEM-CURRENT-VISUAL-SURFACE
     text:
-      {
-        zh-CN: Item 必须提供当前 full-width row、justify-between、spacing、radius、typography、outline 与 selection tokens。,
-        en: Item must provide the current full-width row,
-        justify-between,
-        spacing,
-        radius,
-        typography,
-        outline,
-        and selection tokens.,
-      }
+      zh-CN: Item 使用固定源 full-width flex row、gap-2、rounded-sm、py-1.5、pl-2、pr-8、text-sm，无 justify-between；indicator absolute right-2 size-3.5，check size-4；作者显式以公开 ItemText part 包裹文字。
+      en: Item uses the pinned full-width flex row, gap-2, rounded-sm, py-1.5, pl-2, pr-8 and text-sm without justify-between; indicator is absolute right-2 size-3.5 with a size-4 check; authors explicitly wrap text in the public ItemText part.
   - id: P-SHADCN-SELECT-ITEM-STATE-DRIVEN-STYLES
     text:
       {
@@ -102,8 +94,8 @@ openQuestions:
         and exact parity converge?,
       }
     context:
-      zh-CN: intentional deviation 是省略 `asChild`。upstream indicator 绝对定位到 right-2 并位于 children 前，children 包在 ItemText；当前先渲染 slot、后追加普通 span，使用 justify-between/size-5。待核对项还包括 focus-only mapping、pressed/hover extras、pr-8/pl-2、nested SVG/span rules、data-slot 与 forwarding。
-      en: The intentional deviation is omission of `asChild`. Upstream positions the indicator absolutely at right-2 before children and wraps children in ItemText; current code renders the slot first and appends a normal span using justify-between and size-5. Other gaps include focus-only mapping, extra pressed and hover behavior, pr-8 and pl-2, nested SVG and span rules, data-slot, and forwarding.
+      zh-CN: intentional deviation 是省略 `asChild`。upstream indicator 绝对定位到 right-2 并位于 children 前，children 包在 ItemText；本次以合法外层 ItemText 包裹文字，并提供 absolute right-2/size-3.5 indicator 与 pl-2/pr-8；indicator DOM 顺序仍为 slot 后，视觉绝对定位。待核对项还包括 focus-only mapping、pressed/hover extras、pr-8/pl-2、nested SVG/span rules、data-slot 与 forwarding。
+      en: The intentional deviation is omission of `asChild`. Upstream positions the indicator absolutely at right-2 before children and wraps children in ItemText; This slice supplies externally composed ItemText, an absolute right-2/size-3.5 indicator and pl-2/pr-8. Indicator DOM order remains after the slot with absolute visual positioning. Other gaps include focus-only mapping, extra pressed and hover behavior, pr-8 and pl-2, nested SVG and span rules, data-slot, and forwarding.
     blocks: [shadcn select item parity roadmap]
 sources:
   - path: packages/prototypes/shadcn/src/select/item.proto.ts

@@ -12,6 +12,9 @@ import {
 import shadcnButton from '@proto.ui/prototypes-shadcn/button';
 import {
   selectContent as shadcnSelectContent,
+  selectSurface as shadcnSelectSurface,
+  selectViewport as shadcnSelectViewport,
+  selectItemText as shadcnSelectItemText,
   selectItem as shadcnSelectItem,
   selectRoot as shadcnSelectRoot,
   selectTrigger as shadcnSelectTrigger,
@@ -36,6 +39,9 @@ const siteProjections = [
   ['wc-shadcn-select-value', shadcnSelectValue],
   ['wc-shadcn-select-content', shadcnSelectContent],
   ['wc-shadcn-select-item', shadcnSelectItem],
+  ['wc-shadcn-select-surface', shadcnSelectSurface],
+  ['wc-shadcn-select-viewport', shadcnSelectViewport],
+  ['wc-shadcn-select-item-text', shadcnSelectItemText],
 ] as const;
 
 export type SiteSelectExposes = {
@@ -362,8 +368,9 @@ function initializeSelect(root: SiteSelectRoot): void {
     // Portaled content needs its own family theme rather than root inheritance.
     content.dataset.siteControlFamily = family;
     applyProps(content, {
-      position: content.dataset.position ?? 'popper',
-      align: content.dataset.align ?? 'start',
+      // Omitted placement belongs to the selected Prototype family.
+      ...(content.dataset.position ? { position: content.dataset.position } : {}),
+      ...(content.dataset.align ? { align: content.dataset.align } : {}),
     });
   }
 

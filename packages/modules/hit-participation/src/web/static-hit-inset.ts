@@ -59,16 +59,9 @@ export function prepareStaticHitInset(
   ]);
   if (
     replaced.has(target.tagName) ||
-    ![
-      'block',
-      'inline-block',
-      'flex',
-      'inline-flex',
-      'grid',
-      'inline-grid',
-      'flow-root',
-      'none',
-    ].includes(computed.display)
+    !['block', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'flow-root'].includes(
+      computed.display
+    )
   ) {
     throw new Error(
       '[HitParticipation] staticHitInset unsupported: a non-replaced single principal box is required.'

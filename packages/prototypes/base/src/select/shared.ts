@@ -18,6 +18,8 @@ export type SelectValueRequest = Readonly<{
 
 export type SelectContextValue = {
   rootId: string;
+  /** Internal scalar collection fact revision, not part identity or readiness. */
+  collectionRevision?: number;
   open: boolean;
   controlledOpen: boolean;
   value: string;
@@ -44,6 +46,13 @@ export function createSelectContentId(rootId: string): string {
 
 export function requestSelectOpen(run: any, request: SelectOpenRequest): boolean {
   try {
+    if (!request.open && request.reason === 'tab') {
+      const contents = run.anatomy.partsOf(SELECT_FAMILY, 'content');
+      if (contents.length === 1) {
+        const cancel = contents[0].getExpose('__cancelPendingEntry') as (() => void) | null;
+        cancel?.();
+      }
+    }
     const root = run.anatomy.partsOf(SELECT_FAMILY, 'root')[0] ?? null;
     const requestOpen = root?.getExpose('requestOpen') as
       | ((nextRequest: SelectOpenRequest) => boolean)

@@ -5,7 +5,9 @@ import type { ShadcnSelectTriggerExposes, ShadcnSelectTriggerProps } from './typ
 function renderChevron(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>) {
   return renderer.el(
     'span',
-    { style: tw('pointer-events-none flex shrink-0 items-center opacity-50') },
+    {
+      style: tw('pointer-events-none flex shrink-0 items-center text-muted-foreground opacity-50'),
+    },
     renderer.svg.root(
       {
         viewBox: '0 0 24 24',
@@ -28,7 +30,11 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     // P-SHADCN-SELECT-TRIGGER-SIZE-PROP
     def.props.define({
       size: { type: 'enum', empty: 'fallback', options: ['sm', 'default'] },
-      appearance: { type: 'enum', empty: 'fallback', options: ['default', 'ghost'] },
+      appearance: {
+        type: 'enum',
+        empty: 'fallback',
+        options: ['default', 'ghost'],
+      },
     });
     def.props.setDefaults({ size: 'default', appearance: 'default' });
 
@@ -43,7 +49,7 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     // P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'flex items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-colors outline-none select-none'
+        'flex w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none select-none'
       )
     );
     // P-SHADCN-SELECT-TRIGGER-APPEARANCE: visual delta only; Base owns behavior.
@@ -76,16 +82,21 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
       intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
     });
     def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(hovered).eq(true)),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/30')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.meta('colorScheme').eq('dark'),
+          w.state(hovered).eq(true)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-input/50')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),
       intent: (i) => i.feedback.style.use(tw('border-ring ring-3 ring-ring/50')),
-    });
-    def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(pressed).eq(true)),
-      intent: (i) => i.feedback.style.use(tw('bg-input/70 translate-y-px')),
     });
     def.rule({
       when: (w) =>
@@ -97,7 +108,7 @@ const selectTrigger = definePrototype<ShadcnSelectTriggerProps, ShadcnSelectTrig
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
     });
 
     // P-SHADCN-SELECT-TRIGGER-CHEVRON

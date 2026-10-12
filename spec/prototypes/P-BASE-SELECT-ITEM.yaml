@@ -8,6 +8,10 @@ statement:
   zh-CN: Select Item 是 Content 中可重复出现的 option。它发布 value/textValue/disabled collection snapshot、option semantics、committed selected 与 transient active state。focus 或 enabled pointer intent 可以改变 popup active option；Enter、Space 或 pointer activation 发出 select 并请求 Root commit。disabled Item 必须同时退出 focus navigation 与 commit。
   en: Select Item is a repeatable option within Content. It publishes value, textValue, and disabled collection snapshots, option semantics, committed selected state, and transient active state. Focus or enabled pointer intent may change the popup active option, while Enter, Space, or pointer activation emits select and requests a Root commit. A disabled Item must leave both focus navigation and commit.
 criteria:
+  - id: P-BASE-SELECT-ITEM-LOCAL-TAB
+    text:
+      zh-CN: 已打开、enabled 且自身持焦的 Item 通过自己的 portable key.down 处理 Tab；先取消同域唯一 Content 的本次自动入场焦点，再请求关闭，不阻止默认动作。不得由 Content global 根据后来焦点重新判定原事件归属。
+      en: An open enabled focused Item handles Tab through its own portable key.down. It first cancels this epoch automatic entry focus in the unique same-domain Content, then requests close without preventing default. Content global handlers must not reclassify the original event from later focus.
   - id: P-BASE-SELECT-ITEM-AUTHORING-ENTRIES
     text:
       zh-CN: '`base-select-item` 与 `asSelectItem` 必须是同一 Item protocol 的 authoring entries。'
@@ -16,6 +20,10 @@ criteria:
     text:
       zh-CN: Item 必须通过 Collection Item 发布有序的 value、textValue、disabled 与 position snapshot；value 必须是 option identity。
       en: Item must publish an ordered value, textValue, disabled, and position snapshot through Collection Item, with value as the option identity.
+  - id: P-BASE-SELECT-ITEM-METADATA-FOCUS-ORDER
+    text:
+      zh-CN: 本地 disabled 变为 true 时，Item 必须在清除现持焦事实前发布当前 collection 元数据，让 Content 认领并安全退出已禁用的持焦项；恢复 enabled 时先恢复焦点资格再发布，以便当前合法目标恢复可聚焦。同步通知导致 owner dispose 后不得继续同步交互状态。
+      en: When local disabled becomes true, Item publishes current collection metadata before clearing existing focus ownership so Content can safely retire a now-disabled focused item. Re-enabling restores focus eligibility before publication so the admitted current target can receive focus. Synchronous owner disposal during notification cancels further interaction synchronization.
   - id: P-BASE-SELECT-ITEM-A11Y
     text:
       zh-CN: Item 必须投射 option role、content-derived name、selected、disabled 与 activate action。

@@ -17,6 +17,10 @@ statement:
 
 
 criteria:
+  - id: P-BRUTALIST-SELECT-VALUE-CURRENT-PIN-RECIPE
+    text:
+      zh-CN: Value 自身提供 flex、flex-1、items-center、gap-2、text-left；仅自身 part，不查询后代 DOM。line-clamp-1 的正常 document/Shadow CSS 翻译尚不支持，不计入本轮完成。
+      en: Value owns flex, flex-1, items-center, gap-2, text-left; this styles the authored part without descendant DOM queries. The normal document/Shadow renderer does not yet translate line-clamp-1; it is not completed by this slice.
   - id: P-BRUTALIST-SELECT-VALUE-BASE-INHERITANCE
     text:
       en: >-
@@ -42,6 +46,8 @@ criteria:
 
 
 sources:
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+    label: Current fixed Neo Select source; visual adaptation retains Base protocol ownership
   - path: packages/prototypes/brutalist/src/select/value.proto.ts
   - path: packages/prototypes/brutalist/test/select.test.ts
 relates:

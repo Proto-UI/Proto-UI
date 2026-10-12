@@ -149,3 +149,62 @@ it.each(['ltr', 'rtl'] as const)(
   },
   30_000
 );
+
+it.each(['ltr', 'rtl'] as const)(
+  'native controlled refusal, current selection and fresh reopen in %s',
+  async (direction) => {
+    const context = await browser.newContext({ viewport: { width: 900, height: 700 } });
+    try {
+      const page = await context.newPage();
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await page.setContent('<!doctype html><html><head></head><body></body></html>');
+      await page.addScriptTag({ content: bundle });
+      await page.evaluate(
+        (direction) => window.alignmentProof.mountAlignmentProof({ direction, controlled: true }),
+        direction
+      );
+      await page.evaluate(() => window.alignmentProof.updateAlignmentProof({ open: true }));
+      await page.locator('[data-demo-ref="item-1"]').waitFor({ state: 'visible' });
+      await page.keyboard.press('Escape');
+      await page.keyboard.press('Escape');
+      expect(await page.locator('[data-demo-ref="trigger"]').getAttribute('aria-expanded')).toBe(
+        'true'
+      );
+      expect(await page.evaluate(() => document.activeElement?.getAttribute('data-demo-ref'))).toBe(
+        'item-1'
+      );
+      await page.evaluate(() => window.alignmentProof.updateAlignmentProof({ selected: 2 }));
+      const current = await page.evaluate(() => {
+        const row = document.querySelector<HTMLElement>('[data-demo-ref="item-2"]');
+        const trigger = document.querySelector<HTMLElement>('[data-demo-ref="trigger"]');
+        if (!row || !trigger) throw new Error('Missing current geometry');
+        const r = row.getBoundingClientRect(),
+          t = trigger.getBoundingClientRect();
+        return {
+          delta: Math.abs(r.top + r.height / 2 - t.top - t.height / 2),
+          focus: document.activeElement === row,
+        };
+      });
+      expect(current.delta).toBeLessThanOrEqual(1);
+      expect(current.focus).toBe(true);
+      await page.evaluate(() => window.alignmentProof.updateAlignmentProof({ open: false }));
+      expect(await page.evaluate(() => window.alignmentProof.readProofPhase())).toBe('closed');
+      await page.evaluate(() =>
+        window.alignmentProof.updateAlignmentProof({ open: true, selected: 0 })
+      );
+      await page.locator('[data-demo-ref="item-0"]').waitFor({ state: 'visible' });
+      expect(await page.evaluate(() => document.activeElement?.getAttribute('data-demo-ref'))).toBe(
+        'item-0'
+      );
+      await page.keyboard.press('ArrowDown');
+      expect(await page.evaluate(() => document.activeElement?.getAttribute('data-demo-ref'))).toBe(
+        'item-1'
+      );
+      expect(errors).toEqual([]);
+    } finally {
+      await context.close();
+    }
+  },
+  30_000
+);

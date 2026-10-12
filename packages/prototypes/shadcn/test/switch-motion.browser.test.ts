@@ -12,12 +12,20 @@ import {
   renderPrefixedThemeCss,
 } from '../../../cli/src/services/proto-style-css';
 import { SHADCN_THEME_CSS } from '../../../cli/src/legacy/type';
+import {
+  assertNativeTapRoute,
+  assertNoAuthoredOutsideHit,
+  measureNativeButtonControl,
+} from './switch-native-input-evidence';
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-switch-consumer-evidence');
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 beforeAll(async () => {
   await mkdir(output, { recursive: true });
-  tokens = await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch');
+  tokens = (await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch')).map((token) => {
+    if (typeof token !== 'string') throw new TypeError('Expected a collected style token string');
+    return token;
+  });
   const built = await build({
     stdin: {
       contents: `
@@ -40,7 +48,7 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 30000);
 afterAll(async () => browser?.close());
-describe('actual Shadcn prototype with canonical typed theme and static hit inset', () => {
+describe('New York default Switch with no authored hit expansion and native touch targeting', () => {
   for (const scope of ['document', 'shadow'] as const)
     for (const font of [16, 32])
       it(`${scope} root ${font}px records actual consumer motion and activation`, async () => {
@@ -116,6 +124,232 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
                   diagnostics: [...diagnostics],
                 };
               };
+              // Diagnostic observers only: retain the native input, timing and assertions.
+              // `precedingStage` names the last sample, not an inferred native action.
+              const nativeEvents: unknown[] = [],
+                checkpoints: unknown[] = [];
+              const stateChanges: unknown[] = [],
+                exposedChanges: unknown[] = [],
+                authoredHitSnapshots: unknown[] = [];
+              let precedingStage = 'setup';
+              let precedingCheckpointId = 0;
+              let requestedInput: unknown = null;
+              let nextEventId = 0;
+              const eventIds = new WeakMap<Event, number>();
+              const checkedHandle = root.getExposes().checked;
+              const offChecked = checkedHandle.subscribe(
+                (change: { type: string; prev?: boolean; next?: boolean }) => {
+                  if (change.type === 'next')
+                    stateChanges.push({
+                      precedingCheckpointId,
+                      now: performance.now(),
+                      prev: change.prev,
+                      next: change.next,
+                    });
+                }
+              );
+              const recordCheckedChange = (event: Event) => {
+                exposedChanges.push({
+                  precedingCheckpointId,
+                  now: performance.now(),
+                  checked: (event as CustomEvent).detail.checked,
+                });
+              };
+              root.addEventListener('checkedChange', recordCheckedChange, { passive: true });
+              const describeTarget = (target: EventTarget | null): string => {
+                if (target === window) return 'window';
+                if (target === document) return 'document';
+                if (target instanceof ShadowRoot)
+                  return '#shadow-root:' + describeTarget(target.host);
+                if (target instanceof Element)
+                  return (
+                    target.localName +
+                    (target.id ? '#' + target.id : '') +
+                    (target.hasAttribute('part')
+                      ? '[part=' + target.getAttribute('part') + ']'
+                      : '')
+                  );
+                return target instanceof Node ? target.nodeName : String(target);
+              };
+              const rect = (element: Element) => {
+                const r = element.getBoundingClientRect();
+                return { x: r.x, y: r.y, width: r.width, height: r.height };
+              };
+              const geometry = () => ({
+                rootHost: rect(root),
+                rootSurface: rect(root.shadowRoot?.querySelector('[part="surface"]') ?? root),
+                thumbHost: rect(thumb),
+                thumbSurface: rect(thumb.shadowRoot?.querySelector('[part="surface"]') ?? thumb),
+              });
+              const pointHit = (x: number, y: number) => ({
+                x,
+                y,
+                document: describeTarget(document.elementFromPoint(x, y)),
+                documentStack: document.elementsFromPoint(x, y).map(describeTarget),
+                rootShadow: root.shadowRoot
+                  ? describeTarget(root.shadowRoot.elementFromPoint(x, y))
+                  : null,
+              });
+              const recordNative = (event: Event) => {
+                let eventId = eventIds.get(event);
+                if (eventId === undefined) {
+                  eventId = ++nextEventId;
+                  eventIds.set(event, eventId);
+                }
+                const pointer = event as PointerEvent;
+                const touch = event as TouchEvent;
+                const changedTouches = Array.from(touch.changedTouches ?? []).map((point) => ({
+                  identifier: point.identifier,
+                  clientX: point.clientX,
+                  clientY: point.clientY,
+                  radiusX: point.radiusX,
+                  radiusY: point.radiusY,
+                  force: point.force,
+                  target: describeTarget(point.target),
+                }));
+                nativeEvents.push({
+                  eventId,
+                  type: event.type,
+                  eventPhase: event.eventPhase,
+                  precedingStage,
+                  precedingCheckpointId,
+                  requestedInput,
+                  now: performance.now(),
+                  timeStamp: event.timeStamp,
+                  isTrusted: event.isTrusted,
+                  cancelable: event.cancelable,
+                  defaultPrevented: event.defaultPrevented,
+                  target: describeTarget(event.target),
+                  composedPath: event.composedPath().map(describeTarget),
+                  clientX: pointer.clientX,
+                  clientY: pointer.clientY,
+                  pointerType: pointer.pointerType,
+                  pointerId: pointer.pointerId,
+                  isPrimary: pointer.isPrimary,
+                  width: pointer.width,
+                  height: pointer.height,
+                  button: pointer.button,
+                  detail: pointer.detail,
+                  firesTouchEvents: (event as any).sourceCapabilities?.firesTouchEvents ?? null,
+                  changedTouches,
+                  checked: root.getExposes().checked.get(),
+                });
+              };
+              const eventTypes = [
+                'pointerdown',
+                'pointerup',
+                'pointercancel',
+                'touchstart',
+                'touchend',
+                'touchcancel',
+                'mousedown',
+                'mouseup',
+                'click',
+              ];
+              for (const type of eventTypes) {
+                window.addEventListener(type, recordNative, { capture: true, passive: true });
+                window.addEventListener(type, recordNative, { capture: false, passive: true });
+              }
+              (window as any).switchInputTrace = {
+                readStage(stage: string) {
+                  const checkpoint = (checkpoints as any[])
+                    .filter((entry) => entry.stage === stage)
+                    .at(-1);
+                  if (!checkpoint) throw new Error('Missing input checkpoint: ' + stage);
+                  const inStage = (entry: any) =>
+                    entry.precedingCheckpointId === checkpoint.checkpointId;
+                  return {
+                    checkpoint,
+                    nativeEvents: nativeEvents.filter(inStage),
+                    stateChanges: stateChanges.filter(inStage),
+                    exposedChanges: exposedChanges.filter(inStage),
+                  };
+                },
+                readAuthoredBoundary() {
+                  const r = root.getBoundingClientRect();
+                  const outsidePoints = [
+                    ['left', r.x - 0.5, r.y + r.height / 2],
+                    ['right', r.right + 0.5, r.y + r.height / 2],
+                    ['top', r.x + r.width / 2, r.y - 0.5],
+                    ['bottom', r.x + r.width / 2, r.bottom + 0.5],
+                  ] as const;
+                  const snapshot = {
+                    now: performance.now(),
+                    snapshotTiming: 'settled-before-input',
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                    outsidePoints: outsidePoints.map(([label, x, y]) => {
+                      const hit = document.elementFromPoint(x, y);
+                      return {
+                        label,
+                        x,
+                        y,
+                        target: describeTarget(hit),
+                        ownedHit: hit === root || (!!hit && root.contains(hit)),
+                      };
+                    }),
+                  };
+                  authoredHitSnapshots.push(snapshot);
+                  return snapshot;
+                },
+                checkpoint(stage: string, input: unknown, checked: boolean) {
+                  precedingStage = stage;
+                  precedingCheckpointId += 1;
+                  requestedInput = input;
+                  const requested = input as { x?: number; y?: number } | null;
+                  checkpoints.push({
+                    stage,
+                    checkpointId: precedingCheckpointId,
+                    requestedInput,
+                    checked,
+                    now: performance.now(),
+                    // These are pre-request facts, never dispatch-time hit-test claims.
+                    snapshotTiming: requested ? 'pre-request-checkpoint' : 'after-original-sample',
+                    geometry: requested ? geometry() : null,
+                    pointHit:
+                      requested &&
+                      typeof requested.x === 'number' &&
+                      typeof requested.y === 'number'
+                        ? pointHit(requested.x, requested.y)
+                        : null,
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                  });
+                },
+                finish() {
+                  const cleanupErrors: string[] = [];
+                  const release = (cleanup: () => void) => {
+                    try {
+                      cleanup();
+                    } catch (error) {
+                      cleanupErrors.push(String(error));
+                    }
+                  };
+                  // The original exposed handle is invalid after the remount test;
+                  // subscribe returns an unwrapped disposer that remains releasable.
+                  release(offChecked);
+                  release(() => root.removeEventListener('checkedChange', recordCheckedChange));
+                  for (const type of eventTypes) {
+                    release(() => window.removeEventListener(type, recordNative, true));
+                    release(() => window.removeEventListener(type, recordNative, false));
+                  }
+                  return {
+                    nativeEvents,
+                    checkpoints,
+                    stateChanges,
+                    exposedChanges,
+                    authoredHitSnapshots,
+                    cleanupErrors,
+                    environment: {
+                      userAgent: navigator.userAgent,
+                      devicePixelRatio,
+                      viewport: {
+                        width: innerWidth,
+                        height: innerHeight,
+                        scale: visualViewport?.scale ?? null,
+                      },
+                    },
+                  };
+                },
+              };
             },
             {
               scope,
@@ -125,17 +359,28 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
               artifact: renderProtoShadowSplitStyleArtifact(tokens),
             }
           );
-          const sample = async (stage: string) => {
-            const value = await page.evaluate(() => (window as any).sampleSwitch());
+          const sample = async (
+            stage: string,
+            requestedInput: { kind: string; x: number; y: number } | null = null
+          ) => {
+            const value = await page.evaluate(
+              ({ stage, requestedInput }) => {
+                const w = window as any;
+                const value = w.sampleSwitch();
+                w.switchInputTrace.checkpoint(stage, requestedInput, value.checked);
+                return value;
+              },
+              { stage, requestedInput }
+            );
             samples.push({ stage, ...value });
             return value;
           };
           await page.waitForTimeout(100);
           const initial = await sample('initial');
-          expect(initial.root.width).toBeCloseTo(32, 1);
-          expect(initial.root.height).toBeCloseTo(18.4, 1);
+          expect(initial.root.width).toBeCloseTo(font * 2, 1);
+          expect(initial.root.height).toBeCloseTo(font * 1.15, 1);
           expect(initial.thumb.height).toBeCloseTo(font, 1);
-          expect(initial.thumb.width).toBeCloseTo(font === 16 ? 16 : 30, 1);
+          expect(initial.thumb.width).toBeCloseTo(font, 1);
           expect(initial.inlineColor).toBe('');
           expect(initial.checked).toBe(false);
           await page.screenshot({
@@ -187,22 +432,83 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
           expect(pressed.transform).toBe(end.transform);
           await page.mouse.move(2, 2);
           await page.mouse.up();
-          // Every inset edge remains the same semantic switch, including native touch.
+          // New York does not declare the Nova pseudo-element acquisition area.
+          assertNoAuthoredOutsideHit(
+            await page.evaluate(() => (window as any).switchInputTrace.readAuthoredBoundary())
+          );
           for (const [edge, x, y] of [
             ['left', initial.root.x - 4, initial.root.y + 9],
-            ['right', initial.root.x + 36, initial.root.y + 9],
+            ['right', initial.root.x + initial.root.width + 4, initial.root.y + 9],
             ['top', initial.root.x + 16, initial.root.y - 3],
-            ['bottom', initial.root.x + 16, initial.root.y + 22],
+            ['bottom', initial.root.x + 16, initial.root.y + initial.root.height + 4],
           ] as const) {
-            const before = await sample('before-' + edge);
+            const before = await sample('before-' + edge, { kind: 'mouse-click', x, y });
             await page.mouse.click(x, y);
             await page.waitForTimeout(190);
-            expect((await sample('hit-' + edge)).checked).toBe(!before.checked);
+            expect((await sample('outside-' + edge)).checked).toBe(before.checked);
           }
-          const beforeTouch = await sample('before-touch');
+          const centerBefore = await sample('before-center-pointer', {
+            kind: 'mouse-click',
+            x: initial.root.x + initial.root.width / 2,
+            y: initial.root.y + initial.root.height / 2,
+          });
+          await page.mouse.click(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
+          await page.waitForTimeout(190);
+          expect((await sample('center-pointer')).checked).toBe(!centerBefore.checked);
+          const touchCenterBefore = await sample('before-center-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x + initial.root.width / 2,
+            y: initial.root.y + initial.root.height / 2,
+          });
+          await page.touchscreen.tap(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
+          await page.waitForTimeout(190);
+          expect((await sample('center-touch')).checked).toBe(!touchCenterBefore.checked);
+          const readStage = (stage: string) =>
+            page.evaluate((stage) => (window as any).switchInputTrace.readStage(stage), stage);
+          assertNativeTapRoute(
+            await readStage('before-center-touch'),
+            'shadcn-switch-root#subject',
+            !touchCenterBefore.checked,
+            true
+          );
+          const beforeTouch = await sample('before-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x - 4,
+            y: initial.root.y + 9,
+          });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
           await page.waitForTimeout(190);
-          expect((await sample('touch-expanded')).checked).toBe(!beforeTouch.checked);
+          const afterTouch = await sample('touch-outside');
+          const nearTouchTrace = await readStage('before-touch');
+          expect(nearTouchTrace.checkpoint.checked).toBe(beforeTouch.checked);
+          expect(nearTouchTrace.checkpoint.pointHit.documentStack).not.toContain(
+            'shadcn-switch-root#subject'
+          );
+          expect(nearTouchTrace.checkpoint.staticHitAttribute).toBeNull();
+          // 0718 recorded a trusted UA-retargeted click here. Raw x outside the
+          // border box must not override the browser's native activation target.
+          assertNativeTapRoute(nearTouchTrace, 'shadcn-switch-root#subject', afterTouch.checked);
+          const farTouchBefore = await sample('before-far-touch', {
+            kind: 'touchscreen-tap',
+            x: initial.root.x - 40,
+            y: initial.root.y + 9,
+          });
+          await page.touchscreen.tap(initial.root.x - 40, initial.root.y + 9);
+          await page.waitForTimeout(190);
+          const farTouchAfter = await sample('far-touch-outside');
+          expect(farTouchAfter.checked).toBe(farTouchBefore.checked);
+          assertNativeTapRoute(
+            await readStage('before-far-touch'),
+            'shadcn-switch-root#subject',
+            farTouchAfter.checked,
+            false
+          );
           await page.evaluate(() => {
             const w = window as any;
             w.SwitchConsumer.setElementProps(w.subject, { checked: false });
@@ -231,7 +537,7 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
             w.SwitchConsumer.setElementProps(w.subject, { checked: true, disabled: true });
           });
           await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
-          expect((await sample('disabled-expanded')).checked).toBe(true);
+          expect((await sample('disabled-outside')).checked).toBe(true);
           await page.evaluate(() => {
             const el = (window as any).subject;
             el.remove();
@@ -280,11 +586,68 @@ describe('actual Shadcn prototype with canonical typed theme and static hit inse
             )
           ).toBe(true);
         } finally {
-          await writeFile(
-            path.join(output, `switch-${scope}-${font}-samples.json`),
-            JSON.stringify({ scope, font, samples, errors }, null, 2)
-          );
-          await page.close();
+          try {
+            const nativeInput = await page
+              .evaluate(() => (window as any).switchInputTrace?.finish() ?? null)
+              .catch((error) => ({ collectionError: String(error) }));
+            await Promise.all([
+              writeFile(
+                path.join(output, `switch-${scope}-${font}-samples.json`),
+                JSON.stringify({ scope, font, samples, errors }, null, 2)
+              ),
+              writeFile(
+                path.join(output, `switch-${scope}-${font}-native-events.json`),
+                JSON.stringify(
+                  { scope, font, browserVersion: browser.version(), nativeInput },
+                  null,
+                  2
+                )
+              ),
+            ]);
+            expect(nativeInput).not.toBeNull();
+            expect(nativeInput).not.toHaveProperty('collectionError');
+            expect((nativeInput as any).cleanupErrors).toEqual([]);
+          } finally {
+            await page.close();
+          }
         }
+      }, 30000);
+});
+
+describe('Independent native HTML button touch-target control', () => {
+  for (const scope of ['document', 'shadow'] as const)
+    for (const font of [16, 32])
+      it(`${scope} root ${font}px records UA targeting and an authored-expansion negative control`, async () => {
+        // Match the exact 0718 consumer boxes without importing or executing an upstream widget.
+        const box =
+          font === 16
+            ? { x: 148, y: 206.4375, width: 32, height: 18.390625 }
+            : { x: 148, y: 264.875, width: 64, height: 36.796875 };
+        const result = await measureNativeButtonControl(browser, scope, box);
+        await writeFile(
+          path.join(output, `native-button-${scope}-${font}-control.json`),
+          JSON.stringify(result, null, 2)
+        );
+        expect(result.measurementError).toBeNull();
+        expect(result.errors).toEqual([]);
+        const evidence = result.evidence;
+        for (const stage of ['near-touch', 'far-touch']) {
+          const checkpoint = evidence.checkpoints.find((entry: any) => entry.stage === stage);
+          expect(checkpoint.box).toEqual(box);
+          expect(checkpoint.ownedPointHit).toBe(false);
+          const clicks = evidence.events.filter(
+            (event: any) =>
+              event.stage === stage && event.type === 'click' && event.eventPhase === 3
+          );
+          expect(clicks).toHaveLength(1);
+          expect(clicks[0].isTrusted).toBe(true);
+          expect(clicks[0].pointerType).toBe('touch');
+          const changes = evidence.changes.filter((change: any) => change.stage === stage);
+          expect(changes).toHaveLength(clicks[0].ownerInPath ? 1 : 0);
+          if (stage === 'far-touch') expect(clicks[0].ownerInPath).toBe(false);
+        }
+        // A real author-created ::after extension is detected at the same x−4 point.
+        expect(result.mutation?.ownedPointHit).toBe(true);
+        expect(result.mutation?.box).toEqual(box);
       }, 30000);
 });

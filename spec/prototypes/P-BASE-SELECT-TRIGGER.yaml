@@ -8,6 +8,10 @@ statement:
   zh-CN: Select Trigger 是同域 Root 中至多一个的 focusable command。它投射 select-only combobox role、expanded/controls/disabled facts 与 content-derived name，并将 pointer、Enter、Space、ArrowDown、ArrowUp 的 open intent 提交到 Root；它不得拥有 open 或 selection。
   en: Select Trigger is the optional, at-most-one focusable command in the Root domain. It projects a select-only combobox role, expanded, controls, and disabled facts, and a content-derived name, and submits pointer, Enter, Space, ArrowDown, and ArrowUp open intent to Root; it must not own open state or selection.
 criteria:
+  - id: P-BASE-SELECT-TRIGGER-COLD-TAB
+    text:
+      zh-CN: 已提交 open=true 且 Trigger 持焦时，Trigger 自己对 Tab 发出一次关闭请求，不阻止默认动作，也不依赖 Content 已 mounted；受控拒绝维持逻辑 open。各 Item 只接收自身持焦的局部 Tab，避免同一次冒泡事件重复请求。
+      en: When committed open is true and Trigger owns focus, Trigger itself submits one Tab close request without preventing default or depending on mounted Content. Controlled refusal preserves logical open. Each Item handles only its own focused local Tab to avoid duplicate requests for the same bubbling event.
   - id: P-BASE-SELECT-TRIGGER-AUTHORING-ENTRIES
     text:
       zh-CN: '`base-select-trigger` 与 `asSelectTrigger` 必须是同一 Trigger protocol 的 authoring entries。'

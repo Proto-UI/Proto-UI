@@ -1,4 +1,4 @@
-import type { EffectsPort } from '@proto.ui/core';
+import type { EffectsPort, ResidentMotionProperty } from '@proto.ui/core';
 import {
   createResidentMotionProjector,
   type ResidentMotionSink,
@@ -47,10 +47,22 @@ export function createWebResidentMotionSink(
     return result;
   }
   const original = new Map<string, { value: string; priority: string }>();
-  let lastWritten = new Map<string, string>();
+  const lastWritten = new Map<string, { value: string; priority: string }>();
+  const lost = new Set<string>();
+  const stillOwned = (property: string, written: { value: string; priority: string }) =>
+    el.style.getPropertyValue(property) === written.value &&
+    el.style.getPropertyPriority(property) === written.priority;
+  function detectLoss() {
+    for (const [property, written] of lastWritten)
+      if (!stillOwned(property, written)) {
+        lost.add(property);
+        lastWritten.delete(property);
+        original.delete(property);
+      }
+  }
   function clear() {
     for (const [property, written] of lastWritten) {
-      if (el.style.getPropertyValue(property) !== written) continue;
+      if (!stillOwned(property, written)) continue;
       const before = original.get(property)!;
       if (before.value) el.style.setProperty(property, before.value, before.priority);
       else el.style.removeProperty(property);
@@ -58,17 +70,19 @@ export function createWebResidentMotionSink(
     lastWritten.clear();
     original.clear();
   }
-  function write(property: string, value: string | undefined) {
+  function write(property: string, value: string | undefined): boolean {
+    detectLoss();
+    if (lost.has(property)) return false;
     if (value === undefined) {
       const old = lastWritten.get(property);
-      if (old !== undefined && el.style.getPropertyValue(property) === old) {
+      if (old !== undefined && stillOwned(property, old)) {
         const before = original.get(property)!;
         if (before.value) el.style.setProperty(property, before.value, before.priority);
         else el.style.removeProperty(property);
       }
       lastWritten.delete(property);
       original.delete(property);
-      return;
+      return true;
     }
     if (!original.has(property))
       original.set(property, {
@@ -76,12 +90,17 @@ export function createWebResidentMotionSink(
         priority: el.style.getPropertyPriority(property),
       });
     el.style.setProperty(property, value);
-    lastWritten.set(property, el.style.getPropertyValue(property));
+    lastWritten.set(property, {
+      value: el.style.getPropertyValue(property),
+      priority: el.style.getPropertyPriority(property),
+    });
+    return true;
   }
   const sink = createResidentMotionProjector({
     diagnostics: options.diagnostics,
     now: () => win?.performance.now() ?? 0,
     environment: () => {
+      detectLoss();
       const preference = readWebPreference(doc, 'preference.reducedMotion');
       const palette = paletteSource?.current();
       // Root font is a host unit basis, never a recovered style target.
@@ -95,9 +114,12 @@ export function createWebResidentMotionSink(
         preference:
           preference === 'reduce' || preference === 'no-preference' ? preference : 'unknown',
         visible: el.isConnected && !hidden && doc.visibilityState !== 'hidden',
-        supportedProperties: (win?.CSS?.supports?.('translate', '1px')
-          ? ['translate', 'background-color']
-          : ['background-color']) as readonly ('translate' | 'background-color')[],
+        supportedProperties: (
+          (win?.CSS?.supports?.('translate', '1px')
+            ? ['translate', 'background-color']
+            : ['background-color']) as ResidentMotionProperty[]
+        ).filter((property) => !lost.has(property)),
+        projectionDiagnostics: [...lost].map((property) => `${property}:external-inline-owner`),
         width,
         height,
         rootFontPx: Number.isFinite(font) ? font : null,
@@ -152,24 +174,32 @@ export function createWebResidentMotionSink(
       if (typeof ticket === 'number') win?.cancelAnimationFrame(ticket);
     },
     project(style, presentation, isCurrent) {
-      if (!isCurrent()) return;
+      if (!isCurrent()) return [];
       effects.queueStyle(style);
-      if (!isCurrent()) return;
+      if (!isCurrent()) return [];
       effects.requestFlush();
-      if (!isCurrent()) return;
-      write(
-        'translate',
-        presentation.translate
-          ? `${presentation.translate[0]}px ${presentation.translate[1]}px`
-          : undefined
-      );
-      if (!isCurrent()) return;
+      if (!isCurrent()) return [];
+      const accepted: ResidentMotionProperty[] = [];
+      if (
+        write(
+          'translate',
+          presentation.translate
+            ? `${presentation.translate[0]}px ${presentation.translate[1]}px`
+            : undefined
+        )
+      )
+        accepted.push('translate');
+      if (!isCurrent()) return [];
       const c =
         presentation.backgroundColorState === 'active' ? presentation.backgroundColor : undefined;
-      write(
-        'background-color',
-        c ? `rgba(${c[0] * 255}, ${c[1] * 255}, ${c[2] * 255}, ${c[3]})` : undefined
-      );
+      if (
+        write(
+          'background-color',
+          c ? `rgba(${c[0] * 255}, ${c[1] * 255}, ${c[2] * 255}, ${c[3]})` : undefined
+        )
+      )
+        accepted.push('background-color');
+      return accepted;
     },
   });
   return sink;

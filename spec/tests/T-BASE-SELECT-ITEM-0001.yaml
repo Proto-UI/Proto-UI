@@ -5,6 +5,14 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers ordered option metadata, option a11y, active and selected separation, controlled and uncontrolled commits, close policy, and disabled gating.
 cases:
+  - id: T-BASE-SELECT-ITEM-0001-CASE-METADATA-FOCUS-ORDER
+    title: Disabled focused selection retires to Trigger and enabled repair restores eligibility
+    covers: [P-BASE-SELECT-ITEM-METADATA-FOCUS-ORDER]
+    expectation: disabled-abort-preserves-focus-ownership-and-enabled-recovery-can-focus
+  - id: T-BASE-SELECT-ITEM-0001-CASE-LOCAL-TAB
+    title: Original Item Tab route remains unique under synchronous focus changes
+    covers: [P-BASE-SELECT-ITEM-LOCAL-TAB]
+    expectation: one-original-event-one-close-request-and-next-independent-event-remains-valid
   - id: T-BASE-SELECT-ITEM-0001-CASE-COLLECTION-A11Y
     title: Item publishes ordered option metadata and accessible option facts
     covers:
@@ -27,6 +35,21 @@ cases:
     covers: [P-BASE-SELECT-ITEM-DISABLED]
     expectation: disabled-select-item-never-focuses-selects-or-closes
 implementations:
+  - id: select-item-metadata-synchronous-disposal
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/select-metadata-disposal.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-ITEM-0001-CASE-METADATA-FOCUS-ORDER]
+    exercises: [P-BASE-SELECT-ITEM]
+  - id: shadcn-select-item-local-tab
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-alignment-owner.test.ts
+    required: true
+    consumesCases:
+      [T-BASE-SELECT-ITEM-0001-CASE-LOCAL-TAB, T-BASE-SELECT-ITEM-0001-CASE-METADATA-FOCUS-ORDER]
+    exercises: [P-BASE-SELECT-ITEM]
   - id: prototypes-base-select-item-contract
     kind: module-test
     status: passing

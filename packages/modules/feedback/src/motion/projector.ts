@@ -23,6 +23,7 @@ export type MotionEnvironment = Readonly<{
   palette: Readonly<Record<string, MotionRgba>>;
   paletteRevision: number;
   paletteDiagnostics?: readonly string[];
+  projectionDiagnostics?: readonly string[];
 }>;
 export type MotionPresentation = Readonly<{
   translate?: readonly number[];
@@ -37,7 +38,11 @@ export type ResidentMotionHost = {
   requestFrame(callback: () => void): unknown;
   cancelFrame(ticket: unknown): void;
   /** Check isCurrent after every reentrant host call before writing physical output. */
-  project(style: StyleHandle, presentation: MotionPresentation, isCurrent: () => boolean): void;
+  project(
+    style: StyleHandle,
+    presentation: MotionPresentation,
+    isCurrent: () => boolean
+  ): readonly ResidentMotionProperty[];
   diagnostics?(reasons: readonly string[]): void;
 };
 /** One cross-platform driver: hosts supply only environment, scheduling and paint. */
@@ -59,6 +64,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     ReturnType<typeof createResidentMotionSampler>
   >();
   const declarationKeys = new Map<ResidentMotionProperty, string>();
+  const acceptedSamples = new Map<ResidentMotionProperty, readonly number[]>();
   function cancel() {
     generation++;
     if (ticket !== null) host.cancelFrame(ticket);
@@ -69,11 +75,12 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
     for (const s of samplers.values()) s.dispose();
     samplers.clear();
     declarationKeys.clear();
+    acceptedSamples.clear();
     wasVisible = false;
     wasAllowed = false;
     presented = false;
   }
-  function render() {
+  function render(fromAnimationFrame = false) {
     if (retired || !last) return;
     cancel();
     const currentGeneration = generation,
@@ -93,14 +100,16 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
       backgroundColorState?: 'active' | 'settled';
     } = {};
     const omitted = new Set<string>(),
-      reasons: string[] = [...(env.paletteDiagnostics ?? [])];
+      reasons: string[] = [...(env.paletteDiagnostics ?? []), ...(env.projectionDiagnostics ?? [])];
     let active = false;
+    const samples = new Map<ResidentMotionProperty, readonly number[]>();
     for (const declaration of frame.declarations)
       for (const property of declaration.properties) {
         const key = JSON.stringify([declaration.durationMs, declaration.easing]);
         let sampler = samplers.get(property);
         if (declarationKeys.get(property) !== key) {
           sampler?.dispose();
+          acceptedSamples.delete(property);
           sampler = createResidentMotionSampler(declaration);
           samplers.set(property, sampler);
           declarationKeys.set(property, key);
@@ -131,10 +140,17 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
           sampler!.dispose();
           samplers.delete(property);
           declarationKeys.delete(property);
+          acceptedSamples.delete(property);
           reasons.push(`${property}:unresolved-target-settled`);
           continue;
         }
-        const sample = sampler!.target(value, now, animate)!;
+        const sample = sampler!.target(
+          value,
+          now,
+          animate && acceptedSamples.has(property),
+          fromAnimationFrame ? undefined : acceptedSamples.get(property)
+        )!;
+        samples.set(property, sample);
         if (property === 'translate') {
           presentation.translate = sample;
           if (target.supported) for (const token of target.ownedTokens) omitted.add(token);
@@ -144,16 +160,32 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         }
         active ||= sampler!.active;
       }
-    diagnostics = Object.freeze(reasons);
+    diagnostics = Object.freeze([...reasons]);
     host.diagnostics?.(diagnostics);
     if (retired || last !== frame || generation !== currentGeneration) return;
-    host.project(
+    const accepted = host.project(
       createRootStyleEffect(
         readRootStyleEntries(frame.style, 'setup').filter((entry) => !omitted.has(entry.token))
       ),
       Object.freeze(presentation),
       () => !retired && last === frame && generation === currentGeneration
     );
+    if (retired || last !== frame || generation !== currentGeneration) return;
+    active = false;
+    for (const [property, sample] of samples) {
+      if (accepted.includes(property)) {
+        acceptedSamples.set(property, sample);
+        active ||= samplers.get(property)?.active ?? false;
+      } else {
+        acceptedSamples.delete(property);
+        samplers.get(property)?.dispose();
+        samplers.delete(property);
+        declarationKeys.delete(property);
+        reasons.push(`${property}:projection-rejected`);
+      }
+    }
+    diagnostics = Object.freeze([...reasons]);
+    host.diagnostics?.(diagnostics);
     if (
       (!presented || (active && allowed)) &&
       !retired &&
@@ -166,7 +198,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
         if (!retired && generation === currentGeneration) {
           ticket = null;
           presented = true;
-          render();
+          render(true);
         }
       });
       // Scheduling itself may synchronously reenter, release, or replace this view.
@@ -202,7 +234,7 @@ export function createResidentMotionProjector(host: ResidentMotionHost): Residen
       if (!off && !subscribing) {
         subscribing = true;
         try {
-          const unsubscribe = host.subscribe(render);
+          const unsubscribe = host.subscribe(() => render());
           if (retired) {
             unsubscribe();
             return;

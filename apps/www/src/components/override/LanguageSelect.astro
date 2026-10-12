@@ -65,15 +65,27 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
     <SelectContent
       data-site-select-content
       data-site-control-family={family}
-      data-position="popper"
-      data-align="end"
+      data-position={family === 'brutalist' ? 'popper' : undefined}
+      data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {
-        localeOptions.map((option) => (
-          <SelectItem data-value={option.value} data-text-value={option.label}>
-            {option.label}
-          </SelectItem>
-        ))
+        family === 'shadcn' ? (
+          <wc-shadcn-select-surface>
+            <wc-shadcn-select-viewport>
+              {localeOptions.map((option) => (
+                <SelectItem data-value={option.value} data-text-value={option.label}>
+                  <wc-shadcn-select-item-text>{option.label}</wc-shadcn-select-item-text>
+                </SelectItem>
+              ))}
+            </wc-shadcn-select-viewport>
+          </wc-shadcn-select-surface>
+        ) : (
+          localeOptions.map((option) => (
+            <SelectItem data-value={option.value} data-text-value={option.label}>
+              {option.label}
+            </SelectItem>
+          ))
+        )
       }
     </SelectContent>
   </SelectRoot>

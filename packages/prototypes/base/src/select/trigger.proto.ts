@@ -66,6 +66,12 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
   def.event.on('key.down', (run, ev) => {
     if (command.disabled.get()) return;
     const key = ev?.key;
+    if (key === 'Tab') {
+      if (run.context.read(SELECT_CONTEXT).open && command.focused.get()) {
+        requestSelectOpen(run, { open: false, reason: 'tab', focusReason: 'keyboard' });
+      }
+      return;
+    }
     if (key !== 'ArrowDown' && key !== 'ArrowUp') return;
     ev.control.requestDefaultActionPrevention({
       reason: 'select.arrow-open',

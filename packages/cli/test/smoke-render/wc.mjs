@@ -5,8 +5,14 @@
 // reachable through customElements. happy-dom provides the DOM globals that the
 // adapter and the registry need.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import {
+  assertStyledSwitch,
+  assertSwitchThumbState,
+  loadConsumerStyles,
+} from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
+loadConsumerStyles(document, { evidenceName: 'cli-wc' });
 
 await import('./proto-ui/components/wc/index.ts');
 const { setElementProps } = await import('@proto.ui/adapter-web-component');
@@ -28,22 +34,19 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 const switchElement = document.createElement('proto-ui-shadcn-switch');
 document.body.appendChild(switchElement);
 await flush();
+assertStyledSwitch(switchElement, 'wc smoke');
 const switchThumb = switchElement.firstElementChild;
 if (switchThumb?.localName !== 'proto-ui-shadcn-switch-thumb') {
   throw new Error('wc smoke: Switch preset did not materialize its default Thumb');
 }
-if (
-  !switchThumb
-    .getAttribute('data-pui-style')
-    ?.includes('data-[checked]:translate-x-[calc(100%_-_2px)]')
-) {
-  throw new Error('wc smoke: Switch Thumb is missing its checked translation token');
-}
+assertSwitchThumbState(switchElement, false, 'wc smoke: initial unchecked');
 switchElement.dispatchEvent(new MouseEvent('click', { bubbles: true }));
 await flush();
 if (!switchElement.hasAttribute('data-checked') || !switchThumb.hasAttribute('data-checked')) {
   throw new Error('wc smoke: Switch preset did not propagate checked state to its Thumb');
 }
+
+assertSwitchThumbState(switchElement, true, 'wc smoke: after click');
 
 const dialogRoot = document.createElement('proto-ui-shadcn-dialog-root');
 document.body.appendChild(dialogRoot);

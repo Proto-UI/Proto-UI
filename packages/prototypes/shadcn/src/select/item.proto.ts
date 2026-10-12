@@ -5,7 +5,11 @@ import type { ShadcnSelectItemExposes, ShadcnSelectItemProps } from './types';
 function renderCheck(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, selected: boolean) {
   return renderer.el(
     'span',
-    { style: tw('pointer-events-none flex size-5 shrink-0 items-center justify-center') },
+    {
+      style: tw(
+        'pointer-events-none absolute right-2 flex size-3.5 shrink-0 items-center justify-center'
+      ),
+    },
     selected
       ? renderer.svg.root(
           {
@@ -36,7 +40,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
     // P-SHADCN-SELECT-ITEM-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'relative flex w-full cursor-default items-center justify-between gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none'
+        'relative flex w-full cursor-default items-center gap-2 rounded-sm pl-2 pr-8 py-1.5 text-sm outline-none select-none'
       )
     );
     // P-SHADCN-SELECT-ITEM-STATE-DRIVEN-STYLES

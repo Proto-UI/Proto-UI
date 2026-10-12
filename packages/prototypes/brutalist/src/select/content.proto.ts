@@ -8,6 +8,7 @@ const selectContent = definePrototype<BrutalistSelectContentProps, BrutalistSele
   setup(def) {
     // P-BRUTALIST-SELECT-CONTENT-BASE-INHERITANCE: inherit Base Select Content open/transitionState/side states once.
     const select = asSelectContent();
+    def.props.setDefaults({ position: 'popper', side: 'bottom', sideOffset: 4, align: 'center' });
     // P-BRUTALIST-SELECT-CONTENT-TRANSITION: enter 150ms / leave 100ms; side slide-in + fade zoom enter/leave.
     select.asTransition.configure({ enterDuration: 150, leaveDuration: 100 });
     const { open } = select.stateHandles;

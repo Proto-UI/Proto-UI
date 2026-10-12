@@ -1,0 +1,41 @@
+id: T-DRAWER-STRUCTURE-0001
+type: test
+title: Drawer passive structure owner and cleanup evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Logical runtime and synthetic Web Component structure tests do not establish native layout or full New York Drawer behavior.
+summary: Verifies passive composition, mixed family and nested Root isolation, recipe and terminal cleanup.
+cases:
+  - id: T-DRAWER-STRUCTURE-0001-CASE-PARTS
+    title: Passive slots and idempotent hooks preserve owner-local membership
+    covers:
+      [
+        C-DRAWER-STRUCTURE-0001-PASSIVE,
+        C-DRAWER-STRUCTURE-0001-OWNER,
+        P-BASE-DRAWER-HEADER-STRUCTURE,
+        P-BASE-DRAWER-FOOTER-STRUCTURE,
+      ]
+    expectation: no-new-input-or-state-authority-and-no-cross-root-membership
+  - id: T-DRAWER-STRUCTURE-0001-CASE-FOOTER
+    title: Pinned family Footer recipe remains separate from default consumers
+    covers: [C-DRAWER-STRUCTURE-0001-FAMILY, P-SHADCN-DRAWER-FOOTER-STRUCTURE]
+    expectation: footer-only-new-york-recipe-with-no-behavior-replacement
+implementations:
+  - id: drawer-structure-logical
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/drawer-structure.test.ts
+    required: true
+    consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-PARTS, T-DRAWER-STRUCTURE-0001-CASE-FOOTER]
+    notes:
+      - Native layout, visual screenshots and other adapters remain unverified.
+verifies:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+  prototypes: [P-BASE-DRAWER-HEADER, P-BASE-DRAWER-FOOTER, P-SHADCN-DRAWER-FOOTER]
+exercises:
+  prototypes: [P-BASE-DRAWER-HEADER, P-BASE-DRAWER-FOOTER, P-SHADCN-DRAWER-FOOTER]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Preserve missing-export baseline failures and test the independent structural parts.
+tags: [drawer, anatomy, composition]

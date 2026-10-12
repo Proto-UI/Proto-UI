@@ -4,7 +4,7 @@ import { createWebContextMenuInputHost } from '../src';
 import { resolveWebInputOriginAnchor } from '../src/web/input-origin-anchor';
 
 const leases: { dispose(): void }[] = [];
-function fixture(onIntent?: (intent: ContextMenuInputIntent) => boolean) {
+function fixture(onIntent?: (intent: ContextMenuInputIntent) => boolean, onCancel?: () => void) {
   const target = document.createElement('button');
   document.body.append(target);
   const intents: ContextMenuInputIntent[] = [];
@@ -22,6 +22,7 @@ function fixture(onIntent?: (intent: ContextMenuInputIntent) => boolean) {
       return {
         cancel() {
           task.cancelled = true;
+          onCancel?.();
         },
       };
     },
@@ -222,4 +223,204 @@ it('a rejected replacement intent preserves the last accepted anchor', () => {
   context(f.target);
   expect(resolveWebInputOriginAnchor(accepted)).not.toBeNull();
   expect(resolveWebInputOriginAnchor(f.intents[1].anchor)).toBeNull();
+});
+
+function adoptIntoFrame(target: HTMLElement) {
+  const frame = document.createElement('iframe');
+  document.body.append(frame);
+  const doc = frame.contentDocument!;
+  // HappyDOM 15 adoptNode installs a non-configurable own ownerDocument,
+  // unlike the browser getter; keep it configurable for repeat-adoption coverage.
+  if (!Object.hasOwn(target, 'ownerDocument'))
+    Object.defineProperty(target, 'ownerDocument', {
+      value: target.ownerDocument,
+      configurable: true,
+    });
+  doc.body.append(doc.adoptNode(target));
+  return { doc, win: frame.contentWindow! };
+}
+describe('same-target document ownership', () => {
+  it.each([
+    'pointerup',
+    'pointercancel',
+    'pointermove',
+    'second-contact',
+    'scroll',
+    'blur',
+    'hidden',
+  ])('rebinds cancellation to the adopted document on %s', (reason) => {
+    const f = fixture();
+    const next = adoptIntoFrame(f.target);
+    f.lease.update({ disabled: false });
+    pointer(f.target, 'pointerdown');
+    const task = f.tasks.at(-1)!;
+    if (reason === 'second-contact') pointer(next.doc, 'pointerdown', { pointerId: 2 });
+    else if (reason === 'scroll') next.doc.dispatchEvent(new Event('scroll'));
+    else if (reason === 'blur') next.win.dispatchEvent(new Event('blur'));
+    else if (reason === 'hidden') {
+      Object.defineProperty(next.doc, 'visibilityState', {
+        value: 'hidden',
+        configurable: true,
+      });
+      next.doc.dispatchEvent(new Event('visibilitychange'));
+    } else pointer(next.doc, reason, { clientX: 100 });
+    expect(task.cancelled).toBe(true);
+    task.callback();
+    expect(f.intents).toHaveLength(0);
+  });
+  it('revokes old work and anchors while preserving same-document updates', () => {
+    const f = fixture();
+    context(f.target);
+    const old = f.intents[0].anchor;
+    const revoked = vi.fn();
+    resolveWebInputOriginAnchor(old)!.subscribeInvalidation(revoked);
+    pointer(f.target, 'pointerdown');
+    const task = f.tasks.at(-1)!;
+    f.lease.update({ disabled: false });
+    expect(task.cancelled).toBe(false);
+    expect(resolveWebInputOriginAnchor(old)).not.toBeNull();
+    adoptIntoFrame(f.target);
+    f.lease.update({ disabled: false });
+    expect(task.cancelled).toBe(true);
+    expect(resolveWebInputOriginAnchor(old)).toBeNull();
+    expect(revoked).toHaveBeenCalledOnce();
+    task.callback();
+    expect(f.intents).toHaveLength(1);
+  });
+  it('removes old listeners over repeated adoption and cleans the final document on dispose', () => {
+    const f = fixture();
+    const first = adoptIntoFrame(f.target);
+    f.lease.update({ disabled: false });
+    const second = adoptIntoFrame(f.target);
+    f.lease.update({ disabled: false });
+    pointer(f.target, 'pointerdown');
+    const task = f.tasks.at(-1)!;
+    document.dispatchEvent(new Event('scroll'));
+    first.doc.dispatchEvent(new Event('scroll'));
+    first.win.dispatchEvent(new Event('blur'));
+    expect(task.cancelled).toBe(false);
+    const removed = vi.spyOn(second.doc, 'removeEventListener');
+    const removedWindow = vi.spyOn(second.win, 'removeEventListener');
+    f.lease.dispose();
+    expect(task.cancelled).toBe(true);
+    expect(removed.mock.calls.map(([name]) => name)).toEqual(
+      expect.arrayContaining([
+        'pointerdown',
+        'pointermove',
+        'pointerup',
+        'pointercancel',
+        'scroll',
+        'visibilitychange',
+      ])
+    );
+    expect(removedWindow).toHaveBeenCalledWith('blur', expect.any(Function));
+    f.lease.update({ disabled: false });
+    context(f.target);
+    task.callback();
+    expect(f.intents).toHaveLength(0);
+  });
+  it('rechecks adoption at target input even before a module refresh', () => {
+    const f = fixture();
+    context(f.target);
+    const old = f.intents[0].anchor;
+    const next = adoptIntoFrame(f.target);
+    pointer(f.target, 'pointerdown');
+    pointer(next.doc, 'pointerup');
+    expect(f.tasks.at(-1)!.cancelled).toBe(true);
+    expect(resolveWebInputOriginAnchor(old)).toBeNull();
+  });
+});
+
+it('adoption cancels late hold callbacks before any observer or explicit update', () => {
+  const f = fixture();
+  pointer(f.target, 'pointerdown');
+  const task = f.tasks[0];
+  adoptIntoFrame(f.target);
+  task.callback();
+  expect(task.cancelled).toBe(true);
+  expect(f.intents).toHaveLength(0);
+});
+it('adoption invalidates accepted suppression and observes detachment in the new document', async () => {
+  const f = fixture();
+  pointer(f.target, 'pointerdown');
+  f.fire();
+  const old = f.intents[0].anchor;
+  const next = adoptIntoFrame(f.target);
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(resolveWebInputOriginAnchor(old)).toBeNull();
+  expect(click(f.target).defaultPrevented).toBe(false);
+  context(f.target);
+  const current = f.intents.at(-1)!.anchor;
+  f.target.remove();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(resolveWebInputOriginAnchor(current)).toBeNull();
+  expect(next.doc.body.children).toHaveLength(0);
+});
+
+it('preserves observation acquired by reentrant anchor invalidation during adoption', async () => {
+  const f = fixture();
+  context(f.target);
+  const invalidated = vi.fn();
+  resolveWebInputOriginAnchor(f.intents[0].anchor)!.subscribeInvalidation(() => {
+    context(f.target);
+    resolveWebInputOriginAnchor(f.intents.at(-1)!.anchor)?.subscribeInvalidation(invalidated);
+  });
+  adoptIntoFrame(f.target);
+  f.lease.update({ disabled: false });
+  expect(f.intents).toHaveLength(2);
+  f.target.remove();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(invalidated).toHaveBeenCalledOnce();
+});
+it('applies disabled state before adoption invalidation can reenter input', () => {
+  const f = fixture();
+  context(f.target);
+  resolveWebInputOriginAnchor(f.intents[0].anchor)!.subscribeInvalidation(() => context(f.target));
+  adoptIntoFrame(f.target);
+  f.lease.update({ disabled: true });
+  expect(f.intents).toHaveLength(1);
+});
+
+it('retains fresh pending observation acquired during old task cancellation on adoption', async () => {
+  let reentered = false;
+  const f = fixture(undefined, () => {
+    if (reentered) return;
+    reentered = true;
+    pointer(f.target, 'pointerdown');
+  });
+  pointer(f.target, 'pointerdown');
+  adoptIntoFrame(f.target);
+  f.lease.update({ disabled: false });
+  expect(f.tasks).toHaveLength(2);
+  expect(f.tasks[0].cancelled).toBe(true);
+  expect(f.tasks[1].cancelled).toBe(false);
+  f.target.remove();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  expect(f.tasks[1].cancelled).toBe(true);
+});
+it('disposal rejects pending-cancellation and anchor-invalidation reentry', () => {
+  const f = fixture(undefined, () => pointer(f.target, 'pointerdown'));
+  context(f.target);
+  resolveWebInputOriginAnchor(f.intents[0].anchor)!.subscribeInvalidation(() => context(f.target));
+  pointer(f.target, 'pointerdown');
+  f.lease.dispose();
+  expect(f.tasks).toHaveLength(1);
+  expect(f.tasks[0].cancelled).toBe(true);
+  expect(f.intents).toHaveLength(1);
+});
+it('observes new-document release during reentrant old-task cancellation', () => {
+  let reentered = false;
+  const f = fixture(undefined, () => {
+    if (reentered) return;
+    reentered = true;
+    pointer(f.target, 'pointerdown');
+    pointer(f.target.ownerDocument, 'pointerup');
+  });
+  pointer(f.target, 'pointerdown');
+  adoptIntoFrame(f.target);
+  f.lease.update({ disabled: false });
+  expect(f.tasks).toHaveLength(2);
+  expect(f.tasks[1].cancelled).toBe(true);
+  f.tasks[1].callback();
+  expect(f.intents).toHaveLength(0);
 });

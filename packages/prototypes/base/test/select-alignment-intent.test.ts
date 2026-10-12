@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { AnatomyPartView, AnchoredPositionConfig } from '@proto.ui/core';
 import {
   resolveInitialSelectAlignment,
+  resolveCurrentSelectAlignment,
   type InitialSelectAlignmentInput,
 } from '../src/select/alignment-intent';
 import { solveTargetAlignment } from '../../../modules/positioning/src/geometry/target-alignment';
@@ -201,5 +202,61 @@ describe('initial Select semantic alignment intent (unwired S1)', () => {
     );
     expect(result.kind).toBe('plan');
     if (result.kind === 'plan') expect(result.plan.inline.inset).toBe(104);
+  });
+});
+
+describe('represented current Select value alignment intent', () => {
+  // T-BASE-SELECT-CONTENT-0001-CASE-CURRENT-ALIGNMENT
+  it('replaces the row and text together for the new committed enabled value', () => {
+    const result = resolveCurrentSelectAlignment(
+      input({ phase: 'open-update', committed: { kind: 'value', value: 'c' } })
+    );
+    expect(result.kind).toBe('target-pair');
+    if (result.kind !== 'target-pair') throw new Error(result.kind);
+    expect(result.floating).toEqual({ block: records[2].row, inline: records[2].text });
+    expect(result.contentEdges).toEqual({ atStart: false, atEnd: true });
+  });
+  it.each([{ kind: 'unset' as const }, { kind: 'value' as const, value: 'unknown' }])(
+    'does not apply initial fallback to current %j',
+    (committed) => {
+      expect(resolveCurrentSelectAlignment(input({ phase: 'open-update', committed }))).toEqual({
+        kind: 'unresolved',
+        reason: 'open-update-compatibility',
+      });
+    }
+  );
+  it('does not resolve an unsettled update', () => {
+    expect(resolveCurrentSelectAlignment(input({ phase: 'unsettled' }))).toEqual({
+      kind: 'unresolved',
+      reason: 'unsettled',
+    });
+  });
+  it('keeps disabled selected compatibility unresolved', () => {
+    expect(
+      resolveCurrentSelectAlignment(
+        input({ phase: 'open-update', records: [records[0], { ...records[1], disabled: true }] })
+      )
+    ).toEqual({ kind: 'unresolved', reason: 'disabled-selected-compatibility' });
+  });
+  it('requires the current registered text association', () => {
+    expect(
+      resolveCurrentSelectAlignment(
+        input({ phase: 'open-update', records: [records[0], { ...records[1], text: null }] })
+      )
+    ).toEqual({ kind: 'unresolved', reason: 'missing-text' });
+  });
+  it('keeps duplicate semantic values unresolved', () => {
+    expect(
+      resolveCurrentSelectAlignment(
+        input({ phase: 'open-update', records: [records[1], records[1]] })
+      )
+    ).toEqual({ kind: 'unresolved', reason: 'duplicate-value' });
+  });
+  it('leaves explicit popper unchanged even for unrepresented values', () => {
+    expect(
+      resolveCurrentSelectAlignment(
+        input({ mode: 'popper', phase: 'open-update', committed: { kind: 'unset' } })
+      )
+    ).toEqual({ kind: 'edge', config: edge });
   });
 });
