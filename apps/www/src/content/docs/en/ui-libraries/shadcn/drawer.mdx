@@ -14,6 +14,8 @@ An edge-attached modal panel with four placement choices.
   codePanel={false}
 />
 
+Header and Footer now own their padding; Content uses a vertical flex layout without shared container padding, so custom body content must supply its own spacing. Header centers only for accepted top/bottom directions and otherwise inherits alignment; rejected direction updates keep the last accepted presentation. Title inherits font size and line height. The current uniform border, radius and shadow remain explicit differences from the pinned New York edge-specific paint. Responsive Header rules, a decorative Indicator and upstream extent sizing remain unfinished; the interactive Handle is unchanged.
+
 Top/bottom Content fits its content by default. Its maximum is the available height minus 6 root-text units, always bounded by the safe available region. Content.minExtent and maxExtent accept neutral lengths with unit logical, root-text, available or available-minus-root-text and a nonnegative finite value. A minimum above the safe cap is clamped. Left/right retain the existing capped 20rem presentation in this vertical-only draft.
 
 The project composes Content as an overflow-y-auto scrollport. This differs from the fixed Shadcn/Neo reference wrappers' overflow-hidden Content with an explicitly authored scrolling body. The long example keeps Close inside the same scrollport.

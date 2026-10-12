@@ -17,9 +17,23 @@ cases:
       ]
     expectation: no-new-input-or-state-authority-and-no-cross-root-membership
   - id: T-DRAWER-STRUCTURE-0001-CASE-FOOTER
-    title: Pinned family Footer recipe remains separate from default consumers
+    title: Pinned Footer recipe remains independent of input behavior
     covers: [C-DRAWER-STRUCTURE-0001-FAMILY, P-SHADCN-DRAWER-FOOTER-STRUCTURE]
-    expectation: footer-only-new-york-recipe-with-no-behavior-replacement
+    expectation: footer-new-york-recipe-with-no-behavior-replacement
+  - id: T-DRAWER-STRUCTURE-0001-CASE-DIRECTION
+    title: Accepted side observation is read-only, owner-scoped and reparent-safe
+    covers:
+      [
+        C-DRAWER-STRUCTURE-0001-DIRECTION,
+        C-DRAWER-STRUCTURE-0001-OBSERVATION,
+        P-SHADCN-DRAWER-HEADER-STRUCTURE,
+        P-BASE-DRAWER-ACCEPTED-SIDE-OBSERVATION,
+      ]
+    expectation: four-directions-invalid-retention-nested-isolation-read-only-and-terminal-cleanup
+  - id: T-DRAWER-STRUCTURE-0001-CASE-INTERIOR
+    title: Supported interior recipe and actual demo spacing preserve explicit upstream gaps
+    covers: [C-DRAWER-STRUCTURE-0001-FAMILY, C-DRAWER-STRUCTURE-0001-INTERIOR]
+    expectation: static-token-closure-and-real-header-footer-body-composition
 implementations:
   - id: drawer-structure-logical
     kind: runtime-test
@@ -29,13 +43,57 @@ implementations:
     consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-PARTS, T-DRAWER-STRUCTURE-0001-CASE-FOOTER]
     notes:
       - Native layout, visual screenshots and other adapters remain unverified.
+  - id: drawer-direction-logical
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/base/test/drawer-direction.test.ts
+    required: true
+    consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-DIRECTION]
+  - id: drawer-structure-source
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/shadcn/test/drawer-structure.test.ts
+    required: true
+    consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-INTERIOR]
+  - id: drawer-structure-demo
+    kind: runtime-test
+    status: passing
+    path: apps/www/src/content/docs/drawer-auto-demo.test.ts
+    required: true
+    consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-INTERIOR]
+  - id: drawer-structure-native
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts
+    required: true
+    consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-DIRECTION, T-DRAWER-STRUCTURE-0001-CASE-INTERIOR]
+    notes:
+      - Official exact-head Actions only; no new native execution or screenshots are claimed.
+      - Existing vertical extent oracle remains unchanged and does not certify upstream extent migration.
 verifies:
   contracts: [C-DRAWER-STRUCTURE-0001]
-  prototypes: [P-BASE-DRAWER-HEADER, P-BASE-DRAWER-FOOTER, P-SHADCN-DRAWER-FOOTER]
+  prototypes:
+    [
+      P-BASE-DRAWER-HEADER,
+      P-BASE-DRAWER-FOOTER,
+      P-SHADCN-DRAWER-FOOTER,
+      P-SHADCN-DRAWER-HEADER,
+      P-BASE-DRAWER-ACCEPTED-SIDE,
+    ]
 exercises:
-  prototypes: [P-BASE-DRAWER-HEADER, P-BASE-DRAWER-FOOTER, P-SHADCN-DRAWER-FOOTER]
+  prototypes:
+    [
+      P-BASE-DRAWER-HEADER,
+      P-BASE-DRAWER-FOOTER,
+      P-SHADCN-DRAWER-FOOTER,
+      P-SHADCN-DRAWER-HEADER,
+      P-BASE-DRAWER-ACCEPTED-SIDE,
+    ]
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Preserve missing-export baseline failures and test the independent structural parts.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Add direction authority, retained reparent cleanup, source closure, actual demo composition and planned native structure evidence.
 tags: [drawer, anatomy, composition]

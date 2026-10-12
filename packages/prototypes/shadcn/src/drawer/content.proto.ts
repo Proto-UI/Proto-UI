@@ -10,10 +10,9 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
   setup(def) {
     const behavior = asDrawerContent();
     def.props.setDefaults({ maxExtent: { unit: 'available-minus-root-text', value: 6 } });
+    // Keep existing uniform edge paint until directional style translation is supported.
     def.feedback.style.use(
-      tw(
-        'rounded-lg border border-border bg-popover text-popover-foreground shadow-md p-4 grid gap-4'
-      )
+      tw('rounded-lg border border-border bg-background text-foreground shadow-md flex flex-col')
     );
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
   },

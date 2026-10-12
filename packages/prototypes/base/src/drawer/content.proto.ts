@@ -2,8 +2,11 @@ import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/cor
 import { asAccessible, asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import { setupDrawerSnap } from './snap';
+import { observeDrawerSide } from './side-observation';
+import { DRAWER_PRESENTATION_CONTEXT } from './presentation-context';
 import {
   DRAWER_CONTEXT,
+  DRAWER_CONTENT_CONTEXT,
   DRAWER_FAMILY,
   createDrawerPartId,
   requestDrawerOpen,
@@ -22,6 +25,8 @@ function projectDrawerContentHandle(
 ): DrawerContentHandles {
   // C-AS-HOOK-0009-E, C-AS-HOOK-0009-F: selectively re-export Transition's
   // stable child handle without flattening its state into Drawer Content.
+  const side = result.getState?.('drawerSide');
+  if (!side) throw new Error('[as-drawer-content] missing accepted side handle.');
   const open = result.getState?.('open');
   const asTransition = result.getAsHookHandle?.('asTransition');
   if (!open || !asTransition) {
@@ -35,6 +40,7 @@ function projectDrawerContentHandle(
   if (!snapPoint || !dragging || !dragProgress || !offsetPercentage || !extentValid)
     throw new Error('[as-drawer-content] missing snap handles.');
   return {
+    acceptedSide: observeDrawerSide(side),
     stateHandles: { open, snapPoint, dragging, dragProgress, offsetPercentage, extentValid },
     asTransition,
   };
@@ -101,6 +107,19 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
     );
   });
   overlay.configure({ availableLayout: sizing.layout });
+  def.context.provide(DRAWER_PRESENTATION_CONTEXT, { rootId: '', side: '' });
+  const publishAcceptedSide = (run: import('@proto.ui/core').RunHandle<DrawerContentProps>) => {
+    const root = run.context.read(DRAWER_CONTEXT);
+    run.context.update(DRAWER_PRESENTATION_CONTEXT, {
+      rootId: root.rootId,
+      side: sizing.hasAccepted() && sizing.admitted.get() ? side.get() : '',
+    });
+  };
+  // The existing accepted model publishes this local provider after admission.
+  // Its side prop is never used as presentation authority.
+  def.context.subscribe(DRAWER_CONTENT_CONTEXT, publishAcceptedSide);
+  def.lifecycle.onCreated(publishAcceptedSide);
+  def.lifecycle.onMounted(publishAcceptedSide);
   def.feedback.style.use(
     tw('fixed overflow-y-auto overflow-x-hidden min-w-0 min-h-0 content-start wrap-anywhere')
   );

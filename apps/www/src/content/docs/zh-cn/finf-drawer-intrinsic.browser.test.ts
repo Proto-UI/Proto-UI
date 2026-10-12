@@ -34,9 +34,20 @@ beforeAll(async () => {
     ...['base', 'shadcn', 'brutalist'].map(
       (f) => `packages/prototypes/${f}/src/drawer/content.proto.ts`
     ),
-    ...['snap.ts', 'handle.proto.ts', 'types.ts'].map(
-      (f) => `packages/prototypes/base/src/drawer/${f}`
+    ...[
+      'snap.ts',
+      'handle.proto.ts',
+      'types.ts',
+      'content.proto.ts',
+      'accepted-side.proto.ts',
+      'presentation-context.ts',
+      'side-observation.ts',
+    ].map((f) => `packages/prototypes/base/src/drawer/${f}`),
+    ...['header', 'footer', 'title'].map(
+      (part) => `packages/prototypes/shadcn/src/drawer/${part}.proto.ts`
     ),
+    'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts',
+    'spec/contracts/C-DRAWER-STRUCTURE-0001.yaml',
   ];
   const hashes = Object.fromEntries(
     await Promise.all(
@@ -52,7 +63,9 @@ beforeAll(async () => {
     revision,
     tree,
     hashes,
-    expectedCases: 64,
+    expectedCases: 64 + RUNTIMES.length,
+    structure:
+      'Shadcn Header/Footer composition and four accepted directions; uniform edge paint retained; existing A-6rem cap oracle deliberately unchanged, not upstream 80vh equivalence',
     oracle:
       'same live composed DOM measured with vertical constraints temporarily released, explicit scroll restoration and immediate/two-frame restoration checks, then clamped by independently computed viewport cap; Base A; Shadcn/Neo max(0,A-6*rootText)',
     phase: 'planned; individual terminal receipts prove execution',
@@ -297,14 +310,19 @@ async function mount(page: Page, options: Options) {
             'content',
             [
               proto('handle', [], { a11yLabel: 'Fixture resize' }),
-              proto('title', ['Intrinsic acceptance']),
+              ...(options.family === 'shadcn'
+                ? [proto('header', [proto('title', ['Intrinsic acceptance'])])]
+                : [proto('title', ['Intrinsic acceptance'])]),
               {
                 kind: 'box',
                 ref: 'intrinsic-payload',
+                ...(options.family === 'shadcn' ? { className: 'p-4' } : {}),
                 attrs: { style: `height:${options.long ? 1600 : 72}px; flex-shrink:0` },
                 children: ['Owned test content'],
               },
-              proto('close', ['Close fixture']),
+              ...(options.family === 'shadcn'
+                ? [proto('footer', [proto('close', ['Close fixture'])])]
+                : [proto('close', ['Close fixture'])]),
             ],
             props
           ),
@@ -875,6 +893,106 @@ for (const runtime of RUNTIMES)
         await page.evaluate(() =>
           (window as any).__drawerFixtureApi.setProps('intrinsic-root', { open: false })
         );
+        await expect.poll(() => panel.isVisible()).toBe(false);
+      }
+    );
+  }, 90_000);
+
+// Structural evidence uses actual parts and the same existing extent behavior.
+// It does not certify upstream edge paint, responsive md rules or 80vh/w-3/4 sizing.
+for (const runtime of RUNTIMES)
+  it(`shadcn/${runtime}/accepted-direction-structure`, async () => {
+    await runCase(
+      `shadcn-${runtime}-accepted-direction-structure`,
+      {
+        family: 'shadcn',
+        runtime,
+        side: 'bottom',
+        root: 16,
+        long: false,
+      },
+      async (page, panel, samples) => {
+        const header = page.locator('[data-demo-ref="intrinsic-header"]');
+        const footer = page.locator('[data-demo-ref="intrinsic-footer"]');
+        const inspect = async () => ({
+          content: await panel.evaluate((node) => {
+            const css = getComputedStyle(node),
+              rect = node.getBoundingClientRect();
+            return {
+              display: css.display,
+              direction: css.flexDirection,
+              align: css.textAlign,
+              padding: [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft],
+              x: rect.x,
+              y: rect.y,
+              width: rect.width,
+              height: rect.height,
+              right: rect.right,
+              bottom: rect.bottom,
+            };
+          }),
+          header: await header.evaluate((node) => {
+            const css = getComputedStyle(node);
+            return {
+              display: css.display,
+              direction: css.flexDirection,
+              gap: css.gap,
+              align: css.textAlign,
+              padding: css.paddingTop,
+            };
+          }),
+          footer: await footer.evaluate((node) => ({ padding: getComputedStyle(node).paddingTop })),
+        });
+        const update = async (side: string) => {
+          await page.evaluate(
+            (side) => (window as any).__drawerFixtureApi.setProps('intrinsic-content', { side }),
+            side
+          );
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              )
+          );
+        };
+        for (const side of ['top', 'right', 'bottom', 'left']) {
+          await update(side);
+          const actual = await inspect();
+          expect(actual.content.display).toBe('flex');
+          expect(actual.content.direction).toBe('column');
+          expect(actual.content.padding.map(Number.parseFloat)).toEqual([0, 0, 0, 0]);
+          expect(actual.header.display).toBe('flex');
+          expect(actual.header.direction).toBe('column');
+          expect(Number.parseFloat(actual.header.gap)).toBe(2);
+          expect(Number.parseFloat(actual.header.padding)).toBe(16);
+          expect(Number.parseFloat(actual.footer.padding)).toBe(16);
+          expect(actual.header.align).toBe(
+            side === 'top' || side === 'bottom' ? 'center' : actual.content.align
+          );
+          expect(actual.content.x).toBeGreaterThanOrEqual(-1);
+          expect(actual.content.y).toBeGreaterThanOrEqual(-1);
+          expect(actual.content.right).toBeLessThanOrEqual(641);
+          expect(actual.content.bottom).toBeLessThanOrEqual(801);
+          const file = `shadcn-${runtime}-${side}-structure-${revision.slice(0, 12)}.png`;
+          const bytes = await page.screenshot({ path: path.join(output, file) });
+          samples.push({
+            stage: `structure-${side}`,
+            actual,
+            screenshot: {
+              file,
+              sha256: createHash('sha256').update(bytes).digest('hex'),
+              revision,
+              tree,
+            },
+          });
+        }
+        const accepted = await inspect();
+        await update('diagonal');
+        expect(await inspect()).toEqual(accepted);
+        await update('bottom');
+        expect((await inspect()).header.align).toBe('center');
+        const close = await visibleClose(page, panel, false, samples);
+        await close.click();
         await expect.poll(() => panel.isVisible()).toBe(false);
       }
     );

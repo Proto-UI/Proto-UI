@@ -30,21 +30,33 @@ export default {
                 'props': { 'a11yLabel': 'Resize drawer' },
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-drawer-title',
-                'children': ['Drawer settings'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-drawer-description',
-                'children': [
-                  'Drag the handle to half size or expand it with Arrow Up. Drag further down to close. Changes remain in this demonstration.',
+                kind: 'proto',
+                prototypeId: 'shadcn-drawer-header',
+                children: [
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-drawer-title',
+                    'children': ['Drawer settings'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-drawer-description',
+                    'children': [
+                      'Drag the handle to half size or expand it with Arrow Up. Drag further down to close. Changes remain in this demonstration.',
+                    ],
+                  },
                 ],
               },
               {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-drawer-close',
-                'children': ['Close'],
+                kind: 'proto',
+                prototypeId: 'shadcn-drawer-footer',
+                children: [
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-drawer-close',
+                    'children': ['Close'],
+                  },
+                ],
               },
             ],
             'props': {

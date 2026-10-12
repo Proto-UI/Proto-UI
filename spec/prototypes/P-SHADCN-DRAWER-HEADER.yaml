@@ -1,0 +1,30 @@
+id: P-SHADCN-DRAWER-HEADER
+type: prototype
+title: Shadcn Drawer Header accepted-direction structure
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Native direction and layout evidence remains separate; responsive styling and complete upstream alignment are not implemented.
+summary: Passive Base Header composition with a read-only accepted-direction presentation.
+statement:
+  en: Header composes passive Base anatomy and observes owner-local accepted Content direction for its basic New York layout.
+  zh-CN: Header 组合被动 Base anatomy，并观察 owner 局部已接受 Content 方向以实现基础 New York 布局。
+criteria:
+  - id: P-SHADCN-DRAWER-HEADER-STRUCTURE
+    text:
+      en: Follow C-DRAWER-STRUCTURE-0001 direction observation, owner isolation, cleanup and bounded family recipe requirements.
+      zh-CN: 遵守 C-DRAWER-STRUCTURE-0001 的方向观察、owner 隔离、清理与有限 family recipe 要求。
+sources:
+  - path: packages/prototypes/shadcn/src/drawer/header.proto.ts
+  - path: packages/prototypes/base/src/drawer/accepted-side.proto.ts
+  - path: packages/prototypes/base/test/drawer-direction.test.ts
+dependsOn:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+inherits:
+  prototypes: [P-BASE-DRAWER-HEADER]
+verifies:
+  tests: [T-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Add a basic Header projection without changing Base input, admission or geometry ownership.
+tags: [prototype, shadcn, drawer, header, anatomy]

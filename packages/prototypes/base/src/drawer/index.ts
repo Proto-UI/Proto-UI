@@ -48,3 +48,6 @@ export type { DrawerHeaderProps, DrawerHeaderExposes, DrawerHeaderAsHookContract
 
 export { asDrawerFooter, default as drawerFooter } from './footer.proto';
 export type { DrawerFooterProps, DrawerFooterExposes, DrawerFooterAsHookContract } from './types';
+
+export { asDrawerAcceptedSide } from './accepted-side.proto';
+export type { DrawerSide, DrawerAcceptedSideObservation } from './types';
