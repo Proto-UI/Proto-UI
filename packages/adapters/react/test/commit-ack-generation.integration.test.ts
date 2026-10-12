@@ -106,7 +106,10 @@ for (const ownerContext of [false, true])
       const acks: string[] = [];
       const reveals: string[] = [];
       const remove = Element.prototype.removeAttribute;
-      vi.spyOn(Element.prototype, 'removeAttribute').mockImplementation(function (name) {
+      vi.spyOn(Element.prototype, 'removeAttribute').mockImplementation(function (
+        this: Element,
+        name
+      ) {
         if (
           name === 'data-pui-view-pending' &&
           this.parentElement === host &&
@@ -240,7 +243,7 @@ it('does not reveal a view retired by a synchronous done callback', async () => 
   let run: any;
   const reveals: string[] = [];
   const remove = Element.prototype.removeAttribute;
-  vi.spyOn(Element.prototype, 'removeAttribute').mockImplementation(function (name) {
+  vi.spyOn(Element.prototype, 'removeAttribute').mockImplementation(function (this: Element, name) {
     if (name === 'data-pui-view-pending' && this.parentElement === host && this.hasAttribute(name))
       reveals.push(this.textContent ?? '');
     return remove.call(this, name);
