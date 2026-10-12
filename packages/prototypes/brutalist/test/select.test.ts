@@ -54,7 +54,11 @@ function createSelect(options?: {
   setElementProps(value, options?.value ?? {});
   setElementProps(
     content,
-    options?.content ?? { side: 'right', align: 'start', avoidCollisions: false }
+    options?.content ?? {
+      side: 'right',
+      align: 'start',
+      avoidCollisions: false,
+    }
   );
   trigger.appendChild(value);
   root.append(trigger, content);
@@ -336,7 +340,9 @@ describe('prototypes/brutalist: select', () => {
   it('keeps selection check-only while active and focused items receive the accent pair', async () => {
     // T-BRUTALIST-SELECT-0001-CASE-7
     vi.useFakeTimers();
-    const { root, trigger, value, items } = createSelect({ root: { defaultValue: 'alpha' } });
+    const { root, trigger, value, items } = createSelect({
+      root: { defaultValue: 'alpha' },
+    });
     await settle();
     const alpha = items[0];
     const beta = items[1];
@@ -353,7 +359,18 @@ describe('prototypes/brutalist: select', () => {
       'm20 6-11 11-5-5'
     );
     expect(beta.querySelector('svg')).toBeNull();
-    for (const token of ['rounded-base', 'w-full', 'font-sans', 'text-sm', 'justify-between']) {
+    const glyph = alpha.querySelector('svg');
+    const glyphFrame = glyph?.parentElement;
+    expect(glyph?.getAttribute('width')).toBe('16');
+    expect(glyph?.getAttribute('height')).toBe('16');
+    if (!glyphFrame) throw new Error('Expected owned glyph frame.');
+    for (const token of ['flex', 'size-4', 'shrink-0'])
+      expect(styleContains(glyphFrame, token)).toBe(true);
+    const indicator = glyphFrame.parentElement;
+    expect(indicator).toBeTruthy();
+    for (const token of ['absolute', 'right-2', 'size-3.5'])
+      expect(styleContains(indicator!, token)).toBe(true);
+    for (const token of ['rounded-base', 'w-full', 'font-sans', 'text-sm', 'pl-2', 'pr-8']) {
       expect(styleContains(alpha, token)).toBe(true);
     }
 

@@ -8,6 +8,16 @@ summary: >-
 
 
 cases:
+  - id: T-BRUTALIST-SELECT-0001-CASE-CURRENT-PIN-RECIPE
+    title: Current fixed Neo recipe owns indicator gutter, Value layout and centered edge placement
+    covers:
+      [
+        P-BRUTALIST-SELECT-TRIGGER-CURRENT-PIN-RECIPE,
+        P-BRUTALIST-SELECT-ITEM-CURRENT-PIN-RECIPE,
+        P-BRUTALIST-SELECT-VALUE-CURRENT-PIN-RECIPE,
+        P-BRUTALIST-SELECT-CONTENT-CURRENT-PIN-RECIPE,
+      ]
+    expectation: recipe-tokens-and-real-own-parts-preserve-upstream-flow-with-normal-and-shadow-css
   - id: T-BRUTALIST-SELECT-0001-CASE-1
     title: Direct entry and Base Select inheritance
     covers:
@@ -67,6 +77,19 @@ cases:
       - P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR
     expectation: p-brutalist-select-trigger-opt-in-elevation
 implementations:
+  - id: brutalist-select-current-pin-recipe
+    kind: module-test
+    status: passing
+    path: packages/prototypes/brutalist/test/select-current-recipe.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SELECT-0001-CASE-CURRENT-PIN-RECIPE]
+    exercises:
+      [
+        P-BRUTALIST-SELECT-TRIGGER,
+        P-BRUTALIST-SELECT-ITEM,
+        P-BRUTALIST-SELECT-VALUE,
+        P-BRUTALIST-SELECT-CONTENT,
+      ]
   - id: prototypes-brutalist-select-contract
     kind: module-test
     status: passing

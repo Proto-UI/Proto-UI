@@ -5,20 +5,26 @@ import type { BrutalistSelectItemExposes, BrutalistSelectItemProps } from './typ
 function renderCheck(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, selected: boolean) {
   return renderer.el(
     'span',
-    { style: tw('pointer-events-none flex size-5 shrink-0 items-center justify-center') },
+    {
+      style: tw('pointer-events-none absolute right-2 flex size-3.5 items-center justify-center'),
+    },
     selected
-      ? renderer.svg.root(
-          {
-            viewBox: '0 0 24 24',
-            width: 16,
-            height: 16,
-            fill: 'none',
-            stroke: 'currentColor',
-            strokeWidth: 2,
-            strokeLinecap: 'round',
-            strokeLinejoin: 'round',
-          },
-          renderer.svg.path({ d: 'm20 6-11 11-5-5' })
+      ? renderer.el(
+          'span',
+          { style: tw('flex size-4 shrink-0 items-center justify-center') },
+          renderer.svg.root(
+            {
+              viewBox: '0 0 24 24',
+              width: 16,
+              height: 16,
+              fill: 'none',
+              stroke: 'currentColor',
+              strokeWidth: 2,
+              strokeLinecap: 'round',
+              strokeLinejoin: 'round',
+            },
+            renderer.svg.path({ d: 'm20 6-11 11-5-5' })
+          )
         )
       : null
   );
@@ -35,7 +41,7 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
     // P-BRUTALIST-SELECT-ITEM-VISUAL-GRAMMAR: resting sans full-width item surface (font-sans font-medium text-sm, rounded-base, gap-2).
     def.feedback.style.use(
       tw(
-        'relative flex w-full cursor-default items-center justify-between gap-2 rounded-base border-2 border-transparent px-2 py-1.5 font-sans font-medium text-sm outline-none select-none'
+        'relative flex w-full cursor-default items-center gap-2 rounded-base border-2 border-transparent pl-2 pr-8 py-1.5 font-sans font-medium text-sm outline-none select-none'
       )
     );
     // P-BRUTALIST-SELECT-ITEM-INTERACTION (active/hovered/focused/focusVisible/pressed → bg-main text-main-foreground; disabled → opacity-50 pointer-events-none) and SELECTED-PAIR-INVARIANT below.
@@ -76,7 +82,14 @@ const selectItem = definePrototype<BrutalistSelectItemProps, BrutalistSelectItem
       renderTask = null;
     });
 
-    return (renderer) => [renderer.r.slot(), renderCheck(renderer, selected.get())];
+    return (renderer) => [
+      renderer.el(
+        'span',
+        { style: tw('flex flex-1 items-center gap-2 whitespace-nowrap') },
+        renderer.r.slot()
+      ),
+      renderCheck(renderer, selected.get()),
+    ];
   },
 });
 

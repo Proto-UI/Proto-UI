@@ -11,6 +11,10 @@ statement:
   zh-CN: P-BRUTALIST-SELECT-ITEM 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-SELECT-ITEM-CURRENT-PIN-RECIPE
+    text:
+      zh-CN: Item 使用 pl-2/pr-8/py-1.5；文本 slot 包裹为 flex-1/items-center/gap-2/whitespace-nowrap；勾选容器 absolute right-2 size-3.5，内部 SVG 16×16 由自有 size-4/shrink-0 包裹保持尺寸，不占文本流。
+      en: Item uses pl-2/pr-8/py-1.5; its text slot wrapper uses flex-1/items-center/gap-2/whitespace-nowrap. The check container is absolute right-2 size-3.5 with a 16-by-16 SVG in an owned size-4/shrink-0 wrapper, outside text flow.
   - id: P-BRUTALIST-SELECT-ITEM-BASE-INHERITANCE
     text:
       en: >-
@@ -66,6 +70,8 @@ criteria:
 
 
 sources:
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/select.tsx
+    label: Current fixed Neo Select source; visual adaptation retains Base protocol ownership
   - path: docs/superpowers/specs/2026-10-03-neobrutalism-source-aligned-design.md
   - path: packages/prototypes/brutalist/src/select/item.proto.ts
   - path: packages/prototypes/brutalist/test/select.test.ts
