@@ -44,6 +44,7 @@ export type DemoChild = DemoNode | string;
 export type DemoRuntimeApi = {
   call(ref: string, path: string, ...args: unknown[]): unknown;
   getExposes(ref: string): Record<string, unknown> | undefined;
+  /** Patch authored props: omitted keys persist; explicit undefined is forwarded to the Props resolver. */
   setProps(ref: string, next: Record<string, unknown>): void;
   /** Website composition surface channel; available in all four built-in renderers. */
   setSurfaceStyle?(ref: string, next: Record<string, string>): void;

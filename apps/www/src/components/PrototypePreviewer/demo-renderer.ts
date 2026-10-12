@@ -50,6 +50,7 @@ type PropsBaseType = Record<string, unknown>;
 const reactComponentCache = new WeakMap<object, Map<string, any>>();
 const vueComponentCache = new WeakMap<object, Map<string, any>>();
 const wcSurfaceProps = new WeakMap<HTMLElement, Record<string, unknown>>();
+const wcRawProps = new WeakMap<HTMLElement, Record<string, unknown>>();
 
 const EMPTY_DEMO_RENDER: DemoRenderResult = { destroy: () => {} };
 
@@ -212,6 +213,7 @@ function renderDemoNodeWc(
     surfaceStyle: node.surfaceStyle,
   };
   wcSurfaceProps.set(el, surfaceProps);
+  wcRawProps.set(el, { ...(node.props ?? {}) });
   setElementAssociations(el, associations.resolve(node.associations) ?? {});
   setElementProps(el, {
     ...(node.props ?? {}),
@@ -278,7 +280,12 @@ async function renderDemoWc(
       const el = refs[ref] as DemoInstance &
         HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
       if (!el) return;
-      el.setProps?.({ ...next, ...(wcSurfaceProps.get(el) ?? {}) });
+      const current = wcRawProps.get(el);
+      if (!current) return;
+      // DemoRuntimeApi updates are patches. The WC adapter deliberately accepts
+      // full snapshots, so retain the authored props before projecting one.
+      Object.assign(current, next);
+      el.setProps?.({ ...current, ...(wcSurfaceProps.get(el) ?? {}) });
       el.update?.();
     },
   };
