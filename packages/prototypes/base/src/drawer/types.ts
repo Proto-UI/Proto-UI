@@ -191,3 +191,11 @@ export type DrawerHandleAsHookContract = {
     focusVisible: State<boolean>;
   };
 };
+
+export interface DrawerHeaderProps {}
+export type DrawerHeaderExposes = {};
+export type DrawerHeaderAsHookContract = {};
+
+export interface DrawerFooterProps {}
+export type DrawerFooterExposes = {};
+export type DrawerFooterAsHookContract = {};

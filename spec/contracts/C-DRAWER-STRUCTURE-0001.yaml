@@ -1,0 +1,39 @@
+id: C-DRAWER-STRUCTURE-0001
+type: contract
+title: Passive Drawer Header and Footer share their logical owner
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Portable structural parts are defined independently of New York direction, viewport sizing and Content gesture work; native composition remains unverified.
+summary: Header and Footer reuse existing Drawer anatomy roles without introducing state or input ownership.
+statement:
+  en: Drawer Header and Footer are passive slot containers belonging to the nearest logical Drawer family owner. Family styling does not create another Root, input route or mutable presentation authority.
+  zh-CN: Drawer Header 与 Footer 是归属最近逻辑 Drawer family owner 的被动 slot 容器。family 样式不创建另一 Root、输入路径或可变呈现权限。
+criteria:
+  - id: C-DRAWER-STRUCTURE-0001-PASSIVE
+    text:
+      en: Base Header and Footer claim only their existing header or footer anatomy role and preserve authored children. They add no focusability, accessibility role, range, state, event, command or geometry owner. The asHook form is idempotent within one prototype setup.
+      zh-CN: Base Header 与 Footer 仅声明已有 header 或 footer anatomy role 并保留作者子内容，不增加焦点、无障碍角色、范围、State、事件、命令或几何 owner。asHook 在一次原型 setup 内幂等。
+  - id: C-DRAWER-STRUCTURE-0001-OWNER
+    text:
+      en: Existing Drawer anatomy cardinality and containment apply within each logical Root. Mixed visual families may compose under that owner; nested Roots do not share header or footer membership. Disposing the owner releases descendant instances and memberships; these passive parts expose no writable or retained State handles.
+      zh-CN: 已有 Drawer anatomy 数量与包含约束在每个逻辑 Root 内适用。不同视觉 family 可在同一 owner 下组合；嵌套 Root 不共享 header 或 footer 成员。owner dispose 释放子实例与成员；被动部件不暴露可写或留存 State handle。
+  - id: C-DRAWER-STRUCTURE-0001-FAMILY
+    text:
+      en: Shadcn Footer consumes Base Footer and owns only the pinned New York mt-auto flex flex-col gap-2 p-4 recipe, with mt-auto expressed by the existing equivalent mt-[auto] token. This slice does not alter existing consumers, Handle, Content sizing or gestures. Header directional alignment and decorative Indicator require separate accepted-state and gesture contracts; this slice does not certify complete New York Drawer parity.
+      zh-CN: Shadcn Footer 消费 Base Footer，仅拥有固定 New York 的 mt-auto flex flex-col gap-2 p-4 recipe，其中 mt-auto 用已有等价 mt-[auto] token 表达。本切片不改变现有 consumer、Handle、Content 尺寸或手势。Header 方向对齐与装饰 Indicator 需要独立的 accepted-state 与手势契约，不据此认定整个 New York Drawer 对齐。
+dependsOn:
+  contracts: [C-DRAWER-AUTO-CONSUMER-0001]
+verifies:
+  tests: [T-DRAWER-STRUCTURE-0001]
+sources:
+  - path: packages/prototypes/shadcn/src/drawer/footer.proto.ts
+    note: Recipe source is shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/drawer.tsx.
+openQuestions:
+  - id: C-DRAWER-STRUCTURE-0001-Q-NATIVE
+    question: Which native adapter evidence establishes preserved slot composition and owner isolation beyond the logical and Web Component tests?
+    blocks: [activation:C-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define passive Base Header and Footer and the isolated New York Footer recipe without changing existing consumers.
+tags: [drawer, anatomy, composition]

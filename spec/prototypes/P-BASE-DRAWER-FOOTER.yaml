@@ -1,0 +1,27 @@
+id: P-BASE-DRAWER-FOOTER
+type: prototype
+title: Base Drawer Footer passive structural part
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: New structural part has logical tests; native composition and complete New York migration remain separate.
+summary: Optional owner-scoped footer slot without independent interaction or State ownership.
+statement:
+  en: This part preserves children and claims the existing Drawer footer role within its logical Root.
+  zh-CN: 本部件保留子内容，并在其逻辑 Root 内声明已有 Drawer footer role。
+criteria:
+  - id: P-BASE-DRAWER-FOOTER-STRUCTURE
+    text:
+      en: Follow C-DRAWER-STRUCTURE-0001 passive-slot, owner isolation and terminal cleanup requirements.
+      zh-CN: 遵守 C-DRAWER-STRUCTURE-0001 的被动 slot、owner 隔离与终止清理要求。
+sources:
+  - path: packages/prototypes/base/src/drawer/footer.proto.ts
+  - path: packages/prototypes/base/test/drawer-structure.test.ts
+dependsOn:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+verifies:
+  tests: [T-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Add the bounded passive footer primitive without changing existing consumers.
+tags: [prototype, base, drawer, footer, anatomy]

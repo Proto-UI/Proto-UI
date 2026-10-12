@@ -25,3 +25,6 @@ export type {
   DrawerMaskProps,
   DrawerMaskExposes,
 } from '@proto.ui/prototypes-base/drawer';
+
+export { default as drawerFooter } from './footer.proto';
+export type { DrawerFooterProps, DrawerFooterExposes } from '@proto.ui/prototypes-base/drawer';

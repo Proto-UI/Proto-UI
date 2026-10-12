@@ -298,6 +298,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'min-w-[var(--proto-ui-anchor-width)]',
   'ml-auto',
   'mt-2',
+  'mt-[auto]',
   'mx-0',
   'mx-1',
   'my-1',
