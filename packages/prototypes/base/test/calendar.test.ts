@@ -16,6 +16,33 @@ const flush = async () => {
   for (let n = 0; n < 12; n++) await Promise.resolve();
 };
 describe('Calendar functional slice', () => {
+  it.each([Number.MAX_SAFE_INTEGER, -Number.MAX_SAFE_INTEGER])(
+    'preserves the original date when a safe-integer month shift overflows: %s',
+    (count) => {
+      expect(addMonths('2026-10-12', count)).toBe('2026-10-12');
+    }
+  );
+  it('preserves the original date when the shifted month is valid but its end overflows', () => {
+    const value = '2026-10-12';
+    const count = (275760 - 2026) * 12 + (8 - 9);
+    const shifted = new Date(`${value}T00:00:00.000Z`);
+    shifted.setUTCDate(1);
+    shifted.setUTCMonth(shifted.getUTCMonth() + count);
+    expect(Number.isFinite(shifted.getTime())).toBe(true);
+    const end = new Date(shifted.getTime());
+    end.setUTCMonth(end.getUTCMonth() + 1, 0);
+    expect(Number.isFinite(end.getTime())).toBe(false);
+    expect(addMonths(value, count)).toBe(value);
+  });
+  it('preserves ordinary month navigation and invalid-argument handling', () => {
+    expect(addMonths('2024-03-31', -1)).toBe('2024-02-29');
+    expect(addMonths('2026-10-12', 0)).toBe('2026-10-12');
+    expect(addMonths('2026-12-12', 1)).toBe('2027-01-12');
+    for (const count of [NaN, Infinity, -Infinity, 1.5, Number.MAX_SAFE_INTEGER + 1]) {
+      expect(addMonths('2026-10-12', count)).toBe('2026-10-12');
+    }
+    expect(addMonths('2025-02-29', 1)).toBe('2025-02-29');
+  });
   it('validates civil dates and clamps month arithmetic through leap years', () => {
     expect(parseDate('2025-02-29')).toBe(null);
     expect(addMonths('2024-01-31', 1)).toBe('2024-02-29');
