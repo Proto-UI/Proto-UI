@@ -22,8 +22,8 @@ criteria:
       en: Content must use `asFocusRoving` as the sole owner of ArrowUp, ArrowDown, Home, End, orientation, boundaries, and deferred entry; it must not consume `useFocusRoving` or make Items manually forward sibling movement.
   - id: P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE
     text:
-      zh-CN: Content 必须消费 non-modal Overlay，并以 `asTransition` 作为唯一 Presence driver；logical close 后保留 leave view，只在 closed 后 detach。
-      en: Content must consume a non-modal Overlay and bind `asTransition` as its sole Presence driver; it must retain the leaving view after logical close and detach only after reaching closed.
+      zh-CN: Content 必须消费 non-modal Overlay，并以 `asTransition` 作为唯一 Presence driver；只有 Root 已提交 open=false 才能驱动 leave，随后按配置保留 leave view，只在 closed 后 detach。受控 owner 拒绝 close 请求时，不得暂时 entering/leaving、撤销准备或重置 focus/scroll。
+      en: Content must consume a non-modal Overlay and bind `asTransition` as its sole Presence driver; only Root committed open=false may drive leave; it then retains the configured leaving view and detaches only after reaching closed. A controlled owner refusing a close request must not transiently enter/leave, cancel preparation, or reset focus/scroll.
   - id: P-BASE-SELECT-CONTENT-POSITION
     text:
       zh-CN: Content 必须接受 side、align、sideOffset、alignOffset、avoidCollisions 与 collisionPadding，把运行时更新提交给 fixed、portal、Trigger-anchored positioning policy。

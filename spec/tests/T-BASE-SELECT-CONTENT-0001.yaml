@@ -22,6 +22,10 @@ cases:
     title: Content retains leave view and portals a collision-aware Trigger-anchored surface
     covers: [P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE, P-BASE-SELECT-CONTENT-POSITION]
     expectation: select-content-transition-is-the-only-positioned-overlay-presence-driver
+  - id: T-BASE-SELECT-CONTENT-0001-CASE-CONTROLLED-PRESENCE
+    title: Refused controlled close never drives transient presence or a new focus entry
+    covers: [P-BASE-SELECT-CONTENT-OVERLAY-PRESENCE]
+    expectation: committed-root-open-is-the-only-presence-authority
   - id: T-BASE-SELECT-CONTENT-0001-CASE-KEYBOARD
     title: Keyboard movement, boundaries, commit, and runtime-delayed typeahead skip disabled options
     covers: [P-BASE-SELECT-CONTENT-KEYBOARD]
@@ -41,6 +45,7 @@ implementations:
         T-BASE-SELECT-CONTENT-0001-CASE-A11Y-FOCUS,
         T-BASE-SELECT-CONTENT-0001-CASE-ENTRY-STABILITY,
         T-BASE-SELECT-CONTENT-0001-CASE-PRESENCE-POSITION,
+        T-BASE-SELECT-CONTENT-0001-CASE-CONTROLLED-PRESENCE,
         T-BASE-SELECT-CONTENT-0001-CASE-KEYBOARD,
         T-BASE-SELECT-CONTENT-0001-CASE-DISMISS,
       ]

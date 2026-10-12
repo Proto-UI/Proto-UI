@@ -91,16 +91,23 @@ function setupSelectContent(
   const boundary = asBoundary();
   boundary.observe('pointer.press');
 
+  const open = def.state.bool('open', false);
+  def.expose.state('open', open);
+
   const transition = asTransition();
   transition.configure({ enterDuration: 0, leaveDuration: 0 });
   overlay.bindPresence({
-    enter: transition.controls.enter,
-    leave: transition.controls.leave,
+    // Overlay dismissal is a request until Root commits it. In particular an
+    // Escape request may be refused by a controlled owner without any leave.
+    enter: () => {
+      if (open.get()) transition.controls.enter();
+    },
+    leave: () => {
+      if (!open.get()) transition.controls.leave();
+    },
     present: transition.isPresent,
   });
 
-  const open = def.state.bool('open', false);
-  def.expose.state('open', open);
   const store = (api?.store ?? {}) as { run: any };
   store.run = null;
   let currentContext: SelectContextValue | null = null;
@@ -221,10 +228,15 @@ function setupSelectContent(
     currentContext = ctx;
     contentId.set(createSelectContentId(ctx.rootId), 'reason: select content identity sync');
     open.set(ctx.open, reason);
+    if (currentContext !== ctx) return;
     if (ctx.open) {
       overlay.openOverlay(reason);
+      if (currentContext !== ctx) return;
+      transition.controls.enter();
+      if (currentContext !== ctx) return;
       if (!wasOpen) {
         focusScope.activate({ reason: ctx.requestFocusReason ?? 'programmatic' });
+        if (currentContext !== ctx) return;
         scheduleOpenFocusAction(run);
       }
       return;
@@ -232,7 +244,11 @@ function setupSelectContent(
     entryTask?.cancel();
     entryTask = null;
     if (wasOpen) focusScope.deactivate({ reason: ctx.requestFocusReason ?? 'programmatic' });
+    if (currentContext !== ctx) return;
     overlay.close(reason);
+    if (currentContext !== ctx) return;
+    transition.controls.leave();
+    if (currentContext !== ctx) return;
     if (wasOpen && (ctx.requestReason === 'escape' || ctx.requestReason === 'item.select')) {
       focusTrigger(run, ctx.requestFocusReason ?? 'programmatic');
     }
@@ -274,7 +290,7 @@ function setupSelectContent(
       reason: 'escape',
       focusReason: 'keyboard',
     });
-    if (ctx.controlledOpen) overlay.openOverlay('controlled.sync');
+    if (ctx.controlledOpen && currentContext?.open) overlay.openOverlay('controlled.sync');
   });
 
   def.event.onGlobal('key.down', (run, ev) => {
