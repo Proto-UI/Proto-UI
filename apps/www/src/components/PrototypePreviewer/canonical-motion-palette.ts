@@ -30,20 +30,27 @@ export function createCanonicalMotionPalette(surface: HTMLElement): ResidentMoti
   }
   const source: ResidentMotionPaletteSource = {
     current() {
-      const selected = mode(),
-        facts = SHADCN_MOTION_PALETTE[selected];
-      const computed = win?.getComputedStyle(surface);
+      // A detached surface has no computed theme authority. Invalidation can arrive
+      // before its owner retires; absence is neither a match nor a consumer override.
+      const available = surface.isConnected;
+      const selected = available ? mode() : null;
       const colors: Record<string, MotionRgba> = {},
         diagnostics: string[] = [];
-      for (const [role, color] of Object.entries(facts.colors)) {
-        const expected = facts.expectedInputs[role as keyof typeof facts.expectedInputs];
-        const observed = computed?.getPropertyValue('--pui-' + role) ?? '';
-        if (expected && normalize(observed) === normalize(expected))
-          colors[role] = color as unknown as MotionRgba;
-        else diagnostics.push(`theme-source-mismatch:${role}`);
+      if (selected === null) diagnostics.push('theme-source-unavailable:detached');
+      else {
+        const facts = SHADCN_MOTION_PALETTE[selected];
+        const computed = win?.getComputedStyle(surface);
+        for (const [role, color] of Object.entries(facts.colors)) {
+          const expected = facts.expectedInputs[role as keyof typeof facts.expectedInputs];
+          const observed = computed?.getPropertyValue('--pui-' + role) ?? '';
+          if (expected && normalize(observed) === normalize(expected))
+            colors[role] = color as unknown as MotionRgba;
+          else diagnostics.push(`theme-source-mismatch:${role}`);
+        }
       }
       const next = JSON.stringify([
         SHADCN_MOTION_PALETTE.sourceHash,
+        available,
         selected,
         colors,
         diagnostics,
