@@ -87,6 +87,12 @@ criteria:
       en: Base Transition does not define CSS classes, keyframes, easing, physics, layout or shared-element motion, staggering, child orchestration, host animation-event detection, or a component semantic role; these visual and host-projection responsibilities belong to downstream prototypes, adapters, or later capabilities.
     dependsOn:
       knowledge: [K-DESIGN-TRADEOFF-0001]
+  - id: P-BASE-TRANSITION-REENTRANT-CONTINUATION
+    text:
+      zh-CN: 同步 before/after 信号、状态投射或视图请求中出现更新目标、重新初始化、卸载或销毁时，旧阶段操作不得继续覆盖新目标、发出过期 after 信号或撤销新视图；同向重复开始请求保持幂等。未被取代的正常事件顺序、持续时间与中断策略不变。本条不定义 CSS 轨迹，也不声明任意宿主调度器注册重入已获支持。
+      en: When a synchronous before/after signal, state projection, or view request changes the target, reinitializes, unmounts, or disposes the machine, an obsolete phase operation must not overwrite the new target, emit stale after signals, or withdraw a new view; repeated same-direction start requests remain idempotent. Uninterrupted event ordering, durations, and interruption policy remain unchanged. This criterion neither defines CSS trajectories nor claims support for arbitrary host scheduler-registration reentrancy.
+    dependsOn:
+      contracts: [C-AS-TRANSITION-0001]
 openQuestions:
   - id: P-BASE-TRANSITION-Q-REDUCED-MOTION-SOURCE
     question:
