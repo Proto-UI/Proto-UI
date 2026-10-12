@@ -39,6 +39,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
 
   const initialContext: SelectContextValue = {
     rootId: '',
+    collectionRevision: 0,
     open: false,
     controlledOpen: false,
     value: '',
@@ -96,9 +97,22 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     run.context.update(SELECT_CONTEXT, next);
   };
 
+  let collectionSnapshot = '';
   const refreshSelectedText = (run: any) => {
+    const records = collection.getItems().map((item: Record<string, unknown>) => ({
+      value: String(item.value ?? ''),
+      textValue: String(item.textValue ?? ''),
+      disabled: item.disabled === true,
+    }));
+    const nextSnapshot = JSON.stringify(records);
+    if (nextSnapshot !== collectionSnapshot) {
+      // Save before notification: a synchronous subscriber may refresh again.
+      collectionSnapshot = nextSnapshot;
+      snapshot = { ...snapshot, collectionRevision: (snapshot.collectionRevision ?? 0) + 1 };
+    }
     const selectedValue = value.get();
-    const nextTextValue = resolveTextValue(run, selectedValue);
+    const selected = records.find((item) => item.value === selectedValue);
+    const nextTextValue = selected ? selected.textValue || selected.value : '';
     if (selectedValue && !nextTextValue && !snapshot.open) {
       syncContext(run);
       return;

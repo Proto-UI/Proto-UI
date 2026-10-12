@@ -84,7 +84,9 @@ describe('prototypes/shadcn: select', () => {
     expect(styleContains(content, 'w-[var(--proto-ui-anchor-width)]')).toBe(true);
     expect(styleContains(content, 'min-w-[var(--proto-ui-anchor-width)]')).toBe(true);
     expect(styleContains(alpha, 'rounded-sm')).toBe(true);
-    expect(styleContains(alpha, 'justify-between')).toBe(true);
+    expect(styleContains(alpha, 'justify-between')).toBe(false);
+    expect(styleContains(alpha, 'pl-2')).toBe(true);
+    expect(styleContains(alpha, 'pr-8')).toBe(true);
     expect(alpha.querySelector('svg')).toBeNull();
     expect(alpha.lastElementChild?.tagName).toBe('SPAN');
   });
@@ -145,7 +147,7 @@ describe('prototypes/shadcn: select', () => {
     expect(root.getExposes().open.get()).toBe(false);
   });
 
-  it('accepts official size and position props while retaining shadcn transition presence', async () => {
+  it('accepts official size and position props and withdraws immediately on committed close', async () => {
     vi.useFakeTimers();
     const { root, trigger, content, alpha } = createSelect({
       trigger: { size: 'sm' },
@@ -166,8 +168,8 @@ describe('prototypes/shadcn: select', () => {
 
     alpha.click();
     await settle();
-    expect(content.getExposes().transitionState.get()).toBe('leaving');
-    expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+    expect(content.getExposes().transitionState.get()).toBe('closed');
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
     expect(styleContains(content, 'animate-out')).toBe(true);
     await vi.advanceTimersByTimeAsync(100);
     await flush();

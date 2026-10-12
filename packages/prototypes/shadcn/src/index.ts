@@ -328,3 +328,13 @@ export * from './virtual-list';
 export * from './date-picker';
 
 export * from './data-table';
+
+export { default as selectSurface, default as shadcnSelectSurface } from './select/surface.proto';
+export {
+  default as selectViewport,
+  default as shadcnSelectViewport,
+} from './select/viewport.proto';
+export {
+  default as selectItemText,
+  default as shadcnSelectItemText,
+} from './select/item-text.proto';

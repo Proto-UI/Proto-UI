@@ -81,10 +81,19 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     if (ctx) sync(run, ctx);
     notifySelectItemSnapshotChanged(run);
   });
+  let disposed = false;
+  def.lifecycle.onBeforeDispose(() => {
+    disposed = true;
+  });
   def.props.watch(['value', 'textValue', 'disabled'], (run) => {
+    const nextOwnDisabled = !!run.props.get().disabled;
+    // Disabling publishes while old focus ownership remains observable.
+    // Re-enabling must restore focus eligibility before admission can focus it.
+    if (nextOwnDisabled) notifySelectItemSnapshotChanged(run);
+    if (disposed) return;
     const ctx = readContext(run);
     if (ctx) sync(run, ctx);
-    notifySelectItemSnapshotChanged(run);
+    if (!nextOwnDisabled && !disposed) notifySelectItemSnapshotChanged(run);
   });
 
   const updateActiveValue = (run: any) => {
@@ -108,6 +117,12 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
       prev.activeValue === ownValue ? { ...prev, activeValue: '' } : prev
     );
   };
+
+  def.event.on('key.down', (run, ev) => {
+    if (ev.key !== 'Tab' || command.disabled.get() || !command.focused.get()) return;
+    if (!readContext(run)?.open) return;
+    requestSelectOpen(run, { open: false, reason: 'tab', focusReason: 'keyboard' });
+  });
 
   def.event.on('press.commit', (run, ev) => {
     if (command.disabled.get()) return;

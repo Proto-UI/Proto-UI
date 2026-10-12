@@ -63,7 +63,7 @@ it('connects real prototype parts, applies neutral host facts, releases cold ent
   if (!frame) throw new Error('Missing real Content frame');
   expect(frame.style.position).toBe('fixed');
   expect(frame.style.left).toBe('180px');
-  expect(frame.getAttribute('data-transition-state')).toBe('entered');
+  expect(frame.getAttribute('data-transition-state')).toBe('entering');
   expect(document.activeElement?.getAttribute('data-demo-ref')).toBe('item-1');
 });
 
@@ -98,9 +98,12 @@ it.each(['surface', 'item-text'] as const)(
       await new Promise((resolve) => setTimeout(resolve, 0));
     });
     expect(readProofFailure()).toBe(
-      omitPart === 'surface' ? 'missing-or-ambiguous-parts' : 'missing-text'
+      omitPart === 'surface'
+        ? 'select.structure.missing-or-ambiguous-parts'
+        : 'select.structure.missing-or-ambiguous-item-text'
     );
-    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    // Presentation abort leaves the committed Root fact intact.
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
     const frame = document.querySelector<HTMLElement>('[data-demo-ref="frame"]');
     expect(frame?.hasAttribute('data-pui-view-detached')).toBe(true);
   }

@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers independent command state, combobox relationships, pointer and keyboard entry, disabled gating, and absence of selection ownership.
 cases:
+  - id: T-BASE-SELECT-TRIGGER-0001-CASE-COLD-TAB
+    title: Trigger owns early cold Tab with exactly one controlled close request
+    covers: [P-BASE-SELECT-TRIGGER-COLD-TAB]
+    expectation: trigger-tab-does-not-wait-for-content-mount-or-prevent-default
   - id: T-BASE-SELECT-TRIGGER-0001-CASE-COMMAND-A11Y
     title: Trigger is an independent accessible select-only combobox command
     covers:
@@ -23,6 +27,13 @@ cases:
     covers: [P-BASE-SELECT-TRIGGER-DISABLED]
     expectation: disabled-select-trigger-never-opens-or-focuses
 implementations:
+  - id: shadcn-select-trigger-cold-tab
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-alignment-owner.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-TRIGGER-0001-CASE-COLD-TAB]
+    exercises: [P-BASE-SELECT-TRIGGER]
   - id: prototypes-base-select-trigger-contract
     kind: module-test
     status: passing

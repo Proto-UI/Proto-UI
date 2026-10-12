@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Content Base listbox inheritance, position API, transition and surface, asChild omission, and bounded parity.
 cases:
+  - id: T-SHADCN-SELECT-CONTENT-0001-CASE-COMPLETE-OWNER
+    title: Public complete composition aligns and survives controlled refusal and synchronous reopen
+    covers:
+      [
+        P-SHADCN-SELECT-CONTENT-POSITION-PROP,
+        P-SHADCN-SELECT-CONTENT-TRANSITION,
+        P-SHADCN-SELECT-CONTENT-CURRENT-VISUAL-SURFACE,
+      ]
+    expectation: sole-base-owner-applies-current-alignment-and-shadcn-real-close-reopens-through-fresh-cold-gate
   - id: T-SHADCN-SELECT-CONTENT-0001-CASE-CURRENT-PROTOCOL
     title: Content retains listbox behavior and current portaled motion while position parity stays bounded
     covers:
@@ -22,6 +31,20 @@ cases:
       ]
     expectation: shadcn-select-content-current-listbox-motion
 implementations:
+  - id: prototypes-shadcn-select-complete-owner
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-alignment-owner.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-CONTENT-0001-CASE-COMPLETE-OWNER]
+    exercises: [P-SHADCN-SELECT-CONTENT, P-BASE-SELECT-CONTENT]
+  - id: react-select-public-composition-sequencing
+    kind: adapter-test
+    status: passing
+    path: packages/web-conformance/test/select-target-alignment-fixture.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-CONTENT-0001-CASE-COMPLETE-OWNER]
+    exercises: [P-SHADCN-SELECT-CONTENT, P-BASE-SELECT-CONTENT]
   - id: prototypes-shadcn-select-content-contract
     kind: module-test
     status: passing
@@ -35,7 +58,7 @@ implementations:
         keyboard focus entry,
         position enum acceptance,
         current anchor-width surface,
-        entering and 100ms leaving retention; Viewport and popper gaps stay centralized.,
+        entering and immediate committed close; full composition has separate current-request and admission coverage.,
       ]
 verifies:
   prototypes:

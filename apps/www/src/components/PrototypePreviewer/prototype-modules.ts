@@ -1034,6 +1034,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/select/content.proto');
     registerPrototype('shadcn-select-content', mod.default);
   },
+  'shadcn-select-surface': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-surface', mod.selectSurface);
+  },
+  'shadcn-select-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-viewport', mod.selectViewport);
+  },
+  'shadcn-select-item-text': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-item-text', mod.selectItemText);
+  },
   'shadcn-select-item': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/select/item.proto');
     registerPrototype('shadcn-select-item', mod.default);

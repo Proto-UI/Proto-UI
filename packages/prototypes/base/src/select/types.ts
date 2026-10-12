@@ -85,6 +85,7 @@ export type SelectValueStateHandles = { displayValue: State<string> };
 export type SelectValueAsHookContract = { state: SelectValueStateHandles };
 
 export type SelectContentProps = TransitionProps & {
+  position?: 'popper' | 'item-aligned';
   side?: 'top' | 'right' | 'bottom' | 'left';
   align?: 'start' | 'center' | 'end';
   sideOffset?: number;
@@ -94,6 +95,9 @@ export type SelectContentProps = TransitionProps & {
 };
 
 export type SelectContentExposes = TransitionExposes & {
+  /** @internal Same-domain Trigger cancels automatic focus for the current open epoch. */
+  __cancelPendingEntry: ExposeMethod<() => void>;
+  alignmentDiagnostic: ExposeState<string>;
   open: ExposeState<boolean>;
   focusFirst: ExposeMethod<() => void>;
   focusLast: ExposeMethod<() => void>;
@@ -101,13 +105,16 @@ export type SelectContentExposes = TransitionExposes & {
   focusPrev: ExposeMethod<() => void>;
   focusSelected: ExposeMethod<() => void>;
 };
-export type SelectContentStateHandles = { open: State<boolean> };
+export type SelectContentStateHandles = { open: State<boolean>; alignmentFull: State<boolean> };
 export type SelectContentAsHookContract = {
   state: SelectContentStateHandles;
   asHooks: { asTransition: TransitionHandles };
 };
 export type SelectContentHandles = {
-  stateHandles: { open: BorrowedStateHandle<boolean, SelectContentProps> };
+  stateHandles: {
+    open: BorrowedStateHandle<boolean, SelectContentProps>;
+    alignmentFull: BorrowedStateHandle<boolean, SelectContentProps>;
+  };
   asTransition: TransitionHandles;
 };
 

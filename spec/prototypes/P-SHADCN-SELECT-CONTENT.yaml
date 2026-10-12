@@ -5,8 +5,8 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Select Content inherits Base listbox, focus, overlay, presence, position, keyboard, and dismissal behavior and adds a position prop, configured transition, and current surface.
 statement:
-  zh-CN: Shadcn Select Content 是 `P-BASE-SELECT-CONTENT` 之上的 direct part，保留 listbox a11y、roving focus、overlay/presence、position、keyboard 与 dismiss behavior，增加 position enum、150/100ms Transition 配置及当前 popover animations/surface。`asChild` 明确不提供。
-  en: Shadcn Select Content is a direct part over `P-BASE-SELECT-CONTENT`. It retains listbox accessibility, roving focus, overlay and presence, positioning, keyboard, and dismissal behavior while adding a position enum, 150/100ms Transition configuration, and the current popover animations and surface. `asChild` is explicitly unavailable.
+  zh-CN: Shadcn Select Content 是 `P-BASE-SELECT-CONTENT` 之上的 direct part，保留 listbox a11y、roving focus、overlay/presence、position、keyboard 与 dismiss behavior，增加 position enum、150/0ms Transition 配置及当前 popover animations/surface。`asChild` 明确不提供。
+  en: Shadcn Select Content is a direct part over `P-BASE-SELECT-CONTENT`. It retains listbox accessibility, roving focus, overlay and presence, positioning, keyboard, and dismissal behavior while adding a position enum, 150/0ms Transition configuration, and the current popover animations and surface. `asChild` is explicitly unavailable.
 criteria:
   - id: P-SHADCN-SELECT-CONTENT-UPSTREAM-IDENTITY
     text:
@@ -52,28 +52,22 @@ criteria:
   - id: P-SHADCN-SELECT-CONTENT-POSITION-PROP
     text:
       {
-        zh-CN: position 接受 item-aligned/popper、默认 item-aligned；当前只保证参数存在，不保证官方 popper conditional projection 已完成。,
-        en: Position accepts item-aligned and popper and defaults to item-aligned; the current guarantee covers parameter presence but not completed upstream popper conditional projection.,
+        zh-CN: position 接受 item-aligned/popper，Shadcn 默认 item-aligned、align=center、sideOffset=0，Base 默认 popper；完整 Surface/Viewport/ItemText 组合使用已固定 Radix 2.2.6 对齐协议，零新 parts 的旧组合暂保留 edge 兼容并不计入上游对齐。,
+        en: Position accepts item-aligned and popper; Shadcn defaults to item-aligned,
+        align=center and sideOffset=0 while Base defaults to popper. Complete Surface/Viewport/ItemText composition uses the pinned Radix 2.2.6 alignment protocol. Legacy composition with none of the new parts temporarily retains edge compatibility and does not count as upstream alignment.,
       }
   - id: P-SHADCN-SELECT-CONTENT-TRANSITION
     text:
       {
-        zh-CN: Content 必须配置 enterDuration=150ms、leaveDuration=100ms 并在 leave 完成前保留 portal surface。,
-        en: Content must configure enterDuration=150ms and leaveDuration=100ms and retain the portaled surface until leave completion.,
+        zh-CN: 固定源 Radix Select 在 committed open=false 时立即撤下 Content；此前 100ms leave 是偏离。Shadcn 配置 enterDuration=150ms、leaveDuration=0ms、interrupt=reverse，并在真实关闭请求返回后仅当最新 Root 仍 closed 且 phase=leaving 时 complete。beforeLeave 同步撤回关闭必须保持最新 open；拒绝受控关闭不运行关闭路径；真实 closed 后重开必须 fresh cold preparing。,
+        en: Pinned Radix Select withdraws Content immediately when committed open becomes false; the former 100ms leave was a deviation. Shadcn configures enterDuration=150ms,
+        leaveDuration=0ms and interrupt=reverse. After the committed close operation returns,
+        complete only if the latest Root remains closed and phase is leaving. A synchronous beforeLeave reversal preserves the latest open; refused controlled close never runs this path; reopening after actual closed requires fresh cold preparation.,
       }
   - id: P-SHADCN-SELECT-CONTENT-CURRENT-VISUAL-SURFACE
     text:
-      {
-        zh-CN: Content 必须提供当前 anchor-width/height constraints、overflow、popover、border、padding、shadow、outline 与 duration tokens。,
-        en: Content must provide the current anchor-width and height constraints,
-        overflow,
-        popover,
-        border,
-        padding,
-        shadow,
-        outline,
-        and duration tokens.,
-      }
+      zh-CN: 完整组合中 Content 仅承担内部定位 frame，Surface 通过 Base 合法 part hook 承担 paint，Viewport 承担滚动与 p-1，ItemText 提供实际文字锚点。Surface 使用固定源 min-w-[8rem]、rounded-md、border、shadow-md、popover 与 flex column/max-h-full；Viewport relative flex-1 min-h-0 overflow-hidden overflow-y-auto。popper 才使用 trigger-size 变量与四向 translate-1。parts 从公开 select 入口提供，不能在 Template 内嵌 PrototypeRef；私有 JSON 视觉 Context 只投射当前 phase/side/position，不驱动 presence。
+      en: In complete composition Content owns only the internal positioning frame, Surface uses the legal Base part hook to own paint, Viewport owns scrolling and p-1, and ItemText supplies the actual text anchor. Surface uses pinned min-w-[8rem], rounded-md, border, shadow-md, popover and flex column/max-h-full; Viewport uses relative flex-1 min-h-0 overflow-hidden overflow-y-auto. Only popper uses trigger-size variables and directional translate-1. Parts are exported from the public select entry and cannot nest PrototypeRef in Template. Private JSON visual Context projects phase/side/position only and never drives presence.
   - id: P-SHADCN-SELECT-CONTENT-OPEN-AND-SIDE-STYLES
     text:
       {
@@ -107,10 +101,13 @@ openQuestions:
         and exact motion parity converge?,
       }
     context:
-      zh-CN: intentional deviation 是省略 `asChild`。upstream 固定 Portal、Viewport、上下 scroll buttons，默认 align=center，并仅在 popper 时使用 side translation 与 trigger size vars；当前没有这些 parts/conditional rules，且总是使用 anchor width、p-1。data-slot、transform-origin、Radix vars、forwarding 与 motion timing 也待核对。
-      en: The intentional deviation is omission of `asChild`. Upstream fixes Portal, Viewport, and scroll buttons, defaults align=center, and uses side translation and trigger-size variables only for popper; current code lacks those parts and conditional rules and always uses anchor width and p-1. Data-slot, transform-origin, Radix variables, forwarding, and motion timing also need review.
+      zh-CN: intentional deviation 是省略 `asChild`。upstream 固定 Portal、Viewport、上下 scroll buttons，默认 align=center，并仅在 popper 时使用 side translation 与 trigger size vars；本次提供真实 Surface/Viewport/ItemText 与完整组合绑定；七处 www 迁移清单尚未全完成，旧零 parts 组合仍是 edge 兼容。上下 scroll buttons 尚未实现。data-slot、transform-origin、Radix vars、forwarding 与 motion timing 也待核对。
+      en: The intentional deviation is omission of `asChild`. Upstream fixes Portal, Viewport, and scroll buttons, defaults align=center, and uses side translation and trigger-size variables only for popper; This slice supplies actual Surface/Viewport/ItemText and the complete binding. The seven-site www migration remains incomplete and zero-part legacy compositions still use edge compatibility. Scroll buttons remain unimplemented. Data-slot, transform-origin, Radix variables, forwarding, and motion timing also need review.
     blocks: [shadcn select content parity roadmap]
 sources:
+  - path: packages/prototypes/shadcn/src/select/surface.proto.ts
+  - path: packages/prototypes/shadcn/src/select/viewport.proto.ts
+  - path: packages/prototypes/shadcn/src/select/item-text.proto.ts
   - path: packages/prototypes/shadcn/src/select/content.proto.ts
   - path: packages/prototypes/shadcn/test/select.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/select.tsx
