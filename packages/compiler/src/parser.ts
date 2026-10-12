@@ -174,6 +174,8 @@ class Frontend {
         if (!assignable(returnType, declared)) rejectNode(node.type, 'PUI1006', 'Function return does not satisfy its declared type.');
         returnType = declared;
       }
+      if (context === 'setup' && returnType !== 'function' && returnType !== 'void')
+        rejectNode(node, 'PUI1006', 'Setup must return a render function or void.');
       return { parameters, body, phase, context, returnType, span: sourceSpan(node) };
     } finally { this.context = previousContext; }
   }
@@ -420,7 +422,7 @@ class Frontend {
           this.activeHooks.delete(id);
         }
         this.requirements.add('authored-hook');
-        return { kind: 'authored-hook', hookId: id, type: 'void', span };
+        return { kind: 'authored-hook', hookId: id, type: 'authored-result', span };
       } else rejectNode(node, 'PUI1004', `Unadmitted call ${name}.`);
     } else if (ts.isPropertyAccessExpression(node.expression)) {
       // Resolve the public path against the single operation table, including renderer.read.*.

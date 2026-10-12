@@ -118,6 +118,39 @@ export { __default as named };`;
     }
   });
 
+  it('rejects non-render setup results for a Prototype or authored hook', () => {
+    const files = {
+      'invalid.proto.ts': `import {defineAsHook} from '@proto.ui/core';
+export const asInvalid = defineAsHook({name:'as-invalid',setup(){return {illegal:true};}});`,
+    };
+    for (const source of [
+      `import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'invalid',setup(){return null;}});`,
+      `import {definePrototype} from '@proto.ui/core';
+import {asInvalid} from './invalid.proto';
+export default definePrototype({name:'caller',setup(){asInvalid();}});`,
+    ]) {
+      expect(parsePrototype(source, { files })).toMatchObject({
+        ok: false,
+        diagnostics: [{ code: 'PUI1006' }],
+      });
+    }
+  });
+
+  it('rejects an authored caller result as an entry setup render', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+import {asPart} from './part.proto';
+export default definePrototype({name:'caller',setup(){return asPart();}});`;
+    const files = {
+      'part.proto.ts': `import {defineAsHook} from '@proto.ui/core';
+export const asPart = defineAsHook({name:'as-part',setup(){}});`,
+    };
+    expect(parsePrototype(source, { files })).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI1006' }],
+    });
+  });
+
   it('analyzes one static authored-hook call into the caller source graph', () => {
     const caller = `import {definePrototype} from '@proto.ui/core';
 import {asButton as applyButton} from './button.proto';

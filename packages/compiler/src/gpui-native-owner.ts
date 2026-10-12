@@ -10,7 +10,8 @@ import { gpuiNativeImageSource } from './gpui-native-image';
 import { gpuiNativePositioningSource } from './gpui-native-positioning';
 import { gpuiNativeOverlaySource } from './gpui-native-overlay';
 
-export const gpuiNativeOwnerSource = String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
+export const gpuiNativeOwnerSource =
+  String.raw`use std::{cell::{Cell, RefCell}, collections::{BTreeMap, BTreeSet, VecDeque}, rc::{Rc, Weak}};
 use serde_json::{Value as Json, Map};
 use gpui::{prelude::*, AnyElement, App, Bounds, FocusHandle, Pixels, Window, div, canvas};
 pub type OwnerRef = Rc<RefCell<Owner>>;
@@ -107,12 +108,29 @@ impl Owner {
         let owner=Rc::new(RefCell::new(Self{phase:"setup",disposed:false,present:true,mounted:false,epoch:0,dirty:true,native_drive:None,window_id:None,update_requested:false,projection_revision:0,committed_revision:0,projection:Value::Undefined,renderer:Value::Undefined,raw_value:Value::json(raw.clone()),props_value:Value::Undefined,raw,props:Json::Object(Map::new()),schemas:BTreeMap::new(),defaults:BTreeMap::new(),states:BTreeMap::new(),exposes:BTreeMap::new(),declared_events:BTreeSet::new(),emitted:Vec::new(),lifecycle:BTreeMap::new(),watchers:Vec::new(),listeners:Vec::new(),contributions:Vec::new(),patch:Vec::new(),suppressed:BTreeSet::new(),parent,providers:BTreeMap::new(),subscriptions:Vec::new(),context_accepts,props_accepts,prop_valid,previous_valid:BTreeMap::new(),default_layers:Vec::new(),focusable:false,focus_disabled:false,focus_requested:false,focus_entry:true,focused:false,suppress_click:false,accessible:false,accessible_role:Value::Undefined,accessible_states:BTreeMap::new(),accessible_actions:BTreeSet::new(),name_content:false,slot:Vec::new(),bounds:None,native_hitbox:None,native_translation:gpui::Point::default(),theme:"shadcn".into(),dark:false,style_vocabulary,modules:Modules::default(),press:NativePress::default(),press_global:false,window_input_observed:None}));
         OWNERS.with(|all|all.borrow_mut().push(Rc::downgrade(&owner)));owner
     }
-    pub fn finish(owner:&OwnerRef,renderer:Value){owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);life(owner,"created");}
+    pub fn finish(owner:&OwnerRef,renderer:Value){owner.borrow_mut().renderer=renderer;owner.borrow_mut().phase="idle";resolve_props(owner);accessible_alive(owner);
+        if let Err(failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||life(owner,"created"))){
+            attempt_failed_created_cleanup(||Self::failed_created_cleanup(owner));
+            std::panic::resume_unwind(failure);
+        }
+    }
+    // C-LIFECYCLE-0002-J: only acquired synchronous created failure owns this recovery.
+    fn failed_created_cleanup(owner:&OwnerRef){
+        if owner.borrow().disposed{return}
+        attempt_failed_created_cleanup(||begin_native_detach(owner));
+        for release in NATIVE_VIEW_RELEASES{attempt_failed_created_cleanup(||release(owner));}
+        let callbacks=owner.borrow().lifecycle.get("before-dispose").cloned().unwrap_or_default();
+        for callback in callbacks{attempt_failed_created_cleanup(||invoke(owner,"before-dispose",&callback,vec![capability(&Rc::downgrade(owner))]));}
+        attempt_failed_created_cleanup(||Self::failed_created_retire(owner));
+        attempt_failed_created_cleanup(topology_refresh);
+        attempt_failed_created_cleanup(poll_state_watchers);
+    }
     pub fn project(owner:&OwnerRef){
         let needed={let o=owner.borrow();o.present&&!o.disposed&&(matches!(o.projection,Value::Undefined)||o.update_requested)};
         if !needed{return}
         let renderer={let mut o=owner.borrow_mut();o.update_requested=false;o.phase="render";o.renderer.clone()};
-        let result=renderer.call(vec![capability(&Rc::downgrade(owner))]);
+        // C-CORE-SYNTAX-0004-C: void setup projects one anonymous slot.
+        let result=match renderer{Value::Undefined=>slot(),other=>other.call(vec![capability(&Rc::downgrade(owner))])};
         assert!(valid_template_children(&result),"invalid template children");
         let mut o=owner.borrow_mut();o.projection=result;o.projection_revision+=1;o.phase="idle";
     }
@@ -123,12 +141,49 @@ impl Owner {
         life(owner,event);
     }
     pub fn dispose(owner:&OwnerRef){if owner.borrow().disposed{return}detach_native_view(owner);
-        life(owner,"before-dispose");let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.bounds=None;o.native_hitbox=None;o.projection=Value::Undefined;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.modules=Modules::default();drop(o);topology_refresh();poll_state_watchers();
+        life(owner,"before-dispose");Self::retire(owner);topology_refresh();poll_state_watchers();
+    }
+    fn retire(owner:&OwnerRef){
+        let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.projection=Value::Undefined;o.renderer=Value::Undefined;o.watchers.clear();o.listeners.clear();o.contributions.clear();o.subscriptions.clear();o.providers.clear();o.exposes.clear();o.states.clear();o.lifecycle.clear();o.slot.clear();o.modules=Modules::default();
+    }
+    // Failed-created retirement extracts owned values inside one short borrow so
+    // one destructor panic cannot abort the remaining terminal release attempts;
+    // each drop runs under its own guard after the borrow ends. Reachable
+    // acquired resources (including module-held tasks/leases inside Modules)
+    // therefore retire even when a callback capture's destructor panics.
+    fn failed_created_retire(owner:&OwnerRef){
+            let extracted={let mut o=owner.borrow_mut();o.disposed=true;o.present=false;o.mounted=false;o.bounds=None;o.native_hitbox=None;
+            (std::mem::take(&mut o.projection),std::mem::take(&mut o.renderer),std::mem::take(&mut o.watchers),std::mem::take(&mut o.listeners),std::mem::take(&mut o.contributions),std::mem::take(&mut o.subscriptions),std::mem::take(&mut o.providers),std::mem::take(&mut o.exposes),std::mem::take(&mut o.states),std::mem::take(&mut o.lifecycle),std::mem::take(&mut o.slot),std::mem::take(&mut o.modules))};
+        let(projection,renderer,watchers,listeners,contributions,subscriptions,providers,exposes,states,lifecycle,slot,modules)=extracted;
+        attempt_failed_created_cleanup(||drop(projection));
+        attempt_failed_created_cleanup(||drop(renderer));
+        attempt_failed_created_cleanup(||drop(watchers));
+        attempt_failed_created_cleanup(||drop(listeners));
+        attempt_failed_created_cleanup(||drop(contributions));
+        attempt_failed_created_cleanup(||drop(subscriptions));
+        attempt_failed_created_cleanup(||drop(providers));
+        attempt_failed_created_cleanup(||drop(exposes));
+        attempt_failed_created_cleanup(||drop(states));
+        attempt_failed_created_cleanup(||drop(lifecycle));
+        attempt_failed_created_cleanup(||drop(slot));
+        attempt_failed_created_cleanup(||drop(modules));
     }
 }
+fn attempt_failed_created_cleanup<T>(operation:impl FnOnce()->T){
+    if let Err(failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||drop(operation()))){
+        if let Err(drop_failure)=std::panic::catch_unwind(std::panic::AssertUnwindSafe(||drop(failure))){
+            // Quarantine the destructor's failure: dropping it could panic again and skip retirement.
+            std::mem::forget(drop_failure);
+        }
+    }
+}
+const NATIVE_VIEW_RELEASES:[fn(&OwnerRef);4]=[text_detach,image_detach,positioning_detach,overlay_detach];
+fn begin_native_detach(owner:&OwnerRef)->bool{
+    let mut o=owner.borrow_mut();let mounted=o.mounted;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted
+}
 pub fn detach_native_view(owner:&OwnerRef){
-    let mounted={let mut o=owner.borrow_mut();let mounted=o.mounted;o.mounted=false;o.bounds=None;o.native_hitbox=None;o.modules.a11y_node=None;o.modules.a11y_frame=0;o.modules.a11y_bindings=0;o.committed_revision=0;o.press=NativePress::default();mounted};
-    text_detach(owner);image_detach(owner);positioning_detach(owner);overlay_detach(owner);
+    let mounted=begin_native_detach(owner);
+    for release in NATIVE_VIEW_RELEASES{release(owner);}
     if mounted{topology_refresh();life(owner,"unmounted");poll_state_watchers();}
 }
 struct PhaseGuard{owner:OwnerWeak,previous:&'static str}
@@ -534,4 +589,13 @@ pub fn global_key_up(event:&gpui::KeyUpEvent,window:&mut Window,cx:&mut App){
     for owner in &owners{let end={let mut owner=owner.borrow_mut();if owner.press.key.as_deref()==key.as_deref(){owner.press.key.take().is_some()}else{false}};if end{prevented|=dispatch_root_route(owner,"press.end",press_fields("press.end",&fields));}}
     if prevented{window.prevent_default();cx.stop_propagation();}drive_owners(window,cx);
 }
-` + gpuiNativeModulesSource + gpuiNativeTopologySource + gpuiNativeTableSource + gpuiNativeBoundarySource + gpuiNativeScrollSource + gpuiNativeTextSource + gpuiNativeImageSource + gpuiNativePositioningSource + gpuiNativeOverlaySource;
+` +
+  gpuiNativeModulesSource +
+  gpuiNativeTopologySource +
+  gpuiNativeTableSource +
+  gpuiNativeBoundarySource +
+  gpuiNativeScrollSource +
+  gpuiNativeTextSource +
+  gpuiNativeImageSource +
+  gpuiNativePositioningSource +
+  gpuiNativeOverlaySource;

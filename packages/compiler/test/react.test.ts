@@ -91,6 +91,56 @@ describe('checked IR to React runtime-backed source', () => {
     });
   });
 
+  it('rejects non-render setup results in caller-supplied entry and authored-hook IR', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+import {asPart} from './part.proto';
+export default definePrototype({name:'caller',setup(){asPart();}});`;
+    const files = {
+      'part.proto.ts': `import {defineAsHook} from '@proto.ui/core';
+export const asPart = defineAsHook({name:'as-part',setup(){}});`,
+    };
+    for (const target of ['entry', 'hook']) {
+      const parsed = parsePrototype(source, { files });
+      if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+      const setup = target === 'entry' ? parsed.value.setup : parsed.value.hooks[0].setup;
+      setup.returnType = 'null';
+      setup.body.push({
+        kind: 'return',
+        value: { kind: 'literal', value: null, type: 'null', span: setup.span },
+        span: setup.span,
+      });
+      const rejection = { ok: false, diagnostics: [{ code: 'PUI2002', category: 'invalid-ir' }] };
+      expect(validateIR(parsed.value)).toMatchObject(rejection);
+      expect(emitReact(parsed.value)).toMatchObject(rejection);
+    }
+  });
+
+  it('rejects an authored caller result recorded as void in entry setup IR', () => {
+    const source = `import {definePrototype} from '@proto.ui/core';
+import {asPart} from './part.proto';
+export default definePrototype({name:'caller',setup(){asPart();}});`;
+    const files = {
+      'part.proto.ts': `import {defineAsHook} from '@proto.ui/core';
+export const asPart = defineAsHook({name:'as-part',setup(){}});`,
+    };
+    const parsed = parsePrototype(source, { files });
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    const statement = parsed.value.setup.body[0];
+    if (statement.kind !== 'effect' || statement.expression.kind !== 'authored-hook')
+      throw new Error('Expected the authored call');
+    parsed.value.setup.body = [
+      {
+        kind: 'return',
+        value: { ...statement.expression, type: 'void' },
+        span: statement.span,
+      },
+    ];
+    expect(emitReact(parsed.value)).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI2002', category: 'invalid-ir' }],
+    });
+  });
+
   it('rejects incompatible State write values at both checked-IR entrypoints', () => {
     const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
       export default definePrototype({name:'typed-state-write',setup(def){

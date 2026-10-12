@@ -4,6 +4,7 @@ import type { ProtoPhase } from '@proto.ui/core';
 import type { PropsSpecMap } from '@proto.ui/types';
 
 import { PropsModuleImpl } from '../../src/impl';
+import { RAW_PROPS_SOURCE_CAP } from '../../src/caps';
 
 function createModule<P extends Record<string, any>>() {
   const caps = {
@@ -279,4 +280,58 @@ describe('props: resolved watchers (T-PROPS-0007)', () => {
 
     expect(order).toEqual(['key-1', 'all-1', 'key-2', 'all-2']);
   });
+
+  it.each([new Error('acquired source release failed'), undefined])(
+    'retires queued watcher work when the acquired source release throws %s',
+    (releaseFailure) => {
+      let raw = { value: 0 };
+      let invalidate: (() => void) | undefined;
+      let releases = 0;
+      const source = {
+        get: () => raw,
+        subscribe(listener: () => void) {
+          invalidate = listener;
+          return () => {
+            releases++;
+            invalidate = undefined;
+            throw releaseFailure;
+          };
+        },
+      };
+      const caps = {
+        onChange: (_fn: (epoch: number) => void) => {},
+        has: (key: unknown) => key === RAW_PROPS_SOURCE_CAP,
+        get: (key: unknown) => (key === RAW_PROPS_SOURCE_CAP ? source : undefined),
+      } as any;
+      const pm = new PropsModuleImpl<{ value: number }>(caps, 'release-failure');
+      const observed: number[] = [];
+      pm.define({ value: { type: 'number' } });
+      pm.watchKeys(['value'], (_run, next) => observed.push(next.value));
+      pm.syncFromHost();
+
+      raw = { value: 1 };
+      invalidate!();
+      pm.syncFromHost();
+      executeResolvedTasks(pm);
+      expect(observed).toEqual([1]);
+
+      raw = { value: 2 };
+      invalidate!();
+      pm.syncFromHost();
+      let caught = false;
+      let thrown: unknown;
+      try {
+        pm.dispose();
+      } catch (error) {
+        caught = true;
+        thrown = error;
+      }
+      expect(caught).toBe(true);
+      expect(thrown).toBe(releaseFailure);
+      executeResolvedTasks(pm);
+      expect(observed).toEqual([1]);
+      expect(() => pm.dispose()).not.toThrow();
+      expect(releases).toBe(1);
+    }
+  );
 });

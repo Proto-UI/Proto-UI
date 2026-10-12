@@ -79,8 +79,11 @@ portable analyzable input → [future Compiler] → host artifacts
 | `vue-source-v1` | Vue 3.5.31 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
 | `vue2-source-v1` | Vue 2.6.14 | Target framework 加生成的 native helper；不依赖 Proto UI Runtime/Adapter |
 | `web-component-source-v1` | Custom Elements v1 | 生成的 native helper；不依赖 framework 或 Proto UI Runtime/Adapter |
+| `gpui-source-v1` | 固定 Git revision `62e5991dd0f0c8a3af8d5e7e9c4652490d468db8` 的 GPUI | GPUI 加生成的共享 Rust support crate；不依赖 Proto UI Runtime/Adapter |
 
-GPUI、Qt、Flutter profile identity **尚未实现**，选择它们会拒绝编译。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **4**、target profile identity 与生成 helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+Qt、Flutter profile identity **尚未实现**，选择它们会拒绝编译。GPUI 仍是私有 source profile，不是已编目的 official Adapter，也不代表完整 native conformance。实际测试的 target version 不构成对其他版本的 compatibility 承诺。Restricted source admission、semantic IR version **5**、target profile identity 与生成 Web helper ABI **1** 是不同的私有 compatibility 维度；IR 和 helper 文件都不是 public plugin SPI。
+
+GPUI source owner 按定义将 `void` setup 解释为 host Root 内部的匿名 slot（`C-CORE-SYNTAX-0004-C`、`C-TEMPLATE-0001`）。包含 State 和公开 increment method 的纯作者定义在没有 Web global 的环境中完成编译，并在真实 headless GPUI window 中运行。同一生成组件按顺序接入两个 native slot child，method 调用前后保留实际测得的布局框，并通过公开 State 观察到 0 到 1 的变化。这份有界证据不代表 OS-visible rendering、assistive-technology fidelity 或完整 compiler/Prototype equivalence；缺失 native style declaration 会生成 diagnostic，而不会替换成 Web 行为。
 
 Frontend 读取限定 root 内的完整 TypeScript source graph，不 import 或 evaluate 作者程序。准入范围包括 checked data、primitive/control-flow callback、static helper 和 authored hook、显式 update、named State 与 typed expose、Props/Context read/watch、单 Root template、serializable Rule condition/style intent，以及已声明的 native event/focus/accessibility 切片。Unsupported syntax、phase/capture authority、operation、target version 和缺失 host capability 会生成 diagnostic，不会静默 bridge。
 
@@ -105,7 +108,7 @@ Compilation 先规划 source、supporting helper、standard source map 与 hash/
 
 ### 已执行证据与成本测量
 
-私有验证在四个 native profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。
+私有验证在四个 Web source profile 的独立物理 consumer 中编译、挂载三 component/Context assembly，type-check 生成的 TypeScript/helper，重建并执行 consumer-owned template edit，拒绝引入的 syntax error，并验证物理 dependency tree 与 artifact hash；这些 Web consumer 测量不执行 GPUI。Vue 2 的 JavaScript component body 不执行 `checkJs`。另有 offline private-package rehearsal，在普通 Node 中执行打包 Compiler 的 JavaScript API，并记录 tarball integrity、实际 bundled compile-time input、dependency、BOM 和 license；这不等于 official package 或 public declaration-file release。
 
 真实 Chromium 分别核对原 React Adapter、runtime-backed output 与 native React output 的 explicit update/detach/reattach，以及有限 Rule/style/AX/input 程序。Missing-update 与 duplicate-activation mutant 被实际观察拒绝。独立的生成 callback 真实错误堆栈通过 standard executable-to-generated、generated-to-author 两段 map 精确定位；不宣称自动 map composition。
 
