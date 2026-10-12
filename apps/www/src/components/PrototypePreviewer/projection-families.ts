@@ -357,6 +357,9 @@ const SHADCN_MANIFEST = {
         'shadcn-select-trigger',
         'shadcn-select-value',
         'shadcn-select-content',
+        'shadcn-select-surface',
+        'shadcn-select-viewport',
+        'shadcn-select-item-text',
         'shadcn-select-item',
       ],
       parts: {
@@ -376,6 +379,18 @@ const SHADCN_MANIFEST = {
         item: {
           basePrototypeId: 'P-BASE-SELECT-ITEM',
           prototypeId: 'shadcn-select-item',
+        },
+        surface: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'shadcn-select-surface',
+        },
+        viewport: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'shadcn-select-viewport',
+        },
+        itemText: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'shadcn-select-item-text',
         },
       },
     },
@@ -1155,7 +1170,7 @@ const BOOTSTRAP_232_MANIFEST = {
       recipePrototypeIds: ['bootstrap-2-3-2-button'],
       parts: { root: { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' } },
     },
-    'checkbox': {
+    checkbox: {
       baseFamilyId: 'P-BASE-CHECKBOX',
       recipeId: 'demo-bootstrap-2-3-2-checkbox',
       recipePrototypeIds: ['bootstrap-2-3-2-checkbox-root', 'bootstrap-2-3-2-checkbox-indicator'],
@@ -1167,7 +1182,7 @@ const BOOTSTRAP_232_MANIFEST = {
         },
       },
     },
-    'switch': {
+    switch: {
       baseFamilyId: 'P-BASE-SWITCH',
       recipeId: 'demo-bootstrap-2-3-2-switch',
       recipePrototypeIds: ['bootstrap-2-3-2-switch-root', 'bootstrap-2-3-2-switch-thumb'],
@@ -1179,7 +1194,7 @@ const BOOTSTRAP_232_MANIFEST = {
         },
       },
     },
-    'toggle': {
+    toggle: {
       baseFamilyId: 'P-BASE-TOGGLE',
       recipeId: 'demo-bootstrap-2-3-2-toggle',
       recipePrototypeIds: ['bootstrap-2-3-2-toggle'],
@@ -1187,7 +1202,7 @@ const BOOTSTRAP_232_MANIFEST = {
         root: { basePrototypeId: 'P-BASE-TOGGLE', prototypeId: 'bootstrap-2-3-2-toggle' },
       },
     },
-    'input': {
+    input: {
       baseFamilyId: 'P-BASE-INPUT',
       recipeId: 'demo-bootstrap-2-3-2-input',
       recipePrototypeIds: ['bootstrap-2-3-2-input-root'],
@@ -1195,7 +1210,7 @@ const BOOTSTRAP_232_MANIFEST = {
         root: { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'bootstrap-2-3-2-input-root' },
       },
     },
-    'textarea': {
+    textarea: {
       baseFamilyId: 'P-BASE-TEXTAREA',
       recipeId: 'demo-bootstrap-2-3-2-textarea',
       recipePrototypeIds: ['bootstrap-2-3-2-textarea-root'],
@@ -1203,7 +1218,7 @@ const BOOTSTRAP_232_MANIFEST = {
         root: { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'bootstrap-2-3-2-textarea-root' },
       },
     },
-    'separator': {
+    separator: {
       baseFamilyId: 'P-BASE-SEPARATOR',
       recipeId: 'demo-bootstrap-2-3-2-separator',
       recipePrototypeIds: ['bootstrap-2-3-2-separator-root'],
@@ -1505,7 +1520,13 @@ export function validateProjectionFamilyManifest(manifest: ProjectionFamilyManif
       );
     }
 
-    const requiredPartIds = REQUIRED_PART_IDS[familyId as ProjectionComponentId];
+    const commonPartIds = REQUIRED_PART_IDS[familyId as ProjectionComponentId];
+    const requiredPartIds = commonPartIds && [
+      ...commonPartIds,
+      ...(projectionFamilyId === 'shadcn' && familyId === 'select'
+        ? ['surface', 'viewport', 'itemText']
+        : []),
+    ];
     if (!requiredPartIds) {
       throw new Error(
         `[PrototypePreviewer] projection family ${projectionFamilyId} family ${familyId} has no declared part contract.`
@@ -1644,4 +1665,24 @@ export function resolveProjectionRecipe(
     );
   }
   return match;
+}
+
+/** Complete public Select composition where the family declares it. */
+export type ProjectionSelectParts = Readonly<
+  Record<'root' | 'trigger' | 'value' | 'content' | 'item', string> &
+    Partial<Record<'surface' | 'viewport' | 'itemText', string>>
+>;
+
+export function resolveProjectionSelectParts(family: ProjectionFamilyId): ProjectionSelectParts {
+  const partIds = [
+    'root',
+    'trigger',
+    'value',
+    'content',
+    'item',
+    ...(family === 'shadcn' ? ['surface', 'viewport', 'itemText'] : []),
+  ];
+  return Object.fromEntries(
+    partIds.map((id) => [id, resolveProjectionPart(family, 'select', id).prototypeId])
+  ) as ProjectionSelectParts;
 }

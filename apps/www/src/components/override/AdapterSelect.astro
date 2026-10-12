@@ -41,15 +41,27 @@ const options = [
     <SelectContent
       data-site-select-content
       data-site-control-family={family}
-      data-position="popper"
-      data-align="end"
+      data-position={family === 'brutalist' ? 'popper' : undefined}
+      data-align={family === 'brutalist' ? 'end' : undefined}
     >
       {
-        options.map((opt) => (
-          <SelectItem data-value={opt.value} data-text-value={opt.label}>
-            {opt.label}
-          </SelectItem>
-        ))
+        family === 'shadcn' ? (
+          <wc-shadcn-select-surface>
+            <wc-shadcn-select-viewport>
+              {options.map((opt) => (
+                <SelectItem data-value={opt.value} data-text-value={opt.label}>
+                  <wc-shadcn-select-item-text>{opt.label}</wc-shadcn-select-item-text>
+                </SelectItem>
+              ))}
+            </wc-shadcn-select-viewport>
+          </wc-shadcn-select-surface>
+        ) : (
+          options.map((opt) => (
+            <SelectItem data-value={opt.value} data-text-value={opt.label}>
+              {opt.label}
+            </SelectItem>
+          ))
+        )
       }
     </SelectContent>
   </SelectRoot>

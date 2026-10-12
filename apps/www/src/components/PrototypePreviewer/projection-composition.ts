@@ -14,6 +14,8 @@ import {
 import {
   PROJECTION_FAMILY_MANIFESTS,
   resolveProjectionPart,
+  resolveProjectionSelectParts,
+  type ProjectionSelectParts,
   type ProjectionComponentId,
   type ProjectionFamilyId,
   type ProjectionFamilyManifest,
@@ -506,7 +508,7 @@ function createSelectControl<Value extends string>(
   id: ProjectionControlId,
   currentValue: Value,
   config: ProjectionControlConfig<Value>,
-  selectParts: Readonly<Record<'root' | 'trigger' | 'value' | 'content' | 'item', string>>,
+  selectParts: ProjectionSelectParts,
   coordinateAttrs: DemoBoxAttrs,
   themeSurfaceStyle: DemoSurfaceStyle | undefined,
   locked: boolean
@@ -559,29 +561,51 @@ function createSelectControl<Value extends string>(
         ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
     },
-    // The website owns control density, through the Adapter's normalized surface channel.
+    // The consumer owns available width; Shadcn keeps its Prototype density.
     surfaceStyle: {
       width: '100%',
       minWidth: '0',
       maxWidth: '100%',
-      minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
-      paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
+      ...(selectParts.surface
+        ? {}
+        : {
+            minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.25rem))',
+            paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
+          }),
       ...(config.wrapValue ? { height: 'auto' } : {}),
     },
     children: [value],
   });
+  const items = config.options.map((option) =>
+    createProjectedProto(selectParts.item, coordinateAttrs, themeSurfaceStyle, {
+      props: {
+        value: option.value,
+        textValue: option.label,
+        disabled: option.disabled === true,
+      },
+      children: selectParts.itemText
+        ? [
+            createProjectedProto(selectParts.itemText, coordinateAttrs, themeSurfaceStyle, {
+              children: [option.label],
+            }),
+          ]
+        : [option.label],
+    })
+  );
   const content = createProjectedProto(selectParts.content, coordinateAttrs, themeSurfaceStyle, {
-    props: { position: 'popper', align: 'start' },
-    children: config.options.map((option) =>
-      createProjectedProto(selectParts.item, coordinateAttrs, themeSurfaceStyle, {
-        props: {
-          value: option.value,
-          textValue: option.label,
-          disabled: option.disabled === true,
-        },
-        children: [option.label],
-      })
-    ),
+    ...(selectParts.surface ? {} : { props: { position: 'popper', align: 'start' } }),
+    children:
+      selectParts.surface && selectParts.viewport
+        ? [
+            createProjectedProto(selectParts.surface, coordinateAttrs, themeSurfaceStyle, {
+              children: [
+                createProjectedProto(selectParts.viewport, coordinateAttrs, themeSurfaceStyle, {
+                  children: items,
+                }),
+              ],
+            }),
+          ]
+        : items,
   });
   const root = createProjectedProto(selectParts.root, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.root,
@@ -706,15 +730,7 @@ export function createProjectionComposition(
   const coordinateAttrs = createCoordinateAttrs(options);
   const runtimeTabs =
     controlIds.includes('runtime') && options.controls.runtime.presentation === 'tabs';
-  const selectParts = Object.fromEntries(
-    (controlIds.some((id) => id !== 'runtime' || !runtimeTabs)
-      ? (['root', 'trigger', 'value', 'content', 'item'] as const)
-      : []
-    ).map((partId) => [
-      partId,
-      resolveProjectionPart(options.projectionFamilyId, 'select', partId).prototypeId,
-    ])
-  ) as Record<'root' | 'trigger' | 'value' | 'content' | 'item', string>;
+  const selectParts = resolveProjectionSelectParts(options.projectionFamilyId);
   const tabsParts = Object.fromEntries(
     (runtimeTabs ? (['root', 'list', 'trigger', 'content'] as const) : []).map((partId) => [
       partId,

@@ -4,13 +4,18 @@ import type { DemoNode, DemoSetupContext, DemoSpec } from '../PrototypePreviewer
 import type { ProjectionContentRecipe } from '../PrototypePreviewer/projection-composition';
 import {
   resolveProjectionPart,
+  resolveProjectionSelectParts,
   type ProjectionFamilyId,
 } from '../PrototypePreviewer/projection-families';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 
 export const HOMEPAGE_SHOWCASE_ID = 'website-component-gallery';
 
-type Settings = { view: 'list' | 'board' | 'calendar'; summary: boolean; note: string };
+type Settings = {
+  view: 'list' | 'board' | 'calendar';
+  summary: boolean;
+  note: string;
+};
 const defaults = (): Settings => ({ view: 'list', summary: false, note: '' });
 const equal = (left: Settings, right: Settings) =>
   left.view === right.view && left.summary === right.summary && left.note === right.note;
@@ -63,12 +68,13 @@ export function createHomepageShowcase(
   isCurrentGeneration: () => boolean = isActive
 ): { demo: DemoSpec; recipe: ProjectionContentRecipe } {
   const copy = COPY[locale === 'en' ? 'en' : 'zh-cn'];
+  const selectParts = resolveProjectionSelectParts(family);
   const parts = {
-    select: resolveProjectionPart(family, 'select', 'root').prototypeId,
-    trigger: resolveProjectionPart(family, 'select', 'trigger').prototypeId,
-    value: resolveProjectionPart(family, 'select', 'value').prototypeId,
-    content: resolveProjectionPart(family, 'select', 'content').prototypeId,
-    item: resolveProjectionPart(family, 'select', 'item').prototypeId,
+    select: selectParts.root,
+    trigger: selectParts.trigger,
+    value: selectParts.value,
+    content: selectParts.content,
+    item: selectParts.item,
     switch: resolveProjectionPart(family, 'switch', 'root').prototypeId,
     thumb: resolveProjectionPart(family, 'switch', 'thumb').prototypeId,
     textarea: resolveProjectionPart(family, 'textarea', 'root').prototypeId,
@@ -79,6 +85,20 @@ export function createHomepageShowcase(
     className: 'home-settings__label',
     children: [text],
   });
+  const selectItems: DemoNode[] = Object.entries(copy.views).map(([value, text]) => ({
+    kind: 'proto',
+    prototypeId: parts.item,
+    props: { value, textValue: text },
+    children: selectParts.itemText
+      ? [
+          {
+            kind: 'proto',
+            prototypeId: selectParts.itemText,
+            children: [text],
+          },
+        ]
+      : [text],
+  }));
   const initial = defaults();
   const gallery = createHomepageGalleryParts(
     family,
@@ -90,7 +110,14 @@ export function createHomepageShowcase(
   const result: { demo: DemoSpec; recipe: ProjectionContentRecipe } = {
     recipe: {
       id: HOMEPAGE_SHOWCASE_ID,
-      prototypeIds: [...new Set([...Object.values(parts), ...gallery.ids, `${family}-text-root`])],
+      prototypeIds: [
+        ...new Set([
+          ...Object.values(parts),
+          ...Object.values(selectParts),
+          ...gallery.ids,
+          `${family}-text-root`,
+        ]),
+      ],
       rootPrototypeId: parts.select,
     },
     demo: {
@@ -143,13 +170,27 @@ export function createHomepageShowcase(
                           {
                             kind: 'proto',
                             prototypeId: parts.content,
-                            props: { position: 'popper', align: 'start' },
-                            children: Object.entries(copy.views).map(([value, text]) => ({
-                              kind: 'proto',
-                              prototypeId: parts.item,
-                              props: { value, textValue: text },
-                              children: [text],
-                            })),
+                            ...(selectParts.surface
+                              ? {}
+                              : {
+                                  props: { position: 'popper', align: 'start' },
+                                }),
+                            children:
+                              selectParts.surface && selectParts.viewport
+                                ? [
+                                    {
+                                      kind: 'proto',
+                                      prototypeId: selectParts.surface,
+                                      children: [
+                                        {
+                                          kind: 'proto',
+                                          prototypeId: selectParts.viewport,
+                                          children: selectItems,
+                                        },
+                                      ],
+                                    },
+                                  ]
+                                : selectItems,
                           },
                         ],
                       },
