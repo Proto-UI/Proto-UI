@@ -2,6 +2,7 @@ import { beforeAll, afterAll, describe, expect, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { switchRoot, switchThumb } from '../src/switch';
+import { switchRoot as baseRoot, switchThumb as baseThumb } from '../../base/src/switch';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 const recipeSheet = document.createElement('style');
 beforeAll(() => {
@@ -14,8 +15,190 @@ afterAll(() => recipeSheet.remove());
 
 AdaptToWebComponent(switchRoot as any);
 AdaptToWebComponent(switchThumb as any);
+AdaptToWebComponent(baseRoot as any);
+AdaptToWebComponent(baseThumb as any);
+const settle = async () => {
+  for (let i = 0; i < 8; i++) await Promise.resolve();
+};
+const makeRoot = (size?: 'default' | 'sm', name = 'shadcn-switch-root') => {
+  const root = document.createElement(name) as any;
+  if (size !== undefined) setElementProps(root, { size });
+  return root;
+};
+const makeThumb = () => document.createElement('shadcn-switch-thumb') as any;
+const expectSize = (thumb: Element, size: 'default' | 'sm') => {
+  expect(styleContains(thumb, size === 'sm' ? 'size-3' : 'size-4')).toBe(true);
+  expect(styleContains(thumb, size === 'sm' ? 'size-4' : 'size-3')).toBe(false);
+};
 
 describe('prototypes/shadcn: switch', () => {
+  it.each(['default', 'sm'] as const)(
+    'initial %s size preserves value and sizes every Thumb',
+    async (size) => {
+      const root = makeRoot(size),
+        a = makeThumb(),
+        b = makeThumb();
+      const changes: unknown[] = [];
+      root.addEventListener('checkedChange', (event: CustomEvent) => changes.push(event.detail));
+      root.append(a, b);
+      document.body.append(root);
+      await settle();
+      expect(root.getExposes().getVisualSize()).toBe(size);
+      expect(styleContains(root, size === 'sm' ? 'h-3.5' : 'h-[1.15rem]')).toBe(true);
+      expect(styleContains(root, size === 'sm' ? 'w-6' : 'w-8')).toBe(true);
+      expectSize(a, size);
+      expectSize(b, size);
+      expect(root.getExposes().checked.get()).toBe(false);
+      expect(changes).toEqual([]);
+      root.remove();
+      await settle();
+    }
+  );
+
+  it('uses the default for an initially invalid size', async () => {
+    const root = makeRoot(),
+      thumb = makeThumb();
+    setElementProps(root, { size: 'unknown' });
+    root.append(thumb);
+    document.body.append(root);
+    await settle();
+    expectSize(thumb, 'default');
+    expect(root.getExposes().getVisualSize()).toBe('default');
+    root.remove();
+    await settle();
+  });
+
+  it('updates default → sm → default without value events or competing dimensions', async () => {
+    const root = makeRoot(),
+      thumb = makeThumb();
+    root.append(thumb);
+    document.body.append(root);
+    await settle();
+    root.click();
+    await settle();
+    const changes: unknown[] = [];
+    root.addEventListener('checkedChange', (event: CustomEvent) => changes.push(event.detail));
+    for (const size of ['sm', 'default', 'sm', undefined] as const) {
+      setElementProps(root, size === undefined ? {} : { size });
+      await settle();
+      const expected = size ?? 'default';
+      expect(
+        styleContains(thumb, expected === 'sm' ? 'size-3' : 'size-4'),
+        `size=${size} root=${root.getExposes().getVisualSize()} tokens=${thumb.getAttribute('data-pui-style')}`
+      ).toBe(true);
+      expect(root.getExposes().getVisualSize()).toBe(expected);
+      expect(styleContains(root, expected === 'sm' ? 'w-8' : 'w-6')).toBe(false);
+      expect(styleContains(root, expected === 'sm' ? 'h-[1.15rem]' : 'h-3.5')).toBe(false);
+      expect(root.getExposes().checked.get()).toBe(true);
+      expect(thumb.getExposes().isChecked()).toBe(true);
+      expect(styleContains(thumb, 'translate-x-[calc(100%_-_2px)]')).toBe(true);
+    }
+    setElementProps(root, { size: 'sm' });
+    await settle();
+    for (const size of [undefined, 'unknown']) {
+      setElementProps(root, { size });
+      await settle();
+      expectSize(thumb, 'sm');
+      expect(root.getExposes().getVisualSize()).toBe('sm');
+    }
+    setElementProps(root, {});
+    await settle();
+    expectSize(thumb, 'default');
+    expect(changes).toEqual([]);
+    root.remove();
+    await settle();
+  });
+
+  it('isolates nested and sibling Shadcn domains and intervening Base Roots', async () => {
+    const outer = makeRoot('sm'),
+      inner = makeRoot('default'),
+      base = makeRoot(undefined, 'base-switch-root'),
+      sibling = makeRoot('default');
+    const outerThumb = makeThumb(),
+      innerThumb = makeThumb(),
+      baseOwned = makeThumb(),
+      siblingThumb = makeThumb();
+    const neutral = document.createElement('base-switch-thumb');
+    outer.append(outerThumb, neutral, inner);
+    inner.append(innerThumb, base);
+    base.append(baseOwned);
+    sibling.append(siblingThumb);
+    document.body.append(outer, sibling);
+    await settle();
+    expectSize(outerThumb, 'sm');
+    expectSize(innerThumb, 'default');
+    expectSize(baseOwned, 'default');
+    expectSize(siblingThumb, 'default');
+    expect(styleContains(neutral, 'size-3')).toBe(false);
+    expect(base.getExposes().getVisualSize).toBeUndefined();
+    setElementProps(inner, { size: 'sm' });
+    setElementProps(outer, { size: 'default' });
+    await settle();
+    expectSize(innerThumb, 'sm');
+    expectSize(outerThumb, 'default');
+    expectSize(baseOwned, 'default');
+    setElementProps(outer, { size: 'sm' });
+    await settle();
+    expectSize(baseOwned, 'default');
+    expectSize(siblingThumb, 'default');
+    outer.remove();
+    sibling.remove();
+    await settle();
+  });
+
+  it('reparents live Thumbs using current owner and ignores old outer visual invalidations', async () => {
+    const outer = makeRoot('sm'),
+      small = makeRoot('sm'),
+      base = makeRoot(undefined, 'base-switch-root'),
+      thumb = makeThumb();
+    outer.append(base, thumb);
+    document.body.append(outer, small);
+    await settle();
+    expectSize(thumb, 'sm');
+    base.append(thumb);
+    await settle();
+    expectSize(thumb, 'default');
+    for (const size of ['default', 'sm'] as const) {
+      setElementProps(outer, { size });
+      await settle();
+      expectSize(thumb, 'default');
+    }
+    small.append(thumb);
+    await settle();
+    expectSize(thumb, 'sm');
+    setElementProps(small, { size: 'default' });
+    await settle();
+    expectSize(thumb, 'default');
+    outer.remove();
+    small.remove();
+    await settle();
+  });
+
+  it('raw composition permits omitted and replacement parts without a second size owner', async () => {
+    const root = makeRoot('sm');
+    document.body.append(root);
+    await settle();
+    expect(root.children).toHaveLength(0);
+    expect(root.getExposes().getVisualSize()).toBe('sm');
+    const first = makeThumb();
+    root.append(first);
+    await settle();
+    expectSize(first, 'sm');
+    const replacement = makeThumb();
+    first.replaceWith(replacement);
+    await settle();
+    expectSize(replacement, 'sm');
+    replacement.remove();
+    await settle();
+    setElementProps(root, { size: 'default' });
+    await settle();
+    const restored = makeThumb();
+    root.append(restored);
+    await settle();
+    expectSize(restored, 'default');
+    root.remove();
+    await settle();
+  });
   it('keeps root and thumb as named direct entries', () => {
     expect(switchRoot.name).toBe('shadcn-switch-root');
     expect(switchThumb.name).toBe('shadcn-switch-thumb');

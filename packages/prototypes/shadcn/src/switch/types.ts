@@ -1,3 +1,4 @@
+import type { ExposeMethod } from '@proto.ui/core';
 import type {
   SwitchRootAsHookContract,
   SwitchRootExposes,
@@ -9,9 +10,16 @@ import type {
   SwitchThumbStateHandles,
 } from '@proto.ui/prototypes-base/switch';
 
-export interface ShadcnSwitchRootProps extends SwitchRootProps {}
+export type ShadcnSwitchSize = 'default' | 'sm';
 
-export type ShadcnSwitchRootExposes = SwitchRootExposes;
+export interface ShadcnSwitchRootProps extends SwitchRootProps {
+  size?: ShadcnSwitchSize;
+}
+
+export type ShadcnSwitchRootExposes = SwitchRootExposes & {
+  /** Family visual capability; consumed only through the actual Switch-domain Root. */
+  getVisualSize: ExposeMethod<() => ShadcnSwitchSize>;
+};
 
 export type ShadcnSwitchRootStateHandles = SwitchRootStateHandles;
 

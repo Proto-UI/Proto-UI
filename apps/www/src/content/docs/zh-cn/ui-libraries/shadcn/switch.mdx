@@ -7,4 +7,8 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 当前页面展示 Proto UI 中 `shadcn` 风格的 `switch` 条目。
 
+在 Root 上设置 `size="sm"` 使用小尺寸；省略 `size` 或设置 `size="default"` 使用默认尺寸。Thumb 从实际所属的逻辑 Switch Root 派生尺寸，没有独立 size prop。尺寸变化不会改变 checked 值或发出 `checkedChange`。
+
+[固定 New York 源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 使用 rem：默认 Root 为 2rem × 1.15rem，Thumb 为 1rem；小尺寸 Root 为 1.5rem × 0.875rem，Thumb 为 0.75rem。checked 位移为实际 Thumb 宽度减 2px。这些源码尺寸不代表跨目标渲染已验收；完整上游 transition 通道与 API 一致性仍未完成。
+
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />

@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Switch Root identity, Base inheritance, Root/Thumb behavior, the replaceable default-Thumb preset, current styles, intentional asChild omission, and its bounded upstream compatibility claim.
 cases:
+  - id: T-SHADCN-SWITCH-0001-CASE-VISUAL-SIZE
+    title: Family-only default and sm sizes follow the actual logical Root across updates and remounts
+    covers:
+      [
+        P-SHADCN-SWITCH-VISUAL-SIZE-PROP,
+        P-SHADCN-SWITCH-VISUAL-SIZE-OWNER,
+        P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE,
+      ]
+    expectation: shadcn-switch-size-is-current-owner-bound-without-value-events
   - id: T-SHADCN-SWITCH-0001-CASE-IDENTITY-AND-INHERITANCE
     title: Root is a direct unofficial projection that inherits Base Switch
     covers:
@@ -34,6 +43,24 @@ cases:
     covers: [P-SHADCN-SWITCH-COMPONENT-PRESET, D-COMPONENT-PRESET-MATERIALIZATION-0001-F]
     expectation: shadcn-switch-generated-facades-support-context-safe-default-replacement-and-omission
 implementations:
+  - id: t-shadcn-switch-0001-size-lifecycle
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-size-lifecycle.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-VISUAL-SIZE]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Deterministic Runtime tests cover repeated detach/remount, current-owner rebinding, subscription count and parent-first terminal disposal; no rendered or native-input acceptance.
+  - id: t-shadcn-switch-0001-size-generated-preset
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-size-preset.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-0001-CASE-VISUAL-SIZE]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Executes the actual generated WC facade against real prototypes for default, replacement and omission; other adapters and packed consumers retain separate gates.
   - id: prototypes-shadcn-switch-new-york-browser
     kind: module-test
     status: planned
@@ -42,7 +69,7 @@ implementations:
     consumesCases: [T-SHADCN-SWITCH-0001-CASE-FAMILY-AND-VISUALS]
     exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
     notes:
-      - New York default root-16/root-32 browser evidence must be collected afresh for document and shadow surfaces; source/token assertions are not rendered geometry or native activation acceptance.
+      - New York default/sm root-16/root-32 browser evidence must be collected afresh for document and shadow surfaces; source/token assertions are not rendered geometry or native activation acceptance.
   - id: prototypes-shadcn-switch-root-contract
     kind: module-test
     status: planned
@@ -50,6 +77,7 @@ implementations:
     required: true
     consumesCases:
       [
+        T-SHADCN-SWITCH-0001-CASE-VISUAL-SIZE,
         T-SHADCN-SWITCH-0001-CASE-IDENTITY-AND-INHERITANCE,
         T-SHADCN-SWITCH-0001-CASE-FAMILY-AND-VISUALS,
         T-SHADCN-SWITCH-0001-CASE-COMPATIBILITY-SUBSET,
@@ -95,6 +123,9 @@ verifies:
     - id: P-SHADCN-SWITCH
       anchors:
         [
+          P-SHADCN-SWITCH-VISUAL-SIZE-PROP,
+          P-SHADCN-SWITCH-VISUAL-SIZE-OWNER,
+          P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE,
           P-SHADCN-SWITCH-UPSTREAM-IDENTITY,
           P-SHADCN-SWITCH-BASE-INHERITANCE,
           P-SHADCN-SWITCH-CURRENT-BASE-DEVIATIONS,
@@ -124,4 +155,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Specify content-pinned base-nova default geometry and state palettes; retain semantic ownership and planned fresh evidence.
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Add owner-bound default/sm size cases for initial and dynamic sizing, mixed Switch domains, composition and lifecycle; rendered evidence remains planned.
 tags: [prototype, shadcn, switch, root, delta, compatibility, test]

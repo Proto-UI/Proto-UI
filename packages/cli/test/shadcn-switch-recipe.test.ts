@@ -6,76 +6,108 @@ import {
 } from '../src/services/proto-style-css';
 import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
 
-// Source units, not a layout-engine assertion. Actual used geometry is a separate browser gate.
-describe('fixed Base Nova Switch recipe delivery', () => {
-  it('preserves px track, rem Thumb and percentage travel in document and split delivery', async () => {
-    const tokens = (await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch')).map(
-      (token) => {
-        if (typeof token !== 'string')
-          throw new TypeError('Expected a collected style token string');
-        return token;
-      }
-    );
-    for (const token of ['h-[18.4px]', 'w-[32px]', 'size-4', 'p-0', 'rounded-full']) {
+// Fixed source: shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b,
+// apps/v4/registry/new-york-v4/ui/switch.tsx, blob c45932afe4e484c900aa916e81d0e0d67137bedc.
+// Source units only; actual used geometry is a separate browser gate.
+const collected = async () =>
+  (await collectProtoStyleTokens('packages/prototypes/shadcn/src/switch')).map((token) => {
+    if (typeof token !== 'string') throw new TypeError('Expected a collected style token string');
+    return token;
+  });
+describe('fixed New York Switch recipe delivery', () => {
+  it('delivers both source size recipes and percentage-minus-px travel from real collected tokens', async () => {
+    const tokens = await collected();
+    for (const token of [
+      'h-[1.15rem]',
+      'w-8',
+      'size-4',
+      'h-3.5',
+      'w-6',
+      'size-3',
+      'p-0',
+      'rounded-full',
+      'shadow-xs',
+    ]) {
       expect(tokens).toContain(token);
       expect(SHADCN_STYLE_TOKENS).toContain(token);
     }
     for (const token of [
-      'h-[1.15rem]',
-      'w-8',
+      'h-[18.4px]',
+      'w-[32px]',
       'h-6',
       'w-11',
       'size-5',
       'px-0.5',
-      'shadow-xs',
       'shadow-lg',
       'duration-200',
       'scale-[0.98]',
-    ]) {
+    ])
       expect(tokens).not.toContain(token);
-    }
-    const documentCss = renderProtoStyleTokenCss(tokens);
-    const splitCss = renderProtoShadowSplitStyleArtifact(tokens).cssText;
-    for (const css of [documentCss, splitCss]) {
+    for (const css of [
+      renderProtoStyleTokenCss(tokens),
+      renderProtoShadowSplitStyleArtifact(tokens).cssText,
+    ]) {
       for (const declaration of [
-        'height: 18.4px;',
-        'width: 32px;',
+        'height: 1.15rem;',
+        'width: 2rem;',
         'width: 1rem;',
         'height: 1rem;',
+        'height: 0.875rem;',
+        'width: 1.5rem;',
+        'width: 0.75rem;',
+        'height: 0.75rem;',
         '--pui-translate-x: calc(100% - 2px);',
         'border-radius: 9999px;',
         'box-sizing: border-box;',
-      ]) {
+      ])
         expect(css).toContain(declaration);
-      }
-      // Reduced motion is now consumed by the shared runtime projector; this
-      // source recipe must not install a second CSS timing writer.
+      // Existing Runtime remains the timing writer; no full transition-all claim.
       expect(css).not.toContain('transition-property:');
     }
-    expect(splitCss).toContain(':host([data-pui-split-root-style~="h-[18.4px]"])');
-    expect(splitCss).toContain(':host([data-pui-split-root-style~="w-[32px]"])');
+    const splitCss = renderProtoShadowSplitStyleArtifact(tokens).cssText;
+    for (const token of ['h-[1.15rem]', 'w-8', 'h-3.5', 'w-6'])
+      expect(splitCss).toContain(`:host([data-pui-split-root-style~="${token}"])`);
   });
 
   it.each([16, 32])(
-    'does not convert source px dimensions to rem at root font %ipx',
-    (rootFont) => {
-      // Declaration-level normalization: a 32px root font doubles size-4 but not the track.
-      // Flex shrink, physical overflow and actual rendered travel require real layout evidence.
-      const css = renderProtoStyleTokenCss([
-        'h-[18.4px]',
-        'w-[32px]',
-        'size-4',
-        'translate-x-[calc(100%_-_2px)]',
-      ]);
-      const trackHeight = Number(css.match(/height: (18\.4)px;/)?.[1]);
-      const trackWidth = Number(css.match(/width: (32)px;/)?.[1]);
-      const declaredThumb = Number(css.match(/width: (1)rem;/)?.[1]) * rootFont;
-      expect([trackWidth, trackHeight, declaredThumb]).toEqual([32, 18.4, rootFont]);
-      if (rootFont === 16) {
-        expect(declaredThumb - 2).toBe(14);
-        expect((trackHeight - 2 - declaredThumb) / 2).toBeCloseTo(0.2);
-      } else {
-        expect(declaredThumb).toBeGreaterThan(trackWidth - 2);
+    'preserves rem dimensions and the fixed 2px travel deduction at root font %ipx',
+    async (rootFont) => {
+      const tokens = await collected();
+      for (const [size, height, width, thumb, expected] of [
+        [
+          'default',
+          'h-[1.15rem]',
+          'w-8',
+          'size-4',
+          [rootFont * 2, rootFont * 1.15, rootFont, rootFont - 2],
+        ],
+        [
+          'sm',
+          'h-3.5',
+          'w-6',
+          'size-3',
+          [rootFont * 1.5, rootFont * 0.875, rootFont * 0.75, rootFont * 0.75 - 2],
+        ],
+      ] as const) {
+        for (const token of [height, width, thumb]) expect(tokens, size).toContain(token);
+        const dimension = (token: string, property: string) => {
+          const css = renderProtoStyleTokenCss(tokens.filter((entry) => entry === token));
+          const rem = css.match(new RegExp(`${property}: ([0-9.]+)rem;`));
+          expect(rem, `${size} ${token} must preserve source rem`).not.toBeNull();
+          return Number(rem![1]) * rootFont;
+        };
+        const thumbWidth = dimension(thumb, 'width');
+        expect([
+          dimension(width, 'width'),
+          dimension(height, 'height'),
+          thumbWidth,
+          thumbWidth - 2,
+        ]).toEqual(expected);
+        expect(
+          renderProtoStyleTokenCss(
+            tokens.filter((token) => token === 'translate-x-[calc(100%_-_2px)]')
+          )
+        ).toContain('--pui-translate-x: calc(100% - 2px);');
       }
     }
   );
