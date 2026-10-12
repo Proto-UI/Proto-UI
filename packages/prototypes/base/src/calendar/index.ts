@@ -324,6 +324,7 @@ function setupDay(def: DefHandle<CalendarDayProps, CalendarDayExposes>) {
   a11y.name(dateLabel);
   a11y.state('current', current);
   a11y.state('selected', selected);
+  a11y.action('activate');
   a11y.state('hidden', hidden);
   def.rule({
     when: (w) => w.state(hidden).eq(true),
