@@ -75,6 +75,11 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   let snapshot = initialContext;
   let published = initialContext;
   let currentRun: any = null;
+  // A state/Context notification may retire and remount this same instance.
+  // Run-handle identity alone cannot distinguish the old continuation.
+  let viewEpoch = 0;
+  let selectionSequence = 0;
+  const ownsView = (epoch: number) => currentRun !== null && epoch === viewEpoch;
 
   const resolveTextValue = (run: any, nextValue: string): string => {
     if (!nextValue) return '';
@@ -131,7 +136,8 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   });
 
   submitOpenRequest = (run, request) => {
-    if (snapshot.disabled) return false;
+    if (!currentRun || snapshot.disabled) return false;
+    const epoch = viewEpoch;
     snapshot = {
       ...snapshot,
       activeValue: request.open ? snapshot.value : '',
@@ -141,8 +147,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     };
     if (!snapshot.controlledOpen) {
       open?.set(request.open, 'reason: select root accepted open request');
+      if (!ownsView(epoch)) return true;
     }
     syncContext(run);
+    if (!ownsView(epoch)) return true;
     run.expose.emit('openChange', {
       open: request.open,
       reason: request.reason,
@@ -152,7 +160,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   };
 
   const submitValueRequest = (run: any, request: SelectValueRequest): boolean => {
-    if (snapshot.disabled) return false;
+    if (!currentRun || snapshot.disabled) return false;
+    const epoch = viewEpoch;
+    const selection = ++selectionSequence;
+    const isCurrent = () => ownsView(epoch) && selection === selectionSequence;
     snapshot = {
       ...snapshot,
       activeValue: request.value,
@@ -161,12 +172,15 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     };
     if (!snapshot.controlledValue) {
       value.set(request.value, 'reason: select root accepted value request');
+      if (!isCurrent()) return true;
       textValue.set(
         request.textValue || resolveTextValue(run, request.value),
         'reason: select root accepted selected text'
       );
+      if (!isCurrent()) return true;
     }
     syncContext(run);
+    if (!isCurrent()) return true;
     run.expose.emit('valueChange', request);
     return true;
   };
@@ -203,13 +217,17 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   });
 
   def.lifecycle.onMounted((run) => {
+    viewEpoch++;
     currentRun = run;
     refreshSelectedText(run);
   });
 
-  def.lifecycle.onUnmounted(() => {
+  const retireView = () => {
+    viewEpoch++;
     currentRun = null;
-  });
+  };
+  def.lifecycle.onUnmounted(retireView);
+  def.lifecycle.onBeforeDispose(retireView);
 
   def.props.watch(['value', 'disabled', 'closeOnSelect'], (run, next) => {
     const controlledValue = run.props.isProvided('value');
