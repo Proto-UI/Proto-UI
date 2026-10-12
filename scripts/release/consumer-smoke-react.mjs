@@ -14,10 +14,16 @@ import { spawnSync } from 'node:child_process';
 
 import { getAllPackages, ROOT_DIR, selectPackages } from './lib.mjs';
 import { readVersion } from './version-utils.mjs';
+import { runNoStylesConsumer } from './consumer-smoke-no-styles.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURE_DIR = join(__dirname, 'consumer-smoke', 'react-vite');
-const RELEASE_ROOTS = ['@proto.ui/cli', '@proto.ui/adapter-react', '@proto.ui/prototypes-shadcn'];
+const RELEASE_ROOTS = [
+  '@proto.ui/cli',
+  '@proto.ui/adapter-react',
+  '@proto.ui/prototypes-shadcn',
+  '@proto.ui/prototypes-base',
+];
 
 const args = parseArgs(process.argv.slice(2));
 const workDir = args.workDir ?? mkdtempSync(join(tmpdir(), 'proto-ui-react-consumer-'));
@@ -94,7 +100,7 @@ try {
   });
 
   const cli = join(consumerDir, 'node_modules', '@proto.ui', 'cli', 'bin', 'proto-ui.js');
-  run(process.execPath, [cli, 'init', '--yes', '--no-interactive', '--no-styles'], {
+  run(process.execPath, [cli, 'init', '--yes', '--no-interactive'], {
     cwd: consumerDir,
   });
   run(
@@ -112,8 +118,18 @@ try {
     });
   }
 
+  for (const helper of ['consumer-smoke-css.mjs', 'consumer-smoke-css.d.mts']) {
+    cpSync(join(__dirname, helper), join(consumerDir, helper));
+  }
+  // Browser/build input keeps the exact CLI entry, including cascade layers.
+  const mainPath = join(consumerDir, 'src', 'main.tsx');
+  writeFileSync(
+    mainPath,
+    `import './styles/proto-ui-style.css';\n${readFileSync(mainPath, 'utf8')}`
+  );
   run('npm', ['run', 'build'], { cwd: consumerDir });
   run('npm', ['run', 'smoke'], { cwd: consumerDir });
+  runNoStylesConsumer({ consumerDir, cli, fixtureDir: __dirname, run });
 
   succeeded = true;
   console.log(

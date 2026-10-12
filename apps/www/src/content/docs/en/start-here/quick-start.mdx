@@ -99,6 +99,8 @@ your-project/
 
 The CLI manages generated files; do not edit them by hand. Use `--prototypes brutalist` when initializing a project that should use the Brutalist preset, or `--no-styles` when the application will provide the complete semantic token surface itself.
 
+For the 0.3 source candidate in PR #872, including the new Shadcn Switch static-hit implementation, `--no-styles` disables generation; styled prototypes still need their complete theme and structural token rules loaded before mounting. Semantic variables alone are insufficient. Shadcn Switch requires a positioned principal box from its structural CSS, plus the host's supported inset-only hit ring. This candidate explicitly rejects missing structural CSS, changing the historical zero-CSS mount behavior. This describes the source candidate, not the currently documented stable `@latest` 0.2.0 release. Base Switch remains usable without application-provided theme/token CSS; applications using `--no-styles` supply the complete styling closure themselves.
+
 ## Import the styles once
 
 Import the generated stylesheet from the application entry:

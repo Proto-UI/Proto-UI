@@ -98,6 +98,8 @@ your-project/
 
 生成文件由 CLI 管理，请勿手动修改。如果项目要使用 Brutalist preset，请在初始化时加上 `--prototypes brutalist`；如果应用会自行提供完整的语义 token surface，可使用 `--no-styles`。
 
+本 PR（#872）的 0.3 源码候选引入新的 Shadcn Switch static-hit 实现。在该候选中，`--no-styles` 只禁用生成；有样式的原型仍要求在挂载前加载完整主题和结构 token 规则，仅有语义变量并不足够。Shadcn Switch 需要结构 CSS 提供已定位的主盒，并要求 host 支持 inset-only hit ring。该候选会对缺失结构 CSS 明确报错，改变历史零 CSS 挂载行为；此处描述源码候选，并非本页当前介绍的稳定 `@latest` 0.2.0。Base Switch 仍可在不由应用提供主题/token CSS 的情况下使用；使用 `--no-styles` 的应用需自行提供完整样式闭包。
+
 ## 引入一次样式
 
 从应用入口导入生成的样式表：

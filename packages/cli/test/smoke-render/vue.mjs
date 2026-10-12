@@ -22,8 +22,10 @@
 // asFocusable via asButton, so the focus module stamps `tabindex="0"`, and
 // shadcn's feedback.style stamps the `group/button` token chain.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import { assertPositionedSwitch, loadConsumerStyles } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
+loadConsumerStyles(document, { evidenceName: 'cli-vue' });
 
 const Vue = await import('vue');
 const { ShadcnButton, ShadcnDialogContent, ShadcnDialogRoot, ShadcnSwitch, BaseImageRoot } =
@@ -85,6 +87,7 @@ presetApp.mount(presetContainer);
 await flush();
 
 const switchRoot = presetContainer.querySelector('.consumer-switch');
+assertPositionedSwitch(switchRoot, 'vue smoke');
 const switchThumb = switchRoot?.firstElementChild;
 if (
   switchRoot?.getAttribute('aria-checked') !== 'true' ||
@@ -94,6 +97,14 @@ if (
   !switchThumb.hasAttribute('data-checked')
 ) {
   throw new Error('vue smoke: Switch preset did not mount a state-driven default Thumb');
+}
+switchRoot.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+await flush();
+if (
+  switchRoot.getAttribute('aria-checked') !== 'false' ||
+  switchThumb.hasAttribute('data-checked')
+) {
+  throw new Error('vue smoke: Switch click did not update Root and Thumb');
 }
 const closeIcon = document.body.querySelector('.consumer-dialog-content [aria-label="Close"]');
 if (!closeIcon) {
