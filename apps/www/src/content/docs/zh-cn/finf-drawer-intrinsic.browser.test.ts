@@ -54,7 +54,7 @@ beforeAll(async () => {
     hashes,
     expectedCases: 64,
     oracle:
-      'same live composed DOM measured with vertical constraints temporarily released, exact restoration verified, then clamped by independently computed viewport cap; Base A; Shadcn/Neo max(0,A-6*rootText)',
+      'same live composed DOM measured with vertical constraints temporarily released, explicit scroll restoration and immediate/two-frame restoration checks, then clamped by independently computed viewport cap; Base A; Shadcn/Neo max(0,A-6*rootText)',
     phase: 'planned; individual terminal receipts prove execution',
   });
   if (process.env.GITHUB_ACTIONS !== 'true' || !process.env.CANDIDATE_SHA)
@@ -79,6 +79,169 @@ afterAll(async () => {
     await stopServer();
   }
 }, 60_000);
+
+function installDrawerInputTrace() {
+  const panel = document.querySelector<HTMLElement>('[data-demo-ref="intrinsic-content"]')!;
+  const handle = document.querySelector<HTMLElement>('[data-demo-ref="intrinsic-handle"]')!;
+  const entries: unknown[] = [];
+  let frame = 0,
+    stopped = false,
+    contact = false,
+    lastId = -1;
+  const label = (node: unknown) =>
+    node instanceof Element
+      ? {
+          tag: node.tagName,
+          ref: node.getAttribute('data-demo-ref'),
+          role: node.getAttribute('role'),
+        }
+      : null;
+  const rect = (node: Element) => {
+    const r = node.getBoundingClientRect();
+    return Object.fromEntries(
+      ['x', 'y', 'width', 'height', 'top', 'right', 'bottom', 'left'].map((key) => [
+        key,
+        (r as any)[key],
+      ])
+    );
+  };
+  const record = (stage: string, event?: Record<string, unknown>) => {
+    if (stopped || entries.length >= 2048) return;
+    const api = (window as any).__drawerFixtureApi;
+    const state = (part: string, key: string) => {
+      try {
+        return api.getExposes(`intrinsic-${part}`)?.[key]?.get?.();
+      } catch (error) {
+        return { error: String(error) };
+      }
+    };
+    const r = panel.getBoundingClientRect();
+    entries.push({
+      stage,
+      time: performance.now(),
+      panel: rect(panel),
+      handle: rect(handle),
+      heightPrecision: r.height.toPrecision(17),
+      widthPrecision: r.width.toPrecision(17),
+      style: {
+        height: panel.style.height,
+        minHeight: panel.style.minHeight,
+        maxHeight: panel.style.maxHeight,
+        translate: panel.style.translate,
+      },
+      connected: { panel: panel.isConnected, handle: handle.isConnected },
+      state: {
+        dragging: state('content', 'dragging'),
+        progress: state('content', 'dragProgress'),
+        valid: state('content', 'extentValid'),
+        open: state('root', 'open'),
+        handleDisabled: state('handle', 'disabled'),
+      },
+      requests: [...((window as any).__drawerFixture.requests ?? [])],
+      ...(event ? { event } : { captured: handle.hasPointerCapture(lastId) }),
+    });
+  };
+  const tick = () => {
+    frame = 0;
+    if (stopped || !contact) return;
+    record('frame');
+    frame = requestAnimationFrame(tick);
+  };
+  const listener = (event: Event) => {
+    const pointer = event as PointerEvent;
+    if (pointer.type === 'pointerdown') {
+      contact = true;
+      lastId = pointer.pointerId;
+      if (!frame) frame = requestAnimationFrame(tick);
+    }
+    // Snapshot the path during dispatch; composedPath is empty after dispatch.
+    const fact = {
+      type: pointer.type,
+      id: pointer.pointerId,
+      primary: pointer.isPrimary,
+      buttons: pointer.buttons,
+      button: pointer.button,
+      x: pointer.clientX,
+      y: pointer.clientY,
+      trusted: pointer.isTrusted,
+      defaultPrevented: pointer.defaultPrevented,
+      target: label(pointer.target),
+      hit: label(document.elementFromPoint(pointer.clientX, pointer.clientY)),
+      path: pointer
+        .composedPath()
+        .filter((node) => node instanceof Element)
+        .slice(0, 6)
+        .map((node) => ({
+          ...label(node),
+          captured: (node as Element).hasPointerCapture(pointer.pointerId),
+        })),
+    };
+    record('event', fact);
+    queueMicrotask(() =>
+      record('after-event', { ...fact, defaultPrevented: pointer.defaultPrevented })
+    );
+    if (pointer.type === 'pointerup' || pointer.type === 'pointercancel') {
+      contact = false;
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+    }
+  };
+  const types = [
+    'pointerdown',
+    'pointermove',
+    'pointerup',
+    'pointercancel',
+    'gotpointercapture',
+    'lostpointercapture',
+  ];
+  const registered: string[] = [];
+  const unsubscribe: (() => void)[] = [];
+  const stop = () => {
+    if (stopped) return;
+    stopped = true;
+    const errors: unknown[] = [];
+    const attempt = (cleanup: () => void) => {
+      try {
+        cleanup();
+      } catch (error) {
+        errors.push(error);
+      }
+    };
+    const pending = frame;
+    frame = 0;
+    if (pending) attempt(() => cancelAnimationFrame(pending));
+    for (const type of registered.splice(0))
+      attempt(() => document.removeEventListener(type, listener, true));
+    for (const off of unsubscribe.splice(0)) attempt(off);
+    if (errors.length) throw new AggregateError(errors, 'Drawer input trace cleanup failed');
+  };
+  // Publish cleanup before acquiring any resource, including synchronous subscriptions.
+  (window as any).__drawerInputTrace = { entries, stop };
+  try {
+    for (const type of types) {
+      document.addEventListener(type, listener, { capture: true, passive: true });
+      registered.push(type);
+    }
+    for (const key of ['dragging', 'dragProgress']) {
+      const exposed = (window as any).__drawerFixtureApi.getExposes('intrinsic-content')?.[key];
+      if (typeof exposed?.subscribe === 'function') {
+        const off = exposed.subscribe(() => record(`state-${key}`));
+        if (typeof off === 'function') unsubscribe.push(off);
+      }
+    }
+    record('installed');
+  } catch (error) {
+    try {
+      stop();
+    } catch (cleanupError) {
+      throw new AggregateError(
+        [error, cleanupError],
+        'Drawer input trace installation and cleanup failed'
+      );
+    }
+    throw error;
+  }
+}
 
 type Options = {
   family: Family;
@@ -193,9 +356,11 @@ async function mount(page: Page, options: Options) {
   await page.waitForTimeout(100);
   return panel;
 }
-// Measure the same real composed DOM before any input. The independent browser
+// Measure the same real composed DOM before the tested gestures. The browser
 // CSS sizing experiment removes only vertical constraints, then restores the
-// exact inline declaration. It creates no surrogate or second Drawer owner and
+// exact inline declaration and scroll positions. This is a reversible test-only
+// intervention: expanding the panel can synchronously clamp its scroll offset.
+// It creates no surrogate or second Drawer owner and
 // therefore preserves real slots, shadow trees, inheritance, fonts, and children.
 // Actual constrained geometry is sampled BEFORE this test-only intervention;
 // subsequent scroll/drag observations never repeat it or write scrollTop.
@@ -208,7 +373,29 @@ async function measureNatural(panel: Locator) {
     };
     const before = rect(),
       styleBefore = node.getAttribute('style');
+    // Include real ancestors, descendants, slotted light DOM and open shadow DOM.
+    // Do not clone custom elements or create another live Drawer owner.
+    const scrollNodes: Element[] = [];
+    const visit = (root: Document | ShadowRoot) => {
+      for (const child of root.querySelectorAll('*')) {
+        scrollNodes.push(child);
+        if (child.shadowRoot) visit(child.shadowRoot);
+      }
+    };
+    visit(document);
+    const readScroll = () =>
+      scrollNodes.map((item) => ({ top: item.scrollTop, left: item.scrollLeft }));
+    const scrollPositionsBefore = readScroll();
     const scrollBefore = { top: node.scrollTop, left: node.scrollLeft };
+    const deepFocus = () => {
+      const chain: Element[] = [];
+      let active = document.activeElement;
+      while (active) {
+        chain.push(active);
+        active = active.shadowRoot?.activeElement ?? null;
+      }
+      return chain;
+    };
     const readPublicState = () => {
       const api = (window as any).__drawerFixtureApi;
       return Object.fromEntries(
@@ -235,11 +422,30 @@ async function measureNatural(panel: Locator) {
     };
     const stateBefore = readPublicState();
     const requestsBefore = JSON.stringify((window as any).__drawerFixture.requests);
-    const focusBefore = document.activeElement;
+    const focusBefore = deepFocus();
     const css = getComputedStyle(node);
     const fontBefore = { family: css.fontFamily, size: css.fontSize, lineHeight: css.lineHeight };
+    const restoration = () => {
+      const focus = deepFocus();
+      const currentCss = getComputedStyle(node);
+      return {
+        styleRestored: node.getAttribute('style') === styleBefore,
+        focusRestored:
+          focus.length === focusBefore.length && focus.every((item, i) => item === focusBefore[i]),
+        state: readPublicState(),
+        requests: JSON.stringify((window as any).__drawerFixture.requests),
+        scroll: readScroll(),
+        font: {
+          family: currentCss.fontFamily,
+          size: currentCss.fontSize,
+          lineHeight: currentCss.lineHeight,
+        },
+      };
+    };
+    const restorationBefore = restoration();
     let natural = NaN,
       widthDuring = NaN;
+    let scrollDuring: ReturnType<typeof readScroll> = [];
     try {
       // Keep precisely the current inline-size and all content presentation.
       // Only the public CSS block-size constraints and opposing edge can change.
@@ -255,29 +461,49 @@ async function measureNatural(panel: Locator) {
       const free = rect();
       natural = free.height;
       widthDuring = free.width;
+      scrollDuring = readScroll();
     } finally {
       if (styleBefore === null) node.removeAttribute('style');
       else node.setAttribute('style', styleBefore);
+      // Restore the constrained scroll range BEFORE restoring offsets. A write
+      // while the panel is still expanded would itself be clamped back to zero.
+      rect();
+      const focus = deepFocus();
+      if (focus.length !== focusBefore.length || focus.some((item, i) => item !== focusBefore[i])) {
+        const target = focusBefore.at(-1);
+        if (target instanceof HTMLElement) target.focus({ preventScroll: true });
+      }
+      scrollNodes.forEach((item, i) => {
+        const saved = scrollPositionsBefore[i];
+        if (item.scrollTop !== saved.top || item.scrollLeft !== saved.left)
+          item.scrollTo({ top: saved.top, left: saved.left, behavior: 'instant' });
+      });
     }
     const immediate = rect();
+    const restorationImmediate = restoration();
     // Give the genuine host observers two rendering turns to prove that the
     // temporary test declarations did not become a persistent owner mutation.
     await new Promise<void>((resolve) =>
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
     );
+    const restorationSettled = restoration();
     const settled = rect(),
       restoredCss = getComputedStyle(node);
     (window as any).__drawerNatural = natural;
     return {
       natural,
       before,
+      scrollDuring,
+      restorationBefore,
+      restorationImmediate,
+      restorationSettled,
       widthDuring,
       immediate,
       settled,
       styleRestored: node.getAttribute('style') === styleBefore,
       scrollBefore,
       scrollAfter: { top: node.scrollTop, left: node.scrollLeft },
-      focusRestored: document.activeElement === focusBefore,
+      focusRestored: restorationSettled.focusRestored,
       stateBefore,
       stateAfter: readPublicState(),
       requestsBefore,
@@ -301,6 +527,7 @@ async function geometry(panel: Locator) {
       x: box.x,
       y: box.y,
       height: box.height,
+      maxHeight: parseFloat(css.maxHeight),
       bottom: box.bottom,
       natural,
       scrollHeight: node.scrollHeight,
@@ -330,12 +557,26 @@ function assertGeometry(actual: Awaited<ReturnType<typeof geometry>>, options: O
     );
   return { cap, expected };
 }
-async function visibleClose(page: Page, panel: Locator, long: boolean) {
+async function visibleClose(page: Page, panel: Locator, long: boolean, samples: unknown[]) {
   if (long) {
     expect(await panel.evaluate((node) => node.scrollHeight > node.clientHeight)).toBe(true);
     await panel.hover();
+    const beforeWheel = await panel.evaluate((node) => node.scrollTop);
+    // The open/focus path can already place the panel at its bottom. A positive
+    // offset alone would then falsely pass even if wheel scrolling was broken.
+    // Only native input changes offsets after the measurement transaction.
+    await page.mouse.wheel(0, -2400);
+    await expect.poll(() => panel.evaluate((node) => node.scrollTop)).toBe(0);
+    const afterUp = await panel.evaluate((node) => node.scrollTop);
+    if (beforeWheel > 0) expect(afterUp).toBeLessThan(beforeWheel);
     await page.mouse.wheel(0, 2400);
-    await expect.poll(() => panel.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+    await expect.poll(() => panel.evaluate((node) => node.scrollTop)).toBeGreaterThan(afterUp);
+    samples.push({
+      stage: 'native-wheel-scroll',
+      beforeWheel,
+      afterUp,
+      afterDown: await panel.evaluate((node) => node.scrollTop),
+    });
   }
   const close = page.locator('[data-demo-ref="intrinsic-close"]');
   await close.scrollIntoViewIfNeeded();
@@ -394,6 +635,8 @@ async function runCase(
       diagnostics.slice(diagnosticsBeforeMeasurement),
       'Sizing instrumentation must not create diagnostics'
     ).toEqual([]);
+    expect(naturalReceipt.restorationImmediate).toEqual(naturalReceipt.restorationBefore);
+    expect(naturalReceipt.restorationSettled).toEqual(naturalReceipt.restorationBefore);
     expect(naturalReceipt.styleRestored).toBe(true);
     expect(naturalReceipt.focusRestored).toBe(true);
     expect(naturalReceipt.stateAfter).toEqual(naturalReceipt.stateBefore);
@@ -430,6 +673,10 @@ async function runCase(
           const current = await geometry(panel);
           return Math.max(
             Math.abs(current.height - expected),
+            // Geometry alone can already match for short top panels. Require
+            // the new owner-written safety cap in the same readiness poll,
+            // retaining the original toBeCloseTo(cap, 4) precision below.
+            Math.abs(current.maxHeight - cap) < 0.00005 ? 0 : Infinity,
             Math.abs(
               (options.side === 'top' ? current.y : current.bottom) -
                 (options.side === 'top' ? 0 : height)
@@ -475,6 +722,16 @@ async function runCase(
       .catch(() => {});
     throw failure;
   } finally {
+    const inputTrace = await page
+      .evaluate(() => {
+        const trace = (window as any).__drawerInputTrace;
+        if (!trace) return null;
+        trace.stop();
+        return trace.entries;
+      })
+      .catch((failure) => ({ collectionError: String(failure) }));
+    if (inputTrace !== null)
+      samples.push({ stage: 'minimum-native-input-trace', entries: inputTrace });
     await json(`${name}.json`, {
       revision,
       tree,
@@ -502,7 +759,7 @@ for (const runtime of RUNTIMES)
             expect(await handle.getAttribute('aria-hidden')).toBe('true');
             expect(await handle.getAttribute('aria-valuenow')).toBeNull();
             expect(await handle.evaluate((node) => (node as HTMLElement).tabIndex)).toBeLessThan(0);
-            const close = await visibleClose(page, panel, scenario.long);
+            const close = await visibleClose(page, panel, scenario.long, samples);
             samples.push({ stage: 'reachable-close', ...(await geometry(panel)) });
             if (scenario.long)
               await page.screenshot({
@@ -545,7 +802,7 @@ for (const runtime of RUNTIMES)
         await expect
           .poll(async () => Math.abs((await geometry(panel)).height - cap))
           .toBeLessThanOrEqual(2);
-        await (await visibleClose(page, panel, true)).click();
+        await (await visibleClose(page, panel, true, samples)).click();
         await expect.poll(() => panel.isVisible()).toBe(false);
       });
     }, 90_000);
@@ -565,6 +822,7 @@ for (const runtime of RUNTIMES)
       `base-${runtime}-minimum-controlled-drag-cancel`,
       options,
       async (page, panel, samples) => {
+        await page.evaluate(installDrawerInputTrace);
         await page.evaluate(() =>
           document.addEventListener(
             'pointerdown',
@@ -612,7 +870,7 @@ for (const runtime of RUNTIMES)
           .poll(async () => Math.abs((await geometry(panel)).y - start.y))
           .toBeLessThanOrEqual(2);
         samples.push({ stage: 'controlled-rejection-restored', ...(await geometry(panel)) });
-        await (await visibleClose(page, panel, false)).click();
+        await (await visibleClose(page, panel, false, samples)).click();
         expect(await panel.isVisible()).toBe(true);
         await page.evaluate(() =>
           (window as any).__drawerFixtureApi.setProps('intrinsic-root', { open: false })
