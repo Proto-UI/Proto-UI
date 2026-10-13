@@ -5,7 +5,7 @@ import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { chromium, type Page, type Locator } from 'playwright-core';
+import { chromium, type BrowserContext, type Page, type Locator } from 'playwright-core';
 import {
   chromeExecutable,
   choosePreviewRuntime,
@@ -66,7 +66,7 @@ try {
   for (const scene of scenes) {
     const sceneDir = path.join(output, scene.id);
     await mkdir(sceneDir, { recursive: true });
-    const context = await browser.newContext({
+    const context: BrowserContext = await browser.newContext({
       viewport: { width: 900, height: 700 },
       deviceScaleFactor: 1,
       colorScheme: 'light',
@@ -87,7 +87,7 @@ try {
     });
     const cdp = await context.newCDPSession(page);
     const frames: {
-      timestamp: number;
+      timestamp: number | undefined;
       receivedAt: number;
       sessionId: number;
       bytes: Buffer;
@@ -143,43 +143,47 @@ try {
       await page.evaluate(() => {
         const observations: unknown[] = [];
         (window as any).__transitionCapture = { observations, stopped: false };
-        const loop = () => {
-          const capture = (window as any).__transitionCapture;
-          if (capture.stopped || observations.length >= 1200) return;
-          const subjects = [
-            ...document.querySelectorAll(
-              '[data-previewer-id] .host [role="switch"], [role="dialog"], [role="listbox"]'
-            ),
-          ].filter((node) => node.getBoundingClientRect().width > 0);
-          observations.push({
-            now: performance.now(),
-            wallTime: Date.now(),
-            subjects: subjects
-              .flatMap((root) => [root, ...root.querySelectorAll('*')].slice(0, 24))
-              .map((node) => {
-                const s = getComputedStyle(node),
-                  r = node.getBoundingClientRect();
-                return {
-                  tag: node.localName,
-                  role: node.getAttribute('role'),
-                  checked: node.getAttribute('aria-checked'),
-                  x: r.x,
-                  y: r.y,
-                  width: r.width,
-                  height: r.height,
-                  opacity: s.opacity,
-                  transform: s.transform,
-                  translate: s.translate,
-                  scale: s.scale,
-                  backgroundColor: s.backgroundColor,
-                  transition: s.transition,
-                  animation: s.animation,
-                };
-              }),
-          });
-          requestAnimationFrame(loop);
+        // A nested named arrow gains a module-scoped __name helper under tsx.
+        // Object methods remain self-contained when Playwright serializes this callback.
+        const loop = {
+          tick() {
+            const capture = (window as any).__transitionCapture;
+            if (capture.stopped || observations.length >= 1200) return;
+            const subjects = [
+              ...document.querySelectorAll(
+                '[data-previewer-id] .host [role="switch"], [role="dialog"], [role="listbox"]'
+              ),
+            ].filter((node) => node.getBoundingClientRect().width > 0);
+            observations.push({
+              now: performance.now(),
+              wallTime: Date.now(),
+              subjects: subjects
+                .flatMap((root) => [root, ...root.querySelectorAll('*')].slice(0, 24))
+                .map((node) => {
+                  const s = getComputedStyle(node),
+                    r = node.getBoundingClientRect();
+                  return {
+                    tag: node.localName,
+                    role: node.getAttribute('role'),
+                    checked: node.getAttribute('aria-checked'),
+                    x: r.x,
+                    y: r.y,
+                    width: r.width,
+                    height: r.height,
+                    opacity: s.opacity,
+                    transform: s.transform,
+                    translate: s.translate,
+                    scale: s.scale,
+                    backgroundColor: s.backgroundColor,
+                    transition: s.transition,
+                    animation: s.animation,
+                  };
+                }),
+            });
+            requestAnimationFrame(loop.tick);
+          },
         };
-        requestAnimationFrame(loop);
+        requestAnimationFrame(loop.tick);
       });
       let firstFrameResolve: (() => void) | undefined;
       const firstFrame = new Promise<void>((resolve) => {
@@ -305,11 +309,12 @@ try {
       const distinctFrameHashes = new Set(inventory.map((frame) => frame.sha256)).size;
       const timestampsValid = frames.every(
         (frame, i) =>
-          Number.isFinite(frame.timestamp) && (i === 0 || frame.timestamp > frames[i - 1].timestamp)
+          Number.isFinite(frame.timestamp) &&
+          (i === 0 || (frame.timestamp ?? NaN) > (frames[i - 1].timestamp ?? NaN))
       );
       const gaps = frames
         .slice(1)
-        .map((frame, i) => (frame.timestamp - frames[i].timestamp) * 1000);
+        .map((frame, i) => ((frame.timestamp ?? NaN) - (frames[i].timestamp ?? NaN)) * 1000);
       const observedCadence = {
         timestampsValid,
         firstFrameTimestamp: frames[0]?.timestamp ?? null,
