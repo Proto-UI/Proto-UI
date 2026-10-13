@@ -342,3 +342,135 @@ it('a changed endpoint during synchronous completion obtains a new current recei
   expect(controller.facade.isCurrent(owner.writer, receipts[1])).toBe(true);
   controller.dispose();
 });
+
+function disposalFixture(
+  failure: unknown,
+  releaseFailure?: { value: unknown },
+  reenter?: 'release' | 'unsubscribe'
+) {
+  const a = { get: () => 'x' },
+    b = { get: () => 'x' };
+  const callbacks = new Set<() => void>();
+  const calls: string[] = [];
+  let index = 0,
+    invalidations = 0;
+  let undeclare = () => {};
+  const controller = createPresenceController({
+    setup() {},
+    runtime() {},
+    invalidate() {
+      invalidations++;
+    },
+    dispatch: (fn) => fn(),
+    callbackContext: () => ({}),
+    fallback() {},
+    sink: () => ({
+      commit() {},
+      cancel() {},
+      settle: () => true,
+      release() {
+        calls.push('release');
+        controller.dispose();
+        if (reenter === 'release') undeclare();
+        if (releaseFailure) throw releaseFailure.value;
+      },
+    }),
+    watch(_source, callback) {
+      const n = index++;
+      const wrapped = () => callback();
+      callbacks.add(wrapped);
+      return () => {
+        calls.push(`off${n}`);
+        callbacks.delete(wrapped);
+        controller.dispose();
+        if (reenter === 'unsubscribe') undeclare();
+        if (n === 0) throw failure;
+      };
+    },
+  });
+  const owner = controller.facade.owner();
+  controller.facade.registerSource(a);
+  controller.facade.registerSource(b);
+  undeclare = controller.declare({
+    owner: owner.ref,
+    closed: { translate: { source: a, cases: { x: [zero, zero] } } },
+    entered: { translate: { source: b, cases: { x: [zero, zero] } } },
+    easing: [0, 0, 1, 1],
+  } as any);
+  controller.facade.publish(owner.writer, {
+    owner: owner.ref,
+    revision: 1,
+    phase: 'entering',
+    attempt: { ownerEpoch: 1, phaseAttempt: 1 },
+    completion: 'presentation',
+    durationMs: 500,
+    timeoutMs: 1000,
+  });
+  controller.commit(tw('bg-black/50'), 1, 1);
+  return { controller, owner, calls, callbacks, invalidations: () => invalidations };
+}
+it.each([undefined, null, false, 0, '', new Error('unsubscribe')])(
+  'dispose attempts every watcher and clears declaration despite first thrown value %s',
+  (failure) => {
+    const f = disposalFixture(failure);
+    let caught = false,
+      actual: unknown;
+    try {
+      f.controller.dispose();
+    } catch (error) {
+      caught = true;
+      actual = error;
+    }
+    expect(caught).toBe(true);
+    expect(actual).toBe(failure);
+    expect.soft(f.calls).toEqual(['release', 'off0', 'off1']);
+    expect.soft(f.callbacks.size).toBe(0);
+    expect.soft(f.controller.declared).toBe(false);
+    const before = f.invalidations();
+    for (const callback of f.callbacks) callback();
+    expect.soft(f.invalidations()).toBe(before);
+    expect(() => f.controller.dispose()).not.toThrow();
+    expect.soft(f.calls).toEqual(['release', 'off0', 'off1']);
+    expect(() => f.controller.facade.publish(f.owner.writer, {} as any)).toThrow(/retired/);
+  }
+);
+it.each([undefined, null, false, 0, '', new Error('release')])(
+  'dispose preserves initiating sink release value %s when unsubscribe also fails',
+  (failure) => {
+    const f = disposalFixture(new Error('secondary unsubscribe'), { value: failure });
+    let caught = false,
+      actual: unknown;
+    try {
+      f.controller.dispose();
+    } catch (error) {
+      caught = true;
+      actual = error;
+    }
+    expect(caught).toBe(true);
+    expect.soft(actual).toBe(failure);
+    expect.soft(f.calls).toEqual(['release', 'off0', 'off1']);
+    expect.soft(f.callbacks.size).toBe(0);
+    expect.soft(f.controller.declared).toBe(false);
+    expect(() => f.controller.dispose()).not.toThrow();
+  }
+);
+
+it.each(['release', 'unsubscribe'] as const)(
+  'retires declaration before reentrant declaration disposal from %s',
+  (reenter) => {
+    const failure = new Error('first unsubscribe');
+    const f = disposalFixture(failure, undefined, reenter);
+    let actual: unknown;
+    try {
+      f.controller.dispose();
+    } catch (error) {
+      actual = error;
+    }
+    expect(actual).toBe(failure);
+    expect(f.calls).toEqual(['release', 'off0', 'off1']);
+    expect(f.callbacks.size).toBe(0);
+    expect(f.controller.declared).toBe(false);
+    expect(() => f.controller.dispose()).not.toThrow();
+    expect(f.calls).toEqual(['release', 'off0', 'off1']);
+  }
+);

@@ -338,15 +338,26 @@ export function createPresenceController(options: PresenceControllerOptions) {
     dispose() {
       if (disposed) return;
       disposed = true;
-      try {
-        release();
-      } finally {
-        for (const off of subscriptions) off();
-        subscriptions.clear();
-        owners.clear();
-        writers.clear();
-        declaration = null;
-      }
+      let failed = false;
+      let error: unknown;
+      const cleanup = (callback: () => void) => {
+        try {
+          callback();
+        } catch (failure) {
+          if (!failed) {
+            failed = true;
+            error = failure;
+          }
+        }
+      };
+      const unsubs = [...subscriptions];
+      subscriptions.clear();
+      declaration = null;
+      cleanup(release);
+      for (const off of unsubs) cleanup(off);
+      owners.clear();
+      writers.clear();
+      if (failed) throw error;
     },
     diagnostics: () => Object.freeze([...reasons, ...(sink?.diagnostics?.() ?? [])]),
   };
