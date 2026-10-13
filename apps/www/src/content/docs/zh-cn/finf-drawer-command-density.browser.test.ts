@@ -545,6 +545,89 @@ for (const family of families)
                 return request.abort();
               });
               page = await context.newPage();
+              // Observe the existing trusted input without inserting an await into
+              // reopen/Escape, changing its target, or manufacturing readiness.
+              await page.addInitScript(() => {
+                const rows: unknown[] = [];
+                (window as any).__drawerInputTrace = rows;
+                let keydowns = 0;
+                const snapshot = (label: string, event?: Event) => {
+                  if (rows.length >= 96) return;
+                  try {
+                    const surfaces = Array.from(
+                      document.querySelectorAll<HTMLElement>(
+                        '[role="dialog"],[data-demo-ref="root"],[data-demo-ref="trigger"],[data-demo-ref="content"]'
+                      )
+                    ).map((el) => {
+                      const vm = (el as any).__vue__;
+                      const state = vm?.__pui;
+                      const exposed = vm?.getExposes?.();
+                      const session = state?.owner?.session;
+                      const overlay = session?.caps?.getPort?.('overlay');
+                      return {
+                        tag: el.tagName,
+                        id: el.id,
+                        ref: el.getAttribute('data-demo-ref'),
+                        connected: el.isConnected,
+                        display: getComputedStyle(el).display,
+                        visibility: getComputedStyle(el).visibility,
+                        pending: !!el.closest('[data-pui-view-pending]'),
+                        detached: !!el.closest('[data-pui-view-detached]'),
+                        expanded: el.getAttribute('aria-expanded'),
+                        transitionAttribute: el.getAttribute('data-transition-state'),
+                        open: exposed?.open?.get?.(),
+                        transition: exposed?.transitionState?.get?.(),
+                        overlayOpen: overlay?.isOpen?.(),
+                        viewReady: state?.viewReady,
+                        focusIngressReady: state?.focusIngressReady,
+                        hasView: state?.owner?.hasView,
+                        shouldExist: vm?.__puiShouldExist,
+                        gateEnabled: state?.eventGate?.isEnabled?.(),
+                        viewIntent: session?.viewIntent?.getSnapshot?.(),
+                        overlayReason: overlay?.getLastReason?.(),
+                        pendingCommit: state?.pendingCommit,
+                      };
+                    });
+                    rows.push({
+                      label,
+                      time: performance.now(),
+                      keydowns,
+                      target: event?.target instanceof Element ? event.target.tagName : null,
+                      active: document.activeElement?.tagName,
+                      defaultPrevented: event?.defaultPrevented,
+                      surfaces,
+                    });
+                  } catch (error) {
+                    rows.push({ label, error: String(error) });
+                  }
+                };
+                window.addEventListener(
+                  'click',
+                  (event) => {
+                    snapshot('click-capture', event);
+                    queueMicrotask(() => snapshot('click-microtask', event));
+                  },
+                  { capture: true, passive: true }
+                );
+                window.addEventListener(
+                  'keydown',
+                  (event) => {
+                    if (event.key !== 'Escape') return;
+                    keydowns++;
+                    snapshot('escape-capture', event);
+                    queueMicrotask(() => snapshot('escape-microtask', event));
+                    requestAnimationFrame(() => snapshot('escape-next-frame', event));
+                  },
+                  { capture: true, passive: true }
+                );
+                window.addEventListener(
+                  'keydown',
+                  (event) => {
+                    if (event.key === 'Escape') snapshot('escape-bubble', event);
+                  },
+                  { passive: true }
+                );
+              });
               page.setDefaultTimeout(15_000);
               page.setDefaultNavigationTimeout(30_000);
               page.on('pageerror', (error) => errors.push(`${stage}: ${String(error)}`));
@@ -699,6 +782,16 @@ for (const family of families)
                 }
               throw error;
             } finally {
+              // Read only after the unchanged assertions have succeeded or failed.
+              if (page) {
+                try {
+                  observations.inputTrace = await page.evaluate(
+                    () => (window as any).__drawerInputTrace ?? []
+                  );
+                } catch (error) {
+                  observations.inputTraceError = String(error);
+                }
+              }
               try {
                 await writeJson(`${id}.json`, {
                   candidate,
