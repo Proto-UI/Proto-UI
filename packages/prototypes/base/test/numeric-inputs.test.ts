@@ -169,3 +169,25 @@ it('Slider routes real Web pointer samples through normalized AxisInput and canc
   expect(root.getExposes().value.get()).toBe(75);
   expect(root.getExposes().dragging.get()).toBe(false);
 });
+
+it('Number Field step buttons declare activate and use one existing press owner', async () => {
+  const root = part('number-field-root', { min: 0, max: 3, defaultValue: 1 });
+  const plus = part('number-field-increment'),
+    minus = part('number-field-decrement');
+  root.append(minus, part('number-field-input'), plus);
+  document.body.append(root);
+  await flush();
+  for (const step of [plus, minus])
+    expect(step.getAttribute('data-pui-a11y-actions')).toBe('activate');
+  plus.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  await flush();
+  expect(root.getExposes().value.get()).toBe(2);
+  minus.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  await flush();
+  expect(root.getExposes().value.get()).toBe(1);
+  setElementProps(root, { disabled: true });
+  await flush();
+  plus.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 0 }));
+  await flush();
+  expect(root.getExposes().value.get()).toBe(1);
+});

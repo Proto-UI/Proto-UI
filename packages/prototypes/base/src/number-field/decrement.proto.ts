@@ -20,6 +20,7 @@ function setup(def: DefHandle<NumberFieldPartProps>) {
   def.expose.state('focusVisible', focus.focusVisible);
   const a = asAccessible();
   a.role('button');
+  a.action('activate', { event: 'click' });
   a.nameFromContent();
   a.state('disabled', disabled);
   const sync = (run: RunHandle<NumberFieldPartProps>) => {

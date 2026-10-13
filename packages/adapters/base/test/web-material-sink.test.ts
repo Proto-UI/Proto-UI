@@ -1321,3 +1321,29 @@ it('retains author ownership when preferences revoke paint before the style obse
     f.sink.release(1);
   }
 });
+
+it.each([undefined, null, false, 0, ''])(
+  'release preserves first falsy failure %s while cleaning later resources',
+  (failure) => {
+    const f = fixture();
+    const sourceDelete = vi.spyOn(f.sourceListeners, 'delete').mockImplementation(() => {
+      throw failure;
+    });
+    const preferenceDelete = vi.spyOn(f.preferenceListeners, 'delete').mockImplementation(() => {
+      throw new Error('later failure');
+    });
+    let caught = false,
+      actual: unknown;
+    try {
+      f.sink.release(1);
+    } catch (error) {
+      caught = true;
+      actual = error;
+    }
+    expect(caught).toBe(true);
+    expect(actual).toBe(failure);
+    expect(preferenceDelete).toHaveBeenCalledOnce();
+    expect(() => f.sink.release(1)).not.toThrow();
+    expect(sourceDelete).toHaveBeenCalledOnce();
+  }
+);

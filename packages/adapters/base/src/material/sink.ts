@@ -975,6 +975,7 @@ function createDocumentMaterialSink(
       motion.stop();
       last = null;
       let error: unknown;
+      let failed = false;
       for (const dispose of [
         cancelPending,
         clearImage,
@@ -987,10 +988,13 @@ function createDocumentMaterialSink(
         try {
           dispose();
         } catch (failure) {
-          error ??= failure;
+          if (!failed) {
+            failed = true;
+            error = failure;
+          }
         }
       }
-      if (error) throw error;
+      if (failed) throw error;
     },
   };
 }

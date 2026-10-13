@@ -73,6 +73,7 @@ function click(target: EventTarget, detail = 1) {
   return event;
 }
 afterEach(() => {
+  vi.restoreAllMocks();
   leases.splice(0).forEach((lease) => lease.dispose());
   document.body.replaceChildren();
 });
@@ -423,4 +424,90 @@ it('observes new-document release during reentrant old-task cancellation', () =>
   expect(f.tasks[1].cancelled).toBe(true);
   f.tasks[1].callback();
   expect(f.intents).toHaveLength(0);
+});
+
+it.each([undefined, null, false, 0, ''])(
+  'dispose removes listeners despite first falsy cancel failure %s',
+  (failure) => {
+    const f = fixture(undefined, () => {
+      throw failure;
+    });
+    context(f.target);
+    resolveWebInputOriginAnchor(f.intents[0].anchor)!.subscribeInvalidation(() => {
+      throw new Error('later failure');
+    });
+    pointer(f.target, 'pointerdown');
+    const targetRemove = vi.spyOn(f.target, 'removeEventListener');
+    const documentRemove = vi.spyOn(document, 'removeEventListener');
+    const windowRemove = vi.spyOn(window, 'removeEventListener');
+    let caught = false,
+      actual: unknown;
+    try {
+      f.lease.dispose();
+    } catch (error) {
+      caught = true;
+      actual = error;
+    }
+    expect(caught).toBe(true);
+    expect(actual).toBe(failure);
+    expect(targetRemove).toHaveBeenCalledTimes(4);
+    expect(documentRemove).toHaveBeenCalledTimes(6);
+    expect(windowRemove).toHaveBeenCalledTimes(1);
+    expect(() => f.lease.dispose()).not.toThrow();
+    expect(targetRemove).toHaveBeenCalledTimes(4);
+    vi.restoreAllMocks();
+  }
+);
+it('dispose attempts anchor retirement after observer and timer cleanup throw', () => {
+  const first = { cause: 'observer' },
+    later = { cause: 'timer' };
+  const f = fixture(undefined, () => {
+    throw later;
+  });
+  context(f.target);
+  const reference = resolveWebInputOriginAnchor(f.intents[0].anchor)!;
+  const invalidated = vi.fn();
+  reference.subscribeInvalidation(invalidated);
+  pointer(f.target, 'pointerdown');
+  vi.spyOn(MutationObserver.prototype, 'disconnect').mockImplementation(() => {
+    throw first;
+  });
+  let actual: unknown;
+  try {
+    f.lease.dispose();
+  } catch (error) {
+    actual = error;
+  }
+  expect(actual).toBe(first);
+  expect(f.tasks[0].cancelled).toBe(true);
+  expect(invalidated).toHaveBeenCalledOnce();
+  expect(resolveWebInputOriginAnchor(f.intents[0].anchor)).toBeNull();
+  vi.restoreAllMocks();
+});
+
+it('disabled reset retires an anchor despite suppression cancellation failure and permits later reuse', () => {
+  const failure = { cause: 'suppression cancellation' };
+  const f = fixture(undefined, () => {
+    throw failure;
+  });
+  f.target.dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'ContextMenu', bubbles: true, cancelable: true })
+  );
+  const original = f.intents[0].anchor;
+  const invalidated = vi.fn();
+  resolveWebInputOriginAnchor(original)!.subscribeInvalidation(invalidated);
+  let actual: unknown;
+  try {
+    f.lease.update({ disabled: true });
+  } catch (error) {
+    actual = error;
+  }
+  expect(actual).toBe(failure);
+  expect(f.tasks[0].cancelled).toBe(true);
+  expect(invalidated).toHaveBeenCalledOnce();
+  expect(resolveWebInputOriginAnchor(original)).toBeNull();
+  f.lease.update({ disabled: false });
+  context(f.target);
+  expect(f.intents).toHaveLength(2);
+  expect(resolveWebInputOriginAnchor(f.intents[1].anchor)).not.toBeNull();
 });

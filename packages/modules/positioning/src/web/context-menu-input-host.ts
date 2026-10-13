@@ -44,6 +44,21 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
         suppressionTask = null;
         task?.cancel();
       };
+      const cleanup = (tasks: (() => void)[]) => {
+        let failed = false;
+        let error: unknown;
+        for (const task of tasks) {
+          try {
+            task();
+          } catch (failure) {
+            if (!failed) {
+              failed = true;
+              error = failure;
+            }
+          }
+        }
+        if (failed) throw error;
+      };
       const reset = () => {
         revision++;
         const previousPending = pendingTask;
@@ -56,12 +71,14 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
         suppressionTask = null;
         activeAnchor = null;
         observer = null;
-        previousObserver?.disconnect();
         // Cancel/invalidation callbacks may reenter and acquire fresh resources.
         // Clear only the captured generation before invoking those callbacks.
-        previousPending?.cancel();
-        previousSuppression?.cancel();
-        anchor?.dispose();
+        cleanup([
+          () => previousObserver?.disconnect(),
+          () => previousPending?.cancel(),
+          () => previousSuppression?.cancel(),
+          () => anchor?.dispose(),
+        ]);
       };
       const observeDetach = () => {
         if (observer || typeof MutationObserver !== 'function') return;
@@ -255,12 +272,14 @@ export function createWebContextMenuInputHost(): ContextMenuInputHost {
         dispose() {
           if (disposed) return;
           disposed = true;
-          reset();
-          target.removeEventListener('pointerdown', onDown);
-          target.removeEventListener('contextmenu', onContextMenu);
-          target.removeEventListener('keydown', onKey);
-          target.removeEventListener('click', onClick, true);
-          detachDocument();
+          cleanup([
+            reset,
+            () => target.removeEventListener('pointerdown', onDown),
+            () => target.removeEventListener('contextmenu', onContextMenu),
+            () => target.removeEventListener('keydown', onKey),
+            () => target.removeEventListener('click', onClick, true),
+            detachDocument,
+          ]);
         },
       };
     },

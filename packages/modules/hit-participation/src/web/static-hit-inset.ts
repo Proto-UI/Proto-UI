@@ -73,6 +73,10 @@ export function prepareStaticHitInset(
     );
   }
   const root = styleRoot(target);
+  const styleParent = root.nodeType === 9 ? (root as Document).head : root;
+  if (!styleParent) {
+    throw new Error('[HitParticipation] staticHitInset unsupported: no host style parent.');
+  }
 
   const content =
     !previous || previous.root !== root ? view.getComputedStyle(target, '::after').content : 'none';
@@ -100,7 +104,7 @@ export function prepareStaticHitInset(
     // cancellation, focus defaults and event.target on the same semantic root.
     const text = `[${ATTRIBUTE}="${id}"]::after{all:initial!important;content:""!important;position:absolute!important;display:block!important;top:${edge('top')}!important;right:${edge('right')}!important;bottom:${edge('bottom')}!important;left:${edge('left')}!important;pointer-events:inherit!important;visibility:inherit!important;cursor:inherit!important;clip-path:${ring}!important;}`;
     style.textContent = text;
-    (root.nodeType === 9 ? (root as Document).head : root).appendChild(style);
+    styleParent.appendChild(style);
     target.setAttribute(ATTRIBUTE, id);
     const sheet = style.sheet;
     const ruleSnapshot = sheet

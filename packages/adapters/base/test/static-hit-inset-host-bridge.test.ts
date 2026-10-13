@@ -236,3 +236,43 @@ it.each(['fresh', 'existing'])(
     bridge.sync({ config: { mode: 'participating' }, regions: [] });
   }
 );
+
+it('rejects a missing document head without replacing old regions or leaking target ownership', () => {
+  const old = root(),
+    next = root();
+  const bridge = createWebHitParticipationHostBridge();
+  bridge.sync({ config: { mode: 'disabled' }, regions: [{ target: old, mode: 'disabled' }] });
+  const head = document.head;
+  head.remove();
+  try {
+    expect(() => bridge.sync(arg(next))).toThrow();
+    expect(old.style.pointerEvents).toBe('none');
+    bridge.sync({ config: { mode: 'participating' }, regions: [] });
+    expect(old.style.pointerEvents).toBe('');
+    const other = createWebHitParticipationHostBridge();
+    expect(() =>
+      other.sync({ config: { mode: 'disabled' }, regions: [{ target: next, mode: 'disabled' }] })
+    ).not.toThrow();
+    other.sync({ config: { mode: 'participating' }, regions: [] });
+  } finally {
+    document.documentElement.prepend(head);
+  }
+});
+
+it('does not retain a phantom owner after initial inset activation fails', () => {
+  const target = root();
+  const bridge = createWebHitParticipationHostBridge();
+  const head = document.head;
+  head.remove();
+  try {
+    expect(() => bridge.sync(arg(target))).toThrow();
+    bridge.sync({ config: { mode: 'participating' }, regions: [] });
+    const other = createWebHitParticipationHostBridge();
+    expect(() =>
+      other.sync({ config: { mode: 'disabled' }, regions: [{ target, mode: 'disabled' }] })
+    ).not.toThrow();
+    other.sync({ config: { mode: 'participating' }, regions: [] });
+  } finally {
+    document.documentElement.prepend(head);
+  }
+});
