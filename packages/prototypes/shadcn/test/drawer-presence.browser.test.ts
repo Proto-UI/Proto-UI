@@ -173,13 +173,40 @@ describe('real Drawer semantic Scroll physical target', () => {
         expect(initial.clientHeight).toBeGreaterThan(0);
         expect(initial.surfaceRect.height).toBeLessThanOrEqual(201);
         expect(initial.scrollHeight).toBeGreaterThan(initial.clientHeight);
-        expect(initial.clipProbe).toMatchObject({
-          withinViewport: true,
-          hitPresent: true,
-          childExtends: true,
-          childCoversY: true,
-          clipped: true,
-        });
+        const assertHorizontalClip = async (
+          stage: string,
+          leftWidth: number,
+          bottomHeight: number
+        ) => {
+          // Bottom spans the whole available width by contract. Use the admitted
+          // left-side 20rem recipe so an outside-edge hit probe is actually visible.
+          await page.evaluate(() => (window as any).scrollFixture.side('left'));
+          await expect.poll(async () => (await sample()).acceptedSide).toBe('left');
+          await expect
+            .poll(async () => Math.round((await sample()).surfaceRect.width))
+            .toBe(leftWidth);
+          const clipping = await sample();
+          samples.push({ stage, ...clipping });
+          expect(clipping.clipProbe).toMatchObject({
+            withinViewport: true,
+            hitPresent: true,
+            childExtends: true,
+            childCoversY: true,
+            clipped: true,
+          });
+          expect(clipping.overflowX).toBe('hidden');
+          expect(clipping.overflowY).toBe('auto');
+          await page.evaluate(() => (window as any).scrollFixture.side('bottom'));
+          await expect.poll(async () => (await sample()).acceptedSide).toBe('bottom');
+          await expect
+            .poll(async () => ({
+              width: Math.round((await sample()).surfaceRect.width),
+              height: Math.round((await sample()).surfaceRect.height),
+            }))
+            .toEqual({ width: 800, height: bottomHeight });
+          samples.push({ stage: `${stage}-restored-bottom`, ...(await sample()) });
+        };
+        await assertHorizontalClip('left-clipping', 320, 200);
         expect(initial.overflowX).toBe('hidden');
         expect(initial.overflowY).toBe('auto');
         const outcome = await page.evaluate(() => (window as any).scrollFixture.request(0.5));
@@ -223,13 +250,7 @@ describe('real Drawer semantic Scroll physical target', () => {
         const resized = await sample();
         samples.push({ stage: 'root-text-resize', ...resized });
         expect(resized.surfaceRect.height).toBeLessThanOrEqual(251);
-        expect(resized.clipProbe).toMatchObject({
-          withinViewport: true,
-          hitPresent: true,
-          childExtends: true,
-          childCoversY: true,
-          clipped: true,
-        });
+        await assertHorizontalClip('left-clipping-resized', 400, 250);
         expect(errors).toEqual([]);
         await page.screenshot({
           path: path.join(output, `drawer-${scope}-scroll.png`),

@@ -2,6 +2,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import * as drawer from '../../src/drawer';
 import { definePrototype } from '@proto.ui/core';
 import { asScrollSurface } from '@proto.ui/hooks';
+import { asDrawerContent } from '../../../base/src/drawer';
 
 /** Real family source fixture. No upstream implementation or demo-local animation. */
 export function createDrawerPresenceFixture(
@@ -68,6 +69,8 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
     setup(def) {
       drawer.drawerContent.setup(def);
       const scroll = asScrollSurface();
+      const acceptedSide = asDrawerContent().acceptedSide;
+      def.expose.method('__testAcceptedSide', () => acceptedSide.read());
       def.expose.method('__testScrollSnapshot', () => scroll.getSnapshot());
       def.expose.method('__testScrollTo', (position: number) =>
         scroll.request({ kind: 'to', axis: 'vertical', position })
@@ -81,9 +84,6 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
   const mask = document.createElement(drawer.drawerMask.name);
   setElementProps(root, { open: false });
   setElementProps(content, { side: 'bottom', maxExtent: { unit: 'root-text', value: 12.5 } });
-  // Test-page width constraint leaves visible room to verify clipping outside the boundary.
-  // Height still comes solely from the real available-layout/extent model.
-  content.style.width = '320px';
   const first = document.createElement('button');
   first.textContent = 'Scroll start';
   first.id = 'drawer-scroll-start';
@@ -105,6 +105,9 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
     content,
     open() {
       setElementProps(root, { open: true });
+    },
+    side(side: 'left' | 'bottom') {
+      setElementProps(content, { side, maxExtent: { unit: 'root-text', value: 12.5 } });
     },
     request(position: number) {
       return (content as any).getExposes().__testScrollTo(position);
@@ -134,6 +137,7 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
       };
       return {
         phase: (content as any).getExposes().transitionState.get(),
+        acceptedSide: (content as any).getExposes().__testAcceptedSide(),
         facts: (content as any).getExposes().__testScrollSnapshot(),
         hostRect: content.getBoundingClientRect().toJSON(),
         surfaceRect: target.getBoundingClientRect().toJSON(),
