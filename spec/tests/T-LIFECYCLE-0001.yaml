@@ -89,6 +89,7 @@ implementations:
       - T-LIFECYCLE-0001-CASE-UPDATE-CYCLE-ORDER
       - T-LIFECYCLE-0001-CASE-UNMOUNT-DISPOSAL-BOUNDARY
       - T-LIFECYCLE-0001-CASE-REPEATED-MOUNT-EPOCHS
+      - T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP
     notes:
       - Shared lifecycle ordering fixture for runtime tests, adapter conformance tests, and future host profile test harnesses.
   - id: runtime-lifecycle-with-host-order

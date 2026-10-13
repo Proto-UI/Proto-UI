@@ -5,7 +5,8 @@ export type LifecycleCallbackOrderExpectation =
   | 'update-render-commit-updated'
   | 'repeatable-unmounted-preserves-instance-until-terminal-dispose'
   | 'setup-created-once-mounted-unmounted-per-epoch'
-  | 'direct-and-hook-callbacks-run-in-registration-order';
+  | 'direct-and-hook-callbacks-run-in-registration-order'
+  | 'failed-created-primary-preserved-acquired-resources-terminally-released';
 
 export type LifecycleTracePoint =
   | 'setup'
@@ -107,6 +108,17 @@ export const LIFECYCLE_CALLBACK_ORDER_CASES = [
       'unmount-begin',
       'unmounted',
       'dispose',
+    ],
+  },
+  {
+    id: 'failed-created-terminal-cleanup',
+    title:
+      'failed created preserves its initiating value and invalidates acquired instance resources despite throwing cleanup',
+    specCase: 'T-LIFECYCLE-0001-CASE-FAILED-CREATED-TERMINAL-CLEANUP',
+    covers: ['C-LIFECYCLE-0002-G', 'C-LIFECYCLE-0002-J'],
+    expectation: 'failed-created-primary-preserved-acquired-resources-terminally-released',
+    notes: [
+      'This fixture records the portable expectation; resource and Delay runtime tests provide executable evidence.',
     ],
   },
 ] as const satisfies readonly LifecycleCallbackOrderCase[];
