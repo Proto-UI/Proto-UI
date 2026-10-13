@@ -58,10 +58,12 @@ describe('runtime contract: core delay primitive (v0)', () => {
       const creationError = new Error('created failed');
       const diagnosticError = new Error('terminal diagnostic failed');
       const calls: string[] = [];
+      let diagnosticCalls = 0;
       let state!: OwnedStateHandle<boolean>;
       host.onLifecycleEvent = (event) => {
         const point = event.type === 'instance.phase' ? event.phase : event.type;
         if (point === failurePoint) {
+          diagnosticCalls += 1;
           // A host may synchronously flush already queued work during teardown.
           host.flushAllDelays();
           throw diagnosticError;
@@ -90,11 +92,8 @@ describe('runtime contract: core delay primitive (v0)', () => {
       } catch (error) {
         thrown = error;
       }
-      expect(thrown).toBeInstanceOf(AggregateError);
-      const errors = (thrown as AggregateError).errors;
-      expect(errors).toHaveLength(2);
-      expect(errors[0]).toBe(creationError);
-      expect(errors[1]).toBe(diagnosticError);
+      expect(thrown).toBe(creationError);
+      expect(diagnosticCalls).toBe(1);
       expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
       expect(host.delays.map((task) => task.cancelCalls)).toEqual([1]);
       expect(() => state.get()).toThrow(/disposed/i);
@@ -103,14 +102,18 @@ describe('runtime contract: core delay primitive (v0)', () => {
     }
   );
 
-  it('retains both diagnostic and author cleanup errors after the creation error', () => {
+  it('preserves the creation error after diagnostic and author cleanup failures', () => {
     const host = createDelayHost('x-delay-failed-creation-multiple-errors');
     const creationError = new Error('created failed');
     const diagnosticError = new Error('disposing diagnostic failed');
     const cleanupError = new Error('cleanup failed');
+    const failures: unknown[] = [];
     let state!: OwnedStateHandle<boolean>;
     host.onLifecycleEvent = (event) => {
-      if (event.type === 'instance.phase' && event.phase === 'disposing') throw diagnosticError;
+      if (event.type === 'instance.phase' && event.phase === 'disposing') {
+        failures.push(diagnosticError);
+        throw diagnosticError;
+      }
     };
     let thrown: unknown;
     try {
@@ -124,6 +127,7 @@ describe('runtime contract: core delay primitive (v0)', () => {
               throw creationError;
             });
             def.lifecycle.onBeforeDispose(() => {
+              failures.push(cleanupError);
               throw cleanupError;
             });
           },
@@ -133,14 +137,8 @@ describe('runtime contract: core delay primitive (v0)', () => {
     } catch (error) {
       thrown = error;
     }
-    expect(thrown).toBeInstanceOf(AggregateError);
-    const errors = (thrown as AggregateError).errors;
-    expect(errors).toHaveLength(2);
-    expect(errors[0]).toBe(creationError);
-    expect(errors[1]).toBeInstanceOf(AggregateError);
-    expect(errors[1].errors).toHaveLength(2);
-    expect(errors[1].errors[0]).toBe(diagnosticError);
-    expect(errors[1].errors[1]).toBe(cleanupError);
+    expect(thrown).toBe(creationError);
+    expect(failures).toEqual([diagnosticError, cleanupError]);
     expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
     expect(() => state.get()).toThrow(/disposed/i);
   });
@@ -189,15 +187,7 @@ describe('runtime contract: core delay primitive (v0)', () => {
       } catch (error) {
         thrown = error;
       }
-      if (cleanupThrows) {
-        expect(thrown).toBeInstanceOf(AggregateError);
-        const errors = (thrown as AggregateError).errors;
-        expect(errors).toHaveLength(2);
-        expect(errors[0]).toBe(creationError);
-        expect(errors[1]).toBe(cleanupError);
-      } else {
-        expect(thrown).toBe(creationError);
-      }
+      expect(thrown).toBe(creationError);
       expect(host.delays.map((rec) => rec.cancelled)).toEqual([true, true]);
       expect(host.delays.map((rec) => rec.cancelCalls)).toEqual([1, 1]);
       expect(callbacks).toEqual(['created:1', 'disposed:1']);

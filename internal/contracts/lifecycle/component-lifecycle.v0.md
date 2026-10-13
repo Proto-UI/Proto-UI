@@ -125,7 +125,7 @@ Lifecycle violations (ordering, availability, or domain misuse) are considered *
 
 Implementations MUST fail fast and MUST NOT silently recover.
 
-The draft `C-LIFECYCLE-0002-I` defines one bounded failed-creation path. After Runtime acquires an instance, a synchronous `created` failure completes all reachable acquired-resource terminal cleanup before rethrowing the **identical initiating value**. Queued Delay work is cancelled and instance-scoped handles become invalid even when a cleanup callback, diagnostic, or release also throws; those secondary errors do not replace the initiating value.
+The draft `C-LIFECYCLE-0002-J` defines one bounded failed-creation path. After Runtime acquires an instance, a synchronous `created` failure completes all reachable acquired-resource terminal cleanup before rethrowing the **identical initiating value**. Queued Delay work is cancelled and instance-scoped handles become invalid even when a cleanup callback, diagnostic, or release also throws; those secondary errors do not replace the initiating value.
 
 Props synchronization or watcher dispatch failures while entering that failed-creation cleanup cannot skip registered `beforeDispose` releases. Ordinary callback entry and normal disposal retain their existing preparation-error behavior.
 

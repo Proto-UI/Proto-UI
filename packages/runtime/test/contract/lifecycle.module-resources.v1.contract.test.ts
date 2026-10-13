@@ -138,12 +138,9 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
       } catch (error) {
         thrown = error;
       }
-      // C-LIFECYCLE-0002-J: the initiating value stays first and is never
-      // replaced; secondary cleanup-callback failures surface after it on this
-      // future-mainline boundary (matching the falsy-cleanup tests below).
-      expect(thrown).toBeInstanceOf(AggregateError);
-      expect((thrown as AggregateError).errors[0]).toBe(createdFailure);
-      expect((thrown as AggregateError).errors.slice(1)).not.toContain(createdFailure);
+      // C-LIFECYCLE-0002-J: secondary cleanup failures cannot replace the
+      // identical initiating value.
+      expect(thrown).toBe(createdFailure);
       expect(disposed).toBe(2);
       expect(rawSubscriptionReleased).toBe(true);
       expect(() => open.get()).toThrow();
@@ -151,7 +148,7 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
   );
 
   it.each([undefined, null, false, 0, ''])(
-    'preserves falsy cleanup failure %s when creation fails',
+    'preserves the created failure when cleanup throws %s',
     async (cleanupFailure) => {
       const createdFailure = new Error('created failure');
       let cleanupCalls = 0;
@@ -173,13 +170,48 @@ describe('runtime contract: lifecycle module resource ownership (v1)', () => {
       } catch (error) {
         thrown = error;
       }
-      expect(thrown).toBeInstanceOf(AggregateError);
-      expect((thrown as AggregateError).errors).toEqual([createdFailure, cleanupFailure]);
+      expect(thrown).toBe(createdFailure);
       // Allow the shared disposal promise to settle: failed synchronous creation
       // has no returned session from which a caller could observe that promise.
       await Promise.resolve();
       await Promise.resolve();
       expect(cleanupCalls).toBe(1);
+    }
+  );
+
+  it.each([undefined, null, false, 0, ''])(
+    'preserves the initiating created value %s after cleanup fails',
+    (failure) => {
+      let retained!: OwnedStateHandle<boolean>;
+      let cleanupCalls = 0;
+      const proto = definePrototype({
+        name: 'lifecycle-falsy-created-failure',
+        setup(def) {
+          retained = def.state.bool('retained', false);
+          def.lifecycle.onCreated(() => {
+            throw failure;
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            cleanupCalls += 1;
+            throw new Error('cleanup failure');
+          });
+          def.lifecycle.onBeforeDispose(() => {
+            cleanupCalls += 1;
+          });
+        },
+      });
+      let thrown: unknown;
+      let caught = false;
+      try {
+        createRuntimeSession(proto, createImmediateHost());
+      } catch (error) {
+        caught = true;
+        thrown = error;
+      }
+      expect(caught).toBe(true);
+      expect(thrown).toBe(failure);
+      expect(cleanupCalls).toBe(2);
+      expect(() => retained.get()).toThrow();
     }
   );
 

@@ -482,10 +482,8 @@ export function createRuntimeSession<P extends PropsBaseType>(
   ) => {
     const terminalErrors: unknown[] = [];
     const recordCleanupFailure = (error: unknown) => terminalErrors.push(error);
-    // Preparation errors (Props source/watcher dispatch) while entering failed-
-    // creation cleanup are swallowed: the callbacks must still run, but those
-    // secondary diagnostics do not reach the caller alongside the initiating
-    // value. Cleanup-callback failures do.
+    // Preparation errors cannot skip beforeDispose callbacks while failed
+    // creation retains its initiating value.
     const retainInitiatingFailure = completeFailedCreation
       ? (_error: unknown) => {}
       : recordFailure;
@@ -516,9 +514,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
     attemptCleanup(inst.dispose, recordFailure);
     attemptCleanup(() => setInstancePhase('disposed'), recordFailure);
     attemptCleanup(() => emit({ type: 'instance.dispose.done' }), recordFailure);
-    // Secondary cleanup-callback failures stay observable to the failed-creation
-    // caller without replacing the initiating value (C-LIFECYCLE-0002-I); the
-    // retained initiating-failure recorder above only covers preparation errors.
     for (const terminalError of terminalErrors) recordFailure(terminalError);
   };
 
@@ -568,6 +563,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
     return pending;
   };
 
+  let createdFailure: { value: unknown } | undefined;
   try {
     emit({ type: 'instance.setup.exit' });
     propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
@@ -580,17 +576,23 @@ export function createRuntimeSession<P extends PropsBaseType>(
     setInstancePhase('alive');
     applyInstanceAssociations(host.getInstanceAssociations?.());
     callbackScope.run(run, () => {
-      for (const cb of lifecycle.created) cb(run);
+      try {
+        for (const cb of lifecycle.created) cb(run);
+      } catch (error) {
+        createdFailure = { value: error };
+        throw error;
+      }
     });
     emit({ type: 'instance.created' });
   } catch (creationError) {
     // No session was published and no view was mounted. Finish reachable
-    // acquired cleanup synchronously; a secondary failure cannot replace the
-    // identical initiating value, including a falsy JavaScript thrown value.
+    // acquired cleanup synchronously. C-LIFECYCLE-0002-J preserves an authored
+    // created failure, including a falsy JavaScript thrown value.
     const terminalErrors: unknown[] = [];
     const recordFailure = (error: unknown) => terminalErrors.push(error);
     beginDispose(recordFailure);
     finalizeDispose(recordFailure, true);
+    if (createdFailure) throw createdFailure.value;
     if (terminalErrors.length > 1) {
       throw new AggregateError([creationError, new AggregateError(terminalErrors)]);
     }
