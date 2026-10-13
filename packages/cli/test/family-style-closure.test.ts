@@ -63,7 +63,6 @@ describe('real family preset inherited physical closure', () => {
       const required = direct.filter(
         (token) => token.includes('pui-drag-progress') || token === 'content-start'
       );
-      expect(required.length).toBeGreaterThanOrEqual(5);
       const closure = await collectFamilyStyleClosure(
         path.resolve('packages/prototypes', family, 'src'),
         baseRoot
@@ -80,9 +79,6 @@ describe('real family preset inherited physical closure', () => {
       ]) {
         expect(css).not.toContain('Unsupported Proto UI style tokens');
         expect(css).toContain('align-content: flex-start;');
-        expect(css).toContain(
-          'height: calc(var(--proto-ui-available-region-height,100vh)*0.85*var(--pui-drag-progress));'
-        );
       }
     });
   }

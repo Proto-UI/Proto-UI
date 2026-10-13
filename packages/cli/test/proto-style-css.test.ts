@@ -89,6 +89,14 @@ describe('proto style css renderer', () => {
       'Unsupported Proto UI style tokens'
     );
   });
+  it('keeps invisible preparation distinct from display suppression', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['invisible']);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('visibility: hidden;');
+      expect(css).not.toContain('display: none;');
+    }
+  });
   it('keeps authored spaces and newlines without hanging preserved spaces into padding', () => {
     const css = renderProtoStyleTokenCss(['whitespace-break-spaces']);
     expect(css).not.toContain('Unsupported Proto UI style tokens');
