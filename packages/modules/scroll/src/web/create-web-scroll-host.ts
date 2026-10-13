@@ -18,6 +18,7 @@ import type {
   ScrollSurfaceHostLease,
 } from '../caps';
 import { createReaderContactSession } from './reader-contact-session';
+import { createScrollPolicyLease } from './scroll-policy-lease';
 
 export type WebScrollSurfaceHostOptions = Readonly<{
   moveGestureHost: MoveGestureHost;
@@ -26,6 +27,11 @@ export type WebScrollSurfaceHostOptions = Readonly<{
   /** Host-local proximity in CSS pixels; never projected into portable facts. */
   endThreshold?: number;
   minThumbSize?: number;
+  /** Binding-aware hosts opt into exclusive guarded projection ownership. */
+  exclusivePolicy?: boolean;
+  onPolicyLost?: () => void;
+  /** Authority for deferred physical writes in a binding-aware host. */
+  isCurrentBinding?: () => boolean;
 }>;
 
 type DisplayStyle = Readonly<{ value: string; priority: string }>;
@@ -264,6 +270,7 @@ export function createWebScrollSurfaceHost(
       const trackInsets = new Map<HTMLElement, DisplayStyle>();
       const moveLeases = new Map<HTMLElement, MoveGestureHostLease>();
       const dragGrabOffsets = new Map<HTMLElement, number>();
+      const policyLease = options.exclusivePolicy ? createScrollPolicyLease(target) : null;
       const original = {
         overflowX: target.style.overflowX,
         overflowY: target.style.overflowY,
@@ -272,6 +279,10 @@ export function createWebScrollSurfaceHost(
       };
 
       const projectPolicy = () => {
+        if (policyLease) {
+          policyLease.project(connection);
+          return;
+        }
         const axes = connection.config.axes;
         target.style.overflowX = axes === 'vertical' ? 'hidden' : 'auto';
         target.style.overflowY = axes === 'horizontal' ? 'hidden' : 'auto';
@@ -515,7 +526,7 @@ export function createWebScrollSurfaceHost(
         publish();
         if (scheduledEnd !== movement || disposed) return;
         const apply = () => {
-          if (scheduledEnd !== movement || disposed) return;
+          if (scheduledEnd !== movement || disposed || !policyCurrent()) return;
           scheduledEnd = null;
           const currentAxis = movement.axis;
           if (!isAxisEnabled(currentAxis)) {
@@ -546,7 +557,14 @@ export function createWebScrollSurfaceHost(
           movement.cancel = () => clearTimeout(timer);
         }
       };
+      const policyCurrent = () => {
+        if (disposed || options.isCurrentBinding?.() === false) return false;
+        if (!policyLease || policyLease.valid()) return !disposed;
+        options.onPolicyLost?.();
+        return false;
+      };
       const executeRequest = (request: ScrollSurfaceRequest) => {
+        if (!policyCurrent()) return;
         const followAxis = configuredFollowAxis();
         if (request.kind === 'to-end') {
           if (followAxis && request.axis !== followAxis) {
@@ -642,7 +660,7 @@ export function createWebScrollSurfaceHost(
         }
       };
       const publish = () => {
-        if (disposed) return;
+        if (disposed || !policyCurrent()) return;
         const facts = snapshot();
         projectComposedChrome(facts);
         connection.onFacts(facts);
@@ -911,12 +929,7 @@ export function createWebScrollSurfaceHost(
           observingFonts = false;
         }
       };
-      target.addEventListener('scroll', onScroll, { passive: true });
-      target.addEventListener('load', onContentReflow, true);
-      target.addEventListener('transitionend', onContentReflow, true);
-      target.addEventListener('transitioncancel', onContentReflow, true);
-      target.addEventListener('animationend', onContentReflow, true);
-      target.addEventListener('animationcancel', onContentReflow, true);
+
       let observingGestures = false;
       // Reader-input listeners exist only while a follow axis is configured,
       // so an ordinary Scroll Area never fans window movement events through
@@ -953,21 +966,15 @@ export function createWebScrollSurfaceHost(
         ownerWindow?.removeEventListener('keyup', completeReaderIntent);
         observingGestures = false;
       };
-      ownerWindow?.addEventListener('blur', resetReaderInput);
-      const resizeObserver =
-        typeof ResizeObserver === 'function' ? new ResizeObserver(onLayoutChange) : undefined;
-      const mutationObserver =
-        typeof MutationObserver === 'function'
-          ? new MutationObserver((records) => {
-              if (disposed) return;
-              if (
-                records.some((record) => record.type === 'childList' && record.target === target)
-              ) {
-                observeGeometry();
-              }
-              onLayoutChange();
-            })
-          : undefined;
+      let resizeObserver: ResizeObserver | undefined;
+      let mutationObserver: MutationObserver | undefined;
+      const onMutation = (records: MutationRecord[]) => {
+        if (disposed) return;
+        if (records.some((record) => record.type === 'childList' && record.target === target)) {
+          observeGeometry();
+        }
+        onLayoutChange();
+      };
       function observeGeometry() {
         resizeObserver?.disconnect();
         mutationObserver?.disconnect();
@@ -979,7 +986,13 @@ export function createWebScrollSurfaceHost(
           target,
           configuredFollowAxis()
             ? END_FOLLOW_CONTENT_OBSERVER_OPTIONS
-            : BASE_CONTENT_OBSERVER_OPTIONS
+            : options.exclusivePolicy
+              ? {
+                  childList: true,
+                  attributes: true,
+                  attributeFilter: ['style', 'data-pui-scroll-projection'],
+                }
+              : BASE_CONTENT_OBSERVER_OPTIONS
         );
         for (const control of connection.composedChrome?.controls ?? []) {
           if (!isWebControl(control)) continue;
@@ -1010,17 +1023,113 @@ export function createWebScrollSurfaceHost(
         lastFollowLayout = readFollowLayout(axis);
         scheduleEnd(axis);
       };
-      ownerWindow?.addEventListener('resize', onLayoutChange);
-      projectPolicy();
-      reconcileMoveGestures();
-      observeGeometry();
-      reconcileFontObservation();
-      reconcileGestureObservation();
-      resetEndFollow();
+      const dispose = () => {
+        if (disposed) return;
+        disposed = true;
+        let failed = false;
+        let failure: unknown;
+        const attempt = (action: () => void) => {
+          try {
+            action();
+          } catch (error) {
+            if (!failed) {
+              failed = true;
+              failure = error;
+            }
+          }
+        };
+        attempt(resetReaderInput);
+        requestedDepartureAxis = null;
+        attempt(() => cancelScheduledEnd(false));
+        attempt(() => cancelScrollEndTimer?.());
+        for (const [type, listener, capture] of [
+          ['scroll', onScroll],
+          ['load', onContentReflow, true],
+          ['transitionend', onContentReflow, true],
+          ['transitioncancel', onContentReflow, true],
+          ['animationend', onContentReflow, true],
+          ['animationcancel', onContentReflow, true],
+          ['wheel', onWheel],
+          ['pointerdown', onPointerDown],
+          ['touchstart', onTouchStart],
+          ['keydown', onKeyDown],
+        ] as const)
+          attempt(() => target.removeEventListener(type, listener as EventListener, capture));
+        for (const [type, listener] of [
+          ['pointermove', onPointerMove],
+          ['pointerup', onPointerUp],
+          ['pointercancel', onPointerCancel],
+          ['touchmove', onTouchMove],
+          ['touchend', onTouchEnd],
+          ['touchcancel', onTouchEnd],
+          ['keyup', completeReaderIntent],
+          ['blur', resetReaderInput],
+          ['resize', onLayoutChange],
+        ] as const)
+          attempt(() => ownerWindow?.removeEventListener(type, listener as EventListener));
+        if (observingFonts) {
+          observingFonts = false;
+          attempt(() => fontFaceSet?.removeEventListener('loadingdone', onContentReflow));
+        }
+        attempt(() => resizeObserver?.disconnect());
+        attempt(() => mutationObserver?.disconnect());
+        const leases = Array.from(moveLeases.values());
+        moveLeases.clear();
+        for (const lease of leases) attempt(() => lease.dispose());
+        dragGrabOffsets.clear();
+        attempt(() => restoreInactiveThumbs(new Set()));
+        attempt(() => restoreTrackInsets(new Set()));
+        for (const track of Array.from(trackStyles.keys()))
+          attempt(() => restoreTrackDisplay(track));
+        if (policyLease) attempt(() => policyLease.release());
+        else {
+          attempt(() => {
+            target.style.overflowX = original.overflowX;
+          });
+          attempt(() => {
+            target.style.overflowY = original.overflowY;
+          });
+          attempt(() => {
+            target.style.scrollbarWidth = original.scrollbarWidth;
+          });
+          attempt(() => {
+            if (original.projection === null) target.removeAttribute('data-pui-scroll-projection');
+            else target.setAttribute('data-pui-scroll-projection', original.projection);
+          });
+        }
+        if (failed) throw failure;
+      };
+      try {
+        target.addEventListener('scroll', onScroll, { passive: true });
+        target.addEventListener('load', onContentReflow, true);
+        target.addEventListener('transitionend', onContentReflow, true);
+        target.addEventListener('transitioncancel', onContentReflow, true);
+        target.addEventListener('animationend', onContentReflow, true);
+        target.addEventListener('animationcancel', onContentReflow, true);
+        ownerWindow?.addEventListener('blur', resetReaderInput);
+        const Resize = ownerWindow?.ResizeObserver;
+        const Mutation = ownerWindow?.MutationObserver;
+        resizeObserver = typeof Resize === 'function' ? new Resize(onLayoutChange) : undefined;
+        mutationObserver = typeof Mutation === 'function' ? new Mutation(onMutation) : undefined;
+        ownerWindow?.addEventListener('resize', onLayoutChange);
+        projectPolicy();
+        reconcileMoveGestures();
+        observeGeometry();
+        reconcileFontObservation();
+        reconcileGestureObservation();
+        resetEndFollow();
+      } catch (error) {
+        try {
+          dispose();
+        } catch {
+          /* preserve the initiating acquisition failure */
+        }
+        throw error;
+      }
 
       return {
         update(nextConnection: ScrollSurfaceHostAttachment) {
-          if (disposed) return;
+          if (disposed || !policyCurrent()) return;
           const previousAxis = configuredFollowAxis();
           const previousAxes = connection.config.axes;
           connection = nextConnection;
@@ -1039,52 +1148,7 @@ export function createWebScrollSurfaceHost(
           if (disposed) return;
           executeRequest(request);
         },
-        dispose() {
-          if (disposed) return;
-          disposed = true;
-          resetReaderInput();
-          requestedDepartureAxis = null;
-          cancelScheduledEnd(false);
-          cancelScrollEndTimer?.();
-          target.removeEventListener('scroll', onScroll);
-          target.removeEventListener('load', onContentReflow, true);
-          target.removeEventListener('transitionend', onContentReflow, true);
-          target.removeEventListener('transitioncancel', onContentReflow, true);
-          target.removeEventListener('animationend', onContentReflow, true);
-          target.removeEventListener('animationcancel', onContentReflow, true);
-          target.removeEventListener('wheel', onWheel);
-          target.removeEventListener('pointerdown', onPointerDown);
-          ownerWindow?.removeEventListener('pointermove', onPointerMove);
-          ownerWindow?.removeEventListener('pointerup', onPointerUp);
-          ownerWindow?.removeEventListener('pointercancel', onPointerCancel);
-          target.removeEventListener('touchstart', onTouchStart);
-          ownerWindow?.removeEventListener('touchmove', onTouchMove);
-          ownerWindow?.removeEventListener('touchend', onTouchEnd);
-          ownerWindow?.removeEventListener('touchcancel', onTouchEnd);
-          target.removeEventListener('keydown', onKeyDown);
-          ownerWindow?.removeEventListener('keyup', completeReaderIntent);
-          ownerWindow?.removeEventListener('blur', resetReaderInput);
-          ownerWindow?.removeEventListener('resize', onLayoutChange);
-          if (observingFonts) {
-            fontFaceSet?.removeEventListener('loadingdone', onContentReflow);
-            observingFonts = false;
-          }
-          resizeObserver?.disconnect();
-          mutationObserver?.disconnect();
-          for (const lease of moveLeases.values()) lease.dispose();
-          moveLeases.clear();
-          dragGrabOffsets.clear();
-          restoreInactiveThumbs(new Set());
-          restoreTrackInsets(new Set());
-          for (const track of Array.from(trackStyles.keys())) {
-            restoreTrackDisplay(track);
-          }
-          target.style.overflowX = original.overflowX;
-          target.style.overflowY = original.overflowY;
-          target.style.scrollbarWidth = original.scrollbarWidth;
-          if (original.projection === null) target.removeAttribute('data-pui-scroll-projection');
-          else target.setAttribute('data-pui-scroll-projection', original.projection);
-        },
+        dispose,
       };
     },
   };

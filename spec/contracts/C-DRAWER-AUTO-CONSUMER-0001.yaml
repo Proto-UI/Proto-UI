@@ -25,6 +25,10 @@ criteria:
     text:
       en: Public examples use legal statically preflighted input and separate short intrinsic, long scrolling and explicit snap cases. Source and synthetic CSSOM evidence cannot certify native content height, current cap, actual scrollTop or Close reachability. Native/GPUI mappings, Compiler and packed-consumer composition remain separately blocking acceptance work.
       zh-CN: 公开示例使用静态预检合法输入，分开短内容 intrinsic、长内容滚动及显式 snap。源码与合成 CSSOM 不证明 native 内容高度、当前 cap、真实 scrollTop 或 Close 可达。native/GPUI、Compiler 与打包组合仍分别阻塞验收。
+  - id: C-DRAWER-AUTO-CONSUMER-0001-SCROLL
+    text:
+      en: Content declares the existing semantic Scroll surface with vertical axes and system projection to own vertical scrolling and horizontal clipping. Prototype code does not manipulate host overflow or targets. An ordinary split host binds the current inner content surface as the single scrollport, subject to explicit readiness and exclusive policy admission; unresolved host support does not certify native geometry.
+      zh-CN: Content 使用现有语义 Scroll surface 声明 vertical axes 和 system projection，负责纵向滚动及横向裁切。原型不操作宿主 overflow 或 target。普通 split host 在显式 readiness 和独占 policy 准入后，以当前内内容表面作为唯一 scrollport；未解决的 host 支持不代表 native 几何已验证。
 dependsOn:
   contracts:
     [C-DRAWER-EXTENT-MODEL-0001, C-AVAILABLE-SPACE-LAYOUT-0001, C-AXIS-INPUT-CONTACT-BASIS-0001]

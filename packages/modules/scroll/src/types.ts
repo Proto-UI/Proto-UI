@@ -5,6 +5,7 @@ import type {
   ScrollSurfaceConfigPatch,
   ScrollSurfaceHandle,
   ScrollSurfaceRequest,
+  ScrollSurfaceRequestOutcome,
   ScrollSurfaceSnapshot,
 } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -16,7 +17,7 @@ export type ScrollFacade = {
 export type ScrollPort = {
   configureSurface(patch: ScrollSurfaceConfigPatch): void;
   bindComposedChrome(binding: ScrollComposedChromeBinding): void;
-  request(request: ScrollSurfaceRequest): void;
+  request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome;
   getConfig(): ScrollSurfaceConfig;
   getSnapshot(): ScrollSurfaceSnapshot;
 };

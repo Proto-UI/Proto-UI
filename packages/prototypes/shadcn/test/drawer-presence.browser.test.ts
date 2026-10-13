@@ -24,7 +24,7 @@ beforeAll(async () => {
     await build({
       stdin: {
         contents:
-          "export {createDrawerPresenceFixture} from './packages/prototypes/shadcn/test/fixtures/drawer-presence';",
+          "export {createDrawerPresenceFixture,createDrawerScrollFixture} from './packages/prototypes/shadcn/test/fixtures/drawer-presence';",
         resolveDir: process.cwd(),
         loader: 'ts',
       },
@@ -123,6 +123,121 @@ describe('real Shadcn Drawer source physical presentation', () => {
       } finally {
         await writeFile(
           path.join(output, `drawer-${scope}-trace.json`),
+          JSON.stringify({ scope, samples, errors }, null, 2)
+        );
+        await page.close();
+      }
+    },
+    20000
+  );
+});
+
+describe('real Drawer semantic Scroll physical target', () => {
+  it.each(['document', 'shadow'] as const)(
+    '%s keeps one bounded slot scrollport',
+    async (scope) => {
+      const page = await browser.newPage({ viewport: { width: 800, height: 600 } });
+      const samples: unknown[] = [],
+        errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(String(error)));
+      try {
+        await page.route('**/*', (route) => route.abort());
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.setContent('<style>html{font-size:16px}body{margin:0}</style>');
+        await page.addScriptTag({ content: script });
+        await page.evaluate(
+          ({ scope, css, artifact }) => {
+            const sheet = document.createElement('style');
+            sheet.textContent = css;
+            document.head.append(sheet);
+            (window as any).scrollFixture = (window as any).DrawerFixture.createDrawerScrollFixture(
+              scope === 'shadow'
+                ? { shadow: { mode: 'open', presentation: 'split', styleArtifact: artifact } }
+                : {}
+            );
+            (window as any).scrollFixture.open();
+          },
+          {
+            scope,
+            css: renderProtoStyleTokenCss(tokens),
+            artifact: renderProtoShadowSplitStyleArtifact(tokens),
+          }
+        );
+        const sample = () => page.evaluate(() => (window as any).scrollFixture.sample());
+        await expect.poll(async () => (await sample()).phase).toBe('entered');
+        await expect.poll(async () => (await sample()).facts.projection).toBe('system');
+        const initial = await sample();
+        samples.push({ stage: 'initial', ...initial });
+        expect(errors).toEqual([]);
+        expect(initial.isHost).toBe(scope === 'document');
+        expect(initial.clientHeight).toBeGreaterThan(0);
+        expect(initial.surfaceRect.height).toBeLessThanOrEqual(201);
+        expect(initial.scrollHeight).toBeGreaterThan(initial.clientHeight);
+        expect(initial.clipProbe).toMatchObject({
+          withinViewport: true,
+          hitPresent: true,
+          childExtends: true,
+          childCoversY: true,
+          clipped: true,
+        });
+        expect(initial.overflowX).toBe('hidden');
+        expect(initial.overflowY).toBe('auto');
+        const outcome = await page.evaluate(() => (window as any).scrollFixture.request(0.5));
+        expect(outcome.kind).toBe('dispatched');
+        await expect.poll(async () => (await sample()).scrollTop).toBeGreaterThan(100);
+        const requested = await sample();
+        samples.push({ stage: 'semantic-request', ...requested });
+        expect(requested.surfaceRect.y).toBeCloseTo(initial.surfaceRect.y, 1);
+        expect(requested.firstRect.y).toBeLessThan(initial.firstRect.y);
+        expect(requested.background).toBe(initial.background);
+        expect(requested.border).toBe(initial.border);
+        if (scope === 'shadow') expect(requested.hostScrollTop).toBe(0);
+        await page.mouse.move(requested.surfaceRect.x + 20, requested.surfaceRect.y + 20);
+        await page.mouse.wheel(0, 120);
+        await expect
+          .poll(async () => (await sample()).scrollTop)
+          .toBeGreaterThan(requested.scrollTop);
+        samples.push({ stage: 'wheel', ...(await sample()) });
+        await page.locator('#drawer-scroll-start').focus();
+        await expect.poll(async () => (await sample()).scrollTop).toBeLessThan(30);
+        await page.keyboard.press('PageDown');
+        await expect.poll(async () => (await sample()).scrollTop).toBeGreaterThan(30);
+        samples.push({ stage: 'keyboard-scroll', ...(await sample()) });
+        await page.locator('#drawer-scroll-start').focus();
+        await page.keyboard.press('Tab');
+        await expect
+          .poll(async () =>
+            page
+              .locator('#drawer-scroll-end')
+              .evaluate((el) => el === el.ownerDocument.activeElement)
+          )
+          .toBe(true);
+        const focused = await sample();
+        samples.push({ stage: 'focus-reveal', ...focused });
+        expect(focused.lastRect.bottom).toBeLessThanOrEqual(focused.surfaceRect.bottom + 1);
+        expect(focused.lastRect.top).toBeGreaterThanOrEqual(focused.surfaceRect.top - 1);
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = '20px';
+        });
+        await expect.poll(async () => (await sample()).surfaceRect.height).toBeGreaterThan(240);
+        const resized = await sample();
+        samples.push({ stage: 'root-text-resize', ...resized });
+        expect(resized.surfaceRect.height).toBeLessThanOrEqual(251);
+        expect(resized.clipProbe).toMatchObject({
+          withinViewport: true,
+          hitPresent: true,
+          childExtends: true,
+          childCoversY: true,
+          clipped: true,
+        });
+        expect(errors).toEqual([]);
+        await page.screenshot({
+          path: path.join(output, `drawer-${scope}-scroll.png`),
+          fullPage: true,
+        });
+      } finally {
+        await writeFile(
+          path.join(output, `drawer-${scope}-scroll-trace.json`),
           JSON.stringify({ scope, samples, errors }, null, 2)
         );
         await page.close();

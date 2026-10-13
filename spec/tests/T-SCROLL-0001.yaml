@@ -61,7 +61,37 @@ cases:
       - A-VUE-2-0001-SCROLL
       - A-WEB-COMPONENT-0001-SCROLL
     expectation: host-request-changes-physical-offset-then-observed-facts-and-cleanup-stops-input
+  - id: T-SCROLL-0001-CASE-AVAILABILITY
+    title: Physical binding admission is atomic across unavailable targets and reentry
+    covers:
+      [
+        C-SCROLL-0001-AVAILABILITY,
+        HC-SCROLL-SURFACE-0001-AVAILABILITY,
+        HC-SCROLL-SURFACE-0001-SPLIT,
+      ]
+    expectation: no-false-projection-no-request-replay-no-stale-physical-lease
+
 implementations:
+  - id: scroll-availability-transaction
+    kind: runtime-test
+    status: passing
+    path: packages/modules/scroll/test/availability.test.ts
+    required: true
+    consumesCases: [T-SCROLL-0001-CASE-AVAILABILITY]
+  - id: scroll-bound-web-host
+    kind: runtime-test
+    status: passing
+    path: packages/modules/scroll/test/web-bound-scroll-host.test.ts
+    required: true
+    consumesCases: [T-SCROLL-0001-CASE-AVAILABILITY]
+  - id: drawer-native-semantic-scroll
+    kind: runtime-test
+    status: planned
+    path: packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
+    required: true
+    consumesCases: [T-SCROLL-0001-CASE-AVAILABILITY]
+    notes:
+      [Native execution is required; source and DOM-model tests do not certify split slot geometry.]
   - id: scroll-module-projection-negotiation
     kind: module-test
     status: passing

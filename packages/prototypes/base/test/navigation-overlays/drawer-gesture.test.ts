@@ -132,7 +132,10 @@ describe.each(families.map((family) => [family.drawerContent.name, family] as co
         const p = fixture({ side, defaultSnapPoint: 0.5 }, {}, family);
         await flush();
         const styles = p.content.getAttribute('data-pui-style') ?? '';
-        expect(styles).toContain('overflow-y-auto');
+        // Scroll owns actual policy; authored overflow tokens no longer carry it.
+        expect(p.content.style.overflowY).toBe('auto');
+        expect(p.content.style.overflowX).toBe('hidden');
+        expect(p.content.getAttribute('data-pui-scroll-projection')).toBe('system');
         expect(styles).toContain('content-start');
         expect(styles).not.toContain('translate-y-[calc(var(--pui-offset-percentage)');
         expect(styles).not.toContain('translate-x-[calc(var(--pui-offset-percentage)');
@@ -348,8 +351,6 @@ it('keeps horizontal compatibility tokens while vertical geometry moves to neutr
   const recipes = [
     'w-[calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress))]',
     'h-[var(--proto-ui-available-region-height,100vh)]',
-    'overflow-y-auto',
-    'overflow-x-hidden',
     'content-start',
     'left-[calc(var(--proto-ui-available-region-center-x,50vw)_-_var(--proto-ui-available-region-width,100vw)/2)]',
     'top-[calc(var(--proto-ui-available-region-center-y,50vh)_-_var(--proto-ui-available-region-height,100vh)/2)]',
@@ -358,6 +359,8 @@ it('keeps horizontal compatibility tokens while vertical geometry moves to neutr
     'right-1',
   ];
   for (const recipe of recipes) expect(tokens).toContain(recipe);
+  expect(tokens).not.toContain('overflow-y-auto');
+  expect(tokens).not.toContain('overflow-x-hidden');
   expect(
     tokens.some((token) => token.startsWith('translate-') && token.includes('offset-percentage'))
   ).toBe(false);
@@ -367,7 +370,7 @@ it('keeps horizontal compatibility tokens while vertical geometry moves to neutr
     expect(css).toContain(
       'width: calc(min(20rem,var(--proto-ui-available-region-width,100vw))*var(--pui-drag-progress));'
     );
-    expect(css).toContain('overflow-y: auto;');
+    expect(css).not.toContain('overflow-y: auto;');
     expect(css).toContain('align-content: flex-start;');
   }
 });

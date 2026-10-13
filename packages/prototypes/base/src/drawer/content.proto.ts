@@ -1,5 +1,11 @@
 import { defineAsHook, definePrototype, tw, type DefHandle } from '@proto.ui/core';
-import { asAccessible, asBoundary, asFocusScope, asOverlay } from '@proto.ui/hooks';
+import {
+  asAccessible,
+  asBoundary,
+  asFocusScope,
+  asOverlay,
+  asScrollSurface,
+} from '@proto.ui/hooks';
 import { asTransition } from '../tools';
 import { setupDrawerSnap } from './snap';
 import { observeDrawerSide } from './side-observation';
@@ -120,9 +126,9 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   def.context.subscribe(DRAWER_CONTENT_CONTEXT, publishAcceptedSide);
   def.lifecycle.onCreated(publishAcceptedSide);
   def.lifecycle.onMounted(publishAcceptedSide);
-  def.feedback.style.use(
-    tw('fixed overflow-y-auto overflow-x-hidden min-w-0 min-h-0 content-start wrap-anywhere')
-  );
+  const scroll = asScrollSurface<DrawerContentProps>();
+  scroll.configure({ axes: 'vertical', projection: 'system' });
+  def.feedback.style.use(tw('fixed min-w-0 min-h-0 content-start wrap-anywhere'));
   def.rule({
     when: (w) => w.state(side).eq('left'),
     intent: (i) =>

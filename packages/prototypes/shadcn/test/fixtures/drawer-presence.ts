@@ -1,5 +1,7 @@
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as drawer from '../../src/drawer';
+import { definePrototype } from '@proto.ui/core';
+import { asScrollSurface } from '@proto.ui/hooks';
 
 /** Real family source fixture. No upstream implementation or demo-local animation. */
 export function createDrawerPresenceFixture(
@@ -55,6 +57,99 @@ export function createDrawerPresenceFixture(
     },
     side(side: 'top' | 'bottom' | 'left' | 'right') {
       setElementProps(content, { side, maxExtent: { unit: 'logical', value: 200 } });
+    },
+  };
+}
+
+/** Test-only observation/request ports around unchanged family setup; no host style overrides. */
+export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebComponent>[1] = {}) {
+  const contentPrototype = definePrototype({
+    ...drawer.drawerContent,
+    setup(def) {
+      drawer.drawerContent.setup(def);
+      const scroll = asScrollSurface();
+      def.expose.method('__testScrollSnapshot', () => scroll.getSnapshot());
+      def.expose.method('__testScrollTo', (position: number) =>
+        scroll.request({ kind: 'to', axis: 'vertical', position })
+      );
+    },
+  });
+  for (const prototype of [drawer.drawerRoot, contentPrototype, drawer.drawerMask])
+    AdaptToWebComponent(prototype, options);
+  const root = document.createElement(drawer.drawerRoot.name);
+  const content = document.createElement(contentPrototype.name);
+  const mask = document.createElement(drawer.drawerMask.name);
+  setElementProps(root, { open: false });
+  setElementProps(content, { side: 'bottom', maxExtent: { unit: 'root-text', value: 12.5 } });
+  // Test-page width constraint leaves visible room to verify clipping outside the boundary.
+  // Height still comes solely from the real available-layout/extent model.
+  content.style.width = '320px';
+  const first = document.createElement('button');
+  first.textContent = 'Scroll start';
+  first.id = 'drawer-scroll-start';
+  const long = document.createElement('div');
+  long.textContent = 'Long slotted content';
+  long.style.height = '1000px';
+  long.style.flexShrink = '0';
+  long.style.width = '1600px';
+  const last = document.createElement('button');
+  last.textContent = 'Scroll end';
+  last.id = 'drawer-scroll-end';
+  content.append(first, long, last);
+  root.append(mask, content);
+  document.body.append(root);
+  const surface = () =>
+    (content.shadowRoot?.querySelector('[part="surface"]') ?? content) as HTMLElement;
+  return {
+    root,
+    content,
+    open() {
+      setElementProps(root, { open: true });
+    },
+    request(position: number) {
+      return (content as any).getExposes().__testScrollTo(position);
+    },
+    sample() {
+      const target = surface(),
+        style = getComputedStyle(target);
+      const surfaceRect = target.getBoundingClientRect(),
+        longRect = long.getBoundingClientRect();
+      const probeX = surfaceRect.right + 8;
+      const probeY =
+        (Math.max(surfaceRect.top, longRect.top) + Math.min(surfaceRect.bottom, longRect.bottom)) /
+        2;
+      const hit = document.elementFromPoint(probeX, probeY);
+      const clipProbe = {
+        x: probeX,
+        y: probeY,
+        withinViewport: probeX >= 0 && probeY >= 0 && probeX < innerWidth && probeY < innerHeight,
+        hitPresent: hit !== null,
+        childExtends: longRect.right > probeX,
+        childCoversY:
+          longRect.top < probeY &&
+          longRect.bottom > probeY &&
+          surfaceRect.top < probeY &&
+          surfaceRect.bottom > probeY,
+        clipped: hit !== null && !content.contains(hit),
+      };
+      return {
+        phase: (content as any).getExposes().transitionState.get(),
+        facts: (content as any).getExposes().__testScrollSnapshot(),
+        hostRect: content.getBoundingClientRect().toJSON(),
+        surfaceRect: target.getBoundingClientRect().toJSON(),
+        scrollTop: target.scrollTop,
+        scrollHeight: target.scrollHeight,
+        clientHeight: target.clientHeight,
+        hostScrollTop: content.scrollTop,
+        isHost: target === content,
+        clipProbe,
+        overflowX: style.overflowX,
+        overflowY: style.overflowY,
+        border: style.borderTopWidth,
+        background: style.backgroundColor,
+        firstRect: first.getBoundingClientRect().toJSON(),
+        lastRect: last.getBoundingClientRect().toJSON(),
+      };
     },
   };
 }

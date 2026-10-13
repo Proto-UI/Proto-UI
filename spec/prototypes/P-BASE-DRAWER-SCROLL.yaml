@@ -1,0 +1,31 @@
+id: P-BASE-DRAWER-SCROLL
+type: prototype
+title: Drawer semantic vertical scroll surface
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Source integration uses existing Scroll declarations; physical split geometry and native input remain pending exact-source evidence.
+summary: Content declares one vertical system Scroll surface without raw host overflow access.
+statement:
+  en: Base Drawer Content consumes asScrollSurface with vertical axes and system projection. The host owns current-target readiness, actual clipping and scrolling, facts, requests and guarded session cleanup.
+  zh-CN: Base Drawer Content 消费 asScrollSurface，配置 vertical axes 和 system projection。Host 负责当前 target 就绪、真实裁切滚动、facts、requests 及受保护的 session 清理。
+criteria:
+  - id: P-BASE-DRAWER-SCROLL-DECLARATION
+    text:
+      en: Follow the Content scroll contract through the existing portable Scroll hook. Do not add component-named host branches or infer a role for raw overflow style tokens. Controlled open, extent admission, focus and Transition ownership remain with their existing domains.
+      zh-CN: 通过现有 portable Scroll hook 遵守 Content 滚动契约，不增加组件名 host 分支或给原始 overflow token 推断 role。受控 open、extent 准入、focus 和 Transition 的所有权保持在现有 domain。
+sources:
+  - path: packages/prototypes/base/src/drawer/content.proto.ts
+  - path: packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
+dependsOn:
+  contracts: [C-DRAWER-AUTO-CONSUMER-0001, C-SCROLL-0001]
+verifies:
+  tests: [T-SCROLL-0001]
+openQuestions:
+  - id: P-BASE-DRAWER-SCROLL-Q-NATIVE
+    question: Which exact-source native results establish bounded slot geometry, clipping, scrolling and focus reveal in Document and split Shadow?
+    blocks: [activation:P-BASE-DRAWER-SCROLL]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Express project-authored Drawer scrolling through the existing semantic Scroll capability.
+tags: [drawer, scroll, prototype, base]

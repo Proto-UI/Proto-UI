@@ -50,6 +50,10 @@ criteria:
     text:
       zh-CN: composed Thumb movement 必须遵循 `C-SCROLL-COMPOSED-CONTROL-0001`，由 Move Gesture host session 产生 `control-drag` request，并继续以实际 surface facts 作为位置真相。
       en: Composed Thumb movement must follow `C-SCROLL-COMPOSED-CONTROL-0001`, producing `control-drag` requests from a Move Gesture host session while retaining actual surface facts as position truth.
+  - id: C-SCROLL-0001-AVAILABILITY
+    text:
+      en: An availability-aware host binds one current physical identity. Until a returned lease and its initial real facts are accepted for that identity, projection is unresolved and prior axis observations are historical, not current geometry. Unavailable requests return rejected without replay; dispatched means delivery to the current engine, while queued is limited to the synchronous attachment transaction. Old bindings cannot publish facts or consume requests after replacement, document retirement or disposal.
+      zh-CN: 具备 availability 的 host 绑定唯一当前物理身份。在对应 lease 返回且初始真实 facts 被接受前，projection 为 unresolved，旧轴观察仅为历史值而非当前几何。不可用请求返回 rejected 且不重放；dispatched 仅表示交给当前 engine，queued 仅限同步 attachment 事务。旧 binding 在替换、文档退役或销毁后不能发布 facts 或消费请求。
 openQuestions:
   - id: C-SCROLL-0001-Q-LENGTH
     question:

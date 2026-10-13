@@ -13,6 +13,7 @@ import type {
   ScrollSurfaceConfigPatch,
   ScrollSurfaceHandle,
   ScrollSurfaceRequest,
+  ScrollSurfaceRequestOutcome,
   ScrollSurfaceSnapshot,
   Unsubscribe,
 } from '@proto.ui/core';
@@ -58,6 +59,15 @@ export class ScrollModuleImpl extends ModuleBase {
   private offAnatomyTargets: Unsubscribe | null = null;
   private lease: ScrollSurfaceHostLease | null = null;
   private mounted = false;
+  private availabilitySession: {
+    host: ScrollSurfaceHost;
+    installing: boolean;
+    off: Unsubscribe | null;
+  } | null = null;
+  private currentBinding: object | null = null;
+  private acquiringEpoch: number | null = null;
+  private retirementDepth = 0;
+  private refreshAfterRetirement = false;
   private leaseEpoch = 0;
   private snapshotEpoch = 0;
   private attachingLease: { epoch: number; requests: ScrollSurfaceRequest[] } | null = null;
@@ -202,23 +212,31 @@ export class ScrollModuleImpl extends ModuleBase {
     }
   }
 
-  request(request: ScrollSurfaceRequest): void {
-    if (!this.declared) return;
+  request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome {
+    if (!this.declared) return { kind: 'rejected', reason: 'not-declared' };
+    if (!this.mounted) return { kind: 'rejected', reason: 'not-mounted' };
+    const epoch = this.leaseEpoch;
+    if (this.availabilitySession && !this.bindingIsCurrent(epoch, this.currentBinding)) {
+      if (epoch === this.leaseEpoch && request.kind === 'to-end')
+        this.set(this.endFollowRequestStatusOwned, 'rejected');
+      return { kind: 'rejected', reason: 'unavailable' };
+    }
     const normalized =
       request.kind === 'to' || request.kind === 'control-drag'
         ? { ...request, position: clampRatio(request.position) }
         : request;
     if (this.attachingLease?.epoch === this.leaseEpoch) {
       this.attachingLease.requests.push(normalized);
-      return;
+      return { kind: 'queued' };
     }
     if (!this.lease) {
       if (normalized.kind === 'to-end') {
         this.set(this.endFollowRequestStatusOwned, 'rejected');
       }
-      return;
+      return { kind: 'rejected', reason: 'unavailable' };
     }
     this.lease.request(normalized);
+    return { kind: 'dispatched' };
   }
 
   getConfig(): ScrollSurfaceConfig {
@@ -269,13 +287,23 @@ export class ScrollModuleImpl extends ModuleBase {
     super.onProtoPhase(phase);
     if (phase === 'unmounted') {
       this.mounted = false;
-      this.disconnect();
-    }
-    if (phase === 'unmounted') {
-      this.offAnatomyOrder?.();
+      const order = this.offAnatomyOrder;
+      const targets = this.offAnatomyTargets;
       this.offAnatomyOrder = null;
-      this.offAnatomyTargets?.();
       this.offAnatomyTargets = null;
+      let failed = false;
+      let failure: unknown;
+      for (const cleanup of [() => this.disconnect(), () => order?.(), () => targets?.()]) {
+        try {
+          cleanup();
+        } catch (error) {
+          if (!failed) {
+            failed = true;
+            failure = error;
+          }
+        }
+      }
+      if (failed) throw failure;
     }
   }
 
@@ -284,6 +312,200 @@ export class ScrollModuleImpl extends ModuleBase {
   }
 
   private attach(): void {
+    if (this.retirementDepth) {
+      this.deferUntilRetired();
+      return;
+    }
+    const host = this.getHost();
+    if (host?.availability) {
+      if (this.availabilitySession?.host === host) {
+        if (!this.availabilitySession.installing) this.refreshAvailability();
+        return;
+      }
+      this.disconnect();
+      if (!this.mounted || this.getHost() !== host || this.availabilitySession) return;
+      const session = { host, installing: true, off: null as Unsubscribe | null };
+      this.availabilitySession = session;
+      try {
+        const off = host.availability.subscribe(() => {
+          if (this.availabilitySession === session && !session.installing)
+            this.refreshAvailability();
+        });
+        session.installing = false;
+        if (this.availabilitySession !== session || !this.mounted) {
+          off();
+          return;
+        }
+        session.off = off;
+      } catch (error) {
+        if (this.availabilitySession === session) {
+          try {
+            this.disconnect();
+          } catch {
+            /* Keep the acquisition failure. */
+          }
+        }
+        throw error;
+      }
+      this.refreshAvailability();
+      return;
+    }
+    if (this.availabilitySession) {
+      this.disconnect();
+      if (this.getHost() !== host || this.availabilitySession || this.lease) return;
+    }
+    if (this.mounted) this.attachStatic();
+  }
+
+  private bindingIsCurrent(epoch: number, binding: object | null): boolean {
+    const session = this.availabilitySession;
+    if (!binding || !session || epoch !== this.leaseEpoch || !this.mounted) return false;
+    const value = session.host.availability!.get();
+    return (
+      this.availabilitySession === session &&
+      epoch === this.leaseEpoch &&
+      this.mounted &&
+      value.kind === 'available' &&
+      value.binding === binding
+    );
+  }
+
+  private resetFacts(epoch: number, rejectPending: boolean): void {
+    const previousStatus = this.endFollowRequestStatusOwned.get();
+    let failure: unknown;
+    let failed = false;
+    const write = <V>(handle: OwnedStateHandle<V>, value: V) => {
+      if (epoch !== this.leaseEpoch) return;
+      try {
+        this.set(handle, value);
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          failure = error;
+        }
+      }
+    };
+    write(this.projectionOwned, 'unresolved');
+    write(this.scrollingOwned, false);
+    write(this.endFollowStateOwned, 'off');
+    write(
+      this.endFollowRequestStatusOwned,
+      rejectPending && (previousStatus === 'pending' || previousStatus === 'rejected')
+        ? 'rejected'
+        : 'idle'
+    );
+    if (failed) throw failure;
+  }
+
+  private refreshAvailability(): void {
+    if (this.retirementDepth) {
+      this.deferUntilRetired();
+      return;
+    }
+    const session = this.availabilitySession;
+    if (!session || session.installing || !this.mounted) return;
+    const observedEpoch = this.leaseEpoch;
+    const available = session.host.availability!.get();
+    if (this.availabilitySession !== session || observedEpoch !== this.leaseEpoch || !this.mounted)
+      return;
+    if (
+      available.kind === 'available' &&
+      this.currentBinding === available.binding &&
+      (this.lease || this.attachingLease || this.acquiringEpoch === this.leaseEpoch)
+    )
+      return;
+    const epoch = ++this.leaseEpoch;
+    this.snapshotEpoch++;
+    this.attachingLease = null;
+    this.currentBinding = null;
+    this.acquiringEpoch = null;
+    const previous = this.lease;
+    this.lease = null;
+    this.retire([() => this.resetFacts(epoch, true), () => previous?.dispose()]);
+    if (
+      epoch !== this.leaseEpoch ||
+      this.availabilitySession !== session ||
+      !this.mounted ||
+      available.kind !== 'available'
+    )
+      return;
+    const binding = available.binding;
+    if (!this.bindingIsCurrent(epoch, binding)) return;
+    const projection = resolveScrollProjection(
+      this.config,
+      session.host.support,
+      session.host.preference
+    );
+    if (!this.bindingIsCurrent(epoch, binding)) return;
+    this.currentBinding = binding;
+    this.acquiringEpoch = epoch;
+    const attaching = { epoch, requests: [] as ScrollSurfaceRequest[] };
+    let initial: ScrollSurfaceSnapshot | undefined;
+    let admitted = false;
+    let returned: ScrollSurfaceHostLease | null = null;
+    try {
+      const attachment = this.createHostAttachment(epoch, projection, (snapshot) => {
+        if (!this.bindingIsCurrent(epoch, binding)) return;
+        if (!admitted) {
+          initial = snapshot;
+          return;
+        }
+        this.applySnapshot(snapshot);
+      });
+      if (!this.bindingIsCurrent(epoch, binding)) return;
+      returned = session.host.attach(attachment, binding);
+      if (!this.bindingIsCurrent(epoch, binding)) {
+        const stale = returned;
+        returned = null;
+        this.retire([() => stale.dispose()]);
+        return;
+      }
+      if (!initial)
+        throw new Error(
+          '[Scroll] missing-initial-snapshot: available host must synchronously report initial facts.'
+        );
+      this.lease = returned;
+      admitted = true;
+      this.attachingLease = attaching;
+      this.applySnapshot(initial);
+      for (const request of attaching.requests) {
+        if (!this.bindingIsCurrent(epoch, binding) || this.lease !== returned) break;
+        returned.request(request);
+      }
+    } catch (error) {
+      if (epoch === this.leaseEpoch) {
+        ++this.leaseEpoch;
+        this.snapshotEpoch++;
+        this.currentBinding = null;
+        this.acquiringEpoch = null;
+        this.lease = null;
+        this.attachingLease = null;
+        const failedEpoch = this.leaseEpoch;
+        const failedLease = returned;
+        returned = null;
+        try {
+          this.retire([() => this.resetFacts(failedEpoch, true), () => failedLease?.dispose()]);
+        } catch {
+          /* Retain the first failure after attempting all cleanup. */
+        }
+      }
+      if (!admitted && returned && epoch !== this.leaseEpoch) {
+        try {
+          const stale = returned;
+          returned = null;
+          this.retire([() => stale.dispose()]);
+        } catch {
+          /* Retain the acquisition failure. */
+        }
+      }
+      throw error;
+    } finally {
+      if (this.attachingLease === attaching) this.attachingLease = null;
+      if (this.acquiringEpoch === epoch) this.acquiringEpoch = null;
+    }
+  }
+
+  private attachStatic(): void {
     const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
     this.attachingLease = null;
@@ -320,18 +542,27 @@ export class ScrollModuleImpl extends ModuleBase {
       }
     } finally {
       if (this.attachingLease === attaching) this.attachingLease = null;
+      if (this.acquiringEpoch === epoch) this.acquiringEpoch = null;
     }
   }
 
-  private createHostAttachment(epoch = this.leaseEpoch): ScrollSurfaceHostAttachment {
+  private createHostAttachment(
+    epoch = this.leaseEpoch,
+    projection = this.projectionOwned.get() as Exclude<ScrollResolvedProjection, 'unresolved'>,
+    onFacts?: (snapshot: ScrollSurfaceSnapshot) => void
+  ): ScrollSurfaceHostAttachment {
     const composedChrome = this.resolveComposedChrome();
     const attachment: ScrollSurfaceHostAttachment = {
       config: this.config,
-      projection: this.projectionOwned.get() as Exclude<ScrollResolvedProjection, 'unresolved'>,
-      onFacts: (snapshot) => {
-        if (epoch !== this.leaseEpoch || !this.mounted) return;
-        this.applySnapshot(snapshot);
-      },
+      projection,
+      onFacts:
+        onFacts ??
+        ((snapshot) => {
+          if (epoch !== this.leaseEpoch || !this.mounted) return;
+          if (this.availabilitySession && !this.bindingIsCurrent(epoch, this.currentBinding))
+            return;
+          this.applySnapshot(snapshot);
+        }),
       ...(composedChrome ? { composedChrome } : {}),
     };
     return Object.freeze(attachment);
@@ -434,20 +665,54 @@ export class ScrollModuleImpl extends ModuleBase {
     this.statePort.set(handle, value, 'reason: scroll host fact');
   }
 
+  private deferUntilRetired(): void {
+    // Revoke old callbacks immediately; acquisition waits until every physical
+    // disposer in the outer retirement has returned, including nested cleanup.
+    this.leaseEpoch++;
+    this.snapshotEpoch++;
+    this.refreshAfterRetirement = true;
+  }
+
+  private retire(cleanups: readonly (() => void)[]): void {
+    this.retirementDepth++;
+    let failed = false;
+    let failure: unknown;
+    const attempt = (operation: () => void) => {
+      try {
+        operation();
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          failure = error;
+        }
+      }
+    };
+    try {
+      for (const cleanup of cleanups) attempt(cleanup);
+    } finally {
+      this.retirementDepth--;
+    }
+    if (!this.retirementDepth && this.refreshAfterRetirement) {
+      this.refreshAfterRetirement = false;
+      if (this.mounted) attempt(() => this.attach());
+    }
+    if (failed) throw failure;
+  }
+
   disconnect(): void {
     const epoch = ++this.leaseEpoch;
     this.snapshotEpoch++;
     this.attachingLease = null;
+    this.currentBinding = null;
+    this.acquiringEpoch = null;
     const previous = this.lease;
     this.lease = null;
-    previous?.dispose();
-    if (epoch !== this.leaseEpoch) return;
-    this.set(this.scrollingOwned, false);
-    if (epoch !== this.leaseEpoch) return;
-    this.set(this.projectionOwned, 'unresolved');
-    if (epoch !== this.leaseEpoch) return;
-    this.set(this.endFollowStateOwned, 'off');
-    if (epoch !== this.leaseEpoch) return;
-    this.set(this.endFollowRequestStatusOwned, 'idle');
+    const session = this.availabilitySession;
+    this.availabilitySession = null;
+    this.retire([
+      () => this.resetFacts(epoch, !!session),
+      () => previous?.dispose(),
+      () => session?.off?.(),
+    ]);
   }
 }

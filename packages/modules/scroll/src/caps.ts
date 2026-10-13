@@ -28,10 +28,23 @@ export interface ScrollSurfaceHostLease {
   dispose(): void;
 }
 
+export type ScrollSurfaceAvailability =
+  | Readonly<{
+      kind: 'unavailable';
+      reason: 'target-pending' | 'target-retired' | 'unsupported-profile' | 'ownership-conflict';
+    }>
+  | Readonly<{ kind: 'available'; binding: object }>;
+
+export interface ScrollSurfaceAvailabilityPort {
+  get(): ScrollSurfaceAvailability;
+  subscribe(onChange: () => void): () => void;
+}
+
 export interface ScrollSurfaceHost {
   readonly support: ScrollSurfaceHostSupport;
   readonly preference?: import('@proto.ui/core').ScrollProjectionPreference;
-  attach(connection: ScrollSurfaceHostAttachment): ScrollSurfaceHostLease;
+  readonly availability?: ScrollSurfaceAvailabilityPort;
+  attach(connection: ScrollSurfaceHostAttachment, expectedBinding?: object): ScrollSurfaceHostLease;
 }
 
 export const SCROLL_SURFACE_HOST_CAP = cap<ScrollSurfaceHost>('@proto.ui/scroll/surfaceHost');

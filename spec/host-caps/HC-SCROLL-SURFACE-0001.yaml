@@ -54,6 +54,14 @@ criteria:
     text:
       zh-CN: End-follow session cleanup 必须取消 scheduled layout movement 与 request outcome，并释放新增 observer/listener；旧 target/epoch 的 callback 不得移动或发布到 replacement lease。
       en: End-follow session cleanup must cancel scheduled layout movement and request outcomes and release added observers and listeners; callbacks from an old target or epoch must not move or publish into a replacement lease.
+  - id: HC-SCROLL-SURFACE-0001-AVAILABILITY
+    text:
+      en: The optional typed availability port reports a host-local opaque available binding or an explicit unavailable reason. Attachment validates the expected binding and buffers synchronous initial facts until the complete acquisition returns. Failure releases all acquired resources without resolved fact publication; callback reentry preserves newer authority. Static hosts retain their existing contract.
+      zh-CN: 可选 typed availability port 返回宿主内不透明 available binding 或明确 unavailable 原因。attach 核对 expected binding，将同步初始 facts 缓存到完整 acquisition 返回后才发布。失败释放所有已取得资源，不发布 resolved facts；回调重入保留较新权限。静态 host 保留现有契约。
+  - id: HC-SCROLL-SURFACE-0001-SPLIT
+    text:
+      en: The bounded ordinary split Web profile supports vertical system Scroll on the current inner surface containing paint and slot content. Boundary placement remains separate. One exclusive policy lease preflights all overflow/projection writes, preserves foreign replacements and priorities, and attempts every cleanup. Unready or replaced surfaces and document epochs revoke old facts and observers before teardown. Raw overflow tokens do not acquire a style role from this semantic declaration.
+      zh-CN: 有界普通 split Web profile 在含 paint 和 slot 内容的当前内表面支持纵向 system Scroll，boundary placement 仍独立。唯一独占 policy lease 整体预检 overflow/projection 写入，保留外部替换及优先级，并尝试全部清理。未就绪、换表面或换文档代际在清理前撤销旧 facts 和 observer。该语义声明不为原始 overflow token 授予 style role。
 satisfies:
   contracts:
     - C-SCROLL-0001

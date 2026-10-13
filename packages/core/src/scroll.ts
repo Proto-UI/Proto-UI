@@ -67,6 +67,11 @@ export type ScrollSurfaceRequest =
   | Readonly<{ kind: 'control-drag'; axis: ScrollAxis; position: number }>
   | Readonly<{ kind: 'to-end'; axis: ScrollAxis }>;
 
+export type ScrollSurfaceRequestOutcome =
+  | Readonly<{ kind: 'dispatched' }>
+  | Readonly<{ kind: 'queued' }>
+  | Readonly<{ kind: 'rejected'; reason: 'not-mounted' | 'not-declared' | 'unavailable' }>;
+
 export type ScrollAxisFactsHandle<P extends PropsBaseType = PropsBaseType> = Readonly<{
   position: ObservedStateHandle<number, P>;
   visibleRatio: ObservedStateHandle<number, P>;
@@ -90,7 +95,7 @@ export interface ScrollSurfaceHandle<P extends PropsBaseType = PropsBaseType> {
 
   configure(patch: ScrollSurfaceConfigPatch): void;
   bindComposedChrome(binding: ScrollComposedChromeBinding): void;
-  request(request: ScrollSurfaceRequest): void;
+  request(request: ScrollSurfaceRequest): ScrollSurfaceRequestOutcome;
   getSnapshot(): ScrollSurfaceSnapshot;
 }
 

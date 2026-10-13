@@ -1,3 +1,4 @@
+import { subscribeScrollTarget } from './scroll-target';
 import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
 import {
   PRESENCE_PRESENTATION_SINK_CAP,
@@ -141,7 +142,7 @@ import {
   type PreferenceInvalidationSource,
   type ColorSchemeInvalidationSource,
 } from '@proto.ui/module-rule-meta';
-import { createWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
+import { createBoundWebScrollSurfaceHost, SCROLL_SURFACE_HOST_CAP } from '@proto.ui/module-scroll';
 import { type PropsBaseType } from '@proto.ui/types';
 import {
   createWebComponentPortalMount,
@@ -2120,7 +2121,21 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     .use('scroll', [
       [
         SCROLL_SURFACE_HOST_CAP,
-        createWebScrollSurfaceHost(el, {
+        createBoundWebScrollSurfaceHost({
+          boundary: el,
+          getTarget: () =>
+            (args.feedbackSurfaceProjection ?? args.surfaceProjection).getSurfaceTarget(),
+          isReady: args.isViewReady,
+          subscribeTarget: (listener) =>
+            subscribeScrollTarget(
+              (fn) =>
+                (args.feedbackSurfaceProjection ?? args.surfaceProjection).subscribeSurfaceTarget(
+                  fn
+                ),
+              args.subscribeTargetReady,
+              listener
+            ),
+          subscribeDocumentChange: args.subscribeDocumentChange,
           moveGestureHost: createWebMoveGestureHost(),
           preference: scrollProjection,
         }),
