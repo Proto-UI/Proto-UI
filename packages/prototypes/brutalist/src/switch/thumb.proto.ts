@@ -10,7 +10,7 @@ const THUMB_TOKENS = [
   'absolute',
   'left-1',
   'top-1/2',
-  'translate-y-[-50%]',
+  '-translate-y-1/2',
   'block',
   'size-4',
   'rounded-full',

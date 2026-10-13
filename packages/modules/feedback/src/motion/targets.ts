@@ -3,15 +3,14 @@ export type MotionLength = Readonly<{ px: number; rem: number; percent: number }
 export type MotionTranslate = Readonly<{ x: MotionLength; y: MotionLength }>;
 export type MotionColor = Readonly<{ role: string; alpha: number }>;
 const zero = (): MotionLength => Object.freeze({ px: 0, rem: 0, percent: 0 });
-function length(raw: string): MotionLength | null {
-  let negative = false;
-  if (raw.startsWith('-')) {
-    negative = true;
-    raw = raw.slice(1);
-  }
+function length(raw: string, negative: boolean): MotionLength | null {
   let result: MotionLength | null = null;
   if (/^\d+(?:\.\d+)?$/.test(raw)) result = { px: 0, rem: Number(raw) / 4, percent: 0 };
-  else if (raw === 'full') result = { px: 0, rem: 0, percent: 100 };
+  else if (/^\d+\/\d+$/.test(raw)) {
+    const [numerator, denominator] = raw.split('/').map(Number);
+    if (Number.isSafeInteger(numerator) && Number.isSafeInteger(denominator) && denominator > 0)
+      result = { px: 0, rem: 0, percent: (100 * numerator) / denominator };
+  } else if (raw === 'full') result = { px: 0, rem: 0, percent: 100 };
   else if (/^\[calc\(/.test(raw)) {
     const calc = raw
       .replaceAll('_', '')
@@ -84,7 +83,7 @@ export function extractResidentMotionTarget(
       const m = token.match(/^(-?)translate-([xy])-(.+)$/)!;
       if (seen.has(m[2])) return { supported: false, reason: 'ambiguous-target' };
       seen.add(m[2]);
-      const v = length(m[1] + m[3]);
+      const v = length(m[3], m[1] === '-');
       if (!v) return { supported: false, reason: 'length-unavailable' };
       if (m[2] === 'x') x = v;
       else y = v;

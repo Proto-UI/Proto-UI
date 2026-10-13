@@ -35,6 +35,8 @@ const COMPOSITE_DISPLAY_TOKENS = new Set([
 const ROOT_GEOMETRY_TOKENS = new Set([
   'translate-y-px',
   'translate-x-0',
+  // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING: exact 1.25rem only.
+  'translate-x-5',
   'translate-x-[calc(100%_-_2px)]',
   'scale-[0.98]',
   'will-change-transform',

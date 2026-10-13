@@ -54,6 +54,15 @@ cases:
       - P-BRUTALIST-SWITCH-DEMO-NAMING
     expectation: p-brutalist-switch-demo-name-from-content
 implementations:
+  - id: brutalist-switch-shadow-admission
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-shadow-admission.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SWITCH-0001-CASE-RESIDENT]
+    exercises: [P-BRUTALIST-SWITCH, P-BRUTALIST-SWITCH-THUMB]
+    notes:
+      - Actual Shadow setup and final targets with unknown measurement/preference settle. Regression reproduces the 3161744 unresolved-role failure; physical trajectories require a fresh CI run.
   - id: brutalist-switch-resident-runtime
     kind: module-test
     status: planned

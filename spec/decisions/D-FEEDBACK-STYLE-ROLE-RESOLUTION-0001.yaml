@@ -65,6 +65,16 @@ criteria:
     text:
       zh-CN: H1 在内部 vocabulary 中增加 `root-geometry` 与 `hit-testing`，不增加作者 API。首批精确准入 `translate-y-px`、`translate-x-0`、`translate-x-[calc(100%_-_2px)]`、`scale-[0.98]`、`will-change-transform` 为 canonical root-geometry，`pointer-events-none` 为 canonical hit-testing。其余未治理的 translate/scale/will-change/pointer-events 值仍 unresolved；分类准入不等于物理 recipe 已支持。新增信息必须沿用 G–H 的完整 provenance transport。
       en: H1 adds internal `root-geometry` and `hit-testing` vocabulary without author APIs. The initial exact canonical root-geometry tokens are `translate-y-px`, `translate-x-0`, `translate-x-[calc(100%_-_2px)]`, `scale-[0.98]`, and `will-change-transform`; `pointer-events-none` is canonical hit-testing. Other ungoverned translate/scale/will-change/pointer-events values remain unresolved. Classification admission does not establish physical recipe support. New information retains the complete provenance transport under G-H.
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING
+    text:
+      en: >-
+        Admit exactly translate-x-5 as canonical root-geometry, preserving its existing 1.25rem physical meaning and whole-Root geometry ownership under M. This is a token-level admission independent of prototype identity, not a translate-family or arbitrary-value admission. Other spacing, negative, axis and percentage variants remain unresolved unless separately admitted. Shadow still requires the same-source H1 recipe and complete provenance; resident sampling does not bypass initial or settled target admission.
+
+
+      zh-CN: >-
+        仅精确准入 translate-x-5 为 canonical root-geometry，保持已有 1.25rem 物理含义及 M 的完整 Root 几何 owner。这是独立于 prototype 身份的 token 准入，不是 translate 全族或任意值准入。其他 spacing、负值、轴向及百分比变体 未经独立准入仍 unresolved。Shadow 仍要求同源 H1 recipe 与完整 provenance； resident 采样不绕过初始化或收敛目标的 admission。
+
+
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-M
     text:
       zh-CN: H1 Root 变换必须作用于完整实例的视觉与命中几何；WC split 在 boundary 上执行一次，surface 与 slot 随动而不重复变换。保留 collapsed Root 的普通流尺寸分配、百分比参照与 transform origin；will-change-transform 跟随实际变换 target，包括 stacking/containing-block 效应。不得通过变换接管 slot 内容样式或状态。
@@ -144,6 +154,9 @@ verifies:
   tests:
     - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Admit exact font-relative translate-x-5 Root geometry without broadening other transform roles or bypassing Shadow recipes.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Approved K1 exact half-translation Root geometry and same-source bounded Dialog fade/zoom obligations; draft retained.

@@ -27,14 +27,14 @@ describe('Brutalist Thumb resident declaration and static CSS fallback', () => {
       if (typeof token !== 'string') throw new TypeError('Expected collected token');
       return token;
     });
-    expect(tokens).toContain('translate-y-[-50%]');
+    expect(tokens).toContain('-translate-y-1/2');
     const css = renderProtoStyleTokenCss(tokens);
     expect(css).toContain('--pui-translate-y: -50%;');
     expect(css).toContain('--pui-translate-x: 1.25rem;');
     expect(css).not.toContain('transition-property:');
     for (const font of [16, 32]) {
       const target = extractResidentMotionTarget(
-        ['translate-x-5', 'translate-y-[-50%]'],
+        ['translate-x-5', '-translate-y-1/2'],
         'translate'
       );
       expect(target.supported).toBe(true);

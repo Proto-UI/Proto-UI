@@ -144,7 +144,7 @@ describe('prototypes/brutalist: switch', () => {
       'absolute',
       'left-1',
       'top-1/2',
-      'translate-y-[-50%]',
+      '-translate-y-1/2',
       'size-4',
       'rounded-full',
       'border-2',

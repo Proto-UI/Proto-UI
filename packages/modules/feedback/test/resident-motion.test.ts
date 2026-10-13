@@ -164,3 +164,57 @@ it('dimension replacement settles and typed anchors are copied', () => {
   expect(s.target([1, 2], 95, true, [1])).toEqual([1, 2]);
   expect(s.active).toBe(false);
 });
+
+it('resolves neutral signed fractions against the own reference box without pixel guesses', () => {
+  for (const [token, ratio] of [
+    ['-translate-y-1/2', -0.5],
+    ['translate-y-1/3', 1 / 3],
+    ['translate-y-3/2', 1.5],
+    ['translate-y-0/2', 0],
+  ] as const) {
+    const target = extractResidentMotionTarget([token], 'translate');
+    expect(target.supported).toBe(true);
+    if (target.supported) {
+      for (const size of [16, 32])
+        expect(
+          resolveMotionTranslate(target.value as MotionTranslate, {
+            rootFontPx: 16,
+            width: size,
+            height: size,
+          })![1]
+        ).toBeCloseTo(size * ratio);
+      if (ratio)
+        expect(
+          resolveMotionTranslate(target.value as MotionTranslate, {
+            rootFontPx: 16,
+            width: 16,
+            height: null,
+          })
+        ).toBeNull();
+    }
+  }
+});
+it.each([
+  '-1/2',
+  '+1/2',
+  '1/0',
+  '1/-2',
+  '1/+2',
+  '1/2/3',
+  '1.5/2',
+  '1/2px',
+  '/2',
+  '1/',
+  '--1/2',
+  'NaN/2',
+  'Infinity/2',
+  '9007199254740992/2',
+  '1/9007199254740992',
+])('rejects malformed or unsafe resident fraction %s', (fraction) => {
+  for (const axis of ['x', 'y']) {
+    expect(extractResidentMotionTarget([`translate-${axis}-${fraction}`], 'translate')).toEqual({
+      supported: false,
+      reason: 'length-unavailable',
+    });
+  }
+});

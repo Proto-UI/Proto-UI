@@ -27,8 +27,8 @@ criteria:
       zh-CN: 直接 prototype 入口名为 `brutalist-switch-thumb`，且是本 foundation 切片中唯一公开的 Switch Thumb 入口。
   - id: P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT
     text:
-      en: 'Thumb is absolutely placed at left-1 top-1/2 with translate-y-[-50%] (equivalent to -translate-y-1/2). It alone moves from translate-x-0 to translate-x-5 (20px). Both endpoints retain 6px outer inset and vertical centering within the 48x24 track. Placement is physically left-to-right even in an RTL ancestor; mirrored semantics are not claimed.'
-      zh-CN: 'Thumb 绝对定位于 left-1 top-1/2 并使用 translate-y-[-50%]（与 -translate-y-1/2 等价）；只有它从 translate-x-0 移动到 translate-x-5（20px）。两个端点均保留 6px 外侧留白并在 48×24 track 内垂直居中。RTL 祖先下仍采用物理从左到右定位，不声称镜像语义。'
+      en: 'Thumb is absolutely placed at left-1 top-1/2 with -translate-y-1/2. It alone moves from translate-x-0 to translate-x-5 (20px). Both endpoints retain 6px outer inset and vertical centering within the 48x24 track. Placement is physically left-to-right even in an RTL ancestor; mirrored semantics are not claimed.'
+      zh-CN: 'Thumb 绝对定位于 left-1 top-1/2 并使用 -translate-y-1/2；只有它从 translate-x-0 移动到 translate-x-5（20px）。两个端点均保留 6px 外侧留白并在 48×24 track 内垂直居中。RTL 祖先下仍采用物理从左到右定位，不声称镜像语义。'
 
   - id: P-BRUTALIST-SWITCH-THUMB-VISUAL-GRAMMAR
     text:

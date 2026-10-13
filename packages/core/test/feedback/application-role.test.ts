@@ -99,3 +99,23 @@ describe('feedback style application-role classification v0', () => {
     });
   });
 });
+
+it('admits only the exact font-relative resident spacing token, independently of component identity', () => {
+  expect(classifyTwTokenApplicationRoleV0('translate-x-5')).toEqual({
+    token: 'translate-x-5',
+    role: 'root-geometry',
+    roleSource: 'canonical',
+  });
+  for (const token of [
+    'translate-x-4',
+    'translate-x-6',
+    '-translate-x-5',
+    'translate-y-5',
+    'translate-x-[1.25rem]',
+    'translate-y-[-50%]',
+    'translate-x-5/0',
+    'translate-x-5oops',
+  ]) {
+    expect(classifyTwTokenApplicationRoleV0(token).role).toBe('unresolved');
+  }
+});

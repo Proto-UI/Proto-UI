@@ -8,6 +8,10 @@ lifecycleRationale:
 since: 0.3.0-alpha.0
 summary: Canonical classification plus Root-only provenance through semantic merge, Rule lowering, runtime patches, replay, and unchanged collapsed output.
 cases:
+  - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-RESIDENT-SPACING
+    title: Exact translate-x-5 admission preserves unresolved neighbors and real Shadow initial targets
+    covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING]
+    expectation: exact-font-relative-root-geometry-without-family-bypass
   - id: T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-TEMPLATE-ONLY-CSS
     title: Proven Template-only occurrences receive ordinary Shadow CSS without Root decomposition
     covers: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F]
@@ -137,6 +141,20 @@ cases:
       - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-K
     expectation: complete-projection-or-synchronous-rejection
 implementations:
+  - id: resident-spacing-role
+    kind: module-test
+    status: planned
+    path: packages/core/test/feedback/application-role.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-RESIDENT-SPACING]
+  - id: resident-spacing-shadow-setup
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-shadow-admission.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-CASE-RESIDENT-SPACING]
+    notes:
+      - Actual Shadow Root/Thumb setup and final tokens; deterministic DOM admission evidence only, not browser geometry.
   - id: cli-template-root-separation
     kind: workspace-check
     status: passing
