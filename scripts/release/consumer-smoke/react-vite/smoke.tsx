@@ -1,5 +1,6 @@
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import {
+  assertStyledButton,
   assertStyledSwitch,
   assertSwitchThumbState,
   loadConsumerStyles,
@@ -31,10 +32,7 @@ async function mountAndAssert(label: string) {
   const button = container.querySelector('.consumer-button');
   assert(button?.getAttribute('tabindex') === '0', `${label}: Button is not focusable`);
   assert(button?.getAttribute('aria-disabled') === 'false', `${label}: Button prop update failed`);
-  assert(
-    button?.getAttribute('data-pui-style')?.includes('group/button'),
-    `${label}: Button prototype styles are missing`
-  );
+  assertStyledButton(button, `${label}: Button`);
 
   const switchRoot = container.querySelector('.consumer-switch');
   assertStyledSwitch(switchRoot, label);

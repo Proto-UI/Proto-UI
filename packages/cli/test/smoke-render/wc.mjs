@@ -6,6 +6,7 @@
 // adapter and the registry need.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import {
+  assertStyledButton,
   assertStyledSwitch,
   assertSwitchThumbState,
   loadConsumerStyles,
@@ -34,6 +35,7 @@ const flush = () => new Promise((resolve) => setTimeout(resolve, 50));
 const switchElement = document.createElement('proto-ui-shadcn-switch');
 document.body.appendChild(switchElement);
 await flush();
+assertStyledButton(el, 'wc smoke: Button');
 assertStyledSwitch(switchElement, 'wc smoke');
 const switchThumb = switchElement.firstElementChild;
 if (switchThumb?.localName !== 'proto-ui-shadcn-switch-thumb') {

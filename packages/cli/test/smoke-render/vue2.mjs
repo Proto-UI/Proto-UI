@@ -2,6 +2,7 @@
 // per-host facade, so the assertions exercise packaged dependencies and the
 // Vue 2 codegen path together rather than source-only Adapter tests.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import { assertDefaultButtonTokens } from './consumer-smoke-css.mjs';
 
 GlobalRegistrator.register();
 
@@ -20,9 +21,8 @@ const host = button.$el;
 if (host.getAttribute('tabindex') !== '0') {
   throw new Error(`vue2 smoke: Button host is not focusable: ${host.outerHTML}`);
 }
-if (!host.getAttribute('data-pui-style')?.includes('group/button')) {
-  throw new Error(`vue2 smoke: Button host is missing prototype tokens: ${host.outerHTML}`);
-}
+// This is the intentional --no-styles consumer: check prototype output only.
+assertDefaultButtonTokens(host, 'vue2 smoke: Button');
 if (!host.classList.contains('user-added') || !host.textContent?.includes('click')) {
   throw new Error(`vue2 smoke: Button lost user content or class: ${host.outerHTML}`);
 }

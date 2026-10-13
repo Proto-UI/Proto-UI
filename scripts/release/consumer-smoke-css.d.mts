@@ -17,3 +17,6 @@ export function assertSwitchThumbState(
   expectedChecked: boolean,
   label: string
 ): void;
+
+export function assertDefaultButtonTokens(element: Element | null, label: string): void;
+export function assertStyledButton(element: Element | null, label: string): void;

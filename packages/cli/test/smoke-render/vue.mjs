@@ -20,9 +20,10 @@
 // What we assert: v0's Vue adapter renders the host as `rootTag` (default
 // `div`), so we don't query for `<button>`. shadcn-button pulls in
 // asFocusable via asButton, so the focus module stamps `tabindex="0"`, and
-// shadcn's feedback.style stamps the `group/button` token chain.
+// shadcn's feedback.style stamps the pinned New York paint token chain.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import {
+  assertStyledButton,
   assertStyledSwitch,
   assertSwitchThumbState,
   loadConsumerStyles,
@@ -59,16 +60,7 @@ if (host.getAttribute('tabindex') !== '0') {
   );
 }
 const className = host.getAttribute('class') || '';
-const styleName = host.getAttribute('data-pui-style') || '';
-if (!styleName.includes('group/button')) {
-  throw new Error(
-    'vue smoke: Button host missing prototype tokens (feedback.style did not stamp data-pui-style); host=' +
-      host.outerHTML
-  );
-}
-if (className.includes('group/button')) {
-  throw new Error('vue smoke: Button leaked prototype token into class; host=' + host.outerHTML);
-}
+assertStyledButton(host, 'vue smoke: Button');
 if (!className.includes('user-added')) {
   throw new Error('vue smoke: Button host missing user class; host=' + host.outerHTML);
 }

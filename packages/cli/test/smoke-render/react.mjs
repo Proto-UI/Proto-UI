@@ -21,9 +21,10 @@
 // `div`), so we don't query for `<button>`. Both shadcn-button and base-button
 // pull in asFocusable via asButton, so the focus module stamps `tabindex="0"`
 // onto the host. Shadcn additionally stamps its feedback.style class tokens,
-// so we assert `group/button` only on the shadcn host.
+// so we assert the pinned New York paint tokens and installed CSS on that host.
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import {
+  assertStyledButton,
   assertStyledSwitch,
   assertSwitchThumbState,
   loadConsumerStyles,
@@ -69,18 +70,7 @@ async function renderHost(label, Component) {
 
 const shadcn = await renderHost('shadcn Button', ShadcnButton);
 const shadcnClass = shadcn.getAttribute('class') || '';
-const shadcnStyle = shadcn.getAttribute('data-pui-style') || '';
-if (!shadcnStyle.includes('group/button')) {
-  throw new Error(
-    'react smoke: shadcn Button host missing prototype tokens (feedback.style did not stamp data-pui-style); host=' +
-      shadcn.outerHTML
-  );
-}
-if (shadcnClass.includes('group/button')) {
-  throw new Error(
-    'react smoke: shadcn Button leaked prototype token into class; host=' + shadcn.outerHTML
-  );
-}
+assertStyledButton(shadcn, 'react smoke: shadcn Button');
 if (!shadcnClass.includes('user-added')) {
   throw new Error(
     'react smoke: shadcn Button host missing user className; host=' + shadcn.outerHTML

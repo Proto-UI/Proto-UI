@@ -110,6 +110,72 @@ export function loadConsumerStyles(
   return { styles, files, evidenceDir };
 }
 
+// Independent consumer oracle: P-SHADCN-BUTTON-NEW-YORK-PAINT and
+// shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b,
+// apps/v4/registry/new-york-v4/ui/button.tsx:7,11,23.
+// A removed non-paint marker (group/button) is not evidence of missing styles.
+export function assertDefaultButtonTokens(element, label) {
+  if (!element) throw new Error(`${label}: Button host is missing`);
+  const tokens = new Set((element.getAttribute('data-pui-style') ?? '').split(/\s+/));
+  for (const token of [
+    'inline-flex',
+    'shrink-0',
+    'items-center',
+    'justify-center',
+    'rounded-md',
+    'text-sm',
+    'font-medium',
+    'bg-primary',
+    'text-primary-foreground',
+    'h-9',
+    'gap-2',
+    'px-4',
+    'py-2',
+    'whitespace-nowrap',
+  ]) {
+    if (!tokens.has(token))
+      throw new Error(`${label}: Button current recipe token is missing: ${token}`);
+    if (element.classList.contains(token))
+      throw new Error(`${label}: Button leaked prototype token into class: ${token}`);
+  }
+}
+
+// Styled consumers must also observe real CSS installation. HappyDOM computed
+// values below are structural evidence, not native layout/paint or motion proof.
+export function assertStyledButton(element, label) {
+  assertDefaultButtonTokens(element, label);
+  const view = element.ownerDocument.defaultView;
+  const style = view.getComputedStyle(element);
+  const rootFont =
+    Number.parseFloat(view.getComputedStyle(element.ownerDocument.documentElement).fontSize) || 16;
+  const expected = {
+    display: 'inline-flex',
+    flexShrink: '0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxSizing: 'border-box',
+    height: `${2.25 * rootFont}px`,
+    gap: `${0.5 * rootFont}px`,
+    // HappyDOM does not reliably expand padding-inline/block into physical
+    // longhands. Check the installed logical declarations; browser tests retain
+    // exact physical padding checks at the fixed root font.
+    paddingInline: `${rootFont}px`,
+    paddingBlock: `${0.5 * rootFont}px`,
+  };
+  for (const [property, value] of Object.entries(expected)) {
+    // HappyDOM retains logical padding/gap in rem; compare exact unit equivalents.
+    // This is bounded computed-CSS normalization, not a layout simulation.
+    const raw = style.getPropertyValue(
+      property.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)
+    );
+    const actual = /^\d+(?:\.\d+)?rem$/.test(raw) ? `${Number.parseFloat(raw) * rootFont}px` : raw;
+    if (actual !== value)
+      throw new Error(
+        `${label}: Button generated CSS mismatch: ${property}=${raw}, expected=${value}`
+      );
+  }
+}
+
 // P-SHADCN-SWITCH[-THUMB]-CURRENT-VISUAL-SURFACE: fixed New York
 // 02cad611 default recipe. There is no positioned-box or staticHitInset prerequisite.
 // Computed structure proves CSS installation. Exact installed declarations retain

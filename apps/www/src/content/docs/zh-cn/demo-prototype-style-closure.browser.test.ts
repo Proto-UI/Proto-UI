@@ -786,9 +786,11 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         await page.waitForTimeout(220);
         expect(await readFocusPaint(), `${runtime}/blur-restored-endpoint`).toEqual(unfocused);
 
-        expect(facts.button.height, `${runtime}/button-height`).toBe('32px');
-        expect(facts.button.paddingLeft, `${runtime}/button-padding-left`).toBe('10px');
-        expect(facts.button.paddingRight, `${runtime}/button-padding-right`).toBe('10px');
+        // P-SHADCN-BUTTON-NEW-YORK-PAINT, pinned New York 02cad611 button.tsx:7/23.
+        // Outline default: h-9/px-4/py-2/rounded-md at the fixed 16px root.
+        expect(facts.button.height, `${runtime}/button-height`).toBe('36px');
+        expect(facts.button.paddingLeft, `${runtime}/button-padding-left`).toBe('16px');
+        expect(facts.button.paddingRight, `${runtime}/button-padding-right`).toBe('16px');
         expect(facts.button.borderWidth, `${runtime}/button-border-width`).toBe('1px');
         expect(facts.button.borderStyle, `${runtime}/button-border-style`).toBe('solid');
         expect(facts.button.color, `${runtime}/button-foreground`).toBe(expectedButton.foreground);
@@ -798,7 +800,7 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         expect(facts.button.borderColor, `${runtime}/button-border-color`).toBe(
           colorScheme === 'dark' ? expectedButton.inputBorder : expectedButton.border
         );
-        expect(facts.button.borderRadius, `${runtime}/button-radius`).toBe('10px');
+        expect(facts.button.borderRadius, `${runtime}/button-radius`).toBe('8px');
         expect(facts.button.fontFamily, `${runtime}/button-consumer-font`).toBe(facts.hostFont);
         if (!firstButton) firstButton = facts.button;
         else expect(facts.button, `${runtime}/button-parity`).toEqual(firstButton);

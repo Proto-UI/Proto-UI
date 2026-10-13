@@ -245,6 +245,10 @@ function runVue2Consumer({ consumerDir, expectedPackages, packageByName, release
     assert(facade.includes(expected), `generated Vue 2 facade is missing ${expected}`);
   }
 
+  cpSync(
+    join(ROOT_DIR, 'scripts', 'release', 'consumer-smoke-css.mjs'),
+    join(consumerDir, 'consumer-smoke-css.mjs')
+  );
   cpSync(join(RENDER_FIXTURE_DIR, 'vue2.mjs'), join(consumerDir, 'vue2.mjs'));
   run(process.execPath, ['--import', 'tsx', './vue2.mjs'], { cwd: consumerDir });
   console.log(

@@ -21,6 +21,11 @@ cases:
       - P-SHADCN-BUTTON-NEW-YORK-PAINT
       - P-SHADCN-BUTTON-WRAP-PROP
     expectation: shadcn-button-current-variant-size-and-removal-defaults
+  - id: T-SHADCN-BUTTON-0001-CASE-CONSUMER-PAINT
+    title: current New York consumer oracles reject stale geometry and missing installed styles
+    covers:
+      - P-SHADCN-BUTTON-NEW-YORK-PAINT
+    expectation: shadcn-button-consumer-checks-current-tokens-and-installed-css-without-obsolete-marker
   - id: T-SHADCN-BUTTON-0001-CASE-INTERACTION-STYLES
     title: inherited Button facts drive hover focus press and disabled visual rules
     covers:
@@ -52,6 +57,16 @@ implementations:
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
       - Positive tests cover only the current Proto UI guarantee; asChild omission is governed by D-AS-CHILD-OMISSION-0001. The pinned compatibility baseline and the later stable official source for the intentionally adopted destructive recipe remain distinct catalog evidence, so the recipe adoption does not widen the parity claim. Remaining upstream gaps stay bounded by declared prop enums, source review, and the single catalog-visible compatibility question.
+  - id: prototypes-shadcn-button-consumer-style
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/button-consumer-style.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-BUTTON-0001-CASE-CONSUMER-PAINT
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Source host plus generated CLI CSS in HappyDOM; not packed-artifact or native browser admission. The release helper tests reject obsolete tokens, class leakage, absent CSS and stale installed height/padding. Native website suites retain exact default/icon geometry and interaction assertions. See scripts/release/consumer-smoke/README.md for the consumer boundary.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -76,4 +91,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: Updated compatibility evidence mapping to keep the historical pinned baseline distinct from later adopted recipe evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded source-host consumer paint coverage and mapped current New York geometry to packed and website test oracles without widening upstream parity claims.
 tags: [prototype, shadcn, button, delta, compatibility, test]

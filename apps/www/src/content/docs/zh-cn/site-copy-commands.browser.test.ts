@@ -519,8 +519,9 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
                 theme
               );
               const baseline = await unfocusedPaint(button);
+              // Fixed New York 02cad611 Button icon size-9; retain Brutalist h-10.
               expect([baseline.width, baseline.height]).toEqual(
-                family === 'shadcn' ? [32, 32] : [40, 40]
+                family === 'shadcn' ? [36, 36] : [40, 40]
               );
               expect(baseline.glyph).toEqual([18, 18]);
               expect(Math.max(...baseline.center)).toBeLessThanOrEqual(1);

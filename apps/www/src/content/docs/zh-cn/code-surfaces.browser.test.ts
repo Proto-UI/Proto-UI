@@ -213,7 +213,7 @@ async function expectCopyControls(page: Page): Promise<void> {
       const buttonRect = element.getBoundingClientRect();
       const iconRect = icon.getBoundingClientRect();
       const radius = document.createElement('div');
-      radius.style.borderRadius = style.getPropertyValue('--pui-radius-lg');
+      radius.style.borderRadius = style.getPropertyValue('--pui-radius-md');
       element.parentElement!.append(radius);
       const expectedRadius = getComputedStyle(radius).borderRadius;
       radius.remove();
@@ -232,12 +232,13 @@ async function expectCopyControls(page: Page): Promise<void> {
         shadow: style.boxShadow,
       };
     });
-    // #630 keeps its 32px/18px geometry. Radius and focus now belong to the
-    // actual Shadcn Button's rounded-lg/ring-3 recipe, not a CSS imitation.
-    expect([facts.width, facts.height, ...facts.glyph]).toEqual(['32px', '32px', '18px', '18px']);
+    // P-SHADCN-BUTTON-NEW-YORK-PAINT: fixed 02cad611 Button icon size-9
+    // is 2.25rem (36px at this 16px root). The site's 18px glyph is unchanged.
+    expect([facts.width, facts.height, ...facts.glyph]).toEqual(['36px', '36px', '18px', '18px']);
     expect(facts.radius).toBe(facts.expectedRadius);
     expect(facts.opacity).toBe('1');
-    expect(facts.tokens).toContain('rounded-lg');
+    expect(facts.tokens).toContain('rounded-md');
+    expect(facts.tokens).toContain('size-9');
     expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
     await page.keyboard.press('Tab');
     await control.focus();

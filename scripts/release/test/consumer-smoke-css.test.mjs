@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { Window } from 'happy-dom';
 import {
+  assertDefaultButtonTokens,
+  assertStyledButton,
   assertStyledSwitch,
   assertSwitchThumbState,
   loadConsumerStyles,
@@ -480,5 +482,113 @@ test('keeps styled/no-styles cases separate and browser entry on the original CS
     );
     assert.ok(source.includes('loadConsumerStyles(document'));
     assert.ok(source.includes('assertStyledSwitch('));
+    assert.ok(source.includes('assertStyledButton('));
+    assert.ok(!source.includes("includes('group/button')"));
   }
+  const packedReact = readFileSync(
+    join(root, 'scripts/release/consumer-smoke/react-vite/smoke.tsx'),
+    'utf8'
+  );
+  assert.ok(packedReact.includes('assertStyledButton('));
+  const vue2 = readFileSync(join(root, 'packages/cli/test/smoke-render/vue2.mjs'), 'utf8');
+  assert.ok(vue2.includes('assertDefaultButtonTokens('));
+  assert.ok(!vue2.includes('assertStyledButton('));
+  assert.ok(!vue2.includes('loadConsumerStyles('));
+  const cli = readFileSync(join(root, 'scripts/release/consumer-smoke-cli.mjs'), 'utf8');
+  const vue2Runner = cli.slice(cli.indexOf('function runVue2Consumer('));
+  assert.ok(vue2Runner.includes("'--no-styles'"));
+  assert.ok(vue2Runner.includes("join(consumerDir, 'consumer-smoke-css.mjs')"));
 });
+
+// P-SHADCN-BUTTON-NEW-YORK-PAINT: independent fixed-upstream consumer oracle.
+function buttonFixture(document) {
+  const element = document.createElement('div');
+  element.className = 'user-added';
+  element.setAttribute(
+    'data-pui-style',
+    'inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground h-9 gap-2 px-4 py-2 whitespace-nowrap'
+  );
+  document.body.append(element);
+  return element;
+}
+
+test('New York Button tokens and actual generated CSS replace the obsolete marker oracle', (t) => {
+  const { directory, window } = fixture(t);
+  const button = buttonFixture(window.document);
+  assertDefaultButtonTokens(button, 'tokens only');
+  assert.throws(() => assertStyledButton(button, 'zero CSS'), /Button generated CSS mismatch/);
+  loadConsumerStyles(window.document, { root: directory });
+  assertStyledButton(button, 'fixed New York default');
+  window.document.documentElement.style.fontSize = '32px';
+  assertStyledButton(button, 'font-relative default');
+});
+
+for (const [name, mutate] of [
+  ['marker alone', (element) => element.setAttribute('data-pui-style', 'group/button')],
+  [
+    'old height',
+    (element) =>
+      element.setAttribute(
+        'data-pui-style',
+        element.getAttribute('data-pui-style').replace('h-9', 'h-8')
+      ),
+  ],
+  [
+    'old radius',
+    (element) =>
+      element.setAttribute(
+        'data-pui-style',
+        element.getAttribute('data-pui-style').replace('rounded-md', 'rounded-lg')
+      ),
+  ],
+  [
+    'old padding',
+    (element) =>
+      element.setAttribute(
+        'data-pui-style',
+        element.getAttribute('data-pui-style').replace('px-4', 'px-2.5')
+      ),
+  ],
+  ['class leakage', (element) => element.classList.add('rounded-md')],
+]) {
+  test(`Button consumer oracle rejects ${name}`, (t) => {
+    const { window } = fixture(t);
+    const element = buttonFixture(window.document);
+    mutate(element);
+    assert.throws(
+      () => assertDefaultButtonTokens(element, name),
+      /Button (current recipe token is missing|leaked prototype token)/
+    );
+  });
+}
+
+test('Button CSS check rejects a stale installed height despite valid prototype tokens', (t) => {
+  const { directory, window } = fixture(t);
+  const element = buttonFixture(window.document);
+  loadConsumerStyles(window.document, { root: directory });
+  const override = window.document.createElement('style');
+  override.textContent = '[data-pui-style] { height: 32px; }';
+  window.document.head.append(override);
+  assert.throws(
+    () => assertStyledButton(element, 'stale CSS'),
+    /Button generated CSS mismatch: height=/
+  );
+});
+
+for (const [property, value] of [
+  ['padding-inline', '10px'],
+  ['padding-block', '4px'],
+]) {
+  test(`Button CSS check rejects stale ${property} despite valid prototype tokens`, (t) => {
+    const { directory, window } = fixture(t);
+    const element = buttonFixture(window.document);
+    loadConsumerStyles(window.document, { root: directory });
+    const override = window.document.createElement('style');
+    override.textContent = `[data-pui-style] { ${property}: ${value}; }`;
+    window.document.head.append(override);
+    assert.throws(
+      () => assertStyledButton(element, 'stale padding'),
+      /Button generated CSS mismatch: padding/
+    );
+  });
+}
