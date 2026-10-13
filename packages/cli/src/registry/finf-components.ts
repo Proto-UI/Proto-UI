@@ -98,6 +98,20 @@ export const FINF_WORKSPACE_COMPONENT_ENTRIES: Record<string, ComponentEntry> = 
         'elementName': 'proto-ui-shadcn-alert-dialog-content',
       },
       {
+        'prototypeImport': 'alertDialogHeader',
+        'reactExport': 'ShadcnAlertDialogHeader',
+        'vueExport': 'ShadcnAlertDialogHeader',
+        'wcExport': 'ShadcnAlertDialogHeaderElement',
+        'elementName': 'proto-ui-shadcn-alert-dialog-header',
+      },
+      {
+        'prototypeImport': 'alertDialogFooter',
+        'reactExport': 'ShadcnAlertDialogFooter',
+        'vueExport': 'ShadcnAlertDialogFooter',
+        'wcExport': 'ShadcnAlertDialogFooterElement',
+        'elementName': 'proto-ui-shadcn-alert-dialog-footer',
+      },
+      {
         'prototypeImport': 'alertDialogTitle',
         'reactExport': 'ShadcnAlertDialogTitle',
         'vueExport': 'ShadcnAlertDialogTitle',

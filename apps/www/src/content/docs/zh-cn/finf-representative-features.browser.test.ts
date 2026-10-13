@@ -66,17 +66,19 @@ function routeFor(family: Family, component: string): string {
 
 function references(family: Family, component: string) {
   const record =
-    component === 'calendar'
-      ? RECORDS.calendar
-      : component === 'runtime-tabs'
-        ? RECORDS.tabs
-        : component === 'accordion'
-          ? RECORDS.accordion
-          : component === 'drawer'
-            ? RECORDS.drawer
-            : ['form', 'fieldset', 'checkbox-group'].includes(component)
-              ? RECORDS.form
-              : RECORDS.overlay;
+    family === 'shadcn' && component === 'alert-dialog'
+      ? 'internal/contracts/overlay/shadcn-alert-dialog.presentation.v0.md'
+      : component === 'calendar'
+        ? RECORDS.calendar
+        : component === 'runtime-tabs'
+          ? RECORDS.tabs
+          : component === 'accordion'
+            ? RECORDS.accordion
+            : component === 'drawer'
+              ? RECORDS.drawer
+              : ['form', 'fieldset', 'checkbox-group'].includes(component)
+                ? RECORDS.form
+                : RECORDS.overlay;
   // Only references already inspected and named in the records are carried here.
   // A same-named upstream implementation is not invented for adapted families.
   const upstream =
@@ -95,7 +97,12 @@ function references(family: Family, component: string) {
               ]
             : component === 'accordion'
               ? ['https://ui.shadcn.com/docs/components/base/accordion']
-              : [`https://ui.shadcn.com/r/styles/base-nova/${component}.json`]
+              : component === 'alert-dialog'
+                ? [
+                    'https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/alert-dialog.tsx',
+                    'https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx',
+                  ]
+                : [`https://ui.shadcn.com/r/styles/base-nova/${component}.json`]
         : family === 'brutalist'
           ? [
               'https://github.com/ekmas/neobrutalism-components/tree/3306a802724874a85f93079702b2795370a279d4/src/components/ui',
@@ -998,7 +1005,27 @@ async function alertDialogJourney({ page, previewer, capture }: Journey) {
   await panel.waitFor({ state: 'visible' });
   const action = panel.getByRole('button', { name: 'Confirm', exact: true });
   const cancel = panel.getByRole('button', { name: 'Cancel', exact: true });
-  const initial = { action: await paint(action), cancel: await paint(cancel) };
+  const initial = {
+    panel: await paint(panel),
+    action: await paint(action),
+    cancel: await paint(cancel),
+    groups: await panel.evaluate((element) =>
+      Array.from(element.children).map((child) => {
+        const style = getComputedStyle(child);
+        const rect = child.getBoundingClientRect();
+        return {
+          name: child.tagName,
+          display: style.display,
+          gap: style.gap,
+          flexDirection: style.flexDirection,
+          flexWrap: style.flexWrap,
+          textAlign: style.textAlign,
+          width: rect.width,
+          height: rect.height,
+        };
+      })
+    ),
+  };
   await capture('opened', initial);
   await action.hover();
   await capture('action-hover', { action: await paint(action) });

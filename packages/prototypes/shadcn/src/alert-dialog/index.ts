@@ -18,10 +18,21 @@ export type {
   AlertDialogTitleExposes,
   AlertDialogDescriptionProps,
   AlertDialogDescriptionExposes,
-  AlertDialogCancelProps,
   AlertDialogCancelExposes,
-  AlertDialogActionProps,
   AlertDialogActionExposes,
   AlertDialogMaskProps,
   AlertDialogMaskExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+
+export { default as alertDialogHeader } from './header.proto';
+export { default as alertDialogFooter } from './footer.proto';
+export type {
+  ShadcnAlertDialogActionProps,
+  ShadcnAlertDialogActionProps as AlertDialogActionProps,
+  ShadcnAlertDialogCancelProps,
+  ShadcnAlertDialogCancelProps as AlertDialogCancelProps,
+  ShadcnAlertDialogHeaderProps,
+  ShadcnAlertDialogHeaderExposes,
+  ShadcnAlertDialogFooterProps,
+  ShadcnAlertDialogFooterExposes,
+} from './types';

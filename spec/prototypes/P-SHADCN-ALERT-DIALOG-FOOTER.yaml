@@ -1,0 +1,44 @@
+id: P-SHADCN-ALERT-DIALOG-FOOTER
+type: prototype
+title: Shadcn New York AlertDialog Footer is a passive intrinsic action group
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The existing AlertDialog footer role permits a bounded passive presentation part. Intrinsic wrapping fixes desktop composition but does not implement the upstream 40rem full-width column switch. Independent and cross-runtime visual acceptance remain pending.
+  zh-CN: 既有 AlertDialog footer role 允许有界被动样式部件。固有尺寸换行修复桌面组合，但未实现上游 40rem 全宽纵排切换。独立及跨 runtime 视觉验收仍待完成。
+summary: Optional slot-preserving action group with right alignment, 0.5rem spacing and intrinsic reverse wrapping.
+statement:
+  en: Footer claims only the existing ALERT_DIALOG_FAMILY footer role. Authored Cancel and Action remain independent inherited command owners. The bounded layout follows the desktop grouping of shadcn-ui/ui New York 02cad611, with an explicit mobile breakpoint gap.
+  zh-CN: Footer 仅声明既有 ALERT_DIALOG_FAMILY footer role。作者提供的 Cancel、Action 保留独立继承命令 owner。有界布局遵循 shadcn-ui/ui New York 02cad611 的桌面分组，明确保留移动断点缺口。
+criteria:
+  - id: P-SHADCN-ALERT-DIALOG-FOOTER-PASSIVE
+    text:
+      en: Export alertDialogFooter as shadcn-alert-dialog-footer. Claim the existing footer role and preserve the anonymous slot with empty Props and Exposes; do not own state, events, focus, open requests, accessibility control roles or Base behavior hooks.
+      zh-CN: 导出 alertDialogFooter，名称为 shadcn-alert-dialog-footer。声明既有 footer role，保留匿名 slot 与空 Props、Exposes；不拥有 state、event、focus、open request、可访问控件 role 或 Base behavior hook。
+  - id: P-SHADCN-ALERT-DIALOG-FOOTER-LAYOUT
+    text:
+      en: Use flex min-w-0 flex-wrap-reverse gap-2 items-center justify-end. Actions keep intrinsic inline width when they fit and may opt into bounded long-label wrapping with the command wrap prop when space is exhausted. Do not stretch all actions into Content grid rows or introduce host selectors. Natural wrapping does not satisfy upstream full-width reverse columns below 40rem.
+      zh-CN: 使用 flex min-w-0 flex-wrap-reverse gap-2 items-center justify-end。空间充足时 action 保持固有 inline 宽度，空间不足时可通过 command wrap prop 显式启用有界长标签换行。不把全部 action 拉伸为 Content grid 行，不引入 host selector。自然换行不满足上游 40rem 以下全宽反向纵排要求。
+  - id: P-SHADCN-ALERT-DIALOG-FOOTER-COMPOSITION
+    text:
+      en: The reference demo authors Cancel then Action inside this part. Grouping preserves Cancel initial focus, the outside-dismiss guard, controlled open ownership and exactly one original request per command; Footer creates no command or extra input surface.
+      zh-CN: 参考 demo 在该部件中按 Cancel、Action 顺序组合。分组保留 Cancel 初始焦点、外部关闭保护、受控 open ownership 及每次命令唯一的原始 request；Footer 不创建命令或额外输入面。
+openQuestions:
+  - id: P-SHADCN-ALERT-DIALOG-FOOTER-Q-RESPONSIVE
+    question: Which governed cross-host layout input and real rendering evidence will support the upstream 40rem full-width reverse-column switch?
+    blocks: ['activation:P-SHADCN-ALERT-DIALOG-FOOTER']
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-FEEDBACK-STYLE-0002, C-FEEDBACK-STYLE-0004]
+verifies:
+  tests: [T-SHADCN-ALERT-DIALOG-0001]
+sources:
+  - path: packages/prototypes/shadcn/src/alert-dialog/footer.proto.ts
+  - path: packages/prototypes/base/src/alert-dialog/shared.ts
+  - path: packages/prototypes/shadcn/test/alert-dialog.test.ts
+  - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/alert-dialog.tsx
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added passive desktop action grouping with intrinsic reverse wrapping and explicit responsive/visual acceptance debt.
+tags: [prototype, shadcn, alert-dialog, presentation]

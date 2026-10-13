@@ -47,6 +47,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/alert-dialog');
     registerExactPrototype('shadcn-alert-dialog-content', module.alertDialogContent);
   },
+  'shadcn-alert-dialog-header': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/alert-dialog');
+    registerExactPrototype('shadcn-alert-dialog-header', module.alertDialogHeader);
+  },
+  'shadcn-alert-dialog-footer': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/alert-dialog');
+    registerExactPrototype('shadcn-alert-dialog-footer', module.alertDialogFooter);
+  },
   'shadcn-alert-dialog-title': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/alert-dialog');
     registerExactPrototype('shadcn-alert-dialog-title', module.alertDialogTitle);

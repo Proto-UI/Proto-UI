@@ -18,6 +18,8 @@ Root 固定 alert 语义。Mask 管理模态遮罩；Content 约束焦点、拒�
 
 Root 支持受控 open 和非受控 defaultOpen。禁用命令不激活。传入 open 时，最终状态仍由调用方持有，通过 openChange 接收请求后再提供新值。
 
-组成: Root, Trigger, Content, Title, Description, Cancel, Action, Mask.
+组成: Root, Trigger, Content, Header, Footer, Title, Description, Cancel, Action, Mask.
 
 当前是草稿源码实现。完整 native/GPUI、编译器、打包消费、视觉及独立验收仍待完成；本页不表示 Finf 已完成。
+
+默认静态样式按固定 New York 版本对齐。Header/Footer 是可复用的被动分组。响应式断点布局、small size/media 变体和 presence 动画仍待完成；当前不代表完整上游一致性。

@@ -1,0 +1,58 @@
+id: T-SHADCN-ALERT-DIALOG-0001
+type: test
+title: Shadcn New York AlertDialog passive grouping source and host-unit coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Source and Web Component host-unit checks cover the bounded grouping contract. They do not prove real layout, native input, upstream mobile breakpoint parity or complete cross-Adapter acceptance.
+  zh-CN: 源码与 Web Component host-unit 检查覆盖有界分组契约；不证明真实布局、原生输入、上游移动断点一致性或完整跨 Adapter 验收。
+summary: Covers passive Header/Footer ownership, authored child preservation, intrinsic layout tokens and unchanged command composition.
+cases:
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-1
+    title: Optional groups have empty public behavior and preserve authored descendants
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-PASSIVE, P-SHADCN-ALERT-DIALOG-FOOTER-PASSIVE]
+    expectation: passive-alert-dialog-group-exports-and-slots
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-2
+    title: Group styles preserve spacing and bounded intrinsic reverse wrapping without host variants
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-LAYOUT, P-SHADCN-ALERT-DIALOG-FOOTER-LAYOUT]
+    expectation: bounded-alert-dialog-group-style-intents
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-3
+    title: Nested commands retain Cancel focus and single-owner controlled requests
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-COMPOSITION, P-SHADCN-ALERT-DIALOG-FOOTER-COMPOSITION]
+    expectation: grouped-alert-dialog-command-and-accessibility-composition
+  - id: T-SHADCN-ALERT-DIALOG-0001-CASE-4
+    title: The public demo consumes both reusable grouping prototypes
+    covers: [P-SHADCN-ALERT-DIALOG-HEADER-COMPOSITION, P-SHADCN-ALERT-DIALOG-FOOTER-COMPOSITION]
+    expectation: grouped-alert-dialog-demo-source
+implementations:
+  - id: shadcn-alert-dialog-source-and-host-unit
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/alert-dialog.test.ts
+    required: true
+    consumesCases:
+      [
+        T-SHADCN-ALERT-DIALOG-0001-CASE-1,
+        T-SHADCN-ALERT-DIALOG-0001-CASE-2,
+        T-SHADCN-ALERT-DIALOG-0001-CASE-3,
+      ]
+    exercises: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+  - id: shadcn-alert-dialog-demo-grouping
+    kind: module-test
+    status: passing
+    path: apps/www/src/components/PrototypePreviewer/shadcn-alert-dialog-layout.test.ts
+    required: true
+    consumesCases: [T-SHADCN-ALERT-DIALOG-0001-CASE-4]
+    exercises: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+verifies:
+  prototypes: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+exercises:
+  prototypes: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+sources:
+  - path: packages/prototypes/shadcn/test/alert-dialog.test.ts
+  - path: apps/www/src/components/PrototypePreviewer/shadcn-alert-dialog-layout.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded passive grouping coverage without claiming native or upstream mobile visual acceptance.
+tags: [test, shadcn, alert-dialog, source, host-unit]

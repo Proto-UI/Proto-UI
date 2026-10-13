@@ -18,6 +18,10 @@ criteria:
     text:
       zh-CN: 可选 wrap 布尔呈现选项默认 false；非 icon size 启用后在容器可用宽度内换行、以原 size 高度为最小高度，不改变 Base activation、焦点或 accessible name。icon size 保持固定尺寸。该选项是 Proto UI 扩展，不属于上游逐字 API 兼容承诺；容器及自定义后代仍须提供可用宽度，不能推断任意嵌套内容都可自动修复。
       en: Optional boolean wrap defaults to false. For non-icon sizes it wraps labels within the containing width and uses the original size height as a minimum, without changing Base activation, focus or accessible names. Icon size retains fixed dimensions. This Proto UI extension is not a literal upstream API parity claim; containers and custom descendants must still provide usable width, and arbitrary nested content is not automatically repaired.
+  - id: P-SHADCN-BUTTON-NEW-YORK-PAINT
+    text:
+      en: The shared passive Button paint and supported fixed sizes use the New York source at 02cad61166c4c20edbc8a3f71bd720eed4c1f49b. Base is rounded-md; every size owns exactly one gap to avoid conflicting base/Rule tokens. Default size is h-9 gap-2 px-4 py-2, sm is h-8 gap-1.5 px-3, lg is h-10 gap-2 px-6, and icon is size-9 gap-2. Default variant keeps its existing primary 80-percent hover while the New York 90-percent migration waits for borrowed-state consumer style closure; outline adds border and shadow-xs with accent hover. AlertDialog and Drawer commands may reuse these constants while retaining their original Base interaction owner. The explicit wrap extension retains auto height and py-1 with corresponding minimum heights and inline padding; it is not fixed-height upstream equivalence. Existing press-offset and adopted destructive extensions remain recorded separately.
+      zh-CN: 共享被动 Button 样式与已有 fixed size 按 New York 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 对齐。基础为 rounded-md；每个 size 只拥有一个 gap，避免 base 与 Rule token 冲突。default 为 h-9 gap-2 px-4 py-2，sm 为 h-8 gap-1.5 px-3，lg 为 h-10 gap-2 px-6，icon 为 size-9 gap-2。default 暂保留既有 primary 与 80% hover，New York 90% hover 迁移须等待 borrowed-state consumer 样式闭包补齐；outline 使用 border、shadow-xs 与 accent hover。AlertDialog、Drawer command 可复用常量但保留原有 Base 交互所有者。显式 wrap 扩展仍使用 auto height、py-1、相应最小高度和 inline padding，不宣称 fixed-height 上游等价。既有按压位移和 destructive 扩展单独保留。
   - id: P-SHADCN-BUTTON-UPSTREAM-IDENTITY
     text:
       zh-CN: Shadcn Button 必须明确标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并以固定 upstream revision/path 作为兼容比较基线；P 实体只治理 Proto UI 投射，不主张上游所有权或认证。
@@ -105,10 +109,14 @@ openQuestions:
         The pinned historical compatibility baseline remains the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; it has not been silently advanced. The current destructive recipe—`bg-destructive/10 text-destructive`, hover `bg-destructive/20`, dark `bg-destructive/20`, and `dark:hover:bg-destructive/30`—is instead an intentional adoption of a later official design, with stable source evidence pinned to shadcn-ui/ui revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` at `apps/v4/registry/styles/style-maia.css`. That source explains the current visual recipe only and does not widen the overall upstream parity claim. The measured contrast from #454 is retained as adopted-upstream behavior evidence; it is not an accidental Proto UI parity gap, a local palette remediation requirement, or a Proto UI-owned 4.5:1 guarantee. The decided intentional deviation still includes omission of `asChild`, and the transparent slot is not a Radix Slot equivalent. Current implementation or review gaps include at least className and native-button prop forwarding, aria-invalid styling, nested-SVG sizing, xs/icon-xs/icon-sm/icon-lg sizes, and exact differences between current size and other visual tokens and the pinned baseline. The current passing guarantee must not expand until an item is implemented and tested.
 
 
-    blocks: [shadcn button parity roadmap]
+    blocks: ['activation:P-SHADCN-BUTTON']
 sources:
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: packages/prototypes/shadcn/src/button/button.proto.ts
+  - path: packages/prototypes/shadcn/src/button/paint.ts
+  - path: internal/contracts/overlay/shadcn-alert-dialog.presentation.v0.md
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx
+    label: Current PR 872 fixed New York sizing and default/outline paint source; historical compatibility baseline remains separate
   - path: packages/prototypes/shadcn/src/button/types.ts
   - path: packages/prototypes/shadcn/test/button.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/button.tsx
@@ -140,4 +148,7 @@ revisions:
   - version: 0.3.0-alpha.0
     change: revised
     summary: Distinguished the pinned historical compatibility baseline from the later intentionally adopted destructive visual recipe and retained contrast as adopted-upstream evidence.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Adopted the confirmed PR 872 New York sizing and reusable passive default/outline paint without changing Base ownership, the opt-in wrapping extension, or the separate destructive recipe.
 tags: [prototype, shadcn, button, upstream-derived, delta, compatibility, visual]

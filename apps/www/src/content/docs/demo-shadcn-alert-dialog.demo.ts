@@ -25,26 +25,38 @@ export default {
             'children': [
               {
                 'kind': 'proto',
-                'prototypeId': 'shadcn-alert-dialog-title',
-                'children': ['AlertDialog settings'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-alert-dialog-description',
+                'prototypeId': 'shadcn-alert-dialog-header',
                 'children': [
-                  'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-alert-dialog-title',
+                    'children': ['AlertDialog settings'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-alert-dialog-description',
+                    'children': [
+                      'Changes remain in this demonstration. Close and reopen to exercise focus restoration.',
+                    ],
+                  },
                 ],
               },
               {
                 'kind': 'proto',
-                'prototypeId': 'shadcn-alert-dialog-cancel',
-                'children': ['Cancel'],
-              },
-              {
-                'kind': 'proto',
-                'prototypeId': 'shadcn-alert-dialog-action',
-                'children': ['Confirm'],
-                'ref': 'action',
+                'prototypeId': 'shadcn-alert-dialog-footer',
+                'children': [
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-alert-dialog-cancel',
+                    'children': ['Cancel'],
+                  },
+                  {
+                    'kind': 'proto',
+                    'prototypeId': 'shadcn-alert-dialog-action',
+                    'children': ['Confirm'],
+                    'ref': 'action',
+                  },
+                ],
               },
             ],
             'props': {
