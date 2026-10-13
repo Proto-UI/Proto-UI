@@ -33,7 +33,16 @@ afterEach(async () => {
   owned.clear();
   await expect.poll(() => [...lives.values()].every((x) => x.made === x.dead)).toBe(true);
 });
-function fixture(slug: string, props = {}) {
+function fixture(
+  slug: string,
+  props = {},
+  choices = [
+    ['apple', 'Apple'],
+    ['pear', 'Pear'],
+    ['orange', 'Orange'],
+    ['disabled', 'Disabled'],
+  ]
+) {
   const make = (part: string, props = {}): any => {
     const e = document.createElement(`base-${slug}-${part}`);
     setElementProps(e, props);
@@ -45,12 +54,7 @@ function fixture(slug: string, props = {}) {
     content = make('content'),
     empty = make('empty');
   empty.textContent = 'No results';
-  const items = [
-    ['apple', 'Apple'],
-    ['pear', 'Pear'],
-    ['orange', 'Orange'],
-    ['disabled', 'Disabled'],
-  ].map(([value, textValue]) => {
+  const items = choices.map(([value, textValue]) => {
     const e = make('item', { value, textValue, disabled: value === 'disabled' });
     e.textContent = textValue;
     return e;
@@ -148,4 +152,135 @@ it('does not select options while IME composition is active', async () => {
   editor.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: 'pe' }));
   await flush();
   expect(p.root.getExposes().inputValue.get()).toBe('pe');
+});
+
+describe.each(groups)('$slug registered-option admission', ({ slug }) => {
+  it.each([false, true])(
+    'rejects a filtered duplicate value when the hidden duplicate is disabled=%s',
+    async (hiddenDisabled) => {
+      const p = fixture(slug, { defaultOpen: true }, [
+        ['shared', 'Alpha'],
+        ['shared', 'Beta'],
+      ]);
+      setElementProps(p.items[1], { value: 'shared', textValue: 'Beta', disabled: hiddenDisabled });
+      await flush();
+      expect(p.root.getExposes().visibleCount.get()).toBe(2);
+      p.root.getExposes().setInputValue('Alpha');
+      await flush();
+      expect(p.items.map((item) => item.getExposes().visible.get())).toEqual([true, false]);
+      const events: unknown[] = [];
+      p.root.addEventListener(slug === 'command' ? 'execute' : 'valueChange', (e: any) =>
+        events.push(e.detail)
+      );
+      const accepted = p.root.getExposes().select('shared');
+      await flush();
+      const selection = {
+        accepted,
+        value: p.root.getExposes().value.get(),
+        inputValue: p.root.getExposes().inputValue.get(),
+        open: p.root.getExposes().open.get(),
+        events,
+      };
+      p.root.getExposes().setInputValue('');
+      await flush();
+      expect({
+        selection,
+        selected: p.items.map((item) => item.getExposes().selected.get()),
+      }).toEqual({
+        selection: {
+          accepted: false,
+          value: '',
+          inputValue: 'Alpha',
+          open: true,
+          events: [],
+        },
+        selected: [slug === 'command', false],
+      });
+    }
+  );
+
+  it('does not exempt owner-filtered children from duplicate-value rejection', async () => {
+    const p = fixture(slug, { filter: false }, [
+      ['shared', 'Alpha'],
+      ['shared', 'Beta'],
+    ]);
+    await flush();
+    p.root.getExposes().setInputValue('Alpha');
+    await flush();
+    expect(p.root.getExposes().visibleCount.get()).toBe(2);
+    expect(p.root.getExposes().select('shared')).toBe(false);
+  });
+
+  it('keeps visibility and disabled checks for otherwise unique values', async () => {
+    const p = fixture(slug);
+    await flush();
+    p.root.getExposes().setInputValue('Pear');
+    await flush();
+    expect(p.root.getExposes().select('apple')).toBe(false);
+    p.root.getExposes().setInputValue('Disabled');
+    await flush();
+    expect(p.root.getExposes().select('disabled')).toBe(false);
+    p.root.getExposes().setInputValue('Pear');
+    await flush();
+    const events: unknown[] = [];
+    p.root.addEventListener(slug === 'command' ? 'execute' : 'valueChange', (e: any) =>
+      events.push(e.detail)
+    );
+    expect(p.root.getExposes().select('pear')).toBe(true);
+    expect(events).toEqual([
+      {
+        value: slug === 'autocomplete' ? 'Pear' : 'pear',
+        textValue: 'Pear',
+        reason: 'programmatic',
+      },
+    ]);
+    expect(p.root.getExposes().open.get()).toBe(slug === 'command');
+  });
+
+  it('rejects ambiguous controlled requests while preserving legal owner refusal', async () => {
+    const p = fixture(slug, { value: 'owner', inputValue: 'Alpha', open: true }, [
+      ['shared', 'Alpha'],
+      ['shared', 'Beta'],
+      ['unique', 'Unique'],
+    ]);
+    await flush();
+    expect(p.root.getExposes().visibleCount.get()).toBe(1);
+    const events: unknown[] = [];
+    p.root.addEventListener(slug === 'command' ? 'execute' : 'valueChange', (e: any) =>
+      events.push(e.detail)
+    );
+    const ambiguous = p.root.getExposes().select('shared');
+    const ambiguousEvents = [...events];
+    events.length = 0;
+    setElementProps(p.root, { value: 'owner', inputValue: 'Unique', open: true });
+    await flush();
+    expect(p.root.getExposes().select('unique')).toBe(true);
+    expect(events).toEqual([
+      {
+        value: slug === 'autocomplete' ? 'Unique' : 'unique',
+        textValue: 'Unique',
+        reason: 'programmatic',
+      },
+    ]);
+    expect(p.root.getExposes().value.get()).toBe('owner');
+    expect(p.root.getExposes().inputValue.get()).toBe('Unique');
+    expect(p.root.getExposes().open.get()).toBe(true);
+    expect({ ambiguous, ambiguousEvents }).toEqual({
+      ambiguous: false,
+      ambiguousEvents: [],
+    });
+  });
+});
+
+it('preserves unmatched autocomplete free text alongside duplicate suggestions', async () => {
+  const p = fixture('autocomplete', {}, [
+    ['shared', 'Alpha'],
+    ['shared', 'Beta'],
+  ]);
+  await flush();
+  p.root.getExposes().setInputValue('Custom');
+  await flush();
+  expect(p.root.getExposes().visibleCount.get()).toBe(0);
+  expect(p.root.getExposes().select('Custom', 'free-text')).toBe(true);
+  expect(p.root.getExposes().value.get()).toBe('Custom');
 });

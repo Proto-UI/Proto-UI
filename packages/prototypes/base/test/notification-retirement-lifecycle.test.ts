@@ -23,7 +23,7 @@ import {
 } from '@proto.ui/module-text-control';
 import { numberFieldRoot } from '../src/number-field';
 import { dataTableRoot, DATA_TABLE_CONTEXT } from '../src/data-table';
-import { calendarRoot } from '../src/calendar';
+import { calendarRoot, CALENDAR_CONTEXT } from '../src/calendar';
 import { toastRoot } from '../src/toast';
 import { TOAST_CONTEXT } from '../src/toast/shared';
 import { checkboxGroupRoot } from '../src/checkbox-group';
@@ -190,6 +190,30 @@ const cases = [
     state: 'month',
     request: (x: any) => x.requestMonth('2026-11'),
     event: 'monthChange',
+  },
+  {
+    name: 'Calendar value',
+    proto: calendarRoot,
+    props: { defaultMonth: '2026-01', defaultValue: '2026-01-10' },
+    state: 'value',
+    request: (x: any) => x.requestValue('2026-02-10'),
+    event: 'valueChange',
+  },
+  {
+    name: 'Calendar value Context',
+    proto: calendarRoot,
+    props: { defaultMonth: '2026-01', defaultValue: '2026-01-10' },
+    context: CALENDAR_CONTEXT,
+    request: (x: any) => x.requestValue('2026-02-10'),
+    event: 'valueChange',
+  },
+  {
+    name: 'Calendar value month completion',
+    proto: calendarRoot,
+    props: { defaultMonth: '2026-01', defaultValue: '2026-01-10' },
+    request: (x: any) => x.requestValue('2026-02-10'),
+    event: 'valueChange',
+    callback: 'monthChange',
   },
   {
     name: 'Toast open',

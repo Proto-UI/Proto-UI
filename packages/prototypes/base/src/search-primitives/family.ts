@@ -216,9 +216,10 @@ export function createSearchFamily(slug: string, mode: 'autocomplete' | 'combobo
     const select = (selectedValue: string, reason = 'programmatic') => {
       const run = currentRun;
       if (!run || run.props.get().disabled || run.props.get().readOnly) return false;
+      const free = mode === 'autocomplete' && reason === 'free-text' && !!selectedValue;
+      if (!free && itemsOf(run).filter((i) => i.value === selectedValue).length !== 1) return false;
       const matching = visibleItems(run).filter((i) => i.value === selectedValue);
       const candidate = matching.length === 1 && !matching[0].disabled ? matching[0] : null;
-      const free = mode === 'autocomplete' && reason === 'free-text' && !!selectedValue;
       if (!candidate && !free) return false;
       const epoch = viewEpoch;
       const selection = ++selectionSequence;
