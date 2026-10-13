@@ -104,6 +104,135 @@ export async function deadline<T>(
   }
 }
 
+// Closed diagnostic expressions return only booleans. They never serialize a
+// target, config, closure, scope, user value or DOM object. Chrome must reject
+// evaluation whenever it cannot prove freedom from side effects.
+export const GUARD_EXPRESSIONS = {
+  syncCurrentViewSideEffects: `({
+    validView: validView(),
+    registrationIdentity: registration === this.registration,
+    configIdentity: config === this.config,
+    registrationValues: registration.trigger === this.registration.trigger && registration.anchor === this.registration.anchor && registration.content === this.registration.content,
+    positionValues: config.placement === this.config.placement && config.align === this.config.align && config.sideOffset === this.config.sideOffset && config.alignOffset === this.config.alignOffset && config.strategy === this.config.strategy && config.avoidCollisions === this.config.avoidCollisions && config.collisionBoundary === this.config.collisionBoundary && config.collisionPadding === this.config.collisionPadding && config.excludeAnchorTranslation === this.config.excludeAnchorTranslation,
+    viewActive: this.viewActive === true,
+    mounted: this.mountPhase === 'mounted',
+    reconcileAgain: this.reconcileViewAgain === true
+  })`,
+  mountGlobalIfNeeded: `({
+    currentGuard: current(),
+    revoked: lease.revoked === true,
+    acquiring: lease.acquiring === true,
+    leaseIdentity: this.portalLease === lease,
+    targetIdentity: lease.target === hostEl,
+    currentTargetIdentity: this.portalLease !== null && this.portalLease.target === hostEl,
+    viewActive: this.viewActive === true,
+    mounted: this.mountPhase === 'mounted'
+  })`,
+} as const;
+const GUARD_KEYS = {
+  syncCurrentViewSideEffects: [
+    'validView',
+    'registrationIdentity',
+    'configIdentity',
+    'registrationValues',
+    'positionValues',
+    'viewActive',
+    'mounted',
+    'reconcileAgain',
+  ],
+  mountGlobalIfNeeded: [
+    'currentGuard',
+    'revoked',
+    'acquiring',
+    'leaseIdentity',
+    'targetIdentity',
+    'currentTargetIdentity',
+    'viewActive',
+    'mounted',
+  ],
+} as const;
+type GuardFrame = { callFrameId: string; functionName: string; location: { scriptId: string } };
+export async function collectGuardFacts(
+  session: Pick<CDPSession, 'send'>,
+  frames: readonly GuardFrame[],
+  scripts: ReadonlyMap<string, { url: string }>,
+  baseUrl: string
+) {
+  const facts: Record<string, unknown>[] = [];
+  for (const name of ['syncCurrentViewSideEffects', 'mountGlobalIfNeeded'] as const) {
+    const frame = frames.find((frame) => {
+      if (frame.functionName !== name) return false;
+      try {
+        const url = new URL(scripts.get(frame.location.scriptId)?.url ?? '');
+        return (
+          url.origin === baseUrl && url.pathname.endsWith('/packages/modules/overlay/src/impl.ts')
+        );
+      } catch {
+        return false;
+      }
+    });
+    if (!frame) {
+      facts.push({ name, outcome: 'frame-unavailable' });
+      continue;
+    }
+    try {
+      const result = await deadline(
+        'guard-' + name,
+        () =>
+          session.send('Debugger.evaluateOnCallFrame', {
+            callFrameId: frame.callFrameId,
+            expression: GUARD_EXPRESSIONS[name],
+            throwOnSideEffect: true,
+            timeout: 500,
+            returnByValue: true,
+            includeCommandLineAPI: false,
+            generatePreview: false,
+            silent: true,
+          }),
+        750
+      );
+      if (result.exceptionDetails) {
+        const kind = result.exceptionDetails.exception?.className;
+        facts.push({
+          name,
+          outcome: 'evaluation-rejected',
+          exceptionKind: ['ReferenceError', 'EvalError', 'TypeError', 'SyntaxError'].includes(
+            kind ?? ''
+          )
+            ? kind
+            : 'Other',
+        });
+        continue;
+      }
+      const value = result.result.value;
+      const keys = GUARD_KEYS[name];
+      if (
+        !value ||
+        typeof value !== 'object' ||
+        Array.isArray(value) ||
+        Object.keys(value).length !== keys.length ||
+        keys.some((key) => typeof value[key] !== 'boolean')
+      ) {
+        facts.push({ name, outcome: 'unexpected-result' });
+        continue;
+      }
+      facts.push({
+        name,
+        outcome: 'observed',
+        facts: Object.fromEntries(keys.map((key) => [key, value[key]])),
+      });
+    } catch (error) {
+      facts.push({
+        name,
+        outcome: String(error).startsWith('Error: Diagnostic deadline:')
+          ? 'deadline'
+          : 'protocol-error',
+      });
+    }
+  }
+  return facts;
+}
+
 async function main() {
   assert.equal(process.env.GITHUB_ACTIONS, 'true', 'CI only; local native browser is prohibited');
   const mode = observerMode(process.env.PUI_SELECT_OBSERVER);
@@ -151,6 +280,7 @@ async function main() {
     context: BrowserContext | undefined,
     cdp: CDPSession | undefined;
   const scripts = new Map<string, { url: string; sourceMapURL: string }>();
+  let baseUrl: string | undefined;
   let closing = false,
     paused = false,
     screencasting = false;
@@ -184,7 +314,7 @@ async function main() {
     }
   };
   try {
-    const baseUrl = await startServer('/');
+    baseUrl = await startServer('/');
     const executablePath = await chromeExecutable();
     browser = await chromium.launch({
       executablePath,
@@ -323,15 +453,18 @@ async function main() {
     log('failure', String(error));
     save();
     if (cdp) {
-      // Failure-only debugger collection. No expression evaluation, DOM write,
-      // breakpoint, force click or timeout extension; resume before teardown.
+      // Failure-only debugger collection. Closed boolean-only expressions are
+      // checked by Chrome throwOnSideEffect; rejection is retained, never retried
+      // with weaker safeguards. No DOM write, breakpoint or forced input.
       const session = cdp;
+      let pausedFrames: GuardFrame[] = [];
       let resolvePaused!: (value: unknown) => void;
       const stack = new Promise<unknown>((resolve) => {
         resolvePaused = resolve;
       });
       session.on('Debugger.paused', (event) => {
         paused = true;
+        pausedFrames = event.callFrames;
         const value = {
           reason: event.reason,
           callFrames: event.callFrames.slice(0, 60).map((frame) => ({
@@ -350,6 +483,13 @@ async function main() {
         await session.send('Debugger.pause');
         await stack;
       });
+      if (paused && baseUrl) {
+        receipt.guardSamplingBoundary =
+          'Paused after timeout, possibly inside rejection cleanup. Current mismatches do not identify the first invalidating callback.';
+        receipt.guardFacts = await collectGuardFacts(session, pausedFrames, scripts, baseUrl);
+        log('debugger/guard-facts', receipt.guardFacts);
+        save();
+      }
       // Attempt resume even if the pause acknowledgement or event timed out.
       if (await cleanup('debugger-resume', () => session.send('Debugger.resume'))) paused = false;
     }
