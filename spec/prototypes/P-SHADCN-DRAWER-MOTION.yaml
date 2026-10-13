@@ -22,7 +22,7 @@ criteria:
       en: An already initialized Transition entered phase without appear has no synthetic interpolation. Vaul defaultOpen initial suppression must be verified separately from late Base Content admission; controlled open alone does not imply that upstream suppression. Reduced or unknown preference, unavailable geometry, projection failure and deadline settle the latest target through the same guarded completion path without a retained-view leak. Events continue to mean phase completion rather than certified painted success.
   - id: P-SHADCN-DRAWER-MOTION-EVIDENCE
     text:
-      en: Separately validate authored family target semantics, host presentation, compiler coverage and native realization. Document and Shadow physical browser traces must capture timestamps, actual movement, simultaneous fade, retained close and reversal for the exact candidate. DOM-model tests do not certify physical presentation or GPUI support.
+      en: Separately validate authored family target semantics, host presentation, compiler coverage and native realization. Document and Shadow physical browser traces must capture timestamps, actual movement, simultaneous fade, retained close and reversal for the exact candidate. A public nested demo with intrinsic height must also show an entering phase and changing physical position before finished completion; a fixed-height fixture or successful diagnostic collection alone does not cover cold intrinsic entry. DOM-model tests do not certify physical presentation or GPUI support.
 sources:
   - path: packages/prototypes/shadcn/src/drawer/content.proto.ts
   - path: packages/prototypes/shadcn/src/drawer/mask.proto.ts

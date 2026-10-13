@@ -272,7 +272,7 @@ describe('real Drawer semantic Scroll physical target', () => {
 // a control, not a replacement for the intrinsic public page or a production fix.
 describe('public www Drawer cold-entry diagnostic', () => {
   it.each([false, true])(
-    'records intrinsic geometry and completion (fixed control=%s)',
+    'animates the public cold entry with measured intrinsic geometry (fixed control=%s)',
     async (fixedControl) => {
       const { buildPublicDrawerEntryProbe, buildPublicDrawerBoxCss } =
         await import('./fixtures/drawer-entry-build');
@@ -363,6 +363,20 @@ describe('public www Drawer cold-entry diagnostic', () => {
               event.channel === 'content' && event.phase === 'entering' && event.kind === 'complete'
           )
         ).toBe(true);
+        const completion = events.find(
+          (event) =>
+            event.channel === 'content' && event.phase === 'entering' && event.kind === 'complete'
+        );
+        expect(completion.detail.outcome).toBe('finished');
+        const moving = (result as any).frames.filter(
+          (frame: any) => frame.phase === 'entering' && frame.rect.height > 0
+        );
+        expect(moving.length).toBeGreaterThan(1);
+        expect(
+          Math.max(...moving.map((frame: any) => frame.rect.y)) -
+            Math.min(...moving.map((frame: any) => frame.rect.y))
+        ).toBeGreaterThan(1);
+        expect((result as any).frames.at(-1).phase).toBe('entered');
         await page.screenshot({
           path: path.join(
             output,
@@ -384,7 +398,14 @@ describe('public www Drawer cold-entry diagnostic', () => {
             `drawer-public-${fixedControl ? 'fixed-control' : 'intrinsic'}-diagnostic.json`
           ),
           JSON.stringify(
-            { fixedControl, diagnosticOnly: true, observationMayForceLayout: true, errors, result },
+            {
+              fixedControl,
+              diagnosticOnly: false,
+              intrinsicMotionAssertion: true,
+              observationMayForceLayout: true,
+              errors,
+              result,
+            },
             null,
             2
           )

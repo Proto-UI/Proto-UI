@@ -42,6 +42,16 @@ cases:
     covers: [HC-FEEDBACK-PRESENCE-PRESENTATION-0001-DOCUMENT]
     expectation: destination-document-policy-and-no-stale-frame-acknowledgement
 implementations:
+  - id: presence-semantic-style-preparation
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/presence-semantic-style.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION,
+        T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER,
+      ]
   - id: presence-web-document-adoption
     kind: module-test
     status: passing

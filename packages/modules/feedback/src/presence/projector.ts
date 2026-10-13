@@ -76,6 +76,16 @@ export function createPresencePresentationProjector(
   let cold = true;
   let awaitingInitialFrame = false;
   let completed = false;
+  let preparedFrame: PresencePresentationFrame | null = null;
+  let preparingFrame: PresencePresentationFrame | null = null;
+  let commitDepth = 0;
+  let pendingTick = false;
+  let pendingFrameTick: { frame: PresencePresentationFrame; token: number } | null = null;
+  let pendingSettlement: {
+    frame: PresencePresentationFrame;
+    token: number;
+    outcome: PresentationOutcome;
+  } | null = null;
   let completedTarget: number | null = null;
   const reasons = new Set<string>();
   const cancel = () => {
@@ -92,6 +102,10 @@ export function createPresencePresentationProjector(
   };
   const current = (candidate: PresencePresentationFrame, token: number) =>
     !retired && frame === candidate && token === generation;
+  const sameAttempt = (left: PresencePresentationFrame, right: PresencePresentationFrame) =>
+    left.owner.owner === right.owner.owner && attemptKey(left) === attemptKey(right);
+  const currentSettlement = (queued: NonNullable<typeof pendingSettlement>) =>
+    !retired && !!frame && queued.token === generation && sameAttempt(queued.frame, frame);
   const render = (
     candidate: PresencePresentationFrame,
     value: readonly number[],
@@ -131,16 +145,27 @@ export function createPresencePresentationProjector(
       reasons.add(reason);
     }
     if (!current(candidate, token)) return;
-    candidate.complete(host.binding, reason);
+    if (candidate.owner.attempt) candidate.complete(host.binding, reason);
   };
   const settle = (outcome: PresentationOutcome): boolean => {
     if (!frame || retired) return false;
+    if (commitDepth) {
+      if (!pendingSettlement || !currentSettlement(pendingSettlement))
+        pendingSettlement = { frame, token: generation, outcome };
+      // The finite synchronous preparation must unwind before any environment
+      // read or completion. False does not claim endpoint application success.
+      return false;
+    }
     const op = ++operation;
     cancel();
     if (retired || operation !== op || !frame) return false;
     const candidate = frame,
       token = generation;
     if (!current(candidate, token)) return false;
+    if (preparedFrame !== candidate) {
+      complete(candidate, 'projection-failed', token);
+      return false;
+    }
     const env = host.environment();
     if (!current(candidate, token)) return false;
     const endpoint =
@@ -175,6 +200,14 @@ export function createPresencePresentationProjector(
   }
   function tick(fromFrame = false) {
     if (retired || !frame) return;
+    // A synchronous style flush may notify or replace this frame. Only the
+    // latest fully prepared frame may consume dimensions or acknowledge paint.
+    if (commitDepth) {
+      pendingTick = true;
+      if (fromFrame) pendingFrameTick = { frame, token: generation };
+      return;
+    }
+    if (preparedFrame !== frame) return;
     const candidate = frame,
       token = generation;
     // This first host profile only admits neutral entered modulation. General
@@ -291,7 +324,12 @@ export function createPresencePresentationProjector(
         schedule();
         return;
       }
-      if (!fromFrame) return;
+      if (!fromFrame) {
+        // A superseded deferred delivery cannot acknowledge this frame. If it
+        // consumed the ticket, request a new current acknowledgement instead.
+        schedule();
+        return;
+      }
       // A delivered presentation frame acknowledges the actual start sample.
       if (!render(candidate, acknowledged ?? initial, token)) {
         if (current(candidate, token)) settle('projection-failed');
@@ -326,37 +364,93 @@ export function createPresencePresentationProjector(
   return {
     commit(next) {
       if (retired) return;
-      const op = ++operation;
-      if (view !== null && next.view !== view) {
-        cancel();
-        if (retired || operation !== op) return;
-        acknowledged = null;
-        target = null;
-        sampler?.dispose();
-        sampler = null;
-        cold = true;
+      if (preparingFrame === next) {
+        pendingTick = true;
+        return;
       }
-      const changed = key !== attemptKey(next);
-      if (changed) {
-        cancel();
-        if (retired || operation !== op) return;
-        completed = false;
-        awaitingInitialFrame = false;
-      }
-      view = next.view;
-      frame = next;
-      key = attemptKey(next);
-      next.bind(host.binding);
-      if (retired || frame !== next) return;
-      if (!off) {
-        const nextOff = host.subscribe(() => tick());
-        if (retired || operation !== op) {
-          nextOff();
-          return;
+      commitDepth++;
+      try {
+        const op = ++operation;
+        if (view !== null && next.view !== view) {
+          cancel();
+          if (retired || operation !== op) return;
+          acknowledged = null;
+          target = null;
+          sampler?.dispose();
+          sampler = null;
+          cold = true;
         }
-        off = nextOff;
+        const changed = key !== attemptKey(next);
+        if (changed) {
+          cancel();
+          if (retired || operation !== op) return;
+          completed = false;
+          awaitingInitialFrame = false;
+        }
+        view = next.view;
+        if (frame !== next) preparedFrame = null;
+        frame = next;
+        key = attemptKey(next);
+        next.bind(host.binding);
+        if (retired || frame !== next || operation !== op) return;
+        if (preparedFrame !== next) {
+          const token = generation;
+          const previousPreparation = preparingFrame;
+          preparingFrame = next;
+          let accepted = false;
+          try {
+            // Empty channels project only the semantic style. They do not lease
+            // motion channels or update the last acknowledged display sample.
+            accepted = host.project(next.style, {}, () => current(next, token));
+          } catch {
+            reasons.add('projection-failed');
+          } finally {
+            preparingFrame = previousPreparation;
+          }
+          if (!current(next, token) || operation !== op) return;
+          if (!accepted) {
+            reasons.add('projection-failed');
+            cancel();
+            if (retired || frame !== next || operation !== op) return;
+            sampler?.dispose();
+            sampler = null;
+            samplerConfig = '';
+            awaitingInitialFrame = false;
+            if (next.owner.attempt) complete(next, 'projection-failed', generation);
+            else {
+              try {
+                host.release();
+              } catch {
+                reasons.add('projection-failed');
+              }
+            }
+            return;
+          }
+          preparedFrame = next;
+        }
+        if (!off) {
+          const nextOff = host.subscribe(() => tick());
+          if (retired || operation !== op) {
+            nextOff();
+            return;
+          }
+          off = nextOff;
+        }
+        if (operation === op) tick();
+      } finally {
+        commitDepth--;
+        if (!commitDepth) {
+          const settlement = pendingSettlement;
+          const delivered = pendingFrameTick;
+          const requested = pendingTick;
+          pendingSettlement = null;
+          pendingFrameTick = null;
+          pendingTick = false;
+          if (settlement && currentSettlement(settlement) && preparedFrame === frame)
+            settle(settlement.outcome);
+          else if (requested) tick(!!delivered && current(delivered.frame, delivered.token));
+        }
       }
-      if (operation === op) tick();
     },
     settle,
     cancel() {
@@ -364,6 +458,7 @@ export function createPresencePresentationProjector(
       cancel();
       if (retired || operation !== op) return;
       frame = null;
+      preparedFrame = null;
       sampler?.dispose();
       sampler = null;
       samplerConfig = '';
@@ -380,6 +475,7 @@ export function createPresencePresentationProjector(
       operation++;
       cancel();
       frame = null;
+      preparedFrame = null;
       acknowledged = null;
       target = null;
       sampler?.dispose();
