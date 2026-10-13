@@ -11,8 +11,8 @@ statement:
 criteria:
   - id: C-DRAWER-AUTO-CONSUMER-0001-LAYOUT
     text:
-      en: Valid top/bottom input consumes the extent model and shared available-layout binding. Intrinsic extent fits content within minimum and the current safe maximum; explicit snap fractions use the full capped extent without the former implicit 0.85 multiplier. Base defaults to available one, Shadcn c2a67849 and Neo 3306a802 to available-minus-root-text six through family prop defaults. Left/right retain legacy presentation. Content remains the project-authored vertical scrollport, not an assertion that upstream overflow-hidden Content itself scrolls.
-      zh-CN: 有效 top/bottom 输入消费尺寸模型及共享 available-layout binding。intrinsic 在最小值与当前安全上限内适配内容；显式 snap 比例以完整安全上限为分母，移除旧隐式 0.85。Base 默认 available one，固定 Shadcn/Neo 由 family props 提供 available-minus-root-text six。left/right 保留旧呈现。Content 的纵向滚动区域是本项目组合，不声称上游 overflow-hidden Content 自带滚动。
+      en: Valid top/bottom input consumes the extent model and shared available-layout binding. Intrinsic extent fits content within minimum and the current safe maximum; explicit snap fractions use the full capped extent without the former implicit 0.85 multiplier. Base defaults to available one. Neo 3306a802 and the retained Shadcn compatibility recipe use available-minus-root-text six through family prop defaults; the latter is not the current New York 02cad611 max-h-80vh target. Left/right retain legacy presentation. Content remains the project-authored vertical scrollport; New York DrawerContent itself declares no overflow utility.
+      zh-CN: 有效 top/bottom 输入消费尺寸模型及共享 available-layout binding。intrinsic 在最小值与当前安全上限内适配内容；显式 snap 比例以完整安全上限为分母，移除旧隐式 0.85。Base 默认 available one；Neo 固定参考及 Shadcn 保留的兼容配方由 family props 提供 available-minus-root-text six，后者不等价于当前 New York 02cad611 的 max-h-80vh。left/right 保留旧呈现。Content 的纵向滚动区域是本项目组合；New York DrawerContent 本身未声明 overflow utility。
   - id: C-DRAWER-AUTO-CONSUMER-0001-HANDLE
     text:
       en: Intrinsic Handle is an aria-hidden pointer affordance, excluded from keyboard focus, with no separator range or Enter/Space close action. Fraction mode retains named separator and existing resize keys. Switching a focused Handle to intrinsic withdraws focus as well as range fields. Intrinsic drag changes outward displacement rather than content extent, using cancel-on-extent-change; snap retains preserve-start resizing. Mode, accepted configuration, invalid updates and disabled state cancel active contacts and release capture. Controlled refusal restores the accepted owner presentation.
@@ -42,4 +42,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Integrate the valid-input path while retaining the failing initial-invalid family boundary and native acceptance gaps.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Label the retained Shadcn cap as compatibility behavior rather than the current New York viewport-relative target.
 tags: [drawer, intrinsic, layout, accessibility]

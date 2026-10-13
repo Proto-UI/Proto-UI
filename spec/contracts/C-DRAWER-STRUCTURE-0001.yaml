@@ -31,8 +31,8 @@ criteria:
       zh-CN: Shadcn Header 组合 Base Header 与已接受方向观察，拥有 flex flex-col gap-0.5 p-4，已接受 top/bottom 时居中；left/right 或缺失 Content 时继承对齐。Footer 保留 mt-[auto] flex flex-col gap-2 p-4。family 局部呈现 State 可为 rule 镜像观察值，不改变 Base 权限。md 响应式对齐与间距、方向边缘绘制、装饰 Indicator 及上游 extent 迁移仍为独立未实现切片，不认定完整 New York 对齐。
   - id: C-DRAWER-STRUCTURE-0001-INTERIOR
     text:
-      en: Shadcn Content uses flex flex-col bg-background text-foreground without the former grid gap-4 p-4. Existing uniform rounded-lg border border-border shadow-md remains explicitly retained mismatch until directional edge translation is supported; it is not upstream-equivalent paint. Header/Footer own their padding in migrated demos, and authored body content owns its spacing. Title uses text-foreground font-semibold and inherits font size and line height. The existing available-minus-root-text cap and horizontal extent are unchanged, not certified as upstream 80vh or w-3/4.
-      zh-CN: Shadcn Content 使用 flex flex-col bg-background text-foreground，移除原 grid gap-4 p-4。现有统一 rounded-lg border border-border shadow-md 明确保留为尚未对齐项，直到方向边缘翻译得到支持，不认定其绘制与上游等价。已迁移 demo 的 Header/Footer 自有 padding，正文自有间距。Title 使用 text-foreground font-semibold 并继承字号与行高。已有 available-minus-root-text cap 与横向 extent 不变，不认定为上游 80vh 或 w-3/4。
+      en: Shadcn Content uses flex flex-col bg-background text-foreground without the former grid gap-4 p-4. Content adds no box shadow. Uniform rounded-lg border border-border remains an explicit mismatch until generic directional corner/edge translation is supported; it is not upstream-equivalent paint. Header/Footer own their padding in migrated demos, and authored body content owns its spacing. Title uses text-foreground font-semibold and inherits font size and line height. The existing available-minus-root-text cap and horizontal extent are unchanged, not certified as upstream 80vh or w-3/4.
+      zh-CN: Shadcn Content 使用 flex flex-col bg-background text-foreground，移除原 grid gap-4 p-4。Content 不再添加 box shadow；统一 rounded-lg border border-border 仍明确为尚未对齐项，等待通用分角圆角与单边绘制能力，不认定其绘制与上游等价。已迁移 demo 的 Header/Footer 自有 padding，正文自有间距。Title 使用 text-foreground font-semibold 并继承字号与行高。已有 available-minus-root-text cap 与横向 extent 不变，不认定为上游 80vh 或 w-3/4。
 dependsOn:
   contracts: [C-DRAWER-AUTO-CONSUMER-0001, C-DRAWER-CONTENT-ADMISSION-0001, C-FEEDBACK-STYLE-0004]
 verifies:
@@ -56,4 +56,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Add an observation-only accepted-side protocol, owner-safe Header composition and supported Content interior while retaining explicit responsive, edge-paint, indicator and extent gaps.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Remove the unsupported Content shadow and retain explicit generic directional-edge and responsive capability gaps.
 tags: [drawer, anatomy, composition]

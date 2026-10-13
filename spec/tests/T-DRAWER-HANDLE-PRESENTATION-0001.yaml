@@ -1,0 +1,44 @@
+id: T-DRAWER-HANDLE-PRESENTATION-0001
+type: test
+title: Drawer Handle family placement and intrinsic contribution evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Source-host regression does not establish physical layout; native geometry remains a separately planned implementation.
+summary: Keeps Handle behavior and non-Shadcn families intact while testing the bounded bottom flow recipe.
+cases:
+  - id: T-DRAWER-HANDLE-PRESENTATION-0001-CASE-SOURCE
+    title: Family-specific flow and edge recipes preserve behavior across direction changes
+    covers:
+      [
+        C-DRAWER-HANDLE-PRESENTATION-0001-OWNER,
+        C-DRAWER-HANDLE-PRESENTATION-0001-BOTTOM,
+        C-DRAWER-HANDLE-PRESENTATION-0001-BOUNDARY,
+        C-DRAWER-HANDLE-PRESENTATION-0001-EVIDENCE,
+      ]
+    expectation: source-host-and-document-shadow-closure-without-family-leakage
+  - id: T-DRAWER-HANDLE-PRESENTATION-0001-CASE-NATIVE
+    title: Root-scaled natural extent counts the bottom Handle once and keeps snap denominator
+    covers: [C-DRAWER-HANDLE-PRESENTATION-0001-BOTTOM, C-DRAWER-HANDLE-PRESENTATION-0001-EVIDENCE]
+    expectation: actual-flow-rectangles-and-half-full-snap-evidence-bound-to-exact-source
+implementations:
+  - id: drawer-handle-presentation-source
+    kind: runtime-test
+    status: passing
+    path: packages/prototypes/shadcn/test/drawer-handle-presentation.test.ts
+    required: true
+    consumesCases: [T-DRAWER-HANDLE-PRESENTATION-0001-CASE-SOURCE]
+  - id: drawer-handle-presentation-native
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts
+    required: true
+    consumesCases: [T-DRAWER-HANDLE-PRESENTATION-0001-CASE-NATIVE]
+    notes:
+      - Official exact-head Actions only. No new native execution or screenshot is claimed by the local source suite.
+verifies:
+  contracts: [C-DRAWER-HANDLE-PRESENTATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bind source-host preservation and planned physical flow/snap evidence to the bounded family presentation contract.
+tags: [drawer, presentation, family]

@@ -49,7 +49,7 @@ const references = {
   shadcn: 'internal/contracts/overlay/shadcn-drawer-command-density.presentation.v0.md',
   brutalist: 'internal/contracts/overlay/brutalist-drawer-command-density.presentation.v0.md',
   adaptation:
-    'Upstream fixed h-8/h-10 and nowrap become local minimum heights and wrapping. This is bounded density, not full upstream paint parity or a 44px target guarantee.',
+    'Shadcn uses fixed New York h-9 by default and explicitly opts long labels into min-h-9/py-1 wrapping; Neo retains its separate minimum-height/wrapping contract. This is bounded density, not full upstream paint parity or a 44px target guarantee.',
 };
 const writeJson = (name: string, value: unknown) =>
   writeFile(path.join(output, name), JSON.stringify(value, null, 2) + '\n');
@@ -62,6 +62,8 @@ beforeAll(async () => {
   for (const file of [
     references.shadcn,
     references.brutalist,
+    'packages/prototypes/shadcn/src/button/paint.ts',
+    'packages/prototypes/shadcn/src/drawer/types.ts',
     ...families.flatMap((family) =>
       ['trigger', 'close'].map(
         (part) => `packages/prototypes/${family}/src/drawer/${part}.proto.ts`
@@ -209,14 +211,15 @@ function assertDensity(
   const c = actual.control,
     rem = Number.parseFloat(actual.rootFont);
   const neo = family === 'brutalist',
-    minimum = (neo ? 2.5 : 2) * rem;
+    minimum = (neo ? 2.5 : 2.25) * rem;
   expect(c.boxSizing).toBe('border-box');
-  expect(Number.parseFloat(c.minHeight)).toBeCloseTo(minimum, 4);
+  if (neo || long) expect(Number.parseFloat(c.minHeight)).toBeCloseTo(minimum, 4);
+  else expect(c.minHeight === 'auto' || Number.parseFloat(c.minHeight) === 0).toBe(true);
   expect(c.maxHeight).toBe('none');
   if (long || multiline) expect(c.rect.height).toBeGreaterThan(minimum);
   else expect(c.rect.height).toBeCloseTo(minimum, 4);
   expect(c.padding.map(Number.parseFloat)).toEqual(
-    neo ? [rem / 2, rem, rem / 2, rem] : [0, rem * 0.625, 0, rem * 0.625]
+    neo || !long ? [rem / 2, rem, rem / 2, rem] : [rem / 4, rem, rem / 4, rem]
   );
   expect(c.border.map(Number.parseFloat)).toEqual(neo ? [2, 2, 2, 2] : [1, 1, 1, 1]);
   expect(Number.parseFloat(c.fontSize)).toBeCloseTo(rem * 0.875, 4);
@@ -227,10 +230,14 @@ function assertDensity(
   expect(radius).not.toBeNull();
   const radiusPx = Number(radius![1]) * (radius![2] === 'rem' ? rem : 1);
   if (neo) expect(radiusPx).toBe(5);
-  for (const value of c.radii) expect(Number.parseFloat(value)).toBeCloseTo(radiusPx, 4);
-  expect(c.whiteSpace).toBe('normal');
-  expect(c.overflowWrap).toBe('anywhere');
-  expect(c.textAlign).toBe('center');
+  // Existing family theme mapping remains radius-2px; no new upstream root-scaling parity claim.
+  for (const value of c.radii)
+    expect(Number.parseFloat(value)).toBeCloseTo(neo ? radiusPx : Math.max(radiusPx - 2, 0), 4);
+  expect(c.whiteSpace).toBe(neo || long ? 'normal' : 'nowrap');
+  if (neo || long) {
+    expect(c.overflowWrap).toBe('anywhere');
+    expect(c.textAlign).toBe('center');
+  }
   expect(c.scroll.width).toBeLessThanOrEqual(c.client.width + 1);
   expect(c.scroll.height).toBeLessThanOrEqual(c.client.height + 1);
 }
@@ -328,6 +335,7 @@ async function mountLongLabel(
         if (node.kind === 'proto' && /-drawer-(trigger|close)$/.test(node.prototypeId)) {
           node.ref = node.prototypeId.endsWith('trigger') ? 'density-trigger' : 'density-close';
           node.children = [label];
+          if (family === 'shadcn') node.props = { ...node.props, wrap: true };
           return {
             kind: 'box',
             attrs: { style: `width: ${width}px; max-width: 100%; min-width: 0` },
@@ -810,7 +818,7 @@ for (const family of families)
                   deniedRequests,
                   browser: browser.version(),
                   limit:
-                    'Root scaling is not browser zoom. Long-label fixture changes only consumer text and container width. No full paint, GPUI, or complete accessibility certification.',
+                    'Root scaling is not browser zoom. Long-label fixture changes consumer text/container width and explicitly enables Shadcn wrap. No full paint, GPUI, or complete accessibility certification.',
                 });
               } finally {
                 await context?.close();

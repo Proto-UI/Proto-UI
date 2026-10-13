@@ -12,7 +12,7 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
     def.props.setDefaults({ maxExtent: { unit: 'available-minus-root-text', value: 6 } });
     // Keep existing uniform edge paint until directional style translation is supported.
     def.feedback.style.use(
-      tw('rounded-lg border border-border bg-background text-foreground shadow-md flex flex-col')
+      tw('rounded-lg border border-border bg-background text-foreground flex flex-col')
     );
     // P-SHADCN-DRAWER-MOTION: fixed Vaul 1.1.2 presentation, separate safety bound.
     behavior.asTransition.configure({

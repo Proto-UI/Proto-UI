@@ -13,7 +13,7 @@ import {
 import * as drawer from '../src/drawer';
 
 // Independent oracle: shadcn-drawer-command-density.presentation.v0.md;
-// Fixed consumer Button density; minimum-height/wrapping is an explicit project adaptation.
+// Fixed New York Button default density; wrapping is an explicit opt-in adaptation.
 // Preserve paint/state: this is not full upstream Button equivalence.
 // Source-host evidence below is not browser geometry or hit-area evidence.
 const sourceRoot = path.resolve('packages/prototypes/shadcn/src');
@@ -22,19 +22,15 @@ const commands = [
   ['close', 'asDrawerClose'],
 ] as const;
 const density = [
-  'min-h-8',
-  'px-2.5',
-  'py-0',
-  'rounded-lg',
+  'h-9',
+  'px-4',
+  'py-2',
+  'rounded-md',
   'text-sm',
   'font-medium',
-  'min-w-0',
-  'max-w-full',
-  'whitespace-normal',
-  'wrap-anywhere',
-  'text-center',
+  'whitespace-nowrap',
 ];
-const oldDensity = ['h-8', 'py-2', 'px-3', 'rounded-md', 'whitespace-nowrap'];
+const oldDensity = ['min-h-8', 'h-8', 'py-0', 'px-2.5', 'rounded-lg'];
 const owned = new Set<HTMLElement>();
 const lives = { created: 0, disposed: 0 };
 for (const prototype of Object.values(drawer).filter(
@@ -95,24 +91,26 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
           'items-center',
           'justify-center',
           'border',
-          'border-input',
+          'border-border',
           'bg-background',
           'text-sm',
           'font-medium',
           'outline-none',
-          'ring-2',
-          'ring-ring',
-          'ring-offset-2',
+          'ring-3',
+          'ring-ring/50',
+          'border-ring',
           'opacity-50',
-          'cursor-not-allowed',
+          'pointer-events-none',
         ])
       );
       const source = await readFile(file, 'utf8');
       expect(source.match(new RegExp(`${hook}\\(\\)`, 'g'))).toHaveLength(1);
       expect(source).not.toContain('asButton');
       expect(source).not.toContain("from '../style'");
+      expect(tokens).toContain('shadow-xs');
+      expect(tokens).toContain('bg-accent');
       expect(
-        tokens.some((token) => typeof token === 'string' && /^(shadow|translate|scale)/.test(token))
+        tokens.some((token) => typeof token === 'string' && /^(translate|scale)/.test(token))
       ).toBe(false);
     });
 
@@ -126,21 +124,53 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
       for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
         const css = render(tokens);
         expect(css).not.toContain('Unsupported Proto UI style tokens');
-        expect(css).toContain('min-height: 2rem;');
-        expect(css).toContain('padding-inline: 0.625rem;');
+        expect(css).toContain('height: 2.25rem;');
+        expect(css).toContain('padding-inline: 1rem;');
         expect(css).toContain('box-sizing: border-box;');
-        expect(css).toContain('white-space: normal;');
-        expect(css).toContain('overflow-wrap: anywhere;');
-        expect(css).toContain('text-align: center;');
-        expect(css).toContain('max-width: 100%;');
-        expect(css).toContain('min-width: 0px;');
+        expect(css).toContain('white-space: nowrap;');
+        expect(tokens).not.toContain('min-h-9');
+        expect(tokens).not.toContain('whitespace-normal');
         expect(css).toContain('font-weight: 500;');
         expect(css).toContain('font-size: 0.875rem;');
         expect(css).toContain('line-height: 1.25rem;');
-        expect(css).toContain('padding-block: 0px;');
+        expect(css).toContain('padding-block: 0.5rem;');
       }
     });
   }
+
+  it('changes to the explicit wrapping extension and back without fixed-height residue', async () => {
+    const nodes = fixture();
+    nodes.trigger.click();
+    await flush();
+    for (const part of ['trigger', 'close'] as const) {
+      setElementProps(nodes[part], { wrap: true });
+      await flush();
+      const tokens = tokensOf(nodes[part]);
+      expect(tokens).toEqual(
+        expect.arrayContaining([
+          'min-h-9',
+          'px-4',
+          'py-1',
+          'whitespace-normal',
+          'min-w-0',
+          'max-w-full',
+          'wrap-anywhere',
+          'text-center',
+        ])
+      );
+      for (const old of ['h-9', 'py-2', 'whitespace-nowrap']) expect(tokens).not.toContain(old);
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render(tokens);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+        expect(css).toContain('min-height: 2.25rem;');
+        expect(css).toContain('padding-block: 0.25rem;');
+      }
+      setElementProps(nodes[part], { wrap: false });
+      await flush();
+      expect(tokensOf(nodes[part])).toContain('h-9');
+      expect(tokensOf(nodes[part])).not.toContain('min-h-9');
+    }
+  });
 
   it('keeps one request per source-host command and the existing title relation', async () => {
     const nodes = fixture();
@@ -183,7 +213,10 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     for (const part of ['trigger', 'close'] as const) {
       expect(nodes[part].getAttribute('aria-disabled')).toBe('true');
       expect(tokensOf(nodes[part])).toEqual(
-        expect.arrayContaining(['data-[disabled]:opacity-50', 'data-[disabled]:cursor-not-allowed'])
+        expect.arrayContaining([
+          'data-[disabled]:opacity-50',
+          'data-[disabled]:pointer-events-none',
+        ])
       );
       nodes[part].click();
     }
@@ -203,8 +236,8 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(complete);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
-      expect(css).toContain('min-height: 2rem;');
-      expect(css).toContain('padding-inline: 0.625rem;');
+      expect(css).toContain('height: 2.25rem;');
+      expect(css).toContain('padding-inline: 1rem;');
       expect(css).toContain('font-size: 0.875rem;');
       expect(css).toContain('line-height: 1.25rem;');
     }

@@ -1,33 +1,35 @@
-# Shadcn Drawer command density (v0, proposed bounded presentation)
+# Shadcn Drawer command presentation (v0, bounded New York migration)
 
-Status: independently reviewed bounded presentation direction, admitted for this local implementation on 2026-10-11. This uncataloged transitional presentation slice does not admit the full Drawer or Button. Draft `C-AS-HOOK-0001`, `C-FEEDBACK-STYLE-0003` and `C-AS-OVERLAY-0001` constrain composition, style intent and unchanged overlay ownership.
+Status: proposed bounded presentation migrated on 2026-10-13 under the owner's fixed-reference direction. This is not full Drawer or Button acceptance. Draft `C-AS-HOOK-0001`, `C-FEEDBACK-STYLE-0003`, `C-FEEDBACK-STYLE-0004` and `C-AS-OVERLAY-0001` constrain composition and unchanged ownership.
 
-## Fixed source and scope
+## Reference and history
 
-Use shadcn/ui `c2a67849be260701852b0977ba15eb5f3a0ce2a4`, Base route with Nova styling:
+The current reference is shadcn/ui `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`, New York:
 
-- [Base Drawer consumer](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/examples/drawer-example.tsx) renders an outline Button for Trigger and footer Close, with size omitted.
-- [Base Button](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/bases/base/ui/button.tsx) selects default size.
-- [Nova Button rules](https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L148-L206) supply `h-8 px-2.5`, `rounded-lg text-sm font-medium`; there is no vertical-padding contribution for default size. The primitive alone does not supply this command density.
+- [Drawer demo lines 69–74 and 126–131](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/examples/drawer-demo.tsx#L69-L131) composes Trigger and Close with outline Button, omitting size.
+- [Button lines 6–41](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx#L6-L41) supplies rounded-md, text-sm/font-medium, h-9 px-4 py-2 and nowrap. Outline uses border, background and shadow-xs, with separate hover, focus and dark paint.
 
-This changes only the two existing Drawer command recipes' density, weight and radius, plus the explicit long-label adaptation below. It does not change the separately cataloged Shadcn Button reference. Full outline paint, icon spacing, hover, dark, expanded and focus equivalence remain outside this slice.
+The preceding 2026-10-11 contract used Base/Nova `c2a67849…` (32px, 10px inline padding, rounded-lg). That historical recipe and its 112 native density receipts do not certify the current New York migration. Git history retains the original definition and evidence.
 
-## Presentation and ownership
+## Ownership and presentation
 
-Both commands contribute `min-h-8 px-2.5 py-0 rounded-lg text-sm font-medium min-w-0 max-w-full whitespace-normal wrap-anywhere text-center`, replacing `px-3 py-2 rounded-md`. At root16 and one line, expected border-box height is32px, inline padding10px, block padding0, font14px/line20px, weight500. At root32, the rem dimensions become minimum64px, inline20px, font28px/line40px; actual 1px borders remain host pixel borders. Radius uses the existing family `rounded-lg` mapping. Retain `inline-flex items-center justify-center` and border-box sizing. Explicit `text-center` centers each wrapped text line, rather than relying on native Button defaults or ancestor text alignment; this is part of the local wrapping adaptation. Font family and all existing paint/state rules remain unchanged.
+Each command composes exactly one existing asDrawerTrigger or asDrawerClose. It consumes shared passive New York Button token constants from `packages/prototypes/shadcn/src/button/paint.ts`; no second asButton, activation listener or host inspection is introduced. Root open/request ownership, controlled refusal, disabled suppression, focus and disposal remain unchanged.
 
-Upstream uses fixed height and no-wrap. Choosing minimum height and wrapping is a Proto UI adaptation for the owner's narrow-screen/enlarged-text requirement, not an upstream assertion: allow additional lines to increase the box instead of clipping or ellipsizing its label. Under constrained available width, `min-w-0 max-w-full whitespace-normal wrap-anywhere text-center` must allow long and unbroken labels to wrap. Do not set a fixed width, max-height, overflow clipping or expanded invisible hit region. Consumer stretch may still set Close width. This is a 32px default visual density, not a claim of a 44px touch target or full accessibility certification.
+Default `wrap=false` uses fixed 2.25rem border-box height, 1rem inline and 0.5rem block padding, font 0.875rem/1.25rem and weight 500. Its rounded-md intent is preserved. Default height is 36px at root16 and 72px at root32; do not replace it with min-height plus py-2, which creates a different natural bordered box. The existing family theme realizes radius-md as radius minus 2px; that coincides at root16 with the upstream app demo's global radius times 0.8 but diverges at root32. The installable neutral theme only defines radius itself; selecting and migrating the shared radius mapping remains separate.
 
-Keep one existing `asDrawerTrigger()` or `asDrawerClose()` and no `asButton()`, new activation listener, DOM inspection, prop or public anatomy. Do not change Base behavior, root open/request ownership, controlled refusal, disabled logic, portal membership, gesture, focus, scroll or disposal. No Compiler, IR, Adapter or Focus changes.
+The explicit local `wrap=true` extension uses the shared Button wrap recipe: min-h-9 h-auto px-4 py-1 whitespace-normal min-w-0 max-w-full wrap-anywhere text-center. A sufficiently constrained multiline label grows beyond 2.25rem. Its smaller block padding is intentional local behavior, not an assertion of exact upstream fixed-height equivalence. Switching either way removes stale fixed/minimum height and no-wrap/wrap contributions.
+
+Hover uses the existing hovered State, focus the existing focusVisible State, and disabled the existing disabled State. Bounded shared paint includes outline shadow, hover accent, ring-3/ring-ring/50, and disabled opacity/pointer suppression. Dark outline paint, icon-specific padding, invalid state, reduced-motion handling for generic transition-all and full Button equivalence remain unverified or incomplete.
 
 ## Acceptance
 
-1. An independent contract-derived source/token oracle rejects both old recipes, preserves paint/focus/disabled tokens and proves one Drawer hook with no second button behavior.
-2. Real source-host contributions and complete-family normal Document and Shadow CSS lower minimum height2rem, inline padding0.625rem, block padding0, small type0.875rem/1.25rem and wrapping without unsupported-token diagnostics. Source-host/CSS checks do not prove native layout or hit testing.
-3. Existing Drawer request, controlled, disabled, focus, gesture and lifecycle regressions remain intact. Test one request for Trigger/Close, reopen and final disposal; do not weaken existing tests or correct other owners' logic.
-4. Before claiming native visual acceptance, collect exact-source native receipts for WC/React/Vue/Vue2, light/dark, normal/narrow320px, root32 and long/unbroken labels. Measure box-sizing, font/root metrics, rect/scroll/client sizes, all borders/padding, height/min/max-height and any Shadow visual surface separately. Normal one-line32px and constrained-label growth must be observed, including no clipped text. Constrain the long-label command container to160px at root16 and240px at root32, both greater than inline padding plus borders; use a repeated sentence and an unbroken identifier. An arbitrarily narrower box below that physical floor has no absolute no-overflow guarantee. Root scaling is not browser zoom.
-5. Native pointer hit probes inside/just outside actual command edges, open/close/reopen/Escape, and exact-commit screenshots are separate evidence. Missing native/browser/GPUI evidence remains explicit debt; registration or source CSS is not a pass.
+1. Independent source oracles reject the former Nova default and establish one behavior owner, shared passive paint and no component-specific host logic.
+2. Source-host default and explicit wrap contributions lower in Document and Shadow without unsupported tokens. Toggling wrap restores the correct recipe. Test one activation request, controlled refusal, disabled state, reopen and terminal cleanup.
+3. Exact-head native density cases must now measure 36/72px defaults and separately request wrap for constrained long/unbroken labels. Do not reuse the former 32/64px receipts. Keep actual radius/paint gaps visible and retain the Brutalist family's independent recipe and oracle.
+4. Native hit testing, actual text fit, light/dark paint, screenshots and GPUI remain separately required. Source/CSS closure is not native acceptance or a 44px target guarantee.
 
-Mapping: `packages/prototypes/shadcn/src/drawer/{trigger,close}.proto.ts`; planned `packages/prototypes/shadcn/test/drawer-command-density.test.ts`. No demo content or Finf completion-count changes.
+Mapping: `packages/prototypes/shadcn/src/drawer/trigger.proto.ts`, `close.proto.ts`, `types.ts`, `packages/prototypes/shadcn/test/drawer-command-density.test.ts`, and `apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts`.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot
+
+ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)

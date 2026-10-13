@@ -1,0 +1,50 @@
+id: C-DRAWER-HANDLE-PRESENTATION-0001
+type: contract
+title: Drawer Handle separates input ownership from optional family placement
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: The bounded bottom recipe and source-host composition are testable; exact-head native geometry, full-Content drag and a separate decorative Indicator remain unfinished.
+summary: Handle behavior remains portable and independent of the optional legacy edge recipe or Shadcn bottom flow recipe.
+statement:
+  en: asDrawerHandle owns the existing context, anatomy, gesture, focus and accessibility behavior without imposing edge placement. The optional useDrawerHandleEdgeStyle setup helper composes that same idempotent behavior and adds only presentation.
+criteria:
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-OWNER
+    text:
+      en: The existing captured side State is borrowed read-only for family presentation. The helper does not add a second input, geometry, focus or anatomy owner. Base standalone Handle and the Brutalist, Bootstrap 2.3.2 and Liquid Glass projections explicitly retain their former edge recipe. No Shadcn dimension is placed in Base or another family.
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-BOTTOM
+    text:
+      en: Shadcn accepted bottom uses normal flow, centered automatic inline margins, one root-text-unit top margin, half a root-text-unit height, fixed 100 logical-pixel width, zero flex shrink, full rounding and muted fill. Relative positioning has no offsets and preserves normal-flow geometry. This derives from fixed New York 02cad611 drawer.tsx line 67, not Vaul.Handle's separate 32px recipe. Intrinsic natural extent includes the Handle margin and height exactly once; fraction mode keeps its existing cap and snap denominator.
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-BOUNDARY
+    text:
+      en: The current Handle still owns pointer drag and, in fraction mode, keyboard resize. Its top/left/right affordances remain visible and usable. This is an explicit remaining difference from New York's bottom-only decorative div and Vaul's default whole-Content dragging. Hiding those live controls is prohibited until the shared Indicator/drag definition and implementation preserve their required interaction. No platform lookup, host selector or compiler component dispatch replaces that work.
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-EVIDENCE
+    text:
+      en: Test intrinsic and snap bottom recipes, direction changes without stale offsets, unchanged other-family placement, source-host behavior and Document/Shadow token closure. Native acceptance separately measures actual Handle dimensions, margin, centering, adjacency and the sum of child border boxes at root16/root32, plus unchanged half/full snap extent. Synthetic CSS or source tests are not physical geometry evidence.
+dependsOn:
+  contracts:
+    [
+      C-DRAWER-AUTO-CONSUMER-0001,
+      C-DRAWER-STRUCTURE-0001,
+      C-FEEDBACK-STYLE-0003,
+      C-FEEDBACK-STYLE-0004,
+    ]
+verifies:
+  tests: [T-DRAWER-HANDLE-PRESENTATION-0001]
+sources:
+  - path: packages/prototypes/base/src/drawer/handle.proto.ts
+  - path: packages/prototypes/base/src/drawer/types.ts
+  - path: packages/prototypes/shadcn/src/drawer/handle.proto.ts
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/drawer.tsx#L67
+  - path: https://github.com/emilkowalski/vaul/blob/73d06cdd3fd990bf4b83214cfe240c246908af0d/src/index.tsx#L919-L925
+openQuestions:
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-Q-NATIVE
+    question: Which exact-head native receipts establish once-only intrinsic contribution and snap stability on every required adapter?
+    blocks: [activation:C-DRAWER-HANDLE-PRESENTATION-0001]
+  - id: C-DRAWER-HANDLE-PRESENTATION-0001-Q-INDICATOR
+    question: How will a separate passive Indicator and neutral whole-Content gesture routing preserve nested scrolling, input exclusion, focus and retained resize semantics?
+    blocks: [activation:C-DRAWER-HANDLE-PRESENTATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Separate legacy edge placement from Handle input and adopt only the bounded Shadcn bottom flow recipe with explicit remaining interaction and geometry gates.
+tags: [drawer, presentation, family, gesture]

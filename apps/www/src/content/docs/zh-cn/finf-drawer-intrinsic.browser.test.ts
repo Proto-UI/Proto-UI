@@ -43,11 +43,13 @@ beforeAll(async () => {
       'presentation-context.ts',
       'side-observation.ts',
     ].map((f) => `packages/prototypes/base/src/drawer/${f}`),
-    ...['header', 'footer', 'title'].map(
+    ...['header', 'footer', 'title', 'handle', 'trigger', 'close'].map(
       (part) => `packages/prototypes/shadcn/src/drawer/${part}.proto.ts`
     ),
     'apps/www/src/components/PrototypePreviewer/finf-prototype-modules.ts',
     'spec/contracts/C-DRAWER-STRUCTURE-0001.yaml',
+    'spec/contracts/C-DRAWER-HANDLE-PRESENTATION-0001.yaml',
+    'packages/prototypes/shadcn/src/button/paint.ts',
   ];
   const hashes = Object.fromEntries(
     await Promise.all(
@@ -763,6 +765,69 @@ async function runCase(
     await page.close();
   }
 }
+// Independent physical-flow oracle. It reads rendered rectangles, never Drawer
+// extent-model helpers, and makes a duplicated/missing Handle contribution observable.
+async function assertBottomHandleFlow(page: Page, intrinsic: boolean, samples: unknown[]) {
+  const actual = await page.evaluate(() => {
+    const element = (part: string) =>
+      document.querySelector<HTMLElement>(`[data-demo-ref="intrinsic-${part}"]`)!;
+    const describe = (part: string) => {
+      const node = element(part),
+        css = getComputedStyle(node),
+        rect = node.getBoundingClientRect();
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        x: rect.x,
+        width: rect.width,
+        height: rect.height,
+        position: css.position,
+        shrink: css.flexShrink,
+        marginTop: parseFloat(css.marginTop),
+        marginBottom: parseFloat(css.marginBottom),
+      };
+    };
+    const panel = element('content'),
+      css = getComputedStyle(panel);
+    return {
+      root: parseFloat(getComputedStyle(document.documentElement).fontSize),
+      content: describe('content'),
+      handle: describe('handle'),
+      header: describe('header'),
+      payload: describe('payload'),
+      footer: describe('footer'),
+      borders: [parseFloat(css.borderTopWidth), parseFloat(css.borderBottomWidth)],
+    };
+  });
+  samples.push({
+    stage: intrinsic ? 'bottom-handle-intrinsic-flow' : 'bottom-handle-snap-flow',
+    actual,
+  });
+  expect(actual.handle.position).toBe('relative');
+  expect(actual.handle.width).toBeCloseTo(100, 4);
+  expect(actual.handle.height).toBeCloseTo(actual.root * 0.5, 4);
+  expect(actual.handle.marginTop).toBeCloseTo(actual.root, 4);
+  expect(actual.handle.shrink).toBe('0');
+  expect(actual.handle.top - actual.content.top).toBeCloseTo(actual.root + actual.borders[0], 4);
+  expect(actual.handle.x + actual.handle.width / 2).toBeCloseTo(
+    actual.content.x + actual.content.width / 2,
+    4
+  );
+  expect(actual.header.top).toBeCloseTo(actual.handle.bottom, 4);
+  if (intrinsic) {
+    const expected =
+      actual.borders[0] +
+      actual.borders[1] +
+      actual.handle.marginTop +
+      actual.handle.height +
+      actual.header.height +
+      actual.payload.height +
+      actual.footer.height;
+    expect(actual.content.height).toBeCloseTo(expected, 4);
+    expect(actual.footer.top).toBeCloseTo(actual.payload.bottom, 4);
+  }
+}
+
 for (const runtime of RUNTIMES)
   for (const family of families) {
     for (const scenario of scenarios)
@@ -777,6 +842,23 @@ for (const runtime of RUNTIMES)
             expect(await handle.getAttribute('aria-hidden')).toBe('true');
             expect(await handle.getAttribute('aria-valuenow')).toBeNull();
             expect(await handle.evaluate((node) => (node as HTMLElement).tabIndex)).toBeLessThan(0);
+            if (family === 'shadcn' && scenario.side === 'bottom' && !scenario.long) {
+              for (const font of [16, 32]) {
+                await page.evaluate(async (value) => {
+                  document.documentElement.style.fontSize = `${value}px`;
+                  await new Promise<void>((resolve) =>
+                    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                  );
+                }, font);
+                await assertBottomHandleFlow(page, true, samples);
+              }
+              await page.evaluate(async (value) => {
+                document.documentElement.style.fontSize = `${value}px`;
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                );
+              }, scenario.root);
+            }
             const close = await visibleClose(page, panel, scenario.long, samples);
             samples.push({ stage: 'reachable-close', ...(await geometry(panel)) });
             if (scenario.long)
@@ -808,6 +890,7 @@ for (const runtime of RUNTIMES)
       await runCase(`${family}-${runtime}-explicit-snap`, options, async (page, panel, samples) => {
         const handle = page.locator('[data-demo-ref="intrinsic-handle"]');
         expect(await handle.getAttribute('role')).toBe('separator');
+        if (family === 'shadcn') await assertBottomHandleFlow(page, false, samples);
         await handle.focus();
         await page.keyboard.press('Home');
         const cap = 800 - (family === 'base' ? 0 : 96);
@@ -815,6 +898,7 @@ for (const runtime of RUNTIMES)
           .poll(async () => Math.abs((await geometry(panel)).height - cap / 2))
           .toBeLessThanOrEqual(2);
         expect(await handle.getAttribute('aria-valuenow')).toBe('50');
+        if (family === 'shadcn') await assertBottomHandleFlow(page, false, samples);
         samples.push({ stage: 'half', ...(await geometry(panel)) });
         await page.keyboard.press('End');
         await expect

@@ -22,7 +22,6 @@ it('statically collects and realizes supported Header, Content, Footer and Title
       'border-border',
       'bg-background',
       'text-foreground',
-      'shadow-md',
       'flex',
       'flex-col',
     ],
@@ -50,5 +49,5 @@ it('Title inherits size and Content removes container padding without claiming d
   expect(content).not.toContain('grid');
   expect(content).toContain('rounded-lg');
   expect(content).toContain('border');
-  expect(content).toContain('shadow-md');
+  expect(content).not.toContain('shadow-md');
 });

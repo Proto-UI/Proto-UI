@@ -150,33 +150,8 @@ function setup(def: DefHandle<DrawerHandleProps, DrawerHandleExposes>) {
     if (next === 0) requestDrawerOpen(run, false, 'handle.dismiss', 'keyboard');
     else contentMethod(run, 'requestSnapPoint', next, 'keyboard');
   });
-  // Keep the grab target at the visible inward edge at every snap extent.
-  def.feedback.style.use(tw('absolute z-10 select-none rounded-full'));
-  def.rule({
-    when: (w) => w.state(focus.focusVisible).eq(true),
-    intent: (i) => i.feedback.style.use(tw('ring-2')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('bottom'),
-    intent: (i) =>
-      i.feedback.style.use(tw('top-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('top'),
-    intent: (i) =>
-      i.feedback.style.use(tw('bottom-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('left'),
-    intent: (i) =>
-      i.feedback.style.use(tw('right-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')),
-  });
-  def.rule({
-    when: (w) => w.state(side).eq('right'),
-    intent: (i) =>
-      i.feedback.style.use(tw('left-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')),
-  });
 }
+
 export const asDrawerHandle = defineAsHook<
   DrawerHandleProps,
   DrawerHandleExposes,
@@ -184,5 +159,53 @@ export const asDrawerHandle = defineAsHook<
 >({ name: 'as-drawer-handle', setup });
 export default definePrototype<DrawerHandleProps, DrawerHandleExposes>({
   name: 'base-drawer-handle',
-  setup,
+  setup(def) {
+    asDrawerHandle();
+    useDrawerHandleEdgeStyle(def);
+  },
 });
+
+/** Optional presentation only; the Handle hook keeps gesture and focus ownership. */
+export function useDrawerHandleEdgeStyle(
+  def: DefHandle<DrawerHandleProps, DrawerHandleExposes>,
+  options: { bottom?: boolean } = {}
+): void {
+  const behavior = asDrawerHandle();
+  const side = behavior.getState!('side')!;
+  const focusVisible = behavior.getState!('focusVisible')!;
+  // Keep legacy edge targets for Base and families that opt into this recipe.
+  def.feedback.style.use(tw('select-none rounded-full'));
+  def.rule({
+    when: (w) => w.state(focusVisible).eq(true),
+    intent: (i) => i.feedback.style.use(tw('ring-2')),
+  });
+  if (options.bottom !== false)
+    def.rule({
+      when: (w) => w.state(side).eq('bottom'),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('absolute z-10 top-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')
+        ),
+    });
+  def.rule({
+    when: (w) => w.state(side).eq('top'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw('absolute z-10 bottom-1 left-1/2 -translate-x-1/2 h-2 w-12 cursor-ns-resize')
+      ),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('left'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw('absolute z-10 right-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')
+      ),
+  });
+  def.rule({
+    when: (w) => w.state(side).eq('right'),
+    intent: (i) =>
+      i.feedback.style.use(
+        tw('absolute z-10 left-1 top-1/2 -translate-y-1/2 h-12 w-2 cursor-ew-resize')
+      ),
+  });
+}

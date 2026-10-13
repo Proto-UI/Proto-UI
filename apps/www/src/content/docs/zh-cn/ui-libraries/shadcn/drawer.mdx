@@ -14,11 +14,13 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
-Header 与 Footer 现在各自拥有 padding；Content 改用纵向 flex 布局，不再统一添加容器 padding，自定义正文需要自行定义间距。Header 仅在已接受 top/bottom 方向时居中，其他情况继承对齐；非法方向更新保留最后已接受的呈现。Title 继承字号与行高。现有统一 border、圆角与 shadow 仍明确不同于固定 New York 的方向边缘绘制。响应式 Header、装饰 Indicator 与上游 extent 尺寸仍未完成；交互 Handle 不变。
+Header 与 Footer 现在各自拥有 padding；Content 改用纵向 flex 布局，不再统一添加容器 padding，自定义正文需要自行定义间距。Header 仅在已接受 top/bottom 方向时居中，其他情况继承对齐；非法方向更新保留最后已接受的呈现。Title 继承字号与行高。Content 已移除 shadow；统一 border 和圆角仍不同于固定 New York 的方向边缘绘制。底部 Handle 现为正常流中的 100px 宽、0.5rem 高、1rem 上间距和 muted 填充；保留拖动与 resize，包括其他方向的可见控制，因此尚不等同于上游仅底部显示的装饰指示条或整块 Content 拖动。响应式 Header、方向边缘和上游 extent 尺寸仍未完成。
 
-top/bottom Content 默认按内容高度显示，最大高度为可用高度减去 6 个根文本单位，始终受安全可用区域约束。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。本纵向草稿中，left/right 保留既有受限 20rem 呈现。
+短内容示例采用上游 demo 的居中、全宽且 max-w-sm 内容列，这是消费方组合，不是所有 Drawer 的最大宽度。Trigger 与 Close 使用固定 New York outline Button 配方，默认高度 2.25rem、横向 padding 1rem；需要长标签时可显式设置 wrap=true，采用本项目的最小高度与多行适配。theme 圆角缩放、深色 outline 绘制和完整 Button 对齐仍为独立待办。
 
-本项目将 Content 组合为 overflow-y-auto 滚动区域；这是项目的组合选择，不等同于固定 Shadcn/Neo 参考 wrapper 的 overflow-hidden Content 加显式滚动 body。长内容示例的 Close 仍在同一滚动区域内。
+top/bottom Content 默认按内容高度显示；目前保留的兼容最大高度为可用高度减去 6 个根文本单位，始终受安全可用区域约束。它尚未实现 New York 的 viewport 相对 max-h-80vh 及独立 mt-24/mb-24 间距。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。本纵向草稿中，left/right 保留既有受限 20rem 呈现。
+
+本项目将 Content 组合为纵向 Scroll surface；固定 New York DrawerContent wrapper 本身未声明 overflow utility。长内容示例的 Close 仍在同一滚动区域内。
 
 Root 支持受控 open 或非受控 defaultOpen。禁用命令不激活。调用方拒绝关闭请求时，拖动预览恢复到实际受控状态。
 

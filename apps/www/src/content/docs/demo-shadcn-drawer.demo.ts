@@ -30,31 +30,37 @@ export default {
                 'props': { 'a11yLabel': 'Resize drawer' },
               },
               {
-                kind: 'proto',
-                prototypeId: 'shadcn-drawer-header',
+                kind: 'box',
+                className: 'mx-auto w-full max-w-sm',
                 children: [
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'shadcn-drawer-title',
-                    'children': ['Drawer settings'],
-                  },
-                  {
-                    'kind': 'proto',
-                    'prototypeId': 'shadcn-drawer-description',
-                    'children': [
-                      'This panel fits its content. Drag the handle outward to dismiss, or choose Close.',
+                    kind: 'proto',
+                    prototypeId: 'shadcn-drawer-header',
+                    children: [
+                      {
+                        'kind': 'proto',
+                        'prototypeId': 'shadcn-drawer-title',
+                        'children': ['Drawer settings'],
+                      },
+                      {
+                        'kind': 'proto',
+                        'prototypeId': 'shadcn-drawer-description',
+                        'children': [
+                          'This panel fits its content. Drag the handle outward to dismiss, or choose Close.',
+                        ],
+                      },
                     ],
                   },
-                ],
-              },
-              {
-                kind: 'proto',
-                prototypeId: 'shadcn-drawer-footer',
-                children: [
                   {
-                    'kind': 'proto',
-                    'prototypeId': 'shadcn-drawer-close',
-                    'children': ['Close'],
+                    kind: 'proto',
+                    prototypeId: 'shadcn-drawer-footer',
+                    children: [
+                      {
+                        'kind': 'proto',
+                        'prototypeId': 'shadcn-drawer-close',
+                        'children': ['Close'],
+                      },
+                    ],
                   },
                 ],
               },

@@ -31,9 +31,15 @@ it.each(Object.entries(files).filter(([path]) => path.includes('shadcn')))(
   'Shadcn structural parts own spacing in the actual %s demo',
   (_path, demo) => {
     const panel = panels(demo.root)[0];
-    const children = panel.children!.filter(
-      (child): child is DemoNode => typeof child !== 'string'
+    const direct = panel.children!.filter((child): child is DemoNode => typeof child !== 'string');
+    const column = direct.find(
+      (child) => child.kind === 'box' && child.className === 'mx-auto w-full max-w-sm'
     );
+    const children =
+      column && 'children' in column
+        ? column.children!.filter((child): child is DemoNode => typeof child !== 'string')
+        : direct;
+    if (_path === './demo-shadcn-drawer.demo.ts') expect(column).toBeDefined();
     const parts = children.filter(
       (child): child is Extract<DemoNode, { kind: 'proto' }> => child.kind === 'proto'
     );

@@ -196,6 +196,8 @@ export type DrawerHandleExposes = {
 };
 export type DrawerHandleAsHookContract = {
   state: {
+    /** Read-only captured accepted side for optional family presentation. */
+    side: State<string>;
     disabled: State<boolean>;
     focused: State<boolean>;
     focusVisible: State<boolean>;

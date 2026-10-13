@@ -39,7 +39,7 @@ export { asDrawerTitle, default as drawerTitle } from './title.proto';
 export { asDrawerDescription, default as drawerDescription } from './description.proto';
 export { asDrawerClose, default as drawerClose } from './close.proto';
 
-export { asDrawerHandle, default as drawerHandle } from './handle.proto';
+export { asDrawerHandle, useDrawerHandleEdgeStyle, default as drawerHandle } from './handle.proto';
 
 export default drawerRoot;
 

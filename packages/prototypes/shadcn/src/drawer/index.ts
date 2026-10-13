@@ -12,7 +12,6 @@ export type {
   DrawerHandleExposes,
   DrawerRootProps,
   DrawerRootExposes,
-  DrawerTriggerProps,
   DrawerTriggerExposes,
   DrawerContentProps,
   DrawerContentExposes,
@@ -20,7 +19,6 @@ export type {
   DrawerTitleExposes,
   DrawerDescriptionProps,
   DrawerDescriptionExposes,
-  DrawerCloseProps,
   DrawerCloseExposes,
   DrawerMaskProps,
   DrawerMaskExposes,
@@ -31,3 +29,5 @@ export type { DrawerFooterProps, DrawerFooterExposes } from '@proto.ui/prototype
 
 export { default as drawerHeader } from './header.proto';
 export type { DrawerHeaderProps, DrawerHeaderExposes } from '@proto.ui/prototypes-base/drawer';
+
+export type { DrawerTriggerProps, DrawerCloseProps } from './types';
