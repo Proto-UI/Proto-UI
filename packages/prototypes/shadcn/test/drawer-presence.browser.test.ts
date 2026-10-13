@@ -267,3 +267,132 @@ describe('real Drawer semantic Scroll physical target', () => {
     20000
   );
 });
+
+// Diagnostic replay of the actual public nested demo. Its explicit-height pair is
+// a control, not a replacement for the intrinsic public page or a production fix.
+describe('public www Drawer cold-entry diagnostic', () => {
+  it.each([false, true])(
+    'records intrinsic geometry and completion (fixed control=%s)',
+    async (fixedControl) => {
+      const { buildPublicDrawerEntryProbe, buildPublicDrawerBoxCss } =
+        await import('./fixtures/drawer-entry-build');
+      const { readdir } = await import('node:fs/promises');
+      const files: string[] = [];
+      for (const family of ['base', 'shadcn']) {
+        const directory = `packages/prototypes/${family}/src/drawer`;
+        for (const file of await readdir(directory))
+          if (file.endsWith('.ts')) files.push(`${directory}/${file}`);
+      }
+      const demoPath = '../../../../apps/www/src/content/docs/demo-shadcn-drawer.demo';
+      const demo = (await import(demoPath)).default;
+      const boxTokens = new Set<string>();
+      const walk = (node: any) => {
+        for (const token of (node.className ?? '').split(/\s+/)) if (token) boxTokens.add(token);
+        for (const child of node.children ?? []) if (typeof child === 'object') walk(child);
+      };
+      walk(demo.root);
+      const sourceTokens = (await collectProtoStyleTokensFromFiles(files)).filter(
+        (token): token is string => typeof token === 'string'
+      );
+      const css = `${await buildPublicDrawerBoxCss([...boxTokens])}\n${renderProtoStyleTokenCss(sourceTokens)}`;
+      const diagnosticScript = await buildPublicDrawerEntryProbe();
+      const page = await browser.newPage({ viewport: { width: 900, height: 700 } });
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(String(error)));
+      let result: unknown;
+      try {
+        await page.route('**/*', (route) => route.abort());
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        await page.setContent('<style>html{font-size:16px}body{margin:0;background:white}</style>');
+        await page.addStyleTag({ content: css });
+        await page.addScriptTag({ content: diagnosticScript });
+        await page.evaluate(async (fixed) => {
+          (window as any).publicEntry = await (
+            window as any
+          ).PublicDrawerEntry.createPublicDrawerEntryFixture(fixed);
+        }, fixedControl);
+        // Let initial closed admission finish, exactly as a human clicks a ready demo.
+        await page.locator('wc-shadcn-drawer-trigger').waitFor({ state: 'visible' });
+        await page.evaluate(() => {
+          const samples: unknown[] = [];
+          (window as any).__entryFrames = samples;
+          const sample = () => {
+            const content = document.querySelector('wc-shadcn-drawer-content') as HTMLElement & {
+              getExposes?: () => any;
+            };
+            const mask = document.querySelector('wc-shadcn-drawer-mask') as HTMLElement;
+            samples.push({
+              time: performance.now(),
+              phase: content?.getExposes?.().transitionState.get(),
+              rect: content?.getBoundingClientRect().toJSON(),
+              translate: content?.style.translate,
+              maskOpacity: mask ? getComputedStyle(mask).opacity : null,
+            });
+          };
+          (window as any).__entryRequestedAt = performance.now();
+          const end = performance.now() + 750;
+          (window as any).__entryDone = new Promise<void>((resolve) => {
+            const frame = () => {
+              sample();
+              if (performance.now() < end) requestAnimationFrame(frame);
+              else resolve();
+            };
+            requestAnimationFrame(frame);
+          });
+          (window as any).publicEntry.open();
+        });
+        await page.evaluate(() => (window as any).__entryDone);
+        result = await page.evaluate(() => ({
+          requestedAt: (window as any).__entryRequestedAt,
+          events: (window as any).__drawerEntryProbe,
+          frames: (window as any).__entryFrames,
+        }));
+        expect(errors).toEqual([]);
+        const events = (result as any).events as any[];
+        expect(
+          events.some(
+            (event) =>
+              event.channel === 'content' &&
+              event.phase === 'entering' &&
+              event.kind === 'environment'
+          )
+        ).toBe(true);
+        expect(
+          events.some(
+            (event) =>
+              event.channel === 'content' && event.phase === 'entering' && event.kind === 'complete'
+          )
+        ).toBe(true);
+        await page.screenshot({
+          path: path.join(
+            output,
+            `drawer-public-${fixedControl ? 'fixed-control' : 'intrinsic'}-settled.png`
+          ),
+        });
+      } finally {
+        // Failure-safe extraction preserves setup and partial first-attempt records.
+        if (!result)
+          result = await page
+            .evaluate(() => ({
+              events: (window as any).__drawerEntryProbe,
+              frames: (window as any).__entryFrames,
+            }))
+            .catch(() => null);
+        await writeFile(
+          path.join(
+            output,
+            `drawer-public-${fixedControl ? 'fixed-control' : 'intrinsic'}-diagnostic.json`
+          ),
+          JSON.stringify(
+            { fixedControl, diagnosticOnly: true, observationMayForceLayout: true, errors, result },
+            null,
+            2
+          )
+        );
+        await page.evaluate(() => (window as any).publicEntry?.dispose()).catch(() => {});
+        await page.close();
+      }
+    },
+    30000
+  );
+});
