@@ -322,3 +322,13 @@ Composition 把 theme map 放在节点自有 `surfaceStyle` 之前；显式样�
 Website passive shell 的可选 `prepareAppearance` 返回同步 publish / rollback lease。它与既有 scope controller 的真实 commit 边界共享同一 theme map 和 generation receipt：publish 在内容迁移及其同步回调之前更新 owned normalized 输入；失败时先恢复 retained 输入，再归还内容。候选仅加载完成不发布主题，Promise 完成顺序不决定可见 family。同 family 的更新依据 controller 当前已提交的 receipt，嵌套更新和失败回滚不得覆盖更新的持有者。没有此 callback 的既有调用保持原路径；这只是 Website composition 的事务参与，不是跨 renderer 原生绘制的原子性保证。
 
 `C-HOST-SURFACE-PROJECTION-0001`、`C-PROTOTYPE-STYLE-CLOSURE-0001`、`D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001` 仍为 draft；本功能没有改变它们的生命周期或通用 Portal 自动继承承诺。真实浏览器的颜色、圆角、字体与焦点行程仍须独立验证。
+
+## Demo setup 的 outward callback
+
+`DemoNode.props` 仍只允许 JSON-like 初始数据；函数在 `demo.setup` 中通过 `api.setProps(ref, patch)` 安装。Website 的通用 callback 约定与现有 React/Vue renderer 一致：函数键 `onX`（`on` 后紧接大写字母）对应将该首字母小写、其余字符保留的事件名，例如 `onOpenChange` → `openChange`、`onURLChange` → `uRLChange`。callback 接收 payload，不接收 DOM Event。其他函数 prop 和全部原始 props 仍按原有路径传递。
+
+WC renderer 在这个 Website consumer 边界订阅 Adapter 发出的同名 `CustomEvent`，取其 `detail`。它只接收 composed path 起点为该 ref 持久元素的信号，不把同名原生输入、嵌套子元素或 Shadow 内子元素的事件当成该实例的信号。跨 realm 使用原生 CustomEvent detail getter 的 receiver 检查；这不是声明元数据查询或安全认证。依照 draft `C-EXPOSE-EVENT-0001-G`，`getExposes()` 不暴露事件 declaration。已声明事件校验仍由 Runtime/Module 执行，Website 只实现上述命名约定，不能宣称自己验证了 declaration。
+
+patch 中省略 callback 键会保留现值；替换函数不会叠加 listener；显式 `undefined`、`null` 或其他非函数值撤销该 callback。props 原始值仍被保留和传给 Props resolver。callback 与本次 demo host lease 一起释放，失效 API 不可重新安装，setup 失败及 teardown 抛错也会尝试清理全部 owned listener、实例和 association。同步同元素移动保持一份订阅；新的 host generation 使用独立订阅。
+
+同一 Demo setup 不要再为这些 callback 安装 WC `CustomEvent` fallback，否则一个 outward signal 会有两条 consumer 路径。已有按 runtime 互斥选择 DOM 或 callback 的网站消费者可以保持原路径；这里没有阻止传播或合并事件。

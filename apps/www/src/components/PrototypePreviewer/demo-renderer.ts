@@ -179,8 +179,10 @@ function renderDemoNodeWc(
   node: DemoChild,
   parent: HTMLElement,
   instances: HTMLElement[],
-  associations: ReturnType<typeof createDemoAssociationScope>
+  associations: ReturnType<typeof createDemoAssociationScope>,
+  isCurrent: () => boolean
 ) {
+  if (!isCurrent()) return;
   if (typeof node === 'string') {
     parent.appendChild(document.createTextNode(node));
     return;
@@ -198,7 +200,7 @@ function renderDemoNodeWc(
     if (node.ref) el.setAttribute('data-demo-ref', node.ref);
     parent.appendChild(el);
     const kids = node.children ?? [];
-    for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
+    for (const child of kids) renderDemoNodeWc(child, el, instances, associations, isCurrent);
     return;
   }
 
@@ -223,8 +225,8 @@ function renderDemoNodeWc(
   // Materialize authored children before connecting the custom element so the
   // Web Component adapter can project slots or reject contentless children.
   const kids = node.children ?? [];
-  for (const child of kids) renderDemoNodeWc(child, el, instances, associations);
-  parent.appendChild(el);
+  for (const child of kids) renderDemoNodeWc(child, el, instances, associations, isCurrent);
+  if (isCurrent()) parent.appendChild(el);
 }
 
 function collectDemoRefs(host: HTMLElement): Record<string, HTMLElement> {
@@ -245,6 +247,92 @@ function resolvePath(obj: unknown, path: string): unknown {
   }, obj);
 }
 
+/** Website onX convention over the WC Adapter's outward CustomEvent carrier. */
+function createWcDemoCallbacks(isCurrent: () => boolean) {
+  type Binding = { callback: (payload: unknown) => void; listener: EventListener };
+  const bindings = new Map<HTMLElement, Map<string, Binding>>();
+  let live = true;
+
+  return {
+    patch(el: HTMLElement, next: Record<string, unknown>) {
+      if (!live || !isCurrent()) return;
+      for (const [prop, value] of Object.entries(next)) {
+        if (!live || !isCurrent()) return;
+        if (!/^on[A-Z]/.test(prop)) continue;
+        // Match the existing React/Vue callback convention: only the first
+        // character after `on` is lowercased; the rest of the key is exact.
+        const key = prop[2]!.toLowerCase() + prop.slice(3);
+        const owned = bindings.get(el) ?? new Map<string, Binding>();
+        const existing = owned.get(key);
+        if (typeof value !== 'function') {
+          if (existing) {
+            owned.delete(key);
+            el.removeEventListener(key, existing.listener);
+          }
+          if (owned.size === 0) bindings.delete(el);
+          continue;
+        }
+        const callback = value as Binding['callback'];
+        if (existing) {
+          existing.callback = callback;
+          continue;
+        }
+        const binding: Binding = {
+          callback,
+          listener(event) {
+            if (!live || !isCurrent() || !el.isConnected) return;
+            // A native click and an outward click may share a name. The brand
+            // works across realms without relying on window.CustomEvent.
+            const CustomEventCtor = el.ownerDocument.defaultView?.CustomEvent;
+            if (!CustomEventCtor) return;
+            if (
+              !(event instanceof CustomEventCtor) &&
+              Object.prototype.toString.call(event) !== '[object CustomEvent]'
+            )
+              return;
+            // The native detail getter performs the WebIDL brand check across
+            // realms. A forged toStringTag alone must not identify a signal.
+            const readDetail = Object.getOwnPropertyDescriptor(
+              CustomEventCtor.prototype,
+              'detail'
+            )?.get;
+            if (!readDetail) return;
+            let payload: unknown;
+            try {
+              payload = readDetail.call(event);
+            } catch {
+              return;
+            }
+            // `target` alone can be retargeted across a shadow boundary. Only
+            // the persistent owner itself emits this instance's outward signal.
+            if (event.composedPath()[0] !== el) return;
+            if (!live || !isCurrent()) return;
+            const current = binding.callback;
+            current(payload);
+          },
+        };
+        owned.set(key, binding);
+        bindings.set(el, owned);
+        el.addEventListener(key, binding.listener);
+        if (!live || !isCurrent()) {
+          el.removeEventListener(key, binding.listener);
+          return;
+        }
+      }
+    },
+    dispose() {
+      if (!live) return;
+      live = false;
+      const steps: Array<() => void> = [];
+      for (const [el, owned] of bindings)
+        for (const [key, binding] of owned)
+          steps.push(() => el.removeEventListener(key, binding.listener));
+      bindings.clear();
+      runCleanupSteps(steps);
+    },
+  };
+}
+
 async function renderDemoWc(
   opt: DemoRenderOptions,
   lease: HostMountLease
@@ -252,51 +340,17 @@ async function renderDemoWc(
   const { host, demo } = opt;
   const associations = createDemoAssociationScope();
   const instances: HTMLElement[] = [];
-  renderDemoNodeWc(demo.root, host, instances, associations);
+  const callbacks = createWcDemoCallbacks(() => ownsLease(opt, lease));
+  let cleanup: ReturnType<NonNullable<typeof demo.setup>>;
 
-  const refs = collectDemoRefs(host);
-  const api: DemoRuntimeApi = {
-    setSurfaceStyle(ref, next) {
-      if (!ownsLease(opt, lease)) return;
-      const el = refs[ref];
-      const surface = el && wcSurfaceProps.get(el);
-      if (!surface) return;
-      surface.surfaceStyle = next;
-      api.setProps(ref, {});
-    },
-    call(ref, path, ...args) {
-      const el = refs[ref] as DemoInstance & HTMLElement;
-      if (!el) return;
-      const exposes = el.getExposes?.() ?? {};
-      const fn = resolvePath(exposes, path);
-      if (typeof fn !== 'function') return;
-      return fn(...args);
-    },
-    getExposes(ref) {
-      const el = refs[ref] as DemoInstance & HTMLElement;
-      return el?.getExposes?.();
-    },
-    setProps(ref, next) {
-      const el = refs[ref] as DemoInstance &
-        HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
-      if (!el) return;
-      const current = wcRawProps.get(el);
-      if (!current) return;
-      // DemoRuntimeApi updates are patches. The WC adapter deliberately accepts
-      // full snapshots, so retain the authored props before projecting one.
-      Object.assign(current, next);
-      el.setProps?.({ ...current, ...(wcSurfaceProps.get(el) ?? {}) });
-      el.update?.();
-    },
-  };
-
-  let cleanup = demo.setup?.({ host, refs, api });
-
+  // Own resources before connecting instances or calling setup: either can
+  // fail or reenter the host, including after moving a portal out of its tree.
   if (
     !lease.commit(() => {
       const currentCleanup = cleanup;
       cleanup = undefined;
       const cleanupSteps: Array<() => void> = [
+        () => callbacks.dispose(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
@@ -311,9 +365,64 @@ async function renderDemoWc(
       cleanupSteps.push(() => associations.dispose());
       runCleanupSteps(cleanupSteps);
     })
-  ) {
+  )
     return EMPTY_DEMO_RENDER;
+
+  renderDemoNodeWc(demo.root, host, instances, associations, () => ownsLease(opt, lease));
+  if (!ownsLease(opt, lease)) return abandonLease(lease);
+  const refs = collectDemoRefs(host);
+  const api: DemoRuntimeApi = {
+    setSurfaceStyle(ref, next) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref];
+      const surface = el && wcSurfaceProps.get(el);
+      if (!surface) return;
+      surface.surfaceStyle = next;
+      api.setProps(ref, {});
+    },
+    call(ref, path, ...args) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref] as DemoInstance & HTMLElement;
+      if (!el) return;
+      const exposes = el.getExposes?.() ?? {};
+      const fn = resolvePath(exposes, path);
+      if (typeof fn !== 'function') return;
+      return fn(...args);
+    },
+    getExposes(ref) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref] as DemoInstance & HTMLElement;
+      return el?.getExposes?.();
+    },
+    setProps(ref, next) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref] as DemoInstance &
+        HTMLElement & { setProps?(v: Record<string, unknown>): void; update?(): void };
+      if (!el) return;
+      const current = wcRawProps.get(el);
+      if (!current) return;
+      // Keep every original prop, including ordinary function-valued props.
+      // The additive callback projection does not inspect private declarations
+      // or reinterpret getExposes(), which intentionally omits event metadata.
+      // Read caller-owned getters once, then recheck before acquiring resources.
+      const patch = { ...next };
+      if (!ownsLease(opt, lease)) return;
+      callbacks.patch(el, patch);
+      if (!ownsLease(opt, lease)) return;
+      // DemoRuntimeApi updates are patches. The WC adapter deliberately accepts
+      // full snapshots, so retain the authored props before projecting one.
+      Object.assign(current, patch);
+      el.setProps?.({ ...current, ...(wcSurfaceProps.get(el) ?? {}) });
+      if (ownsLease(opt, lease)) el.update?.();
+    },
+  };
+
+  const setupCleanup = demo.setup?.({ host, refs, api });
+  if (!ownsLease(opt, lease)) {
+    if (typeof setupCleanup === 'function') setupCleanup();
+    return abandonLease(lease);
   }
+  cleanup = setupCleanup;
 
   return {
     destroy: () => {
@@ -889,8 +998,17 @@ export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResu
         throw unsupportedRuntime(opt.runtime);
     }
   } catch (error) {
-    scene?.dispose();
-    lease.release();
+    try {
+      runCleanupSteps([
+        () => scene?.dispose(),
+        () => {
+          lease.release();
+        },
+      ]);
+    } catch {
+      // A secondary teardown failure must not replace the initiating error,
+      // including a falsy thrown value from demo setup or instance creation.
+    }
     throw error;
   }
 }

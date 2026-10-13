@@ -41,7 +41,7 @@ function exposedState<Value>(value: unknown, label: string): CalendarCaptionStat
   return value as CalendarCaptionState<Value>;
 }
 
-export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) {
+export function setupCalendarCaptionDemo({ host, api }: DemoSetupContext) {
   let active = true;
   let binding: CalendarCaptionBinding | undefined;
   let today = localCivilDate(new Date());
@@ -124,22 +124,6 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
     { month: monthControl, year: yearControl }
   );
 
-  const onDomProposal = (event: Event) => {
-    if (!active || !(event instanceof CustomEvent)) return;
-    // Never treat a native change or a nested/sibling control's event as this
-    // owner's proposal. WC uses DOM events; React and Vue use callbacks above.
-    if (event.target === refs['month-select'] && event.type === 'valueChange') {
-      monthControl.onValueChange(event.detail);
-    } else if (event.target === refs['year-select'] && event.type === 'valueChange') {
-      yearControl.onValueChange(event.detail);
-    } else if (event.target === refs.calendar) {
-      if (event.type === 'monthChange') onMonthChange(event.detail);
-      else onValueChange(event.detail);
-    }
-  };
-  host.addEventListener('monthChange', onDomProposal);
-  host.addEventListener('valueChange', onDomProposal);
-
   const refreshClock = () => {
     if (!active) return;
     clearTimeout(midnightTimer);
@@ -159,8 +143,6 @@ export function setupCalendarCaptionDemo({ host, refs, api }: DemoSetupContext) 
     active = false;
     clearTimeout(midnightTimer);
     document.removeEventListener('visibilitychange', refreshClock);
-    host.removeEventListener('monthChange', onDomProposal);
-    host.removeEventListener('valueChange', onDomProposal);
     binding?.dispose();
   };
 }

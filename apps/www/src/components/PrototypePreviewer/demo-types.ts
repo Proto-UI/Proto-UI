@@ -44,7 +44,11 @@ export type DemoChild = DemoNode | string;
 export type DemoRuntimeApi = {
   call(ref: string, path: string, ...args: unknown[]): unknown;
   getExposes(ref: string): Record<string, unknown> | undefined;
-  /** Patch authored props: omitted keys persist; explicit undefined is forwarded to the Props resolver. */
+  /**
+   * Patch authored props: omitted keys persist; explicit undefined reaches the Props resolver.
+   * Setup's function-valued onX props receive outward payloads in every renderer;
+   * a nonfunction patch removes that callback. Initial DemoNode.props stay JSON-like.
+   */
   setProps(ref: string, next: Record<string, unknown>): void;
   /** Website composition surface channel; available in all four built-in renderers. */
   setSurfaceStyle?(ref: string, next: Record<string, string>): void;

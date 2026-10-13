@@ -2,7 +2,7 @@ import type { DemoSetupContext } from '../../../components/PrototypePreviewer/de
 
 // Only the demo owns acceptance of controlled proposals. The native editor,
 // normalized events and focus stay with the actual Base Input prototype.
-export function setupBaseInputDemo({ host, refs, api }: DemoSetupContext) {
+export function setupBaseInputDemo({ refs, api }: DemoSetupContext) {
   let active = true;
   const status = refs.status;
   let value = 'Owner-controlled value';
@@ -18,19 +18,8 @@ export function setupBaseInputDemo({ host, refs, api }: DemoSetupContext) {
   // WC raw-prop updates replace the record; keep value and naming on every
   // callback installation/update instead of relying on a partial merge.
   api.setProps('controlled', completeProps());
-  // WC exposes normalized proposals as DOM CustomEvents; React/Vue use
-  // callbacks. Accept only this controlled Root's normalized event, never
-  // a native input/change bubble or a sibling field.
-  const onDomProposal = (event: Event) => {
-    if (!(event instanceof CustomEvent)) return;
-    const target = event.target as HTMLElement | null;
-    if (target?.closest('[data-demo-ref]')?.getAttribute('data-demo-ref') !== 'controlled') return;
-    onValueChange(event.detail);
-  };
-  host.addEventListener('valueChange', onDomProposal);
   return () => {
     active = false;
-    host.removeEventListener('valueChange', onDomProposal);
   };
 }
 

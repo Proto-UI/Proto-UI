@@ -77,19 +77,5 @@ export default {
     };
     setControlledProps();
     api.setProps('accept', { onClick: accept });
-
-    // WC exposes CustomEvents; React/Vue invoke the callback props above.
-    const onRequest = (event: Event) => {
-      if (event instanceof CustomEvent) propose(event.detail as OpenRequest);
-    };
-    const onAccept = (event: Event) => {
-      if (event instanceof CustomEvent) accept();
-    };
-    refs.controlled.addEventListener('openChange', onRequest);
-    refs.accept.addEventListener('click', onAccept);
-    return () => {
-      refs.controlled.removeEventListener('openChange', onRequest);
-      refs.accept.removeEventListener('click', onAccept);
-    };
   },
 } satisfies DemoSpec;

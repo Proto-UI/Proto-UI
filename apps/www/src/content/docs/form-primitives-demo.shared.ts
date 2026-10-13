@@ -137,11 +137,6 @@ export function createFormPrimitivesDemo(
         refs.status.textContent = JSON.stringify(detail.values);
       };
       api.setProps('form', { ariaLabel: 'Profile form · 资料表单', onSubmit: report });
-      const listener = (event: Event) => {
-        if (event instanceof CustomEvent && event.target === refs.form) report(event.detail);
-      };
-      refs.form.addEventListener('submit', listener);
-      return () => refs.form.removeEventListener('submit', listener);
     },
   };
 }

@@ -44,7 +44,11 @@ describe('Textarea documentation demo events', () => {
     textarea.dispatchEvent(
       new CustomEvent('change', { detail: { value: 'Projected' }, bubbles: true })
     );
-    expect(refs.eventLog?.textContent).toBe('textarea.change: {"value":"Projected"}');
+    // Demo setup owns one callback path; the renderer owns WC translation.
+    // An extra direct DOM listener here would duplicate that callback.
+    expect(refs.eventLog?.textContent).toBe('uncontrolled.change: {"value":"Normalized"}');
+    onChange?.({ value: 'Projected' });
+    expect(refs.eventLog?.textContent).toBe('uncontrolled.change: {"value":"Projected"}');
 
     if (cleanup) cleanup();
   });

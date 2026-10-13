@@ -42,14 +42,6 @@ const stateKeys = [
   'composing',
 ] as const;
 
-const eventNames = [
-  'valueChange',
-  'change',
-  'compositionStart',
-  'compositionUpdate',
-  'compositionEnd',
-] as const;
-
 let textareaDemoSequence = 0;
 
 export function createTextareaDemoSetup(resetProps: Readonly<Record<string, unknown>>) {
@@ -107,16 +99,6 @@ export function createTextareaDemoSetup(resetProps: Readonly<Record<string, unkn
       describedBy: help.id,
     });
 
-    const onExposedEvent = (event: Event) => {
-      if (!(event instanceof CustomEvent)) return;
-      const source =
-        (event.target as HTMLElement | null)
-          ?.closest('[data-demo-ref]')
-          ?.getAttribute('data-demo-ref') ?? 'textarea';
-      record(source, event.type, event.detail);
-    };
-    for (const eventName of eventNames) host.addEventListener(eventName, onExposedEvent);
-
     let alternate = false;
     const activate = (target: HTMLElement) => {
       if (target.closest('[data-demo-ref="toggleProps"]')) {
@@ -163,7 +145,6 @@ export function createTextareaDemoSetup(resetProps: Readonly<Record<string, unkn
 
     return () => {
       cancelAnimationFrame(stateFrame);
-      for (const eventName of eventNames) host.removeEventListener(eventName, onExposedEvent);
       host.removeEventListener('click', onHostClick);
       host.removeEventListener('keydown', onHostKeyDown);
       host.removeEventListener('focusin', onFocusChange);

@@ -125,14 +125,6 @@ export default {
     };
     update();
     api.setProps('accept', { onClick: accept });
-    const onRequest = (event: Event) => {
-      if (event instanceof CustomEvent) propose(event.detail as ValueRequest);
-    };
-    const onAccept = (event: Event) => {
-      if (event instanceof CustomEvent) accept();
-    };
-    refs.controlled.addEventListener('valueChange', onRequest);
-    refs.accept.addEventListener('click', onAccept);
     const labels = ['uncontrolled', 'disabled', 'controlled', 'rtl'];
     const labelTriggers = () => {
       for (const id of labels) refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
@@ -146,8 +138,6 @@ export default {
     for (const id of labels)
       observer.observe(refs[`${id}Trigger`], { attributes: true, attributeFilter: ['aria-label'] });
     return () => {
-      refs.controlled.removeEventListener('valueChange', onRequest);
-      refs.accept.removeEventListener('click', onAccept);
       observer.disconnect();
     };
   },

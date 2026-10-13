@@ -123,14 +123,6 @@ export function createFieldDemo(family: string): DemoSpec {
         currentRequest = '',
         pendingResult: { invalid: boolean; errors: string[] } | null = null;
       const timers = new Set<ReturnType<typeof setTimeout>>();
-      const removals: Array<() => void> = [];
-      const listen = (ref: string, eventName: string, callback: (detail: any) => void) => {
-        const listener = (event: Event) => {
-          if (event instanceof CustomEvent && event.target === refs[ref]) callback(event.detail);
-        };
-        refs[ref].addEventListener(eventName, listener);
-        removals.push(() => refs[ref].removeEventListener(eventName, listener));
-      };
       const check = (request: FieldValidationRequest) => {
         if (currentRequest === request.requestId) return;
         currentRequest = request.requestId;
@@ -157,7 +149,6 @@ export function createFieldDemo(family: string): DemoSpec {
         validationMode: 'onChange',
         onValidationRequest: check,
       });
-      listen('asyncRoot', 'validationRequest', check);
       const propose = (value: { invalid: boolean; errors: string[] }) => {
         pendingResult = { invalid: value.invalid, errors: [...value.errors] };
         refs.controlledStatus.textContent = `Proposed invalid=${value.invalid}; owner unchanged · 校验提案尚未接受`;
@@ -168,10 +159,8 @@ export function createFieldDemo(family: string): DemoSpec {
         validationMode: 'manual',
         onValidityChange: propose,
       });
-      listen('controlledRoot', 'validityChange', propose);
       const action = (ref: string, callback: () => void) => {
         api.setProps(ref, { onClick: callback });
-        listen(ref, 'click', callback);
       };
       action('validate', () => api.call('requiredRoot', 'validate'));
       action('reset', () => api.call('requiredRoot', 'resetValidation'));
@@ -196,7 +185,6 @@ export function createFieldDemo(family: string): DemoSpec {
       return () => {
         alive = false;
         for (const timer of timers) clearTimeout(timer);
-        for (const remove of removals) remove();
       };
     },
   };

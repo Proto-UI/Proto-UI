@@ -129,19 +129,6 @@ export function createAccordionDemo(family: string): DemoSpec {
       };
       sync();
       api.setProps('accept', { onClick: accept });
-      const requestListener = (event: Event) => {
-        if (event instanceof CustomEvent && event.target === refs.controlled)
-          propose(event.detail as Request);
-      };
-      const acceptListener = (event: Event) => {
-        if (event instanceof CustomEvent) accept();
-      };
-      refs.controlled.addEventListener('openChange', requestListener);
-      refs.accept.addEventListener('click', acceptListener);
-      return () => {
-        refs.controlled.removeEventListener('openChange', requestListener);
-        refs.accept.removeEventListener('click', acceptListener);
-      };
     },
   };
 }

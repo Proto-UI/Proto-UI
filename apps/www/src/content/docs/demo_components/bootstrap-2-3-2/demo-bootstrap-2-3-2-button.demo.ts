@@ -38,10 +38,5 @@ export default {
       refs.count.textContent = `${++count} activations`;
     };
     api.setProps('action', { onClick: update });
-    const event = (event: Event) => {
-      if (event instanceof CustomEvent) update();
-    };
-    refs.action.addEventListener('click', event);
-    return () => refs.action.removeEventListener('click', event);
   },
 } satisfies DemoSpec;

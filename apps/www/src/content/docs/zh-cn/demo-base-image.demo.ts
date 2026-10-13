@@ -65,30 +65,18 @@ export default {
     const setSource = (source: string) =>
       api.setProps('resource', { ...resourceProps, source, onLoadingStatusChange: record });
     setSource('');
-    const onStatus = (event: Event) => {
-      if (event instanceof CustomEvent) record(event.detail);
-    };
-    refs.resource.addEventListener('loadingStatusChange', onStatus);
-
     const actions = {
       loadImage: () => setSource(`${landscape}?resource`),
       replaceImage: () => setSource(`${portrait}?resource`),
       failImage: () => setSource(unavailable),
       clearImage: () => setSource(''),
     };
-    const disposers = Object.entries(actions).map(([ref, activate]) => {
+    for (const [ref, activate] of Object.entries(actions)) {
       api.setProps(ref, { onClick: activate });
-      const onClick = (event: Event) => {
-        if (event instanceof CustomEvent) activate();
-      };
-      refs[ref].addEventListener('click', onClick);
-      return () => refs[ref].removeEventListener('click', onClick);
-    });
+    }
     frame = requestAnimationFrame(renderStatus);
     return () => {
       cancelAnimationFrame(frame);
-      refs.resource.removeEventListener('loadingStatusChange', onStatus);
-      disposers.forEach((dispose) => dispose());
     };
   },
   root: {

@@ -44,18 +44,13 @@ export function createRangeReadoutDemo(family: string, component: 'progress' | '
         },
       ],
     },
-    setup({ refs, api }) {
+    setup({ api }) {
       let value = 42;
       const advance = () => {
         value = (value + 17) % 101;
         api.setProps('range', { value, min: 0, max: 100, low: 25, high: 75, optimum: 50 });
       };
       api.setProps('advance', { onClick: advance });
-      const listener = (event: Event) => {
-        if (event instanceof CustomEvent && event.target === refs.advance) advance();
-      };
-      refs.advance.addEventListener('click', listener);
-      return () => refs.advance.removeEventListener('click', listener);
     },
   };
 }
