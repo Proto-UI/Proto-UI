@@ -269,6 +269,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       const location = span(func.span), phase = String(func.phase) as Phase, context = String(func.context) as FunctionContext;
       if (!['setup','callback','render'].includes(phase) || (expectedPhase && phase !== expectedPhase) || !CONTEXTS.has(context) ||
           (context !== 'helper' && (phase !== 'callback' ? context !== phase : context === 'setup' || context === 'render'))) bad('Function phase/context mismatch.',location);
+      if (expectedPhase === 'setup' && context !== 'setup') bad('Function phase/context mismatch.',location);
       const params = parameters(func.parameters), declaredReturn = valueType(func.returnType,location);
       if (context === 'setup' && (params.length > 1 || (params.length === 1 && params[0].type !== 'def'))) bad('Setup signature must receive its definition handle.',location);
       if (context === 'setup' && declaredReturn !== 'function' && declaredReturn !== 'void')
