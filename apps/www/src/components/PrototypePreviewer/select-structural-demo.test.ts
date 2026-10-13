@@ -2,6 +2,8 @@ import { expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import demo from '../../content/docs/zh-cn/demo-shadcn-select.demo';
 import { assertDemoSpec, type DemoChild, type DemoNode } from './demo-types';
+import { assertProjectionRecipeClosure } from './projection-composition';
+import { runtimePreviewRecipe } from './runtime-preview-surface';
 const nodes = (node: DemoChild): DemoNode[] =>
   typeof node === 'string'
     ? []
@@ -25,4 +27,21 @@ it('feeds real grouped parts and mixed Items back into the source-pinned public 
   for (const family of ['base', 'shadcn'])
     for (const name of ['group', 'label', 'separator'])
       expect(loaders).toContain(`'${family}-select-${name}': async`);
+});
+
+it('declares the actual grouped Select demo in the RuntimeBox projection recipe', () => {
+  const recipe = runtimePreviewRecipe('shadcn', 'select');
+  expect(() =>
+    assertProjectionRecipeClosure(demo.root, recipe.prototypeIds, recipe.id)
+  ).not.toThrow();
+  for (const part of ['group', 'label', 'separator']) {
+    const prototypeId = `shadcn-select-${part}`;
+    expect(() =>
+      assertProjectionRecipeClosure(
+        demo.root,
+        recipe.prototypeIds.filter((id) => id !== prototypeId),
+        recipe.id
+      )
+    ).toThrow(`uses undeclared Prototype(s): ${prototypeId}.`);
+  }
 });
