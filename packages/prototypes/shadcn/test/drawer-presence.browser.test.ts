@@ -11,20 +11,14 @@ import {
   renderProtoStyleTokenCss,
 } from '../../../cli/src/services/proto-style-css';
 import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prototype-style-tokens';
+import { DRAWER_PRESENCE_SOURCE_FILES } from './fixtures/drawer-presence-sources';
 let browser: Awaited<ReturnType<typeof launchBrowser>>, script: string, tokens: string[];
 const output =
   process.env.PUI_FINF_FEATURE_EVIDENCE_DIR ?? path.join(tmpdir(), 'pui-drawer-presence-evidence');
 beforeAll(async () => {
-  tokens = (
-    await collectProtoStyleTokensFromFiles([
-      'packages/prototypes/shadcn/src/drawer/content.proto.ts',
-      'packages/prototypes/shadcn/src/drawer/mask.proto.ts',
-      'packages/prototypes/base/src/drawer/root.proto.ts',
-      'packages/prototypes/base/src/drawer/content.proto.ts',
-      'packages/prototypes/base/src/drawer/overlay.proto.ts',
-      'packages/prototypes/base/src/drawer/snap.ts',
-    ])
-  ).filter((x): x is string => typeof x === 'string');
+  tokens = (await collectProtoStyleTokensFromFiles(DRAWER_PRESENCE_SOURCE_FILES)).filter(
+    (x): x is string => typeof x === 'string'
+  );
   await mkdir(output, { recursive: true });
   script = (
     await build({
@@ -83,6 +77,8 @@ describe('real Shadcn Drawer source physical presentation', () => {
           }
         );
         await page.waitForTimeout(30);
+        // Report setup/admission failure before attempting exposed motion samples.
+        expect(errors, `${scope} Root/Content/Mask setup`).toEqual([]);
         await page.evaluate(() => (window as any).fixture.style());
         const sample = () => page.evaluate(() => (window as any).fixture.sample());
         const target = (open: boolean) =>
