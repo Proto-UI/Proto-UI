@@ -40,20 +40,26 @@ export function requestDrawerOpen(
   run: any,
   nextOpen: boolean,
   reason: string,
-  focusReason: DrawerOpenFocusReason | null
+  focusReason: DrawerOpenFocusReason | null,
+  expectedRootId?: string
 ): boolean {
   try {
-    run.context.update(DRAWER_CONTEXT, (prev: DrawerContextValue) => ({
-      ...prev,
-      open: prev.controlled ? prev.open : nextOpen,
-      openFocusReason: nextOpen ? focusReason : null,
-      returnFocusReason: nextOpen ? null : focusReason,
-      requestedOpen: nextOpen,
-      requestReason: reason,
-      requestFocusReason: focusReason,
-      requestVersion: prev.requestVersion + 1,
-    }));
-    return true;
+    let requested = false;
+    run.context.update(DRAWER_CONTEXT, (prev: DrawerContextValue) => {
+      if (expectedRootId !== undefined && prev.rootId !== expectedRootId) return prev;
+      requested = true;
+      return {
+        ...prev,
+        open: prev.controlled ? prev.open : nextOpen,
+        openFocusReason: nextOpen ? focusReason : null,
+        returnFocusReason: nextOpen ? null : focusReason,
+        requestedOpen: nextOpen,
+        requestReason: reason,
+        requestFocusReason: focusReason,
+        requestVersion: prev.requestVersion + 1,
+      };
+    });
+    return requested;
   } catch (error) {
     if ((error as { code?: string })?.code === 'CONTEXT_DISCONNECTED') return false;
     throw error;

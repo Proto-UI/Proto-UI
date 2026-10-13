@@ -144,6 +144,8 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   const open = def.state.bool('open', false);
   def.expose.state('open', open);
 
+  // Semantic dismissal belongs to the retained instance, not its physical view.
+  let logicalRun: import('@proto.ui/core').RunHandle<DrawerContentProps> | null = null;
   let mountedRun: any = null;
   let currentContext: DrawerContextValue | null = null;
   let warnedMissingAlertDescription = false;
@@ -238,6 +240,7 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
   });
 
   def.lifecycle.onCreated((run) => {
+    logicalRun = run;
     const ctx = run.context.read(DRAWER_CONTEXT);
     currentContext = ctx;
     syncIdentity(ctx);
@@ -270,20 +273,43 @@ function setupDrawerContent(def: DefHandle<DrawerContentProps, DrawerContentExpo
 
   def.lifecycle.onUnmounted(() => {
     mountedRun = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    logicalRun = null;
     currentContext = null;
   });
+  const readLiveContext = (run: import('@proto.ui/core').RunHandle<DrawerContentProps>) => {
+    try {
+      return run.context.read(DRAWER_CONTEXT);
+    } catch (error) {
+      if ((error as { code?: string })?.code === 'CONTEXT_DISCONNECTED') return null;
+      throw error;
+    }
+  };
 
   overlay.open.watch((_ctx, event) => {
     if (event.type !== 'next' || event.next || event.reason !== 'escape') return;
-    const run = mountedRun;
-    if (!run) return;
-    const ctx = currentContext;
-    if (!ctx) return;
-    if (!ctx.open) return;
-    requestDrawerOpen(run, false, 'escape', 'keyboard');
-    // Request delivery may synchronously replace the owner's open input.
-    // Restore only a still-open controlled fact, never the pre-request snapshot.
-    if (currentContext?.controlled && currentContext.open) overlay.openOverlay('controlled.sync');
+    // A prior presence watcher may already have synchronously detached the view.
+    // A reentrant reopen, disposal or Context rebind must not reuse that close.
+    const run = logicalRun;
+    const expectedRootId = currentContext?.rootId;
+    if (!run || !expectedRootId || !open.get() || overlay.isOpen()) return;
+    const ctx = readLiveContext(run);
+    if (!ctx?.open || ctx.rootId !== expectedRootId) return;
+    if (!requestDrawerOpen(run, false, 'escape', 'keyboard', expectedRootId)) return;
+    // Request delivery can dispose, reparent or replace the controlled input.
+    if (logicalRun !== run) return;
+    const current = readLiveContext(run);
+    if (
+      current?.rootId === expectedRootId &&
+      current.controlled &&
+      current.open &&
+      current.contentAdmitted &&
+      open.get() &&
+      sizing.hasAccepted() &&
+      sizing.admitted.get()
+    )
+      overlay.openOverlay('controlled.sync');
   });
 
   boundary.subscribeOutside(() => {

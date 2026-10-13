@@ -19,7 +19,25 @@ cases:
     title: Four runtime close and reopen preserve the logical declaration
     covers: [C-DRAWER-CONTENT-ADMISSION-0001-LIFETIME, C-DRAWER-CONTENT-ADMISSION-0001-BOUNDARY]
     expectation: no-presence-detach-admission-deadlock
+  - id: T-DRAWER-CONTENT-ADMISSION-0001-CASE-DISMISSAL
+    title: Semantic dismissal survives synchronous view completion without escaping its Root
+    covers: [C-DRAWER-CONTENT-ADMISSION-0001-DISMISSAL]
+    expectation: exactly-current-owner-request-with-controlled-refusal-and-terminal-revocation
 implementations:
+  - id: drawer-dismissal-vue2
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/vue2/test/drawer-close-request-lifetime.test.ts
+    required: true
+    consumesCases: [T-DRAWER-CONTENT-ADMISSION-0001-CASE-DISMISSAL]
+  - id: drawer-dismissal-wc
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/web-component/test/drawer-close-request-lifetime.test.ts
+    required: true
+    consumesCases: [T-DRAWER-CONTENT-ADMISSION-0001-CASE-DISMISSAL]
+    notes:
+      - Synthetic WC integration injects reentry at actual afterLeave and verifies logical Context rebinding; it does not claim native paint or Vue2 unmount timing.
   - id: drawer-admission-owner
     kind: runtime-test
     status: passing
