@@ -27,3 +27,5 @@ export * from './platform/web-style-support-source';
 export * from './platform/portal-direction';
 export { createWebAxisInputHost } from './gestures/web-axis-input-host';
 export * from './motion/web-resident-motion';
+
+export { createWebPresencePresentationSink } from './motion/web-presence-presentation';

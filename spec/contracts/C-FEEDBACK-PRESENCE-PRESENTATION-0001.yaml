@@ -1,0 +1,46 @@
+id: C-FEEDBACK-PRESENCE-PRESENTATION-0001
+type: contract
+title: Typed presence presentation borrows an existing phase owner
+status: draft
+since: 0.2.0-rc.0
+summary: Setup recipes bind immutable typed endpoints to one read-only symbolic phase owner without becoming presence authority.
+lifecycleRationale:
+  en: Source-host implementation is a bounded increment. Independent integration review, Compiler coverage and real Document, Shadow and native presentation evidence remain activation blockers.
+statement:
+  en: def.feedback.presence.owner declares a lexical phase-owner reference and separate private writer. def.feedback.style.presence binds that reference to typed closed and entered endpoints. An existing Transition remains the sole phase and ViewIntent owner. Presentation requests guarded completion, never writes phase, and uses the owner's resolved duration and logical attempt. Existing timer completion remains the default.
+criteria:
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-DECLARATION
+    text:
+      en: Setup-only recipes are immutable detached snapshots with matching nonempty endpoint channels. Only translate and opacity are admitted. Translate is a dense pair of finite affine px, rootText and ownBox coefficients, or a nonempty finite case selection over a borrowed readable State identity. Opacity is finite in [0,1]. Easing is a finite cubic-bezier tuple with x coordinates in [0,1]. All declaration fields and array entries are own data properties; accessors, sparse arrays, unsupported channels and unknown keys reject without evaluation. Unresolved dynamic cases diagnose instead of guessing. Scale, cycles and layout animation are unsupported.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-AUTHORITY
+    text:
+      en: References resolve through instance-local registries, never through a forged declaration string, component name, source path or DOM object. Exported owner references carry no publication authority. The private writer alone publishes immutable phase frames; the host mints and validates physical view bindings. Completion checks current owner, logical attempt, owner revision, physical binding and endpoint target revision. Authored completion callbacks are ordinary Proto source program operations in legal runtime scope, not opaque host callbacks. Unsupported compilers diagnose these operations explicitly rather than erase them.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-TIMING
+    text:
+      en: The phase owner allocates its attempt before synchronous phase observers run and supplies the sole resolved duration. Presentation policy requires a finite positive independent deadline larger than the configured duration. Invalid static policy rejects atomically. A later duration that reaches the deadline settles with invalid-policy and completes the still-current attempt. Zero duration completes synchronously. Initial entered with appear false settles directly without interpolation, deadline or synthetic event; preparing readiness remains with its existing consumer.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-ACKNOWLEDGEMENT
+    text:
+      en: Cold entering applies the closed endpoint through the ordinary atomic sink and waits for a current presentation-frame application acknowledgement before starting interpolation time. A timer, mounted notification, measurement or scheduled frame is not an acknowledgement. Completion follows current endpoint application acknowledgement, semantic-style settlement and release of transient channels. Acknowledgement proves accepted application, not physical rasterization. Existing afterEnter and afterLeave retain phase-completion meaning; presentation outcome is separate.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-RETARGET
+    text:
+      en: Warm same-view reversal starts at the last acknowledged displayed sample and uses resident reversal shortening, never unseen wall-clock progress. Unchanged commits do not restart. Changed endpoint recipes advance target revision without extending the original independent deadline. Controlled refusal changes no accepted target. New views start cold. Existing Transition wait, immediate and reverse interruption policies remain authoritative.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-PROFILE
+    text:
+      en: Generic portable declarations retain typed arbitrary finite endpoints. The first bounded source-Web profile admits only a neutral entered translation with every affine coefficient zero and entered opacity one or absent. Other valid declarations receive an explicit unsupported-endpoint outcome before transient writes and fall back to the current semantic baseline. This profile restriction is not a generic syntax ban, an arbitrary-endpoint success claim or Compiler/native acceptance.
+  - id: C-FEEDBACK-PRESENCE-PRESENTATION-0001-SETTLEMENT
+    text:
+      en: Missing capability, unknown or reduced preference, hidden surface, unresolved input or units, unsupported endpoints in the admitted host profile, lost projection ownership, sink failure, scheduler failure, invalid policy or independent deadline stop scheduling, attempt current semantic settlement, diagnose a bounded outcome, and consume only the still-current completion. Deadline completion cannot depend on RAF, promise completion or successful sink work. Cancellation or diagnostic exceptions cannot strand phase completion. Every reentrant boundary rechecks live ownership; replacement, disposal or retirement wins. Restoration does not replay an old attempt. Cleanup invalidates receipts and removes timers and subscriptions exactly once.
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-RESIDENT-MOTION-0001
+    - C-AS-TRANSITION-0001
+sources:
+  - path: packages/core/src/presence-presentation.ts
+verifies:
+  tests:
+    - T-FEEDBACK-PRESENCE-PRESENTATION-0001
+revisions:
+  - version: 0.2.0-rc.0
+    change: introduced
+    summary: Define a bounded presentation-only source and host protocol with explicit independent completion safety.

@@ -253,6 +253,9 @@ importers:
       '@proto.ui/module-feedback':
         specifier: workspace:*
         version: link:../../modules/feedback
+      '@proto.ui/module-positioning':
+        specifier: workspace:*
+        version: link:../../modules/positioning
       '@proto.ui/runtime':
         specifier: workspace:*
         version: link:../../runtime
@@ -997,6 +1000,9 @@ importers:
       '@proto.ui/module-base':
         specifier: workspace:*
         version: link:../base
+      '@proto.ui/module-state':
+        specifier: workspace:*
+        version: link:../state
 
   packages/modules/focus:
     dependencies:

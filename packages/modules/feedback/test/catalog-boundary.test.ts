@@ -67,6 +67,7 @@ describe('Feedback catalog boundary', () => {
       'clearPatch',
       'exportMerged',
       'patch',
+      'presence',
       'suppress',
       'transition',
       'use',

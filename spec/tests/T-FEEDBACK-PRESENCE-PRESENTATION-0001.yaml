@@ -1,0 +1,105 @@
+id: T-FEEDBACK-PRESENCE-PRESENTATION-0001
+type: test
+title: Presence declaration safety and attempt-bound presentation
+status: draft
+since: 0.2.0-rc.0
+summary: Separate declaration validation, phase ownership, host application and physical evidence.
+lifecycleRationale:
+  en: Core, Transition and Feedback source tests and a Web DOM harness provide bounded declaration, attempt and CSSOM evidence; physical browser frames, native hosts and Compiler conformance remain independent evidence obligations.
+cases:
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-SNAPSHOT
+    title: Reject invalid declarations without accessor execution and retain immutable snapshots
+    covers: [C-FEEDBACK-PRESENCE-PRESENTATION-0001-DECLARATION]
+    expectation: finite-immutable-own-data-declarations
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER
+    title: Validate logical and physical authority with shared timing and bounded settlement
+    covers:
+      [
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-AUTHORITY,
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-TIMING,
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-SETTLEMENT,
+      ]
+    expectation: current-owner-only-completion-with-independent-deadline
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION
+    title: Acknowledge cold start and endpoint while preserving reversal and target revisions
+    covers:
+      [
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-ACKNOWLEDGEMENT,
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-RETARGET,
+      ]
+    expectation: current-atomic-application-before-completion
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE
+    title: Neutral entered endpoints compose live geometry and unsupported endpoints settle explicitly
+    covers:
+      [
+        C-FEEDBACK-PRESENCE-PRESENTATION-0001-PROFILE,
+        HC-FEEDBACK-PRESENCE-PRESENTATION-0001-COMPOSITION,
+        HC-FEEDBACK-PRESENCE-PRESENTATION-0001-PROFILE,
+      ]
+    expectation: bounded-web-profile-and-live-typed-baseline
+  - id: T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-DOCUMENT
+    title: Document adoption retires stale physical presentation inputs and receipts
+    covers: [HC-FEEDBACK-PRESENCE-PRESENTATION-0001-DOCUMENT]
+    expectation: destination-document-policy-and-no-stale-frame-acknowledgement
+implementations:
+  - id: presence-web-document-adoption
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-presence-adoption.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-DOCUMENT]
+  - id: presence-web-component-adoption
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/presence-adoption.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-DOCUMENT]
+  - id: presence-core-declaration
+    kind: module-test
+    status: passing
+    path: packages/core/test/presence-presentation-declaration.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-SNAPSHOT]
+  - id: presence-transition-machine
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/transition-presentation.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER]
+  - id: presence-transition-hook
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/as-transition.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER]
+  - id: presence-feedback-controller
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/presence-controller.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-OWNER]
+  - id: presence-feedback-projector
+    kind: module-test
+    status: passing
+    path: packages/modules/feedback/test/presence-projector.test.ts
+    required: true
+    consumesCases:
+      [
+        T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-APPLICATION,
+        T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE,
+      ]
+  - id: presence-web-sink
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-presence-presentation.test.ts
+    required: true
+    consumesCases: [T-FEEDBACK-PRESENCE-PRESENTATION-0001-CASE-WEB-PROFILE]
+verifies:
+  contracts:
+    - C-FEEDBACK-PRESENCE-PRESENTATION-0001
+  hostCaps:
+    - HC-FEEDBACK-PRESENCE-PRESENTATION-0001
+revisions:
+  - version: 0.2.0-rc.0
+    change: introduced
+    summary: Define independently verifiable declaration, authority and application cases without claiming host pixels.

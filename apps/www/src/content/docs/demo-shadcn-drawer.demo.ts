@@ -60,8 +60,6 @@ export default {
               },
             ],
             'props': {
-              'enterDuration': 0,
-              'leaveDuration': 0,
               'side': 'bottom',
             },
           },

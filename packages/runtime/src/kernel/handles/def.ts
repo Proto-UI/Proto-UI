@@ -69,6 +69,7 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
     const rt = getAsHookRuntime(def as object);
     const name = (handle as any)?.__stateName;
     rt?.registerStateName(name, (handle as any)?.__stateId);
+    feedback.presence.registerSource(handle as object);
   };
 
   const facades = modules.getFacades();
@@ -166,6 +167,12 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
     },
 
     feedback: {
+      presence: {
+        owner() {
+          ensureSetup('def.feedback.presence.owner');
+          return feedback.presence.owner();
+        },
+      },
       material: {
         declare(slot) {
           ensureSetup('def.feedback.material.declare');
@@ -187,6 +194,15 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       style: {
+        presence(declaration) {
+          ensureSetup('def.feedback.style.presence');
+          const off = feedback.style.presence(declaration);
+          recordCaptured(def, 'feedback', off);
+          return () => {
+            ensureSetup('def.feedback.style.presence:dispose');
+            off();
+          };
+        },
         transition(declaration) {
           ensureSetup('def.feedback.style.transition');
           const off = feedback.style.transition(declaration);

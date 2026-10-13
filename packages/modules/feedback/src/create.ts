@@ -1,3 +1,6 @@
+import { createPresenceController } from './presence/controller';
+import { PRESENCE_PRESENTATION_SINK_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from './presence/sink';
+import type { StatePort } from '@proto.ui/module-state';
 import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.ui/core';
 import { RESIDENT_MOTION_SINK_CAP, type ResidentMotionSink } from './motion/sink';
 import type { MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
@@ -46,11 +49,64 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
     deps,
     build: ({ init, caps }) => {
       class Impl extends ModuleBase {
+        private presence = createPresenceController({
+          setup: (op) => this.ensureSetup(op),
+          runtime: (op) => {
+            this.ensureRuntime(op);
+            this.sys?.ensureCallback(op);
+          },
+          invalidate: () => {
+            this.markDirty();
+            if (this.sys?.execPhase() === 'callback' && this.sys.deferAfterCallback)
+              this.sys.deferAfterCallback(() => {
+                if (!this.disposed) this.flushIfPossible();
+              });
+            else this.flushIfPossible();
+          },
+          callbackContext: () => this.sys?.getCallbackCtx(),
+          dispatch: (callback) => {
+            if (this.sys?.execPhase() === 'callback') callback();
+            else if (this.caps.has(PRESENCE_RUN_IN_CALLBACK_CAP))
+              this.caps.get(PRESENCE_RUN_IN_CALLBACK_CAP)(callback);
+            else throw new Error('[feedback.presence] Callback scope capability unavailable');
+          },
+          watch: (source, callback) => {
+            const state = deps.tryPort<StatePort>('state');
+            if (!state) throw new Error('[feedback.presence] State registry unavailable');
+            return state.watch(
+              source as import('@proto.ui/core').OwnedStateHandle<string>,
+              (_run, event) => {
+                if (event.type === 'next') callback();
+              }
+            );
+          },
+          sink: () =>
+            this.caps.has(PRESENCE_PRESENTATION_SINK_CAP)
+              ? this.caps.get(PRESENCE_PRESENTATION_SINK_CAP)
+              : null,
+          fallback: (style) => {
+            if (this.caps.has(EFFECTS_CAP)) {
+              const effects = this.caps.get(EFFECTS_CAP);
+              effects.queueStyle(style);
+              effects.requestFlush();
+            }
+          },
+        });
+        presenceFacade() {
+          return this.presence.facade;
+        }
+        declarePresence(value: import('@proto.ui/core').PresencePresentationDeclaration) {
+          if (this.motionDeclarations.size)
+            throw new Error('[feedback.presence] Resident/presence channel ownership overlap');
+          return this.presence.declare(value);
+        }
         private motionDeclarations = new Set<ResidentMotionDeclaration>();
         private motionSink: ResidentMotionSink | null = null;
         private motionView = 0;
         declareMotion(declaration: ResidentMotionDeclaration): () => void {
           this.ensureSetup('def.feedback.style.transition');
+          if (this.presence.declared)
+            throw new Error('[feedback.presence] Resident/presence channel ownership overlap');
           const copy = snapshotResidentMotion(declaration);
           if (
             [...this.motionDeclarations].some((existing) =>
@@ -313,7 +369,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
             try {
               this.releaseVisualSink();
             } finally {
-              this.releaseMotionSink();
+              try {
+                this.releaseMotionSink();
+              } finally {
+                this.presence.release();
+              }
             }
           }
           if (phase === 'mounting') {
@@ -355,6 +415,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         private hasOutput(): boolean {
           return (
+            this.caps.has(PRESENCE_PRESENTATION_SINK_CAP) ||
             this.caps.has(RESIDENT_MOTION_SINK_CAP) ||
             this.caps.has(VISUAL_FEEDBACK_SINK_CAP) ||
             this.caps.has(FINAL_STYLE_SINK_CAP) ||
@@ -397,7 +458,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const style = snapshotFinalStyle(handle);
           const pending = { ...style, tokens: [...style.tokens] };
           try {
-            if (this.motionDeclarations.size && this.caps.has(RESIDENT_MOTION_SINK_CAP)) {
+            if (this.presence.declared) {
+              if (this.sharedSlot || this.material)
+                throw new Error('[feedback.presence] Combined material projection unavailable');
+              this.presence.commit(pending, this.viewEpoch, revision);
+            } else if (this.motionDeclarations.size && this.caps.has(RESIDENT_MOTION_SINK_CAP)) {
               // Optical material needs an atomic combined consumer; never let two
               // independently scheduled writers contend for paint ownership.
               if (this.sharedSlot || this.material)
@@ -513,7 +578,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           this.disposed = true;
           try {
             try {
-              this.releaseVisualSink();
+              try {
+                this.presence.dispose();
+              } finally {
+                this.releaseVisualSink();
+              }
             } finally {
               this.releaseMotionSink();
             }
@@ -578,12 +647,14 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       const impl = new Impl(caps);
 
       const facade: FeedbackFacade = {
+        presence: impl.presenceFacade(),
         material: {
           declare: (slot) => impl.declareMaterial(slot),
           use: (candidate) => impl.useMaterial(candidate),
         },
         style: {
           transition: (declaration) => impl.declareMotion(declaration),
+          presence: (declaration) => impl.declarePresence(declaration),
           use: (...handles) => impl.useStyle(handles),
           patch: (...handles) => impl.patchStyle(handles),
           suppress: (...handles) => impl.suppressStyle(handles),

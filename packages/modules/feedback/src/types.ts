@@ -11,12 +11,18 @@ import type { ModuleFacade, ModuleHooks, ModuleScope } from '@proto.ui/core';
 export type FeedbackRuntimeStyleDisposer = (options?: { flush?: boolean }) => void;
 
 export interface FeedbackFacade extends ModuleFacade {
+  presence: import('@proto.ui/core').PresenceOwnerRuntime & {
+    owner(): import('@proto.ui/core').PresenceOwnerDeclaration<any>;
+    /** Runtime setup registry bridge; not exposed on author def/run. */
+    registerSource(source: object): void;
+  };
   material: {
     /** Setup-only single owned slot and whole candidate contributions. */
     declare(slot: MaterialSlot): () => void;
     use(candidate: MaterialCandidate): () => void;
   };
   style: {
+    presence: (declaration: import('@proto.ui/core').PresencePresentationDeclaration) => () => void;
     /** setup-only; presentation never owns State or presence */
     transition: (declaration: ResidentMotionDeclaration) => () => void;
     /** setup-only */

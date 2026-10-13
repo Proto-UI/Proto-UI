@@ -837,3 +837,77 @@ describe('prototypes/base: asTransition', () => {
     ]);
   });
 });
+
+describe('asTransition presentation policy integration', () => {
+  it('exports an owner ref while retaining the existing completion and watchdog path', async () => {
+    const ctx = createHost({ open: true });
+    let transition: ReturnType<typeof asTransition>;
+    const P = definePrototype<TransitionProps>({
+      name: 'x-transition-presentation-policy',
+      setup() {
+        transition = asTransition();
+        transition.configure({
+          completion: { kind: 'presentation', timeoutMs: 1000 },
+          enterDuration: 500,
+          leaveDuration: 500,
+        });
+        return (r) => r.el('div');
+      },
+    });
+    const result = mountTransition(P, ctx);
+    expect(Object.isFrozen(transition!.presentationOwner)).toBe(true);
+    result.invokeInCallbackScope(() => transition!.controls.leave());
+    expect(ctx.getExposes().transitionState.get()).toBe('leaving');
+    expect(ctx.getDelays().map((t) => t.durationMs)).toEqual([1000]);
+    ctx.flushDelay(0);
+    expect(ctx.getExposes().transitionState.get()).toBe('closed');
+    expect(ctx.getExposes().isPresent.get()).toBe(false);
+    await result.session.unmount();
+  });
+  it('rejects an invalid static policy atomically and preserves timer defaults', async () => {
+    const ctx = createHost({ open: true });
+    let transition: ReturnType<typeof asTransition>;
+    const P = definePrototype<TransitionProps>({
+      name: 'x-transition-presentation-invalid',
+      setup() {
+        transition = asTransition();
+        expect(() =>
+          transition.configure({
+            completion: { kind: 'presentation', timeoutMs: 400 },
+            enterDuration: 500,
+            leaveDuration: 100,
+          })
+        ).toThrow('shorter');
+        return (r) => r.el('div');
+      },
+    });
+    const result = mountTransition(P, ctx);
+    result.invokeInCallbackScope(() => transition!.controls.leave());
+    expect(ctx.getDelays().map((t) => t.durationMs)).toEqual([200]);
+    await result.session.unmount();
+  });
+  it.each([0, 1000, 1500])(
+    'settles explicit runtime duration %s without a watchdog leak',
+    async (duration) => {
+      const ctx = createHost({ open: true, leaveDuration: duration });
+      let transition: ReturnType<typeof asTransition>;
+      const P = definePrototype<TransitionProps>({
+        name: `x-transition-presentation-runtime-${duration}`,
+        setup() {
+          transition = asTransition();
+          transition.configure({
+            completion: { kind: 'presentation', timeoutMs: 1000 },
+            enterDuration: 500,
+            leaveDuration: 500,
+          });
+          return (r) => r.el('div');
+        },
+      });
+      const result = mountTransition(P, ctx);
+      result.invokeInCallbackScope(() => transition!.controls.leave());
+      expect(ctx.getExposes().transitionState.get()).toBe('closed');
+      expect(ctx.getDelays()).toHaveLength(0);
+      await result.session.unmount();
+    }
+  );
+});

@@ -1,6 +1,8 @@
 import type { ContextKey, JsonObject } from '@proto.ui/types';
 import type {
   BorrowedStateHandle,
+  PresentationOwnerRef,
+  PresentationCompletionConfig,
   ExposeEvent,
   ExposeMethod,
   ExposeState,
@@ -39,6 +41,7 @@ export type TransitionControls = {
 };
 
 export type TransitionConfig = {
+  completion?: PresentationCompletionConfig;
   /** Opt-in cold entry only; no warm animation freeze. */
   coldEntryPreparation?: boolean;
   appear?: boolean;
@@ -48,6 +51,8 @@ export type TransitionConfig = {
 };
 
 export type TransitionExposes = {
+  getPresentationOwner: ExposeMethod<() => PresentationOwnerRef>;
+  configurePresentation: ExposeMethod<(config: TransitionConfig) => void>;
   /** Authored capture/projection entry; always setup-only, never a runtime command. */
   bindInitialOpen: ExposeMethod<TransitionInitialOpenBinding>;
   beforeEnter: ExposeEvent<void>;
@@ -65,6 +70,7 @@ export type TransitionExposes = {
 };
 
 export type TransitionHandles = {
+  readonly presentationOwner: PresentationOwnerRef;
   transitionState: BorrowedStateHandle<TransitionState, TransitionProps>;
   /** View-resource retention, including preparation; never a second mount-phase fact. */
   isPresent: BorrowedStateHandle<boolean, TransitionProps>;

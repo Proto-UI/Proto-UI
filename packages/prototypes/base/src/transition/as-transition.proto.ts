@@ -1,5 +1,12 @@
 import type { ContextKey, JsonObject } from '@proto.ui/types';
-import { defineAsHook, delay, type RunHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  delay,
+  snapshotPresentationCompletionConfig,
+  type PresentationCompletionConfig,
+  type PresentationOwnerRef,
+  type RunHandle,
+} from '@proto.ui/core';
 import { createTransitionMachine, type TransitionMachineDriver } from './machine';
 import type {
   TransitionAsHookContract,
@@ -101,6 +108,20 @@ export const asTransition = defineAsHook<
     };
     def.expose.method('bindInitialOpen', bindInitialOpen);
 
+    const presentation = def.feedback.presence.owner();
+    let completion: PresentationCompletionConfig = 'timer';
+    def.expose.method('getPresentationOwner', () => presentation.ref);
+    def.expose.method('configurePresentation', (config: TransitionConfig) => {
+      appearDefault.setDefault(appearDefault.get());
+      const policy = snapshotPresentationCompletionConfig(config.completion ?? completion);
+      const enter = config.enterDuration ?? enterDurationDefault.get();
+      const leave = config.leaveDuration ?? leaveDurationDefault.get();
+      if (![enter, leave].every((value) => Number.isFinite(value) && value >= 0))
+        throw new Error('[asTransition] durations must be finite non-negative numbers.');
+      if (policy !== 'timer' && (enter >= policy.timeoutMs || leave >= policy.timeoutMs))
+        throw new Error('[asTransition] presentation duration must be shorter than timeoutMs.');
+      completion = policy;
+    });
     let currentRun: RunHandle<TransitionProps> | null = null;
     const getProps = () => currentRun?.props.get();
 
@@ -118,6 +139,14 @@ export const asTransition = defineAsHook<
         );
       },
       requiresColdPreparation: () => coldEntryPreparation.get(),
+      getCompletion: () => completion,
+      publishPresentation: (frame) =>
+        currentRun?.feedback.presence.publish(presentation.writer, {
+          ...frame,
+          owner: presentation.ref,
+        }),
+      settlePresentation: (outcome) =>
+        currentRun?.feedback.presence.settle(presentation.writer, outcome),
       getInterrupt: () =>
         currentRun?.props.isProvided('interrupt')
           ? ((getProps()?.interrupt as TransitionInterrupt | undefined) ?? interruptDefault.get())
@@ -147,6 +176,14 @@ export const asTransition = defineAsHook<
       },
     };
     const machine = createTransitionMachine(driver);
+    presentation.onCompletionRequest((run, request) => {
+      if (!currentRun) return;
+      if (!run.feedback.presence.isCurrent(presentation.writer, request.receipt)) return;
+      machine.completePresentation(
+        request.receipt.attempt,
+        () => !!currentRun && run.feedback.presence.isCurrent(presentation.writer, request.receipt)
+      );
+    });
 
     const controls: TransitionControls = {
       enter: () => machine.enter(),
@@ -252,7 +289,19 @@ export const asTransition = defineAsHook<
       'transitionColdEntryPreparation'
     );
 
+    const configurePresentation = requireProjectedHandle(
+      result.getMethod?.('configurePresentation') as
+        | ((config: TransitionConfig) => void)
+        | undefined,
+      'configurePresentation'
+    );
+    const getPresentationOwner = requireProjectedHandle(
+      result.getMethod?.('getPresentationOwner') as (() => PresentationOwnerRef) | undefined,
+      'getPresentationOwner'
+    );
     const configure = (config: TransitionConfig) => {
+      // Validate the whole prospective policy before installing any defaults.
+      configurePresentation(config);
       let configured = false;
       if (typeof config.coldEntryPreparation !== 'undefined') {
         coldEntryPreparation.setDefault(config.coldEntryPreparation);
@@ -288,6 +337,13 @@ export const asTransition = defineAsHook<
       result.getMethod?.('bindInitialOpen') as TransitionInitialOpenBinding | undefined,
       'bindInitialOpen'
     );
-    return { transitionState, isPresent, controls, configure, bindInitialOpen };
+    return {
+      transitionState,
+      isPresent,
+      controls,
+      configure,
+      bindInitialOpen,
+      presentationOwner: getPresentationOwner(),
+    };
   },
 });

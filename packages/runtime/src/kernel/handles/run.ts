@@ -48,6 +48,11 @@ export const createRunHandle = <P extends PropsBaseType>(
       emit: (key, payload, options) => exposeEvent.emit(key, payload, options),
     },
     feedback: {
+      presence: {
+        publish: (writer, frame) => feedback.presence.publish(writer, frame),
+        isCurrent: (writer, receipt) => feedback.presence.isCurrent(writer, receipt),
+        settle: (writer, outcome) => feedback.presence.settle(writer, outcome),
+      },
       style: {
         patch: (...handles) => feedback.style.patch(...handles),
         suppress: (...handles) => feedback.style.suppress(...handles),

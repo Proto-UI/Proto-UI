@@ -11,3 +11,6 @@ export * from './motion/sampler';
 export * from './motion/targets';
 export * from './motion/color';
 export * from './motion/projector';
+
+export * from './presence/sink';
+export * from './presence/projector';

@@ -1,3 +1,8 @@
+import type {
+  PresencePresentationDeclaration,
+  PresenceOwnerDeclaration,
+  PresenceOwnerRuntime,
+} from './presence-presentation';
 import type { ResidentMotionDeclaration } from './resident-motion';
 // packages/core/src/handles.ts
 import type { MaterialCandidate, MaterialSlot } from './material';
@@ -197,6 +202,7 @@ export interface RunHandle<Props extends PropsBaseType> {
   };
 
   feedback: {
+    presence: PresenceOwnerRuntime;
     style: {
       patch: (...handles: StyleHandle[]) => void;
       suppress: (...handles: StyleHandle[]) => void;
@@ -243,6 +249,7 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
   };
 
   feedback: {
+    presence: { owner(): PresenceOwnerDeclaration<Props> };
     material: {
       declare(slot: MaterialSlot): UnUse;
       use(candidate: MaterialCandidate): UnUse;
@@ -250,6 +257,7 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
     style: {
       use: (...handles: StyleHandle[]) => UnUse;
       transition: (declaration: ResidentMotionDeclaration) => UnUse;
+      presence: (declaration: PresencePresentationDeclaration) => UnUse;
     };
   };
 

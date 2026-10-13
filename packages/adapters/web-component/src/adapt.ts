@@ -231,6 +231,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _controller: RuntimeController | null = null;
     private _anatomyPort: AnatomyPort | null = null;
     private _focusTargetReadyListeners = new Set<() => void>();
+    private _documentChangeListeners = new Set<
+      (document: Document, phase: 'retire' | 'ready') => void
+    >();
+    private _pendingPresentationDocument: Document | null = null;
+    private _presentationDocument = this.ownerDocument;
     private _focusTargetRetryScheduled = false;
     private _focusTargetRetryCount = 0;
     private _focusIntentState: FocusIntentState = {};
@@ -338,22 +343,47 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     adoptedCallback(_oldDocument?: Document, newDocument: Document = this.ownerDocument) {
-      this._portalConceal.cancel();
-      if (!opt.getMeta) this._defaultMetaGetter = createDefaultMetaGetter(newDocument);
-      // Adoption detaches the host from its old physical tree before the
-      // destination can connect it. Drop that stale logical edge here; a
-      // subsequent connection will bind the destination parent. Same-document
-      // portal moves deliberately retain their projected logical ownership.
-      bindLogicalParent(this._instanceToken, null);
-      adoptWebComponentPortalProjections(this, newDocument);
-      this._defaultKeyedMetaSources?.adoptDocument(newDocument);
-      this._defaultColorSchemeSource?.adoptDocument(newDocument);
-      this._globalEventTarget.setTarget(newDocument.defaultView);
-      this._overlayModal.adoptDocument(newDocument);
-      this._splitResources?.environment.adoptDocument(newDocument);
-      this._hostDisplay?.sync();
-      this._controller?.update();
-      this[NOTIFY_FOCUS_TARGET_READY]();
+      if (this._presentationDocument !== newDocument) {
+        this._presentationDocument = newDocument;
+        this._pendingPresentationDocument = newDocument;
+        this._notifyPresentationDocument(newDocument, 'retire');
+      }
+      try {
+        this._portalConceal.cancel();
+        if (!opt.getMeta) this._defaultMetaGetter = createDefaultMetaGetter(newDocument);
+        // Adoption detaches the host from its old physical tree before the
+        // destination can connect it. Drop that stale logical edge here; a
+        // subsequent connection will bind the destination parent. Same-document
+        // portal moves deliberately retain their projected logical ownership.
+        bindLogicalParent(this._instanceToken, null);
+        adoptWebComponentPortalProjections(this, newDocument);
+        this._defaultKeyedMetaSources?.adoptDocument(newDocument);
+        this._defaultColorSchemeSource?.adoptDocument(newDocument);
+        this._globalEventTarget.setTarget(newDocument.defaultView);
+        this._overlayModal.adoptDocument(newDocument);
+        this._splitResources?.environment.adoptDocument(newDocument);
+        this._hostDisplay?.sync();
+        this._controller?.update();
+        this[NOTIFY_FOCUS_TARGET_READY]();
+      } finally {
+        if (this._pendingPresentationDocument === newDocument) {
+          this._pendingPresentationDocument = null;
+          this._notifyPresentationDocument(newDocument, 'ready');
+        }
+      }
+    }
+
+    private _notifyPresentationDocument(document: Document, phase: 'retire' | 'ready') {
+      for (const listener of Array.from(this._documentChangeListeners)) {
+        if (this._terminalDisposing || this._presentationDocument !== document) break;
+        if (!this._documentChangeListeners.has(listener)) continue;
+        // A presentation observer cannot take over the Adapter's adoption lifecycle.
+        try {
+          listener(document, phase);
+        } catch {
+          /* Per-sink guards still validate document identity. */
+        }
+      }
     }
 
     connectedCallback() {
@@ -449,6 +479,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const releaseOwnerResources = () => {
         if (ownerResourcesReleased) return;
         ownerResourcesReleased = true;
+        this._documentChangeListeners.clear();
+        this._pendingPresentationDocument = null;
         completeCleanup([
           () => {
             const cleanup = releaseCurrentView;
@@ -548,7 +580,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const runtimeColorSchemeSource = ownerSplitResources
         ? {
             getter: ownerGetMeta,
-            subscribe: (listener: () => void) => ownerSplitResources.environment.subscribe(listener),
+            subscribe: (listener: () => void) =>
+              ownerSplitResources.environment.subscribe(listener),
           }
         : this._defaultColorSchemeSource;
       this._hostDisplay = installDefaultHostDisplay(thisEl, {
@@ -690,7 +723,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 !ownerResourcesReleased &&
                 !this._terminalDisposing &&
                 !thisEl.hasAttribute(PUI_VIEW_DETACHED_ATTR)
-              ) currentEventGate?.enable();
+              )
+                currentEventGate?.enable();
             },
             disable: () => currentEventGate?.disable(),
             dispose: () => owner.disposeView(),
@@ -1011,6 +1045,14 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               effectsPort,
               visualFeedbackSink,
               residentMotion: opt.residentMotion,
+              subscribeDocumentChange: (listener) => {
+                this._documentChangeListeners.add(listener);
+                if (this._pendingPresentationDocument)
+                  listener(this._pendingPresentationDocument, 'retire');
+                return () => {
+                  this._documentChangeListeners.delete(listener);
+                };
+              },
               materialBindingFactory: proto.modules?.some(
                 (declaration) => declaration.id === OWNED_MATERIAL_ID
               )
@@ -1030,8 +1072,11 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               setExposes,
               runInCallbackScope,
               isViewReady: () =>
-                !disposed && !ownerResourcesReleased && !this._terminalDisposing &&
-                thisEl.isConnected && !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
+                !disposed &&
+                !ownerResourcesReleased &&
+                !this._terminalDisposing &&
+                thisEl.isConnected &&
+                !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
               isEntryAcquisitionReady: (target) => {
                 releaseRequestedTargetReady?.();
                 releaseRequestedTargetReady = undefined;
@@ -1083,9 +1128,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                   this,
                   () => {
                     if (
-                      disposed || ownerResourcesReleased || this._terminalDisposing ||
+                      disposed ||
+                      ownerResourcesReleased ||
+                      this._terminalDisposing ||
                       generation !== focusRetryGeneration
-                    ) return;
+                    )
+                      return;
                     this._focusTargetRetryScheduled = false;
                     this[NOTIFY_FOCUS_TARGET_READY]();
                   },
@@ -1162,8 +1210,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 if (conceal) await conceal;
                 if (
                   ownerResourcesReleased ||
-                this._terminalDisposing ||
-                requestVersion !== latestIntentVersion ||
+                  this._terminalDisposing ||
+                  requestVersion !== latestIntentVersion ||
                   !thisEl.isConnected ||
                   this._controller !== hostSession.controller
                 )

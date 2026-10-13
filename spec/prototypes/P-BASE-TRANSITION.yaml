@@ -93,6 +93,11 @@ criteria:
       en: When a synchronous before/after signal, state projection, or view request changes the target, reinitializes, unmounts, or disposes the machine, an obsolete phase operation must not overwrite the new target, emit stale after signals, or withdraw a new view; repeated same-direction start requests remain idempotent. Uninterrupted event ordering, durations, and interruption policy remain unchanged. This criterion neither defines CSS trajectories nor claims support for arbitrary host scheduler-registration reentrancy.
     dependsOn:
       contracts: [C-AS-TRANSITION-0001]
+  - id: P-BASE-TRANSITION-PRESENTATION-COMPLETION
+    text:
+      en: Opt-in presentation completion publishes a lexical owner reference with a private writer, resolved duration, and independent logical phase attempt before synchronous phase observers. Only current physical-binding receipts may consume the existing completion path. A bounded Core delay watchdog includes acknowledgement wait and interpolation; zero duration settles immediately, invalid duration reaching the bound rejects without animation, and failed settlement or cancellation cannot retain a leaving view. Retirement, disposal and reentrant replacement invalidate old acknowledgements. Omitted or timer policy preserves default timer completion. The Drawer 1000 ms bound is engineering policy rather than upstream choreography.
+    dependsOn:
+      contracts: [C-FEEDBACK-PRESENCE-PRESENTATION-0001]
 openQuestions:
   - id: P-BASE-TRANSITION-Q-REDUCED-MOTION-SOURCE
     question:
@@ -108,6 +113,7 @@ sources:
   - path: packages/prototypes/base/src/transition/as-transition.proto.ts
   - path: packages/prototypes/base/src/transition/machine.ts
   - path: packages/prototypes/base/test/as-transition.test.ts
+  - path: packages/prototypes/base/test/transition-presentation.test.ts
   - path: spec/contracts/C-AS-TRANSITION-0001.yaml
   - path: spec/tests/T-AS-TRANSITION-0001.yaml
   - path: https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html

@@ -1,9 +1,11 @@
+import { acquireWebTranslation } from './translation-composition';
 import type { AvailableLayoutFrame, AvailableSpaceRect } from '@proto.ui/core';
 import { resolveAvailableExtent } from '../available-layout';
 
 type Written = { value: string; priority: string };
 /** Host-only realization of neutral layout intent. No component policy or measurements escape. */
 export function createWebAvailableLayout(target: HTMLElement) {
+  let translation: ReturnType<typeof acquireWebTranslation> | null = null;
   const original = new Map<string, Written>();
   const projected = new Map<string, Written>();
   const relinquished = new Set<string>();
@@ -28,6 +30,10 @@ export function createWebAvailableLayout(target: HTMLElement) {
     projected.set(name, read(name));
   };
   const restore = (only?: string) => {
+    if (only === undefined || only === 'translate') {
+      translation?.release();
+      translation = null;
+    }
     for (const [name, value] of projected) {
       if (only !== undefined && name !== only) continue;
       if (!equal(read(name), value)) {
@@ -154,7 +160,11 @@ export function createWebAvailableLayout(target: HTMLElement) {
     write(horizontal ? 'min-width' : 'min-height', px(bounds.minimum));
     const trailing = value.edge === 'bottom' || value.edge === 'right';
     const offset = (trailing ? value.displacement - 1 : -value.displacement) * 100;
-    write('translate', horizontal ? `${offset}% 0px` : `0px ${offset}%`);
+    translation ??= acquireWebTranslation(target, 'layout');
+    const zero = { px: 0, rootText: 0, ownBox: 0 };
+    const shifted = { px: 0, rootText: 0, ownBox: offset / 100 };
+    if (!translation.set(horizontal ? [shifted, zero] : [zero, shifted]))
+      relinquished.add('translate');
     restore('display');
     status = relinquished.size ? 'ownership-lost' : 'ready';
   }

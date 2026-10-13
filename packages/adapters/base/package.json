@@ -8,7 +8,8 @@
     "@proto.ui/module-expose-state": "workspace:*",
     "@proto.ui/runtime": "workspace:*",
     "@proto.ui/types": "workspace:*",
-    "@proto.ui/module-feedback": "workspace:*"
+    "@proto.ui/module-feedback": "workspace:*",
+    "@proto.ui/module-positioning": "workspace:*"
   },
   "devDependencies": {},
   "exports": {

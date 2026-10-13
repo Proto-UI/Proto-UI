@@ -1,3 +1,8 @@
+import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
+import {
+  PRESENCE_PRESENTATION_SINK_CAP,
+  PRESENCE_RUN_IN_CALLBACK_CAP,
+} from '@proto.ui/module-feedback';
 import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
@@ -389,6 +394,8 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      [PRESENCE_PRESENTATION_SINK_CAP, createWebPresencePresentationSink(args.el, effectsPort)],
+      [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [
         RESIDENT_MOTION_SINK_CAP,
         createWebResidentMotionSink(args.el, effectsPort, args.residentMotion),

@@ -1,3 +1,9 @@
+import { createWebPresencePresentationSink } from '@proto.ui/adapter-base';
+import {
+  PRESENCE_PRESENTATION_SINK_CAP,
+  PRESENCE_RUN_IN_CALLBACK_CAP,
+  type PresencePresentationSink,
+} from '@proto.ui/module-feedback';
 import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
@@ -1076,6 +1082,9 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
   const physicalControl = () => args.textControlTarget;
   const physicalImage = () => args.imageViewTarget;
 
+  let presenceSink: PresencePresentationSink | null = null;
+  let presenceSurface: HTMLElement | null = null;
+  let presenceView: number | null = null;
   const wiring = createControlWiring(
     args,
     rawPropsSource,
@@ -1165,6 +1174,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   onFocusAcquired?: () => void;
   onFocusPendingReleased?: () => void;
   subscribeTargetReady: (listener: () => void) => () => void;
+  subscribeDocumentChange?: (
+    listener: (document: Document, phase: 'retire' | 'ready') => void
+  ) => () => void;
   retryTargetReady: () => void;
   overlayLayerScheduler?: OverlayLayerScheduler;
   overlayModal?: OverlayModal;
@@ -1288,6 +1300,9 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   const portalMount = createWebComponentPortalMount();
   let releasePortalDirection: (() => void) | null = null;
 
+  let presenceSink: PresencePresentationSink | null = null;
+  let presenceSurface: HTMLElement | null = null;
+  let presenceView: number | null = null;
   const wiring = createControlWiring(
     args,
     rawPropsSource,
@@ -1298,6 +1313,44 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   )
     .use('feedback', [
       [EFFECTS_CAP, effectsPort],
+      [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
+      [
+        PRESENCE_PRESENTATION_SINK_CAP,
+        {
+          commit(frame: import('@proto.ui/module-feedback').PresencePresentationFrame) {
+            const surface = (
+              args.feedbackSurfaceProjection ?? args.surfaceProjection
+            ).getSurfaceTarget();
+            if (!surface) {
+              effectsPort.queueStyle(frame.style);
+              effectsPort.requestFlush();
+              return;
+            }
+            if (presenceSurface !== surface) {
+              if (presenceSink && presenceView !== null) presenceSink.release(presenceView);
+              presenceSurface = surface;
+              presenceSink = createWebPresencePresentationSink(surface, effectsPort, {
+                subscribeDocumentChange: args.subscribeDocumentChange,
+              });
+            }
+            presenceView = frame.view;
+            presenceSink!.commit(frame);
+          },
+          cancel() {
+            presenceSink?.cancel();
+          },
+          settle(outcome: import('@proto.ui/core').PresentationOutcome) {
+            return presenceSink?.settle(outcome) ?? false;
+          },
+          release(view: number) {
+            presenceSink?.release(view);
+            presenceSink = null;
+            presenceSurface = null;
+            presenceView = null;
+          },
+          diagnostics: () => presenceSink?.diagnostics?.() ?? [],
+        },
+      ],
       [
         RESIDENT_MOTION_SINK_CAP,
         {

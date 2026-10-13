@@ -1,0 +1,55 @@
+id: P-SHADCN-DRAWER-MOTION
+type: prototype
+title: Shadcn Drawer bounded presence presentation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Source-session and Web sink evidence do not establish physical Document, Shadow, GPUI or compiler acceptance. Native-browser fixtures require execution and native backends remain independently owned.
+summary: Family-owned plain Drawer Content slide and Mask fade use separate Transition owners and a bounded host-neutral presentation declaration.
+statement:
+  en: The plain Shadcn Drawer projection follows pinned Vaul 1.1.2 visual endpoints and timing while preserving Base admission, accepted direction, geometry, focus, drag and lifecycle ownership. Snap-point-specific upstream choreography is outside this plain endpoint slice.
+criteria:
+  - id: P-SHADCN-DRAWER-MOTION-REFERENCE
+    text:
+      en: Default enter and leave duration is 500 ms with cubic-bezier(0.32,0.72,0,1), pinned to Vaul 1.1.2. Closed translation is minus one own reference box for top/left and plus one for bottom/right; entered translation is zero. Mask opacity is zero to one. The separately configured 1000 ms completion watchdog is engineering failure policy, not upstream choreography.
+  - id: P-SHADCN-DRAWER-MOTION-OWNERS
+    text:
+      en: Content and Mask bind their own local read-only Transition presentation owner references. Each completes only its current receipt and remains retained through its own acknowledgement or bounded fallback. Root accepted open and Content accepted side remain authoritative; controlled refusal starts no motion. Family declarations may not create another ViewIntent writer or alter Base accepted-side mutation authority.
+  - id: P-SHADCN-DRAWER-MOTION-COMPOSITION
+    text:
+      en: Presence translation composes with current layout and snap displacement without replacing them. Side changes retarget from the last acknowledged sample; reversal and detached/replaced view epochs obey the shared presence contract. No demo-local keyframes, DOM lookup or component-name host dispatch substitutes for the declaration.
+  - id: P-SHADCN-DRAWER-MOTION-SETTLEMENT
+    text:
+      en: An already initialized Transition entered phase without appear has no synthetic interpolation. Vaul defaultOpen initial suppression must be verified separately from late Base Content admission; controlled open alone does not imply that upstream suppression. Reduced or unknown preference, unavailable geometry, projection failure and deadline settle the latest target through the same guarded completion path without a retained-view leak. Events continue to mean phase completion rather than certified painted success.
+  - id: P-SHADCN-DRAWER-MOTION-EVIDENCE
+    text:
+      en: Separately validate authored family target semantics, host presentation, compiler coverage and native realization. Document and Shadow physical browser traces must capture timestamps, actual movement, simultaneous fade, retained close and reversal for the exact candidate. DOM-model tests do not certify physical presentation or GPUI support.
+sources:
+  - path: packages/prototypes/shadcn/src/drawer/content.proto.ts
+  - path: packages/prototypes/shadcn/src/drawer/mask.proto.ts
+  - path: packages/prototypes/base/src/drawer/content.proto.ts
+  - path: packages/prototypes/base/src/drawer/snap.ts
+  - path: packages/prototypes/base/src/drawer/overlay.proto.ts
+  - path: packages/prototypes/shadcn/test/drawer-presence-presentation.test.ts
+  - path: packages/prototypes/shadcn/test/drawer-presence.browser.test.ts
+  - path: packages/prototypes/shadcn/test/fixtures/drawer-presence.ts
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/package.json
+  - path: https://github.com/emilkowalski/vaul/blob/73d06cdd3fd990bf4b83214cfe240c246908af0d/src/style.css
+  - path: https://github.com/emilkowalski/vaul/blob/73d06cdd3fd990bf4b83214cfe240c246908af0d/src/index.tsx#L106-L110
+  - path: https://github.com/emilkowalski/vaul/blob/73d06cdd3fd990bf4b83214cfe240c246908af0d/src/constants.ts
+dependsOn:
+  contracts: [C-FEEDBACK-PRESENCE-PRESENTATION-0001, C-AS-TRANSITION-0001, C-DRAWER-STRUCTURE-0001]
+  hostCaps: [HC-FEEDBACK-PRESENCE-PRESENTATION-0001]
+relates:
+  prototypes: [P-BASE-TRANSITION]
+openQuestions:
+  - id: P-SHADCN-DRAWER-MOTION-Q-INITIAL-ADMISSION
+    question:
+      en: How should initial Root defaultOpen suppress first presentation while preserving Content declaration admission and Mask ordering?
+    context:
+      en: Pinned Vaul 1.1.2 initializes shouldAnimate from not defaultOpen. Current Base admission can deliver accepted open only after Transition initialization; binding raw Root open would bypass admission. Generic Transition initial entered behavior does not prove this family integration.
+    blocks: [activation:P-SHADCN-DRAWER-MOTION]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define bounded plain Drawer slide/fade and separate source, physical host and native acceptance.
+tags: [prototype, shadcn, drawer, motion, presence]

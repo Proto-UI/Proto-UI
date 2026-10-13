@@ -19,3 +19,5 @@ export type {
   ContextMenuInputHostLease,
 } from './caps';
 export { createWebContextMenuInputHost } from './web/context-menu-input-host';
+
+export { acquireWebTranslation } from './web/translation-composition';
