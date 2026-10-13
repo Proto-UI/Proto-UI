@@ -59,6 +59,8 @@ describe('runtime contract: core delay primitive (v0)', () => {
       const diagnosticError = new Error('terminal diagnostic failed');
       const calls: string[] = [];
       let diagnosticCalls = 0;
+      const cleanupValues: boolean[] = [];
+      let delayRegistrationRejected = false;
       let state!: OwnedStateHandle<boolean>;
       host.onLifecycleEvent = (event) => {
         const point = event.type === 'instance.phase' ? event.phase : event.type;
@@ -80,8 +82,12 @@ describe('runtime contract: core delay primitive (v0)', () => {
           });
           def.lifecycle.onBeforeDispose(() => {
             calls.push('beforeDispose');
-            expect(state.get()).toBe(false);
-            expect(() => delay(0, () => calls.push('revived delay'))).toThrow();
+            cleanupValues.push(state.get());
+            try {
+              delay(0, () => calls.push('revived delay'));
+            } catch {
+              delayRegistrationRejected = true;
+            }
           });
         },
       };
@@ -94,6 +100,8 @@ describe('runtime contract: core delay primitive (v0)', () => {
       }
       expect(thrown).toBe(creationError);
       expect(diagnosticCalls).toBe(1);
+      expect(cleanupValues).toEqual([false]);
+      expect(delayRegistrationRejected).toBe(true);
       expect(host.delays.map((task) => task.cancelled)).toEqual([true]);
       expect(host.delays.map((task) => task.cancelCalls)).toEqual([1]);
       expect(() => state.get()).toThrow(/disposed/i);
