@@ -27,7 +27,7 @@ criteria:
       en: A new view settles every initialization commit until its first presentation-frame callback; any target received before that boundary is its not-yet-presented initial state. The boundary uses one delivered frame per view, is epoch/cancellation safe, and never polls idle. After that boundary, first mount, hidden or detached view, new view epoch, missing unit measurement, missing palette resolution, reduce or unknown motion preference settle to the current target. Returning to no-preference does not replay. Dispose cancels scheduling and rejects stale callbacks or commits.
   - id: C-FEEDBACK-RESIDENT-MOTION-0001-F
     text:
-      en: Translate is a typed affine pair with px, rem and own reference-box percentage terms. The host must supply the actual reference-box extent and root font; missing bases cannot be guessed. Projection must remove exactly its owned translated contribution and preserve unrelated transform channels; incompatible composition is an explicit unsupported result.
+      en: Translate is a typed affine pair with px, rem and own reference-box percentage terms. A utility fraction a/b supplies 100*a/b percent of its own reference box, with an optional leading minus; a and b must be nonnegative safe integers and b must be positive. Invalid, zero-denominator or unsafe fractions are unsupported, not guessed. Typed fraction support does not admit an application role or claim a physical CSS recipe. The host must supply the actual reference-box extent and root font; missing bases cannot be guessed. Projection must remove exactly its owned translated contribution and preserve unrelated transform channels; incompatible composition is an explicit unsupported result.
   - id: C-FEEDBACK-RESIDENT-MOTION-0001-G
     text:
       en: Color targets are semantic palette roles or typed colors with alpha, resolved through a versioned host palette. Interpolation uses premultiplied Oklab with explicit conversion; missing roles settle, and final CSS strings or computed background color are never the source of target identity.
@@ -58,6 +58,9 @@ verifies:
   tests:
     - T-FEEDBACK-RESIDENT-MOTION-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Define bounded signed safe-integer fraction targets against the own reference box, independently of role and physical recipe admission.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Defined persistent typed translate/color target motion, interruption, projection ownership and lifecycle boundaries independently of presence.

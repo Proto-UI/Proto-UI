@@ -2,6 +2,7 @@ import switchRoot from './root.proto';
 import switchThumb from './thumb.proto';
 
 export type {
+  ShadcnSwitchSize,
   ShadcnSwitchRootProps,
   ShadcnSwitchRootExposes,
   ShadcnSwitchRootStateHandles,

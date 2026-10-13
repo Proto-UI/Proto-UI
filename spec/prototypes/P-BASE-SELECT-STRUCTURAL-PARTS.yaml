@@ -1,0 +1,59 @@
+id: P-BASE-SELECT-STRUCTURAL-PARTS
+type: prototype
+title: Select Group Label and decorative Separator
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Governed portable grouping and decorative parts remain draft pending independent review and native accessibility acceptance; Web projection and GPUI peer objects do not establish native assistive-technology acceptance.
+summary: Optional passive Select parts preserve Root selection ownership and provide a genuine group-local accessible name.
+anatomy:
+  family: base-select-group-scope
+  roles:
+    root: { cardinality: { min: 1, max: 1 } }
+    label: { cardinality: { min: 0, max: 1 } }
+  relations:
+    - { kind: contains, parent: root, child: label }
+criteria:
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-OWNERSHIP
+    text:
+      en: Group and Label preserve slots. Group is a passive accessible group; Label supplies that group's name and is not a control label or activation target. Neither part installs selection, collection, focus, input, presence or positioning ownership. Root remains the sole selection and collection owner, including mixed grouped and ungrouped Items in their authored order.
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-SCOPE
+    text:
+      en: Group and Label claim their optional SELECT_FAMILY roles. The separate static SELECT_GROUP_FAMILY is a naming-scope family, not a second Select collection. Each Group claims its root and each SelectRoot claims a scope-only root barrier without adding an accessible group role or naming relationship. Label claims its label role. The nearest naming-scope root isolates sibling and nested Groups, distinct Select roots and malformed Labels under nested Select roots. Existing Content-to-Item and Viewport-to-Item ancestor relations remain valid through Group wrappers.
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-NAME
+    text:
+      en: Only Group declares labelledBy targeting the label role and exact label protocol key in its own naming scope; Label registers that part key. No generated label ID, host node, DOM query or adapter identity enters portable state or context. Missing or duplicate Labels fail closed; removal, reparent, rematerialization and disposal use the existing structured relationship lease lifecycle without stale cross-group names.
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-SEPARATOR
+    text:
+      en: Separator claims its optional SELECT_FAMILY role, declares a hidden accessibility tree contribution, renders no children and owns no events, focus or collection member. It is decorative and must not claim role separator. Contentless rendering prevents hidden interactive authored descendants.
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-ENTRIES
+    text:
+      en: Group, Label and Separator each have equivalent named direct prototypes and asSelectGroup, asSelectLabel and asSelectSeparator hooks with public props, exposes and contract types. They accept no component policy props and add no public state or command exposes. AsHook inherits declarations, not the caller renderer; authored Separator callers must explicitly return an empty view, while Group and Label callers preserve their slots.
+dependsOn:
+  prototypes: [P-BASE-SELECT, P-BASE-SELECT-ALIGNMENT-PARTS]
+  contracts:
+    [
+      C-ANATOMY-0002,
+      C-ANATOMY-0004,
+      C-ANATOMY-0005,
+      C-A11Y-0001,
+      C-A11Y-PART-RELATIONSHIP-0001,
+      C-AS-HOOK-0001,
+    ]
+verifies:
+  tests: [T-SELECT-STRUCTURAL-PARTS-0001]
+sources:
+  - path: packages/prototypes/base/src/select/group.proto.ts
+  - path: packages/prototypes/base/src/select/label.proto.ts
+  - path: packages/prototypes/base/src/select/separator.proto.ts
+  - path: packages/prototypes/base/src/select/shared.ts
+openQuestions:
+  - id: P-BASE-SELECT-STRUCTURAL-PARTS-Q-NATIVE
+    question:
+      en: When will native assistive-technology acceptance independently verify group naming and decorative exclusion on the required targets? GPUI peer currently omits the A11y tree contribution from its wire/session snapshot, so Separator hidden semantics remain unrealized there; successful group semanticObjectId relations do not close this transport gap.
+    blocks: [activation:P-BASE-SELECT-STRUCTURAL-PARTS]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined passive grouping, scoped names, scope-only Select boundaries and contentless decorative separation without new runtime capabilities.
+tags: [prototype, base, select, anatomy, a11y]

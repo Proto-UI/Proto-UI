@@ -7,12 +7,19 @@ on:
       - 'packages/hooks/src/**'
       - 'packages/modules/**'
       - 'packages/prototypes/base/src/select/**'
+      - 'packages/prototypes/shadcn/src/select/**'
+      - 'packages/adapters/react/src/**'
+      - 'packages/cli/src/services/proto-style-css.ts'
+      - 'packages/cli/src/services/prototype-style-tokens.ts'
+      - 'packages/cli/src/legacy/type.ts'
       - 'packages/prototypes/base/src/transition/**'
       - 'packages/web-conformance/package.json'
       - 'package.json'
       - 'pnpm-lock.yaml'
       - 'packages/web-conformance/test/fixtures/select-target-alignment-native.ts'
       - 'packages/web-conformance/test/select-target-alignment.browser.test.ts'
+      - 'packages/web-conformance/test/fixtures/select-group-native.ts'
+      - 'packages/web-conformance/test/select-group.browser.test.ts'
 permissions:
   contents: read
 concurrency:
@@ -42,8 +49,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           git rev-parse HEAD > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/source-sha.txt"
-          corepack pnpm@10.32.1 exec vitest run packages/web-conformance/test/select-target-alignment.browser.test.ts --maxWorkers=1 --minWorkers=1 2>&1 | tee "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/native.log"
+          git rev-parse HEAD^{tree} > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/source-tree.txt"
+          sha256sum packages/web-conformance/test/fixtures/select-group-native.ts packages/web-conformance/test/select-group.browser.test.ts > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/grouped-fixture-sha256.txt"
+          corepack pnpm@10.32.1 exec vitest run packages/web-conformance/test/select-target-alignment.browser.test.ts packages/web-conformance/test/select-group.browser.test.ts --maxWorkers=1 --minWorkers=1 2>&1 | tee "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/native.log"
       - name: Retain commit-bound isolated prototype evidence
         if: always()
         uses: actions/upload-artifact@v4

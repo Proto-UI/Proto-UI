@@ -360,6 +360,9 @@ const SHADCN_MANIFEST = {
         'shadcn-select-surface',
         'shadcn-select-viewport',
         'shadcn-select-item-text',
+        'shadcn-select-group',
+        'shadcn-select-label',
+        'shadcn-select-separator',
         'shadcn-select-item',
       ],
       parts: {
@@ -391,6 +394,18 @@ const SHADCN_MANIFEST = {
         itemText: {
           basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
           prototypeId: 'shadcn-select-item-text',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'shadcn-select-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'shadcn-select-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'shadcn-select-separator',
         },
       },
     },
@@ -1524,7 +1539,7 @@ export function validateProjectionFamilyManifest(manifest: ProjectionFamilyManif
     const requiredPartIds = commonPartIds && [
       ...commonPartIds,
       ...(projectionFamilyId === 'shadcn' && familyId === 'select'
-        ? ['surface', 'viewport', 'itemText']
+        ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
         : []),
     ];
     if (!requiredPartIds) {

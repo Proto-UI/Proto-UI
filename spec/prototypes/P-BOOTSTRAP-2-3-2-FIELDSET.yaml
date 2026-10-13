@@ -1,0 +1,52 @@
+id: P-BOOTSTRAP-2-3-2-FIELDSET
+type: prototype
+title: bootstrap-2-3-2 Fieldset root
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 可移植分组的 draft 方向。原生无障碍、跨 Adapter 实现、关系生命周期与独立精确 head 验收仍阻塞稳定准入；synthetic DOM 与源码 token 不建立这些保证。
+  en: Draft portable grouping direction. Native accessibility, cross-Adapter realization, relation lifetime and independent exact-head acceptance remain activation blockers; synthetic DOM and source tokens do not establish them.
+summary: Direct Base projection of passive Fieldset root.
+statement: &a1
+  zh-CN: 拥有被动分组、本地或祖先 disabled 策略及分组名称/描述关系。保留插槽子内容，不创建值、校验、提交或焦点所有权。
+  en: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-FIELDSET-SEMANTICS
+    text: *a1
+  - id: P-BOOTSTRAP-2-3-2-FIELDSET-INHERITANCE
+    text:
+      zh-CN: 消费一次 asFieldsetRoot 并保留继承 renderer、Props、exposes 与 modules；不增加第二策略或关系 owner。
+      en: Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner.
+  - id: P-BOOTSTRAP-2-3-2-FIELDSET-PRESENTATION
+    text:
+      zh-CN: 块级分组，零 margin、padding 与 border；无卡片外框。
+      en: Block group with zero margin, padding and border; no card shell.
+dependsOn:
+  contracts:
+    - C-FIELDSET-0001
+    - C-FEEDBACK-STYLE-0003
+verifies:
+  tests:
+    - T-BASE-FIELDSET-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/fieldset/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/fieldset/index.ts
+  - path: internal/records/2026-10-10-finf-form-upstream-paint.md
+    label: Non-normative pinned upstream comparison and deliberate projection differences
+inherits:
+  prototypes:
+    - P-BASE-FIELDSET
+openQuestions:
+  - id: P-BOOTSTRAP-2-3-2-FIELDSET-Q-ACCEPTANCE
+    question:
+      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。
+      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these.
+    blocks:
+      - activation:P-BOOTSTRAP-2-3-2-FIELDSET
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced draft Fieldset definition with explicit evidence limits; no stable admission.
+tags:
+  - fieldset
+  - draft

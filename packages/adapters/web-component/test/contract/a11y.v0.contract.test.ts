@@ -12,6 +12,7 @@ import {
 import { createWebComponentModules } from '../../src/runtime/modules';
 import {
   createLogicalInstance,
+  isFocusTargetOwnerReady,
   markProtoInstance,
   unbindProtoInstance,
 } from '../../src/platform/instance-tree';
@@ -493,6 +494,7 @@ describe('contract: adapter-web-component / same-domain part relationships', () 
         setExposes() {},
         runInCallbackScope: (fn) => fn(),
         isViewReady: () => true,
+        isEntryAcquisitionReady: isFocusTargetOwnerReady,
         subscribeTargetReady: () => () => {},
         retryTargetReady() {},
       });

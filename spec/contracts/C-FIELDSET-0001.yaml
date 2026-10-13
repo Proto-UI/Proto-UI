@@ -1,0 +1,63 @@
+id: C-FIELDSET-0001
+type: contract
+title: Portable passive Fieldset grouping
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 可移植分组的 draft 方向。原生无障碍、跨 Adapter 实现、关系生命周期与独立精确 head 验收仍阻塞稳定准入；synthetic DOM 与源码 token 不建立这些保证。
+  en: Draft portable grouping direction. Native accessibility, cross-Adapter realization, relation lifetime and independent exact-head acceptance remain activation blockers; synthetic DOM and source tokens do not establish them.
+summary: Independent group policy, passive parts and host-owned accessible relationships.
+statement:
+  zh-CN: 独立于当前实现及原生 HTML fieldset 行为定义可移植 Fieldset 边界。
+  en: Defines the portable Fieldset boundary independently of its current implementation and of native HTML fieldset behavior.
+criteria:
+  - id: C-FIELDSET-0001-OWNER
+    text:
+      zh-CN: Root 是被动语义分组，不是 Field 或 Form owner。接受 disabled 与 ariaLabel 并暴露 effective disabled；不拥有控件值、编辑器、校验、提交、重置或额外焦点目标。
+      en: Root is a passive semantic group, not a Field or Form owner. It accepts disabled and ariaLabel and exposes effective disabled; it owns no control value, editor, validation, submission, reset or additional focus target.
+  - id: C-FIELDSET-0001-DISABLED
+    text:
+      zh-CN: effective disabled 为本地 disabled 或外层 Fieldset 策略。嵌套 Root 不得遮蔽祖先；解除祖先限制仍保留每个后代的本地限制。参与的 Field 按自身契约消费策略；Fieldset 不猜测任意后代控件或改写值。
+      en: Effective disabled is local disabled OR the enclosing Fieldset policy. Nested Roots must not hide ancestors; removing an ancestor restriction preserves every descendant local restriction. Participating Fields consume that policy through their own contract; Fieldset does not infer arbitrary descendant controls or rewrite values.
+  - id: C-FIELDSET-0001-ANATOMY
+    text:
+      zh-CN: 一个 Root 建立分组，最多各有一个 Legend 与 Description。嵌套分组的名称与描述目标保持 Root 隔离。Legend 与 Description 为被动插槽内容，暴露继承 disabled，不增加输入、激活动作或 Tab 停靠。
+      en: One Root establishes a group with at most one Legend and one Description. Nested group naming and description targets remain scoped to their own Root. Legend and Description are passive slotted content and expose inherited disabled without adding an input, activation action or tab stop.
+  - id: C-FIELDSET-0001-RELATIONS
+    text:
+      zh-CN: Root 经 A11y 声明 group 角色、ariaLabel 名称及精确 Anatomy labelledBy Legend / describedBy Description 关系。不编写 DOM ID 或直接查询 DOM。宿主拥有名称计算与关系投射。缺失、替换或移除部件不得留下过期或跨组引用；重复精确目标按 C-A11Y-PART-RELATIONSHIP-0001 fail closed，不选择第一个。完整终止/重挂载与宿主证据仍待补。
+      en: Root declares group role, ariaLabel naming and exact Anatomy labelledBy Legend / describedBy Description relationships through A11y. No authored DOM IDs or direct DOM discovery. Hosts own accessible-name computation and relationship projection. Absent, replaced or detached parts must not leave stale or cross-group references; duplicate exact targets fail closed under C-A11Y-PART-RELATIONSHIP-0001 rather than selecting the first. Full terminal/remount and host evidence remain explicitly open.
+  - id: C-FIELDSET-0001-BOUNDS
+    text:
+      zh-CN: 此可移植分组不采用原生 HTML first-Legend disabled 豁免。Legend 内参与的 Field 遵循相同继承 disabled 策略。不准入原生 fieldset/form 序列化、校验转发、第二编辑/键盘 owner 或宿主特例。C-FIELD-0001 排除 Fieldset，并非其定义。
+      en: This portable group does not adopt the native HTML first-Legend disabled exemption. A participating Field inside Legend follows the same inherited disabled policy. No native fieldset/form serialization, validation forwarding, second editing/keyboard owner or host-specific bypass is admitted. C-FIELD-0001 excludes Fieldset and is not its definition.
+sources:
+  - path: packages/prototypes/base/src/fieldset/root.proto.ts
+  - path: packages/prototypes/base/src/fieldset/shared.ts
+references:
+  contracts:
+    - C-FIELD-0001
+openQuestions:
+  - id: C-FIELDSET-0001-Q-ACCEPTANCE
+    question:
+      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。
+      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these.
+    blocks:
+      - activation:C-FIELDSET-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced draft Fieldset definition with explicit evidence limits; no stable admission.
+tags:
+  - fieldset
+  - draft
+dependsOn:
+  contracts:
+    - C-A11Y-PART-RELATIONSHIP-0001
+    - C-A11Y-0001
+    - C-ANATOMY-0001
+    - C-ANATOMY-0002
+    - C-CONTEXT-0001
+    - C-CONTEXT-0004
+    - C-CONTEXT-0011
+    - C-PROPS-0001

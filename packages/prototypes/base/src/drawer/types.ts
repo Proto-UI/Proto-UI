@@ -117,7 +117,16 @@ export type DrawerContentExposes = TransitionExposes & {
   __onAxisInput: ExposeMethod<(sample: import('@proto.ui/core').AxisInputSample) => void>;
 };
 
+export type DrawerSide = 'top' | 'right' | 'bottom' | 'left';
+
+/** Read-only observation, not a Rule State token. observe is setup-only. */
+export interface DrawerAcceptedSideObservation {
+  read(): DrawerSide | null;
+  observe(listener: (side: DrawerSide | null) => void): () => void;
+}
+
 export type DrawerContentStateHandles = {
+  drawerSide: State<string>;
   open: State<boolean>;
   snapPoint: State<number>;
   dragging: State<boolean>;
@@ -134,6 +143,7 @@ export type DrawerContentAsHookContract = {
 };
 
 export type DrawerContentHandles = {
+  acceptedSide: DrawerAcceptedSideObservation;
   stateHandles: {
     open: BorrowedStateHandle<boolean, DrawerContentProps>;
     snapPoint: BorrowedStateHandle<number, DrawerContentProps>;

@@ -28,12 +28,29 @@ export type TapTrace = {
 /** Check authored hit regions independently from the UA's native touch adjustment. */
 export function assertNoAuthoredOutsideHit(snapshot: {
   staticHitAttribute: string | null;
-  outsidePoints: { label: string; ownedHit: boolean }[];
+  rootBox: Box;
+  sampling: 'chromium-1-css-pixel-footprint';
+  outsidePoints: { label: string; x: number; y: number; ownedHit: boolean }[];
 }) {
   assert.equal(snapshot.staticHitAttribute, null, 'New York must not declare a static hit inset');
-  assert.equal(snapshot.outsidePoints.length, 4, 'all four close border probes are required');
-  for (const point of snapshot.outsidePoints)
+  assert.equal(snapshot.sampling, 'chromium-1-css-pixel-footprint');
+  assert.deepEqual(
+    snapshot.outsidePoints.map(({ label }) => label),
+    ['left', 'right', 'top', 'bottom']
+  );
+  const r = snapshot.rootBox;
+  assert.ok(
+    [r.x, r.y, r.width, r.height].every(Number.isFinite) && r.width > 0 && r.height > 0,
+    'finite nonempty root border box is required'
+  );
+  for (const point of snapshot.outsidePoints) {
+    assert.ok(Number.isFinite(point.x) && Number.isFinite(point.y), 'finite query coordinates');
+    // Blink point queries cover [x,x+1) × [y,y+1), not a zero-area mathematical point.
+    const overlaps =
+      point.x < r.x + r.width && point.x + 1 > r.x && point.y < r.y + r.height && point.y + 1 > r.y;
+    assert.equal(overlaps, false, `query footprint overlaps the ${point.label} border`);
     assert.equal(point.ownedHit, false, `authored hit area extends outside ${point.label}`);
+  }
 }
 
 /** A near-edge tap follows the trusted native target, never its raw-coordinate assumption. */
@@ -138,19 +155,73 @@ export async function measureNativeButtonControl(
     await page.evaluate(
       ({ scope, box }) => {
         document.documentElement.style.fontSize = box.width / 2 + 'px';
+        const decoration =
+          'box-sizing:border-box;display:inline-flex;align-items:center;padding:0;border:1px solid transparent;border-radius:9999px;appearance:none;overflow:visible;background:#eee;';
+        const rect = (element: Element) => {
+          const r = element.getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        };
+        const styleSnapshot = (element: HTMLElement) => {
+          const style = getComputedStyle(element);
+          const pseudo = (name: string) => {
+            const value = getComputedStyle(element, name);
+            return {
+              content: value.content,
+              position: value.position,
+              inset: value.getPropertyValue('inset'),
+              pointerEvents: value.pointerEvents,
+            };
+          };
+          return {
+            pseudoBefore: pseudo('::before'),
+            pseudoAfter: pseudo('::after'),
+            cssText: element.style.cssText,
+            height: style.height,
+            width: style.width,
+            boxSizing: style.boxSizing,
+            transform: style.transform,
+            zoom: style.zoom,
+          };
+        };
+        // Preserve the former floating-pixel cssText read/append/write path as an
+        // isolated diagnostic. It is removed before any control native input.
+        const roundTripButton = document.createElement('button');
+        roundTripButton.type = 'button';
+        roundTripButton.setAttribute('role', 'switch');
+        const roundTripHost = scope === 'shadow' ? document.createElement('div') : roundTripButton;
+        const requestedCssText = `position:absolute;left:${box.x}px;top:${box.y}px;width:${box.width}px;height:${box.height}px;`;
+        roundTripHost.style.cssText = requestedCssText;
+        document.body.append(roundTripHost);
+        const beforeRoundTrip = { box: rect(roundTripHost), style: styleSnapshot(roundTripHost) };
+        const serializedCssText = roundTripHost.style.cssText;
+        roundTripButton.style.cssText += decoration;
+        if (scope === 'shadow') {
+          roundTripButton.style.cssText += 'position:relative;width:100%;height:100%;';
+          roundTripHost.attachShadow({ mode: 'open' }).append(roundTripButton);
+        }
+        const roundTrip = {
+          requestedCssText,
+          serializedCssText,
+          before: beforeRoundTrip,
+          after: { box: rect(roundTripHost), style: styleSnapshot(roundTripHost) },
+          buttonAfter: { box: rect(roundTripButton), style: styleSnapshot(roundTripButton) },
+        };
+        roundTripHost.remove();
         const button = document.createElement('button');
         button.id = 'native-button';
         button.type = 'button';
         button.setAttribute('role', 'switch');
         const host = scope === 'shadow' ? document.createElement('div') : button;
         host.id = scope === 'shadow' ? 'control-host' : 'native-button';
-        host.style.cssText = `position:absolute;left:${box.x}px;top:${box.y}px;width:${box.width}px;height:${box.height}px;`;
+        // Build the original New York dimensions from declarations once; do not
+        // serialize measured fractional pixels and feed them back through CSSOM.
+        host.style.cssText =
+          `position:absolute;left:${box.x}px;top:${box.y}px;width:2rem;height:1.15rem;` +
+          (scope === 'document' ? decoration : '');
         const container =
           scope === 'shadow' ? host.attachShadow({ mode: 'open' }) : host.parentNode;
-        button.style.cssText +=
-          'box-sizing:border-box;display:inline-flex;align-items:center;padding:0;border:1px solid transparent;border-radius:9999px;appearance:none;overflow:visible;background:#eee;';
         if (scope === 'shadow') {
-          button.style.cssText += 'position:relative;width:100%;height:100%;';
+          button.style.cssText = decoration + 'position:relative;width:100%;height:100%;';
           container!.appendChild(button);
         }
         document.querySelector('#mount')!.append(host);
@@ -216,6 +287,41 @@ export async function measureNativeButtonControl(
           checked = !checked;
           changes.push({ stage, checked, now: performance.now() });
         });
+        const boundary = () => {
+          const r = button.getBoundingClientRect();
+          const read = (points: readonly (readonly [string, number, number])[]) =>
+            points.map(([label, x, y]) => {
+              const hit = document.elementFromPoint(x, y);
+              return {
+                label,
+                x,
+                y,
+                target: hit?.localName ?? null,
+                ownedHit: hit === host || (!!hit && host.contains(hit)),
+              };
+            });
+          return {
+            rootBox: rect(button),
+            sampling: 'chromium-1-css-pixel-footprint',
+            samplingScope:
+              'No authored expansion detected at these four 1 CSS pixel footprints; not an arbitrary subpixel guarantee.',
+            staticHitAttribute: null,
+            style: styleSnapshot(button),
+            diagnosticHalfPixelPoints: read([
+              ['left', r.x - 0.5, r.y + r.height / 2],
+              ['right', r.right + 0.5, r.y + r.height / 2],
+              ['top', r.x + r.width / 2, r.y - 0.5],
+              ['bottom', r.x + r.width / 2, r.bottom + 0.5],
+            ]),
+            outsidePoints: read([
+              ['left', r.x - 1, r.y + r.height / 2],
+              ['right', r.right, r.y + r.height / 2],
+              ['top', r.x + r.width / 2, r.y - 1],
+              ['bottom', r.x + r.width / 2, r.bottom],
+            ]),
+          };
+        };
+        const baselineBoundary = boundary();
         const snapshot = (name: string, x: number, y: number) => {
           stage = name;
           const pointTarget = document.elementFromPoint(x, y);
@@ -229,13 +335,14 @@ export async function measureNativeButtonControl(
             box: { x: r.x, y: r.y, width: r.width, height: r.height },
             pointHit: pointTarget?.localName ?? null,
             ownedPointHit: pointTarget === host || (!!pointTarget && host.contains(pointTarget)),
+            style: styleSnapshot(button),
           };
           checkpoints.push(value);
           return value;
         };
         (window as any).nativeButtonProbe = {
           snapshot,
-          read: () => ({ checked, events, changes, checkpoints }),
+          read: () => ({ checked, events, changes, checkpoints, baselineBoundary, roundTrip }),
           mutationControl(x: number, y: number) {
             const style = document.createElement('style');
             style.textContent =
@@ -243,7 +350,7 @@ export async function measureNativeButtonControl(
             const styleRoot = scope === 'shadow' ? container! : document.head;
             styleRoot.appendChild(style);
             try {
-              return snapshot('authored-expansion-mutation', x, y);
+              return { ...snapshot('authored-expansion-mutation', x, y), boundary: boundary() };
             } finally {
               style.remove();
             }

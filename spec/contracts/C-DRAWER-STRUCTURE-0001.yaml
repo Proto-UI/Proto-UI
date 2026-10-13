@@ -4,7 +4,7 @@ title: Passive Drawer Header and Footer share their logical owner
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale: Portable structural parts are defined independently of New York direction, viewport sizing and Content gesture work; native composition remains unverified.
-summary: Header and Footer reuse existing Drawer anatomy roles without introducing state or input ownership.
+summary: Passive parts preserve anatomy; a separate read-only accepted-direction observation supports family presentation without input ownership.
 statement:
   en: Drawer Header and Footer are passive slot containers belonging to the nearest logical Drawer family owner. Family styling does not create another Root, input route or mutable presentation authority.
   zh-CN: Drawer Header 与 Footer 是归属最近逻辑 Drawer family owner 的被动 slot 容器。family 样式不创建另一 Root、输入路径或可变呈现权限。
@@ -17,15 +17,32 @@ criteria:
     text:
       en: Existing Drawer anatomy cardinality and containment apply within each logical Root. Mixed visual families may compose under that owner; nested Roots do not share header or footer membership. Disposing the owner releases descendant instances and memberships; these passive parts expose no writable or retained State handles.
       zh-CN: 已有 Drawer anatomy 数量与包含约束在每个逻辑 Root 内适用。不同视觉 family 可在同一 owner 下组合；嵌套 Root 不共享 header 或 footer 成员。owner dispose 释放子实例与成员；被动部件不暴露可写或留存 State handle。
+  - id: C-DRAWER-STRUCTURE-0001-DIRECTION
+    text:
+      en: Content asHook returns a frozen acceptedSide observation of its existing accepted drawerSide with read and observe only; it is not a Rule State token. It never exposes set, setDefault, raw capture access or mutable Context. Initial unadmitted Content retains the existing bottom default, and invalid updates retain the last accepted side together with the existing admission behavior.
+      zh-CN: Content asHook 将已有已接受 drawerSide 投影为仅含 read 与 observe 的冻结观察对象，并非 Rule State token。不提供 set、setDefault、原始 capture 或可写 Context。初始未准入 Content 保留已有 bottom 默认值；非法更新保留最后已接受方向及现有准入行为。
+  - id: C-DRAWER-STRUCTURE-0001-OBSERVATION
+    text:
+      en: The separate asDrawerAcceptedSide helper observes only the nearest logical Drawer Root's Content through a private scalar presentation Context whose Root ID must match the nearest Drawer Root Context. Missing or retired Content projects null, never an outer Root's Content. The existing Context API owns subscriptions and provider rebinding; the helper gates projection during view detach and terminal disposal, and resynchronizes on remount. Only an admitted accepted Content publishes a direction; otherwise the descendant projection is null. Its frozen read/observe facade is idempotent within setup, is observation-only and cannot change Content acceptance; observe registration is setup-only. Base Header and Footer remain passive and do not compose this helper themselves.
+      zh-CN: 独立 asDrawerAcceptedSide helper 仅经私有标量呈现 Context 观察最近逻辑 Drawer Root 的 Content，呈现 Root ID 必须与最近 Drawer Root Context 匹配。缺失或退役 Content 投影 null，绝不借用外层 Root 的 Content。已有 Context API 负责订阅及 provider 重绑定；helper 在 view detach 与最终 dispose 期间阻断投影并于 remount 重新同步。只有已准入且已接受的 Content 发布方向，否则子部件观察为 null。冻结 read/observe facade 在 setup 内幂等，只读且不能改变 Content 准入；observe 仅在 setup 注册。Base Header 与 Footer 仍被动，不自行组合此 helper。
   - id: C-DRAWER-STRUCTURE-0001-FAMILY
     text:
-      en: Shadcn Footer consumes Base Footer and owns only the pinned New York mt-auto flex flex-col gap-2 p-4 recipe, with mt-auto expressed by the existing equivalent mt-[auto] token. This slice does not alter existing consumers, Handle, Content sizing or gestures. Header directional alignment and decorative Indicator require separate accepted-state and gesture contracts; this slice does not certify complete New York Drawer parity.
-      zh-CN: Shadcn Footer 消费 Base Footer，仅拥有固定 New York 的 mt-auto flex flex-col gap-2 p-4 recipe，其中 mt-auto 用已有等价 mt-[auto] token 表达。本切片不改变现有 consumer、Handle、Content 尺寸或手势。Header 方向对齐与装饰 Indicator 需要独立的 accepted-state 与手势契约，不据此认定整个 New York Drawer 对齐。
+      en: Shadcn Header composes Base Header and the accepted-side observation, owning flex flex-col gap-0.5 p-4 and center alignment for accepted top/bottom directions; left/right or missing Content inherit alignment. Shadcn Footer retains mt-[auto] flex flex-col gap-2 p-4. Family-local presentation State may mirror the observation for rules but does not mutate Base authority. Responsive md alignment/gap, directional edge paint, decorative Indicator and upstream extent migration remain separate unimplemented slices; no full New York parity is certified.
+      zh-CN: Shadcn Header 组合 Base Header 与已接受方向观察，拥有 flex flex-col gap-0.5 p-4，已接受 top/bottom 时居中；left/right 或缺失 Content 时继承对齐。Footer 保留 mt-[auto] flex flex-col gap-2 p-4。family 局部呈现 State 可为 rule 镜像观察值，不改变 Base 权限。md 响应式对齐与间距、方向边缘绘制、装饰 Indicator 及上游 extent 迁移仍为独立未实现切片，不认定完整 New York 对齐。
+  - id: C-DRAWER-STRUCTURE-0001-INTERIOR
+    text:
+      en: Shadcn Content uses flex flex-col bg-background text-foreground without the former grid gap-4 p-4. Existing uniform rounded-lg border border-border shadow-md remains explicitly retained mismatch until directional edge translation is supported; it is not upstream-equivalent paint. Header/Footer own their padding in migrated demos, and authored body content owns its spacing. Title uses text-foreground font-semibold and inherits font size and line height. The existing available-minus-root-text cap and horizontal extent are unchanged, not certified as upstream 80vh or w-3/4.
+      zh-CN: Shadcn Content 使用 flex flex-col bg-background text-foreground，移除原 grid gap-4 p-4。现有统一 rounded-lg border border-border shadow-md 明确保留为尚未对齐项，直到方向边缘翻译得到支持，不认定其绘制与上游等价。已迁移 demo 的 Header/Footer 自有 padding，正文自有间距。Title 使用 text-foreground font-semibold 并继承字号与行高。已有 available-minus-root-text cap 与横向 extent 不变，不认定为上游 80vh 或 w-3/4。
 dependsOn:
-  contracts: [C-DRAWER-AUTO-CONSUMER-0001]
+  contracts: [C-DRAWER-AUTO-CONSUMER-0001, C-DRAWER-CONTENT-ADMISSION-0001, C-FEEDBACK-STYLE-0004]
 verifies:
   tests: [T-DRAWER-STRUCTURE-0001]
 sources:
+  - path: packages/prototypes/base/src/drawer/accepted-side.proto.ts
+  - path: packages/prototypes/base/src/drawer/content.proto.ts
+  - path: packages/prototypes/shadcn/src/drawer/header.proto.ts
+  - path: packages/prototypes/shadcn/src/drawer/content.proto.ts
+  - path: packages/prototypes/shadcn/src/drawer/title.proto.ts
   - path: packages/prototypes/shadcn/src/drawer/footer.proto.ts
     note: Recipe source is shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/drawer.tsx.
 openQuestions:
@@ -36,4 +53,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Define passive Base Header and Footer and the isolated New York Footer recipe without changing existing consumers.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Add an observation-only accepted-side protocol, owner-safe Header composition and supported Content interior while retaining explicit responsive, edge-paint, indicator and extent gaps.
 tags: [drawer, anatomy, composition]

@@ -145,3 +145,25 @@ test('BOM check rejects a stale generated package set', () => {
     f.close();
   }
 });
+
+// Exercise the real workspace inventory as well as the isolated rejection fixtures.
+test('reviewed workspace BOM covers Axis Input and Native Link without launch promotion', () => {
+  const result = spawnSync(
+    process.execPath,
+    ['scripts/release/check-release-assets.mjs', '--check'],
+    {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }
+  );
+  assert.equal(result.status, 0, result.stderr);
+  const bom = JSON.parse(
+    readFileSync(join(ROOT, `internal/releases/${version}/package-bom.json`), 'utf8')
+  );
+  for (const name of ['@proto.ui/module-axis-input', '@proto.ui/module-native-link']) {
+    const entries = bom.packages.filter((pkg) => pkg.name === name);
+    assert.equal(entries.length, 1, name);
+    assert.equal(entries[0].version, version);
+    assert.equal(entries[0].releaseRole, 'internal-or-dependency-directed');
+  }
+});

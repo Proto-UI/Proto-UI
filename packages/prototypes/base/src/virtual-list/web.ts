@@ -20,7 +20,8 @@ export function attachWebVirtualList(options: {
     queued = false,
     epoch = 0;
   const views = new Map<string, HTMLElement>(),
-    measurements = new Map<string, number>();
+    measurements = new Map<string, number>(),
+    measuredThisTurn = new Set<string>();
   const leading = content.ownerDocument.createElement('div'),
     trailing = content.ownerDocument.createElement('div');
   leading.setAttribute('aria-hidden', 'true');
@@ -47,10 +48,14 @@ export function attachWebVirtualList(options: {
     queued = true;
     queueMicrotask(() => {
       queued = false;
-      if (!disposed) refresh();
+      if (!disposed) refreshNow();
     });
   };
   const refresh = () => {
+    if (!refreshing) measuredThisTurn.clear();
+    refreshNow();
+  };
+  const refreshNow = () => {
     if (disposed) return;
     if (refreshing) {
       queueRefresh();
@@ -87,7 +92,9 @@ export function attachWebVirtualList(options: {
       const wanted = new Set(request.keys);
       const staged: HTMLElement[] = [];
       const created = new Set<HTMLElement>();
-      let projecting = false;
+      let projecting = false,
+        measurementsChanged = false,
+        discoveredMeasurement = false;
       const abort = () => {
         collection.reject(request);
         if (projecting || !collection.snapshot().committed) clearMaterialization();
@@ -150,12 +157,21 @@ export function attachWebVirtualList(options: {
             abort();
             return;
           }
-          if (height > 0 && Number.isFinite(height)) measurements.set(key, height);
+          if (height > 0 && Number.isFinite(height)) {
+            if (height !== (measurements.get(key) ?? estimate)) measurementsChanged = true;
+            if (!measuredThisTurn.has(key)) discoveredMeasurement = true;
+            measuredThisTurn.add(key);
+            measurements.set(key, height);
+          }
         }
         const measured = geometry().offsets;
         leading.style.height = `${measured[request.start] ?? 0}px`;
         trailing.style.height = `${Math.max(0, (measured.at(-1) ?? 0) - (measured[request.end] ?? 0))}px`;
         if (!collection.commit(request, request.keys)) abort();
+        // Re-evaluate the range after measurement, including newly revealed rows.
+        // Stop repeated known-key layout oscillations instead of starving the host
+        // with an endless microtask chain. A later host signal can retry them.
+        else if (measurementsChanged && discoveredMeasurement) queueRefresh();
       } catch (error) {
         abort();
         throw error;
@@ -174,6 +190,7 @@ export function attachWebVirtualList(options: {
   viewport.addEventListener('scroll', refresh, { passive: true });
   const unsubscribe = collection.subscribe(() => {
     epoch++;
+    measuredThisTurn.clear();
     // setItems/configure/invalidate have revoked the old model commitment.
     // Revoke its physical views even if the next proposal is unavailable.
     if (!collection.snapshot().committed) clearMaterialization();

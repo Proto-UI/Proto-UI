@@ -8,6 +8,7 @@ import {
   bindLogicalParent,
   createLogicalInstance,
   getLogicalTriggerSurfaceRoot,
+  isFocusTargetOwnerReady,
   markProtoInstance,
   mergeLogicalTriggerGroup,
   unbindProtoInstance,
@@ -201,6 +202,7 @@ describe('WC live focus-entry resolver inputs', () => {
       setExposes() {},
       runInCallbackScope: (fn) => fn(),
       isViewReady: () => true,
+      isEntryAcquisitionReady: isFocusTargetOwnerReady,
       subscribeTargetReady: () => () => {},
       retryTargetReady() {},
     });
@@ -944,6 +946,7 @@ describe('WC live focus-entry resolver inputs', () => {
       setExposes() {},
       runInCallbackScope: (fn) => fn(),
       isViewReady: () => true,
+      isEntryAcquisitionReady: isFocusTargetOwnerReady,
       subscribeTargetReady: () => () => {},
       retryTargetReady() {},
     });

@@ -20,7 +20,7 @@ export function addMonths(value: string, count: number): string {
   const end = new Date(date.getTime());
   end.setUTCMonth(end.getUTCMonth() + 1, 0);
   date.setUTCDate(Math.min(day, end.getUTCDate()));
-  return dateKey(date);
+  return Number.isFinite(date.getTime()) ? dateKey(date) : value;
 }
 export function monthDays(month: string, weekStartsOn = 0, fixedWeeks = false): string[] {
   const first = parseDate(`${month}-01`);

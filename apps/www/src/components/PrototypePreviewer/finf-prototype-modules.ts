@@ -234,6 +234,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/drawer');
     registerExactPrototype('shadcn-drawer-mask', module.drawerMask);
   },
+  'shadcn-drawer-header': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/drawer');
+    registerExactPrototype('shadcn-drawer-header', module.drawerHeader);
+  },
+  'shadcn-drawer-footer': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/drawer');
+    registerExactPrototype('shadcn-drawer-footer', module.drawerFooter);
+  },
   'shadcn-drawer-handle': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/drawer');
     registerExactPrototype('shadcn-drawer-handle', module.drawerHandle);

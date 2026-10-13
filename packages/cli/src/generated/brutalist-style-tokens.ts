@@ -397,7 +397,6 @@ export const BRUTALIST_STYLE_TOKENS: string[] = [
   'transition-colors',
   'transition-none',
   'transition-opacity',
-  'transition-transform',
   'translate-x-0',
   'translate-x-1',
   'translate-x-1/2',

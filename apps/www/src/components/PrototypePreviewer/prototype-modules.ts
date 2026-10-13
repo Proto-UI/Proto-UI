@@ -1034,6 +1034,30 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/select/content.proto');
     registerPrototype('shadcn-select-content', mod.default);
   },
+  'base-select-group': async () => {
+    const mod = await import('@proto.ui/prototypes-base/select');
+    registerPrototype('base-select-group', mod.selectGroup);
+  },
+  'base-select-label': async () => {
+    const mod = await import('@proto.ui/prototypes-base/select');
+    registerPrototype('base-select-label', mod.selectLabel);
+  },
+  'base-select-separator': async () => {
+    const mod = await import('@proto.ui/prototypes-base/select');
+    registerPrototype('base-select-separator', mod.selectSeparator);
+  },
+  'shadcn-select-group': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-group', mod.selectGroup);
+  },
+  'shadcn-select-label': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-label', mod.selectLabel);
+  },
+  'shadcn-select-separator': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/select');
+    registerPrototype('shadcn-select-separator', mod.selectSeparator);
+  },
   'shadcn-select-surface': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/select');
     registerPrototype('shadcn-select-surface', mod.selectSurface);

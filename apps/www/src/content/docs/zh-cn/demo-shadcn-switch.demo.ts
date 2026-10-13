@@ -7,6 +7,24 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'shadcn-switch-root',
+        props: { size: 'sm', defaultChecked: false },
+        children: [
+          { kind: 'proto', prototypeId: 'shadcn-switch-thumb' },
+          { kind: 'box', className: 'sr-only', children: ['Small email alerts'] },
+        ],
+      },
+      {
+        kind: 'proto',
+        prototypeId: 'shadcn-switch-root',
+        props: { size: 'sm', defaultChecked: true },
+        children: [
+          { kind: 'proto', prototypeId: 'shadcn-switch-thumb' },
+          { kind: 'box', className: 'sr-only', children: ['Small release alerts'] },
+        ],
+      },
+      {
+        kind: 'proto',
+        prototypeId: 'shadcn-switch-root',
         props: { defaultChecked: false },
         children: [
           {

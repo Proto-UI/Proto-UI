@@ -5,8 +5,8 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Switch Root is an unofficial Proto UI-maintained projection that inherits Base Switch root semantics and adds the currently implemented shadcn-style track and state-driven visual surface.
 statement:
-  en: This unofficial direct projection preserves all Base Switch value, activation, focus, disabled, accessibility, context and checkedChange ownership. The current default-size visual target is shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/switch.tsx. Older Base+Nova sources remain historical evidence only. Public Root/Thumb composition and preset ownership are unchanged.
-  zh-CN: 此非官方投射保留全部 Base Switch value、activation、focus、disabled、accessibility、context 与 checkedChange owner。现行默认尺寸视觉目标为 shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 的 apps/v4/registry/new-york-v4/ui/switch.tsx；旧 Base+Nova 仅保留历史证据，公开 Root/Thumb composition 与 preset owner 不变。
+  en: This unofficial direct projection preserves all Base Switch value, activation, focus, disabled, accessibility, context and checkedChange ownership. The current default/sm visual target is shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/switch.tsx. Older Base+Nova sources remain historical evidence only. Public Root/Thumb composition and preset ownership are unchanged.
+  zh-CN: 此非官方投射保留全部 Base Switch value、activation、focus、disabled、accessibility、context 与 checkedChange owner。现行默认/sm尺寸视觉目标为 shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 的 apps/v4/registry/new-york-v4/ui/switch.tsx；旧 Base+Nova 仅保留历史证据，公开 Root/Thumb composition 与 preset owner 不变。
 criteria:
   - id: P-SHADCN-SWITCH-UPSTREAM-IDENTITY
     text:
@@ -39,8 +39,8 @@ criteria:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Root uses inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none. Preserve source rem units; declarations correspond to 32 by 18.4 at root 16px and 64 by 36.8 at root 32px, without claiming rendered measurement. No extra hover tint or press scale is added. Scoped border-box and select-none are retained host-baseline extensions. Existing resident background-color motion remains governed by C-FEEDBACK-RESIDENT-MOTION-0001; full upstream transition-all interpolation is not implemented. The sm Root and coordinated Thumb size remain explicitly unimplemented pending portable same-domain size definition.
-      zh-CN: 默认 Root 使用 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none。保留 rem；声明值对应根字体16px时32×18.4、32px时64×36.8，不等于实测。无额外hover着色或press缩放；保留scoped border-box与select-none宿主基线扩展。既有resident background-color动画继续受C-FEEDBACK-RESIDENT-MOTION-0001治理，尚未完整实现transition-all。sm Root/Thumb协调须先定义可移植同域尺寸协议，当前明确未实现。
+      en: Default Root uses inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none. Preserve source rem units; declarations correspond to 32 by 18.4 at root 16px and 64 by 36.8 at root 32px, without claiming rendered measurement. No extra hover tint or press scale is added. Scoped border-box and select-none are retained host-baseline extensions. Existing resident background-color motion remains governed by C-FEEDBACK-RESIDENT-MOTION-0001; full upstream transition-all interpolation is not implemented. The sm Root uses h-3.5 w-6 (0.875rem by 1.5rem) through the owner-bound visual size protocol below.
+      zh-CN: 默认 Root 使用 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none。保留 rem；声明值对应根字体16px时32×18.4、32px时64×36.8，不等于实测。无额外hover着色或press缩放；保留scoped border-box与select-none宿主基线扩展。既有resident background-color动画继续受C-FEEDBACK-RESIDENT-MOTION-0001治理，尚未完整实现transition-all。sm Root使用h-3.5 w-6（0.875rem×1.5rem），按下述owner-bound视觉尺寸协议协调。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -89,14 +89,31 @@ criteria:
       decisions:
         - id: D-COMPONENT-PRESET-MATERIALIZATION-0001
           since: 0.2.0-rc.3
+  - id: P-SHADCN-SWITCH-VISUAL-SIZE-PROP
+    text:
+      en: Only Shadcn Root accepts size default or sm, defaulting to default when absent. Its family-owned getVisualSize Expose method returns the normalized resolved size. Missing size resets to default; provided-empty or invalid enum input follows C-PROPS-0009 (including previous-valid fallback), not a family-specific raw-Props bypass. Size changes change only appearance and never checked, disabled, focus, activation or checkedChange. Base Root and Thumb gain no visual prop, state or guarantee.
+      zh-CN: 仅Shadcn Root接受size default或sm，省略时为default。家族自有getVisualSize Expose方法返回规范化resolved尺寸。移除size时回退default；显式empty或非法enum遵循C-PROPS-0009（含previous-valid fallback），不以家族raw Props绕过。size变化只影响外观，不改变checked、disabled、focus、activation或checkedChange；Base Root/Thumb不新增视觉prop、state或guarantee。
+    dependsOn:
+      contracts: [C-PROPS-0009]
+  - id: P-SHADCN-SWITCH-VISUAL-SIZE-OWNER
+    text:
+      en: Shadcn Thumb resolves the actual current root in its inherited SWITCH_FAMILY anatomy domain and reads only that Root's explicit getVisualSize capability. A missing capability or unknown result yields default. Structural detach or retirement clears derived size to default; this does not relax strict missing-domain queries or inherited required Base Context diagnostics. A Shadcn visual Context size value is an invalidation signal only, never owner authority; an outer Shadcn sm Root must not size a Thumb owned by an inner Base or another styled Switch Root claiming SWITCH_FAMILY. No identity tokens, host targets or functions travel through Context, and no DOM selector or host ancestry access substitutes for logical Anatomy resolution.
+      zh-CN: Shadcn Thumb解析继承SWITCH_FAMILY当前domain中的实际Root，仅读取该Root显式getVisualSize能力。能力缺失或返回未知值时为default；结构detach/retirement时清除派生尺寸为default，不放宽strict missing-domain query或继承的Base required Context诊断。Shadcn视觉Context的size值只触发重新读取，不代表owner；外层Shadcn sm Root不得影响内层Base或其他同样claim SWITCH_FAMILY的styled Switch Root所拥有的Thumb。Context不传identity token、host target或函数，不以DOM selector/host ancestry取代逻辑Anatomy解析。
+    dependsOn:
+      contracts:
+        [C-ANATOMY-0001, C-ANATOMY-0005, C-ANATOMY-0009, C-ANATOMY-ORDER-0003, C-CONTEXT-0011]
+  - id: P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE
+    text:
+      en: Root initializes size before descendant mounting and publishes size invalidation on Props changes. Every Thumb resolves its current owner on mount, update, relevant Anatomy membership change and visual Context notification; it never trusts a cached former owner or notification payload. View detach clears derived visual size, remount re-reads current ownership, and terminal disposal releases module-owned subscriptions. Multiple Thumbs derive independently. Default, replacement and omitted preset parts preserve this protocol without a second visual owner. Native, browser and compiler realization remain separate evidence gates.
+      zh-CN: Root在后代挂载前初始化size，Props变化时发布尺寸失效通知。每个Thumb在mount、update、相关Anatomy membership变化与视觉Context通知时重新解析当前owner，不信任旧owner缓存或通知payload。view detach清除派生尺寸，remount重读当前owner，terminal dispose释放module自有订阅。多个Thumb独立派生；preset默认、替换、省略均不新增视觉owner。native、browser与compiler实现仍须分别验收。
 openQuestions:
   - id: P-SHADCN-SWITCH-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: 相较固定 shadcn/ui Switch baseline，当前全部差异分别是有意偏离还是待实现 gap，应按什么顺序收敛？
       en: Against the pinned shadcn/ui Switch baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
     context:
-      en: This slice migrates only default-size appearance. Upstream sm needs portable same-domain Root-to-Thumb size coordination; feed that definition gap back to the Base/prototype owner before implementation, never substitute a DOM selector or unscoped family context. Root transition-all spans more channels than current resident motion supports. className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. The fixed New York wrapper has no invalid-state recipe or field-label selector, so those are not missing source paint. Disabled pointer suppression, scoped baseline and explicit Root/Thumb preset composition remain disclosed Proto UI extensions. Source, CSS, real-browser and native evidence remain independent gates.
-      zh-CN: 本片仅迁移默认尺寸外观；sm需要可移植同域Root→Thumb尺寸协调，须先反哺Base/原型owner的定义缺口，不能DOM selector或无域家族context代替。Root transition-all超出现有resident motion通道；className/native forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。固定NY wrapper没有invalid或field-label样式，不能伪报为缺失源paint。disabled pointer suppression、scoped baseline及公开Root/Thumb preset仍是已披露Proto扩展。source、CSS、真实浏览器与native证据分别验收。
+      en: Default and sm appearance use the Shadcn-owned logical-root size protocol above; its implementation and rendered evidence must be verified separately. Root transition-all spans more channels than current resident motion supports. className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. The fixed New York wrapper has no invalid-state recipe or field-label selector, so those are not missing source paint. Disabled pointer suppression, scoped baseline and explicit Root/Thumb preset composition remain disclosed Proto UI extensions. Source, CSS, real-browser and native evidence remain independent gates.
+      zh-CN: default与sm外观遵循上述Shadcn自有逻辑Root尺寸协议；其实现与渲染证据须分别验证。Root transition-all超出现有resident motion通道；className/native forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。固定NY wrapper没有invalid或field-label样式，不能伪报为缺失源paint。disabled pointer suppression、scoped baseline及公开Root/Thumb preset仍是已披露Proto扩展。source、CSS、真实浏览器与native证据分别验收。
     blocks: [shadcn switch parity roadmap]
   - id: P-SHADCN-SWITCH-Q-HIT-ENVELOPE
     question:
@@ -157,4 +174,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Adopt the fixed 2026-10-12 New York default rem recipe, shadow and unexpanded hit box; retain explicit sm, motion and native evidence gaps.
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Define Shadcn-only default/sm visual sizing through actual Switch-domain Root Expose reads and Context invalidation, including mixed-family isolation and repeatable lifecycle.
 tags: [prototype, shadcn, switch, root, upstream-derived, delta, compatibility, visual]

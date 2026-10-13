@@ -7,15 +7,6 @@ import * as tree from '../src/platform/instance-tree';
 const flush = async () => {
   for (let i = 0; i < 30; i++) await Promise.resolve();
 };
-const settlePortalConceal = async () => {
-  // The admitted portal paint barrier owns two rendering opportunities before
-  // view-epoch teardown; microtasks alone do not exercise that boundary.
-  await flush();
-  await new Promise<void>((resolve) =>
-    requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-  );
-  await flush();
-};
 
 it.each(
   (['external-remove', 'close-then-move'] as const).flatMap((mode) =>
@@ -26,6 +17,11 @@ it.each(
   async ({ mode, property }) => {
     let setups = 0;
     let disposed = 0;
+    let completeUnmount: (() => void) | undefined;
+    const waitForUnmount = () =>
+      new Promise<void>((resolve) => {
+        completeUnmount = resolve;
+      });
     const parentProto = definePrototype({
       name: `wc-portal-parent-release-host-${mode}-${property}`,
       setup() {
@@ -49,7 +45,16 @@ it.each(
       },
     });
     const Parent = AdaptToWebComponent(parentProto);
-    const Content = AdaptToWebComponent(contentProto);
+    const Content = AdaptToWebComponent(contentProto, {
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type !== 'unmount.done') return;
+          const complete = completeUnmount;
+          completeUnmount = undefined;
+          complete?.();
+        },
+      },
+    });
     const originalParent: any = new Parent();
     const newParent: any = new Parent();
     const content: any = new Content();
@@ -58,7 +63,7 @@ it.each(
     await flush();
     const oldToken = content._instanceToken;
     // Supplemental property-ownership controls delegate to the native getter.
-    // They must survive either acquisition or replacement of the Adapter shim.
+    // Neither acquisition nor release may replace caller-owned DOM behavior.
     const nativeParentGetter = Object.getOwnPropertyDescriptor(Node.prototype, 'parentNode')!.get!;
     const hostDescriptor = {
       get(this: Node) {
@@ -81,10 +86,11 @@ it.each(
         expectedDescriptor = Object.getOwnPropertyDescriptor(content, 'parentNode');
       }
 
+      const firstUnmount = waitForUnmount();
       if (mode === 'external-remove') content.remove();
       else content.getExposes().actions.close();
-      if (mode === 'external-remove') await flush();
-      else await settlePortalConceal();
+      await firstUnmount;
+      await flush();
       const releasedDescriptor = Object.getOwnPropertyDescriptor(content, 'parentNode');
       const releasedParent = content.parentNode;
       const releasedConnected = content.isConnected;
@@ -120,8 +126,10 @@ it.each(
       expect(Array.from(document.body.children)).toContain(content);
       content.getExposes().actions.focus();
       expect(document.activeElement).toBe(content);
+      const secondUnmount = waitForUnmount();
       content.getExposes().actions.close();
-      await settlePortalConceal();
+      await secondUnmount;
+      await flush();
       expect(content.parentNode).toBe(newParent);
       expect(Array.from(newParent.children)).toContain(content);
       expect(Object.getOwnPropertyDescriptor(content, 'parentNode')).toEqual(expectedDescriptor);

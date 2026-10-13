@@ -1,0 +1,41 @@
+id: P-SHADCN-SELECT-STRUCTURAL-PARTS
+type: prototype
+title: Shadcn Select Group Label and Separator projections
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Source-pinned structural projection remains draft pending independent exact-candidate review and required host visual/accessibility evidence. It does not close the remaining full Select upstream parity gaps.
+summary: Three direct Shadcn parts inherit passive Base semantics and apply only the pinned upstream recipes.
+criteria:
+  - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-INHERITANCE
+    text:
+      en: Group, Label and Separator invoke their matching Base hooks without replacing naming, collection or selection ownership. They retain the Base public props/exposes/contract types and are available through family and package exports.
+  - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-RECIPE
+    text:
+      en: The adopted structural-parts recipe is shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/select.tsx, resolved Radix Select 2.2.6. Group adds no family visual recipe. Label uses px-2 py-1.5 text-xs text-muted-foreground. Separator uses pointer-events-none -mx-1 my-1 h-px bg-border, preserving negative 0.25rem inline margin and relative spacing instead of substituting default-font pixel values. Source token presence alone is not proof of host paint.
+  - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-CONSUMER
+    text:
+      en: Real grouped Select demos instantiate these prototypes and existing Items, rather than page-local group semantics or visual substitutes. The canonical generated style closure must include all inherited and authored recipes. Grouped and ungrouped selection remains Base-owned.
+dependsOn:
+  contracts: [C-AS-HOOK-0001]
+  prototypes: [P-SHADCN-SELECT]
+inherits:
+  prototypes: [P-BASE-SELECT-STRUCTURAL-PARTS]
+verifies:
+  tests: [T-SELECT-STRUCTURAL-PARTS-0001]
+sources:
+  - path: packages/prototypes/shadcn/src/select/group.proto.ts
+  - path: packages/prototypes/shadcn/src/select/label.proto.ts
+  - path: packages/prototypes/shadcn/src/select/separator.proto.ts
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/select.tsx
+    label: Adopted structural-parts upstream source; Radix Select dependency resolved to 2.2.6
+openQuestions:
+  - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-Q-HOST
+    question:
+      en: When will required native paint and assistive-technology acceptance verify this exact structural projection?
+    blocks: [activation:P-SHADCN-SELECT-STRUCTURAL-PARTS]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Adopted the pinned Group Label Separator recipe and Base semantics without asserting full Select parity.
+tags: [prototype, shadcn, select, upstream-derived]

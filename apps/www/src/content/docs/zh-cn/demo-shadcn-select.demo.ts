@@ -51,33 +51,60 @@ export default {
                 children: [
                   {
                     kind: 'proto',
-                    prototypeId: 'shadcn-select-item',
-                    props: { value: 'react', textValue: 'React' },
+                    prototypeId: 'shadcn-select-group',
                     children: [
                       {
                         kind: 'proto',
-                        prototypeId: 'shadcn-select-item-text',
-                        children: ['React'],
+                        prototypeId: 'shadcn-select-label',
+                        children: ['Framework adapters'],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'react', textValue: 'React' },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['React'],
+                          },
+                        ],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'vue', textValue: 'Vue' },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['Vue'],
+                          },
+                        ],
                       },
                     ],
                   },
+                  { kind: 'proto', prototypeId: 'shadcn-select-separator' },
                   {
                     kind: 'proto',
-                    prototypeId: 'shadcn-select-item',
-                    props: { value: 'vue', textValue: 'Vue' },
-                    children: [
-                      { kind: 'proto', prototypeId: 'shadcn-select-item-text', children: ['Vue'] },
-                    ],
-                  },
-                  {
-                    kind: 'proto',
-                    prototypeId: 'shadcn-select-item',
-                    props: { value: 'wc', textValue: 'Web Components' },
+                    prototypeId: 'shadcn-select-group',
                     children: [
                       {
                         kind: 'proto',
-                        prototypeId: 'shadcn-select-item-text',
-                        children: ['Web Components'],
+                        prototypeId: 'shadcn-select-label',
+                        children: ['Web platform'],
+                      },
+                      {
+                        kind: 'proto',
+                        prototypeId: 'shadcn-select-item',
+                        props: { value: 'wc', textValue: 'Web Components' },
+                        children: [
+                          {
+                            kind: 'proto',
+                            prototypeId: 'shadcn-select-item-text',
+                            children: ['Web Components'],
+                          },
+                        ],
                       },
                     ],
                   },

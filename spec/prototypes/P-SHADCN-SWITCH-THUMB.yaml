@@ -49,8 +49,8 @@ criteria:
             ]
   - id: P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Thumb uses pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Checked uses translate-x-[calc(100%_-_2px)]; dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Source size-4 remains 1rem, corresponding to 16px or 32px at those root fonts; translation is the used Thumb width minus 2px. Root now scales in rem too; declarations are not rendered geometry evidence. Local ring isolation and scoped border-box remain disclosed extensions. Existing resident translate timing is preserved; full transform-channel support and sm same-domain sizing remain gaps. No value or interaction owner is added.
-      zh-CN: 默认Thumb使用pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border/shadow。checked为translate-x-[calc(100%_-_2px)]，dark unchecked为bg-foreground、checked为bg-primary-foreground。size-4保持1rem，在两种根字体下声明为16px/32px；位移为实际Thumb宽减2px。Root也按rem缩放，声明不是渲染实测。local ring isolation与scoped border-box为已披露扩展；保留resident translate动画，完整transform通道与sm同域尺寸仍是缺口，不新增值或交互owner。
+      en: Default Thumb uses pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Checked uses translate-x-[calc(100%_-_2px)]; dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Source size-4 remains 1rem, corresponding to 16px or 32px at those root fonts; translation is the used Thumb width minus 2px. Root now scales in rem too; declarations are not rendered geometry evidence. Local ring isolation and scoped border-box remain disclosed extensions. Existing resident translate timing is preserved; sm uses size-3 (0.75rem) under the actual logical Root size protocol; full transform-channel support remains a gap. No value or interaction owner is added.
+      zh-CN: 默认Thumb使用pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border/shadow。checked为translate-x-[calc(100%_-_2px)]，dark unchecked为bg-foreground、checked为bg-primary-foreground。size-4保持1rem，在两种根字体下声明为16px/32px；位移为实际Thumb宽减2px。Root也按rem缩放，声明不是渲染实测。local ring isolation与scoped border-box为已披露扩展；保留resident translate动画，sm按实际逻辑Root尺寸协议使用size-3（0.75rem），完整transform通道仍是缺口，不新增值或交互owner。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -60,14 +60,22 @@ criteria:
     text:
       zh-CN: 当前实体只声明已测试的 inherited indicator behavior 与视觉 surface；公开组合模型和 upstream token 的全部差异必须集中在唯一 compatibility open question。
       en: This entity claims only tested inherited indicator behavior and visual surface; all differences in public composition and upstream tokens must remain centralized in one compatibility open question.
+  - id: P-SHADCN-SWITCH-THUMB-VISUAL-SIZE
+    text:
+      en: Thumb has no size prop and derives default or sm only under P-SHADCN-SWITCH-VISUAL-SIZE-OWNER and P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE. Default uses size-4 (1rem), sm uses size-3 (0.75rem), and checked travel remains used Thumb width minus 2px for both. At root fonts 16/32px the sm Root is 24x14/48x28px, Thumb is 12/24px and checked travel is 10/22px. These source relationships are expectations, not measured browser or native results.
+      zh-CN: Thumb没有size prop，仅按P-SHADCN-SWITCH-VISUAL-SIZE-OWNER及P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE派生default/sm。default用size-4（1rem），sm用size-3（0.75rem），两者checked位移均为实际Thumb宽减2px。根字体16/32px时sm Root为24×14/48×28px，Thumb为12/24px，checked位移10/22px；这些源码关系是预期，不是browser/native实测。
+    references:
+      prototypes:
+        - id: P-SHADCN-SWITCH
+          anchors: [P-SHADCN-SWITCH-VISUAL-SIZE-OWNER, P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE]
 openQuestions:
   - id: P-SHADCN-SWITCH-THUMB-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: 当前公开 Thumb anatomy part 与固定 upstream 内部 Thumb 在组合、尺寸、状态位移和 surface 上应如何对齐？
       en: How should the current public Thumb anatomy part align with the pinned upstream internal Thumb in composition, sizing, state movement, and surface?
     context:
-      en: The default-size presentation follows the pinned New York wrapper. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Smaller size, inherited size coordination, full transition-transform channels and full API parity remain outside this slice. Extra borders and shadows are absent; existing governed resident timing remains; real rendered travel and dark paint remain separately testable.
-      zh-CN: 默认尺寸呈现遵循固定New York wrapper；保留公开可选same-domain Thumb，不照搬上游内部composition。sm尺寸、继承size协调、完整transition-transform通道与API一致仍不属于本片。不加入额外border/shadow，保留既有受治理resident timing；真实位移与dark paint仍需独立验证。
+      en: The default/sm presentation follows the pinned New York wrapper. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Owner-bound size coordination is family-owned; full transition-transform channels and full API parity remain outside this slice. Extra borders and shadows are absent; existing governed resident timing remains; real rendered travel and dark paint remain separately testable.
+      zh-CN: default/sm尺寸呈现遵循固定New York wrapper；保留公开可选same-domain Thumb，不照搬上游内部composition。owner-bound尺寸协调由家族自有；完整transition-transform通道与API一致仍不属于本片。不加入额外border/shadow，保留既有受治理resident timing；真实位移与dark paint仍需独立验证。
     blocks: [shadcn switch thumb parity roadmap]
 sources:
   - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx
@@ -109,4 +117,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Update the fixed New York source target and rem geometry relation; retain sm and full motion-channel gaps.
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Define derived sm Thumb dimensions and owner-bound lifecycle without a Thumb size prop or Base visual semantics.
 tags: [prototype, shadcn, switch, thumb, upstream-derived, delta, compatibility, visual]

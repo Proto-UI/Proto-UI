@@ -290,6 +290,9 @@ const EXPECTED_RECIPE_PROTOTYPE_IDS = {
       'shadcn-select-surface',
       'shadcn-select-viewport',
       'shadcn-select-item-text',
+      'shadcn-select-group',
+      'shadcn-select-label',
+      'shadcn-select-separator',
       'shadcn-select-item',
     ],
     dialog: [
@@ -509,6 +512,18 @@ const EXPECTED_SELECT_PARTS = {
       basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
       prototypeId: 'shadcn-select-item-text',
     },
+    group: {
+      basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+      prototypeId: 'shadcn-select-group',
+    },
+    label: {
+      basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+      prototypeId: 'shadcn-select-label',
+    },
+    separator: {
+      basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+      prototypeId: 'shadcn-select-separator',
+    },
   },
   brutalist: {
     root: { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'brutalist-select-root' },
@@ -597,7 +612,7 @@ describe('Website projection-family manifests', () => {
           [
             ...EXPECTED_REQUIRED_PART_IDS[familyId],
             ...(projectionFamilyId === 'shadcn' && familyId === 'select'
-              ? ['surface', 'viewport', 'itemText']
+              ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
               : []),
           ].sort()
         );

@@ -143,3 +143,15 @@ export type SelectItemAsHookContract = {
 
 export type SelectItemSnapshot = CollectionItemSnapshot &
   Readonly<{ value: string; textValue: string; disabled: boolean }>;
+
+export type SelectGroupProps = {};
+export type SelectGroupExposes = {};
+export type SelectGroupAsHookContract = {};
+
+export type SelectLabelProps = {};
+export type SelectLabelExposes = {};
+export type SelectLabelAsHookContract = {};
+
+export type SelectSeparatorProps = {};
+export type SelectSeparatorExposes = {};
+export type SelectSeparatorAsHookContract = {};

@@ -40,6 +40,14 @@ export interface RuntimeSession<P extends PropsBaseType = PropsBaseType> {
   readonly kernel: Kernel<P>;
 }
 
+function attemptCleanup(action: () => void, recordFailure: (error: unknown) => void) {
+  try {
+    action();
+  } catch (error) {
+    recordFailure(error);
+  }
+}
+
 export function createRuntimeSession<P extends PropsBaseType>(
   proto: Prototype<P>,
   host: RuntimeHost<P>
@@ -87,8 +95,20 @@ export function createRuntimeSession<P extends PropsBaseType>(
   const pendingDelayTasks = new Set<{ cancel(): void }>();
 
   const cancelPendingDelayTasks = () => {
-    for (const task of [...pendingDelayTasks]) task.cancel();
+    let failed = false;
+    let firstError: unknown;
+    for (const task of [...pendingDelayTasks]) {
+      try {
+        task.cancel();
+      } catch (error) {
+        if (!failed) {
+          failed = true;
+          firstError = error;
+        }
+      }
+    }
     pendingDelayTasks.clear();
+    if (failed) throw firstError;
   };
 
   callbackScope.setDelayContext({
@@ -294,15 +314,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   (run as any).update = () => controller.update();
 
-  emit({ type: 'instance.setup.exit' });
-  propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
-  // Register before hosts subscribe: revoke relationship leases before a
-  // ViewIntent can hide or remove its physical view. Terminal lock clears it.
-  kernel.viewIntent.subscribe(({ present }) => {
-    moduleHub.getPort<ControlLabelPort>('control-label')?.prepareViewPresence(present);
-    moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
-  });
-
   const mount = (): Promise<void> => {
     if (instancePhase !== 'alive') {
       return Promise.reject(
@@ -410,15 +421,16 @@ export function createRuntimeSession<P extends PropsBaseType>(
     ++transitionVersion;
     mountPending?.resolve();
     mountPending = undefined;
-    let phaseFailed = false;
-    let phaseError: unknown;
-    try {
-      setMountPhase('unmounting', epoch);
-    } catch (error) {
-      phaseFailed = true;
-      phaseError = error;
-    }
-    cancelPendingDelayTasks();
+    let callbackFailed = false;
+    let callbackError: unknown;
+    const recordFailure = (error: unknown) => {
+      if (!callbackFailed) {
+        callbackFailed = true;
+        callbackError = error;
+      }
+    };
+    attemptCleanup(() => setMountPhase('unmounting', epoch), recordFailure);
+    attemptCleanup(cancelPendingDelayTasks, recordFailure);
 
     void (async () => {
       // A repeatable detach honors presence/transition approval. Terminal
@@ -426,7 +438,7 @@ export function createRuntimeSession<P extends PropsBaseType>(
       // transition after the owning host component has already gone away.
       const presencePort = moduleHub.getPort<PresencePort>('presence');
       const terminal = force || instancePhase === 'disposing';
-      if (terminal) presencePort?.forceUnmount();
+      if (terminal) attemptCleanup(() => presencePort?.forceUnmount(), recordFailure);
       const presence = terminal ? undefined : presencePort?.awaitUnmount();
       if (presence) {
         unmountWaitingForPresence = true;
@@ -435,29 +447,19 @@ export function createRuntimeSession<P extends PropsBaseType>(
       if (currentUnmountVersion !== unmountVersion) return;
       unmountWaitingForPresence = false;
 
-      let callbackFailed = phaseFailed;
-      let callbackError: unknown = phaseError;
-      const attempt = (action: () => void) => {
-        try {
-          action();
-        } catch (error) {
-          if (!callbackFailed) {
-            callbackFailed = true;
-            callbackError = error;
-          }
-        }
-      };
-      emit({ type: 'unmount.begin', epoch });
-      attempt(() => host.onUnmountBegin?.());
-      attempt(() => moduleHub.getPort<EventPort>('event')?.unbind?.());
-      attempt(() =>
-        callbackScope.run(run, () => {
-          for (const cb of lifecycle.unmounted) cb(run);
-        })
+      attemptCleanup(() => emit({ type: 'unmount.begin', epoch }), recordFailure);
+      attemptCleanup(() => host.onUnmountBegin?.(), recordFailure);
+      attemptCleanup(() => moduleHub.getPort<EventPort>('event')?.unbind?.(), recordFailure);
+      attemptCleanup(
+        () =>
+          callbackScope.run(run, () => {
+            for (const cb of lifecycle.unmounted) cb(run);
+          }),
+        recordFailure
       );
-      attempt(() => setMountPhase('detached', epoch));
-      cancelPendingDelayTasks();
-      emit({ type: 'unmount.done', epoch });
+      attemptCleanup(() => setMountPhase('detached', epoch), recordFailure);
+      attemptCleanup(cancelPendingDelayTasks, recordFailure);
+      attemptCleanup(() => emit({ type: 'unmount.done', epoch }), recordFailure);
       if (unmountPending === pending) unmountPending = undefined;
       if (callbackFailed) throw callbackError;
     })().then(resolveUnmount, rejectUnmount);
@@ -467,7 +469,60 @@ export function createRuntimeSession<P extends PropsBaseType>(
 
   const unmount = (): Promise<void> => unmountInternal(false);
 
-  const dispose = (failFast = false): Promise<void> => {
+  const beginDispose = (recordFailure: (error: unknown) => void) => {
+    attemptCleanup(() => setInstancePhase('disposing'), recordFailure);
+    attemptCleanup(cancelPendingDelayTasks, recordFailure);
+    attemptCleanup(kernel.viewIntent.lockTerminal, recordFailure);
+    attemptCleanup(() => emit({ type: 'instance.dispose.begin' }), recordFailure);
+  };
+
+  const finalizeDispose = (
+    recordFailure: (error: unknown) => void,
+    completeFailedCreation = false
+  ) => {
+    const terminalErrors: unknown[] = [];
+    const recordCleanupFailure = (error: unknown) => terminalErrors.push(error);
+    // Preparation errors (Props source/watcher dispatch) while entering failed-
+    // creation cleanup are swallowed: the callbacks must still run, but those
+    // secondary diagnostics do not reach the caller alongside the initiating
+    // value. Cleanup-callback failures do.
+    const retainInitiatingFailure = completeFailedCreation
+      ? (_error: unknown) => {}
+      : recordFailure;
+    attemptCleanup(
+      () =>
+        callbackScope.run(
+          run,
+          () => {
+            for (const cb of lifecycle.beforeDispose)
+              attemptCleanup(() => cb(run), recordCleanupFailure);
+          },
+          completeFailedCreation ? (_error: unknown) => {} : undefined
+        ),
+      retainInitiatingFailure
+    );
+
+    const eventRegistry = (
+      moduleHub as ModuleOrchestrator & { [__RT_EVENT_CALLBACKS]?: { clear(): void } }
+    )[__RT_EVENT_CALLBACKS];
+    attemptCleanup(() => eventRegistry?.clear(), recordFailure);
+    // Legacy terminal notification; repeatable unmount keeps logical resources.
+    attemptCleanup(() => moduleHub.setProtoPhase('unmounted'), recordFailure);
+    attemptCleanup(
+      () => moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver(null),
+      recordFailure
+    );
+    attemptCleanup(cancelPendingDelayTasks, recordFailure);
+    attemptCleanup(inst.dispose, recordFailure);
+    attemptCleanup(() => setInstancePhase('disposed'), recordFailure);
+    attemptCleanup(() => emit({ type: 'instance.dispose.done' }), recordFailure);
+    // Secondary cleanup-callback failures stay observable to the failed-creation
+    // caller without replacing the initiating value (C-LIFECYCLE-0002-I); the
+    // retained initiating-failure recorder above only covers preparation errors.
+    for (const terminalError of terminalErrors) recordFailure(terminalError);
+  };
+
+  const dispose = (): Promise<void> => {
     if (disposePending) return disposePending;
     if (instancePhase === 'disposed') return Promise.resolve();
     // Publish the shared completion before any callback can reenter disposal.
@@ -478,7 +533,6 @@ export function createRuntimeSession<P extends PropsBaseType>(
       rejectDispose = reject;
     });
     disposePending = pending;
-    let synchronousFailure: { error: unknown } | undefined;
     const succeed = () => {
       disposePending = undefined;
       resolveDispose();
@@ -487,115 +541,62 @@ export function createRuntimeSession<P extends PropsBaseType>(
       disposePending = undefined;
       rejectDispose(error);
     };
-    // Diagnostic observers must not interrupt terminal resource release. Keep
-    // their failures observable through the same disposal completion.
     const terminalErrors: unknown[] = [];
-    const notify = (action: () => void) => {
-      try {
-        action();
-      } catch (error) {
-        terminalErrors.push(error);
-      }
-    };
+    const recordFailure = (error: unknown) => terminalErrors.push(error);
     try {
-      notify(() => setInstancePhase('disposing'));
-      cancelPendingDelayTasks();
-      kernel.viewIntent.lockTerminal();
-      notify(() => emit({ type: 'instance.dispose.begin' }));
-
-      const finalizeDispose = () => {
-        try {
-          callbackScope.run(run, () => {
-            for (const cb of lifecycle.beforeDispose) cb(run);
-          });
-        } catch (error) {
-          terminalErrors.push(error);
-        }
-
-        const eventRegistry = (moduleHub as any)[__RT_EVENT_CALLBACKS] as
-          | { clear: () => void }
-          | undefined;
-        eventRegistry?.clear?.();
-
-        // Legacy terminal notification. Modules are migrated away from treating
-        // repeatable unmount as disposal in a later layer-specific change.
-        moduleHub.setProtoPhase('unmounted');
-        moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver(null);
-        cancelPendingDelayTasks();
-        try {
-          inst.dispose();
-        } catch (error) {
-          terminalErrors.push(error);
-        }
-        notify(() => setInstancePhase('disposed'));
-        notify(() => emit({ type: 'instance.dispose.done' }));
-        return {
-          failed: terminalErrors.length > 0,
-          error: terminalErrors.length > 1 ? new AggregateError(terminalErrors) : terminalErrors[0],
-        };
-      };
-
+      beginDispose(recordFailure);
       const unmountResult = unmountInternal(true);
-      let completion: Promise<void>;
-      if (mountPhase === 'detached') {
-        // Preserve deterministic terminal invalidation when no asynchronous
-        // presence transition blocks unmount. The returned Promise still
-        // carries callback errors to async-aware callers.
-        const finalError = finalizeDispose();
-        if (finalError.failed) synchronousFailure = { error: finalError.error };
-        completion = unmountResult.then(
-          () => {
-            if (finalError.failed) throw finalError.error;
-          },
-          (unmountError) => {
-            throw unmountError;
-          }
-        );
-      } else {
-        completion = unmountResult.then(
-          () => {
-            const finalError = finalizeDispose();
-            if (finalError.failed) throw finalError.error;
-          },
-          (unmountError) => {
-            finalizeDispose();
-            throw unmountError;
-          }
-        );
-      }
-
+      // Preserve synchronous terminal invalidation when no host completion
+      // remains outstanding; async-aware callers still receive cleanup errors.
+      const finalized = mountPhase === 'detached';
+      if (finalized) finalizeDispose(recordFailure);
+      const completion = unmountResult.then(
+        () => {
+          if (!finalized) finalizeDispose(recordFailure);
+          if (terminalErrors.length > 1) throw new AggregateError(terminalErrors);
+          if (terminalErrors.length) throw terminalErrors[0];
+        },
+        (unmountError) => {
+          if (!finalized) finalizeDispose(recordFailure);
+          throw unmountError;
+        }
+      );
       completion.then(succeed, fail);
     } catch (error) {
-      synchronousFailure = { error };
       fail(error);
-    }
-    if (failFast && synchronousFailure) {
-      // Failed creation cannot return a session or its disposal promise. Keep
-      // shared reentrant completion intact while reporting synchronous cleanup
-      // failure to that same creation caller, including falsy thrown values.
-      void pending.catch(() => {});
-      throw synchronousFailure.error;
     }
     return pending;
   };
 
-  setInstancePhase('alive');
   try {
+    emit({ type: 'instance.setup.exit' });
+    propsPort.applyRaw({ ...(host.getRawProps?.() ?? {}) });
+    // Register before hosts subscribe: revoke relationship leases before a
+    // ViewIntent can hide or remove its physical view. Terminal lock clears it.
+    kernel.viewIntent.subscribe(({ present }) => {
+      moduleHub.getPort<ControlLabelPort>('control-label')?.prepareViewPresence(present);
+      moduleHub.getPort<A11yPort>('a11y')?.prepareViewPresence(present);
+    });
+    setInstancePhase('alive');
     applyInstanceAssociations(host.getInstanceAssociations?.());
     callbackScope.run(run, () => {
       for (const cb of lifecycle.created) cb(run);
     });
-  } catch (error) {
-    // No session reaches the host on failure. Release logical resources while
-    // its owner capabilities still exist, before host wiring is revoked.
-    try {
-      void dispose(true);
-    } catch (cleanupError) {
-      throw new AggregateError([error, cleanupError]);
+    emit({ type: 'instance.created' });
+  } catch (creationError) {
+    // No session was published and no view was mounted. Finish reachable
+    // acquired cleanup synchronously; a secondary failure cannot replace the
+    // identical initiating value, including a falsy JavaScript thrown value.
+    const terminalErrors: unknown[] = [];
+    const recordFailure = (error: unknown) => terminalErrors.push(error);
+    beginDispose(recordFailure);
+    finalizeDispose(recordFailure, true);
+    if (terminalErrors.length > 1) {
+      throw new AggregateError([creationError, new AggregateError(terminalErrors)]);
     }
-    throw error;
+    if (terminalErrors.length) throw new AggregateError([creationError, terminalErrors[0]]);
+    throw creationError;
   }
-  emit({ type: 'instance.created' });
 
   if (host.presenceLifecycle === 'session') {
     moduleHub.getPort<PresencePort>('presence')?.setLifecycleDriver({

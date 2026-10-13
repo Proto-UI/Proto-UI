@@ -41,6 +41,7 @@ function setup(def: DefHandle<ToggleGroupItemProps, ToggleGroupItemExposes>) {
   a11y.role('button');
   a11y.nameFromContent();
   a11y.state('pressed', active);
+  a11y.action('activate');
   a11y.state('disabled', disabled);
   let currentRun: RunHandle<ToggleGroupItemProps> | null = null;
   def.expose.method('focusSelf', (options) => {

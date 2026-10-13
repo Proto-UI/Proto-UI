@@ -62,6 +62,6 @@ An enabled pointer or Enter/Space activation submits a value request. Disabled i
 
 ## Deferred scope
 
-This version does not define form submission, hidden inputs, editable search, multiple selection, virtualization, or the `Group`, `Label`, `Separator`, `Viewport`, scroll-control, `ItemText`, and `ItemIndicator` parts.
+This legacy v0 description does not define form submission, hidden inputs, editable search, multiple selection, virtualization, scroll controls, or ItemIndicator. Current optional Surface/Viewport/ItemText parts are governed by `P-BASE-SELECT-ALIGNMENT-PARTS`; Group/Label/decorative Separator and isolated naming scopes are governed by `P-BASE-SELECT-STRUCTURAL-PARTS`. Those draft catalog definitions take precedence over this historical v0 surface.
 
 The shadcn composition accepts `position="item-aligned"` for API compatibility, but Base currently guarantees anchored positioning only; Radix-style per-item geometry remains deferred.

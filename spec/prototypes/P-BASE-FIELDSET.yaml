@@ -1,0 +1,60 @@
+id: P-BASE-FIELDSET
+type: prototype
+title: base Fieldset root
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 可移植分组的 draft 方向。原生无障碍、跨 Adapter 实现、关系生命周期与独立精确 head 验收仍阻塞稳定准入；synthetic DOM 与源码 token 不建立这些保证。
+  en: Draft portable grouping direction. Native accessibility, cross-Adapter realization, relation lifetime and independent exact-head acceptance remain activation blockers; synthetic DOM and source tokens do not establish them.
+summary: Portable passive Fieldset root.
+statement: &a1
+  zh-CN: 拥有被动分组、本地或祖先 disabled 策略及分组名称/描述关系。保留插槽子内容，不创建值、校验、提交或焦点所有权。
+  en: Own the passive group, local-or-ancestor disabled policy and group naming/description relations. Preserve slotted children without creating value, validation, submission or focus ownership.
+criteria:
+  - id: P-BASE-FIELDSET-SEMANTICS
+    text: *a1
+dependsOn:
+  contracts:
+    - C-FIELDSET-0001
+verifies:
+  tests:
+    - T-BASE-FIELDSET-0001
+sources:
+  - path: packages/prototypes/base/src/fieldset/root.proto.ts
+  - path: packages/prototypes/base/src/fieldset/index.ts
+anatomy:
+  family: base-fieldset
+  roles:
+    root:
+      cardinality:
+        min: 1
+        max: 1
+    legend:
+      cardinality:
+        min: 0
+        max: 1
+    description:
+      cardinality:
+        min: 0
+        max: 1
+  relations:
+    - kind: contains
+      parent: root
+      child: legend
+    - kind: contains
+      parent: root
+      child: description
+openQuestions:
+  - id: P-BASE-FIELDSET-Q-ACCEPTANCE
+    question:
+      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。
+      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these.
+    blocks:
+      - activation:P-BASE-FIELDSET
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced draft Fieldset definition with explicit evidence limits; no stable admission.
+tags:
+  - fieldset
+  - draft

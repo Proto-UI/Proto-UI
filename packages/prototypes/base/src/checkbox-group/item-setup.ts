@@ -35,6 +35,7 @@ export function setupCheckboxGroupItem(
   a11y.state('checked', mixed);
   a11y.state('disabled', disabled);
   a11y.state('readOnly', readOnly);
+  a11y.action('activate');
   let current: RunHandle<CheckboxGroupItemProps> | null = null;
   const sync = (run: RunHandle<CheckboxGroupItemProps>) => {
     current = run;

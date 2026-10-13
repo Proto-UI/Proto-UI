@@ -68,7 +68,7 @@ describe('prototypes/brutalist: switch', () => {
     expect(styleContains(root, 'p-0')).toBe(true);
     expect(styleContains(root, 'data-[checked]:pl-5')).toBe(false);
     expect(styleContains(root, 'data-[checked]:pr-0.5')).toBe(false);
-    expect(styleContains(thumb, 'data-[checked]:translate-x-5')).toBe(true);
+    expect(styleContains(thumb, 'translate-x-5')).toBe(true);
     expect(styleContains(thumb, 'bg-white')).toBe(true);
   });
 
@@ -145,7 +145,6 @@ describe('prototypes/brutalist: switch', () => {
       'left-1',
       'top-1/2',
       '-translate-y-1/2',
-      'transition-transform',
       'size-4',
       'rounded-full',
       'border-2',
@@ -154,6 +153,8 @@ describe('prototypes/brutalist: switch', () => {
     ]) {
       expect(styleContains(thumb, token)).toBe(true);
     }
+    expect(styleContains(thumb, 'transition-transform')).toBe(false);
+    expect(styleContains(thumb, 'duration-150')).toBe(false);
     for (const forbidden of ['rounded-none', 'shadow-md', 'backdrop-blur']) {
       expect(styleContains(root, forbidden)).toBe(false);
       expect(styleContains(thumb, forbidden)).toBe(false);

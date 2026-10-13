@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, tw, type RunHandle } from '@proto.ui/core';
 import { asSwitchRoot } from '@proto.ui/prototypes-base/switch';
+import { SWITCH_VISUAL, normalizeSwitchSize } from './visual';
 import type { ShadcnSwitchRootExposes, ShadcnSwitchRootProps } from './types';
 
 // Fixed New York 02cad611: preserve upstream rem units at every root font size.
-// This default-size slice does not claim sm-size coordination or transition-all parity.
+// Size coordination is family-owned; full transition-all parity remains separate.
 const ROOT_BASE_TOKENS = [
   'peer',
   'inline-flex',
-  'h-[1.15rem]',
-  'w-8',
   'shrink-0',
   'items-center',
   'rounded-full',
@@ -32,6 +31,28 @@ const switchRoot = definePrototype<ShadcnSwitchRootProps, ShadcnSwitchRootExpose
       throw new Error('[shadcn-switch-root] asSwitchRoot must project Switch root state handles.');
     }
     const { checked, disabled, focusVisible } = switchState;
+    // P-SHADCN-SWITCH-VISUAL-SIZE-PROP, P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE
+    def.props.define({ size: { type: 'enum', options: ['default', 'sm'], empty: 'fallback' } });
+    def.props.setDefaults({ size: 'default' });
+    const size = def.state.enum('switchVisualSize', 'default', { options: ['default', 'sm'] });
+    def.expose.method('getVisualSize', () => size.get());
+    def.context.provide(SWITCH_VISUAL, { size: 'default' });
+    const syncSize = (run: RunHandle<ShadcnSwitchRootProps>) => {
+      const next = normalizeSwitchSize(run.props.get().size);
+      size.set(next, 'reason: shadcn switch Root visual size');
+      run.context.update(SWITCH_VISUAL, { size: next });
+    };
+    def.lifecycle.onCreated(syncSize);
+    def.lifecycle.onMounted(syncSize);
+    def.props.watch(['size'], syncSize);
+    def.rule({
+      when: (w) => w.state(size).eq('default'),
+      intent: (i) => i.feedback.style.use(tw('h-[1.15rem] w-8')),
+    });
+    def.rule({
+      when: (w) => w.state(size).eq('sm'),
+      intent: (i) => i.feedback.style.use(tw('h-3.5 w-6')),
+    });
     // P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
     def.feedback.style.transition({
       properties: ['background-color'],

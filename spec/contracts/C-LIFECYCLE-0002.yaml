@@ -50,6 +50,10 @@ criteria:
     text:
       zh-CN: 同一实例、同一次 lifecycle checkpoint 中，正常返回的 authored callback 必须按 setup chain 中成功注册的先后顺序调用；直接注册与 hook 内注册共享序列，once hook 重复调用不得重复注册。前一 callback 的同步部分返回后才调用下一个，已完成的同步 State 写入按 State 契约对后者可见。本规则不扩展异步 await、抛错恢复、跨实例顺序或私有 Module teardown 语义。
       en: For one instance and one occurrence of a lifecycle checkpoint, normally returning authored callbacks must be invoked in successful setup-chain registration order. Direct and hook registrations share that sequence, and repeated once-hook calls must not register again. The next callback starts after the previous synchronous body returns, with completed synchronous State writes visible under the State contract. This rule adds no async awaiting, error recovery, cross-instance order, or private Module teardown semantics.
+  - id: C-LIFECYCLE-0002-J
+    text:
+      zh-CN: Runtime 已取得 instance 后，若同步 `created` callback 抛错，必须在重新抛出同一原始值之前完成所有可达的已取得资源的 terminal cleanup，取消已排队的 Delay 并使 instance-scoped handle 失效。清理 callback、diagnostic 或 release 的次级错误不得替换该原始值；该边界不承诺回收未返回资源的失败 factory，也不定义其它 lifecycle callback 的一般错误恢复。
+      en: After Runtime acquires an instance, a synchronous `created` callback failure must complete all reachable acquired-resource terminal cleanup, cancel queued Delay work, and invalidate instance-scoped handles before rethrowing the identical initiating value. Secondary cleanup callback, diagnostic, or release errors must not replace that value. This boundary does not promise to reclaim resources never returned by a failing factory or define general error recovery for other lifecycle callbacks.
 sources:
   - path: packages/runtime/test/contract/lifecycle.same-checkpoint-order.contract.test.ts
   - path: internal/contracts/lifecycle/component-lifecycle.v0.md
@@ -76,11 +80,11 @@ dependsOn:
 openQuestions:
   - id: C-LIFECYCLE-0002-Q-CALLBACK-ERRORS
     question:
-      zh-CN: lifecycle callback 抛错后的传播、后续 callback 是否继续执行、以及是否进入 dispose 是否应由本契约定义？
-      en: Should this contract define error propagation, whether later lifecycle callbacks continue, and whether disposal proceeds after a lifecycle callback throws?
+      zh-CN: 除 I 治理的已取得 instance 的同步 `created` 失败外，lifecycle callback 抛错后的传播、后续 callback 是否继续执行、以及是否进入 dispose 是否应由本契约定义？
+      en: Beyond the acquired-instance synchronous `created` failure governed by I, should this contract define error propagation, whether later lifecycle callbacks continue, and whether disposal proceeds after a lifecycle callback throws?
     context:
-      zh-CN: 旧契约只要求不能重排 canonical timeline，错误恢复仍是 adapter/runtime 断口。
-      en: Older contracts only require that the canonical timeline not be reordered; error recovery remains a runtime/adapter gap.
+      zh-CN: I 只关闭同步创建失败的原始错误与可达资源清理边界；其它 callback 的传播、继续执行与恢复仍是 adapter/runtime 断口，不因此提升 draft lifecycle。
+      en: I closes only the initiating-error and reachable-resource cleanup boundary for synchronous failed creation. Propagation, continuation, and recovery for other callbacks remain a runtime/adapter gap, without promoting this draft lifecycle.
     blocks:
       - C-LIFECYCLE-0002
 revisions:
@@ -102,6 +106,9 @@ revisions:
   - version: 0.1.0
     change: revised
     summary: Defined same-checkpoint authored registration order across direct and once-hook contributions without expanding error or asynchronous semantics.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: 'Defined the accepted acquired-instance synchronous created-failure boundary as criterion J: preserve the initiating thrown value while completing reachable terminal cleanup; broader callback error recovery remains open and draft.'
 tags:
   - lifecycle
   - callbacks

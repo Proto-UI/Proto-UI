@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Switch Thumb identity, Base indicator inheritance, context-driven checked state, current visual surface, and its bounded upstream composition claim.
 cases:
+  - id: T-SHADCN-SWITCH-THUMB-0001-CASE-VISUAL-SIZE
+    title: Family-only default and sm sizes follow the actual logical Root across updates and remounts
+    covers: [P-SHADCN-SWITCH-THUMB-VISUAL-SIZE]
+    expectation: shadcn-switch-size-is-current-owner-bound-without-value-events
   - id: T-SHADCN-SWITCH-THUMB-0001-CASE-IDENTITY-AND-INHERITANCE
     title: Thumb is a direct unofficial projection that inherits the Base indicator
     covers:
@@ -24,6 +28,24 @@ cases:
     covers: [P-SHADCN-SWITCH-THUMB-COMPATIBILITY-SUBSET]
     expectation: shadcn-switch-thumb-does-not-overclaim-upstream-parity
 implementations:
+  - id: t-shadcn-switch-thumb-0001-size-lifecycle
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-size-lifecycle.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-THUMB-0001-CASE-VISUAL-SIZE]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Deterministic Runtime tests cover repeated detach/remount, current-owner rebinding, subscription count and parent-first terminal disposal; no rendered or native-input acceptance.
+  - id: t-shadcn-switch-thumb-0001-size-generated-preset
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-size-preset.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-THUMB-0001-CASE-VISUAL-SIZE]
+    exercises: [P-SHADCN-SWITCH, P-SHADCN-SWITCH-THUMB]
+    notes:
+      - Executes the actual generated WC facade against real prototypes for default, replacement and omission; other adapters and packed consumers retain separate gates.
   - id: prototypes-shadcn-switch-thumb-contract
     kind: module-test
     status: planned
@@ -31,6 +53,7 @@ implementations:
     required: true
     consumesCases:
       [
+        T-SHADCN-SWITCH-THUMB-0001-CASE-VISUAL-SIZE,
         T-SHADCN-SWITCH-THUMB-0001-CASE-IDENTITY-AND-INHERITANCE,
         T-SHADCN-SWITCH-THUMB-0001-CASE-CONTEXT-AND-VISUALS,
         T-SHADCN-SWITCH-THUMB-0001-CASE-COMPATIBILITY-SUBSET,
@@ -44,6 +67,7 @@ verifies:
     - id: P-SHADCN-SWITCH-THUMB
       anchors:
         [
+          P-SHADCN-SWITCH-THUMB-VISUAL-SIZE,
           P-SHADCN-SWITCH-THUMB-UPSTREAM-IDENTITY,
           P-SHADCN-SWITCH-THUMB-BASE-INHERITANCE,
           P-SHADCN-SWITCH-THUMB-CURRENT-BASE-DEVIATIONS,
@@ -67,4 +91,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Specify content-pinned base-nova default geometry and state palettes; retain semantic ownership and planned fresh evidence.
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Add owner-bound default/sm size cases for initial and dynamic sizing, mixed Switch domains, composition and lifecycle; rendered evidence remains planned.
 tags: [prototype, shadcn, switch, thumb, delta, compatibility, test]

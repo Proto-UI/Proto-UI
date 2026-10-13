@@ -14,6 +14,8 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
   codePanel={false}
 />
 
+Header 与 Footer 现在各自拥有 padding；Content 改用纵向 flex 布局，不再统一添加容器 padding，自定义正文需要自行定义间距。Header 仅在已接受 top/bottom 方向时居中，其他情况继承对齐；非法方向更新保留最后已接受的呈现。Title 继承字号与行高。现有统一 border、圆角与 shadow 仍明确不同于固定 New York 的方向边缘绘制。响应式 Header、装饰 Indicator 与上游 extent 尺寸仍未完成；交互 Handle 不变。
+
 top/bottom Content 默认按内容高度显示，最大高度为可用高度减去 6 个根文本单位，始终受安全可用区域约束。Content.minExtent/maxExtent 接受中立长度：unit 为 logical、root-text、available 或 available-minus-root-text，value 为非负有限数字。最小高度超过安全上限时以上限优先。本纵向草稿中，left/right 保留既有受限 20rem 呈现。
 
 本项目将 Content 组合为 overflow-y-auto 滚动区域；这是项目的组合选择，不等同于固定 Shadcn/Neo 参考 wrapper 的 overflow-hidden Content 加显式滚动 body。长内容示例的 Close 仍在同一滚动区域内。

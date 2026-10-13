@@ -18,8 +18,6 @@ const THUMB_TOKENS = [
   'border-black',
   'bg-white',
   'translate-x-0',
-  'transition-transform',
-  'duration-150',
 ].join(' ');
 
 const switchThumb = definePrototype<BrutalistSwitchThumbProps, BrutalistSwitchThumbExposes>({
@@ -35,6 +33,13 @@ const switchThumb = definePrototype<BrutalistSwitchThumbProps, BrutalistSwitchTh
     }
     // Base Switch thumb only projects checked/disabled. Press feedback remains on Root.
     const { checked } = switchState;
+    // P-BRUTALIST-SWITCH-THUMB-RESIDENT-MOTION: the draft family timing,
+    // not an explicit duration in the upstream switch.tsx source.
+    def.feedback.style.transition({
+      properties: ['translate'],
+      durationMs: 150,
+      easing: [0.4, 0, 0.2, 1],
+    });
     def.feedback.style.use(tw(THUMB_TOKENS));
     // P-BRUTALIST-SWITCH-THUMB-SINGLE-MOVEMENT — checked: one 20px transform delta.
     def.rule({

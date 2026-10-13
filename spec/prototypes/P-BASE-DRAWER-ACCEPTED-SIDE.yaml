@@ -1,0 +1,27 @@
+id: P-BASE-DRAWER-ACCEPTED-SIDE
+type: prototype
+title: Base Drawer accepted-direction observation helper
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: The observation helper has logical source-host evidence; native adapter composition remains unverified.
+summary: Observation-only scoped projection for accepted Content direction.
+statement:
+  en: The helper returns a frozen read/observe facade for the accepted direction of Content belonging to the nearest logical Drawer Root, or null without an admitted matching owner.
+  zh-CN: helper 返回冻结 read/observe facade，用于观察最近逻辑 Drawer Root 所属 Content 的已接受方向；没有匹配且已准入的 owner 时返回 null。
+criteria:
+  - id: P-BASE-DRAWER-ACCEPTED-SIDE-OBSERVATION
+    text:
+      en: Follow C-DRAWER-STRUCTURE-0001 observation-only boundary, Root identity checks and retained-view cleanup requirements; do not expose mutable Context or Rule State identity.
+      zh-CN: 遵守 C-DRAWER-STRUCTURE-0001 的只读边界、Root 身份核验及 retained-view 清理要求，不暴露可写 Context 或 Rule State 身份。
+sources:
+  - path: packages/prototypes/base/src/drawer/accepted-side.proto.ts
+  - path: packages/prototypes/base/test/drawer-direction.test.ts
+dependsOn:
+  contracts: [C-DRAWER-STRUCTURE-0001]
+verifies:
+  tests: [T-DRAWER-STRUCTURE-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Add owner-scoped read-only accepted-direction observation without a new input or geometry owner.
+tags: [prototype, base, drawer, observation]

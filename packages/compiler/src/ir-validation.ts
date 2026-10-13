@@ -19,6 +19,7 @@ import { acceptsValue } from './data-types';
 import type { RuleCondition, RuleDeclarationIR } from './rule-declarations';
 
 const CAPABILITIES = new Set(['unknown','def','run','render','event','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string', ...MODULE_CAPABILITY_TYPES]);
+CAPABILITIES.add('authored-result');
 const CONTEXTS = new Set(['setup','render','helper','event','props-watch','context-watch','context-update','state-watch','collection-meta','positioning','created','mounted','updated','unmounted','before-dispose','expose-method']);
 const RESERVED = new Set('await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof let new null return super switch this throw true try typeof var void while with yield'.split(' '));
 const FALLBACK: SourceSpan = { file: '<ir>', start: 0, end: 0, line: 1, column: 1, endLine: 1, endColumn: 1 };
@@ -270,6 +271,8 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           (context !== 'helper' && (phase !== 'callback' ? context !== phase : context === 'setup' || context === 'render'))) bad('Function phase/context mismatch.',location);
       const params = parameters(func.parameters), declaredReturn = valueType(func.returnType,location);
       if (context === 'setup' && (params.length > 1 || (params.length === 1 && params[0].type !== 'def'))) bad('Setup signature must receive its definition handle.',location);
+      if (context === 'setup' && declaredReturn !== 'function' && declaredReturn !== 'void')
+        bad('Setup must return a render function or void.',location);
       const scope = new Map(outer);
       for (const parameter of params) scope.set(parameter.name,{type: parameter.optional && isDataValueType(parameter.type) ? parseDataType({kind:'union',members:[parameter.type,'void']}) : parameter.type});
       const returns: ValueType[] = [];
@@ -415,7 +418,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           }
           case 'authored-hook':
             if (phase !== 'setup' || !hookIds.has(text(node.hookId))) bad('Invalid authored-hook call.',location);
-            type = 'void'; break;
+            type = 'authored-result'; break;
           case 'operation': {
             const operation = text(node.operation);
             if (!Object.hasOwn(OPERATION_RULES,operation)) bad('Unknown semantic operation.',location);

@@ -349,15 +349,19 @@ export class PropsModuleImpl<P extends PropsBaseType> extends ModuleBase {
   }
 
   dispose(): void {
-    this.unsubRaw?.();
+    const unsubscribe = this.unsubRaw;
     this.unsubRaw = undefined;
-    this.subscribed = false;
-    this.lastSource = undefined;
+    try {
+      unsubscribe?.call(this);
+    } finally {
+      this.subscribed = false;
+      this.lastSource = undefined;
 
-    this.rawDirty = true;
-    this.pendingReport = null;
+      this.rawDirty = true;
+      this.pendingReport = null;
 
-    this.kernel.dispose?.();
+      this.kernel.dispose?.();
+    }
   }
 
   // -------------------------

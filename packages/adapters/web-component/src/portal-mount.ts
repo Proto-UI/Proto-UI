@@ -10,7 +10,7 @@ import {
  * No open-state writes or Runtime disposal here: restore the DOM projection
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
-const activeProjections = new WeakSet<HTMLElement>();
+const activeProjections = new WeakMap<HTMLElement, (restoreToOrigin?: boolean) => void>();
 const adoptedProjections = new WeakMap<HTMLElement, Set<(document: Document) => void>>();
 const projectionByOriginMarker = new WeakMap<Node, HTMLElement>();
 const originMarkerByProjection = new WeakMap<HTMLElement, Node>();
@@ -21,6 +21,11 @@ function isShadowRootNode(node: Node): node is ShadowRoot {
 
 export function isWebComponentPortaled(el: HTMLElement): boolean {
   return activeProjections.has(el);
+}
+
+/** Confirmed owner disconnection withdraws projection without reconnecting it. */
+export function abandonWebComponentPortalProjection(el: HTMLElement): void {
+  activeProjections.get(el)?.(false);
 }
 
 /** Resolves only a currently active projection at its logical origin point. */
@@ -174,7 +179,7 @@ export function createWebComponentPortalMount() {
         for (const tree of trees) observer!.observe(tree, { childList: true, subtree: true });
         observedTrees = trees;
       }
-      const restore = () => {
+      const restore = (restoreToOrigin = true) => {
         if (revoke !== restore) return;
         revoke = null;
         unbindAdoption?.();
@@ -198,10 +203,10 @@ export function createWebComponentPortalMount() {
         // may reparent this element or establish a newer projection lease.
         const unchanged = generation === lease && revoke === null;
         const stillOwned = unchanged && ownedProjection && el.parentNode === projectionBody;
-        if (marker.parentNode === parent) {
+        if (restoreToOrigin && marker.parentNode === parent) {
           if (stillOwned || (unchanged && !wasProjected && el.parentNode === parent))
             cleanup(() => parent.insertBefore(el, marker));
-        } else if (stillOwned) cleanup(() => el.remove());
+        } else if (restoreToOrigin && stillOwned) cleanup(() => el.remove());
         cleanup(() => marker.remove());
         if (errors.length === 1) throw errors[0];
         if (errors.length > 1) throw new AggregateError(errors, 'Portal projection cleanup failed');
@@ -215,7 +220,7 @@ export function createWebComponentPortalMount() {
         observeOriginTrees();
         parent.insertBefore(marker, el);
         projected = true;
-        activeProjections.add(el);
+        activeProjections.set(el, restore);
         projectionByOriginMarker.set(marker, el);
         originMarkerByProjection.set(el, marker);
         projectionBody = el.ownerDocument.body;

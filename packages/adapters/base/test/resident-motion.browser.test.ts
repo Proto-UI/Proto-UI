@@ -20,6 +20,7 @@ beforeAll(async () => {
     stdin: {
       contents: `
   export {createResidentMotionFixture} from './packages/adapters/base/test/fixtures/resident-motion';
+  export {installResidentMotionTrace,probeResidentLegacyColorSerialization} from './packages/adapters/base/test/resident-motion-trace';
   export {AdaptToWebComponent as adapt} from './packages/adapters/web-component/src/adapt';
   export {setElementProps,getElementProps} from './packages/adapters/web-component/src/props';
  `,
@@ -46,6 +47,7 @@ describe('resident motion own-source physical browser fixture', () => {
       const page = await browser.newPage();
       const samples: unknown[] = [];
       const pageErrors: string[] = [];
+      let testcaseFailed = false;
       page.on('pageerror', (error) => pageErrors.push(String(error)));
       try {
         await page.route('**/*', (route) => route.abort());
@@ -57,6 +59,8 @@ describe('resident motion own-source physical browser fixture', () => {
         await page.evaluate(
           ({ scope, css, artifact }) => {
             const p = (window as any).ResidentFixture;
+            const trace = p.installResidentMotionTrace(window);
+            (window as any).residentTrace = trace;
             // Single fixture color fact source feeds both ordinary CSS and the typed palette.
             const colors = { input: [0, 0, 0, 1], primary: [1, 1, 1, 1] };
             const sheet = document.createElement('style');
@@ -66,11 +70,13 @@ describe('resident motion own-source physical browser fixture', () => {
             (window as any).residentDiagnostics = [];
             const options: any = {
               residentMotion: {
-                diagnostics: (reasons: readonly string[]) =>
+                diagnostics: (reasons: readonly string[]) => {
                   (window as any).residentDiagnostics.push({
                     now: performance.now(),
                     reasons: [...reasons],
-                  }),
+                  });
+                  trace.diagnostic(reasons);
+                },
                 palette: { current: () => ({ revision: 1, colors }), subscribe: () => () => {} },
               },
             };
@@ -86,6 +92,7 @@ describe('resident motion own-source physical browser fixture', () => {
               );
             document.querySelector('main')!.append(el);
             (window as any).subject = el;
+            trace.bindSurface(el.shadowRoot?.querySelector('[part="surface"]') ?? el);
           },
           {
             scope,
@@ -116,6 +123,7 @@ describe('resident motion own-source physical browser fixture', () => {
               rootFont: getComputedStyle(document.documentElement).fontSize,
               reduced: matchMedia('(prefers-reduced-motion: reduce)').matches,
               diagnostics: [...(window as any).residentDiagnostics],
+              traceCheckpoint: (window as any).residentTrace.checkpoint(surface),
             };
           });
         const target = (active: boolean) =>
@@ -191,12 +199,54 @@ describe('resident motion own-source physical browser fixture', () => {
         samples.push({ stage: 'reopen', ...reopened });
         expect(reopened.x - initial.x).toBeCloseTo(14, 1);
         expect(reopened.color).toBe('rgb(255, 255, 255)');
+      } catch (error) {
+        testcaseFailed = true;
+        throw error;
       } finally {
-        await writeFile(
-          path.join(output, `resident-${scope}-samples.json`),
-          JSON.stringify({ scope, samples, pageErrors }, null, 2)
-        );
-        await page.close();
+        // Preserve the original testcase exception. Evidence/close failures must not mask it.
+        const evidenceErrors: string[] = [];
+        let trace: unknown = null;
+        try {
+          trace = await page.evaluate(() => {
+            const recorded = (window as any).residentTrace?.finish() ?? null;
+            // Parsing/layout control runs only after trace wrappers have been restored.
+            try {
+              return {
+                recorded,
+                colorSerialization: (
+                  window as any
+                ).ResidentFixture.probeResidentLegacyColorSerialization(window),
+              };
+            } catch (error) {
+              return { recorded, controlError: String(error) };
+            }
+          });
+          if (!(trace as any)?.recorded) evidenceErrors.push('trace unavailable');
+          if ((trace as any)?.controlError) evidenceErrors.push((trace as any).controlError);
+          if ((trace as any)?.recorded?.cleanupConflicts?.length)
+            evidenceErrors.push('trace cleanup conflict');
+          if ((trace as any)?.recorded?.observationErrors)
+            evidenceErrors.push('trace observation failed');
+        } catch (error) {
+          evidenceErrors.push(`trace collection: ${String(error)}`);
+        }
+        try {
+          await page.close();
+        } catch (error) {
+          evidenceErrors.push(`page close: ${String(error)}`);
+        }
+        try {
+          await writeFile(
+            path.join(output, `resident-${scope}-samples.json`),
+            JSON.stringify({ scope, samples, pageErrors, trace, evidenceErrors }, null, 2)
+          );
+        } catch (error) {
+          evidenceErrors.push(`evidence write: ${String(error)}`);
+        }
+        if (evidenceErrors.length) {
+          console.error('[resident-motion evidence]', evidenceErrors);
+          if (!testcaseFailed) throw new Error(evidenceErrors.join('; '));
+        }
       }
     },
     30000

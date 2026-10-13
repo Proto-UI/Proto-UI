@@ -237,6 +237,7 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
   asTrigger();
   const a = asAccessible();
   a.role('treeitem');
+  a.action('activate');
   a.nameFromContent();
   a.state('selected', selected);
   a.state('expanded', expandedText);
@@ -356,7 +357,7 @@ function setupItem(def: DefHandle<TreeItemProps, TreeItemExposes>) {
       reason: 'tree.navigation',
       source: 'base-tree-item',
     });
-    if (target) {
+    if (target && list.some((node) => node.key === target)) {
       const c = run.context.read(TREE_CONTEXT);
       run.context.update(TREE_CONTEXT, { ...c, active: target });
       const part = run.anatomy.partsOf(TREE_FAMILY, 'item').find((p) => {

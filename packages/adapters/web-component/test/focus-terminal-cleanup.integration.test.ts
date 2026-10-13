@@ -250,6 +250,10 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
   async (mode) => {
     let setups = 0,
       disposed = 0;
+    let completeUnmount!: () => void;
+    const unmounted = new Promise<void>((resolve) => {
+      completeUnmount = resolve;
+    });
     const proto = definePrototype({
       name: `wc-terminal-portal-${mode}`,
       setup(def) {
@@ -263,7 +267,13 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
         return () => 'Portal content';
       },
     });
-    AdaptToWebComponent(proto);
+    AdaptToWebComponent(proto, {
+      diagnostics: {
+        onLifecycleEvent(event) {
+          if (event.type === 'unmount.done') completeUnmount();
+        },
+      },
+    });
     const host = document.createElement('div'),
       next = document.createElement('span'),
       content: any = document.createElement(proto.name);
@@ -280,8 +290,9 @@ it.each(['close', 'external-remove', 'close-to-detached-parent'] as const)(
         if (mode === 'close-to-detached-parent') host.remove();
         content.getExposes().actions.close();
       }
-      if (mode === 'external-remove') await flush();
-      else await settlePortalConceal();
+      // Revocation follows the actual view completion, not a microtask count.
+      await unmounted;
+      await flush();
       if (mode === 'external-remove') {
         expect(content.isConnected).toBe(false);
         expect(Array.from(host.children)).not.toContain(content);

@@ -28,3 +28,6 @@ export type {
 
 export { default as drawerFooter } from './footer.proto';
 export type { DrawerFooterProps, DrawerFooterExposes } from '@proto.ui/prototypes-base/drawer';
+
+export { default as drawerHeader } from './header.proto';
+export type { DrawerHeaderProps, DrawerHeaderExposes } from '@proto.ui/prototypes-base/drawer';

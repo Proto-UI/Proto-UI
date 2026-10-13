@@ -68,6 +68,13 @@ beforeAll(async () => {
       )
     ),
     'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts',
+    ...['content', 'header', 'footer', 'title'].map(
+      (part) => `packages/prototypes/shadcn/src/drawer/${part}.proto.ts`
+    ),
+    'apps/www/src/content/docs/demo-shadcn-drawer.demo.ts',
+    'packages/prototypes/base/src/drawer/accepted-side.proto.ts',
+    'packages/prototypes/base/src/drawer/presentation-context.ts',
+    'packages/prototypes/base/src/drawer/content.proto.ts',
   ])
     sourceHashes[file] = createHash('sha256')
       .update(await readFile(file))
@@ -619,6 +626,19 @@ for (const family of families)
               await record(stage, trigger);
               await clickTopInset(page, trigger, pointerInputs, 'open');
               const panel = await panelFor(page, trigger);
+              if (family === 'shadcn') {
+                const structure = await panel.evaluate((node) => {
+                  const css = getComputedStyle(node);
+                  return {
+                    display: css.display,
+                    direction: css.flexDirection,
+                    padding: [css.paddingTop, css.paddingRight, css.paddingBottom, css.paddingLeft],
+                  };
+                });
+                expect(structure.display).toBe('flex');
+                expect(structure.direction).toBe('column');
+                expect(structure.padding.map(Number.parseFloat)).toEqual([0, 0, 0, 0]);
+              }
               const close = scenario.label
                 ? panel.locator('[data-demo-ref="density-close"]')
                 : panel.getByRole('button', { name: 'Close', exact: true });

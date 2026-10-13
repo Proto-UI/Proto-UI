@@ -92,6 +92,9 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
     surface: { cardinality: { min: 0, max: 1 } },
     viewport: { cardinality: { min: 0, max: 1 } },
     'item-text': { cardinality: { min: 0, max: 100 } },
+    group: { cardinality: { min: 0, max: 100 } },
+    label: { cardinality: { min: 0, max: 100 } },
+    separator: { cardinality: { min: 0, max: 100 } },
     item: { cardinality: { min: 0, max: 100 } },
   },
   relations: [
@@ -102,6 +105,9 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
     { kind: 'contains', parent: 'content', child: 'surface' },
     { kind: 'contains', parent: 'surface', child: 'viewport' },
     { kind: 'contains', parent: 'item', child: 'item-text' },
+    { kind: 'contains', parent: 'content', child: 'group' },
+    { kind: 'contains', parent: 'group', child: 'label' },
+    { kind: 'contains', parent: 'content', child: 'separator' },
   ],
   profiles: {
     'item-aligned': {
@@ -121,3 +127,12 @@ export const SELECT_FAMILY = createAnatomyFamily('base-select', {
 });
 
 export const SELECT_CONTEXT = createContextKey<SelectContextValue>('base-select');
+
+/** Naming scopes only: Group owns the relation; SelectRoot is an isolation barrier. */
+export const SELECT_GROUP_FAMILY = createAnatomyFamily('base-select-group-scope', {
+  roles: {
+    root: { cardinality: { min: 1, max: 1 } },
+    label: { cardinality: { min: 0, max: 1 } },
+  },
+  relations: [{ kind: 'contains', parent: 'root', child: 'label' }],
+});

@@ -265,6 +265,8 @@ it('all slice definitions satisfy the current entity schema', () => {
     'prototypes/P-BASE-DRAWER-HEADER',
     'prototypes/P-BASE-DRAWER-FOOTER',
     'prototypes/P-SHADCN-DRAWER-FOOTER',
+    'prototypes/P-SHADCN-DRAWER-HEADER',
+    'prototypes/P-BASE-DRAWER-ACCEPTED-SIDE',
   ])
     expect(() =>
       validateSpecEntity(parse(readFileSync(`spec/${path}.yaml`, 'utf8')))

@@ -8,7 +8,7 @@ import {
 export default definePrototype<DrawerTitleProps, DrawerTitleExposes>({
   name: 'shadcn-drawer-title',
   setup(def) {
-    const behavior = asDrawerTitle();
-    def.feedback.style.use(tw('text-lg font-semibold'));
+    asDrawerTitle();
+    def.feedback.style.use(tw('text-foreground font-semibold'));
   },
 });

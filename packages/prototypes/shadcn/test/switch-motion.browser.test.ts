@@ -48,7 +48,7 @@ beforeAll(async () => {
   browser = await launchBrowser();
 }, 30000);
 afterAll(async () => browser?.close());
-describe('New York default Switch with no authored hit expansion and native touch targeting', () => {
+describe.each(['default', 'sm'] as const)('New York %s Switch', (size) => {
   for (const scope of ['document', 'shadow'] as const)
     for (const font of [16, 32])
       it(`${scope} root ${font}px records actual consumer motion and activation`, async () => {
@@ -64,7 +64,7 @@ describe('New York default Switch with no authored hit expansion and native touc
           );
           await page.addScriptTag({ content: script });
           await page.evaluate(
-            ({ scope, font, css, theme, artifact }) => {
+            ({ scope, font, size, css, theme, artifact }) => {
               const p = (window as any).SwitchConsumer;
               document.documentElement.style.fontSize = font + 'px';
               document.documentElement.classList.add('light');
@@ -88,6 +88,7 @@ describe('New York default Switch with no authored hit expansion and native touc
                 Thumb = p.adapt(p.switchThumb, options);
               const root = new Root(),
                 thumb = new Thumb();
+              p.setElementProps(root, { size });
               root.id = 'subject';
               thumb.id = 'thumb';
               root.append(thumb);
@@ -267,17 +268,8 @@ describe('New York default Switch with no authored hit expansion and native touc
                 },
                 readAuthoredBoundary() {
                   const r = root.getBoundingClientRect();
-                  const outsidePoints = [
-                    ['left', r.x - 0.5, r.y + r.height / 2],
-                    ['right', r.right + 0.5, r.y + r.height / 2],
-                    ['top', r.x + r.width / 2, r.y - 0.5],
-                    ['bottom', r.x + r.width / 2, r.bottom + 0.5],
-                  ] as const;
-                  const snapshot = {
-                    now: performance.now(),
-                    snapshotTiming: 'settled-before-input',
-                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
-                    outsidePoints: outsidePoints.map(([label, x, y]) => {
+                  const read = (points: readonly (readonly [string, number, number])[]) =>
+                    points.map(([label, x, y]) => {
                       const hit = document.elementFromPoint(x, y);
                       return {
                         label,
@@ -286,7 +278,49 @@ describe('New York default Switch with no authored hit expansion and native touc
                         target: describeTarget(hit),
                         ownedHit: hit === root || (!!hit && root.contains(hit)),
                       };
-                    }),
+                    });
+                  const style = getComputedStyle(root);
+                  const pseudo = (name: string) => {
+                    const value = getComputedStyle(root, name);
+                    return {
+                      content: value.content,
+                      position: value.position,
+                      inset: value.getPropertyValue('inset'),
+                      pointerEvents: value.pointerEvents,
+                    };
+                  };
+                  const snapshot = {
+                    now: performance.now(),
+                    snapshotTiming: 'settled-before-input',
+                    rootBox: { x: r.x, y: r.y, width: r.width, height: r.height },
+                    sampling: 'chromium-1-css-pixel-footprint',
+                    samplingScope:
+                      'No authored expansion detected at these four 1 CSS pixel footprints; not an arbitrary subpixel guarantee.',
+                    staticHitAttribute: root.getAttribute('data-pui-static-hit'),
+                    style: {
+                      pseudoBefore: pseudo('::before'),
+                      pseudoAfter: pseudo('::after'),
+                      cssText: root.style.cssText,
+                      height: style.height,
+                      width: style.width,
+                      boxSizing: style.boxSizing,
+                      transform: style.transform,
+                      zoom: style.zoom,
+                    },
+                    // Retain the original observations: these half-pixel queries may
+                    // overlap the border through Blink's one-pixel query footprint.
+                    diagnosticHalfPixelPoints: read([
+                      ['left', r.x - 0.5, r.y + r.height / 2],
+                      ['right', r.right + 0.5, r.y + r.height / 2],
+                      ['top', r.x + r.width / 2, r.y - 0.5],
+                      ['bottom', r.x + r.width / 2, r.bottom + 0.5],
+                    ]),
+                    outsidePoints: read([
+                      ['left', r.x - 1, r.y + r.height / 2],
+                      ['right', r.right, r.y + r.height / 2],
+                      ['top', r.x + r.width / 2, r.y - 1],
+                      ['bottom', r.x + r.width / 2, r.bottom],
+                    ]),
                   };
                   authoredHitSnapshots.push(snapshot);
                   return snapshot;
@@ -354,6 +388,7 @@ describe('New York default Switch with no authored hit expansion and native touc
             {
               scope,
               font,
+              size,
               css: renderProtoStyleTokenCss(tokens),
               theme: renderPrefixedThemeCss(SHADCN_THEME_CSS),
               artifact: renderProtoShadowSplitStyleArtifact(tokens),
@@ -375,19 +410,56 @@ describe('New York default Switch with no authored hit expansion and native touc
             samples.push({ stage, ...value });
             return value;
           };
+          const setProps = (props: Record<string, unknown>) =>
+            page.evaluate(
+              ({ size, props }) => {
+                const w = window as any;
+                w.SwitchConsumer.setElementProps(w.subject, { ...props, size });
+              },
+              { size, props }
+            );
           await page.waitForTimeout(100);
           const initial = await sample('initial');
-          expect(initial.root.width).toBeCloseTo(font * 2, 1);
-          expect(initial.root.height).toBeCloseTo(font * 1.15, 1);
-          expect(initial.thumb.height).toBeCloseTo(font, 1);
-          expect(initial.thumb.width).toBeCloseTo(font, 1);
+          expect(initial.root.width).toBeCloseTo(font * (size === 'sm' ? 1.5 : 2), 1);
+          expect(initial.root.height).toBeCloseTo(font * (size === 'sm' ? 0.875 : 1.15), 1);
+          expect(initial.thumb.height).toBeCloseTo(font * (size === 'sm' ? 0.75 : 1), 1);
+          expect(initial.thumb.width).toBeCloseTo(font * (size === 'sm' ? 0.75 : 1), 1);
           expect(initial.inlineColor).toBe('');
           expect(initial.checked).toBe(false);
+          // Props-driven size changes are tested separately from native activation.
+          await page.evaluate(() => {
+            const w = window as any;
+            w.sizeChangeEvents = [];
+            w.sizeChangeListener = (event: CustomEvent) => w.sizeChangeEvents.push(event.detail);
+            w.subject.addEventListener('checkedChange', w.sizeChangeListener);
+          });
+          for (const nextSize of ['default', 'sm', 'default', size] as const) {
+            await page.evaluate((size) => {
+              const w = window as any;
+              w.SwitchConsumer.setElementProps(w.subject, { size });
+            }, nextSize);
+            await page.waitForTimeout(190);
+            const resized = await sample(`size-${nextSize}`);
+            expect(resized.root.width).toBeCloseTo(font * (nextSize === 'sm' ? 1.5 : 2), 1);
+            expect(resized.root.height).toBeCloseTo(font * (nextSize === 'sm' ? 0.875 : 1.15), 1);
+            expect(resized.thumb.width).toBeCloseTo(font * (nextSize === 'sm' ? 0.75 : 1), 1);
+            expect(resized.checked).toBe(false);
+          }
+          expect(
+            await page.evaluate(() => {
+              const w = window as any;
+              w.subject.removeEventListener('checkedChange', w.sizeChangeListener);
+              return w.sizeChangeEvents;
+            })
+          ).toEqual([]);
           await page.screenshot({
-            path: path.join(output, `switch-${scope}-${font}-initial.png`),
+            path: path.join(output, `switch-${scope}-${size}-${font}-initial.png`),
             fullPage: true,
           });
-          await page.mouse.move(initial.root.x + 16, initial.root.y + 9);
+          await page.mouse.move(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
           await page.mouse.down();
           const uncheckedPressed = await sample('unchecked-hover-pressed');
           expect(uncheckedPressed.color).toBe(initial.color);
@@ -425,7 +497,10 @@ describe('New York default Switch with no authored hit expansion and native touc
               Math.max(initial.rgba[channel], end.rgba[channel])
             );
           }
-          await page.mouse.move(initial.root.x + 16, initial.root.y + 9);
+          await page.mouse.move(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
           await page.mouse.down();
           const pressed = await sample('hover-pressed');
           expect(pressed.color).toBe(end.color);
@@ -437,10 +512,18 @@ describe('New York default Switch with no authored hit expansion and native touc
             await page.evaluate(() => (window as any).switchInputTrace.readAuthoredBoundary())
           );
           for (const [edge, x, y] of [
-            ['left', initial.root.x - 4, initial.root.y + 9],
-            ['right', initial.root.x + initial.root.width + 4, initial.root.y + 9],
-            ['top', initial.root.x + 16, initial.root.y - 3],
-            ['bottom', initial.root.x + 16, initial.root.y + initial.root.height + 4],
+            ['left', initial.root.x - 4, initial.root.y + initial.root.height / 2],
+            [
+              'right',
+              initial.root.x + initial.root.width + 4,
+              initial.root.y + initial.root.height / 2,
+            ],
+            ['top', initial.root.x + initial.root.width / 2, initial.root.y - 3],
+            [
+              'bottom',
+              initial.root.x + initial.root.width / 2,
+              initial.root.y + initial.root.height + 4,
+            ],
           ] as const) {
             const before = await sample('before-' + edge, { kind: 'mouse-click', x, y });
             await page.mouse.click(x, y);
@@ -480,9 +563,9 @@ describe('New York default Switch with no authored hit expansion and native touc
           const beforeTouch = await sample('before-touch', {
             kind: 'touchscreen-tap',
             x: initial.root.x - 4,
-            y: initial.root.y + 9,
+            y: initial.root.y + initial.root.height / 2,
           });
-          await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
+          await page.touchscreen.tap(initial.root.x - 4, initial.root.y + initial.root.height / 2);
           await page.waitForTimeout(190);
           const afterTouch = await sample('touch-outside');
           const nearTouchTrace = await readStage('before-touch');
@@ -497,9 +580,9 @@ describe('New York default Switch with no authored hit expansion and native touc
           const farTouchBefore = await sample('before-far-touch', {
             kind: 'touchscreen-tap',
             x: initial.root.x - 40,
-            y: initial.root.y + 9,
+            y: initial.root.y + initial.root.height / 2,
           });
-          await page.touchscreen.tap(initial.root.x - 40, initial.root.y + 9);
+          await page.touchscreen.tap(initial.root.x - 40, initial.root.y + initial.root.height / 2);
           await page.waitForTimeout(190);
           const farTouchAfter = await sample('far-touch-outside');
           expect(farTouchAfter.checked).toBe(farTouchBefore.checked);
@@ -509,34 +592,28 @@ describe('New York default Switch with no authored hit expansion and native touc
             farTouchAfter.checked,
             false
           );
-          await page.evaluate(() => {
-            const w = window as any;
-            w.SwitchConsumer.setElementProps(w.subject, { checked: false });
-          });
+          await setProps({ checked: false });
           await page.waitForTimeout(190);
           const controlled = await sample('controlled-false');
-          await page.mouse.click(initial.root.x + 16, initial.root.y + 9);
-          await page.mouse.click(initial.root.x - 4, initial.root.y + 9);
+          await page.mouse.click(
+            initial.root.x + initial.root.width / 2,
+            initial.root.y + initial.root.height / 2
+          );
+          await page.mouse.click(initial.root.x - 4, initial.root.y + initial.root.height / 2);
           await page.waitForTimeout(45);
           const refused = await sample('controlled-refused');
           expect(refused.checked).toBe(false);
           expect(refused.thumb.x).toBeCloseTo(controlled.thumb.x, 2);
           expect(refused.color).toBe(controlled.color);
           await page.emulateMedia({ reducedMotion: 'reduce' });
-          await page.evaluate(() => {
-            const w = window as any;
-            w.SwitchConsumer.setElementProps(w.subject, { checked: true });
-          });
+          await setProps({ checked: true });
           await page.waitForTimeout(30);
           const reduced = await sample('reduced');
           expect(reduced.thumb.x - initial.thumb.x).toBeCloseTo(travel, 1);
           expect(reduced.color).toBe(end.color);
           expect(reduced.inlineColor).toBe('');
-          await page.evaluate(() => {
-            const w = window as any;
-            w.SwitchConsumer.setElementProps(w.subject, { checked: true, disabled: true });
-          });
-          await page.touchscreen.tap(initial.root.x - 4, initial.root.y + 9);
+          await setProps({ checked: true, disabled: true });
+          await page.touchscreen.tap(initial.root.x - 4, initial.root.y + initial.root.height / 2);
           expect((await sample('disabled-outside')).checked).toBe(true);
           await page.evaluate(() => {
             const el = (window as any).subject;
@@ -546,6 +623,9 @@ describe('New York default Switch with no authored hit expansion and native touc
           await page.waitForTimeout(90);
           const reopened = await sample('reopen');
           expect(reopened.checked).toBe(true);
+          expect(reopened.root.width).toBeCloseTo(initial.root.width, 1);
+          expect(reopened.root.height).toBeCloseTo(initial.root.height, 1);
+          expect(reopened.thumb.width).toBeCloseTo(initial.thumb.width, 1);
           expect(reopened.thumb.x - initial.thumb.x).toBeCloseTo(travel, 1);
           expect(reopened.color).toBe(end.color);
           expect(reopened.inlineColor).toBe('');
@@ -556,7 +636,7 @@ describe('New York default Switch with no authored hit expansion and native touc
               .filter((reason: string) => reason.startsWith('theme-source-mismatch:'))
           ).toEqual([]);
           await page.screenshot({
-            path: path.join(output, `switch-${scope}-${font}-settled.png`),
+            path: path.join(output, `switch-${scope}-${size}-${font}-settled.png`),
             fullPage: true,
           });
           // Silent idle CSSOM mutation: CSS owns settled paint without a perpetual observer frame.
@@ -567,15 +647,9 @@ describe('New York default Switch with no authored hit expansion and native touc
           const override = await sample('idle-cssom-override');
           expect(override.color).toBe('rgb(10, 20, 30)');
           expect(override.inlineColor).toBe('');
-          await page.evaluate(() => {
-            const w = window as any;
-            w.SwitchConsumer.setElementProps(w.subject, { checked: false });
-          });
+          await setProps({ checked: false });
           await page.waitForTimeout(190);
-          await page.evaluate(() => {
-            const w = window as any;
-            w.SwitchConsumer.setElementProps(w.subject, { checked: true });
-          });
+          await setProps({ checked: true });
           await page.waitForTimeout(30);
           const mismatched = await sample('next-target-source-mismatch');
           expect(mismatched.color).toBe('rgb(10, 20, 30)');
@@ -592,13 +666,13 @@ describe('New York default Switch with no authored hit expansion and native touc
               .catch((error) => ({ collectionError: String(error) }));
             await Promise.all([
               writeFile(
-                path.join(output, `switch-${scope}-${font}-samples.json`),
-                JSON.stringify({ scope, font, samples, errors }, null, 2)
+                path.join(output, `switch-${scope}-${size}-${font}-samples.json`),
+                JSON.stringify({ scope, size, font, samples, errors }, null, 2)
               ),
               writeFile(
-                path.join(output, `switch-${scope}-${font}-native-events.json`),
+                path.join(output, `switch-${scope}-${size}-${font}-native-events.json`),
                 JSON.stringify(
-                  { scope, font, browserVersion: browser.version(), nativeInput },
+                  { scope, size, font, browserVersion: browser.version(), nativeInput },
                   null,
                   2
                 )
@@ -631,6 +705,8 @@ describe('Independent native HTML button touch-target control', () => {
         expect(result.measurementError).toBeNull();
         expect(result.errors).toEqual([]);
         const evidence = result.evidence;
+        expect(evidence.baselineBoundary.rootBox).toEqual(box);
+        assertNoAuthoredOutsideHit(evidence.baselineBoundary);
         for (const stage of ['near-touch', 'far-touch']) {
           const checkpoint = evidence.checkpoints.find((entry: any) => entry.stage === stage);
           expect(checkpoint.box).toEqual(box);
@@ -649,5 +725,11 @@ describe('Independent native HTML button touch-target control', () => {
         // A real author-created ::after extension is detected at the same x−4 point.
         expect(result.mutation?.ownedPointHit).toBe(true);
         expect(result.mutation?.box).toEqual(box);
+        expect(result.mutation?.boundary.outsidePoints.every((point: any) => point.ownedHit)).toBe(
+          true
+        );
+        expect(() => assertNoAuthoredOutsideHit(result.mutation!.boundary)).toThrow(
+          /extends outside/
+        );
       }, 30000);
 });

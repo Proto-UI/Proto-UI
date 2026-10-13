@@ -114,6 +114,7 @@ export type ValueType =
   | 'unknown'
   | 'def'
   | 'run'
+  | 'authored-result'
   | 'render'
   | 'event'
   | 'host-event'

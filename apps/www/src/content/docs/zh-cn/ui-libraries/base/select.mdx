@@ -54,7 +54,7 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 - 表单语义
 - 原生 `<select>` 等价行为
 - 可编辑 combobox / 搜索能力
-- `Group`、`Label`、`Separator`、`Viewport` 与滚动按钮
+- 滚动按钮与 `ItemIndicator`
 - 表单提交与 hidden input
 - 多选
 
@@ -63,3 +63,9 @@ import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 - 契约：[select.v0.md](https://github.com/Proto-UI/Proto-UI/blob/main/internal/contracts/prototype-base/select.v0.md)
 - 源码：[packages/prototypes/base/src/select](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/base/src/select)
 - 测试：[select.test.ts](https://github.com/Proto-UI/Proto-UI/blob/main/packages/prototypes/base/test/select.test.ts)
+
+## 可选分组与结构 parts
+
+`select-surface`、`select-viewport`、`select-item-text` 提供显式对齐结构。`select-group` 是被动容器；`select-label` 保留子内容，仅命名所属 Group，不是 control label，也没有激活行为。`select-separator` 是隐藏于无障碍树、无子内容的装饰性分隔。
+
+它们提供 `asSelectGroup`、`asSelectLabel`、`asSelectSeparator`；asHook 继承语义声明，使用 `asSelectSeparator` 的作者必须显式返回空 renderer。标签缺失或重复时命名 fail closed，嵌套 Select 根之间不串名。选择、collection 与焦点仍由原 owner 持有。原生辅助技术验收仍待完成；GPUI peer 当前尚未传输 Separator 的 hidden-tree 事实。

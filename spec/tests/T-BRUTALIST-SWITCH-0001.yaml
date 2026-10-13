@@ -8,6 +8,14 @@ summary: >-
 
 
 cases:
+  - id: T-BRUTALIST-SWITCH-0001-CASE-RESIDENT
+    title: Real prototype resident targets preserve timing, acknowledged reversal and lifecycle ownership
+    covers: [P-BRUTALIST-SWITCH-THUMB-RESIDENT-MOTION]
+    expectation: brutalist-thumb-neutral-resident-translate-without-competing-css-timing
+  - id: T-BRUTALIST-SWITCH-0001-CASE-RESIDENT-BROWSER
+    title: Actual Document and Shadow consumer frames preserve constant y and font-relative checked travel
+    covers: [P-BRUTALIST-SWITCH-THUMB-RESIDENT-MOTION]
+    expectation: brutalist-thumb-source-bound-physical-trajectory-at-16-and-32-root-font
   - id: T-BRUTALIST-SWITCH-0001-CASE-1
     title: Direct entry and Base Switch inheritance for root and thumb
     covers:
@@ -46,6 +54,40 @@ cases:
       - P-BRUTALIST-SWITCH-DEMO-NAMING
     expectation: p-brutalist-switch-demo-name-from-content
 implementations:
+  - id: brutalist-switch-shadow-admission
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-shadow-admission.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SWITCH-0001-CASE-RESIDENT]
+    exercises: [P-BRUTALIST-SWITCH, P-BRUTALIST-SWITCH-THUMB]
+    notes:
+      - Actual Shadow setup and final targets with unknown measurement/preference settle. Regression reproduces the 3161744 unresolved-role failure; physical trajectories require a fresh CI run.
+  - id: brutalist-switch-resident-runtime
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-resident.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SWITCH-0001-CASE-RESIDENT]
+    exercises: [P-BRUTALIST-SWITCH, P-BRUTALIST-SWITCH-THUMB]
+    notes:
+      - Actual Root/Thumb and Web Adapter with deterministic frame, media and measurement substitutes; not physical browser or native host evidence.
+  - id: brutalist-switch-resident-source
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-resident-source.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SWITCH-0001-CASE-RESIDENT]
+    exercises: [P-BRUTALIST-SWITCH-THUMB]
+  - id: brutalist-switch-resident-browser
+    kind: workspace-check
+    status: planned
+    path: packages/prototypes/brutalist/test/switch-motion.browser.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SWITCH-0001-CASE-RESIDENT-BROWSER]
+    exercises: [P-BRUTALIST-SWITCH, P-BRUTALIST-SWITCH-THUMB]
+    notes:
+      - Fresh Brutalist-only fixture in existing CI evidence workflow; local browser execution unavailable. Native activation and programmatic reversal traces are distinguished. Root color resident, small sizing, native host and Compiler remain outside this slice.
   - id: prototypes-brutalist-switch-contract
     kind: module-test
     status: passing
@@ -83,6 +125,9 @@ exercises:
     - P-BRUTALIST-SWITCH
     - P-BRUTALIST-SWITCH-THUMB
 revisions:
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Add source, deterministic Runtime and planned real-browser resident Thumb acceptance without promoting draft host support.
   - version: 0.2.0-rc.7
     change: introduced
     summary: >-
