@@ -1,6 +1,7 @@
 // Serialized by Playwright. Observe the failed native surface without changing focus.
-export function collectCollapsibleFocusFailure(element: HTMLElement) {
-  const doc = element.ownerDocument;
+export function collectCollapsibleFocusFailure(elements: Element[]) {
+  const element = elements.length === 1 ? elements[0] : null;
+  const doc = elements[0]?.ownerDocument ?? document;
   const win = doc.defaultView!;
   const summarize = (target: Element | null) => {
     if (!target) return null;
@@ -27,7 +28,7 @@ export function collectCollapsibleFocusFailure(element: HTMLElement) {
       materialQuality: target.getAttribute('data-material-quality'),
     };
   };
-  const previewer = element.closest<HTMLElement>('[data-previewer-id]');
+  const previewer = element?.closest<HTMLElement>('[data-previewer-id]');
   const evidence = previewer as
     | (HTMLElement & {
         __puiCollapsibleEvidence?: unknown[];
@@ -37,10 +38,12 @@ export function collectCollapsibleFocusFailure(element: HTMLElement) {
   const input = evidence?.__puiCollapsibleEvidence;
   const pointerTarget = evidence?.__puiCollapsibleLastPointerTarget;
   return {
-    focused: doc.activeElement === element,
+    matchCount: elements.length,
+    focused: element ? doc.activeElement === element : null,
+    matches: elements.map(summarize),
     expected: summarize(element),
     active: summarize(doc.activeElement),
-    pointerTargetIsExpected: pointerTarget ? pointerTarget === element : null,
+    pointerTargetIsExpected: element && pointerTarget ? pointerTarget === element : null,
     pointerTarget: summarize(pointerTarget ?? null),
     runtime: previewer?.dataset.projectionRuntime,
     projectionState: previewer?.dataset.projectionState,

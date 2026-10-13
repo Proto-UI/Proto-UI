@@ -80,7 +80,7 @@ async function focused(button: Locator): Promise<void> {
     let timer: ReturnType<typeof setTimeout> | undefined;
     try {
       const facts = await Promise.race([
-        button.evaluate(collectCollapsibleFocusFailure),
+        button.evaluateAll(collectCollapsibleFocusFailure),
         new Promise<never>((_, reject) => {
           timer = setTimeout(
             () => reject(new Error('Read-only focus diagnostic exceeded 1000ms')),
