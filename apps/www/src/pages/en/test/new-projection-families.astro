@@ -142,7 +142,7 @@ const themeCss =
                   },
                 ],
               },
-              setup({ refs, api }) {
+              setup({ api }) {
                 let count = 0;
                 const update = () => {
                   document.querySelector<HTMLOutputElement>(`[data-count="${key}"]`)!.value =
@@ -158,15 +158,6 @@ const themeCss =
                 setProps('default', {});
                 setProps('primary', { variant: isBootstrap ? 'primary' : 'prominent' });
                 setProps('disabled', { disabled: true });
-                const onClick = (event: Event) => {
-                  if (event instanceof CustomEvent) update();
-                };
-                for (const ref of ['default', 'primary', 'disabled'])
-                  refs[ref].addEventListener('click', onClick);
-                return () => {
-                  for (const ref of ['default', 'primary', 'disabled'])
-                    refs[ref].removeEventListener('click', onClick);
-                };
               },
             };
             records.push(await renderDemo({ runtime, demo, host }));

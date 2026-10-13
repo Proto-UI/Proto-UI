@@ -73,33 +73,88 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
       const records: DemoRenderResult[] = [];
       const scenes = new Map<string, ReturnType<typeof createPreviewMaterialScene>>();
       (window as any).liquidMaterialFixture = {
-        metrics() { return inspectWebOpticalResources(document); },
-        async stress(count: number) {
-          const host = document.createElement('section'); host.dataset.materialStress = ''; document.querySelector('main')!.append(host);
-          const scene = createPreviewMaterialScene(host); scene.pause(true); scenes.set('stress', scene);
-          records.push(await renderDemo({ runtime: 'wc', host: scene.mount, demo: { type: 'demo', root: { kind: 'box', className: 'material-controls', children: Array.from({ length: count }, (_, i) => ({ kind: 'proto', prototypeId: 'liquid-glass-button', children: [`Stress ${i}`] })) } } }));
+        metrics() {
+          return inspectWebOpticalResources(document);
         },
-        pause(value: boolean) { for (const scene of scenes.values()) scene.pause(value); },
-        source(runtime: string, value: boolean) { scenes.get(runtime)?.sourceAvailable(value); },
-        redraw() { for (const scene of scenes.values()) scene.redraw(); },
+        async stress(count: number) {
+          const host = document.createElement('section');
+          host.dataset.materialStress = '';
+          document.querySelector('main')!.append(host);
+          const scene = createPreviewMaterialScene(host);
+          scene.pause(true);
+          scenes.set('stress', scene);
+          records.push(
+            await renderDemo({
+              runtime: 'wc',
+              host: scene.mount,
+              demo: {
+                type: 'demo',
+                root: {
+                  kind: 'box',
+                  className: 'material-controls',
+                  children: Array.from({ length: count }, (_, i) => ({
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-button',
+                    children: [`Stress ${i}`],
+                  })),
+                },
+              },
+            })
+          );
+        },
+        pause(value: boolean) {
+          for (const scene of scenes.values()) scene.pause(value);
+        },
+        source(runtime: string, value: boolean) {
+          scenes.get(runtime)?.sourceAvailable(value);
+        },
+        redraw() {
+          for (const scene of scenes.values()) scene.redraw();
+        },
         zeroRefraction(runtime: string) {
-          const scene = scenes.get(runtime)!, host = scene.scope.querySelector<HTMLElement>('[data-demo-ref="regular"]')!;
-          const source = scene.lease.current()!, admission = inspectCanvasBackdrop(host, source);
+          const scene = scenes.get(runtime)!,
+            host = scene.scope.querySelector<HTMLElement>('[data-demo-ref="regular"]')!;
+          const source = scene.lease.current()!,
+            admission = inspectCanvasBackdrop(host, source);
           if (!admission.valid) throw new Error(admission.reason);
-          const css = getComputedStyle(host), rect = host.getBoundingClientRect(), canvas = document.createElement('canvas');
+          const css = getComputedStyle(host),
+            rect = host.getBoundingClientRect(),
+            canvas = document.createElement('canvas');
           const program = createWebOpticalProgram(canvas, 'zero-refraction');
-          try { return program.render({ source, geometry: { width: rect.width, height: rect.height, radius: Math.min(parseFloat(css.borderTopLeftRadius), rect.width / 2, rect.height / 2), dpr: devicePixelRatio, bounds: admission.bounds }, pressed: false, variant: 'regular', fill: resolvePaletteColor(css.getPropertyValue('--pui-secondary').trim(), {})!, foreground: resolvePaletteColor(css.color, {})! }); }
-          finally { program.clear(); }
+          try {
+            return program.render({
+              source,
+              geometry: {
+                width: rect.width,
+                height: rect.height,
+                radius: Math.min(
+                  parseFloat(css.borderTopLeftRadius),
+                  rect.width / 2,
+                  rect.height / 2
+                ),
+                dpr: devicePixelRatio,
+                bounds: admission.bounds,
+              },
+              pressed: false,
+              variant: 'regular',
+              fill: resolvePaletteColor(css.getPropertyValue('--pui-secondary').trim(), {})!,
+              foreground: resolvePaletteColor(css.color, {})!,
+            });
+          } finally {
+            program.clear();
+          }
         },
         async dispose() {
           for (const record of records.splice(0).reverse()) await record.destroy();
-          for (const scene of scenes.values()) scene.dispose(); scenes.clear();
+          for (const scene of scenes.values()) scene.dispose();
+          scenes.clear();
         },
       };
       async function mount() {
         for (const runtime of ['wc', 'react', 'vue', 'vue2'] as RuntimeId[]) {
           const host = document.querySelector<HTMLElement>(`[data-material-host="${runtime}"]`)!;
-          const scene = createPreviewMaterialScene(host); scenes.set(runtime, scene);
+          const scene = createPreviewMaterialScene(host);
+          scenes.set(runtime, scene);
           const demo: DemoSpec = {
             type: 'demo',
             root: {
@@ -127,7 +182,7 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
                 },
               ],
             },
-            setup({ refs, api }) {
+            setup({ api }) {
               let count = 0;
               const update = () => {
                 document.querySelector<HTMLOutputElement>(
@@ -135,11 +190,6 @@ import { renderThemeCss } from '../../../../../../packages/prototypes/liquid-gla
                 )!.value = `${++count} activations`;
               };
               api.setProps('regular', { onClick: update });
-              const event = (event: Event) => {
-                if (event instanceof CustomEvent) update();
-              };
-              refs.regular.addEventListener('click', event);
-              return () => refs.regular.removeEventListener('click', event);
             },
           };
           records.push(await renderDemo({ runtime, demo, host: scene.mount }));
