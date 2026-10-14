@@ -99,14 +99,25 @@ implementations:
       - Actual source collection, generated preset equality, Document/Shadow/Shadow-split declaration closure and a real WC host in HappyDOM. Outer-layer unwrapping is explicit; native cascade, pixels, packed artifacts and cross-Adapter visual acceptance remain separate.
   - id: website-shadcn-button-ghost-native
     kind: adapter-test
-    status: planned
+    status: failing
     path: apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts
     required: true
     consumesCases:
       [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK, T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
-      - Eight real public-page cases use Header Adapter selection, actual mounted framework, OS theme projection, generated CSS and outward-signal readouts. Native hover/leave, enabled pointer/Enter/Space controls, disabled pointer rejection and keyboard entry exclusion are source-bound. A disabled host receives native keys only if an unmodified DOM focus attempt actually obtains focus. Planned until exact-candidate official receipts exist; screenshots alone do not establish full Button or host acceptance.
+      - Eight real public-page cases use Header Adapter selection, actual mounted framework, OS theme projection, generated CSS and outward-signal readouts. Native hover/leave, enabled pointer/Enter/Space controls, disabled pointer rejection and keyboard entry exclusion are source-bound. A disabled host receives native keys only if an unmodified DOM focus attempt actually obtains focus. No passing native receipt has been established; screenshots alone do not establish full Button or host acceptance.
+      - 'Official 794b5eb0be5f5d4b7ee1db46085b4949cb57d2ec artifact 11866842609 records eight failures at Header runtime selection with zero Button observations and zero screenshots. This is a documentation navigation prerequisite failure, not evidence of failing Ghost paint. The original suite, automatic workflow and required result remain preserved.'
+  - id: website-shadcn-button-ghost-component-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts
+    required: true
+    consumesCases:
+      [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK, T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Independent component-only native evidence imports the same public DemoSpec into four static runtime routes with official Adapters, ThemeProvider and generated production CSS. Eight cases and source-bound screenshots remain planned until official execution. Header navigation and RuntimePreviewSurface are excluded; this implementation never substitutes for the separate failed public-page journey or full Button acceptance.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -141,4 +152,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Registered planned public ghost native journeys and exact-candidate screenshots; no native or full-delivery pass is inferred from fixture authoring.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Registered planned independent component-native Ghost evidence while retaining the separate public Header journey and its failure signals.
 tags: [prototype, shadcn, button, delta, compatibility, test]

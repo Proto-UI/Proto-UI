@@ -1,0 +1,111 @@
+---
+import ThemeProvider from '../../../../components/override/ThemeProvider.astro';
+import '../../../../styles/global.css';
+
+export function getStaticPaths() {
+  return ['wc', 'react', 'vue', 'vue2'].map((runtime) => ({
+    params: { runtime },
+    props: { runtime },
+  }));
+}
+const { runtime } = Astro.props;
+const labels: Record<string, string> = {
+  wc: 'Web Components',
+  react: 'React',
+  vue: 'Vue 3',
+  vue2: 'Vue 2',
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Ghost component acceptance — {labels[runtime]}</title>
+    <ThemeProvider />
+  </head>
+  <body>
+    <main data-ghost-component-face={runtime}>
+      <h1>Ghost · {labels[runtime]}</h1>
+      <p>Independent component acceptance — Header navigation excluded.</p>
+      <p>Original public DemoSpec, production Adapter and generated stylesheet.</p>
+      <div data-ghost-component-host={runtime} data-mount-state="pending"></div>
+      <p data-ghost-component-error role="alert"></p>
+    </main>
+    <script>
+      import demo from '../../../../content/docs/demo_components/button/demo-button-ghost.demo';
+      import { renderDemo } from '../../../../components/PrototypePreviewer/demo-renderer';
+      import { loadPrototypes } from '../../../../components/PrototypePreviewer/prototype-modules';
+      import type { DemoRenderResult } from '../../../../components/PrototypePreviewer/demo-types';
+      import type { RuntimeId } from '../../../../components/PrototypePreviewer/runtimes/ids';
+
+      const host = document.querySelector<HTMLElement>('[data-ghost-component-host]')!;
+      const runtime = host.dataset.ghostComponentHost as RuntimeId;
+      let current = true;
+      let view: DemoRenderResult | undefined;
+      const report = (error: unknown) => {
+        const message = error instanceof Error ? error.message : String(error);
+        document.querySelector('[data-ghost-component-error]')!.textContent = message;
+        console.error(error);
+      };
+      window.addEventListener(
+        'pagehide',
+        () => {
+          current = false;
+          host.dataset.mountState = 'retired';
+          const retiring = view;
+          view = undefined;
+          try {
+            void Promise.resolve(retiring?.destroy()).catch(report);
+          } catch (error) {
+            report(error);
+          }
+        },
+        { once: true }
+      );
+
+      async function mount() {
+        await loadPrototypes(['shadcn-button']);
+        if (!current) return;
+        const mounted = await renderDemo({ runtime, demo, host, isCurrent: () => current });
+        if (!current) {
+          await mounted.destroy();
+          return;
+        }
+        view = mounted;
+        host.dataset.mountState = 'ready';
+      }
+      void mount().catch((error) => {
+        if (current) host.dataset.mountState = 'error';
+        report(error);
+      });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--pui-background);
+    color: var(--pui-foreground);
+    font-family: var(--font-sans);
+  }
+  main {
+    max-width: 64rem;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+  }
+  p {
+    margin: 0 0 1rem;
+  }
+  [data-ghost-component-host] {
+    margin: 2rem 0;
+  }
+</style>

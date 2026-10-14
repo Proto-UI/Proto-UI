@@ -1,0 +1,112 @@
+name: Finf Button ghost component evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/finf-button-ghost-component-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/src/components/PrototypePreviewer/**'
+      - 'apps/www/src/components/override/**'
+      - 'apps/www/src/content/docs/demo_components/button/**'
+      - 'apps/www/src/pages/en/test/button-ghost/**'
+      - 'apps/www/src/content/docs/zh-cn/ghost-component-fixture.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts'
+      - 'apps/www/src/content/docs/zh-cn/ghost-paint-oracle*'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/src/styles/**'
+      - 'apps/www/astro.config.mjs'
+      - 'scripts/styles/**'
+      - 'scripts/test/server-readiness.mjs'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - 'pnpm-lock.yaml'
+      - 'vitest.config.ts'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: finf-button-ghost-component-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+# Bind images to the actual evidence commit, including its real public demo.
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  component-button-ghost:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies and retain source identity
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/finf-button-ghost-component"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-cjk
+          dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk fontconfig > "$RUNNER_TEMP/finf-button-ghost-component/font-environment.txt"
+          fc-match -f '%{family}\n%{file}\n' 'sans-serif:lang=zh-cn' >> "$RUNNER_TEMP/finf-button-ghost-component/font-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/finf-button-ghost-component/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/finf-button-ghost-component/source-tree.txt"
+          "$CHROME" --version > "$RUNNER_TEMP/finf-button-ghost-component/browser.txt"
+      - name: Check the actual preset generation boundary
+        run: |
+          set -o pipefail
+          corepack pnpm@10.32.1 check:styles:preset 2>&1 | tee "$RUNNER_TEMP/finf-button-ghost-component/preset-check.log"
+      - name: Use the normal website toolchain for the independent fixture
+        run: corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Capture eight component runtime and theme journeys
+        env:
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-button-ghost-component
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 exec vitest run \
+            apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$PUI_FINF_FEATURE_EVIDENCE_DIR/vitest.json" \
+            2>&1 | tee "$PUI_FINF_FEATURE_EVIDENCE_DIR/browser.log"
+      - name: Require the complete eight-case image receipt
+        env:
+          PUI_FINF_FEATURE_EVIDENCE_DIR: ${{ runner.temp }}/finf-button-ghost-component
+        run: |
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          import { readFileSync } from 'node:fs';
+          import { createHash } from 'node:crypto';
+          import path from 'node:path';
+          const directory = process.env.PUI_FINF_FEATURE_EVIDENCE_DIR;
+          const read = name => JSON.parse(readFileSync(path.join(directory, name), 'utf8'));
+          const report = read('vitest.json');
+          assert.equal(report.numTotalTests, 8);
+          assert.equal(report.numPassedTests, 8);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.numPendingTests, 0);
+          for (const runtime of ['wc', 'react', 'vue', 'vue2']) for (const scheme of ['light', 'dark']) {
+            const receipt = read(`button-ghost-component-${runtime}-${scheme}.json`);
+            assert.equal(receipt.result, 'passed');
+            assert.equal(receipt.evidenceScope, 'independent-component');
+            assert.equal(receipt.candidate.revision, process.env.CANDIDATE_SHA);
+            assert.equal(receipt.candidate.cleanExactCommit, true);
+            assert.deepEqual(receipt.screenshots.map(image => image.state), ['rest', 'hover', 'leave', 'disabled']);
+            for (const image of receipt.screenshots) {
+              assert.equal(image.candidate.revision, process.env.CANDIDATE_SHA);
+              assert.equal(image.environment.theme, scheme);
+              assert.equal(image.evidenceScope, 'independent-component');
+              assert.equal(image.sha256, createHash('sha256').update(readFileSync(path.join(directory, image.file))).digest('hex'));
+            }
+          }
+          NODE
+      - name: Retain source-bound images, blocked setup and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: finf-button-ghost-component-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/finf-button-ghost-component
+          if-no-files-found: warn
+          retention-days: 30
