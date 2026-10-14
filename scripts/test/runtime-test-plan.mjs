@@ -164,6 +164,7 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-command-density.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-neo-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-popover-title.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts',
@@ -182,6 +183,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/finf-button-ghost.browser.test.ts':
+    '.github/workflows/finf-button-ghost-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-drawer-intrinsic.browser.test.ts':
     '.github/workflows/finf-representative-features-evidence.yml',
   'apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts':

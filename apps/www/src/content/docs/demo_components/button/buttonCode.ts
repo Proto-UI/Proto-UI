@@ -19,9 +19,22 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
 </div>
     `),
     'demo-button-ghost': formatCode(`
-<div class="flex flex-wrap items-center gap-3">
+<div id="ghost-demo" class="flex flex-wrap items-center gap-3">
   <wc-shadcn-button variant="ghost">Ghost</wc-shadcn-button>
+  <wc-shadcn-button variant="ghost" disabled>Disabled ghost</wc-shadcn-button>
+  <div role="status" aria-live="polite">Enabled activations: 0; disabled activations: 0</div>
 </div>
+<script>
+  const demo = document.querySelector('#ghost-demo');
+  const buttons = demo.querySelectorAll('wc-shadcn-button');
+  const counts = [0, 0];
+  buttons.forEach((button, index) => button.addEventListener('click', (event) => {
+    if (!(event instanceof CustomEvent) || event.target !== button) return;
+    counts[index]++;
+    demo.querySelector('[role="status"]').textContent =
+      'Enabled activations: ' + counts[0] + '; disabled activations: ' + counts[1];
+  }));
+</script>
     `),
     'demo-button-outline': formatCode(`
 <div class="flex flex-wrap items-center gap-3">
@@ -114,12 +127,17 @@ export function DemoButtonDisabledDemo() {
 }
     `),
     'demo-button-ghost': formatCode(`
+import { useState } from 'react';
 import { ShadcnButton } from '../proto-ui/components/react';
 
 export function DemoButtonGhostDemo() {
+  const [enabled, setEnabled] = useState(0);
+  const [disabled, setDisabled] = useState(0);
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton variant="ghost">Ghost</ShadcnButton>
+      <ShadcnButton variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
+      <ShadcnButton variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
+      <div role="status" aria-live="polite">Enabled activations: {enabled}; disabled activations: {disabled}</div>
     </div>
   );
 }
@@ -266,12 +284,17 @@ import { ShadcnButton } from '../proto-ui/components/vue';
     `),
     'demo-button-ghost': formatCode(`
 <script setup lang="ts">
+import { ref } from 'vue';
 import { ShadcnButton } from '../proto-ui/components/vue';
+const enabled = ref(0);
+const disabled = ref(0);
 </script>
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>
     `),
@@ -428,17 +451,17 @@ export default {
     'demo-button-ghost': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="ghost">Ghost</ShadcnButton>
+    <ShadcnButton variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>
 
 <script>
 import { ShadcnButton } from '../proto-ui/components/vue2';
-
 export default {
-  components: {
-    ShadcnButton,
-  },
+  components: { ShadcnButton },
+  data() { return { enabled: 0, disabled: 0 }; },
 };
 </script>
     `),
