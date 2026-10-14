@@ -152,7 +152,7 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
     });
     def.rule({
       when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('ghost')),
-      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     def.rule({
       when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('link')),
@@ -200,6 +200,15 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
           w.prop('variant').eq('destructive')
         ),
       intent: (i) => i.feedback.style.use(tw('ring-destructive/40')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.meta('colorScheme').eq('dark'),
+          w.state(hovered).eq(true),
+          w.prop('variant').eq('ghost')
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent/50')),
     });
     // Disabled remains a standalone rule because it semantically cuts across
     // every variant and size, and we now source it from the shared button

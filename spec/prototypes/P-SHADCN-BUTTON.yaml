@@ -6,11 +6,11 @@ since: 0.2.0-rc.0
 summary: Shadcn Button is an unofficial Proto UI-maintained projection that inherits Base Button by default, may declare setup-time negative patches explicitly, and adds a pinned, currently partial shadcn/ui visual API without duplicating Base semantics.
 statement:
   zh-CN: >-
-    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种 `size`、由 Button interaction state 驱动的视觉反馈，以及 outline 与 destructive 在 dark color scheme 下的样式增量。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；当前 destructive 的 tinted visual recipe 另有意采用较新的官方 recipe 作为视觉来源证据，但该采用不移动整体兼容比较基线，也不扩大 current passing guarantee。`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。
+    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种 `size`、由 Button interaction state 驱动的视觉反馈，以及 outline、destructive 与 ghost 在 dark color scheme 下的样式增量。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；当前 destructive 的 tinted visual recipe 另有意采用较新的官方 recipe 作为视觉来源证据，但该采用不移动整体兼容比较基线，也不扩大 current passing guarantee。`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。
 
 
   en: >-
-    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four `size` values, visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline and destructive variants. Its compatibility baseline is the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the current tinted destructive visual recipe separately records an intentional adoption of a later official recipe as visual-source evidence, without advancing the overall compatibility baseline or widening the current passing guarantee. `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference.
+    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four `size` values, visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline, destructive, and ghost variants. Its compatibility baseline is the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the current tinted destructive visual recipe separately records an intentional adoption of a later official recipe as visual-source evidence, without advancing the overall compatibility baseline or widening the current passing guarantee. `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference.
 
 
 criteria:
@@ -22,6 +22,12 @@ criteria:
     text:
       en: The shared passive Button paint and supported fixed sizes use the New York source at 02cad61166c4c20edbc8a3f71bd720eed4c1f49b. Base is rounded-md; every size owns exactly one gap to avoid conflicting base/Rule tokens. Default size is h-9 gap-2 px-4 py-2, sm is h-8 gap-1.5 px-3, lg is h-10 gap-2 px-6, and icon is size-9 gap-2. Default variant keeps its existing primary 80-percent hover while the New York 90-percent migration waits for borrowed-state consumer style closure; outline adds border and shadow-xs with accent hover. AlertDialog and Drawer commands may reuse these constants while retaining their original Base interaction owner. The explicit wrap extension retains auto height and py-1 with corresponding minimum heights and inline padding; it is not fixed-height upstream equivalence. Existing press-offset and adopted destructive extensions remain recorded separately.
       zh-CN: 共享被动 Button 样式与已有 fixed size 按 New York 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 对齐。基础为 rounded-md；每个 size 只拥有一个 gap，避免 base 与 Rule token 冲突。default 为 h-9 gap-2 px-4 py-2，sm 为 h-8 gap-1.5 px-3，lg 为 h-10 gap-2 px-6，icon 为 size-9 gap-2。default 暂保留既有 primary 与 80% hover，New York 90% hover 迁移须等待 borrowed-state consumer 样式闭包补齐；outline 使用 border、shadow-xs 与 accent hover。AlertDialog、Drawer command 可复用常量但保留原有 Base 交互所有者。显式 wrap 扩展仍使用 auto height、py-1、相应最小高度和 inline padding，不宣称 fixed-height 上游等价。既有按压位移和 destructive 扩展单独保留。
+  - id: P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
+    text:
+      en: Ghost hover follows the fixed New York source at 02cad61166c4c20edbc8a3f71bd720eed4c1f49b using accent background and accent-foreground text, with 50-percent accent background while colorScheme is dark. It derives exclusively from inherited Button hovered state and the current variant/meta. Leaving hover, disabling, replacing the variant or retiring the view removes the applicable hover paint; changing dark to light removes the half-opacity delta. The actual source collector and generated consumer styles must carry these rules without a manually seeded token. This bounded visual adoption does not advance the historical API baseline, migrate default hover80, replace the separately adopted destructive recipe or establish whole-Button parity.
+      zh-CN: ghost hover 按固定 New York 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 使用 accent 背景与 accent-foreground 文字；colorScheme 为 dark 时背景为 50% accent。样式仅从继承 Button 的 hovered state 与当前 variant/meta 派生。离开 hover、禁用、切换 variant 或结束视图生命周期时移除适用的 hover 样式；dark 切回 light 移除半透明增量。真实 source collector 和生成 consumer 样式须自然包含这些 rule，禁止手工 seed token。此有界视觉采用不前移历史 API 基线，不迁移 default hover80，不替换单独采用的 destructive recipe，也不证明整个 Button 上游对齐。
+    dependsOn:
+      contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-BUTTON-UPSTREAM-IDENTITY
     text:
       zh-CN: Shadcn Button 必须明确标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并以固定 upstream revision/path 作为兼容比较基线；P 实体只治理 Proto UI 投射，不主张上游所有权或认证。
@@ -81,8 +87,8 @@ criteria:
             ]
   - id: P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
     text:
-      zh-CN: outline 与 destructive variant 必须能够通过 environment colorScheme meta 投射当前 dark-mode 增量；meta 只影响 visual intent，不改变 Button protocol facts。
-      en: Outline and destructive variants must project the current dark-mode deltas through environment colorScheme meta; meta affects visual intent only and does not change Button protocol facts.
+      zh-CN: outline、destructive 与 ghost variant 必须能够通过 environment colorScheme meta 投射当前 dark-mode 增量；meta 只影响 visual intent，不改变 Button protocol facts。
+      en: Outline, destructive, and ghost variants must project the current dark-mode deltas through environment colorScheme meta; meta affects visual intent only and does not change Button protocol facts.
     dependsOn:
       contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-BUTTON-COMPATIBILITY-SUBSET
@@ -116,7 +122,7 @@ sources:
   - path: packages/prototypes/shadcn/src/button/paint.ts
   - path: internal/contracts/overlay/shadcn-alert-dialog.presentation.v0.md
   - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx
-    label: Current PR 872 fixed New York sizing and default/outline paint source; historical compatibility baseline remains separate
+    label: Current PR 872 fixed New York sizing and default/outline/ghost paint source; historical compatibility baseline remains separate
   - path: packages/prototypes/shadcn/src/button/types.ts
   - path: packages/prototypes/shadcn/test/button.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/button.tsx
@@ -151,4 +157,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Adopted the confirmed PR 872 New York sizing and reusable passive default/outline paint without changing Base ownership, the opt-in wrapping extension, or the separate destructive recipe.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded pinned New York ghost hover and dark-meta paint with source-collected consumer closure; historical API baseline and other variant boundaries remain unchanged.
 tags: [prototype, shadcn, button, upstream-derived, delta, compatibility, visual]

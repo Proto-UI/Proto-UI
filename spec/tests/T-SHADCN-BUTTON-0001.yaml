@@ -32,10 +32,22 @@ cases:
       - P-SHADCN-BUTTON-INTERACTION-STYLES
     expectation: shadcn-button-styles-derive-from-base-button-facts
   - id: T-SHADCN-BUTTON-0001-CASE-COLOR-SCHEME
-    title: dark color-scheme meta affects outline and destructive visuals only
+    title: dark color-scheme meta affects outline, destructive and ghost visuals only
     covers:
       - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
     expectation: shadcn-button-dark-meta-projects-visual-deltas
+  - id: T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK
+    title: ghost hover follows fixed New York paint and clears on inherited state, meta and lifecycle transitions
+    covers:
+      - P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
+      - P-SHADCN-BUTTON-INTERACTION-STYLES
+      - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
+    expectation: shadcn-ghost-accent-hover-and-dark-half-opacity-follow-current-button-facts
+  - id: T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER
+    title: real ghost source rules reach generated CSS and a live public Button consumer
+    covers:
+      - P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
+    expectation: shadcn-ghost-style-closure-is-source-derived-and-consumer-visible
   - id: T-SHADCN-BUTTON-0001-CASE-COMPATIBILITY-SUBSET
     title: pinned baseline, adopted recipe evidence, and undemonstrated render branches stay outside passing parity claims
     covers:
@@ -67,6 +79,24 @@ implementations:
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
       - Source host plus generated CLI CSS in HappyDOM; not packed-artifact or native browser admission. The release helper tests reject obsolete tokens, class leakage, absent CSS and stale installed height/padding. Native website suites retain exact default/icon geometry and interaction assertions. See scripts/release/consumer-smoke/README.md for the consumer boundary.
+  - id: prototypes-shadcn-button-ghost
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/button-ghost.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Real Runtime sessions with inherited Button state and controlled meta inputs; not physical pointer or cross-Adapter acceptance.
+  - id: prototypes-shadcn-button-ghost-consumer
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/button-ghost-style.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Actual source collection, generated preset equality, Document/Shadow/Shadow-split declaration closure and a real WC host in HappyDOM. Outer-layer unwrapping is explicit; native cascade, pixels, packed artifacts and cross-Adapter visual acceptance remain separate.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -77,6 +107,7 @@ verifies:
         - P-SHADCN-BUTTON-VARIANT-PROP
         - P-SHADCN-BUTTON-SIZE-PROP
         - P-SHADCN-BUTTON-NEW-YORK-PAINT
+        - P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
         - P-SHADCN-BUTTON-WRAP-PROP
         - P-SHADCN-BUTTON-INTERACTION-STYLES
         - P-SHADCN-BUTTON-COLOR-SCHEME-STYLES
@@ -94,4 +125,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added bounded source-host consumer paint coverage and mapped current New York geometry to packed and website test oracles without widening upstream parity claims.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added ghost theme/state/lifetime and source-derived consumer closure cases without claiming full upstream parity.
 tags: [prototype, shadcn, button, delta, compatibility, test]
