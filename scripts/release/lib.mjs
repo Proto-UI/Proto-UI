@@ -307,11 +307,14 @@ export function buildPrerequisitePackages(packages) {
     encoding: 'utf8',
     shell: IS_WINDOWS,
   });
+  const diagnostics = collectNonEmptyLines(`${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+  if (result.error) diagnostics.push(result.error.message);
+  if (result.signal) diagnostics.push(`Process terminated by signal ${result.signal}`);
   return [
     {
       name: 'public-package-build',
-      code: result.status ?? 0,
-      diagnostics: collectNonEmptyLines(`${result.stdout}\n${result.stderr}`),
+      code: result.status ?? 1,
+      diagnostics,
     },
   ];
 }
@@ -492,8 +495,13 @@ export function stagePackage(pkg, options) {
           npm_config_cache: npmCacheDir,
         },
       });
-      const errors = collectNonEmptyLines(`${result.stdout}\n${result.stderr}`);
-      const rawCode = result.status ?? 0;
+      const errors = collectNonEmptyLines(`${result.stdout ?? ''}\n${result.stderr ?? ''}`);
+      if (result.error || result.signal || result.status === null) {
+        if (result.error) errors.push(result.error.message);
+        if (result.signal) errors.push(`Process terminated by signal ${result.signal}`);
+        throw new Error(`npm publish did not exit normally for ${pkg.name}\n${errors.join('\n')}`);
+      }
+      const rawCode = result.status;
       const rateLimited = isRateLimitedPublishError(errors);
       // dry-run is meant to validate that the staged tarball is publishable,
       // not that the version slot is empty on the registry. once a version

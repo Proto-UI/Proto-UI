@@ -82,6 +82,8 @@ Real publication is manually triggered from `main` and protected by the GitHub `
 
 Both `stage` and `publish-all` run the public registry preflight before any package is staged or published. A missing identity or non-compliant bootstrap state aborts the run, preventing an avoidable partial publication.
 
+Prerequisite builds require a normal zero exit; startup failures and signal termination abort before staging. A publication subprocess must exit normally before either the already-published dry-run exception or rate-limit retry policy can apply. Signal termination leaves the external publication outcome unverified; it is not success and does not trigger an automatic retry. Reconcile that outcome through the explicit recovery procedure before another real publication attempt.
+
 The workflow:
 
 1. reads `VERSION` from the repository and accepts no temporary version override

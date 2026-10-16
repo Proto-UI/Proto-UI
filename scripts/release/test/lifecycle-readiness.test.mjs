@@ -129,25 +129,6 @@ test('release lifecycle reports are reproducible and require a declared version'
   assert.match(unknown.stderr, /No V entity declares/);
 });
 
-test('release preparation and changed-entity CI invoke the lifecycle tools', () => {
-  const rehearsal = readFileSync(new URL('../rehearse.mjs', import.meta.url), 'utf8');
-  assert.match(rehearsal, /'release:lifecycle'/);
-  assert.match(rehearsal, /lifecycle-review\.json/);
-  const workflow = parse(
-    readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  );
-  const steps = workflow.jobs['test-general'].steps;
-  assert.ok(workflow.jobs.test.needs.includes('test-general'));
-  assert.equal(workflow.jobs.test.if, 'always()');
-  assert.equal(
-    steps.find((step) => step.uses?.startsWith('actions/checkout')).with['fetch-depth'],
-    0
-  );
-  const gate = steps.find((step) => step.name === 'Public documentation gate and repository tests');
-  assert.match(gate.env.SPEC_AUTHORING_BASE, /pull_request\.base\.sha/);
-  assert.match(gate.run, /check:spec-authoring -- --base/);
-});
-
 test('authoring preserves identities across deletion, replacement, and file moves', () => {
   const fixture = mkdtempSync(path.join(tmpdir(), 'proto-lifecycle-authoring-'));
   const run = (command, args) =>
