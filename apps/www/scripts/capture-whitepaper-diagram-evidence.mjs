@@ -5,12 +5,21 @@ import fs from 'node:fs/promises';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chromium } from 'playwright-core';
+import {
+  selectDiagramProfile,
+  diagramLocale,
+  diagramEvidenceId,
+} from './whitepaper-diagram-evidence-profiles.mjs';
+
+// Reject unknown selections before filesystem access or browser initialization.
+const profile = selectDiagramProfile(process.env.DIAGRAM_EVIDENCE_FIGURE);
+const { chromium } = await import('playwright-core');
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const dist = path.join(root, 'apps/www/dist');
-const out = process.env.DIAGRAM_EVIDENCE_DIR;
-assert.ok(out && path.isAbsolute(out), 'An absolute evidence directory is required');
+const evidenceRoot = process.env.DIAGRAM_EVIDENCE_DIR;
+assert.ok(evidenceRoot && path.isAbsolute(evidenceRoot), 'An absolute evidence directory is required');
+const out = path.join(evidenceRoot, profile.figure);
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim();
 assert.equal(
   revision,
@@ -21,6 +30,8 @@ assert.ok(process.env.CHROME_PATH, 'Use an explicitly identified runner browser'
 await fs.mkdir(out, { recursive: true });
 const report = {
   revision,
+  figure: profile.figure,
+  profile,
   renderer: 'built Astro documentation / Chromium',
   cases: [],
   fonts: [],
@@ -65,7 +76,7 @@ try {
   browser = await chromium.launch({ executablePath: process.env.CHROME_PATH, headless: true });
   report.browser = browser.version();
   for (const locale of ['zh-cn', 'en']) {
-    const asset = `/diagrams/whitepaper-switch-activation.${locale}.svg`;
+    const { asset, route } = diagramLocale(profile, locale);
     const bytes = await fs.readFile(path.join(dist, asset));
     const authored = await fs.readFile(path.join(root, 'apps/www/public', asset));
     assert.deepEqual(bytes, authored, 'The built asset must equal the candidate source');
@@ -80,14 +91,17 @@ try {
         const url = new URL(route.request().url());
         return url.origin === origin || url.protocol === 'data:' ? route.continue() : route.abort();
       });
-      // An isolated, source-checked local SVG document inspects embedded fonts.
+      // An isolated, source-checked local SVG document inspects the profile fonts.
       // This does not add SVG-document navigation to the production website.
       const probe = await context.newPage();
-      await probe.setViewportSize({ width: 960, height: 920 });
+      await probe.setViewportSize({ width: profile.width, height: profile.height });
       await probe.goto(origin + asset, { waitUntil: 'load' });
       const fontEvidence = await probe.evaluate(async () => {
         await document.fonts.ready;
         return {
+          families: [...document.querySelectorAll('text')].map(
+            (node) => getComputedStyle(node).fontFamily
+          ),
           faces: [...document.fonts].map((face) => ({ family: face.family, status: face.status })),
           text: [...document.querySelectorAll('tspan')].map((node) => {
             const box = node.getBBox();
@@ -101,39 +115,53 @@ try {
           }),
         };
       });
-      assert.ok(
-        fontEvidence.faces.some(
-          (face) => face.family.includes('Hand Latin') && face.status === 'loaded'
-        )
-      );
-      if (locale === 'zh-cn')
+      if (profile.fonts === 'embedded-handwritten') {
         assert.ok(
           fontEvidence.faces.some(
-            (face) => face.family.includes('Hand CJK') && face.status === 'loaded'
+            (face) => face.family.includes('Hand Latin') && face.status === 'loaded'
           )
         );
+        if (locale === 'zh-cn')
+          assert.ok(
+            fontEvidence.faces.some(
+              (face) => face.family.includes('Hand CJK') && face.status === 'loaded'
+            )
+          );
+      } else {
+        assert.equal(fontEvidence.faces.length, 0, 'System-font diagram must not load embedded faces');
+        assert.ok(fontEvidence.families.length > 0, 'Inspect actual system-font text');
+        assert.ok(fontEvidence.families.every((family) => family.includes('sans-serif')));
+      }
       for (const box of fontEvidence.text) {
         assert.ok(
-          box.x >= -1 && box.y >= -1 && box.x + box.width <= 961 && box.y + box.height <= 921,
+          box.x >= -1 &&
+            box.y >= -1 &&
+            box.x + box.width <= profile.width + 1 &&
+            box.y + box.height <= profile.height + 1,
           `Clipped ${locale}/${theme} text: ${box.text}`
         );
       }
-      report.fonts.push({ locale, theme, svgSha256, ...fontEvidence });
+      report.fonts.push({
+        figure: profile.figure, revision, asset, locale, theme, svgSha256, ...fontEvidence,
+      });
       await probe.close();
 
       for (const viewport of [
         { width: 1440, height: 1000 },
         { width: 390, height: 844 },
       ]) {
-        const id = `${locale}-${theme}-${viewport.width}`;
+        const id = diagramEvidenceId(profile, locale, theme, viewport.width, revision, svgSha256);
         const page = await context.newPage();
         await page.setViewportSize(viewport);
         page.setDefaultTimeout(15000);
         const errors = [];
         page.on('pageerror', (error) => errors.push(error.message));
-        const route = `/${locale}/whitepaper/4-semantics-beyond-channels/`;
         const entry = {
           id,
+          figure: profile.figure,
+          revision,
+          asset,
+          locale,
           route,
           viewport,
           theme,
@@ -168,8 +196,8 @@ try {
               scheme: getComputedStyle(node).colorScheme,
             };
           });
-          assert.equal(entry.image.naturalWidth, 960);
-          assert.equal(entry.image.naturalHeight, 920);
+          assert.equal(entry.image.naturalWidth, profile.width);
+          assert.equal(entry.image.naturalHeight, profile.height);
           assert.ok(entry.image.complete && entry.image.alt.length > 0);
           assert.equal(entry.image.scheme, theme);
           assert.ok(
@@ -183,30 +211,91 @@ try {
           const figure = `${id}-figure.png`;
           await image.screenshot({ path: path.join(out, figure) });
           entry.screenshots.push(figure);
+          // Exercise the actual enhanced page control and themed Dialog. Never
+          // substitute direct SVG navigation for a broken production preview.
+          const trigger = page.locator('[data-docs-image-trigger]').filter({ has: image });
+          await trigger.click();
+          const preview = page.locator('.docs-image-full');
+          await preview.waitFor({ state: 'visible' });
+          await preview.evaluate((node) => node.decode());
+          await page.waitForFunction(() => {
+            const content = document.querySelector('[data-docs-image-content]');
+            return (
+              content?.getAttribute('data-transition-state') === 'entered' &&
+              content.getAnimations().every(
+                (animation) => !animation.pending && animation.playState !== 'running'
+              )
+            );
+          });
+          entry.preview = await preview.evaluate((node) => {
+            const rect = node.getBoundingClientRect();
+            return {
+              src: node.currentSrc,
+              alt: node.alt,
+              naturalWidth: node.naturalWidth,
+              naturalHeight: node.naturalHeight,
+              scheme: getComputedStyle(node).colorScheme,
+              x: rect.x, y: rect.y, width: rect.width, height: rect.height,
+            };
+          });
+          assert.equal(entry.preview.src, origin + asset);
+          assert.equal(entry.preview.naturalWidth, profile.width);
+          assert.equal(entry.preview.naturalHeight, profile.height);
+          assert.equal(entry.preview.alt, entry.image.alt);
+          assert.equal(entry.preview.scheme, theme);
+          assert.ok(
+            entry.preview.width > 0 && entry.preview.height > 0 &&
+              entry.preview.x >= -1 && entry.preview.y >= -1 &&
+              entry.preview.x + entry.preview.width <= viewport.width + 1 &&
+              entry.preview.y + entry.preview.height <= viewport.height + 1,
+            'The themed full-size preview must contain the complete diagram'
+          );
+          assert.equal(new URL(page.url()).pathname, route, 'Preview must stay on the article');
+          const fullSize = `${id}-preview.png`;
+          await page.screenshot({ path: path.join(out, fullSize) });
+          entry.screenshots.push(fullSize);
+          await page.keyboard.press('Escape');
+          await page.waitForFunction(() => {
+            const content = document.querySelector('[data-docs-image-content]');
+            return !content || content.hasAttribute('data-pui-view-detached');
+          });
+          assert.deepEqual(errors, [], 'No preview or dismissal exceptions');
           entry.outcome = 'passed';
         } catch (error) {
           entry.outcome = 'failed';
           entry.error = String(error);
-          await page.screenshot({ path: path.join(out, `${id}-failure.png`) });
           report.failures.push({ id, error: String(error) });
+          const failure = `${id}-failure.png`;
+          await page.screenshot({ path: path.join(out, failure) });
+          entry.screenshots.push(failure);
         } finally {
-          await save();
-          await page.close();
+          try {
+            await save();
+          } finally {
+            await page.close();
+          }
         }
       }
       await context.close();
     }
   }
   assert.equal(report.cases.length, 8);
+  assert.equal(report.fonts.length, 4);
   assert.deepEqual(report.failures, []);
   console.log(
-    `Verified ${report.cases.length} exact-head article renders and ${report.fonts.length} embedded-font probes.`
+    `Verified ${report.cases.length} exact-head article renders and ${report.fonts.length} ${profile.fonts} font probes.`
   );
 } catch (error) {
   report.failures.push({ stage: 'capture', error: String(error) });
   throw error;
 } finally {
-  await save();
-  await browser?.close();
-  await new Promise((resolve) => server.close(resolve));
+  try {
+    await save();
+  } finally {
+    try {
+      await browser?.close();
+    } finally {
+      await new Promise((resolve) => server.close(resolve));
+    }
+  }
 }

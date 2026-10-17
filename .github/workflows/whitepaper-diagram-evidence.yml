@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/whitepaper-diagram-evidence.yml'
       - 'apps/www/scripts/capture-whitepaper-diagram-evidence.mjs'
+      - 'apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs'
+      - 'scripts/docs/test/whitepaper-diagram-evidence*.test.mjs'
       - 'apps/www/scripts/generate-whitepaper-diagrams.mjs'
       - 'apps/www/scripts/whitepaper-diagram-fonts.json'
       - 'apps/www/public/diagrams/**'
@@ -56,14 +58,20 @@ jobs:
             dpkg-query -W -f='${Package} ${Version}\n' fonts-noto-cjk
           } | tee "$DIAGRAM_EVIDENCE_DIR/environment.txt"
       - name: Verify diagram source and build production documentation
+        id: build
         run: |
           set -o pipefail
-          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs
+          node --test scripts/docs/test/generated-whitepaper-diagrams.test.mjs scripts/docs/test/whitepaper-diagram-evidence.test.mjs scripts/docs/test/whitepaper-diagram-evidence-profiles.test.mjs
           corepack pnpm@10.32.1 --filter apps-www build 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/build.log"
       - name: Capture bilingual article and embedded-font evidence
         run: |
           set -o pipefail
-          node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/browser.log"
+          DIAGRAM_EVIDENCE_FIGURE=switch-activation node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/switch-browser.log"
+      - name: Capture evolution article and full-size dialog evidence
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          set -o pipefail
+          DIAGRAM_EVIDENCE_FIGURE=evolution-feedback node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs 2>&1 | tee "$DIAGRAM_EVIDENCE_DIR/evolution-browser.log"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

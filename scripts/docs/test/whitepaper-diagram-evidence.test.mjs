@@ -20,6 +20,10 @@ test('diagram evidence uses an exact-head read-only PR job and a valid job-level
   const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
   assert.equal(checkout.with.ref, '${{ env.CANDIDATE_SHA }}');
   assert.equal(checkout.with['persist-credentials'], false);
+  assert.ok(workflow.on.pull_request.paths.includes('apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs'));
+  for (const figure of ['switch-activation', 'evolution-feedback']) {
+    assert.ok(job.steps.some((step) => step.run?.includes(`DIAGRAM_EVIDENCE_FIGURE=${figure} node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs`)));
+  }
   assert.ok(
     job.steps.some(
       (step) => step.uses?.startsWith('actions/upload-artifact@') && step.if === 'always()'
