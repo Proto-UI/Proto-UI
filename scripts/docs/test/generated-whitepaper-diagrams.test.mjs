@@ -97,6 +97,65 @@ for (const locale of ['en', 'zh-cn']) {
   });
 }
 
+for (const locale of ['en', 'zh-cn']) {
+  test(`Evolution metadata retains concurrent work and alternative revisions (${locale})`, async () => {
+    const svg = await readFile(
+      new URL(`whitepaper-evolution-feedback.${locale}.svg`, diagrams),
+      'utf8'
+    );
+    const root = svg.match(/^<svg\b[^>]*>/)?.[0];
+    assert.ok(root);
+    assert.match(root, /role="img" aria-labelledby="title" aria-describedby="description"/);
+    assert.ok(root.includes(`xml:lang="${locale}"`));
+    for (const id of ['title', 'description']) {
+      assert.equal([...svg.matchAll(new RegExp(`\\bid="${id}"`, 'g'))].length, 1, id);
+    }
+    assert.equal([...svg.matchAll(/<title\b/g)].length, 1);
+    assert.equal([...svg.matchAll(/<desc\b/g)].length, 1);
+    const titles = [...svg.matchAll(/<title\b[^>]*>([^<]+)<\/title>/g)];
+    assert.equal(titles.length, 1);
+    assert.equal(
+      titles[0][1],
+      locale === 'en'
+        ? 'How practice revises the current approximation'
+        : '实践怎样修正当前近似'
+    );
+    assert.match(svg, /<title id="title">/);
+    const descriptions = [...svg.matchAll(/<desc\b[^>]*>([^<]+)<\/desc>/g)];
+    assert.equal(descriptions.length, 1);
+    assert.match(svg, /<desc id="description">/);
+    const description = descriptions[0][1];
+    const relations =
+      locale === 'en'
+        ? [
+            'Theory and kernel, prototype libraries, and the translation layer advance concurrently.',
+            'Implementations, conformance tests, and real use provide evidence for diagnosis:',
+            'implementation drift calls for an implementation fix',
+            'a Host capability gap calls for improved translation',
+            'omitted necessary semantics or a definition overfitted to a class of Host calls for a Prototype revision',
+            'a counterexample to fundamental relations calls for reexamining the theory',
+            'These are alternative diagnoses, not sequential stages.',
+            'Revise the relevant layer explicitly and test again;',
+            'implementation behavior does not silently become a rule.',
+          ]
+        : [
+            '理论与内核、原型库和翻译层并行推进。',
+            '实现、符合性测试与真实使用提供归因证据：',
+            '实现偏差需要修正实现',
+            'Host 能力缺口需要补足翻译能力',
+            '必要语义遗漏或定义对某类 Host 过拟合需要修正 Prototype',
+            '基础关系出现反例需要重新检查理论',
+            '这些是不同的归因方向，不是依次完成的阶段。',
+            '明确修正对应层并重新检验；',
+            '实现结果不会静默成为新标准。',
+          ];
+    for (const relation of relations) assert.ok(description.includes(relation), relation);
+    // These generated-document assertions do not establish how a screen reader
+    // exposes SVG metadata through the chapter's separate <img> embedding.
+    assert.doesNotMatch(svg, /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=/i);
+  });
+}
+
 // Font data is pinned, locally embedded and limited to this figure's visible glyphs.
 test('handwritten font subsets cover visible labels and retain content hashes', async () => {
   const { fonts, upstreamCommit } = JSON.parse(
