@@ -237,6 +237,13 @@ it('does not renew a rejected descendant entry budget because its dual-role root
   try {
     await flushVue();
     await flushVue();
+    // Settle initial presentation before observing focus-only retry frames.
+    for (let round = 0; frames.length && round < 10; round++) {
+      const pending = frames.splice(0);
+      await settle(() => {
+        for (const callback of pending) callback(performance.now());
+      });
+    }
     const root = mounted.root!;
     const descendant = root.querySelector('button')!;
     await settle(() => mounted.vm.getExposes().focusRoot());
