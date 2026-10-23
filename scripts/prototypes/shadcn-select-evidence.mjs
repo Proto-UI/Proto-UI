@@ -119,6 +119,82 @@ try {
       document.documentElement.dataset.ready === 'true' &&
       window.selectEvidence.records.every((r) => r.trigger())
   );
+  // Read-only native diagnosis: retain exact key/focus and public open/value
+  // transitions without changing focus, activation, or endpoint predicates.
+  await page.evaluate(() => {
+    const trace = (window.__selectNativeTrace = []);
+    const describe = (el) =>
+      el instanceof Element
+        ? {
+            tag: el.tagName,
+            role: el.getAttribute('role'),
+            id: el.id,
+            text: (el.textContent || '').trim().slice(0, 80),
+          }
+        : null;
+    const append = (entry) => {
+      if (trace.length < 2000)
+        trace.push({
+          time: performance.now(),
+          ...entry,
+          active: describe(document.activeElement),
+          documentFocused: document.hasFocus(),
+          states: window.selectEvidence.records.map((r) => ({
+            kind: r.kind,
+            expanded: r.trigger()?.getAttribute('aria-expanded'),
+            value: r.trigger()?.textContent?.trim(),
+            rootOpen: r.inspect?.()?.root?.open?.get(),
+            rootValue: r.inspect?.()?.root?.value?.get(),
+          })),
+        });
+    };
+    for (const type of ['keydown', 'keyup', 'click', 'focusin', 'focusout']) {
+      for (const capture of [true, false])
+        document.addEventListener(
+          type,
+          (event) => {
+            append({
+              type,
+              phase: capture ? 'capture' : 'bubble',
+              key: event.key,
+              trusted: event.isTrusted,
+              prevented: event.defaultPrevented,
+              target: describe(event.target),
+              path: event.composedPath().map(describe).filter(Boolean),
+              related: describe(event.relatedTarget),
+            });
+          },
+          capture
+        );
+    }
+    for (const record of window.selectEvidence.records) {
+      const root = record.inspect?.()?.root;
+      for (const field of ['open', 'value'])
+        root?.[field]?.subscribe((event) => {
+          append({
+            type: 'root-state',
+            kind: record.kind,
+            field,
+            eventType: event.type,
+            prev: event.prev,
+            next: event.next,
+          });
+        });
+      const trigger = record.trigger();
+      new MutationObserver((mutations) =>
+        append({
+          type: 'trigger-attributes',
+          kind: record.kind,
+          changed: mutations.map((m) => ({ name: m.attributeName, previous: m.oldValue })),
+        })
+      ).observe(trigger, {
+        attributes: true,
+        attributeOldValue: true,
+        attributeFilter: ['aria-expanded', 'data-focused', 'data-focus-visible'],
+      });
+    }
+    append({ type: 'diagnostic-ready' });
+  });
   const enterKeyboardFocus = async (kind) => {
     const kinds = ['wc', 'react', 'vue', 'vue2'],
       index = kinds.indexOf(kind);
@@ -536,12 +612,18 @@ try {
         await save([theme, style, size, 'all.png'].join('-'));
       }
   assert.deepEqual(errors, []);
+  receipt.nativeTrace = await page.evaluate(() => window.__selectNativeTrace || []);
   receipt.observations = observations;
   receipt.pageErrors = errors;
   receipt.consoleErrors = consoleErrors;
   receipt.failedRequests = failedRequests;
   await writeFile(join(out, 'metrics.json'), JSON.stringify(receipt, null, 2));
 } catch (error) {
+  if (page) {
+    try {
+      receipt.nativeTrace = await page.evaluate(() => window.__selectNativeTrace || []);
+    } catch {}
+  }
   if (page)
     try {
       await page.screenshot({ path: join(out, 'failure.png'), fullPage: true });
