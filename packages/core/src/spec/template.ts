@@ -1,5 +1,6 @@
 // packages/core/src/template.ts
 import type { Prototype } from '../prototype';
+import type { OwnedDecorationTarget } from './feedback/style';
 import { isTemplateStyleHandle, type TemplateStyleHandle } from './feedback/style';
 import { ElementFactory, ReservedFactories } from '../handles';
 
@@ -97,7 +98,7 @@ export type SvgTemplateTag =
   | 'ellipse'
   | 'polygon';
 
-export type ReservedType = { kind: 'slot' };
+export type ReservedType = { kind: 'slot' } | { kind: 'decoration'; target: OwnedDecorationTarget };
 
 export interface TemplateNode {
   type: TemplateType;
@@ -516,7 +517,12 @@ export function createRendererPrimitives(opt: RendererPrimitivesOptions = {}) {
     },
   };
 
-  return { el, slot, r, svg };
+  const decoration = (target: OwnedDecorationTarget): TemplateNode => {
+    if (!target || typeof target !== 'object')
+      throw new Error('[Template] invalid decoration target');
+    return Object.freeze({ type: Object.freeze({ kind: 'decoration' as const, target }) });
+  };
+  return { el, slot, r, svg, decoration };
 }
 
 export interface PrototypeRef {

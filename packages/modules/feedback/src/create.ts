@@ -1,4 +1,7 @@
 import { createPresenceController } from './presence/controller';
+import { OwnedDecorationRegistryModel } from './style/owned-decoration-registry';
+import { OWNED_DECORATION_CAP, type OwnedDecorationBinding } from './style/owned-decoration-cap';
+import type { OwnedDecorationTarget, DecorationStyleFrame } from '@proto.ui/core';
 import { PRESENCE_PRESENTATION_SINK_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from './presence/sink';
 import type { StatePort } from '@proto.ui/module-state';
 import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.ui/core';
@@ -49,6 +52,73 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
     deps,
     build: ({ init, caps }) => {
       class Impl extends ModuleBase {
+        private decoration = new OwnedDecorationRegistryModel();
+        private decorationRules = new Map<OwnedDecorationTarget, object>();
+        private decorationBound = false;
+        private decorationTerminal = false;
+        declareDecoration(): OwnedDecorationTarget {
+          this.ensureSetup('def.feedback.style.declareDecoration');
+          if (!this.caps.has(OWNED_DECORATION_CAP))
+            throw new Error('[feedback] owned-decoration unsupported by this adapter');
+          const target = this.decoration.declareTarget() as OwnedDecorationTarget;
+          this.decorationRules.set(target, this.decoration.declareContribution(target, 'rule'));
+          return target;
+        }
+        useDecoration(target: OwnedDecorationTarget, handles: StyleHandle[]): () => void {
+          this.ensureSetup('def.feedback.style.to.use');
+          const owner = this.decoration.declareContribution(target, 'setup');
+          this.decoration.replace(owner, ...handles);
+          return () => {
+            this.ensureSetup('def.feedback.style.to.use:dispose');
+            this.decoration.withdraw(owner);
+          };
+        }
+        validateDecorationTemplate(targets: readonly OwnedDecorationTarget[]): void {
+          if (!targets.length && !this.decorationRules.size) return;
+          this.ensureNotDisposed('decoration.template');
+          if (!this.caps.has(OWNED_DECORATION_CAP))
+            throw new Error('[feedback] owned-decoration unsupported by this adapter');
+          if (this.decorationBound || this.decorationTerminal)
+            throw new Error('[feedback] decoration structural rebind unsupported');
+          const seen = new Set<OwnedDecorationTarget>();
+          for (const target of targets) {
+            this.decoration.snapshot(target);
+            if (seen.has(target)) throw new Error('[feedback] duplicate decoration binding');
+            seen.add(target);
+          }
+          if (seen.size !== this.decorationRules.size)
+            throw new Error('[feedback] missing decoration binding');
+        }
+        bindDecorations(bindings: readonly OwnedDecorationBinding[]): void {
+          if (!bindings.length && !this.decorationRules.size) return;
+          this.validateDecorationTemplate(bindings.map((x) => x.target));
+          this.decoration.bindAll(bindings);
+          this.decorationBound = true;
+        }
+        snapshotDecorationFrame(
+          frames: readonly DecorationStyleFrame[]
+        ): Map<OwnedDecorationTarget, StyleHandle[]> {
+          const next = new Map<OwnedDecorationTarget, StyleHandle[]>();
+          for (const frame of frames) {
+            const target = frame.target;
+            this.decoration.snapshot(target);
+            if (next.has(target)) throw new Error('[feedback] duplicate decoration frame');
+            const handles = frame.handles.map((h) => ({ kind: h.kind, tokens: [...h.tokens] }));
+            const validator = new FeedbackStyleRecorder();
+            validator.use(...handles);
+            next.set(target, handles);
+          }
+          return next;
+        }
+        replaceDecorationFrame(next: Map<OwnedDecorationTarget, StyleHandle[]>): void {
+          if (this.decorationTerminal) {
+            if (next.size) throw new Error('[feedback] decoration lifetime ended');
+            return;
+          }
+          for (const [target, owner] of this.decorationRules)
+            this.decoration.replace(owner, ...(next.get(target) ?? []));
+        }
+
         private presence = createPresenceController({
           setup: (op) => this.ensureSetup(op),
           runtime: (op) => {
@@ -197,9 +267,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         replaceVisualRuntime(
           previous: FeedbackRuntimeStyleDisposer | null,
           handles: readonly StyleHandle[],
-          candidates: readonly MaterialCandidate[]
+          candidates: readonly MaterialCandidate[],
+          decorations: readonly DecorationStyleFrame[] = []
         ): FeedbackRuntimeStyleDisposer | null {
           this.ensureRuntime('rule.feedback.visual.replace');
+          const decorationFrame = this.snapshotDecorationFrame(decorations);
           if (candidates.length && !this.sharedSlot)
             throw new Error('Material Rule requires a declared slot');
           // Validate complete replacements before retiring the previous owner.
@@ -208,6 +280,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const key = {};
           previous?.({ flush: false });
           if (copied.length) this.materialContributions.set(key, copied);
+          this.replaceDecorationFrame(decorationFrame);
           this.markDirty();
           try {
             this.flushIfPossible();
@@ -216,12 +289,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               throw error;
             });
           }
-          if (!unUse && !copied.length) return null;
+          if (!unUse && !copied.length && !decorationFrame.size) return null;
           let removed = false;
           return (options = {}) => {
             if (this.disposed || removed) return;
             removed = true;
             unUse?.();
+            if (options.flush !== false) this.replaceDecorationFrame(new Map());
             this.materialContributions.delete(key);
             this.markDirty();
             if (options.flush !== false) this.flushIfPossible();
@@ -362,6 +436,10 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
 
         override onMountPhase(phase: MountPhase, epoch: number): void {
           super.onMountPhase(phase, epoch);
+          if (this.decorationBound && (phase === 'unmounting' || phase === 'detached')) {
+            this.decorationTerminal = true;
+            this.decoration.dispose();
+          }
           const oldEpoch = this.viewEpoch;
           this.viewEpoch = epoch;
           if (phase === 'unmounting' || phase === 'detached' || epoch !== oldEpoch) {
@@ -576,6 +654,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         dispose(): void {
           if (this.disposed) return;
           this.disposed = true;
+          this.decorationTerminal = true;
+          this.decoration.dispose();
           try {
             try {
               try {
@@ -653,6 +733,9 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           use: (candidate) => impl.useMaterial(candidate),
         },
         style: {
+          declareDecoration: () => impl.declareDecoration(),
+          to: (target) => ({ use: (...handles) => impl.useDecoration(target, handles) }),
+          validateDecorationTemplate: (targets) => impl.validateDecorationTemplate(targets),
           transition: (declaration) => impl.declareMotion(declaration),
           presence: (declaration) => impl.declarePresence(declaration),
           use: (...handles) => impl.useStyle(handles),
@@ -666,8 +749,10 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       return {
         facade,
         port: {
-          replaceVisualRuntime: (previous, handles, candidates) =>
-            impl.replaceVisualRuntime(previous, handles, candidates),
+          supportsOwnedDecoration: true,
+          bindDecorations: (bindings) => impl.bindDecorations(bindings),
+          replaceVisualRuntime: (previous, handles, candidates, decorations) =>
+            impl.replaceVisualRuntime(previous, handles, candidates, decorations),
           exportMaterialFrame: () => impl.exportMaterialFrame(),
           materialDiagnostics: () => impl.materialDiagnostics(),
           motionDiagnostics: () => impl.motionDiagnostics(),

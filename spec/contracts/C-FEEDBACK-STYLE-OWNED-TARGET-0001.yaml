@@ -3,15 +3,16 @@ type: contract
 title: Draft owned decorative style target boundary
 status: draft
 since: 0.3.0-alpha.1
-summary: "Proposes bounded owned decoration targets on existing style feedback;
-  no API spelling or implementation is claimed. Tracks #935."
+summary: "Draft fixed-first-view owned decoration addressing on existing style feedback;
+  bounded light-WC implementation remains under review. Tracks #935."
 statement:
-  en: This draft defines the minimum law for a future owned decorative target of
-    existing feedback.style. It does not activate the capability, change current
-    Template v0, settle a public API, or authorize a Tabs-specific path.
-    C-FEEDBACK-STYLE-0001 and Rule contribution semantics remain authoritative.
-  zh-CN: 本草案定义未来既有 feedback.style 自有装饰目标的最小法则，不启用能力、不改变现有 Template v0、不定公共 API
-    拼写，也不授权 Tabs 专用通道。C-FEEDBACK-STYLE-0001 与 Rule 贡献语义仍优先。
+  en: This draft defines the minimum law for owned decorative targets of existing
+    feedback.style. A bounded experimental light-DOM Web Component implementation
+    uses setup declareDecoration, style.to(target).use and r.decoration(target).
+    It does not establish stable or portable support. Existing style contribution
+    semantics remain authoritative; no Tabs-specific path is introduced.
+  zh-CN: 本草案定义既有 feedback.style 自有装饰目标的最小法则。受限实验实现仅支持 light-DOM
+    Web Component 的 setup 身份、定点样式贡献与空装饰叶绑定，不构成稳定或可移植支持；既有样式贡献语义优先，不引入 Tabs 专用通道。
 criteria:
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-IDENTITY
     text:
@@ -119,5 +120,6 @@ tags:
   - draft
 lifecycleRationale:
   en: Owned target API, owned-leaf accessibility binding and view lifetime remain
-    explicit open questions. No runtime or adapter capability exists in this
-    design slice.
+    explicit review questions. The fixed-first-view light-WC candidate has DOM
+    unit evidence, not native accessibility acceptance or portable compiler
+    support. Draft status and stable-admission blockers remain unchanged.

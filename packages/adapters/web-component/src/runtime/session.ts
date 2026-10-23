@@ -67,6 +67,15 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   const shadowCommitRoot =
     shadowViewTarget && !textControlTarget ? root.ownerDocument.createDocumentFragment() : null;
 
+  const bindDecorations = (
+    bindings: readonly import('@proto.ui/module-feedback').OwnedDecorationBinding[]
+  ) => {
+    const feedback = capsHub?.getPort?.('feedback') as
+      | import('@proto.ui/module-feedback').FeedbackPort
+      | undefined;
+    if (feedback?.bindDecorations) feedback.bindDecorations(bindings);
+    else if (bindings.length) throw new Error('[WC Adapter] owned-decoration binding unavailable');
+  };
   const commitWebComponentChildren = (children: TemplateChildren) => {
     const nativeTarget = textControlTarget ?? imageViewTarget;
     if (nativeTarget) {
@@ -89,19 +98,24 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (projector) {
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
-        const slotPool = projector.collectSlotPoolBeforeCommit();
+        const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
         root.replaceChildren(...slotPool);
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();
-      const slotPool = projector.collectSlotPoolBeforeCommit();
+      const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
       const owned = new WeakSet<Node>();
 
       const result = commitChildren(root, children, {
         mode: 'light',
         slotPool,
         owned,
+        bindDecorations,
       });
+
+      // Preserve the established no-slot parking contract, but only after
+      // staging and commit have succeeded. Rejected blueprints keep live nodes.
+      if (!result.hasSlot) for (const node of slotPool) node.parentNode?.removeChild(node);
 
       projector.afterCommit({
         owned,
@@ -114,7 +128,6 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     }
     clearSlotProjector();
   };
-
 
   const hostSession = createAdapterHost(
     { ...proto, name: tagName },
@@ -154,10 +167,11 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         ]);
       },
     },
-    { initialMount }
+    { initialMount: 'manual' }
   );
 
   capsHub = hostSession.caps;
+  if (initialMount !== 'manual') void hostSession.mount();
   return { ...hostSession, host };
 }
 

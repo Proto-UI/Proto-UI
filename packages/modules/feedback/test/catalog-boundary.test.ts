@@ -65,12 +65,15 @@ describe('Feedback catalog boundary', () => {
     expect(FeedbackModuleDef.deps).toEqual([]);
     expect(Object.keys(f.style).sort()).toEqual([
       'clearPatch',
+      'declareDecoration',
       'exportMerged',
       'patch',
       'presence',
       'suppress',
+      'to',
       'transition',
       'use',
+      'validateDecorationTemplate',
     ]);
     const remove = f.style.use(tw('opacity-50'));
     f.style.use(tw('bg-red-500'));

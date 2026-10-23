@@ -1,11 +1,11 @@
 id: T-FEEDBACK-STYLE-OWNED-TARGET-0001
 type: test
-title: Planned owned decorative target acceptance
+title: Draft owned decorative target bounded acceptance
 status: draft
 since: 0.3.0-alpha.1
-summary: Unimplemented acceptance design, not passing evidence; two owned leaves
-  and one caller slot must prove fail-closed identity, independent merge, no
-  reset, terminal cleanup and decorative accessibility.
+summary: Bounded light-WC DOM and module evidence exercises two owned leaves and
+  caller content, identity rejection, independent merge, no reset and terminal
+  cleanup. Native focus and accessibility acceptance remain planned.
 cases:
   - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
     title: Identity
@@ -64,10 +64,10 @@ cases:
       not establish runtime or cross-adapter support. PrototypeRef rejection
       remains unchanged.
 implementations:
-  - id: owned-decoration-runtime-contract-planned
-    kind: runtime-test
-    status: planned
-    path: packages/runtime/test/contract/feedback.style.owned-target.contract.test.ts
+  - id: owned-decoration-wc-dom
+    kind: adapter-test
+    status: active
+    path: packages/adapters/web-component/test/owned-decoration.integration.test.ts
     required: true
     consumesCases:
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
@@ -78,8 +78,28 @@ implementations:
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
       - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
     notes:
-      - This path is a planned implementation location, not an existing test or
-        evidence. No owned target API is implemented by this spec-only slice.
+      - "Actual light-WC DOM tests; no native-browser accessibility or focus acceptance."
+  - id: owned-decoration-module-guards
+    kind: runtime-test
+    status: active
+    path: packages/modules/feedback/test/owned-decoration-activation.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+    notes:
+      - "Foreign identity, complete frame validation, rejected rebind and terminal cleanup."
+  - id: owned-decoration-compiler-rejection
+    kind: runtime-test
+    status: active
+    path: packages/compiler/test/owned-decoration-rejection.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
+    notes:
+      - "Unsupported portable source/serialized addressing rejects; legal host control remains accepted."
   - id: owned-decoration-native-browser-planned
     kind: adapter-test
     status: planned
@@ -118,6 +138,7 @@ tags:
   - test
   - planned
 lifecycleRationale:
-  en: All target implementation mappings are planned and unexecuted. Identity
-    rejection, merge/withdrawal, cleanup, accessibility and native no-reset
-    evidence must be implemented before admission.
+  en: Bounded light-WC DOM and module tests now exercise the draft implementation;
+    native-browser accessibility and no-reset acceptance remain planned.
+    Active test mappings do not promote this contract to stable or establish
+    support on other adapters or the portable compiler.

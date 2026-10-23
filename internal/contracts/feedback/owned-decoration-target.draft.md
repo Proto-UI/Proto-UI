@@ -1,4 +1,8 @@
-# Owned decorative style target: contract boundary draft
+# Draft owned decoration: current implementation and design history
+
+The bounded implementation section at the end is the current candidate. Earlier sections retain the gap inventory and proposal history from #938; statements that no implementation exists describe that earlier spec-only slice. Status remains Draft, with native accessibility and portable lowering unverified.
+
+# Historical gap inventory and proposal (2026-10-22 / 2026-10-23 00:49 UTC)
 
 Status: design preparation for Proto-UI/Proto-UI#935, not a stable API, implementation claim, or acceptance. Production Tabs #937 explicitly rejects upstream line until the real capability exists.
 
@@ -50,3 +54,53 @@ The first adapter implementation and its test harness would be a distinct finite
 ## Pending-bind versus unavailable target
 
 Setup may record contributions for a declared target before its first physical commit. That pending declaration is not an unknown target and must not write to the host. The first commit must validate the complete required binding set before projecting any of it. Missing, duplicated, foreign, or unsupported bindings fail closed. The narrow first capability does not promise a target's rematerialization after structural render, view replacement, reparent or portal movement; that lifetime boundary needs an explicit decision rather than silently borrowing A11y ref rematerialization guarantees.
+
+
+## Concrete candidate interface for review, 2026-10-23
+The following spellings are proposed for review, not stable or already implemented:
+- Setup: `const target = def.feedback.style.declareDecoration()` returns an opaque, frozen, instance-local target identity, never a DOM node or string key.
+- Template: `r.decoration(target)` declares one empty owned decorative leaf. The author cannot choose an arbitrary tag, props, events, content, tabindex, children or slot; the adapter chooses a neutral physical leaf. No PrototypeRef or custom-element escape.
+- Setup contribution: `def.feedback.style.to(target).use(tw(...))`; Rule contribution: `i.feedback.style.to(target).use(tw(...))`. This extends existing style contribution addressing; StyleHandle remains a value. Host use remains unchanged. Runtime patch/suppress targeting is excluded from this first slice.
+- The adapter must project permanent accessibility-tree exclusion (aria-hidden=true on Web) and guarantee the empty leaf cannot receive focus or events. Parent AccessibleHandle.tree.hidden and role=presentation are not substitutes. No arbitrary attribute forwarding.
+- Fixed initial-view lifetime only: complete binding-set validation before any caller node mutation, replay pending contributions after first bind, exactly one binding, style-only updates without render, and terminal cleanup. Structural rerender with live targets must reject before mutations; portal/reparent/keep-alive/rematerialization are explicitly unsupported pending later law.
+- Target identity must remain attached to existing style operations/plans through Rule evaluation and compiler lowering. The present evaluator flattens host tokens, so adding only an optional type field is insufficient. Unsupported compiler/adapter profiles must reject rather than erase the target or paint the host.
+
+Private model #941 (18 tests; full feedback suite 257 tests) supports merge/lifetime investigation only. It does not settle the activation contract or make Tabs line available. Compiler/IR coordination is requested through #902. A separate existing-v0 failed-commit atomicity repair will stage the entire blueprint before moving slotPool; it introduces no target API and does not constitute activation.
+
+The existing failed-commit slot staging repair is tracked independently by #943 / #945. It preserves caller nodes on a rejected existing-v0 blueprint; it does not activate targets or settle these candidate spellings. Compiler coordination request: https://github.com/Proto-UI/Proto-UI/issues/902#issuecomment-6354624623 . No reply is presumed to approve this proposal.
+
+
+# Draft fixed-view owned decoration activation
+
+This candidate implements the bounded runtime path proposed in #935/#938. It is not a stable cross-adapter API, portable compiler implementation, or Tabs line recipe.
+
+## Authoring and ownership
+
+- `def.feedback.style.declareDecoration()` creates one frozen opaque identity owned by this instance.
+- `r.decoration(target)` binds that identity to one empty adapter-created leaf. It accepts no tag, props, children, event, text, slot or PrototypeRef.
+- Setup `def.feedback.style.to(target).use(tw(...))` and Rule `i.feedback.style.to(target).use(tw(...))` retain the existing style values and semantic merge. Host style remains separate.
+- This first slice has no target runtime patch/suppress, public physical node, selector addressing, behavior owner, keyed diff, portal/reparent or rematerialization promise.
+
+## Physical closure
+
+Only ordinary light-DOM Web Components opt in. Owner and view capability sets explicitly carry the same eligibility, while physical binding occurs only after whole-blueprint detached staging. Native text/image/link surfaces and Shadow profiles do not opt in. Other runtime adapters reject declaration without the capability.
+
+The adapter creates an empty neutral span, with permanent aria-hidden=true, inert, no tabindex/content and pointer-events:none!important. Existing data-pui-style projection and the configured Template TW resolver provide paint; no page stylesheet or component-specific selector is introduced. The public A11y instance projector is not reused to hide the parent control.
+
+Complete binding validation precedes caller slot movement. Initial contributions replay to detached owned leaves. Subsequent Rule changes update only those leaf styles; host/other leaf contributions remain independent. Re-render with live target bindings fails before adapter mutation. Unmounting ends this fixed-view target lifetime and blocks subsequent writes. Final host replaceChildren failure rollback is not promised.
+
+## Runtime and compiler boundaries
+
+The existing style operation retains an opaque target address through runtime compilation/evaluation into a separate per-target frame. The Web exposed-state optimization retains any op with a target field in the runtime evaluator, including malformed undefined/null fields; it never lowers those ops into host selectors. Feedback rejects foreign/unknown/disposed targets before frame replacement.
+
+Portable compiler source and serialized plan paths remain unsupported and reject. A legal host-plan control establishes that the rejection is due to the extra target field rather than an otherwise malformed fixture. The generic compiler implementation remains separately coordinated under #902.
+
+## Evidence and remaining work
+
+Local approved runtime plus authored changes: 23 test files / 299 tests pass, including 9 actual WC DOM cases; narrow TypeScript passes including new tests. Existing optimizer regression: three addressed cases fail before the guard and pass after it. Tests prove contribution replay/withdrawal, independent leaf and host paint, caller node/value/focus/selection retention, binding rejection, terminal cleanup and no render on style changes.
+
+These are DOM unit tests, not native-browser focus/accessibility acceptance. No computed-color/native screenshot evidence is claimed. Expanded core/runtime/WC non-browser results: 241 files pass, 2 fail, 3 skipped; 2079 tests pass, 2 fail, 34 todo. The failures are the previously reproduced missing base-dropdown-group registration and old Dialog Mask mounted assertion. External CI remains pending. Native evidence, cross-adapter support and a separate production consumer remain follow-on work. New York/latest-style Tabs line is not enabled by this candidate.
+
+## Integration
+
+Actual feature dependencies: #941 registry and #945 whole-blueprint/caller-slot staging; draft contract #938. #951 gte and #953 viewport changes are independent collaboration inputs sharing additive files, not decoration feature dependencies. Preserve their contributions when assembling the branch. No generated stylesheet changes are borrowed from unrelated projection branches.
