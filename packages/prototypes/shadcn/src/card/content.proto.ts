@@ -1,11 +1,10 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
+import { setupCardPartVisual, cardHorizontalPadding } from './visual';
 import type { ShadcnCardContentProps, ShadcnCardContentExposes } from './types';
-
-// P-SHADCN-CARD-CONTENT-VISUAL: passive source-aligned presentation.
 export const ShadcnCardContent = definePrototype<ShadcnCardContentProps, ShadcnCardContentExposes>({
   name: 'shadcn-card-content',
   setup(def) {
-    def.feedback.style.use(tw('px-6'));
-    return (renderer) => [renderer.r.slot()];
+    cardHorizontalPadding(def, setupCardPartVisual(def));
+    return (r) => [r.r.slot()];
   },
 });

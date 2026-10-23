@@ -7,20 +7,26 @@ lifecycleRationale:
   en: Source-aligned styled-only draft under bounded user-authorized Finf work. Stable admission awaits independent review and exact-candidate native visual, first-frame and host evidence; source and harness tests do not complete a Finf goal.
 summary: Passive four-part Card presentation with consumer-owned content semantics.
 statement:
-  en: This direct design-language surface has no Base Card counterpart and does not inherit Surface semantics. It follows the declared subset of shadcn/ui f31ed81983653919dd4fe77aee4b4859f610f1dc apps/v4/registry/new-york-v4/ui/card.tsx under its MIT notice. It is not an official shadcn component or a claim of complete upstream API compatibility.
+  en: This direct design-language surface has no Base Card counterpart and does not inherit Surface semantics. It follows the declared subset of shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7 apps/v4/registry/new-york-v4/ui/card.tsx under its MIT notice. It is not an official shadcn component or a claim of complete upstream API compatibility.
 criteria:
   - id: P-SHADCN-CARD-VISUAL
     text:
-      en: Root owns flex column grouping, gap-6, rounded-xl, a one-pixel border with explicit border-border ink (the upstream global reset made self-contained), bg-card, py-6, text-card-foreground and shadow-sm. Card fill and ink resolve through independent card theme slots rather than page background/foreground tokens; matching default values do not alias those slots.
+      en: Root shares New York/Rhea scope as a declared family boundary. No explicit style means inherit nearest outer scope; explicit selection applies only to this subtree, including other family consumers. New York preserves gap/py/px 24px, rounded-xl, explicit border and shadow-sm. Rhea uses theme-capped min(radius4xl,24px), no border, foreground ring/5 (dark /10), shadow-sm, text-sm, overflow-hidden and default20/sm16 gap and vertical padding. The light and dark ring contributions are mutually exclusive.
   - id: P-SHADCN-CARD-PASSIVE
     text:
       en: All four parts are roleless, non-focusable slots, with no interaction props, event handlers, semantic state, commands or exposed methods. Native anchors and independently semantic children keep their ownership.
   - id: P-SHADCN-CARD-ANATOMY
     text:
-      en: Package root and /card export Root, Header, Content and Footer plus lowercase aliases and empty public props/exposes types; CLI facades and the public preview consume the same parts. No CardTitle, CardDescription, CardAction, asChild or Base Card contract is implied. These are public presentation parts, not a runtime Anatomy domain or an enforced cardinality grammar.
+      en: Package root and /card export Root, Header, Content and Footer plus lowercase aliases and presentation-only style/density/divider props and empty exposes types; CLI facades and the public preview consume the same parts. No CardTitle, CardDescription, CardAction, asChild or Base Card contract is implied. These are public presentation parts, not a runtime Anatomy domain or an enforced cardinality grammar.
   - id: P-SHADCN-CARD-CONTENT
     text:
       en: Consumers retain native headings/paragraphs and may compose Text for title/body with tone inherit to preserve Card foreground. Muted captions/descriptions intentionally request muted tone. Card does not invent heading levels or accessibility roles.
+  - id: P-SHADCN-CARD-SHARED-SCOPE
+    text:
+      en: Root reuses the public style-scope resolver and must not default to a concrete style that masks the outer scope. Parts use shared selection; density has a separate private visual context. Explicit Card scope affects all descendant family consumers, not just the four parts. Nested Card roots isolate density and may inherit or explicitly override style. Style/density changes preserve native content nodes, edited value, selection, focus, links and action ownership. Only new-york-v4/new-york and rhea are supported; New York supports default density only.
+  - id: P-SHADCN-CARD-COMPATIBILITY-LIMITS
+    text:
+      en: This remains the existing four-part passive subset, not a complete upstream Card API. No automatic image-edge detection or descendant image radius, CardAction columns/placement, container queries, arbitrary data-slot/className/native prop forwarding, CardTitle or CardDescription prototype is added. Consumers compose native heading/paragraph semantics and public Text/Button presentation. Rhea title uses base/medium text; description uses small muted text. No full source parity, stable admission or native raster acceptance follows from token tests.
 dependsOn:
   contracts:
     - C-CORE-SYNTAX-0003
@@ -35,6 +41,9 @@ sources:
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
   - path: packages/prototypes/shadcn/test/card.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Project existing passive parts through bounded New York/Rhea shared scope and density; preserve native content ownership and explicit unsupported source features.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added bounded four-part passive draft Card and real gallery consumption; no stable admission.

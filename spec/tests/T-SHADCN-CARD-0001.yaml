@@ -5,7 +5,7 @@ status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
   en: Owning-layer and synthetic Web harness coverage only; native browser visual and first-frame evidence remain pending, with no stable or complete Finf credit.
-summary: Four-part exports, passive composition, theme-token projection and gallery inheritance.
+summary: Four-part exports, passive composition, finite New York/Rhea scope and density projection, and gallery inheritance.
 cases:
   - id: T-SHADCN-CARD-0001-CASE-1
     title: Four public parts and facade aliases
@@ -39,7 +39,36 @@ cases:
       - P-SHADCN-CARD-CONTENT
       - P-SHADCN-CARD-HEADER-VISUAL
     expectation: native-card-paint-distinct-from-page-and-inherited-text
+  - id: T-SHADCN-CARD-0001-CASE-SCOPE
+    title: Root family scope and density preserve native child identity
+    covers:
+      - P-SHADCN-CARD-SHARED-SCOPE
+      - P-SHADCN-CARD-PASSIVE
+      - P-SHADCN-CARD-VISUAL
+    expectation: inherited-and-explicit-style-density-without-editor-reset
 implementations:
+  - id: shadcn-card-style-projection
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/card-style-projection.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-SCOPE
+    exercises:
+      - P-SHADCN-CARD
+      - P-SHADCN-CARD-HEADER
+      - P-SHADCN-CARD-CONTENT
+      - P-SHADCN-CARD-FOOTER
+  - id: shadcn-card-style-native
+    kind: adapter-test
+    status: planned
+    path: scripts/prototypes/shadcn-card-evidence.mjs
+    required: true
+    consumesCases:
+      - T-SHADCN-CARD-0001-CASE-NATIVE
+      - T-SHADCN-CARD-0001-CASE-SCOPE
+    exercises:
+      - P-SHADCN-CARD
   - id: shadcn-card-harness
     kind: module-test
     status: passing

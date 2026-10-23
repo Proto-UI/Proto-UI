@@ -1394,6 +1394,13 @@ function renderColorUtility(utility: string): string[] | null {
 }
 
 function renderRoundedUtility(utility: string): string[] | null {
+  if (utility === 'rounded-[min(var(--pui-radius-4xl),24px)]')
+    return ['border-radius: min(var(--pui-radius-4xl), 24px);'];
+  if (utility === 'rounded-t-[min(var(--pui-radius-4xl),24px)]')
+    return ['border-top-left-radius: min(var(--pui-radius-4xl), 24px);', 'border-top-right-radius: min(var(--pui-radius-4xl), 24px);'];
+  if (utility === 'rounded-b-[min(var(--pui-radius-4xl),24px)]')
+    return ['border-bottom-left-radius: min(var(--pui-radius-4xl), 24px);', 'border-bottom-right-radius: min(var(--pui-radius-4xl), 24px);'];
+
   if (utility === 'rounded-[var(--pui-radius-2xl)]')
     return ['border-radius: var(--pui-radius-2xl);'];
   if (utility === 'rounded-[var(--pui-radius-4xl)]')
