@@ -114,6 +114,7 @@ import {
   abandonWebComponentPortalProjection,
   adoptWebComponentPortalProjections,
   isWebComponentPortaled,
+  isWebComponentPortalRelocating,
 } from './portal-mount';
 import { createRebindableColorSchemeSource } from './color-scheme-source';
 import { createRebindableWebKeyedMetaSources } from './keyed-meta-sources';
@@ -450,7 +451,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         }
         this._hostDisplay?.sync();
         this._pendingOwnedTokens = null;
-        this._controller?.update();
+        if (!isWebComponentPortalRelocating(this)) this._controller?.update();
         const token = this._instanceToken;
         schedule(() => {
           if (this._instanceToken === token && !this._terminalDisposing)

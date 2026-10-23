@@ -152,24 +152,72 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
   });
 });
 
-it('rejects unimplemented portal decoration before moving caller slot nodes', async () => {
-  const { asOverlay } = await import('@proto.ui/hooks');
-  const proto = definePrototype({
-    name: `owned-decoration-portal-${++id}`,
-    setup(def) {
-      asOverlay().configure({ defaultOpen: true, portal: true, entry: 'manual', restore: 'none' });
-      const target = def.feedback.style.declareDecoration();
-      def.feedback.style.to(target).use(tw('bg-black'));
-      return (r) => [r.el('section', r.slot()), r.decoration(target)];
-    },
-  });
-  AdaptToWebComponent(proto);
-  const host = document.createElement(proto.name),
-    input = document.createElement('input');
-  input.value = 'unchanged';
-  host.append(input);
-  expect(() => document.body.append(host)).toThrow('owned-decoration portal unsupported');
-  expect(input.parentNode).toBe(host);
-  expect(input.value).toBe('unchanged');
-  expect(host.querySelector('[data-pui-owned-decoration]')).toBeNull();
-});
+it.each([false, true])(
+  'paints a same-document portal and replays on reopen (directBody=%s)',
+  async (directBody) => {
+    const { asOverlay } = await import('@proto.ui/hooks');
+    let setups = 0,
+      renders = 0;
+    const proto = definePrototype({
+      name: `owned-decoration-portal-${++id}`,
+      setup(def) {
+        setups++;
+        const overlay = asOverlay();
+        overlay.configure({ defaultOpen: true, portal: true, entry: 'manual', restore: 'none' });
+        def.expose('open', () => overlay.openOverlay());
+        def.expose('close', () => overlay.close());
+        const target = def.feedback.style.declareDecoration();
+        const active = def.state.bool('active', false);
+        def.feedback.style.to(target).use(tw('bg-black'));
+        def.rule({
+          when: (w) => w.state(active).eq(true),
+          intent: (i) => i.feedback.style.to(target).use(tw('bg-white')),
+        });
+        def.event.on('key.down', (_run, e) => {
+          if (e.key === 'F2') active.set(!active.get());
+        });
+        return (r) => {
+          renders++;
+          return [r.decoration(target), r.slot()];
+        };
+      },
+    });
+    AdaptToWebComponent(proto);
+    const origin = directBody ? document.body : document.createElement('div');
+    if (!directBody) document.body.append(origin);
+    const host = document.createElement(proto.name) as HTMLElement & { getExposes(): any };
+    const input = document.createElement('input');
+    input.value = 'unchanged';
+    host.append(input);
+    origin.append(host);
+    const flush = async () => {
+      for (let i = 0; i < 30; i++) await Promise.resolve();
+      await new Promise((r) => setTimeout(r, 0));
+    };
+    await flush();
+    const leaf = host.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+    expect(host.parentNode).toBe(document.body);
+    expect(leaf.getAttribute('data-pui-style')).toBe('bg-black');
+    const before = renders;
+    input.focus();
+    input.setSelectionRange(1, 4, 'backward');
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true }));
+    await flush();
+    expect(leaf.getAttribute('data-pui-style')).toBe('bg-white');
+    expect(renders).toBe(before);
+    expect(host.querySelector('input')).toBe(input);
+    expect(document.activeElement).toBe(input);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([1, 4]);
+    for (let i = 0; i < 3; i++) {
+      host.getExposes().close();
+      await flush();
+      host.getExposes().open();
+      await flush();
+    }
+    expect(setups).toBe(1);
+    const reopened = host.querySelector('[data-pui-owned-decoration]')!;
+    expect(reopened.getAttribute('data-pui-style')).toBe('bg-white');
+    expect(host.querySelector('input')).toBe(input);
+    expect(input.value).toBe('unchanged');
+  }
+);

@@ -55,9 +55,10 @@ The first adapter implementation and its test harness would be a distinct finite
 
 Setup may record contributions for a declared target before its first physical commit. That pending declaration is not an unknown target and must not write to the host. The first commit must validate the complete required binding set before projecting any of it. Missing, duplicated, foreign, or unsupported bindings fail closed. The narrow first capability does not promise a target's rematerialization after structural render, view replacement, reparent or portal movement; that lifetime boundary needs an explicit decision rather than silently borrowing A11y ref rematerialization guarantees.
 
-
 ## Concrete candidate interface for review, 2026-10-23
+
 The following spellings are proposed for review, not stable or already implemented:
+
 - Setup: `const target = def.feedback.style.declareDecoration()` returns an opaque, frozen, instance-local target identity, never a DOM node or string key.
 - Template: `r.decoration(target)` declares one empty owned decorative leaf. The author cannot choose an arbitrary tag, props, events, content, tabindex, children or slot; the adapter chooses a neutral physical leaf. No PrototypeRef or custom-element escape.
 - Setup contribution: `def.feedback.style.to(target).use(tw(...))`; Rule contribution: `i.feedback.style.to(target).use(tw(...))`. This extends existing style contribution addressing; StyleHandle remains a value. Host use remains unchanged. Runtime patch/suppress targeting is excluded from this first slice.
@@ -68,7 +69,6 @@ The following spellings are proposed for review, not stable or already implement
 Private model #941 (18 tests; full feedback suite 257 tests) supports merge/lifetime investigation only. It does not settle the activation contract or make Tabs line available. Compiler/IR coordination is requested through #902. A separate existing-v0 failed-commit atomicity repair will stage the entire blueprint before moving slotPool; it introduces no target API and does not constitute activation.
 
 The existing failed-commit slot staging repair is tracked independently by #943 / #945. It preserves caller nodes on a rejected existing-v0 blueprint; it does not activate targets or settle these candidate spellings. Compiler coordination request: https://github.com/Proto-UI/Proto-UI/issues/902#issuecomment-6354624623 . No reply is presumed to approve this proposal.
-
 
 # Draft fixed-view owned decoration activation
 
@@ -105,7 +105,6 @@ These are DOM unit tests, not native-browser focus/accessibility acceptance. No 
 
 Actual feature dependencies: #941 registry and #945 whole-blueprint/caller-slot staging; draft contract #938. #951 gte and #953 viewport changes are independent collaboration inputs sharing additive files, not decoration feature dependencies. Preserve their contributions when assembling the branch. No generated stylesheet changes are borrowed from unrelated projection branches.
 
-
 ## Draft view-generation refinement (#957, 2026-10-23)
 
 The earlier fixed-first-view proposal and #956 implementation above are historical boundaries, not a reason to equate normal framework view detachment with owner disposal. `createViewEpochOwner.detachView()` unmounts a view while retaining its logical session; `dispose()` is terminal.
@@ -120,7 +119,6 @@ Local framework coverage includes ordinary React and StrictMode, same-turn React
 
 The contract remains Draft. Portable compiler target lowering remains explicitly rejected. Native source-bound evidence for these new adapter and view-generation paths is still required.
 
-
 ### Captured private binding authority
 
 The FeedbackPort exposes a private opaque view-lease capture for adapters. Capture happens while staging, not in a delayed commit callback. The whole binding set snapshots target/sink fields once, validates every sink and exact current lease, and only then publishes. A detached, foreign or retired lease cannot bind even when a new view is mounting. A malformed unpublished sink batch can be corrected without poisoning the view. Reentrant flush stops when its captured binding generation changes; it must never resume into a newly rebound view.
@@ -128,3 +126,15 @@ The FeedbackPort exposes a private opaque view-lease capture for adapters. Captu
 Local verification at 2026-10-23 02:47 UTC: 21 focused files / 300 tests pass, including all Feedback tests, shared staging, four adapters, StrictMode and KeepAlive. Full workspace TypeScript passes. A broader three-framework run has 1197 passing and 11 failing tests; the same eleven failures reproduce exactly in the unchanged prior approved snapshot (six files, 88 pass / 11 fail). This is baseline comparison, not a full-green claim or an attribution of their original cause. No new adapter-native screenshot or AX acceptance is claimed.
 
 Final formatted candidate combined run: 1491 tests pass and the same 11 comparator-reproduced cases fail. Two existing browser suites additionally fail at Chromium startup with ProcessSingleton socket EPERM, leaving 18 tests skipped; they are not native passes and no browser restriction was relaxed. The result is not a full-green suite.
+
+## Draft same-document portal refinement (#963, 2026-10-23)
+
+This candidate changes the earlier explicit portal rejection only for an existing same-document logical portal owner and fixed physical view. No public author spelling changes: the leaf stays empty, permanently decorative, and owned by the current Feedback view lease. A private transport gate stores only the latest already-merged paint, not a second contribution engine. It waits for the existing portal material epoch's actual projection commit before writing.
+
+Policy suspension withdraws the old epoch's paint and cannot revive that epoch. A new authoritative portal epoch can replay retained logical paint only while the same physical view lease remains current. Terminal view retirement, foreign-document adoption, or reentrant owner replacement during a physical write stops old writes. Old releases cannot clear a newer epoch. Normal overlay close/open may construct a new physical leaf; this is not a promise of cross-close leaf identity or focus. Within an open view, changing styles retains caller nodes/value/focus/selection and causes no Proto render.
+
+WC portal moves use a private synchronous, nested and finally-cleaned relocation window so connectedCallback does not request an unrelated Template rebuild during an authentic lease-owned move. Arbitrary DOM moves or user attributes cannot enter that window. A direct-body no-op gets a real material epoch without moving the host, creating a physical projection marker, or changing isPortaled semantics. Repeated mount is idempotent; unmount retires that lease. Cross-document transfer does not use the same-document reconnect shortcut.
+
+React uses its stable createPortal container; Vue uses the existing Teleport projection commit; Vue2 uses its existing native projection commit, including its no-op destination path. Their current-view stage and original logical ownership remain authoritative. Preserve independent #921 reveal and #953 viewport contributions during integration. Portal logical Context is not replaced with DOM ancestry.
+
+Evidence at this candidate: four actual adapter DOM canaries exercise Rule paint, open-view no-render/focus/selection and three close/open cycles. WC additionally tests a direct-body no-op. Guard tests exercise nested relocation, throwing moves and retirement during connectedCallback. These are DOM unit tests, not native-browser portal geometry, focus or accessibility acceptance. The full focused run has 171 passes and two Vue/Vue2 cross-document control failures; both reproduce unchanged in the #961 predecessor (32 pass / same two fail). Full workspace TypeScript passes. This is not an all-green suite. Portal-native evidence and production Select consumption remain pending; this candidate does not make any PR Ready.

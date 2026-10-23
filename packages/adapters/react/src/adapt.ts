@@ -556,13 +556,15 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             const targets = collectWebOwnedDecorationTargets(children);
             const caps = ownerRef.current?.session?.caps;
             const feedback = caps?.getFacades().feedback as FeedbackFacade | undefined;
-            if (targets.length && caps?.getPort<OverlayPort>('overlay')?.getConfig().portal)
-              throw new Error('[React Adapter] owned-decoration portal unsupported');
             const decoration = targets.length
-              ? createWebOwnedDecorationStage(targets, (ids) => {
-                  if (!feedback) throw new Error('[React Adapter] owned-decoration unavailable');
-                  feedback.style.validateDecorationTemplate(ids);
-                })
+              ? createWebOwnedDecorationStage(
+                  targets,
+                  (ids) => {
+                    if (!feedback) throw new Error('[React Adapter] owned-decoration unavailable');
+                    feedback.style.validateDecorationTemplate(ids);
+                  },
+                  { portal: !!caps?.getPort<OverlayPort>('overlay')?.getConfig().portal }
+                )
               : undefined;
             if (!targets.length) feedback?.style.validateDecorationTemplate([]);
             // Pure VNode construction validates the entire v0 blueprint before

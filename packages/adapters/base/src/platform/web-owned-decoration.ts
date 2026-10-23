@@ -1,3 +1,4 @@
+import { createWebOwnedDecorationPortalGate } from './web-owned-decoration-portal';
 import {
   isSvgTemplateNode,
   type OwnedDecorationTarget,
@@ -41,8 +42,10 @@ export type WebOwnedDecorationStage = ReturnType<typeof createWebOwnedDecoration
 /** One physical first view only; no registry recreation or framework state updates on paint. */
 export function createWebOwnedDecorationStage(
   targets: readonly OwnedDecorationTarget[],
-  validate: (targets: readonly OwnedDecorationTarget[]) => void
+  validate: (targets: readonly OwnedDecorationTarget[]) => void,
+  options: { portal?: boolean } = {}
 ) {
+  let portalGate: ReturnType<typeof createWebOwnedDecorationPortalGate> | null = null;
   const identities = [...targets];
   if (new Set(identities).size !== identities.length)
     throw new Error('[owned-decoration] duplicate target');
@@ -127,15 +130,30 @@ export function createWebOwnedDecorationStage(
       });
       phase = 'binding';
       try {
-        bindAll(bindings);
+        portalGate = options.portal
+          ? createWebOwnedDecorationPortalGate(
+              host as HTMLElement,
+              () => phase === 'binding' || phase === 'bound'
+            )
+          : null;
+        bindAll(
+          portalGate
+            ? bindings.map((binding) => ({
+                target: binding.target,
+                sink: portalGate!.wrap(binding.sink),
+              }))
+            : bindings
+        );
         if (phase !== 'binding') throw new Error('[owned-decoration] view retired during binding');
         phase = 'bound';
       } catch (error) {
+        portalGate?.dispose();
         phase = 'failed';
         throw error;
       }
     },
     retire() {
+      portalGate?.dispose();
       phase = 'retired';
       for (const entry of refs.values()) entry.active = false;
     },

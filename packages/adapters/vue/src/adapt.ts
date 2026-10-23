@@ -456,11 +456,11 @@ export function createVueAdapter(runtime: VueRuntime) {
             onCommit: (children, signal, caps) => {
               const targets = collectWebOwnedDecorationTargets(children);
               const feedback = caps.getFacades().feedback as FeedbackFacade;
-              if (targets.length && caps.getPort<OverlayPort>('overlay')?.getConfig().portal)
-                throw new Error('[Vue Adapter] owned-decoration portal unsupported');
               const stage = targets.length
-                ? createWebOwnedDecorationStage(targets, (ids) =>
-                    feedback.style.validateDecorationTemplate(ids)
+                ? createWebOwnedDecorationStage(
+                    targets,
+                    (ids) => feedback.style.validateDecorationTemplate(ids),
+                    { portal: !!caps.getPort<OverlayPort>('overlay')?.getConfig().portal }
                   )
                 : undefined;
               if (!targets.length) feedback.style.validateDecorationTemplate([]);

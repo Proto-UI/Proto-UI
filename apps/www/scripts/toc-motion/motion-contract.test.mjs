@@ -98,3 +98,31 @@ test('isolating every sample or omitting the final input epoch cannot pass', () 
   assert.ok(classifyFrameSamples([epochFrame(0, 1)], 1).failures.length);
   assert.ok(classifyFrameSamples([epochFrame(0, 0)], 1).failures.length);
 });
+
+
+test('native wheel diagnostics disclose hit targets without retargeting or weakening motion', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('./capture-toc-motion.mjs', import.meta.url), 'utf8');
+  const required = [
+    'document.elementFromPoint(x, y)', 'node = node.parentElement',
+    'overscrollBehaviorY: style.overscrollBehaviorY', 'overflowY: style.overflowY',
+    'scrollTop: node.scrollTop', 'scrollHeight: node.scrollHeight', 'clientHeight: node.clientHeight',
+    'target: wheelNode(event.target)', 'event.composedPath()',
+    'hitEvidence: state.readWheelHit(event.clientX, event.clientY)',
+    'deltaMode: event.deltaMode', 'defaultPrevented: event.defaultPrevented',
+    "event.type === 'wheel' && event.stage === s.stage", 'finalFixedPoint: s.readWheelHit(700, 550)',
+    'documentScroller: wheelNode(document.scrollingElement)',
+    'await page.mouse.move(700, 550)', 'await page.mouse.wheel(0, 220 * direction)',
+    'entry.summary.scrollMax - entry.summary.scrollMin < 500',
+    'checks(entry, checkAnimatedRun(entry.frames).failures)',
+  ];
+  const verify = (candidate) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    const hitStart = candidate.indexOf('const wheelNode =');
+    const hitEnd = candidate.indexOf('const tick =', hitStart);
+    assert.ok(!candidate.slice(hitStart, hitEnd).includes('preventDefault('));
+    assert.match(candidate, /entry\.wheelEvidence = await page\.evaluate\([\s\S]*?await save\(\);\s*entry\.inputEpoch/);
+  };
+  verify(source);
+  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
+});

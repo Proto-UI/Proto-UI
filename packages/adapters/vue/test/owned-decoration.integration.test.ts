@@ -92,3 +92,82 @@ describe('draft Vue owned decoration view leases', () => {
       }
     });
 });
+
+it('vue real same-document portal retains Rule paint through reopen', async () => {
+  const { asOverlay } = await import('@proto.ui/hooks');
+  let setups = 0,
+    renders = 0,
+    actions!: { open: () => void; close: () => void };
+  const proto = definePrototype({
+    name: 'vue-portal-owned-leaf',
+    setup(def) {
+      setups++;
+      const overlay = asOverlay();
+      overlay.configure({ defaultOpen: true, portal: true, entry: 'manual', restore: 'none' });
+      def.expose('portalActions', {
+        open: () => overlay.openOverlay(),
+        close: () => overlay.close(),
+      });
+      const target = def.feedback.style.declareDecoration(),
+        active = def.state.bool('active', false);
+      def.feedback.style.to(target).use(tw('bg-black'));
+      def.rule({
+        when: (w) => w.state(active).eq(true),
+        intent: (i) => i.feedback.style.to(target).use(tw('bg-white')),
+      });
+      def.event.on('key.down', (_run, e) => {
+        if (e.key === 'F2') active.set(!active.get());
+      });
+      return (r) => {
+        renders++;
+        return [r.decoration(target), r.slot()];
+      };
+    },
+  });
+  const container = document.createElement('div');
+  document.body.append(container);
+  const Component = createVueAdapter(Vue)(proto, { autoUpdateOnPropsChange: false });
+  const portalRef = Vue.ref();
+  const app = Vue.createApp({
+    render: () =>
+      Vue.h(Component, { ref: portalRef }, () => [
+        Vue.h('input', { 'data-portal-probe': 'vue', value: 'retain caller' }),
+      ]),
+  });
+  try {
+    await settle(() => app.mount(container));
+
+    const input = document.querySelector<HTMLInputElement>('input[data-portal-probe="vue"]')!;
+    const host = input.parentElement!,
+      leaf = host.querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
+    expect(container.contains(host)).toBe(false);
+    expect(host.isConnected).toBe(true);
+    expect(leaf.getAttribute('data-pui-style')).toBe('bg-black');
+    input.focus();
+    input.setSelectionRange(1, 4, 'backward');
+    const before = renders;
+    await settle(() =>
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'F2', bubbles: true }))
+    );
+    expect(leaf.getAttribute('data-pui-style')).toBe('bg-white');
+    expect(renders).toBe(before);
+    expect(document.activeElement).toBe(input);
+    expect([input.selectionStart, input.selectionEnd]).toEqual([1, 4]);
+    actions = portalRef.value.getExposes().portalActions;
+    for (let i = 0; i < 3; i++) {
+      await settle(actions.close);
+      await settle(actions.open);
+    }
+    const current = document.querySelector<HTMLInputElement>('input[data-portal-probe="vue"]')!;
+    expect(setups).toBe(1);
+    expect(current.value).toBe('retain caller');
+    expect(
+      current
+        .parentElement!.querySelector('[data-pui-owned-decoration]')!
+        .getAttribute('data-pui-style')
+    ).toBe('bg-white');
+  } finally {
+    await settle(() => app.unmount());
+    container.remove();
+  }
+});

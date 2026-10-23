@@ -1,3 +1,4 @@
+import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
 import type { InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { Prototype, TemplateChildren } from '@proto.ui/core';
@@ -62,6 +63,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   } = args;
 
   let capsHub: any = null;
+  let portalDecorationGate: ReturnType<typeof createWebOwnedDecorationPortalGate> | null = null;
   // Stage split Template output without replacing owner-lived Shadow nodes.
   // Reuse the staging root; its live child list needs no intermediate copy.
   const shadowCommitRoot =
@@ -110,11 +112,35 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
             const overlay = capsHub?.getPort?.('overlay') as
               | import('@proto.ui/module-overlay').OverlayPort
               | undefined;
-            if (bindings.length && overlay?.getConfig().portal)
-              throw new Error('[WC Adapter] owned-decoration portal unsupported');
-            if (feedback?.bindDecorations) feedback.bindDecorations(bindings, lease!);
-            else if (bindings.length)
-              throw new Error('[WC Adapter] owned-decoration binding unavailable');
+            const gate =
+              bindings.length && overlay?.getConfig().portal
+                ? createWebOwnedDecorationPortalGate(root as HTMLElement, () => {
+                    try {
+                      return feedback?.captureDecorationLease?.() === lease;
+                    } catch {
+                      return false;
+                    }
+                  })
+                : null;
+            try {
+              if (feedback?.bindDecorations)
+                feedback.bindDecorations(
+                  gate
+                    ? bindings.map((binding) => ({
+                        target: binding.target,
+                        sink: gate.wrap(binding.sink),
+                      }))
+                    : bindings,
+                  lease!
+                );
+              else if (bindings.length)
+                throw new Error('[WC Adapter] owned-decoration binding unavailable');
+              portalDecorationGate?.dispose();
+              portalDecorationGate = gate;
+            } catch (error) {
+              gate?.dispose();
+              throw error;
+            }
           };
         })(),
       });
@@ -154,6 +180,8 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         wiring.onRuntimeReady(wiringApi);
       },
       onUnmountBegin: () => {
+        portalDecorationGate?.dispose();
+        portalDecorationGate = null;
         eventGate.disable();
       },
       afterUnmount: () => {

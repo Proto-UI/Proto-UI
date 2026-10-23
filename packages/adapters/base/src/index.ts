@@ -36,3 +36,5 @@ export {
   createWebOwnedDecorationStage,
   type WebOwnedDecorationStage,
 } from './platform/web-owned-decoration';
+
+export { createWebOwnedDecorationPortalGate } from './platform/web-owned-decoration-portal';
