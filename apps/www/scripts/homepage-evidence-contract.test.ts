@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
@@ -670,7 +671,17 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
       locator: locate,
       async evaluateAll(callback: (nodes: Element[]) => unknown) {
         return callback(
-          ['controls', 'hover', 'preferences', 'editor', 'overlays', 'choices'].map((id) => {
+          [
+            'controls',
+            'hover',
+            'workspace-command',
+            'workspace-help',
+            'preferences',
+            'workspace-progress',
+            'editor',
+            'overlays',
+            'choices',
+          ].map((id) => {
             const el = previewWindow.document.createElement('div');
             el.setAttribute('data-gallery-demo', id);
             return el as unknown as Element;
@@ -951,6 +962,9 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     { name: 'native-links', suite: 'site-native-links' },
     { name: 'code-surfaces', suite: 'code-surfaces' },
     { name: 'code-surface-grammar', suite: 'code-surface-grammar' },
+    { name: 'docs-content-flow', suite: 'docs-content-flow' },
+    { name: 'homepage-button-contract', suite: 'homepage-button-contract' },
+    { name: 'homepage-composition', suite: 'homepage-composition' },
     { name: 'copy-commands', suite: 'site-copy-commands' },
     { name: 'runtime-box', suite: 'runtime-preview-surface', contract: 'runtime-preview-evidence' },
     { name: 'search-commands', suite: 'site-search-commands' },
@@ -998,4 +1012,173 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     '*.json',
   ])
     assert.ok(frames.with.path.includes(pattern));
+});
+
+test('density observer rejects missing cards and incorrect physical multicol spacing', () => {
+  const source = readFileSync(
+    new URL('capture-visual-density-evidence.ts', import.meta.url),
+    'utf8'
+  );
+  const ast = ts.createSourceFile(
+    'density.ts',
+    source,
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TS
+  );
+  const declaration = ast.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'gallerySpacingIssues'
+  );
+  assert.ok(declaration);
+  const code = transformSync(declaration.getText(ast).replace('export ', ''), {
+    loader: 'ts',
+    target: 'es2022',
+  }).code;
+  const observe = runInNewContext(`${code}\ngallerySpacingIssues`);
+  const ids = [
+    'controls',
+    'hover',
+    'workspace-command',
+    'workspace-help',
+    'preferences',
+    'workspace-progress',
+    'editor',
+    'overlays',
+    'choices',
+  ];
+  const facts = {
+    columnGap: '24px',
+    cards: ids.map((id, i) => ({
+      id,
+      x: Math.floor(i / 3) * 324,
+      right: Math.floor(i / 3) * 324 + 300,
+      y: (i % 3) * 124,
+      bottom: (i % 3) * 124 + 100,
+    })),
+  };
+  assert.equal(observe(facts, 24).length, 0);
+  const narrow = {
+    columnGap: '20px',
+    cards: ids.map((id, i) => ({ id, x: 0, right: 280, y: i * 120, bottom: i * 120 + 100 })),
+  };
+  assert.equal(observe(narrow, 20).length, 0);
+  for (const mutate of [
+    (value: typeof facts) => {
+      value.cards.pop();
+    },
+    (value: typeof facts) => {
+      value.cards[8]!.id = value.cards[0]!.id;
+    },
+    (value: typeof facts) => {
+      value.columnGap = 'normal 24px';
+    },
+    (value: typeof facts) => {
+      value.cards[1]!.y += 10;
+    },
+    (value: typeof facts) => {
+      for (const card of value.cards.slice(3, 6)) {
+        card.x += 10;
+        card.right += 10;
+      }
+    },
+    (value: typeof facts) => {
+      value.cards[0]!.right = value.cards[0]!.x;
+    },
+  ]) {
+    const broken = structuredClone(facts);
+    mutate(broken);
+    assert.ok(observe(broken, 24).length > 0);
+  }
+  assert.match(source, /assert\.deepEqual\(\s*gallerySpacingIssues\(facts\.gallerySpacing,/);
+  assert.match(source, /select\.height - \(v\.width === 390 \? 44 : 36\)/);
+});
+
+test('only composition restores a hash-keyed font package without extending existing budgets', () => {
+  const workflow = parse(
+    readFileSync(
+      new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  const job = workflow.jobs['isolated-controls'];
+  assert.equal(job['timeout-minutes'], 15);
+  const cache = job.steps.find(
+    (step: { name?: string }) => step.name === 'Restore the exact composition font package only'
+  );
+  assert.equal(cache.if, "matrix.name == 'homepage-composition'");
+  assert.equal(cache.uses, 'actions/cache@v4');
+  assert.equal(cache['timeout-minutes'], 1);
+  assert.equal(
+    cache.with.path,
+    '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb'
+  );
+  assert.equal(
+    cache.with.key,
+    'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c'
+  );
+  assert.equal(cache.with['restore-keys'], undefined);
+  const prep = job.steps.find(
+    (step: { name?: string }) =>
+      step.name === 'Install locked dependencies and the same official font package'
+  );
+  assert.equal(prep['timeout-minutes'], 5);
+  assert.match(prep.run, /pnpm@10\.32\.1 install --frozen-lockfile --ignore-scripts/);
+  assert.match(prep.run, /if \[\[ '\$\{\{ matrix.name \}\}' == 'homepage-composition' \]\]; then/);
+  assert.match(
+    prep.run,
+    /timeout --signal=TERM --kill-after=5s 220s bash apps\/www\/scripts\/prepare-homepage-composition-fonts.sh/
+  );
+  assert.match(
+    prep.run,
+    /else\s+sudo apt-get update -qq\s+sudo apt-get install -y --no-install-recommends fonts-noto-cjk\s+fi/
+  );
+});
+
+test('font acceptance rejects missing Chinese glyphs and malformed selected-face charsets', () => {
+  const shell = readFileSync(
+    new URL('prepare-homepage-composition-fonts.sh', import.meta.url),
+    'utf8'
+  );
+  const body = shell.match(/<<'JS'\n([\s\S]*?)\nJS/);
+  assert.ok(body);
+  const code = transformSync(body[1]!, { loader: 'js', format: 'cjs', target: 'es2022' }).code;
+  const verify = (charset: string) =>
+    runInNewContext(code, {
+      require: (name: string) => {
+        if (name === 'node:assert/strict') return assert;
+        if (name === 'node:fs') return { readFileSync: () => charset };
+        throw new Error(`Unexpected font verifier import: ${name}`);
+      },
+      process: { argv: ['node', '-', 'selected-face.txt'] },
+      console: { log: () => undefined },
+    });
+  assert.doesNotThrow(() => verify('20-7e 4e00-9fff'));
+  for (const bad of ['', '20-7e', 'garbage', '9fff-4e00', '110000-110001'])
+    assert.throws(() => verify(bad));
+  assert.match(shell, /readonly VERSION='1:20230817\+repack1-3'/);
+  assert.match(shell, /readonly SIZE='61229778'/);
+  assert.match(
+    shell,
+    /readonly SHA256='7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c'/
+  );
+  assert.match(shell, /verify_deb "\$DEB" \|\| fail 'Cached Ubuntu font package/);
+  assert.match(shell, /--connect-timeout 10 --max-time 60/);
+  assert.match(shell, /Noto Sans CJK SC/);
+  assert.match(shell, /dpkg-query -L "\$PACKAGE"/);
+});
+
+test('font preparation mocks preserve integrity and glyph failure gates without downloads', () => {
+  const output = execFileSync(
+    'bash',
+    [
+      new URL('prepare-homepage-composition-fonts.test.sh', import.meta.url).pathname,
+      new URL('prepare-homepage-composition-fonts.sh', import.meta.url).pathname,
+    ],
+    { encoding: 'utf8', timeout: 20_000 }
+  );
+  assert.deepEqual(
+    [...output.matchAll(/^PASS: ([\w-]+) \(exit /gm)].map((match) => match[1]),
+    ['success', 'bad-sha', 'bad-version', 'wrong-family', 'missing-glyphs']
+  );
 });

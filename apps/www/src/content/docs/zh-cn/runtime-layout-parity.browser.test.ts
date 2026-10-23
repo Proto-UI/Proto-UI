@@ -99,10 +99,26 @@ async function galleryGeometry(home: Locator) {
       const rect = element.getBoundingClientRect();
       return { x: rect.x - origin.x, y: rect.y - origin.y, width: rect.width, height: rect.height };
     };
-    const text = [...gallery.querySelectorAll<HTMLElement>('[data-home-text]')].map((owner) => {
+    const authoredText = [...gallery.querySelectorAll<HTMLElement>('[data-home-text]')];
+    const visible = (node: HTMLElement) => {
+      for (let at: HTMLElement | null = node; at; at = at.parentElement) {
+        const style = getComputedStyle(at);
+        if (
+          at.matches('[hidden],[aria-hidden="true"],[data-pui-view-detached]') ||
+          style.display === 'none' ||
+          style.visibility === 'hidden'
+        )
+          return false;
+      }
+      return node.getClientRects().length > 0;
+    };
+    // Compare homologous painted text, not WC's retained closed bodies with
+    // framework-removed subtrees. The separate authored count remains exact.
+    const text = authoredText.filter(visible).map((owner) => {
       const surface = owner.firstElementChild!;
       const css = getComputedStyle(surface);
       return {
+        key: `${owner.closest<HTMLElement>('[data-gallery-demo]')?.dataset.galleryDemo}/${owner.className}/${owner.textContent}`,
         role: owner.className,
         text: owner.textContent,
         ...box(owner),
@@ -114,6 +130,7 @@ async function galleryGeometry(home: Locator) {
       };
     });
     return {
+      authoredTextCount: authoredText.length,
       gallery: box(gallery),
       settings: box(gallery.querySelector('[data-home-settings]')!),
       cards: [...gallery.querySelectorAll<HTMLElement>('[data-gallery-demo]')].map((card) => ({
@@ -183,7 +200,9 @@ describe.sequential('Runtime-only vertical layout parity', () => {
             await capture(page, home, `home-${family}-${width}-${index}-${runtime}`, facts);
             expect(facts.theme).toBe('light');
             expect(facts.pageOverflow).toBeLessThanOrEqual(1);
+            expect(facts.authoredTextCount).toBe({ wc: 35, react: 33, vue: 33, vue2: 33 }[runtime]);
             expect(facts.text.length).toBeGreaterThan(20);
+            expect(new Set(facts.text.map((text) => text.key)).size).toBe(facts.text.length);
             for (const text of facts.text) expect(text.display, text.role).toBe('block');
             if (!baseline) baseline = facts;
             else {
@@ -197,6 +216,9 @@ describe.sequential('Runtime-only vertical layout parity', () => {
                 pairedBox(baseline!.cards[index]!, card, card.id!)
               );
               expect(facts.text.length).toBe(baseline.text.length);
+              expect(facts.text.map((text) => text.key)).toEqual(
+                baseline.text.map((text) => text.key)
+              );
               facts.text.forEach((text, index) => {
                 const previous = baseline!.text[index]!;
                 expect([text.role, text.text, text.font, text.size, text.leading]).toEqual([

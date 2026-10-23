@@ -166,6 +166,7 @@ export const BROWSER_SUITES = Object.freeze([
 // The historical PRODUCTION_* names include built-site checks and the private
 // Liquid Card candidate fixture, whose own workflow uses an isolated dev server.
 export const PRODUCTION_BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-prominent-tint.browser.test.ts',
@@ -196,6 +197,8 @@ export const PRODUCTION_BROWSER_SUITES = Object.freeze([
 
 // Each dedicated suite has an executable owner; exclusion is never a skip.
 export const PRODUCTION_BROWSER_OWNERS = Object.freeze({
+  'apps/www/src/content/docs/zh-cn/homepage-composition.browser.test.ts':
+    '.github/workflows/homepage-visual-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-toggle.browser.test.ts':
     '.github/workflows/liquid-material-evidence.yml',
   'apps/www/src/content/docs/zh-cn/demo-liquid-glass-hover.browser.test.ts':

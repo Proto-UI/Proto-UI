@@ -1,3 +1,4 @@
+import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import {
@@ -328,14 +329,18 @@ export function createHomepageGalleryParts(
     ],
     'choices'
   );
+  const composition = createHomepageCompositionParts(family, locale, {
+    p, box, card, button, status,
+  });
   return {
     ids,
     card,
     columns(form: DemoNode): DemoNode[] {
       return [
         box('home-gallery__column', [controls, hover]),
+        box('home-gallery__column', [composition.command, composition.help]),
         box('home-gallery__column', [form]),
-        box('home-gallery__column', [editor]),
+        box('home-gallery__column', [composition.progress, editor]),
         box('home-gallery__column', [overlays, choices]),
       ];
     },
@@ -404,6 +409,7 @@ export function createHomepageGalleryParts(
       const feedback = (ref: string, value: string) => {
         setHomepageText(context.refs[ref]!, value);
       };
+      composition.setup({ bind, write, feedback });
       for (const [ref, label] of [
         ['gallery-primary', zh ? '主要按钮' : 'Primary button'],
         ['gallery-secondary', zh ? '次要按钮' : 'Secondary button'],
@@ -480,3 +486,4 @@ export function createHomepageGalleryParts(
     },
   };
 }
+

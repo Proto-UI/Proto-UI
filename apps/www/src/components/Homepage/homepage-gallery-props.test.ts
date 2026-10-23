@@ -46,7 +46,42 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     };
     await settle();
     verify();
-    expect(host.querySelectorAll('[data-home-text]')).toHaveLength(24);
+    const assertTextOwners = (owners: Element[]) => {
+      // Direct WC rendering retains authored boxes inside detached content hosts.
+      expect(owners).toHaveLength(35);
+      expect(new Set(owners).size).toBe(35);
+      expect(
+        owners.filter((owner) => !owner.closest('[data-gallery-demo^="workspace-"]'))
+      ).toHaveLength(24);
+      const scenes = {
+        'workspace-command': [
+          'What comes next?',
+          'Find a step to update the plan on this page.',
+          'Page-only demo. No external actions.',
+        ],
+        'workspace-progress': [
+          'Make room for an idea',
+          'Drag or use arrow keys to adjust your plan.',
+          'Plan progress: 40%',
+        ],
+        'workspace-help': [
+          'A little help along the way',
+          'Open a question and keep exploring.',
+          'Choose a result in the step finder, or adjust the progress. Both scenes use the same page-local plan.',
+          'Use Tab to move focus, arrows and Enter to choose search results, and arrows to adjust the slider.',
+          'This is an interactive example on the current page. Nothing is uploaded, published or saved to an account. Reloading restores the defaults.',
+        ],
+      };
+      for (const [id, texts] of Object.entries(scenes)) {
+        const actual = owners.filter((owner) => owner.closest(`[data-gallery-demo="${id}"]`));
+        expect(actual.map((owner) => owner.textContent?.trim())).toEqual(texts);
+      }
+    };
+    const textOwners = Array.from(host.querySelectorAll('[data-home-text]'));
+    assertTextOwners(textOwners);
+    expect(() => assertTextOwners(textOwners.slice(1))).toThrow();
+    expect(() => assertTextOwners([...textOwners, textOwners[0]!])).toThrow();
+    expect(() => assertTextOwners([textOwners[0]!, ...textOwners.slice(0, -1)])).toThrow();
     for (const owner of host.querySelectorAll('[data-home-text]')) {
       const text = owner.querySelector('[data-pui-root]')!;
       expect(text).not.toBeNull();
