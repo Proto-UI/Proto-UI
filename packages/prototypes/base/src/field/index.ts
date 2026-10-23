@@ -21,3 +21,10 @@ export type {
   FieldSelectTriggerExposes,
   FieldSelectTriggerAsHookContract,
 } from './select-trigger.proto';
+
+export { default as fieldSwitch, asFieldSwitch } from './switch.proto';
+export type {
+  FieldSwitchProps,
+  FieldSwitchExposes,
+  FieldSwitchAsHookContract,
+} from './switch.proto';

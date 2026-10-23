@@ -1,9 +1,23 @@
-import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
+import {
+  defineAsHook,
+  definePrototype,
+  delay,
+  type DefHandle,
+  type RunHandle,
+} from '@proto.ui/core';
 import { asAccessible, asFocusable, asTrigger, asControlLabel, asAxisInput } from '@proto.ui/hooks';
 import { SWITCH_CONTEXT, SWITCH_FAMILY } from './shared';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
+import { FIELD_LABEL_PAIR } from '../field/shared';
 import type { SwitchRootAsHookContract, SwitchRootExposes, SwitchRootProps } from './types';
 
-function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): void {
+export type SwitchRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+/** Definition-time semantic composition; ordinary Switch remains independent of Field. */
+export function setupSwitchRoot(
+  def: DefHandle<SwitchRootProps, SwitchRootExposes>,
+  options: SwitchRootSetupOptions = {}
+): void {
+  const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
   // P-BASE-SWITCH-ROLE-ON-OFF-VALUE, P-BASE-SWITCH-DISPLAY-AND-INPUT
   // P-BASE-SWITCH-ROOT-SEMANTIC-OWNER, P-BASE-SWITCH-ROOT-DOMAIN-ANCHOR
@@ -94,6 +108,29 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
   let startProgress = 0;
   let live = true;
   let interactionEpoch = 0;
+  let currentRun: RunHandle<SwitchRootProps> | null = null;
+  let viewEpoch = 0;
+  const reportTasks = new Set<{ cancel(): void }>();
+  const readOnly = () => binding?.state.fieldReadOnly.get() ?? false;
+  const reportField = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
+    if (!binding || !live || !currentRun) return;
+    binding.report({ value: checked.get(), focused: focused.get(), composing: false, reason });
+  };
+  const retireField = () => {
+    currentRun = null;
+    viewEpoch++;
+    for (const task of reportTasks) task.cancel();
+    reportTasks.clear();
+  };
+  const notifyFieldChange = () => {
+    if (!binding || !live || !currentRun) return;
+    const epoch = viewEpoch;
+    const task = delay(0, () => {
+      reportTasks.delete(task);
+      if (currentRun && live && epoch === viewEpoch) reportField('change');
+    });
+    reportTasks.add(task);
+  };
 
   const publishContext = (run: RunHandle<SwitchRootProps>) => {
     const epoch = interactionEpoch;
@@ -120,7 +157,7 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
       activation: 'directional',
       contactBasis: 'cancel-on-extent-change',
       disabled: !live || disabled.get() || !draggable.get(),
-      readOnly: false,
+      readOnly: readOnly(),
       reverse: false,
     });
   };
@@ -157,22 +194,38 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
     publishContext(run);
   };
 
+  if (binding) {
+    binding.state.fieldDisabled.watch(() => {
+      if (currentRun) syncDisabled(currentRun, binding.state.fieldDisabled.get());
+    });
+    binding.state.fieldReadOnly.watch(() => {
+      if (currentRun) invalidatePreview(currentRun);
+    });
+    focused.watch((_, event) => {
+      if (event.type === 'next') reportField(event.next ? 'sync' : 'blur');
+    });
+  }
+
   // P-BASE-SWITCH-CONTROLLED-CHECKED, P-BASE-SWITCH-CONTROLLED-EMITS-NEXT
   // P-BASE-SWITCH-UNCONTROLLED-UPDATES-CHECKED
   def.lifecycle.onCreated((run) => {
+    currentRun = run;
     controlled = run.props.isProvided('checked');
     checked.set(
       controlled ? !!run.props.get().checked : !!run.props.get().defaultChecked,
       'reason: switch root initialize checked'
     );
-    syncDisabled(run, !!run.props.get().disabled);
+    syncDisabled(run, binding ? binding.state.fieldDisabled.get() : !!run.props.get().disabled);
     publishContext(run);
+    reportField();
   });
 
   def.lifecycle.onMounted((run) => {
+    currentRun = run;
     live = true;
     syncAxis(run);
     publishContext(run);
+    reportField();
   });
 
   // P-BASE-SWITCH-CONTROLLED-CHECKED
@@ -184,11 +237,12 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
     if (controlled) checked.set(!!next.checked, 'reason: switch root controlled checked sync');
     if (changed) invalidatePreview(run);
     else publishContext(run);
+    reportField();
   });
 
   // P-BASE-SWITCH-DISABLED-EXPOSE, P-BASE-SWITCH-DISABLED-CLEAR-TRANSIENT
   def.props.watch(['disabled'], (run, next) => {
-    syncDisabled(run, !!next.disabled);
+    syncDisabled(run, binding ? binding.state.fieldDisabled.get() : !!next.disabled);
   });
 
   def.props.watch(['draggable', 'direction'], (run) => {
@@ -196,10 +250,12 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
     publishContext(run);
   });
   def.lifecycle.onUnmounted((run) => {
+    retireField();
     live = false;
     invalidatePreview(run, false);
   });
   def.lifecycle.onBeforeDispose(() => {
+    retireField();
     live = false;
     accepted = false;
     interactionEpoch++;
@@ -252,19 +308,33 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
     nextChecked: boolean,
     isCurrent: () => boolean = () => true
   ) => {
-    if (!live || disabled.get() || !isCurrent() || nextChecked === checked.get()) return;
+    if (!live || disabled.get() || readOnly() || !isCurrent() || nextChecked === checked.get())
+      return;
+    const previousChecked = checked.get();
     const epoch = ++interactionEpoch;
-    const current = () => live && !disabled.get() && interactionEpoch === epoch && isCurrent();
+    const current = () =>
+      live && !disabled.get() && !readOnly() && interactionEpoch === epoch && isCurrent();
     if (!controlled) checked.set(nextChecked, 'reason: switch accepted checked request');
     if (!current()) return;
     publishContext(run);
     if (!current()) return;
+    const reportRun = currentRun;
+    const reportEpoch = viewEpoch;
     run.expose.emit('checkedChange', { checked: nextChecked });
     if (current()) publishContext(run);
+    if (
+      live &&
+      currentRun === reportRun &&
+      viewEpoch === reportEpoch &&
+      checked.get() !== previousChecked
+    ) {
+      reportField();
+      if (live && currentRun === reportRun && viewEpoch === reportEpoch) notifyFieldChange();
+    }
   };
   const activate = (run: RunHandle<SwitchRootProps>, isCurrent: () => boolean = () => true) => {
     pressed.set(false, 'reason: switch root press.commit => pressed');
-    if (!live || disabled.get() || !isCurrent()) return;
+    if (!live || disabled.get() || readOnly() || !isCurrent()) return;
     if (accepted) invalidatePreview(run);
     requestChecked(run, !checked.get(), isCurrent);
   };
@@ -277,7 +347,7 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
       return;
     }
     if (sample.phase === 'start') {
-      if (disabled.get() || !draggable.get()) return;
+      if (disabled.get() || readOnly() || !draggable.get()) return;
       const epoch = ++interactionEpoch;
       accepted = true;
       startProgress = checked.get() ? 1 : 0;
@@ -305,13 +375,16 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
   def.event.on('press.commit', (run) => {
     activate(run);
   });
-  asControlLabel().target<SwitchRootProps>((run, request) => {
-    if (disabled.get() || !request.isCurrent()) return;
-    const isCurrent = () => !disabled.get() && request.isCurrent();
-    focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
-    if (!isCurrent()) return;
-    activate(run, isCurrent);
-  });
+  asControlLabel().target<SwitchRootProps>(
+    (run, request) => {
+      if (disabled.get() || !request.isCurrent()) return;
+      const isCurrent = () => !disabled.get() && request.isCurrent();
+      focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+      if (!isCurrent()) return;
+      activate(run, isCurrent);
+    },
+    options.fieldBinding ? FIELD_LABEL_PAIR : undefined
+  );
 }
 
 /*
@@ -319,7 +392,7 @@ function setupSwitchRoot(def: DefHandle<SwitchRootProps, SwitchRootExposes>): vo
  * - P-BASE-SWITCH-CLICK-DEFERRED: absence of a `click` expose event is the implementation.
  * - P-BASE-SWITCH-INDICATOR-PRESENTATIONAL-A11Y: owned by root semantics and thumb's absence of a11y control syntax.
  * - P-BASE-SWITCH-PROP-LABEL-DEFERRED: accessible naming uses content/a11y projection; no `label` prop is accepted.
- * - P-BASE-SWITCH-FORM-INTEGRATION-DEFERRED: awaits Form prototype cataloging.
+ * - P-BASE-SWITCH-FORM-INTEGRATION-DEFERRED: optional Field composition is explicit; form submission remains outside this root.
  * - P-BASE-SWITCH-NO-VISUAL-VARIANT-CORE: visual parameters are owned by downstream styled prototypes.
  * - P-BASE-SWITCH-TRACK-DEFERRED: track is not an official Switch core part in this implementation.
  */

@@ -1,0 +1,29 @@
+id: C-FIELD-SWITCH-0001
+type: contract
+title: Optional Field composition of the existing Switch root
+status: draft
+since: 0.3.0-alpha.1
+summary: One checked owner and one Field validator, with explicit semantic composition.
+criteria:
+  - id: C-FIELD-SWITCH-0001-COMPOSITION
+    text:
+      en: FieldSwitch and asFieldSwitch call the public setupSwitchRoot with definition-time fieldBinding enabled. Ordinary Switch keeps its existing label association and does not silently attach to a surrounding Field. The composed root claims the existing Field control role and uses FIELD_LABEL_PAIR while remaining the sole Switch checked and directional-preview owner. Thumb remains a passive Switch part.
+  - id: C-FIELD-SWITCH-0001-POLICY
+    text:
+      en: The existing optional Field binding combines local and parent disabled, readOnly and required without feeding inherited policy back into raw local props. Disabled prevents focus and activation. ReadOnly preserves focus but rejects checked requests and directional activation; changing policy during a preview cancels that preview through the existing axis policy and restores canonical progress. Removing either local or parent restriction restores the existing owner. Controlled checked props remain authoritative.
+  - id: C-FIELD-SWITCH-0001-FACTS
+    text:
+      en: Invalid, pending, required, label, description and error relationships belong exclusively to the existing Field binding. Reports contain the canonical boolean checked value, never a rejected controlled proposal, and use the existing Field initial-value and validation leases. There is no new validator, inferred native validity, hidden input, form serialization or submission protocol. Without a provider the optional entry has no dangling Field relationships.
+  - id: C-FIELD-SWITCH-0001-LIFECYCLE
+    text:
+      en: Each accepted canonical checked change emits the existing checkedChange synchronously. If the same view remains live after delivery, its canonical Field snapshot is synchronized and one owned zero-delay change notification is scheduled. Consecutive accepted changes are not debounced; each notification reads current canonical truth and existing Field validation leases retain latest-result ownership. A rejected controlled request schedules no validation. Unmount, disposal or synchronous outward-listener retirement cancels pending reports. Focus and blur reporting reuse the existing focus owner. Relationships and policy changes do not replace checked state or copy Switch activation or drag mechanics.
+sources:
+  - path: packages/prototypes/base/src/switch/root.proto.ts
+  - path: packages/prototypes/base/src/field/switch.proto.ts
+verifies:
+  tests: [T-FIELD-SWITCH-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Opts the existing Switch root into Field semantics without a second behavior implementation.
+tags: [field, switch, composition]

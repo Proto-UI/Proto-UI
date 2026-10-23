@@ -10,5 +10,10 @@ export type {
 } from './types';
 
 export { SWITCH_FAMILY } from './shared';
-export { asSwitchRoot, default as switchRoot } from './root.proto';
+export {
+  asSwitchRoot,
+  setupSwitchRoot,
+  type SwitchRootSetupOptions,
+  default as switchRoot,
+} from './root.proto';
 export { asSwitchThumb, default as switchThumb } from './thumb.proto';
