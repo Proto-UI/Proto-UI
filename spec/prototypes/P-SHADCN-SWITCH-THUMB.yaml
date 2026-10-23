@@ -6,11 +6,11 @@ since: 0.2.0-rc.0
 summary: Shadcn Switch Thumb inherits the Base context-driven indicator protocol and adds the currently implemented thumb shape, sizing, surface, and motion tokens.
 statement:
   zh-CN: >-
-    Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 resident translate timing declaration。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。
+    Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 source CSS transform transition declaration。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。
 
 
   en: >-
-    Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and resident translate timing declaration. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences.
+    Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and source CSS transform transition declaration. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences.
 
 
 criteria:
@@ -49,8 +49,8 @@ criteria:
             ]
   - id: P-SHADCN-SWITCH-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Thumb uses pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Checked uses translate-x-[calc(100%_-_2px)]; dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Source size-4 remains 1rem, corresponding to 16px or 32px at those root fonts; translation is the used Thumb width minus 2px. Root now scales in rem too; declarations are not rendered geometry evidence. Local ring isolation and scoped border-box remain disclosed extensions. Existing resident translate timing is preserved; sm uses size-3 (0.75rem) under the actual logical Root size protocol; full transform-channel support remains a gap. No value or interaction owner is added.
-      zh-CN: 默认Thumb使用pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border/shadow。checked为translate-x-[calc(100%_-_2px)]，dark unchecked为bg-foreground、checked为bg-primary-foreground。size-4保持1rem，在两种根字体下声明为16px/32px；位移为实际Thumb宽减2px。Root也按rem缩放，声明不是渲染实测。local ring isolation与scoped border-box为已披露扩展；保留resident translate动画，sm按实际逻辑Root尺寸协议使用size-3（0.75rem），完整transform通道仍是缺口，不新增值或交互owner。
+      en: Default Thumb uses pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0 with no border or shadow. Checked uses translate-x-[calc(100%_-_2px)]; dark unchecked uses bg-foreground and dark checked bg-primary-foreground. Source size-4 remains 1rem, corresponding to 16px or 32px at those root fonts; translation is the used Thumb width minus 2px. Root now scales in rem too; declarations are not rendered geometry evidence. Local ring isolation and scoped border-box remain disclosed extensions. Source CSS transform transition replaces resident translate timing; sm uses size-3 (0.75rem) under the actual logical Root size protocol; independent transform properties and reduced-motion projection are included; actual native motion remains separately verified. No value or interaction owner is added.
+      zh-CN: 默认Thumb使用pointer-events-none block size-4 rounded-full bg-background ring-0 ring-offset-0 translate-x-0，无border/shadow。checked为translate-x-[calc(100%_-_2px)]，dark unchecked为bg-foreground、checked为bg-primary-foreground。size-4保持1rem，在两种根字体下声明为16px/32px；位移为实际Thumb宽减2px。Root也按rem缩放，声明不是渲染实测。local ring isolation与scoped border-box为已披露扩展；源 CSS transform transition 替代旧 resident translate 动画，sm按实际逻辑Root尺寸协议使用size-3（0.75rem），独立 transform 属性与减少运动投射已包含，实际原生运动仍独立验证，不新增值或交互owner。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -68,17 +68,25 @@ criteria:
       prototypes:
         - id: P-SHADCN-SWITCH
           anchors: [P-SHADCN-SWITCH-VISUAL-SIZE-OWNER, P-SHADCN-SWITCH-VISUAL-SIZE-LIFECYCLE]
+  - id: P-SHADCN-SWITCH-THUMB-SHARED-PROFILES
+    text:
+      en: Actual Root style is authoritative. New York keeps full radius and 100%-2px travel; Rhea adds theme2xl, shadow-sm, light padding clip and 100%-4px travel. Both use the fixed source transform transition, whose CSS includes independent translate/scale/rotate and honors reduced motion. This replaces the previous resident translate writer, not checked ownership or Thumb anatomy.
+      zh-CN: 视觉样式以实际 Root 为准。NY 保留 full 圆角与 100%-2px 位移；Rhea 使用 theme2xl、shadow-sm、浅色 padding clip 与 100%-4px 位移。两者使用固定上游 transform transition，CSS 包含独立 translate/scale/rotate 并遵循减少运动偏好；该声明替代旧 resident translate writer，不替换 checked 或 Thumb anatomy。
 openQuestions:
   - id: P-SHADCN-SWITCH-THUMB-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: 当前公开 Thumb anatomy part 与固定 upstream 内部 Thumb 在组合、尺寸、状态位移和 surface 上应如何对齐？
       en: How should the current public Thumb anatomy part align with the pinned upstream internal Thumb in composition, sizing, state movement, and surface?
     context:
-      en: The default/sm presentation follows the pinned New York wrapper. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Owner-bound size coordination is family-owned; full transition-transform channels and full API parity remain outside this slice. Extra borders and shadows are absent; existing governed resident timing remains; real rendered travel and dark paint remain separately testable.
-      zh-CN: default/sm尺寸呈现遵循固定New York wrapper；保留公开可选same-domain Thumb，不照搬上游内部composition。owner-bound尺寸协调由家族自有；完整transition-transform通道与API一致仍不属于本片。不加入额外border/shadow，保留既有受治理resident timing；真实位移与dark paint仍需独立验证。
+      en: The default/sm presentation follows the pinned New York wrapper. A public optional same-domain Thumb is retained instead of copying the upstream internal composition. Owner-bound size coordination is family-owned; full API parity remains outside this slice; transform properties and reduced-motion CSS are projected. New York has no extra border or shadow, while Rhea intentionally uses its source shadow-sm; competing resident timing is not installed; real rendered travel and dark paint remain separately testable.
+      zh-CN: default/sm尺寸呈现遵循固定New York wrapper；保留公开可选same-domain Thumb，不照搬上游内部composition。owner-bound尺寸协调由家族自有；完整 API 一致仍不属于本片；投射 transform 属性与减少运动 CSS。NY 无额外 border/shadow，Rhea 使用源 shadow-sm，不安装冲突的 resident timing；真实位移与dark paint仍需独立验证。
     blocks: [shadcn switch thumb parity roadmap]
 sources:
-  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+    label: Rhea Switch rules; fixed Git blob 94bbca2a7f78845e7cfbcff68fb8f535e3848a98; inspected 2026-10-23. Local text has one transport-added final newline excluded from the Git-blob comparison.
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/switch.tsx
+    label: Common Base wrapper and hit inset; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7.
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/new-york-v4/ui/switch.tsx
     label: Current New York Switch wrapper; inspected 2026-10-12; Git blob c45932afe4e484c900aa916e81d0e0d67137bedc; SHA256 743676f33f823ffa8008bbd5eb94cb68e227599447d60e132a202291a395f8e4
   - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L1249-L1264
     label: Historical Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39

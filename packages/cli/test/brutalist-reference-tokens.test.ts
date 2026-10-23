@@ -23,7 +23,7 @@ describe('source-aligned Brutalist style closure', () => {
       'font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'
     );
     expect(css).toContain('border-radius: var(--pui-radius);');
-    expect(css).toContain('transition-property: transform;');
+    expect(css).toContain('transition-property: transform, translate, scale, rotate;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     const reduced = renderProtoStyleTokenCss(['transition-transform']).split(
       '@media (prefers-reduced-motion: reduce)'

@@ -33,3 +33,6 @@ export type {
   ShadcnFieldSelectTriggerProps,
   ShadcnFieldSelectTriggerExposes,
 } from './select-trigger.proto';
+
+export { default as fieldSwitch, default as shadcnFieldSwitch } from './switch.proto';
+export type { ShadcnFieldSwitchProps, ShadcnFieldSwitchExposes } from './switch.proto';

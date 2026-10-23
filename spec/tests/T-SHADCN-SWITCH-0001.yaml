@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Switch Root identity, Base inheritance, Root/Thumb behavior, the replaceable default-Thumb preset, current styles, intentional asChild omission, and its bounded upstream compatibility claim.
 cases:
+  - id: T-SHADCN-SWITCH-0001-CASE-SHARED-PROFILES
+    title: NY and Rhea retain scope precedence, actual Root visual ownership and bounded hit lease
+    covers:
+      [
+        P-SHADCN-SWITCH-SHARED-PROFILES,
+        P-SHADCN-SWITCH-RHEA-SURFACE,
+        P-SHADCN-SWITCH-RHEA-HIT-LEASE,
+      ]
+    expectation: switch-style-profile-and-four-runtime-native-evidence
   - id: T-SHADCN-SWITCH-0001-CASE-VISUAL-SIZE
     title: Family-only default and sm sizes follow the actual logical Root across updates and remounts
     covers:

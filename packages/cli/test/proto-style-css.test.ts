@@ -369,7 +369,11 @@ describe('proto style css renderer', () => {
   });
 
   it('renders only finite field sizing and resize vocabulary on light and shadow targets', () => {
-    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss, (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText]) {
+    for (const render of [
+      renderProtoStyleTokenCss,
+      renderProtoShadowStyleTokenCss,
+      (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+    ]) {
       for (const [token, declaration] of [
         ['resize-none', 'resize: none;'],
         ['resize-y', 'resize: vertical;'],
@@ -944,4 +948,23 @@ it('lowers only the two additional bounded theme radius slots for Command', () =
   const theme = renderPrefixedThemeCss(':root{--radius:0.625rem;}');
   expect(theme).toContain('--pui-radius-xl: calc(var(--pui-radius) + 4px);');
   expect(theme).toContain('--pui-radius-3xl: calc(var(--pui-radius) + 12px);');
+});
+
+describe('transform transition property closure', () => {
+  it('includes independent transform properties on all three targets and preserves reduced motion', () => {
+    for (const render of [
+      renderProtoStyleTokenCss,
+      renderProtoShadowStyleTokenCss,
+      (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+    ]) {
+      const css = render(['transition-transform', 'translate-x-[calc(100%_-_4px)]']);
+      expect(css).toContain('transition-property: transform, translate, scale, rotate;');
+      expect(css).toContain('@media (prefers-reduced-motion: reduce)');
+      expect(css).toContain('transition-property: none;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['transition-[transform,translate,opacity]'])).toContain(
+        'Unsupported Proto UI style tokens'
+      );
+    }
+  });
 });

@@ -288,7 +288,7 @@ const staticUtilities: Record<string, string[]> = {
   ],
   'transition-none': ['transition-property: none;'],
   'transition-transform': [
-    'transition-property: transform;',
+    'transition-property: transform, translate, scale, rotate;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],

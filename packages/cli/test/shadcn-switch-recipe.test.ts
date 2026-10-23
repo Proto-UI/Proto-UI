@@ -61,8 +61,9 @@ describe('fixed New York Switch recipe delivery', () => {
         'box-sizing: border-box;',
       ])
         expect(css).toContain(declaration);
-      // Existing Runtime remains the timing writer; no full transition-all claim.
-      expect(css).not.toContain('transition-property:');
+      // Fixed upstream uses CSS transition-all / independent transform properties.
+      expect(css).toContain('transition-property: all;');
+      expect(css).toContain('transition-property: transform, translate, scale, rotate;');
     }
     const splitCss = renderProtoShadowSplitStyleArtifact(tokens).cssText;
     for (const token of ['h-[1.15rem]', 'w-8', 'h-3.5', 'w-6'])

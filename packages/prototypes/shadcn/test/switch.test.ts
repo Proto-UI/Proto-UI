@@ -259,7 +259,7 @@ describe('prototypes/shadcn: switch', () => {
         .map((value: string) => value.slice(value.lastIndexOf(':') + 1));
       expect(authoredUtilities).not.toContain(token);
     }
-    expect(styleContains(thumb, 'transition-transform')).toBe(false);
+    expect(styleContains(thumb, 'transition-transform')).toBe(true);
     expect(styleContains(thumb, 'border')).toBe(false);
     expect(styleContains(thumb, 'shadow-lg')).toBe(false);
     for (const checked of [false, true]) {
@@ -319,7 +319,9 @@ describe('prototypes/shadcn: switch', () => {
     for (let i = 0; i < 6; i++) await Promise.resolve();
     expect(root.getAttribute('style') ?? '').not.toContain('static-hit');
     expect(root.getAttribute('data-pui-static-hit')).toBeNull();
-    expect(styleContains(root, 'relative')).toBe(false);
+    // A persistent positioning box permits scope-driven hit lease acquisition.
+    // NY still owns no inset or generated hit marker.
+    expect(styleContains(root, 'relative')).toBe(true);
     root.remove();
   });
 

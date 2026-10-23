@@ -5,8 +5,8 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Switch Root is an unofficial Proto UI-maintained projection that inherits Base Switch root semantics and adds the currently implemented shadcn-style track and state-driven visual surface.
 statement:
-  en: This unofficial direct projection preserves all Base Switch value, activation, focus, disabled, accessibility, context and checkedChange ownership. The current default/sm visual target is shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b apps/v4/registry/new-york-v4/ui/switch.tsx. Older Base+Nova sources remain historical evidence only. Public Root/Thumb composition and preset ownership are unchanged.
-  zh-CN: 此非官方投射保留全部 Base Switch value、activation、focus、disabled、accessibility、context 与 checkedChange owner。现行默认/sm尺寸视觉目标为 shadcn/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 的 apps/v4/registry/new-york-v4/ui/switch.tsx；旧 Base+Nova 仅保留历史证据，公开 Root/Thumb composition 与 preset owner 不变。
+  en: This unofficial direct projection preserves all Base Switch value, activation, focus, disabled, accessibility, context and checkedChange ownership. The current default/sm visual target is shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7 apps/v4/registry/new-york-v4/ui/switch.tsx. Older Base+Nova sources remain historical evidence only. Public Root/Thumb composition and preset ownership are unchanged.
+  zh-CN: 此非官方投射保留全部 Base Switch value、activation、focus、disabled、accessibility、context 与 checkedChange owner。现行默认/sm尺寸视觉目标为 shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7 的 apps/v4/registry/new-york-v4/ui/switch.tsx；旧 Base+Nova 仅保留历史证据，公开 Root/Thumb composition 与 preset owner 不变。
 criteria:
   - id: P-SHADCN-SWITCH-UPSTREAM-IDENTITY
     text:
@@ -33,14 +33,14 @@ criteria:
       zh-CN: 不对 Base value、activation、focus、disabled、a11y、context、交互状态或 outward signals 施加负向补丁；家族 style rules 仍是视觉增量。
   - id: P-SHADCN-SWITCH-DIRECT-ENTRY
     text:
-      zh-CN: 当前 Root protocol 以 `shadcn-switch-root` direct prototype 公开；本层不额外提供 authored asHook。
-      en: The current Root protocol is exposed as the `shadcn-switch-root` direct prototype; this layer provides no additional authored asHook.
+      zh-CN: 普通 Root protocol 以 shadcn-switch-root 公开；shadcn-field-switch 语义组合复用 asFieldSwitch 与同一 paint setup，并采用既有可选 Field label、policy 与 invalid owner。本层不新增第二套 Switch 行为实现或 authored asHook。
+      en: The ordinary Root protocol is exposed as shadcn-switch-root. The shadcn-field-switch semantic composition reuses asFieldSwitch and the same paint setup, with existing optional Field label, policy and invalid ownership; this layer provides no second Switch behavior implementation or additional authored asHook.
     dependsOn:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-SWITCH-CURRENT-VISUAL-SURFACE
     text:
-      en: Default Root uses inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none. Preserve source rem units; declarations correspond to 32 by 18.4 at root 16px and 64 by 36.8 at root 32px, without claiming rendered measurement. No extra hover tint or press scale is added. Scoped border-box and select-none are retained host-baseline extensions. Existing resident background-color motion remains governed by C-FEEDBACK-RESIDENT-MOTION-0001; full upstream transition-all interpolation is not implemented. The sm Root uses h-3.5 w-6 (0.875rem by 1.5rem) through the owner-bound visual size protocol below.
-      zh-CN: 默认 Root 使用 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none。保留 rem；声明值对应根字体16px时32×18.4、32px时64×36.8，不等于实测。无额外hover着色或press缩放；保留scoped border-box与select-none宿主基线扩展。既有resident background-color动画继续受C-FEEDBACK-RESIDENT-MOTION-0001治理，尚未完整实现transition-all。sm Root使用h-3.5 w-6（0.875rem×1.5rem），按下述owner-bound视觉尺寸协议协调。
+      en: Default Root uses inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none. Preserve source rem units; declarations correspond to 32 by 18.4 at root 16px and 64 by 36.8 at root 32px, without claiming rendered measurement. No extra hover tint or press scale is added. Scoped border-box and select-none are retained host-baseline extensions. CSS transition-all now follows the fixed source; this supersedes the previous narrower resident background-color declaration and must not install a competing inline transition writer. The sm Root uses h-3.5 w-6 (0.875rem by 1.5rem) through the owner-bound visual size protocol below.
+      zh-CN: 默认 Root 使用 inline-flex h-[1.15rem] w-8 shrink-0 items-center rounded-full border border-transparent p-0 shadow-xs bg-input outline-none。保留 rem；声明值对应根字体16px时32×18.4、32px时64×36.8，不等于实测。无额外hover着色或press缩放；保留scoped border-box与select-none宿主基线扩展。按固定上游改用 CSS transition-all，替代旧的较窄 resident background-color 声明，不得同时安装冲突的 inline transition writer。sm Root使用h-3.5 w-6（0.875rem×1.5rem），按下述owner-bound视觉尺寸协议协调。
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
       decisions:
@@ -106,14 +106,26 @@ criteria:
     text:
       en: Root initializes size before descendant mounting and publishes size invalidation on Props changes. Every Thumb resolves its current owner on mount, update, relevant Anatomy membership change and visual Context notification; it never trusts a cached former owner or notification payload. View detach clears derived visual size, remount re-reads current ownership, and terminal disposal releases module-owned subscriptions. Multiple Thumbs derive independently. Default, replacement and omitted preset parts preserve this protocol without a second visual owner. Native, browser and compiler realization remain separate evidence gates.
       zh-CN: Root在后代挂载前初始化size，Props变化时发布尺寸失效通知。每个Thumb在mount、update、相关Anatomy membership变化与视觉Context通知时重新解析当前owner，不信任旧owner缓存或通知payload。view detach清除派生尺寸，remount重读当前owner，terminal dispose释放module自有订阅。多个Thumb独立派生；preset默认、替换、省略均不新增视觉owner。native、browser与compiler实现仍须分别验收。
+  - id: P-SHADCN-SWITCH-SHARED-PROFILES
+    text:
+      en: Absent or inherit styleProfile follows the nearest shared scope with compatibility fallback new-york-v4. Only new-york-v4 (alias new-york) and rhea are supported; other style IDs fail closed. Root publishes visual style and size invalidation, while Thumb re-reads its actual anatomy Root. Neither style switching nor optional Field integration replaces checked, axis, focus or caller Thumb identity.
+      zh-CN: 缺省或 inherit 的 styleProfile 继承最近公共 scope，以 new-york-v4 兼容回退。仅支持 new-york-v4（别名 new-york）与 rhea，其余 ID 明确拒绝。Root 发布视觉尺寸与样式失效通知，Thumb 重读实际 anatomy Root；样式切换和可选 Field 接入不替换 checked、axis、focus 或 caller Thumb 身份。
+  - id: P-SHADCN-SWITCH-RHEA-SURFACE
+    text:
+      en: Rhea uses default 20 by 32 and small 16 by 24 CSS pixels at 16px root font, theme2xl corners, 2px border and no root shadow. Unchecked is input90; checked is primary. Valid focus uses ring30 and border-ring. Only the Field entry consumes existing invalid facts for destructive20 (dark40) ring and destructive (dark50) border. Thumb uses theme2xl, shadow-sm, light padding clip and checked travel 100%-4px. Ordinary standalone or sibling FieldLabel anatomy retains its keyboard ring; wrapped card-label outer-ring composition is not supported and no Field-wide focus boolean is substituted for that ancestor selector.
+      zh-CN: Rhea 在 16px 根字体下为默认 20×32、小号 16×24，theme2xl 圆角、2px 边框、无 Root 阴影。unchecked 为 input90，checked 为 primary；有效焦点为 ring30 与 border-ring。仅 Field 入口复用既有 invalid 事实，投射 destructive20（暗色40）环与 destructive（暗色50）边框。Thumb 使用 theme2xl、shadow-sm、浅色 padding clip、checked 位移 100%-4px。普通独立或 sibling FieldLabel 组合保留键盘环；包裹 card-label 外环组合不支持，不以 Field 聚合焦点伪造祖先选择器。
+  - id: P-SHADCN-SWITCH-RHEA-HIT-LEASE
+    text:
+      en: Root retains a positioned padding box across styles as a disclosed host baseline. Only mounted Rhea acquires one owner-relative self-region lease with .75rem horizontal and .5rem vertical inset. New York, detach and disposal release it. Positioning is not itself an acquisition marker; disabled/readOnly activation and checked ownership remain Base behavior. No drag enhancement is added.
+      zh-CN: Root 跨样式保留定位 padding box，作为明确披露的宿主基线。仅已挂载 Rhea 获取一个 owner-relative self-region lease，水平 .75rem、垂直 .5rem；NY、detach 和 dispose 均撤回。定位不等于命中扩展，disabled/readOnly 激活与 checked 所有权仍属于 Base，不新增拖动增强。
 openQuestions:
   - id: P-SHADCN-SWITCH-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: 相较固定 shadcn/ui Switch baseline，当前全部差异分别是有意偏离还是待实现 gap，应按什么顺序收敛？
       en: Against the pinned shadcn/ui Switch baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
     context:
-      en: Default and sm appearance use the Shadcn-owned logical-root size protocol above; its implementation and rendered evidence must be verified separately. Root transition-all spans more channels than current resident motion supports. className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. The fixed New York wrapper has no invalid-state recipe or field-label selector, so those are not missing source paint. Disabled pointer suppression, scoped baseline and explicit Root/Thumb preset composition remain disclosed Proto UI extensions. Source, CSS, real-browser and native evidence remain independent gates.
-      zh-CN: default与sm外观遵循上述Shadcn自有逻辑Root尺寸协议；其实现与渲染证据须分别验证。Root transition-all超出现有resident motion通道；className/native forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。固定NY wrapper没有invalid或field-label样式，不能伪报为缺失源paint。disabled pointer suppression、scoped baseline及公开Root/Thumb preset仍是已披露Proto扩展。source、CSS、真实浏览器与native证据分别验收。
+      en: Default and sm appearance use the Shadcn-owned logical-root size protocol above; its implementation and rendered evidence must be verified separately. New York and Rhea use source CSS transitions; native intermediate motion remains a separate gate. Modern upstream radius-2xl is radius multiplied by 1.8, whereas the current generic Proto derived variable adds 8px; their default-10px agreement does not establish dynamic-theme parity. Non-default-radius conformance remains blocked pending a separately bounded modern-family radius projection that preserves generic and legacy New York meaning. className/native prop forwarding, data-slot/data-size, form props and callback naming remain gaps or semantic exclusions. The fixed New York wrapper has no invalid-state recipe or field-label selector, so those are not missing source paint. Disabled pointer suppression, scoped baseline and explicit Root/Thumb preset composition remain disclosed Proto UI extensions. Source, CSS, real-browser and native evidence remain independent gates.
+      zh-CN: default与sm外观遵循上述Shadcn自有逻辑Root尺寸协议；其实现与渲染证据须分别验证。NY 与 Rhea 使用源 CSS transition，中间帧原生运动仍独立验收。现代上游 radius-2xl 为 radius 乘1.8，现通用 Proto 派生变量为加8px；默认10px相等不证明动态主题一致。非默认radius仍待有界现代family投射修复，不改变通用及旧NY语义；className/native forwarding、data-slot/data-size、form props与callback命名仍为缺口或语义排除。固定NY wrapper没有invalid或field-label样式，不能伪报为缺失源paint。disabled pointer suppression、scoped baseline及公开Root/Thumb preset仍是已披露Proto扩展。source、CSS、真实浏览器与native证据分别验收。
     blocks: [shadcn switch parity roadmap]
   - id: P-SHADCN-SWITCH-Q-HIT-ENVELOPE
     question:
@@ -124,7 +136,15 @@ openQuestions:
       zh-CN: 历史Nova扩展命中证据不能验收新profile；须重测pointer、touch、disabled、focus与裁切，不声称扩展命中区。通用staticHitInset仍供实际声明它的消费者使用。
     blocks: [activation:P-SHADCN-SWITCH]
 sources:
-  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx
+  - path: packages/prototypes/shadcn/src/field/switch.proto.ts
+    label: Optional Field semantic composition sharing the same Switch visual setup.
+  - path: packages/prototypes/shadcn/src/switch/root-visual.ts
+    label: Shared family paint setup for ordinary and optional Field entries.
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+    label: Rhea Switch rules; fixed Git blob 94bbca2a7f78845e7cfbcff68fb8f535e3848a98; inspected 2026-10-23. Local text has one transport-added final newline excluded from the Git-blob comparison.
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/switch.tsx
+    label: Common Base wrapper and hit inset; Git blob 753fd22a92536c103d3ff4c4c6171d48f428ead7.
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/new-york-v4/ui/switch.tsx
     label: Current New York Switch wrapper; inspected 2026-10-12; Git blob c45932afe4e484c900aa916e81d0e0d67137bedc; SHA256 743676f33f823ffa8008bbd5eb94cb68e227599447d60e132a202291a395f8e4
   - path: https://github.com/shadcn-ui/ui/blob/c2a67849be260701852b0977ba15eb5f3a0ce2a4/apps/v4/registry/styles/style-nova.css#L1249-L1264
     label: Historical Base Nova recipe; px track dimensions, rem Thumb and percentage-minus-px travel; inspected 2026-10-11, Git blob 514a3e8e00deac2ef59fee04c57cb10fd277ef39
