@@ -166,6 +166,30 @@ test('unrecognized CSS rule/declaration structures fail rather than selecting gu
   }
 });
 
+test('recognizes only the exact low-layer selection paint consuming existing roles', () => {
+  const css = theme('--selection: lab(2.75381% 0 0); --selection-foreground: lab(100% 0 0);');
+  const paint =
+    '@layer theme { ::selection { background-color: var(--selection); color: var(--selection-foreground); } }';
+  const withPaint = deriveShadcnMotionPalette(css + paint);
+  const withoutPaint = deriveShadcnMotionPalette(css);
+  assert.deepEqual(withPaint.light, withoutPaint.light);
+  assert.deepEqual(withPaint.dark, withoutPaint.dark);
+  // Provenance still binds the complete canonical CSS, including its paint.
+  assert.notEqual(withPaint.sourceHash, withoutPaint.sourceHash);
+  for (const invalid of [
+    paint + paint,
+    paint.replace('@layer theme', '@layer utilities'),
+    paint.replace('::selection', '*'),
+    paint.replace('var(--selection);', 'red;'),
+    paint.replace('var(--selection);', 'var(--selection) !important;'),
+    paint.replace(
+      'color: var(--selection-foreground);',
+      'color: var(--selection-foreground); user-select: none;'
+    ),
+  ])
+    assert.throws(() => deriveShadcnMotionPalette(css + invalid), /SHADCN_THEME_CSS/);
+});
+
 test('canonical source produces readonly typed output, resolves aliases and leaves external roles open', async () => {
   const palette = await generateShadcnMotionPalette({ check: true });
   for (const mode of [palette.light, palette.dark]) {

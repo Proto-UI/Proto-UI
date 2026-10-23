@@ -24,8 +24,6 @@ const BUTTON_BASE_TOKENS = [
   'items-center',
   'justify-center',
   'gap-2',
-  'whitespace-nowrap',
-  'select-none',
   'font-sans',
   'font-medium',
   BRUTALIST_STRUCTURE_TOKENS,
@@ -57,11 +55,19 @@ const VARIANT_FILL_TOKENS: Record<Exclude<BrutalistButtonVariant, 'solid'>, stri
 
 // P-BRUTALIST-BUTTON-SIZE-PROP
 const SIZE_TOKENS: Record<BrutalistButtonSize, string> = {
-  default: 'h-10 px-4 text-sm',
-  sm: 'h-9 px-3 text-sm',
-  lg: 'h-11 px-8 text-sm',
-  icon: 'size-10',
+  default: 'h-10 px-4 text-sm whitespace-nowrap',
+  sm: 'h-9 px-3 text-sm whitespace-nowrap',
+  lg: 'h-11 px-8 text-sm whitespace-nowrap',
+  icon: 'size-10 whitespace-nowrap',
 };
+
+// Proto UI opt-in multiline extension. Pinned default geometry remains unchanged.
+const WRAP_SIZE_TOKENS = {
+  default:
+    'min-h-10 h-auto px-4 py-1 text-sm whitespace-normal min-w-0 max-w-full wrap-anywhere text-center',
+  sm: 'min-h-9 h-auto px-3 py-1 text-sm whitespace-normal min-w-0 max-w-full wrap-anywhere text-center',
+  lg: 'min-h-11 h-auto px-8 py-1 text-sm whitespace-normal min-w-0 max-w-full wrap-anywhere text-center',
+} as const;
 
 const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
   // P-BRUTALIST-BUTTON-ENTRY
@@ -80,6 +86,7 @@ const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
         options: ['main', 'mint', 'lavender', 'coral', 'sky'],
       },
       size: { type: 'enum', empty: 'fallback', options: ['default', 'sm', 'lg', 'icon'] },
+      wrap: { type: 'boolean', empty: 'fallback' },
       // P-BRUTALIST-BUTTON-BASE-INHERITANCE (disabled from Base Button)
       disabled: { type: 'boolean', empty: 'fallback' },
     });
@@ -88,6 +95,7 @@ const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
       variant: 'solid',
       color: 'main',
       size: 'default',
+      wrap: false,
       disabled: false,
     });
 
@@ -99,6 +107,18 @@ const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
     const { disabled, hovered, focusVisible, pressed } = buttonState;
 
     def.feedback.style.use(tw(BUTTON_BASE_TOKENS));
+
+    // P-BRUTALIST-BUTTON-MOTION: one CSS clock covers both transform and shadow.
+    // The bounded preference lease updates already-mounted controls. Unknown is
+    // deliberately static; no resident writer competes for these properties.
+    def.rule({
+      when: (w) => w.meta('preference.reducedMotion').eq('no-preference'),
+      intent: (i) => i.feedback.style.use(tw('transition-all')),
+    });
+    def.rule({
+      when: (w) => w.not(w.meta('preference.reducedMotion').eq('no-preference')),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
 
     // P-BRUTALIST-BUTTON-COLOR-PROP — solid + color pairs
     (Object.keys(SOLID_COLOR_TOKENS) as BrutalistButtonColor[]).forEach((color) => {
@@ -121,10 +141,21 @@ const button = definePrototype<BrutalistButtonProps, BrutalistButtonExposes>({
     // P-BRUTALIST-BUTTON-SIZE-PROP
     (Object.keys(SIZE_TOKENS) as BrutalistButtonSize[]).forEach((size) => {
       def.rule({
-        when: (w) => w.prop('size').eq(size),
+        when: (w) =>
+          size === 'icon'
+            ? w.prop('size').eq(size)
+            : w.all(w.prop('size').eq(size), w.prop('wrap').eq(false)),
         intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
       });
     });
+
+    // P-BRUTALIST-BUTTON-WRAP: family-owned minimum, not a consumer height override.
+    for (const size of ['default', 'sm', 'lg'] as const) {
+      def.rule({
+        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(true)),
+        intent: (i) => i.feedback.style.use(tw(WRAP_SIZE_TOKENS[size])),
+      });
+    }
 
     // P-BRUTALIST-BUTTON-INTERACTION — hover feedback
     def.rule({

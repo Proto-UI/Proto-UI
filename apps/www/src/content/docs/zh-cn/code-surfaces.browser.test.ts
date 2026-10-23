@@ -71,10 +71,21 @@ async function ready(page: Page): Promise<void> {
   });
 }
 
-async function surfaceFacts(page: Page): Promise<SurfaceFacts> {
-  return page.evaluate(() => {
+async function surfaceFacts(page: Page, ecPage: Page = page): Promise<SurfaceFacts> {
+  const ecFacts = await ecPage.evaluate(() => {
     const ec = document.querySelector<HTMLElement>('.expressive-code pre')!;
-    const preview = [...document.querySelectorAll<HTMLElement>('.proto-previewer__code')].find(
+    const frame = ec.closest<HTMLElement>('[data-site-code-surface="frame"]')!
+      .querySelector<HTMLElement>(':scope > .site-code-surface-mount .site-code-surface-paint')!;
+    const facts = (element: HTMLElement, surface?: HTMLElement): CodeStyleFacts => {
+      const style = getComputedStyle(element);
+      return { background: surface ? getComputedStyle(surface).backgroundColor : style.backgroundColor,
+        color: style.color, font: style.fontFamily, size: style.fontSize, lineHeight: style.lineHeight };
+    };
+    return { pre: facts(ec, frame), code: facts(ec.querySelector('code')!),
+      border: getComputedStyle(frame).borderLeftColor, radius: getComputedStyle(frame).borderRadius };
+  });
+  return page.evaluate((ecFacts) => {
+    const preview = [...document.querySelectorAll<HTMLElement>('.proto-previewer .proto-previewer__code, [data-code-example-command] .proto-previewer__code')].find(
       (element) => element.checkVisibility()
     )!;
     const card = preview.closest<HTMLElement>('.proto-previewer, .code-example')!;
@@ -86,9 +97,6 @@ async function surfaceFacts(page: Page): Promise<SurfaceFacts> {
     const frame = sourceFrame.querySelector<HTMLElement>(
       ':scope > .site-code-surface-mount .site-code-surface-paint'
     )!;
-    const ecFrame = ec
-      .closest<HTMLElement>('[data-site-code-surface="frame"]')!
-      .querySelector<HTMLElement>(':scope > .site-code-surface-mount .site-code-surface-paint')!;
     if (!frame) throw new Error('The committed RuntimeBox canvas must exist before paint evidence');
     const frameStyle = getComputedStyle(frame);
     const layoutStyle = getComputedStyle(card);
@@ -116,12 +124,12 @@ async function surfaceFacts(page: Page): Promise<SurfaceFacts> {
       };
     };
     return {
-      ec: facts(ec, ecFrame),
+      ec: ecFacts.pre,
       preview: facts(preview, frame),
-      ecCode: facts(ec.querySelector('code')!),
+      ecCode: ecFacts.code,
       previewCode: facts(preview.querySelector('code')!),
-      border: [getComputedStyle(ecFrame).borderLeftColor, frameStyle.borderLeftColor],
-      radius: [getComputedStyle(ecFrame).borderRadius, frameStyle.borderRadius],
+      border: [ecFacts.border, frameStyle.borderLeftColor],
+      radius: [ecFacts.radius, frameStyle.borderRadius],
       expectedPreviewRadius,
       canvasCount: isRuntimePreview ? canvases.length : null,
       layoutBorderWidths: isRuntimePreview
@@ -134,11 +142,11 @@ async function surfaceFacts(page: Page): Promise<SurfaceFacts> {
         : null,
       documentOverflow: document.documentElement.scrollWidth - innerWidth,
     };
-  });
+  }, ecFacts);
 }
 
-async function expectSurfaces(page: Page): Promise<SurfaceFacts> {
-  const facts = await surfaceFacts(page);
+async function expectSurfaces(page: Page, ecPage: Page = page): Promise<SurfaceFacts> {
+  const facts = await surfaceFacts(page, ecPage);
   expect(facts.preview).toEqual(facts.ec);
   expect(facts.previewCode).toEqual(facts.ecCode);
   expect(facts.ec.size).toBe('13px');
@@ -191,11 +199,11 @@ async function expectSurfaces(page: Page): Promise<SurfaceFacts> {
   return facts;
 }
 
-async function expectCopyControls(page: Page): Promise<void> {
-  const panel = page.locator('[data-code-shell]:visible').first();
+async function expectCopyControls(page: Page, codeExample = false, ecPage: Page = page): Promise<void> {
+  const panel = page.locator(codeExample ? '[data-code-example] [data-code-shell]:visible' : '[data-code-shell]:visible').first();
   const toggle = panel.locator('[data-code-toggle]');
   if (await toggle.isVisible()) await toggle.click();
-  const ec = page
+  const ec = ecPage
     .locator(
       '.expressive-code [data-site-copy][data-copy-view="ready"] [data-demo-ref="copy-button"]'
     )
@@ -204,6 +212,8 @@ async function expectCopyControls(page: Page): Promise<void> {
     '[data-copy][data-copy-view="ready"] [data-demo-ref="copy-button"]'
   );
   for (const control of [ec, preview]) {
+    const page = control.page();
+    await page.bringToFront();
     await control.waitFor({ state: 'visible' });
     await page.mouse.move(0, 0);
     await control.evaluate((element: HTMLElement) => element.blur());
@@ -213,7 +223,10 @@ async function expectCopyControls(page: Page): Promise<void> {
       const buttonRect = element.getBoundingClientRect();
       const iconRect = icon.getBoundingClientRect();
       const radius = document.createElement('div');
-      radius.style.borderRadius = style.getPropertyValue('--pui-radius-md');
+      const compact = Boolean(element.closest('[data-code-example]'));
+      radius.style.borderRadius = style.getPropertyValue(
+        compact ? '--pui-radius-md' : '--pui-radius-2xl'
+      );
       element.parentElement!.append(radius);
       const expectedRadius = getComputedStyle(radius).borderRadius;
       radius.remove();
@@ -232,13 +245,15 @@ async function expectCopyControls(page: Page): Promise<void> {
         shadow: style.boxShadow,
       };
     });
-    // P-SHADCN-BUTTON-NEW-YORK-PAINT: fixed 02cad611 Button icon size-9
-    // is 2.25rem (36px at this 16px root). The site's 18px glyph is unchanged.
-    expect([facts.width, facts.height, ...facts.glyph]).toEqual(['36px', '36px', '18px', '18px']);
+    // Ordinary controls use the public Rhea icon size-8 and 18px glyphs.
+    // CodeExample explicitly opts into Proto icon-compact: the Blocks
+    // toolbar size-7 consumer geometry, not upstream icon-sm.
+    const inCodeExample = await control.evaluate((node) => Boolean(node.closest('[data-code-example]')));
+    expect([facts.width, facts.height, ...facts.glyph]).toEqual(inCodeExample ? ['28px', '28px', '16px', '16px'] : ['32px', '32px', '18px', '18px']);
     expect(facts.radius).toBe(facts.expectedRadius);
     expect(facts.opacity).toBe('1');
-    expect(facts.tokens).toContain('rounded-md');
-    expect(facts.tokens).toContain('size-9');
+    expect(facts.tokens).toContain(inCodeExample ? 'rounded-md' : 'rounded-[var(--pui-radius-2xl)]');
+    expect(facts.tokens).toContain(inCodeExample ? 'size-7' : 'size-8');
     expect(Math.max(...facts.center)).toBeLessThanOrEqual(1);
     await page.keyboard.press('Tab');
     await control.focus();
@@ -253,9 +268,41 @@ async function expectCopyControls(page: Page): Promise<void> {
     expect(focused.focused).toBe(true);
     expect(focused.shadow).not.toBe(facts.shadow);
   }
-  expect(await preview.evaluate((element) => getComputedStyle(element).backgroundColor)).toBe(
-    await ec.evaluate((element) => getComputedStyle(element).backgroundColor)
-  );
+  const ecPaint = await ec.evaluate((element) => {
+    const expected = document.createElement('div');
+    // Fixed Rhea outline is background-colored in light and transparent in dark.
+    expected.style.backgroundColor =
+      document.documentElement.dataset.theme === 'dark'
+        ? 'transparent'
+        : 'var(--pui-background)';
+    element.append(expected);
+    const facts = {
+      actual: getComputedStyle(element).backgroundColor,
+      expected: getComputedStyle(expected).backgroundColor,
+    };
+    expected.remove();
+    return facts;
+  });
+  await expect.poll(
+    () => ec.evaluate((element) => getComputedStyle(element).backgroundColor),
+    { timeout: 2_000 }
+  ).toBe(ecPaint.expected);
+  const ecBackground = ecPaint.expected;
+  const previewBackground = await preview.evaluate((element) => getComputedStyle(element).backgroundColor);
+  if (codeExample) {
+    // CodeExample intentionally follows upstream docs' ghost Copy. Ordinary
+    // Expressive Code and Previewer Copy retain the existing outline recipe.
+    expect(await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))).toBe(true);
+    expect(await preview.getAttribute('data-pui-style')).toContain('bg-transparent');
+    expect(previewBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(await preview.evaluate((element) =>
+      element.closest('[data-site-copy]')?.querySelector('[data-demo-ref="copy-backplate"]') !== null
+    )).toBe(false);
+    // Outline remains independently source-bound above; dark Rhea is also transparent.
+  } else {
+    expect(await preview.evaluate((element) => Boolean(element.closest('[data-code-example]')))).toBe(false);
+    expect(previewBackground).toBe(ecBackground);
+  }
 }
 
 // Compare actual EC output against the same source rendered by the Previewer's
@@ -608,7 +655,7 @@ async function retainEvidence(page: Page, name: string, facts: unknown): Promise
   await writeFile(join(directory, `${name}.json`), JSON.stringify(facts, null, 2));
   await page
     .locator(
-      name.endsWith('-install') ? '.install-command-card:visible' : '[data-code-shell]:visible'
+      name.endsWith('-install') ? '.install-command-card:visible' : name.endsWith('-after-navigation') ? '[data-code-example] [data-code-shell]:visible' : '[data-code-shell]:visible'
     )
     .first()
     .evaluate((element) => element.scrollIntoView({ block: 'center' }));
@@ -794,7 +841,11 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
   it('retains CodeExample and install tokens across navigation and Astro reinitialization', async () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 1000 } });
     const page = await context.newPage();
+    const ecPage = await context.newPage();
     try {
+      await ecPage.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
+      await ready(ecPage);
+      await page.bringToFront();
       await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
       await ready(page);
       await page.evaluate(() => {
@@ -822,15 +873,16 @@ describe.sequential('code-surface dogfood matrix (#630, #420, #568)', () => {
         await page.evaluate((mode) => {
           document.documentElement.dataset.theme = mode;
         }, theme);
-        const facts = await expectSurfaces(page);
+        await ecPage.evaluate((mode) => { document.documentElement.dataset.theme = mode; }, theme);
+        const facts = await expectSurfaces(page, ecPage);
         expectedInstall.set(theme, facts.ec);
-        await expectCopyControls(page);
+        await expectCopyControls(page, true, ecPage);
         await page.evaluate(() => {
           document.dispatchEvent(new Event('astro:page-load'));
           document.dispatchEvent(new Event('astro:page-load'));
         });
-        expect(await surfaceFacts(page)).toEqual(facts);
-        await expectCopyControls(page);
+        expect(await surfaceFacts(page, ecPage)).toEqual(facts);
+        await expectCopyControls(page, true, ecPage);
         await retainEvidence(page, `390-${theme}-after-navigation`, { facts });
       }
       await page.goto(`${baseUrl}/zh-cn/ui-libraries/shadcn/button/`, {

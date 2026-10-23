@@ -1,0 +1,69 @@
+---
+import CodePanel, { type CodeLang } from './PrototypePreviewer/CodePanel.astro';
+import { codeFileNodes } from './code-file-tree-model';
+interface Props {
+  id: string;
+  files: readonly { name: string; code: string; lang: CodeLang }[];
+  directories?: readonly string[];
+  initialFile?: string;
+  label: string;
+  filesLabel?: string;
+  copyLabel?: string;
+  emptyLabel?: string;
+  standalone?: boolean;
+}
+const { id, files, directories = [], initialFile, label, filesLabel = 'Files', copyLabel = 'Copy', emptyLabel = 'empty', standalone = false } = Astro.props;
+if (!files.length) throw new Error('[CodeFileBrowser] At least one real file is required.');
+const nodes = codeFileNodes(files.map((file) => file.name), directories);
+const active = initialFile === undefined ? 0 : files.findIndex((file) => file.name === initialFile);
+if (active < 0) throw new Error('[CodeFileBrowser] Initial file must exist.');
+---
+<section class="code-file-browser" data-code-file-browser data-standalone-file-browser={standalone ? '' : undefined} data-site-code-surface="frame" aria-label={label}>
+  <aside class="code-file-browser__files" data-code-files>
+    <div class="code-file-browser__label">{filesLabel}</div>
+    <div class="code-file-browser__tree-scroll" data-code-tree-scroll tabindex="0" role="region" aria-label={filesLabel}>
+    <nav class="code-file-browser__fallback" aria-label={filesLabel} data-code-file-tabs data-empty-directory-label={emptyLabel}>
+      {nodes.map((node) => node.fileIndex === undefined ? (
+        <span data-code-directory-path={node.key} style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}>
+          {node.name}/ {!nodes.some((child) => child.parentKey === node.key) && <small>({emptyLabel})</small>}
+        </span>
+      ) : (
+        <a id={`${id}-file-tab-${node.fileIndex}`} href={`#${id}-file-panel-${node.fileIndex}`}
+          data-code-file-tab data-code-file-index={node.fileIndex} data-code-file-path={node.key}
+          aria-controls={`${id}-file-panel-${node.fileIndex}`} data-code-file-selected={node.fileIndex === active ? 'true' : undefined}
+          style={`padding-inline-start:${0.5 + node.depth * 0.75}rem`}>{node.name}</a>
+      ))}
+    </nav>
+    </div>
+  </aside>
+  <div class="code-file-browser__source" data-code-file-source>
+    {files.map((file, index) => <CodePanel id={`${id}-file-panel-${index}`} labelledBy={`${id}-file-tab-${index}`}
+      hidden={index !== active} fileIndex={index} panelRole="region" framed={false} collapsible={false}
+      title={file.name} scrollableTitle copyLabel={`${copyLabel} ${file.name}`} code={file.code} lang={file.lang} />)}
+  </div>
+</section>
+<noscript set:html={'<style>@layer base { [data-code-file-browser] [data-code-file-panel][hidden] { display:block!important; } }</style>'} />
+<script>
+  import { initStandaloneCodeFileBrowsers } from './code-file-browser-client';
+  initStandaloneCodeFileBrowsers(document);
+  document.addEventListener('astro:page-load', () => initStandaloneCodeFileBrowsers(document));
+</script>
+<style>
+  .code-file-browser { display: grid; grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr); min-width: 0; max-width: 100%; }
+  .code-file-browser__files, .code-file-browser__source { min-width: 0; }
+  .code-file-browser__files { padding: 0; border-inline-end: 1px solid var(--color-border); }
+  .code-file-browser__label { color: color-mix(in oklab, var(--color-foreground) 70%, transparent); display: flex; align-items: center; min-height: 3rem; padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); font-size: 0.875rem; font-weight: 500; }
+  .code-file-browser__tree-scroll { min-width: 0; max-width: 100%; overflow-x: auto; }
+  .code-file-browser__tree-scroll:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+  .code-file-browser :global([data-code-file-header]) { padding-inline: 16px; gap: 8px; }
+  .code-file-browser__fallback { display: flex; flex-direction: column; width: 100%; }
+  .code-file-browser__fallback :is(a, span) { display: block; min-height: 2.75rem; padding: 0.5rem; overflow-wrap: anywhere; font-size: 0.8125rem; }
+  .code-file-browser__fallback a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+  .code-file-browser__fallback[hidden] { display: none; }
+  [data-standalone-file-browser] { grid-template-columns: minmax(10rem, 15rem) minmax(0, 1fr); }
+  [data-standalone-file-browser] :global([data-code-file-source] .proto-previewer__code) { max-height: 28rem; overflow: auto; }
+  @media (max-width: 48rem) {
+    .code-file-browser { grid-template-columns: minmax(0, 1fr); }
+    .code-file-browser__files { border-inline-end: 0; border-bottom: 1px solid var(--color-border); }
+  }
+</style>

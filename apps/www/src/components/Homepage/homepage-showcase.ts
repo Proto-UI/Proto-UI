@@ -1,5 +1,5 @@
 import { composeHomepageText, setHomepageText } from './homepage-text';
-import { createHomepageGalleryParts, homepageCommandLayout } from './homepage-gallery-parts';
+import { createHomepageGalleryParts } from './homepage-gallery-parts';
 import type { DemoNode, DemoSetupContext, DemoSpec } from '../PrototypePreviewer/demo-types';
 import type { ProjectionContentRecipe } from '../PrototypePreviewer/projection-composition';
 import {
@@ -254,17 +254,19 @@ export function createHomepageShowcase(
                   {
                     kind: 'proto',
                     prototypeId: parts.button,
-                    surfaceStyle: homepageCommandLayout(family),
                     ref: 'settings-save',
-                    props: { disabled: true },
+                    props: { disabled: true, wrap: true },
                     children: [copy.save],
                   },
                   {
                     kind: 'proto',
                     prototypeId: parts.button,
-                    surfaceStyle: homepageCommandLayout(family),
                     ref: 'settings-reset',
-                    props: { disabled: true, variant: family === 'shadcn' ? 'outline' : 'surface' },
+                    props: {
+                      disabled: true,
+                      wrap: true,
+                      variant: family === 'shadcn' ? 'outline' : 'surface',
+                    },
                     children: [copy.reset],
                   },
                 ],

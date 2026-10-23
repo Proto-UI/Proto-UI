@@ -7,3 +7,10 @@ export { default as fieldLabel, asFieldLabel } from './label.proto';
 export { default as fieldDescription, asFieldDescription } from './description.proto';
 export { default as fieldError, asFieldError } from './error.proto';
 export { default as fieldValidity, asFieldValidity } from './validity.proto';
+
+export { default as fieldTextarea, asFieldTextarea } from './textarea.proto';
+export type {
+  FieldTextareaProps,
+  FieldTextareaExposes,
+  FieldTextareaAsHookContract,
+} from './textarea.proto';

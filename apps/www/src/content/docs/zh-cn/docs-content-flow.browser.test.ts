@@ -8,6 +8,8 @@ const ORDINARY_FLOW_GAP_PX = 16;
 // Current website reading recipe; native heading semantics and ordinary flow remain unchanged.
 const SECTION_FLOW_GAP_PX = 40;
 const GAP_TOLERANCE_PX = 0.5;
+// CodeExample explicitly owns a .5rem host-panel gap below its visible host chrome.
+const CODE_EXAMPLE_HOST_GAP_PX = 8;
 
 const VIEWPORTS = [
   { width: 1440, height: 900 },
@@ -48,13 +50,16 @@ type SelectFacts = {
 };
 
 type QuickStartFacts = {
-  paragraphToExpressiveCode: number;
-  expressiveCodeToParagraph: number;
+  paragraphToStandaloneCode: number;
+  standaloneCodeToParagraph: number;
   paragraphToCodeExample: number;
   codeExampleToParagraph: number;
   codeExampleStripToPanel: number;
-  expressivePreviousTag: string;
-  expressiveNextTag: string;
+  commandBeforeSource: boolean;
+  independentCommandAndSource: boolean;
+  hasFileTree: boolean;
+  standalonePreviousTag: string;
+  standaloneNextTag: string;
   examplePreviousTag: string;
   exampleNextTag: string;
 };
@@ -158,7 +163,8 @@ async function readSelectFacts(page: Page): Promise<SelectFacts> {
 
 async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
   await page.locator('[data-code-example]').waitFor({ state: 'visible' });
-  await page.locator('.expressive-code').first().waitFor({ state: 'visible' });
+  await page.locator('[data-code-example] [data-code-file-browser]:visible [data-code-example-tree][role="tree"]').waitFor();
+  await page.locator('[data-code-presentation="docs"]').first().waitFor({ state: 'visible' });
 
   return page.evaluate(() => {
     const renderedSibling = (
@@ -185,29 +191,35 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     };
 
     const flow = document.querySelector<HTMLElement>('[data-doc-flow]');
-    const expressiveCode = flow?.querySelector<HTMLElement>(':scope > .expressive-code');
+    const standaloneCode = flow?.querySelector<HTMLElement>(':scope > [data-code-presentation="docs"]');
     const codeExample = flow?.querySelector<HTMLElement>(':scope > [data-code-example]');
-    const expressivePrevious = expressiveCode
-      ? renderedSibling(expressiveCode, 'previousElementSibling')
+    const standalonePrevious = standaloneCode
+      ? renderedSibling(standaloneCode, 'previousElementSibling')
       : null;
-    const expressiveNext = expressiveCode
-      ? renderedSibling(expressiveCode, 'nextElementSibling')
+    const standaloneNext = standaloneCode
+      ? renderedSibling(standaloneCode, 'nextElementSibling')
       : null;
     const examplePrevious = codeExample
       ? renderedSibling(codeExample, 'previousElementSibling')
       : null;
     const exampleNext = codeExample ? renderedSibling(codeExample, 'nextElementSibling') : null;
-    const exampleStrip = codeExample?.querySelector<HTMLElement>(':scope > .code-example__strip');
+    const hostList = codeExample?.querySelector<HTMLElement>('[data-code-example-tablist="host"]');
+    const hint = codeExample?.querySelector<HTMLElement>('[data-code-host-overflow]');
+    const exampleStrip = hint && !hint.hidden && hint.getBoundingClientRect().height > 0 ? hint : hostList;
     const examplePanel = codeExample?.querySelector<HTMLElement>(
-      ':scope > .code-example__host-panel:not([hidden])'
+      '[data-code-host-panel]:not([hidden])'
     );
 
+    const command = examplePanel?.querySelector<HTMLElement>('[data-code-example-command]');
+    const source = examplePanel?.querySelector<HTMLElement>('[data-code-file-browser]');
+
     if (
+      !command || !source ||
       !flow ||
-      !expressiveCode ||
+      !standaloneCode ||
       !codeExample ||
-      !expressivePrevious ||
-      !expressiveNext ||
+      !standalonePrevious ||
+      !standaloneNext ||
       !examplePrevious ||
       !exampleNext ||
       !exampleStrip ||
@@ -217,19 +229,22 @@ async function readQuickStartFacts(page: Page): Promise<QuickStartFacts> {
     }
 
     return {
-      paragraphToExpressiveCode:
-        expressiveCode.getBoundingClientRect().top -
-        expressivePrevious.getBoundingClientRect().bottom,
-      expressiveCodeToParagraph:
-        expressiveNext.getBoundingClientRect().top - expressiveCode.getBoundingClientRect().bottom,
+      commandBeforeSource: command.getBoundingClientRect().bottom <= source.getBoundingClientRect().top,
+      independentCommandAndSource: !command.contains(source) && !source.contains(command) && command.getAttribute('data-site-code-surface') === 'frame' && source.getAttribute('data-site-code-surface') === 'frame',
+      hasFileTree: Boolean(source.querySelector('[data-code-example-tree][role="tree"]')),
+      paragraphToStandaloneCode:
+        standaloneCode.getBoundingClientRect().top -
+        standalonePrevious.getBoundingClientRect().bottom,
+      standaloneCodeToParagraph:
+        standaloneNext.getBoundingClientRect().top - standaloneCode.getBoundingClientRect().bottom,
       paragraphToCodeExample:
         codeExample.getBoundingClientRect().top - examplePrevious.getBoundingClientRect().bottom,
       codeExampleToParagraph:
         exampleNext.getBoundingClientRect().top - codeExample.getBoundingClientRect().bottom,
       codeExampleStripToPanel:
         examplePanel.getBoundingClientRect().top - exampleStrip.getBoundingClientRect().bottom,
-      expressivePreviousTag: expressivePrevious.tagName,
-      expressiveNextTag: expressiveNext.tagName,
+      standalonePreviousTag: standalonePrevious.tagName,
+      standaloneNextTag: standaloneNext.tagName,
       examplePreviousTag: examplePrevious.tagName,
       exampleNextTag: exampleNext.tagName,
     };
@@ -299,19 +314,22 @@ describe.sequential('documentation content-flow browser regression', () => {
           const flow = await readFlowFacts(page);
           const quickStart = await readQuickStartFacts(page);
           expectFlowBoundary(flow, label);
-          expect(quickStart.expressivePreviousTag, `${label}/code predecessor`).toBe('P');
-          expect(quickStart.expressiveNextTag, `${label}/code successor`).toBe('P');
+          expect(quickStart.commandBeforeSource, `${label}/install before usage`).toBe(true);
+          expect(quickStart.independentCommandAndSource, `${label}/separate install and source frames`).toBe(true);
+          expect(quickStart.hasFileTree, `${label}/real file Tree`).toBe(true);
+          expect(quickStart.standalonePreviousTag, `${label}/code predecessor`).toBe('P');
+          expect(quickStart.standaloneNextTag, `${label}/code successor`).toBe('P');
           expect(quickStart.examplePreviousTag, `${label}/example predecessor`).toBe('P');
           expect(quickStart.exampleNextTag, `${label}/example successor`).toBe('P');
           expectGap(
-            quickStart.paragraphToExpressiveCode,
+            quickStart.paragraphToStandaloneCode,
             ORDINARY_FLOW_GAP_PX,
-            `${label}/prose-expressive-code`
+            `${label}/prose-standalone-code`
           );
           expectGap(
-            quickStart.expressiveCodeToParagraph,
+            quickStart.standaloneCodeToParagraph,
             ORDINARY_FLOW_GAP_PX,
-            `${label}/expressive-code-prose`
+            `${label}/standalone-code-prose`
           );
           expectGap(
             quickStart.paragraphToCodeExample,
@@ -325,7 +343,7 @@ describe.sequential('documentation content-flow browser regression', () => {
           );
           expectGap(
             quickStart.codeExampleStripToPanel,
-            0,
+            CODE_EXAMPLE_HOST_GAP_PX,
             `${label}/CodeExample internal boundary`
           );
         } finally {

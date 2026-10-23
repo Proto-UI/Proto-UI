@@ -234,6 +234,9 @@ const staticUtilities: Record<string, string[]> = {
   'overflow-x-hidden': ['overflow-x: hidden;'],
   'overflow-y-auto': ['overflow-y: auto;'],
   'resize-y': ['resize: vertical;'],
+  'resize-none': ['resize: none;'],
+  'field-sizing-content': ['field-sizing: content;'],
+  'field-sizing-fixed': ['field-sizing: fixed;'],
   'whitespace-nowrap': ['white-space: nowrap;'],
   'whitespace-pre-wrap': ['white-space: pre-wrap;'],
   'whitespace-break-spaces': ['white-space: break-spaces;'],
@@ -360,6 +363,7 @@ const staticUtilities: Record<string, string[]> = {
   'bg-transparent': ['background-color: transparent;'],
   'bg-black': ['background-color: #000;'],
   'bg-white': ['background-color: #fff;'],
+  'text-white': ['color: #fff;'],
   'bg-foreground': ['background-color: var(--pui-foreground);'],
   'bg-canvas': ['background-color: var(--pui-background);'],
   'bg-paper': ['background-color: var(--pui-background);'],
@@ -810,7 +814,7 @@ function renderShadowSplitCss(tokens: string[]): string {
   for (const rule of rules) {
     // C-FEEDBACK-STYLE-0004: selection styles paint the browser's static
     // pseudo-element, not the Root box or its sizing/geometry contributions.
-    if (isStaticSelectionToken(rule.token)) continue;
+    if (isStaticSelectionToken(rule.token) || isStaticPlaceholderColorToken(rule.token)) continue;
     const selector = buildSplitHostSelector(rule.token);
     // Empty-declaration markers still need a compiled membership receipt.
     // This non-paint property does not introduce group/peer selector semantics.
@@ -854,6 +858,7 @@ function buildSplitHostSelector(token: string): string {
   for (const variant of variants) {
     if (variant === 'dark') dark = true;
     else if (variant === 'selection' && isStaticSelectionToken(token)) continue;
+    else if (variant === 'placeholder' && isStaticPlaceholderColorToken(token)) continue;
     else {
       if (
         !/^(hover|active|disabled|focus-visible|data-\[.+\]|not-\[data-[\w-]+\]|aria-[\w-]+)$/.test(
@@ -1241,6 +1246,8 @@ export function renderPrefixedThemeCss(input: string): string {
     /(--pui-radius:\s*[^;]+;)/,
     [
       '$1',
+      '    --pui-radius-2xl: calc(var(--pui-radius) + 8px);',
+      '    --pui-radius-4xl: calc(var(--pui-radius) + 16px);',
       '    --pui-radius-xl: calc(var(--pui-radius) + 4px);',
       '    --pui-radius-lg: var(--pui-radius);',
       '    --pui-radius-md: max(calc(var(--pui-radius) - 2px), 0px);',
@@ -1284,6 +1291,11 @@ function renderTokenRule(token: string): CssRule | null {
   if (parts.slice(0, -1).includes('selection') && /^select-(auto|text|none)$/.test(utility)) {
     return null;
   }
+  if (
+    parts.slice(0, -1).includes('placeholder') &&
+    !isStaticPlaceholderColorToken(`placeholder:${utility}`)
+  )
+    return null;
   const css = renderUtility(utility);
   if (!css) return null;
   return { token, css };
@@ -1357,6 +1369,12 @@ function renderSpacingUtility(utility: string): string[] | null {
 }
 
 function renderColorUtility(utility: string): string[] | null {
+  // One pinned Rhea/Luma secondary hover expression, not arbitrary CSS admission.
+  if (utility === 'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]') {
+    return [
+      'background-color: color-mix(in oklch, var(--pui-secondary), var(--pui-foreground) 5%);',
+    ];
+  }
   if (utility === 'ring-black') return ['--pui-ring-color: #000000;', ...ringShadow()];
   if (utility === 'bg-black/50') return ['background-color: rgb(0 0 0 / 0.5);'];
   if (utility === 'bg-black/80') return ['background-color: rgb(0 0 0 / 0.8);'];
@@ -1376,6 +1394,10 @@ function renderColorUtility(utility: string): string[] | null {
 }
 
 function renderRoundedUtility(utility: string): string[] | null {
+  if (utility === 'rounded-[var(--pui-radius-2xl)]')
+    return ['border-radius: var(--pui-radius-2xl);'];
+  if (utility === 'rounded-[var(--pui-radius-4xl)]')
+    return ['border-radius: var(--pui-radius-4xl);'];
   if (utility === 'rounded-base') return ['border-radius: var(--pui-radius);'];
   if (utility === 'rounded-none') return ['border-radius: 0;'];
   if (utility === 'rounded-full') return ['border-radius: 9999px;'];
@@ -1432,7 +1454,9 @@ function buildSelectors(
 ): string[] {
   if (target === 'shadow-split') {
     const selector = `${buildSplitHostSelector(token)} > [${SPLIT_SURFACE_ATTR}][${PUI_STYLE_ATTR}~="${escapeCssString(token)}"]`;
-    return isStaticSelectionToken(token) ? applyVariant(selector, 'selection') : [selector];
+    if (isStaticSelectionToken(token)) return applyVariant(selector, 'selection');
+    if (isStaticPlaceholderColorToken(token)) return applyVariant(selector, 'placeholder');
+    return [selector];
   }
   const parts = splitVariants(token);
   const variants = parts.slice(0, -1);
@@ -1476,6 +1500,10 @@ function buildSelectors(
 
 function hasDarkVariant(token: string): boolean {
   return splitVariants(token).slice(0, -1).includes('dark');
+}
+
+function isStaticPlaceholderColorToken(token: string): boolean {
+  return /^placeholder:text-(foreground|muted-foreground|primary|destructive)$/.test(token);
 }
 
 function isStaticSelectionToken(token: string): boolean {

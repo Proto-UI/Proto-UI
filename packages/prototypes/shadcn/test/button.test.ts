@@ -57,14 +57,14 @@ describe('prototypes/shadcn: button', () => {
     let tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('bg-primary');
     expect(tokens).not.toContain('border-border');
-    expect(tokens).toContain('h-9');
+    expect(tokens).toContain('h-8');
     expect(tokens).not.toContain('opacity-50');
 
     rawProps = { variant: 'destructive', size: 'lg', disabled: true };
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('bg-destructive/10');
-    expect(tokens).toContain('h-10');
+    expect(tokens).toContain('h-9');
     expect(tokens).toContain('opacity-50');
 
     rawProps = { variant: 'outline', size: 'default', disabled: false };
@@ -76,14 +76,14 @@ describe('prototypes/shadcn: button', () => {
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('whitespace-normal');
-    expect(tokens).toContain('min-h-9');
+    expect(tokens).toContain('min-h-8');
     expect(tokens).toContain('max-w-full');
-    expect(tokens).not.toContain('h-9');
+    expect(tokens).not.toContain('h-8');
     expect(tokens).not.toContain('whitespace-nowrap');
     rawProps = { wrap: true, size: 'icon' };
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();
-    expect(tokens).toContain('size-9');
+    expect(tokens).toContain('size-8');
     expect(tokens).not.toContain('whitespace-normal');
 
     // Preserve every public size/wrap combination while keeping icon density fixed.
@@ -93,12 +93,12 @@ describe('prototypes/shadcn: button', () => {
         controller.applyRawProps(rawProps as any);
         const actual = controller.getRuleStyleTokens();
         if (size === 'icon') {
-          expect(actual).toContain('size-9');
+          expect(actual).toContain('size-8');
           expect(actual).toContain('whitespace-nowrap');
           expect(actual).not.toContain('h-auto');
           expect(actual).not.toContain('whitespace-normal');
         } else {
-          const height = { default: '9', sm: '8', lg: '10' }[size];
+          const height = { default: '8', sm: '7', lg: '9' }[size];
           expect(actual).toContain(`${wrap ? 'min-h' : 'h'}-${height}`);
           expect(actual).toContain(wrap ? 'whitespace-normal' : 'whitespace-nowrap');
           expect(actual).not.toContain(wrap ? 'whitespace-nowrap' : 'whitespace-normal');
@@ -108,12 +108,41 @@ describe('prototypes/shadcn: button', () => {
       }
     }
 
+    for (const profile of ['rhea', 'luma'] as const) {
+      for (const [size, steps] of Object.entries(
+        profile === 'rhea'
+          ? { default: 8, sm: 7, lg: 9, icon: 8 }
+          : { default: 9, sm: 8, lg: 10, icon: 9 }
+      )) {
+        for (const wrap of [false, true]) {
+          controller.applyRawProps({ styleProfile: profile, size, wrap });
+          const actual = controller.getRuleStyleTokens();
+          expect(actual).toContain(`${size === 'icon' ? 'size' : wrap ? 'min-h' : 'h'}-${steps}`);
+          expect(actual).toContain(
+            profile === 'rhea'
+              ? 'rounded-[var(--pui-radius-2xl)]'
+              : 'rounded-[var(--pui-radius-4xl)]'
+          );
+          expect(actual.includes('h-auto')).toBe(wrap && size !== 'icon');
+          expect(actual).not.toContain('text-[0.8rem]');
+          expect(actual).not.toContain('py-2');
+        }
+      }
+      controller.applyRawProps({ styleProfile: profile, size: 'icon-compact', wrap: true });
+      const compact = controller.getRuleStyleTokens();
+      expect(compact).toContain('size-7');
+      expect(compact).toContain('rounded-md');
+      expect(compact).not.toContain('h-auto');
+      expect(compact).not.toContain('rounded-[var(--pui-radius-2xl)]');
+      expect(compact).not.toContain('rounded-[var(--pui-radius-4xl)]');
+    }
+
     rawProps = {};
     controller.applyRawProps(rawProps as any);
     tokens = controller.getRuleStyleTokens();
     expect(tokens).toContain('bg-primary');
     expect(tokens).not.toContain('border-border');
-    expect(tokens).toContain('h-9');
+    expect(tokens).toContain('h-8');
     expect(tokens).not.toContain('opacity-50');
   });
 
@@ -210,7 +239,8 @@ describe('prototypes/shadcn: button', () => {
 
     colorScheme = 'dark';
     tokens = controller.getRuleStyleTokens();
-    expect(tokens).toContain('border-input');
-    expect(tokens).toContain('bg-input/30');
+    expect(tokens).toContain('border-border');
+    expect(tokens).not.toContain('border-input');
+    expect(tokens).toContain('bg-transparent');
   });
 });

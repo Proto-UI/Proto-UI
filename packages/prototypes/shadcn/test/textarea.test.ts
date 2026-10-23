@@ -19,7 +19,9 @@ const SURFACE_TOKENS = [
   'bg-transparent',
   'px-3',
   'py-2',
-  'text-base',
+  'text-sm',
+  'field-sizing-content',
+  'placeholder:text-muted-foreground',
   'text-foreground',
   'shadow-xs',
   'transition-[color,box-shadow]',
@@ -28,22 +30,8 @@ const SURFACE_TOKENS = [
   'outline-none',
 ];
 
-/**
- * Web-host lowering of the condition-driven rules, including the colorScheme
- * rule. `dark:bg-input/30` must be present as a static token: the selector form
- * is what makes a theme switch repaint, whereas a rule left on the default plan
- * samples the scheme once and goes stale. These tokens are evidence that
- * inherited state and host metadata reach the style projection; they are not a
- * portable guarantee of this projection.
- */
-const WEB_STATE_TOKENS = [
-  'data-[focus-visible]:border-ring',
-  'data-[focus-visible]:ring-ring/50',
-  'data-[focus-visible]:ring-3',
-  'data-[disabled]:cursor-not-allowed',
-  'data-[disabled]:opacity-50',
-  'dark:bg-input/30',
-];
+/** Disabled remains directly lowerable; profile-qualified focus/theme use live Rules. */
+const WEB_STATE_TOKENS = ['data-[disabled]:cursor-not-allowed', 'data-[disabled]:opacity-50'];
 
 const UNSCOPED_STATE_TOKENS = [
   'border-ring',
@@ -147,7 +135,7 @@ describe('prototypes/shadcn: textarea', () => {
     el.remove();
   });
 
-  it('lowers focus, disabled, and colorScheme rules to conditional web presentation', async () => {
+  it('keeps directly lowered disabled presentation and no unconditional focus/theme paint', async () => {
     // T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE
     const el = document.createElement('shadcn-textarea-root');
     document.body.appendChild(el);

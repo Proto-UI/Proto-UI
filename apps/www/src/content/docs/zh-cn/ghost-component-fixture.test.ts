@@ -3,7 +3,7 @@ import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import { parse } from 'yaml';
 import { expect, it, vi } from 'vitest';
-import demo from '../demo_components/button/demo-button-ghost.demo';
+import { createGhostDemo as actualGhostDemo } from '../demo_components/button/demo-button-ghost.demo';
 import {
   PRODUCTION_BROWSER_SUITES,
   PRODUCTION_BROWSER_OWNERS,
@@ -35,7 +35,7 @@ function deferred<T>() {
 }
 // Execute the authored fixture owner, not a copied lifecycle. Controlled loader
 // promises verify fixture cleanup only; production input/paint remains native CI.
-function owner() {
+function owner(profile = 'new-york') {
   const loaded = deferred<void>();
   const mounted = deferred<{ destroy(): void | Promise<void> }>();
   const host = document.createElement('div');
@@ -46,7 +46,12 @@ function owner() {
   const renderDemo = vi.fn((_options: unknown) => mounted.promise),
     loadPrototypes = vi.fn(() => loaded.promise),
     report = vi.fn();
+  const createGhostDemo = vi.fn(actualGhostDemo);
   runInNewContext(client, {
+    URL,
+    location: {
+      href: `https://fixture.invalid/en/test/button-ghost/react/?styleProfile=${profile}`,
+    },
     document: {
       querySelector: (selector: string) =>
         selector === '[data-ghost-component-host]' ? host : error,
@@ -58,12 +63,13 @@ function owner() {
         handlers.push(callback);
       },
     },
-    demo,
+    createGhostDemo,
     renderDemo,
     loadPrototypes,
     console: { error: report },
   });
   return {
+    createGhostDemo,
     loaded,
     mounted,
     host,
@@ -87,7 +93,9 @@ it('passes the unchanged real DemoSpec to the runtime and retires a settled moun
     isCurrent(): boolean;
   };
   expect(options.runtime).toBe('react');
-  expect(options.demo).toBe(demo);
+  expect(f.createGhostDemo).toHaveBeenCalledTimes(1);
+  expect(f.createGhostDemo).toHaveBeenCalledWith('new-york');
+  expect(options.demo).toBe(f.createGhostDemo.mock.results[0].value);
   expect(options.host).toBe(f.host);
   expect(options.isCurrent()).toBe(true);
   f.mounted.resolve({ destroy });
@@ -144,7 +152,7 @@ it('uses four static public faces and the existing production theme/reset/genera
   expect(fixture).toContain('<ThemeProvider />');
   expect(fixture).toContain("import '../../../../styles/global.css'");
   expect(fixture).toContain(
-    "import demo from '../../../../content/docs/demo_components/button/demo-button-ghost.demo'"
+    "import { createGhostDemo } from '../../../../content/docs/demo_components/button/demo-button-ghost.demo'"
   );
   expect(fixture).toContain('Independent component acceptance');
   expect(fixture).toContain('Header navigation excluded');
@@ -179,7 +187,7 @@ it('adds an independent owner while preserving the public workflow and its eight
   expect(workflow.concurrency['cancel-in-progress']).toBe(false);
   expect(workflowText).toContain(suite);
   expect(workflowText).not.toContain(publicSuite);
-  expect(workflowText).toContain('assert.equal(report.numPassedTests, 8)');
+  expect(workflowText).toContain('assert.equal(report.numPassedTests, 16)');
   expect(workflowText).toContain("receipt.evidenceScope, 'independent-component'");
   expect(publicText).toContain('pull_request:');
   expect(publicText).toContain(publicSuite);
@@ -202,4 +210,22 @@ it('adds an independent owner while preserving the public workflow and its eight
     'selectRuntime(',
   ])
     expect(source).not.toContain(forbidden);
+});
+
+it.each(['new-york', 'rhea'] as const)(
+  'constructs the actual %s fixture before mounting without paint overrides',
+  async (profile) => {
+    const f = owner(profile);
+    f.loaded.resolve();
+    await flush();
+    expect(f.createGhostDemo).toHaveBeenCalledTimes(1);
+    expect(f.createGhostDemo).toHaveBeenCalledWith(profile);
+    const spec = f.createGhostDemo.mock.results[0].value;
+    expect(f.host.dataset.styleProfile).toBe(profile);
+    expect(JSON.stringify(spec)).toContain(`"styleProfile":"${profile}"`);
+    expect(f.renderDemo).toHaveBeenCalledWith(expect.objectContaining({ demo: spec }));
+  }
+);
+it('rejects an unrecognized profile instead of silently admitting a false source identity', () => {
+  expect(() => owner('unknown')).toThrow('Unsupported ghost acceptance profile');
 });

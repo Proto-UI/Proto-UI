@@ -24,6 +24,9 @@ export default definePrototype<ShadcnAlertDialogActionProps, AlertDialogActionEx
     def.props.setDefaults({ wrap: false });
     const behavior = asAlertDialogAction();
     const state = behavior.getState!;
+    // Restore the pre-e0d4f3d command-subject selection affordance. This owner
+    // remains AlertDialog, not Button; shared Drawer paint is deliberately unchanged.
+    def.feedback.style.use(tw('select-none'));
     def.feedback.style.use(tw(SHADCN_BUTTON_BASE_TOKENS));
     def.rule({
       when: (w) => w.prop('wrap').eq(false),

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { RuntimeHost } from '@proto.ui/runtime';
 import { executeWithHost } from '@proto.ui/runtime';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
-import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { RULE_META_GET_CAP, RULE_META_PREFERENCE_SOURCE_CAP } from '@proto.ui/module-rule-meta';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
@@ -30,6 +30,14 @@ function createButtonHost(
 ) {
   const rootTarget = new EventTarget();
   const globalTarget = new EventTarget();
+  let reducedMotion: unknown = 'unknown';
+  const preferenceListeners = new Set<() => void>();
+  const metaGetter = (key: string) =>
+    key === 'colorScheme'
+      ? colorSchemeRef.current
+      : key === 'preference.reducedMotion'
+        ? reducedMotion
+        : null;
   const host: RuntimeHost<any> = {
     prototypeName: 'x-brutalist-button',
     getRawProps() {
@@ -52,17 +60,58 @@ function createButtonHost(
         [AS_TRIGGER_GET_PROTO_CAP, () => null],
       ]);
       wiring.attach('rule-meta', [
+        [RULE_META_GET_CAP, metaGetter],
         [
-          RULE_META_GET_CAP,
-          (key: string) => (key === 'colorScheme' ? colorSchemeRef.current : null),
+          RULE_META_PREFERENCE_SOURCE_CAP,
+          {
+            getter: metaGetter,
+            subscribe(keys: readonly string[], invalidate: () => void) {
+              expect(keys).toEqual(['preference.reducedMotion']);
+              preferenceListeners.add(invalidate);
+              return () => {
+                preferenceListeners.delete(invalidate);
+              };
+            },
+          },
         ],
       ]);
     },
   };
-  return { host, rootTarget, globalTarget };
+  return {
+    host,
+    rootTarget,
+    globalTarget,
+    preferenceListeners,
+    setReducedMotion(value: unknown) {
+      reducedMotion = value;
+      for (const invalidate of preferenceListeners) invalidate();
+    },
+  };
 }
 
 describe('prototypes/brutalist: button', () => {
+  it('keeps one live timing writer for transform and shadow; unknown/reduce is static', () => {
+    const fixture = createButtonHost({ current: {} });
+    const { controller } = executeWithHost(button, fixture.host);
+    const expectTiming = (value: unknown, expected: string) => {
+      fixture.setReducedMotion(value);
+      const tokens = controller.getRuleStyleTokens();
+      expect(tokens.filter((token) => token.startsWith('transition-'))).toEqual([expected]);
+    };
+    expectTiming('unknown', 'transition-none');
+    expect(fixture.preferenceListeners.size).toBe(1);
+    expectTiming('no-preference', 'transition-all');
+    fixture.rootTarget.dispatchEvent(new CustomEvent('pointer.enter'));
+    expectTiming('no-preference', 'transition-all');
+    expect(controller.getRuleStyleTokens()).toContain('shadow-none');
+    fixture.rootTarget.dispatchEvent(new CustomEvent('pointer.leave'));
+    expectTiming('no-preference', 'transition-all');
+    expect(controller.getRuleStyleTokens()).toContain('shadow-[4px_4px_0_0_#000]');
+    expectTiming('reduce', 'transition-none');
+    expectTiming(null, 'transition-none');
+    expectTiming('no-preference', 'transition-all');
+  });
+
   // T-BRUTALIST-BUTTON-0001-CASE-1 / P-BRUTALIST-BUTTON-ENTRY, P-BRUTALIST-BUTTON-BASE-INHERITANCE
   it('exposes the direct brutalist-button entry and inherits Base Button as-hook', () => {
     const rawPropsRef = { current: {} as Record<string, unknown> };
@@ -239,4 +288,29 @@ describe('prototypes/brutalist: button', () => {
       expect(controller.getRuleStyleTokens()).not.toContain('h-12');
     }
   });
+});
+
+it('wrap is an opt-in family extension that restores fixed defaults and never resizes icons', () => {
+  const rawPropsRef = { current: {} as Record<string, unknown> };
+  const { host } = createButtonHost(rawPropsRef);
+  const { controller } = executeWithHost(button, host);
+  for (const [size, minimum] of [
+    ['default', 'min-h-10'],
+    ['sm', 'min-h-9'],
+    ['lg', 'min-h-11'],
+  ] as const) {
+    controller.applyRawProps({ size, wrap: true });
+    const tokens = controller.getRuleStyleTokens();
+    expect(tokens).toContain('h-auto');
+    expect(tokens).toContain(minimum);
+    expect(tokens).toContain('whitespace-normal');
+    expect(tokens).not.toContain(minimum.replace('min-', ''));
+    expect(tokens).toContain('text-sm');
+  }
+  controller.applyRawProps({ size: 'icon', wrap: true });
+  expect(controller.getRuleStyleTokens()).toContain('size-10');
+  expect(controller.getRuleStyleTokens()).not.toContain('h-auto');
+  controller.applyRawProps({});
+  expect(controller.getRuleStyleTokens()).toContain('h-10');
+  expect(controller.getRuleStyleTokens()).not.toContain('h-auto');
 });

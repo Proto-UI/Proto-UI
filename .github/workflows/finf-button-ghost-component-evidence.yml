@@ -83,17 +83,18 @@ jobs:
           const directory = process.env.PUI_FINF_FEATURE_EVIDENCE_DIR;
           const read = name => JSON.parse(readFileSync(path.join(directory, name), 'utf8'));
           const report = read('vitest.json');
-          assert.equal(report.numTotalTests, 8);
-          assert.equal(report.numPassedTests, 8);
+          assert.equal(report.numTotalTests, 16);
+          assert.equal(report.numPassedTests, 16);
           assert.equal(report.numFailedTests, 0);
           assert.equal(report.numPendingTests, 0);
-          for (const runtime of ['wc', 'react', 'vue', 'vue2']) for (const scheme of ['light', 'dark']) {
-            const receipt = read(`button-ghost-component-${runtime}-${scheme}.json`);
+          for (const profile of ['new-york', 'rhea']) for (const runtime of ['wc', 'react', 'vue', 'vue2']) for (const scheme of ['light', 'dark']) {
+            const receipt = read(`button-ghost-component-${profile}-${runtime}-${scheme}.json`);
             assert.equal(receipt.result, 'passed');
             assert.equal(receipt.evidenceScope, 'independent-component');
+            assert.equal(receipt.styleProfile, profile);
             assert.equal(receipt.candidate.revision, process.env.CANDIDATE_SHA);
             assert.equal(receipt.candidate.cleanExactCommit, true);
-            assert.deepEqual(receipt.screenshots.map(image => image.state), ['rest', 'hover', 'leave', 'disabled']);
+            assert.deepEqual(receipt.screenshots.map(image => image.state), ['rest', 'hover-before-assert', 'hover', 'leave', 'disabled']);
             for (const image of receipt.screenshots) {
               assert.equal(image.candidate.revision, process.env.CANDIDATE_SHA);
               assert.equal(image.environment.theme, scheme);

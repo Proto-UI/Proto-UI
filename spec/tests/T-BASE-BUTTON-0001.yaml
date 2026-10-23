@@ -5,6 +5,10 @@ status: draft
 since: 0.1.0
 summary: Contract test coverage for the Base Button prototype protocol and its asButton authoring entry.
 cases:
+  - id: T-BASE-BUTTON-0001-CASE-CONTENT-SELECTION
+    title: Local Base selection inheritance and explicit restoration
+    covers: [P-BASE-BUTTON-CONTENT-SELECTION]
+    expectation: base-button-local-selection-policy
   - id: T-BASE-BUTTON-0001-CASE-DISABLED-CONTROLLED
     title: disabled props synchronize state and omission restores the enabled default
     covers:
@@ -69,6 +73,26 @@ cases:
       - P-BASE-BUTTON-A11Y-ENHANCEMENT
     expectation: deferred-button-surfaces-remain-explicit
 implementations:
+  - id: prototypes-base-button-selection
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/button-selection.test.ts
+    required: true
+    consumesCases: [T-BASE-BUTTON-0001-CASE-CONTENT-SELECTION]
+    exercises: [P-BASE-BUTTON]
+    notes:
+      [Local isolated module results do not establish native drag or rendered geometry acceptance.]
+  - id: homepage-base-button-contract-browser
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts
+    required: true
+    consumesCases: [T-BASE-BUTTON-0001-CASE-CONTENT-SELECTION]
+    exercises: [P-BASE-BUTTON]
+    notes:
+      [
+        Four runtimes and both homepage families retain real input and geometry assertions; browser result is pending for this candidate.,
+      ]
   - id: prototypes-base-as-button-contract
     kind: module-test
     status: passing
@@ -114,6 +138,9 @@ exercises:
   prototypes:
     - P-BASE-BUTTON
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded local selection or public wrapping regressions and an explicitly pending four-runtime homepage browser acceptance mapping; existing protocol and visual evidence remains preserved.
   - version: 0.1.0
     change: introduced
     summary: Introduced Base Button protocol test entity aligned to P-BASE-BUTTON criteria.

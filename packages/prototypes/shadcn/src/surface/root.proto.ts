@@ -4,10 +4,25 @@ import {
   type SurfaceRootProps,
   type SurfaceRootExposes,
 } from '@proto.ui/prototypes-base/surface';
-export const ShadcnSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootExposes>({
+import {
+  SHADCN_ACTION_RADIUS,
+  SHADCN_ACTION_FOCUS,
+  SHADCN_SECONDARY_HOVER,
+} from '../button/profiles';
+import type { ShadcnActionStyleProfile } from '../button/types';
+
+export interface ShadcnSurfaceRootProps extends SurfaceRootProps {
+  /** Passive appearance only. The native owner retains all interaction semantics. */
+  actionProfile?: 'none' | ShadcnActionStyleProfile;
+}
+export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, SurfaceRootExposes>({
   name: 'shadcn-surface-root',
   setup(def) {
     asSurfaceRoot();
+    def.props.define({
+      actionProfile: { type: 'enum', empty: 'fallback', options: ['none', 'rhea', 'luma'] },
+    });
+    def.props.setDefaults({ actionProfile: 'none' });
     def.rule({
       when: (w) => w.prop('variant').eq('scrim'),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),
@@ -33,43 +48,43 @@ export const ShadcnSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootEx
       intent: (i) => i.feedback.style.use(tw('opacity-100')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('default'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('default')),
       intent: (i) => i.feedback.style.use(tw('rounded-xl')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('none'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('none')),
       intent: (i) => i.feedback.style.use(tw('rounded-none')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('sm'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('sm')),
       intent: (i) => i.feedback.style.use(tw('rounded-sm')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('md'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('md')),
       intent: (i) => i.feedback.style.use(tw('rounded-md')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('lg'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('lg')),
       intent: (i) => i.feedback.style.use(tw('rounded-lg')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('xl'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('xl')),
       intent: (i) => i.feedback.style.use(tw('rounded-xl')),
     });
     def.rule({
-      when: (w) => w.prop('radius').eq('full'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('radius').eq('full')),
       intent: (i) => i.feedback.style.use(tw('rounded-full')),
     });
     def.rule({
-      when: (w) => w.prop('border').eq('all'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('border').eq('all')),
       intent: (i) => i.feedback.style.use(tw('border border-border')),
     });
     def.rule({
-      when: (w) => w.prop('border').eq('bottom'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('border').eq('bottom')),
       intent: (i) => i.feedback.style.use(tw('border-b border-border')),
     });
     def.rule({
-      when: (w) => w.prop('border').eq('none'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('border').eq('none')),
       intent: (i) => i.feedback.style.use(tw('border-0')),
     });
     def.rule({
@@ -101,14 +116,19 @@ export const ShadcnSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootEx
       intent: (i) => i.feedback.style.use(tw('shadow-sm')),
     });
     def.rule({
-      when: (w) => w.prop('focusVisible').eq(true),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('focusVisible').eq(true)),
       intent: (i) =>
         i.feedback.style.use(
           tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background')
         ),
     });
     def.rule({
-      when: (w) => w.all(w.prop('variant').eq('solid'), w.prop('hovered').eq(true)),
+      when: (w) =>
+        w.all(
+          w.prop('actionProfile').eq('none'),
+          w.prop('variant').eq('solid'),
+          w.prop('hovered').eq(true)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
@@ -118,11 +138,65 @@ export const ShadcnSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootEx
     def.rule({
       when: (w) =>
         w.all(
+          w.prop('actionProfile').eq('none'),
           w.any(w.prop('variant').eq('outline'), w.prop('variant').eq('transparent')),
           w.any(w.prop('hovered').eq(true), w.prop('current').eq(true))
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
+    for (const profile of ['rhea', 'luma'] as const) {
+      def.rule({
+        when: (w) => w.prop('actionProfile').eq(profile),
+        intent: (i) =>
+          i.feedback.style.use(
+            tw(
+              'border border-transparent bg-clip-padding transition-all outline-none',
+              SHADCN_ACTION_RADIUS[profile]
+            )
+          ),
+      });
+      def.rule({
+        when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
+        intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS)),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('solid'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('secondary'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw(SHADCN_SECONDARY_HOVER)),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('transparent'),
+            w.prop('hovered').eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('actionProfile').eq(profile),
+            w.prop('variant').eq('transparent'),
+            w.prop('hovered').eq(true),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+      });
+    }
     return (renderer) => renderer.r.slot();
   },
 });

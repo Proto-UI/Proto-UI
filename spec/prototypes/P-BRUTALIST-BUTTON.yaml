@@ -11,6 +11,14 @@ statement:
   zh-CN: P-BRUTALIST-BUTTON 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-BUTTON-MOTION
+    text:
+      en: The mounted Button has one CSS timing writer. With preference.reducedMotion equal to no-preference, transition-all uses the existing compiler mapping of 150ms cubic-bezier(0.4,0,0.2,1), including transform and the hard box-shadow on entry and release. Reduce or unknown uses transition-none, and live preference changes update the same mounted subject. Hover and transient press share the existing endpoint, not an additional displacement. At 200% text scale translation follows rem while the hard shadow remains 4px. This does not change Base activation timing, add keyboard press-start semantics, or claim that every other Brutalist command already shares this timing.
+      zh-CN: 挂载 Button 仅有一个 CSS 时序写入者。preference.reducedMotion 为 no-preference 时，transition-all 使用既有 compiler 的 150ms cubic-bezier(0.4,0,0.2,1)，覆盖进入与释放的 transform 和硬 box-shadow；reduce 或未知时为 transition-none，偏好变化实时更新同一 subject。hover 与瞬时 press 共用既有端点，不叠加位移；200% 文字缩放时位移随 rem，硬阴影仍为 4px。不改变 Base 激活时机、不新增键盘 press-start，也不声称其他 Brutalist command 已拥有相同时序。
+  - id: P-BRUTALIST-BUTTON-WRAP
+    text:
+      en: Public wrap is an opt-in boolean defaulting to false. For default/sm/lg, true uses automatic height with the existing family minimum of 2.5rem/2.25rem/2.75rem, normal wrapping, unchanged horizontal padding/font size, 0.25rem vertical padding and bounded inline width. Icon stays square at 2.5rem. Removing wrap restores fixed defaults. This is a Proto UI extension, not a claim that pinned upstream exposes the same API.
+      zh-CN: 公开 wrap 是默认 false 的可选 boolean。default/sm/lg 为 true 时使用自动高度及既有 2.5rem/2.25rem/2.75rem family 下限，允许换行，保留水平 padding 与字号，垂直 padding 为 0.25rem，并限制 inline 宽度。icon 保留 2.5rem 正方形；移除 wrap 恢复默认固定尺寸。此为 Proto UI 扩展，不声称固定上游有同名 API。
   - id: P-BRUTALIST-BUTTON-BASE-INHERITANCE
     text:
       en: >-
@@ -128,6 +136,9 @@ inherits:
     - id: P-BASE-BUTTON
 verifies: { tests: [T-BRUTALIST-BUTTON-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added opt-in public wrap for content-driven height while preserving all pinned default sizes; command selection is inherited from Base rather than duplicated in family paint.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Aligned draft visual grammar with neobrutalism-components 3306a802; corrected earlier local sm text-xs and lg h-12 px-6 text-base choices to the pinned source. Base semantics and Proto UI API extensions remain unchanged.

@@ -37,6 +37,9 @@ criteria:
   - id: C-CONTENT-SELECTION-AFFORDANCE-0001-SUPPORT
     text:
       en: Token acceptance and CSS generation do not certify native selection support or every browser. Unsupported native properties or tokens retain explicit diagnostics. GPUI/AppKit/SwiftUI/Flutter/Qt selection fidelity and real assistive-technology conformance are outside this slice.
+  - id: C-CONTENT-SELECTION-AFFORDANCE-0001-THEME-PAINT
+    text:
+      en: Public Web theme selection paint consumes the existing selection background/foreground roles at low cascade priority without changing host selection behavior. Scoped family boundaries and palette-only variable banks must not repaint unrelated content. Explicit component highlight paint retains precedence; editable text and ordinary document text remain selectable. Light-DOM evidence does not certify separate shadow stylesheet installation or native hosts.
 dependsOn:
   contracts:
     - C-FEEDBACK-STYLE-0001
@@ -49,6 +52,8 @@ references:
     - P-SHADCN-TOGGLE
     - P-SHADCN-CHECKBOX
 sources:
+  - path: packages/cli/src/legacy/type.ts
+  - path: packages/prototypes/brutalist/src/theme.ts
   - path: packages/core/src/spec/feedback/semantic-merge.ts
   - path: packages/cli/src/services/proto-style-css.ts
   - path: internal/records/2026-10-06-content-selection-affordance.md

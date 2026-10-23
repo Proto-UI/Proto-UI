@@ -14,15 +14,16 @@ import button from '../src/button';
 
 // T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER:
 // Collect the actual source; never seed the generator with an expected new token.
-const darkHover = 'dark:data-[hovered]:bg-accent/50';
-const darkDeclaration =
-  'background-color: color-mix(in oklab, var(--pui-accent) 50%, transparent);';
+const darkHover = 'dark:data-[hovered]:bg-muted/50';
+const darkDeclaration = 'background-color: color-mix(in oklab, var(--pui-muted) 50%, transparent);';
 
 it('carries real ghost Rules through the official preset and all existing physical CSS targets', async () => {
   const sourceTokens = (await collectProtoStyleTokens(
     path.resolve('packages/prototypes/shadcn/src/button')
   )) as string[];
+  expect(sourceTokens).toContain('bg-muted/50');
   expect(sourceTokens).toContain('bg-accent/50');
+  expect(sourceTokens).toContain('text-accent-foreground');
   expect(sourceTokens).toContain(darkHover);
   const closure = await collectFamilyStyleClosure(
     path.resolve('packages/prototypes/shadcn/src'),
@@ -38,8 +39,12 @@ it('carries real ghost Rules through the official preset and all existing physic
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     expect(css).toContain(darkHover);
     expect(css).toContain(darkDeclaration);
+    expect(css).toContain(
+      'background-color: color-mix(in oklab, var(--pui-accent) 50%, transparent);'
+    );
     expect(css).toContain('color: var(--pui-accent-foreground);');
-    const withoutGhostDark = sourceTokens.filter((token) => !token.includes('bg-accent/50'));
+    expect(css).toContain('color: var(--pui-foreground);');
+    const withoutGhostDark = sourceTokens.filter((token) => !token.includes('bg-muted/50'));
     expect(renderProtoStyleTokenCss(withoutGhostDark)).not.toContain(darkDeclaration);
   }
 });
@@ -64,6 +69,16 @@ it('matches generated hover declarations against the real Button host during the
   const matched = (property: 'background-color' | 'color') =>
     [...style.textContent!.matchAll(/^[ \t]*(:where[^{}]+)\{([^{}]+)\}/gm)]
       .filter(([, , body]) => new RegExp(`(?:^|;)\\s*${property}:`).test(body))
+      // HappyDOM 15 misparses commas inside quoted attribute values in :where.
+      // Exclude selectors whose required token is absent before asking it to
+      // match. This does not alter declarations or discard any possible match.
+      .filter(([, selector]) => {
+        const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
+        return (
+          !required ||
+          (element.getAttribute('data-pui-style') ?? '').split(/\s+/).includes(required)
+        );
+      })
       .filter(([, selector]) => element.matches(selector.trim()))
       .flatMap(([, , body]) =>
         [...body.matchAll(new RegExp(`(?:^|;)\\s*${property}:\\s*([^;]+);`, 'g'))].map((match) =>
@@ -82,31 +97,29 @@ it('matches generated hover declarations against the real Button host during the
     element.dispatchEvent(new PointerEvent('pointerenter'));
     await flush();
     expect(element.hasAttribute('data-hovered')).toBe(true);
-    expect(matched('background-color')).toContain('var(--pui-accent)');
-    expect(matched('color')).toContain('var(--pui-accent-foreground)');
-    expect(matched('background-color')).not.toContain('var(--pui-muted)');
+    expect(matched('background-color')).toContain('var(--pui-muted)');
+    expect(matched('color')).toContain('var(--pui-foreground)');
+    expect(matched('background-color')).not.toContain('var(--pui-accent)');
     expect(matched('background-color')).not.toContain(
-      'color-mix(in oklab, var(--pui-accent) 50%, transparent)'
+      'color-mix(in oklab, var(--pui-muted) 50%, transparent)'
     );
     document.documentElement.classList.replace('light', 'dark');
     // Await the actual environment observer notification, not a fixed sleep.
-    await vi.waitFor(() =>
-      expect(element.getAttribute('data-pui-style')).toContain('bg-accent/50')
-    );
+    await vi.waitFor(() => expect(element.getAttribute('data-pui-style')).toContain('bg-muted/50'));
     expect(matched('background-color')).toContain(
-      'color-mix(in oklab, var(--pui-accent) 50%, transparent)'
+      'color-mix(in oklab, var(--pui-muted) 50%, transparent)'
     );
     document.documentElement.classList.replace('dark', 'light');
     await vi.waitFor(() =>
-      expect(element.getAttribute('data-pui-style')).not.toContain('bg-accent/50')
+      expect(element.getAttribute('data-pui-style')).not.toContain('bg-muted/50')
     );
     expect(matched('background-color')).not.toContain(
-      'color-mix(in oklab, var(--pui-accent) 50%, transparent)'
+      'color-mix(in oklab, var(--pui-muted) 50%, transparent)'
     );
     setElementProps(element, { variant: 'ghost', disabled: true });
     await flush();
     expect(element.hasAttribute('data-hovered')).toBe(false);
-    expect(matched('background-color')).not.toContain('var(--pui-accent)');
+    expect(matched('background-color')).not.toContain('var(--pui-muted)');
     expect(element.getAttribute('aria-disabled')).toBe('true');
     setElementProps(element, { variant: 'default', disabled: false });
     await flush();
@@ -118,7 +131,7 @@ it('matches generated hover declarations against the real Button host during the
     expect(matched('background-color')).not.toContain(
       'color-mix(in oklab, var(--pui-primary) 90%, transparent)'
     );
-    expect(matched('color')).not.toContain('var(--pui-accent-foreground)');
+    expect(matched('color')).not.toContain('var(--pui-foreground)');
     element.dispatchEvent(new PointerEvent('pointerleave'));
     await flush();
     expect(element.hasAttribute('data-hovered')).toBe(false);

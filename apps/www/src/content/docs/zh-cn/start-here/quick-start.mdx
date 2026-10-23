@@ -3,17 +3,14 @@ title: '快速开始'
 description: '通过 npm latest 稳定版本初始化 Proto UI 0.2.0 并添加组件'
 ---
 
+import StaticCodeBlock from '@/components/StaticCodeBlock.astro';
+import CliInitOutput from '@/components/CliInitOutput.astro';
 import DocStageNotice from '@/components/DocStageNotice.astro';
 import CodeExample from '@/components/CodeExample.astro';
 import { Aside } from '@astrojs/starlight/components';
 
 export const buttonHostFiles = /** @type {const} */ ({
   react: [
-    {
-      name: 'install.sh',
-      lang: 'bash',
-      code: 'npx @proto.ui/cli@latest add react shadcn-button',
-    },
     {
       name: 'src/App.tsx',
       lang: 'tsx',
@@ -24,18 +21,59 @@ export function App() {
 }`,
     },
   ],
+  vue: [
+    { name: 'src/App.vue', lang: 'vue', code: `<script setup lang="ts">
+import { ShadcnButton } from '../proto-ui/components/vue';
+</script>
+
+<template>
+  <ShadcnButton variant="outline">Proto UI 0.2.0</ShadcnButton>
+</template>` },
+  ],
   wc: [
-    {
-      name: 'install.sh',
-      lang: 'bash',
-      code: 'npx @proto.ui/cli@latest add wc shadcn-button',
-    },
     {
       name: 'src/main.ts',
       lang: 'typescript',
-      code: `import '../proto-ui/components/wc';
+      code: `import './styles/proto-ui-style.css';
+import '../proto-ui/components/wc';`,
+    },
+    {
+      name: 'index.html',
+      lang: 'html',
+      code: `<proto-ui-shadcn-button variant="outline">Proto UI 0.2.0</proto-ui-shadcn-button>
+<script type="module" src="/src/main.ts"></script>`,
+    },
+  ],
+});
 
-document.body.innerHTML = '<proto-ui-shadcn-button variant="outline">Proto UI 0.2.0</proto-ui-shadcn-button>';`, }, ], });
+export const buttonHostCommands = /** @type {const} */ ({
+  react: { label: '终端', code: 'npx @proto.ui/cli@latest add react shadcn-button' },
+  vue: { label: '终端', code: 'npx @proto.ui/cli@latest add vue shadcn-button' },
+  wc: { label: '终端', code: 'npx @proto.ui/cli@latest add wc shadcn-button' },
+});
+
+export const pendingButtonHosts = /** @type {const} */ ([
+  {
+    "id": "vue2",
+    "label": "Vue 2",
+    "message": "本稳定版快速开始路径仍为 WIP。官方 Vue 2 Adapter 面向 Vue >=2.6.0 <2.7，自 0.3 预发布线提供；稳定 0.2.0 CLI 不支持 vue2，因此这里不展示不可用的 @latest 安装命令。"
+  },
+  {
+    "id": "gpui",
+    "label": "GPUI",
+    "message": "公开快速开始接入仍为 WIP。仓库已有实现中的私有 GPUI 源码编译 profile，但尚不是已发布的官方 Adapter，也没有稳定 CLI add 接入路径。"
+  },
+  {
+    "id": "qt",
+    "label": "Qt",
+    "message": "WIP。Qt 已列为编译目标，但当前 profile 尚未实现，编译会明确拒绝。暂不提供稳定版 CLI 安装或导入示例。"
+  },
+  {
+    "id": "flutter",
+    "label": "Flutter",
+    "message": "WIP。Flutter 已列为编译目标，但当前 profile 尚未实现，编译会明确拒绝。暂不提供稳定版 CLI 安装或导入示例。"
+  }
+]);
 
 <DocStageNotice
   title="Proto UI 0.2.0 已通过 npm latest 发布。"
@@ -59,9 +97,7 @@ CLI 会按照自身精确版本安装所选 Adapter 与 Prototype package。使�
 
 可以直接通过 `npx` 调用 CLI，不需要全局安装：
 
-```bash
-npx @proto.ui/cli@latest --help
-```
+<StaticCodeBlock id="quick-start-cli-help" code={"npx @proto.ui/cli@latest --help"} title="终端" icon="terminal" lang="bash" copyLabel="复制 CLI 帮助命令" />
 
 显式写出 `@latest` 是为了让稳定 channel 策略一目了然。如果需要永久可复现的安装或 CI 流程，请改用 `@0.2.0`。
 
@@ -69,27 +105,11 @@ npx @proto.ui/cli@latest --help
 
 在应用根目录执行：
 
-```bash
-npx @proto.ui/cli@latest init
-```
+<StaticCodeBlock id="quick-start-init-command" code="npx @proto.ui/cli@latest init" title="终端" icon="terminal" lang="bash" copyLabel="复制初始化命令" />
 
 接受默认选项后，CLI 会创建本地 Proto UI workspace 与 Shadcn 样式预设：
 
-```txt
-your-project/
-├── src/
-│   └── styles/
-│       ├── proto-ui-style.css
-│       ├── proto-ui-tokens.generated.css
-│       └── shadcn-theme.css
-├── proto-ui/
-│   ├── adapters/
-│   ├── prototypes/
-│   ├── components/
-│   └── config.json
-├── package.json
-└── ...
-```
+<CliInitOutput />
 
 - `proto-ui/config.json` 记录后续 CLI 命令读取的项目配置。
 - `proto-ui/components/` 保存应用需要导入的已生成 host 入口。
@@ -104,23 +124,13 @@ your-project/
 
 从应用入口导入生成的样式表：
 
-```ts
-import './styles/proto-ui-style.css';
-```
+<StaticCodeBlock code={"import './styles/proto-ui-style.css';"} title="样式导入" icon="file-code" lang="typescript" copyLabel="复制 样式导入" />
 
 如果入口文件位于其他位置，请调整相对路径。应用未主动选择主题时，生成的 Shadcn theme 会跟随 `prefers-color-scheme`。在根元素设置 `data-theme="light"` / `data-theme="dark"`，或使用兼容的 `.light` / `.dark` class，可以覆盖系统偏好。
 
 如果应用没有使用 CSS named cascade layers，保留上面的单次 import 即可。如果应用使用了 named layers，请改为在一个 CSS 入口中、任何 reset、Proto UI 或 consumer layer 首次声明之前建立完整顺序：
 
-```css
-/* src/app.css */
-@layer theme, base, proto-ui, components, utilities;
-
-@import './reset.css' layer(base);
-@import './styles/proto-ui-style.css';
-@import './app-components.css' layer(components);
-@import './app-utilities.css' layer(utilities);
-```
+<StaticCodeBlock code={"/* src/app.css */\n@layer theme, base, proto-ui, components, utilities;\n\n@import './reset.css' layer(base);\n@import './styles/proto-ui-style.css';\n@import './app-components.css' layer(components);\n@import './app-utilities.css' layer(utilities);"} title="src/app.css" icon="file-code" lang="css" copyLabel="复制 src/app.css" />
 
 应用入口只需 import 一次 `app.css`，不要再分别导入这些 stylesheet。生成入口会把 theme 默认值放进 `theme` layer，因此更后的 named consumer layer 或 unlayered consumer CSS 声明的变量值仍然拥有优先权。完整关系是 `theme defaults < reset/base < proto-ui < explicit consumer layers`。使用 Tailwind 时，应保留它的 `theme < base < components < utilities` 顺序，并在最早的 layer order statement 中把 `proto-ui` 插入 base 之后、应用的 components 与 utilities layers 之前。
 
@@ -128,12 +138,18 @@ Named layer 的顺序会在首次出现时固定。生成的 `@layer theme, prot
 
 ## 添加并导入组件
 
-请按应用实际使用的 host 添加官方 Shadcn Button facade。下面把 React 与 Web Components 各自的 CLI 命令和应用入口放在同一个示例中；支持当前站点 Adapter 偏好时，示例会以该 host 作为初始页签。
+选择应用使用的 host。React、Vue 和 Web Components 提供稳定版示例；开发中页签说明当前接入进度。
+
+在项目根目录运行命令，再将示例加入对应的应用文件。
 
 <CodeExample
   files={buttonHostFiles}
+  commands={buttonHostCommands}
+  pendingHosts={pendingButtonHosts}
+  labels={{ files: '文件', install: '安装组件', usage: '在应用中使用', copy: '复制', pending: '开发中', overflow: '横向滑动查看全部 host →' }}
+  guidance={{ wc: '适用于已有 TypeScript 打包应用（如 Vite），不是独立 file:// 页面。将元素加入现有 HTML，将注册导入加入模块入口；保留原有内容，不要重复加载入口，并按需调整路径。' }}
   initialHost="react"
-  label="在 React 或 Web Components 中添加并使用 Shadcn Button"
+  label="Shadcn Button 各 host 接入示例与 WIP 状态"
 />
 
 命令会安装匹配的 Adapter 与 `@proto.ui/prototypes-shadcn@0.2.0`，并在 `proto-ui/components/` 下生成 host 入口。Vue 项目在同一命令中使用 `vue`。这里有意使用相对路径：不同应用并不共享同一套路径别名与目录层级。生成的 facade 会保留 Prototype 声明的 props、事件 listener 与 ref/expose surface。
@@ -146,16 +162,11 @@ Named layer 的顺序会在首次出现时固定。生成的 `@layer theme, prot
 
 ## 按组件继续接入
 
-```bash
-npx @proto.ui/cli@latest add react shadcn-toggle
-npx @proto.ui/cli@latest add react shadcn-dialog
-```
+<StaticCodeBlock code={"npx @proto.ui/cli@latest add react shadcn-toggle\nnpx @proto.ui/cli@latest add react shadcn-dialog"} title="终端" icon="terminal" lang="bash" copyLabel="复制组件添加命令" />
 
 生成的 host 入口会持续累积导出，因此应用可以始终从同一路径导入：
 
-```tsx
-import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';
-```
+<StaticCodeBlock code={"import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/components/react';"} title="组件导入" icon="file-code" lang="tsx" copyLabel="复制 组件导入" />
 
 如果只想生成文件而不安装缺失 package，可添加 `--no-install`。CLI 会打印精确安装命令，但在补齐这些 dependency 前，生成入口无法完成构建。
 
@@ -183,3 +194,4 @@ import { ShadcnButton, ShadcnDialogRoot, ShadcnToggle } from '../proto-ui/compon
 | 尝试 Neo-Brutalist 视觉风格        | [Brutalist 原型库](/zh-cn/ui-libraries/brutalist/) |
 | 查找并使用图标                     | [Lucide 图标库](/zh-cn/ui-libraries/lucide/)       |
 | 深入了解 Proto UI 的思路与设计边界 | [白皮书：序章](/zh-cn/whitepaper/0-preface/)       |
+

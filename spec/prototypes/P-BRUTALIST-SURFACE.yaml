@@ -21,7 +21,11 @@ criteria:
   - id: P-BRUTALIST-SURFACE-ENTRIES
     text:
       en: The public package root and /surface subpath expose Surface, with CLI registration for adapter facade consumption. Partial-family Surface defaults to neutral opaque outline presentation (transparent and scrim are ordinary fills, not material effects) and does not expand material or unrelated component compatibility guarantees.
+  - id: P-BRUTALIST-SURFACE-ACTION-APPEARANCE
+    text:
+      en: The separate brutalistActionAppearance Web composition helper returns existing Surface and Text props plus family-owned wrapping layout for an action label. It does not add a Surface prop or change atom defaults. Its default minimum height matches the family default wrapped Button, while the native owner retains href, focus, Enter, modifiers, middle click, context menu and Space behavior. The label's nonselectable affordance does not suppress document or editor selection, intercept events or introduce Button semantics. This is a passive appearance composition, not admission of a Base Link prototype or a cross-host navigation API.
 sources:
+  - path: packages/prototypes/brutalist/src/surface/action-appearance.ts
   - path: packages/prototypes/brutalist/src/surface/root.proto.ts
   - path: packages/prototypes/brutalist/src/surface/index.ts
 dependsOn:

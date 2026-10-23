@@ -1,5 +1,8 @@
 import { defineAsHook, definePrototype, type DefHandle, type RunHandle } from '@proto.ui/core';
 import { asAccessible, asFocusable, asTextControl, asControlLabel } from '@proto.ui/hooks';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
+import { FIELD_LABEL_PAIR } from '../field/shared';
+import type { FieldControlReport } from '../field/types';
 import { declareTextControl } from '@proto.ui/module-text-control';
 import type {
   TextareaCompositionDetail,
@@ -19,7 +22,14 @@ export type {
   TextareaValueChangeDetail,
 } from './types';
 
-function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes>) {
+export type TextareaRootSetupOptions = Readonly<{ fieldBinding?: boolean }>;
+
+/** Definition-time composition only. The ordinary Textarea entry keeps explicit label associations. */
+export function setupTextareaRoot(
+  def: DefHandle<TextareaRootProps, TextareaRootExposes>,
+  options: TextareaRootSetupOptions = {}
+) {
+  const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
   def.props.define({
     value: { type: 'string', empty: 'fallback' },
@@ -79,9 +89,13 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
     if (!disabled.get()) focusable.focusSelf(options);
   });
   def.expose.method('blurSelf', () => focusable.blur());
-  asControlLabel().target((_, request) => {
-    if (!disabled.get() && request.isCurrent()) focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
-  });
+  asControlLabel().target(
+    (_, request) => {
+      if (!disabled.get() && request.isCurrent())
+        focusable.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    },
+    options.fieldBinding ? FIELD_LABEL_PAIR : undefined
+  );
   def.expose.event('valueChange', { payload: 'json' });
   def.expose.event('change', { payload: 'json' });
   def.expose.event('compositionStart', { payload: 'json' });
@@ -92,14 +106,41 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
   accessible.name(ariaLabel);
   accessible.state('disabled', disabled);
   accessible.state('readOnly', readOnly);
-  accessible.relation('labelledBy', { target: labelledBy });
-  accessible.relation('describedBy', { target: describedBy });
+  if (!binding) {
+    accessible.relation('labelledBy', { target: labelledBy });
+    accessible.relation('describedBy', { target: describedBy });
+  }
+  // The Field binding owns invalid/busy and part relationships. Do not replace
+  // them with the ordinary Textarea's empty external-ID defaults.
+  const reportField = (reason: FieldControlReport['reason'] = 'sync') =>
+    binding?.report({
+      value: control.snapshot()?.value ?? value.get(),
+      focused: focused.get(),
+      composing: composing.get(),
+      reason,
+    });
+  let currentView: RunHandle<TextareaRootProps> | null = null;
+  let viewEpoch = 0;
+  def.lifecycle.onMounted((run) => {
+    currentView = run;
+    reportField();
+  });
+  def.lifecycle.onUnmounted(() => {
+    currentView = null;
+    viewEpoch++;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    currentView = null;
+    viewEpoch++;
+  });
 
-  const sync = (props: Readonly<TextareaRootProps>) => {
+  const sync = (props: Readonly<TextareaRootProps>, report = true) => {
     const isControlled = typeof props.value === 'string';
-    const nextDisabled = props.disabled ?? false;
+    const nextDisabled = binding ? binding.state.fieldDisabled.get() : (props.disabled ?? false);
+    const nextReadOnly = binding ? binding.state.fieldReadOnly.get() : (props.readOnly ?? false);
+    const nextRequired = binding ? binding.state.fieldRequired.get() : (props.required ?? false);
     disabled.set(nextDisabled, 'reason: textarea sync disabled');
-    readOnly.set(props.readOnly ?? false, 'reason: textarea sync readonly');
+    readOnly.set(nextReadOnly, 'reason: textarea sync readonly');
     ariaLabel.set(props.ariaLabel ?? '', 'reason: textarea sync aria label');
     labelledBy.set(props.labelledBy ?? '', 'reason: textarea sync labelledby');
     describedBy.set(props.describedBy ?? '', 'reason: textarea sync describedby');
@@ -109,10 +150,10 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
       value: isControlled ? props.value : undefined,
       defaultValue: props.defaultValue ?? '',
       disabled: nextDisabled,
-      readOnly: props.readOnly ?? false,
+      readOnly: nextReadOnly,
       placeholder: props.placeholder ?? '',
       rows: props.rows ?? 2,
-      required: props.required ?? false,
+      required: nextRequired,
       name: props.name ?? '',
       autoComplete: props.autoComplete ?? '',
       minLength: props.minLength ?? -1,
@@ -120,8 +161,32 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
       wrap: props.wrap ?? 'soft',
     });
     value.set(control.snapshot()?.value ?? '', 'reason: textarea sync value');
+    if (report) reportField();
   };
 
+  if (binding) {
+    for (const state of [
+      binding.state.fieldDisabled,
+      binding.state.fieldReadOnly,
+      binding.state.fieldRequired,
+    ]) {
+      state.watch((run, event) => {
+        if (event.type === 'next') sync(run.props.get(), false);
+      });
+    }
+    focused.watch((_run, event) => {
+      if (event.type === 'next') reportField(focused.get() ? 'sync' : 'blur');
+    });
+    const checkRelations = (run: RunHandle<TextareaRootProps>) => {
+      const raw = run.props.getRaw();
+      if (raw.labelledBy || raw.describedBy)
+        throw new Error(
+          '[field-textarea] Field owns label and description relationships; external ID inputs are not admitted.'
+        );
+    };
+    def.lifecycle.onCreated(checkRelations);
+    def.props.watchRaw(['labelledBy', 'describedBy'], checkRelations);
+  }
   def.lifecycle.onCreated((run) => sync(run.props.get()));
   def.props.watch(
     [
@@ -145,6 +210,7 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
   );
 
   control.on('input', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea input value');
     composing.set(event.composing, 'reason: textarea input composing');
     const detail: TextareaValueChangeDetail = Object.freeze({
@@ -154,10 +220,13 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
       inputType: event.inputType,
     });
     run.expose.emit('valueChange', detail);
+    if (binding && currentView === run && epoch === viewEpoch) reportField('input');
   });
   control.on('change', (run, event) => {
+    const epoch = viewEpoch;
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea change value');
     run.expose.emit('change', Object.freeze({ value: event.value }));
+    if (binding && currentView === run && epoch === viewEpoch) reportField('change');
   });
 
   const emitComposition = (
@@ -173,7 +242,9 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
   };
   control.on('compositionstart', (run, event) => {
     composing.set(true, 'reason: textarea composition start');
+    const epoch = viewEpoch;
     emitComposition(run, 'compositionStart', event);
+    if (binding && currentView === run && epoch === viewEpoch) reportField();
   });
   control.on('compositionupdate', (run, event) => {
     emitComposition(run, 'compositionUpdate', event);
@@ -181,7 +252,9 @@ function setupTextareaRoot(def: DefHandle<TextareaRootProps, TextareaRootExposes
   control.on('compositionend', (run, event) => {
     composing.set(false, 'reason: textarea composition end');
     value.set(control.snapshot()?.value ?? event.value, 'reason: textarea composition end value');
+    const epoch = viewEpoch;
     emitComposition(run, 'compositionEnd', event);
+    if (binding && currentView === run && epoch === viewEpoch) reportField('compositionend');
   });
   return () => null;
 }

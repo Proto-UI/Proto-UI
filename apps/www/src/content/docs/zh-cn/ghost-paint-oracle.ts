@@ -32,6 +32,41 @@ export function ghostPaintFailures(
   hovered: boolean,
   disabled = false
 ): string[] {
+  return pinnedGhostPaintFailures(
+    actual,
+    scheme,
+    hovered,
+    disabled,
+    actual.accent,
+    actual.accentForeground
+  );
+}
+
+/** Rhea 25af02b1: independent muted/foreground oracle, never an alternative accepted by New York. */
+export function rheaGhostPaintFailures(
+  actual: GhostPaint & { muted: Rgba },
+  scheme: 'light' | 'dark',
+  hovered: boolean,
+  disabled = false
+): string[] {
+  return pinnedGhostPaintFailures(
+    actual,
+    scheme,
+    hovered,
+    disabled,
+    actual.muted,
+    actual.normalForeground
+  );
+}
+
+function pinnedGhostPaintFailures(
+  actual: GhostPaint,
+  scheme: 'light' | 'dark',
+  hovered: boolean,
+  disabled: boolean,
+  hoverBackground: Rgba,
+  hoverForeground: Rgba
+): string[] {
   const failures: string[] = [];
   const check = (ok: boolean, name: string) => {
     if (!ok) failures.push(name);
@@ -39,18 +74,15 @@ export function ghostPaintFailures(
   const background: Rgba =
     hovered && !disabled
       ? [
-          actual.accent[0],
-          actual.accent[1],
-          actual.accent[2],
-          actual.accent[3] * (scheme === 'dark' ? 0.5 : 1),
+          hoverBackground[0],
+          hoverBackground[1],
+          hoverBackground[2],
+          hoverBackground[3] * (scheme === 'dark' ? 0.5 : 1),
         ]
       : [0, 0, 0, 0];
   check(sameRgba(actual.background, background), 'background');
   check(
-    sameRgba(
-      actual.foreground,
-      hovered && !disabled ? actual.accentForeground : actual.normalForeground
-    ),
+    sameRgba(actual.foreground, hovered && !disabled ? hoverForeground : actual.normalForeground),
     'foreground'
   );
   check(actual.hovered === (hovered && !disabled), 'hovered');

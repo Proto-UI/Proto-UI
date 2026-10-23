@@ -11,15 +11,25 @@ import type {
 import { definePrototype, tw, type State } from '@proto.ui/core';
 import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
 export type * from '@proto.ui/prototypes-base/tree';
-export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
+export type ShadcnTreeAppearance = 'default' | 'embedded';
+export interface ShadcnTreeRootProps extends TreeRootProps { appearance?: ShadcnTreeAppearance }
+export interface ShadcnTreeItemProps extends TreeItemProps { appearance?: ShadcnTreeAppearance }
+
+export const treeRoot = definePrototype<ShadcnTreeRootProps, TreeRootExposes>({
   name: 'shadcn-tree-root',
   setup(def) {
+    def.props.define({ appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' } });
+    def.props.setDefaults({ appearance: 'default' });
     const behavior = asTreeRoot();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground rounded-lg border border-border bg-background shadow-sm p-3 gap-2'
-      )
-    );
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground'));
+    def.rule({
+      when: (w) => w.prop('appearance').eq('default'),
+      intent: (i) => i.feedback.style.use(tw('rounded-lg border border-border bg-background shadow-sm p-3 gap-2')),
+    });
+    def.rule({
+      when: (w) => w.prop('appearance').eq('embedded'),
+      intent: (i) => i.feedback.style.use(tw('flex flex-col gap-1.5 rounded-none border-0 bg-transparent shadow-none p-0')),
+    });
     const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
     if (states?.focusVisible)
       def.rule({
@@ -35,16 +45,22 @@ export const treeRoot = definePrototype<TreeRootProps, TreeRootExposes>({
   },
 });
 export { treeRoot as shadcnTreeRoot };
-export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
+export const treeItem = definePrototype<ShadcnTreeItemProps, TreeItemExposes>({
   name: 'shadcn-tree-item',
   setup(def) {
+    def.props.define({ appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' } });
+    def.props.setDefaults({ appearance: 'default' });
     const behavior = asTreeItem();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground flex items-center gap-2 rounded-md px-3 py-2 cursor-pointer'
-      )
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground flex items-center gap-2 cursor-pointer'));
+    def.rule({
+      when: (w) => w.prop('appearance').eq('default'),
+      intent: (i) => i.feedback.style.use(tw('rounded-md px-3 py-2')),
+    });
+    def.rule({
+      when: (w) => w.prop('appearance').eq('embedded'),
+      intent: (i) => i.feedback.style.use(tw('w-full min-h-8 rounded-none px-2 py-1 text-sm')),
+    });
+    const states = behavior.stateHandles;
     if (states?.focusVisible)
       def.rule({
         when: (w) => w.state(states.focusVisible!).eq(true),
@@ -58,8 +74,42 @@ export const treeItem = definePrototype<TreeItemProps, TreeItemExposes>({
       });
     if (states?.selected)
       def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
+        when: (w) => w.all(w.state(states.selected!).eq(true), w.prop('appearance').eq('default')),
         intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      });
+    if (states?.selected)
+      def.rule({
+        when: (w) => w.all(w.state(states.selected!).eq(true), w.prop('appearance').eq('embedded')),
+        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15 font-medium')),
+      });
+    if (states?.selected)
+      def.rule({
+        when: (w) => w.all(w.state(states.selected!).eq(false), w.prop('appearance').eq('embedded')),
+        intent: (i) => i.feedback.style.use(tw('font-normal')),
+      });
+    // Family-only pointer paint; Base retains the sole activation/focus owner.
+    const hovered = def.state.bool('embeddedHovered', false);
+    const clearHover = () => hovered.set(false, 'embedded tree pointer paint reset');
+    def.event.on('pointer.enter', (run) => {
+      if (run.props.get().appearance === 'embedded' && !states?.disabled?.get())
+        hovered.set(true, 'embedded tree pointer enter');
+    });
+    def.event.on('pointer.leave', clearHover);
+    def.event.on('pointer.cancel', clearHover);
+    def.lifecycle.onUnmounted(clearHover);
+    def.props.watch(['appearance'], clearHover);
+    states?.disabled.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clearHover();
+    });
+    if (states?.disabled && states?.selected)
+      def.rule({
+        when: (w) => w.all(w.prop('appearance').eq('embedded'), w.state(hovered).eq(true), w.state(states.disabled!).eq(false), w.state(states.selected!).eq(false)),
+        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
+      });
+    if (states?.focused)
+      def.rule({
+        when: (w) => w.all(w.state(states.focused!).eq(true), w.prop('appearance').eq('embedded')),
+        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
       });
   },
 });

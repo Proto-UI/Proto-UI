@@ -1,0 +1,45 @@
+id: C-FIELD-TEXTAREA-0001
+type: contract
+title: Opt-in Field composition over the existing multiline editor
+status: draft
+since: 0.3.0-alpha.1
+summary: Definition-time Field binding reuses Textarea editing while keeping ordinary explicit Label associations unchanged.
+statement:
+  en: Field multiline composition borrows canonical Field policy and validity, not native HTML validity, and never creates another editor or validator.
+criteria:
+  - id: C-FIELD-TEXTAREA-0001-COMPOSITION
+    text:
+      en: setupTextareaRoot admits the public definition-time fieldBinding option. Ordinary base-textarea-root and asTextareaRoot retain the default false configuration. fieldTextarea and asFieldTextarea use true and share the same setup and static multiline requirement. AsHookCaller receives no hidden options.
+  - id: C-FIELD-TEXTAREA-0001-RELATIONS
+    text:
+      en: Field mode uses the existing FIELD_LABEL_PAIR and asOptionalFieldControl anatomy relationships. Nonempty external labelledBy or describedBy inputs fail closed rather than replacing Field relations. Ordinary mode retains independent explicit Label references and external ID relationships and never automatically consumes a nearby Field.
+  - id: C-FIELD-TEXTAREA-0001-FACTS
+    text:
+      en: Field binding is sole owner of borrowed invalid and pending facts, exposed through its existing nested handle. Effective disabled, readOnly and required combine local restrictions with Field policy and withdraw without retaining stale restrictions. No Field parent leaves local policy intact and invalid false. HTML constraint validity is not translated into canonical Field validity.
+  - id: C-FIELD-TEXTAREA-0001-LIFECYCLE
+    text:
+      en: Provider updates preserve the same multiline editor, value ownership, focus, selection and composition. Canonical editor facts are explicitly reported to Field; policy-only projection does not recursively report partial policy updates. A disposed view cannot report after an outward callback. Disabled label activation never transfers focus. Existing Textarea editing and explicit label behavior remain available.
+  - id: C-FIELD-TEXTAREA-0001-BOUNDARY
+    text:
+      en: This is a semantic Field composition usable by every design family, not a new Rhea editor or visual profile. It does not add native validity inference, submission, reset protocol, implicit-submit eligibility, JavaScript sizing or intrinsic-sizing adoption. Existing Field validation and TextControl ownership remain authoritative.
+sources:
+  - path: packages/prototypes/base/src/textarea/root.proto.ts
+  - path: packages/prototypes/base/src/field/textarea.proto.ts
+dependsOn:
+  contracts:
+    - C-FIELD-0001
+    - C-CONTROL-LABEL-0001
+    - C-TEXT-CONTROL-0001
+  prototypes:
+    - P-BASE-TEXTAREA
+verifies:
+  tests:
+    - T-FIELD-TEXTAREA-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Explicitly compose the existing multiline editor with optional canonical Field facts without replacing standalone Textarea semantics.
+tags:
+  - field
+  - textarea
+  - composition

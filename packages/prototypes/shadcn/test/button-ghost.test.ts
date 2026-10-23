@@ -10,12 +10,16 @@ import {
 } from '@proto.ui/module-as-trigger';
 import button from '../src/button';
 
-// T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK:
-// shadcn-ui/ui 02cad611, new-york-v4/ui/button.tsx:18-19.
+// Separate pinned profiles: Rhea/Luma 25af02b1 and explicit New York 02cad611.
+// Neither profile may accept the other profile's hover palette.
 // This exercises the real prototype and inherited Button states, not copied rules.
-async function fixture(initialScheme: 'light' | 'dark' = 'light', disabled = false) {
+async function fixture(
+  initialScheme: 'light' | 'dark' = 'light',
+  disabled = false,
+  styleProfile: 'new-york' | 'rhea' | 'luma' = 'rhea'
+) {
   let colorScheme = initialScheme;
-  let raw: Record<string, unknown> = { variant: 'ghost', disabled };
+  let raw: Record<string, unknown> = { variant: 'ghost', disabled, styleProfile };
   const root = new EventTarget();
   const global = new EventTarget();
   const clicks: string[] = [];
@@ -61,21 +65,27 @@ async function fixture(initialScheme: 'light' | 'dark' = 'light', disabled = fal
 }
 
 function expectRest(tokens: readonly string[]) {
-  for (const token of ['bg-accent', 'bg-accent/50', 'text-accent-foreground', 'bg-muted'])
+  for (const token of [
+    'bg-accent',
+    'bg-accent/50',
+    'text-accent-foreground',
+    'bg-muted',
+    'bg-muted/50',
+  ])
     expect(tokens).not.toContain(token);
 }
 
 it.each(['light', 'dark'] as const)(
-  'ghost %s hover enters and leaves the pinned accent recipe',
+  'ghost %s hover enters and leaves the pinned Rhea/Luma muted recipe',
   async (scheme) => {
     const ctx = await fixture(scheme);
     try {
       expectRest(ctx.tokens());
       ctx.emit('pointer.enter');
-      expect(ctx.tokens()).toContain(scheme === 'dark' ? 'bg-accent/50' : 'bg-accent');
-      expect(ctx.tokens()).toContain('text-accent-foreground');
-      expect(ctx.tokens()).not.toContain('bg-muted');
-      expect(ctx.tokens().includes('bg-accent/50')).toBe(scheme === 'dark');
+      expect(ctx.tokens()).toContain(scheme === 'dark' ? 'bg-muted/50' : 'bg-muted');
+      expect(ctx.tokens()).toContain('text-foreground');
+      expect(ctx.tokens()).not.toContain('bg-accent');
+      expect(ctx.tokens().includes('bg-muted/50')).toBe(scheme === 'dark');
       ctx.emit('pointer.leave');
       expectRest(ctx.tokens());
     } finally {
@@ -88,12 +98,12 @@ it('re-evaluates dark and light while the same ghost remains hovered', async () 
   const ctx = await fixture();
   try {
     ctx.emit('pointer.enter');
-    expect(ctx.tokens()).toContain('bg-accent');
+    expect(ctx.tokens()).toContain('bg-muted');
     ctx.scheme('dark');
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
     ctx.scheme('light');
-    expect(ctx.tokens()).not.toContain('bg-accent/50');
-    expect(ctx.tokens()).toContain('text-accent-foreground');
+    expect(ctx.tokens()).not.toContain('bg-muted/50');
+    expect(ctx.tokens()).toContain('text-foreground');
   } finally {
     await ctx.session.dispose();
   }
@@ -103,17 +113,17 @@ it('removes ghost-only dark paint on variant replacement and prop omission', asy
   const ctx = await fixture('dark');
   try {
     ctx.emit('pointer.enter');
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
     ctx.props({ variant: 'outline' });
-    expect(ctx.tokens()).not.toContain('bg-accent/50');
-    expect(ctx.tokens()).toContain('bg-input/50');
+    expect(ctx.tokens()).not.toContain('bg-muted/50');
+    expect(ctx.tokens()).toContain('bg-input/30');
     ctx.props({});
     expect(ctx.tokens()).toContain('bg-primary/80');
     expect(ctx.tokens()).not.toContain('bg-primary/90');
-    expect(ctx.tokens()).not.toContain('bg-accent/50');
-    expect(ctx.tokens()).not.toContain('text-accent-foreground');
+    expect(ctx.tokens()).not.toContain('bg-muted/50');
+    expect(ctx.tokens()).not.toContain('text-foreground');
     ctx.props({ variant: 'ghost' });
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
   } finally {
     await ctx.session.dispose();
   }
@@ -130,7 +140,7 @@ it.each(['light', 'dark'] as const)(
       expect(ctx.clicks).toEqual([]);
       ctx.props({ variant: 'ghost', disabled: false });
       ctx.emit('pointer.enter');
-      expect(ctx.tokens()).toContain('text-accent-foreground');
+      expect(ctx.tokens()).toContain('text-foreground');
       ctx.props({ variant: 'ghost', disabled: true });
       expectRest(ctx.tokens());
       expect(ctx.tokens()).toContain('opacity-50');
@@ -152,7 +162,7 @@ it('preserves inherited focus, press and exactly one click without changing pain
     ctx.emit('pointer.enter');
     ctx.emit('pointer.down');
     expect(ctx.tokens()).toContain('translate-y-px');
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
     ctx.emit('press.commit');
     expect(ctx.clicks).toEqual(['click']);
     expect(ctx.tokens()).not.toContain('translate-y-px');
@@ -167,13 +177,51 @@ it('does not retain ghost hover paint across a real unmount and remount', async 
   const ctx = await fixture('dark');
   try {
     ctx.emit('pointer.enter');
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
     await ctx.session.unmount();
     await ctx.session.mount();
     expectRest(ctx.tokens());
     ctx.emit('pointer.enter');
-    expect(ctx.tokens()).toContain('bg-accent/50');
+    expect(ctx.tokens()).toContain('bg-muted/50');
   } finally {
     await ctx.session.dispose();
   }
 });
+
+it.each(['light', 'dark'] as const)(
+  'explicit New York %s retains the fixed accent recipe and profile replacement',
+  async (scheme) => {
+    const ctx = await fixture(scheme, false, 'new-york');
+    try {
+      expectRest(ctx.tokens());
+      ctx.emit('pointer.enter');
+      expect(ctx.tokens()).toContain(scheme === 'dark' ? 'bg-accent/50' : 'bg-accent');
+      expect(ctx.tokens()).toContain('text-accent-foreground');
+      expect(ctx.tokens()).not.toContain('bg-muted');
+      expect(ctx.tokens()).not.toContain('bg-muted/50');
+      for (const styleProfile of ['rhea', 'luma', 'new-york'] as const) {
+        ctx.props({ styleProfile, variant: 'ghost' });
+        expect(ctx.tokens()).toContain(
+          styleProfile === 'new-york'
+            ? scheme === 'dark'
+              ? 'bg-accent/50'
+              : 'bg-accent'
+            : scheme === 'dark'
+              ? 'bg-muted/50'
+              : 'bg-muted'
+        );
+        expect(ctx.tokens()).not.toContain(
+          styleProfile === 'new-york' ? 'bg-muted/50' : 'bg-accent/50'
+        );
+      }
+      ctx.emit('pointer.leave');
+      expectRest(ctx.tokens());
+      ctx.props({ styleProfile: 'new-york', variant: 'ghost', disabled: true });
+      ctx.emit('pointer.enter');
+      expectRest(ctx.tokens());
+      expect(ctx.tokens()).toContain('pointer-events-none');
+    } finally {
+      await ctx.session.dispose();
+    }
+  }
+);

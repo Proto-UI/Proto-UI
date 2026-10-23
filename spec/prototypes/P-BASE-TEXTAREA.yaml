@@ -8,6 +8,9 @@ statement:
   zh-CN: Base Textarea 通过 Text Control host boundary 拥有一个 logical multiline editor，由 adapter 选择物理宿主目标；当前 Web profile 使用一个原生 textarea。它固定 controlled/uncontrolled value ownership，标准化 input/change/IME event，投影 property 与 textbox 无障碍信息，并提供物理 focus/blur；它不拥有 form workflow、validation message、auto-resize、rich-text composition 或系统 editing chrome。
   en: Base Textarea owns one logical multiline editor through the Text Control host boundary while the adapter selects the physical host target; the current Web profile uses one native textarea. It fixes controlled or uncontrolled value ownership, normalizes input/change/IME events, projects properties and textbox accessibility, and exposes physical focus and blur; it does not own form workflow, validation messages, auto-resize, rich-text composition, or system editing chrome.
 criteria:
+  - id: P-BASE-TEXTAREA-FIELD-COMPOSITION
+    text:
+      en: The optional Field composition explicitly uses the public definition-time setupTextareaRoot fieldBinding option and the same editor. Field retains validity and anatomy relationships; ordinary Textarea retains explicit independent Label associations and external ID relations. Consuming existing Field facts is not ownership of a validator or validation messages. This does not revise the auto-resize or form workflow exclusions.
   - id: P-BASE-TEXTAREA-EXTERNAL-LABEL
     text:
       en: An independent Base Label may associate through the explicit typed InstanceAssociations.controlLabel input and C-CONTROL-LABEL-0001. This is not a Props value, label text Prop or new Anatomy part. A qualifying label request shares the focus-only operation, leaving native editing, value, selection and composition unchanged. Naming and activation remain independent, and a stale pair cannot perform subsequent target effects.
@@ -68,6 +71,9 @@ verifies:
   tests:
     - T-BASE-TEXTAREA-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Admit explicit optional Field composition through shared setup without changing ordinary Textarea association or editing defaults.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added opt-in independent Label association through a separate typed input without changing JSON Props or control Anatomy.

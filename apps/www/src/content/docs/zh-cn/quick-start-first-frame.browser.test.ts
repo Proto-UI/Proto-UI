@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import os from 'node:os';
@@ -202,8 +203,13 @@ function readPageFrame({
     const search = searchReady
       ? searchRoot.querySelector('[data-projection-generation-state="active"] [data-open-modal]')
       : searchRoot.querySelector('[data-search-startup-button]');
-    const code = document.querySelector<HTMLElement>('[data-site-code-surface="frame"]')!;
-    const toolbar = code.querySelector<HTMLElement>('[data-site-code-surface="toolbar"]')!;
+    const code = document.querySelector<HTMLElement>(
+      '#quick-start-cli-help[data-code-shell][data-code-presentation="docs"]'
+    );
+    if (!code || code !== document.querySelector('[data-site-code-surface="frame"]'))
+      throw new Error('Quick Start help must be the real first docs code frame');
+    const caption = code.querySelector<HTMLElement>(':scope > [data-code-file-header]');
+    if (!caption) throw new Error('Quick Start help must retain its native docs caption');
     const surface = (owner: HTMLElement) => {
       const live = ['ready', 'retained'].includes(owner.dataset.codeSurfaceView ?? '');
       const plane = live
@@ -214,6 +220,7 @@ function readPageFrame({
     const identityHost = window as typeof window & { __startupNativeNodes?: Element[] };
     const nativeNodes = [
       code,
+      caption,
       code.querySelector('pre')!,
       code.querySelector('code')!,
       headerRoot.querySelector('[data-site-header-desktop-navigation] a')!,
@@ -275,7 +282,7 @@ function readPageFrame({
       searchOverflow: search ? search.scrollWidth - search.clientWidth : null,
       searchGlyph: sample(search?.querySelector('svg') ?? null),
       code: surface(code),
-      codeToolbar: surface(toolbar),
+      codeCaption: sample(caption),
       codeText: sample(code.querySelector('pre')),
       searchReady,
       searchDisabled:
@@ -283,7 +290,9 @@ function readPageFrame({
         search?.hasAttribute('disabled') === true,
       // Copy and stored Runtime availability are separate command-state
       // transitions; the passive code frame must never wait for either.
-      copyReady: !!code.querySelector('[data-copy-command]'),
+      copyReady: !!code.querySelector(
+        '[data-site-copy][data-copy-view="ready"] [data-demo-ref="copy-button"]'
+      ),
     };
     return {
       chrome,
@@ -350,7 +359,7 @@ async function beforeReleaseDeadline<T>(work: Promise<T>, label: string): Promis
     if (timer) clearTimeout(timer);
   }
 }
-async function captureViewport(page: Page, file: string) {
+async function captureViewport(page: Page, file: string, clip?: { x: number; y: number; width: number; height: number }) {
   // Playwright's screenshot convenience method also awaits document.fonts.ready.
   // Chromium's public captureScreenshot captures the real current surface
   // without waiting for the intentionally paused deferred-module document load.
@@ -361,6 +370,7 @@ async function captureViewport(page: Page, file: string) {
         format: 'png',
         fromSurface: true,
         captureBeyondViewport: false,
+        ...(clip ? { clip: { ...clip, scale: 1 } } : {}),
       }),
       'viewport capture'
     );
@@ -381,7 +391,8 @@ async function waitForCapturedFonts(page: Page) {
           ...Object.values(selectors),
           '[data-search-startup-button]',
           '[data-site-header-fallback-summary]',
-          '[data-site-code-surface="frame"] pre',
+          '#quick-start-cli-help[data-code-presentation="docs"] pre',
+          '#quick-start-cli-help > [data-code-file-header]',
         ].map((selector) => {
           const owner = document.querySelector<HTMLElement>(selector)!;
           const leaf = owner.querySelector<HTMLElement>('[data-typography-prototype]') ?? owner;
@@ -500,7 +511,7 @@ function compare(
     'searchLabel',
     'searchShortcut',
     'code',
-    'codeToolbar',
+    'codeCaption',
     'codeText',
   ] as const) {
     const initial = before.chrome[key];
@@ -533,8 +544,8 @@ function compare(
     if (key === 'searchGlyph')
       for (const property of ['stroke', 'strokeWidth', 'fill', 'shapes'] as const)
         expect(next[property], `${key}.${property}`).toEqual(initial[property]);
-    // Passive planes contain no text. Compare fonts only for actual labels/code.
-    if (['search', 'searchLabel', 'searchShortcut', 'codeText'].includes(key)) {
+    // Passive planes contain no text. Compare fonts for actual labels, native caption and code.
+    if (['search', 'searchLabel', 'searchShortcut', 'codeCaption', 'codeText'].includes(key)) {
       for (const property of ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight'] as const)
         expect(next[property], `${key}.${property}`).toEqual(initial[property]);
       expect(initial.fontReady, `${key} initial actual font`).toBe(true);
@@ -639,18 +650,16 @@ describe('quick-start first-frame continuity', () => {
             await page.waitForFunction(
               (runtime) => {
                 const note = document.querySelector<HTMLElement>('.starlight-aside--note');
+                const code = document.querySelector<HTMLElement>(
+                  '#quick-start-cli-help[data-code-shell][data-code-presentation="docs"]'
+                );
                 return (
                   note?.dataset.noteSurfaceView === 'ready' &&
                   document.querySelector('site-search')?.getAttribute('data-search-view') ===
                     'ready' &&
-                  [
-                    ...document
-                      .querySelectorAll('[data-site-code-surface="frame"]')[0]!
-                      .querySelectorAll('[data-site-code-surface="toolbar"]'),
-                    document.querySelector('[data-site-code-surface="frame"]')!,
-                  ].every(
-                    (surface) => surface.getAttribute('data-code-surface-view') === 'ready'
-                  ) &&
+                  code === document.querySelector('[data-site-code-surface="frame"]') &&
+                  code?.getAttribute('data-code-surface-view') === 'ready' &&
+                  !!code.querySelector(':scope > [data-code-file-header]') &&
                   note.dataset.noteSurfaceRuntime === runtime &&
                   document
                     .querySelector('.doc-stage-notice__title')
@@ -676,6 +685,184 @@ describe('quick-start first-frame continuity', () => {
             for (const frame of frames) compare(before, frame);
             expect(errors).toEqual([]);
             await checkpoint(page, prefix, 'passed');
+            if (navigation === 'refresh' && runtime === 'react' && platform === 'default') {
+              // Additional component evidence after every original first-frame
+              // assertion and trace. Never substitute this for the page-top shots
+              // or the full CodeExample browser acceptance matrix.
+              const example = page.locator('[data-code-example]').first();
+              await example.scrollIntoViewIfNeeded();
+              await example
+                .locator('[data-code-example-tablist="host"] [role="tab"]')
+                .last()
+                .waitFor();
+              await example
+                .locator(
+                  '[data-code-host-panel]:visible [data-copy-view="ready"] [data-demo-ref="copy-button"]'
+                )
+                .first()
+                .waitFor({ state: 'visible' });
+              const componentPrefix = `${prefix}-code-example`;
+              await writeFile(
+                path.join(directory, `${componentPrefix}.json`),
+                JSON.stringify(
+                  {
+                    ...source,
+                    url: page.url(),
+                    viewport: page.viewportSize(),
+                    colorScheme: condition.colorScheme,
+                    contentHost: 'react',
+                    copyRuntime: runtime,
+                    chromeRuntime: 'wc',
+                    stage: 'additional-post-first-frame-component-diagnostic',
+                    fullCodeExampleAcceptance: false,
+                  },
+                  null,
+                  2
+                )
+              );
+              await captureViewport(page, path.join(directory, `${componentPrefix}.png`));
+              const init = page.locator('[data-cli-init-output]');
+              const generatedBrowser = init.locator('[data-standalone-file-browser][data-file-browser-init="1"]');
+              await generatedBrowser.waitFor();
+              await init.scrollIntoViewIfNeeded();
+              await writeFile(
+                path.join(directory, `${prefix}-cli-init.json`),
+                JSON.stringify(
+                  {
+                    ...source,
+                    url: page.url(),
+                    viewport: page.viewportSize(),
+                    colorScheme: condition.colorScheme,
+                    cliVersion: await init.getAttribute('data-cli-version'),
+                    stage: 'additional-cli-init-diagnostic',
+                    fullCodeExampleAcceptance: false,
+                  },
+                  null,
+                  2
+                )
+              );
+              await captureViewport(page, path.join(directory, `${prefix}-cli-init.png`));
+              const initCommand = page.locator('#quick-start-init-command');
+              await initCommand.evaluate((node) => node.scrollIntoView({ block: 'center' }));
+              await writeFile(
+                path.join(directory, `${prefix}-cli-init-command.json`),
+                JSON.stringify(
+                  {
+                    ...source,
+                    url: page.url(),
+                    viewport: page.viewportSize(),
+                    colorScheme: condition.colorScheme,
+                    stage: 'additional-cli-init-command-diagnostic',
+                    fullCodeExampleAcceptance: false,
+                  },
+                  null,
+                  2
+                )
+              );
+              await captureViewport(page, path.join(directory, `${prefix}-cli-init-command.png`));
+              for (const [filePath, label] of [
+                ['proto-ui/config.json', 'config'],
+                ['src/styles/proto-ui-style.css', 'style'],
+              ] as const) {
+                const item = generatedBrowser.locator(`[data-code-tree-path="${filePath}"]`);
+                await item.click();
+                const detail = generatedBrowser.locator('[data-code-file-panel]:visible');
+                expect(await detail.locator('[data-code-file-title]').textContent()).toBe(filePath);
+                await detail
+                  .locator('[data-copy-view="ready"] [data-demo-ref="copy-button"]')
+                  .waitFor({ state: 'visible' });
+                const capturePosition = await generatedBrowser.evaluate(async (node) => {
+                  const headerBottom = () => Math.max(0, ...[...document.querySelectorAll('header')].map((header) => {
+                    const rect = header.getBoundingClientRect();
+                    return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
+                  }));
+                  window.scrollBy({ top: node.getBoundingClientRect().top - headerBottom() - 16, behavior: 'instant' });
+                  await new Promise(requestAnimationFrame);
+                  await new Promise(requestAnimationFrame);
+                  const rect = node.getBoundingClientRect();
+                  const clip = { x: Math.max(0, rect.left), y: Math.max(0, rect.top), width: Math.min(innerWidth, rect.right) - Math.max(0, rect.left), height: Math.min(innerHeight, rect.bottom) - Math.max(0, rect.top) };
+                  return { top: rect.top, headerBottom: headerBottom(), bounds: { x: rect.x, y: rect.y, width: rect.width, height: rect.height }, clip: { ...clip, x: clip.x + scrollX, y: clip.y + scrollY }, clipCoordinates: 'page', scroll: { x: scrollX, y: scrollY }, partial: clip.width < rect.width || clip.height < rect.height, viewportHeight: innerHeight };
+                });
+                expect(capturePosition.top).toBeGreaterThanOrEqual(capturePosition.headerBottom);
+
+                const content = await detail.locator('code').getAttribute('data-raw-code');
+                await writeFile(
+                  path.join(directory, `${prefix}-cli-init-${label}.json`),
+                  JSON.stringify(
+                    {
+                      ...source,
+                      url: page.url(),
+                      viewport: page.viewportSize(),
+                      colorScheme: condition.colorScheme,
+                      file: filePath,
+                      captureKind: 'visible-file-browser-region',
+                      capturePosition,
+                      sourceSha256: createHash('sha256')
+                        .update(content ?? '')
+                        .digest('hex'),
+                      stage: 'additional-generated-file-diagnostic',
+                      fullCodeExampleAcceptance: false,
+                    },
+                    null,
+                    2
+                  )
+                );
+                await writeFile(path.join(directory, `${prefix}-cli-init-${label}-viewport.json`), JSON.stringify({
+                  ...source, url: page.url(), viewport: page.viewportSize(), colorScheme: condition.colorScheme,
+                  file: filePath, sourceSha256: createHash('sha256').update(content ?? '').digest('hex'),
+                  captureKind: 'viewport', capturePosition, stage: 'additional-generated-file-viewport-diagnostic', fullCodeExampleAcceptance: false,
+                }, null, 2));
+                await captureViewport(page, path.join(directory, `${prefix}-cli-init-${label}-viewport.png`));
+                // Element screenshots can recenter an oversized element beneath the fixed header.
+                // Capture only the actual visible intersection, alongside the unmodified viewport.
+                await captureViewport(page, path.join(directory, `${prefix}-cli-init-${label}.png`), capturePosition.clip);
+                const capturePositionAfter = await generatedBrowser.evaluate((node) => ({
+                  top: node.getBoundingClientRect().top,
+                  headerBottom: Math.max(0, ...[...document.querySelectorAll('header')].map((header) => {
+                    const rect = header.getBoundingClientRect();
+                    return rect.top <= 1 && rect.bottom > 0 ? rect.bottom : 0;
+                  })),
+                }));
+                await writeFile(path.join(directory, `${prefix}-cli-init-${label}-position-after.json`), JSON.stringify({
+                  ...source, file: filePath, capturePositionAfter, stage: 'after-file-browser-region-capture',
+                }, null, 2));
+                expect(capturePositionAfter.top).toBeGreaterThanOrEqual(capturePositionAfter.headerBottom);
+
+              }
+              const directoryCode = generatedBrowser.locator('[data-code-file-panel]:visible');
+              await directoryCode.evaluate((node) => node.scrollIntoView({ block: 'center' }));
+              const scroll = await directoryCode.locator('pre').evaluate((node) => {
+                node.scrollLeft = node.scrollWidth;
+                return {
+                  left: node.scrollLeft,
+                  maximum: node.scrollWidth - node.clientWidth,
+                  clientWidth: node.clientWidth,
+                  scrollWidth: node.scrollWidth,
+                };
+              });
+              await writeFile(
+                path.join(directory, `${prefix}-cli-init-scroll-end.json`),
+                JSON.stringify(
+                  {
+                    ...source,
+                    url: page.url(),
+                    viewport: page.viewportSize(),
+                    colorScheme: condition.colorScheme,
+                    scroll,
+                    stage: 'additional-generated-source-scroll-diagnostic',
+                    file: await directoryCode.locator('[data-code-file-title]').textContent(),
+                    fullCodeExampleAcceptance: false,
+                  },
+                  null,
+                  2
+                )
+              );
+              await captureViewport(
+                page,
+                path.join(directory, `${prefix}-cli-init-scroll-end.png`)
+              );
+              expect(Math.abs(scroll.left - scroll.maximum)).toBeLessThanOrEqual(1);
+            }
           } catch (error) {
             await captureFailure(page, prefix, error);
             throw error;
@@ -774,12 +961,15 @@ describe('quick-start first-frame continuity', () => {
             }
             expect(acquired, 'trusted forward Tab reaches the actual Header owner').toBe(true);
           }
-          await page.locator('[data-site-code-surface="frame"] pre').first().waitFor();
+          await page.locator('#quick-start-cli-help[data-code-presentation="docs"] pre').first().waitFor();
           await page.evaluate(
             ({ focusOwner, phase }) => {
               const code = document.querySelector(
-                '[data-site-code-surface="frame"] pre'
+                '#quick-start-cli-help[data-code-presentation="docs"] pre'
               ) as HTMLElement;
+              if (!code || code.closest('[data-site-code-surface="frame"]') !==
+                document.querySelector('[data-site-code-surface="frame"]'))
+                throw new Error('Ownership selection must use the first Quick Start help code frame');
               const walker = document.createTreeWalker(code, NodeFilter.SHOW_TEXT);
               let text = walker.nextNode()!;
               while (text && !text.textContent?.trim()) text = walker.nextNode()!;
@@ -865,7 +1055,7 @@ describe('quick-start first-frame continuity', () => {
                           ? document.activeElement?.hasAttribute('data-site-menu-button')
                           : document.activeElement === target,
                       codeSame:
-                        document.querySelector('[data-site-code-surface="frame"] pre') === code,
+                        document.querySelector('#quick-start-cli-help[data-code-presentation="docs"] pre') === code,
                       textRetained: text.isConnected && code.contains(text),
                       selectionSame:
                         selection.anchorNode === text &&
@@ -1019,7 +1209,7 @@ describe('quick-start first-frame continuity', () => {
             return {
               initialSelectionNonempty: saved.selected.trim().length > 0,
               codeSame:
-                document.querySelector('[data-site-code-surface="frame"] pre') === saved.code,
+                document.querySelector('#quick-start-cli-help[data-code-presentation="docs"] pre') === saved.code,
               textRetained: saved.text.isConnected && saved.code.contains(saved.text),
               selectionSame:
                 selection.anchorNode === saved.anchor &&
@@ -1174,7 +1364,7 @@ describe('quick-start first-frame continuity', () => {
           'search',
           'searchGlyph',
           'code',
-          'codeToolbar',
+          'codeCaption',
           'codeText',
         ] as const)
           expect(result.chrome[key]?.visible, `${key} no-JS visible`).toBe(true);

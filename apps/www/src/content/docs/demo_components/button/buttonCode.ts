@@ -20,8 +20,8 @@ export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {
     `),
     'demo-button-ghost': formatCode(`
 <div id="ghost-demo" class="flex flex-wrap items-center gap-3">
-  <wc-shadcn-button variant="ghost">Ghost</wc-shadcn-button>
-  <wc-shadcn-button variant="ghost" disabled>Disabled ghost</wc-shadcn-button>
+  <wc-shadcn-button style-profile="new-york" variant="ghost">Ghost</wc-shadcn-button>
+  <wc-shadcn-button style-profile="new-york" variant="ghost" disabled>Disabled ghost</wc-shadcn-button>
   <div role="status" aria-live="polite">Enabled activations: 0; disabled activations: 0</div>
 </div>
 <script>
@@ -135,8 +135,8 @@ export function DemoButtonGhostDemo() {
   const [disabled, setDisabled] = useState(0);
   return (
     <div className="flex flex-wrap items-center gap-3">
-      <ShadcnButton variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
-      <ShadcnButton variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
+      <ShadcnButton styleProfile="new-york" variant="ghost" onClick={() => setEnabled((n) => n + 1)}>Ghost</ShadcnButton>
+      <ShadcnButton styleProfile="new-york" variant="ghost" disabled onClick={() => setDisabled((n) => n + 1)}>Disabled ghost</ShadcnButton>
       <div role="status" aria-live="polite">Enabled activations: {enabled}; disabled activations: {disabled}</div>
     </div>
   );
@@ -292,8 +292,8 @@ const disabled = ref(0);
 
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="ghost" @click="enabled++">Ghost</ShadcnButton>
-    <ShadcnButton variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <ShadcnButton styleProfile="new-york" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="new-york" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
     <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>
@@ -451,8 +451,8 @@ export default {
     'demo-button-ghost': formatCode(`
 <template>
   <div class="flex flex-wrap items-center gap-3">
-    <ShadcnButton variant="ghost" @click="enabled++">Ghost</ShadcnButton>
-    <ShadcnButton variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
+    <ShadcnButton styleProfile="new-york" variant="ghost" @click="enabled++">Ghost</ShadcnButton>
+    <ShadcnButton styleProfile="new-york" variant="ghost" disabled @click="disabled++">Disabled ghost</ShadcnButton>
     <div role="status" aria-live="polite">Enabled activations: {{ enabled }}; disabled activations: {{ disabled }}</div>
   </div>
 </template>

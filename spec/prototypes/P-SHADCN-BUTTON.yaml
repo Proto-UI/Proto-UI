@@ -6,28 +6,53 @@ since: 0.2.0-rc.0
 summary: Shadcn Button is an unofficial Proto UI-maintained projection that inherits Base Button by default, may declare setup-time negative patches explicitly, and adds a pinned, currently partial shadcn/ui visual API without duplicating Base semantics.
 statement:
   zh-CN: >-
-    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种 `size`、由 Button interaction state 驱动的视觉反馈，以及 outline、destructive 与 ghost 在 dark color scheme 下的样式增量。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；当前 destructive 的 tinted visual recipe 另有意采用较新的官方 recipe 作为视觉来源证据，但该采用不移动整体兼容比较基线，也不扩大 current passing guarantee。`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。
+    Shadcn Button 是在 `P-BASE-BUTTON` 之上提供 shadcn/ui Button 外观与 API 投射的 direct prototype。当前协议保留 Base Button 的 command、activation、focus、disabled、a11y 与 outward-signal 行为，并新增六种 `variant`、四种既有 `size` 及显式 Proto 扩展 `icon-compact`、命名外观 `styleProfile`（默认 rhea、可选 luma）、由 Button interaction state 驱动的视觉反馈，以及 outline、destructive 与 ghost 在 dark color scheme 下的样式增量。历史 API 兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Button；当前 destructive 的 tinted visual recipe 另有意采用较新的官方 recipe 作为视觉来源证据，但该采用不移动整体兼容比较基线，也不扩大 current passing guarantee。`asChild` 是明确不提供的 API，其他未对齐项统一记录为 compatibility differences。当前首页外观的受限来源由下方 Rhea/Luma profile criterion 单列，不把历史基线视为当前视觉对齐证明。
 
 
   en: >-
-    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four `size` values, visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline, destructive, and ghost variants. Its compatibility baseline is the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the current tinted destructive visual recipe separately records an intentional adoption of a later official recipe as visual-source evidence, without advancing the overall compatibility baseline or widening the current passing guarantee. `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference.
+    Shadcn Button is a direct prototype that projects the shadcn/ui Button API and appearance over `P-BASE-BUTTON`. The current protocol retains Base Button command, activation, focus, disabled, accessibility, and outward-signal behavior while adding six `variant` values, four existing `size` values plus the explicit Proto extension `icon-compact`, the named `styleProfile` presentation (default rhea, optional luma), visual feedback driven by Button interaction state, and dark-color-scheme styling deltas for outline, destructive, and ghost variants. Its historical API comparison baseline remains the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the current tinted destructive visual recipe separately records an intentional adoption of a later official recipe as visual-source evidence, without advancing the overall compatibility baseline or widening the current passing guarantee. `asChild` is explicitly unavailable, and every other divergence is tracked as a compatibility difference. The bounded current homepage visual source is separately identified by the Rhea/Luma profile criterion below, rather than claiming visual parity with the historical baseline.
 
 
 criteria:
+  - id: P-SHADCN-BUTTON-RHEA-LUMA-PROFILES
+    text:
+      en: The modern styleProfile subset is rhea|luma with default rhea; explicit new-york is governed separately below. It identifies the fixed upstream homepage card and hero imports, not a universal Shadcn default. Rhea default/sm/lg/icon use 2/1.75/2.25/2rem; Luma uses 2.25/2/2.5/2.25rem. Both default and sm have 0.75rem inline padding, lg has 1rem; default/lg gap is 0.375rem and sm gap 0.25rem. All supported sizes retain 0.875rem text with 1.25rem leading. Named corners are theme radius plus 8px for Rhea and plus 16px for Luma, giving 18px/26px at the canonical 10px theme radius. Existing generic rounded-2xl is not redefined. Wrap keeps each profile minimum and allows growth with py-1; icon and Proto icon-compact remain fixed. Removing profile restores Rhea. No xs/new icon size, asChild, aria-invalid, nested SVG or expanded-state parity is inferred. The upstream first hero 35px consumer override is not reproduced by this public 36px Luma default.
+      zh-CN: 现代 styleProfile 子集为 rhea|luma，默认 rhea；显式 new-york 在下项独立约束。分别标识固定上游首页卡片与 hero 来源而非唯一 Shadcn 默认。Rhea default/sm/lg/icon 为 32/28/36/32px，Luma 为 36/32/40/36px；字号均 14px、行高 20px，default/sm 水平 padding 12px、lg 为 16px。Rhea/Luma 圆角为主题 radius 加 8px/16px，标准主题为 18px/26px，不重定义全局 rounded-2xl。wrap 保留对应最小高度并允许增长，icon 与 Proto compact 固定；省略 profile 恢复 Rhea。不宣称未实现子集对齐，首 hero 的上游页面 35px 特例不由默认 Luma 36px 伪装。
+  - id: P-SHADCN-BUTTON-ICON-COMPACT
+    text:
+      en: The explicit Proto UI icon-compact size uses size-7 gap-2 (1.75rem square) and remains fixed when wrap is true. It projects the consumer size-7 override in shadcn Blocks at ba1503c64472b82256d9de95e2e62c5901a38e8b, not a same-named upstream size API; upstream icon-sm is size-8 and icon-xs is size-6. It preserves inherited activation, focus, disabled and accessible-name ownership, adds no layout override bypass, and does not move the historical compatibility baseline or claim full Button parity. The compact extension remains 28px with the prior 8px theme-relative corner; the explicit Rhea/Luma migration separately governs other sizes and defaults. Native sizing and focus evidence are required separately from token tests.
+      zh-CN: 显式 Proto UI 扩展 icon-compact 使用 size-7 gap-2（1.75rem 正方形），wrap 为 true 时仍固定尺寸。它映射 shadcn Blocks ba1503c64472b82256d9de95e2e62c5901a38e8b 的 consumer size-7 覆盖，不是上游同名 size API；上游 icon-sm 为 size-8，icon-xs 为 size-6。它保留继承的激活、焦点、禁用和 accessible name 所有权，不新增布局覆盖旁路，不移动历史兼容基线或声称完整 Button 对齐。其他 size 与省略 size 的默认值不变；原生尺寸和焦点证据须独立于 token 测试验证。
   - id: P-SHADCN-BUTTON-WRAP-PROP
     text:
-      zh-CN: 可选 wrap 布尔呈现选项默认 false；非 icon size 启用后在容器可用宽度内换行、以原 size 高度为最小高度，不改变 Base activation、焦点或 accessible name。icon size 保持固定尺寸。该选项是 Proto UI 扩展，不属于上游逐字 API 兼容承诺；容器及自定义后代仍须提供可用宽度，不能推断任意嵌套内容都可自动修复。
-      en: Optional boolean wrap defaults to false. For non-icon sizes it wraps labels within the containing width and uses the original size height as a minimum, without changing Base activation, focus or accessible names. Icon size retains fixed dimensions. This Proto UI extension is not a literal upstream API parity claim; containers and custom descendants must still provide usable width, and arbitrary nested content is not automatically repaired.
+      zh-CN: 可选 wrap 布尔呈现选项默认 false；非 icon size 启用后在容器可用宽度内换行、以原 size 高度为最小高度，不改变 Base activation、焦点或 accessible name。icon 与 icon-compact size 保持固定尺寸。该选项是 Proto UI 扩展，不属于上游逐字 API 兼容承诺；容器及自定义后代仍须提供可用宽度，不能推断任意嵌套内容都可自动修复。
+      en: Optional boolean wrap defaults to false. For non-icon sizes it wraps labels within the containing width and uses the original size height as a minimum, without changing Base activation, focus or accessible names. Icon and icon-compact sizes retain fixed dimensions. This Proto UI extension is not a literal upstream API parity claim; containers and custom descendants must still provide usable width, and arbitrary nested content is not automatically repaired.
   - id: P-SHADCN-BUTTON-NEW-YORK-PAINT
     text:
-      en: The shared passive Button paint and supported fixed sizes use the New York source at 02cad61166c4c20edbc8a3f71bd720eed4c1f49b. Base is rounded-md; every size owns exactly one gap to avoid conflicting base/Rule tokens. Default size is h-9 gap-2 px-4 py-2, sm is h-8 gap-1.5 px-3, lg is h-10 gap-2 px-6, and icon is size-9 gap-2. Default variant keeps its existing primary 80-percent hover while the New York 90-percent migration waits for borrowed-state consumer style closure; outline adds border and shadow-xs with accent hover. AlertDialog and Drawer commands may reuse these constants while retaining their original Base interaction owner. The explicit wrap extension retains auto height and py-1 with corresponding minimum heights and inline padding; it is not fixed-height upstream equivalence. Existing press-offset and adopted destructive extensions remain recorded separately.
-      zh-CN: 共享被动 Button 样式与已有 fixed size 按 New York 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 对齐。基础为 rounded-md；每个 size 只拥有一个 gap，避免 base 与 Rule token 冲突。default 为 h-9 gap-2 px-4 py-2，sm 为 h-8 gap-1.5 px-3，lg 为 h-10 gap-2 px-6，icon 为 size-9 gap-2。default 暂保留既有 primary 与 80% hover，New York 90% hover 迁移须等待 borrowed-state consumer 样式闭包补齐；outline 使用 border、shadow-xs 与 accent hover。AlertDialog、Drawer command 可复用常量但保留原有 Base 交互所有者。显式 wrap 扩展仍使用 auto height、py-1、相应最小高度和 inline padding，不宣称 fixed-height 上游等价。既有按压位移和 destructive 扩展单独保留。
+      en: >-
+        Explicit styleProfile new-york selects the direct Button supported subset at shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b, not the default Rhea or compound paint.ts. Default/sm/lg/icon are 36/32/40/36px at root16, rounded-md; default px4 py2, sm gap1.5 px3, lg px6. Default hover is primary/90; destructive is opaque destructive with white text and hover destructive/90, dark destructive/60 and destructive focus20/40; outline is background plus border/shadow-xs, dark input/30 and hover input/50; secondary hover is secondary/80; link hover underlines. Focus is ring3/ring50. No modern transparent border, muted ghost, tinted destructive or pressed translation may leak into this profile. Base behavior is unchanged. wrap and icon-compact remain explicitly Proto extensions. Passive actions do not claim this profile; full-family selectable legacy style remains separate work.
+
+
+      zh-CN: >-
+        显式 styleProfile new-york 选择固定 02cad611 的 direct Button 已支持子集，不冒用 Rhea 默认或 compound paint.ts。default/sm/lg/icon 为36/32/40/36px，rounded-md；primary hover90、destructive opaque/white与dark60、outline dark input30/50、secondary hover80、focus ring3/ring50按固定源。现代边框、muted ghost、tinted destructive及press位移不得泄漏。Base行为不变，wrap与icon-compact仍是Proto扩展；passive不承诺该profile，全族旧风格选择另行实现。
+
+
+  - id: P-SHADCN-BUTTON-MODERN-PAINT
+    text:
+      en: >-
+        Rhea remains the direct Button default and Luma an explicit profile, pinned to shadcn-ui/ui 25af02b1b467fcd53b63e0c6d6d324c57c16ef18. Their transparent 1px border, background clipping, 14px/20px typography, ring3/ring30 and source-specific hover/dark branches remain independent from legacy New York. Secondary hover uses the finite 5% foreground mix. Compound command paint is unchanged and not asserted to be the complete direct legacy recipe.
+
+
+      zh-CN: 固定25af02b1的Rhea默认与显式Luma保留独立现代配方，包括透明1px边框、14/20字体、ring3/ring30及各hover/dark分支；secondary使用5% foreground混色。compound不改且不冒称完整direct旧配方。
   - id: P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
     text:
-      en: Ghost hover follows the fixed New York source at 02cad61166c4c20edbc8a3f71bd720eed4c1f49b using accent background and accent-foreground text, with 50-percent accent background while colorScheme is dark. It derives exclusively from inherited Button hovered state and the current variant/meta. Leaving hover, disabling, replacing the variant or retiring the view removes the applicable hover paint; changing dark to light removes the half-opacity delta. The actual source collector and generated consumer styles must carry these rules without a manually seeded token. This bounded visual adoption does not advance the historical API baseline, migrate default hover80, replace the separately adopted destructive recipe or establish whole-Button parity.
-      zh-CN: ghost hover 按固定 New York 02cad61166c4c20edbc8a3f71bd720eed4c1f49b 使用 accent 背景与 accent-foreground 文字；colorScheme 为 dark 时背景为 50% accent。样式仅从继承 Button 的 hovered state 与当前 variant/meta 派生。离开 hover、禁用、切换 variant 或结束视图生命周期时移除适用的 hover 样式；dark 切回 light 移除半透明增量。真实 source collector 和生成 consumer 样式须自然包含这些 rule，禁止手工 seed token。此有界视觉采用不前移历史 API 基线，不迁移 default hover80，不替换单独采用的 destructive recipe，也不证明整个 Button 上游对齐。
+      en: Explicit new-york ghost uses accent background and accent-foreground on hover, accent/50 in dark mode, transparent background and normal foreground at rest. Inherited state, disabled, variant/profile replacement, remount and live scheme transitions clear stale paint. Natural source collection and installed preset must deliver the same contract. Modern muted is not an accepted alternative.
+      zh-CN: 显式new-york ghost在hover使用accent/accent-foreground，dark为accent/50，rest透明且普通前景；禁用、切换variant/profile、重挂载及实时主题更新须清理旧paint，真实源提取及preset交付相同合同，不能接受现代muted替代。
     dependsOn:
       contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  - id: P-SHADCN-BUTTON-GHOST-MODERN-PAINT
+    text:
+      en: Rhea and Luma ghost retain the fixed 25af02b1 muted/foreground hover and dark muted/50 recipe with the same state cleanup and source-derived consumer requirements. Legacy accent is not accepted by the modern oracle.
+      zh-CN: Rhea/Luma ghost保留25af02b1的muted/foreground hover和dark muted/50；相同状态清理及真实生成闭包仍必需，现代oracle不接受旧accent。
   - id: P-SHADCN-BUTTON-UPSTREAM-IDENTITY
     text:
       zh-CN: Shadcn Button 必须明确标记为 Proto UI 维护的非官方 shadcn/ui 衍生实现，并以固定 upstream revision/path 作为兼容比较基线；P 实体只治理 Proto UI 投射，不主张上游所有权或认证。
@@ -65,14 +90,14 @@ criteria:
       contracts: [C-PROPS-0001, C-PROPS-0003, C-PROPS-0009, C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-BUTTON-SIZE-PROP
     text:
-      zh-CN: 当前 passing API 必须提供 `size`，可选 default、sm、lg、icon，默认 default；每个值必须投射对应的尺寸与间距 tokens，移除该 prop 必须恢复 default tokens。
-      en: The current passing API must provide `size` with default, sm, lg, and icon options and a default of default; each value must project its corresponding size and spacing tokens, and removing the prop must restore the default tokens.
+      zh-CN: 当前 passing API 必须提供 `size`，可选 default、sm、lg、icon、icon-compact，默认 default；每个值必须投射对应的尺寸与间距 tokens，移除该 prop 必须恢复 default tokens。
+      en: The current passing API must provide `size` with default, sm, lg, icon, and icon-compact options and a default of default; each value must project its corresponding size and spacing tokens, and removing the prop must restore the default tokens.
     dependsOn:
       contracts: [C-PROPS-0001, C-PROPS-0003, C-PROPS-0009, C-RULE-INTENT-FEEDBACK-STYLE-0001]
   - id: P-SHADCN-BUTTON-INTERACTION-STYLES
     text:
-      zh-CN: Shadcn Button 必须从 inherited hovered、focusVisible、pressed 与 disabled state 派生 hover、focus ring、press offset 与 disabled visual rules；视觉 rule 不得成为另一套交互状态真相。
-      en: Shadcn Button must derive hover, focus-ring, press-offset, and disabled visual rules from inherited hovered, focusVisible, pressed, and disabled state; visual rules must not become a second source of interaction-state truth.
+      zh-CN: Shadcn Button 必须从 inherited hovered、focusVisible、pressed 与 disabled state 派生 hover、focus ring、profile特定的press offset与disabled visual rules；视觉 rule 不得成为另一套交互状态真相。
+      en: Shadcn Button must derive hover, focus-ring, profile-specific press-offset, and disabled visual rules from inherited hovered, focusVisible, pressed, and disabled state; visual rules must not become a second source of interaction-state truth.
     dependsOn:
       contracts: [C-RULE-WHEN-0002, C-RULE-INTENT-FEEDBACK-STYLE-0001]
     references:
@@ -112,17 +137,25 @@ openQuestions:
 
 
       en: >-
-        The pinned historical compatibility baseline remains the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; it has not been silently advanced. The current destructive recipe—`bg-destructive/10 text-destructive`, hover `bg-destructive/20`, dark `bg-destructive/20`, and `dark:hover:bg-destructive/30`—is instead an intentional adoption of a later official design, with stable source evidence pinned to shadcn-ui/ui revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` at `apps/v4/registry/styles/style-maia.css`. That source explains the current visual recipe only and does not widen the overall upstream parity claim. The measured contrast from #454 is retained as adopted-upstream behavior evidence; it is not an accidental Proto UI parity gap, a local palette remediation requirement, or a Proto UI-owned 4.5:1 guarantee. The decided intentional deviation still includes omission of `asChild`, and the transparent slot is not a Radix Slot equivalent. Current implementation or review gaps include at least className and native-button prop forwarding, aria-invalid styling, nested-SVG sizing, xs/icon-xs/icon-sm/icon-lg sizes, and exact differences between current size and other visual tokens and the pinned baseline. The current passing guarantee must not expand until an item is implemented and tested.
+        The pinned historical compatibility baseline remains the v4 new-york Button at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; it has not been silently advanced. The current destructive recipe—`bg-destructive/10 text-destructive`, hover `bg-destructive/20`, dark `bg-destructive/20`, and `dark:hover:bg-destructive/30`—is instead an intentional adoption of a later official design, with stable source evidence pinned to shadcn-ui/ui revision `1773ecfeeb4a04366978d353e69b5c7ded78dcb2` at `apps/v4/registry/styles/style-maia.css`. That source explains the current visual recipe only and does not widen the overall upstream parity claim. The measured contrast from #454 is retained as adopted-upstream behavior evidence; it is not an accidental Proto UI parity gap, a local palette remediation requirement, or a Proto UI-owned 4.5:1 guarantee. The decided intentional deviation still includes omission of `asChild`, and the transparent slot is not a Radix Slot equivalent. The explicit new-york direct Button profile now separately restores the supported 02cad611 recipe; it is not full-family New York coverage. Current implementation or review gaps include at least className and native-button prop forwarding, aria-invalid styling, nested-SVG sizing, xs/icon-xs/icon-sm/icon-lg sizes, and exact differences between current size and other visual tokens and the pinned baseline. The current passing guarantee must not expand until an item is implemented and tested.
 
 
     blocks: ['activation:P-SHADCN-BUTTON']
 sources:
+  - path: packages/prototypes/shadcn/src/button/new-york.ts
+  - path: packages/prototypes/shadcn/src/button/profiles.ts
+  - path: https://github.com/shadcn-ui/ui/blob/25af02b1b467fcd53b63e0c6d6d324c57c16ef18/apps/v4/registry/styles/style-rhea.css
+    label: Explicit direct Button default profile, selected by upstream homepage component cards
+  - path: https://github.com/shadcn-ui/ui/blob/25af02b1b467fcd53b63e0c6d6d324c57c16ef18/apps/v4/registry/styles/style-luma.css
+    label: Explicit public hero action profile, not the 35px page override
+  - path: https://github.com/shadcn-ui/ui/blob/ba1503c64472b82256d9de95e2e62c5901a38e8b/apps/v4/components/block-viewer.tsx
+    label: Blocks Copy size-7 consumer geometry mapped by the explicit Proto icon-compact extension, not a Button baseline change
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: packages/prototypes/shadcn/src/button/button.proto.ts
   - path: packages/prototypes/shadcn/src/button/paint.ts
   - path: internal/contracts/overlay/shadcn-alert-dialog.presentation.v0.md
   - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/button.tsx
-    label: Current PR 872 fixed New York sizing and default/outline/ghost paint source; historical compatibility baseline remains separate
+    label: Explicit legacy direct Button profile source; historical overall compatibility baseline and compound recipe remain separate
   - path: packages/prototypes/shadcn/src/button/types.ts
   - path: packages/prototypes/shadcn/test/button.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/button.tsx
@@ -160,4 +193,10 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added bounded pinned New York ghost hover and dark-meta paint with source-collected consumer closure; historical API baseline and other variant boundaries remain unchanged.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added an explicit Proto icon-compact presentation size for the pinned Blocks size-7 consumer without claiming upstream icon-sm parity or changing Base ownership and existing defaults.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Restored explicit new-york direct Button supported recipes and source-bound legacy ghost acceptance alongside separate modern profiles; passive actions and whole-family style selection are not widened.
 tags: [prototype, shadcn, button, upstream-derived, delta, compatibility, visual]

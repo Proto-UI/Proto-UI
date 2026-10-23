@@ -1,29 +1,7 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asTabsTrigger } from '@proto.ui/prototypes-base/tabs';
+import { setupTabsVisual, TAB_TRIGGER_COMMON, TAB_TRIGGER_RECIPES } from './visual';
 import type { ShadcnTabsTriggerExposes, ShadcnTabsTriggerProps } from './types';
-
-const BASE_TOKENS = [
-  'relative',
-  'inline-flex',
-  'h-[calc(100%_-_1px)]',
-  'flex-1',
-  'items-center',
-  'justify-center',
-  'gap-1.5',
-  'whitespace-nowrap',
-  'rounded-md',
-  'border',
-  'border-transparent',
-  'px-2',
-  'py-1',
-  'text-sm',
-  'font-medium',
-  'transition-all',
-  'outline-none',
-  'text-foreground/60',
-  'select-none',
-].join(' ');
-
 const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExposes>({
   name: 'shadcn-tabs-trigger',
   setup(def) {
@@ -31,43 +9,90 @@ const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExp
       appearance: { type: 'enum', options: ['default', 'underline'], empty: 'fallback' },
     });
     def.props.setDefaults({ appearance: 'default' });
-    // P-SHADCN-TABS-TRIGGER-BASE-INHERITANCE,
-    // P-SHADCN-TABS-TRIGGER-CURRENT-BASE-DEVIATIONS
-    const triggerState = asTabsTrigger().stateHandles;
-    if (!triggerState) {
-      throw new Error(
-        '[shadcn-tabs-trigger] asTabsTrigger must project Tabs trigger state handles.'
-      );
-    }
-    const { disabled, hovered, focusVisible, selected } = triggerState;
-
-    // P-SHADCN-TABS-TRIGGER-CURRENT-VISUAL-SURFACE
+    const { disabled, hovered, focusVisible, selected } = asTabsTrigger().stateHandles!;
+    const { style, orientation } = setupTabsVisual(def);
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
-      intent: (i) => i.feedback.style.use(tw(BASE_TOKENS)),
+      intent: (i) => i.feedback.style.use(TAB_TRIGGER_COMMON),
     });
-
-    // P-SHADCN-TABS-TRIGGER-STATE-DRIVEN-STYLES
+    // The existing physical outline-none utility is a transparent shorthand.
+    // Withdraw it during visible focus so it cannot reset the focused 1px width.
     def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(focusVisible).eq(true)),
-      intent: (i) =>
-        i.feedback.style.use(tw('border-ring ring-3 ring-ring/50 outline-1 outline-ring')),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.not(w.state(focusVisible).eq(true))),
+      intent: (i) => i.feedback.style.use(tw('outline-none')),
     });
-
+    for (const id of ['new-york-v4', 'nova', 'rhea'] as const) {
+      def.rule({
+        when: (w) => w.all(w.prop('appearance').eq('default'), w.state(style).eq(id)),
+        intent: (i) => i.feedback.style.use(TAB_TRIGGER_RECIPES[id]),
+      });
+    }
     def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true)),
-      intent: (i) => i.feedback.style.use(tw('bg-background text-foreground shadow-sm')),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('vertical')),
+      intent: (i) => i.feedback.style.use(tw('w-full justify-start')),
     });
-
     def.rule({
       when: (w) =>
         w.all(
           w.prop('appearance').eq('default'),
-          w.all(w.state(hovered).eq(true), w.state(selected).eq(false))
+          w.state(orientation).eq('vertical'),
+          w.state(style).eq('rhea')
         ),
+      intent: (i) => i.feedback.style.use(tw('px-3 py-0.5')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(hovered).eq(true)),
       intent: (i) => i.feedback.style.use(tw('text-foreground')),
     });
-
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('ring-3 ring-ring/50 outline-1 outline-ring')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(focusVisible).eq(true),
+          w.not(w.state(style).eq('rhea'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('border-ring')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('bg-background text-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(selected).eq(true),
+          w.not(w.state(style).eq('rhea'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('shadow-sm')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(selected).eq(true),
+          w.meta('colorScheme').eq('dark')
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-input/30 text-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(selected).eq(true),
+          w.meta('colorScheme').eq('dark'),
+          w.not(w.state(style).eq('rhea'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('border-input')),
+    });
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('default'), w.state(disabled).eq(true)),
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
@@ -99,7 +124,4 @@ const tabsTrigger = definePrototype<ShadcnTabsTriggerProps, ShadcnTabsTriggerExp
     });
   },
 });
-
-/** P-SHADCN-TABS-TRIGGER-DIRECT-ENTRY; parity remains bounded by P-SHADCN-TABS-TRIGGER-COMPATIBILITY-SUBSET. */
-
 export default tabsTrigger;

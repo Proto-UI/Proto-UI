@@ -1,3 +1,4 @@
+import { isPlaceholderColorTokenV0 } from './placeholder';
 // packages/core/src/spec/feedback/tokens.ts
 
 // Arbitrary values may legitimately contain punctuation (calc, var, quoted
@@ -50,7 +51,7 @@ function selectionPayloadHasSelectorSyntax(token: string): boolean {
  * Validate a Tailwind-flavored token for feedback v0.
  *
  * Forbidden:
- * - ':' (variants / pseudo / selector), except one allowlisted `selection:` prefix
+ * - ':' (variants / pseudo / selector), except static `selection:` or exact finite placeholder color tokens
  *
  * Allowed:
  * - arbitrary values in brackets: `w-[2px]`, `h-[var(--x)]`
@@ -76,6 +77,8 @@ export function assertTwTokenV0(token: string, ctx?: string): void {
       `[feedback] invalid tw token${where}: selector-like token is forbidden in "${token}"`
     );
   }
+
+  if (isPlaceholderColorTokenV0(token)) return;
 
   if (token.includes(':')) {
     const selectionPrefix = 'selection:';

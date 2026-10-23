@@ -1,6 +1,8 @@
 ---
 import { SITE_LINK_ICONS, type SiteLinkIcon } from '../../prototypes/site-link-icons';
 import '../../styles/site-native-links.css';
+import { linkActionAppearance, type SiteLinkAppearance } from '../site-link-recipes';
+import { resolveSiteLibraryFamily } from '../site-library-family';
 import { HOME_ACTION_ICONS, homeActionIcon } from './home-action-icons';
 export interface HomeAction {
   text: string;
@@ -13,6 +15,7 @@ export interface HomeAction {
 interface Props {
   id: string;
   actions: HomeAction[];
+  appearance?: SiteLinkAppearance;
   class?: string;
   runtimeControl?: boolean;
   themeButton?: boolean;
@@ -22,6 +25,7 @@ interface Props {
 const {
   id,
   actions,
+  appearance,
   class: className,
   runtimeControl = false,
   themeButton = false,
@@ -29,6 +33,7 @@ const {
   menuButton = false,
 } = Astro.props;
 const locale = Astro.locals.starlightRoute.locale;
+const initialFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const themeLabel = locale === 'zh-cn' ? '切换主题' : 'Toggle theme';
 const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and settings';
 ---
@@ -50,10 +55,17 @@ const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and setti
             {...attrs}
             href={link}
             class="site-native-link"
+            style={
+              appearance === 'action' && !icon
+                ? linkActionAppearance(initialFamily, variant).layout
+                : undefined
+            }
             data-home-action-variant={variant}
             data-site-link-icon={icon}
             data-home-action-icon={icon ? undefined : homeActionIcon(configuredIcon)}
-            data-site-link-appearance={icon ? 'icon' : undefined}
+            data-site-link-appearance={
+              icon ? 'icon' : (appearance ?? attrs['data-site-link-appearance'])
+            }
           >
             {icon ? (
               <svg
@@ -131,6 +143,8 @@ const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and setti
   .home-actions-fallback a {
     display: inline-flex;
     align-items: center;
+  }
+  .home-actions-fallback a:not([data-site-link-appearance='action']) {
     min-height: 2.75rem;
   }
   .home-theme-accessible-label {

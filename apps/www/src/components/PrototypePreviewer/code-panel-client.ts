@@ -23,6 +23,10 @@ export function refreshCodePanel(shell: HTMLElement, options: RefreshCodePanelOp
   const content = shell.querySelector<HTMLElement>('[data-code-content]');
   if (!panel || !content) return;
 
+  if (shell.dataset.codeCollapsible === 'false') {
+    setExpanded(shell, true);
+    return;
+  }
   if (options.reset) setExpanded(shell, false);
   if (shell.dataset.codeExpanded === 'true') return;
   if (panel.getBoundingClientRect().height < MIN_VISIBLE_PANEL_HEIGHT) return;
@@ -37,7 +41,7 @@ const panels = new Map<HTMLElement, () => void>();
 function initCodePanel(shell: HTMLElement): void {
   if (panels.has(shell)) return;
   shell.dataset.codePanelInit = '1';
-  setExpanded(shell, false);
+  setExpanded(shell, shell.dataset.codeCollapsible === 'false');
   const panel = shell.querySelector<HTMLElement>('[data-code-inner]');
   const toggle = shell.querySelector<HTMLElement>('[data-code-toggle]');
   let alive = true;

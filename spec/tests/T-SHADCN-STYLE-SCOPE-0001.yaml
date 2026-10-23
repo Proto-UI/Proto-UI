@@ -1,0 +1,74 @@
+id: T-SHADCN-STYLE-SCOPE-0001
+type: test
+title: Shared Shadcn scope transport and bounded real Tabs canary
+status: draft
+since: 0.3.0-alpha.1
+summary: Checks shared key identity, explicit and nearest precedence, nested
+  inheritance, source membership, paint withdrawal, no Tabs reset and terminal
+  cleanup.
+cases:
+  - id: T-SHADCN-STYLE-SCOPE-0001-CASE-SELECTION
+    title: Canonical style IDs, singleton key, precedence and nested inheritance
+    covers:
+      - P-SHADCN-STYLE-SCOPE-IDENTITY
+      - P-SHADCN-STYLE-SCOPE-SELECTION
+      - P-SHADCN-STYLE-SCOPE-NESTING
+      - P-SHADCN-STYLE-SCOPE-PROVENANCE
+    expectation: explicit-before-nearest-before-compatible-baseline
+  - id: T-SHADCN-STYLE-SCOPE-0001-CASE-LIVE-PAINT
+    title: Existing Base Tabs preserves its live behavior while radius contributions
+      switch
+    covers:
+      - P-SHADCN-STYLE-SCOPE-PAINT-ONLY
+      - P-SHADCN-STYLE-SCOPE-NO-RESET
+    expectation: old-paint-withdrawn-without-value-signal-handle-focus-or-node-reset
+  - id: T-SHADCN-STYLE-SCOPE-0001-CASE-DISPOSAL
+    title: Terminal consumer disposal removes context callbacks
+    covers:
+      - P-SHADCN-STYLE-SCOPE-LIFETIME
+    expectation: disposed-consumer-not-notified-by-later-provider-updates
+implementations:
+  - id: prototypes-shadcn-style-scope-transport
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/style-scope.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-STYLE-SCOPE-0001-CASE-SELECTION
+      - T-SHADCN-STYLE-SCOPE-0001-CASE-LIVE-PAINT
+      - T-SHADCN-STYLE-SCOPE-0001-CASE-DISPOSAL
+    exercises:
+      - P-SHADCN-STYLE-SCOPE
+      - P-BASE-TABS-TRIGGER
+    notes:
+      - Local six-case Web Component happy-dom test on approved fixed runtime
+        plus authored changes. Not native browser, cross-Adapter, portal, IME or
+        full visual parity evidence.
+verifies:
+  prototypes:
+    - id: P-SHADCN-STYLE-SCOPE
+      anchors:
+        - P-SHADCN-STYLE-SCOPE-IDENTITY
+        - P-SHADCN-STYLE-SCOPE-SELECTION
+        - P-SHADCN-STYLE-SCOPE-NESTING
+        - P-SHADCN-STYLE-SCOPE-PAINT-ONLY
+        - P-SHADCN-STYLE-SCOPE-NO-RESET
+        - P-SHADCN-STYLE-SCOPE-LIFETIME
+        - P-SHADCN-STYLE-SCOPE-PROVENANCE
+exercises:
+  prototypes:
+    - P-SHADCN-STYLE-SCOPE
+    - P-BASE-TABS-TRIGGER
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded transport and no-reset canary coverage; native portal and
+      full family parity remain open.
+tags:
+  - prototype
+  - shadcn
+  - context
+  - test
+lifecycleRationale:
+  en: Six local transport tests cover the bounded carrier only; native portal,
+    full family projection and adapter acceptance remain missing.

@@ -39,7 +39,23 @@ cases:
     title: Focus, disabled, and dark rules reach the web style projection as conditional presentation
     covers: [P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES]
     expectation: shadcn-textarea-state-rules-lower-to-conditional-web-presentation
+  - id: T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES
+    title: Shared scope and Field facts preserve one physical editor
+    covers:
+      [
+        P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE,
+        P-SHADCN-TEXTAREA-FIELD-COMPOSITION,
+        P-SHADCN-TEXTAREA-BOUNDARY,
+      ]
+    expectation: explicit-nearest-compatible-styles-with-native-width-fallback-and-no-editor-reset
 implementations:
+  - id: prototypes-shadcn-textarea-shared-styles
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/textarea-style-projection.test.ts
+    required: true
+    consumesCases:
+      [T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES, T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE]
   - id: prototypes-shadcn-textarea-contract
     kind: module-test
     status: passing
@@ -56,9 +72,9 @@ implementations:
       ]
     exercises: &id001 [P-SHADCN-TEXTAREA, P-BASE-TEXTAREA]
     notes:
-      - The asChild omission case checks both the exported props type and preservation of the single Base-owned editor; auto-resize, aria-invalid presentation, and remaining parity gaps stay bounded by the declared surface and centralized compatibility question.
+      - The asChild omission case checks both the exported props type and preservation of the single Base-owned editor; native intrinsic sizing and optional Field invalid follow the revised bounded surface; remaining native/compiler parity gaps are explicit.
       - Surface-token coverage requires explicit `text-foreground` and `resize-y`; standalone four-runtime computed-style coverage is mapped by `T-PROTOTYPE-STYLE-CLOSURE-0001`.
-      - The web-state case asserts Adapter lowering of the three condition-driven rules on the Web Component host, including the colorScheme rule. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited focus, disabled, and value state handles.
+      - The web-state case asserts directly lowerable disabled presentation and no unconditional focus/theme paint; profile-qualified focus/theme and Field invalid are exercised by the shared style projection tests. Host attribute form is evidence for that lowering, not a portable guarantee; the portable surface stays the inherited focus, disabled, and value state handles.
   - id: prototypes-shadcn-textarea-browser
     kind: runtime-test
     status: passing
@@ -67,10 +83,42 @@ implementations:
     consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-WEB-STATE-EVIDENCE]
     exercises: *id001
     notes:
-      - Drives light to dark and back in Web Components, React, and Vue without remounting the adapter. Static lowering of the colorScheme rule is what makes the repaint happen; a rule left on the default plan samples the scheme once and leaves stale presentation.
+      - Drives light to dark and back in Web Components, React, and Vue without remounting the adapter. The live colorScheme source invalidates profile-qualified runtime Rules; static selector lowering is not required for this shared-style composition.
       - Asserts the transitioned property set is exactly `color, box-shadow` at the upstream duration and easing. The set matters beyond parity, because a wider set would also animate the background and make the colorScheme reads race the animation.
       - Covers the real pointer-focus ring in both directions and requires a frame strictly between endpoints when the physical host reports focus-visible; WC, React, and Vue all require projected focus instead of a skip path.
       - Real click and real Tab traversal snapshot the physical textarea native `:focus-visible` result together with projected `data-focus-visible` in every runtime and require equality. The ring endpoint is derived from that measured value. WC physical-control coverage additionally resamples same-target native true/false after modality input without requiring a second focus event and invalidates the sampler on blur/remount/teardown.
+  - id: shadcn-textarea-style-react
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/react/test/shadcn-textarea-style.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES]
+    notes: [Simulated DOM tests do not establish native CSS intrinsic sizing or screenshot parity.]
+
+  - id: shadcn-textarea-style-vue
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/vue/test/shadcn-textarea-style.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES]
+    notes: [Simulated DOM tests do not establish native CSS intrinsic sizing or screenshot parity.]
+
+  - id: shadcn-textarea-style-vue2
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/vue2/test/shadcn-textarea-style.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES]
+    notes: [Simulated DOM tests do not establish native CSS intrinsic sizing or screenshot parity.]
+
+  - id: shadcn-textarea-style-web-component
+    kind: runtime-test
+    status: passing
+    path: packages/adapters/web-component/test/shadcn-textarea-style.test.ts
+    required: true
+    consumesCases: [T-SHADCN-TEXTAREA-0001-CASE-SHARED-STYLES]
+    notes: [Simulated DOM tests do not establish native CSS intrinsic sizing or screenshot parity.]
+
 verifies:
   prototypes:
     - id: P-SHADCN-TEXTAREA

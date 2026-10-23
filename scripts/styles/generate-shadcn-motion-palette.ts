@@ -48,7 +48,15 @@ export function extractShadcnThemeCss(source: string): string {
 
 /** This is deliberately a bounded parser for the canonical theme, not a CSS evaluator. */
 function readThemeDeclarations(css: string) {
-  const text = css.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, ' ');
+  // This exact low-priority paint projection consumes existing color roles;
+  // it introduces no new palette declaration or arbitrary CSS evaluation.
+  const selectionPaint =
+    /@layer\s+theme\s*\{\s*::selection\s*\{\s*background-color\s*:\s*var\(--selection\)\s*;\s*color\s*:\s*var\(--selection-foreground\)\s*;\s*\}\s*\}/g;
+  if ([...withoutComments.matchAll(selectionPaint)].length > 1) {
+    throw new Error('Repeated SHADCN_THEME_CSS selection paint rule.');
+  }
+  const text = withoutComments.replace(selectionPaint, '');
   const blocks = [...text.matchAll(/([^{}]+)\{([^{}]*)\}/g)];
   if (
     blocks

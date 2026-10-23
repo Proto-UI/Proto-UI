@@ -40,6 +40,21 @@ describe('first-frame harness load-gate contract', () => {
       /expect\(\s*initial\.selectionSame/
     );
   });
+  it('measures the real first docs caption without inventing an EC toolbar owner', () => {
+    expect(source).toContain('#quick-start-cli-help[data-code-shell][data-code-presentation="docs"]');
+    expect(source).toContain('Quick Start help must be the real first docs code frame');
+    expect(source).toContain('Ownership selection must use the first Quick Start help code frame');
+    expect(source).toContain(":scope > [data-code-file-header]");
+    expect(source).toContain('codeCaption: sample(caption)');
+    expect(source).not.toContain('[data-site-code-surface="toolbar"]');
+    expect(source).not.toContain('[data-copy-command]');
+    expect(source).toContain('[data-site-copy][data-copy-view="ready"] [data-demo-ref="copy-button"]');
+    expect(source).toContain("'codeCaption', 'codeText'].includes(key)");
+    const hydration = source.slice(source.indexOf("await checkpoint(page, prefix, 'hydration')"),
+      source.indexOf("const after = await record(page"));
+    expect(hydration).not.toContain('data-copy-view');
+    expect(hydration).toContain("code?.getAttribute('data-code-surface-view') === 'ready'");
+  });
   it('waits for the shared real Typography completion predicate before observing final ownership', () => {
     const ownershipStart = source.indexOf('for (const focusOwner');
     const wait = source.indexOf(

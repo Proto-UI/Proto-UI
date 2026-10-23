@@ -124,7 +124,7 @@ export function copyPaintIssues(
   } else if (state === 'focus') {
     if (!changed.focused || !changed.focusVisible) issues.push('keyboard focus is not visible');
     const required =
-      family === 'shadcn' ? ['ring-3', 'ring-ring/50'] : ['ring-2', 'ring-ring', 'ring-offset-2'];
+      family === 'shadcn' ? ['ring-3', 'ring-ring/30'] : ['ring-2', 'ring-ring', 'ring-offset-2'];
     if (!required.every((token) => hasStateToken(token, 'focus-visible')))
       issues.push('family focus ring recipe absent');
     if (
@@ -136,7 +136,7 @@ export function copyPaintIssues(
       changed.pressed
     )
       issues.push('focus comparison is not isolated from other states');
-    // eb735/514f source recipes: Shadcn 3px ring; Brutalist 2px ring + 2px offset.
+    // Fixed Rhea/Luma source: Shadcn 3px/30% ring; Brutalist 2px ring + 2px offset.
     // Compare a real zero-offset, zero-blur layer in the computed shadow with an
     // independent CSS probe, rather than accepting any hard-shadow difference.
     const expected = copyShadowLayers(changed.expectedRingShadow);

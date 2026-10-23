@@ -1,99 +1,173 @@
 id: P-SHADCN-TABS-LIST
 type: prototype
-title: Shadcn Tabs List inherits Base Tabs List and projects the pinned v4 default surface
+title: Shadcn Tabs List inherits Base Tabs List and projects the source-bound
+  text/default surface
 status: draft
 since: 0.2.0-rc.0
-summary: Shadcn Tabs List inherits Base collection, roving-focus, orientation, and accessibility behavior and reproduces the pinned v4 default horizontal list surface.
+summary: Inherits Base behavior and projects the bounded text-only default
+  surface for New York v4, Nova and Rhea through shared style scope.
 statement:
-  zh-CN: >-
-    Shadcn Tabs List 是 `P-BASE-TABS-LIST` 之上的 direct anatomy part，保留同域 collection、roving focus、keyboard navigation、orientation 与 tablist a11y，并按固定 v4 baseline 投射 default variant 的 horizontal list surface，包括明确的 fit-content width。`line` variant 与 vertical 方向感知样式尚未进入 passing API；`asChild` 明确不提供。
-
-
-  en: >-
-    Shadcn Tabs List is a direct anatomy part over `P-BASE-TABS-LIST`. It retains same-domain collection, roving focus, keyboard navigation, orientation, and tablist accessibility while projecting the pinned v4 default-variant horizontal list surface, including an explicit fit-content width. The `line` variant and vertical orientation-aware styles are not yet part of the passing API; `asChild` is explicitly unavailable.
-
-
+  en: This draft projects only the text-only default surface of fixed upstream
+    3d98900e9b73c45f035f8109e9d41ba6a51685e7 for New York v4, Nova and Rhea,
+    preserving Base ownership and shared style-scope precedence. Both
+    orientations and light/dark interaction paint are covered where relevant to
+    this part. It is not complete Tabs or all-style parity. Existing Proto
+    underline remains a separate compatibility appearance, never an alias for
+    upstream line.
 criteria:
   - id: P-SHADCN-TABS-LIST-UPSTREAM-IDENTITY
     text:
-      zh-CN: List 必须沿用固定 Shadcn Tabs revision/path，并明确为 Proto UI 治理的非官方 anatomy projection。
-      en: List must use the pinned Shadcn Tabs revision and path and identify itself as an unofficial Proto UI-governed anatomy projection.
+      zh-CN: List 必须沿用固定 Shadcn Tabs revision/path，并明确为 Proto UI 治理的非官方 anatomy
+        projection。
+      en: List must use the pinned Shadcn Tabs revision and path and identify itself
+        as an unofficial Proto UI-governed anatomy projection.
   - id: P-SHADCN-TABS-LIST-BASE-INHERITANCE
     text:
-      zh-CN: '`shadcn-tabs-list` 必须继承 `P-BASE-TABS-LIST` 并调用 `asTabsList()`；任何 setup-only 负向补丁必须显式声明。'
-      en: '`shadcn-tabs-list` must inherit `P-BASE-TABS-LIST` and call `asTabsList()`; any setup-only negative patch must be declared explicitly.'
+      zh-CN: "`shadcn-tabs-list` 必须继承 `P-BASE-TABS-LIST` 并调用 `asTabsList()`；任何
+        setup-only 负向补丁必须显式声明。"
+      en: "`shadcn-tabs-list` must inherit `P-BASE-TABS-LIST` and call `asTabsList()`;
+        any setup-only negative patch must be declared explicitly."
     references:
       prototypes:
         - id: P-BASE-TABS-LIST
           anchors:
-            [
-              P-BASE-TABS-LIST-AUTHORING-ENTRIES,
-              P-BASE-TABS-LIST-ROLE-COLLECTION,
-              P-BASE-TABS-LIST-FOCUS-ROVING,
-            ]
+            - P-BASE-TABS-LIST-AUTHORING-ENTRIES
+            - P-BASE-TABS-LIST-ROLE-COLLECTION
+            - P-BASE-TABS-LIST-FOCUS-ROVING
   - id: P-SHADCN-TABS-LIST-CURRENT-BASE-DEVIATIONS
     text:
-      zh-CN: 当前实现不反转 inherited collection、context、focus、keyboard 或 a11y guarantee；新增 tokens 仅构成视觉增量。
-      en: The current implementation reverses no inherited collection, context, focus, keyboard, or accessibility guarantee; added tokens are visual deltas only.
+      zh-CN: 当前实现不反转 inherited collection、context、focus、keyboard 或 a11y guarantee；新增
+        tokens 仅构成视觉增量。
+      en: The current implementation reverses no inherited collection, context, focus,
+        keyboard, or accessibility guarantee; added tokens are visual deltas
+        only.
   - id: P-SHADCN-TABS-LIST-DIRECT-ENTRY
     text:
       zh-CN: 当前 List protocol 以 `shadcn-tabs-list` direct prototype 公开。
-      en: The current List protocol is exposed as the `shadcn-tabs-list` direct prototype.
+      en: The current List protocol is exposed as the `shadcn-tabs-list` direct
+        prototype.
   - id: P-SHADCN-TABS-LIST-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: 默认 horizontal/default-variant List 必须按固定 v4 baseline 提供 `inline-flex h-9 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground`；不得附加旧有 border、shadow、rounded-xl 或 muted opacity，也不得据此宣称 line/vertical parity。
-      en: The default horizontal, default-variant List must provide `inline-flex h-9 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground` from the pinned v4 baseline; it must not retain the former border, shadow, rounded-xl, or muted-opacity additions, and this does not claim line or vertical parity.
+      en: "The source-bound text/default surface is described by the dedicated Tabs
+        coverage inventory: New York compatibility dimensions plus Nova/Rhea
+        recipes, Base-derived horizontal/vertical layout, and existing
+        feedback.style semantic merging. Only the declared bounded surface is
+        projected; it does not imply line, SVG, arbitrary native props, or
+        other-style support."
   - id: P-SHADCN-TABS-LIST-COMPATIBILITY-SUBSET
     text:
-      zh-CN: 已测试的 Base behavior 与当前 surface 之外，所有差异必须集中在唯一 compatibility open question。
-      en: Beyond tested Base behavior and the current surface, all differences must be centralized in one compatibility open question.
+      zh-CN: 已测试的 Base behavior 与当前 surface 之外，所有差异必须集中在唯一 compatibility open
+        question。
+      en: Beyond tested Base behavior and the current surface, all differences must be
+        centralized in one compatibility open question.
   - id: P-SHADCN-TABS-LIST-AS-CHILD-OMISSION
     text:
       zh-CN: upstream List props 中的 `asChild` 依共享决策有意省略。
-      en: The `asChild` member of upstream List props is intentionally omitted under the shared decision.
+      en: The `asChild` member of upstream List props is intentionally omitted under
+        the shared decision.
     dependsOn:
-      decisions: [D-AS-CHILD-OMISSION-0001]
+      decisions:
+        - D-AS-CHILD-OMISSION-0001
   - id: P-SHADCN-TABS-LIST-APPEARANCE
     text:
-      en: 'Accept appearance=default|underline with default as the omission behavior. Default preserves the family surface. Underline is a horizontal Runtime consumer opt-in: full-width transparent, borderless, non-wrapping text row, 24px label gap and horizontal overflow on narrow hosts. It must retain Base roving, orientation and naming semantics; it is not a claim of upstream line-variant or vertical visual parity. Each change withdraws the previous appearance contribution and restores the default surface when reversed.'
-
+      en: "Accept appearance=default|underline with default as the omission behavior.
+        Default preserves the family surface. Underline is a horizontal Runtime
+        consumer opt-in: full-width transparent, borderless, non-wrapping text
+        row, 24px label gap and horizontal overflow on narrow hosts. It must
+        retain Base roving, orientation and naming semantics; it is not a claim
+        of upstream line-variant or vertical visual parity. Each change
+        withdraws the previous appearance contribution and restores the default
+        surface when reversed."
+  - id: P-SHADCN-TABS-LIST-STYLE-SCOPE
+    text:
+      en: Use the shared style-scope singleton. Explicit selection wins over nearest
+        scope and then New York compatibility fallback. Root/List may provide
+        local inherited selection. Style-only changes do not mutate Base
+        value/orientation, replace handles or user nodes, or reset
+        focus/selection. Unsupported canonical and unknown raw choices reject
+        rather than silently selecting another style.
+  - id: P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+    text:
+      en: "The complete style ID inventory remains eight latest styles plus separate
+        legacy New York. This slice implements only New York/Nova/Rhea
+        text/default; all six others reject. Upstream line remains explicitly
+        unsupported pending #935; nested SVG and inline-glyph handling remain
+        unprojected. Existing appearance=underline is separately preserved.
+        Source hashes, fixture references and tests must remain current."
 openQuestions:
   - id: P-SHADCN-TABS-LIST-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: List 的 variant、orientation 与 token parity 应如何收敛？
       en: How should List variant, orientation, and token parity converge?
     context:
-      zh-CN: >-
-        intentional deviation 是省略 `asChild`。默认 horizontal/default-variant surface 已对齐固定 v4 baseline。upstream 仍公开 `variant: default | line`，并使用 Root orientation group 调整 vertical height 与 flex direction；当前 API 没有 variant，data-slot/data-variant 与 vertical `h-fit flex-col` 仍是待实现或待评审 gap。
-
-
-      en: >-
-        The intentional deviation is omission of `asChild`. The default horizontal, default-variant surface now matches the pinned v4 baseline. Upstream still exposes `variant: default | line` and uses the Root orientation group for vertical height and flex direction; the current API has no variant, while data-slot, data-variant, and vertical `h-fit flex-col` remain implementation or review gaps.
-
-
-    blocks: [shadcn tabs list parity roadmap]
+      en: "Current implementation adds shared-scope selection and source-bound
+        text/default New York/Nova/Rhea paint in both orientations and
+        light/dark; this does not close full upstream parity. Remaining gaps:
+        six other styles, upstream line (explicit rejection pending #935 owned
+        decorative feedback), nested SVG/default or overridden icon
+        size/inline-icon placement, className/native prop forwarding,
+        data-slot/state naming correspondence, and native/cross-adapter visual
+        acceptance. asChild remains intentionally omitted. Existing Proto
+        underline is a compatibility identity, not upstream line. Raw unknown
+        style choices are explicitly rejected. See #934 and the coverage
+        inventory."
+    blocks:
+      - shadcn tabs list parity roadmap
 sources:
   - path: packages/prototypes/shadcn/src/tabs/list.proto.ts
   - path: packages/prototypes/shadcn/src/tabs/types.ts
   - path: packages/prototypes/shadcn/test/tabs.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/tabs.tsx
-    label: shadcn/ui v4 new-york TabsList pinned baseline
+    label: Historical New York baseline, retained for provenance; current source
+      binding is 3d989 coverage inventory
+  - path: internal/fixtures/shadcn-tabs-style/coverage.json
+  - path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/issues/934
 dependsOn:
   contracts:
-    [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-CORE-SYNTAX-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
-  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
-  prototypes: [P-SHADCN-TABS]
+    - C-AS-HOOK-0001
+    - C-CORE-SYNTAX-0003
+    - C-CORE-SYNTAX-0007
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+  decisions:
+    - D-PROTOTYPE-ENTITY-NAMING-0001
+    - D-AS-CHILD-OMISSION-0001
+  prototypes:
+    - P-SHADCN-TABS
+    - id: P-SHADCN-STYLE-SCOPE
+      since: 0.3.0-alpha.1
 inherits:
   prototypes:
     - id: P-BASE-TABS-LIST
-      note: Default inherited collection protocol; explicit setup-time negative patches must be declared.
+      note: Default inherited collection protocol; explicit setup-time negative
+        patches must be declared.
 verifies:
-  { tests: [T-SHADCN-TABS-LIST-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }] }
+  tests:
+    - T-SHADCN-TABS-LIST-0001
+    - id: T-RUNTIME-TABS-APPEARANCE-0001
+      since: 0.3.0-alpha.1
+    - id: T-SHADCN-TABS-STYLE-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
+    summary: Added bounded production text/default style scope projection; line
+      explicitly rejects pending generic owned decorative feedback, with legacy
+      underline and all remaining gaps preserved.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family
+      default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.2.0-rc.0
     change: introduced
-    summary: Introduced Shadcn Tabs List delta cataloging with Base inheritance, current surface, intentional asChild omission, and variant parity gaps.
-tags: [prototype, shadcn, tabs, list, upstream-derived, delta, compatibility, visual]
+    summary: Introduced Shadcn Tabs List delta cataloging with Base inheritance,
+      current surface, intentional asChild omission, and variant parity gaps.
+tags:
+  - prototype
+  - shadcn
+  - tabs
+  - list
+  - upstream-derived
+  - delta
+  - compatibility
+  - visual

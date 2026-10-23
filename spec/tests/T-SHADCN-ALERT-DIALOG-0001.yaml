@@ -37,6 +37,8 @@ implementations:
         T-SHADCN-ALERT-DIALOG-0001-CASE-3,
       ]
     exercises: [P-SHADCN-ALERT-DIALOG-HEADER, P-SHADCN-ALERT-DIALOG-FOOTER]
+    notes:
+      - Command composition regression also restores the pre-e0d4f3d action/cancel select-none affordance, preserves selectable dialog prose and rejects an added asButton dependency. This host-unit evidence does not establish native selection or extend Drawer policy.
   - id: shadcn-alert-dialog-demo-grouping
     kind: module-test
     status: passing
@@ -52,6 +54,9 @@ sources:
   - path: packages/prototypes/shadcn/test/alert-dialog.test.ts
   - path: apps/www/src/components/PrototypePreviewer/shadcn-alert-dialog-layout.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Preserved the independent AlertDialog command ownership while recovering the action/cancel selection affordance lost during shared paint extraction; no Drawer or global selection policy expansion.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added bounded passive grouping coverage without claiming native or upstream mobile visual acceptance.

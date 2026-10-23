@@ -1,3 +1,4 @@
+import { isPlaceholderColorTokenV0 } from './placeholder';
 /**
  * Core-owned Root role vocabulary. Internal effects resolve it before lowering;
  * author StyleHandle syntax and Template style remain token-only.
@@ -203,6 +204,7 @@ function resolution(
  * semantic decision supplies enough evidence to classify them.
  */
 export function classifyTwTokenApplicationRoleV0(token: string): TwTokenApplicationRoleResolution {
+  if (isPlaceholderColorTokenV0(token)) return resolution(token, 'surface', 'canonical');
   // I1 exact admission precedes negative normalization; no visibility family widening.
   if (token === 'hidden') return resolution(token, 'root-participation', 'canonical');
   if (token === 'relative') return resolution(token, 'root-geometry', 'canonical');
@@ -210,6 +212,9 @@ export function classifyTwTokenApplicationRoleV0(token: string): TwTokenApplicat
   // not automatically admit negative, arbitrary, axis or other family variants.
   if (ROOT_GEOMETRY_TOKENS.has(token)) return resolution(token, 'root-geometry', 'canonical');
   if (token === 'pointer-events-none') return resolution(token, 'hit-testing', 'canonical');
+  if (token === 'field-sizing-content' || token === 'field-sizing-fixed') {
+    return resolution(token, 'surface', 'canonical');
+  }
   const comparable = withoutNegativePrefix(token);
 
   if (UNRESOLVED_EXACT_TOKENS.has(comparable) || startsWithAny(comparable, UNRESOLVED_PREFIXES)) {

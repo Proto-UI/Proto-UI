@@ -9,6 +9,8 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
 import { getCode } from '@/utils/conversionUtils';
 
+`size="icon-compact"` is an explicit Proto UI extension: a fixed 1.75rem square, including when `wrap` is enabled. It maps the upstream Blocks toolbar’s `size-7` usage, not the upstream 2rem `icon-sm` API. Existing sizes and defaults are unchanged.
+
 The Button prototype keeps one canonical demo per supported runtime. Use the adapter selector in the page chrome to compare the same semantic surface across implementations.
 
 <div data-adapter-panel="wc">

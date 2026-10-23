@@ -1,0 +1,54 @@
+[
+  {
+    "style": "nova",
+    "sourceSha256": "fd9803ec398290c306b377a46a769cad0c7ff024bf6a626993c113cacc20f16e",
+    "line": 153,
+    "selectors": [
+      ".style-nova",
+      ".cn-button-variant-default"
+    ],
+    "normalized": [
+      {
+        "inspectionKey": "background",
+        "sourceValue": "primary",
+        "sourceToken": "bg-primary"
+      },
+      {
+        "inspectionKey": "foreground",
+        "sourceValue": "primary-foreground",
+        "sourceToken": "text-primary-foreground"
+      },
+      {
+        "inspectionKey": "hover.background",
+        "sourceValue": "primary/80",
+        "sourceToken": "hover:bg-primary/80"
+      }
+    ]
+  },
+  {
+    "style": "rhea",
+    "sourceSha256": "bac4eff75a0e21d9dd90ce40634937f54730471d8f7fa50ca67b317892cf908f",
+    "line": 75,
+    "selectors": [
+      ".style-rhea",
+      ".cn-button-variant-default"
+    ],
+    "normalized": [
+      {
+        "inspectionKey": "background",
+        "sourceValue": "primary",
+        "sourceToken": "bg-primary"
+      },
+      {
+        "inspectionKey": "foreground",
+        "sourceValue": "primary-foreground",
+        "sourceToken": "text-primary-foreground"
+      },
+      {
+        "inspectionKey": "hover.background",
+        "sourceValue": "primary/80",
+        "sourceToken": "hover:bg-primary/80"
+      }
+    ]
+  }
+]

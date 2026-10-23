@@ -1,0 +1,61 @@
+id: T-PLACEHOLDER-COLOR-0001
+type: test
+title: Finite placeholder color authoring and Web projection
+status: draft
+since: 0.3.0-alpha.1
+summary: Finite author/CSS checks and four-adapter editor continuity, not native raster or non-Web conformance.
+cases:
+  - id: T-PLACEHOLDER-COLOR-0001-CASE-CORE
+    title: Exact vocabulary and independent conflict group
+    covers: [C-PLACEHOLDER-COLOR-0001-ADMISSION, C-PLACEHOLDER-COLOR-0001-MERGE]
+    expectation: only-four-static-colors-have-canonical-independent-surface-intent
+  - id: T-PLACEHOLDER-COLOR-0001-CASE-CSS
+    title: Actual placeholder target in document, shadow and split
+    covers: [C-PLACEHOLDER-COLOR-0001-PROJECTION]
+    expectation: placeholder-paint-never-targets-wrapper-box-or-admits-unknown-payload
+  - id: T-PLACEHOLDER-COLOR-0001-CASE-ADAPTERS
+    title: Real adapter contribution replacement preserves edited text
+    covers: [C-PLACEHOLDER-COLOR-0001-LIFECYCLE]
+    expectation: same-editor-edited-value-and-selection-survive-color-change-and-withdrawal
+implementations:
+  - id: placeholder-color-core
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/placeholder-color.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-CORE]
+  - id: placeholder-color-css
+    kind: module-test
+    status: passing
+    path: packages/cli/test/placeholder-color.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-CSS]
+  - id: placeholder-color-react
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/react/test/placeholder-color.integration.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-ADAPTERS]
+  - id: placeholder-color-vue
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/placeholder-color.integration.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-ADAPTERS]
+  - id: placeholder-color-vue2
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue2/test/placeholder-color.integration.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-ADAPTERS]
+  - id: placeholder-color-web-component
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/web-component/test/placeholder-color.integration.test.ts
+    required: true
+    consumesCases: [T-PLACEHOLDER-COLOR-0001-CASE-ADAPTERS]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bind exact author, CSS and real-adapter checks while retaining native raster limitations.
+tags: [feedback, style, placeholder]

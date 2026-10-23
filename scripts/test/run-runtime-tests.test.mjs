@@ -1164,6 +1164,25 @@ describe('bounded CI runtime shards (no browser or server)', () => {
       )
     );
   });
+  it('registers the homepage Button contract in development and exactly one ordinary browser shard', () => {
+    const suite = 'apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts';
+    assertBrowserInventory();
+    assert.equal(BROWSER_SUITES.filter((entry) => entry === suite).length, 1);
+    assert.ok(!PRODUCTION_BROWSER_SUITES.includes(suite));
+    assert.ok(READY_ROUTES.includes('/zh-cn/'));
+    const [general, browser] = createRuntimeTestPlan([]);
+    assert.equal(general.args[general.args.indexOf(suite) - 1], '--exclude');
+    assert.equal(browser.needsServer, true);
+    assert.equal(browser.args.filter((entry) => entry === suite).length, 1);
+    const shards = browserShards();
+    assert.equal(shards.flat().filter((entry) => entry === suite).length, 1);
+    const owner = shards.findIndex((entries) => entries.includes(suite));
+    assert.equal(
+      selectBrowserShard(`${owner + 1}/${BROWSER_SHARD_COUNT}`).filter((entry) => entry === suite)
+        .length,
+      1
+    );
+  });
   it('keeps all development suites exactly once in deterministic nonempty bounded shards', () => {
     const shards = browserShards();
     assert.equal(shards.length, BROWSER_SHARD_COUNT);

@@ -63,6 +63,24 @@ afterEach(async () => {
 });
 
 describe('Shadcn New York AlertDialog source-aligned passive projection', () => {
+  it('restores action/cancel selection affordance without suppressing dialog prose or acquiring Button ownership', async () => {
+    const p = fixture();
+    await flush();
+    for (const role of ['action', 'cancel']) {
+      expect(styleContains(p[role], 'select-none'), role).toBe(true);
+      const source = readFileSync(
+        path.join(process.cwd(), `packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
+        'utf8'
+      );
+      expect(source).not.toMatch(/\basButton\s*\(/);
+      setElementProps(p[role], { disabled: true });
+      await flush();
+      expect(styleContains(p[role], 'select-none'), role + ' disabled').toBe(true);
+    }
+    for (const role of ['content', 'title', 'description', 'header', 'footer'])
+      expect(styleContains(p[role], 'select-none'), role + ' remains content').toBe(false);
+  });
+
   it('uses the pinned New York panel, title/body, and default/outline command paint', async () => {
     const p = fixture();
     await flush();

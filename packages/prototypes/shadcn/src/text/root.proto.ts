@@ -2,11 +2,24 @@ import { definePrototype, tw } from '@proto.ui/core';
 import { asTextRoot } from '@proto.ui/prototypes-base/text';
 import type { TextRootProps, TextRootExposes } from '@proto.ui/prototypes-base/text';
 
+import type { ShadcnActionStyleProfile } from '../button/types';
+export interface ShadcnTextRootProps extends TextRootProps {
+  actionProfile?: 'none' | ShadcnActionStyleProfile;
+}
+
 // P-SHADCN-TEXT-PROJECTION: family theme variables own font and ink; all inputs are portable.
-const textRoot = definePrototype<TextRootProps, TextRootExposes>({
+const textRoot = definePrototype<ShadcnTextRootProps, TextRootExposes>({
   name: 'shadcn-text-root',
   setup(def) {
     asTextRoot();
+    def.props.define({
+      actionProfile: { type: 'enum', empty: 'fallback', options: ['none', 'rhea', 'luma'] },
+    });
+    def.props.setDefaults({ actionProfile: 'none' });
+    def.rule({
+      when: (w) => w.not(w.prop('actionProfile').eq('none')),
+      intent: (i) => i.feedback.style.use(tw('leading-5')),
+    });
     def.rule({
       when: (w) => w.prop('size').eq('xs'),
       intent: (i) => i.feedback.style.use(tw('text-xs')),
@@ -84,19 +97,19 @@ const textRoot = definePrototype<TextRootProps, TextRootExposes>({
       intent: (i) => i.feedback.style.use(tw('font-mono')),
     });
     def.rule({
-      when: (w) => w.prop('leading').eq('tight'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('leading').eq('tight')),
       intent: (i) => i.feedback.style.use(tw('leading-tight')),
     });
     def.rule({
-      when: (w) => w.prop('leading').eq('snug'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('leading').eq('snug')),
       intent: (i) => i.feedback.style.use(tw('leading-snug')),
     });
     def.rule({
-      when: (w) => w.prop('leading').eq('normal'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('leading').eq('normal')),
       intent: (i) => i.feedback.style.use(tw('leading-normal')),
     });
     def.rule({
-      when: (w) => w.prop('leading').eq('relaxed'),
+      when: (w) => w.all(w.prop('actionProfile').eq('none'), w.prop('leading').eq('relaxed')),
       intent: (i) => i.feedback.style.use(tw('leading-relaxed')),
     });
     def.rule({

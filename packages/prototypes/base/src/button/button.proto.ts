@@ -1,11 +1,15 @@
 import type { DefHandle } from '@proto.ui/core';
-import { defineAsHook, definePrototype } from '@proto.ui/core';
+import { defineAsHook, definePrototype, tw } from '@proto.ui/core';
 import { asAccessible, asFocusable, asTrigger } from '@proto.ui/hooks';
 import type { ButtonAsHookContract, ButtonExposes, ButtonProps, ButtonStateHandles } from './types';
 
 export type { ButtonProps, ButtonExposes, ButtonStateHandles, ButtonAsHookContract } from './types';
 
 function setupButton(def: DefHandle<ButtonProps, ButtonExposes>): void {
+  // P-BASE-BUTTON-CONTENT-SELECTION: action-subject affordance, not visual paint.
+  // C-CONTENT-SELECTION-AFFORDANCE-0001 preserves explicit select-text restoration,
+  // host range/copy behavior and useful neighboring content. No event cancellation.
+  def.feedback.style.use(tw('select-none'));
   const accessible = asAccessible();
   // P-BASE-BUTTON-TRIGGER-SEMANTICS, P-BASE-BUTTON-NESTED-TRIGGER-ROUTE
   asTrigger();

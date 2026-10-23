@@ -7,62 +7,51 @@ import type {
   ShadcnButtonVariant,
 } from './types';
 
+import { NEW_YORK_BASE, NEW_YORK_VARIANTS, NEW_YORK_SIZES, NEW_YORK_WRAP_SIZES } from './new-york';
+import { SHADCN_BUTTON_DISABLED_TOKENS } from './paint';
 import {
-  SHADCN_BUTTON_BASE_TOKENS,
-  SHADCN_BUTTON_DEFAULT_SIZE_TOKENS,
-  SHADCN_BUTTON_WRAP_DEFAULT_SIZE_TOKENS,
-  SHADCN_BUTTON_DEFAULT_VARIANT_TOKENS,
-  SHADCN_BUTTON_OUTLINE_VARIANT_TOKENS,
-  SHADCN_BUTTON_DEFAULT_HOVER_TOKENS,
-  SHADCN_BUTTON_OUTLINE_HOVER_TOKENS,
-  SHADCN_BUTTON_FOCUS_TOKENS,
-  SHADCN_BUTTON_DISABLED_TOKENS,
-} from './paint';
+  SHADCN_ACTION_BASE,
+  SHADCN_ACTION_FOCUS,
+  SHADCN_ACTION_RADIUS,
+  SHADCN_ACTION_SIZES,
+  SHADCN_ACTION_WRAP_SIZES,
+  SHADCN_SECONDARY_HOVER,
+} from './profiles';
 
 // Variant rules stay composable and only encode the stable visual surface.
 // Pseudo selectors such as hover/focus-visible/dark are left to
 // dedicated rule extensions because the current feedback token contract does
 // not accept selector-style utilities directly.
 const VARIANT_TOKENS: Record<ShadcnButtonVariant, string> = {
-  default: SHADCN_BUTTON_DEFAULT_VARIANT_TOKENS,
+  default: 'bg-primary text-primary-foreground',
   destructive: 'border-transparent bg-destructive/10 text-destructive',
-  outline: SHADCN_BUTTON_OUTLINE_VARIANT_TOKENS,
+  outline: 'border-border bg-background text-foreground',
   secondary: 'border-transparent bg-secondary text-secondary-foreground',
   ghost: 'border-transparent bg-transparent text-foreground',
   link: 'border-transparent bg-transparent text-primary underline-offset-4',
 };
-
-// Size rules cover the public API we expose right now. The upstream examples
-// also contain xs-style variants, but those are not part of this prototype API
-// yet, so they are intentionally left out here.
-const SIZE_TOKENS: Record<ShadcnButtonSize, string> = {
-  default: SHADCN_BUTTON_DEFAULT_SIZE_TOKENS,
-  sm: 'h-8 gap-1.5 px-3 whitespace-nowrap',
-  lg: 'h-10 gap-2 px-6 whitespace-nowrap',
-  icon: 'size-9 gap-2 whitespace-nowrap',
-};
-
-const WRAP_SIZE_TOKENS = {
-  default: SHADCN_BUTTON_WRAP_DEFAULT_SIZE_TOKENS,
-  sm: 'min-h-8 h-auto gap-1.5 px-3 py-1 min-w-0 max-w-full whitespace-normal break-words',
-  lg: 'min-h-10 h-auto gap-2 px-6 py-1 min-w-0 max-w-full whitespace-normal break-words',
-} as const;
 
 const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
   name: 'shadcn-button',
   setup(def) {
     // P-SHADCN-BUTTON-VARIANT-PROP, P-SHADCN-BUTTON-SIZE-PROP
     def.props.define({
+      styleProfile: { type: 'enum', empty: 'fallback', options: ['rhea', 'luma', 'new-york'] },
       variant: {
         type: 'enum',
         empty: 'fallback',
         options: ['default', 'destructive', 'outline', 'secondary', 'ghost', 'link'],
       },
-      size: { type: 'enum', empty: 'fallback', options: ['default', 'sm', 'lg', 'icon'] },
+      size: {
+        type: 'enum',
+        empty: 'fallback',
+        options: ['default', 'sm', 'lg', 'icon', 'icon-compact'],
+      },
       disabled: { type: 'boolean', empty: 'fallback' },
       wrap: { type: 'boolean', empty: 'fallback' },
     });
     def.props.setDefaults({
+      styleProfile: 'rhea',
       variant: 'default',
       size: 'default',
       disabled: false,
@@ -81,40 +70,53 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
 
     // P-SHADCN-BUTTON-DIRECT-ENTRY
     // Base skeleton shared by every shadcn-style button.
-    def.feedback.style.use(tw(SHADCN_BUTTON_BASE_TOKENS));
+    def.rule({
+      when: (w) => w.not(w.prop('styleProfile').eq('new-york')),
+      intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_BASE)),
+    });
 
     // Variant surface rules map the public `variant` prop to visual tokens.
     (Object.keys(VARIANT_TOKENS) as ShadcnButtonVariant[]).forEach((variant) => {
       def.rule({
-        when: (w) => w.prop('variant').eq(variant),
+        when: (w) =>
+          w.all(w.not(w.prop('styleProfile').eq('new-york')), w.prop('variant').eq(variant)),
         intent: (i) => i.feedback.style.use(tw(VARIANT_TOKENS[variant])),
       });
     });
 
-    // Size rules are isolated so later icon-density refinements can layer on
-    // top without re-encoding every variant.
-    (Object.keys(SIZE_TOKENS) as ShadcnButtonSize[]).forEach((size) => {
-      // Keep each rule callback in the statically modeled DSL shape. The
-      // setup-time size branch must not hide rule dependencies in a ternary.
-      if (size === 'icon') {
-        def.rule({
-          when: (w) => w.prop('size').eq(size),
-          intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
-        });
-        return;
+    for (const profile of ['rhea', 'luma'] as const) {
+      def.rule({
+        when: (w) =>
+          w.all(w.prop('styleProfile').eq(profile), w.not(w.prop('size').eq('icon-compact'))),
+        intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_RADIUS[profile])),
+      });
+      for (const size of ['default', 'sm', 'lg', 'icon', 'icon-compact'] as const) {
+        if (size === 'icon' || size === 'icon-compact') {
+          def.rule({
+            when: (w) => w.all(w.prop('styleProfile').eq(profile), w.prop('size').eq(size)),
+            intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_SIZES[`${profile}-${size}`])),
+          });
+        } else {
+          def.rule({
+            when: (w) =>
+              w.all(
+                w.prop('styleProfile').eq(profile),
+                w.prop('size').eq(size),
+                w.prop('wrap').eq(false)
+              ),
+            intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_SIZES[`${profile}-${size}`])),
+          });
+          def.rule({
+            when: (w) =>
+              w.all(
+                w.prop('styleProfile').eq(profile),
+                w.prop('size').eq(size),
+                w.prop('wrap').eq(true)
+              ),
+            intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_WRAP_SIZES[`${profile}-${size}`])),
+          });
+        }
       }
-      def.rule({
-        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(false)),
-        intent: (i) => i.feedback.style.use(tw(SIZE_TOKENS[size])),
-      });
-    });
-
-    // Optional, reusable label wrapping. Fixed icon density is deliberately unchanged.
-    for (const size of ['default', 'sm', 'lg'] as const) {
-      def.rule({
-        when: (w) => w.all(w.prop('size').eq(size), w.prop('wrap').eq(true)),
-        intent: (i) => i.feedback.style.use(tw(WRAP_SIZE_TOKENS[size])),
-      });
     }
 
     // P-SHADCN-BUTTON-INTERACTION-STYLES
@@ -122,44 +124,73 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
     // shadcn styling can stay inside rule semantics instead of hard-coding
     // host-specific pseudo selectors.
     def.rule({
-      when: (w) => w.state(focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_FOCUS_TOKENS)),
+      when: (w) =>
+        w.all(w.not(w.prop('styleProfile').eq('new-york')), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS)),
     });
 
     def.rule({
-      when: (w) => w.all(w.state(focusVisible).eq(true), w.prop('variant').eq('destructive')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(focusVisible).eq(true), w.prop('variant').eq('destructive'))
+        ),
       intent: (i) => i.feedback.style.use(tw('border-destructive/40 ring-destructive/20')),
     });
 
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
+      when: (w) => w.all(w.not(w.prop('styleProfile').eq('new-york')), w.state(pressed).eq(true)),
       intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
 
     // Hovered surface rules are split by variant so later dark/meta branches
     // can replace them cleanly without duplicating the base variant tokens.
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('default')),
-      intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DEFAULT_HOVER_TOKENS)),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('default'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('secondary')),
-      intent: (i) => i.feedback.style.use(tw('bg-secondary/80')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('secondary'))
+        ),
+      intent: (i) => i.feedback.style.use(tw(SHADCN_SECONDARY_HOVER)),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('outline')),
-      intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_OUTLINE_HOVER_TOKENS)),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('outline'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('ghost')),
-      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('ghost'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('link')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('link'))
+        ),
       intent: (i) => i.feedback.style.use(tw('underline')),
     });
     def.rule({
-      when: (w) => w.all(w.state(hovered).eq(true), w.prop('variant').eq('destructive')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('destructive'))
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
     });
 
@@ -167,46 +198,216 @@ const button = definePrototype<ShadcnButtonProps, ShadcnButtonExposes>({
     // Dark mode stays in meta so the prototype remains host-agnostic while web
     // adapters still have a clean place to optimize to `dark:*`.
     def.rule({
-      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('outline')),
-      intent: (i) => i.feedback.style.use(tw('border-input bg-input/30')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('outline'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-transparent')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
-          w.state(hovered).eq(true),
-          w.prop('variant').eq('outline')
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true),
+            w.prop('variant').eq('outline')
+          )
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-input/50')),
+      intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
     def.rule({
-      when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('destructive')),
+      when: (w) =>
+        w.all(
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('destructive'))
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
-          w.state(hovered).eq(true),
-          w.prop('variant').eq('destructive')
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true),
+            w.prop('variant').eq('destructive')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/30')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
-          w.state(focusVisible).eq(true),
-          w.prop('variant').eq('destructive')
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(focusVisible).eq(true),
+            w.prop('variant').eq('destructive')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('ring-destructive/40')),
     });
     def.rule({
       when: (w) =>
         w.all(
-          w.meta('colorScheme').eq('dark'),
-          w.state(hovered).eq(true),
-          w.prop('variant').eq('ghost')
+          w.not(w.prop('styleProfile').eq('new-york')),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true),
+            w.prop('variant').eq('ghost')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+    });
+    // Explicit legacy profile, not an override of modern recipes or compound paint.
+    def.rule({
+      when: (w) => w.prop('styleProfile').eq('new-york'),
+      intent: (i) => i.feedback.style.use(tw(NEW_YORK_BASE)),
+    });
+    for (const variant of Object.keys(NEW_YORK_VARIANTS) as ShadcnButtonVariant[]) {
+      def.rule({
+        when: (w) => w.all(w.prop('styleProfile').eq('new-york'), w.prop('variant').eq(variant)),
+        intent: (i) => i.feedback.style.use(tw(NEW_YORK_VARIANTS[variant])),
+      });
+    }
+    for (const size of ['default', 'sm', 'lg', 'icon', 'icon-compact'] as const) {
+      if (size === 'icon' || size === 'icon-compact') {
+        def.rule({
+          when: (w) => w.all(w.prop('styleProfile').eq('new-york'), w.prop('size').eq(size)),
+          intent: (i) => i.feedback.style.use(tw(NEW_YORK_SIZES[size])),
+        });
+      } else {
+        def.rule({
+          when: (w) =>
+            w.all(
+              w.prop('styleProfile').eq('new-york'),
+              w.prop('size').eq(size),
+              w.prop('wrap').eq(false)
+            ),
+          intent: (i) => i.feedback.style.use(tw(NEW_YORK_SIZES[size])),
+        });
+        def.rule({
+          when: (w) =>
+            w.all(
+              w.prop('styleProfile').eq('new-york'),
+              w.prop('size').eq(size),
+              w.prop('wrap').eq(true)
+            ),
+          intent: (i) => i.feedback.style.use(tw(NEW_YORK_WRAP_SIZES[size])),
+        });
+      }
+    }
+    def.rule({
+      when: (w) => w.all(w.prop('styleProfile').eq('new-york'), w.state(focusVisible).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('border-ring ring-3 ring-ring/50')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(focusVisible).eq(true), w.prop('variant').eq('destructive'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('ring-destructive/20')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('default'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-primary/90')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('secondary'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-secondary/80')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('outline'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('ghost'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('link'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('underline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.state(hovered).eq(true), w.prop('variant').eq('destructive'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-destructive/90')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('outline'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('border-input bg-input/30')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true),
+            w.prop('variant').eq('outline')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-input/50')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(w.meta('colorScheme').eq('dark'), w.prop('variant').eq('destructive'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-destructive/60')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(focusVisible).eq(true),
+            w.prop('variant').eq('destructive')
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('ring-destructive/40')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('styleProfile').eq('new-york'),
+          w.all(
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true),
+            w.prop('variant').eq('ghost')
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/50')),
     });

@@ -173,3 +173,18 @@ it('moves focus from the disappearing expansion Button to the native code viewpo
   expect(document.activeElement).toBe(shell.querySelector('pre'));
   document.body.replaceChildren();
 });
+
+it('keeps required usage and its copy visible through initialization and reset without measurement', () => {
+  document.body.innerHTML = panelMarkup('required', 'line\n'.repeat(80));
+  const shell = document.querySelector<HTMLElement>('[data-code-shell]')!;
+  shell.dataset.codeCollapsible = 'false';
+  shell.querySelector('[data-code-toggle]')!.remove();
+  setMeasurements(shell, { panelHeight: 0, fullHeight: 400 });
+  initCodePanels(document);
+  expect(shell.dataset.codeExpanded).toBe('true');
+  refreshCodePanel(shell, { reset: true });
+  expect(shell.dataset.codeExpanded).toBe('true');
+  expect(shell.querySelector<HTMLElement>('[data-copy]')!.hidden).toBe(false);
+  expect(shell.querySelector('[data-code-toggle]')).toBeNull();
+  document.body.replaceChildren();
+});

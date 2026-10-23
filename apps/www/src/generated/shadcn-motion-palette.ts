@@ -23,7 +23,7 @@ export type ShadcnMotionPaletteMode = {
   >;
 };
 export const SHADCN_MOTION_PALETTE = {
-  'sourceHash': 'sha256:96c512bffa40f7c5aa48d521c99c373d811150295cb9fe9995deb3c39c3307b8',
+  'sourceHash': 'sha256:060a6a5fed484bc11bdd1aba5d13d2643aa537197a242e71c678426f4002b057',
   'light': {
     'colors': {
       'accent': [0.960586783, 0.960587058, 0.960586891, 1],

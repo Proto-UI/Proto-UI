@@ -1,0 +1,43 @@
+name: Shadcn Textarea shared style evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/prototypes/shadcn/src/textarea/**'
+      - 'packages/prototypes/shadcn/src/style-scope/**'
+      - 'packages/prototypes/shadcn/test/textarea*.test.ts'
+      - 'packages/prototypes/shadcn/src/field/textarea.proto.ts'
+      - 'packages/adapters/**/src/**'
+      - 'scripts/prototypes/shadcn-textarea-evidence*'
+      - '.github/workflows/shadcn-textarea-style.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  textarea-four-web-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked existing dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Test production editor and scope projection
+        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/textarea-style-projection.test.ts packages/prototypes/shadcn/test/textarea.test.ts packages/prototypes/shadcn/test/style-scope.test.ts packages/prototypes/shadcn/test/textarea-evidence-app-probe.test.ts
+      - name: Capture exact-head four-runtime width and Field invalid surface
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --import tsx scripts/prototypes/shadcn-textarea-evidence.mjs /tmp/pui-shadcn-textarea-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shadcn-textarea-shared-style-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/pui-shadcn-textarea-evidence/
+          if-no-files-found: warn
+          retention-days: 30

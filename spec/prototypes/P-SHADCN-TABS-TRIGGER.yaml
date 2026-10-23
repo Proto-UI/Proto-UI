@@ -1,125 +1,202 @@
 id: P-SHADCN-TABS-TRIGGER
 type: prototype
-title: Shadcn Tabs Trigger inherits Base Tabs Trigger and projects pinned v4 default styling
+title: Shadcn Tabs Trigger inherits Base Tabs Trigger and projects source-bound
+  text/default styling
 status: draft
 since: 0.2.0-rc.0
-summary: Shadcn Tabs Trigger inherits Base tab selection, focus, activation, and accessibility behavior and reproduces the pinned v4 default-variant horizontal trigger surface.
+summary: Inherits Base behavior and projects the bounded text-only default
+  surface for New York v4, Nova and Rhea through shared style scope.
 statement:
-  zh-CN: >-
-    Shadcn Tabs Trigger 是 `P-BASE-TABS-TRIGGER` 之上的 direct anatomy part，保留同域 tab identity、selection request、interaction/focus state、disabled gating 与 a11y，并按固定 v4 baseline 投射 default variant 的 horizontal trigger surface，以及 selected、hovered、focusVisible、disabled 视觉反馈。pressed 仍是 inherited interaction fact，但默认 v4 surface 不为其增加独立视觉；orientation/variant-aware styling、SVG handling 与其他 API 差异尚不属于 passing guarantee；`asChild` 明确不提供。
-
-
-  en: >-
-    Shadcn Tabs Trigger is a direct anatomy part over `P-BASE-TABS-TRIGGER`. It retains same-domain tab identity, selection requests, interaction and focus state, disabled gating, and accessibility while projecting the pinned v4 default-variant horizontal trigger surface and selected, hovered, focusVisible, and disabled feedback. Pressed remains an inherited interaction fact but adds no independent visual in the default v4 surface. Orientation and variant-aware styling, SVG handling, and other API differences are not part of the passing guarantee; `asChild` is explicitly unavailable.
-
-
+  en: This draft projects only the text-only default surface of fixed upstream
+    3d98900e9b73c45f035f8109e9d41ba6a51685e7 for New York v4, Nova and Rhea,
+    preserving Base ownership and shared style-scope precedence. Both
+    orientations and light/dark interaction paint are covered where relevant to
+    this part. It is not complete Tabs or all-style parity. Existing Proto
+    underline remains a separate compatibility appearance, never an alias for
+    upstream line.
 criteria:
   - id: P-SHADCN-TABS-TRIGGER-UPSTREAM-IDENTITY
     text:
-      zh-CN: Trigger 必须沿用固定 Shadcn Tabs revision/path，并明确为 Proto UI 治理的非官方 anatomy projection。
-      en: Trigger must use the pinned Shadcn Tabs revision and path and identify itself as an unofficial Proto UI-governed anatomy projection.
+      zh-CN: Trigger 必须沿用固定 Shadcn Tabs revision/path，并明确为 Proto UI 治理的非官方 anatomy
+        projection。
+      en: Trigger must use the pinned Shadcn Tabs revision and path and identify
+        itself as an unofficial Proto UI-governed anatomy projection.
   - id: P-SHADCN-TABS-TRIGGER-BASE-INHERITANCE
     text:
-      zh-CN: '`shadcn-tabs-trigger` 必须继承 `P-BASE-TABS-TRIGGER` 并调用 `asTabsTrigger()`；任何 setup-only 负向补丁必须声明被改写能力及替代语义。'
-      en: '`shadcn-tabs-trigger` must inherit `P-BASE-TABS-TRIGGER` and call `asTabsTrigger()`; any setup-only negative patch must identify the rewritten capability and replacement semantics.'
+      zh-CN: "`shadcn-tabs-trigger` 必须继承 `P-BASE-TABS-TRIGGER` 并调用
+        `asTabsTrigger()`；任何 setup-only 负向补丁必须声明被改写能力及替代语义。"
+      en: "`shadcn-tabs-trigger` must inherit `P-BASE-TABS-TRIGGER` and call
+        `asTabsTrigger()`; any setup-only negative patch must identify the
+        rewritten capability and replacement semantics."
     references:
       prototypes:
         - id: P-BASE-TABS-TRIGGER
           anchors:
-            [
-              P-BASE-TABS-TRIGGER-AUTHORING-ENTRIES,
-              P-BASE-TABS-TRIGGER-ROLE-TAB,
-              P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION,
-            ]
+            - P-BASE-TABS-TRIGGER-AUTHORING-ENTRIES
+            - P-BASE-TABS-TRIGGER-ROLE-TAB
+            - P-BASE-TABS-TRIGGER-ACTIVATION-REQUESTS-SELECTION
   - id: P-SHADCN-TABS-TRIGGER-CURRENT-BASE-DEVIATIONS
     text:
-      zh-CN: 当前实现不反转 inherited selection、context、interaction、focus、disabled、keyboard、click signal 或 a11y guarantee；新增 rules 仅构成视觉增量。
-      en: The current implementation reverses no inherited selection, context, interaction, focus, disabled, keyboard, click-signal, or accessibility guarantee; added rules are visual deltas only.
+      zh-CN: 当前实现不反转 inherited
+        selection、context、interaction、focus、disabled、keyboard、click signal 或
+        a11y guarantee；新增 rules 仅构成视觉增量。
+      en: The current implementation reverses no inherited selection, context,
+        interaction, focus, disabled, keyboard, click-signal, or accessibility
+        guarantee; added rules are visual deltas only.
   - id: P-SHADCN-TABS-TRIGGER-DIRECT-ENTRY
     text:
       zh-CN: 当前 Trigger protocol 以 `shadcn-tabs-trigger` direct prototype 公开。
-      en: The current Trigger protocol is exposed as the `shadcn-tabs-trigger` direct prototype.
+      en: The current Trigger protocol is exposed as the `shadcn-tabs-trigger` direct
+        prototype.
   - id: P-SHADCN-TABS-TRIGGER-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: 默认 horizontal/default-variant Trigger 必须翻译固定 v4 baseline 的 relative、inline-flex、height、flex growth、alignment、gap、rounded-md、transparent border、px-2/py-1、typography、foreground opacity、transition 与 outline surface；不得保留旧有 rounded-lg、px-3/py-1.5 或额外按压缩放。
-      en: The default horizontal, default-variant Trigger must translate the pinned v4 relative, inline-flex, height, flex-growth, alignment, gap, rounded-md, transparent-border, px-2/py-1, typography, foreground-opacity, transition, and outline surface; it must not retain the former rounded-lg, px-3/py-1.5, or extra pressed scaling.
+      en: "The source-bound text/default surface is described by the dedicated Tabs
+        coverage inventory: New York compatibility dimensions plus Nova/Rhea
+        recipes, Base-derived horizontal/vertical layout, and existing
+        feedback.style semantic merging. Only the declared bounded surface is
+        projected; it does not imply line, SVG, arbitrary native props, or
+        other-style support."
   - id: P-SHADCN-TABS-TRIGGER-STATE-DRIVEN-STYLES
     text:
-      zh-CN: appearance=default 时，selected、hovered、focusVisible 与 disabled rules 必须从 inherited Trigger state 派生：selected 投射 background/foreground/shadow-sm，hovered 非 selected 只提升 foreground，focusVisible 投射 border/ring/outline，disabled 抑制 pointer 并降低 opacity；不得创建第二套 selection 或 interaction truth。
-      en: >-
-        With appearance=default, selected, hovered, focusVisible, and disabled rules must derive from inherited Trigger state: selected projects background, foreground, and shadow-sm; hovered non-selected raises only the foreground; focusVisible projects border, ring, and outline; disabled suppresses pointer input and lowers opacity. They must not create a second selection or interaction source of truth.
-
-
+      zh-CN: appearance=default 时，selected、hovered、focusVisible 与 disabled rules 必须从
+        inherited Trigger state 派生：selected 投射
+        background/foreground/shadow-sm，hovered 非 selected 只提升
+        foreground，focusVisible 投射 border/ring/outline，disabled 抑制 pointer 并降低
+        opacity；不得创建第二套 selection 或 interaction truth。
+      en: "With appearance=default, selected, hovered, focusVisible, and disabled
+        rules must derive from inherited Trigger state: selected projects
+        background, foreground, and shadow-sm; hovered non-selected raises only
+        the foreground; focusVisible projects border, ring, and outline;
+        disabled suppresses pointer input and lowers opacity. They must not
+        create a second selection or interaction source of truth."
     references:
       prototypes:
         - id: P-BASE-TABS-TRIGGER
           anchors:
-            [
-              P-BASE-TABS-TRIGGER-SELECTED-DERIVED,
-              P-BASE-TABS-TRIGGER-INTERACTION-STATES,
-              P-BASE-TABS-TRIGGER-FOCUSABLE,
-              P-BASE-TABS-TRIGGER-DISABLED-EXPOSE,
-            ]
+            - P-BASE-TABS-TRIGGER-SELECTED-DERIVED
+            - P-BASE-TABS-TRIGGER-INTERACTION-STATES
+            - P-BASE-TABS-TRIGGER-FOCUSABLE
+            - P-BASE-TABS-TRIGGER-DISABLED-EXPOSE
   - id: P-SHADCN-TABS-TRIGGER-COMPATIBILITY-SUBSET
     text:
-      zh-CN: 当前实体只声明已测试的 inherited behavior 与视觉 surface；固定 baseline 的全部差异集中维护在唯一 compatibility open question。
-      en: This entity claims only tested inherited behavior and visual surface; every difference from the pinned baseline is maintained in one compatibility open question.
+      zh-CN: 当前实体只声明已测试的 inherited behavior 与视觉 surface；固定 baseline 的全部差异集中维护在唯一
+        compatibility open question。
+      en: This entity claims only tested inherited behavior and visual surface; every
+        difference from the pinned baseline is maintained in one compatibility
+        open question.
   - id: P-SHADCN-TABS-TRIGGER-AS-CHILD-OMISSION
     text:
       zh-CN: upstream Trigger props 中的 `asChild` 依共享决策有意省略。
-      en: The `asChild` member of upstream Trigger props is intentionally omitted under the shared decision.
+      en: The `asChild` member of upstream Trigger props is intentionally omitted
+        under the shared decision.
     dependsOn:
-      decisions: [D-AS-CHILD-OMISSION-0001]
+      decisions:
+        - D-AS-CHILD-OMISSION-0001
   - id: P-SHADCN-TABS-TRIGGER-APPEARANCE
     text:
-      en: 'Accept appearance=default|underline with default as the omission behavior. Underline is a Runtime consumer opt-in: transparent unframed medium-weight 16px label, muted inactive text, foreground selected/hover text and a reserved 2px selected underline spanning the label. Focus-visible remains perceivable and disabled remains gated/dimmed. Selection, hover, press, focus-visible and disabled truth stay Base-owned. Default-to-underline-to-default must withdraw obsolete paint and reproduce the original current-state default contribution; no static-selector representation or upstream line/vertical parity is mandated.'
-
+      en: "Accept appearance=default|underline with default as the omission behavior.
+        Underline is a Runtime consumer opt-in: transparent unframed
+        medium-weight 16px label, muted inactive text, foreground selected/hover
+        text and a reserved 2px selected underline spanning the label.
+        Focus-visible remains perceivable and disabled remains gated/dimmed.
+        Selection, hover, press, focus-visible and disabled truth stay
+        Base-owned. Default-to-underline-to-default must withdraw obsolete paint
+        and reproduce the original current-state default contribution; no
+        static-selector representation or upstream line/vertical parity is
+        mandated."
+  - id: P-SHADCN-TABS-TRIGGER-STYLE-SCOPE
+    text:
+      en: Use the shared style-scope singleton. Explicit selection wins over nearest
+        scope and then New York compatibility fallback. Root/List may provide
+        local inherited selection. Style-only changes do not mutate Base
+        value/orientation, replace handles or user nodes, or reset
+        focus/selection. Unsupported canonical and unknown raw choices reject
+        rather than silently selecting another style.
+  - id: P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+    text:
+      en: "The complete style ID inventory remains eight latest styles plus separate
+        legacy New York. This slice implements only New York/Nova/Rhea
+        text/default; all six others reject. Upstream line remains explicitly
+        unsupported pending #935; nested SVG and inline-glyph handling remain
+        unprojected. Existing appearance=underline is separately preserved.
+        Source hashes, fixture references and tests must remain current."
 openQuestions:
   - id: P-SHADCN-TABS-TRIGGER-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: Trigger 的 orientation/variant-aware styling 与其他 upstream parity 应如何收敛？
-      en: How should Trigger orientation and variant-aware styling and other upstream parity converge?
+      en: How should Trigger orientation and variant-aware styling and other upstream
+        parity converge?
     context:
-      zh-CN: >-
-        intentional deviation 是省略 `asChild`。默认 horizontal/default-variant 的 light surface 与 focus outline 已按 Proto state facts 翻译固定 v4 baseline。待实现或待评审项包括 className/native prop forwarding、data-slot、Radix data-state 命名映射、vertical full-width/left alignment、List line variant 分支及 line indicator、显式 dark 分支，以及 nested SVG handling。
-
-
-      en: >-
-        The intentional deviation is omission of `asChild`. The default horizontal, default-variant light surface and focus outline now translate the pinned v4 baseline through Proto state facts. Implementation or review gaps include className and native prop forwarding, data-slot, Radix data-state naming, vertical full-width and left alignment, the List line-variant branch and line indicator, explicit dark branches, and nested-SVG handling.
-
-
-    blocks: [shadcn tabs trigger parity roadmap]
+      en: "Current implementation adds shared-scope selection and source-bound
+        text/default New York/Nova/Rhea paint in both orientations and
+        light/dark; this does not close full upstream parity. Remaining gaps:
+        six other styles, upstream line (explicit rejection pending #935 owned
+        decorative feedback), nested SVG/default or overridden icon
+        size/inline-icon placement, className/native prop forwarding,
+        data-slot/state naming correspondence, and native/cross-adapter visual
+        acceptance. asChild remains intentionally omitted. Existing Proto
+        underline is a compatibility identity, not upstream line. Raw unknown
+        style choices are explicitly rejected. See #934 and the coverage
+        inventory."
+    blocks:
+      - shadcn tabs trigger parity roadmap
 sources:
   - path: packages/prototypes/shadcn/src/tabs/trigger.proto.ts
   - path: packages/prototypes/shadcn/src/tabs/types.ts
   - path: packages/prototypes/shadcn/test/tabs.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/tabs.tsx
-    label: shadcn/ui v4 new-york TabsTrigger pinned baseline
+    label: Historical New York baseline, retained for provenance; current source
+      binding is 3d989 coverage inventory
+  - path: internal/fixtures/shadcn-tabs-style/coverage.json
+  - path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/issues/934
 dependsOn:
   contracts:
-    [
-      C-AS-HOOK-0001,
-      C-CORE-SYNTAX-0003,
-      C-CORE-SYNTAX-0007,
-      C-RULE-WHEN-0002,
-      C-RULE-INTENT-FEEDBACK-STYLE-0001,
-    ]
-  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
-  prototypes: [P-SHADCN-TABS]
+    - C-AS-HOOK-0001
+    - C-CORE-SYNTAX-0003
+    - C-CORE-SYNTAX-0007
+    - C-RULE-WHEN-0002
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+  decisions:
+    - D-PROTOTYPE-ENTITY-NAMING-0001
+    - D-AS-CHILD-OMISSION-0001
+  prototypes:
+    - P-SHADCN-TABS
+    - id: P-SHADCN-STYLE-SCOPE
+      since: 0.3.0-alpha.1
 inherits:
   prototypes:
     - id: P-BASE-TABS-TRIGGER
-      note: Default inherited tab protocol; explicit setup-time negative patches must be declared.
+      note: Default inherited tab protocol; explicit setup-time negative patches must
+        be declared.
 verifies:
-  {
-    tests:
-      [T-SHADCN-TABS-TRIGGER-0001, { id: T-RUNTIME-TABS-APPEARANCE-0001, since: 0.3.0-alpha.1 }],
-  }
+  tests:
+    - T-SHADCN-TABS-TRIGGER-0001
+    - id: T-RUNTIME-TABS-APPEARANCE-0001
+      since: 0.3.0-alpha.1
+    - id: T-SHADCN-TABS-STYLE-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised
-    summary: Bound the opt-in Runtime underline appearance while preserving family default behavior, Base ownership and existing upstream parity gaps.
+    summary: Added bounded production text/default style scope projection; line
+      explicitly rejects pending generic owned decorative feedback, with legacy
+      underline and all remaining gaps preserved.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the opt-in Runtime underline appearance while preserving family
+      default behavior, Base ownership and existing upstream parity gaps.
   - version: 0.2.0-rc.0
     change: introduced
-    summary: Introduced Shadcn Tabs Trigger delta cataloging with Base inheritance, state-driven styles, intentional asChild omission, and centralized parity gaps.
-tags: [prototype, shadcn, tabs, trigger, upstream-derived, delta, compatibility, visual]
+    summary: Introduced Shadcn Tabs Trigger delta cataloging with Base inheritance,
+      state-driven styles, intentional asChild omission, and centralized parity
+      gaps.
+tags:
+  - prototype
+  - shadcn
+  - tabs
+  - trigger
+  - upstream-derived
+  - delta
+  - compatibility
+  - visual

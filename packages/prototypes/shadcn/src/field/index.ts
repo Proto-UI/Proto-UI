@@ -21,3 +21,6 @@ export type {
   FieldValidityProps,
   FieldValidityExposes,
 } from '@proto.ui/prototypes-base/field';
+
+export { default as fieldTextarea, default as shadcnFieldTextarea } from './textarea.proto';
+export type { ShadcnFieldTextareaProps, ShadcnFieldTextareaExposes } from './textarea.proto';

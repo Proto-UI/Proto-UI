@@ -79,6 +79,28 @@ function fixture() {
 }
 
 describe('real WC Copy command composition', () => {
+  it.each(['example', 'docs', 'file-browser'] as const)(
+    'uses a real ghost Button without a backplate for the explicit %s presentation',
+    async (presentation) => {
+      const { root } = fixture();
+      const example = document.createElement('section');
+      if (presentation === 'example') example.dataset.codeExample = '';
+      else if (presentation === 'file-browser') example.dataset.codeFileBrowser = '';
+      else example.dataset.codePresentation = 'docs';
+      root.before(example);
+      example.append(root);
+      const handle = initCopyCommand(root, () => 'active file source');
+      mounted.push(handle);
+      await handle.ready;
+      expect(root.querySelector('[data-demo-ref="copy-backplate"]')).toBeNull();
+      const button = root.querySelector('[data-demo-ref="copy-button"]')!;
+      expect(button.getAttribute('data-pui-style')).toContain('bg-transparent');
+      expect(button.getAttribute('role')).toBe('button');
+      expect(button.getAttribute('data-pui-style')).toContain('size-7');
+    },
+    15000
+  );
+
   it('uses actual family Button/Lucide/LiveRegion, filters native duplication and keeps a stable name', async () => {
     const { root, writeText } = fixture();
     const handle = initCopyCommand(root, () => '<&\n');

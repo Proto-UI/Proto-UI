@@ -1,16 +1,17 @@
 id: P-SHADCN-TEXTAREA
 type: prototype
-title: Shadcn Textarea Root inherits Base Textarea and adds the current rule surface
+title: Shared-scope New York and Rhea Textarea projection
 status: draft
+lifecycleRationale: Draft source-mapped New York/Rhea production paint; exact native resize, intrinsic sizing, scope and invalid-state evidence plus independent admission remain required.
 since: 0.3.0-alpha.0
 summary: Shadcn Textarea Root is an unofficial Proto UI-maintained projection that inherits the host-mediated Base Textarea editor and adds the currently implemented field surface and state-driven presentation.
 statement:
   zh-CN: >-
-    Shadcn Textarea Root 是 `P-BASE-TEXTAREA` 之上的 direct prototype，保留 Base Textarea 的 controlled/uncontrolled value、归一化 input/change/IME 事件、accessibility 投影、focus/blur 与唯一 host-owned 物理编辑器，并增加当前实现的 field 尺寸、边框、focus ring 与 disabled 呈现。兼容比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Textarea；`asChild` 明确不提供，其他差异统一记录为 compatibility differences。
+    Shadcn Textarea Root 是 `P-BASE-TEXTAREA` 之上的 direct prototype，保留 Base Textarea 的 controlled/uncontrolled value、归一化 input/change/IME 事件、accessibility 投影、focus/blur 与唯一 host-owned 物理编辑器，并增加当前实现的 field 尺寸、边框、focus ring 与 disabled 呈现。兼容比较基线固定到 shadcn-ui/ui revision `3d98900e9b73c45f035f8109e9d41ba6a51685e7` 的 New York 与 Rhea Textarea；`asChild` 明确不提供，其他差异统一记录为 compatibility differences。
 
 
   en: >-
-    Shadcn Textarea Root is a direct prototype over `P-BASE-TEXTAREA`. It retains Base Textarea controlled and uncontrolled value, normalized input/change/IME events, accessibility projection, focus and blur, and the single host-owned physical editor while adding the currently implemented field dimensions, border, focus ring, and disabled presentation. Its compatibility baseline is the v4 new-york Textarea at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; `asChild` is explicitly unavailable, and all other divergences are tracked as compatibility differences.
+    Shadcn Textarea Root is a direct prototype over `P-BASE-TEXTAREA`. It retains Base Textarea controlled and uncontrolled value, normalized input/change/IME events, accessibility projection, focus and blur, and the single host-owned physical editor while adding the currently implemented field dimensions, border, focus ring, and disabled presentation. Its compatibility baseline is the New York and Rhea Textarea at shadcn-ui/ui revision `3d98900e9b73c45f035f8109e9d41ba6a51685e7`; `asChild` is explicitly unavailable, and all other divergences are tracked as compatibility differences.
 
 
 criteria:
@@ -46,8 +47,8 @@ criteria:
       contracts: [C-CORE-SYNTAX-0003]
   - id: P-SHADCN-TEXTAREA-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: Root 必须投射当前 field surface：`flex min-h-16 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`。`resize-y` 与 `text-foreground` 是 portable Prototype intent；每个 host profile 所需的 physical-surface normalization 由对应 Adapter/style translation 自行拥有。这些 tokens 是当前 passing surface，不表示与 upstream 精确一致。
-      en: Root must project the current field surface, `flex min-h-16 w-full resize-y rounded-md border border-input bg-transparent px-3 py-2 text-base text-foreground shadow-xs transition-[color,box-shadow] duration-150 ease-in-out outline-none`. `resize-y` and `text-foreground` are portable Prototype intent; any physical-surface normalization needed by a host profile remains owned by that profile's Adapter or style translation. These tokens form the current passing surface and do not imply exact upstream parity.
+      zh-CN: 普通 Root 与语义 Field Textarea 共用唯一 paint setup，支持 new-york-v4（new-york alias）与 rhea；显式选择优先于最近 shared scope，再回退 New York。公共规则使用 native field-sizing-content、placeholder muted foreground、基础 text-base 和 viewport.width gte 768 时 text-sm。New York 保留 resize-y/rounded-md/px-3/shadow-xs/150ms；Rhea 使用 resize-none/主题派生 rounded-2xl（基础 radius + 8px）/px-2.5/bg-input/50/transparent border/200ms，无 shadow。未知宽度安全保留基础字号，不在 Adapter 写入断点。
+      en: Ordinary Root and semantic Field Textarea share one paint setup supporting new-york-v4 (new-york alias) and rhea. Explicit choice wins over nearest shared scope, then New York fallback. Common paint includes native field-sizing-content, muted placeholder color, text-base and text-sm when viewport.width gte 768. New York retains resize-y/rounded-md/px-3/shadow-xs/150ms; Rhea uses resize-none/theme-derived rounded-2xl (base radius + 8px)/px-2.5/bg-input/50/transparent border/200ms without shadow. Unknown width safely retains base font size; no Adapter owns the breakpoint.
     dependsOn:
       contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001, C-PROTOTYPE-STYLE-CLOSURE-0001]
   - id: P-SHADCN-TEXTAREA-STATE-DRIVEN-STYLES
@@ -70,8 +71,8 @@ criteria:
           anchors: [P-BASE-TEXTAREA-PRESENTATION-SURFACE, P-BASE-TEXTAREA-BOUNDARY]
   - id: P-SHADCN-TEXTAREA-BOUNDARY
     text:
-      zh-CN: 投影不得引入第二个编辑器、form workflow、validation message、auto-resize、rich text 或 announcement 协议。
-      en: The projection must introduce no second editor, form workflow, validation message, auto-resize, rich text, or announcement protocol.
+      zh-CN: 投影不得引入第二个编辑器、form workflow、validation message、JS 测量/设置高度的 auto-resize、rich text 或 announcement 协议。按用户最新上游对齐要求，旧 slice 的全部 auto-resize 排除仅对 native CSS field-sizing-content 视觉 intrinsic 明确修订；它不新增编辑状态或 JS 尺寸协议。
+      en: The projection must introduce no second editor, form workflow, validation message, JS-measured/height-setting auto-resize, rich text, or announcement protocol. Under the current user request for latest upstream parity, the prior slice-wide auto-resize exclusion is explicitly superseded only for native CSS field-sizing-content visual intrinsic sizing; it introduces no editing state or JS sizing protocol.
     references:
       prototypes:
         - id: P-BASE-TEXTAREA
@@ -86,6 +87,14 @@ criteria:
       en: The `asChild` member of upstream Root props is intentionally omitted under `D-AS-CHILD-OMISSION-0001`; no element projection may be claimed as a Radix Slot equivalent.
     dependsOn:
       decisions: [D-AS-CHILD-OMISSION-0001]
+  - id: P-SHADCN-TEXTAREA-FIELD-COMPOSITION
+    text: The public fieldTextarea entry composes asFieldTextarea and the same setupTextareaVisual as ordinary Root. Optional Field binding remains sole owner of invalid/pending/policy/relationships; ordinary Root retains independent explicit-label semantics. Style scope changes must not replace Base handles, value, selection, IME or focus. Rhea invalid paints destructive border/ring, ring-3, dark ring/40 and dark border/50 from the Field fact.
+    dependsOn:
+      contracts:
+        - id: C-FIELD-TEXTAREA-0001
+          since: 0.3.0-alpha.1
+        - id: C-RULE-VIEWPORT-WIDTH-0001
+          since: 0.3.0-alpha.1
 openQuestions:
   - id: P-SHADCN-TEXTAREA-Q-UPSTREAM-DIFFERENCES
     question:
@@ -93,19 +102,21 @@ openQuestions:
       en: Against the pinned shadcn/ui Textarea baseline, which current differences are intentional deviations versus implementation gaps, and in what order should the gaps converge?
     context:
       zh-CN: >-
-        已确定的 intentional deviation 有三项。`asChild` 依 `D-AS-CHILD-OMISSION-0001` 不提供。upstream 的 `field-sizing-content` 是 auto-resize，被本 issue 明确排除在范围外。upstream 的 `aria-invalid:*` 呈现不实现——Base Textarea 未投出 invalid state，若照搬会得到一个没有协议背书、纯由宿主 ARIA 属性驱动的呈现；这与 `P-SHADCN-BUTTON` 把 `aria-invalid` 选择器记为 compatibility difference 的既有处理一致。待实现或待评审差异包括 `placeholder:text-muted-foreground` 与 `md:text-sm`——两者都是 author channel 无法书写（`C-FEEDBACK-STYLE-0004` 禁止 tw token 含 `:`）且无法由 rule 降级产生的 variant，因为它们不对应任何 state；`data-slot`、className 与 native prop forwarding。`transition-[color,box-shadow]` 已按 upstream 精确实现，配合 `duration-150 ease-in-out`（upstream 未覆写时的 Tailwind 默认）。这些项目通过实现与测试前不得扩大 passing guarantee。
-
+        固定源为 3d98900e9b73c45f035f8109e9d41ba6a51685e7 的 bases/base/ui/textarea.tsx、styles/style-rhea.css、new-york-v4/ui/textarea.tsx。有意差异：asChild 不提供，New York 保留既有 resize-y，原 Root 不自动吸附 Field；invalid 仅由显式语义 fieldTextarea 复用既有 optional Field binding，不映射任意宿主 aria-invalid 或 native validity。fieldTextarea 与 Root 共用 Base editor 和 paint setup，不是平行风格产品。旧 auto-resize 排除按本次用户指示仅修订为允许 native intrinsic CSS，JS 高度测量仍禁止。placeholder 与 md 现由有限颜色通道和受租约 viewport.width Rule 表达。remaining gaps：data-slot/className/任意 native prop forwarding、compiler positive lowering、native intrinsic/resizing/raster 和独立批准。普通 Root 显式 labels 保留；Field 模式拒绝外部关系覆盖。不得把这些 gap 或静态测试当成全部上游 API parity。
 
       en: >-
-        Three intentional deviations are decided. `asChild` is omitted under `D-AS-CHILD-OMISSION-0001`. Upstream `field-sizing-content` is auto-resize, which this slice explicitly excludes. Upstream `aria-invalid:*` presentation is not implemented: Base Textarea projects no invalid state, so copying it would produce a presentation with no protocol backing, driven solely by a host-set ARIA attribute; this matches the existing treatment in `P-SHADCN-BUTTON`, which records `aria-invalid` selectors as a compatibility difference. Remaining implementation or review gaps include `placeholder:text-muted-foreground` and `md:text-sm` - both are variants the author channel cannot express, since `C-FEEDBACK-STYLE-0004` forbids `:` in tw tokens and neither corresponds to a state that rule lowering could emit - plus `data-slot` and className and native prop forwarding. `transition-[color,box-shadow]` is implemented exactly, paired with `duration-150 ease-in-out`, the Tailwind defaults upstream does not override. The passing guarantee must not expand until an item is implemented and tested.
+        Sources are bases/base/ui/textarea.tsx, styles/style-rhea.css and new-york-v4/ui/textarea.tsx at 3d98900e9b73c45f035f8109e9d41ba6a51685e7. Intentional differences: asChild is absent, New York retains existing resize-y, and ordinary Root does not absorb Field. Only the explicit semantic fieldTextarea obtains invalid from existing optional Field binding, never arbitrary host aria-invalid/native validity. Field Textarea shares the Base editor and paint setup, not a parallel style product. The old auto-resize exclusion is revised under the current user direction only to permit native intrinsic CSS; JS height measurement remains forbidden. Placeholder and md are now expressed through finite color vocabulary and leased viewport.width Rules. Remaining gaps include data-slot/className/arbitrary native prop forwarding, positive compiler lowering, native intrinsic/resizing/raster evidence and independent approval. Ordinary explicit labels remain; Field mode rejects external relationship overrides. Browsers without native field-sizing support retain native rows/min-height fallback; no JS autosize polyfill is claimed. These gaps or static tests cannot be called complete upstream API parity.
 
 
-    blocks: [shadcn textarea parity roadmap]
 sources:
+  - path: packages/prototypes/shadcn/src/textarea/visual.ts
+  - path: packages/prototypes/shadcn/src/field/textarea.proto.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/textarea.tsx
   - path: packages/prototypes/shadcn/src/textarea/root.proto.ts
   - path: packages/prototypes/shadcn/src/textarea/types.ts
   - path: packages/prototypes/shadcn/test/textarea.test.ts
-  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/textarea.tsx
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/new-york-v4/ui/textarea.tsx
     label: shadcn/ui v4 new-york Textarea pinned baseline
 dependsOn:
   contracts:
@@ -124,6 +135,9 @@ inherits:
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
 verifies: { tests: [T-SHADCN-TEXTAREA-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Source-pinned shared New York/Rhea paint, optional Field invalid and explicit native intrinsic boundary revision; no JS sizing or full-host parity claim.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Closed the portable field surface with explicit foreground and vertical-resize intent while leaving host normalization to each Adapter profile.
