@@ -1,4 +1,10 @@
 import {
+  collectWebOwnedDecorationTargets,
+  createWebOwnedDecorationStage,
+  type WebOwnedDecorationStage,
+} from '@proto.ui/adapter-base';
+import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
+import {
   getWebPortalDestinationGeneration,
   resolveWebPortalDestinationBinding,
   subscribeWebPortalDestinations,
@@ -212,6 +218,26 @@ export function createVueAdapter(runtime: VueRuntime) {
       );
     }
     const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
+    const ownedDecoration =
+      !declaredRootTag &&
+      ![
+        'input',
+        'img',
+        'textarea',
+        'select',
+        'a',
+        'br',
+        'hr',
+        'area',
+        'base',
+        'embed',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ].includes(rootTag);
 
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
@@ -395,6 +421,13 @@ export function createVueAdapter(runtime: VueRuntime) {
         };
 
         let pendingCommit = false;
+        let renderDecoration: WebOwnedDecorationStage | undefined;
+        let decorationView: {
+          stage: WebOwnedDecorationStage;
+          root: HTMLElement | null;
+          port: FeedbackPort;
+          lease: object;
+        } | null = null;
         let commitGeneration = 0;
         let pendingSignal: CommitSignal | null = null;
         let hostSession: ReturnType<typeof createVueHostSession<Props>> | null = null;
@@ -420,7 +453,28 @@ export function createVueAdapter(runtime: VueRuntime) {
             },
             onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
             onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
-            onCommit: (children, signal) => {
+            onCommit: (children, signal, caps) => {
+              const targets = collectWebOwnedDecorationTargets(children);
+              const feedback = caps.getFacades().feedback as FeedbackFacade;
+              if (targets.length && caps.getPort<OverlayPort>('overlay')?.getConfig().portal)
+                throw new Error('[Vue Adapter] owned-decoration portal unsupported');
+              const stage = targets.length
+                ? createWebOwnedDecorationStage(targets, (ids) =>
+                    feedback.style.validateDecorationTemplate(ids)
+                  )
+                : undefined;
+              if (!targets.length) feedback.style.validateDecorationTemplate([]);
+              renderTemplateToVue({ h: () => null }, children, { decoration: stage });
+              decorationView?.stage.retire();
+              renderDecoration = stage;
+              decorationView = stage
+                ? {
+                    stage,
+                    root: rootRef.value,
+                    port: caps.getPort<FeedbackPort>('feedback')!,
+                    lease: caps.getPort<FeedbackPort>('feedback')!.captureDecorationLease!(),
+                  }
+                : null;
               commitGeneration += 1;
               pendingCommit = true;
               pendingSignal = signal;
@@ -440,6 +494,7 @@ export function createVueAdapter(runtime: VueRuntime) {
 
         if (supportsOwnerContext) {
           const ownerModules = createVueOwnerModules({
+            ownedDecoration,
             instanceToken,
             emit: (key, payload, options) => {
               ctx.emit(key, payload, options);
@@ -505,8 +560,35 @@ export function createVueAdapter(runtime: VueRuntime) {
             const generation = commitGeneration;
             const signal = pendingSignal;
             const gate = eventGateRef.value;
+            const decoration = decorationView;
+            const capturedRoot = rootRef.value;
             pendingSignal = null;
             await runtime.nextTick();
+            if (
+              generation !== commitGeneration ||
+              gate !== eventGateRef.value ||
+              rootRef.value !== capturedRoot ||
+              !shouldExist.value
+            )
+              return;
+            if (decoration) {
+              if (
+                decorationView !== decoration ||
+                !capturedRoot ||
+                decoration.root !== capturedRoot ||
+                !decoration.port.bindDecorations
+              )
+                throw new Error('[Vue Adapter] stale decoration commit');
+              decoration.stage.bind(capturedRoot, (bindings) =>
+                decoration.port.bindDecorations!(bindings, decoration.lease)
+              );
+              if (
+                generation !== commitGeneration ||
+                gate !== eventGateRef.value ||
+                rootRef.value !== capturedRoot
+              )
+                return;
+            }
             viewReady = true;
             notifyFocusTargetReady();
             signal?.done?.();
@@ -595,6 +677,10 @@ export function createVueAdapter(runtime: VueRuntime) {
           const disposeView = () => {
             if (viewDisposed) return;
             viewDisposed = true;
+            if (decorationView?.root === rootEl) {
+              decorationView.stage.retire();
+              decorationView = null;
+            }
             const releases = [
               () => {
                 if (
@@ -653,6 +739,7 @@ export function createVueAdapter(runtime: VueRuntime) {
           });
 
           const modules = createVueModules({
+            ownedDecoration,
             getPortalOrigin: () => portalOriginRef.value,
             el: rootEl,
             instanceToken,
@@ -869,7 +956,10 @@ export function createVueAdapter(runtime: VueRuntime) {
           // Without a view there is no template to place the slot into, so the
           // authored children stand in for it.
           const rendered = present
-            ? renderTemplateToVue(runtime, renderChildren.value, { slot: slotNodes as any })
+            ? renderTemplateToVue(runtime, renderChildren.value, {
+                slot: slotNodes as any,
+                decoration: renderDecoration,
+              })
             : slotNodes;
 
           const content = runtime.h(

@@ -3,16 +3,16 @@ type: contract
 title: Draft owned decorative style target boundary
 status: draft
 since: 0.3.0-alpha.1
-summary: "Draft fixed-first-view owned decoration addressing on existing style feedback;
-  bounded light-WC implementation remains under review. Tracks #935."
+summary: "Draft owner-lived decoration addressing with generation-scoped physical views;
+  bounded Web adapter implementation remains under review. Tracks #935 and #957."
 statement:
   en: This draft defines the minimum law for owned decorative targets of existing
-    feedback.style. A bounded experimental light-DOM Web Component implementation
-    uses setup declareDecoration, style.to(target).use and r.decoration(target).
+    feedback.style. Bounded experimental Web Component, React, Vue and Vue2 implementations
+    use setup declareDecoration, style.to(target).use and r.decoration(target).
     It does not establish stable or portable support. Existing style contribution
     semantics remain authoritative; no Tabs-specific path is introduced.
-  zh-CN: 本草案定义既有 feedback.style 自有装饰目标的最小法则。受限实验实现仅支持 light-DOM
-    Web Component 的 setup 身份、定点样式贡献与空装饰叶绑定，不构成稳定或可移植支持；既有样式贡献语义优先，不引入 Tabs 专用通道。
+  zh-CN: 本草案定义既有 feedback.style 自有装饰目标的最小法则。受限实验实现探索 light-DOM
+    Web Component、React、Vue 与 Vue2 的 setup 身份、定点样式贡献与空装饰叶绑定，不构成稳定或可移植支持；既有样式贡献语义优先，不引入 Tabs 专用通道。
 criteria:
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-IDENTITY
     text:
@@ -23,11 +23,11 @@ criteria:
         或宿主节点为键；不得伪造、跨实例共享或在释放后复用。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-BINDING
     text:
-      en: One target binds exactly one framework-owned decorative leaf in the declared
+      en: Within one physical view lease, one target binds exactly one framework-owned decorative leaf in the declared
         Template. Duplicate, foreign, slot, caller-owned, PrototypeRef and
         host-root bindings fail closed before mutation. Style updates never
         create, remove, replace or rebind nodes.
-      zh-CN: 一个目标仅绑定声明 Template 中一个框架拥有的装饰叶节点；重复、外来、slot、用户节点、PrototypeRef
+      zh-CN: 在一个物理 view lease 中，一个目标仅绑定声明 Template 中一个框架拥有的装饰叶节点；重复、外来、slot、用户节点、PrototypeRef
         及宿主根绑定必须在修改前拒绝。样式更新不得创建、移除、替换或重绑节点。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-CONTRIBUTION
     text:
@@ -38,12 +38,19 @@ criteria:
       zh-CN: 既有 setup 与 Rule 样式贡献仍为纯样式，并按既有语义法则为各目标独立合并。Rule 失效只撤回自身贡献，不改宿主及其他目标。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-LIFETIME
     text:
-      en: A committed target replays its current merged style without rendering;
-        terminal disposal removes bindings, contributions and subscriptions and
+      en: A committed target replays its current merged style without rendering.
+        Temporary view detachment revokes physical sinks while preserving the live
+        owner, opaque identities and logical contributions. A new signalled view
+        generation validates and binds the complete same target set before reveal;
+        stale release, ref and acknowledgement callbacks cannot mutate or revive it.
+        Structural rebind within a live view remains rejected. Terminal instance
+        disposal removes bindings, contributions and subscriptions and
         prevents later physical writes. Unknown, unavailable or unsupported
         targets reject explicitly, with no silent host fallback.
       zh-CN: 目标提交绑定后无需 render
-        即回放当前合并样式；终止释放必须移除绑定、贡献及订阅，禁止后续物理写入。未知、不可用或不支持目标须明确拒绝，不得静默回落宿主。
+        即回放当前合并样式；临时 view detach 撤销物理 sink，但保留活 owner、opaque 身份及逻辑贡献。
+        新的已通知 view generation 须在 reveal 前验证并完整绑定同一目标集；旧 release、ref 与 ack
+        不得修改或复活新 view，同一活 view 内结构重绑仍拒绝。实例终止释放必须移除绑定、贡献及订阅，禁止后续物理写入。未知、不可用或不支持目标须明确拒绝，不得静默回落宿主。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-NO-RESET
     text:
       en: Style changes retain owned node and caller slot identities, value and
@@ -120,6 +127,8 @@ tags:
   - draft
 lifecycleRationale:
   en: Owned target API, owned-leaf accessibility binding and view lifetime remain
-    explicit review questions. The fixed-first-view light-WC candidate has DOM
-    unit evidence, not native accessibility acceptance or portable compiler
-    support. Draft status and stable-admission blockers remain unchanged.
+    explicit review questions. The bounded Web adapter candidates have DOM/framework
+    evidence, not native accessibility acceptance or portable compiler support.
+    React asynchronous Activity retention beyond the existing same-turn owner
+    disposal window is an independently reproduced pre-existing gap; this draft
+    does not revive disposed owners or declare that gap solved. Draft status and stable-admission blockers remain unchanged.

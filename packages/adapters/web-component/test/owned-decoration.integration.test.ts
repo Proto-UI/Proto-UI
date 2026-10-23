@@ -151,3 +151,25 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(host.shadowRoot?.querySelector('[data-pui-owned-decoration]')).toBeNull();
   });
 });
+
+it('rejects unimplemented portal decoration before moving caller slot nodes', async () => {
+  const { asOverlay } = await import('@proto.ui/hooks');
+  const proto = definePrototype({
+    name: `owned-decoration-portal-${++id}`,
+    setup(def) {
+      asOverlay().configure({ defaultOpen: true, portal: true, entry: 'manual', restore: 'none' });
+      const target = def.feedback.style.declareDecoration();
+      def.feedback.style.to(target).use(tw('bg-black'));
+      return (r) => [r.el('section', r.slot()), r.decoration(target)];
+    },
+  });
+  AdaptToWebComponent(proto);
+  const host = document.createElement(proto.name),
+    input = document.createElement('input');
+  input.value = 'unchanged';
+  host.append(input);
+  expect(() => document.body.append(host)).toThrow('owned-decoration portal unsupported');
+  expect(input.parentNode).toBe(host);
+  expect(input.value).toBe('unchanged');
+  expect(host.querySelector('[data-pui-owned-decoration]')).toBeNull();
+});

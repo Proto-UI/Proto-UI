@@ -142,10 +142,12 @@ describe('private owned decoration logic model (not adapter activation)', () => 
       x = r.declareTarget(),
       y = r.declareTarget(),
       later = vi.fn();
-    r.bindAll([
-      { target: x, sink: () => r.dispose() },
-      { target: y, sink: later },
-    ]);
+    expect(() =>
+      r.bindAll([
+        { target: x, sink: () => r.dispose() },
+        { target: y, sink: later },
+      ])
+    ).toThrow('generation retired');
     expect(later).not.toHaveBeenCalled();
   });
   it('retains logical intent for explicit retry after sink failure', () => {
@@ -284,4 +286,121 @@ describe('private owned decoration logic model (not adapter activation)', () => 
     r.bindAll([{ target: x, sink }]);
     expect(sink).toHaveBeenCalledOnce();
   });
+});
+
+describe('draft owner-lived targets with replaceable view leases', () => {
+  it('retains identities and latest intent across physical suspension', () => {
+    const r = new Registry();
+    const t = r.declareTarget();
+    const c = r.declareContribution(t, 'setup');
+    const old = vi.fn(),
+      next = vi.fn();
+    r.replace(c, tw('bg-black'));
+    r.bindAll([{ target: t, sink: old }]);
+    r.suspendBindings();
+    r.replace(c, tw('bg-white'));
+    expect(old).toHaveBeenCalledTimes(1);
+    expect(() => r.declareTarget()).toThrow('closed');
+    expect(() => r.declareContribution(t, 'rule')).toThrow('closed');
+    r.bindAll([{ target: t, sink: next }]);
+    expect(next).toHaveBeenLastCalledWith({ kind: 'tw', tokens: ['bg-white'] });
+    r.withdraw(c);
+    expect(next).toHaveBeenLastCalledWith({ kind: 'tw', tokens: [] });
+    expect(old).toHaveBeenCalledTimes(1);
+  });
+  it('still validates the entire replacement binding set', () => {
+    const r = new Registry();
+    const a = r.declareTarget(),
+      b = r.declareTarget();
+    const old = vi.fn(),
+      next = vi.fn();
+    r.bindAll([
+      { target: a, sink: old },
+      { target: b, sink: old },
+    ]);
+    r.suspendBindings();
+    expect(() => r.bindAll([{ target: a, sink: next }])).toThrow('unbound');
+    expect(next).not.toHaveBeenCalled();
+    expect(() =>
+      r.bindAll([
+        { target: a, sink: next },
+        { target: {}, sink: next },
+      ])
+    ).toThrow('foreign');
+    r.bindAll([
+      { target: a, sink: next },
+      { target: b, sink: next },
+    ]);
+    expect(next).toHaveBeenCalledTimes(2);
+  });
+  it('rejects a getter that retires the candidate binding generation', () => {
+    const r = new Registry();
+    const t = r.declareTarget();
+    r.bindAll([{ target: t, sink: vi.fn() }]);
+    r.suspendBindings();
+    const next = vi.fn();
+    expect(() =>
+      r.bindAll([
+        {
+          target: t,
+          get sink() {
+            r.suspendBindings();
+            return next;
+          },
+        },
+      ])
+    ).toThrow('generation');
+    expect(next).not.toHaveBeenCalled();
+  });
+  it('stops old flush after a sink synchronously detaches the view', () => {
+    const r = new Registry();
+    const a = r.declareTarget(),
+      b = r.declareTarget();
+    const other = vi.fn();
+    expect(() =>
+      r.bindAll([
+        { target: a, sink: () => r.suspendBindings() },
+        { target: b, sink: other },
+      ])
+    ).toThrow('generation retired');
+    expect(other).not.toHaveBeenCalled();
+  });
+  it('never resurrects an owner after terminal disposal', () => {
+    const r = new Registry();
+    const t = r.declareTarget();
+    r.bindAll([{ target: t, sink: vi.fn() }]);
+    r.suspendBindings();
+    r.dispose();
+    expect(() => r.bindAll([{ target: t, sink: vi.fn() }])).toThrow('disposed');
+    expect(() => r.suspendBindings()).toThrow('disposed');
+  });
+});
+
+it('never resumes an older flush into a reentrant newer generation', () => {
+  const r = new Registry(),
+    a = r.declareTarget(),
+    b = r.declareTarget();
+  const nextA = vi.fn(),
+    nextB = vi.fn(() => {
+      throw new Error('new sink failure');
+    });
+  expect(() =>
+    r.bindAll([
+      {
+        target: a,
+        sink: () => {
+          r.suspendBindings();
+          try {
+            r.bindAll([
+              { target: a, sink: nextA },
+              { target: b, sink: nextB },
+            ]);
+          } catch {}
+        },
+      },
+      { target: b, sink: vi.fn() },
+    ])
+  ).toThrow('generation retired');
+  expect(nextA).toHaveBeenCalledOnce();
+  expect(nextB).toHaveBeenCalledOnce();
 });

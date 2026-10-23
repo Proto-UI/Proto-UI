@@ -49,8 +49,10 @@ export interface FeedbackFacade extends ModuleFacade {
 
 export type FeedbackPort = {
   supportsOwnedDecoration?: true;
+  captureDecorationLease?: () => object;
   bindDecorations?: (
-    bindings: readonly import('./style/owned-decoration-cap').OwnedDecorationBinding[]
+    bindings: readonly import('./style/owned-decoration-cap').OwnedDecorationBinding[],
+    lease: object
   ) => void;
 
   /** Replaces a Rule's style and material together before one visual flush. */

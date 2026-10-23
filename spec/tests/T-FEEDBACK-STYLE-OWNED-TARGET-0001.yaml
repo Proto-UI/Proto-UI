@@ -64,6 +64,42 @@ cases:
       not establish runtime or cross-adapter support. PrototypeRef rejection
       remains unchanged.
 implementations:
+  - id: owned-decoration-react-dom
+    kind: adapter-test
+    status: active
+    path: packages/adapters/react/test/owned-decoration.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+    notes:
+      - "Real framework DOM tests, not native browser or accessibility-tree acceptance."
+  - id: owned-decoration-vue-dom
+    kind: adapter-test
+    status: active
+    path: packages/adapters/vue/test/owned-decoration.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+    notes:
+      - "Real framework DOM tests, not native browser or accessibility-tree acceptance."
+  - id: owned-decoration-vue2-dom
+    kind: adapter-test
+    status: active
+    path: packages/adapters/vue2/test/owned-decoration.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+    notes:
+      - "Real framework DOM tests, not native browser or accessibility-tree acceptance."
   - id: owned-decoration-wc-dom
     kind: adapter-test
     status: active
@@ -138,7 +174,8 @@ tags:
   - test
   - planned
 lifecycleRationale:
-  en: Bounded light-WC DOM and module tests now exercise the draft implementation;
+  en: Bounded WC, React, Vue and Vue2 DOM/framework and module tests exercise the draft implementation;
     native-browser accessibility and no-reset acceptance remain planned.
     Active test mappings do not promote this contract to stable or establish
-    support on other adapters or the portable compiler.
+    support on untested profiles or the portable compiler. React tests cover StrictMode
+    and same-turn Activity; arbitrary asynchronous owner retention is not established.

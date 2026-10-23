@@ -1,3 +1,9 @@
+import {
+  collectWebOwnedDecorationTargets,
+  createWebOwnedDecorationStage,
+  type WebOwnedDecorationStage,
+} from '@proto.ui/adapter-base';
+import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -228,6 +234,26 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       );
     }
     const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
+    const ownedDecoration =
+      !declaredRootTag &&
+      ![
+        'input',
+        'img',
+        'textarea',
+        'select',
+        'a',
+        'br',
+        'hr',
+        'area',
+        'base',
+        'embed',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ].includes(rootTag);
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
       (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||
@@ -358,6 +384,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const [renderCommit, setRenderCommit] = runtime.useState<{
         children: any;
         version: number;
+        decoration?: WebOwnedDecorationStage;
       }>({ children: null, version: 0 });
       const hostTokenRevisionRef = runtime.useRef(0);
       const [hostStyle, setHostStyle] = runtime.useState<{ tokens: string[]; revision: number }>({
@@ -434,12 +461,18 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const deliveredRawPropsRef = runtime.useRef<Record<string, unknown> | null>(null);
 
       const viewGenerationRef = runtime.useRef(0);
+      const decorationViewRef = runtime.useRef<{
+        stage: WebOwnedDecorationStage;
+        generation: number;
+      } | null>(null);
       const pendingCommitRef = runtime.useRef<{
         signal: CommitSignal | null;
         version: number;
         viewGeneration: number;
         root: HTMLElement | null;
         styleRevision: number;
+        decoration?: WebOwnedDecorationStage;
+        decorationLease?: object;
       } | null>(null);
       const commitVersionRef = runtime.useRef(0);
       const pendingRevealStyleRevisionRef = runtime.useRef<number | null>(null);
@@ -520,6 +553,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           onCommit: (children, signal) => {
+            const targets = collectWebOwnedDecorationTargets(children);
+            const caps = ownerRef.current?.session?.caps;
+            const feedback = caps?.getFacades().feedback as FeedbackFacade | undefined;
+            if (targets.length && caps?.getPort<OverlayPort>('overlay')?.getConfig().portal)
+              throw new Error('[React Adapter] owned-decoration portal unsupported');
+            const decoration = targets.length
+              ? createWebOwnedDecorationStage(targets, (ids) => {
+                  if (!feedback) throw new Error('[React Adapter] owned-decoration unavailable');
+                  feedback.style.validateDecorationTemplate(ids);
+                })
+              : undefined;
+            if (!targets.length) feedback?.style.validateDecorationTemplate([]);
+            // Pure VNode construction validates the entire v0 blueprint before
+            // publishing a replacement React children transaction.
+            renderTemplateToReact({ createElement: () => null }, children, { decoration });
+            decorationViewRef.current?.stage.retire();
+            decorationViewRef.current = decoration
+              ? { stage: decoration, generation: viewGenerationRef.current }
+              : null;
             const version = ++commitVersionRef.current;
             pendingCommitRef.current = {
               signal,
@@ -527,8 +579,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               viewGeneration: viewGenerationRef.current,
               root: rootRef.current,
               styleRevision: hostTokenRevisionRef.current,
+              decoration,
+              decorationLease: decoration
+                ? caps?.getPort<FeedbackPort>('feedback')?.captureDecorationLease?.()
+                : undefined,
             };
-            setRenderCommit({ children, version });
+            setRenderCommit({ children, version, decoration });
           },
           onAfterUnmount: () => {
             scopedExposesReaderRef.current.invalidate();
@@ -546,6 +602,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         let hostSession = ownerRef.current?.session;
         if (!hostSession) {
           const ownerModules = createReactOwnerModules({
+            ownedDecoration,
             instanceToken: instanceTokenRef.current,
             emit: (key, payload) => {
               eventCallbacksRef.current[key]?.(payload);
@@ -655,6 +712,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         const disposeView = () => {
           if (viewDisposed) return;
           viewDisposed = true;
+          if (decorationViewRef.current?.generation === viewGeneration) {
+            decorationViewRef.current.stage.retire();
+            decorationViewRef.current = null;
+          }
           if (viewGenerationRef.current === viewGeneration) {
             viewGenerationRef.current += 1;
             pendingCommitRef.current = null;
@@ -722,6 +783,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         const rawPropsSource = rawPropsSourceRef.current as RawPropsSource<Props>;
         const modules = createReactModules({
+          ownedDecoration,
           getPortalOrigin: () => portalOriginRef.current,
           el: rootEl,
           instanceToken: instanceTokenRef.current,
@@ -920,6 +982,20 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           ) {
             return;
           }
+          if (pending.decoration) {
+            const port = ownerRef.current?.session?.caps.getPort<FeedbackPort>('feedback');
+            if (!port?.bindDecorations)
+              throw new Error('[React Adapter] owned-decoration binding unavailable');
+            pending.decoration.bind(pending.root, (bindings) =>
+              port.bindDecorations!(bindings, pending.decorationLease!)
+            );
+            if (
+              viewGenerationRef.current !== pending.viewGeneration ||
+              rootRef.current !== pending.root ||
+              pendingCommitRef.current !== pending
+            )
+              return;
+          }
           pendingCommitRef.current = null;
           const wasReady = viewReadyRef.current;
           projectionReadyRef.current = true;
@@ -1000,6 +1076,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
       const rendered = renderTemplateToReact(runtime, renderCommit.children, {
         slot: props.children,
+        decoration: renderCommit.decoration,
       });
       // Template roots are a static child list. Passing that list as one array
       // makes React treat it as a dynamic collection and warn that anatomy

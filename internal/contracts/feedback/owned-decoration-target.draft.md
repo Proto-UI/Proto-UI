@@ -104,3 +104,27 @@ These are DOM unit tests, not native-browser focus/accessibility acceptance. No 
 ## Integration
 
 Actual feature dependencies: #941 registry and #945 whole-blueprint/caller-slot staging; draft contract #938. #951 gte and #953 viewport changes are independent collaboration inputs sharing additive files, not decoration feature dependencies. Preserve their contributions when assembling the branch. No generated stylesheet changes are borrowed from unrelated projection branches.
+
+
+## Draft view-generation refinement (#957, 2026-10-23)
+
+The earlier fixed-first-view proposal and #956 implementation above are historical boundaries, not a reason to equate normal framework view detachment with owner disposal. `createViewEpochOwner.detachView()` unmounts a view while retaining its logical session; `dispose()` is terminal.
+
+The follow-up keeps one registry and opaque target/contribution identities for the live logical owner. Unmounting revokes the current physical sinks before the adapter releases DOM. Suspended logical contributions may change without physical writes. A newly signalled mounting generation validates the complete same target set, binds new empty adapter-owned leaves, and replays the latest merged values. Declarations never reopen. Terminal instance disposing/disposed closes the registry permanently.
+
+Old physical callbacks cannot revoke or paint a newer view. Harmless stale framework ref notifications do nothing, while explicit stale bind/sink operations fail closed. Per-view stages are one-shot; the registry is not reset. Structural replacement inside a still-live view, unexplained root replacement, caller-owned targets and portal relocation remain unsupported. Runtime mount epochs alone do not authorize arbitrary physical replacement.
+
+React binds in its matching layout commit before acknowledgement and the final-style reveal barrier. Vue binds after nextTick with captured root/gate/generation checks before acknowledgement; integration must preserve #921's newer reveal barrier. Vue2 uses native VNode insert/postpatch/destroy hooks and binds at its existing current-view acknowledgement. Existing viewport contributions from #953 remain independent additive integration requirements.
+
+Local framework coverage includes ordinary React and StrictMode, same-turn React.Activity hide/show after successful binding, Vue3 KeepAlive with owner Context enabled/disabled, and Vue2 KeepAlive. Setup remains once, logical intent survives legitimate retained-owner view changes, and style updates retain caller input identity/value/focus/selection without Proto rendering. These are DOM/framework tests, not native accessibility acceptance. A separate no-target control on the unchanged approved baseline reproduces an existing React Activity failure when hidden across a timer and shown after deferred owner disposal; this patch neither revives that disposed owner nor claims the broader retention gap fixed.
+
+The contract remains Draft. Portable compiler target lowering remains explicitly rejected. Native source-bound evidence for these new adapter and view-generation paths is still required.
+
+
+### Captured private binding authority
+
+The FeedbackPort exposes a private opaque view-lease capture for adapters. Capture happens while staging, not in a delayed commit callback. The whole binding set snapshots target/sink fields once, validates every sink and exact current lease, and only then publishes. A detached, foreign or retired lease cannot bind even when a new view is mounting. A malformed unpublished sink batch can be corrected without poisoning the view. Reentrant flush stops when its captured binding generation changes; it must never resume into a newly rebound view.
+
+Local verification at 2026-10-23 02:47 UTC: 21 focused files / 300 tests pass, including all Feedback tests, shared staging, four adapters, StrictMode and KeepAlive. Full workspace TypeScript passes. A broader three-framework run has 1197 passing and 11 failing tests; the same eleven failures reproduce exactly in the unchanged prior approved snapshot (six files, 88 pass / 11 fail). This is baseline comparison, not a full-green claim or an attribution of their original cause. No new adapter-native screenshot or AX acceptance is claimed.
+
+Final formatted candidate combined run: 1491 tests pass and the same 11 comparator-reproduced cases fail. Two existing browser suites additionally fail at Chromium startup with ProcessSingleton socket EPERM, leaving 18 tests skipped; they are not native passes and no browser restriction was relaxed. The result is not a full-green suite.

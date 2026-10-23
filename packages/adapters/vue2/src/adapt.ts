@@ -1,3 +1,9 @@
+import {
+  collectWebOwnedDecorationTargets,
+  createWebOwnedDecorationStage,
+  type WebOwnedDecorationStage,
+} from '@proto.ui/adapter-base';
+import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
 import { refreshVue2PortalDestination } from './runtime/modules';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
@@ -123,6 +129,7 @@ export interface Vue2AdapterOptions<Props extends PropsBaseType> {
 type Vue2InternalState<Props extends PropsBaseType> = {
   proto: Prototype<Props>;
   initOptions: {
+    ownedDecoration?: boolean;
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
@@ -144,6 +151,13 @@ type Vue2InternalState<Props extends PropsBaseType> = {
   exposes: Record<string, unknown>;
   invoke: ((fn: () => void) => void) | null;
   scopedExposesReader: ReturnType<typeof createScopedExposesReader>;
+  renderDecoration?: WebOwnedDecorationStage;
+  decorationView?: {
+    stage: WebOwnedDecorationStage;
+    root: HTMLElement | null;
+    port: FeedbackPort;
+    lease: object;
+  };
   pendingCommit: boolean;
   pendingSignal: CommitSignal | null;
   viewReady: boolean;
@@ -239,6 +253,26 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       );
     }
     const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
+    const ownedDecoration =
+      !declaredRootTag &&
+      ![
+        'input',
+        'img',
+        'textarea',
+        'select',
+        'a',
+        'br',
+        'hr',
+        'area',
+        'base',
+        'embed',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ].includes(rootTag);
 
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
@@ -259,6 +293,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
       const state = {
         proto,
         initOptions: {
+          ownedDecoration,
           createVisualSink: createVisualSink,
           residentMotion: opt.residentMotion,
           schedule,
@@ -383,7 +418,8 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
               opt.diagnostics?.onLifecycleEvent?.(event);
               trackFocusIngress(vm, event);
             },
-            onCommit: (children, signal) => {
+            onCommit: (children, signal, caps) => {
+              stageVue2Decoration(vm, children, caps);
               state.pendingCommit = true;
               state.pendingSignal = signal;
               setVmField(vm, '__puiRenderChildren', children);
@@ -404,6 +440,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           });
 
         const ownerModules = createVue2OwnerModules({
+          ownedDecoration,
           instanceToken: state.instanceToken,
           emit: (key, payload, options) => {
             emitVue2(vm, key, payload, options);
@@ -448,6 +485,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         if (rootEl) installViewVisibilityRule(rootEl.ownerDocument);
         if ((this as any).__puiShouldExist) {
           initSession(runtime, this, proto, {
+            ownedDecoration,
             createVisualSink: createVisualSink,
             residentMotion: opt.residentMotion,
             schedule,
@@ -471,6 +509,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           afterVueCommit(runtime, this, () => {
             if (getRootElement(this) === target && (this as any).__puiShouldExist) {
               initSession(runtime, this, proto, {
+                ownedDecoration,
                 createVisualSink: createVisualSink,
                 residentMotion: opt.residentMotion,
                 schedule,
@@ -498,6 +537,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         afterVueCommit(runtime, this, () => {
           if (state.terminalDisposed || activationVersion !== state.activationVersion) return;
           initSession(runtime, this, proto, {
+            ownedDecoration,
             createVisualSink: createVisualSink,
             residentMotion: opt.residentMotion,
             schedule,
@@ -563,6 +603,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
         const rendered = present
           ? renderTemplateToVue2(renderRuntime, (this as any).__puiRenderChildren, {
               slot: slotNodes,
+              decoration: state.renderDecoration,
             })
           : slotNodes;
         const rootChildren = normalizeVue2Children(rendered);
@@ -667,6 +708,7 @@ function initSession<Props extends PropsBaseType>(
   vm: Vue2AdapterInstance<Prototype<Props>> | any,
   proto: Prototype<Props> | null,
   options: {
+    ownedDecoration?: boolean;
     schedule: (task: () => void) => void;
     getMeta: (key: string) => unknown;
     createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
@@ -748,6 +790,10 @@ function initSession<Props extends PropsBaseType>(
     if (viewDisposed) return;
     viewDisposed = true;
     state.viewDisposed = true;
+    if (state.decorationView?.root === rootEl) {
+      state.decorationView.stage.retire();
+      state.decorationView = undefined;
+    }
     const releases = [
       () => {
         if (ownedVisualStyle !== null && rootEl.getAttribute('data-pui-style') === ownedVisualStyle)
@@ -805,6 +851,7 @@ function initSession<Props extends PropsBaseType>(
   });
 
   const modules = createVue2Modules({
+    ownedDecoration: targetOptions.ownedDecoration,
     el: rootEl,
     instanceToken: state.instanceToken,
     router,
@@ -922,7 +969,8 @@ function initSession<Props extends PropsBaseType>(
         router: {
           dispose: () => state.owner.disposeView(),
         },
-        onCommit: (children, signal) => {
+        onCommit: (children, signal, caps) => {
+          stageVue2Decoration(vm, children, caps);
           state.pendingCommit = true;
           state.pendingSignal = signal;
           setVmField(vm, '__puiRenderChildren', children);
@@ -966,6 +1014,7 @@ function getLogicalProtoFromState<Props extends PropsBaseType>(
 function getInitOptionsFromState<Props extends PropsBaseType>(
   state: Vue2InternalState<Props>
 ): {
+  ownedDecoration?: boolean;
   schedule: (task: () => void) => void;
   getMeta: (key: string) => unknown;
   createVisualSink?: Vue2AdapterOptions<Props>['createVisualSink'];
@@ -1000,6 +1049,35 @@ function trackFocusIngress(vm: any, event: RuntimeLifecycleEvent) {
   if (state.focusIngressReady) notifyFocusTargetReady(vm);
 }
 
+function stageVue2Decoration(
+  vm: any,
+  children: any,
+  caps: ReturnType<typeof createVue2HostSession>['caps']
+) {
+  const state = getState(vm);
+  const targets = collectWebOwnedDecorationTargets(children);
+  const feedback = caps.getFacades().feedback as FeedbackFacade;
+  if (targets.length && caps.getPort<OverlayPort>('overlay')?.getConfig().portal)
+    throw new Error('[Vue2 Adapter] owned-decoration portal unsupported');
+  const stage = targets.length
+    ? createWebOwnedDecorationStage(targets, (ids) =>
+        feedback.style.validateDecorationTemplate(ids)
+      )
+    : undefined;
+  if (!targets.length) feedback.style.validateDecorationTemplate([]);
+  renderTemplateToVue2({ h: () => null }, children, { decoration: stage });
+  state.decorationView?.stage.retire();
+  state.renderDecoration = stage;
+  state.decorationView = stage
+    ? {
+        stage,
+        root: getRootElement(vm),
+        port: caps.getPort<FeedbackPort>('feedback')!,
+        lease: caps.getPort<FeedbackPort>('feedback')!.captureDecorationLease!(),
+      }
+    : undefined;
+}
+
 function finishPendingCommit(vm: any, commitVersion: number) {
   const state = getState(vm);
   const root = getRootElement(vm);
@@ -1016,6 +1094,15 @@ function finishPendingCommit(vm: any, commitVersion: number) {
     vm.__puiShouldExist &&
     state.owner.hasView;
   if (!state.pendingCommit || !isCurrentView()) return;
+  const decoration = state.decorationView;
+  if (decoration) {
+    if (decoration.root !== root || !decoration.port.bindDecorations)
+      throw new Error('[Vue2 Adapter] stale decoration commit');
+    decoration.stage.bind(root!, (bindings) =>
+      decoration.port.bindDecorations!(bindings, decoration.lease)
+    );
+    if (!isCurrentView() || state.decorationView !== decoration) return;
+  }
   state.pendingCommit = false;
   const signal = state.pendingSignal;
   state.pendingSignal = null;
