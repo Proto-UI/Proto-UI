@@ -26,6 +26,13 @@ cases:
       - P-SHADCN-TEXT-PROJECTION
       - P-BRUTALIST-TEXT-PROJECTION
     expectation: text-projection
+  - id: T-TEXT-0001-CASE-DENSITY
+    title: Shadcn and Brutalist size-owned line boxes and tighter inputs survive four public Web Adapter prop transports
+    covers:
+      - P-BASE-TEXT-INPUTS
+      - P-SHADCN-TEXT-PROJECTION
+      - P-BRUTALIST-TEXT-PROJECTION
+    expectation: text-density
   - id: T-TEXT-0001-CASE-PUBLIC
     title: Package exports and generated public Adapter facades
     covers:
@@ -61,6 +68,7 @@ implementations:
       - T-TEXT-0001-CASE-CONTENT
       - T-TEXT-0001-CASE-PASSIVE
       - T-TEXT-0001-CASE-PROJECTION
+      - T-TEXT-0001-CASE-DENSITY
     exercises:
       - P-BASE-TEXT
       - P-SHADCN-TEXT
@@ -73,6 +81,7 @@ implementations:
     consumesCases:
       - T-TEXT-0001-CASE-PUBLIC
       - T-TEXT-0001-CASE-COMPILER
+      - T-TEXT-0001-CASE-DENSITY
       - T-TEXT-0001-CASE-LIMITS
     exercises:
       - P-BASE-TEXT
@@ -99,6 +108,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added real four-Web-Adapter, source compiler and explicit unsupported-surface evidence; native Rust execution remains pending.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added all-size line-box, tighter token whitelist, generated-preset closure, and separate missing versus unusable-prop compatibility evidence for Shadcn and Brutalist.
 tags:
   - test
   - text

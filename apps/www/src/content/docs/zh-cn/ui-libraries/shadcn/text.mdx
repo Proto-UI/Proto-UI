@@ -47,18 +47,24 @@ export function SectionTitle() {
 | `tone`       | `default`, `muted`, `inherit`                              | `default` |
 | `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
 | `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `tight`, `snug`, `normal`, `relaxed`                       | `normal`  |
-| `tracking`   | `normal`, `tight`                                          | `normal`  |
+| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
+| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
 | `emphasis`   | `normal`, `italic`                                         | `normal`  |
 | `decoration` | `none`, `underline`, `line-through`                        | `none`    |
 
 `tone="inherit"` 保留外层语义 owner 或 Surface 的前景色，适合 solid/accent 表面的对比关系。移除 prop 后恢复默认值。单一匿名槽保留作者提供的文本和子内容，没有暴露的 state、method 或 event。页面角色、文案、标题层级、`asChild`、`tag`、`href`、`for`、内容解析器、编辑器及自动响应式断点都不属于此 API。
+
+`leading="size"` 保留所选字号内建的行框，不额外添加 leading 覆盖。Shadcn 和 Brutalist 中，`xs`、`sm`、`base`、`lg`、`xl`、`2xl`、`3xl`、`4xl`、`5xl` 的行高分别为 `1rem`、`1.25rem`、`1.5rem`、`1.75rem`、`1.75rem`、`2rem`、`2.25rem`、`2.5rem`、`1`。例如根字号为 16px 时，`size="base"` 为 16/24，`size="lg"` 为 18/28；省略 size 恢复 `base`。初始非法 size 也回退到 `base`；已有合法值后再传入空值或非法值，按既有 Props 契约保留上一个合法值。`leading="tighter"` 选择 `1.1`，`tracking="tighter"` 选择 `-0.05em`。既有 `normal` 默认值不变。这些是有限视觉语义，不接受数字或任意 CSS 输入。Base 只规范化输入；本次密度扩展只验证 Shadcn 和 Brutalist，不代表全部家族或原生平台等价。
+
+Shadcn action 组合保留既有优先级：`actionProfile="rhea"` 或 `"luma"` 仍选择 `1.25rem` 行高，包括同时传入 `leading="size"` 或 `"tighter"` 的情况。
 
 ## Adapter 与 Compiler 边界
 
 已实现的 Web profile 通过 Web Components、React、Vue 3、Vue 2 验证，包括属性变化/移除、内容保留与原生 owner 组合。Web compiler 的 source-closure 和生成 facade 检查与 Adapter 证据分开，不代表任意 Prototype AOT 或原生平台等价。
 
 CLI 拒绝不支持的 GPUI target。原生 GPUI 排版映射仍缺少 `font-style`、`letter-spacing`、`text-decoration-line`；这些是明确诊断的限制，不是等价画面。GPUI 当前对 `tone="inherit"` 报告 `UnsupportedValue(color, inherit)`。未知样式 token 报告 `Unsupported Proto UI style tokens`，不会静默成功。真实浏览器视觉验收及各目标执行证据，应与源码、DOM 测试分别陈述。
+
+密度取值对照 [固定版本 shadcn page-header 源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx) 及其 [MIT 许可证](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/LICENSE.md)：标题使用 `lg:leading-[1.1]`、`xl:tracking-tighter`，说明文字沿用 `text-base`、`sm:text-lg` 的字号内建行框。这是可复用排版选项的参考依据，不代表上游存在 Text 组件，也不引入页面专属 Text API。
 
 ## 依据
 

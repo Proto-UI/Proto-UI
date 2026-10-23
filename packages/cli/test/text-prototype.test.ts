@@ -4,7 +4,13 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { renderHostIndex } from '../src/services/codegen';
 import { collectProtoStyleTokens } from '../src/services/prototype-style-tokens';
-import { renderProtoStyleTokenCss } from '../src/services/proto-style-css';
+import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowStyleTokenCss,
+} from '../src/services/proto-style-css';
+import { SHADCN_STYLE_TOKENS } from '../src/generated/shadcn-style-tokens';
+import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
+import { collectFamilyStyleClosure } from '../../../scripts/styles/family-style-closure';
 import { COMPONENT_REGISTRY } from '../src/registry/components';
 
 const required = {
@@ -46,6 +52,10 @@ describe('Text public compiler consumption', () => {
       const css = renderProtoStyleTokenCss(tokens);
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       const familyRequired = { ...required } as Record<string, string>;
+      if (family === 'shadcn' || family === 'brutalist') {
+        familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
+        familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
+      }
       if (family === 'bootstrap-2-3-2') {
         delete familyRequired['text-2xl'];
         delete familyRequired['leading-normal'];
@@ -132,4 +142,84 @@ describe('Text public compiler consumption', () => {
     expect(css).toContain('unsupported-text-feature');
     expect(css).toContain('font-size: 3rem;');
   });
+});
+
+// T-TEXT-0001-CASE-DENSITY: bounded author vocabulary and actual generated family closure.
+describe('Text density token closure', () => {
+  const sizeLineBoxes = {
+    'text-xs': ['0.75rem', '1rem'],
+    'text-sm': ['0.875rem', '1.25rem'],
+    'text-base': ['1rem', '1.5rem'],
+    'text-lg': ['1.125rem', '1.75rem'],
+    'text-xl': ['1.25rem', '1.75rem'],
+    'text-2xl': ['1.5rem', '2rem'],
+    'text-3xl': ['1.875rem', '2.25rem'],
+    'text-4xl': ['2.25rem', '2.5rem'],
+    'text-5xl': ['3rem', '1'],
+  };
+  it('retains every selected size line box in document and Shadow CSS', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      for (const [token, [size, lineHeight]] of Object.entries(sizeLineBoxes)) {
+        const css = render([token]);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+        expect(css).toContain(`font-size: ${size};`);
+        expect(css).toContain(`line-height: ${lineHeight};`);
+        expect(css.match(/(?:^|\n)\s*line-height:/g)).toHaveLength(1);
+      }
+      const explicit = render(['text-lg', 'leading-normal']);
+      expect(explicit).toContain('line-height: 1.5;');
+      expect(explicit.lastIndexOf('line-height: 1.5;')).toBeGreaterThan(
+        explicit.indexOf('line-height: 1.75rem;')
+      );
+    }
+  });
+  it('accepts only the named tighter additions without opening an expression parser', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['text-5xl', 'leading-[1.1]', 'tracking-tighter']);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('line-height: 1.1;');
+      expect(css).toContain('letter-spacing: -0.05em;');
+      expect(css.lastIndexOf('line-height: 1.1;')).toBeGreaterThan(css.indexOf('font-size: 3rem;'));
+      for (const token of [
+        'leading-[1.10]',
+        'leading-[1.2]',
+        'leading-[-1.1]',
+        'leading-[1.1;color:red]',
+        'leading-[var(--private-leading)]',
+        'leading-[calc(1+.1)]',
+        'leading-size',
+        'tracking-[-0.05em]',
+        'tracking-[var(--private-tracking)]',
+        'tracking-tighter;color:red',
+      ]) {
+        const rejected = render([token]);
+        expect(rejected).toContain('Unsupported Proto UI style tokens');
+        expect(rejected).not.toMatch(/(?:^|\n)\s*line-height:/);
+        expect(
+          (rejected.match(/letter-spacing:[^;]+;/g) ?? []).every(
+            (declaration) => declaration === 'letter-spacing: inherit;'
+          )
+        ).toBe(true);
+      }
+    }
+  });
+  it.each([
+    ['shadcn', SHADCN_STYLE_TOKENS],
+    ['brutalist', BRUTALIST_STYLE_TOKENS],
+  ] as const)(
+    'closes the generated %s preset over actual family and Base sources',
+    async (family, preset) => {
+      const closure = await collectFamilyStyleClosure(
+        path.resolve(`packages/prototypes/${family}/src`),
+        path.resolve('packages/prototypes/base/src')
+      );
+      expect(preset).toEqual(closure.tokens);
+      expect(preset).toContain('leading-[1.1]');
+      expect(preset).toContain('tracking-tighter');
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render([...preset]);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+    }
+  );
 });

@@ -36,10 +36,18 @@ export function homepageTextProps(
     emphasis: 'normal',
     decoration: 'none',
     ...role,
+    ...(family === 'shadcn' && className === 'home-gallery__caption'
+      ? { size: 'sm' as const }
+      : {}),
     ...(role.font === 'heading'
       ? {
           font: family === 'brutalist' ? 'heading' : 'body',
-          weight: family === 'brutalist' ? 'bold' : 'semibold',
+          weight:
+            family === 'brutalist'
+              ? 'bold'
+              : className === 'home-gallery__title'
+                ? 'medium'
+                : 'semibold',
         }
       : {}),
   };

@@ -501,7 +501,7 @@ async function exerciseWorkspaceSettings(
     .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-gallery-demo')));
   assert.deepEqual(
     [...liveResult].join(','),
-    'controls,hover,preferences,editor,overlays,choices',
+    'controls,hover,workspace-command,workspace-help,preferences,workspace-progress,editor,overlays,choices',
     'Every real component composition remains present'
   );
   activeProbeStage = 'workspace-settings-saved-capture';

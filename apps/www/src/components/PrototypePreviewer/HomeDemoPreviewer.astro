@@ -13,8 +13,18 @@ const copy =
         loading: 'Preparing',
         ready: 'Ready',
         error: 'Error',
+        noScript: 'These interactive examples need JavaScript.',
+        documentation: 'Read the component documentation',
       }
-    : { title: '交互组件', family: '页面风格', loading: '准备中', ready: '就绪', error: '错误' };
+    : {
+        title: '交互组件',
+        family: '页面风格',
+        loading: '准备中',
+        ready: '就绪',
+        error: '错误',
+        noScript: '这些交互示例需要 JavaScript。',
+        documentation: '阅读组件文档',
+      };
 const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}`;
 ---
 
@@ -32,6 +42,12 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
   data-status-ready={copy.ready}
   data-status-error={copy.error}
 >
+  <noscript>
+    <p data-home-demo-nojs>
+      {copy.noScript}
+      <a href={`/${locale}/ui-libraries/shadcn/accordion/`}>{copy.documentation}</a>
+    </p>
+  </noscript>
   <div class="home-demo-previewer__host" data-home-demo-host aria-busy="true"></div>
   <output
     class="home-demo-previewer__status"
@@ -46,7 +62,7 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
 <style>
   /* App-owned layout only. Text and Interactive surfaces belong to the selected PUI library. */
   .home-demo-previewer {
-    width: min(100%, 78rem);
+    width: min(100%, 100rem);
     margin: 0 auto;
     padding: 0 0 3rem;
     scroll-margin-block: 8rem;
@@ -141,12 +157,10 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     overflow-wrap: anywhere;
   }
   .home-demo-previewer :global(.home-gallery) {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1.5rem;
-    align-items: start;
+    --homepage-gallery-gap: 1.5rem;
+    columns: 18rem;
+    column-gap: var(--homepage-gallery-gap);
   }
-  .home-demo-previewer :global(.home-gallery__column),
   .home-demo-previewer :global(.home-gallery__card-body),
   .home-demo-previewer :global(.home-gallery__stack) {
     display: grid;
@@ -155,11 +169,15 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     gap: 1rem;
     min-width: 0;
   }
+  /* Keep the authored reading/tab order while allowing cards, not fixed
+     groups, to fill responsive columns. No component paint is owned here. */
   .home-demo-previewer :global(.home-gallery__column) {
-    gap: 1.5rem;
+    display: contents;
   }
   .home-demo-previewer :global(.home-gallery__item) {
     min-width: 0;
+    break-inside: avoid;
+    margin-block-end: var(--homepage-gallery-gap);
   }
   .home-demo-previewer :global(.home-gallery__card-heading) {
     display: grid;
@@ -214,20 +232,21 @@ const projectionOwner = `${id}-projection-${Math.random().toString(36).slice(2)}
     min-width: 0;
     overflow-wrap: anywhere;
   }
-  @media (max-width: 1199px) {
-    .home-demo-previewer :global(.home-gallery) {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
   @media (max-width: 767px) {
-    .home-demo-previewer :global(.home-gallery),
-    .home-demo-previewer :global(.home-gallery__column) {
-      gap: 1.25rem;
+    .home-demo-previewer :global(.home-gallery) {
+      --homepage-gallery-gap: 1.25rem;
     }
   }
   @media (max-width: 639px) {
     .home-demo-previewer :global(.home-gallery) {
-      grid-template-columns: minmax(0, 1fr);
+      columns: 1;
     }
+  }
+  /* With scripting enabled, noscript contains text rather than these child elements.
+     Hide only the empty loading structure when the real static fallback is present. */
+  .home-demo-previewer:has([data-home-demo-nojs]) > .home-demo-previewer__host,
+  .home-demo-previewer:has([data-home-demo-nojs])[data-runner-state]
+    > .home-demo-previewer__status {
+    display: none;
   }
 </style>

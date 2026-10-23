@@ -62,6 +62,7 @@ import {
 import { createOwnedVisualSurface, isOwnedVisualNode } from './visual-surface';
 import { SlotProjector } from './slot-projector';
 import { createOwnedTwTokenApplier } from './feedback-style';
+import { createNativeTextLayoutApplier } from './native-text-layout';
 import { installDebugHooks, removeDebugHooks } from './debug/hooks';
 import {
   installDefaultHostDisplay,
@@ -902,15 +903,19 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 },
                 getOwned: () => splitOwnedTokens,
               }
-            : createOwnedTwTokenApplier(
-                this._textControlTarget ??
-                  this._imageViewTarget ??
-                  this._nativeLinkTarget ??
+            : this._textControlTarget
+              ? createNativeTextLayoutApplier(
                   thisEl,
-                {
-                  onChange: () => this._hostDisplay?.sync(),
-                }
-              ));
+                  this._textControlTarget,
+                  () => finalStyleEntries,
+                  { onChange: () => this._hostDisplay?.sync() }
+                )
+              : createOwnedTwTokenApplier(
+                  this._imageViewTarget ?? this._nativeLinkTarget ?? thisEl,
+                  {
+                    onChange: () => this._hostDisplay?.sync(),
+                  }
+                ));
           currentEventGate = eventGate;
           currentRouter = router;
           // Split owns its role-aware styles across synchronous DOM moves.
@@ -981,13 +986,22 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               acquisitionError = error;
             }
           };
+          const ordinaryEffects = createWebEffectsPort(applier);
           const effectsPort: EffectsPort = splitEffects
             ? {
                 queueStyle: (handle) => project(() => splitEffects.queueStyle(handle)),
                 requestFlush: () => project(() => splitEffects.requestFlush()),
                 flushNow: () => project(() => splitEffects.flushNow?.()),
               }
-            : createWebEffectsPort(applier);
+            : this._textControlTarget
+              ? {
+                  ...ordinaryEffects,
+                  queueStyle(handle) {
+                    finalStyleEntries = readRootStyleEntries(handle, 'setup');
+                    ordinaryEffects.queueStyle(handle);
+                  },
+                }
+              : ordinaryEffects;
           const deferredVisualSink = opt.createVisualSink
             ? createDeferredViewVisualSink(
                 () => opt.createVisualSink!(thisEl, effectsPort),
@@ -1030,8 +1044,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 commit(frame) {
                   if (finalStyleSinkReleased) throw new Error('Retired material visual sink');
                   finalStyleSinkView = frame.view;
-                  if (splitEffects) {
-                    if (!('entries' in frame.style))
+                  if (splitEffects || thisEl._textControlTarget) {
+                    if (splitEffects && !('entries' in frame.style))
                       throw new Error('shadow-split:root-provenance');
                     finalStyleEntries = readRootStyleEntries(
                       { ...frame.style, tokens: [...frame.style.tokens] },

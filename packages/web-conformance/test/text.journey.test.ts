@@ -205,3 +205,167 @@ describe.each(runtimes)('real %s Adapter Text', (runtime) => {
     );
   });
 });
+
+// T-TEXT-0001-CASE-DENSITY: public props, not an internal rule evaluator or page CSS.
+describe.each(runtimes)('real %s Adapter Text density', (runtime) => {
+  it.each(Object.entries({ base: baseText, shadcn: shadcnText, brutalist: brutalistText }))(
+    '%s transports size/tighter inputs, defaults and prop removal on the same passive subject',
+    async (family, proto) => {
+      const owner = document.createElement('h1');
+      document.body.append(owner);
+      const mounted = await mount(runtime, proto, owner);
+      const tokens = () =>
+        (mounted.element.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+      try {
+        await mounted.update({ size: 'not-a-size', leading: 'size' } as unknown as TextRootProps);
+        if (family !== 'base') {
+          expect(tokens()).toContain('text-base');
+          expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([]);
+        }
+        for (const [size, token] of Object.entries(options.size)) {
+          await mounted.update({
+            size: size as TextRootProps['size'],
+            leading: 'size',
+            tracking: 'tighter',
+          });
+          expect(owner.firstElementChild).toBe(mounted.element);
+          expect(owner.textContent).toBe(TEXT);
+          if (family === 'base') expect(tokens()).toEqual([]);
+          else {
+            expect(tokens()).toContain(token);
+            expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([]);
+            expect(tokens().filter((value) => value.startsWith('tracking-'))).toEqual([
+              'tracking-tighter',
+            ]);
+          }
+        }
+        for (const size of [undefined, 'not-a-size']) {
+          await mounted.update({ size, leading: 'size' } as TextRootProps);
+          if (family !== 'base') {
+            expect(tokens()).toContain('text-5xl');
+            expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([]);
+          }
+        }
+        await mounted.update({ leading: 'size' });
+        if (family !== 'base') expect(tokens()).toContain('text-base');
+        await mounted.update({ size: '5xl', leading: 'tighter', tracking: 'tighter' });
+        if (family !== 'base') {
+          expect(tokens()).toContain('text-5xl');
+          expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([
+            'leading-[1.1]',
+          ]);
+          expect(tokens().filter((value) => value.startsWith('tracking-'))).toEqual([
+            'tracking-tighter',
+          ]);
+        }
+        await mounted.update({ size: 'lg', leading: 'size' });
+        if (family !== 'base') {
+          expect(tokens()).toContain('text-lg');
+          expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([]);
+          expect(tokens()).toContain('tracking-normal');
+        }
+        await mounted.update({ size: 'lg', leading: 'normal', tracking: 'normal' });
+        if (family !== 'base')
+          expect(tokens().filter((value) => value.startsWith('leading-'))).toEqual([
+            'leading-normal',
+          ]);
+        for (const invalid of ['1.1', 'font', 'calc(1 + .1)', 'var(--private-leading)']) {
+          await mounted.update({ leading: invalid, tracking: invalid } as TextRootProps);
+          expect(tokens().sort()).toEqual(family === 'base' ? [] : [...defaults].sort());
+        }
+        await mounted.update({});
+        expect(tokens().sort()).toEqual(family === 'base' ? [] : [...defaults].sort());
+        expect(owner.firstElementChild).toBe(mounted.element);
+        expect(owner.textContent).toBe(TEXT);
+        expect(mounted.element.getAttribute('role')).toBeNull();
+        expect(mounted.element.getAttribute('tabindex')).toBeNull();
+        expect(mounted.element.getAttribute('aria-live')).toBeNull();
+      } finally {
+        mounted.unmount();
+        owner.remove();
+      }
+    }
+  );
+
+  it.each(['rhea', 'luma'] as const)(
+    'preserves Shadcn %s action leading precedence',
+    async (actionProfile) => {
+      const owner = document.createElement('button');
+      document.body.append(owner);
+      const mounted = await mount(runtime, shadcnText, owner);
+      try {
+        for (const leading of ['size', 'tighter', 'normal'] as const) {
+          await mounted.update({ actionProfile, leading } as TextRootProps);
+          const tokens = (mounted.element.getAttribute('data-pui-style') ?? '').split(/\s+/);
+          expect(tokens.filter((value) => value.startsWith('leading-'))).toEqual(['leading-5']);
+          expect(owner.firstElementChild).toBe(mounted.element);
+          expect(owner.textContent).toBe(TEXT);
+        }
+        await mounted.update({ leading: 'tighter' });
+        expect((mounted.element.getAttribute('data-pui-style') ?? '').split(/\s+/)).toContain(
+          'leading-[1.1]'
+        );
+        await mounted.update({});
+        expect((mounted.element.getAttribute('data-pui-style') ?? '').split(/\s+/).sort()).toEqual(
+          [...defaults].sort()
+        );
+      } finally {
+        mounted.unmount();
+        owner.remove();
+      }
+    }
+  );
+});
+
+// The existing Props fallback distinction stays observable through every public transport.
+describe.each(runtimes)('real %s Adapter Text size fallback', (runtime) => {
+  describe.each(Object.entries({ shadcn: shadcnText, brutalist: brutalistText }))(
+    '%s',
+    (_family, proto) => {
+      it.each([
+        {
+          name: 'initial invalid uses base',
+          previous: undefined,
+          next: { size: 'invalid', leading: 'size' },
+          token: 'text-base',
+        },
+        {
+          name: 'missing releases a previously valid size to base',
+          previous: 'lg',
+          next: { leading: 'size' },
+          token: 'text-base',
+        },
+        {
+          name: 'invalid retains the previous valid size',
+          previous: 'lg',
+          next: { size: 'invalid', leading: 'size' },
+          token: 'text-lg',
+        },
+        {
+          name: 'provided undefined retains the previous valid size',
+          previous: 'lg',
+          next: { size: undefined, leading: 'size' },
+          token: 'text-lg',
+        },
+      ])('$name', async ({ previous, next, token }) => {
+        const owner = document.createElement('p');
+        document.body.append(owner);
+        const mounted = await mount(runtime, proto, owner);
+        try {
+          if (previous) await mounted.update({ size: previous, leading: 'size' } as TextRootProps);
+          await mounted.update(next as TextRootProps);
+          const tokens = (mounted.element.getAttribute('data-pui-style') ?? '').split(/\s+/);
+          expect(tokens.filter((value) => Object.values(options.size).includes(value))).toEqual([
+            token,
+          ]);
+          expect(tokens.filter((value) => value.startsWith('leading-'))).toEqual([]);
+          expect(owner.firstElementChild).toBe(mounted.element);
+          expect(owner.textContent).toBe(TEXT);
+        } finally {
+          mounted.unmount();
+          owner.remove();
+        }
+      });
+    }
+  );
+});

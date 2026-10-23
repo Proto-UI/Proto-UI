@@ -1,0 +1,170 @@
+---
+import '../../../styles/global.css';
+import SiteLibraryStyle from '../../../components/SiteLibraryStyle.astro';
+import { renderProtoStyleTokenCss } from '../../../../../../packages/cli/src/services/proto-style-css';
+import { SHADCN_STYLE_TOKENS } from '../../../../../../packages/cli/src/generated/shadcn-style-tokens';
+import { BRUTALIST_STYLE_TOKENS } from '../../../../../../packages/cli/src/generated/brutalist-style-tokens';
+const css = renderProtoStyleTokenCss([
+  ...new Set([...SHADCN_STYLE_TOKENS, ...BRUTALIST_STYLE_TOKENS]),
+]);
+const families = ['shadcn', 'brutalist'];
+const widths = [144, 224, 360];
+const variants = ['placeholder', 'value', 'disabled'];
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>CommandInput intrinsic width acceptance</title>
+    <SiteLibraryStyle />
+    <style is:global data-command-source-css set:html={css}></style>
+  </head>
+  <body>
+    <h1>CommandInput width fixture</h1>
+    <p>Real public Prototype and Adapter projections. Only the test parent owns its width.</p>
+    <main data-command-width-fixture data-mount-state="pending">
+      {
+        families.map((family) => (
+          <section data-site-family-scope data-site-library-family={family}>
+            <h2>{family}</h2>
+            <div class="fixture-grid">
+              {widths.map((width) => (
+                <div class="fixture-column" style={`width: ${width}px`}>
+                  <h3>{width}px parent</h3>
+                  {variants.map((variant) => (
+                    <article
+                      data-width-case={`${family}-${width}-${variant}`}
+                      data-family={family}
+                      data-width={width}
+                      data-variant={variant}
+                    >
+                      <p>{variant}</p>
+                      <div data-command-width-host />
+                    </article>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </main>
+    <p data-command-width-error role="alert"></p>
+    <script>
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
+      import {
+        isRuntimeId,
+        type RuntimeId,
+      } from '../../../components/PrototypePreviewer/runtimes/ids';
+      import type {
+        DemoSpec,
+        DemoRenderResult,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      const requestedRuntime = new URL(location.href).searchParams.get('runtime') ?? 'wc';
+      if (
+        !isRuntimeId(requestedRuntime) ||
+        !['wc', 'react', 'vue', 'vue2'].includes(requestedRuntime)
+      )
+        throw new Error('Unsupported fixture runtime');
+      const runtime: RuntimeId = requestedRuntime;
+      const main = document.querySelector<HTMLElement>('[data-command-width-fixture]')!;
+      main.dataset.runtime = runtime;
+      let current = true;
+      const views: DemoRenderResult[] = [];
+      const report = (error: unknown) => {
+        document.querySelector('[data-command-width-error]')!.textContent = String(error);
+        console.error(error);
+      };
+      window.addEventListener(
+        'pagehide',
+        () => {
+          current = false;
+          main.dataset.mountState = 'retired';
+          for (const view of views.splice(0)) void Promise.resolve(view.destroy()).catch(report);
+        },
+        { once: true }
+      );
+      async function mount() {
+        await loadPrototypes([
+          'shadcn-command-root',
+          'shadcn-command-input',
+          'brutalist-command-root',
+          'brutalist-command-input',
+        ]);
+        for (const owner of document.querySelectorAll<HTMLElement>('[data-width-case]')) {
+          if (!current) return;
+          const family = owner.dataset.family!;
+          const variant = owner.dataset.variant!;
+          const demo: DemoSpec = {
+            type: 'demo',
+            root: {
+              kind: 'proto',
+              prototypeId: `${family}-command-root`,
+              props: {
+                a11yLabel: owner.dataset.widthCase,
+                disabled: variant === 'disabled',
+                ...(variant === 'placeholder'
+                  ? {}
+                  : { defaultInputValue: 'abcdefghijklmnopqrstuvwxyz0123456789'.repeat(3) }),
+              },
+              children: [
+                {
+                  kind: 'proto',
+                  prototypeId: `${family}-command-input`,
+                  ref: 'input',
+                  props: {
+                    a11yLabel: owner.dataset.widthCase,
+                    placeholder:
+                      'Search a deliberately long unbroken placeholder abcdefghijklmnopqrstuvwxyz',
+                  },
+                },
+              ],
+            },
+          };
+          const view = await renderDemo({
+            runtime,
+            demo,
+            host: owner.querySelector<HTMLElement>('[data-command-width-host]')!,
+            isCurrent: () => current,
+          });
+          if (!current) {
+            await view.destroy();
+            return;
+          }
+          views.push(view);
+        }
+        main.dataset.mountState = 'ready';
+      }
+      void mount().catch((error) => {
+        if (current) main.dataset.mountState = 'error';
+        report(error);
+      });
+    </script>
+  </body>
+</html>
+<style>
+  body {
+    margin: 16px;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    overflow-wrap: anywhere;
+  }
+  .fixture-grid {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+  }
+  .fixture-column {
+    flex: none;
+  }
+  article {
+    margin-block: 16px;
+  }
+</style>
