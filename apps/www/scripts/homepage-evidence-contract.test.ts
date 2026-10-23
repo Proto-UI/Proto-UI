@@ -1274,3 +1274,33 @@ test('Accordion readiness remains count-one and width failures retain full physi
   ])
     assert.throws(() => verify(browser.replaceAll(fragment, '')));
 });
+
+test('homepage Command verifies the public outer shell and actual muted active paint without changing the editor', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const required = [
+    'expect(paint.shellCount).toBe(1)',
+    "expect(paint.rootRadius).toBe('22px')",
+    "expect(paint.shellRadius).toBe('18px')",
+    'expect(paint.shellHeight).toBe(32)',
+    "expect(paint.innerRadius).toBe('0px')",
+    "expect(paint.innerBorder).toBe('0px')",
+    "expect(paint.innerFont).toBe('14px')",
+    "expect(paint.activeRadius).toBe('14px')",
+    'expect(paint.activeBackground).toBe(paint.expectedMuted)',
+    "expect(paint.activeText).toBe('Build a prototype')",
+    'record.commandPaint = paint',
+    'record.commandPaintSamples = samples',
+    "expect(paint.themeMutedToken).not.toBe('')",
+    "expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)')",
+    'reference.remove()',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(candidate, /finally\s*\{\s*record\.commandPaint = paint;\s*await save\(\);/);
+  };
+  verify(source);
+  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
+});

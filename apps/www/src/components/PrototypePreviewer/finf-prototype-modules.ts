@@ -958,6 +958,14 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-shadcn/command');
     registerExactPrototype('shadcn-command-input', module.commandInput);
   },
+  'shadcn-command-input-wrapper': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/command');
+    registerExactPrototype('shadcn-command-input-wrapper', module.commandInputWrapper);
+  },
+  'shadcn-input-shell': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/input-shell');
+    registerExactPrototype('shadcn-input-shell', module.inputShell);
+  },
   'shadcn-command-content': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/command');
     registerExactPrototype('shadcn-command-content', module.commandContent);

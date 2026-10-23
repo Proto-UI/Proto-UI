@@ -50,6 +50,18 @@ export function createHomepageCompositionParts(
       progress: 90,
     },
   ];
+  // Command's upstream slot intentionally does not select the ordinary shell focus ring.
+  // This passive shell has no disabled opacity of its own; the editor retains those facts.
+  const commandInput = () =>
+    p(
+      `${family}-command-input`,
+      [],
+      {
+        placeholder: zh ? '搜索步骤…' : 'Find a step…',
+        a11yLabel: zh ? '搜索示例步骤' : 'Search example steps',
+      },
+      'composition-command-input'
+    );
   const command = card(
     zh ? '下一步做什么？' : 'What comes next?',
     zh ? '搜索一个步骤，更新本页的计划。' : 'Find a step to update the plan on this page.',
@@ -57,15 +69,11 @@ export function createHomepageCompositionParts(
       p(
         `${family}-command-root`,
         [
-          p(
-            `${family}-command-input`,
-            [],
-            {
-              placeholder: zh ? '搜索步骤…' : 'Find a step…',
-              a11yLabel: zh ? '搜索示例步骤' : 'Search example steps',
-            },
-            'composition-command-input'
-          ),
+          family === 'shadcn'
+            ? p('shadcn-command-input-wrapper', [
+                p('shadcn-input-shell', [commandInput()], { focusIndicator: 'none' }),
+              ])
+            : commandInput(),
           p(`${family}-command-content`, [
             ...commands.map(({ value, text }) =>
               p(`${family}-command-item`, [text], {

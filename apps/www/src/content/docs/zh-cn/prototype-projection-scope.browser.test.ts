@@ -497,6 +497,8 @@ async function assertTaskPartInventory(
           ...Array(3).fill('shadcn-select-item-text'),
           'shadcn-select-surface',
           'shadcn-select-viewport',
+          'shadcn-command-input-wrapper',
+          'shadcn-input-shell',
         ]
       : []),
     ...(family === 'shadcn'
@@ -511,7 +513,7 @@ async function assertTaskPartInventory(
     expectedIds
   );
   expect(new Set(actualIds).size, 'complete declared task recipe').toBe(
-    family === 'shadcn' ? 61 : 56
+    family === 'shadcn' ? 63 : 56
   );
   await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
   const owners = await parts.evaluateAll((elements) =>

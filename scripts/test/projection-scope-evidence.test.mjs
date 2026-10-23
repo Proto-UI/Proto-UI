@@ -327,11 +327,17 @@ for (const family of ['shadcn', 'brutalist']) {
               : ['brutalist-surface-root']),
             `${family}-text-root`,
             ...(family === 'shadcn'
-              ? ['shadcn-select-item-text', 'shadcn-select-surface', 'shadcn-select-viewport']
+              ? [
+                  'shadcn-select-item-text',
+                  'shadcn-select-surface',
+                  'shadcn-select-viewport',
+                  'shadcn-command-input-wrapper',
+                  'shadcn-input-shell',
+                ]
               : []),
           ].sort()
         );
-        assert.equal(value.task.recipe.prototypeIds.length, family === 'shadcn' ? 61 : 56);
+        assert.equal(value.task.recipe.prototypeIds.length, family === 'shadcn' ? 63 : 56);
         await verify(value);
         assert.equal(Object.keys(SCENE_PART_COUNTS).length, 19);
         for (const [suffix, count] of Object.entries(SCENE_PART_COUNTS)) {
@@ -350,6 +356,21 @@ for (const family of ['shadcn', 'brutalist']) {
           await assert.rejects(() => verify(value), undefined, `duplicate ${suffix}`);
           duplicate.remove();
         }
+        if (family === 'shadcn')
+          for (const id of ['shadcn-command-input-wrapper', 'shadcn-input-shell']) {
+            const nodes = value.element.querySelectorAll(`[data-projection-prototype="${id}"]`);
+            assert.equal(nodes.length, 1, `exactly one public shell part ${id}`);
+            const target = nodes[0],
+              parent = target.parentNode,
+              next = target.nextSibling;
+            target.remove();
+            await assert.rejects(() => verify(value), undefined, `missing ${id}`);
+            parent.insertBefore(target, next);
+            const duplicate = target.cloneNode(true);
+            parent.insertBefore(duplicate, next);
+            await assert.rejects(() => verify(value), undefined, `duplicate ${id}`);
+            duplicate.remove();
+          }
         await verify(value);
       } finally {
         value.close();

@@ -88,6 +88,24 @@ describe('homepage workspace compositions', () => {
       ]) {
         expect(ids.has(`${family}-${suffix}`)).toBe(true);
       }
+      const wrapper = nodes.filter(
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-command-input-wrapper'
+      );
+      const shell = nodes.filter(
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-input-shell'
+      );
+      expect(wrapper).toHaveLength(family === 'shadcn' ? 1 : 0);
+      expect(shell).toHaveLength(family === 'shadcn' ? 1 : 0);
+      if (family === 'shadcn') {
+        expect(wrapper[0]!.children).toEqual([shell[0]]);
+        expect(shell[0]!.kind === 'proto' && shell[0]!.props).toEqual({ focusIndicator: 'none' });
+        expect(shell[0]!.children).toHaveLength(1);
+        expect(shell[0]!.children?.[0]).toMatchObject({
+          kind: 'proto',
+          prototypeId: 'shadcn-command-input',
+          ref: 'composition-command-input',
+        });
+      }
       const refs = nodes.flatMap((node) => (node.ref ? [node.ref] : []));
       expect(new Set(refs).size).toBe(refs.length);
       for (const node of nodes.filter((node) => node.kind === 'proto')) {

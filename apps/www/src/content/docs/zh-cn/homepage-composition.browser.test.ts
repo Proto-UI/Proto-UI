@@ -14,8 +14,9 @@ import { copySourceBindingIssues, type CopySourceBinding } from './copy-command-
 // Four separate width-fixture contexts isolate intrinsic input sizing.
 // 150s startup + 8 x 45s scenes + 30s no-JS + 30s width + 20s teardown
 // + 1s pure contracts = 591s < the unchanged 600s lane cap.
-// Only real input changes application state. The sole style mutation is the
+// Only real input changes application state. The sole component-style mutation is the
 // explicitly reported text-resize simulation, never a component geometry fix.
+// A zero-size hidden theme-color probe is temporary observation, not component paint.
 const directory = join(
   process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ||
     join(process.env.RUNNER_TEMP || tmpdir(), 'homepage-evidence'),
@@ -854,6 +855,99 @@ describe.sequential(
             await expect.poll(activeText).toBe('Outline an idea');
             await input.press('ArrowDown');
             await expect.poll(activeText).toBe('Build a prototype');
+            if (family === 'shadcn') {
+              const readPaint = () =>
+                command.evaluate((root) => {
+                  const input = root.querySelector<HTMLInputElement>('input')!;
+                  const shell = root.querySelector<HTMLElement>(
+                    '[data-projection-prototype="shadcn-input-shell"]'
+                  )!;
+                  const wrapper = root.querySelector<HTMLElement>(
+                    '[data-projection-prototype="shadcn-command-input-wrapper"]'
+                  )!;
+                  const active = document.getElementById(
+                    input.getAttribute('aria-activedescendant')!
+                  )!;
+                  const reference = document.createElement('span');
+                  reference.setAttribute('aria-hidden', 'true');
+                  // Zero-size detached-from-flow color probe; never changes any component style.
+                  reference.style.cssText =
+                    'position:fixed;visibility:hidden;pointer-events:none;width:0;height:0;background:var(--pui-muted)';
+                  root.append(reference);
+                  try {
+                    const inner = getComputedStyle(input),
+                      outer = getComputedStyle(shell),
+                      item = getComputedStyle(active);
+                    return {
+                      rootRadius: getComputedStyle(root).borderRadius,
+                      shellRadius: outer.borderRadius,
+                      shellHeight: shell.getBoundingClientRect().height,
+                      wrapperPadding: getComputedStyle(wrapper).padding,
+                      innerRadius: inner.borderRadius,
+                      innerBorder: inner.borderTopWidth,
+                      innerFont: inner.fontSize,
+                      activeRadius: item.borderRadius,
+                      activeBackground: item.backgroundColor,
+                      expectedMuted: getComputedStyle(reference).backgroundColor,
+                      themeMutedToken: getComputedStyle(root)
+                        .getPropertyValue('--pui-muted')
+                        .trim(),
+                      activeText: active.textContent,
+                      shellCount: root.querySelectorAll(
+                        '[data-projection-prototype="shadcn-input-shell"]'
+                      ).length,
+                    };
+                  } finally {
+                    reference.remove();
+                  }
+                });
+              let paint = await readPaint();
+              const samples = [paint];
+              record.commandPaintSamples = samples;
+              try {
+                await expect
+                  .poll(
+                    async () => {
+                      paint = await readPaint();
+                      samples.push(paint);
+                      return (
+                        paint.shellCount === 1 &&
+                        paint.rootRadius === '22px' &&
+                        paint.shellRadius === '18px' &&
+                        paint.shellHeight === 32 &&
+                        paint.wrapperPadding === '4px 4px 0px' &&
+                        paint.innerRadius === '0px' &&
+                        paint.innerBorder === '0px' &&
+                        paint.innerFont === '14px' &&
+                        paint.activeRadius === '14px' &&
+                        paint.activeText === 'Build a prototype' &&
+                        paint.themeMutedToken.length > 0 &&
+                        !['transparent', 'rgba(0, 0, 0, 0)'].includes(paint.expectedMuted) &&
+                        paint.activeBackground === paint.expectedMuted
+                      );
+                    },
+                    { timeout: 1500, interval: 25 }
+                  )
+                  .toBe(true);
+              } finally {
+                record.commandPaint = paint;
+                await save();
+              }
+              expect(paint.themeMutedToken).not.toBe('');
+              expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)');
+              expect(paint.expectedMuted).not.toBe('transparent');
+              expect(paint.shellCount).toBe(1);
+              expect(paint.rootRadius).toBe('22px');
+              expect(paint.shellRadius).toBe('18px');
+              expect(paint.shellHeight).toBe(32);
+              expect(paint.wrapperPadding).toBe('4px 4px 0px');
+              expect(paint.innerRadius).toBe('0px');
+              expect(paint.innerBorder).toBe('0px');
+              expect(paint.innerFont).toBe('14px');
+              expect(paint.activeRadius).toBe('14px');
+              expect(paint.activeBackground).toBe(paint.expectedMuted);
+              expect(paint.activeText).toBe('Build a prototype');
+            }
             await input.press('Enter');
             await plan(page, 60);
             await hasFocus(input);

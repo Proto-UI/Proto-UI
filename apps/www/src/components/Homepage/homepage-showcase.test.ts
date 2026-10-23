@@ -82,7 +82,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
     // The closed recipe now includes the actual family Label relation owner.
-    expect(ids.size).toBe(family === 'shadcn' ? 61 : 56);
+    expect(ids.size).toBe(family === 'shadcn' ? 63 : 56);
     if (family === 'shadcn') {
       for (const part of ['root', 'header', 'content'])
         expect(ids.has(`shadcn-card-${part}`)).toBe(true);
@@ -109,6 +109,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       'accordion-trigger',
       'accordion-content',
     ].map((suffix) => `${family}-${suffix}`);
+    if (family === 'shadcn') sceneIds.push('shadcn-command-input-wrapper', 'shadcn-input-shell');
     const assertRecipe = (recipe: readonly string[]) => {
       expect(recipe).toHaveLength(ids.size);
       expect(new Set(recipe).size).toBe(recipe.length);
@@ -117,8 +118,10 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     };
     const recipe = [...content.recipe.prototypeIds];
     assertRecipe(recipe);
-    expect(() => assertRecipe(recipe.filter((id) => id !== sceneIds[0]))).toThrow();
-    expect(() => assertRecipe([...recipe, sceneIds[0]!])).toThrow();
+    for (const sceneId of sceneIds) {
+      expect(() => assertRecipe(recipe.filter((id) => id !== sceneId))).toThrow();
+      expect(() => assertRecipe([...recipe, sceneId])).toThrow();
+    }
     expect(ids.has(`${family}-label-root`)).toBe(true);
     expect(
       [...ids].every((id) => id.startsWith(`${family}-`) || id === PREVIEW_SURFACE_ID(family))
