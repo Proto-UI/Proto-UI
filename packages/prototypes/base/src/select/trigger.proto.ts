@@ -1,5 +1,7 @@
-import { asAccessible } from '@proto.ui/hooks';
-import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
+import { asOptionalFieldControl } from '../field/control-binding.proto';
+import { FIELD_LABEL_PAIR } from '../field/shared';
+import { asAccessible, asControlLabel } from '@proto.ui/hooks';
+import { defineAsHook, definePrototype, delay, type DefHandle } from '@proto.ui/core';
 import { setupSelectCommand } from './command';
 import {
   createSelectContentId,
@@ -14,7 +16,11 @@ import type {
   SelectTriggerProps,
 } from './types';
 
-function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExposes>): void {
+export function setupSelectTrigger(
+  def: DefHandle<SelectTriggerProps, SelectTriggerExposes>,
+  options: Readonly<{ fieldBinding?: boolean }> = {}
+): void {
+  const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
   def.anatomy.claim(SELECT_FAMILY, { role: 'trigger' });
   const command = setupSelectCommand(def, 'select trigger');
@@ -25,6 +31,7 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
   def.expose.state('placeholder', placeholder);
 
   accessible.role('combobox');
+  // Field labelledBy remains authoritative when resolved; content naming is the no-provider fallback.
   accessible.nameFromContent();
   accessible.state('disabled', command.disabled);
   accessible.state('expanded', expanded);
@@ -32,14 +39,74 @@ function setupSelectTrigger(def: DefHandle<SelectTriggerProps, SelectTriggerExpo
   accessible.relation('controls', { target: controls });
   accessible.action('activate', { event: 'click' });
 
+  let currentRun: any = null;
+  let viewEpoch = 0;
+  const reportTasks = new Set<{ cancel(): void }>();
+  const report = (reason: 'sync' | 'change' | 'blur' = 'sync') => {
+    if (!binding || !currentRun) return;
+    binding.report({
+      value: currentRun.context.read(SELECT_CONTEXT).value,
+      focused: command.focused.get(),
+      composing: false,
+      reason,
+    });
+  };
+  if (binding) {
+    asControlLabel().target((_, request) => {
+      if (!command.disabled.get() && request.isCurrent())
+        command.focusSelf({ reason: request.source === 'pointer' ? 'pointer' : 'programmatic' });
+    }, FIELD_LABEL_PAIR);
+    def.expose.method('__selectFieldPolicy' as any, () => ({
+      disabled: binding.state.fieldDisabled.get(),
+      readOnly: binding.state.fieldReadOnly.get(),
+    }));
+    def.expose.method('__fieldSelectChange' as any, () => {
+      const epoch = viewEpoch;
+      const task = delay(0, () => {
+        reportTasks.delete(task);
+        if (currentRun && epoch === viewEpoch) report('change');
+      });
+      reportTasks.add(task);
+    });
+    binding.state.fieldDisabled.watch(() => {
+      if (currentRun) command.syncDisabled(binding.state.fieldDisabled.get());
+    });
+    command.focused.watch((_, event) => {
+      if (event.type === 'next') report(event.next ? 'sync' : 'blur');
+    });
+  }
   const sync = (run: any, ctx: SelectContextValue) => {
-    command.syncDisabled(!!run.props.get().disabled || ctx.disabled);
+    currentRun = run;
+    const epoch = viewEpoch;
+    const current = () => currentRun === run && viewEpoch === epoch;
+    binding?.setPolicy({ disabled: !!ctx.controlDisabled, readOnly: !!ctx.controlReadOnly });
+    if (!current()) return;
+    command.syncDisabled(
+      binding ? binding.state.fieldDisabled.get() : !!run.props.get().disabled || ctx.disabled
+    );
+    if (!current()) return;
     expanded.set(ctx.open, 'reason: select trigger expanded sync');
+    if (!current()) return;
     placeholder.set(!ctx.value, 'reason: select trigger placeholder sync');
+    if (!current()) return;
     controls.set(createSelectContentId(ctx.rootId), 'reason: select trigger controls sync');
+    if (current()) report();
   };
   def.context.subscribe(SELECT_CONTEXT, (run, next) => sync(run, next));
   def.lifecycle.onCreated((run) => sync(run, run.context.read(SELECT_CONTEXT)));
+  def.lifecycle.onUnmounted(() => {
+    viewEpoch++;
+    for (const task of reportTasks) task.cancel();
+    reportTasks.clear();
+    currentRun = null;
+  });
+  def.lifecycle.onBeforeDispose(() => {
+    viewEpoch++;
+    for (const task of reportTasks) task.cancel();
+    reportTasks.clear();
+    currentRun = null;
+  });
+  def.lifecycle.onMounted((run) => sync(run, run.context.read(SELECT_CONTEXT)));
   def.props.watch(['disabled'], (run) => sync(run, run.context.read(SELECT_CONTEXT)));
 
   def.event.on('press.commit', (run, ev) => {

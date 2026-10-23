@@ -1,3 +1,4 @@
+import { FIELD_CONTEXT } from '../field/shared';
 import { defineAsHook, definePrototype, type DefHandle } from '@proto.ui/core';
 import { asCollection } from '@proto.ui/hooks';
 import { useOpenState } from '../tools';
@@ -31,12 +32,14 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     value: { type: 'string', empty: 'fallback' },
     defaultValue: { type: 'string', empty: 'fallback' },
     disabled: { type: 'boolean', empty: 'fallback' },
+    readOnly: { type: 'boolean', empty: 'fallback' },
     closeOnSelect: { type: 'boolean', empty: 'fallback' },
   });
   def.props.setDefaults({
     defaultOpen: false,
     defaultValue: '',
     disabled: false,
+    readOnly: false,
     closeOnSelect: true,
   });
 
@@ -49,6 +52,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     textValue: '',
     controlledValue: false,
     disabled: false,
+    readOnly: false,
     activeValue: '',
     closeOnSelect: true,
     requestReason: null,
@@ -95,6 +99,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   const syncContext = (run: any) => {
     const next = {
       ...snapshot,
+      controlDisabled: !!run.props.get().disabled,
+      controlReadOnly: !!run.props.get().readOnly,
+      disabled: !!run.props.get().disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
+      readOnly: !!run.props.get().readOnly || !!run.context.tryRead(FIELD_CONTEXT)?.readOnly,
       open: open?.get() ?? false,
       value: value.get(),
       textValue: textValue.get(),
@@ -104,6 +112,10 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     published = next;
     run.context.update(SELECT_CONTEXT, next);
   };
+
+  def.context.trySubscribe(FIELD_CONTEXT, (run) => {
+    if (currentRun) syncContext(run);
+  });
 
   let collectionSnapshot = '';
   const refreshSelectedText = (run: any) => {
@@ -163,7 +175,13 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   };
 
   const submitValueRequest = (run: any, request: SelectValueRequest): boolean => {
-    if (!currentRun || snapshot.disabled) return false;
+    if (!currentRun || snapshot.disabled || snapshot.readOnly) return false;
+    const fieldPolicy = run.anatomy
+      .partsOf(SELECT_FAMILY, 'trigger')[0]
+      ?.getExpose('__selectFieldPolicy');
+    const policy = typeof fieldPolicy === 'function' ? fieldPolicy() : null;
+    if (policy?.disabled || policy?.readOnly) return false;
+    const previousValue = value.get();
     const epoch = viewEpoch;
     const selection = ++selectionSequence;
     const isCurrent = () => ownsView(epoch) && selection === selectionSequence;
@@ -185,6 +203,12 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     syncContext(run);
     if (!isCurrent()) return true;
     run.expose.emit('valueChange', request);
+    if (isCurrent() && value.get() !== previousValue) {
+      const notify = run.anatomy
+        .partsOf(SELECT_FAMILY, 'trigger')[0]
+        ?.getExpose('__fieldSelectChange');
+      if (typeof notify === 'function') notify();
+    }
     return true;
   };
 
@@ -232,7 +256,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   def.lifecycle.onUnmounted(retireView);
   def.lifecycle.onBeforeDispose(retireView);
 
-  def.props.watch(['value', 'disabled', 'closeOnSelect'], (run, next) => {
+  def.props.watch(['value', 'disabled', 'readOnly', 'closeOnSelect'], (run, next) => {
     const controlledValue = run.props.isProvided('value');
     snapshot = {
       ...snapshot,

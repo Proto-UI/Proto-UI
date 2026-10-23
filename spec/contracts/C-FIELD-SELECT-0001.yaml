@@ -1,0 +1,30 @@
+id: C-FIELD-SELECT-0001
+type: contract
+title: Optional Field Select Trigger composition and owning Root policy
+status: draft
+since: 0.3.0-alpha.1
+summary: Reuse one Select protocol and the existing Field binding without a second validator or selection state.
+criteria:
+  - id: C-FIELD-SELECT-0001-COMPOSITION
+    text:
+      en: FieldSelectTrigger and asFieldSelectTrigger invoke the same public setupSelectTrigger with definition-time fieldBinding enabled. Ordinary SelectTrigger retains content-derived naming and does not silently acquire invalid or Field relationships. The composed trigger is the Field control and reuses FIELD_LABEL_PAIR for label focus; Root remains the only selection owner.
+  - id: C-FIELD-SELECT-0001-POLICY
+    text:
+      en: Select Root optionally observes existing FIELD_CONTEXT and combines its disabled/readOnly policy with local Root props. Disabled rejects open/value requests; readOnly rejects value changes, including an already-open popup, while still allowing inspection, focus and close. Root checks the current composed Trigger local policy before value acceptance. Owner-controlled value updates remain authoritative. With no Field and omitted readOnly, old behavior remains unchanged.
+  - id: C-FIELD-SELECT-0001-FACTS
+    text:
+      en: Existing optional Field binding exclusively owns invalid, pending, required and Field relationships. Raw Root control policy is distinct from inherited Field policy so removing local or parent restrictions cannot latch them through a report feedback loop. Reports use canonical Root value, not an unaccepted controlled request. No native constraint validation or HTML validity is inferred.
+  - id: C-FIELD-SELECT-0001-LIFECYCLE
+    text:
+      en: Field relationship and policy updates preserve Root value/open ownership and control identity. Canonical value is reported synchronously for inspection, while onChange validation notification is deferred through an owned zero-delay task after outward valueChange delivery; each accepted canonical change retains its own notification task and retirement cancels pending tasks, without debounce or delaying user valueChange. Rejected controlled requests schedule no validation notification. Every notification reads the current canonical value and existing Field request leases enforce latest-result ownership. Synchronous valueChange callbacks that retire the view prevent stale change reports; unmount/dispose retires the Trigger report endpoint. Parent replacement must re-resolve Field facts without retaining old invalid/relationships. This composition does not copy popup navigation, focus restoration, geometry or activation behavior.
+sources:
+  - path: packages/prototypes/base/src/select/root.proto.ts
+  - path: packages/prototypes/base/src/select/trigger.proto.ts
+  - path: packages/prototypes/base/src/field/select-trigger.proto.ts
+verifies:
+  tests: [T-FIELD-SELECT-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Makes optional Field association explicit while keeping one canonical Select owner and existing Field validator.
+tags: [field, select, composition]

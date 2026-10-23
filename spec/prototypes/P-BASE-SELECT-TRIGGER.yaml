@@ -8,6 +8,11 @@ statement:
   zh-CN: Select Trigger 是同域 Root 中至多一个的 focusable command。它投射 select-only combobox role、expanded/controls/disabled facts 与 content-derived name，并将 pointer、Enter、Space、ArrowDown、ArrowUp 的 open intent 提交到 Root；它不得拥有 open 或 selection。
   en: Select Trigger is the optional, at-most-one focusable command in the Root domain. It projects a select-only combobox role, expanded, controls, and disabled facts, and a content-derived name, and submits pointer, Enter, Space, ArrowDown, and ArrowUp open intent to Root; it must not own open state or selection.
 criteria:
+  - id: P-BASE-SELECT-TRIGGER-OPTIONAL-FIELD-COMPOSITION
+    text:
+      en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger keeps content-derived naming while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier content-only Trigger surface without replacing selection, popup or focus protocols.
+    dependsOn:
+      contracts: [{ id: C-FIELD-SELECT-0001, since: 0.3.0-alpha.1 }]
   - id: P-BASE-SELECT-TRIGGER-TRANSIENT-CLEANUP
     text:
       zh-CN: 'press.cancel、pointer.cancel 与 view unmount 必须清除本 part 的 hovered/pressed；清理不得改变 canonical Root open/value or committed selected 或发出 activation/request。逻辑实例 remount 不得重放旧瞬态；pointer.leave 的语义清理不等于取消 Host 持有的 contact。'
