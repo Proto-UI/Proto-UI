@@ -69,7 +69,15 @@ const UNRESOLVED_PREFIXES = [
   'will-change-',
 ] as const;
 
-const PLACEMENT_EXACT_TOKENS = new Set(['absolute', 'fixed', 'grow', 'shrink', 'static', 'sticky']);
+const PLACEMENT_EXACT_TOKENS = new Set([
+  'absolute',
+  'fixed',
+  'grow',
+  'shrink',
+  'static',
+  'sticky',
+  'isolate',
+]);
 
 const PLACEMENT_PREFIXES = [
   'aspect-',

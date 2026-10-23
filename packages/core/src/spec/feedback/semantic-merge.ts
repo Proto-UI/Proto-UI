@@ -60,6 +60,10 @@ const TEXT_ALIGN_TOKENS = new Set(['left', 'right', 'center', 'justify', 'start'
 
 export function getSemanticGroupKeyV0(token: string): string {
   if (isPlaceholderColorTokenV0(token)) return 'placeholder:text-color';
+  if (token === '-z-1' || token === 'z-10' || token === 'z-40' || token === 'z-50')
+    return 'finite z index';
+  if (token === 'backdrop-blur-xs' || token === 'backdrop-filter-[blur(40px)_saturate(1.5)]')
+    return 'complete backdrop filter';
   // Keep allowlisted selector targets isolated from the element's ordinary
   // style groups, while still resolving conflicts within the target by the
   // underlying utility (for example selection:bg-* is last-wins separately
