@@ -1249,6 +1249,7 @@ export function renderPrefixedThemeCss(input: string): string {
     [
       '$1',
       '    --pui-radius-2xl: calc(var(--pui-radius) + 8px);',
+      '    --pui-radius-3xl: calc(var(--pui-radius) + 12px);',
       '    --pui-radius-4xl: calc(var(--pui-radius) + 16px);',
       '    --pui-radius-xl: calc(var(--pui-radius) + 4px);',
       '    --pui-radius-lg: var(--pui-radius);',
@@ -1399,10 +1400,19 @@ function renderRoundedUtility(utility: string): string[] | null {
   if (utility === 'rounded-[min(var(--pui-radius-4xl),24px)]')
     return ['border-radius: min(var(--pui-radius-4xl), 24px);'];
   if (utility === 'rounded-t-[min(var(--pui-radius-4xl),24px)]')
-    return ['border-top-left-radius: min(var(--pui-radius-4xl), 24px);', 'border-top-right-radius: min(var(--pui-radius-4xl), 24px);'];
+    return [
+      'border-top-left-radius: min(var(--pui-radius-4xl), 24px);',
+      'border-top-right-radius: min(var(--pui-radius-4xl), 24px);',
+    ];
   if (utility === 'rounded-b-[min(var(--pui-radius-4xl),24px)]')
-    return ['border-bottom-left-radius: min(var(--pui-radius-4xl), 24px);', 'border-bottom-right-radius: min(var(--pui-radius-4xl), 24px);'];
+    return [
+      'border-bottom-left-radius: min(var(--pui-radius-4xl), 24px);',
+      'border-bottom-right-radius: min(var(--pui-radius-4xl), 24px);',
+    ];
 
+  if (utility === 'rounded-[var(--pui-radius-xl)]') return ['border-radius: var(--pui-radius-xl);'];
+  if (utility === 'rounded-[var(--pui-radius-3xl)]')
+    return ['border-radius: var(--pui-radius-3xl);'];
   if (utility === 'rounded-[var(--pui-radius-2xl)]')
     return ['border-radius: var(--pui-radius-2xl);'];
   if (utility === 'rounded-[var(--pui-radius-4xl)]')

@@ -4,15 +4,6 @@ export { default as commandContent } from './content.proto';
 export { default as commandItem } from './item.proto';
 export { default as commandEmpty } from './empty.proto';
 export { default } from './root.proto';
-export type {
-  CommandRootProps,
-  CommandRootExposes,
-  CommandInputProps,
-  CommandInputExposes,
-  CommandContentProps,
-  CommandContentExposes,
-  CommandItemProps,
-  CommandItemExposes,
-  CommandEmptyProps,
-  CommandEmptyExposes,
-} from '@proto.ui/prototypes-base/command';
+export { COMMAND_PROJECTED_STYLES } from './visual';
+export type * from './types';
+export { commandInputWrapper } from './input-wrapper.proto';
