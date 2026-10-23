@@ -18,6 +18,20 @@ export function createIntentBuilder<Props extends PropsBaseType = PropsBaseType>
         },
       },
       style: {
+        to: (target) => ({
+          use: (...handles: StyleHandle[]) => {
+            if (!target || typeof target !== 'object')
+              throw new Error('[rule] invalid decoration target');
+            const copied = handles.map((h) => {
+              if (!h || h.kind !== 'tw' || !Array.isArray(h.tokens))
+                throw new Error('[rule] unsupported style handle');
+              const tokens = [...h.tokens];
+              for (const token of tokens) assertTwTokenV0(token, 'rule.feedback.style.to.use');
+              return { kind: 'tw' as const, tokens };
+            });
+            ops.push({ kind: 'feedback.style.use', target, handles: copied });
+          },
+        }),
         use: (...handles: StyleHandle[]) => {
           for (const handle of handles) {
             if (!handle || handle.kind !== 'tw' || !Array.isArray(handle.tokens)) {

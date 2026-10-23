@@ -17,6 +17,11 @@ import {
   selectSeparator,
 } from '../../../prototypes/shadcn/src/select';
 
+// Native-fixture marker, not a new public prototype prop. Preserve the existing data-attribute route.
+const demoRef = (value: string): React.Attributes & { 'data-demo-ref': string } => ({
+  'data-demo-ref': value,
+});
+
 (
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -87,34 +92,34 @@ export async function mount(direction: 'ltr' | 'rtl') {
           contentProps,
           React.createElement(
             Surface,
-            { 'data-demo-ref': 'surface' },
+            demoRef('surface'),
             React.createElement(
               Viewport,
-              { 'data-demo-ref': 'viewport' },
+              demoRef('viewport'),
               React.createElement(
                 Group,
-                { 'data-demo-ref': 'frameworks' },
+                demoRef('frameworks'),
                 mode !== 'removed' &&
                   React.createElement(
                     Label,
-                    { key: mode, 'data-demo-ref': 'framework-label' },
+                    { key: mode, ...demoRef('framework-label') },
                     mode === 'rebound' ? 'Framework adapters (rebound)' : 'Framework adapters'
                   ),
                 item('react', 'React'),
                 item('vue', 'Vue'),
                 React.createElement(
                   Group,
-                  { key: 'nested', 'data-demo-ref': 'nested' },
-                  React.createElement(Label, { 'data-demo-ref': 'nested-label' }, 'Legacy adapter'),
+                  { key: 'nested', ...demoRef('nested') },
+                  React.createElement(Label, demoRef('nested-label'), 'Legacy adapter'),
                   item('vue2', 'Vue 2')
                 )
               ),
               // Deliberately no children: a separator is decoration, not an option or label.
-              React.createElement(Separator, { 'data-demo-ref': 'separator' }),
+              React.createElement(Separator, demoRef('separator')),
               React.createElement(
                 Group,
-                { 'data-demo-ref': 'platform' },
-                React.createElement(Label, { 'data-demo-ref': 'platform-label' }, 'Web platform'),
+                demoRef('platform'),
+                React.createElement(Label, demoRef('platform-label'), 'Web platform'),
                 item('wc', 'Web Components')
               )
             )

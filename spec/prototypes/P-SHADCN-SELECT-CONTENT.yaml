@@ -8,6 +8,9 @@ statement:
   zh-CN: Shadcn Select Content 是 `P-BASE-SELECT-CONTENT` 之上的 direct part，保留 listbox a11y、roving focus、overlay/presence、position、keyboard 与 dismiss behavior，增加 position enum、150/0ms Transition 配置及当前 popover animations/surface。`asChild` 明确不提供。
   en: Shadcn Select Content is a direct part over `P-BASE-SELECT-CONTENT`. It retains listbox accessibility, roving focus, overlay and presence, positioning, keyboard, and dismissal behavior while adding a position enum, 150/0ms Transition configuration, and the current popover animations and surface. `asChild` is explicitly unavailable.
 criteria:
+  - id: P-SHADCN-SELECT-CONTENT-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-CONTENT-SIDE-AVAILABILITY
     text:
       zh-CN: 固定 Radix item-aligned 不提供 data-side，故不得从默认 side prop 虚构定向 slide 或 popper 位移。popper 当前仅有请求 side，碰撞后 resolved side 订阅尚未提供；该差距必须明确，不能声称全方向碰撞动画一致。

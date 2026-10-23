@@ -5,9 +5,12 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Select Root is an unofficial direct projection that inherits Base select-only value, text derivation, requests, context, and anatomy and adds no Root-specific behavior.
 statement:
-  zh-CN: Shadcn Select Root 是 `P-BASE-SELECT` 之上的 direct prototype，保留 select-only value/open ownership、selection invariant、text derivation、requests、context 与 anatomy；当前 Root 不增加行为或视觉 surface。Root 原比较基线为 `f31ed81983653919dd4fe77aee4b4859f610f1dc`；已采用的结构 parts 基线为 `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`，详见 `P-SHADCN-SELECT-STRUCTURAL-PARTS`。
-  en: Shadcn Select Root is a direct prototype over `P-BASE-SELECT`. It retains select-only value and open ownership, selection invariant, text derivation, requests, context, and anatomy; the current Root adds no behavior or visual surface. Its original Root comparison reference is `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the adopted structural-parts reference is `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`, governed by `P-SHADCN-SELECT-STRUCTURAL-PARTS`.
+  zh-CN: Shadcn Select Root 是 `P-BASE-SELECT` 之上的 direct prototype，保留 select-only value/open ownership、selection invariant、text derivation、requests、context 与 anatomy；Root 仅新增共享 style scope 边界，不新增交互行为。Root 原比较基线为 `f31ed81983653919dd4fe77aee4b4859f610f1dc`；已采用的结构 parts 基线为 `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`，详见 `P-SHADCN-SELECT-STRUCTURAL-PARTS`。
+  en: Shadcn Select Root is a direct prototype over `P-BASE-SELECT`. It retains select-only value and open ownership, selection invariant, text derivation, requests, context, and anatomy; Root adds only a shared style-scope boundary, not interaction behavior. Its original Root comparison reference is `f31ed81983653919dd4fe77aee4b4859f610f1dc`; the adopted structural-parts reference is `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`, governed by `P-SHADCN-SELECT-STRUCTURAL-PARTS`.
 criteria:
+  - id: P-SHADCN-SELECT-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-UPSTREAM-IDENTITY
     text:
       {
@@ -31,8 +34,8 @@ criteria:
             ]
   - id: P-SHADCN-SELECT-CURRENT-BASE-DEVIATIONS
     text:
-      zh-CN: 当前实现不反转 inherited value/open、selection、text、request、context 或 anatomy guarantee，也不增加 Root-specific surface。
-      en: The current implementation reverses no inherited value, open, selection, text, request, context or anatomy guarantee and adds no Root-specific surface.
+      zh-CN: 当前实现不反转 inherited value/open、selection、text、request、context 或 anatomy guarantee，仅增加共享 style-scope 边界。
+      en: The current implementation reverses no inherited value, open, selection, text, request, context or anatomy guarantee and adds only a shared style-scope boundary.
   - id: P-SHADCN-SELECT-DIRECT-ENTRY
     text:
       {

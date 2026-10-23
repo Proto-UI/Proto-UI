@@ -1,3 +1,4 @@
+import { setupSelectStyle } from './style';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSelectValue } from '@proto.ui/prototypes-base/select';
 import type { ShadcnSelectValueExposes, ShadcnSelectValueProps } from './types';
@@ -5,7 +6,16 @@ import type { ShadcnSelectValueExposes, ShadcnSelectValueProps } from './types';
 const selectValue = definePrototype<ShadcnSelectValueProps, ShadcnSelectValueExposes>({
   name: 'shadcn-select-value',
   setup(def) {
-    def.feedback.style.use(tw('line-clamp-1 flex items-center gap-2'));
+    const style = setupSelectStyle(def);
+    def.feedback.style.use(tw('line-clamp-1 flex items-center'));
+    def.rule({
+      when: (w) => w.state(style).eq('new-york-v4'),
+      intent: (i) => i.feedback.style.use(tw('gap-2')),
+    });
+    def.rule({
+      when: (w) => w.state(style).eq('rhea'),
+      intent: (i) => i.feedback.style.use(tw('flex-1 text-left gap-1.5')),
+    });
     // P-SHADCN-SELECT-VALUE-BASE-INHERITANCE,
     // P-SHADCN-SELECT-VALUE-CURRENT-BASE-DEVIATIONS,
     // P-SHADCN-SELECT-VALUE-DISPLAY-RENDER

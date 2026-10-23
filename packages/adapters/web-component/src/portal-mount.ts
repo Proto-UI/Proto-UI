@@ -19,6 +19,11 @@ import {
  * No open-state writes or Runtime disposal here: restore the DOM projection
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
+export { isWebComponentOwnedRelocating as isWebComponentPortalRelocating } from './owned-relocation';
+import { withWebComponentOwnedRelocation } from './owned-relocation';
+function relocate(el: HTMLElement, destination: Node, move: () => void): void {
+  withWebComponentOwnedRelocation([el], destination, move);
+}
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
   refreshProjections.get(el)?.();
@@ -90,6 +95,12 @@ function portalLogicalParent(node: Node): HTMLElement | null {
 
 export function createWebComponentPortalMount() {
   let revoke: (() => void) | null = null;
+  let idleProjection: { retire: () => void } | null = null;
+  const releaseIdle = () => {
+    const idle = idleProjection;
+    idleProjection = null;
+    idle?.retire();
+  };
   return {
     mount(el: HTMLElement) {
       if (revoke) return;
@@ -106,9 +117,66 @@ export function createWebComponentPortalMount() {
           return;
         // A superseded read returns body as a safety fallback. It cannot prove
         // the current policy is a no-op; the guarded acquisition below resolves it.
-        if (revision === getWebPortalDestinationGeneration() && initial.destination === parent)
+        if (revision === getWebPortalDestinationGeneration() && initial.destination === parent) {
+          if (idleProjection) return;
+          const epoch = {};
+          projectionEpochs.set(el, epoch);
+          let material: WebPortalMaterialEpoch | null = null;
+          let off = () => {};
+          const idle = {
+            retire() {
+              off();
+              material?.release();
+            },
+          };
+          idleProjection = idle;
+          const current = () => idleProjection === idle && projectionEpochs.get(el) === epoch;
+          const refresh = () => {
+            if (!current()) return;
+            if (
+              el.parentNode !== parent ||
+              !el.isConnected ||
+              el.ownerDocument !== parent.ownerDocument
+            ) {
+              material?.suspend();
+              return;
+            }
+            const next = resolveWebPortalDestinationBinding(parent, el);
+            if (
+              current() &&
+              (next.destination !== initial.destination ||
+                next.registration !== initial.registration)
+            )
+              material?.suspend();
+          };
+          try {
+            const acquired = beginWebPortalMaterialEpoch(el);
+            if (!current()) {
+              acquired.release();
+              return;
+            }
+            material = acquired;
+            off = subscribeWebPortalDestinations(refresh);
+            refresh();
+            if (current() && el.parentNode === parent && el.isConnected)
+              material.commitProjection();
+          } catch (error) {
+            if (idleProjection === idle) idleProjection = null;
+            idle.retire();
+            throw error;
+          }
           return;
+        }
       }
+      const beforeIdleRelease = projectionEpochs.get(el);
+      releaseIdle();
+      if (
+        revoke ||
+        idleProjection ||
+        el.parentNode !== parent ||
+        projectionEpochs.get(el) !== beforeIdleRelease
+      )
+        return;
       const epoch = {};
       projectionEpochs.set(el, epoch);
       const isCurrent = () => revoke === restore && projectionEpochs.get(el) === epoch;
@@ -280,7 +348,10 @@ export function createWebComponentPortalMount() {
         const stillOwned = isLastRetired() && ownedProjection && el.parentNode === projectionBody;
         if (restoreToOrigin && marker.parentNode === parent) {
           if (stillOwned || (isLastRetired() && !wasProjected && el.parentNode === parent))
-            cleanup(() => parent.insertBefore(el, marker));
+            cleanup(() => {
+              if (el.parentNode !== parent || marker.nextSibling !== el)
+                relocate(el, parent, () => parent.insertBefore(el, marker));
+            });
         } else if (restoreToOrigin && stillOwned) cleanup(() => el.remove());
         cleanup(() => marker.remove());
         if (isLastRetired()) cleanup(() => notifyWebPortalProjection(el));
@@ -326,7 +397,8 @@ export function createWebComponentPortalMount() {
           return;
         }
         materialEpoch = acquiredMaterial;
-        projectionBody.appendChild(el);
+        if (el.parentNode !== projectionBody)
+          relocate(el, projectionBody!, () => projectionBody!.appendChild(el));
         if (isCurrent() && ownsProjection()) {
           refreshDestination();
           if (isCurrent() && ownsProjection()) materialEpoch.commitProjection();
@@ -338,6 +410,7 @@ export function createWebComponentPortalMount() {
       }
     },
     unmount(_el: HTMLElement) {
+      releaseIdle();
       revoke?.();
     },
   };

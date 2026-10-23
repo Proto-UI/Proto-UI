@@ -24,6 +24,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
   section.append(host);
   document.querySelector('main').append(section);
   let set;
+  let dispose;
   if (kind === 'wc') {
     protos.forEach((p) => AdaptToWebComponent(p));
     const [scope, field, control, label, description, error] = protos.map((p) =>
@@ -35,6 +36,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     field.append(label, description, control, error);
     scope.append(field);
     host.append(scope);
+    dispose = () => scope.remove();
     set = (style, invalid, mode = 'normal') => {
       setElementProps(control, {
         placeholder: 'Write a message',
@@ -46,10 +48,11 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
       setElementProps(field, { invalid, errors: invalid ? ['Invalid message'] : [] });
     };
   } else if (kind === 'react') {
-    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) =>
-      createReactAdapter(React)(p)
-    );
+    // One adapter factory owns the shared logical-parent channel for this tree.
+    const adapt = createReactAdapter(React);
+    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) => adapt(p));
     const root = createRoot(host);
+    dispose = () => root.unmount();
     set = (style, invalid, mode = 'normal') =>
       root.render(
         React.createElement(
@@ -71,11 +74,11 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
         )
       );
   } else if (kind === 'vue') {
-    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) =>
-      createVueAdapter(Vue)(p)
-    );
+    // One adapter factory owns the shared logical-parent channel for this tree.
+    const adapt = createVueAdapter(Vue);
+    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) => adapt(p));
     const state = Vue.reactive({ style: 'rhea', invalid: false, mode: 'normal' });
-    Vue.createApp({
+    const app = Vue.createApp({
       render: () =>
         Vue.h(Scope, { styleProfile: state.style }, () =>
           Vue.h(
@@ -94,7 +97,9 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
             ]
           )
         ),
-    }).mount(host);
+    });
+    app.mount(host);
+    dispose = () => app.unmount();
     set = (style, invalid, mode = 'normal') => {
       state.style = style;
       state.invalid = invalid;
@@ -107,9 +112,9 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
       set: Vue2.set.bind(Vue2),
       delete: Vue2.delete.bind(Vue2),
     };
-    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) =>
-      createVue2Adapter(runtime)(p)
-    );
+    // One adapter factory owns the shared logical-parent channel for this tree.
+    const adapt = createVue2Adapter(runtime);
+    const [Scope, Field, Control, Label, Description, ErrorView] = protos.map((p) => adapt(p));
     const state = Vue2.observable({ style: 'rhea', invalid: false, mode: 'normal' });
     const app = new Vue2({
       render(h) {
@@ -136,6 +141,10 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     });
     app.$mount();
     host.append(app.$el);
+    dispose = () => {
+      app.$destroy();
+      app.$el.remove();
+    };
     set = (style, invalid, mode = 'normal') => {
       state.style = style;
       state.invalid = invalid;
@@ -143,10 +152,11 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     };
   }
   set('rhea', false);
-  records.push({ kind, host, set, editor: () => host.querySelector('textarea') });
+  records.push({ kind, host, set, dispose, editor: () => host.querySelector('textarea') });
 }
 window.textareaEvidence = {
   records,
+  dispose: () => records.forEach((r) => r.dispose()),
   set: (style, invalid = false, mode = 'normal') =>
     records.forEach((r) => r.set(style, invalid, mode)),
 };

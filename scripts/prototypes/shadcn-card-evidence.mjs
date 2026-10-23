@@ -98,6 +98,9 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 let browser, page;
 const observations = [];
+const errors = [];
+const consoleErrors = [];
+const failedRequests = [];
 try {
   browser = await launchBrowser();
   const context = await browser.newContext({ viewport: { width: 1180, height: 850 } });
@@ -105,8 +108,11 @@ try {
     new URL(r.request().url()).origin === origin ? r.continue() : r.abort()
   );
   page = await context.newPage();
-  const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('console', (m) => {
+    if (m.type() === 'error') consoleErrors.push(m.text());
+  });
+  page.on('requestfailed', (r) => failedRequests.push({ url: r.url(), failure: r.failure() }));
   await page.goto(origin, { waitUntil: 'networkidle' });
   await page.waitForFunction(
     () =>
@@ -241,6 +247,23 @@ try {
             path: join(out, `${theme}-${style}-${size}-${divider ? 'dividers' : 'plain'}.png`),
             fullPage: true,
           });
+          if (style === 'rhea' && size === 'sm' && divider) {
+            // Scope and child props are separate public updates. Do not briefly ask a
+            // New York Card to keep Rhea-only sm while transitioning to the next theme.
+            await page.evaluate(() => window.cardEvidence.set('rhea', undefined, 'default', true));
+            const transition = { theme, style, step: 'restore-common-density', values: [] };
+            observations.push(transition);
+            await observeExact(transition, (values) => {
+              for (const v of values) {
+                assert.equal(v.radius, '24px');
+                assert.equal(v.py, '20px');
+                assert.equal(v.gap, '20px');
+                for (const part of [v.header, v.content, v.footer]) assert.equal(part.px, '20px');
+                assert.equal(v.header.pb, '20px');
+                assert.equal(v.footer.pt, '20px');
+              }
+            });
+          }
         }
   for (const base of [2, 10, 32]) {
     await page.evaluate((base) => {
@@ -303,8 +326,21 @@ try {
   );
 } catch (error) {
   let screenshot;
+  let readiness;
   if (page) {
     try {
+      readiness = await page.evaluate(() => ({
+        ready: document.documentElement.dataset.ready,
+        records: window.cardEvidence?.records.map((r) => ({
+          kind: r.kind,
+          editor: !!r.editor(),
+          html: r.host.innerHTML,
+        })),
+        sections: [...document.querySelectorAll('section')].map((s) => ({
+          runtime: s.dataset.runtime,
+          html: s.innerHTML,
+        })),
+      }));
       const b = await page.screenshot({ path: join(out, 'failure.png'), fullPage: true });
       screenshot = { path: 'failure.png', sha256: hash(b) };
     } catch (e) {
@@ -314,7 +350,16 @@ try {
   await writeFile(
     join(out, 'failure.json'),
     JSON.stringify(
-      { revision: receipt.revision, error: String(error), screenshot, observations },
+      {
+        revision: receipt.revision,
+        error: String(error),
+        screenshot,
+        observations,
+        errors,
+        consoleErrors,
+        failedRequests,
+        readiness,
+      },
       null,
       2
     )

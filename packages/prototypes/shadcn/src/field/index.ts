@@ -24,3 +24,12 @@ export type {
 
 export { default as fieldTextarea, default as shadcnFieldTextarea } from './textarea.proto';
 export type { ShadcnFieldTextareaProps, ShadcnFieldTextareaExposes } from './textarea.proto';
+
+export {
+  default as fieldSelectTrigger,
+  default as shadcnFieldSelectTrigger,
+} from './select-trigger.proto';
+export type {
+  ShadcnFieldSelectTriggerProps,
+  ShadcnFieldSelectTriggerExposes,
+} from './select-trigger.proto';

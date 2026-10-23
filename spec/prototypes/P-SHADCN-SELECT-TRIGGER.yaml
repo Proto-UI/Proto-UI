@@ -9,6 +9,9 @@ statement:
   en: 'Shadcn Select Trigger is a direct part over P-BASE-SELECT-TRIGGER, retaining combobox command/accessibility, open request, placeholder and disabled behavior. It adds size: sm | default, appearance: default | ghost, state-derived visual feedback and a fixed chevron. Default matches the pinned ordinary and dark recipe; ghost is a Proto UI presentation extension, not pinned-upstream parity. asChild remains unavailable.'
 
 criteria:
+  - id: P-SHADCN-SELECT-TRIGGER-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-TRIGGER-UPSTREAM-IDENTITY
     text:
       {

@@ -29,7 +29,6 @@ describe('proto style css renderer', () => {
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       expect(render(['rounded-2xl'])).toContain('border-radius: 1rem;');
       for (const token of [
-        'rounded-[var(--pui-radius-3xl)]',
         'rounded-[var(--private-radius)]',
         'rounded-[var(--pui-radius-2xl);color:red]',
         'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)]',
@@ -922,4 +921,27 @@ it('delivers the standard fixed white foreground through each existing CSS targe
       expect(rejected, token).not.toContain('color: #fff;');
     }
   }
+});
+
+it('lowers only the two additional bounded theme radius slots for Command', () => {
+  for (const render of [
+    renderProtoStyleTokenCss,
+    renderProtoShadowStyleTokenCss,
+    (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+  ]) {
+    const css = render(['rounded-[var(--pui-radius-xl)]', 'rounded-[var(--pui-radius-3xl)]']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('border-radius: var(--pui-radius-xl);');
+    expect(css).toContain('border-radius: var(--pui-radius-3xl);');
+    for (const token of [
+      'rounded-[var(--other-radius-xl)]',
+      'rounded-[calc(var(--pui-radius-3xl)+1px)]',
+      'rounded-[var(--pui-radius-5xl)]',
+    ]) {
+      expect(render([token])).toContain('Unsupported Proto UI style tokens');
+    }
+  }
+  const theme = renderPrefixedThemeCss(':root{--radius:0.625rem;}');
+  expect(theme).toContain('--pui-radius-xl: calc(var(--pui-radius) + 4px);');
+  expect(theme).toContain('--pui-radius-3xl: calc(var(--pui-radius) + 12px);');
 });

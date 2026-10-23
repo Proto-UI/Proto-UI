@@ -259,9 +259,14 @@ it('supports ghost presentation and restores default while inherited states stay
   await settle();
   expect(root.getExposes().open.get()).toBe(true);
   expect(styleContains(content, 'bg-popover')).toBe(true);
-  expect(styleContains(trigger, 'data-[focus-visible]:ring-3')).toBe(true);
+  trigger.blur();
+  document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+  trigger.getExposes().focusSelf();
+  await settle();
+  expect(trigger.getExposes().focusVisible.get()).toBe(true);
+  expect(styleContains(trigger, 'ring-3')).toBe(true);
   trigger.setProps({ appearance: 'ghost', disabled: true });
   await settle();
   expect(trigger.getAttribute('aria-disabled')).toBe('true');
-  expect(styleContains(trigger, 'data-[disabled]:cursor-not-allowed')).toBe(true);
+  expect(styleContains(trigger, 'cursor-not-allowed')).toBe(true);
 });

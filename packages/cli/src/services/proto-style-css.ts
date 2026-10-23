@@ -131,6 +131,7 @@ const staticUtilities: Record<string, string[]> = {
     '-webkit-line-clamp: 1;',
   ],
   'scroll-my-1': ['scroll-margin-block: 0.25rem;'],
+  'scroll-my-1.5': ['scroll-margin-block: 0.375rem;'],
   'border-dashed': ['border-style: dashed;'],
   'cursor-move': ['cursor: move;'],
   'grid-cols-7': ['grid-template-columns: repeat(7, minmax(0, 1fr));'],
@@ -941,7 +942,7 @@ function splitHostDeclarations(declaration: string): string[] {
     return [];
   }
   if (
-    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|position|inset(?:-.+)?|top|right|bottom|left|z-index|isolation|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
+    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|scroll-margin-block|position|inset(?:-.+)?|top|right|bottom|left|z-index|isolation|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
       property
     )
   ) {
@@ -1252,6 +1253,7 @@ export function renderPrefixedThemeCss(input: string): string {
     [
       '$1',
       '    --pui-radius-2xl: calc(var(--pui-radius) + 8px);',
+      '    --pui-radius-3xl: calc(var(--pui-radius) + 12px);',
       '    --pui-radius-4xl: calc(var(--pui-radius) + 16px);',
       '    --pui-radius-xl: calc(var(--pui-radius) + 4px);',
       '    --pui-radius-lg: var(--pui-radius);',
@@ -1412,6 +1414,9 @@ function renderRoundedUtility(utility: string): string[] | null {
       'border-bottom-right-radius: min(var(--pui-radius-4xl), 24px);',
     ];
 
+  if (utility === 'rounded-[var(--pui-radius-xl)]') return ['border-radius: var(--pui-radius-xl);'];
+  if (utility === 'rounded-[var(--pui-radius-3xl)]')
+    return ['border-radius: var(--pui-radius-3xl);'];
   if (utility === 'rounded-[var(--pui-radius-2xl)]')
     return ['border-radius: var(--pui-radius-2xl);'];
   if (utility === 'rounded-[var(--pui-radius-4xl)]')
