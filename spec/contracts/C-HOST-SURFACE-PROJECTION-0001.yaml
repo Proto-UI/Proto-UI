@@ -24,8 +24,8 @@ criteria:
       en: Instance lifecycle, logical parenthood, the semantic event boundary, exposes or refs, and adapter identity metadata such as `data-pui-root` must remain anchored to the boundaryTarget rather than moving to the raw physical control when the visual target diverges.
   - id: C-HOST-SURFACE-PROJECTION-0001-C
     text:
-      zh-CN: Root style 的可见 surface 绘制与 adapter-normalized surface class/style 必须投影到 surfaceTarget；wrapper 不得形成额外可见边框、背景、命中错觉或无法命中的 focus pseudo-class。明确治理的 split profile 可以把 Root placement 投到 boundary，并为保持布局语义向 boundary 提供 surface intent 的必要非绘制性尺寸贡献；不得因此迁移 surface 绘制或其它 domain ownership。既有 profile 的 target 映射保持不变。
-      en: Visible Root surface painting and adapter-normalized surface class/style must project to surfaceTarget without creating an extra visible border, background, misleading hit area, or unmatchable focus pseudo-class on the wrapper. An explicitly governed split profile may project Root placement to the boundary and provide necessary non-paint sizing contributions from surface intent to preserve layout semantics; this must not move surface painting or other domain ownership. Existing profile target mappings remain unchanged.
+      zh-CN: Root style 的可见 surface 绘制与 adapter-normalized surface class/style 必须投影到 surfaceTarget；wrapper 不得形成额外可见边框、背景、命中错觉或无法命中的 focus pseudo-class。明确治理的 split profile 可以把 Root placement 投到 boundary，并为保持布局语义向 boundary 提供 surface intent 的必要非绘制性尺寸贡献；不得因此迁移 surface 绘制或其它 domain ownership。既有 profile 的 target 映射保持不变，除 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH 的有界非 split native w-full contribution。
+      en: Visible Root surface painting and adapter-normalized surface class/style must project to surfaceTarget without creating an extra visible border, background, misleading hit area, or unmatchable focus pseudo-class on the wrapper. An explicitly governed split profile may project Root placement to the boundary and provide necessary non-paint sizing contributions from surface intent to preserve layout semantics; this must not move surface painting or other domain ownership. Existing profile target mappings remain unchanged except the bounded non-split native w-full contribution in D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH.
   - id: C-HOST-SURFACE-PROJECTION-0001-D
     text:
       zh-CN: Surface role 不得被解释为通用 focus、a11y、event、hit-testing 或 native-property target；这些 domain 继续由各自 contract/host capability 决定，并可在具体 profile 中与 surfaceTarget 指向同一物理对象。
@@ -57,6 +57,7 @@ criteria:
       zh-CN: I1 的 hidden 布局参与与 relative 坐标参照遵守 D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 Q–R，在 WC split boundary 上投影；surface 不因这些职责成为 lifecycle、a11y 或坐标的第二个 owner。其它 Adapter 的既有 target 映射保持不变。
       en: I1 hidden participation and relative coordinate reference follow D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001 Q-R and project onto the WC split boundary. These responsibilities do not make the surface a second lifecycle, accessibility, or coordinate owner. Existing target mappings in other Adapters remain unchanged.
 sources:
+  - path: packages/adapters/web-component/src/native-text-layout.ts
   - path: internal/records/2026-09-13-shadow-g1-s1-approved-goal.zh-CN.md
   - path: internal/records/2026-08-02-host-surface-projection.zh-CN.md
   - path: packages/adapters/base/src/host/surface-projection.ts
@@ -76,6 +77,9 @@ verifies:
   tests:
     - T-HOST-SURFACE-PROJECTION-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound non-split native w-full parent allocation without moving paint or generalizing flex placement.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Bound I1 whole-Root participation and coordinate projection without widening surface ownership or changing other Adapter targets.

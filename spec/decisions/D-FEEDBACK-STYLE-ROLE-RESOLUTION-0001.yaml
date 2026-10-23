@@ -17,6 +17,16 @@ statement:
 
 
 criteria:
+  - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH
+    text:
+      en: >-
+        For non-split Web Component host-owned single-line and multiline text editors, canonical Root w-full also contributes its unchanged percentage-width token to the logical boundary. The native editor retains the complete original token output and remains the only painted and editable surface. This is the bounded exception to E needed to evaluate the logical Root width against its parent, rather than only filling an intrinsically sized wrapper. Select by canonical original author-token provenance from the same final merged result, preserving lowered conditions; never infer from selector suffixes or prototype names. Withdrawal, replacement and disposal revoke only this source's boundary contribution. Without w-full, retain existing native intrinsic behavior. No grow, min-width, arbitrary dimension, margin, paint, raw surface class/style or other role is mirrored by this recipe. It does not change the separately governed Shadow split recipe or claim general flex allocation equivalence.
+
+
+      zh-CN: >-
+        非 split Web Component 的 host-owned 单行和多行 text editor 中，canonical Root w-full 还向 logical boundary 提供未改写的百分比宽度 token；native editor 保留完整原 token 输出，仍是唯一绘制和编辑 surface。这是 E 的有界例外，使 logical Root 宽度相对父容器求值，而非只填满 intrinsic wrapper。必须从同一最终 merged result 的 canonical 原始 author-token provenance 选择并保留 lowered condition，不按 selector 后缀或 prototype 名猜测。撤回、替换和 disposal 仅撤销本 source 的 boundary contribution。无 w-full 时保留既有 native intrinsic 行为。不镜像 grow、min-width、任意尺寸、margin、paint、raw surface class/style 或其它 role；不改变独立治理的 Shadow split recipe，也不宣称通用 flex allocation 等价。
+
+
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-A
     text:
       zh-CN: 第一阶段 application-role vocabulary 必须区分 `surface`、`placement`、`composite` 与 `unresolved`，且 classification result 必须保留原 token 与 role provenance。
@@ -35,8 +45,8 @@ criteria:
       en: Tokens not recognized by canonical or unresolved families must use the `surface` fallback and remain distinguishable from canonical surface tokens through `fallback` provenance.
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-E
     text:
-      zh-CN: 内部 Root effect transport 不得改变公共 author syntax、`StyleHandle` shape、token validation、公共 token snapshot、既有 semantic group/顺序或 collapsed Adapter 的 physical token 输出；既有 profile 仍把全部 role 投到原 target。
-      en: Internal Root effect transport must preserve public author syntax, the StyleHandle shape, token validation, public token snapshots, existing semantic groups/order, and collapsed Adapter physical-token output; existing profiles continue projecting every role to their original target.
+      zh-CN: 内部 Root effect transport 不得改变公共 author syntax、`StyleHandle` shape、token validation、公共 token snapshot、既有 semantic group/顺序或 collapsed Adapter 的 physical token 输出；既有 profile 仍把全部 role 投到原 target，除下述明确有界的 native full-width contribution。
+      en: Internal Root effect transport must preserve public author syntax, the StyleHandle shape, token validation, public token snapshots, existing semantic groups/order, and collapsed Adapter physical-token output; existing profiles continue projecting every role to their original target except the explicitly bounded native full-width contribution below.
   - id: D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-F
     text:
       zh-CN: 当前禁止 `:` 的作者 token purity 规则保持不变；显式 role qualifier 与改变冲突分组的 role-aware merge 留给独立决策。Template node style 不进入 Root role transport。
@@ -137,6 +147,7 @@ openQuestions:
       zh-CN: D1 明确当前 role transport 仅覆盖 Root，不扩大 Template authoring surface；未来 Template role 的必要性仍未决定。
       en: D1 confines current role transport to Root without widening Template authoring; the need for future Template roles remains undecided.
 sources:
+  - path: packages/adapters/web-component/src/native-text-layout.ts
   - path: internal/records/2026-09-12-shadow-dom-web-component-adapter-and-style-roles.zh-CN.md
   - path: packages/core/src/spec/feedback/application-role.ts
   - path: packages/core/src/spec/feedback/semantic-merge.ts
@@ -154,6 +165,9 @@ verifies:
   tests:
     - T-FEEDBACK-STYLE-ROLE-RESOLUTION-0001
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Bound non-split native w-full parent allocation without moving paint or generalizing flex placement.
   - version: 0.3.0-alpha.1
     change: expanded
     summary: Admit exact font-relative translate-x-5 Root geometry without broadening other transform roles or bypassing Shadow recipes.
