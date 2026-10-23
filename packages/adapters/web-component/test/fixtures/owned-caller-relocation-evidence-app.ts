@@ -1,3 +1,10 @@
+import { captureWebComponentCallerFocus } from '../../src/owned-relocation';
+import {
+  readOwnedRelocationDiagnostics,
+  recordOwnedRelocationDiagnostic,
+  setOwnedRelocationDiagnosticPhase,
+  setOwnedRelocationDiagnostics,
+} from '../../src/owned-relocation-diagnostics';
 import { definePrototype, tw } from '../../../../core/src';
 import { AdaptToWebComponent } from '../../src';
 let setups = 0,
@@ -41,6 +48,39 @@ const parent = definePrototype({
 });
 AdaptToWebComponent(child);
 AdaptToWebComponent(parent);
+// Evidence-only observers: no monkey-patching, cancellation, retargeting or callbacks
+// into the recorder. Normal adapter execution leaves its recorder disabled.
+setOwnedRelocationDiagnostics(true);
+const nativeFocusEvents: unknown[] = [];
+const describeNode = (node: EventTarget | null) =>
+  node instanceof Node
+    ? {
+        node: node.nodeName,
+        id: node instanceof Element ? node.id : null,
+        connected: node.isConnected,
+        parent: node.parentNode?.nodeName ?? null,
+        parentId: node.parentElement?.id ?? null,
+      }
+    : null;
+for (const type of ['focus', 'blur', 'focusin', 'focusout']) {
+  document.addEventListener(
+    type,
+    (event) => {
+      const focus = event as FocusEvent;
+      nativeFocusEvents.push({
+        time: performance.now(),
+        type,
+        phase: readOwnedRelocationDiagnostics().phase,
+        trusted: event.isTrusted,
+        target: describeNode(event.target),
+        relatedTarget: describeNode(focus.relatedTarget),
+        active: describeNode(document.activeElement),
+        composedPath: event.composedPath().map(describeNode),
+      });
+    },
+    true
+  );
+}
 const main = document.querySelector('main')!;
 const outer = document.createElement(parent.name) as HTMLElement & { update(): void };
 const host = document.createElement(child.name);
@@ -54,7 +94,9 @@ button.textContent = 'Toggle decoration';
 input.addEventListener('keydown', (e) => {
   if (e.key === 'F3') {
     e.preventDefault();
+    recordOwnedRelocationDiagnostic(0, 'outer.update', 'before');
     outer.update();
+    recordOwnedRelocationDiagnostic(0, 'outer.update', 'after');
   }
 });
 host.append(input, button);
@@ -64,6 +106,62 @@ await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame
 const expectedLeaves = [...host.querySelectorAll<HTMLElement>('[data-pui-owned-decoration]')];
 const originalRenders = renders;
 (window as any).decorationWebEvidence = {
+  focusDiagnostics() {
+    return {
+      nativeFocusEvents: [...nativeFocusEvents],
+      transport: readOwnedRelocationDiagnostics(),
+    };
+  },
+  nativeFocusControls() {
+    const probeRoot = document.createElement('div');
+    probeRoot.id = 'focus-diagnostic-controls';
+    const probe = document.createElement('input');
+    probe.id = 'focus-diagnostic-input';
+    const other = document.createElement('button');
+    other.id = 'focus-diagnostic-other';
+    probeRoot.append(probe, other);
+    document.body.append(probeRoot);
+    const previous = setOwnedRelocationDiagnosticPhase('native-removeChild-control');
+    try {
+      probe.focus();
+      const removalBefore = {
+        time: performance.now(),
+        input: describeNode(probe),
+        active: describeNode(document.activeElement),
+      };
+      probeRoot.removeChild(probe);
+      const removalAfter = {
+        time: performance.now(),
+        input: describeNode(probe),
+        active: describeNode(document.activeElement),
+      };
+      probeRoot.prepend(probe);
+      setOwnedRelocationDiagnosticPhase('author-blur-control');
+      probe.focus();
+      const blurGuard = captureWebComponentCallerFocus([probe]);
+      try {
+        probe.blur();
+        blurGuard.restore(() => true);
+      } finally {
+        blurGuard.dispose();
+      }
+      const authorBlurRespected = document.activeElement !== probe;
+      setOwnedRelocationDiagnosticPhase('author-focus-control');
+      probe.focus();
+      const focusGuard = captureWebComponentCallerFocus([probe]);
+      try {
+        other.focus();
+        focusGuard.restore(() => true);
+      } finally {
+        focusGuard.dispose();
+      }
+      const authorFocusRespected = document.activeElement === other;
+      return { removalBefore, removalAfter, authorBlurRespected, authorFocusRespected };
+    } finally {
+      probeRoot.remove();
+      setOwnedRelocationDiagnosticPhase(previous);
+    }
+  },
   get leaves() {
     return [...host.querySelectorAll<HTMLElement>('[data-pui-owned-decoration]')];
   },

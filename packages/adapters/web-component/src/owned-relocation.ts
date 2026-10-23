@@ -1,4 +1,8 @@
 import {
+  beginOwnedRelocationDiagnostic,
+  recordOwnedRelocationDiagnostic,
+} from './owned-relocation-diagnostics';
+import {
   getLogicalEventRouteSurfaceForTarget,
   isFocusTargetOwnerReady,
 } from './platform/instance-tree';
@@ -51,13 +55,33 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
   const owned = !!target && roots.some((root) => pathToRoot(target).includes(root));
   const owner = target ? getLogicalEventRouteSurfaceForTarget(target) : null;
   let blocked = !owned || !!target?.isContentEditable;
+  const diagnostic = beginOwnedRelocationDiagnostic();
+  recordOwnedRelocationDiagnostic(
+    diagnostic,
+    'capture',
+    !owned ? 'not-owned' : blocked ? 'contenteditable' : 'eligible'
+  );
   let restoring = false;
   const onFocus = (event: Event) => {
-    if (!restoring && !event.composedPath().includes(target!)) blocked = true;
+    if (!restoring) {
+      const elsewhere = !event.composedPath().includes(target!);
+      recordOwnedRelocationDiagnostic(diagnostic, 'focusin:elsewhere', elsewhere);
+      if (elsewhere) {
+        blocked = true;
+        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'focusin-elsewhere');
+      }
+    }
   };
   const onBlur = (event: Event) => {
     // A deliberate blur while still attached is not transport-induced loss.
-    if (!restoring && target?.isConnected && event.composedPath().includes(target)) blocked = true;
+    if (!restoring) {
+      const connected = target?.isConnected;
+      recordOwnedRelocationDiagnostic(diagnostic, 'focusout:connected-at-gate', connected ?? false);
+      if (connected && event.composedPath().includes(target!)) {
+        blocked = true;
+        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'attached-focusout');
+      }
+    }
   };
   if (owned) {
     doc!.addEventListener('focusin', onFocus, true);
@@ -65,29 +89,74 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
   }
   return {
     restore(isCurrent: (node: Node) => boolean) {
+      // Preserve the original short-circuit order and read every predicate once.
+      if (blocked) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'blocked');
+        return;
+      }
+      if (!target) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'no-target');
+        return;
+      }
+      if (!doc) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'no-document');
+        return;
+      }
+      if (!target.isConnected) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'disconnected');
+        return;
+      }
+      if (target.ownerDocument !== doc) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'document-changed');
+        return;
+      }
+      if (!isCurrent(target)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'not-current-transport');
+        return;
+      }
+      if (getLogicalEventRouteSurfaceForTarget(target) !== owner) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'owner-changed');
+        return;
+      }
+      if (owner !== null && !isFocusTargetOwnerReady(target)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'owner-not-ready');
+        return;
+      }
+      if (pathToRoot(target).some((node) => windows.get(node)?.revoked)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'revoked-window');
+        return;
+      }
+      if (target.matches(':disabled')) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'disabled');
+        return;
+      }
       if (
-        blocked ||
-        !target ||
-        !doc ||
-        !target.isConnected ||
-        target.ownerDocument !== doc ||
-        !isCurrent(target) ||
-        getLogicalEventRouteSurfaceForTarget(target) !== owner ||
-        (owner !== null && !isFocusTargetOwnerReady(target)) ||
-        pathToRoot(target).some((node) => windows.get(node)?.revoked) ||
-        target.matches(':disabled') ||
         pathToRoot(target).some(
           (node) => node.nodeType === 1 && (node as Element).hasAttribute('inert')
         )
-      )
+      ) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'inert-ancestor');
         return;
+      }
       const current = doc.activeElement;
-      if (current && current !== doc.body && current !== doc.documentElement && current !== target)
+      if (
+        current &&
+        current !== doc.body &&
+        current !== doc.documentElement &&
+        current !== target
+      ) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'different-active-element');
         return;
-      if (current === target) return;
+      }
+      if (current === target) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'return', 'already-focused');
+        return;
+      }
       restoring = true;
       try {
+        recordOwnedRelocationDiagnostic(diagnostic, 'focus-call', 'before');
         target.focus({ preventScroll: true });
+        recordOwnedRelocationDiagnostic(diagnostic, 'focus-call', 'after');
         // Native text controls retain selection in the same node. Do not replay
         // a saved range after focus() author handlers: they may change value,
         // type or selection, or redirect focus deliberately.
@@ -96,6 +165,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       }
     },
     dispose() {
+      recordOwnedRelocationDiagnostic(diagnostic, 'dispose');
       if (owned) {
         doc!.removeEventListener('focusin', onFocus, true);
         doc!.removeEventListener('focusout', onBlur, true);

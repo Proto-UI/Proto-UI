@@ -72,6 +72,7 @@ const boundSources = [
   'packages/adapters/base/src/platform/portal-destination.ts',
   'packages/adapters/web-component/src/portal-mount.ts',
   'packages/adapters/web-component/src/owned-relocation.ts',
+  'packages/adapters/web-component/src/owned-relocation-diagnostics.ts',
   'packages/adapters/web-component/src/platform/instance-tree.ts',
   'packages/adapters/web-component/src/slot-projector.ts',
   'packages/adapters/web-component/src/adapt.ts',
@@ -149,8 +150,15 @@ try {
     page.on('pageerror', (e) => errors.push({ adapter, error: String(e) }));
     await page.goto(`${origin}/?adapter=${adapter}`, { waitUntil: 'networkidle' });
     await page.waitForFunction(() => document.documentElement.dataset.ready === 'true');
+    const controls = await page.evaluate(() => window.decorationWebEvidence.nativeFocusControls());
+    observations.push({ phase: 'native-focus-controls', ...controls });
+    assert.equal(controls.authorBlurRespected, true);
+    assert.equal(controls.authorFocusRespected, true);
     const snapshot = async () => {
-      const frame = await page.evaluate(() => window.decorationWebEvidence.snapshot());
+      const frame = await page.evaluate(() => ({
+        ...window.decorationWebEvidence.snapshot(),
+        focusDiagnostics: window.decorationWebEvidence.focusDiagnostics(),
+      }));
       observations.push({ phase: 'observed-before-assertion', ...frame });
       return frame;
     };
@@ -323,7 +331,10 @@ try {
     try {
       observations.push({
         phase: 'failure-current',
-        ...(await page.evaluate(() => window.decorationWebEvidence?.snapshot())),
+        ...(await page.evaluate(() => ({
+          ...window.decorationWebEvidence?.snapshot(),
+          focusDiagnostics: window.decorationWebEvidence?.focusDiagnostics(),
+        }))),
       });
     } catch {}
   }

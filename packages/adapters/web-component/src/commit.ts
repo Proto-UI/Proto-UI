@@ -1,4 +1,8 @@
 import {
+  recordOwnedRelocationDiagnostic,
+  setOwnedRelocationDiagnosticPhase,
+} from './owned-relocation-diagnostics';
+import {
   captureWebComponentCallerFocus,
   isWebComponentOwnedRelocating,
   withWebComponentOwnedRelocation,
@@ -249,22 +253,32 @@ export function commitChildren(
   // slot content. A later invalid node must not detach children from the live
   // tree just because an earlier slot was encountered in the traversal.
   const focus = captureWebComponentCallerFocus(cfg.slotPool);
+  const previousDiagnosticPhase = setOwnedRelocationDiagnosticPhase('caller-staging');
   try {
     if (cfg.mode === 'light' && ctx.slotEnd) {
       const slotParent = ctx.slotEnd.parentNode!;
-      for (const node of cfg.slotPool) slotParent.insertBefore(node, ctx.slotEnd);
+      for (const node of cfg.slotPool) {
+        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
+        slotParent.insertBefore(node, ctx.slotEnd);
+        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
+      }
     }
     withWebComponentOwnedRelocation(
       cfg.slotPool,
       hostRoot,
       () => {
+        setOwnedRelocationDiagnosticPhase('caller-publish');
+        recordOwnedRelocationDiagnostic(0, 'replaceChildren', 'before');
         (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
+        recordOwnedRelocationDiagnostic(0, 'replaceChildren', 'after');
+        setOwnedRelocationDiagnosticPhase('caller-restore');
         focus.restore(isWebComponentOwnedRelocating);
       },
       container
     );
   } finally {
     focus.dispose();
+    setOwnedRelocationDiagnosticPhase(previousDiagnosticPhase);
   }
 
   return {
