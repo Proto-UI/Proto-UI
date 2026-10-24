@@ -1,0 +1,38 @@
+id: T-FIELD-SWITCH-0001
+type: test
+title: Optional Field Switch regression evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft regression mapping for the newly introduced optional Field Switch composition records synthetic policy and canonical-report coverage; it does not promote native hit-area, visual, or assistive-technology acceptance.
+summary: Synthetic WC events and geometry establish bounded runtime behavior, not native hit area or visual acceptance.
+cases:
+  - id: T-FIELD-SWITCH-0001-CASE-POLICY
+    title: Existing checked and axis owners respect optional Field policy
+    covers: [C-FIELD-SWITCH-0001-POLICY]
+    expectation: policy-restores-without-latching-or-stale-drag-commit
+  - id: T-FIELD-SWITCH-0001-CASE-COMPOSITION
+    title: One Field control with canonical reports and stable relationships
+    covers:
+      [C-FIELD-SWITCH-0001-COMPOSITION, C-FIELD-SWITCH-0001-FACTS, C-FIELD-SWITCH-0001-LIFECYCLE]
+    expectation: opt-in-relationships-and-canonical-boolean-with-retirement-safe-notifications
+implementations:
+  - id: field-switch-wc
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/field-switch.test.ts
+    required: true
+    consumesCases: [T-FIELD-SWITCH-0001-CASE-POLICY, T-FIELD-SWITCH-0001-CASE-COMPOSITION]
+  - id: field-switch-report-order-wc
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/field-switch-report-order.test.ts
+    required: true
+    consumesCases: [T-FIELD-SWITCH-0001-CASE-COMPOSITION]
+sources:
+  - path: packages/prototypes/base/test/field-switch.test.ts
+  - path: packages/prototypes/base/test/field-switch-report-order.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Verifies Field composition while retaining the original Switch regression suite.
+tags: [field, switch]
