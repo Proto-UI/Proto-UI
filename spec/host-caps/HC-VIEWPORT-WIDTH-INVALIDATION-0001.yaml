@@ -1,0 +1,29 @@
+id: HC-VIEWPORT-WIDTH-INVALIDATION-0001
+type: host-cap
+title: Host provides getter-paired viewport width invalidations
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Draft Web geometry capability; native-browser evidence and independent admission remain pending, with other host profiles unsupported.
+summary: One exact-key source invalidates CSS-pixel width reads under a mounted lease.
+statement: RULE_META_VIEWPORT_SOURCE_CAP pairs its exact getter with subscribe(keys, invalidate) for viewport.width only. Subscription returns an independent disposer and does not synchronously notify. It conveys no DOM object, event payload or breakpoint policy.
+criteria:
+  - id: HC-VIEWPORT-WIDTH-INVALIDATION-0001-A
+    text: The default Web source samples finite nonnegative window.innerWidth including scrollbar, uses one lazy resize listener per Document, coalesces changed-value notifications and detaches after the last subscriber. SSR and absent observability do not install a default source.
+  - id: HC-VIEWPORT-WIDTH-INVALIDATION-0001-B
+    text: Every source is paired with its actual getter. Adapter custom getters receive no unrelated default source. Web Component adoption rebinds realm listeners and invalidates the current read while obsolete-generation callbacks become inert.
+satisfies:
+  contracts:
+    - id: C-RULE-VIEWPORT-WIDTH-0001
+      anchors:
+        [C-RULE-VIEWPORT-WIDTH-0001-A, C-RULE-VIEWPORT-WIDTH-0001-B, C-RULE-VIEWPORT-WIDTH-0001-C]
+verifies:
+  tests: [T-RULE-VIEWPORT-WIDTH-0001]
+relates:
+  modules: [M-RULE-META-0001]
+sources:
+  - path: packages/adapters/base/src/platform/web-viewport-source.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bounded width-only source and independent disposer, without compiler or native claims.
+tags: [host-capability, viewport, web, draft]

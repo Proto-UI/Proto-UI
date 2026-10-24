@@ -1,6 +1,7 @@
 import {
   createDefaultWebPreferenceSource,
   createDefaultWebStyleSupportSource,
+  createDefaultWebViewportSource,
 } from '@proto.ui/adapter-base';
 
 type KeyedSource<Key extends string> = {
@@ -8,7 +9,7 @@ type KeyedSource<Key extends string> = {
   subscribe(keys: readonly Key[], invalidate: () => void): () => void;
 };
 
-/** Private lifetime bridge for the two fixed Web namespaces, not a public Meta bus. */
+/** Private lifetime bridge for the fixed Web namespaces, not a public Meta bus. */
 function createRebindableSource<Key extends string>(
   getter: (key: string) => unknown,
   doc: Document,
@@ -76,14 +77,18 @@ export function createRebindableWebKeyedMetaSources(
     doc,
     createDefaultWebStyleSupportSource
   );
+  const viewportSource = createRebindableSource(getter, doc, createDefaultWebViewportSource);
   return {
+    viewportSource,
     preferenceSource,
     styleSupportSource,
     adoptDocument(next: Document) {
+      viewportSource.adoptDocument(next);
       preferenceSource.adoptDocument(next);
       styleSupportSource.adoptDocument(next);
     },
     dispose() {
+      viewportSource.dispose();
       preferenceSource.dispose();
       styleSupportSource.dispose();
     },

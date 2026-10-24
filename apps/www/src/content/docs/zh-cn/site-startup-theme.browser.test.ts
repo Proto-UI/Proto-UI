@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { launchBrowser, startServer, stopServer } from './browser-harness';
+import { launchBrowser, runtimeSelectTrigger, startServer, stopServer } from './browser-harness';
 
 const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const baseline = process.env.PROTO_UI_STARTUP_SUBJECT === 'baseline';
@@ -216,20 +216,25 @@ for (const width of [2048, 390, 430, 320]) {
       });
       try {
         await page.goto(`${baseUrl}/zh-cn/ui-libraries/base/button/`);
-        const value = page
-          .locator('.proto-previewer [data-adapter-select-root] wc-shadcn-select-value')
-          .first();
+        const value = runtimeSelectTrigger(page.locator('.proto-previewer').first());
         await value.waitFor();
         await expect.poll(() => value.textContent()).toContain('Web Components');
-        const facts = await value.evaluate((e) => ({
-          text: e.textContent,
-          height: e.getBoundingClientRect().height,
-          lineHeight: Number.parseFloat(getComputedStyle(e).lineHeight),
-          width: e.getBoundingClientRect().width,
-          scrollWidth: e.scrollWidth,
-          viewport: innerWidth,
-        }));
+        const facts = await value.evaluate((e) => {
+          const label = e.ownerDocument.createRange();
+          label.selectNodeContents(e);
+          return {
+            measurement: 'rendered-label-range',
+            text: e.textContent,
+            height: label.getBoundingClientRect().height,
+            controlHeight: e.getBoundingClientRect().height,
+            lineHeight: Number.parseFloat(getComputedStyle(e).lineHeight),
+            width: e.getBoundingClientRect().width,
+            scrollWidth: e.scrollWidth,
+            viewport: innerWidth,
+          };
+        });
         await capture(page, `button-${width}-runtime-label`, facts);
+        expect(facts.height).toBeGreaterThan(0);
         if (!baseline && width !== 320) {
           expect(facts.height).toBeLessThanOrEqual(facts.lineHeight + 1);
           expect(facts.scrollWidth).toBeLessThanOrEqual(facts.width + 1);

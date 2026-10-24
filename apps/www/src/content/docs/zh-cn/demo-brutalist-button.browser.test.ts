@@ -59,6 +59,29 @@ async function styleOf(button: Locator): Promise<ButtonStyle> {
   });
 }
 
+// State feedback precedes a real CSS transition. Observe its exact painted
+// endpoint without sleeping, re-triggering input, or weakening the assertions.
+async function settledStyleOf(
+  button: Locator,
+  settled: (style: ButtonStyle) => boolean
+): Promise<ButtonStyle> {
+  let last: ButtonStyle | undefined;
+  await expect
+    .poll(
+      async () => {
+        last = await styleOf(button);
+        return settled(last) ? null : last;
+      },
+      { timeout: 2000, interval: 20 }
+    )
+    .toBeNull();
+  if (!last) throw new Error('No Button paint was sampled.');
+  return last;
+}
+function shadowCleared(shadow: string): boolean {
+  return shadow === 'none' || /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(shadow);
+}
+
 function geometryOf(style: ButtonStyle) {
   return {
     borderColor: style.borderColor,
@@ -166,7 +189,12 @@ describe.sequential('Brutalist Button browser regressions', () => {
         // park it at the origin so "resting" is measured without hover state.
         await page.mouse.move(0, 0);
         await waitForState(page, 0, 'data-hovered', false);
-        const resting = await styleOf(solid);
+        const resting = await settledStyleOf(
+          solid,
+          (style) =>
+            style.transform === 'none' &&
+            /(?:^|, )rgb\(0, 0, 0\) 4px 4px 0px 0px$/.test(style.boxShadow)
+        );
         expect(resting, `${runtime}/rest`).toMatchObject({
           borderColor: 'rgb(0, 0, 0)',
           borderRadius: '5px',
@@ -181,7 +209,11 @@ describe.sequential('Brutalist Button browser regressions', () => {
 
         await solid.hover();
         await waitForState(page, 0, 'data-hovered', true);
-        const hovered = await styleOf(solid);
+        const hovered = await settledStyleOf(
+          solid,
+          (style) =>
+            style.transform === 'matrix(1, 0, 0, 1, 4, 4)' && shadowCleared(style.boxShadow)
+        );
         expect(
           hovered.boxShadow === 'none' ||
             /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(hovered.boxShadow)
@@ -196,7 +228,10 @@ describe.sequential('Brutalist Button browser regressions', () => {
         await page.mouse.move(bounds!.x + bounds!.width / 2, bounds!.y + bounds!.height / 2);
         await page.mouse.down();
         await waitForState(page, 0, 'data-pressed', true);
-        const pressed = await styleOf(solid);
+        const pressed = await settledStyleOf(
+          solid,
+          (style) => style.transform === hovered.transform && style.boxShadow === hovered.boxShadow
+        );
         expect(
           pressed.boxShadow === 'none' ||
             /^(?:rgba\(0, 0, 0, 0\) 0px 0px 0px 0px(?:, )?)+$/.test(pressed.boxShadow),
@@ -209,7 +244,10 @@ describe.sequential('Brutalist Button browser regressions', () => {
 
         await page.mouse.up();
         await waitForState(page, 0, 'data-pressed', false);
-        const settled = await styleOf(solid);
+        const settled = await settledStyleOf(
+          solid,
+          (style) => style.transform === hovered.transform && style.boxShadow === hovered.boxShadow
+        );
         expect(settled.boxShadow, `${runtime}/settled-shadow`).toBe(hovered.boxShadow);
         expect(settled.transform, `${runtime}/settled-transform`).toBe(hovered.transform);
         await persistFrame(interactionFrame, runtime, 'settled');
@@ -219,7 +257,6 @@ describe.sequential('Brutalist Button browser regressions', () => {
         await runtimeSelectTrigger(previewer).focus();
         await page.keyboard.press('Tab');
         await waitForState(page, 0, 'data-focus-visible', true);
-        const focused = await styleOf(solid);
         const [ringOffsetColor, ringColor] = await resolvedTokenColors(solid, [
           '--pui-background',
           '--pui-ring',
@@ -232,6 +269,13 @@ describe.sequential('Brutalist Button browser regressions', () => {
         );
         expect(ringColor, `${runtime}/ring-visible`).not.toMatch(
           /^(?:transparent|rgba\([^)]*, 0\))$/
+        );
+        const focused = await settledStyleOf(
+          solid,
+          (style) =>
+            style.transform === 'none' &&
+            style.boxShadow.includes(`${ringOffsetColor} 0px 0px 0px 2px`) &&
+            style.boxShadow.includes(`${ringColor} 0px 0px 0px 4px`)
         );
         expect(focused.boxShadow, `${runtime}/ring-offset`).toContain(
           `${ringOffsetColor} 0px 0px 0px 2px`

@@ -7,12 +7,44 @@ import {
   renderPrefixedThemeCss,
   renderProtoShadowStyleArtifact,
   renderProtoShadowStyleTokenCss,
+  renderProtoShadowSplitStyleArtifact,
   renderProtoStyleEntryCss,
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
 
 describe('proto style css renderer', () => {
+  it('projects only the named Rhea/Luma radii and secondary hover mix', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([
+        'rounded-[var(--pui-radius-2xl)]',
+        'rounded-[var(--pui-radius-4xl)]',
+        'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]',
+      ]);
+      expect(css).toContain('border-radius: var(--pui-radius-2xl);');
+      expect(css).toContain('border-radius: var(--pui-radius-4xl);');
+      expect(css).toContain(
+        'background-color: color-mix(in oklch, var(--pui-secondary), var(--pui-foreground) 5%);'
+      );
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['rounded-2xl'])).toContain('border-radius: 1rem;');
+      for (const token of [
+        'rounded-[var(--pui-radius-3xl)]',
+        'rounded-[var(--private-radius)]',
+        'rounded-[var(--pui-radius-2xl);color:red]',
+        'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)]',
+        'bg-[color-mix(in_srgb,var(--secondary),var(--foreground)_5%)]',
+        'bg-[color-mix(in_oklch,var(--primary),var(--foreground)_5%)]',
+        'bg-[var(--secondary)]',
+      ]) {
+        expect(render([token])).toContain('Unsupported Proto UI style tokens');
+      }
+    }
+    const theme = renderPrefixedThemeCss(':root { --radius: 0.625rem; }');
+    expect(theme).toContain('--pui-radius-2xl: calc(var(--pui-radius) + 8px);');
+    expect(theme).toContain('--pui-radius-4xl: calc(var(--pui-radius) + 16px);');
+  });
+
   it('renders the finite 3px corner token without admitting arbitrary radius CSS', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       for (const value of [3, 4, 6]) {
@@ -335,6 +367,31 @@ describe('proto style css renderer', () => {
     expect(css).toContain('display: flex;');
     expect(css).toContain('justify-content: space-between;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
+  });
+
+  it('renders only finite field sizing and resize vocabulary on light and shadow targets', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss, (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText]) {
+      for (const [token, declaration] of [
+        ['resize-none', 'resize: none;'],
+        ['resize-y', 'resize: vertical;'],
+        ['field-sizing-content', 'field-sizing: content;'],
+        ['field-sizing-fixed', 'field-sizing: fixed;'],
+      ]) {
+        const css = render([token]);
+        expect(css).toContain(declaration);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+      for (const token of [
+        'resize-auto',
+        'field-sizing-auto',
+        'field-sizing-[content]',
+        'field-sizing-content;display:none',
+      ]) {
+        const css = render([token]);
+        expect(css).toContain('Unsupported Proto UI style tokens');
+        expect(css).not.toMatch(/(?:^|\n)\s*(?:field-sizing|resize):/);
+      }
+    }
   });
 
   it('renders the vertical resize utility used by Brutalist Textarea', () => {
@@ -839,5 +896,30 @@ it('lowers the complete physical Drawer handle cursor and local stacking vocabul
     expect(css).toContain('cursor: ew-resize;');
     expect(css).toContain('cursor: ns-resize;');
     expect(css).toContain('z-index: 10;');
+  }
+});
+
+it('delivers the standard fixed white foreground through each existing CSS target without admitting arbitrary colors', () => {
+  const renderers = [
+    renderProtoStyleTokenCss,
+    renderProtoShadowStyleTokenCss,
+    (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+  ];
+  for (const render of renderers) {
+    const css = render(['text-white']);
+    expect(css).toContain('color: #fff;');
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).not.toContain('var(--pui-destructive-foreground)');
+    for (const token of [
+      'text-snow',
+      'text-white/90',
+      'text-[#fff]',
+      'text-[white]',
+      'text-white;display:none',
+    ]) {
+      const rejected = render([token]);
+      expect(rejected, token).toContain('Unsupported Proto UI style tokens');
+      expect(rejected, token).not.toContain('color: #fff;');
+    }
   }
 });

@@ -1,0 +1,44 @@
+id: C-FIELD-SIZING-STYLE-0001
+type: contract
+title: Finite field sizing and resize presentation vocabulary
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: This finite Web presentation slice has source, merge, role and four-adapter token evidence. Native intrinsic layout and actual Textarea profile adoption remain unaccepted.
+summary: Field sizing and resize affordances are independent style choices, not an editing or JavaScript auto-resize protocol.
+statement:
+  en: A prototype may express fixed or content-derived field sizing and vertical or absent user resize affordance through ordinary feedback.style tokens. This does not grant a component permission to exceed its own protocol boundaries or claim browser feature support.
+criteria:
+  - id: C-FIELD-SIZING-STYLE-0001-VOCABULARY
+    text:
+      en: The finite choices are field-sizing-fixed, field-sizing-content, resize-y and resize-none. The two field-sizing tokens classify as canonical surface intent. Unknown or arbitrary field-sizing values must not acquire canonical support from a broad prefix admission.
+  - id: C-FIELD-SIZING-STYLE-0001-MERGE
+    text:
+      en: Each pair forms its own last-wins semantic group. Changing either pair must not suppress the other pair or absorb an unknown token. Rule withdrawal restores the prior effective choice without introducing component state.
+  - id: C-FIELD-SIZING-STYLE-0001-WEB
+    text:
+      en: Shared Web CSS translation maps the finite choices to field-sizing fixed or content and resize vertical or none, scoped to the actual presentation target in light and shadow output. Unknown values remain unsupported diagnostics. No component-name dispatch, script measurement, ResizeObserver loop or page-specific selector is introduced.
+  - id: C-FIELD-SIZING-STYLE-0001-BOUNDARY
+    text:
+      en: Tokens own no value, selection, composition, focus, rows or height state. Content sizing relies on native layout support and may change geometry; native layout compatibility is not proven by CSS serialization. This prerequisite does not modify the existing Base or Shadcn Textarea exclusions of auto-resize, nor advertise a complete Rhea profile. A consumer must explicitly govern adoption and verify constraints, editing continuity and unsupported-host behavior.
+openQuestions:
+  - id: C-FIELD-SIZING-STYLE-0001-Q-NATIVE
+    question:
+      en: Which real browser and native host profiles faithfully realize intrinsic sizing with rows and min/max constraints?
+    context:
+      en: Current evidence establishes Web token transport and CSS emission only. Textarea adoption must reconcile P-BASE-TEXTAREA-BOUNDARY and P-SHADCN-TEXTAREA-BOUNDARY, and separately supply responsive and validation semantics required by latest upstream.
+    blocks: [activation:C-FIELD-SIZING-STYLE-0001]
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-0003, C-FEEDBACK-STYLE-0004, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001]
+sources:
+  - path: packages/core/src/spec/feedback/semantic-merge.ts
+  - path: packages/core/src/spec/feedback/application-role.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/textarea.tsx
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added a finite field-sizing prerequisite without enabling any production Textarea profile.
+tags: [feedback, style, field-sizing, textarea]

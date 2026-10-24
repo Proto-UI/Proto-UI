@@ -3,6 +3,12 @@ import { describe, expect, it } from 'vitest';
 import { classifyTwTokenApplicationRoleV0 } from '../../src/spec/feedback/application-role';
 
 describe('feedback style application-role classification v0', () => {
+  it.each(['field-sizing-auto', '-field-sizing-content', 'field-sizing-[content]'])(
+    'does not claim canonical role support for %s',
+    (token) => {
+      expect(classifyTwTokenApplicationRoleV0(token).roleSource).toBe('fallback');
+    }
+  );
   it.each([
     'bg-primary',
     'border-ring',
@@ -17,6 +23,9 @@ describe('feedback style application-role classification v0', () => {
     'group/button',
     'peer',
     'resize-y',
+    'resize-none',
+    'field-sizing-content',
+    'field-sizing-fixed',
     'underline-offset-4',
     'uppercase',
     'whitespace-nowrap',

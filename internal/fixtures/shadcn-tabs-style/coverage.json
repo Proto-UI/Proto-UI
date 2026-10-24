@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "sourceCommit": "3d98900e9b73c45f035f8109e9d41ba6a51685e7",
+  "sourceTree": "81a576ce4689c4a9f47314d29db1e104aabe2129",
+  "license": "MIT",
+  "notice": "../shadcn-style-source/NOTICE.shadcn-MIT.txt",
+  "cssInventory": "../shadcn-style-source/manifest.json",
+  "sources": [
+    {
+      "path": "apps/v4/registry/bases/base/ui/tabs.tsx",
+      "storagePath": "base-tabs.tsx.txt",
+      "sha256": "1eda25325a7aae9184224247d837b94f98f162d4f697740cc2b1bd53bd35cec6",
+      "gitBlob": "2b39bbfe73883fcb8a6630e0d6af953ed0b08f49"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/tabs.tsx",
+      "storagePath": "radix-tabs.tsx.txt",
+      "sha256": "96ad5bec050c42dc755c8254c9d7408a04969df29ce5230d29196d1c64bff497",
+      "gitBlob": "4276eb90d96b577f9f16547d6c9ea67d4b74b3ff"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/tabs.tsx",
+      "storagePath": "aria-tabs.tsx.txt",
+      "sha256": "9ab0c37a41594b5bf60751ee05c2c8f9a42cfa1558015607ef154c315afd3954",
+      "gitBlob": "a20aca1b03123c60422035e098b135c1c1022534"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/tabs.tsx",
+      "storagePath": "new-york-v4-tabs.tsx.txt",
+      "sha256": "e1df6e2f95ece373ca909c1d54b8ba8cf4c47dd425c1784bbb9a01c38dd0936b",
+      "gitBlob": "6e174747a509f8a906ce9cfb27bc2c7603f2b6b5"
+    }
+  ],
+  "reference": "Latest Base visual structure plus per-style CSS; New York remains its independent legacy source. Radix/Aria inspected for semantic correspondence, not Proto adapters.",
+  "coverage": [
+    {
+      "style": "vega",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "nova",
+      "status": "projected-bounded-text-default",
+      "surface": [
+        "root",
+        "list",
+        "trigger",
+        "content"
+      ],
+      "orientations": [
+        "horizontal",
+        "vertical"
+      ],
+      "colorSchemes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "style": "maia",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "lyra",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "mira",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "luma",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "sera",
+      "status": "unsupported",
+      "surface": [],
+      "orientations": [],
+      "colorSchemes": []
+    },
+    {
+      "style": "rhea",
+      "status": "projected-bounded-text-default",
+      "surface": [
+        "root",
+        "list",
+        "trigger",
+        "content"
+      ],
+      "orientations": [
+        "horizontal",
+        "vertical"
+      ],
+      "colorSchemes": [
+        "light",
+        "dark"
+      ]
+    },
+    {
+      "style": "new-york-v4",
+      "status": "projected-bounded-text-default",
+      "surface": [
+        "root",
+        "list",
+        "trigger",
+        "content"
+      ],
+      "orientations": [
+        "horizontal",
+        "vertical"
+      ],
+      "colorSchemes": [
+        "light",
+        "dark"
+      ]
+    }
+  ],
+  "gaps": [
+    {
+      "surface": "upstream-line",
+      "status": "explicit-rejection",
+      "dependency": "#935"
+    },
+    {
+      "surface": "nested-svg/inline-icon",
+      "status": "not-projected",
+      "dependency": "shared inline-glyph contract; no SVG DOM querying"
+    },
+    {
+      "surface": "asChild/native prop forwarding",
+      "status": "intentional-non-equivalence"
+    }
+  ],
+  "compatibility": {
+    "appearanceUnderline": "Existing Proto-only compatibility; not upstream line",
+    "extras": [
+      "select-none",
+      "outline-none"
+    ],
+    "rheaImportantBorder": "Resolve border-transparent! through semantic rule precedence: do not add focus/dark border overrides for Rhea. No CSS important token copied."
+  }
+}

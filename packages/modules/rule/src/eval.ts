@@ -28,6 +28,16 @@ function evalExpr<Props extends PropsBaseType>(
       return false;
     case 'eq':
       return evalValue(e.left, ctx) === e.right;
+    case 'gte': {
+      const value = evalValue(e.left, ctx);
+      return (
+        typeof value === 'number' &&
+        Number.isFinite(value) &&
+        typeof e.right === 'number' &&
+        Number.isFinite(e.right) &&
+        value >= e.right
+      );
+    }
     case 'not':
       return !evalExpr(e.expr, ctx);
     case 'all':

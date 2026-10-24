@@ -14,6 +14,14 @@ statement:
 
 
 criteria:
+  - id: P-BASE-BUTTON-CONTENT-SELECTION
+    text:
+      en: Pure command-action Button subjects declare select-none through Base feedback, shared by direct and asButton entries. This is a local affordance, not visual family paint or copy protection. Explicit later select-text restoration remains allowed; adjacent prose, editable content, browser range/copy behavior and independent trigger protocols are not suppressed. No global event prevention or family geometry belongs to this policy.
+      zh-CN: 纯命令动作 Button subject 由 Base feedback 声明 select-none，direct 与 asButton 共享。它是局部交互可供性，不是 family paint 或复制保护；允许后续显式 select-text 恢复，不抑制相邻正文、可编辑内容、浏览器范围与复制或独立 trigger 协议，也不引入全局事件阻止或 family 几何。
+    dependsOn:
+      contracts:
+        - id: C-CONTENT-SELECTION-AFFORDANCE-0001
+          since: 0.3.0-alpha.1
   - id: P-BASE-BUTTON-ROLE-COMMAND
     text:
       zh-CN: Button 表示一个触发离散 action 的 command control。
@@ -335,6 +343,9 @@ verifies:
   tests:
     - T-BASE-BUTTON-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Local command selection affordance is owned by Base Button under the admitted content-selection contract; restores the policy lost by the Shadcn paint extraction without adding family dimensions or global copy suppression.
   - version: 0.1.0
     change: introduced
     summary: Introduced the first Base Button prototype contract entity with props, accessibility, interaction, focus, signal, and extension boundaries.

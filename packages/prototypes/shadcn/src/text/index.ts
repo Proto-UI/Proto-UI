@@ -7,6 +7,6 @@ export {
 export type {
   TextRootProps,
   TextRootExposes,
-  TextRootProps as ShadcnTextRootProps,
   TextRootExposes as ShadcnTextRootExposes,
 } from '@proto.ui/prototypes-base/text';
+export type { ShadcnTextRootProps } from './root.proto';

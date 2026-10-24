@@ -5,6 +5,22 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Shadcn Button's first-class reversible Base inheritance, current absence of Base-behavior reversals, direct entry, visual API, intentional asChild omission, and the centralized upstream compatibility boundary including pinned-baseline versus adopted-recipe evidence.
 cases:
+  - id: T-SHADCN-BUTTON-0001-CASE-NEW-YORK-PROFILE
+    title: explicit legacy supported variants sizes and wrapping close through the actual preset
+    covers: [P-SHADCN-BUTTON-NEW-YORK-PAINT, P-SHADCN-BUTTON-SIZE-PROP, P-SHADCN-BUTTON-WRAP-PROP]
+    expectation: fixed-02cad611-profile-without-modern-paint-leakage
+  - id: T-SHADCN-BUTTON-0001-CASE-GHOST-MODERN
+    title: modern ghost has a separate source-specific muted oracle
+    covers: [P-SHADCN-BUTTON-GHOST-MODERN-PAINT]
+    expectation: fixed-25af02b1-modern-ghost-rejects-legacy-accent
+  - id: T-SHADCN-BUTTON-0001-CASE-RHEA-LUMA
+    title: named Rhea and Luma profiles preserve size, wrapping and compact boundaries
+    covers: [P-SHADCN-BUTTON-RHEA-LUMA-PROFILES]
+    expectation: named-rhea-and-luma-not-page-height-overrides
+  - id: T-SHADCN-BUTTON-0001-CASE-ICON-COMPACT
+    title: explicit compact icon size stays fixed with wrapping and restores existing defaults
+    covers: [P-SHADCN-BUTTON-ICON-COMPACT, P-SHADCN-BUTTON-SIZE-PROP, P-SHADCN-BUTTON-WRAP-PROP]
+    expectation: compact-icon-size-7-inherits-button-state-without-changing-other-sizes
   - id: T-SHADCN-BUTTON-0001-CASE-IDENTITY-AND-INHERITANCE
     title: Shadcn Button is a direct unofficial projection that inherits Base Button
     covers:
@@ -18,13 +34,13 @@ cases:
     covers:
       - P-SHADCN-BUTTON-VARIANT-PROP
       - P-SHADCN-BUTTON-SIZE-PROP
-      - P-SHADCN-BUTTON-NEW-YORK-PAINT
+      - P-SHADCN-BUTTON-MODERN-PAINT
       - P-SHADCN-BUTTON-WRAP-PROP
     expectation: shadcn-button-current-variant-size-and-removal-defaults
   - id: T-SHADCN-BUTTON-0001-CASE-CONSUMER-PAINT
-    title: current New York consumer oracles reject stale geometry and missing installed styles
+    title: current Rhea consumer oracles reject stale geometry and missing installed styles
     covers:
-      - P-SHADCN-BUTTON-NEW-YORK-PAINT
+      - P-SHADCN-BUTTON-MODERN-PAINT
     expectation: shadcn-button-consumer-checks-current-tokens-and-installed-css-without-obsolete-marker
   - id: T-SHADCN-BUTTON-0001-CASE-INTERACTION-STYLES
     title: inherited Button facts drive hover focus press and disabled visual rules
@@ -55,6 +71,31 @@ cases:
       - P-SHADCN-BUTTON-AS-CHILD-OMISSION
     expectation: shadcn-button-does-not-overclaim-upstream-parity
 implementations:
+  - id: prototypes-shadcn-button-new-york-profile
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/button-new-york-profile.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-NEW-YORK-PROFILE]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+  - id: prototypes-shadcn-button-rhea-luma-profiles
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/button.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-RHEA-LUMA]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Named profile/size/wrap projection and compact preservation; actual Web geometry remains separately required.
+  - id: prototypes-shadcn-button-compact-size
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/button-size-style-dom.test.ts
+    required: true
+    consumesCases: [T-SHADCN-BUTTON-0001-CASE-ICON-COMPACT]
+    exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
+    notes:
+      - Real WC host and emitted CSS fixture; native browser geometry and focus remain separate acceptance evidence.
   - id: prototypes-shadcn-button-contract
     kind: module-test
     status: passing
@@ -81,10 +122,11 @@ implementations:
       - Source host plus generated CLI CSS in HappyDOM; not packed-artifact or native browser admission. The release helper tests reject obsolete tokens, class leakage, absent CSS and stale installed height/padding. Native website suites retain exact default/icon geometry and interaction assertions. See scripts/release/consumer-smoke/README.md for the consumer boundary.
   - id: prototypes-shadcn-button-ghost
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/button-ghost.test.ts
     required: true
-    consumesCases: [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK]
+    consumesCases:
+      [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK, T-SHADCN-BUTTON-0001-CASE-GHOST-MODERN]
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
       - Real Runtime sessions with inherited Button state and controlled meta inputs; not physical pointer or cross-Adapter acceptance.
@@ -93,7 +135,8 @@ implementations:
     status: passing
     path: packages/prototypes/shadcn/test/button-ghost-style.test.ts
     required: true
-    consumesCases: [T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
+    consumesCases:
+      [T-SHADCN-BUTTON-0001-CASE-GHOST-MODERN, T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
       - Actual source collection, generated preset equality, Document/Shadow/Shadow-split declaration closure and a real WC host in HappyDOM. Outer-layer unwrapping is explicit; native cascade, pixels, packed artifacts and cross-Adapter visual acceptance remain separate.
@@ -114,10 +157,14 @@ implementations:
     path: apps/www/src/content/docs/zh-cn/finf-button-ghost-component.browser.test.ts
     required: true
     consumesCases:
-      [T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK, T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER]
+      [
+        T-SHADCN-BUTTON-0001-CASE-GHOST-NEW-YORK,
+        T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER,
+        T-SHADCN-BUTTON-0001-CASE-GHOST-MODERN,
+      ]
     exercises: [P-SHADCN-BUTTON, P-BASE-BUTTON]
     notes:
-      - Independent component-only native evidence imports the same public DemoSpec into four static runtime routes with official Adapters, ThemeProvider and generated production CSS. Eight cases and source-bound screenshots remain planned until official execution. Header navigation and RuntimePreviewSurface are excluded; this implementation never substitutes for the separate failed public-page journey or full Button acceptance.
+      - Independent component-only native evidence imports the same public DemoSpec into four static runtime routes with official Adapters, ThemeProvider and generated production CSS. Sixteen cases (eight explicit New York and eight independent Rhea cases) and source-bound screenshots remain planned until official execution. Header navigation and RuntimePreviewSurface are excluded; this implementation never substitutes for the separate failed public-page journey or full Button acceptance.
 verifies:
   prototypes:
     - id: P-SHADCN-BUTTON
@@ -128,6 +175,8 @@ verifies:
         - P-SHADCN-BUTTON-VARIANT-PROP
         - P-SHADCN-BUTTON-SIZE-PROP
         - P-SHADCN-BUTTON-NEW-YORK-PAINT
+        - P-SHADCN-BUTTON-MODERN-PAINT
+        - P-SHADCN-BUTTON-GHOST-MODERN-PAINT
         - P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT
         - P-SHADCN-BUTTON-WRAP-PROP
         - P-SHADCN-BUTTON-INTERACTION-STYLES

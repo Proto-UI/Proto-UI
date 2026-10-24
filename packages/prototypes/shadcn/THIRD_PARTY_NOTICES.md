@@ -27,3 +27,7 @@ The bounded Drawer bottom Handle recipe uses the same revision’s `apps/v4/regi
 ## New York Button ghost hover (2026-10-14)
 
 The bounded ghost hover recipe derives from the same fixed shadcn/ui revision `02cad61166c4c20edbc8a3f71bd720eed4c1f49b`, `apps/v4/registry/new-york-v4/ui/button.tsx`, lines 18–19 (blob `e3345d985d14c33e3cb9d8c45cf973807326c944`), under the MIT license above. It uses accent/accent-foreground hover and half-opacity accent in dark mode. It does not advance the historical API baseline, migrate the temporarily retained default hover80, or replace the separately adopted destructive variant. Native visual and complete Button acceptance remain separate.
+
+## Homepage Rhea / Luma Button profiles (2026-10-22)
+
+The direct Button and explicitly opted-in passive action appearance derive from shadcn/ui revision `25af02b1b467fcd53b63e0c6d6d324c57c16ef18`, `apps/v4/registry/styles/style-rhea.css` and `style-luma.css`, under the MIT license above. At that revision the homepage UI Elements card imports `base-rhea`, while the hero imports `radix-luma`; these are distinct presentation profiles, not a universal shadcn default. This bounded migration replaces the direct Button's earlier New York paint, not the independent AlertDialog/Drawer command paint. The compatibility baseline, deliberately omitted APIs, Proto multiline wrapping, and compact icon extension remain separately documented. See `internal/records/2026-10-22-shadcn-homepage-button-profiles.md`.

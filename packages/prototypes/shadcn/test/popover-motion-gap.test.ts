@@ -3,7 +3,6 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import * as popover from '../src/popover';
 // Diagnostic only; independent expectation C-AS-TRANSITION-0001-C/D.
 // Agent: dot
-// ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
 for (const proto of [popover.popoverRoot, popover.popoverContent, popover.popoverTrigger]) {
   AdaptToWebComponent(proto);
 }

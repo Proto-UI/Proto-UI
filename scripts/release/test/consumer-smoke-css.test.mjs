@@ -14,6 +14,7 @@ import {
   assertSwitchThumbState,
   loadConsumerStyles,
   unwrapGeneratedTokenLayer,
+  unwrapGeneratedThemeSelectionLayer,
 } from '../consumer-smoke-css.mjs';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
@@ -110,7 +111,10 @@ test('loads actual complete CLI output, preserves original bytes/hash, and obser
   const result = loadConsumerStyles(window.document, { root: directory });
   assertStyledSwitch(element, 'generated CSS');
   assert.notEqual(window.getComputedStyle(element).position, 'relative');
-  assert.equal(result.styles[0].textContent, css['shadcn-theme.css']);
+  assert.equal(
+    result.styles[0].textContent,
+    unwrapGeneratedThemeSelectionLayer(css['shadcn-theme.css'])
+  );
   assert.equal(result.styles[1].textContent, body);
   const manifest = JSON.parse(readFileSync(join(result.evidenceDir, 'manifest.json'), 'utf8'));
   for (const file of manifest.files) {
@@ -121,7 +125,7 @@ test('loads actual complete CLI output, preserves original bytes/hash, and obser
   }
   assert.match(
     manifest.limitation,
-    /No cascade-layer, width\/layout, paint, or native hit-testing equivalence/
+    /No cascade-layer, selection-paint, width\/layout, paint, or native hit-testing equivalence/
   );
   // Rem declarations are checked above; rendered geometry and motion need a browser.
 });
@@ -500,25 +504,25 @@ test('keeps styled/no-styles cases separate and browser entry on the original CS
   assert.ok(vue2Runner.includes("join(consumerDir, 'consumer-smoke-css.mjs')"));
 });
 
-// P-SHADCN-BUTTON-NEW-YORK-PAINT: independent fixed-upstream consumer oracle.
+// P-SHADCN-BUTTON-RHEA-LUMA-PROFILES: independent fixed-upstream consumer oracle.
 function buttonFixture(document) {
   const element = document.createElement('div');
   element.className = 'user-added';
   element.setAttribute(
     'data-pui-style',
-    'inline-flex shrink-0 items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground h-9 gap-2 px-4 py-2 whitespace-nowrap'
+    'inline-flex shrink-0 items-center justify-center rounded-[var(--pui-radius-2xl)] text-sm leading-5 py-0 font-medium border border-transparent bg-primary text-primary-foreground h-8 gap-1.5 px-3 whitespace-nowrap'
   );
   document.body.append(element);
   return element;
 }
 
-test('New York Button tokens and actual generated CSS replace the obsolete marker oracle', (t) => {
+test('Rhea Button tokens and actual generated CSS replace the obsolete marker oracle', (t) => {
   const { directory, window } = fixture(t);
   const button = buttonFixture(window.document);
   assertDefaultButtonTokens(button, 'tokens only');
   assert.throws(() => assertStyledButton(button, 'zero CSS'), /Button generated CSS mismatch/);
   loadConsumerStyles(window.document, { root: directory });
-  assertStyledButton(button, 'fixed New York default');
+  assertStyledButton(button, 'fixed Rhea default');
   window.document.documentElement.style.fontSize = '32px';
   assertStyledButton(button, 'font-relative default');
 });
@@ -530,7 +534,7 @@ for (const [name, mutate] of [
     (element) =>
       element.setAttribute(
         'data-pui-style',
-        element.getAttribute('data-pui-style').replace('h-9', 'h-8')
+        element.getAttribute('data-pui-style').replace('h-8', 'h-9')
       ),
   ],
   [
@@ -538,7 +542,9 @@ for (const [name, mutate] of [
     (element) =>
       element.setAttribute(
         'data-pui-style',
-        element.getAttribute('data-pui-style').replace('rounded-md', 'rounded-lg')
+        element
+          .getAttribute('data-pui-style')
+          .replace('rounded-[var(--pui-radius-2xl)]', 'rounded-md')
       ),
   ],
   [
@@ -546,10 +552,10 @@ for (const [name, mutate] of [
     (element) =>
       element.setAttribute(
         'data-pui-style',
-        element.getAttribute('data-pui-style').replace('px-4', 'px-2.5')
+        element.getAttribute('data-pui-style').replace('px-3', 'px-4')
       ),
   ],
-  ['class leakage', (element) => element.classList.add('rounded-md')],
+  ['class leakage', (element) => element.classList.add('rounded-[var(--pui-radius-2xl)]')],
 ]) {
   test(`Button consumer oracle rejects ${name}`, (t) => {
     const { window } = fixture(t);
@@ -567,7 +573,7 @@ test('Button CSS check rejects a stale installed height despite valid prototype 
   const element = buttonFixture(window.document);
   loadConsumerStyles(window.document, { root: directory });
   const override = window.document.createElement('style');
-  override.textContent = '[data-pui-style] { height: 32px; }';
+  override.textContent = '[data-pui-style] { height: 36px; }';
   window.document.head.append(override);
   assert.throws(
     () => assertStyledButton(element, 'stale CSS'),
@@ -590,5 +596,54 @@ for (const [property, value] of [
       () => assertStyledButton(element, 'stale padding'),
       /Button generated CSS mismatch: padding/
     );
+  });
+}
+
+const selectionBody = `::selection {
+      background-color: var(--pui-selection);
+      color: var(--pui-selection-foreground);
+    }`;
+const selectionLayer = `@layer theme {
+    ${selectionBody}
+  }`;
+
+test('recognizes only canonical generated theme selection and retains all other bytes', () => {
+  const theme = css['shadcn-theme.css'];
+  assert.ok(theme.includes(selectionLayer));
+  assert.equal(
+    unwrapGeneratedThemeSelectionLayer(theme),
+    theme.replace(selectionLayer, selectionBody)
+  );
+  const quoted = `/* ${selectionLayer} */\n[data-value="@layer"] { content: "@import"; }\n`;
+  assert.equal(
+    unwrapGeneratedThemeSelectionLayer(quoted + theme),
+    quoted + theme.replace(selectionLayer, selectionBody)
+  );
+  assert.equal(
+    unwrapGeneratedThemeSelectionLayer(':root { --pui-selection: black; }'),
+    ':root { --pui-selection: black; }'
+  );
+  assert.throws(
+    () => unwrapGeneratedTokenLayer(`${prefix}\n${selectionLayer}\n}\n`),
+    /consumer CSS smoke:/
+  );
+});
+
+for (const [name, invalid] of Object.entries({
+  'unknown layer': selectionLayer.replace('@layer theme', '@layer arbitrary'),
+  'unknown selector': selectionLayer.replace('::selection', '*'),
+  'changed role': selectionLayer.replace('--pui-selection)', '--pui-primary)'),
+  'additional declaration': selectionLayer.replace(
+    'color: var(--pui-selection-foreground);',
+    'color: var(--pui-selection-foreground); display: none;'
+  ),
+  'important paint': selectionLayer.replace('--pui-selection);', '--pui-selection) !important;'),
+  'duplicated rule': selectionLayer + selectionLayer,
+  'nested rule': `@media (prefers-color-scheme: dark) { ${selectionLayer} }`,
+  'additional import': selectionLayer + "\n@import './unapproved.css';",
+  'unbalanced suffix': selectionLayer + '}',
+})) {
+  test(`theme selection fails closed on ${name}`, () => {
+    assert.throws(() => unwrapGeneratedThemeSelectionLayer(invalid), /consumer CSS smoke:/);
   });
 }

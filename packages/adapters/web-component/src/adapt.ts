@@ -583,6 +583,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       this._defaultKeyedMetaSources = defaultKeyedMetaSources;
       const preferenceSource = defaultKeyedMetaSources?.preferenceSource;
       const styleSupportSource = defaultKeyedMetaSources?.styleSupportSource;
+      const viewportSource = defaultKeyedMetaSources?.viewportSource;
       // Split reserves colorScheme for its retained environment, not the document getter.
       const ownerSplitResources = splitResources;
       const runtimeColorSchemeSource = ownerSplitResources
@@ -1074,6 +1075,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               colorSchemeSource: runtimeColorSchemeSource,
               preferenceSource,
               styleSupportSource,
+              viewportSource,
               textControlTarget: this._textControlTarget,
               imageViewTarget: this._imageViewTarget,
               nativeLinkTarget,
@@ -1246,6 +1248,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         colorSchemeSource: runtimeColorSchemeSource,
         preferenceSource,
         styleSupportSource,
+        viewportSource,
         textControlTarget: this._textControlTarget,
         imageViewTarget: this._imageViewTarget,
         nativeLinkTarget,

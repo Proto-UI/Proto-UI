@@ -1,5 +1,6 @@
 ---
 import CodePanel from './PrototypePreviewer/CodePanel.astro';
+import CodeFileBrowser from './CodeFileBrowser.astro';
 import { AdapterIds } from './PrototypePreviewer/runtimes/ids';
 import { isRuntimeId } from './adapter-preference';
 import type { CodeExampleProps } from './code-example-types';
@@ -8,16 +9,23 @@ export type { CodeExampleFile, CodeExampleProps, CodeExamplesByHost } from './co
 
 interface Props extends CodeExampleProps {}
 
-const { files, initialHost, label = 'Code example', class: className = '' } = Astro.props;
+const { files, commands = {}, pendingHosts = [], guidance = {}, labels = { install: 'Install', usage: 'Usage', copy: 'Copy', pending: 'WIP', overflow: 'Scroll to see all hosts →' }, initialHost, label = 'Code example', class: className = '' } = Astro.props;
 
 for (const host of Object.keys(files)) {
   if (!isRuntimeId(host)) throw new Error(`[CodeExample] Unsupported host "${host}".`);
 }
 
-const hosts = AdapterIds.filter((host) => files[host] !== undefined);
+const readyHosts = AdapterIds.filter((host) => files[host] !== undefined);
+const pending = new Map(pendingHosts.map((host) => [host.id, host]));
+if (pending.size !== pendingHosts.length || pendingHosts.some((host) =>
+  !host.id.trim() || !host.label.trim() || !host.message.trim() || isRuntimeId(host.id) && files[host.id] !== undefined
+)) throw new Error('[CodeExample] Pending hosts require unique IDs, labels and explanations.');
+const hosts = [...readyHosts, ...pending.keys()];
+const hostLabels: Record<string, string> = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' };
+const hostLabel = (host: (typeof hosts)[number]) => pending.get(host)?.label ?? hostLabels[host] ?? host;
 if (hosts.length === 0) throw new Error('[CodeExample] At least one supported host is required.');
 
-for (const host of hosts) {
+for (const host of readyHosts) {
   const hostFiles = files[host];
   if (!hostFiles?.length)
     throw new Error(`[CodeExample] Host "${host}" requires at least one file.`);
@@ -35,6 +43,11 @@ if (initialHost && !hosts.includes(initialHost)) {
   throw new Error(`[CodeExample] initialHost "${initialHost}" is not present in files.`);
 }
 
+for (const [host, command] of Object.entries(commands)) {
+  if (!isRuntimeId(host) || !files[host] || !command?.label.trim() || !command.code.trim())
+    throw new Error('[CodeExample] Commands require a ready host, label and command text.');
+}
+
 const activeHost = initialHost ?? hosts[0];
 const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
 ---
@@ -42,91 +55,76 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
 <section
   class:list={['code-example', className]}
   data-code-example
-  data-site-code-surface="frame"
   data-initial-host={activeHost}
   aria-label={label}
 >
-  <div class="code-example__strip" data-code-toolbar data-site-code-surface="toolbar">
-    <div class="code-example__tabs" role="tablist" aria-label="Host" data-code-host-tabs>
+  <div class="code-example__strip" data-code-toolbar>
+    <nav class="code-example__tabs" aria-label="Host" data-code-host-tabs>
       {
         hosts.map((host, hostIndex) => {
           const selected = host === activeHost;
           return (
-            <button
+            <a
               id={`${instanceId}-host-tab-${hostIndex}`}
-              type="button"
-              role="tab"
+              href={`#${instanceId}-host-panel-${hostIndex}`}
               data-code-host-tab
               data-code-host={host}
+              data-code-host-name={hostLabel(host)}
+              data-code-host-availability={pending.has(host) ? labels.pending : undefined}
               aria-controls={`${instanceId}-host-panel-${hostIndex}`}
-              aria-selected={selected}
-              tabindex={selected ? 0 : -1}
+              data-code-host-selected={selected ? 'true' : undefined}
             >
-              {host === 'wc' ? 'Web Components' : host === 'react' ? 'React' : 'Vue'}
-            </button>
+              {hostLabel(host)}{pending.has(host) && <span data-code-host-status> · {labels.pending}</span>}
+            </a>
           );
         })
       }
-    </div>
+    </nav>
   </div>
+
+  <p class="code-example__overflow-hint" data-code-host-overflow>{labels.overflow}</p>
 
   {
     hosts.map((host, hostIndex) => {
-      const hostFiles = files[host] ?? [];
+      const hostFiles = isRuntimeId(host) ? files[host] ?? [] : [];
+      const pendingHost = pending.get(host);
+      const command = isRuntimeId(host) ? commands[host] : undefined;
       const hostSelected = host === activeHost;
       return (
         <section
           id={`${instanceId}-host-panel-${hostIndex}`}
           class="code-example__host-panel"
-          role="tabpanel"
+          role="region"
           data-code-host-panel
           data-code-host={host}
           aria-labelledby={`${instanceId}-host-tab-${hostIndex}`}
           hidden={!hostSelected}
         >
-          <div
-            class="code-example__strip code-example__strip--files"
-            data-code-toolbar
-            data-site-code-surface="toolbar"
-          >
-            <div
-              class="code-example__tabs"
-              role="tablist"
-              aria-label={`Files for ${host}`}
-              data-code-file-tabs
-            >
-              {hostFiles.map((file, fileIndex) => (
-                <button
-                  id={`${instanceId}-${hostIndex}-file-tab-${fileIndex}`}
-                  type="button"
-                  role="tab"
-                  data-code-file-tab
-                  data-code-file-index={fileIndex}
-                  aria-controls={`${instanceId}-${hostIndex}-file-panel-${fileIndex}`}
-                  aria-selected={fileIndex === 0}
-                  tabindex={fileIndex === 0 ? 0 : -1}
-                >
-                  {file.name}
-                </button>
-              ))}
+          {command && (
+            <section data-code-example-command data-site-code-surface="frame" aria-label={command.label}>
+              <div class="code-example__command-label" data-code-toolbar data-site-code-surface="toolbar">
+                {labels.install} · {command.label}
+              </div>
+              <CodePanel code={command.code} lang="bash" framed={false} collapsible={false} copyLabel={`${labels.copy} ${command.label}`} />
+            </section>
+          )}
+          {!pendingHost && <div class="code-example__usage-label">{labels.usage}</div>}
+          {!pendingHost && isRuntimeId(host) && guidance[host] && <p class="code-example__guidance" data-code-example-guidance>{guidance[host]}</p>}
+          {pendingHost ? (
+            <div class="code-example__wip" data-code-example-wip data-site-code-surface="frame">
+              <p><strong>WIP · {pendingHost.label}</strong></p>
+              <p>{pendingHost.message}</p>
             </div>
-          </div>
-          {hostFiles.map((file, fileIndex) => (
-            <CodePanel
-              id={`${instanceId}-${hostIndex}-file-panel-${fileIndex}`}
-              labelledBy={`${instanceId}-${hostIndex}-file-tab-${fileIndex}`}
-              hidden={fileIndex !== 0}
-              fileIndex={fileIndex}
-              framed={false}
-              code={file.code}
-              lang={file.lang}
-            />
-          ))}
+          ) : <CodeFileBrowser id={`${instanceId}-${hostIndex}`} files={hostFiles} label={labels.usage} filesLabel={labels.files ?? 'Files'} copyLabel={labels.copy} />}
+
         </section>
       );
     })
   }
 </section>
+
+<!-- Match Tailwind’s base layer: layered !important hidden beats an unlayered override. -->
+<noscript set:html={'<style>@layer base { [data-code-example] [data-code-host-panel][hidden], [data-code-example] [data-code-file-panel][hidden] { display:block!important; } } [data-code-example] [data-code-host-panel] { margin-block:1.5rem; }</style>'} />
 
 <script>
   import { initCodeExamples } from './code-example-client';
@@ -145,9 +143,29 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     max-width: 100%;
   }
 
+  .code-example :global([hidden]),
   .code-example__host-panel[hidden],
   :global([data-code-example] [data-code-file-panel][hidden]) {
     display: none;
+  }
+
+  .code-example__host-panel {
+    margin-top: 0.5rem;
+  }
+
+  .code-example__command-label {
+    padding: 0.625rem 1rem;
+    font-size: 0.8125rem;
+    color: var(--color-muted-foreground);
+  }
+
+  .code-example__usage-label { padding: 1rem 1rem 0.25rem; font-size: 0.875rem; font-weight: 600; }
+  .code-example__guidance { margin: 0; padding: 0.5rem 1rem; font-size: 0.8125rem; color: var(--color-muted-foreground); }
+  .code-example__overflow-hint { margin: 0.25rem 0; font-size: 0.75rem; color: var(--color-muted-foreground); }
+  @media (min-width: 60rem) { .code-example:not([data-code-example-init]) .code-example__overflow-hint { display: none; } }
+
+  .code-example__wip {
+    padding: 1rem;
   }
 
   .code-example__strip {
@@ -164,7 +182,7 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     padding: 0;
   }
 
-  .code-example__tabs button {
+  .code-example__tabs :is(button, a) {
     flex: none;
     border: 0;
     border-radius: 0.375rem;
@@ -177,16 +195,18 @@ const instanceId = `code-example-${Math.random().toString(36).slice(2)}`;
     line-height: 1.25rem;
     white-space: nowrap;
     cursor: pointer;
+    text-decoration: none;
   }
 
-  .code-example__tabs button[aria-selected='true'] {
+  .code-example__tabs :is(button, a)[aria-selected='true'] {
     background: var(--color-background);
     color: var(--color-foreground);
     box-shadow: 0 1px 2px color-mix(in srgb, var(--color-foreground) 12%, transparent);
   }
 
-  .code-example__tabs button:focus-visible {
+  .code-example__tabs :is(button, a):focus-visible {
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
   }
 </style>
+

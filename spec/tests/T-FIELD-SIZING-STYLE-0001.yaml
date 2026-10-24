@@ -1,0 +1,80 @@
+id: T-FIELD-SIZING-STYLE-0001
+type: test
+title: Finite field sizing style transport and CSS closure
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Executed token tests and four real framework adapters cover transport, not native browser intrinsic layout or Textarea adoption.
+summary: Verifies finite vocabulary, independent conflict groups, scoped CSS and actual adapter style-surface continuity.
+cases:
+  - id: T-FIELD-SIZING-STYLE-0001-CASE-MERGE
+    title: Finite choices replace independently and preserve unknown tokens
+    covers: [C-FIELD-SIZING-STYLE-0001-VOCABULARY, C-FIELD-SIZING-STYLE-0001-MERGE]
+    expectation: independent-finite-groups
+  - id: T-FIELD-SIZING-STYLE-0001-CASE-CSS
+    title: Scoped light and shadow CSS supports only finite values
+    covers: [C-FIELD-SIZING-STYLE-0001-WEB]
+    expectation: no-arbitrary-css-admission
+  - id: T-FIELD-SIZING-STYLE-0001-CASE-ADAPTER
+    title: Four Web adapters replace style contributions on the same physical style surface
+    covers: [C-FIELD-SIZING-STYLE-0001-MERGE]
+    expectation: no-stale-sizing-choice
+implementations:
+  - id: core-field-sizing-merge
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/semantic-merge.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-MERGE]
+  - id: core-field-sizing-role
+    kind: module-test
+    status: passing
+    path: packages/core/test/feedback/application-role.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-MERGE]
+  - id: cli-field-sizing-css
+    kind: module-test
+    status: passing
+    path: packages/cli/test/proto-style-css.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-CSS]
+  - id: react-field-sizing
+    kind: module-test
+    status: passing
+    path: packages/adapters/react/test/field-sizing.integration.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-ADAPTER]
+  - id: vue-field-sizing
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue/test/field-sizing.integration.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-ADAPTER]
+  - id: vue2-field-sizing
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue2/test/field-sizing.integration.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-ADAPTER]
+  - id: web-component-field-sizing
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/field-sizing.integration.test.ts
+    required: true
+    consumesCases: [T-FIELD-SIZING-STYLE-0001-CASE-ADAPTER]
+verifies:
+  contracts:
+    - id: C-FIELD-SIZING-STYLE-0001
+      anchors:
+        [
+          C-FIELD-SIZING-STYLE-0001-VOCABULARY,
+          C-FIELD-SIZING-STYLE-0001-MERGE,
+          C-FIELD-SIZING-STYLE-0001-WEB,
+        ]
+sources:
+  - path: packages/adapters/base/test-utils/field-sizing.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded finite token tests and four-adapter transport without native layout claims.
+tags: [feedback, style, test]

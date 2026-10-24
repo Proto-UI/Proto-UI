@@ -47,12 +47,14 @@ The same subpath and package root also export `textRoot` and `BrutalistTextRoot`
 | `tone`       | `default`, `muted`, `inherit`                              | `default` |
 | `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
 | `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `tight`, `snug`, `normal`, `relaxed`                       | `normal`  |
-| `tracking`   | `normal`, `tight`                                          | `normal`  |
+| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
+| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
 | `emphasis`   | `normal`, `italic`                                         | `normal`  |
 | `decoration` | `none`, `underline`, `line-through`                        | `none`    |
 
 `tone="inherit"` keeps the enclosing semantic or Surface owner's foreground, which is useful for contrast on solid or accent surfaces. Removing a prop restores its default. The single anonymous slot preserves authored text and children. There are no exposed states, methods or events. No page role, copy, heading level, `asChild`, `tag`, `href`, `for`, content parser, editor, or automatic responsive breakpoint is part of this API.
+
+`leading="size"` keeps the line box built into the selected size instead of adding a leading override. Shadcn and Brutalist map `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, and `5xl` to line heights of `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively. For example, `size="base"` uses 16/24 and `size="lg"` uses 18/28 at a 16px root size. Omitting size restores `base`. An initially invalid size also falls back to `base`; a provided empty or invalid size after a valid value retains that previous value under the existing Props contract. `leading="tighter"` selects `1.1`; `tracking="tighter"` selects `-0.05em`. The existing `normal` defaults are unchanged. These options are finite visual semantics, not numeric or arbitrary-CSS inputs. Base only normalizes them; this density extension is verified for Shadcn and Brutalist, not every family or native target.
 
 ## Adapter and Compiler boundary
 

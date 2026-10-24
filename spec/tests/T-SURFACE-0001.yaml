@@ -30,7 +30,18 @@ cases:
         P-LIQUID-GLASS-SURFACE-ENTRIES,
       ]
     expectation: All declared tokens produce Web CSS, publishable entries generate each Web facade, private family source exports remain workspace-only and absent from public CLI choices, and unsupported target or token remains an explicit error or diagnostic.
+  - id: T-SURFACE-0001-CASE-ACTION-APPEARANCE
+    title: Passive public action appearance preserves native navigation ownership
+    covers: [P-SHADCN-SURFACE-ACTION-APPEARANCE, P-BRUTALIST-SURFACE-ACTION-APPEARANCE]
+    expectation: Public composition geometry matches the compiled default wrapped Button and supplies only passive Surface/Text props and layout. Native anchor identity and Space behavior remain native; action-label drag selection is suppressed without suppressing prose or editor selection. Ordinary navigation and Surface defaults are unchanged.
 implementations:
+  - id: public-action-appearance
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/site-action-appearance.test.ts
+    required: true
+    consumesCases: [T-SURFACE-0001-CASE-ACTION-APPEARANCE]
+    exercises: [P-SHADCN-SURFACE, P-BRUTALIST-SURFACE]
   - id: surface-public-compiler
     kind: module-test
     status: passing

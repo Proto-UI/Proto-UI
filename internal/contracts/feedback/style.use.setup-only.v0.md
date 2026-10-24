@@ -4,7 +4,7 @@
 
 This contract defines the **author-facing API boundary** for recording style intent via feedback.
 
-This setup API records **static style intent tokens**. Runtime patching is separately governed by [C-FEEDBACK-STYLE-0005](../../../spec/contracts/C-FEEDBACK-STYLE-0005.yaml). It does not express conditions, host-state selectors, priorities, or realization strategy. The exact subject-local `select-auto|select-text|select-none` interaction-affordance exception is governed by [C-CONTENT-SELECTION-AFFORDANCE-0001](../../../spec/contracts/C-CONTENT-SELECTION-AFFORDANCE-0001.yaml); it is distinct from `selection:*` paint and owns no editor, range, focus or activation state. The one static target variant currently allowed is `selection:<style-token>`, which targets native text selection without reading Proto UI state.
+This setup API records **static style intent tokens**. Runtime patching is separately governed by [C-FEEDBACK-STYLE-0005](../../../spec/contracts/C-FEEDBACK-STYLE-0005.yaml). It does not express conditions, host-state selectors, priorities, or realization strategy. The exact subject-local `select-auto|select-text|select-none` interaction-affordance exception is governed by [C-CONTENT-SELECTION-AFFORDANCE-0001](../../../spec/contracts/C-CONTENT-SELECTION-AFFORDANCE-0001.yaml); it is distinct from `selection:*` paint and owns no editor, range, focus or activation state. The static target exceptions are `selection:<style-token>` and the finite placeholder color vocabulary in [C-PLACEHOLDER-COLOR-0001](../../../spec/contracts/C-PLACEHOLDER-COLOR-0001.yaml). Both describe paint without reading Proto UI state or owning text content.
 
 The intent recorded here is later composed with rule, expose, and adapter, but this contract intentionally limits what authors can express.
 
@@ -93,7 +93,7 @@ The following are **out of scope** for v0 and MUST NOT be accepted:
 
 - Conditional or dynamic handles (`when`, predicates, expressions)
 - Arbitrary selector-based syntax
-- Pseudo-class syntax and pseudo-elements other than the allowlisted static `selection:` target
+- Pseudo-class syntax and pseudo-elements other than the allowlisted static `selection:` and finite placeholder color targets
 - Host-specific variants or cascade controls
 - Inline style declarations
 
@@ -109,10 +109,10 @@ Feedback records **intent**, not **compiled output**.
 
 A `tw` token MUST NOT contain:
 
-- `:` (variant / pseudo / selector syntax), except one `selection:` prefix
+- `:` (variant / pseudo / selector syntax), except one `selection:` prefix or an exact finite placeholder color token
 - `&`, `>`, `#`, `.` (selector operators)
 
-Tokens containing any of the above **MUST throw**, except `selection:<style-token>` where `<style-token>` is one valid unvarianted token. Nested or combined variants remain forbidden.
+Tokens containing any of the above **MUST throw**, except `selection:<style-token>` where `<style-token>` is one valid unvarianted token. The additional exact tokens are `placeholder:text-foreground`, `placeholder:text-muted-foreground`, `placeholder:text-primary` and `placeholder:text-destructive`. Placeholder font size, arbitrary color, alpha suffix, content, opacity and nested or combined variants remain forbidden.
 
 ---
 

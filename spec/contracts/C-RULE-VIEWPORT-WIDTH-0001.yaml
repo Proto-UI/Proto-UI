@@ -1,0 +1,36 @@
+id: C-RULE-VIEWPORT-WIDTH-0001
+type: contract
+title: Bounded live layout viewport width
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Experimental width-only geometry source for shared family responsive policy; independent admission and native-browser evidence remain open, with compiler and native providers excluded.
+summary: One getter-paired CSS-pixel width fact supports prototype-owned numeric conditions.
+statement:
+  en: Rule Meta owns a mounted source lease for viewport.width only. Its value is a finite nonnegative number in CSS pixels or unknown. Prototype Rule data owns thresholds; the host supplies geometry, never family breakpoints.
+  zh-CN: Rule Meta 仅为 viewport.width 提供 mounted source 租约，值是有限非负 CSS 像素数或 unknown。阈值由 Prototype Rule 数据声明，Host 只提供几何事实，不承载 family 断点。
+criteria:
+  - id: C-RULE-VIEWPORT-WIDTH-0001-A
+    text: Only exact authored viewport.width dependencies acquire a lease paired to the identical getter. Absent, unpaired, inactive, invalid or unleased values read unknown, not zero. No coercion, height, screen geometry, DPR, location or visualViewport is exposed.
+  - id: C-RULE-VIEWPORT-WIDTH-0001-B
+    text: Default Web width is window.innerWidth in CSS pixels, including any scrollbar. A lazy shared Document resize listener coalesces changes, suppresses unchanged values, and is released at the last subscription. Read values are sampled fresh, not delivered as event payloads. Old-generation queued callbacks cannot affect a later lease.
+  - id: C-RULE-VIEWPORT-WIDTH-0001-C
+    text: Source/getter replacement, loss, unmount and disposal retire existing leases before reevaluation. Remount samples even unchanged values. Web Component Document adoption rebinds the source to the new realm. Custom getMeta never silently acquires a default source. Width changes recompute style without recreating the prototype, editor or public state.
+  - id: C-RULE-VIEWPORT-WIDTH-0001-D
+    text: This draft source does not admit compiler positive lowering, native providers, a complete responsive family or browser raster parity. Unsupported profiles retain explicit diagnostics; SSR and missing-host reads stay unknown. The separately defined finite gte condition owns comparison semantics.
+verifies:
+  tests: [T-RULE-VIEWPORT-WIDTH-0001]
+relates:
+  contracts: [C-RULE-WHEN-0001]
+  modules: [M-RULE-META-0001]
+openQuestions:
+  - id: C-RULE-VIEWPORT-WIDTH-0001-Q-ADMISSION
+    question: Have native-browser viewport resizing, independent review and responsive consumer composition established admission beyond simulated adapter tests?
+    blocks: [activation:C-RULE-VIEWPORT-WIDTH-0001]
+sources:
+  - path: packages/modules/rule-meta/src/caps.ts
+  - path: packages/adapters/base/src/platform/web-viewport-source.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Adds width-only mounted geometry without a public Meta subscription bus or adapter breakpoint.
+tags: [rule, viewport, geometry, draft]

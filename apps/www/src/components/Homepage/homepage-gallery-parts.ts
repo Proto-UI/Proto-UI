@@ -7,17 +7,6 @@ import {
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import { surfacePrototypeId, panelSurfaceProps, panelSurfaceLayout } from '../surface-recipes';
 
-/** Consumer geometry only: retain family paint and the public default height,
- * while allowing enlarged text to make a command taller than that minimum. */
-export const homepageCommandLayout = (family: ProjectionFamilyId) => ({
-  minWidth: '0',
-  maxWidth: '100%',
-  height: 'auto',
-  minHeight: family === 'brutalist' ? '2.5rem' : '2rem',
-  whiteSpace: 'normal',
-  overflowWrap: 'anywhere',
-});
-
 export function createHomepageGalleryParts(
   family: ProjectionFamilyId,
   runtime: RuntimeId,
@@ -59,9 +48,6 @@ export function createHomepageGalleryParts(
       ...(ref ? { ref } : {}),
       ...(id === PREVIEW_SURFACE_ID
         ? { surfaceStyle: { ...panelSurfaceLayout, padding: '1.25rem' } }
-        : {}),
-      ...(/-(?:button|dialog-trigger|dropdown-menu-trigger)$/.test(id)
-        ? { surfaceStyle: homepageCommandLayout(family) }
         : {}),
       ...(id === 'brutalist-tabs-list'
         ? {
@@ -107,6 +93,7 @@ export function createHomepageGalleryParts(
                 ? 'destructive'
                 : 'outline',
         disabled,
+        wrap: true,
       },
       ref
     );

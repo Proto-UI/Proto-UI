@@ -21,8 +21,9 @@ import {
   stopServer,
   applyColorScheme,
 } from './browser-harness';
-import { ghostPaintFailures } from './ghost-paint-oracle';
+import { ghostPaintFailures, rheaGhostPaintFailures } from './ghost-paint-oracle';
 
+const profiles = ['new-york', 'rhea'] as const;
 const routeBase = '/en/test/button-ghost/';
 const evidenceScope = 'independent-component';
 const demoId = 'demo-button-ghost';
@@ -44,7 +45,7 @@ const candidate = {
     .update(execFileSync('git', ['diff', '--binary', 'HEAD']))
     .digest('hex'),
 };
-const references = {
+const legacyReferences = {
   productBase: '794b5eb0be5f5d4b7ee1db46085b4949cb57d2ec',
   preservedPublicFailureArtifact: '11866842609',
   upstream: '02cad61166c4c20edbc8a3f71bd720eed4c1f49b',
@@ -53,6 +54,16 @@ const references = {
   criterion: 'P-SHADCN-BUTTON#P-SHADCN-BUTTON-GHOST-NEW-YORK-PAINT',
   limit:
     'Independent component-native paint/input only. Header, docs navigation and RuntimePreviewSurface are excluded; public-page failures remain separate. Not packed, GPUI, full Button parity or animation timing. Images bind the actual new candidate, not productBase.',
+};
+const references = {
+  'new-york': legacyReferences,
+  rhea: {
+    ...legacyReferences,
+    upstream: '25af02b1b467fcd53b63e0c6d6d324c57c16ef18',
+    blob: null,
+    url: 'https://github.com/shadcn-ui/ui/blob/25af02b1b467fcd53b63e0c6d6d324c57c16ef18/apps/v4/registry/styles/style-rhea.css',
+    criterion: 'P-SHADCN-BUTTON#P-SHADCN-BUTTON-GHOST-MODERN-PAINT',
+  },
 };
 const writeJson = (name: string, value: unknown) =>
   writeFile(path.join(output, name), JSON.stringify(value, null, 2) + '\n');
@@ -63,6 +74,9 @@ beforeAll(async () => {
   const sourceHashes: Record<string, string> = {};
   for (const file of [
     'packages/prototypes/shadcn/src/button/button.proto.ts',
+    'packages/prototypes/shadcn/src/button/new-york.ts',
+    'packages/prototypes/shadcn/src/button/profiles.ts',
+    'packages/prototypes/shadcn/src/button/types.ts',
     'packages/prototypes/shadcn/src/button/paint.ts',
     'packages/prototypes/base/src/button/button.proto.ts',
     'packages/cli/src/generated/shadcn-style-tokens.ts',
@@ -92,7 +106,7 @@ beforeAll(async () => {
     routes: RUNTIMES.map((runtime) => `${routeBase}${runtime}/`),
     evidenceScope,
     demoId,
-    expectedCases: RUNTIMES.length * COLOR_SCHEMES.length,
+    expectedCases: RUNTIMES.length * COLOR_SCHEMES.length * profiles.length,
     phase: 'Planned; terminal case receipts alone prove execution.',
   });
   try {
@@ -225,7 +239,7 @@ async function metrics(control: Locator) {
       return Array.from(ctx.getImageData(0, 0, 1, 1).data) as [number, number, number, number];
     };
     const palette = Object.fromEntries(
-      ['accent', 'accent-foreground', 'foreground'].map((key) => [
+      ['accent', 'accent-foreground', 'foreground', 'muted'].map((key) => [
         key,
         css.getPropertyValue(`--pui-${key}`).trim(),
       ])
@@ -241,6 +255,7 @@ async function metrics(control: Locator) {
       background: rgba(css.backgroundColor),
       foreground: rgba(css.color),
       accent: rgba(palette.accent),
+      muted: rgba(palette.muted),
       accentForeground: rgba(palette['accent-foreground']),
       normalForeground: rgba(palette.foreground),
       hovered: element.hasAttribute('data-hovered'),
@@ -283,219 +298,235 @@ async function centerHit(control: Locator) {
     };
   });
 }
-for (const runtime of RUNTIMES)
-  for (const scheme of COLOR_SCHEMES) {
-    const route = `${routeBase}${runtime}/`;
-    const id = `button-ghost-component-${runtime}-${scheme}`;
-    it(
-      id,
-      async () => {
-        let context: BrowserContext | undefined, page: Page | undefined, face: Locator | undefined;
-        let stage = 'created',
-          result = 'failed',
-          failure: string | undefined;
-        const observations: Record<string, unknown> = {},
-          screenshots: unknown[] = [],
-          errors: string[] = [],
-          deniedRequests: string[] = [];
-        try {
-          context = await browser.newContext({
-            viewport: { width: 1280, height: 1000 },
-            colorScheme: scheme,
-            reducedMotion: 'reduce',
-            locale: 'zh-CN',
-            timezoneId: 'UTC',
-          });
-          await context.route('**/*', (request) => {
-            const url = new URL(request.request().url());
-            if (url.origin === new URL(baseUrl).origin) return request.continue();
-            deniedRequests.push(url.origin);
-            return request.abort();
-          });
-          page = await context.newPage();
-          page.setDefaultTimeout(15_000);
-          page.setDefaultNavigationTimeout(30_000);
-          page.on('pageerror', (error) => errors.push(`${stage}: ${String(error)}`));
-          const capture = async (state: string) => {
-            const file = `${id}-${state}.png`,
-              bytes = await face!.screenshot({ path: path.join(output, file) });
-            screenshots.push({
-              candidate,
-              evidenceScope,
-              runtime,
-              scheme,
-              route,
-              demoId,
-              state,
-              file,
-              sha256: createHash('sha256').update(bytes).digest('hex'),
-              observations: structuredClone(observations),
-              environment: await page!.evaluate(() => ({
-                viewport: { width: innerWidth, height: innerHeight },
-                dpr: devicePixelRatio,
-                fonts: document.fonts.status,
-                theme: document.documentElement.dataset.theme,
-                rootFont: getComputedStyle(document.documentElement).fontSize,
-              })),
+for (const profile of profiles)
+  for (const runtime of RUNTIMES)
+    for (const scheme of COLOR_SCHEMES) {
+      const route = `${routeBase}${runtime}/?styleProfile=${profile}`;
+      const id = `button-ghost-component-${profile}-${runtime}-${scheme}`;
+      it(
+        id,
+        async () => {
+          let context: BrowserContext | undefined,
+            page: Page | undefined,
+            face: Locator | undefined;
+          let stage = 'created',
+            result = 'failed',
+            failure: string | undefined;
+          const observations: Record<string, unknown> = {},
+            screenshots: unknown[] = [],
+            errors: string[] = [],
+            deniedRequests: string[] = [];
+          try {
+            context = await browser.newContext({
+              viewport: { width: 1280, height: 1000 },
+              colorScheme: scheme,
+              reducedMotion: 'reduce',
+              locale: 'zh-CN',
+              timezoneId: 'UTC',
             });
-          };
-          stage = 'navigate';
-          expect(
-            (await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' }))?.status()
-          ).toBe(200);
-          await applyColorScheme(page, scheme);
-          stage = 'component-runtime-mount';
-          const component = await componentFace(page, runtime);
-          face = component.face;
-          observations.componentBoundary = component.boundary;
-          await page.evaluate(() => document.fonts.ready);
-          const enabled = face.getByRole('button', { name: 'Ghost', exact: true });
-          const disabled = face.getByRole('button', { name: 'Disabled ghost', exact: true });
-          const status = face.getByRole('status');
-          const counts = (enabledCount: number) =>
-            expect
-              .poll(() => status.textContent())
-              .toBe(`Enabled activations: ${enabledCount}; disabled activations: 0`);
-          const paint = async (target: Locator, hovered: boolean, isDisabled = false) => {
-            await expect
-              .poll(async () =>
-                ghostPaintFailures(await metrics(target), scheme, hovered, isDisabled)
-              )
-              .toEqual([]);
-            const observed = await metrics(target);
-            expect(observed.theme).toBe(scheme);
-            return observed;
-          };
-          await counts(0);
-          await page.mouse.move(0, 0);
-          stage = 'rest';
-          observations.rest = await paint(enabled, false);
-          observations.disabledRest = await paint(disabled, false, true);
-          await capture('rest');
-          stage = 'hover';
-          await enabled.hover();
-          observations.hover = await paint(enabled, true);
-          await counts(0);
-          await capture('hover');
-          stage = 'leave';
-          await page.mouse.move(0, 0);
-          observations.leave = await paint(enabled, false);
-          await counts(0);
-          await capture('leave');
-          stage = 'enabled-pointer-control';
-          const enabledHit = await centerHit(enabled);
-          expect(enabledHit.hasArea).toBe(true);
-          expect(enabledHit.inViewport).toBe(true);
-          expect(enabledHit.hitExists).toBe(true);
-          expect(enabledHit.belongs).toBe(true);
-          observations.enabledHit = enabledHit;
-          await page.mouse.click(enabledHit.x, enabledHit.y);
-          await counts(1);
-          await expect
-            .poll(() => enabled.evaluate((element) => document.activeElement === element))
-            .toBe(true);
-          stage = 'enabled-keyboard-control';
-          await page.keyboard.press('Enter');
-          await counts(2);
-          await page.keyboard.press('Space');
-          await counts(3);
-          stage = 'disabled-tab-exclusion';
-          await page.keyboard.press('Tab');
-          await settleInput(page!);
-          observations.afterTab = await metrics(disabled);
-          expect((observations.afterTab as Awaited<ReturnType<typeof metrics>>).active).toBe(false);
-          await counts(3);
-          // Host focus() is a diagnostic attempt, not Base focusSelf(). Do not add
-          // tabindex to force access. If the browser excludes this disabled host,
-          // record keyboard entry exclusion rather than pretending it got key input.
-          await disabled.evaluate((element) => (element as HTMLElement).focus());
-          const disabledFocused = await disabled.evaluate(
-            (element) => document.activeElement === element
-          );
-          observations.disabledKeyboard = {
-            input: 'DOM focus attempt, then trusted keys only if actually focused',
-            acquiredFocus: disabledFocused,
-            result: disabledFocused ? 'activation guard exercised' : 'keyboard entry excluded',
-          };
-          if (disabledFocused) {
-            await page!.keyboard.press('Enter');
-            await page!.keyboard.press('Space');
-          }
-          await settleInput(page!);
-          await counts(3);
-          stage = 'disabled-pointer-hover';
-          await disabled.scrollIntoViewIfNeeded();
-          const disabledHit = await centerHit(disabled);
-          expect(disabledHit.hasArea).toBe(true);
-          expect(disabledHit.inViewport).toBe(true);
-          expect(disabledHit.hitExists).toBe(true);
-          expect(disabledHit.belongs).toBe(false);
-          observations.disabledHit = disabledHit;
-          await page.mouse.move(disabledHit.x, disabledHit.y);
-          await settleInput(page!);
-          observations.disabledHover = await paint(disabled, false, true);
-          await counts(3);
-          await page.mouse.click(disabledHit.x, disabledHit.y);
-          await settleInput(page!);
-          observations.disabledAfterInput = await paint(disabled, false, true);
-          await counts(3);
-          await capture('disabled');
-          await page.mouse.move(0, 0);
-          observations.finalLeave = await paint(enabled, false);
-          await paint(disabled, false, true);
-          expect(errors).toEqual([]);
-          expect(deniedRequests).toEqual([]);
-          result = 'passed';
-        } catch (error) {
-          failure = String(error);
-          if (page)
-            try {
-              // Snapshot immediately; never re-wait on a failed strict control locator.
-              observations.failureDom = await page
-                .locator('[data-ghost-component-face]')
-                .evaluateAll((nodes) =>
-                  nodes.map((node) => ({
-                    runtime: node.getAttribute('data-ghost-component-face'),
-                    text: node.textContent?.slice(0, 1000),
-                    html: node.outerHTML.slice(0, 8000),
-                  }))
-                );
-              const file = `${id}-failure.png`,
-                bytes = await page.screenshot({ path: path.join(output, file), timeout: 5_000 });
+            await context.route('**/*', (request) => {
+              const url = new URL(request.request().url());
+              if (url.origin === new URL(baseUrl).origin) return request.continue();
+              deniedRequests.push(url.origin);
+              return request.abort();
+            });
+            page = await context.newPage();
+            page.setDefaultTimeout(15_000);
+            page.setDefaultNavigationTimeout(30_000);
+            page.on('pageerror', (error) => errors.push(`${stage}: ${String(error)}`));
+            const capture = async (state: string) => {
+              const file = `${id}-${state}.png`,
+                bytes = await face!.screenshot({ path: path.join(output, file) });
               screenshots.push({
                 candidate,
                 evidenceScope,
                 runtime,
                 scheme,
-                stage,
+                route,
+                demoId,
+                state,
                 file,
                 sha256: createHash('sha256').update(bytes).digest('hex'),
+                observations: structuredClone(observations),
+                environment: await page!.evaluate(() => ({
+                  viewport: { width: innerWidth, height: innerHeight },
+                  dpr: devicePixelRatio,
+                  fonts: document.fonts.status,
+                  theme: document.documentElement.dataset.theme,
+                  rootFont: getComputedStyle(document.documentElement).fontSize,
+                })),
               });
-            } catch (captureError) {
-              errors.push(`failure capture: ${String(captureError)}`);
+            };
+            stage = 'navigate';
+            expect(
+              (await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' }))?.status()
+            ).toBe(200);
+            await applyColorScheme(page, scheme);
+            stage = 'component-runtime-mount';
+            const component = await componentFace(page, runtime);
+            face = component.face;
+            observations.componentBoundary = component.boundary;
+            await page.evaluate(() => document.fonts.ready);
+            const enabled = face.getByRole('button', { name: 'Ghost', exact: true });
+            const disabled = face.getByRole('button', { name: 'Disabled ghost', exact: true });
+            const status = face.getByRole('status');
+            const counts = (enabledCount: number) =>
+              expect
+                .poll(() => status.textContent())
+                .toBe(`Enabled activations: ${enabledCount}; disabled activations: 0`);
+            const paint = async (target: Locator, hovered: boolean, isDisabled = false) => {
+              await expect
+                .poll(async () => {
+                  const actual = await metrics(target);
+                  observations[`${stage}LastPaint`] = actual;
+                  return (profile === 'new-york' ? ghostPaintFailures : rheaGhostPaintFailures)(
+                    actual,
+                    scheme,
+                    hovered,
+                    isDisabled
+                  );
+                })
+                .toEqual([]);
+              const observed = await metrics(target);
+              expect(observed.tokens).toContain(profile === 'new-york' ? 'h-9' : 'h-8');
+              expect(observed.theme).toBe(scheme);
+              return observed;
+            };
+            await counts(0);
+            await page.mouse.move(0, 0);
+            stage = 'rest';
+            observations.rest = await paint(enabled, false);
+            observations.disabledRest = await paint(disabled, false, true);
+            await capture('rest');
+            stage = 'hover';
+            await enabled.hover();
+            observations.hoverBeforeAssert = await metrics(enabled);
+            await capture('hover-before-assert');
+            observations.hover = await paint(enabled, true);
+            await counts(0);
+            await capture('hover');
+            stage = 'leave';
+            await page.mouse.move(0, 0);
+            observations.leave = await paint(enabled, false);
+            await counts(0);
+            await capture('leave');
+            stage = 'enabled-pointer-control';
+            const enabledHit = await centerHit(enabled);
+            expect(enabledHit.hasArea).toBe(true);
+            expect(enabledHit.inViewport).toBe(true);
+            expect(enabledHit.hitExists).toBe(true);
+            expect(enabledHit.belongs).toBe(true);
+            observations.enabledHit = enabledHit;
+            await page.mouse.click(enabledHit.x, enabledHit.y);
+            await counts(1);
+            await expect
+              .poll(() => enabled.evaluate((element) => document.activeElement === element))
+              .toBe(true);
+            stage = 'enabled-keyboard-control';
+            await page.keyboard.press('Enter');
+            await counts(2);
+            await page.keyboard.press('Space');
+            await counts(3);
+            stage = 'disabled-tab-exclusion';
+            await page.keyboard.press('Tab');
+            await settleInput(page!);
+            observations.afterTab = await metrics(disabled);
+            expect((observations.afterTab as Awaited<ReturnType<typeof metrics>>).active).toBe(
+              false
+            );
+            await counts(3);
+            // Host focus() is a diagnostic attempt, not Base focusSelf(). Do not add
+            // tabindex to force access. If the browser excludes this disabled host,
+            // record keyboard entry exclusion rather than pretending it got key input.
+            await disabled.evaluate((element) => (element as HTMLElement).focus());
+            const disabledFocused = await disabled.evaluate(
+              (element) => document.activeElement === element
+            );
+            observations.disabledKeyboard = {
+              input: 'DOM focus attempt, then trusted keys only if actually focused',
+              acquiredFocus: disabledFocused,
+              result: disabledFocused ? 'activation guard exercised' : 'keyboard entry excluded',
+            };
+            if (disabledFocused) {
+              await page!.keyboard.press('Enter');
+              await page!.keyboard.press('Space');
             }
-          throw error;
-        } finally {
-          await writeJson(`${id}.json`, {
-            candidate,
-            references,
-            evidenceScope,
-            runtime,
-            scheme,
-            route,
-            demoId,
-            result,
-            stage,
-            failure,
-            observations,
-            screenshots,
-            errors,
-            deniedRequests,
-            browserVersion: browser?.version(),
-          });
-          await context?.close();
-        }
-      },
-      120_000
-    );
-  }
+            await settleInput(page!);
+            await counts(3);
+            stage = 'disabled-pointer-hover';
+            await disabled.scrollIntoViewIfNeeded();
+            const disabledHit = await centerHit(disabled);
+            expect(disabledHit.hasArea).toBe(true);
+            expect(disabledHit.inViewport).toBe(true);
+            expect(disabledHit.hitExists).toBe(true);
+            expect(disabledHit.belongs).toBe(false);
+            observations.disabledHit = disabledHit;
+            await page.mouse.move(disabledHit.x, disabledHit.y);
+            await settleInput(page!);
+            observations.disabledHover = await paint(disabled, false, true);
+            await counts(3);
+            await page.mouse.click(disabledHit.x, disabledHit.y);
+            await settleInput(page!);
+            observations.disabledAfterInput = await paint(disabled, false, true);
+            await counts(3);
+            await capture('disabled');
+            await page.mouse.move(0, 0);
+            observations.finalLeave = await paint(enabled, false);
+            await paint(disabled, false, true);
+            expect(errors).toEqual([]);
+            expect(deniedRequests).toEqual([]);
+            result = 'passed';
+          } catch (error) {
+            failure = String(error);
+            if (page)
+              try {
+                // Snapshot immediately; never re-wait on a failed strict control locator.
+                observations.failureDom = await page
+                  .locator('[data-ghost-component-face]')
+                  .evaluateAll((nodes) =>
+                    nodes.map((node) => ({
+                      runtime: node.getAttribute('data-ghost-component-face'),
+                      text: node.textContent?.slice(0, 1000),
+                      html: node.outerHTML.slice(0, 8000),
+                    }))
+                  );
+                const file = `${id}-failure.png`,
+                  bytes = await page.screenshot({ path: path.join(output, file), timeout: 5_000 });
+                screenshots.push({
+                  candidate,
+                  evidenceScope,
+                  runtime,
+                  scheme,
+                  stage,
+                  file,
+                  sha256: createHash('sha256').update(bytes).digest('hex'),
+                });
+              } catch (captureError) {
+                errors.push(`failure capture: ${String(captureError)}`);
+              }
+            throw error;
+          } finally {
+            await writeJson(`${id}.json`, {
+              candidate,
+              references: references[profile],
+              styleProfile: profile,
+              evidenceScope,
+              runtime,
+              scheme,
+              route,
+              demoId,
+              result,
+              stage,
+              failure,
+              observations,
+              screenshots,
+              errors,
+              deniedRequests,
+              browserVersion: browser?.version(),
+            });
+            await context?.close();
+          }
+        },
+        120_000
+      );
+    }

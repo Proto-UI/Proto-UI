@@ -16,6 +16,7 @@ import { remarkConceptDirective } from './src/utils/remark-concept-directive.js'
 import { codeThemes } from './src/components/PrototypePreviewer/code-themes.mjs';
 import { runtimeRetryUrlsPlugin } from './scripts/runtime-retry-urls.mjs';
 import { contrastProvenancePlugin } from './scripts/contrast-provenance.mjs';
+import { accordionActivationProbePlugin } from './scripts/accordion-activation-probe.mjs';
 import { siteCopyPlugin } from './src/utils/expressive-code-copy.mjs';
 
 const PROTO_UI_PREFIX = '@proto.ui/';
@@ -1956,6 +1957,7 @@ export default defineConfig({
       ...(process.env.PROTO_UI_CONTRAST_AUDIT === '1'
         ? [contrastProvenancePlugin(repositoryRoot)]
         : []),
+      accordionActivationProbePlugin(repositoryRoot),
       protoUiSourcePlugin,
       runtimeRetryUrlsPlugin(),
       websiteBundleGraphPlugin(),

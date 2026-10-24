@@ -13,6 +13,10 @@ import type { RuleMetaFacade, RuleMetaModule } from './types';
 import {
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
   RULE_META_GET_CAP,
+  RULE_META_VIEWPORT_SOURCE_CAP,
+  isViewportKey,
+  normalizeViewportWidth,
+  type ViewportKey,
   RULE_META_PREFERENCE_SOURCE_CAP,
   RULE_META_STYLE_SUPPORT_SOURCE_CAP,
   isStyleSupportKey,
@@ -38,6 +42,11 @@ class RuleMetaModuleImpl extends ModuleBase {
     () => this.rulePort.requestStyleReevaluation()
   );
 
+  private readonly viewportLease = createKeyedMetaLease<ViewportKey>(
+    () => this.canSubscribe(),
+    () => this.rulePort.requestStyleReevaluation()
+  );
+
   constructor(caps: CapsVaultView, deps: ModuleDeps) {
     super(caps);
     this.rulePort = deps.requirePort<RulePort<any>>('rule');
@@ -53,7 +62,8 @@ class RuleMetaModuleImpl extends ModuleBase {
             .some((rule) =>
               rule.deps.some(
                 (dep) =>
-                  dep.kind === 'meta' && (isPreferenceKey(dep.key) || isStyleSupportKey(dep.key))
+                  dep.kind === 'meta' &&
+                  (isPreferenceKey(dep.key) || isStyleSupportKey(dep.key) || isViewportKey(dep.key))
               )
             )
         )
@@ -134,6 +144,7 @@ class RuleMetaModuleImpl extends ModuleBase {
   }
 
   private reconcileBoundedLeases(): void {
+    this.reconcileKeyedLease(this.viewportLease, isViewportKey, RULE_META_VIEWPORT_SOURCE_CAP);
     this.reconcileKeyedLease(
       this.preferenceLease,
       isPreferenceKey,
@@ -169,12 +180,14 @@ class RuleMetaModuleImpl extends ModuleBase {
   dispose(): void {
     this.disposed = true;
     this.releaseLease();
+    this.viewportLease.release();
     this.preferenceLease.release();
     this.styleSupportLease.release();
   }
 
   get(key: string): unknown {
     const getter = this.caps.has(RULE_META_GET_CAP) ? this.caps.get(RULE_META_GET_CAP) : null;
+    if (isViewportKey(key)) return normalizeViewportWidth(this.viewportLease.read(key, getter));
     if (isPreferenceKey(key))
       return normalizePreferenceValue(key, this.preferenceLease.read(key, getter));
     if (isStyleSupportKey(key)) {

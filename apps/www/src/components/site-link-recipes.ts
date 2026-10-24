@@ -1,5 +1,7 @@
 import type { SurfaceRootProps } from '@proto.ui/prototypes-base/surface';
 import type { TextRootProps } from '@proto.ui/prototypes-base/text';
+import { shadcnActionAppearance } from '@proto.ui/prototypes-shadcn/surface';
+import { brutalistActionAppearance } from '@proto.ui/prototypes-brutalist/surface';
 import type { NativeLinkFacts } from './site-native-link-facts';
 import type { SiteLibraryFamily } from './site-library-family';
 import { SITE_LINK_ICONS, type SiteLinkIcon } from '../prototypes/site-link-icons';
@@ -20,15 +22,26 @@ const initial: NativeLinkFacts = {
   pressed: false,
   current: false,
 };
+/** Choose a public family recipe; native anchor identity is not rewritten. */
+export function linkActionAppearance(
+  family: SiteLibraryFamily,
+  emphasis: SiteLinkEmphasis,
+  facts = initial
+) {
+  const options = { ...facts, emphasis: emphasis === 'link' ? ('minimal' as const) : emphasis };
+  return family === 'brutalist'
+    ? brutalistActionAppearance(options)
+    : shadcnActionAppearance({ ...options, styleProfile: 'luma' });
+}
 export function linkSurfaceProps(
   family: SiteLibraryFamily,
   appearance: SiteLinkAppearance,
   emphasis: SiteLinkEmphasis,
   facts = initial
 ): SurfaceRootProps {
+  if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
   const action =
-    ['action', 'icon', 'pagination'].includes(appearance) &&
-    !['minimal', 'link'].includes(emphasis);
+    ['icon', 'pagination'].includes(appearance) && !['minimal', 'link'].includes(emphasis);
   const framedNavigation = family === 'brutalist' && ['brand', 'nav'].includes(appearance);
   const framed = action || framedNavigation;
   const group = appearance === 'nav-group';
@@ -38,11 +51,9 @@ export function linkSurfaceProps(
       row && (facts.current || (family === 'brutalist' && facts.hovered))
         ? 'accent'
         : framed
-          ? emphasis === 'primary' && appearance === 'action'
-            ? 'solid'
-            : family === 'brutalist'
-              ? 'secondary'
-              : 'outline'
+          ? family === 'brutalist'
+            ? 'secondary'
+            : 'outline'
           : 'transparent',
     radius: framed
       ? family === 'brutalist'
@@ -71,6 +82,7 @@ export function linkTextProps(
   facts = initial,
   family: SiteLibraryFamily = 'shadcn'
 ): TextRootProps {
+  if (appearance === 'action') return linkActionAppearance(family, 'primary', facts).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
     size: appearance === 'brand' ? 'base' : appearance === 'nav-group' ? 'xs' : 'sm',
@@ -105,40 +117,40 @@ export function linkSurfaceLayout(
   emphasis: SiteLinkEmphasis,
   facts = initial
 ): Record<string, string> {
+  if (appearance === 'action') {
+    return { ...linkActionAppearance(family, emphasis, facts).layout, pointerEvents: 'none' };
+  }
   const row = ['sidebar', 'toc', 'pagination', 'nav-group'].includes(appearance);
   const raised =
     family === 'brutalist' &&
     (['brand', 'nav'].includes(appearance) ||
-      (['action', 'icon', 'pagination'].includes(appearance) &&
-        ['primary', 'secondary'].includes(emphasis)));
+      (['icon', 'pagination'].includes(appearance) && ['primary', 'secondary'].includes(emphasis)));
   const size: Record<string, string> =
     appearance === 'icon'
       ? { width: '2.75rem', height: '2.75rem', padding: '0' }
-      : appearance === 'action'
-        ? { minHeight: '2.75rem', padding: '0.5rem 1rem', gap: '0.5rem', overflowWrap: 'anywhere' }
-        : appearance === 'pagination'
-          ? { minHeight: '2.25rem', padding: '0.25rem 0.75rem', gap: '0.375rem' }
-          : appearance === 'sidebar' || appearance === 'toc' || appearance === 'nav-group'
-            ? {
-                minHeight: 'var(--site-navigation-row-height, 2rem)',
-                // Preserve the same 4px/8px content inset when the public border appears.
-                padding:
-                  family === 'brutalist' &&
-                  appearance !== 'nav-group' &&
-                  (facts.current || facts.hovered)
-                    ? '0.125rem 0.375rem'
-                    : '0.25rem 0.5rem',
-                gap: '0.5rem',
-              }
-            : {
-                minHeight: appearance === 'text' ? '1.5rem' : '2.75rem',
-                padding:
-                  appearance === 'text'
-                    ? '0'
-                    : family === 'brutalist'
-                      ? '0.5rem 0.75rem'
-                      : '0.5rem 0',
-              };
+      : appearance === 'pagination'
+        ? { minHeight: '2.25rem', padding: '0.25rem 0.75rem', gap: '0.375rem' }
+        : appearance === 'sidebar' || appearance === 'toc' || appearance === 'nav-group'
+          ? {
+              minHeight: 'var(--site-navigation-row-height, 2rem)',
+              // Preserve the same 4px/8px content inset when the public border appears.
+              padding:
+                family === 'brutalist' &&
+                appearance !== 'nav-group' &&
+                (facts.current || facts.hovered)
+                  ? '0.125rem 0.375rem'
+                  : '0.25rem 0.5rem',
+              gap: '0.5rem',
+            }
+          : {
+              minHeight: appearance === 'text' ? '1.5rem' : '2.75rem',
+              padding:
+                appearance === 'text'
+                  ? '0'
+                  : family === 'brutalist'
+                    ? '0.5rem 0.75rem'
+                    : '0.5rem 0',
+            };
   return {
     pointerEvents: 'none',
     display: row ? 'flex' : 'inline-flex',

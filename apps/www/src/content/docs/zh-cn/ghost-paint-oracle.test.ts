@@ -1,5 +1,10 @@
 import { expect, it } from 'vitest';
-import { ghostPaintFailures, sameRgba, type GhostPaint } from './ghost-paint-oracle';
+import {
+  ghostPaintFailures,
+  rheaGhostPaintFailures,
+  sameRgba,
+  type GhostPaint,
+} from './ghost-paint-oracle';
 const observation = (scheme: 'light' | 'dark', hovered: boolean, disabled = false): GhostPaint => ({
   background: hovered && !disabled ? [65, 65, 65, scheme === 'dark' ? 128 : 255] : [0, 0, 0, 0],
   foreground: hovered && !disabled ? [245, 245, 245, 255] : [250, 250, 250, 255],
@@ -62,3 +67,23 @@ it('allows only conversion rounding and never accepts invalid or materially diff
   expect(sameRgba([65, 65, 65, 255], [65, 65, 65, 127.5])).toBe(false);
   expect(sameRgba([NaN, 0, 0, 0], [0, 0, 0, 0])).toBe(false);
 });
+
+it.each(['light', 'dark'] as const)(
+  'keeps %s modern and legacy paint oracles disjoint',
+  (scheme) => {
+    const legacy = { ...observation(scheme, true), muted: [80, 80, 80, 255] as const };
+    const modern = {
+      ...legacy,
+      background: [80, 80, 80, scheme === 'dark' ? 128 : 255] as const,
+      foreground: legacy.normalForeground,
+    };
+    expect(ghostPaintFailures(legacy, scheme, true)).toEqual([]);
+    expect(rheaGhostPaintFailures(modern, scheme, true)).toEqual([]);
+    expect(rheaGhostPaintFailures(legacy, scheme, true)).toEqual(
+      expect.arrayContaining(['background', 'foreground'])
+    );
+    expect(ghostPaintFailures(modern, scheme, true)).toEqual(
+      expect.arrayContaining(['background', 'foreground'])
+    );
+  }
+);

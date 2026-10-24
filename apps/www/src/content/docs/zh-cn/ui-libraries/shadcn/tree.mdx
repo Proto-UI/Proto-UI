@@ -9,6 +9,8 @@ Tree 管理完整显式层级的单选与展开。nodeKey 在当前树唯一，p
 
 当前是功能源码 WIP。完整 Adapter/Compiler、原生 GPUI、包消费者、无障碍与绑定提交的视觉验收仍待补齐。
 
+Shadcn Root 与 Item 可显式设置 `appearance="embedded"`，用于已有表面内的文件导航。两个部分分别设置，默认外观保持不变。嵌入态采用较轻的选中背景，保留键盘焦点与禁用语义，并允许放大文字换行；它只是设计族外观选项，不新增选择或展开负责人。
+
 <PrototypePreviewer
   demoId="demo-shadcn-tree"
   initialRuntime="wc"

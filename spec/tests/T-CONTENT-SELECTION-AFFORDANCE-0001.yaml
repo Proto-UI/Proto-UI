@@ -17,7 +17,23 @@ cases:
       - C-CONTENT-SELECTION-AFFORDANCE-0001-VOCABULARY
       - C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
     expectation: explicit-subject-local-css-without-global-suppression
+  - id: T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-THEME-PAINT
+    title: Canonical theme selection paint preserves scopes, component overrides and editing
+    covers: [C-CONTENT-SELECTION-AFFORDANCE-0001-THEME-PAINT]
+    expectation: low-priority-selection-colors-without-selection-ownership
 implementations:
+  - id: theme-selection-boundary
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/theme.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-THEME-PAINT]
+  - id: theme-selection-web-observation
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts
+    required: true
+    consumesCases: [T-CONTENT-SELECTION-AFFORDANCE-0001-CASE-THEME-PAINT]
   - id: core-selection-affordance-subject-validation
     kind: module-test
     status: passing
@@ -49,6 +65,7 @@ verifies:
         - C-CONTENT-SELECTION-AFFORDANCE-0001-VOCABULARY
         - C-CONTENT-SELECTION-AFFORDANCE-0001-MERGE
         - C-CONTENT-SELECTION-AFFORDANCE-0001-WEB
+        - C-CONTENT-SELECTION-AFFORDANCE-0001-THEME-PAINT
 sources:
   - path: packages/core/test/feedback/semantic-merge.test.ts
   - path: packages/cli/test/proto-style-css.test.ts

@@ -1,26 +1,72 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asTabsList } from '@proto.ui/prototypes-base/tabs';
+import { setupShadcnStyleScope } from '../style-scope';
+import { setupTabsVisual } from './visual';
 import type { ShadcnTabsListExposes, ShadcnTabsListProps } from './types';
-
 const tabsList = definePrototype<ShadcnTabsListProps, ShadcnTabsListExposes>({
   name: 'shadcn-tabs-list',
   setup(def) {
     def.props.define({
       appearance: { type: 'enum', options: ['default', 'underline'], empty: 'fallback' },
+      variant: { type: 'enum', options: ['default', 'line'], empty: 'fallback' },
     });
-    def.props.setDefaults({ appearance: 'default' });
-    // P-SHADCN-TABS-LIST-BASE-INHERITANCE, P-SHADCN-TABS-LIST-CURRENT-BASE-DEVIATIONS
+    def.props.setDefaults({ appearance: 'default', variant: 'default' });
     asTabsList();
-    // P-SHADCN-TABS-LIST-CURRENT-VISUAL-SURFACE
+    setupShadcnStyleScope(def);
+    const { style, orientation } = setupTabsVisual(def);
+    const rejectUnsupportedVariant = (run: any) => {
+      const variant = run.props.getRaw().variant;
+      if (variant != null && variant !== 'default')
+        throw new Error(
+          '[shadcn-tabs-list] Unsupported upstream line variant: owned decorative feedback target is not implemented'
+        );
+    };
+    def.props.watchRaw(['variant'], rejectUnsupportedVariant);
+    def.lifecycle.onCreated(rejectUnsupportedVariant);
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'inline-flex h-9 w-fit items-center justify-center rounded-lg bg-muted p-[3px] text-muted-foreground'
+            'inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground'
           )
         ),
     });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(style).eq('rhea')),
+      intent: (i) => i.feedback.style.use(tw('rounded-2xl')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.prop('variant').eq('default')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('horizontal')),
+      intent: (i) => i.feedback.style.use(tw('h-8')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(orientation).eq('horizontal'),
+          w.state(style).eq('new-york-v4')
+        ),
+      intent: (i) => i.feedback.style.use(tw('h-9')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('vertical')),
+      intent: (i) => i.feedback.style.use(tw('h-fit flex-col')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(orientation).eq('vertical'),
+          w.state(style).eq('rhea')
+        ),
+      intent: (i) => i.feedback.style.use(tw('p-1')),
+    });
+    // Existing Proto underline is a separately named compatibility surface, not upstream line.
     def.rule({
       when: (w) => w.prop('appearance').eq('underline'),
       intent: (i) =>
@@ -32,7 +78,4 @@ const tabsList = definePrototype<ShadcnTabsListProps, ShadcnTabsListExposes>({
     });
   },
 });
-
-/** P-SHADCN-TABS-LIST-DIRECT-ENTRY; parity remains bounded by P-SHADCN-TABS-LIST-COMPATIBILITY-SUBSET. */
-
 export default tabsList;

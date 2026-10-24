@@ -1,0 +1,1349 @@
+{
+  "schemaVersion": 1,
+  "kind": "proto-ui.shadcn-source-inspection",
+  "revision": "3d98900e9b73c45f035f8109e9d41ba6a51685e7",
+  "repository": "https://github.com/shadcn-ui/ui",
+  "styles": [
+    "vega",
+    "nova",
+    "maia",
+    "lyra",
+    "mira",
+    "luma",
+    "sera",
+    "rhea"
+  ],
+  "bases": [
+    "base",
+    "aria",
+    "radix"
+  ],
+  "legacy": {
+    "id": "new-york-v4",
+    "preserve": true,
+    "status": "separate-legacy-baseline-not-current-style"
+  },
+  "sources": [
+    {
+      "path": "LICENSE.md",
+      "gitBlob": "fad4d887a681dd49233e5ed01ee2c7a1513089a0",
+      "sha256": "1564074e13439397221ffd522e2e504d56561994a23d371aa5e3ad43e4f5423f",
+      "storagePath": "LICENSE.md"
+    },
+    {
+      "path": "apps/v4/registry/styles.tsx",
+      "gitBlob": "073055fb561d57302866a3473be540c55338254c",
+      "sha256": "78c2d54e8c52f0b2b7d59a9fc8872d6f871849a97c6ddaddd36146dacafe83db",
+      "storagePath": "apps/v4/registry/styles.tsx.txt"
+    },
+    {
+      "path": "apps/v4/registry/bases.ts",
+      "gitBlob": "daef69f814f8ee9fbc244c0d12d8d1b594d40c78",
+      "sha256": "db9613a61c01c432daa6b95ed70d6fe9767f6fe810c9167c898de7a280c98597",
+      "storagePath": "apps/v4/registry/bases.ts.txt"
+    },
+    {
+      "path": "apps/v4/registry/_legacy-styles.ts",
+      "gitBlob": "c8ab7867090519d08681085c0e72edb534e4185a",
+      "sha256": "1200469dfa69929d1aad0c758c975b35c621821445b760f316cf23c6ce3c4726",
+      "storagePath": "apps/v4/registry/_legacy-styles.ts.txt"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-luma.css",
+      "gitBlob": "891fbb6e2e4ceb7c7865d77821a6472884393b07",
+      "sha256": "35c0578be1623049da1f11729ae43a2a7884dcc17b948fc72dcdf4f1be3c0484",
+      "storagePath": "apps/v4/registry/styles/style-luma.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-lyra.css",
+      "gitBlob": "05342f268c86cf19d343e683eb29ba55e39fd155",
+      "sha256": "be24110aafbd07d794ced58f15512c640ab3dfa5733beb850e83f968457a9b52",
+      "storagePath": "apps/v4/registry/styles/style-lyra.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-maia.css",
+      "gitBlob": "ed13c6871a0bd6168f716b52f0a1aee15a903edc",
+      "sha256": "8d518bcb26fad2904e7048e7be4c708814168c5e4ee29f1228945f91efd694a1",
+      "storagePath": "apps/v4/registry/styles/style-maia.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-mira.css",
+      "gitBlob": "1f6b9efe3700bcc6417c2fa5c09ac2411e2f0944",
+      "sha256": "cdde6d38ee43c94cb6785672455adeea7fe195cc57772dc52b41acb5a1789732",
+      "storagePath": "apps/v4/registry/styles/style-mira.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-nova.css",
+      "gitBlob": "293204b2bf08ddfd86dbc49b75dc4749cd2135ed",
+      "sha256": "fd9803ec398290c306b377a46a769cad0c7ff024bf6a626993c113cacc20f16e",
+      "storagePath": "apps/v4/registry/styles/style-nova.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-rhea.css",
+      "gitBlob": "94bbca2a7f78845e7cfbcff68fb8f535e3848a98",
+      "sha256": "bac4eff75a0e21d9dd90ce40634937f54730471d8f7fa50ca67b317892cf908f",
+      "storagePath": "apps/v4/registry/styles/style-rhea.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-sera.css",
+      "gitBlob": "6fb2c12894e0267973fefe9a2c5f496a4a44e44f",
+      "sha256": "c26380d5023bb63d25c03c94cae223e0a4f133f6bae0a63f77b8e4ac17483ba0",
+      "storagePath": "apps/v4/registry/styles/style-sera.css"
+    },
+    {
+      "path": "apps/v4/registry/styles/style-vega.css",
+      "gitBlob": "9f03b3c6dc5a803db963a81743d47d5b5f8f9fe0",
+      "sha256": "10fa07bd61b429ae2c14c572ba9975f6e991d68a04f8fec7e354a062597e0d4e",
+      "storagePath": "apps/v4/registry/styles/style-vega.css"
+    }
+  ],
+  "componentInventory": [
+    {
+      "path": "apps/v4/registry/bases/aria/ui/accordion.tsx",
+      "gitBlob": "3ba423087e0b55c6d8b0bb3432db62ba58cf3330",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/alert-dialog.tsx",
+      "gitBlob": "4686fbaeb7ac8946e18b5d9f45712ad32aab5a05",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/alert.tsx",
+      "gitBlob": "e9aa02f381ef6e588cfb57696f76703c0f7c4ceb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/aspect-ratio.tsx",
+      "gitBlob": "ebe2783654a6ce3240b2bd3a4bdb80b07c26cf8f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/attachment.tsx",
+      "gitBlob": "c02c54b52fc879a3b2e32e840866acf0a8efef97",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/avatar.tsx",
+      "gitBlob": "42d922f7e4375fd550c8f288e081f1b5c46243be",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/badge.tsx",
+      "gitBlob": "1d546cce51064f85ff6a5e311cd766d0cdc5d670",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/breadcrumb.tsx",
+      "gitBlob": "43617ba7f6590236a9c15cdf401bb54764d66d81",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/bubble.tsx",
+      "gitBlob": "88f6a8eb23e7d504bc7f9593cb43f25297b06f64",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/button-group.tsx",
+      "gitBlob": "083fa498b0395eacbf8176676c74af4ef4226627",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/button.tsx",
+      "gitBlob": "7a17d75d6e316844bf72cd5e76aed72020ed4f9f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/calendar.tsx",
+      "gitBlob": "7a162520ab3efd43e8188948df8d8071c2f0cf47",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/card.tsx",
+      "gitBlob": "2062884f29a8044fa48edf86605182eca29f8716",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/carousel.tsx",
+      "gitBlob": "aac546f6f0686cf51e5f88c9eff433121a396021",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/chart.tsx",
+      "gitBlob": "7b783bf1db4670daaaf984e7efe2381e4db4640d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/checkbox.tsx",
+      "gitBlob": "92092fcf471d417def02bc86ebf56418766e2f33",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/code-block.tsx",
+      "gitBlob": "0ca7c951d9a7ad5974eb0af4894adf09ba66f6ae",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/collapsible.tsx",
+      "gitBlob": "3cf65ea19e54cdf3c4c0d8483332ab75074dc19f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/combobox.tsx",
+      "gitBlob": "862ddcc02c92ac70dd61d5e6aa8452403f92f028",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/command.tsx",
+      "gitBlob": "22c1638756943a124ab015950add1e425f93fe9e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/context-menu.tsx",
+      "gitBlob": "87143849a10338196605cec4f143bff6d50fa6bf",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/dialog.tsx",
+      "gitBlob": "9132b42309fac4ee26269260b70a916c9539b694",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/direction.tsx",
+      "gitBlob": "4def3386e788f8ace3d38edb429da033b8374d65",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/drawer.tsx",
+      "gitBlob": "bebe3a912626745d7567982acd7b2465504e59c1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/dropdown-menu.tsx",
+      "gitBlob": "33d656b9f71eb929242b77c822749bb4ed2612a1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/empty.tsx",
+      "gitBlob": "6a49a9813c02e2ce2548402e1a63b05de550bace",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/field.tsx",
+      "gitBlob": "f1d04775b81c1537e59dbd45eb3b0f64e9b54400",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/hover-card.tsx",
+      "gitBlob": "317a1123ef039924e016072ad61841ccebfc1d79",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/input-group.tsx",
+      "gitBlob": "ad1d96c8b3c2ef76f056eec336c5365783ef4c89",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/input-otp.tsx",
+      "gitBlob": "9680970c7bfcf40588b8c69123b2d02a1e2699b6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/input.tsx",
+      "gitBlob": "b09cd35313946b4238781b4e8689bc4df03fced9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/item.tsx",
+      "gitBlob": "2f7204e26d5aba79ec36b2aec130d8f4cb86eff8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/kbd.tsx",
+      "gitBlob": "8031fb7fe2a96f6b8bd55f19537a13c65c3e1240",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/label.tsx",
+      "gitBlob": "165f9fed4747abfcf2c8bb4a109cee602d323221",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/marker.tsx",
+      "gitBlob": "8055ef4b22d07918f2ec5c6354ab6c1069d91415",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/message-scroller.tsx",
+      "gitBlob": "3736a120556630125a19b78f806bf71eca7f7f81",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/message.tsx",
+      "gitBlob": "ae7aef393f0714997c632fdac0755ce9d830f965",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/native-select.tsx",
+      "gitBlob": "273a3bc8ea586d4d525c7d3da108c65810894e93",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/pagination.tsx",
+      "gitBlob": "30dbbb0119c35dcc73face4f980884e221e59dc9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/popover.tsx",
+      "gitBlob": "848b235e42f41b8ebe985814183a48b90567f5ba",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/progress.tsx",
+      "gitBlob": "2b5968ed2e5175e7eeb2281f45b37964097f846b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/questionnaire.tsx",
+      "gitBlob": "22b0e13559dcc34c7af72573fdab8f4ea9846a2e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/radio-group.tsx",
+      "gitBlob": "fbc2a9e7f9ac38508af8ed8d296db105496c9d66",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/resizable.tsx",
+      "gitBlob": "76d7a0e2dc9e2ea70b7d01bc286f7cde64fbe6c8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/scroll-area.tsx",
+      "gitBlob": "eb1ecebfd247ad81d03381c6102ad14aba81cbb6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/select.tsx",
+      "gitBlob": "b6eb51be5386de218903898c5c76b7550647e69f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/separator.tsx",
+      "gitBlob": "f4c57e85fff86aa592ca6ef570cdcbe35c831de3",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/sheet.tsx",
+      "gitBlob": "563f1e0bc1f0d3109dd2a79cd24f8839ef547073",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/sidebar.tsx",
+      "gitBlob": "cfb7a9a625ce402f222b2e7eb2c0569953f4d0f6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/skeleton.tsx",
+      "gitBlob": "0439455a951949f8a75be48fa2c8b8e9f3d8b0f2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/slider.tsx",
+      "gitBlob": "221f3d2ff0f4af4e325eb4aa0c3aee8c6fb632bd",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/sonner.tsx",
+      "gitBlob": "0c2e93ea32d47a346e4dd0d92b916d965c09d7e5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/spinner.tsx",
+      "gitBlob": "2a91bf988618e87a3698133b0bd971a00ec3f61b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/switch.tsx",
+      "gitBlob": "bce101def4c2ccd1547b0062aacb494311926864",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/table.tsx",
+      "gitBlob": "00bea179e2a3945045d344ca375dea6d4239cf4d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/tabs.tsx",
+      "gitBlob": "a20aca1b03123c60422035e098b135c1c1022534",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/textarea.tsx",
+      "gitBlob": "e6575a44966052729329d3ca9faa4d377a9a27f4",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/toggle-group.tsx",
+      "gitBlob": "625312778563bc270d411f04b10268159ab6bf82",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/toggle.tsx",
+      "gitBlob": "56b68155c9476236b3f701cc05af5e2802511f5a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/tooltip.tsx",
+      "gitBlob": "131908dc59ad958ca450d8115ce5e1fc9a03ca09",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/aria/ui/trace.tsx",
+      "gitBlob": "3de11039c163b1426b4f11ebdf223bc698a36ea4",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/accordion.tsx",
+      "gitBlob": "182ccd8e3e872fc0b0a24bb72c0469b6a5857b16",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/alert-dialog.tsx",
+      "gitBlob": "ab1dc757812bf207ee16691f265470b78ce56d40",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/alert.tsx",
+      "gitBlob": "e9aa02f381ef6e588cfb57696f76703c0f7c4ceb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/aspect-ratio.tsx",
+      "gitBlob": "ebe2783654a6ce3240b2bd3a4bdb80b07c26cf8f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/attachment.tsx",
+      "gitBlob": "be31b4b73bb15e7e080e0b63681a8cae1793261e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/avatar.tsx",
+      "gitBlob": "d46f2e9392747cd065e6e760092a7a2b500b4634",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/badge.tsx",
+      "gitBlob": "10a7f676f81090c851211f363057238d5906e2ca",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/breadcrumb.tsx",
+      "gitBlob": "e0a0a2f1f55e4bba083ddf7a44f85bd34ce91804",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/bubble.tsx",
+      "gitBlob": "0b5a88bcce7ee588094c255e823d69950f841138",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/button-group.tsx",
+      "gitBlob": "9bdfea8e85060ffbc302fab7dad64ca761b4b073",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/button.tsx",
+      "gitBlob": "2007374034d564bb926915baa057e500cab631a4",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/calendar.tsx",
+      "gitBlob": "568ab9fd00a03d1651d1b42cb8915eed282cf1a4",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/card.tsx",
+      "gitBlob": "2062884f29a8044fa48edf86605182eca29f8716",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/carousel.tsx",
+      "gitBlob": "67bb25fa3ad927545ee1b80189cd7e9c9c3ca96a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/chart.tsx",
+      "gitBlob": "fa460c956066fbc5720ebe4203ba7353628201d5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/checkbox.tsx",
+      "gitBlob": "ecf58adc56fd11b95c5962e3e6482fad5c27ebb1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/code-block.tsx",
+      "gitBlob": "ecb191d6122e9011a6cf2b172bf283f2e1524341",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/collapsible.tsx",
+      "gitBlob": "488fb33af5107a94791ef3235ee58861e3ed6855",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/combobox.tsx",
+      "gitBlob": "8fc7ae799f00cec1cf4efa6ab8509717f64a7a91",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/command.tsx",
+      "gitBlob": "21dd5593478db868a6a566af6b2914fd1dfbc96f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/context-menu.tsx",
+      "gitBlob": "3fc2b82c358ed8f592a6a13539bb051c9d978d19",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/dialog.tsx",
+      "gitBlob": "8c68524ade906dc3754769729ae3cbcb1b9d7b55",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/direction.tsx",
+      "gitBlob": "d8cf134614ac38b4fbc6c902e6e2cf770ba389c1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/drawer.tsx",
+      "gitBlob": "bebe3a912626745d7567982acd7b2465504e59c1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/dropdown-menu.tsx",
+      "gitBlob": "4c4543e2954441c012d3a7dc1d850e99613f5651",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/empty.tsx",
+      "gitBlob": "6a49a9813c02e2ce2548402e1a63b05de550bace",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/field.tsx",
+      "gitBlob": "d58e0d29dbfe52053a21eff0b837f571b278f1ef",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/hover-card.tsx",
+      "gitBlob": "f76bbaa239c8907d8935521f20e940bb4e3a40ff",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/input-group.tsx",
+      "gitBlob": "cb328462c7c372f1b22342b25d396704d87247c1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/input-otp.tsx",
+      "gitBlob": "9680970c7bfcf40588b8c69123b2d02a1e2699b6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/input.tsx",
+      "gitBlob": "06c96abffafcd0fbbedb24778f0c2f668e1b2109",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/item.tsx",
+      "gitBlob": "ebdb220dcada0975388fbf2b095b1db61c5d8413",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/kbd.tsx",
+      "gitBlob": "1fc8d9c188183e3df985d9a1f454ca692186790f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/label.tsx",
+      "gitBlob": "3b0886ba1826c80e7c6e0c22b699a43cb6df5bc9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/marker.tsx",
+      "gitBlob": "4fcf772c96f7649cea01ad6f7a688a521a817a42",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/menubar.tsx",
+      "gitBlob": "ac05ba9b8ef04ea55c038d8b6eb244a8c0f323ef",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/message-scroller.tsx",
+      "gitBlob": "37268f119d3298c7c428bda0751c2af32f0ada9e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/message.tsx",
+      "gitBlob": "ae7aef393f0714997c632fdac0755ce9d830f965",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/native-select.tsx",
+      "gitBlob": "273a3bc8ea586d4d525c7d3da108c65810894e93",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/navigation-menu.tsx",
+      "gitBlob": "54bf3f8c29ab48b087a62dce4bcbe8ede7ab6418",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/pagination.tsx",
+      "gitBlob": "b1f8b1df96e8a29f8f799c190cf545544607d2a5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/popover.tsx",
+      "gitBlob": "808aa62dc13b4b9c37efbe9c676c09b8e06c0738",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/progress.tsx",
+      "gitBlob": "43df6eb11e1c55ad939e24dc408042efa6fe8f93",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/questionnaire.tsx",
+      "gitBlob": "59de4ea25facd1a4514a192eb08d6fe7987ca14e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/radio-group.tsx",
+      "gitBlob": "1293df6fbc4dde4dcd15cb60aacb734031844164",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/resizable.tsx",
+      "gitBlob": "76d7a0e2dc9e2ea70b7d01bc286f7cde64fbe6c8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/scroll-area.tsx",
+      "gitBlob": "a7acc33718ff8d558e276048c9cc191d8d0d5b2b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/select.tsx",
+      "gitBlob": "2cb76c117197336324cfaed1300e92ca65273b40",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/separator.tsx",
+      "gitBlob": "d69c13426761105ab42e5a6bd364dc54bd70f78c",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/sheet.tsx",
+      "gitBlob": "72669ad9cb812dcbf389f8be6e8157eaa8023479",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/sidebar.tsx",
+      "gitBlob": "1ca3356406a02d78b828f8ade02a420f19b40e55",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/skeleton.tsx",
+      "gitBlob": "0439455a951949f8a75be48fa2c8b8e9f3d8b0f2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/slider.tsx",
+      "gitBlob": "2e55a9a0fc07b66fc86ce1df33c86c2501939088",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/sonner.tsx",
+      "gitBlob": "0c2e93ea32d47a346e4dd0d92b916d965c09d7e5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/spinner.tsx",
+      "gitBlob": "2a91bf988618e87a3698133b0bd971a00ec3f61b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/switch.tsx",
+      "gitBlob": "753fd22a92536c103d3ff4c4c6171d48f428ead7",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/table.tsx",
+      "gitBlob": "160cf7aa14b8467a777eb2405053d2d968f641b9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/tabs.tsx",
+      "gitBlob": "2b39bbfe73883fcb8a6630e0d6af953ed0b08f49",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/textarea.tsx",
+      "gitBlob": "8b8d3f1c6cc7c66c2fab2e050164f355a655b6c9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/toast.tsx",
+      "gitBlob": "0c9dfc0a76eeacfde789c4beed5f4eea2666c686",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/toggle-group.tsx",
+      "gitBlob": "f2d9475eaaa1132ea00efd113a415dac46cd2bb3",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/toggle.tsx",
+      "gitBlob": "b058b4d0e74ccc7de2258b63a77f0136bb391b11",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/tooltip.tsx",
+      "gitBlob": "8fbd22dacb65913e7e31cde7ad800dce6f889116",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/base/ui/trace.tsx",
+      "gitBlob": "dd8676567bd72d32ba695470e797eaf8c66af900",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/accordion.tsx",
+      "gitBlob": "8cf54bf712b78dca13f4f72d4ec393ece4392824",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/alert-dialog.tsx",
+      "gitBlob": "9726776cda43f26e624e88a3dc54ec22eaefdcb3",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/alert.tsx",
+      "gitBlob": "e9aa02f381ef6e588cfb57696f76703c0f7c4ceb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/aspect-ratio.tsx",
+      "gitBlob": "57e38fa96f9c0cb767d7b8de0d6dbc171d1b921a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/attachment.tsx",
+      "gitBlob": "b6211674f6154d7217114d8c6682706559b882ae",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/avatar.tsx",
+      "gitBlob": "5521146b8a3e525170852d5aa328aed6a7d69ac5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/badge.tsx",
+      "gitBlob": "b1d6ddb61bbb415afa3736a055949b732d689da3",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/breadcrumb.tsx",
+      "gitBlob": "7bcdf3a21029aadfc411e63a34a748288355b1ee",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/bubble.tsx",
+      "gitBlob": "0c9d4885ccb0b8c5a27642f6bff2b363a82a303d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/button-group.tsx",
+      "gitBlob": "831d57fb03390cffe842e46ac966915d3627177e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/button.tsx",
+      "gitBlob": "e6266ffa1f7d2a694f2abad0d51c215c8248c245",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/calendar.tsx",
+      "gitBlob": "8bfe9f9c2c7d38270f4efb57052bae371ad319b1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/card.tsx",
+      "gitBlob": "2062884f29a8044fa48edf86605182eca29f8716",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/carousel.tsx",
+      "gitBlob": "4c3ae042698a3b812d9578b7a8b93854b2ea9f1d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/chart.tsx",
+      "gitBlob": "fa460c956066fbc5720ebe4203ba7353628201d5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/checkbox.tsx",
+      "gitBlob": "0fd34ca4b01087ab971212a631dd56ffa1f9256d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/code-block.tsx",
+      "gitBlob": "7edba201930175e60e4691cc0e8f0c92363b60a6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/collapsible.tsx",
+      "gitBlob": "2f7a4e7fc64a8874373c1584646a63f28cd63c47",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/combobox.tsx",
+      "gitBlob": "0662e1c59fcf92a43554a5496d62a8517dedf9c2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/command.tsx",
+      "gitBlob": "e076bcf497e46b6ae39628712b02f0915360ffa0",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/context-menu.tsx",
+      "gitBlob": "fddd712d91235f6af91e5cf6e2477e854b4316b9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/dialog.tsx",
+      "gitBlob": "d76134f9f0da9d428cb409b0a14594c245fd40d1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/direction.tsx",
+      "gitBlob": "22e165774bd595fbf41d0c45efef1cf996897983",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/drawer.tsx",
+      "gitBlob": "dc3938fe0f12ea68099a72969f333fc5184bc312",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/dropdown-menu.tsx",
+      "gitBlob": "4e7077741fb5bd5118251d1b0c8e3770054a3792",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/empty.tsx",
+      "gitBlob": "6a49a9813c02e2ce2548402e1a63b05de550bace",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/field.tsx",
+      "gitBlob": "c927c173514fa52c6a073757bea01fef08dbb5b6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/hover-card.tsx",
+      "gitBlob": "3a2de807addf5772d9e26683c32a876327ac4f7f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/input-group.tsx",
+      "gitBlob": "9126487bf0c03a6aa1edce0e2b54b938722478ae",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/input-otp.tsx",
+      "gitBlob": "9680970c7bfcf40588b8c69123b2d02a1e2699b6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/input.tsx",
+      "gitBlob": "88c9083eeb3d0c5a79626af27da43b109a673d29",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/item.tsx",
+      "gitBlob": "8b96560e6f6505a2346ee78801be3dba7bf67b40",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/kbd.tsx",
+      "gitBlob": "1fc8d9c188183e3df985d9a1f454ca692186790f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/label.tsx",
+      "gitBlob": "c9bd65cb06550fbcd5953d94bb0a6bb37cf03f2e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/marker.tsx",
+      "gitBlob": "85ad0596ab2f9ef624c9aaee1b7195f4216f8d86",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/menubar.tsx",
+      "gitBlob": "3074897d043a4442dffe3d96464499773496575b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/message-scroller.tsx",
+      "gitBlob": "6402bba539ef665fe267e023de6430f766dff138",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/message.tsx",
+      "gitBlob": "ae7aef393f0714997c632fdac0755ce9d830f965",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/native-select.tsx",
+      "gitBlob": "273a3bc8ea586d4d525c7d3da108c65810894e93",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/navigation-menu.tsx",
+      "gitBlob": "7d925d57b46fdf77bcce6d5a4448442c3ba45215",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/pagination.tsx",
+      "gitBlob": "114877ed03a146a605393a49711baf660dd66acf",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/popover.tsx",
+      "gitBlob": "d8e539566cfafc43bb8b6441679b88e64e9387a2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/progress.tsx",
+      "gitBlob": "e53ba770fb79db26862ddaab7c51db2c0257af7d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/questionnaire.tsx",
+      "gitBlob": "0781676567a5d8bbcac688f45032118bc57f448e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/radio-group.tsx",
+      "gitBlob": "f99bd66182dda0ea6a4ba134a04e2ae6ae3c192d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/resizable.tsx",
+      "gitBlob": "76d7a0e2dc9e2ea70b7d01bc286f7cde64fbe6c8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/scroll-area.tsx",
+      "gitBlob": "cd597c803b18b1335eb5a8cbc30e3a883c9f842f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/select.tsx",
+      "gitBlob": "df255a61c5308d47b41d7109fda2c264a53406aa",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/separator.tsx",
+      "gitBlob": "c340a95405a9bfe6eb34c29c7018583db1b29d25",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/sheet.tsx",
+      "gitBlob": "d95a5ca396395b1252424301e5ccb9716a2b6a6a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/sidebar.tsx",
+      "gitBlob": "caf389104e2d6e36b8a4cc72844718a3eb933b9e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/skeleton.tsx",
+      "gitBlob": "0439455a951949f8a75be48fa2c8b8e9f3d8b0f2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/slider.tsx",
+      "gitBlob": "d94d3d8fca2e309caca599fca181720e8b6f2524",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/sonner.tsx",
+      "gitBlob": "0c2e93ea32d47a346e4dd0d92b916d965c09d7e5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/spinner.tsx",
+      "gitBlob": "2a91bf988618e87a3698133b0bd971a00ec3f61b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/switch.tsx",
+      "gitBlob": "8d43e624843da44ae2c3068fa244453282735ed8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/table.tsx",
+      "gitBlob": "160cf7aa14b8467a777eb2405053d2d968f641b9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/tabs.tsx",
+      "gitBlob": "4276eb90d96b577f9f16547d6c9ea67d4b74b3ff",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/textarea.tsx",
+      "gitBlob": "8b8d3f1c6cc7c66c2fab2e050164f355a655b6c9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/toggle-group.tsx",
+      "gitBlob": "7d892c5b6faf6e98f6e3231ae0ab1e7d40238abb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/toggle.tsx",
+      "gitBlob": "37c743fa89e480f2cd7b7801cf1ae12db619e834",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/tooltip.tsx",
+      "gitBlob": "2b6c4e049259e7318d52e85e93e8079304fb67b5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/bases/radix/ui/trace.tsx",
+      "gitBlob": "7bdb64cde56de910ef0cd24fcd4af21bcff5d71b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/accordion.tsx",
+      "gitBlob": "b83c53e5e3502eb57bbba1cfc4c6fdaeba163339",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/alert-dialog.tsx",
+      "gitBlob": "566c463a61b48c79ad544bfdd80434174107c9d5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/alert.tsx",
+      "gitBlob": "86310a66e80c0a370169b9fb4ed49af6bea954fb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/aspect-ratio.tsx",
+      "gitBlob": "57e38fa96f9c0cb767d7b8de0d6dbc171d1b921a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/attachment.tsx",
+      "gitBlob": "cf4750525db9ec3b3b5efbd4efcc39620ff0997e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/avatar.tsx",
+      "gitBlob": "561f04be186f94896ec31e618fee6818c7fcc6c8",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/badge.tsx",
+      "gitBlob": "1a94cc539326e26227271a0b3599be99e0e55fb6",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/breadcrumb.tsx",
+      "gitBlob": "12aa08af155d76bf3335b41ba9b92a593b6354d1",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/bubble.tsx",
+      "gitBlob": "da2c99035d566dd72536e61b922eb6ef5ffb3b4b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/button-group.tsx",
+      "gitBlob": "965285725a0a5d3af5d512537846455b808602fe",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/button.tsx",
+      "gitBlob": "e3345d985d14c33e3cb9d8c45cf973807326c944",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/calendar.tsx",
+      "gitBlob": "215b068893d3fcabf8ec6ed8d14cce99438380b9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/card.tsx",
+      "gitBlob": "6aebd4cf612dfa24d40ffdf357c6f6363e144d6a",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/carousel.tsx",
+      "gitBlob": "25134a12616e729ae8c5a1a1f2eec062f8c94109",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/chart.tsx",
+      "gitBlob": "f4971bf60d74ac43b48d4c86982a6cacb56bde37",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/checkbox.tsx",
+      "gitBlob": "9aaa1baace43e42aba6ee7c3b04adb8ff7e99ea2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/collapsible.tsx",
+      "gitBlob": "2f7a4e7fc64a8874373c1584646a63f28cd63c47",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/combobox.tsx",
+      "gitBlob": "00e208e0398fd1cfe9394ac28f1d5ffeb90b10d3",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/command.tsx",
+      "gitBlob": "1605b2f525140db07b1d0f267721e22c185bd43c",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/context-menu.tsx",
+      "gitBlob": "188f89f5b45e4a24d45c1924a35e4d44abed9070",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/dialog.tsx",
+      "gitBlob": "ccadf4a85bf6398d52314b112600f796fc97db97",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/direction.tsx",
+      "gitBlob": "22e165774bd595fbf41d0c45efef1cf996897983",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/drawer.tsx",
+      "gitBlob": "4e416683964bdef2c52c5dcd597ab0cb8f4c015b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/dropdown-menu.tsx",
+      "gitBlob": "1f9742d6783223126a3b91e91b7a230243ddf23d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/empty.tsx",
+      "gitBlob": "bfd524fb206070222851692210a62144f44c0611",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/field.tsx",
+      "gitBlob": "9107ef025c35eb5b19c023688743e27e3825e70d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/form.tsx",
+      "gitBlob": "c1c77ca6098eef2a4dc6ac8be6ec2ad3100c7237",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/hover-card.tsx",
+      "gitBlob": "e1ffdb54ce6aeb5473648f219bb3bdd84e13f821",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/input-group.tsx",
+      "gitBlob": "a457945603c5e2fd52190135520fb67ccb6af388",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/input-otp.tsx",
+      "gitBlob": "9a71a837dfe4805a21dfa9b3747e4d7296d4ec72",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/input.tsx",
+      "gitBlob": "ddb9b315e34245addded54b1848bb32c80c418cc",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/item.tsx",
+      "gitBlob": "22bc2521ad4fa762b0de948f3f9d53bc217f1069",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/kbd.tsx",
+      "gitBlob": "8089ad74a1d99d1f7393e7248f9777c4ff4df02b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/label.tsx",
+      "gitBlob": "5aff7469c384001a3f1b49cc5cf8871b10f10386",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/marker.tsx",
+      "gitBlob": "8bad2ea33f03a73a515b11a39e28fedc4e52ad8b",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/menubar.tsx",
+      "gitBlob": "9143baeb5a07224bc4224241d51a00d3c539eb5f",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/message-scroller.tsx",
+      "gitBlob": "7b394cddd94f0b1108da44f949613481987436c7",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/message.tsx",
+      "gitBlob": "765bb9bfd4d9499d74b76a5331fb18d7c0dc4cf9",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/native-select.tsx",
+      "gitBlob": "9ddba6b7fcddda52d9c4fc969cd910b929e7aec7",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/navigation-menu.tsx",
+      "gitBlob": "ab18d0d2043e6aadd14135ccc854999c0bf6e70e",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/pagination.tsx",
+      "gitBlob": "0e5980373355daf65200d8070ed99ffb839fbf8d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/popover.tsx",
+      "gitBlob": "b62cf5d7c9d0688eb4d6a38de5e6a13bb7a9b317",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/progress.tsx",
+      "gitBlob": "ac48e2e5e25d507fcc68df5f95717b8a3df71867",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/radio-group.tsx",
+      "gitBlob": "2dc7ec59fa0af08a9274410db47b03cb78f629eb",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/resizable.tsx",
+      "gitBlob": "709e5fd2f97527364ca1ebf1e8fe82b3f9ca8417",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/scroll-area.tsx",
+      "gitBlob": "4542a3e26d68a524dc5e504156eb09dd3440a3f5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/select.tsx",
+      "gitBlob": "8058e266346ddf79b0b156a7c5d07e716d5792ee",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/separator.tsx",
+      "gitBlob": "6a553b978c11cf82c93817b2d0dde1db0e555835",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sheet.tsx",
+      "gitBlob": "9f7ae5fed9763e9ddbe38692fbf5b3f67224b731",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sidebar.tsx",
+      "gitBlob": "31cafe4cb8aa5127e050d883afb395b626565d2c",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/skeleton.tsx",
+      "gitBlob": "a1ceb0545be73aa39a336271ecb69ed6aa69a64d",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/slider.tsx",
+      "gitBlob": "f1a421ef3f90344dac8b53d92e58ba7d2ae0cd13",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/sonner.tsx",
+      "gitBlob": "9b20afe2e10fd9b94d1abc1ae732054b2fb9821c",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/spinner.tsx",
+      "gitBlob": "3e0fd0a1d046107cb97bb3028561485c08be65c2",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/switch.tsx",
+      "gitBlob": "c45932afe4e484c900aa916e81d0e0d67137bedc",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/table.tsx",
+      "gitBlob": "47ce10b2a4347c9dcdc96b04c8c855d42edbb2a7",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/tabs.tsx",
+      "gitBlob": "6e174747a509f8a906ce9cfb27bc2c7603f2b6b5",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/textarea.tsx",
+      "gitBlob": "bf23f6c255978311c3069f5da3fa10c1d896e8cf",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/toggle-group.tsx",
+      "gitBlob": "a227abc4c6d630498bed98bd83d10c7fbe3360fc",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/toggle.tsx",
+      "gitBlob": "0291f01cff0429bbf2fb3575a15867556cc88a89",
+      "status": "not-projected"
+    },
+    {
+      "path": "apps/v4/registry/new-york-v4/ui/tooltip.tsx",
+      "gitBlob": "c8c47cb146e6167c68f74f8a2f2f0c7c2d06ec72",
+      "status": "not-projected"
+    }
+  ],
+  "scope": "Complete pinned style CSS and UI source path inventory; no behavioral, visual or projection parity claim.",
+  "sourceTree": "81a576ce4689c4a9f47314d29db1e104aabe2129"
+}

@@ -1,0 +1,56 @@
+---
+import output from '../generated/cli-init.generated.json';
+import StaticCodeBlock from './StaticCodeBlock.astro';
+import CodeFileBrowser from './CodeFileBrowser.astro';
+const zh = Astro.url.pathname.startsWith('/zh-cn/');
+const files = output.entries.filter((entry) => entry.kind === 'file');
+const sourceCommand = 'node apps/www/scripts/generate-cli-init-docs.mjs';
+---
+
+<section data-cli-init-output data-cli-version={output.cli.version}>
+  <p>
+    {
+      zh
+        ? `以下目录与文件内容由本站构建时实际运行本仓 CLI ${output.cli.version} 生成，不是稳定 0.2.0 的实测输出。空目录表示 init 尚未添加组件。`
+        : `The following paths and file contents are generated during this site build by running the repository CLI ${output.cli.version}, not a verified stable 0.2.0 output. Empty directories mean init has not added components yet.`
+    }
+  </p>
+  <div data-cli-generated-files>
+    <CodeFileBrowser id="cli-init-generated" standalone
+      files={files.map((file) => ({ name: file.path, code: file.content!, lang: file.path.endsWith('.json') ? 'json' : 'css' }))}
+      directories={output.entries.filter((entry) => entry.kind === 'directory').map((entry) => entry.path)}
+      initialFile="proto-ui/config.json" label={zh ? 'CLI 生成的文件' : 'CLI generated files'}
+      filesLabel={zh ? '文件' : 'Files'} copyLabel={zh ? '复制' : 'Copy'} emptyLabel={zh ? '空目录' : 'empty'} />
+  </div>
+  <details data-cli-provenance>
+    <summary>{zh ? '构建来源与复现' : 'Build provenance and reproduction'}</summary>
+    <p>
+      {
+        zh
+          ? '在仓库根目录运行以下命令。提取脚本先构建本仓 CLI，再在空的临时项目中运行；生成失败会中止文档构建，不使用旧示例。'
+          : 'Run these commands from the repository root. The extractor builds the repository CLI, then runs it in an empty temporary project. Generation failure stops the docs build instead of using stale examples.'
+      }
+    </p>
+    <StaticCodeBlock
+      code={sourceCommand}
+      title={zh ? '构建并提取' : 'Build and extract'}
+      icon="terminal"
+      lang="bash"
+      copyLabel={zh ? '复制生成命令' : 'Copy generation command'}
+    />
+    <p>CLI {output.cli.version} · SHA-256 {output.cli.sourceTreeHash}</p>
+  </details>
+</section>
+<style>
+  [data-cli-generated-files] {
+    margin-block: 1rem;
+  }
+  summary {
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    padding-block: 0.5rem;
+  }
+  details > :not(summary) {
+    margin-block: 0.5rem;
+  }
+</style>

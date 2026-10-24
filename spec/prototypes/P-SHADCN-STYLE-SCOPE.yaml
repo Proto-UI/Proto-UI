@@ -1,0 +1,113 @@
+id: P-SHADCN-STYLE-SCOPE
+type: prototype
+title: Shared Shadcn style selection through the existing Context channel
+status: draft
+since: 0.3.0-alpha.1
+summary: A family-owned selection carrier and helper derive visual selection
+  without introducing behavior ownership or asserting complete style parity.
+statement:
+  en: shadcn-style-scope provides one reference-identity ContextKey carrying JSON
+    {style}. Consumers resolve explicit styleProfile before the nearest scope
+    and then their own compatibility baseline. The helper derives a visual State
+    for existing Rule and feedback.style APIs; it never changes Base behavior or
+    host identity. Membership is the eight pinned current styles plus separate
+    new-york-v4 legacy, not eight completed mappings.
+criteria:
+  - id: P-SHADCN-STYLE-SCOPE-IDENTITY
+    text:
+      en: One exported singleton SHADCN_STYLE_SCOPE key identifies the channel by
+        reference, never by debugName. Values contain only a canonical style ID
+        or null inside a JSON object.
+  - id: P-SHADCN-STYLE-SCOPE-SELECTION
+    text:
+      en: Explicit styleProfile wins over the nearest scope, which wins over the
+        consumer compatibility fallback. The inherit sentinel or omission does
+        not select a concrete style. new-york is an explicit alias for
+        new-york-v4. Unknown IDs reject at normalization rather than inventing a
+        mapping.
+  - id: P-SHADCN-STYLE-SCOPE-NESTING
+    text:
+      en: A scope inherits strictly from ancestors, excluding its own provider, and
+        republishes its effective choice. A scope with no concrete inherited or
+        explicit choice carries null, preserving each leaf baseline rather than
+        falsely making all current defaults New York.
+  - id: P-SHADCN-STYLE-SCOPE-PAINT-ONLY
+    text:
+      en: Selection updates only a dedicated derived visual State. Existing Rule
+        contributions withdraw when inactive and semantic merge remains
+        authoritative. No template mutation, DOM class channel, site CSS
+        dependency, new behavior IR or Adapter identity is introduced.
+  - id: P-SHADCN-STYLE-SCOPE-NO-RESET
+    text:
+      en: A style-only update must not recreate the consumer, replace Base state
+        handles, reset value/open/checked/focus/editor selection, or emit
+        behavior changes. This slice exercises actual Base Tabs value, selected
+        handles, focus and live node identity; other controls require later
+        evidence.
+  - id: P-SHADCN-STYLE-SCOPE-LIFETIME
+    text:
+      en: Existing Context and Props lifecycle ownership cleans subscriptions on
+        terminal disposal. Creation, mount and actual update callbacks re-read
+        through current Context APIs. No polling or synthetic invalidation may
+        conceal a missing live ancestry notification.
+  - id: P-SHADCN-STYLE-SCOPE-PROVENANCE
+    text:
+      en: Style membership and the two Nova/Rhea radius canaries bind to the
+        prerequisite source manifest at shadcn-ui/ui
+        3d98900e9b73c45f035f8109e9d41ba6a51685e7. A test-only compatibility
+        radius is not New York parity. Source IDs and transport tests do not
+        establish full component projections.
+openQuestions:
+  - id: P-SHADCN-STYLE-SCOPE-Q-REMAINING-BOUNDARIES
+    question:
+      en: Which additional owner and Adapter evidence is required before expanding the
+        transport guarantee?
+    context:
+      en: Context provider removal or ancestry-only reparent has no guaranteed value
+        callback. Existing lifecycle re-reads cannot create missing host
+        notifications or runtime subscriptions. Arbitrary live reparent and
+        alive-view detach/remount require separately governed lifecycle
+        evidence. Portals must follow logical owner scope, not their physical
+        mount container; no native portal coverage is claimed here. Production
+        Button/Dropdown/Tabs/Select/Input/ Textarea/Switch/search consumers,
+        their actual source rule mappings, IME/selection, browser/AT and
+        cross-Adapter closure remain follow-up work. Do not silently fall back
+        from an unsupported style mapping or advertise family-wide switching.
+    blocks:
+      - activation:P-SHADCN-STYLE-SCOPE
+sources:
+  - path: packages/prototypes/shadcn/src/style-scope/context.ts
+  - path: packages/prototypes/shadcn/src/style-scope/selection.ts
+  - path: packages/prototypes/shadcn/src/style-scope/root.proto.ts
+  - path: packages/prototypes/shadcn/test/style-scope.test.ts
+  - path: internal/fixtures/shadcn-style-source/manifest.json
+  - path: https://github.com/Proto-UI/Proto-UI/pull/929
+dependsOn:
+  contracts:
+    - C-CONTEXT-0001
+    - C-CONTEXT-0004
+    - C-CONTEXT-0009
+    - C-CONTEXT-0012
+    - C-RULE-WHEN-0002
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+verifies:
+  tests:
+    - T-SHADCN-STYLE-SCOPE-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Introduced bounded shared selection transport and real Base Tabs canary
+      without claiming full projection parity.
+tags:
+  - prototype
+  - shadcn
+  - context
+  - style
+  - selection
+  - draft
+lifecycleRationale:
+  en: Transport and a bounded Tabs canary exist; full family projection, native
+    portal/reparent lifecycle and cross-adapter no-reset acceptance remain
+    unresolved.

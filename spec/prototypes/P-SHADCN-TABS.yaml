@@ -1,18 +1,11 @@
 id: P-SHADCN-TABS
 type: prototype
-title: Shadcn Tabs Root inherits Base Tabs and projects the pinned v4 default layout
+title: Shadcn Tabs Root inherits Base Tabs and projects the source-bound text/default layout
 status: draft
 since: 0.2.0-rc.0
-summary: Shadcn Tabs Root is an unofficial projection that inherits Base Tabs selection and family semantics and reproduces the pinned v4 default horizontal root layout.
+summary: Inherits Base behavior and projects the bounded text-only default surface for New York v4, Nova and Rhea through shared style scope.
 statement:
-  zh-CN: >-
-    Shadcn Tabs Root 是 `P-BASE-TABS` 之上的 direct prototype，保留 Base Tabs 的 single-selection value、orientation、activation mode、context、anatomy 与 `valueChange` signal，并为默认 horizontal 用法投射固定 v4 baseline 的 flex column 与 gap-2 layout。比较基线固定到 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 v4 new-york Tabs；`asChild` 明确不提供，vertical layout 与其他差异集中记录为 compatibility differences。
-
-
-  en: >-
-    Shadcn Tabs Root is a direct prototype over `P-BASE-TABS`. It retains Base Tabs single-selection value, orientation, activation mode, context, anatomy, and the `valueChange` signal while projecting the pinned v4 flex-column and gap-2 layout for the default horizontal composition. Its comparison baseline is the v4 new-york Tabs at shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc`; `asChild` is explicitly unavailable, and vertical layout and other differences are centralized as compatibility differences.
-
-
+  en: This draft projects only the text-only default surface of fixed upstream 3d98900e9b73c45f035f8109e9d41ba6a51685e7 for New York v4, Nova and Rhea, preserving Base ownership and shared style-scope precedence. Both orientations and light/dark interaction paint are covered where relevant to this part. It is not complete Tabs or all-style parity. Existing Proto underline remains a separate compatibility appearance, never an alias for upstream line.
 criteria:
   - id: P-SHADCN-TABS-UPSTREAM-IDENTITY
     text:
@@ -26,13 +19,13 @@ criteria:
       prototypes:
         - id: P-BASE-TABS
           anchors:
-            [
-              P-BASE-TABS-AUTHORING-ENTRIES,
-              P-BASE-TABS-ROOT-SEMANTIC-OWNER,
-              P-BASE-TABS-ANATOMY-FAMILY,
-            ]
+            - P-BASE-TABS-AUTHORING-ENTRIES
+            - P-BASE-TABS-ROOT-SEMANTIC-OWNER
+            - P-BASE-TABS-ANATOMY-FAMILY
     dependsOn:
-      contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0007]
+      contracts:
+        - C-AS-HOOK-0001
+        - C-CORE-SYNTAX-0007
   - id: P-SHADCN-TABS-CURRENT-BASE-DEVIATIONS
     text:
       zh-CN: 当前实现不反转 inherited value、selection、orientation、activation、context、anatomy、a11y 或 signal guarantee；新增 style tokens 仅构成视觉增量。
@@ -43,10 +36,10 @@ criteria:
       en: The current Root protocol is exposed as `shadcn-tabs-root`; this layer provides no additional authored asHook.
   - id: P-SHADCN-TABS-CURRENT-VISUAL-SURFACE
     text:
-      zh-CN: 默认 horizontal Root 必须按固定 v4 baseline 提供 `flex flex-col gap-2`，不得额外以 Root token 强制 foreground；该 surface 不表示 vertical orientation-aware layout 已对齐。
-      en: The default horizontal Root must provide `flex flex-col gap-2` from the pinned v4 baseline without forcing foreground through an extra Root token; this surface does not imply parity with the vertical orientation-aware layout.
+      en: 'The source-bound text/default surface is described by the dedicated Tabs coverage inventory: New York compatibility dimensions plus Nova/Rhea recipes, Base-derived horizontal/vertical layout, and existing feedback.style semantic merging. Only the declared bounded surface is projected; it does not imply line, SVG, arbitrary native props, or other-style support.'
     dependsOn:
-      contracts: [C-RULE-INTENT-FEEDBACK-STYLE-0001]
+      contracts:
+        - C-RULE-INTENT-FEEDBACK-STYLE-0001
   - id: P-SHADCN-TABS-COMPATIBILITY-SUBSET
     text:
       zh-CN: 当前实体只声明已测试的 inherited family behavior 与 root surface；固定 baseline 的所有差异必须集中在唯一 compatibility open question。
@@ -56,40 +49,65 @@ criteria:
       zh-CN: upstream Root props 中的 `asChild` 依 `D-AS-CHILD-OMISSION-0001` 有意不进入 API。
       en: The `asChild` member of upstream Root props is intentionally omitted under `D-AS-CHILD-OMISSION-0001`.
     dependsOn:
-      decisions: [D-AS-CHILD-OMISSION-0001]
+      decisions:
+        - D-AS-CHILD-OMISSION-0001
+  - id: P-SHADCN-TABS-STYLE-SCOPE
+    text:
+      en: Use the shared style-scope singleton. Explicit selection wins over nearest scope and then New York compatibility fallback. Root/List may provide local inherited selection. Style-only changes do not mutate Base value/orientation, replace handles or user nodes, or reset focus/selection. Unsupported canonical and unknown raw choices reject rather than silently selecting another style.
+  - id: P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
+    text:
+      en: 'The complete style ID inventory remains eight latest styles plus separate legacy New York. This slice implements only New York/Nova/Rhea text/default; all six others reject. Upstream line remains explicitly unsupported pending #935; nested SVG and inline-glyph handling remain unprojected. Existing appearance=underline is separately preserved. Source hashes, fixture references and tests must remain current.'
 openQuestions:
   - id: P-SHADCN-TABS-Q-UPSTREAM-DIFFERENCES
     question:
       zh-CN: Shadcn Tabs Root 相对固定 upstream baseline 的全部差异应如何分类与收敛？
       en: How should every Shadcn Tabs Root difference from the pinned upstream baseline be classified and converged?
     context:
-      zh-CN: >-
-        intentional deviation 是不提供 `asChild`。默认 horizontal layout 已对齐固定 v4 baseline。待实现或待评审项包括 upstream `onValueChange` 相对 `valueChange` signal、className/native prop forwarding、data-slot/data-orientation，以及只有 horizontal 才采用 flex-column 的方向感知 layout。实现并测试前不得扩大 passing guarantee。
-
-
-      en: >-
-        The intentional deviation is omission of `asChild`. The default horizontal layout now matches the pinned v4 baseline. Implementation or review gaps include upstream `onValueChange` versus the `valueChange` signal, className and native prop forwarding, data-slot and data-orientation, and orientation-aware layout that uses flex-column only for horizontal tabs. The passing guarantee must not expand before implementation and tests.
-
-
-    blocks: [shadcn tabs root parity roadmap]
+      en: 'Current implementation adds shared-scope selection and source-bound text/default New York/Nova/Rhea paint in both orientations and light/dark; this does not close full upstream parity. Remaining gaps: six other styles, upstream line (explicit rejection pending #935 owned decorative feedback), nested SVG/default or overridden icon size/inline-icon placement, className/native prop forwarding, data-slot/state naming correspondence, and native/cross-adapter visual acceptance. asChild remains intentionally omitted. Existing Proto underline is a compatibility identity, not upstream line. Raw unknown style choices are explicitly rejected. See #934 and the coverage inventory.'
+    blocks:
+      - shadcn tabs root parity roadmap
 sources:
   - path: internal/records/2026-07-18-external-prototype-library-governance.zh-CN.md
   - path: packages/prototypes/shadcn/src/tabs/root.proto.ts
   - path: packages/prototypes/shadcn/src/tabs/types.ts
   - path: packages/prototypes/shadcn/test/tabs.test.ts
   - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/tabs.tsx
-    label: shadcn/ui v4 new-york Tabs pinned baseline
+    label: Historical New York baseline, retained for provenance; current source binding is 3d989 coverage inventory
+  - path: internal/fixtures/shadcn-tabs-style/coverage.json
+  - path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/issues/934
 dependsOn:
   contracts:
-    [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-CORE-SYNTAX-0007, C-RULE-INTENT-FEEDBACK-STYLE-0001]
-  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-AS-CHILD-OMISSION-0001]
+    - C-AS-HOOK-0001
+    - C-CORE-SYNTAX-0003
+    - C-CORE-SYNTAX-0007
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+  decisions:
+    - D-PROTOTYPE-ENTITY-NAMING-0001
+    - D-AS-CHILD-OMISSION-0001
+  prototypes:
+    - P-SHADCN-STYLE-SCOPE
 inherits:
   prototypes:
     - id: P-BASE-TABS
       note: Default inherited protocol; explicit setup-time negative-patch criteria may override individual guarantees.
-verifies: { tests: [T-SHADCN-TABS-0001] }
+verifies:
+  tests:
+    - T-SHADCN-TABS-0001
+    - T-SHADCN-TABS-STYLE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added bounded production text/default style scope projection; line explicitly rejects pending generic owned decorative feedback, with legacy underline and all remaining gaps preserved.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Introduced Shadcn Tabs Root delta cataloging with Base inheritance, current layout surface, intentional asChild omission, and centralized upstream differences.
-tags: [prototype, shadcn, tabs, root, upstream-derived, delta, compatibility, visual]
+tags:
+  - prototype
+  - shadcn
+  - tabs
+  - root
+  - upstream-derived
+  - delta
+  - compatibility
+  - visual

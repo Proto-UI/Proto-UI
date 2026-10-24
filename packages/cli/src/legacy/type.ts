@@ -106,4 +106,11 @@ export const SHADCN_THEME_CSS = `:root {
     --selection: lab(90.952% 0 -0.0000119209);
     --selection-foreground: lab(7.78201% -0.0000149012 0);
   }
+  /* Theme-owned default; component selection utilities keep precedence. */
+  @layer theme {
+    ::selection {
+      background-color: var(--selection);
+      color: var(--selection-foreground);
+    }
+  }
   `;

@@ -6,6 +6,15 @@ import {
 } from './adapter-preference';
 import { initCodeExamples } from './code-example-client';
 
+// These tests retain the native fallback contract. The real Tabs projection has
+// a separate suite and browser evidence; do not conflate the two owners.
+vi.mock('./code-example-tabs', async (importOriginal) => ({
+  ...await importOriginal<typeof import('./code-example-tabs')>(),
+  enhanceCodeExampleTabs: () => ({ select() {}, destroy() {} }),
+}));
+
+vi.mock('./code-example-tree', () => ({ enhanceCodeExampleTree: () => ({ select() {}, destroy() {} }) }));
+
 function exampleMarkup(id: string, initialHost: 'wc' | 'react' = 'wc'): string {
   const hosts = ['wc', 'react'] as const;
   return `
@@ -35,8 +44,11 @@ function exampleMarkup(id: string, initialHost: 'wc' | 'react' = 'wc'): string {
             aria-labelledby="${id}-host-tab-${hostIndex}"
             ${host === initialHost ? '' : 'hidden'}
           >
+            <section data-code-example-command aria-label="Terminal">
+              <figure data-code-shell><pre><code>npx @proto.ui/cli@latest add ${host} shadcn-button</code></pre></figure>
+            </section>
             <div role="tablist" aria-label="Files" data-code-file-tabs>
-              ${['install.sh', host === 'react' ? 'Demo.tsx' : 'main.ts']
+              ${['src/styles.css', host === 'react' ? 'src/Demo.tsx' : 'src/main.ts']
                 .map(
                   (name, fileIndex) => `<button
                     id="${id}-${host}-file-tab-${fileIndex}"
@@ -93,6 +105,7 @@ describe('CodeExample client', () => {
   });
 
   afterEach(() => {
+    document.dispatchEvent(new Event('astro:before-swap'));
     vi.restoreAllMocks();
     document.body.innerHTML = '';
     localStorage.clear();
@@ -219,6 +232,34 @@ describe('CodeExample client', () => {
     expect(selectedHost(root)).toBe('wc');
   });
 
+  it('lets an explicit WIP host remain selectable without inventing file or copy controls', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    root.querySelector('[data-code-host-tabs]')!.insertAdjacentHTML('beforeend',
+      '<button role="tab" data-code-host-tab data-code-host="qt" aria-selected="false" aria-controls="qt-wip" tabindex="-1">Qt</button>');
+    root.insertAdjacentHTML('beforeend',
+      '<section id="qt-wip" data-code-host-panel data-code-host="qt" role="tabpanel" hidden><p data-code-example-wip>WIP: no stable CLI path yet.</p></section>');
+    initCodeExamples(document);
+    root.querySelector<HTMLButtonElement>('[data-code-host-tab][data-code-host="qt"]')!.click();
+    expect(selectedHost(root)).toBe('qt');
+    const panel = root.querySelector<HTMLElement>('#qt-wip')!;
+    expect(panel.hidden).toBe(false);
+    expect(panel.querySelector('[data-code-file-tabs], [data-site-copy], pre')).toBeNull();
+    document.dispatchEvent(new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: 'react' } }));
+    expect(selectedHost(root)).toBe('qt');
+  });
+
+  it('keeps terminal commands outside file tab selection', () => {
+    const root = document.querySelector<HTMLElement>('[data-code-example]')!;
+    initCodeExamples(document);
+    const panel = root.querySelector<HTMLElement>('[data-code-host-panel][data-code-host="wc"]')!;
+    const command = panel.querySelector<HTMLElement>('[data-code-example-command]')!;
+    panel.querySelectorAll<HTMLButtonElement>('[data-code-file-tab]')[1].click();
+    expect(command.hidden).toBe(false);
+    expect(command.querySelector('[role="tab"], [role="tabpanel"], [data-code-file-panel]')).toBeNull();
+    expect(command.textContent).toContain('add wc shadcn-button');
+    expect(panel.querySelector('[data-code-file-tabs]')!.textContent).not.toContain('install.sh');
+  });
+
   it('initializes each root idempotently', () => {
     const root = document.querySelector<HTMLElement>('[data-code-example]')!;
     initCodeExamples(document);
@@ -231,3 +272,4 @@ describe('CodeExample client', () => {
     expect(selectedHost(root)).toBe('react');
   });
 });
+

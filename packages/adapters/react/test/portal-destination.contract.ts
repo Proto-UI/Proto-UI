@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { definePrototype, type Prototype } from '@proto.ui/core';
 import { asFocusable, asFocusScope, asOverlay } from '@proto.ui/hooks';
 import { expectStableReactPortalMount } from './portal-destination.assertions';
@@ -163,6 +163,7 @@ export function portalDestinationContract(name: string, mount: Mount) {
       const parent = target.parentNode;
       const targetDocument = target.ownerDocument;
       const projectionGeneration = getWebPortalProjectionGeneration(target);
+      const restoreInsertions: Array<() => void> = [];
       try {
         expect(isWebPortalMaterialSuspended(target)).toBe(false);
         // Happy DOM does not recursively adopt descendants. Explicitly adopt
@@ -176,6 +177,24 @@ export function portalDestinationContract(name: string, mount: Mount) {
             node.appendChild(child);
           }
         };
+        // Native insertion also adopts nodes created by the renderer after
+        // close/reopen. Happy DOM otherwise leaves their original Document.
+        const appendChild = Node.prototype.appendChild;
+        const insertBefore = Node.prototype.insertBefore;
+        const append = vi.spyOn(Node.prototype, 'appendChild').mockImplementation(function <
+          T extends Node,
+        >(this: Node, node: T): T {
+          if (this.ownerDocument === foreign && node.ownerDocument !== foreign) adopt(node);
+          return appendChild.call(this, node) as T;
+        });
+        restoreInsertions.push(() => append.mockRestore());
+        const insert = vi.spyOn(Node.prototype, 'insertBefore').mockImplementation(function <
+          T extends Node,
+        >(this: Node, node: T, reference: Node | null): T {
+          if (this.ownerDocument === foreign && node.ownerDocument !== foreign) adopt(node);
+          return insertBefore.call(this, node, reference) as T;
+        });
+        restoreInsertions.push(() => insert.mockRestore());
         await f.run(() => {
           adopt(f.host);
           foreign.body.append(f.host);
@@ -212,6 +231,7 @@ export function portalDestinationContract(name: string, mount: Mount) {
         // WC explicitly retains its pre-existing adoption/detach lifecycle.
         // Its passing suspension assertion is not a same-parent continuity claim.
       } finally {
+        for (const restore of restoreInsertions.reverse()) restore();
         await f.cleanup();
         iframe.remove();
       }

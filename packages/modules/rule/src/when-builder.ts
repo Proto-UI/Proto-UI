@@ -30,6 +30,13 @@ export function createWhenBuilder<Props extends PropsBaseType>(opts?: {
   };
 
   const makeSignal = (left: any, stateKind?: string): WhenSignal<Props, any> => ({
+    gte(lit: number): WhenExpr<Props> {
+      if (stateKind === 'number.list')
+        throw new Error('[Rule] number.list does not support scalar gte comparisons');
+      if (typeof lit !== 'number' || !Number.isFinite(lit))
+        throw new Error('[Rule] gte requires a finite number literal');
+      return { type: 'gte', left, right: lit };
+    },
     eq(lit: WhenLiteral): WhenExpr<Props> {
       if (stateKind === 'number.list') {
         throw new Error('[Rule] number.list does not support scalar eq comparisons');

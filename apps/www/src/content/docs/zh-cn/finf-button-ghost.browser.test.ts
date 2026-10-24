@@ -357,6 +357,10 @@ for (const runtime of RUNTIMES)
           await page.evaluate(() => document.fonts.ready);
           const enabled = previewer.getByRole('button', { name: 'Ghost', exact: true });
           const disabled = previewer.getByRole('button', { name: 'Disabled ghost', exact: true });
+          observations.profile = 'new-york';
+          expect((await metrics(enabled)).tokens?.split(/\s+/)).toEqual(
+            expect.arrayContaining(['h-9', 'rounded-md'])
+          );
           const status = previewer.getByRole('status');
           const counts = (enabledCount: number) =>
             expect
@@ -364,9 +368,11 @@ for (const runtime of RUNTIMES)
               .toBe(`Enabled activations: ${enabledCount}; disabled activations: 0`);
           const paint = async (target: Locator, hovered: boolean, isDisabled = false) => {
             await expect
-              .poll(async () =>
-                ghostPaintFailures(await metrics(target), scheme, hovered, isDisabled)
-              )
+              .poll(async () => {
+                const actual = await metrics(target);
+                observations[`${stage}LastPaint`] = actual;
+                return ghostPaintFailures(actual, scheme, hovered, isDisabled);
+              })
               .toEqual([]);
             const observed = await metrics(target);
             expect(observed.theme).toBe(scheme);
@@ -380,6 +386,8 @@ for (const runtime of RUNTIMES)
           await capture('rest');
           stage = 'hover';
           await enabled.hover();
+          observations.hoverBeforeAssert = await metrics(enabled);
+          await capture('hover-before-assert');
           observations.hover = await paint(enabled, true);
           await counts(0);
           await capture('hover');

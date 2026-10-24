@@ -127,6 +127,30 @@ describe('prototypes/brutalist: canonical theme manifest', () => {
     expect(css).toContain('--pui-mint-foreground: #000000;');
     expect(css).not.toContain(':root');
   });
+  it('paints selection only in the theme boundary at low cascade priority', () => {
+    const css = renderBrutalistThemeCss({
+      variablePrefix: 'pui-',
+      lightSelector: '.light-scope',
+      darkSelector: '.dark-scope',
+    });
+    expect(css).toContain('@layer theme {');
+    expect(css).toContain(':where(.light-scope, .dark-scope)::selection');
+    expect(css).toContain(':where(.light-scope, .dark-scope) ::selection');
+    expect(css).toContain('background-color: var(--pui-selection);');
+    expect(css).toContain('color: var(--pui-selection-foreground);');
+    expect(css).not.toContain('!important');
+    expect(css).not.toContain('user-select');
+  });
+
+  it('keeps palette-only variable banks free of global or scoped selection paint', () => {
+    const css = renderBrutalistThemeCss({
+      variablePrefix: 'site-brutalist-',
+      includeSelection: false,
+    });
+    expect(css).toContain('--site-brutalist-selection:');
+    expect(css).not.toContain('::selection');
+  });
+
   it('keeps the offline CLI theme projection byte-equivalent to the package renderer', () => {
     expect(GENERATED_BRUTALIST_THEME).toEqual(BRUTALIST_THEME);
     expect(BRUTALIST_THEME_CSS).toBe(renderBrutalistThemeCss());

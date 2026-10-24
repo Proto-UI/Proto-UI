@@ -38,3 +38,4 @@ export {
 } from './platform/web-owned-decoration';
 
 export { createWebOwnedDecorationPortalGate } from './platform/web-owned-decoration-portal';
+export * from './platform/web-viewport-source';

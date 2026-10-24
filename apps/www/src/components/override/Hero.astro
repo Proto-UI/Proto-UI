@@ -29,7 +29,12 @@ const whitepaperLabel =
   }
   {
     actions.length > 0 && (
-      <HomeActions id="homepage-hero-actions" class="homepage-hero__actions" actions={actions} />
+      <HomeActions
+        id="homepage-hero-actions"
+        appearance="action"
+        class="homepage-hero__actions"
+        actions={actions}
+      />
     )
   }
 </section>
@@ -76,11 +81,6 @@ const whitepaperLabel =
   .homepage-hero :global(.homepage-hero__actions .home-actions-fallback) {
     justify-content: center;
     gap: 0.75rem;
-  }
-  .homepage-hero :global(.homepage-hero__actions .home-runtime-anchor),
-  .homepage-hero :global(.homepage-hero__actions .home-actions-fallback a) {
-    min-height: 2.75rem;
-    padding: 0.625rem 1rem;
   }
   /* Only size the native owner here; its passive Link Prototype owns paint,
      typography and wrapping. Use the real projected anchor class. */

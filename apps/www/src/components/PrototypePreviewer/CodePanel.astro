@@ -1,4 +1,6 @@
 ---
+import { codeFileIcon, type CodeFileIcon } from '../code-file-icon';
+import StaticLucideIcon from '../StaticLucideIcon.astro';
 import SiteCopyBootstrap from '../SiteCopyBootstrap.astro';
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
 const siteFamily = resolveSiteLibraryFamily(Astro.url.pathname);
@@ -15,9 +17,34 @@ interface Props {
   hidden?: boolean;
   fileIndex?: number;
   framed?: boolean;
+  /** Required instructions stay readable, including before hydration. */
+  collapsible?: boolean;
+  copyLabel?: string;
+  title?: string;
+  scrollableTitle?: boolean;
+  titleIcon?: 'terminal' | 'folder-tree' | CodeFileIcon;
+  lineNumbers?: boolean;
+  presentation?: 'docs';
+  panelRole?: 'tabpanel' | 'region';
 }
 
-const { code, lang = 'tsx', id, labelledBy, hidden, fileIndex, framed = true } = Astro.props;
+const {
+  code,
+  lang = 'tsx',
+  id,
+  labelledBy,
+  hidden,
+  fileIndex,
+  framed = true,
+  collapsible = true,
+  copyLabel = 'Copy code',
+  title,
+  scrollableTitle = false,
+  titleIcon,
+  lineNumbers = true,
+  presentation,
+  panelRole = 'tabpanel',
+} = Astro.props;
 const highlighted = await highlightCode(code, lang);
 ---
 
@@ -25,32 +52,68 @@ const highlighted = await highlightCode(code, lang);
 <figure
   id={id}
   class="relative min-w-0 max-w-full"
-  role={labelledBy ? 'tabpanel' : undefined}
+  role={labelledBy ? panelRole : undefined}
   aria-labelledby={labelledBy}
   hidden={hidden}
   data-code-file-panel={labelledBy ? '' : undefined}
   data-code-file-index={fileIndex}
   data-code-shell
+  data-code-presentation={presentation}
+  data-code-line-numbers={String(lineNumbers)}
+  data-code-collapsible={String(collapsible)}
+  data-code-expanded={collapsible ? undefined : 'true'}
   data-site-code-surface={framed ? 'frame' : undefined}
 >
-  <div class="group relative min-w-0 max-w-full min-h-12" data-code-inner>
-    <div class="site-code-copy-overlay" hidden data-copy data-site-copy data-copy-label="Copy code">
-    </div>
+  {
+    title && (
+      <figcaption class="code-panel__title" data-code-file-header>
+        <StaticLucideIcon name={titleIcon ?? codeFileIcon(title)} size={scrollableTitle ? "16px" : "1rem"} />
+        <span data-code-file-title data-code-title-scroll={scrollableTitle ? "" : undefined} tabindex={scrollableTitle ? 0 : undefined}>{title}</span>
+        <div
+          class="site-code-copy-header"
+          hidden={collapsible}
+          data-copy
+          data-site-copy
+          data-copy-label={copyLabel}
+        />
+      </figcaption>
+    )
+  }
+  <div
+    class="group relative min-w-0 max-w-full min-h-12"
+    data-code-inner
+    data-code-expanded={collapsible ? undefined : 'true'}
+  >
+    {
+      !title && (
+        <div
+          class="site-code-copy-overlay"
+          hidden={collapsible}
+          data-copy
+          data-site-copy
+          data-copy-label={copyLabel}
+        />
+      )
+    }
 
     <div class="min-w-0 max-w-full" data-code-content set:html={highlighted} />
 
-    <Button
-      data-site-button
-      data-site-control-family={siteFamily}
-      data-variant="outline"
-      data-size="sm"
-      class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10"
-      data-code-toggle
-      aria-expanded="false"
-      aria-label="展开代码"
-    >
-      View code
-    </Button>
+    {
+      collapsible && (
+        <Button
+          data-site-button
+          data-site-control-family={siteFamily}
+          data-variant="outline"
+          data-size="sm"
+          class="absolute left-1/2 bottom-1/2 -translate-x-1/2 translate-y-1/2 z-10"
+          data-code-toggle
+          aria-expanded="false"
+          aria-label="展开代码"
+        >
+          View code
+        </Button>
+      )
+    }
   </div>
 </figure>
 
@@ -65,3 +128,80 @@ const highlighted = await highlightCode(code, lang);
     initCodePanels(document);
   });
 </script>
+
+<style is:global>
+  .code-panel__title {
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    gap: 0.5rem;
+    overflow-wrap: anywhere;
+  }
+  /* Required source reserves a real column for Copy, outside the scroll viewport. */
+  [data-code-collapsible='false']:not(:has([data-code-file-header])) [data-code-inner] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    column-gap: 0.5rem;
+  }
+  [data-code-collapsible='false'] [data-code-content] {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  [data-code-collapsible='false'] .site-code-copy-overlay {
+    position: static;
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+  }
+  [data-code-collapsible='false'] .proto-previewer__code {
+    max-height: none;
+    padding-inline-end: 0;
+  }
+  .code-panel__title > [data-code-file-title] {
+    min-width: 0;
+  }
+  [data-code-title-scroll] {
+    flex: 1 1 auto; white-space: nowrap; overflow-x: auto; overflow-y: hidden;
+  }
+  [data-code-title-scroll]:focus-visible { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+  .site-code-copy-header {
+    margin-inline-start: auto;
+    flex: none;
+  }
+  [data-code-file-header] + [data-code-inner] {
+    padding-inline: 0;
+  }
+  [data-code-file-header] ~ [data-code-inner] .proto-previewer__code {
+    font-size: 0.875rem;
+    line-height: 1.3125rem;
+  }
+  [data-code-file-header] ~ [data-code-inner] .proto-previewer__code > code {
+    display: grid;
+    min-width: max-content;
+  }
+  [data-code-file-header] ~ [data-code-inner] .proto-previewer__code .line {
+    display: block;
+    padding-block: 1px;
+  }
+  [data-code-presentation='docs'] [data-code-file-header] {
+    min-height: 2.625rem;
+    padding-block: 0.375rem;
+  }
+  [data-code-presentation='docs'] [data-code-inner] {
+    padding: 0.875rem 1rem;
+  }
+  [data-code-presentation='docs'] [data-code-inner] .proto-previewer__code {
+    font-size: 0.875rem;
+    line-height: 1.53125rem;
+  }
+  [data-code-presentation='docs'] [data-code-inner] .proto-previewer__code .line {
+    padding-block: 0;
+  }
+  [data-code-line-numbers='false'] .proto-previewer__code .line::before {
+    display: none;
+  }
+</style>

@@ -1,0 +1,61 @@
+id: T-RULE-VIEWPORT-WIDTH-0001
+type: test
+title: Width source and mounted adapter composition
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Simulated source/runtime/adapter checks do not replace native-browser viewport and adoption evidence.
+summary: Finite width, exact leases, resize-driven Rule and realm adoption closure.
+cases:
+  - id: T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE
+    title: Finite bounded source, lease and adapter lifecycle
+    covers:
+      [
+        C-RULE-VIEWPORT-WIDTH-0001-A,
+        C-RULE-VIEWPORT-WIDTH-0001-B,
+        C-RULE-VIEWPORT-WIDTH-0001-C,
+        HC-VIEWPORT-WIDTH-INVALIDATION-0001-A,
+        HC-VIEWPORT-WIDTH-INVALIDATION-0001-B,
+      ]
+    expectation: finite-width-or-unknown-exact-source-no-reset-and-no-stale-realm
+implementations:
+  - id: viewport-width-0
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/web-viewport-source.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+  - id: viewport-width-1
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.viewport-width-lifecycle.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+  - id: viewport-width-2
+    kind: module-test
+    status: passing
+    path: packages/adapters/react/test/viewport-width.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+  - id: viewport-width-3
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue/test/viewport-width.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+  - id: viewport-width-4
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue2/test/viewport-width.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+  - id: viewport-width-5
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/viewport-width.test.ts
+    required: true
+    consumesCases: [T-RULE-VIEWPORT-WIDTH-0001-CASE-LIFECYCLE]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Tests source lifetime and four actual adapter Rule paths without claiming native raster.
+tags: [rule, viewport, geometry]

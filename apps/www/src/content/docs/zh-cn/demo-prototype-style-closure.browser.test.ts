@@ -786,21 +786,21 @@ describe.sequential('Prototype style closure without Website CSS', () => {
         await page.waitForTimeout(220);
         expect(await readFocusPaint(), `${runtime}/blur-restored-endpoint`).toEqual(unfocused);
 
-        // P-SHADCN-BUTTON-NEW-YORK-PAINT, pinned New York 02cad611 button.tsx:7/23.
-        // Outline default: h-9/px-4/py-2/rounded-md at the fixed 16px root.
-        expect(facts.button.height, `${runtime}/button-height`).toBe('36px');
-        expect(facts.button.paddingLeft, `${runtime}/button-padding-left`).toBe('16px');
-        expect(facts.button.paddingRight, `${runtime}/button-padding-right`).toBe('16px');
+        // Direct Rhea outline, pinned 25af02b1 style-rhea.css.
+        // h-8/px-3, theme radius + 8px; dark outline is transparent, not input-filled.
+        expect(facts.button.height, `${runtime}/button-height`).toBe('32px');
+        expect(facts.button.paddingLeft, `${runtime}/button-padding-left`).toBe('12px');
+        expect(facts.button.paddingRight, `${runtime}/button-padding-right`).toBe('12px');
         expect(facts.button.borderWidth, `${runtime}/button-border-width`).toBe('1px');
         expect(facts.button.borderStyle, `${runtime}/button-border-style`).toBe('solid');
         expect(facts.button.color, `${runtime}/button-foreground`).toBe(expectedButton.foreground);
         expect(facts.button.background, `${runtime}/button-background`).toBe(
-          colorScheme === 'dark' ? expectedButton.inputBackground : expectedButton.background
+          colorScheme === 'dark' ? 'rgba(0, 0, 0, 0)' : expectedButton.background
         );
         expect(facts.button.borderColor, `${runtime}/button-border-color`).toBe(
-          colorScheme === 'dark' ? expectedButton.inputBorder : expectedButton.border
+          expectedButton.border
         );
-        expect(facts.button.borderRadius, `${runtime}/button-radius`).toBe('8px');
+        expect(facts.button.borderRadius, `${runtime}/button-radius`).toBe('18px');
         expect(facts.button.fontFamily, `${runtime}/button-consumer-font`).toBe(facts.hostFont);
         if (!firstButton) firstButton = facts.button;
         else expect(facts.button, `${runtime}/button-parity`).toEqual(firstButton);

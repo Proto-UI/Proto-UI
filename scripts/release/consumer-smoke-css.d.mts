@@ -1,3 +1,4 @@
+export function unwrapGeneratedThemeSelectionLayer(css: string): string;
 export function unwrapGeneratedTokenLayer(css: string): string;
 export function loadConsumerStyles(
   document: Document,

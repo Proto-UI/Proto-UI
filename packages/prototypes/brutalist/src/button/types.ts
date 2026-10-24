@@ -13,6 +13,8 @@ export type BrutalistButtonColor = 'main' | 'mint' | 'lavender' | 'coral' | 'sky
 export type BrutalistButtonSize = 'default' | 'sm' | 'lg' | 'icon';
 
 export interface BrutalistButtonProps extends ButtonProps {
+  /** Opt-in multiline label; preserves each family size minimum. Ignored for icon. */
+  wrap?: boolean;
   // P-BRUTALIST-BUTTON-VARIANT-PROP
   variant?: BrutalistButtonVariant;
   // P-BRUTALIST-BUTTON-COLOR-PROP

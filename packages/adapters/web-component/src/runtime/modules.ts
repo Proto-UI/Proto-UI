@@ -138,7 +138,9 @@ import {
   RULE_META_COLOR_SCHEME_SOURCE_CAP,
   RULE_META_PREFERENCE_SOURCE_CAP,
   RULE_META_STYLE_SUPPORT_SOURCE_CAP,
+  RULE_META_VIEWPORT_SOURCE_CAP,
   type StyleSupportInvalidationSource,
+  type ViewportInvalidationSource,
   type PreferenceInvalidationSource,
   type ColorSchemeInvalidationSource,
 } from '@proto.ui/module-rule-meta';
@@ -928,6 +930,7 @@ type WebComponentOwnerModulesArgs<Props extends PropsBaseType> = {
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;
+  viewportSource?: ViewportInvalidationSource;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
     allowStringVar?: boolean;
@@ -1010,6 +1013,7 @@ function addLogicalModules(
   colorSchemeSource: ColorSchemeInvalidationSource | undefined,
   preferenceSource: PreferenceInvalidationSource | undefined,
   styleSupportSource: StyleSupportInvalidationSource | undefined,
+  viewportSource: ViewportInvalidationSource | undefined,
   orderObserver?: typeof createDomOrderObserver
 ) {
   const anatomy: CapEntries[number][] = [
@@ -1039,6 +1043,7 @@ function addLogicalModules(
         ? [[RULE_META_COLOR_SCHEME_SOURCE_CAP, colorSchemeSource] as const]
         : []),
       ...(preferenceSource ? [[RULE_META_PREFERENCE_SOURCE_CAP, preferenceSource] as const] : []),
+      ...(viewportSource ? [[RULE_META_VIEWPORT_SOURCE_CAP, viewportSource] as const] : []),
       ...(styleSupportSource
         ? [[RULE_META_STYLE_SUPPORT_SOURCE_CAP, styleSupportSource] as const]
         : []),
@@ -1060,6 +1065,7 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     colorSchemeSource,
     preferenceSource,
     styleSupportSource,
+    viewportSource,
     setExposes,
   } = args;
   const getControlLabelSurface = () => {
@@ -1131,7 +1137,8 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     getMeta,
     colorSchemeSource,
     preferenceSource,
-    styleSupportSource
+    styleSupportSource,
+    viewportSource
   )
     .use('overlay', () => [
       ...(args.overlayLayerScheduler
@@ -1171,6 +1178,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;
+  viewportSource?: ViewportInvalidationSource;
   exposeStateWebMode?: {
     allowContinuousAttr?: boolean;
     allowStringVar?: boolean;
@@ -1205,6 +1213,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     colorSchemeSource,
     preferenceSource,
     styleSupportSource,
+    viewportSource,
     exposeStateWebMode,
     scrollProjection,
     setExposes,
@@ -2114,6 +2123,7 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     colorSchemeSource,
     preferenceSource,
     styleSupportSource,
+    viewportSource,
     createDomOrderObserver
   )
     .use('hit-participation', [

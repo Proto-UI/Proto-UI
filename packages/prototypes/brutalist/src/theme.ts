@@ -87,6 +87,8 @@ export interface RenderBrutalistThemeCssOptions {
   readonly variablePrefix?: string;
   readonly lightSelector?: string;
   readonly darkSelector?: string;
+  /** False for variable-bank projections that must not paint another scope. */
+  readonly includeSelection?: boolean;
 }
 
 function renderDeclarations(mode: BrutalistThemeMode, variablePrefix: string): string {
@@ -109,5 +111,19 @@ export function renderBrutalistThemeCss(options: RenderBrutalistThemeCssOptions 
     renderDeclarations(BRUTALIST_THEME.dark, variablePrefix),
     '}',
     '',
+    ...(options.includeSelection === false
+      ? []
+      : [
+          // Scope both originating elements and descendants; do not repaint
+          // unrelated family roots when only a preview boundary owns these vars.
+          '@layer theme {',
+          `  :where(${lightSelector}, ${darkSelector})::selection,`,
+          `  :where(${lightSelector}, ${darkSelector}) ::selection {`,
+          `    background-color: var(--${variablePrefix}selection);`,
+          `    color: var(--${variablePrefix}selection-foreground);`,
+          '  }',
+          '}',
+          '',
+        ]),
   ].join('\n');
 }

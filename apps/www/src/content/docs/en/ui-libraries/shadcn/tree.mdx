@@ -9,6 +9,8 @@ Tree owns single selection and expansion of a complete authored hierarchy. nodeK
 
 This is a WIP source checkpoint. Full Adapter/Compiler, native GPUI, package consumer, accessibility and commit-bound visual acceptance remain pending.
 
+Shadcn Root and Item accept `appearance="embedded"` for file navigation inside an existing surface. Set it explicitly on both parts; the default appearance is unchanged. Embedded rows use a quiet selected surface, retain keyboard focus and disabled semantics, and wrap enlarged text. This is a family presentation option, not a new selection or expansion owner.
+
 <PrototypePreviewer
   demoId="demo-shadcn-tree"
   initialRuntime="wc"

@@ -47,18 +47,24 @@ The same subpath and package root also export `textRoot` and `ShadcnTextRoot` al
 | `tone`       | `default`, `muted`, `inherit`                              | `default` |
 | `weight`     | `normal`, `medium`, `semibold`, `bold`                     | `normal`  |
 | `font`       | `body`, `heading`, `mono`                                  | `body`    |
-| `leading`    | `tight`, `snug`, `normal`, `relaxed`                       | `normal`  |
-| `tracking`   | `normal`, `tight`                                          | `normal`  |
+| `leading`    | `size`, `tighter`, `tight`, `snug`, `normal`, `relaxed`    | `normal`  |
+| `tracking`   | `normal`, `tight`, `tighter`                               | `normal`  |
 | `emphasis`   | `normal`, `italic`                                         | `normal`  |
 | `decoration` | `none`, `underline`, `line-through`                        | `none`    |
 
 `tone="inherit"` keeps the enclosing semantic or Surface owner's foreground, which is useful for contrast on solid or accent surfaces. Removing a prop restores its default. The single anonymous slot preserves authored text and children. There are no exposed states, methods or events. No page role, copy, heading level, `asChild`, `tag`, `href`, `for`, content parser, editor, or automatic responsive breakpoint is part of this API.
+
+`leading="size"` keeps the line box built into the selected size instead of adding a leading override. Shadcn and Brutalist map `xs`, `sm`, `base`, `lg`, `xl`, `2xl`, `3xl`, `4xl`, and `5xl` to line heights of `1rem`, `1.25rem`, `1.5rem`, `1.75rem`, `1.75rem`, `2rem`, `2.25rem`, `2.5rem`, and `1` respectively. For example, `size="base"` uses 16/24 and `size="lg"` uses 18/28 at a 16px root size. Omitting size restores `base`. An initially invalid size also falls back to `base`; a provided empty or invalid size after a valid value retains that previous value under the existing Props contract. `leading="tighter"` selects `1.1`; `tracking="tighter"` selects `-0.05em`. The existing `normal` defaults are unchanged. These options are finite visual semantics, not numeric or arbitrary-CSS inputs. Base only normalizes them; this density extension is verified for Shadcn and Brutalist, not every family or native target.
+
+Shadcn action composition keeps its existing precedence: `actionProfile="rhea"` or `"luma"` still selects `1.25rem` leading, including when `leading="size"` or `"tighter"` is supplied.
 
 ## Adapter and Compiler boundary
 
 The implemented Web profile is exercised through Web Components, React, Vue 3 and Vue 2, including property changes/removal, retained content and native-owner composition. Web compiler source-closure and generated-facade checks are separate from that Adapter evidence; they do not establish arbitrary Prototype AOT or native parity.
 
 The CLI's unsupported GPUI target is rejected. Native GPUI typography mapping still omits `font-style`, `letter-spacing` and `text-decoration-line`; those omissions are diagnostic limits, not an equivalent rendering. `tone="inherit"` currently reports `UnsupportedValue(color, inherit)` on GPUI. Unknown style tokens report `Unsupported Proto UI style tokens` rather than silently succeeding. Real-browser visual acceptance and each target's execution evidence remain distinct from source and DOM tests.
+
+The density values are checked against the [pinned shadcn page-header source](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx) under its [MIT license](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/LICENSE.md): the heading uses `lg:leading-[1.1]` and `xl:tracking-tighter`, while the description uses size-owned `text-base` and `sm:text-lg` line boxes. This is reference evidence for reusable typography choices, not an upstream Text component or a page-specific Text API.
 
 ## Authority
 

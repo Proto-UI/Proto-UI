@@ -208,7 +208,9 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-### ghost 虚化
+### ghost 虚化（New York）
+
+此示例显式选择 `styleProfile="new-york"`，对应固定旧版 New York 的 accent hover。默认 Rhea 与 Luma 使用各自的 muted 配方，不以旧版预期替代。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -301,6 +303,8 @@ import { getCode } from '@/utils/conversionUtils';
 </div>
 
 ### size 尺寸
+
+`icon-compact` 是 Proto UI 的紧凑图标扩展，使用 1.75rem 正方形，`wrap` 不改变其尺寸。它映射上游 Blocks 工具栏的 `size-7` 用法，不等同于上游 2rem 的 `icon-sm`；其余尺寸与默认值不变。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer
@@ -406,7 +410,7 @@ import { getCode } from '@/utils/conversionUtils';
     },
     {
       name: 'size',
-      type: "'default' | 'sm' | 'lg' | 'icon'",
+      type: "'default' | 'sm' | 'lg' | 'icon' | 'icon-compact'",
       default: 'default',
     },
     {

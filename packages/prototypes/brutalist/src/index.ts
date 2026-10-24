@@ -190,6 +190,7 @@ export type {
 export * from './text';
 
 export { default as BrutalistSurfaceRoot, surfaceRoot } from './surface';
+export { brutalistActionAppearance, type BrutalistActionAppearanceOptions } from './surface';
 
 export type { SurfaceRootProps, SurfaceRootExposes } from './surface';
 

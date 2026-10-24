@@ -3,9 +3,9 @@ import {
   createCanvasBackdropLease,
   createWebMaterialSink,
   createWebMaterialPreferences,
+  contactPaintOutset,
   type MaterialPaletteSnapshot,
 } from '@proto.ui/adapter-base/web-material';
-import { contactPaintOutset } from '../../../../../packages/adapters/base/src/material/contact-profile';
 import { THEME } from '../../../../../packages/prototypes/liquid-glass/src/theme';
 import { registerPreviewMaterialProvider } from './preview-material-provider';
 /** This canvas is the visible preview background and the ONLY sampled plane.
@@ -29,7 +29,8 @@ export function createPreviewMaterialScene(parent: HTMLElement) {
     // DPR may exceed the source budget; the unchanged lease then fails closed.
     maxWidth: '32rem',
     boxSizing: 'border-box',
-    padding: '2rem',
+    paddingBlock: '2rem',
+    paddingInline: 'min(2rem, 8%)',
   });
   // This visible scene already owns preview padding and popup space. A nested
   // centered RuntimeBox reserve would leave real flow boxes behind the popup,
@@ -86,8 +87,12 @@ export function createPreviewMaterialScene(parent: HTMLElement) {
   function layout() {
     const scene = scope.getBoundingClientRect();
     const flow = mount.getBoundingClientRect();
-    const padding = parseFloat(win.getComputedStyle(scope).paddingBottom) || 0;
-    let bottom = flow.bottom + padding;
+    // Rectangles are viewport pixels; reserve and padding use local CSS pixels.
+    const css = win.getComputedStyle(scope);
+    const scale = scene.width / parseFloat(css.width);
+    if (!Number.isFinite(scale) || scale <= 0) return;
+    const padding = parseFloat(css.paddingBottom) || 0;
+    let bottom = (flow.bottom - scene.top) / scale + padding;
     for (const element of overlayMount.querySelectorAll<HTMLElement>('*')) {
       if (element.closest('[data-material-scene]') !== scope) continue;
       const css = win.getComputedStyle(element);
@@ -101,10 +106,10 @@ export function createPreviewMaterialScene(parent: HTMLElement) {
         continue;
       bottom = Math.max(
         bottom,
-        rect.bottom + contactPaintOutset(rect.width, rect.height) + padding
+        (rect.bottom - scene.top + contactPaintOutset(rect.width, rect.height)) / scale + padding
       );
     }
-    const height = Math.max(0, Math.ceil(bottom - scene.top));
+    const height = Math.max(0, Math.ceil(bottom));
     if (Number.isFinite(height) && scope.style.minHeight !== `${height}px`)
       scope.style.minHeight = `${height}px`;
   }

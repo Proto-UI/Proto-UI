@@ -1,0 +1,38 @@
+id: T-FIELD-TEXTAREA-0001
+type: test
+title: Field multiline composition regression evidence
+status: draft
+since: 0.3.0-alpha.1
+summary: Synthetic WC coverage is not native input, assistive-technology or complete visual acceptance.
+cases:
+  - id: T-FIELD-TEXTAREA-0001-CASE-COMPOSITION
+    title: Existing and opt-in entries retain mutually exclusive association semantics
+    covers:
+      - C-FIELD-TEXTAREA-0001-COMPOSITION
+      - C-FIELD-TEXTAREA-0001-RELATIONS
+      - C-FIELD-TEXTAREA-0001-BOUNDARY
+    expectation: one-shared-editor-setup-with-explicit-field-opt-in-and-conflict-rejection
+  - id: T-FIELD-TEXTAREA-0001-CASE-LIFECYCLE
+    title: Canonical Field updates preserve editing and retire stale callback reports
+    covers:
+      - C-FIELD-TEXTAREA-0001-FACTS
+      - C-FIELD-TEXTAREA-0001-LIFECYCLE
+    expectation: field-policy-and-invalid-change-without-editor-value-selection-or-ime-reset
+implementations:
+  - id: field-textarea-wc-synthetic
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/field-textarea.test.ts
+    required: true
+    consumesCases:
+      - T-FIELD-TEXTAREA-0001-CASE-COMPOSITION
+      - T-FIELD-TEXTAREA-0001-CASE-LIFECYCLE
+sources:
+  - path: packages/prototypes/base/test/field-textarea.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Adds targeted optional Field composition tests while preserving ordinary Textarea regressions.
+tags:
+  - field
+  - textarea

@@ -1,0 +1,38 @@
+id: C-PLACEHOLDER-COLOR-0001
+type: contract
+title: Finite static placeholder color paint
+status: draft
+since: 0.3.0-alpha.1
+summary: A generic static visual target, not control state, placeholder content or another editor.
+statement:
+  en: Placeholder color intent targets the existing native placeholder paint surface without reading emptiness, changing content or selecting a component in the adapter.
+criteria:
+  - id: C-PLACEHOLDER-COLOR-0001-ADMISSION
+    text:
+      en: Exactly placeholder:text-foreground, placeholder:text-muted-foreground, placeholder:text-primary and placeholder:text-destructive are admitted. Font size, arbitrary color, alpha suffix, opacity, content, selector and nested state variants fail synchronously at author admission. Selection behavior remains unchanged.
+  - id: C-PLACEHOLDER-COLOR-0001-MERGE
+    text:
+      en: These four tokens are canonical surface paint and share one independent last-wins group. They do not replace ordinary text color or selection color. Unknown placeholder tokens never gain canonical provenance by a prefix match.
+  - id: C-PLACEHOLDER-COLOR-0001-PROJECTION
+    text:
+      en: Document and shadow CSS use the actual target's placeholder pseudo-element. Shadow split projects only to the inner actual editor surface and emits no host-wrapper paint or geometry contribution. Unsupported payloads retain explicit diagnostics. This does not establish non-Web support.
+  - id: C-PLACEHOLDER-COLOR-0001-LIFECYCLE
+    text:
+      en: Rule contribution changes and withdrawal preserve editor identity, edited value and selection; they do not modify placeholder content, force placeholder visibility or infer invalid/empty state. Native raster, accessibility and editing behavior remain separate evidence obligations.
+sources:
+  - path: packages/core/src/spec/feedback/placeholder.ts
+  - path: packages/core/src/spec/feedback/tokens.ts
+  - path: packages/core/src/spec/feedback/semantic-merge.ts
+  - path: packages/core/src/spec/feedback/application-role.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+dependsOn:
+  contracts:
+    - C-FEEDBACK-STYLE-0004
+verifies:
+  tests:
+    - T-PLACEHOLDER-COLOR-0001
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Admit exact static placeholder colors for general editable surfaces, initially required by latest upstream Textarea styling.
+tags: [feedback, style, placeholder, text]

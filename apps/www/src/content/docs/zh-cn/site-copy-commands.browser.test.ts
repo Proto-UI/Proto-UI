@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 
 const ROUTE = '/zh-cn/start-here/quick-start/';
+const EC_ROUTE = '/zh-cn/ui-libraries/base/collapsible/';
 let browser: Browser;
 let baseUrl: string;
 let sourceBinding: CopySourceBinding;
@@ -27,7 +28,7 @@ beforeAll(async () => {
   await mkdir(directory, { recursive: true });
   await writeFile(join(directory, 'source-binding.json'), JSON.stringify(sourceBinding, null, 2));
   expect(copySourceBindingIssues(sourceBinding, Boolean(process.env.CI))).toEqual([]);
-  baseUrl = await startServer(ROUTE);
+  baseUrl = await startServer([ROUTE, EC_ROUTE]);
   browser = await launchBrowser();
 }, 300_000);
 afterAll(async () => {
@@ -66,7 +67,7 @@ async function paint(button: Locator) {
     const ringColor = style.getPropertyValue('--pui-ring').trim();
     const expectedSpread = family === 'brutalist' ? 4 : 3;
     const expectedColor =
-      family === 'brutalist' ? ringColor : `color-mix(in oklab, ${ringColor} 50%, transparent)`;
+      family === 'brutalist' ? ringColor : `color-mix(in oklab, ${ringColor} 30%, transparent)`;
     // Resolve the independent source recipe in the same browser color serializer.
     // Keep the probe outside the live Prototype subtree and never derive it from
     // --pui-ring-shadow or the control's actual box-shadow under test.
@@ -145,8 +146,7 @@ async function unfocusedPaint(button: Locator) {
   return paint(button);
 }
 
-async function observeCopyPage(page: Page) {
-  const errors: Array<{ kind: string; text: string }> = [];
+async function observeCopyPage(page: Page, errors: Array<{ kind: string; text: string }> = []) {
   page.on('pageerror', (error) =>
     errors.push({ kind: 'pageerror', text: error.stack ?? error.message })
   );
@@ -249,6 +249,17 @@ async function evidence(page: Page, root: Locator | null, name: string, facts: u
             state: button.dataset.copyState,
             tokens: button.getAttribute('data-pui-style'),
             focused: document.activeElement === button,
+            focusVisible: button.hasAttribute('data-focus-visible'),
+            nativeFocusVisible: button.matches(':focus-visible'),
+            shadow: getComputedStyle(button).boxShadow,
+            background: getComputedStyle(button).backgroundColor,
+            ringColor: getComputedStyle(button).getPropertyValue('--pui-ring'),
+            animations: button.getAnimations().map((animation) => ({
+              property: animation instanceof CSSTransition ? animation.transitionProperty : null,
+              currentTime: animation.currentTime,
+              playState: animation.playState,
+              timing: animation.effect?.getComputedTiming(),
+            })),
             rect: button.getBoundingClientRect().toJSON(),
           })),
         };
@@ -318,7 +329,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
     const page = await context.newPage();
     const errors = await observeCopyPage(page);
     try {
-      await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${baseUrl}${EC_ROUTE}`, { waitUntil: 'domcontentloaded' });
       const root = page.locator('.expressive-code [data-site-copy]').first();
       await ready(root, 'wc', 'shadcn');
       const expected = await root.getAttribute('data-site-copy-text');
@@ -345,7 +356,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
     const page = await context.newPage();
     const errors = await observeCopyPage(page);
     try {
-      await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${baseUrl}${EC_ROUTE}`, { waitUntil: 'domcontentloaded' });
       const source = page.locator('.expressive-code pre').first();
       expect((await source.textContent())?.trim()).toBeTruthy();
       const facts = await source.evaluate((element) => ({
@@ -478,28 +489,67 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
           });
         }, runtime);
         const page = await context.newPage();
+        const ecPage = await context.newPage();
         const errors = await observeCopyPage(page);
-        const stage = { action: 'navigate', family, index: -1, theme: 'light' };
+        await observeCopyPage(ecPage, errors);
+        const stage = {
+          action: 'navigate',
+          family,
+          index: -1,
+          theme: 'light',
+          contentHost: 'react',
+        };
         let observedRoot: Locator | null = null;
+        let observedPage = page;
         try {
           await page.goto(`${baseUrl}${ROUTE}`, { waitUntil: 'domcontentloaded' });
+          // Source host availability is independent of the Copy renderer.
+          // Keep Vue 2 runtime coverage while selecting runnable React content.
+          const example = page.locator('[data-code-example]').first();
+          await example.locator('[data-code-example-tablist="host"]').waitFor();
+          if (runtime === 'vue2') {
+            const pending = example.locator(
+              '[data-code-host-panel][data-code-host="vue2"]:visible'
+            );
+            await pending.waitFor();
+            expect(await pending.locator('[data-code-example-wip]').count()).toBe(1);
+            expect(
+              await pending.locator('pre, [data-site-copy], [data-code-example-command]').count()
+            ).toBe(0);
+          }
+          await example
+            .locator('[data-code-example-tablist="host"]')
+            .getByRole('tab', { name: 'React', exact: true })
+            .click();
           await page.waitForSelector('[data-code-panel-init="1"]:visible');
           // Docs has no family picker. This explicit consumer-input fixture uses
           // the same family markers as applySiteLibraryFamily; screenshots label it.
           stage.family = family;
           stage.action = 'family input and ready';
           await applyFamilyFixture(page, family);
-          const panel = page.locator('[data-code-shell]:visible').first();
+          const panel = example.locator('[data-code-shell]:visible').first();
           await panel.waitFor();
           const toggle = panel.locator('[data-code-toggle]');
           if (await toggle.isVisible()) await toggle.click();
+          // Quick Start now uses authored CodePanel blocks throughout. Retain
+          // real EC coverage on its own documentation page, without fake markup.
+          stage.action = 'navigate real EC consumer';
+          observedPage = ecPage;
+          await ecPage.goto(`${baseUrl}${EC_ROUTE}`, { waitUntil: 'domcontentloaded' });
+          stage.action = 'EC family input and ready';
+          await applyFamilyFixture(ecPage, family);
           const roots = [
-            page.locator('.expressive-code [data-site-copy]').first(),
+            ecPage.locator('.expressive-code [data-site-copy]').first(),
             panel.locator('[data-site-copy]'),
           ];
           for (const [index, root] of roots.entries()) {
+            // Clipboard fixtures, theme, pointer, keyboard, and evidence belong
+            // to the root's actual document, not necessarily Quick Start.
+            const page = root.page();
             stage.index = index;
             observedRoot = root;
+            observedPage = page;
+            await page.bringToFront();
             stage.action = 'ready';
             await ready(root, runtime, family);
             const button = root.locator('[data-demo-ref="copy-button"]');
@@ -519,15 +569,23 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
                 theme
               );
               const baseline = await unfocusedPaint(button);
-              // Fixed New York 02cad611 Button icon size-9; retain Brutalist h-10.
-              expect([baseline.width, baseline.height]).toEqual(
-                family === 'shadcn' ? [36, 36] : [40, 40]
+              // EC uses the direct Rhea icon size-8. Only the explicit
+              // CodeExample consumer opts into Proto icon-compact (size-7),
+              // mapping the pinned Blocks toolbar rather than upstream icon-sm.
+              const inCodeExample = await root.evaluate((node) =>
+                Boolean(node.closest('[data-code-example]'))
               );
-              expect(baseline.glyph).toEqual([18, 18]);
+              expect(inCodeExample).toBe(index === 1);
+              const compact = family === 'shadcn' && inCodeExample;
+              expect([baseline.width, baseline.height]).toEqual(
+                family === 'brutalist' ? [40, 40] : compact ? [28, 28] : [32, 32]
+              );
+              expect(baseline.glyph).toEqual(compact ? [16, 16] : [18, 18]);
               expect(Math.max(...baseline.center)).toBeLessThanOrEqual(1);
               // Record baseline before any assertion on the first interactive state.
               await evidence(page, root, `${runtime}-${family}-${index}-${theme}-baseline`, {
                 runtime,
+                contentHost: 'react',
                 family,
                 theme,
                 baseline,
@@ -561,6 +619,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
                   .toEqual([]);
                 await evidence(page, root, `${runtime}-${family}-${index}-${theme}-pressed`, {
                   runtime,
+                  contentHost: 'react',
                   family,
                   theme,
                   baseline,
@@ -577,6 +636,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
               const unfocused = await unfocusedPaint(button);
               await evidence(page, root, `${runtime}-${family}-${index}-${theme}-unfocused`, {
                 runtime,
+                contentHost: 'react',
                 family,
                 theme,
                 unfocused,
@@ -585,6 +645,20 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
               stage.action = 'focus';
               await page.keyboard.press('Tab');
               await button.focus();
+              await evidence(
+                page,
+                root,
+                `${runtime}-${family}-${index}-${theme}-focus-before-assert`,
+                {
+                  runtime,
+                  contentHost: 'react',
+                  family,
+                  theme,
+                  unfocused,
+                  focused: await paint(button),
+                  errors,
+                }
+              );
               await expect
                 .poll(async () =>
                   copyPaintIssues(
@@ -598,6 +672,7 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
               const focused = await paint(button);
               await evidence(page, root, `${runtime}-${family}-${index}-${theme}-focus`, {
                 runtime,
+                contentHost: 'react',
                 family,
                 theme,
                 familyInput: 'explicit docs consumer fixture',
@@ -664,13 +739,18 @@ describe.sequential('Copy commands: real consumer recipes across public runtimes
             );
             expect(await button.textContent()).toBe(name);
           }
-          expect(
-            await page.evaluate(() => document.documentElement.scrollWidth - innerWidth)
-          ).toBeLessThanOrEqual(1);
-          expect(await page.locator('.expressive-code .copy button').count()).toBe(0);
+          for (const consumerPage of [ecPage, page]) {
+            stage.action = 'page overflow and legacy Copy';
+            observedRoot = null;
+            observedPage = consumerPage;
+            expect(
+              await consumerPage.evaluate(() => document.documentElement.scrollWidth - innerWidth)
+            ).toBeLessThanOrEqual(1);
+            expect(await consumerPage.locator('.expressive-code .copy button').count()).toBe(0);
+          }
         } catch (error) {
           await recordFailure(
-            page,
+            observedPage,
             observedRoot,
             `${runtime}-${family}-${stage.index}-${stage.theme}`,
             stage,

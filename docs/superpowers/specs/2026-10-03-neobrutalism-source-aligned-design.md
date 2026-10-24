@@ -68,7 +68,7 @@ The current upstream source ships no dark-mode palette. PUI keeps its establishe
 
 ## Interaction-state matrix
 
-- Elevated default Button-like controls: rest at zero translation / 4px hard shadow; hover and transient press at +4px,+4px / no outer shadow. Press does not add another 4px. Button-like controls currently retain PUI's instantaneous snap rather than the reference's 150ms transition-all; endpoint alignment does not claim timing identity. Upstream reverse is the separate negative-displacement variant; PUI does not claim to expose that API in this slice
+- Elevated default Button-like controls: rest at zero translation / 4px hard shadow; hover and transient press at +4px,+4px / no outer shadow. Press does not add another 4px. The Button follow-through in #911 restores the reference's 150ms transition-all through mutually exclusive live reduced-motion rules: no-preference animates both transform and shadow; reduce or unknown is instantaneous. This is one CSS writer, not CSS plus resident motion. Other button-like controls are not implicitly migrated by this Button-only change; their timing remains a separately verified contract. Upstream reverse is the separate negative-displacement variant; PUI does not claim to expose that API in this slice
 - Flat controls (default Select, Tabs, Toggle): keep geometry stable through hover/press; use their existing paired color, reserved border and persistent selected/active signals
 - Focus: existing theme-relative hard ring with offset; retained Tabs Content fallback-native focus indication
 - Disabled: preserve shape and paired surface while retaining existing opacity, pointer gate and Base disabled behavior

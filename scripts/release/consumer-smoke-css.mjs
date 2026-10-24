@@ -14,6 +14,22 @@ const ENTRY =
   "@import './shadcn-theme.css' layer(theme);\n" +
   "@import './proto-ui-tokens.generated.css';\n";
 const FILES = ['proto-ui-style.css', 'shadcn-theme.css', 'proto-ui-tokens.generated.css'];
+// Exact canonical CLI output only. HappyDOM cannot model cascade layers; the
+// original bytes remain the browser/build source and are hashed in evidence.
+const THEME_SELECTION_BODY = `::selection {
+      background-color: var(--pui-selection);
+      color: var(--pui-selection-foreground);
+    }`;
+const THEME_SELECTION_LAYER = `@layer theme {
+    ${THEME_SELECTION_BODY}
+  }`;
+
+export function unwrapGeneratedThemeSelectionLayer(css) {
+  const selectionRange = assertBoundedBody(css, true);
+  return selectionRange
+    ? css.slice(0, selectionRange[0]) + THEME_SELECTION_BODY + css.slice(selectionRange[1])
+    : css;
+}
 
 // Bounded delimiter validation, not a CSS parser: only the generator's exact
 // single outer wrapper is accepted. Comments/quoted strings may contain braces.
@@ -28,7 +44,8 @@ export function unwrapGeneratedTokenLayer(css) {
   return body;
 }
 
-function assertBoundedBody(body) {
+function assertBoundedBody(body, allowThemeSelection = false) {
+  let selectionRange = null;
   let depth = 0;
   let quote = null;
   let comment = false;
@@ -52,7 +69,13 @@ function assertBoundedBody(body) {
       // Escaped identifiers are outside this generator's at-rule vocabulary.
       throw new Error('consumer CSS smoke: unexpected unquoted escape');
     } else if (c === '@' && /^@(layer|import)\b/i.test(body.slice(i))) {
-      throw new Error('consumer CSS smoke: additional @layer or @import is unsupported');
+      if (allowThemeSelection && depth === 0 && body.startsWith(THEME_SELECTION_LAYER, i)) {
+        if (selectionRange) throw new Error('consumer CSS smoke: repeated theme selection layer');
+        selectionRange = [i, i + THEME_SELECTION_LAYER.length];
+        i = selectionRange[1] - 1;
+      } else {
+        throw new Error('consumer CSS smoke: additional @layer or @import is unsupported');
+      }
     } else if (c === '{') {
       depth += 1;
     } else if (c === '}') {
@@ -63,6 +86,7 @@ function assertBoundedBody(body) {
   if (depth !== 0 || quote || comment) {
     throw new Error('consumer CSS smoke: unbalanced generated CSS');
   }
+  return selectionRange;
 }
 
 export function loadConsumerStyles(
@@ -76,8 +100,7 @@ export function loadConsumerStyles(
   if (originals[0].bytes.toString('utf8') !== ENTRY) {
     throw new Error('consumer CSS smoke: unsupported generated entry/import order');
   }
-  const theme = originals[1].bytes.toString('utf8');
-  assertBoundedBody(theme);
+  const theme = unwrapGeneratedThemeSelectionLayer(originals[1].bytes.toString('utf8'));
   const tokens = unwrapGeneratedTokenLayer(originals[2].bytes.toString('utf8'));
   const evidenceDir = join(root, 'consumer-css-evidence', evidenceName);
   mkdirSync(evidenceDir, { recursive: true });
@@ -90,8 +113,8 @@ export function loadConsumerStyles(
     };
   });
   const limitation =
-    'HappyDOM only: explicit theme then token load; single outer proto-ui layer removed. ' +
-    'No cascade-layer, width/layout, paint, or native hit-testing equivalence is claimed. ' +
+    'HappyDOM only: explicit theme then token load; single outer proto-ui layer and exact canonical theme selection wrapper removed. ' +
+    'No cascade-layer, selection-paint, width/layout, paint, or native hit-testing equivalence is claimed. ' +
     'Browser/build entry consumes the original complete stylesheet.';
   writeFileSync(
     join(evidenceDir, 'manifest.json'),
@@ -110,9 +133,9 @@ export function loadConsumerStyles(
   return { styles, files, evidenceDir };
 }
 
-// Independent consumer oracle: P-SHADCN-BUTTON-NEW-YORK-PAINT and
-// shadcn-ui/ui 02cad61166c4c20edbc8a3f71bd720eed4c1f49b,
-// apps/v4/registry/new-york-v4/ui/button.tsx:7,11,23.
+// Independent direct Button Rhea consumer oracle: shadcn-ui/ui
+// 25af02b1b467fcd53b63e0c6d6d324c57c16ef18, apps/v4/registry/styles/style-rhea.css.
+// Compound command paint has a separate pin and is not changed by this oracle.
 // A removed non-paint marker (group/button) is not evidence of missing styles.
 export function assertDefaultButtonTokens(element, label) {
   if (!element) throw new Error(`${label}: Button host is missing`);
@@ -122,15 +145,18 @@ export function assertDefaultButtonTokens(element, label) {
     'shrink-0',
     'items-center',
     'justify-center',
-    'rounded-md',
+    'rounded-[var(--pui-radius-2xl)]',
     'text-sm',
     'font-medium',
     'bg-primary',
     'text-primary-foreground',
-    'h-9',
-    'gap-2',
-    'px-4',
-    'py-2',
+    'h-8',
+    'gap-1.5',
+    'px-3',
+    'leading-5',
+    'py-0',
+    'border',
+    'border-transparent',
     'whitespace-nowrap',
   ]) {
     if (!tokens.has(token))
@@ -154,13 +180,13 @@ export function assertStyledButton(element, label) {
     alignItems: 'center',
     justifyContent: 'center',
     boxSizing: 'border-box',
-    height: `${2.25 * rootFont}px`,
-    gap: `${0.5 * rootFont}px`,
+    height: `${2 * rootFont}px`,
+    gap: `${0.375 * rootFont}px`,
     // HappyDOM does not reliably expand padding-inline/block into physical
     // longhands. Check the installed logical declarations; browser tests retain
     // exact physical padding checks at the fixed root font.
-    paddingInline: `${rootFont}px`,
-    paddingBlock: `${0.5 * rootFont}px`,
+    paddingInline: `${0.75 * rootFont}px`,
+    paddingBlock: '0px',
   };
   for (const [property, value] of Object.entries(expected)) {
     // HappyDOM retains logical padding/gap in rem; compare exact unit equivalents.

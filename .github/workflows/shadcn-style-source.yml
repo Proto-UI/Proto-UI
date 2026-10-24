@@ -1,0 +1,34 @@
+name: Shadcn style source inspection
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/shadcn-style-source.yml'
+      - 'internal/fixtures/shadcn-style-source/**'
+      - 'scripts/prototypes/*shadcn-style-source*'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/shadcn-style-source.yml'
+      - 'internal/fixtures/shadcn-style-source/**'
+      - 'scripts/prototypes/*shadcn-style-source*'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check pinned sources and generated inspection outputs
+        run: node scripts/prototypes/check-shadcn-style-source.mjs
+      - name: Test inspection grammar and rejection boundaries
+        run: node --test scripts/prototypes/shadcn-style-source.test.mjs

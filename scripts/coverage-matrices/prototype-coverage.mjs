@@ -1485,7 +1485,7 @@ export function renderPlan(d) {
       'Overlay root cause is not yet reproduced. The scrollbar-coordinate regression must retain actual baseline, repaired real-input journeys and every dependent anchored/portaled composition; it cannot be checked from a guessed offset patch.',
       p.materialBoundary,
       p.packagingBoundary,
-      'Agent: dot  \nModelTrace: not measured — owner-authorized dot exemption (2026-10-06)',
+      'Agent: dot',
     ].join('\n\n') + '\n'
   );
 }
@@ -1650,7 +1650,7 @@ export function render(d) {
     'These manifest facts describe the selected source revision and do not prove registry publication or a successful consumer install. Four-family implementation and runtime/visual parity remain required in Finf; private package status is not a waiver. Changing release identity/publication requires its own explicit release authorization.',
     '## Verification and update contract',
     '- Source/count/link and receipt-shape integrity (never a substitute for independent review of actual evidence): `node scripts/coverage-matrices/prototype-coverage.mjs --check`. Negative controls: `node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs`.\n- Refresh main and reference revisions before changing facts; update the JSON and regenerate this view. New reference names enter independent review, never automatic scope.\n- Every adopted row needs a real owner, precise semantic/negative boundary, main/open-PR separation, lifecycle, host/Compiler evidence and consumer acceptance. Closing the matrix PR does not close #870.\n- This audit does not rerun prototype/runtime/visual tests. Existing mapped tests are source evidence only; no full-feature or native certification is claimed. Independent review and exact-head CI remain required for the matrix change.',
-    'Agent: dot  \nModelTrace: not measured — owner-authorized dot exemption (2026-10-06)',
+    'Agent: dot',
   ];
   return sections.join('\n\n') + '\n';
 }

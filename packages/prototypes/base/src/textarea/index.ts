@@ -1,5 +1,6 @@
-export { default, default as textareaRoot, asTextareaRoot } from './root.proto';
+export { default, default as textareaRoot, asTextareaRoot, setupTextareaRoot } from './root.proto';
 export type {
+  TextareaRootSetupOptions,
   TextareaChangeDetail,
   TextareaCompositionDetail,
   TextareaRootAsHookContract,

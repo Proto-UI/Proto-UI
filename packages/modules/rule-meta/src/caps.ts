@@ -57,3 +57,20 @@ export type StyleSupportInvalidationSource = {
 export const RULE_META_STYLE_SUPPORT_SOURCE_CAP = cap<StyleSupportInvalidationSource>(
   '@proto.ui/rule-meta/style-support-source'
 );
+
+/** Bounded layout viewport geometry; unknown is not a zero-width viewport. */
+export type ViewportKey = 'viewport.width';
+export type ViewportWidthValue = number | 'unknown';
+export function isViewportKey(key: string): key is ViewportKey {
+  return key === 'viewport.width';
+}
+export function normalizeViewportWidth(value: unknown): ViewportWidthValue {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : 'unknown';
+}
+export type ViewportInvalidationSource = {
+  readonly getter: RuleMetaGetter;
+  subscribe(keys: readonly ViewportKey[], invalidate: () => void): () => void;
+};
+export const RULE_META_VIEWPORT_SOURCE_CAP = cap<ViewportInvalidationSource>(
+  '@proto.ui/rule-meta/viewport-source'
+);

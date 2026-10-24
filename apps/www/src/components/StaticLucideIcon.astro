@@ -1,4 +1,11 @@
 ---
+import { LUCIDE_FILE_TEXT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/file-text';
+import { LUCIDE_FILE_COG_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/file-cog';
+import { LUCIDE_FILE_BRACES_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/file-braces';
+import { LUCIDE_FILE_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/file';
+import { LUCIDE_FOLDER_TREE_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/folder-tree';
+import { LUCIDE_TERMINAL_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/terminal';
+import { LUCIDE_FILE_CODE_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/file-code';
 import { LUCIDE_ARROW_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/arrow-right';
 import { LUCIDE_X_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/x';
 import { LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY } from '@proto.ui/prototypes-lucide/icons/arrow-up-right';
@@ -19,6 +26,13 @@ interface Props {
 }
 
 type PreviewIconName =
+  | 'file-text'
+  | 'file-cog'
+  | 'file-braces'
+  | 'file'
+  | 'folder-tree'
+  | 'terminal'
+  | 'file-code'
   | 'arrow-right'
   | 'x'
   | 'arrow-up-right'
@@ -30,6 +44,13 @@ type PreviewIconName =
   | 'sun';
 
 const factories = {
+  'file-text': LUCIDE_FILE_TEXT_SHAPE_FACTORY,
+  'file-cog': LUCIDE_FILE_COG_SHAPE_FACTORY,
+  'file-braces': LUCIDE_FILE_BRACES_SHAPE_FACTORY,
+  'file': LUCIDE_FILE_SHAPE_FACTORY,
+  'folder-tree': LUCIDE_FOLDER_TREE_SHAPE_FACTORY,
+  'terminal': LUCIDE_TERMINAL_SHAPE_FACTORY,
+  'file-code': LUCIDE_FILE_CODE_SHAPE_FACTORY,
   'arrow-right': LUCIDE_ARROW_RIGHT_SHAPE_FACTORY,
   x: LUCIDE_X_SHAPE_FACTORY,
   'arrow-up-right': LUCIDE_ARROW_UP_RIGHT_SHAPE_FACTORY,

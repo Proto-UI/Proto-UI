@@ -21,7 +21,7 @@ export type RootStyleEffect = StyleHandle & {
 
 export function resolveRootStyleEntry(token: string, origin: RootStyleOrigin): RootStyleEntry {
   // Legacy unsafe inputs may lack the author token. Do not guess from a selector.
-  // Reuse author validation for its one static selection exception; this does
+  // Reuse author validation for its finite static paint exceptions; this does
   // not promote the classifier's fallback provenance or admit lowered variants.
   if (token.includes(':')) {
     try {

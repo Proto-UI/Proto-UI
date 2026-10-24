@@ -30,7 +30,7 @@ Keep exactly one `asDrawerTrigger()` or `asDrawerClose()`; no `asButton()`, new 
 
 Mapping: `packages/prototypes/brutalist/src/drawer/{trigger,close}.proto.ts`; planned `packages/prototypes/brutalist/test/drawer-command-density.test.ts`. No demo or Finf completion-count changes.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot
 
 ## Separately authorized Website consumer follow-up (2026-10-11)
 

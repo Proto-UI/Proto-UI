@@ -13,7 +13,7 @@ const idle: CopyPaint = {
   glyph: [18, 18],
   background: 'white',
   shadow: 'none',
-  expectedRingShadow: 'rgba(100, 100, 100, 0.5) 0px 0px 0px 3px',
+  expectedRingShadow: 'rgba(100, 100, 100, 0.3) 0px 0px 0px 3px',
   expectedRingOffsetShadow: 'none',
   transform: 'none',
   translate: 'none',
@@ -37,7 +37,7 @@ const focus = {
     focused: true,
     focusVisible: true,
     shadow: idle.expectedRingShadow,
-    tokens: 'data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50',
+    tokens: 'data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/30',
   },
   brutalist: {
     ...brute,
@@ -48,6 +48,40 @@ const focus = {
   },
 };
 describe('actual Copy family paint evidence', () => {
+  it('requires the pinned Rhea/Luma 3px 30% ring and rejects the old 50% recipe', () => {
+    const reference = 'rgba(100, 100, 100, 0.3) 0px 0px 0px 3px';
+    const base = { ...idle, expectedRingShadow: reference };
+    const current = {
+      ...focus.shadcn,
+      expectedRingShadow: reference,
+      shadow: reference,
+      tokens: 'data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/30',
+    };
+    expect(copyPaintIssues('shadcn', base, current, 'focus')).toEqual([]);
+    expect(
+      copyPaintIssues(
+        'shadcn',
+        base,
+        {
+          ...current,
+          tokens: 'data-[focus-visible]:ring-3 data-[focus-visible]:ring-ring/50',
+        },
+        'focus'
+      )
+    ).toContain('family focus ring recipe absent');
+    expect(
+      copyPaintIssues(
+        'shadcn',
+        base,
+        {
+          ...current,
+          shadow: 'rgba(100, 100, 100, 0.5) 0px 0px 0px 3px',
+        },
+        'focus'
+      )
+    ).toContain('computed family ring color/width layer is absent');
+  });
+
   it('accepts state-lowered Shadcn focus tokens and requires their real paint', () => {
     expect(copyPaintIssues('shadcn', idle, focus.shadcn, 'focus')).toEqual([]);
     expect(focus.shadcn.tokens.split(' ').includes('ring-3')).toBe(false);

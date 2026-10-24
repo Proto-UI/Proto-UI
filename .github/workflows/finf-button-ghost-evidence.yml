@@ -92,7 +92,7 @@ jobs:
             assert.equal(receipt.result, 'passed');
             assert.equal(receipt.candidate.revision, process.env.CANDIDATE_SHA);
             assert.equal(receipt.candidate.cleanExactCommit, true);
-            assert.deepEqual(receipt.screenshots.map(image => image.state), ['rest', 'hover', 'leave', 'disabled']);
+            assert.deepEqual(receipt.screenshots.map(image => image.state), ['rest', 'hover-before-assert', 'hover', 'leave', 'disabled']);
             for (const image of receipt.screenshots) {
               assert.equal(image.candidate.revision, process.env.CANDIDATE_SHA);
               assert.equal(image.environment.theme, scheme);

@@ -35,7 +35,7 @@ const labels: Record<string, string> = {
       <p data-ghost-component-error role="alert"></p>
     </main>
     <script>
-      import demo from '../../../../content/docs/demo_components/button/demo-button-ghost.demo';
+      import { createGhostDemo } from '../../../../content/docs/demo_components/button/demo-button-ghost.demo';
       import { renderDemo } from '../../../../components/PrototypePreviewer/demo-renderer';
       import { loadPrototypes } from '../../../../components/PrototypePreviewer/prototype-modules';
       import type { DemoRenderResult } from '../../../../components/PrototypePreviewer/demo-types';
@@ -43,6 +43,16 @@ const labels: Record<string, string> = {
 
       const host = document.querySelector<HTMLElement>('[data-ghost-component-host]')!;
       const runtime = host.dataset.ghostComponentHost as RuntimeId;
+      const requestedProfile = new URL(location.href).searchParams.get('styleProfile');
+      if (
+        requestedProfile !== null &&
+        requestedProfile !== 'new-york' &&
+        requestedProfile !== 'rhea'
+      )
+        throw new Error('Unsupported ghost acceptance profile');
+      const styleProfile = requestedProfile === 'rhea' ? 'rhea' : 'new-york';
+      const demo = createGhostDemo(styleProfile);
+      host.dataset.styleProfile = styleProfile;
       let current = true;
       let view: DemoRenderResult | undefined;
       const report = (error: unknown) => {

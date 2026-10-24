@@ -6,6 +6,7 @@ export function GET() {
   const themeCss = [
     renderBrutalistThemeCss({
       variablePrefix: 'site-brutalist-',
+      includeSelection: false,
       lightSelector: ':root',
       darkSelector: ":root.dark, :root[data-theme='dark']",
     }),

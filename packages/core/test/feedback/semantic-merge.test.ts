@@ -2,6 +2,20 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('merges finite sizing and resize choices independently without absorbing unknown tokens', () => {
+    expect(
+      mergeTwTokensV0(['resize-y', 'field-sizing-content', 'resize-none', 'field-sizing-fixed'])
+        .tokens
+    ).toEqual(['resize-none', 'field-sizing-fixed']);
+    expect(
+      mergeTwTokensV0(['resize-none', 'resize-y', 'field-sizing-fixed', 'field-sizing-content'])
+        .tokens
+    ).toEqual(['resize-y', 'field-sizing-content']);
+    expect(
+      mergeTwTokensV0(['resize-auto', 'resize-none', 'field-sizing-auto', 'field-sizing-content'])
+        .tokens
+    ).toEqual(['resize-auto', 'resize-none', 'field-sizing-auto', 'field-sizing-content']);
+  });
   it('preserves unknown tokens that resemble the internal selection group', () => {
     expect(mergeTwTokensV0(['user-select', 'select-none', 'select-text']).tokens).toEqual([
       'user-select',

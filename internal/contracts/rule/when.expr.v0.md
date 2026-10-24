@@ -12,7 +12,7 @@
 
 - condition expression AST
 - dependency-producing value inputs
-- strict equality semantics
+- strict equality and one finite numeric gte predicate
 - logical operators
 - purity constraints
 
@@ -36,6 +36,7 @@ type WhenExpr<Props> =
   | { type: 'true' }
   | { type: 'false' }
   | { type: 'eq'; left: WhenValue<Props>; right: WhenLiteral }
+  | { type: 'gte'; left: WhenValue<Props>; right: number }
   | { type: 'not'; expr: WhenExpr<Props> }
   | { type: 'all'; exprs: WhenExpr<Props>[] }
   | { type: 'any'; exprs: WhenExpr<Props>[] };
@@ -132,3 +133,9 @@ Identical input values must produce identical boolean results.
 - `when.deps.props.v0.md`
 - `when.deps.state.v0.md`
 - `when.deps.context.v0.md`
+
+## Finite numeric gte extension
+
+`signal.gte(finiteNumber)` records a pure data predicate over the existing input identity. The RHS is one finite number, not another signal or executable comparator. Authored nonnumeric/NaN/infinite RHS throws synchronously. Evaluation matches only when both sampled LHS and recorded RHS are finite numbers and LHS is greater than or equal to RHS. No coercion occurs. `number.list` does not admit scalar gte, just as it excludes scalar eq.
+
+This adds no observable source, subscription or adapter breakpoint. Thresholds belong in prototype declarations. Existing dependency collection, invalidation, logical short circuit and contribution withdrawal still apply. Runtime IR is not automatically a portable compiler plan: each compiler profile must explicitly admit this operator or reject it. Current portable source/plan profiles retain PUI1024/PUI2024 rejection until their complete target closure supports gte.

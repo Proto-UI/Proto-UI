@@ -93,12 +93,15 @@ export type WhenExpr<Props extends PropsBaseType> =
   | { type: 'true' }
   | { type: 'false' }
   | { type: 'eq'; left: WhenValue<Props>; right: WhenLiteral }
+  | { type: 'gte'; left: WhenValue<Props>; right: number }
   | { type: 'not'; expr: WhenExpr<Props> }
   | { type: 'all'; exprs: WhenExpr<Props>[] }
   | { type: 'any'; exprs: WhenExpr<Props>[] };
 
 export interface WhenSignal<Props extends PropsBaseType, T> {
   eq(lit: WhenComparable<T>): WhenExpr<Props>;
+  /** Finite numeric comparison only; nonnumeric current values never match. */
+  gte(lit: number): WhenExpr<Props>;
 }
 
 export interface WhenBuilder<Props extends PropsBaseType> {

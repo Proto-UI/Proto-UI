@@ -31,6 +31,7 @@ import {
   createDefaultWebColorSchemeSource,
   createDefaultWebPreferenceSource,
   createDefaultWebStyleSupportSource,
+  createDefaultWebViewportSource,
   createScopedExposesReader,
   createViewEpochOwner,
   createWebProtoEventRouter,
@@ -57,6 +58,7 @@ import type {
   ColorSchemeInvalidationSource,
   PreferenceInvalidationSource,
   StyleSupportInvalidationSource,
+  ViewportInvalidationSource,
 } from '@proto.ui/module-rule-meta';
 import { PropsBaseType } from '@proto.ui/types';
 
@@ -137,6 +139,7 @@ type Vue2InternalState<Props extends PropsBaseType> = {
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
+    viewportSource?: ViewportInvalidationSource;
     onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
     onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
     exposeStateWebMode?: ExposeStateWebMode;
@@ -230,6 +233,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
     const styleSupportSource = opt.getMeta
       ? undefined
       : createDefaultWebStyleSupportSource(getMeta);
+    const viewportSource = opt.getMeta ? undefined : createDefaultWebViewportSource(getMeta);
     const exposeStateWebMode = opt.exposeStateWebMode;
     const scrollProjection = opt.scrollProjection;
     const autoUpdate = opt.autoUpdateOnPropsChange ?? true;
@@ -301,6 +305,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           colorSchemeSource,
           preferenceSource,
           styleSupportSource,
+          viewportSource,
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           exposeStateWebMode,
@@ -450,6 +455,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
           colorSchemeSource,
           preferenceSource,
           styleSupportSource,
+          viewportSource,
           setExposes: (record) => {
             state.exposes = record;
           },
@@ -493,6 +499,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             colorSchemeSource,
             preferenceSource,
             styleSupportSource,
+            viewportSource,
             exposeStateWebMode,
             scrollProjection,
             overlayLayerScheduler,
@@ -517,6 +524,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
                 colorSchemeSource,
                 preferenceSource,
                 styleSupportSource,
+                viewportSource,
                 exposeStateWebMode,
                 scrollProjection,
                 overlayLayerScheduler,
@@ -545,6 +553,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             colorSchemeSource,
             preferenceSource,
             styleSupportSource,
+            viewportSource,
             exposeStateWebMode,
             scrollProjection,
             overlayLayerScheduler,
@@ -716,6 +725,7 @@ function initSession<Props extends PropsBaseType>(
     colorSchemeSource?: ColorSchemeInvalidationSource;
     preferenceSource?: PreferenceInvalidationSource;
     styleSupportSource?: StyleSupportInvalidationSource;
+    viewportSource?: ViewportInvalidationSource;
     onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
     onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
     exposeStateWebMode?: ExposeStateWebMode;
@@ -874,6 +884,7 @@ function initSession<Props extends PropsBaseType>(
     colorSchemeSource: targetOptions.colorSchemeSource,
     preferenceSource: targetOptions.preferenceSource,
     styleSupportSource: targetOptions.styleSupportSource,
+    viewportSource: targetOptions.viewportSource,
     exposeStateWebMode: targetOptions.exposeStateWebMode,
     scrollProjection: targetOptions.scrollProjection,
     setExposes: (record) => {
@@ -1022,6 +1033,7 @@ function getInitOptionsFromState<Props extends PropsBaseType>(
   colorSchemeSource?: ColorSchemeInvalidationSource;
   preferenceSource?: PreferenceInvalidationSource;
   styleSupportSource?: StyleSupportInvalidationSource;
+  viewportSource?: ViewportInvalidationSource;
   onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
   onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
   exposeStateWebMode?: ExposeStateWebMode;

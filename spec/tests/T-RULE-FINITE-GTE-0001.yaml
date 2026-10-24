@@ -1,0 +1,43 @@
+id: T-RULE-FINITE-GTE-0001
+type: test
+title: Finite numeric Rule gte and explicit compiler boundary
+status: draft
+since: 0.3.0-alpha.1
+summary: One pure comparison preserves dependency identity, runtime withdrawal and unsupported compiler diagnostics.
+cases:
+  - id: T-RULE-FINITE-GTE-0001-CASE-NUMERIC
+    title: Exact finite numeric boundary and pure data recording
+    covers: [C-RULE-WHEN-0001-FINITE-GTE, C-RULE-WHEN-0001-A, C-RULE-WHEN-0001-B]
+    expectation: finite-numbers-only-no-coercion-or-runtime-getter-during-recording
+  - id: T-RULE-FINITE-GTE-0001-CASE-RUNTIME
+    title: Existing reevaluation activates and withdraws numeric threshold style
+    covers: [C-RULE-WHEN-0001-FINITE-GTE, C-RULE-WHEN-0001-C]
+    expectation: generic-runtime-style-contribution-recomputes-with-eq-unchanged
+  - id: T-RULE-FINITE-GTE-0001-CASE-COMPILER
+    title: Compiler profiles reject unadmitted source and serialized operators explicitly
+    covers: [C-RULE-WHEN-0001-FINITE-GTE]
+    expectation: unsupported-source-and-portable-plan-never-reinterpret-or-drop-gte
+implementations:
+  - id: rule-finite-gte-module
+    kind: module-test
+    status: passing
+    path: packages/modules/rule/test/finite-gte.test.ts
+    required: true
+    consumesCases: [T-RULE-FINITE-GTE-0001-CASE-NUMERIC]
+  - id: rule-finite-gte-runtime
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/rule.finite-gte.contract.test.ts
+    required: true
+    consumesCases: [T-RULE-FINITE-GTE-0001-CASE-RUNTIME]
+  - id: rule-finite-gte-compiler-boundary
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/rule-gte-boundary.test.ts
+    required: true
+    consumesCases: [T-RULE-FINITE-GTE-0001-CASE-COMPILER]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Red/green runtime gte tests plus explicit current compiler rejection boundary.
+tags: [rule, comparison, numeric]

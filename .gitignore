@@ -145,3 +145,7 @@ apps/www/src/styles/proto-ui-tokens.generated.css
 apps/www/src/styles/shadcn-theme.css
 apps/www/src/styles/proto-ui-shadow-style.generated.js
 apps/www/src/styles/proto-ui-shadow-style.generated.d.ts
+
+# Actual local CLI init output regenerated before docs dev/build/check.
+apps/www/src/generated/cli-init.generated.json
+apps/www/src/generated/cli-init.generated.json.tmp

@@ -1,0 +1,91 @@
+id: T-SHADCN-TABS-STYLE-0001
+type: test
+title: Production Tabs text/default style projection and no-reset scope switching
+status: draft
+since: 0.3.0-alpha.1
+summary: Bounded three-style text/default evidence, not complete Tabs or all-adapter parity.
+cases:
+  - id: T-SHADCN-TABS-STYLE-0001-CASE-MATRIX
+    title: Three styles across horizontal/vertical and light/dark with hover, focus, selected and disabled paint
+    covers:
+      - P-SHADCN-TABS-STYLE-SCOPE
+      - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-LIST-STYLE-SCOPE
+      - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-TRIGGER-STYLE-SCOPE
+      - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-CONTENT-STYLE-SCOPE
+      - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
+    expectation: source-bound-default-surface-and-semantic-withdrawal
+  - id: T-SHADCN-TABS-STYLE-0001-CASE-NO-RESET
+    title: Production scope precedence preserves value, handles, focus, user children and selection
+    covers:
+      - P-SHADCN-TABS-STYLE-SCOPE
+      - P-SHADCN-TABS-LIST-STYLE-SCOPE
+      - P-SHADCN-TABS-TRIGGER-STYLE-SCOPE
+      - P-SHADCN-TABS-CONTENT-STYLE-SCOPE
+    expectation: same-live-behavior-and-owned-user-nodes
+  - id: T-SHADCN-TABS-STYLE-0001-CASE-FAIL-CLOSED
+    title: Reject unsupported/unknown style and upstream line while retaining independent underline compatibility
+    covers:
+      - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
+    expectation: explicit-capability-boundary-without-silent-fallback
+  - id: T-SHADCN-TABS-STYLE-0001-CASE-SOURCE
+    title: Fixed source bytes and exhaustive style statuses
+    covers:
+      - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+      - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
+    expectation: hashes-and-coverage-match-fixed-source
+implementations:
+  - id: prototypes-shadcn-tabs-style-projection
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-TABS-STYLE-0001-CASE-MATRIX
+      - T-SHADCN-TABS-STYLE-0001-CASE-NO-RESET
+      - T-SHADCN-TABS-STYLE-0001-CASE-FAIL-CLOSED
+      - T-SHADCN-TABS-STYLE-0001-CASE-SOURCE
+    exercises: &a1
+      - P-SHADCN-TABS
+      - P-SHADCN-TABS-LIST
+      - P-SHADCN-TABS-TRIGGER
+      - P-SHADCN-TABS-CONTENT
+    notes:
+      - Approved fixed runtime plus authored changes. Happy DOM evidence does not establish native browser screenshots, pixel parity, portal, or every adapter.
+verifies:
+  prototypes:
+    - id: P-SHADCN-TABS
+      anchors:
+        - P-SHADCN-TABS-STYLE-SCOPE
+        - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
+    - id: P-SHADCN-TABS-LIST
+      anchors:
+        - P-SHADCN-TABS-LIST-STYLE-SCOPE
+        - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
+    - id: P-SHADCN-TABS-TRIGGER
+      anchors:
+        - P-SHADCN-TABS-TRIGGER-STYLE-SCOPE
+        - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
+    - id: P-SHADCN-TABS-CONTENT
+      anchors:
+        - P-SHADCN-TABS-CONTENT-STYLE-SCOPE
+        - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
+exercises:
+  prototypes: *a1
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added bounded production style matrix and no-reset/fail-closed/source evidence.
+tags:
+  - prototype
+  - shadcn
+  - tabs
+  - style
+  - test

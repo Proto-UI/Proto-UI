@@ -23,10 +23,15 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     };
     const verify = () => {
       for (const name of ['settings-save', 'settings-reset', 'editor-reset']) {
-        expect(ref(name).style.maxWidth).toBe('100%');
-        expect(ref(name).style.whiteSpace).toBe('normal');
-        expect(ref(name).style.height).toBe('auto');
-        expect(ref(name).style.minHeight).toBe(family === 'brutalist' ? '2.5rem' : '2rem');
+        // Family-owned wrapping replaces homepage numeric height overrides.
+        expect(getElementProps(ref(name))).toMatchObject({ wrap: true });
+        for (const property of ['height', 'minHeight', 'whiteSpace', 'overflowWrap'] as const)
+          expect(ref(name).style[property]).toBe('');
+        const tokens = (ref(name).getAttribute('data-pui-style') ?? '').split(/\s+/);
+        expect(tokens).toContain('h-auto');
+        expect(tokens).toContain('whitespace-normal');
+        expect(tokens).not.toContain('whitespace-nowrap');
+        expect(tokens).toContain(family === 'brutalist' ? 'min-h-10' : 'min-h-8');
       }
       expect(Number(input('editor-text').rows)).toBe(4);
       expect(input('editor-text').getAttribute('aria-label')).toBe('Edit example text');
