@@ -3,6 +3,7 @@ type: contract
 title: Optional Field composition of the existing Switch root
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale: Draft optional Field composition introduced in this release reuses the existing Switch checked and activation owners and Field validation leases; ordinary Switch remains independent, while native input and independent semantic acceptance remain required.
 summary: One checked owner and one Field validator, with explicit semantic composition.
 criteria:
   - id: C-FIELD-SWITCH-0001-COMPOSITION

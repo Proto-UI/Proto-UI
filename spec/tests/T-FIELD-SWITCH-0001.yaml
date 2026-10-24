@@ -3,6 +3,7 @@ type: test
 title: Optional Field Switch regression evidence
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale: Draft regression mapping for the newly introduced optional Field Switch composition records synthetic policy and canonical-report coverage; it does not promote native hit-area, visual, or assistive-technology acceptance.
 summary: Synthetic WC events and geometry establish bounded runtime behavior, not native hit area or visual acceptance.
 cases:
   - id: T-FIELD-SWITCH-0001-CASE-POLICY
