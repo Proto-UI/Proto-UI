@@ -19,22 +19,10 @@ import {
  * No open-state writes or Runtime disposal here: restore the DOM projection
  * and let normal Custom Element disconnection settle the owner lifetime.
  */
-// Only this module can enter an authenticated, synchronous projection move.
-// A DOM attribute cannot forge the window; nested moves restore their outer depth.
-const relocationDepth = new WeakMap<HTMLElement, { depth: number; document: Document }>();
-export function isWebComponentPortalRelocating(el: HTMLElement): boolean {
-  const window = relocationDepth.get(el);
-  return !!window && window.depth > 0 && window.document === el.ownerDocument;
-}
-function relocate(el: HTMLElement, move: () => void): void {
-  const previous = relocationDepth.get(el);
-  relocationDepth.set(el, { depth: (previous?.depth ?? 0) + 1, document: el.ownerDocument });
-  try {
-    move();
-  } finally {
-    if (previous) relocationDepth.set(el, previous);
-    else relocationDepth.delete(el);
-  }
+export { isWebComponentOwnedRelocating as isWebComponentPortalRelocating } from './owned-relocation';
+import { withWebComponentOwnedRelocation } from './owned-relocation';
+function relocate(el: HTMLElement, destination: Node, move: () => void): void {
+  withWebComponentOwnedRelocation([el], destination, move);
 }
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {
@@ -362,7 +350,7 @@ export function createWebComponentPortalMount() {
           if (stillOwned || (isLastRetired() && !wasProjected && el.parentNode === parent))
             cleanup(() => {
               if (el.parentNode !== parent || marker.nextSibling !== el)
-                relocate(el, () => parent.insertBefore(el, marker));
+                relocate(el, parent, () => parent.insertBefore(el, marker));
             });
         } else if (restoreToOrigin && stillOwned) cleanup(() => el.remove());
         cleanup(() => marker.remove());
@@ -409,7 +397,8 @@ export function createWebComponentPortalMount() {
           return;
         }
         materialEpoch = acquiredMaterial;
-        if (el.parentNode !== projectionBody) relocate(el, () => projectionBody!.appendChild(el));
+        if (el.parentNode !== projectionBody)
+          relocate(el, projectionBody!, () => projectionBody!.appendChild(el));
         if (isCurrent() && ownsProjection()) {
           refreshDestination();
           if (isCurrent() && ownsProjection()) materialEpoch.commitProjection();

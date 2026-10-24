@@ -43,7 +43,7 @@ it('private relocation window is exception-safe and ordinary reconnect is not ma
   document.body.append(origin);
   const mount = createWebComponentPortalMount(),
     append = vi.spyOn(document.body, 'appendChild').mockImplementation(() => {
-      expect(isWebComponentPortalRelocating(host)).toBe(true);
+      expect(isWebComponentPortalRelocating(host)).toBe(false);
       throw new Error('failed physical move');
     });
   expect(() => mount.mount(host)).toThrow('failed physical move');

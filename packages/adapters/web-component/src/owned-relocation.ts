@@ -1,0 +1,320 @@
+import {
+  beginOwnedRelocationDiagnostic,
+  recordOwnedRelocationDiagnostic,
+} from './owned-relocation-diagnostics';
+import {
+  getLogicalEventRouteSurfaceForTarget,
+  isFocusTargetOwnerReady,
+} from './platform/instance-tree';
+/** Private synchronous authority for one exact adapter-owned physical move. */
+type Window = {
+  document: Document;
+  path: readonly Node[];
+  previous?: Window;
+  claimed?: boolean;
+  revoked?: boolean;
+};
+const windows = new WeakMap<Node, Window>();
+// Capture the host primitive before prototype author hooks can run. Instance
+// overrides/getters are never invoked while natural-blur authority is open.
+const nativeInsertBefore = typeof Node === 'undefined' ? null : Node.prototype.insertBefore;
+const parentOf = (node: Node): Node | null =>
+  node.parentNode ?? (node.nodeType === 11 && 'host' in node ? (node as ShadowRoot).host : null);
+function pathToRoot(node: Node): Node[] {
+  const path: Node[] = [];
+  for (let current: Node | null = node; current; current = parentOf(current)) path.push(current);
+  return path;
+}
+export function isWebComponentOwnedRelocating(node: Node): boolean {
+  const active = windows.get(node);
+  if (!active || active.revoked || active.document !== node.ownerDocument) return false;
+  const actual = pathToRoot(node);
+  return (
+    actual.length === active.path.length &&
+    actual.every((part, index) => part === active.path[index])
+  );
+}
+/** One reconnect allowance, claimed before any extensible lifecycle hook runs. */
+export function claimWebComponentOwnedRelocation(node: Node): (() => boolean) | null {
+  const active = windows.get(node);
+  if (!active) return null;
+  if (active.claimed || !isWebComponentOwnedRelocating(node)) {
+    active.revoked = true;
+    return null;
+  }
+  active.claimed = true;
+  return () => {
+    if (windows.get(node) !== active) return false;
+    if (!isWebComponentOwnedRelocating(node)) active.revoked = true;
+    return !active.revoked;
+  };
+}
+/** Preserve only a live caller's focus lost by this transport, never steal author focus. */
+export function captureWebComponentCallerFocus(roots: readonly Node[]) {
+  const doc = roots[0]?.ownerDocument;
+  let active = doc?.activeElement as HTMLElement | null | undefined;
+  while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
+  const target = active;
+  const owned = !!target && roots.some((root) => pathToRoot(target).includes(root));
+  const owner = target ? getLogicalEventRouteSurfaceForTarget(target) : null;
+  let blocked = !owned || !!target?.isContentEditable;
+  const diagnostic = beginOwnedRelocationDiagnostic();
+  recordOwnedRelocationDiagnostic(
+    diagnostic,
+    'capture',
+    !owned ? 'not-owned' : blocked ? 'contenteditable' : 'eligible'
+  );
+  let restoring = false;
+  // Authority belongs to one private DOM primitive, not a diagnostic phase or
+  // arbitrary author callback. A native removal may emit focusout while the
+  // old tree is still connected (Chromium); certify the move after it returns.
+  let staging: { path: readonly Node[]; root: Node; consumed: boolean } | null = null;
+  const onFocus = (event: Event) => {
+    if (!restoring) {
+      const elsewhere = !event.composedPath().includes(target!);
+      recordOwnedRelocationDiagnostic(diagnostic, 'focusin:elsewhere', elsewhere);
+      if (elsewhere) {
+        blocked = true;
+        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'focusin-elsewhere');
+      }
+    }
+  };
+  const onBlur = (event: Event) => {
+    // A deliberate blur while still attached is not transport-induced loss.
+    if (!restoring) {
+      const connected = target?.isConnected;
+      recordOwnedRelocationDiagnostic(diagnostic, 'focusout:connected-at-gate', connected ?? false);
+      if (connected && event.composedPath().includes(target!)) {
+        const currentPath = pathToRoot(target!);
+        const operation = staging;
+        if (
+          operation &&
+          !operation.consumed &&
+          (event as FocusEvent).relatedTarget === null &&
+          target!.ownerDocument === doc &&
+          currentPath.length === operation.path.length &&
+          currentPath.every((node, index) => node === operation.path[index])
+        ) {
+          operation.consumed = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'focusout', 'pending-certified-staging');
+        } else {
+          blocked = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'attached-focusout');
+        }
+      }
+    }
+  };
+  if (owned) {
+    doc!.addEventListener('focusin', onFocus, true);
+    doc!.addEventListener('focusout', onBlur, true);
+  }
+  return {
+    stagingInsertBefore(node: Node, parent: Node, before: Node | null) {
+      if (staging) {
+        blocked = true;
+        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'reentrant-staging');
+      }
+      const source = node.parentNode;
+      const path = target ? pathToRoot(target) : [];
+      const canCertify =
+        !blocked &&
+        !staging &&
+        !!doc &&
+        !!target &&
+        !!source &&
+        source !== parent &&
+        node.ownerDocument === doc &&
+        parent.ownerDocument === doc &&
+        path.includes(node) &&
+        target.isConnected &&
+        (!before || before.parentNode === parent);
+      if (!canCertify || !nativeInsertBefore) return parent.insertBefore(node, before);
+      const Observer = doc.defaultView?.MutationObserver;
+      if (!Observer) return parent.insertBefore(node, before);
+      const protectedPath = new Set(path);
+      const observer = new Observer(() => {});
+      // Observe each old ancestry edge directly, including shadow boundaries.
+      // No overlapping subtree subscriptions and no duplicate-record masking:
+      // an author moving an ancestor away and back still revokes restoration.
+      for (const part of new Set([...path, parent])) {
+        observer.observe(part, { childList: true });
+      }
+      const operation = { path, root: node, consumed: false };
+      staging = operation;
+      try {
+        const result = nativeInsertBefore.call(parent, node, before);
+        const records = observer
+          .takeRecords()
+          .filter((record) =>
+            [...Array.from(record.addedNodes), ...Array.from(record.removedNodes)].some((changed) =>
+              protectedPath.has(changed)
+            )
+          );
+        const exactRemoval = records.filter(
+          (record) =>
+            record.target === source &&
+            record.addedNodes.length === 0 &&
+            record.removedNodes.length === 1 &&
+            record.removedNodes[0] === node
+        );
+        const exactInsertion = records.filter(
+          (record) =>
+            record.target === parent &&
+            record.removedNodes.length === 0 &&
+            record.addedNodes.length === 1 &&
+            record.addedNodes[0] === node
+        );
+        const movedPath = target ? pathToRoot(target) : [];
+        const targetPrefix = path.slice(0, path.indexOf(node) + 1);
+        if (
+          records.length !== 2 ||
+          exactRemoval.length !== 1 ||
+          exactInsertion.length !== 1 ||
+          node.parentNode !== parent ||
+          node.nextSibling !== before ||
+          node.ownerDocument !== doc ||
+          target!.ownerDocument !== doc ||
+          !targetPrefix.every((part, index) => movedPath[index] === part)
+        ) {
+          blocked = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'staging-mutation-changed');
+        } else {
+          recordOwnedRelocationDiagnostic(diagnostic, 'staging', 'certified');
+        }
+        return result;
+      } catch (error) {
+        blocked = true;
+        throw error;
+      } finally {
+        staging = null;
+        observer.disconnect();
+      }
+    },
+    restore(isCurrent: (node: Node) => boolean) {
+      // Preserve the original short-circuit order and read every predicate once.
+      if (blocked) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'blocked');
+        return;
+      }
+      if (!target) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'no-target');
+        return;
+      }
+      if (!doc) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'no-document');
+        return;
+      }
+      if (!target.isConnected) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'disconnected');
+        return;
+      }
+      if (target.ownerDocument !== doc) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'document-changed');
+        return;
+      }
+      if (!isCurrent(target)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'not-current-transport');
+        return;
+      }
+      if (getLogicalEventRouteSurfaceForTarget(target) !== owner) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'owner-changed');
+        return;
+      }
+      if (owner !== null && !isFocusTargetOwnerReady(target)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'owner-not-ready');
+        return;
+      }
+      if (pathToRoot(target).some((node) => windows.get(node)?.revoked)) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'revoked-window');
+        return;
+      }
+      if (target.matches(':disabled')) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'disabled');
+        return;
+      }
+      if (
+        pathToRoot(target).some(
+          (node) => node.nodeType === 1 && (node as Element).hasAttribute('inert')
+        )
+      ) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'inert-ancestor');
+        return;
+      }
+      const current = doc.activeElement;
+      if (
+        current &&
+        current !== doc.body &&
+        current !== doc.documentElement &&
+        current !== target
+      ) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'reject', 'different-active-element');
+        return;
+      }
+      if (current === target) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'return', 'already-focused');
+        return;
+      }
+      restoring = true;
+      try {
+        recordOwnedRelocationDiagnostic(diagnostic, 'focus-call', 'before');
+        target.focus({ preventScroll: true });
+        recordOwnedRelocationDiagnostic(diagnostic, 'focus-call', 'after');
+        // Native text controls retain selection in the same node. Do not replay
+        // a saved range after focus() author handlers: they may change value,
+        // type or selection, or redirect focus deliberately.
+      } finally {
+        restoring = false;
+      }
+    },
+    dispose() {
+      recordOwnedRelocationDiagnostic(diagnostic, 'dispose');
+      if (owned) {
+        doc!.removeEventListener('focusin', onFocus, true);
+        doc!.removeEventListener('focusout', onBlur, true);
+      }
+    },
+  };
+}
+/** stagingRoot is replaced by destination; otherwise roots are direct destination children. */
+export function withWebComponentOwnedRelocation<T>(
+  roots: readonly Node[],
+  destination: Node,
+  move: () => T,
+  stagingRoot?: Node
+): T {
+  const acquired: Array<[Node, Window]> = [];
+  const seen = new Set<Node>();
+  const destinationPath = pathToRoot(destination);
+  const focus = captureWebComponentCallerFocus(roots);
+  const visit = (node: Node, expected: readonly Node[]) => {
+    if (seen.has(node)) return;
+    seen.add(node);
+    if (!node.ownerDocument || destination.ownerDocument !== node.ownerDocument) return;
+    const entry = { document: node.ownerDocument, path: expected, previous: windows.get(node) };
+    windows.set(node, entry);
+    acquired.push([node, entry]);
+    for (const child of Array.from(node.childNodes)) visit(child, [child, ...expected]);
+    const shadow = (node as Element).shadowRoot;
+    if (shadow) visit(shadow, [shadow, ...expected]);
+  };
+  try {
+    for (const root of roots) {
+      if (stagingRoot) {
+        const path = pathToRoot(root),
+          index = path.indexOf(stagingRoot);
+        if (index < 1) continue;
+        visit(root, [...path.slice(0, index), ...destinationPath]);
+      } else visit(root, [root, ...destinationPath]);
+    }
+    const result = move();
+    focus.restore(isWebComponentOwnedRelocating);
+    return result;
+  } finally {
+    focus.dispose();
+    for (const [node, entry] of acquired) {
+      if (windows.get(node) !== entry) continue;
+      if (entry.previous) windows.set(node, entry.previous);
+      else windows.delete(node);
+    }
+  }
+}

@@ -1,3 +1,4 @@
+import { withWebComponentOwnedRelocation } from '../owned-relocation';
 import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
 import type { InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
@@ -92,7 +93,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
         const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
-        root.replaceChildren(...slotPool);
+        withWebComponentOwnedRelocation(slotPool, root, () => root.replaceChildren(...slotPool));
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();

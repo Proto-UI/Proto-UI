@@ -41,6 +41,16 @@ cases:
       - C-FEEDBACK-STYLE-OWNED-TARGET-0001-SUPPORT
     expectation: Each adapter must explicitly implement or reject the capability. Accepted types, draft contracts, static inspection and planned tests do not establish runtime or cross-adapter support. PrototypeRef rejection remains unchanged.
 implementations:
+  - id: owned-decoration-caller-relocation
+    kind: adapter-test
+    status: active
+    path: packages/adapters/web-component/test/owned-slot-relocation.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+    notes:
+      - 'Private destination-bound single-reconnect authority; explicit child structural updates remain rejected. DOM tests only, not native focus acceptance.'
   - id: owned-decoration-portal-gate
     kind: adapter-test
     status: active

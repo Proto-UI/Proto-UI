@@ -26,8 +26,8 @@ criteria:
       zh-CN: 目标提交绑定后无需 render 即回放当前合并样式；临时 view detach 撤销物理 sink，但保留活 owner、opaque 身份及逻辑贡献。 新的已通知 view generation 须在 reveal 前验证并完整绑定同一目标集；旧 release、ref 与 ack 不得修改或复活新 view，同一活 view 内结构重绑仍拒绝。实例终止释放必须移除绑定、贡献及订阅，禁止后续物理写入。未知、不可用或不支持目标须明确拒绝，不得静默回落宿主。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-NO-RESET
     text:
-      en: Style changes retain owned node and caller slot identities, value and selection handles, focus and selection ranges. No state/event ownership, selector query, arbitrary host attribute, behavior IR, generic keyed diff or arbitrary reparent guarantee is added. Same-document portal paint requires a current physical-view lease and an authoritative committed portal epoch.
-      zh-CN: 样式变化必须保留自有节点及用户 slot 身份、值及选择句柄、焦点与选区；不新增状态/事件所有权、selector 查询、任意宿主属性、行为 IR、通用 keyed diff 或任意 reparent 保证；同文档 portal 绘制同时要求当前物理 view lease 和已提交的公共 portal epoch。
+      en: Style changes retain owned node and caller slot identities, value and selection handles, focus and selection ranges. No state/event ownership, selector query, arbitrary host attribute, behavior IR, generic keyed diff or arbitrary reparent guarantee is added. Same-document portal paint requires a current physical-view lease and an authoritative committed portal epoch. A private adapter-owned caller relocation may retain an existing child view only with an exact destination ancestry, unchanged document and owner, and a single-use synchronous reconnect receipt; it does not authorize an explicit child structural update.
+      zh-CN: 样式变化必须保留自有节点及用户 slot 身份、值及选择句柄、焦点与选区；不新增状态/事件所有权、selector 查询、任意宿主属性、行为 IR、通用 keyed diff 或任意 reparent 保证；同文档 portal 绘制同时要求当前物理 view lease 和已提交的公共 portal epoch。adapter 自有 caller 搬运仅在目的祖先身份、文档与 owner 不变且具有单次同步 reconnect 凭据时保留既有子 view，不授权显式子模板结构更新。
   - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001-DECORATIVE
     text:
       en: 'A target is permanently decorative: accessibility-hidden without layout hiding, not focusable, no actions, names, events or caller content. Reuse governed A11y projection where applicable; never hide the owning control or its slot. Arbitrary Template props and DOM attributes remain prohibited.'
