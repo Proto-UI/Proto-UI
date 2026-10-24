@@ -259,7 +259,7 @@ export function commitChildren(
       const slotParent = ctx.slotEnd.parentNode!;
       for (const node of cfg.slotPool) {
         recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
-        slotParent.insertBefore(node, ctx.slotEnd);
+        focus.stagingInsertBefore(node, slotParent, ctx.slotEnd);
         recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
       }
     }

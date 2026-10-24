@@ -15,6 +15,9 @@ type Window = {
   revoked?: boolean;
 };
 const windows = new WeakMap<Node, Window>();
+// Capture the host primitive before prototype author hooks can run. Instance
+// overrides/getters are never invoked while natural-blur authority is open.
+const nativeInsertBefore = typeof Node === 'undefined' ? null : Node.prototype.insertBefore;
 const parentOf = (node: Node): Node | null =>
   node.parentNode ?? (node.nodeType === 11 && 'host' in node ? (node as ShadowRoot).host : null);
 function pathToRoot(node: Node): Node[] {
@@ -62,6 +65,10 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     !owned ? 'not-owned' : blocked ? 'contenteditable' : 'eligible'
   );
   let restoring = false;
+  // Authority belongs to one private DOM primitive, not a diagnostic phase or
+  // arbitrary author callback. A native removal may emit focusout while the
+  // old tree is still connected (Chromium); certify the move after it returns.
+  let staging: { path: readonly Node[]; root: Node; consumed: boolean } | null = null;
   const onFocus = (event: Event) => {
     if (!restoring) {
       const elsewhere = !event.composedPath().includes(target!);
@@ -78,8 +85,22 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       const connected = target?.isConnected;
       recordOwnedRelocationDiagnostic(diagnostic, 'focusout:connected-at-gate', connected ?? false);
       if (connected && event.composedPath().includes(target!)) {
-        blocked = true;
-        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'attached-focusout');
+        const currentPath = pathToRoot(target!);
+        const operation = staging;
+        if (
+          operation &&
+          !operation.consumed &&
+          (event as FocusEvent).relatedTarget === null &&
+          target!.ownerDocument === doc &&
+          currentPath.length === operation.path.length &&
+          currentPath.every((node, index) => node === operation.path[index])
+        ) {
+          operation.consumed = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'focusout', 'pending-certified-staging');
+        } else {
+          blocked = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'attached-focusout');
+        }
       }
     }
   };
@@ -88,6 +109,87 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     doc!.addEventListener('focusout', onBlur, true);
   }
   return {
+    stagingInsertBefore(node: Node, parent: Node, before: Node | null) {
+      if (staging) {
+        blocked = true;
+        recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'reentrant-staging');
+      }
+      const source = node.parentNode;
+      const path = target ? pathToRoot(target) : [];
+      const canCertify =
+        !blocked &&
+        !staging &&
+        !!doc &&
+        !!target &&
+        !!source &&
+        source !== parent &&
+        node.ownerDocument === doc &&
+        parent.ownerDocument === doc &&
+        path.includes(node) &&
+        target.isConnected &&
+        (!before || before.parentNode === parent);
+      if (!canCertify || !nativeInsertBefore) return parent.insertBefore(node, before);
+      const Observer = doc.defaultView?.MutationObserver;
+      if (!Observer) return parent.insertBefore(node, before);
+      const protectedPath = new Set(path);
+      const observer = new Observer(() => {});
+      // Observe each old ancestry edge directly, including shadow boundaries.
+      // No overlapping subtree subscriptions and no duplicate-record masking:
+      // an author moving an ancestor away and back still revokes restoration.
+      for (const part of new Set([...path, parent])) {
+        observer.observe(part, { childList: true });
+      }
+      const operation = { path, root: node, consumed: false };
+      staging = operation;
+      try {
+        const result = nativeInsertBefore.call(parent, node, before);
+        const records = observer
+          .takeRecords()
+          .filter((record) =>
+            [...Array.from(record.addedNodes), ...Array.from(record.removedNodes)].some((changed) =>
+              protectedPath.has(changed)
+            )
+          );
+        const exactRemoval = records.filter(
+          (record) =>
+            record.target === source &&
+            record.addedNodes.length === 0 &&
+            record.removedNodes.length === 1 &&
+            record.removedNodes[0] === node
+        );
+        const exactInsertion = records.filter(
+          (record) =>
+            record.target === parent &&
+            record.removedNodes.length === 0 &&
+            record.addedNodes.length === 1 &&
+            record.addedNodes[0] === node
+        );
+        const movedPath = target ? pathToRoot(target) : [];
+        const targetPrefix = path.slice(0, path.indexOf(node) + 1);
+        if (
+          records.length !== 2 ||
+          exactRemoval.length !== 1 ||
+          exactInsertion.length !== 1 ||
+          node.parentNode !== parent ||
+          node.nextSibling !== before ||
+          node.ownerDocument !== doc ||
+          target!.ownerDocument !== doc ||
+          !targetPrefix.every((part, index) => movedPath[index] === part)
+        ) {
+          blocked = true;
+          recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'staging-mutation-changed');
+        } else {
+          recordOwnedRelocationDiagnostic(diagnostic, 'staging', 'certified');
+        }
+        return result;
+      } catch (error) {
+        blocked = true;
+        throw error;
+      } finally {
+        staging = null;
+        observer.disconnect();
+      }
+    },
     restore(isCurrent: (node: Node) => boolean) {
       // Preserve the original short-circuit order and read every predicate once.
       if (blocked) {
