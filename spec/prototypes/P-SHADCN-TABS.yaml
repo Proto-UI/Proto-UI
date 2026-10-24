@@ -86,7 +86,8 @@ dependsOn:
     - D-PROTOTYPE-ENTITY-NAMING-0001
     - D-AS-CHILD-OMISSION-0001
   prototypes:
-    - P-SHADCN-STYLE-SCOPE
+    - id: P-SHADCN-STYLE-SCOPE
+      since: 0.3.0-alpha.1
 inherits:
   prototypes:
     - id: P-BASE-TABS
@@ -94,7 +95,8 @@ inherits:
 verifies:
   tests:
     - T-SHADCN-TABS-0001
-    - T-SHADCN-TABS-STYLE-0001
+    - id: T-SHADCN-TABS-STYLE-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised

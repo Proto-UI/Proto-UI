@@ -95,7 +95,8 @@ dependsOn:
     - D-AS-CHILD-OMISSION-0001
   prototypes:
     - P-SHADCN-TABS
-    - P-SHADCN-STYLE-SCOPE
+    - id: P-SHADCN-STYLE-SCOPE
+      since: 0.3.0-alpha.1
 inherits:
   prototypes:
     - id: P-BASE-TABS-TRIGGER
@@ -105,7 +106,8 @@ verifies:
     - T-SHADCN-TABS-TRIGGER-0001
     - id: T-RUNTIME-TABS-APPEARANCE-0001
       since: 0.3.0-alpha.1
-    - T-SHADCN-TABS-STYLE-0001
+    - id: T-SHADCN-TABS-STYLE-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised

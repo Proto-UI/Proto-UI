@@ -151,6 +151,19 @@ try {
     await page.evaluate(
       () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
     );
+    // Observe actual transition completion instead of sampling an interpolated
+    // radius after a fixed number of frames. Keep the exact geometry oracle.
+    const waitGeometry = () =>
+      page.waitForFunction(() =>
+        window.tabsEvidence.records.every(
+          (r) =>
+            getComputedStyle(r.triggers[0]).borderRadius ===
+              (r.style === 'rhea' ? '16px' : '6px') &&
+            (r.orientation !== 'horizontal' ||
+              r.list.getBoundingClientRect().height === (r.style === 'new-york-v4' ? 36 : 32))
+        )
+      );
+    await waitGeometry();
     const matrix = await page.evaluate(() =>
       window.tabsEvidence.records.map((r) => ({
         style: r.style,
@@ -317,6 +330,7 @@ try {
       return true;
     });
     assert.equal(stable, true);
+    await waitGeometry();
     await page.screenshot({ path: join(out, `${theme}-tabs.png`), fullPage: true });
     observations.push({ theme, matrix, oracle, interaction, noReset: stable });
   }

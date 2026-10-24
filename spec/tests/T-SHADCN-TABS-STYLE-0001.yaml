@@ -89,3 +89,7 @@ tags:
   - tabs
   - style
   - test
+lifecycleRationale:
+  en: The three-style text/default test matrix is bounded; six styles, line, glyph
+    and complete native acceptance remain open, and the first native capture
+    failed its incomplete fixture theme.

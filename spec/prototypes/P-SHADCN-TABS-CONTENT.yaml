@@ -91,7 +91,8 @@ dependsOn:
     - D-AS-CHILD-OMISSION-0001
   prototypes:
     - P-SHADCN-TABS
-    - P-SHADCN-STYLE-SCOPE
+    - id: P-SHADCN-STYLE-SCOPE
+      since: 0.3.0-alpha.1
 inherits:
   prototypes:
     - id: P-BASE-TABS-CONTENT
@@ -99,7 +100,8 @@ inherits:
 verifies:
   tests:
     - T-SHADCN-TABS-CONTENT-0001
-    - T-SHADCN-TABS-STYLE-0001
+    - id: T-SHADCN-TABS-STYLE-0001
+      since: 0.3.0-alpha.1
 revisions:
   - version: 0.3.0-alpha.1
     change: revised
