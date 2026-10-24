@@ -271,6 +271,25 @@ it('transport restores native text selection but does not steal deliberate autho
   });
   expect(document.activeElement).not.toBe(input);
 });
+
+it('does not restore after a callback refocuses then deliberately blurs the caller', () => {
+  const origin = document.createElement('div');
+  const destination = document.createElement('section');
+  const input = document.createElement('input');
+  origin.append(input);
+  document.body.append(origin, destination);
+  input.focus();
+  withWebComponentOwnedRelocation([input], destination, (runOwnedMove) => {
+    runOwnedMove([input], () => {
+      // Model Chromium's attached transport focusout, then an author callback.
+      input.blur();
+      input.focus();
+      input.blur();
+      destination.append(input);
+    });
+  });
+  expect(document.activeElement).toBe(document.body);
+});
 it('does not restore a removed, disabled, inert or author-reparented focused target', () => {
   for (const mode of ['removed', 'disabled', 'inert', 'reparented']) {
     const origin = document.createElement('div'),

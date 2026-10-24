@@ -64,6 +64,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
   const owner = target ? getLogicalEventRouteSurfaceForTarget(target) : null;
   let blocked = !owned || !!target?.isContentEditable;
   let ownedMoveDepth = 0;
+  let targetRefocused = false;
   const diagnostic = beginOwnedRelocationDiagnostic();
   recordOwnedRelocationDiagnostic(
     diagnostic,
@@ -78,7 +79,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       if (elsewhere) {
         blocked = true;
         recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'focusin-elsewhere');
-      }
+      } else targetRefocused = true;
     }
   };
   const onBlur = (event: Event) => {
@@ -88,7 +89,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       const connected = target?.isConnected;
       const includesTarget = event.composedPath().includes(target!);
       recordOwnedRelocationDiagnostic(diagnostic, 'focusout:connected-at-gate', connected ?? false);
-      if (connected && includesTarget && ownedMoveDepth > 0) {
+      if (connected && includesTarget && ownedMoveDepth > 0 && !targetRefocused) {
         recordOwnedRelocationDiagnostic(diagnostic, 'focusout:owned-move', true);
       } else if (connected && includesTarget) {
         blocked = true;

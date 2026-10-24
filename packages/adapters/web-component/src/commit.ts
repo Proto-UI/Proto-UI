@@ -270,12 +270,13 @@ export function commitChildren(
   const focus = captureWebComponentCallerFocus(cfg.slotPool);
   const previousDiagnosticPhase = setOwnedRelocationDiagnosticPhase('caller-staging');
   try {
-    if (cfg.mode === 'light' && ctx.slotEnd) {
-      const slotParent = ctx.slotEnd.parentNode!;
+    const slotEnd = ctx.slotEnd;
+    if (cfg.mode === 'light' && slotEnd) {
+      const slotParent = slotEnd.parentNode!;
       for (const node of cfg.slotPool) {
         focus.move([node], () => {
           recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
-          slotParent.insertBefore(node, ctx.slotEnd);
+          slotParent.insertBefore(node, slotEnd);
           recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
         });
       }
