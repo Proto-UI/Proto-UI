@@ -9,6 +9,8 @@ import {
   CONTEXT_INSTANCE_TOKEN_CAP,
   CONTEXT_PARENT_CAP,
 } from '../../../../packages/modules/context/src';
+import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
+import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
