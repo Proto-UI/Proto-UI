@@ -249,6 +249,21 @@ export function commitChildren(
 
   cfg.bindDecorations(ctx.decorations);
 
+  // Remember the entire old path: a disconnect callback may move an ancestor
+  // into another detached tree without changing the caller's immediate parent.
+  const parkingParents = cfg.mode === 'light' && !ctx.slotUsed ? new Map<Node, Node>() : null;
+  if (parkingParents) {
+    for (const node of cfg.slotPool) {
+      if (!hostRoot.contains(node)) continue;
+      let current = node;
+      while (current !== hostRoot && !parkingParents.has(current)) {
+        const parent = current.parentNode!;
+        parkingParents.set(current, parent);
+        current = parent;
+      }
+    }
+  }
+
   // Stage and validate the WHOLE blueprint before moving any caller-owned
   // slot content. A later invalid node must not detach children from the live
   // tree just because an earlier slot was encountered in the traversal.
@@ -280,6 +295,22 @@ export function commitChildren(
       },
       container
     );
+    if (parkingParents) {
+      for (const node of cfg.slotPool) {
+        let current = node;
+        let retained = false;
+        while (parkingParents.has(current)) {
+          const parent = parkingParents.get(current)!;
+          if (parent === hostRoot) {
+            retained = current.parentNode === null;
+            break;
+          }
+          if (current.parentNode !== parent) break;
+          current = parent;
+        }
+        if (retained) node.parentNode?.removeChild(node);
+      }
+    }
   } finally {
     focus.dispose();
     setOwnedRelocationDiagnosticPhase(previousDiagnosticPhase);

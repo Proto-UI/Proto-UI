@@ -148,10 +148,6 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         })(),
       });
 
-      // Preserve the established no-slot parking contract, but only after
-      // staging and commit have succeeded. Rejected blueprints keep live nodes.
-      if (!result.hasSlot) for (const node of slotPool) node.parentNode?.removeChild(node);
-
       projector.afterCommit({
         owned,
         slotStart: result.slotStart,

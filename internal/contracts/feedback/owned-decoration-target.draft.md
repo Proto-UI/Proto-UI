@@ -145,6 +145,8 @@ A light-WC parent commit may move its existing caller slot subtree while retaini
 
 The final staged replacement, slot-only transition and live caller projection use the same private helper. Blueprint validation still precedes caller movement. Projection rechecks a later node's source and the current slot boundary after earlier callbacks, rather than reclaiming author-moved nodes. This does not promise rollback after final host mutation exceptions or a generic keyed diff.
 
+No-slot parking also respects synchronous author reparenting during disconnection. After a successful commit, the adapter parks a caller only if its complete original ancestor path remains unchanged under the detached former host child; moving that child into another detached tree also relinquishes parking authority. Native Chromium controls cover direct and nested callers moved to an external connected host, an ancestor moved to an external detached tree, and ordinary parking followed by restoration. These controls do not extend the supported relocation or final-mutation rollback boundaries.
+
 Explicit child update/setProps structural recommits remain rejected before replacement. The successful Select consumer uses the existing Surface owner and shared Rule/Context paint, with default adapter options; no fixture autoUpdateOnPropsChange:false switch supplies production acceptance. Earlier isolated nonportal capture fixtures used that option to bound their no-render proof and must not be described as proof that arbitrary default own-props rerender is supported. Native evidence for this caller-relocation candidate remains pending; DOM tests and consumer probes do not substitute for native focus, selection or accessibility validation.
 
 ### Caller focus transport follow-up

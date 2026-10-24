@@ -43,4 +43,76 @@ describe('WC session failed blueprint preserves projected caller content', () =>
     expect(host.querySelector('input')).toBe(input);
     expect(host.textContent).toBe('caller-tail');
   });
+
+  it('does not remove a caller reparented by its disconnection callback during a no-slot commit', () => {
+    let showSlot = true;
+    let armed = false;
+    let moved = false;
+    const destination = document.createElement('aside');
+    const callerName = `x-reparented-caller-${nextName++}`;
+    customElements.define(
+      callerName,
+      class extends HTMLElement {
+        disconnectedCallback() {
+          if (!armed || moved) return;
+          moved = true;
+          destination.append(this);
+        }
+      }
+    );
+    const prototype: Prototype = {
+      name: `x-slot-reparent-update-${nextName++}`,
+      setup() {
+        return (r) => (showSlot ? r.slot() : r.el('p', 'no slot'));
+      },
+    };
+    AdaptToWebComponent(prototype);
+    const host = document.createElement(prototype.name) as HTMLElement & { update(): void };
+    const caller = document.createElement(callerName);
+    host.append(caller);
+    document.body.append(destination, host);
+    armed = true;
+    showSlot = false;
+    host.update();
+    expect(caller.parentNode).toBe(destination);
+    expect(caller.isConnected).toBe(true);
+    expect(host.textContent).toBe('no slot');
+  });
+
+  it('does not reclaim a caller whose ancestor moved to an external detached tree during commit', () => {
+    let showSlot = true;
+    let armed = false;
+    let moved = false;
+    const destination = document.createDocumentFragment();
+    const callerName = `x-reparented-ancestor-caller-${nextName++}`;
+    customElements.define(
+      callerName,
+      class extends HTMLElement {
+        disconnectedCallback() {
+          if (!armed || moved) return;
+          moved = true;
+          destination.append(this.parentNode!);
+        }
+      }
+    );
+    const prototype: Prototype = {
+      name: `x-slot-ancestor-reparent-update-${nextName++}`,
+      setup() {
+        return (r) => (showSlot ? r.el('section', r.slot()) : r.el('p', 'no slot'));
+      },
+    };
+    AdaptToWebComponent(prototype);
+    const host = document.createElement(prototype.name) as HTMLElement & { update(): void };
+    const caller = document.createElement(callerName);
+    host.append(caller);
+    document.body.append(host);
+    const originalParent = caller.parentNode;
+    armed = true;
+    showSlot = false;
+    host.update();
+    expect(destination.firstChild).toBe(originalParent);
+    expect(caller.parentNode).toBe(originalParent);
+    expect(destination.contains(caller)).toBe(true);
+    expect(host.textContent).toBe('no slot');
+  });
 });
