@@ -573,7 +573,8 @@ criteria:
     dependsOn:
       contracts:
         - C-PROPS-0001
-        - C-FIELD-SWITCH-0001
+        - id: C-FIELD-SWITCH-0001
+          since: 0.3.0-alpha.1
       decisions:
         - D-BASE-PROTOTYPE-INDEPENDENCE-0001
     references:
