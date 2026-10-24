@@ -1,0 +1,56 @@
+name: Code source scroll chaining evidence
+on:
+  pull_request:
+    paths:
+      - 'apps/www/src/styles/code-surfaces.css'
+      - 'apps/www/src/content/docs/zh-cn/code-scroll-chain*'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - '.github/workflows/code-scroll-chain-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-code-scroll-chain:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Restore exact existing font package
+        timeout-minutes: 1
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb
+          key: ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c
+      - name: Prepare locked dependencies and verified fonts
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          corepack pnpm@10.32.1 --filter apps-www exec astro preferences disable devToolbar
+      - name: Execute exact source and native scroll contracts
+        timeout-minutes: 10
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          PROTO_UI_CODE_SCROLL_EVIDENCE_DIR: ${{ runner.temp }}/code-scroll-chain
+        run: |
+          set -euo pipefail
+          mkdir -p "$PROTO_UI_CODE_SCROLL_EVIDENCE_DIR"
+          git rev-parse HEAD | tee "$PROTO_UI_CODE_SCROLL_EVIDENCE_DIR/revision.txt"
+          timeout --signal=TERM --kill-after=10s 560s corepack pnpm@10.32.1 exec vitest run --no-file-parallelism apps/www/src/content/docs/zh-cn/code-scroll-chain.test.ts apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts 2>&1 | tee "$PROTO_UI_CODE_SCROLL_EVIDENCE_DIR/tests.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-scroll-chain-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/code-scroll-chain
+          if-no-files-found: warn
+          retention-days: 30

@@ -315,14 +315,43 @@ function installObserver() {
       }),
     { passive: true }
   );
+  // Diagnostics only: neither retarget nor cancel native wheel input.
+  const wheelNode = (node) => {
+    if (!(node instanceof Element)) return null;
+    const style = getComputedStyle(node);
+    const bounds = node.getBoundingClientRect();
+    return {
+      tag: node.tagName, id: node.id, className: node.getAttribute('class'),
+      rect: rect(bounds), scrollTop: node.scrollTop, scrollLeft: node.scrollLeft,
+      scrollHeight: node.scrollHeight, clientHeight: node.clientHeight,
+      scrollWidth: node.scrollWidth, clientWidth: node.clientWidth,
+      overflowX: style.overflowX, overflowY: style.overflowY,
+      overscrollBehaviorY: style.overscrollBehaviorY,
+    };
+  };
+  state.readWheelHit = (x, y) => {
+    const hit = document.elementFromPoint(x, y);
+    const ancestors = [];
+    for (let node = hit; node; node = node.parentElement) ancestors.push(wheelNode(node));
+    return {
+      point: { x, y }, hit: wheelNode(hit), ancestors, scrollX, scrollY,
+      viewport: { width: innerWidth, height: innerHeight },
+      documentScroller: wheelNode(document.scrollingElement),
+    };
+  };
   window.addEventListener(
     'wheel',
     (event) =>
       state.events.push({
         t: performance.now(),
         type: 'wheel',
+        stage: state.stage,
         trusted: event.isTrusted,
-        deltaY: event.deltaY,
+        deltaX: event.deltaX, deltaY: event.deltaY, deltaMode: event.deltaMode,
+        defaultPrevented: event.defaultPrevented,
+        target: wheelNode(event.target),
+        composedPath: event.composedPath().filter((node) => node instanceof Element).map(wheelNode),
+        hitEvidence: state.readWheelHit(event.clientX, event.clientY),
         scrollY,
       }),
     { passive: true }
@@ -374,6 +403,15 @@ async function finishStage(page, entry) {
     s.sampling = false;
     return s.frames;
   });
+  entry.wheelEvidence = await page.evaluate(() => {
+    const s = window.__tocEvidence;
+    return {
+      events: s.events.filter((event) => event.type === 'wheel' && event.stage === s.stage),
+      finalFixedPoint: s.readWheelHit(700, 550),
+    };
+  });
+  // Persist the hit/scroll-chain facts even if a later assertion or screenshot fails.
+  await save();
   entry.inputEpoch = await page.evaluate(() => window.__tocEvidence.inputEpoch);
   const classified = classifyFrameSamples(entry.frames, entry.inputEpoch);
   entry.preFrameDiagnostics = classified.beforeFrame;

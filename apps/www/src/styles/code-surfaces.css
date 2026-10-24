@@ -138,7 +138,10 @@
     margin: 0;
     min-width: 0;
     max-width: 100%;
-    overscroll-behavior: contain;
+    /* Horizontal code panning stays local; vertical wheel/touch input must
+     * reach the document when this native scroller has no remaining range. */
+    overscroll-behavior-x: contain;
+    overscroll-behavior-y: auto;
     max-height: 4.5rem;
     overflow: auto;
     white-space: pre;

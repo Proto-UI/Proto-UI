@@ -20,6 +20,7 @@ on:
       - 'apps/www/src/styles/shadcn-theme.css'
       - 'apps/www/src/styles/proto-ui-*.css'
       - 'apps/www/src/styles/markdown.css'
+      - 'apps/www/src/styles/code-surfaces.css'
       - 'apps/www/src/components/site-typography*'
       - 'apps/www/src/components/override/Header.astro'
       - 'apps/www/src/components/override/TwoColumnContent.astro'

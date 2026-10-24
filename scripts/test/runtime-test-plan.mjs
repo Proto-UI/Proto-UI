@@ -132,6 +132,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/scroll-end-follow.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-tooltip.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/code-surfaces.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/code-scroll-chain.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/code-surface-grammar.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/runtime-preview-surface.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/site-copy-commands.browser.test.ts',
