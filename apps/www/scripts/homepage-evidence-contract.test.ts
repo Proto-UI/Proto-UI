@@ -1416,3 +1416,33 @@ test('gallery activation requires one exact localized result rather than a remov
     /gallery-primary[^\n]+\.click\(\);\s*await page\.waitForFunction\(galleryButtonActivated/
   );
 });
+
+test('Hero native evidence measures actual Text paint, real resize and unchanged editor without changing budgets', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  ).replace(/\s+/g, ' ');
+  const required = [
+    "await stage('hero-responsive-typography')",
+    'await page.setViewportSize({ width, height: 1000 })',
+    "native.querySelector<HTMLElement>( '[data-typography-prototype]' )",
+    'getComputedStyle(owner)',
+    "fontSize: width >= 1280 ? '48px' : '30px'",
+    "lineHeight: width >= 1280 ? '52.8px' : '33px'",
+    "fontWeight: '600'",
+    "letterSpacing: width >= 1280 ? '-2.4px' : '-0.75px'",
+    'heroSamples.push({ width, expected, facts })',
+    'current === original, originalNote',
+    'current === original, originalHeading',
+    'await hasFocus(note)',
+    "expect(await note.inputValue()).toBe('Preserved across Hero viewport changes')",
+    'record.nativeHero = nativeHero',
+    'enhanced: false',
+    '45_000',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+  };
+  verify(source);
+  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
+});

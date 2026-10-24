@@ -120,7 +120,7 @@ describe('batched real typography adapters and stable native semantic owners', (
       const surface = heading.querySelector<HTMLElement>('[data-typography-prototype]')!;
       expect(surface.dataset.typographyRuntime).toBe(runtime);
       expect(surface.style.getPropertyValue('--pui-font-sans')).toContain('system-ui');
-      expect(surface.getAttribute('data-pui-style')).toContain('text-4xl');
+      expect(surface.getAttribute('data-pui-style')).toContain('text-3xl');
       expect(surface.getAttribute('data-pui-style')).toContain('font-semibold');
       expect(surface.getAttribute('data-pui-style')).not.toContain('pointer-events-none');
       if (runtime !== 'wc') expect(surface.localName).toBe('span');
@@ -502,7 +502,7 @@ describe('Shadcn document reading composition', () => {
       expect(tokens(root, 'prose')).toContain('text-inherit');
       expect(root.querySelector('#prose [data-site-typography-slot]')!.firstChild).toBe(source);
     });
-    it(`${runtime}: retains the homepage's existing title, slogan, tagline and body`, async () => {
+    it(`${runtime}: retains document roles while using the source-aligned medium homepage slogan`, async () => {
       const root = readingFixture();
       root.querySelector('main')!.setAttribute('data-homepage-runtime', '');
       root
@@ -515,7 +515,7 @@ describe('Shadcn document reading composition', () => {
       candidates.push(candidate);
       candidate.activate();
       expect(tokens(root, 'page-title')).toContain('text-4xl');
-      expect(tokens(root, 'slogan')).toContain('text-4xl');
+      expect(tokens(root, 'slogan')).toContain('text-3xl');
       expect(tokens(root, 'description')).toContain('text-lg');
       expect(tokens(root, 'prose')).toContain('text-foreground');
     });
@@ -654,4 +654,285 @@ describe('Library Card ownership before any runtime marker exists', () => {
         part.setAttribute('data-pui-root', '');
       expect(collect()).toEqual(['ordinary-title', 'ordinary-body']);
     });
+});
+
+// Controlled matchMedia samples are participant-unit input only. No change
+// events are dispatched and no shared runtime/client listeners are exercised.
+// In particular, these tests do not certify automatic 640/1280px resizing.
+describe('finite Hero viewport participant contract (explicit refresh)', () => {
+  const widths = [320, 639, 640, 767, 768, 1024, 1279, 1280, 1440] as const;
+  function controlledViewport(initial: number) {
+    let width = initial;
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      const matches =
+        query === '(max-width: 47.999rem)'
+          ? width <= 47.999 * 16
+          : query === '(min-width: 40rem)'
+            ? width >= 640
+            : query === '(min-width: 80rem)'
+              ? width >= 1280
+              : false;
+      return {
+        matches,
+        media: query,
+        onchange: null,
+        addListener() {},
+        removeListener() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent: () => true,
+      } as MediaQueryList;
+    });
+    return (next: number) => {
+      width = next;
+    };
+  }
+  function heroFixture() {
+    document.body.innerHTML =
+      '<main data-site-family-scope><h1 id="bounded-hero" data-site-typography="slogan">A reusable component model</h1><p id="bounded-tagline" data-site-typography="tagline">Authored source stays <em>owned</em> by the document.</p><p id="bounded-body">Regular body text.</p></main>';
+    return document.querySelector<HTMLElement>('main')!;
+  }
+  function surfaceTokens(root: HTMLElement, id: string) {
+    return root
+      .querySelector<HTMLElement>(`#${id} [data-typography-prototype]`)!
+      .getAttribute('data-pui-style')!
+      .split(/\s+/)
+      .filter(Boolean)
+      .sort();
+  }
+  function expectedTokens(role: 'slogan' | 'tagline', width: number) {
+    return role === 'slogan'
+      ? [
+          `text-${width >= 1280 ? '5xl' : '3xl'}`,
+          'text-foreground',
+          'font-semibold',
+          'font-sans',
+          'leading-[1.1]',
+          width >= 1280 ? 'tracking-tighter' : 'tracking-tight',
+          'not-italic',
+          'no-underline',
+        ].sort()
+      : [
+          `text-${width >= 640 ? 'lg' : 'base'}`,
+          'text-foreground',
+          'font-normal',
+          'font-sans',
+          'tracking-normal',
+          'not-italic',
+          'no-underline',
+        ].sort();
+  }
+  it('increments revision exactly at Hero/compact boundaries, including backwards, without source edits', () => {
+    const setWidth = controlledViewport(320);
+    const root = heroFixture();
+    const participant = siteTypographyParticipant(root);
+    const original = root.innerHTML;
+    const samples = [
+      [320, 1],
+      [639, 1],
+      [640, 2],
+      [767, 2],
+      [768, 3],
+      [1024, 3],
+      [1279, 3],
+      [1280, 4],
+      [1440, 4],
+      [1279, 5],
+      [768, 5],
+      [767, 6],
+      [640, 6],
+      [639, 7],
+      [320, 7],
+    ];
+    for (const [width, revision] of samples) {
+      setWidth(width!);
+      expect(participant.getSourceRevision(), `${width}px revision`).toBe(revision);
+      expect(participant.getSourceRevision(), 'a second sample must be stable').toBe(revision);
+      expect(root.innerHTML).toBe(original);
+    }
+    participant.destroy();
+    expect(participant.needsRefresh()).toBe(false);
+  });
+
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    for (const width of widths) {
+      it(`${runtime}/${width}px: consumes exact public Text tokens in retained native owners`, async () => {
+        controlledViewport(width);
+        const root = heroFixture();
+        const heading = root.querySelector('#bounded-hero')!;
+        const headingText = heading.firstChild;
+        const emphasis = root.querySelector('em');
+        const participant = siteTypographyParticipant(root);
+        const candidate = await participant.materialize(request(runtime, 1));
+        candidates.push(candidate);
+        candidate.activate();
+        expect(surfaceTokens(root, 'bounded-hero')).toEqual(expectedTokens('slogan', width));
+        expect(surfaceTokens(root, 'bounded-tagline')).toEqual(expectedTokens('tagline', width));
+        expect(surfaceTokens(root, 'bounded-body')).toEqual(
+          [
+            'font-normal',
+            'font-sans',
+            'leading-relaxed',
+            'no-underline',
+            'not-italic',
+            'text-base',
+            'text-foreground',
+            'tracking-normal',
+          ].sort()
+        );
+        expect(root.querySelector('#bounded-hero')).toBe(heading);
+        expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(headingText);
+        expect(root.querySelector('em')).toBe(emphasis);
+        expect(root.querySelectorAll('h1')).toHaveLength(1);
+        expect(root.querySelectorAll('p')).toHaveLength(2);
+        expect(root.querySelectorAll('[role],[tabindex]')).toHaveLength(0);
+        expect(participant.needsRefresh()).toBe(false);
+      });
+    }
+    it(`${runtime}: refresh follows committed small/medium/wide snapshots and restores original source`, async () => {
+      const setWidth = controlledViewport(639);
+      const root = heroFixture();
+      const original = root.innerHTML;
+      const source = root.querySelector('#bounded-hero')!.firstChild;
+      const participant = siteTypographyParticipant(root);
+      let previous: MaterializedProjectionCandidate | undefined;
+      let generation = 0;
+      for (const width of [639, 640, 1280, 1279, 639]) {
+        setWidth(width);
+        expect(participant.needsRefresh()).toBe(true);
+        const oldSurface = root.querySelector('#bounded-hero [data-typography-prototype]');
+        const candidate = await participant.materialize(request(runtime, ++generation));
+        candidates.push(candidate);
+        // Preparation itself never publishes a viewport recipe.
+        expect(root.querySelector('#bounded-hero [data-typography-prototype]')).toBe(oldSurface);
+        expect(participant.needsRefresh()).toBe(true);
+        candidate.activate();
+        expect(participant.needsRefresh()).toBe(false);
+        expect(surfaceTokens(root, 'bounded-hero')).toEqual(expectedTokens('slogan', width));
+        expect(surfaceTokens(root, 'bounded-tagline')).toEqual(expectedTokens('tagline', width));
+        expect(root.querySelector('#bounded-hero [data-site-typography-slot]')!.firstChild).toBe(
+          source
+        );
+        if (previous) await previous.dispose();
+        previous = candidate;
+      }
+      await previous!.dispose();
+      participant.destroy();
+      expect(root.innerHTML).toBe(original);
+      expect(document.querySelectorAll('[data-site-typography-batch]')).toHaveLength(0);
+    });
+  }
+  it('commits the Hero bucket for empty scopes rather than refreshing forever', async () => {
+    const setWidth = controlledViewport(639);
+    document.body.innerHTML = '<main></main>';
+    const participant = siteTypographyParticipant(document.querySelector<HTMLElement>('main')!);
+    for (const width of [639, 640, 1280, 1279, 639]) {
+      setWidth(width);
+      const candidate = await participant.materialize(request('wc', width));
+      candidates.push(candidate);
+      candidate.activate();
+      expect(participant.needsRefresh()).toBe(false);
+    }
+    participant.destroy();
+  });
+});
+
+describe('homepage typography media-query transaction integration', () => {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`${runtime}: refreshes both Hero boundaries and removes every listener on destruction`, async () => {
+      let width = 639;
+      const records = new Map<
+        string,
+        { query: MediaQueryList; callbacks: Set<EventListenerOrEventListenerObject> }
+      >();
+      const matches = (query: string) =>
+        query === '(max-width: 47.999rem)'
+          ? width < 768
+          : query === '(min-width: 40rem)'
+            ? width >= 640
+            : query === '(min-width: 80rem)'
+              ? width >= 1280
+              : false;
+      vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+        if (!records.has(query)) {
+          const callbacks = new Set<EventListenerOrEventListenerObject>();
+          const media = {
+            media: query,
+            get matches() {
+              return matches(query);
+            },
+            onchange: null,
+            addEventListener: (_name: string, callback: EventListenerOrEventListenerObject) =>
+              callbacks.add(callback),
+            removeEventListener: (_name: string, callback: EventListenerOrEventListenerObject) =>
+              callbacks.delete(callback),
+            addListener() {},
+            removeListener() {},
+            dispatchEvent: () => true,
+          } as MediaQueryList;
+          records.set(query, { query: media, callbacks });
+        }
+        return records.get(query)!.query;
+      });
+      const changeWidth = (next: number) => {
+        const before = new Map([...records].map(([query]) => [query, matches(query)]));
+        width = next;
+        for (const [query, { callbacks }] of records)
+          if (before.get(query) !== matches(query)) {
+            const event = new Event('change');
+            for (const callback of [...callbacks])
+              typeof callback === 'function' ? callback(event) : callback.handleEvent(event);
+          }
+      };
+      document.body.innerHTML =
+        '<header data-homepage-runtime><output data-homepage-runtime-status></output><div data-homepage-actions data-homepage-controls="runtime"><div data-homepage-fallback><a href="/docs/">Docs</a></div><div data-homepage-mount></div></div></header><main><h1 data-site-typography="slogan">Own unchanged heading</h1><p data-site-typography="tagline">Own unchanged description</p><input aria-label="Preserved editor" value="keep this value"></main>';
+      const header = document.querySelector<HTMLElement>('header')!;
+      const heading = document.querySelector<HTMLElement>('h1')!;
+      const originalSource = heading.firstChild;
+      const editor = document.querySelector<HTMLInputElement>('input')!;
+      const handle = initHomepageRuntime(header)!;
+      handles.push(handle);
+      await vi.waitFor(() => expect(handle.getSnapshot().phase).toBe('ready'));
+      if (runtime !== 'wc') {
+        document.dispatchEvent(
+          new CustomEvent(PREFERRED_ADAPTER_EVENT, { detail: { adapter: runtime } })
+        );
+        await vi.waitFor(() => expect(heading.dataset.typographyRuntime).toBe(runtime));
+      }
+      editor.focus();
+      for (const next of [639, 640, 1279, 1280, 1440, 1279, 640, 639]) {
+        changeWidth(next);
+        await vi.waitFor(() => {
+          const headingTokens = heading
+            .querySelector('[data-typography-prototype]')!
+            .getAttribute('data-pui-style')!;
+          const taglineTokens = document
+            .querySelector('p [data-typography-prototype]')!
+            .getAttribute('data-pui-style')!;
+          expect(headingTokens.split(/\s+/)).toContain(next >= 1280 ? 'text-5xl' : 'text-3xl');
+          expect(taglineTokens.split(/\s+/)).toContain(next >= 640 ? 'text-lg' : 'text-base');
+        });
+        expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(
+          originalSource
+        );
+        expect(document.querySelector('input')).toBe(editor);
+        expect(editor.value).toBe('keep this value');
+        expect(document.activeElement).toBe(editor);
+      }
+      for (const query of ['(max-width: 47.999rem)', '(min-width: 40rem)', '(min-width: 80rem)'])
+        expect(
+          [...records.get(query)!.callbacks].filter(
+            (callback) => typeof callback === 'function' && callback.name === 'onTypographyChange'
+          )
+        ).toHaveLength(1);
+      await handle.destroy();
+      for (const query of ['(max-width: 47.999rem)', '(min-width: 40rem)', '(min-width: 80rem)'])
+        expect(records.get(query)!.callbacks.size).toBe(0);
+      changeWidth(1440);
+      await settle();
+      expect(document.querySelectorAll('[data-typography-prototype]')).toHaveLength(0);
+      expect(heading.firstChild).toBe(originalSource);
+      expect(editor.value).toBe('keep this value');
+    });
+  }
 });

@@ -1,4 +1,4 @@
-import { siteTextRecipe } from './site-text-recipes';
+import { siteTextRecipe, type SiteHeroViewport } from './site-text-recipes';
 import { SITE_TYPOGRAPHY_ROLES, type SiteTypographyRole } from './site-text-recipes';
 import { prepareDemoRuntime, renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
@@ -197,7 +197,14 @@ export function siteTypographyParticipant(
   let alive = true;
   let committed: ScopedTarget[] = [];
   let committedCompact = false;
+  let committedHeroViewport: SiteHeroViewport = 'medium';
   const compact = () => document.defaultView?.matchMedia('(max-width: 47.999rem)').matches === true;
+  const heroViewport = (): SiteHeroViewport =>
+    document.defaultView?.matchMedia('(min-width: 80rem)').matches === true
+      ? 'wide'
+      : document.defaultView?.matchMedia('(min-width: 40rem)').matches === true
+        ? 'medium'
+        : 'small';
   const targets = (): ScopedTarget[] =>
     collectSiteTypographyTargets(root, options.docsOnly).map((target) => ({
       ...target,
@@ -209,7 +216,9 @@ export function siteTypographyParticipant(
           : 'site',
     }));
   let sourceRevision = 0;
-  let sourceSnapshot: { targets: ScopedTarget[]; nodes: Node[][]; compact: boolean } | undefined;
+  let sourceSnapshot:
+    | { targets: ScopedTarget[]; nodes: Node[][]; compact: boolean; heroViewport: SiteHeroViewport }
+    | undefined;
   return {
     root,
     // A participant-local revision, independent of the page's runtime/family
@@ -218,10 +227,12 @@ export function siteTypographyParticipant(
       const next = targets();
       const nodes = next.map(({ native }) => sourceNodes(native));
       const isCompact = compact();
+      const heroScale = heroViewport();
       const previous = sourceSnapshot;
       if (
         !previous ||
         previous.compact !== isCompact ||
+        previous.heroViewport !== heroScale ||
         next.length !== previous.targets.length ||
         next.some(
           ({ native, role, context }, index) =>
@@ -232,7 +243,7 @@ export function siteTypographyParticipant(
             nodes[index]!.some((node, offset) => node !== previous.nodes[index]![offset])
         )
       ) {
-        sourceSnapshot = { targets: next, nodes, compact: isCompact };
+        sourceSnapshot = { targets: next, nodes, compact: isCompact, heroViewport: heroScale };
         sourceRevision++;
       }
       return sourceRevision;
@@ -242,6 +253,7 @@ export function siteTypographyParticipant(
       const next = targets();
       return (
         compact() !== committedCompact ||
+        heroViewport() !== committedHeroViewport ||
         next.length !== committed.length ||
         next.some(
           (target, index) =>
@@ -264,6 +276,7 @@ export function siteTypographyParticipant(
         throw new Error('[SiteTypography] Unsupported projection selection.');
       const selected = targets();
       const isCompact = compact();
+      const heroScale = heroViewport();
       const host = document.createElement('span');
       host.dataset.siteTypographyBatch = ownerId;
       host.hidden = true;
@@ -325,6 +338,7 @@ export function siteTypographyParticipant(
             activate() {
               committed = [];
               committedCompact = isCompact;
+              committedHeroViewport = heroScale;
             },
             setLocked() {},
             setThemeSurfaceStyle() {},
@@ -353,7 +367,7 @@ export function siteTypographyParticipant(
                   // different line boxes; labels/legends remain legal inline.
                   className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
-                  props: { ...siteTextRecipe(role, family, isCompact, context) },
+                  props: { ...siteTextRecipe(role, family, isCompact, context, heroScale) },
                   surfaceStyle: theme,
                   children: [
                     {
@@ -416,6 +430,7 @@ export function siteTypographyParticipant(
             });
             committed = selected;
             committedCompact = isCompact;
+            committedHeroViewport = heroScale;
           },
           // Passive text must remain selectable/clickable during preparation.
           setLocked() {},

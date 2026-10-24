@@ -83,3 +83,146 @@ it('matches pre-module paragraph rhythm and document heading ink to public Text 
   expect(css).toContain('@apply text-3xl leading-tight text-foreground;');
   expect(css).toMatch(/docs-content-flow > blockquote p\s*\{\s*line-height: 1\.625;/);
 });
+
+// App-owned responsive composition. These are explicit input contracts, not a
+// live resize listener test or a new Base Text viewport API.
+describe('finite homepage Hero recipes', () => {
+  const viewports = [
+    { width: 320, bucket: 'small', heading: '3xl', tracking: 'tight', tagline: 'base' },
+    { width: 639, bucket: 'small', heading: '3xl', tracking: 'tight', tagline: 'base' },
+    { width: 640, bucket: 'medium', heading: '3xl', tracking: 'tight', tagline: 'lg' },
+    { width: 767, bucket: 'medium', heading: '3xl', tracking: 'tight', tagline: 'lg' },
+    { width: 768, bucket: 'medium', heading: '3xl', tracking: 'tight', tagline: 'lg' },
+    { width: 1024, bucket: 'medium', heading: '3xl', tracking: 'tight', tagline: 'lg' },
+    { width: 1279, bucket: 'medium', heading: '3xl', tracking: 'tight', tagline: 'lg' },
+    { width: 1280, bucket: 'wide', heading: '5xl', tracking: 'tighter', tagline: 'lg' },
+    { width: 1440, bucket: 'wide', heading: '5xl', tracking: 'tighter', tagline: 'lg' },
+  ] as const;
+  for (const { width, bucket, heading, tracking, tagline } of viewports) {
+    it(`${width}px: composes exact Shadcn Hero inputs`, () => {
+      expect(siteTextRecipe('slogan', 'shadcn', width < 768, 'site', bucket)).toEqual({
+        size: heading,
+        tone: 'default',
+        weight: 'semibold',
+        font: 'body',
+        leading: 'tighter',
+        tracking,
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+      expect(siteTextRecipe('tagline', 'shadcn', width < 768, 'site', bucket)).toEqual({
+        size: tagline,
+        tone: 'default',
+        weight: 'normal',
+        font: 'body',
+        leading: 'size',
+        tracking: 'normal',
+        emphasis: 'normal',
+        decoration: 'none',
+      });
+    });
+  }
+
+  // Explicit old-contract table. Do not compare the new implementation with a
+  // helper which merely repeats its branching or use toMatchObject here.
+  const retainedRoles = {
+    h1: { size: '4xl', leading: 'tight', tracking: 'tight', heading: true },
+    h2: { size: '2xl', leading: 'tight', tracking: 'tight', heading: true },
+    h3: { size: 'xl', leading: 'snug', tracking: 'normal', heading: true },
+    h4: { size: 'lg', leading: 'snug', tracking: 'normal', heading: true },
+    h5: { size: 'lg', leading: 'snug', tracking: 'normal', heading: true },
+    h6: { size: 'base', leading: 'normal', tracking: 'normal', heading: true },
+    body: { size: 'base', leading: 'relaxed', tracking: 'normal', heading: false },
+    label: { size: 'sm', leading: 'normal', tracking: 'normal', heading: false },
+    'notice-title': { size: 'base', leading: 'relaxed', tracking: 'normal', heading: false },
+    caption: { size: 'sm', leading: 'normal', tracking: 'normal', heading: false },
+  } as const;
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const context of ['site', 'document'] as const) {
+      for (const compact of [false, true]) {
+        it(`${family}/${context}/compact=${compact}: all non-Hero inputs remain exact in every bucket`, () => {
+          for (const bucket of ['small', 'medium', 'wide'] as const) {
+            for (const role of Object.keys(retainedRoles) as Array<keyof typeof retainedRoles>) {
+              const old = retainedRoles[role];
+              const reading = family === 'shadcn' && context === 'document';
+              expect(siteTextRecipe(role, family, compact, context, bucket)).toEqual({
+                size: reading && role === 'h1' ? '3xl' : old.size,
+                tone:
+                  role === 'caption' ? 'muted' : reading && role === 'body' ? 'inherit' : 'default',
+                weight:
+                  role === 'notice-title'
+                    ? 'semibold'
+                    : old.heading
+                      ? family === 'brutalist'
+                        ? 'bold'
+                        : 'semibold'
+                      : family === 'brutalist' || role === 'label'
+                        ? 'medium'
+                        : 'normal',
+                font: old.heading && family === 'brutalist' ? 'heading' : 'body',
+                leading: old.leading,
+                tracking: old.tracking,
+                emphasis: 'normal',
+                decoration: 'none',
+              });
+            }
+          }
+        });
+        if (family === 'shadcn' && context === 'site') continue;
+        it(`${family}/${context}/compact=${compact}: existing slogan/tagline recipes ignore Hero bucket`, () => {
+          for (const bucket of ['small', 'medium', 'wide'] as const) {
+            expect(siteTextRecipe('slogan', family, compact, context, bucket)).toEqual({
+              size: compact ? '2xl' : '4xl',
+              tone: 'default',
+              weight: family === 'brutalist' ? 'bold' : 'semibold',
+              font: family === 'brutalist' ? 'heading' : 'body',
+              leading: 'tight',
+              tracking: 'tight',
+              emphasis: 'normal',
+              decoration: 'none',
+            });
+            expect(siteTextRecipe('tagline', family, compact, context, bucket)).toEqual({
+              size: compact || (context === 'document' && family === 'shadcn') ? 'base' : 'lg',
+              tone: 'muted',
+              weight: family === 'brutalist' ? 'medium' : 'normal',
+              font: 'body',
+              leading: 'relaxed',
+              tracking: 'normal',
+              emphasis: 'normal',
+              decoration: 'none',
+            });
+          }
+        });
+      }
+    }
+  }
+  it('keeps an omitted viewport finite and independent of the browser global', () => {
+    expect(siteTextRecipe('slogan', 'shadcn')).toEqual(
+      siteTextRecipe('slogan', 'shadcn', false, 'site', 'medium')
+    );
+    expect(siteTextRecipe('tagline', 'shadcn', true)).toEqual(
+      siteTextRecipe('tagline', 'shadcn', true, 'site', 'small')
+    );
+  });
+});
+
+it('Hero native fallback and public recipes share the finite source breakpoints without painting enhanced Text', () => {
+  const hero = readFileSync('apps/www/src/components/override/Hero.astro', 'utf8');
+  expect(hero).toContain(
+    '3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/components/page-header.tsx'
+  );
+  expect(hero).toContain('max-width: 56rem');
+  expect(hero).toContain('@media (min-width: 640px)');
+  expect(hero).toContain('@media (min-width: 1280px)');
+  const fallbackRules = [
+    ...hero.matchAll(/([^{}]+)\{([^{}]*(?:font-size|font-weight|letter-spacing)[^{}]*)\}/g),
+  ];
+  expect(fallbackRules).toHaveLength(4);
+  for (const match of fallbackRules) {
+    expect(match[1]).toContain(":global([data-site-library-family='shadcn'])");
+    expect(match[1]).toContain(':not([data-typography-owner])');
+  }
+  expect(hero).not.toContain('[data-typography-prototype]');
+  expect(hero).toContain('whitepaperHref');
+  expect(hero).toContain('actions={actions}');
+});

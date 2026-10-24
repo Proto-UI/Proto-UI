@@ -17,25 +17,42 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'caption',
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
+export type SiteHeroViewport = 'small' | 'medium' | 'wide';
+/** App transaction inputs, not a new Text/viewport Prototype API. */
+export const SITE_TYPOGRAPHY_MEDIA_QUERIES = [
+  '(max-width: 47.999rem)',
+  '(min-width: 40rem)',
+  '(min-width: 80rem)',
+] as const;
 export function siteTextRecipe(
   role: SiteTypographyRole,
   family: SiteLibraryFamily,
   compact = false,
-  context: 'site' | 'document' = 'site'
+  context: 'site' | 'document' = 'site',
+  heroViewport: SiteHeroViewport = compact ? 'small' : 'medium'
 ): TextRootProps {
   // These are existing public Text inputs, composed only for ordinary Shadcn
   // document reading. Homepage and notice/chrome owners keep their recipes.
   const reading = context === 'document' && family === 'shadcn';
+  const shadcnHero = family === 'shadcn' && context === 'site';
   const heading = role === 'slogan' || /^h[1-6]$/.test(role);
   const size: TextRootProps['size'] =
     role === 'slogan'
-      ? compact
-        ? '2xl'
-        : '4xl'
+      ? shadcnHero
+        ? heroViewport === 'wide'
+          ? '5xl'
+          : '3xl'
+        : compact
+          ? '2xl'
+          : '4xl'
       : role === 'tagline'
-        ? compact || reading
-          ? 'base'
-          : 'lg'
+        ? shadcnHero
+          ? heroViewport === 'small'
+            ? 'base'
+            : 'lg'
+          : compact || reading
+            ? 'base'
+            : 'lg'
         : (
             {
               h1: reading ? '3xl' : '4xl',
@@ -53,11 +70,13 @@ export function siteTextRecipe(
   return {
     size,
     tone:
-      role === 'tagline' || role === 'caption'
-        ? 'muted'
-        : reading && role === 'body'
-          ? 'inherit'
-          : 'default',
+      role === 'tagline' && shadcnHero
+        ? 'default'
+        : role === 'tagline' || role === 'caption'
+          ? 'muted'
+          : reading && role === 'body'
+            ? 'inherit'
+            : 'default',
     weight:
       role === 'notice-title'
         ? 'semibold'
@@ -70,14 +89,23 @@ export function siteTextRecipe(
             : 'normal',
     font: heading && family === 'brutalist' ? 'heading' : 'body',
     leading:
-      role === 'slogan' || role === 'h1' || role === 'h2'
-        ? 'tight'
-        : role === 'h3' || role === 'h4' || role === 'h5'
-          ? 'snug'
-          : role === 'body' || role === 'tagline' || role === 'notice-title'
-            ? 'relaxed'
-            : 'normal',
-    tracking: role === 'slogan' || role === 'h1' || role === 'h2' ? 'tight' : 'normal',
+      shadcnHero && role === 'slogan'
+        ? 'tighter'
+        : shadcnHero && role === 'tagline'
+          ? 'size'
+          : role === 'slogan' || role === 'h1' || role === 'h2'
+            ? 'tight'
+            : role === 'h3' || role === 'h4' || role === 'h5'
+              ? 'snug'
+              : role === 'body' || role === 'tagline' || role === 'notice-title'
+                ? 'relaxed'
+                : 'normal',
+    tracking:
+      shadcnHero && role === 'slogan' && heroViewport === 'wide'
+        ? 'tighter'
+        : role === 'slogan' || role === 'h1' || role === 'h2'
+          ? 'tight'
+          : 'normal',
     emphasis: 'normal',
     decoration: 'none',
   };

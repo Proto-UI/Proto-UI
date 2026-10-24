@@ -861,6 +861,79 @@ describe.sequential(
             ).toBe(1);
             expect(await page.locator(`${HOME} [data-home-demo-nojs] [aria-live]`).count()).toBe(0);
             if (family === 'shadcn') {
+              await stage('hero-responsive-typography');
+              const note = page.locator(`${ACTIVE} textarea`).first();
+              const originalNote = await note.elementHandle();
+              const originalHeading = await page.locator('.homepage-hero h1').elementHandle();
+              await note.fill('Preserved across Hero viewport changes');
+              await note.focus();
+              const heroSamples: unknown[] = [];
+              record.heroTypography = heroSamples;
+              try {
+                for (const width of [320, 639, 640, 767, 768, 1024, 1279, 1280, 1440, 1279, 639]) {
+                  await page.setViewportSize({ width, height: 1000 });
+                  const expected = {
+                    heading: {
+                      fontSize: width >= 1280 ? '48px' : '30px',
+                      lineHeight: width >= 1280 ? '52.8px' : '33px',
+                      fontWeight: '600',
+                      letterSpacing: width >= 1280 ? '-2.4px' : '-0.75px',
+                    },
+                    tagline: {
+                      fontSize: width >= 640 ? '18px' : '16px',
+                      lineHeight: width >= 640 ? '28px' : '24px',
+                      fontWeight: '400',
+                    },
+                  };
+                  await expect
+                    .poll(
+                      async () => {
+                        const facts = await page!.evaluate(() => {
+                          const paint = (selector: string) => {
+                            const native = document.querySelector<HTMLElement>(selector)!;
+                            const owner = native.querySelector<HTMLElement>(
+                              '[data-typography-prototype]'
+                            );
+                            if (!owner) throw new Error(`Missing enhanced Text owner: ${selector}`);
+                            const style = getComputedStyle(owner);
+                            return {
+                              fontSize: style.fontSize,
+                              lineHeight: style.lineHeight,
+                              fontWeight: style.fontWeight,
+                              letterSpacing: style.letterSpacing,
+                            };
+                          };
+                          return {
+                            heading: paint('.homepage-hero h1'),
+                            tagline: paint('.homepage-hero__tagline'),
+                          };
+                        });
+                        heroSamples.push({ width, expected, facts });
+                        return facts;
+                      },
+                      { timeout: 1500, interval: 25 }
+                    )
+                    .toMatchObject(expected);
+                  expect(
+                    await note.evaluate((current, original) => current === original, originalNote)
+                  ).toBe(true);
+                  expect(
+                    await page
+                      .locator('.homepage-hero h1')
+                      .evaluate((current, original) => current === original, originalHeading)
+                  ).toBe(true);
+                  expect(await note.inputValue()).toBe('Preserved across Hero viewport changes');
+                  await hasFocus(note);
+                }
+                await page.setViewportSize({ width: 1440, height: 1000 });
+                await capture('hero-1440-source-aligned');
+              } finally {
+                await save();
+                await originalNote?.dispose();
+                await originalHeading?.dispose();
+              }
+              await note.fill('');
+              await page.setViewportSize({ width: 1400, height: 1000 });
               await stage('select-rhea');
               const trigger = page.locator(
                 `${ACTIVE} [data-demo-ref="settings-view-trigger"][role="combobox"]`
@@ -1538,6 +1611,44 @@ it('without JavaScript both localized homepages retain a readable documentation 
       record.hostVisible = await page.locator(`${HOME} [data-home-demo-host]`).isVisible();
       record.statusVisible = await page.locator(`${HOME} [data-home-demo-status]`).isVisible();
       await capture('fallback');
+      const nativeHero: unknown[] = [];
+      record.nativeHero = nativeHero;
+      for (const width of [320, 640, 1280]) {
+        await page.setViewportSize({ width, height: 1000 });
+        const facts = await page.evaluate(() => {
+          const heading = document.querySelector<HTMLElement>('.homepage-hero h1')!;
+          const tagline = document.querySelector<HTMLElement>('.homepage-hero__tagline')!;
+          const titleStyle = getComputedStyle(heading),
+            descriptionStyle = getComputedStyle(tagline);
+          return {
+            enhanced: heading.hasAttribute('data-typography-owner'),
+            heading: {
+              fontSize: titleStyle.fontSize,
+              lineHeight: titleStyle.lineHeight,
+              fontWeight: titleStyle.fontWeight,
+            },
+            tagline: {
+              fontSize: descriptionStyle.fontSize,
+              lineHeight: descriptionStyle.lineHeight,
+            },
+          };
+        });
+        nativeHero.push({ width, facts });
+        await save();
+        expect(facts).toEqual({
+          enhanced: false,
+          heading: {
+            fontSize: width >= 1280 ? '48px' : '30px',
+            lineHeight: width >= 1280 ? '52.8px' : '33px',
+            fontWeight: '600',
+          },
+          tagline: {
+            fontSize: width >= 640 ? '18px' : '16px',
+            lineHeight: width >= 640 ? '28px' : '24px',
+          },
+        });
+      }
+      await page.setViewportSize({ width: 320, height: 1000 });
       expect(await fallback.isVisible()).toBe(true);
       expect(record.text).toContain(
         locale === 'en'
