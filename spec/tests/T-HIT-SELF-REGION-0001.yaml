@@ -1,0 +1,50 @@
+id: T-HIT-SELF-REGION-0001
+type: test
+title: Self-region ownership and lifecycle evidence
+status: draft
+since: 0.3.0-alpha.1
+summary: Runtime and four adapter DOM tests do not replace native hit testing.
+cases:
+  - id: T-HIT-SELF-REGION-0001-CASE-LEASE
+    title: Same owner leases retain existing boundaries
+    covers:
+      [
+        C-HIT-SELF-REGION-0001-ADDRESS,
+        C-HIT-SELF-REGION-0001-OWNERSHIP,
+        C-HIT-SELF-REGION-0001-LIFETIME,
+      ]
+    expectation: self-target-resolves-with-owned-release-and-lifecycle-cleanup
+  - id: T-HIT-SELF-REGION-0001-CASE-COMPILER
+    title: Unsupported source profiles reject the new operation
+    covers: [C-HIT-SELF-REGION-0001-BOUNDARIES]
+    expectation: explicit-unsupported-input-not-silent-emission
+implementations:
+  - id: self-region-runtime
+    kind: module-test
+    status: passing
+    path: packages/runtime/test/contract/static-hit-inset.contract.test.ts
+    required: true
+    consumesCases: [T-HIT-SELF-REGION-0001-CASE-LEASE]
+  - id: self-region-four-web
+    kind: module-test
+    status: passing
+    path: packages/adapters/base/test/fixtures/hit-conformance.ts
+    required: true
+    consumesCases: [T-HIT-SELF-REGION-0001-CASE-LEASE]
+  - id: self-region-compiler-boundary
+    kind: module-test
+    status: passing
+    path: packages/compiler/test/self-hit-region-boundary.test.ts
+    required: true
+    consumesCases: [T-HIT-SELF-REGION-0001-CASE-COMPILER]
+  - id: self-region-native-four-web
+    kind: adapter-test
+    status: planned
+    path: scripts/analysis/self-hit-region-browser.mjs
+    required: true
+    consumesCases: [T-HIT-SELF-REGION-0001-CASE-LEASE]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Records bounded runtime lease and explicit compiler rejection evidence.
+tags: [hit-participation, lifecycle]

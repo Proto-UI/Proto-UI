@@ -42,6 +42,7 @@ export class HitParticipationModuleImpl extends ModuleBase {
   private readonly warnings: string[] = [];
   private hostBridge: HitParticipationHostBridge | null = null;
   private hostElement: HTMLElement | null = null;
+  private readonly selfTarget = Object.freeze({});
   private nextRegionId = 1;
   private regions: HitParticipationRegionRecord[] = [];
   private suspended = false;
@@ -79,10 +80,12 @@ export class HitParticipationModuleImpl extends ModuleBase {
   }
 
   private refreshHostCaps(): void {
-    this.hostElement = this.caps.has(HOST_ELEMENT_CAP) ? this.caps.get(HOST_ELEMENT_CAP) : null;
-    this.hostBridge = this.caps.has(HIT_PARTICIPATION_HOST_BRIDGE_CAP)
+    const nextBridge = this.caps.has(HIT_PARTICIPATION_HOST_BRIDGE_CAP)
       ? this.caps.get(HIT_PARTICIPATION_HOST_BRIDGE_CAP)
       : null;
+    if (this.hostBridge && this.hostBridge !== nextBridge) this.clearHostBridge();
+    this.hostElement = this.caps.has(HOST_ELEMENT_CAP) ? this.caps.get(HOST_ELEMENT_CAP) : null;
+    this.hostBridge = nextBridge;
   }
 
   private ensureSetup(op: string) {
@@ -144,27 +147,48 @@ export class HitParticipationModuleImpl extends ModuleBase {
     }
   }
 
+  private ensureSelfLeaseLive(): void {
+    if (
+      this.protoPhase === 'unmounted' ||
+      this.instancePhase === 'disposing' ||
+      this.instancePhase === 'disposed'
+    ) {
+      throw illegalPhase('hitParticipation.registerSelfRegion', this.protoPhase, {
+        prototypeName: this.prototypeName,
+      });
+    }
+  }
+
+  registerSelfRegion(options: HitParticipationRegionOptions = {}): () => void {
+    this.ensureSelfLeaseLive();
+    return this.registerRegion(this.selfTarget, options);
+  }
+
   registerRegion(target: unknown, options: HitParticipationRegionOptions = {}): () => void {
     const id = this.nextRegionId++;
-    this.replaceRegions(
-      this.regions.concat([
-        Object.freeze({
-          id,
-          target,
-          role: options.role,
-          mode: options.mode ?? this.config.mode,
-          ...(options.staticHitInset === null
-            ? {}
-            : {
-                staticHitInset:
-                  typeof options.staticHitInset === 'undefined'
-                    ? this.config.staticHitInset
-                    : snapshotStaticHitInset(options.staticHitInset),
-              }),
-          meta: options.meta,
-        }),
-      ])
-    );
+    // Read caller accessors once before selecting the current declaration list.
+    // A getter may successfully acquire another lease; never overwrite that lease
+    // with a receiver captured before the getter ran.
+    const role = options.role;
+    const mode = options.mode;
+    const rawInset = options.staticHitInset;
+    const meta = options.meta;
+    const inset =
+      rawInset === null
+        ? undefined
+        : rawInset === undefined
+          ? this.config.staticHitInset
+          : snapshotStaticHitInset(rawInset);
+    const record = Object.freeze({
+      id,
+      target,
+      role,
+      mode: mode ?? this.config.mode,
+      ...(inset ? { staticHitInset: inset } : {}),
+      meta,
+    });
+    if (target === this.selfTarget) this.ensureSelfLeaseLive();
+    this.replaceRegions(this.regions.concat([record]));
     return () => {
       this.replaceRegions(this.regions.filter((region) => region.id !== id));
     };
@@ -198,15 +222,17 @@ export class HitParticipationModuleImpl extends ModuleBase {
   }
 
   private buildRegions(): readonly HitParticipationRegion[] {
-    return this.regions.map(({ target, role, mode, meta, staticHitInset }) =>
-      Object.freeze({
-        target,
-        mode,
-        ...(staticHitInset ? { staticHitInset } : {}),
-        ...(typeof role === 'undefined' ? {} : { role }),
-        ...(typeof meta === 'undefined' ? {} : { meta }),
-      })
-    );
+    return this.regions
+      .filter(({ target }) => target !== this.selfTarget || this.hostElement !== null)
+      .map(({ target, role, mode, meta, staticHitInset }) =>
+        Object.freeze({
+          target: target === this.selfTarget ? this.hostElement : target,
+          mode,
+          ...(staticHitInset ? { staticHitInset } : {}),
+          ...(typeof role === 'undefined' ? {} : { role }),
+          ...(typeof meta === 'undefined' ? {} : { meta }),
+        })
+      );
   }
 
   private getEffectiveRegions(includeImplicitHost: boolean): readonly HitParticipationRegion[] {
@@ -239,6 +265,9 @@ export class HitParticipationModuleImpl extends ModuleBase {
       this.mountPhase === 'unmounting'
     )
       return;
+    if (!this.hostElement && this.regions.some(({ target }) => target === this.selfTarget)) {
+      throw new Error('[HitParticipation] self region requires a bound host target.');
+    }
     const regions = this.getEffectiveRegions(true);
     if (
       regions.some((region) => region.staticHitInset) &&
@@ -259,6 +288,8 @@ export class HitParticipationModuleImpl extends ModuleBase {
 
   readonly handle: HitParticipationHandle<any> = {
     configure: (patch: HitParticipationConfigPatch) => this.configure(patch),
+    registerSelfRegion: (options?: HitParticipationRegionOptions) =>
+      this.registerSelfRegion(options),
     registerRegion: (target: unknown, options?: HitParticipationRegionOptions) =>
       this.registerRegion(target, options),
     unregisterRegion: (target: unknown) => this.unregisterRegion(target),

@@ -5,6 +5,61 @@ export type HitTree = { proto: Prototype; children?: HitTree[] };
 export type HitMount = { host: HTMLElement; flush(): Promise<void>; unmount(): Promise<void> };
 export function hitAdapterConformance(name: string, mount: (tree: HitTree[]) => Promise<HitMount>) {
   describe(`${name}: Hit Participation ownership`, () => {
+    it('leases and releases only its own root on the normal adapter path', async () => {
+      let hit!: HitParticipationHandle;
+      const proto = definePrototype({
+        name: `self-hit-${name}-lease`,
+        setup() {
+          hit = asHitParticipation();
+          return (r) => r.slot();
+        },
+      });
+      const mounted = await mount([{ proto }]);
+      try {
+        await mounted.flush();
+        const root = mounted.host.querySelector<HTMLElement>('[data-pui-root]')!;
+        const editor = document.createElement('input');
+        editor.value = 'retained';
+        root.append(editor);
+        editor.focus();
+        editor.setSelectionRange(1, 5);
+        const original = root.style.pointerEvents;
+        const release = hit.registerSelfRegion({ mode: 'disabled' });
+        expect(root.style.pointerEvents).toBe('none');
+        expect(document.activeElement).toBe(editor);
+        expect(editor.selectionStart).toBe(1);
+        expect(editor.selectionEnd).toBe(5);
+        expect(editor.value).toBe('retained');
+        release();
+        expect(root.style.pointerEvents).toBe(original);
+        expect(root.contains(editor)).toBe(true);
+        expect(document.activeElement).toBe(editor);
+        release();
+        expect(root.style.pointerEvents).toBe(original);
+        root.style.position = 'relative';
+        root.style.display = 'block';
+        const beforeStyle = root.style.cssText;
+        const inset = hit.registerSelfRegion({
+          staticHitInset: {
+            top: { value: 0.5, unit: 'rem' },
+            right: { value: 0.75, unit: 'rem' },
+            bottom: { value: 0.5, unit: 'rem' },
+            left: { value: 0.75, unit: 'rem' },
+          },
+        });
+        expect(root.hasAttribute('data-pui-static-hit')).toBe(true);
+        expect(root.style.cssText).toBe(beforeStyle);
+        expect(root.contains(editor)).toBe(true);
+        expect(document.activeElement).toBe(editor);
+        expect(editor.selectionStart).toBe(1);
+        expect(editor.selectionEnd).toBe(5);
+        inset();
+        expect(root.hasAttribute('data-pui-static-hit')).toBe(false);
+        expect(root.style.cssText).toBe(beforeStyle);
+      } finally {
+        await mounted.unmount();
+      }
+    });
     it('T-HIT-PARTICIPATION-0001-CASE-ADAPTER: shares claims, rejects conflicts without poisoning the Module and restores after cleanup', async () => {
       const target = document.createElement('div');
       target.style.pointerEvents = 'auto';

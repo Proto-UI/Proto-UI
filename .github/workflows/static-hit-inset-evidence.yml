@@ -5,6 +5,8 @@ on:
       - '.github/workflows/static-hit-inset-evidence.yml'
       - 'scripts/analysis/static-hit-inset-browser.mjs'
       - 'scripts/analysis/fixtures/static-hit-inset.ts'
+      - 'scripts/analysis/self-hit-region-browser.mjs'
+      - 'scripts/analysis/fixtures/self-hit-region.mjs'
       - 'packages/core/**'
       - 'packages/types/**'
       - 'packages/hooks/**'
@@ -60,6 +62,12 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/analysis/static-hit-inset-browser.mjs 2>&1 | tee "$RUNNER_TEMP/static-hit-inset/browser.log"
+      - name: Exercise runtime self-region acquire and release in four adapters
+        env:
+          STATIC_HIT_EVIDENCE_DIR: ${{ runner.temp }}/static-hit-inset
+        run: |
+          set -euo pipefail
+          node scripts/analysis/self-hit-region-browser.mjs 2>&1 | tee "$RUNNER_TEMP/static-hit-inset/self-region-browser.log"
       - name: Retain source-bound results and failures
         if: always()
         uses: actions/upload-artifact@v4

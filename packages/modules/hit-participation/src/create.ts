@@ -25,11 +25,13 @@ export function createHitParticipationModule(ctx: ModuleFactoryArgs) {
           getHitParticipation: () => impl.handle,
         },
         hooks: {
+          onInstancePhase: (phase) => impl.onInstancePhase(phase),
           onMountPhase: (phase, epoch) => impl.onMountPhase(phase, epoch),
           onProtoPhase: (phase) => impl.onProtoPhase(phase),
         },
         port: {
           configure: (patch) => impl.configure(patch),
+          registerSelfRegion: (options) => impl.registerSelfRegion(options),
           registerRegion: (target, options) => impl.registerRegion(target, options),
           unregisterRegion: (target) => impl.unregisterRegion(target),
           getConfig: () => impl.getConfig(),

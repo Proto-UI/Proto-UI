@@ -1,0 +1,31 @@
+id: C-HIT-SELF-REGION-0001
+type: contract
+title: Bounded self-region leases reuse Hit Participation
+status: draft
+since: 0.3.0-alpha.1
+summary: A logical owner can lease its existing host region without obtaining a host address.
+criteria:
+  - id: C-HIT-SELF-REGION-0001-ADDRESS
+    text:
+      en: registerSelfRegion(options) returns only a disposer and declares the existing owning instance host. It accepts the existing finite region options and staticHitInset data, snapshots them, and never exposes a DOM host or accepts a selector. The logical declaration resolves against current host capabilities; unbound declarations have no physical target or projection. A bound Web bridge without a host rejects projection. No hostless or unsupported profile is claimed to realize a hit inset.
+  - id: C-HIT-SELF-REGION-0001-OWNERSHIP
+    text:
+      en: Caller option fields are read once before selecting the latest declaration list; a successful nested lease is preserved, and lifecycle retirement during accessors is rechecked before commit. The operation reuses existing same-target mode and inset conflict validation, last accepted declaration ordering, rollback and idempotent release. Releasing a self declaration restores the previous accepted declaration or implicit host configuration. configure remains setup-only. The new operation neither synthesizes activation nor replaces event, checked, disabled, label or focus owners.
+  - id: C-HIT-SELF-REGION-0001-LIFETIME
+    text:
+      en: Detached views suspend projection while retaining logical declarations for repeatable mount. Capability host changes resolve the same self declaration to the current host, and replacing a host bridge withdraws its old claims before new projection. Terminal disposal clears declarations and rejects new self leases; old disposers cannot resurrect them. Physical target replacement does not promise identity of the replaced host or restoration of a retired host's focus.
+  - id: C-HIT-SELF-REGION-0001-BOUNDARIES
+    text:
+      en: Existing static inset geometry, clipping, positioned non-replaced root, pseudo ownership and native feature restrictions remain unchanged. Style choices and inset distances belong to prototypes, never adapter component dispatch. Compiler source profiles reject the new operation until separately admitted; this runtime carrier is not a compiler or native hit-area acceptance claim.
+dependsOn:
+  contracts: [C-HIT-PARTICIPATION-0001]
+verifies:
+  tests: [T-HIT-SELF-REGION-0001]
+sources:
+  - path: packages/core/src/hit-participation.ts
+  - path: packages/modules/hit-participation/src/impl.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Adds an owner-relative lease without exposing a host target or changing setup configuration.
+tags: [hit-participation, lifecycle]

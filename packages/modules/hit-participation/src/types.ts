@@ -17,6 +17,7 @@ export type HitParticipationFacade = {
 
 export type HitParticipationPort = ModulePort & {
   configure(patch: HitParticipationConfigPatch): void;
+  registerSelfRegion(options?: HitParticipationRegionOptions): () => void;
   registerRegion(target: unknown, options?: HitParticipationRegionOptions): () => void;
   unregisterRegion(target: unknown): void;
   getConfig(): HitParticipationConfig;

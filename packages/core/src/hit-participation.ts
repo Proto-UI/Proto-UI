@@ -91,6 +91,7 @@ export type HitParticipationRegion = Readonly<{
 
 export interface HitParticipationHandle<P extends PropsBaseType = PropsBaseType> {
   configure(patch: HitParticipationConfigPatch): void;
+  registerSelfRegion(options?: HitParticipationRegionOptions): () => void;
   registerRegion(target: unknown, options?: HitParticipationRegionOptions): () => void;
   unregisterRegion(target: unknown): void;
 }
