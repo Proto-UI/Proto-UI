@@ -1,10 +1,10 @@
 import { createRuntimeSession } from '../../../../packages/runtime/src';
-import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
-import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
   CONTEXT_INSTANCE_TOKEN_CAP,
   CONTEXT_PARENT_CAP,
 } from '../../../../packages/modules/context/src';
+import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
+import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
@@ -40,7 +40,9 @@ export function createStyleSnapshotter<const R extends Record<string, Prototype<
 /** Internal build-time projection for the finite reviewed recipe registries.
  * This runs setup/mount lifecycle; it is not a pure
  * arbitrary-Prototype evaluator. Callers must not pass resource-owning recipes.
- * Command-style mode provides detached event identity, never real host input.
+ * Every invocation supplies isolated root Context identity. This does not model
+ * parent/child SSR inheritance. Command-style mode provides detached event
+ * identity, never real host input.
  * Build-time, style-only projection of the actual Prototype. It installs no
  * browser interaction source, never claims a functioning SSR command, and
  * disposes the Runtime even when rendering fails. */
