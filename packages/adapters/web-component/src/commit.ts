@@ -274,11 +274,9 @@ export function commitChildren(
     if (cfg.mode === 'light' && slotEnd) {
       const slotParent = slotEnd.parentNode!;
       for (const node of cfg.slotPool) {
-        focus.move([node], () => {
-          recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
-          slotParent.insertBefore(node, slotEnd);
-          recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
-        });
+        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
+        focus.stagingInsertBefore(node, slotParent, slotEnd);
+        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
       }
     }
     withWebComponentOwnedRelocation(
