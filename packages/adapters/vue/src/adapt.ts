@@ -21,7 +21,9 @@ import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
+  equalOwnedTemplateBlueprint,
   getModuleDeclaration,
+  type TemplateChildren,
   type Prototype,
   type ScrollProjectionPreference,
 } from '@proto.ui/core';
@@ -422,11 +424,18 @@ export function createVueAdapter(runtime: VueRuntime) {
 
         let pendingCommit = false;
         let renderDecoration: WebOwnedDecorationStage | undefined;
+        let viewGeneration = 0;
         let decorationView: {
           stage: WebOwnedDecorationStage;
+          blueprint: TemplateChildren;
+          generation: number;
           root: HTMLElement | null;
+          document: Document | null;
+          caps: ReturnType<typeof createVueHostSession<Props>>['caps'];
+          session: ReturnType<typeof createVueHostSession<Props>> | null;
           port: FeedbackPort;
           lease: object;
+          committed: boolean;
         } | null = null;
         let commitGeneration = 0;
         let pendingSignal: CommitSignal | null = null;
@@ -454,27 +463,75 @@ export function createVueAdapter(runtime: VueRuntime) {
             onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
             onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
             onCommit: (children, signal, caps) => {
+              const root = rootRef.value;
+              const generation = viewGeneration;
+              const previousCommitGeneration = commitGeneration;
+              const session = owner.session;
               const targets = collectWebOwnedDecorationTargets(children);
               const feedback = caps.getFacades().feedback as FeedbackFacade;
-              const stage = targets.length
-                ? createWebOwnedDecorationStage(
-                    targets,
-                    (ids) => feedback.style.validateDecorationTemplate(ids),
-                    { portal: !!caps.getPort<OverlayPort>('overlay')?.getConfig().portal }
-                  )
-                : undefined;
-              if (!targets.length) feedback.style.validateDecorationTemplate([]);
-              renderTemplateToVue({ h: () => null }, children, { decoration: stage });
-              decorationView?.stage.retire();
-              renderDecoration = stage;
-              decorationView = stage
-                ? {
+              const port = caps.getPort<FeedbackPort>('feedback');
+              const lease = targets.length ? port?.captureDecorationLease?.() : undefined;
+              const previous = decorationView;
+              let next = previous?.committed ? previous : null;
+              let stage: WebOwnedDecorationStage | undefined;
+              if (next) {
+                feedback.style.validateDecorationTemplate(targets);
+                if (!equalOwnedTemplateBlueprint(next.blueprint, children))
+                  throw new Error('[owned-decoration] structural rebind unsupported');
+                if (
+                  !root ||
+                  next.root !== root ||
+                  next.document !== root.ownerDocument ||
+                  next.generation !== generation ||
+                  next.session !== session ||
+                  next.caps !== caps ||
+                  next.port !== port ||
+                  next.lease !== lease ||
+                  !owner.hasView
+                )
+                  throw new Error('[Vue Adapter] stale decoration reuse');
+                next.stage.assertReusable(root);
+                stage = next.stage;
+              } else {
+                stage = targets.length
+                  ? createWebOwnedDecorationStage(
+                      targets,
+                      (ids) => feedback.style.validateDecorationTemplate(ids),
+                      { portal: !!caps.getPort<OverlayPort>('overlay')?.getConfig().portal }
+                    )
+                  : undefined;
+                if (!targets.length) feedback.style.validateDecorationTemplate([]);
+                if (stage) {
+                  if (!port || !lease)
+                    throw new Error('[Vue Adapter] owned-decoration unavailable');
+                  next = {
                     stage,
-                    root: rootRef.value,
-                    port: caps.getPort<FeedbackPort>('feedback')!,
-                    lease: caps.getPort<FeedbackPort>('feedback')!.captureDecorationLease!(),
-                  }
-                : null;
+                    blueprint: children,
+                    generation,
+                    root,
+                    document: root?.ownerDocument ?? null,
+                    caps,
+                    session,
+                    port,
+                    lease,
+                    committed: false,
+                  };
+                }
+              }
+              renderTemplateToVue({ h: () => null }, children, { decoration: stage });
+              if (
+                stage &&
+                (rootRef.value !== root ||
+                  viewGeneration !== generation ||
+                  commitGeneration !== previousCommitGeneration ||
+                  decorationView !== previous ||
+                  owner.session !== session ||
+                  port?.captureDecorationLease?.() !== lease)
+              )
+                throw new Error('[Vue Adapter] stale decoration commit');
+              if (previous !== next) previous?.stage.retire();
+              renderDecoration = stage;
+              decorationView = next;
               commitGeneration += 1;
               pendingCommit = true;
               pendingSignal = signal;
@@ -572,22 +629,41 @@ export function createVueAdapter(runtime: VueRuntime) {
             )
               return;
             if (decoration) {
+              const session = owner.session;
+              const port = session?.caps.getPort<FeedbackPort>('feedback');
               if (
                 decorationView !== decoration ||
                 !capturedRoot ||
                 decoration.root !== capturedRoot ||
-                !decoration.port.bindDecorations
+                decoration.document !== capturedRoot.ownerDocument ||
+                decoration.generation !== viewGeneration ||
+                decoration.caps !== session?.caps ||
+                (decoration.committed && decoration.session !== session) ||
+                decoration.port !== port ||
+                !owner.hasView ||
+                !port?.bindDecorations ||
+                port.captureDecorationLease?.() !== decoration.lease
               )
                 throw new Error('[Vue Adapter] stale decoration commit');
-              decoration.stage.bind(capturedRoot, (bindings) =>
-                decoration.port.bindDecorations!(bindings, decoration.lease)
-              );
+              if (decoration.committed) decoration.stage.assertReusable(capturedRoot);
+              else
+                decoration.stage.bind(capturedRoot, (bindings) =>
+                  port.bindDecorations!(bindings, decoration.lease)
+                );
               if (
                 generation !== commitGeneration ||
                 gate !== eventGateRef.value ||
-                rootRef.value !== capturedRoot
+                rootRef.value !== capturedRoot ||
+                capturedRoot.ownerDocument !== decoration.document ||
+                decorationView !== decoration ||
+                decoration.generation !== viewGeneration ||
+                owner.session !== session ||
+                !owner.hasView ||
+                port.captureDecorationLease?.() !== decoration.lease
               )
                 return;
+              decoration.session = session;
+              decoration.committed = true;
             }
             viewReady = true;
             notifyFocusTargetReady();
@@ -651,6 +727,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             isEnabled: () => eventGate.isEnabled?.() ?? true,
           });
           bindLogicalEventTarget(instanceToken, router.rootTarget);
+          const physicalGeneration = ++viewGeneration;
           let viewDisposed = false;
           let ownedVisualStyle: string | null = null;
           let focusRetryGeneration = 0;
@@ -677,7 +754,8 @@ export function createVueAdapter(runtime: VueRuntime) {
           const disposeView = () => {
             if (viewDisposed) return;
             viewDisposed = true;
-            if (decorationView?.root === rootEl) {
+            if (viewGeneration === physicalGeneration) viewGeneration += 1;
+            if (decorationView?.generation === physicalGeneration) {
               decorationView.stage.retire();
               decorationView = null;
             }

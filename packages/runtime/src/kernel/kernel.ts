@@ -1,6 +1,7 @@
 // packages/runtime/src/kernel/kernel.ts
 import {
   createRendererPrimitives,
+  snapshotOwnedTemplateBlueprint,
   Phase,
   Prototype,
   RendererHandle,
@@ -192,7 +193,13 @@ export function createKernel<P extends PropsBaseType>(
     const previousPhase = phase;
     setPhase('render');
     try {
-      const children = renderFn(renderer);
+      const feedback = modules.getFacades()['feedback'] as FeedbackFacade;
+      const guarded = feedback?.style.hasDecorationTargets?.() ?? false;
+      const lease = guarded ? feedback.style.captureDecorationLease() : undefined;
+      const rendered = renderFn(renderer);
+      const children = guarded ? snapshotOwnedTemplateBlueprint(rendered) : rendered;
+      if (guarded && feedback.style.captureDecorationLease() !== lease)
+        throw new Error('[Template] stale owned blueprint lease');
       const targets: import('@proto.ui/core').OwnedDecorationTarget[] = [];
       const visit = (node: any): void => {
         if (Array.isArray(node)) {
@@ -210,7 +217,6 @@ export function createKernel<P extends PropsBaseType>(
         } else visit(node.children);
       };
       visit(children);
-      const feedback = modules.getFacades()['feedback'] as FeedbackFacade;
       if (feedback?.style.validateDecorationTemplate)
         feedback.style.validateDecorationTemplate(targets);
       else if (targets.length) throw new Error('[Template] owned-decoration unsupported');

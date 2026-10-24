@@ -26,6 +26,9 @@ export interface FeedbackFacade extends ModuleFacade {
   style: {
     declareDecoration(): OwnedDecorationTarget;
     to(target: OwnedDecorationTarget): { use(...handles: StyleHandle[]): () => void };
+    /** Internal guarded-template bridge, not exposed on def/run. */
+    hasDecorationTargets(): boolean;
+    captureDecorationLease(): object;
     validateDecorationTemplate(targets: readonly OwnedDecorationTarget[]): void;
     presence: (declaration: import('@proto.ui/core').PresencePresentationDeclaration) => () => void;
     /** setup-only; presentation never owns State or presence */

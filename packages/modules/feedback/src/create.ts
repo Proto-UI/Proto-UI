@@ -57,6 +57,9 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         private decorationBound = false;
         private decorationTerminal = false;
         private decorationLease: object | null = null;
+        hasDecorationTargets(): boolean {
+          return this.decorationRules.size > 0;
+        }
         captureDecorationLease(): object {
           if (!this.decorationLease || this.decorationTerminal)
             throw new Error('[feedback] decoration view is not active');
@@ -84,7 +87,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           this.ensureNotDisposed('decoration.template');
           if (!this.caps.has(OWNED_DECORATION_CAP))
             throw new Error('[feedback] owned-decoration unsupported by this adapter');
-          if (this.decorationBound || this.decorationTerminal)
+          if (this.decorationTerminal)
             throw new Error('[feedback] decoration structural rebind unsupported');
           const seen = new Set<OwnedDecorationTarget>();
           for (const target of targets) {
@@ -98,6 +101,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         bindDecorations(bindings: readonly OwnedDecorationBinding[], lease: object): void {
           if (!bindings.length && !this.decorationRules.size) return;
           const checkLease = () => {
+            if (this.decorationBound)
+              throw new Error('[feedback] decoration structural rebind unsupported');
             if (!lease || lease !== this.decorationLease || this.decorationTerminal)
               throw new Error('[feedback] stale decoration view lease');
           };
@@ -112,6 +117,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               throw new Error('[feedback] invalid decoration sink');
           checkLease();
           this.validateDecorationTemplate(copied.map((binding) => binding.target));
+          checkLease();
           this.decorationBound = true;
           this.decoration.bindAll(copied);
         }
@@ -776,6 +782,8 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         style: {
           declareDecoration: () => impl.declareDecoration(),
           to: (target) => ({ use: (...handles) => impl.useDecoration(target, handles) }),
+          hasDecorationTargets: () => impl.hasDecorationTargets(),
+          captureDecorationLease: () => impl.captureDecorationLease(),
           validateDecorationTemplate: (targets) => impl.validateDecorationTemplate(targets),
           transition: (declaration) => impl.declareMotion(declaration),
           presence: (declaration) => impl.declarePresence(declaration),

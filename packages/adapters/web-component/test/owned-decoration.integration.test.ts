@@ -70,7 +70,8 @@ describe('draft owned decoration through actual WC / Rule / feedback', () => {
     expect(input.selectionStart).toBe(1);
     expect(input.selectionEnd).toBe(5);
     expect(input.selectionDirection).toBe('backward');
-    expect(() => host.update()).toThrow('structural rebind unsupported');
+    expect(() => host.update()).not.toThrow();
+    expect(renders).toBe(2);
     expect([...host.childNodes]).toEqual(original);
     expect(input.parentNode).toBe(inputParent);
     host.remove();

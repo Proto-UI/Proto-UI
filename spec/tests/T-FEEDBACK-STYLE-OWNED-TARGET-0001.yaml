@@ -41,6 +41,39 @@ cases:
       - C-FEEDBACK-STYLE-OWNED-TARGET-0001-SUPPORT
     expectation: Each adapter must explicitly implement or reject the capability. Accepted types, draft contracts, static inspection and planned tests do not establish runtime or cross-adapter support. PrototypeRef rejection remains unchanged.
 implementations:
+  - id: owned-blueprint-snapshot
+    kind: adapter-test
+    status: active
+    path: packages/core/test/owned-template-blueprint.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+    notes:
+      - 'Exact immutable full-Template comparison; single-read and fail-closed source shape negatives.'
+  - id: owned-blueprint-wc-reuse
+    kind: adapter-test
+    status: active
+    path: packages/adapters/web-component/test/owned-blueprint-reuse.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+    notes:
+      - 'Default props and equal explicit update retain physical view; changed structure and stale lifetime reject.'
+  - id: owned-blueprint-framework-reuse
+    kind: adapter-test
+    status: active
+    path: packages/adapters/react/test/owned-blueprint-reuse.integration.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+    notes:
+      - 'Actual React/Vue/Vue2 default props, caller A-to-B, lease and acknowledgment controls; DOM evidence, not native.'
   - id: owned-decoration-caller-relocation
     kind: adapter-test
     status: active

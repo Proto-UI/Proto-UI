@@ -45,7 +45,10 @@ export function createWebOwnedDecorationStage(
   validate: (targets: readonly OwnedDecorationTarget[]) => void,
   options: { portal?: boolean } = {}
 ) {
+  let boundHost: Element | null = null;
+  let boundDocument: Document | null = null;
   let portalGate: ReturnType<typeof createWebOwnedDecorationPortalGate> | null = null;
+  const boundPaths = new Map<OwnedDecorationTarget, Node[]>();
   const identities = [...targets];
   if (new Set(identities).size !== identities.length)
     throw new Error('[owned-decoration] duplicate target');
@@ -105,6 +108,48 @@ export function createWebOwnedDecorationStage(
       if (!entry) throw new Error('[owned-decoration] foreign target');
       return entry.ref;
     },
+    assertReusable(host: Element) {
+      if (
+        phase !== 'bound' ||
+        host !== boundHost ||
+        host.ownerDocument !== boundDocument ||
+        !host.isConnected
+      )
+        throw new Error('[owned-decoration] stale reusable view');
+      portalGate?.assertReusable();
+      for (const [target, entry] of refs) {
+        if (
+          !entry.active ||
+          !entry.node ||
+          entry.node.ownerDocument !== boundDocument ||
+          !host.contains(entry.node) ||
+          entry.node === host
+        )
+          throw new Error('[owned-decoration] missing reusable physical leaf');
+        checkLeaf(entry.node);
+        if (
+          entry.node.getAttribute('aria-hidden') !== 'true' ||
+          !entry.node.hasAttribute('inert') ||
+          entry.node.style.getPropertyValue('pointer-events') !== 'none' ||
+          entry.node.style.getPropertyPriority('pointer-events') !== 'important'
+        )
+          throw new Error('[owned-decoration] decorative invariant changed');
+        let parent: Node | null = entry.node.parentNode;
+        for (const expected of boundPaths.get(target) ?? []) {
+          if (parent !== expected)
+            throw new Error('[owned-decoration] physical leaf ancestry changed');
+          parent = parent.parentNode;
+        }
+      }
+      if (
+        phase !== 'bound' ||
+        host !== boundHost ||
+        host.ownerDocument !== boundDocument ||
+        !host.isConnected
+      )
+        throw new Error('[owned-decoration] reusable view superseded');
+      portalGate?.assertReusable();
+    },
     bind(host: Element, bindAll: (bindings: readonly OwnedDecorationBinding[]) => void) {
       if (phase !== 'staging') throw new Error('[owned-decoration] repeated binding');
       const physical = new Set<Element>();
@@ -115,6 +160,14 @@ export function createWebOwnedDecorationStage(
         const node = checkLeaf(entry.node);
         if (physical.has(node)) throw new Error('[owned-decoration] duplicate physical leaf');
         physical.add(node);
+        const path: Node[] = [];
+        let ancestor: Node | null = node.parentNode;
+        while (ancestor) {
+          path.push(ancestor);
+          if (ancestor === host) break;
+          ancestor = ancestor.parentNode;
+        }
+        boundPaths.set(target, path);
         return {
           target,
           sink(value) {
@@ -145,6 +198,8 @@ export function createWebOwnedDecorationStage(
             : bindings
         );
         if (phase !== 'binding') throw new Error('[owned-decoration] view retired during binding');
+        boundHost = host;
+        boundDocument = host.ownerDocument;
         phase = 'bound';
       } catch (error) {
         portalGate?.dispose();

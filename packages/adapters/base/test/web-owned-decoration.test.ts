@@ -116,3 +116,30 @@ describe('draft owned decoration physical staging', () => {
     expect(stale.attributes.length).toBe(0);
   });
 });
+
+it('reuse validates committed phase, exact physical ancestry and permanent retirement', () => {
+  const f = fixture(1);
+  document.body.append(f.host);
+  expect(() => f.stage.assertReusable(f.host)).toThrow('stale');
+  f.stage.bind(f.host, () => {});
+  expect(() => f.stage.assertReusable(f.host)).not.toThrow();
+  const wrapper = document.createElement('section');
+  f.host.append(wrapper);
+  wrapper.append(f.nodes[0]);
+  expect(() => f.stage.assertReusable(f.host)).toThrow('ancestry');
+  f.host.append(f.nodes[0]);
+  expect(() => f.stage.assertReusable(f.host)).not.toThrow();
+  f.stage.retire();
+  expect(() => f.stage.assertReusable(f.host)).toThrow('stale');
+  f.host.remove();
+});
+it('detached or foreign-document physical view is not reusable', () => {
+  const f = fixture(1);
+  document.body.append(f.host);
+  f.stage.bind(f.host, () => {});
+  f.host.remove();
+  expect(() => f.stage.assertReusable(f.host)).toThrow('stale');
+  const other = document.implementation.createHTMLDocument();
+  other.body.append(other.adoptNode(f.host));
+  expect(() => f.stage.assertReusable(f.host)).toThrow('stale');
+});

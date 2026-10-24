@@ -172,6 +172,19 @@ export function createWebOwnedDecorationPortalGate(host: HTMLElement, isCurrent:
         reconcile();
       };
     },
+    assertReusable() {
+      const current = getWebPortalMaterialEpochSnapshot(host);
+      if (
+        phase !== 'active' ||
+        !isCurrent() ||
+        host.ownerDocument !== document ||
+        !host.isConnected ||
+        !owner ||
+        current.owner !== owner ||
+        current.suspended
+      )
+        throw new Error('[owned-decoration] unavailable portal reuse epoch');
+    },
     status() {
       return { phase, reason };
     },

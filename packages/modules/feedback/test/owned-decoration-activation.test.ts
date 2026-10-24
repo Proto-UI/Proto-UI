@@ -54,6 +54,9 @@ describe('draft decoration module activation guards', () => {
     a.style.to(x).use(tw('opacity-50'));
     bindA([{ target: x, sink }]);
     expect(sink).toHaveBeenCalledOnce();
+    expect(a.style.hasDecorationTargets()).toBe(true);
+    expect(() => a.style.validateDecorationTemplate([x])).not.toThrow();
+    expect(() => a.style.validateDecorationTemplate([])).toThrow('missing');
     expect(() => bindA([{ target: x, sink }])).toThrow('structural rebind');
     a.hooks.dispose?.();
     b.hooks.dispose?.();

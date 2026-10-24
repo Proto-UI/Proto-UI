@@ -69,12 +69,13 @@ it('parent Template recommit retains the live caller child decoration owner', as
   ]);
 });
 
-it('ordinary child owner updates remain rejected rather than silently reusing a structural view', async () => {
+it('changed child blueprints remain rejected rather than silently reusing a structural view', async () => {
+  let changed = false;
   const proto = definePrototype({
     name: `owned-slot-explicit-${++sequence}`,
     setup(def) {
       const target = def.feedback.style.declareDecoration();
-      return (r) => [r.decoration(target), r.slot()];
+      return (r) => [r.decoration(target), changed ? r.el('section', r.slot()) : r.slot()];
     },
   });
   AdaptToWebComponent(proto);
@@ -85,6 +86,7 @@ it('ordinary child owner updates remain rejected rather than silently reusing a 
   document.body.append(host);
   await settle();
   const leaf = host.firstChild;
+  changed = true;
   expect(() => host.update()).toThrow('decoration structural rebind unsupported');
   expect(host.firstChild).toBe(leaf);
   expect(() => host.setProps({ unused: 'changed' })).toThrow(

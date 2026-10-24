@@ -14,7 +14,9 @@ import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
+  equalOwnedTemplateBlueprint,
   getModuleDeclaration,
+  type TemplateChildren,
   type Prototype,
   type ScrollProjectionPreference,
 } from '@proto.ui/core';
@@ -463,7 +465,14 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const viewGenerationRef = runtime.useRef(0);
       const decorationViewRef = runtime.useRef<{
         stage: WebOwnedDecorationStage;
+        blueprint: TemplateChildren;
         generation: number;
+        root: HTMLElement | null;
+        document: Document | null;
+        session: ReturnType<typeof createReactHostSession<Props>> | null;
+        port: FeedbackPort;
+        lease: object;
+        committed: boolean;
       } | null>(null);
       const pendingCommitRef = runtime.useRef<{
         signal: CommitSignal | null;
@@ -553,38 +562,88 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           onCommit: (children, signal) => {
+            const root = rootRef.current;
+            const generation = viewGenerationRef.current;
+            const previousVersion = commitVersionRef.current;
+            const session = ownerRef.current?.session ?? null;
+            const caps = session?.caps;
             const targets = collectWebOwnedDecorationTargets(children);
-            const caps = ownerRef.current?.session?.caps;
             const feedback = caps?.getFacades().feedback as FeedbackFacade | undefined;
-            const decoration = targets.length
-              ? createWebOwnedDecorationStage(
-                  targets,
-                  (ids) => {
-                    if (!feedback) throw new Error('[React Adapter] owned-decoration unavailable');
-                    feedback.style.validateDecorationTemplate(ids);
-                  },
-                  { portal: !!caps?.getPort<OverlayPort>('overlay')?.getConfig().portal }
-                )
-              : undefined;
-            if (!targets.length) feedback?.style.validateDecorationTemplate([]);
-            // Pure VNode construction validates the entire v0 blueprint before
-            // publishing a replacement React children transaction.
+            const port = caps?.getPort<FeedbackPort>('feedback');
+            const lease = targets.length ? port?.captureDecorationLease?.() : undefined;
+            const previous = decorationViewRef.current;
+            let next = previous?.committed ? previous : null;
+            let decoration: WebOwnedDecorationStage | undefined;
+            if (next) {
+              feedback?.style.validateDecorationTemplate(targets);
+              if (!equalOwnedTemplateBlueprint(next.blueprint, children))
+                throw new Error('[owned-decoration] structural rebind unsupported');
+              if (
+                !root ||
+                next.root !== root ||
+                next.document !== root.ownerDocument ||
+                next.generation !== generation ||
+                next.session !== session ||
+                next.port !== port ||
+                next.lease !== lease ||
+                !ownerRef.current?.hasView
+              )
+                throw new Error('[React Adapter] stale decoration reuse');
+              next.stage.assertReusable(root);
+              decoration = next.stage;
+            } else {
+              decoration = targets.length
+                ? createWebOwnedDecorationStage(
+                    targets,
+                    (ids) => {
+                      if (!feedback)
+                        throw new Error('[React Adapter] owned-decoration unavailable');
+                      feedback.style.validateDecorationTemplate(ids);
+                    },
+                    { portal: !!caps?.getPort<OverlayPort>('overlay')?.getConfig().portal }
+                  )
+                : undefined;
+              if (!targets.length) feedback?.style.validateDecorationTemplate([]);
+              if (decoration) {
+                if (!port || !lease)
+                  throw new Error('[React Adapter] owned-decoration unavailable');
+                next = {
+                  stage: decoration,
+                  blueprint: children,
+                  generation,
+                  root,
+                  document: root?.ownerDocument ?? null,
+                  session,
+                  port,
+                  lease,
+                  committed: false,
+                };
+              }
+            }
+            // Validate before publication. Cache only the blueprint and physical
+            // stage: fresh VNodes must still project this render's caller children.
             renderTemplateToReact({ createElement: () => null }, children, { decoration });
-            decorationViewRef.current?.stage.retire();
-            decorationViewRef.current = decoration
-              ? { stage: decoration, generation: viewGenerationRef.current }
-              : null;
+            if (
+              decoration &&
+              (rootRef.current !== root ||
+                viewGenerationRef.current !== generation ||
+                commitVersionRef.current !== previousVersion ||
+                decorationViewRef.current !== previous ||
+                ownerRef.current?.session !== session ||
+                port?.captureDecorationLease?.() !== lease)
+            )
+              throw new Error('[React Adapter] stale decoration commit');
+            if (previous !== next) previous?.stage.retire();
+            decorationViewRef.current = next;
             const version = ++commitVersionRef.current;
             pendingCommitRef.current = {
               signal,
               version,
-              viewGeneration: viewGenerationRef.current,
-              root: rootRef.current,
+              viewGeneration: generation,
+              root,
               styleRevision: hostTokenRevisionRef.current,
               decoration,
-              decorationLease: decoration
-                ? caps?.getPort<FeedbackPort>('feedback')?.captureDecorationLease?.()
-                : undefined,
+              decorationLease: lease,
             };
             setRenderCommit({ children, version, decoration });
           },
@@ -985,18 +1044,42 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
             return;
           }
           if (pending.decoration) {
-            const port = ownerRef.current?.session?.caps.getPort<FeedbackPort>('feedback');
-            if (!port?.bindDecorations)
-              throw new Error('[React Adapter] owned-decoration binding unavailable');
-            pending.decoration.bind(pending.root, (bindings) =>
-              port.bindDecorations!(bindings, pending.decorationLease!)
-            );
+            const decoration = decorationViewRef.current;
+            const session = ownerRef.current?.session;
+            const port = session?.caps.getPort<FeedbackPort>('feedback');
+            if (
+              !decoration ||
+              decoration.stage !== pending.decoration ||
+              decoration.root !== pending.root ||
+              decoration.document !== pending.root.ownerDocument ||
+              decoration.generation !== pending.viewGeneration ||
+              decoration.session !== session ||
+              decoration.port !== port ||
+              decoration.lease !== pending.decorationLease ||
+              !ownerRef.current?.hasView ||
+              !port?.bindDecorations ||
+              port.captureDecorationLease?.() !== decoration.lease
+            )
+              throw new Error('[React Adapter] stale decoration commit');
+            if (decoration.committed) decoration.stage.assertReusable(pending.root);
+            else
+              decoration.stage.bind(pending.root, (bindings) =>
+                port.bindDecorations!(bindings, decoration.lease)
+              );
             if (
               viewGenerationRef.current !== pending.viewGeneration ||
               rootRef.current !== pending.root ||
-              pendingCommitRef.current !== pending
+              pending.root.ownerDocument !== decoration.document ||
+              pendingCommitRef.current !== pending ||
+              decorationViewRef.current !== decoration ||
+              ownerRef.current?.session !== session ||
+              !ownerRef.current?.hasView ||
+              port.captureDecorationLease?.() !== decoration.lease
             )
               return;
+            // done() may synchronously update again. Publish physical readiness
+            // first, and never overwrite a newer cache after that callback.
+            decoration.committed = true;
           }
           pendingCommitRef.current = null;
           const wasReady = viewReadyRef.current;

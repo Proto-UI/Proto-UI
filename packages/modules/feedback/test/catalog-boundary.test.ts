@@ -64,9 +64,11 @@ describe('Feedback catalog boundary', () => {
     expect(FeedbackModuleDef.resourceOwnership).toBe('mixed');
     expect(FeedbackModuleDef.deps).toEqual([]);
     expect(Object.keys(f.style).sort()).toEqual([
+      'captureDecorationLease',
       'clearPatch',
       'declareDecoration',
       'exportMerged',
+      'hasDecorationTargets',
       'patch',
       'presence',
       'suppress',
