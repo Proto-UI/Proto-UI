@@ -16,6 +16,26 @@ CLI package used by applications and maintainers to scaffold Proto UI configurat
 npm install @proto.ui/cli@0.3.0-alpha.1
 ```
 
+## Authored hook state selectors
+
+Nested child handles remain under their explicit result or projected paths rather than being flattened. Literal `getState` lookups and detached lookup aliases preserve the same provenance.
+
+Package resolution for an imported hook follows the manifest's own conditional-export key order among conditions active for the importer: configured `customConditions` plus `default`, `node` and the importer's ESM/CJS format under Node16/NodeNext, or the module setting otherwise. Declaration-only `types` entries are never runtime answers, and an existing source sibling still wins over a shipped `.js` file so provenance keeps pointing at authored code.
+
+Type-only `satisfies` wrappers and stable shorthand configuration names preserve producer identity. Setup literals follow their lexical bindings, including successive synchronous helper calls with different arguments. Object destructuring in `projectHandle` and numeric tuple reads retain declaration provenance; numeric record keys alone do not prove iterable destructuring.
+
+This is a bounded static analysis, not a JavaScript interpreter. Unproved setup captures remain open, so the coverage scanner reports unresolved reads instead of discarding optional Rules as unreachable. Bodyless declarations do not prove executable setup or helper captures. Async/generator factories cannot prove a returned holder, and mutations or escapes invalidate provider-member proofs. Finite literal loops preserve captured token values and row pairing; consumed style handles follow sequential assignments while retaining conditional alternatives.
+
+Loop-assigned literal bindings, parameter initialization with unproved effects, and possible computed configuration overwrites remain unresolved. Unproved hook names are not indexed as named child captures.
+
+Stable aliases of the setup State facade retain declaration provenance. Extracted constructor functions, unanalysed runtime uses of a State facade or its owning Def, and constructor-member replacement leave capture open; handles proven before that boundary remain known. Stable Def aliases and definition arguments followed into proven synchronous helpers preserve their identity. Conflicting reachable constructors for the same state name remain unresolved rather than selecting the last source branch or proving the member absent. Binding declarations, static property names, and type-only syntax do not count as runtime facade uses.
+
+Logical and compound member writes preserve the evaluated receiver across right-hand-side effects and rebinding. Logical assignments use state-handle object truthiness only when every reachable member is proven, including local receiver branches with no recognized member; a legacy coverage label alone is not member-existence proof. Other compound results remain unproved. Destructured conditional members keep separate selectors, while opaque writes retain exposure uncertainty through aliases instead of certifying stale handles or silently treating exposed state as internal.
+
+Source-backed member writes follow the actual receiver object, including nested projected paths: aliases of the same object observe the write, a right-hand side that replaces the receiver keeps its evaluated identity, and conditional receivers keep their alternatives. A write the analysis cannot order (deferred, conditional, dynamic key or unproven right side) marks the affected members unresolved rather than keeping a stale selector.
+
+Projector returns are admitted as proof only when the return expression is effect-free: reads of the projection's own `getState`, `getMethod`, `getAsHook` and `getAsHookHandle` accessors count as reads, but calls the analysis cannot classify as these accessors, or writes visible in a reachable branch, keep the projection unresolved.
+
 ## Opt-in Shadow style companion
 
 The source CLI generates the companion consumed by the Web Component Adapter's explicit experimental `shadow: { mode: 'open', presentation: 'split', styleArtifact }` profile. Pass the imported value as `styleArtifact`; generating it alone does not select that profile. Existing boolean `shadow` options remain unchanged. See the [Adapter guide](../adapters/web-component/README.md) for admitted prototypes, recipes and customization limits. Installing an already-published CLI version does not imply that it includes this source change.

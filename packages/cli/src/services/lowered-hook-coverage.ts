@@ -2,6 +2,14 @@ import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
+import {
+  createHookSourceSummaryContext,
+  type HookSourceState,
+  type HookSourceSummaryContext,
+  type HookSourceValue,
+} from './hook-source-summary.js';
+import { loweredHookStates } from './prototype-style-tokens.js';
+
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
  * which the Web projection maps before it normalizes anything.
@@ -24,6 +32,8 @@ const OFFICIAL_EXPOSED_STATE_NAMES: Readonly<Record<string, string>> = Object.fr
 export type HookStateUsage = {
   hook: string;
   state: string;
+  /** Non-enumerable source identity attached by the scanner for bounded gates. */
+  provenance?: HookSourceState;
 };
 
 export type UnresolvedStateRead = {
@@ -74,16 +84,56 @@ export type RuleStateScan = {
   exposedLocals: ExposedLocalUsage[];
 };
 
-type LocalStateBinding = { kind: 'localState'; declaredAs: string | null; exposedAs?: string };
+type LocalStateBinding = {
+  kind: 'localState';
+  declaredAs: string | null;
+  exposedAs?: string | null;
+};
 
 type Binding =
-  | { kind: 'hookResult'; hook: string }
-  | { kind: 'handleBag'; hook: string }
-  | { kind: 'handle'; hook: string; state: string }
+  | {
+      kind: 'hookResult';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  /** A callable result member, such as `result.getState`, kept as an alias. */
+  | {
+      kind: 'callable';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  | {
+      kind: 'handleBag';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  | {
+      kind: 'handle';
+      hook: string;
+      state: string;
+      sourceState?: HookSourceState;
+      sourceAlternatives?: HookSourceState[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
   /** `def.state.bool(...)` — owned by the prototype, not borrowed from a hook. */
   | (LocalStateBinding & {
       /** Handles the name may still hold because a write may be skipped. */
       alternatives?: LocalStateBinding[];
+      bindingNode?: ts.Node;
     })
   /** A value a `tw(...)` argument may name, resolved where it was declared. */
   | {
@@ -98,17 +148,25 @@ type Binding =
        * resolve, so its member set is known to be incomplete.
        */
       opaque?: boolean;
+      bindingNode?: ts.Node;
     }
   /** A named import; only a relative one is something the extractor follows. */
-  | { kind: 'tokenImport'; specifier: string; imported: string; from?: string }
+  | {
+      kind: 'tokenImport';
+      specifier: string;
+      imported: string;
+      from?: string;
+      bindingNode?: ts.Node;
+    }
   /** A parameter: it shadows an outer name and its origin is not recoverable. */
-  | { kind: 'opaque' };
+  | { kind: 'opaque'; sourceAuthority?: boolean; bindingNode?: ts.Node };
 
 type Scope = {
   parent: Scope | null;
   bindings: Map<string, Binding>;
   /** The node that created this scope, used to resolve exposures lexically. */
   node: ts.Node | null;
+  sourceSummary: HookSourceSummaryContext;
 };
 
 function lookup(scope: Scope | null, name: string): Binding | null {
@@ -124,7 +182,10 @@ function lookup(scope: Scope | null, name: string): Binding | null {
  * statically executes exactly as written; anything else has to keep whatever
  * the name held before it.
  */
-function isConditionallyReached(node: ts.Node): boolean {
+function isConditionallyReached(
+  node: ts.Node,
+  definitelyReachedLogicalAssignments?: WeakSet<ts.Node>
+): boolean {
   for (
     let child: ts.Node = node, parent = node.parent;
     parent;
@@ -169,8 +230,16 @@ function isConditionallyReached(node: ts.Node): boolean {
       const shortCircuits =
         operator === ts.SyntaxKind.AmpersandAmpersandToken ||
         operator === ts.SyntaxKind.BarBarToken ||
-        operator === ts.SyntaxKind.QuestionQuestionToken;
-      if (shortCircuits && child === parent.right) return true;
+        operator === ts.SyntaxKind.QuestionQuestionToken ||
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
+      if (
+        shortCircuits &&
+        child === parent.right &&
+        !definitelyReachedLogicalAssignments?.has(parent)
+      )
+        return true;
     }
   }
   return false;
@@ -349,12 +418,16 @@ function introducesScope(node: ts.Node): boolean {
  */
 export function scanRuleStateReads(
   sourceText: string,
-  fileName = 'source.proto.ts'
+  fileName = 'source.proto.ts',
+  suppliedSummary?: HookSourceSummaryContext
 ): RuleStateScan {
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
+  sourceSummary.registerSource(source);
   const usages: HookStateUsage[] = [];
   const unresolved: UnresolvedStateRead[] = [];
   const exposedLocals: ExposedLocalUsage[] = [];
+  let hasObjectPrototypeEscape = false;
 
   /**
    * `def.expose.state('hidden', hidden)` by handle name. The Web runtime turns
@@ -385,13 +458,275 @@ export function scanRuleStateReads(
       ? unwrap(node.expression)
       : node;
 
-  const exposedKeys = new Map<ts.Node, Map<string, string>>();
+  const inspectPrototype = (node: ts.Node): void => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === 'prototype' &&
+      (() => {
+        const owner = unwrap(node.expression);
+        if (!ts.isIdentifier(owner)) return false;
+        return owner.text === 'Object';
+      })()
+    ) {
+      hasObjectPrototypeEscape = true;
+      return;
+    }
+    ts.forEachChild(node, inspectPrototype);
+  };
+  inspectPrototype(source);
+
+  const sourceEnvironment = (scope: Scope): Map<string, HookSourceValue> => {
+    const environment = new Map<string, HookSourceValue>();
+    for (let current: Scope | null = scope; current; current = current.parent) {
+      for (const [name, binding] of current.bindings) {
+        if (environment.has(name)) continue;
+        // An imported producer/factory is resolved by the source summary's
+        // module graph. Marking it as an unknown local would shadow that
+        // admitted source identity before `resolve` can follow the import.
+        // Nearest authored locals still enter as unknown and therefore retain
+        // lexical-shadow protection.
+        if (binding.kind === 'tokenImport') continue;
+        if (binding.kind === 'handle' && binding.sourceState) {
+          environment.set(name, { kind: 'state', state: binding.sourceState });
+        } else if ('sourceValue' in binding && binding.sourceValue) {
+          environment.set(name, binding.sourceValue);
+        } else {
+          // A nearest local/parameter that is not source-backed still shadows
+          // an outer producer. Omitting it would let summary resolution reach a
+          // stale same-name source value from an enclosing scope.
+          environment.set(name, { kind: 'unknown', reason: 'lexically shadowed' });
+        }
+      }
+    }
+    return environment;
+  };
+
+  const sourceValueHasProvenance = (value: HookSourceValue): boolean => {
+    if (value.kind === 'unknown') return false;
+    if (value.kind === 'state' || value.kind === 'result' || value.kind === 'callable') return true;
+    for (const member of value.members.values()) {
+      if (sourceValueHasProvenance(member)) return true;
+    }
+    return false;
+  };
+
+  const sourcePathHasProvenance = (
+    node: ts.Node,
+    scope: Scope,
+    resolved: { matched: boolean; value: HookSourceValue },
+    seen = new Set<ts.Node>()
+  ): boolean => {
+    if (sourceValueHasProvenance(resolved.value)) return true;
+    const expression = unwrap(node);
+    // Authority comes from the producer/path, not from whether this bucket
+    // currently contains a nonempty set of state handles.
+    if (ts.isIdentifier(expression)) {
+      const binding = lookup(scope, expression.text);
+      if (binding && 'sourceAuthority' in binding && binding.sourceAuthority === true) return true;
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      scope.sourceSummary.isAuthoredProducerCall(expression, expression.getSourceFile())
+    )
+      return true;
+    if (seen.has(node)) return false;
+    seen.add(node);
+    const owner = ownerOf(node);
+    if (!owner) return false;
+    const parent = sourceResolve(owner, scope);
+    return parent.matched && sourcePathHasProvenance(owner, scope, parent, seen);
+  };
+
+  const sourceResolve = (node: ts.Node, scope: Scope) => {
+    const value = unwrap(node);
+    if (ts.isCallExpression(value)) {
+      const callee = unwrap(value.expression);
+      const calleeIdentifier = ts.isIdentifier(callee) ? callee : null;
+      if (calleeIdentifier) {
+        const name = calleeIdentifier.text;
+        const binding = lookup(scope, name);
+        // A local callable alias (for example `const lookup = facts.getState!`)
+        // is resolved through the source environment. It is not a producer call,
+        // so the producer-binding identity fence must not reject it as a shadow.
+        if (binding && binding.kind !== 'tokenImport' && binding.kind !== 'callable') {
+          const bindingNode = binding.bindingNode;
+          const sourceIdentity = scope.sourceSummary as HookSourceSummaryContext & {
+            isSameSourceBinding?: (
+              node: ts.CallExpression,
+              source: ts.SourceFile,
+              bindingNode: ts.Node
+            ) => boolean;
+          };
+          const sameBinding =
+            bindingNode && typeof sourceIdentity.isSameSourceBinding === 'function'
+              ? sourceIdentity.isSameSourceBinding(value, node.getSourceFile(), bindingNode)
+              : false;
+          if (!sameBinding) {
+            return {
+              matched: true,
+              value: { kind: 'unknown', reason: 'lexically shadowed' } as const,
+            };
+          }
+        }
+      }
+    }
+    return scope.sourceSummary.resolve(node, source, sourceEnvironment(scope));
+  };
+
+  const sourceResolveCandidates = (node: ts.Node, scope: Scope) => {
+    const primary = sourceResolve(node, scope);
+    if (primary.value.kind === 'unknown' && primary.value.reason === 'lexically shadowed') {
+      return [primary];
+    }
+    const base = sourceEnvironment(scope);
+    const referenced = new Set<string>();
+    const collectReferenced = (current: ts.Node): void => {
+      if (ts.isIdentifier(current)) {
+        const parent = current.parent;
+        // A property name is not a lexical lookup. The receiver is the
+        // identifier whose source alternatives can affect this expression.
+        if (!(ts.isPropertyAccessExpression(parent) && parent.name === current)) {
+          referenced.add(current.text);
+        }
+      }
+      ts.forEachChild(current, collectReferenced);
+    };
+    collectReferenced(node);
+    let environments = [base];
+    const seen = new Set<string>();
+    for (let current: Scope | null = scope; current; current = current.parent) {
+      for (const [name, binding] of current.bindings) {
+        if (seen.has(name)) continue;
+        seen.add(name);
+        if (!referenced.has(name)) continue;
+        const candidates =
+          binding.kind === 'handle' && binding.sourceState
+            ? [
+                { kind: 'state', state: binding.sourceState } as HookSourceValue,
+                ...(binding.sourceAlternatives ?? []).map(
+                  (state) => ({ kind: 'state', state }) as HookSourceValue
+                ),
+              ]
+            : sourceBindingValues(binding);
+        if (candidates.length <= 1) continue;
+        environments = environments.flatMap((environment) =>
+          candidates.map((candidate) => {
+            const next = new Map(environment);
+            next.set(name, candidate);
+            return next;
+          })
+        );
+      }
+    }
+    return environments.map((environment) =>
+      scope.sourceSummary.resolve(node, source, environment)
+    );
+  };
+
+  const sourceHookLabel = (node: ts.Node, scope?: Scope): string | null => {
+    let label: string | null = null;
+    const visit = (current: ts.Node): void => {
+      if (label) return;
+      const value = unwrap(current);
+      if (scope && ts.isIdentifier(value)) {
+        const binding = lookup(scope, value.text);
+        if (binding && 'hook' in binding) {
+          label = binding.hook;
+          return;
+        }
+        // An imported hook reached through a local alias still reports the
+        // imported producer identity.
+        if (binding?.kind === 'tokenImport' && loweredHookStates(binding.imported)) {
+          label = binding.imported;
+          return;
+        }
+      }
+      if (ts.isCallExpression(value)) {
+        const callee = unwrap(value.expression);
+        const calleeIdentifier = ts.isIdentifier(callee) ? callee : null;
+        if (!calleeIdentifier) {
+          ts.forEachChild(current, visit);
+          return;
+        }
+        const name = calleeIdentifier.text;
+        const resolved = scope
+          ? scope.sourceSummary.resolve(value, source, sourceEnvironment(scope))
+          : null;
+        if (resolved?.matched && resolved.value.kind !== 'unknown') {
+          // Report the declared producer binding, so a local alias of an
+          // exported hook keeps the identity callers already key on.
+          const binding = scope ? lookup(scope, name) : null;
+          if (binding && 'hook' in binding) {
+            label = binding.hook;
+            return;
+          }
+          // `const parentAlias = asParent` is stored as a token whose
+          // initializer is the imported identifier. Follow that one hop so the
+          // label is the imported producer rather than the local spelling. The
+          // built-in hook table is deliberately not consulted: this call has
+          // already resolved to a proven producer, which may be authored and
+          // therefore absent from that table. A locally defined producer has no
+          // imported initializer and keeps its own name through the fallback.
+          const initializer =
+            binding?.kind === 'token' && binding.initializer ? unwrap(binding.initializer) : null;
+          // The TypeScript node guards are not null-safe, so test the node
+          // before calling them.
+          const imported =
+            scope && initializer && ts.isIdentifier(initializer)
+              ? lookup(scope, initializer.text)
+              : null;
+          label = imported?.kind === 'tokenImport' ? imported.imported : name;
+          return;
+        }
+      }
+      ts.forEachChild(current, visit);
+    };
+    visit(node);
+    return label;
+  };
+
+  const sourceUsage = (
+    hook: string,
+    state: string,
+    provenance: HookSourceState
+  ): HookStateUsage => {
+    const usage: HookStateUsage = { hook, state };
+    Object.defineProperty(usage, 'provenance', {
+      value: provenance,
+      enumerable: false,
+      configurable: true,
+    });
+    return usage;
+  };
+
+  // A member write can move a state handle from another producer into a bag.
+  // Keep the producer identity with the source state, not only with the bag.
+  const sourceStateHooks = new WeakMap<HookSourceState, string>();
+  const rememberSourceStateHooks = (node: ts.Node, scope: Scope): void => {
+    const hook = sourceHookLabel(node, scope);
+    if (!hook) return;
+    const candidates = sourceResolveCandidates(node, scope);
+    if (candidates.length === 0) return;
+    let owner: HookSourceState['owner'] | undefined;
+    for (const candidate of candidates) {
+      if (!candidate.matched || candidate.value.kind !== 'state') return;
+      const next = candidate.value.state.owner;
+      if (owner && (owner.file !== next.file || owner.start !== next.start)) return;
+      owner = next;
+    }
+    for (const candidate of candidates) {
+      if (candidate.value.kind === 'state') sourceStateHooks.set(candidate.value.state, hook);
+    }
+  };
+
+  const exposedKeys = new Map<ts.Node, Map<string, string | null>>();
   type AliasEdge = {
     owner: ts.Node;
     name: string;
     target: string;
     at: number;
     conditional: boolean;
+    opaque?: boolean;
     chain: ts.Node[];
     node: ts.Node;
   };
@@ -412,7 +747,7 @@ export function scanRuleStateReads(
   };
   // Members carry positions for the same reason aliases do: a write through the
   // container retargets the member from there on.
-  type MemberEdge = { target: string; at: number; conditional: boolean };
+  type MemberEdge = { target: string | null; at: number; conditional: boolean };
   const objectMembers = new Map<ts.Node, Map<string, Map<string, MemberEdge[]>>>();
 
   /**
@@ -484,7 +819,7 @@ export function scanRuleStateReads(
     owner: ts.Node,
     base: string,
     key: string,
-    target: string,
+    target: string | null,
     at: number,
     conditional: boolean
   ): void => {
@@ -506,17 +841,17 @@ export function scanRuleStateReads(
   };
 
   /** The identifier member `key` of an initializer names, if it names one. */
-  const memberTargetName = (
+  const memberTargetNames = (
     initializer: ts.Node,
     key: string,
     chain: ts.Node[],
     at: number
-  ): { target: string; at: number } | null => {
+  ): { targets: Array<{ target: string; at: number }>; opaque: boolean } => {
     const value = unwrap(initializer);
     if (ts.isObjectLiteralExpression(value)) {
       for (const property of value.properties) {
         if (ts.isShorthandPropertyAssignment(property) && property.name.text === key) {
-          return { target: key, at };
+          return { targets: [{ target: key, at }], opaque: false };
         }
         if (
           ts.isPropertyAssignment(property) &&
@@ -524,23 +859,41 @@ export function scanRuleStateReads(
           property.name.text === key
         ) {
           const assigned = unwrap(property.initializer);
-          return ts.isIdentifier(assigned) ? { target: assigned.text, at } : null;
+          return ts.isIdentifier(assigned)
+            ? { targets: [{ target: assigned.text, at }], opaque: false }
+            : { targets: [], opaque: false };
         }
       }
-      return null;
+      return { targets: [], opaque: false };
     }
-    if (!ts.isIdentifier(value)) return null;
+    if (ts.isArrayLiteralExpression(value)) {
+      const index = Number(key);
+      const element =
+        Number.isInteger(index) && index >= 0 && String(index) === key
+          ? value.elements[index]
+          : undefined;
+      const target = element && !ts.isOmittedExpression(element) ? unwrap(element) : null;
+      return target && ts.isIdentifier(target)
+        ? { targets: [{ target: target.text, at }], opaque: false }
+        : { targets: [], opaque: false };
+    }
+    if (!ts.isIdentifier(value)) return { targets: [], opaque: false };
     const [container] = containerRoots(value.text, chain, at);
     for (const scope of chain) {
       const members = objectMembers.get(scope)?.get(container);
       if (!members) continue;
       const edges = members.get(key);
-      if (!edges) return null;
+      if (!edges) return { targets: [], opaque: false };
       const visible = visibleEdges(edges, at);
-      // A pattern binds one name, so several candidates leave it ambiguous.
-      return visible.length === 1 ? { target: visible[0].target, at: visible[0].at } : null;
+      const opaque = visible.some((edge) => edge.target === null);
+      return {
+        targets: visible.flatMap((edge) =>
+          edge.target === null ? [] : [{ target: edge.target, at: edge.at }]
+        ),
+        opaque,
+      };
     }
-    return null;
+    return { targets: [], opaque: false };
   };
 
   /**
@@ -552,8 +905,8 @@ export function scanRuleStateReads(
     initializer: ts.Node,
     chain: ts.Node[],
     at: number
-  ): Array<{ name: string; target: string; at: number }> => {
-    const out: Array<{ name: string; target: string; at: number }> = [];
+  ): Array<{ name: string; target: string; at: number; opaque?: boolean }> => {
+    const out: Array<{ name: string; target: string; at: number; opaque?: boolean }> = [];
     if (ts.isObjectBindingPattern(name)) {
       for (const element of name.elements) {
         if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
@@ -561,20 +914,37 @@ export function scanRuleStateReads(
         const key =
           ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
         if (!key) continue;
-        const resolved = memberTargetName(initializer, key, chain, at);
-        if (resolved) out.push({ name: element.name.text, ...resolved });
+        const resolved = memberTargetNames(initializer, key, chain, at);
+        if (resolved.targets.length > 0) {
+          for (const target of resolved.targets) {
+            out.push({
+              name: element.name.text,
+              ...target,
+              ...(resolved.opaque ? { opaque: true } : {}),
+            });
+          }
+        } else if (resolved.opaque) {
+          // Keep an opaque alias edge even when no concrete handle survived.
+          out.push({ name: element.name.text, target: element.name.text, at, opaque: true });
+        }
       }
       return out;
     }
     if (!ts.isArrayBindingPattern(name)) return out;
-    const values = unwrap(initializer);
-    if (!ts.isArrayLiteralExpression(values)) return out;
     name.elements.forEach((element, index) => {
       if (ts.isOmittedExpression(element)) return;
       if (!ts.isIdentifier(element.name) || element.dotDotDotToken) return;
-      const value = values.elements[index] && unwrap(values.elements[index]);
-      if (value && ts.isIdentifier(value)) {
-        out.push({ name: element.name.text, target: value.text, at });
+      const resolved = memberTargetNames(initializer, String(index), chain, at);
+      if (resolved.targets.length > 0) {
+        for (const target of resolved.targets) {
+          out.push({
+            name: element.name.text,
+            ...target,
+            ...(resolved.opaque ? { opaque: true } : {}),
+          });
+        }
+      } else if (resolved.opaque) {
+        out.push({ name: element.name.text, target: element.name.text, at, opaque: true });
       }
     });
     return out;
@@ -588,7 +958,7 @@ export function scanRuleStateReads(
     node: ts.Node,
     chain: ts.Node[],
     at: number
-  ): Array<{ name: string; at: number }> => {
+  ): Array<{ name: string; at: number; opaque?: boolean }> => {
     const value = unwrap(node);
     if (ts.isIdentifier(value)) return [{ name: value.text, at }];
     const owner = ownerOf(value);
@@ -602,7 +972,14 @@ export function scanRuleStateReads(
         if (!members) continue;
         for (const [key, edges] of members) {
           if (!memberNamed(value, key)) continue;
-          out.push(...visibleEdges(edges, at).map((edge) => ({ name: edge.target, at: edge.at })));
+          const visible = visibleEdges(edges, at);
+          // Keep possible old/RHS handles, but carry the opaque write so a
+          // local exposure cannot be mistaken for an internal state.
+          const opaque = visible.some((edge) => edge.target === null);
+          for (const edge of visible) {
+            if (edge.target !== null)
+              out.push({ name: edge.target, at: edge.at, ...(opaque ? { opaque: true } : {}) });
+          }
         }
         break;
       }
@@ -610,37 +987,31 @@ export function scanRuleStateReads(
     return out;
   };
   const rawExposures: Array<{
-    handles: Array<{ name: string; at: number }>;
+    handles: Array<{ name: string; at: number; opaque?: boolean }>;
     key: ts.Expression;
     chain: ts.Node[];
   }> = [];
 
-  const memberNamed = (node: ts.Node, name: string): boolean => {
+  /** A statically-known property key; dynamic indexes must invalidate all candidates. */
+  const memberNameOf = (node: ts.Node): string | null => {
     const target = unwrap(node);
-    if (ts.isPropertyAccessExpression(target)) return target.name.text === name;
+    if (ts.isPropertyAccessExpression(target)) return target.name.text;
     if (ts.isElementAccessExpression(target)) {
       const argument = target.argumentExpression;
-      return Boolean(argument) && ts.isStringLiteralLike(argument) && argument.text === name;
+      return argument && (ts.isStringLiteralLike(argument) || ts.isNumericLiteral(argument))
+        ? argument.text
+        : null;
     }
-    return false;
+    return null;
   };
+
+  const memberNamed = (node: ts.Node, name: string): boolean => memberNameOf(node) === name;
 
   const ownerOf = (node: ts.Node): ts.Node | null => {
     const target = unwrap(node);
     return ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)
       ? target.expression
       : null;
-  };
-
-  /** The member a `x.name` or `x['name']` write names, if it is static. */
-  const memberNameOf = (node: ts.Node): string | null => {
-    const target = unwrap(node);
-    if (ts.isPropertyAccessExpression(target)) return target.name.text;
-    if (ts.isElementAccessExpression(target)) {
-      const argument = target.argumentExpression;
-      return argument && ts.isStringLiteralLike(argument) ? argument.text : null;
-    }
-    return null;
   };
 
   const collectExposedKeys = (node: ts.Node, chain: ts.Node[]): void => {
@@ -706,6 +1077,7 @@ export function scanRuleStateReads(
           target: alias.target,
           at: alias.at,
           conditional,
+          ...(alias.opaque ? { opaque: true } : {}),
           chain: [...nextChain, source],
           node,
         });
@@ -715,19 +1087,28 @@ export function scanRuleStateReads(
     // member the exposure reads is the one assigned last before it.
     if (
       ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
       (ts.isPropertyAccessExpression(node.left) || ts.isElementAccessExpression(node.left))
     ) {
+      const operator = node.operatorToken.kind;
+      const logicalAssignment =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
       const base = unwrap(ownerOf(node.left) ?? node.left);
       const member = memberNameOf(node.left);
       if (ts.isIdentifier(base)) {
         const chain = [...nextChain, source];
-        const at = node.getStart();
-        const containers = containerRoots(base.text, chain, at);
+        // Non-plain writes complete after their RHS, so later source positions
+        // must not see a nested RHS member write as the final value.
+        const at = operator === ts.SyntaxKind.EqualsToken ? node.getStart() : node.getEnd();
+        const containers = containerRoots(base.text, chain, node.getStart());
         const declaring =
           chain.find((candidate) => declaredIn.get(candidate)?.has(containers[0])) ?? null;
         const conditional =
           isConditionallyReached(node) ||
+          logicalAssignment ||
           isDeferredWrite(node, enclosingFunction(declaring)) ||
           containers.length > 1 ||
           member === null;
@@ -741,8 +1122,19 @@ export function scanRuleStateReads(
               ? [...(objectMembers.get(memberOwnerScope)?.get(container)?.keys() ?? [])]
               : [member];
           for (const key of keys) {
-            for (const target of aliasTargets(node.right)) {
-              recordMember(memberOwnerScope, container, key, target, at, conditional);
+            if (operator === ts.SyntaxKind.EqualsToken) {
+              for (const target of aliasTargets(node.right)) {
+                recordMember(memberOwnerScope, container, key, target, at, conditional);
+              }
+            } else {
+              // This prepass runs before readState exists. Mark a non-plain
+              // write opaque rather than attributing the RHS to the member.
+              recordMember(memberOwnerScope, container, key, null, at, conditional);
+              if (logicalAssignment) {
+                for (const target of aliasTargets(node.right)) {
+                  recordMember(memberOwnerScope, container, key, target, at, conditional);
+                }
+              }
             }
           }
         }
@@ -818,7 +1210,7 @@ export function scanRuleStateReads(
     chain: ts.Node[],
     at: number,
     seen = new Set<string>()
-  ): Array<{ name: string; chain: ts.Node[] }> => {
+  ): Array<{ name: string; chain: ts.Node[]; opaque?: boolean }> => {
     if (seen.has(name)) return [{ name, chain }];
     // A write in another function is unordered against this read, so it adds a
     // candidate rather than replacing one.
@@ -840,7 +1232,12 @@ export function scanRuleStateReads(
     const next = new Set([...seen, name]);
     // An alias captured its target where the alias was written, so a name the
     // exposure site shadows must not answer for it.
-    return found.flatMap((edge) => aliasRoots(edge.target, edge.chain ?? chain, edge.at, next));
+    return found.flatMap((edge) =>
+      aliasRoots(edge.target, edge.chain ?? chain, edge.at, next).map((entry) => ({
+        ...entry,
+        ...(edge.opaque ? { opaque: true } : {}),
+      }))
+    );
   };
 
   // An exposure names a binding, and a binding lives in one scope. Writing it
@@ -854,8 +1251,11 @@ export function scanRuleStateReads(
     // attribute comes from the declared name anyway.
     const text = ts.isStringLiteralLike(key) ? key.text : '';
     const named = handles.flatMap((handle) => [
-      { name: handle.name, chain },
-      ...aliasRoots(handle.name, chain, handle.at),
+      { name: handle.name, chain, opaque: handle.opaque },
+      ...aliasRoots(handle.name, chain, handle.at).map((entry) => ({
+        ...entry,
+        opaque: Boolean(handle.opaque || entry.opaque),
+      })),
     ]);
     const seen = new Set<string>();
     for (const entry of named) {
@@ -864,14 +1264,15 @@ export function scanRuleStateReads(
       const identity = `${entry.name}\u0000${owner.pos}`;
       if (seen.has(identity)) continue;
       seen.add(identity);
-      const scoped = exposedKeys.get(owner) ?? new Map<string, string>();
-      if (!scoped.has(entry.name)) scoped.set(entry.name, text);
+      const scoped = exposedKeys.get(owner) ?? new Map<string, string | null>();
+      if (entry.opaque) scoped.set(entry.name, null);
+      else if (!scoped.has(entry.name)) scoped.set(entry.name, text);
       exposedKeys.set(owner, scoped);
     }
   }
 
   /** The exposure visible from a scope chain, nearest scope first. */
-  const exposureFor = (name: string, scope: Scope): string | undefined => {
+  const exposureFor = (name: string, scope: Scope): string | null | undefined => {
     for (let current: Scope | null = scope; current; current = current.parent) {
       if (!current.node) continue;
       const scoped = exposedKeys.get(current.node);
@@ -881,11 +1282,19 @@ export function scanRuleStateReads(
     return undefined;
   };
 
-  const hookOfCall = (node: ts.Node): string | null => {
+  const hookOfCall = (node: ts.Node, scope?: Scope): string | null => {
     const call = unwrap(node);
     if (!ts.isCallExpression(call) || !ts.isIdentifier(call.expression)) return null;
     const name = call.expression.text;
-    return name.startsWith('as') ? name : null;
+    const binding = scope ? lookup(scope, name) : null;
+    if (binding && binding.kind !== 'tokenImport') return null;
+    if (loweredHookStates(name)) return name;
+    // A local alias of an imported hook is the same producer, so report the
+    // imported name the extractor keys on rather than the local spelling.
+    if (binding?.kind === 'tokenImport' && loweredHookStates(binding.imported)) {
+      return binding.imported;
+    }
+    return null;
   };
 
   /** Resolves an expression to the hook whose state-handle bag it denotes. */
@@ -900,13 +1309,231 @@ export function scanRuleStateReads(
     const owner = unwrap(expression.expression);
     if (ts.isIdentifier(owner)) {
       const binding = lookup(scope, owner.text);
-      return binding?.kind === 'hookResult' ? binding.hook : null;
+      if (binding?.kind !== 'hookResult') return null;
+      if (binding.sourceValue?.kind === 'result' && binding.sourceValue.stateHandles.size === 0)
+        return null;
+      return binding.hook;
     }
-    return hookOfCall(owner);
+    return hookOfCall(owner, scope);
   };
 
   const declare = (scope: Scope, name: string, binding: Binding): void => {
     scope.bindings.set(name, binding);
+  };
+
+  const sourceBindingValues = (binding: Binding | undefined): HookSourceValue[] => {
+    if (!binding || !('sourceValue' in binding) || !binding.sourceValue) return [];
+    return [binding.sourceValue, ...(binding.sourceAlternatives ?? [])];
+  };
+
+  const sourceBindingStates = (binding: Binding | undefined): HookSourceState[] => {
+    if (!binding || binding.kind !== 'handle' || !binding.sourceState) return [];
+    return [binding.sourceState, ...(binding.sourceAlternatives ?? [])];
+  };
+
+  const sourceBindingHooks = (binding: Binding | undefined): string[] => {
+    if (!binding || !('hook' in binding)) return [];
+    return [binding.hook, ...(binding.sourceAlternativeHooks ?? [])];
+  };
+
+  const containsSourceReference = (
+    value: HookSourceValue,
+    target: HookSourceValue,
+    seen = new Set<HookSourceValue>()
+  ): boolean => {
+    if (value === target) return true;
+    if (seen.has(value)) return false;
+    seen.add(value);
+    if (value.kind === 'object') {
+      for (const member of value.members.values()) {
+        if (containsSourceReference(member, target, seen)) return true;
+      }
+    } else if (value.kind === 'result') {
+      if (value.handle && containsSourceReference(value.handle, target, seen)) return true;
+      for (const child of value.children.values()) {
+        if (containsSourceReference(child, target, seen)) return true;
+      }
+    } else if (value.kind === 'callable') {
+      return containsSourceReference(value.result, target, seen);
+    }
+    return false;
+  };
+
+  const sourceOwnerScope = (scope: Scope, target: HookSourceValue): Scope | null => {
+    let owning: Scope | null = null;
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const binding of owner.bindings.values()) {
+        if (sourceBindingValues(binding).some((value) => containsSourceReference(value, target))) {
+          owning = owner;
+          break;
+        }
+      }
+    }
+    return owning;
+  };
+
+  const sourceBinding = (
+    binding: Binding | undefined
+  ): binding is Extract<Binding, { kind: 'handle' | 'handleBag' | 'hookResult' | 'callable' }> =>
+    binding?.kind === 'handle' ||
+    binding?.kind === 'handleBag' ||
+    binding?.kind === 'hookResult' ||
+    binding?.kind === 'callable';
+
+  /**
+   * Copy-on-write a source summary without mutating the cached producer graph.
+   *
+   * Source values are immutable summaries, but aliases can share any object
+   * inside the graph (including through a result handle or child). A visited
+   * set is not sufficient here: when the same ancestor is reached through a
+   * second path it would return the original node and leave that path stale.
+   * Memoizing the rewritten node preserves the DAG sharing while making every
+   * containing path observe the replacement.
+   */
+  const sourceGraphReplacements = new Map<HookSourceValue, Set<HookSourceValue>>();
+  const latestSourceGraphs = (value: HookSourceValue): HookSourceValue[] => {
+    const visit = (current: HookSourceValue, seen: Set<HookSourceValue>): HookSourceValue[] => {
+      if (seen.has(current)) return [current];
+      const replacements = sourceGraphReplacements.get(current);
+      if (!replacements || replacements.size === 0) return [current];
+      const nextSeen = new Set(seen);
+      nextSeen.add(current);
+      return [
+        ...new Set(
+          [...replacements].flatMap((next) =>
+            next === current ? [current] : visit(next, nextSeen)
+          )
+        ),
+      ];
+    };
+    return visit(value, new Set());
+  };
+
+  const recordSourceGraphReplacement = (
+    before: HookSourceValue,
+    after: HookSourceValue,
+    uncertain: boolean
+  ): void => {
+    const replacements = sourceGraphReplacements.get(before) ?? new Set<HookSourceValue>();
+    replacements.add(after);
+    if (uncertain) replacements.add(before);
+    sourceGraphReplacements.set(before, replacements);
+  };
+
+  const replaceSourceGraph = (
+    value: HookSourceValue,
+    target: HookSourceValue,
+    replacement: HookSourceValue,
+    memo: Map<HookSourceValue, HookSourceValue>
+  ): HookSourceValue => {
+    if (value === target) return replacement;
+    const cached = memo.get(value);
+    if (cached) return cached;
+
+    if (value.kind === 'state' || value.kind === 'unknown') {
+      memo.set(value, value);
+      return value;
+    }
+
+    if (value.kind === 'object') {
+      const members = new Map<string, HookSourceValue>();
+      // Install the provisional clone before walking children so a cyclic
+      // authored projection cannot recurse forever. If no child changes, the
+      // memo entry is replaced with the original below.
+      const clone: Extract<HookSourceValue, { kind: 'object' }> = { ...value, members };
+      memo.set(value, clone);
+      let changed = false;
+      for (const [key, member] of value.members) {
+        const next = replaceSourceGraph(member, target, replacement, memo);
+        members.set(key, next);
+        changed ||= next !== member;
+      }
+      if (!changed) {
+        memo.set(value, value);
+        return value;
+      }
+      return clone;
+    }
+
+    if (value.kind === 'result') {
+      const children = new Map<string, HookSourceValue>();
+      const clone: Extract<HookSourceValue, { kind: 'result' }> = { ...value, children };
+      memo.set(value, clone);
+      let changed = false;
+      if (value.handle) {
+        const handle = replaceSourceGraph(value.handle, target, replacement, memo);
+        clone.handle = handle;
+        changed ||= handle !== value.handle;
+      }
+      for (const [key, child] of value.children) {
+        const next = replaceSourceGraph(child, target, replacement, memo);
+        children.set(key, next);
+        changed ||= next !== child;
+      }
+      if (!changed) {
+        memo.set(value, value);
+        return value;
+      }
+      return clone;
+    }
+
+    // A callable owns a result graph. Keep its identity and operation while
+    // replacing any object reachable through that result.
+    const clone: Extract<HookSourceValue, { kind: 'callable' }> = { ...value };
+    memo.set(value, clone);
+    const result = replaceSourceGraph(value.result, target, replacement, memo);
+    if (result === value.result) {
+      memo.set(value, value);
+      return value;
+    }
+    clone.result = result as Extract<HookSourceValue, { kind: 'result' }>;
+    return clone;
+  };
+
+  /** Publish an object replacement to all source-backed bindings in scope. */
+  const publishSourceGraph = (
+    scope: Scope,
+    target: HookSourceValue,
+    replacement: HookSourceValue,
+    previous: HookSourceValue,
+    uncertain: boolean
+  ): void => {
+    // One memo spans all bindings and candidates, so shared ancestors remain
+    // shared instead of being cloned independently for each visible alias.
+    const memo = new Map<HookSourceValue, HookSourceValue>();
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const [name, binding] of owner.bindings) {
+        if (!sourceBinding(binding) || !('sourceValue' in binding) || !binding.sourceValue)
+          continue;
+        const candidates = [binding.sourceValue, ...(binding.sourceAlternatives ?? [])];
+        const replaced = candidates.map((candidate) =>
+          replaceSourceGraph(candidate, target, replacement, memo)
+        );
+        const changed = replaced.some((candidate, index) => candidate !== candidates[index]);
+        if (!changed) continue;
+
+        const alternatives = replaced.slice(1);
+        // If this write may not run, keep every graph it changed as a
+        // candidate too. For the directly replaced object use the already
+        // snapshotted clone, matching the existing direct-alias behavior.
+        if (uncertain) {
+          candidates.forEach((candidate, index) => {
+            if (replaced[index] === candidate) return;
+            const prior = candidate === target ? previous : candidate;
+            if (!alternatives.includes(prior)) alternatives.push(prior);
+          });
+        }
+        declare(owner, name, {
+          ...binding,
+          sourceValue: replaced[0],
+          ...(alternatives.length > 0 ? { sourceAlternatives: alternatives } : {}),
+        } as Binding);
+      }
+    }
+    recordSourceGraphReplacement(target, replacement, uncertain);
+    for (const [before, after] of memo) {
+      if (before !== after) recordSourceGraphReplacement(before, after, uncertain);
+    }
   };
 
   /**
@@ -914,6 +1541,8 @@ export function scanRuleStateReads(
    * runtime lowers whichever it holds, so a conditional reassignment keeps the
    * binding it replaces as an alternative instead of discarding it.
    */
+  const definitelyReachedLogicalAssignments = new WeakSet<ts.Node>();
+
   const declareConditionally = (
     scope: Scope,
     name: string,
@@ -925,9 +1554,43 @@ export function scanRuleStateReads(
     declareValue(node as ts.BindingName, initializer, scope, lookupScope);
     const next = scope.bindings.get(name);
     const uncertain =
-      isConditionallyReached(initializer.parent) ||
+      isConditionallyReached(initializer.parent, definitelyReachedLogicalAssignments) ||
       isDeferredWrite(initializer, enclosingFunction(scope.node));
     if (!uncertain || !previous || !next) return;
+    if (sourceBinding(next) && sourceBinding(previous)) {
+      const sourceAuthority = next.sourceAuthority === true || previous.sourceAuthority === true;
+      if (sourceAuthority && next.sourceAuthority !== true) {
+        declare(scope, name, { ...next, sourceAuthority: true } as Binding);
+      }
+      if (next.kind === 'handle' && previous.kind === 'handle') {
+        const states = [
+          ...new Set([...sourceBindingStates(next), ...sourceBindingStates(previous)]),
+        ];
+        const hooks = [...new Set([...sourceBindingHooks(next), ...sourceBindingHooks(previous)])];
+        if (states.length > 1)
+          declare(scope, name, {
+            ...next,
+            sourceState: states[0],
+            sourceAlternatives: states.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          });
+      } else {
+        const values = [
+          ...new Set([...sourceBindingValues(next), ...sourceBindingValues(previous)]),
+        ];
+        const hooks = [...new Set([...sourceBindingHooks(next), ...sourceBindingHooks(previous)])];
+        if (values.length > 1)
+          declare(scope, name, {
+            ...next,
+            sourceValue: values[0],
+            sourceAlternatives: values.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          } as Binding);
+      }
+      return;
+    }
     if (next.kind !== 'localState' || previous.kind !== 'localState') return;
     // Alternatives are flat: a candidate carries no candidates of its own.
     const bare = (binding: LocalStateBinding): LocalStateBinding => ({
@@ -955,6 +1618,107 @@ export function scanRuleStateReads(
     scope: Scope,
     lookupScope: Scope = scope
   ): void => {
+    // `sourceBinding` at module scope is the kind predicate; this local used to
+    // shadow it and then get called as one.
+    const resolved = sourceResolve(initializer, lookupScope);
+    const sourceHook = sourceHookLabel(initializer, lookupScope);
+    const sourceNode = unwrap(initializer);
+    // Summary evaluation recognizes every ordinary object/array literal. Keep
+    // those in the established token/container path unless this is a proven
+    // non-literal source expression, so local maps are not replaced by a blank
+    // source bag.
+    const sourceCanIntercept =
+      resolved.matched &&
+      sourcePathHasProvenance(initializer, lookupScope, resolved) &&
+      !ts.isObjectLiteralExpression(sourceNode) &&
+      !ts.isArrayLiteralExpression(sourceNode) &&
+      !ts.isConditionalExpression(sourceNode);
+    if (sourceCanIntercept) {
+      const sourceValue = resolved.value;
+      if (ts.isObjectBindingPattern(name)) {
+        if (sourceValue.kind !== 'object') {
+          for (const element of name.elements) {
+            if (ts.isIdentifier(element.name))
+              declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+          return;
+        }
+        for (const element of name.elements) {
+          if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
+          const property = element.propertyName ?? element.name;
+          const key =
+            ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+          const held = key ? sourceValue.members.get(key) : undefined;
+          if (held?.kind === 'state') {
+            declare(scope, element.name.text, {
+              kind: 'handle',
+              hook: sourceHook ?? '<source-hook>',
+              state: held.state.declaredName,
+              sourceState: held.state,
+              sourceAuthority: true,
+            });
+          } else {
+            declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+        }
+        return;
+      }
+      if (ts.isArrayBindingPattern(name)) {
+        if (sourceValue.kind !== 'object') {
+          for (const element of name.elements) {
+            if (ts.isBindingElement(element) && ts.isIdentifier(element.name))
+              declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+          return;
+        }
+        name.elements.forEach((element, index) => {
+          if (!ts.isBindingElement(element)) return;
+          if (!ts.isIdentifier(element.name) || element.dotDotDotToken) return;
+          const held = sourceValue.members.get(String(index));
+          if (held?.kind === 'state')
+            declare(scope, element.name.text, {
+              kind: 'handle',
+              hook: sourceHook ?? '<source-hook>',
+              state: held.state.declaredName,
+              sourceState: held.state,
+              sourceAuthority: true,
+            });
+          else declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+        });
+        return;
+      }
+      if (ts.isIdentifier(name)) {
+        if (sourceValue.kind === 'state') {
+          declare(scope, name.text, {
+            kind: 'handle',
+            hook: sourceHook ?? '<source-hook>',
+            state: sourceValue.state.declaredName,
+            sourceState: sourceValue.state,
+            sourceAuthority: true,
+          });
+        } else if (sourceValue.kind === 'unknown') {
+          declare(scope, name.text, { kind: 'opaque', sourceAuthority: true });
+        } else if (
+          sourceValue.kind === 'object' ||
+          sourceValue.kind === 'result' ||
+          sourceValue.kind === 'callable'
+        ) {
+          declare(scope, name.text, {
+            kind:
+              sourceValue.kind === 'object'
+                ? 'handleBag'
+                : sourceValue.kind === 'result'
+                  ? 'hookResult'
+                  : 'callable',
+            hook: sourceHook ?? '<source-hook>',
+            sourceValue,
+            sourceAuthority: true,
+          });
+        }
+        return;
+      }
+    }
+
     const bag = bagHook(initializer, lookupScope);
 
     if (bag) {
@@ -978,14 +1742,123 @@ export function scanRuleStateReads(
     // `const current = enabled ? first : second` — the runtime keeps one branch
     // and it carries its own declared name, so both candidates are retained.
     const chosen = unwrap(initializer);
+    if (
+      ts.isConditionalExpression(chosen) &&
+      !ts.isIdentifier(name) &&
+      (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name))
+    ) {
+      const branches = [chosen.whenTrue, chosen.whenFalse].map((branch) =>
+        sourceResolve(branch, lookupScope)
+      );
+      const provenObjects = branches.every(
+        (branch) =>
+          branch.matched &&
+          sourcePathHasProvenance(
+            branch === branches[0] ? chosen.whenTrue : chosen.whenFalse,
+            lookupScope,
+            branch
+          ) &&
+          branch.value.kind === 'object'
+      );
+      if (provenObjects) {
+        const hooks = [
+          sourceHookLabel(chosen.whenTrue, lookupScope),
+          sourceHookLabel(chosen.whenFalse, lookupScope),
+        ];
+        const bind = (target: ts.Identifier, key: string): void => {
+          const held = branches.map((branch) =>
+            branch.value.kind === 'object' ? branch.value.members.get(key) : undefined
+          );
+          if (
+            held.every(
+              (value): value is HookSourceValue & { kind: 'state' } => value?.kind === 'state'
+            )
+          ) {
+            const states = [
+              ...new Map(
+                held.map((state) => [
+                  `${state.state.declaration.file}\u0000${state.state.declaration.start}`,
+                  state,
+                ])
+              ).values(),
+            ];
+            const labels = [...new Set(hooks.filter((hook): hook is string => Boolean(hook)))];
+            declare(scope, target.text, {
+              kind: 'handle',
+              hook: labels[0] ?? '<source-hook>',
+              state: states[0].state.declaredName,
+              sourceState: states[0].state,
+              sourceAlternatives: states.slice(1).map((state) => state.state),
+              sourceAlternativeHooks: labels.slice(1),
+            });
+          } else {
+            declare(scope, target.text, { kind: 'opaque' });
+          }
+        };
+        if (ts.isObjectBindingPattern(name)) {
+          for (const element of name.elements) {
+            if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
+            const property = element.propertyName ?? element.name;
+            const key =
+              ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+            if (key) bind(element.name, key);
+          }
+        } else {
+          name.elements.forEach((element, index) => {
+            if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
+            bind(element.name, String(index));
+          });
+        }
+        return;
+      }
+    }
     if (ts.isConditionalExpression(chosen) && ts.isIdentifier(name)) {
       // Each branch is bound into a throwaway scope so this reads exactly what
       // the same expression would name on its own.
       const branches = [chosen.whenTrue, chosen.whenFalse].map((branch) => {
-        const probe: Scope = { parent: lookupScope, bindings: new Map(), node: lookupScope.node };
+        const probe: Scope = {
+          parent: lookupScope,
+          bindings: new Map(),
+          node: lookupScope.node,
+          sourceSummary: lookupScope.sourceSummary,
+        };
         declareValue(name, branch, probe, lookupScope);
         return probe.bindings.get(name.text);
       });
+      // `sourceBinding` is a type predicate, not a callable runtime test, so it
+      // cannot be handed to `filter`. Narrowing happens in the loop instead.
+      const sourceBranches: Binding[] = [];
+      for (const branch of branches) {
+        if (sourceBinding(branch)) sourceBranches.push(branch);
+      }
+      if (sourceBranches.length === branches.length && sourceBranches.length > 0) {
+        const head = sourceBranches[0];
+        const sourceAuthority = sourceBranches.some(
+          (branch) => 'sourceAuthority' in branch && branch.sourceAuthority === true
+        );
+        if (head.kind === 'handle' && sourceBranches.every((branch) => branch.kind === 'handle')) {
+          const states = [...new Set(sourceBranches.flatMap(sourceBindingStates))];
+          const hooks = [...new Set(sourceBranches.flatMap(sourceBindingHooks))];
+          declare(scope, name.text, {
+            ...head,
+            sourceState: states[0],
+            sourceAlternatives: states.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          });
+        } else {
+          const values = [...new Set(sourceBranches.flatMap(sourceBindingValues))];
+          const hooks = [...new Set(sourceBranches.flatMap(sourceBindingHooks))];
+          declare(scope, name.text, {
+            ...head,
+            sourceValue: values[0],
+            sourceAlternatives: values.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          } as Binding);
+        }
+        return;
+      }
       const locals = branches.filter(
         (binding): binding is Binding & { kind: 'localState' } => binding?.kind === 'localState'
       );
@@ -1009,9 +1882,10 @@ export function scanRuleStateReads(
           seen.add(candidate.declaredAs);
           alternatives.push(bare(candidate));
         }
+        const exposedAs = exposureFor(name.text, scope);
         declare(scope, name.text, {
           ...head,
-          exposedAs: exposureFor(name.text, scope) ?? head.exposedAs,
+          exposedAs: exposedAs === undefined ? head.exposedAs : exposedAs,
           alternatives,
         });
         return;
@@ -1081,7 +1955,7 @@ export function scanRuleStateReads(
       return;
     }
 
-    const hook = hookOfCall(initializer);
+    const hook = hookOfCall(initializer, lookupScope);
     if (hook && ts.isIdentifier(name)) {
       declare(scope, name.text, { kind: 'hookResult', hook });
       return;
@@ -1091,12 +1965,19 @@ export function scanRuleStateReads(
     // resolves the alias, so a rule reading the alias is not a blind spot.
     if (ts.isIdentifier(value) && ts.isIdentifier(name)) {
       const aliased = lookup(lookupScope, value.text);
+      if (aliased?.kind === 'tokenImport' && loweredHookStates(aliased.imported)) {
+        // A local alias of an imported hook is the same producer, so carry the
+        // imported identity instead of the local spelling.
+        declare(scope, name.text, { kind: 'hookResult', hook: aliased.imported });
+        return;
+      }
       if (aliased && aliased.kind !== 'token' && aliased.kind !== 'tokenImport') {
+        const exposedAs = exposureFor(name.text, scope);
         declare(
           scope,
           name.text,
           aliased.kind === 'localState'
-            ? { ...aliased, exposedAs: exposureFor(name.text, scope) ?? aliased.exposedAs }
+            ? { ...aliased, exposedAs: exposedAs === undefined ? aliased.exposedAs : exposedAs }
             : aliased
         );
         return;
@@ -1116,6 +1997,8 @@ export function scanRuleStateReads(
         kind: 'token',
         initializer,
         ...(partial ? { opaque: true } : {}),
+        bindingNode:
+          ts.isVariableDeclaration(name.parent) && name.parent.name === name ? name.parent : name,
       });
     }
   };
@@ -1145,6 +2028,7 @@ export function scanRuleStateReads(
 
   const localStateRead = (binding: LocalStateBinding, state: string): StateRead | null => {
     if (binding.exposedAs === undefined) return 'local';
+    if (binding.exposedAs === null) return null;
     // The runtime attribute comes from the declared name. If that name is not
     // statically readable the extractor emits nothing, so substituting the
     // expose key here would certify a selector that never exists.
@@ -1165,9 +2049,46 @@ export function scanRuleStateReads(
    */
   const readState = (node: ts.Node, scope: Scope): StateRead[] | null => {
     const argument = unwrap(node);
+    const resolvedCandidates = sourceResolveCandidates(argument, scope);
+    const sourceStates = resolvedCandidates
+      .filter((candidate) => candidate.matched)
+      .map((candidate) => candidate.value);
+    if (
+      sourceStates.length === resolvedCandidates.length &&
+      sourceStates.length > 0 &&
+      sourceStates.every((candidate) => candidate.kind === 'state')
+    ) {
+      const hook = sourceHookLabel(argument, scope);
+      const hooks = sourceStates.map((candidate) => sourceStateHooks.get(candidate.state) ?? hook);
+      if (
+        hooks.length > 0 &&
+        hooks.every((candidate): candidate is string => typeof candidate === 'string')
+      ) {
+        return sourceStates.map((candidate, index) =>
+          sourceUsage(hooks[index], candidate.state.declaredName, candidate.state)
+        );
+      }
+      if (!hook && !ts.isIdentifier(argument)) return null;
+      if (!hook) {
+        // A local identifier is handled below so its authored alias retains
+        // the caller spelling in the public result.
+      } else {
+        return sourceStates.map((candidate) => {
+          return sourceUsage(hook, candidate.state.declaredName, candidate.state);
+        });
+      }
+    }
     if (ts.isIdentifier(argument)) {
       const binding = lookup(scope, argument.text);
-      if (binding?.kind === 'handle') return [{ hook: binding.hook, state: binding.state }];
+      if (binding?.kind === 'handle') {
+        const states = sourceBindingStates(binding);
+        const hooks = sourceBindingHooks(binding);
+        return states.length > 0
+          ? states.map((state, index) =>
+              sourceUsage(hooks[index] ?? binding.hook, binding.state, state)
+            )
+          : [{ hook: binding.hook, state: binding.state }];
+      }
       if (binding?.kind === 'localState') {
         const reads = [binding, ...(binding.alternatives ?? [])].map((candidate) =>
           localStateRead(candidate, argument.text)
@@ -1177,9 +2098,32 @@ export function scanRuleStateReads(
       return null;
     }
     if (ts.isPropertyAccessExpression(argument) || ts.isElementAccessExpression(argument)) {
+      const member = memberNameOf(argument);
+      const ownerExpression = ownerOf(argument);
+      if (member !== null && ownerExpression) {
+        const ownerCandidates = sourceResolveCandidates(ownerExpression, scope);
+        const ownerIdentifier = unwrap(ownerExpression);
+        const ownerBinding = ts.isIdentifier(ownerIdentifier)
+          ? lookup(scope, ownerIdentifier.text)
+          : null;
+        const authoritative =
+          ownerCandidates.some(
+            (candidate) =>
+              candidate.matched && sourcePathHasProvenance(ownerExpression, scope, candidate)
+          ) ||
+          (ownerBinding !== null &&
+            'sourceAuthority' in ownerBinding &&
+            ownerBinding.sourceAuthority === true);
+        // The complete source-state proof above already handled known members.
+        // Missing or unknown source paths cannot regain proof from a legacy
+        // hook-name table or an internal result bucket with a matching name.
+        if (authoritative) return null;
+      }
       if (ts.isPropertyAccessExpression(argument)) {
         const owner = bagHook(argument.expression, scope);
-        if (owner) return [{ hook: owner, state: argument.name.text }];
+        if (owner) {
+          return [{ hook: owner, state: argument.name.text }];
+        }
       }
       // `const controls = { ready: flag }` — production reads the container the
       // same way it reads an `asHook` bag, so this is not a blind spot.
@@ -1273,6 +2217,49 @@ export function scanRuleStateReads(
     return [];
   };
 
+  const declareLoopTokenBindings = (
+    node: ts.ForOfStatement,
+    scope: Scope,
+    row?: ts.Expression
+  ): void => {
+    const initializer = node.initializer;
+    const iterable = unwrap(node.expression);
+    if (!ts.isVariableDeclarationList(initializer) || !ts.isArrayLiteralExpression(iterable))
+      return;
+    const elements = row
+      ? [row]
+      : iterable.elements.filter((element) => !ts.isOmittedExpression(element));
+    const assign = (name: ts.BindingName, expressions: ts.Expression[]): void => {
+      if (!ts.isIdentifier(name) || expressions.length === 0) return;
+      declare(scope, name.text, {
+        kind: 'token',
+        initializer: expressions[0],
+        ...(expressions.length > 1 ? { alternates: expressions.slice(1) } : {}),
+        bindingNode: initializer,
+      });
+    };
+    const members = (key: string): ts.Expression[] =>
+      elements.flatMap((element) => containerMembers(element, key, scope));
+    for (const declaration of initializer.declarations) {
+      if (ts.isIdentifier(declaration.name)) {
+        assign(declaration.name, elements);
+      } else if (ts.isArrayBindingPattern(declaration.name)) {
+        declaration.name.elements.forEach((element, index) => {
+          if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
+          assign(element.name, members(String(index)));
+        });
+      } else if (ts.isObjectBindingPattern(declaration.name)) {
+        for (const element of declaration.name.elements) {
+          if (!ts.isBindingElement(element) || !ts.isIdentifier(element.name)) continue;
+          const property = element.propertyName ?? element.name;
+          const key =
+            ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+          if (key !== null) assign(element.name, members(key));
+        }
+      }
+    }
+  };
+
   /** Every binding a base expression may name, following a conditional. */
   const containerBindings = (
     node: ts.Node,
@@ -1289,13 +2276,52 @@ export function scanRuleStateReads(
     if (!ts.isIdentifier(value) || seen.has(value.text)) return [];
     const owner = scopeBinding(scope, value.text);
     const held = owner?.bindings.get(value.text);
-    if (!owner || held?.kind !== 'token') return [];
+    if (!owner || !held) return [];
+    if (held.kind === 'handleBag' && held.sourceValue?.kind === 'object') {
+      return [{ scope: owner, name: value.text }];
+    }
+    if (held.kind !== 'token') return [];
     const initializer = unwrap(held.initializer);
     if (ts.isIdentifier(initializer) || ts.isConditionalExpression(initializer)) {
       const next = containerBindings(initializer, scope, new Set([...seen, value.text]));
       if (next.length > 0) return next;
     }
     return [{ scope: owner, name: value.text }];
+  };
+
+  /** Token bindings that resolve to the same pre-RHS container receiver. */
+  const tokenAliases = (
+    target: { scope: Scope; name: string },
+    scope: Scope
+  ): Array<{ scope: Scope; name: string; initializer: ts.Expression; bindingNode?: ts.Node }> => {
+    const aliases: Array<{
+      scope: Scope;
+      name: string;
+      initializer: ts.Expression;
+      bindingNode?: ts.Node;
+    }> = [];
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const [name, binding] of owner.bindings) {
+        if (binding.kind !== 'token') continue;
+        const declaration = binding.bindingNode;
+        const reference =
+          declaration && ts.isVariableDeclaration(declaration) ? declaration.name : declaration;
+        if (!reference || !ts.isIdentifier(reference)) continue;
+        if (
+          containerBindings(reference, owner).some(
+            (candidate) => candidate.scope === target.scope && candidate.name === target.name
+          )
+        ) {
+          aliases.push({
+            scope: owner,
+            name,
+            initializer: binding.initializer,
+            bindingNode: binding.bindingNode,
+          });
+        }
+      }
+    }
+    return aliases;
   };
 
   /** Whether any container this base may name has an unresolvable branch. */
@@ -1323,17 +2349,72 @@ export function scanRuleStateReads(
     return owner && key !== null ? containerMembers(owner, key, scope) : [];
   };
 
+  const sourceMemberPresence = (node: ts.Node, scope: Scope): boolean | null => {
+    const value = unwrap(node);
+    if (!ts.isPropertyAccessExpression(value) && !ts.isElementAccessExpression(value)) return null;
+    const key = memberNameOf(value);
+    const owner = ownerOf(value);
+    if (key === null || !owner || hasObjectPrototypeEscape || key in Object.prototype) return null;
+    const resolvedCandidates = sourceResolveCandidates(owner, scope);
+    const resolved = resolvedCandidates.find((candidate) => candidate.matched);
+    if (!resolved || resolvedCandidates.some((candidate) => !candidate.matched)) return null;
+    const ownerIdentifier = unwrap(owner);
+    const ownerBinding = ts.isIdentifier(ownerIdentifier)
+      ? lookup(scope, ownerIdentifier.text)
+      : null;
+    const candidates =
+      ownerBinding && 'sourceValue' in ownerBinding && ownerBinding.sourceValue
+        ? [ownerBinding.sourceValue, ...(ownerBinding.sourceAlternatives ?? [])]
+        : resolvedCandidates.map((candidate) => candidate.value);
+    const objects = candidates.filter(
+      (candidate): candidate is Extract<HookSourceValue, { kind: 'object' }> =>
+        candidate.kind === 'object'
+    );
+    if (objects.length !== candidates.length) return null;
+    if (objects.every((candidate) => !candidate.members.has(key) && candidate.closed === true))
+      return false;
+    return null;
+  };
+
+  const sourceConditionOutcome = (node: ts.Node, scope: Scope): boolean | null => {
+    const value = unwrap(node);
+    if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
+      const presence = sourceMemberPresence(value.operand, scope);
+      return presence === null ? null : !presence;
+    }
+    return sourceMemberPresence(value, scope);
+  };
+
   /**
    * The extractor's `resolveStateEqVariant` lowers exactly three right-hand
    * sides: the two boolean keywords, and a string literal whose text is a legal
    * data-attribute value. `null` means the extractor produces no variant, which
    * the scanner reports rather than reading as covered.
    */
-  const comparisonOf = (node: ts.Expression | undefined): 'positive' | 'negative' | null => {
+  const comparisonOf = (
+    node: ts.Expression | undefined,
+    scope: Scope
+  ): 'positive' | 'negative' | null => {
     if (!node) return null;
     if (node.kind === ts.SyntaxKind.TrueKeyword) return 'positive';
     if (node.kind === ts.SyntaxKind.FalseKeyword) return 'negative';
     if (ts.isStringLiteralLike(node) && /^[a-zA-Z0-9_-]+$/.test(node.text)) return 'positive';
+    if (ts.isIdentifier(node)) {
+      const binding = lookup(scope, node.text);
+      if (binding?.kind === 'token') {
+        const candidates = [binding.initializer, ...(binding.alternates ?? [])].map((candidate) =>
+          unwrap(candidate)
+        );
+        if (
+          candidates.length > 0 &&
+          candidates.every(
+            (candidate): candidate is ts.StringLiteralLike =>
+              ts.isStringLiteralLike(candidate) && /^[a-zA-Z0-9_-]+$/.test(candidate.text)
+          )
+        )
+          return 'positive';
+      }
+    }
     // `number.discrete` bindings lower by stringifying the literal, and `-1`
     // parses as a prefix unary expression rather than a numeric literal.
     if (ts.isNumericLiteral(node)) return 'positive';
@@ -1398,7 +2479,12 @@ export function scanRuleStateReads(
   const moduleRootScope = (module: ts.SourceFile): Scope => {
     const cached = moduleScopes.get(module);
     if (cached) return cached;
-    const scope: Scope = { parent: null, bindings: new Map(), node: null };
+    const scope: Scope = {
+      parent: null,
+      bindings: new Map(),
+      node: null,
+      sourceSummary,
+    };
     // Insert before filling so a cycle of relative modules terminates.
     moduleScopes.set(module, scope);
     for (const statement of module.statements) {
@@ -1483,6 +2569,10 @@ export function scanRuleStateReads(
         resolvableTokenArgument(inner.whenTrue, scope, seen) &&
         resolvableTokenArgument(inner.whenFalse, scope, seen)
       );
+    if (ts.isCallExpression(inner) && ts.isIdentifier(inner.expression)) {
+      if (inner.expression.text !== 'tw' || inner.arguments.length === 0) return false;
+      return inner.arguments.every((argument) => resolvableTokenArgument(argument, scope, seen));
+    }
     // `[...].join(' ')` is the one call form the extractor resolves, and
     // `resolveJoinCall` reads only a literal separator — anything else falls
     // back to `,` there while the runtime joins on the real value.
@@ -1503,8 +2593,11 @@ export function scanRuleStateReads(
       if (seen.has(inner.text)) return false;
       const binding = lookup(scope, inner.text);
       const next = new Set([...seen, inner.text]);
-      if (binding?.kind === 'token')
-        return resolvableTokenArgument(binding.initializer, scope, next);
+      if (binding?.kind === 'token') {
+        return [binding.initializer, ...(binding.alternates ?? [])].every((candidate) =>
+          resolvableTokenArgument(candidate, scope, next)
+        );
+      }
       if (binding?.kind === 'tokenImport') {
         const module = loadRelativeModule(binding.specifier, binding.from ?? fileName);
         if (!module) return false;
@@ -1573,17 +2666,19 @@ export function scanRuleStateReads(
     return handles.every((handle) => {
       const call = unwrap(handle);
       if (
-        !ts.isCallExpression(call) ||
-        !ts.isIdentifier(call.expression) ||
-        call.expression.text !== 'tw'
+        ts.isCallExpression(call) &&
+        ts.isIdentifier(call.expression) &&
+        call.expression.text === 'tw'
       ) {
-        // A pre-bound handle gives `collectTwTokens` no call to read.
-        return false;
+        return (
+          call.arguments.length > 0 &&
+          call.arguments.every((argument) => resolvableTokenArgument(argument, scope))
+        );
       }
-      return (
-        call.arguments.length > 0 &&
-        call.arguments.every((argument) => resolvableTokenArgument(argument, scope))
-      );
+      // The style collector resolves a finite pre-bound tw handle through its
+      // lexical binding; require that same token proof here instead of
+      // rejecting every non-inline handle.
+      return resolvableTokenArgument(call as ts.Expression, scope);
     });
   };
 
@@ -1744,7 +2839,7 @@ export function scanRuleStateReads(
               usages: readState(receiver.arguments[0], scope),
               subject: receiver.arguments[0].getText(source),
               text: node.getText(source),
-              comparison: comparisonOf(node.arguments[0]),
+              comparison: comparisonOf(node.arguments[0], scope),
             });
           }
         }
@@ -1826,19 +2921,69 @@ export function scanRuleStateReads(
     }
   };
 
+  const shadowBindingPattern = (scope: Scope, name: ts.BindingName): void => {
+    if (ts.isIdentifier(name)) {
+      declare(scope, name.text, { kind: 'opaque' });
+      return;
+    }
+    for (const element of name.elements) {
+      if (ts.isBindingElement(element)) shadowBindingPattern(scope, element.name);
+    }
+  };
+
   const visit = (node: ts.Node, scope: Scope): void => {
     const current = introducesScope(node)
-      ? { parent: scope, bindings: new Map<string, Binding>(), node }
+      ? {
+          parent: scope,
+          bindings: new Map<string, Binding>(),
+          node,
+          sourceSummary: scope.sourceSummary,
+        }
       : scope;
+
+    if (ts.isForOfStatement(node)) {
+      const iterable = unwrap(node.expression);
+      if (ts.isArrayLiteralExpression(iterable)) {
+        visit(node.expression, current);
+        for (const row of iterable.elements) {
+          if (ts.isOmittedExpression(row)) continue;
+          const rowScope: Scope = {
+            parent: current,
+            bindings: new Map(),
+            node: null,
+            sourceSummary: current.sourceSummary,
+          };
+          declareLoopTokenBindings(node, rowScope, row);
+          visit(node.statement, rowScope);
+        }
+        return;
+      }
+    }
+
+    if (ts.isIfStatement(node)) {
+      const outcome = sourceConditionOutcome(node.expression, current);
+      visit(node.expression, current);
+      if (outcome === false) {
+        if (node.elseStatement) visit(node.elseStatement, current);
+        return;
+      }
+      if (outcome === true) {
+        visit(node.thenStatement, current);
+        return;
+      }
+      visit(node.thenStatement, current);
+      if (node.elseStatement) visit(node.elseStatement, current);
+      return;
+    }
 
     // A parameter shadows whatever the enclosing scopes bound to that name. Its
     // own origin cannot be recovered from the source, so it resolves to nothing
     // rather than falling through to an outer handle of the same name.
     if (ts.isFunctionLike(node)) {
-      for (const parameter of node.parameters) {
-        if (ts.isIdentifier(parameter.name))
-          declare(current, parameter.name.text, { kind: 'opaque' });
-      }
+      for (const parameter of node.parameters) shadowBindingPattern(current, parameter.name);
+    }
+    if (ts.isCatchClause(node) && node.variableDeclaration) {
+      shadowBindingPattern(current, node.variableDeclaration.name);
     }
 
     // A statement, or a loop initializer, which production registers in the
@@ -1859,26 +3004,168 @@ export function scanRuleStateReads(
     // Writing through the container moves the member for every read after it.
     if (
       ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
       (ts.isPropertyAccessExpression(node.left) || ts.isElementAccessExpression(node.left))
     ) {
+      const operator = node.operatorToken.kind;
+      const plainAssignment = operator === ts.SyntaxKind.EqualsToken;
+      const logicalAssignment =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
+      // Evaluate LHS receiver/key effects before reading its old value or
+      // proving logical assignment short-circuit behavior.
+      visit(node.left, current);
       const base = unwrap(ownerOf(node.left) ?? node.left);
       const member = memberNameOf(node.left);
-      if (ts.isIdentifier(base) || ts.isConditionalExpression(base)) {
+      const previousState = logicalAssignment ? readState(node.left, current) : null;
+      // Legacy coverage can name a read before its table proves that member
+      // exists. Only actual local/source handles or table members are truthy.
+      const knownStateHandle =
+        previousState !== null &&
+        previousState.length > 0 &&
+        previousState.every(
+          (state) =>
+            state === 'local' ||
+            'exposedLocal' in state ||
+            state.provenance !== undefined ||
+            loweredHookStates(state.hook)?.has(state.state) === true
+        );
+      if (
+        knownStateHandle &&
+        (operator === ts.SyntaxKind.BarBarEqualsToken ||
+          operator === ts.SyntaxKind.QuestionQuestionEqualsToken)
+      ) {
+        // A state handle is truthy and non-nullish, so neither operator runs
+        // its RHS or changes the member.
+        return;
+      }
+      const writesRight =
+        plainAssignment ||
+        (operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken && knownStateHandle);
+      const targets =
+        ts.isIdentifier(base) || ts.isConditionalExpression(base)
+          ? containerBindings(base, current)
+          : [];
+      const receivers = targets.map((target) => {
+        const receiver = target.scope.bindings.get(target.name);
+        return {
+          target,
+          receiver,
+          aliases: receiver?.kind === 'token' ? tokenAliases(target, current) : [],
+        };
+      });
+      // A nested receiver is an object inside a binding's source graph, not a
+      // new binding named after the member expression. Capture it before RHS
+      // writes can rebind the root or replace that nested object.
+      const sourceReceiverValues = (expression: ts.Node): HookSourceValue[] => {
+        const value = unwrap(expression);
+        if (ts.isConditionalExpression(value)) {
+          return [
+            ...sourceReceiverValues(value.whenTrue),
+            ...sourceReceiverValues(value.whenFalse),
+          ];
+        }
+        return sourceResolveCandidates(value, current)
+          .filter((candidate) => candidate.matched && candidate.value.kind === 'object')
+          .map((candidate) => candidate.value);
+      };
+      const sourceReceivers = [...new Set(sourceReceiverValues(base))].map((value) => ({
+        value,
+        owning: sourceOwnerScope(current, value),
+      }));
+      const definitelyRunsRight =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken && knownStateHandle;
+      if (definitelyRunsRight) definitelyReachedLogicalAssignments.add(node);
+      try {
+        visit(node.right, current);
+      } finally {
+        if (definitelyRunsRight) definitelyReachedLogicalAssignments.delete(node);
+      }
+      if (writesRight) rememberSourceStateHooks(node.right, current);
+      for (const { value: receiver, owning } of sourceReceivers) {
+        const uncertain =
+          isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
+          isDeferredWrite(node, enclosingFunction(owning?.node ?? null)) ||
+          sourceReceivers.length > 1 ||
+          (logicalAssignment && !knownStateHandle) ||
+          member === null;
+        const right = writesRight ? sourceResolve(node.right, current) : null;
+        const replacement: HookSourceValue = right?.matched
+          ? right.value
+          : { kind: 'unknown', reason: 'unresolved member write' };
+        const versions = latestSourceGraphs(receiver);
+        if (!versions.includes(receiver)) versions.push(receiver);
+        for (const value of versions) {
+          if (value.kind !== 'object') continue;
+          const previous = { ...value, members: new Map(value.members) } as HookSourceValue;
+          const members = new Map(value.members);
+          const keys = member === null ? [...members.keys()] : [member];
+          for (const key of keys) members.set(key, replacement);
+          publishSourceGraph(current, value, { ...value, members }, previous, uncertain);
+        }
+      }
+      if (receivers.length > 0) {
         // An alias of the container is the same object, so the write lands on
         // the binding that actually holds the literal — on each of them when
         // the base may be either of two objects.
-        const targets = containerBindings(base, current);
-        for (const target of targets) {
-          const container = target.scope.bindings.get(target.name);
-          if (container?.kind !== 'token') continue;
+        for (const { target, receiver, aliases } of receivers) {
+          if (!receiver) continue;
           // The declaring scope, not this one: inside a callback the write
           // would otherwise be compared against itself and always look ordered.
           const uncertain =
-            isConditionallyReached(node) ||
+            isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
             isDeferredWrite(node, enclosingFunction(target.scope.node)) ||
             targets.length > 1 ||
+            (logicalAssignment && !knownStateHandle) ||
             member === null;
+          if (receiver.kind === 'handleBag' && receiver.sourceValue?.kind === 'object') {
+            // Already published through the captured source receivers above.
+            continue;
+          }
+          const currentContainer = target.scope.bindings.get(target.name);
+          if (
+            receiver.kind === 'token' &&
+            (!currentContainer ||
+              currentContainer.kind !== 'token' ||
+              currentContainer.initializer !== receiver.initializer)
+          ) {
+            // The evaluated token container was rebound during the RHS. Do not
+            // apply its result to the new receiver; invalidate the member on
+            // still-live aliases whose origin cannot be followed exactly.
+            for (const alias of aliases) {
+              const held = alias.scope.bindings.get(alias.name);
+              if (
+                held?.kind !== 'token' ||
+                held.initializer !== alias.initializer ||
+                held.bindingNode !== alias.bindingNode
+              )
+                continue;
+              const keys =
+                member === null
+                  ? [
+                      ...new Set([
+                        ...(held.members?.keys() ?? []),
+                        ...containerKeys(held.initializer, alias.scope),
+                      ]),
+                    ]
+                  : [member];
+              const members = new Map(held.members ?? []);
+              for (const key of keys) {
+                const previous =
+                  held.members?.get(key) ?? containerMembers(held.initializer, key, alias.scope);
+                members.set(key, [node, ...(uncertain ? previous : [])]);
+              }
+              declare(alias.scope, alias.name, { ...held, members });
+            }
+            continue;
+          }
+          const container =
+            receiver.kind === 'token' && currentContainer?.kind === 'token'
+              ? currentContainer
+              : receiver;
+          if (container.kind !== 'token') continue;
           const keys =
             member === null
               ? [
@@ -1897,11 +3184,12 @@ export function scanRuleStateReads(
               [container.initializer, ...(container.alternates ?? [])].flatMap((held) =>
                 containerMembers(held, key, current)
               );
-            members.set(key, [node.right, ...(uncertain ? previous : [])]);
+            members.set(key, [writesRight ? node.right : node, ...(uncertain ? previous : [])]);
           }
           declare(target.scope, target.name, { ...container, members });
         }
       }
+      return;
     }
 
     // A reassignment moves the handle for every read that follows it.
@@ -1916,7 +3204,8 @@ export function scanRuleStateReads(
       declareConditionally(owner, name, node.left, current, node.right);
       const next = owner.bindings.get(name);
       const uncertain =
-        isConditionallyReached(node) || isDeferredWrite(node, enclosingFunction(owner.node));
+        isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
+        isDeferredWrite(node, enclosingFunction(owner.node));
       if (uncertain && replaced?.kind === 'token' && next?.kind === 'token') {
         // Members written into the replaced container are candidates too; its
         // initializer alone does not carry them.
@@ -1961,7 +3250,12 @@ export function scanRuleStateReads(
     ts.forEachChild(node, (child) => visit(child, current));
   };
 
-  const rootScope: Scope = { parent: null, bindings: new Map(), node: source };
+  const rootScope: Scope = {
+    parent: null,
+    bindings: new Map(),
+    node: source,
+    sourceSummary,
+  };
   declareImports(rootScope);
   visit(source, rootScope);
 
