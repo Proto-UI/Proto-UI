@@ -22,7 +22,7 @@ import {
 export { isWebComponentOwnedRelocating as isWebComponentPortalRelocating } from './owned-relocation';
 import { withWebComponentOwnedRelocation } from './owned-relocation';
 function relocate(el: HTMLElement, destination: Node, move: () => void): void {
-  withWebComponentOwnedRelocation([el], destination, move);
+  withWebComponentOwnedRelocation([el], destination, (runOwnedMove) => runOwnedMove([el], move));
 }
 const refreshProjections = new WeakMap<HTMLElement, () => void>();
 export function refreshWebComponentPortalProjection(el: HTMLElement): void {

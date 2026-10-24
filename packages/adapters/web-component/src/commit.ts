@@ -258,18 +258,22 @@ export function commitChildren(
     if (cfg.mode === 'light' && ctx.slotEnd) {
       const slotParent = ctx.slotEnd.parentNode!;
       for (const node of cfg.slotPool) {
-        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
-        slotParent.insertBefore(node, ctx.slotEnd);
-        recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
+        focus.move([node], () => {
+          recordOwnedRelocationDiagnostic(0, 'insertBefore', 'before');
+          slotParent.insertBefore(node, ctx.slotEnd);
+          recordOwnedRelocationDiagnostic(0, 'insertBefore', 'after');
+        });
       }
     }
     withWebComponentOwnedRelocation(
       cfg.slotPool,
       hostRoot,
-      () => {
+      (moveOwnedNodes) => {
         setOwnedRelocationDiagnosticPhase('caller-publish');
         recordOwnedRelocationDiagnostic(0, 'replaceChildren', 'before');
-        (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
+        moveOwnedNodes(cfg.slotPool, () =>
+          hostRoot.replaceChildren(...Array.from(container.childNodes))
+        );
         recordOwnedRelocationDiagnostic(0, 'replaceChildren', 'after');
         setOwnedRelocationDiagnosticPhase('caller-restore');
         focus.restore(isWebComponentOwnedRelocating);

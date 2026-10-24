@@ -102,9 +102,9 @@ it('authenticates the whole destination ancestry and permanently consumes a reco
   root.append(child);
   origin.append(root);
   document.body.append(origin, destination, other);
-  withWebComponentOwnedRelocation([root], destination, () => {
+  withWebComponentOwnedRelocation([root], destination, (runOwnedMove) => {
     expect(isWebComponentOwnedRelocating(child)).toBe(false);
-    destination.append(root);
+    runOwnedMove([root], () => destination.append(root));
     const receipt = claimWebComponentOwnedRelocation(child);
     expect(receipt?.()).toBe(true);
     other.append(destination);
@@ -126,12 +126,12 @@ it('nested moves cannot renew an already consumed outer reconnect receipt', () =
     root = document.createElement('div');
   origin.append(root);
   document.body.append(origin, destination, nested);
-  withWebComponentOwnedRelocation([root], destination, () => {
-    destination.append(root);
+  withWebComponentOwnedRelocation([root], destination, (runOwnedMove) => {
+    runOwnedMove([root], () => destination.append(root));
     const outer = claimWebComponentOwnedRelocation(root);
     expect(outer?.()).toBe(true);
-    withWebComponentOwnedRelocation([root], nested, () => {
-      nested.append(root);
+    withWebComponentOwnedRelocation([root], nested, (runNestedMove) => {
+      runNestedMove([root], () => nested.append(root));
       expect(claimWebComponentOwnedRelocation(root)?.()).toBe(true);
       expect(outer?.()).toBe(false);
     });
@@ -148,8 +148,8 @@ it('foreign documents and throwing moves cannot retain relocation authority', ()
   origin.append(root);
   document.body.append(origin, destination);
   expect(() =>
-    withWebComponentOwnedRelocation([root], destination, () => {
-      destination.append(root);
+    withWebComponentOwnedRelocation([root], destination, (runOwnedMove) => {
+      runOwnedMove([root], () => destination.append(root));
       expect(claimWebComponentOwnedRelocation(root)?.()).toBe(true);
       throw new Error('move failed');
     })
@@ -185,7 +185,9 @@ it('a reentrant author same-parent reconnect cannot reuse the adapter allowance'
   const host = document.createElement(name);
   origin.append(host);
   reenter = true;
-  withWebComponentOwnedRelocation([host], destination, () => destination.append(host));
+  withWebComponentOwnedRelocation([host], destination, (runOwnedMove) =>
+    runOwnedMove([host], () => destination.append(host))
+  );
   expect(observations).toEqual([true, false, false]);
   expect(isWebComponentOwnedRelocating(host)).toBe(false);
 });
@@ -248,22 +250,24 @@ it('transport restores native text selection but does not steal deliberate autho
   document.body.append(origin, destination, other);
   input.focus();
   input.setSelectionRange(1, 5, 'backward');
-  withWebComponentOwnedRelocation([input], destination, () => destination.append(input));
+  withWebComponentOwnedRelocation([input], destination, (runOwnedMove) =>
+    runOwnedMove([input], () => destination.append(input))
+  );
   expect(document.activeElement).toBe(input);
   expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
     1,
     5,
     'backward',
   ]);
-  withWebComponentOwnedRelocation([input], origin, () => {
-    origin.append(input);
+  withWebComponentOwnedRelocation([input], origin, (runOwnedMove) => {
+    runOwnedMove([input], () => origin.append(input));
     other.focus();
   });
   expect(document.activeElement).toBe(other);
   input.focus();
-  withWebComponentOwnedRelocation([input], destination, () => {
+  withWebComponentOwnedRelocation([input], destination, (runOwnedMove) => {
     input.blur();
-    destination.append(input);
+    runOwnedMove([input], () => destination.append(input));
   });
   expect(document.activeElement).not.toBe(input);
 });
@@ -276,8 +280,8 @@ it('does not restore a removed, disabled, inert or author-reparented focused tar
     origin.append(input);
     document.body.append(origin, destination, elsewhere);
     input.focus();
-    withWebComponentOwnedRelocation([input], destination, () => {
-      destination.append(input);
+    withWebComponentOwnedRelocation([input], destination, (runOwnedMove) => {
+      runOwnedMove([input], () => destination.append(input));
       if (mode === 'removed') input.remove();
       if (mode === 'disabled') input.disabled = true;
       if (mode === 'inert') destination.setAttribute('inert', '');
@@ -299,7 +303,9 @@ it('captures open-shadow active chains while retaining the original native input
   document.body.append(origin, destination);
   input.focus();
   input.setSelectionRange(2, 6, 'forward');
-  withWebComponentOwnedRelocation([host], destination, () => destination.append(host));
+  withWebComponentOwnedRelocation([host], destination, (runOwnedMove) =>
+    runOwnedMove([host], () => destination.append(host))
+  );
   expect(document.activeElement).toBe(host);
   expect(shadow.activeElement).toBe(input);
   expect([input.selectionStart, input.selectionEnd, input.selectionDirection]).toEqual([
@@ -331,8 +337,8 @@ it('does not restore focus into a retired, replaced or revoked logical owner', (
       subscribe: () => () => {},
     });
     input.focus();
-    withWebComponentOwnedRelocation([host], destination, () => {
-      destination.append(host);
+    withWebComponentOwnedRelocation([host], destination, (runOwnedMove) => {
+      runOwnedMove([host], () => destination.append(host));
       if (mode === 'retired') release();
       if (mode === 'replaced') markProtoInstance(host, proto, createLogicalInstance(proto));
       if (mode === 'revoked') {
@@ -376,7 +382,9 @@ it('focus restoration never replays selection over author type, value, selection
       { once: true }
     );
     expect(() =>
-      withWebComponentOwnedRelocation([input], destination, () => destination.append(input))
+      withWebComponentOwnedRelocation([input], destination, (runOwnedMove) =>
+        runOwnedMove([input], () => destination.append(input))
+      )
     ).not.toThrow();
     if (mode === 'type') expect(input.type).toBe('number');
     if (mode === 'selection') {

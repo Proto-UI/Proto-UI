@@ -37,6 +37,52 @@ it('records deliberate attached blur without restoring focus', () => {
     ])
   );
 });
+it('attributes an attached focusout only to the exact captured subtree move', () => {
+  setOwnedRelocationDiagnostics(true);
+  const root = document.createElement('div');
+  const input = document.createElement('input');
+  root.append(input);
+  document.body.append(root);
+  input.focus();
+  const guard = captureWebComponentCallerFocus([root]);
+  guard.move([root], () => {
+    // Model Chromium's observed blur-before-detach ordering; the native F3
+    // fixture separately exercises the actual DOM removal without this call.
+    input.blur();
+    root.remove();
+    document.body.append(root);
+  });
+  guard.restore(() => true);
+  guard.dispose();
+  expect(document.activeElement).toBe(input);
+  const entries = readOwnedRelocationDiagnostics().entries;
+  expect(entries).toContainEqual(
+    expect.objectContaining({ phase: 'idle:focusout:owned-move', fact: true })
+  );
+  expect(entries).not.toContainEqual(expect.objectContaining({ fact: 'attached-focusout' }));
+});
+it('does not attribute an unrelated attached focusout to the captured target move', () => {
+  setOwnedRelocationDiagnostics(true);
+  const root = document.createElement('div');
+  const input = document.createElement('input');
+  const unrelated = document.createElement('div');
+  root.append(input);
+  document.body.append(root, unrelated);
+  input.focus();
+  const guard = captureWebComponentCallerFocus([root]);
+  guard.move([unrelated], () => {
+    input.blur();
+  });
+  guard.restore(() => true);
+  guard.dispose();
+  expect(document.activeElement).not.toBe(input);
+  expect(readOwnedRelocationDiagnostics().entries).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ phase: 'idle:blocked', fact: 'attached-focusout' }),
+      expect.objectContaining({ phase: 'idle:reject', fact: 'blocked' }),
+    ])
+  );
+});
 it('records author focus elsewhere without taking focus back', () => {
   setOwnedRelocationDiagnostics(true);
   const input = document.createElement('input'),
@@ -44,7 +90,7 @@ it('records author focus elsewhere without taking focus back', () => {
   document.body.append(input, other);
   input.focus();
   const guard = captureWebComponentCallerFocus([input]);
-  other.focus();
+  guard.move([input], () => other.focus());
   guard.restore(() => true);
   guard.dispose();
   expect(document.activeElement).toBe(other);

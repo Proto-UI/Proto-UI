@@ -113,9 +113,9 @@ export class SlotProjector {
           // or replaced this projection. Do not reclaim author-moved nodes.
           if (this.slotEnd !== end || end.parentNode !== parent) break;
           if (n.parentNode !== this.el || !this.shouldMoveToSlot(n)) continue;
-          withWebComponentOwnedRelocation([n], parent, () => {
-            parent.insertBefore(n, end);
-          });
+          withWebComponentOwnedRelocation([n], parent, (runOwnedMove) =>
+            runOwnedMove([n], () => parent.insertBefore(n, end))
+          );
           if (n.parentNode === parent && !this.projected.includes(n)) this.projected.push(n);
         }
       } finally {

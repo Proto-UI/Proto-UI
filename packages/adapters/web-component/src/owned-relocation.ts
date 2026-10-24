@@ -14,9 +14,17 @@ type Window = {
   claimed?: boolean;
   revoked?: boolean;
 };
+/** Scope one synchronous DOM mutation that can detach the captured caller target. */
+type OwnedMove = <T>(roots: readonly Node[], move: () => T) => T;
 const windows = new WeakMap<Node, Window>();
 const parentOf = (node: Node): Node | null =>
   node.parentNode ?? (node.nodeType === 11 && 'host' in node ? (node as ShadowRoot).host : null);
+function isWithinComposedRoot(node: Node, root: Node): boolean {
+  for (let current: Node | null = node; current; current = parentOf(current)) {
+    if (current === root) return true;
+  }
+  return false;
+}
 function pathToRoot(node: Node): Node[] {
   const path: Node[] = [];
   for (let current: Node | null = node; current; current = parentOf(current)) path.push(current);
@@ -52,9 +60,10 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
   let active = doc?.activeElement as HTMLElement | null | undefined;
   while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement as HTMLElement;
   const target = active;
-  const owned = !!target && roots.some((root) => pathToRoot(target).includes(root));
+  const owned = !!target && roots.some((root) => isWithinComposedRoot(target, root));
   const owner = target ? getLogicalEventRouteSurfaceForTarget(target) : null;
   let blocked = !owned || !!target?.isContentEditable;
+  let ownedMoveDepth = 0;
   const diagnostic = beginOwnedRelocationDiagnostic();
   recordOwnedRelocationDiagnostic(
     diagnostic,
@@ -73,14 +82,31 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     }
   };
   const onBlur = (event: Event) => {
-    // A deliberate blur while still attached is not transport-induced loss.
+    // Native removal may dispatch focusout before the moved subtree is detached.
+    // Only the exact adapter DOM operation may classify that attached blur as transport.
     if (!restoring) {
       const connected = target?.isConnected;
+      const includesTarget = event.composedPath().includes(target!);
       recordOwnedRelocationDiagnostic(diagnostic, 'focusout:connected-at-gate', connected ?? false);
-      if (connected && event.composedPath().includes(target!)) {
+      if (connected && includesTarget && ownedMoveDepth > 0) {
+        recordOwnedRelocationDiagnostic(diagnostic, 'focusout:owned-move', true);
+      } else if (connected && includesTarget) {
         blocked = true;
         recordOwnedRelocationDiagnostic(diagnostic, 'blocked', 'attached-focusout');
       }
+    }
+  };
+  const move: OwnedMove = (movingRoots, operation) => {
+    const transportsTarget =
+      owned && !!target && movingRoots.some((root) => isWithinComposedRoot(target, root));
+    if (!transportsTarget) return operation();
+    ownedMoveDepth++;
+    recordOwnedRelocationDiagnostic(diagnostic, 'owned-move:before', movingRoots.length);
+    try {
+      return operation();
+    } finally {
+      recordOwnedRelocationDiagnostic(diagnostic, 'owned-move:after', movingRoots.length);
+      ownedMoveDepth--;
     }
   };
   if (owned) {
@@ -88,6 +114,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     doc!.addEventListener('focusout', onBlur, true);
   }
   return {
+    move,
     restore(isCurrent: (node: Node) => boolean) {
       // Preserve the original short-circuit order and read every predicate once.
       if (blocked) {
@@ -173,11 +200,15 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
     },
   };
 }
-/** stagingRoot is replaced by destination; otherwise roots are direct destination children. */
+/**
+ * stagingRoot is replaced by destination; otherwise roots are direct destination children.
+ * Each physical DOM mutation must use the supplied move scope so native blur is attributed only
+ * to the exact adapter-owned transport operation.
+ */
 export function withWebComponentOwnedRelocation<T>(
   roots: readonly Node[],
   destination: Node,
-  move: () => T,
+  move: (runOwnedMove: OwnedMove) => T,
   stagingRoot?: Node
 ): T {
   const acquired: Array<[Node, Window]> = [];
@@ -204,7 +235,7 @@ export function withWebComponentOwnedRelocation<T>(
         visit(root, [...path.slice(0, index), ...destinationPath]);
       } else visit(root, [root, ...destinationPath]);
     }
-    const result = move();
+    const result = move(focus.move);
     focus.restore(isWebComponentOwnedRelocating);
     return result;
   } finally {

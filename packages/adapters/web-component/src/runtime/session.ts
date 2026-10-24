@@ -93,7 +93,9 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
         const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
-        withWebComponentOwnedRelocation(slotPool, root, () => root.replaceChildren(...slotPool));
+        withWebComponentOwnedRelocation(slotPool, root, (runOwnedMove) =>
+          runOwnedMove(slotPool, () => root.replaceChildren(...slotPool))
+        );
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();
