@@ -151,7 +151,7 @@ Explicit child update/setProps structural recommits remain rejected before repla
 
 ### Caller focus transport follow-up
 
-The combined candidate uses the captured native insertion primitive, one null-related focusout at the unchanged pre-move ancestry, and synchronous mutation records to certify the exact staging removal and insertion. Additional protected-ancestry mutations revoke restoration; an arbitrary adapter callback window does not grant focus-loss authority.
+The combined candidate uses the captured native insertion primitive, one null-related focusout at the unchanged pre-move ancestry, and synchronous mutation records to certify the exact staging removal and insertion. Additional protected-ancestry mutations revoke staging restoration. Existing privileged caller/portal move callbacks retain their separate exact-move scope and deliberate-refocus/blur rejection; they do not substitute for staging certification.
 
 If a connection callback refocuses the captured target and then deliberately blurs it, the later attached blur cancels restoration even while the same DOM move is still running. Native callback controls distinguish this author decision from the initial transport focusout.
 

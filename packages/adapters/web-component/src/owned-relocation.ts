@@ -14,6 +14,8 @@ type Window = {
   claimed?: boolean;
   revoked?: boolean;
 };
+/** Scope one synchronous DOM mutation that can detach the captured caller target. */
+type OwnedMove = <T>(roots: readonly Node[], move: () => T) => T;
 const windows = new WeakMap<Node, Window>();
 // Capture the host primitive before prototype author hooks can run. Instance
 // overrides/getters are never invoked while natural-blur authority is open.
@@ -64,6 +66,7 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
   const owned = !!target && roots.some((root) => isWithinComposedRoot(target, root));
   const owner = target ? getLogicalEventRouteSurfaceForTarget(target) : null;
   let blocked = !owned || !!target?.isContentEditable;
+  let ownedMoveDepth = 0;
   let targetRefocused = false;
   const diagnostic = beginOwnedRelocationDiagnostic();
   recordOwnedRelocationDiagnostic(
@@ -96,7 +99,9 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       if (connected && includesTarget) {
         const currentPath = pathToRoot(target!);
         const operation = staging;
-        if (
+        if (!operation && ownedMoveDepth > 0 && !targetRefocused) {
+          recordOwnedRelocationDiagnostic(diagnostic, 'focusout:owned-move', true);
+        } else if (
           operation &&
           !operation.consumed &&
           !targetRefocused &&
@@ -114,11 +119,25 @@ export function captureWebComponentCallerFocus(roots: readonly Node[]) {
       }
     }
   };
+  const move: OwnedMove = (movingRoots, operation) => {
+    const transportsTarget =
+      owned && !!target && movingRoots.some((root) => isWithinComposedRoot(target, root));
+    if (!transportsTarget) return operation();
+    ownedMoveDepth++;
+    recordOwnedRelocationDiagnostic(diagnostic, 'owned-move:before', movingRoots.length);
+    try {
+      return operation();
+    } finally {
+      recordOwnedRelocationDiagnostic(diagnostic, 'owned-move:after', movingRoots.length);
+      ownedMoveDepth--;
+    }
+  };
   if (owned) {
     doc!.addEventListener('focusin', onFocus, true);
     doc!.addEventListener('focusout', onBlur, true);
   }
   return {
+    move,
     stagingInsertBefore(node: Node, parent: Node, before: Node | null) {
       if (staging) {
         blocked = true;
