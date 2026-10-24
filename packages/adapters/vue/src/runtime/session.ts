@@ -20,7 +20,11 @@ export function createVueHostSession<Props extends PropsBaseType>(args: {
   };
   onLifecycleCheckpoint?: (cp: RuntimeCheckpoint) => void;
   onLifecycleEvent?: (event: RuntimeLifecycleEvent) => void;
-  onCommit: (children: any, signal: CommitSignal | null) => void;
+  onCommit: (
+    children: any,
+    signal: CommitSignal | null,
+    caps: ReturnType<typeof createAdapterHost<Props>>['caps']
+  ) => void;
   onAfterUnmount?: () => void;
   initialMount?: 'eager' | 'manual';
 }) {
@@ -38,7 +42,8 @@ export function createVueHostSession<Props extends PropsBaseType>(args: {
     initialMount,
   } = args;
 
-  return createAdapterHost(
+  let caps: ReturnType<typeof createAdapterHost<Props>>['caps'];
+  const session = createAdapterHost(
     proto,
     {
       getRawProps: () => rawPropsSource.get() as Readonly<Props & PropsBaseType>,
@@ -48,7 +53,7 @@ export function createVueHostSession<Props extends PropsBaseType>(args: {
       onLifecycleEvent,
       commit: (children, signal) => {
         eventGate.disable();
-        onCommit(children, signal ?? null);
+        onCommit(children, signal ?? null, caps);
       },
     },
     {
@@ -65,6 +70,9 @@ export function createVueHostSession<Props extends PropsBaseType>(args: {
         onAfterUnmount?.();
       },
     },
-    { initialMount }
+    { initialMount: 'manual' }
   );
+  caps = session.caps;
+  if (initialMount !== 'manual') void session.mount();
+  return session;
 }

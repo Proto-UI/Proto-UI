@@ -22,6 +22,7 @@ import {
 import {
   UnUse,
   StyleHandle,
+  OwnedDecorationTarget,
   TemplateType,
   TemplateProps,
   TemplateChildren,
@@ -118,7 +119,7 @@ export interface WhenBuilder<Props extends PropsBaseType> {
 }
 
 export type RuleOp<Props extends PropsBaseType = PropsBaseType> =
-  | { kind: 'feedback.style.use'; handles: StyleHandle[] }
+  | { kind: 'feedback.style.use'; handles: StyleHandle[]; target?: OwnedDecorationTarget }
   | { kind: 'feedback.material.use'; candidate: MaterialCandidate }
   | {
       kind: 'state.set';
@@ -141,6 +142,7 @@ export interface IntentBuilder<Props extends PropsBaseType = PropsBaseType> {
     material: { use(candidate: MaterialCandidate): void };
     style: {
       use(...handles: StyleHandle[]): void;
+      to(target: OwnedDecorationTarget): { use(...handles: StyleHandle[]): void };
     };
   };
   state: <T>(handle: OwnedStateHandle<T> | BorrowedStateHandle<T, Props>) => StateIntentBuilder<T>;
@@ -259,6 +261,8 @@ export interface DefHandle<Props extends PropsBaseType, Exposes = Record<string,
     };
     style: {
       use: (...handles: StyleHandle[]) => UnUse;
+      declareDecoration(): OwnedDecorationTarget;
+      to(target: OwnedDecorationTarget): { use(...handles: StyleHandle[]): UnUse };
       transition: (declaration: ResidentMotionDeclaration) => UnUse;
       presence: (declaration: PresencePresentationDeclaration) => UnUse;
     };
@@ -357,6 +361,7 @@ export interface ElementFactory {
 export interface RendererHandle<Props extends PropsBaseType> {
   el: ElementFactory;
   slot(): TemplateNode;
+  decoration(target: OwnedDecorationTarget): TemplateNode;
   r: ReservedFactories;
   svg: SvgFactories;
   read: RenderReadHandle<Props>; // render 阶段可用的 readonly 快照视图

@@ -13,7 +13,7 @@ import {
   PRESENCE_RUN_IN_CALLBACK_CAP,
 } from '@proto.ui/module-feedback';
 import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
-import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
+import { OWNED_DECORATION_CAP, RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   NATIVE_LINK_HOST_CAP,
   NATIVE_LINK_RUN_IN_CALLBACK_CAP,
@@ -161,6 +161,7 @@ import {
 } from '../platform/instance-tree';
 
 type Vue2OwnerModulesArgs<Props extends PropsBaseType> = {
+  ownedDecoration?: boolean;
   instanceToken: LogicalInstanceToken;
   emit: (key: string, payload?: unknown, options?: Record<string, unknown>) => void;
   rawPropsSource: RawPropsSource<Props>;
@@ -325,6 +326,7 @@ export function createVue2OwnerModules<Props extends PropsBaseType>(
   } = args;
 
   return createCapsWiring()
+    .use('feedback', args.ownedDecoration ? [[OWNED_DECORATION_CAP, true]] : [])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
@@ -396,6 +398,7 @@ export type FocusIntentState = {
 };
 
 export function createVue2Modules<Props extends PropsBaseType>(args: {
+  ownedDecoration?: boolean;
   el: HTMLElement;
   instanceToken: LogicalInstanceToken;
   router: {
@@ -491,6 +494,7 @@ export function createVue2Modules<Props extends PropsBaseType>(args: {
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
+      ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
       [EFFECTS_CAP, effectsPort],
       [PRESENCE_PRESENTATION_SINK_CAP, createWebPresencePresentationSink(args.el, effectsPort)],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],

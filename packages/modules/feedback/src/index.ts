@@ -1,4 +1,5 @@
 export * from './types';
+export * from './style/owned-decoration-cap';
 export type { FeedbackPort } from './types';
 export * from './create';
 export * from './caps';

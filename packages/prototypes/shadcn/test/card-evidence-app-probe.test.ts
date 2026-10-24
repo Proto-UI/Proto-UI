@@ -33,6 +33,22 @@ it('shares the actual four-framework Card evidence factory across every part and
     await check(true);
     app.set('new-york', undefined);
     await check(false);
+    app.set('rhea', undefined, 'default');
+    await check(true);
+    app.set('rhea', undefined, 'sm');
+    await vi.waitFor(() => {
+      for (const r of app.records) {
+        expect(
+          r.host.querySelector('[data-pui-style~="bg-card"]').getAttribute('data-pui-style')
+        ).toContain('py-4');
+      }
+    });
+    // Provider and child props are separate updates, not an atomic cross-owner transaction.
+    // Restore a density supported by both profiles before changing the outer scope.
+    app.set('rhea', undefined, 'default');
+    await check(true);
+    app.set('new-york', undefined, 'default');
+    await check(false);
     app.set('new-york', 'rhea');
     await check(true);
     expect(errors).toEqual([]);

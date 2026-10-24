@@ -177,6 +177,53 @@ try {
           fullPage: true,
         });
       }
+  // Verify the original native tab order and keep the focus-visible entry inside
+  // the document. The last control has no next in-document focus target.
+  const focusTrace = async (kind, phase) => {
+    const trace = await page.evaluate(
+      ({ kind, phase }) => {
+        const editors = window.textareaEvidence.records.map((r) => r.editor());
+        const active = document.activeElement;
+        return {
+          kind,
+          phase,
+          documentFocused: document.hasFocus(),
+          activeIndex: editors.indexOf(active),
+          activeTag: active?.tagName,
+          activeRole: active?.getAttribute('role'),
+          activeTabIndex: active?.tabIndex,
+          editors: editors.map((e) => ({
+            kind: e.closest('section')?.dataset.runtime,
+            tabIndex: e.tabIndex,
+            disabled: e.disabled,
+            connected: e.isConnected,
+          })),
+        };
+      },
+      { kind, phase }
+    );
+    observations.push({ focusNavigation: trace });
+    return trace;
+  };
+  const enterKeyboardFocus = async (kind) => {
+    const kinds = ['wc', 'react', 'vue', 'vue2'],
+      index = kinds.indexOf(kind);
+    const editor = page.locator(`section[data-runtime="${kind}"] textarea`);
+    await editor.focus();
+    const before = await focusTrace(kind, 'before-in-document-entry');
+    assert.equal(before.activeIndex, index);
+    assert(before.editors.every((e) => e.connected && !e.disabled && e.tabIndex === 0));
+    await page.keyboard.press(index === 3 ? 'Shift+Tab' : 'Tab');
+    const neighbor = await focusTrace(kind, 'keyboard-neighbor');
+    assert.equal(
+      neighbor.activeIndex,
+      index === 3 ? 2 : index + 1,
+      'native DOM tab neighbor must match the original editor order'
+    );
+    await page.keyboard.press(index === 3 ? 'Tab' : 'Shift+Tab');
+    const restored = await focusTrace(kind, 'keyboard-return');
+    assert.equal(restored.activeIndex, index, 'native keyboard return must target the same editor');
+  };
   // Resolve the actually applied ring variable through the browser's color parser,
   // and verify that the painted box-shadow contains that exact computed color.
   async function observeState(kind, expectedBorder, expectedRing, wanted) {
@@ -262,9 +309,7 @@ try {
             for (const focused of mode === 'disabled' ? [false] : [false, true]) {
               const editor = page.locator(`section[data-runtime="${kind}"] textarea`);
               if (focused) {
-                await editor.focus();
-                await page.keyboard.press('Tab');
-                await page.keyboard.press('Shift+Tab');
+                await enterKeyboardFocus(kind);
               } else await editor.evaluate((e) => e.blur());
 
               const border = invalid
@@ -374,9 +419,7 @@ try {
     await editor.fill(Array.from({ length: 12 }, (_, i) => `Line ${i}`).join('\n'));
     const after = await editor.evaluate((e) => e.getBoundingClientRect().height);
     assert(after > before, `${kind}: native intrinsic content growth`);
-    await editor.focus();
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Shift+Tab');
+    await enterKeyboardFocus(kind);
     assert(
       await editor.evaluate((e) => document.activeElement === e && e.matches(':focus-visible')),
       `${kind}: real keyboard focus-visible entry`
@@ -411,6 +454,15 @@ try {
     await page.evaluate(() => window.textareaEvidence.set('rhea', false));
     await page.waitForTimeout(240);
   }
+  // Preserve the original last-control navigation as diagnostics after the
+  // acceptance matrix, so leaving the page cannot poison later input routing.
+  const lastEditor = page.locator('section[data-runtime="vue2"] textarea');
+  await lastEditor.focus();
+  await focusTrace('vue2', 'original-last-before');
+  await page.keyboard.press('Tab');
+  await focusTrace('vue2', 'original-last-after-Tab');
+  await page.keyboard.press('Shift+Tab');
+  await focusTrace('vue2', 'original-last-after-ShiftTab');
   assert.deepEqual(errors, []);
   await writeFile(
     join(out, 'observations.json'),
@@ -423,6 +475,8 @@ try {
     try {
       readiness = await page.evaluate(() => ({
         ready: document.documentElement.dataset.ready,
+        documentFocused: document.hasFocus(),
+        activeElement: document.activeElement?.outerHTML,
         records: window.textareaEvidence?.records.map((r) => ({
           kind: r.kind,
           editor: !!r.editor(),

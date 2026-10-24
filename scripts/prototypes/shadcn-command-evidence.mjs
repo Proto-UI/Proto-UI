@@ -144,6 +144,11 @@ try {
         return {
           kind: r.kind,
           type: r.type,
+          theme: {
+            rootFontSize: getComputedStyle(document.documentElement).fontSize,
+            rootRadiusToken: ss.getPropertyValue('--pui-radius').trim(),
+            mdRadiusToken: ss.getPropertyValue('--pui-radius-md').trim(),
+          },
           input: {
             width: input.getBoundingClientRect().width,
             font: cs.fontSize,
@@ -210,9 +215,12 @@ try {
       const facts = await endpoint((rows) => {
         assert.equal(rows.length, 8);
         for (const r of rows) {
+          assert.equal(r.theme.rootFontSize, '16px');
+          assert.equal(r.theme.rootRadiusToken, '0.625rem');
+          assert.equal(r.theme.mdRadiusToken, 'max(calc(0.625rem - 2px), 0px)');
           assert.equal(r.input.border, '0px');
           assert.equal(r.input.radius, '0px');
-          assert.equal(r.shell.radius, style === 'rhea' ? '18px' : '6px');
+          assert.equal(r.shell.radius, style === 'rhea' ? '18px' : '8px');
           assert.equal(r.shell.height, style === 'rhea' ? 32 : 36);
           assert.equal(r.input.font, r.type === 'command' ? '14px' : '14px');
         }
@@ -341,7 +349,7 @@ try {
         window.retainedEditor = e;
       });
       await page.evaluate(() => window.commandEvidence.set({ style: 'new-york-v4' }));
-      await endpoint((rows) => rows.forEach((r) => assert.equal(r.shell.radius, '6px')));
+      await endpoint((rows) => rows.forEach((r) => assert.equal(r.shell.radius, '8px')));
       const continuity = await input.evaluate((e) => ({
         same: e === window.retainedEditor,
         value: e.value,

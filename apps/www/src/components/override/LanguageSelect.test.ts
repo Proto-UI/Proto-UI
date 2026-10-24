@@ -1,16 +1,25 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import ts from 'typescript';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const source = readFileSync(
   resolve(process.cwd(), 'apps/www/src/components/override/LanguageSelect.astro'),
   'utf8'
 );
-const inlineScript = source.match(/<script is:inline>([\s\S]*?)<\/script>/)?.[1];
-
-if (!inlineScript) {
-  throw new Error('LanguageSelect.astro must include an inline initialization script');
+const processedScripts = [...source.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+if (processedScripts.length !== 1 || source.includes('<script is:inline>')) {
+  throw new Error('LanguageSelect.astro must have one processed initialization script');
 }
+const processedScript = processedScripts[0][1];
+const importStatement = "import { initSiteControls } from '../site-shadcn-controls';";
+if (!processedScript.includes(importStatement)) {
+  throw new Error('LanguageSelect must retain its existing site controls initialization');
+}
+const inlineScript = ts.transpileModule(
+  processedScript.replace(importStatement, 'const initSiteControls = () => {};'),
+  { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }
+).outputText;
 
 const languageSelect = (family = 'shadcn') => `
   <div class="language-select-wrapper">

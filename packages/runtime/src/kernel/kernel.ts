@@ -1,6 +1,7 @@
 // packages/runtime/src/kernel/kernel.ts
 import {
   createRendererPrimitives,
+  snapshotOwnedTemplateBlueprint,
   Phase,
   Prototype,
   RendererHandle,
@@ -21,6 +22,7 @@ import {
 import type { RuleFacade } from '@proto.ui/module-rule';
 import type { ModuleOrchestratorFacadeView } from '../orchestrator/module-orchestrator/types';
 import type { PropsFacade } from '@proto.ui/module-props';
+import type { FeedbackFacade } from '@proto.ui/module-feedback';
 import type { ContextFacade } from '@proto.ui/module-context';
 import type { AnatomyFacade } from '@proto.ui/module-anatomy';
 import type { ExecPhase } from '@proto.ui/module-base';
@@ -181,8 +183,8 @@ export function createKernel<P extends PropsBaseType>(
     },
   };
 
-  const { el, slot, r, svg } = createRendererPrimitives();
-  const renderer: RendererHandle<P> = { el, slot, r, svg, read };
+  const { el, slot, r, svg, decoration } = createRendererPrimitives();
+  const renderer: RendererHandle<P> = { el, slot, r, svg, decoration, read };
 
   // ----------------
   // render
@@ -191,7 +193,34 @@ export function createKernel<P extends PropsBaseType>(
     const previousPhase = phase;
     setPhase('render');
     try {
-      return renderFn(renderer);
+      const feedback = modules.getFacades()['feedback'] as FeedbackFacade;
+      const guarded = feedback?.style.hasDecorationTargets?.() ?? false;
+      const lease = guarded ? feedback.style.captureDecorationLease() : undefined;
+      const rendered = renderFn(renderer);
+      const children = guarded ? snapshotOwnedTemplateBlueprint(rendered) : rendered;
+      if (guarded && feedback.style.captureDecorationLease() !== lease)
+        throw new Error('[Template] stale owned blueprint lease');
+      const targets: import('@proto.ui/core').OwnedDecorationTarget[] = [];
+      const visit = (node: any): void => {
+        if (Array.isArray(node)) {
+          for (const n of node) visit(n);
+          return;
+        }
+        if (!node || typeof node !== 'object') return;
+        if (node.type?.kind === 'decoration') {
+          if (
+            Object.keys(node).some((k) => k !== 'type') ||
+            Object.keys(node.type).some((k) => k !== 'kind' && k !== 'target')
+          )
+            throw new Error('[Template] decoration must be an empty owned leaf');
+          targets.push(node.type.target);
+        } else visit(node.children);
+      };
+      visit(children);
+      if (feedback?.style.validateDecorationTemplate)
+        feedback.style.validateDecorationTemplate(targets);
+      else if (targets.length) throw new Error('[Template] owned-decoration unsupported');
+      return children;
     } finally {
       setPhase(previousPhase);
     }

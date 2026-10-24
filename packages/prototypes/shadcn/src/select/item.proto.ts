@@ -1,19 +1,28 @@
+import { setupSelectStyle } from './style';
+import { SHADCN_STYLE_SCOPE } from '../style-scope';
 import { definePrototype, delay, type RendererHandle, tw } from '@proto.ui/core';
 import { asSelectItem } from '@proto.ui/prototypes-base/select';
 import type { ShadcnSelectItemExposes, ShadcnSelectItemProps } from './types';
 
-function renderCheck(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, selected: boolean) {
+function renderCheck(
+  renderer: Pick<RendererHandle<any>, 'svg' | 'el'>,
+  selected: boolean,
+  rhea: boolean
+) {
   return renderer.el(
     'span',
     {
       style: tw(
-        'pointer-events-none absolute right-2 flex size-3.5 shrink-0 items-center justify-center'
+        rhea
+          ? 'pointer-events-none absolute right-2 flex size-4 shrink-0 items-center justify-center'
+          : 'pointer-events-none absolute right-2 flex size-3.5 shrink-0 items-center justify-center'
       ),
     },
     selected
       ? renderer.svg.root(
           {
             viewBox: '0 0 24 24',
+            'aria-hidden': 'true',
             width: 16,
             height: 16,
             fill: 'none',
@@ -31,6 +40,7 @@ function renderCheck(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, selected
 const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExposes>({
   name: 'shadcn-select-item',
   setup(def) {
+    const style = setupSelectStyle(def);
     // P-SHADCN-SELECT-ITEM-BASE-INHERITANCE,
     // P-SHADCN-SELECT-ITEM-CURRENT-BASE-DEVIATIONS
     const state = asSelectItem().stateHandles;
@@ -40,22 +50,33 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
     // P-SHADCN-SELECT-ITEM-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'relative flex w-full cursor-default items-center gap-2 rounded-sm pl-2 pr-8 py-1.5 text-sm outline-none select-none'
+        'relative flex w-full cursor-default items-center gap-2 pl-2 pr-8 py-1.5 text-sm outline-none select-none'
       )
     );
+    def.rule({
+      when: (w) => w.state(style).eq('new-york-v4'),
+      intent: (i) => i.feedback.style.use(tw('rounded-sm')),
+    });
+    def.rule({
+      when: (w) => w.state(style).eq('rhea'),
+      intent: (i) => i.feedback.style.use(tw('min-h-7 rounded-[var(--pui-radius-xl)]')),
+    });
     // P-SHADCN-SELECT-ITEM-STATE-DRIVEN-STYLES
     def.rule({
       when: (w) =>
-        w.any(
-          w.state(active).eq(true),
-          w.state(hovered).eq(true),
-          w.state(focused).eq(true),
-          w.state(focusVisible).eq(true)
+        w.all(
+          w.state(style).eq('new-york-v4'),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true)
+          )
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     def.rule({
-      when: (w) => w.state(pressed).eq(true),
+      when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(pressed).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-accent/80')),
     });
     def.rule({
@@ -63,6 +84,20 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
       intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
     });
 
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq('rhea'),
+          w.any(
+            w.state(active).eq(true),
+            w.state(hovered).eq(true),
+            w.state(focused).eq(true),
+            w.state(focusVisible).eq(true)
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-foreground/10 text-accent-foreground')),
+    });
+    let renderedStyle = style.get();
     let renderTask: { cancel(): void } | null = null;
     // P-SHADCN-SELECT-ITEM-SELECTED-INDICATOR
     selected.watch((run, event) => {
@@ -73,12 +108,31 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
         run.update();
       });
     });
+    const repaint = (run: import('@proto.ui/core').RunHandle<ShadcnSelectItemProps>) => {
+      if (renderedStyle === style.get()) return;
+      renderTask?.cancel();
+      renderTask = delay(0, () => {
+        renderTask = null;
+        run.update();
+      });
+    };
+    def.context.trySubscribe(SHADCN_STYLE_SCOPE, repaint);
+    def.props.watchRaw(['styleProfile'], repaint);
+    def.lifecycle.onMounted(repaint);
+    def.lifecycle.onUpdated(repaint);
+    def.lifecycle.onBeforeDispose(() => {
+      renderTask?.cancel();
+      renderTask = null;
+    });
     def.lifecycle.onUnmounted(() => {
       renderTask?.cancel();
       renderTask = null;
     });
 
-    return (renderer) => [renderer.r.slot(), renderCheck(renderer, selected.get())];
+    return (renderer) => {
+      renderedStyle = style.get();
+      return [renderer.r.slot(), renderCheck(renderer, selected.get(), renderedStyle === 'rhea')];
+    };
   },
 });
 

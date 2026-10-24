@@ -1,0 +1,49 @@
+name: Draft four-Web-adapter decoration native evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/core/src/handles.ts'
+      - 'packages/core/src/spec/template.ts'
+      - 'packages/modules/feedback/**'
+      - 'packages/modules/rule/**'
+      - 'packages/modules/rule-expose-state-web/**'
+      - 'packages/adapters/web-component/src/**'
+      - 'packages/adapters/base/src/platform/web-owned-decoration.ts'
+      - 'packages/adapters/react/src/**'
+      - 'packages/adapters/react/test/fixtures/owned-decoration-web-evidence-app.ts'
+      - 'packages/adapters/vue/src/**'
+      - 'packages/adapters/vue2/src/**'
+      - 'scripts/feedback/owned-decoration-web-evidence*'
+      - '.github/workflows/owned-decoration-web-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  owned-decoration-web-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked existing dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Check bounded activation
+        run: node node_modules/vitest/vitest.mjs run packages/modules/feedback/test/owned-decoration-activation.test.ts packages/modules/rule/test/owned-decoration-address.test.ts packages/adapters/web-component/test/owned-decoration.integration.test.ts packages/compiler/test/owned-decoration-rejection.test.ts packages/adapters/react/test/owned-decoration.integration.test.ts packages/adapters/vue/test/owned-decoration.integration.test.ts packages/adapters/vue2/test/owned-decoration.integration.test.ts
+      - name: Capture exact-head native keyboard, pointer and accessibility evidence
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --import tsx scripts/feedback/owned-decoration-web-evidence.mjs /tmp/pui-owned-decoration-web-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-decoration-web-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/pui-owned-decoration-web-evidence/
+          if-no-files-found: warn
+          retention-days: 30

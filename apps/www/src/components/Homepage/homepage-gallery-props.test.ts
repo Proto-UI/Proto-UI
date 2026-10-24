@@ -221,6 +221,26 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         expect(getElementProps(ref('editor-text'))).not.toHaveProperty('styleProfile');
         expect(getElementProps(tabsList)).not.toHaveProperty('styleProfile');
       }
+      const select = ref('settings-view');
+      const trigger = ref('settings-view-trigger');
+      const settingsCard = select.closest<HTMLElement>('wc-shadcn-card-root')!;
+      const note = input('settings-note');
+      for (const styleProfile of ['new-york-v4', 'rhea'] as const) {
+        setElementProps(settingsCard, { styleProfile });
+        await settle();
+        expect(ref('settings-view')).toBe(select);
+        expect(ref('settings-view-trigger')).toBe(trigger);
+        expect(input('settings-note')).toBe(note);
+        expect(note.value).toBe('A meaningful edit');
+        expect(getElementProps(select)).not.toHaveProperty('styleProfile');
+        expect(getElementProps(trigger)).not.toHaveProperty('styleProfile');
+        expect(trigger.getAttribute('data-pui-style')?.split(/\s+/)).toContain(
+          styleProfile === 'rhea' ? 'rounded-[var(--pui-radius-2xl)]' : 'rounded-md'
+        );
+        expect(trigger.getAttribute('data-pui-style')?.split(/\s+/)).toContain(
+          styleProfile === 'rhea' ? 'h-8' : 'h-9'
+        );
+      }
       verify();
     }
     ref('editor-reset').click();

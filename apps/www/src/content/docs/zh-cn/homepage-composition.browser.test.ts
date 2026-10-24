@@ -778,6 +778,39 @@ describe.sequential(
           let context: BrowserContext | undefined, page: Page | undefined;
           const capture = async (name: string) => {
             const filename = `${prefix}-${name}.png`;
+            // Preserve the actual interaction position, including failures. A full-page
+            // bitmap is not evidence of scrollY=0; record sticky-header framing.
+            const framing = () =>
+              page!.evaluate(() => {
+                const box = (selector: string) => {
+                  const node = document.querySelector<HTMLElement>(selector);
+                  if (!node) return null;
+                  const rect = node.getBoundingClientRect();
+                  const style = getComputedStyle(node);
+                  return {
+                    left: rect.left,
+                    top: rect.top,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                    width: rect.width,
+                    height: rect.height,
+                    position: style.position,
+                    zIndex: style.zIndex,
+                  };
+                };
+                return {
+                  scrollX,
+                  scrollY,
+                  viewport: { width: innerWidth, height: innerHeight },
+                  documentHeight: document.documentElement.scrollHeight,
+                  header: box('header'),
+                  heroHeading: box('main h1'),
+                  search: box('.site-header-search'),
+                };
+              });
+            const beforeCapture = await framing();
+            record.captureFraming = { mode: 'preserve-interaction-position', beforeCapture };
+            await save();
             const bytes = await page!.screenshot({
               path: join(directory, filename),
               fullPage: true,
@@ -789,6 +822,11 @@ describe.sequential(
               testSha256,
               sha256: createHash('sha256').update(bytes).digest('hex'),
               stage: record.stage,
+              framing: {
+                mode: 'preserve-interaction-position',
+                beforeCapture,
+                afterCapture: await framing(),
+              },
             });
             await save();
           };
@@ -822,6 +860,144 @@ describe.sequential(
               await page.locator(`${HOME} [data-home-demo-status][aria-live="polite"]`).count()
             ).toBe(1);
             expect(await page.locator(`${HOME} [data-home-demo-nojs] [aria-live]`).count()).toBe(0);
+            if (family === 'shadcn') {
+              await stage('select-rhea');
+              const trigger = page.locator(
+                `${ACTIVE} [data-demo-ref="settings-view-trigger"][role="combobox"]`
+              );
+              const editor = page.locator(`${ACTIVE} textarea`).first();
+              const originalEditor = await editor.elementHandle();
+              const sameEditor = () =>
+                editor.evaluate((current, original) => current === original, originalEditor);
+              await editor.fill('Retain this note across Select choices');
+              await trigger.press('ArrowDown');
+              await attribute(trigger, 'aria-expanded', 'true');
+              const portalId = await trigger.getAttribute('aria-controls');
+              expect(portalId).toBeTruthy();
+              const portal = page.locator(`[id=${JSON.stringify(portalId)}]`);
+              await expect.poll(() => portal.count()).toBe(1);
+              await expect.poll(() => portal.getByRole('option').count()).toBe(3);
+              const surface = portal.locator('[data-projection-prototype="shadcn-select-surface"]');
+              const group = surface.locator('[data-projection-prototype="shadcn-select-group"]');
+              await expect.poll(() => group.count()).toBe(1);
+              const readSelect = async () => ({
+                trigger: await trigger.evaluate((element) => {
+                  const css = getComputedStyle(element);
+                  return {
+                    radius: css.borderRadius,
+                    height: element.getBoundingClientRect().height,
+                    fontSize: css.fontSize,
+                    gap: css.columnGap,
+                  };
+                }),
+                popup: await surface.evaluate((element) => {
+                  const css = getComputedStyle(element);
+                  const leaf = element.querySelector<HTMLElement>('[data-pui-owned-decoration]');
+                  const group = element.querySelector<HTMLElement>(
+                    '[data-projection-prototype="shadcn-select-group"]'
+                  );
+                  const item = element.querySelector<HTMLElement>('[role="option"]');
+                  const reference = document.createElement('span');
+                  reference.setAttribute('aria-hidden', 'true');
+                  reference.style.cssText =
+                    'position:fixed;visibility:hidden;pointer-events:none;width:0;height:0;background:color-mix(in oklab,var(--pui-popover) 70%,transparent)';
+                  element.append(reference);
+                  try {
+                    return {
+                      radius: css.borderRadius,
+                      background: css.backgroundColor,
+                      expectedBackground: getComputedStyle(reference).backgroundColor,
+                      themePopover: css.getPropertyValue('--pui-popover').trim(),
+                      isolation: css.isolation,
+                      leafCount: element.querySelectorAll('[data-pui-owned-decoration]').length,
+                      filter: leaf ? getComputedStyle(leaf).backdropFilter : null,
+                      leafRadius: leaf ? getComputedStyle(leaf).borderRadius : null,
+                      leafAriaHidden: leaf?.getAttribute('aria-hidden'),
+                      padding: group ? getComputedStyle(group).padding : null,
+                      itemRadius: item ? getComputedStyle(item).borderRadius : null,
+                      escaped: element.closest('[data-projection-content]') === null,
+                    };
+                  } finally {
+                    reference.remove();
+                  }
+                }),
+              });
+              const selectPaintSamples: unknown[] = [];
+              record.selectPaintSamples = selectPaintSamples;
+              try {
+                await expect
+                  .poll(
+                    async () => {
+                      const facts = await readSelect();
+                      selectPaintSamples.push(facts);
+                      record.selectPaint = facts;
+                      const { background, expectedBackground, themePopover, ...popup } =
+                        facts.popup;
+                      return {
+                        trigger: facts.trigger,
+                        popup,
+                        backgroundMatches: background === expectedBackground,
+                        validTheme:
+                          Boolean(themePopover) &&
+                          expectedBackground !== 'transparent' &&
+                          expectedBackground !== 'rgba(0, 0, 0, 0)',
+                      };
+                    },
+                    { timeout: 1500, interval: 25 }
+                  )
+                  .toEqual({
+                    trigger: { radius: '18px', height: 32, fontSize: '14px', gap: '6px' },
+                    backgroundMatches: true,
+                    validTheme: true,
+                    popup: {
+                      radius: '18px',
+                      isolation: 'isolate',
+                      leafCount: 1,
+                      filter: 'blur(40px) saturate(1.5)',
+                      leafRadius: '18px',
+                      leafAriaHidden: 'true',
+                      padding: '4px',
+                      itemRadius: '14px',
+                      escaped: true,
+                    },
+                  });
+              } finally {
+                await save();
+              }
+              const background = (record.selectPaint as Awaited<ReturnType<typeof readSelect>>)
+                .popup.background;
+              expect(background).not.toBe('transparent');
+              expect(background).not.toBe('rgba(0, 0, 0, 0)');
+              await capture('select-rhea-open');
+              await page.keyboard.press('End');
+              await page.keyboard.press('Enter');
+              await attribute(trigger, 'aria-expanded', 'false');
+              await expect.poll(() => trigger.textContent()).toBe('In-app');
+              await hasFocus(trigger);
+              await expect
+                .poll(() => editor.inputValue())
+                .toBe('Retain this note across Select choices');
+              expect(await sameEditor()).toBe(true);
+              await trigger.press('ArrowDown');
+              await attribute(trigger, 'aria-expanded', 'true');
+              await page.keyboard.press('Home');
+              await page.keyboard.press('Enter');
+              await attribute(trigger, 'aria-expanded', 'false');
+              await expect.poll(() => trigger.textContent()).toBe('Email');
+              await hasFocus(trigger);
+              expect(await sameEditor()).toBe(true);
+              await expect
+                .poll(() => editor.inputValue())
+                .toBe('Retain this note across Select choices');
+              await editor.fill('');
+              await originalEditor!.dispose();
+              record.selectJourney = [
+                'Email',
+                'keyboard End/Enter: In-app',
+                'keyboard Home/Enter: Email',
+              ];
+              await save();
+            }
             await stage('command');
             const command = page.locator(`${ACTIVE} [data-demo-ref="composition-command"]`);
             const input = command.getByRole('combobox', {

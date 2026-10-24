@@ -3,6 +3,10 @@ import { registerPrototype } from './registry';
 
 // Explicit source slices. This registry does not confer catalog or release admission.
 export const finfPrototypeModules: Record<string, () => Promise<void>> = {
+  'shadcn-select-group': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/select');
+    registerExactPrototype('shadcn-select-group', module.selectGroup);
+  },
   'base-alert-dialog-root': async () => {
     const module = await import('@proto.ui/prototypes-base/alert-dialog');
     registerExactPrototype('base-alert-dialog-root', module.alertDialogRoot);

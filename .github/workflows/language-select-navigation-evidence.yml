@@ -1,0 +1,64 @@
+name: Language selector navigation evidence
+on:
+  pull_request:
+    paths:
+      - 'apps/www/src/components/override/LanguageSelect.astro'
+      - 'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts'
+      - 'scripts/test/language-select-navigation-evidence.test.mjs'
+      - 'scripts/test/runtime-test-plan.mjs'
+      - '.github/workflows/language-select-navigation-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-language-navigation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      PROTO_UI_EXPECTED_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prepare locked dependencies
+        env:
+          PROTO_UI_LANGUAGE_EVIDENCE_DIR: ${{ runner.temp }}/language-navigation
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          mkdir -p "$PROTO_UI_LANGUAGE_EVIDENCE_DIR"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+      - name: Build the actual production website
+        env:
+          PROTO_UI_LANGUAGE_EVIDENCE_DIR: ${{ runner.temp }}/language-navigation
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          corepack pnpm@10.32.1 docs:build 2>&1 | tee "$PROTO_UI_LANGUAGE_EVIDENCE_DIR/build.log"
+      - name: Execute production locale journeys
+        timeout-minutes: 10
+        env:
+          PROTO_UI_LANGUAGE_EVIDENCE_DIR: ${{ runner.temp }}/language-navigation
+          PROTO_UI_BROWSER_BASE_URL: http://127.0.0.1:4358
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4358 --bind 127.0.0.1 --directory apps/www/dist > "$PROTO_UI_LANGUAGE_EVIDENCE_DIR/server.log" 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true' EXIT
+          node --test scripts/test/language-select-navigation-evidence.test.mjs
+          timeout --signal=TERM --kill-after=10s 560s corepack pnpm@10.32.1 exec vitest run --no-file-parallelism --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json --outputFile="$PROTO_UI_LANGUAGE_EVIDENCE_DIR/vitest.json" apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts 2>&1 | tee "$PROTO_UI_LANGUAGE_EVIDENCE_DIR/tests.log"
+          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const r=JSON.parse(fs.readFileSync(process.env.PROTO_UI_LANGUAGE_EVIDENCE_DIR+"/vitest.json","utf8")); assert.equal(r.numTotalTests,4); assert.equal(r.numPassedTests,4); assert.equal(r.numFailedTests,0); assert.equal(r.numPendingTests,0);'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: language-navigation-${{ github.event.pull_request.head.sha || github.sha }}
+          path: ${{ runner.temp }}/language-navigation
+          if-no-files-found: error
+          retention-days: 30

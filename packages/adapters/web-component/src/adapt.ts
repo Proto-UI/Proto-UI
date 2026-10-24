@@ -1,3 +1,4 @@
+import { claimWebComponentOwnedRelocation } from './owned-relocation';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -389,6 +390,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
+      const relocation = claimWebComponentOwnedRelocation(this);
+      const owner = this._instanceToken;
       // A queued connect reaction can run after an ancestor's reaction has
       // detached this element. Do not publish a false owner/topology change
       // or request a terminal reconnect; a real later connection retries.
@@ -404,7 +407,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       }
       const initializing = !this._mountedOnce;
       try {
-        this._connectOwner();
+        this._connectOwner(() => this._instanceToken === owner && !!relocation?.());
       } catch (error) {
         // Preserve the synchronous failure; the guarded terminal transaction
         // also owns partial activation and callback reentry for every profile.
@@ -423,7 +426,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       ]);
     }
 
-    private _connectOwner() {
+    private _connectOwner(relocationIsCurrent: () => boolean) {
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       if (this._mountedOnce) {
         const previousParent = getLogicalParent(this._instanceToken);
@@ -451,7 +454,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         }
         this._hostDisplay?.sync();
         this._pendingOwnedTokens = null;
-        this._controller?.update();
+        if (!relocationIsCurrent()) this._controller?.update();
         const token = this._instanceToken;
         schedule(() => {
           if (this._instanceToken === token && !this._terminalDisposing)

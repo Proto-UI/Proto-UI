@@ -21,6 +21,7 @@ export interface SelectRootProps {
   value?: string;
   defaultValue?: string;
   disabled?: boolean;
+  readOnly?: boolean;
   closeOnSelect?: boolean;
 }
 

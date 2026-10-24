@@ -131,6 +131,7 @@ const staticUtilities: Record<string, string[]> = {
     '-webkit-line-clamp: 1;',
   ],
   'scroll-my-1': ['scroll-margin-block: 0.25rem;'],
+  'scroll-my-1.5': ['scroll-margin-block: 0.375rem;'],
   'border-dashed': ['border-style: dashed;'],
   'cursor-move': ['cursor: move;'],
   'grid-cols-7': ['grid-template-columns: repeat(7, minmax(0, 1fr));'],
@@ -674,6 +675,11 @@ const staticUtilities: Record<string, string[]> = {
   'shadow-none': ['--pui-shadow: 0 0 #0000;', ...composedShadow()],
   'shadow-hard': ['--pui-shadow: 2px 2px 0 0 var(--pui-foreground);', ...composedShadow()],
   'backdrop-blur-xs': ['backdrop-filter: blur(4px);'],
+  'backdrop-filter-[blur(40px)_saturate(1.5)]': ['backdrop-filter: blur(40px) saturate(1.5);'],
+  '-z-1': ['z-index: -1;'],
+  isolate: ['isolation: isolate;'],
+  'rounded-[inherit]': ['border-radius: inherit;'],
+  'min-w-36': ['min-width: 9rem;'],
   'z-10': ['z-index: 10;'],
   'z-40': ['z-index: 40;'],
   'z-50': ['z-index: 50;'],
@@ -938,7 +944,7 @@ function splitHostDeclarations(declaration: string): string[] {
     return [];
   }
   if (
-    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|position|inset(?:-.+)?|top|right|bottom|left|z-index|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
+    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|scroll-margin-block|position|inset(?:-.+)?|top|right|bottom|left|z-index|isolation|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
       property
     )
   ) {

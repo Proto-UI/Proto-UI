@@ -14,3 +14,10 @@ export type {
   FieldTextareaExposes,
   FieldTextareaAsHookContract,
 } from './textarea.proto';
+
+export { default as fieldSelectTrigger, asFieldSelectTrigger } from './select-trigger.proto';
+export type {
+  FieldSelectTriggerProps,
+  FieldSelectTriggerExposes,
+  FieldSelectTriggerAsHookContract,
+} from './select-trigger.proto';

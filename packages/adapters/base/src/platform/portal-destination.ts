@@ -226,6 +226,20 @@ export function beginWebPortalMaterialEpoch(host: HTMLElement): WebPortalMateria
   };
 }
 
+/** Internal transport snapshot: opaque ownership only, never material eligibility. */
+export function getWebPortalMaterialEpochSnapshot(host: HTMLElement): Readonly<{
+  owner: object | null;
+  suspended: boolean;
+  generation: number;
+}> {
+  const state = materialEpochs.get(host);
+  return Object.freeze({
+    owner: state?.owner ?? null,
+    suspended: state?.suspended ?? true,
+    generation: state?.generation ?? 0,
+  });
+}
+
 export function isWebPortalMaterialSuspended(host: HTMLElement): boolean {
   return materialEpochs.get(host)?.suspended ?? false;
 }

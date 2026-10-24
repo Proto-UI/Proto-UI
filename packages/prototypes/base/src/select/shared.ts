@@ -26,6 +26,11 @@ export type SelectContextValue = {
   textValue: string;
   controlledValue: boolean;
   disabled: boolean;
+  /** Selection policy; read-only may still open for inspection and close normally. */
+  readOnly?: boolean;
+  /** Uncombined Root policy, to avoid feeding inherited Field policy back as local input. */
+  controlDisabled?: boolean;
+  controlReadOnly?: boolean;
   activeValue: string;
   closeOnSelect: boolean;
   requestReason: string | null;

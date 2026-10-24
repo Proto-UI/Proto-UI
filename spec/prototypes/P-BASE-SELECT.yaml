@@ -39,6 +39,11 @@ anatomy:
     - { kind: contains, parent: group, child: label }
     - { kind: contains, parent: content, child: separator }
 criteria:
+  - id: P-BASE-SELECT-OPTIONAL-FIELD-COMPOSITION
+    text:
+      en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger keeps content-derived naming while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier content-only Trigger surface without replacing selection, popup or focus protocols.
+    dependsOn:
+      contracts: [{ id: C-FIELD-SELECT-0001, since: 0.3.0-alpha.1 }]
   - id: P-BASE-SELECT-ROLE-SELECT-ONLY
     text:
       zh-CN: Select 必须表示从有限 option 集合中提交一个持久值的 select-only control，不得把 action menu、可自由输入 combobox 或 multi-select 伪装成当前协议。

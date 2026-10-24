@@ -1,3 +1,4 @@
+import type { ShadcnStyleProps } from '../src/style-scope';
 import { afterEach, expect, expectTypeOf, it } from 'vitest';
 import { AdaptToWebComponent } from '@proto.ui/adapter-web-component';
 import {
@@ -35,7 +36,7 @@ afterEach(async () => {
   await flush();
 });
 it('publishes family and whole-entry prototypes, hooks and structural types', () => {
-  expectTypeOf<ShadcnSelectGroupProps>().toEqualTypeOf<SelectGroupProps>();
+  expectTypeOf<ShadcnSelectGroupProps>().toEqualTypeOf<SelectGroupProps & ShadcnStyleProps>();
   expectTypeOf<ShadcnSelectLabelExposes>().toEqualTypeOf<SelectLabelExposes>();
   expectTypeOf<ShadcnSelectSeparatorAsHookContract>().toEqualTypeOf<SelectSeparatorAsHookContract>();
   for (const name of ['Group', 'Label', 'Separator'] as const) {

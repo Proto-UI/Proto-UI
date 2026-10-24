@@ -497,6 +497,7 @@ async function assertTaskPartInventory(
           ...Array(3).fill('shadcn-select-item-text'),
           'shadcn-select-surface',
           'shadcn-select-viewport',
+          'shadcn-select-group',
           'shadcn-command-input-wrapper',
           'shadcn-input-shell',
         ]
@@ -513,7 +514,7 @@ async function assertTaskPartInventory(
     expectedIds
   );
   expect(new Set(actualIds).size, 'complete declared task recipe').toBe(
-    family === 'shadcn' ? 63 : 56
+    family === 'shadcn' ? 64 : 56
   );
   await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
   const owners = await parts.evaluateAll((elements) =>
@@ -596,7 +597,12 @@ async function assertSelectFingerprint(
     expect(paint.font).toContain('DM Sans');
   } else {
     expect(restingTokens).toEqual(
-      expect.arrayContaining(['rounded-md', 'border-input', 'shadow-xs'])
+      expect.arrayContaining([
+        'rounded-[var(--pui-radius-2xl)]',
+        'border-transparent',
+        'bg-input/50',
+        'h-8',
+      ])
     );
   }
 
