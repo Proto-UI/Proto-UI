@@ -165,8 +165,57 @@ for (const name of ['proto-ui-style.css', 'shadcn-theme.css', 'proto-ui-tokens.g
   assert(inside(consumer, path));
   resources.set(`/src/styles/${name}`, { type: 'text/css', body: readFileSync(path) });
 }
+// Additive browser-realm replay of the unchanged synthetic fixture's sequence.
+// Preparation failures are recorded, not allowed to prevent the trusted cases.
+let replaySourceSha256 = null;
+let originalSyntheticFixtureSha256 = null;
+const replayInputs = [];
+const replayResources = new Map();
+const replayPreparationErrors = [];
+try {
+  const replaySource = readFileSync(new URL('./wc-checkbox-label-browser-replay.mjs', import.meta.url));
+  replaySourceSha256 = digest(replaySource);
+  originalSyntheticFixtureSha256 = digest(readFileSync(new URL('./wc-checkbox-label.mjs', import.meta.url)));
+  const replayEntry = join(consumer, 'wc-checkbox-label-browser-replay.mjs');
+  // Reject a pre-existing symlink that could redirect this consumer-local copy.
+  assert(!existsSync(replayEntry) || inside(consumer, realpathSync(replayEntry)), 'replay entry escaped packed consumer');
+  writeFileSync(replayEntry, replaySource, { flag: existsSync(replayEntry) ? 'w' : 'wx' });
+  assert(inside(consumer, realpathSync(replayEntry)), 'replay entry escaped packed consumer');
+  assert.equal(digestFile(replayEntry), replaySourceSha256, 'replay source copy must be verbatim');
+  const replayBundle = await esbuild.build({
+    absWorkingDir: consumer,
+    entryPoints: ['wc-checkbox-label-browser-replay.mjs'],
+    outfile: 'checkbox-replay-bundle.js',
+    bundle: true,
+    platform: 'browser',
+    format: 'esm',
+    write: false,
+    metafile: true,
+    logLevel: 'silent',
+  });
+  assert.equal(replayBundle.outputFiles.length, 1, 'unexpected additional replay bundle output');
+  for (const [name, metadata] of Object.entries(replayBundle.metafile.inputs)) {
+    const path = realpathSync(resolve(consumer, name));
+    assert(inside(consumer, path), `replay business source escaped packed consumer: ${name}`);
+    assert(metadata.imports.every((item) => !item.external), 'unexpected external replay input import');
+    replayInputs.push({ path: relative(consumer, path).replaceAll('\\', '/'), sha256: digestFile(path) });
+  }
+  for (const output of Object.values(replayBundle.metafile.outputs)) {
+    assert.equal(output.imports.length, 0, 'replay browser bundle must be self-contained');
+  }
+  replayResources.set('/checkbox-replay', { type: 'text/html', body: Buffer.from('<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles/proto-ui-style.css"></head><body><script type="module" src="/checkbox-replay-bundle.js"></script></body></html>') });
+  replayResources.set('/checkbox-replay-bundle.js', { type: 'text/javascript', body: Buffer.from(replayBundle.outputFiles[0].contents) });
+  for (const name of ['proto-ui-style.css', 'shadcn-theme.css', 'proto-ui-tokens.generated.css']) {
+    const path = `/src/styles/${name}`;
+    replayResources.set(path, resources.get(path));
+  }
+  for (const [path, resource] of replayResources) resources.set(path, resource);
+} catch (error) {
+  replayPreparationErrors.push(error);
+}
 const failures = [];
 failures.push(...orderPreparationErrors);
+failures.push(...replayPreparationErrors);
 let browser, context, server;
 let nativeEvidence;
 console.log(JSON.stringify({
@@ -183,6 +232,9 @@ console.log(JSON.stringify({
   browser: { command: chrome, executable: chromeBinary, launcherSha256: digestFile(realpathSync(chrome)), executableSha256: digestFile(chromeBinary), commandVersion: chromeVersion.stdout.trim() },
   runnerImage: { os: process.env.ImageOS ?? null, version: process.env.ImageVersion ?? null },
   inputs,
+  replaySourceSha256,
+  originalSyntheticFixtureSha256,
+  replayInputs,
   resources: [...resources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
   outcome: 'prepared-not-yet-executed',
 }));
@@ -442,6 +494,9 @@ try {
     browser: { executable: chromeBinary, executableSha256: digestFile(chromeBinary), commandVersion: chromeVersion.stdout.trim(), version: browser.version() },
     runnerImage: { os: process.env.ImageOS ?? null, version: process.env.ImageVersion ?? null },
     inputs,
+    replaySourceSha256,
+    originalSyntheticFixtureSha256,
+    replayInputs,
     resources: [...resources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
     platformOrder: initial.order,
     infrastructureStyleHashes: infrastructureHashes,
@@ -456,6 +511,86 @@ try {
 } catch (error) {
   failures.push(error);
 } finally {
+  // Replay is deliberately in finally: an earlier trusted-pointer assertion
+  // failure must not suppress the independent original-sequence observation.
+  let replayPage;
+  let replayResult = { checkpoints: [], outcome: 'failed', failureStage: 'imports-start', error: null, cleanupError: null };
+  let replayRunnerError = null;
+  let replayInstalledStyles = null;
+  const replayFailureStart = failures.length;
+  try {
+    assert.equal(replayPreparationErrors.length, 0, 'browser replay preparation failed');
+    assert(context && server?.listening, 'browser replay context unavailable');
+    const replayOrigin = `http://127.0.0.1:${server.address().port}`;
+    replayPage = await context.newPage();
+    replayPage.on('pageerror', (error) => failures.push(error));
+    replayPage.on('console', (message) => {
+      if (message.type() === 'error') failures.push(new Error(`replay browser console: ${message.text()}`));
+    });
+    replayPage.on('requestfailed', (request) => failures.push(new Error(`replay browser request failed: ${request.failure()?.errorText ?? 'unknown'}`)));
+    replayPage.on('response', (response) => {
+      if (response.status() >= 400) failures.push(new Error(`replay browser HTTP ${response.status()}`));
+    });
+    // A page-specific route replaces the broader context resource allowlist.
+    await replayPage.route('**/*', async (route) => {
+      const url = new URL(route.request().url());
+      if (url.origin === replayOrigin && replayResources.has(url.pathname) && !url.search && !url.hash && route.request().method() === 'GET') {
+        await route.continue();
+      } else {
+        failures.push(new Error('blocked non-replay page request'));
+        await route.abort();
+      }
+    });
+    const replayResponse = await replayPage.goto(replayOrigin + '/checkbox-replay', { waitUntil: 'load' });
+    assert.equal(replayResponse.status(), 200);
+    await replayPage.waitForFunction(() => !!window.packedCheckboxReplay);
+    replayResult = await replayPage.evaluate(() => window.packedCheckboxReplay);
+    // The helper serializes only after body cleanup; infrastructure styles must
+    // still be in head with exactly the CSP-admitted installed adapter bytes.
+    replayInstalledStyles = await replayPage.evaluate(() => [...document.querySelectorAll('style')]
+      .map((style) => ({ id: style.id, text: style.textContent, inHead: style.parentElement === document.head })));
+    assert.equal(replayInstalledStyles.length, 2, 'replay keeps only the two fixed infrastructure styles');
+    assert(replayInstalledStyles.every((style) => style.inHead), 'replay infrastructure styles remain in head after cleanup');
+    assert.deepEqual(Object.fromEntries(replayInstalledStyles.map(({ id, text }) => [id, text])), infrastructureStyles,
+      'replay installed adapter styles must match exact CSP-admitted text after cleanup');
+    assert.equal(await replayPage.evaluate(() => document.body.childElementCount), 0, 'replay body cleanup completed');
+    assert.equal(replayResult.outcome, 'passed', `browser replay failed at ${replayResult.failureStage}: ${JSON.stringify(replayResult.error)}`);
+    assert.equal(replayResult.cleanupError, null, 'browser replay cleanup failed');
+  } catch (error) {
+    replayRunnerError = { name: error.name, message: error.message, stack: error.stack ?? null };
+    failures.push(error);
+  } finally {
+    try { await replayPage?.close(); } catch (error) {
+      failures.push(error);
+      replayRunnerError ??= { name: error.name, message: error.message, stack: error.stack ?? null };
+    }
+    console.log(JSON.stringify({
+      kind: 'checkbox-label-packed-browser-replay-evidence',
+      host: 'native-chromium',
+      eventMode: 'original-programmatic-dispatch-not-trusted-pointer',
+      testedCommit: binding.testedCommit,
+      releaseVersion: binding.releaseVersion,
+      packages: binding.packages,
+      lockSha256: binding.lockSha256,
+      generatedFacadeSha256: binding.generatedFacadeSha256,
+      fixtureSha256: digestFile(fileURLToPath(import.meta.url)),
+      replaySourceSha256,
+      originalSyntheticFixtureSha256,
+      repoLockSha256: digest(lock),
+      tooling,
+      inputs: replayInputs,
+      resources: [...replayResources].map(([path, { body }]) => ({ path, sha256: digest(body) })),
+      browser: { executable: chromeBinary, executableSha256: digestFile(chromeBinary), commandVersion: chromeVersion.stdout.trim(), version: browser?.version() ?? null },
+      infrastructureStyleHashes: infrastructureHashes,
+      installedStylesAfterCleanup: replayInstalledStyles,
+      ...replayResult,
+      outcome: replayRunnerError || failures.length > replayFailureStart ? 'failed' : replayResult.outcome,
+      runnerError: replayRunnerError,
+      observedPageNetworkErrorCount: failures.length - replayFailureStart,
+      syntheticAcceptance: 'separate-unmodified-fixture-still-required',
+      registryPublication: 'not-performed',
+    }));
+  }
   for (const close of [() => context?.close(), () => browser?.close(), () => server && new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve());
     server.closeAllConnections();
