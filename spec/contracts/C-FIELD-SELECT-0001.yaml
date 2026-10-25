@@ -3,6 +3,8 @@ type: contract
 title: Optional Field Select Trigger composition and owning Root policy
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The opt-in composition retains one Select owner and existing Field validation. Synthetic Web Component coverage does not establish exact-head native keyboard, assistive-technology, lifecycle or installed-consumer acceptance, so this contract remains draft.
 summary: Reuse one Select protocol and the existing Field binding without a second validator or selection state.
 criteria:
   - id: C-FIELD-SELECT-0001-COMPOSITION

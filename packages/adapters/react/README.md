@@ -16,6 +16,10 @@ The default `colorScheme` reader follows root `class` / `data-theme` markers and
 
 The guarantee is limited to the default getter in same-document light DOM without intervening local theme markers. An explicit `getMeta` keeps sampled behavior; subtree, ShadowRoot and cross-document equivalence remain outside this slice. See [C-RULE-COLOR-SCHEME-0001](../../../spec/contracts/C-RULE-COLOR-SCHEME-0001.yaml) and [T-RULE-COLOR-SCHEME-0001](../../../spec/tests/T-RULE-COLOR-SCHEME-0001.yaml), both draft.
 
+## Text Control values
+
+For a statically declared Text Control root, the adapter mirrors the host lease's `defaultValue` patch into React's native `defaultValue` prop. Text Control remains the owner of the current editor value; this prevents React reconciliation from replacing an authored initial textarea value with an empty default while preserving dirty uncontrolled edits across later property updates. See [C-TEXT-CONTROL-0001](../../../spec/contracts/C-TEXT-CONTROL-0001.yaml), draft.
+
 ## Package Role
 
 Adapter package intended to be used together with Proto UI prototypes and the shared runtime stack.

@@ -87,6 +87,28 @@ describe('current article nearest-edge layout', () => {
     stop = initSidebarCurrentVisibility(root);
     await flush();
   });
+  it.each([false, true])(
+    'distinguishes a pending layout scroll from a user wheel (%s)',
+    async (manual) => {
+      const { root, owner, link } = fixture();
+      stop = initSidebarCurrentVisibility(root);
+      const initial = [...frames.values()];
+      frames.clear();
+      for (const callback of initial) callback(0);
+      expect(owner.scrollTop).toBe(544);
+
+      // Projection changes the row geometry while the browser adjusts the
+      // same scroller before the initial reveal has settled.
+      vi.mocked(link.getBoundingClientRect).mockImplementation(
+        () => new DOMRect(0, 1172 - owner.scrollTop, 240, 44)
+      );
+      if (manual) root.dispatchEvent(new WheelEvent('wheel'));
+      owner.scrollTop = 776;
+      owner.dispatchEvent(new Event('scroll'));
+      await flush();
+      expect(owner.scrollTop).toBe(manual ? 776 : 816);
+    }
+  );
   it('waits for the actual mobile drawer opening', async () => {
     const { root, owner, link } = fixture(true);
     let open = false;

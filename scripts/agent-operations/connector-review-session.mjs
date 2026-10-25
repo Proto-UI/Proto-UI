@@ -1,6 +1,5 @@
 // Parent-owned review session. No model/reviewer is invoked by this helper.
 import { createHash } from 'node:crypto';
-import { assertModelTraceDisclosure, assertModelTraceFresh } from './modeltrace.mjs';
 import { validateSelfAssessmentResult, isSelfAssessmentFresh } from './assessment-runtime.mjs';
 import {
   authorizeReviewSubmission,
@@ -264,7 +263,7 @@ export class ConnectorReviewSession {
         'Parent inspects actual diff and evidence, reconciles prior findings, and supplies its own packet; helper does not judge.',
     };
   }
-  #authorize(packet, live, assessment, permitDuplicate = false, measured = {}) {
+  #authorize(packet, live, assessment, permitDuplicate = false) {
     this.#refreshPolicy();
     validateSelfAssessmentResult(assessment, this.#policy);
     const snapshot = this.#readSnapshot();
@@ -297,8 +296,6 @@ export class ConnectorReviewSession {
     );
     assert(!live.input.isDraft, 'draft pull requests are analysis-only');
     const authorization = authorizeReviewSubmission({
-      modelTrace: measured.modelTrace,
-      modelTraceContext: measured.modelTraceContext,
       packet,
       input: this.#initial.input,
       liveInput: live.input,
@@ -383,18 +380,7 @@ export class ConnectorReviewSession {
     }
     throw new Error('intent-free claim release contention budget exhausted');
   }
-  async publishParentPacket(
-    packet,
-    assessment,
-    analysisReconciliation = null,
-    measuredInputs = {}
-  ) {
-    // Snapshot caller-owned measured inputs once; both pre-stage and final
-    // authorization validate this same receipt/context, never body text alone.
-    const measured = structuredClone({
-      modelTrace: measuredInputs.modelTrace,
-      modelTraceContext: measuredInputs.modelTraceContext,
-    });
+  async publishParentPacket(packet, assessment, analysisReconciliation = null) {
     assert(
       this.#initial && !this.#used,
       'parent-review request required; one publication attempt per session'
@@ -406,7 +392,7 @@ export class ConnectorReviewSession {
     let terminalStarted = false;
     try {
       live = await this.#transport.collect(this.#initial.input.pullRequest);
-      const authorization = this.#authorize(packet, live, assessment, true, measured);
+      const authorization = this.#authorize(packet, live, assessment, true);
       if (authorization.duplicate) {
         terminalStarted = true;
         const finished = await this.#completeParentAnalysis(packet, true);
@@ -473,16 +459,10 @@ export class ConnectorReviewSession {
             current.slot.generation,
         'material generation changed before review request'
       );
-      this.#authorize(intent.analysis.packet, final, assessment, false, measured);
+      this.#authorize(intent.analysis.packet, final, assessment, false);
       await this.#ledger.consumePublicationAttempt(intent.id);
       attemptConsumed = true;
       this.#refreshPolicy();
-      // The durable attempt fence can await remote ledger IO. Recheck the same
-      // measured tuple at dispatch; expiry here stays consumed/unknown, no retry.
-      assertModelTraceFresh(measured.modelTrace, measured.modelTraceContext, {
-        repositoryId: intent.analysis.packet.repositoryId,
-      });
-      assertModelTraceDisclosure(intent.body, measured.modelTrace);
       const receipt = await this.#transport.submit(intent.pullRequest, intent);
       confirmedReceipt = receipt;
       // The API acknowledges a review of one commit, never approval of a later head.

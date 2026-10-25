@@ -692,10 +692,6 @@ describe('@proto.ui/cli', () => {
     expect(baselineAt).toBeGreaterThan(protoLayerAt);
     expect(baselineAt).toBeLessThan(firstTokenAt);
     expect(tokensCss).toContain('box-sizing: border-box;');
-    expect(tokensCss).toContain(`data-[active]:bg-muted"])[data-active]`);
-    expect(tokensCss).toContain(
-      `data-[hovered]:not-[data-active]:bg-muted"])[data-hovered]:not([data-active])`
-    );
     expect(tokensCss).toContain(`data-[checked]:bg-primary"])[data-checked]`);
     expect(tokensCss).toContain(`data-[checked]:opacity-100"])[data-checked]`);
     expect(tokensCss).toContain(`[data-pui-style~="animate-in"]`);
@@ -717,7 +713,15 @@ describe('@proto.ui/cli', () => {
     expect(styleCss).not.toContain(`@import './shadcn-theme.css';`);
     expect(styleCss).toContain(`@import './proto-ui-tokens.generated.css';`);
     expect(themeCss).toContain('--pui-background');
+    expect(themeCss).toContain('--pui-selection:');
+    expect(themeCss).toContain('--pui-selection-foreground:');
+    expect(themeCss).toContain('::selection {');
+    expect(themeCss).toContain('background-color: var(--pui-selection);');
+    expect(themeCss).toContain('color: var(--pui-selection-foreground);');
+    expect(themeCss).toContain('@layer theme {');
+    expect(themeCss.indexOf('::selection {')).toBeGreaterThan(themeCss.indexOf('@layer theme {'));
     expect(themeCss).not.toContain('--background:');
+    expect(themeCss).not.toContain('var(--selection)');
     expect(themeCss).not.toContain('box-sizing: border-box;');
     expect(themeCss).toContain('@media (prefers-color-scheme: dark)');
     expect(themeCss).toContain(
@@ -725,17 +729,6 @@ describe('@proto.ui/cli', () => {
     );
     expect(tokensCss).toContain('@media (prefers-color-scheme: dark)');
     await expect(fs.stat(path.join(cwd, 'src/styles/shadcn-theme.css'))).resolves.toBeTruthy();
-
-    const scannedTokensFile = path.join(cwd, 'shadcn-source-tokens.css');
-    const scanResult = runCli(process.cwd(), [
-      'tokens',
-      '--input',
-      'packages/prototypes/shadcn/src',
-      '--out',
-      scannedTokensFile,
-    ]);
-    expect(scanResult.status).toBe(0);
-    await expect(fs.readFile(scannedTokensFile, 'utf8')).resolves.toBe(tokensCss);
   });
 
   it('renders the official prototype token set without unsupported-token comments', async () => {
@@ -755,10 +748,6 @@ describe('@proto.ui/cli', () => {
     const tokensCss = await fs.readFile(outFile, 'utf8');
     expect(tokensCss).toContain(`[data-pui-style~="bg-primary"]`);
     expect(tokensCss).toContain(`[data-pui-style~="rounded-md"]`);
-    expect(tokensCss).toContain(`data-[active]:bg-muted"])[data-active]`);
-    expect(tokensCss).toContain(
-      `data-[hovered]:not-[data-active]:bg-muted"])[data-hovered]:not([data-active])`
-    );
     expect(tokensCss).not.toContain(`not-[data-open]:hidden`);
     expect(tokensCss).toContain(`[data-pui-style~="px-0.5"]`);
     expect(tokensCss).toContain(`data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-checked]`);

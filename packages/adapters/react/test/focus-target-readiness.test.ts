@@ -36,6 +36,9 @@ describe('React Focus target readiness', () => {
       effectsPort: { queueStyle() {}, requestFlush() {}, flushNow() {} },
       getMeta: () => undefined,
       setExposes() {},
+      setTextControlDefaultValue() {
+        throw new Error('A focus-only fixture must not project a Text Control defaultValue.');
+      },
       runInCallbackScope: (fn: () => void) => fn(),
       isViewReady: () => effectsReady,
       isEntryAcquisitionReady: () => focusReady,

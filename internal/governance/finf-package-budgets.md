@@ -24,5 +24,3 @@ When all 68 items are recorded complete, the size check automatically returns to
 Before final Finf acceptance, the integrator must remove the temporary opt-in from the package and snapshot entrypoints, rerun canonical strict budgets on the full final source, and restore a separately reviewed, evidence-backed bounded budget if accepted growth needs new ceilings. Retain the old baselines, prior red runs and growth attribution. Completion flags must never be held false or fabricated to prolong the exception. Re-entering advisory after Finf completion requires a new explicit project decision; ordinary numeric-budget authority cannot extend this phase. No registry publication or other release action is authorized here.
 
 The original baseline and same-source strict/advisory measurements are retained in `internal/records/2026-10-08-finf-development-budget.json`.
-
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.

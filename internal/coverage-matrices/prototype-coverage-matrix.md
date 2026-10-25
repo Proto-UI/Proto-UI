@@ -344,5 +344,4 @@ These manifest facts describe the selected source revision and do not prove regi
 - Every adopted row needs a real owner, precise semantic/negative boundary, main/open-PR separation, lifecycle, host/Compiler evidence and consumer acceptance. Closing the matrix PR does not close #870.
 - This audit does not rerun prototype/runtime/visual tests. Existing mapped tests are source evidence only; no full-feature or native certification is claimed. Independent review and exact-head CI remain required for the matrix change.
 
-Agent: dot  
-ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot

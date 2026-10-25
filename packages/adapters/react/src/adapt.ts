@@ -275,6 +275,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      // React's native textarea reconciliation writes an absent defaultValue
+      // back as an empty string. Mirror the Text Control host patch so React
+      // keeps its DOM wrapper state aligned with the host-owned editor.
+      const [textControlDefaultValue, setTextControlDefaultValue] = runtime.useState<
+        string | undefined
+      >(undefined);
       const portalOriginRef = runtime.useRef<HTMLElement | null>(null);
       // React owns the children, while this Adapter owns one stable portal
       // mount. Relocating the mount keeps createPortal's container identity and
@@ -874,6 +880,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           viewportSource,
           exposeStateWebMode,
           scrollProjection,
+          setTextControlDefaultValue,
           setExposes: (record) => {
             exposesRef.current = record;
           },
@@ -1201,6 +1208,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               rootTag,
               {
                 ref: rootRef as { current: HTMLElement | null },
+                ...(textControlRootTag ? { defaultValue: textControlDefaultValue } : {}),
                 className: mergeHostClassName([
                   props.surfaceClassName,
                   props.hostClassName,

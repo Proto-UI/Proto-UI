@@ -1,6 +1,6 @@
 // @vitest-environment node
 import type { Browser } from 'playwright-core';
-import { afterAll, beforeAll, expect, it } from 'vitest';
+import { afterAll, beforeAll, expect, it, onTestFinished } from 'vitest';
 import { launchBrowser, startServer, stopServer } from './browser-harness';
 import { runS4PaintJourney } from '../../../../../../scripts/analysis/shadow-s4-paint-browser.mjs';
 
@@ -20,6 +20,23 @@ it('S4: compositor never repaints a closed Dialog after settings changes', async
     viewport: { width: 1100, height: 900 },
     colorScheme: 'light',
   });
+  let closing: Promise<void> | undefined;
+  const closeContext = () => (closing ??= context.close());
+  onTestFinished(closeContext);
+  context.on('close', () => {
+    try {
+      console.info(
+        '[S4 context closed]',
+        JSON.stringify({
+          scope: 'paint',
+          nodeMs: globalThis.performance.now(),
+          dateNow: Date.now(),
+        })
+      );
+    } catch {
+      /* Diagnostic output cannot replace cleanup. */
+    }
+  });
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -29,6 +46,6 @@ it('S4: compositor never repaints a closed Dialog after settings changes', async
     expect(result.paths).toBe(24);
     expect(errors).toEqual([]);
   } finally {
-    await context.close();
+    await closeContext();
   }
 }, 150_000);
