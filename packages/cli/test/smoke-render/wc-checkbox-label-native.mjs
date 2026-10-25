@@ -217,7 +217,7 @@ const failures = [];
 failures.push(...orderPreparationErrors);
 failures.push(...replayPreparationErrors);
 let browser, context, server;
-let nativeEvidence;
+let nativeEvidence, replayEvidence;
 console.log(JSON.stringify({
   kind: 'checkbox-label-packed-native-prepared',
   testedCommit: binding.testedCommit,
@@ -505,7 +505,7 @@ try {
       'direct-pointer', 'focused-space', 'interactive-descendant-exclusion', 'pair-isolation',
       'omitted-indicator', 'raw-root', 'disabled', 'controlled-rejection', 'mixed',
       'naming-only', 'detached-label-programmatic-regression', 'removal-without-observed-pageerror'],
-    syntheticAcceptance: 'separate-unmodified-fixture-still-required',
+    syntheticAcceptance: 'separate-observed-fixture-host-policy',
     registryPublication: 'not-performed',
   };
 } catch (error) {
@@ -564,7 +564,7 @@ try {
       failures.push(error);
       replayRunnerError ??= { name: error.name, message: error.message, stack: error.stack ?? null };
     }
-    console.log(JSON.stringify({
+    replayEvidence = {
       kind: 'checkbox-label-packed-browser-replay-evidence',
       host: 'native-chromium',
       eventMode: 'original-programmatic-dispatch-not-trusted-pointer',
@@ -587,9 +587,10 @@ try {
       outcome: replayRunnerError || failures.length > replayFailureStart ? 'failed' : replayResult.outcome,
       runnerError: replayRunnerError,
       observedPageNetworkErrorCount: failures.length - replayFailureStart,
-      syntheticAcceptance: 'separate-unmodified-fixture-still-required',
+      syntheticAcceptance: 'separate-observed-fixture-host-policy',
       registryPublication: 'not-performed',
-    }));
+    };
+    console.log(JSON.stringify(replayEvidence));
   }
   for (const close of [() => context?.close(), () => browser?.close(), () => server && new Promise((resolve, reject) => {
     server.close((error) => error ? reject(error) : resolve());
@@ -601,3 +602,9 @@ try {
 if (failures.length) throw new AggregateError(failures, 'packed native Checkbox+Label failed');
 
 console.log(JSON.stringify(nativeEvidence));
+
+// Terminal receipt exists only after both real browser paths and all cleanup pass.
+writeFileSync(join(consumer, 'checkbox-label-native-receipt.json'), JSON.stringify({
+  kind: 'checkbox-label-native-process-receipt', version: 1, final: true,
+  native: nativeEvidence, replay: replayEvidence,
+}));

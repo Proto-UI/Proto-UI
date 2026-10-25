@@ -1,5 +1,8 @@
 // Packed installed WC consumer. HappyDOM events are synthetic, not native or AT evidence.
 import { strict as assert } from 'node:assert';
+import { createHash } from 'node:crypto';
+import { readFileSync, writeFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { GlobalRegistrator } from '@happy-dom/global-registrator';
 import { loadConsumerStyles } from './consumer-smoke-css.mjs';
 
@@ -11,14 +14,34 @@ const { createShadcnCheckboxLabelComposition } =
 const { setElementAssociations, setElementProps } = await import('@proto.ui/adapter-web-component');
 
 let stage = 'imports-complete';
+// Observation only: never handles/suppresses an exception, changes an action,
+// schedules work, or declares a failed synthetic run successful.
+const receipt = {
+  kind: 'checkbox-label-synthetic-process-receipt', version: 1,
+  fixtureSha256: createHash('sha256').update(readFileSync(fileURLToPath(import.meta.url))).digest('hex'),
+  checkpoints: [stage], platformOrder: null, primary: null, cleanup: null,
+  cleanupCompleted: false, fatal: [],
+};
+const describeError = (error) => ({
+  name: error?.name ?? null, code: error?.code ?? null,
+  message: error?.message ?? null, stack: error?.stack ?? null,
+});
+process.on('exit', (exitCode) => {
+  const final = { ...receipt, final: true, exitCode, finalStage: stage };
+  // Fixed local sidecar, not an environment-selected output destination.
+  writeFileSync('checkbox-label-synthetic-receipt.json', JSON.stringify(final));
+  console.error(JSON.stringify(final));
+});
 // Observe fatal async failures without installing an exception/rejection handler
 // that would suppress Node's default nonzero exit.
 Error.stackTraceLimit = 40;
 process.on('uncaughtExceptionMonitor', (error, origin) => {
+  receipt.fatal.push({ origin, stage, sameAsPrimary: error === primaryError, error: describeError(error) });
   console.error(`packed WC Checkbox+Label fatal ${origin} at ${stage}`, error);
 });
 function checkpoint(next) {
   stage = next;
+  receipt.checkpoints.push(stage);
   console.log(`packed WC Checkbox+Label stage: ${stage}`);
 }
 // Independent platform canary: no Proto definitions, adapter, context or timers.
@@ -51,6 +74,7 @@ function observePreassembledCustomElementOrder() {
       nativeAcceptance: 'not-run',
     })
   );
+  receipt.platformOrder = [...order];
   wrapper.remove();
 }
 
@@ -203,6 +227,7 @@ try {
   );
 } catch (error) {
   primaryError = error;
+  receipt.primary = { stage, error: describeError(error) };
   console.error(`packed WC Checkbox+Label primary failure at ${stage}`, error);
   throw error;
 } finally {
@@ -211,7 +236,9 @@ try {
     document.body.replaceChildren();
     await settle();
     GlobalRegistrator.unregister();
+    receipt.cleanupCompleted = true;
   } catch (cleanupError) {
+    receipt.cleanup = { stage, error: describeError(cleanupError) };
     console.error('packed WC Checkbox+Label cleanup failure', cleanupError);
     if (primaryError) {
       throw new AggregateError([primaryError, cleanupError], 'WC fixture and cleanup both failed');

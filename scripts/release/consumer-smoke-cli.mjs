@@ -18,6 +18,7 @@ import { spawnSync } from 'node:child_process';
 import { getAllPackages, ROOT_DIR, selectPackages } from './lib.mjs';
 import { readVersion } from './version-utils.mjs';
 import { runNoStylesConsumer } from './consumer-smoke-no-styles.mjs';
+import { decideCheckboxHostAdmission } from './checkbox-host-admission.mjs';
 
 const RENDER_FIXTURE_DIR = join(ROOT_DIR, 'packages', 'cli', 'test', 'smoke-render');
 const CONSUMER_FIXTURE_DIR = join(ROOT_DIR, 'scripts', 'release', 'consumer-smoke');
@@ -35,6 +36,9 @@ const VUE2_RELEASE_ROOTS = [
   '@proto.ui/prototypes-base',
   '@proto.ui/prototypes-shadcn',
 ];
+
+// This is the actual existing CI smoke entrypoint; policy controls cannot go uncollected.
+run(process.execPath, ['--test', join(ROOT_DIR, 'scripts/release/test/checkbox-host-admission.test.mjs')]);
 
 const workDir = mkdtempSync(join(tmpdir(), 'proto-ui-cli-consumer-'));
 const releaseDir = join(workDir, 'release');
@@ -155,6 +159,8 @@ try {
   // Independent outcomes: a native setup/product failure must not hide the
   // existing synthetic explicit-Indicator failure (nor may native success erase it).
   const hostFailures = [];
+  let nativeProcess = null;
+  let otherHostsPassed = false;
   try {
     for (const name of ['preassembled-ce-order.mjs', 'standalone-ce-order.mjs']) {
       cpSync(join(RENDER_FIXTURE_DIR, name), join(consumerDir, name));
@@ -175,19 +181,66 @@ try {
       consumerDir,
       ROOT_DIR,
     ], { cwd: consumerDir, timeout: 120000 });
+    nativeProcess = { status: 0, signal: null, error: null };
     console.log('packed WC native bounded cases: passed');
   } catch (error) {
     console.error('packed WC native bounded cases: failed', error);
     hostFailures.push(error);
   }
   try {
-    for (const renderer of ['react.mjs', 'vue.mjs', 'wc.mjs', 'wc-checkbox-label.mjs']) {
+    for (const renderer of ['react.mjs', 'vue.mjs', 'wc.mjs']) {
       cpSync(join(RENDER_FIXTURE_DIR, renderer), join(consumerDir, renderer));
       run(process.execPath, ['--import', 'tsx', `./${renderer}`], { cwd: consumerDir });
     }
-    console.log('packed WC synthetic cases: passed');
+    otherHostsPassed = true;
+    console.log('packed React/Vue/WC baseline synthetic cases: passed');
   } catch (error) {
     console.error('packed WC synthetic cases: failed', error);
+    hostFailures.push(error);
+  }
+  // Only this invocation has a typed outcome. All other hosts still use run's
+  // strict throw, and collection/preparation failures remain blocking.
+  let disposition;
+  try {
+    cpSync(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label.mjs'), join(consumerDir, 'wc-checkbox-label.mjs'));
+    const result = spawnSync(process.execPath, ['--import', 'tsx', './wc-checkbox-label.mjs'], {
+      cwd: consumerDir, encoding: 'utf8', stdio: 'inherit', env: process.env,
+      shell: process.platform === 'win32', timeout: 120000,
+    });
+    const syntheticProcess = {
+      status: result.status, signal: result.signal,
+      error: result.error ? { name: result.error.name, code: result.error.code ?? null, message: result.error.message } : null,
+    };
+    const readReceipt = (name) => {
+      const path = join(consumerDir, name);
+      return existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : null;
+    };
+    const binding = readReceipt('checkbox-delivery-evidence.json');
+    const digest = (path) => createHash('sha256').update(readFileSync(path)).digest('hex');
+    const expected = {
+      testedCommit: binding.testedCommit, releaseVersion: binding.releaseVersion, packages: binding.packages,
+      lockSha256: digest(join(consumerDir, 'package-lock.json')),
+      generatedFacadeSha256: digest(join(consumerDir, 'proto-ui/components/wc/index.ts')),
+      fixtureSha256: digest(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs')),
+      originalSyntheticFixtureSha256: digest(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label.mjs')),
+      replaySourceSha256: digest(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-browser-replay.mjs')),
+      repoLockSha256: digest(join(ROOT_DIR, 'pnpm-lock.yaml')),
+    };
+    const input = {
+      prepared: hostFailures.length === 0, otherHostsPassed, expected, nativeProcess,
+      nativeReceipt: readReceipt('checkbox-label-native-receipt.json'),
+      syntheticProcess, syntheticReceipt: readReceipt('checkbox-label-synthetic-receipt.json'),
+      syntheticHost: readInstalledSyntheticHostEvidence(),
+    };
+    disposition = decideCheckboxHostAdmission(input);
+    // Full receipts + actual process outcomes survive successful workDir cleanup
+    // in the durable CI log, in addition to inherited raw primary/cleanup errors.
+    const evidence = { kind: 'checkbox-label-host-admission', ...input, disposition };
+    console.log(JSON.stringify(evidence));
+    writeFileSync(join(consumerDir, 'checkbox-label-host-admission.json'), JSON.stringify(evidence));
+    assert(disposition.admitted, `packed WC host admission failed: ${disposition.reason}`);
+  } catch (error) {
+    console.error('packed WC synthetic evidence/admission failed', error);
     hostFailures.push(error);
   }
   if (hostFailures.length) throw new AggregateError(hostFailures, 'packed WC host checks failed');
@@ -195,7 +248,7 @@ try {
   logCheckboxDeliveryEvidence(
     packManifest,
     consumerPackageNames,
-    'packed-types-synthetic-wc-and-bounded-native-passed'
+    `packed-types-and-both-native-paths-passed;synthetic=${disposition.synthetic}`
   );
   runNoStylesConsumer({ consumerDir, cli, fixtureDir: join(ROOT_DIR, 'scripts', 'release'), run });
 
@@ -567,8 +620,8 @@ function logCheckboxDeliveryEvidence(packManifest, names, phase) {
     lockSha256: digest(join(consumerDir, 'package-lock.json')),
     generatedFacadeSha256: digest(join(consumerDir, 'proto-ui', 'components', 'wc', 'index.ts')),
     fixtureSha256: digest(join(RENDER_FIXTURE_DIR, 'wc-checkbox-label.mjs')),
-    nativeAcceptance: phase === 'packed-types-synthetic-wc-and-bounded-native-passed'
-      ? 'bounded-default-and-preassembled-explicit-only' : 'not-run',
+    nativeAcceptance: phase.startsWith('packed-types-and-both-native-paths-passed;')
+      ? 'bounded-trusted-and-programmatic-native-paths-passed' : 'not-run',
     registryPublication: 'not-performed',
   };
   console.log(JSON.stringify(evidence));
