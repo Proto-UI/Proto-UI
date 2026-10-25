@@ -156,6 +156,20 @@ try {
   // existing synthetic explicit-Indicator failure (nor may native success erase it).
   const hostFailures = [];
   try {
+    for (const name of ['preassembled-ce-order.mjs', 'standalone-ce-order.mjs']) {
+      cpSync(join(RENDER_FIXTURE_DIR, name), join(consumerDir, name));
+    }
+    console.log(JSON.stringify({
+      kind: 'standalone-order-diagnostic-source',
+      sharedSourceSha256: createHash('sha256').update(readFileSync(join(consumerDir, 'preassembled-ce-order.mjs'))).digest('hex'),
+      runnerSha256: createHash('sha256').update(readFileSync(join(consumerDir, 'standalone-ce-order.mjs'))).digest('hex'),
+    }));
+    run(process.execPath, ['./standalone-ce-order.mjs'], { cwd: consumerDir, timeout: 10000 });
+  } catch (error) {
+    console.error('standalone order diagnostic collection failed', error);
+    hostFailures.push(error);
+  }
+  try {
     run(process.execPath, [
       join(RENDER_FIXTURE_DIR, 'wc-checkbox-label-native.mjs'),
       consumerDir,

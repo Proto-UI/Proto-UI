@@ -2,6 +2,8 @@
 
 The [active prototype comparison and four-family projection matrix](prototype-coverage-matrix.md), backed by [structured data](prototype-coverage-matrix.json), is the current portfolio entry under [#870](https://github.com/Proto-UI/Proto-UI/issues/870). It supersedes the older #377 matrix navigation while preserving its [dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md), unfinished work, and existing implementation owners.
 
+The [composition delivery parity audit and repair record](composition-delivery-parity.md) traces public definitions, recommended compositions, homepage/demo consumers and workspace/installed boundaries, with reproducible diagnosis and commit-bound validation. It is not a claim that all composition or installation gaps are closed.
+
 Proto UI is independent. Comparison projects and design/specification references do not determine its roadmap. A directory name is neither a new Base protocol nor an automatic adoption commitment.
 
 The following are separate dimensions, not numbers to add into one coverage percentage:

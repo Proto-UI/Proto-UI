@@ -123,6 +123,25 @@ const resources = new Map([
   ['/', { type: 'text/html', body: Buffer.from('<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"><link rel="stylesheet" href="/src/styles/proto-ui-style.css"></head><body><script type="module" src="/checkbox-native-bundle.js"></script></body></html>') }],
   ['/checkbox-native-bundle.js', { type: 'text/javascript', body: Buffer.from(bundled.outputFiles[0].contents) }],
 ]);
+// A separate page/realm, without CSS or business imports, executes the same
+// import-free module copied into the standalone HappyDOM consumer process.
+let orderModule;
+const orderPreparationErrors = [];
+const orderResources = new Map();
+try {
+  orderModule = readFileSync(new URL('./preassembled-ce-order.mjs', import.meta.url));
+  const preparedOrderResources = new Map([
+  ['/standalone-order', { type: 'text/html', body: Buffer.from('<!doctype html><html><head><meta charset="utf-8"><link rel="icon" href="data:,"></head><body><script type="module" src="/standalone-order-entry.mjs"></script></body></html>') }],
+  ['/preassembled-ce-order.mjs', { type: 'text/javascript', body: orderModule }],
+  ['/standalone-order-entry.mjs', { type: 'text/javascript', body: Buffer.from("import { observeStandaloneConnectionOrder } from '/preassembled-ce-order.mjs';\nwindow.standaloneOrder = observeStandaloneConnectionOrder();\n") }],
+  ]);
+  for (const [path, resource] of preparedOrderResources) {
+    orderResources.set(path, resource);
+    resources.set(path, resource);
+  }
+} catch (error) {
+  orderPreparationErrors.push(error);
+}
 // Existing adapter infrastructure creates two empty style elements and then
 // fills these fixed rules. Permit only their exact bytes, not arbitrary inline
 // styles, and independently check the actual installed adapter's DOM output.
@@ -147,6 +166,7 @@ for (const name of ['proto-ui-style.css', 'shadcn-theme.css', 'proto-ui-tokens.g
   resources.set(`/src/styles/${name}`, { type: 'text/css', body: readFileSync(path) });
 }
 const failures = [];
+failures.push(...orderPreparationErrors);
 let browser, context, server;
 let nativeEvidence;
 console.log(JSON.stringify({
@@ -208,6 +228,45 @@ try {
     failures.push(new Error('blocked unexpected WebSocket'));
     socket.close();
   });
+  let orderPage;
+  try {
+    assert.equal(orderPreparationErrors.length, 0, 'standalone native diagnostic preparation failed');
+    orderPage = await context.newPage();
+    orderPage.on('pageerror', (error) => failures.push(error));
+    orderPage.on('console', (message) => {
+      if (message.type() === 'error') failures.push(new Error(`standalone browser console: ${message.text()}`));
+    });
+    // The diagnostic realm cannot load even the product resources admitted for
+    // the independent product page in this same browser context.
+    await orderPage.route('**/*', async (route) => {
+      const url = new URL(route.request().url());
+      if (url.origin === origin && orderResources.has(url.pathname) && !url.search && !url.hash && route.request().method() === 'GET') {
+        await route.continue();
+      } else {
+        failures.push(new Error('blocked non-diagnostic order-page request'));
+        await route.abort();
+      }
+    });
+    const orderResponse = await orderPage.goto(origin + '/standalone-order', { waitUntil: 'load' });
+    assert.equal(orderResponse.status(), 200);
+    await orderPage.waitForFunction(() => !!window.standaloneOrder);
+    const standaloneOrder = await orderPage.evaluate(() => window.standaloneOrder);
+    console.log(JSON.stringify({
+      kind: 'standalone-preassembled-custom-element-order',
+      host: 'native-chromium',
+      productImports: false,
+      sharedSourceSha256: digest(orderModule),
+      ...standaloneOrder,
+    }));
+    assert.equal(standaloneOrder.errors.length, 0, 'standalone native diagnostic errors');
+    assert.equal(standaloneOrder.observations.length, 2, 'standalone native diagnostic incomplete');
+    // Collection success is not a host-admission pass. Original native
+    // parent-first assertion and all product assertions remain below.
+  } catch (error) {
+    failures.push(error);
+  } finally {
+    try { await orderPage?.close(); } catch (error) { failures.push(error); }
+  }
   const page = await context.newPage();
   page.on('pageerror', (error) => failures.push(error));
   page.on('console', (message) => {
