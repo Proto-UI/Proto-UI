@@ -32,6 +32,9 @@ dependsOn:
 verifies:
   tests: [T-SHADCN-SELECT-STYLE-0001]
 sources:
+  - path: packages/prototypes/shadcn/src/select/root.proto.ts
+  - path: packages/prototypes/shadcn/src/select/trigger.proto.ts
+  - path: packages/prototypes/shadcn/src/select/surface.proto.ts
   - path: packages/prototypes/shadcn/src/select/style.ts
   - path: packages/prototypes/shadcn/src/select/trigger-visual.ts
   - path: packages/prototypes/shadcn/src/select/visual.ts
