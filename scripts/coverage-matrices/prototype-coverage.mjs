@@ -647,6 +647,25 @@ export function refreshCandidateSource(data, repoRoot, identity) {
   const previous = data.candidateSource ?? data;
   const prototypeInventory = {};
   const familyKeys = ['bootstrap-2-3-2', 'brutalist', 'liquid-glass', 'shadcn'];
+  const sourcePathsOf = (entity) =>
+    (entity.sources ?? [])
+      .map((source) => (typeof source === 'string' ? source : source?.path))
+      .filter((path) => typeof path === 'string');
+  // Every Base identity names the subject family its projections belong to.
+  // That family is the anchor used to resolve a multi-family source citation.
+  const baseFamilyById = new Map();
+  for (const entity of catalog.filter((e) => e.id.startsWith('P-BASE-'))) {
+    const families = [
+      ...new Set(
+        sourcePathsOf(entity)
+          .filter(
+            (path) => path.startsWith('packages/prototypes/base/src/') && path.endsWith('.proto.ts')
+          )
+          .map((path) => path.split('/')[4])
+      ),
+    ];
+    if (families.length === 1) baseFamilyById.set(entity.id, families[0]);
+  }
   for (const lib of Object.keys(data.prototypeInventory)) {
     const sourceFiles = [];
     const visit = (directory) => {
@@ -658,15 +677,53 @@ export function refreshCandidateSource(data, repoRoot, identity) {
       }
     };
     visit(path.join(repoRoot, `packages/prototypes/${lib}/src`));
+    const families = [...new Set(sourceFiles.map((p) => p.split('/')[4]))].sort();
+    // Ownership: one identity owns exactly one family per library. Catalog
+    // sources are supporting evidence, so a cited declaration in another
+    // family never grants a second family. When several families are cited the
+    // owner is the Base subject family the identity inherits; an identity
+    // without that anchor fails closed instead of being counted twice.
+    const ownedFamilyById = new Map();
+    for (const entity of catalog) {
+      if (!entity.id.startsWith(`P-${lib.toUpperCase()}-`)) continue;
+      const cited = [
+        ...new Set(
+          sourcePathsOf(entity)
+            .filter(
+              (path) =>
+                path.startsWith(`packages/prototypes/${lib}/src/`) && path.endsWith('.proto.ts')
+            )
+            .map((path) => path.split('/')[4])
+        ),
+      ];
+      if (cited.length === 0) continue;
+      if (cited.length === 1) {
+        ownedFamilyById.set(entity.id, cited[0]);
+        continue;
+      }
+      const inherited = [
+        ...new Set(
+          (entity.inherits?.prototypes ?? [])
+            .map((parent) => (typeof parent === 'string' ? parent : parent?.id))
+            .filter((id) => baseFamilyById.has(id))
+            .map((id) => baseFamilyById.get(id))
+        ),
+      ];
+      if (inherited.length === 1 && cited.includes(inherited[0])) {
+        ownedFamilyById.set(entity.id, inherited[0]);
+        continue;
+      }
+      throw new Error(
+        `Catalog entity ${entity.id} cites multiple ${lib} families (${cited.sort().join(', ')}) without one inherited Base family`
+      );
+    }
     prototypeInventory[lib] = {};
-    for (const family of [...new Set(sourceFiles.map((p) => p.split('/')[4]))].sort()) {
+    for (const family of families) {
       const files = sourceFiles
         .filter((p) => p.startsWith(`packages/prototypes/${lib}/src/${family}/`))
         .sort();
       const entities = catalog.filter(
-        (e) =>
-          e.id.startsWith(`P-${lib.toUpperCase()}-`) &&
-          (e.sources ?? []).some((source) => files.includes(source.path))
+        (e) => e.id.startsWith(`P-${lib.toUpperCase()}-`) && ownedFamilyById.get(e.id) === family
       );
       const old = previous.prototypeInventory[lib]?.[family];
       const tests = [

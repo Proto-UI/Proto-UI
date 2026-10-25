@@ -25,3 +25,5 @@ node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs
 ```
 
 The JSON is the editable inventory; the Markdown view is generated. Refresh exact snapshots and per-row decisions when the source changes. A successful check proves bounded inventory consistency, not runtime behavior or semantic admission.
+
+A cataloged projection has one owning family. Its inherited Base identity selects that family when its source list also cites supporting definitions from other families; those supporting paths do not duplicate the projection identity into another row. A multi-family source list without one proven inherited Base owner is rejected rather than guessed. Candidate source refreshes retain the pinned-main inventory and existing acceptance gates; a newer source inventory is not lifecycle promotion or completed parity.
