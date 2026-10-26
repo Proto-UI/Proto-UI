@@ -1,0 +1,52 @@
+name: Draft fixed-blueprint default-props native evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/core/src/handles.ts'
+      - 'packages/core/src/spec/template.ts'
+      - 'packages/core/src/spec/owned-template-blueprint.ts'
+      - 'packages/core/src/spec/index.ts'
+      - 'packages/runtime/src/kernel/kernel.ts'
+      - 'packages/modules/feedback/**'
+      - 'packages/modules/rule/**'
+      - 'packages/modules/rule-expose-state-web/**'
+      - 'packages/adapters/web-component/src/**'
+      - 'packages/adapters/base/src/platform/web-owned-decoration.ts'
+      - 'packages/adapters/react/src/**'
+      - 'packages/adapters/react/test/fixtures/owned-blueprint-reuse-evidence-app.ts'
+      - 'packages/adapters/vue/src/**'
+      - 'packages/adapters/vue2/src/**'
+      - 'scripts/feedback/owned-blueprint-reuse-evidence*'
+      - '.github/workflows/owned-blueprint-reuse-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  owned-blueprint-reuse-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked existing dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Check bounded exact-blueprint reuse
+        run: node node_modules/vitest/vitest.mjs run packages/core/test/owned-template-blueprint.test.ts packages/modules/feedback/test/owned-decoration-activation.test.ts packages/adapters/web-component/test/owned-blueprint-reuse.test.ts packages/adapters/react/test/owned-blueprint-reuse.integration.test.ts
+      - name: Capture exact-head native keyboard, pointer and accessibility evidence
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --import tsx scripts/feedback/owned-blueprint-reuse-evidence.mjs /tmp/pui-owned-blueprint-reuse-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: owned-blueprint-reuse-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/pui-owned-blueprint-reuse-evidence/
+          if-no-files-found: warn
+          retention-days: 30

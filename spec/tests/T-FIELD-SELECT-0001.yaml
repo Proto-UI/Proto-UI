@@ -1,0 +1,43 @@
+id: T-FIELD-SELECT-0001
+type: test
+title: Optional Field Select composition regression evidence
+status: draft
+since: 0.3.0-alpha.1
+summary: Synthetic WC coverage is not native keyboard, assistive technology or visual acceptance.
+cases:
+  - id: T-FIELD-SELECT-0001-CASE-POLICY
+    title: Root gates existing popup selection under Field policy
+    covers: [C-FIELD-SELECT-0001-POLICY]
+    expectation: disabled-and-readonly-requests-rejected-by-canonical-owner
+  - id: T-FIELD-SELECT-0001-CASE-COMPOSITION
+    title: Field relationships and reports preserve one Select owner
+    covers:
+      [C-FIELD-SELECT-0001-COMPOSITION, C-FIELD-SELECT-0001-FACTS, C-FIELD-SELECT-0001-LIFECYCLE]
+    expectation: opt-in-field-invalid-and-label-with-no-feedback-latch-or-stale-reports
+implementations:
+  - id: field-select-policy-wc
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/select-field-policy.test.ts
+    required: true
+    consumesCases: [T-FIELD-SELECT-0001-CASE-POLICY]
+  - id: field-select-trigger-wc
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/field-select-trigger.test.ts
+    required: true
+    consumesCases: [T-FIELD-SELECT-0001-CASE-COMPOSITION]
+  - id: field-select-report-order-wc
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/field-select-report-order.test.ts
+    required: true
+    consumesCases: [T-FIELD-SELECT-0001-CASE-COMPOSITION]
+sources:
+  - path: packages/prototypes/base/test/select-field-policy.test.ts
+  - path: packages/prototypes/base/test/field-select-trigger.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Tests Field composition while preserving existing Select regression coverage.
+tags: [field, select]

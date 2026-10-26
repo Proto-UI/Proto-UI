@@ -12,6 +12,16 @@ import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-c
 import { verifyRevision } from './homepage-evidence-contract';
 import { readReadingReflow } from '../src/content/docs/zh-cn/reading-reflow-evidence';
 
+/** Independent candidate oracle: upstream Shadcn heading is 3xl, then 5xl at xl.
+ * Preserve the existing non-Shadcn density expectation and all layout tolerances. */
+export function expectedCandidateSloganFontSize(
+  family: 'shadcn' | 'brutalist',
+  width: number
+): number {
+  if (family === 'shadcn') return width >= 1280 ? 48 : 30;
+  return width === 390 ? 24 : 36;
+}
+
 /** Layout evidence only. Preserve exact spacing across grid and multicol CSS serialization. */
 export function gallerySpacingIssues(
   facts: {
@@ -255,7 +265,7 @@ try {
           assert.equal(facts.primary.fontSize, 14);
           assert.ok(Math.abs(facts.primary.height - (v.family === 'brutalist' ? 40 : 32)) <= 1);
           if (kind === 'candidate') {
-            assert.equal(facts.slogan.fontSize, v.width === 390 ? 24 : 36);
+            assert.equal(facts.slogan.fontSize, expectedCandidateSloganFontSize(v.family, v.width));
             if (v.family === 'shadcn') {
               assert.equal(facts.cardPrototype, 'shadcn-card-root');
               assert.equal(facts.cardPadding, '20px 0px');

@@ -51,3 +51,9 @@ export type {
   ShadcnSelectSeparatorExposes,
   ShadcnSelectSeparatorAsHookContract,
 } from './types';
+
+export type {
+  ShadcnSelectSurfaceProps,
+  ShadcnSelectViewportProps,
+  ShadcnSelectItemTextProps,
+} from './types';

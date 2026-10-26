@@ -82,11 +82,12 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
     // The closed recipe now includes the actual family Label relation owner.
-    expect(ids.size).toBe(family === 'shadcn' ? 63 : 56);
+    expect(ids.size).toBe(family === 'shadcn' ? 64 : 56);
     if (family === 'shadcn') {
       for (const part of ['root', 'header', 'content'])
         expect(ids.has(`shadcn-card-${part}`)).toBe(true);
       expect(ids.has('shadcn-surface-root')).toBe(false);
+      expect(ids.has('shadcn-select-group')).toBe(true);
     }
     const sceneIds = [
       'command-root',

@@ -1,0 +1,69 @@
+id: T-TRANSLUCENT-SURFACE-STYLE-0001
+type: test
+title: Finite translucent surface style transport and CSS closure
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Executed token tests and four real framework adapters cover transport, not native backdrop rasterization or Select adoption.
+summary: Verifies finite vocabulary, complete filter conflict group, scoped CSS and actual adapter style-surface continuity.
+cases:
+  - id: T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-MERGE
+    title: Finite choices replace independently and preserve unknown tokens
+    covers: [C-TRANSLUCENT-SURFACE-STYLE-0001-VOCABULARY, C-TRANSLUCENT-SURFACE-STYLE-0001-MERGE]
+    expectation: independent-finite-groups
+  - id: T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-CSS
+    title: Scoped light and shadow CSS supports only finite values
+    covers: [C-TRANSLUCENT-SURFACE-STYLE-0001-TARGET]
+    expectation: no-arbitrary-css-admission
+  - id: T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-ADAPTER
+    title: Four Web adapters replace style contributions on the same physical style surface
+    covers: [C-TRANSLUCENT-SURFACE-STYLE-0001-MERGE]
+    expectation: no-stale-filter-choice
+implementations:
+  - id: cli-translucent-surface-css
+    kind: module-test
+    status: passing
+    path: packages/cli/test/translucent-surface-tokens.test.ts
+    required: true
+    consumesCases:
+      [T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-CSS, T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-MERGE]
+  - id: react-translucent-surface
+    kind: module-test
+    status: passing
+    path: packages/adapters/react/test/translucent-surface.integration.test.ts
+    required: true
+    consumesCases: [T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-ADAPTER]
+  - id: vue-translucent-surface
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue/test/translucent-surface.integration.test.ts
+    required: true
+    consumesCases: [T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-ADAPTER]
+  - id: vue2-translucent-surface
+    kind: module-test
+    status: passing
+    path: packages/adapters/vue2/test/translucent-surface.integration.test.ts
+    required: true
+    consumesCases: [T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-ADAPTER]
+  - id: web-component-translucent-surface
+    kind: module-test
+    status: passing
+    path: packages/adapters/web-component/test/translucent-surface.integration.test.ts
+    required: true
+    consumesCases: [T-TRANSLUCENT-SURFACE-STYLE-0001-CASE-ADAPTER]
+verifies:
+  contracts:
+    - id: C-TRANSLUCENT-SURFACE-STYLE-0001
+      anchors:
+        [
+          C-TRANSLUCENT-SURFACE-STYLE-0001-VOCABULARY,
+          C-TRANSLUCENT-SURFACE-STYLE-0001-MERGE,
+          C-TRANSLUCENT-SURFACE-STYLE-0001-TARGET,
+        ]
+sources:
+  - path: packages/adapters/base/test-utils/translucent-surface.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded finite token tests and four-adapter transport without native layout claims.
+tags: [feedback, style, test]

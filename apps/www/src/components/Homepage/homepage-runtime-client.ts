@@ -1,3 +1,4 @@
+import { SITE_TYPOGRAPHY_MEDIA_QUERIES } from '../site-text-recipes';
 import { homeActionIcon, appendHomeActionGlyph } from './home-action-icons';
 import {
   linkSurfaceProps,
@@ -834,7 +835,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       epoch++;
       typographyEpoch++;
       observer.disconnect();
-      compactMedia?.removeEventListener('change', onTypographyChange);
+      for (const media of typographyMedia) media.removeEventListener('change', onTypographyChange);
       typography.destroy();
       disclosure?.destroy();
       for (const stop of stopThemes) stop();
@@ -921,8 +922,10 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       }
     })();
   };
-  const compactMedia = document.defaultView?.matchMedia('(max-width: 47.999rem)');
-  compactMedia?.addEventListener('change', onTypographyChange);
+  const typographyMedia = document.defaultView
+    ? SITE_TYPOGRAPHY_MEDIA_QUERIES.map((query) => document.defaultView!.matchMedia(query))
+    : [];
+  for (const media of typographyMedia) media.addEventListener('change', onTypographyChange);
   const observer = new MutationObserver(() => {
     if (!root.isConnected) void destroy();
     else onTypographyChange();

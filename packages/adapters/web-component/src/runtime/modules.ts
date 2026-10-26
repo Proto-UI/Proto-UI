@@ -6,7 +6,7 @@ import {
   type PresencePresentationSink,
 } from '@proto.ui/module-feedback';
 import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
-import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
+import { RESIDENT_MOTION_SINK_CAP, OWNED_DECORATION_CAP } from '@proto.ui/module-feedback';
 import {
   NATIVE_LINK_HOST_CAP,
   NATIVE_LINK_RUN_IN_CALLBACK_CAP,
@@ -1099,6 +1099,16 @@ export function createWebComponentOwnerModules<Props extends PropsBaseType>(
     physicalImage,
     getControlLabelSurface
   )
+    // Eligibility is an owner capability available during setup; physical
+    // bindings are still acquired only after the complete first view stages.
+    .use('feedback', [
+      ...(!el.shadowRoot &&
+      !args.textControlTarget &&
+      !args.imageViewTarget &&
+      !args.nativeLinkTarget
+        ? [[OWNED_DECORATION_CAP, true] as const]
+        : []),
+    ])
     .use('a11y', [
       [
         A11Y_PROJECT_CAP,
@@ -1322,6 +1332,12 @@ export function createWebComponentModules<Props extends PropsBaseType>(args: {
     subscribeControlLabelSurface
   )
     .use('feedback', [
+      ...(!el.shadowRoot &&
+      !args.textControlTarget &&
+      !args.imageViewTarget &&
+      !args.nativeLinkTarget
+        ? [[OWNED_DECORATION_CAP, true] as const]
+        : []),
       [EFFECTS_CAP, effectsPort],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
       [

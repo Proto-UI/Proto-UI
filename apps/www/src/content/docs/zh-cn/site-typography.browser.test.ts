@@ -256,6 +256,15 @@ function assertSourceIntegrity(measured: Awaited<ReturnType<typeof sourceIntegri
     expect(node.nestedFocusable).toBe(0);
   }
 }
+function narrowHomepageHeading(family: 'shadcn' | 'brutalist', textPercent: number) {
+  const scale = textPercent / 100;
+  return {
+    token: family === 'shadcn' ? 'text-3xl' : 'text-2xl',
+    size: (family === 'shadcn' ? 30 : 24) * scale,
+    lineHeight: `${(family === 'shadcn' ? 33 : 30) * scale}px`,
+  };
+}
+
 async function typographyPaint(page: Page, selector: string) {
   return page.locator(selector).evaluate((native) => {
     const surface = native.querySelector<HTMLElement>('[data-typography-prototype]') ?? native;
@@ -488,20 +497,33 @@ describe.sequential('native SiteTypography rendered evidence', () => {
                     await page.evaluate((percent) => {
                       document.documentElement.style.fontSize = `${percent}%`;
                     }, textPercent);
-                    await page.waitForFunction(
-                      () =>
-                        document.querySelector(
-                          '[data-site-typography="slogan"] [data-pui-style~="text-2xl"]'
-                        ),
-                      undefined,
-                      { timeout: 15_000 }
-                    );
-                    await page.evaluate(
-                      () =>
-                        new Promise<void>((resolve) =>
-                          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
-                        )
-                    );
+                    const expectedHeading = narrowHomepageHeading(family, textPercent);
+                    const headingSamples: unknown[] = [];
+                    state.expectedHeading = expectedHeading;
+                    state.headingSamples = headingSamples;
+                    await expect
+                      .poll(
+                        async () => {
+                          const paint = await typographyPaint(
+                            page,
+                            '[data-site-typography="slogan"]'
+                          );
+                          const sample = {
+                            token:
+                              paint.tokens?.split(/\s+/).includes(expectedHeading.token) ?? false,
+                            size: paint.size,
+                            lineHeight: paint.lineHeight,
+                          };
+                          headingSamples.push(sample);
+                          return sample;
+                        },
+                        { timeout: 15_000 }
+                      )
+                      .toEqual({
+                        token: true,
+                        size: expectedHeading.size,
+                        lineHeight: expectedHeading.lineHeight,
+                      });
                     const slogan = await typographyPaint(page, '[data-site-typography="slogan"]');
                     const tagline = await typographyPaint(page, '[data-site-typography="tagline"]');
                     const geometry = await overflow(page);
@@ -841,7 +863,7 @@ describe.sequential('document reading native fallback', () => {
   for (const [name, route, titleSize, titleLeading] of [
     ['shadcn', '/zh-cn/start-here/quick-start/', '30px', '37.5px'],
     ['brutalist', '/en/ui-libraries/brutalist/components/button/', '36px', '44px'],
-    ['homepage', '/zh-cn/', '36px', '44px'],
+    ['homepage', '/zh-cn/', '30px', '33px'],
   ] as const) {
     it(`${name}: retains its own no-JavaScript heading scale`, async () => {
       await runCase(

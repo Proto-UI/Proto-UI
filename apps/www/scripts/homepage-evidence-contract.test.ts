@@ -1304,3 +1304,201 @@ test('homepage Command verifies the public outer shell and actual muted active p
   verify(source);
   for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
 });
+
+test('homepage Select verifies the inherited Rhea surface, real portal and keyboard continuity', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const required = [
+    "await stage('select-rhea')",
+    "await trigger.press('ArrowDown')",
+    "await page.keyboard.press('End')",
+    "await page.keyboard.press('Home')",
+    "await page.keyboard.press('Enter')",
+    'await hasFocus(trigger)',
+    "radius: '18px', height: 32, fontSize: '14px', gap: '6px'",
+    "filter: 'blur(40px) saturate(1.5)'",
+    "leafAriaHidden: 'true'",
+    "padding: '4px', itemRadius: '14px', escaped: true",
+    'record.selectPaintSamples = selectPaintSamples',
+    'record.selectPaint = facts',
+    'editor.evaluate((current, original) => current === original, originalEditor)',
+    'backgroundMatches: background === expectedBackground',
+    'Boolean(themePopover)',
+    "expectedBackground !== 'rgba(0, 0, 0, 0)'",
+    'reference.remove()',
+    "await capture('select-rhea-open')",
+    "expect(background).not.toBe('rgba(0, 0, 0, 0)')",
+    'expect(await sameEditor()).toBe(true)',
+  ];
+  const verify = (candidate: string) => {
+    candidate = candidate.replace(/\s+/g, ' ');
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(candidate, /finally\s*\{\s*await save\(\);\s*\}/);
+    assert.equal(candidate.split('expect(await sameEditor()).toBe(true)').length - 1, 2);
+  };
+  const normalized = source.replace(/\s+/g, ' ');
+  verify(normalized);
+  for (const fragment of required) assert.throws(() => verify(normalized.replaceAll(fragment, '')));
+});
+
+test('composition screenshots preserve and disclose actual interaction framing', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const capture = source.slice(
+    source.indexOf('const capture = async (name: string)'),
+    source.indexOf('await save();\n          try {')
+  );
+  const required = [
+    "mode: 'preserve-interaction-position'",
+    'scrollX, scrollY',
+    'width: innerWidth, height: innerHeight',
+    'document.documentElement.scrollHeight',
+    "header: box('header')",
+    "heroHeading: box('main h1')",
+    "search: box('.site-header-search')",
+    'node.getBoundingClientRect()',
+    'position: style.position',
+    'zIndex: style.zIndex',
+    'const beforeCapture = await framing()',
+    'record.captureFraming',
+    'afterCapture: await framing()',
+    'fullPage: true',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(
+      candidate,
+      /record\.captureFraming =[^;]+;\s*await save\(\);\s*const bytes = await page!\.screenshot/
+    );
+    assert.ok(!candidate.includes('scrollTo('));
+  };
+  const normalized = capture.replace(/\s+/g, ' ');
+  verify(normalized);
+  for (const fragment of required) assert.throws(() => verify(normalized.replaceAll(fragment, '')));
+});
+
+test('gallery activation requires one exact localized result rather than a removed checkmark', () => {
+  const text = readFileSync(new URL('./capture-homepage-evidence.ts', import.meta.url), 'utf8');
+  const source = ts.createSourceFile('capture.ts', text, ts.ScriptTarget.Latest, true);
+  const declaration = source.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'galleryButtonActivated'
+  );
+  assert.ok(declaration);
+  const compiled = transformSync(declaration.getText(source), { loader: 'ts', format: 'cjs' }).code;
+  for (const expected of ['主要按钮: 已触发', 'Primary button: Activated']) {
+    const window = new Window();
+    const document = window.document;
+    document.body.innerHTML = '<main data-home-showcase="website-component-gallery"></main>';
+    const home = '[data-home-showcase="website-component-gallery"]';
+    const observe = runInNewContext(`${compiled}\ngalleryButtonActivated;`, { document });
+    const probe = () => observe({ home, expected });
+    assert.equal(probe(), false, 'missing result');
+    const feedback = document.createElement('span');
+    feedback.dataset.demoRef = 'gallery-controls-feedback';
+    document.querySelector(home)!.append(feedback);
+    for (const wrong of ['', '✓', 'Try any control', expected + ' extra']) {
+      feedback.textContent = wrong;
+      assert.equal(probe(), false, 'wrong or partial result');
+    }
+    feedback.textContent = expected;
+    assert.equal(probe(), true);
+    feedback.after(feedback.cloneNode(true));
+    assert.equal(probe(), false, 'duplicate result');
+    window.happyDOM.abort();
+  }
+  assert.ok(text.includes("expected: zh ? '主要按钮: 已触发' : 'Primary button: Activated'"));
+  assert.match(
+    text,
+    /gallery-primary[^\n]+\.click\(\);\s*await page\.waitForFunction\(galleryButtonActivated/
+  );
+});
+
+test('Hero native evidence measures actual Text paint, real resize and unchanged editor without changing budgets', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  ).replace(/\s+/g, ' ');
+  const required = [
+    "await stage('hero-responsive-typography')",
+    'await page.setViewportSize({ width, height: 1000 })',
+    "native.querySelector<HTMLElement>( '[data-typography-prototype]' )",
+    'getComputedStyle(owner)',
+    "fontSize: width >= 1280 ? '48px' : '30px'",
+    "lineHeight: width >= 1280 ? '52.8px' : '33px'",
+    "fontWeight: '600'",
+    "letterSpacing: width >= 1280 ? '-2.4px' : '-0.75px'",
+    'heroSamples.push({ width, expected, facts })',
+    'current === original, originalNote',
+    'current === original, originalHeading',
+    'await hasFocus(note)',
+    "expect(await note.inputValue()).toBe('Preserved across Hero viewport changes')",
+    'record.nativeHero = nativeHero',
+    'enhanced: false',
+    '45_000',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+  };
+  verify(source);
+  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
+});
+
+
+test('density candidate uses the independent exact family heading oracle without relaxing other checks', () => {
+  const source = readFileSync(
+    new URL('capture-visual-density-evidence.ts', import.meta.url),
+    'utf8'
+  );
+  const ast = ts.createSourceFile(
+    'density.ts',
+    source,
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TS
+  );
+  const declaration = ast.statements.find(
+    (node) =>
+      ts.isFunctionDeclaration(node) && node.name?.text === 'expectedCandidateSloganFontSize'
+  );
+  assert.ok(declaration);
+  const code = ts.transpileModule(declaration.getText(ast).replace('export ', ''), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const expected = runInNewContext(`${code}\nexpectedCandidateSloganFontSize`);
+  const cases = [
+    ['shadcn', 390, 30],
+    ['shadcn', 960, 30],
+    ['shadcn', 1279, 30],
+    ['shadcn', 1280, 48],
+    ['shadcn', 1440, 48],
+    ['brutalist', 390, 24],
+    ['brutalist', 1440, 36],
+  ] as const;
+  const check = (oracle: typeof expected) => {
+    for (const [family, width, size] of cases) assert.equal(oracle(family, width), size);
+  };
+  check(expected);
+  // Old shared sizing, wrong xl boundary, and accidentally changing Brutalist all fail.
+  for (const mutant of [
+    (_family: string, width: number) => (width === 390 ? 24 : 36),
+    (family: string, width: number) =>
+      family === 'shadcn' ? (width > 1280 ? 48 : 30) : expected(family, width),
+    (_family: string, width: number) => (width >= 1280 ? 48 : 30),
+  ])
+    assert.throws(() => check(mutant));
+  const call =
+    'assert.equal(facts.slogan.fontSize, expectedCandidateSloganFontSize(v.family, v.width))';
+  const checkCall = (text: string) => assert.ok(text.includes(call));
+  checkCall(source);
+  assert.throws(() => checkCall(source.replace(call, '')));
+  assert.ok(source.includes('assert.ok(facts.overflow <= 1)'));
+  assert.ok(source.includes('assert.equal(facts.title.fontSize, 16)'));
+  assert.ok(
+    source.includes("assert.equal(facts.caption.fontSize, v.family === 'shadcn' ? 14 : 12)")
+  );
+});
+

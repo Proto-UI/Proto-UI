@@ -8,6 +8,9 @@ statement:
   zh-CN: Shadcn Select Item 是 `P-BASE-SELECT-ITEM` 之上的 direct part，保留 option collection/a11y、active 与 selected 分离、commit、controlled value 和 disabled behavior，并增加当前 item surface、state feedback 与由 inherited selected state 驱动的 check SVG。`asChild` 明确不提供。
   en: Shadcn Select Item is a direct part over `P-BASE-SELECT-ITEM`. It retains option collection and accessibility, active versus selected separation, commit, controlled value, and disabled behavior while adding the current item surface, state feedback, and a check SVG driven by inherited selected state. `asChild` is explicitly unavailable.
 criteria:
+  - id: P-SHADCN-SELECT-ITEM-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-ITEM-UPSTREAM-IDENTITY
     text:
       {

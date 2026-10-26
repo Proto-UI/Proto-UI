@@ -7,6 +7,9 @@ lifecycleRationale:
   en: Source-pinned structural projection remains draft pending independent exact-candidate review and required host visual/accessibility evidence. It does not close the remaining full Select upstream parity gaps.
 summary: Three direct Shadcn parts inherit passive Base semantics and apply only the pinned upstream recipes.
 criteria:
+  - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-STRUCTURAL-PARTS-INHERITANCE
     text:
       en: Group, Label and Separator invoke their matching Base hooks without replacing naming, collection or selection ownership. They retain the Base public props/exposes/contract types and are available through family and package exports.

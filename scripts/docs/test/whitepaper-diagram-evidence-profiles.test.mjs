@@ -73,8 +73,14 @@ test('only the six explicit profile/locale assets can be selected', async () => 
       'zh-cn': ['/diagrams/whitepaper-switch-activation.zh-cn.svg'],
     },
     'evolution-feedback': {
-      en: ['/diagrams/whitepaper-evolution-feedback.en.svg', '/diagrams/whitepaper-evolution-feedback.mobile.en.svg'],
-      'zh-cn': ['/diagrams/whitepaper-evolution-feedback.zh-cn.svg', '/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg'],
+      en: [
+        '/diagrams/whitepaper-evolution-feedback.en.svg',
+        '/diagrams/whitepaper-evolution-feedback.mobile.en.svg',
+      ],
+      'zh-cn': [
+        '/diagrams/whitepaper-evolution-feedback.zh-cn.svg',
+        '/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg',
+      ],
     },
   };
   for (const [figure, locales] of Object.entries(expected)) {
@@ -82,17 +88,37 @@ test('only the six explicit profile/locale assets can be selected', async () => 
     for (const [locale, paths] of Object.entries(locales)) {
       const variants = diagramVariants(profile, locale);
       assert.ok(Object.isFrozen(variants));
-      assert.deepEqual(variants.map((item) => item.asset), paths);
+      assert.deepEqual(
+        variants.map((item) => item.asset),
+        paths
+      );
       for (const selected of variants) {
         assert.ok(Object.isFrozen(selected));
         assert.equal(selected.width, selected.name === 'mobile' ? 500 : 960);
         assert.equal(selected.height, selected.name === 'mobile' ? 1000 : profile.height);
-        const svg = await readFile(new URL(`../../../apps/www/public${selected.asset}`, import.meta.url), 'utf8');
-        assert.ok(svg.includes(`width="${selected.width}" height="${selected.height}" viewBox="0 0 ${selected.width} ${selected.height}"`));
+        const svg = await readFile(
+          new URL(`../../../apps/www/public${selected.asset}`, import.meta.url),
+          'utf8'
+        );
+        assert.ok(
+          svg.includes(
+            `width="${selected.width}" height="${selected.height}" viewBox="0 0 ${selected.width} ${selected.height}"`
+          )
+        );
         assert.doesNotMatch(svg, /<script\b|<foreignObject\b|\son[a-z]+\s*=|(?:href|src)\s*=/i);
         if (selected.name === 'mobile') {
-          const article = await readFile(new URL(`../../../apps/www/src/content/docs/${locale}/whitepaper/${profile.chapter}.md`, import.meta.url), 'utf8');
-          assert.ok(article.includes(`<source media="(max-width: 639px)" srcset="${selected.asset}" width="500" height="1000"`));
+          const article = await readFile(
+            new URL(
+              `../../../apps/www/src/content/docs/${locale}/whitepaper/${profile.chapter}.md`,
+              import.meta.url
+            ),
+            'utf8'
+          );
+          assert.ok(
+            article.includes(
+              `<source media="(max-width: 639px)" srcset="${selected.asset}" width="500" height="1000"`
+            )
+          );
           assert.match(article, /<picture>\s*<source[^>]+>\s*<img[^>]+>\s*<\/picture>/);
           assert.match(svg, /data-layout="mobile"/);
           assert.doesNotMatch(svg, /@font-face/);
@@ -112,7 +138,10 @@ test('responsive selection is width-bound, with an exact 639/640 boundary and no
       const selected = selectDiagramVariant(evolution, locale, width);
       assert.equal(selected.name, width <= 639 ? 'mobile' : 'desktop');
       assert.equal(selected, diagramVariants(evolution, locale)[width <= 639 ? 1 : 0]);
-      assert.equal(selectDiagramVariant(activation, locale, width), diagramVariants(activation, locale)[0]);
+      assert.equal(
+        selectDiagramVariant(activation, locale, width),
+        diagramVariants(activation, locale)[0]
+      );
     }
     for (const invalid of [0, -1, 639.5, NaN, Infinity, '390', '/diagrams/other.svg', {}]) {
       assert.throws(() => selectDiagramVariant(evolution, locale, invalid), /viewport width/);
@@ -131,8 +160,16 @@ test('Switch captures stay unchanged; evolution adds bounded resize, boundary an
     ...standard,
     { scenario: 'boundary-639', viewport: { width: 639, height: 1000 } },
     { scenario: 'boundary-640', viewport: { width: 640, height: 1000 } },
-    { scenario: 'resize-to-mobile', initialViewport: { width: 1440, height: 1000 }, viewport: { width: 390, height: 844 } },
-    { scenario: 'resize-to-desktop', initialViewport: { width: 390, height: 844 }, viewport: { width: 1440, height: 1000 } },
+    {
+      scenario: 'resize-to-mobile',
+      initialViewport: { width: 1440, height: 1000 },
+      viewport: { width: 390, height: 844 },
+    },
+    {
+      scenario: 'resize-to-desktop',
+      initialViewport: { width: 390, height: 844 },
+      viewport: { width: 1440, height: 1000 },
+    },
     { scenario: 'landscape-390', viewport: { width: 844, height: 390 } },
   ]);
   assert.ok(Object.isFrozen(cases));
@@ -184,16 +221,31 @@ test('evolution identities bind variant and scenario as well as selected asset h
     for (const theme of ['light', 'dark']) {
       for (const { viewport, scenario } of diagramEvidenceCases(profile)) {
         const selected = selectDiagramVariant(profile, locale, viewport.width);
-        const id = diagramEvidenceId(profile, locale, theme, viewport.width, revision, hash, scenario);
-        assert.equal(id, `evolution-feedback-${selected.name}-${locale}-${theme}-${viewport.width}-${scenario}-${revision}-${hash}`);
+        const id = diagramEvidenceId(
+          profile,
+          locale,
+          theme,
+          viewport.width,
+          revision,
+          hash,
+          scenario
+        );
+        assert.equal(
+          id,
+          `evolution-feedback-${selected.name}-${locale}-${theme}-${viewport.width}-${scenario}-${revision}-${hash}`
+        );
         ids.add(id);
       }
     }
   }
   assert.equal(ids.size, 28);
   assert.throws(() => diagramEvidenceId(profile, 'en', 'light', 390, revision, hash, '../asset'));
-  assert.throws(() => diagramEvidenceId(profile, 'en', 'light', 640, revision, hash, 'boundary-639'));
-  assert.throws(() => diagramEvidenceId(selectDiagramProfile(), 'en', 'light', 639, revision, hash, 'boundary-639'));
+  assert.throws(() =>
+    diagramEvidenceId(profile, 'en', 'light', 640, revision, hash, 'boundary-639')
+  );
+  assert.throws(() =>
+    diagramEvidenceId(selectDiagramProfile(), 'en', 'light', 639, revision, hash, 'boundary-639')
+  );
 });
 
 test('runner rejects an unknown selection before dependency, asset or browser initialization', () => {

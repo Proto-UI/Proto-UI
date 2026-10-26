@@ -1,3 +1,4 @@
+import { withWebComponentOwnedRelocation } from './owned-relocation';
 // packages/adapters/web-component/src/slot-projector.ts
 
 import { isOwnedVisualNode } from './visual-surface';
@@ -108,11 +109,14 @@ export class SlotProjector {
         if (!parent) return;
 
         for (const n of toMove) {
-          // n 目前是 el 的 direct child，移走
-          if (n.parentNode === this.el) this.el.removeChild(n);
-
-          parent.insertBefore(n, end);
-          if (!this.projected.includes(n)) this.projected.push(n);
+          // A previous connected reaction may have reparented a later node
+          // or replaced this projection. Do not reclaim author-moved nodes.
+          if (this.slotEnd !== end || end.parentNode !== parent) break;
+          if (n.parentNode !== this.el || !this.shouldMoveToSlot(n)) continue;
+          withWebComponentOwnedRelocation([n], parent, () => {
+            parent.insertBefore(n, end);
+          });
+          if (n.parentNode === parent && !this.projected.includes(n)) this.projected.push(n);
         }
       } finally {
         this.suppress--;

@@ -267,13 +267,26 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
 
     const tokens = res.plan.tokens ?? [];
     const materials = res.plan.materials ?? [];
-    if (tokens.length === 0 && materials.length === 0 && !this.unUseRuleStyle) return;
+    const decorations = res.plan.decorations ?? [];
+    if (
+      decorations.length &&
+      (!feedbackPort.supportsOwnedDecoration || !feedbackPort.replaceVisualRuntime)
+    )
+      throw new Error('Feedback port cannot consume owned-decoration intent');
+    if (
+      tokens.length === 0 &&
+      materials.length === 0 &&
+      decorations.length === 0 &&
+      !this.unUseRuleStyle
+    )
+      return;
 
     if (feedbackPort.replaceVisualRuntime) {
       const next = feedbackPort.replaceVisualRuntime(
         this.unUseRuleStyle,
         tokens.length ? [{ kind: 'tw', tokens }] : [],
-        materials
+        materials,
+        decorations
       );
       if (!this.driverActive || this.disposed) {
         next?.();

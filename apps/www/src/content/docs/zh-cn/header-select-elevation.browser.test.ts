@@ -151,6 +151,7 @@ describe.sequential('Header public family presentation and labelled compact fiel
           const errors: string[] = [];
           page.on('pageerror', (error) => errors.push(error.message));
           const measurements: unknown[] = [];
+          let focusReturnTarget: { id: string; control: string; width: number } | null = null;
           let disposition = 'not-completed';
           const capture = async (state: string) => {
             if (output)
@@ -290,6 +291,7 @@ describe.sequential('Header public family presentation and labelled compact fiel
                   control,
                   paint: firstPressed,
                 });
+                // P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES withdraws the old +1px delta.
                 const pressedY = hovered.y;
                 // React may publish the inherited state before its prop+state
                 // visual rule is committed. Keep the exact pose, waiting for
@@ -340,10 +342,12 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 await capture(`${width}-${control}-popup`);
                 await page.keyboard.press('Escape');
                 await popup.waitFor({ state: 'hidden' });
+                focusReturnTarget = { id: id!, control, width };
                 await page.waitForFunction(
                   (id) => document.activeElement?.getAttribute('aria-controls') === id,
                   id
                 );
+                focusReturnTarget = null;
                 await page.mouse.move(0, 900);
                 await keyboardFocus(page, select);
                 const focused = await sample(select);
@@ -491,6 +495,37 @@ describe.sequential('Header public family presentation and labelled compact fiel
             disposition = 'candidate-accepted';
           } catch (error) {
             disposition = 'unexpected-failure';
+            if (focusReturnTarget) {
+              try {
+                const focusReturnFailure = await page.evaluate((target) => {
+                  const active = document.activeElement;
+                  const popup = document.getElementById(target.id);
+                  const triggers = [...document.querySelectorAll('[role="combobox"]')].filter(
+                    (element) => element.getAttribute('aria-controls') === target.id
+                  );
+                  return {
+                    target,
+                    nodes: [active, popup, ...triggers].map((element, index) => ({
+                      kind: index === 0 ? 'active' : index === 1 ? 'popup' : 'trigger',
+                      tag: element?.localName ?? null,
+                      id: element?.id ?? null,
+                      role: element?.getAttribute('role') ?? null,
+                      controls: element?.getAttribute('aria-controls') ?? null,
+                      owner: element?.getAttribute('data-projection-owner') ?? null,
+                      generation: element?.getAttribute('data-projection-generation') ?? null,
+                      transition: element?.getAttribute('data-transition-state') ?? null,
+                      expanded: element?.getAttribute('aria-expanded') ?? null,
+                      connected: element?.isConnected ?? false,
+                      active: element === active,
+                    })),
+                  };
+                }, focusReturnTarget);
+                measurements.push({ stage: 'focus-return-failure', ...focusReturnFailure });
+                console.error('Header focus return failure', JSON.stringify(focusReturnFailure));
+              } catch (diagnosticError) {
+                console.error('Header focus return diagnostic unavailable', diagnosticError);
+              }
+            }
             try {
               await capture('failure');
             } catch (captureError) {

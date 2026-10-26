@@ -15,6 +15,20 @@ const disclosures = new WeakMap<HTMLElement, SiteHeaderDisclosure>();
 const contentsNavigations = new WeakMap<HTMLElement, SiteContentsNavigation>();
 const FOCUSABLE = 'a[href], button, [role="button"], [role="combobox"], [tabindex="0"]';
 
+/** Resolve escaped Select ownership through this disclosure's own IDREFs.
+ * The caller chooses the eligible triggers; unrelated portals are never inside. */
+function ownsSelectPopupForRoot(
+  root: HTMLElement | null,
+  target: Element | null,
+  triggerSelector = '[aria-controls]'
+): boolean {
+  const popup = target?.closest('[role="listbox"], [data-site-select-content]');
+  if (!root || !popup?.id) return false;
+  return [...root.querySelectorAll(triggerSelector)].some((trigger) =>
+    trigger.getAttribute('aria-controls')?.split(/\s+/).includes(popup.id)
+  );
+}
+
 export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosure {
   const existing = disclosures.get(root);
   if (existing) return existing;
@@ -188,13 +202,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     sync();
     if (restoreFocus || hidingFocus) activeButton()?.focus({ preventScroll: true });
   };
-  const ownsSelectPopup = (target: Element | null) => {
-    const popup = target?.closest('[role="listbox"], [data-site-select-content]');
-    if (!popup?.id) return false;
-    return [...root.querySelectorAll('[aria-controls]')].some((trigger) =>
-      trigger.getAttribute('aria-controls')?.split(/\s+/).includes(popup.id)
-    );
-  };
+  const ownsSelectPopup = (target: Element | null) => ownsSelectPopupForRoot(root, target);
   const nestedEscape = new WeakSet<KeyboardEvent>();
   const captureEscapeOwner = (event: KeyboardEvent) => {
     if (event.key !== 'Escape' || !open) return;
@@ -487,9 +495,15 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
   };
   const onOutside = (event: Event) => {
     if (!expanded || !(event.target instanceof view.Element)) return;
+    const sidebar = document.getElementById('starlight__sidebar');
     if (
       menuHost.contains(event.target) ||
-      document.getElementById('starlight__sidebar')?.contains(event.target)
+      sidebar?.contains(event.target) ||
+      ownsSelectPopupForRoot(
+        sidebar,
+        event.target,
+        '[role="combobox"][aria-expanded="true"][aria-controls]'
+      )
     )
       return;
     collapseMenu();

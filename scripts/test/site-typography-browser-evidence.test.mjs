@@ -218,3 +218,136 @@ describe('native typography browser ownership and bounded registration', () => {
     );
   });
 });
+
+function assertTypographyFontPreparation(value) {
+  const job = value.jobs['native-typography'];
+  assert.equal(job['timeout-minutes'], 22);
+  const restore = job.steps.filter((step) => step.uses === 'actions/cache@v4');
+  assert.equal(restore.length, 1);
+  assert.equal(restore[0]['timeout-minutes'], 1);
+  assert.deepEqual(restore[0].with, {
+    path: '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb',
+    key: 'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c',
+  });
+  const prep = job.steps.find(
+    (step) => step.name === 'Install locked dependencies and real CJK font resources'
+  );
+  assert.equal(prep['timeout-minutes'], 5);
+  assert.equal(prep.env.FONT_EVIDENCE_DIR, '${{ runner.temp }}/typography-evidence');
+  assert.ok(prep.run.includes('corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts'));
+  assert.ok(
+    prep.run.includes(
+      'timeout --signal=TERM --kill-after=5s 220s bash apps/www/scripts/prepare-homepage-composition-fonts.sh'
+    )
+  );
+  assert.ok(
+    prep.run.includes("dpkg-query -W -f='${Package} ${Version}\\n' fonts-noto-cjk fontconfig")
+  );
+  assert.ok(prep.run.includes("fc-match -f '%{family}\\n%{file}\\n' 'sans-serif:lang=zh-cn'"));
+  assert.ok(prep.run.includes('tee -a "$RUNNER_TEMP/typography-evidence/font-environment.txt"'));
+  assert.doesNotMatch(prep.run, /apt-get|\|\| true|continue-on-error|skip/i);
+  assert.ok(job.steps.indexOf(restore[0]) < job.steps.indexOf(prep));
+}
+it('reuses the exact verified font package without extending typography budgets or skipping font validation', () => {
+  assertTypographyFontPreparation(workflow);
+});
+for (const [name, mutate] of [
+  [
+    'truncated font provenance',
+    (w) => {
+      const prep = w.jobs['native-typography'].steps.find(
+        (s) => s.name === 'Install locked dependencies and real CJK font resources'
+      );
+      prep.run = prep.run.replace('tee -a', 'tee');
+    },
+  ],
+  [
+    'wide cache',
+    (w) => {
+      w.jobs['native-typography'].steps.find((s) => s.uses === 'actions/cache@v4').with.path =
+        '${{ runner.temp }}';
+    },
+  ],
+  [
+    'unverified cache identity',
+    (w) => {
+      w.jobs['native-typography'].steps.find((s) => s.uses === 'actions/cache@v4').with.key =
+        'fonts-latest';
+    },
+  ],
+  [
+    'preparation budget expansion',
+    (w) => {
+      w.jobs['native-typography'].steps.find(
+        (s) => s.name === 'Install locked dependencies and real CJK font resources'
+      )['timeout-minutes'] = 6;
+    },
+  ],
+  [
+    'missing font helper',
+    (w) => {
+      w.jobs['native-typography'].steps.find(
+        (s) => s.name === 'Install locked dependencies and real CJK font resources'
+      ).run = 'echo prepared';
+    },
+  ],
+  [
+    'swallowed font failure',
+    (w) => {
+      w.jobs['native-typography'].steps.find(
+        (s) => s.name === 'Install locked dependencies and real CJK font resources'
+      ).run += '\ntrue || true';
+    },
+  ],
+  [
+    'wrong evidence destination',
+    (w) => {
+      w.jobs['native-typography'].steps.find(
+        (s) => s.name === 'Install locked dependencies and real CJK font resources'
+      ).env.FONT_EVIDENCE_DIR = '/tmp/other';
+    },
+  ],
+])
+  it(`rejects typography font preparation with ${name}`, () => {
+    const changed = structuredClone(workflow);
+    mutate(changed);
+    assert.throws(() => assertTypographyFontPreparation(changed));
+  });
+
+it('keeps exact family-separated narrow Hero paint at both text scales', () => {
+  const ast = ts.createSourceFile(suitePath, suite, ts.ScriptTarget.Latest, true);
+  const node = ast.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'narrowHomepageHeading'
+  );
+  assert.ok(node);
+  const js = ts.transpileModule(node.getText(ast), {
+    compilerOptions: { target: ts.ScriptTarget.ES2022 },
+  }).outputText;
+  const expected = runInNewContext(js + '; narrowHomepageHeading');
+  for (const [family, percent, token, size, lineHeight] of [
+    ['shadcn', 100, 'text-3xl', 30, '33px'],
+    ['shadcn', 200, 'text-3xl', 60, '66px'],
+    ['brutalist', 100, 'text-2xl', 24, '30px'],
+    ['brutalist', 200, 'text-2xl', 48, '60px'],
+  ])
+    assert.deepEqual(JSON.parse(JSON.stringify(expected(family, percent))), {
+      token,
+      size,
+      lineHeight,
+    });
+  const required = [
+    'state.headingSamples = headingSamples',
+    'headingSamples.push(sample)',
+    'size: expectedHeading.size',
+    'lineHeight: expectedHeading.lineHeight',
+    'timeout: 15_000',
+    "['homepage', '/zh-cn/', '30px', '33px']",
+    'geometry.documentWidth).toBeLessThanOrEqual(geometry.viewport + 1)',
+    'geometry.bodyWidth).toBeLessThanOrEqual(geometry.viewport + 1)',
+  ];
+  const verify = (source) => {
+    for (const item of required) assert.ok(source.includes(item), item);
+  };
+  verify(suite);
+  for (const item of required) assert.throws(() => verify(suite.replaceAll(item, '')));
+});

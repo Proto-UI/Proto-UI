@@ -1,10 +1,9 @@
 import { FeedbackStyleRecorder, type StyleHandle } from '@proto.ui/core';
 
 /**
- * Private logic model for #935. Not exported by the package and not activated
- * by Def, Rule, Template or any adapter. A callback is NOT proof of physical
- * ownership, accessibility exclusion or native no-reset support. #938's API
- * and view-lifetime activation questions remain unresolved.
+ * Internal owner-lived target/contribution registry for the Draft #935 contract.
+ * Physical view leases can suspend/rebind without recreating logical identities.
+ * Adapters must separately prove empty-leaf ownership, A11y and commit readiness.
  */
 type Identity = object;
 type Snapshot = Readonly<{ kind: 'tw'; tokens: readonly string[] }>;
@@ -13,8 +12,9 @@ type Contribution = { target: Identity; origin: 'setup' | 'rule'; handles: Style
 type Target = { sink?: Sink; published?: string; revision: number };
 
 export class OwnedDecorationRegistryModel {
-  private phase: 'declaring' | 'bound' | 'disposed' = 'declaring';
+  private phase: 'declaring' | 'bound' | 'suspended' | 'disposed' = 'declaring';
   private binding = false;
+  private generation = 0;
   private readonly targets = new Map<Identity, Target>();
   private readonly contributions = new Map<Identity, Contribution>();
 
@@ -27,6 +27,11 @@ export class OwnedDecorationRegistryModel {
   private declaring(): void {
     this.live();
     if (this.phase !== 'declaring') throw new Error('owned-decoration: declarations closed');
+  }
+  private bindable(): void {
+    this.live();
+    if (this.phase !== 'declaring' && this.phase !== 'suspended')
+      throw new Error('owned-decoration: declarations closed');
   }
   private target(identity: Identity): Target {
     this.live();
@@ -92,12 +97,13 @@ export class OwnedDecorationRegistryModel {
   }
 
   /**
-   * Model binding only. Validate the entire required set before invoking ANY
-   * callback. The future adapter must independently prove owned decorative leaves.
-   * This model deliberately rejects structural rebinding and implicit rescope.
+   * Validate the entire required set before invoking ANY callback. Adapters
+   * independently prove physical ownership. A live bound lease cannot rebind;
+   * explicit suspension permits a new complete lease for the same logical set.
    */
   bindAll(bindings: readonly { target: Identity; sink: Sink }[]): void {
-    this.declaring();
+    this.bindable();
+    const generation = this.generation;
     if (this.binding) throw new Error('owned-decoration: reentrant binding');
     this.binding = true;
     try {
@@ -112,7 +118,9 @@ export class OwnedDecorationRegistryModel {
         if (typeof sink !== 'function') throw new Error('owned-decoration: unsupported sink');
         checked.set(target, sink);
       }
-      this.declaring();
+      this.bindable();
+      if (generation !== this.generation)
+        throw new Error('owned-decoration: stale binding generation');
       if (checked.size !== this.targets.size) throw new Error('owned-decoration: unbound target');
       for (const [identity, sink] of checked) this.targets.get(identity)!.sink = sink;
       this.phase = 'bound';
@@ -120,6 +128,20 @@ export class OwnedDecorationRegistryModel {
       this.binding = false;
     }
     this.flush();
+    if (generation !== this.generation || this.phase !== 'bound')
+      throw new Error('owned-decoration: binding generation retired');
+  }
+
+  /** Revoke physical leases while preserving owner-lived targets and contributions. */
+  suspendBindings(): void {
+    this.live();
+    this.generation += 1;
+    for (const target of this.targets.values()) {
+      target.sink = undefined;
+      target.published = undefined;
+      target.revision += 1;
+    }
+    this.phase = 'suspended';
   }
 
   private publish(identity: Identity): void {
@@ -144,8 +166,9 @@ export class OwnedDecorationRegistryModel {
   flush(): void {
     this.live();
     if (this.phase !== 'bound') throw new Error('owned-decoration: unbound target');
+    const generation = this.generation;
     for (const identity of this.targets.keys()) {
-      if (this.isDisposed()) break;
+      if (this.phase !== 'bound' || this.generation !== generation) break;
       this.publish(identity);
     }
   }
@@ -153,6 +176,7 @@ export class OwnedDecorationRegistryModel {
   dispose(): void {
     if (this.phase === 'disposed') return;
     this.phase = 'disposed';
+    this.generation += 1;
     this.targets.clear();
     this.contributions.clear();
   }

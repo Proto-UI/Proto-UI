@@ -21,7 +21,14 @@ criteria:
     references:
       prototypes:
         - id: P-BASE-INPUT
-          anchors: [P-BASE-INPUT-PHYSICAL-TARGET, P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, P-BASE-INPUT-NATIVE-PROPS, P-BASE-INPUT-A11Y-AND-FOCUS]
+          anchors:
+            [
+              P-BASE-INPUT-PHYSICAL-TARGET,
+              P-BASE-INPUT-VALUE-OWNERSHIP,
+              P-BASE-INPUT-EVENTS-AND-IME,
+              P-BASE-INPUT-NATIVE-PROPS,
+              P-BASE-INPUT-A11Y-AND-FOCUS,
+            ]
   - id: P-SHADCN-INPUT-SHELL-CONTROL-PAINT
     text:
       en: The inner editor is full-width min-width-zero grow, rounded-none, border-0, transparent, shadow-none, outline-none and ring-0; it must not form a second rounded shell. New York uses h-9/px-3 and Rhea h-8/px-2.5, with py-1 and base text size switching to text-sm at viewport.width >= 768. Native selection retains primary/primary-foreground and placeholder uses muted-foreground. Inherited disabled owns cursor-not-allowed and opacity-50; the passive shell does not double that opacity.

@@ -56,7 +56,8 @@ sources:
   - path: internal/contracts/command/shadcn-input-shell.presentation.v0.md
   - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
 dependsOn:
-  contracts: [C-CORE-SYNTAX-0003, C-PROPS-0001, C-FEEDBACK-STYLE-0002, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  contracts:
+    [C-CORE-SYNTAX-0003, C-PROPS-0001, C-FEEDBACK-STYLE-0002, C-PROTOTYPE-STYLE-CLOSURE-0001]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
 relates:
   prototypes: [P-SHADCN-INPUT-SHELL-CONTROL]

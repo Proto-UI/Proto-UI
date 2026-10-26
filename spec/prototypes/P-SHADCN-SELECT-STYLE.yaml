@@ -1,0 +1,45 @@
+id: P-SHADCN-SELECT-STYLE
+type: prototype
+title: Shadcn Select bounded shared New York and Rhea presentation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Bounded visual draft. Source and DOM tests do not establish native raster, portal compositing or complete upstream parity; exact-head native acceptance remains required.
+summary: One Base Select behavior with shared profile selection and optional existing Field semantics.
+statement:
+  en: The existing eleven public Select parts share the family style scope. New York preserves the previously documented compatibility recipes; Rhea maps the fixed base select and style-rhea source, including its translucent popup. No second editor, selection state, validator or website paint override is introduced.
+criteria:
+  - id: P-SHADCN-SELECT-STYLE-SCOPE
+    text:
+      en: Root delegates to shared style-scope resolution. Absent or inherit follows the nearest outer boundary, explicit profile overrides only its subtree, and no ancestor falls back to new-york-v4. Only new-york-v4, its new-york alias and rhea are accepted. Parts use the same resolver through logical portal ancestry. Unknown or unmapped profiles fail closed.
+  - id: P-SHADCN-SELECT-STYLE-TRIGGER
+    text:
+      en: New York keeps default and small heights 36 and 32px and its explicit ghost extension. Rhea uses 32 and 28px, theme radius2xl, input/50 fill, transparent normal border, 14px/20px text, gap6 and 16px full-opacity chevron. Rhea ghost is unsupported and rejected. Decorative SVG may be replaced on profile change, but the real focusable Trigger, caller Value and other caller nodes, canonical selection and open ownership must not reset.
+  - id: P-SHADCN-SELECT-STYLE-FIELD
+    text:
+      en: Optional FieldSelectTrigger uses the existing Field control binding and the same paint setup as plain Trigger. Invalid comes only from the existing Field fact, never inferred from native validity or a new local validator. Ordinary Trigger does not silently attach to Field. Invalid focus colors replace ordinary focus colors while retaining the 3px focus geometry; clearing invalid restores the ordinary profile ring. Disabled and readOnly acceptance stays Base-owned.
+  - id: P-SHADCN-SELECT-STYLE-POPUP
+    text:
+      en: Rhea requires the existing complete Content, Surface, Viewport and ItemText composition. Surface owns the permanent empty aria-hidden inert decoration leaf; its Rule projection contributes blur40px/saturate1.5 only for Rhea and withdraws it for New York. Rhea Surface uses min-width144px, radius2xl, popover/70, shadow-lg and mutually exclusive foreground ring/5 light or /10 dark. Content retains Base geometry and transitions and never owns the fixed leaf. Rhea Content-only legacy composition is rejected, not silently painted as complete Rhea. New York legacy Content-only remains compatible. The complete anatomy always declares the fixed empty leaf, including New York; therefore it requires the owned-decoration capable adapter stack and is not compatible with an older adapter that lacks that capability.
+  - id: P-SHADCN-SELECT-STYLE-PARTS
+    text:
+      en: Rhea Group owns padding4 and scroll-margin-block6, Viewport padding0, Label horizontal8/vertical4 with text-xs, Item minimum height28 and radiusxl with foreground/10 active highlight, ItemText flex1/gap8, Value flex1/gap6 and Separator foreground/5. Existing item behavior, disabled policy, canonical text and indicator ownership remain Base-owned.
+  - id: P-SHADCN-SELECT-STYLE-LIMITS
+    text:
+      en: Only the existing public parts and default/small Trigger sizes are mapped. No ScrollUpButton, ScrollDownButton, new arrow part, arbitrary SVG/children selector, asChild, arbitrary native forwarding or upstream Base UI positioning algorithm is claimed. Existing Base geometry remains authoritative. The fixed decoration capability supports initial same-document portals, certified adapter-owned caller transport and exact unchanged-blueprint reuse on default adapter updates, not foreign documents or author-owned structural rebinding. Explicit Surface styleProfile changes use normal public props without disabling automatic updates; the bound leaf, focusable Trigger and complete caller options remain identical while Rule paint is replaced or withdrawn. CSS token tests do not establish actual blur compositing, stacking or native accessibility acceptance.
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-OWNED-TARGET-0001, C-FIELD-SELECT-0001]
+verifies:
+  tests: [T-SHADCN-SELECT-STYLE-0001]
+sources:
+  - path: packages/prototypes/shadcn/src/select/style.ts
+  - path: packages/prototypes/shadcn/src/select/trigger-visual.ts
+  - path: packages/prototypes/shadcn/src/select/visual.ts
+  - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/select.tsx
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added finite shared profiles over the existing Select anatomy and Field binding, retaining explicit compatibility and unsupported composition boundaries.
+tags: [prototype, shadcn, select, style, draft]

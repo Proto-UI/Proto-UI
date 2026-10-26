@@ -31,3 +31,11 @@ export function isTemplateStyleHandle(v: any): v is StyleHandle {
     v.tokens.every((x: any) => typeof x === 'string')
   );
 }
+
+/** Draft owned-decoration identity. Only the declaring instance can bind/use it. */
+declare const ownedDecorationBrand: unique symbol;
+export type OwnedDecorationTarget = { readonly [ownedDecorationBrand]: true };
+export type DecorationStyleFrame = Readonly<{
+  target: OwnedDecorationTarget;
+  handles: readonly StyleHandle[];
+}>;

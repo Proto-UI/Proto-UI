@@ -1,0 +1,36 @@
+id: C-TRANSLUCENT-SURFACE-STYLE-0001
+type: contract
+title: Finite translucent surface presentation vocabulary
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Finite CSS serialization and four real adapter token transport are implemented; native backdrop rasterization and portal-owned consumer acceptance remain separate.
+summary: A complete finite backdrop filter and supporting placement tokens without arbitrary filter expression support.
+statement:
+  en: Ordinary feedback.style can project a finite translucent surface recipe without component dispatch or hidden inherited filter variables. This vocabulary does not authorize a decoration target, portal destination, or complete component profile.
+criteria:
+  - id: C-TRANSLUCENT-SURFACE-STYLE-0001-VOCABULARY
+    text:
+      en: Exact supported additions are backdrop-filter-[blur(40px)_saturate(1.5)], -z-1, isolate, rounded-[inherit], and min-w-36. The first token emits the complete blur(40px) saturate(1.5) filter. No arbitrary filter values, URLs, expressions or lists are admitted by this slice. Other unsupported tokens retain renderer diagnostics.
+  - id: C-TRANSLUCENT-SURFACE-STYLE-0001-MERGE
+    text:
+      en: The supported -z-1, z-10, z-40 and z-50 values share one finite last-wins group that does not absorb unknown z values. The complete filter and existing backdrop-blur-xs share a separate finite last-wins group, without absorbing unknown filters or unrelated foreground/background paint. Rule withdrawal restores the previous choice on the same style surface. The inherited radius follows CSS inheritance, not an inferred ancestor DOM query.
+  - id: C-TRANSLUCENT-SURFACE-STYLE-0001-TARGET
+    text:
+      en: Document, shadow and split CSS preserve the declarations. Backdrop and inherited radius are canonical surface intent; negative z-index, isolation and minimum width are placement intent. No family breakpoint, selector, adapter special case or custom CSS property filter accumulator is introduced.
+  - id: C-TRANSLUCENT-SURFACE-STYLE-0001-BOUNDARY
+    text:
+      en: Existing styleSupport.backdropBlur4px does not prove support for this stronger combined filter. CSS serialization and adapter token tests are not native compositing, stacking or portal accessibility evidence. A consumer must use an admitted owned target, supply an explicit supported-host policy, and independently verify actual native paint. This slice does not enable Rhea Select or loosen portal-owned decoration restrictions.
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-0003, C-FEEDBACK-STYLE-0004, C-RULE-INTENT-FEEDBACK-STYLE-0001]
+  decisions: [D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001]
+sources:
+  - path: packages/core/src/spec/feedback/semantic-merge.ts
+  - path: packages/core/src/spec/feedback/application-role.ts
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added five finite generic presentation mappings without enabling a production consumer.
+tags: [feedback, style, css]

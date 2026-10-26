@@ -1,3 +1,4 @@
+import type { ShadcnStyleProps } from '@proto.ui/prototypes-shadcn/style-scope';
 import { definePrototype } from '@proto.ui/core';
 import {
   asSelectGroup,
@@ -39,13 +40,13 @@ type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Assert<T extends true> = T;
 type PublicStructuralTypes = [
-  Assert<Equal<SelectGroupProps, ShadcnSelectGroupProps>>,
+  Assert<Equal<SelectGroupProps & ShadcnStyleProps, ShadcnSelectGroupProps>>,
   Assert<Equal<SelectGroupExposes, ShadcnSelectGroupExposes>>,
   Assert<Equal<SelectGroupAsHookContract, ShadcnSelectGroupAsHookContract>>,
-  Assert<Equal<SelectLabelProps, ShadcnSelectLabelProps>>,
+  Assert<Equal<SelectLabelProps & ShadcnStyleProps, ShadcnSelectLabelProps>>,
   Assert<Equal<SelectLabelExposes, ShadcnSelectLabelExposes>>,
   Assert<Equal<SelectLabelAsHookContract, ShadcnSelectLabelAsHookContract>>,
-  Assert<Equal<SelectSeparatorProps, ShadcnSelectSeparatorProps>>,
+  Assert<Equal<SelectSeparatorProps & ShadcnStyleProps, ShadcnSelectSeparatorProps>>,
   Assert<Equal<SelectSeparatorExposes, ShadcnSelectSeparatorExposes>>,
   Assert<Equal<SelectSeparatorAsHookContract, ShadcnSelectSeparatorAsHookContract>>,
 ];

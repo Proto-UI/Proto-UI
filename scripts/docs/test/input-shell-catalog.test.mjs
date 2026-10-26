@@ -24,7 +24,10 @@ async function inventory(catalog, releaseVersion = '0.2.0', extraExports = {}) {
     bom: { packages: [{ name: library.packageName }] },
     libraries: [library],
     manifests: new Map([
-      [library.packageName, { exports: { './input-shell': manifest.exports['./input-shell'], ...extraExports } }],
+      [
+        library.packageName,
+        { exports: { './input-shell': manifest.exports['./input-shell'], ...extraExports } },
+      ],
     ]),
     catalog,
     overviewEntries: new Map([['shadcn', []]]),
@@ -38,7 +41,11 @@ test('input shell has real separate draft protocol owners and reciprocal evidenc
   const evidence = await entity(testId, 'tests');
   const train = '0.3.0-alpha.1';
   const trainEntity = parseYaml(await read('spec/versions/V-PROTO-UI-0010.yaml'));
-  assert.equal(trainEntity.release.version, train, 'preserve the actual introduction train, not a moving VERSION');
+  assert.equal(
+    trainEntity.release.version,
+    train,
+    'preserve the actual introduction train, not a moving VERSION'
+  );
   for (const record of [shell, control, evidence]) {
     assert.equal(record.since, train);
     assert.equal(record.status, 'draft');
@@ -55,13 +62,23 @@ test('input shell has real separate draft protocol owners and reciprocal evidenc
     assert.ok(ids(evidence.exercises.prototypes).includes(record.id));
     assert.ok(ids(evidence.verifies.prototypes).includes(record.id));
   }
-  assert.equal(shell.inherits, undefined, 'passive shell must not invent Base InputGroup inheritance');
+  assert.equal(
+    shell.inherits,
+    undefined,
+    'passive shell must not invent Base InputGroup inheritance'
+  );
   assert.deepEqual(ids(control.inherits.prototypes), ['P-BASE-INPUT']);
-  const criterionIds = new Set([...shell.criteria, ...control.criteria].map((criterion) => criterion.id));
+  const criterionIds = new Set(
+    [...shell.criteria, ...control.criteria].map((criterion) => criterion.id)
+  );
   for (const testCase of evidence.cases) {
     for (const covered of testCase.covers) assert.ok(criterionIds.has(covered), covered);
   }
-  assert.ok(evidence.implementations.some((entry) => entry.id === 'derived-input-conformance' && entry.status === 'missing'));
+  assert.ok(
+    evidence.implementations.some(
+      (entry) => entry.id === 'derived-input-conformance' && entry.status === 'missing'
+    )
+  );
 });
 
 test('draft shell ownership fixes only its missing-family classification, not unrelated exports', async () => {
@@ -71,7 +88,9 @@ test('draft shell ownership fixes only its missing-family classification, not un
   assert.match(missing[0], /\.\/input-shell: unclassified family\/export/);
   assert.match(missing[0], /P-SHADCN-INPUT-SHELL/);
   assert.deepEqual(await inventory([shell]), []);
-  const unrelated = await inventory([shell], '0.2.0', { './uncataloged-sentinel': './dist/sentinel.js' });
+  const unrelated = await inventory([shell], '0.2.0', {
+    './uncataloged-sentinel': './dist/sentinel.js',
+  });
   assert.equal(unrelated.length, 1);
   assert.match(unrelated[0], /P-SHADCN-UNCATALOGED-SENTINEL/);
 });

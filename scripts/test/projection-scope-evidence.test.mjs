@@ -331,13 +331,14 @@ for (const family of ['shadcn', 'brutalist']) {
                   'shadcn-select-item-text',
                   'shadcn-select-surface',
                   'shadcn-select-viewport',
+                  'shadcn-select-group',
                   'shadcn-command-input-wrapper',
                   'shadcn-input-shell',
                 ]
               : []),
           ].sort()
         );
-        assert.equal(value.task.recipe.prototypeIds.length, family === 'shadcn' ? 63 : 56);
+        assert.equal(value.task.recipe.prototypeIds.length, family === 'shadcn' ? 64 : 56);
         await verify(value);
         assert.equal(Object.keys(SCENE_PART_COUNTS).length, 19);
         for (const [suffix, count] of Object.entries(SCENE_PART_COUNTS)) {
@@ -357,9 +358,14 @@ for (const family of ['shadcn', 'brutalist']) {
           duplicate.remove();
         }
         if (family === 'shadcn')
-          for (const id of ['shadcn-command-input-wrapper', 'shadcn-input-shell']) {
-            const nodes = value.element.querySelectorAll(`[data-projection-prototype="${id}"]`);
-            assert.equal(nodes.length, 1, `exactly one public shell part ${id}`);
+          for (const id of [
+            'shadcn-command-input-wrapper',
+            'shadcn-input-shell',
+            'shadcn-select-group',
+          ]) {
+            const root = id === 'shadcn-select-group' ? value.portalElement : value.element;
+            const nodes = root.querySelectorAll(`[data-projection-prototype="${id}"]`);
+            assert.equal(nodes.length, 1, `exactly one public composition part ${id}`);
             const target = nodes[0],
               parent = target.parentNode,
               next = target.nextSibling;

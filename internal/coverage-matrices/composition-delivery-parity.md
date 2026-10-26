@@ -50,6 +50,7 @@
 - Proto-UI 明确不支持 upstream `asChild`；不能把普通 children/Proto slot、Radix Slot 的替换宿主能力、推荐 composition 当成同一个概念。
 
 固定来源：
+
 - [官方 Checkbox 定义](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/checkbox.tsx)，blob `f5a7e433f3795b82a00c5c06a1fc6decf116a84a`。
 - [同版本官方组合示例](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/examples/checkbox-demo.tsx)，blob `4cdae4210dc738b05778f17e4b72e2063e6ffcf3`。
 - [Proto-UI Checkbox 定义](https://github.com/Proto-UI/Proto-UI/blob/7181a93a5ec5cad43936a72e31d5477d5488733a/spec/prototypes/P-SHADCN-CHECKBOX.yaml)。
@@ -80,7 +81,7 @@
 ## 3. 推荐 composition 必须公开什么
 
 | 契约面 | 推荐做法 | 禁止或明确不保证 |
-|---|---|---|
+| --- | --- | --- |
 | 原型身份 | 引用已有 family Root/Indicator/Label；所有入口同一来源 | 同名另写一份状态机；网站专用 Checkbox |
 | 每实例关联 | 公开 opaque association、作用域隔离、dispose/rebind | 全局固定字符串造成跨实例绑定 |
 | 名称与激活 | 短名称 Label 命名+激活；naming-only 是显式选项 | 把 ariaLabel 文本副本当真实 Label |
@@ -101,7 +102,7 @@
 以下文档路径以 `apps/www/src/content/` 为前缀，除另注均与 main blob 对齐。
 
 | ID | 级别/分类 | 位置与证据 | 根因及正确切片 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | C01 | 事实，交付缺口 | Shadcn `src/component-presets.ts` 仅 Checkbox/Switch/Dialog 三个 replaceable-default-part；Checkbox preset只Root+Indicator | 现有 convenience facade不是Label+Control推荐组合；S0/S1 |
 | C02 | 事实，行为组合漂移 | `docs/zh-cn/demo-shadcn-checkbox.demo.ts:13–27`；Brutalist/Bootstrap对应文件；首页 gallery 使用独立Label关联 | 同原子、不同必要组合，修公开组合消费，不造新activation；S3 |
 | C03 | 事实，作者示例偏差 | `docs/demo-base-checkbox.demo.ts` checkboxRow 把文字放Root内并加select-none | 可作为低层示例但不能充当推荐Label+Control一致性；保留raw并明确标记 |
@@ -124,7 +125,7 @@
 这是全仓公开组合审计的覆盖表，不是所有类别均已发现缺陷。跨族不存在某个原子时，不能为了凑齐矩阵虚构API。
 
 | 组合类别 | 已检查或待续核的公共责任 | 当前处理 |
-|---|---|---|
+| --- | --- | --- |
 | Checkbox/Switch/RadioGroup | 值与activation原子；独立Label；Indicator/Thumb；Group别混Form | Checkbox/普通Switch命名消费优先；Radio单选组不复制Checkbox状态 |
 | Input/Textarea/Field/Fieldset/Form | 单编辑器、Label/Description/Error、optional字段绑定、group与提交 | 普通控件先Label；复杂字段复用既有#906链；不自动承诺所有form/native submission |
 | CheckboxGroup | 多选值组合与子控制所有权 | sourceOnly/child-handle失败保留；不能把一组checkbox label等同完整group |
@@ -148,7 +149,7 @@
 ### 5.1 各族 main 源码规模与差异
 
 | 包 | main原型文件数 | 不应隐含的保证 |
-|---|---:|---|
+| --- | --: | --- |
 | Base | 176 | 协议/原子存在不等于全部CLI可安装 |
 | Shadcn | 192 | 不同组件固定上游可能不同；不能统称最新Base UI |
 | Brutalist | 183 | 不是Shadcn换皮；独立外观规则和缺失入口须单列 |
@@ -216,7 +217,7 @@ main Base `field/index.ts:11–16` 已导出 FieldTextarea，但 CLI Base Field 
 候选与输出内容绑定：
 
 | 材料 | SHA / SHA-256 |
-|---|---|
+| --- | --- |
 | `packages/cli/src/registry/components.ts` 基线 blob | `8bd17346e072495a047f41f95aa299a531bc4384` |
 | 同文件候选 blob | `5049a9f6b1d79c9d57bcc9fe3e6a57ca6c823c65` |
 | `packages/cli/test/field-prototype.test.ts` 基线 blob | `a1591e26b31569a8f9cd58a8caceadc145ff60e3` |
@@ -253,7 +254,7 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 不是每个箭头都要求新建Issue。复用既有来源，只有现有Issue无法承载独立验收的具体交付时才创建有界子项；每PR base必须真实包含依赖，不能只在正文写depends-on。
 
 | 切片 | 范围 | 排除 | 验收 | 来源/负责人边界 |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | F0 | Base FieldTextarea workspace facade补齐+四host断言+本文 | installed放行、其他族/SelectTrigger | 生成包含正确适配器与公开import；sourceOnly/default拒绝仍成立 | #942/#906；现有cyjin-yl贡献，写前复核精确hunkclaim |
 | S0/S1 | 一个公开Label+Checkbox推荐构造、内容/关系/销毁契约 | 任意React slot兼容、第二状态机、每族一套机制 | 多实例不串、动态label、单次激活、disabled/controlled/mixed、raw可用 | #865/#870/#503；新精确五文件consumer claim不自动扩大为公共APIowner |
 | S2 | 对S1真正依赖的exports/registry/assets闭包与clean packed consumer | npm发布、private族放行、Compiler全target承诺 | 无monorepo alias/私有import；默认替换省略与负向准入；独立锁文件 | #503/#505；涉及#925CLI hunks必须协调，不接管其任务 |
@@ -277,7 +278,7 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 ## 8. 验收矩阵与发布门
 
 | 层 | 必测 | 不能作为替代证据 |
-|---|---|---|
+| --- | --- | --- |
 | 源/定义 | fixed pin、admitted anatomy、public exports、metadata与registry一致 | 目录同名、旧catalog口头说明 |
 | 生成 | WC/React/Vue/Vue2；TS/JS；raw/default/replacement/omission；明确支持门 | 网站webpack/alias能解析 |
 | 逻辑 | checked/mixed/controlled拒绝、disabled/readOnly、关系生命周期、多实例 | 只测happy-path截图 |
@@ -289,7 +290,6 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 
 没有浏览器或安装证据的格子明确写未测。交互源码已存在不等于四runtime全通过；生成代码存在不等于npm已可安装；同一固定源码的上游静态阅读不授予执行第三方或升级版本的权限。
 
-
 ## 9. 安装交付完整入口矩阵（静态）
 
 ### B. Registry facade 覆盖缺口（不是语义不存在）
@@ -297,26 +297,32 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 完整枚举两个registry，应用components.ts覆盖FINF spread；共227条entry，公开63，workspace-only164。计数是CLI入口，不是独立prototype数量、不表示发布已验证。逐项数据来自这两个精确版本 registry。
 
 #### base: 52入口；公开21；workspace 31
+
 - 公开：label, surface, text, button, toggle, transition, textarea, image, table, accordion, collapsible, switch, tabs, radio-group, dropdown, select, hover-card, separator, live-region, async-region, dialog
 - workspace：alert-dialog, drawer, popover, toggle-group, toolbar, toast, autocomplete, combobox, command, menubar, navigation-menu, context-menu, progress, meter, fieldset, form, checkbox-group, slider-values, slider, number-field, input-otp, calendar, tree, message-scroller, resizable, carousel, virtual-list, date-picker, data-table, dropdown-composition, field
 
 #### shadcn: 51入口；公开21；workspace 30
+
 - 公开：label, card, surface, text, input, button, toggle, separator, textarea, checkbox, switch, tabs, hover-card, dropdown, select, radio-group, scroll-area, tooltip, dialog, accordion, collapsible
 - workspace：alert-dialog, drawer, popover, toggle-group, toolbar, toast, autocomplete, combobox, command, menubar, navigation-menu, context-menu, progress, meter, fieldset, form, checkbox-group, slider, number-field, input-otp, calendar, tree, message-scroller, resizable, carousel, virtual-list, date-picker, data-table, dropdown-composition, field
 
 #### brutalist: 51入口；公开21；workspace 30
+
 - 公开：label, surface, text, button, badge, toggle, separator, skeleton, spinner, input, textarea, card, switch, tabs, hover-card, dropdown, select, dialog, scroll-area, accordion, collapsible
 - workspace：alert-dialog, drawer, popover, toggle-group, toolbar, toast, autocomplete, combobox, command, menubar, navigation-menu, context-menu, progress, meter, fieldset, form, checkbox-group, slider, number-field, input-otp, calendar, tree, message-scroller, resizable, carousel, virtual-list, date-picker, data-table, dropdown-composition, field
 
 #### bootstrap-2-3-2: 36入口；公开0；workspace 36
+
 - 公开：无
 - workspace：alert-dialog, drawer, popover, toggle-group, toolbar, toast, autocomplete, combobox, command, menubar, navigation-menu, context-menu, progress, meter, fieldset, form, checkbox-group, slider, number-field, input-otp, calendar, tree, message-scroller, resizable, carousel, virtual-list, date-picker, data-table, dropdown, field, label, text, accordion, tabs, select, collapsible
 
 #### liquid-glass: 37入口；公开0；workspace 37
+
 - 公开：无
 - workspace：alert-dialog, drawer, popover, toggle-group, toolbar, toast, autocomplete, combobox, command, menubar, navigation-menu, context-menu, progress, meter, fieldset, form, checkbox-group, slider, number-field, input-otp, calendar, tree, message-scroller, resizable, carousel, virtual-list, date-picker, data-table, dropdown, toggle, field, label, text, accordion, tabs, select, collapsible
 
 对照各族 exact-main package.json exports，以下组件subpath有导出但没有任何对应CLI entry：
+
 - Base：checkbox、tooltip、scroll-area、input。
 - Brutalist：checkbox、tooltip。
 - Bootstrap 2.3.2：button、checkbox、switch、toggle、input、textarea、separator、surface。
@@ -341,7 +347,6 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 
 `apps/www/src/components/PrototypePreviewer/demo-types.ts:35-40,263-279` 的 associations.controlLabel 是按demo渲染作用域的序列化关系意图；demo-renderer.ts通过WC setElementAssociations与框架instanceAssociations适配。这个原语应被推荐组合复用，而不是在页面手写.click()/aria状态。CLI codegen当前没有此关系recipe输入；不能把DemoSpec字段原样当作消费者组件prop。
 
-
 ## 10. 其他家族固定上游与逐问题追溯
 
 ### 范围、结论与证据等级
@@ -359,7 +364,7 @@ Proto 基线：`7181a93a5ec5cad43936a72e31d5477d5488733a`。只读静态比对�
 ### 固定来源矩阵
 
 | 家族/组件 | 已采用基线与范围 | 本次官方证据 | 不能作出的推论 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Shadcn Switch | New York `02cad61166c4c20edbc8a3f71bd720eed4c1f49b` | `apps/v4/registry/new-york-v4/ui/switch.tsx`，blob `c45932af…`；同 revision `examples/switch-demo.tsx` | Nova 历史扩展命中区不是当前默认；current docs invalid 示例不代表 NY wrapper 有 invalid paint |
 | Shadcn Toggle | New York `02cad611…` | 同目录 `toggle.tsx`，blob `0291f01c…` | Base active/pressed 不等于已具备所有 variant/icon/native forwarding |
 | Shadcn Input | 2026-10-10 base-nova registry 内容快照 | main P-SHADCN-INPUT：registry SHA256 `bbad1bba130ac9750a61844eeb8f043e8a710846e07689fa85398b80a46c2741`，TSX `dab990dfefa0ba78854ab6602ad074270dba9d7d1262184d9bfbb62bd990903b` | 本次未重取得可匹配的旧快照正文；不得用今天同 URL 内容代替旧快照，不推断 Git revision |
@@ -372,6 +377,7 @@ Proto 基线：`7181a93a5ec5cad43936a72e31d5477d5488733a`。只读静态比对�
 | Liquid Glass | Proto 独立设计语言投射；部分 P 引用 Apple HIG/materials/WWDC25 | main P-LIQUID-GLASS-TOGGLE 明确非 Apple component/shader parity；官方 HIG URL 可定位，但正文抓取未成功 | 不制造 Apple 私有组件源码/pin；不能用 CSS blur 或两张图声称光学/原生一致 |
 
 官方固定链接示例：
+
 - [Shadcn Switch 默认示例](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/examples/switch-demo.tsx)
 - [Neo Switch](https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/switch.tsx)
 - [Shadcn Dialog](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/dialog.tsx)
@@ -382,7 +388,7 @@ Proto 基线：`7181a93a5ec5cad43936a72e31d5477d5488733a`。只读静态比对�
 严重度：S1 = 可访问操作/状态所有权受影响的优先修复；S2 = 组合、公开能力或定义漂移；S3 = 来源/证据补齐。置信度与严重度分开。以下不重复创建已有 owner 项。
 
 | ID | 判定与证据 | 修复层/依赖 | 可复现、可关闭标准 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | U-SW-01 | S1 消费者缺口：主页可见 Switch 文本与隐藏命名分离。固定官方示例 L6–8 是 sibling Switch+Label；wrapper L24–30 只自动 Thumb。与 Checkbox 同类，但不是“上游自带文字” | 现有 ControlLabel + family Label + demo/主页/CLI推荐 recipe；Base Switch 保留 checked owner；依赖现有 #865 | 可见 Label 点击恰好一次请求；disabled不切换/不抢焦点；受控拒绝/延迟保持owner值；替换文案后名称来自可见源；附同commit四Web真实操作证据 |
 | U-SW-02 | S2 定义迁移：P-BRUTALIST-SWITCH 的 DEMO-NAMING 要求 caption inside Root；main demo L3–4 absolute left-full，L22–28 caption在Root。不是尚未关联标签的同一种实现 | 先修订该draft与相关T；推荐独立组合，保留raw Root能力，不假定任意nested交互可作为label内容 | 新推荐组合无绝对定位挪动标签；安装后示例/demo/主页一致；名称、点击、禁用均验证；不得只删旧断言 |
 | U-SW-03 | S2 明确上游能力差异：Neo Switch wrapper size=default/sm，默认h-6 w-12、sm h-5 w-9；main BrutalistSwitchRootProps只扩展draggable?:false，无size | Family视觉size owner与Thumb逻辑关系，复用合法通用能力；不是Base选择语义 | 显式sm及default可逆切换，Thumb归属隔离，checked不变，root字体缩放保持rem；drag显式unsupported不得计为已实现 |
@@ -488,71 +494,93 @@ Proto 基线：`7181a93a5ec5cad43936a72e31d5477d5488733a`。只读静态比对�
 ### 4. 基础设施与职责边界：七类
 
 #### 07. 受控 props 更新调度重复
+
 `homepage-showcase.ts:300–356` 与 `homepage-gallery-parts.ts` setup 分别实现 props 合并、WC/React microtask、Vue/Vue2 直接写入和 generation gate。先审查 demo renderer/Adapter 的 setProps replacement 与 callback/reentrancy 契约，再提取共享绑定/调度。不是将通知偏好业务迁入原型。验收包括 Textarea IME/caret、Select value/close、callback 保留、旧实例不能回放 queued writes。
 
 #### 08. 跨 runtime outward event 绑定重复
+
 Theme/menu/showcase/gallery/search 都区分 WC CustomEvent 与 framework callback。这是合法的 Adapter-facing 消费，不等于 synthetic input。可归一为类型化共享 helper；验收一次动作一个信号、清理正确，禁止按组件名分发。
 
 #### 09. Header disclosure 中的通用弹层能力
+
 `site-header-disclosure.ts` 包含 open、aria-expanded/controls、Escape/outside、focus return、portal 子项识别和定位。应拆分：可复用开放/关闭/焦点关系考虑既有 Collapsible/Popover/overlay 原型，几何归 host；断点搬移、导航、history、跨面板策略归应用。须与 #921 文件负责人协调。验收嵌套 Select 先消费 Escape、第二次关闭父层、portal 不误判 outside，非模态导航不被强加 focus trap。
 
 #### 10. 原生链接的交互状态采集
+
 `site-native-link-facts.ts:16–109` 采集 hover/pressed/focus-visible/current，投影到 public Surface/Text，不拦截 click、不模拟导航。`site-link-recipes.ts` 与导出的 family action appearance 已复用部分视觉能力。可研究公开 NativeLink/action composition，但必须保留中键、修饰键、context menu、download、Space 原生行为及已定义 disabled 语义；不能用 Button click 冒充链接。
 
 #### 11. Text 替换时保存真实选区
+
 `site-typography.ts:111–188,308,412` 移动文本源节点时保存/重映射 Selection。此属 host/renderer 生命周期，不应成为 portable Text 的 selection state。可提取共有移动能力，但不能全局清除选区。验收正反选区、runtime/theme 替换、不抢焦点、嵌套链接与原文保留；准备期间 passive text 不锁定。
 
 #### 12. Header/Search 跨 generation 焦点恢复
+
 `site-header-surface.ts` 保留原生子树焦点，`site-search-commands.ts` 保存焦点 epoch。可复用 generation-aware restore；返回哪个业务 command 仍由应用决定。不能仅因存在 focus() 就认定为 Button hack。
 
 #### 13. 父层关闭 Select 与替换前关闭
+
 `site-select-dismissal.ts` 注册 owner→public requestOpen；projection composition 在 runtime 替换前关闭。父层/history 关闭意图归应用，Select 状态转移归 Select。若正常选择必须额外 consumer close 才完成，则应以精确按键证据修 Base/router，不能把补丁永久写入页面。已接受的 generic router 修复不是 Select-name Compiler hack。
 
 ### 5. 已原型化或合理应用组合：十五类
 
 #### 14. 内容选择策略
+
 BaseButton、actionable BaseLabel、family Checkbox/Toggle/Tabs 已在语义 subject 声明 select-none；passive Text/content 保留可选。验收生成 CSS 与真实拖选/copy；旧 demo className 策略仍需清理。不允许全页禁选，也不要求所有文字都能点击。
 
 #### 15. Button wrap 与 family profile
+
 Shadcn Button 已公开 rhea/luma/new-york profile 和 wrap。首页 wrap:true 是合理 opt-in。保持家族差异，验证独立 demo 同样可消费。
 
 #### 16. Card anatomy
+
 main 首页仍是 Surface + authored headings/body；#984 已采用 Shadcn Card Root/Header/Content rhea，这是分支中实际的原型消费迁移，不应冒称已进入 main。Brutalist 是否有适用 Card 定义须先核对；业务布局不必原子化。
 
 #### 17. Hero Typography 与文档角色
+
 public Text props + site recipes 承担字体；heading role 留在文档 wrapper。哪个文本是 Hero、断点选择属于页面布局。保留200%text resize、行框、字体及选区验证，不新造 BaseHero 业务原型。
 
 #### 18. Header Select appearance/density
+
 ghost/elevated 是 family 选项，宽度/minHeight/padding 是显式消费者输入。不能把 Header 44px 要求推广为所有 Select 默认，或删掉通用不注入高度的测试。若需要公共 responsive size profile，先定义再替换当前输入。
 
 #### 19. Gallery 外层布局
+
 `HomeDemoPreviewer.astro:106–243` 的 grid/columns、gap、reading order、外层换行属应用布局；未发现其中接管组件视觉状态。保留移动端/zoom overflow 与 Tab 顺序测试。
 
 #### 20. 通知偏好保存/重置
+
 draft/saved、dirty、字符计数、save/reset、反馈是应用业务。Select/Switch/Textarea/Button 输出事件；输入接受和IME时序归 primitive/infrastructure，保存含义不下沉。
 
 #### 21. 文本编辑示例
+
 Bold/Italic 使用 Toggle activeChange、Text weight/emphasis；Textarea valueChange、Tabs 和 Reset 组合合理。示例文本和重置值属于消费者；第07项调度重复单独处理。
 
 #### 22. 选择数量、应用选择与副本计数
+
 Checkbox checkedChange、Menu select 由公开原型产生；页面计数与 Apply 的说明属业务。未发现首页标签点击直接写 checked 的代码。
 
 #### 23. Dialog、DropdownMenu、HoverCard
+
 Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是公开 props。未发现首页另建 Escape 或 hover timer。需共享 keyboard/focus/dismiss 验收，但不能把尚未复现的问题称为缺陷。
 
 #### 24. Command、Slider、Accordion
+
 #984 新 `homepage-composition-parts.ts` 使用 public prototypes，页面只把 command 结果映射为 progress、验证 outward finite range、reset40和状态文字。main 尚无该文件。过滤、键盘、拖动、范围、展开不应由页面重写，计划映射也不应塞入原型。
 
 #### 25. Loading/retry/cancel 与整体 runtime 切换
+
 投影/materializer 编排负责多根节点原子替换。可评价既有 AsyncRegion/loading 复用，但它不是 Checkbox 功能。必须保留 inert、rollback、focus、accepted edits 和旧 generation 隔离。
 
 #### 26. Locale、路由、Starlight、Pagefind
+
 偏好持久化、路由目标、主题 provider、搜索索引属于应用。Search Button 的 shortcut annotation 是业务上下文；物理快捷键桥接依宿主职责，不搬入组件专用 Compiler 分支。
 
 #### 27. 图标与静态 glyph
+
 `home-action-icons.ts`、`site-link-icons.ts` 提供内容；Search 已使用 public Lucide 图标。不因图标在首页出现就新增有状态原型。
 
 #### 28. 旧 homepage-live-preview
+
 此模块展示本页任务数据和视图排列，不是 Calendar 或项目管理原型。当前 `homepage-demo-participant` 调用 `homepage-showcase` 而非它。清理前核对引用，不围绕未使用的旧示例制造迁移任务。
 
 ### 6. 建议实现顺序与共同验收
@@ -570,7 +598,7 @@ Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是
 以下“负责人”仅指已确认的分支/文件协作范围，不代表未经核验的原型全局claim。变更前重新读取最新head和公开claim。
 
 | 项目 | 可独立实施范围 | 不应修改/需要先协调 | 已确认负责人或待核验项 |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Switch可见Label | 首页和独立demo采用已有Label+controlLabel，测试disabled/controlled | 不新增Switch状态机，不改Compiler | #984 为 dot 自有分支；原型层是否另有有效claim尚未确认，不能推断无人负责 |
 | Textarea可见Label | 使用已有focus-only关联；必要时消费FieldTextarea；补命名/焦点/IME测试 | 不重新实现text editing/caret/IME，不把readOnly当disabled | #984 为 dot 自有分支；关联 [#906](https://github.com/Proto-UI/Proto-UI/issues/906) Field组合范围，实际文件claim需重核 |
 | Select字段命名 | 使用FieldLabel/FieldSelectTrigger并移除有替代证据的属性观察器 | 普通Select不能直接扩大ControlLabel目标集；共享projection/runtime修改先协调 | #984为dot；[#921](https://github.com/Proto-UI/Proto-UI/pull/921) 的HyacinthHaru保留共享runtime/native-links/startup-theme范围；Field/Select原型claim需重核 |
@@ -602,7 +630,7 @@ Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是
 #### 9.2 不是只核对 prototypeId 的几个具体证据
 
 | 控件 | 注册链与真实实现 | 首页/demo差异 |
-|---|---|---|
+| --- | --- | --- |
 | Shadcn Checkbox | `prototype-modules.ts:1152–1158` → `@proto.ui/prototypes-shadcn/checkbox` 的 `shadcnCheckboxRoot` / Indicator → `packages/prototypes/shadcn/src/checkbox/index.ts` 重新导出 `root.proto.ts` → `asCheckboxRoot()` | 同一Checkbox定义；首页另组合独立Label及controlLabel关联，旧demo只拼普通文本box与sr-only副本 |
 | Shadcn Switch | `prototype-modules.ts:881–887` → `packages/prototypes/shadcn/src/switch/root.proto.ts` / thumb.proto.ts 的default export | 同一Switch定义；Label结构、controlled/defaultChecked和页面反馈不同 |
 | Shadcn Select | `prototype-modules.ts:1029–1083` →同一family root/trigger/value/content/item源文件与公开surface/viewport/itemText导出 | 同一公开parts；Header/首页/独立demo选择不同anatomy组合、style输入和命名方式；不能据此说已经复用了同一字段组合 |
@@ -624,7 +652,6 @@ Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是
 #### 9.4 对迁移目标的修正
 
 应统一的是“公开原型定义 + 可复用的必要语义组合 + 相同验收”，不是强行把两个页面变成同一实例或共享同一业务状态。优先把Checkbox+Label、Field+Textarea/Select等组合做成同一可消费路径，去掉分叉的plain label、属性重写和组件内样式补丁；页面继续只提供业务数据、文案、回调和外层布局。原生导航/第三方搜索保留其真实宿主职责，能抽取的基本交互再依定义迁入原型。
-
 
 ## 续记：#1001 的 inherited input shard 漏项（2026-10-25 UTC）
 
@@ -649,13 +676,12 @@ node --test --test-isolation=none \
 ```
 
 | 被测状态 | 真实结果 | 意义 |
-|---|---|---|
+| --- | --- | --- |
 | 原 bdeef 两文件 | 1 通过、1 失败，exit 1 | 原计划断言准确发现 input 缺席 |
 | 只携带 workflow 一行 | 1 通过、1 失败，exit 1 | 唯一覆盖恢复，但 toolbar 旧的精确期待失败，证明两处必须成对 |
 | 两处同源 hunk | 2 通过、0 失败，exit 0 | 选定的两个现有契约测试通过；无删除、跳过或放松其断言 |
 
 这只是明确筛选的两项契约，不是完整 187 项重跑，也不等于完整 CI、浏览器、packed 或 registry-install 验收。原有 FieldTextarea 的 8-case codegen 证据与 Vitest/Rollup 预收集受限记录仍按上一片保留，没有重标为本片新运行。后续必须读取新 exact-head CI 的真实状态，capture 尚未启动时不能补写假截图。
-
 
 ## 续记：治理正文快照与文档时效修复（2026-10-25 UTC）
 

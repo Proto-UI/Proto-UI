@@ -1,11 +1,14 @@
+import type { ShadcnSelectViewportProps } from './types';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSelectViewport } from '@proto.ui/prototypes-base/select';
 import { SELECT_VISUAL } from './visual';
+import { setupSelectStyle } from './style';
 
-export default definePrototype({
+export default definePrototype<ShadcnSelectViewportProps>({
   name: 'shadcn-select-viewport',
   setup(def) {
     asSelectViewport();
+    const style = setupSelectStyle(def);
     const position = def.state.string('selectViewportPosition', 'item-aligned');
     def.context.subscribe(SELECT_VISUAL, (_run, next) =>
       position.set(next.position, 'reason: select viewport position')
@@ -16,9 +19,17 @@ export default definePrototype({
         'reason: select viewport initial position'
       )
     );
-    def.feedback.style.use(tw('relative flex-1 min-h-0 overflow-hidden overflow-y-auto p-1'));
+    def.feedback.style.use(tw('relative flex-1 min-h-0 overflow-hidden overflow-y-auto'));
     def.rule({
-      when: (w) => w.state(position).eq('popper'),
+      when: (w) => w.state(style).eq('new-york-v4'),
+      intent: (i) => i.feedback.style.use(tw('p-1')),
+    });
+    def.rule({
+      when: (w) => w.state(style).eq('rhea'),
+      intent: (i) => i.feedback.style.use(tw('p-0')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(position).eq('popper')),
       intent: (i) =>
         i.feedback.style.use(
           tw(

@@ -1,0 +1,43 @@
+name: Shadcn Select shared style evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/prototypes/shadcn/src/select/**'
+      - 'packages/prototypes/shadcn/src/field/select-trigger.proto.ts'
+      - 'packages/prototypes/shadcn/test/select*.test.ts'
+      - 'packages/prototypes/shadcn/src/style-scope/**'
+      - 'packages/adapters/**/src/**'
+      - 'scripts/prototypes/shadcn-select-evidence*'
+      - '.github/workflows/shadcn-select-style.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  select-four-web-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked existing dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Test public Select behavior, scope, Field and complete anatomy
+        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/select.test.ts packages/prototypes/shadcn/test/select-style-trigger.test.ts packages/prototypes/shadcn/test/select-style-popup.test.ts packages/prototypes/shadcn/test/select-evidence-app-probe.test.ts packages/prototypes/shadcn/test/select-surface-style-prop.test.ts packages/prototypes/shadcn/test/select-alignment-owner.test.ts packages/cli/test/scroll-margin-tokens.test.ts
+      - name: Capture exact-head four-runtime style and portal surface
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --import tsx scripts/prototypes/shadcn-select-evidence.mjs /tmp/pui-shadcn-select-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shadcn-select-shared-style-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/pui-shadcn-select-evidence/
+          if-no-files-found: warn
+          retention-days: 30

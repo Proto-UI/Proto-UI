@@ -1,6 +1,13 @@
+import {
+  captureWebComponentCallerFocus,
+  isWebComponentOwnedRelocating,
+  withWebComponentOwnedRelocation,
+} from './owned-relocation';
 // packages/adapters/web-component/src/commit.ts
 
 import { applyTemplateStyle } from './style';
+import { stageOwnedDecoration } from './owned-decoration';
+import type { OwnedDecorationBinding } from '@proto.ui/module-feedback';
 import type {
   TemplateChildren,
   TemplateChild,
@@ -13,6 +20,7 @@ import { isSvgTemplateNode } from '@proto.ui/core';
 
 export type CommitOptions = {
   mode?: 'light' | 'shadow';
+  bindDecorations?: (bindings: readonly OwnedDecorationBinding[]) => void;
   slotPool?: Node[];
   owned?: WeakSet<Node>; // 收集“模板创建的节点”，用于区分外部节点
 };
@@ -69,7 +77,12 @@ function appendCommittedChild(
   child: TemplateChild,
   doc: Document,
   opt: Required<CommitOptions>,
-  ctx: { slotUsed: boolean; slotStart?: Text; slotEnd?: Text }
+  ctx: {
+    slotUsed: boolean;
+    slotStart?: Text;
+    slotEnd?: Text;
+    decorations: OwnedDecorationBinding[];
+  }
 ) {
   if (child === null) return;
 
@@ -89,6 +102,18 @@ function appendCommittedChild(
   }
 
   const t = child.type;
+  if (t && typeof t === 'object' && t.kind === 'decoration') {
+    if (
+      Object.keys(child).some((k) => k !== 'type') ||
+      Object.keys(t).some((k) => k !== 'kind' && k !== 'target')
+    )
+      throw new Error('[Template] decoration must be an empty owned leaf');
+    const staged = stageOwnedDecoration(doc, t.target);
+    opt.owned.add(staged.node);
+    ctx.decorations.push(staged.binding);
+    parent.appendChild(staged.node);
+    return;
+  }
 
   if (isReservedType(t) && t.kind === 'slot') {
     if ((child as any).children != null) {
@@ -160,7 +185,12 @@ function appendSvgChild(
   child: SvgTemplateNode,
   doc: Document,
   opt: Required<CommitOptions>,
-  ctx: { slotUsed: boolean; slotStart?: Text; slotEnd?: Text }
+  ctx: {
+    slotUsed: boolean;
+    slotStart?: Text;
+    slotEnd?: Text;
+    decorations: OwnedDecorationBinding[];
+  }
 ): void {
   const el = doc.createElementNS(SVG_NS, child.tag);
   opt.owned?.add(el);
@@ -193,24 +223,49 @@ export function commitChildren(
     mode: opt.mode ?? 'light',
     slotPool: opt.slotPool ?? [],
     owned: opt.owned ?? new WeakSet<Node>(),
+    bindDecorations:
+      opt.bindDecorations ??
+      ((bindings) => {
+        if (bindings.length) throw new Error('[Template] owned-decoration unsupported');
+      }),
   };
 
-  const ctx: { slotUsed: boolean; slotStart?: Text; slotEnd?: Text } = {
+  const ctx: {
+    slotUsed: boolean;
+    slotStart?: Text;
+    slotEnd?: Text;
+    decorations: OwnedDecorationBinding[];
+  } = {
     slotUsed: false,
+    decorations: [],
   };
 
   const arr = toArray(children);
   for (const c of arr) appendCommittedChild(container, c, doc, cfg, ctx);
 
+  cfg.bindDecorations(ctx.decorations);
+
   // Stage and validate the WHOLE blueprint before moving any caller-owned
   // slot content. A later invalid node must not detach children from the live
   // tree just because an earlier slot was encountered in the traversal.
-  if (cfg.mode === 'light' && ctx.slotEnd) {
-    const slotParent = ctx.slotEnd.parentNode!;
-    for (const node of cfg.slotPool) slotParent.insertBefore(node, ctx.slotEnd);
+  const focus = captureWebComponentCallerFocus(cfg.slotPool);
+  try {
+    if (cfg.mode === 'light' && ctx.slotEnd) {
+      const slotParent = ctx.slotEnd.parentNode!;
+      for (const node of cfg.slotPool) slotParent.insertBefore(node, ctx.slotEnd);
+    }
+    withWebComponentOwnedRelocation(
+      cfg.slotPool,
+      hostRoot,
+      () => {
+        (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
+        focus.restore(isWebComponentOwnedRelocating);
+      },
+      container
+    );
+  } finally {
+    focus.dispose();
   }
-
-  (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
 
   return {
     hasSlot: ctx.slotUsed,

@@ -8,6 +8,9 @@ statement:
   zh-CN: Shadcn Select Value 是 `P-BASE-SELECT-VALUE` 之上的 direct part，从同域 context 派生 displayValue，沿用 placeholder fallback，并将非空 displayValue 渲染为文本；它不拥有 selection 或 interaction。`asChild` 明确不提供。
   en: Shadcn Select Value is a direct part over `P-BASE-SELECT-VALUE`. It derives displayValue from same-domain context, retains placeholder fallback, and renders a non-empty displayValue as text; it owns no selection or interaction. `asChild` is explicitly unavailable.
 criteria:
+  - id: P-SHADCN-SELECT-VALUE-STYLE-PROFILES
+    text:
+      en: The earlier fixed recipes in this document describe the New York compatibility profile. Shared style selection additionally supports Rhea from shadcn/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7; the bounded profile and composition contract is P-SHADCN-SELECT-STYLE. This is not full upstream API, positioning or scroll-control parity.
   - id: P-SHADCN-SELECT-VALUE-UPSTREAM-IDENTITY
     text:
       {

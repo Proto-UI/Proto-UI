@@ -13,11 +13,23 @@ cases:
     expectation: Missing/malformed facts and duplicate real identities fail; replacement, disposal and owner retirement detach subscriptions, and stale or reentrant callbacks never publish retired facts. Caller fact merging must retain authored presentation inputs.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS
     title: Command and ordinary Input retain one actual editor through style changes
-    covers: [P-SHADCN-INPUT-SHELL-STYLE-SELECTION, P-SHADCN-INPUT-SHELL-OUTER-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    covers:
+      [
+        P-SHADCN-INPUT-SHELL-STYLE-SELECTION,
+        P-SHADCN-INPUT-SHELL-OUTER-PAINT,
+        P-SHADCN-INPUT-SHELL-CONTROL-PAINT,
+        P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY,
+      ]
     expectation: Both consumers use the same passive shell and binder; borderless editor identity and selected value/selection/focus persist across style scope changes. Ordinary editor remains distinct from Command. Existing tests cover only part of the profile matrix; direct shell/control negative-profile and alias/withdrawal coverage must be reviewed separately.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE
     title: Exact-source four-Web-runtime native shell observations
-    covers: [P-SHADCN-INPUT-SHELL-OUTER-PAINT, P-SHADCN-INPUT-SHELL-FOCUS-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    covers:
+      [
+        P-SHADCN-INPUT-SHELL-OUTER-PAINT,
+        P-SHADCN-INPUT-SHELL-FOCUS-PAINT,
+        P-SHADCN-INPUT-SHELL-CONTROL-PAINT,
+        P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY,
+      ]
     expectation: Source receipts bind real WC/React/Vue/Vue2 measurements and images to the tested head; fixed theme geometry and keyboard ring distinction, selected continuity/readOnly/disabled flows and 320/1180 text200 bounds remain strict. Failures retain artifacts. Text resizing is not browser UI zoom, and the collector is not full Base Input or non-Web conformance.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-CATALOG
     title: Actual public export has real draft owners without a policy exemption
@@ -25,7 +37,13 @@ cases:
     expectation: The real manifest entry resolves to the bounded draft Root identity, its separate Control owns the correct source and inherits Base Input, and both retain reciprocal P/T mappings. Removing the Root restores the exact missing-family diagnostic; unrelated missing exports still fail. At a release that includes this family, missing overview and sidebar still fail.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-BOUNDARIES
     title: Complete passive and direct profile-boundary coverage
-    covers: [P-SHADCN-INPUT-SHELL-PASSIVE, P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY, P-SHADCN-INPUT-SHELL-STYLE-SELECTION, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    covers:
+      [
+        P-SHADCN-INPUT-SHELL-PASSIVE,
+        P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY,
+        P-SHADCN-INPUT-SHELL-STYLE-SELECTION,
+        P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY,
+      ]
     expectation: Explicit direct-entry tests establish no shell role/tabindex/interaction ownership, caller-owned single-control and fact-merge boundaries, and direct Root/Control unsupported-profile rejection, alias and withdrawal. Existing Command-only negative tests do not automatically cover both entries.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-INHERITED
     title: Complete Base Input guarantees through this derived entry
@@ -39,7 +57,10 @@ implementations:
     required: true
     consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-BINDING]
     exercises: [P-SHADCN-INPUT-SHELL]
-    notes: [Existing lifecycle regression source inspected; not executed for this catalog candidate. Caller merging remains a separate composition obligation.]
+    notes:
+      [
+        Existing lifecycle regression source inspected; not executed for this catalog candidate. Caller merging remains a separate composition obligation.,
+      ]
   - id: wc-style-projection
     kind: adapter-test
     status: needs-review
@@ -47,7 +68,10 @@ implementations:
     required: true
     consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS]
     exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
-    notes: [Existing unsupported-profile and alias/withdrawal cases address Command; no complete direct shell/control profile matrix is inferred.]
+    notes:
+      [
+        Existing unsupported-profile and alias/withdrawal cases address Command; no complete direct shell/control profile matrix is inferred.,
+      ]
   - id: four-runtime-app
     kind: adapter-test
     status: needs-review
@@ -73,7 +97,10 @@ implementations:
     required: true
     consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE]
     exercises: [P-SHADCN-INPUT-SHELL]
-    notes: [Source-expression and generated-theme regression supports the collector oracle only; it does not itself execute native measurements.]
+    notes:
+      [
+        Source-expression and generated-theme regression supports the collector oracle only; it does not itself execute native measurements.,
+      ]
   - id: catalog-regression
     kind: workspace-check
     status: planned
