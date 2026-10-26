@@ -33,4 +33,4 @@ Run commands from the repository root:
 - Chinese docs live under `src/content/docs/zh-cn/`.
 - Prototype demos are registered through `src/components/PrototypePreviewer/`.
 - Generated CSS token files in `src/styles/` should be regenerated through package scripts instead of edited by hand.
-- Build-time style snapshots use finite reviewed recipe registries. Each Runtime session owns a detached Context root with no logical parent, so setup-phase providers and subscriptions can resolve within that snapshot. This is style projection, not an interactive SSR host or a substitute for Adapter-owned child topology.
+- Build-time style snapshots use finite reviewed recipe registries. Each Runtime session owns a detached Context root with no logical parent, so setup-phase providers and subscriptions can resolve within that snapshot. A created session is disposed after mount/evaluation failures, including mounted-hook failures; this is not a rollback guarantee for construction exceptions before `createRuntimeSession` returns. This is style projection, not an interactive SSR host or a substitute for Adapter-owned child topology.
