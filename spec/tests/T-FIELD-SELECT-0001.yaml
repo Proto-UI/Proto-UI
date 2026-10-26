@@ -3,6 +3,8 @@ type: test
 title: Optional Field Select composition regression evidence
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The mapped tests exercise synthetic Web Component policy, binding and report ordering. Exact-head native input, assistive-technology, terminal lifecycle and installed-consumer evidence remain separate; these mappings do not establish stable cross-host acceptance.
 summary: Synthetic WC coverage is not native keyboard, assistive technology or visual acceptance.
 cases:
   - id: T-FIELD-SELECT-0001-CASE-POLICY

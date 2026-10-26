@@ -17,12 +17,12 @@
 
 ## 1. 基线、覆盖与证据分级
 
-### 1.1 固定版本
+### 1.1 原始 F0 审计与首片固定版本（历史）
 
 - main：`7181a93a5ec5cad43936a72e31d5477d5488733a`。
-- 首片实现的真实 stack parent：[#955](https://github.com/Proto-UI/Proto-UI/pull/955)，branch `dot/finfv2-rhea-textarea-954`，head `b01cd33661850db5d8cba37122d732384c472083`，tree `ce3a36e016b6fe2b52b36d72eba28c19793b2023`。仅在该完整父树上追加本片三文件，不用 main 覆盖父分支其他改动。
+- F0 / #1001 首片实现当时的真实 stack parent：[#955](https://github.com/Proto-UI/Proto-UI/pull/955)，branch `dot/finfv2-rhea-textarea-954`，head `b01cd33661850db5d8cba37122d732384c472083`，tree `ce3a36e016b6fe2b52b36d72eba28c19793b2023`。仅在该完整父树上追加本片三文件，不用 main 覆盖父分支其他改动。
 - 2026-10-25 05:23 UTC 发布准备复核：[#997](https://github.com/Proto-UI/Proto-UI/pull/997) 已由维护者于 05:13:35 UTC 合并；main 已前进到 `4d0751dc0499dcd574be8ada56a314a533c2d85a`。本文全仓审计仍绑定旧 `7181a93` snapshot，不自动等价于新 main 的全仓结论。两项代码目标在新 main 的 blob 未变，新文档尚不存在；此观察不代表旧 #997 检查全绿，也不是本片主动合并。
-- 首页在途分支：[#984](https://github.com/Proto-UI/Proto-UI/pull/984)，head `1dcd9545d6dadeb0e04491653d51124aaff1a467`。
+- 原始审计时的首页在途分支：[#984](https://github.com/Proto-UI/Proto-UI/pull/984)，head `1dcd9545d6dadeb0e04491653d51124aaff1a467`。
 - 相关 Issue/PR 与文件 claim 在 2026-10-25 05:07–05:08 UTC 重读。全仓开放基线为 136 Issues、23 PRs，其中 21 Draft；后续写入/合并前仍须重查最新状态。
 - main 固定树：[源码](https://github.com/Proto-UI/Proto-UI/tree/7181a93a5ec5cad43936a72e31d5477d5488733a)。本文相对源码路径默认指此 main，明确标“在途”者除外。
 
@@ -692,3 +692,94 @@ node --test --test-isolation=none \
 - 有界实际验证使用仓库原 `collectDependencyOwners`、`normalizeLiveIssue`、`normalizeLivePullRequest`、`reconcileGovernanceSnapshot`、`hasGovernanceDrift`，输入 exact-parent 两 matrix 与本次 authenticated API 读取的 28 个对象，在既有 Node 24 guard/只读白名单下执行。旧 snapshot `hasGovernanceDrift=true`；同源携带版本 `hasGovernanceDrift=false`；27 Issues/1 PR 全部保留，断言进程 exit 0。没有运行网络 CLI main，也不冒称 hosted `--check` 已通过。
 - 可复现流程：固定 head，读取上述两 matrix 和 retained snapshot；读取它们绑定的 Issues/PR，按 canonical normalize/reconcile 比较；保留变更字段与旧正文 hash 证据；只在 owner 协调后携带现有 canonical source；再运行最终 head 的 `node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check` 与正常 CI。不要因日志提示就自动 `--write` 或推断 owner。
 - 仅追加 README 的报告链接并校正此前“尚未发布”的时态，已发布的 bdeef/ee40 证据不冒充本片新测试。ee40 的 popup-boundaries 与 binary-and-buttons 两个目标 CI jobs 已真实通过完整 187/187 计划测试（含 exactly-once 与 toolbar），随后 native capture 在 rest 阶段因 authored materialized anatomy/current conditional subtree 缺失失败，不能称整 shard 通过；其余 shards 与最终新 head 仍需验收。日志与 raw artifacts 见 [popup job](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/job/121088651821)、[popup artifact](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/artifacts/12590005407)、[binary job](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/job/121088651814)、[binary artifact](https://github.com/Proto-UI/Proto-UI/actions/runs/40166542220/artifacts/12589680225)。这里只读取 official CI 日志，未下载或视觉检查这些 artifacts。其他真实失败（private SSR PUI3301、material public-source/blur、原生视觉/几何和 preview artifact 预算）保持各自 owner 与原日志，不因治理修复获豁免。#1000 仅承担 Checkbox composition/install 闭包，不自动扩大为 Shadcn Field registry owner。
+
+## 2026-10-25 S1：公开 Checkbox + Label construction（#998）
+
+本节与 S1 实现同批提交，不是独立文档完成声明。实际 integration parent 为 #984 的 `a1ee35046ff35e9f57b6490d997e0dbd0b0241d2`，tree `837ed8dba3b376d005886bb37d6f3d1ba31832f8`。Hero 排版不是 Checkbox 语义前置。BaseFieldTextarea 与 #1001 独立，不建立 Checkbox 硬依赖。
+
+### 诊断与决策
+
+首页与 demo 使用相同 raw Checkbox 定义，但独立 Label 组合不同。首页已有 controlLabel；三族 demo 的可见 sibling box 未关联，并有隐藏命名副本。此事实来自固定 main `7181a93a5ec5cad43936a72e31d5477d5488733a` 的源码审计及用户报告，不冒称 native 复现。最初准备的五文件 demo patch 已暂停，不能代替公开组合交付。
+
+现有 Shadcn preset 仅 Root→Indicator，不能被描述成 Label slot 开关。Template v0 不承载 prototype-level composition；因此本片不造 wrapper prototype，而在 `/checkbox` 公开 recommendation 与每实例 construction。recommendation 是 part identity、拓扑与短名称默认选项的唯一源码权威；constructor 只创建既有 public opaque ref 并交给 Root/Label adapter input。原型状态、事件、焦点和生命周期所有权不变。rich content 继续使用宿主合法 children/slots，不承诺任意交互后代，也没有 `asChild` 或 readOnly 新 API。
+
+### 可复现审查路线
+
+1. 检查 `packages/prototypes/shadcn/src/checkbox/preset.ts` 与 `component-presets.types.ts`：现有三 preset 的类别、默认部件和替换政策不变。
+2. 检查新增 `checkbox/composition.ts`：公开 part 引用等于既有真实定义；唯一 structure 为 sibling Root/Label 与 Root 内 Indicator；无 DOM、callback、checked cache、全局 pair 或资源监听。
+3. 通过 `packages/prototypes/shadcn/test/checkbox-label-composition.test.ts` 验证 constructor identity、两实例隔离、冻结默认值与禁止序列化。宿主用例独立覆盖 rich label、一次 activation、direct press、disabled/mixed/controlled、raw naming-only、嵌套动作与 rebind/detach，不把合成事件当 native 验收。
+4. 正常仓库环境执行 `pnpm exec vitest run packages/prototypes/shadcn/test/checkbox-label-composition.test.ts`；并执行 `pnpm check:types` 与 `pnpm check:spec-authoring -- --base a1ee35046ff35e9f57b6490d997e0dbd0b0241d2`，核对新 draft contract/test 的图关系与增量作者约束。
+5. 后续 native 与 installed tests 必须使用精确开发 head，包含真实键盘/焦点与 accessible-name 计算。浏览器截图与输出绑定同一 head。S2 #1000 验证 packed/install 闭包，S3 在 #865/#933 消费公开定义；不据源码导出宣称安装一致。
+
+### 本轮真实验证与失败
+
+- 四个修改的 TypeScript 目标：0 个诊断；继承验证闭包中仍有 101 个 transitive diagnostics。不是全仓类型通过。
+- 实际源码 constructor 独立运行：identity、topology、per-instance isolation、frozen defaults、serialization rejection 通过。它使用已有受限验证闭包中的显式源路径解析，不是 packed consumer 验收，也没有执行宿主原型 setup。
+- 三个候选 spec YAML 的 schema 解析通过；这不等于完整图、authoring、CI 或稳定 admission 通过。
+- 真实 Vitest 启动在收集用例前被 Rollup `ERR_DLOPEN_DISABLED` 阻断，构造器/宿主 Vitest 用例均不得标为通过。未启用 native addon、降低权限限制或替换 runner 伪装结果。
+- constructor 初次尝试受继承依赖 symlink 指向隔离范围外旧产物影响，read guard 明确拒绝；未读取或复制被拒目录，改为当前已允许闭包内源文件解析。schema 初次尝试因顶层 zod resolution 缺失失败，后使用已安装且允许读取的固定 zod 4.3.6；无新增安装。原失败保留。
+- 新宿主用例覆盖 detach，不是 terminal disposal；真实 native、AT 名称计算、terminal disposal、完整 graph/authoring 与 packed/install 尚欠。缺 checks 不算通过。
+- 本片没有 UI 布局变更或 native 截图。S3 使用真实 Label 时须审查 family font/line-height/margins，不得宣称与旧 box 像素一致。
+
+### 文档来源与合流
+
+本文前序全部记录保留自公开 #1001 commit `bdeef58c20b7479fd2a0a3975dda0e5c8a543d2f` 的同路径，blob `f94e2d8c8db3233c6c9920299634656d91358c03`，SHA256 `2dd0342004b499351ebf2046b505c0b76020eaa1da7e56202d0f567940dde68d`。S1 parent tree 尚无此路径；仅复用公开诊断文本，不宣称继承 #1001 源码，也不把 FieldTextarea 当 Checkbox 前置。后续合流如出现 add/add 冲突，应内容级合并保留双方诊断，不整文件覆盖或删除历史。
+
+### S1 静态复审补充
+
+复审明确了冻结边界：仅冻结 helper 新建容器和 Label 默认值，import 的共享原型与 Indicator preset 保持原有 identity/可变性，不作深冻结或修改。rebind 测试新增旧 association 的独立 Label 负控：它不能再请求原 control，当前新 association 的 Label 仍应只请求一次；这样不会把忽略两次更新的实现误判为 rebind 成功。用例仍未取得 Vitest 或 native 通过结果。公共页的示意已标明 adapter-neutral，不冒称完整可运行 host 示例。
+
+## 续记：#1003 当前分支的治理与诊断文本合流（2026-10-25 UTC）
+
+本节只维护现有 S1 分支的三条文档/快照路径，不执行共享父分支同步，不导入 #1001 的实现，也不发布 #984 的待批记录。依据：[共享父分支协调决定](https://github.com/Proto-UI/Proto-UI/pull/955#issuecomment-6397665849)、[当前工作归属](https://github.com/Proto-UI/Proto-UI/issues/890#issuecomment-6398921519)。[原始 #998 claim](https://github.com/Proto-UI/Proto-UI/issues/998#issuecomment-6394968072) 的期限和实现范围不因本文延长。
+
+### 精确当前来源与真正的父关系
+
+以下是 2026-10-25 14:54 UTC 读取的源状态，不替代前文各时点的历史审计或执行结果：
+
+| 载体 | 已发布 source head | PR base / 已知集成状态 |
+| --- | --- | --- |
+| main | `42cc744e36ef2fef350a7113d2e9189459fe6db5` | 当前主线；不等于任一在途片已验收 |
+| #955 | `7c541478b7f27242849bf03b8ece192164d8e6f9` | main；后续 native child synchronization 由对接人协调 |
+| F0 #1001 | `cd06b023d752cb551adac26af37a735e1757191c` | #955 分支，PR 仍报告旧 base OID `b01cd33661850db5d8cba37122d732384c472083`；不是已同步 |
+| S1 #1003 | `3ad7a5091ffb825ee95602e1285393b981368a94` | #984 分支；已集成父提交 `2bf355668c81639a1f1b86fd61689926ca477f93` |
+| #984 | `08318c1701818940377b55be0479917ba694a1f4` | 比 S1 已集成父提交更新；本片不携带该提交、不写该分支 |
+| S2 #1004 | `d2099b6ac1771f09e8fcabd0c60c65d347f7ab62` | #1003；base OID `3ad7a5091ffb825ee95602e1285393b981368a94` |
+| S3 #1006 | `0525e9b48513e3be82d9f59145d186cb30e0f709` | #1004；base OID `d2099b6ac1771f09e8fcabd0c60c65d347f7ab62` |
+
+S1 的实际源依赖仍是原有 #984 集成树，不是 F0 的 #955 父树；Hero 不是 Checkbox 语义前置。前文 #955 b01cd、#984 1dcd、#984 a1ee 分别属于历史 F0 审计或初始 S1 实现，不能作为当前父指针。此三路径修订不更改 PR base，不宣称当前 main、#984 最新提交或 #1001 实现已成为 S1 的源祖先。
+
+### 三路径修订与内容保留
+
+- `github-governance-snapshot.json` 复用精确 main `42cc744e` 的现成 canonical blob `d210410244516f84f260b0a26fe6cc87786fe778`；读取时 #1001 同路径仍是同一 blob。不是凭旧评论猜测 canonical，也不手工改 hash、自动重新生成快照或更改消费者 matrix。
+- `README.md` 复用 #1001 的导航增补（blob `fd1134a24cc258df3cbda7b7f000eeea7cd31ce0`），明确报告不是全量 composition/install 缺口关闭证明。
+- 本文采用已公开 #1001 文档 blob `f174ffeb4a587d2a003c5c4a32cc79355b5144a8` 的 F0 发布时态、input-shard 与治理续记，保留 S1 原 blob `3d71adc083a220c4998a9a2b781b22eab77a8b6f` 的完整 S1 章节。原始基线改为明确历史标签，不把旧测试改写为本片执行。
+- S2 当前文档 blob `503fee2160861b721e9f19b006ff52c8d48eca09`、S3 当前文档 blob `6d53d58d19eb50460478d75670da138175e59c08` 的独立段落仍留在各自分支。后续对接人同步须内容级合并保留 F0/S1/S2/S3 全部记录，input-shard 同源段只保留一份，不能用整个文件选 ours/theirs。本文不反向复制子项实现或声称其结果已经发生在 S1。
+
+### 本次验证边界与交接
+
+本次只读取公开 source blobs、PR head/base 和协调/claim，静态核对三路径来源与段落保留；未执行仓库源码、测试、构建、格式化或浏览器。精确 canonical blob 相等并不证明当前 live governance reconciliation 已通过；#1001 历史 28 对象验证及其他分支的 CI/截图仍属于其原 head。本段记录于三路径候选准备阶段，不预造最终 commit head；后续发布的真实新 SHA、静态验证及未完成项由对应 PR 的开发评论绑定。本段不替代该发布回执。
+
+验收应确认：只有这三条叶路径变化；snapshot 与精确 canonical source 字节相等；README 链接有效；完整 S1、F0 两个续记和失败记录不丢失；PR base 不变。随后由获准验证路径读取最终 head 的真实 governance/CI 结果。native pointer/keyboard/focus、accessible name、terminal disposal 与 installed/synthetic 宿主分歧仍是既有债务，缺 checks 不算通过。#998/#1000 保持开放；不宣布 Ready、合并、发布或独立验收。
+
+## 续记：本地集成与实际验证（2026-10-26 UTC）
+
+前面的 runner 阻断、三路径修订和旧 head 表格均是各自日期的事实，不改写为本轮结果。本轮本地候选以 #1003 head `be2cc64b5e1ddf27fd9bcd06b1980ae62cdf39a5` 合入 #955 parent `7c541478b7f27242849bf03b8ece192164d8e6f9`，仍有未提交内容；这不是 main 已合并，也不是公开 PR head 已更新。最近读取的 #1001 source head 为 `1bdb62e0c5d9c0c81e43ef023150e004a3550d3b`。父分支还在修复 inventory，最终提交、native stack 同步、PR base 与 head 必须在发布时重新绑定，不能复用上节旧指针。
+
+本轮实际运行结果：
+
+| 验证面 | 观察结果 | 不包含的保证 |
+| --- | --- | --- |
+| Checkbox atom 与 composition 两个 Vitest 文件 | 18 个用例通过，其中 composition 6 个、atom 12 个 | 不是 native input、AT 或 installed consumer |
+| 继承的 FieldSelect policy、trigger、report-order 三个文件 | 14 个用例通过 | 不是 native 验收 |
+| 相对 main `42cc744e36ef2fef350a7113d2e9189459fe6db5` 的增量 spec-authoring | 补齐两个 FieldSelect rationale 后，37 个变更 catalog 输入通过 | 不提升 draft 生命周期 |
+| 原始全量 `check:types` | 978 个文件，0 error、0 warning | 不替代最终提交 CI |
+| Astro/Starlight build | Astro 报告 654 页构建通过；Pagefind 扫描 672 个 HTML 文件，索引其中 637 页 | 不是线上部署；Pagefind 单独报告 18 个 redirect 文件缺少外层 `<html>` 元素，并按 `data-pagefind-body` 筛选索引，不能用 Astro 的页面计数直接相减 |
+| 实际 Chrome，本地构建的 EN/ZH 页面 | 导航、选中 sidebar、正文和可视截图通过，无水平溢出 | 只验证文档，不证明 Checkbox 原生交互 |
+| `check:public-docs` | 仍失败：79 个 unclassified family/export 项 | 未证明与早先 78 项等价，不把 build 通过冒充此 gate 通过 |
+
+对应复现命令为 `corepack pnpm@10.32.1 exec vitest run packages/prototypes/shadcn/test/checkbox.test.ts packages/prototypes/shadcn/test/checkbox-label-composition.test.ts`，须通过共享重型 workload guardian 串行执行。composition 用例源码 SHA256 为 `1c05565353e516d071b6e6c937bc9c0ec9fc41472e86e15e46cc028b8b9aa53e`；对应 `T-CHECKBOX-LABEL-COMPOSITION-0001` 的 implementation 现记录有限的本地 passing，但实体仍为 draft。旧 `ERR_DLOPEN_DISABLED` 不再描述本轮执行，旧失败记录继续保留。
+
+本轮不再是上节的三路径修改：候选还包含 Checkbox composition 实现、其导出与测试、关联 spec、两种语言的 `checkbox-composition.mdx`、`apps/www/astro.config.mjs` 的 Shadcn 导航项、两个 FieldSelect rationale，以及继承的父分支变化。最终 PR body 必须从实际 base/head 重算完整路径，不沿用旧路径计数或“PR base 不变”承诺。根级 `checkbox-composition` 路由有意保留为跨 Checkbox/Label 的组合指南，Shadcn 分组指向其具体实现；EN/ZH 同路由且均已实际观察，不另加兼容重定向。
+
+候选 inventory 的 expected path set 覆盖全部当前 prototype source/test，不只两个新增 Checkbox 文件。它必须在 #955 canonical family ownership 修复后通过原生成器刷新，保留 immutable source proof，不能手改 hash 或把 source presence 当实现验收。#998、#1000 继续开放；S2/S3 分支仍需同步，native pointer/keyboard/focus、computed accessible name、terminal disposal、packed/install closure 和最终 exact-head CI 均不因本节关闭。

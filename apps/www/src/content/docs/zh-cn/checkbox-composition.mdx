@@ -1,0 +1,42 @@
+---
+title: Checkbox 与 Label 的推荐组合
+description: 复用同一公开 Checkbox、Indicator 与独立 Label，通过实例关联组合短名称，而不是添加页面点击转发。
+---
+
+此推荐目前是 draft。源码入口不等于已发布包、完整安装闭包或所有宿主已经验收。安装交付由 #1000 跟进；本切片 #998 不迁移首页与 demo，也不改变 Checkbox anatomy。
+
+## 使用相同的原子定义
+
+`@proto.ui/prototypes-shadcn/checkbox` 导出 `shadcnCheckboxLabelComposition` 与 `createShadcnCheckboxLabelComposition()`。公开 recommendation 给出真实的 Root、Indicator、Label 定义、关系与短名称默认选项。Indicator 放在 Root 内，Label 与 Root 同级。Indicator 替换仍遵循原有 Checkbox preset；这不是“标签 slot 模式”。原有 raw atoms 导出保持不变。
+
+只冻结 helper 新建的容器与 Label 默认值；引用的 prototype 和共享 preset 保持原有 identity 与可变性，不作 deep-freeze 承诺，也不修改它们。
+
+在一个组合挂载时创建一次实例，并在该宿主的重渲染期间保留它；不要放入模块全局供多个控件共用，也不要每次 render 都生成新关联。
+
+下面是 adapter-neutral 输入示意，不是完整可运行的宿主示例。完整 host examples、native 输入、terminal disposal 与 packed/install 验收仍未完成。
+
+```ts
+import { createShadcnCheckboxLabelComposition } from '@proto.ui/prototypes-shadcn/checkbox';
+
+const pair = createShadcnCheckboxLabelComposition();
+// Adapt pair.recipe.parts.control / indicator / label using the chosen adapter.
+// Root input: pair.control.instanceAssociations
+// Label input: pair.label.instanceAssociations and pair.label.props
+// Checkbox props and outward handlers remain owned by the existing Checkbox.
+```
+
+React/Vue/Vue2 通过现有 `instanceAssociations` 输入传递关联，并把 `pair.label.props` 作为 Label 的 props。Web Component 使用公开 `setElementAssociations(element, ...)`，Label props 通过 `setElementProps` 提供。不要把 opaque reference 放进 Props、HTML attribute 或 JSON。绑定与卸载由现有 adapter 管理；构造器不安装监听器，也不提供虚假的 dispose API。换用新关联时同时更新 Root 与 Label。
+
+## 富内容不等于任意交互内容
+
+标签使用宿主本来支持的 children/slots，可以包含合法的强调文本、显式标记为装饰性的图标等非交互名称内容，不局限为字符串。它不提供 `asChild` 或另一套 slot 协议，也不会自动修正非法内容。名称来自实际 Label，不要添加隐藏重复名称。
+
+链接、Button、编辑器等独立动作优先放在相邻内容区域；若嵌入，仍须符合宿主内容模型及既有交互后代排除规则，点击不能同时切换 Checkbox。不能把另一个 Label 或无关 labelable control 当作无限制内容。长说明、错误信息应与短名称分离并保留选择能力；只有实际建立描述关系时才能宣称它被读作说明。
+
+短 actionable label 默认 naming 与 activation 都启用，Checkbox 继续拥有 checked、mixed、disabled、controlled 与 focus 行为。需要 naming-only 时用公开 raw Label 显式关闭 activation，而不是修改共享 recipe。没有新增 Checkbox readOnly。
+
+## 对齐上游与验收边界
+
+比较基线仍是 shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 New York Checkbox。上游封装 Root 与 Indicator，并通过独立 Label 组合名称，不内置固定标签文本。这里不迁移为当前 Base UI 实现。
+
+构造器单元测试、合成宿主事件、真实浏览器输入与安装后的行为是不同证据。旧截图不能证明新提交；代码存在也不能证明键盘、焦点、辅助技术名称计算或像素一致。首页/demo/安装入口的一致消费仍需各自后续切片验证。

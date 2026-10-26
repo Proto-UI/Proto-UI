@@ -1,0 +1,47 @@
+id: C-CHECKBOX-LABEL-COMPOSITION-0001
+type: contract
+title: Recommended host-side Shadcn Checkbox and independent Label composition
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The bounded public construction direction is accepted for implementation; exact-head native, installed-consumer and independent evidence remain required before stable admission.
+summary: One public recommendation composes existing atoms through the existing instance-association channel without introducing another prototype or value owner.
+statement:
+  en: The Shadcn checkbox subpath exposes a source-owned recommendation and an instance constructor. The recommendation references existing Checkbox Root, Indicator and independent Label definitions. Root and Label are siblings, Indicator remains Root's child, and the existing default-part preset governs Indicator replacement. Each constructor call provides a fresh opaque controlLabel association shared by only that control and label, with short actionable-name defaults naming true and activation true. This is host-side construction, not Core Template composition or a new anatomy role.
+  zh-CN: Shadcn checkbox 子路径公开由源码治理的推荐组合与实例构造器，引用现有 Checkbox Root、Indicator 和独立 Label。Root 与 Label 为同级，Indicator 仍为 Root 子项，其替换遵循既有默认部件 preset。每次构造创建独立 opaque controlLabel 关联，仅供该 control 与 label 共享，短名称默认 naming 与 activation 为 true。这是宿主侧构造，不是新增 Core Template 组合或 anatomy role。
+criteria:
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-SOURCE
+    text:
+      en: Public recommendation identities must be the existing family definitions. Its topology and Label defaults have one source; host projections consume them rather than copying a state machine or adding a second recipe authority. Existing raw atoms and the Indicator replacement policy remain available and unchanged.
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-INSTANCE
+    text:
+      en: Every instance construction creates one admitted ControlLabelRef shared between its Root and Label inputs and distinct from other constructor calls. Only containers and Label default props created by this helper are frozen. Imported prototype definitions and the existing shared default-part preset retain their identity and existing mutability; the recommendation is not a deep-freeze promise and must not freeze or modify shared objects. Consumers retain the result across host renders and never share one constructed pair between independent controls. The reference is neither Props nor serializable data.
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-OWNERSHIP
+    text:
+      en: The construction has no checked, mixed, disabled, focus, event or form owner, no callback forwarding, host access, listeners or resource lifetime. Existing Checkbox and ControlLabel implementations retain all behavior and adapter lifecycle. Rebinding updates both inputs through the existing association channel; detach and terminal disposal remain distinct adapter responsibilities, not a new constructor dispose method.
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-CONTENT
+    text:
+      en: Label content uses ordinary host children or slots, not a string-only label prop or an asChild mode. Valid noninteractive rich naming content is allowed and decorative content needs explicit hidden semantics. Interactive descendants retain their own action and existing input exclusion. Nested labels and unrelated labelable controls are not unrestricted content; long description and error text remain separate from the short actionable name. Raw naming-only composition remains selectable. This construction adds no Checkbox readOnly API.
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-EVIDENCE
+    text:
+      en: Source, synthetic adapter, native input and installed-output evidence are separate. Importing or constructing inputs alone cannot certify a working binding, accessible-name computation, native focus, visual equivalence or install closure. The pinned New York baseline is not upgraded by this recommendation.
+dependsOn:
+  contracts: [C-CONTROL-LABEL-0001, C-TEMPLATE-0006]
+references:
+  prototypes: [P-SHADCN-CHECKBOX, P-SHADCN-LABEL]
+sources:
+  - path: packages/prototypes/shadcn/src/checkbox/composition.ts
+  - path: packages/prototypes/shadcn/src/checkbox/preset.ts
+  - path: packages/prototypes/shadcn/test/checkbox-label-composition.test.ts
+  - path: https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/examples/checkbox-demo.tsx
+    label: Pinned upstream independent Label composition; no default text or label slot-mode switch.
+openQuestions:
+  - id: C-CHECKBOX-LABEL-COMPOSITION-0001-Q-ADMISSION
+    question:
+      en: Do exact-head native host input, accessible-name, lifecycle and installed-consumer evidence establish the recommendation across its declared supported targets?
+    blocks: [activation:C-CHECKBOX-LABEL-COMPOSITION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined a draft public host construction over existing Checkbox and Label semantics, without changing anatomy or the pinned upstream baseline.
+tags: [checkbox, label, composition, accessibility]

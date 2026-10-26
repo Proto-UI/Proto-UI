@@ -23,12 +23,12 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate local tree bf17187e1f95044b8aaf598447289d8ed352716f; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate commit 76471a6e8d4497a1a5f328dcc17f42fec697456f; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Main families / identities | Candidate families / identities |
 | --- | --- | --- |
 | base | 22 / 55 | 49 / 88 |
-| shadcn | 17 / 48 | 51 / 83 |
+| shadcn | 17 / 48 | 52 / 84 |
 | brutalist | 19 / 51 | 52 / 78 |
 | bootstrap-2-3-2 | 2 / 2 | 44 / 48 |
 | liquid-glass | 2 / 2 | 39 / 41 |

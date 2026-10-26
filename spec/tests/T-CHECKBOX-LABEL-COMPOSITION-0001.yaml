@@ -1,0 +1,44 @@
+id: T-CHECKBOX-LABEL-COMPOSITION-0001
+type: test
+title: Recommended Checkbox Label construction evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Construction and synthetic host tests passed locally on the 2026-10-26 integration candidate; native input, terminal disposal and installed closure remain separate admission debt, so this entity remains draft.
+summary: Public identity, instance isolation and existing host behavior are checked without equating source construction to native acceptance.
+cases:
+  - id: T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-CONSTRUCTION
+    title: Existing parts and isolated immutable instance inputs
+    covers: [C-CHECKBOX-LABEL-COMPOSITION-0001-SOURCE, C-CHECKBOX-LABEL-COMPOSITION-0001-INSTANCE]
+    expectation: Same real atoms and preset, independent fresh references, immutable defaults and explicit serialization rejection.
+  - id: T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-HOST
+    title: Existing synthetic host association retains state and input ownership
+    covers:
+      [
+        C-CHECKBOX-LABEL-COMPOSITION-0001-OWNERSHIP,
+        C-CHECKBOX-LABEL-COMPOSITION-0001-CONTENT,
+        C-CHECKBOX-LABEL-COMPOSITION-0001-EVIDENCE,
+      ]
+    expectation: Rich visible label, direct input, disabled and mixed control, controlled rejection, raw naming-only content, nested action exclusion, rebind and detached input isolation; not native or assistive-technology acceptance.
+implementations:
+  - id: checkbox-label-construction-and-host
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/checkbox-label-composition.test.ts
+    required: true
+    consumesCases:
+      [
+        T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-CONSTRUCTION,
+        T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-HOST,
+      ]
+    notes:
+      - The 2026-10-25 runner failure remains historical evidence. On 2026-10-26 the local integration candidate collected and passed all six construction/host cases, alongside twelve Checkbox atom cases; see the dated continuation in internal/coverage-matrices/composition-delivery-parity.md.
+      - Test source SHA256 is 1c05565353e516d071b6e6c937bc9c0ec9fc41472e86e15e46cc028b8b9aa53e. Execution used the uncommitted integration of head be2cc64b5e1ddf27fd9bcd06b1980ae62cdf39a5 and parent 7c541478b7f27242849bf03b8ece192164d8e6f9, not a published exact-head CI result.
+      - Detach coverage is not terminal runtime disposal, native input, computed accessibility-tree name or packed/install proof.
+verifies:
+  contracts: [C-CHECKBOX-LABEL-COMPOSITION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Recorded bounded constructor and host-unit cases without promoting draft construction or claiming real-browser acceptance.
+tags: [checkbox, label, composition, evidence]

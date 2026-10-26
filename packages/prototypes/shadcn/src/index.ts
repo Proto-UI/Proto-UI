@@ -397,3 +397,9 @@ export type {
   InputShellTarget,
   InputShellControlInstance,
 } from './input-shell';
+
+export {
+  shadcnCheckboxLabelComposition,
+  createShadcnCheckboxLabelComposition,
+} from './checkbox/composition';
+export type { ShadcnCheckboxLabelCompositionInstance } from './checkbox/composition';

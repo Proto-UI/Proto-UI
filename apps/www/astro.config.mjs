@@ -671,6 +671,14 @@ export default defineConfig({
                   slug: 'ui-libraries/shadcn/checkbox',
                 },
                 {
+                  label: 'Checkbox + Label (Draft)',
+                  translations: {
+                    en: 'Checkbox + Label (Draft)',
+                    'zh-CN': 'Checkbox + Label（草案）',
+                  },
+                  slug: 'checkbox-composition',
+                },
+                {
                   label: 'Radio Group',
                   translations: { en: 'Radio Group', 'zh-CN': 'Radio Group' },
                   slug: 'ui-libraries/shadcn/radio-group',

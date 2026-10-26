@@ -16,3 +16,9 @@ export { checkboxRoot, checkboxIndicator };
 export { default as shadcnCheckboxRoot } from './root.proto';
 export { default as shadcnCheckboxIndicator } from './indicator.proto';
 export { default as componentPreset, shadcnCheckboxComponentPreset } from './preset';
+
+export {
+  shadcnCheckboxLabelComposition,
+  createShadcnCheckboxLabelComposition,
+} from './composition';
+export type { ShadcnCheckboxLabelCompositionInstance } from './composition';
