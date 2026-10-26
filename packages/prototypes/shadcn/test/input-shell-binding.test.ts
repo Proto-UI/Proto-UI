@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
 import { bindInputShellControl } from '../src/input-shell/bind-control';
+const cleanupFailures: Array<[string, unknown]> = [
+  ['undefined', undefined],
+  ['null', null],
+  ['false', false],
+  ['zero', 0],
+  ['empty string', ''],
+  ['Error', new Error('cleanup')],
+];
 function fact(initial = false) {
   let value: unknown = initial;
   const listeners = new Set<() => void>();
@@ -49,6 +57,36 @@ function target() {
       writes.push(value);
     },
     writes,
+  };
+}
+function ownerWithCleanupFailure(cleanupError: unknown) {
+  const base = owner();
+  const onDispose = base.onDispose;
+  let attempts = 0;
+  return {
+    ...base,
+    onDispose(fn: () => void) {
+      const off = onDispose(fn);
+      return () => {
+        attempts++;
+        off();
+        throw cleanupError;
+      };
+    },
+    attempts: () => attempts,
+  };
+}
+function failingUnsubscribe(
+  source: { subscribe(listener: () => void): () => void },
+  error: unknown
+) {
+  const subscribe = source.subscribe;
+  source.subscribe = (listener: () => void) => {
+    const off = subscribe(listener);
+    return () => {
+      off();
+      throw error;
+    };
   };
 }
 describe('single-control input shell composition lifecycle', () => {
@@ -215,6 +253,199 @@ describe('single-control input shell composition lifecycle', () => {
     expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
     b.sync();
     expect(t.writes).toHaveLength(1);
+  });
+  describe.each(['dispose', 'replace'] as const)('%s cleanup failure', (operation) => {
+    it.each([
+      ['undefined', undefined],
+      ['null', null],
+      ['false', false],
+      ['zero', 0],
+      ['empty string', ''],
+      ['Error', new Error('first cleanup')],
+    ])('retains the first %s throw while retiring every resource', (_label, primary) => {
+      const o = owner(),
+        c = control(),
+        next = control(),
+        t = target();
+      const focusSubscribe = c.focusVisible.subscribe;
+      const disabledSubscribe = c.disabled.subscribe;
+      c.focusVisible.subscribe = (listener) => {
+        const off = focusSubscribe(listener);
+        return () => {
+          off();
+          throw primary;
+        };
+      };
+      c.disabled.subscribe = (listener) => {
+        const off = disabledSubscribe(listener);
+        return () => {
+          off();
+          throw new Error('secondary cleanup');
+        };
+      };
+      const binding = bindInputShellControl(o, t, c);
+      let didThrow = false;
+      let observed: unknown;
+      try {
+        if (operation === 'dispose') binding.dispose();
+        else binding.replace(next);
+      } catch (cause) {
+        didThrow = true;
+        observed = cause;
+      }
+      expect(didThrow).toBe(true);
+      expect(observed).toBe(primary);
+      expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+      expect([next.focusVisible.count(), next.disabled.count()]).toEqual([0, 0]);
+      c.focusVisible.set(true);
+      next.disabled.set(true);
+      binding.sync();
+      binding.dispose();
+      expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+
+      c.focusVisible.subscribe = focusSubscribe;
+      c.disabled.subscribe = disabledSubscribe;
+      const nextOwner = owner();
+      const reacquired = bindInputShellControl(nextOwner, t, c);
+      expect(t.writes.at(-1)).toEqual({ focusVisible: true, disabled: false });
+      expect([c.focusVisible.count(), c.disabled.count(), nextOwner.count()]).toEqual([1, 1, 1]);
+      reacquired.dispose();
+    });
+  });
+  describe('owner cleanup failure', () => {
+    it.each(cleanupFailures)(
+      'surfaces the owner cleanup %s when every control unsubscribe succeeds',
+      (_label, ownerError) => {
+        const o = ownerWithCleanupFailure(ownerError);
+        const c = control();
+        const t = target();
+        const binding = bindInputShellControl(o, t, c);
+        let didThrow = false;
+        let observed: unknown;
+        try {
+          binding.dispose();
+        } catch (cause) {
+          didThrow = true;
+          observed = cause;
+        }
+        expect(didThrow).toBe(true);
+        expect(observed).toBe(ownerError);
+        expect(o.attempts()).toBe(1);
+        expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+        c.focusVisible.set(true);
+        binding.sync();
+        expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+        expect(() => binding.dispose()).not.toThrow();
+        const fresh = owner();
+        const reacquired = bindInputShellControl(fresh, t, c);
+        expect(t.writes.at(-1)).toEqual({ focusVisible: true, disabled: false });
+        expect([c.focusVisible.count(), c.disabled.count(), fresh.count()]).toEqual([1, 1, 1]);
+        reacquired.dispose();
+      }
+    );
+    it.each(cleanupFailures)(
+      'keeps the first %s control unsubscribe failure when owner cleanup also fails',
+      (_label, primary) => {
+        const o = ownerWithCleanupFailure(new Error('later owner cleanup'));
+        const c = control();
+        const t = target();
+        failingUnsubscribe(c.focusVisible, primary);
+        const binding = bindInputShellControl(o, t, c);
+        let didThrow = false;
+        let observed: unknown;
+        try {
+          binding.dispose();
+        } catch (cause) {
+          didThrow = true;
+          observed = cause;
+        }
+        expect(didThrow).toBe(true);
+        expect(observed).toBe(primary);
+        expect(o.attempts()).toBe(1);
+        expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+        c.focusVisible.set(true);
+        binding.sync();
+        expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+        expect(() => binding.dispose()).not.toThrow();
+        const reacquired = bindInputShellControl(owner(), t, control());
+        expect(t.writes.at(-1)).toEqual({ focusVisible: false, disabled: false });
+        reacquired.dispose();
+      }
+    );
+    it('keeps a later control unsubscribe failure when owner cleanup also fails', () => {
+      const primary = new Error('second cleanup');
+      const o = ownerWithCleanupFailure(new Error('later owner cleanup'));
+      const c = control();
+      const t = target();
+      failingUnsubscribe(c.disabled, primary);
+      const binding = bindInputShellControl(o, t, c);
+      let didThrow = false;
+      let observed: unknown;
+      try {
+        binding.dispose();
+      } catch (cause) {
+        didThrow = true;
+        observed = cause;
+      }
+      expect(didThrow).toBe(true);
+      expect(observed).toBe(primary);
+      expect(o.attempts()).toBe(1);
+      expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+      c.disabled.set(true);
+      binding.sync();
+      expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+      expect(() => binding.dispose()).not.toThrow();
+    });
+    it('keeps the first control unsubscribe failure when both controls and the owner fail', () => {
+      const first = new Error('first cleanup');
+      const o = ownerWithCleanupFailure(new Error('later owner cleanup'));
+      const c = control();
+      const t = target();
+      failingUnsubscribe(c.focusVisible, first);
+      failingUnsubscribe(c.disabled, new Error('second cleanup'));
+      const binding = bindInputShellControl(o, t, c);
+      let didThrow = false;
+      let observed: unknown;
+      try {
+        binding.dispose();
+      } catch (cause) {
+        didThrow = true;
+        observed = cause;
+      }
+      expect(didThrow).toBe(true);
+      expect(observed).toBe(first);
+      expect(o.attempts()).toBe(1);
+      expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+      c.focusVisible.set(true);
+      c.disabled.set(true);
+      binding.sync();
+      expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+      expect(() => binding.dispose()).not.toThrow();
+    });
+    it('keeps the original replacement failure and attaches no new control when owner cleanup also fails', () => {
+      const primary = new Error('first cleanup');
+      const o = ownerWithCleanupFailure(new Error('later owner cleanup'));
+      const c = control();
+      const next = control();
+      const t = target();
+      failingUnsubscribe(c.focusVisible, primary);
+      const binding = bindInputShellControl(o, t, c);
+      let didThrow = false;
+      let observed: unknown;
+      try {
+        binding.replace(next);
+      } catch (cause) {
+        didThrow = true;
+        observed = cause;
+      }
+      expect(didThrow).toBe(true);
+      expect(observed).toBe(primary);
+      expect(o.attempts()).toBe(1);
+      expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+      expect([next.focusVisible.count(), next.disabled.count()]).toEqual([0, 0]);
+      expect(t.writes).toEqual([{ focusVisible: false, disabled: false }]);
+      expect(() => binding.dispose()).not.toThrow();
+    });
   });
 });
 

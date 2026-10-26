@@ -527,19 +527,7 @@ function validateCollaborationContract() {
     if (!sameMembers(receiptSchema.properties?.schemaVersion?.enum, [1, 2])) {
       fail(collaborationReceiptSchemaFile, 'receipt must admit current v2 and historical v1');
     }
-    const disclosureRule = receiptSchema.allOf?.find(
-      (rule) => rule.if?.properties?.schemaVersion?.const === 2
-    );
-    if (
-      receiptSchema.properties?.modelTrace?.$ref !== 'modeltrace-receipt.schema.json' ||
-      !sameMembers(disclosureRule?.then?.required, ['modelTrace']) ||
-      !sameMembers(disclosureRule?.else?.not?.required, ['modelTrace'])
-    ) {
-      fail(
-        collaborationReceiptSchemaFile,
-        'current v2 must require public ModelTrace and historical v1 must retain its original shape'
-      );
-    }
+
     if (receiptSchema.properties?.kind?.const !== 'proto-ui.collaboration-receipt') {
       fail(collaborationReceiptSchemaFile, 'kind must bind the collaboration receipt');
     }

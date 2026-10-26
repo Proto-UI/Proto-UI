@@ -8,8 +8,6 @@ No item is checked for an incremental/simple implementation. Every required acce
 
 ## One checkbox means all acceptance gates
 
-Apply [prototype upstream conformance and completion](../agent-operations/prototype-upstream-conformance.md) to every item and family. A missing capability remains implementation work: definition → neutral capability when needed → Base/family prototype → real consumer → exact-revision evidence. Platform-specific component substitutes do not close an item.
-
 1. Complete governed semantic contract and explicit negative boundaries; no simplified interim version marked done
 
 2. Final Base identities mapped atom-by-atom to Shadcn, Neobrutalism (package brutalist), Bootstrap 2.3.2 and Liquid Glass
@@ -170,7 +168,7 @@ Every final Base atomic identity and its Shadcn/Neobrutalism/Bootstrap2.3.2/Liqu
 
 Two coexisting intents are required: explicit Liquid Glass uses a self-implemented effect; ordinary adaptive native blur prefers the actual system/version native mechanism. Do not silently substitute them. Govern sampling, ownership, performance and accessibility/capability fallback; Apple native effects do not discharge the explicit self-implemented intent.
 
-The structured ledger has 304 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
+The structured ledger has 352 required GPUI Base-identity × design-family cells. They remain unassessed/pending until exact implementation and native evidence are mapped; existing code is not erased and missing code is not marked not-applicable.
 
 ## Previous work remains equal priority
 
@@ -252,6 +250,10 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-DIALOG-MASK | P-SHADCN-DIALOG-MASK | P-BRUTALIST-DIALOG-MASK | required missing | required missing |
 | P-BASE-DIALOG-TITLE | P-SHADCN-DIALOG-TITLE | P-BRUTALIST-DIALOG-TITLE | required missing | required missing |
 | P-BASE-DIALOG-TRIGGER | P-SHADCN-DIALOG-TRIGGER | P-BRUTALIST-DIALOG-TRIGGER | required missing | required missing |
+| P-BASE-DRAWER-ACCEPTED-SIDE | required missing | required missing | required missing | required missing |
+| P-BASE-DRAWER-FOOTER | P-SHADCN-DRAWER-FOOTER | required missing | required missing | required missing |
+| P-BASE-DRAWER-HEADER | P-SHADCN-DRAWER-HEADER | required missing | required missing | required missing |
+| P-BASE-DRAWER-SCROLL | required missing | required missing | required missing | required missing |
 | P-BASE-DROPDOWN-MENU | P-SHADCN-DROPDOWN-MENU | P-BRUTALIST-DROPDOWN-MENU | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-CONTENT | P-SHADCN-DROPDOWN-MENU-CONTENT | P-BRUTALIST-DROPDOWN-MENU-CONTENT | required missing | required missing |
 | P-BASE-DROPDOWN-MENU-GROUP | required missing | required missing | required missing | required missing |
@@ -266,11 +268,14 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-FIELD-ERROR | P-SHADCN-FIELD-ERROR | P-BRUTALIST-FIELD-ERROR | P-BOOTSTRAP-2-3-2-FIELD-ERROR | P-LIQUID-GLASS-FIELD-ERROR |
 | P-BASE-FIELD-LABEL | P-SHADCN-FIELD-LABEL | P-BRUTALIST-FIELD-LABEL | P-BOOTSTRAP-2-3-2-FIELD-LABEL | P-LIQUID-GLASS-FIELD-LABEL |
 | P-BASE-FIELD-VALIDITY | P-SHADCN-FIELD-VALIDITY | P-BRUTALIST-FIELD-VALIDITY | P-BOOTSTRAP-2-3-2-FIELD-VALIDITY | P-LIQUID-GLASS-FIELD-VALIDITY |
+| P-BASE-FIELDSET | P-SHADCN-FIELDSET | P-BRUTALIST-FIELDSET | P-BOOTSTRAP-2-3-2-FIELDSET | P-LIQUID-GLASS-FIELDSET |
+| P-BASE-FIELDSET-DESCRIPTION | P-SHADCN-FIELDSET-DESCRIPTION | P-BRUTALIST-FIELDSET-DESCRIPTION | P-BOOTSTRAP-2-3-2-FIELDSET-DESCRIPTION | P-LIQUID-GLASS-FIELDSET-DESCRIPTION |
+| P-BASE-FIELDSET-LEGEND | P-SHADCN-FIELDSET-LEGEND | P-BRUTALIST-FIELDSET-LEGEND | P-BOOTSTRAP-2-3-2-FIELDSET-LEGEND | P-LIQUID-GLASS-FIELDSET-LEGEND |
 | P-BASE-HOVER-CARD | P-SHADCN-HOVER-CARD | P-BRUTALIST-HOVER-CARD | required missing | required missing |
 | P-BASE-HOVER-CARD-CONTENT | P-SHADCN-HOVER-CARD-CONTENT | P-BRUTALIST-HOVER-CARD-CONTENT | required missing | required missing |
 | P-BASE-HOVER-CARD-TRIGGER | P-SHADCN-HOVER-CARD-TRIGGER | P-BRUTALIST-HOVER-CARD-TRIGGER | required missing | required missing |
 | P-BASE-IMAGE | required missing | required missing | required missing | required missing |
-| P-BASE-INPUT | P-SHADCN-INPUT | required missing | P-BOOTSTRAP-2-3-2-INPUT | required missing |
+| P-BASE-INPUT | P-SHADCN-INPUT | P-BRUTALIST-INPUT | P-BOOTSTRAP-2-3-2-INPUT | required missing |
 | P-BASE-LABEL | P-SHADCN-LABEL | P-BRUTALIST-LABEL | P-BOOTSTRAP-2-3-2-LABEL | P-LIQUID-GLASS-LABEL |
 | P-BASE-LIVE-REGION | required missing | required missing | required missing | required missing |
 | P-BASE-RADIO-GROUP | P-SHADCN-RADIO-GROUP | required missing | required missing | required missing |
@@ -281,11 +286,16 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-SCROLL-AREA-THUMB | P-SHADCN-SCROLL-AREA-THUMB | P-BRUTALIST-SCROLL-AREA-THUMB | required missing | required missing |
 | P-BASE-SCROLL-AREA-VIEWPORT | P-SHADCN-SCROLL-AREA-VIEWPORT | P-BRUTALIST-SCROLL-AREA-VIEWPORT | required missing | required missing |
 | P-BASE-SELECT | P-SHADCN-SELECT | P-BRUTALIST-SELECT | P-BOOTSTRAP-2-3-2-SELECT | P-LIQUID-GLASS-SELECT |
+| P-BASE-SELECT-ALIGNMENT-PARTS | required missing | required missing | required missing | required missing |
 | P-BASE-SELECT-CONTENT | P-SHADCN-SELECT-CONTENT | P-BRUTALIST-SELECT-CONTENT | P-BOOTSTRAP-2-3-2-SELECT-CONTENT | P-LIQUID-GLASS-SELECT-CONTENT |
 | P-BASE-SELECT-ITEM | P-SHADCN-SELECT-ITEM | P-BRUTALIST-SELECT-ITEM | P-BOOTSTRAP-2-3-2-SELECT-ITEM | P-LIQUID-GLASS-SELECT-ITEM |
+| P-BASE-SELECT-STRUCTURAL-PARTS | P-SHADCN-SELECT-STRUCTURAL-PARTS | required missing | required missing | required missing |
 | P-BASE-SELECT-TRIGGER | P-SHADCN-SELECT-TRIGGER | P-BRUTALIST-SELECT-TRIGGER | P-BOOTSTRAP-2-3-2-SELECT-TRIGGER | P-LIQUID-GLASS-SELECT-TRIGGER |
 | P-BASE-SELECT-VALUE | P-SHADCN-SELECT-VALUE | P-BRUTALIST-SELECT-VALUE | P-BOOTSTRAP-2-3-2-SELECT-VALUE | P-LIQUID-GLASS-SELECT-VALUE |
 | P-BASE-SEPARATOR | P-SHADCN-SEPARATOR | P-BRUTALIST-SEPARATOR | P-BOOTSTRAP-2-3-2-SEPARATOR | required missing |
+| P-BASE-SLIDER-FIELD-THUMB | required missing | required missing | required missing | required missing |
+| P-BASE-SLIDER-THUMB | required missing | required missing | required missing | required missing |
+| P-BASE-SLIDER-VALUES | required missing | required missing | required missing | required missing |
 | P-BASE-SURFACE | P-SHADCN-SURFACE | P-BRUTALIST-SURFACE | P-BOOTSTRAP-2-3-2-SURFACE | P-LIQUID-GLASS-SURFACE |
 | P-BASE-SWITCH | P-SHADCN-SWITCH | P-BRUTALIST-SWITCH | P-BOOTSTRAP-2-3-2-SWITCH | required missing |
 | P-BASE-SWITCH-THUMB | P-SHADCN-SWITCH-THUMB | P-BRUTALIST-SWITCH-THUMB | P-BOOTSTRAP-2-3-2-SWITCH-THUMB | required missing |
@@ -301,7 +311,7 @@ Each cell below is required. An existing draft inheritance mapping is source evi
 | P-BASE-TABS-TRIGGER | P-SHADCN-TABS-TRIGGER | P-BRUTALIST-TABS-TRIGGER | P-BOOTSTRAP-2-3-2-TABS-TRIGGER | P-LIQUID-GLASS-TABS-TRIGGER |
 | P-BASE-TEXT | P-SHADCN-TEXT | P-BRUTALIST-TEXT | P-BOOTSTRAP-2-3-2-TEXT | P-LIQUID-GLASS-TEXT |
 | P-BASE-TEXTAREA | P-SHADCN-TEXTAREA | P-BRUTALIST-TEXTAREA | P-BOOTSTRAP-2-3-2-TEXTAREA | required missing |
-| P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | P-BOOTSTRAP-2-3-2-TOGGLE | required missing |
+| P-BASE-TOGGLE | P-SHADCN-TOGGLE | P-BRUTALIST-TOGGLE | P-BOOTSTRAP-2-3-2-TOGGLE | P-LIQUID-GLASS-TOGGLE |
 | P-BASE-TOGGLE-GROUP | P-SHADCN-TOGGLE-GROUP | P-BRUTALIST-TOGGLE-GROUP | P-BOOTSTRAP-2-3-2-TOGGLE-GROUP | P-LIQUID-GLASS-TOGGLE-GROUP |
 | P-BASE-TOOLTIP | P-SHADCN-TOOLTIP | P-BRUTALIST-TOOLTIP | required missing | required missing |
 | P-BASE-TOOLTIP-CONTENT | P-SHADCN-TOOLTIP-CONTENT | P-BRUTALIST-TOOLTIP-CONTENT | required missing | required missing |
@@ -327,5 +337,4 @@ Two coexisting intents are required: explicit Liquid Glass uses a self-implement
 
 Bootstrap and Liquid Glass receive complete source/dist/type/package/consumer readiness in this task. Existing private flags are not a permanent exemption. Inspect release workflows before changing flags/exports; do not implicitly trigger registry publishing. Actual registry release or new credentials remain separately gated.
 
-Agent: dot  
-ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot

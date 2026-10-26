@@ -3,6 +3,8 @@ type: test
 title: Field multiline composition regression evidence
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The mapped synthetic WC regressions cover opt-in composition and editor continuity, not native editing, assistive technology or complete cross-runtime behavior; the test entity remains draft pending that evidence.
 summary: Synthetic WC coverage is not native input, assistive-technology or complete visual acceptance.
 cases:
   - id: T-FIELD-TEXTAREA-0001-CASE-COMPOSITION

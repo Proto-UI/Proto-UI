@@ -12,6 +12,7 @@ import {
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
+import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
   it('projects only the named Rhea/Luma radii and secondary hover mix', () => {
@@ -43,6 +44,13 @@ describe('proto style css renderer', () => {
     const theme = renderPrefixedThemeCss(':root { --radius: 0.625rem; }');
     expect(theme).toContain('--pui-radius-2xl: calc(var(--pui-radius) + 8px);');
     expect(theme).toContain('--pui-radius-4xl: calc(var(--pui-radius) + 16px);');
+
+    const selectionPaint = renderPrefixedThemeCss(SHADCN_THEME_PAINT_CSS, {
+      variableDeclarations: SHADCN_THEME_VARIABLES_CSS,
+    });
+    expect(selectionPaint).toContain('background-color: var(--pui-selection);');
+    expect(selectionPaint).toContain('color: var(--pui-selection-foreground);');
+    expect(selectionPaint).not.toContain('--pui-selection:');
   });
 
   it('renders the finite 3px corner token without admitting arbitrary radius CSS', () => {

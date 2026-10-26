@@ -112,8 +112,6 @@ openQuestions:
 
 
     blocks: [shadcn checkbox parity roadmap]
-references:
-  contracts: [C-CHECKBOX-LABEL-COMPOSITION-0001]
 sources:
   - path: packages/prototypes/shadcn/src/checkbox/root.proto.ts
   - path: packages/prototypes/shadcn/src/checkbox/types.ts

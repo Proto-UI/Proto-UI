@@ -70,6 +70,14 @@ portable analyzable input → [future Compiler] → host artifacts
 
 `packages/compiler` 是已实现的**私有实验**，不是 official Compiler distribution。Manifest 保持 `private: true` 与 `protoUi.release.scan: false`。私有 Compiler CLI 与已发布的 `proto-ui` CLI 分开；publication、catalog admission 和长期 compatibility 需要各自的批准。
 
+### 当前 main 的浏览器边界与网站 inventory
+
+在当前 main `7181a93a5ec5cad43936a72e31d5477d5488733a` 中，与 PR #829 相关的 browser-host prototype 不存在：compiler package 没有当前 browser export、VM host、memory entry、browser build 或 WASM regression。PR #829 的源码进入的是 feature branch，不是这一 main revision；其 browser code 和 dependencies 属于历史证据，不是当前交付。
+
+Issue #817 仍保持 open。网站 demo inventory 只做 source-AST discovery 与 canonical private Node `compileFile` admission。它记录已挂载页面、静态 registration、source-located rejection 和 unresolved binding；它不会执行 WASM、运行 compiler preview、迁移页面，也不证明 browser isolation、security、performance、full parity 或 public Compiler。历史 #829 inventory 的各行（包括 rejection）继续作为带日期的 evidence 与 reconciliation obligation 保留，绝不是新的 pass。
+
+使用 `node --import tsx scripts/compiler/website-demo-inventory.mjs` 重新生成 inventory。Generator 在 `scripts/compiler/website-demo-migrations-829.json` 保留完整 immutable historical input，核对其 SHA-256，并输出 `internal/compiler/website-demo-migrations.json`。当前 input membership（包括范围内隐藏 source file）、bytes、已安装 parser dependency closure、HEAD/index provenance 与 dirty worktree binding 分别记录。修改、缺失或新增 input 会使原 binding 失效；unresolved 或 dynamic source address 继续显式保留，不会变成成功 admission。
+
 ### 已实现 profile 与 compatibility
 
 | 私有 profile | 实际运行的 target | Output dependency 边界 |

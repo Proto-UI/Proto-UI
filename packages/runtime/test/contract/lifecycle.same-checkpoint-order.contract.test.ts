@@ -9,7 +9,6 @@ import { createRuntimeSession, type RuntimeHost, type RuntimeLifecycleEvent } fr
 
 // C-LIFECYCLE-0002-I: definition-first authored same-checkpoint FIFO.
 // Agent: dot
-// ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
 const checkpoints = [
   'onCreated',
   'onMounted',

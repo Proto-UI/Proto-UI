@@ -7,6 +7,27 @@ const lowered = (tokens: string[], prefix: string) =>
   entriesFor(tokens).map((entry) => ({ ...entry, token: `${prefix}:${entry.token}` }));
 
 describe('bounded native width contribution', () => {
+  it.each(['replace', 'clear'] as const)(
+    'preserves an overlapping external boundary width on %s',
+    (withdrawal) => {
+      const host = document.createElement('x-width-owner');
+      const editor = document.createElement('input');
+      host.setAttribute('data-pui-style', 'consumer-host w-full');
+      let entries: readonly RootStyleEntry[] = entriesFor(['w-full']);
+      const applier = createNativeTextLayoutApplier(host, editor, () => entries);
+      applier.apply(['w-full']);
+      if (withdrawal === 'replace') {
+        entries = entriesFor(['opacity-50']);
+        applier.apply(['opacity-50']);
+      } else {
+        applier.clear();
+      }
+      expect(host.getAttribute('data-pui-style')).toBe('consumer-host w-full');
+      expect(editor.getAttribute('data-pui-style')).toBe(
+        withdrawal === 'replace' ? 'opacity-50' : null
+      );
+    }
+  );
   it('preserves canonical lowered conditions and retracts only its own width', () => {
     const host = document.createElement('x-width-owner');
     const editor = document.createElement('input');

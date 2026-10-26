@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { containsExpectedRingShadow } from './shadcn-textarea-shadow-oracle.mjs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -225,7 +226,9 @@ try {
     assert.equal(restored.activeIndex, index, 'native keyboard return must target the same editor');
   };
   // Resolve the actually applied ring variable through the browser's color parser,
-  // and verify that the painted box-shadow contains that exact computed color.
+  // Compare painted geometry/color against an independent box-shadow oracle.
+  // Color and shadow serialization can differ in their final decimal places;
+  // both sides of the paint comparison must use the same CSS property.
   async function observeState(kind, expectedBorder, expectedRing, wanted) {
     const attempt = { kind, wanted, expectedBorder, expectedRing };
     observations.push({ paintAttempt: attempt });
@@ -239,6 +242,7 @@ try {
           actual.style.color = c.getPropertyValue('--pui-ring-color');
           oracle.style.color = expected.ring || 'transparent';
           oracle.style.borderColor = expected.border;
+          oracle.style.boxShadow = `0 0 0 3px ${expected.ring || 'transparent'}`;
           document.body.append(actual, oracle);
           const result = {
             kind: expected.kind,
@@ -251,6 +255,7 @@ try {
             expectedBorder: getComputedStyle(oracle).borderColor,
             ringColor: getComputedStyle(actual).color,
             expectedRing: getComputedStyle(oracle).color,
+            expectedRingShadow: getComputedStyle(oracle).boxShadow,
             ringWidth: c.getPropertyValue('--pui-ring-width').trim(),
             shadow: c.boxShadow,
             opacity: c.opacity,
@@ -271,7 +276,8 @@ try {
         sampled.disabled === (wanted.mode === 'disabled') &&
         sampled.readOnly === (wanted.mode === 'readonly') &&
         (wanted.ringVisible
-          ? sampled.ringWidth === '3px' && sampled.shadow.includes(sampled.ringColor)
+          ? sampled.ringWidth === '3px' &&
+            containsExpectedRingShadow(sampled.shadow, sampled.expectedRingShadow)
           : sampled.ringWidth !== '3px') &&
         (wanted.mode !== 'disabled' || sampled.opacity === '0.5')
       )
@@ -341,7 +347,7 @@ try {
               if (focused || (invalid && style === 'rhea')) {
                 assert.equal(observed.ringWidth, '3px');
                 assert(
-                  observed.shadow.includes(observed.ringColor),
+                  containsExpectedRingShadow(observed.shadow, observed.expectedRingShadow),
                   `${kind}: actual painted ring color`
                 );
               } else assert.notEqual(observed.ringWidth, '3px');
@@ -370,7 +376,7 @@ try {
                 assert.equal(cleared.nativeFocus, true);
                 assert.equal(cleared.ringWidth, '3px');
                 assert(
-                  cleared.shadow.includes(cleared.ringColor),
+                  containsExpectedRingShadow(cleared.shadow, cleared.expectedRingShadow),
                   `${kind}: restored painted focus ring`
                 );
                 observations.push({ cleared });

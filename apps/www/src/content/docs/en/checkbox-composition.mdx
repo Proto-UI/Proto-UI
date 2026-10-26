@@ -1,0 +1,42 @@
+---
+title: Recommended Checkbox and Label Composition
+description: Reuse the same public Checkbox, Indicator and independent Label, composing the short name through an instance association instead of adding page-level click forwarding.
+---
+
+This recommendation is currently a draft. A source entry point is not the same as a published package, a complete installation closure, or acceptance by every host. Installation delivery is tracked by #1000; this slice #998 does not migrate the homepage or the demo, and does not change the Checkbox anatomy.
+
+## Reuse the same atomic definitions
+
+`@proto.ui/prototypes-shadcn/checkbox` exports `shadcnCheckboxLabelComposition` and `createShadcnCheckboxLabelComposition()`. The public recommendation carries the real Root, Indicator and Label definitions, their relations and the short-name default options. The Indicator sits inside the Root, and the Label is a sibling of the Root. Indicator replacement still follows the existing Checkbox preset; this is not a "label slot mode". The existing raw atom exports stay unchanged.
+
+Only the containers and the Label defaults created by the helper are frozen. The referenced prototype and the shared preset keep their original identity and mutability; this is not a deep-freeze promise, and they are not modified.
+
+Create the instance once when a composition mounts, and retain it across that host's re-renders. Do not place it in a module global shared by several controls, and do not create a new association on every render.
+
+The following is an adapter-neutral input sketch, not a complete runnable host example. Complete host examples, native input, terminal disposal and packed/install acceptance are still unfinished.
+
+```ts
+import { createShadcnCheckboxLabelComposition } from '@proto.ui/prototypes-shadcn/checkbox';
+
+const pair = createShadcnCheckboxLabelComposition();
+// Adapt pair.recipe.parts.control / indicator / label using the chosen adapter.
+// Root input: pair.control.instanceAssociations
+// Label input: pair.label.instanceAssociations and pair.label.props
+// Checkbox props and outward handlers remain owned by the existing Checkbox.
+```
+
+React, Vue and Vue2 pass the association through the existing `instanceAssociations` input, and pass `pair.label.props` as the Label props. The Web Component uses the public `setElementAssociations(element, ...)`, and Label props are provided through `setElementProps`. Do not put an opaque reference into Props, an HTML attribute or JSON. Binding and teardown are managed by the existing adapter; the constructor installs no listener and offers no fake dispose API. When switching to a new association, update the Root and the Label together.
+
+## Rich content is not arbitrary interactive content
+
+The Label uses the children/slots the host already supports. It may contain legal emphasis text, icons explicitly marked as decorative and other non-interactive naming content, and is not limited to a string. It offers no `asChild` and no alternative slot protocol, and it does not correct invalid content automatically. The name comes from the actual Label; do not add a hidden duplicate name.
+
+Standalone actions such as links, Buttons and editors belong in an adjacent content area. If embedded, they must still comply with the host content model and the existing interactive-descendant exclusion rules, and a click must not also toggle the Checkbox. Another Label, or an unrelated labelable control, is not unrestricted content. Long descriptions and error messages should be separated from the short name and keep their selectable text; only claim that they are read as a description when an actual description relation is established.
+
+A short actionable label enables both naming and activation by default, and the Checkbox keeps ownership of checked, mixed, disabled, controlled and focus behavior. When naming-only is needed, use the public raw Label to turn activation off explicitly instead of modifying the shared recipe. No new Checkbox readOnly is added.
+
+## Align with upstream and the acceptance boundary
+
+The comparison baseline remains the New York Checkbox at shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc`. Upstream wraps the Root and the Indicator, and composes the name through an independent Label, without a built-in fixed label text. This is not a migration to the current Base UI implementation.
+
+Constructor unit tests, synthetic host events, real browser input and installed behavior are different kinds of evidence. An old screenshot cannot prove a new commit, and the presence of code cannot prove keyboard, focus, assistive-technology name computation or pixel parity. Consistent consumption of the homepage, the demo and the installation entry still needs its own follow-up slices.

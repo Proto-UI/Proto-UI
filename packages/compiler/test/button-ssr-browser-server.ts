@@ -123,8 +123,8 @@ export async function startButtonSsrBrowserServer(
         );
         return mutation ? mutateButtonCarrier(result.html, mutation) : result.html;
       });
-      // Page geometry is harness input. All Button styling is compiled cssText.
-      const html = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><title>Compiler Button SSR evidence</title><style data-pui-ssr-css="${compiled.provenance.artifacts.environment}">${compiled.environmentCssText}</style><style data-pui-ssr-css="${compiled.provenance.cssSha256}">${compiled.cssText}</style><style>body{margin:32px;background:#eee;font-family:Arial,sans-serif}main{display:flex;gap:24px;align-items:start}#selection{margin-top:32px}</style></head><body><main>${instances.join('')}</main><p id="selection">Selection outside the server Button must remain intact.</p><script defer src="/client.js"></script></body></html>`;
+      // Page geometry and theme paint are consumer inputs; Button styling is compiled cssText.
+      const html = `<!doctype html><html lang="en" data-theme="light"><head><meta charset="utf-8"><title>Compiler Button SSR evidence</title><style data-pui-ssr-css="${compiled.provenance.artifacts.environment}">${compiled.environmentCssText}</style><style data-pui-ssr-consumer-theme-paint="${compiled.provenance.consumerThemePaint.sha256}">${compiled.consumerThemePaintCssText}</style><style data-pui-ssr-css="${compiled.provenance.cssSha256}">${compiled.cssText}</style><style>body{margin:32px;background:#eee;font-family:Arial,sans-serif}main{display:flex;gap:24px;align-items:start}#selection{margin-top:32px}</style></head><body><main>${instances.join('')}</main><p id="selection">Selection outside the server Button must remain intact.</p><script defer src="/client.js"></script></body></html>`;
       await writeFile(path.join(evidenceDir, `request-${current}.html`), html);
       requests.push({
         path: url.pathname + url.search,
@@ -156,6 +156,10 @@ export async function startButtonSsrBrowserServer(
     await writeFile(
       path.join(evidenceDir, 'generated-environment.css'),
       compiled.environmentCssText
+    );
+    await writeFile(
+      path.join(evidenceDir, 'consumer-theme-paint.css'),
+      compiled.consumerThemePaintCssText
     );
     await writeFile(path.join(evidenceDir, 'generated-client.js'), compiled.clientCode);
     await writeFile(

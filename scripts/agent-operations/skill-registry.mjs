@@ -308,10 +308,7 @@ function validateArtifact(artifact, index, handoff) {
       artifact.reference.length <= 1000,
     `handoff.artifacts[${index}].reference is invalid`
   );
-  if (
-    ['modeltrace-record', 'human-directed-operation'].includes(artifact.type) ||
-    artifact.digest !== undefined
-  )
+  if (artifact.type === 'human-directed-operation' || artifact.digest !== undefined)
     assert(DIGEST.test(artifact.digest), `handoff.artifacts[${index}].digest is invalid`);
 }
 

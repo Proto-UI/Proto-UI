@@ -14,7 +14,6 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { readPublishedReviewPacket } from '../published-review-packet.mjs';
-import { modelTraceFixture, writeModelTraceFixture } from './fixtures/modeltrace.mjs';
 
 import {
   MAX_PUBLISHED_REVIEW_PACKET_BYTES,
@@ -40,7 +39,6 @@ import {
 
 function merge({ input, packet, publishedPacket, ...overrides }) {
   return authorizePullRequestMerge({
-    ...modelTraceFixture(input.repositoryId),
     packet,
     publishedPacket,
     input,
@@ -63,7 +61,6 @@ function merge({ input, packet, publishedPacket, ...overrides }) {
 
 function submit(input, packet, priorPacket) {
   return authorizeReviewSubmission({
-    ...modelTraceFixture(input.repositoryId),
     packet,
     input,
     liveInput: structuredClone(input),
@@ -399,7 +396,7 @@ const incompletePublicationBodies = [
   ['unrelated HTML comment', (body) => `${body}\n<!-- Unreviewed addition -->`],
 ];
 for (const [name, changeBody] of incompletePublicationBodies) {
-  test(`publication credit and duplicate detection require rendered disclosure: ${name}`, () => {
+  test(`publication credit and duplicate detection require the rendered review body: ${name}`, () => {
     const fixture = target();
     const original = structuredClone(fixture.publishedPacket);
     fixture.input.reviews[0].body = changeBody(fixture.body, fixture.publishedPacket);
@@ -415,7 +412,7 @@ for (const [name, changeBody] of incompletePublicationBodies) {
   });
 }
 
-test('rendered publication tolerates CRLF and surrounding whitespace without losing disclosure', () => {
+test('rendered publication tolerates CRLF and surrounding whitespace without changing its body', () => {
   const fixture = target();
   fixture.input.reviews[0].body = ` \r\n${fixture.body.replaceAll('\n', '\r\n')}\r\n `;
   resealCurrentPacket(fixture);
@@ -683,7 +680,6 @@ test('merge CLI rejects missing, oversized, and unbound originals before any Git
   try {
     const fixture = target();
     const root = fileURLToPath(new URL('../../..', import.meta.url));
-    const identity = writeModelTraceFixture(directory, fixture.input.repositoryId);
     const inputPath = path.join(directory, 'input.json');
     const packetPath = path.join(directory, 'packet.json');
     const publishedPath = path.join(directory, 'published.json');
@@ -728,7 +724,6 @@ test('merge CLI rejects missing, oversized, and unbound originals before any Git
             digest: `sha256:${computeReviewPacketDigest(fixture.publishedPacket)}`,
           },
           { type: 'mutation-authorization', reference: 'explicit-current-user' },
-          identity.artifact,
         ],
         humanGates: [],
         notes: [],
@@ -772,10 +767,6 @@ test('merge CLI rejects missing, oversized, and unbound originals before any Git
           handoffPath,
           '--authorization',
           'explicit-current-user',
-          '--record',
-          identity.recordPath,
-          '--context',
-          identity.contextPath,
           ...publicationArgs,
         ],
         {

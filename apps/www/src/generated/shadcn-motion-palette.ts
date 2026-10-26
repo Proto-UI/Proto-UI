@@ -1,5 +1,5 @@
 /**
- * Generated from packages/cli/src/legacy/type.ts#SHADCN_THEME_CSS.
+ * Generated from packages/cli/src/legacy/type.ts#SHADCN_THEME_VARIABLES_CSS.
  * Run: node --import tsx scripts/styles/generate-shadcn-motion-palette.ts [--check]
  * Do not edit by hand. sourceHash hashes the exact extracted CSS literal.
  * RGBA is non-premultiplied, gamma-encoded sRGB in [0,1], with channel clipping.
@@ -23,7 +23,7 @@ export type ShadcnMotionPaletteMode = {
   >;
 };
 export const SHADCN_MOTION_PALETTE = {
-  'sourceHash': 'sha256:060a6a5fed484bc11bdd1aba5d13d2643aa537197a242e71c678426f4002b057',
+  'sourceHash': 'sha256:8bb5d047e6c6aff5ffe8c7a71302f2343b51320c523edf09de8d929c34d624e5',
   'light': {
     'colors': {
       'accent': [0.960586783, 0.960587058, 0.960586891, 1],
@@ -153,7 +153,7 @@ export const SHADCN_MOTION_PALETTE = {
       'secondary': [0.149382066, 0.149382078, 0.14938211, 1],
       'secondary-foreground': [0.98025598, 0.98025598, 0.98025598, 1],
       'selection': [0.898160632, 0.898160666, 0.898160753, 1],
-      'selection-foreground': [0.09052732, 0.090527427, 0.090527399, 1],
+      'selection-foreground': [0.090527401, 0.090527401, 0.090527401, 1],
       'sidebar': [0.09052732, 0.090527427, 0.090527399, 1],
       'sidebar-accent': [0.149382066, 0.149382078, 0.14938211, 1],
       'sidebar-accent-foreground': [0.98025598, 0.98025598, 0.98025598, 1],
@@ -190,7 +190,7 @@ export const SHADCN_MOTION_PALETTE = {
       'secondary': 'lab(15.204% 0 -0.00000596046)',
       'secondary-foreground': 'lab(98.26% 0 0)',
       'selection': 'lab(90.952% 0 -0.0000119209)',
-      'selection-foreground': 'lab(7.78201% -0.0000149012 0)',
+      'selection-foreground': 'lab(7.78201% 0 0)',
       'sidebar': 'lab(7.78201% -0.0000149012 0)',
       'sidebar-accent': 'lab(15.204% 0 -0.00000596046)',
       'sidebar-accent-foreground': 'lab(98.26% 0 0)',

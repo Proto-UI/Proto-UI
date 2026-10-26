@@ -7,6 +7,7 @@ on:
       - 'apps/www/scripts/capture-whitepaper-diagram-evidence.mjs'
       - 'apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs'
       - 'scripts/docs/test/whitepaper-diagram-evidence*.test.mjs'
+      - 'scripts/docs/test/generated-whitepaper-diagrams.test.mjs'
       - 'apps/www/scripts/generate-whitepaper-diagrams.mjs'
       - 'apps/www/scripts/whitepaper-diagram-fonts.json'
       - 'apps/www/public/diagrams/**'

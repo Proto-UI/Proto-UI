@@ -4,7 +4,7 @@ title: Recommended Checkbox Label construction evidence
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Candidate construction and synthetic host tests are recorded without a passing execution claim; native input and installed closure remain separate admission debt.
+  en: Construction and synthetic host tests passed locally on the 2026-10-26 integration candidate; native input, terminal disposal and installed closure remain separate admission debt, so this entity remains draft.
 summary: Public identity, instance isolation and existing host behavior are checked without equating source construction to native acceptance.
 cases:
   - id: T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-CONSTRUCTION
@@ -23,7 +23,7 @@ cases:
 implementations:
   - id: checkbox-label-construction-and-host
     kind: adapter-test
-    status: planned
+    status: passing
     path: packages/prototypes/shadcn/test/checkbox-label-composition.test.ts
     required: true
     consumesCases:
@@ -32,7 +32,8 @@ implementations:
         T-CHECKBOX-LABEL-COMPOSITION-0001-CASE-HOST,
       ]
     notes:
-      - Candidate test source exists; local runner result and inherited failures are recorded in the same repair PR diagnosis. Planned means no passing evidence is asserted.
+      - The 2026-10-25 runner failure remains historical evidence. On 2026-10-26 the local integration candidate collected and passed all six construction/host cases, alongside twelve Checkbox atom cases; see the dated continuation in internal/coverage-matrices/composition-delivery-parity.md.
+      - Test source SHA256 is 1c05565353e516d071b6e6c937bc9c0ec9fc41472e86e15e46cc028b8b9aa53e. Execution used the uncommitted integration of head be2cc64b5e1ddf27fd9bcd06b1980ae62cdf39a5 and parent 7c541478b7f27242849bf03b8ece192164d8e6f9, not a published exact-head CI result.
       - Detach coverage is not terminal runtime disposal, native input, computed accessibility-tree name or packed/install proof.
 verifies:
   contracts: [C-CHECKBOX-LABEL-COMPOSITION-0001]
