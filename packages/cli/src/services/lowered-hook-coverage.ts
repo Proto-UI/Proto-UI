@@ -2,6 +2,20 @@ import { readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import ts from 'typescript';
 
+import {
+  createHookSourceSummaryContext,
+  createSourceGraphVersionTracker,
+  hookSourceCallMutation,
+  mutateSourceGraph,
+  sourceMembersOneProducer,
+  sourceMembersProven,
+  type HookSourceState,
+  type HookSourceSummaryContext,
+  type HookSourceValue,
+  type SourceGraphVersionTracker,
+} from './hook-source-summary.js';
+import { loweredHookStates } from './prototype-style-tokens.js';
+
 /**
  * Mirrors `OFFICIAL_EXPOSED_STATE_NAMES` in `@proto.ui/module-expose-state-web`,
  * which the Web projection maps before it normalizes anything.
@@ -24,6 +38,8 @@ const OFFICIAL_EXPOSED_STATE_NAMES: Readonly<Record<string, string>> = Object.fr
 export type HookStateUsage = {
   hook: string;
   state: string;
+  /** Non-enumerable source identity attached by the scanner for bounded gates. */
+  provenance?: HookSourceState;
 };
 
 export type UnresolvedStateRead = {
@@ -74,16 +90,56 @@ export type RuleStateScan = {
   exposedLocals: ExposedLocalUsage[];
 };
 
-type LocalStateBinding = { kind: 'localState'; declaredAs: string | null; exposedAs?: string };
+type LocalStateBinding = {
+  kind: 'localState';
+  declaredAs: string | null;
+  exposedAs?: string | null;
+};
 
 type Binding =
-  | { kind: 'hookResult'; hook: string }
-  | { kind: 'handleBag'; hook: string }
-  | { kind: 'handle'; hook: string; state: string }
+  | {
+      kind: 'hookResult';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  /** A callable result member, such as `result.getState`, kept as an alias. */
+  | {
+      kind: 'callable';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  | {
+      kind: 'handleBag';
+      hook: string;
+      sourceValue?: HookSourceValue;
+      sourceAlternatives?: HookSourceValue[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
+  | {
+      kind: 'handle';
+      hook: string;
+      state: string;
+      sourceState?: HookSourceState;
+      sourceAlternatives?: HookSourceState[];
+      sourceAlternativeHooks?: string[];
+      sourceAuthority?: boolean;
+      bindingNode?: ts.Node;
+    }
   /** `def.state.bool(...)` — owned by the prototype, not borrowed from a hook. */
   | (LocalStateBinding & {
       /** Handles the name may still hold because a write may be skipped. */
       alternatives?: LocalStateBinding[];
+      bindingNode?: ts.Node;
     })
   /** A value a `tw(...)` argument may name, resolved where it was declared. */
   | {
@@ -98,17 +154,42 @@ type Binding =
        * resolve, so its member set is known to be incomplete.
        */
       opaque?: boolean;
+      bindingNode?: ts.Node;
     }
   /** A named import; only a relative one is something the extractor follows. */
-  | { kind: 'tokenImport'; specifier: string; imported: string; from?: string }
+  | {
+      kind: 'tokenImport';
+      specifier: string;
+      imported: string;
+      from?: string;
+      bindingNode?: ts.Node;
+    }
+  /**
+   * A default import. The imported value is the module's default export, so
+   * the local name stands for whatever that export holds and its spelling
+   * proves no built-in hook.
+   */
+  | {
+      kind: 'defaultImport';
+      specifier: string;
+      from?: string;
+      bindingNode?: ts.Node;
+    }
   /** A parameter: it shadows an outer name and its origin is not recoverable. */
-  | { kind: 'opaque' };
+  | { kind: 'opaque'; sourceAuthority?: boolean; bindingNode?: ts.Node };
 
 type Scope = {
   parent: Scope | null;
   bindings: Map<string, Binding>;
   /** The node that created this scope, used to resolve exposures lexically. */
   node: ts.Node | null;
+  sourceSummary: HookSourceSummaryContext;
+  /**
+   * The versions of the containers this scope's owner holds. A scope chain
+   * shares one tracker, so a helper inside an owner shares its owner's
+   * containers, while an authored setup - its own owner - starts a new one.
+   */
+  versions: SourceGraphVersionTracker;
 };
 
 function lookup(scope: Scope | null, name: string): Binding | null {
@@ -124,7 +205,10 @@ function lookup(scope: Scope | null, name: string): Binding | null {
  * statically executes exactly as written; anything else has to keep whatever
  * the name held before it.
  */
-function isConditionallyReached(node: ts.Node): boolean {
+function isConditionallyReached(
+  node: ts.Node,
+  definitelyReachedLogicalAssignments?: WeakSet<ts.Node>
+): boolean {
   for (
     let child: ts.Node = node, parent = node.parent;
     parent;
@@ -169,8 +253,16 @@ function isConditionallyReached(node: ts.Node): boolean {
       const shortCircuits =
         operator === ts.SyntaxKind.AmpersandAmpersandToken ||
         operator === ts.SyntaxKind.BarBarToken ||
-        operator === ts.SyntaxKind.QuestionQuestionToken;
-      if (shortCircuits && child === parent.right) return true;
+        operator === ts.SyntaxKind.QuestionQuestionToken ||
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
+      if (
+        shortCircuits &&
+        child === parent.right &&
+        !definitelyReachedLogicalAssignments?.has(parent)
+      )
+        return true;
     }
   }
   return false;
@@ -349,12 +441,17 @@ function introducesScope(node: ts.Node): boolean {
  */
 export function scanRuleStateReads(
   sourceText: string,
-  fileName = 'source.proto.ts'
+  fileName = 'source.proto.ts',
+  suppliedSummary?: HookSourceSummaryContext
 ): RuleStateScan {
   const source = ts.createSourceFile(fileName, sourceText, ts.ScriptTarget.Latest, true);
+  const sourceSummary = suppliedSummary ?? createHookSourceSummaryContext();
+  sourceSummary.registerSource(source);
+
   const usages: HookStateUsage[] = [];
   const unresolved: UnresolvedStateRead[] = [];
   const exposedLocals: ExposedLocalUsage[] = [];
+  let hasObjectPrototypeEscape = false;
 
   /**
    * `def.expose.state('hidden', hidden)` by handle name. The Web runtime turns
@@ -385,13 +482,548 @@ export function scanRuleStateReads(
       ? unwrap(node.expression)
       : node;
 
-  const exposedKeys = new Map<ts.Node, Map<string, string>>();
+  const inspectPrototype = (node: ts.Node): void => {
+    if (
+      ts.isPropertyAccessExpression(node) &&
+      node.name.text === 'prototype' &&
+      (() => {
+        const owner = unwrap(node.expression);
+        if (!ts.isIdentifier(owner)) return false;
+        return owner.text === 'Object';
+      })()
+    ) {
+      hasObjectPrototypeEscape = true;
+      return;
+    }
+    ts.forEachChild(node, inspectPrototype);
+  };
+  inspectPrototype(source);
+
+  const sourceEnvironment = (scope: Scope): Map<string, HookSourceValue> => {
+    const environment = new Map<string, HookSourceValue>();
+    for (let current: Scope | null = scope; current; current = current.parent) {
+      for (const [name, binding] of current.bindings) {
+        if (environment.has(name)) continue;
+        // An imported producer/factory is resolved by the source summary's
+        // module graph. Marking it as an unknown local would shadow that
+        // admitted source identity before `resolve` can follow the import.
+        // Nearest authored locals still enter as unknown and therefore retain
+        // lexical-shadow protection.
+        if (binding.kind === 'tokenImport' || binding.kind === 'defaultImport') continue;
+        if (binding.kind === 'handle' && binding.sourceState) {
+          environment.set(name, { kind: 'state', state: binding.sourceState });
+        } else if ('sourceValue' in binding && binding.sourceValue) {
+          environment.set(name, binding.sourceValue);
+        } else {
+          // A nearest local/parameter that is not source-backed still shadows
+          // an outer producer. Omitting it would let summary resolution reach a
+          // stale same-name source value from an enclosing scope.
+          environment.set(name, { kind: 'unknown', reason: 'lexically shadowed' });
+        }
+      }
+    }
+    return environment;
+  };
+
+  const sourceValueHasProvenance = (value: HookSourceValue): boolean => {
+    if (value.kind === 'unknown') return false;
+    if (value.kind === 'state' || value.kind === 'result' || value.kind === 'callable') return true;
+    for (const member of value.members.values()) {
+      if (sourceValueHasProvenance(member)) return true;
+    }
+    return false;
+  };
+
+  const sourcePathHasProvenance = (
+    node: ts.Node,
+    scope: Scope,
+    resolved: { matched: boolean; value: HookSourceValue },
+    seen = new Set<ts.Node>()
+  ): boolean => {
+    if (sourceValueHasProvenance(resolved.value)) return true;
+    const expression = unwrap(node);
+    // Authority comes from the producer/path, not from whether this bucket
+    // currently contains a nonempty set of state handles.
+    if (ts.isIdentifier(expression)) {
+      const binding = lookup(scope, expression.text);
+      if (binding && 'sourceAuthority' in binding && binding.sourceAuthority === true) return true;
+    }
+    if (
+      ts.isCallExpression(expression) &&
+      scope.sourceSummary.isAuthoredProducerCall(expression, expression.getSourceFile())
+    )
+      return true;
+    if (seen.has(node)) return false;
+    seen.add(node);
+    const owner = ownerOf(node);
+    if (!owner) return false;
+    const parent = sourceResolve(owner, scope);
+    return parent.matched && sourcePathHasProvenance(owner, scope, parent, seen);
+  };
+
+  /**
+   * The producer call whose member the node reads, and the member it names.
+   *
+   * A producer hands the same container to every call, so the member a call
+   * reads is the member the container holds now.
+   */
+  function producerMemberRead(node: ts.Node): { owner: ts.CallExpression; key: string } | null {
+    const value = unwrap(node);
+    if (!ts.isPropertyAccessExpression(value) && !ts.isElementAccessExpression(value)) {
+      return null;
+    }
+    const owner = unwrap(value.expression);
+    if (!ts.isCallExpression(owner)) return null;
+    const key = memberNameOf(value);
+    if (key === null) return null;
+    return { owner, key };
+  }
+
+  /**
+   * The values a producer call's member holds, one per graph the container
+   * may hold now.
+   *
+   * The container may hold several graphs: a write that may not have run left
+   * the graph it replaced in place. The member is proven only when every
+   * graph proves it, so a graph whose member is unknown makes the member
+   * unknown - the newest graph alone is not the answer.
+   */
+  const producerMemberValues = (node: ts.Node, scope: Scope): HookSourceValue[] | null => {
+    const read = producerMemberRead(node);
+    if (!read) return null;
+    const container = sourceResolve(read.owner, scope);
+    if (!container.matched || container.value.kind !== 'object') return null;
+    const versions = scope.versions.versions(container.value);
+    const graphs = versions.length > 0 ? versions : [container.value];
+    // The values are the member's values, one per graph the container may
+    // hold, and not the graphs themselves: the member is what the read is
+    // about, and the other members of a graph say nothing about it.
+    const seen = new Set<HookSourceValue>();
+    const values: HookSourceValue[] = [];
+    for (const graph of graphs) {
+      // A graph that is not an object holds no members, so it contributes no
+      // member: the member is unknown, and the unknown alternative is kept.
+      const member = graph.kind === 'object' ? graph.members.get(read.key) : undefined;
+      if (!member) {
+        // A member no graph carries is an alternative of its own, so it is not
+        // deduped away.
+        const missing: HookSourceValue = { kind: 'unknown', reason: 'unknown member' };
+        values.push(missing);
+        continue;
+      }
+      // The same member in two graphs is one member: the graphs differ in
+      // other members, not in this one.
+      if (seen.has(member)) continue;
+      seen.add(member);
+      values.push(member);
+    }
+    return values;
+  };
+
+  const sourceResolve = (
+    node: ts.Node,
+    scope: Scope
+  ): { matched: boolean; value: HookSourceValue } => {
+    const value = unwrap(node);
+    if (ts.isCallExpression(value)) {
+      const callee = unwrap(value.expression);
+      const calleeIdentifier = ts.isIdentifier(callee) ? callee : null;
+      if (calleeIdentifier) {
+        const name = calleeIdentifier.text;
+        const binding = lookup(scope, name);
+        // A local callable alias (for example `const lookup = facts.getState!`)
+        // is resolved through the source environment. It is not a producer call,
+        // so the producer-binding identity fence must not reject it as a shadow.
+        if (
+          binding &&
+          binding.kind !== 'tokenImport' &&
+          binding.kind !== 'defaultImport' &&
+          binding.kind !== 'callable'
+        ) {
+          const bindingNode = binding.bindingNode;
+          const sourceIdentity = scope.sourceSummary as HookSourceSummaryContext & {
+            isSameSourceBinding?: (
+              node: ts.CallExpression,
+              source: ts.SourceFile,
+              bindingNode: ts.Node
+            ) => boolean;
+          };
+          const sameBinding =
+            bindingNode && typeof sourceIdentity.isSameSourceBinding === 'function'
+              ? sourceIdentity.isSameSourceBinding(value, node.getSourceFile(), bindingNode)
+              : false;
+          if (!sameBinding) {
+            return {
+              matched: true,
+              value: { kind: 'unknown', reason: 'lexically shadowed' } as const,
+            };
+          }
+        }
+      }
+    }
+    // A member of a producer call reads the container the producer handed
+    // out, and the container holds its current graph: the member a write
+    // replaced is the member the call reads. The declared projection is not
+    // what the container holds now.
+    const members = producerMemberValues(value, scope);
+    if (members) {
+      // A scalar consumer captures one value, not a live member expression.
+      // Only a single proven identity can be captured as a definite value;
+      // an unresolved alternative must remain unresolved after later writes.
+      if (members.length === 1) return { matched: true, value: members[0] };
+      return {
+        matched: true,
+        value: { kind: 'unknown', reason: 'ambiguous captured member' },
+      };
+    }
+    const resolved = scope.sourceSummary.resolve(node, source, sourceEnvironment(scope));
+    // A producer hands the same container to every call, so a copy that wrote
+    // to it is visible to a later resolution of that producer: the resolution
+    // advances to the version the container holds now.
+    if (resolved.value.kind === 'object') {
+      return { matched: resolved.matched, value: scope.versions.latest(resolved.value) };
+    }
+    return resolved;
+  };
+
+  const sourceResolveCandidates = (node: ts.Node, scope: Scope) => {
+    const primary = sourceResolve(node, scope);
+    if (primary.value.kind === 'unknown' && primary.value.reason === 'lexically shadowed') {
+      return [primary];
+    }
+    // A producer call's member is read from every graph the container may
+    // hold now, so the conditional alternative is carried too: the member is
+    // proven only when every graph proves it.
+    const members = producerMemberValues(node, scope);
+    if (members) return members.map((value) => ({ matched: true, value }));
+    const base = sourceEnvironment(scope);
+    const referenced = new Set<string>();
+    const collectReferenced = (current: ts.Node): void => {
+      if (ts.isIdentifier(current)) {
+        const parent = current.parent;
+        // A property name is not a lexical lookup. The receiver is the
+        // identifier whose source alternatives can affect this expression.
+        if (!(ts.isPropertyAccessExpression(parent) && parent.name === current)) {
+          referenced.add(current.text);
+        }
+      }
+      ts.forEachChild(current, collectReferenced);
+    };
+    collectReferenced(node);
+    let environments = [base];
+    const seen = new Set<string>();
+    for (let current: Scope | null = scope; current; current = current.parent) {
+      for (const [name, binding] of current.bindings) {
+        if (seen.has(name)) continue;
+        seen.add(name);
+        if (!referenced.has(name)) continue;
+        const candidates =
+          binding.kind === 'handle' && binding.sourceState
+            ? [
+                { kind: 'state', state: binding.sourceState } as HookSourceValue,
+                ...(binding.sourceAlternatives ?? []).map(
+                  (state) => ({ kind: 'state', state }) as HookSourceValue
+                ),
+              ]
+            : sourceBindingValues(binding);
+        if (candidates.length <= 1) continue;
+        environments = environments.flatMap((environment) =>
+          candidates.map((candidate) => {
+            const next = new Map(environment);
+            next.set(name, candidate);
+            return next;
+          })
+        );
+      }
+    }
+    const resolved = environments.map((environment) =>
+      scope.sourceSummary.resolve(node, source, environment)
+    );
+    // A container may hold several graphs: a write that may not have run left
+    // the graph it replaced in place, and a producer hands the same container
+    // to every call. Fan out over the versions the container may hold, before
+    // a newest-version normalization drops one of them.
+    const candidates: { matched: boolean; value: HookSourceValue }[] = [];
+    const byValue = new Map<HookSourceValue, { matched: boolean; value: HookSourceValue }>();
+    for (const candidate of resolved) {
+      if (candidate.value.kind !== 'object') {
+        candidates.push(candidate);
+        continue;
+      }
+      for (const version of scope.versions.versions(candidate.value)) {
+        // The same container is reached through several names, so the version
+        // is counted once.
+        const existing = byValue.get(version);
+        if (existing) {
+          if (candidate.matched) existing.matched = true;
+          continue;
+        }
+        const entry = { matched: candidate.matched, value: version };
+        byValue.set(version, entry);
+        candidates.push(entry);
+      }
+    }
+    return candidates;
+  };
+
+  /**
+   * The source-backed containers an expression may denote. A container is an
+   * object graph the source summary proved, so it carries the members a
+   * handle bag holds.
+   */
+  const sourceContainerValues = (expression: ts.Node, scope: Scope): HookSourceValue[] => {
+    const value = unwrap(expression);
+    if (ts.isConditionalExpression(value)) {
+      return [
+        ...sourceContainerValues(value.whenTrue, scope),
+        ...sourceContainerValues(value.whenFalse, scope),
+      ];
+    }
+    if (ts.isObjectLiteralExpression(value) || ts.isArrayLiteralExpression(value)) {
+      // A literal holds its containers inside; the literal itself denotes no
+      // container. Resolving it would expand the scope for every property,
+      // so the nested values are read instead.
+      const values: HookSourceValue[] = [];
+      const visit = (node: ts.Node): void => {
+        if (ts.isPropertyAssignment(node)) {
+          visit(node.initializer);
+          return;
+        }
+        if (ts.isShorthandPropertyAssignment(node)) {
+          visit(node.name);
+          return;
+        }
+        if (ts.isSpreadAssignment(node)) {
+          visit(node.expression);
+          return;
+        }
+        if (ts.isArrayLiteralExpression(node)) {
+          for (const element of node.elements) {
+            if (!ts.isOmittedExpression(element)) visit(element);
+          }
+          return;
+        }
+        if (
+          ts.isIdentifier(node) ||
+          ts.isPropertyAccessExpression(node) ||
+          ts.isElementAccessExpression(node)
+        ) {
+          values.push(...sourceContainerValues(node, scope));
+          return;
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(value);
+      return [...new Set(values)];
+    }
+    if (ts.isIdentifier(value)) {
+      // A name answers from its binding: the source-backed graph it holds, or
+      // nothing. Resolving the expression instead would expand the scope into
+      // one environment per candidate, for every call argument.
+      const binding = lookup(scope, value.text) ?? undefined;
+      return sourceBindingValues(binding).filter((candidate) => candidate.kind === 'object');
+    }
+    const owner = ownerOf(value);
+    const ownerName = owner ? unwrap(owner) : null;
+    if (ownerName && ts.isIdentifier(ownerName)) {
+      const binding = lookup(scope, ownerName.text) ?? undefined;
+      const candidates = sourceBindingValues(binding);
+      // A name that holds no proven source value cannot have a source-backed
+      // member either.
+      if (candidates.length === 0) return [];
+      // A member of a proven object graph is read from that graph, so the
+      // scope does not have to be expanded into one environment per candidate.
+      const key = memberNameOf(value);
+      if (key !== null && candidates.every((candidate) => candidate.kind === 'object')) {
+        const members = candidates.map((candidate) =>
+          candidate.kind === 'object' ? candidate.members.get(key) : undefined
+        );
+        return [...new Set(members.filter((member) => member !== undefined))];
+      }
+    }
+    return [
+      ...new Set(
+        sourceResolveCandidates(value, scope)
+          .filter((candidate) => candidate.matched && candidate.value.kind === 'object')
+          .map((candidate) => candidate.value)
+      ),
+    ];
+  };
+
+  /**
+   * The source-backed containers a call's receiver denotes.
+   *
+   * A method call may write to the object it is called on, so the receiver is
+   * a container the call may mutate even when the call takes no argument at
+   * all. A call whose callee is a bare name has no receiver: nothing is
+   * handed to it but its arguments.
+   */
+  const receiverContainerValues = (node: ts.CallExpression, scope: Scope): HookSourceValue[] => {
+    const callee = unwrap(node.expression);
+    if (!ts.isPropertyAccessExpression(callee) && !ts.isElementAccessExpression(callee)) return [];
+    return sourceContainerValues(callee.expression, scope);
+  };
+
+  /**
+   * The source graph a copy reads from, when the expression denotes exactly
+   * one proven graph. A source with an unproved alternative denotes no single
+   * graph, so nothing about the copy is proven.
+   */
+  const sourceCopyValue = (expression: ts.Node, scope: Scope): HookSourceValue | undefined => {
+    const resolved = sourceResolveCandidates(expression, scope);
+    const matched = resolved.filter((candidate) => candidate.matched);
+    if (matched.length !== 1 || matched.length !== resolved.length) return undefined;
+    const value = matched[0].value;
+    return value.kind === 'object' ? value : undefined;
+  };
+
+  const sourceHookLabel = (node: ts.Node, scope?: Scope): string | null => {
+    let label: string | null = null;
+    const visit = (current: ts.Node): void => {
+      if (label) return;
+      const value = unwrap(current);
+      if (scope && ts.isIdentifier(value)) {
+        const binding = lookup(scope, value.text);
+        if (binding && 'hook' in binding) {
+          label = binding.hook;
+          return;
+        }
+        // An imported hook reached through a local alias still reports the
+        // imported producer identity.
+        if (binding?.kind === 'tokenImport' && loweredHookStates(binding.imported)) {
+          label = binding.imported;
+          return;
+        }
+      }
+      if (ts.isCallExpression(value)) {
+        const callee = unwrap(value.expression);
+        const calleeIdentifier = ts.isIdentifier(callee) ? callee : null;
+        if (!calleeIdentifier) {
+          ts.forEachChild(current, visit);
+          return;
+        }
+        const name = calleeIdentifier.text;
+        const resolved = scope
+          ? scope.sourceSummary.resolve(value, source, sourceEnvironment(scope))
+          : null;
+        if (resolved?.matched && resolved.value.kind !== 'unknown') {
+          // A same-name once call can return a child installed by an earlier
+          // producer. Its cached value belongs to that winning producer, not
+          // to the syntactic caller whose setup was skipped.
+          if (resolved.hook) {
+            label = resolved.hook;
+            return;
+          }
+          // Report the declared producer binding, so a local alias of an
+          // exported hook keeps the identity callers already key on.
+          const binding = scope ? lookup(scope, name) : null;
+          if (binding && 'hook' in binding) {
+            label = binding.hook;
+            return;
+          }
+          // `const parentAlias = asParent` is stored as a token whose
+          // initializer is the imported identifier. Follow that one hop so the
+          // label is the imported producer rather than the local spelling. The
+          // built-in hook table is deliberately not consulted: this call has
+          // already resolved to a proven producer, which may be authored and
+          // therefore absent from that table. A locally defined producer has no
+          // imported initializer and keeps its own name through the fallback.
+          const initializer =
+            binding?.kind === 'token' && binding.initializer ? unwrap(binding.initializer) : null;
+          // The TypeScript node guards are not null-safe, so test the node
+          // before calling them.
+          const imported =
+            scope && initializer && ts.isIdentifier(initializer)
+              ? lookup(scope, initializer.text)
+              : null;
+          label = imported?.kind === 'tokenImport' ? imported.imported : name;
+          return;
+        }
+      }
+      ts.forEachChild(current, visit);
+    };
+    visit(node);
+    return label;
+  };
+
+  /**
+   * A call argument as it was while that argument was evaluated. The call
+   * receives those objects, so a later argument that rebinds a name does not
+   * move the mutation onto the container the name holds afterwards.
+   */
+  type CapturedArgument = {
+    argument: ts.Expression;
+    /** The containers the argument may denote. */
+    values: HookSourceValue[];
+    /** The single source graph the argument denotes, for a known copy. */
+    source?: HookSourceValue;
+    /** The producer the argument's value came from, for a known copy. */
+    label?: string | null;
+  };
+
+  const captureArgument = (
+    argument: ts.Expression,
+    scope: Scope,
+    copySource: boolean
+  ): CapturedArgument => {
+    const inner = unwrap(argument);
+    // An assignment expression stands for the value it assigned.
+    const assigned =
+      ts.isBinaryExpression(inner) && inner.operatorToken.kind === ts.SyntaxKind.EqualsToken
+        ? inner.right
+        : inner;
+    const values = sourceContainerValues(assigned, scope);
+    if (!copySource) return { argument, values };
+    return {
+      argument,
+      values,
+      source: sourceCopyValue(assigned, scope),
+      label: sourceHookLabel(assigned, scope),
+    };
+  };
+
+  const sourceUsage = (
+    hook: string,
+    state: string,
+    provenance: HookSourceState
+  ): HookStateUsage => {
+    const usage: HookStateUsage = { hook, state };
+    Object.defineProperty(usage, 'provenance', {
+      value: provenance,
+      enumerable: false,
+      configurable: true,
+    });
+    return usage;
+  };
+
+  // A member write can move a state handle from another producer into a bag.
+  // Keep the producer identity with the source state, not only with the bag.
+  const sourceStateHooks = new WeakMap<HookSourceState, string>();
+  const rememberSourceStateHooks = (node: ts.Node, scope: Scope): void => {
+    const hook = sourceHookLabel(node, scope);
+    if (!hook) return;
+    const candidates = sourceResolveCandidates(node, scope);
+    if (candidates.length === 0) return;
+    let owner: HookSourceState['owner'] | undefined;
+    for (const candidate of candidates) {
+      if (!candidate.matched || candidate.value.kind !== 'state') return;
+      const next = candidate.value.state.owner;
+      if (owner && (owner.file !== next.file || owner.start !== next.start)) return;
+      owner = next;
+    }
+    for (const candidate of candidates) {
+      if (candidate.value.kind === 'state') sourceStateHooks.set(candidate.value.state, hook);
+    }
+  };
+
+  const exposedKeys = new Map<ts.Node, Map<string, string | null>>();
   type AliasEdge = {
     owner: ts.Node;
     name: string;
     target: string;
     at: number;
     conditional: boolean;
+    opaque?: boolean;
     chain: ts.Node[];
     node: ts.Node;
   };
@@ -412,7 +1044,7 @@ export function scanRuleStateReads(
   };
   // Members carry positions for the same reason aliases do: a write through the
   // container retargets the member from there on.
-  type MemberEdge = { target: string; at: number; conditional: boolean };
+  type MemberEdge = { target: string | null; at: number; conditional: boolean };
   const objectMembers = new Map<ts.Node, Map<string, Map<string, MemberEdge[]>>>();
 
   /**
@@ -484,7 +1116,7 @@ export function scanRuleStateReads(
     owner: ts.Node,
     base: string,
     key: string,
-    target: string,
+    target: string | null,
     at: number,
     conditional: boolean
   ): void => {
@@ -506,17 +1138,17 @@ export function scanRuleStateReads(
   };
 
   /** The identifier member `key` of an initializer names, if it names one. */
-  const memberTargetName = (
+  const memberTargetNames = (
     initializer: ts.Node,
     key: string,
     chain: ts.Node[],
     at: number
-  ): { target: string; at: number } | null => {
+  ): { targets: Array<{ target: string; at: number }>; opaque: boolean } => {
     const value = unwrap(initializer);
     if (ts.isObjectLiteralExpression(value)) {
       for (const property of value.properties) {
         if (ts.isShorthandPropertyAssignment(property) && property.name.text === key) {
-          return { target: key, at };
+          return { targets: [{ target: key, at }], opaque: false };
         }
         if (
           ts.isPropertyAssignment(property) &&
@@ -524,23 +1156,41 @@ export function scanRuleStateReads(
           property.name.text === key
         ) {
           const assigned = unwrap(property.initializer);
-          return ts.isIdentifier(assigned) ? { target: assigned.text, at } : null;
+          return ts.isIdentifier(assigned)
+            ? { targets: [{ target: assigned.text, at }], opaque: false }
+            : { targets: [], opaque: false };
         }
       }
-      return null;
+      return { targets: [], opaque: false };
     }
-    if (!ts.isIdentifier(value)) return null;
+    if (ts.isArrayLiteralExpression(value)) {
+      const index = Number(key);
+      const element =
+        Number.isInteger(index) && index >= 0 && String(index) === key
+          ? value.elements[index]
+          : undefined;
+      const target = element && !ts.isOmittedExpression(element) ? unwrap(element) : null;
+      return target && ts.isIdentifier(target)
+        ? { targets: [{ target: target.text, at }], opaque: false }
+        : { targets: [], opaque: false };
+    }
+    if (!ts.isIdentifier(value)) return { targets: [], opaque: false };
     const [container] = containerRoots(value.text, chain, at);
     for (const scope of chain) {
       const members = objectMembers.get(scope)?.get(container);
       if (!members) continue;
       const edges = members.get(key);
-      if (!edges) return null;
+      if (!edges) return { targets: [], opaque: false };
       const visible = visibleEdges(edges, at);
-      // A pattern binds one name, so several candidates leave it ambiguous.
-      return visible.length === 1 ? { target: visible[0].target, at: visible[0].at } : null;
+      const opaque = visible.some((edge) => edge.target === null);
+      return {
+        targets: visible.flatMap((edge) =>
+          edge.target === null ? [] : [{ target: edge.target, at: edge.at }]
+        ),
+        opaque,
+      };
     }
-    return null;
+    return { targets: [], opaque: false };
   };
 
   /**
@@ -552,8 +1202,8 @@ export function scanRuleStateReads(
     initializer: ts.Node,
     chain: ts.Node[],
     at: number
-  ): Array<{ name: string; target: string; at: number }> => {
-    const out: Array<{ name: string; target: string; at: number }> = [];
+  ): Array<{ name: string; target: string; at: number; opaque?: boolean }> => {
+    const out: Array<{ name: string; target: string; at: number; opaque?: boolean }> = [];
     if (ts.isObjectBindingPattern(name)) {
       for (const element of name.elements) {
         if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
@@ -561,20 +1211,37 @@ export function scanRuleStateReads(
         const key =
           ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
         if (!key) continue;
-        const resolved = memberTargetName(initializer, key, chain, at);
-        if (resolved) out.push({ name: element.name.text, ...resolved });
+        const resolved = memberTargetNames(initializer, key, chain, at);
+        if (resolved.targets.length > 0) {
+          for (const target of resolved.targets) {
+            out.push({
+              name: element.name.text,
+              ...target,
+              ...(resolved.opaque ? { opaque: true } : {}),
+            });
+          }
+        } else if (resolved.opaque) {
+          // Keep an opaque alias edge even when no concrete handle survived.
+          out.push({ name: element.name.text, target: element.name.text, at, opaque: true });
+        }
       }
       return out;
     }
     if (!ts.isArrayBindingPattern(name)) return out;
-    const values = unwrap(initializer);
-    if (!ts.isArrayLiteralExpression(values)) return out;
     name.elements.forEach((element, index) => {
       if (ts.isOmittedExpression(element)) return;
       if (!ts.isIdentifier(element.name) || element.dotDotDotToken) return;
-      const value = values.elements[index] && unwrap(values.elements[index]);
-      if (value && ts.isIdentifier(value)) {
-        out.push({ name: element.name.text, target: value.text, at });
+      const resolved = memberTargetNames(initializer, String(index), chain, at);
+      if (resolved.targets.length > 0) {
+        for (const target of resolved.targets) {
+          out.push({
+            name: element.name.text,
+            ...target,
+            ...(resolved.opaque ? { opaque: true } : {}),
+          });
+        }
+      } else if (resolved.opaque) {
+        out.push({ name: element.name.text, target: element.name.text, at, opaque: true });
       }
     });
     return out;
@@ -588,7 +1255,7 @@ export function scanRuleStateReads(
     node: ts.Node,
     chain: ts.Node[],
     at: number
-  ): Array<{ name: string; at: number }> => {
+  ): Array<{ name: string; at: number; opaque?: boolean }> => {
     const value = unwrap(node);
     if (ts.isIdentifier(value)) return [{ name: value.text, at }];
     const owner = ownerOf(value);
@@ -602,7 +1269,14 @@ export function scanRuleStateReads(
         if (!members) continue;
         for (const [key, edges] of members) {
           if (!memberNamed(value, key)) continue;
-          out.push(...visibleEdges(edges, at).map((edge) => ({ name: edge.target, at: edge.at })));
+          const visible = visibleEdges(edges, at);
+          // Keep possible old/RHS handles, but carry the opaque write so a
+          // local exposure cannot be mistaken for an internal state.
+          const opaque = visible.some((edge) => edge.target === null);
+          for (const edge of visible) {
+            if (edge.target !== null)
+              out.push({ name: edge.target, at: edge.at, ...(opaque ? { opaque: true } : {}) });
+          }
         }
         break;
       }
@@ -610,37 +1284,31 @@ export function scanRuleStateReads(
     return out;
   };
   const rawExposures: Array<{
-    handles: Array<{ name: string; at: number }>;
+    handles: Array<{ name: string; at: number; opaque?: boolean }>;
     key: ts.Expression;
     chain: ts.Node[];
   }> = [];
 
-  const memberNamed = (node: ts.Node, name: string): boolean => {
+  /** A statically-known property key; dynamic indexes must invalidate all candidates. */
+  const memberNameOf = (node: ts.Node): string | null => {
     const target = unwrap(node);
-    if (ts.isPropertyAccessExpression(target)) return target.name.text === name;
+    if (ts.isPropertyAccessExpression(target)) return target.name.text;
     if (ts.isElementAccessExpression(target)) {
       const argument = target.argumentExpression;
-      return Boolean(argument) && ts.isStringLiteralLike(argument) && argument.text === name;
+      return argument && (ts.isStringLiteralLike(argument) || ts.isNumericLiteral(argument))
+        ? argument.text
+        : null;
     }
-    return false;
+    return null;
   };
+
+  const memberNamed = (node: ts.Node, name: string): boolean => memberNameOf(node) === name;
 
   const ownerOf = (node: ts.Node): ts.Node | null => {
     const target = unwrap(node);
     return ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target)
       ? target.expression
       : null;
-  };
-
-  /** The member a `x.name` or `x['name']` write names, if it is static. */
-  const memberNameOf = (node: ts.Node): string | null => {
-    const target = unwrap(node);
-    if (ts.isPropertyAccessExpression(target)) return target.name.text;
-    if (ts.isElementAccessExpression(target)) {
-      const argument = target.argumentExpression;
-      return argument && ts.isStringLiteralLike(argument) ? argument.text : null;
-    }
-    return null;
   };
 
   const collectExposedKeys = (node: ts.Node, chain: ts.Node[]): void => {
@@ -706,6 +1374,7 @@ export function scanRuleStateReads(
           target: alias.target,
           at: alias.at,
           conditional,
+          ...(alias.opaque ? { opaque: true } : {}),
           chain: [...nextChain, source],
           node,
         });
@@ -715,19 +1384,28 @@ export function scanRuleStateReads(
     // member the exposure reads is the one assigned last before it.
     if (
       ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
       (ts.isPropertyAccessExpression(node.left) || ts.isElementAccessExpression(node.left))
     ) {
+      const operator = node.operatorToken.kind;
+      const logicalAssignment =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
       const base = unwrap(ownerOf(node.left) ?? node.left);
       const member = memberNameOf(node.left);
       if (ts.isIdentifier(base)) {
         const chain = [...nextChain, source];
-        const at = node.getStart();
-        const containers = containerRoots(base.text, chain, at);
+        // Non-plain writes complete after their RHS, so later source positions
+        // must not see a nested RHS member write as the final value.
+        const at = operator === ts.SyntaxKind.EqualsToken ? node.getStart() : node.getEnd();
+        const containers = containerRoots(base.text, chain, node.getStart());
         const declaring =
           chain.find((candidate) => declaredIn.get(candidate)?.has(containers[0])) ?? null;
         const conditional =
           isConditionallyReached(node) ||
+          logicalAssignment ||
           isDeferredWrite(node, enclosingFunction(declaring)) ||
           containers.length > 1 ||
           member === null;
@@ -741,8 +1419,19 @@ export function scanRuleStateReads(
               ? [...(objectMembers.get(memberOwnerScope)?.get(container)?.keys() ?? [])]
               : [member];
           for (const key of keys) {
-            for (const target of aliasTargets(node.right)) {
-              recordMember(memberOwnerScope, container, key, target, at, conditional);
+            if (operator === ts.SyntaxKind.EqualsToken) {
+              for (const target of aliasTargets(node.right)) {
+                recordMember(memberOwnerScope, container, key, target, at, conditional);
+              }
+            } else {
+              // This prepass runs before readState exists. Mark a non-plain
+              // write opaque rather than attributing the RHS to the member.
+              recordMember(memberOwnerScope, container, key, null, at, conditional);
+              if (logicalAssignment) {
+                for (const target of aliasTargets(node.right)) {
+                  recordMember(memberOwnerScope, container, key, target, at, conditional);
+                }
+              }
             }
           }
         }
@@ -818,7 +1507,7 @@ export function scanRuleStateReads(
     chain: ts.Node[],
     at: number,
     seen = new Set<string>()
-  ): Array<{ name: string; chain: ts.Node[] }> => {
+  ): Array<{ name: string; chain: ts.Node[]; opaque?: boolean }> => {
     if (seen.has(name)) return [{ name, chain }];
     // A write in another function is unordered against this read, so it adds a
     // candidate rather than replacing one.
@@ -840,7 +1529,12 @@ export function scanRuleStateReads(
     const next = new Set([...seen, name]);
     // An alias captured its target where the alias was written, so a name the
     // exposure site shadows must not answer for it.
-    return found.flatMap((edge) => aliasRoots(edge.target, edge.chain ?? chain, edge.at, next));
+    return found.flatMap((edge) =>
+      aliasRoots(edge.target, edge.chain ?? chain, edge.at, next).map((entry) => ({
+        ...entry,
+        ...(edge.opaque ? { opaque: true } : {}),
+      }))
+    );
   };
 
   // An exposure names a binding, and a binding lives in one scope. Writing it
@@ -854,8 +1548,11 @@ export function scanRuleStateReads(
     // attribute comes from the declared name anyway.
     const text = ts.isStringLiteralLike(key) ? key.text : '';
     const named = handles.flatMap((handle) => [
-      { name: handle.name, chain },
-      ...aliasRoots(handle.name, chain, handle.at),
+      { name: handle.name, chain, opaque: handle.opaque },
+      ...aliasRoots(handle.name, chain, handle.at).map((entry) => ({
+        ...entry,
+        opaque: Boolean(handle.opaque || entry.opaque),
+      })),
     ]);
     const seen = new Set<string>();
     for (const entry of named) {
@@ -864,14 +1561,15 @@ export function scanRuleStateReads(
       const identity = `${entry.name}\u0000${owner.pos}`;
       if (seen.has(identity)) continue;
       seen.add(identity);
-      const scoped = exposedKeys.get(owner) ?? new Map<string, string>();
-      if (!scoped.has(entry.name)) scoped.set(entry.name, text);
+      const scoped = exposedKeys.get(owner) ?? new Map<string, string | null>();
+      if (entry.opaque) scoped.set(entry.name, null);
+      else if (!scoped.has(entry.name)) scoped.set(entry.name, text);
       exposedKeys.set(owner, scoped);
     }
   }
 
   /** The exposure visible from a scope chain, nearest scope first. */
-  const exposureFor = (name: string, scope: Scope): string | undefined => {
+  const exposureFor = (name: string, scope: Scope): string | null | undefined => {
     for (let current: Scope | null = scope; current; current = current.parent) {
       if (!current.node) continue;
       const scoped = exposedKeys.get(current.node);
@@ -881,11 +1579,22 @@ export function scanRuleStateReads(
     return undefined;
   };
 
-  const hookOfCall = (node: ts.Node): string | null => {
+  const hookOfCall = (node: ts.Node, scope?: Scope): string | null => {
     const call = unwrap(node);
     if (!ts.isCallExpression(call) || !ts.isIdentifier(call.expression)) return null;
     const name = call.expression.text;
-    return name.startsWith('as') ? name : null;
+    const binding = scope ? lookup(scope, name) : null;
+    // A bound name that is not a named import cannot be answered for by the
+    // built-in hook table. A default import in particular names the module's
+    // default export, which need not be a hook at all.
+    if (binding && binding.kind !== 'tokenImport') return null;
+    if (loweredHookStates(name)) return name;
+    // A local alias of an imported hook is the same producer, so report the
+    // imported name the extractor keys on rather than the local spelling.
+    if (binding?.kind === 'tokenImport' && loweredHookStates(binding.imported)) {
+      return binding.imported;
+    }
+    return null;
   };
 
   /** Resolves an expression to the hook whose state-handle bag it denotes. */
@@ -900,13 +1609,236 @@ export function scanRuleStateReads(
     const owner = unwrap(expression.expression);
     if (ts.isIdentifier(owner)) {
       const binding = lookup(scope, owner.text);
-      return binding?.kind === 'hookResult' ? binding.hook : null;
+      if (binding?.kind !== 'hookResult') return null;
+      if (binding.sourceValue?.kind === 'result' && binding.sourceValue.stateHandles.size === 0)
+        return null;
+      return binding.hook;
     }
-    return hookOfCall(owner);
+    return hookOfCall(owner, scope);
   };
 
   const declare = (scope: Scope, name: string, binding: Binding): void => {
     scope.bindings.set(name, binding);
+  };
+
+  const sourceBindingValues = (binding: Binding | undefined): HookSourceValue[] => {
+    if (!binding || !('sourceValue' in binding) || !binding.sourceValue) return [];
+    return [binding.sourceValue, ...(binding.sourceAlternatives ?? [])];
+  };
+
+  const sourceBindingStates = (binding: Binding | undefined): HookSourceState[] => {
+    if (!binding || binding.kind !== 'handle' || !binding.sourceState) return [];
+    return [binding.sourceState, ...(binding.sourceAlternatives ?? [])];
+  };
+
+  const sourceBindingHooks = (binding: Binding | undefined): string[] => {
+    if (!binding || !('hook' in binding)) return [];
+    return [binding.hook, ...(binding.sourceAlternativeHooks ?? [])];
+  };
+
+  const containsSourceReference = (
+    value: HookSourceValue,
+    target: HookSourceValue,
+    seen = new Set<HookSourceValue>()
+  ): boolean => {
+    if (value === target) return true;
+    if (seen.has(value)) return false;
+    seen.add(value);
+    if (value.kind === 'object') {
+      for (const member of value.members.values()) {
+        if (containsSourceReference(member, target, seen)) return true;
+      }
+    } else if (value.kind === 'result') {
+      if (value.handle && containsSourceReference(value.handle, target, seen)) return true;
+      for (const child of value.children.values()) {
+        if (containsSourceReference(child, target, seen)) return true;
+      }
+    } else if (value.kind === 'callable') {
+      return containsSourceReference(value.result, target, seen);
+    }
+    return false;
+  };
+
+  const sourceOwnerScope = (scope: Scope, target: HookSourceValue): Scope | null => {
+    let owning: Scope | null = null;
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const binding of owner.bindings.values()) {
+        if (sourceBindingValues(binding).some((value) => containsSourceReference(value, target))) {
+          owning = owner;
+          break;
+        }
+      }
+    }
+    return owning;
+  };
+
+  const sourceBinding = (
+    binding: Binding | undefined
+  ): binding is Extract<Binding, { kind: 'handle' | 'handleBag' | 'hookResult' | 'callable' }> =>
+    binding?.kind === 'handle' ||
+    binding?.kind === 'handleBag' ||
+    binding?.kind === 'hookResult' ||
+    binding?.kind === 'callable';
+
+  /**
+   * The newest version of a captured graph. A member write replaces the graph
+   * a container holds without replacing the container, so a mutation that was
+   * captured before that write lands on the version the container holds now.
+   */
+  const latestSourceVersion = (scope: Scope, value: HookSourceValue): HookSourceValue =>
+    scope.versions.latest(value);
+
+  /**
+   * Copy-on-write a source summary without mutating the cached producer graph.
+   *
+   * Source values are immutable summaries, but aliases can share any object
+   * inside the graph (including through a result handle or child). A visited
+   * set is not sufficient here: when the same ancestor is reached through a
+   * second path it would return the original node and leave that path stale.
+   * Memoizing the rewritten node preserves the DAG sharing while making every
+   * containing path observe the replacement.
+   */
+  const replaceSourceGraph = (
+    value: HookSourceValue,
+    target: HookSourceValue,
+    replacement: HookSourceValue,
+    memo: Map<HookSourceValue, HookSourceValue>,
+    replacements?: ReadonlyMap<HookSourceValue, HookSourceValue>
+  ): HookSourceValue => {
+    const direct = replacements?.get(value) ?? (value === target ? replacement : undefined);
+    if (direct !== undefined) return direct;
+    const cached = memo.get(value);
+    if (cached) return cached;
+
+    if (value.kind === 'state' || value.kind === 'unknown') {
+      memo.set(value, value);
+      return value;
+    }
+
+    if (value.kind === 'object') {
+      const members = new Map<string, HookSourceValue>();
+      // Install the provisional clone before walking children so a cyclic
+      // authored projection cannot recurse forever. If no child changes, the
+      // memo entry is replaced with the original below.
+      const clone: Extract<HookSourceValue, { kind: 'object' }> = { ...value, members };
+      memo.set(value, clone);
+      let changed = false;
+      for (const [key, member] of value.members) {
+        const next = replaceSourceGraph(member, target, replacement, memo, replacements);
+        members.set(key, next);
+        changed ||= next !== member;
+      }
+      if (!changed) {
+        memo.set(value, value);
+        return value;
+      }
+      return clone;
+    }
+
+    if (value.kind === 'result') {
+      const children = new Map<string, HookSourceValue>();
+      const clone: Extract<HookSourceValue, { kind: 'result' }> = { ...value, children };
+      memo.set(value, clone);
+      let changed = false;
+      if (value.handle) {
+        const handle = replaceSourceGraph(value.handle, target, replacement, memo, replacements);
+        clone.handle = handle;
+        changed ||= handle !== value.handle;
+      }
+      for (const [key, child] of value.children) {
+        const next = replaceSourceGraph(child, target, replacement, memo, replacements);
+        children.set(key, next);
+        changed ||= next !== child;
+      }
+      if (!changed) {
+        memo.set(value, value);
+        return value;
+      }
+      return clone;
+    }
+
+    // The admitted callable is an immutable capture, not a containment edge
+    // into the container it reads: the runtime freezes the projected
+    // state-handle map and closes the accessor over that map, and the summary
+    // reads only the state handles it captured. A write to the container
+    // therefore does not change the callable, and the callable keeps its
+    // identity when the container is written.
+    memo.set(value, value);
+    return value;
+  };
+
+  /** Publish one atomic object-replacement batch to all source-backed bindings. */
+  const publishSourceGraph = (
+    scope: Scope,
+    target: HookSourceValue,
+    replacement: HookSourceValue,
+    uncertain: boolean,
+    replacements?: ReadonlyMap<HookSourceValue, HookSourceValue>
+  ): void => {
+    // One memo spans all bindings and candidates, so shared ancestors remain
+    // shared instead of being cloned independently for each visible alias.
+    const memo = new Map<HookSourceValue, HookSourceValue>();
+    // Pass 1: the lineage. The memo holds the graphs the write rewrote, and
+    // the tracker learns them before the names are written, because the
+    // second pass reads the graphs the container may hold from the tracker.
+    const rewritten: {
+      owner: Scope;
+      name: string;
+      binding: Binding;
+      sourceValue: HookSourceValue;
+    }[] = [];
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const [name, binding] of owner.bindings) {
+        if (!sourceBinding(binding) || !('sourceValue' in binding) || !binding.sourceValue)
+          continue;
+        // The name holds the graph it holds now and the graphs it may hold
+        // instead. The same graph is not held twice.
+        const candidates = [
+          ...new Set([binding.sourceValue, ...(binding.sourceAlternatives ?? [])]),
+        ];
+        const replaced = candidates.map((candidate) =>
+          replaceSourceGraph(candidate, target, replacement, memo, replacements)
+        );
+        const changed = replaced.some((candidate, index) => candidate !== candidates[index]);
+        if (!changed) continue;
+        // The graph the name holds now is captured here, where the guard above
+        // has already established that the name holds one.
+        rewritten.push({ owner, name, binding, sourceValue: binding.sourceValue });
+      }
+    }
+    for (const [before, after] of memo) {
+      if (before === after) continue;
+      // A write to a nested object rewrites the ancestors that hold it, so the
+      // graph a container holds is a newer version of the graph it replaced.
+      // Recording the ancestors keeps a later resolution of one of them - a
+      // producer call that hands the same container out again - from reaching
+      // the graph that was written to.
+      scope.versions.record(before, after, uncertain);
+    }
+    if (replacements) {
+      for (const [before, after] of replacements) scope.versions.record(before, after, uncertain);
+    } else {
+      scope.versions.record(target, replacement, uncertain);
+    }
+    // Pass 2: the names. A name holds the graph the write produced and the
+    // graphs it may hold instead. The list is the container's graphs, not the
+    // history of the graphs the container passed through: keeping the history
+    // would let the environment fan-out grow with every write, even though
+    // the tracker holds one graph per distinct content.
+    for (const { owner, name, binding, sourceValue } of rewritten) {
+      const held = new Set<HookSourceValue>();
+      for (const candidate of sourceBindingValues(binding)) {
+        for (const version of scope.versions.versions(candidate)) held.add(version);
+      }
+      if (held.size === 0) continue;
+      const latest = scope.versions.latest(sourceValue);
+      const next = [latest, ...[...held].filter((version) => version !== latest)];
+      declare(owner, name, {
+        ...binding,
+        sourceValue: next[0],
+        sourceAlternatives: next.slice(1),
+      } as Binding);
+    }
   };
 
   /**
@@ -914,6 +1846,8 @@ export function scanRuleStateReads(
    * runtime lowers whichever it holds, so a conditional reassignment keeps the
    * binding it replaces as an alternative instead of discarding it.
    */
+  const definitelyReachedLogicalAssignments = new WeakSet<ts.Node>();
+
   const declareConditionally = (
     scope: Scope,
     name: string,
@@ -925,9 +1859,43 @@ export function scanRuleStateReads(
     declareValue(node as ts.BindingName, initializer, scope, lookupScope);
     const next = scope.bindings.get(name);
     const uncertain =
-      isConditionallyReached(initializer.parent) ||
+      isConditionallyReached(initializer.parent, definitelyReachedLogicalAssignments) ||
       isDeferredWrite(initializer, enclosingFunction(scope.node));
     if (!uncertain || !previous || !next) return;
+    if (sourceBinding(next) && sourceBinding(previous)) {
+      const sourceAuthority = next.sourceAuthority === true || previous.sourceAuthority === true;
+      if (sourceAuthority && next.sourceAuthority !== true) {
+        declare(scope, name, { ...next, sourceAuthority: true } as Binding);
+      }
+      if (next.kind === 'handle' && previous.kind === 'handle') {
+        const states = [
+          ...new Set([...sourceBindingStates(next), ...sourceBindingStates(previous)]),
+        ];
+        const hooks = [...new Set([...sourceBindingHooks(next), ...sourceBindingHooks(previous)])];
+        if (states.length > 1)
+          declare(scope, name, {
+            ...next,
+            sourceState: states[0],
+            sourceAlternatives: states.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          });
+      } else {
+        const values = [
+          ...new Set([...sourceBindingValues(next), ...sourceBindingValues(previous)]),
+        ];
+        const hooks = [...new Set([...sourceBindingHooks(next), ...sourceBindingHooks(previous)])];
+        if (values.length > 1)
+          declare(scope, name, {
+            ...next,
+            sourceValue: values[0],
+            sourceAlternatives: values.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          } as Binding);
+      }
+      return;
+    }
     if (next.kind !== 'localState' || previous.kind !== 'localState') return;
     // Alternatives are flat: a candidate carries no candidates of its own.
     const bare = (binding: LocalStateBinding): LocalStateBinding => ({
@@ -955,6 +1923,107 @@ export function scanRuleStateReads(
     scope: Scope,
     lookupScope: Scope = scope
   ): void => {
+    // `sourceBinding` at module scope is the kind predicate; this local used to
+    // shadow it and then get called as one.
+    const resolved = sourceResolve(initializer, lookupScope);
+    const sourceHook = sourceHookLabel(initializer, lookupScope);
+    const sourceNode = unwrap(initializer);
+    // Summary evaluation recognizes every ordinary object/array literal. Keep
+    // those in the established token/container path unless this is a proven
+    // non-literal source expression, so local maps are not replaced by a blank
+    // source bag.
+    const sourceCanIntercept =
+      resolved.matched &&
+      sourcePathHasProvenance(initializer, lookupScope, resolved) &&
+      !ts.isObjectLiteralExpression(sourceNode) &&
+      !ts.isArrayLiteralExpression(sourceNode) &&
+      !ts.isConditionalExpression(sourceNode);
+    if (sourceCanIntercept) {
+      const sourceValue = resolved.value;
+      if (ts.isObjectBindingPattern(name)) {
+        if (sourceValue.kind !== 'object') {
+          for (const element of name.elements) {
+            if (ts.isIdentifier(element.name))
+              declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+          return;
+        }
+        for (const element of name.elements) {
+          if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
+          const property = element.propertyName ?? element.name;
+          const key =
+            ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+          const held = key ? sourceValue.members.get(key) : undefined;
+          if (held?.kind === 'state') {
+            declare(scope, element.name.text, {
+              kind: 'handle',
+              hook: sourceHook ?? '<source-hook>',
+              state: held.state.declaredName,
+              sourceState: held.state,
+              sourceAuthority: true,
+            });
+          } else {
+            declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+        }
+        return;
+      }
+      if (ts.isArrayBindingPattern(name)) {
+        if (sourceValue.kind !== 'object') {
+          for (const element of name.elements) {
+            if (ts.isBindingElement(element) && ts.isIdentifier(element.name))
+              declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+          }
+          return;
+        }
+        name.elements.forEach((element, index) => {
+          if (!ts.isBindingElement(element)) return;
+          if (!ts.isIdentifier(element.name) || element.dotDotDotToken) return;
+          const held = sourceValue.members.get(String(index));
+          if (held?.kind === 'state')
+            declare(scope, element.name.text, {
+              kind: 'handle',
+              hook: sourceHook ?? '<source-hook>',
+              state: held.state.declaredName,
+              sourceState: held.state,
+              sourceAuthority: true,
+            });
+          else declare(scope, element.name.text, { kind: 'opaque', sourceAuthority: true });
+        });
+        return;
+      }
+      if (ts.isIdentifier(name)) {
+        if (sourceValue.kind === 'state') {
+          declare(scope, name.text, {
+            kind: 'handle',
+            hook: sourceHook ?? '<source-hook>',
+            state: sourceValue.state.declaredName,
+            sourceState: sourceValue.state,
+            sourceAuthority: true,
+          });
+        } else if (sourceValue.kind === 'unknown') {
+          declare(scope, name.text, { kind: 'opaque', sourceAuthority: true });
+        } else if (
+          sourceValue.kind === 'object' ||
+          sourceValue.kind === 'result' ||
+          sourceValue.kind === 'callable'
+        ) {
+          declare(scope, name.text, {
+            kind:
+              sourceValue.kind === 'object'
+                ? 'handleBag'
+                : sourceValue.kind === 'result'
+                  ? 'hookResult'
+                  : 'callable',
+            hook: sourceHook ?? '<source-hook>',
+            sourceValue,
+            sourceAuthority: true,
+          });
+        }
+        return;
+      }
+    }
+
     const bag = bagHook(initializer, lookupScope);
 
     if (bag) {
@@ -978,14 +2047,124 @@ export function scanRuleStateReads(
     // `const current = enabled ? first : second` — the runtime keeps one branch
     // and it carries its own declared name, so both candidates are retained.
     const chosen = unwrap(initializer);
+    if (
+      ts.isConditionalExpression(chosen) &&
+      !ts.isIdentifier(name) &&
+      (ts.isObjectBindingPattern(name) || ts.isArrayBindingPattern(name))
+    ) {
+      const branches = [chosen.whenTrue, chosen.whenFalse].map((branch) =>
+        sourceResolve(branch, lookupScope)
+      );
+      const provenObjects = branches.every(
+        (branch) =>
+          branch.matched &&
+          sourcePathHasProvenance(
+            branch === branches[0] ? chosen.whenTrue : chosen.whenFalse,
+            lookupScope,
+            branch
+          ) &&
+          branch.value.kind === 'object'
+      );
+      if (provenObjects) {
+        const hooks = [
+          sourceHookLabel(chosen.whenTrue, lookupScope),
+          sourceHookLabel(chosen.whenFalse, lookupScope),
+        ];
+        const bind = (target: ts.Identifier, key: string): void => {
+          const held = branches.map((branch) =>
+            branch.value.kind === 'object' ? branch.value.members.get(key) : undefined
+          );
+          if (
+            held.every(
+              (value): value is HookSourceValue & { kind: 'state' } => value?.kind === 'state'
+            )
+          ) {
+            const states = [
+              ...new Map(
+                held.map((state) => [
+                  `${state.state.declaration.file}\u0000${state.state.declaration.start}`,
+                  state,
+                ])
+              ).values(),
+            ];
+            const labels = [...new Set(hooks.filter((hook): hook is string => Boolean(hook)))];
+            declare(scope, target.text, {
+              kind: 'handle',
+              hook: labels[0] ?? '<source-hook>',
+              state: states[0].state.declaredName,
+              sourceState: states[0].state,
+              sourceAlternatives: states.slice(1).map((state) => state.state),
+              sourceAlternativeHooks: labels.slice(1),
+            });
+          } else {
+            declare(scope, target.text, { kind: 'opaque' });
+          }
+        };
+        if (ts.isObjectBindingPattern(name)) {
+          for (const element of name.elements) {
+            if (!ts.isIdentifier(element.name) || element.dotDotDotToken) continue;
+            const property = element.propertyName ?? element.name;
+            const key =
+              ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+            if (key) bind(element.name, key);
+          }
+        } else {
+          name.elements.forEach((element, index) => {
+            if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
+            bind(element.name, String(index));
+          });
+        }
+        return;
+      }
+    }
     if (ts.isConditionalExpression(chosen) && ts.isIdentifier(name)) {
       // Each branch is bound into a throwaway scope so this reads exactly what
       // the same expression would name on its own.
       const branches = [chosen.whenTrue, chosen.whenFalse].map((branch) => {
-        const probe: Scope = { parent: lookupScope, bindings: new Map(), node: lookupScope.node };
+        const probe: Scope = {
+          parent: lookupScope,
+          bindings: new Map(),
+          node: lookupScope.node,
+          sourceSummary: lookupScope.sourceSummary,
+          versions: lookupScope.versions,
+        };
         declareValue(name, branch, probe, lookupScope);
         return probe.bindings.get(name.text);
       });
+      // `sourceBinding` is a type predicate, not a callable runtime test, so it
+      // cannot be handed to `filter`. Narrowing happens in the loop instead.
+      const sourceBranches: Binding[] = [];
+      for (const branch of branches) {
+        if (sourceBinding(branch)) sourceBranches.push(branch);
+      }
+      if (sourceBranches.length === branches.length && sourceBranches.length > 0) {
+        const head = sourceBranches[0];
+        const sourceAuthority = sourceBranches.some(
+          (branch) => 'sourceAuthority' in branch && branch.sourceAuthority === true
+        );
+        if (head.kind === 'handle' && sourceBranches.every((branch) => branch.kind === 'handle')) {
+          const states = [...new Set(sourceBranches.flatMap(sourceBindingStates))];
+          const hooks = [...new Set(sourceBranches.flatMap(sourceBindingHooks))];
+          declare(scope, name.text, {
+            ...head,
+            sourceState: states[0],
+            sourceAlternatives: states.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          });
+        } else {
+          const values = [...new Set(sourceBranches.flatMap(sourceBindingValues))];
+          const hooks = [...new Set(sourceBranches.flatMap(sourceBindingHooks))];
+          declare(scope, name.text, {
+            ...head,
+            sourceValue: values[0],
+            sourceAlternatives: values.slice(1),
+            sourceAlternativeHooks: hooks.slice(1),
+            sourceAuthority,
+          } as Binding);
+        }
+        return;
+      }
       const locals = branches.filter(
         (binding): binding is Binding & { kind: 'localState' } => binding?.kind === 'localState'
       );
@@ -1009,9 +2188,10 @@ export function scanRuleStateReads(
           seen.add(candidate.declaredAs);
           alternatives.push(bare(candidate));
         }
+        const exposedAs = exposureFor(name.text, scope);
         declare(scope, name.text, {
           ...head,
-          exposedAs: exposureFor(name.text, scope) ?? head.exposedAs,
+          exposedAs: exposedAs === undefined ? head.exposedAs : exposedAs,
           alternatives,
         });
         return;
@@ -1081,7 +2261,7 @@ export function scanRuleStateReads(
       return;
     }
 
-    const hook = hookOfCall(initializer);
+    const hook = hookOfCall(initializer, lookupScope);
     if (hook && ts.isIdentifier(name)) {
       declare(scope, name.text, { kind: 'hookResult', hook });
       return;
@@ -1091,12 +2271,24 @@ export function scanRuleStateReads(
     // resolves the alias, so a rule reading the alias is not a blind spot.
     if (ts.isIdentifier(value) && ts.isIdentifier(name)) {
       const aliased = lookup(lookupScope, value.text);
-      if (aliased && aliased.kind !== 'token' && aliased.kind !== 'tokenImport') {
+      if (aliased?.kind === 'tokenImport' && loweredHookStates(aliased.imported)) {
+        // A local alias of an imported hook is the same producer, so carry the
+        // imported identity instead of the local spelling.
+        declare(scope, name.text, { kind: 'hookResult', hook: aliased.imported });
+        return;
+      }
+      if (
+        aliased &&
+        aliased.kind !== 'token' &&
+        aliased.kind !== 'tokenImport' &&
+        aliased.kind !== 'defaultImport'
+      ) {
+        const exposedAs = exposureFor(name.text, scope);
         declare(
           scope,
           name.text,
           aliased.kind === 'localState'
-            ? { ...aliased, exposedAs: exposureFor(name.text, scope) ?? aliased.exposedAs }
+            ? { ...aliased, exposedAs: exposedAs === undefined ? aliased.exposedAs : exposedAs }
             : aliased
         );
         return;
@@ -1116,6 +2308,8 @@ export function scanRuleStateReads(
         kind: 'token',
         initializer,
         ...(partial ? { opaque: true } : {}),
+        bindingNode:
+          ts.isVariableDeclaration(name.parent) && name.parent.name === name ? name.parent : name,
       });
     }
   };
@@ -1124,7 +2318,19 @@ export function scanRuleStateReads(
     for (const statement of source.statements) {
       if (!ts.isImportDeclaration(statement)) continue;
       if (!ts.isStringLiteralLike(statement.moduleSpecifier)) continue;
-      const bindings = statement.importClause?.namedBindings;
+      const clause = statement.importClause;
+      if (!clause) continue;
+      // A default import binds the module's default export. The name is bound,
+      // so the built-in hook table must not answer for it by spelling: only a
+      // proven authored producer may, and the source summary resolves that.
+      if (clause.name) {
+        declare(scope, clause.name.text, {
+          kind: 'defaultImport',
+          specifier: statement.moduleSpecifier.text,
+          from: fileName,
+        });
+      }
+      const bindings = clause.namedBindings;
       if (!bindings || !ts.isNamedImports(bindings)) continue;
       for (const element of bindings.elements) {
         declare(scope, element.name.text, {
@@ -1145,6 +2351,7 @@ export function scanRuleStateReads(
 
   const localStateRead = (binding: LocalStateBinding, state: string): StateRead | null => {
     if (binding.exposedAs === undefined) return 'local';
+    if (binding.exposedAs === null) return null;
     // The runtime attribute comes from the declared name. If that name is not
     // statically readable the extractor emits nothing, so substituting the
     // expose key here would certify a selector that never exists.
@@ -1165,9 +2372,46 @@ export function scanRuleStateReads(
    */
   const readState = (node: ts.Node, scope: Scope): StateRead[] | null => {
     const argument = unwrap(node);
+    const resolvedCandidates = sourceResolveCandidates(argument, scope);
+    const sourceStates = resolvedCandidates
+      .filter((candidate) => candidate.matched)
+      .map((candidate) => candidate.value);
+    if (
+      sourceStates.length === resolvedCandidates.length &&
+      sourceStates.length > 0 &&
+      sourceStates.every((candidate) => candidate.kind === 'state')
+    ) {
+      const hook = sourceHookLabel(argument, scope);
+      const hooks = sourceStates.map((candidate) => sourceStateHooks.get(candidate.state) ?? hook);
+      if (
+        hooks.length > 0 &&
+        hooks.every((candidate): candidate is string => typeof candidate === 'string')
+      ) {
+        return sourceStates.map((candidate, index) =>
+          sourceUsage(hooks[index], candidate.state.declaredName, candidate.state)
+        );
+      }
+      if (!hook && !ts.isIdentifier(argument)) return null;
+      if (!hook) {
+        // A local identifier is handled below so its authored alias retains
+        // the caller spelling in the public result.
+      } else {
+        return sourceStates.map((candidate) => {
+          return sourceUsage(hook, candidate.state.declaredName, candidate.state);
+        });
+      }
+    }
     if (ts.isIdentifier(argument)) {
       const binding = lookup(scope, argument.text);
-      if (binding?.kind === 'handle') return [{ hook: binding.hook, state: binding.state }];
+      if (binding?.kind === 'handle') {
+        const states = sourceBindingStates(binding);
+        const hooks = sourceBindingHooks(binding);
+        return states.length > 0
+          ? states.map((state, index) =>
+              sourceUsage(hooks[index] ?? binding.hook, binding.state, state)
+            )
+          : [{ hook: binding.hook, state: binding.state }];
+      }
       if (binding?.kind === 'localState') {
         const reads = [binding, ...(binding.alternatives ?? [])].map((candidate) =>
           localStateRead(candidate, argument.text)
@@ -1177,9 +2421,32 @@ export function scanRuleStateReads(
       return null;
     }
     if (ts.isPropertyAccessExpression(argument) || ts.isElementAccessExpression(argument)) {
+      const member = memberNameOf(argument);
+      const ownerExpression = ownerOf(argument);
+      if (member !== null && ownerExpression) {
+        const ownerCandidates = sourceResolveCandidates(ownerExpression, scope);
+        const ownerIdentifier = unwrap(ownerExpression);
+        const ownerBinding = ts.isIdentifier(ownerIdentifier)
+          ? lookup(scope, ownerIdentifier.text)
+          : null;
+        const authoritative =
+          ownerCandidates.some(
+            (candidate) =>
+              candidate.matched && sourcePathHasProvenance(ownerExpression, scope, candidate)
+          ) ||
+          (ownerBinding !== null &&
+            'sourceAuthority' in ownerBinding &&
+            ownerBinding.sourceAuthority === true);
+        // The complete source-state proof above already handled known members.
+        // Missing or unknown source paths cannot regain proof from a legacy
+        // hook-name table or an internal result bucket with a matching name.
+        if (authoritative) return null;
+      }
       if (ts.isPropertyAccessExpression(argument)) {
         const owner = bagHook(argument.expression, scope);
-        if (owner) return [{ hook: owner, state: argument.name.text }];
+        if (owner) {
+          return [{ hook: owner, state: argument.name.text }];
+        }
       }
       // `const controls = { ready: flag }` — production reads the container the
       // same way it reads an `asHook` bag, so this is not a blind spot.
@@ -1273,6 +2540,49 @@ export function scanRuleStateReads(
     return [];
   };
 
+  const declareLoopTokenBindings = (
+    node: ts.ForOfStatement,
+    scope: Scope,
+    row?: ts.Expression
+  ): void => {
+    const initializer = node.initializer;
+    const iterable = unwrap(node.expression);
+    if (!ts.isVariableDeclarationList(initializer) || !ts.isArrayLiteralExpression(iterable))
+      return;
+    const elements = row
+      ? [row]
+      : iterable.elements.filter((element) => !ts.isOmittedExpression(element));
+    const assign = (name: ts.BindingName, expressions: ts.Expression[]): void => {
+      if (!ts.isIdentifier(name) || expressions.length === 0) return;
+      declare(scope, name.text, {
+        kind: 'token',
+        initializer: expressions[0],
+        ...(expressions.length > 1 ? { alternates: expressions.slice(1) } : {}),
+        bindingNode: initializer,
+      });
+    };
+    const members = (key: string): ts.Expression[] =>
+      elements.flatMap((element) => containerMembers(element, key, scope));
+    for (const declaration of initializer.declarations) {
+      if (ts.isIdentifier(declaration.name)) {
+        assign(declaration.name, elements);
+      } else if (ts.isArrayBindingPattern(declaration.name)) {
+        declaration.name.elements.forEach((element, index) => {
+          if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
+          assign(element.name, members(String(index)));
+        });
+      } else if (ts.isObjectBindingPattern(declaration.name)) {
+        for (const element of declaration.name.elements) {
+          if (!ts.isBindingElement(element) || !ts.isIdentifier(element.name)) continue;
+          const property = element.propertyName ?? element.name;
+          const key =
+            ts.isIdentifier(property) || ts.isStringLiteralLike(property) ? property.text : null;
+          if (key !== null) assign(element.name, members(key));
+        }
+      }
+    }
+  };
+
   /** Every binding a base expression may name, following a conditional. */
   const containerBindings = (
     node: ts.Node,
@@ -1289,13 +2599,52 @@ export function scanRuleStateReads(
     if (!ts.isIdentifier(value) || seen.has(value.text)) return [];
     const owner = scopeBinding(scope, value.text);
     const held = owner?.bindings.get(value.text);
-    if (!owner || held?.kind !== 'token') return [];
+    if (!owner || !held) return [];
+    if (held.kind === 'handleBag' && held.sourceValue?.kind === 'object') {
+      return [{ scope: owner, name: value.text }];
+    }
+    if (held.kind !== 'token') return [];
     const initializer = unwrap(held.initializer);
     if (ts.isIdentifier(initializer) || ts.isConditionalExpression(initializer)) {
       const next = containerBindings(initializer, scope, new Set([...seen, value.text]));
       if (next.length > 0) return next;
     }
     return [{ scope: owner, name: value.text }];
+  };
+
+  /** Token bindings that resolve to the same pre-RHS container receiver. */
+  const tokenAliases = (
+    target: { scope: Scope; name: string },
+    scope: Scope
+  ): Array<{ scope: Scope; name: string; initializer: ts.Expression; bindingNode?: ts.Node }> => {
+    const aliases: Array<{
+      scope: Scope;
+      name: string;
+      initializer: ts.Expression;
+      bindingNode?: ts.Node;
+    }> = [];
+    for (let owner: Scope | null = scope; owner; owner = owner.parent) {
+      for (const [name, binding] of owner.bindings) {
+        if (binding.kind !== 'token') continue;
+        const declaration = binding.bindingNode;
+        const reference =
+          declaration && ts.isVariableDeclaration(declaration) ? declaration.name : declaration;
+        if (!reference || !ts.isIdentifier(reference)) continue;
+        if (
+          containerBindings(reference, owner).some(
+            (candidate) => candidate.scope === target.scope && candidate.name === target.name
+          )
+        ) {
+          aliases.push({
+            scope: owner,
+            name,
+            initializer: binding.initializer,
+            bindingNode: binding.bindingNode,
+          });
+        }
+      }
+    }
+    return aliases;
   };
 
   /** Whether any container this base may name has an unresolvable branch. */
@@ -1323,17 +2672,72 @@ export function scanRuleStateReads(
     return owner && key !== null ? containerMembers(owner, key, scope) : [];
   };
 
+  const sourceMemberPresence = (node: ts.Node, scope: Scope): boolean | null => {
+    const value = unwrap(node);
+    if (!ts.isPropertyAccessExpression(value) && !ts.isElementAccessExpression(value)) return null;
+    const key = memberNameOf(value);
+    const owner = ownerOf(value);
+    if (key === null || !owner || hasObjectPrototypeEscape || key in Object.prototype) return null;
+    const resolvedCandidates = sourceResolveCandidates(owner, scope);
+    const resolved = resolvedCandidates.find((candidate) => candidate.matched);
+    if (!resolved || resolvedCandidates.some((candidate) => !candidate.matched)) return null;
+    const ownerIdentifier = unwrap(owner);
+    const ownerBinding = ts.isIdentifier(ownerIdentifier)
+      ? lookup(scope, ownerIdentifier.text)
+      : null;
+    const candidates =
+      ownerBinding && 'sourceValue' in ownerBinding && ownerBinding.sourceValue
+        ? [ownerBinding.sourceValue, ...(ownerBinding.sourceAlternatives ?? [])]
+        : resolvedCandidates.map((candidate) => candidate.value);
+    const objects = candidates.filter(
+      (candidate): candidate is Extract<HookSourceValue, { kind: 'object' }> =>
+        candidate.kind === 'object'
+    );
+    if (objects.length !== candidates.length) return null;
+    if (objects.every((candidate) => !candidate.members.has(key) && candidate.closed === true))
+      return false;
+    return null;
+  };
+
+  const sourceConditionOutcome = (node: ts.Node, scope: Scope): boolean | null => {
+    const value = unwrap(node);
+    if (ts.isPrefixUnaryExpression(value) && value.operator === ts.SyntaxKind.ExclamationToken) {
+      const presence = sourceMemberPresence(value.operand, scope);
+      return presence === null ? null : !presence;
+    }
+    return sourceMemberPresence(value, scope);
+  };
+
   /**
    * The extractor's `resolveStateEqVariant` lowers exactly three right-hand
    * sides: the two boolean keywords, and a string literal whose text is a legal
    * data-attribute value. `null` means the extractor produces no variant, which
    * the scanner reports rather than reading as covered.
    */
-  const comparisonOf = (node: ts.Expression | undefined): 'positive' | 'negative' | null => {
+  const comparisonOf = (
+    node: ts.Expression | undefined,
+    scope: Scope
+  ): 'positive' | 'negative' | null => {
     if (!node) return null;
     if (node.kind === ts.SyntaxKind.TrueKeyword) return 'positive';
     if (node.kind === ts.SyntaxKind.FalseKeyword) return 'negative';
     if (ts.isStringLiteralLike(node) && /^[a-zA-Z0-9_-]+$/.test(node.text)) return 'positive';
+    if (ts.isIdentifier(node)) {
+      const binding = lookup(scope, node.text);
+      if (binding?.kind === 'token') {
+        const candidates = [binding.initializer, ...(binding.alternates ?? [])].map((candidate) =>
+          unwrap(candidate)
+        );
+        if (
+          candidates.length > 0 &&
+          candidates.every(
+            (candidate): candidate is ts.StringLiteralLike =>
+              ts.isStringLiteralLike(candidate) && /^[a-zA-Z0-9_-]+$/.test(candidate.text)
+          )
+        )
+          return 'positive';
+      }
+    }
     // `number.discrete` bindings lower by stringifying the literal, and `-1`
     // parses as a prefix unary expression rather than a numeric literal.
     if (ts.isNumericLiteral(node)) return 'positive';
@@ -1398,12 +2802,26 @@ export function scanRuleStateReads(
   const moduleRootScope = (module: ts.SourceFile): Scope => {
     const cached = moduleScopes.get(module);
     if (cached) return cached;
-    const scope: Scope = { parent: null, bindings: new Map(), node: null };
+    const scope: Scope = {
+      parent: null,
+      bindings: new Map(),
+      node: null,
+      sourceSummary,
+      versions: createSourceGraphVersionTracker(),
+    };
     // Insert before filling so a cycle of relative modules terminates.
     moduleScopes.set(module, scope);
     for (const statement of module.statements) {
       if (ts.isImportDeclaration(statement) && ts.isStringLiteralLike(statement.moduleSpecifier)) {
-        const named = statement.importClause?.namedBindings;
+        const clause = statement.importClause;
+        if (clause?.name) {
+          scope.bindings.set(clause.name.text, {
+            kind: 'defaultImport',
+            specifier: statement.moduleSpecifier.text,
+            from: module.fileName,
+          });
+        }
+        const named = clause?.namedBindings;
         if (named && ts.isNamedImports(named)) {
           for (const element of named.elements) {
             scope.bindings.set(element.name.text, {
@@ -1483,6 +2901,10 @@ export function scanRuleStateReads(
         resolvableTokenArgument(inner.whenTrue, scope, seen) &&
         resolvableTokenArgument(inner.whenFalse, scope, seen)
       );
+    if (ts.isCallExpression(inner) && ts.isIdentifier(inner.expression)) {
+      if (inner.expression.text !== 'tw' || inner.arguments.length === 0) return false;
+      return inner.arguments.every((argument) => resolvableTokenArgument(argument, scope, seen));
+    }
     // `[...].join(' ')` is the one call form the extractor resolves, and
     // `resolveJoinCall` reads only a literal separator — anything else falls
     // back to `,` there while the runtime joins on the real value.
@@ -1503,8 +2925,11 @@ export function scanRuleStateReads(
       if (seen.has(inner.text)) return false;
       const binding = lookup(scope, inner.text);
       const next = new Set([...seen, inner.text]);
-      if (binding?.kind === 'token')
-        return resolvableTokenArgument(binding.initializer, scope, next);
+      if (binding?.kind === 'token') {
+        return [binding.initializer, ...(binding.alternates ?? [])].every((candidate) =>
+          resolvableTokenArgument(candidate, scope, next)
+        );
+      }
       if (binding?.kind === 'tokenImport') {
         const module = loadRelativeModule(binding.specifier, binding.from ?? fileName);
         if (!module) return false;
@@ -1573,17 +2998,19 @@ export function scanRuleStateReads(
     return handles.every((handle) => {
       const call = unwrap(handle);
       if (
-        !ts.isCallExpression(call) ||
-        !ts.isIdentifier(call.expression) ||
-        call.expression.text !== 'tw'
+        ts.isCallExpression(call) &&
+        ts.isIdentifier(call.expression) &&
+        call.expression.text === 'tw'
       ) {
-        // A pre-bound handle gives `collectTwTokens` no call to read.
-        return false;
+        return (
+          call.arguments.length > 0 &&
+          call.arguments.every((argument) => resolvableTokenArgument(argument, scope))
+        );
       }
-      return (
-        call.arguments.length > 0 &&
-        call.arguments.every((argument) => resolvableTokenArgument(argument, scope))
-      );
+      // The style collector resolves a finite pre-bound tw handle through its
+      // lexical binding; require that same token proof here instead of
+      // rejecting every non-inline handle.
+      return resolvableTokenArgument(call as ts.Expression, scope);
     });
   };
 
@@ -1744,7 +3171,7 @@ export function scanRuleStateReads(
               usages: readState(receiver.arguments[0], scope),
               subject: receiver.arguments[0].getText(source),
               text: node.getText(source),
-              comparison: comparisonOf(node.arguments[0]),
+              comparison: comparisonOf(node.arguments[0], scope),
             });
           }
         }
@@ -1826,19 +3253,371 @@ export function scanRuleStateReads(
     }
   };
 
+  const shadowBindingPattern = (scope: Scope, name: ts.BindingName): void => {
+    if (ts.isIdentifier(name)) {
+      declare(scope, name.text, { kind: 'opaque' });
+      return;
+    }
+    for (const element of name.elements) {
+      if (ts.isBindingElement(element)) shadowBindingPattern(scope, element.name);
+    }
+  };
+
+  /**
+   * Whether a call's callee denotes a proven read-only accessor.
+   *
+   * A proven accessor reads the result it is called on and never writes to
+   * it, so the call does not withdraw the proof the receiver's members
+   * carry. The proof is the callee itself, not the value the call returns: a
+   * state read with a dynamic key returns a value the summary cannot name,
+   * while the accessor still reads. A method whose name merely looks
+   * read-only proves nothing about what it does to its receiver, so nothing
+   * is exempt by its spelling, and a callable that is not an admitted
+   * accessor proves nothing either.
+   *
+   * The member is read from the graph the receiver holds now, not from the
+   * projection the producer declared. A member write replaces the member in
+   * the graph the container holds, and a producer hands the same container to
+   * every call, so a later call reaches the member the container holds then.
+   * Reading the declared projection instead would certify a receiver whose
+   * member a write may already have replaced.
+   *
+   * Every graph the receiver may denote must carry such an accessor. The
+   * receiver may be one of several values - a name that holds one object on
+   * one branch and another on the other - and the runtime picks the branch it
+   * takes, so a callee that may be a mutator on one of them writes to the
+   * receiver on that branch. Reading only the primary resolution would
+   * certify a receiver the runtime may have written to.
+   *
+   * The receiver is captured before the arguments are evaluated, so the proof
+   * is the one the receiver carried when the call was reached: a later
+   * argument that rebinds a name cannot change what the callee denoted.
+   *
+   * Every version the receiver may hold is read, not only the newest one. A
+   * write that may not have run leaves the graph it replaced in place, so
+   * the container may still hold a member the newest version replaced.
+   */
+  const provenAccessorCallee = (
+    node: ts.CallExpression,
+    scope: Scope,
+    receiver: HookSourceValue[]
+  ): boolean => {
+    const callee = unwrap(node.expression);
+    if (!ts.isPropertyAccessExpression(callee) && !ts.isElementAccessExpression(callee))
+      return false;
+    const key = memberNameOf(callee);
+    if (key === null || receiver.length === 0) return false;
+    // Every version the receiver may hold is required, and the versions of
+    // several candidates are the same container, so they are counted once.
+    const versions = new Set<HookSourceValue>();
+    for (const held of receiver) {
+      for (const version of scope.versions.versions(held)) versions.add(version);
+    }
+    if (versions.size === 0) return false;
+    return [...versions].every((current) => {
+      if (current.kind !== 'object') return false;
+      const member = current.members.get(key);
+      if (!member || member.kind !== 'callable') return false;
+      return member.operation === 'getState';
+    });
+  };
+
+  /**
+   * A call may write to the containers it receives, so the cached provenance
+   * of a source-backed container is only sound while no member it holds has
+   * been replaced.
+   *
+   * A known mutating call is tracked when every member it copies is proven.
+   * Any other call keeps no proof of the members the containers it received
+   * hold, or of mutable containers reachable through them, because it may have
+   * replaced any of them.
+   *
+   * `captured` holds the containers each argument denoted while that argument
+   * was evaluated. The call receives those objects, so a later argument that
+   * rebinds a name does not move the mutation onto the container the name
+   * holds afterwards.
+   *
+   * `receiver` holds the containers the receiver denoted while it was
+   * evaluated. A method call may write to the object it is called on, so the
+   * receiver is a container the call may mutate even when it takes no
+   * argument.
+   *
+   * `readsOnly` says the callee is a proven read-only accessor, so the call
+   * does not write to the receiver it is called on.
+   */
+  const applyCallMutation = (
+    node: ts.CallExpression,
+    scope: Scope,
+    captured: CapturedArgument[],
+    receiver: HookSourceValue[],
+    readsOnly: boolean
+  ): void => {
+    if (captured.length === 0 && receiver.length === 0) return;
+    // An authored asHook producer never receives the arguments of its call:
+    // the runtime evaluates them for their effects and then invokes the
+    // producer's setup with the definition handle alone
+    // (packages/core/src/prototype.ts, `proto.setup(def)` for the asHook
+    // kind), and the summary only recognizes `defineAsHook` declarations as
+    // producers. The producer therefore cannot write to a container it was
+    // passed, so the call does not withdraw it here.
+    if (scope.sourceSummary.isAuthoredProducerCall(node, source)) return;
+    const mutation = hookSourceCallMutation(node);
+    const callWriteUncertain = (value: HookSourceValue, ambiguous: boolean): boolean => {
+      const owning = sourceOwnerScope(scope, value);
+      return (
+        ambiguous ||
+        isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
+        isDeferredWrite(node, enclosingFunction(owning?.node ?? null))
+      );
+    };
+    const publish = (value: HookSourceValue, next: HookSourceValue, ambiguous = false): void => {
+      publishSourceGraph(scope, value, next, callWriteUncertain(value, ambiguous));
+    };
+    /**
+     * An unknown call can reach a nested object through the container it was
+     * handed. Walk object identities, not structural equality, so shared
+     * children are written once and distinct twins stay distinct. State
+     * handles are leaves, and a callable's result is an immutable capture,
+     * not an edge into objects the call received. Publish reachable objects as
+     * one batch so conditional writes retain no intermediate parent graphs.
+     */
+    const invalidateUnknownCallGraphs = (
+      requests: ReadonlyArray<{ value: HookSourceValue; uncertain: boolean }>
+    ): void => {
+      const collect = (
+        uncertain: boolean,
+        seen: Set<HookSourceValue>,
+        skip?: ReadonlySet<HookSourceValue>
+      ): Map<HookSourceValue, HookSourceValue> => {
+        const replacements = new Map<HookSourceValue, HookSourceValue>();
+        const visit = (current: HookSourceValue): void => {
+          if (current.kind !== 'object' && current.kind !== 'result') return;
+          if (seen.has(current) || skip?.has(current)) return;
+          seen.add(current);
+          const versions = scope.versions.versions(current);
+          for (const version of versions) seen.add(version);
+          if (current.kind === 'result') {
+            for (const version of versions) {
+              if (version.kind !== 'result' || skip?.has(version)) continue;
+              if (version.handle) visit(version.handle);
+              for (const child of version.children.values()) visit(child);
+            }
+            return;
+          }
+          // A retired reference still needs its own replacement, but its old
+          // members are detached. Only live versions describe reachable edges.
+          if (!replacements.has(current)) {
+            replacements.set(current, mutateSourceGraph(current, null));
+          }
+          for (const version of versions) {
+            if (version.kind !== 'object' || skip?.has(version)) continue;
+            if (!replacements.has(version)) {
+              replacements.set(version, mutateSourceGraph(version, null));
+            }
+            for (const member of version.members.values()) visit(member);
+          }
+        };
+        for (const request of requests) {
+          if (request.uncertain === uncertain) visit(request.value);
+        }
+        return replacements;
+      };
+      // A container reached through a definite request is definitely written,
+      // even when a conditional candidate can also reach it. Collect both maps
+      // before publishing either so every replacement uses the pre-call graph.
+      const definiteSeen = new Set<HookSourceValue>();
+      const definite = collect(false, definiteSeen);
+      const conditional = collect(true, new Set<HookSourceValue>(), definiteSeen);
+      const publishBatch = (
+        replacements: Map<HookSourceValue, HookSourceValue>,
+        uncertain: boolean
+      ): void => {
+        const first = replacements.entries().next();
+        if (first.done) return;
+        publishSourceGraph(scope, first.value[0], first.value[1], uncertain, replacements);
+      };
+      // Definite writes must advance every graph retained by a possible write,
+      // while the unknown alternative from that possible write remains.
+      publishBatch(conditional, true);
+      publishBatch(definite, false);
+    };
+    const unknownCallValues: { value: HookSourceValue; uncertain: boolean }[] = [];
+    // The receiver is evaluated before the arguments, so the container it
+    // denoted is the one the call wrote to before it looked at an argument.
+    // Every version a container the call received may hold is read before
+    // any of them is written: a write can leave the container holding a new
+    // graph, and the versions the call wrote to are the ones the call found.
+    // Reading them per container as the call goes would let the write to one
+    // container add versions to the container the next lookup reads, and the
+    // call would write to graphs the call never received.
+    const capturedBatch = captured.map((entry) => {
+      const live = new Set<HookSourceValue>();
+      for (const candidate of entry.values) {
+        for (const version of scope.versions.versions(candidate)) live.add(version);
+      }
+      const first = entry.values[0];
+      const oneContainer =
+        first !== undefined &&
+        entry.values.every((candidate) => scope.versions.sameContainer(candidate, first));
+      return { live, oneContainer };
+    });
+    if (receiver.length > 0 && !readsOnly) {
+      // Every version the receiver may hold is withdrawn, because a write that
+      // may not have run leaves the graph it replaced in place. The versions
+      // of one container are that container, so the call wrote to all of them;
+      // the candidates of different containers are written one at a time, so
+      // the others keep the members they held.
+      const live = new Set<HookSourceValue>();
+      for (const candidate of receiver) {
+        for (const version of scope.versions.versions(candidate)) live.add(version);
+      }
+      const first = receiver[0];
+      const oneContainer =
+        first !== undefined &&
+        receiver.every((candidate) => scope.versions.sameContainer(candidate, first));
+      for (const value of live) {
+        if (value.kind !== 'object') continue;
+        if (mutation.kind === 'unknown') {
+          unknownCallValues.push({
+            value,
+            uncertain: callWriteUncertain(value, !oneContainer),
+          });
+        } else {
+          publish(value, mutateSourceGraph(value, null), !oneContainer);
+        }
+      }
+    }
+    if (mutation.kind === 'copy') {
+      const target = captured[mutation.target];
+      if (!target) return;
+      const targets = target.values.map((value) => latestSourceVersion(scope, value));
+      if (targets.length === 0) return;
+      const sources = mutation.sources.map((index) => captured[index]).filter(Boolean);
+      // A copy with no source changes nothing, so the container keeps its proof.
+      if (sources.length === 0) return;
+      const copied: HookSourceValue[] = [];
+      const labels: string[] = [];
+      let proven = true;
+      for (const argument of sources) {
+        // The source is read when the call runs, so it advances to the version
+        // it holds then and not to the snapshot taken while it was evaluated.
+        const value = argument.source ? scope.versions.latest(argument.source) : undefined;
+        const label = argument.label;
+        // A source with an unproved alternative copies a different member set
+        // on the other branch, and members that come from more than one
+        // producer name no single producer, so the copy is not proven.
+        if (!value || !label || !sourceMembersProven(value) || !sourceMembersOneProducer(value)) {
+          proven = false;
+          break;
+        }
+        copied.push(value);
+        labels.push(label);
+      }
+      for (const value of targets) {
+        publish(
+          value,
+          proven ? mutateSourceGraph(value, copied) : mutateSourceGraph(value, null),
+          // Only one of several targets is written, so the others keep the
+          // members they held.
+          targets.length > 1
+        );
+      }
+      if (!proven) return;
+      // The copied states keep the producer that owns them, so a read after
+      // the call names the producer the copy came from rather than the one
+      // that produced the container it was written to. A state that already
+      // carries its producer keeps it: a later copy through another container
+      // does not change who owns the state.
+      copied.forEach((source, index) => {
+        if (source.kind !== 'object') return;
+        for (const member of source.members.values()) {
+          if (member.kind === 'state' && !sourceStateHooks.has(member.state)) {
+            sourceStateHooks.set(member.state, labels[index]);
+          }
+        }
+      });
+      return;
+    }
+    // An unknown call may replace any member of every container it receives.
+    for (const { live, oneContainer } of capturedBatch) {
+      // Every version a received container may hold is withdrawn, because a
+      // write that may not have run leaves the graph it replaced in place. The
+      // versions of one container are that container, so the call wrote to all
+      // of them; the candidates of different containers are written one at a
+      // time, so the others keep the members they held.
+      for (const value of live) {
+        // The call received one of several containers, so the others keep the
+        // members they held.
+        if (value.kind !== 'object') continue;
+        unknownCallValues.push({
+          value,
+          uncertain: callWriteUncertain(value, !oneContainer),
+        });
+      }
+    }
+    invalidateUnknownCallGraphs(unknownCallValues);
+  };
+
   const visit = (node: ts.Node, scope: Scope): void => {
     const current = introducesScope(node)
-      ? { parent: scope, bindings: new Map<string, Binding>(), node }
+      ? {
+          parent: scope,
+          bindings: new Map<string, Binding>(),
+          node,
+          sourceSummary: scope.sourceSummary,
+          // An authored setup is its own owner: it holds its own containers of
+          // the producers it reads, so it does not share the versions of the
+          // owner around it.
+          versions: scope.sourceSummary.isAuthoredSetup(node, source)
+            ? createSourceGraphVersionTracker()
+            : scope.versions,
+        }
       : scope;
+
+    if (ts.isForOfStatement(node)) {
+      const iterable = unwrap(node.expression);
+      if (ts.isArrayLiteralExpression(iterable)) {
+        visit(node.expression, current);
+        for (const row of iterable.elements) {
+          if (ts.isOmittedExpression(row)) continue;
+          const rowScope: Scope = {
+            parent: current,
+            bindings: new Map(),
+            node: null,
+            sourceSummary: current.sourceSummary,
+            versions: current.versions,
+          };
+          declareLoopTokenBindings(node, rowScope, row);
+          visit(node.statement, rowScope);
+        }
+        return;
+      }
+    }
+
+    if (ts.isIfStatement(node)) {
+      const outcome = sourceConditionOutcome(node.expression, current);
+      visit(node.expression, current);
+      if (outcome === false) {
+        if (node.elseStatement) visit(node.elseStatement, current);
+        return;
+      }
+      if (outcome === true) {
+        visit(node.thenStatement, current);
+        return;
+      }
+      visit(node.thenStatement, current);
+      if (node.elseStatement) visit(node.elseStatement, current);
+      return;
+    }
 
     // A parameter shadows whatever the enclosing scopes bound to that name. Its
     // own origin cannot be recovered from the source, so it resolves to nothing
     // rather than falling through to an outer handle of the same name.
     if (ts.isFunctionLike(node)) {
-      for (const parameter of node.parameters) {
-        if (ts.isIdentifier(parameter.name))
-          declare(current, parameter.name.text, { kind: 'opaque' });
-      }
+      for (const parameter of node.parameters) shadowBindingPattern(current, parameter.name);
+    }
+    if (ts.isCatchClause(node) && node.variableDeclaration) {
+      shadowBindingPattern(current, node.variableDeclaration.name);
     }
 
     // A statement, or a loop initializer, which production registers in the
@@ -1859,26 +3638,199 @@ export function scanRuleStateReads(
     // Writing through the container moves the member for every read after it.
     if (
       ts.isBinaryExpression(node) &&
-      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
-      (ts.isPropertyAccessExpression(node.left) || ts.isElementAccessExpression(node.left))
+      node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+      node.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
+      // A cast or a pair of parentheses names the same member, so the write
+      // reaches the same container.
+      (ts.isPropertyAccessExpression(unwrap(node.left)) ||
+        ts.isElementAccessExpression(unwrap(node.left)))
     ) {
+      const operator = node.operatorToken.kind;
+      const plainAssignment = operator === ts.SyntaxKind.EqualsToken;
+      const logicalAssignment =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        operator === ts.SyntaxKind.BarBarEqualsToken ||
+        operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
+      // Evaluate LHS receiver/key effects before reading its old value or
+      // proving logical assignment short-circuit behavior.
+      visit(node.left, current);
       const base = unwrap(ownerOf(node.left) ?? node.left);
       const member = memberNameOf(node.left);
-      if (ts.isIdentifier(base) || ts.isConditionalExpression(base)) {
+      const previousState = logicalAssignment ? readState(node.left, current) : null;
+      // Legacy coverage can name a read before its table proves that member
+      // exists. Only actual local/source handles or table members are truthy.
+      const knownStateHandle =
+        previousState !== null &&
+        previousState.length > 0 &&
+        previousState.every(
+          (state) =>
+            state === 'local' ||
+            'exposedLocal' in state ||
+            state.provenance !== undefined ||
+            loweredHookStates(state.hook)?.has(state.state) === true
+        );
+      if (
+        knownStateHandle &&
+        (operator === ts.SyntaxKind.BarBarEqualsToken ||
+          operator === ts.SyntaxKind.QuestionQuestionEqualsToken)
+      ) {
+        // A state handle is truthy and non-nullish, so neither operator runs
+        // its RHS or changes the member.
+        return;
+      }
+      const writesRight =
+        plainAssignment ||
+        (operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken && knownStateHandle);
+      const targets =
+        ts.isIdentifier(base) || ts.isConditionalExpression(base)
+          ? containerBindings(base, current)
+          : [];
+      const receivers = targets.map((target) => {
+        const receiver = target.scope.bindings.get(target.name);
+        return {
+          target,
+          receiver,
+          aliases: receiver?.kind === 'token' ? tokenAliases(target, current) : [],
+        };
+      });
+      // A nested receiver is an object inside a binding's source graph, not a
+      // new binding named after the member expression. Capture it before RHS
+      // writes can rebind the root or replace that nested object.
+      const sourceReceiverValues = (expression: ts.Node): HookSourceValue[] => {
+        const value = unwrap(expression);
+        if (ts.isConditionalExpression(value)) {
+          return [
+            ...sourceReceiverValues(value.whenTrue),
+            ...sourceReceiverValues(value.whenFalse),
+          ];
+        }
+        return sourceResolveCandidates(value, current)
+          .filter((candidate) => candidate.matched && candidate.value.kind === 'object')
+          .map((candidate) => candidate.value);
+      };
+      const sourceReceivers = [...new Set(sourceReceiverValues(base))];
+      const definitelyRunsRight =
+        operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken && knownStateHandle;
+      if (definitelyRunsRight) definitelyReachedLogicalAssignments.add(node);
+      try {
+        visit(node.right, current);
+      } finally {
+        if (definitelyRunsRight) definitelyReachedLogicalAssignments.delete(node);
+      }
+      if (writesRight) rememberSourceStateHooks(node.right, current);
+      // The write lands on the container, and the versions of one container
+      // are that container, so the write reaches every version the container
+      // may hold now. The set of versions is taken before any of them is
+      // written: a version written twice would be published twice, and the
+      // second publication would add another graph the container may hold -
+      // the same write would then grow the container it was applied to.
+      const held = new Set<HookSourceValue>();
+      const owners = new Map<HookSourceValue, Scope | null>();
+      for (const receiver of sourceReceivers) {
+        const owning = sourceOwnerScope(current, receiver);
+        for (const version of current.versions.versions(receiver)) {
+          if (held.has(version)) continue;
+          held.add(version);
+          owners.set(version, owning);
+        }
+      }
+      // The candidates of one container are that container, so the write
+      // reaches all of them together. Only candidates of different
+      // containers are written one at a time, so the others keep the members
+      // they held.
+      const first = sourceReceivers[0];
+      const oneContainer =
+        first !== undefined &&
+        sourceReceivers.every((receiver) => current.versions.sameContainer(receiver, first));
+      const right = writesRight ? sourceResolve(node.right, current) : null;
+      const replacement: HookSourceValue = right?.matched
+        ? right.value
+        : { kind: 'unknown', reason: 'unresolved member write' };
+      for (const value of held) {
+        if (value.kind !== 'object') continue;
+        const owning = owners.get(value) ?? null;
+        const uncertain =
+          isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
+          isDeferredWrite(node, enclosingFunction(owning?.node ?? null)) ||
+          // Only one of several containers is written, so the others keep the
+          // members they held.
+          !oneContainer ||
+          (logicalAssignment && !knownStateHandle) ||
+          member === null;
+        const members = new Map(value.members);
+        const keys = member === null ? [...members.keys()] : [member];
+        // A write that leaves the member as it is does not give the container
+        // a new graph: the container holds the graph it held. Two writes to
+        // the same member with the same value therefore leave one graph
+        // between them, and the graphs the container may hold stay as many as
+        // the distinct graphs it may hold.
+        if (keys.every((key) => members.get(key) === replacement)) continue;
+        for (const key of keys) members.set(key, replacement);
+        // The graph the write replaced is kept as it is, so a write that may
+        // not have run leaves the container holding a version the tracker
+        // knows. A copy of it would be a graph nothing else can reach.
+        publishSourceGraph(current, value, { ...value, members }, uncertain);
+      }
+      if (receivers.length > 0) {
         // An alias of the container is the same object, so the write lands on
         // the binding that actually holds the literal — on each of them when
         // the base may be either of two objects.
-        const targets = containerBindings(base, current);
-        for (const target of targets) {
-          const container = target.scope.bindings.get(target.name);
-          if (container?.kind !== 'token') continue;
+        for (const { target, receiver, aliases } of receivers) {
+          if (!receiver) continue;
           // The declaring scope, not this one: inside a callback the write
           // would otherwise be compared against itself and always look ordered.
           const uncertain =
-            isConditionallyReached(node) ||
+            isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
             isDeferredWrite(node, enclosingFunction(target.scope.node)) ||
             targets.length > 1 ||
+            (logicalAssignment && !knownStateHandle) ||
             member === null;
+          if (receiver.kind === 'handleBag' && receiver.sourceValue?.kind === 'object') {
+            // Already published through the captured source receivers above.
+            continue;
+          }
+          const currentContainer = target.scope.bindings.get(target.name);
+          if (
+            receiver.kind === 'token' &&
+            (!currentContainer ||
+              currentContainer.kind !== 'token' ||
+              currentContainer.initializer !== receiver.initializer)
+          ) {
+            // The evaluated token container was rebound during the RHS. Do not
+            // apply its result to the new receiver; invalidate the member on
+            // still-live aliases whose origin cannot be followed exactly.
+            for (const alias of aliases) {
+              const held = alias.scope.bindings.get(alias.name);
+              if (
+                held?.kind !== 'token' ||
+                held.initializer !== alias.initializer ||
+                held.bindingNode !== alias.bindingNode
+              )
+                continue;
+              const keys =
+                member === null
+                  ? [
+                      ...new Set([
+                        ...(held.members?.keys() ?? []),
+                        ...containerKeys(held.initializer, alias.scope),
+                      ]),
+                    ]
+                  : [member];
+              const members = new Map(held.members ?? []);
+              for (const key of keys) {
+                const previous =
+                  held.members?.get(key) ?? containerMembers(held.initializer, key, alias.scope);
+                members.set(key, [node, ...(uncertain ? previous : [])]);
+              }
+              declare(alias.scope, alias.name, { ...held, members });
+            }
+            continue;
+          }
+          const container =
+            receiver.kind === 'token' && currentContainer?.kind === 'token'
+              ? currentContainer
+              : receiver;
+          if (container.kind !== 'token') continue;
           const keys =
             member === null
               ? [
@@ -1897,11 +3849,89 @@ export function scanRuleStateReads(
               [container.initializer, ...(container.alternates ?? [])].flatMap((held) =>
                 containerMembers(held, key, current)
               );
-            members.set(key, [node.right, ...(uncertain ? previous : [])]);
+            members.set(key, [writesRight ? node.right : node, ...(uncertain ? previous : [])]);
           }
           declare(target.scope, target.name, { ...container, members });
         }
       }
+      return;
+    }
+
+    if (
+      ts.isBinaryExpression(node) &&
+      node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+      (ts.isObjectLiteralExpression(unwrap(node.left)) ||
+        ts.isArrayLiteralExpression(unwrap(node.left)))
+    ) {
+      visit(node.right, current);
+      const invalidatePattern = (target: ts.Node): void => {
+        const value = unwrap(target);
+        if (ts.isObjectLiteralExpression(value)) {
+          for (const property of value.properties) {
+            if (ts.isPropertyAssignment(property)) invalidatePattern(property.initializer);
+            else if (ts.isShorthandPropertyAssignment(property)) invalidatePattern(property.name);
+            else if (ts.isSpreadAssignment(property)) invalidatePattern(property.expression);
+          }
+        } else if (ts.isArrayLiteralExpression(value)) {
+          for (const element of value.elements) invalidatePattern(element);
+        } else if (ts.isSpreadElement(value)) invalidatePattern(value.expression);
+        else if (
+          ts.isBinaryExpression(value) &&
+          value.operatorToken.kind === ts.SyntaxKind.EqualsToken
+        )
+          invalidatePattern(value.left);
+        else if (ts.isIdentifier(value)) {
+          const owner = scopeBinding(current, value.text) ?? current;
+          declare(owner, value.text, { kind: 'opaque', sourceAuthority: true });
+        } else if (ts.isPropertyAccessExpression(value) || ts.isElementAccessExpression(value)) {
+          visit(value, current);
+          const key = memberNameOf(value);
+          const owner = ownerOf(value);
+          if (!owner) return;
+          for (const candidate of sourceResolveCandidates(owner, current)) {
+            if (candidate.value.kind !== 'object') continue;
+            const members = new Map(candidate.value.members);
+            for (const member of key === null ? [...members.keys()] : [key])
+              members.set(member, { kind: 'unknown', reason: 'destructured member write' });
+            publishSourceGraph(current, candidate.value, { ...candidate.value, members }, false);
+          }
+        }
+      };
+      invalidatePattern(node.left);
+      return;
+    }
+
+    if (
+      ts.isBinaryExpression(node) &&
+      ts.isIdentifier(node.left) &&
+      (node.operatorToken.kind === ts.SyntaxKind.AmpersandAmpersandEqualsToken ||
+        node.operatorToken.kind === ts.SyntaxKind.BarBarEqualsToken ||
+        node.operatorToken.kind === ts.SyntaxKind.QuestionQuestionEqualsToken)
+    ) {
+      const states = readState(node.left, current);
+      const knownHandle =
+        states !== null &&
+        states.length > 0 &&
+        states.every(
+          (state) =>
+            state === 'local' ||
+            'exposedLocal' in state ||
+            state.provenance !== undefined ||
+            loweredHookStates(state.hook)?.has(state.state) === true
+        );
+      if (knownHandle && node.operatorToken.kind !== ts.SyntaxKind.AmpersandAmpersandEqualsToken)
+        return;
+      const owner = scopeBinding(current, node.left.text) ?? current;
+      if (knownHandle) definitelyReachedLogicalAssignments.add(node);
+      try {
+        visit(node.right, current);
+        if (knownHandle)
+          declareConditionally(owner, node.left.text, node.left, current, node.right);
+        else declare(owner, node.left.text, { kind: 'opaque', sourceAuthority: true });
+      } finally {
+        if (knownHandle) definitelyReachedLogicalAssignments.delete(node);
+      }
+      return;
     }
 
     // A reassignment moves the handle for every read that follows it.
@@ -1916,7 +3946,8 @@ export function scanRuleStateReads(
       declareConditionally(owner, name, node.left, current, node.right);
       const next = owner.bindings.get(name);
       const uncertain =
-        isConditionallyReached(node) || isDeferredWrite(node, enclosingFunction(owner.node));
+        isConditionallyReached(node, definitelyReachedLogicalAssignments) ||
+        isDeferredWrite(node, enclosingFunction(owner.node));
       if (uncertain && replaced?.kind === 'token' && next?.kind === 'token') {
         // Members written into the replaced container are candidates too; its
         // initializer alone does not carry them.
@@ -1958,10 +3989,47 @@ export function scanRuleStateReads(
       else unresolved.push({ expression: node.getText(source), reason: 'spec' });
     }
 
+    if (ts.isCallExpression(node)) {
+      // The callee and the arguments are evaluated in order, and the call
+      // receives the objects its arguments denoted while they were evaluated.
+      visit(node.expression, current);
+      const mutation = hookSourceCallMutation(node);
+      // The receiver is evaluated before the arguments, so the container it
+      // denotes is captured before they are visited: a later argument that
+      // rebinds the name does not move the mutation onto the container the
+      // name holds afterwards.
+      const receiver = receiverContainerValues(node, current);
+      // The callee is evaluated before the arguments as well, so the proof
+      // that it reads the receiver it is called on is captured before they
+      // are visited: a later argument that rebinds a name cannot change what
+      // the callee denoted. The proof reads the member from the graph the
+      // receiver holds now, so a member a write replaced is not exempt.
+      const readsOnly = provenAccessorCallee(node, current, receiver);
+      const captured: CapturedArgument[] = [];
+      for (const argument of node.arguments) {
+        captured.push(
+          captureArgument(
+            argument,
+            current,
+            mutation.kind === 'copy' && mutation.sources.includes(captured.length)
+          )
+        );
+        visit(argument, current);
+      }
+      applyCallMutation(node, current, captured, receiver, readsOnly);
+      return;
+    }
+
     ts.forEachChild(node, (child) => visit(child, current));
   };
 
-  const rootScope: Scope = { parent: null, bindings: new Map(), node: source };
+  const rootScope: Scope = {
+    parent: null,
+    bindings: new Map(),
+    node: source,
+    sourceSummary,
+    versions: createSourceGraphVersionTracker(),
+  };
   declareImports(rootScope);
   visit(source, rootScope);
 

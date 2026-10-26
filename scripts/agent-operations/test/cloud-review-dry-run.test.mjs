@@ -14,7 +14,6 @@ import { LocalCloudReviewLedger } from '../local-cloud-review-ledger.mjs';
 import { renderReviewBody } from '../review-runtime.mjs';
 import { analysis } from './fixtures/cloud-review.mjs';
 import { withReviewTransportMetadata } from './fixtures/review-pagination.mjs';
-import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 
 const policy = parse(
   readFileSync(
@@ -158,7 +157,6 @@ function setup(t, mutate = () => {}) {
   mutate(fixture);
   const dry = new CloudReviewDryRun(ledger, policy, {
     runner: fixture.runner,
-    ...modelTraceFixture(),
   });
   const { input } = dry.begin(487);
   const { packet } = analysis(input);

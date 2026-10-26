@@ -49,4 +49,4 @@ The four public Web runtimes and light/dark themes require independent computed 
 - The dedicated `popover-title` group in `.github/workflows/finf-representative-features-evidence.yml` owns those eight browser cases and retains exact-commit JSON/PNG artifacts. The runtime test planner registers this owner rather than silently excluding the suite.
 - This local implementation has **not run the eight browser cases**: the actual local invocation stops at the official GitHub Actions / clean exact-head gate. Consequently default computed typography, custom inheritance, browser-native focus/lifecycle, narrow/200% text and screenshots remain unverified here. GPUI, compiler composition and same-state upstream screenshots also remain unrun. React/Vue/Vue2 renderer-driven isolated Title removal/remount is not covered by direct DOM mutation and remains separate debt. Registration and a blocked setup are not passing evidence.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot

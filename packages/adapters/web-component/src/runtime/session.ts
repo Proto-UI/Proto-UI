@@ -89,12 +89,12 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (projector) {
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
-        const slotPool = projector.collectSlotPoolBeforeCommit();
+        const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
         root.replaceChildren(...slotPool);
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();
-      const slotPool = projector.collectSlotPoolBeforeCommit();
+      const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
       const owned = new WeakSet<Node>();
 
       const result = commitChildren(root, children, {
@@ -102,6 +102,10 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         slotPool,
         owned,
       });
+
+      // Preserve the established no-slot parking contract, but only after
+      // staging and commit have succeeded. Rejected blueprints keep live nodes.
+      if (!result.hasSlot) for (const node of slotPool) node.parentNode?.removeChild(node);
 
       projector.afterCommit({
         owned,
@@ -114,7 +118,6 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     }
     clearSlotProjector();
   };
-
 
   const hostSession = createAdapterHost(
     { ...proto, name: tagName },

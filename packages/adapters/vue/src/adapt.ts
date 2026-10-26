@@ -37,6 +37,7 @@ import {
   installViewVisibilityRule,
   PUI_VIEW_DETACHED_ATTR,
   PUI_VIEW_PENDING_ATTR,
+  PUI_VIEW_REVEALING_ATTR,
   type ProtoAdapterExposes,
   type ProtoAdapterProps,
   scheduleAfterWebLayout,
@@ -329,6 +330,7 @@ export function createVueAdapter(runtime: VueRuntime) {
         const controllerRef = runtime.ref<RuntimeController | null>(null);
         // The gate is an opaque resource: deep ref proxies break view-epoch identity checks.
         const eventGateRef = runtime.shallowRef<ReturnType<typeof createEventGate> | null>(null);
+        let revealedGate: ReturnType<typeof createEventGate> | null = null;
         const exposesRef = runtime.ref<Record<string, unknown>>({});
         const invokeRef = runtime.ref<((fn: () => void) => void) | null>(null);
         const scopedExposesReader = createScopedExposesReader(() => invokeRef.value);
@@ -521,7 +523,27 @@ export function createVueAdapter(runtime: VueRuntime) {
               !shouldExist.value
             )
               return;
-            rootRef.value?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+            const revealedRoot = rootRef.value;
+            const firstReveal = revealedGate !== gate;
+            revealedGate = gate;
+            // Keep the first authored style from transitioning from the unstyled host.
+            if (firstReveal) revealedRoot?.setAttribute(PUI_VIEW_REVEALING_ATTR, '');
+            revealedRoot?.removeAttribute(PUI_VIEW_PENDING_ATTR);
+            if (firstReveal && revealedRoot) {
+              scheduleAfterWebLayout(
+                revealedRoot,
+                () => {
+                  if (
+                    rootRef.value === revealedRoot &&
+                    gate === eventGateRef.value &&
+                    !revealedRoot.hasAttribute(PUI_VIEW_PENDING_ATTR)
+                  ) {
+                    revealedRoot.removeAttribute(PUI_VIEW_REVEALING_ATTR);
+                  }
+                },
+                schedule
+              );
+            }
             gate?.enable();
             // onUpdated can schedule a Vue removal or replacement. Announce
             // observation readiness after that host commit has settled.
@@ -899,7 +921,10 @@ export function createVueAdapter(runtime: VueRuntime) {
               dir: ctx.attrs.dir ?? props.dir,
               'data-pui-root': '',
               [PUI_VIEW_DETACHED_ATTR]: detached ? '' : undefined,
-              [PUI_VIEW_PENDING_ATTR]: viewReady ? undefined : '',
+              [PUI_VIEW_PENDING_ATTR]:
+                viewReady && revealedGate !== null && revealedGate === eventGateRef.value
+                  ? undefined
+                  : '',
               ...(createVisualSink
                 ? {}
                 : { 'data-pui-style': serializeStyleTokens(hostTokens.value) }),

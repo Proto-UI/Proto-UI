@@ -1,0 +1,61 @@
+id: P-SHADCN-INPUT-SHELL-CONTROL
+type: prototype
+title: Shadcn ordinary Input editor for the passive input shell
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Catalogs the existing PR 971 Base-Input-derived editor in the current workspace train. Complete inherited-protocol evidence, direct profile-boundary tests and independent catalog review remain unresolved; no stable activation is inferred from historical native screenshots.
+summary: A contentless Base Input projection whose outer border, radius and focus ring are delegated to the composed passive shell.
+statement:
+  en: shadcn-input-shell-control is a distinct presentation protocol inheriting P-BASE-INPUT through asInputRoot. It is the ordinary Input consumer of P-SHADCN-INPUT-SHELL, not the Command editor and not the standalone P-SHADCN-INPUT recipe. It preserves the sole host-owned editor and introduces no new Base identity, arbitrary native input type, validation protocol or secondary state authority.
+anatomy:
+  family: shadcn-input-shell-control
+  roles:
+    root:
+      cardinality: { min: 1, max: 1 }
+      summary: One inherited Base Input host-owned physical editor; renderer returns null.
+criteria:
+  - id: P-SHADCN-INPUT-SHELL-CONTROL-BASE-OWNERSHIP
+    text:
+      en: The public inputShellControl entry invokes asInputRoot with its modules and retains Base Input controlled/uncontrolled value, normalized events and IME, live native text props, naming/description, disabled/readOnly and physical focus. Its renderer returns null and must not create a second editing surface or use caller children as an editor.
+    references:
+      prototypes:
+        - id: P-BASE-INPUT
+          anchors: [P-BASE-INPUT-PHYSICAL-TARGET, P-BASE-INPUT-VALUE-OWNERSHIP, P-BASE-INPUT-EVENTS-AND-IME, P-BASE-INPUT-NATIVE-PROPS, P-BASE-INPUT-A11Y-AND-FOCUS]
+  - id: P-SHADCN-INPUT-SHELL-CONTROL-PAINT
+    text:
+      en: The inner editor is full-width min-width-zero grow, rounded-none, border-0, transparent, shadow-none, outline-none and ring-0; it must not form a second rounded shell. New York uses h-9/px-3 and Rhea h-8/px-2.5, with py-1 and base text size switching to text-sm at viewport.width >= 768. Native selection retains primary/primary-foreground and placeholder uses muted-foreground. Inherited disabled owns cursor-not-allowed and opacity-50; the passive shell does not double that opacity.
+  - id: P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY
+    text:
+      en: Shared styleProfile supports exactly new-york-v4 (alias new-york) and rhea. The prop defaults to inherit; selection resolves explicit choice, inherited scope and then the new-york-v4 compatibility fallback in that order. inherit withdraws explicit choice and unsupported known profiles fail. Style changes preserve editor identity, value, selection and focus. The ordinary composition uses the shell's ring rather than installing a second editor ring.
+  - id: P-SHADCN-INPUT-SHELL-CONTROL-BOUNDARY
+    text:
+      en: Public Props/Exposes retain Base Input plus existing style selection; no search execution, Form ownership, invalid aggregation, multi-control, textarea/block or complete InputGroup API is added. Command composition uses its own existing commandInput instead. This entity does not revise P-SHADCN-INPUT's separate visual reference or claim every inherited Base criterion was exercised by the shell fixture.
+openQuestions:
+  - id: P-SHADCN-INPUT-SHELL-CONTROL-Q-ADMISSION
+    question:
+      en: Are the complete inherited Base guarantees and bounded presentation supported by candidate-bound evidence and independent review?
+    context:
+      en: Existing shell fixtures cover selected editing/identity/disabled/readOnly and presentation flows. They are not a complete controlledness, normalized-event, IME and native-prop conformance suite for this derived entry. Direct control alias/withdrawal/unsupported-profile cases also need explicit review. Missing coverage remains an admission blocker, not a reason to weaken Base guarantees.
+    blocks: [activation:P-SHADCN-INPUT-SHELL-CONTROL]
+sources:
+  - path: packages/prototypes/shadcn/src/input-shell/control.proto.ts
+  - path: packages/prototypes/shadcn/src/input-shell/types.ts
+  - path: packages/prototypes/shadcn/src/input-shell/index.ts
+  - path: internal/contracts/command/shadcn-input-shell.presentation.v0.md
+inherits:
+  prototypes:
+    - id: P-BASE-INPUT
+      note: Full inherited single-line editor protocol; no negative patch or second editor.
+dependsOn:
+  contracts: [C-AS-HOOK-0001, C-CORE-SYNTAX-0003, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+relates:
+  prototypes: [P-SHADCN-INPUT-SHELL]
+verifies:
+  tests: [T-SHADCN-INPUT-SHELL-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the existing ordinary shell editor separately from passive Root and standalone Shadcn Input, preserving inherited Base ownership and unresolved evidence.
+tags: [prototype, shadcn, input-shell, control, inherited]

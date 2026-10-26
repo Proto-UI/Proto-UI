@@ -19,6 +19,10 @@ on:
       - 'apps/www/src/content/docs/demo-*-accordion.demo.ts'
       - 'apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts'
       - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/src/content/docs/zh-cn/accordion-activation-observation*'
+      - 'apps/www/src/content/docs/zh-cn/docs-query-timing*'
+      - 'apps/www/scripts/accordion-activation-probe*'
+      - 'apps/www/astro.config.mjs'
       - 'apps/www/src/components/PrototypePreviewer/**'
       - 'scripts/test/server-readiness*'
       - 'pnpm-lock.yaml'
@@ -73,8 +77,10 @@ jobs:
         timeout-minutes: 20
         env:
           PROTO_UI_ACCORDION_SCREENSHOT_DIR: ${{ runner.temp }}/accordion-family/screenshots
+          PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR: ${{ runner.temp }}/accordion-family/activation
         run: |
           set -euo pipefail
+          mkdir -p "$PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR"
           # Supplementary direct evidence only. The standard required CI inventory
           # and its historical failures remain intact; this does not replace them.
           corepack pnpm@10.32.1 exec vitest run \
@@ -89,6 +95,16 @@ jobs:
           assert.equal(report.numTotalTests, 25, 'The complete native Accordion inventory must run.');
           assert.equal(report.numPassedTests, 25, 'All native Accordion journeys must pass.');
           assert.equal(report.numFailedTests, 0);
+          const activation = JSON.parse(fs.readFileSync(`${process.env.PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR}/activation-before-close.json`, 'utf8'));
+          const final = JSON.parse(fs.readFileSync(`${process.env.PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR}/activation-final.json`, 'utf8'));
+          assert.equal(activation.node.mappingCompleteAtSnapshot, true, 'The original getter call/attempt ledger must be complete.');
+          assert.equal(activation.main.errors, 0);
+          assert.equal(activation.main.dropped, 0);
+          assert.notEqual(activation.main.windowStart, null);
+          assert.equal(final.callerDiagnosticErrors, 0);
+          assert.equal(final.contextClosed, true);
+          assert.equal(final.node.disposed, true);
+          assert.deepEqual(final.node.errors, []);
           JS
       - name: Retain exact-source results, screenshots and failures
         if: always()

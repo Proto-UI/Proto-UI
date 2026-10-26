@@ -247,6 +247,23 @@ try {
             path: join(out, `${theme}-${style}-${size}-${divider ? 'dividers' : 'plain'}.png`),
             fullPage: true,
           });
+          if (style === 'rhea' && size === 'sm' && divider) {
+            // Scope and child props are separate public updates. Do not briefly ask a
+            // New York Card to keep Rhea-only sm while transitioning to the next theme.
+            await page.evaluate(() => window.cardEvidence.set('rhea', undefined, 'default', true));
+            const transition = { theme, style, step: 'restore-common-density', values: [] };
+            observations.push(transition);
+            await observeExact(transition, (values) => {
+              for (const v of values) {
+                assert.equal(v.radius, '24px');
+                assert.equal(v.py, '20px');
+                assert.equal(v.gap, '20px');
+                for (const part of [v.header, v.content, v.footer]) assert.equal(part.px, '20px');
+                assert.equal(v.header.pb, '20px');
+                assert.equal(v.footer.pt, '20px');
+              }
+            });
+          }
         }
   for (const base of [2, 10, 32]) {
     await page.evaluate((base) => {

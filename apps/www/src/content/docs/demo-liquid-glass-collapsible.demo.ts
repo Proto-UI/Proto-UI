@@ -35,7 +35,7 @@ export default {
   type: 'demo',
   root: {
     kind: 'box',
-    className: 'grid w-full min-w-0 max-w-lg gap-5 p-2',
+    className: 'grid grid-cols-1 w-full min-w-0 max-w-lg gap-5 p-2',
     children: [
       disclosure(
         'uncontrolled',

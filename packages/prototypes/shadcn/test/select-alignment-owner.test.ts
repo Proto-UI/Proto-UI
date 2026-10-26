@@ -766,3 +766,112 @@ it('item-aligned paint never invents data-side slides or popper translations', a
     expect(styleContains(f.surface, 'zoom-in-95')).toBe(true);
   }
 });
+
+it('focus-return reentry preserves the newer open selection', async () => {
+  vi.useFakeTimers();
+  facts();
+  const f = full();
+  await settle();
+  f.trigger.click();
+  await settle();
+  expect(document.activeElement).toBe(f.items[1]);
+  let returns = 0;
+  f.trigger.addEventListener('focus', () => {
+    returns += 1;
+    if (returns === 1) setElementProps(f.root, { open: true, value: 'gamma' });
+  });
+  f.root.getExposes().close('escape');
+  await settle();
+  expect(returns).toBe(1);
+  expect(f.root.getExposes().open.get()).toBe(true);
+  expect(f.root.getExposes().value.get()).toBe('gamma');
+  expect(f.content.getExposes().transitionState.get()).not.toBe('closed');
+  expect(document.activeElement).toBe(f.items[2]);
+  await vi.advanceTimersByTimeAsync(200);
+  await flush();
+  expect(f.content.getExposes().transitionState.get()).toBe('entered');
+  expect(document.activeElement).toBe(f.items[2]);
+});
+
+it('a throwing focus return still leaves the current Select and preserves its error', async () => {
+  vi.useFakeTimers();
+  facts();
+  const f = full();
+  await settle();
+  f.trigger.click();
+  await settle();
+  expect(document.activeElement).toBe(f.items[1]);
+  const failure = new Error('focus-return host failure');
+  const focus = vi.spyOn(f.trigger, 'focus').mockImplementation(() => {
+    throw failure;
+  });
+  let caught: unknown;
+  let threw = false;
+  try {
+    f.root.getExposes().close('escape');
+  } catch (error) {
+    threw = true;
+    caught = error;
+  } finally {
+    focus.mockRestore();
+  }
+  expect(threw).toBe(true);
+  expect(caught).toBe(failure);
+  expect(f.root.getExposes().open.get()).toBe(false);
+  await settle();
+  expect(f.content.getExposes().transitionState.get()).toBe('closed');
+});
+
+it('preparing focus-return reentry preserves the newer open request', async () => {
+  vi.useFakeTimers();
+  const f = full();
+  await settle();
+  f.trigger.click();
+  await settle();
+  // No geometry facts or private admission flags: retain the actual cold phase.
+  expect(f.content.getExposes().transitionState.get()).toBe('preparing');
+  f.items[1].focus();
+  expect(document.activeElement).toBe(f.items[1]);
+  let returns = 0;
+  f.trigger.addEventListener('focus', () => {
+    returns += 1;
+    if (returns === 1) setElementProps(f.root, { open: true, value: 'gamma' });
+  });
+  f.root.getExposes().close('escape');
+  await settle();
+  expect(returns).toBe(1);
+  expect(f.root.getExposes().open.get()).toBe(true);
+  expect(f.root.getExposes().value.get()).toBe('gamma');
+  expect(f.content.getExposes().transitionState.get()).toBe('preparing');
+  expect(document.activeElement).toBe(f.trigger);
+});
+
+it('a throwing preparing focus return still closes the current Select', async () => {
+  vi.useFakeTimers();
+  const f = full();
+  await settle();
+  f.trigger.click();
+  await settle();
+  expect(f.content.getExposes().transitionState.get()).toBe('preparing');
+  f.items[1].focus();
+  expect(document.activeElement).toBe(f.items[1]);
+  const failure = new Error('preparing focus-return host failure');
+  const focus = vi.spyOn(f.trigger, 'focus').mockImplementation(() => {
+    throw failure;
+  });
+  let caught: unknown;
+  let threw = false;
+  try {
+    f.root.getExposes().close('escape');
+  } catch (error) {
+    threw = true;
+    caught = error;
+  } finally {
+    focus.mockRestore();
+  }
+  expect(threw).toBe(true);
+  expect(caught).toBe(failure);
+  expect(f.root.getExposes().open.get()).toBe(false);
+  await settle();
+  expect(f.content.getExposes().transitionState.get()).toBe('closed');
+});

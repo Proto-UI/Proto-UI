@@ -83,7 +83,9 @@ export default defineConfig({
       enforce: 'pre',
       resolveId(id) {
         if (id === '@floating-ui/dom') {
-          const manifestPath = require.resolve(id + '/package.json', { paths: [path.resolve(__dirname, 'packages/modules/positioning')] });
+          const manifestPath = require.resolve(id + '/package.json', {
+            paths: [path.resolve(__dirname, 'packages/modules/positioning')],
+          });
           const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
           return path.resolve(path.dirname(manifestPath), manifest.exports['.'].import.default);
         }
@@ -98,6 +100,7 @@ export default defineConfig({
       'packages/**/test/**/*.test.ts',
       'internal/contracts/__tests__/**/*.test.ts',
       'apps/**/test/**/*.test.ts',
+      'apps/www/test/proto-ui-source.test.mjs',
       'apps/www/src/**/*.test.ts',
     ],
   },

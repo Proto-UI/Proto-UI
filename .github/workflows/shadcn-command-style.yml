@@ -32,7 +32,7 @@ jobs:
           corepack pnpm@10.32.1 install --frozen-lockfile
       - name: Test public binding, actual four-framework app and bounded CSS
         timeout-minutes: 3
-        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/input-shell-binding.test.ts packages/prototypes/shadcn/test/command-style-projection.test.ts packages/prototypes/shadcn/test/command-evidence-app.test.ts packages/cli/test/proto-style-css.test.ts
+        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/input-shell-binding.test.ts packages/prototypes/shadcn/test/command-style-projection.test.ts packages/prototypes/shadcn/test/command-evidence-app.test.ts packages/prototypes/shadcn/test/command-evidence-contract.test.ts packages/cli/test/proto-style-css.test.ts
       - name: Capture exact-head native Command and ordinary Input shell
         timeout-minutes: 5
         env:

@@ -3,6 +3,8 @@ type: contract
 title: Opt-in Field composition over the existing multiline editor
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Synthetic WC composition and editor-continuity coverage do not establish native editing, assistive-technology or complete cross-runtime acceptance; these remain blockers to stable admission.
 summary: Definition-time Field binding reuses Textarea editing while keeping ordinary explicit Label associations unchanged.
 statement:
   en: Field multiline composition borrows canonical Field policy and validity, not native HTML validity, and never creates another editor or validator.

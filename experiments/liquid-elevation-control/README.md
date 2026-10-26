@@ -1,6 +1,6 @@
 # Liquid Surface elevation control
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot
 
 This isolated CI-only experiment compares the existing Liquid Surface `elevation: none` with `raised`. Both variants are produced through the actual `LibraryCardPart` and Liquid family prototype, including compiled SSR style tokens. No equivalent handwritten shadow CSS is used. The current owned deterministic Canvas scene (gradients and thin curved lines) is reused; no external images or reference artwork are included.
 

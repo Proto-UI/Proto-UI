@@ -261,6 +261,11 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'BaseFieldValidity',
           elementName: 'proto-ui-base-field-validity',
         },
+        {
+          prototypeImport: 'fieldTextarea',
+          exportBaseName: 'BaseFieldTextarea',
+          elementName: 'proto-ui-base-field-textarea',
+        },
       ],
       { stylePreset: null }
     ),

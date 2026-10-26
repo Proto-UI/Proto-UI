@@ -16,7 +16,26 @@ export function headerPopupSettled(element: Element): boolean {
 }
 
 export function readHeaderPopupPaint(element: Element) {
-  const style = getComputedStyle(element);
+  let paintElement = element;
+  if (element.getAttribute('data-projection-prototype') === 'shadcn-select-content') {
+    const surfaces = [
+      ...element.querySelectorAll('[data-projection-prototype="shadcn-select-surface"]'),
+    ].filter((surface) => surface.closest('[role="listbox"]') === element);
+    const surface = surfaces[0];
+    const owner = element.getAttribute('data-projection-owner');
+    const generation = element.getAttribute('data-projection-generation');
+    if (
+      !owner ||
+      !generation ||
+      surfaces.length !== 1 ||
+      !surface ||
+      surface.getAttribute('data-projection-owner') !== owner ||
+      surface.getAttribute('data-projection-generation') !== generation
+    )
+      throw new Error('Expected one current Shadcn Select Surface for Header popup paint');
+    paintElement = surface;
+  }
+  const style = getComputedStyle(paintElement);
   const options = [...element.querySelectorAll<HTMLElement>('[role="option"]')].filter(
     (option) => option.getAttribute('aria-disabled') !== 'true'
   );
@@ -40,6 +59,13 @@ export function readHeaderPopupPaint(element: Element) {
     opacity: Number(style.opacity),
     background: style.backgroundColor,
     backgroundRgba: colors[0],
+    shadow: style.boxShadow,
+    tokens: paintElement.getAttribute('data-pui-style'),
+    paintOwner: {
+      prototype: paintElement.getAttribute('data-projection-prototype'),
+      owner: paintElement.getAttribute('data-projection-owner'),
+      generation: paintElement.getAttribute('data-projection-generation'),
+    },
     animations: element.getAnimations({ subtree: true }).map((animation) => ({
       state: animation.playState,
       time: animation.currentTime,

@@ -1,0 +1,69 @@
+id: P-SHADCN-INPUT-SHELL
+type: prototype
+title: Shadcn single-control passive input shell
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Catalogs the bounded issue 960 / PR 971 composition in the existing 0.3.0-alpha.1 workspace train. Independent catalog review, complete criterion mapping and candidate-bound validation remain pending; historical component evidence is not stable admission.
+summary: A reusable roleless visual shell around one independently owned inline editor, with an explicitly owned public-fact binding.
+statement:
+  en: The shadcn-input-shell protocol owns outer presentation only. Its caller composes exactly one inline editor and owns binding lifetime; the editor retains all editing, focus, disabled and interaction authority. This is a direct styled-only prototype, not a new Base InputGroup, state machine or full upstream InputGroup API. The unofficial projection retains the MIT-attributed shadcn-ui/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7 Command/InputGroup and Rhea reference described in the legacy composition contract.
+anatomy:
+  family: shadcn-input-shell
+  roles:
+    root:
+      cardinality: { min: 1, max: 1 }
+      summary: Roleless slotted presentation owner, not an editor or focus target.
+    control:
+      cardinality: { min: 1, max: 1 }
+      summary: Caller-supplied inline editor, either inputShellControl or the existing Command input; this is a composition precondition, not runtime child-count enforcement.
+  relations:
+    - { kind: contains, parent: root, child: control }
+criteria:
+  - id: P-SHADCN-INPUT-SHELL-PASSIVE
+    text:
+      en: Root adds no role, tabindex, focus request, editor, keyboard handler or independent interaction truth. It renders caller content through its slot. The caller must supply exactly one inline control; no DOM discovery or automatic multiple-control arbitration is promised.
+  - id: P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY
+    text:
+      en: The package root and ./input-shell entry expose inputShell, inputShellControl, bindInputShellControl and their public types. The private grouped-paint context is not a public context key or InstanceAssociations protocol. Addons, addon-click focus, nested-button exclusion, invalid aggregation, multi-control ownership, textarea/block alignment and full upstream InputGroup parity are excluded.
+  - id: P-SHADCN-INPUT-SHELL-STYLE-SELECTION
+    text:
+      en: Shared styleProfile supports only new-york-v4 (alias new-york) and rhea. The prop defaults to the inherit sentinel; selection resolves explicit choice, then inherited scope, then new-york-v4 compatibility fallback. inherit withdraws explicit selection. Unsupported known profiles fail explicitly. Changing presentation must preserve the actual editor node, value, selection and focus rather than recreate the editor.
+  - id: P-SHADCN-INPUT-SHELL-OUTER-PAINT
+    text:
+      en: Root owns full-width min-width-zero flex containment around one inline control, border and color/box-shadow transition. New York uses h-9, rounded-md, border-input, shadow-xs and 150ms, with bg-input/30 in dark mode. Rhea uses h-8, theme radius-2xl, transparent border, bg-input/50 and 200ms. Consumer theme values remain consumer-owned; these recipes do not install a global reset or page-specific CSS.
+  - id: P-SHADCN-INPUT-SHELL-FOCUS-PAINT
+    text:
+      en: focusVisible and disabled are projected facts defaulting false, not semantic state. focusIndicator defaults ring; ring plus focusVisible projects border-ring and ring-3 with ring-ring/50 for New York or ring-ring/30 for Rhea. Command composition uses none to match its command-input slot boundary; ordinary Input uses ring. Root must not duplicate the control's disabled opacity.
+  - id: P-SHADCN-INPUT-SHELL-BINDING-FACTS
+    text:
+      en: bindInputShellControl requires actual public control and target identities and an explicit owner with isCurrent/onDispose. It reads boolean focusVisible/disabled through public getExposes get/subscribe interfaces and rejects missing or malformed facts. target.setFacts must merge only those facts with authored props, retaining styleProfile and focusIndicator. No facts may be inferred from DOM or independently maintained editor state.
+  - id: P-SHADCN-INPUT-SHELL-BINDING-LIFETIME
+    text:
+      en: At most one active binding may reserve a real target or control. replace detaches the old source and rejects invalid or duplicate replacements. Disposal is idempotent, attempts every unsubscribe and forbids later writes. Generation/source checks prevent stale callbacks and reentrant reads from publishing old facts; synchronous subscription notifications wait until attachment completes. The caller retires the binding with its view and must not reuse a destroyed target through an old owner.
+openQuestions:
+  - id: P-SHADCN-INPUT-SHELL-Q-ADMISSION
+    question:
+      en: Has independent review reconciled every criterion, public projection and exact-candidate executable/native evidence before stable admission?
+    context:
+      en: Existing unit and native paths are mapped as needs-review, not freshly passing. Explicit root passivity, direct shell/control unsupported-profile rejection and full caller-obligation coverage need criterion-level review. Bilingual stable navigation/detail coverage must be supplied before this family is available in a stable release; the existing current stable release is 0.2.0. No non-Web host or browser-zoom acceptance is claimed.
+    blocks: [activation:P-SHADCN-INPUT-SHELL]
+sources:
+  - path: packages/prototypes/shadcn/src/input-shell/root.proto.ts
+  - path: packages/prototypes/shadcn/src/input-shell/index.ts
+  - path: packages/prototypes/shadcn/src/input-shell/types.ts
+  - path: packages/prototypes/shadcn/src/input-shell/bind-control.ts
+  - path: internal/contracts/command/shadcn-input-shell.presentation.v0.md
+  - path: packages/prototypes/shadcn/THIRD_PARTY_NOTICES.md
+dependsOn:
+  contracts: [C-CORE-SYNTAX-0003, C-PROPS-0001, C-FEEDBACK-STYLE-0002, C-PROTOTYPE-STYLE-CLOSURE-0001]
+  decisions: [D-PROTOTYPE-ENTITY-NAMING-0001]
+relates:
+  prototypes: [P-SHADCN-INPUT-SHELL-CONTROL]
+verifies:
+  tests: [T-SHADCN-INPUT-SHELL-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the already bounded single-control presentation and binding contract in its existing workspace train, without claiming historical activation or full InputGroup parity.
+tags: [prototype, shadcn, input-shell, passive, composition]

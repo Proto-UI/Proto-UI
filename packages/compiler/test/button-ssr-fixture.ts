@@ -1,6 +1,6 @@
 import path from 'node:path';
 import { readFile } from 'node:fs/promises';
-import { SHADCN_THEME_CSS } from '../../cli/src/legacy/type';
+import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../../cli/src/legacy/type';
 import { renderPrefixedThemeCss } from '../../cli/src/services/proto-style-css';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
@@ -12,11 +12,23 @@ import { emitWebComponentSource } from '../src/web-component-source';
 import type { Compilation } from '../src/compile';
 
 export const repositoryRoot = fileURLToPath(new NodeURL('../../../', import.meta.url));
-// C-PROTOTYPE-STYLE-CLOSURE-0001-D: this test consumer explicitly chooses its theme.
+// C-PROTOTYPE-STYLE-CLOSURE-0001-D: choose the canonical variable bank; paint stays separate.
 export const buttonSsrStyleEnvironment = {
   id: 'shadcn-consumer-light',
   cssText:
-    '@layer theme, proto-ui;\n@layer theme {\n' + renderPrefixedThemeCss(SHADCN_THEME_CSS) + '}\n',
+    '@layer theme, proto-ui;\n@layer theme {\n' +
+    renderPrefixedThemeCss(SHADCN_THEME_VARIABLES_CSS) +
+    '}\n',
+};
+// Consumer-owned theme paint is explicit browser input, not generated environment CSS.
+export const buttonSsrConsumerThemePaint = {
+  id: 'shadcn-consumer-selection-paint',
+  cssText:
+    '@layer theme, proto-ui;\n@layer theme {\n' +
+    renderPrefixedThemeCss(SHADCN_THEME_PAINT_CSS, {
+      variableDeclarations: SHADCN_THEME_VARIABLES_CSS,
+    }) +
+    '}\n',
 };
 export const baseButtonPath = 'packages/prototypes/base/src/button/button.proto.ts';
 export const fixtureButtonPath = 'packages/compiler/test/fixtures/button-ssr/button.proto.ts';
@@ -110,7 +122,7 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
   const environmentCssText = generatedFiles.find(
     (file) => file.path === 'Component.environment.css'
   )!.contents;
-  const environmentSources = await Promise.all(
+  const themeSources = await Promise.all(
     ['packages/cli/src/legacy/type.ts', 'packages/cli/src/services/proto-style-css.ts'].map(
       async (file) => ({
         file,
@@ -159,10 +171,14 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
     ],
   });
   const clientCode = bundled.outputFiles[0].text;
+  const consumerThemePaintSha256 = createHash('sha256')
+    .update(buttonSsrConsumerThemePaint.cssText)
+    .digest('hex');
   return {
     tagName,
     cssText,
     environmentCssText,
+    consumerThemePaintCssText: buttonSsrConsumerThemePaint.cssText,
     clientCode,
     generatedFiles,
     render: server.renderToString,
@@ -172,7 +188,13 @@ export async function buildButtonSsrFixture(options: { tagName?: string; direct?
       sourceFiles: compilation.ir.sourceFiles.map(({ file, sha256 }) => ({ file, sha256 })),
       binding: server.hydrationBinding,
       artifacts: server.hydrationArtifacts,
-      environmentSources,
+      environmentSources: themeSources,
+      consumerThemePaint: {
+        id: buttonSsrConsumerThemePaint.id,
+        artifact: 'consumer-theme-paint.css',
+        sha256: consumerThemePaintSha256,
+        sourceFiles: themeSources,
+      },
       themeActivation: { attribute: 'data-theme', value: 'light' },
       generatedFiles: generatedFiles.map((file) => ({
         path: file.path,

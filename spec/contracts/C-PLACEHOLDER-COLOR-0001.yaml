@@ -3,6 +3,8 @@ type: contract
 title: Finite static placeholder color paint
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Finite vocabulary, CSS projection and four-Web-adapter editor-continuity checks do not establish native raster, accessibility or non-Web conformance; these remain blockers to stable admission.
 summary: A generic static visual target, not control state, placeholder content or another editor.
 statement:
   en: Placeholder color intent targets the existing native placeholder paint surface without reading emptiness, changing content or selecting a component in the adapter.

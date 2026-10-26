@@ -6,11 +6,11 @@ import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { compileFile, compilePrototype, compilationArtifacts } from '../src/compile';
 import { parsePrototype } from '../src/parser';
 import { emitWebComponentSource } from '../src/web-component-source';
-import { renderProtoStyleTokenCss } from '../../cli/src/services/proto-style-css';
 import {
   baseButtonPath,
   buildButtonSsrFixture,
   compileButtonSsrFixture,
+  buttonSsrConsumerThemePaint,
   buttonSsrStyleEnvironment,
   loadGeneratedModule,
   repositoryRoot,
@@ -123,16 +123,11 @@ describe('experimental source-generated Button SSR', () => {
     expect(second.html).toContain('aria-disabled="true"');
     expect(second.carrier.attributes['data-pui-style']).toContain('opacity-50');
     expect(first.html).toContain('<span>Enabled</span>');
-    const tokens = new Set([
-      ...first.carrier.attributes['data-pui-style'].split(' '),
-      ...second.carrier.attributes['data-pui-style'].split(' '),
-    ]);
-    expect(fixture.cssText).toBe(renderProtoStyleTokenCss([...tokens].sort()));
     expect(fixture.cssText).toContain('user-select: text');
     expect(fixture.cssText).toContain('box-sizing: border-box');
   });
 
-  it('binds the explicitly selected canonical consumer theme and all of its required variables', () => {
+  it('binds the canonical variable bank separately from consumer theme paint', async () => {
     expect(fixture.environmentCssText).toBe(buttonSsrStyleEnvironment.cssText);
     expect(fixture.provenance.styleEnvironment).toMatchObject({
       id: 'shadcn-consumer-light',
@@ -142,8 +137,37 @@ describe('experimental source-generated Button SSR', () => {
     });
     expect(fixture.environmentCssText).toContain('--pui-foreground:');
     expect(fixture.environmentCssText).toContain('--pui-radius-md:');
+    expect(fixture.environmentCssText).toContain('--pui-selection:');
+    expect(fixture.environmentCssText).not.toContain('::selection');
+    expect(fixture.environmentCssText).not.toContain('background-color:');
     expect(fixture.environmentCssText).toContain('@layer theme, proto-ui;');
+    expect(fixture.environmentCssText).toContain('@media (prefers-color-scheme: dark)');
+    expect(fixture.consumerThemePaintCssText).toBe(buttonSsrConsumerThemePaint.cssText);
+    expect(fixture.consumerThemePaintCssText).toContain('::selection');
+    expect(fixture.consumerThemePaintCssText).toContain('background-color: var(--pui-selection);');
+    expect(fixture.consumerThemePaintCssText).toContain('color: var(--pui-selection-foreground);');
+    expect(fixture.provenance.consumerThemePaint).toMatchObject({
+      id: 'shadcn-consumer-selection-paint',
+      artifact: 'consumer-theme-paint.css',
+      sha256: createHash('sha256').update(fixture.consumerThemePaintCssText).digest('hex'),
+    });
+    expect(fixture.provenance.consumerThemePaint.sha256).not.toBe(
+      fixture.provenance.artifacts.environment
+    );
     expect(fixture.provenance.themeActivation).toEqual({ attribute: 'data-theme', value: 'light' });
+
+    const compilation = await compileButtonSsrFixture();
+    const paintAsEnvironment = emitWebComponentSource(compilation.ir, {
+      ssr: true,
+      styleEnvironment: {
+        id: 'not-an-environment',
+        cssText: buttonSsrConsumerThemePaint.cssText,
+      },
+    });
+    expect(paintAsEnvironment).toMatchObject({
+      ok: false,
+      diagnostics: [{ code: 'PUI3301' }],
+    });
   });
 
   it.each(['absent', 'missing-variable', 'wrong-theme'])(

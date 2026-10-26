@@ -44,10 +44,8 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.lifecycle.onBeforeDispose(() => {
       disposed = true;
     });
-    open.watch((run, event) => {
-      if (event.type !== 'next' || event.next) return;
-      select.asTransition.controls.leave();
-      if (disposed) return;
+    def.context.subscribe(SELECT_CONTEXT, (run, next) => {
+      if (next.open || disposed) return;
       // Read the latest Root fact after a synchronous beforeLeave callback.
       if (!run.context.read(SELECT_CONTEXT).open && transitionState.get() === 'leaving')
         select.asTransition.controls.complete();

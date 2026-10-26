@@ -7,7 +7,6 @@ import { asTransition, type TransitionHandles, type TransitionProps } from '../s
 
 // C-AS-TRANSITION-0001-O: a declarative single initial sample, not a target observer.
 // Agent: dot
-// ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
 type Value = { open: boolean; other: boolean; label: string; optional?: boolean };
 const sessions: Array<RuntimeSession<any>> = [];
 afterEach(async () => {

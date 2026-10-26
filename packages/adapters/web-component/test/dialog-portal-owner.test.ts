@@ -1,4 +1,5 @@
-import { describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { retainHappyDomMutationCallbacks } from '../../../../scripts/test/happy-dom-mutation-keepalive.mjs';
 import { AdaptToWebComponent, setElementProps } from '../src';
 import {
   dialogRoot,
@@ -6,6 +7,12 @@ import {
   dialogContent,
   dialogTrigger,
 } from '../../../prototypes/base/src/dialog';
+
+let observerKeeper: ReturnType<typeof retainHappyDomMutationCallbacks>;
+beforeAll(() => {
+  observerKeeper = retainHappyDomMutationCallbacks(window);
+});
+afterAll(() => observerKeeper.restore());
 
 // A-WEB-COMPONENT G/I + C-AS-OVERLAY E/F/K: physical portal projection
 // must not orphan a descendant when its logical origin leaves the document.

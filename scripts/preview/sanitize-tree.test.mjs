@@ -51,6 +51,7 @@ test('refuses overlapping source and trusted output trees', async () => {
 test('rejects every reserved platform control at the artifact root', async () => {
   for (const reserved of [
     '.assetsignore',
+    '.publisher-receipt.json',
     '_headers',
     '_redirects',
     '_routes.json',
@@ -64,6 +65,17 @@ test('rejects every reserved platform control at the artifact root', async () =>
     } finally {
       await rm(root, { recursive: true, force: true });
     }
+  }
+});
+
+test('rejects a publisher receipt directory at the artifact root', async () => {
+  const { root, source, output } = await fixture();
+  try {
+    await writeFile(path.join(source, 'index.html'), 'safe');
+    await mkdir(path.join(source, '.publisher-receipt.json'));
+    await assert.rejects(sanitizePreviewTree({ source, output }), /reserved platform file/);
+  } finally {
+    await rm(root, { recursive: true, force: true });
   }
 });
 

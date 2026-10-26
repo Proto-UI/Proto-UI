@@ -123,7 +123,6 @@ function appendCommittedChild(
     ctx.slotEnd = end;
 
     parent.appendChild(start);
-    for (const n of opt.slotPool) parent.appendChild(n);
     parent.appendChild(end);
     return;
   }
@@ -202,6 +201,14 @@ export function commitChildren(
 
   const arr = toArray(children);
   for (const c of arr) appendCommittedChild(container, c, doc, cfg, ctx);
+
+  // Stage and validate the WHOLE blueprint before moving any caller-owned
+  // slot content. A later invalid node must not detach children from the live
+  // tree just because an earlier slot was encountered in the traversal.
+  if (cfg.mode === 'light' && ctx.slotEnd) {
+    const slotParent = ctx.slotEnd.parentNode!;
+    for (const node of cfg.slotPool) slotParent.insertBefore(node, ctx.slotEnd);
+  }
 
   (hostRoot as any).replaceChildren(...Array.from(container.childNodes));
 

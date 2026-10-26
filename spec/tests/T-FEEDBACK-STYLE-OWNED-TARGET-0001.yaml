@@ -1,0 +1,123 @@
+id: T-FEEDBACK-STYLE-OWNED-TARGET-0001
+type: test
+title: Planned owned decorative target acceptance
+status: draft
+since: 0.3.0-alpha.1
+summary: Unimplemented acceptance design, not passing evidence; two owned leaves
+  and one caller slot must prove fail-closed identity, independent merge, no
+  reset, terminal cleanup and decorative accessibility.
+cases:
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
+    title: Identity
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-IDENTITY
+    expectation: A target identity is setup-created, opaque, scoped to one logical
+      instance lifetime, independent of debug names and host nodes, and cannot
+      be forged, shared across instances or reused after disposal.
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+    title: Binding
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-BINDING
+    expectation: One target binds exactly one framework-owned decorative leaf in the
+      declared Template. Duplicate, foreign, slot, caller-owned, PrototypeRef
+      and host-root bindings fail closed before mutation. Style updates never
+      create, remove, replace or rebind nodes.
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+    title: Contribution
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-CONTRIBUTION
+    expectation: Existing setup and Rule style contributions remain style-only and
+      merge independently per target using the existing semantic law. Rule
+      invalidation withdraws only its own contribution; host and other targets
+      remain unchanged.
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+    title: Lifetime
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-LIFETIME
+    expectation: A committed target replays its current merged style without
+      rendering; terminal disposal removes bindings, contributions and
+      subscriptions and prevents later physical writes. Unknown, unavailable or
+      unsupported targets reject explicitly, with no silent host fallback.
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+    title: No Reset
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-NO-RESET
+    expectation: Style changes retain owned node and caller slot identities, value
+      and selection handles, focus and selection ranges. No state/event
+      ownership, selector query, arbitrary host attribute, behavior IR, generic
+      keyed diff, portal or reparent guarantee is added.
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+    title: Decorative
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-DECORATIVE
+    expectation: "A target is permanently decorative: accessibility-hidden without
+      layout hiding, not focusable, no actions, names, events or caller content.
+      Reuse governed A11y projection where applicable; never hide the owning
+      control or its slot. Arbitrary Template props and DOM attributes remain
+      prohibited."
+  - id: T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
+    title: Support
+    covers:
+      - C-FEEDBACK-STYLE-OWNED-TARGET-0001-SUPPORT
+    expectation: Each adapter must explicitly implement or reject the capability.
+      Accepted types, draft contracts, static inspection and planned tests do
+      not establish runtime or cross-adapter support. PrototypeRef rejection
+      remains unchanged.
+implementations:
+  - id: owned-decoration-runtime-contract-planned
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/feedback.style.owned-target.contract.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-IDENTITY
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-CONTRIBUTION
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
+    notes:
+      - This path is a planned implementation location, not an existing test or
+        evidence. No owned target API is implemented by this spec-only slice.
+  - id: owned-decoration-native-browser-planned
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/feedback-style-owned-target.browser.test.ts
+    required: true
+    consumesCases:
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-BINDING
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-LIFETIME
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-NO-RESET
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-DECORATIVE
+      - T-FEEDBACK-STYLE-OWNED-TARGET-0001-CASE-SUPPORT
+    notes:
+      - Require actual focus/selection and accessibility-tree evidence plus
+        strict node identity and zero-render assertions. No browser pass is
+        claimed.
+verifies:
+  contracts:
+    - id: C-FEEDBACK-STYLE-OWNED-TARGET-0001
+      anchors:
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-IDENTITY
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-BINDING
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-CONTRIBUTION
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-LIFETIME
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-NO-RESET
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-DECORATIVE
+        - C-FEEDBACK-STYLE-OWNED-TARGET-0001-SUPPORT
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Registered planned fail-closed tests without converting design intent
+      into passing implementation evidence.
+tags:
+  - feedback
+  - style
+  - template
+  - test
+  - planned
+lifecycleRationale:
+  en: All target implementation mappings are planned and unexecuted. Identity
+    rejection, merge/withdrawal, cleanup, accessibility and native no-reset
+    evidence must be implemented before admission.

@@ -34,6 +34,7 @@ import { installColorSchemeResourceProbe, createColorSchemeSurfaceProbe } from '
 const stylesheet = '/@id/__x00__virtual:color-scheme.css';
 await import(/* @vite-ignore */ stylesheet);
 const runtime = new URLSearchParams(location.search).get('runtime') ?? 'wc';
+const mountedRecommit = new URLSearchParams(location.search).get('mountedRecommit') === '1';
 document.querySelector('#runtime-name')!.textContent = runtime;
 const resourceProbe = installColorSchemeResourceProbe();
 function setTheme(theme: 'light' | 'dark' | 'system') {
@@ -111,6 +112,7 @@ const Probe = definePrototype<any, any>({
     def.lifecycle.onCreated((current) => {
       run = current;
     });
+    if (mountedRecommit) def.lifecycle.onMounted((current) => current.update());
     def.lifecycle.onUpdated(() => {
       stats.probeUpdated++;
     });
@@ -350,6 +352,7 @@ if (runtime === 'wc') {
     Object.entries(definitions).map(([id, proto]) => [
       id,
       adapt(proto, {
+        ...(mountedRecommit ? { schedule: (task: () => void) => task() } : {}),
         autoUpdateOnPropsChange: id !== 'probe',
         ...metaOptions(id),
         ...diagnosticsFor(id),

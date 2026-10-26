@@ -131,6 +131,16 @@ describe.sequential('default-document colorScheme browser contract', () => {
           customNative: await customEditor.inputValue(),
           logical: await page.evaluate(() => (window as any).colorSchemeFixture.editorValues()),
         };
+        if (runtime === 'react') {
+          expect(observations.initialEditorValues).toEqual({
+            native: 'Theme follows the document',
+            customNative: 'Theme follows the document',
+            logical: {
+              textarea: 'Theme follows the document',
+              customTextarea: 'Theme follows the document',
+            },
+          });
+        }
         const draft = 'User draft survives theme changes';
         const customDraft = 'Custom reader sample';
         // Seed through actual editor input and blur before measuring settled color-only changes.
@@ -179,7 +189,7 @@ describe.sequential('default-document colorScheme browser contract', () => {
         await expect.poll(async () => alpha((await paint(probe)).background)).toBe(0.2);
         await expect.poll(async () => alpha((await paint(outline)).background)).toBe(0.045);
         await expect.poll(async () => alpha((await paint(checkbox)).background)).toBe(0.045);
-        await expect.poll(async () => alpha((await paint(switchRoot)).background)).toBe(0.075);
+        await expect.poll(async () => alpha((await paint(switchRoot)).background)).toBe(0.12);
         expect(await stats(page)).toEqual(initialStats);
         expect(await button.evaluate((node, old) => node === old, oldButton)).toBe(true);
         expect(await textarea.evaluate((node, old) => node === old, oldEditor)).toBe(true);
@@ -493,9 +503,11 @@ describe.sequential('default-document colorScheme browser contract', () => {
     90_000
   );
 
-  it.each(['wc', 'react', 'vue', 'vue2'])(
+  it.each(['wc', 'react', 'vue', 'vue2', 'vue-mounted-recommit'])(
     '%s reveals the initial dark recipe',
-    async (runtime) => {
+    async (caseName) => {
+      const mountedRecommit = caseName === 'vue-mounted-recommit';
+      const runtime = mountedRecommit ? 'vue' : caseName;
       const context = await browser.newContext({
         viewport: { width: 1100, height: 1400 },
         colorScheme: 'light',
@@ -505,20 +517,23 @@ describe.sequential('default-document colorScheme browser contract', () => {
       let capturedFrames: unknown = null;
       page.on('pageerror', (error) => errors.push(error.message));
       try {
-        await page.goto(`${baseUrl}/?runtime=${runtime}&initial=dark`);
+        await page.goto(
+          `${baseUrl}/?runtime=${runtime}&initial=dark${mountedRecommit ? '&mountedRecommit=1' : ''}`
+        );
         await page.waitForSelector('body[data-ready="true"]', { timeout: 20_000 });
         const frames = await page.evaluate(() => (window as any).colorSchemeFixture.initialFrames);
         capturedFrames = frames;
         // Preserve every id before any assertion so a failed oracle cannot hide its input.
         await writeFile(
-          path.join(evidenceDir, `${runtime}-initial-dark.json`),
+          path.join(evidenceDir, `${caseName}-initial-dark.json`),
           JSON.stringify(frames, null, 2) + '\n'
         );
+        if (mountedRecommit) expect((await stats(page)).probeRenders).toBeGreaterThan(1);
         for (const [id, expected] of Object.entries({
           button: 0.2,
           outline: 0.045,
           checkbox: 0.045,
-          switch: 0.075,
+          switch: 0.12,
           textarea: 0.045,
           probe: 0.2,
         })) {
@@ -534,7 +549,7 @@ describe.sequential('default-document colorScheme browser contract', () => {
         }
         await activeResources(page);
         await writeFile(
-          path.join(evidenceDir, `${runtime}-initial-dark.json`),
+          path.join(evidenceDir, `${caseName}-initial-dark.json`),
           JSON.stringify(frames, null, 2) + '\n'
         );
         await page.evaluate(() => (window as any).colorSchemeFixture.dispose());
@@ -544,9 +559,15 @@ describe.sequential('default-document colorScheme browser contract', () => {
         await page.evaluate(() => (window as any).colorSchemeFixture.restoreInstrumentation());
       } finally {
         await writeFile(
-          path.join(evidenceDir, `${runtime}-initial-dark-diagnostics.json`),
+          path.join(evidenceDir, `${caseName}-initial-dark-diagnostics.json`),
           JSON.stringify(
-            { runtime, browser: browser.version(), frames: capturedFrames, errors },
+            {
+              runtime,
+              mountedRecommit,
+              browser: browser.version(),
+              frames: capturedFrames,
+              errors,
+            },
             null,
             2
           ) + '\n'

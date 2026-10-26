@@ -12,6 +12,8 @@ This is the default same-document light-DOM realization of [HC-COLOR-SCHEME-INVA
 
 ## Package Role
 
+`@proto.ui/adapter-base/web-material` exports `contactPaintOutset(width, height)` for layout space around the current draft Web contact profile. Pass the host's bounding rectangle width and height in CSS pixels; the result is the profile's paint outset in CSS pixels. It does not admit source pixels, optical effects or input ownership, and is not a general margin for other material profiles.
+
 Adapter foundation package used to translate Proto UI contracts into concrete host integrations.
 
 ## Install

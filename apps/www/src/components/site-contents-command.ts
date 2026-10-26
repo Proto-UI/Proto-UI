@@ -135,7 +135,8 @@ export function contentsCommandParticipant(header: HTMLElement) {
                 });
               };
               const unbind = navigation.bindButton(button, isActive, () => {
-                context.api.call('contents-command', 'focusSelf');
+                if (document.activeElement !== button)
+                  context.api.call('contents-command', 'focusSelf');
               });
               if (runtime === 'wc') button.addEventListener('click', click);
               subscribers.add(paint);

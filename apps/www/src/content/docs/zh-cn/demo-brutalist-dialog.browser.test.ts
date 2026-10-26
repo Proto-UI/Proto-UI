@@ -58,8 +58,8 @@ let baseUrl = '';
  * child count reads a previous runtime's residue as this runtime's overlay.
  */
 async function readOverlayGeometry(page: Page): Promise<OverlayGeometry> {
-  return page.evaluate(() => {
-    const roots = Array.from(document.body.children).filter(
+  return page.evaluate((portalHost) => {
+    const roots = Array.from(document.querySelectorAll(portalHost)).filter(
       (element) => element.hasAttribute('data-pui-root') && element.hasAttribute('data-is-present')
     );
     const content = roots.find((element) => element.getAttribute('role') === 'dialog');
@@ -96,7 +96,7 @@ async function readOverlayGeometry(page: Page): Promise<OverlayGeometry> {
       presentRoots: roots.length,
       centreHitInsideContent: Boolean(hit && content.contains(hit)),
     };
-  });
+  }, BODY_PORTAL_HOST);
 }
 
 function expectNear(actual: number, expected: number, label: string): void {
@@ -220,6 +220,23 @@ describe('Brutalist Dialog overlay geometry', () => {
 
         // A panel positioned once at mount would still satisfy everything above.
         await page.setViewportSize({ ...RESIZED_VIEWPORT });
+        // The viewport command can finish before the available-space resize notification.
+        await page.waitForFunction(
+          ({ portalHost, width, height }) => {
+            const content = Array.from(document.querySelectorAll(portalHost)).find(
+              (element) =>
+                element.hasAttribute('data-is-present') && element.getAttribute('role') === 'dialog'
+            );
+            if (!content) return false;
+            const style = getComputedStyle(content);
+            return (
+              parseFloat(style.getPropertyValue('--proto-ui-available-region-width')) === width &&
+              parseFloat(style.getPropertyValue('--proto-ui-available-region-height')) === height
+            );
+          },
+          { portalHost: BODY_PORTAL_HOST, ...RESIZED_VIEWPORT },
+          { timeout: 20_000 }
+        );
         const resized = await readOverlayGeometry(page);
         expect(resized.viewport.width, `${runtime}/resized-viewport`).toBe(RESIZED_VIEWPORT.width);
         expectCentred(resized, `${runtime}/resized`);

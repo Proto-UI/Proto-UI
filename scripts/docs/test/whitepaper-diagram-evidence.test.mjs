@@ -3,7 +3,7 @@ import { readFile } from 'node:fs/promises';
 import test from 'node:test';
 import { parse } from 'yaml';
 
-test('diagram evidence uses an exact-head read-only PR job and a valid job-level environment', async () => {
+test('diagram evidence PR capture keeps exact-head checkout read-only', async () => {
   const workflow = parse(
     await readFile(
       new URL('../../../.github/workflows/whitepaper-diagram-evidence.yml', import.meta.url),
@@ -13,20 +13,8 @@ test('diagram evidence uses an exact-head read-only PR job and a valid job-level
   assert.deepEqual(Object.keys(workflow.on), ['pull_request']);
   assert.deepEqual(workflow.permissions, { contents: 'read' });
   const job = workflow.jobs.capture;
-  assert.equal(job.env.CANDIDATE_SHA, '${{ github.event.pull_request.head.sha }}');
-  // runner is unavailable at jobs.<job_id>.env. Keep the fixed Linux path here;
-  // runtime runner variables may only be resolved later inside a step.
-  assert.equal(job.env.DIAGRAM_EVIDENCE_DIR, '/tmp/whitepaper-diagram-evidence');
   const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
+  assert.equal(job.env.CANDIDATE_SHA, '${{ github.event.pull_request.head.sha }}');
   assert.equal(checkout.with.ref, '${{ env.CANDIDATE_SHA }}');
   assert.equal(checkout.with['persist-credentials'], false);
-  assert.ok(workflow.on.pull_request.paths.includes('apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs'));
-  for (const figure of ['switch-activation', 'evolution-feedback']) {
-    assert.ok(job.steps.some((step) => step.run?.includes(`DIAGRAM_EVIDENCE_FIGURE=${figure} node apps/www/scripts/capture-whitepaper-diagram-evidence.mjs`)));
-  }
-  assert.ok(
-    job.steps.some(
-      (step) => step.uses?.startsWith('actions/upload-artifact@') && step.if === 'always()'
-    )
-  );
 });

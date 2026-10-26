@@ -247,6 +247,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      // React's native textarea reconciliation writes an absent defaultValue
+      // back as an empty string. Mirror the Text Control host patch so React
+      // keeps its DOM wrapper state aligned with the host-owned editor.
+      const [textControlDefaultValue, setTextControlDefaultValue] = runtime.useState<
+        string | undefined
+      >(undefined);
       const portalOriginRef = runtime.useRef<HTMLElement | null>(null);
       // React owns the children, while this Adapter owns one stable portal
       // mount. Relocating the mount keeps createPortal's container identity and
@@ -477,15 +483,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         };
       }
 
-      runtime.useImperativeHandle(
-        ref,
-        () => ({
+      // One public handle per adapter instance. React re-runs the imperative
+      // handle effect whenever the consumer's ref identity changes, so the
+      // factory must hand back the same object every time: consumers reserve
+      // real instance identity, not a per-render wrapper. The handle keeps
+      // reading the live controller, exposes and callback-scope refs.
+      const handleRef = runtime.useRef<{
+        update: () => void;
+        getExposes: () => Record<string, unknown>;
+        invokeInCallbackScope: (fn: () => void) => void;
+      } | null>(null);
+      if (!handleRef.current) {
+        handleRef.current = {
           update: () => controllerRef.current?.update(),
           getExposes: () => scopedExposesReaderRef.current.read(exposesRef.current ?? {}),
           invokeInCallbackScope: (fn: () => void) => invokeInCallbackScopeRef.current?.(fn),
-        }),
-        []
-      );
+        };
+      }
+
+      runtime.useImperativeHandle(ref, () => handleRef.current!, []);
 
       runtime.useEffect(() => {
         controllerRef.current?.applyInstanceAssociations(
@@ -751,6 +767,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           viewportSource,
           exposeStateWebMode,
           scrollProjection,
+          setTextControlDefaultValue,
           setExposes: (record) => {
             exposesRef.current = record;
           },
@@ -1039,6 +1056,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               rootTag,
               {
                 ref: rootRef as { current: HTMLElement | null },
+                ...(textControlRootTag ? { defaultValue: textControlDefaultValue } : {}),
                 className: mergeHostClassName([
                   props.surfaceClassName,
                   props.hostClassName,

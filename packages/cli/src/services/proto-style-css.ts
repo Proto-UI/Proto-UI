@@ -1228,9 +1228,12 @@ export function renderProtoStyleEntryCss({
   ].join('\n');
 }
 
-export function renderPrefixedThemeCss(input: string): string {
+export function renderPrefixedThemeCss(
+  input: string,
+  options: { variableDeclarations?: string } = {}
+): string {
   const variableNames = new Set<string>();
-  input.replace(/--([a-z0-9-]+)\s*:/g, (_match, name: string) => {
+  (options.variableDeclarations ?? input).replace(/--([a-z0-9-]+)\s*:/g, (_match, name: string) => {
     variableNames.add(name);
     return '';
   });

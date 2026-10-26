@@ -752,10 +752,11 @@ async function settledPublicLayout(
 }
 
 async function retainContainerDiagnostic(name: string, report: Record<string, unknown>) {
-  if (!evidence) return;
-  await mkdir(path.join(evidence, 'portal'), { recursive: true });
+  const directory = evidence ?? process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+  if (!directory) return;
+  await mkdir(path.join(directory, 'portal'), { recursive: true });
   await writeFile(
-    path.join(evidence, 'portal', `${name}.json`),
+    path.join(directory, 'portal', `${name}.json`),
     JSON.stringify(
       {
         sourceSha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),

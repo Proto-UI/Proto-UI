@@ -100,7 +100,7 @@ implementations:
       - T-EVENT-0003-CASE-SCOPED-TRANSLATION
       - T-EVENT-0003-CASE-REBIND-CLEANUP
     notes:
-      - Candidate filtering retains final ownership checks, Portal and slot routes, same-Event redispatch and fresh rebinding. Native listener bookkeeping covers once, abort, capture and options snapshots without introducing author semantic listener options.
+      - Candidate filtering retains final ownership checks, Portal and slot routes, same-Event click and Enter redispatch after Portal owner rebinding, and fresh mapping checks. Native listener bookkeeping covers once, abort, capture and options snapshots without introducing author semantic listener options.
       - Deterministic traversal-work assertions are engineering regression bounds, not a normative frame-rate guarantee. Host-specific performance samples remain in the dated S5 record.
   - id: module-event-boundary-types
     kind: workspace-check

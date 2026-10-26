@@ -22,8 +22,8 @@ type ModePalette = {
 };
 type Resolution = { color: Rgba; input: string } | { diagnostic: Diagnostic };
 
-/** Read the existing literal without importing or executing the CLI module. */
-export function extractShadcnThemeCss(source: string): string {
+/** Read only the canonical variable-bank literal without importing or executing the CLI module. */
+export function extractShadcnThemeVariablesCss(source: string): string {
   const ast = ts.createSourceFile(SHADCN_THEME_SOURCE, source, ts.ScriptTarget.Latest, true);
   const declarations = ast.statements.flatMap((statement) =>
     ts.isVariableStatement(statement) &&
@@ -31,7 +31,8 @@ export function extractShadcnThemeCss(source: string): string {
     statement.declarationList.flags & ts.NodeFlags.Const
       ? statement.declarationList.declarations.filter(
           (declaration) =>
-            ts.isIdentifier(declaration.name) && declaration.name.text === 'SHADCN_THEME_CSS'
+            ts.isIdentifier(declaration.name) &&
+            declaration.name.text === 'SHADCN_THEME_VARIABLES_CSS'
         )
       : []
   );
@@ -41,7 +42,9 @@ export function extractShadcnThemeCss(source: string): string {
     !initializer ||
     !ts.isNoSubstitutionTemplateLiteral(initializer)
   ) {
-    throw new Error('SHADCN_THEME_CSS must be one exported const with a static template literal.');
+    throw new Error(
+      'SHADCN_THEME_VARIABLES_CSS must be one exported const with a static template literal.'
+    );
   }
   return initializer.text;
 }
@@ -226,12 +229,12 @@ export async function generateShadcnMotionPalette(
   const sourcePath = options.sourcePath ?? path.join(root, SHADCN_THEME_SOURCE);
   const outputPath = options.outputPath ?? path.join(root, SHADCN_PALETTE_OUTPUT);
   const palette = deriveShadcnMotionPalette(
-    extractShadcnThemeCss(await readFile(sourcePath, 'utf8'))
+    extractShadcnThemeVariablesCss(await readFile(sourcePath, 'utf8'))
   );
   const config = (await resolveConfig(path.join(root, SHADCN_PALETTE_OUTPUT))) ?? {};
   const generated = await format(
     `/**
- * Generated from ${SHADCN_THEME_SOURCE}#SHADCN_THEME_CSS.
+ * Generated from ${SHADCN_THEME_SOURCE}#SHADCN_THEME_VARIABLES_CSS.
  * Run: node --import tsx scripts/styles/generate-shadcn-motion-palette.ts [--check]
  * Do not edit by hand. sourceHash hashes the exact extracted CSS literal.
  * RGBA is non-premultiplied, gamma-encoded sRGB in [0,1], with channel clipping.

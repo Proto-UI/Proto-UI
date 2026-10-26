@@ -153,7 +153,7 @@ test('toolbar setup preserves all current manifest families, bounded jobs and ex
     { shard: 'naming-and-disclosures', families: 'label,collapsible,accordion,field' },
     {
       shard: 'passive-and-editors',
-      families: 'badge,card,skeleton,separator,spinner,textarea,scroll-area',
+      families: 'badge,card,skeleton,separator,spinner,textarea,scroll-area,input',
     },
   ]);
   const checkout = audit.steps.find((step) => step.uses === 'actions/checkout@v4');

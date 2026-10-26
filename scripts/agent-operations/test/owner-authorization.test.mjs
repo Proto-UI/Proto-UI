@@ -139,8 +139,6 @@ import {
   publishReview,
   fixturePublishedPacket,
 } from './fixtures/review-publication.mjs';
-import { modelTraceFixture, writeModelTraceFixture } from './fixtures/modeltrace.mjs';
-const measurement = modelTraceFixture(context.repositoryId);
 const policy = YAML.parse(
   fs.readFileSync(
     new URL('../../../internal/agent-operations/capability-policy.yaml', import.meta.url),
@@ -173,13 +171,7 @@ test('real resolver CLI continues owner-delegated schedule without a repeated as
   f.save({ ...f.grant, status: 'revoked' }, 2);
   assert.throws(() => execFileSync(process.execPath, options, { cwd: root, stdio: 'pipe' }));
 });
-function collaboration(
-  record = {
-    type: 'modeltrace-record',
-    reference: 'fixture:modeltrace-record',
-    digest: measurement.modelTrace.id,
-  }
-) {
+function collaboration() {
   const timestamp = '2026-10-04T10:00:00.000Z',
     head = 'a'.repeat(40);
   const expected = {
@@ -200,7 +192,7 @@ function collaboration(
     target: { kind: 'pull-request', number: 813, updatedAt: timestamp, headSha: head },
     expected,
     desired: { ...expected, title: 'Corrected' },
-    evidence: [{ type: 'owner-decision', reference: 'fixture:trusted-owner-decision' }, record],
+    evidence: [{ type: 'owner-decision', reference: 'fixture:trusted-owner-decision' }],
     rationale: 'Repair the title within an existing owner delegation.',
     humanGates: [],
   };
@@ -210,9 +202,7 @@ function collaboration(
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: request.repositoryId,
     action: request.action,
-    // Live collection happens after the fixture measurement, matching the
-    // supported measuredAt <= verifiedAt receipt chronology boundary.
-    observedAt: new Date(Date.parse(measurement.modelTrace.measuredAt) + 1000).toISOString(),
+    observedAt: '2026-10-04T10:00:01.000Z',
     viewerLogin: 'cyjin-yl',
     viewerPermission: 'MAINTAIN',
     current: {
@@ -233,11 +223,9 @@ function collaboration(
 test('owner-delegated collaboration passes actual handoff CLI and exact-state admission', (t) => {
   const f = fixture(t),
     dir = path.dirname(f.statePath),
-    identity = writeModelTraceFixture(dir, context.repositoryId),
-    { request, liveState } = collaboration(identity.artifact),
+    { request, liveState } = collaboration(),
     p = f.load();
   const params = {
-    ...measurement,
     request,
     liveState,
     executionMode: 'autonomous',
@@ -260,7 +248,6 @@ test('owner-delegated collaboration passes actual handoff CLI and exact-state ad
     handoffPath = path.join(dir, 'handoff.json');
   fs.writeFileSync(requestPath, JSON.stringify(request));
   const artifacts = [
-    identity.artifact,
     { type: 'capability-envelope', reference: 'fixture:context' },
     { type: 'github-snapshot', reference: 'fixture:live' },
     { type: 'mutation-authorization', reference: f.grant.id },
@@ -295,10 +282,6 @@ test('owner-delegated collaboration passes actual handoff CLI and exact-state ad
     requestPath,
     '--handoff',
     handoffPath,
-    '--record',
-    identity.recordPath,
-    '--context',
-    identity.contextPath,
     '--owner-authorization',
     f.statePath,
     '--owner-key',
@@ -317,7 +300,6 @@ test('owner delegation admits a real review packet but cannot remove CI or indep
     packet = reviewPacket(input),
     ownerAuthorization = f.load();
   const params = {
-    ...measurement,
     packet,
     input,
     liveInput: input,
@@ -361,7 +343,6 @@ test('owner-delegated merge still requires exact live publication, trusted green
     input = publishReview(reviewSnapshot()).input,
     packet = reviewPacket(input);
   const params = {
-    ...measurement,
     packet,
     publishedPacket: fixturePublishedPacket(input),
     input,
@@ -403,7 +384,6 @@ test('delegation never permits runtime mode/source drift or an invented mode', (
   ]) {
     assert.equal(
       authorizeCollaborationMutation({
-        ...measurement,
         request,
         liveState,
         executionMode,
@@ -577,7 +557,6 @@ test('real owner-delegated mutation adapter reaches exactly one write and rechec
       reads = 0;
     const options = {
       authorizationContext: {
-        ...measurement,
         executionMode: 'autonomous',
         executionModeSource: 'schedule',
         policy,
@@ -618,37 +597,6 @@ test('real owner-delegated mutation adapter reaches exactly one write and rechec
   }
 });
 
-test('a current owner grant cannot write after measurement expiry during the final collaboration read', (t) => {
-  const f = fixture(t),
-    { request, liveState } = collaboration(),
-    clock = Date.parse(measurement.modelTrace.measuredAt) + 1;
-  t.mock.timers.enable({ apis: ['Date'], now: clock });
-  let writes = 0;
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(request, liveState, {
-        authorizationContext: {
-          ...measurement,
-          executionMode: 'autonomous',
-          executionModeSource: 'schedule',
-          policy,
-          ownerAuthorization: f.load(),
-          selfAssessment: null,
-        },
-        runner() {
-          writes++;
-          throw Error('expired measurement must not reach the writer');
-        },
-        collectState() {
-          t.mock.timers.tick(Date.parse(measurement.modelTrace.expiresAt) - clock + 1);
-          return liveState;
-        },
-      }),
-    /expired/
-  );
-  assert.equal(writes, 0);
-});
-
 test('actual delegated collaboration apply CLI uses the real adapter and never writes after revocation', (t) => {
   for (const [mode, source] of [
     ['autonomous', 'schedule'],
@@ -657,8 +605,7 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
     for (const revoke of [false, true]) {
       const f = fixture(t),
         dir = path.dirname(f.statePath),
-        identity = writeModelTraceFixture(dir, context.repositoryId),
-        { request, liveState } = collaboration(identity.artifact),
+        { request, liveState } = collaboration(),
         rp = path.join(dir, 'request.json'),
         hp = path.join(dir, 'handoff.json');
       f.save({ ...f.grant, scopeIds: ['pull-request:813'] }, 2);
@@ -674,7 +621,6 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
           fromId: 'pui-dev',
           nextSkillId: 'pui-collaborate',
           artifacts: [
-            identity.artifact,
             { type: 'capability-envelope', reference: 'fixture:context' },
             { type: 'github-snapshot', reference: 'fixture:live' },
             { type: 'mutation-authorization', reference: f.grant.id },
@@ -692,7 +638,7 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
         reads = 0;
       const post = {
         ...liveState,
-        observedAt: new Date(Date.parse(measurement.modelTrace.measuredAt) + 2000).toISOString(),
+        observedAt: '2026-10-04T10:00:06.000Z',
         current: {
           ...liveState.current,
           title: 'Corrected',
@@ -710,10 +656,6 @@ test('actual delegated collaboration apply CLI uses the real adapter and never w
           rp,
           '--handoff',
           hp,
-          '--record',
-          identity.recordPath,
-          '--context',
-          identity.contextPath,
           ...ownerFlags(f),
         ],
         {
