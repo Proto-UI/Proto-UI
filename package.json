@@ -83,7 +83,6 @@
     "agent:skill:schema": "node scripts/agent-operations/generate-handoff-schema.mjs",
     "agent:review": "node scripts/agent-operations/review-packet.mjs",
     "agent:collaborate": "node scripts/agent-operations/collaboration-packet.mjs",
-    "agent:identify": "node scripts/agent-operations/modeltrace-cli.mjs",
     "agent:publish": "node scripts/agent-operations/agent-publish.mjs",
     "agent:event-shadow": "node scripts/agent-operations/event-shadow-cli.mjs",
     "agent:assess": "node scripts/agent-operations/create-capability-challenge.mjs",

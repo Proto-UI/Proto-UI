@@ -7,7 +7,7 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import {
   deriveShadcnMotionPalette,
-  extractShadcnThemeCss,
+  extractShadcnThemeVariablesCss,
   generateShadcnMotionPalette,
   parseStaticLab,
   SHADCN_PALETTE_OUTPUT,
@@ -17,7 +17,7 @@ import {
 const root = fileURLToPath(new URL('../../..', import.meta.url));
 const theme = (light: string, dark = '') =>
   `:root { ${light} } :root.dark, :root[data-theme='dark'] { ${dark} }`;
-const source = (css: string) => `export const SHADCN_THEME_CSS = \`${css}\`;`;
+const source = (css: string) => `export const SHADCN_THEME_VARIABLES_CSS = \`${css}\`;`;
 
 function close(actual: readonly number[] | null, expected: readonly number[], epsilon = 1e-7) {
   assert.ok(actual, 'Expected a supported static Lab color');
@@ -27,20 +27,41 @@ function close(actual: readonly number[] | null, expected: readonly number[], ep
   );
 }
 
-test('extracts the canonical literal through the AST without executing source code', () => {
+test('extracts the canonical variable-bank literal through the AST without executing source code', () => {
   const css = theme('--primary: lab(100 0 0);');
-  assert.equal(extractShadcnThemeCss(`throw new Error('Do not execute');\n${source(css)}`), css);
-  assert.throws(() => extractShadcnThemeCss('// ' + source(css)), /static template literal/);
+  assert.equal(
+    extractShadcnThemeVariablesCss(`throw new Error('Do not execute');\n${source(css)}`),
+    css
+  );
+  const composedTheme =
+    `${source(css)}\n` +
+    'export const SHADCN_THEME_PAINT_CSS = `@layer theme {}`;\n' +
+    'export const SHADCN_THEME_CSS = `${SHADCN_THEME_VARIABLES_CSS}${SHADCN_THEME_PAINT_CSS}`;';
+  assert.equal(extractShadcnThemeVariablesCss(composedTheme), css);
   assert.throws(
-    () => extractShadcnThemeCss(`${source(css)}\n${source(css)}`),
+    () =>
+      extractShadcnThemeVariablesCss(
+        source(css).replace('SHADCN_THEME_VARIABLES_CSS', 'SHADCN_THEME_CSS')
+      ),
     /static template literal/
   );
   assert.throws(
-    () => extractShadcnThemeCss('export const SHADCN_THEME_CSS = `:root { ${dynamic} }`;'),
+    () => extractShadcnThemeVariablesCss('// ' + source(css)),
     /static template literal/
   );
   assert.throws(
-    () => extractShadcnThemeCss('export const SHADCN_THEME_CSS = getTheme();'),
+    () => extractShadcnThemeVariablesCss(`${source(css)}\n${source(css)}`),
+    /static template literal/
+  );
+  assert.throws(
+    () =>
+      extractShadcnThemeVariablesCss(
+        'export const SHADCN_THEME_VARIABLES_CSS = `:root { ${dynamic} }`;'
+      ),
+    /static template literal/
+  );
+  assert.throws(
+    () => extractShadcnThemeVariablesCss('export const SHADCN_THEME_VARIABLES_CSS = getTheme();'),
     /static template literal/
   );
 });
@@ -174,7 +195,7 @@ test('recognizes only the exact low-layer selection paint consuming existing rol
   const withoutPaint = deriveShadcnMotionPalette(css);
   assert.deepEqual(withPaint.light, withoutPaint.light);
   assert.deepEqual(withPaint.dark, withoutPaint.dark);
-  // Provenance still binds the complete canonical CSS, including its paint.
+  // Direct derivation binds its complete input; generation extracts the variable-bank literal.
   assert.notEqual(withPaint.sourceHash, withoutPaint.sourceHash);
   for (const invalid of [
     paint + paint,
@@ -192,6 +213,14 @@ test('recognizes only the exact low-layer selection paint consuming existing rol
 
 test('canonical source produces readonly typed output, resolves aliases and leaves external roles open', async () => {
   const palette = await generateShadcnMotionPalette({ check: true });
+  const source = await readFile(path.join(root, SHADCN_THEME_SOURCE), 'utf8');
+  const variableBank = extractShadcnThemeVariablesCss(source);
+  assert.match(variableBank, /--selection:\s*lab\(/);
+  assert.doesNotMatch(variableBank, /::selection|background-color\s*:/);
+  assert.equal(
+    palette.sourceHash,
+    `sha256:${createHash('sha256').update(variableBank).digest('hex')}`
+  );
   for (const mode of [palette.light, palette.dark]) {
     assert.deepEqual(Object.keys(mode.expectedInputs), Object.keys(mode.colors));
     assert.deepEqual(Object.keys(mode.unresolved), [

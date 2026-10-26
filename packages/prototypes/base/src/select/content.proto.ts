@@ -305,19 +305,40 @@ function setupSelectContent(
     if (entryActive) focusScope.deactivate({ reason: ctx.requestFocusReason ?? 'programmatic' });
     entryActive = false;
     if (!isCurrentPresentation(run, ctx)) return;
-    overlay.close(blocked() ? 'select.presentation-abort' : reason);
-    if (!isCurrentPresentation(run, ctx)) return;
-    transition.controls.leave();
-    if (!isCurrentPresentation(run, ctx)) return;
-    if (blocked() && transition.transitionState.get() === 'leaving') transition.controls.complete();
-    if (!isCurrentPresentation(run, ctx)) return;
-    if (blocked()) {
-      if (focusedEntry) focusTrigger(run, 'programmatic');
-    } else if (
-      ownedEntry &&
-      (ctx.requestReason === 'escape' || ctx.requestReason === 'item.select')
-    ) {
-      focusTrigger(run, ctx.requestFocusReason ?? 'programmatic');
+    const returnFocus = () => {
+      if (blocked()) {
+        if (focusedEntry) focusTrigger(run, 'programmatic');
+      } else if (
+        ownedEntry &&
+        (ctx.requestReason === 'escape' || ctx.requestReason === 'item.select')
+      ) {
+        focusTrigger(run, ctx.requestFocusReason ?? 'programmatic');
+      }
+    };
+    // Bound Overlay leave can synchronously retire a preparing view.
+    const preparing = transition.transitionState.get() === 'preparing';
+    let focusFailed = false;
+    let focusError: unknown;
+    if (preparing) {
+      try {
+        returnFocus();
+      } catch (error) {
+        focusFailed = true;
+        focusError = error;
+      }
+    }
+    try {
+      if (preparing && !isCurrentPresentation(run, ctx)) return;
+      overlay.close(blocked() ? 'select.presentation-abort' : reason);
+      if (!isCurrentPresentation(run, ctx)) return;
+      transition.controls.leave();
+      if (!isCurrentPresentation(run, ctx)) return;
+      if (blocked() && transition.transitionState.get() === 'leaving')
+        transition.controls.complete();
+      if (!isCurrentPresentation(run, ctx)) return;
+      if (!preparing) returnFocus();
+    } finally {
+      if (focusFailed) throw focusError;
     }
   };
   const updateOpen = (run: any, ctx: SelectContextValue, reason: string) => {

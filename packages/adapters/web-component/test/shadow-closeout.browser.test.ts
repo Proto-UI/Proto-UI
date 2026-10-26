@@ -3423,7 +3423,7 @@ describe('Shadow closeout native boundaries', () => {
     page.on('pageerror', (error) => errors.push(error.message));
     try {
       await page.addScriptTag({ content: script });
-      const result = await page.evaluate(() => {
+      const { released, remounted, ...result } = await page.evaluate(() => {
         const p = (window as any).Closeout;
         const origin = document.createElement('section');
         const projected = document.createElement('div');
@@ -3445,13 +3445,21 @@ describe('Shadow closeout native boundaries', () => {
           absentFromBodyQuery: document.body.querySelector('#native-parent-portal') === null,
         };
         portal.unmount(projected);
+        const released = projected.parentNode === null;
+        // External removal ends that lease; restoration uses a fresh owned projection.
+        origin.append(projected);
+        portal.mount(projected);
+        const remounted = projected.parentNode === document.body;
+        portal.unmount(projected);
         const restored = {
           parentNodeIsOrigin: projected.parentNode === origin,
           presentInOriginQuery: origin.querySelector('#native-parent-portal') === projected,
         };
         origin.remove();
-        return { mounted, removed, restored };
+        return { mounted, removed, restored, released, remounted };
       });
+      expect(released).toBe(true);
+      expect(remounted).toBe(true);
       expect(result).toEqual({
         mounted: {
           parentNodeIsBody: true,

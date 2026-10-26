@@ -1,6 +1,8 @@
 # Bounded Command and single-control input shell
 
-Status: Draft; carrier #960. This is a presentation composition, not a new Base search state machine or full shadcn InputGroup implementation.
+Status: Draft; issue #960, implementation carrier #971. This is a presentation composition, not a new Base search state machine or full shadcn InputGroup implementation.
+
+The single-control shell and ordinary shell editor are now cataloged by [P-SHADCN-INPUT-SHELL](../../../spec/prototypes/P-SHADCN-INPUT-SHELL.yaml) and [P-SHADCN-INPUT-SHELL-CONTROL](../../../spec/prototypes/P-SHADCN-INPUT-SHELL-CONTROL.yaml), with bounded evidence and explicit gaps in [T-SHADCN-INPUT-SHELL-0001](../../../spec/tests/T-SHADCN-INPUT-SHELL-0001.yaml). Those draft entities govern this slice; this document retains source rationale, composition examples and the separate Command migration boundary. Their `since: 0.3.0-alpha.1` records the existing workspace train, not historical stable activation. No Base InputGroup identity or full InputGroup compatibility is admitted.
 
 ## Fixed reference and supported boundary
 

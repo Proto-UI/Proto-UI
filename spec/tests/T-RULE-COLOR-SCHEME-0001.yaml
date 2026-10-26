@@ -4,8 +4,8 @@ title: Default colorScheme source, Rule lease and four Adapter evidence
 status: draft
 since: 0.3.0-alpha.0
 lifecycleRationale:
-  en: Source, Runtime, four real-framework happy-dom tests and eight bounded real-browser cases have passed for their stated surfaces. The matrix distinguishes actual recipe/reveal/resource evidence from excluded host domains and the separately observed React default-value gap; independent stable admission remains required.
-  zh-CN: source、Runtime、四个真实框架的 happy-dom 测试及八个有界真实浏览器 case 已通过其声明 surface。矩阵区分实际配方/reveal/资源证据、排除的宿主域和单独观察到的 React 默认值缺口；仍须独立稳定接纳。
+  en: Source, Runtime, real-framework happy-dom tests and nine bounded real-browser cases have passed for their stated surfaces. The matrix distinguishes actual recipe/reveal/resource evidence from excluded host domains and the separately observed React default-value gap; independent stable admission remains required.
+  zh-CN: source、Runtime、真实框架的 happy-dom 测试及九个有界真实浏览器 case 已通过其声明 surface。矩阵区分实际配方/reveal/资源证据、排除的宿主域和单独观察到的 React 默认值缺口；仍须独立稳定接纳。
 summary: Separate source, owner, lease, reader, Adapter token and browser cases keep the S1-S8 evidence boundary explicit.
 cases:
   - id: T-RULE-COLOR-SCHEME-0001-CASE-SOURCE-PRIORITY
@@ -175,6 +175,14 @@ implementations:
     consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-VUE2]
     notes:
       - Real Vue 2 under happy-dom checks token/child identity, custom sampling, initial detached and retained remount, and concurrent Props/theme changes with explicit updates. It does not prove browser painting, KeepAlive or portals.
+  - id: vue-reveal
+    kind: adapter-test
+    status: passing
+    path: packages/adapters/vue/test/view-reveal-style.integration.test.ts
+    required: true
+    consumesCases: [T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-LIFETIME]
+    notes:
+      - Actual Vue under happy-dom checks a plain prototype's synchronous mounted recommit, first-reveal marker lifetime and restoration of normal transitions with controlled layout frame delivery. Native painting remains separate browser evidence.
   - id: web-component
     kind: adapter-test
     status: passing
@@ -194,7 +202,7 @@ implementations:
       - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-TRANSITION
       - T-RULE-COLOR-SCHEME-0001-CASE-BROWSER-EXCLUSIONS
     notes:
-      - Eight Chromium cases use real React StrictMode, Vue 3/Vue 2 KeepAlive and Custom Elements. They measure exact Shadcn recipes, native input draft retention, initial and remount/portal frame sequences, normal Props sync, native observer/MQL release, full WC disconnect/reconnect and Transition fallback/event/presence behavior.
+      - Nine Chromium cases use real React StrictMode, Vue 3/Vue 2 KeepAlive and Custom Elements. They measure exact Shadcn recipes, native input draft retention, initial and remount/portal frame sequences, normal Props sync, native observer/MQL release, full WC disconnect/reconnect and Transition fallback/event/presence behavior. The extra Vue case uses the existing synchronous scheduler and an actual mounted recommit without changing the original eight cases or their frame assertions.
       - Same-epoch physical replacement uses an actual Runtime plus WC commit/Effects/applier host, not an assertion of arbitrary internal target replacement in every Adapter. Custom/subtree counterexamples are checked; ShadowRoot and cross-document behavior remain outside the guarantee.
       - Initial React uncontrolled defaultValue projection differs from logical value on both the public baseline and the candidate. The fixture records that existing gap before real input; passing theme/draft checks do not claim that initialization defect is repaired.
 verifies:

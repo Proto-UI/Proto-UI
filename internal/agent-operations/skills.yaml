@@ -1,5 +1,5 @@
 schemaVersion: 2
-registryVersion: 2026-10-14.human-directed-connected-operation-1
+registryVersion: 2026-10-23.source-bound-operations-1
 entrypoints:
   development: pui-dev
   maintenance: pui-maintain
@@ -14,15 +14,6 @@ compositionRules:
   - continue governed ready work through implementation, review, and integration
   - stop only for unresolved product direction or a privileged or irreversible operation
 skills:
-  - id: pui-agent-identify
-    entrypoints: [development, maintenance]
-    loadPath: .agents/skills/pui-agent-identify/SKILL.md
-    transition: request context -> current unsigned closed-set ModelTrace record
-    autonomousMinimumBand: U0
-    taskClass: public-read
-    mutation: disposable-output-only
-    requires: [request-context]
-    produces: [modeltrace-record]
   - id: pui-assess
     entrypoints: [development, maintenance]
     loadPath: .agents/skills/pui-assess/SKILL.md
@@ -57,14 +48,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: claim-work-item
     mutation: reversible-github-metadata
-    requires:
-      [
-        capability-envelope,
-        work-item-proposal,
-        evidence-assessment,
-        mutation-authorization,
-        modeltrace-record,
-      ]
+    requires: [capability-envelope, work-item-proposal, evidence-assessment, mutation-authorization]
     produces: [mutation-receipt, bounded-subject]
   - id: pui-unclaim
     entrypoints: [development]
@@ -73,7 +57,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: release-own-claim
     mutation: reversible-github-metadata
-    requires: [capability-envelope, claim-receipt, mutation-authorization, modeltrace-record]
+    requires: [capability-envelope, claim-receipt, mutation-authorization]
     produces: [mutation-receipt]
   - id: pui-trace
     entrypoints: [development]
@@ -211,14 +195,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: integrate-reviewed-pull-request
     mutation: conditional-pull-request-merge
-    requires:
-      [
-        review-packet,
-        review-input,
-        published-review-packet,
-        mutation-authorization,
-        modeltrace-record,
-      ]
+    requires: [review-packet, review-input, published-review-packet, mutation-authorization]
     humanDirectedRequires:
       [capability-envelope, github-snapshot, mutation-authorization, human-directed-operation]
     produces: [mutation-receipt]
@@ -229,14 +206,7 @@ skills:
     autonomousMinimumBand: C2
     taskClass: maintain-collaboration-state
     mutation: reversible-github-collaboration
-    requires:
-      [
-        capability-envelope,
-        github-snapshot,
-        mutation-authorization,
-        collaboration-request,
-        modeltrace-record,
-      ]
+    requires: [capability-envelope, github-snapshot, mutation-authorization, collaboration-request]
     humanDirectedRequires:
       [capability-envelope, github-snapshot, mutation-authorization, human-directed-operation]
     produces: [mutation-receipt]
@@ -275,13 +245,7 @@ skills:
     taskClass: publish-evidence-comment
     mutation: reversible-github-metadata
     requires:
-      [
-        capability-envelope,
-        issue-report,
-        evidence-publication-packet,
-        mutation-authorization,
-        modeltrace-record,
-      ]
+      [capability-envelope, issue-report, evidence-publication-packet, mutation-authorization]
     produces: [mutation-receipt, evidence-ledger-update]
   - id: pui-govern
     entrypoints: [development]

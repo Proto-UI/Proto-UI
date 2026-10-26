@@ -97,10 +97,13 @@ Proto UI 所期望的演进循环是：提出近似，将其写成 Prototype，�
 白皮书负责给出哲学方向，Spec 把其中可以工程治理的部分细化成可检查的义务，实现和测试再提供当前行为的证据。实践可以推动白皮书、Spec、Prototype 或翻译边界发生变化，却不应该静默覆盖它们。否则，我们无法分辨自己是在修正认识，还是只是在替偶然的实现结果寻找解释。
 
 <figure class="whitepaper-figure">
-  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图">
-    <img src="/diagrams/whitepaper-evolution-feedback.zh-cn.svg" alt="理论与内核、原型库、翻译层共同接受实践检验；证据经过归因，推动对应层的明确修正。" width="960" height="928" class="whitepaper-diagram" loading="lazy" />
+  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="点击查看大图" aria-describedby="evolution-feedback-description">
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-evolution-feedback.mobile.zh-cn.svg" width="500" height="1000" />
+      <img src="/diagrams/whitepaper-evolution-feedback.zh-cn.svg" alt="理论与内核、原型库、翻译层共同接受实践检验；证据经过归因，推动对应层的明确修正。" aria-describedby="evolution-feedback-description" width="960" height="928" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
-  <figcaption>点击查看大图</figcaption>
+  <figcaption id="evolution-feedback-description"><span class="sr-only">理论与内核、原型库和翻译层并行推进。实现、符合性测试与真实使用提供归因证据：实现偏差需要修正实现；Host 能力缺口需要补足翻译能力；必要语义遗漏或定义对某类 Host 过拟合需要修正 Prototype；基础关系出现反例需要重新检查理论。这些是不同的归因方向，不是依次完成的阶段。明确修正对应层并重新检验；实现结果不会静默成为新标准。</span>点击查看大图</figcaption>
 </figure>
 
 ## 仍然需要更远的检验

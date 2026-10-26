@@ -23,18 +23,18 @@ Total: **63 library-family instances; 27 distinct subjects; 159 P identities; 15
 
 ## Separate candidate source inventory
 
-Candidate commit 98c858f24aa834cc66fdb45b8241bc58076524e9; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
+Candidate local tree bf17187e1f95044b8aaf598447289d8ed352716f; based on main 25c3d0731e39003d87f541afc5e1a294a9d95568. These source counts are candidate-only; offline Git commit/tree proofs bind every stored path to the advertised object and the current worktree. The historical main snapshot is checked against its fixed evidence digest without requiring historical Git objects. These records do not change any pinned-main comparison denominator, mark work accepted, or establish current-main availability.
 
 | Library | Main families / identities | Candidate families / identities |
 | --- | --- | --- |
-| base | 22 / 55 | 42 / 76 |
-| shadcn | 17 / 48 | 43 / 73 |
-| brutalist | 19 / 51 | 44 / 72 |
-| bootstrap-2-3-2 | 2 / 2 | 37 / 45 |
-| liquid-glass | 2 / 2 | 31 / 37 |
+| base | 22 / 55 | 49 / 88 |
+| shadcn | 17 / 48 | 51 / 83 |
+| brutalist | 19 / 51 | 52 / 78 |
+| bootstrap-2-3-2 | 2 / 2 | 44 / 48 |
+| liquid-glass | 2 / 2 | 39 / 41 |
 | lucide | 1 / 1 | 1 / 1 |
 
-Candidate atomic GPUI obligations: 304; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
+Candidate atomic GPUI obligations: 352; see the complete checklist. Source presence does not satisfy runtime, lifecycle, GPUI or independent acceptance gates.
 
 ## Reference sets and difference accounting
 
@@ -344,5 +344,4 @@ These manifest facts describe the selected source revision and do not prove regi
 - Every adopted row needs a real owner, precise semantic/negative boundary, main/open-PR separation, lifecycle, host/Compiler evidence and consumer acceptance. Closing the matrix PR does not close #870.
 - This audit does not rerun prototype/runtime/visual tests. Existing mapped tests are source evidence only; no full-feature or native certification is claimed. Independent review and exact-head CI remain required for the matrix change.
 
-Agent: dot  
-ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot

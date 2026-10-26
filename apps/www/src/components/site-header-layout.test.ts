@@ -38,6 +38,21 @@ it('reflows enlarged desktop reading columns and Header by container space, pres
   expect(header).toContain('@container docs-page (max-width: 42rem)');
 });
 
+it('keeps the outer canvas as the only narrow reading gutter without changing splash spacing', () => {
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  const globalStyles = readFileSync('apps/www/src/styles/global.css', 'utf8');
+  const classes = columns.match(/const mainPaneClass = isSplash\s*\? '([^']+)'\s*:\s*'([^']+)'/)!;
+  expect(globalStyles).toMatch(
+    /\.container-wrapper\s*\{[^}]*padding-inline: calc\(var\(--spacing\) \* 4\)/
+  );
+  expect(classes[2]!.split(/\s+/).filter((token) => /^(?:md:)?px-/.test(token))).toEqual([
+    'px-0',
+    'md:px-0',
+  ]);
+  expect(classes[1]).toContain('px-1');
+  expect(classes[1]).toContain('md:px-6');
+});
+
 describe('reading reflow query boundaries (source arithmetic, not browser paint)', () => {
   const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const query = columns.match(

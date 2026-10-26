@@ -2,6 +2,8 @@
 
 The [active prototype comparison and four-family projection matrix](prototype-coverage-matrix.md), backed by [structured data](prototype-coverage-matrix.json), is the current portfolio entry under [#870](https://github.com/Proto-UI/Proto-UI/issues/870). It supersedes the older #377 matrix navigation while preserving its [dated snapshot](snapshots/2026-10-06-issue-377-before-migration.md), unfinished work, and existing implementation owners.
 
+The [composition delivery parity audit and repair record](composition-delivery-parity.md) traces public definitions, recommended compositions, homepage/demo consumers and workspace/installed boundaries, with reproducible diagnosis and commit-bound validation. It is not a claim that all composition or installation gaps are closed.
+
 Proto UI is independent. Comparison projects and design/specification references do not determine its roadmap. A directory name is neither a new Base protocol nor an automatic adoption commitment.
 
 The following are separate dimensions, not numbers to add into one coverage percentage:
@@ -23,3 +25,5 @@ node --test scripts/coverage-matrices/test/prototype-coverage.test.mjs
 ```
 
 The JSON is the editable inventory; the Markdown view is generated. Refresh exact snapshots and per-row decisions when the source changes. A successful check proves bounded inventory consistency, not runtime behavior or semantic admission.
+
+A cataloged projection has one owning family. Its inherited Base identity selects that family when its source list also cites supporting definitions from other families; those supporting paths do not duplicate the projection identity into another row. A multi-family source list without one proven inherited Base owner is rejected rather than guessed. Candidate source refreshes retain the pinned-main inventory and existing acceptance gates; a newer source inventory is not lifecycle promotion or completed parity.

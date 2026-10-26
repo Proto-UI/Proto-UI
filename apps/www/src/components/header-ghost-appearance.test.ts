@@ -86,6 +86,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
         ...['root', 'trigger', 'value', 'content', 'item'].map(
           (part) => `${family}-select-${part}`
         ),
+        ...(family === 'shadcn'
+          ? ['shadcn-select-surface', 'shadcn-select-viewport', 'shadcn-select-item-text']
+          : []),
       ]);
       rendered = await renderDemo({ runtime, demo: composition.demo, host });
       disclosure = initSiteHeaderDisclosure(header);

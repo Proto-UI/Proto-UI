@@ -21,19 +21,10 @@ import {
 } from '../collect-live-collaboration-state.mjs';
 import { parseCollaborationCli, runCollaborationCli } from '../collaboration-packet.mjs';
 import { collectThreadRevision } from '../thread-revision.mjs';
-import { modelTraceFixture, writeModelTraceFixture } from './fixtures/modeltrace.mjs';
+const OBSERVATION_BASE = '2026-08-27T01:00:00.000Z';
 
-const { modelTrace, modelTraceContext, disclosure } = modelTraceFixture();
-const modelTraceArtifact = {
-  type: 'modeltrace-record',
-  reference: 'fixture://modeltrace-record',
-  digest: modelTrace.id,
-};
-
-// Receipt-producing observations must follow the synthetic measurement. Keep
-// old target/server metadata independent; it need not be a mutation timestamp.
 function fixtureTimestamp(seconds, fraction = '000') {
-  const second = Math.floor(Date.parse(modelTrace.measuredAt) / 1000) + 1 + seconds;
+  const second = Math.floor(Date.parse(OBSERVATION_BASE) / 1000) + 1 + seconds;
   return new Date(second * 1000).toISOString().replace(/\.\d{3}Z$/, `.${fraction}Z`);
 }
 
@@ -100,8 +91,6 @@ function applyGitHubCollaborationMutation(request, preState, options = {}) {
       executionModeSource: 'current-user',
       policy,
       selfAssessment: assessment,
-      modelTrace,
-      modelTraceContext,
     },
     ...options,
   });
@@ -109,17 +98,6 @@ function applyGitHubCollaborationMutation(request, preState, options = {}) {
 
 function seal(request) {
   const value = structuredClone(request);
-  if (!value.evidence.some((item) => item.type === 'modeltrace-record')) {
-    value.evidence.push(structuredClone(modelTraceArtifact));
-  }
-  if (
-    value.action === 'post-bounded-reconciliation-comment' ||
-    (value.action === 'update-governed-issue-or-pull-request-metadata' &&
-      value.desired.body !== null &&
-      value.desired.body !== value.expected.body)
-  ) {
-    if (!value.desired.body.includes(disclosure)) value.desired.body += `\n\n${disclosure}`;
-  }
   value.requestDigest = computeCollaborationRequestDigest(value);
   return value;
 }
@@ -203,8 +181,6 @@ function authorize(request, liveState, overrides = {}) {
     executionModeSource: 'current-user',
     policy,
     selfAssessment: assessment,
-    modelTrace,
-    modelTraceContext,
     ...overrides,
   });
 }
@@ -236,44 +212,6 @@ function assertUnknownComment(callback, request, acknowledgementReceived, reason
   });
   return caught;
 }
-
-test('missing or mismatched records cannot reach collaboration writes even with current user permission', () => {
-  const request = metadataRequest();
-  const withoutBinding = {
-    ...request,
-    evidence: request.evidence.filter((item) => item.type !== 'modeltrace-record'),
-  };
-  withoutBinding.requestDigest = computeCollaborationRequestDigest(withoutBinding);
-  const context = {
-    executionMode: 'human-assisted',
-    executionModeSource: 'current-user',
-    policy,
-    modelTrace,
-    modelTraceContext,
-  };
-  for (const [candidate, override] of [
-    [request, { modelTrace: undefined }],
-    [request, { modelTraceContext: { ...modelTraceContext, routeDigest: 'c'.repeat(64) } }],
-    [withoutBinding, {}],
-  ]) {
-    let writes = 0;
-    let reads = 0;
-    assert.throws(() =>
-      applyMutationWithContext(candidate, metadataLive(), {
-        authorizationContext: { ...context, ...override },
-        runner() {
-          writes += 1;
-        },
-        collectState() {
-          reads += 1;
-          return metadataLive();
-        },
-      })
-    );
-    assert.equal(writes, 0);
-    assert.equal(reads, 0);
-  }
-});
 
 test('request digest binds every purpose and rejects tampering', () => {
   const request = metadataRequest();
@@ -348,7 +286,6 @@ test('an autonomous handoff cannot omit its governed-outcome artifact and public
   const handoff = {
     executionMode: 'autonomous',
     artifacts: [
-      modelTraceArtifact,
       {
         type: 'collaboration-request',
         reference: 'artifact://collaboration/pr-509',
@@ -384,10 +321,7 @@ test('all seven autonomous writers stay blocked even after scope activation and 
       authorizationId: 'proto-ui-scheduled-collaboration-v1',
       evidence: [
         ...fixture.request.evidence.filter(
-          (entry) =>
-            !['current-user-instruction', 'governed-outcome', 'modeltrace-record'].includes(
-              entry.type
-            )
+          (entry) => !['current-user-instruction', 'governed-outcome'].includes(entry.type)
         ),
         ...autonomousRequest().evidence,
       ],
@@ -408,8 +342,6 @@ test('all seven autonomous writers stay blocked even after scope activation and 
             executionModeSource: 'schedule',
             policy,
             selfAssessment: assessment,
-            modelTrace,
-            modelTraceContext,
           },
           runner() {
             calls += 1;
@@ -430,7 +362,6 @@ test('handoff artifacts bind the exact request digest and authorization scope', 
   const request = metadataRequest();
   const handoff = {
     artifacts: [
-      modelTraceArtifact,
       {
         type: 'collaboration-request',
         reference: 'artifact://collaboration/pr-509',
@@ -495,7 +426,6 @@ test('ready-for-review handoff binds a digested validation-report artifact', () 
       reference: 'artifact://validation/pr-509',
       digest: `sha256:${'d'.repeat(64)}`,
     },
-    modelTraceArtifact,
   ];
   const handoff = { artifacts };
   assert.equal(validateCollaborationHandoffBinding(request, handoff), handoff);
@@ -1223,25 +1153,7 @@ test('metadata PATCH sends only fields whose desired values changed', () => {
   assert.deepEqual(input, { labels: ['governed', 'triaged'] });
 });
 
-test('null body replacement cannot delete disclosure and existing content through a metadata PATCH', () => {
-  const base = metadataRequest();
-  const request = seal({ ...base, desired: { ...base.expected, body: null } });
-  let writes = 0;
-  assert.throws(
-    () =>
-      applyGitHubCollaborationMutation(request, metadataLive(), {
-        runner() {
-          writes += 1;
-          return '{}';
-        },
-        collectState: () => metadataLive(),
-      }),
-    /ModelTrace disclosure/
-  );
-  assert.equal(writes, 0);
-});
-
-test('metadata body replacement publishes the complete disclosed body without rewriting prior content', () => {
+test('metadata body replacement publishes the exact authorized body without rewriting prior content', () => {
   const base = metadataRequest();
   const request = seal({
     ...base,
@@ -1255,16 +1167,14 @@ test('metadata body replacement publishes the complete disclosed body without re
       writes += 1;
       assert.equal(command, 'gh');
       assert.ok(args.includes('PATCH'));
-      assert.deepEqual(JSON.parse(options.input), {
-        body: `Updated governed evidence.\n\n${disclosure}`,
-      });
+      assert.deepEqual(JSON.parse(options.input), { body: 'Updated governed evidence.' });
       return JSON.stringify({ id: 509, node_id: 'PR_node' });
     },
     collectState: () => (writes ? postState : preState),
   });
   assert.equal(writes, 1);
   assert.equal(result.mutationCount, 1);
-  assert.equal(result.postState.current.body, `Updated governed evidence.\n\n${disclosure}`);
+  assert.equal(result.postState.current.body, 'Updated governed evidence.');
   assert.equal(preState.current.body, 'Old body');
 });
 
@@ -1445,7 +1355,7 @@ test('receipt validation binds the request and rejects impossible mutation count
   );
 });
 
-test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects foreign attribution', () => {
+test('schema-v2 receipts remain bound to the request repository', () => {
   const request = metadataRequest({ repositoryId: 'github.com:proto-ui/proto-ui' });
   const preState = metadataLive();
   const receipt = buildCollaborationReceipt({
@@ -1460,14 +1370,13 @@ test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects forei
     verifiedAt: fixtureTimestamp(11),
     verification: 'live-state-matches-desired',
     note: 'Synthetic receipt ingestion control.',
-    modelTrace,
   });
   validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), request);
+  assert.equal(receipt.schemaVersion, 2);
   const foreign = {
     ...receipt,
-    modelTrace: modelTraceFixture('github.com:Other/Other').modelTrace,
+    repositoryId: 'github.com:Other/Other',
   };
-  assert.throws(() => validateCollaborationReceipt(foreign), /repository/);
   assert.throws(() => validateCollaborationReceipt(foreign, request), /repository/);
   assert.throws(
     () => validateCollaborationReceipt({ ...receipt, repositoryId: ['github.com:a', 'b/c'] }),
@@ -1475,41 +1384,7 @@ test('schema-v2 receipt ingestion admits GitHub casing aliases but rejects forei
   );
 });
 
-test('schema-v2 receipt ingestion rejects retroactive measurements without losing timestamp precision', () => {
-  const request = metadataRequest();
-  const preState = metadataLive();
-  const receipt = buildCollaborationReceipt({
-    request,
-    preState,
-    postState: preState,
-    actor: 'maintainer',
-    outcome: 'no-op',
-    mutationCount: 0,
-    reconciliationCount: 0,
-    platformObject: null,
-    verifiedAt: modelTrace.measuredAt,
-    verification: 'live-state-matches-desired',
-    note: 'Synthetic measurement and verification at the same instant.',
-    modelTrace,
-  });
-  const measured = Date.parse(modelTrace.measuredAt);
-  const equalOffset = new Date(measured + 60 * 60 * 1000).toISOString().replace('Z', '000+01:00');
-  validateCollaborationReceipt({ ...receipt, verifiedAt: equalOffset }, request);
-  // Verification accepts finer fractions than ModelTrace measurement. This is
-  // one microsecond before measurement, including the .000 second rollover.
-  const fractionalBefore = new Date(measured - 1).toISOString().replace('Z', '999Z');
-  assert.throws(
-    () => validateCollaborationReceipt({ ...receipt, verifiedAt: fractionalBefore }, request),
-    /measurement occurs after receipt verification/
-  );
-  const beforeOffset = new Date(measured - 1 + 60 * 60 * 1000).toISOString().replace('Z', '+01:00');
-  assert.throws(
-    () => validateCollaborationReceipt({ ...receipt, verifiedAt: beforeOffset }),
-    /measurement occurs after receipt verification/
-  );
-});
-
-test('applied thread receipts admit late verification and old PR metadata but reject later attribution', () => {
+test('applied thread receipts admit late verification and old PR metadata', () => {
   const fixture = nonMetadataMutationCases().find((item) => item.name === 'resolve thread');
   const preState = { ...metadataLive(), action: fixture.request.action, current: fixture.before };
   const postState = {
@@ -1533,23 +1408,14 @@ test('applied thread receipts admit late verification and old PR metadata but re
       workflowRunId: null,
       workflowAttempt: null,
     },
-    verifiedAt: new Date(Date.parse(modelTrace.expiresAt) + 124).toISOString(),
+    verifiedAt: fixtureTimestamp(10_000),
     verification: 'live-state-matches-desired',
-    note: 'Synthetic post-write readback after measurement expiry; PR metadata is unchanged.',
-    modelTrace,
+    note: 'The exact thread resolution was verified after the PR metadata changed.',
   });
   validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), fixture.request);
-  assert.throws(
-    () =>
-      validateCollaborationReceipt({
-        ...receipt,
-        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
-      }),
-    /measurement occurs after receipt verification/
-  );
 });
 
-test('rejected receipts retain historical attribution without implying a write or current freshness', () => {
+test('rejected receipts never imply a write', () => {
   const request = metadataRequest();
   const preState = metadataLive();
   const receipt = buildCollaborationReceipt({
@@ -1561,20 +1427,11 @@ test('rejected receipts retain historical attribution without implying a write o
     mutationCount: 0,
     reconciliationCount: 0,
     platformObject: null,
-    verifiedAt: modelTrace.expiresAt,
+    verifiedAt: fixtureTimestamp(11),
     verification: 'live-authorization-rejected',
-    note: 'Synthetic zero-write historical rejection.',
-    modelTrace,
+    note: 'The live authorization gate rejected the request before a write.',
   });
   validateCollaborationReceipt(JSON.parse(JSON.stringify(receipt)), request);
-  assert.throws(
-    () =>
-      validateCollaborationReceipt({
-        ...receipt,
-        verifiedAt: new Date(Date.parse(modelTrace.measuredAt) - 1).toISOString(),
-      }),
-    /measurement occurs after receipt verification/
-  );
 });
 
 test('update-branch no-op is bound to the exact base and rejects an unrelated stale head', () => {
@@ -1743,7 +1600,7 @@ for (const [actor, maintainerCanModify, containsBaseSha] of [
   ['maintainer', false, false],
   ['maintainer', true, true],
 ]) {
-  test(`update-branch ${containsBaseSha ? 'retains an exact-base no-op' : 'rejects server-created commits'} for ${actor} with maintainer edits ${maintainerCanModify}`, () => {
+  test(`update-branch ${containsBaseSha ? 'retains an exact-base no-op' : 'uses the authorized exact-head update'} for ${actor} with maintainer edits ${maintainerCanModify}`, () => {
     const fixture = nonMetadataMutationCases().find((item) => item.name === 'update branch');
     const preState = {
       ...metadataLive(),
@@ -1752,39 +1609,60 @@ for (const [actor, maintainerCanModify, containsBaseSha] of [
       current: { ...fixture.before, maintainerCanModify, containsBaseSha },
     };
     const decision = authorize(fixture.request, preState);
-    assert.equal(decision.allowed, containsBaseSha);
-    assert.equal(decision.outcome, containsBaseSha ? 'no-op' : 'rejected');
+    assert.equal(decision.allowed, true);
+    assert.equal(decision.outcome, containsBaseSha ? 'no-op' : 'mutate');
     let writes = 0;
     let reads = 0;
     let waits = 0;
+    const postState = {
+      ...preState,
+      observedAt: fixtureTimestamp(10),
+      current: { ...fixture.before, ...fixture.after, maintainerCanModify },
+    };
     const apply = () =>
       applyGitHubCollaborationMutation(fixture.request, preState, {
-        runner() {
+        runner(command, args, options) {
           writes += 1;
-          throw new Error('server update must never write');
+          assert.equal(command, 'gh');
+          assert.deepEqual(args.slice(0, 5), [
+            'api',
+            '--method',
+            'PUT',
+            'repos/Proto-UI/Proto-UI/pulls/509/update-branch',
+            '--input',
+          ]);
+          assert.deepEqual(JSON.parse(options.input), { expected_head_sha: HEAD });
+          return '';
         },
         collectState() {
           reads += 1;
-          return preState;
+          return containsBaseSha || reads === 1 ? preState : postState;
         },
         wait() {
           waits += 1;
         },
+        asyncVerificationAttempts: 2,
+        asyncVerificationDelayMs: 0,
       });
     if (containsBaseSha) {
       const result = apply();
       assert.equal(result.mutationCount, 0);
       assert.deepEqual(result.postState, preState);
     } else {
-      assert.throws(apply);
+      const result = apply();
+      assert.equal(result.mutationCount, 1);
+      assert.equal(result.postState.current.headSha, NEXT_HEAD);
     }
-    assert.equal(writes, 0);
-    assert.equal(reads, 0);
+    assert.equal(writes, containsBaseSha ? 0 : 1);
+    assert.equal(reads, containsBaseSha ? 0 : 2);
     assert.equal(waits, 0);
-    const { receipt, writes: cliWrites } = runCollaborationFixture(fixture, [preState]);
-    assert.equal(receipt.outcome, containsBaseSha ? 'no-op' : 'rejected');
-    assert.equal(receipt.mutationCount, 0);
-    assert.equal(cliWrites, 0);
+    const { receipt, writes: cliWrites } = runCollaborationFixture(
+      fixture,
+      containsBaseSha ? [preState] : [preState, preState, postState]
+    );
+    assert.equal(receipt.outcome, containsBaseSha ? 'no-op' : 'applied');
+    assert.equal(receipt.mutationCount, containsBaseSha ? 0 : 1);
+    assert.equal(cliWrites, containsBaseSha ? 0 : 1);
   });
 }
 
@@ -1842,14 +1720,10 @@ for (const scenario of [
 ]) {
   test(`collaboration CLI emits a validated zero-write receipt for ${scenario.name}`, () => {
     const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-'));
-    const identity = writeModelTraceFixture(directory);
     const request = seal({
       ...metadataRequest(),
       authorizationId: 'explicit-current-user',
-      evidence: [
-        { type: 'current-user-instruction', reference: 'conversation://current-request' },
-        identity.artifact,
-      ],
+      evidence: [{ type: 'current-user-instruction', reference: 'conversation://current-request' }],
     });
     const handoff = {
       schemaVersion: 1,
@@ -1860,7 +1734,6 @@ for (const scenario of [
       fromId: 'pui-pr',
       nextSkillId: 'pui-collaborate',
       artifacts: [
-        identity.artifact,
         { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
         { type: 'review-input', reference: 'artifact://pr/509/review-input' },
         { type: 'capability-envelope', reference: 'artifact://capability/current' },
@@ -1893,10 +1766,6 @@ for (const scenario of [
           requestPath,
           '--handoff',
           handoffPath,
-          '--record',
-          identity.recordPath,
-          '--context',
-          identity.contextPath,
         ],
         {
           collectState() {
@@ -1910,6 +1779,7 @@ for (const scenario of [
       );
       validateCollaborationReceipt(output, request);
       assert.equal(output.kind, 'proto-ui.collaboration-receipt');
+      assert.equal(output.schemaVersion, 2);
       assert.equal(output.outcome, scenario.kind);
       assert.equal(output.mutationCount, 0);
       assert.equal(writes, 0);
@@ -1961,8 +1831,6 @@ test('the mutation adapter requires execution authorization as well as matching 
           executionMode: 'human-assisted',
           executionModeSource: 'repository-issue',
           policy,
-          modelTrace,
-          modelTraceContext,
         },
       }),
     /authorization|source/
@@ -2207,23 +2075,9 @@ function nonMetadataMutationCases() {
 function runCollaborationFixture(fixture, states) {
   const directory = mkdtempSync(join(tmpdir(), 'proto-ui-collaboration-preflight-'));
   try {
-    const identity = writeModelTraceFixture(directory);
-    const oldMarker = collaborationMarker(fixture.request);
-    const request = seal({
-      ...fixture.request,
-      evidence: [
-        ...fixture.request.evidence.filter((item) => item.type !== 'modeltrace-record'),
-        identity.artifact,
-      ],
-    });
-    const newMarker = collaborationMarker(request);
+    const request = seal(fixture.request);
     const boundStates = structuredClone(states);
-    for (const state of boundStates) {
-      const comment = state.current?.markerComment;
-      if (typeof comment?.body === 'string')
-        comment.body = comment.body.replace(oldMarker, newMarker);
-    }
-    const response = fixture.response?.replace(oldMarker, newMarker);
+    const response = fixture.response;
     const requestPath = join(directory, 'request.json');
     const handoffPath = join(directory, 'handoff.json');
     writeFileSync(requestPath, JSON.stringify(request));
@@ -2238,7 +2092,6 @@ function runCollaborationFixture(fixture, states) {
         fromId: 'pui-pr',
         nextSkillId: 'pui-collaborate',
         artifacts: [
-          identity.artifact,
           { type: 'pull-request-report', reference: 'artifact://pr/509/report' },
           { type: 'review-input', reference: 'artifact://pr/509/review-input' },
           { type: 'capability-envelope', reference: 'artifact://capability/current' },
@@ -2267,10 +2120,6 @@ function runCollaborationFixture(fixture, states) {
         requestPath,
         '--handoff',
         handoffPath,
-        '--record',
-        identity.recordPath,
-        '--context',
-        identity.contextPath,
       ],
       {
         collectState: () => boundStates[Math.min(reads++, boundStates.length - 1)],
