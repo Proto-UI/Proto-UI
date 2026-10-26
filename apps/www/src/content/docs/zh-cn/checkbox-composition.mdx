@@ -40,3 +40,50 @@ React/Vue/Vue2 通过现有 `instanceAssociations` 输入传递关联，并把 `
 比较基线仍是 shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 New York Checkbox。上游封装 Root 与 Indicator，并通过独立 Label 组合名称，不内置固定标签文本。这里不迁移为当前 Base UI 实现。
 
 构造器单元测试、合成宿主事件、真实浏览器输入与安装后的行为是不同证据。旧截图不能证明新提交；代码存在也不能证明键盘、焦点、辅助技术名称计算或像素一致。首页/demo/安装入口的一致消费仍需各自后续切片验证。
+
+## 有限的 Web Components 安装后使用路径
+
+下面是 #1000 的 candidate 验收路径，不表示当前 npm 发布版已经包含这个 draft helper。使用本次候选真实打包产物安装 `@proto.ui/cli`、`@proto.ui/adapter-web-component`、`@proto.ui/prototypes-shadcn` 及其声明依赖后，在消费者项目执行既有命令。正式发布前不要把旧 registry 包与本页新 API 混用。
+
+```sh
+npx proto-ui init --prototypes shadcn --yes --no-interactive
+npx proto-ui add wc shadcn-checkbox --no-interactive
+npx proto-ui add wc shadcn-label --no-interactive
+```
+
+这两条 add 分别提供 Checkbox（默认 Indicator）与独立 Label，不存在一个内置固定标签文案的 Checkbox。项目已有另一套 style preset 时，应先按 CLI 提示显式迁移，不能静默混用 family。下面代码置于支持 TypeScript/CSS import 的消费者入口；JavaScript 项目使用 CLI 实际生成的 `index.js` 路径。宿主打包器处理生成的样式入口，不用网站的源码 alias。
+
+```ts
+import './src/styles/proto-ui-style.css';
+import {
+  ShadcnCheckboxElement,
+  ShadcnLabelRootElement,
+} from './proto-ui/components/wc/index.ts';
+import { createShadcnCheckboxLabelComposition } from '@proto.ui/prototypes-shadcn/checkbox';
+import {
+  setElementAssociations,
+  setElementProps,
+} from '@proto.ui/adapter-web-component';
+
+// Called once for this mounted pair, not once per render and not globally.
+const pair = createShadcnCheckboxLabelComposition();
+const control = new ShadcnCheckboxElement();
+const label = new ShadcnLabelRootElement();
+const emphasis = document.createElement('strong');
+emphasis.textContent = '接收更新';
+label.append(emphasis);
+setElementProps(label, pair.label.props);
+setElementAssociations(control, pair.control.instanceAssociations);
+setElementAssociations(label, pair.label.instanceAssociations);
+const container = document.createElement('div');
+container.append(control, label);
+document.body.append(container);
+
+// Remove the complete mounted pair when the owning host view is removed.
+// Actual adapter cleanup owns resources; the helper has no dispose method.
+// container.remove();
+```
+
+使用 `ShadcnCheckboxElement` 时不要再额外追加默认 Indicator；需要显式替换或关闭时沿用原 preset 规则。`ShadcnCheckboxRootElement` 仍是 raw Root，不会自动补 Indicator。Label 可以承载合法的非交互富名称，独立按钮/链接优先放相邻区域。不要另加隐藏重复名称、页面 `.click()` 转发或第二套 checked 状态。
+
+现有 PR CI 的 `cli-smoke` 会从真实 tarball 新建独立消费者，用已安装 CLI 生成这两个 facade，执行 public helper 导入、声明、缺失 Label 产物负控和 WC 合成行为。此证据不会自动证明浏览器原生输入、辅助技术名称计算、布局像素或正式 registry 发布；通过情况须查看对应精确提交的 CI，未运行不能标为通过。

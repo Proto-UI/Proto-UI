@@ -93,3 +93,22 @@ void reactInvalidFit;
 void vueInvalidFit;
 void webComponentInvalidFit;
 void imageStatuses;
+
+// Public package declarations, not monorepo source imports.
+import {
+  createShadcnCheckboxLabelComposition,
+  type ShadcnCheckboxLabelCompositionInstance,
+} from '@proto.ui/prototypes-shadcn/checkbox';
+import { setElementAssociations, setElementProps } from '@proto.ui/adapter-web-component';
+import { ShadcnCheckboxElement, ShadcnLabelRootElement } from './proto-ui/components/wc';
+
+const checkboxPair: ShadcnCheckboxLabelCompositionInstance = createShadcnCheckboxLabelComposition();
+const checkboxControl = new ShadcnCheckboxElement();
+const checkboxLabel = new ShadcnLabelRootElement();
+setElementAssociations(checkboxControl, checkboxPair.control.instanceAssociations);
+setElementAssociations(checkboxLabel, checkboxPair.label.instanceAssociations);
+setElementProps(checkboxLabel, checkboxPair.label.props);
+// @ts-expect-error The opaque association is not an HTML attribute or JSON string.
+setElementAssociations(checkboxLabel, { controlLabel: 'serialized-ref' });
+// @ts-expect-error Composition Label props remain readonly, not a mutable global default.
+checkboxPair.label.props.activation = false;
