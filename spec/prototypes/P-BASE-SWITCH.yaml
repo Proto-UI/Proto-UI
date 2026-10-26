@@ -568,11 +568,13 @@ criteria:
             - P-BASE-BUTTON-PROP-LABEL-DEFERRED
   - id: P-BASE-SWITCH-FORM-INTEGRATION-DEFERRED
     text:
-      zh-CN: Switch 与 Form 的联动是重要场景，但 `name`、`value`、`form`、`required` 与 unchecked value 不进入第一轮 Base Switch core props。
-      en: Switch and Form integration is an important scenario, but `name`, `value`, `form`, `required`, and unchecked value do not enter the first Base Switch core props surface.
+      zh-CN: 普通 Switch 继续不暴露 `name`、`value`、`form`、`required` 与 unchecked value。显式 FieldSwitch 组合通过既有 Field binding 支持 required、invalid、readOnly 与标签关系，共用同一 Switch root setup；不增加隐藏输入或提交序列化。
+      en: Ordinary Switch continues to omit `name`, `value`, `form`, `required` and unchecked value. Explicit FieldSwitch composition supports required, invalid, readOnly and relationships through the existing Field binding and the same Switch root setup; hidden input and form submission serialization remain outside this surface.
     dependsOn:
       contracts:
         - C-PROPS-0001
+        - id: C-FIELD-SWITCH-0001
+          since: 0.3.0-alpha.1
       decisions:
         - D-BASE-PROTOTYPE-INDEPENDENCE-0001
     references:
