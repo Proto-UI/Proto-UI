@@ -2,6 +2,10 @@ import { createRuntimeSession } from '../../../../packages/runtime/src';
 import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
 import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
+  CONTEXT_INSTANCE_TOKEN_CAP,
+  CONTEXT_PARENT_CAP,
+} from '../../../../packages/modules/context/src';
+import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
   AS_TRIGGER_GET_PROTO_CAP,
@@ -33,8 +37,8 @@ export function createStyleSnapshotter<const R extends Record<string, Prototype<
   };
 }
 
-/** Internal build-time projection for the reviewed passive Surface/Text and
- * Button recipes only. This runs setup/mount lifecycle; it is not a pure
+/** Internal build-time projection for the finite reviewed recipe registries.
+ * This runs setup/mount lifecycle; it is not a pure
  * arbitrary-Prototype evaluator. Callers must not pass resource-owning recipes.
  * Command-style mode provides detached event identity, never real host input.
  * Build-time, style-only projection of the actual Prototype. It installs no
@@ -46,8 +50,8 @@ async function snapshotPrototypeStyle(
   mode: 'passive' | 'command-style' = 'passive'
 ): Promise<string[]> {
   let tokens: string[] = [];
-  // A detached, never-dispatched identity lets command recipes declare their
-  // standard hooks without connecting input or implying an interactive host.
+  // One detached identity owns this snapshot's Context root and lets command
+  // recipes declare hooks without connecting input or an interactive host.
   const identity = new EventTarget();
   const session = createRuntimeSession(prototype, {
     prototypeName: prototype.name,
@@ -55,6 +59,12 @@ async function snapshotPrototypeStyle(
     schedule: (task) => task(),
     commit: (_children, signal) => signal?.done(),
     onRuntimeReady(wiring) {
+      // Each snapshot owns one detached root, with no logical ancestor.
+      // Context providers/subscriptions still belong to this Runtime session.
+      wiring.attach('context', [
+        [CONTEXT_INSTANCE_TOKEN_CAP, identity],
+        [CONTEXT_PARENT_CAP, () => null],
+      ]);
       if (mode === 'command-style') {
         wiring.attach('as-trigger', [
           [AS_TRIGGER_INSTANCE_CAP, identity],
