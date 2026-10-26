@@ -91,50 +91,6 @@ test('completed v1 remains compatible; completed v2 still requires producer outp
     /duplicates type/
   );
 });
-test('v1 and v2 require a content-bound identity record and keep it singleton', () => {
-  const current = base({
-    fromId: 'pui-agent-identify',
-    nextSkillId: null,
-    artifacts: [
-      a('request-context'),
-      a('modeltrace-record', 'fixture:current-model', { digest: 'sha256:' + digest }),
-    ],
-  });
-  const { outcome, binding, ...legacy } = current;
-  legacy.schemaVersion = 1;
-  for (const handoff of [legacy, current]) {
-    assert.equal(accepted(handoff).nextSkill, null);
-    for (const value of [undefined, digest]) {
-      const unbound = structuredClone(handoff);
-      const record = unbound.artifacts.find((artifact) => artifact.type === 'modeltrace-record');
-      delete record.digest;
-      if (value !== undefined) record.digest = value;
-      assert.equal(structural(unbound), false);
-      assert.throws(() => validateSkillHandoff(unbound, registry));
-    }
-    assert.throws(
-      () =>
-        validateSkillHandoff({
-          ...handoff,
-          artifacts: [
-            ...handoff.artifacts,
-            a('modeltrace-record', 'fixture:other-model', { digest: 'sha256:' + digest }),
-          ],
-        }),
-      /duplicates type/
-    );
-  }
-  assert.equal(
-    structural({
-      ...current,
-      artifacts: [
-        ...current.artifacts,
-        a('modeltrace-record', 'fixture:other-model', { digest: 'sha256:' + digest }),
-      ],
-    }),
-    false
-  );
-});
 test('interruption admits exactly one read-only CI leaf or truthful terminal, never mutation', () => {
   assert.equal(accepted(interrupted()).nextSkill.id, 'pui-ci');
   assert.equal(accepted(interrupted({ nextSkillId: null })).nextSkill, null);

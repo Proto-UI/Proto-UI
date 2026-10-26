@@ -36,6 +36,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
   section.append(label, host);
   document.querySelector('main').append(section);
   let set;
+  let dispose;
   if (kind === 'wc') {
     protos.forEach((p) => AdaptToWebComponent(p));
     const [scope, card, header, content, footer] = protos
@@ -59,6 +60,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     card.append(header, content, footer);
     scope.append(card);
     host.append(scope);
+    dispose = () => scope.remove();
     set = (outerStyle, rootStyle, size, divider) => {
       setElementProps(scope, { styleProfile: outerStyle });
       setElementProps(card, { styleProfile: rootStyle, size });
@@ -66,11 +68,11 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
       setElementProps(footer, { divider });
     };
   } else if (kind === 'react') {
-    const [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) =>
-      createReactAdapter(React)(p)
-    );
+    const adapt = createReactAdapter(React);
+    const [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) => adapt(p));
     const root = createRoot(host),
       h = React.createElement;
+    dispose = () => root.unmount();
     set = (outerStyle, rootStyle, size, divider) =>
       root.render(
         h(
@@ -91,12 +93,11 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
         )
       );
   } else if (kind === 'vue') {
-    const [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) =>
-      createVueAdapter(Vue)(p)
-    );
+    const adapt = createVueAdapter(Vue);
+    const [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) => adapt(p));
     const state = Vue.reactive({ outer: 'rhea', own: undefined, size: 'default', divider: false }),
       h = Vue.h;
-    Vue.createApp({
+    const app = Vue.createApp({
       render: () =>
         h(Scope, { styleProfile: state.outer }, () =>
           h(Card, { styleProfile: state.own, size: state.size }, () => [
@@ -110,19 +111,20 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
             ),
           ])
         ),
-    }).mount(host);
+    });
+    app.mount(host);
+    dispose = () => app.unmount();
     set = (outerStyle, rootStyle, size, divider) =>
       Object.assign(state, { outer: outerStyle, own: rootStyle, size, divider });
   } else {
     const runtime = {
-        extend: Vue2.extend.bind(Vue2),
-        nextTick: Vue2.nextTick.bind(Vue2),
-        set: Vue2.set.bind(Vue2),
-        delete: Vue2.delete.bind(Vue2),
-      },
-      [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) =>
-        createVue2Adapter(runtime)(p)
-      );
+      extend: Vue2.extend.bind(Vue2),
+      nextTick: Vue2.nextTick.bind(Vue2),
+      set: Vue2.set.bind(Vue2),
+      delete: Vue2.delete.bind(Vue2),
+    };
+    const adapt = createVue2Adapter(runtime);
+    const [Scope, Card, Header, Content, Footer, Text, Textarea] = protos.map((p) => adapt(p));
     const state = Vue2.observable({
       outer: 'rhea',
       own: undefined,
@@ -147,14 +149,19 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     });
     app.$mount();
     host.append(app.$el);
+    dispose = () => {
+      app.$destroy();
+      app.$el.remove();
+    };
     set = (outerStyle, rootStyle, size, divider) =>
       Object.assign(state, { outer: outerStyle, own: rootStyle, size, divider });
   }
   set('rhea', undefined, 'default', false);
-  records.push({ kind, host, set, editor: () => host.querySelector('textarea') });
+  records.push({ kind, host, set, dispose, editor: () => host.querySelector('textarea') });
 }
 window.cardEvidence = {
   records,
+  dispose: () => records.forEach((r) => r.dispose()),
   set: (outer, own, size = 'default', divider = false) =>
     records.forEach((r) => r.set(outer, own, size, divider)),
 };

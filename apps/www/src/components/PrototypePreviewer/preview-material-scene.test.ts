@@ -9,13 +9,21 @@ import { findPreviewMaterialProvider } from './preview-material-provider';
 const cleanups: Array<() => void> = [];
 let width = 420;
 let flowHeight = 40;
+let layoutScale = 1;
+let originX = 0;
+let originY = 0;
 let frames: Map<number, FrameRequestCallback>;
 let resizeCallbacks: ResizeObserverCallback[];
 let rects: WeakMap<Element, DOMRect>;
 const rect = (x: number, y: number, w: number, h: number) => new DOMRect(x, y, w, h);
+const viewportRect = (x: number, y: number, w: number, h: number) =>
+  rect(originX + x * layoutScale, originY + y * layoutScale, w * layoutScale, h * layoutScale);
 beforeEach(() => {
   width = 420;
   flowHeight = 40;
+  layoutScale = 1;
+  originX = 0;
+  originY = 0;
   frames = new Map();
   resizeCallbacks = [];
   rects = new WeakMap();
@@ -44,16 +52,18 @@ beforeEach(() => {
     const element = this as HTMLElement;
     const scope = element.closest<HTMLElement>('[data-material-scene]');
     if (element === scope || element.matches('[data-material-backdrop]'))
-      return rect(0, 0, width, parseFloat(scope!.style.minHeight) || flowHeight + 64);
+      return viewportRect(0, 0, width, parseFloat(scope!.style.minHeight) || flowHeight + 64);
     if (element.parentElement === scope && !element.matches('[data-material-overlay-mount]'))
-      return rect(32, 32, width - 64, flowHeight);
+      return viewportRect(32, 32, width - 64, flowHeight);
     return rect(0, 0, 0, 0);
   });
   const computed = window.getComputedStyle.bind(window);
   vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
     const css = computed(element, pseudo);
-    if (element.matches('[data-material-scene]'))
+    if (element.matches('[data-material-scene]')) {
       Object.defineProperty(css, 'paddingBottom', { value: '32px', configurable: true });
+      Object.defineProperty(css, 'width', { value: `${width}px`, configurable: true });
+    }
     return css;
   });
   vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(function () {
@@ -98,7 +108,8 @@ describe('bounded visible Previewer source layout', () => {
     const outside = document.createElement('div');
     parent.append(outside);
     const s = scene(parent);
-    expect(s.scope.style.padding).toBe('2rem');
+    expect(s.scope.style.paddingBlock).toBe('2rem');
+    expect(s.scope.style.paddingInline).toBe('min(2rem, 8%)');
     expect(s.scope.style.getPropertyValue('--runtime-box-content-min')).toBe('0px');
     expect(s.scope.style.getPropertyValue('--runtime-box-content-padding')).toBe('0px');
     expect(parent.style.getPropertyValue('--runtime-box-content-min')).toBe('10rem');
@@ -144,6 +155,30 @@ describe('bounded visible Previewer source layout', () => {
     expect(s.scope.style.minHeight).toBe('104px');
     expect(s.lease.current()?.height).toBe(104);
   });
+  it.each([
+    { scale: 1.25, popupReserve: 437 },
+    { scale: 0.8, popupReserve: 439 },
+  ])('keeps the CSS reserve in local units under zoom $scale', (zoom) => {
+    // These are explicit scaled geometry facts, not native zoom/optical evidence.
+    layoutScale = zoom.scale;
+    originX = 37.25;
+    originY = 91.5;
+    const parent = document.createElement('div');
+    parent.style.zoom = String(zoom.scale);
+    document.body.append(parent);
+    const s = scene(parent);
+    expect(s.scope.style.minHeight).toBe('104px');
+    const popup = document.createElement('div');
+    s.overlayMount.append(popup);
+    rects.set(popup, viewportRect(32, 80, 200, 300));
+    resize();
+    expect(s.scope.style.minHeight).toBe(`${zoom.popupReserve}px`);
+    expect(popup.parentElement).toBe(s.overlayMount);
+    popup.remove();
+    resize();
+    expect(s.scope.style.minHeight).toBe('104px');
+  });
+
   it('rejects actual one-pixel coverage loss without weakening contains or outset checks', () => {
     const s = scene();
     const popup = document.createElement('div');

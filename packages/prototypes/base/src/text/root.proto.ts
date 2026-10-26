@@ -13,8 +13,12 @@ function setupTextRoot(def: DefHandle<TextRootProps, TextRootExposes>): RenderFn
     tone: { type: 'enum', empty: 'fallback', options: ['default', 'muted', 'inherit'] },
     weight: { type: 'enum', empty: 'fallback', options: ['normal', 'medium', 'semibold', 'bold'] },
     font: { type: 'enum', empty: 'fallback', options: ['body', 'heading', 'mono'] },
-    leading: { type: 'enum', empty: 'fallback', options: ['tight', 'snug', 'normal', 'relaxed'] },
-    tracking: { type: 'enum', empty: 'fallback', options: ['normal', 'tight'] },
+    leading: {
+      type: 'enum',
+      empty: 'fallback',
+      options: ['size', 'tighter', 'tight', 'snug', 'normal', 'relaxed'],
+    },
+    tracking: { type: 'enum', empty: 'fallback', options: ['normal', 'tight', 'tighter'] },
     emphasis: { type: 'enum', empty: 'fallback', options: ['normal', 'italic'] },
     decoration: { type: 'enum', empty: 'fallback', options: ['none', 'underline', 'line-through'] },
   });

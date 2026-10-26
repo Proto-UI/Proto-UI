@@ -9,6 +9,9 @@
 .site-copy-mount {
   position: relative;
 }
+.site-copy-mount > [data-projection-generation-state='staging'] {
+  overflow: clip;
+}
 /* A nested command scope is not the Previewer's demo canvas. */
 .proto-previewer[data-previewer-id] [data-site-copy] .site-copy-mount .pui-projection-content {
   min-height: 0;

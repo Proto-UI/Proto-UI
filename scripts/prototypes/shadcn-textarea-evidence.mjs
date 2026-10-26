@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { containsExpectedRingShadow } from './shadcn-textarea-shadow-oracle.mjs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -95,6 +96,9 @@ await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
 const origin = `http://127.0.0.1:${server.address().port}`;
 let browser, page;
 const observations = [];
+const errors = [];
+const consoleErrors = [];
+const failedRequests = [];
 try {
   browser = await launchBrowser();
   const context = await browser.newContext({ viewport: { width: 767, height: 1000 } });
@@ -102,8 +106,13 @@ try {
     new URL(route.request().url()).origin === origin ? route.continue() : route.abort()
   );
   page = await context.newPage();
-  const errors = [];
   page.on('pageerror', (e) => errors.push(String(e)));
+  page.on('console', (message) => {
+    if (message.type() === 'error') consoleErrors.push(message.text());
+  });
+  page.on('requestfailed', (request) =>
+    failedRequests.push({ url: request.url(), failure: request.failure() })
+  );
   await page.goto(origin, { waitUntil: 'networkidle' });
   await page.waitForFunction(
     () =>
@@ -169,8 +178,57 @@ try {
           fullPage: true,
         });
       }
+  // Verify the original native tab order and keep the focus-visible entry inside
+  // the document. The last control has no next in-document focus target.
+  const focusTrace = async (kind, phase) => {
+    const trace = await page.evaluate(
+      ({ kind, phase }) => {
+        const editors = window.textareaEvidence.records.map((r) => r.editor());
+        const active = document.activeElement;
+        return {
+          kind,
+          phase,
+          documentFocused: document.hasFocus(),
+          activeIndex: editors.indexOf(active),
+          activeTag: active?.tagName,
+          activeRole: active?.getAttribute('role'),
+          activeTabIndex: active?.tabIndex,
+          editors: editors.map((e) => ({
+            kind: e.closest('section')?.dataset.runtime,
+            tabIndex: e.tabIndex,
+            disabled: e.disabled,
+            connected: e.isConnected,
+          })),
+        };
+      },
+      { kind, phase }
+    );
+    observations.push({ focusNavigation: trace });
+    return trace;
+  };
+  const enterKeyboardFocus = async (kind) => {
+    const kinds = ['wc', 'react', 'vue', 'vue2'],
+      index = kinds.indexOf(kind);
+    const editor = page.locator(`section[data-runtime="${kind}"] textarea`);
+    await editor.focus();
+    const before = await focusTrace(kind, 'before-in-document-entry');
+    assert.equal(before.activeIndex, index);
+    assert(before.editors.every((e) => e.connected && !e.disabled && e.tabIndex === 0));
+    await page.keyboard.press(index === 3 ? 'Shift+Tab' : 'Tab');
+    const neighbor = await focusTrace(kind, 'keyboard-neighbor');
+    assert.equal(
+      neighbor.activeIndex,
+      index === 3 ? 2 : index + 1,
+      'native DOM tab neighbor must match the original editor order'
+    );
+    await page.keyboard.press(index === 3 ? 'Tab' : 'Shift+Tab');
+    const restored = await focusTrace(kind, 'keyboard-return');
+    assert.equal(restored.activeIndex, index, 'native keyboard return must target the same editor');
+  };
   // Resolve the actually applied ring variable through the browser's color parser,
-  // and verify that the painted box-shadow contains that exact computed color.
+  // Compare painted geometry/color against an independent box-shadow oracle.
+  // Color and shadow serialization can differ in their final decimal places;
+  // both sides of the paint comparison must use the same CSS property.
   async function observeState(kind, expectedBorder, expectedRing, wanted) {
     const attempt = { kind, wanted, expectedBorder, expectedRing };
     observations.push({ paintAttempt: attempt });
@@ -184,6 +242,7 @@ try {
           actual.style.color = c.getPropertyValue('--pui-ring-color');
           oracle.style.color = expected.ring || 'transparent';
           oracle.style.borderColor = expected.border;
+          oracle.style.boxShadow = `0 0 0 3px ${expected.ring || 'transparent'}`;
           document.body.append(actual, oracle);
           const result = {
             kind: expected.kind,
@@ -196,6 +255,7 @@ try {
             expectedBorder: getComputedStyle(oracle).borderColor,
             ringColor: getComputedStyle(actual).color,
             expectedRing: getComputedStyle(oracle).color,
+            expectedRingShadow: getComputedStyle(oracle).boxShadow,
             ringWidth: c.getPropertyValue('--pui-ring-width').trim(),
             shadow: c.boxShadow,
             opacity: c.opacity,
@@ -216,7 +276,8 @@ try {
         sampled.disabled === (wanted.mode === 'disabled') &&
         sampled.readOnly === (wanted.mode === 'readonly') &&
         (wanted.ringVisible
-          ? sampled.ringWidth === '3px' && sampled.shadow.includes(sampled.ringColor)
+          ? sampled.ringWidth === '3px' &&
+            containsExpectedRingShadow(sampled.shadow, sampled.expectedRingShadow)
           : sampled.ringWidth !== '3px') &&
         (wanted.mode !== 'disabled' || sampled.opacity === '0.5')
       )
@@ -254,9 +315,7 @@ try {
             for (const focused of mode === 'disabled' ? [false] : [false, true]) {
               const editor = page.locator(`section[data-runtime="${kind}"] textarea`);
               if (focused) {
-                await editor.focus();
-                await page.keyboard.press('Tab');
-                await page.keyboard.press('Shift+Tab');
+                await enterKeyboardFocus(kind);
               } else await editor.evaluate((e) => e.blur());
 
               const border = invalid
@@ -288,7 +347,7 @@ try {
               if (focused || (invalid && style === 'rhea')) {
                 assert.equal(observed.ringWidth, '3px');
                 assert(
-                  observed.shadow.includes(observed.ringColor),
+                  containsExpectedRingShadow(observed.shadow, observed.expectedRingShadow),
                   `${kind}: actual painted ring color`
                 );
               } else assert.notEqual(observed.ringWidth, '3px');
@@ -317,7 +376,7 @@ try {
                 assert.equal(cleared.nativeFocus, true);
                 assert.equal(cleared.ringWidth, '3px');
                 assert(
-                  cleared.shadow.includes(cleared.ringColor),
+                  containsExpectedRingShadow(cleared.shadow, cleared.expectedRingShadow),
                   `${kind}: restored painted focus ring`
                 );
                 observations.push({ cleared });
@@ -366,9 +425,7 @@ try {
     await editor.fill(Array.from({ length: 12 }, (_, i) => `Line ${i}`).join('\n'));
     const after = await editor.evaluate((e) => e.getBoundingClientRect().height);
     assert(after > before, `${kind}: native intrinsic content growth`);
-    await editor.focus();
-    await page.keyboard.press('Tab');
-    await page.keyboard.press('Shift+Tab');
+    await enterKeyboardFocus(kind);
     assert(
       await editor.evaluate((e) => document.activeElement === e && e.matches(':focus-visible')),
       `${kind}: real keyboard focus-visible entry`
@@ -403,6 +460,15 @@ try {
     await page.evaluate(() => window.textareaEvidence.set('rhea', false));
     await page.waitForTimeout(240);
   }
+  // Preserve the original last-control navigation as diagnostics after the
+  // acceptance matrix, so leaving the page cannot poison later input routing.
+  const lastEditor = page.locator('section[data-runtime="vue2"] textarea');
+  await lastEditor.focus();
+  await focusTrace('vue2', 'original-last-before');
+  await page.keyboard.press('Tab');
+  await focusTrace('vue2', 'original-last-after-Tab');
+  await page.keyboard.press('Shift+Tab');
+  await focusTrace('vue2', 'original-last-after-ShiftTab');
   assert.deepEqual(errors, []);
   await writeFile(
     join(out, 'observations.json'),
@@ -410,8 +476,23 @@ try {
   );
 } catch (error) {
   let failureScreenshot;
+  let readiness;
   if (page) {
     try {
+      readiness = await page.evaluate(() => ({
+        ready: document.documentElement.dataset.ready,
+        documentFocused: document.hasFocus(),
+        activeElement: document.activeElement?.outerHTML,
+        records: window.textareaEvidence?.records.map((r) => ({
+          kind: r.kind,
+          editor: !!r.editor(),
+          html: r.host.innerHTML,
+        })),
+        sections: [...document.querySelectorAll('section')].map((s) => ({
+          runtime: s.dataset.runtime,
+          html: s.innerHTML,
+        })),
+      }));
       const bytes = await page.screenshot({ path: join(out, 'failure.png'), fullPage: true });
       failureScreenshot = { path: 'failure.png', sha256: hash(bytes) };
     } catch (captureError) {
@@ -421,7 +502,16 @@ try {
   await writeFile(
     join(out, 'failure.json'),
     JSON.stringify(
-      { revision: receipt.revision, error: String(error), failureScreenshot, observations },
+      {
+        revision: receipt.revision,
+        error: String(error),
+        failureScreenshot,
+        observations,
+        errors,
+        consoleErrors,
+        failedRequests,
+        readiness,
+      },
       null,
       2
     )

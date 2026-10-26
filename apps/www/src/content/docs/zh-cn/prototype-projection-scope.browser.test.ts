@@ -42,7 +42,7 @@ const EXPECTED_TASK_PROTOTYPES = {
   },
 } as const;
 const GALLERY_PART_COUNTS = {
-  'button': 11,
+  'button': 12,
   'separator-root': 2,
   'toggle': 4,
   'checkbox-root': 4,
@@ -77,6 +77,25 @@ const GALLERY_PART_COUNTS = {
   'dropdown-trigger': 1,
   'dropdown-content': 1,
   'dropdown-item': 2,
+  'command-root': 1,
+  'command-input': 1,
+  'command-content': 1,
+  'command-item': 4,
+  'command-empty': 1,
+  'progress-root': 1,
+  'progress-label': 1,
+  'progress-track': 1,
+  'progress-indicator': 1,
+  'progress-value': 1,
+  'slider-root': 1,
+  'slider-track': 1,
+  'slider-indicator': 1,
+  'slider-thumb': 1,
+  'accordion-root': 1,
+  'accordion-item': 3,
+  'accordion-heading': 3,
+  'accordion-trigger': 3,
+  'accordion-content': 3,
 } as const;
 const TASK_PART_REFS = {
   'settings-view': 'select',
@@ -463,19 +482,30 @@ async function assertTaskPartInventory(
   const family = expected.projectionFamilyId;
   const expectedIds = [
     ...Object.entries(GALLERY_PART_COUNTS).flatMap(([suffix, count]) =>
-      Array(suffix === 'button' && family === 'brutalist' ? count - 1 : count).fill(
-        `${family}-${suffix}`
-      )
+      // Default disclosure state opens exactly one answer. WC retains the two
+      // closed authored hosts; React/Vue/Vue2 withdraw their non-overlay bodies.
+      Array(
+        suffix === 'button' && family === 'brutalist'
+          ? count - 1
+          : suffix === 'accordion-content' && expected.runtimeId !== 'wc'
+            ? 1
+            : count
+      ).fill(`${family}-${suffix}`)
     ),
     ...(family === 'shadcn'
       ? [
           ...Array(3).fill('shadcn-select-item-text'),
           'shadcn-select-surface',
           'shadcn-select-viewport',
+          'shadcn-select-group',
+          'shadcn-command-input-wrapper',
+          'shadcn-input-shell',
         ]
       : []),
-    ...Array(6).fill(`${family}-surface-root`),
-    ...Array(24).fill(`${family}-text-root`),
+    ...(family === 'shadcn'
+      ? ['root', 'header', 'content'].flatMap((part) => Array(9).fill(`shadcn-card-${part}`))
+      : Array(9).fill('brutalist-surface-root')),
+    ...Array(expected.runtimeId === 'wc' ? 35 : 33).fill(`${family}-text-root`),
   ].sort();
   const actualIds = await parts.evaluateAll((elements) =>
     elements.map((element) => element.getAttribute('data-projection-prototype')).sort()
@@ -484,7 +514,7 @@ async function assertTaskPartInventory(
     expectedIds
   );
   expect(new Set(actualIds).size, 'complete declared task recipe').toBe(
-    family === 'shadcn' ? 40 : 37
+    family === 'shadcn' ? 64 : 56
   );
   await assertSurfacesShareCoordinate(parts, expected, 'every actual task part coordinate');
   const owners = await parts.evaluateAll((elements) =>
@@ -567,7 +597,12 @@ async function assertSelectFingerprint(
     expect(paint.font).toContain('DM Sans');
   } else {
     expect(restingTokens).toEqual(
-      expect.arrayContaining(['rounded-md', 'border-input', 'shadow-xs'])
+      expect.arrayContaining([
+        'rounded-[var(--pui-radius-2xl)]',
+        'border-transparent',
+        'bg-input/50',
+        'h-8',
+      ])
     );
   }
 

@@ -9,6 +9,7 @@ export const PREVIEW_LIMITS = Object.freeze({
 });
 
 export const RESERVED_PREVIEW_ROOT_FILES = new Set([
+  '.publisher-receipt.json',
   '_worker.js',
   '_routes.json',
   '_headers',

@@ -225,7 +225,7 @@ class RuleExposeStateWebImpl extends ModuleBase {
       const tokens: string[] = [];
       let ok = true;
       for (const op of r.intent.ops) {
-        if (op.kind !== 'feedback.style.use') {
+        if (op.kind !== 'feedback.style.use' || 'target' in op) {
           ok = false;
           break;
         }

@@ -1,0 +1,47 @@
+name: Shadcn Command shared style evidence
+on:
+  pull_request:
+    paths:
+      - 'packages/prototypes/shadcn/src/command/**'
+      - 'packages/prototypes/shadcn/src/input-shell/**'
+      - 'packages/prototypes/shadcn/src/style-scope/**'
+      - 'packages/prototypes/shadcn/test/command*.test.ts'
+      - 'packages/prototypes/shadcn/test/input-shell*.test.ts'
+      - 'packages/adapters/**/src/**'
+      - 'packages/cli/src/services/proto-style-css.ts'
+      - 'scripts/prototypes/shadcn-command-evidence*'
+      - '.github/workflows/shadcn-command-style.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  command-four-web-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked existing dependencies
+        run: |
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+      - name: Test public binding, actual four-framework app and bounded CSS
+        timeout-minutes: 3
+        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/input-shell-binding.test.ts packages/prototypes/shadcn/test/command-style-projection.test.ts packages/prototypes/shadcn/test/command-evidence-app.test.ts packages/prototypes/shadcn/test/command-evidence-contract.test.ts packages/cli/test/proto-style-css.test.ts
+      - name: Capture exact-head native Command and ordinary Input shell
+        timeout-minutes: 5
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node --import tsx scripts/prototypes/shadcn-command-evidence.mjs /tmp/pui-shadcn-command-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: shadcn-command-shared-style-${{ github.event.pull_request.head.sha || github.sha }}
+          path: /tmp/pui-shadcn-command-evidence/
+          if-no-files-found: warn
+          retention-days: 30

@@ -5,6 +5,16 @@ status: draft
 since: 0.2.0-rc.7
 summary: Covers host-neutral static editing requirements, the Web single-line (input) and multiline (textarea) profiles, portable property projection, normalized events, CR/LF canonicalization, composition-safe value reconciliation, selection preservation, cross-adapter materialization, native-event containment, and lease cleanup.
 cases:
+  - id: T-TEXT-CONTROL-0001-CASE-NATIVE-FULL-WIDTH
+    title: Non-split WC native full-width contribution preserves parent evaluation and editor ownership
+    covers:
+      - D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-NATIVE-FULL-WIDTH
+      - C-HOST-SURFACE-PROJECTION-0001-C
+      - C-TEXT-CONTROL-0001-G
+    expectation: >-
+      Canonical w-full and its lowered conditions reach the native boundary from the same final merged output; withdrawal removes only owned contributions. Padding, border, opacity, raw surface styles, unsafe selectors and unknown tokens stay off the boundary. Input and Textarea retain identity, focus, value and selection. Separate exact-source native-browser evidence must compare real Input, Textarea and CommandInput across four runtimes at 100/200 percent root font sizes, narrow/wide parents, reset/no-reset and padded/gapped sibling compositions; simulated DOM transport alone cannot establish layout acceptance.
+
+
   - id: T-TEXT-CONTROL-0001-CASE-STATIC-TARGET
     title: Host-neutral static requirements materialize one textarea across Web Component, React, Vue 3, and Vue 2 adapters on the Web host
     covers:
@@ -267,6 +277,9 @@ exercises:
   prototypes:
     - P-BASE-TEXTAREA
 sources:
+  - path: packages/adapters/web-component/test/native-text-layout.test.ts
+  - path: packages/adapters/web-component/test/native-text-layout.integration.test.ts
+  - path: packages/adapters/web-component/test/native-text-width.browser.test.ts
   - path: packages/modules/text-control/test/web.test.ts
   - path: packages/modules/text-control/test/impl-spec.test.ts
   - path: packages/adapters/react/test/text-control.integration.test.ts
@@ -275,6 +288,9 @@ sources:
   - path: packages/adapters/vue2/test/textarea.integration.test.ts
   - path: packages/prototypes/base/test/textarea.test.ts
 revisions:
+  - version: 0.3.0-alpha.0
+    change: revised
+    summary: Added bounded native full-width transport and separate exact-source browser acceptance; browser execution remains pending.
   - version: 0.2.0-rc.7
     change: revised
     summary: Added host-neutral declaration and Web editing-session preservation coverage.

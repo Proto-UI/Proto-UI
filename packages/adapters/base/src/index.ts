@@ -32,3 +32,10 @@ export * from './motion/web-resident-motion';
 export { createWebPresencePresentationSink } from './motion/web-presence-presentation';
 
 export * from './platform/web-viewport-source';
+export {
+  collectWebOwnedDecorationTargets,
+  createWebOwnedDecorationStage,
+  type WebOwnedDecorationStage,
+} from './platform/web-owned-decoration';
+
+export { createWebOwnedDecorationPortalGate } from './platform/web-owned-decoration-portal';

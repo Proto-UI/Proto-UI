@@ -59,6 +59,7 @@ const TEXT_SIZE_TOKENS = new Set([
 const TEXT_ALIGN_TOKENS = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
 
 export function getSemanticGroupKeyV0(token: string): string {
+  if (token === 'scroll-my-1' || token === 'scroll-my-1.5') return 'finite scroll margin block';
   if (isPlaceholderColorTokenV0(token)) return 'placeholder:text-color';
   if (token === '-z-1' || token === 'z-10' || token === 'z-40' || token === 'z-50')
     return 'finite z index';

@@ -372,12 +372,38 @@ async function waitForScrollBeyond(
   );
 }
 
-async function viewportRing(page: Page): Promise<ViewportRing> {
-  const measurement = await page.evaluate(() => {
+async function viewportRing(page: Page, armScrollEnd = false): Promise<ViewportRing> {
+  const measurement = await page.evaluate((armScrollEnd) => {
     const viewport = document.querySelector<HTMLElement>(
       '[data-previewer-id] [data-demo-ref="scrollViewport"]'
     );
     if (!viewport) throw new Error('The Brutalist Scroll Area demo must render its Viewport.');
+
+    const observed = viewport as HTMLElement & {
+      __testScrollEnd?: { pending: boolean; rightSeen: boolean };
+    };
+    if (!observed.__testScrollEnd) {
+      const activity = { pending: false, rightSeen: false };
+      observed.__testScrollEnd = activity;
+      viewport.addEventListener(
+        'keydown',
+        (event) => {
+          if (event.key === 'ArrowRight' && event.isTrusted && event.target === viewport) {
+            activity.rightSeen = true;
+            activity.pending = true;
+          }
+        },
+        { capture: true, passive: true }
+      );
+      viewport.addEventListener(
+        'scrollend',
+        (event) => {
+          if (event.target === viewport) activity.pending = false;
+        },
+        { passive: true }
+      );
+    }
+    if (armScrollEnd) observed.__testScrollEnd.rightSeen = false;
 
     const shadow = getComputedStyle(viewport).boxShadow;
     const parts: string[] = [];
@@ -405,7 +431,7 @@ async function viewportRing(page: Page): Promise<ViewportRing> {
       scrollTop: viewport.scrollTop,
       scrollLeft: viewport.scrollLeft,
     };
-  });
+  }, armScrollEnd);
   return { ...measurement, bounds: documentRect(measurement) };
 }
 
@@ -644,45 +670,67 @@ async function buttonFills(
   page: Page,
   scope?: JSHandle<HTMLElement>
 ): Promise<Record<keyof typeof BUTTON_FILLS, ButtonFill>> {
-  return page.evaluate(
-    ({ fills, scopeRoot }) => {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1;
-      canvas.height = 1;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
-      if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
+  const read = () =>
+    page.evaluate(
+      ({ fills, scopeRoot }) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext('2d', { willReadFrequently: true });
+        if (!context) throw new Error('Canvas 2D context is required to resolve painted colours.');
 
-      const paint = (color: string): string => {
-        context.clearRect(0, 0, 1, 1);
-        context.fillStyle = '#000';
-        context.fillStyle = color;
-        context.fillRect(0, 0, 1, 1);
-        return Array.from(context.getImageData(0, 0, 1, 1).data).join(',');
-      };
-
-      const result: Record<string, unknown> = {};
-      for (const [ref, [backgroundVar, colorVar]] of Object.entries(fills)) {
-        const element = (scopeRoot ?? document).querySelector<HTMLElement>(
-          `${scopeRoot ? '' : '[data-previewer-id] '}[data-demo-ref="${ref}"]`
-        );
-        if (!element) throw new Error(`The Brutalist Button demo must render ${ref}.`);
-        const style = getComputedStyle(element);
-        result[ref] = {
-          background: paint(style.backgroundColor),
-          color: paint(style.color),
-          opacity: style.opacity,
-          variables: {
-            background: paint(style.getPropertyValue(backgroundVar).trim()),
-            color: paint(style.getPropertyValue(colorVar).trim()),
-          },
-          hovered: element.hasAttribute('data-hovered'),
-          pressed: element.hasAttribute('data-pressed'),
+        const paint = (color: string): string => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = '#000';
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          return Array.from(context.getImageData(0, 0, 1, 1).data).join(',');
         };
-      }
-      return result as Record<string, ButtonFill>;
-    },
-    { fills: BUTTON_FILLS, scopeRoot: scope }
-  );
+
+        const result: Record<string, unknown> = {};
+        for (const [ref, [backgroundVar, colorVar]] of Object.entries(fills)) {
+          const element = (scopeRoot ?? document).querySelector<HTMLElement>(
+            `${scopeRoot ? '' : '[data-previewer-id] '}[data-demo-ref="${ref}"]`
+          );
+          if (!element) throw new Error(`The Brutalist Button demo must render ${ref}.`);
+          const style = getComputedStyle(element);
+          result[ref] = {
+            background: paint(style.backgroundColor),
+            color: paint(style.color),
+            opacity: style.opacity,
+            variables: {
+              background: paint(style.getPropertyValue(backgroundVar).trim()),
+              color: paint(style.getPropertyValue(colorVar).trim()),
+            },
+            hovered: element.hasAttribute('data-hovered'),
+            pressed: element.hasAttribute('data-pressed'),
+          };
+        }
+        return result as Record<string, ButtonFill>;
+      },
+      { fills: BUTTON_FILLS, scopeRoot: scope }
+    );
+
+  let result!: Awaited<ReturnType<typeof read>>;
+  await expect
+    .poll(
+      async () => {
+        result = await read();
+        return Object.entries(result).flatMap(([ref, fill]) =>
+          (['background', 'color'] as const)
+            .filter((property) => fill[property] !== fill.variables[property])
+            .map((property) => ({
+              ref,
+              property,
+              actual: fill[property],
+              expected: fill.variables[property],
+            }))
+        );
+      },
+      { timeout: 2000, interval: 20 }
+    )
+    .toEqual([]);
+  return result;
 }
 
 beforeAll(async () => {
@@ -747,7 +795,9 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
         await page.waitForFunction(
           () =>
             document
-              .querySelector('[data-previewer-id] [role="tab"]:nth-of-type(2)')
+              .querySelector(
+                '[data-previewer-id] [data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [role="tab"]:nth-of-type(2)'
+              )
               ?.getAttribute('aria-selected') === 'true'
         );
 
@@ -770,7 +820,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
     });
     try {
       for (const runtime of RUNTIMES) {
-        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 5);
+        await selectRuntime(page, previewer, runtime, '[data-pui-root]', 24);
         const trigger = previewer
           .locator(
             '[data-projection-content] .pui-runtime-preview-surface[data-demo-ref="__website_runtime_preview_surface__"] [data-pui-root]'
@@ -1429,7 +1479,7 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
             { timeout: 10_000 }
           );
 
-          const focused = await viewportRing(page);
+          const focused = await viewportRing(page, true);
           // Exactly one inset layer, drawn from the theme ring.
           expect(focused.insetLayers, `${label}/inset-count`).toHaveLength(1);
           // Zero offsets with a positive spread is the whole border box, so the
@@ -1469,11 +1519,34 @@ describe.sequential('Brutalist control documentation browser regressions', () =>
           await page.keyboard.press('ArrowDown');
           await waitForScrollBeyond(page, 'scrollTop', focused.scrollTop);
           await page.keyboard.press('ArrowRight');
+          const scrollEndDeadline = performance.now() + 10_000;
           await waitForScrollBeyond(page, 'scrollLeft', focused.scrollLeft);
 
           const scrolled = await viewportRing(page);
           expect(scrolled.insetLayers, `${label}/ring-after-scroll`).toEqual(focused.insetLayers);
           expect(scrolled.bounds, `${label}/geometry-after-scroll`).toEqual(resting.bounds);
+
+          // Progress can precede scrollend. Finish this interaction before the
+          // blur/theme transition gives the next scheme its own native input.
+          const remaining = scrollEndDeadline - performance.now();
+          if (remaining <= 0) throw new Error('Scroll completion exceeded the progress budget.');
+          await page.waitForFunction(
+            () => {
+              const viewport = document.querySelector<HTMLElement>(
+                '[data-previewer-id] [data-demo-ref="scrollViewport"]'
+              ) as
+                | (HTMLElement & {
+                    __testScrollEnd?: { pending: boolean; rightSeen: boolean };
+                  })
+                | null;
+              return (
+                viewport?.__testScrollEnd?.rightSeen === true &&
+                viewport.__testScrollEnd.pending === false
+              );
+            },
+            undefined,
+            { timeout: remaining }
+          );
 
           // Blur so the next scheme starts from a resting surface. The scroll
           // position is left where it is: selectRuntime remounts the demo

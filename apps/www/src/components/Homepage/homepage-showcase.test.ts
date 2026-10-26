@@ -75,20 +75,60 @@ function mount(runtime: RuntimeId, locale = 'en') {
 afterEach(() => document.body.replaceChildren());
 
 for (const family of ['shadcn', 'brutalist'] as const) {
-  it(`${family} has a closed explicit recipe using real lane parts and the explicit passive preview surface`, () => {
+  it(`${family} has a closed explicit recipe using real lane parts and family-owned passive card surfaces`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
     const ids = new Set<string>();
     collectPrototypeIds(content.demo.root, ids);
     expect([...ids].sort()).toEqual([...content.recipe.prototypeIds].sort());
     // The closed recipe now includes the actual family Label relation owner.
-    expect(ids.size).toBe(family === 'shadcn' ? 40 : 37);
+    expect(ids.size).toBe(family === 'shadcn' ? 64 : 56);
+    if (family === 'shadcn') {
+      for (const part of ['root', 'header', 'content'])
+        expect(ids.has(`shadcn-card-${part}`)).toBe(true);
+      expect(ids.has('shadcn-surface-root')).toBe(false);
+      expect(ids.has('shadcn-select-group')).toBe(true);
+    }
+    const sceneIds = [
+      'command-root',
+      'command-input',
+      'command-content',
+      'command-item',
+      'command-empty',
+      'progress-root',
+      'progress-label',
+      'progress-track',
+      'progress-indicator',
+      'progress-value',
+      'slider-root',
+      'slider-track',
+      'slider-indicator',
+      'slider-thumb',
+      'accordion-root',
+      'accordion-item',
+      'accordion-heading',
+      'accordion-trigger',
+      'accordion-content',
+    ].map((suffix) => `${family}-${suffix}`);
+    if (family === 'shadcn') sceneIds.push('shadcn-command-input-wrapper', 'shadcn-input-shell');
+    const assertRecipe = (recipe: readonly string[]) => {
+      expect(recipe).toHaveLength(ids.size);
+      expect(new Set(recipe).size).toBe(recipe.length);
+      expect([...recipe].sort()).toEqual([...ids].sort());
+      for (const id of sceneIds) expect(recipe.filter((value) => value === id)).toHaveLength(1);
+    };
+    const recipe = [...content.recipe.prototypeIds];
+    assertRecipe(recipe);
+    for (const sceneId of sceneIds) {
+      expect(() => assertRecipe(recipe.filter((id) => id !== sceneId))).toThrow();
+      expect(() => assertRecipe([...recipe, sceneId])).toThrow();
+    }
     expect(ids.has(`${family}-label-root`)).toBe(true);
     expect(
       [...ids].every((id) => id.startsWith(`${family}-`) || id === PREVIEW_SURFACE_ID(family))
     ).toBe(true);
     expect(ids.has(`${family}-hover-card-root`)).toBe(true);
-    expect(ids.has(`${family}-card-root`)).toBe(false);
+    expect(ids.has(`${family}-card-root`)).toBe(family === 'shadcn');
     const composition = createProjectionComposition({
       ownerId: 'settings',
       runtimeId: 'wc',
@@ -117,6 +157,38 @@ for (const family of ['shadcn', 'brutalist'] as const) {
 
 for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
   describe(`${runtime} task event contract`, () => {
+    it('shares scene state while preserving authored props and withdrawing callbacks', async () => {
+      const task = mount(runtime);
+      task.event('composition-command', 'execute', { value: 'prototype' });
+      await Promise.resolve();
+      expect(task.props['composition-progress']).toMatchObject({ value: 60, min: 0, max: 100 });
+      expect(task.props['composition-slider']).toMatchObject({
+        value: 60,
+        step: 5,
+        min: 0,
+        max: 100,
+      });
+      task.event('composition-slider', 'valueChange', { value: 75 });
+      await Promise.resolve();
+      expect(task.props['composition-progress']!.value).toBe(75);
+      task.lock();
+      task.event('composition-command', 'execute', { value: 'review' });
+      await Promise.resolve();
+      expect(task.props['composition-progress']!.value).toBe(75);
+      task.unlock();
+      for (let count = 0; count < 3; count++) {
+        task.event('composition-reset', 'click');
+        await Promise.resolve();
+        expect(task.props['composition-progress']!.value).toBe(40);
+      }
+      task.event('composition-command', 'execute', { value: 'review' });
+      const beforeWithdrawal = task.props['composition-progress']!.value;
+      task.deactivate();
+      task.cleanup();
+      task.event('composition-reset', 'click');
+      await Promise.resolve();
+      expect(task.props['composition-progress']!.value).toBe(beforeWithdrawal);
+    });
     it('edits, saves an actual page-local snapshot, restores defaults and saves again', async () => {
       const task = mount(runtime);
       expect(task.props['settings-save']!.disabled).toBe(true);

@@ -11,6 +11,58 @@ import type { Page } from 'playwright-core';
 import { launchBrowser, startServer, stopServer } from '../src/content/docs/zh-cn/browser-harness';
 import { verifyRevision } from './homepage-evidence-contract';
 import { readReadingReflow } from '../src/content/docs/zh-cn/reading-reflow-evidence';
+
+/** Layout evidence only. Preserve exact spacing across grid and multicol CSS serialization. */
+export function gallerySpacingIssues(
+  facts: {
+    columnGap: string;
+    cards: Array<{ id: string | null; x: number; y: number; right: number; bottom: number }>;
+  },
+  expectedGap: number
+): string[] {
+  const issues: string[] = [];
+  const ids = [
+    'controls',
+    'hover',
+    'workspace-command',
+    'workspace-help',
+    'preferences',
+    'workspace-progress',
+    'editor',
+    'overlays',
+    'choices',
+  ];
+  if (JSON.stringify(facts.cards.map((card) => card.id)) !== JSON.stringify(ids))
+    issues.push('exact nine-card inventory');
+  if (facts.columnGap !== `${expectedGap}px`) issues.push('column spacing');
+  const columns: (typeof facts.cards)[] = [];
+  for (const card of facts.cards) {
+    if (
+      ![card.x, card.y, card.right, card.bottom].every(Number.isFinite) ||
+      card.right <= card.x ||
+      card.bottom <= card.y
+    )
+      issues.push('invalid card geometry');
+    let column = columns.find((items) => Math.abs(items[0]!.x - card.x) <= 1);
+    if (!column) {
+      column = [];
+      columns.push(column);
+    }
+    column.push(card);
+  }
+  columns.sort((a, b) => a[0]!.x - b[0]!.x);
+  for (const column of columns) {
+    column.sort((a, b) => a.y - b.y);
+    for (let i = 1; i < column.length; i++)
+      if (Math.abs(column[i]!.y - column[i - 1]!.bottom - expectedGap) > 1)
+        issues.push('vertical card spacing');
+  }
+  for (let i = 1; i < columns.length; i++)
+    if (Math.abs(columns[i]![0]!.x - columns[i - 1]![0]!.right - expectedGap) > 1)
+      issues.push('horizontal card spacing');
+  return issues;
+}
+
 const { values } = parseArgs({
   options: {
     'revision-kind': { type: 'string' },
@@ -153,7 +205,7 @@ try {
               };
             });
             const card = document.querySelector<HTMLElement>(
-              '[data-gallery-demo] [data-projection-prototype$="-surface-root"]'
+              '[data-gallery-demo] [data-projection-prototype="shadcn-card-root"], [data-gallery-demo] [data-projection-prototype="brutalist-surface-root"], [data-gallery-demo] [data-projection-prototype="shadcn-surface-root"]'
             )!;
             const primary = document.querySelector<HTMLElement>(
               '[data-demo-ref="gallery-primary"]'
@@ -163,7 +215,34 @@ try {
               title,
               caption,
               cardPadding: getComputedStyle(card).padding,
+              cardPrototype: card.dataset.projectionPrototype,
+              cardRadius: getComputedStyle(card).borderTopLeftRadius,
+              cardHeaderPadding: (() => {
+                const header = card.querySelector(
+                  '[data-projection-prototype="shadcn-card-header"]'
+                );
+                return header ? getComputedStyle(header).padding : null;
+              })(),
+              cardContentPadding: (() => {
+                const content = card.querySelector(
+                  '[data-projection-prototype="shadcn-card-content"]'
+                );
+                return content ? getComputedStyle(content).padding : null;
+              })(),
               gridGap: getComputedStyle(document.querySelector('.home-gallery')!).gap,
+              gallerySpacing: {
+                columnGap: getComputedStyle(document.querySelector('.home-gallery')!).columnGap,
+                cards: [...document.querySelectorAll('[data-gallery-demo]')].map((card) => {
+                  const rect = card.getBoundingClientRect();
+                  return {
+                    id: card.getAttribute('data-gallery-demo'),
+                    x: rect.x,
+                    y: rect.y,
+                    right: rect.right,
+                    bottom: rect.bottom,
+                  };
+                }),
+              },
               primary: {
                 height: primary.getBoundingClientRect().height,
                 fontSize: parseFloat(getComputedStyle(primary).fontSize),
@@ -177,10 +256,23 @@ try {
           assert.ok(Math.abs(facts.primary.height - (v.family === 'brutalist' ? 40 : 32)) <= 1);
           if (kind === 'candidate') {
             assert.equal(facts.slogan.fontSize, v.width === 390 ? 24 : 36);
-            assert.equal(facts.cardPadding, '20px');
-            assert.equal(facts.gridGap, v.width === 390 ? '20px' : '24px');
+            if (v.family === 'shadcn') {
+              assert.equal(facts.cardPrototype, 'shadcn-card-root');
+              assert.equal(facts.cardPadding, '20px 0px');
+              assert.equal(facts.cardHeaderPadding, '0px 20px');
+              assert.equal(facts.cardContentPadding, '0px 20px');
+              assert.equal(facts.cardRadius, '24px');
+              assert.equal(facts.title.fontWeight, '500');
+            } else {
+              assert.equal(facts.cardPrototype, 'brutalist-surface-root');
+              assert.equal(facts.cardPadding, '20px');
+            }
+            assert.deepEqual(
+              gallerySpacingIssues(facts.gallerySpacing, v.width === 390 ? 20 : 24),
+              []
+            );
             assert.equal(facts.title.fontSize, 16);
-            assert.equal(facts.caption.fontSize, 12);
+            assert.equal(facts.caption.fontSize, v.family === 'shadcn' ? 14 : 12);
           }
           if (v.width === 390)
             await page.locator('.site-header-menu [data-demo-ref="home-menu"]').click();

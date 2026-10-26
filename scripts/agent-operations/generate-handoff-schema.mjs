@@ -14,7 +14,7 @@ const legacy = JSON.parse(
 delete legacy.$schema;
 delete legacy.$id;
 Object.assign(legacy.properties.artifacts.items, {
-  if: { properties: { type: { enum: ['modeltrace-record', 'human-directed-operation'] } } },
+  if: { properties: { type: { const: 'human-directed-operation' } } },
   then: { required: ['digest'] },
 });
 const registry = loadSkillRegistry();

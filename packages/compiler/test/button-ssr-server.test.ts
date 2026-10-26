@@ -92,6 +92,10 @@ describe('Button SSR generated server artifact', () => {
       compilationArtifacts(compilation),
       'Component.ts'
     ) as unknown as FixtureServer;
+    expect(before.hydrationArtifacts.environment).toBe(
+      createHash('sha256').update(buttonSsrStyleEnvironment.cssText).digest('hex')
+    );
+    expect(before.hydrationArtifacts).not.toHaveProperty('consumerThemePaint');
     for (const styleEnvironment of [
       { ...buttonSsrStyleEnvironment, id: 'other-consumer-theme' },
       {

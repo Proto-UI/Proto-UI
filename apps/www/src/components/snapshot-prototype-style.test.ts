@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
-import { renderSnapshotTokenCss } from './snapshot-prototype-style';
+import { createContextKey, definePrototype, tw } from '@proto.ui/core';
+import { createStyleSnapshotter, renderSnapshotTokenCss } from './snapshot-prototype-style';
 
 // Source/CSSOM membership evidence. The native first-frame CI owns the actual
 // cascade and pixel result; this reconstructs the offending stylesheet order.
@@ -41,4 +42,92 @@ describe('snapshot CSS stays with its exact startup owner', () => {
     other.setAttribute('data-pui-style', 'text-sm');
     expect(matchingDeclarations(css, other)).toEqual({});
   });
+});
+
+describe('finite snapshot isolated Context root', () => {
+  it('supports own provider and update without leaking across overlapping snapshots', async () => {
+    const key = createContextKey<{ enabled: boolean }>('snapshot-isolation');
+    let disposed = 0;
+    const provider = definePrototype<{ enabled?: boolean }>({
+      name: 'snapshot-provider',
+      setup(def) {
+        def.props.define({ enabled: { type: 'boolean' } });
+        const enabled = def.state.bool('enabled', false);
+        def.rule({
+          when: (w) => w.state(enabled).eq(true),
+          intent: (i) => i.feedback.style.use(tw('block')),
+        });
+        def.rule({
+          when: (w) => w.state(enabled).eq(false),
+          intent: (i) => i.feedback.style.use(tw('hidden')),
+        });
+        def.context.provide(key, { enabled: false });
+        def.context.subscribe(key);
+        def.context.trySubscribeAncestor(key);
+        def.lifecycle.onMounted((run) => {
+          expect(run.context.tryReadAncestor(key)).toBeNull();
+          run.context.update(key, { enabled: !!run.props.get().enabled });
+          enabled.set(run.context.read(key).enabled);
+        });
+        def.lifecycle.onBeforeDispose(() => {
+          disposed++;
+        });
+        return () => null;
+      },
+    });
+    const reader = definePrototype({
+      name: 'snapshot-unrelated-reader',
+      setup(def) {
+        def.context.trySubscribe(key);
+        def.feedback.style.use(tw('inline-block'));
+        def.lifecycle.onMounted((run) => {
+          expect(run.context.tryRead(key)).toBeNull();
+        });
+        return () => null;
+      },
+    });
+    const snapshot = createStyleSnapshotter({ provider, reader });
+    const results = await Promise.all([
+      snapshot('provider', { enabled: true }),
+      snapshot('provider', { enabled: false }),
+      snapshot('reader', {}),
+    ]);
+    expect(results).toEqual([['block'], ['hidden'], ['inline-block']]);
+    expect(disposed).toBe(2);
+    expect(await snapshot('reader', {})).toEqual(['inline-block']);
+    expect(() => snapshot('unknown' as 'provider', {})).toThrow('Unreviewed');
+  });
+});
+
+it('disposes a provided context when mounted snapshot evaluation fails', async () => {
+  const key = createContextKey<{ value: number }>('snapshot-failure-cleanup');
+  let disposed = 0;
+  const failing = definePrototype({
+    name: 'snapshot-failing-provider',
+    setup(def) {
+      def.context.provide(key, { value: 1 });
+      def.lifecycle.onBeforeDispose(() => {
+        disposed++;
+      });
+      def.lifecycle.onMounted(() => {
+        throw new Error('snapshot intentional failure');
+      });
+      return () => null;
+    },
+  });
+  const reader = definePrototype({
+    name: 'snapshot-reader-after-failure',
+    setup(def) {
+      def.context.trySubscribe(key);
+      def.feedback.style.use(tw('block'));
+      def.lifecycle.onMounted((run) => {
+        expect(run.context.tryRead(key)).toBeNull();
+      });
+      return () => null;
+    },
+  });
+  const snapshot = createStyleSnapshotter({ failing, reader });
+  await expect(snapshot('failing', {})).rejects.toThrow('snapshot intentional failure');
+  expect(disposed).toBe(1);
+  expect(await snapshot('reader', {})).toEqual(['block']);
 });

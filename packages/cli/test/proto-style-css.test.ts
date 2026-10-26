@@ -12,6 +12,7 @@ import {
   renderProtoStyleTokenCss,
 } from '../src/services/proto-style-css';
 import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens';
+import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
   it('projects only the named Rhea/Luma radii and secondary hover mix', () => {
@@ -29,7 +30,7 @@ describe('proto style css renderer', () => {
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       expect(render(['rounded-2xl'])).toContain('border-radius: 1rem;');
       for (const token of [
-        'rounded-[var(--pui-radius-3xl)]',
+        'rounded-[var(--pui-radius-5xl)]',
         'rounded-[var(--private-radius)]',
         'rounded-[var(--pui-radius-2xl);color:red]',
         'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_6%)]',
@@ -43,6 +44,13 @@ describe('proto style css renderer', () => {
     const theme = renderPrefixedThemeCss(':root { --radius: 0.625rem; }');
     expect(theme).toContain('--pui-radius-2xl: calc(var(--pui-radius) + 8px);');
     expect(theme).toContain('--pui-radius-4xl: calc(var(--pui-radius) + 16px);');
+
+    const selectionPaint = renderPrefixedThemeCss(SHADCN_THEME_PAINT_CSS, {
+      variableDeclarations: SHADCN_THEME_VARIABLES_CSS,
+    });
+    expect(selectionPaint).toContain('background-color: var(--pui-selection);');
+    expect(selectionPaint).toContain('color: var(--pui-selection-foreground);');
+    expect(selectionPaint).not.toContain('--pui-selection:');
   });
 
   it('renders the finite 3px corner token without admitting arbitrary radius CSS', () => {
@@ -370,7 +378,11 @@ describe('proto style css renderer', () => {
   });
 
   it('renders only finite field sizing and resize vocabulary on light and shadow targets', () => {
-    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss, (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText]) {
+    for (const render of [
+      renderProtoStyleTokenCss,
+      renderProtoShadowStyleTokenCss,
+      (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+    ]) {
       for (const [token, declaration] of [
         ['resize-none', 'resize: none;'],
         ['resize-y', 'resize: vertical;'],
@@ -922,4 +934,27 @@ it('delivers the standard fixed white foreground through each existing CSS targe
       expect(rejected, token).not.toContain('color: #fff;');
     }
   }
+});
+
+it('lowers only the two additional bounded theme radius slots for Command', () => {
+  for (const render of [
+    renderProtoStyleTokenCss,
+    renderProtoShadowStyleTokenCss,
+    (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+  ]) {
+    const css = render(['rounded-[var(--pui-radius-xl)]', 'rounded-[var(--pui-radius-3xl)]']);
+    expect(css).not.toContain('Unsupported Proto UI style tokens');
+    expect(css).toContain('border-radius: var(--pui-radius-xl);');
+    expect(css).toContain('border-radius: var(--pui-radius-3xl);');
+    for (const token of [
+      'rounded-[var(--other-radius-xl)]',
+      'rounded-[calc(var(--pui-radius-3xl)+1px)]',
+      'rounded-[var(--pui-radius-5xl)]',
+    ]) {
+      expect(render([token])).toContain('Unsupported Proto UI style tokens');
+    }
+  }
+  const theme = renderPrefixedThemeCss(':root{--radius:0.625rem;}');
+  expect(theme).toContain('--pui-radius-xl: calc(var(--pui-radius) + 4px);');
+  expect(theme).toContain('--pui-radius-3xl: calc(var(--pui-radius) + 12px);');
 });

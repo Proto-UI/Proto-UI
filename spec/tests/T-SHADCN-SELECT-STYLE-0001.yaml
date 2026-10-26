@@ -1,0 +1,59 @@
+id: T-SHADCN-SELECT-STYLE-0001
+type: test
+title: Shared Select profile and actual composed app evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: DOM and source checks are partial evidence; exact-head native matrix and portal compositing remain pending.
+summary: Profile withdrawal, Field colors, actual four-framework app and native visual endpoints.
+cases:
+  - id: T-SHADCN-SELECT-STYLE-0001-CASE-TRIGGER
+    title: Trigger identity and Field invalid focus restoration
+    covers:
+      [P-SHADCN-SELECT-STYLE-SCOPE, P-SHADCN-SELECT-STYLE-TRIGGER, P-SHADCN-SELECT-STYLE-FIELD]
+    expectation: same-trigger-canonical-value-and-focus-with-exclusive-colors
+  - id: T-SHADCN-SELECT-STYLE-0001-CASE-POPUP
+    title: Same-document portal profile withdrawal and existing anatomy
+    covers: [P-SHADCN-SELECT-STYLE-POPUP, P-SHADCN-SELECT-STYLE-PARTS, P-SHADCN-SELECT-STYLE-LIMITS]
+    expectation: permanent-empty-leaf-and-caller-options-with-correct-paint-through-inherited-and-explicit-surface-props
+  - id: T-SHADCN-SELECT-STYLE-0001-CASE-NATIVE
+    title: Four-framework native light dark and size matrix
+    covers:
+      [P-SHADCN-SELECT-STYLE-TRIGGER, P-SHADCN-SELECT-STYLE-FIELD, P-SHADCN-SELECT-STYLE-POPUP]
+    expectation: exact-computed-color-geometry-focus-and-translucent-compositing
+implementations:
+  - id: shadcn-select-profile-trigger
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-style-trigger.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-TRIGGER]
+    exercises: [P-SHADCN-SELECT-STYLE]
+  - id: shadcn-select-profile-popup
+    kind: module-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-style-popup.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-POPUP]
+    exercises: [P-SHADCN-SELECT-STYLE]
+  - id: shadcn-select-profile-actual-app
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-evidence-app-probe.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-TRIGGER, T-SHADCN-SELECT-STYLE-0001-CASE-POPUP]
+    exercises: [P-SHADCN-SELECT-STYLE]
+  - id: shadcn-select-profile-surface-props
+    kind: adapter-test
+    status: passing
+    path: packages/prototypes/shadcn/test/select-surface-style-prop.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-POPUP]
+    exercises: [P-SHADCN-SELECT-STYLE]
+  - id: shadcn-select-profile-native
+    kind: adapter-test
+    status: planned
+    path: scripts/prototypes/shadcn-select-evidence.mjs
+    required: true
+    consumesCases: [T-SHADCN-SELECT-STYLE-0001-CASE-NATIVE]
+    exercises: [P-SHADCN-SELECT-STYLE]

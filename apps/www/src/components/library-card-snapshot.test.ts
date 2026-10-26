@@ -85,3 +85,16 @@ it('dogfoods Card-specific SSR tokens and retains inherited title/body ink', asy
   // Neutral Surface remains distinct from the Card contract.
   expect(await snapshotLibraryPart('shadcn-surface', librarySurfaceProps)).not.toContain('bg-card');
 });
+
+it('projects explicit Card style per isolated snapshot without retaining the prior choice', async () => {
+  const rhea = await snapshotLibraryPart('shadcn-card', { styleProfile: 'rhea' });
+  expect(rhea).toContain('ring-1');
+  expect(rhea).toContain('py-5');
+  expect(rhea).not.toContain('py-6');
+  const inherited = await snapshotLibraryPart('shadcn-card', {});
+  expect(inherited).toContain('py-6');
+  expect(inherited).not.toContain('ring-1');
+  await expect(snapshotLibraryPart('shadcn-card', { styleProfile: 'nova' })).rejects.toThrow(
+    'Unsupported style'
+  );
+});

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import { runInNewContext } from 'node:vm';
@@ -670,7 +671,17 @@ test('actual candidate task driver saves edits, restores a dirty draft, then sav
       locator: locate,
       async evaluateAll(callback: (nodes: Element[]) => unknown) {
         return callback(
-          ['controls', 'hover', 'preferences', 'editor', 'overlays', 'choices'].map((id) => {
+          [
+            'controls',
+            'hover',
+            'workspace-command',
+            'workspace-help',
+            'preferences',
+            'workspace-progress',
+            'editor',
+            'overlays',
+            'choices',
+          ].map((id) => {
             const el = previewWindow.document.createElement('div');
             el.setAttribute('data-gallery-demo', id);
             return el as unknown as Element;
@@ -951,6 +962,9 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     { name: 'native-links', suite: 'site-native-links' },
     { name: 'code-surfaces', suite: 'code-surfaces' },
     { name: 'code-surface-grammar', suite: 'code-surface-grammar' },
+    { name: 'docs-content-flow', suite: 'docs-content-flow' },
+    { name: 'homepage-button-contract', suite: 'homepage-button-contract' },
+    { name: 'homepage-composition', suite: 'homepage-composition' },
     { name: 'copy-commands', suite: 'site-copy-commands' },
     { name: 'runtime-box', suite: 'runtime-preview-surface', contract: 'runtime-preview-evidence' },
     { name: 'search-commands', suite: 'site-search-commands' },
@@ -998,4 +1012,407 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     '*.json',
   ])
     assert.ok(frames.with.path.includes(pattern));
+});
+
+test('density observer rejects missing cards and incorrect physical multicol spacing', () => {
+  const source = readFileSync(
+    new URL('capture-visual-density-evidence.ts', import.meta.url),
+    'utf8'
+  );
+  const ast = ts.createSourceFile(
+    'density.ts',
+    source,
+    ts.ScriptTarget.ES2022,
+    true,
+    ts.ScriptKind.TS
+  );
+  const declaration = ast.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'gallerySpacingIssues'
+  );
+  assert.ok(declaration);
+  const code = transformSync(declaration.getText(ast).replace('export ', ''), {
+    loader: 'ts',
+    target: 'es2022',
+  }).code;
+  const observe = runInNewContext(`${code}\ngallerySpacingIssues`);
+  const ids = [
+    'controls',
+    'hover',
+    'workspace-command',
+    'workspace-help',
+    'preferences',
+    'workspace-progress',
+    'editor',
+    'overlays',
+    'choices',
+  ];
+  const facts = {
+    columnGap: '24px',
+    cards: ids.map((id, i) => ({
+      id,
+      x: Math.floor(i / 3) * 324,
+      right: Math.floor(i / 3) * 324 + 300,
+      y: (i % 3) * 124,
+      bottom: (i % 3) * 124 + 100,
+    })),
+  };
+  assert.equal(observe(facts, 24).length, 0);
+  const narrow = {
+    columnGap: '20px',
+    cards: ids.map((id, i) => ({ id, x: 0, right: 280, y: i * 120, bottom: i * 120 + 100 })),
+  };
+  assert.equal(observe(narrow, 20).length, 0);
+  for (const mutate of [
+    (value: typeof facts) => {
+      value.cards.pop();
+    },
+    (value: typeof facts) => {
+      value.cards[8]!.id = value.cards[0]!.id;
+    },
+    (value: typeof facts) => {
+      value.columnGap = 'normal 24px';
+    },
+    (value: typeof facts) => {
+      value.cards[1]!.y += 10;
+    },
+    (value: typeof facts) => {
+      for (const card of value.cards.slice(3, 6)) {
+        card.x += 10;
+        card.right += 10;
+      }
+    },
+    (value: typeof facts) => {
+      value.cards[0]!.right = value.cards[0]!.x;
+    },
+  ]) {
+    const broken = structuredClone(facts);
+    mutate(broken);
+    assert.ok(observe(broken, 24).length > 0);
+  }
+  assert.match(source, /assert\.deepEqual\(\s*gallerySpacingIssues\(facts\.gallerySpacing,/);
+  assert.match(source, /select\.height - \(v\.width === 390 \? 44 : 36\)/);
+});
+
+test('only composition restores a hash-keyed font package without extending existing budgets', () => {
+  const workflow = parse(
+    readFileSync(
+      new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
+  );
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  const job = workflow.jobs['isolated-controls'];
+  assert.equal(job['timeout-minutes'], 15);
+  const cache = job.steps.find(
+    (step: { name?: string }) => step.name === 'Restore the exact composition font package only'
+  );
+  assert.equal(cache.if, "matrix.name == 'homepage-composition'");
+  assert.equal(cache.uses, 'actions/cache@v4');
+  assert.equal(cache['timeout-minutes'], 1);
+  assert.equal(
+    cache.with.path,
+    '${{ runner.temp }}/homepage-font-cache/fonts-noto-cjk_20230817+repack1-3_all.deb'
+  );
+  assert.equal(
+    cache.with.key,
+    'ubuntu24-fonts-noto-cjk-7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c'
+  );
+  assert.equal(cache.with['restore-keys'], undefined);
+  const prep = job.steps.find(
+    (step: { name?: string }) =>
+      step.name === 'Install locked dependencies and the same official font package'
+  );
+  assert.equal(prep['timeout-minutes'], 5);
+  assert.match(prep.run, /pnpm@10\.32\.1 install --frozen-lockfile --ignore-scripts/);
+  assert.match(prep.run, /if \[\[ '\$\{\{ matrix.name \}\}' == 'homepage-composition' \]\]; then/);
+  assert.match(
+    prep.run,
+    /timeout --signal=TERM --kill-after=5s 220s bash apps\/www\/scripts\/prepare-homepage-composition-fonts.sh/
+  );
+  assert.match(
+    prep.run,
+    /else\s+sudo apt-get update -qq\s+sudo apt-get install -y --no-install-recommends fonts-noto-cjk\s+fi/
+  );
+});
+
+test('font acceptance rejects missing Chinese glyphs and malformed selected-face charsets', () => {
+  const shell = readFileSync(
+    new URL('prepare-homepage-composition-fonts.sh', import.meta.url),
+    'utf8'
+  );
+  const body = shell.match(/<<'JS'\n([\s\S]*?)\nJS/);
+  assert.ok(body);
+  const code = transformSync(body[1]!, { loader: 'js', format: 'cjs', target: 'es2022' }).code;
+  const verify = (charset: string) =>
+    runInNewContext(code, {
+      require: (name: string) => {
+        if (name === 'node:assert/strict') return assert;
+        if (name === 'node:fs') return { readFileSync: () => charset };
+        throw new Error(`Unexpected font verifier import: ${name}`);
+      },
+      process: { argv: ['node', '-', 'selected-face.txt'] },
+      console: { log: () => undefined },
+    });
+  assert.doesNotThrow(() => verify('20-7e 4e00-9fff'));
+  for (const bad of ['', '20-7e', 'garbage', '9fff-4e00', '110000-110001'])
+    assert.throws(() => verify(bad));
+  assert.match(shell, /readonly VERSION='1:20230817\+repack1-3'/);
+  assert.match(shell, /readonly SIZE='61229778'/);
+  assert.match(
+    shell,
+    /readonly SHA256='7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c'/
+  );
+  assert.match(shell, /verify_deb "\$DEB" \|\| fail 'Cached Ubuntu font package/);
+  assert.match(shell, /--connect-timeout 10 --max-time 60/);
+  assert.match(shell, /Noto Sans CJK SC/);
+  assert.match(shell, /dpkg-query -L "\$PACKAGE"/);
+});
+
+test('font preparation mocks preserve integrity and glyph failure gates without downloads', () => {
+  const output = execFileSync(
+    'bash',
+    [
+      new URL('prepare-homepage-composition-fonts.test.sh', import.meta.url).pathname,
+      new URL('prepare-homepage-composition-fonts.sh', import.meta.url).pathname,
+    ],
+    { encoding: 'utf8', timeout: 20_000 }
+  );
+  assert.deepEqual(
+    [...output.matchAll(/^PASS: ([\w-]+) \(exit /gm)].map((match) => match[1]),
+    ['success', 'bad-sha', 'bad-version', 'wrong-family', 'missing-glyphs']
+  );
+});
+
+test('200% text observer records the animated intermediate frame then requires the exact endpoint', async () => {
+  const browser = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const start = browser.indexOf('async function resizeText200(');
+  const end = browser.indexOf('\nasync function settled(', start);
+  assert.ok(start >= 0 && end > start);
+  const code = transformSync(
+    `${browser.slice(start, end)}\nexports.resizeText200 = resizeText200;`,
+    { loader: 'ts', format: 'cjs', target: 'es2022' }
+  ).code;
+  for (const reachesEndpoint of [true, false]) {
+    let size = 16.45,
+      disposed = false,
+      reads = 0;
+    const node = {
+      tagName: 'BUTTON',
+      textContent: 'Primary',
+      isConnected: true,
+      closest: () => null,
+      getAnimations: () => [{ playState: 'running', currentTime: 25, effect: null }],
+    };
+    const samples = [{ node, before: 14 }];
+    const context = {
+      exports: {} as { resizeText200?: (page: unknown) => Promise<any[]> },
+      KeyframeEffect: class {},
+      getComputedStyle: () => ({
+        fontSize: String(size),
+        transitionProperty: 'all',
+        transitionDuration: '0.15s',
+      }),
+      expect: {
+        poll: (observe: () => Promise<boolean>, options: unknown) => ({
+          toBe: async (value: boolean) => {
+            assert.deepEqual(JSON.parse(JSON.stringify(options)), { timeout: 1500, interval: 25 });
+            assert.equal(await observe(), false);
+            if (reachesEndpoint) size = 28;
+            if ((await observe()) !== value)
+              throw new Error('bounded exact endpoint was not reached');
+          },
+        }),
+      },
+    };
+    runInNewContext(code, context);
+    const result = await context.exports.resizeText200!({
+      evaluateHandle: async () => ({
+        evaluate: async (fn: (samples: unknown) => unknown) => {
+          reads++;
+          return fn(samples);
+        },
+        dispose: async () => {
+          disposed = true;
+        },
+      }),
+    });
+    assert.equal(result[0].immediate.after, 16.45);
+    assert.equal(result[0].immediate.animations[0].playState, 'running');
+    assert.equal(result[0].after, reachesEndpoint ? 28 : 16.45);
+    assert.equal(result[0].settleFailure === null, reachesEndpoint);
+    assert.ok(disposed);
+    assert.ok(reads >= 4);
+  }
+});
+
+test('Accordion readiness remains count-one and width failures retain full physical layout evidence', () => {
+  const browser = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const verify = (source: string) => {
+    assert.match(
+      source,
+      /await expect\.poll\(\(\) => panel\.count\(\), \{ timeout: 1500, interval: 25 \}\)\.toBe\(1\)/
+    );
+    assert.match(source, /step\.afterPress = await accordionSnapshot\(\)/);
+    assert.match(source, /step\.ready = await accordionSnapshot\(\)/);
+    assert.match(source, /await attribute\(panel, 'aria-labelledby', triggerId\)/);
+    assert.match(source, /expect\(fact\.input\.width\)\.toBeCloseTo\(fact\.parentWidth, 0\)/);
+    assert.match(source, /flexBasis: css\.flexBasis/);
+    assert.match(source, /record\.failureDOM = await page\.evaluate/);
+  };
+  verify(browser);
+  for (const fragment of [
+    'step.ready = await accordionSnapshot()',
+    "await attribute(panel, 'aria-labelledby', triggerId)",
+    'expect(fact.input.width).toBeCloseTo(fact.parentWidth, 0)',
+    'record.failureDOM = await page.evaluate',
+  ])
+    assert.throws(() => verify(browser.replaceAll(fragment, '')));
+});
+
+test('homepage Command verifies the public outer shell and actual muted active paint without changing the editor', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const required = [
+    'expect(paint.shellCount).toBe(1)',
+    "expect(paint.rootRadius).toBe('22px')",
+    "expect(paint.shellRadius).toBe('18px')",
+    'expect(paint.shellHeight).toBe(32)',
+    "expect(paint.innerRadius).toBe('0px')",
+    "expect(paint.innerBorder).toBe('0px')",
+    "expect(paint.innerFont).toBe('14px')",
+    "expect(paint.activeRadius).toBe('14px')",
+    'expect(paint.activeBackground).toBe(paint.expectedMuted)',
+    "expect(paint.activeText).toBe('Build a prototype')",
+    'record.commandPaint = paint',
+    'record.commandPaintSamples = samples',
+    "expect(paint.themeMutedToken).not.toBe('')",
+    "expect(paint.expectedMuted).not.toBe('rgba(0, 0, 0, 0)')",
+    'reference.remove()',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(candidate, /finally\s*\{\s*record\.commandPaint = paint;\s*await save\(\);/);
+  };
+  verify(source);
+  for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
+});
+
+test('homepage Select verifies the inherited Rhea surface, real portal and keyboard continuity', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const required = [
+    "await stage('select-rhea')",
+    "await trigger.press('ArrowDown')",
+    "await page.keyboard.press('End')",
+    "await page.keyboard.press('Home')",
+    "await page.keyboard.press('Enter')",
+    'await hasFocus(trigger)',
+    "radius: '18px', height: 32, fontSize: '14px', gap: '6px'",
+    "filter: 'blur(40px) saturate(1.5)'",
+    "leafAriaHidden: 'true'",
+    "padding: '4px', itemRadius: '14px', escaped: true",
+    'record.selectPaintSamples = selectPaintSamples',
+    'record.selectPaint = facts',
+    'editor.evaluate((current, original) => current === original, originalEditor)',
+    'backgroundMatches: background === expectedBackground',
+    'Boolean(themePopover)',
+    "expectedBackground !== 'rgba(0, 0, 0, 0)'",
+    'reference.remove()',
+    "await capture('select-rhea-open')",
+    "expect(background).not.toBe('rgba(0, 0, 0, 0)')",
+    'expect(await sameEditor()).toBe(true)',
+  ];
+  const verify = (candidate: string) => {
+    candidate = candidate.replace(/\s+/g, ' ');
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(candidate, /finally\s*\{\s*await save\(\);\s*\}/);
+    assert.equal(candidate.split('expect(await sameEditor()).toBe(true)').length - 1, 2);
+  };
+  const normalized = source.replace(/\s+/g, ' ');
+  verify(normalized);
+  for (const fragment of required) assert.throws(() => verify(normalized.replaceAll(fragment, '')));
+});
+
+test('composition screenshots preserve and disclose actual interaction framing', () => {
+  const source = readFileSync(
+    new URL('../src/content/docs/zh-cn/homepage-composition.browser.test.ts', import.meta.url),
+    'utf8'
+  );
+  const capture = source.slice(
+    source.indexOf('const capture = async (name: string)'),
+    source.indexOf('await save();\n          try {')
+  );
+  const required = [
+    "mode: 'preserve-interaction-position'",
+    'scrollX, scrollY',
+    'width: innerWidth, height: innerHeight',
+    'document.documentElement.scrollHeight',
+    "header: box('header')",
+    "heroHeading: box('main h1')",
+    "search: box('.site-header-search')",
+    'node.getBoundingClientRect()',
+    'position: style.position',
+    'zIndex: style.zIndex',
+    'const beforeCapture = await framing()',
+    'record.captureFraming',
+    'afterCapture: await framing()',
+    'fullPage: true',
+  ];
+  const verify = (candidate: string) => {
+    for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
+    assert.match(
+      candidate,
+      /record\.captureFraming =[^;]+;\s*await save\(\);\s*const bytes = await page!\.screenshot/
+    );
+    assert.ok(!candidate.includes('scrollTo('));
+  };
+  const normalized = capture.replace(/\s+/g, ' ');
+  verify(normalized);
+  for (const fragment of required) assert.throws(() => verify(normalized.replaceAll(fragment, '')));
+});
+
+test('gallery activation requires one exact localized result rather than a removed checkmark', () => {
+  const text = readFileSync(new URL('./capture-homepage-evidence.ts', import.meta.url), 'utf8');
+  const source = ts.createSourceFile('capture.ts', text, ts.ScriptTarget.Latest, true);
+  const declaration = source.statements.find(
+    (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'galleryButtonActivated'
+  );
+  assert.ok(declaration);
+  const compiled = transformSync(declaration.getText(source), { loader: 'ts', format: 'cjs' }).code;
+  for (const expected of ['主要按钮: 已触发', 'Primary button: Activated']) {
+    const window = new Window();
+    const document = window.document;
+    document.body.innerHTML = '<main data-home-showcase="website-component-gallery"></main>';
+    const home = '[data-home-showcase="website-component-gallery"]';
+    const observe = runInNewContext(`${compiled}\ngalleryButtonActivated;`, { document });
+    const probe = () => observe({ home, expected });
+    assert.equal(probe(), false, 'missing result');
+    const feedback = document.createElement('span');
+    feedback.dataset.demoRef = 'gallery-controls-feedback';
+    document.querySelector(home)!.append(feedback);
+    for (const wrong of ['', '✓', 'Try any control', expected + ' extra']) {
+      feedback.textContent = wrong;
+      assert.equal(probe(), false, 'wrong or partial result');
+    }
+    feedback.textContent = expected;
+    assert.equal(probe(), true);
+    feedback.after(feedback.cloneNode(true));
+    assert.equal(probe(), false, 'duplicate result');
+    window.happyDOM.abort();
+  }
+  assert.ok(text.includes("expected: zh ? '主要按钮: 已触发' : 'Primary button: Activated'"));
+  assert.match(
+    text,
+    /gallery-primary[^\n]+\.click\(\);\s*await page\.waitForFunction\(galleryButtonActivated/
+  );
 });

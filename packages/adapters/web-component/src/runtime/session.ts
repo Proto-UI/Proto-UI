@@ -1,4 +1,6 @@
-import type { InstanceAssociations } from '@proto.ui/core';
+import { withWebComponentOwnedRelocation } from '../owned-relocation';
+import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
+import { equalOwnedTemplateBlueprint, type InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { Prototype, TemplateChildren } from '@proto.ui/core';
 import { type RawPropsSource } from '@proto.ui/module-props';
@@ -62,12 +64,68 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   } = args;
 
   let capsHub: any = null;
+  let commitTurn = 0;
+  let decorationCommit: {
+    blueprint: TemplateChildren;
+    lease: object;
+    document: Document;
+    nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }>;
+  } | null = null;
+  const currentFeedback = () =>
+    capsHub?.getPort?.('feedback') as import('@proto.ui/module-feedback').FeedbackPort | undefined;
+
+  let portalDecorationGate: ReturnType<typeof createWebOwnedDecorationPortalGate> | null = null;
   // Stage split Template output without replacing owner-lived Shadow nodes.
   // Reuse the staging root; its live child list needs no intermediate copy.
   const shadowCommitRoot =
     shadowViewTarget && !textControlTarget ? root.ownerDocument.createDocumentFragment() : null;
 
   const commitWebComponentChildren = (children: TemplateChildren) => {
+    const turn = ++commitTurn;
+    if (decorationCommit) {
+      const record = decorationCommit;
+      if (
+        currentFeedback()?.captureDecorationLease?.() !== record.lease ||
+        root.ownerDocument !== record.document ||
+        !root.isConnected
+      )
+        throw new Error('[WC Adapter] stale decoration blueprint lease');
+      if (!equalOwnedTemplateBlueprint(record.blueprint, children))
+        throw new Error('[feedback] decoration structural rebind unsupported');
+      for (const { node, parent, decoration } of record.nodes) {
+        if (
+          node.ownerDocument !== record.document ||
+          node.parentNode !== parent ||
+          !root.contains(node)
+        )
+          throw new Error('[WC Adapter] decoration physical blueprint changed');
+        if (decoration) {
+          const leaf = node as HTMLElement;
+          if (
+            leaf.childNodes.length ||
+            leaf.hasAttribute('tabindex') ||
+            leaf.hasAttribute('contenteditable') ||
+            !leaf.hasAttribute('data-pui-owned-decoration') ||
+            leaf.getAttribute('aria-hidden') !== 'true' ||
+            !leaf.hasAttribute('inert') ||
+            leaf.style.getPropertyValue('pointer-events') !== 'none' ||
+            leaf.style.getPropertyPriority('pointer-events') !== 'important'
+          )
+            throw new Error('[WC Adapter] decoration physical leaf changed');
+        }
+      }
+      portalDecorationGate?.assertReusable();
+      if (
+        turn !== commitTurn ||
+        decorationCommit !== record ||
+        !root.isConnected ||
+        root.ownerDocument !== record.document ||
+        currentFeedback()?.captureDecorationLease?.() !== record.lease
+      )
+        throw new Error('[WC Adapter] decoration reuse superseded');
+      return;
+    }
+
     const nativeTarget = textControlTarget ?? imageViewTarget;
     if (nativeTarget) {
       const hasChildren = Array.isArray(children) ? children.length > 0 : children != null;
@@ -89,19 +147,65 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
       if (projector) {
         // Preserve caller nodes before dropping the previous owned-node boundary.
         // An initial slot-only view has no projector and leaves its children alone.
-        const slotPool = projector.collectSlotPoolBeforeCommit();
-        root.replaceChildren(...slotPool);
+        const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
+        withWebComponentOwnedRelocation(slotPool, root, () => root.replaceChildren(...slotPool));
       }
     } else {
       const projector = getSlotProjector() ?? ensureSlotProjector();
-      const slotPool = projector.collectSlotPoolBeforeCommit();
+      const slotPool = projector.collectSlotPoolBeforeCommit({ detach: false });
       const owned = new WeakSet<Node>();
+      let boundLease: object | undefined;
 
       const result = commitChildren(root, children, {
         mode: 'light',
         slotPool,
         owned,
+        bindDecorations: (() => {
+          const feedback = capsHub?.getPort?.('feedback') as
+            | import('@proto.ui/module-feedback').FeedbackPort
+            | undefined;
+          const lease = feedback?.captureDecorationLease?.();
+          return (bindings) => {
+            const overlay = capsHub?.getPort?.('overlay') as
+              | import('@proto.ui/module-overlay').OverlayPort
+              | undefined;
+            const gate =
+              bindings.length && overlay?.getConfig().portal
+                ? createWebOwnedDecorationPortalGate(root as HTMLElement, () => {
+                    try {
+                      return feedback?.captureDecorationLease?.() === lease;
+                    } catch {
+                      return false;
+                    }
+                  })
+                : null;
+            try {
+              if (feedback?.bindDecorations)
+                feedback.bindDecorations(
+                  gate
+                    ? bindings.map((binding) => ({
+                        target: binding.target,
+                        sink: gate.wrap(binding.sink),
+                      }))
+                    : bindings,
+                  lease!
+                );
+              else if (bindings.length)
+                throw new Error('[WC Adapter] owned-decoration binding unavailable');
+              portalDecorationGate?.dispose();
+              portalDecorationGate = gate;
+              if (bindings.length) boundLease = lease;
+            } catch (error) {
+              gate?.dispose();
+              throw error;
+            }
+          };
+        })(),
       });
+
+      // Preserve the established no-slot parking contract, but only after
+      // staging and commit have succeeded. Rejected blueprints keep live nodes.
+      if (!result.hasSlot) for (const node of slotPool) node.parentNode?.removeChild(node);
 
       projector.afterCommit({
         owned,
@@ -110,11 +214,40 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         projected: slotPool,
         enableMO: result.hasSlot,
       });
+      if (boundLease) {
+        if (currentFeedback()?.captureDecorationLease?.() !== boundLease)
+          throw new Error('[WC Adapter] decoration lease changed during commit');
+        const nodes: Array<{ node: Node; parent: Node | null; decoration: boolean }> = [];
+        const collect = (parent: Node) => {
+          for (const node of Array.from(parent.childNodes)) {
+            if (!owned.has(node)) continue;
+            nodes.push({
+              node,
+              parent: node.parentNode,
+              decoration:
+                node.nodeType === 1 && (node as Element).hasAttribute('data-pui-owned-decoration'),
+            });
+            collect(node);
+          }
+        };
+        collect(root);
+        if (
+          turn !== commitTurn ||
+          !root.isConnected ||
+          currentFeedback()?.captureDecorationLease?.() !== boundLease
+        )
+          throw new Error('[WC Adapter] decoration commit superseded');
+        decorationCommit = {
+          blueprint: children,
+          lease: boundLease,
+          document: root.ownerDocument,
+          nodes,
+        };
+      }
       return;
     }
     clearSlotProjector();
   };
-
 
   const hostSession = createAdapterHost(
     { ...proto, name: tagName },
@@ -135,6 +268,10 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         wiring.onRuntimeReady(wiringApi);
       },
       onUnmountBegin: () => {
+        commitTurn++;
+        decorationCommit = null;
+        portalDecorationGate?.dispose();
+        portalDecorationGate = null;
         eventGate.disable();
       },
       afterUnmount: () => {
@@ -154,10 +291,11 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
         ]);
       },
     },
-    { initialMount }
+    { initialMount: 'manual' }
   );
 
   capsHub = hostSession.caps;
+  if (initialMount !== 'manual') void hostSession.mount();
   return { ...hostSession, host };
 }
 

@@ -3,7 +3,7 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { stringify as stringifyYaml } from 'yaml';
+import { parse as parseYaml, stringify as stringifyYaml } from 'yaml';
 import {
   root,
   dataPath,
@@ -56,9 +56,19 @@ const fixtureSource = {
 };
 // Mutation cases exercise a fixed historical fixture; the production source test
 // and all candidate tests below still use the real current source and hashes.
-const copy = () => {
+const copy = ({ currentSource = false } = {}) => {
   const d = structuredClone(baseline);
   delete d.candidateSource;
+  if (!currentSource) {
+    // These controls read pinned-main catalog bytes, not the newer candidate.
+    // Their delivery scope must describe the same immutable inventory.
+    for (const item of d.deliveryPlan.items) {
+      if (!item.id.startsWith('baseline.')) continue;
+      item.baseEntityIds = [
+        ...d.prototypeInventory.base[item.id.slice('baseline.'.length)].entityIds,
+      ];
+    }
+  }
   fixtureCopies.add(d);
   return d;
 };
@@ -653,11 +663,44 @@ test('review 4198901128: Button receipts cannot complete Label or Overlay', () =
 });
 
 function sameSourceCandidate() {
-  const d = copy();
+  const d = copy({ currentSource: true });
   const tree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], { cwd: root }).toString().trim();
   d.candidateSource = refreshCandidateSource(d, root, { tree });
   return d;
 }
+test('supporting declarations cannot give a projection a second family owner', (t) => {
+  mockRead(t, {
+    'spec/prototypes/P-SHADCN-BUTTON.yaml': (text) => {
+      if (typeof text !== 'string') return text;
+      const entity = parseYaml(text);
+      entity.sources.push({ path: 'packages/prototypes/shadcn/src/toggle/toggle.proto.ts' });
+      return stringifyYaml(entity);
+    },
+  });
+  const inventory = sameSourceCandidate().candidateSource.prototypeInventory.shadcn;
+  const owners = Object.entries(inventory)
+    .filter(([, family]) => family.entityIds.includes('P-SHADCN-BUTTON'))
+    .map(([family]) => family);
+  assert.deepEqual(owners, ['button']);
+  assert(
+    inventory.toggle.sourceFiles.includes('packages/prototypes/shadcn/src/toggle/toggle.proto.ts')
+  );
+});
+test('ambiguous source families without an inherited Base owner fail closed', (t) => {
+  mockRead(t, {
+    'spec/prototypes/P-SHADCN-BUTTON.yaml': (text) => {
+      if (typeof text !== 'string') return text;
+      const entity = parseYaml(text);
+      entity.sources.push({ path: 'packages/prototypes/shadcn/src/toggle/toggle.proto.ts' });
+      delete entity.inherits;
+      return stringifyYaml(entity);
+    },
+  });
+  assert.throws(
+    sameSourceCandidate,
+    /P-SHADCN-BUTTON cites multiple shadcn families.*without one inherited Base family/
+  );
+});
 test('candidate refresh preserves pinned-main comparison and all acceptance checkboxes', () => {
   const d = sameSourceCandidate();
   assert.deepEqual(d.comparisonRows, baseline.comparisonRows);
@@ -790,7 +833,7 @@ test('review 4199624959: an empty implementation ledger cannot verify GPUI', () 
 });
 
 test('advertised commit proof rejects a real but different commit even with both fields changed', () => {
-  const d = copy();
+  const d = copy({ currentSource: true });
   const revision = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root }).toString().trim();
   d.candidateSource = refreshCandidateSource(d, root, { revision });
   assert.deepEqual(validate(d), []);

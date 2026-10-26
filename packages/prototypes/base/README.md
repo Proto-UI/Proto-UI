@@ -89,33 +89,16 @@ The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldD
 
 `asFieldControl` is the generic finite-value reporting/association bridge; `asFieldTextControl` is the default text-editor authoring entry. A custom control explicitly consumes the effective policy and reports its canonical value; it declares its existing focus/activation operation with `asControlLabel().target(callback, FIELD_LABEL_PAIR)` to reuse the actual native-input and lifecycle guards. The pair is setup-only, never a Prop or Context value.
 
+`fieldSelectTrigger` opts an existing Select into Field composition without replacing its Root value ownership. Controlled requests notify Field only when owner props change the canonical value, including acceptance after outward delivery. Each accepted canonical change retains a notification, including nested synchronous requests; notifications wait for the outermost outward callback to return, and view retirement cancels pending work. Rejected proposals do not validate their proposed values.
+
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
 
 ## Optional Field multiline composition
 
-Use `fieldTextarea` or `asFieldTextarea` from `@proto.ui/prototypes-base/field`
-when a multiline editor participates in Field label, description, current error,
-policy and validation semantics. They call the same `setupTextareaRoot` as
-ordinary Textarea. They do not introduce a second editor or validator, and are
-not design-family-specific alternatives.
+Use `fieldTextarea` or `asFieldTextarea` from `@proto.ui/prototypes-base/field` when a multiline editor participates in Field label, description, current error, policy and validation semantics. They call the same `setupTextareaRoot` as ordinary Textarea. They do not introduce a second editor or validator, and are not design-family-specific alternatives.
 
-`setupTextareaRoot` and `TextareaRootSetupOptions` are public from the `textarea`
-entry. Its definition-time `{ fieldBinding: true }` option selects the existing
-Field anatomy pair and optional Field binding. AsHook calls remain argumentless.
-Custom definitions must reuse `asTextareaRoot.modules`. Default configuration
-keeps the existing independent `InstanceAssociations.controlLabel` association
-and external ID relations. The association modes are not combined at runtime.
+`setupTextareaRoot` and `TextareaRootSetupOptions` are public from the `textarea` entry. Its definition-time `{ fieldBinding: true }` option selects the existing Field anatomy pair and optional Field binding. AsHook calls remain argumentless. Custom definitions must reuse `asTextareaRoot.modules`. Default configuration keeps the existing independent `InstanceAssociations.controlLabel` association and external ID relations. The association modes are not combined at runtime.
 
-Field composition rejects nonempty `labelledBy`/`describedBy` inputs because
-Field owns those relationships. `ariaLabel` remains available. The shared Props
-schema remains visible; those two conflicting values fail closed rather than
-silently replacing the Field relation. Read borrowed invalid/pending through
-`handle.getAsHookHandle('as-optional-field-control').state`, not a second local
-invalid state. Without a parent Field, local policies remain effective and
-invalid stays false. Native HTML validity is not a Field validity source.
+Field composition rejects nonempty `labelledBy`/`describedBy` inputs because Field owns those relationships. `ariaLabel` remains available. The shared Props schema remains visible; those two conflicting values fail closed rather than silently replacing the Field relation. Read borrowed invalid/pending through `handle.getAsHookHandle('as-optional-field-control').state`, not a second local invalid state. Without a parent Field, local policies remain effective and invalid stays false. Native HTML validity is not a Field validity source.
 
-Field policy-only updates preserve editing and do not report a partially updated
-policy back to Field. Canonical editing reports use the existing Field bridge;
-view disposal during an outward callback prevents late reports. Form reset and
-implicit submission are not added by this composition. Synthetic tests are not
-native input, assistive-technology or complete design-family visual acceptance.
+Field policy-only updates preserve editing and do not report a partially updated policy back to Field. Canonical editing reports use the existing Field bridge; view disposal during an outward callback prevents late reports. Form reset and implicit submission are not added by this composition. Synthetic tests are not native input, assistive-technology or complete design-family visual acceptance.

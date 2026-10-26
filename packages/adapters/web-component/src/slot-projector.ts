@@ -1,3 +1,4 @@
+import { withWebComponentOwnedRelocation } from './owned-relocation';
 // packages/adapters/web-component/src/slot-projector.ts
 
 import { isOwnedVisualNode } from './visual-surface';
@@ -30,7 +31,7 @@ export class SlotProjector {
   }
 
   /** rebuild 前：收集并“保住”外部节点 */
-  collectSlotPoolBeforeCommit(): Node[] {
+  collectSlotPoolBeforeCommit(options: { detach?: boolean } = {}): Node[] {
     // Snapshot before detaching anything: observer delivery may lag a caller
     // removal, reparent, prepend or reorder. Only a no-slot commit parks nodes.
     const candidates = new Set<Node>();
@@ -51,7 +52,9 @@ export class SlotProjector {
     const live = roots.filter((node) => this.el.contains(node));
     live.sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1));
     const pool = [...parked, ...live];
-    for (const node of pool) node.parentNode?.removeChild(node);
+    // A staged commit must validate the full blueprint before touching caller
+    // nodes. Cleanup callers retain the historical detach behavior by default.
+    if (options.detach !== false) for (const node of pool) node.parentNode?.removeChild(node);
     return pool;
   }
 
@@ -106,11 +109,14 @@ export class SlotProjector {
         if (!parent) return;
 
         for (const n of toMove) {
-          // n 目前是 el 的 direct child，移走
-          if (n.parentNode === this.el) this.el.removeChild(n);
-
-          parent.insertBefore(n, end);
-          if (!this.projected.includes(n)) this.projected.push(n);
+          // A previous connected reaction may have reparented a later node
+          // or replaced this projection. Do not reclaim author-moved nodes.
+          if (this.slotEnd !== end || end.parentNode !== parent) break;
+          if (n.parentNode !== this.el || !this.shouldMoveToSlot(n)) continue;
+          withWebComponentOwnedRelocation([n], parent, () => {
+            parent.insertBefore(n, end);
+          });
+          if (n.parentNode === parent && !this.projected.includes(n)) this.projected.push(n);
         }
       } finally {
         this.suppress--;

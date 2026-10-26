@@ -291,6 +291,11 @@
       "types": "./dist/style-scope/index.d.ts",
       "import": "./dist/style-scope/index.js",
       "default": "./dist/style-scope/index.js"
+    },
+    "./input-shell": {
+      "types": "./dist/input-shell/index.d.ts",
+      "import": "./dist/input-shell/index.js",
+      "default": "./dist/input-shell/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",

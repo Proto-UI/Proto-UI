@@ -501,7 +501,7 @@ async function exerciseWorkspaceSettings(
     .evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-gallery-demo')));
   assert.deepEqual(
     [...liveResult].join(','),
-    'controls,hover,preferences,editor,overlays,choices',
+    'controls,hover,workspace-command,workspace-help,preferences,workspace-progress,editor,overlays,choices',
     'Every real component composition remains present'
   );
   activeProbeStage = 'workspace-settings-saved-capture';
@@ -565,6 +565,11 @@ async function waitForDialogEntryFocus(page: Page, dialog: Locator) {
   }
 }
 
+function galleryButtonActivated({ home, expected }: { home: string; expected: string }) {
+  const feedback = document.querySelectorAll(`${home} [data-demo-ref="gallery-controls-feedback"]`);
+  return feedback.length === 1 && feedback[0]?.textContent === expected;
+}
+
 async function exerciseInteractiveGallery(
   page: Page,
   route: string,
@@ -574,13 +579,10 @@ async function exerciseInteractiveGallery(
   const gallery = page.locator(`${HOME} [data-home-gallery]`);
   activeProbeStage = 'gallery-button';
   await gallery.locator('[data-demo-ref="gallery-primary"]').click();
-  await page.waitForFunction(
-    (home) =>
-      document
-        .querySelector(`${home} [data-demo-ref="gallery-controls-feedback"]`)
-        ?.textContent?.includes('✓'),
-    HOME
-  );
+  await page.waitForFunction(galleryButtonActivated, {
+    home: HOME,
+    expected: zh ? '主要按钮: 已触发' : 'Primary button: Activated',
+  });
   activeProbeStage = 'gallery-editor';
   const editor = gallery.locator('[data-gallery-demo="editor"]');
   const text = editor.locator('textarea');

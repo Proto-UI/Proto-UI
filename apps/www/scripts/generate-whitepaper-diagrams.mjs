@@ -298,22 +298,29 @@ function consistency() {
   return 862;
 }
 
-function evolution() {
-  heading(
-    '08',
-    tr('实践怎样修正当前近似', 'How practice revises the current approximation'),
-    tr(
-      '三条主线并行推进，用证据判断应该修改哪一层',
-      'Three concurrent lines of work; evidence identifies the layer to revise'
-    )
+function evolutionDescription() {
+  parts.push(
+    `<desc id="description">${esc(
+      tr(
+        '理论与内核、原型库和翻译层并行推进。实现、符合性测试与真实使用提供归因证据：实现偏差需要修正实现；Host 能力缺口需要补足翻译能力；必要语义遗漏或定义对某类 Host 过拟合需要修正 Prototype；基础关系出现反例需要重新检查理论。这些是不同的归因方向，不是依次完成的阶段。明确修正对应层并重新检验；实现结果不会静默成为新标准。',
+        'Theory and kernel, prototype libraries, and the translation layer advance concurrently. Implementations, conformance tests, and real use provide evidence for diagnosis: implementation drift calls for an implementation fix; a Host capability gap calls for improved translation; omitted necessary semantics or a definition overfitted to a class of Host calls for a Prototype revision; a counterexample to fundamental relations calls for reexamining the theory. These are alternative diagnoses, not sequential stages. Revise the relevant layer explicitly and test again; implementation behavior does not silently become a rule.'
+      )
+    )}</desc>`
   );
+}
+
+function evolution() {
+  evolutionDescription();
+  // Keep details in the chapter and accessible description; prioritize labels at article width.
+  text(48, 74, tr('实践、证据与明确修正', 'Practice, evidence, explicit revision'), 40, 'start', 'strong');
+  text(48, 132, tr('三条主线并行推进', 'Three concurrent lines of work'), 36, 'start', 'muted');
   const xs = [112, 400, 688];
   const labels = [
-    tr('理论与内核|提供表达与运行基础', 'Theory and kernel|Define and execute'),
-    tr('原型库|探索 Component 身份', 'Prototype libraries|Explore identity'),
-    tr('翻译层|面对真实 Host', 'Translation layer|Meet real Hosts'),
+    tr('理论|与内核', 'Theory|and kernel'),
+    tr('原型库', 'Prototype|libraries'),
+    tr('翻译层', 'Translation|layer'),
   ];
-  xs.forEach((x, i) => box(x, 181, 224, 115, labels[i], ['blue', 'green', 'amber'][i], 21));
+  xs.forEach((x, i) => box(x, 181, 224, 115, labels[i], ['blue', 'green', 'amber'][i], 36));
   path('M336 225 H397');
   path('M400 254 H339');
   path('M624 225 H685');
@@ -326,11 +333,11 @@ function evolution() {
     800,
     100,
     tr(
-      '实现、符合性测试与真实使用|收集行为结果、失败与反例',
-      'Implementations, conformance tests, and real use|Collect outcomes, failures, and counterexamples'
+      '实践提供证据|行为结果、失败与反例',
+      'Practice provides evidence|Outcomes, failures, counterexamples'
     ),
     'panel',
-    24
+    36
   );
   path('M512 476 V521');
   box(
@@ -338,9 +345,9 @@ function evolution() {
     521,
     800,
     68,
-    tr('归因：证据指出哪一层的问题？', 'Classify: which layer does the evidence challenge?'),
+    tr('归因：哪一层需要修正？', 'Which layer needs revision?'),
     'blue',
-    25
+    36
   );
   const cards = [
     [112, 631, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
@@ -350,22 +357,89 @@ function evolution() {
       748,
       tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype'),
     ],
-    [528, 748, tr('基础关系出现反例|重审理论', 'Counterexample to relations|Revisit the theory')],
+    [528, 748, tr('基础关系出现反例|重审理论', 'Relation challenged|Revisit the theory')],
   ];
   path('M512 589 V615');
   rect(100, 615, 824, 238, 'scope');
   // The four panels are alternative diagnoses, not sequential stages.
-  cards.forEach(([x, y, label]) => box(x, y, 384, 92, label, 'panel', 23));
+  cards.forEach(([x, y, label]) => box(x, y, 384, 92, label, 'panel', 36));
   path('M100 734 H72 V164 H800', false);
   xs.forEach((x) => path(`M${x + 112} 164 V178`));
-  foot(
-    886,
-    tr(
-      '明确修正并重新检验；实现结果不会自动成为新标准。',
-      'Make an explicit revision and test again; behavior does not silently become a rule.'
-    )
-  );
+  text(48, 886, tr('明确修正，再次检验。', 'Revise explicitly, then test again.'), 36, 'start', 'muted');
   return 928;
+}
+
+function evolutionMobile() {
+  // The mobile composition preserves the desktop graph and complete description.
+  // Parallel work stays on one row; the lower cards are alternative diagnoses.
+  evolutionDescription();
+  parts.push(
+    '<defs><marker id="mobile-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" markerUnits="userSpaceOnUse" orient="auto-start-reverse"><path d="M1 1 L9 5 L1 9" fill="none" stroke="var(--muted)" stroke-width="1.5"/></marker></defs>'
+  );
+  const edge = (relation, from, to, d, arrow = true) =>
+    parts.push(
+      `<path data-relation="${relation}" data-from="${from}" data-to="${to}" d="${d}" class="line"${arrow ? ' marker-end="url(#mobile-arrow)"' : ''}/>`
+    );
+  const node = (id, x, y, w, h, label, cls = 'panel') => {
+    parts.push(`<g data-node="${id}">`);
+    box(x, y, w, h, label, cls, 26);
+    parts.push('</g>');
+  };
+
+  text(32, 40, tr('从实践到明确修正', 'Practice to explicit revision'), 28, 'start', 'strong');
+  text(32, 80, tr('三条主线并行推进', 'Three concurrent lines of work'), 26, 'start', 'muted');
+  const lanes = [
+    ['theory-kernel', 32, tr('理论|与内核', 'Theory|and kernel'), 'blue'],
+    ['prototype-libraries', 188, tr('原型库', 'Prototype|libraries'), 'green'],
+    ['translation-layer', 344, tr('翻译层', 'Translation|layer'), 'amber'],
+  ];
+  lanes.forEach(([id, x, label, cls]) => node(id, x, 108, 140, 116, label, cls));
+  edge('work-exchange', 'theory-kernel', 'prototype-libraries', 'M172 152 H186');
+  edge('work-exchange', 'prototype-libraries', 'theory-kernel', 'M188 181 H174');
+  edge('work-exchange', 'prototype-libraries', 'translation-layer', 'M328 152 H342');
+  edge('work-exchange', 'translation-layer', 'prototype-libraries', 'M344 181 H330');
+  lanes.forEach(([id, x]) =>
+    edge('practice-input', id, 'practice-evidence', `M${x + 70} 224 V246 H258`, false)
+  );
+  edge('evidence-entry', 'work', 'practice-evidence', 'M258 246 V267');
+  node(
+    'practice-evidence',
+    32,
+    270,
+    452,
+    108,
+    tr('实践提供证据|行为结果、失败与反例', 'Practice provides evidence|Outcomes, failures,|counterexamples')
+  );
+  edge('diagnose', 'practice-evidence', 'diagnoses', 'M258 378 V390');
+  text(32, 411, tr('哪一层需要修正？', 'Which layer needs revision?'), 26, 'start', 'strong');
+  text(32, 445, tr('不同归因，并非先后阶段', 'Alternative diagnoses, not stages'), 26, 'start', 'muted');
+
+  parts.push('<g data-alternatives="diagnoses">');
+  rect(32, 462, 452, 416, 'scope');
+  const diagnoses = [
+    ['implementation', 472, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
+    ['host-capability', 572, tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation')],
+    ['prototype', 672, tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype')],
+    ['theory', 772, tr('基础关系出现反例|重审理论', 'Relation challenged|Revisit the theory')],
+  ];
+  diagnoses.forEach(([id, y, label]) => {
+    parts.push(`<g data-diagnosis="${id}">`);
+    box(44, y, 428, 88, label, 'panel', 26);
+    parts.push('</g>');
+  });
+  parts.push('</g>');
+  // A single return bus reaches all concurrent lanes. No card-to-card arrows.
+  edge('revision-loop', 'diagnoses', 'work', 'M32 670 H12 V94 H414', false);
+  lanes.forEach(([id, x]) => edge('revision-return', 'diagnoses', id, `M${x + 70} 94 V105`));
+  text(
+    32,
+    930,
+    tr('明确修正，再次检验。|实现结果不静默成为标准。', 'Revise, then test again.|No silent rule changes.'),
+    26,
+    'start',
+    'muted'
+  );
+  return 1000;
 }
 
 const figures = {
@@ -373,6 +447,7 @@ const figures = {
   'switch-activation': activation,
   'conditional-consistency': consistency,
   'evolution-feedback': evolution,
+  'evolution-feedback.mobile': evolutionMobile,
 };
 await mkdir(output, { recursive: true });
 for (const locale of ['zh-cn', 'en']) {
@@ -380,9 +455,12 @@ for (const locale of ['zh-cn', 'en']) {
   for (const [name, render] of Object.entries(figures)) {
     parts = [];
     const height = render();
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="960" height="${height}" viewBox="0 0 960 ${height}" role="img" aria-labelledby="title"${name === 'switch-activation' ? ' aria-describedby="description"' : ''} xml:lang="${locale}">
+    const mobile = name === 'evolution-feedback.mobile';
+    const width = mobile ? 500 : 960;
+    const isEvolution = name === 'evolution-feedback' || mobile;
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="title"${name === 'switch-activation' || isEvolution ? ' aria-describedby="description"' : ''} xml:lang="${locale}"${mobile ? ' data-layout="mobile"' : ''}>
 <!-- Generated by apps/www/scripts/generate-whitepaper-diagrams.mjs. -->
-<title id="title">${esc(name === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : name.replaceAll('-', ' '))}</title>
+<title id="title">${esc(name === 'switch-activation' ? tr('一次 Switch 激活', 'One Switch activation') : isEvolution ? tr('实践怎样修正当前近似', 'How practice revises the current approximation') : name.replaceAll('-', ' '))}</title>
 <defs><style>
   :root { --ink:#24313d; --muted:#596875; --line:#94a3ae; --panel:#f7f9fb; --blue:#eaf2fc; --green:#eaf5ee; --amber:#fbf2e2; }
   @media(prefers-color-scheme:dark) { :root { --ink:#e1e8ed; --muted:#a6b5c0; --line:#667986; --panel:#161c22; --blue:#192d43; --green:#1a3028; --amber:#362d1c; } }

@@ -8,6 +8,13 @@ import brutalist from '../../content/docs/demo-brutalist-collapsible.demo';
 import bootstrap from '../../content/docs/demo-bootstrap-2-3-2-collapsible.demo';
 import glass from '../../content/docs/demo-liquid-glass-collapsible.demo';
 
+it('keeps the Liquid disclosure demo in one track bounded by its actual preview width', () => {
+  expect(glass.root).toMatchObject({
+    kind: 'box',
+    className: expect.stringContaining('grid-cols-1'),
+  });
+});
+
 for (const [family, demo] of [
   ['shadcn', shadcn],
   ['brutalist', brutalist],

@@ -243,7 +243,7 @@ async function nativePopup(
       (error: unknown) => ({ error })
     );
   try {
-    if (action === 'modifier') await link.click({ modifiers: ['Control'] });
+    if (action === 'modifier') await link.click({ modifiers: ['ControlOrMeta'] });
     else if (action === 'middle') await link.click({ button: 'middle' });
     else {
       await link.focus();
@@ -587,12 +587,20 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           );
           await ready(page, runtime, family);
           const heroCTA = page.locator(
-            '[data-projection-generation-state="active"] a[data-home-action-icon="external"]'
+            '#homepage-hero-actions [data-projection-generation-state="active"] a[href="#home-demo-previewer"]'
           );
           expect(await heroCTA.count()).toBe(1);
           expect((await heroCTA.textContent())?.trim()).toBe('试试 Demo');
           expect(await heroCTA.getAttribute('href')).toBe('#home-demo-previewer');
-          expect(await heroCTA.locator('svg[aria-hidden="true"]').count()).toBe(1);
+          expect(await heroCTA.getAttribute('data-home-action-icon')).toBeNull();
+          expect(await heroCTA.locator('svg').count()).toBe(0);
+          expect(
+            (
+              (await heroCTA
+                .locator(`[data-projection-prototype="${family}-surface-root"]`)
+                .getAttribute('data-pui-style')) ?? ''
+            ).split(/\s+/)
+          ).toContain(family === 'brutalist' ? 'bg-secondary-background' : 'bg-secondary');
           await openSettings(page);
           // Each journey measures viewport hit targets. Earlier keyboard/focus
           // actions may scroll the document while the Header remains sticky.
@@ -886,7 +894,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           anchor.addEventListener('click', (event) => event.preventDefault(), { once: true })
         );
         const count = context.pages().length;
-        await control.click({ modifiers: ['Control'] });
+        await control.click({ modifiers: ['ControlOrMeta'] });
         const cancelled = await saveNativeTrace(controlPage, 'plain-native-negative-control');
         expect(cancelled.filter((event) => event.type === 'click').at(-1)).toMatchObject({
           trusted: true,
@@ -1288,11 +1296,15 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
     const page = await context.newPage();
     try {
       await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
-      const heroCTA = page.locator('[data-homepage-fallback] a[data-home-action-icon="external"]');
+      const heroCTA = page.locator(
+        '#homepage-hero-actions [data-homepage-fallback] a[href="#home-demo-previewer"]'
+      );
       expect(await heroCTA.count()).toBe(1);
       expect((await heroCTA.textContent())?.trim()).toBe('试试 Demo');
       expect(await heroCTA.getAttribute('href')).toBe('#home-demo-previewer');
-      expect(await heroCTA.locator('svg[aria-hidden="true"]').count()).toBe(1);
+      expect(await heroCTA.getAttribute('data-home-action-variant')).toBe('secondary');
+      expect(await heroCTA.getAttribute('data-home-action-icon')).toBeNull();
+      expect(await heroCTA.locator('svg').count()).toBe(0);
       const links = page.locator('#home-social a');
       expect(await links.count()).toBe(4);
       const summary = page.locator('[data-site-header-fallback-summary]');
@@ -1308,7 +1320,7 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
         'hero-cta-no-js',
         'shadcn',
         'native-no-js',
-        'configured-external-icon-and-native-disclosure'
+        'secondary-icon-free-hero-and-native-disclosure'
       );
       await summary.press('Enter');
       expect(await links.first().isVisible()).toBe(false);
@@ -1761,6 +1773,14 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
       });
       const page = await context.newPage();
       try {
+        // Keep the native content area aligned with the emulated viewport for wheel input.
+        const cdp = await context.newCDPSession(page);
+        try {
+          const { windowId } = await cdp.send('Browser.getWindowForTarget');
+          await cdp.send('Browser.setContentsSize', { windowId, width, height: 900 });
+        } finally {
+          await cdp.detach();
+        }
         await page.goto(`${baseUrl}/zh-cn/contribute/automation/`, { waitUntil: 'networkidle' });
         const sidebar = page.locator('.docs-sidebar');
         const current = sidebar.locator('.top-level a[aria-current="page"]');

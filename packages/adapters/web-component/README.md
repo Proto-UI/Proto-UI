@@ -98,6 +98,12 @@ The current default body portal inherits the physical destination's document the
 
 These are scoped Chrome composition results, not lifecycle promotion or general portal support. Nested modals, arbitrary portal targets, cross-document/closed-shadow trees and arbitrary transforms/animations remain outside the split admission. Native text editing has separate evidence below; it does not establish every Dialog/editor combination. Slots remain consumer-owned, and retained settings values belong to the demo's consumer model rather than automatic preservation of every descendant instance.
 
+### Non-split native full-width contribution
+
+Withdrawing a Root contribution removes only that source's ownership. An overlapping token already supplied externally on the boundary remains; an external owner can still explicitly remove its token while the Adapter is active.
+
+The default non-split native Input/Textarea projection retains all visual tokens on its physical editor. Canonical Root `w-full` additionally contributes the same percentage-width token to the Custom Element boundary so width is evaluated against the logical parent's allocation rather than only an intrinsic wrapper. This bounded contribution preserves original provenance and lowered conditions, retracts with the final style result, and never copies paint, padding, border, `grow`, `min-w-0`, or raw surface customization. Without `w-full`, native intrinsic behavior is unchanged. It is not a general flex/dimension mapping and does not change the separately governed Shadow split recipe below. Simulated-DOM transport tests do not establish native layout acceptance.
+
 ### Native text editing
 
 The existing Base Input, Base Textarea and Shadcn Textarea are admitted. Regenerate the CLI companion: older v1 artifacts without the native recipe are rejected before registration. The single native editor is also the surface, directly inside the ShadowRoot with `part="control surface"`. It receives normalized surface props and existing text/focus/a11y projections; no second painted wrapper is added.

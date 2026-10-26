@@ -16,7 +16,7 @@ criteria:
       en: Existing optional Field binding exclusively owns invalid, pending, required and Field relationships. Raw Root control policy is distinct from inherited Field policy so removing local or parent restrictions cannot latch them through a report feedback loop. Reports use canonical Root value, not an unaccepted controlled request. No native constraint validation or HTML validity is inferred.
   - id: C-FIELD-SELECT-0001-LIFECYCLE
     text:
-      en: Field relationship and policy updates preserve Root value/open ownership and control identity. Canonical value is reported synchronously for inspection, while onChange validation notification is deferred through an owned zero-delay task after outward valueChange delivery; each accepted canonical change retains its own notification task and retirement cancels pending tasks, without debounce or delaying user valueChange. Rejected controlled requests schedule no validation notification. Every notification reads the current canonical value and existing Field request leases enforce latest-result ownership. Synchronous valueChange callbacks that retire the view prevent stale change reports; unmount/dispose retires the Trigger report endpoint. Parent replacement must re-resolve Field facts without retaining old invalid/relationships. This composition does not copy popup navigation, focus restoration, geometry or activation behavior.
+      en: Field relationship and policy updates preserve Root value/open ownership and control identity. Canonical value is reported synchronously for inspection, while onChange validation notification is deferred through an owned zero-delay task after outward valueChange delivery; each accepted canonical change retains its own notification task and retirement cancels pending tasks, without debounce or delaying user valueChange. Controlled acceptance is observed when owner props change the canonical value, including after outward delivery; emitting a proposal alone does not accept it. Rejected controlled requests schedule no validation notification. Every notification reads the current canonical value and existing Field request leases enforce latest-result ownership. Synchronous valueChange callbacks that retire the view prevent stale change reports; unmount/dispose retires the Trigger report endpoint. Parent replacement must re-resolve Field facts without retaining old invalid/relationships. This composition does not copy popup navigation, focus restoration, geometry or activation behavior.
 sources:
   - path: packages/prototypes/base/src/select/root.proto.ts
   - path: packages/prototypes/base/src/select/trigger.proto.ts
@@ -27,4 +27,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Makes optional Field association explicit while keeping one canonical Select owner and existing Field validator.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Observes controlled owner acceptance after outward event delivery without validating unaccepted proposals.
 tags: [field, select, composition]

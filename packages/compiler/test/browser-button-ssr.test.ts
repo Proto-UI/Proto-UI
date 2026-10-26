@@ -301,6 +301,33 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         expect(response?.status()).toBe(200);
         const htmlSource = await response!.text();
         expect(htmlSource).toContain('data-pui-carrier');
+        expect(htmlSource).toContain(
+          `<style data-pui-ssr-consumer-theme-paint="${compiled.provenance.consumerThemePaint.sha256}">${compiled.consumerThemePaintCssText}</style>`
+        );
+        const selectionPaint = await page.evaluate(() => {
+          const text = document.querySelector('#selection')!.firstChild!;
+          const selection = document.getSelection()!;
+          const range = document.createRange();
+          range.selectNodeContents(text);
+          selection.addRange(range);
+          const probe = document.createElement('span');
+          probe.style.backgroundColor = 'var(--pui-selection)';
+          probe.style.color = 'var(--pui-selection-foreground)';
+          document.body.append(probe);
+          const expected = getComputedStyle(probe);
+          const actual = getComputedStyle(document.querySelector('#selection')!, '::selection');
+          const result = {
+            background: actual.backgroundColor,
+            expectedBackground: expected.backgroundColor,
+            color: actual.color,
+            expectedColor: expected.color,
+          };
+          probe.remove();
+          selection.removeAllRanges();
+          return result;
+        });
+        expect(selectionPaint.background).toBe(selectionPaint.expectedBackground);
+        expect(selectionPaint.color).toBe(selectionPaint.expectedColor);
         const before = await snapshot(page, 'no-javascript-first-paint');
         expectVisible(before.roots[0]);
         expect(before.roots[0].status).toBe('unregistered');
@@ -755,7 +782,11 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
         .endsWith('packages/prototypes/base/src/button/button.proto.ts')
     );
     expect(original).toBeDefined();
-    for (const entry of [...provenance.sourceFiles, ...provenance.environmentSources]) {
+    for (const entry of [
+      ...provenance.sourceFiles,
+      ...provenance.environmentSources,
+      ...provenance.consumerThemePaint.sourceFiles,
+    ]) {
       const contents = await readFile(path.resolve(root, entry.file), 'utf8');
       expect(entry.sha256).toBe(sha256(contents));
     }
@@ -778,6 +809,18 @@ describe.sequential('experimental compiler SSR: real Base Button source to nativ
     expect(provenance.artifacts.source).toBe(provenance.source.sha256);
     expect(provenance.artifacts.css).toBe(provenance.cssSha256);
     expect(provenance.artifacts.environment).toBe(sha256(compiled.environmentCssText));
+    expect(compiled.environmentCssText).not.toContain('::selection');
+    expect(compiled.consumerThemePaintCssText).toContain('::selection');
+    expect(compiled.consumerThemePaintCssText).toContain('var(--pui-selection)');
+    expect(provenance.consumerThemePaint).toMatchObject({
+      id: 'shadcn-consumer-selection-paint',
+      artifact: 'consumer-theme-paint.css',
+      sha256: sha256(compiled.consumerThemePaintCssText),
+    });
+    expect(await readFile(path.join(fixture.evidenceDir, 'consumer-theme-paint.css'), 'utf8')).toBe(
+      compiled.consumerThemePaintCssText
+    );
+    expect(provenance.consumerThemePaint.sha256).not.toBe(provenance.artifacts.environment);
     expect(provenance.styleEnvironment).toMatchObject({
       id: 'shadcn-consumer-light',
       artifact: 'Component.environment.css',

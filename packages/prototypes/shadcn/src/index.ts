@@ -382,3 +382,18 @@ export type {
 
 export { fieldTextarea, shadcnFieldTextarea } from './field';
 export type { ShadcnFieldTextareaProps, ShadcnFieldTextareaExposes } from './field';
+
+export {
+  inputShell,
+  inputShellControl,
+  bindInputShellControl,
+  INPUT_SHELL_PROJECTED_STYLES,
+} from './input-shell';
+export type {
+  InputShellProps,
+  InputShellControlProps,
+  InputShellControlExposes,
+  InputShellOwner,
+  InputShellTarget,
+  InputShellControlInstance,
+} from './input-shell';

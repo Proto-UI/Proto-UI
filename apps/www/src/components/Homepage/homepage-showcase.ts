@@ -69,6 +69,8 @@ export function createHomepageShowcase(
 ): { demo: DemoSpec; recipe: ProjectionContentRecipe } {
   const copy = COPY[locale === 'en' ? 'en' : 'zh-cn'];
   const selectParts = resolveProjectionSelectParts(family);
+  const selectGroup =
+    family === 'shadcn' ? resolveProjectionPart(family, 'select', 'group').prototypeId : undefined;
   const parts = {
     select: selectParts.root,
     trigger: selectParts.trigger,
@@ -114,6 +116,7 @@ export function createHomepageShowcase(
         ...new Set([
           ...Object.values(parts),
           ...Object.values(selectParts),
+          ...(selectGroup ? [selectGroup] : []),
           ...gallery.ids,
           `${family}-text-root`,
         ]),
@@ -185,7 +188,15 @@ export function createHomepageShowcase(
                                         {
                                           kind: 'proto',
                                           prototypeId: selectParts.viewport,
-                                          children: selectItems,
+                                          children: selectGroup
+                                            ? [
+                                                {
+                                                  kind: 'proto',
+                                                  prototypeId: selectGroup,
+                                                  children: selectItems,
+                                                },
+                                              ]
+                                            : selectItems,
                                         },
                                       ],
                                     },

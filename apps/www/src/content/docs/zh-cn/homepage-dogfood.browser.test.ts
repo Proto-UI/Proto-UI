@@ -1,6 +1,12 @@
 // @vitest-environment node
 import { revealHeaderPreferences } from './site-header-browser';
+import {
+  prepareUtilityFamilyReadObservation,
+  settleFamilyQueryBatch,
+} from './family-query-observer';
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
+import { installDocsCallTimingObserver } from './docs-query-timing.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
@@ -10,10 +16,13 @@ import {
   headerPreferenceLeaseIssues,
   measureHeaderPreferenceFocusRing,
 } from './site-header-breakpoint-evidence';
-import type { Browser, ElementHandle, Page } from 'playwright-core';
+import type { Browser, ElementHandle, JSHandle, Page } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
 const LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' } as const;
+const familyQueryMode = process.env.PROTO_UI_FAMILY_QUERY_MODE ?? 'hybrid';
+if (!['hybrid', 'native-only', 'node-only'].includes(familyQueryMode))
+  throw new Error('Unknown family query observation mode');
 let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
@@ -238,7 +247,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       expect(await link.isVisible()).toBe(true);
       const destination = await link.getAttribute('href');
       const opened = context.waitForEvent('page');
-      await link.click({ modifiers: ['Control'] });
+      await link.click({ modifiers: ['ControlOrMeta'] });
       const newPage = await opened;
       await newPage.waitForURL(`**${destination}`);
       await newPage.close();
@@ -484,6 +493,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         const languagePortal = page.locator(`[id=${JSON.stringify(languagePortalId)}]`);
         await languagePortal.waitFor({ state: 'visible' });
         expect(await languagePortal.getAttribute('data-site-control-family')).toBe(route.family);
+        await languagePortal.getByRole('option').first().waitFor({ state: 'visible' });
         expect(await languagePortal.getByRole('option').count()).toBeGreaterThan(1);
         await page.keyboard.press('Escape');
         await languagePortal.waitFor({ state: 'hidden' });
@@ -719,9 +729,7 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           expect(facts.height).toBeGreaterThanOrEqual(44);
           expect(facts.ownsCenter).toBe(true);
           expect(facts.focusVisible).toBe(true);
-          expect(facts.tokens).toContain(
-            family === 'shadcn' ? 'border-transparent' : 'rounded-base'
-          );
+          expect(facts.tokens).toContain(family === 'shadcn' ? 'border-ring' : 'rounded-base');
           const id = `${family}-${runtime}-keyboard-focus`;
           const record = {
             source,
@@ -749,18 +757,44 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
   it('uses the same mobile shell on documentation with independent global navigation and contents', async () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
     const page = await context.newPage();
+    const source = {
+      sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
+      dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
+    };
+    let stage = 'navigate';
+    let activeWidth: number | null = null;
+    const stages: Array<{ stage: string; width: number; nodeMs: number }> = [];
     try {
       for (const width of [390, 430, 320]) {
+        activeWidth = width;
+        stage = 'navigate';
         await page.setViewportSize({ width, height: 844 });
         await page.goto(`${baseUrl}/zh-cn/ui-libraries/brutalist/components/tooltip/`, {
           waitUntil: 'networkidle',
         });
         const header = page.locator('[data-docs-site-header]');
         const menu = header.locator('[data-site-menu-button]');
+        stage = 'menu-ready';
+        stages.push({ stage, width, nodeMs: performance.now() });
         await expect.poll(() => header.getAttribute('data-site-menu-ready')).toBe('');
+        stage = 'mobile-interaction';
+        stages.push({ stage, width, nodeMs: performance.now() });
         // This loop reuses its native pointer across navigations. Measure the
         // resting row, not a legitimate +4px Brutalist hover under the old point.
         await page.mouse.move(0, 800);
+        await expect
+          .poll(
+            () =>
+              header.evaluate((element) =>
+                [
+                  ...element.querySelectorAll(
+                    '.site-header-search [data-open-modal], [data-theme-toggle], [data-site-menu-button]'
+                  ),
+                ].every((control) => getComputedStyle(control).transform === 'none')
+              ),
+            { timeout: 1000 }
+          )
+          .toBe(true);
         const geometry = await header.evaluate((element) => {
           const bounds = element.getBoundingClientRect();
           const controls = [
@@ -863,12 +897,62 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         // Reverse the order and exercise the complete keydown + keyup Escape.
         await menu.click();
         await contents.click();
+        stage = 'navigation-close-from-contents';
+        stages.push({ stage, width, nodeMs: performance.now() });
         await expect.poll(() => menu.getAttribute('aria-expanded')).toBe('false');
+        stage = 'contents-focus';
+        stages.push({ stage, width, nodeMs: performance.now() });
         expect(await contents.getAttribute('aria-expanded')).toBe('true');
         await page.keyboard.press('Escape');
         expect(await contents.evaluate((element) => document.activeElement === element)).toBe(true);
       }
+    } catch (error) {
+      const rejected = {
+        source,
+        stage,
+        width: activeWidth,
+        nodeMs: performance.now(),
+        message: String(error),
+        stack: error instanceof Error ? error.stack : null,
+        cause: error instanceof Error && error.cause !== undefined ? String(error.cause) : null,
+        stages: stages.map((entry) => ({ ...entry })),
+      };
+      // Freeze the original rejection before any post-failure browser request.
+      console.info('[mobile-shell-rejection]', JSON.stringify(rejected));
+      try {
+        const directory = path.join(
+          process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
+            path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
+          'mobile-shell'
+        );
+        await mkdir(directory, { recursive: true });
+        await writeFile(path.join(directory, 'rejection.json'), JSON.stringify(rejected, null, 2));
+        const nodeStartedMs = performance.now();
+        const facts = await page.evaluate(() => {
+          const header = document.querySelector<HTMLElement>('[data-docs-site-header]');
+          const menu = header?.querySelector('[data-site-menu-button]');
+          const contents = header?.querySelector('[data-site-contents-command]');
+          return {
+            timeOrigin: performance.timeOrigin,
+            pageMs: performance.now(),
+            menuReady: header?.getAttribute('data-site-menu-ready'),
+            menuExpanded: menu?.getAttribute('aria-expanded'),
+            contents: contents?.outerHTML,
+            bodyExpanded: document.body.getAttribute('data-mobile-menu-expanded'),
+            activeElement: document.activeElement?.outerHTML,
+          };
+        });
+        await writeFile(
+          path.join(directory, 'post-rejection.json'),
+          JSON.stringify({ nodeStartedMs, nodeReturnedMs: performance.now(), facts }, null, 2)
+        );
+        await page.screenshot({ path: path.join(directory, 'failure.png'), fullPage: true });
+      } catch (captureError) {
+        console.info('[mobile-shell-capture-error]', String(captureError));
+      }
+      throw error;
     } finally {
+      console.info('[mobile-shell-stages]', JSON.stringify({ source, stages }));
       await context.close();
     }
   }, 90_000);
@@ -1008,7 +1092,391 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     const records: unknown[] = [];
     const ringFailures: string[] = [];
     const errors: string[] = [];
+    const consoleErrors: string[] = [];
+    const familyCommitCalls: Array<{
+      call: number;
+      startedMs: number;
+      returnedMs?: number;
+      value?: string | null;
+      error?: string;
+    }> = [];
+    const familyCommitTiming = {
+      clock: 'Node performance.now() milliseconds',
+      timeOrigin: performance.timeOrigin,
+      startedMs: null as number | null,
+      finishedMs: null as number | null,
+      outcome: 'not-run',
+      totalCalls: 0,
+      droppedCalls: 0,
+      observerError: false,
+      calls: familyCommitCalls,
+      rejectionSnapshot: null as typeof familyCommitCalls | null,
+    };
+    let utilityObservation: Awaited<ReturnType<typeof prepareUtilityFamilyReadObservation>> | null =
+      null;
+    // Keep every original Promise until post-verdict settlement; only displayed rows are capped.
+    const familyQueryRequests: Array<{
+      request: Promise<string | null>;
+      call: (typeof familyCommitCalls)[number];
+    }> = [];
+    const familyQueryObservation = {
+      mode: familyQueryMode,
+      enabled: {
+        node: true,
+        writerMO: familyQueryMode !== 'node-only',
+        utility: familyQueryMode === 'hybrid',
+      },
+      ledgerError: false,
+      verdict: null as null | { outcome: string; nodeMs: number | null; frozenAtMs: number },
+      pendingAtVerdict: [] as typeof familyCommitCalls,
+      pendingAtVerdictCount: 0,
+      droppedPendingRows: 0,
+      referenceCountAtVerdict: 0,
+      referenceCountAfterDrain: 0,
+      issuedAfterDrain: 0,
+      wait: {
+        startedMs: null as number | null,
+        finishedMs: null as number | null,
+        drainedReferences: 0,
+        budgetMs: 1000,
+        budgetExpired: false,
+        pendingAtDrainEndCount: 0,
+        pendingAtDrainEnd: [] as typeof familyCommitCalls,
+        droppedPendingAtDrainEndRows: 0,
+        displayedOutcomes: [] as Array<Record<string, unknown>>,
+        droppedOutcomeRows: 0,
+        completeAtDrainPoint: false,
+      },
+      utility: null as Record<string, any> | null,
+      cleanupDeferredUntilContextClose: false,
+      errors: [] as string[],
+    };
+    const noteQueryError = (error: unknown) => {
+      try {
+        familyQueryObservation.errors.push(String(error));
+      } catch {
+        familyQueryObservation.ledgerError = true;
+      }
+    };
+    let finishQueries: Promise<void> | null = null;
+    const finishFamilyQueryObservation = () =>
+      (finishQueries ??= (async () => {
+        if (family !== 'brutalist') return;
+        try {
+          familySDK?.freezeVerdict(familyCommitTiming.outcome === 'fulfilled');
+          familyQueryObservation.verdict = {
+            outcome: familyCommitTiming.outcome,
+            nodeMs: familyCommitTiming.finishedMs,
+            frozenAtMs: performance.now(),
+          };
+          familyQueryObservation.referenceCountAtVerdict = familyQueryRequests.length;
+          const pending = familyQueryRequests.filter(({ call }) => call.returnedMs === undefined);
+          familyQueryObservation.pendingAtVerdictCount = pending.length;
+          familyQueryObservation.pendingAtVerdict = pending
+            .slice(0, 64)
+            .map(({ call }) => ({ ...call }));
+          familyQueryObservation.droppedPendingRows = Math.max(0, pending.length - 64);
+          try {
+            console.info(
+              '[family-query-verdict]',
+              JSON.stringify({
+                source,
+                family,
+                mode: familyQueryMode,
+                verdict: familyQueryObservation.verdict,
+                referenceCount: familyQueryObservation.referenceCountAtVerdict,
+                pendingCount: pending.length,
+                pending: familyQueryObservation.pendingAtVerdict,
+                droppedPendingRows: familyQueryObservation.droppedPendingRows,
+              })
+            );
+          } catch (error) {
+            noteQueryError(error);
+          }
+          familyQueryObservation.wait.startedMs = performance.now();
+          const drainDeadline =
+            familyQueryObservation.wait.startedMs + familyQueryObservation.wait.budgetMs;
+          let drained = 0;
+          while (drained < familyQueryRequests.length) {
+            const batch = familyQueryRequests.slice(drained);
+            const settlement = await settleFamilyQueryBatch(
+              batch.map(({ request }) => request),
+              Math.max(0, drainDeadline - performance.now())
+            );
+            if (!settlement.complete) {
+              familyQueryObservation.wait.budgetExpired = true;
+              break;
+            }
+            const outcomes = settlement.outcomes;
+            const observedAtMs = performance.now();
+            outcomes.forEach((outcome, index) => {
+              try {
+                if (familyQueryObservation.wait.displayedOutcomes.length < 64)
+                  familyQueryObservation.wait.displayedOutcomes.push({
+                    call: batch[index]!.call.call,
+                    status: outcome.status,
+                    ...('value' in outcome
+                      ? { value: outcome.value }
+                      : { error: String(outcome.reason) }),
+                    batchObservedAtMs: observedAtMs,
+                  });
+                else familyQueryObservation.wait.droppedOutcomeRows++;
+              } catch (error) {
+                noteQueryError(error);
+              }
+            });
+            drained += batch.length;
+            familyQueryObservation.wait.drainedReferences = drained;
+          }
+          familyQueryObservation.referenceCountAfterDrain = familyQueryRequests.length;
+          const pendingAtDrainEnd = familyQueryRequests.filter(
+            ({ call }) => call.returnedMs === undefined
+          );
+          familyQueryObservation.wait.pendingAtDrainEndCount = pendingAtDrainEnd.length;
+          familyQueryObservation.wait.pendingAtDrainEnd = pendingAtDrainEnd
+            .slice(0, 64)
+            .map(({ call }) => ({ ...call }));
+          familyQueryObservation.wait.droppedPendingAtDrainEndRows = Math.max(
+            0,
+            pendingAtDrainEnd.length - 64
+          );
+          familyQueryObservation.wait.completeAtDrainPoint =
+            !familyQueryObservation.ledgerError &&
+            !familyQueryObservation.wait.budgetExpired &&
+            drained === familyQueryRequests.length;
+        } catch (error) {
+          noteQueryError(error);
+        } finally {
+          familyQueryObservation.wait.finishedMs = performance.now();
+        }
+        if (utilityObservation) {
+          if (familyQueryObservation.wait.completeAtDrainPoint) {
+            try {
+              familyQueryObservation.utility = await utilityObservation.collectAndRestore();
+            } catch (error) {
+              noteQueryError(error);
+            }
+          } else {
+            // Unknown/unretained requests cannot be made safe by restoring their hook early.
+            familyQueryObservation.cleanupDeferredUntilContextClose = true;
+          }
+        }
+        try {
+          console.info(
+            '[family-query-settled]',
+            JSON.stringify({ source, family, ...familyQueryObservation })
+          );
+        } catch (error) {
+          noteQueryError(error);
+        }
+      })());
+    const observeFamilyMutation = () => {
+      const target = document.querySelector<HTMLElement>('[data-homepage-runtime]')!;
+      const nativeDataset = target.dataset;
+      const ownDataset = Object.getOwnPropertyDescriptor(target, 'dataset');
+      const writes: Array<{
+        startedMs: number | null;
+        finishedMs: number;
+        previous: string | null;
+        current: string | null;
+        returned?: boolean;
+        error?: string;
+      }> = [];
+      let droppedWrites = 0;
+      let writerObserverError = false;
+      const recordWrite = (
+        startedMs: number | null,
+        previous: string | null,
+        result: { returned: boolean } | { error: unknown }
+      ) => {
+        try {
+          const finishedMs = performance.now();
+          if (writes.length < 64)
+            writes.push({
+              startedMs,
+              finishedMs,
+              previous,
+              current: target.getAttribute('data-family'),
+              ...('error' in result ? { error: String(result.error) } : result),
+            });
+          else droppedWrites += 1;
+        } catch {
+          writerObserverError = true;
+        }
+      };
+      // This instance-only interposition changes dataset identity/access cost.
+      // It brackets the native attribute write, not the complete publication.
+      const dataset = new Proxy(nativeDataset, {
+        set(subject, key, value) {
+          if (key !== 'family') return Reflect.set(subject, key, value, subject);
+          let previous: string | null = null;
+          let startedMs: number | null = null;
+          try {
+            previous = target.getAttribute('data-family');
+            startedMs = performance.now();
+          } catch {
+            writerObserverError = true;
+          }
+          let returned: boolean;
+          try {
+            returned = Reflect.set(subject, key, value, subject);
+          } catch (error) {
+            recordWrite(startedMs, previous, { error });
+            throw error;
+          }
+          recordWrite(startedMs, previous, { returned });
+          return returned;
+        },
+      });
+      const datasetGetter = () => dataset;
+      const deliveries: Array<{
+        deliveredMs: number;
+        oldValues: Array<string | null>;
+        currentValueAtDelivery: string | null;
+        connected: boolean;
+      }> = [];
+      let retainedRecords = 0;
+      let droppedRecords = 0;
+      let observerError: string | null = null;
+      const observer = new MutationObserver((records) => {
+        try {
+          const deliveredMs = performance.now();
+          const retained = records.slice(0, 64 - retainedRecords);
+          retainedRecords += retained.length;
+          droppedRecords += records.length - retained.length;
+          if (retained.length)
+            deliveries.push({
+              deliveredMs,
+              oldValues: retained.map((record) => record.oldValue),
+              currentValueAtDelivery: target.getAttribute('data-family'),
+              connected: target.isConnected,
+            });
+        } catch (error) {
+          observerError = String(error);
+        }
+      });
+      observer.observe(target, {
+        attributes: true,
+        attributeFilter: ['data-family'],
+        attributeOldValue: true,
+      });
+      try {
+        Object.defineProperty(target, 'dataset', {
+          configurable: true,
+          enumerable: ownDataset?.enumerable ?? false,
+          get: datasetGetter,
+        });
+      } catch (error) {
+        observer.disconnect();
+        throw error;
+      }
+      return {
+        target,
+        observer,
+        deliveries,
+        getDroppedRecords: () => droppedRecords,
+        getObserverError: () => observerError,
+        initialValue: target.getAttribute('data-family'),
+        timeOrigin: performance.timeOrigin,
+        setupPageMs: performance.now(),
+        writes,
+        getDroppedWrites: () => droppedWrites,
+        getWriterObserverError: () => writerObserverError,
+        restoreDataset: () => {
+          if (Object.getOwnPropertyDescriptor(target, 'dataset')?.get !== datasetGetter)
+            return false;
+          if (ownDataset) Object.defineProperty(target, 'dataset', ownDataset);
+          else Reflect.deleteProperty(target, 'dataset');
+          return target.dataset === nativeDataset;
+        },
+      };
+    };
+    let familyMutationHandle: JSHandle<ReturnType<typeof observeFamilyMutation>> | null = null;
+    const familyMutationTiming = {
+      clock: 'Browser performance.now() milliseconds; MutationObserver delivery, not mutation time',
+      setup: null as { nodeStartedMs: number; nodeReturnedMs: number } | null,
+      collect: null as { nodeStartedMs: number; nodeReturnedMs: number } | null,
+      calibration: [] as Array<{
+        nodeStartedMs: number;
+        nodeReturnedMs: number;
+        timeOrigin: number;
+        pageMs: number;
+        currentRootSame: boolean;
+      }>,
+      facts: null as unknown,
+      errors: [] as string[],
+    };
+    const collectFamilyMutation = async () => {
+      const handle = familyMutationHandle;
+      if (!handle) return;
+      familyMutationHandle = null;
+      const nodeStartedMs = performance.now();
+      try {
+        familyMutationTiming.facts = await handle.evaluate((state) => {
+          const pending = state.observer.takeRecords();
+          const pendingOldValues = pending.slice(0, 64).map((record) => record.oldValue);
+          state.observer.disconnect();
+          const datasetRestored = state.restoreDataset();
+          return {
+            timeOrigin: state.timeOrigin,
+            collectedTimeOrigin: performance.timeOrigin,
+            setupPageMs: state.setupPageMs,
+            collectedPageMs: performance.now(),
+            initialValue: state.initialValue,
+            deliveries: state.deliveries,
+            pendingOldValues,
+            pendingDroppedRecords: Math.max(0, pending.length - pendingOldValues.length),
+            currentValueAtCollection: state.target.getAttribute('data-family'),
+            currentRootSame: document.querySelector('[data-homepage-runtime]') === state.target,
+            connected: state.target.isConnected,
+            droppedRecords: state.getDroppedRecords(),
+            observerError: state.getObserverError(),
+            writes: state.writes,
+            droppedWrites: state.getDroppedWrites(),
+            writerObserverError: state.getWriterObserverError(),
+            datasetRestored,
+          };
+        });
+      } catch (error) {
+        familyMutationTiming.errors.push(String(error));
+      } finally {
+        familyMutationTiming.collect = { nodeStartedMs, nodeReturnedMs: performance.now() };
+      }
+      try {
+        // Fixed post-poll samples; retain every interval rather than picking a fast one.
+        for (let index = 0; index < 3; index += 1) {
+          const nodeStartedMs = performance.now();
+          const sample = await handle.evaluate((state) => ({
+            timeOrigin: performance.timeOrigin,
+            pageMs: performance.now(),
+            currentRootSame: document.querySelector('[data-homepage-runtime]') === state.target,
+          }));
+          familyMutationTiming.calibration.push({
+            nodeStartedMs,
+            nodeReturnedMs: performance.now(),
+            ...sample,
+          });
+        }
+      } catch (error) {
+        familyMutationTiming.errors.push(String(error));
+      } finally {
+        await handle.dispose().catch((error) => familyMutationTiming.errors.push(String(error)));
+      }
+    };
+    page.on('console', (message) => {
+      if (message.type() === 'error') consoleErrors.push(message.text());
+    });
     page.on('pageerror', (error) => errors.push(error.message));
+    const familySDK =
+      family === 'brutalist'
+        ? installDocsCallTimingObserver(page, {
+            sdkRoot: path.dirname(
+              createRequire(import.meta.url).resolve('playwright-core/package.json')
+            ),
+            selector: '[data-homepage-runtime]',
+            attribute: 'data-family',
+          })
+        : null;
     let stage = 'navigate';
     const save = async (name: string, facts: unknown) => {
       const id = `${family}-${name}`;
@@ -1030,24 +1498,81 @@ for (const family of ['shadcn', 'brutalist'] as const) {
     };
     try {
       await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
+      stage = 'initial-ready';
       await ready(page, 'wc');
       if (family === 'brutalist') {
+        if (familyQueryMode !== 'node-only') {
+          // Bracket a page-clock sample before input; keep the original click/poll interval intact.
+          const nodeStartedMs = performance.now();
+          try {
+            familyMutationHandle = await page.evaluateHandle(observeFamilyMutation);
+          } catch (error) {
+            familyMutationTiming.errors.push(String(error));
+          } finally {
+            familyMutationTiming.setup = { nodeStartedMs, nodeReturnedMs: performance.now() };
+          }
+        }
+        stage = 'family-open';
         await revealHeaderPreferences(page);
         const control = page.locator(
           '#home-preferences [data-projection-control="family"] [role="combobox"]'
         );
         await control.click();
         const id = await control.getAttribute('aria-controls');
+        if (familyQueryMode === 'hybrid')
+          utilityObservation = await prepareUtilityFamilyReadObservation(page);
+        stage = 'family-choice';
         await page
           .locator(`[id=${JSON.stringify(id)}]`)
           .getByRole('option', { name: 'Brutalist', exact: true })
           .click();
+        stage = 'family-commit';
+        familyCommitTiming.startedMs = performance.now();
+        familyCommitTiming.outcome = 'pending';
         await expect
-          .poll(() => page.locator('[data-homepage-runtime]').getAttribute('data-family'))
+          .poll(() => {
+            const call: (typeof familyCommitCalls)[number] = {
+              call: ++familyCommitTiming.totalCalls,
+              startedMs: performance.now(),
+            };
+            if (familyCommitCalls.length < 64) familyCommitCalls.push(call);
+            else familyCommitTiming.droppedCalls += 1;
+            const request: Promise<string | null> = familySDK!.runOriginalQuery(call.call, () =>
+              page.locator('[data-homepage-runtime]').getAttribute('data-family')
+            );
+            try {
+              familyQueryRequests.push({ request, call });
+              if (familyQueryObservation.wait.finishedMs !== null)
+                familyQueryObservation.issuedAfterDrain++;
+            } catch {
+              familyQueryObservation.ledgerError = true;
+            }
+            void request
+              .then(
+                (value) => {
+                  call.returnedMs = performance.now();
+                  call.value = value;
+                },
+                (error) => {
+                  call.returnedMs = performance.now();
+                  call.error = String(error);
+                }
+              )
+              .catch(() => {
+                familyCommitTiming.observerError = true;
+              });
+            return request;
+          })
           .toBe(family);
+        familyCommitTiming.finishedMs = performance.now();
+        familyCommitTiming.outcome = 'fulfilled';
+        await finishFamilyQueryObservation();
+        await collectFamilyMutation();
+        stage = 'family-ready';
         await ready(page, 'wc');
       }
       for (const runtime of RUNTIMES) {
+        stage = `${runtime}-setup`;
         await page.setViewportSize({ width: 390, height: 844 });
         await switchRuntime(page, runtime);
         const header = page.locator('[data-homepage-runtime]');
@@ -1227,14 +1752,148 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         []
       );
     } catch (error) {
-      await save('failure', { stage, message: String(error), records, ringFailures, errors });
+      if (stage === 'family-commit') {
+        familyCommitTiming.finishedMs = performance.now();
+        familyCommitTiming.outcome = 'rejected';
+        familyCommitTiming.rejectionSnapshot = familyCommitCalls.map((call) => ({ ...call }));
+      }
+      await finishFamilyQueryObservation();
+      await collectFamilyMutation();
+      const failureState = await page
+        .evaluate(() => {
+          const header = document.querySelector<HTMLElement>('[data-homepage-runtime]');
+          const demo = document.querySelector<HTMLElement>('[data-home-showcase]');
+          const trigger = header?.querySelector<HTMLElement>(
+            '[data-projection-control="family"] [role="combobox"]'
+          );
+          const portalId = trigger?.getAttribute('aria-controls');
+          const portal = portalId ? document.getElementById(portalId) : null;
+          const sample = (element: HTMLElement | null | undefined) =>
+            element
+              ? {
+                  tag: element.tagName,
+                  id: element.id,
+                  connected: element.isConnected,
+                  dataset: { ...element.dataset },
+                  busy: element.getAttribute('aria-busy'),
+                  hidden: !!element.closest('[hidden], [inert]'),
+                }
+              : null;
+          return {
+            header: sample(header),
+            showcase: sample(demo),
+            status: header?.querySelector('[data-homepage-runtime-status]')?.textContent,
+            transaction: (
+              header as HTMLElement & { __homepageRuntime__?: { getSnapshot(): unknown } }
+            )?.__homepageRuntime__?.getSnapshot(),
+            generations: Array.from(
+              header?.querySelectorAll<HTMLElement>('[data-projection-generation-state]') ?? []
+            ).map(sample),
+            familyTrigger: sample(trigger),
+            familyValue: trigger?.textContent,
+            portal: sample(portal),
+          };
+        })
+        .catch((captureError) => ({ captureError: String(captureError) }));
+      await save('failure', {
+        stage,
+        message: String(error),
+        familyCommitTiming,
+        familyMutationTiming,
+        records,
+        ringFailures,
+        errors,
+        consoleErrors,
+        failureState,
+      });
       throw error;
     } finally {
+      if (family === 'brutalist') await finishFamilyQueryObservation();
       await writeFile(
         path.join(evidenceDirectory, `${family}-lifecycle.json`),
-        JSON.stringify({ source, family, records, ringFailures, errors }, null, 2)
+        JSON.stringify(
+          {
+            source,
+            family,
+            records,
+            ringFailures,
+            errors,
+            consoleErrors,
+            familyCommitTiming,
+            familyMutationTiming,
+          },
+          null,
+          2
+        )
       );
-      await context.close();
+      if (family === 'brutalist') {
+        console.info(
+          '[family-commit-poll-timing]',
+          JSON.stringify({ source, familyCommitTiming, familyMutationTiming })
+        );
+      }
+      let contextCloseSucceeded = false;
+      try {
+        await context.close();
+        contextCloseSucceeded = true;
+      } finally {
+        try {
+          familySDK?.disposeAfterContextClosed(contextCloseSucceeded);
+          if (familySDK)
+            await settleFamilyQueryBatch(
+              [
+                writeFile(
+                  path.join(evidenceDirectory, `${family}-sdk-timing.json`),
+                  JSON.stringify({ source, family, observation: familySDK.snapshot() }, null, 2)
+                ),
+              ],
+              2000
+            );
+        } catch (error) {
+          noteQueryError(error);
+        }
+        if (utilityObservation && familyQueryObservation.cleanupDeferredUntilContextClose) {
+          try {
+            familyQueryObservation.utility =
+              await utilityObservation.disposeIncompleteCapture(contextCloseSucceeded);
+          } catch (error) {
+            noteQueryError(error);
+          }
+        }
+        if (family === 'brutalist') {
+          try {
+            const report = {
+              source,
+              family,
+              ...familyQueryObservation,
+              referenceCountAtReport: familyQueryRequests.length,
+              pendingObservedAtReport: familyQueryRequests.filter(
+                ({ call }) => call.returnedMs === undefined
+              ).length,
+              droppedNodeRows: familyCommitTiming.droppedCalls,
+              captureCoversAllRecordedQueries:
+                !familyQueryObservation.ledgerError &&
+                familyQueryObservation.issuedAfterDrain === 0 &&
+                familyQueryObservation.wait.completeAtDrainPoint &&
+                familyQueryObservation.wait.droppedOutcomeRows === 0 &&
+                familyQueryObservation.droppedPendingRows === 0 &&
+                familyCommitTiming.droppedCalls === 0,
+            };
+            console.info('[family-query-observation]', JSON.stringify(report));
+            await writeFile(
+              path.join(evidenceDirectory, `${family}-query-observation.json`),
+              JSON.stringify(report, null, 2)
+            );
+          } catch (error) {
+            noteQueryError(error);
+            try {
+              console.info('[family-query-capture-error]', String(error));
+            } catch {
+              /* Retain original outcome. */
+            }
+          }
+        }
+      }
     }
   }, 180_000);
 }

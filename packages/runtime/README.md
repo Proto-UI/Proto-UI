@@ -10,6 +10,10 @@ Implements the runtime execution flow that adapters can host under the Proto UI 
 
 Runtime package that coordinates setup, rendering, lifecycle, module orchestration, and host execution boundaries.
 
+## Captured setup feedback
+
+An authored asHook captures setup style contributions made through both `def.feedback.style.use(...)` and `def.feedback.style.to(target).use(...)`. Its `disposers.feedback` and `disposers.all` can withdraw those contributions during setup without removing independent Root or target contributions. The returned disposers remain setup-only; capturing a targeted contribution does not change its target identity or grant a later runtime write.
+
 ## Install
 
 ```bash

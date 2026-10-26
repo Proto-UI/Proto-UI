@@ -14,6 +14,11 @@ import {
   selectItemText,
 } from '../../../prototypes/shadcn/src/select';
 
+// Native-fixture marker, not a new public prototype prop. Preserve the existing data-attribute route.
+const demoRef = (value: string): React.Attributes & { 'data-demo-ref': string } => ({
+  'data-demo-ref': value,
+});
+
 (
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true;
@@ -93,22 +98,18 @@ export async function mountAlignmentProof(
       itemProps,
       options.omitPart === 'item-text' && i === selected
         ? `Option ${i}`
-        : React.createElement(Text, { 'data-demo-ref': `text-${i}` }, `Option ${i}`)
+        : React.createElement(Text, demoRef(`text-${i}`), `Option ${i}`)
     );
   });
   const rows = React.createElement(
     Viewport,
-    { className: 'proof-viewport', 'data-demo-ref': 'viewport' },
+    { className: 'proof-viewport', ...demoRef('viewport') },
     ...items
   );
   const painted =
     options.omitPart === 'surface'
       ? rows
-      : React.createElement(
-          Surface,
-          { className: 'proof-surface', 'data-demo-ref': 'surface' },
-          rows
-        );
+      : React.createElement(Surface, { className: 'proof-surface', ...demoRef('surface') }, rows);
   const triggerProps: React.ComponentProps<typeof Trigger> & { 'data-demo-ref': string } = {
     className: 'proof-trigger',
     'data-demo-ref': 'trigger',

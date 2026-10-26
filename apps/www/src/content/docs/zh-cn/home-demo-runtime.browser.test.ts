@@ -55,7 +55,12 @@ async function portalControlledBy(page: Page, trigger: Locator): Promise<Locator
   const controlledId = await trigger.getAttribute('aria-controls');
   expect(controlledId, 'projection Select aria-controls').toBeTruthy();
   const portal = page.locator(`[id=${JSON.stringify(controlledId)}]`);
+  const deadline = performance.now() + 10_000;
   await portal.waitFor({ state: 'visible', timeout: 10_000 });
+  // Content can be measurable while its positioned Surface is still hidden.
+  const remaining = deadline - performance.now();
+  if (remaining <= 0) throw new Error('Projection Select options did not become visible in time.');
+  await portal.getByRole('option').first().waitFor({ state: 'visible', timeout: remaining });
   return portal;
 }
 
@@ -512,7 +517,8 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
         if (sample.ref === 'settings-save' || sample.ref === 'settings-reset') {
           const tokens = sample.style.split(/\s+/);
           expect(tokens).toContain('transition-all');
-          expect(tokens.some((token) => ['h-8', 'size-8'].includes(token))).toBe(true);
+          expect(tokens).toContain('min-h-8');
+          expect(tokens).toContain('h-auto');
         }
       }
 

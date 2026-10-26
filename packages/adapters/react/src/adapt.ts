@@ -1,3 +1,9 @@
+import {
+  collectWebOwnedDecorationTargets,
+  createWebOwnedDecorationStage,
+  type WebOwnedDecorationStage,
+} from '@proto.ui/adapter-base';
+import type { FeedbackFacade, FeedbackPort } from '@proto.ui/module-feedback';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -8,7 +14,9 @@ import { createDeferredViewVisualSink, type VisualFeedbackSink } from '@proto.ui
 import { withoutInstanceAssociations } from '@proto.ui/adapter-base/internal/instance-associations';
 import type { InstanceAssociations } from '@proto.ui/core';
 import {
+  equalOwnedTemplateBlueprint,
   getModuleDeclaration,
+  type TemplateChildren,
   type Prototype,
   type ScrollProjectionPreference,
 } from '@proto.ui/core';
@@ -230,6 +238,26 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       );
     }
     const rootTag = declaredRootTag ?? opt.rootTag ?? 'div';
+    const ownedDecoration =
+      !declaredRootTag &&
+      ![
+        'input',
+        'img',
+        'textarea',
+        'select',
+        'a',
+        'br',
+        'hr',
+        'area',
+        'base',
+        'embed',
+        'link',
+        'meta',
+        'param',
+        'source',
+        'track',
+        'wbr',
+      ].includes(rootTag);
     const hasCustomOverlayLayerConfig =
       !!opt.overlayLayer &&
       (typeof opt.overlayLayer.baseZIndex !== 'undefined' ||
@@ -247,6 +275,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
     const Component = runtime.forwardRef((props: ReactAdapterProps<Props>, ref: any) => {
       const rootRef = runtime.useRef<HTMLElement | null>(null);
+      // React's native textarea reconciliation writes an absent defaultValue
+      // back as an empty string. Mirror the Text Control host patch so React
+      // keeps its DOM wrapper state aligned with the host-owned editor.
+      const [textControlDefaultValue, setTextControlDefaultValue] = runtime.useState<
+        string | undefined
+      >(undefined);
       const portalOriginRef = runtime.useRef<HTMLElement | null>(null);
       // React owns the children, while this Adapter owns one stable portal
       // mount. Relocating the mount keeps createPortal's container identity and
@@ -360,6 +394,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const [renderCommit, setRenderCommit] = runtime.useState<{
         children: any;
         version: number;
+        decoration?: WebOwnedDecorationStage;
       }>({ children: null, version: 0 });
       const hostTokenRevisionRef = runtime.useRef(0);
       const [hostStyle, setHostStyle] = runtime.useState<{ tokens: string[]; revision: number }>({
@@ -436,12 +471,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
       const deliveredRawPropsRef = runtime.useRef<Record<string, unknown> | null>(null);
 
       const viewGenerationRef = runtime.useRef(0);
+      const decorationViewRef = runtime.useRef<{
+        stage: WebOwnedDecorationStage;
+        blueprint: TemplateChildren;
+        generation: number;
+        root: HTMLElement | null;
+        document: Document | null;
+        session: ReturnType<typeof createReactHostSession<Props>> | null;
+        port: FeedbackPort;
+        lease: object;
+        committed: boolean;
+      } | null>(null);
       const pendingCommitRef = runtime.useRef<{
         signal: CommitSignal | null;
         version: number;
         viewGeneration: number;
         root: HTMLElement | null;
         styleRevision: number;
+        decoration?: WebOwnedDecorationStage;
+        decorationLease?: object;
       } | null>(null);
       const commitVersionRef = runtime.useRef(0);
       const pendingRevealStyleRevisionRef = runtime.useRef<number | null>(null);
@@ -477,15 +525,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         };
       }
 
-      runtime.useImperativeHandle(
-        ref,
-        () => ({
+      // One public handle per adapter instance. React re-runs the imperative
+      // handle effect whenever the consumer's ref identity changes, so the
+      // factory must hand back the same object every time: consumers reserve
+      // real instance identity, not a per-render wrapper. The handle keeps
+      // reading the live controller, exposes and callback-scope refs.
+      const handleRef = runtime.useRef<{
+        update: () => void;
+        getExposes: () => Record<string, unknown>;
+        invokeInCallbackScope: (fn: () => void) => void;
+      } | null>(null);
+      if (!handleRef.current) {
+        handleRef.current = {
           update: () => controllerRef.current?.update(),
           getExposes: () => scopedExposesReaderRef.current.read(exposesRef.current ?? {}),
           invokeInCallbackScope: (fn: () => void) => invokeInCallbackScopeRef.current?.(fn),
-        }),
-        []
-      );
+        };
+      }
+
+      runtime.useImperativeHandle(ref, () => handleRef.current!, []);
 
       runtime.useEffect(() => {
         controllerRef.current?.applyInstanceAssociations(
@@ -522,15 +580,90 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           onLifecycleCheckpoint: opt.diagnostics?.onLifecycleCheckpoint,
           onLifecycleEvent: opt.diagnostics?.onLifecycleEvent,
           onCommit: (children, signal) => {
+            const root = rootRef.current;
+            const generation = viewGenerationRef.current;
+            const previousVersion = commitVersionRef.current;
+            const session = ownerRef.current?.session ?? null;
+            const caps = session?.caps;
+            const targets = collectWebOwnedDecorationTargets(children);
+            const feedback = caps?.getFacades().feedback as FeedbackFacade | undefined;
+            const port = caps?.getPort<FeedbackPort>('feedback');
+            const lease = targets.length ? port?.captureDecorationLease?.() : undefined;
+            const previous = decorationViewRef.current;
+            let next = previous?.committed ? previous : null;
+            let decoration: WebOwnedDecorationStage | undefined;
+            if (next) {
+              feedback?.style.validateDecorationTemplate(targets);
+              if (!equalOwnedTemplateBlueprint(next.blueprint, children))
+                throw new Error('[owned-decoration] structural rebind unsupported');
+              if (
+                !root ||
+                next.root !== root ||
+                next.document !== root.ownerDocument ||
+                next.generation !== generation ||
+                next.session !== session ||
+                next.port !== port ||
+                next.lease !== lease ||
+                !ownerRef.current?.hasView
+              )
+                throw new Error('[React Adapter] stale decoration reuse');
+              next.stage.assertReusable(root);
+              decoration = next.stage;
+            } else {
+              decoration = targets.length
+                ? createWebOwnedDecorationStage(
+                    targets,
+                    (ids) => {
+                      if (!feedback)
+                        throw new Error('[React Adapter] owned-decoration unavailable');
+                      feedback.style.validateDecorationTemplate(ids);
+                    },
+                    { portal: !!caps?.getPort<OverlayPort>('overlay')?.getConfig().portal }
+                  )
+                : undefined;
+              if (!targets.length) feedback?.style.validateDecorationTemplate([]);
+              if (decoration) {
+                if (!port || !lease)
+                  throw new Error('[React Adapter] owned-decoration unavailable');
+                next = {
+                  stage: decoration,
+                  blueprint: children,
+                  generation,
+                  root,
+                  document: root?.ownerDocument ?? null,
+                  session,
+                  port,
+                  lease,
+                  committed: false,
+                };
+              }
+            }
+            // Validate before publication. Cache only the blueprint and physical
+            // stage: fresh VNodes must still project this render's caller children.
+            renderTemplateToReact({ createElement: () => null }, children, { decoration });
+            if (
+              decoration &&
+              (rootRef.current !== root ||
+                viewGenerationRef.current !== generation ||
+                commitVersionRef.current !== previousVersion ||
+                decorationViewRef.current !== previous ||
+                ownerRef.current?.session !== session ||
+                port?.captureDecorationLease?.() !== lease)
+            )
+              throw new Error('[React Adapter] stale decoration commit');
+            if (previous !== next) previous?.stage.retire();
+            decorationViewRef.current = next;
             const version = ++commitVersionRef.current;
             pendingCommitRef.current = {
               signal,
               version,
-              viewGeneration: viewGenerationRef.current,
-              root: rootRef.current,
+              viewGeneration: generation,
+              root,
               styleRevision: hostTokenRevisionRef.current,
+              decoration,
+              decorationLease: lease,
             };
-            setRenderCommit({ children, version });
+            setRenderCommit({ children, version, decoration });
           },
           onAfterUnmount: () => {
             scopedExposesReaderRef.current.invalidate();
@@ -548,6 +681,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         let hostSession = ownerRef.current?.session;
         if (!hostSession) {
           const ownerModules = createReactOwnerModules({
+            ownedDecoration,
             instanceToken: instanceTokenRef.current,
             emit: (key, payload) => {
               eventCallbacksRef.current[key]?.(payload);
@@ -658,6 +792,10 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         const disposeView = () => {
           if (viewDisposed) return;
           viewDisposed = true;
+          if (decorationViewRef.current?.generation === viewGeneration) {
+            decorationViewRef.current.stage.retire();
+            decorationViewRef.current = null;
+          }
           if (viewGenerationRef.current === viewGeneration) {
             viewGenerationRef.current += 1;
             pendingCommitRef.current = null;
@@ -725,6 +863,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         const rawPropsSource = rawPropsSourceRef.current as RawPropsSource<Props>;
         const modules = createReactModules({
+          ownedDecoration,
           getPortalOrigin: () => portalOriginRef.current,
           el: rootEl,
           instanceToken: instanceTokenRef.current,
@@ -751,6 +890,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           viewportSource,
           exposeStateWebMode,
           scrollProjection,
+          setTextControlDefaultValue,
           setExposes: (record) => {
             exposesRef.current = record;
           },
@@ -924,6 +1064,44 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           ) {
             return;
           }
+          if (pending.decoration) {
+            const decoration = decorationViewRef.current;
+            const session = ownerRef.current?.session;
+            const port = session?.caps.getPort<FeedbackPort>('feedback');
+            if (
+              !decoration ||
+              decoration.stage !== pending.decoration ||
+              decoration.root !== pending.root ||
+              decoration.document !== pending.root.ownerDocument ||
+              decoration.generation !== pending.viewGeneration ||
+              decoration.session !== session ||
+              decoration.port !== port ||
+              decoration.lease !== pending.decorationLease ||
+              !ownerRef.current?.hasView ||
+              !port?.bindDecorations ||
+              port.captureDecorationLease?.() !== decoration.lease
+            )
+              throw new Error('[React Adapter] stale decoration commit');
+            if (decoration.committed) decoration.stage.assertReusable(pending.root);
+            else
+              decoration.stage.bind(pending.root, (bindings) =>
+                port.bindDecorations!(bindings, decoration.lease)
+              );
+            if (
+              viewGenerationRef.current !== pending.viewGeneration ||
+              rootRef.current !== pending.root ||
+              pending.root.ownerDocument !== decoration.document ||
+              pendingCommitRef.current !== pending ||
+              decorationViewRef.current !== decoration ||
+              ownerRef.current?.session !== session ||
+              !ownerRef.current?.hasView ||
+              port.captureDecorationLease?.() !== decoration.lease
+            )
+              return;
+            // done() may synchronously update again. Publish physical readiness
+            // first, and never overwrite a newer cache after that callback.
+            decoration.committed = true;
+          }
           pendingCommitRef.current = null;
           const wasReady = viewReadyRef.current;
           projectionReadyRef.current = true;
@@ -1004,6 +1182,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
       const rendered = renderTemplateToReact(runtime, renderCommit.children, {
         slot: props.children,
+        decoration: renderCommit.decoration,
       });
       // Template roots are a static child list. Passing that list as one array
       // makes React treat it as a dynamic collection and warn that anatomy
@@ -1039,6 +1218,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
               rootTag,
               {
                 ref: rootRef as { current: HTMLElement | null },
+                ...(textControlRootTag ? { defaultValue: textControlDefaultValue } : {}),
                 className: mergeHostClassName([
                   props.surfaceClassName,
                   props.hostClassName,

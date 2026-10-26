@@ -1,0 +1,40 @@
+id: P-BRUTALIST-CONTEXT-MENU
+type: prototype
+title: Brutalist contextMenu
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  zh-CN: 'Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。'
+  en: 'Draft implementation direction. Stable admission requires independent review and browser/native evidence.'
+summary: Brutalist contextMenu protocol with shared Proto UI lifecycle and anatomy boundaries.
+statement:
+  zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
+  en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
+criteria:
+  - id: P-BRUTALIST-CONTEXT-MENU-ADMISSION
+    text:
+      zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
+      en: Draft admission requires exact-head browser/native evidence and independent review.
+dependsOn:
+  contracts:
+    - C-PROPS-0001
+    - C-LIFECYCLE-0008
+verifies:
+  tests: []
+sources:
+  - path: packages/prototypes/brutalist/src/context-menu/
+openQuestions:
+  - id: P-BRUTALIST-CONTEXT-MENU-Q-ADMISSION
+    question:
+      zh-CN: 何时完成精确 head 的浏览器/native 证据并准入此 draft？
+      en: When have exact-head browser/native evidence admitted this draft?
+    blocks:
+      - activation:P-BRUTALIST-CONTEXT-MENU
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Cataloged the Brutalist contextMenu family as draft.
+tags:
+  - prototype
+  - brutalist
+  - context-menu

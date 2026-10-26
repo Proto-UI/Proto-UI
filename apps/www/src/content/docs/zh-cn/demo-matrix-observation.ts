@@ -136,3 +136,206 @@ export function collectMatrixReadinessDiagnostics(runtimeCount: number) {
     truncated: uninitialized.length > 1000 || notReady.length > 1000 || errors.length > 1000,
   };
 }
+
+/** Keep the original S4 startup predicate; retain its first short-circuit miss. */
+export function observeS4Startup(): boolean {
+  const previews = [...document.querySelectorAll('[data-previewer-id]')];
+  const failure: {
+    first?: {
+      previewer: Element;
+      host: Element | null;
+      index: number;
+      inited: string | null;
+      children: number | null;
+    };
+  } = {};
+  const ready =
+    previews.length > 0 &&
+    previews.every((previewer, index) => {
+      const inited = previewer.getAttribute('data-inited');
+      // Preserve the original short circuit: an uninitialized previewer does
+      // not query its host merely to produce diagnostics.
+      const host = inited === '1' ? previewer.querySelector('.host') : null;
+      const children = inited === '1' ? (host?.childElementCount ?? 0) : null;
+      const result = inited === '1' && children !== null && children > 0;
+      if (!result) failure.first = { previewer, host, index, inited, children };
+      return result;
+    });
+  try {
+    const row = {
+      timeOrigin: globalThis.performance.timeOrigin,
+      pageMs: globalThis.performance.now(),
+      dateNow: Date.now(),
+      count: previews.length,
+      ready,
+      firstMissing: failure.first
+        ? {
+            previewerId: failure.first.previewer.getAttribute('data-previewer-id'),
+            index: failure.first.index,
+            inited: failure.first.inited,
+            hostChildren: failure.first.children,
+          }
+        : null,
+      firstMissingOwner: failure.first
+        ? {
+            demoId: failure.first.previewer.getAttribute('data-demo-id'),
+            prototypeId: failure.first.previewer.getAttribute('data-prototype-id'),
+            declaredRuntime: failure.first.previewer.getAttribute('data-initial-runtime'),
+            projectionMode: failure.first.previewer.getAttribute('data-projection-mode'),
+            projectionState: failure.first.previewer.getAttribute('data-projection-state'),
+            mounting: failure.first.previewer.getAttribute('data-mounting'),
+            hostTag: failure.first.host?.tagName ?? null,
+            hostOwner:
+              failure.first.host
+                ?.closest('[data-previewer-id]')
+                ?.getAttribute('data-previewer-id') ?? null,
+            startupPending:
+              failure.first.host?.hasAttribute('data-previewer-startup-pending') ?? null,
+            hostOwnInert: failure.first.host?.hasAttribute('inert') ?? null,
+            hostText: failure.first.host?.textContent?.slice(0, 512) ?? null,
+          }
+        : null,
+    };
+    const key = JSON.stringify([row.count, row.ready, row.firstMissing, row.firstMissingOwner]);
+    const target = window as any;
+    const journal = (target.__puiS4Startup ??= {
+      samples: 0,
+      changes: [],
+      dropped: 0,
+      lastKey: '',
+      last: null,
+    });
+    journal.samples++;
+    journal.last = row;
+    if (key !== journal.lastKey) {
+      journal.lastKey = key;
+      if (journal.changes.length < 32) {
+        journal.changes.push(row);
+        // Stream only the same bounded changes; the original last sample remains.
+        console.info('[S4 startup change]', JSON.stringify(row));
+      } else journal.dropped++;
+    }
+  } catch {
+    // Diagnostics cannot change the original readiness result.
+  }
+  return ready;
+}
+
+/** Passive pre-navigation observation only; no whole-matrix scan or layout read. */
+export function installS4InitJournal(): void {
+  if (window.top !== window) return;
+  const state = {
+    deliveryCount: 0,
+    observedRecords: 0,
+    examinedRecords: 0,
+    skippedBatchRecords: 0,
+    ignoredTargets: 0,
+    emitted: 0,
+    droppedEmits: 0,
+    observerErrors: 0,
+    stoppedAtCap: false,
+    last: null as Record<string, unknown> | null,
+  };
+  let observer: MutationObserver | null = null;
+  const emit = (stage: string, facts: Record<string, unknown> = {}) => {
+    try {
+      if (state.emitted >= 128) {
+        state.droppedEmits++;
+        return;
+      }
+      state.emitted++;
+      const row = {
+        stage,
+        ordinal: state.emitted,
+        timeOrigin: globalThis.performance.timeOrigin,
+        pageMs: globalThis.performance.now(),
+        dateNow: Date.now(),
+        readyState: document.readyState,
+        ...facts,
+      };
+      state.last = row;
+      if (state.emitted === 128) {
+        state.stoppedAtCap = true;
+        observer?.disconnect();
+      }
+      console.info('[S4 init observation]', JSON.stringify(row));
+    } catch {
+      state.observerErrors++;
+    }
+  };
+  try {
+    Object.defineProperty(window, '__puiS4InitJournal', {
+      configurable: true,
+      value: state,
+    });
+    observer = new MutationObserver((records) => {
+      state.deliveryCount++;
+      state.observedRecords += records.length;
+      const count = Math.min(records.length, 8);
+      state.skippedBatchRecords += records.length - count;
+      for (let index = 0; index < count; index++) {
+        try {
+          state.examinedRecords++;
+          const record = records[index]!;
+          const target = record.target;
+          if (!(target instanceof Element)) continue;
+          const previewer = target.hasAttribute('data-previewer-id');
+          const host = target.classList.contains('host');
+          if (!previewer && !host) {
+            state.ignoredTargets++;
+            continue;
+          }
+          // A host's direct parent is the preview wrapper, not its owning root.
+          const root = target.closest('[data-previewer-id]');
+          emit('mutation-delivery', {
+            rootId: root?.getAttribute('data-previewer-id') ?? null,
+            rootInited: root?.getAttribute('data-inited') ?? null,
+            rootProjectionState: root?.getAttribute('data-projection-state') ?? null,
+            delivery: state.deliveryCount,
+            batchIndex: index,
+            batchSize: records.length,
+            type: record.type,
+            attribute: record.attributeName,
+            targetTag: target.tagName,
+            targetClass: target.getAttribute('class'),
+            parentClass: target.parentElement?.getAttribute('class') ?? null,
+            previewerId: target.getAttribute('data-previewer-id'),
+            parentPreviewerId: target.parentElement?.getAttribute('data-previewer-id') ?? null,
+            demoId: target.getAttribute('data-demo-id'),
+            inited: target.getAttribute('data-inited'),
+            mounting: target.getAttribute('data-mounting'),
+            lazy: target.getAttribute('data-lazy'),
+            lazyObserved: target.getAttribute('data-lazy-observed'),
+            projectionState: target.getAttribute('data-projection-state'),
+            hostChildren: host ? target.childElementCount : null,
+          });
+        } catch {
+          state.observerErrors++;
+        }
+        if (state.stoppedAtCap) break;
+      }
+    });
+    observer.observe(document, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: [
+        'data-inited',
+        'data-mounting',
+        'data-lazy-observed',
+        'data-projection-state',
+      ],
+    });
+    document.addEventListener('DOMContentLoaded', () => emit('domcontentloaded'), { once: true });
+    window.addEventListener('load', () => emit('load'), { once: true });
+    emit('installed');
+  } catch {
+    state.observerErrors++;
+    try {
+      observer?.disconnect();
+    } catch {
+      state.observerErrors++;
+    }
+    emit('setup-unavailable');
+  }
+}

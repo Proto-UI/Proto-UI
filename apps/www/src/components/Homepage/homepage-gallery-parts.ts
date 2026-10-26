@@ -1,3 +1,4 @@
+import { createHomepageCompositionParts } from './homepage-composition-parts';
 import { homepageTextProps, setHomepageText } from './homepage-text';
 import type { DemoChild, DemoNode, DemoSetupContext } from '../PrototypePreviewer/demo-types';
 import {
@@ -16,7 +17,7 @@ export function createHomepageGalleryParts(
 ) {
   const zh = locale === 'zh-cn';
   const PREVIEW_SURFACE_ID = surfacePrototypeId(family);
-  const ids = new Set<string>([PREVIEW_SURFACE_ID]);
+  const ids = new Set<string>();
   const authoredProps = new Map<string, Record<string, unknown>>();
   const box = (
     className: string,
@@ -121,30 +122,42 @@ export function createHomepageGalleryParts(
   const sample = zh
     ? '用同一份原型，组合你的界面。'
     : 'Compose your interface from the same prototypes.';
-  const card = (title: string, caption: string, children: DemoChild[], id: string): DemoNode =>
-    box(
-      'home-gallery__item',
-      [
-        p(
-          PREVIEW_SURFACE_ID,
-          [
-            box('home-gallery__card-body', [
-              box('home-gallery__card-heading', [
-                box('home-gallery__title', [title], undefined, {
-                  role: 'heading',
-                  'aria-level': '2',
-                }),
-                box('home-gallery__caption', [caption]),
+  const card = (title: string, caption: string, children: DemoChild[], id: string): DemoNode => {
+    const titleNode: DemoNode = {
+      kind: 'box',
+      className: 'home-gallery__title',
+      attrs: { role: 'heading', 'aria-level': '2' },
+      children: [title],
+    };
+    const captionNode = box('home-gallery__caption', [caption]);
+    const surface =
+      family === 'shadcn'
+        ? p(
+            'shadcn-card-root',
+            [
+              p('shadcn-card-header', [titleNode, captionNode]),
+              p('shadcn-card-content', [box('home-gallery__stack', children)]),
+            ],
+            { styleProfile: 'rhea' }
+          )
+        : p(
+            PREVIEW_SURFACE_ID,
+            [
+              box('home-gallery__card-body', [
+                box('home-gallery__card-heading', [
+                  box('home-gallery__title', [title], undefined, {
+                    role: 'heading',
+                    'aria-level': '2',
+                  }),
+                  captionNode,
+                ]),
+                ...children,
               ]),
-              ...children,
-            ]),
-          ],
-          { ...panelSurfaceProps(family === 'brutalist' && id === 'editor' ? 'canvas' : 'card') }
-        ),
-      ],
-      undefined,
-      { 'data-gallery-demo': id }
-    );
+            ],
+            { ...panelSurfaceProps(id === 'editor' ? 'canvas' : 'card') }
+          );
+    return box('home-gallery__item', [surface], undefined, { 'data-gallery-demo': id });
+  };
   const controls = card(
     zh ? '按钮与选择' : 'Buttons & selection',
     'Button · Toggle · Checkbox · Switch',
@@ -328,14 +341,22 @@ export function createHomepageGalleryParts(
     ],
     'choices'
   );
+  const composition = createHomepageCompositionParts(family, locale, {
+    p,
+    box,
+    card,
+    button,
+    status,
+  });
   return {
     ids,
     card,
     columns(form: DemoNode): DemoNode[] {
       return [
         box('home-gallery__column', [controls, hover]),
+        box('home-gallery__column', [composition.command, composition.help]),
         box('home-gallery__column', [form]),
-        box('home-gallery__column', [editor]),
+        box('home-gallery__column', [composition.progress, editor]),
         box('home-gallery__column', [overlays, choices]),
       ];
     },
@@ -404,6 +425,7 @@ export function createHomepageGalleryParts(
       const feedback = (ref: string, value: string) => {
         setHomepageText(context.refs[ref]!, value);
       };
+      composition.setup({ bind, write, feedback });
       for (const [ref, label] of [
         ['gallery-primary', zh ? '主要按钮' : 'Primary button'],
         ['gallery-secondary', zh ? '次要按钮' : 'Secondary button'],

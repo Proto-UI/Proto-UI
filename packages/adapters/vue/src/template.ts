@@ -1,3 +1,7 @@
+import {
+  collectWebOwnedDecorationTargets,
+  type WebOwnedDecorationStage,
+} from '@proto.ui/adapter-base';
 // packages/adapters/vue/src/template.ts
 import {
   mergeTwTokensV0,
@@ -19,6 +23,7 @@ export type VueRuntime = {
 
 export type RenderTemplateOptions = {
   slot?: any;
+  decoration?: WebOwnedDecorationStage;
 };
 
 function isTemplateNode(x: any): x is TemplateNode {
@@ -84,6 +89,17 @@ function renderChild(
   }
 
   const t = child.type;
+  if (t && typeof t === 'object' && t.kind === 'decoration') {
+    if (!opt.decoration) throw new Error('[Template] owned-decoration unsupported');
+    const ref = opt.decoration.ref(t.target);
+    return runtime.h('span', {
+      ref,
+      'data-pui-owned-decoration': '',
+      'aria-hidden': 'true',
+      inert: '',
+      style: { pointerEvents: 'none' },
+    });
+  }
 
   if (isReservedType(t) && t.kind === 'slot') {
     if ((child as any).children != null) {
@@ -131,6 +147,7 @@ export function renderTemplateToVue(
   children: TemplateChildren,
   opt: RenderTemplateOptions = {}
 ): any {
+  collectWebOwnedDecorationTargets(children);
   const arr = toArray(children);
   const ctx = { slotUsed: false };
   const out = arr.map((c) => renderChild(runtime, c, opt, ctx));

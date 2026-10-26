@@ -48,15 +48,9 @@
         "live-authorization-rejected"
       ]
     },
-    "note": { "type": "string", "minLength": 1, "maxLength": 2000 },
-    "modelTrace": { "$ref": "modeltrace-receipt.schema.json" }
+    "note": { "type": "string", "minLength": 1, "maxLength": 2000 }
   },
   "allOf": [
-    {
-      "if": { "properties": { "schemaVersion": { "const": 2 } } },
-      "then": { "required": ["modelTrace"] },
-      "else": { "not": { "required": ["modelTrace"] } }
-    },
     {
       "if": { "properties": { "action": { "const": "resolve-fixed-review-thread" } } },
       "then": { "properties": { "target": { "$ref": "#/$defs/threadTarget" } } }

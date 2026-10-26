@@ -1,7 +1,10 @@
+import { runInNewContext } from 'node:vm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   collectMatrixInteractiveFacts,
   matrixHostsReady,
+  observeS4Startup,
+  installS4InitJournal,
   collectMatrixReadinessDiagnostics,
 } from './demo-matrix-observation';
 
@@ -188,5 +191,187 @@ describe('Demo Matrix read-only failure diagnostics', () => {
     )!.dataset.projectionGenerationState = 'active';
     expect(collectMatrixReadinessDiagnostics(4).notReadyCount).toBe(0);
     expect(matrixHostsReady()).toBe(true);
+  });
+});
+
+// The S4 journal observes the existing weaker child-count gate; it does not
+// silently promote that gate to matrixHostsReady's committed projection rule.
+describe('S4 original startup predicate observation', () => {
+  beforeEach(() => {
+    delete (window as any).__puiS4Startup;
+  });
+
+  it('retains the empty-page failure and initialized skeleton acceptance', () => {
+    expect(observeS4Startup()).toBe(false);
+    const { root } = cell();
+    expect(observeS4Startup()).toBe(true);
+    expect(matrixHostsReady()).toBe(false);
+    expect((window as any).__puiS4Startup.last).toMatchObject({ ready: true, count: 1 });
+    root.remove();
+  });
+
+  it('records the original first miss without querying its uninitialized host', () => {
+    const { root } = cell();
+    root.removeAttribute('data-inited');
+    const query = vi.spyOn(root, 'querySelector');
+    expect(observeS4Startup()).toBe(false);
+    expect(query).not.toHaveBeenCalled();
+    expect((window as any).__puiS4Startup.last.firstMissing).toEqual({
+      previewerId: 'fixture',
+      index: 0,
+      inited: null,
+      hostChildren: null,
+    });
+  });
+
+  it('retains the empty-host failure and bounds changes while keeping the last sample', () => {
+    const { root, host } = cell();
+    host.replaceChildren();
+    for (let index = 0; index < 40; index++) {
+      root.dataset.previewerId = `fixture-${index}`;
+      expect(observeS4Startup()).toBe(false);
+    }
+    const journal = (window as any).__puiS4Startup;
+    expect(journal.changes).toHaveLength(32);
+    expect(journal.dropped).toBe(8);
+    expect(journal.last.firstMissing).toMatchObject({ previewerId: 'fixture-39', hostChildren: 0 });
+  });
+
+  it('keeps the original Boolean even when the observation slot cannot be read', () => {
+    cell();
+    Object.defineProperty(window, '__puiS4Startup', {
+      configurable: true,
+      get() {
+        throw new Error('observer unavailable');
+      },
+    });
+    expect(observeS4Startup()).toBe(true);
+    delete (window as any).__puiS4Startup;
+  });
+});
+
+function initJournalControl() {
+  const rows: Array<Record<string, any>> = [];
+  let deliver: (records: unknown[]) => void = () => {};
+  let disconnected = 0;
+  const attributes: Record<string, string> = { 'data-previewer-id': 'fixture', 'data-inited': '1' };
+  const root = { getAttribute: (name: string) => attributes[name] ?? null };
+  class Target {
+    tagName = 'DIV';
+    childElementCount = 3;
+    parentElement = {
+      getAttribute: (name: string) => (name === 'class' ? 'preview-wrapper' : null),
+    };
+    classList = { contains: (name: string) => name === 'host' };
+    hasAttribute() {
+      return false;
+    }
+    getAttribute(name: string) {
+      return name === 'class' ? 'host' : null;
+    }
+    closest() {
+      return root;
+    }
+  }
+  const observedWindow: any = { addEventListener() {} };
+  observedWindow.top = observedWindow;
+  const observedDocument = {
+    readyState: 'loading',
+    addEventListener() {},
+    querySelectorAll() {
+      throw new Error('Whole-matrix query is not part of this observer');
+    },
+  };
+  runInNewContext(`(${Function.prototype.toString.call(installS4InitJournal)})()`, {
+    window: observedWindow,
+    document: observedDocument,
+    Element: Target,
+    performance: { timeOrigin: 10, now: () => 12 },
+    MutationObserver: class {
+      constructor(callback: typeof deliver) {
+        deliver = callback;
+      }
+      observe() {}
+      disconnect() {
+        disconnected++;
+      }
+    },
+    console: { info: (_marker: string, text: string) => rows.push(JSON.parse(text)) },
+  });
+  return {
+    rows,
+    state: observedWindow.__puiS4InitJournal,
+    deliver: (count: number) =>
+      deliver(
+        Array.from({ length: count }, () => ({
+          target: new Target(),
+          type: 'childList',
+          attributeName: null,
+        }))
+      ),
+    disconnected: () => disconnected,
+  };
+}
+
+describe('S4 init observation retention', () => {
+  it('serializes without imports and binds a host through its actual previewer ancestor', () => {
+    const control = initJournalControl();
+    control.deliver(1);
+    expect(control.rows[1]).toMatchObject({
+      stage: 'mutation-delivery',
+      hostChildren: 3,
+      parentPreviewerId: null,
+      rootId: 'fixture',
+      rootInited: '1',
+    });
+    expect(control.state.observerErrors).toBe(0);
+  });
+
+  it('bounds each delivered batch and stops at the total emit cap', () => {
+    const control = initJournalControl();
+    control.deliver(20);
+    expect(control.state.examinedRecords).toBe(8);
+    expect(control.state.skippedBatchRecords).toBe(12);
+    for (let index = 0; index < 16; index++) control.deliver(8);
+    expect(control.rows).toHaveLength(128);
+    expect(control.state.stoppedAtCap).toBe(true);
+    expect(control.disconnected()).toBeGreaterThan(0);
+  });
+});
+
+describe('S4 missing-host ownership observation', () => {
+  it('retains the failure while identifying the declared owner and adjacent pending state', () => {
+    delete (window as any).__puiS4Startup;
+    const { root, host } = cell('loading');
+    root.dataset.demoId = 'demo-base-accordion';
+    root.dataset.initialRuntime = 'wc';
+    host.replaceChildren();
+    host.setAttribute('data-previewer-startup-pending', '');
+    host.setAttribute('inert', '');
+    expect(observeS4Startup()).toBe(false);
+    const journal = (window as any).__puiS4Startup;
+    expect(journal.last.firstMissing).toEqual({
+      previewerId: 'fixture',
+      index: 0,
+      inited: '1',
+      hostChildren: 0,
+    });
+    expect(journal.last.firstMissingOwner).toEqual({
+      demoId: 'demo-base-accordion',
+      prototypeId: null,
+      declaredRuntime: 'wc',
+      projectionMode: 'fixed-family',
+      projectionState: 'loading',
+      mounting: null,
+      hostTag: 'DIV',
+      hostOwner: 'fixture',
+      startupPending: true,
+      hostOwnInert: true,
+      hostText: '',
+    });
+    root.dataset.projectionState = 'error';
+    expect(observeS4Startup()).toBe(false);
+    expect(journal.changes).toHaveLength(2);
+    expect(journal.last.firstMissingOwner.projectionState).toBe('error');
   });
 });

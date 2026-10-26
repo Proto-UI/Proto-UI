@@ -1,0 +1,118 @@
+id: T-SHADCN-INPUT-SHELL-0001
+type: test
+title: Bounded input shell composition and public catalog evidence
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Maps existing shell tests and native collector plus the new catalog regression without treating source inspection or historical PR 971 results as a fresh run. Criterion-level mapping, missing derived-editor coverage and independent review remain pending.
+summary: Separates binder lifecycle, real-consumer presentation, native measurements and catalog ownership from full inherited-editor conformance.
+cases:
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-BINDING
+    title: Public facts and explicit view lifetime
+    covers: [P-SHADCN-INPUT-SHELL-BINDING-FACTS, P-SHADCN-INPUT-SHELL-BINDING-LIFETIME]
+    expectation: Missing/malformed facts and duplicate real identities fail; replacement, disposal and owner retirement detach subscriptions, and stale or reentrant callbacks never publish retired facts. Caller fact merging must retain authored presentation inputs.
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS
+    title: Command and ordinary Input retain one actual editor through style changes
+    covers: [P-SHADCN-INPUT-SHELL-STYLE-SELECTION, P-SHADCN-INPUT-SHELL-OUTER-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    expectation: Both consumers use the same passive shell and binder; borderless editor identity and selected value/selection/focus persist across style scope changes. Ordinary editor remains distinct from Command. Existing tests cover only part of the profile matrix; direct shell/control negative-profile and alias/withdrawal coverage must be reviewed separately.
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE
+    title: Exact-source four-Web-runtime native shell observations
+    covers: [P-SHADCN-INPUT-SHELL-OUTER-PAINT, P-SHADCN-INPUT-SHELL-FOCUS-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-PAINT, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    expectation: Source receipts bind real WC/React/Vue/Vue2 measurements and images to the tested head; fixed theme geometry and keyboard ring distinction, selected continuity/readOnly/disabled flows and 320/1180 text200 bounds remain strict. Failures retain artifacts. Text resizing is not browser UI zoom, and the collector is not full Base Input or non-Web conformance.
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-CATALOG
+    title: Actual public export has real draft owners without a policy exemption
+    covers: [P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY, P-SHADCN-INPUT-SHELL-CONTROL-BOUNDARY]
+    expectation: The real manifest entry resolves to the bounded draft Root identity, its separate Control owns the correct source and inherits Base Input, and both retain reciprocal P/T mappings. Removing the Root restores the exact missing-family diagnostic; unrelated missing exports still fail. At a release that includes this family, missing overview and sidebar still fail.
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-BOUNDARIES
+    title: Complete passive and direct profile-boundary coverage
+    covers: [P-SHADCN-INPUT-SHELL-PASSIVE, P-SHADCN-INPUT-SHELL-PUBLIC-BOUNDARY, P-SHADCN-INPUT-SHELL-STYLE-SELECTION, P-SHADCN-INPUT-SHELL-CONTROL-STYLE-CONTINUITY]
+    expectation: Explicit direct-entry tests establish no shell role/tabindex/interaction ownership, caller-owned single-control and fact-merge boundaries, and direct Root/Control unsupported-profile rejection, alias and withdrawal. Existing Command-only negative tests do not automatically cover both entries.
+  - id: T-SHADCN-INPUT-SHELL-0001-CASE-INHERITED
+    title: Complete Base Input guarantees through this derived entry
+    covers: [P-SHADCN-INPUT-SHELL-CONTROL-BASE-OWNERSHIP, P-SHADCN-INPUT-SHELL-CONTROL-BOUNDARY]
+    expectation: Exercise controlled/uncontrolled ownership, normalization, composition/IME, native-prop updates, naming/description and disabled-aware physical focus through inputShellControl itself. A reusable Base suite must be adapted explicitly; a relation or successful shell geometry run is insufficient evidence.
+implementations:
+  - id: binding-lifecycle
+    kind: module-test
+    status: needs-review
+    path: packages/prototypes/shadcn/test/input-shell-binding.test.ts
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-BINDING]
+    exercises: [P-SHADCN-INPUT-SHELL]
+    notes: [Existing lifecycle regression source inspected; not executed for this catalog candidate. Caller merging remains a separate composition obligation.]
+  - id: wc-style-projection
+    kind: adapter-test
+    status: needs-review
+    path: packages/prototypes/shadcn/test/command-style-projection.test.ts
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS]
+    exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+    notes: [Existing unsupported-profile and alias/withdrawal cases address Command; no complete direct shell/control profile matrix is inferred.]
+  - id: four-runtime-app
+    kind: adapter-test
+    status: needs-review
+    path: packages/prototypes/shadcn/test/command-evidence-app.test.ts
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS]
+    exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+    notes: [Synthetic DOM readiness and interaction coverage is not native layout evidence.]
+  - id: native-collector
+    kind: runtime-test
+    status: needs-review
+    path: scripts/prototypes/shadcn-command-evidence.mjs
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE]
+    exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+    notes:
+      - Historical ab5a119381b6d474e4a9e1d5962a989e822521ee results are reported in PR 971 comment 6359524429; they are not fresh candidate acceptance or a full inherited-editor suite.
+      - The 5c58de0a39ed3d91ae4dde00a447dc94064ed818 New York radius-oracle failure is retained historical evidence, not recast as a production fix.
+  - id: native-oracle-contract
+    kind: module-test
+    status: needs-review
+    path: packages/prototypes/shadcn/test/command-evidence-contract.test.ts
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-NATIVE]
+    exercises: [P-SHADCN-INPUT-SHELL]
+    notes: [Source-expression and generated-theme regression supports the collector oracle only; it does not itself execute native measurements.]
+  - id: catalog-regression
+    kind: workspace-check
+    status: planned
+    path: scripts/docs/test/input-shell-catalog.test.mjs
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-CATALOG]
+    exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+    notes:
+      - New focused metadata regression is unexecuted; it does not replace schema/graph validation or review public API semantics.
+      - The test:public-docs glob includes this file, but CI runs check:public-docs first under fail-fast. Unrelated catalog drift prevents reaching this test while that gate fails; collection is not execution. No checker, workflow or step order is changed to bypass the failure.
+  - id: direct-boundary-conformance
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-BOUNDARIES]
+    exercises: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+  - id: derived-input-conformance
+    kind: adapter-test
+    status: missing
+    required: true
+    consumesCases: [T-SHADCN-INPUT-SHELL-0001-CASE-INHERITED]
+    exercises: [P-SHADCN-INPUT-SHELL-CONTROL]
+verifies:
+  prototypes: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+exercises:
+  prototypes: [P-SHADCN-INPUT-SHELL, P-SHADCN-INPUT-SHELL-CONTROL]
+openQuestions:
+  - id: T-SHADCN-INPUT-SHELL-0001-Q-COVERAGE
+    question:
+      en: Have complete direct boundary and inherited editor cases been implemented and all mappings independently reviewed against candidate-bound results?
+    blocks:
+      - activation:T-SHADCN-INPUT-SHELL-0001
+      - implementation:T-SHADCN-INPUT-SHELL-0001#direct-boundary-conformance
+      - implementation:T-SHADCN-INPUT-SHELL-0001#derived-input-conformance
+sources:
+  - path: internal/contracts/command/shadcn-input-shell.presentation.v0.md
+  - path: .github/workflows/shadcn-command-style.yml
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Mapped bounded existing evidence separately from missing direct-boundary and inherited-editor conformance; no fresh passing or stable claim.
+tags: [test, shadcn, input-shell, lifecycle, catalog]

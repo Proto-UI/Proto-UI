@@ -1,5 +1,7 @@
 import type {
   StyleHandle,
+  OwnedDecorationTarget,
+  DecorationStyleFrame,
   ResidentMotionDeclaration,
   ModuleInstance,
   MaterialSlot,
@@ -22,6 +24,12 @@ export interface FeedbackFacade extends ModuleFacade {
     use(candidate: MaterialCandidate): () => void;
   };
   style: {
+    declareDecoration(): OwnedDecorationTarget;
+    to(target: OwnedDecorationTarget): { use(...handles: StyleHandle[]): () => void };
+    /** Internal guarded-template bridge, not exposed on def/run. */
+    hasDecorationTargets(): boolean;
+    captureDecorationLease(): object;
+    validateDecorationTemplate(targets: readonly OwnedDecorationTarget[]): void;
     presence: (declaration: import('@proto.ui/core').PresencePresentationDeclaration) => () => void;
     /** setup-only; presentation never owns State or presence */
     transition: (declaration: ResidentMotionDeclaration) => () => void;
@@ -43,11 +51,19 @@ export interface FeedbackFacade extends ModuleFacade {
 }
 
 export type FeedbackPort = {
+  supportsOwnedDecoration?: true;
+  captureDecorationLease?: () => object;
+  bindDecorations?: (
+    bindings: readonly import('./style/owned-decoration-cap').OwnedDecorationBinding[],
+    lease: object
+  ) => void;
+
   /** Replaces a Rule's style and material together before one visual flush. */
   replaceVisualRuntime?: (
     previous: FeedbackRuntimeStyleDisposer | null,
     handles: readonly StyleHandle[],
-    candidates: readonly MaterialCandidate[]
+    candidates: readonly MaterialCandidate[],
+    decorations?: readonly DecorationStyleFrame[]
   ) => FeedbackRuntimeStyleDisposer | null;
   exportMaterialFrame?: () => MaterialIntentFrame;
   materialDiagnostics?: () => readonly string[];

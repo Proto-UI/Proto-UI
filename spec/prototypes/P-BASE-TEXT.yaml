@@ -11,7 +11,7 @@ statement:
 criteria:
   - id: P-BASE-TEXT-INPUTS
     text:
-      en: Public inputs are size xs|sm|base|lg|xl|2xl|3xl|4xl|5xl; tone default|muted|inherit; weight normal|medium|semibold|bold; font body|heading|mono; leading tight|snug|normal|relaxed; tracking normal|tight; emphasis normal|italic; decoration none|underline|line-through. Defaults are respectively base, default, normal, body, normal, normal, normal and none. Removing a prop restores its default.
+      en: Public inputs are size xs|sm|base|lg|xl|2xl|3xl|4xl|5xl; tone default|muted|inherit; weight normal|medium|semibold|bold; font body|heading|mono; leading size|tighter|tight|snug|normal|relaxed; tracking normal|tight|tighter; emphasis normal|italic; decoration none|underline|line-through. Defaults are respectively base, default, normal, body, normal, normal, normal and none. Removing a prop restores its default. The size leading option preserves the selected family size line box without an additional leading override; tighter requests the compact 1.1 line-height projection. Missing size normalizes to base. An initially invalid size falls back to base; provided empty or invalid size after a valid value preserves that previous value under the existing Props contract. No numeric or expression input is accepted.
   - id: P-BASE-TEXT-CONTENT
     text:
       en: The default slot preserves authored text and children without replacing the native h1-h6, p, label, a or editor owner. One Text instance has one canonical presentation subject. No content transformation or formatting parser is provided.
@@ -37,6 +37,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added governed passive Text subject and reusable presentation vocabulary without new native semantics.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Extended the finite visual vocabulary with size-owned leading and tighter leading/tracking; existing defaults and passive ownership remain unchanged.
 tags:
   - prototype
   - base

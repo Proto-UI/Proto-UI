@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import fs from 'node:fs';
-import { mkdtempSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
 
 import { runCollaborationCli } from '../collaboration-packet.mjs';
-import { fileURLToPath } from 'node:url';
 import {
   authorizeCollaborationMutation,
   collaborationMarker,
@@ -18,8 +16,6 @@ import {
   applyGitHubCollaborationMutation,
   CollaborationMutationUnknown,
 } from '../collect-live-collaboration-state.mjs';
-import { writeModelTraceFixture } from './fixtures/modeltrace.mjs';
-import { buildModelTraceRecord, computeModelTraceChallengeDigest } from '../modeltrace.mjs';
 
 // These fixtures represent independently established launch context. Never
 // construct launcher arguments by reading the task-authored handoff below.
@@ -44,7 +40,6 @@ function fixture(
 ) {
   const directory = mkdtempSync(join(tmpdir(), 'collaboration-invocation-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  const identity = writeModelTraceFixture(directory);
   const expected = {
     title: 'Old title',
     body: 'Offline fixture',
@@ -63,7 +58,7 @@ function fixture(
     target: { kind: 'pull-request', number: 509, updatedAt: UPDATED_AT, headSha: HEAD },
     expected,
     desired: { ...expected, title: 'New title' },
-    evidence: [...evidence, identity.artifact],
+    evidence: [...evidence],
     rationale: 'Apply the explicitly requested bounded title correction.',
     humanGates: [],
   };
@@ -77,7 +72,6 @@ function fixture(
     fromId: 'pui-pr',
     nextSkillId: 'pui-collaborate',
     artifacts: [
-      identity.artifact,
       { type: 'pull-request-report', reference: 'fixture://report' },
       { type: 'review-input', reference: 'fixture://review' },
       { type: 'capability-envelope', reference: 'fixture://capability' },
@@ -97,9 +91,7 @@ function fixture(
     kind: 'proto-ui.live-collaboration-state',
     repositoryId: request.repositoryId,
     action: request.action,
-    // Live collection happens after the fixture measurement, matching the
-    // supported measuredAt <= verifiedAt receipt chronology boundary.
-    observedAt: new Date(Date.parse(identity.modelTrace.measuredAt) + 1000).toISOString(),
+    observedAt: '2026-10-02T01:02:00.000Z',
     viewerLogin: 'fixture-maintainer',
     viewerPermission: 'WRITE',
     current: {
@@ -120,22 +112,12 @@ function fixture(
   writeFileSync(requestPath, JSON.stringify(request));
   writeFileSync(handoffPath, JSON.stringify(handoff));
   return {
-    ...identity,
     request,
     requestPath,
     handoff,
     handoffPath,
     live,
-    args: [
-      '--request',
-      requestPath,
-      '--handoff',
-      handoffPath,
-      '--record',
-      identity.recordPath,
-      '--context',
-      identity.contextPath,
-    ],
+    args: ['--request', requestPath, '--handoff', handoffPath],
   };
 }
 
@@ -282,8 +264,6 @@ for (const command of ['validate', 'apply']) {
         request: f.request,
         liveState: f.live,
         ...HUMAN_LAUNCH,
-        modelTrace: f.modelTrace,
-        modelTraceContext: f.modelTraceContext,
       });
       assert.equal(decision.allowed, false);
       assert.match(decision.reason, /requires current-user-instruction purpose evidence/);
@@ -291,222 +271,21 @@ for (const command of ['validate', 'apply']) {
   }
 }
 
-for (const scenario of [
-  'missing record',
-  'missing context',
-  'unbound request',
-  'wrong handoff record',
-  'changed route',
-  'expired measurement',
-]) {
-  test(`apply cannot reach external dependencies with ${scenario}`, (t) => {
-    const f = fixture(t);
-    let args = [...f.args];
-    if (scenario === 'missing record' || scenario === 'missing context') {
-      const option = scenario === 'missing record' ? '--record' : '--context';
-      const index = args.indexOf(option);
-      args.splice(index, 2);
-    } else if (scenario === 'unbound request') {
-      f.request.evidence = f.request.evidence.filter((item) => item.type !== 'modeltrace-record');
-      f.request.requestDigest = computeCollaborationRequestDigest(f.request);
-      f.handoff.artifacts.find((item) => item.type === 'collaboration-request').digest =
-        `sha256:${f.request.requestDigest}`;
-      writeFileSync(f.requestPath, JSON.stringify(f.request));
-      writeFileSync(f.handoffPath, JSON.stringify(f.handoff));
-    } else if (scenario === 'wrong handoff record') {
-      f.handoff.artifacts.find((item) => item.type === 'modeltrace-record').digest =
-        `sha256:${'f'.repeat(64)}`;
-      writeFileSync(f.handoffPath, JSON.stringify(f.handoff));
-    } else if (scenario === 'changed route') {
-      writeFileSync(
-        f.contextPath,
-        JSON.stringify({ ...f.modelTraceContext, routeDigest: 'c'.repeat(64) })
-      );
-    } else {
-      // Keep the failed probes synthetic and valid, but issue them in the past.
-      const challenge = {
-        ...f.record.challenge,
-        issuedAt: '2020-01-01T00:00:00.000Z',
-        expiresAt: '2020-01-01T00:10:00.000Z',
-      };
-      const response = {
-        ...f.record.response,
-        challengeDigest: computeModelTraceChallengeDigest(challenge),
-        startedAt: challenge.issuedAt,
-        completedAt: challenge.issuedAt,
-      };
-      writeFileSync(f.recordPath, JSON.stringify(buildModelTraceRecord(challenge, response)));
-    }
-    const { calls, dependencies } = untouchedDependencies();
-    assert.throws(
-      () =>
-        runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...args], {
-          ...dependencies,
-          loadPolicy: () => ({}),
-        }),
-      /record|context|route changed|measurement expired/
-    );
-    assert.deepEqual(calls, []);
-  });
-}
-
-for (const scenario of [
-  'in-checkout record',
-  'in-checkout context',
-  'in-checkout alias',
-  'raw record reused as handoff',
-  'raw context reused as owner key',
-]) {
-  test(`apply rejects ${scenario} before raw JSON reading or external dependencies`, (t) => {
-    const f = fixture(t);
-    const root = fileURLToPath(new URL('../../..', import.meta.url));
-    const insideDir = mkdtempSync(join(root, '.modeltrace-inside-fixture-'));
-    t.after(() => rmSync(insideDir, { recursive: true, force: true }));
-    const insideRecord = join(insideDir, 'record.json');
-    const insideContext = join(insideDir, 'context.json');
-    writeFileSync(insideRecord, JSON.stringify(f.record));
-    writeFileSync(insideContext, JSON.stringify(f.modelTraceContext));
-    let args = [...f.args];
-    if (scenario === 'in-checkout record') {
-      const idx = args.indexOf('--record');
-      args[idx + 1] = insideRecord;
-    } else if (scenario === 'in-checkout context') {
-      const idx = args.indexOf('--context');
-      args[idx + 1] = insideContext;
-    } else if (scenario === 'raw record reused as handoff') {
-      args[args.indexOf('--record') + 1] = insideRecord;
-      args[args.indexOf('--handoff') + 1] = insideRecord;
-    } else if (scenario === 'raw context reused as owner key') {
-      args[args.indexOf('--context') + 1] = insideContext;
-      args.push(
-        '--owner-authorization',
-        f.recordPath,
-        '--owner-key',
-        insideContext,
-        '--owner-grant',
-        'synthetic-invocation-control'
-      );
-    } else {
-      // A directory alias outside checkout still reaches stageable raw inputs.
-      const aliasDir = mkdtempSync(join(tmpdir(), 'collab-alias-'));
-      t.after(() => rmSync(aliasDir, { recursive: true, force: true }));
-      const aliasRoot = join(aliasDir, 'checkout-inputs');
-      symlinkSync(insideDir, aliasRoot, 'dir');
-      const aliasRecord = join(aliasRoot, 'record.json');
-      const aliasContext = join(aliasRoot, 'context.json');
-      const recIdx = args.indexOf('--record');
-      args[recIdx + 1] = aliasRecord;
-      const ctxIdx = args.indexOf('--context');
-      args[ctxIdx + 1] = aliasContext;
-    }
-    const rawPaths = new Set([
-      f.recordPath,
-      f.contextPath,
-      insideRecord,
-      insideContext,
-      args[args.indexOf('--record') + 1],
-      args[args.indexOf('--context') + 1],
-    ]);
-    const opened = [];
-    const openSync = fs.openSync;
-    const readFileSync = fs.readFileSync;
-    fs.openSync = (file, ...options) => {
-      if (rawPaths.has(String(file))) opened.push(String(file));
-      return openSync(file, ...options);
-    };
-    fs.readFileSync = (file, ...options) => {
-      if (rawPaths.has(String(file))) opened.push(String(file));
-      return readFileSync(file, ...options);
-    };
-    t.after(() => {
-      fs.openSync = openSync;
-      fs.readFileSync = readFileSync;
-    });
-    const { calls, dependencies } = untouchedDependencies();
-    let failure;
-    try {
-      runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...args], {
-        ...dependencies,
-        loadPolicy: () => ({}),
-      });
-    } catch (error) {
-      failure = error;
-    }
-    assert.deepEqual(calls, []);
-    assert.deepEqual(opened, []);
-    assert.match(failure?.message ?? '', /outside the checkout/);
-  });
-}
-
-test('apply accepts outside-checkout ModelTrace record/context as control', (t) => {
+test('collaboration commands reject removed record and context options', (t) => {
   const f = fixture(t);
-  // Default fixture paths live in tmpdir (outside checkout); the apply path
-  // must proceed past the containment check to reach live collection.
-  let liveReads = 0;
-  const liveBoundary = new Error('controlled live collection boundary');
-  assert.throws(
-    () =>
-      runCollaborationCli(['apply', ...launchArgs(HUMAN_LAUNCH), ...f.args], {
-        loadPolicy: () => ({}),
-        collectState() {
-          liveReads += 1;
-          throw liveBoundary;
-        },
-      }),
-    (error) => error === liveBoundary
-  );
-  assert.equal(liveReads, 1);
-});
-
-for (const scenario of [
-  'missing --record and --context flags',
-  'unavailable referenced measurement files',
-  'expired record',
-]) {
-  test(`validate succeeds with ${scenario} without reading ModelTrace files`, (t) => {
-    const f = fixture(t);
-    let args = [...f.args];
-    if (scenario === 'missing --record and --context flags') {
-      for (const option of ['--record', '--context']) {
-        const index = args.indexOf(option);
-        args.splice(index, 2);
-      }
-    } else if (scenario === 'unavailable referenced measurement files') {
-      // Point to non-existent paths while keeping the flags present.
-      const recordIndex = args.indexOf('--record');
-      args[recordIndex + 1] = '/nonexistent/modeltrace-record.json';
-      const contextIndex = args.indexOf('--context');
-      args[contextIndex + 1] = '/nonexistent/modeltrace-context.json';
-    } else {
-      // Expired record: issue probes in the past.
-      const challenge = {
-        ...f.record.challenge,
-        issuedAt: '2020-01-01T00:00:00.000Z',
-        expiresAt: '2020-01-01T00:10:00.000Z',
-      };
-      const response = {
-        ...f.record.response,
-        challengeDigest: computeModelTraceChallengeDigest(challenge),
-        startedAt: challenge.issuedAt,
-        completedAt: challenge.issuedAt,
-      };
-      writeFileSync(f.recordPath, JSON.stringify(buildModelTraceRecord(challenge, response)));
+  for (const command of ['validate', 'apply']) {
+    for (const option of ['--record', '--context']) {
+      assert.throws(
+        () =>
+          runCollaborationCli(
+            [command, ...launchArgs(HUMAN_LAUNCH), ...f.args, option, '/private/unused.json'],
+            { loadPolicy: () => ({}) }
+          ),
+        /unexpected option/
+      );
     }
-    const { calls, dependencies } = untouchedDependencies();
-    const result = runCollaborationCli(['validate', ...launchArgs(HUMAN_LAUNCH), ...args], {
-      ...dependencies,
-      loadPolicy: () => ({}),
-    });
-    assert.equal(result.valid, true);
-    assert.equal(result.requestDigest, f.request.requestDigest);
-    assert.equal(result.action, f.request.action);
-    assert.equal(result.executionMode, 'human-assisted');
-    assert.equal(result.executionModeSource, 'current-user');
-    assert.ok(result.eligibility);
-    // No external dependency was called.
-    assert.deepEqual(calls, []);
-  });
-}
+  }
+});
 
 for (const source of ['current-user', 'active-human-loop']) {
   test(`explicit human invocation validates and retains ${source} through final writer admission`, (t) => {
@@ -551,6 +330,7 @@ for (const source of ['current-user', 'active-human-loop']) {
       },
     });
     validateCollaborationReceipt(result, f.request);
+    assert.equal(result.schemaVersion, 2);
     assert.equal(result.outcome, 'applied');
     assert.equal(result.mutationCount, 1);
     assert.equal(reads, 3);
@@ -563,7 +343,7 @@ function commentFixture(t) {
   const f = fixture(t);
   f.request.action = 'post-bounded-reconciliation-comment';
   f.request.expected = { markerAbsent: true };
-  f.request.desired = { body: `The exact requested reconciliation.\n\n${f.disclosure}` };
+  f.request.desired = { body: 'The exact requested reconciliation.' };
   f.request.requestDigest = computeCollaborationRequestDigest(f.request);
   f.handoff.artifacts.find((item) => item.type === 'collaboration-request').digest =
     `sha256:${f.request.requestDigest}`;

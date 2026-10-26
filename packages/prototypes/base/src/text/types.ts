@@ -4,8 +4,9 @@ export interface TextRootProps {
   tone?: 'default' | 'muted' | 'inherit';
   weight?: 'normal' | 'medium' | 'semibold' | 'bold';
   font?: 'body' | 'heading' | 'mono';
-  leading?: 'tight' | 'snug' | 'normal' | 'relaxed';
-  tracking?: 'normal' | 'tight';
+  /** `size` preserves the selected size's line box; other values explicitly override it. */
+  leading?: 'size' | 'tighter' | 'tight' | 'snug' | 'normal' | 'relaxed';
+  tracking?: 'normal' | 'tight' | 'tighter';
   emphasis?: 'normal' | 'italic';
   decoration?: 'none' | 'underline' | 'line-through';
 }

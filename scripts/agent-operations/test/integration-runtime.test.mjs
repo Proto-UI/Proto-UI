@@ -13,7 +13,6 @@ import {
   validateReviewInputSnapshot,
 } from '../review-runtime.mjs';
 import { agentEvidence } from './fixtures/agent-evidence.mjs';
-import { modelTraceFixture } from './fixtures/modeltrace.mjs';
 import {
   fixturePublishedPacket,
   publishReview,
@@ -52,7 +51,6 @@ const packet = reviewPacket;
 function scheduledMerge(overrides = {}) {
   const input = overrides.input ?? reviewInput();
   return authorizePullRequestMerge({
-    ...modelTraceFixture(input.repositoryId),
     packet: overrides.packet ?? packet(input),
     publishedPacket: fixturePublishedPacket(input),
     input,
@@ -712,8 +710,8 @@ for (const [name, transform, allowed] of [
     const packetToken = reviewPacketMarker(fixturePublishedPacket(input));
     const originalReceipt = `<!-- ${packetToken} ${evidenceToken} -->`;
     assert.ok(input.reviews[0].body.includes(originalReceipt));
-    // Exercise receipt syntax within the real rendered disclosure. A receipt
-    // without that disclosure is no longer a valid publication positive.
+    // Exercise receipt syntax within the real rendered review body. A receipt
+    // without that body is no longer a valid publication positive.
     input.reviews[0].body = input.reviews[0].body.replace(
       originalReceipt,
       transform(evidenceToken, packetToken)

@@ -11,7 +11,7 @@ export default definePrototype<CommandInputProps, CommandInputExposes>({
     const behavior = asCommandInput();
     def.feedback.style.use(
       tw(
-        'rounded-none border-2 border-foreground min-w-0 grow bg-background px-3 py-2 text-base text-foreground outline-none'
+        'rounded-none border-2 border-foreground min-w-0 w-full grow bg-background px-3 py-2 text-base text-foreground outline-none'
       )
     );
     def.rule({

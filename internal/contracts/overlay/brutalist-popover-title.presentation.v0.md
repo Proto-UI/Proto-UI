@@ -63,4 +63,4 @@ For this consumer follow-up, the browser oracle requires Title and Content headi
 
 The shared public-DOM timeline probe only observes existing typography journeys, including the 320px/root-200% transition and final real Close click. It retains the original assertions and timeouts; no coordinate, focus, scroll or production behavior is repaired by the probe. The prior React/Vue off-viewport Close failures and independent interaction debts remain open until new evidence resolves them.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot

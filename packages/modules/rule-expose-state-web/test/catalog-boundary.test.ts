@@ -179,3 +179,16 @@ it('T-RULE-EXPOSE-STATE-WEB-0001-CASE-REPRESENTATION: does not replace strict eq
   expect([...f.contributions]).toEqual([]);
   f.module.hooks?.dispose?.();
 });
+
+it.each([{}, undefined, null])(
+  'does not lower addressed or malformed target ops into host selectors (%s)',
+  (target) => {
+    const f = fixture();
+    Object.assign(f.rules[0].intent.ops[0], { target });
+    f.phase('mounted', 1);
+    f.apply();
+    expect(f.remaining()).toEqual([1]);
+    expect([...f.contributions]).toEqual([]);
+    f.module.hooks?.dispose?.();
+  }
+);

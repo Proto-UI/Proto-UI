@@ -194,6 +194,24 @@ export const createDefHandle = <P extends PropsBaseType, E = Record<string, unkn
         },
       },
       style: {
+        declareDecoration: () => {
+          ensureSetup('def.feedback.style.declareDecoration');
+          return feedback.style.declareDecoration();
+        },
+        to: (target) => {
+          ensureSetup('def.feedback.style.to');
+          return {
+            use: (...handles) => {
+              ensureSetup('def.feedback.style.to.use');
+              const off = feedback.style.to(target).use(...handles);
+              recordCaptured(def, 'feedback', off);
+              return () => {
+                ensureSetup('def.feedback.style.to.use:dispose');
+                off();
+              };
+            },
+          };
+        },
         presence(declaration) {
           ensureSetup('def.feedback.style.presence');
           const off = feedback.style.presence(declaration);

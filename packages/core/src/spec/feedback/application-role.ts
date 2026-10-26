@@ -212,6 +212,7 @@ function resolution(
  * semantic decision supplies enough evidence to classify them.
  */
 export function classifyTwTokenApplicationRoleV0(token: string): TwTokenApplicationRoleResolution {
+  if (token === 'scroll-my-1' || token === 'scroll-my-1.5') return resolution(token, 'placement', 'canonical');
   if (isPlaceholderColorTokenV0(token)) return resolution(token, 'surface', 'canonical');
   // I1 exact admission precedes negative normalization; no visibility family widening.
   if (token === 'hidden') return resolution(token, 'root-participation', 'canonical');

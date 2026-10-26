@@ -1,12 +1,15 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSelectContent, SELECT_CONTEXT } from '@proto.ui/prototypes-base/select';
 import { SELECT_VISUAL } from './visual';
+import { setupSelectStyle } from './style';
+import { SHADCN_STYLE_SCOPE } from '../style-scope';
 import type { ShadcnSelectContentExposes, ShadcnSelectContentProps } from './types';
 
 const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectContentExposes>({
   name: 'shadcn-select-content',
   setup(def) {
     const select = asSelectContent();
+    const style = setupSelectStyle(def);
     // Override Base neutral policy only after its defaults are registered.
     def.props.setDefaults({
       position: 'item-aligned',
@@ -44,10 +47,8 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.lifecycle.onBeforeDispose(() => {
       disposed = true;
     });
-    open.watch((run, event) => {
-      if (event.type !== 'next' || event.next) return;
-      select.asTransition.controls.leave();
-      if (disposed) return;
+    def.context.subscribe(SELECT_CONTEXT, (run, next) => {
+      if (next.open || disposed) return;
       // Read the latest Root fact after a synchronous beforeLeave callback.
       if (!run.context.read(SELECT_CONTEXT).open && transitionState.get() === 'leaving')
         select.asTransition.controls.complete();
@@ -64,7 +65,7 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     // The legacy zero-new-parts composition retains its old paint temporarily.
     // P-SHADCN-SELECT-CONTENT-CURRENT-VISUAL-SURFACE
     def.rule({
-      when: (w) => w.state(alignmentFull).eq(false),
+      when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(alignmentFull).eq(false)),
       intent: (i) =>
         i.feedback.style.use(
           tw(
@@ -76,18 +77,25 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.rule({
       when: (w) =>
         w.all(
+          w.state(style).eq('new-york-v4'),
           w.state(alignmentFull).eq(false),
           w.any(w.state(transitionState).eq('entering'), w.state(transitionState).eq('entered'))
         ),
       intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
     });
     def.rule({
-      when: (w) => w.all(w.state(alignmentFull).eq(false), w.state(open).eq(false)),
+      when: (w) =>
+        w.all(
+          w.state(style).eq('new-york-v4'),
+          w.state(alignmentFull).eq(false),
+          w.state(open).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
     });
     def.rule({
       when: (w) =>
         w.all(
+          w.state(style).eq('new-york-v4'),
           w.state(alignmentFull).eq(false),
           w.state(open).eq(true),
           w.prop('position').eq('popper'),
@@ -98,6 +106,7 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.rule({
       when: (w) =>
         w.all(
+          w.state(style).eq('new-york-v4'),
           w.state(alignmentFull).eq(false),
           w.state(open).eq(true),
           w.prop('position').eq('popper'),
@@ -108,6 +117,7 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.rule({
       when: (w) =>
         w.all(
+          w.state(style).eq('new-york-v4'),
           w.state(alignmentFull).eq(false),
           w.state(open).eq(true),
           w.prop('position').eq('popper'),
@@ -118,6 +128,7 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
     def.rule({
       when: (w) =>
         w.all(
+          w.state(style).eq('new-york-v4'),
           w.state(alignmentFull).eq(false),
           w.state(open).eq(true),
           w.prop('position').eq('popper'),
@@ -125,9 +136,27 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
         ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-left-2')),
     });
+    // Rhea's translucent paint belongs to the existing public Surface owner.
+    // Content performs alignment updates and cannot own a fixed decoration lease.
+    let compositionCommitted = false;
+    const validateComposition = () => {
+      if (!compositionCommitted) return;
+      if (open.get() && style.get() === 'rhea' && !alignmentFull.get()) {
+        throw new Error(
+          '[shadcn-select] Rhea requires the complete Select Surface/Viewport/ItemText composition.'
+        );
+      }
+    };
+    def.lifecycle.onUpdated(() => {
+      compositionCommitted = true;
+      validateComposition();
+    });
+    def.lifecycle.onUnmounted(() => {
+      compositionCommitted = false;
+    });
+    def.context.trySubscribe(SHADCN_STYLE_SCOPE, validateComposition);
+    def.props.watchRaw(['styleProfile'], validateComposition);
   },
 });
-
-/** P-SHADCN-SELECT-CONTENT-DIRECT-ENTRY; parity is bounded by P-SHADCN-SELECT-CONTENT-COMPATIBILITY-SUBSET. */
 
 export default selectContent;

@@ -28,7 +28,7 @@ jobs:
           corepack enable
           corepack pnpm@10.32.1 install --frozen-lockfile
       - name: Test passive Card and scope projection
-        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/card-style-projection.test.ts packages/prototypes/shadcn/test/card.test.ts packages/prototypes/shadcn/test/style-scope.test.ts
+        run: node node_modules/vitest/vitest.mjs run packages/prototypes/shadcn/test/card-style-projection.test.ts packages/prototypes/shadcn/test/card-evidence-app-probe.test.ts packages/prototypes/shadcn/test/card.test.ts packages/prototypes/shadcn/test/style-scope.test.ts
       - name: Capture exact-head four-runtime Card density, theme and scope
         env:
           EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}

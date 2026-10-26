@@ -31,5 +31,3 @@ Hover uses the existing hovered State, focus the existing focusVisible State, an
 Mapping: `packages/prototypes/shadcn/src/drawer/trigger.proto.ts`, `close.proto.ts`, `types.ts`, `packages/prototypes/shadcn/test/drawer-command-density.test.ts`, and `apps/www/src/content/docs/zh-cn/finf-drawer-command-density.browser.test.ts`.
 
 Agent: dot
-
-ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)

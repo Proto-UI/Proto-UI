@@ -1,12 +1,13 @@
 // packages/runtime/test/contract/as-hook.v0.contract.test.ts
 import { describe, it, expect } from 'vitest';
-import type { Prototype, State } from '@proto.ui/core';
+import type { AsHookResult, OwnedDecorationTarget, Prototype, State } from '@proto.ui/core';
 import { defineAsHook, definePrototype, tw } from '@proto.ui/core';
 import type { RuntimeHost } from '../../src';
-import { executeWithHost } from '../../src';
+import { createRuntimeSession, executeWithHost } from '../../src';
 import type { PropsBaseType } from '@proto.ui/types';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { asFocusable } from '@proto.ui/hooks';
+import { EFFECTS_CAP, OWNED_DECORATION_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
 
 /**
  * Runtime Contract (v0): asHook
@@ -469,6 +470,98 @@ describe('runtime contract: asHook (v0)', () => {
 
     expect(controller.getRuleStyleTokens()).not.toContain('opacity-50');
   });
+
+  it.each(['retain', 'feedback', 'all'] as const)(
+    'AS-HOOK-0485: targeted setup style capture preserves identity and withdraws only its own paint (%s)',
+    async (withdraw) => {
+      const root = document.createElement('div');
+      const decoration = document.createElement('span');
+      const otherDecoration = document.createElement('span');
+      let target!: OwnedDecorationTarget;
+      let otherTarget!: OwnedDecorationTarget;
+      let result!: AsHookResult;
+      let setupCount = 0;
+      const asTargetPaint = defineAsHook({
+        name: 'as-target-paint-0485',
+        setup(def) {
+          setupCount += 1;
+          def.feedback.style.to(target).use(tw('bg-red-500'));
+        },
+      });
+      const P = definePrototype({
+        name: `x-as-hook-0485-${withdraw}`,
+        setup(def) {
+          target = def.feedback.style.declareDecoration();
+          otherTarget = def.feedback.style.declareDecoration();
+          def.feedback.style.use(tw('text-white'));
+          def.feedback.style.to(target).use(tw('opacity-50'));
+          def.feedback.style.to(otherTarget).use(tw('bg-blue-500'));
+          result = asTargetPaint();
+          expect(asTargetPaint()).toBe(result);
+          if (withdraw !== 'retain') {
+            // Missing capture must fail on retained target paint, not an undefined call.
+            for (const off of result.disposers?.[withdraw] ?? []) off();
+          }
+          return (r) => [r.decoration(target), r.decoration(otherTarget)];
+        },
+      });
+      const session = createRuntimeSession(P, {
+        prototypeName: P.name,
+        getRawProps: () => ({}),
+        schedule: (task) => task(),
+        onRuntimeReady(wiring) {
+          wiring.attach('feedback', [
+            [OWNED_DECORATION_CAP, true],
+            [
+              EFFECTS_CAP,
+              {
+                queueStyle: (value) => {
+                  root.className = value.tokens.join(' ');
+                },
+                requestFlush() {},
+              },
+            ],
+          ]);
+        },
+        commit(_children, signal) {
+          const port = session.caps.getPort<FeedbackPort>('feedback')!;
+          port.bindDecorations!(
+            [
+              {
+                target,
+                sink: (value) => {
+                  decoration.className = value.tokens.join(' ');
+                },
+              },
+              {
+                target: otherTarget,
+                sink: (value) => {
+                  otherDecoration.className = value.tokens.join(' ');
+                },
+              },
+            ],
+            port.captureDecorationLease!()
+          );
+          signal?.done();
+        },
+      });
+      try {
+        await session.mount();
+        expect(decoration.className).toBe(
+          withdraw === 'retain' ? 'opacity-50 bg-red-500' : 'opacity-50'
+        );
+        expect(root.className).toBe('text-white');
+        expect(otherDecoration.className).toBe('bg-blue-500');
+        expect(setupCount).toBe(1);
+        expect(result.disposers!.all[0]).toBe(result.disposers!.feedback![0]);
+        expect(() => result.disposers!.feedback![0]()).toThrow(/setup only/i);
+        expect(decoration.classList.contains('bg-red-500')).toBe(withdraw === 'retain');
+        expect(otherDecoration.className).toBe('bg-blue-500');
+      } finally {
+        await session.dispose();
+      }
+    }
+  );
 
   it('AS-HOOK-0500: render fragment returned by asHook can be composed into caller render', () => {
     const asFrag = defineAsHook({

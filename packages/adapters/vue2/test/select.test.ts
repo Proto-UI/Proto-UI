@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as base from '../../../prototypes/base/src/select';
 import * as bootstrap from '../../../prototypes/bootstrap-2-3-2/src/select';
 import * as glass from '../../../prototypes/liquid-glass/src/select';
+import * as shadcn from '../../../prototypes/shadcn/src/select';
 
 import { createVue2Adapter } from '../src/adapt';
 import { Vue2Any, Vue2RuntimeAny } from './utils/vue2';
@@ -104,3 +105,77 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
     });
   });
 }
+
+it('returns Shadcn Trigger focus when Escape synchronously retires the Content view', async () => {
+  // T-BASE-SELECT-CONTENT-0001-CASE-DISMISS
+  // Real Vue 2 and public lifecycle diagnostics; synthetic DOM input, not native paint evidence.
+  vi.useFakeTimers();
+  const adapt = createVue2Adapter(Vue2RuntimeAny);
+  const Root = adapt(shadcn.selectRoot);
+  const Trigger = adapt(shadcn.selectTrigger);
+  const Value = adapt(shadcn.selectValue);
+  let dispatchingEscape = false;
+  let unmountedDuringEscape = false;
+  const Content = adapt(shadcn.selectContent, {
+    diagnostics: {
+      onLifecycleEvent(event) {
+        if (dispatchingEscape && event.type === 'unmount.done') unmountedDuringEscape = true;
+      },
+    },
+  });
+  const Item = adapt(shadcn.selectItem);
+  const host = document.createElement('div');
+  document.body.appendChild(host);
+  const App = Vue2Any.extend({
+    render(h: any) {
+      return h(Root, { attrs: { defaultOpen: true, defaultValue: 'alpha' }, ref: 'root' }, [
+        h(Trigger, { ref: 'trigger' }, [h(Value, { ref: 'value' })]),
+        h(
+          Content,
+          { attrs: { position: 'popper', enterDuration: 0, leaveDuration: 0 }, ref: 'content' },
+          [
+            h(Item, { attrs: { value: 'alpha', textValue: 'Alpha' }, ref: 'alpha' }, ['Alpha']),
+            h(Item, { attrs: { value: 'beta', textValue: 'Beta' }, ref: 'beta' }, ['Beta']),
+          ]
+        ),
+      ]);
+    },
+  });
+  const vm = new App().$mount();
+  host.appendChild(vm.$el);
+
+  try {
+    await settleVue2();
+    await settleVue2();
+    const refs = vm.$refs as Record<string, any>;
+    const trigger = refs.trigger.$el;
+    const content = refs.content.$el;
+    expect(refs.root.getExposes().open.get()).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
+    await settleVue2();
+    expect(document.activeElement).toBe(refs.beta.$el);
+
+    dispatchingEscape = true;
+    try {
+      refs.beta.$el.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true })
+      );
+    } finally {
+      dispatchingEscape = false;
+    }
+    await settleVue2();
+
+    expect(unmountedDuringEscape).toBe(true);
+    expect(refs.root.getExposes().open.get()).toBe(false);
+    expect(refs.root.getExposes().value.get()).toBe('alpha');
+    expect(trigger.isConnected).toBe(true);
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(content.isConnected).toBe(true);
+    expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
+    expect(document.activeElement).toBe(trigger);
+  } finally {
+    vm.$destroy();
+    host.remove();
+  }
+});

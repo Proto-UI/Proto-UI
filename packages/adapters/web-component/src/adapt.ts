@@ -1,3 +1,4 @@
+import { claimWebComponentOwnedRelocation } from './owned-relocation';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -62,6 +63,7 @@ import {
 import { createOwnedVisualSurface, isOwnedVisualNode } from './visual-surface';
 import { SlotProjector } from './slot-projector';
 import { createOwnedTwTokenApplier } from './feedback-style';
+import { createNativeTextLayoutApplier } from './native-text-layout';
 import { installDebugHooks, removeDebugHooks } from './debug/hooks';
 import {
   installDefaultHostDisplay,
@@ -388,6 +390,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     }
 
     connectedCallback() {
+      const relocation = claimWebComponentOwnedRelocation(this);
+      const owner = this._instanceToken;
       // A queued connect reaction can run after an ancestor's reaction has
       // detached this element. Do not publish a false owner/topology change
       // or request a terminal reconnect; a real later connection retries.
@@ -403,7 +407,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       }
       const initializing = !this._mountedOnce;
       try {
-        this._connectOwner();
+        this._connectOwner(() => this._instanceToken === owner && !!relocation?.());
       } catch (error) {
         // Preserve the synchronous failure; the guarded terminal transaction
         // also owns partial activation and callback reentry for every profile.
@@ -422,7 +426,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       ]);
     }
 
-    private _connectOwner() {
+    private _connectOwner(relocationIsCurrent: () => boolean) {
       this._globalEventTarget.setTarget(this.ownerDocument.defaultView);
       if (this._mountedOnce) {
         const previousParent = getLogicalParent(this._instanceToken);
@@ -450,7 +454,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
         }
         this._hostDisplay?.sync();
         this._pendingOwnedTokens = null;
-        this._controller?.update();
+        if (!relocationIsCurrent()) this._controller?.update();
         const token = this._instanceToken;
         schedule(() => {
           if (this._instanceToken === token && !this._terminalDisposing)
@@ -902,15 +906,19 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 },
                 getOwned: () => splitOwnedTokens,
               }
-            : createOwnedTwTokenApplier(
-                this._textControlTarget ??
-                  this._imageViewTarget ??
-                  this._nativeLinkTarget ??
+            : this._textControlTarget
+              ? createNativeTextLayoutApplier(
                   thisEl,
-                {
-                  onChange: () => this._hostDisplay?.sync(),
-                }
-              ));
+                  this._textControlTarget,
+                  () => finalStyleEntries,
+                  { onChange: () => this._hostDisplay?.sync() }
+                )
+              : createOwnedTwTokenApplier(
+                  this._imageViewTarget ?? this._nativeLinkTarget ?? thisEl,
+                  {
+                    onChange: () => this._hostDisplay?.sync(),
+                  }
+                ));
           currentEventGate = eventGate;
           currentRouter = router;
           // Split owns its role-aware styles across synchronous DOM moves.
@@ -981,13 +989,22 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               acquisitionError = error;
             }
           };
+          const ordinaryEffects = createWebEffectsPort(applier);
           const effectsPort: EffectsPort = splitEffects
             ? {
                 queueStyle: (handle) => project(() => splitEffects.queueStyle(handle)),
                 requestFlush: () => project(() => splitEffects.requestFlush()),
                 flushNow: () => project(() => splitEffects.flushNow?.()),
               }
-            : createWebEffectsPort(applier);
+            : this._textControlTarget
+              ? {
+                  ...ordinaryEffects,
+                  queueStyle(handle) {
+                    finalStyleEntries = readRootStyleEntries(handle, 'setup');
+                    ordinaryEffects.queueStyle(handle);
+                  },
+                }
+              : ordinaryEffects;
           const deferredVisualSink = opt.createVisualSink
             ? createDeferredViewVisualSink(
                 () => opt.createVisualSink!(thisEl, effectsPort),
@@ -1030,8 +1047,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
                 commit(frame) {
                   if (finalStyleSinkReleased) throw new Error('Retired material visual sink');
                   finalStyleSinkView = frame.view;
-                  if (splitEffects) {
-                    if (!('entries' in frame.style))
+                  if (splitEffects || thisEl._textControlTarget) {
+                    if (splitEffects && !('entries' in frame.style))
                       throw new Error('shadow-split:root-provenance');
                     finalStyleEntries = readRootStyleEntries(
                       { ...frame.style, tokens: [...frame.style.tokens] },

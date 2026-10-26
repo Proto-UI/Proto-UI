@@ -1,9 +1,9 @@
-import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { lstat, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { execFile, spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { promisify } from 'node:util';
+import { isDeepStrictEqual, promisify } from 'node:util';
 import {
   admitPreviewBuild,
   listPreviewBuildArtifacts,
@@ -15,6 +15,47 @@ import { sanitizePreviewTree } from './sanitize-tree.mjs';
 const workflow = 'intranet-preview-build.yml';
 const generationPattern = /^p[1-9][0-9]*-r[1-9][0-9]*-a[1-9][0-9]*$/;
 const generationFor = (binding) => `p${binding.pr}-r${binding.run_id}-a${binding.run_attempt}`;
+const generationReceipt = '.publisher-receipt.json';
+
+async function hasCompleteGeneration(destination, binding) {
+  let receipt;
+  try {
+    receipt = JSON.parse(await readFile(join(destination, generationReceipt), 'utf8'));
+  } catch {
+    return false;
+  }
+  if (receipt.schemaVersion !== 1 || !isDeepStrictEqual(receipt.binding, binding))
+    throw new Error('Existing generation has a different artifact binding');
+  if (
+    !Number.isSafeInteger(receipt.files) ||
+    receipt.files < 1 ||
+    !Number.isSafeInteger(receipt.bytes) ||
+    receipt.bytes < 1
+  )
+    return false;
+  const entrypoint = await stat(join(destination, 'index.html')).catch(() => null);
+  if (!entrypoint?.isFile() || entrypoint.size === 0) return false;
+  let files = 0;
+  let bytes = 0;
+  async function visit(directory, root = false) {
+    for (const entry of await readdir(directory, { withFileTypes: true })) {
+      if (root && entry.name === generationReceipt) continue;
+      const target = join(directory, entry.name);
+      if (entry.isDirectory()) {
+        if (!(await visit(target))) return false;
+        continue;
+      }
+      if (!entry.isFile()) return false;
+      const current = await lstat(target);
+      if (!current.isFile() || current.isSymbolicLink()) return false;
+      files += 1;
+      bytes += current.size;
+      if (files > receipt.files || bytes > receipt.bytes) return false;
+    }
+    return true;
+  }
+  return (await visit(destination, true)) && files === receipt.files && bytes === receipt.bytes;
+}
 
 export function githubClient(token, signal) {
   if (!token || /[\r\n]/.test(token))
@@ -332,15 +373,16 @@ export async function synchronizePreviews({
         const generation = generationFor(binding);
         if (!generationPattern.test(generation)) throw new Error('Invalid preview generation');
         const destination = join(root, 'sites', generation);
-        let exists = false;
-        if (old) {
-          try {
-            exists = (await stat(join(destination, 'index.html'))).isFile();
-          } catch {
-            /* Rebuild missing owned data. */
-          }
-        }
+        const exists = await hasCompleteGeneration(destination, binding);
         if (!exists) {
+          // Never spend a download on a destination that cannot be reused or
+          // replaced atomically. A later scan can retire the invalid data.
+          try {
+            await stat(destination);
+            throw new Error('Existing generation is incomplete');
+          } catch (error) {
+            if (error.code !== 'ENOENT') throw error;
+          }
           const bytes = await download({
             token,
             repository: 'Proto-UI/Proto-UI',
@@ -350,19 +392,16 @@ export async function synchronizePreviews({
           const extracted = join(staging, 'extracted'),
             clean = join(staging, generation);
           await materializeBoundedZip(bytes, extracted);
-          await sanitizePreviewTree({ source: extracted, output: clean });
+          const sanitized = await sanitizePreviewTree({ source: extracted, output: clean });
           const entrypoint = await stat(join(clean, 'index.html'));
           if (!entrypoint.isFile() || entrypoint.size === 0)
             throw new Error('Preview has no static entrypoint');
+          await writeFile(
+            join(clean, generationReceipt),
+            `${JSON.stringify({ schemaVersion: 1, binding, ...sanitized })}\n`,
+            { mode: 0o640 }
+          );
           await rm(extracted, { recursive: true, force: true });
-          // An existing generation is never overwritten with different bytes.
-          // A missing entrypoint in one is corruption, not permission to replace.
-          try {
-            await stat(destination);
-            throw new Error('Existing generation is incomplete');
-          } catch (error) {
-            if (error.code !== 'ENOENT') throw error;
-          }
           await rename(clean, destination);
         }
         // Every retained and newly staged generation passes the same final

@@ -4,7 +4,7 @@ import {
   PRESENCE_RUN_IN_CALLBACK_CAP,
 } from '@proto.ui/module-feedback';
 import { createWebResidentMotionSink, type WebResidentMotionOptions } from '@proto.ui/adapter-base';
-import { RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
+import { OWNED_DECORATION_CAP, RESIDENT_MOTION_SINK_CAP } from '@proto.ui/module-feedback';
 import {
   NATIVE_LINK_HOST_CAP,
   NATIVE_LINK_RUN_IN_CALLBACK_CAP,
@@ -17,7 +17,7 @@ import {
   CONTROL_LABEL_RUN_IN_CALLBACK_CAP,
   createWebControlLabelHost,
 } from '@proto.ui/module-control-label';
-import type { FocusEntryConfig } from '@proto.ui/core';
+import type { FocusEntryConfig, TextControlPatch } from '@proto.ui/core';
 import {
   isWebFocusTargetActive,
   orderFocusTargetsByDocument,
@@ -153,6 +153,7 @@ import {
 } from '../platform/instance-tree';
 
 type ReactOwnerModulesArgs<Props extends PropsBaseType> = {
+  ownedDecoration?: boolean;
   instanceToken: LogicalInstanceToken;
   emit: (key: string, payload?: unknown, options?: Record<string, unknown>) => void;
   rawPropsSource: RawPropsSource<Props>;
@@ -218,6 +219,7 @@ export function createReactOwnerModules<Props extends PropsBaseType>(
   } = args;
 
   return createCapsWiring()
+    .use('feedback', args.ownedDecoration ? [[OWNED_DECORATION_CAP, true]] : [])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('expose-event', [[EXPOSE_EVENT_SINK_CAP, emit]])
     .use('focus', [
@@ -289,6 +291,7 @@ export type FocusIntentState = {
 };
 
 export function createReactModules<Props extends PropsBaseType>(args: {
+  ownedDecoration?: boolean;
   el: HTMLElement;
   instanceToken: LogicalInstanceToken;
   router: {
@@ -309,6 +312,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
   exposeStateWebMode?: ExposeStateWebMode;
   scrollProjection?: ScrollProjectionPreference;
   setExposes: (record: Record<string, unknown>) => void;
+  setTextControlDefaultValue: (value: string) => void;
   runInCallbackScope: (fn: () => void) => void;
   isViewReady: () => boolean;
   isEntryAcquisitionReady: (target: HTMLElement) => boolean;
@@ -392,7 +396,8 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     },
   };
 
-  const physicalControl = () => args.getCurrentElement() as HTMLTextAreaElement | null;
+  const physicalControl = () =>
+    args.getCurrentElement() as HTMLInputElement | HTMLTextAreaElement | null;
   const physicalImage = () => args.getCurrentElement() as HTMLImageElement | null;
 
   return createCapsWiring()
@@ -404,7 +409,10 @@ export function createReactModules<Props extends PropsBaseType>(args: {
       [CONTROL_LABEL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('text-control', [
-      [TEXT_CONTROL_HOST_CAP, createWebTextControlHost(physicalControl)],
+      [
+        TEXT_CONTROL_HOST_CAP,
+        createReactTextControlHost(physicalControl, args.setTextControlDefaultValue),
+      ],
       [TEXT_CONTROL_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
     ])
     .use('native-link', [
@@ -420,6 +428,7 @@ export function createReactModules<Props extends PropsBaseType>(args: {
     ])
     .use('props', [[RAW_PROPS_SOURCE_CAP, rawPropsSource]])
     .use('feedback', [
+      ...(args.ownedDecoration ? [[OWNED_DECORATION_CAP, true] as const] : []),
       [EFFECTS_CAP, effectsPort],
       [PRESENCE_PRESENTATION_SINK_CAP, createWebPresencePresentationSink(args.el, effectsPort)],
       [PRESENCE_RUN_IN_CALLBACK_CAP, args.runInCallbackScope],
@@ -609,6 +618,31 @@ export function createReactModules<Props extends PropsBaseType>(args: {
         : []),
     ])
     .build();
+}
+
+function createReactTextControlHost(
+  getTarget: Parameters<typeof createWebTextControlHost>[0],
+  setDefaultValue: (value: string) => void
+) {
+  const host = createWebTextControlHost(getTarget);
+  const projectDefaultValue = (patch: TextControlPatch) => {
+    if (typeof patch.defaultValue === 'string') setDefaultValue(patch.defaultValue);
+  };
+
+  return {
+    attach(connection: Parameters<typeof host.attach>[0]) {
+      const lease = host.attach(connection);
+      projectDefaultValue(connection.patch);
+      return {
+        update(patch: TextControlPatch) {
+          lease.update(patch);
+          projectDefaultValue(patch);
+        },
+        snapshot: () => lease.snapshot(),
+        dispose: () => lease.dispose(),
+      };
+    },
+  };
 }
 
 function isNativelyFocusable(el: HTMLElement): boolean {

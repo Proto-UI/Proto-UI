@@ -1,6 +1,8 @@
 import { afterEach, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { selectRoot, selectTrigger } from '../src/select';
+import { definePrototype } from '@proto.ui/core';
+import { selectRoot, selectTrigger, SELECT_CONTEXT } from '../src/select';
+import type { SelectValueRequest } from '../src/select';
 import {
   fieldRoot,
   fieldSelectTrigger,
@@ -8,6 +10,38 @@ import {
   fieldDescription,
   fieldError,
 } from '../src/field';
+import type { FieldValidationRequest } from '../src/field';
+// A real Context subscriber that reenters the Root while an outer request is
+// still inside its own Context sync, before that request is delivered outward.
+type SelectRootElement = HTMLElement & {
+  getExposes(): {
+    requestValue(request: { value: string; textValue: string; reason: string }): boolean;
+  };
+};
+type ReentryPlan = {
+  /** Canonical value the owner accepts during the outer Context sync. */
+  accept?: string;
+  /** The nested request the subscriber issues during the outer Context sync. */
+  nested: { value: string; textValue: string };
+};
+let reentryTarget: SelectRootElement | null = null;
+let reentryPlan: ReentryPlan | null = null;
+let reentryFired = false;
+const selectContextReentryProbe = definePrototype({
+  name: 'field-select-context-reentry-probe',
+  setup(def) {
+    def.context.subscribe(SELECT_CONTEXT, (_run, next) => {
+      const plan = reentryPlan;
+      const target = reentryTarget;
+      if (!plan || !target || reentryFired) return;
+      if (next.requestReason !== 'item.select' || next.activeValue !== 'beta') return;
+      reentryFired = true;
+      if (plan.accept) setElementProps(target, { value: plan.accept });
+      const { value, textValue } = plan.nested;
+      target.getExposes().requestValue({ value, textValue, reason: 'keyboard' });
+    });
+  },
+});
 for (const p of [
   selectRoot,
   selectTrigger,
@@ -16,11 +50,12 @@ for (const p of [
   fieldLabel,
   fieldDescription,
   fieldError,
+  selectContextReentryProbe,
 ])
   AdaptToWebComponent(p as any);
 const flush = () => new Promise((r) => setTimeout(r, 0));
 afterEach(() => document.body.replaceChildren());
-function mount() {
+function mount(options: { probe?: boolean } = {}) {
   const field = document.createElement(fieldRoot.name),
     root = document.createElement(selectRoot.name) as any,
     trigger = document.createElement(fieldSelectTrigger.name) as any,
@@ -31,6 +66,7 @@ function mount() {
   description.textContent = 'Choose carefully';
   setElementProps(root, { defaultValue: 'alpha' });
   root.append(trigger);
+  if (options.probe) root.append(document.createElement(selectContextReentryProbe.name));
   field.append(label, description, root, error);
   document.body.append(field);
   return { field, root, trigger, label, description, error };
@@ -218,4 +254,162 @@ it('rejecting a controlled request does not validate a proposed value and synchr
   await flush();
   expect(m.root.getExposes().value.get()).toBe('accepted');
   expect(validations.map((x) => x.value)).toEqual(['accepted']);
+});
+it('validates the canonical value when a controlled owner accepts after outward delivery', async () => {
+  const m = mount();
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const events: string[] = [];
+  const validations: any[] = [];
+  m.field.addEventListener('validationRequest', (event: any) => {
+    events.push('validation');
+    validations.push(event.detail);
+  });
+  m.root.addEventListener('valueChange', () => {
+    events.push('outward');
+    queueMicrotask(() => {
+      events.push('owner-accept');
+      setElementProps(m.root, { value: 'accepted' });
+    });
+  });
+  m.root.getExposes().requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+  expect(events).toEqual(['outward']);
+  expect(m.root.getExposes().value.get()).toBe('alpha');
+  await flush();
+  await flush();
+  expect(m.root.getExposes().value.get()).toBe('accepted');
+  expect(validations.map((entry) => entry.value)).toEqual(['accepted']);
+  expect(events).toEqual(['outward', 'owner-accept', 'validation']);
+});
+it('retains both canonical acceptances when controlled outward delivery reenters', async () => {
+  const m = mount();
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const changes: string[] = [];
+  const validations: any[] = [];
+  const api = m.root.getExposes();
+  m.root.addEventListener('valueChange', (event: any) => {
+    changes.push(event.detail.value);
+    setElementProps(m.root, { value: event.detail.value });
+    if (event.detail.value === 'beta')
+      api.requestValue({ value: 'gamma', textValue: 'Gamma', reason: 'keyboard' });
+  });
+  m.field.addEventListener('validationRequest', (event: any) => validations.push(event.detail));
+  api.requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+  expect(changes).toEqual(['beta', 'gamma']);
+  expect(api.value.get()).toBe('gamma');
+  await flush();
+  expect(validations.map((entry) => entry.value)).toEqual(['gamma', 'gamma']);
+});
+it('retains a notification for each overlapping controlled canonical acceptance', async () => {
+  const m = mount();
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const changes: string[] = [];
+  const validations: any[] = [];
+  m.root.addEventListener('valueChange', (event: any) => {
+    changes.push(event.detail.value);
+    queueMicrotask(() => setElementProps(m.root, { value: event.detail.value }));
+  });
+  m.field.addEventListener('validationRequest', (event: any) => validations.push(event.detail));
+  const api = m.root.getExposes();
+  api.requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+  api.requestValue({ value: 'gamma', textValue: 'Gamma', reason: 'keyboard' });
+  expect(changes).toEqual(['beta', 'gamma']);
+  expect(api.value.get()).toBe('alpha');
+  await flush();
+  await flush();
+  expect(api.value.get()).toBe('gamma');
+  expect(validations.map((entry) => entry.value)).toEqual(['gamma', 'gamma']);
+  expect(
+    (m.field as any).getExposes().resolveValidation(validations[0].requestId, { invalid: false })
+  ).toBe(false);
+  expect(
+    (m.field as any).getExposes().resolveValidation(validations[1].requestId, { invalid: false })
+  ).toBe(true);
+});
+it('retains a nested controlled acceptance when a Context subscriber reenters before outward delivery', async () => {
+  const m = mount({ probe: true });
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const changes: string[] = [];
+  const validations: FieldValidationRequest[] = [];
+  m.root.addEventListener('valueChange', (event: Event) => {
+    const detail = (event as CustomEvent<SelectValueRequest>).detail;
+    changes.push(detail.value);
+    setElementProps(m.root, { value: detail.value });
+  });
+  m.field.addEventListener('validationRequest', (event: Event) => {
+    validations.push((event as CustomEvent<FieldValidationRequest>).detail);
+  });
+  reentryTarget = m.root;
+  reentryPlan = { nested: { value: 'gamma', textValue: 'Gamma' } };
+  reentryFired = false;
+  try {
+    m.root.getExposes().requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+    await flush();
+  } finally {
+    reentryTarget = null;
+    reentryPlan = null;
+  }
+  expect(changes).toEqual(['gamma']);
+  expect(m.root.getExposes().value.get()).toBe('gamma');
+  expect(validations.map((entry) => entry.value)).toEqual(['gamma']);
+});
+it('retains an accepted controlled notification when the owner releases control before outward returns', async () => {
+  const m = mount();
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const changes: string[] = [];
+  const validations: FieldValidationRequest[] = [];
+  m.root.addEventListener('valueChange', (event: Event) => {
+    const detail = (event as CustomEvent<SelectValueRequest>).detail;
+    changes.push(detail.value);
+    setElementProps(m.root, { value: detail.value });
+    setElementProps(m.root, {});
+  });
+  m.field.addEventListener('validationRequest', (event: Event) => {
+    validations.push((event as CustomEvent<FieldValidationRequest>).detail);
+  });
+  m.root.getExposes().requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+  await flush();
+  expect(changes).toEqual(['beta']);
+  expect(m.root.getExposes().value.get()).toBe('beta');
+  expect(validations.map((entry) => entry.value)).toEqual(['beta']);
+});
+it('retains a nested controlled acceptance when the superseded request already spent its owner budget', async () => {
+  const m = mount({ probe: true });
+  setElementProps(m.field, { externalValidation: true, validationMode: 'onChange' });
+  setElementProps(m.root, { value: 'alpha' });
+  await flush();
+  const changes: string[] = [];
+  const validations: FieldValidationRequest[] = [];
+  m.root.addEventListener('valueChange', (event: Event) => {
+    const detail = (event as CustomEvent<SelectValueRequest>).detail;
+    changes.push(detail.value);
+    // The owner accepts the nested proposal after the outer request returned.
+    queueMicrotask(() => setElementProps(m.root, { value: detail.value }));
+  });
+  m.field.addEventListener('validationRequest', (event: Event) => {
+    validations.push((event as CustomEvent<FieldValidationRequest>).detail);
+  });
+  reentryTarget = m.root;
+  reentryPlan = { accept: 'beta', nested: { value: 'gamma', textValue: 'Gamma' } };
+  reentryFired = false;
+  try {
+    m.root.getExposes().requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' });
+    await flush();
+    await flush();
+  } finally {
+    reentryTarget = null;
+    reentryPlan = null;
+  }
+  expect(changes).toEqual(['gamma']);
+  expect(m.root.getExposes().value.get()).toBe('gamma');
+  expect(validations.map((entry) => entry.value)).toEqual(['gamma', 'gamma']);
 });

@@ -97,10 +97,13 @@ When an implementation differs from expectations, that implementation does not a
 The whitepaper provides philosophical direction. Spec refines the parts that can be governed by engineering into checkable obligations. Implementations and tests provide evidence of current behavior. Practice can drive changes to the whitepaper, Spec, a Prototype, or a translation boundary, but it should not silently override them. Otherwise, we cannot tell whether we are revising our understanding or merely finding explanations for accidental implementation outcomes.
 
 <figure class="whitepaper-figure">
-  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram">
-    <img src="/diagrams/whitepaper-evolution-feedback.en.svg" alt="Theory and kernel, prototype libraries and translation face practice; classified evidence guides explicit revisions to the relevant layer." width="960" height="928" class="whitepaper-diagram" loading="lazy" />
+  <button type="button" data-diagram-open aria-haspopup="dialog" aria-label="Open full-size diagram" aria-describedby="evolution-feedback-description">
+    <picture>
+      <source media="(max-width: 639px)" srcset="/diagrams/whitepaper-evolution-feedback.mobile.en.svg" width="500" height="1000" />
+      <img src="/diagrams/whitepaper-evolution-feedback.en.svg" alt="Theory and kernel, prototype libraries and translation face practice; classified evidence guides explicit revisions to the relevant layer." aria-describedby="evolution-feedback-description" width="960" height="928" class="whitepaper-diagram" loading="lazy" />
+    </picture>
   </button>
-  <figcaption>Open full-size diagram</figcaption>
+  <figcaption id="evolution-feedback-description"><span class="sr-only">Theory and kernel, prototype libraries, and the translation layer advance concurrently. Implementations, conformance tests, and real use provide evidence for diagnosis: implementation drift calls for an implementation fix; a Host capability gap calls for improved translation; omitted necessary semantics or a definition overfitted to a class of Host calls for a Prototype revision; a counterexample to fundamental relations calls for reexamining the theory. These are alternative diagnoses, not sequential stages. Revise the relevant layer explicitly and test again; implementation behavior does not silently become a rule. </span>Open full-size diagram</figcaption>
 </figure>
 
 ## More Distant Tests Are Still Needed

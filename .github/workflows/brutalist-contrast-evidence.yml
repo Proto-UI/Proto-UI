@@ -28,7 +28,7 @@ jobs:
           - shard: naming-and-disclosures
             families: label,collapsible,accordion,field
           - shard: passive-and-editors
-            families: badge,card,skeleton,separator,spinner,textarea,scroll-area
+            families: badge,card,skeleton,separator,spinner,textarea,scroll-area,input
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     steps:

@@ -12,4 +12,4 @@ Explicit Content.open/defaultOpen still precede the bound fallback. Root/Content
 
 Acceptance includes controlled/uncontrolled initial false/true × appear false/true; no spurious startup events; legal prior once-hook installation; explicit-input no-context-read precedence; immutable binding identity and setup guards; first close/reopen, retained leaving epoch, interruptions, explicit complete, unmount/dispose, reduced-motion ordering; existing controlled/focus/scroll/density regressions. Source-runtime and Compiler, packed consumers, official native-browser Actions, and GPUI evidence remain separate. No CSS animation or native intermediate-paint completion is claimed by this fix.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot

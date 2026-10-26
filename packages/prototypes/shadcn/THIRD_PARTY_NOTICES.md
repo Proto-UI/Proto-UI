@@ -35,3 +35,11 @@ The direct Button and explicitly opted-in passive action appearance derive from 
 ## Shared-scope passive Card (2026-10-23)
 
 The existing four Card presentation regions additionally map New York and Rhea from shadcn/ui `3d98900e9b73c45f035f8109e9d41ba6a51685e7`, `apps/v4/registry/bases/base/ui/card.tsx` (blob `2062884f29a8044fa48edf86605182eca29f8716`), `apps/v4/registry/new-york-v4/ui/card.tsx` (blob `6aebd4cf612dfa24d40ffdf357c6f6363e144d6a`) and `apps/v4/registry/styles/style-rhea.css` (blob `94bbca2a7f78845e7cfbcff68fb8f535e3848a98`), under the MIT license above. Scope and density are Proto presentation semantics, not upstream React API equivalence. Image-edge selectors, automatic CardAction layout and container queries remain unsupported by this bounded four-part surface.
+
+## Shared-scope Command and single-control shell (2026-10-23)
+
+The bounded Rhea Command and reusable single-inline-control shell derive from shadcn/ui `3d98900e9b73c45f035f8109e9d41ba6a51685e7`, `apps/v4/registry/bases/base/ui/command.tsx`, `apps/v4/registry/bases/base/ui/input-group.tsx`, `apps/v4/registry/styles/style-rhea.css`, and the New York shell in `apps/v4/registry/new-york-v4/ui/input-group.tsx`, under the MIT license above. The existing New York standalone Command remains a Proto compatibility recipe, not a new claim of full cmdk parity. See `internal/contracts/command/shadcn-input-shell.presentation.v0.md` for the omitted addons, invalid aggregation, groups, shortcuts and other unsupported upstream anatomy.
+
+## Shared-scope Select profiles (2026-10-23)
+
+The bounded Rhea Select presentation derives from shadcn/ui `3d98900e9b73c45f035f8109e9d41ba6a51685e7`, `apps/v4/registry/bases/base/ui/select.tsx` (blob `2cb76c117197336324cfaed1300e92ca65273b40`) and `apps/v4/registry/styles/style-rhea.css` (blob `94bbca2a7f78845e7cfbcff68fb8f535e3848a98`), under the MIT license above. Existing New York behavior and presentation compatibility remain separately documented. Scope selection, optional Field binding and the existing Content/Surface/Viewport/ItemText composition are Proto contracts, not upstream React/Base UI API equivalence. Scroll controls, foreign-document portals, arbitrary glyph selectors and full positioning parity are not included.

@@ -379,8 +379,6 @@ for (const schemaName of [
   'review-packet.schema.json',
   'collaboration-request.schema.json',
   'collaboration-receipt.schema.json',
-  'modeltrace-receipt.schema.json',
-  'modeltrace-context.schema.json',
 ]) {
   JSON.parse(readFileSync(resolve(root, 'internal/agent-operations/schemas', schemaName), 'utf8'));
 }

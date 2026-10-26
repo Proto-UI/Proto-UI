@@ -1,9 +1,12 @@
 import { createPresenceController } from './presence/controller';
+import { OwnedDecorationRegistryModel } from './style/owned-decoration-registry';
+import { OWNED_DECORATION_CAP, type OwnedDecorationBinding } from './style/owned-decoration-cap';
+import type { OwnedDecorationTarget, DecorationStyleFrame } from '@proto.ui/core';
 import { PRESENCE_PRESENTATION_SINK_CAP, PRESENCE_RUN_IN_CALLBACK_CAP } from './presence/sink';
 import type { StatePort } from '@proto.ui/module-state';
 import { snapshotResidentMotion, type ResidentMotionDeclaration } from '@proto.ui/core';
 import { RESIDENT_MOTION_SINK_CAP, type ResidentMotionSink } from './motion/sink';
-import type { MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
+import type { InstancePhase, MountPhase, ProtoPhase, StyleHandle } from '@proto.ui/core';
 import {
   illegalPhase,
   snapshotMaterialCandidate,
@@ -49,6 +52,99 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
     deps,
     build: ({ init, caps }) => {
       class Impl extends ModuleBase {
+        private decoration = new OwnedDecorationRegistryModel();
+        private decorationRules = new Map<OwnedDecorationTarget, object>();
+        private decorationBound = false;
+        private decorationTerminal = false;
+        private decorationLease: object | null = null;
+        hasDecorationTargets(): boolean {
+          return this.decorationRules.size > 0;
+        }
+        captureDecorationLease(): object {
+          if (!this.decorationLease || this.decorationTerminal)
+            throw new Error('[feedback] decoration view is not active');
+          return this.decorationLease;
+        }
+        declareDecoration(): OwnedDecorationTarget {
+          this.ensureSetup('def.feedback.style.declareDecoration');
+          if (!this.caps.has(OWNED_DECORATION_CAP))
+            throw new Error('[feedback] owned-decoration unsupported by this adapter');
+          const target = this.decoration.declareTarget() as OwnedDecorationTarget;
+          this.decorationRules.set(target, this.decoration.declareContribution(target, 'rule'));
+          return target;
+        }
+        useDecoration(target: OwnedDecorationTarget, handles: StyleHandle[]): () => void {
+          this.ensureSetup('def.feedback.style.to.use');
+          const owner = this.decoration.declareContribution(target, 'setup');
+          this.decoration.replace(owner, ...handles);
+          return () => {
+            this.ensureSetup('def.feedback.style.to.use:dispose');
+            this.decoration.withdraw(owner);
+          };
+        }
+        validateDecorationTemplate(targets: readonly OwnedDecorationTarget[]): void {
+          if (!targets.length && !this.decorationRules.size) return;
+          this.ensureNotDisposed('decoration.template');
+          if (!this.caps.has(OWNED_DECORATION_CAP))
+            throw new Error('[feedback] owned-decoration unsupported by this adapter');
+          if (this.decorationTerminal)
+            throw new Error('[feedback] decoration structural rebind unsupported');
+          const seen = new Set<OwnedDecorationTarget>();
+          for (const target of targets) {
+            this.decoration.snapshot(target);
+            if (seen.has(target)) throw new Error('[feedback] duplicate decoration binding');
+            seen.add(target);
+          }
+          if (seen.size !== this.decorationRules.size)
+            throw new Error('[feedback] missing decoration binding');
+        }
+        bindDecorations(bindings: readonly OwnedDecorationBinding[], lease: object): void {
+          if (!bindings.length && !this.decorationRules.size) return;
+          const checkLease = () => {
+            if (this.decorationBound)
+              throw new Error('[feedback] decoration structural rebind unsupported');
+            if (!lease || lease !== this.decorationLease || this.decorationTerminal)
+              throw new Error('[feedback] stale decoration view lease');
+          };
+          checkLease();
+          // Read hostile accessors only once, before any binding is published.
+          const copied = bindings.map((binding) => ({
+            target: binding.target,
+            sink: binding.sink,
+          }));
+          for (const binding of copied)
+            if (typeof binding.sink !== 'function')
+              throw new Error('[feedback] invalid decoration sink');
+          checkLease();
+          this.validateDecorationTemplate(copied.map((binding) => binding.target));
+          checkLease();
+          this.decorationBound = true;
+          this.decoration.bindAll(copied);
+        }
+        snapshotDecorationFrame(
+          frames: readonly DecorationStyleFrame[]
+        ): Map<OwnedDecorationTarget, StyleHandle[]> {
+          const next = new Map<OwnedDecorationTarget, StyleHandle[]>();
+          for (const frame of frames) {
+            const target = frame.target;
+            this.decoration.snapshot(target);
+            if (next.has(target)) throw new Error('[feedback] duplicate decoration frame');
+            const handles = frame.handles.map((h) => ({ kind: h.kind, tokens: [...h.tokens] }));
+            const validator = new FeedbackStyleRecorder();
+            validator.use(...handles);
+            next.set(target, handles);
+          }
+          return next;
+        }
+        replaceDecorationFrame(next: Map<OwnedDecorationTarget, StyleHandle[]>): void {
+          if (this.decorationTerminal) {
+            if (next.size) throw new Error('[feedback] decoration lifetime ended');
+            return;
+          }
+          for (const [target, owner] of this.decorationRules)
+            this.decoration.replace(owner, ...(next.get(target) ?? []));
+        }
+
         private presence = createPresenceController({
           setup: (op) => this.ensureSetup(op),
           runtime: (op) => {
@@ -197,9 +293,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         replaceVisualRuntime(
           previous: FeedbackRuntimeStyleDisposer | null,
           handles: readonly StyleHandle[],
-          candidates: readonly MaterialCandidate[]
+          candidates: readonly MaterialCandidate[],
+          decorations: readonly DecorationStyleFrame[] = []
         ): FeedbackRuntimeStyleDisposer | null {
           this.ensureRuntime('rule.feedback.visual.replace');
+          const decorationFrame = this.snapshotDecorationFrame(decorations);
           if (candidates.length && !this.sharedSlot)
             throw new Error('Material Rule requires a declared slot');
           // Validate complete replacements before retiring the previous owner.
@@ -208,6 +306,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           const key = {};
           previous?.({ flush: false });
           if (copied.length) this.materialContributions.set(key, copied);
+          this.replaceDecorationFrame(decorationFrame);
           this.markDirty();
           try {
             this.flushIfPossible();
@@ -216,12 +315,13 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
               throw error;
             });
           }
-          if (!unUse && !copied.length) return null;
+          if (!unUse && !copied.length && !decorationFrame.size) return null;
           let removed = false;
           return (options = {}) => {
             if (this.disposed || removed) return;
             removed = true;
             unUse?.();
+            if (options.flush !== false) this.replaceDecorationFrame(new Map());
             this.materialContributions.delete(key);
             this.markDirty();
             if (options.flush !== false) this.flushIfPossible();
@@ -360,8 +460,32 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           if (phase === 'mounted') this.flushIfPossible();
         }
 
+        override onInstancePhase(phase: InstancePhase): void {
+          super.onInstancePhase(phase);
+          if (phase === 'disposing' || phase === 'disposed') {
+            this.decorationTerminal = true;
+            this.decorationLease = null;
+            this.decorationBound = false;
+            this.decoration.dispose();
+          }
+        }
+
         override onMountPhase(phase: MountPhase, epoch: number): void {
+          if (epoch < this.viewEpoch) return;
           super.onMountPhase(phase, epoch);
+          if (phase === 'unmounting' || phase === 'detached') this.decorationLease = null;
+          else if (phase === 'mounting' && (epoch > this.viewEpoch || !this.decorationLease))
+            this.decorationLease = Object.freeze({});
+          // Temporary view detachment is not terminal instance disposal. Keep
+          // logical targets/intent, but revoke every old physical sink first.
+          if (
+            this.decorationBound &&
+            epoch >= this.viewEpoch &&
+            (phase === 'unmounting' || phase === 'detached' || epoch > this.viewEpoch)
+          ) {
+            this.decorationBound = false;
+            this.decoration.suspendBindings();
+          }
           const oldEpoch = this.viewEpoch;
           this.viewEpoch = epoch;
           if (phase === 'unmounting' || phase === 'detached' || epoch !== oldEpoch) {
@@ -576,6 +700,9 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         dispose(): void {
           if (this.disposed) return;
           this.disposed = true;
+          this.decorationTerminal = true;
+          this.decorationLease = null;
+          this.decoration.dispose();
           try {
             try {
               try {
@@ -653,6 +780,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
           use: (candidate) => impl.useMaterial(candidate),
         },
         style: {
+          declareDecoration: () => impl.declareDecoration(),
+          to: (target) => ({ use: (...handles) => impl.useDecoration(target, handles) }),
+          hasDecorationTargets: () => impl.hasDecorationTargets(),
+          captureDecorationLease: () => impl.captureDecorationLease(),
+          validateDecorationTemplate: (targets) => impl.validateDecorationTemplate(targets),
           transition: (declaration) => impl.declareMotion(declaration),
           presence: (declaration) => impl.declarePresence(declaration),
           use: (...handles) => impl.useStyle(handles),
@@ -666,8 +798,11 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
       return {
         facade,
         port: {
-          replaceVisualRuntime: (previous, handles, candidates) =>
-            impl.replaceVisualRuntime(previous, handles, candidates),
+          supportsOwnedDecoration: true,
+          captureDecorationLease: () => impl.captureDecorationLease(),
+          bindDecorations: (bindings, lease) => impl.bindDecorations(bindings, lease),
+          replaceVisualRuntime: (previous, handles, candidates, decorations) =>
+            impl.replaceVisualRuntime(previous, handles, candidates, decorations),
           exportMaterialFrame: () => impl.exportMaterialFrame(),
           materialDiagnostics: () => impl.materialDiagnostics(),
           motionDiagnostics: () => impl.motionDiagnostics(),
@@ -683,6 +818,7 @@ export function createFeedbackModule(ctx: ModuleFactoryArgs): FeedbackModule {
         } satisfies FeedbackPort,
         hooks: {
           dispose: () => impl.dispose(),
+          onInstancePhase: (p: InstancePhase) => impl.onInstancePhase(p),
           onMountPhase: (p: MountPhase, epoch: number) => impl.onMountPhase(p, epoch),
           onProtoPhase: (p: ProtoPhase) => impl.onProtoPhase(p),
           afterRenderCommit: () => impl.afterRenderCommit(),

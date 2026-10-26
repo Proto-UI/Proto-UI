@@ -1,4 +1,5 @@
 export { createWebMaterialSink, type WebMaterialOptions } from './sink';
+export { contactPaintOutset } from './contact-profile';
 export {
   createCanvasBackdropLease,
   inspectCanvasBackdrop,

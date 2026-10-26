@@ -14,7 +14,7 @@ criteria:
       en: The projection invokes asTextRoot and preserves its slot, defaults, passive boundary and independent presentation axes without negative patches.
   - id: P-BRUTALIST-TEXT-PROJECTION
     text:
-      en: Each input selects exactly one token for its axis through def.rule and feedback.style. Size maps to text-xs through text-5xl, tone to text-foreground/text-muted-foreground/text-inherit, weight to font-normal/medium/semibold/bold, font to font-sans/heading/mono, leading and tracking to their named tokens, emphasis to not-italic/italic and decoration to no-underline/underline/line-through. Explicit leading wins over composite size line-height. Removing props restores defaults on the same subject.
+      en: Each input selects exactly one token for its axis through def.rule and feedback.style, except leading size, which intentionally contributes no leading token. Size maps to text-xs through text-5xl, tone to text-foreground/text-muted-foreground/text-inherit, weight to font-normal/medium/semibold/bold, font to font-sans/heading/mono, leading tighter to leading-[1.1], tracking tighter to tracking-tighter, other explicit leading and tracking values to their named tokens, emphasis to not-italic/italic and decoration to no-underline/underline/line-through. Explicit leading other than size wins over composite size line-height. With leading size, xs|sm|base|lg|xl|2xl|3xl|4xl|5xl retain respectively 1rem|1.25rem|1.5rem|1.75rem|1.75rem|2rem|2.25rem|2.5rem|1 line-height from their size tokens. Missing size falls back to base. An initially invalid size falls back to base; provided empty or invalid size after a valid value preserves that previous value under the existing Props contract. Default leading normal remains 1.5; tighter is 1.1 and tracking tighter is -0.05em. Removing props restores defaults on the same subject.
   - id: P-BRUTALIST-TEXT-CONSUMPTION
     text:
       en: Public root and /text exports include textRoot, brutalistTextRoot, BrutalistTextRoot and TextRootProps/TextRootExposes with family aliases. CLI brutalist-text generates WC, React, Vue and Vue2 facades. Real four-Adapter DOM evidence does not imply browser visual acceptance or native parity. Web compiler owns these declarations; unsupported CLI hosts are rejected. GPUI currently reports unmapped inherit color, font-style, letter-spacing and text-decoration-line rather than claiming their realization.
@@ -36,6 +36,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added bounded Text family projection through standard typography feedback.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Added explicit size-owned line boxes and bounded tighter leading/tracking without changing existing defaults or native semantics.
 tags:
   - prototype
   - brutalist

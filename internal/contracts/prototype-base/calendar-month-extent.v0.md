@@ -27,4 +27,4 @@ Month, week start and fixed-week changes update the same mounted atoms. An appli
 
 Calendar's full catalog definition and draft composition questions remain open. Caption month/year Select is explicit application composition through public canonical month/requestMonth, not an embedded Base Select or a native-select promise. Locale, year range and native popup appearance are separate concerns. Compiler coverage, packed generation, native hosts, actual accessible naming and exact-commit visual comparison require their own evidence.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06)
+Agent: dot

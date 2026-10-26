@@ -51,11 +51,7 @@
               "reference": { "type": "string", "minLength": 1, "maxLength": 1000 },
               "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
             },
-            "if": {
-              "properties": {
-                "type": { "enum": ["modeltrace-record", "human-directed-operation"] }
-              }
-            },
+            "if": { "properties": { "type": { "const": "human-directed-operation" } } },
             "then": { "required": ["digest"] }
           }
         },
@@ -159,7 +155,6 @@
                   "maintenance-outcome",
                   "maintenance-state-receipt",
                   "mission-candidate",
-                  "modeltrace-record",
                   "mutation-authorization",
                   "mutation-receipt",
                   "observation-report",
@@ -191,11 +186,7 @@
               "revision": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
               "result": { "enum": ["passed", "failed", "not-run", "partial"] }
             },
-            "if": {
-              "properties": {
-                "type": { "enum": ["modeltrace-record", "human-directed-operation"] }
-              }
-            },
+            "if": { "properties": { "type": { "const": "human-directed-operation" } } },
             "then": { "required": ["digest"] }
           }
         },
@@ -629,19 +620,6 @@
               "contains": {
                 "type": "object",
                 "properties": { "type": { "const": "mission-candidate" } },
-                "required": ["type"]
-              },
-              "minContains": 0,
-              "maxContains": 1
-            }
-          }
-        },
-        {
-          "properties": {
-            "artifacts": {
-              "contains": {
-                "type": "object",
-                "properties": { "type": { "const": "modeltrace-record" } },
                 "required": ["type"]
               },
               "minContains": 0,

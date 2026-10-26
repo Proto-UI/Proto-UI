@@ -119,11 +119,18 @@ function fixture(family = 'shadcn', runtimeId = 'wc') {
   document.body.append(host);
   const refs = {};
   const prototypeNodes = [];
-  function render(node, parent) {
+  function render(node, parent, closedAccordion = false) {
     if (typeof node === 'string' || node.kind === 'text') {
       parent.append(typeof node === 'string' ? node : node.text);
       return;
     }
+    if (node.kind === 'proto' && node.prototypeId.endsWith('-accordion-item'))
+      closedAccordion = node.props?.value !== 'try';
+    const closedBody =
+      node.kind === 'proto' && node.prototypeId.endsWith('-accordion-content') && closedAccordion;
+    // This fixture models default presence only, not Accordion's state machine.
+    // Real adapter open/close behavior is covered by the projection/native suites.
+    if (closedBody && runtimeId !== 'wc') return;
     const textarea = node.kind === 'proto' && node.prototypeId.endsWith('-textarea-root');
     const element = document.createElement(textarea && runtimeId !== 'wc' ? 'textarea' : 'div');
     element.className = node.className ?? '';
@@ -141,8 +148,12 @@ function fixture(family = 'shadcn', runtimeId = 'wc') {
       prototypeNodes.push({ element: control, prototypeId: node.prototypeId });
     } else if (node.kind === 'proto')
       prototypeNodes.push({ element, prototypeId: node.prototypeId });
+    if (closedBody) {
+      element.hidden = true;
+      element.setAttribute('data-pui-view-detached', '');
+    }
     parent.append(element);
-    for (const child of node.children ?? []) render(child, element);
+    for (const child of node.children ?? []) render(child, element, closedAccordion);
   }
   render(composition.demo.root, host);
   const content = host.querySelector('[data-projection-content]');
@@ -180,6 +191,82 @@ async function verify(value) {
   await api.workspaceTask(value.scope, value.coordinate);
   await api.assertTaskPartInventory(value.scope, value.content, value.portal, value.coordinate);
 }
+
+const selectFingerprint =
+  ast.statements
+    .find(
+      (statement) =>
+        ts.isFunctionDeclaration(statement) && statement.name?.text === 'assertSelectFingerprint'
+    )
+    ?.getText(ast) ?? '';
+const SELECT_MOTION_STEPS = [
+  `const trigger = selectRoot.locator('[data-demo-ref="settings-view-trigger"][role="combobox"]')`,
+  'await page.mouse.move(0, 0)',
+  "element.hasAttribute('data-hovered')",
+  '.toBe(false)',
+  'const restingBounds = await trigger.boundingBox()',
+  'await page.mouse.down()',
+  'try {',
+  "element.hasAttribute('data-pressed')",
+  '.toBe(true)',
+  '.poll(async () => (await trigger.boundingBox())?.y, { timeout: 10_000 }) .toBeCloseTo(restingBounds.y, 3)',
+  'expect((await trigger.boundingBox())?.x).toBeCloseTo(restingBounds.x, 3)',
+  '} finally { await page.mouse.up(); }',
+  "element.hasAttribute('data-pressed')",
+  '.toBe(false)',
+  "await page.keyboard.press('Escape')",
+];
+function assertSelectMotionContract(fingerprint) {
+  const normalized = fingerprint.replace(/\s+/g, ' ');
+  let cursor = 0;
+  for (const step of SELECT_MOTION_STEPS) {
+    const at = normalized.indexOf(step, cursor);
+    assert.notEqual(at, -1, `Select native press sequence retains ${step}`);
+    cursor = at + step.length;
+  }
+}
+test('Select source contract rejects removal of native input, precision or release cleanup', () => {
+  const normalized = selectFingerprint.replace(/\s+/g, ' ');
+  assertSelectMotionContract(normalized);
+  let cursor = 0;
+  for (const step of SELECT_MOTION_STEPS) {
+    // Mutate the exact occurrence used by the ordered native-input contract,
+    // not an unrelated earlier try/false assertion in the same function.
+    const at = normalized.indexOf(step, cursor);
+    assert.notEqual(at, -1);
+    const removed = normalized.slice(0, at) + '/* removed */' + normalized.slice(at + step.length);
+    assert.throws(
+      () => assertSelectMotionContract(removed),
+      undefined,
+      `missing native step ${step}`
+    );
+    cursor = at + step.length;
+  }
+});
+
+// Independent explicit list: removing a scene part from both the recipe and the
+// browser's inventory cannot silently make this contract green.
+const SCENE_PART_COUNTS = {
+  'command-root': 1,
+  'command-input': 1,
+  'command-content': 1,
+  'command-item': 4,
+  'command-empty': 1,
+  'progress-root': 1,
+  'progress-label': 1,
+  'progress-track': 1,
+  'progress-indicator': 1,
+  'progress-value': 1,
+  'slider-root': 1,
+  'slider-track': 1,
+  'slider-indicator': 1,
+  'slider-thumb': 1,
+  'accordion-root': 1,
+  'accordion-item': 3,
+  'accordion-heading': 3,
+  'accordion-trigger': 3,
+  'accordion-content': 3,
+};
 
 test('browser acceptance targets the approved task without restoring the removed picker', () => {
   assert.deepEqual(
@@ -221,9 +308,9 @@ test('browser acceptance targets the approved task without restoring the removed
     'replaced Runtime generation surfaces',
     'expected.content',
     'expected.item',
-    "restingBounds.y + (projectionFamilyId === 'brutalist' ? 0 : 1)",
   ])
     assert.ok(source.includes(requirement), `retains ${requirement}`);
+  assertSelectMotionContract(selectFingerprint);
 });
 
 for (const family of ['shadcn', 'brutalist']) {
@@ -235,11 +322,61 @@ for (const family of ['shadcn', 'brutalist']) {
           [...value.task.recipe.prototypeIds].sort(),
           [
             ...Object.keys(api.GALLERY_PART_COUNTS).map((suffix) => `${family}-${suffix}`),
-            `${family}-surface-root`,
+            ...(family === 'shadcn'
+              ? ['shadcn-card-root', 'shadcn-card-header', 'shadcn-card-content']
+              : ['brutalist-surface-root']),
             `${family}-text-root`,
+            ...(family === 'shadcn'
+              ? [
+                  'shadcn-select-item-text',
+                  'shadcn-select-surface',
+                  'shadcn-select-viewport',
+                  'shadcn-select-group',
+                  'shadcn-command-input-wrapper',
+                  'shadcn-input-shell',
+                ]
+              : []),
           ].sort()
         );
-        assert.equal(value.task.recipe.prototypeIds.length, 37);
+        assert.equal(value.task.recipe.prototypeIds.length, family === 'shadcn' ? 64 : 56);
+        await verify(value);
+        assert.equal(Object.keys(SCENE_PART_COUNTS).length, 19);
+        for (const [suffix, count] of Object.entries(SCENE_PART_COUNTS)) {
+          assert.equal(api.GALLERY_PART_COUNTS[suffix], count, `explicit scene count ${suffix}`);
+          const target = value.element.querySelector(
+            `[data-projection-prototype="${family}-${suffix}"]`
+          );
+          assert.ok(target, `scene part ${suffix} is physically present`);
+          const parent = target.parentNode;
+          const next = target.nextSibling;
+          target.remove();
+          await assert.rejects(() => verify(value), undefined, `missing ${suffix}`);
+          parent.insertBefore(target, next);
+          const duplicate = target.cloneNode(true);
+          parent.insertBefore(duplicate, next);
+          await assert.rejects(() => verify(value), undefined, `duplicate ${suffix}`);
+          duplicate.remove();
+        }
+        if (family === 'shadcn')
+          for (const id of [
+            'shadcn-command-input-wrapper',
+            'shadcn-input-shell',
+            'shadcn-select-group',
+          ]) {
+            const root = id === 'shadcn-select-group' ? value.portalElement : value.element;
+            const nodes = root.querySelectorAll(`[data-projection-prototype="${id}"]`);
+            assert.equal(nodes.length, 1, `exactly one public composition part ${id}`);
+            const target = nodes[0],
+              parent = target.parentNode,
+              next = target.nextSibling;
+            target.remove();
+            await assert.rejects(() => verify(value), undefined, `missing ${id}`);
+            parent.insertBefore(target, next);
+            const duplicate = target.cloneNode(true);
+            parent.insertBefore(duplicate, next);
+            await assert.rejects(() => verify(value), undefined, `duplicate ${id}`);
+            duplicate.remove();
+          }
         await verify(value);
       } finally {
         value.close();

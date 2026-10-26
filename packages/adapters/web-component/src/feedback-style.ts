@@ -3,7 +3,11 @@ import { mergeTwTokensV0 } from '@proto.ui/core';
 const KEY = '__proto_ui_applied_style_tokens_v0__';
 export const PUI_STYLE_ATTR = 'data-pui-style';
 const SETUP_STYLE_SOURCE = Symbol('proto-ui.setup-style');
-const ownedTokensByHost = new WeakMap<HTMLElement, Map<unknown, Set<string>>>();
+type HostTokenOwnership = {
+  owners: Map<unknown, Set<string>>;
+  external: Set<string>;
+};
+const ownedTokensByHost = new WeakMap<HTMLElement, HostTokenOwnership>();
 
 /**
  * v0 compatibility helper: map style tokens onto the Proto UI style attribute.
@@ -94,22 +98,27 @@ function setStyleAttribute(el: HTMLElement, tokens: readonly string[]) {
 }
 
 function applyOwnedStyleTokens(el: HTMLElement, source: unknown, tokens: readonly string[]) {
-  const owners = ownedTokensByHost.get(el) ?? new Map<unknown, Set<string>>();
+  const ownership = ownedTokensByHost.get(el) ?? {
+    owners: new Map<unknown, Set<string>>(),
+    external: new Set<string>(),
+  };
+  const { owners } = ownership;
   const previouslyOwned = collectOwnedTokens(owners);
   const normalized = new Set(normalizeTokens(tokens));
   if (normalized.size > 0) owners.set(source, normalized);
   else owners.delete(source);
-  ownedTokensByHost.set(el, owners);
-  rewriteStyleAttribute(el, owners, previouslyOwned);
+  ownedTokensByHost.set(el, ownership);
+  rewriteStyleAttribute(el, ownership, previouslyOwned);
   if (owners.size === 0) ownedTokensByHost.delete(el);
 }
 
 function clearOwnedStyleTokens(el: HTMLElement, source: unknown) {
-  const owners = ownedTokensByHost.get(el);
-  if (!owners) return;
+  const ownership = ownedTokensByHost.get(el);
+  if (!ownership) return;
+  const { owners } = ownership;
   const previouslyOwned = collectOwnedTokens(owners);
   owners.delete(source);
-  rewriteStyleAttribute(el, owners, previouslyOwned);
+  rewriteStyleAttribute(el, ownership, previouslyOwned);
   if (owners.size === 0) ownedTokensByHost.delete(el);
 }
 
@@ -123,15 +132,21 @@ function collectOwnedTokens(owners: Map<unknown, Set<string>>) {
 
 function rewriteStyleAttribute(
   el: HTMLElement,
-  owners: Map<unknown, Set<string>>,
+  ownership: HostTokenOwnership,
   previouslyOwned: ReadonlySet<string>
 ) {
   const current = normalizeTokens((el.getAttribute(PUI_STYLE_ATTR) ?? '').split(/\s+/));
-  const external = current.filter((token) => !previouslyOwned.has(token));
+  const external = current.filter(
+    (token) => !previouslyOwned.has(token) || ownership.external.has(token)
+  );
+  // An overlapping adapter contribution does not acquire an external token.
+  // Reconcile against the current attribute so external removals stay removed.
+  ownership.external.clear();
+  for (const token of external) ownership.external.add(token);
   const next = [...external];
   const seen = new Set(next);
 
-  for (const tokens of owners.values()) {
+  for (const tokens of ownership.owners.values()) {
     for (const token of tokens) {
       if (seen.has(token)) continue;
       seen.add(token);

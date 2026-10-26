@@ -131,6 +131,7 @@ const staticUtilities: Record<string, string[]> = {
     '-webkit-line-clamp: 1;',
   ],
   'scroll-my-1': ['scroll-margin-block: 0.25rem;'],
+  'scroll-my-1.5': ['scroll-margin-block: 0.375rem;'],
   'border-dashed': ['border-style: dashed;'],
   'cursor-move': ['cursor: move;'],
   'grid-cols-7': ['grid-template-columns: repeat(7, minmax(0, 1fr));'],
@@ -315,9 +316,11 @@ const staticUtilities: Record<string, string[]> = {
   'leading-6': ['line-height: 1.5rem;'],
   'leading-relaxed': ['line-height: 1.625;'],
   'leading-none': ['line-height: 1;'],
+  'leading-[1.1]': ['line-height: 1.1;'],
   'leading-tight': ['line-height: 1.25;'],
   'leading-snug': ['line-height: 1.375;'],
   'leading-normal': ['line-height: 1.5;'],
+  'tracking-tighter': ['letter-spacing: -0.05em;'],
   'tracking-tight': ['letter-spacing: -0.025em;'],
   'tracking-normal': ['letter-spacing: 0;'],
   'tracking-widest': ['letter-spacing: 0.1em;'],
@@ -941,7 +944,7 @@ function splitHostDeclarations(declaration: string): string[] {
     return [];
   }
   if (
-    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|position|inset(?:-.+)?|top|right|bottom|left|z-index|isolation|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
+    /^(width|height|min-width|min-height|max-width|max-height|aspect-ratio|margin(?:-.+)?|scroll-margin-block|position|inset(?:-.+)?|top|right|bottom|left|z-index|isolation|flex(?:-grow|-shrink|-basis)?|order|align-self|font(?:-.+)?|line-height|letter-spacing|transform|--pui-(?:translate|scale)-[xy]|will-change|pointer-events|transition-(?:property|duration|delay|timing-function))$/.test(
       property
     )
   ) {
@@ -1231,9 +1234,12 @@ export function renderProtoStyleEntryCss({
   ].join('\n');
 }
 
-export function renderPrefixedThemeCss(input: string): string {
+export function renderPrefixedThemeCss(
+  input: string,
+  options: { variableDeclarations?: string } = {}
+): string {
   const variableNames = new Set<string>();
-  input.replace(/--([a-z0-9-]+)\s*:/g, (_match, name: string) => {
+  (options.variableDeclarations ?? input).replace(/--([a-z0-9-]+)\s*:/g, (_match, name: string) => {
     variableNames.add(name);
     return '';
   });
@@ -1252,6 +1258,7 @@ export function renderPrefixedThemeCss(input: string): string {
     [
       '$1',
       '    --pui-radius-2xl: calc(var(--pui-radius) + 8px);',
+      '    --pui-radius-3xl: calc(var(--pui-radius) + 12px);',
       '    --pui-radius-4xl: calc(var(--pui-radius) + 16px);',
       '    --pui-radius-xl: calc(var(--pui-radius) + 4px);',
       '    --pui-radius-lg: var(--pui-radius);',
@@ -1412,6 +1419,9 @@ function renderRoundedUtility(utility: string): string[] | null {
       'border-bottom-right-radius: min(var(--pui-radius-4xl), 24px);',
     ];
 
+  if (utility === 'rounded-[var(--pui-radius-xl)]') return ['border-radius: var(--pui-radius-xl);'];
+  if (utility === 'rounded-[var(--pui-radius-3xl)]')
+    return ['border-radius: var(--pui-radius-3xl);'];
   if (utility === 'rounded-[var(--pui-radius-2xl)]')
     return ['border-radius: var(--pui-radius-2xl);'];
   if (utility === 'rounded-[var(--pui-radius-4xl)]')
