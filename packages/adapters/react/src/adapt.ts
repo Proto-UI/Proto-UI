@@ -525,15 +525,25 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
         };
       }
 
-      runtime.useImperativeHandle(
-        ref,
-        () => ({
+      // One public handle per adapter instance. React re-runs the imperative
+      // handle effect whenever the consumer's ref identity changes, so the
+      // factory must hand back the same object every time: consumers reserve
+      // real instance identity, not a per-render wrapper. The handle keeps
+      // reading the live controller, exposes and callback-scope refs.
+      const handleRef = runtime.useRef<{
+        update: () => void;
+        getExposes: () => Record<string, unknown>;
+        invokeInCallbackScope: (fn: () => void) => void;
+      } | null>(null);
+      if (!handleRef.current) {
+        handleRef.current = {
           update: () => controllerRef.current?.update(),
           getExposes: () => scopedExposesReaderRef.current.read(exposesRef.current ?? {}),
           invokeInCallbackScope: (fn: () => void) => invokeInCallbackScopeRef.current?.(fn),
-        }),
-        []
-      );
+        };
+      }
+
+      runtime.useImperativeHandle(ref, () => handleRef.current!, []);
 
       runtime.useEffect(() => {
         controllerRef.current?.applyInstanceAssociations(

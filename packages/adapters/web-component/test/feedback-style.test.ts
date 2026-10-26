@@ -6,6 +6,17 @@ import {
 } from '../src/feedback-style';
 
 describe('adapter-web-component: owned tw tokens applier', () => {
+  it('does not restore an external overlap its owner explicitly removed', () => {
+    const host = document.createElement('div');
+    host.setAttribute('data-pui-style', 'external-token w-full');
+    const applier = createOwnedTwTokenApplier(host);
+    applier.apply(['w-full']);
+    host.setAttribute('data-pui-style', 'external-token');
+    applier.apply(['w-full']);
+    expect(host.getAttribute('data-pui-style')).toBe('external-token w-full');
+    applier.clear();
+    expect(host.getAttribute('data-pui-style')).toBe('external-token');
+  });
   it('apply adds tokens to data-pui-style and does not touch user classes', () => {
     const host = document.createElement('div');
     host.className = 'user-a user-b';

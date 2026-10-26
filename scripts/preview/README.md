@@ -33,9 +33,11 @@ Preview JavaScript is untrusted. The server sets `no-store`, `nosniff`, no-index
 
 A failed, queued or superseding build cannot leave its predecessor advertised as Ready. Closed PRs and changed heads lose their catalog entry; requests to a non-current generation return `410`. A failed synchronization returns `503`, rather than renewing old Ready state. A catalog older than five minutes also returns `503`, including when the publisher stopped or was killed.
 
+A completed on-disk generation remains reusable after a synchronization failure clears the catalog. Its publisher receipt binds the exact artifact and records the sanitized file count and byte total; recovery verifies that receipt, the current file inventory and a non-empty entrypoint before restoring Ready without another download. A changed artifact, missing companion asset or incomplete generation is rejected before any download. The shared live admission guard still runs after this disk check.
+
 Synchronization is polling, not an atomic GitHub authorization transaction. GitHub can change after the last API read. The two-minute deployment timer and five-minute serving lease bound convergence; they do not promise instantaneous revocation. The scan itself must finish within four minutes, and every Ready entry retains the original scan timestamp rather than a later lease extension.
 
-The retained artifact envelope is 50 MiB compressed, 100 MiB expanded, 25 MiB per file and 20,000 files. ZIP materialization additionally limits each path to 64 components/1,024 UTF-8 bytes, aggregate path names to 8 MiB and inferred parent directories to 20,000. Links, special files, traversal, ambiguous paths, and root `_worker.js`, `_routes.json`, `_headers`, `_redirects` or `.assetsignore` controls are rejected. Empty regular assets remain valid.
+The retained artifact envelope is 50 MiB compressed, 100 MiB expanded, 25 MiB per file and 20,000 files. ZIP materialization additionally limits each path to 64 components/1,024 UTF-8 bytes, aggregate path names to 8 MiB and inferred parent directories to 20,000. Links, special files, traversal, ambiguous paths, and root `_worker.js`, `_routes.json`, `_headers`, `_redirects`, `.assetsignore` or `.publisher-receipt.json` controls are rejected. Empty regular assets remain valid.
 
 ## Runtime configuration
 
