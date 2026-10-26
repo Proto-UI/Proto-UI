@@ -28,7 +28,6 @@ Current preparation checked both changed test files with standalone TypeScript o
 
 Required acceptance remains full canonical docs build and complete ZIP admission under the unchanged100MiB limit, all current baseline routes/resources preserved, with actual expanded/compressed counts and exact head. Dedicated same-head header/sidebar locale initialization, cookie/storage/navigation and browser screenshots remain uncovered in this small extraction. Existing #982 native evidence and its later sidebar-close fix cannot be borrowed as this candidate's verification. The carrier remains Draft pending required validation, review, DCO and conflicts; this does not waive unrelated red checks or establish long-term bundle capacity.
 
-
 ## Shared-parent carry on #955, 2026-10-25 13:23 UTC
 
 The [designated counterpart decision](https://github.com/Proto-UI/Proto-UI/pull/955#issuecomment-6398116080) selects the existing three-file repair from #1005 at `4ecb49e09e9ebda35a76d5d768ec25b764572a01`, before counterpart-owned native stack synchronization. The inspected parent is `9152794c4aa5a4b48646c353a7042a6ef3b54a61`. Both existing source/test preimages match #1005's parent exactly; the lifecycle test is absent. This carry reuses the three source/test blobs without editing them, preserving their original contribution and sign-off provenance. This record is the only additional documentation path.

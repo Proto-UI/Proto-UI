@@ -98,7 +98,15 @@ export function diagramEvidenceCases(profile) {
   return profile.figure === 'evolution-feedback' ? evolutionCases : standardCases;
 }
 
-export function diagramEvidenceId(profile, locale, theme, width, revision, svgSha256, scenario = 'standard') {
+export function diagramEvidenceId(
+  profile,
+  locale,
+  theme,
+  width,
+  revision,
+  svgSha256,
+  scenario = 'standard'
+) {
   diagramLocale(profile, locale);
   assert.ok(theme === 'light' || theme === 'dark', 'Unsupported evidence theme');
   assert.ok(

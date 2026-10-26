@@ -290,7 +290,6 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 
 没有浏览器或安装证据的格子明确写未测。交互源码已存在不等于四runtime全通过；生成代码存在不等于npm已可安装；同一固定源码的上游静态阅读不授予执行第三方或升级版本的权限。
 
-
 ## 9. 安装交付完整入口矩阵（静态）
 
 ### B. Registry facade 覆盖缺口（不是语义不存在）
@@ -347,7 +346,6 @@ S0 定义推荐composition、上游和支持矩阵（设计步骤，随真实修
 ### E. Demo关联协议不等于公共安装组合
 
 `apps/www/src/components/PrototypePreviewer/demo-types.ts:35-40,263-279` 的 associations.controlLabel 是按demo渲染作用域的序列化关系意图；demo-renderer.ts通过WC setElementAssociations与框架instanceAssociations适配。这个原语应被推荐组合复用，而不是在页面手写.click()/aria状态。CLI codegen当前没有此关系recipe输入；不能把DemoSpec字段原样当作消费者组件prop。
-
 
 ## 10. 其他家族固定上游与逐问题追溯
 
@@ -520,6 +518,7 @@ Theme/menu/showcase/gallery/search 都区分 WC CustomEvent 与 framework callba
 `site-header-surface.ts` 保留原生子树焦点，`site-search-commands.ts` 保存焦点 epoch。可复用 generation-aware restore；返回哪个业务 command 仍由应用决定。不能仅因存在 focus() 就认定为 Button hack。
 
 #### 13. 父层关闭 Select 与替换前关闭
+
 `site-select-dismissal.ts` 注册 owner→public requestOpen；projection composition 在 runtime 替换前关闭。父层/history 关闭意图归应用，Select 状态转移归 Select。若正常选择必须额外 consumer close 才完成，则应以精确按键证据修 Base/router，不能把补丁永久写入页面。已接受的 generic router 修复不是 Select-name Compiler hack。
 
 ### 5. 已原型化或合理应用组合：十五类
@@ -581,6 +580,7 @@ Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是
 `home-action-icons.ts`、`site-link-icons.ts` 提供内容；Search 已使用 public Lucide 图标。不因图标在首页出现就新增有状态原型。
 
 #### 28. 旧 homepage-live-preview
+
 此模块展示本页任务数据和视图排列，不是 Calendar 或项目管理原型。当前 `homepage-demo-participant` 调用 `homepage-showcase` 而非它。清理前核对引用，不围绕未使用的旧示例制造迁移任务。
 
 ### 6. 建议实现顺序与共同验收
@@ -653,7 +653,6 @@ Gallery 使用公开 parts；确认按钮仅更新 status，HoverCard delays 是
 
 应统一的是“公开原型定义 + 可复用的必要语义组合 + 相同验收”，不是强行把两个页面变成同一实例或共享同一业务状态。优先把Checkbox+Label、Field+Textarea/Select等组合做成同一可消费路径，去掉分叉的plain label、属性重写和组件内样式补丁；页面继续只提供业务数据、文案、回调和外层布局。原生导航/第三方搜索保留其真实宿主职责，能抽取的基本交互再依定义迁入原型。
 
-
 ## 续记：#1001 的 inherited input shard 漏项（2026-10-25 UTC）
 
 这一维护片的实现 parent 为 [bdeef58c](https://github.com/Proto-UI/Proto-UI/commit/bdeef58c20b7479fd2a0a3975dda0e5c8a543d2f)，继续 stack 在 #955，不更改 #955 的分支，也不合入整个 main。上文 7181 的全仓审计快照与第一片 Base-only workspace 映射结论保持原有边界。
@@ -683,7 +682,6 @@ node --test --test-isolation=none \
 | 两处同源 hunk | 2 通过、0 失败，exit 0 | 选定的两个现有契约测试通过；无删除、跳过或放松其断言 |
 
 这只是明确筛选的两项契约，不是完整 187 项重跑，也不等于完整 CI、浏览器、packed 或 registry-install 验收。原有 FieldTextarea 的 8-case codegen 证据与 Vitest/Rollup 预收集受限记录仍按上一片保留，没有重标为本片新运行。后续必须读取新 exact-head CI 的真实状态，capture 尚未启动时不能补写假截图。
-
 
 ## 续记：治理正文快照与文档时效修复（2026-10-25 UTC）
 

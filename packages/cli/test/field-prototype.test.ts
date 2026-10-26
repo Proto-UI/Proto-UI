@@ -9,9 +9,9 @@ describe('Field package/CLI closure', () => {
     '%s exposes the existing Base FieldTextarea only through explicit workspace generation',
     (host) => {
       expect(() => renderHostIndex(host, ['base-field'])).toThrow(/workspace-source-only/);
-      expect(() =>
-        renderHostIndex(host, ['base-field'], { sourceMode: 'installed' })
-      ).toThrow(/workspace-source-only/);
+      expect(() => renderHostIndex(host, ['base-field'], { sourceMode: 'installed' })).toThrow(
+        /workspace-source-only/
+      );
       expect(listComponentChoices().some((entry) => entry.value === 'base-field')).toBe(false);
 
       for (const language of ['ts', 'js'] as const) {

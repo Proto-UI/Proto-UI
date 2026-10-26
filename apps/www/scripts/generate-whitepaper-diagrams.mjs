@@ -312,7 +312,14 @@ function evolutionDescription() {
 function evolution() {
   evolutionDescription();
   // Keep details in the chapter and accessible description; prioritize labels at article width.
-  text(48, 74, tr('实践、证据与明确修正', 'Practice, evidence, explicit revision'), 40, 'start', 'strong');
+  text(
+    48,
+    74,
+    tr('实践、证据与明确修正', 'Practice, evidence, explicit revision'),
+    40,
+    'start',
+    'strong'
+  );
   text(48, 132, tr('三条主线并行推进', 'Three concurrent lines of work'), 36, 'start', 'muted');
   const xs = [112, 400, 688];
   const labels = [
@@ -340,15 +347,7 @@ function evolution() {
     36
   );
   path('M512 476 V521');
-  box(
-    112,
-    521,
-    800,
-    68,
-    tr('归因：哪一层需要修正？', 'Which layer needs revision?'),
-    'blue',
-    36
-  );
+  box(112, 521, 800, 68, tr('归因：哪一层需要修正？', 'Which layer needs revision?'), 'blue', 36);
   const cards = [
     [112, 631, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
     [528, 631, tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation')],
@@ -365,7 +364,14 @@ function evolution() {
   cards.forEach(([x, y, label]) => box(x, y, 384, 92, label, 'panel', 36));
   path('M100 734 H72 V164 H800', false);
   xs.forEach((x) => path(`M${x + 112} 164 V178`));
-  text(48, 886, tr('明确修正，再次检验。', 'Revise explicitly, then test again.'), 36, 'start', 'muted');
+  text(
+    48,
+    886,
+    tr('明确修正，再次检验。', 'Revise explicitly, then test again.'),
+    36,
+    'start',
+    'muted'
+  );
   return 928;
 }
 
@@ -408,18 +414,36 @@ function evolutionMobile() {
     270,
     452,
     108,
-    tr('实践提供证据|行为结果、失败与反例', 'Practice provides evidence|Outcomes, failures,|counterexamples')
+    tr(
+      '实践提供证据|行为结果、失败与反例',
+      'Practice provides evidence|Outcomes, failures,|counterexamples'
+    )
   );
   edge('diagnose', 'practice-evidence', 'diagnoses', 'M258 378 V390');
   text(32, 411, tr('哪一层需要修正？', 'Which layer needs revision?'), 26, 'start', 'strong');
-  text(32, 445, tr('不同归因，并非先后阶段', 'Alternative diagnoses, not stages'), 26, 'start', 'muted');
+  text(
+    32,
+    445,
+    tr('不同归因，并非先后阶段', 'Alternative diagnoses, not stages'),
+    26,
+    'start',
+    'muted'
+  );
 
   parts.push('<g data-alternatives="diagnoses">');
   rect(32, 462, 452, 416, 'scope');
   const diagnoses = [
     ['implementation', 472, tr('实现偏差|修正实现', 'Implementation drift|Fix implementation')],
-    ['host-capability', 572, tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation')],
-    ['prototype', 672, tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype')],
+    [
+      'host-capability',
+      572,
+      tr('Host 能力缺口|补足翻译能力', 'Host capability gap|Improve translation'),
+    ],
+    [
+      'prototype',
+      672,
+      tr('义务遗漏或过拟合|修正 Prototype', 'Omission or overfitting|Revise the Prototype'),
+    ],
     ['theory', 772, tr('基础关系出现反例|重审理论', 'Relation challenged|Revisit the theory')],
   ];
   diagnoses.forEach(([id, y, label]) => {
@@ -434,7 +458,10 @@ function evolutionMobile() {
   text(
     32,
     930,
-    tr('明确修正，再次检验。|实现结果不静默成为标准。', 'Revise, then test again.|No silent rule changes.'),
+    tr(
+      '明确修正，再次检验。|实现结果不静默成为标准。',
+      'Revise, then test again.|No silent rule changes.'
+    ),
     26,
     'start',
     'muted'
