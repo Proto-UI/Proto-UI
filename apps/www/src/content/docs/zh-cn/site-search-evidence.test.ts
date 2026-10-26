@@ -159,8 +159,10 @@ function startupHarness() {
     getAttribute(name: string) {
       return name === 'role' ? this.role : this.disabled;
     },
-    closest(selector: string) {
+    closest(selector: string): any {
       if (selector === '[data-projection-generation-host]') return host;
+      if (selector === '[data-search-command-mount]') return mount;
+      if (selector === 'site-search') return root;
       return this.inert ? host : null;
     },
     hasAttribute() {
@@ -180,7 +182,7 @@ function startupHarness() {
   };
   const root = {
     isConnected: true,
-    dataset: { searchView: undefined as string | undefined },
+    dataset: { searchView: undefined as string | undefined, searchGeneration: '1' },
     querySelectorAll(selector: string) {
       if (selector === '[data-search-command-mount]') return [mount];
       if (selector === '[data-projection-generation-host]') return [host];
@@ -188,6 +190,12 @@ function startupHarness() {
     },
   };
   let now = 0;
+  let epoch = 1000;
+  const targetQuery = vi.fn((selector: string) => {
+    if (selector !== 'site-search [data-projection-generation-state="active"] [data-open-modal]')
+      throw new Error('Unexpected target selector');
+    return root.isConnected && host.dataset.projectionGenerationState === 'active' ? [button] : [];
+  });
   let defined = false;
   let define!: () => void;
   const whenDefined = new Promise<void>((resolve) => {
@@ -198,7 +206,8 @@ function startupHarness() {
   });
   const sandbox = {
     window: {} as any,
-    document: { querySelector: () => root },
+    document: { querySelector: () => root, querySelectorAll: targetQuery },
+    Date: { now: () => epoch },
     performance: { timeOrigin: 1000, now: () => ++now },
     customElements: { get: () => (defined ? class {} : undefined), whenDefined: () => whenDefined },
     MutationObserver: class {
@@ -236,6 +245,11 @@ function startupHarness() {
     mutationObservers,
     performanceObservers,
     define,
+    targetQuery,
+    sandbox,
+    setEpoch(value: number) {
+      epoch = value;
+    },
   };
 }
 
@@ -464,4 +478,176 @@ it('does not reuse an old generation ready timestamp for a late current command'
   const evidence = await read({ startedAt: 0 });
   expect(evidence.observedReadyAt).toBe(1500);
   expect(searchReadinessWasOnTime(evidence)).toBe(false);
+});
+
+it('distinguishes no active command from one missing its attribute at the same expired deadline', async () => {
+  let present = false;
+  const read = runInNewContext(`(${readSearchReadyWithinBudget.toString()})`, {
+    Date: { now: () => 1500 },
+    setTimeout: () => 1,
+    clearTimeout() {},
+    MutationObserver: class {
+      observe() {}
+      disconnect() {}
+    },
+    document: {
+      querySelectorAll: () => (present ? [{ getAttribute: () => null, closest: () => null }] : []),
+    },
+    window: {},
+  });
+  const absent = await read({ startedAt: 0 });
+  present = true;
+  const unlabelled = await read({ startedAt: 0 });
+  expect(absent.currentDisabled).toBe(null);
+  expect(unlabelled.currentDisabled).toBe(null);
+  expect(absent.samples[0].commandCount).toBe(0);
+  expect(unlabelled.samples[0].commandCount).toBe(1);
+  expect(absent.samples[0].getterStartedAt).toBeNull();
+  expect(absent.samples[0].getterSettledAt).toBeNull();
+  expect(unlabelled.samples[0].getterStartedAt).toBe(1500);
+  expect(unlabelled.samples[0].getterSettledAt).toBe(1500);
+  for (const evidence of [absent, unlabelled]) {
+    expect(evidence.samples[0].selectorStartedAt).toBe(1500);
+    expect(evidence.samples[0].selectorResolvedAt).toBe(1500);
+    expect(evidence.browserEnteredAt).toBe(1500);
+    expect(evidence.deadline).toBe(1000);
+    expect(searchReadinessWasOnTime(evidence)).toBe(false);
+  }
+});
+
+it('samples the exact startup target after the original ready timestamp and leaves its oracle intact', async () => {
+  const h = startupHarness();
+  const absent = h.trace.snapshot().targetArrival.observations[0];
+  expect(absent).toMatchObject({ count: 0, readStartedAt: null, readSettledAt: null });
+  const reads = vi.spyOn(h.button, 'getAttribute');
+  let originalReads = 0;
+  h.targetQuery.mockImplementationOnce(() => {
+    originalReads = reads.mock.calls.length;
+    return [];
+  });
+  h.mutationObservers[0].callback();
+  expect(reads).toHaveBeenCalledTimes(originalReads);
+
+  Object.assign(h.button, { role: 'button', disabled: 'false', inert: false, pending: false });
+  h.host.dataset.projectionGenerationState = 'active';
+  h.host.inert = false;
+  h.mount.dataset.projectionOwner = h.host.dataset.projectionOwnerHost;
+  h.root.dataset.searchView = 'ready';
+  h.setEpoch(999);
+  // The additional query deliberately consumes injected clock time. It must
+  // not move the original record that the acceptance function already uses.
+  h.targetQuery.mockImplementationOnce(() => {
+    h.setEpoch(1500);
+    return [h.button];
+  });
+  h.mutationObservers[0].callback();
+  const snapshot = h.trace.snapshot();
+  expect(snapshot.events.at(-1).atEpochMs).toBe(999);
+  expect(snapshot.targetArrival.firstFullyReady.atEpochMs).toBe(1500);
+  expect(h.targetQuery).toHaveBeenLastCalledWith(
+    'site-search [data-projection-generation-state="active"] [data-open-modal]'
+  );
+  const read = runInNewContext(`(${readSearchReadyWithinBudget.toString()})`, {
+    ...h.sandbox,
+    setTimeout: () => 1,
+    clearTimeout() {},
+  });
+  const evidence = await read({ startedAt: 0 });
+  expect(evidence.observedReadyAt).toBe(999);
+  expect(searchReadinessWasOnTime(evidence)).toBe(true);
+});
+
+it('does not use a first target arrival from a retired owner to admit a late current generation', async () => {
+  const h = startupHarness();
+  Object.assign(h.button, { role: 'button', disabled: 'false', inert: false, pending: false });
+  h.host.dataset.projectionGenerationState = 'active';
+  h.host.inert = false;
+  h.mount.dataset.projectionOwner = h.host.dataset.projectionOwnerHost;
+  h.root.dataset.searchView = 'ready';
+  h.setEpoch(999);
+  h.mutationObservers[0].callback();
+  const first = h.trace.snapshot().targetArrival.firstFullyReady;
+  h.host.dataset.projectionOwnerHost = 'current-open';
+  h.host.dataset.projectionGenerationHost = '2';
+  h.mount.dataset.projectionOwner = 'current-open';
+  h.root.dataset.searchGeneration = '2';
+  h.setEpoch(1001);
+  h.mutationObservers[0].callback();
+  const arrival = h.trace.snapshot().targetArrival;
+  expect(arrival.firstFullyReady).toEqual(first);
+  expect(arrival.observations.at(-1)).toMatchObject({
+    owner: 'current-open',
+    currentOwner: 'current-open',
+    generation: '2',
+    currentGeneration: '2',
+    atEpochMs: 1001,
+  });
+  h.setEpoch(1500);
+  const read = runInNewContext(`(${readSearchReadyWithinBudget.toString()})`, {
+    ...h.sandbox,
+    setTimeout: () => 1,
+    clearTimeout() {},
+  });
+  const evidence = await read({ startedAt: 0 });
+  expect(evidence.owner).toBe('current-open');
+  expect(evidence.generation).toBe('2');
+  expect(evidence.observedReadyAt).toBe(1001);
+  expect(searchReadinessWasOnTime(evidence)).toBe(false);
+});
+
+it('keeps first target and fully-ready observations beyond the changed-target journal cap', () => {
+  const h = startupHarness();
+  for (let index = 0; index < 40; index++) {
+    h.root.dataset.searchView = String(index);
+    h.mutationObservers[0].callback();
+  }
+  expect(h.trace.snapshot().targetArrival).toMatchObject({
+    observationCount: 41,
+    dropped: 9,
+    firstTarget: null,
+    firstFullyReady: null,
+  });
+  h.host.dataset.projectionGenerationState = 'active';
+  h.mount.dataset.projectionOwner = h.host.dataset.projectionOwnerHost;
+  h.root.dataset.searchView = 'ready';
+  h.mutationObservers[0].callback();
+  expect(h.trace.snapshot().targetArrival.firstTarget).toMatchObject({ count: 1 });
+  expect(h.trace.snapshot().targetArrival.firstFullyReady).toBeNull();
+  Object.assign(h.button, { role: 'button', disabled: 'false', inert: false, pending: false });
+  h.host.inert = false;
+  h.mutationObservers[0].callback();
+  const snapshot = h.trace.snapshot();
+  expect(snapshot.targetArrival.observations).toHaveLength(32);
+  expect(snapshot.targetArrival).toMatchObject({ observationCount: 43, dropped: 11, errors: 0 });
+  expect(snapshot.targetArrival.firstFullyReady).toMatchObject({
+    count: 1,
+    owner: 'open-owner',
+    generation: '1',
+    ariaDisabled: 'false',
+    inert: false,
+    pending: false,
+  });
+  h.mutationObservers[0].callback();
+  expect(h.trace.snapshot().targetArrival.observationCount).toBe(43);
+});
+
+it('contains a target-query diagnostic error and stops extra queries with the existing observer', async () => {
+  const h = startupHarness();
+  h.targetQuery.mockImplementation(() => {
+    throw 0;
+  });
+  h.root.dataset.searchView = 'ready';
+  expect(() => h.mutationObservers[0].callback()).not.toThrow();
+  expect(h.trace.snapshot().events.at(-1).state.view).toBe('ready');
+  expect(h.trace.snapshot().targetArrival.errors).toBe(1);
+  expect(() => h.trace.stop()).not.toThrow();
+  const stopped = h.trace.snapshot();
+  expect(stopped.targetArrival.errors).toBe(2);
+  const calls = h.targetQuery.mock.calls.length;
+  h.mutationObservers[0].callback();
+  h.define();
+  await Promise.resolve();
+  expect(h.targetQuery).toHaveBeenCalledTimes(calls);
+  expect(h.trace.snapshot().events).toEqual(stopped.events);
+  expect(h.mutationObservers[0].disconnect).toHaveBeenCalledTimes(1);
 });

@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import test from 'node:test';
@@ -48,6 +48,7 @@ async function fixture(t) {
     apiReads: 0,
     apiBudget: Infinity,
     missingArtifacts: new Set(),
+    siteArtifactId: null,
   };
   const response = (value) => {
     if (state.fail) throw new Error('GitHub unavailable');
@@ -81,7 +82,7 @@ async function fixture(t) {
           return response({
             total_count: 2,
             artifacts: [true, false].map((marker) => ({
-              id: current.id * 10 + (marker ? 1 : 2),
+              id: marker ? current.id * 10 + 1 : (state.siteArtifactId ?? current.id * 10 + 2),
               name: `intranet-preview-${marker ? 'binding-' : ''}${pr.number}-${pr.head.sha}-${current.run_attempt}`,
               expired: false,
               size_in_bytes: marker ? 60 : archive.length,
@@ -147,6 +148,46 @@ test('an API failure invalidates the serving catalog rather than renewing stale 
   await assert.rejects(f.sync, /GitHub unavailable/);
   assert.deepEqual((await f.manifest()).previews, []);
   assert.equal((await f.manifest()).error, 'Synchronization failed');
+  f.state.fail = false;
+  assert.equal((await f.sync()).previews[0].status, 'ready');
+  assert.equal(f.state.downloads, 1);
+  assert.equal((await f.sync()).previews[0].status, 'ready');
+  assert.equal(f.state.downloads, 1);
+});
+
+test('recovery rejects a replaced artifact instead of reusing its predecessor bytes', async (t) => {
+  const f = await fixture(t);
+  await f.sync();
+  f.state.fail = true;
+  await assert.rejects(f.sync, /GitHub unavailable/);
+  f.state.fail = false;
+  f.state.siteArtifactId = 999;
+  assert.equal((await f.sync()).previews[0].status, 'unavailable');
+  assert.equal(f.state.downloads, 1);
+});
+
+test('recovery rejects missing companion assets without downloading again', async (t) => {
+  const f = await fixture(t);
+  const first = await f.sync();
+  const generation = join(f.root, 'sites', first.previews[0].generation);
+  await rm(join(generation, 'app.js'));
+  f.state.fail = true;
+  await assert.rejects(f.sync, /GitHub unavailable/);
+  f.state.fail = false;
+  assert.equal((await f.sync()).previews[0].status, 'unavailable');
+  assert.equal(f.state.downloads, 1);
+});
+
+test('recovery rejects an empty entrypoint without downloading again', async (t) => {
+  const f = await fixture(t);
+  const first = await f.sync();
+  const generation = join(f.root, 'sites', first.previews[0].generation);
+  await writeFile(join(generation, 'index.html'), '');
+  f.state.fail = true;
+  await assert.rejects(f.sync, /GitHub unavailable/);
+  f.state.fail = false;
+  assert.equal((await f.sync()).previews[0].status, 'unavailable');
+  assert.equal(f.state.downloads, 1);
 });
 
 test('a same-ID rerun receives a distinct origin and cannot reuse the old artifact', async (t) => {

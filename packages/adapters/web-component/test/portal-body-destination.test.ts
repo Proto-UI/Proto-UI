@@ -117,6 +117,8 @@ it('the real WC Adapter binds a direct body overlay and retires it without leaki
   expect(isWebPortalMaterialSuspended(host)).toBe(true);
   actions.close();
   await flush();
+  // A destination change belongs to the next physical view epoch.
+  await vi.waitFor(() => expect(isWebComponentPortaled(host)).toBe(false));
   actions.open();
   await flush();
   expect(host.parentNode).toBe(next);

@@ -22,13 +22,30 @@ import {
   waitForPreviewRuntime,
 } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
+import {
+  installAccordionInputJournal,
+  createAccordionActivationObservation,
+} from './accordion-activation-observation';
+let activation: ReturnType<typeof createAccordionActivationObservation> = null;
 const families = ['base', 'shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'];
 const route = (family: string, locale = 'en') => `/${locale}/ui-libraries/${family}/accordion/`;
 let browser: Browser,
   baseUrl = '';
 const ref = (previewer: Locator, id: string) => previewer.locator(`.host [data-demo-ref="${id}"]`);
 const expanded = async (button: Locator, value: boolean) => {
-  await expect.poll(() => button.getAttribute('aria-expanded')).toBe(String(value));
+  const poll = activation?.beginPoll(value);
+  try {
+    await expect
+      .poll(() => {
+        const read = () => button.getAttribute('aria-expanded');
+        return activation && poll ? activation.read(poll, read) : read();
+      })
+      .toBe(String(value));
+    if (poll) activation?.pass(poll);
+  } catch (error) {
+    if (poll) activation?.fail(poll);
+    throw error;
+  }
 };
 // Canonical expanded can precede React's Content view commit. Wait only for
 // materialization readiness, then assert IDREFs immediately (never poll the relation).
@@ -210,31 +227,19 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           height: 1000,
         });
         try {
-          await page.evaluate(() => {
-            (window as any).__accordionInputEvidence = [];
-            for (const type of ['pointerdown', 'click', 'keydown', 'keyup'])
-              document.addEventListener(
-                type,
-                (event) => {
-                  const ref = (event.target as Element | null)
-                    ?.closest?.('[data-demo-ref]')
-                    ?.getAttribute('data-demo-ref');
-                  if (ref)
-                    (window as any).__accordionInputEvidence.push({
-                      type,
-                      trusted: event.isTrusted,
-                      ref,
-                      key: (event as KeyboardEvent).key ?? null,
-                    });
-                },
-                { capture: true }
-              );
-          });
+          await page.evaluate(
+            installAccordionInputJournal,
+            !!process.env.PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR &&
+              family === 'liquid-glass' &&
+              runtime === 'react'
+          );
           await applyColorScheme(page, 'light');
           await selectAccordionRuntime(page, previewer, runtime);
           const first = ref(previewer, 'single-overview-trigger'),
             second = ref(previewer, 'single-lifetime-trigger'),
             long = ref(previewer, 'single-long-trigger');
+          if (family === 'liquid-glass' && runtime === 'react')
+            activation = createAccordionActivationObservation(page, second);
           await expanded(first, true);
           await expanded(second, false);
           await capture(ref(previewer, 'single'), `${family}-${runtime}-light-initial-open`, {
@@ -269,10 +274,12 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             await ref(previewer, 'single-lifetime-content').getAttribute('aria-labelledby')
           ).toBe(await second.getAttribute('id'));
           const scrollY = await page.evaluate(() => window.scrollY);
+          activation?.setPhase('second-space-close');
           await page.keyboard.press('Space');
           await expanded(second, false);
           expect(await page.evaluate(() => window.scrollY)).toBe(scrollY);
           expect(await second.getAttribute('aria-controls')).toBeNull();
+          activation?.setPhase('second-fresh-enter');
           await page.keyboard.press('Enter');
           await expanded(second, true);
           await materialized(ref(previewer, 'single-lifetime-content'));
@@ -281,6 +288,7 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           expect(
             await ref(previewer, 'single-lifetime-content').getAttribute('aria-labelledby')
           ).toBe(await second.getAttribute('id'));
+          activation?.setPhase('after-target');
           await page.keyboard.press('Tab');
           await focused(long); // disabled header is skipped; no auto focusable Content
           await page.keyboard.press('Home');
@@ -365,8 +373,24 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
             RUNTIMES[(RUNTIMES.indexOf(runtime) + 1) % RUNTIMES.length]!
           );
           expect(await old?.evaluate((el) => el.isConnected)).toBe(false);
+        } catch (error) {
+          activation?.failCase();
+          throw error;
         } finally {
-          await context.close();
+          const closing = activation;
+          let contextClosed = false;
+          try {
+            try {
+              await closing?.beforeClose();
+            } catch {}
+            await context.close();
+            contextClosed = true;
+          } finally {
+            activation = null;
+            try {
+              await closing?.afterClose(contextClosed);
+            } catch {}
+          }
         }
       }, 90_000);
   for (const family of families)

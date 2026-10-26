@@ -19,7 +19,7 @@ export { SHADCN_STYLE_TOKENS } from '../generated/shadcn-style-tokens.js';
 export { BRUTALIST_STYLE_TOKENS } from '../generated/brutalist-style-tokens.js';
 export { BRUTALIST_THEME_CSS } from '../generated/brutalist-theme.js';
 
-export const SHADCN_THEME_CSS = `:root {
+export const SHADCN_THEME_VARIABLES_CSS = `:root {
     --radius: 0.625rem;
     --background: lab(100% 0 0);
     --foreground: lab(2.75381% 0 0);
@@ -104,9 +104,11 @@ export const SHADCN_THEME_CSS = `:root {
     --code-highlight: lab(15.32% 0 0);
     --code-number: lab(67.52% -0.0000298023 0);
     --selection: lab(90.952% 0 -0.0000119209);
-    --selection-foreground: lab(7.78201% -0.0000149012 0);
+    --selection-foreground: lab(7.78201% 0 0);
   }
-  /* Theme-owned default; component selection utilities keep precedence. */
+  `;
+
+export const SHADCN_THEME_PAINT_CSS = `  /* Theme-owned default; component selection utilities keep precedence. */
   @layer theme {
     ::selection {
       background-color: var(--selection);
@@ -114,3 +116,5 @@ export const SHADCN_THEME_CSS = `:root {
     }
   }
   `;
+
+export const SHADCN_THEME_CSS = `${SHADCN_THEME_VARIABLES_CSS}${SHADCN_THEME_PAINT_CSS}`;

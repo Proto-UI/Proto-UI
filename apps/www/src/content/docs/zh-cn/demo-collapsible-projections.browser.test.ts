@@ -569,7 +569,7 @@ for (const family of FAMILIES) {
                 const element = node as HTMLElement;
                 const box = element.getBoundingClientRect();
                 const style = getComputedStyle(element);
-                return {
+                const geometry = Object.freeze({
                   left: box.left,
                   right: box.right,
                   width: box.width,
@@ -577,8 +577,96 @@ for (const family of FAMILIES) {
                   clientWidth: element.clientWidth,
                   paddingLeft: parseFloat(style.paddingLeft),
                   paddingRight: parseFloat(style.paddingRight),
-                };
+                });
+                if (
+                  !(geometry.width > 0 && geometry.left >= 0 && geometry.right <= 320) ||
+                  !(geometry.scrollWidth - geometry.clientWidth <= 1)
+                ) {
+                  try {
+                    const layout = (target: Element) => {
+                      const css = getComputedStyle(target);
+                      return {
+                        display: css.display,
+                        width: css.width,
+                        minWidth: css.minWidth,
+                        maxWidth: css.maxWidth,
+                        boxSizing: css.boxSizing,
+                        font: css.font,
+                        padding: css.padding,
+                        borderWidth: css.borderWidth,
+                        margin: css.margin,
+                        position: css.position,
+                        transform: css.transform,
+                        overflowX: css.overflowX,
+                        gridTemplateColumns: css.gridTemplateColumns,
+                        gridAutoColumns: css.gridAutoColumns,
+                        flexBasis: css.flexBasis,
+                        flexShrink: css.flexShrink,
+                        flexGrow: css.flexGrow,
+                        alignItems: css.alignItems,
+                        alignSelf: css.alignSelf,
+                        justifyContent: css.justifyContent,
+                        justifySelf: css.justifySelf,
+                      };
+                    };
+                    const ancestors = [];
+                    let ancestor = element.parentElement;
+                    for (let depth = 0; ancestor && depth < 8; depth++) {
+                      const rect = ancestor.getBoundingClientRect();
+                      ancestors.push({
+                        tag: ancestor.localName,
+                        id: ancestor.id,
+                        className: ancestor.getAttribute('class'),
+                        demoRef: ancestor.getAttribute('data-demo-ref'),
+                        materialScene: ancestor.getAttribute('data-material-scene'),
+                        rect: {
+                          left: rect.left,
+                          right: rect.right,
+                          top: rect.top,
+                          bottom: rect.bottom,
+                          width: rect.width,
+                          height: rect.height,
+                        },
+                        clientWidth: ancestor.clientWidth,
+                        scrollWidth: ancestor.scrollWidth,
+                        offsetWidth: ancestor.offsetWidth,
+                        scrollLeft: ancestor.scrollLeft,
+                        layout: layout(ancestor),
+                      });
+                      ancestor = ancestor.parentElement;
+                    }
+                    return {
+                      ...geometry,
+                      diagnostic: {
+                        boundary: 'Adjacent same-turn reads after original geometry; not atomic.',
+                        self: {
+                          tag: element.localName,
+                          tokens: element.getAttribute('data-pui-style'),
+                          layout: layout(element),
+                        },
+                        viewport: {
+                          width: window.innerWidth,
+                          clientWidth: document.documentElement.clientWidth,
+                          dpr: window.devicePixelRatio,
+                        },
+                        ancestors,
+                        ancestorsTruncated: ancestor !== null,
+                      },
+                    };
+                  } catch (error) {
+                    return { ...geometry, diagnostic: { error: String(error) } };
+                  }
+                }
+                return geometry;
               });
+              if (
+                !(geometry.width > 0 && geometry.left >= 0 && geometry.right <= 320) ||
+                !(geometry.scrollWidth - geometry.clientWidth <= 1)
+              )
+                console.error(
+                  `[collapsible-narrow-geometry] ${family}/${runtime}/${theme}/${target === root ? 'root' : 'content'}`,
+                  JSON.stringify(geometry)
+                );
               expect(geometry.width).toBeGreaterThan(0);
               expect(geometry.left).toBeGreaterThanOrEqual(0);
               expect(geometry.right).toBeLessThanOrEqual(320);

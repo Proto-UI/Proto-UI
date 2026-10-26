@@ -44,4 +44,4 @@ Functions are synchronous, pure and immutable; they create no lifetime resources
 
 Open work remains: real ItemText and internal frame/viewport part composition; Overlay private target binding; current-lease callbacks; four-adapter commit boundary; placement/focus/scroll ownership; local animation start; layout-versus-visual viewport policy; upstream resize/blur close, Tab/modal/outside behavior; scroll controls; controlled value mutation; www Header/settings/Homepage/Previewer/default demo/Calendar migration. Each belongs to the corresponding prototype, neutral mechanism or consumer owner. No gap is waived and no Component or Compiler/Adapter behavior is silently changed.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot

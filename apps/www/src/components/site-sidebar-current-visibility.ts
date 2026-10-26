@@ -201,6 +201,11 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
       Math.abs(event.target.scrollTop - expectedScroll.top) <= 0.5
     )
       return;
+    // Layout can adjust our own pending scroll before projection has settled.
+    if (pending && expectedScroll?.owner === event.target) {
+      schedule();
+      return;
+    }
     yieldToUser();
   };
   function destroy() {

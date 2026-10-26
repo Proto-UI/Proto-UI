@@ -4,9 +4,9 @@ For Agents following the [visual evidence policy](visual-evidence.md). Humans ma
 
 ## Agent write boundary
 
-Follow [Contributor Agents](contributor-agents.md#measure-and-disclose-the-active-agent-model) for the current private ModelTrace record/context and canonical public disclosure. Agents use `pnpm agent:publish` for supported commits and Issue/PR comments, not direct `git commit`, `gh issue comment`, `gh pr comment`, editor comment submission, or a Contents API write. A receipt is not authorization, identity, independent review or acceptance. Read-only `git`/`gh` inspection and scoped staging remain usable.
+Agents use `pnpm agent:publish` for supported commits and Issue/PR comments, not direct `git commit`, `gh issue comment`, `gh pr comment`, editor comment submission, or a Contents API write. A receipt is not authorization, independent review or acceptance. Read-only `git`/`gh` inspection and scoped staging remain usable.
 
-The examples below use independently established `human-assisted` / `current-user` mode and exact `explicit-current-user` authorization. Substitute the actual authorized repository, target and private paths; do not infer authorization from these examples. Keep the record, context and raw samples outside the real checkout, including through directory aliases, and publish only the canonical public receipt. Other authorized execution envelopes must follow the supported publisher's trusted-launcher requirements, not relabel themselves as current-user work.
+The examples below use independently established `human-assisted` / `current-user` mode and exact `explicit-current-user` authorization. Substitute the actual authorized repository and target; do not infer authorization from these examples. Other authorized execution envelopes must follow the supported publisher's trusted-launcher requirements, not relabel themselves as current-user work.
 
 Attachment, Gist and existing authorized Release/hosting uploads are separate storage operations with their own approval, visibility and retention. `agent:publish` does not upload assets and supplies no new storage API. After uploading, publish the governed evidence comment through the supported publisher. If the authorized publication surface is unsupported, stop at that boundary rather than bypassing it with direct Git/GitHub calls.
 
@@ -32,21 +32,20 @@ Comment publication sends Markdown; it does not itself upload local images. Neit
 3. Put the returned Markdown in the reviewed evidence body and discard the unused editor draft. Agents publish through `agent:publish`, not the editor or raw `gh`. Humans may submit in the editor or through their direct CLI workflow, never both.
 4. Read back the published comment and open the image as the intended reader. Do not assume a private attachment URL is a privacy boundary; upload only approved content.
 
-Prepare `evidence-comment.md` with the actual attachment Markdown, source revision/provenance and stable evidence marker. Generate the disclosure below and include its exact output once as a visible standalone `## ModelTrace` section, not a quoted or commented example. Inspect the complete body and seal its exact bytes/hash under the evidence-publication authorization **after** adding the disclosure; do not authorize an undisclosed body and append it later. The supported publisher preserves an already correctly disclosed body byte-for-byte. If the record expires or changes before publication, prepare and authorize a new exact body rather than changing a sealed payload silently.
+Prepare `evidence-comment.md` with the actual attachment Markdown, source revision/provenance and stable evidence marker. Inspect the complete body and seal its exact bytes/hash under the evidence-publication authorization before writing; do not silently change a sealed payload. Pass that approved lowercase SHA-256 through `--body-digest` so the publisher preserves the payload unchanged. Preserve accurate Agent authorship and source provenance without altering human text.
 
 ```powershell
-$privateRecord = (Resolve-Path -LiteralPath '../private-modeltrace/record.json').Path
-$privateContext = (Resolve-Path -LiteralPath '../private-modeltrace/context.json').Path
-pnpm agent:identify -- disclosure --record $privateRecord --context $privateContext --format markdown
-# Add the exact output to evidence-comment.md, then review and seal the body.
+# Prepare, inspect and authorize the exact evidence-comment.md body before writing.
 gh issue view 123 -R Proto-UI/Proto-UI --comments
 pnpm agent:publish -- comment --number 123 --body-file evidence-comment.md `
-  --repository github.com:Proto-UI/Proto-UI --record $privateRecord --context $privateContext `
+  --body-digest $approvedEvidenceBodySha256 `
+  --repository github.com:Proto-UI/Proto-UI `
   --mode human-assisted --mode-source current-user --authorization explicit-current-user
 gh issue view 123 -R Proto-UI/Proto-UI --comments
 # Same mechanism for an authorized PR follow-up:
 pnpm agent:publish -- comment --number 456 --body-file pr-evidence-comment.md `
-  --repository github.com:Proto-UI/Proto-UI --record $privateRecord --context $privateContext `
+  --body-digest $approvedPrEvidenceBodySha256 `
+  --repository github.com:Proto-UI/Proto-UI `
   --mode human-assisted --mode-source current-user --authorization explicit-current-user
 gh pr view 456 -R Proto-UI/Proto-UI --comments
 ```
@@ -71,7 +70,7 @@ These are separately authorized storage alternatives, not commands to create dup
 
 Choose a verified authorized branch, never a direct write to `main`. Reuse existing Git/worktrees. Keep evidence-only assets out of product PRs; do not merge their branch. Assets that belong to maintained docs/tests use their owning directory and normal PR review. Preserve provenance/license and generators. Use content-specific filenames and pin image links to full commit SHA, not a moving branch.
 
-For Agents, independently review and authorize the **entire** staged change and exact contributor branch, parent HEAD and tree. `git write-tree` records a candidate tree; computing it or viewing a stat does not approve unrelated staged user work. Stop if the index contains work outside the authorization. Prepare `evidence-commit-message.txt` without a `ModelTrace:` trailer; review the generated canonical commit disclosure with the message before authorizing the commit. The publisher appends that exact trailer and the configured contributor's sign-off. Do not paste a trailer into the prepared message or use plain `git commit` as an Agent fallback.
+For Agents, independently review and authorize the **entire** staged change and exact contributor branch, parent HEAD and tree. `git write-tree` records a candidate tree; computing it or viewing a stat does not approve unrelated staged user work. Stop if the index contains work outside the authorization. Prepare and review `evidence-commit-message.txt` and the actual source/provenance with the change before authorizing the commit. The publisher applies the configured contributor's sign-off. Do not use plain `git commit` as an Agent fallback.
 
 ```powershell
 # In the verified target worktree/branch, with no unrelated staged files:
@@ -86,12 +85,9 @@ git write-tree
 $authorizedBranch = 'codex/issue-123-evidence'
 $authorizedHead = 'FULL_REVIEWED_PARENT_COMMIT_SHA'
 $authorizedTree = 'FULL_REVIEWED_AUTHORIZED_TREE_SHA'
-$privateRecord = (Resolve-Path -LiteralPath '../private-modeltrace/record.json').Path
-$privateContext = (Resolve-Path -LiteralPath '../private-modeltrace/context.json').Path
-pnpm agent:identify -- disclosure --record $privateRecord --context $privateContext --format commit
 pnpm agent:publish -- commit --message-file evidence-commit-message.txt `
   --branch $authorizedBranch --expected-head $authorizedHead --expected-tree $authorizedTree `
-  --repository github.com:Proto-UI/Proto-UI --record $privateRecord --context $privateContext `
+  --repository github.com:Proto-UI/Proto-UI `
   --mode human-assisted --mode-source current-user --authorization explicit-current-user
 # Only under separate exact push authorization and live branch permission:
 git push origin HEAD:refs/heads/codex/issue-123-evidence

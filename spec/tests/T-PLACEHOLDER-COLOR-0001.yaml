@@ -3,6 +3,8 @@ type: test
 title: Finite placeholder color authoring and Web projection
 status: draft
 since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The mapped checks cover finite author vocabulary, CSS targets and four-Web-adapter editor continuity, not native raster, accessibility or non-Web conformance; the test entity remains draft pending that evidence.
 summary: Finite author/CSS checks and four-adapter editor continuity, not native raster or non-Web conformance.
 cases:
   - id: T-PLACEHOLDER-COLOR-0001-CASE-CORE

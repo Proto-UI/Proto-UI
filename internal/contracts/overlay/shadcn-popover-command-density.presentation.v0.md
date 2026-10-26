@@ -41,4 +41,4 @@ Planned source/CSS suite: `packages/prototypes/shadcn/test/popover-command-densi
 
 Only the two Shadcn family recipes, this definition and directly associated evidence/registration may change. No Base, Compiler, IR, Adapter, Body, other family, public demo content, or Finf completion-count mutation. LiquidGlass appearance, material admission and diagnostic planning are outside this definition.
 
-Agent: dot ModelTrace: not measured — owner-authorized dot exemption (2026-10-06) This role declaration is not authenticated model identity, permission, independent review, or acceptance.
+Agent: dot

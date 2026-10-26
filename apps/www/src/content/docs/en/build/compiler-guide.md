@@ -70,6 +70,14 @@ If a future proposal needs one of these answers to change, it requires explicit 
 
 `packages/compiler` is an implemented **private experiment**, not an official Compiler distribution. Its manifest retains `private: true` and `protoUi.release.scan: false`. The private compiler CLI is separate from the published `proto-ui` CLI; publication, catalog admission and maintained compatibility require their own approval.
 
+### Current-main browser boundary and website inventory
+
+At current main `7181a93a5ec5cad43936a72e31d5477d5488733a`, the browser-host prototype associated with PR #829 is absent: there is no current browser export, VM host, memory entry, browser build or WASM regression in the compiler package. PR #829's source landed on a feature branch, not this main revision; its browser code and dependencies are historical evidence, not current delivery.
+
+Issue #817 remains open. The website demo inventory is source-AST discovery plus canonical private Node `compileFile` admission only. It records mounted pages, static registrations, source-located rejections and unresolved bindings; it does not execute WASM, run a compiler preview, migrate a page or establish browser isolation, security, performance, full parity or a public Compiler. Historical #829 inventory rows—including rejected rows—remain dated evidence and reconciliation obligations, never new passes.
+
+Regenerate the inventory with `node --import tsx scripts/compiler/website-demo-inventory.mjs`. The generator retains the complete immutable historical input in `scripts/compiler/website-demo-migrations-829.json`, verifies its SHA-256, and writes `internal/compiler/website-demo-migrations.json`. Current input membership (including hidden scoped source files), bytes, installed parser dependency closure, HEAD/index provenance and dirty worktree bindings are recorded separately. Changed, missing or newly added inputs invalidate the binding; unresolved or dynamic source addresses remain visible rather than becoming successful admissions.
+
 ### Implemented profiles and compatibility
 
 | Private profile | Exercised target | Output dependency boundary |
