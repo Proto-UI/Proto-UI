@@ -4,6 +4,7 @@ import ts from 'typescript';
 import { expect, it } from 'vitest';
 import { snapshotLibraryPart } from './library-card-snapshot';
 import { renderSnapshotTokenCss } from './snapshot-prototype-style';
+import { libraryActionAppearanceForFamily } from './library-card-prototypes';
 
 // Execute the actual Astro frontmatter declarations with the real snapshotter.
 // This checks serialization and CSS membership, not native geometry or paint.
@@ -19,7 +20,7 @@ const evaluateSnapshot = new AsyncFunction(
   'Astro',
   'snapshotLibraryPart',
   'createHash',
-  javascript + '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope };'
+  javascript + '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope, layout: typeof layout === "undefined" ? undefined : layout };'
 );
 const snapshot = (part: string, props: Record<string, unknown>) =>
   evaluateSnapshot({ props: { part, props } }, snapshotLibraryPart, createHash) as Promise<{
@@ -29,6 +30,26 @@ const snapshot = (part: string, props: Record<string, unknown>) =>
     snapshotId: string;
     snapshotScope: string;
   }>;
+
+it('prerenders the actual Rhea action recipe and all native-state CSS with its layout', async () => {
+  const action = libraryActionAppearanceForFamily('shadcn');
+  const result = await evaluateSnapshot(
+    { props: { part: 'shadcn-surface', props: action.surface, layout: action.layout } },
+    snapshotLibraryPart,
+    createHash
+  );
+  expect(result.layout).toEqual(action.layout);
+  expect(result.layout.minHeight).toBe('2rem');
+  expect(result.layout.padding).toBe('0.25rem 0.75rem');
+  expect(result.Tag).toBe('wc-library-shadcn-surface');
+  for (const facts of [{}, { hovered: true }, { focusVisible: true }, { pressed: true }]) {
+    const tokens = await snapshotLibraryPart('shadcn-surface', { ...action.surface, ...facts });
+    expect(result.cssTokens).toEqual(expect.arrayContaining(tokens));
+  }
+  const ordinary = await snapshot('shadcn-surface', { variant: 'solid', elevation: 'raised' });
+  expect(result.snapshotId).not.toBe(ordinary.snapshotId);
+  expect(renderSnapshotTokenCss(result.cssTokens, result.snapshotScope)).toContain(result.snapshotId);
+});
 
 it('binds each real Card token set to a deterministic, exact snapshot host', async () => {
   const title = await snapshot('shadcn-text', { size: '2xl', leading: 'tight' });

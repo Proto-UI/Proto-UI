@@ -1,5 +1,17 @@
 import { readFileSync } from 'node:fs';
 import { it, expect } from 'vitest';
+
+it('wires the family action recipe into the same native anchor and serialized passive host', () => {
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  const part = readFileSync('apps/www/src/components/LibraryCardPart.astro', 'utf8');
+  expect(source).toContain('const action = libraryActionAppearanceForFamily(family)');
+  expect(source).toContain('<a href={library.href} data-library-action>');
+  expect(source).toContain('props={{ ...action.surface }}');
+  expect(source).toContain('props={{ ...action.text }}');
+  expect(source).toContain('layout={action.layout}');
+  expect(part).toContain('style={layout}');
+  expect(part).toContain('data-library-props={JSON.stringify(props)}');
+});
 it('keeps ownership honest and removes fake previews and delayed placeholders', () => {
   const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
   expect(source).not.toContain('PrototypePreviewer');

@@ -1,6 +1,26 @@
 import { describe, it, expect } from 'vitest';
 import { snapshotLibraryPart } from './library-card-snapshot';
 import { librarySurfaceProps, libraryHeadingProps } from './library-card-prototypes';
+import { shadcnActionAppearance } from '@proto.ui/prototypes-shadcn/surface';
+import * as recipes from './library-card-prototypes';
+
+it('uses the public default Rhea action recipe without changing other family recipes', async () => {
+  const actionFor = recipes.libraryActionAppearanceForFamily;
+  expect(typeof actionFor).toBe('function');
+  const action = actionFor('shadcn');
+  expect(action).toEqual(shadcnActionAppearance());
+  expect(action.surface).toMatchObject({ actionProfile: 'rhea' });
+  expect(action.layout?.minHeight).toBe('2rem');
+  expect(action.layout?.padding).toBe('0.25rem 0.75rem');
+  expect(await snapshotLibraryPart('shadcn-surface', { ...action.surface })).toEqual(
+    await snapshotLibraryPart('shadcn-surface', { ...shadcnActionAppearance().surface })
+  );
+  for (const family of ['base', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const) {
+    expect(actionFor(family).surface).toEqual(recipes.libraryActionProps);
+    expect(actionFor(family).layout).toBeUndefined();
+  }
+  expect(actionFor('bootstrap-2-3-2').text).toEqual(recipes.bootstrapLibraryActionTextProps);
+});
 describe('library entry real Prototype first-frame projection', () => {
   it('keeps Base truly unstyled and renders the governed Brutalist Card', async () => {
     expect(await snapshotLibraryPart('base-surface', librarySurfaceProps)).toEqual([]);
