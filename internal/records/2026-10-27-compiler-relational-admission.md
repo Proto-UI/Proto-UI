@@ -475,3 +475,223 @@ Qt and Flutter remain outside these checks.
 activation; no spec lifecycle or acceptance criteria changed. Formal review and
 applicable exact-head CI remain separate repository conditions. No
 `COMPILER_MERGE_READY` is asserted by these author compile-only results.
+
+## Official GPUI public-entry runtime check — 2026-10-27
+
+This additional author-run check uses the unchanged numbers/strings complete
+consumer described above, generated from projection
+`f05b162982405f53a20aa18fccc5dd4cf05f8aa9`. It is not execution of the complete
+current PR or newer main. The earlier compile-only and kernel records remain
+historical, not rewritten as runtime results. No implementation, assertion,
+entity lifecycle or dependency declaration in this repository changed.
+
+Rust/Cargo 1.98.1 and official distribution checksum remain as recorded above;
+no independent signing-key chain verification is claimed. The unchanged
+479-package lock selects 301 packages for this Linux test, including 34
+build-script packages and 24 proc-macro packages. The added test-support closure
+was explicitly admitted before execution, not inferred from its manifest presence.
+Offline Cargo tree and actual build packages/features exactly matched the reviewed
+envelope. Successful build produced 358 compiler-artifact events and 41
+build-script-executed events across those 34 packages; event counts are not
+package counts or counts of macro invocations. All 458 registry archives/extracted
+contents and four Git sources/4,703 tracked entries were checked before and after;
+consumer input hashes and lock were unchanged. No credentials, system packages or
+network access were used during building/running; a fresh user/network namespace
+supplemented Cargo offline mode. This user/network namespace plus environment
+cleanup is not a mount namespace or filesystem-allowlist strong sandbox.
+
+First no-run build: 20:29:25.203377–20:32:48.748870 UTC, exit 101, ENOSPC writing
+GPUI's rlib; no test ran. Its stdout/stderr and hash/size inventory of 2,731 failed
+target files were retained. Only that task's failed target cache was removed
+(1,951,582,783 bytes); debug information and incremental compilation were disabled
+for resource recovery. Opt-level 0, debug assertions, overflow checks, all source
+bytes, dependencies/features and assertions remained unchanged. Second no-run
+build: 20:33:25.042777–20:36:29.556819 UTC, exit 0, 184.514 seconds, child maxRSS
+1,178,100 KiB. This was a build recovery, not a retry of a failed behavioral test.
+Four unused-variable warnings (`value` twice, `window`, `cx`) were preserved.
+
+The **only runtime invocation** was 20:38:36.203075–20:38:36.578827 UTC, exit 0,
+0.376 seconds, child maxRSS 106,572 KiB. Actual output:
+
+```text
+running 1 test
+test relational_public ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+```
+
+The single test uses four macro-managed official contexts, one iteration and zero
+retries. Its successful loops perform 24 valid typed/generic public-entry calls
+(8 numeric and 16 string), checking 96 relational booleans, plus three exact-message
+admission rejections. Counts derive from the unchanged source and passing test,
+not independent runtime telemetry. Actual generated Value/SDK conversions and
+public dispatch are exercised; there is no replacement Value or forged Window/App.
+Construction, explicit disposal and macro cleanup are outside the rejection catch.
+Default Rust output capture was retained: successful expected panic output is not
+separately visible in the console log; no diagnostic-only rerun was made.
+
+### Prepared-input reproduction
+
+Select/rebuild the fixed projection and emit the complete numbers/strings consumer
+using the earlier appendix, preserving all 16 supporting files. The generated
+Cargo.toml already has GPUI pinned to
+`62e5991dd0f0c8a3af8d5e7e9c4652490d468db8`, including dev feature `test-support`.
+Use the exact previously verified lock and dependency archive/checkouts; do not
+silently resolve newer dependencies. This public record supplies the complete test
+and command sequence, but the full lock, dependency/tool archives, executable, complete approved source
+baseline and official macro source remain outside
+the public repository. Therefore it is **not self-contained offline reproduction**
+from this text alone. Byte-verification reports do not substitute for possessing
+and verifying those omitted inputs. The commands parameterize prepared absolute
+paths; the no-run command below passes the same harmless runner argument as the
+run stage, whereas the recorded no-run invocation omitted the trailing runner
+argument. No new execution of this reformatted recipe is claimed.
+
+```sh
+# Prerequisites: absolute, separately verified prepared paths. Do not resolve a
+# new lock or download dependencies as part of this offline procedure.
+: "${CONSUMER:?unchanged numbers/strings full consumer directory}"
+: "${TOOLCHAIN_BIN:?verified Rust/Cargo 1.98.1 bin directory}"
+: "${SCOPED_CARGO_HOME:?verified fixed dependency cache}"
+: "${FIXTURE_TARGET:?dedicated disposable target directory}"
+: "${LOG_DIR:?separate existing evidence directory}"
+# Save the exact Rust block below to $CONSUMER/tests/relational_public.rs.
+# Cargo.toml must be the generated manifest, including pinned GPUI test-support.
+printf '%s  %s\n' \
+  d719415271ffb4ad9f64e8183fe81d1e149cb8b82d97628abcebe0399d250bec "$CONSUMER/Cargo.lock" \
+  95d8664fa269fbf98c2fa16a6160f2898d21eb450551b013470979068734fc83 "$CONSUMER/tests/relational_public.rs" \
+  412eb9aa8907be002ba8c3e7f5a9103dc32ddf86bdc6b9aa5ecf91d96f19a649 "$CONSUMER/Component.rs" | sha256sum -c -
+# Both commands use the same profile; debug assertions/overflow checks stay on.
+for stage in build run; do
+  set --
+  if [ "$stage" = build ]; then set -- --no-run; fi
+  unshare --user --net -- env -i \
+    PATH="$TOOLCHAIN_BIN:/usr/bin:/bin" LANG=C.UTF-8 \
+    CARGO_HOME="$SCOPED_CARGO_HOME" CARGO_TARGET_DIR="$FIXTURE_TARGET" \
+    RUSTC="$TOOLCHAIN_BIN/rustc" CARGO_NET_OFFLINE=true CARGO_BUILD_JOBS=1 \
+    CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 CARGO_INCREMENTAL=0 \
+    "$TOOLCHAIN_BIN/cargo" test --manifest-path "$CONSUMER/Cargo.toml" \
+    --test relational_public --target x86_64-unknown-linux-gnu \
+    --locked --offline --message-format=json "$@" -- --test-threads=1 \
+    > "$LOG_DIR/$stage.stdout" 2> "$LOG_DIR/$stage.stderr" || exit "$?"
+done
+```
+
+Complete `tests/relational_public.rs` below has SHA256
+`95d8664fa269fbf98c2fa16a6160f2898d21eb450551b013470979068734fc83`.
+Its historical draft header is retained to preserve approved/executed bytes;
+the dated execution record above supersedes that header's unexecuted status.
+The final comment claiming panic diagnostics remain visible is also historical:
+default successful-test capture hides them; executed source bytes were not edited.
+
+```rust
+// REVIEW DRAFT ONLY: not compiled or executed.
+// Uses the unchanged generated_gpui_component and its real Value/SDK.
+use generated_gpui_component::CompiledComponent;
+use gpui::{AppContext, TestAppContext};
+use serde_json::{json, Value as Json};
+use std::panic::{catch_unwind, AssertUnwindSafe};
+
+// Official macro supplies separate real contexts and its documented teardown.
+// One iteration, fixed seed, no retries; no user-defined platform or fake refs.
+#[gpui::test(iterations = 1, retries = 0, seed = 0)]
+fn relational_public(
+    cx: &mut TestAppContext,
+    reject_null: &mut TestAppContext,
+    reject_bool: &mut TestAppContext,
+    reject_string: &mut TestAppContext,
+) {
+    cx.skip_drawing();
+    let window = cx.add_window(|window, cx| {
+        CompiledComponent::new(json!({}), None, window, cx)
+    });
+    // End the component read borrow before native_drive may update that entity.
+    let handle = window.read_with(cx, |component, _| component.handle()).unwrap();
+    let numbers: &[(f64, f64, [bool; 4])] = &[
+        (2.0, 10.0, [true, true, false, false]),
+        (10.0, 2.0, [false, false, true, true]),
+        (-0.0, 0.0, [false, true, false, true]),
+        (3.5, 3.5, [false, true, false, true]),
+    ];
+    for &(a, b, expected) in numbers {
+        let actual = cx.update_window(window.into(), |_, window, app| {
+            handle.method_0(a, b, window, app)
+        }).unwrap();
+        assert_eq!(actual, expected.to_vec(), "finite numbers {a:?}, {b:?}");
+        let generic = cx.update_window(window.into(), |_, window, app| {
+            handle.call("numbers", vec![json!(a), json!(b)], window, app)
+        }).unwrap();
+        assert_eq!(generic, json!(expected));
+    }
+    let strings: &[(&str, &str, [bool; 4])] = &[
+        ("2", "10", [false, false, true, true]),
+        ("\u{10000}", "\u{e000}", [true, true, false, false]),
+        ("", "a", [true, true, false, false]),
+        ("a", "aa", [true, true, false, false]),
+        ("same", "same", [false, true, false, true]),
+        ("\u{e9}", "e\u{301}", [false, false, true, true]),
+        ("\0a", "\0b", [true, true, false, false]),
+        ("\u{1}", "\u{2}", [true, true, false, false]),
+    ];
+    for &(a, b, expected) in strings {
+        let actual = cx.update_window(window.into(), |_, window, app| {
+            handle.method_1(a.to_owned(), b.to_owned(), window, app)
+        }).unwrap();
+        assert_eq!(actual, expected.to_vec(), "strings {a:?}, {b:?}");
+        let generic = cx.update_window(window.into(), |_, window, app| {
+            handle.call("strings", vec![json!(a), json!(b)], window, app)
+        }).unwrap();
+        assert_eq!(generic, json!(expected));
+    }
+    cx.update_window(window.into(), |_, window, app| {
+        handle.dispose(window, app);
+    }).unwrap();
+    drop(handle);
+
+    // Each rejection has a separate macro-owned official context.
+    // Only the actual generated public call is caught, inside a normally
+    // returning GPUI update closure. Construction/update/teardown failures
+    // escape and fail the test; they cannot count as argument rejection.
+    let invalid: [(&mut TestAppContext, &str, [Json; 2]); 3] = [
+        (reject_null, "numbers", [Json::Null, json!(1)]),
+        (reject_bool, "numbers", [json!(true), json!(1)]),
+        (reject_string, "strings", [json!(1), json!("x")]),
+    ];
+    for (cx, name, arguments) in invalid {
+        cx.skip_drawing();
+        let window = cx.add_window(|window, cx| {
+            CompiledComponent::new(json!({}), None, window, cx)
+        });
+        let handle = window.read_with(cx, |component, _| component.handle()).unwrap();
+        let rejected = cx.update_window(window.into(), |_, window, app| {
+            catch_unwind(AssertUnwindSafe(|| {
+                handle.call(name, arguments.to_vec(), window, app)
+            }))
+        }).unwrap();
+        // The rejected call stops in check_method before invoke/phase change.
+        // Disposal is outside catch; a cleanup panic is a test failure.
+        cx.update_window(window.into(), |_, window, app| {
+            handle.dispose(window, app);
+        }).unwrap();
+        drop(handle);
+        let error = rejected.expect_err("invalid public entry must reject");
+        let message = error.downcast_ref::<String>().map(String::as_str)
+            .or_else(|| error.downcast_ref::<&str>().copied()).unwrap_or("");
+        assert_eq!(message, "invalid exposed method arguments",
+                   "unexpected panic, not admission rejection");
+    }
+    // Macro handles parked tasks, app quit, context drop and dispatcher drain.
+    // No panic hook suppression: expected rejection diagnostics remain visible.
+}
+```
+
+This checks listed finite-number and valid Rust/JSON string transport cases,
+including numeric-looking strings, UTF-16 supplementary/BMP ordering, prefixes,
+combining sequences and controls. It does not admit nonfinite public inputs or
+lone surrogates. Drawing was skipped on official TestPlatform; no real OS window,
+font/rendering/clipboard or external HTTP behavior was accepted. Four simple
+construct/dispose paths are not the full lifecycle/reentrancy matrix. Bottom
+runtime, the full operator/position matrix, Qt/Flutter, stable activation,
+independent acceptance and current whole-tree CI remain separate. The prior
+canonical/nested complete-artifact equivalence is not a bottom runtime execution.
+`COMPILER_MERGE_READY=false / pending` remains unchanged.
