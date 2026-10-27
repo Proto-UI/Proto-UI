@@ -368,3 +368,110 @@ Lone-surrogate transport is not represented by Rust `str` probes. Full generated
 GPUI modules, Qt and Flutter consumers remain UNTESTED by this author validation.
 Existing CI failures and other owners' work remain separate; no
 `COMPILER_MERGE_READY`, formal approval, ready transition or merge is asserted.
+
+## Complete generated GPUI compile checks — 2026-10-27
+
+Two additional author checks used the real generated components and complete
+`proto-ui-gpui-native` Value/host SDK against pinned GPUI, not extracted kernels
+or replacement Value wrappers. Source generation remained on the approved d4-based
+projection `f05b162982405f53a20aa18fccc5dd4cf05f8aa9`; this is not execution of the
+complete b6/cf88 repository combination. Only temporary artifact/lock preparation
+and offline compile-only dependency execution were in scope. No component ran,
+repository dependency changed, system package was installed or lifecycle claim
+was promoted. Earlier evidence and failures above remain historical records.
+
+| Fixture | Source / IR provenance | Complete generated artifacts | Consumer lock SHA256 |
+| --- | --- | --- | --- |
+| numbers/strings | Raw input SHA256 `84a03a6a5cd6b7ed960717f9c2f20fd70f565521d0c760ae9e18d09fb90cece1`; source-graph provenance `40aeaef17b572ae6b9d76a029fa72336c1239fd67ae5675f79ab83af6bbae906`. No separate parsed-IR JSON was retained for this fixture; do not invent an IR-file hash. | Component.rs `412eb9aa8907be002ba8c3e7f5a9103dc32ddf86bdc6b9aa5ecf91d96f19a649`; generated-artifacts JSON `c21de54294e0225aebb3eb681f35a8426f038ca417a4acf7843ffbf5bd27a7fc`; all 16 supporting files materialized. | `d719415271ffb4ad9f64e8183fe81d1e149cb8b82d97628abcebe0399d250bec` |
+| canonical bottom condition | Raw input SHA256 `5612f69d80a9181b1a5d62df87d4cb49acab2dfe1f8978d8571b19203fd5a194`; saved parsed-IR JSON `4b408a699bde5eb72f360cd9c7808c0f8b5e9e4b17d2e60f00744b15e906992a`. Source produces canonical `union[]`; no nested-IR mutation. | Component.rs `3055e075cdea2d8d8c46a523cd1003c84b03bbb058572a59d664b1951805c124`; generated-artifacts JSON `557730253fd2923f6e1daa9f38785733887cb7c98bb522a9be3e1423872d60c3`; all 16 supporting files materialized. | `56a64cbff1ed36d330f6a48b37aa307454b8b2c49272d95c32cffa3a37c8ea2b` |
+
+The numbers/strings input and generation method appear in the prior appendix.
+The canonical bottom input was the existing condition probe, parsed with
+`fileName: 'bottom-condition.proto.ts'`, validated, then emitted without IR edits:
+
+```ts
+import {definePrototype} from '@proto.ui/core';export default definePrototype({name:'bottom',setup(def){def.expose.method('compare',(x:'a')=>{if(x==='a')return false;if(x<null)return true;return false;});return r=>r.el('div',[]);}});
+```
+
+Write each emitter result's `code` to `Component.rs` and every `supportingFiles`
+entry to its exact safe relative path, including Cargo manifests and SDK sources.
+The bottom `.truthy()` condition therefore type-checks against the real Value,
+not a manually reconstructed enum. Separate directories preserve both fixtures.
+Their lock comparison found only the local generated root name changed:
+`generated-gpui-c4930c3117456cbe637f58e70cdd9e75` versus
+`generated-gpui-d7d4d4245a21b29251b4b476a68e67d8`. All third-party
+name/version/source/checksum tuples, third-party features and SDK supporting
+bytes were identical. Both locks contain 479 packages: 458 registry packages,
+19 Git packages at four pinned revisions, and two local packages.
+
+Toolchain: official Rust/Cargo 1.98.1 x86_64-unknown-linux-gnu; rustc commit
+`48a229ceaefd4985c50990b14116b6d856af0985`, Cargo commit
+`797e8a9bca276c1c9f9f738d2a20f484fa4eea9d`. Official standalone archive SHA256
+`24ba1338a2d35c5a3247936546429e163fa674d726102af18bdf624582c57aea`
+matched its official HTTPS checksum; no independently trusted signing-key chain
+verification is claimed. Before compilation, all registry archive hashes and
+extracted member bytes/types/executable bits were checked; four Git checkouts
+were checked against 4,703 tracked blob bytes, executable modes and symlink
+contents. Existing Cargo extraction permissions strip group/other access; no
+permission changes were made. The bottom precompile check was recorded at
+18:52:48–18:52:54Z. A separate delayed read-only postcompile check ran at
+2026-10-27T19:01:55.008467+00:00–2026-10-27T19:02:00.773185+00:00; it compared all
+18 consumer files (including lock) against retained evidence hashes,
+458 registry archives/extracted contents and four Git checkouts (4,703 tracked
+entries), including untracked/ignored-file checks. It found no changes or errors.
+This was performed after review identified the missing postcompile report, not
+at compilation completion; no claim of continuous observation is made. The
+original compile runner itself checked only the lock before/after.
+
+For each exact fixture, the successful command was equivalent to the following,
+with absolute prepared paths, a scoped credential-free environment, one worker,
+no proxy/token values and a fresh network namespace. `--offline` was additional
+Cargo enforcement, not a substitute for isolating build-script networking.
+
+```sh
+unshare --user --net -- env -i PATH="$TOOLCHAIN_BIN:/usr/bin:/bin" LANG=C.UTF-8 \
+  CARGO_HOME="$SCOPED_CARGO_HOME" CARGO_TARGET_DIR="$FIXTURE_TARGET" \
+  RUSTC="$VERIFIED_RUSTC" CARGO_NET_OFFLINE=true CARGO_BUILD_JOBS=1 \
+  "$VERIFIED_CARGO" check --manifest-path "$CONSUMER/Cargo.toml" \
+  --lib --target x86_64-unknown-linux-gnu --locked --offline --message-format=json
+```
+
+| Actual check | Result and retained diagnostics | Resource observation |
+| --- | --- | --- |
+| numbers/strings, started 18:47:34Z | exit 0; 0 errors, 4 unused-variable warnings: `value` at Component.rs:12/19 and `window`/`cx` at :126. | 125.17 s wall; child maxRSS 851,704 KiB. |
+| canonical bottom, started 18:53:05Z | exit 0; 0 errors, 5 warnings: unreachable expression at Component.rs:76 plus unused `value` at :12/19 and `window`/`cx` at :117. | 121.87 s wall; child maxRSS 851,676 KiB. |
+
+Each run observed 287 distinct package IDs and 342 compiler-artifact events
+(all `fresh: false`); 40 build-script-executed events involved 33 distinct
+packages, and 23 packages produced proc-macro artifacts. Event counts and package
+counts are different; neither is a count of proc-macro invocations.
+Child maxRSS is not aggregate concurrent memory peak. Warnings were retained,
+not newly suppressed; no `-D warnings` pass is claimed. The first numbers/strings
+launcher failed exit127 because `/usr/bin/time` was missing, before Cargo ran;
+that failure was preserved, then existing Python resource accounting replaced
+only the measurement wrapper. Earlier metadata DNS failure and its successful
+retry inheriting unchanged platform network settings remain separate records.
+No dependency scripts ran during the prior metadata-only stage.
+
+Public reproduction limits: this record provides inputs, generation/check methods
+and exact lock digests, but the two complete consumer locks and dependency/tool
+archives are currently retained only in the evidence packages/temporary workspace,
+not checked into this public repository. Thus the public text alone is not a
+self-contained or fully offline reproducible build. Do not use a private Library
+link as public evidence, silently regenerate a different lock, or claim omitted
+archives were independently rehashed by a reviewer of the compact evidence ZIP.
+
+These full-module checks add a new evidence layer. Earlier Rust1.85.1 primitive
+kernels and handwritten bool receiver controls remain separate; their NaN/Infinity
+inputs bypass public finite-number admission. Main's Rust1.99.1 generated-condition
+plus minimal Value/Json wrapper is also a separate isolation control. The new
+checks establish complete-module type compatibility for the two named fixtures,
+not execution of relational truth tables or unreachable code. Nested IR, the full
+operator/position matrix, lifecycle, host string transport, windows/rendering,
+Qt and Flutter remain outside these checks.
+
+`C-COMPILER-RELATIONAL-0001-Q-NATIVE-EVIDENCE` and
+`T-COMPILER-RELATIONAL-0001-Q-INDEPENDENT-AND-NATIVE` remain open for stable
+activation; no spec lifecycle or acceptance criteria changed. Formal review and
+applicable exact-head CI remain separate repository conditions. No
+`COMPILER_MERGE_READY` is asserted by these author compile-only results.
