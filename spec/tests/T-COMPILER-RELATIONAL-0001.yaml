@@ -1,0 +1,52 @@
+id: T-COMPILER-RELATIONAL-0001
+type: test
+title: Compiler relational admission and generated consumer conformance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Local targeted evidence and source emission do not replace independent review or native consumer execution; retain draft status.
+cases:
+  - id: T-COMPILER-RELATIONAL-0001-CASE-ADMISSION
+    title: Reject invalid scalar pairs and all invalid union alternatives at source and IR boundaries
+    covers: [C-COMPILER-RELATIONAL-0001-ADMISSION, C-COMPILER-RELATIONAL-0001-MIGRATION]
+    expectation: Explicit rejection without changing strict equality or unrelated arithmetic.
+  - id: T-COMPILER-RELATIONAL-0001-CASE-NUMBER
+    title: Ordered binary64 predicates with NaN and signed zero
+    covers: [C-COMPILER-RELATIONAL-0001-NUMBER]
+    expectation: Handwritten four-operator truth tables including NaN on either side.
+  - id: T-COMPILER-RELATIONAL-0001-CASE-STRING
+    title: UTF-16 order, prefixes, normalization differences and encoding boundaries
+    covers: [C-COMPILER-RELATIONAL-0001-STRING]
+    expectation: U+10000 sorts before U+E000; literal/control text stays distinct; unsupported GPUI lone surrogates diagnose.
+  - id: T-COMPILER-RELATIONAL-0001-CASE-EVALUATION
+    title: Effectful operands execute once in left-to-right order
+    covers: [C-COMPILER-RELATIONAL-0001-EVALUATION]
+    expectation: Repeated generated WC calls append exactly LR then LRLR; GPUI emission binds sequenced operands.
+implementations:
+  - id: compiler-targeted
+    kind: runtime-test
+    status: needs-review
+    path: packages/compiler/test/relational-comparison.test.ts
+    required: true
+    consumesCases: [T-COMPILER-RELATIONAL-0001-CASE-ADMISSION, T-COMPILER-RELATIONAL-0001-CASE-NUMBER, T-COMPILER-RELATIONAL-0001-CASE-STRING, T-COMPILER-RELATIONAL-0001-CASE-EVALUATION]
+    notes:
+      - Actual generated WC execution uses happy-dom; this is not browser or native acceptance.
+      - Actual generated React, Vue3 and Vue2 consumers also execute the handwritten relation matrix and effect-order probe; native execution remains separate evidence debt.
+  - id: expression-types-migration
+    kind: module-test
+    status: needs-review
+    path: packages/compiler/test/expression-types.test.ts
+    required: true
+    consumesCases: [T-COMPILER-RELATIONAL-0001-CASE-ADMISSION]
+verifies:
+  contracts:
+    - id: C-COMPILER-RELATIONAL-0001
+      anchors: [C-COMPILER-RELATIONAL-0001-ADMISSION, C-COMPILER-RELATIONAL-0001-NUMBER, C-COMPILER-RELATIONAL-0001-STRING, C-COMPILER-RELATIONAL-0001-EVALUATION, C-COMPILER-RELATIONAL-0001-MIGRATION]
+openQuestions:
+  - id: T-COMPILER-RELATIONAL-0001-Q-INDEPENDENT-AND-NATIVE
+    question: Independent review and real native consumers have not completed; source emission is not native execution.
+    blocks: [activation:T-COMPILER-RELATIONAL-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Map bounded relational migration cases to targeted executable evidence without stable activation.
+tags: [compiler, relational, conformance]
