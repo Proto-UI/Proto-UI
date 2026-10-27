@@ -4,6 +4,7 @@ import ts from 'typescript';
 import { expect, it } from 'vitest';
 import { snapshotLibraryPart } from './library-card-snapshot';
 import { renderSnapshotTokenCss } from './snapshot-prototype-style';
+import { libraryActionAppearanceForFamily } from './library-card-prototypes';
 
 // Execute the actual Astro frontmatter declarations with the real snapshotter.
 // This checks serialization and CSS membership, not native geometry or paint.
@@ -19,7 +20,7 @@ const evaluateSnapshot = new AsyncFunction(
   'Astro',
   'snapshotLibraryPart',
   'createHash',
-  javascript + '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope };'
+  javascript + '\nreturn { Tag, tokens, cssTokens, snapshotId, snapshotScope, layout: typeof layout === "undefined" ? undefined : layout };'
 );
 const snapshot = (part: string, props: Record<string, unknown>) =>
   evaluateSnapshot({ props: { part, props } }, snapshotLibraryPart, createHash) as Promise<{
@@ -29,6 +30,40 @@ const snapshot = (part: string, props: Record<string, unknown>) =>
     snapshotId: string;
     snapshotScope: string;
   }>;
+
+it('prerenders the actual Rhea action recipe and all native-state CSS with its layout', async () => {
+  const action = libraryActionAppearanceForFamily('shadcn');
+  const result = await evaluateSnapshot(
+    { props: { part: 'shadcn-surface', props: action.surface, layout: action.layout } },
+    snapshotLibraryPart,
+    createHash
+  );
+  expect(result.Tag).toBe('wc-library-shadcn-surface');
+  // Public passive action contract: layout is serialized and state paint is
+  // available before upgrade, independently of a second snapshot evaluation.
+  const layout = document.createElement('span');
+  Object.assign(layout.style, result.layout);
+  expect(layout.style.display).toBe('inline-flex');
+  expect(layout.style.gap).toBe('0.375rem');
+  expect(layout.style.minHeight).toBe('2rem');
+  const css = renderSnapshotTokenCss(result.cssTokens, result.snapshotScope);
+  for (const declaration of [
+    'border-radius: var(--pui-radius-2xl);',
+    'background-color: var(--pui-primary);',
+    'color: var(--pui-primary-foreground);',
+    'border-color: transparent;',
+    'color-mix(in oklab, var(--pui-primary) 80%, transparent)',
+    'border-color: var(--pui-ring);',
+    '--pui-ring-width: 3px;',
+    '--pui-translate-y: 1px;',
+    'outline-color: Highlight',
+  ]) expect(css).toContain(declaration);
+  expect(css).not.toContain('0 1px 2px');
+  const selectors = [...css.matchAll(/(:where\([^{}]+\))\s*\{/g)].map((rule) => rule[1]!);
+  expect(selectors.length).toBeGreaterThan(0);
+  expect(selectors.every((selector) => selector.includes(result.snapshotId))).toBe(true);
+
+});
 
 it('binds each real Card token set to a deterministic, exact snapshot host', async () => {
   const title = await snapshot('shadcn-text', { size: '2xl', leading: 'tight' });

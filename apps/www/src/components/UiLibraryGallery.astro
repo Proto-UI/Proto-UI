@@ -10,9 +10,8 @@ import {
   shadcnLibraryHeadingProps,
   libraryBodyPropsForFamily,
   libraryCaptionPropsForFamily,
-  libraryActionProps,
+  libraryActionAppearanceForFamily,
   bootstrapLibraryHeadingProps,
-  bootstrapLibraryActionTextProps,
   type LibraryFamily,
 } from './library-card-prototypes';
 import { BRUTALIST_THEME } from '../../../../packages/prototypes/brutalist/src/theme';
@@ -290,6 +289,7 @@ const themeCss = Object.entries(familyThemes)
         const bootstrap = family === 'bootstrap-2-3-2';
         const bodyProps = libraryBodyPropsForFamily(family);
         const captionProps = libraryCaptionPropsForFamily(family);
+        const action = libraryActionAppearanceForFamily(family);
         return (
           <article
             class="library-card"
@@ -407,19 +407,28 @@ const themeCss = Object.entries(familyThemes)
                   <a href={library.href} data-library-action>
                     <LibraryCardPart
                       part={`${family}-surface`}
-                      props={libraryActionProps}
+                      props={{ ...action.surface }}
+                      layout={action.layout}
                       class="library-card__action"
                     >
-                      <LibraryCardPart
-                        part={`${family}-text`}
-                        props={
-                          bootstrap
-                            ? bootstrapLibraryActionTextProps
-                            : { size: 'sm', weight: 'medium', tone: 'inherit' }
-                        }
-                      >
-                        {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
-                      </LibraryCardPart>
+                      {shadcn ? (
+                        <>
+                          <LibraryCardPart
+                            part={`${family}-text`}
+                            props={{ ...action.text }}
+                          >
+                            {library.cta}
+                          </LibraryCardPart>
+                          <StaticFamilyIcon family={library.id} name="arrow-right" size="1rem" />
+                        </>
+                      ) : (
+                        <LibraryCardPart
+                          part={`${family}-text`}
+                          props={{ ...action.text }}
+                        >
+                          {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
+                        </LibraryCardPart>
+                      )}
                     </LibraryCardPart>
                   </a>
                 </LibraryCardPart>

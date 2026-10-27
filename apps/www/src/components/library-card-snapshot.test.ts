@@ -1,6 +1,62 @@
 import { describe, it, expect } from 'vitest';
 import { snapshotLibraryPart } from './library-card-snapshot';
 import { librarySurfaceProps, libraryHeadingProps } from './library-card-prototypes';
+import { libraryActionAppearanceForFamily } from './library-card-prototypes';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
+
+// Independent declaration expectations: public Rhea action profile, based on
+// shadcn-ui/ui 96da9cc7 style-rhea.css (rounded-2xl, primary/80 hover,
+// focus ring-3, active translate-y-px), realized by the passive Surface contract.
+// This consumes actual projected CSS; it does not compare the helper to itself
+// or claim browser cascade/geometry from HappyDOM.
+it.each([
+  ['rest', {}, 'background-color: var(--pui-primary);'],
+  ['hover', { hovered: true }, 'color-mix(in oklab, var(--pui-primary) 80%, transparent)'],
+  ['focus', { focusVisible: true }, '--pui-ring-width: 3px;'],
+  ['press', { pressed: true }, '--pui-translate-y: 1px;'],
+] as const)('projects independently expected Rhea %s CSS', async (_name, facts, declaration) => {
+  const action = libraryActionAppearanceForFamily('shadcn');
+  const tokens = await snapshotLibraryPart('shadcn-surface', { ...action.surface, ...facts });
+  const css = renderSnapshotTokenCss(tokens);
+  expect(css).toContain('border-radius: var(--pui-radius-2xl);');
+  expect(css).toContain('color: var(--pui-primary-foreground);');
+  if (!('focusVisible' in facts)) expect(css).toContain('border-color: transparent;');
+  expect(css).not.toContain('0 1px 2px');
+  expect(css).toContain(declaration);
+  if ('focusVisible' in facts) {
+    expect(css).toContain('border-color: var(--pui-ring);');
+    expect(css).toContain('outline: 2px solid transparent;');
+    expect(css).toContain('outline-color: Highlight');
+  }
+  if (!('pressed' in facts)) expect(css).not.toContain('--pui-translate-y: 1px;');
+  if (!('focusVisible' in facts)) expect(css).not.toContain('--pui-ring-width: 3px;');
+});
+it('projects the consumer action label typography as independent Rhea CSS', async () => {
+  const action = libraryActionAppearanceForFamily('shadcn');
+  const css = renderSnapshotTokenCss(await snapshotLibraryPart('shadcn-text', { ...action.text }));
+  // Public text-sm / leading-5 / font-medium: 14px / 20px at a 16px root.
+  expect(css).toContain('font-size: 0.875rem;');
+  expect(css).toContain('line-height: 1.25rem;');
+  expect(css).toContain('font-weight: 500;');
+  expect(css).toContain('color: inherit;');
+});
+
+it('retains observable non-Shadcn action Surface outputs', async () => {
+  for (const [family, radius] of [
+    ['base', null],
+    ['brutalist', 'var(--pui-radius)'],
+    ['bootstrap-2-3-2', '4px'],
+    ['liquid-glass', '0'],
+  ] as const) {
+    const action = libraryActionAppearanceForFamily(family);
+    const tokens = await snapshotLibraryPart(`${family}-surface`, { ...action.surface });
+    const css = renderSnapshotTokenCss(tokens);
+    if (radius === null) expect(tokens).toEqual([]);
+    else expect(css).toContain(`border-radius: ${radius};`);
+    expect(css).not.toContain('border-radius: var(--pui-radius-2xl);');
+  }
+});
+
 describe('library entry real Prototype first-frame projection', () => {
   it('keeps Base truly unstyled and renders the governed Brutalist Card', async () => {
     expect(await snapshotLibraryPart('base-surface', librarySurfaceProps)).toEqual([]);

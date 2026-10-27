@@ -1,6 +1,6 @@
 import BaseSurface from '@proto.ui/prototypes-base/surface';
 import BaseText from '@proto.ui/prototypes-base/text';
-import ShadcnSurface from '@proto.ui/prototypes-shadcn/surface';
+import ShadcnSurface, { shadcnActionAppearance } from '@proto.ui/prototypes-shadcn/surface';
 import {
   ShadcnCardRoot,
   ShadcnCardHeader,
@@ -74,6 +74,19 @@ export const bootstrapLibraryActionTextProps = {
   leading: 'normal',
   tone: 'inherit',
 } as const;
+
+// The link owns navigation; the public family recipe owns its passive appearance.
+export function libraryActionAppearanceForFamily(family: LibraryFamily) {
+  if (family === 'shadcn') return shadcnActionAppearance();
+  return {
+    surface: libraryActionProps,
+    text:
+      family === 'bootstrap-2-3-2'
+        ? bootstrapLibraryActionTextProps
+        : ({ size: 'sm', weight: 'medium', tone: 'inherit' } as const),
+    layout: undefined,
+  };
+}
 
 // Consumer recipes preserve each family's existing typography rather than
 // changing Text defaults shared by unrelated consumers.

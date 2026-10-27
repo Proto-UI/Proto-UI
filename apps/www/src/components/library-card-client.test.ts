@@ -2,8 +2,10 @@ import { initLibraryLiquidCardCandidate } from './library-liquid-card-client';
 import { describe, it, expect } from 'vitest';
 import { initLibraryCards } from './library-card-client';
 import { snapshotLibraryPart } from './library-card-snapshot';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
 import {
   libraryCardPrototypes,
+  libraryActionAppearanceForFamily,
   librarySurfaceProps,
   libraryBodyPropsForFamily,
   libraryCaptionPropsForFamily,
@@ -12,6 +14,63 @@ import {
 const flush = async () => {
   for (let i = 0; i < 8; i++) await Promise.resolve();
 };
+
+it('retains the serialized public Rhea action through native facts, cleanup and re-init', async () => {
+  const recipe = libraryActionAppearanceForFamily('shadcn');
+  const owner = document.createElement('article');
+  const link = document.createElement('a');
+  link.href = '/shadcn/';
+  link.dataset.libraryAction = '';
+  let surface = document.createElement('wc-library-shadcn-surface');
+  surface.dataset.libraryPart = 'shadcn-surface';
+  surface.dataset.libraryProps = JSON.stringify(recipe.surface);
+  surface.textContent = 'Explore';
+  link.append(surface);
+  owner.append(link);
+  document.body.append(owner);
+  const expectFacts = async (facts: Record<string, boolean>) => {
+    await flush();
+    const tokens = (surface.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+    const css = renderSnapshotTokenCss(tokens);
+    expect(css).toContain('border-radius: var(--pui-radius-2xl);');
+    expect(css).toContain('color: var(--pui-primary-foreground);');
+    expect(css).toContain('border-color: transparent;');
+    expect(css).not.toContain('0 1px 2px');
+    expect(css.includes('color-mix(in oklab, var(--pui-primary) 80%, transparent)')).toBe(!!facts.hovered);
+    expect(css.includes('--pui-translate-y: 1px;')).toBe(!!facts.pressed);
+    expect(owner.querySelector('a')).toBe(link);
+    expect(link.getAttribute('href')).toBe('/shadcn/');
+    expect(surface.tabIndex).toBe(-1);
+    expect(surface.hasAttribute('role')).toBe(false);
+    expect(surface.dataset.libraryProps).toBe(JSON.stringify(recipe.surface));
+  };
+  let release = initLibraryCards(owner);
+  // Read the connected upgraded host: HappyDOM may replace its pre-definition wrapper.
+  surface = link.querySelector<HTMLElement>('[data-library-part]')!;
+  for (let cycle = 0; cycle < 2; cycle++) {
+    await expectFacts({});
+    link.dispatchEvent(new Event('pointerenter'));
+    await expectFacts({ hovered: true });
+    const down = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true });
+    link.dispatchEvent(down);
+    expect(down.defaultPrevented).toBe(false);
+    await expectFacts({ hovered: true, pressed: true });
+    link.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', bubbles: true }));
+    link.dispatchEvent(new Event('pointerleave'));
+    await expectFacts({});
+    link.dispatchEvent(new Event('pointerenter'));
+    link.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await expectFacts({ hovered: true, pressed: true });
+    // Interrupt active state, not only an already-neutral action.
+    release();
+    await expectFacts({});
+    link.dispatchEvent(new Event('pointerenter'));
+    await expectFacts({});
+    if (cycle === 0) release = initLibraryCards(owner);
+  }
+  owner.remove();
+  await flush();
+});
 describe('real library card enhancement', () => {
   it.each(Object.keys(libraryCardPrototypes) as LibraryPart[])(
     'keeps server/client tokens and exact native children for %s',
