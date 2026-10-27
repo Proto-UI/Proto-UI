@@ -15,6 +15,4 @@ description: Audit one bounded Proto UI collaboration-governance slice and route
 
 Remain read-only in this leaf and hand authorized mutations to their registered leaves. Missing Project or administration scope is an observation limit that triggers narrower evidence or a scoped no-action result, not proof that configuration is absent.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-govern`, the registered governance report artifact, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language. Keep GitHub names and identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-govern`, the registered governance report artifact, and at most one `nextSkillId`. Communicate with the user in the user's current language. Keep GitHub names and identifiers canonical.

@@ -17,8 +17,4 @@ For event ordering, input attribution, CSS ownership or a suspect fixture, read 
 
 When the repair would change a normative criterion, owner, public API, compatibility promise, or lifecycle, continue only if current authority already fixes that transition; otherwise route the smallest product-direction decision. Do not edit the spec merely to make the implementation pass, hide a lower-layer defect in a Prototype or stylesheet, or treat screenshots as sole protocol evidence.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep technical identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep technical identifiers canonical.

@@ -37,11 +37,7 @@ The standalone CLI mode arguments and purpose evidence are operator declarations
 
 `threadRevisionDigest` detects collected comment changes, including replies, edits, and deletions sharing a timestamp. It is not identity, authorization, or proof that a finding is fixed. Preflight, final pre-write admission, already-resolved no-op, and post-write verification retain the existing head, permission, and timestamp boundaries and compare the digest. Collection remains bounded to one complete page of at most 100 comments; a truncated page is rejected. Neither collection nor the read-to-write interval is an atomic snapshot or server-side compare-and-swap guarantee.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include the registered mutation receipt, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep repository, Issue, pull-request, thread, workflow, and revision identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, including the registered `mutation-receipt`. Communicate with the user in the user's current language. Keep repository, Issue, pull-request, thread, workflow, and revision identifiers exact.
 
 ## Durable owner continuation
 

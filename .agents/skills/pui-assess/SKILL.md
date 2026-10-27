@@ -19,6 +19,4 @@ A self-result can derive U0 through C4 without cross-dimension compensation. It 
 
 Return the challenge ID, response digest, self-assessed band, recommended task and review classes, autonomous ceilings, critical failures, snapshot binding, explicit limitations, and one next transition permitted by the current mode.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-assess`, the registered capability-envelope artifact, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language while preserving canonical identifiers.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-assess`, the registered capability-envelope artifact, and at most one `nextSkillId`. Communicate with the user in the user's current language while preserving canonical identifiers.

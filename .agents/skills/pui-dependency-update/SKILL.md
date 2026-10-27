@@ -15,8 +15,4 @@ description: Apply one governed bounded Proto UI dependency update after pui-dep
 
 The transition changes tracked feature-branch content only. External publication and release remain outside this leaf.
 
-## Explicit handoff
-
-Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry `capability-envelope`, `dependency-report`, `authority-map`, and `implementation-authorization` by reference, preserving their existing references and any digests, and include the registered `candidate-change`. Set `nextSkillId` to one eligible registered leaf or `null` without loading it. Carry all artifacts required by that next leaf and validate the handoff before it is loaded; both `pui-validate` and `pui-review` require the existing authority map, and review additionally requires `evidence-report` and `review-input`.
-
-Communicate with the user in the user's current language. Keep package names, versions, registries, and revision identities canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry `capability-envelope`, `dependency-report`, `authority-map`, and `implementation-authorization` by reference, preserving their existing references and any digests, and include the registered `candidate-change`. Both `pui-validate` and `pui-review` require the existing authority map; review additionally requires `evidence-report` and `review-input`. Communicate with the user in the user's current language. Keep package names, versions, registries, and revision identities canonical.

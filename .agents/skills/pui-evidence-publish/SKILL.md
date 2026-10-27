@@ -20,6 +20,4 @@ This transition publishes a comment, not new storage. Read `internal/agent-opera
 
 Do not assign, label, reopen, close, resolve review threads, approve, merge, create a Release/host, push assets, or alter permissions. Publication needs authorization even when the packet is complete. Existing privacy, design and independent-review gates remain intact.
 
-## Explicit handoff
-
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId: pui-evidence-publish`, both produced artifacts (including honest no-write/unknown receipts), carried required artifacts, and at most one registered next leaf or `null`. Do not load another leaf. Communicate with the user in the user's current language; keep repository and evidence identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId: pui-evidence-publish`, the registered `mutation-receipt` and `evidence-ledger-update` (including honest no-write/unknown outcomes), and carried required artifacts. Communicate with the user in the user's current language; keep repository and evidence identifiers exact.

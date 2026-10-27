@@ -14,9 +14,7 @@ description: Assess and route one bounded Proto UI dependency drift, advisory, o
 
 Remain read-only. Do not install packages, rewrite a lockfile, dismiss an advisory, alter automation, or infer compatibility from a version number.
 
-## Explicit handoff
-
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-deps` and the registered `dependency-report` artifact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-deps` and the registered `dependency-report` artifact.
 
 - Select `nextSkillId: pui-dependency-update` only when a current `pui-orient` `capability-envelope`, an applicable `pui-trace` `authority-map`, and an applicable `implementation-authorization` already exist for the assessed update boundary. Carry all three artifacts by reference alongside `dependency-report`, preserving their existing references and any digests. The dependency report is evidence, not authority or authorization; do not synthesize these prerequisites from update availability or this read-only assessment.
 - If any prerequisite is unavailable, return `nextSkillId: null` with the dependency report and name the missing artifact in `notes`. A missing routing artifact alone is not an attended product decision and does not create a `humanGates` entry.

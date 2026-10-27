@@ -17,8 +17,4 @@ Produce a current working envelope; do not perform the target change.
 
 Return a compact envelope containing `executionMode`, its trusted source, mode evidence, observed facts, unknowns, self-assessed band and freshness, advisory adjustments, autonomous ceilings, actual permissions, the schema's `humanGates` field limited to the two attended decision classes, stale inputs, and the next eligible skill. Mode evidence distinguishes an explicit current task or active human loop from a maintainer invocation, schedule, queue, or standing authorization. Continue to the next eligible skill when the bounded scope, ceiling, and live permission align. Pause only for an attended decision or an actually unavailable permission.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep technical identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep technical identifiers canonical.

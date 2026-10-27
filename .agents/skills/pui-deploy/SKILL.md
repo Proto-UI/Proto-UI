@@ -14,6 +14,4 @@ description: Audit one bounded Proto UI deployment or publication evidence slice
 
 Remain read-only. A reachable URL or successful deployment status does not authorize promotion, rollback, publication, or release.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-deploy`, the registered deployment report artifact, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language. Keep revisions and delivery identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-deploy`, the registered deployment report artifact, and at most one `nextSkillId`. Communicate with the user in the user's current language. Keep revisions and delivery identifiers exact.
