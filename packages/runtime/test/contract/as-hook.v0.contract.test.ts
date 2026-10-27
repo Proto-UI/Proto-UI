@@ -1,6 +1,6 @@
 // packages/runtime/test/contract/as-hook.v0.contract.test.ts
 import { describe, it, expect } from 'vitest';
-import type { AsHookResult, OwnedDecorationTarget, Prototype, State } from '@proto.ui/core';
+import type { AsHookResult, OwnedDecorationTarget, Prototype, State, StyleHandle } from '@proto.ui/core';
 import { defineAsHook, definePrototype, tw } from '@proto.ui/core';
 import type { RuntimeHost } from '../../src';
 import { createRuntimeSession, executeWithHost } from '../../src';
@@ -515,7 +515,7 @@ describe('runtime contract: asHook (v0)', () => {
             [
               EFFECTS_CAP,
               {
-                queueStyle: (value) => {
+                queueStyle: (value: StyleHandle) => {
                   root.className = value.tokens.join(' ');
                 },
                 requestFlush() {},

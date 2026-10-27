@@ -265,6 +265,8 @@ it('supports ghost presentation and restores default while inherited states stay
   await settle();
   expect(trigger.getExposes().focusVisible.get()).toBe(true);
   expect(styleContains(trigger, 'ring-3')).toBe(true);
+  expect(styleContains(trigger, 'border-ring')).toBe(true);
+  expect(styleContains(trigger, 'shadow-none')).toBe(true);
   trigger.setProps({ appearance: 'ghost', disabled: true });
   await settle();
   expect(trigger.getAttribute('aria-disabled')).toBe('true');
