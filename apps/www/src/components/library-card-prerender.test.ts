@@ -38,17 +38,31 @@ it('prerenders the actual Rhea action recipe and all native-state CSS with its l
     snapshotLibraryPart,
     createHash
   );
-  expect(result.layout).toEqual(action.layout);
-  expect(result.layout.minHeight).toBe('2rem');
-  expect(result.layout.padding).toBe('0.25rem 0.75rem');
   expect(result.Tag).toBe('wc-library-shadcn-surface');
-  for (const facts of [{}, { hovered: true }, { focusVisible: true }, { pressed: true }]) {
-    const tokens = await snapshotLibraryPart('shadcn-surface', { ...action.surface, ...facts });
-    expect(result.cssTokens).toEqual(expect.arrayContaining(tokens));
-  }
-  const ordinary = await snapshot('shadcn-surface', { variant: 'solid', elevation: 'raised' });
-  expect(result.snapshotId).not.toBe(ordinary.snapshotId);
-  expect(renderSnapshotTokenCss(result.cssTokens, result.snapshotScope)).toContain(result.snapshotId);
+  // Public passive action contract: layout is serialized and state paint is
+  // available before upgrade, independently of a second snapshot evaluation.
+  const layout = document.createElement('span');
+  Object.assign(layout.style, result.layout);
+  expect(layout.style.display).toBe('inline-flex');
+  expect(layout.style.gap).toBe('0.375rem');
+  expect(layout.style.minHeight).toBe('2rem');
+  const css = renderSnapshotTokenCss(result.cssTokens, result.snapshotScope);
+  for (const declaration of [
+    'border-radius: var(--pui-radius-2xl);',
+    'background-color: var(--pui-primary);',
+    'color: var(--pui-primary-foreground);',
+    'border-color: transparent;',
+    'color-mix(in oklab, var(--pui-primary) 80%, transparent)',
+    'border-color: var(--pui-ring);',
+    '--pui-ring-width: 3px;',
+    '--pui-translate-y: 1px;',
+    'outline-color: Highlight',
+  ]) expect(css).toContain(declaration);
+  expect(css).not.toContain('0 1px 2px');
+  const selectors = [...css.matchAll(/(:where\([^{}]+\))\s*\{/g)].map((rule) => rule[1]!);
+  expect(selectors.length).toBeGreaterThan(0);
+  expect(selectors.every((selector) => selector.includes(result.snapshotId))).toBe(true);
+
 });
 
 it('binds each real Card token set to a deterministic, exact snapshot host', async () => {

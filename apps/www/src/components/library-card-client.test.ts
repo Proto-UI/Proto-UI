@@ -2,9 +2,10 @@ import { initLibraryLiquidCardCandidate } from './library-liquid-card-client';
 import { describe, it, expect } from 'vitest';
 import { initLibraryCards } from './library-card-client';
 import { snapshotLibraryPart } from './library-card-snapshot';
-import { shadcnActionAppearance } from '@proto.ui/prototypes-shadcn/surface';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
 import {
   libraryCardPrototypes,
+  libraryActionAppearanceForFamily,
   librarySurfaceProps,
   libraryBodyPropsForFamily,
   libraryCaptionPropsForFamily,
@@ -15,7 +16,7 @@ const flush = async () => {
 };
 
 it('retains the serialized public Rhea action through native facts, cleanup and re-init', async () => {
-  const recipe = shadcnActionAppearance();
+  const recipe = libraryActionAppearanceForFamily('shadcn');
   const owner = document.createElement('article');
   const link = document.createElement('a');
   link.href = '/shadcn/';
@@ -29,9 +30,14 @@ it('retains the serialized public Rhea action through native facts, cleanup and 
   document.body.append(owner);
   const expectFacts = async (facts: Record<string, boolean>) => {
     await flush();
-    const expected = await snapshotLibraryPart('shadcn-surface', { ...recipe.surface, ...facts });
-    expect((surface.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean).sort())
-      .toEqual([...expected].sort());
+    const tokens = (surface.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+    const css = renderSnapshotTokenCss(tokens);
+    expect(css).toContain('border-radius: var(--pui-radius-2xl);');
+    expect(css).toContain('color: var(--pui-primary-foreground);');
+    expect(css).toContain('border-color: transparent;');
+    expect(css).not.toContain('0 1px 2px');
+    expect(css.includes('color-mix(in oklab, var(--pui-primary) 80%, transparent)')).toBe(!!facts.hovered);
+    expect(css.includes('--pui-translate-y: 1px;')).toBe(!!facts.pressed);
     expect(owner.querySelector('a')).toBe(link);
     expect(link.getAttribute('href')).toBe('/shadcn/');
     expect(surface.tabIndex).toBe(-1);

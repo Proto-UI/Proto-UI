@@ -411,12 +411,24 @@ const themeCss = Object.entries(familyThemes)
                       layout={action.layout}
                       class="library-card__action"
                     >
-                      <LibraryCardPart
-                        part={`${family}-text`}
-                        props={{ ...action.text }}
-                      >
-                        {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
-                      </LibraryCardPart>
+                      {shadcn ? (
+                        <>
+                          <LibraryCardPart
+                            part={`${family}-text`}
+                            props={{ ...action.text }}
+                          >
+                            {library.cta}
+                          </LibraryCardPart>
+                          <StaticFamilyIcon family={library.id} name="arrow-right" size="1rem" />
+                        </>
+                      ) : (
+                        <LibraryCardPart
+                          part={`${family}-text`}
+                          props={{ ...action.text }}
+                        >
+                          {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
+                        </LibraryCardPart>
+                      )}
                     </LibraryCardPart>
                   </a>
                 </LibraryCardPart>
