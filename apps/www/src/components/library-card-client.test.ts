@@ -36,9 +36,7 @@ it('retains the serialized public Rhea action through native facts, cleanup and 
     expect(css).toContain('color: var(--pui-primary-foreground);');
     expect(css).toContain('border-color: transparent;');
     expect(css).not.toContain('0 1px 2px');
-    expect(css.includes('color-mix(in oklab, var(--pui-primary) 80%, transparent)')).toBe(
-      !!facts.hovered
-    );
+    expect(css.includes('color-mix(in oklab, var(--pui-primary) 80%, transparent)')).toBe(!!facts.hovered);
     expect(css.includes('--pui-translate-y: 1px;')).toBe(!!facts.pressed);
     expect(owner.querySelector('a')).toBe(link);
     expect(link.getAttribute('href')).toBe('/shadcn/');
