@@ -59,6 +59,15 @@ test('pointer contact is an actual router-owned leaf with no optical dependency'
   assert.doesNotMatch(contact, /^\s*import\b|\bimport\s*\(|\bfrom\s*['"]/m);
 });
 
+const RECONCILED_DEMO_FACADES = [
+  'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-toggle.astro?astro&type=script&index=0&lang.ts',
+];
+
 function graphFixture() {
   return {
     version: 1,
@@ -169,6 +178,15 @@ function graphFixture() {
           'packages/adapters/vue2/src/index.ts',
         ],
       }),
+      ...RECONCILED_DEMO_FACADES.map((facadeModuleId, index) =>
+        chunk(`_astro/reconciled-demo-${index}.js`, {
+          isEntry: true,
+          facadeModuleId,
+          imports: ['_astro/wc-host.js'],
+          dynamicImports: ['_astro/react.js', '_astro/vue.js', '_astro/vue2.js'],
+          moduleIds: [facadeModuleId.split('?', 1)[0]],
+        })
+      ),
     ],
   };
 }
@@ -196,11 +214,37 @@ test('Bootstrap state-control fixture keeps framework runtimes lazy in its exact
   );
 });
 
+for (const facade of RECONCILED_DEMO_FACADES) {
+  test(`reviewed demo ${facade} retains lazy framework acquisition`, () => {
+    const graph = graphFixture();
+    assert.deepEqual(collectWebsiteProductionBundleIssues({ graph }), []);
+    const entry = graph.chunks.find((candidate) => candidate.facadeModuleId === facade);
+    entry.imports.push('_astro/react.js');
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes(facade) && issue.includes('statically includes the react Adapter')
+      )
+    );
+  });
+  test(`reviewed demo ${facade} does not admit an adjacent facade`, () => {
+    const graph = graphFixture();
+    const entry = graph.chunks.find((candidate) => candidate.facadeModuleId === facade);
+    const unknown = facade.replace('.astro?', '-unreviewed.astro?');
+    entry.facadeModuleId = unknown;
+    assert.ok(
+      collectWebsiteProductionBundleIssues({ graph }).some(
+        (issue) => issue.includes(unknown) && issue.includes('dynamically reaches forbidden')
+      )
+    );
+  });
+}
+
 test('requires every approved demonstration facade in the production graph', () => {
   for (const facadeModuleId of [
     PREVIEWER_FACADE,
     PREVIEWER_CLIENT_FACADE,
     STYLE_ISOLATION_FACADE,
+    ...RECONCILED_DEMO_FACADES,
   ]) {
     const graph = graphFixture();
     graph.chunks = graph.chunks.filter((candidate) => candidate.facadeModuleId !== facadeModuleId);
@@ -268,6 +312,7 @@ test('rejects a graph without route-owned Web Component host provenance', () => 
     '_astro/liquid-glass-material.js',
     '_astro/bootstrap-state-controls.js',
     '_astro/liquid-library-card.js',
+    ...RECONCILED_DEMO_FACADES.map((_, index) => `_astro/reconciled-demo-${index}.js`),
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -288,6 +333,7 @@ test('does not mistake an orphaned WC runtime for primary host provenance', () =
     '_astro/liquid-glass-material.js',
     '_astro/bootstrap-state-controls.js',
     '_astro/liquid-library-card.js',
+    ...RECONCILED_DEMO_FACADES.map((_, index) => `_astro/reconciled-demo-${index}.js`),
   ]) {
     const entry = graph.chunks.find((candidate) => candidate.fileName === route);
     entry.imports = entry.imports.filter((fileName) => fileName !== '_astro/wc-host.js');
@@ -787,6 +833,19 @@ const reviewedWcHelpers = [
   'packages/adapters/web-component/src/shadow-style-artifact.ts',
   'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
   'packages/adapters/web-component/src/shadow-text-control-surface.ts',
+  'packages/adapters/base/src/gestures/web-axis-input-host.ts',
+  'packages/adapters/base/src/gestures/web-move-click-arbitration.ts',
+  'packages/adapters/base/src/motion/web-presence-presentation.ts',
+  'packages/adapters/base/src/motion/web-resident-motion.ts',
+  'packages/adapters/base/src/platform/portal-destination.ts',
+  'packages/adapters/base/src/platform/portal-inline-size.ts',
+  'packages/adapters/base/src/platform/web-owned-decoration-portal.ts',
+  'packages/adapters/base/src/platform/web-owned-decoration.ts',
+  'packages/adapters/base/src/platform/web-viewport-source.ts',
+  'packages/adapters/web-component/src/native-text-layout.ts',
+  'packages/adapters/web-component/src/owned-decoration.ts',
+  'packages/adapters/web-component/src/owned-relocation.ts',
+  'packages/adapters/web-component/src/runtime/scroll-target.ts',
 ];
 
 const siteOwners = [
@@ -1267,6 +1326,24 @@ const configSource = ts.createSourceFile(
   true,
   ts.ScriptKind.JS
 );
+const normalizeFunction = configSource.statements.find(
+  (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'normalizedBundleModuleId'
+);
+assert.ok(normalizeFunction);
+const normalizeBundleId = vm.runInNewContext(`(${normalizeFunction.getText(configSource)})`, {
+  path,
+  repositoryRoot,
+});
+test('bundle graph keeps virtual dependency IDs portable and distinct', () => {
+  const dependency = 'node_modules/.pnpm/react@18.3.1/node_modules/react/index.js';
+  const absolute = path.join(repositoryRoot, dependency);
+  const query = '?commonjs-module';
+  assert.equal(normalizeBundleId(`\0${absolute}${query}`), `virtual:${dependency}${query}`);
+  assert.equal(normalizeBundleId(`${absolute}${query}`), `${dependency}${query}`);
+  assert.equal(normalizeBundleId('\0commonjsHelpers.js'), 'virtual:commonjsHelpers.js');
+  assert.equal(normalizeBundleId(null), null);
+});
+
 const chunkFunction = configSource.statements.find(
   (node) => ts.isFunctionDeclaration(node) && node.name?.text === 'websiteManualChunk'
 );

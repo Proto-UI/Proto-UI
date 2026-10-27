@@ -151,6 +151,8 @@ async function installEventProbe(context: BrowserContext) {
         id,
         phase,
         type: event.type,
+        key: event instanceof KeyboardEvent ? event.key : null,
+        code: event instanceof KeyboardEvent ? event.code : null,
         timeStamp: event.timeStamp,
         timeOrigin: performance.timeOrigin,
         now: performance.now(),
@@ -301,12 +303,23 @@ async function chooseLocale(
   await expect.poll(() => option.count()).toBe(1);
   if (input === 'pointer') await option.click();
   else {
+    await expect
+      .poll(
+        () =>
+          popup.evaluate(
+            (element) =>
+              element.contains(document.activeElement) &&
+              document.activeElement?.getAttribute('aria-selected') === 'true'
+          ),
+        { timeout: 1000 }
+      )
+      .toBe(true);
     const options = popup.getByRole('option');
     const values = await options.evaluateAll((nodes) =>
       nodes.map((node) => node.getAttribute('data-value'))
     );
     const index = values.indexOf(locale);
-    expect(index).toBeGreaterThanOrEqual(0);
+    expect(index, JSON.stringify({ locale, values })).toBeGreaterThanOrEqual(0);
     await page.keyboard.press('Home');
     for (let i = 0; i < index; i++) await page.keyboard.press('ArrowDown');
     await page.keyboard.press('Enter');

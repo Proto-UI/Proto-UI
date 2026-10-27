@@ -27,6 +27,13 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   // mounts each isolated React/Vue/Vue2 Adapter runtime to compare style
   // projection across hosts.
   'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts',
+  // Exact native test entries retain the existing lazy renderer owner.
+  'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-prominent-tint.astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/liquid-glass-toggle.astro?astro&type=script&index=0&lang.ts',
 ]);
 // Sitewide runtime consumers are admitted as exact entry/owner pairs, never
 // by a directory, filename prefix, or arbitrary reachability to shared chunks.
@@ -155,6 +162,20 @@ const REVIEWED_WEBSITE_CONTROL_ADAPTER_MODULES = new Set([
   'packages/adapters/web-component/src/shadow-style-artifact.ts',
   'packages/adapters/web-component/src/shadow-stylesheet-owner.ts',
   'packages/adapters/web-component/src/shadow-text-control-surface.ts',
+  // Reviewed leaves of the existing Base/WC control-bridge entries.
+  'packages/adapters/base/src/gestures/web-axis-input-host.ts',
+  'packages/adapters/base/src/gestures/web-move-click-arbitration.ts',
+  'packages/adapters/base/src/motion/web-presence-presentation.ts',
+  'packages/adapters/base/src/motion/web-resident-motion.ts',
+  'packages/adapters/base/src/platform/portal-destination.ts',
+  'packages/adapters/base/src/platform/portal-inline-size.ts',
+  'packages/adapters/base/src/platform/web-owned-decoration-portal.ts',
+  'packages/adapters/base/src/platform/web-owned-decoration.ts',
+  'packages/adapters/base/src/platform/web-viewport-source.ts',
+  'packages/adapters/web-component/src/native-text-layout.ts',
+  'packages/adapters/web-component/src/owned-decoration.ts',
+  'packages/adapters/web-component/src/owned-relocation.ts',
+  'packages/adapters/web-component/src/runtime/scroll-target.ts',
 ]);
 
 export class WebsiteProductionBundleValidationError extends Error {
