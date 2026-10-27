@@ -7,7 +7,7 @@ import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import { GPUI_NATIVE_SDK_PATH, GPUI_NATIVE_SDK_VERSION, gpuiNativeSdkFiles } from './gpui-native-sdk';
 import type { DataType } from './data-types';
 import { isDataValueType, isPublicValueType } from './ir';
-import { relationalOperandKind } from './expression-types';
+import { inferBinaryType, relationalOperandKind } from './expression-types';
 import type { RuleCondition } from './rule-declarations';
 import type { CompileResult, CompilerDiagnostic, ExpressionIR, FunctionIR, GeneratedModule, PrototypeIR, StatementIR } from './ir';
 
@@ -160,10 +160,13 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
         if (node.operator === '+') return `add(${left}, ${right})`;
         if (['<', '<=', '>', '>='].includes(node.operator)) {
           if (!isDataValueType(node.left.type) || !isDataValueType(node.right.type)) throw new Error('Validated relational operands must be data.');
-          if (typeof node.type !== 'string' && node.type.kind === 'union' && node.type.members.length === 0) {
+          const resultType = inferBinaryType(node.operator, node.left.type, node.right.type);
+          if (typeof resultType !== 'string' && resultType.kind === 'union' && resultType.members.length === 0) {
             // Shared inference retains bottom for unreachable comparisons, even when the
-            // other operand has no relational domain. Do not reclassify that empty domain.
-            return `{ let _relational_left = ${left}; let _relational_right = ${right}; unreachable!("uninhabited Proto relational expression") }`;
+            // other operand has no relational domain. Recompute the validated semantic result
+            // rather than inspecting the raw IR union representation. A typed divergent
+            // result gives method-receiver positions a Value type without fabricating one.
+            return `{ let _relational_left = ${left}; let _relational_right = ${right}; let _relational_result: Value = unreachable!("uninhabited Proto relational expression"); _relational_result }`;
           }
           const kind = relationalOperandKind(node.left.type, node.right.type);
           // Bind Value operands before reading either, preserving left-to-right, once-only evaluation.

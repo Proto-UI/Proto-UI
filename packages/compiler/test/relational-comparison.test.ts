@@ -8,6 +8,7 @@ import * as React from 'react';
 import { createRoot } from 'react-dom/client';
 import * as Vue from 'vue';
 import type { DataType } from '../src/data-types';
+import type { ExpressionIR } from '../src/ir';
 import { inferBinaryType } from '../src/expression-types';
 import { parsePrototype } from '../src/parser';
 import { validateIR } from '../src/ir-validation';
@@ -76,6 +77,10 @@ describe('relational admission migration', () => {
       expect(checked.ok).toBe(false);
       if (!checked.ok) expect(checked.diagnostics).toEqual(expect.arrayContaining([expect.objectContaining({ code: 'PUI2002', message: expect.stringContaining('Relational comparison') })]));
       for (const emit of [emitGpuiSource, emitFlutterSource, emitQtSource, emitReactSource, emitVueSource, emitVue2Source, emitWebComponentSource]) expect(emit(forged).ok).toBe(false);
+      // The GPUI bottom path must not change invalid non-bottom diagnostics or spans.
+      expect(emitGpuiSource(forged)).toEqual(checked);
+      if (!checked.ok) for (const diagnostic of checked.diagnostics)
+        expect(sourceSpans(forged).has(JSON.stringify(diagnostic.span))).toBe(true);
     });
   }
 });
@@ -355,4 +360,48 @@ for (const format of ['json', 'text'] as const) {
       expect(text).not.toContain('source unavailable');
     }
   });
+}
+
+// These exercise admitted raw IR representations and actual emitted source.
+// Typed receiver assertions are emission checks, not a substitute for rustc.
+for (const operator of operators) {
+  for (const rhs of ['null', 'false']) {
+    for (const position of ['return', 'condition', 'not', 'logical-left']) {
+      for (const nested of [false, true]) {
+        it(`GPUI preserves semantic bottom for ${operator} ${rhs}, ${position}, nested=${nested}`, () => {
+          const relationSource = `x${operator}${rhs}`;
+          const tail = position === 'return' ? `return ${relationSource};`
+            : position === 'condition' ? `if(${relationSource})return true;return false;`
+            : position === 'not' ? `return !(${relationSource});`
+            : `return (${relationSource})&&true;`;
+          const body = `def.expose.method('compare',(x:'a')=>{if(x==='a')return false;${tail}});`;
+          const ir = parse(body);
+          const relations: Extract<ExpressionIR, { kind: 'binary' }>[] = [];
+          const visit = (value: unknown) => {
+            if (!value || typeof value !== 'object') return;
+            if ('kind' in value && value.kind === 'binary' && 'operator' in value && value.operator === operator)
+              relations.push(value as Extract<ExpressionIR, { kind: 'binary' }>);
+            Object.values(value).forEach(visit);
+          };
+          visit(ir);
+          expect(relations).toHaveLength(1);
+          const relation = relations[0]!;
+          expect(relation.type).toEqual({ kind: 'union', members: [] });
+          if (nested) relation.type = { kind: 'union', members: [{ kind: 'union', members: [] }] };
+          // Validator accepts both representations; emitter must not escape CompileResult.
+          expect(validateIR(ir).ok).toBe(true);
+          expect(() => emitGpuiSource(ir)).not.toThrow();
+          const emitted = emitGpuiSource(ir);
+          expect(emitted.ok).toBe(true);
+          if (emitted.ok) {
+            expect(emitted.value.code).toMatch(/\{ let _relational_left = [^;]+; let _relational_right = [^;]+; let _relational_result: Value = unreachable!\("uninhabited Proto relational expression"\); _relational_result \}/);
+            expect(emitted.value.code).not.toContain(`scalar_number() ${operator}`);
+          }
+          const element = consumer(body);
+          try { expect((element.getExposes() as { compare(x: string): boolean }).compare('a')).toBe(false); }
+          finally { element.dispose(); element.remove(); }
+        });
+      }
+    }
+  }
 }
