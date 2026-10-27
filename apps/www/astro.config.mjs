@@ -25,14 +25,15 @@ const protoUiSourcePlugin = createProtoUiSourcePlugin({ repositoryRoot });
 /** @param {string | null} id */
 function normalizedBundleModuleId(id) {
   if (id === null) return null;
-  const withoutNullPrefix = id.startsWith('\0') ? `virtual:${id.slice(1)}` : id;
+  const virtualPrefix = id.startsWith('\0') ? 'virtual:' : '';
+  const withoutNullPrefix = virtualPrefix ? id.slice(1) : id;
   const queryIndex = withoutNullPrefix.indexOf('?');
   const filePart = queryIndex === -1 ? withoutNullPrefix : withoutNullPrefix.slice(0, queryIndex);
   const queryPart = queryIndex === -1 ? '' : withoutNullPrefix.slice(queryIndex);
   const normalizedFilePart = path.isAbsolute(filePart)
     ? path.relative(repositoryRoot, filePart).replaceAll('\\', '/')
     : filePart.replaceAll('\\', '/');
-  return `${normalizedFilePart}${queryPart}`;
+  return `${virtualPrefix}${normalizedFilePart}${queryPart}`;
 }
 
 /** @param {string} id */
