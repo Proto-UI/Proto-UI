@@ -15,8 +15,4 @@ description: Create or update a readable Proto UI legacy-contract projection for
 
 Route an uncataloged gap or new semantic owner that current authority does not decide to an attended product-direction decision. Never let readable prose override an entity, and do not rewrite dated history to match current direction.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep repository artifacts in their governed language.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep repository artifacts in their governed language.

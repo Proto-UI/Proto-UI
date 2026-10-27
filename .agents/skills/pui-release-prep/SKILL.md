@@ -15,8 +15,4 @@ description: Prepare a reviewed Proto UI global release candidate as repository 
 
 Keep package publication, tag creation or movement, GitHub Release creation, Version activation, and partial external-publication recovery in their purpose-bound privileged operation. This preparation leaf advances every reversible repository step and hands the exact candidate evidence to that operation.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep release identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep release identifiers exact.

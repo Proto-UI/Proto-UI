@@ -15,8 +15,4 @@ description: Select at most one eligible Proto UI work item and return a read-on
 
 Remain read-only. Do not comment, label, assign, claim, edit, close, create a branch, or mutate Project state. A proposal never changes readiness or grants implementation authority.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep GitHub identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

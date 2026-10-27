@@ -15,8 +15,4 @@ description: Implement or extend one governed Proto UI Module semantic slice. Us
 
 Route to an attended product-direction decision only when the work needs a new identity, public registration shape, ownership migration, portable baseline, dependency, or host fact that current authority does not decide. Do not pass raw host objects into portable state or infer conformance from source inspection.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep technical identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep technical identifiers canonical.

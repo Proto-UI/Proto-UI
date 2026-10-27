@@ -16,8 +16,4 @@ Route a rejected finding to `pui-record`. Route a confirmed implementation, test
 
 The registry always requires `verification-report` and `maintenance-outcome`. It additionally requires `decision-packet` when the handoff declares `unresolved-product-direction`; it does not require a fabricated decision for a governed remediation. The remediation route still requires its separate semantic and mutation authorization artifacts, and an autonomous handoff with an unresolved decision remains terminal.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep evidence references exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep evidence references exact.

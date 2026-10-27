@@ -17,8 +17,4 @@ The selected claim is the complete mutation boundary. Readiness and semantic dir
 
 Publish the claim comment with `pnpm agent:publish -- comment --repository github.com:OWNER/REPO --number ISSUE_NUMBER --body-file <authorized-claim.md> --body-digest <authorized-claim-sha256> --mode human-assisted --mode-source current-user --authorization explicit-current-user` when this is the independently established authorized mode. Supported metadata changes remain separate exact-target `agent:collaborate` actions with unchanged authority/idempotency gates. Do not rewrite human text or hide ambiguous/failed results.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep GitHub identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

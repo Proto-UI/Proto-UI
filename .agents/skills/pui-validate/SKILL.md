@@ -32,19 +32,8 @@ Where reuse or dogfood is claimed, trace the rendered control or surface to the 
 
 For per-commit reporting, reconcile newly pushed development SHAs with their change summaries, validation, remaining work, and comment receipts or publication debt. UI evidence binds the revision, viewport, and theme; purely internal work uses applicable executable evidence. Missing captures or running checks remain `pending`. Return this evidence without posting or uploading from this leaf. Adding or updating a progress comment changes the canonical review input even on the same head; recollect before relying on an earlier packet.
 
-Apply these principles to every validation round; they are methodology, not a checklist of known bugs:
+Apply the six standing principles in the shared [Evidence discipline](../../../internal/agent-operations/contributor-agents.md#evidence-discipline) to every validation round; they are methodology, not a checklist of known bugs.
 
-1. Bind visual assertions to actual rendered output: computed geometry, paint, positioning and component captures. Internal facts alone do not prove a visible defect. For purely internal claims, require executed variable/state observations and a source-bound causal walkthrough under the visual-evidence policy; do not invent a UI or substitute a prose/log screenshot.
-2. Probe transitions, not states. Sample adjacent states pairwise and assert on the deltas between them; most regressions live in the difference between two frames, invisible to isolated snapshots.
-3. Re-assert dependents. Observing or changing a surface obligates re-verifying every surface anchored to, composed with, or layered above it.
-4. Attribute every expectation. Each expected value names its authority (spec anchor or upstream reference); an observable behavior with no cited authority is itself a finding.
-5. Scope expectations per family. Behavioral assumptions never transfer across design languages; each expectation needs a fresh citation inside its own family.
-6. Exercise live boundaries. Any path that depends on an external live system must be run against that system, not only against synthetic fixtures.
-
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep commands and paths exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep commands and paths exact.
 
 A fresh report may record `passed`, `failed`, `partial` or `not-run`; freshness is not a green result. Review and integration independently enforce their required evidence and acceptance conditions.

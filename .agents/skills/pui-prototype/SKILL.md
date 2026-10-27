@@ -16,8 +16,4 @@ description: Maintain an existing Proto UI Prototype or implement a governed Bas
 
 Route only criteria, ownership, public API, classification, compatibility, or dependency choices not decided by current authority to an attended product-direction decision. Keep raw host escapes and negative patches out of the implementation.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep public API names canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep public API names canonical.

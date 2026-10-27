@@ -14,6 +14,4 @@ description: Freeze one eligible Proto UI autonomous-maintenance candidate into 
 
 Use existing authority to resolve finding disposition and governed remediation scope. Pause when product direction is genuinely unresolved, when a privileged or irreversible operation is next, when overlapping runners lack a coordinating lease, or when a required frozen input cannot be established.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-mission`, the registered mission and mutation receipt artifacts, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language. Keep mission and lease identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-mission`, the registered mission and mutation receipt artifacts, and at most one `nextSkillId`. Communicate with the user in the user's current language. Keep mission and lease identifiers exact.

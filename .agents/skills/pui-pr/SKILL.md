@@ -18,6 +18,4 @@ Remain read-only in this leaf and hand authorized mutations to their registered 
 
 Report Agent evidence against `internal/agent-operations/visual-evidence.md`: sanitized request paraphrase, uploaded subject-appropriate visuals, baseline/candidate binding, HTML/static fallback when useful, and explicit debt. This is an Agent-only soft gate; humans may submit plain descriptions. Do not impose an image-presence merge blocker or repair evidence during this read-only transition.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-pr`, both the registered pull-request report and canonical review-input artifacts, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language. Keep GitHub identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-pr`, both the registered pull-request report and canonical review-input artifacts, and at most one `nextSkillId`. Communicate with the user in the user's current language. Keep GitHub identifiers canonical.

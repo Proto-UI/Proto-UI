@@ -15,8 +15,4 @@ description: Create or revise a governed Proto UI spec entity after identity, ow
 
 Route an actually undecided schema design, ownership, public surface, compatibility, lifecycle promotion, or evidence meaning to the smallest product-direction decision. Do not create inventory placeholders or infer a matrix from files, dependencies, packages, or names.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Preserve canonical identifiers and governed localization.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Preserve canonical identifiers and governed localization.
