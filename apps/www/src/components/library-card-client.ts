@@ -1,5 +1,5 @@
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { libraryCardPrototypes, libraryActionProps } from './library-card-prototypes';
+import { libraryCardPrototypes } from './library-card-prototypes';
 import { withNativeContentLease } from './PrototypePreviewer/native-content-lease';
 import { bindNativeLinkFacts } from './site-native-link-facts';
 
@@ -34,10 +34,7 @@ export function initLibraryCards(scope: ParentNode = document) {
     if (bound.has(link)) continue;
     bound.add(link);
     const surface = link.querySelector<HTMLElement>('[data-library-part]')!;
-    const actionProps =
-      surface.localName === 'wc-library-liquid-optical-surface'
-        ? JSON.parse(surface.dataset.libraryProps ?? '{}')
-        : libraryActionProps;
+    const actionProps = JSON.parse(surface.dataset.libraryProps ?? '{}');
     cleanup.push(
       bindNativeLinkFacts(link, (facts) => setElementProps(surface, { ...actionProps, ...facts }))
     );
