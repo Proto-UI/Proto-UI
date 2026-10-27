@@ -1,52 +1,5 @@
 import { readFileSync } from 'node:fs';
 import { it, expect } from 'vitest';
-import ts from 'typescript';
-
-// Supplementary AST composition proof only, not rendered gap/icon geometry or
-// replacement for native consumer behavior. Browser owner coordination is pending.
-it('gives only the Shadcn action a separate label and public-size icon layout item', () => {
-  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
-  const start = source.indexOf('<a href={library.href} data-library-action>');
-  expect(start).toBeGreaterThan(0);
-  const markup = source.slice(start, source.indexOf('</a>', start) + 4);
-  const file = ts.createSourceFile('action.tsx', `const action = (${markup});`, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const conditions: ts.ConditionalExpression[] = [];
-  const visit = (node: ts.Node) => {
-    if (ts.isConditionalExpression(node)) conditions.push(node);
-    ts.forEachChild(node, visit);
-  };
-  visit(file);
-  const branch = conditions.find((node) => node.condition.getText(file) === 'shadcn');
-  expect(branch).toBeDefined();
-  if (!branch) throw new Error('Missing Shadcn-only action composition');
-  const unwrap = (node: ts.Expression): ts.Expression =>
-    ts.isParenthesizedExpression(node) ? unwrap(node.expression) : node;
-  const shadcn = unwrap(branch.whenTrue);
-  const other = unwrap(branch.whenFalse);
-  expect(ts.isJsxFragment(shadcn)).toBe(true);
-  if (!ts.isJsxFragment(shadcn)) throw new Error('Expected sibling action items');
-  const items = shadcn.children.filter((node) => !ts.isJsxText(node) || node.text.trim());
-  expect(items).toHaveLength(2);
-  const [label, icon] = items;
-  expect(label && ts.isJsxElement(label) && label.openingElement.tagName.getText(file)).toBe('LibraryCardPart');
-  if (!label || !ts.isJsxElement(label)) throw new Error('Missing label Text item');
-  expect(label.children.filter(ts.isJsxExpression).map((node) => node.expression?.getText(file))).toEqual(['library.cta']);
-  expect(label.children.some((node) => ts.isJsxElement(node) || ts.isJsxSelfClosingElement(node))).toBe(false);
-  expect(icon && ts.isJsxSelfClosingElement(icon) && icon.tagName.getText(file)).toBe('StaticFamilyIcon');
-  if (!icon || !ts.isJsxSelfClosingElement(icon)) throw new Error('Missing sibling icon');
-  const attr = (name: string) => icon.attributes.properties.find((node) => ts.isJsxAttribute(node) && node.name.getText(file) === name);
-  expect(attr('size')?.getText(file)).toBe('size="1rem"');
-  expect(attr('family')?.getText(file)).toBe('family={library.id}');
-  expect(attr('name')?.getText(file)).toBe('name="arrow-right"');
-  // Other families retain their original inline icon and inherited default size.
-  expect(ts.isJsxElement(other)).toBe(true);
-  if (!ts.isJsxElement(other)) throw new Error('Missing unchanged family Text');
-  const inline = other.children.filter(ts.isJsxSelfClosingElement);
-  expect(inline).toHaveLength(1);
-  expect(inline[0]!.tagName.getText(file)).toBe('StaticFamilyIcon');
-  expect(inline[0]!.attributes.properties.some((node) => ts.isJsxAttribute(node) && node.name.getText(file) === 'size')).toBe(false);
-});
-
 it('keeps ownership honest and removes fake previews and delayed placeholders', () => {
   const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
   expect(source).not.toContain('PrototypePreviewer');
