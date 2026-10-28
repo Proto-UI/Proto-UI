@@ -16,6 +16,8 @@ This is the default same-document light-DOM realization of [HC-COLOR-SCHEME-INVA
 
 `@proto.ui/adapter-base/web-material` exports `contactPaintOutset(width, height)` for layout space around the current draft Web contact profile. Pass the host's bounding rectangle width and height in CSS pixels; the result is the profile's paint outset in CSS pixels. It does not admit source pixels, optical effects or input ownership, and is not a general margin for other material profiles.
 
+The canvas backdrop lease withdraws its frame before invalidating observers. It notifies the entire listener snapshot, then reports the first thrown value, including falsy values; disposal still retires its listeners. If painting has already failed, a secondary notification error does not replace that primary failure.
+
 Adapter foundation package used to translate Proto UI contracts into concrete host integrations.
 
 ## Install

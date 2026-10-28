@@ -27,15 +27,19 @@ export function createCanvasBackdropLease(
     frame: CanvasBackdropFrame | null = null;
   const listeners = new Set<() => void>();
   const notify = () => {
+    let failed = false;
     let failure: unknown;
     for (const listener of [...listeners]) {
       try {
         listener();
       } catch (error) {
-        failure ??= error;
+        if (!failed) {
+          failed = true;
+          failure = error;
+        }
       }
     }
-    if (failure) throw failure;
+    if (failed) throw failure;
   };
   return {
     current: () => frame,
@@ -50,6 +54,7 @@ export function createCanvasBackdropLease(
       if (disposed) throw new Error('Retired backdrop lease');
       const operation = ++revision;
       frame = null;
+      let failed = false;
       try {
         const rect = canvas.getBoundingClientRect(),
           dpr = canvas.ownerDocument.defaultView?.devicePixelRatio ?? NaN;
@@ -77,8 +82,17 @@ export function createCanvasBackdropLease(
         for (let i = 3; i < pixels.length; i += 4)
           if (pixels[i] !== 255) throw new Error('Backdrop must be opaque');
         frame = Object.freeze({ revision: operation, width, height, pixels, canvas, scope });
+      } catch (error) {
+        failed = true;
+        throw error;
       } finally {
-        notify();
+        if (failed) {
+          // Notification still retires every observer, but a secondary
+          // failure must not replace the already-visible paint failure.
+          try {
+            notify();
+          } catch {}
+        } else notify();
       }
     },
     revoke() {
