@@ -349,10 +349,41 @@ function memberSemantics(entry) {
   return Array.isArray(entry) ? entry.filter(Boolean) : [entry];
 }
 
-// Semantic-only local writes have no source-state node. Keep their proof
-// attached to the exact member-map entry and source snapshot it superseded;
-// a later graph replacement or member write cannot reuse that proof.
+// Semantic-only local initializers and writes have no source-state node. Keep their proof
+// attached to the exact member-map entry and source snapshot it superseded.
+// Known writes advance untouched entries; escapes cannot reuse that proof.
 const definitiveLocalMemberWrites = new WeakMap();
+
+function advanceLocalMemberProofs(binding, previousSource, nextSource, writtenMember) {
+  const proofs = definitiveLocalMemberWrites.get(binding.semanticMap);
+  for (const [key, proof] of proofs ?? []) {
+    if (
+      key !== writtenMember &&
+      proof.sourceValue === previousSource &&
+      proof.entry === binding.semanticMap?.get(key)
+    )
+      proofs.set(key, { ...proof, sourceValue: nextSource });
+  }
+}
+
+function joinLocalMemberProofs(binding, branches) {
+  if (!binding.semanticMap) return;
+  const proofs = new Map();
+  for (const [key, entry] of binding.semanticMap ?? []) {
+    if (
+      branches.every((held) => {
+        const proof = definitiveLocalMemberWrites.get(held.semanticMap)?.get(key);
+        return (
+          proof &&
+          proof.sourceValue === held.sourceValue &&
+          proof.entry === held.semanticMap?.get(key)
+        );
+      })
+    )
+      proofs.set(key, { sourceValue: binding.sourceValue, entry });
+  }
+  definitiveLocalMemberWrites.set(binding.semanticMap, proofs);
+}
 
 function freshLocalMemberSemantics(node, scope) {
   const owner = memberOwner(node);
@@ -642,6 +673,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           (logicalAssignment && !knownStateHandle) ||
           // A key this cannot read may name any member the container has.
           member === null;
+        updateTokenMembers(container, member, rightBinding, uncertain);
         if (written.length > 0 && !container.semanticMap) container.semanticMap = new Map();
         const keys =
           member === null
@@ -657,6 +689,11 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
         // Any subsequent write retires a previous semantic-only proof. A new
         // proof is admitted below only after a definite local-state write.
         const localProofs = definitiveLocalMemberWrites.get(container.semanticMap);
+        const previousLocalProof = member === null ? null : localProofs?.get(member);
+        const previousMemberProven =
+          previousLocalProof &&
+          previousLocalProof.sourceValue === container.sourceValue &&
+          previousLocalProof.entry === container.semanticMap?.get(member);
         if (member === null) localProofs?.clear();
         else localProofs?.delete(member);
         // A semantic-only local state has no source declaration to place in
@@ -706,6 +743,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
             }
             others.push({ version, next: { ...version, members: otherMembers } });
           }
+          advanceLocalMemberProofs(container, previousSource, nextSource, member);
           container.sourceValue = nextSource;
           const nextCandidates = uncertain
             ? [nextSource, ...previousCandidates, previousSource, ...others.map((o) => o.next)]
@@ -718,6 +756,8 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           for (let owner = scope; owner; owner = owner.parent) {
             for (const held of owner.bindings.values()) {
               if (held === container || held.sourceValue !== previousSource) continue;
+              advanceLocalMemberProofs(held, previousSource, nextSource, member);
+              updateTokenMembers(held, member, rightBinding, uncertain);
               held.sourceValue = nextSource;
               if (uncertain) {
                 held.sourceValues = [
@@ -748,9 +788,23 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           // The other versions are propagated first, so the graph the
           // container holds now stays the newest one the name holds.
           for (const other of others) {
-            propagateSourceReference(scope, other.version, other.next, uncertain);
+            propagateSourceReference(
+              scope,
+              other.version,
+              other.next,
+              uncertain,
+              undefined,
+              member ?? undefined
+            );
           }
-          propagateSourceReference(scope, previousSource, nextSource, uncertain);
+          propagateSourceReference(
+            scope,
+            previousSource,
+            nextSource,
+            uncertain,
+            undefined,
+            member ?? undefined
+          );
         }
         if (unknownWrite) {
           // An unknown member write can replace the state handle with any
@@ -765,7 +819,10 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
               ? previous.filter((candidate) => !written.includes(candidate))
               : [];
             container.semanticMap.set(key, [...written, ...kept]);
-            if (!uncertain && writtenSource.length === 0) {
+            if (
+              (!uncertain && writtenSource.length === 0) ||
+              (uncertain && previousMemberProven && !rightBinding?.unknownAlternative)
+            ) {
               let proofs = definitiveLocalMemberWrites.get(container.semanticMap);
               if (!proofs) {
                 proofs = new Map();
@@ -1437,7 +1494,14 @@ function replaceSourceReference(value, target, replacement, rewritten = new Map(
   return result;
 }
 
-function propagateSourceReference(scope, target, replacement, uncertain = false, replacements) {
+function propagateSourceReference(
+  scope,
+  target,
+  replacement,
+  uncertain = false,
+  replacements,
+  writtenMember
+) {
   if (replacements) {
     for (const [before, after] of replacements) scope.versions.record(before, after, uncertain);
   } else {
@@ -1454,6 +1518,13 @@ function propagateSourceReference(scope, target, replacement, uncertain = false,
       );
       if (!replaced.some((candidate, index) => candidate !== candidates[index])) continue;
       const next = uncertain ? [...new Set([...replaced, ...candidates])] : replaced;
+      if (writtenMember !== undefined)
+        advanceLocalMemberProofs(
+          binding,
+          binding.sourceValue,
+          next[0],
+          binding.sourceValue === target ? writtenMember : undefined
+        );
       binding.sourceValue = next[0];
       if (next.length > 1 || binding.sourceValues) binding.sourceValues = next;
     }
@@ -1489,6 +1560,18 @@ function mergeSourceSemantics(values) {
   return merged;
 }
 
+/** A container's token strings change with its members, just like its State graph. */
+function updateTokenMembers(binding, member, written, uncertain = false) {
+  if (!binding.map) return;
+  if (member === null) binding.map.clear();
+  else if (written && !written.unknownAlternative && written.strings.length > 0) {
+    const previous = uncertain ? (binding.map.get(member) ?? []) : [];
+    binding.map.set(member, [...new Set([...previous, ...written.strings])]);
+  } else binding.map.delete(member);
+  binding.strings = [...new Set([...binding.map.values()].flat())];
+  binding.single = binding.strings.length === 1 ? binding.strings[0] : null;
+}
+
 /**
  * The selector map of a binding is per binding, so the members a call
  * replaced move there as well as in the source graph.
@@ -1505,6 +1588,7 @@ function applyCallSemantics(scope, previous, next, copied, proven, uncertain) {
   for (let owner = scope; owner; owner = owner.parent) {
     for (const held of owner.bindings.values()) {
       if (held.sourceValue !== next) continue;
+      for (const key of keys) updateTokenMembers(held, key, null);
       if (!held.semanticMap) continue;
       for (const key of keys) {
         if (!proven) {
@@ -1910,7 +1994,9 @@ function sourceSummaryValue(node, scope) {
   if (
     !ts.isCallExpression(node) &&
     !ts.isPropertyAccessExpression(node) &&
-    !ts.isElementAccessExpression(node)
+    !ts.isElementAccessExpression(node) &&
+    !ts.isObjectLiteralExpression(node) &&
+    !ts.isArrayLiteralExpression(node)
   )
     return null;
   const value = unwrapTransparent(node);
@@ -2173,7 +2259,21 @@ function resolveExpression(node, scope) {
     const value = readsAsTokens
       ? { ...asStringValue([parts.join(',')]), elements: parts }
       : emptyValue();
-    return semantics.size > 0 ? { ...value, semanticMap: semantics } : value;
+    const source = sourceSummaryValue(node, scope);
+    if (source && semantics.size > 0) {
+      const proofs = new Map();
+      for (const [key, entry] of semantics) {
+        proofs.set(key, { sourceValue: source.resolved.value, entry });
+      }
+      definitiveLocalMemberWrites.set(semantics, proofs);
+    }
+    return {
+      ...value,
+      ...(semantics.size > 0 ? { semanticMap: semantics } : {}),
+      ...(source
+        ? { sourceValue: source.resolved.value, sourceValues: source.resolvedValues }
+        : {}),
+    };
   }
 
   if (
@@ -2255,8 +2355,11 @@ function resolveExpression(node, scope) {
       // available and never reintroduce a stale source candidate. A null
       // source map means one possible source path is unknown, so even an old
       // local semantic must not certify a convenient branch.
-      const currentSemantics = readMemberSemantics(node, scope);
-      if (currentSemantics.length > 0 && source.semanticMap !== null) {
+      const currentSemantics =
+        source.semanticMap === null
+          ? freshLocalMemberSemantics(node, scope)
+          : readMemberSemantics(node, scope);
+      if (currentSemantics.length > 0) {
         return {
           ...asSemanticValue(currentSemantics[0]),
           alternatives: currentSemantics.slice(1),
@@ -2281,8 +2384,14 @@ function resolveExpression(node, scope) {
           sourceValues: source.resolvedValues,
         };
       }
+      // Source authority governs state proofs, not the independently captured
+      // token strings of a mixed local literal. Read the live lexical map;
+      // never re-evaluate its initializer to recover a revoked handle.
+      const owner = memberOwner(node);
+      const key = memberName(node);
+      const strings = owner && key !== null ? resolveExpression(owner, scope).map?.get(key) : null;
       return {
-        ...emptyValue(),
+        ...(strings ? asStringValue(strings) : emptyValue()),
         sourceValue: source.resolved.value,
         sourceValues: source.resolvedValues,
       };
@@ -2353,7 +2462,24 @@ function resolveExpression(node, scope) {
       }
     }
     const value = asMapValue(entries);
-    return semantics.size > 0 ? { ...value, semanticMap: semantics } : value;
+    // Token maps and immediate semantic maps do not describe nested object
+    // identity. Retain the summary graph as well so writes and escapes through
+    // wrappers reach every alias of the held hook result.
+    const source = sourceSummaryValue(node, scope);
+    if (source && semantics.size > 0) {
+      const proofs = new Map();
+      for (const [key, entry] of semantics) {
+        proofs.set(key, { sourceValue: source.resolved.value, entry });
+      }
+      definitiveLocalMemberWrites.set(semantics, proofs);
+    }
+    return {
+      ...value,
+      ...(semantics.size > 0 ? { semanticMap: semantics } : {}),
+      ...(source
+        ? { sourceValue: source.resolved.value, sourceValues: source.resolvedValues }
+        : {}),
+    };
   }
 
   if (ts.isElementAccessExpression(node)) {
@@ -2447,6 +2573,17 @@ function resolveBinding(node, scope) {
     if (allSourceBranches) {
       const sourceValues = [...new Set(branchSourceValues.flat())];
       const semantics = mergeSourceSemantics(sourceValues);
+      // Source graphs cannot represent prototype-local handles. Join their
+      // captured entries as well, but only all-branch fresh proofs may fill
+      // an unknown source member at the Rule consumer.
+      for (const branch of branches) {
+        for (const [key, entry] of branch.semanticMap ?? []) {
+          const joined = [
+            ...new Set([...memberSemantics(semantics.get(key)), ...memberSemantics(entry)]),
+          ];
+          semantics.set(key, joined.length === 1 ? joined[0] : joined);
+        }
+      }
       const source = {
         ...branches[0],
         sourceValue: sourceValues[0],
@@ -2454,6 +2591,7 @@ function resolveBinding(node, scope) {
         containers: [...new Set(branches.flatMap((branch) => branch.containers ?? [branch]))],
         ...(semantics.size > 0 ? { semanticMap: semantics } : {}),
       };
+      joinLocalMemberProofs(source, branches);
       if (semantics.size > 0) {
         const entries = [...semantics.values()].flatMap((value) =>
           Array.isArray(value) ? value : [value]
@@ -3751,6 +3889,9 @@ function assignIdentifierBinding(node, scope, exposures) {
     next = { ...next, sourceValue: nextSourceValues[0], sourceValues: nextSourceValues };
   }
   if (next.bindingNode) next = { ...next, bindingNode: node };
+  if (uncertain && next.semanticMap && next.containers) {
+    joinLocalMemberProofs(next, next.containers);
+  }
   owner.bindings.set(name, next);
 }
 

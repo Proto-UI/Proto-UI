@@ -48,6 +48,573 @@ const scanExtra = async (producerSource: string, consumerLines: string[]) => {
 };
 
 describe('hook source collision order', () => {
+  it.each([
+    [
+      'forked captured scalar',
+      'let enabled: boolean; const asMutator = defineAsHook({ name: "mutator", setup() { enabled = true; } }); function install({ child }) { if (child) asA(); }',
+      'enabled = false; if (enabled === false) { asMutator(); install({ child: enabled }); }',
+      'alpha',
+      true,
+    ],
+    [
+      'parameter initialization captured scalar',
+      'let enabled: boolean; const asMutator = defineAsHook({ name: "mutator", setup() { enabled = true; } }); function install(ignored = asMutator(), { child } = { child: enabled }) { if (child) asA(); }',
+      'enabled = false; install();',
+      'alpha',
+      true,
+    ],
+    [
+      'getter consumption in assignment',
+      'function install({ child }) { if (child) asA(); }',
+      'const source = { get child() { asA(); return false; } }; let child; ({ child } = source); install({ child: false });',
+      'alpha',
+      true,
+    ],
+    [
+      'object-valued computed method key',
+      'function install({ child = asA() }, ignored) {}',
+      'const key = { toString() { asB(); return "key"; } }; install({ child: undefined }, { [key as unknown as string]() {} });',
+      'beta',
+      true,
+    ],
+    [
+      'primitive computed method key',
+      'function install({ child = asA() }, ignored) {}',
+      'const key = "key"; install({ child: undefined }, { [key]() { asB(); } });',
+      'alpha',
+      false,
+    ],
+    [
+      'returning effect branch',
+      'function prime(flag) { if (flag) { new Unknown(); return; } } function install({ child = asA() }) {}',
+      'prime(externalFlag); install({ child: undefined });',
+      'alpha',
+      true,
+    ],
+    [
+      'caught throwing effect branch',
+      'function prime(flag) { try { if (flag) { new Unknown(); throw null; } } catch {} } function install({ child = asA() }) {}',
+      'prime(externalFlag); install({ child: undefined });',
+      'alpha',
+      true,
+    ],
+    [
+      'recursive identifier assignment',
+      'function install({ child }) { if (child) asA(); }',
+      'let arg = { child: false }; [arg] = [{ child: true }]; install(arg);',
+      'alpha',
+      true,
+    ],
+    [
+      'unchanged identifier',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; install(arg);',
+      'beta',
+      false,
+    ],
+    [
+      'captured scalar producer write',
+      'let enabled: boolean; const asMutator = defineAsHook({ name: "mutator", setup() { enabled = true; } }); function install({ child }) { if (child) asA(); }',
+      'enabled = false; asMutator(); install({ child: enabled });',
+      'alpha',
+      true,
+    ],
+    [
+      'unchanged captured scalar',
+      'let enabled: boolean; function install({ child }) { if (child) asA(); }',
+      'enabled = false; install({ child: enabled });',
+      'beta',
+      false,
+    ],
+    [
+      'replaced array iterator',
+      'function install([child = asA()]) {}',
+      'const previous = Array.prototype[Symbol.iterator]; Array.prototype[Symbol.iterator] = function* () { yield null; }; install([undefined]); Array.prototype[Symbol.iterator] = previous;',
+      'beta',
+      true,
+    ],
+    [
+      'pristine array iterator',
+      'function install([child = asA()]) {}',
+      'install([undefined]);',
+      'alpha',
+      false,
+    ],
+    [
+      'inherited array hole',
+      'function install({ 0: child = asA() }) {}',
+      'Array.prototype[0] = null; install([,]); delete Array.prototype[0];',
+      'beta',
+      true,
+    ],
+    [
+      'own undefined shadows inherited index',
+      'function install({ 0: child = asA() }) {}',
+      'Array.prototype[0] = null; install([undefined]); delete Array.prototype[0];',
+      'alpha',
+      false,
+    ],
+    [
+      'own null shadows inherited index',
+      'function install({ 0: child = asA() }) {}',
+      'Array.prototype[0] = null; install([null]); delete Array.prototype[0];',
+      'beta',
+      false,
+    ],
+    [
+      'pristine absent array index',
+      'function install({ 0: child = asA() }) {}',
+      'install([,]);',
+      'alpha',
+      false,
+    ],
+    [
+      'nested getter before default',
+      'function install({ nested: { ignored }, child = asA() }) {}',
+      'install({ nested: { get ignored() { asB(); return false; } }, child: undefined });',
+      'beta',
+      true,
+    ],
+    [
+      'nested own data before default',
+      'function install({ nested: { ignored }, child = asA() }) {}',
+      'install({ nested: { ignored: false }, child: undefined });',
+      'alpha',
+      false,
+    ],
+    [
+      'eager computed method key',
+      'function prime() { asB(); return "key"; } function install({ child = asA(), ignored }) {}',
+      'install({ child: undefined, ignored: { [prime()]() {} } });',
+      'beta',
+      true,
+    ],
+    [
+      'eager computed accessor key',
+      'function prime() { asB(); return "key"; } function install({ child = asA(), ignored }) {}',
+      'install({ child: undefined, ignored: { get [prime()]() { return false; } } });',
+      'beta',
+      true,
+    ],
+    [
+      'deferred method body',
+      'function install({ child = asA(), ignored }) {}',
+      'install({ child: undefined, ignored: { key() { asB(); } } });',
+      'alpha',
+      false,
+    ],
+  ])(
+    'preserves default registration provenance across %s',
+    async (_label, declaration, body, winner, allowUnknown) => {
+      const { scan } = await scanExtra(
+        [
+          PRODUCERS,
+          declaration,
+          `export const asParent = defineAsHook({ name: 'parent', setup() { ${body} } });`,
+        ].join('\n'),
+        [
+          "import { asParent, asB } from './producers';",
+          'function setup(def) {',
+          'asParent(); const bag = asB();',
+          rule('w.state(bag.ready).eq(true)'),
+          '}',
+          'setup(def);',
+        ]
+      );
+      if (allowUnknown && scan.unresolved.length > 0) {
+        expect(scan.usages).toEqual([]);
+        expect(scan.unresolved.map(({ expression }) => expression)).toEqual(['bag.ready']);
+      } else {
+        expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual([
+          { hook: winner === 'alpha' ? 'asA' : 'asB', state: winner },
+        ]);
+        expect(scan.unresolved).toEqual([]);
+      }
+    }
+  );
+
+  it.each([
+    ['uncaught throw alternative', 'if (externalFlag) { throw new Unknown(); }', false],
+    [
+      'pre-existing effect before throw alternative',
+      'new Unknown(); if (externalFlag) { throw new Unknown(); }',
+      true,
+    ],
+    ['nonthrowing constructor alternative', 'if (externalFlag) { new Unknown(); }', true],
+    ['returning constructor alternative', 'if (externalFlag) { new Unknown(); return {}; }', true],
+    [
+      'mixed returning and throwing alternatives',
+      'if (externalFlag) { if (otherFlag) { new Unknown(); return {}; } throw null; }',
+      true,
+    ],
+    [
+      'caught throwing constructor alternative',
+      'try { if (externalFlag) { throw new Unknown(); } } catch {}',
+      true,
+    ],
+    ['known skipped constructor alternative', 'if (false) { new Unknown(); }', false],
+  ])('keeps continuing registration effects honest: %s', async (_label, guard, unknown) => {
+    const { scan } = await scanExtra(
+      [
+        PRODUCERS,
+        `const asGuard = defineAsHook({ name: 'guard', setup() {}, projectHandle(r) { ${guard} return {}; } });`,
+        'export const asParent = defineAsHook({ name: "parent", setup() { asGuard(); } });',
+      ].join('\n'),
+      [
+        "import { asParent, asA } from './producers';",
+        'function setup(def) {',
+        'asParent(); const bag = asA();',
+        rule('w.state(bag.ready).eq(true)'),
+        '}',
+        'setup(def);',
+      ]
+    );
+    expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(
+      unknown ? [] : [{ hook: 'asA', state: 'alpha' }]
+    );
+    expect(scan.unresolved.map(({ expression }) => expression)).toEqual(
+      unknown ? ['bag.ready'] : []
+    );
+  });
+
+  it.each([
+    ['omitted object', 'function install({ child = asA() } = {}) {}', 'install()', false],
+    [
+      'undefined object',
+      'function install({ child = asA() } = {}) {}',
+      'install(undefined)',
+      false,
+    ],
+    ['missing member', 'function install({ child = asA() } = {}) {}', 'install({})', false],
+    [
+      'undefined member',
+      'function install({ child = asA() } = {}) {}',
+      'install({ child: undefined })',
+      false,
+    ],
+    [
+      'supplied null',
+      'function install({ child = asA() } = {}) {}',
+      'install({ child: null })',
+      true,
+    ],
+    [
+      'supplied false',
+      'function install({ child = asA() } = {}) {}',
+      'install({ child: false })',
+      true,
+    ],
+    [
+      'unknown member',
+      'function install({ child = asA() } = {}) {}',
+      'install({ child: opaque })',
+      'unknown',
+    ],
+    ['unknown object', 'function install({ child = asA() } = {}) {}', 'install(opaque)', 'unknown'],
+    [
+      'unknown nested object',
+      'function install({ nested: { child = asA() } = {} } = {}) {}',
+      'install({ nested: opaque })',
+      'unknown',
+    ],
+    [
+      'nested missing',
+      'function install({ nested: { child = asA() } = {} } = {}) {}',
+      'install()',
+      false,
+    ],
+    [
+      'nested supplied',
+      'function install({ nested: { child = asA() } = {} } = {}) {}',
+      'install({ nested: { child: null } })',
+      true,
+    ],
+    ['array hole', 'function install([child = asA()] = []) {}', 'install([,])', false],
+    ['array undefined', 'function install([child = asA()] = []) {}', 'install([undefined])', false],
+    ['array supplied', 'function install([child = asA()] = []) {}', 'install([null])', true],
+    ['array unknown', 'function install([child = asA()] = []) {}', 'install([opaque])', 'unknown'],
+    [
+      'object first default wins',
+      'function install({ first = asA(), second = asB() } = {}) {}',
+      'install()',
+      false,
+    ],
+    [
+      'object reversed defaults',
+      'function install({ first = asB(), second = asA() } = {}) {}',
+      'install()',
+      true,
+    ],
+    [
+      'array first default wins',
+      'function install([first = asA(), second = asB()] = []) {}',
+      'install()',
+      false,
+    ],
+    [
+      'array reversed defaults',
+      'function install([first = asB(), second = asA()] = []) {}',
+      'install()',
+      true,
+    ],
+    [
+      'earlier binding feeds later default',
+      'function install({ first = true, child = first ? asA() : asB() } = {}) {}',
+      'install()',
+      false,
+    ],
+    [
+      'supplied binding feeds later default',
+      'function install({ first = true, child = first ? asA() : asB() } = {}) {}',
+      'install({ first: false })',
+      true,
+    ],
+  ])('replays reached destructured defaults: %s', async (_label, declaration, call, beta) => {
+    const { scan } = await scanExtra(
+      [
+        PRODUCERS,
+        declaration,
+        `export const asParent = defineAsHook({ name: 'parent', setup() { ${call}; } });`,
+      ].join('\n'),
+      [
+        "import { asParent, asB } from './producers';",
+        'function setup(def) {',
+        '  asParent();',
+        '  const bag = asB();',
+        `  ${rule('w.state(bag.ready).eq(true)')}`,
+        '}',
+        'setup(def);',
+      ]
+    );
+    const uncertain = beta === 'unknown';
+    expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(
+      uncertain ? [] : beta ? [{ hook: 'asB', state: 'beta' }] : [{ hook: 'asA', state: 'alpha' }]
+    );
+    expect(scan.unresolved.map(({ expression }) => expression)).toEqual(
+      uncertain ? ['bag.ready'] : []
+    );
+  });
+
+  it.each([
+    [
+      'deleted member',
+      'function install({ child }) { if (child) asB(); else asA(); }',
+      'const arg: { child?: boolean } = { child: true }; delete arg.child; install(arg);',
+      'unknown',
+    ],
+    [
+      'incremented member',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: 0 }; arg.child++; install(arg);',
+      'unknown',
+    ],
+    [
+      'decremented member',
+      'function install({ child }) { if (child) asB(); else asA(); }',
+      'const arg = { child: 1 }; --arg.child; install(arg);',
+      'unknown',
+    ],
+    [
+      'unchanged member',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; install(arg);',
+      'beta',
+    ],
+    [
+      'nonempty array length',
+      'function install({ length }) { if (length) asA(); }',
+      'install([null]);',
+      'alpha',
+    ],
+    [
+      'empty array length',
+      'function install({ length }) { if (length) asA(); }',
+      'install([]);',
+      'beta',
+    ],
+    [
+      'inherited object method',
+      'function install({ toString }) { if (toString) asA(); }',
+      'install({});',
+      'unknown',
+    ],
+    [
+      'own method shadow',
+      'function install({ toString }) { if (toString) asA(); }',
+      'install({ toString: false });',
+      'beta',
+    ],
+    [
+      'source prototype setter',
+      'function install({ child }) { if (child) asA(); }',
+      'install({ __proto__: { child: true } });',
+      'unknown',
+    ],
+    [
+      'computed own prototype key',
+      'function install({ ["__proto__"]: child }) { if (child) asA(); }',
+      'install({ ["__proto__"]: false });',
+      'beta',
+    ],
+    [
+      'computed own prototype value',
+      'function install({ ["__proto__"]: child }) { if (child) asA(); }',
+      'install({ ["__proto__"]: true });',
+      'alpha',
+    ],
+    [
+      'positional argument after spread',
+      'function install(first, { child }, ...rest) { if (child) asA(); }',
+      'install(...([null, { child: true }] as const), { child: false });',
+      'unknown',
+    ],
+    [
+      'possibly supplied default after spread',
+      'function install(first, child = asA()) {}',
+      'install(...([null, null] as const));',
+      'unknown',
+    ],
+    [
+      'fixed positional control',
+      'function install(first, { child }, ...rest) { if (child) asA(); }',
+      'install(null, { child: false });',
+      'beta',
+    ],
+    // Consuming an unknown iterator can install a name before the helper runs.
+    [
+      'fixed argument before unknown spread',
+      'function install({ child }, ...rest) { if (child) asA(); }',
+      'install({ child: true }, ...opaque);',
+      'unknown',
+    ],
+    [
+      'fixed argument before effect-proven spread',
+      'function install({ child }, ...rest) { if (child) asA(); }',
+      'install({ child: true }, ...[]);',
+      'alpha',
+    ],
+    [
+      'array assignment member target',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; [arg.child] = [true]; install(arg);',
+      'unknown',
+    ],
+    [
+      'object assignment member target',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; ({ value: arg.child } = { value: true }); install(arg);',
+      'unknown',
+    ],
+    [
+      'nested assignment member target',
+      'function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; ({ value: [arg.child] } = { value: [true] }); install(arg);',
+      'unknown',
+    ],
+    [
+      'nested producer captured module aggregate',
+      'let arg: { child: boolean }; const asMutator = defineAsHook({ name: "mutator", setup() { arg.child = true; } }); function install({ child }) { if (child) asA(); }',
+      'arg = { child: false }; asMutator(); install(arg);',
+      'unknown',
+    ],
+    [
+      'nested producer unchanged aggregate control',
+      'let arg: { child: boolean }; const asMutator = defineAsHook({ name: "mutator", setup() {} }); function install({ child }) { if (child) asA(); }',
+      'arg = { child: false }; asMutator(); install(arg);',
+      'beta',
+    ],
+    [
+      'generator iteration before fixed parameter',
+      'const more = function* () { asB(); }; function install({ child }, ...rest) { if (child) asA(); }',
+      'install({ child: true }, ...more());',
+      'unknown',
+    ],
+    [
+      'unconsumed generator control',
+      'const more = function* () { asB(); }; function install({ child }) { if (child) asA(); }',
+      'more(); install({ child: true });',
+      'alpha',
+    ],
+    [
+      'prototype write before fresh aggregate',
+      'function install({ child }) { if (child) asA(); }',
+      '(Object.prototype as { child?: boolean }).child = true; install({}); delete (Object.prototype as { child?: boolean }).child;',
+      'unknown',
+    ],
+    [
+      'prototype write before fresh nested aggregate',
+      'function install({ nested: { child } }) { if (child) asA(); }',
+      '(Object.prototype as { child?: boolean }).child = true; install({ nested: {} }); delete (Object.prototype as { child?: boolean }).child;',
+      'unknown',
+    ],
+    [
+      'fresh own member after prototype write control',
+      'function install({ child }) { if (child) asA(); }',
+      '(Object.prototype as { child?: boolean }).child = true; install({ child: false }); delete (Object.prototype as { child?: boolean }).child;',
+      'beta',
+    ],
+    [
+      'standalone constructor aggregate escape',
+      'class Mutator { constructor(arg: { child: boolean }) { arg.child = true; } } function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; new Mutator(arg); install(arg);',
+      'unknown',
+    ],
+    [
+      'standalone constructor name installation',
+      'class Mutator { constructor() { asB(); } } function install({ child }) { if (child) asA(); }',
+      'new Mutator(); install({ child: true });',
+      'unknown',
+    ],
+    [
+      'uninvoked constructor control',
+      'class Mutator { constructor(arg: { child: boolean }) { arg.child = true; } } function install({ child }) { if (child) asA(); }',
+      'const arg = { child: false }; install(arg);',
+      'beta',
+    ],
+    [
+      'cached winner before constructor control',
+      'class Mutator { constructor() { asB(); } } function install({ child }) { if (child) asA(); }',
+      'asA(); new Mutator(); install({ child: true });',
+      'alpha',
+    ],
+    [
+      'cached winner before iterator control',
+      'const more = function* () { asB(); }; function install({ child }, ...rest) { if (child) asA(); }',
+      'asA(); install({ child: true }, ...more());',
+      'alpha',
+    ],
+  ])(
+    'preserves aggregate and argument certainty: %s',
+    async (_label, declaration, body, outcome) => {
+      const { scan } = await scanExtra(
+        [
+          PRODUCERS,
+          declaration,
+          `export const asParent = defineAsHook({ name: 'parent', setup() { ${body} } });`,
+        ].join('\n'),
+        [
+          "import { asParent, asB } from './producers';",
+          'function setup(def) {',
+          '  asParent();',
+          '  const bag = asB();',
+          `  ${rule('w.state(bag.ready).eq(true)')}`,
+          '}',
+          'setup(def);',
+        ]
+      );
+      expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual(
+        outcome === 'unknown'
+          ? []
+          : outcome === 'alpha'
+            ? [{ hook: 'asA', state: 'alpha' }]
+            : [{ hook: 'asB', state: 'beta' }]
+      );
+      expect(scan.unresolved.map(({ expression }) => expression)).toEqual(
+        outcome === 'unknown' ? ['bag.ready'] : []
+      );
+    }
+  );
+
   it('retires an exposed callable proof when its binding is reassigned', async () => {
     const { scan } = await scanExtra(
       [

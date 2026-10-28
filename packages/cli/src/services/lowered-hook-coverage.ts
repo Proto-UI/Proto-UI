@@ -90,6 +90,8 @@ export type RuleStateScan = {
   exposedLocals: ExposedLocalUsage[];
 };
 
+type StateRead = HookStateUsage | { exposedLocal: ExposedLocalUsage } | 'local';
+
 type LocalStateBinding = {
   kind: 'localState';
   declaredAs: string | null;
@@ -119,6 +121,15 @@ type Binding =
   | {
       kind: 'handleBag';
       hook: string;
+      /** Literal metadata is valid only for this exact source snapshot. */
+      literalProof?: {
+        initializer: ts.Expression;
+        alternates?: ts.Expression[];
+        sourceValue: HookSourceValue;
+        scopes: Map<ts.Expression, Scope>;
+        revokedMembers?: Set<string>;
+        memberReads?: Map<string, StateRead[]>;
+      };
       sourceValue?: HookSourceValue;
       sourceAlternatives?: HookSourceValue[];
       sourceAlternativeHooks?: string[];
@@ -145,6 +156,7 @@ type Binding =
   | {
       kind: 'token';
       initializer: ts.Expression;
+      capturedScopes?: Map<ts.Expression, Scope>;
       /** Members written after the declaration, latest candidates first. */
       members?: Map<string, ts.Expression[]>;
       /** Containers the name may still hold because a write may be skipped. */
@@ -1773,7 +1785,9 @@ export function scanRuleStateReads(
     target: HookSourceValue,
     replacement: HookSourceValue,
     uncertain: boolean,
-    replacements?: ReadonlyMap<HookSourceValue, HookSourceValue>
+    replacements?: ReadonlyMap<HookSourceValue, HookSourceValue>,
+    writtenMember?: string,
+    writtenReads?: StateRead[] | null
   ): void => {
     // One memo spans all bindings and candidates, so shared ancestors remain
     // shared instead of being cloned independently for each visible alias.
@@ -1833,10 +1847,39 @@ export function scanRuleStateReads(
       if (held.size === 0) continue;
       const latest = scope.versions.latest(sourceValue);
       const next = [latest, ...[...held].filter((version) => version !== latest)];
+      const proof = binding.kind === 'handleBag' ? binding.literalProof : undefined;
+      const memberReads = new Map(proof?.memberReads);
+      if (proof && sourceValue === target && writtenMember !== undefined) {
+        const previous = literalMemberReads(proof, writtenMember, scope);
+        if (writtenReads && (!uncertain || previous)) {
+          memberReads.set(writtenMember, [...writtenReads, ...(uncertain ? (previous ?? []) : [])]);
+        } else memberReads.delete(writtenMember);
+      }
       declare(owner, name, {
         ...binding,
         sourceValue: next[0],
         sourceAlternatives: next.slice(1),
+        ...(binding.kind === 'handleBag' &&
+        binding.literalProof &&
+        binding.literalProof.sourceValue === sourceValue &&
+        writtenMember !== undefined
+          ? {
+              literalProof: {
+                ...binding.literalProof,
+                sourceValue: next[0],
+                memberReads,
+                revokedMembers: new Set([
+                  ...[...(binding.literalProof.revokedMembers ?? [])].filter(
+                    (key) =>
+                      sourceValue !== target || key !== writtenMember || !memberReads.has(key)
+                  ),
+                  ...(sourceValue === target && !memberReads.has(writtenMember)
+                    ? [writtenMember]
+                    : []),
+                ]),
+              },
+            }
+          : {}),
       } as Binding);
     }
   };
@@ -1892,6 +1935,32 @@ export function scanRuleStateReads(
             sourceAlternatives: values.slice(1),
             sourceAlternativeHooks: hooks.slice(1),
             sourceAuthority,
+            ...(next.kind === 'handleBag' && previous.kind === 'handleBag'
+              ? {
+                  literalProof:
+                    next.literalProof &&
+                    previous.literalProof &&
+                    next.literalProof.sourceValue === next.sourceValue &&
+                    previous.literalProof.sourceValue === previous.sourceValue
+                      ? {
+                          ...next.literalProof,
+                          scopes: new Map([
+                            ...next.literalProof.scopes,
+                            ...previous.literalProof.scopes,
+                          ]),
+                          alternates: [
+                            ...(next.literalProof.alternates ?? []),
+                            previous.literalProof.initializer,
+                            ...(previous.literalProof.alternates ?? []),
+                          ],
+                          ...joinLiteralMemberReads(
+                            [next.literalProof, previous.literalProof],
+                            lookupScope
+                          ),
+                        }
+                      : undefined,
+                }
+              : {}),
           } as Binding);
       }
       return;
@@ -1917,6 +1986,53 @@ export function scanRuleStateReads(
    * assignment declares in the scope that already owns the name while still
    * resolving its right-hand side where it was written.
    */
+  const snapshotScope = (scope: Scope): Scope => ({
+    ...scope,
+    bindings: new Map(scope.bindings),
+    parent: scope.parent ? snapshotScope(scope.parent) : null,
+  });
+
+  const capturedStateReads = new WeakMap<Binding, StateRead[]>();
+
+  const literalMemberReads = (
+    proof: NonNullable<Extract<Binding, { kind: 'handleBag' }>['literalProof']>,
+    member: string,
+    scope: Scope
+  ): StateRead[] | null => {
+    if (proof.revokedMembers?.has(member)) return null;
+    const retained = proof.memberReads?.get(member);
+    if (retained) return retained;
+    const alternatives = [proof.initializer, ...(proof.alternates ?? [])].map((candidate) => {
+      const capturedScope = proof.scopes.get(candidate) ?? scope;
+      const members = containerMembers(candidate, member, capturedScope);
+      if (members.length === 0) return null;
+      const reads = members.map((value) => readState(value, capturedScope));
+      return reads.some((read) => read === null) ? null : reads.flatMap((read) => read ?? []);
+    });
+    return alternatives.some((read) => read === null)
+      ? null
+      : alternatives.flatMap((read) => read ?? []);
+  };
+
+  const joinLiteralMemberReads = (
+    proofs: NonNullable<Extract<Binding, { kind: 'handleBag' }>['literalProof']>[],
+    scope: Scope
+  ) => {
+    const memberReads = new Map<string, StateRead[]>();
+    const revokedMembers = new Set(proofs.flatMap((proof) => [...(proof.revokedMembers ?? [])]));
+    const keys = new Set(proofs.flatMap((proof) => [...(proof.memberReads?.keys() ?? [])]));
+    for (const key of keys) {
+      const reads = proofs.map((proof) => literalMemberReads(proof, key, scope));
+      if (reads.every((read) => read !== null)) {
+        memberReads.set(
+          key,
+          reads.flatMap((read) => read ?? [])
+        );
+      } else revokedMembers.add(key);
+    }
+    return { memberReads, revokedMembers };
+  };
+
   const declareValue = (
     name: ts.BindingName,
     initializer: ts.Expression,
@@ -1928,18 +2044,131 @@ export function scanRuleStateReads(
     const resolved = sourceResolve(initializer, lookupScope);
     const sourceHook = sourceHookLabel(initializer, lookupScope);
     const sourceNode = unwrap(initializer);
-    // Summary evaluation recognizes every ordinary object/array literal. Keep
-    // those in the established token/container path unless this is a proven
-    // non-literal source expression, so local maps are not replaced by a blank
-    // source bag.
+    const lexicalAlias = ts.isIdentifier(sourceNode) ? lookup(lookupScope, sourceNode.text) : null;
+    const capturedAlias = lexicalAlias ? capturedStateReads.get(lexicalAlias) : undefined;
+    if (capturedAlias && ts.isIdentifier(name)) {
+      const captured: Binding = { ...lexicalAlias! };
+      capturedStateReads.set(captured, capturedAlias);
+      declare(scope, name.text, captured);
+      return;
+    }
+    const lexicalOwner =
+      ts.isPropertyAccessExpression(sourceNode) || ts.isElementAccessExpression(sourceNode)
+        ? ownerOf(sourceNode)
+        : null;
+    const lexicalMember = lexicalOwner ? memberNameOf(sourceNode) : null;
+    if (lexicalOwner && lexicalMember !== null && ts.isIdentifier(name)) {
+      const reads = readState(initializer, lookupScope);
+      if (reads) {
+        const locals = reads.flatMap<LocalStateBinding>((read) =>
+          read === 'local'
+            ? [{ kind: 'localState' as const, declaredAs: null }]
+            : typeof read !== 'string' && 'exposedLocal' in read
+              ? [
+                  {
+                    kind: 'localState' as const,
+                    declaredAs: read.exposedLocal.attribute,
+                    exposedAs: read.exposedLocal.exposedAs,
+                  },
+                ]
+              : []
+        );
+        if (locals.length === reads.length) {
+          declare(scope, name.text, { ...locals[0], alternatives: locals.slice(1) });
+          return;
+        }
+        const values = sourceResolveCandidates(initializer, lookupScope).map(
+          (candidate) => candidate.value
+        );
+        const states = values.flatMap((value) => (value.kind === 'state' ? [value.state] : []));
+        const captured: Binding =
+          states.length === values.length && states.length > 0
+            ? {
+                kind: 'handle',
+                hook: sourceHook ?? '<source-hook>',
+                state: states[0].declaredName,
+                sourceState: states[0],
+                sourceAlternatives: states.slice(1),
+                sourceAuthority: true,
+              }
+            : { kind: 'opaque', sourceAuthority: true };
+        capturedStateReads.set(captured, reads);
+        declare(scope, name.text, captured);
+        return;
+      }
+      // The primary source environment is not proof of every retained branch.
+      if (resolved.matched && resolved.value.kind === 'state') {
+        declare(scope, name.text, { kind: 'opaque', sourceAuthority: true });
+        return;
+      }
+    }
+    if (lexicalOwner && lexicalMember !== null) {
+      const owner = unwrap(lexicalOwner);
+      const held = ts.isIdentifier(owner) ? lookup(lookupScope, owner.text) : null;
+      if (
+        held?.kind === 'handleBag' &&
+        held.literalProof &&
+        held.literalProof.sourceValue === held.sourceValue &&
+        !held.literalProof.revokedMembers?.has(lexicalMember)
+      ) {
+        const proof = held.literalProof;
+        const alternatives = [proof.initializer, ...(proof.alternates ?? [])].map((candidate) => {
+          const capturedScope = proof.scopes.get(candidate) ?? lookupScope;
+          return containerMembers(candidate, lexicalMember, capturedScope).map((member) => ({
+            member,
+            capturedScope,
+          }));
+        });
+        const members = alternatives.flat();
+        if (alternatives.every((members) => members.length > 0) && ts.isIdentifier(name)) {
+          if (
+            !(resolved.matched && resolved.value.kind !== 'unknown') &&
+            members.every(({ member, capturedScope }) =>
+              resolvableTokenArgument(member, capturedScope)
+            )
+          ) {
+            declare(scope, name.text, {
+              kind: 'token',
+              initializer: members[0].member,
+              alternates: members.slice(1).map(({ member }) => member),
+              capturedScopes: new Map(
+                members.map(({ member, capturedScope }) => [member, capturedScope])
+              ),
+            });
+            return;
+          }
+        }
+      }
+    }
+    // Ordinary token literals still use the established container path. A
+    // literal holding source-backed handles must retain its reference graph,
+    // even when its outer members have no immediate state semantics.
     const sourceCanIntercept =
       resolved.matched &&
       sourcePathHasProvenance(initializer, lookupScope, resolved) &&
-      !ts.isObjectLiteralExpression(sourceNode) &&
-      !ts.isArrayLiteralExpression(sourceNode) &&
       !ts.isConditionalExpression(sourceNode);
     if (sourceCanIntercept) {
       const sourceValue = resolved.value;
+      let sourceAlias = lexicalAlias;
+      if (!sourceAlias && lexicalOwner && sourceValue.kind === 'object') {
+        const candidates = sourceResolveCandidates(initializer, lookupScope)
+          .filter((candidate) => candidate.matched)
+          .map((candidate) => candidate.value);
+        for (let owner: Scope | null = lookupScope; owner; owner = owner.parent) {
+          for (const held of owner.bindings.values()) {
+            if (held.kind !== 'handleBag' || held.sourceValue !== sourceValue) continue;
+            const values = [...new Set(sourceBindingValues(held))];
+            if (
+              values.length === new Set(candidates).size &&
+              candidates.every((candidate) => values.includes(candidate))
+            ) {
+              sourceAlias = held;
+              break;
+            }
+          }
+          if (sourceAlias) break;
+        }
+      }
       if (ts.isObjectBindingPattern(name)) {
         if (sourceValue.kind !== 'object') {
           for (const element of name.elements) {
@@ -2018,6 +2247,22 @@ export function scanRuleStateReads(
             hook: sourceHook ?? '<source-hook>',
             sourceValue,
             sourceAuthority: true,
+            ...(sourceValue.kind === 'object' &&
+            (ts.isObjectLiteralExpression(sourceNode) || ts.isArrayLiteralExpression(sourceNode))
+              ? {
+                  literalProof: {
+                    initializer: sourceNode,
+                    sourceValue,
+                    scopes: new Map([[sourceNode, snapshotScope(lookupScope)]]),
+                  },
+                }
+              : sourceAlias?.kind === 'handleBag'
+                ? {
+                    literalProof: sourceAlias.literalProof,
+                    sourceAlternatives: sourceAlias.sourceAlternatives,
+                    sourceAlternativeHooks: sourceAlias.sourceAlternativeHooks,
+                  }
+                : {}),
           });
         }
         return;
@@ -2161,6 +2406,46 @@ export function scanRuleStateReads(
             sourceAlternatives: values.slice(1),
             sourceAlternativeHooks: hooks.slice(1),
             sourceAuthority,
+            ...(head.kind === 'handleBag'
+              ? {
+                  literalProof: sourceBranches.every(
+                    (branch) =>
+                      branch.kind === 'handleBag' &&
+                      branch.literalProof &&
+                      branch.literalProof.sourceValue === branch.sourceValue
+                  )
+                    ? {
+                        initializer: head.literalProof?.initializer ?? chosen.whenTrue,
+                        sourceValue: values[0],
+                        alternates: sourceBranches
+                          .flatMap((branch) =>
+                            branch.kind === 'handleBag' && branch.literalProof
+                              ? [
+                                  branch.literalProof.initializer,
+                                  ...(branch.literalProof.alternates ?? []),
+                                ]
+                              : []
+                          )
+                          .slice(1),
+                        scopes: new Map(
+                          sourceBranches.flatMap((branch) =>
+                            branch.kind === 'handleBag' && branch.literalProof
+                              ? [...branch.literalProof.scopes]
+                              : []
+                          )
+                        ),
+                        ...joinLiteralMemberReads(
+                          sourceBranches.flatMap((branch) =>
+                            branch.kind === 'handleBag' && branch.literalProof
+                              ? [branch.literalProof]
+                              : []
+                          ),
+                          lookupScope
+                        ),
+                      }
+                    : undefined,
+                }
+              : {}),
           } as Binding);
         }
         return;
@@ -2347,8 +2632,6 @@ export function scanRuleStateReads(
    * `'local'` means traced to a prototype-owned state, which needs no hook
    * entry and must not be reported either way.
    */
-  type StateRead = HookStateUsage | { exposedLocal: ExposedLocalUsage } | 'local';
-
   const localStateRead = (binding: LocalStateBinding, state: string): StateRead | null => {
     if (binding.exposedAs === undefined) return 'local';
     if (binding.exposedAs === null) return null;
@@ -2403,6 +2686,8 @@ export function scanRuleStateReads(
     }
     if (ts.isIdentifier(argument)) {
       const binding = lookup(scope, argument.text);
+      const captured = binding ? capturedStateReads.get(binding) : undefined;
+      if (captured) return captured;
       if (binding?.kind === 'handle') {
         const states = sourceBindingStates(binding);
         const hooks = sourceBindingHooks(binding);
@@ -2440,7 +2725,21 @@ export function scanRuleStateReads(
         // The complete source-state proof above already handled known members.
         // Missing or unknown source paths cannot regain proof from a legacy
         // hook-name table or an internal result bucket with a matching name.
-        if (authoritative) return null;
+        if (authoritative) {
+          // Only the captured literal's ordinary local State members may
+          // supplement an unknown source member. Graph writes and escapes
+          // replace the snapshot, so this cannot revive revoked hook proofs.
+          if (
+            ownerBinding?.kind === 'handleBag' &&
+            ownerBinding.literalProof &&
+            ownerBinding.literalProof.sourceValue === ownerBinding.sourceValue &&
+            !ownerBinding.literalProof.revokedMembers?.has(member)
+          ) {
+            const reads = literalMemberReads(ownerBinding.literalProof, member, scope);
+            if (reads) return reads;
+          }
+          return null;
+        }
       }
       if (ts.isPropertyAccessExpression(argument)) {
         const owner = bagHook(argument.expression, scope);
@@ -2927,7 +3226,24 @@ export function scanRuleStateReads(
       const next = new Set([...seen, inner.text]);
       if (binding?.kind === 'token') {
         return [binding.initializer, ...(binding.alternates ?? [])].every((candidate) =>
-          resolvableTokenArgument(candidate, scope, next)
+          resolvableTokenArgument(candidate, binding.capturedScopes?.get(candidate) ?? scope, next)
+        );
+      }
+      if (
+        binding?.kind === 'handleBag' &&
+        binding.literalProof &&
+        binding.literalProof.sourceValue === binding.sourceValue
+      ) {
+        return (
+          !binding.literalProof.revokedMembers?.size &&
+          [binding.literalProof.initializer, ...(binding.literalProof.alternates ?? [])].every(
+            (candidate) =>
+              resolvableTokenArgument(
+                candidate,
+                binding.literalProof?.scopes.get(candidate) ?? scope,
+                next
+              )
+          )
         );
       }
       if (binding?.kind === 'tokenImport') {
@@ -2942,10 +3258,31 @@ export function scanRuleStateReads(
       }
       return false;
     }
-    if (ts.isElementAccessExpression(inner)) {
-      // A member is only reachable if its owner is. Element access is the form
-      // `resolveExpression` reads a token map through.
-      return resolvableTokenArgument(inner.expression, scope, seen);
+    if (ts.isElementAccessExpression(inner) || ts.isPropertyAccessExpression(inner)) {
+      const owner = unwrap(inner.expression);
+      const key = memberNameOf(inner);
+      const binding = ts.isIdentifier(owner) ? lookup(scope, owner.text) : null;
+      if (
+        binding?.kind === 'handleBag' &&
+        binding.literalProof &&
+        key !== null &&
+        binding.literalProof.sourceValue === binding.sourceValue &&
+        !binding.literalProof.revokedMembers?.has(key)
+      ) {
+        const next = new Set([...seen, owner.getText()]);
+        return [binding.literalProof.initializer, ...(binding.literalProof.alternates ?? [])].every(
+          (candidate) => {
+            const captured = binding.literalProof?.scopes.get(candidate) ?? scope;
+            const members = containerMembers(candidate, key, captured);
+            return (
+              members.length > 0 &&
+              members.every((member) => resolvableTokenArgument(member, captured, next))
+            );
+          }
+        );
+      }
+      if (ts.isElementAccessExpression(inner))
+        return resolvableTokenArgument(inner.expression, scope, seen);
     }
     // Dot access resolves through `semanticMap` only, which holds hook state
     // handles rather than tokens. An ordinary token object is a `map`, so
@@ -3746,6 +4083,7 @@ export function scanRuleStateReads(
       const replacement: HookSourceValue = right?.matched
         ? right.value
         : { kind: 'unknown', reason: 'unresolved member write' };
+      const writtenReads = writesRight ? readState(node.right, current) : null;
       for (const value of held) {
         if (value.kind !== 'object') continue;
         const owning = owners.get(value) ?? null;
@@ -3769,7 +4107,15 @@ export function scanRuleStateReads(
         // The graph the write replaced is kept as it is, so a write that may
         // not have run leaves the container holding a version the tracker
         // knows. A copy of it would be a graph nothing else can reach.
-        publishSourceGraph(current, value, { ...value, members }, uncertain);
+        publishSourceGraph(
+          current,
+          value,
+          { ...value, members },
+          uncertain,
+          undefined,
+          member ?? undefined,
+          writtenReads
+        );
       }
       if (receivers.length > 0) {
         // An alias of the container is the same object, so the write lands on

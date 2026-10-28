@@ -1617,7 +1617,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
 
   const unknownRegistrationLiteral = Symbol('unproved registration literal');
   type UnprovedRegistrationLiteral = typeof unknownRegistrationLiteral;
-  type RegistrationLiteral = SetupLiteral | null | undefined | UnprovedRegistrationLiteral;
+  type RegistrationLiteral =
+    | SetupLiteral
+    | null
+    | undefined
+    | UnprovedRegistrationLiteral
+    | { members: Map<string, RegistrationLiteral>; epoch: number; array?: true };
   const registrationLiteral = (
     node: ts.Node
   ): SetupLiteral | null | UnprovedRegistrationLiteral => {
@@ -1675,9 +1680,20 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       }[]
     >();
     let opaque = false;
+    // All replay frames share aggregate lifetimes, including captured module cells.
+    let aggregateEpoch = 0;
+    let aggregateAbsenceUnproved = false;
     const unknownLiteral: UnprovedRegistrationLiteral = unknownRegistrationLiteral;
     type Literal = RegistrationLiteral;
     type Environment = Map<ts.Node, Literal>;
+    const activeEnvironments = new Set<Environment>();
+    const withdrawCapturedBinding = (key: ts.Node, env: Environment): void => {
+      for (const frame of activeEnvironments) {
+        if (frame === env || !frame.has(key)) continue;
+        frame.set(key, unknownLiteral);
+        capabilities(frame).set(key, 'unknown');
+      }
+    };
     const capabilities = (env: Environment): Map<ts.Node, CapabilityOrigin> => {
       let facts = capabilityEnvironments.get(env);
       if (!facts) {
@@ -1799,7 +1815,91 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       if (ts.isIdentifier(value) && value.text === 'undefined' && !binding(value, module))
         return undefined;
       const key = ts.isIdentifier(value) ? binding(value, module) : undefined;
+      // The walk has already replayed expression effects. Re-reading a whole
+      // aggregate afterwards cannot recover earlier member values if a later
+      // member changed their cells; retain no snapshot in that case.
+      if (ts.isObjectLiteralExpression(value) || ts.isArrayLiteralExpression(value)) {
+        const hasEffect = (node: ts.Node): boolean => {
+          if (isFunctionLike(node))
+            return node.name && ts.isComputedPropertyName(node.name)
+              ? hasEffect(node.name.expression)
+              : false;
+          if (
+            ts.isCallExpression(node) ||
+            ts.isNewExpression(node) ||
+            ts.isDeleteExpression(node) ||
+            ts.isPostfixUnaryExpression(node) ||
+            (ts.isPrefixUnaryExpression(node) &&
+              (node.operator === ts.SyntaxKind.PlusPlusToken ||
+                node.operator === ts.SyntaxKind.MinusMinusToken)) ||
+            (ts.isBinaryExpression(node) &&
+              node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+              node.operatorToken.kind <= ts.SyntaxKind.LastAssignment)
+          )
+            return true;
+          return ts.forEachChild(node, hasEffect) === true;
+        };
+        if (hasEffect(value)) return unknownLiteral;
+      }
+      if (ts.isObjectLiteralExpression(value)) {
+        const members = new Map<string, Literal>();
+        for (const property of value.properties) {
+          if (ts.isPropertyAssignment(property)) {
+            const name = ts.isComputedPropertyName(property.name)
+              ? literal(property.name.expression, module, env)
+              : property.name.text;
+            if (typeof name !== 'string' && typeof name !== 'number') return unknownLiteral;
+            // The noncomputed spelling sets the prototype, not an own member.
+            if (name === '__proto__' && !ts.isComputedPropertyName(property.name))
+              return unknownLiteral;
+            members.set(String(name), literal(property.initializer, module, env));
+          } else if (
+            ts.isShorthandPropertyAssignment(property) &&
+            !property.objectAssignmentInitializer
+          ) {
+            members.set(property.name.text, literal(property.name, module, env));
+          } else return unknownLiteral;
+        }
+        return { members, epoch: aggregateEpoch };
+      }
+      if (ts.isArrayLiteralExpression(value)) {
+        const members = new Map<string, Literal>();
+        members.set('length', value.elements.length);
+        for (let index = 0; index < value.elements.length; index++) {
+          const element = value.elements[index];
+          if (ts.isSpreadElement(element)) return unknownLiteral;
+          if (!ts.isOmittedExpression(element))
+            members.set(String(index), literal(element, module, env));
+        }
+        return { members, epoch: aggregateEpoch, array: true };
+      }
       return key && env.has(key) ? env.get(key)! : unknownLiteral;
+    };
+    const invalidateAggregates = (): void => {
+      aggregateEpoch++;
+      // An unmodeled member write can affect a prototype, including aggregates
+      // created later. Own members remain usable on fresh snapshots.
+      aggregateAbsenceUnproved = true;
+    };
+    const hasMemberTarget = (node: ts.Node): boolean => {
+      const target = unwrap(node);
+      if (ts.isPropertyAccessExpression(target) || ts.isElementAccessExpression(target))
+        return true;
+      return ts.forEachChild(target, hasMemberTarget) === true;
+    };
+    const inheritedMemberNames: Readonly<Record<string, boolean>> = {
+      constructor: true,
+      ['__proto__']: true,
+      __defineGetter__: true,
+      __defineSetter__: true,
+      __lookupGetter__: true,
+      __lookupSetter__: true,
+      hasOwnProperty: true,
+      isPrototypeOf: true,
+      propertyIsEnumerable: true,
+      toLocaleString: true,
+      toString: true,
+      valueOf: true,
     };
     const runFunction = (
       fn: ts.FunctionLikeDeclaration,
@@ -1815,9 +1915,11 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         return;
       }
       activeHelpers.add(fn);
+      activeEnvironments.add(env);
       try {
         if (fn.body) walk(fn.body, module, env, certain, children, nested);
       } finally {
+        activeEnvironments.delete(env);
         activeHelpers.delete(fn);
       }
     };
@@ -1881,6 +1983,8 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       entry.initializing = false;
       return installed ?? entry;
     };
+    type Completion = boolean | null | 'throw';
+    let catchDepth = 0;
     const walk = (
       node: ts.Node,
       module: Module,
@@ -1888,8 +1992,70 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       certain: boolean,
       children: Map<string, HookSourceValue>,
       nested: boolean
-    ): boolean | null => {
-      if (ts.isTypeNode(node) || isFunctionLike(node)) return true;
+    ): Completion => {
+      // Forks and parameter initializers are live frames too, even before a
+      // function body starts. Retire only the membership this visit installed.
+      const alreadyActive = activeEnvironments.has(env);
+      activeEnvironments.add(env);
+      try {
+        return walkNode(node, module, env, certain, children, nested);
+      } finally {
+        if (!alreadyActive) activeEnvironments.delete(env);
+      }
+    };
+    const walkBranch = (
+      node: ts.Node,
+      module: Module,
+      env: Environment,
+      children: Map<string, HookSourceValue>,
+      nested: boolean
+    ): Completion => {
+      const beforeOpaque = opaque;
+      const beforeEntries = new Map(
+        [...entries].map(([name, entry]) => [
+          name,
+          {
+            entry,
+            snapshot: { ...entry, owners: new Set(entry.owners) },
+          },
+        ])
+      );
+      const completion = walk(node, module, env, false, children, nested);
+      if (completion === 'throw' && catchDepth === 0) {
+        // This alternative cannot reach the caller's next registration. Returns
+        // can, as can throws intercepted by an enclosing catch: retain those.
+        opaque = beforeOpaque;
+        entries.clear();
+        for (const [name, { entry, snapshot }] of beforeEntries) {
+          Object.assign(entry, snapshot);
+          entries.set(name, entry);
+        }
+      }
+      return completion;
+    };
+    const walkNode = (
+      node: ts.Node,
+      module: Module,
+      env: Environment,
+      certain: boolean,
+      children: Map<string, HookSourceValue>,
+      nested: boolean
+    ): Completion => {
+      if (ts.isTypeNode(node)) return true;
+      if (isFunctionLike(node)) {
+        if (node.name && ts.isComputedPropertyName(node.name))
+          walk(node.name, module, env, certain, children, nested);
+        return true;
+      }
+      if (ts.isComputedPropertyName(node)) {
+        walk(node.expression, module, env, certain, children, nested);
+        const key = literal(node.expression, module, env);
+        if (key === unknownLiteral || (typeof key === 'object' && key !== null)) {
+          invalidateAggregates();
+          opaque = true;
+        }
+        return true;
+      }
       if (ts.isExpressionStatement(node))
         return walk(node.expression, module, env, certain, children, nested);
       if (ts.isAwaitExpression(node) || ts.isYieldExpression(node)) {
@@ -1897,15 +2063,24 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         opaque = true;
         return false;
       }
+      if (ts.isDeleteExpression(node)) {
+        walk(node.expression, module, env, certain, children, nested);
+        invalidateAggregates();
+        return true;
+      }
       if (
         (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
         (node.operator === ts.SyntaxKind.PlusPlusToken ||
           node.operator === ts.SyntaxKind.MinusMinusToken)
       ) {
         walk(node.operand, module, env, certain, children, nested);
+        const operand = unwrap(node.operand);
+        if (ts.isPropertyAccessExpression(operand) || ts.isElementAccessExpression(operand))
+          invalidateAggregates();
         const previous = literal(node.operand, module, env);
         const key = binding(node.operand, module);
         if (key) {
+          withdrawCapturedBinding(key, env);
           callableBindings.delete(key);
           env.set(
             key,
@@ -1922,7 +2097,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         let conditionalCompletion = false;
         for (const statement of node.statements) {
           const completion = walk(statement, module, env, continuationCertain, children, nested);
-          if (completion === false) return false;
+          if (completion === false || completion === 'throw') {
+            // A previous conditional may already have returned to the caller.
+            // A later throw terminates only its surviving alternative, not that
+            // earlier return's effects. Keep the mixed completion conservative.
+            return conditionalCompletion ? null : completion;
+          }
           if (completion === null) {
             continuationCertain = false;
             conditionalCompletion = true;
@@ -1932,7 +2112,23 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       }
       if (ts.isReturnStatement(node) || ts.isThrowStatement(node)) {
         if (node.expression) walk(node.expression, module, env, certain, children, nested);
-        return false;
+        return ts.isThrowStatement(node) ? 'throw' : false;
+      }
+      if (ts.isTryStatement(node)) {
+        if (node.catchClause) catchDepth++;
+        let completion: Completion;
+        try {
+          completion = walk(node.tryBlock, module, env, certain, children, nested);
+        } finally {
+          if (node.catchClause) catchDepth--;
+        }
+        if (node.catchClause && (completion === 'throw' || completion === null))
+          completion = walk(node.catchClause.block, module, env, false, children, nested);
+        if (node.finallyBlock) {
+          const final = walk(node.finallyBlock, module, env, certain, children, nested);
+          if (final === false || final === 'throw') return final;
+        }
+        return completion;
       }
       if (ts.isVariableDeclaration(node)) {
         if (node.initializer) walk(node.initializer, module, env, certain, children, nested);
@@ -1996,8 +2192,66 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         if (runs !== false)
           walk(node.right, module, env, certain && runs === true, children, nested);
         if (operator >= ts.SyntaxKind.FirstAssignment && operator <= ts.SyntaxKind.LastAssignment) {
+          const target = unwrap(node.left);
+          if (
+            runs !== false &&
+            (ts.isObjectLiteralExpression(target) || ts.isArrayLiteralExpression(target))
+          ) {
+            const source = literal(node.right, module, env);
+            const provenData =
+              typeof source === 'object' &&
+              source !== null &&
+              source.epoch === aggregateEpoch &&
+              (ts.isObjectLiteralExpression(target) || (source.array && !aggregateAbsenceUnproved));
+            const ownReads =
+              provenData &&
+              (ts.isObjectLiteralExpression(target)
+                ? target.properties.every((property) => {
+                    const name = ts.isShorthandPropertyAssignment(property)
+                      ? property.name.text
+                      : ts.isPropertyAssignment(property) &&
+                          !ts.isComputedPropertyName(property.name)
+                        ? property.name.text
+                        : null;
+                    return name !== null && source.members.has(name);
+                  })
+                : target.elements.every(
+                    (element, index) =>
+                      ts.isOmittedExpression(element) || source.members.has(String(index))
+                  ));
+            if (!ownReads) {
+              invalidateAggregates();
+              opaque = true;
+            }
+          }
+          if (runs !== false && hasMemberTarget(target)) {
+            invalidateAggregates();
+          }
           const key = binding(node.left, module);
+          if (!key && runs !== false) {
+            const withdrawTarget = (target: ts.Node): void => {
+              const value = unwrap(target);
+              if (ts.isIdentifier(value)) {
+                const assigned = binding(value, module);
+                if (assigned) {
+                  withdrawCapturedBinding(assigned, env);
+                  env.set(assigned, unknownLiteral);
+                  capabilities(env).set(assigned, 'unknown');
+                  callableBindings.delete(assigned);
+                }
+              } else if (ts.isPropertyAssignment(value)) withdrawTarget(value.initializer);
+              else if (ts.isShorthandPropertyAssignment(value)) withdrawTarget(value.name);
+              else if (ts.isBinaryExpression(value)) withdrawTarget(value.left);
+              else if (
+                !ts.isPropertyAccessExpression(value) &&
+                !ts.isElementAccessExpression(value)
+              )
+                ts.forEachChild(value, withdrawTarget);
+            };
+            withdrawTarget(target);
+          }
           if (key && runs !== false) {
+            withdrawCapturedBinding(key, env);
             // The saved callable describes the old value, not this write's
             // replacement. A possible write also invalidates exact dispatch.
             callableBindings.delete(key);
@@ -2050,20 +2304,22 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
               : true;
         const thenEnv = forkEnvironment(env);
         const elseEnv = forkEnvironment(env);
-        const first = walk(node.thenStatement, module, thenEnv, false, children, nested);
+        const first = walkBranch(node.thenStatement, module, thenEnv, children, nested);
         const second = node.elseStatement
-          ? walk(node.elseStatement, module, elseEnv, false, children, nested)
+          ? walkBranch(node.elseStatement, module, elseEnv, children, nested)
           : true;
         joinCapabilities(env, [
-          ...(first !== false ? [thenEnv] : []),
-          ...(second !== false ? [elseEnv] : []),
+          ...(first !== false && first !== 'throw' ? [thenEnv] : []),
+          ...(second !== false && second !== 'throw' ? [elseEnv] : []),
         ]);
         for (const key of env.keys()) env.set(key, unknownLiteral);
-        return first === false && second === false
-          ? false
-          : first !== true || second !== true
-            ? null
-            : true;
+        return first === 'throw' && second === 'throw'
+          ? 'throw'
+          : (first === false || first === 'throw') && (second === false || second === 'throw')
+            ? false
+            : first !== true || second !== true
+              ? null
+              : true;
       }
       if (ts.isConditionalExpression(node)) {
         walk(node.condition, module, env, certain, children, nested);
@@ -2103,12 +2359,36 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         for (const key of env.keys()) env.set(key, unknownLiteral);
         return true;
       }
+      if (ts.isNewExpression(node)) {
+        walk(node.expression, module, env, certain, children, nested);
+        for (const argument of node.arguments ?? [])
+          walk(argument, module, env, certain, children, nested);
+        // Constructors are not replayed as ordinary helpers. Their unproved
+        // effects can both mutate escaped aggregates and install earlier names.
+        invalidateAggregates();
+        opaque = true;
+        return true;
+      }
       if (ts.isCallExpression(node)) {
         walk(node.expression, module, env, certain, children, nested);
         const argumentValues: Literal[] = [];
         const argumentOrigins: CapabilityOrigin[] = [];
+        const firstSpread = node.arguments.findIndex(ts.isSpreadElement);
         for (const argument of node.arguments) {
           walk(argument, module, env, certain, children, nested);
+          if (ts.isSpreadElement(argument)) {
+            const spread = unwrap(argument.expression);
+            // Only a source-local plain array with an unchanged iterator
+            // environment proves consumption has no hidden registration effects.
+            if (
+              aggregateAbsenceUnproved ||
+              !ts.isArrayLiteralExpression(spread) ||
+              spread.elements.some(ts.isSpreadElement)
+            ) {
+              invalidateAggregates();
+              opaque = true;
+            }
+          }
           argumentValues.push(literal(argument, module, env));
           argumentOrigins.push(capabilityOrigin(argument, module, env));
         }
@@ -2156,36 +2436,113 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             if (helper.fn.asteriskToken) continue;
             const helperCertain = certain && helper.certain && helpers.length === 1;
             const helperEnv = forkEnvironment(env);
-            helper.fn.parameters.forEach((parameter, index) => {
-              if (!ts.isIdentifier(parameter.name)) return;
-              const key = binding(parameter.name, helper.module);
-              if (key) {
-                let value = index < argumentValues.length ? argumentValues[index] : undefined;
-                let origin = argumentOrigins[index] ?? 'authored';
-                if (value === undefined && parameter.initializer) {
-                  walk(
-                    parameter.initializer,
-                    helper.module,
-                    helperEnv,
-                    helperCertain,
-                    children,
-                    nested
-                  );
-                  value = literal(parameter.initializer, helper.module, helperEnv);
-                  origin = capabilityOrigin(parameter.initializer, helper.module, helperEnv);
-                } else if (value === unknownLiteral && parameter.initializer) {
-                  // Unknown is not proof of a supplied non-undefined value.
-                  walk(parameter.initializer, helper.module, helperEnv, false, children, nested);
-                  const fallback = capabilityOrigin(
-                    parameter.initializer,
-                    helper.module,
-                    helperEnv
-                  );
-                  if (fallback !== origin) origin = 'unknown';
-                }
-                helperEnv.set(key, value);
-                capabilities(helperEnv).set(key, origin);
+            const bindParameter = (
+              name: ts.BindingName,
+              incoming: Literal,
+              incomingOrigin: CapabilityOrigin,
+              initializer?: ts.Expression
+            ): void => {
+              let value = incoming;
+              let origin = incomingOrigin;
+              if (value === undefined && initializer) {
+                walk(initializer, helper.module, helperEnv, helperCertain, children, nested);
+                value = literal(initializer, helper.module, helperEnv);
+                origin = capabilityOrigin(initializer, helper.module, helperEnv);
+              } else if (value === unknownLiteral && initializer) {
+                // Unknown is not proof of a supplied non-undefined value.
+                walk(initializer, helper.module, helperEnv, false, children, nested);
+                const fallback = capabilityOrigin(initializer, helper.module, helperEnv);
+                if (fallback !== origin) origin = 'unknown';
               }
+              if (!ts.isIdentifier(name)) {
+                if (
+                  typeof value !== 'object' ||
+                  value === null ||
+                  value.epoch !== aggregateEpoch ||
+                  (ts.isArrayBindingPattern(name) && (!value.array || aggregateAbsenceUnproved))
+                ) {
+                  // Destructuring itself can invoke getters or an iterator,
+                  // before any later parameter/default registration runs.
+                  invalidateAggregates();
+                  opaque = true;
+                  value = unknownLiteral;
+                }
+                let index = 0;
+                for (const element of name.elements) {
+                  if (ts.isOmittedExpression(element)) {
+                    index++;
+                    continue;
+                  }
+                  let member: string | null = null;
+                  if (ts.isArrayBindingPattern(name)) member = String(index++);
+                  else if (element.propertyName) {
+                    if (ts.isComputedPropertyName(element.propertyName)) {
+                      walk(
+                        element.propertyName.expression,
+                        helper.module,
+                        helperEnv,
+                        helperCertain,
+                        children,
+                        nested
+                      );
+                      const key = literal(
+                        element.propertyName.expression,
+                        helper.module,
+                        helperEnv
+                      );
+                      if (typeof key === 'string' || typeof key === 'number') member = String(key);
+                    } else member = element.propertyName.text;
+                  } else if (ts.isIdentifier(element.name)) member = element.name.text;
+                  const ownMember =
+                    member !== null &&
+                    typeof value === 'object' &&
+                    value !== null &&
+                    value.epoch === aggregateEpoch &&
+                    value.members.has(member);
+                  const selected =
+                    !element.dotDotDotToken &&
+                    member !== null &&
+                    typeof value === 'object' &&
+                    value !== null &&
+                    value.epoch === aggregateEpoch
+                      ? value.members.has(member)
+                        ? value.members.get(member)
+                        : aggregateAbsenceUnproved ||
+                            Object.hasOwn(inheritedMemberNames, member) ||
+                            (value.members.has('length') && !/^(0|[1-9][0-9]*)$/.test(member))
+                          ? unknownLiteral
+                          : undefined
+                      : unknownLiteral;
+                  if (!ownMember && selected === unknownLiteral) {
+                    invalidateAggregates();
+                    opaque = true;
+                  }
+                  bindParameter(
+                    element.name,
+                    selected,
+                    origin === 'authored' ? origin : 'unknown',
+                    element.initializer
+                  );
+                }
+                return;
+              }
+              const key = binding(name, helper.module);
+              if (!key) return;
+              helperEnv.set(key, value);
+              capabilities(helperEnv).set(key, origin);
+            };
+            helper.fn.parameters.forEach((parameter, index) => {
+              const uncertainPosition = firstSpread !== -1 && index >= firstSpread;
+              bindParameter(
+                parameter.name,
+                parameter.dotDotDotToken || uncertainPosition
+                  ? unknownLiteral
+                  : index < argumentValues.length
+                    ? argumentValues[index]
+                    : undefined,
+                uncertainPosition ? 'unknown' : (argumentOrigins[index] ?? 'authored'),
+                parameter.initializer
+              );
             });
             runFunction(helper.fn, helper.module, helperEnv, helperCertain, children, nested);
             for (const key of env.keys())
@@ -2227,7 +2584,10 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             (origin === 'native-result' &&
               memberOwner(node.expression) !== null &&
               nativeValue(node.expression, module, env));
-          if (!admitted && !nativeObjectEnumeration(node, module, env)) opaque = true;
+          if (!admitted && !nativeObjectEnumeration(node, module, env)) {
+            invalidateAggregates();
+            opaque = true;
+          }
         }
         return true;
       }
