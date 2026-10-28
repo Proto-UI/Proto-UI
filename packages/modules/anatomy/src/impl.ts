@@ -1169,15 +1169,17 @@ export class AnatomyModuleImpl extends ModuleBase {
         if (typeof exposed !== 'function') return exposed;
         return (...args: unknown[]) => {
           let result: unknown;
+          let failed = false;
           let thrown: unknown;
           claim.invoke(() => {
             try {
               result = exposed(...args);
             } catch (error) {
+              failed = true;
               thrown = error;
             }
           });
-          if (thrown) throw thrown;
+          if (failed) throw thrown;
           return result;
         };
       },
