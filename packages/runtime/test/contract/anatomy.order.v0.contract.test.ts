@@ -403,6 +403,88 @@ describe('runtime contract: anatomy.order (v0)', () => {
     expect(read()).toEqual(['a', 'b']);
   });
 
+  it.each([
+    { name: 'normal undefined return', throws: false, value: undefined },
+    { name: 'throw undefined', throws: true, value: undefined },
+    { name: 'throw null', throws: true, value: null },
+    { name: 'throw false', throws: true, value: false },
+    { name: 'throw zero', throws: true, value: 0 },
+    { name: 'throw empty string', throws: true, value: '' },
+    { name: 'throw Error', throws: true, value: new Error('part method failure') },
+  ])('projects a PartView method outcome: $name', async ({ throws, value }) => {
+    const family = createAnatomyFamily('rt-part-view-method-outcome', {
+      roles: {
+        root: { cardinality: { min: 1, max: 1 } },
+        item: { cardinality: { min: 0, max: 1 } },
+      },
+    });
+    const orderMap = new Map([
+      ['root', 0],
+      ['item', 1],
+    ]);
+    const rootTarget = createTarget('root', orderMap);
+    const itemTarget = createTarget('item', orderMap);
+    const parents = new Map<unknown, unknown | null>([
+      [rootTarget, null],
+      [itemTarget, rootTarget],
+    ]);
+    let invokePart: (() => unknown) | undefined;
+    let calls = 0;
+    const Root = definePrototype({
+      name: 'x-part-view-outcome-root',
+      setup(def) {
+        def.anatomy.claim(family, { role: 'root' });
+        def.lifecycle.onCreated((run) => {
+          invokePart = () => {
+            const method = run.anatomy.partsOf(family, 'item')?.[0]?.getExpose('invoke');
+            if (typeof method !== 'function') throw new Error('missing exposed part method');
+            return method();
+          };
+        });
+      },
+    });
+    const Item = definePrototype({
+      name: 'x-part-view-outcome-item',
+      setup(def) {
+        def.anatomy.claim(family, { role: 'item' });
+        const visited = def.state.bool('visited', false);
+        def.expose.method('invoke', () => {
+          calls += 1;
+          visited.set(true);
+          if (throws) throw value;
+          return value;
+        });
+      },
+    });
+    const getPrototype = (instance: unknown) =>
+      instance === rootTarget ? Root : instance === itemTarget ? Item : null;
+    const makeHost = (instance: Target) =>
+      createHost({
+        instance,
+        getParent: (candidate) => parents.get(candidate) ?? null,
+        getPrototype,
+      }).host;
+    const root = executeWithHost(Root as any, makeHost(rootTarget));
+    const item = executeWithHost(Item as any, makeHost(itemTarget));
+    try {
+      expect(invokePart).toBeDefined();
+      let caught = false;
+      let outcome: unknown;
+      try {
+        outcome = invokePart!();
+      } catch (error) {
+        caught = true;
+        outcome = error;
+      }
+      expect(calls).toBe(1);
+      expect(caught).toBe(throws);
+      expect(outcome).toBe(value);
+    } finally {
+      await item.invokeUnmounted();
+      await root.invokeUnmounted();
+    }
+  });
+
   /** T-ANATOMY-ORDER-0001-CASE-PARTS-SUBSCRIPTION */
   it('ANATOMY-ORDER-RT-0500: def.anatomy.subscribeParts reports live role membership changes', async () => {
     const family = createAnatomyFamily('rt-anatomy-parts-subscription', {
