@@ -33,6 +33,89 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 describe('visible in-app canvas backdrop lease', () => {
+  it.each([
+    { name: 'undefined', value: undefined },
+    { name: 'null', value: null },
+    { name: 'false', value: false },
+    { name: 'zero', value: 0 },
+    { name: 'empty string', value: '' },
+    { name: 'Error', value: new Error('backdrop listener failed') },
+  ])('reports the first revoke listener failure: $name', ({ value }) => {
+    const { lease } = fixture();
+    const calls: string[] = [];
+    const remove = lease.subscribe(() => {
+      calls.push('first');
+      throw value;
+    });
+    lease.subscribe(() => calls.push('second'));
+    let caught = false;
+    let error: unknown;
+    try {
+      lease.revoke();
+    } catch (failure) {
+      caught = true;
+      error = failure;
+    }
+    expect(caught).toBe(true);
+    expect(error).toBe(value);
+    expect(calls).toEqual(['first', 'second']);
+    expect(lease.current()).toBeNull();
+    remove();
+    lease.dispose();
+  });
+
+  it('retires all listeners after a falsy first disposal failure', () => {
+    const { lease } = fixture();
+    const calls: string[] = [];
+    lease.subscribe(() => {
+      calls.push('first');
+      throw undefined;
+    });
+    lease.subscribe(() => {
+      calls.push('second');
+      throw new Error('later listener');
+    });
+    let caught = false;
+    let error: unknown = 'not thrown';
+    try {
+      lease.dispose();
+    } catch (failure) {
+      caught = true;
+      error = failure;
+    }
+    expect(caught).toBe(true);
+    expect(error).toBeUndefined();
+    expect(calls).toEqual(['first', 'second']);
+    expect(lease.current()).toBeNull();
+    lease.dispose();
+    expect(calls).toEqual(['first', 'second']);
+    expect(() => lease.subscribe(() => {})).toThrow('Retired');
+  });
+
+  it('preserves a paint failure over a secondary listener failure', () => {
+    const { lease } = fixture();
+    const primary = new Error('paint failed');
+    const secondary = new Error('listener failed');
+    const remove = lease.subscribe(() => {
+      throw secondary;
+    });
+    let caught = false;
+    let error: unknown;
+    try {
+      lease.draw(() => {
+        throw primary;
+      });
+    } catch (failure) {
+      caught = true;
+      error = failure;
+    }
+    expect(caught).toBe(true);
+    expect(error).toBe(primary);
+    expect(lease.current()).toBeNull();
+    remove();
+    lease.dispose();
+  });
+
   it('captures the actual visible canvas and samples the same source coordinates', () => {
     const { host, lease, canvas } = fixture();
     expect(lease.current()?.canvas).toBe(canvas);
