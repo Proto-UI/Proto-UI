@@ -42,6 +42,8 @@ For observer-driven projection, check that applying identical owned state does n
 
 Resolve test paths from the current tree and reconcile the runner's collected files/results with the plan. One matching file can make a command succeed while another requested filter matches nothing. A command selecting no package build is not package evidence. Check required browser suites enter the repository runtime test plan. For catalog path checks, inspect whether the validator reads the worktree, index or committed tree; ensure new evidence files belong to that exact input before claiming the graph validates them.
 
+Exercise observable behavior rather than matching documentation wording or implementation text. Validate documentation references structurally; use the actual supported runtime to verify its behavior, not a prose assertion about its version.
+
 Use the repository Node/pnpm baseline and shared workspace dependencies. Check declared workspace links after switching branches before treating missing-module errors as source regressions. Do not copy entire dependency trees or fetch new bundles to fix a missing local link.
 
 Bound concurrency to the machine, especially when each suite loads the catalog or launches a docs server. Serialize heavyweight builds/browser jobs on constrained machines. Preserve timeout output, inspect discovery/startup/resource contention, then rerun the same assertions with controlled concurrency before considering a justified deadline change. A resource-limited rerun does not prove the original CI configuration is healthy.

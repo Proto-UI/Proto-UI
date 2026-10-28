@@ -3950,20 +3950,6 @@ test('canonical duplicate publication completes durably without replacing prior 
     });
 });
 
-test('review instructions distinguish the governed CLI and exact owner-plugin writer', () => {
-  const skill = readFileSync(
-    new URL('../../../.agents/skills/pui-review/SKILL.md', import.meta.url),
-    'utf8'
-  );
-  assert(skill.includes('pnpm agent:review -- submit-review'));
-  assert(skill.includes('only supported review mutation path'));
-  assert(skill.includes('re-collects the whole canonical review input live from GitHub with `gh`'));
-  assert(skill.includes('governed tokenless owner-plugin writer'));
-  assert(skill.includes('proto-ui-cloud-owner-review-v1'));
-  assert(skill.includes('not an independent alternate writer'));
-  assert(skill.includes('pending-runtime-identity'));
-});
-
 test('converted-to-draft preserves its own lifecycle and still permits only analysis', async (t) => {
   const context = await session(t);
   const { s, f, store } = context;
@@ -3997,15 +3983,6 @@ test('first initial-sweep capture returns the confirmed inventory without a seco
   assert.deepEqual(repeated.inventory, first.inventory);
   assert.equal(store.read().revision, generation);
   assert.equal(f.calls.filter((c) => c.operation === 'add_review_to_pr').length, 0);
-});
-
-test('cloud ledger validation runbook uses the actual Node 24 baseline', () => {
-  const guide = readFileSync(
-    new URL('../../../internal/agent-operations/cloud-review-ledger-candidate.md', import.meta.url),
-    'utf8'
-  );
-  assert.match(guide, /Node(?:\.js)?\s+24/);
-  assert.doesNotMatch(guide, /Node(?:\.js)?\s+22/);
 });
 
 test('duplicate completion version and exact review binding fail closed before a journal write', async (t) => {
