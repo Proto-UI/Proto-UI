@@ -37,6 +37,22 @@ verifies:
         - P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
         - P-SHADCN-MENUBAR-BASE-OWNERSHIP
         - P-SHADCN-MENUBAR-REMAINING-CLOSURE
+implementations:
+  - id: shadcn-menubar-existing-part-projection
+    kind: module-test
+    status: active
+    path: packages/prototypes/shadcn/test/menubar-style-projection.test.ts
+    required: true
+    consumesCases:
+      - T-SHADCN-MENUBAR-STYLE-0001-CASE-PAINT
+      - T-SHADCN-MENUBAR-STYLE-0001-CASE-NO-RESET
+      - T-SHADCN-MENUBAR-STYLE-0001-CASE-SOURCE-UNITS
+    exercises: [P-SHADCN-MENUBAR]
+    notes:
+      - Executable synthetic adapter and CSS-lowering checks; not native rendering or complete-family acceptance.
+exercises:
+  prototypes:
+    - P-SHADCN-MENUBAR
 sources:
   - path: packages/prototypes/shadcn/test/menubar-style-projection.test.ts
   - path: apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts

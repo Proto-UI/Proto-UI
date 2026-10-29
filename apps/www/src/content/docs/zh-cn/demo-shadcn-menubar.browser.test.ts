@@ -54,6 +54,8 @@ async function facts(locator: Locator) {
     const css = getComputedStyle(element);
     const box = element.getBoundingClientRect();
     return {
+      x: box.x,
+      y: box.y,
       width: box.width,
       height: box.height,
       minWidth: css.minWidth,
@@ -85,13 +87,21 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
         const observations: unknown[] = [];
+        let failure: string | null = null;
         const screenshots: Array<{ path: string; sha256: string }> = [];
         const prefix = `${runtime}-${scheme}`;
         let outcome = 'failed';
         const capture = async (subject: Locator, state: string) => {
           const filename = `${prefix}-${state}.png`;
           const target = path.join(out, filename);
-          await subject.screenshot({ path: target });
+          // Locator screenshots may scroll the document and disturb a fixed anchored
+          // overlay. Capture the real viewport without moving the input/anchor.
+          observations.push({
+            state: `capture-${state}`,
+            subject: await facts(subject),
+            scroll: await page.evaluate(() => ({ x: scrollX, y: scrollY })),
+          });
+          await page.screenshot({ path: target });
           screenshots.push({
             path: filename,
             sha256: createHash('sha256')
@@ -217,6 +227,63 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             }).trim()
           ).toBe('');
           outcome = 'passed';
+        } catch (error) {
+          failure = String(error);
+          try {
+            observations.push({
+              state: 'failure-diagnostic',
+              roleMenus: await page
+                .getByRole('menu', { includeHidden: true })
+                .evaluateAll((elements) =>
+                  elements.map((element) => ({
+                    html: element.outerHTML.slice(0, 3500),
+                    rect: element.getBoundingClientRect().toJSON(),
+                    position: getComputedStyle(element).position,
+                    transform: getComputedStyle(element).transform,
+                    display: getComputedStyle(element).display,
+                    visibility: getComputedStyle(element).visibility,
+                  }))
+                ),
+              dom: await page.evaluate(() => {
+                const describe = (element: Element | null) =>
+                  element
+                    ? {
+                        tag: element.tagName,
+                        role: element.getAttribute('role'),
+                        text: element.textContent?.slice(0, 160),
+                        html: element.outerHTML.slice(0, 2500),
+                        rect: element.getBoundingClientRect().toJSON(),
+                        position: getComputedStyle(element).position,
+                        transform: getComputedStyle(element).transform,
+                      }
+                    : null;
+                const active = document.activeElement;
+                return {
+                  scroll: { x: scrollX, y: scrollY },
+                  viewport: { width: innerWidth, height: innerHeight },
+                  active: describe(active),
+                  shadowActive: describe(active?.shadowRoot?.activeElement ?? null),
+                  menus: [...document.querySelectorAll('[role="menu"], [role="menubar"]')].map(
+                    describe
+                  ),
+                };
+              }),
+            });
+            const target = path.join(out, `${prefix}-failed-viewport.png`);
+            await page.screenshot({ path: target });
+            screenshots.push({
+              path: path.basename(target),
+              sha256: createHash('sha256')
+                .update(await readFile(target))
+                .digest('hex'),
+            });
+          } catch (diagnosticError) {
+            observations.push({
+              state: 'failure-diagnostic-error',
+              error: String(diagnosticError),
+            });
+          }
+          throw error;
         } finally {
           try {
             await writeFile(
@@ -235,6 +302,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
                   profile: 'rhea',
                   outcome,
                   errors,
+                  failure,
                   observations,
                   screenshots,
                   limitations: [

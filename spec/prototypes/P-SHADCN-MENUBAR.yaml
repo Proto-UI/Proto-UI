@@ -41,7 +41,10 @@ sources:
     label: Rhea-compatible radix wrapper, Git blob 3074897d043a4442dffe3d96464499773496575b
   - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
     label: Menubar lines 933-986, Git blob 94bbca2a7f78845e7cfbcff68fb8f535e3848a98
-  - path: packages/prototypes/shadcn/src/menubar/
+  - path: packages/prototypes/shadcn/src/menubar/root.proto.ts
+  - path: packages/prototypes/shadcn/src/menubar/trigger.proto.ts
+  - path: packages/prototypes/shadcn/src/menubar/content.proto.ts
+  - path: packages/prototypes/shadcn/src/menubar/item.proto.ts
 openQuestions:
   - id: P-SHADCN-MENUBAR-Q-ADMISSION
     question:
