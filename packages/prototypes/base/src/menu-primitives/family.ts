@@ -230,7 +230,9 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       if (!disabled.get()) focus.focusSelf(options);
     });
     let mounted = false,
-      viewEpoch = 0;
+      viewEpoch = 0,
+      focusEpoch = 0,
+      entryRevision = 0;
     const sync = (run: RunHandle<T.MenuTriggerProps>, ctx: Context) => {
       disabled.set(ctx.disabled || !!run.props.get().disabled, 'reason: menu trigger disabled');
       expanded.set(
@@ -257,6 +259,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       invoke(run, '__refresh');
     });
     focus.focused.watch((run, event) => {
+      if (event.type === 'next') focusEpoch++;
       if (event.type === 'next' && event.next && !disabled.get()) {
         invoke(run, '__current', id);
         const ctx = run.context.read(context);
@@ -266,6 +269,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     });
     const enterContent = (run: RunHandle<T.MenuTriggerProps>, last = false) => {
       const epoch = viewEpoch;
+      const revision = ++entryRevision;
       invoke(run, 'requestValue', run.props.get().value, 'keyboard');
       if (!mounted || viewEpoch !== epoch) return;
       const panels = run.anatomy.partsOf(family, 'content');
@@ -273,6 +277,23 @@ export function createMenuFamily(slug: string, navigation: boolean) {
         const state = p.getExpose('open') as { get?(): boolean } | undefined;
         return state?.get?.();
       });
+      if (!navigation) {
+        const sourceFocusEpoch = focusEpoch;
+        const request = panel?.getExpose('__requestEntry');
+        if (typeof request === 'function')
+          request(
+            last,
+            () =>
+              mounted &&
+              viewEpoch === epoch &&
+              entryRevision === revision &&
+              focusEpoch === sourceFocusEpoch &&
+              focus.focused.get() &&
+              expanded.get() &&
+              !disabled.get()
+          );
+        return;
+      }
       const fn = panel?.getExpose(last ? 'focusLast' : 'focusFirst');
       if (typeof fn === 'function') fn();
     };
@@ -363,6 +384,28 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     const boundary = asBoundary();
     boundary.observe('pointer.press');
     let runNow: RunHandle<T.MenuContentProps> | null = null;
+    let entryEpoch = 0;
+    let cancelEntry: (() => void) | null = null;
+    const retireEntry = () => {
+      entryEpoch++;
+      cancelEntry?.();
+      cancelEntry = null;
+    };
+    if (!navigation)
+      def.expose.method('__requestEntry' as any, (last: boolean, current: () => boolean) => {
+        retireEntry();
+        if (!open.get() || typeof current !== 'function' || !current()) return;
+        const epoch = entryEpoch;
+        cancelEntry = overlay.afterViewReconciled(() => {
+          if (entryEpoch !== epoch) return;
+          cancelEntry = null;
+          if (!open.get() || !current()) return;
+          // The consumer still owns first/last policy. Overlay has only finished
+          // its resource pass; Focus continues to own renderer target readiness.
+          if (last) roving.focusLast(entryOptions);
+          else roving.focusFirst(entryOptions);
+        });
+      });
     const focusTrigger = (run: RunHandle<T.MenuContentProps>) => {
       const trigger = triggers(run).find((t) => t.data.value === run.props.get().value)?.part;
       const fn = trigger?.getExpose('focusSelf');
@@ -390,6 +433,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     });
     const sync = (run: RunHandle<T.MenuContentProps>, ctx: Context) => {
       const next = !!ctx.value && ctx.value === run.props.get().value;
+      if (!next) retireEntry();
       id.set(contentId(ctx.id, run.props.get().value), 'reason: menu content id');
       label.set(run.props.get().a11yLabel || run.props.get().value, 'reason: menu panel name');
       open.set(next, 'reason: menu panel open');
@@ -410,6 +454,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       sync(run, run.context.read(context));
     });
     def.lifecycle.onUnmounted(() => {
+      retireEntry();
       runNow = null;
     });
     def.props.watch(['value', 'sideOffset', 'a11yLabel'], (run) => {
