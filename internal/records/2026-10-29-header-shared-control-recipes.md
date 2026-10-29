@@ -67,3 +67,14 @@ The original hosted homepage-composition artifact12937945321 (run40962297376, ex
 The responsive grid owner now supplies width/padding/alignment/copy-display/margin inputs together, consumed by the same startup/enhanced Search Button composition. No prototype paint, accessible name, Dialog behavior, or generic Rhea default is changed. Browser coverage adds1099/1100/1180/1279 to existing widths, checks Search own scroll containment and44px/hidden decorative copy in compact modes. The whole-page homepage-composition overflow assertion remains intact.
 
 Only source review and the original locked formatter ran locally on this new increment. It has not been executed as UI locally; original hosted CI must validate the new exact commit. The818 screenshot is failure evidence, not a new-candidate effect screenshot. d8fa CI remains separately pending.
+
+
+## 23:35 UTC public Select author-name correction
+
+Actual Header038 run40967859499: flat job success; family16fail/2pass. All home cases stopped at absent combobox author names. The real accessibility snapshot contained selected text but no name. WAI-ARIA1.2 combobox has Name From: author (https://www.w3.org/TR/wai-aria-1.2/#combobox); the earlier sr-only content-derived repair was insufficient.
+
+Optional Base SelectTrigger `accessibleLabel` is now proposed through the existing accessibility name state. Header Runtime/family/locale pass a stable field label; Value retains the selected content independently. Field labelledBy retains standard precedence. Empty/absent author labels intentionally do not invent a name or turn the selected value into a label. No raw DOM attribute restoration, new Field holder or selection/open owner.
+
+Migration scope: ordinary Select's previous nameFromContent projection already cleared raw aria-label attributes. The new empty-name projection preserves that physical behavior; consumers that previously supplied only raw aria-label or selected text must adopt the public author label or Field composition. This patch repairs the Header consumers, not every existing Select demo or the full-family accessibility debt. Existing non-Header consumers require a separate source/actual accessible-tree sweep. Field tests establish both attributes/relationship target; real native Field name precedence and all-host current-value exposure remain browser acceptance debt, not proven by DOM attributes alone.
+
+Exact038 artifact12940913189 downloaded and inspected; docs-dark-1280-ready.png viewed. Source-bound failure images remain available; no image is attributed to this newer candidate. Current candidate Base/composition tests are authored but unexecuted locally; T author-name implementations stay planned. Search original hosted suite20fail/10pass remains independently diagnosed, not absorbed or waived here. No main merge or complete Header acceptance claimed.

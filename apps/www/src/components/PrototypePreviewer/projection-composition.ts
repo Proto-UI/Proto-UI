@@ -564,7 +564,7 @@ function createSelectControl<Value extends string>(
   const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.trigger,
     props: {
-      ...(config.labelPresentation === 'accessible' ? {} : { 'aria-label': config.label }),
+      accessibleLabel: config.label,
       ...(triggerAppearance(config, selectParts.trigger)
         ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
@@ -584,13 +584,8 @@ function createSelectControl<Value extends string>(
       ...(config.minHeight ? { minHeight: config.minHeight } : {}),
       ...(config.paddingBlock ? { paddingBlock: config.paddingBlock } : {}),
     },
-    // Select's governed accessible.nameFromContent owns the physical name.
-    // A manual aria-label is cleared by that projection; keep the compact
-    // field label in its semantic content instead of restoring DOM attributes.
-    children:
-      config.labelPresentation === 'accessible'
-        ? [{ ...label, tag: 'span', className: 'sr-only' }, ' ', value]
-        : [value],
+    // Public Select owns the stable author name; content is only the current value.
+    children: [value],
   });
   const items = config.options.map((option) =>
     createProjectedProto(selectParts.item, coordinateAttrs, themeSurfaceStyle, {
