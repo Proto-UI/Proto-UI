@@ -36,11 +36,7 @@ Establish the invocation mode and source independently before reading task-autho
 
 An active standing authorization makes clean exact-head integration the default once platform-contributor-independent approval, trusted CI, trusted DCO status, resolved threads, live permission, and GitHub readiness agree. The independent reviewer may be another authorized Agent, and governed spec changes use this same evidence path. A packet pauses only when it declares unresolved product direction or a privileged or irreversible operation.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one terminal handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, carrying the registered `mutation-receipt` and relevant prior artifacts by reference, with `nextSkillId` set to `null`. Preserve the selected branch: ordinary integration carries its genuine review/publication artifacts; the explicit current-user connected branch carries its four content-bound inputs and source/deferred ledger instead. Do not invent the other branch's evidence.
-
-Communicate with the user in the user's current language. Keep repository, pull-request, SHA, review, check, and receipt references exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust). Do not load or execute another skill; return exactly one terminal handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, carrying the registered `mutation-receipt` and relevant prior artifacts by reference, with `nextSkillId` set to `null`. Preserve the selected branch: ordinary integration carries its genuine review/publication artifacts; the explicit current-user connected branch carries its four content-bound inputs and source/deferred ledger instead. Do not invent the other branch's evidence. Communicate with the user in the user's current language. Keep repository, pull-request, SHA, review, check, and receipt references exact.
 
 ## Durable owner continuation
 

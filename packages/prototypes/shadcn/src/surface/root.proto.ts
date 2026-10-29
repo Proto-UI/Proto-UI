@@ -132,8 +132,14 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
-      when: (w) => w.prop('pressed').eq(true),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
+      // A pressed fact is not itself an opt-in to Button motion. Ordinary
+      // navigation/content surfaces keep their geometry and authored elevation.
+      when: (w) =>
+        w.all(
+          w.any(w.prop('actionProfile').eq('rhea'), w.prop('actionProfile').eq('luma')),
+          w.prop('pressed').eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
     def.rule({
       when: (w) =>

@@ -25,7 +25,7 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
         '[shadcn-switch-thumb] asSwitchThumb must project Switch thumb state handles.'
       );
     }
-    const { checked } = switchState;
+    const { checked, draggable, dragging, direction } = switchState;
     // P-SHADCN-SWITCH-THUMB-VISUAL-SIZE: Context invalidates; actual Root decides.
     const size = def.state.enum('switchVisualSize', 'default', { options: ['default', 'sm'] });
     const style = def.state.enum('switchVisualStyle', 'new-york-v4', {
@@ -89,12 +89,59 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
     });
     def.feedback.style.use(tw(THUMB_TOKENS));
     def.rule({
-      when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(checked).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(style).eq('new-york-v4'),
+          w.state(checked).eq(true),
+          w.state(draggable).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('translate-x-[calc(100%_-_2px)]')),
     });
     def.rule({
-      when: (w) => w.all(w.state(style).eq('rhea'), w.state(checked).eq(true)),
+      when: (w) =>
+        w.all(w.state(style).eq('rhea'), w.state(checked).eq(true), w.state(draggable).eq(false)),
       intent: (i) => i.feedback.style.use(tw('translate-x-[calc(100%_-_4px)]')),
+    });
+    // P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW: the existing exposed
+    // number.range projects --pui-percentage; no DOM read or state writer.
+    // Keep literal tokens visible to the source-derived preset generator.
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(draggable).eq(true),
+          w.state(style).eq('new-york-v4'),
+          w.state(direction).eq('ltr')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.state(draggable).eq(true), w.state(style).eq('rhea'), w.state(direction).eq('ltr')),
+      intent: (i) =>
+        i.feedback.style.use(tw('translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(draggable).eq(true),
+          w.state(style).eq('new-york-v4'),
+          w.state(direction).eq('rtl')
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.state(draggable).eq(true), w.state(style).eq('rhea'), w.state(direction).eq('rtl')),
+      intent: (i) =>
+        i.feedback.style.use(tw('translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)]')),
+    });
+    // Direct manipulation follows its owner without a trailing CSS animation.
+    // Withdrawal restores the source transition for settled value changes.
+    def.rule({
+      when: (w) => w.state(dragging).eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
     });
     def.rule({
       when: (w) =>

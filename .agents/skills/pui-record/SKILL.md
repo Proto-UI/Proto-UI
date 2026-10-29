@@ -14,6 +14,4 @@ description: Record one authorized non-remediation terminal outcome in Proto UI'
 
 Do not require a remediation review or maintainer disposition for a supported non-remediation outcome. Do not use this transition to avoid review when a finding was confirmed or a repair occurred. Create a bounded follow-up mission when its oracle, lease, mutation scope, and current authorization are all available.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-record`, the registered receipt artifact, and at most one `nextSkillId`.
-
-Communicate with the user in the user's current language. Keep run and finding identifiers exact.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-record`, the registered receipt artifact, and at most one `nextSkillId`. Communicate with the user in the user's current language. Keep run and finding identifiers exact.

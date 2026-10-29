@@ -6,6 +6,8 @@ Base package for building Proto UI adapters.
 
 Provides the base template, shared host wiring, and common runtime bridges for building Proto UI adapters.
 
+When terminal Runtime disposal completes synchronously, `createAdapterHost().dispose()` invokes `afterUnmount` once and rejects with its thrown value, including falsy values. An earlier Runtime disposal failure remains the primary rejection on this path; repeated disposal returns the same completion.
+
 `createDefaultWebColorSchemeSource(getter)` pairs a `createDefaultWebMetaGetter()` reader with lazy document-theme invalidation. Within one loaded module, subscribers share a root MutationObserver and color-scheme media-query listener; the last release removes both. Root dark markers take precedence, followed by explicit light and the system preference. Without Document or MutationObserver no source is supplied; without matchMedia the existing root-marker and light fallback behavior remains.
 
 This is the default same-document light-DOM realization of [HC-COLOR-SCHEME-INVALIDATION-0001](../../../spec/host-caps/HC-COLOR-SCHEME-INVALIDATION-0001.yaml), which remains draft. It is not a general custom-provider, subtree-theme, cross-document or SSR interface.
@@ -13,6 +15,8 @@ This is the default same-document light-DOM realization of [HC-COLOR-SCHEME-INVA
 ## Package Role
 
 `@proto.ui/adapter-base/web-material` exports `contactPaintOutset(width, height)` for layout space around the current draft Web contact profile. Pass the host's bounding rectangle width and height in CSS pixels; the result is the profile's paint outset in CSS pixels. It does not admit source pixels, optical effects or input ownership, and is not a general margin for other material profiles.
+
+The canvas backdrop lease withdraws its frame before invalidating observers. It notifies the entire listener snapshot, then reports the first thrown value, including falsy values; disposal still retires its listeners. If painting has already failed, a secondary notification error does not replace that primary failure.
 
 Adapter foundation package used to translate Proto UI contracts into concrete host integrations.
 

@@ -86,14 +86,16 @@ export function createAdapterHost<P extends PropsBaseType>(
         // adapter resource disposal in that same turn so DOM listeners do not
         // outlive their host/test environment by an extra microtask.
         if (session.instancePhase === 'disposed') {
+          let afterUnmountFailed = false;
           let afterUnmountError: unknown;
           try {
             finishAfterUnmount();
           } catch (error) {
+            afterUnmountFailed = true;
             afterUnmountError = error;
           }
           disposePromise = runtimeDispose.then(() => {
-            if (afterUnmountError) throw afterUnmountError;
+            if (afterUnmountFailed) throw afterUnmountError;
           });
           return;
         }

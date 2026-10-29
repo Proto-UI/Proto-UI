@@ -14,8 +14,4 @@ description: Assess one bounded Proto UI Adapter question without changing repos
 
 Remain read-only. Do not create a support matrix from packages or dependencies, infer conformance from source attachment, edit catalog entities, or authorize implementation.
 
-## Explicit handoff
-
-Do not load or execute another skill. Return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Carry required prior artifacts by reference, include every artifact this leaf produces according to `skills.yaml`, and set `nextSkillId` to one eligible registered leaf or `null`.
-
-Communicate with the user in the user's current language. Keep target, entity, and API identifiers canonical.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return exactly one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`. Communicate with the user in the user's current language. Keep target, entity, and API identifiers canonical.

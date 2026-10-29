@@ -62,6 +62,8 @@ The Web `surface-fade` token consumes `--pui-surface-transition-duration`, defau
 
 `scrim` selects the family's conventional dimming paint. It adds no material sampling, blur or refraction. Opacity zero is not an instruction to disable, make inert, unmount or remove semantic ownership: the existing Dialog/Transition or other semantic owner still gates interaction, presence and focus. Surface does not manage any of those responsibilities.
 
+With `actionProfile="none"` (the default), `pressed` does not move the Surface or remove its supplied elevation. Only an explicit `rhea` or `luma` action appearance opts into one-pixel press translation; a native navigation or content surface does not become a Button merely by receiving a pressed fact.
+
 ## Host and Compiler boundary
 
 Surface uses the ordinary public Prototype, Props and Feedback paths. The bounded conformance slice exercises Web Components, React, Vue 3 and Vue 2. The source-built CLI registers `<family>-surface` for those four facade targets, and the Web style compiler consumes the actual family tokens; `gpui` facade generation is explicitly unsupported. Its supported Web adapter and compiler evidence must be read separately: successfully displaying a Web projection is not proof of complete native support or arbitrary Prototype AOT. No host-specific material backend, screenshot capture, navigation service or code renderer is hidden in Surface. Unsupported target or style diagnostics must remain explicit instead of being treated as equivalent output.

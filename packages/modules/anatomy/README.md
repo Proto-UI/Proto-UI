@@ -10,6 +10,8 @@ The bounded catalog is [M-ANATOMY-0001](../../../spec/modules/M-ANATOMY-0001.yam
 
 `claim` and `subscribeParts` registration are setup-only. The unsubscribe function returned to an author is also setup-only. Queries are runtime reads; public PartView never exposes host targets.
 
+An exposed method read through a PartView runs in the target part's callback scope. Its synchronous return or thrown value reaches the caller unchanged, including `undefined`, `null`, and other falsy values.
+
 Claims and subscription declarations survive repeatable view detach/remount; host observers stop while detached. Terminal disposal removes owner claims and releases listeners. Internal domain and target ports serve downstream modules without becoming author APIs.
 
 After updating logical ancestry, the Web Component Adapter calls the internal `AnatomyPort.syncStructure()` ingress. Retained membership subscriptions reconcile independently of view mounting; this does not restart detached host-order observers or add an author API or Host Capability.

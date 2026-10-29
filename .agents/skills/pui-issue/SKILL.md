@@ -20,8 +20,6 @@ For backfill, record per-Issue collection and interpretation separately: query/s
 
 Apply `internal/agent-operations/visual-evidence.md` as an Agent-only soft-gate assessment: identify missing uploaded topic/reproduction visuals, sanitized request paraphrases, and evidence debt in the report. Humans may submit plain descriptions; missing Agent evidence is not an intake rejection. Historical inventory includes open and closed Issues unless explicitly scoped otherwise. Do not upload or repair gaps in this read-only transition.
 
-Return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-issue`, the registered Issue report artifact, and at most one `nextSkillId`.
+Follow the [shared handoff and exact-action trust contract](../../../internal/agent-operations/contributor-agents.md#handoff-and-exact-action-trust) and return one handoff conforming to `internal/agent-operations/schemas/skill-handoff.schema.json`, with `fromId` set to `pui-issue`, the registered Issue report artifact, and at most one `nextSkillId`.
 
-For an authorized backfill publication, return `pui-evidence-publish` only when one prepared `evidence-publication-packet` and exact `mutation-authorization` accompany the Issue report and current capability envelope. Otherwise return the read-only gap/preparation result. This leaf never uploads or comments; the publication leaf revalidates live state, existing evidence and idempotency independently.
-
-Communicate with the user in the user's current language. Keep GitHub identifiers canonical.
+For an authorized backfill publication, return `pui-evidence-publish` only when one prepared `evidence-publication-packet` and exact `mutation-authorization` accompany the Issue report and current capability envelope. Otherwise return the read-only gap/preparation result. This leaf never uploads or comments; the publication leaf revalidates live state, existing evidence and idempotency independently. Communicate with the user in the user's current language. Keep GitHub identifiers canonical.
