@@ -27,6 +27,8 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     invalid: false,
     disabled: false,
     readOnly: false,
+    draggable: false,
+    direction: 'ltr',
   };
   const fieldProps = (s) => ({ invalid: s.invalid });
   const switchProps = (s) => ({
@@ -34,6 +36,8 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     size: s.size,
     disabled: s.disabled,
     readOnly: s.readOnly,
+    draggable: s.draggable,
+    direction: s.direction,
   });
   if (kind === 'wc') {
     protos.forEach((p) => AdaptToWebComponent(p));
