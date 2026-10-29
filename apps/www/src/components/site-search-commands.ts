@@ -1,4 +1,5 @@
 import { siteSearchShortcutLabel } from './site-search-shortcut';
+import { headerButtonProps } from './site-header-control-recipes';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
@@ -99,6 +100,9 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     const props = {
       variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
       size: command === 'open' ? 'default' : 'sm',
+      ...(command === 'open' && root.closest('[data-site-header]')
+        ? headerButtonProps(family, 'default')
+        : {}),
     };
     return {
       type: 'demo',

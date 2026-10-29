@@ -241,18 +241,15 @@ describe.sequential('Header public family presentation and labelled compact fiel
               await page.setViewportSize({ width, height: 1000 });
               await revealHeaderPreferences(page);
               await page.mouse.move(0, 900);
-              // Clear selection-return focus through native Tab before resting capture.
-              await page
-                .locator('[data-homepage-runtime] [data-projection-control-label="runtime"]')
-                .click();
+              // Visible labels are intentionally not part of the compact Header.
+              // Use genuine outside input, then reopen the preference disclosure.
+              await page.mouse.click(0, 900);
+              await revealHeaderPreferences(page);
               for (const control of ['runtime', 'family'] as const) {
                 const select = trigger(page, control);
                 const rest = await sample(select);
                 expect(rest.hit).toBe(true);
-                expect(rest.height).toBeCloseTo(
-                  appearance === 'flat' || width === 390 ? 44 : 36,
-                  0
-                );
+                expect(rest.height).toBeCloseTo(44, 0);
                 expect(rest.border).toBe(family === 'brutalist' ? '2px' : '1px');
                 if (family === 'brutalist') {
                   expect(rest.radius).toBe('5px');
@@ -260,10 +257,10 @@ describe.sequential('Header public family presentation and labelled compact fiel
                   expect(rest.font).toContain('DM Sans');
                 }
                 if (appearance === 'family' && family === 'shadcn') {
-                  expect(rest.tokens?.split(/\s+/).includes('border-transparent')).toBe(
-                    width === 1440
-                  );
-                  if (width === 1440) expect(rest.borderAlpha).toBe(0);
+                  expect(rest.tokens?.split(/\s+/)).toContain('border-transparent');
+                  expect(rest.tokens?.split(/\s+/)).toContain('bg-input/50');
+                  expect(rest.borderAlpha).toBe(0);
+                  expect(await select.getAttribute('aria-label')).toBeTruthy();
                 }
                 expect(rest.shadow.includes('4px 4px 0px 0px')).toBe(
                   appearance === 'family' && family === 'brutalist'
@@ -316,25 +313,37 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 const popupPaint = await popup.evaluate(readHeaderPopupPaint);
                 measurements.push({ stage: 'popup-settled', width, control, paint: popupPaint });
                 expect(popupPaint.opacity).toBe(1);
-                expect(popupPaint.backgroundRgba[3]).toBe(255);
+                // Rhea intentionally has a translucent public Surface; opacity is
+                // distinct from background alpha. Do not force an opaque page skin.
+                const rhea = appearance === 'family' && family === 'shadcn';
+                expect(popupPaint.backgroundRgba[3]).toBeGreaterThanOrEqual(rhea ? 178 : 255);
+                expect(popupPaint.backgroundRgba[3]).toBeLessThanOrEqual(rhea ? 179 : 255);
                 for (const option of popupPaint.options) {
                   expect(option.opacity).toBe(1);
                   expect(option.colorRgba[3]).toBe(255);
                   expect(
-                    popupOptionContrast(
-                      option.colorRgba,
-                      option.backgroundRgba,
-                      popupPaint.backgroundRgba
+                    Math.min(
+                      ...[0, 255].map((backdrop) => {
+                        const alpha = popupPaint.backgroundRgba[3] / 255;
+                        const composited = popupPaint.backgroundRgba
+                          .slice(0, 3)
+                          .map((channel) => channel * alpha + backdrop * (1 - alpha));
+                        return popupOptionContrast(option.colorRgba, option.backgroundRgba, [
+                          ...composited,
+                          255,
+                        ]);
+                      })
                     ),
-                    `${family}/${theme}/${width}/${option.text} settled option contrast`
+                    `${family}/${theme}/${width}/${option.text} settled option contrast over both backdrop extremes`
                   ).toBeGreaterThanOrEqual(4.5);
                 }
 
-                // Popup paint retains its family presentation; ghost affects Trigger only.
+                // Popup paint is owned by the selected native public profile.
                 const popupShadow = popupPaint.shadow;
                 if (family === 'brutalist') expect(popupShadow).toBe('none');
                 else {
-                  expect(popupPaint.tokens).toContain('shadow-md');
+                  expect(popupPaint.tokens).toContain('shadow-lg');
+                  expect(popupPaint.tokens).toContain('bg-popover/70');
                   expect(popupShadow).not.toBe('none');
                 }
                 await capture(`${width}-${control}-popup`);
@@ -390,11 +399,46 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 expect(moved.focused).toBe(true);
                 await page.setViewportSize({ width, height: 1000 });
                 await revealHeaderPreferences(page);
-                await page
-                  .locator('[data-homepage-runtime] [data-projection-control-label="runtime"]')
-                  .click();
+                await page.mouse.click(0, 900);
+                await revealHeaderPreferences(page);
                 measurements.push({ control, width, rest, hovered, pressed, focused, ring, moved });
               }
+            }
+            if (appearance === 'family') {
+              for (const width of [320, 390, 1280, 1920]) {
+                await page.setViewportSize({ width, height: 1000 });
+                await revealHeaderPreferences(page);
+                const geometry = await page.locator('.site-header').evaluate((header) => {
+                  const bounds = header.getBoundingClientRect();
+                  const style = getComputedStyle(header);
+                  return {
+                    left: bounds.left,
+                    right: bounds.right,
+                    width: bounds.width,
+                    paddingLeft: parseFloat(style.paddingLeft),
+                    paddingRight: parseFloat(style.paddingRight),
+                    viewport: document.documentElement.clientWidth,
+                    scrollWidth: document.documentElement.scrollWidth,
+                  };
+                });
+                measurements.push({ stage: 'shared-header-width', width, geometry });
+                expect(geometry.left).toBeCloseTo(0, 0);
+                expect(geometry.right).toBeCloseTo(geometry.viewport, 0);
+                expect(geometry.paddingLeft).toBeGreaterThanOrEqual(16);
+                expect(geometry.paddingRight).toBeGreaterThanOrEqual(16);
+                expect(geometry.scrollWidth).toBeLessThanOrEqual(geometry.viewport + 1);
+                const locale = page.locator(
+                  '[data-homepage-runtime] [data-projection-control="locale"] [role="combobox"]'
+                );
+                expect(await locale.count()).toBe(1);
+                expect(await locale.getAttribute('aria-label')).toBeTruthy();
+                expect(await locale.evaluate((element) => element.localName)).not.toBe('a');
+                expect((await sample(locale)).height).toBeCloseTo(44, 0);
+                await capture(`${width}-shared-composition`);
+              }
+              // Keep the existing compact original-edge input journey intact.
+              await page.setViewportSize({ width: 390, height: 1000 });
+              await revealHeaderPreferences(page);
             }
             // Hold the real pointer at the original edge; center-only paint
             // checks cannot detect feedback that moves its own hit owner away.
@@ -529,3 +573,128 @@ describe.sequential('Header public family presentation and labelled compact fiel
         }, 90_000);
       }
 });
+
+// A separate docs journey covers the SSR custom-element boundary. These are
+// actual animation-frame observations, not DOM geometry mocked by the test.
+if (appearance === 'family') {
+  describe.sequential('Shared docs Header startup', () => {
+    for (const theme of ['light', 'dark'] as const) {
+      it(`${theme}: preserves theme geometry from the first observable rendered frame`, async () => {
+        const context = await browser.newContext({ colorScheme: theme });
+        try {
+          await context.addInitScript(() => {
+            const observations: unknown[] = [];
+            const state = { observations, stop: false };
+            Object.assign(window, { __headerStartupEvidence: state });
+            const observe = () => {
+              const button = document.querySelector<HTMLElement>('[data-theme-toggle]');
+              if (button) {
+                const rect = button.getBoundingClientRect();
+                const paint = getComputedStyle(button);
+                if (rect.width > 0 && rect.height > 0)
+                  observations.push({
+                    time: performance.now(),
+                    x: rect.x,
+                    y: rect.y,
+                    width: rect.width,
+                    height: rect.height,
+                    radius: parseFloat(paint.borderTopLeftRadius),
+                    background: paint.backgroundColor,
+                    tokens: button.getAttribute('data-pui-style'),
+                    defined: button.matches(':defined'),
+                  });
+              }
+              if (!state.stop && observations.length < 1800) requestAnimationFrame(observe);
+            };
+            requestAnimationFrame(observe);
+          });
+          for (const width of [320, 390, 1280, 1920]) {
+            const page = await context.newPage();
+            await page.setViewportSize({ width, height: 1000 });
+            await page.goto(`${baseUrl}/zh-cn/ui-libraries/shadcn/button/`, {
+              waitUntil: 'domcontentloaded',
+            });
+            if (output)
+              await page.screenshot({
+                path: path.join(output, `docs-${theme}-${width}-domcontentloaded.png`),
+              });
+            await page.waitForFunction(() => {
+              const button = document.querySelector('[data-theme-toggle]') as
+                | (HTMLElement & { getExposes?: () => { focusSelf?: unknown } })
+                | null;
+              return typeof button?.getExposes?.().focusSelf === 'function';
+            });
+            // Prove the mounted public Button accepts native keyboard input;
+            // SSR markers alone are not runtime readiness or first feedback.
+            const themeButton = page.locator('[data-theme-toggle]');
+            for (let tab = 0; tab < 40; tab++) {
+              if (await themeButton.evaluate((element) => document.activeElement === element))
+                break;
+              await page.keyboard.press('Tab');
+            }
+            expect(
+              await themeButton.evaluate((element) => document.activeElement === element)
+            ).toBe(true);
+            const beforePressed = await themeButton.getAttribute('aria-pressed');
+            await page.keyboard.press('Space');
+            await expect
+              .poll(() => themeButton.getAttribute('aria-pressed'))
+              .toBe(beforePressed === 'true' ? 'false' : 'true');
+            await page.keyboard.press('Space');
+            await expect.poll(() => themeButton.getAttribute('aria-pressed')).toBe(beforePressed);
+            const frames = await page.evaluate(async () => {
+              // Continue through actual upgrade, activation and a stable window.
+              for (let frame = 0; frame < 60; frame++) {
+                await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+              }
+              const state = (
+                window as unknown as {
+                  __headerStartupEvidence: {
+                    stop: boolean;
+                    observations: Array<{
+                      width: number;
+                      height: number;
+                      y: number;
+                      radius: number;
+                      tokens: string | null;
+                    }>;
+                  };
+                }
+              ).__headerStartupEvidence;
+              state.stop = true;
+              return state.observations;
+            });
+            if (output) {
+              await writeFile(
+                path.join(output, `docs-${theme}-${width}-startup.json`),
+                JSON.stringify({ sourceSha, width, theme, frames }, null, 2)
+              );
+              await page.screenshot({
+                path: path.join(output, `docs-${theme}-${width}-ready.png`),
+              });
+            }
+            expect(
+              frames.length,
+              'no first-frame observation is not passing evidence'
+            ).toBeGreaterThan(0);
+            for (const frame of frames) {
+              expect(frame.width).toBeCloseTo(44, 0);
+              expect(frame.height).toBeCloseTo(44, 0);
+              expect(frame.y).toBeGreaterThan(0);
+              expect(frame.radius).toBeGreaterThan(0);
+              expect(
+                frame.tokens
+                  ?.split(/\s+/)
+                  .some((token) => token === 'bg-primary' || token === 'bg-primary/80')
+              ).toBe(false);
+              expect(frame.tokens?.split(/\s+/).includes('bg-secondary')).toBe(true);
+            }
+            await page.close();
+          }
+        } finally {
+          await context.close();
+        }
+      }, 90_000);
+    }
+  });
+}

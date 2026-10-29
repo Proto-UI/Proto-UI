@@ -1,4 +1,14 @@
+import {
+  createHomepageLocaleSelect,
+  parseHomepageLocale,
+  type HomepageLocale,
+} from './homepage-locale-select';
 import { SITE_TYPOGRAPHY_MEDIA_QUERIES } from '../site-text-recipes';
+import {
+  headerButtonProps,
+  headerSelectControlProps,
+  headerIconButtonLayout,
+} from '../site-header-control-recipes';
 import { homeActionIcon, appendHomeActionGlyph } from './home-action-icons';
 import {
   linkSurfaceProps,
@@ -75,6 +85,7 @@ type Group = {
   theme: boolean;
   runtime: boolean;
   menu?: boolean;
+  locale?: HomepageLocale;
   disclosure?: SiteHeaderDisclosure;
 };
 type HomepageHandle = { destroy(): Promise<void>; getSnapshot(): ProjectionScopeSnapshot };
@@ -125,6 +136,7 @@ export function createHomepageContent(
   isActive: () => boolean,
   family: SiteLibraryFamily = 'shadcn'
 ): DemoSpec {
+  if (group.locale) return createHomepageLocaleSelect(group.locale, family, runtime, isActive).demo;
   const children: DemoNode[] = group.links.map((link, index) => {
     const attrs: Record<string, string> = {};
     for (const name of ANCHOR_ATTRIBUTES) {
@@ -198,16 +210,12 @@ export function createHomepageContent(
       kind: 'proto',
       prototypeId: resolveProjectionPart(family, 'button', 'root').prototypeId,
       ref: 'home-theme',
-      surfaceStyle: {
-        minHeight: 'var(--site-control-height, 2.75rem)',
-        height: '2.75rem',
-        width: '2.75rem',
-        padding: '0',
-        fontFamily: 'inherit',
-      },
+      surfaceStyle: headerIconButtonLayout(),
       props: {
-        variant: family === 'brutalist' ? 'surface' : 'ghost',
-        size: group.root.dataset.homepageThemeIcon === 'true' ? 'icon' : 'default',
+        ...headerButtonProps(
+          family,
+          group.root.dataset.homepageThemeIcon === 'true' ? 'icon' : 'default'
+        ),
       },
       children:
         group.root.dataset.homepageThemeIcon === 'true'
@@ -230,14 +238,8 @@ export function createHomepageContent(
       kind: 'proto',
       prototypeId: resolveProjectionPart(family, 'button', 'root').prototypeId,
       ref: 'home-menu',
-      surfaceStyle: {
-        minHeight: 'var(--site-control-height, 2.75rem)',
-        height: '2.75rem',
-        width: '2.75rem',
-        padding: '0',
-        fontFamily: 'inherit',
-      },
-      props: { variant: family === 'brutalist' ? 'surface' : 'ghost', size: 'icon' },
+      surfaceStyle: headerIconButtonLayout(),
+      props: headerButtonProps(family),
       children: [
         { kind: 'box', className: 'site-header-menu-icon', attrs: { 'aria-hidden': 'true' } },
         {
@@ -342,25 +344,37 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
     : undefined;
   const groups: Group[] = Array.from(
     document.querySelectorAll<HTMLElement>('[data-homepage-actions]')
-  ).map((group, index) => {
-    const mount = group.querySelector<HTMLElement>('[data-homepage-mount]');
-    const fallback = group.querySelector<HTMLElement>('[data-homepage-fallback]');
-    if (!mount || !fallback)
-      throw new Error('[HomepageRuntime] action group requires an SSR fallback and mount.');
-    const ownerId = `homepage-${group.id || index}`;
-    mount.dataset.projectionOwner = ownerId;
-    return {
-      root: group,
-      mount,
-      fallback,
-      ownerId,
-      links: Array.from(fallback.querySelectorAll<HTMLAnchorElement>('a[href]')),
-      theme: !!fallback.querySelector('[data-homepage-theme]'),
-      runtime: group.dataset.homepageControls === 'runtime',
-      menu: !!fallback.querySelector('[data-homepage-menu]'),
-      disclosure,
-    };
-  });
+  )
+    .filter((group) => {
+      if (!group.hasAttribute('data-homepage-locale')) return true;
+      if (parseHomepageLocale(group.dataset.homepageLocale || '')) return true;
+      console.error('[HomepageRuntime] Invalid locale metadata; retained its recovery Select.');
+      return false;
+    })
+    .map((group, index) => {
+      const mount = group.querySelector<HTMLElement>('[data-homepage-mount]');
+      const fallback = group.querySelector<HTMLElement>('[data-homepage-fallback]');
+      if (!mount || !fallback)
+        throw new Error('[HomepageRuntime] action group requires an SSR fallback and mount.');
+      const ownerId = `homepage-${group.id || index}`;
+      mount.dataset.projectionOwner = ownerId;
+      return {
+        root: group,
+        mount,
+        fallback,
+        ownerId,
+        links: group.dataset.homepageLocale
+          ? []
+          : Array.from(fallback.querySelectorAll<HTMLAnchorElement>('a[href]')),
+        ...(group.dataset.homepageLocale
+          ? { locale: parseHomepageLocale(group.dataset.homepageLocale) }
+          : {}),
+        theme: !!fallback.querySelector('[data-homepage-theme]'),
+        runtime: group.dataset.homepageControls === 'runtime',
+        menu: !!fallback.querySelector('[data-homepage-menu]'),
+        disclosure,
+      };
+    });
   const selectorGroup = groups.find((group) => group.runtime);
   if (!selectorGroup || groups.filter((group) => group.runtime).length !== 1)
     throw new Error('[HomepageRuntime] exactly one page runtime selector is required.');
@@ -429,23 +443,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
   const controls = (): ProjectionCompositionControls => ({
     runtime: {
       label: root.dataset.runtimeLabel || 'Page runtime',
-      wrapValue: true,
-      minHeight: 'var(--site-select-control-height)',
-      paddingBlock: 'var(--site-select-control-padding-block)',
-      triggerAppearance: 'ghost',
-      brutalistTriggerAppearance: 'elevated',
-      compactTriggerAppearance: 'default',
+      ...headerSelectControlProps(),
       options: AdapterIds.map((value) => ({ value, label: LABELS[value] })),
       onValueChange: requestRuntime,
     },
     family: {
       label: root.dataset.familyLabel || demo?.root.dataset.familyLabel || 'Page library',
-      wrapValue: true,
-      minHeight: 'var(--site-select-control-height)',
-      paddingBlock: 'var(--site-select-control-padding-block)',
-      triggerAppearance: 'ghost',
-      brutalistTriggerAppearance: 'elevated',
-      compactTriggerAppearance: 'default',
+      ...headerSelectControlProps(),
       options: [
         { value: 'shadcn', label: 'Shadcn' },
         { value: 'brutalist', label: 'Brutalist' },
@@ -468,6 +472,9 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
       const component = desiredComponent;
       const work = groups.map(async (group) => {
         const ids = [
+          ...(group.locale
+            ? createHomepageLocaleSelect(group.locale, family, runtime, () => false).prototypeIds
+            : []),
           ...(group.links.length ? [`${family}-surface-root`] : []),
           ...(group.links.some((link) => siteLinkIcon(link) === 'none')
             ? [`${family}-text-root`]
@@ -476,7 +483,7 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
             ? [resolveProjectionPart(family, 'button', 'root').prototypeId]
             : []),
         ];
-        if (!group.links.length && !group.theme && !group.menu && !group.runtime)
+        if (!group.links.length && !group.theme && !group.menu && !group.runtime && !group.locale)
           throw new Error('[HomepageRuntime] action groups must not be empty.');
         return materializeProjectionCandidate(request, {
           mount: group.mount,
@@ -595,6 +602,9 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
         publish() {
           // A reader can use native fallback navigation while async code is
           // loading. Carry focus to the same destination before hiding it.
+          const localeFocus = groups.find(
+            (group) => group.locale && group.fallback.contains(document.activeElement)
+          );
           const nativeFocus = groups.flatMap((group) => {
             const index = group.links.findIndex((link) => link === document.activeElement);
             return index < 0 ? [] : [{ group, index }];
@@ -612,6 +622,13 @@ export function initHomepageRuntime(root: HTMLElement): HomepageHandle | undefin
           searchPublication?.publish();
           setStatus('ready', commit.selection.runtimeId as RuntimeId);
           disclosure?.enhance();
+          if (localeFocus) {
+            localeFocus.mount
+              .querySelector<HTMLElement>(
+                '[data-projection-generation-state="active"] [data-demo-ref="home-locale-trigger"]'
+              )
+              ?.focus({ preventScroll: true });
+          }
           if (nativeFocus) {
             nativeFocus.group.mount
               .querySelector<HTMLElement>(

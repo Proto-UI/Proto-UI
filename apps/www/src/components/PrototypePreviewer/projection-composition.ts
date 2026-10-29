@@ -43,6 +43,8 @@ export type ProjectionControlOption<Value extends string = string> = Readonly<{
 
 export type ProjectionControlConfig<Value extends string> = Readonly<{
   label: string;
+  /** Compact command bars retain the Trigger's accessible name without a second visual row. */
+  labelPresentation?: 'visible' | 'accessible';
   /** Runtime Box may use a genuine controlled Tabs composition. */
   presentation?: 'select' | 'tabs';
   placeholder?: string;
@@ -57,6 +59,8 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   /** Shadcn presentation; Brutalist retains its separate explicit appearance. */
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
+  /** Explicit family projection; never overrides another family's recipe. */
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -615,7 +619,14 @@ function createSelectControl<Value extends string>(
   });
   const root = createProjectedProto(selectParts.root, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.root,
-    props: { value: currentValue, disabled: locked, closeOnSelect: true },
+    props: {
+      value: currentValue,
+      disabled: locked,
+      closeOnSelect: true,
+      ...(selectParts.root === 'shadcn-select-root' && config.shadcnStyleProfile
+        ? { styleProfile: config.shadcnStyleProfile }
+        : {}),
+    },
     // Width is a host-owned normalized surface input projected by every
     // Adapter. Website CSS must not reach through the wrapper to style the
     // physical combobox surface.
@@ -633,7 +644,7 @@ function createSelectControl<Value extends string>(
       'data-projection-id': `${id}-control`,
       'aria-disabled': String(locked),
     },
-    children: [label, root],
+    children: config.labelPresentation === 'accessible' ? [root] : [label, root],
   };
 }
 

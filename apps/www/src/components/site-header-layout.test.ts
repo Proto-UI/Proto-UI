@@ -290,3 +290,19 @@ it.each(['en', 'zh-cn'])(
     expect(titleRule[2]).toBe('calc(var(--header-height) + var(--docs-reading-inset, 1rem))');
   }
 );
+
+it('separates full-width Header chrome from the bounded reading canvas', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(frame.indexOf('<slot name="header" />')).toBeLessThan(frame.indexOf('class:list={['));
+  expect(frame).toContain('.site-page-frame > header:has([data-site-header])');
+  expect(frame).not.toContain('.site-page-frame > .container-wrapper > header');
+  expect(frame).toMatch(/\.docs-shell\s*\{[^}]*max-width: 85rem/);
+  const root = css.match(/\.site-header\s*\{([^}]+)\}/)![1];
+  expect(root).toContain('max-width: none');
+  expect(root).toContain('padding-inline: clamp(1rem, 2vw, 2rem)');
+  expect(root).toContain('--site-header-row-height: 4.5rem');
+  expect(root).toContain('--site-control-height: 2.75rem');
+  expect(root).toContain('--site-select-control-height: 2.75rem');
+  expect(css).not.toContain('max-width: 82.5rem');
+  expect(css).not.toContain('Labels occupy the line above');
+});
