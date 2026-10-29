@@ -1,8 +1,9 @@
 // @vitest-environment node
 import { mkdir, writeFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
-import type { Browser, Locator } from 'playwright-core';
+import type { Browser, BrowserContext, Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { RUNTIMES, launchBrowser, openRoute, selectRuntime, startServer, stopServer } from './browser-harness';
 
@@ -16,7 +17,7 @@ const paint = (previewer: Locator, id: string) => ref(previewer, `${id}-card`).e
   return { background: style.backgroundColor, border: style.borderTopColor };
 });
 
-async function capture(previewer: Locator, runtime: string, phase: string) {
+async function capture(previewer: Locator, runtime: string, phase: string, outcome: 'observation' | 'assertions-passed' | 'failed' = 'observation', failure?: string) {
   const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
   if (!directory) return;
   const root = path.join(directory, 'switch-public-compositions');
@@ -26,9 +27,10 @@ async function capture(previewer: Locator, runtime: string, phase: string) {
   const dirty = execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim();
   const name = `${sourceSha.slice(0, 12)}-${runtime}-${phase}`;
   // Viewport capture must not scroll the tall previewer while a native pointer is held.
-  await previewer.page().screenshot({ path: path.join(root, name + '.png'), style: 'astro-dev-toolbar { visibility: hidden; }' });
+  const png = await previewer.page().screenshot({ path: path.join(root, name + '.png'), style: 'astro-dev-toolbar { visibility: hidden; }' });
   await writeFile(path.join(root, name + '.json'), JSON.stringify({
-    sourceSha, tree, dirtyWorktree: !!dirty, runtime, phase, route,
+    sourceSha, tree, dirtyWorktree: !!dirty, runtime, phase, route, outcome, failure,
+    pngSha256: createHash('sha256').update(png).digest('hex'),
     observedAt: new Date().toISOString(),
     controls: await previewer.locator('.host [role="switch"]').evaluateAll((nodes) => nodes.map((el) => ({
       ref: el.getAttribute('data-demo-ref'), checked: el.getAttribute('aria-checked'),
@@ -39,8 +41,26 @@ async function capture(previewer: Locator, runtime: string, phase: string) {
   }, null, 2));
 }
 
+// Always close the context, retain the primary assertion, and fail on cleanup-only errors.
+async function finish(previewer: Locator, runtime: string, phase: string, context: BrowserContext,
+  failure: { error: unknown } | undefined, release?: () => Promise<void>) {
+  const cleanupErrors: unknown[] = [];
+  try { await release?.(); } catch (error) { cleanupErrors.push(error); }
+  try {
+    await capture(previewer, runtime, phase, failure || cleanupErrors.length ? 'failed' : 'assertions-passed',
+      failure ? String(failure.error) : cleanupErrors.length ? cleanupErrors.map(String).join('\n') : undefined);
+  } catch (error) { cleanupErrors.push(error); }
+  finally { try { await context.close(); } catch (error) { cleanupErrors.push(error); } }
+  if (failure) {
+    if (cleanupErrors.length) console.error('Switch evidence/cleanup errors; primary assertion preserved:', cleanupErrors);
+    throw failure.error;
+  }
+  if (cleanupErrors.length) throw new AggregateError(cleanupErrors, 'Switch evidence/cleanup failed');
+}
+
 async function open(runtime: typeof RUNTIMES[number]) {
   const opened = await openRoute(browser, baseUrl, route, { width: 1100, height: 1000 });
+  try {
   const previewer = opened.page.locator('[data-demo-id="demo-shadcn-switch-compositions"]');
   await selectRuntime(opened.page, previewer, runtime, '[role="switch"]', 9);
   await opened.page.evaluate(() => {
@@ -57,6 +77,31 @@ async function open(runtime: typeof RUNTIMES[number]) {
     }
   });
   return { ...opened, previewer };
+  } catch (error) {
+    console.error(`[switch-public-compositions] ${runtime} setup failed:`, error);
+    try {
+      const directory = process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR;
+      if (directory) {
+        const destination = path.join(directory, 'switch-public-compositions');
+        await mkdir(destination, { recursive: true });
+        const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+        const name = `${sourceSha.slice(0, 12)}-${runtime}-setup-failure-${Date.now()}`;
+        const png = await opened.page.screenshot({ path: path.join(destination, name + '.png') });
+        await writeFile(path.join(destination, name + '.json'), JSON.stringify({
+          sourceSha, runtime, route, outcome: 'setup-failed', failure: String(error),
+          pngSha256: createHash('sha256').update(png).digest('hex'),
+          previewers: await opened.page.locator('[data-previewer-id]').evaluateAll((elements) => elements.map((el) => ({
+            id: el.getAttribute('data-previewer-id'), demo: el.getAttribute('data-demo-id'),
+            projection: el.getAttribute('data-projection-mode'),
+            switches: el.querySelectorAll('.host [role="switch"]').length,
+            html: el.outerHTML.slice(0, 30000),
+          }))),
+        }, null, 2));
+      }
+    } catch (captureError) { console.error('Switch setup diagnostic capture failed:', captureError); }
+    try { await opened.context.close(); } catch (cleanupError) { console.error('Switch setup cleanup failed:', cleanupError); }
+    throw error;
+  }
 }
 
 beforeAll(async () => { baseUrl = await startServer(route); browser = await launchBrowser(); }, 120000);
@@ -66,6 +111,7 @@ describe('real public Switch page compositions', () => {
   for (const runtime of RUNTIMES) {
     it(`${runtime} card, label, description, link, disabled and controlled ownership`, async () => {
       const { page, context, previewer } = await open(runtime);
+      let failure: { error: unknown } | undefined;
       try {
         for (const id of ['description', 'choice', 'selected', 'disabled', 'controlled', 'readonly', 'rtl', 'drag', 'drag-rtl']) {
           expect(await ref(previewer, `${id}-control`).getAttribute('aria-labelledby')).toBe(await ref(previewer, `${id}-label`).getAttribute('id'));
@@ -115,14 +161,13 @@ describe('real public Switch page compositions', () => {
         const trusted = await page.evaluate(() => (window as any).__switchCompositionInput);
         expect(trusted.some((event: any) => event.type === 'pointerdown' && event.trusted)).toBe(true);
         expect(trusted.some((event: any) => event.type === 'keydown' && event.trusted && event.key === ' ')).toBe(true);
-      } finally {
-        await capture(previewer, runtime, 'card-result');
-        await context.close();
-      }
+      } catch (error) { failure = { error }; }
+      finally { await finish(previewer, runtime, 'card-result', context, failure); }
     }, 120000);
 
     it(`${runtime} opt-in LTR and RTL thumb moves while held, before one release request`, async () => {
       const { page, context, previewer } = await open(runtime);
+      let failure: { error: unknown } | undefined;
       try {
         const plain = ref(previewer, 'description-control'), plainThumb = ref(previewer, 'description-thumb');
         await plain.scrollIntoViewIfNeeded();
@@ -168,11 +213,8 @@ describe('real public Switch page compositions', () => {
           await expect.poll(() => checked(previewer, id)).toBe('true');
           expect(await requests(previewer, id)).toBe('1');
         }
-      } finally {
-        await page.mouse.up();
-        await capture(previewer, runtime, 'drag-result');
-        await context.close();
-      }
+      } catch (error) { failure = { error }; }
+      finally { await finish(previewer, runtime, 'drag-result', context, failure, () => page.mouse.up()); }
     }, 120000);
   }
 });
