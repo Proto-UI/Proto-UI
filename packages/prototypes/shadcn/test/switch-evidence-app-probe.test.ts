@@ -24,6 +24,16 @@ it('mounts all four real Switch trees and retains both controls across scope and
       expect(controls).toHaveLength(2);
       expect(controls[0].getAttribute('aria-labelledby')).toBeTruthy();
     }
+    // A positive signal control prevents a permanently empty event sink from
+    // making later no-change/once-only assertions pass vacuously.
+    for (const record of app.records) {
+      const before = record.events.length;
+      record.controls()[1].click();
+      await vi.waitFor(() => {
+        expect(record.events).toHaveLength(before + 1);
+        expect(record.events.at(-1).checked).toBe(true);
+      });
+    }
     for (const profile of ['rhea', 'new-york-v4', 'rhea']) {
       app.set({ profile, invalid: true });
       await vi.waitFor(
