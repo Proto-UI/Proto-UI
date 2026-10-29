@@ -560,6 +560,7 @@ try {
                       href: link.getAttribute('href'),
                       current: link.getAttribute('aria-current'),
                       appearance: link.dataset.siteLinkAppearance,
+                      depth: parseFloat(getComputedStyle(link).getPropertyValue('--depth')) || 0,
                       background: s.backgroundColor,
                       inView: link.hasAttribute('in-view'),
                       textHeight: text.getBoundingClientRect().height,
@@ -593,21 +594,23 @@ try {
           if (v.width === 1440) assert.ok(facts.right.length > 0);
           if (kind === 'candidate')
             for (const row of [...facts.left, ...facts.right]) {
-              const minimum = v.width === 390 ? 44 : 32;
+              const minimum = row.appearance === 'toc' ? 24 : v.width === 390 ? 44 : 32;
               assert.ok(row.surfaceHeight >= minimum - 1);
               if (row.textHeight <= row.textLineHeight + 1)
                 assert.ok(
                   Math.abs(row.surfaceHeight - minimum) <= 1,
                   `Unwrapped ${row.label} must be ${minimum}px, got ${row.surfaceHeight}`
                 );
-              assert.equal(row.fontSize, row.appearance === 'sidebar' ? 13 : 14);
+              assert.equal(row.fontSize, row.appearance === 'sidebar' ? 13 : 12.8);
               assert.equal(
                 row.padding,
                 row.appearance === 'sidebar'
                   ? v.family === 'brutalist' && row.current && row.current !== 'false'
                     ? '4px 6px'
                     : '6px 8px'
-                  : '4px 8px'
+                  : row.depth === 0
+                    ? '4px 8px'
+                    : `4px 8px 4px ${8 + row.depth * 16}px`
               );
               assert.equal(
                 row.fontWeight,

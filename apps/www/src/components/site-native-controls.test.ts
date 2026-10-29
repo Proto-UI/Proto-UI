@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initSiteNativeControls, siteSidebarTextRole } from './site-native-controls';
+import {
+  initSiteNativeControls,
+  siteSidebarTextRole,
+  siteIsReadingToc,
+} from './site-native-controls';
 vi.mock('./PrototypePreviewer/projection-theme', () => ({
   resolveProjectionThemeSurfaceStyle: (family: string) => ({
     '--pui-foreground': family === 'brutalist' ? '#111' : '#222',
@@ -163,3 +167,22 @@ it.each(['shadcn', 'brutalist'])(
     }
   }
 );
+
+it('projects only ordinary right reading TOC through its finite compact recipe', async () => {
+  document.body.innerHTML = `<aside class="right-sidebar"><sl-toc><a id="reading" href="#one" data-site-native-link data-site-link-appearance="toc"><span>One</span></a><ul class="isMobile"><li><a id="mobile" href="#two" data-site-native-link data-site-link-appearance="toc">Two</a></li></ul></sl-toc></aside><sl-toc><a id="other" href="#three">Three</a></sl-toc>`;
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#reading')!)).toBe(true);
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#mobile')!)).toBe(false);
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#other')!)).toBe(false);
+  releases.push(initSiteNativeControls());
+  await settle();
+  const reading = document.querySelector<HTMLElement>('#reading')!;
+  const text = reading.querySelector<HTMLElement>('[data-site-link-text]')!;
+  await vi.waitFor(() => expect(text.style.fontSize).toBe('0.8rem'));
+  expect(text.style.lineHeight).toBe('1rem');
+  expect(reading.querySelector<HTMLElement>('[data-site-link-content]')!.style.minHeight).toBe(
+    '1.5rem'
+  );
+  expect(
+    document.querySelector<HTMLElement>('#mobile [data-site-link-content]')!.style.minHeight
+  ).toBe('var(--site-navigation-row-height, 2rem)');
+});

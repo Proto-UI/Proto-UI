@@ -2079,3 +2079,122 @@ it('keeps compact Sidebar typography across root text, viewport and enhancement'
     }
   }
 }, 150_000);
+
+it('keeps reading TOC native row boxes, depth padding and multiline growth through enhancement', async () => {
+  for (const [family, route] of [
+    ['shadcn', '/zh-cn/ui-libraries/shadcn/button/'],
+    ['brutalist', '/zh-cn/ui-libraries/brutalist/components/textarea/'],
+  ] as const) {
+    for (const javaScriptEnabled of [false, true]) {
+      const context = await browser.newContext({
+        javaScriptEnabled,
+        viewport: { width: 1920, height: 1000 },
+      });
+      const page = await context.newPage();
+      const id = `reading-toc-${family}-${javaScriptEnabled ? 'enhanced' : 'nojs'}`;
+      const samples: unknown[] = [];
+      try {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+        if (javaScriptEnabled)
+          await page.waitForFunction(() =>
+            document.querySelector(
+              '.right-sidebar sl-toc a[data-site-link-enhanced] [data-site-link-text]'
+            )
+          );
+        for (const width of [1280, 1920]) {
+          await page.setViewportSize({ width, height: 1000 });
+          for (const rootSize of [16, 20, 24]) {
+            await page.evaluate((size) => {
+              document.documentElement.style.fontSize = `${size}px`;
+            }, rootSize);
+            const rows = await page.locator('.right-sidebar sl-toc a').evaluateAll((links) =>
+              links
+                .filter((link) => link.checkVisibility())
+                .map((link) => {
+                  const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+                  const leaf = link.querySelector<HTMLElement>('[data-site-link-content]') ?? link;
+                  const rect = link.getBoundingClientRect();
+                  const parent = link.parentElement!.getBoundingClientRect();
+                  const style = getComputedStyle(text),
+                    layout = getComputedStyle(leaf);
+                  return {
+                    size: parseFloat(style.fontSize),
+                    line: parseFloat(style.lineHeight),
+                    height: rect.height,
+                    left: rect.left,
+                    width: rect.width,
+                    parentLeft: parent.left,
+                    parentWidth: parent.width,
+                    paddingStart: parseFloat(layout.paddingInlineStart),
+                    depth: parseFloat(getComputedStyle(link).getPropertyValue('--depth')) || 0,
+                    margin: parseFloat(layout.marginBottom),
+                  };
+                })
+            );
+            samples.push({ width, rootSize, rows });
+            expect(rows.length).toBeGreaterThan(0);
+            for (const row of rows) {
+              expect(row.size).toBeCloseTo(rootSize * 0.8, 2);
+              expect(row.line).toBeCloseTo(rootSize, 2);
+              expect(row.height).toBeGreaterThanOrEqual(rootSize * 1.5 - 0.1);
+              expect(row.left).toBeCloseTo(row.parentLeft, 0);
+              expect(row.width).toBeCloseTo(row.parentWidth, 0);
+              expect(row.paddingStart).toBeCloseTo(rootSize * (row.depth + 0.5), 2);
+              expect(row.margin).toBe(0);
+            }
+            if (width === 1920 && rootSize === 16)
+              await captureLinks(page, id, family, 'wc', 'reading-toc-native-density', { samples });
+          }
+        }
+        const first = page.locator('.right-sidebar sl-toc a').first();
+        await first.evaluate((link) => {
+          const source =
+            link.querySelector('[data-site-link-text]')?.firstElementChild ??
+            link.querySelector('span')!;
+          source.textContent =
+            'A deliberately long reading TOC destination that wraps across several lines without a fixed-height clipping shortcut';
+        });
+        const multiline = await first.evaluate((link) => {
+          const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+          return {
+            height: link.getBoundingClientRect().height,
+            line: parseFloat(getComputedStyle(text).lineHeight),
+            root: parseFloat(getComputedStyle(document.documentElement).fontSize),
+          };
+        });
+        samples.push({ multiline });
+        expect(multiline.height).toBeGreaterThan(multiline.root * 1.5);
+        expect(multiline.height).toBeGreaterThanOrEqual(
+          multiline.line * 2 + multiline.root * 0.5 - 1
+        );
+        if (javaScriptEnabled) {
+          await assertNavigationFocus(page, first);
+          for (const position of ['bottom', 'top'] as const) {
+            await page.evaluate(
+              (position) =>
+                window.scrollTo(
+                  0,
+                  position === 'bottom' ? document.documentElement.scrollHeight : 0
+                ),
+              position
+            );
+            await expect
+              .poll(() => page.locator('.right-sidebar sl-toc a[aria-current="true"]').count())
+              .toBe(1);
+            const range = page.locator('.right-sidebar sl-toc > [data-site-toc-highlight]');
+            await expect.poll(() => range.getAttribute('data-toc-range-visible')).not.toBeNull();
+            expect(await range.locator('[data-pui-root]').count()).toBe(1);
+          }
+        }
+      } catch (error) {
+        await captureLinks(page, `${id}-failure`, family, 'wc', 'reading-toc-density-failure', {
+          samples,
+          error: String(error),
+        });
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }
+  }
+}, 150_000);

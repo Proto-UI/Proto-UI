@@ -23,6 +23,16 @@ export function sidebarTextSurfaceStyle(role: SidebarTextRole): Record<string, s
   return { fontSize: role === 'top-group' ? '0.75rem' : '0.8125rem', lineHeight: '1.25rem' };
 }
 
+/** Ordinary reading TOC uses its accepted native .8rem / 1.25 line box. */
+export function readingTocTextSurfaceStyle(): Record<string, string> {
+  return {
+    fontSize: '0.8rem',
+    lineHeight: '1rem',
+    fontFamily: 'inherit',
+    letterSpacing: 'inherit',
+  };
+}
+
 export type SiteLinkEmphasis = 'primary' | 'secondary' | 'minimal' | 'link';
 const initial: NativeLinkFacts = {
   hovered: false,
@@ -110,7 +120,8 @@ export function linkTextProps(
   appearance: SiteLinkAppearance,
   facts = initial,
   family: SiteLibraryFamily = 'shadcn',
-  sidebarRole?: SidebarTextRole
+  sidebarRole?: SidebarTextRole,
+  readingToc = false
 ): TextRootProps {
   if (family === 'shadcn' && appearance === 'nav')
     return {
@@ -140,7 +151,8 @@ export function linkTextProps(
         ? 'semibold'
         : 'medium',
     font: 'body',
-    leading: appearance === 'sidebar' || appearance === 'nav-group' ? 'size' : 'normal',
+    leading:
+      appearance === 'sidebar' || appearance === 'nav-group' || readingToc ? 'size' : 'normal',
     tracking: appearance === 'brand' ? 'tight' : 'normal',
     emphasis: 'normal',
     decoration:
@@ -153,7 +165,8 @@ export function linkSurfaceLayout(
   family: SiteLibraryFamily,
   appearance: SiteLinkAppearance,
   emphasis: SiteLinkEmphasis,
-  facts = initial
+  facts = initial,
+  readingToc = false
 ): Record<string, string> {
   if (family === 'shadcn' && appearance === 'nav')
     return {
@@ -187,6 +200,22 @@ export function linkSurfaceLayout(
           : '0.375rem 0.5rem',
     };
   }
+  if (appearance === 'toc' && readingToc)
+    return {
+      pointerEvents: 'none',
+      display: 'flex',
+      flexShrink: '0',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minWidth: '0',
+      maxWidth: '100%',
+      width: '100%',
+      minHeight: '1.5rem',
+      marginBottom: '0',
+      padding: '0.25rem 0.5rem',
+      paddingInlineStart: 'calc(1rem * var(--depth, 0) + 0.5rem)',
+      gap: '0.5rem',
+    };
   const row = ['toc', 'pagination'].includes(appearance);
   const raised =
     family === 'brutalist' &&

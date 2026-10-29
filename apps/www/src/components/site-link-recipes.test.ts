@@ -4,6 +4,7 @@ import {
   linkSurfaceProps,
   linkTextProps,
   sidebarTextSurfaceStyle,
+  readingTocTextSurfaceStyle,
 } from './site-link-recipes';
 const idle = { hovered: false, pressed: false, focusVisible: false, current: false, inView: false };
 describe('consumer navigation density preserves native selection and family identity', () => {
@@ -149,5 +150,31 @@ it('keeps the native Sidebar typography contract finite and distinct from TOC', 
     expect(linkTextProps('nav-group', idle, family, 'nested-group').tone).toBe('inherit');
     expect(linkSurfaceLayout(family, 'toc', 'minimal', idle).padding).toBe('0.25rem 0.5rem');
     expect(linkSurfaceLayout(family, 'toc', 'minimal', idle).marginBottom).toBe('1px');
+  }
+});
+
+it('matches ordinary reading TOC geometry without shrinking mobile variants or Sidebar targets', () => {
+  expect(readingTocTextSurfaceStyle()).toEqual({
+    fontSize: '0.8rem',
+    lineHeight: '1rem',
+    fontFamily: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    const layout = linkSurfaceLayout(family, 'toc', 'minimal', idle, true);
+    expect(layout).toMatchObject({
+      minHeight: '1.5rem',
+      marginBottom: '0',
+      padding: '0.25rem 0.5rem',
+      paddingInlineStart: 'calc(1rem * var(--depth, 0) + 0.5rem)',
+    });
+    expect(layout).not.toHaveProperty('height');
+    expect(linkSurfaceLayout(family, 'toc', 'minimal', idle).minHeight).toBe(
+      'var(--site-navigation-row-height, 2rem)'
+    );
+    expect(linkSurfaceLayout(family, 'sidebar', 'minimal', idle).minHeight).toBe(
+      'var(--site-navigation-row-height, 2rem)'
+    );
+    expect(linkTextProps('toc', idle, family, undefined, true).leading).toBe('size');
   }
 });
