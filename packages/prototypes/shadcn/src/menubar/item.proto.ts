@@ -1,8 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asMenubarItem,
-  type MenubarItemExposes,
-} from '@proto.ui/prototypes-base/menubar';
+import { asMenubarItem, type MenubarItemExposes } from '@proto.ui/prototypes-base/menubar';
 import { setupMenubarStyle } from './visual';
 import type { ShadcnMenubarItemProps } from './types';
 export default definePrototype<ShadcnMenubarItemProps, MenubarItemExposes>({
@@ -10,7 +7,11 @@ export default definePrototype<ShadcnMenubarItemProps, MenubarItemExposes>({
   setup(def) {
     const behavior = asMenubarItem();
     const style = setupMenubarStyle(def);
-    def.feedback.style.use(tw('relative flex min-w-0 items-center cursor-default gap-2 px-2 py-1.5 text-sm outline-none select-none break-words'));
+    def.feedback.style.use(
+      tw(
+        'relative flex min-w-0 items-center cursor-default gap-2 px-2 py-1.5 text-sm outline-none select-none break-words'
+      )
+    );
     def.rule({
       when: (w) => w.state(style).eq('new-york-v4'),
       intent: (i) => i.feedback.style.use(tw('rounded-sm')),

@@ -1,8 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asMenubarRoot,
-  type MenubarRootExposes,
-} from '@proto.ui/prototypes-base/menubar';
+import { asMenubarRoot, type MenubarRootExposes } from '@proto.ui/prototypes-base/menubar';
 import { setupMenubarStyle } from './visual';
 import type { ShadcnMenubarRootProps } from './types';
 export default definePrototype<ShadcnMenubarRootProps, MenubarRootExposes>({

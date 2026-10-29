@@ -1,12 +1,18 @@
 import type { DefHandle, RunHandle } from '@proto.ui/core';
-import { SHADCN_STYLE_SCOPE, setupShadcnStyleScope, setupShadcnStyleSelection, type ShadcnStyleProps } from '../style-scope';
+import {
+  SHADCN_STYLE_SCOPE,
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
 
 export const MENUBAR_PROJECTED_STYLES = ['new-york-v4', 'rhea'] as const;
 /** Shared selector protocol only; Base owns menu state and all input policy. */
 export function setupMenubarStyle(def: DefHandle<any>, root = false) {
-  if (!root) return setupShadcnStyleSelection(def, 'new-york-v4', {
-    supportedStyles: MENUBAR_PROJECTED_STYLES,
-  });
+  if (!root)
+    return setupShadcnStyleSelection(def, 'new-york-v4', {
+      supportedStyles: MENUBAR_PROJECTED_STYLES,
+    });
   setupShadcnStyleScope(def);
   const style = def.state.enum('menubarResolvedStyle', 'new-york-v4', {
     options: MENUBAR_PROJECTED_STYLES,

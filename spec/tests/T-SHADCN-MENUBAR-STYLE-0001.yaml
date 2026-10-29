@@ -3,9 +3,9 @@ type: test
 title: Menubar source-bound existing-part style projection
 status: draft
 since: 0.3.0-alpha.1
-summary: Planned and authored checks for two existing-part profiles, not native or complete Menubar acceptance.
+summary: Focused synthetic checks for two existing-part profiles, not native or complete Menubar acceptance.
 lifecycleRationale:
-  en: Candidate tests have not been executed; independent review and exact-head native/AT evidence remain required.
+  en: Focused synthetic tests have executed; independent acceptance and exact-head native/AT evidence remain required.
 cases:
   - id: T-SHADCN-MENUBAR-STYLE-0001-CASE-PAINT
     title: Existing Root/Trigger/Content/Item state paint matches separate source recipes
@@ -42,7 +42,7 @@ sources:
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
-    summary: Describe authored unexecuted projection tests and outstanding native acceptance.
+    summary: Describe focused projection tests and outstanding native acceptance.
 tags:
   - prototype
   - shadcn
