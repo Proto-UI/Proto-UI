@@ -5,11 +5,7 @@ import Vue2 from '../../packages/adapters/vue2/node_modules/vue';
 import { createReactAdapter } from '../../packages/adapters/react/src';
 import { createVueAdapter } from '../../packages/adapters/vue/src';
 import { createVue2Adapter } from '../../packages/adapters/vue2/src';
-import {
-  AdaptToWebComponent,
-  setElementProps,
-  getElementProps,
-} from '../../packages/adapters/web-component/src';
+import { AdaptToWebComponent, setElementProps } from '../../packages/adapters/web-component/src';
 import { styleScope } from '../../packages/prototypes/shadcn/src/style-scope';
 import { switchRoot, switchThumb } from '../../packages/prototypes/shadcn/src/switch';
 import { fieldRoot, fieldLabel, fieldSwitch } from '../../packages/prototypes/shadcn/src/field';
@@ -24,9 +20,6 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
   section.append(heading, host);
   document.querySelector('main').append(section);
   let update, dispose;
-  const events = [];
-  const onCheckedChange = (payload) =>
-    events.push({ checked: payload?.checked, source: 'framework-expose-callback' });
   const initial = {
     profile: 'new-york-v4',
     own: 'inherit',
@@ -36,7 +29,6 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     readOnly: false,
     draggable: false,
     direction: 'ltr',
-    checked: undefined,
   };
   const fieldProps = (s) => ({ invalid: s.invalid });
   const switchProps = (s) => ({
@@ -46,8 +38,6 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     readOnly: s.readOnly,
     draggable: s.draggable,
     direction: s.direction,
-    ...(s.checked === undefined ? {} : { checked: s.checked }),
-    ...(kind === 'wc' ? {} : { onCheckedChange }),
   });
   if (kind === 'wc') {
     protos.forEach((p) => AdaptToWebComponent(p));
@@ -141,18 +131,16 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     update(state);
   };
   set({});
-  if (kind === 'wc')
-    host.addEventListener('checkedChange', (e) =>
-      events.push({ checked: e.detail?.checked, trusted: e.isTrusted, source: 'dom-expose-event' })
-    );
+  const events = [];
+  host.addEventListener('checkedChange', (e) =>
+    events.push({ checked: e.detail?.checked, trusted: e.isTrusted })
+  );
   records.push({
     kind,
     host,
     set,
     dispose,
     events,
-    requestedProps: () => switchProps(state),
-    rawProps: (root) => (kind === 'wc' ? getElementProps(root) : null),
     controls: () => [...host.querySelectorAll('[role=switch]')],
   });
 }
