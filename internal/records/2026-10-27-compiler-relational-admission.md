@@ -695,3 +695,96 @@ runtime, the full operator/position matrix, Qt/Flutter, stable activation,
 independent acceptance and current whole-tree CI remain separate. The prior
 canonical/nested complete-artifact equivalence is not a bottom runtime execution.
 `COMPILER_MERGE_READY=false / pending` remains unchanged.
+
+## Spelling-independent relational source smoke — 2026-10-29
+
+This follow-up addresses PR #1024 QA comment 6481013117 on source head
+`418a42bbb77a2143c75cb3eec17fbef533d033d2`. It changes only the existing
+relational test and this record, not Compiler production behavior or draft
+admission semantics. The original record and all historical failures remain.
+
+The old string regex required `relational_left`, `relational_right` and same-line
+`; let` text. Its bottom counterpart also fixed three temporary names and panic
+prose. Two disposable controls against actual emitted source reproduced the
+false-negative mechanism: consistent left-temporary renaming and a newline after
+the first semicolon each failed the old regex (2 failed / 175 skipped, exit 1).
+The controls and their failures were retained outside the production candidate;
+this is an oracle failure, not a Compiler or Rust runtime failure.
+
+The replacement is a fast token/binding structural smoke, explicitly not a Rust
+parser or native acceptance. It ignores whitespace between tokens, keeps string
+values intact, tolerates equivalent Unicode escape spelling, and captures distinct
+temporary names with consistent references. The bottom fixture discovers its
+unique argument-zero binding rather than fixing the generated parameter name.
+It still requires the expected operand identities in order, each once within the
+matched block, a divergent `Value`-typed result and its corresponding receiver.
+Panic string wording is not contractual. Source text in comments, additional
+work outside the matched block and general Rust syntax remain outside this
+bounded smoke; actual behavior requires separate native evidence.
+
+Positive controls transform each actual emitted artifact, not historical output:
+rename temporaries (and the bottom input binding), introduce newlines, vary bottom
+panic prose and use equivalent Unicode escapes. Handwritten negative controls
+reject reversed operand evaluation, repeated left or right evaluation, duplicated
+blocks and collided bindings. All four operators, all 64 bottom cases (rhs
+null/false, return/condition/not/logical-left, canonical/nested IR), source/IR
+rejections, independent numeric/UTF-16 expectations and Web effect tests remain.
+
+Actual author validation on the fixed current source, with original Vitest
+configuration and dependency versions unchanged:
+
+- Before the test change: five files, **216 passed**, exit 0.
+- After the test change: the same five files, **221 passed**, exit 0.
+- TypeScript 5.9.3 scoped `tsc --noEmit`: exit 0, no diagnostics; original strict
+  and skipLibCheck settings retained, not whole-repository type acceptance.
+- `git diff --check`: exit 0. Fresh-context static source/log review found no
+  definite blocker for this bounded Draft update; no formal approval occurred.
+
+Commands, run with a credential-free environment, isolated HOME/TMPDIR and an
+inherited seccomp restriction denying socket creation:
+
+```sh
+node node_modules/vitest/vitest.mjs run \
+  packages/compiler/test/expression-types.test.ts \
+  packages/compiler/test/data-types.test.ts \
+  packages/compiler/test/relational-comparison.test.ts \
+  packages/compiler/test/parser.test.ts \
+  packages/compiler/test/targets.test.ts --maxWorkers=1 --minWorkers=1
+node node_modules/typescript/bin/tsc -p <scoped-config-extending-repo-tsconfig> --noEmit
+```
+
+All 86 prior locked npm packages were restored from official registry metadata;
+tarball SHA512 and SHA256 matched the retained inventory before execution. No
+lifecycle script, package upgrade or dependency/lock edit occurred. `pnpm-lock.yaml`
+blob `2e61d039437eb82af7068653be86e553f2304e0e` is identical at d4 and this
+418a baseline. Existing missing Astro base-config, TypeScript source-map and Vue2
+development notices remain in logs. The baseline log clock used the runner's
+local zone; subsequent runs explicitly set UTC. This isolation does not claim a
+mount/filesystem allowlist sandbox. The record is not a self-contained offline
+distribution of the dependency archives.
+
+Patch reviewed and explicitly approved for isolated execution:
+`9ad093a342007806d7ed8e603df0d4e609eeccd838e4f611e317a8fc4842a2b6` (SHA256).
+Applied test file:
+`5e31acd2e3065b07735a61255f78785d97798a8b01f3d45ad2a7177f8e77f403` (SHA256).
+The preparation copy had one additional trailing LF; applying the unchanged
+approved patch to the exact Git source preserves its actual file ending.
+
+Native verification is still in progress at this append. New generation emitted
+64 bottom inputs plus numbers/strings and reachable effect-order consumers;
+18 complete byte classes and their alpha-renamed/formatted variants are prepared.
+An initial external generator helper failed because top-level await was treated
+as CommonJS; the preserved retry uses `.mts` and succeeded. This is a harness
+format correction, not a product fix or native pass. Fixed Rust/Cargo 1.98.1 and
+the original GPUI dependency closure are being restored and verified; no result
+is transferred from the historical f05b native receipts. Reversed/double-evaluation
+runtime controls, native compilation, broader host domains, Qt/Flutter, formal
+independent review and exact new-head CI remain distinct conditions. Draft and
+`COMPILER_MERGE_READY=false / pending` remain; no merge or issue closure is claimed.
+
+The specifically authorized #1019 body appendix records the bounded original-owner
+continuation without rewriting prior text or changing closed state. Its actual
+lease is 2026-10-29T14:14:38Z through 2026-10-30T14:14:38Z, no automatic extension;
+PR receipt: https://github.com/Proto-UI/Proto-UI/pull/1024#issuecomment-6499173791.
+It does not take over frozen #902 work, #1032 fixture repair, capture timestamps
+or any other owner. AI assistance: OpenAI Dots.

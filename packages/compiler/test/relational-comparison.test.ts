@@ -38,6 +38,59 @@ function sourceSpans(value: unknown, spans = new Set<string>()): Set<string> {
   return spans;
 }
 
+// Fast source-structure smoke only; this is not Rust parsing or native acceptance.
+// Ignore whitespace, not string contents. Capture temporary identifiers and require
+// every later use to refer to the same binding, with distinct operand/result locals.
+function rustTokens(code: string): string[] {
+  return code.match(/"(?:\\.|[^"\\])*"|\$?[A-Za-z_][A-Za-z_0-9]*|\d+(?:\.\d+)?|::|<=|>=|\S/g) ?? [];
+}
+// Decode only valid Unicode escapes inside ordinary quoted Rust literals. Other
+// escape syntax remains untouched; this helper is not a full Rust string parser.
+function rustLiteralSpelling(token: string): string {
+  if (!token.startsWith('"')) return token;
+  return token.replace(/\\(?:u\{([0-9a-fA-F_]+)\}|.)/g, (escape, digits: string | undefined) => {
+    if (digits === undefined) return escape;
+    const point = Number.parseInt(digits.replace(/_/g, ''), 16);
+    return point <= 0x10ffff && !(point >= 0xd800 && point <= 0xdfff) ? String.fromCodePoint(point) : escape;
+  });
+}
+function firstArgumentBinding(code: string): string {
+  const tokens = rustTokens(code), names = new Set<string>();
+  for (let i = 0; i < tokens.length - 10; i++) {
+    if (tokens[i] === 'let' && /^[A-Za-z_][A-Za-z_0-9]*$/.test(tokens[i + 1]!) &&
+        tokens.slice(i + 2, i + 6).join(' ') === '= arg ( &' &&
+        tokens.slice(i + 7, i + 11).join(' ') === ', 0 ) ;') names.add(tokens[i + 1]!);
+  }
+  if (names.size !== 1) throw new Error('Expected one unambiguous first-argument binding in this fixture');
+  return [...names][0]!;
+}
+function hasOneRustBlock(code: string, expected: string): boolean {
+  const actual = rustTokens(code), pattern = rustTokens(expected);
+  let matches = 0;
+  for (let start = 0; start <= actual.length - pattern.length; start++) {
+    const bindings = new Map<string, string>();
+    const matched = pattern.every((token, offset) => {
+      const value = actual[start + offset]!;
+      if (!token.startsWith('$')) return rustLiteralSpelling(value) === rustLiteralSpelling(token);
+      if (token === '$diagnostic') return value.startsWith('"') && value.endsWith('"');
+      if (bindings.has(token)) return bindings.get(token) === value;
+      if (!/^[A-Za-z_][A-Za-z_0-9]*$/.test(value) || [...bindings.values()].includes(value)) return false;
+      bindings.set(token, value);
+      return true;
+    });
+    if (matched) matches++;
+  }
+  return matches === 1;
+}
+function stringRelationBlock(operator: string): string {
+  return `{ let $left = Value::string("𐀀"); let $right = Value::string("");
+    Value::boolean($left.text().encode_utf16().cmp($right.text().encode_utf16()) ${operator} std::cmp::Ordering::Equal) }`;
+}
+function bottomRelationBlock(rhs: string, input: string): string {
+  return `{ let $left = ${input}.clone(); let $right = ${rhs === 'null' ? 'Value::Json(Json::Null)' : 'Value::boolean(false)'};
+    let $result: Value = unreachable!($diagnostic); $result }`;
+}
+
 describe('relational admission migration', () => {
   for (const op of operators) {
     it(`${op} admits homogeneous primitives, literals and every homogeneous union alternative`, () => {
@@ -159,15 +212,39 @@ for (const [name, emit] of Object.entries({ React: emitReactSource, Vue: emitVue
     for (const [, a, b] of cases) expect(emit(parse(operators.map((op, i) => `def.expose.value('r${i}',${a} ${op} ${b});`).join(''))).ok).toBe(true);
   });
 }
-it('GPUI uses UTF-16 comparison for literal string types and evaluates operands into ordered temporaries', () => {
-  const result = emitGpuiSource(parse("def.expose.value('result','\\u{10000}' < '\\uE000')"));
-  expect(result.ok).toBe(true);
-  if (result.ok) {
-    expect(result.value.code).toContain('encode_utf16()');
-    expect(result.value.code).toMatch(/let relational_left = .*; let relational_right = /);
-    expect(result.value.code).not.toContain('scalar_number() <');
-  }
-});
+for (const operator of operators) {
+  it(`GPUI ${operator} uses UTF-16 comparison and ordered once-only operands (source smoke)`, () => {
+    const result = emitGpuiSource(parse(`def.expose.value('result','\\u{10000}' ${operator} '\\uE000')`));
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const code = result.value.code;
+      const expected = stringRelationBlock(operator);
+      expect(hasOneRustBlock(code, expected)).toBe(true);
+      // Benign controls operate on this actual emitted artifact, not an old fixture.
+      const renamed = code.replace(/\brelational_left\b/g, 'lhs_tmp').replace(/\brelational_right\b/g, 'rhs_tmp');
+      expect(hasOneRustBlock(renamed.replace(/; /g, ';\n  '), expected)).toBe(true);
+      expect(hasOneRustBlock(renamed.replace('𐀀', '\\u{10000}').replace('', '\\u{e000}'), expected)).toBe(true);
+      expect(code).not.toContain(`scalar_number() ${operator}`);
+    }
+  });
+}
+// Handwritten adversarial controls test the oracle, not native execution.
+for (const [label, expected, good] of [
+  ['string', stringRelationBlock('<'), `{ let lhs = Value::string("𐀀"); let rhs = Value::string(""); Value::boolean(lhs.text().encode_utf16().cmp(rhs.text().encode_utf16()) < std::cmp::Ordering::Equal) }`],
+  ['bottom', bottomRelationBlock('null', 'input_arg'), `{ let lhs = input_arg.clone(); let rhs = Value::Json(Json::Null); let out: Value = unreachable!("different panic; prose"); out }`],
+ ] as const) {
+  it(`${label} source oracle accepts renamed/formatted locals but rejects reordered or repeated evaluation`, () => {
+    expect(hasOneRustBlock(good, expected)).toBe(true);
+    expect(hasOneRustBlock(good.replace(/; /g, ';\n\t'), expected)).toBe(true);
+    const statements = good.match(/let lhs = [^;]+; let rhs = [^;]+;/)![0];
+    const [left, right] = statements.split('; ').map(part => part.replace(/;$/, '') + ';');
+    expect(hasOneRustBlock(good.replace(statements, right + ' ' + left), expected)).toBe(false);
+    expect(hasOneRustBlock(good.replace(statements, left + ' ' + left + ' ' + right), expected)).toBe(false);
+    expect(hasOneRustBlock(good.replace(statements, left + ' ' + right + ' ' + right), expected)).toBe(false);
+    expect(hasOneRustBlock(good + good, expected)).toBe(false);
+    expect(hasOneRustBlock(good.replace(/\brhs\b/g, 'lhs'), expected)).toBe(false);
+  });
+}
 type ConsumerApi = { getExposes(): Record<string, unknown> };
 type LegacyInstance = { $mount(host: Element): void; $refs: Record<string, ConsumerApi>; $destroy(): void; $el: HTMLElement };
 const Vue2 = createRequire(fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url)))('vue') as {
@@ -394,7 +471,15 @@ for (const operator of operators) {
           const emitted = emitGpuiSource(ir);
           expect(emitted.ok).toBe(true);
           if (emitted.ok) {
-            expect(emitted.value.code).toMatch(/\{ let _relational_left = [^;]+; let _relational_right = [^;]+; let _relational_result: Value = unreachable!\("uninhabited Proto relational expression"\); _relational_result \}/);
+            const expected = bottomRelationBlock(rhs, firstArgumentBinding(emitted.value.code));
+            expect(hasOneRustBlock(emitted.value.code, expected)).toBe(true);
+            const renamed = emitted.value.code
+              .replace(/\b_relational_left\b/g, 'lhs_tmp')
+              .replace(/\b_relational_right\b/g, 'rhs_tmp')
+              .replace(/\b_relational_result\b/g, 'result_tmp')
+              .replace(new RegExp('\\b' + firstArgumentBinding(emitted.value.code) + '\\b', 'g'), 'input_tmp')
+              .replace('"uninhabited Proto relational expression"', '"different bottom diagnostic"');
+            expect(hasOneRustBlock(renamed.replace(/; /g, ';\n  '), bottomRelationBlock(rhs, firstArgumentBinding(renamed)))).toBe(true);
             expect(emitted.value.code).not.toContain(`scalar_number() ${operator}`);
           }
           const element = consumer(body);
