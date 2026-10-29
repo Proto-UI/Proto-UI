@@ -7,3 +7,9 @@ export { default } from './root.proto';
 export { COMMAND_PROJECTED_STYLES } from './visual';
 export type * from './types';
 export { commandInputWrapper } from './input-wrapper.proto';
+
+export { default as commandDialogContent } from './dialog-content.proto';
+export type {
+  CommandDialogContentProps,
+  CommandDialogContentExposes,
+} from './dialog-content.proto';

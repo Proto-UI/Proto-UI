@@ -1,0 +1,87 @@
+id: T-COMMAND-DIALOG-CONTENT-0001
+type: test
+title: Public family CommandDialog content composition
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Static test authoring only; lifecycle timing and exact-head native Search composition are not accepted.
+  zh-CN: 仅静态编写测试；生命周期时序及精确 head 的真实 Search 组合尚未验收。
+summary: Keep the reusable zero-padding Dialog content projection separate from Command state, profile paint and real consumer acceptance.
+cases:
+  - id: T-COMMAND-DIALOG-CONTENT-0001-CASE-OWNERSHIP
+    title: Existing Dialog and Command owners remain independent
+    covers:
+      - P-SHADCN-COMMAND-DIALOG-OWNERSHIP
+      - P-BRUTALIST-COMMAND-DIALOG-OWNERSHIP
+    expectation: one-dialog-owner-title-description-focus-return-controlled-refusal-and-stable-command-editor
+  - id: T-COMMAND-DIALOG-CONTENT-0001-CASE-RECIPE
+    title: Native family content recipe does not inherit padded Dialog paint
+    covers:
+      - P-SHADCN-COMMAND-DIALOG-GEOMETRY
+      - P-SHADCN-COMMAND-DIALOG-PROFILE
+      - P-BRUTALIST-COMMAND-DIALOG-GEOMETRY
+      - P-BRUTALIST-COMMAND-DIALOG-GRAMMAR
+    expectation: explicit-or-inherited-profile-zero-padding-and-family-specific-content-not-inner-command-substitute
+  - id: T-COMMAND-DIALOG-CONTENT-0001-CASE-MOTION
+    title: Reversal and reduced preference preserve inherited presence
+    covers:
+      - P-SHADCN-COMMAND-DIALOG-MOTION
+      - P-BRUTALIST-COMMAND-DIALOG-MOTION
+    expectation: close-reopen-retains-owner-and-editor-with-no-css-motion-under-reduced-preference
+implementations:
+  - id: shadcn-command-dialog-content
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/command-dialog-content.test.ts
+    required: true
+    consumesCases:
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-OWNERSHIP
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-RECIPE
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-MOTION
+    notes:
+      - Newly authored candidate not executed. Token or Happy DOM assertions do not prove native timing, real Search, viewport geometry or style extraction.
+  - id: brutalist-command-dialog-content
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/command-dialog-content.test.ts
+    required: true
+    consumesCases:
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-OWNERSHIP
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-RECIPE
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-MOTION
+    notes:
+      - Newly authored candidate not executed; inner Command border and full composition are separately incomplete.
+verifies:
+  prototypes:
+    - id: P-SHADCN-COMMAND
+      anchors:
+        [
+          P-SHADCN-COMMAND-DIALOG-OWNERSHIP,
+          P-SHADCN-COMMAND-DIALOG-GEOMETRY,
+          P-SHADCN-COMMAND-DIALOG-PROFILE,
+          P-SHADCN-COMMAND-DIALOG-MOTION,
+        ]
+    - id: P-BRUTALIST-COMMAND
+      anchors:
+        [
+          P-BRUTALIST-COMMAND-DIALOG-OWNERSHIP,
+          P-BRUTALIST-COMMAND-DIALOG-GEOMETRY,
+          P-BRUTALIST-COMMAND-DIALOG-GRAMMAR,
+          P-BRUTALIST-COMMAND-DIALOG-MOTION,
+        ]
+exercises:
+  prototypes: [P-SHADCN-COMMAND, P-BRUTALIST-COMMAND, P-BASE-DIALOG-CONTENT]
+openQuestions:
+  - id: T-COMMAND-DIALOG-CONTENT-0001-Q-NATIVE
+    question:
+      en: When will all Web runtimes and both families have exact-head narrow/root-font/focus/motion and real Pagefind Search evidence, including short viewport overflow and controlled dismissal?
+      zh-CN: 何时完成各 Web runtime 与两族精确 head 的窄屏、root 字号、焦点、动画及真实 Pagefind Search 证据，包括短视口溢出与受控关闭？
+    blocks:
+      - activation:T-COMMAND-DIALOG-CONTENT-0001
+      - implementation:T-COMMAND-DIALOG-CONTENT-0001#shadcn-command-dialog-content
+      - implementation:T-COMMAND-DIALOG-CONTENT-0001#brutalist-command-dialog-content
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define bounded shared CommandDialog content tests without claiming execution or full Search acceptance.
+tags: [command, dialog, composition, draft]
