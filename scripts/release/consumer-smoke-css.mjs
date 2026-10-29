@@ -290,9 +290,9 @@ export function assertStyledSwitch(element, label) {
   ]);
   requireRule(
     null,
-    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
     ['--pui-translate-x: calc(100% - 2px)', transform],
-    '[data-checked]'
+    '[data-checked]:not([data-draggable])'
   );
   assertSwitchThumbState(element, element.getAttribute('aria-checked') === 'true', label);
   // These simple rem properties are resolved by this host. This is computed CSS,
