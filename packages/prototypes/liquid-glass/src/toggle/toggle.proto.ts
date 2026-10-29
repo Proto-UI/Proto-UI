@@ -22,7 +22,7 @@ export default definePrototype<ToggleProjectionProps, ToggleExposes>({
     const { active, pressed, hovered, focusVisible, disabled } = state;
     def.feedback.style.use(
       tw(
-        'inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-5 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground'
+        'inline-flex shrink-0 items-center justify-center gap-2 rounded-full border px-2 py-2 text-sm font-medium whitespace-nowrap select-none cursor-pointer shadow-sm bg-secondary text-secondary-foreground'
       )
     );
     // Selection never changes border width or material geometry. A reserved
@@ -86,8 +86,9 @@ export default definePrototype<ToggleProjectionProps, ToggleExposes>({
       // fill/foreground depend on the backdrop and fail shared-provider admission.
       intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED)),
     });
-    // The ordinary template owns only this decorative marker. Reserve its space
-    // in both states, preserving slotted content, naming and the Base root owner.
+    // Equal noninteractive reserves center the slotted content itself, not the
+    // content-plus-check group. Compact symmetric padding avoids adding width
+    // merely to balance the marker. Both reserves remain in every active state.
     let renderTask: { cancel(): void } | null = null;
     active.watch((run, event) => {
       if (event.type !== 'next') return;
@@ -102,6 +103,10 @@ export default definePrototype<ToggleProjectionProps, ToggleExposes>({
       renderTask = null;
     });
     return (renderer) => [
+      renderer.el(
+        'span',
+        { style: tw('pointer-events-none size-3 shrink-0') }
+      ),
       renderer.slot(),
       renderer.el(
         'span',

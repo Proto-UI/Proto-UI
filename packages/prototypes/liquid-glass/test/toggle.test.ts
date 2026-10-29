@@ -189,6 +189,14 @@ describe('Liquid Toggle shared semantic and material projection', () => {
           'pointer-events-none'
         );
         expect(marker()?.parentElement?.getAttribute('data-pui-style')).toContain('size-3');
+        const leadingReserve = f.host.firstElementChild;
+        expect(leadingReserve?.tagName).toBe('SPAN');
+        expect(leadingReserve?.textContent).toBe('');
+        expect(leadingReserve?.getAttribute('data-pui-style')).toBe(
+          'pointer-events-none size-3 shrink-0'
+        );
+        expect(f.tokens()).toContain('px-2');
+        expect(f.tokens()).not.toContain('px-5');
         expect(f.tokens()).not.toContain('underline');
         expect(f.tokens()).not.toContain('no-underline');
       };
@@ -203,7 +211,7 @@ describe('Liquid Toggle shared semantic and material projection', () => {
         await vi.waitFor(() => expect(marker()?.getAttribute('opacity')).toBe('1'));
         assertNameAndSemantics(true);
         const selectedTree = tree();
-        selectedTree[1].children.props.opacity = 0;
+        selectedTree[2].children.props.opacity = 0;
         expect(selectedTree).toEqual(initialTree);
         f.global.dispatchEvent(new CustomEvent('key.down'));
         f.fire('host:focus');

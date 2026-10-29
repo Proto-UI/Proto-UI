@@ -31,7 +31,7 @@ cases:
     expectation: real-four-web-optical-and-fallback-input-evidence
     notes:
       - Preserve all eleven original complete browser scenarios and their source, input, preference, controlled, geometry and cleanup assertions. Replace only the superseded same-fill or same-foreground restrictions with state-specific governed palette assertions.
-      - Frozen same-source tint and zero-refraction controls plus nonempty decoded content-pixel contrast prove more than transparent host CSS or changing image hashes. The currentColor check in permanently reserved space replaces underline for text and icon-only content. Verify same-instance content and outer geometry, preserved names, disabled selected markers and separate focus cues. No platform Differentiate Without Color preference mapping is claimed; native and exact-head browser results remain separate.
+      - Frozen same-source tint and zero-refraction controls plus nonempty decoded content-pixel contrast prove more than transparent host CSS or changing image hashes. The currentColor check in permanently reserved space replaces underline for text and icon-only content. Verify equal permanent leading/trailing reserves and actual content-to-control center alignment in LTR and RTL, compact symmetric padding, same-instance content and outer geometry, preserved names, disabled selected markers and separate focus cues. No platform Differentiate Without Color preference mapping is claimed; native and exact-head browser results remain separate.
 implementations:
   - id: liquid-glass-toggle-contract
     kind: module-test
