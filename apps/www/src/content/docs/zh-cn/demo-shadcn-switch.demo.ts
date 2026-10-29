@@ -25,7 +25,7 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'shadcn-switch-root',
-        props: { defaultChecked: false },
+        props: { defaultChecked: false, draggable: true },
         children: [
           {
             kind: 'proto',
