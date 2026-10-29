@@ -799,6 +799,7 @@ export const DRAFT_FAMILY_STYLE_TOKENS = {
     'pt-1',
     'px-0',
     'px-1',
+    'px-2',
     'px-3',
     'px-4',
     'px-5',
