@@ -750,7 +750,9 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).toContain(`[data-pui-style~="rounded-md"]`);
     expect(tokensCss).not.toContain(`not-[data-open]:hidden`);
     expect(tokensCss).toContain(`[data-pui-style~="px-0.5"]`);
-    expect(tokensCss).toContain(`data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-checked]`);
+    expect(tokensCss).toContain(
+      `data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]"])[data-checked]:not([data-draggable])`
+    );
     expect(tokensCss).toContain('--pui-translate-x: calc(100% - 2px);');
     expect(tokensCss).toContain(`data-[checked]:bg-main"])[data-checked]`);
     expect(tokensCss).not.toContain(`data-[checked]:pl-[20px]"])[data-checked]`);
