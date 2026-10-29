@@ -169,10 +169,15 @@ for (const [name, token, from, to] of [
     'transform:',
     '--unused-transform:',
   ],
-  ['checked travel', 'data-[checked]:translate-x-[calc(100%_-_2px)]', 'calc(100% - 2px)', '14px'],
+  [
+    'checked travel',
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    'calc(100% - 2px)',
+    '14px',
+  ],
   [
     'checked transform',
-    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
     'transform:',
     '--unused-transform:',
   ],
@@ -192,14 +197,31 @@ for (const [name, token, from, to] of [
   });
 }
 
+test('rejects removal of the non-draggable guard from the checked rule', (t) => {
+  const { directory, window } = fixture(t);
+  const element = switchFixture(window.document);
+  const { styles } = loadConsumerStyles(window.document, { root: directory });
+  const selector =
+    ':where([data-pui-style~=\"data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]\"])[data-checked]:not([data-draggable])';
+  assert.ok(styles[1].textContent.includes(selector));
+  styles[1].textContent = styles[1].textContent.replace(
+    selector,
+    selector.replace(':not([data-draggable])', '')
+  );
+  assert.throws(
+    () => assertStyledSwitch(element, 'missing draggable guard'),
+    /generated CSS rule is missing/
+  );
+});
+
 test('rejects a missing checked selector and a missing or unstyled default Thumb', (t) => {
   const { directory, window } = fixture(t);
   const element = switchFixture(window.document);
   const { styles } = loadConsumerStyles(window.document, { root: directory });
   const text = styles[1].textContent;
   styles[1].textContent = text.replace(
-    ':where([data-pui-style~="data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-checked]',
-    ':where([data-pui-style~="data-[checked]:translate-x-[calc(100%_-_2px)]"])[data-unchecked]'
+    ':where([data-pui-style~="data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]"])[data-checked]:not([data-draggable])',
+    ':where([data-pui-style~="data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]"])[data-unchecked]:not([data-draggable])'
   );
   assert.throws(() => assertStyledSwitch(element, 'wrong state'), /generated CSS rule is missing/);
   styles[1].textContent = text;
@@ -276,7 +298,10 @@ test('requires runtime-evaluated Thumb travel and explicit Root/Thumb checked ag
   thumb.setAttribute('data-checked', '');
   thumb.setAttribute(
     'data-pui-style',
-    original.replace('translate-x-0', 'data-[checked]:translate-x-[calc(100%_-_2px)]')
+    original.replace(
+      'translate-x-0',
+      'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]'
+    )
   );
   assert.throws(
     () => assertStyledSwitch(element, 'old lowered recipe'),
@@ -317,7 +342,18 @@ for (const [name, checked, token, inline, priority = '', transform = ''] of [
   ['missing checked channel', true, '', ''],
   ['stale unchecked token', true, 'translate-x-0', ''],
   ['stale checked token', false, 'translate-x-[calc(100%_-_2px)]', ''],
-  ['old lowered checked token', true, 'data-[checked]:translate-x-[calc(100%_-_2px)]', ''],
+  [
+    'obsolete single-state checked token',
+    true,
+    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    '',
+  ],
+  [
+    'lowered compound checked token',
+    true,
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
+    '',
+  ],
   ['nonzero unchecked inline', false, '', '1px 0px'],
   ['unmeasured checked inline', true, '', '14px 0px'],
   ['competing token and inline', false, 'translate-x-0', '0px 0px'],
@@ -366,7 +402,7 @@ for (const [name, token, mutate] of [
   ],
   [
     'important checked transform',
-    'data-[checked]:translate-x-[calc(100%_-_2px)]',
+    'data-[checked]:not-[data-draggable]:translate-x-[calc(100%_-_2px)]',
     (rule, text) =>
       text.replace(rule, rule.replace('transform:', 'transform: scale(99) !important; transform:')),
   ],
