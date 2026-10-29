@@ -507,9 +507,10 @@ try {
                   o.checked === 'false' &&
                   o.percentage === 0 &&
                   !o.dragging &&
-                  Math.abs(o.width - ((size === 'sm' ? 24 : 32) * font) / 16) < 0.5 &&
-                  Math.abs(o.thumbWidth - ((size === 'sm' ? 12 : 16) * font) / 16) < 0.5 &&
-                  Math.abs(o.thumbOffset - origin) < 0.5
+                  o.width === ((size === 'sm' ? 24 : 32) * font) / 16 &&
+                  o.thumbWidth === ((size === 'sm' ? 12 : 16) * font) / 16 &&
+                  border === (profile === 'rhea' ? 2 : 1) &&
+                  o.thumbOffset === origin
                 );
               },
               1
