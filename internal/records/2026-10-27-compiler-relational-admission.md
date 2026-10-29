@@ -788,3 +788,210 @@ lease is 2026-10-29T14:14:38Z through 2026-10-30T14:14:38Z, no automatic extensi
 PR receipt: https://github.com/Proto-UI/Proto-UI/pull/1024#issuecomment-6499173791.
 It does not take over frozen #902 work, #1032 fixture repair, capture timestamps
 or any other owner. AI assistance: OpenAI Dots.
+
+
+## Complete native source controls and per-operator negative evidence — 2026-10-29
+
+This append closes the earlier publication-time “native in progress” note; it
+preserves that historical text rather than rewriting it. Executed generation is
+bound to `418a42bbb77a2143c75cb3eec17fbef533d033d2` plus the explicitly approved
+patch SHA256 `9ad093a342007806d7ed8e603df0d4e609eeccd838e4f611e317a8fc4842a2b6`.
+Those Compiler bytes were published at `da5c2b1c2441bbe640de3f267046d77bdd6f4665`.
+Neither later integrated `43d6320bcedc125d520e6c1fe1f545fd55241cca` nor current
+main `9ab0fcad0fd9b5b49513a6b335e5007abea2d844` was locally executed by this
+validation. This documentation update is not a source execution approval.
+
+### Completed v3 results, including the invalid cache experiment
+
+At 14:46:45–14:49:04 UTC, the 64 bottom inputs formed 16 byte-identical full
+compile-file classes (including supporting files); original/equivalent pairs
+produced 32 successful full-consumer cargo checks. This reduction is not full
+artifact/provenance equivalence. Reachable numbers/strings and effect-order
+original/equivalent consumers each ran through official GPUI TestAppContext:
+four successful runtime invocations. Each numbers/strings invocation exercised
+24 typed/generic public calls, 96 relational results and three exact admission
+rejections. Bottom evidence is compilation, not execution of unreachable code.
+
+The first v2 experiment shared a target directory without invalidating same-named
+generated roots. Its equivalent checks reused old rmeta; even a deliberately
+reversed consumer incorrectly passed. **All v2 results are excluded from
+acceptance.** v3 cleans only each generated root before check/no-run, requires
+all root compiler-artifact events to have `fresh=false`, records actual `-vv`
+rustc commands and input hashes, and copies/hashes rmeta/rlib/test executables
+before the next fixture. Third-party cache reuse is retained and disclosed.
+The later runtime command uses its own just-built executable; this is not a
+claim that every dependency was rebuilt from an empty target.
+
+v3 retained all warnings: 216 across 32 checks and 24 across six no-run commands.
+The original `.ts` helper top-level-await format failure and duplicate prepared
+`[dev-dependencies]` failure remain historical harness errors, not product
+failures or successful native evidence. The fixed generated manifest was used
+without adding dependency features. The v3 summary SHA256 is
+`aabe639c48b99646b988f45f23d246bcd6b76cf4b6ebfb1af93b4e195fbb8c31`.
+
+v3's two deliberately broken variants compiled successfully and failed at the
+first `operator0 repetition0` LR assertion, observing RL and LLR. This proves
+only that first negative case: its single test stopped there. The following v4
+run addresses that specific gap without changing production code or dependencies.
+
+### Four independent operator controls (v4)
+
+The only changed byte content in each v4 consumer copy is its own
+`tests/effect_order.rs` harness below. Original/equivalent/reversed/double-left
+`Component.rs`, generated supporting files, manifests and locks are unchanged
+from v3. Each operator now has an independent official GPUI context/test, one
+iteration, fixed seed and zero retries. Positive cases repeat twice and check
+both the result and accumulated LR/LRLR trace. Each negative test fails on its
+first repetition, so there is no claim that negative second repetitions ran.
+
+Actual generated-input fixture (unchanged, including its redundant semicolon):
+
+```typescript
+import {definePrototype} from '@proto.ui/core';
+export default definePrototype({name:'relational',setup(def){const log=def.state.string('log','');const left=()=>{log.set(log.get()+'L');return 1;};const right=()=>{log.set(log.get()+'R');return 2;};def.expose.method('compare0',()=>left() < right());def.expose.method('compare1',()=>left() <= right());def.expose.method('compare2',()=>left() > right());def.expose.method('compare3',()=>left() >= right());def.expose.method('trace',()=>log.get());;return r=>r.el('div',[]);}});
+```
+
+Actual complete v4 test harness, retained verbatim rather than reformatted:
+
+```rust
+// Actual generated component and official GPUI TestAppContext; not a mock Value.
+use generated_gpui_component::CompiledComponent;
+use gpui::{AppContext, TestAppContext};
+use serde_json::json;
+
+fn check_operator(cx: &mut TestAppContext, index: usize, expected: bool) {
+    cx.skip_drawing();
+    let window = cx.add_window(|window, cx| CompiledComponent::new(json!({}), None, window, cx));
+    let handle = window.read_with(cx, |component, _| component.handle()).unwrap();
+    let mut expected_trace = String::new();
+        for repetition in 0..2 {
+            let actual = cx.update_window(window.into(), |_, window, app| {
+                handle.call(&format!("compare{index}"), vec![], window, app)
+            }).unwrap();
+            assert_eq!(actual, json!(expected), "operator{index} repetition{repetition}");
+            expected_trace.push_str("LR");
+            let trace = cx.update_window(window.into(), |_, window, app| {
+                handle.call("trace", vec![], window, app)
+            }).unwrap();
+            assert_eq!(trace, json!(expected_trace), "ordered once-only operator{index} repetition{repetition}");
+        }
+    cx.update_window(window.into(), |_, window, app| handle.dispose(window, app)).unwrap();
+    drop(handle);
+}
+
+#[gpui::test(iterations = 1, retries = 0, seed = 0)]
+fn relational_effect_order_op0(cx: &mut TestAppContext) {
+    check_operator(cx, 0, true);
+}
+
+#[gpui::test(iterations = 1, retries = 0, seed = 0)]
+fn relational_effect_order_op1(cx: &mut TestAppContext) {
+    check_operator(cx, 1, true);
+}
+
+#[gpui::test(iterations = 1, retries = 0, seed = 0)]
+fn relational_effect_order_op2(cx: &mut TestAppContext) {
+    check_operator(cx, 2, false);
+}
+
+#[gpui::test(iterations = 1, retries = 0, seed = 0)]
+fn relational_effect_order_op3(cx: &mut TestAppContext) {
+    check_operator(cx, 3, false);
+}
+```
+
+Harness SHA256: `67ab3e3d12d83c030b9ac4a130b219c28514add2cd375d0a05d44e731e04d86f`.
+
+| Consumer | Component.rs SHA256 | no-run exit | runtime exit |
+| --- | --- | --- | --- |
+| `effect-order` | `a72008c40de9844e318bba90819cf1f636a3b5038d69e7cf07a8245b175b9cc7` | 0 | 0 |
+| `effect-order-equivalent` | `90b47aeb8db453dfca77d8f4f5618abf69df86cfc0178c0e8212d06aa875efd7` | 0 | 0 |
+| `effect-order-reversed` | `05257fdc8c285557220dc6d9e401a7e5ea618f1efc152f7887d840f11bcead00` | 0 | 101 |
+| `effect-order-double-left` | `6bd87048d917e619c5674281c0dfea1ff6f2dd93ec938bdd385f5974701653f8` | 0 | 101 |
+
+Both original and alpha-renamed/reformatted variants passed all four tests:
+eight positive test results across two runtime invocations. Both deliberately
+broken variants compiled first, then failed all four independent tests:
+eight expected negative results across two runtime invocations. For each of
+`operator0`, `operator1`, `operator2`, `operator3`, the reversed variant observed
+`String("RL")` and the double-left variant `String("LLR")`, versus
+`String("LR")`, at the ordered-once assertion. The bool result assertion ran
+first. A compiler error, environment failure or arbitrary nonzero exit is not
+counted as a negative semantic result. No double-right native mutation was
+added, and this is not a complete mutation-testing suite.
+
+### Reproduction contract and evidence boundary
+
+Use the unchanged emitted complete consumer, its generated manifest and the
+retained locked dependencies; install the test above as `tests/effect_order.rs`.
+The v3 equivalent transform consistently alpha-renames local comparison
+bindings and replaces `; ` separators with a newline. The negative transforms
+swap the left/right binding statements, or add one left evaluation before the
+existing left binding, in each of the four emitted comparisons. The complete
+consumer hashes above fix the actual transformed inputs; source text is not a
+license to apply an unrestricted regex to arbitrary Rust programs.
+
+The recorded command shapes below use `cargo` as shorthand for the fixed
+Rust/Cargo 1.98.1 toolchain's absolute executable under the no-network wrapper.
+They are not an instruction to run an unapproved new tree or use ambient Cargo.
+
+```text
+cargo tree --locked --offline --target x86_64-unknown-linux-gnu --edges normal,build,dev --prefix none --format {p}|{f}
+cargo clean --package <exact generated manifest package.name> --target x86_64-unknown-linux-gnu --locked --offline
+cargo test --test effect_order --target x86_64-unknown-linux-gnu --locked --offline --no-run --message-format=json -vv
+cargo test --test effect_order --target x86_64-unknown-linux-gnu --locked --offline
+```
+
+Before each no-run, require successful generated-root clean, unchanged input
+hashes, real root rustc output and non-fresh root artifact events; retain the
+binary hash/copy before advancing to the next fixture. The runtime must name
+the corresponding binary. Parse each of four failed tests and its exact LR
+assertion, not merely cargo exit101. v4 follows this contract. The root-clean
+step does not erase original source, failure logs or third-party archives.
+
+Execution uses an explicitly constructed empty credential environment, separate
+HOME, Cargo offline plus seccomp socket denial, one build job, incremental0,
+debug-info0, opt-level0 and retained debug/overflow assertions. This is not a
+filesystem allowlist or real-OS UI/assistive-technology test. GPUI test-support
+and all original features are unchanged. Dependency trees match the retained
+301-package feature/source closure; actual no-run artifact closure is 301.
+The earlier check-only closure was 287, not 301 rebuilt packages. No production
+deployment, account access, package upgrade or source-level test deletion occurs.
+
+Full raw logs, command argv/environment/timing, pre/post input hashes, actual
+root artifact events and binary copies are retained under the work handoff
+`qa-evidence/pr1024-resume-20261029/native-validation-v3/` and
+`native-validation-v4/`. These are workspace paths, not public download URLs.
+The repository record embeds the small actual harness/input and key results;
+it is **not** a self-contained offline distribution of toolchains, dependency
+archives, all generated consumers or binaries. A digest is an identity check,
+not proof of availability. The reused numbers test's old “not compiled” comment
+is preserved as historical source and superseded by its actual execution logs.
+
+The v4 run at19:00–19:01 UTC retained four compiler warnings per no-run.
+Summary SHA256: `17fb04dfc128992d977d2704786d49facff2ac194e157f63c92f61dd2532d1c2`.
+After execution, all458 registry archives/extracted entries and four pinned Git
+sources were byte-verified again with `errors=[]`; the post-verification receipt
+SHA256 is `97a083ab6cde06f3be5a9a3b6bd860ff66701e4b4ddc465d4f006fb2981eef4d`.
+This post-execution check has its own timing; it is not a claim of continuous
+filesystem immutability. A separate read-only reviewer recomputed retained
+artifact hashes and checked no-run/runtime/input correspondence; that reviewer
+did not independently execute the consumers or submit a formal approval.
+
+### Current integration and remaining work
+
+The 43d hosted run40924204779 passed types, rust, rust-macos, rust-interop and
+release-consumer-react. Its general job123634354119 checked out synthetic
+`1c4afe3e21ab26c4d8e7aad4ed8625dca5cd801d` for 43d against b57, passed docs413,
+and failed the prototype-catalog gate with497 errors at18:19 UTC. All497 ordered
+error lines exactly match the executed clean-b57 baseline; the downstream
+Compiler suite was not reached. It is neither a Compiler pass nor497 newly
+introduced Compiler defects. The gate is not skipped, whitelisted or weakened.
+Latest main's five Runtime changes remain a different, locally unexecuted
+combination; no content-free merge was added to restart CI.
+
+These are author execution receipts plus separate static receipt review, not
+formal independent acceptance. Review, required current-head CI, broader native
+host-domain/OS lifecycle coverage, Qt/Flutter and stable spec activation remain
+outstanding. Draft and `COMPILER_MERGE_READY=false / pending` are unchanged.
+AI assistance: OpenAI Dots.
