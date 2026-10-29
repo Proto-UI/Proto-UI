@@ -24,6 +24,9 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
   section.append(heading, host);
   document.querySelector('main').append(section);
   let update, dispose;
+  const events = [];
+  const onCheckedChange = (payload) =>
+    events.push({ checked: payload?.checked, source: 'framework-expose-callback' });
   const initial = {
     profile: 'new-york-v4',
     own: 'inherit',
@@ -42,6 +45,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     readOnly: s.readOnly,
     draggable: s.draggable,
     direction: s.direction,
+    ...(kind === 'wc' ? {} : { onCheckedChange }),
   });
   if (kind === 'wc') {
     protos.forEach((p) => AdaptToWebComponent(p));
@@ -135,10 +139,10 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     update(state);
   };
   set({});
-  const events = [];
-  host.addEventListener('checkedChange', (e) =>
-    events.push({ checked: e.detail?.checked, trusted: e.isTrusted })
-  );
+  if (kind === 'wc')
+    host.addEventListener('checkedChange', (e) =>
+      events.push({ checked: e.detail?.checked, trusted: e.isTrusted, source: 'dom-expose-event' })
+    );
   records.push({
     kind,
     host,
