@@ -5,7 +5,11 @@ import Vue2 from '../../packages/adapters/vue2/node_modules/vue';
 import { createReactAdapter } from '../../packages/adapters/react/src';
 import { createVueAdapter } from '../../packages/adapters/vue/src';
 import { createVue2Adapter } from '../../packages/adapters/vue2/src';
-import { AdaptToWebComponent, setElementProps } from '../../packages/adapters/web-component/src';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  getElementProps,
+} from '../../packages/adapters/web-component/src';
 import { styleScope } from '../../packages/prototypes/shadcn/src/style-scope';
 import { switchRoot, switchThumb } from '../../packages/prototypes/shadcn/src/switch';
 import { fieldRoot, fieldLabel, fieldSwitch } from '../../packages/prototypes/shadcn/src/field';
@@ -141,6 +145,8 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     set,
     dispose,
     events,
+    requestedProps: () => switchProps(state),
+    rawProps: (root) => (kind === 'wc' ? getElementProps(root) : null),
     controls: () => [...host.querySelectorAll('[role=switch]')],
   });
 }
