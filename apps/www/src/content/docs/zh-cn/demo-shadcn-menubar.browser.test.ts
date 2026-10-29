@@ -87,6 +87,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
         const observations: unknown[] = [];
+        let interactionTrace: unknown = null;
         let failure: string | null = null;
         const screenshots: Array<{ path: string; sha256: string }> = [];
         const prefix = `${runtime}-${scheme}`;
@@ -114,6 +115,92 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
           expect(await previewer.getAttribute('data-demo-id')).toBe('demo-shadcn-menubar');
           await selectRuntime(page, previewer, runtime, '[role="menubar"]', 1);
           await applyColorScheme(page, scheme);
+          await page.evaluate(() => {
+            const events: unknown[] = [];
+            let dropped = 0;
+            const describe = (node: EventTarget | null) => {
+              if (!(node instanceof Element)) return null;
+              return {
+                tag: node.tagName,
+                role: node.getAttribute('role'),
+                text: node.textContent?.slice(0, 80),
+                connected: node.isConnected,
+                parent: node.parentElement?.tagName,
+              };
+            };
+            const record = (event: unknown) => {
+              if (events.length < 160) events.push(event);
+              else dropped++;
+            };
+            const offListeners: Array<() => void> = [];
+            for (const type of ['focusin', 'focusout', 'keydown']) {
+              const listener = (event: Event) => {
+                const eventPath = event.composedPath();
+                const target = eventPath[0];
+                if (
+                  !eventPath.some(
+                    (node) =>
+                      node instanceof Element && node.closest('[role="menubar"], [role="menu"]')
+                  )
+                )
+                  return;
+                record({
+                  kind: type,
+                  time: performance.now(),
+                  trusted: event.isTrusted,
+                  key: event instanceof KeyboardEvent ? event.key : null,
+                  target: describe(target ?? null),
+                  pathRoles: eventPath
+                    .filter(
+                      (node): node is Element =>
+                        node instanceof Element && node.hasAttribute('role')
+                    )
+                    .map(describe),
+                  active: describe(document.activeElement),
+                  scrollY,
+                });
+              };
+              document.addEventListener(type, listener, true);
+              offListeners.push(() => document.removeEventListener(type, listener, true));
+            }
+            const observer = new MutationObserver((records) => {
+              for (const mutation of records) {
+                const menus = (nodes: NodeList) =>
+                  [...nodes].flatMap((node) =>
+                    node instanceof Element
+                      ? [node, ...node.querySelectorAll('[role="menu"]')]
+                          .filter((element) => element.getAttribute('role') === 'menu')
+                          .map(describe)
+                      : []
+                  );
+                const added = menus(mutation.addedNodes),
+                  removed = menus(mutation.removedNodes);
+                if (added.length || removed.length)
+                  record({
+                    kind: 'menu-childlist-delivery',
+                    time: performance.now(),
+                    parent: describe(mutation.target),
+                    added,
+                    removed,
+                    active: describe(document.activeElement),
+                    scrollY,
+                  });
+              }
+            });
+            observer.observe(document.documentElement, { childList: true, subtree: true });
+            (
+              window as typeof window & {
+                __menubarTrace?: { events: unknown[]; dropped(): number; stop(): void };
+              }
+            ).__menubarTrace = {
+              events,
+              dropped: () => dropped,
+              stop: () => {
+                observer.disconnect();
+                offListeners.forEach((off) => off());
+              },
+            };
+          });
           const bar = previewer.getByRole('menubar', { name: 'Project commands', exact: true });
           const file = bar.getByRole('menuitem', { name: 'File', exact: true });
           const edit = bar.getByRole('menuitem', { name: 'Edit', exact: true });
@@ -292,6 +379,25 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
           throw error;
         } finally {
           try {
+            try {
+              interactionTrace = await page.evaluate(() => {
+                const trace = (
+                  window as typeof window & {
+                    __menubarTrace?: { events: unknown[]; dropped(): number; stop(): void };
+                  }
+                ).__menubarTrace;
+                trace?.stop();
+                return {
+                  events: trace?.events ?? [],
+                  dropped: trace?.dropped() ?? 0,
+                  cap: 160,
+                  limitation:
+                    'Mutation timestamps describe observer delivery, not mutation instants. Mutation observation covers the document light DOM, not open or closed shadow contents; focus evidence is limited to composed events reaching this document. Empty or truncated trace is not proof of no event.',
+                };
+              });
+            } catch (traceError) {
+              observations.push({ state: 'trace-read-error', error: String(traceError) });
+            }
             await writeFile(
               path.join(out, `${prefix}.json`),
               JSON.stringify(
@@ -310,6 +416,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
                   errors,
                   failure,
                   observations,
+                  interactionTrace,
                   screenshots,
                   limitations: [
                     'No New York native parity claim',
