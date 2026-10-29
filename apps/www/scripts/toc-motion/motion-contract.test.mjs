@@ -111,7 +111,6 @@ test('native wheel diagnostics disclose hit targets without retargeting or weake
     'scrollHeight: node.scrollHeight',
     'clientHeight: node.clientHeight',
     'target: wheelNode(event.target)',
-    'event.composedPath()',
     'hitEvidence: state.readWheelHit(event.clientX, event.clientY)',
     'deltaMode: event.deltaMode',
     'defaultPrevented: event.defaultPrevented',
@@ -123,7 +122,9 @@ test('native wheel diagnostics disclose hit targets without retargeting or weake
     'entry.summary.scrollMax - entry.summary.scrollMin < 500',
     'checks(entry, checkAnimatedRun(entry.frames).failures)',
   ];
+  const composedPathCall = /event\s*\.\s*composedPath\s*\(\s*\)/;
   const verify = (candidate) => {
+    assert.match(candidate, composedPathCall);
     for (const fragment of required) assert.ok(candidate.includes(fragment), fragment);
     const hitStart = candidate.indexOf('const wheelNode =');
     const hitEnd = candidate.indexOf('const tick =', hitStart);
@@ -134,5 +135,6 @@ test('native wheel diagnostics disclose hit targets without retargeting or weake
     );
   };
   verify(source);
+  assert.throws(() => verify(source.replace(composedPathCall, '')));
   for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
 });
