@@ -103,10 +103,7 @@ export default definePrototype<ToggleProjectionProps, ToggleExposes>({
       renderTask = null;
     });
     return (renderer) => [
-      renderer.el(
-        'span',
-        { style: tw('pointer-events-none size-3 shrink-0') }
-      ),
+      renderer.el('span', { style: tw('pointer-events-none size-3 shrink-0') }),
       renderer.slot(),
       renderer.el(
         'span',

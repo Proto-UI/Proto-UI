@@ -71,6 +71,9 @@ sources:
 revisions:
   - version: 0.3.0-alpha.1
     change: revised
+    summary: Require nonempty native text or icon geometry and centered content, including RTL enlarged-text fallback captures; retain every original optical and semantic assertion. Exact-head execution remains pending.
+  - version: 0.3.0-alpha.1
+    change: revised
     summary: Require real runtime template and DOM projection coverage of the permanent decorative text/icon check, controlled/refused and disabled selection, preserved naming and independent focus; exact-head browser acceptance remains pending.
   - version: 0.3.0-alpha.1
     change: revised

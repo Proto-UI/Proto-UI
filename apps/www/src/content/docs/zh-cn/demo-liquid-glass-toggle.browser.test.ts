@@ -289,7 +289,10 @@ async function capture(
   expect(selectionMarker.width).toBe(12);
   expect(selectionMarker.height).toBe(12);
   expect(selectionMarker.pointerEvents).toBe('none');
-  expect(contentGeometry, 'Every named text/icon capture requires measurable content').not.toBeNull();
+  expect(
+    contentGeometry,
+    'Every named text/icon capture requires measurable content'
+  ).not.toBeNull();
   expect(Math.abs(contentGeometry!.centerOffset)).toBeLessThanOrEqual(1);
   expect(facts.underline).toBe('none');
   expect(selectionMarker.strokeRgba).toEqual(facts.foreground);
@@ -431,10 +434,13 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           }));
           try {
             for (const direction of ['ltr', 'rtl'] as const) {
-              await bare.evaluate((host, dir) => {
-                host.setAttribute('dir', dir);
-                (host as HTMLElement).style.fontSize = '28px';
-              }, direction);
+              await bare.evaluate(
+                (host, dir) => {
+                  host.setAttribute('dir', dir);
+                  (host as HTMLElement).style.fontSize = '28px';
+                },
+                direction
+              );
               await capture(
                 `${runtime}-${theme}-no-provider-${direction}-large-text`,
                 bare,
@@ -443,11 +449,14 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
               );
             }
           } finally {
-            await bare.evaluate((host, original) => {
-              if (original.dir === null) host.removeAttribute('dir');
-              else host.setAttribute('dir', original.dir);
-              (host as HTMLElement).style.fontSize = original.fontSize;
-            }, originalGeometryStyle);
+            await bare.evaluate(
+              (host, original) => {
+                if (original.dir === null) host.removeAttribute('dir');
+                else host.setAttribute('dir', original.dir);
+                (host as HTMLElement).style.fontSize = original.fontSize;
+              },
+              originalGeometryStyle
+            );
           }
           expect(await subject('disabled').getAttribute('aria-pressed')).toBe('true');
 
