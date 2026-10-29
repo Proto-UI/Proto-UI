@@ -1,3 +1,4 @@
+import { getElementProps } from '@proto.ui/adapter-web-component';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { URL as NodeURL } from 'node:url';
@@ -178,9 +179,16 @@ it('keeps the native summary, caret and browser-owned disclosure through family 
     expect(details.open).toBe(!wasOpen);
     summary.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
     await settle();
-    expect(summary.firstElementChild!.getAttribute('data-pui-style')).toContain('translate-y-px');
+    expect(getElementProps(summary.firstElementChild as HTMLElement)?.pressed).toBe(true);
+    if (family === 'shadcn')
+      expect(summary.firstElementChild!.getAttribute('data-pui-style')).not.toContain(
+        'translate-y-px'
+      );
+    else
+      expect(summary.firstElementChild!.getAttribute('data-pui-style')).toContain('translate-y-px');
     summary.dispatchEvent(new KeyboardEvent('keyup', { key: ' ', bubbles: true }));
     await settle();
+    expect(getElementProps(summary.firstElementChild as HTMLElement)?.pressed).toBe(false);
     expect(summary.firstElementChild!.getAttribute('data-pui-style')).not.toContain(
       'translate-y-px'
     );

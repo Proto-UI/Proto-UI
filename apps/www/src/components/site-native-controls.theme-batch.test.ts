@@ -1,3 +1,4 @@
+import { getElementProps } from '@proto.ui/adapter-web-component';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { initSiteNativeControls } from './site-native-controls';
 const theme = vi.hoisted(() => ({ color: '#222222', read: vi.fn() }));
@@ -165,16 +166,20 @@ it.each(['pointerup', 'blur'])(
     for (const link of document.querySelectorAll('a,summary'))
       link.dispatchEvent(new MouseEvent('pointerdown', { button: 0 }));
     await settle();
-    for (const surface of document.querySelectorAll('wc-site-shadcn-surface'))
-      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('translate-y-px');
+    for (const surface of document.querySelectorAll<HTMLElement>('wc-site-shadcn-surface')) {
+      expect(getElementProps(surface)?.pressed).toBe(true);
+      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
+    }
     const reads = theme.read.mock.calls.length;
     theme.color = '#fedcba';
     window.dispatchEvent(new Event(event));
     await settle();
     expect(theme.read).toHaveBeenCalledTimes(reads + 2);
     assertColor('#fedcba');
-    for (const surface of document.querySelectorAll('wc-site-shadcn-surface'))
+    for (const surface of document.querySelectorAll<HTMLElement>('wc-site-shadcn-surface')) {
+      expect(getElementProps(surface)?.pressed).toBe(false);
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
+    }
   }
 );
 
@@ -226,7 +231,13 @@ it('resamples later microtask facts and preserves the final per-owner interactio
   ).not.toContain('translate-y-px');
   expect(
     second.querySelector('wc-site-shadcn-surface')!.getAttribute('data-pui-style')?.split(/\s+/)
-  ).toContain('translate-y-px');
+  ).not.toContain('translate-y-px');
+  expect(
+    getElementProps(first.querySelector<HTMLElement>('wc-site-shadcn-surface')!)?.pressed
+  ).toBe(false);
+  expect(
+    getElementProps(second.querySelector<HTMLElement>('wc-site-shadcn-surface')!)?.pressed
+  ).toBe(true);
 });
 
 it('cancels a dirty trailing sample when its batch is released before the microtask', async () => {
