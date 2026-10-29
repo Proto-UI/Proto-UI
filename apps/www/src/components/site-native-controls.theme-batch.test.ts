@@ -167,7 +167,7 @@ it.each(['pointerup', 'blur'])(
       link.dispatchEvent(new MouseEvent('pointerdown', { button: 0 }));
     await settle();
     for (const surface of document.querySelectorAll<HTMLElement>('wc-site-shadcn-surface')) {
-      expect(getElementProps(surface).pressed).toBe(true);
+      expect(getElementProps(surface)?.pressed).toBe(true);
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
     }
     const reads = theme.read.mock.calls.length;
@@ -177,7 +177,7 @@ it.each(['pointerup', 'blur'])(
     expect(theme.read).toHaveBeenCalledTimes(reads + 2);
     assertColor('#fedcba');
     for (const surface of document.querySelectorAll<HTMLElement>('wc-site-shadcn-surface')) {
-      expect(getElementProps(surface).pressed).toBe(false);
+      expect(getElementProps(surface)?.pressed).toBe(false);
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
     }
   }
@@ -232,11 +232,11 @@ it('resamples later microtask facts and preserves the final per-owner interactio
   expect(
     second.querySelector('wc-site-shadcn-surface')!.getAttribute('data-pui-style')?.split(/\s+/)
   ).not.toContain('translate-y-px');
-  expect(getElementProps(first.querySelector<HTMLElement>('wc-site-shadcn-surface')!).pressed).toBe(
-    false
-  );
   expect(
-    getElementProps(second.querySelector<HTMLElement>('wc-site-shadcn-surface')!).pressed
+    getElementProps(first.querySelector<HTMLElement>('wc-site-shadcn-surface')!)?.pressed
+  ).toBe(false);
+  expect(
+    getElementProps(second.querySelector<HTMLElement>('wc-site-shadcn-surface')!)?.pressed
   ).toBe(true);
 });
 

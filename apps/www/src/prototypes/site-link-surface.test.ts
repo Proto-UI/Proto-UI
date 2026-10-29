@@ -87,7 +87,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).toContain('bg-secondary-background');
             expect(tokens).not.toContain('bg-muted');
           }
-          expect(getElementProps(surface).pressed).toBe(facts.pressed);
+          expect(getElementProps(surface)?.pressed).toBe(facts.pressed);
           if (family === 'shadcn' && appearance !== 'action') {
             expect(tokens).not.toContain('translate-y-px');
             expect(tokens).not.toContain('shadow-none');
