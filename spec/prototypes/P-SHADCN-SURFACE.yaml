@@ -21,6 +21,9 @@ criteria:
   - id: P-SHADCN-SURFACE-ENTRIES
     text:
       en: The public package root and /surface subpath expose Surface, with CLI registration for adapter facade consumption. Partial-family Surface defaults to neutral opaque outline presentation (transparent and scrim are ordinary fills, not material effects) and does not expand material or unrelated component compatibility guarantees.
+  - id: P-SHADCN-SURFACE-PRESSED-PROJECTION
+    text:
+      en: An observed pressed fact on an ordinary actionProfile none surface does not imply Button motion or remove authored elevation. Explicit rhea and luma action appearances project their one-pixel pressed translation only; they do not apply scale or pressed shadow removal. Native navigation and activation ownership remains unchanged. This does not assign Button feedback to Sidebar, table-of-contents, or other non-action consumers.
   - id: P-SHADCN-SURFACE-ACTION-APPEARANCE
     text:
       en: The separate shadcnActionAppearance Web composition helper returns the public family Surface and Text props plus family-owned wrapping layout for an action label. The Shadcn-only actionProfile enum none|rhea|luma defaults to none; opt-in recipes use the named Button profile corner, border and focus/hover paint without changing ordinary Surface defaults. Its default minimum height matches the family default wrapped Button, while the native owner retains href, focus, Enter, modifiers, middle click, context menu and Space behavior. The label's nonselectable affordance does not suppress document or editor selection, intercept events or introduce Button semantics. This is a passive appearance composition, not admission of a Base Link prototype or a cross-host navigation API.

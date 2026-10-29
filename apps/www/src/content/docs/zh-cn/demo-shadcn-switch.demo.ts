@@ -25,13 +25,13 @@ export default {
       {
         kind: 'proto',
         prototypeId: 'shadcn-switch-root',
-        props: { defaultChecked: false },
+        props: { defaultChecked: false, draggable: true },
         children: [
           {
             kind: 'proto',
             prototypeId: 'shadcn-switch-thumb',
           },
-          { kind: 'box', className: 'sr-only', children: ['Email alerts'] },
+          { kind: 'box', className: 'sr-only', children: ['Email alerts — drag or click'] },
         ],
       },
       {
