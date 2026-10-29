@@ -319,7 +319,11 @@ describe.sequential('Public passive atom documentation previews', () => {
           expect(facts[0].text).toBe('Outline · rest');
           if (family !== 'base') {
             expect(facts[2].shadow).not.toBe('none');
-            expect(facts[3].transform).not.toBe('none');
+            if (family === 'shadcn') {
+              // Ordinary actionProfile:none preserves supplied elevation, not Button motion.
+              expect(facts[3].transform).toBe('none');
+              expect(facts[3].shadow).not.toBe('none');
+            } else expect(facts[3].transform).not.toBe('none');
           }
         }
         expect(errors).toEqual([]);

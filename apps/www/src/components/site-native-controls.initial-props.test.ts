@@ -1,3 +1,4 @@
+import { getElementProps } from '@proto.ui/adapter-web-component';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { initSiteNativeControls } from './site-native-controls';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './PrototypePreviewer/projection-theme';
@@ -181,7 +182,8 @@ it('uses one public update per existing atom and retains pressed/current facts',
     expect(node.style.getPropertyValue('--pui-foreground')).toBe('#222222');
     expect(metrics(node).controllerUpdates - before[index].controllerUpdates).toBe(1);
   }
-  expect(nodes[0].getAttribute('data-pui-style')?.split(/\s+/)).toContain('translate-y-px');
+  expect(getElementProps(nodes[0]).pressed).toBe(true);
+  expect(nodes[0].getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('translate-y-px');
   expect(nodes[1].getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline');
   const beforeThemeChange = nodes.map(metrics);
   document.documentElement.style.setProperty('--pui-foreground', '#ff0000');

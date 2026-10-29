@@ -1,5 +1,9 @@
 import { afterEach, expect, it } from 'vitest';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  getElementProps,
+} from '@proto.ui/adapter-web-component';
 import ShadcnSurface from '@proto.ui/prototypes-shadcn/surface';
 import BrutalistSurface from '@proto.ui/prototypes-brutalist/surface';
 import ShadcnText from '@proto.ui/prototypes-shadcn/text';
@@ -70,7 +74,9 @@ for (const family of ['shadcn', 'brutalist'] as const)
           await settle();
           expect(surface.style.pointerEvents).toBe('none');
           expect(surface.style.marginBottom).toBe(raised ? '0.25rem' : '1px');
-          expect(surface.style.marginRight).toBe(raised ? '0.25rem' : '');
+          expect(surface.style.marginRight).toBe(
+            raised ? '0.25rem' : family === 'brutalist' && appearance === 'action' ? '0px' : ''
+          );
           expect(surface.hasAttribute('role')).toBe(false);
           expect(surface.hasAttribute('tabindex')).toBe(false);
           expect(surface.getExposes()).toEqual({});
@@ -81,21 +87,28 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).toContain('bg-secondary-background');
             expect(tokens).not.toContain('bg-muted');
           }
-          if (!raised && facts.pressed) expect(tokens).toContain('translate-y-px');
-          expect(tokens.includes('ring-2')).toBe(facts.focusVisible);
+          expect(getElementProps(surface).pressed).toBe(facts.pressed);
+          if (family === 'shadcn' && appearance !== 'action') {
+            expect(tokens).not.toContain('translate-y-px');
+            expect(tokens).not.toContain('shadow-none');
+          } else if (!raised && facts.pressed) expect(tokens).toContain('translate-y-px');
+          const focusToken = family === 'shadcn' && appearance === 'action' ? 'ring-3' : 'ring-2';
+          expect(tokens.includes(focusToken)).toBe(facts.focusVisible);
           if (raised)
             expect(tokens).toContain(facts.pressed ? 'translate-y-1' : 'shadow-[4px_4px_0_0_#000]');
           else if (family === 'brutalist') expect(tokens).not.toContain('shadow-');
           expect(text.getAttribute('data-pui-style')).toContain(
-            family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc')
-              ? facts.current
-                ? 'font-medium'
-                : 'font-normal'
-              : facts.current ||
-                  appearance === 'brand' ||
-                  (family === 'brutalist' && appearance === 'nav-group')
-                ? 'font-semibold'
-                : 'font-medium'
+            appearance === 'action'
+              ? 'font-medium'
+              : family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc')
+                ? facts.current
+                  ? 'font-medium'
+                  : 'font-normal'
+                : facts.current ||
+                    appearance === 'brand' ||
+                    (family === 'brutalist' && appearance === 'nav-group')
+                  ? 'font-semibold'
+                  : 'font-medium'
           );
           link.focus();
           expect(document.activeElement).toBe(link);

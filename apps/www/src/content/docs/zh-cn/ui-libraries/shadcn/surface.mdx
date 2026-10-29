@@ -62,6 +62,8 @@ Web 的 `surface-fade` token 消费 `--pui-surface-transition-duration`，默认
 
 `scrim` 选择家族的常规遮暗绘制，不增加材质采样、模糊或折射。opacity 0 不代表禁用、inert、卸载或移除语义 owner：交互门控、presence 与焦点仍归既有 Dialog/Transition 等语义 owner，Surface 不接管这些责任。
 
+默认 `actionProfile="none"` 时，`pressed` 不会移动 Surface，也不会移除已提供的 elevation。只有显式 `rhea` 或 `luma` action appearance 才选择一像素按下位移；原生导航或内容 Surface 不会因为收到 pressed 事实就自动成为 Button。
+
 ## Host 与 Compiler 边界
 
 Surface 经由普通公开 Prototype、Props、Feedback 路径工作。有界符合性 slice 覆盖 Web Components、React、Vue 3、Vue 2。从源码构建的 CLI 为这四种 facade target 注册 `<family>-surface`，Web 样式编译器消费真实家族 token；`gpui` facade 生成为明确不支持。其 Web Adapter 与 compiler 证据应分别阅读：显示 Web 投射不等于完整原生支持或任意 Prototype AOT。Surface 不隐藏宿主特定材质后端、截图捕获、导航服务或代码 renderer。不支持的目标或样式诊断应明确保留，不能当成等价输出。
