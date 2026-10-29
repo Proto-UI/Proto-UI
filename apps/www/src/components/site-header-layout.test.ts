@@ -306,3 +306,23 @@ it('separates full-width Header chrome from the bounded reading canvas', () => {
   expect(css).not.toContain('max-width: 82.5rem');
   expect(css).not.toContain('Labels occupy the line above');
 });
+
+it('couples compact Search geometry and copy at every Header composition breakpoint', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  for (const [query, owner] of [
+    ['@media (max-width: 68.749rem)', '.site-header'],
+    ['@media (max-width: 79.999rem)', '.home-runtime-header'],
+    ['@container docs-page (max-width: 68.749rem)', '.site-header[data-docs-site-header]'],
+  ]) {
+    const section = css.slice(css.indexOf(query));
+    const start = section.indexOf(owner + ' {');
+    const rule = section.slice(start, section.indexOf('}', start));
+    expect(rule).toContain('--site-header-search-width: 2.75rem');
+    expect(rule).toContain('--site-header-search-padding: 0');
+    expect(rule).toContain('--site-header-search-justify: center');
+    expect(rule).toContain('--site-header-search-copy-display: none');
+    expect(rule).toContain('--site-header-search-margin: 0');
+  }
+  expect(css).toContain('display: var(--site-header-search-copy-display, inline)');
+  expect(css).toContain('display: var(--site-header-search-copy-display, inline-flex)');
+});

@@ -429,13 +429,23 @@ describe.sequential('Header public family presentation and labelled compact fiel
               }
             }
             if (appearance === 'family') {
-              for (const width of [320, 390, 1280, 1920]) {
+              for (const width of [320, 390, 1099, 1100, 1180, 1279, 1280, 1920]) {
                 await page.setViewportSize({ width, height: 1000 });
                 await revealHeaderPreferences(page);
                 const geometry = await page.locator('.site-header').evaluate((header) => {
                   const bounds = header.getBoundingClientRect();
                   const style = getComputedStyle(header);
+                  const search = header.querySelector<HTMLElement>('[data-open-modal]')!;
+                  const searchBox = search.getBoundingClientRect();
                   return {
+                    search: {
+                      width: searchBox.width,
+                      clientWidth: search.clientWidth,
+                      scrollWidth: search.scrollWidth,
+                      copyDisplay: [
+                        ...search.querySelectorAll('.site-search-label, .site-search-shortcut'),
+                      ].map((element) => getComputedStyle(element).display),
+                    },
                     left: bounds.left,
                     right: bounds.right,
                     width: bounds.width,
@@ -468,6 +478,13 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 expect(geometry.paddingLeft).toBeGreaterThanOrEqual(16);
                 expect(geometry.paddingRight).toBeGreaterThanOrEqual(16);
                 expect(geometry.headerScrollWidth).toBeLessThanOrEqual(geometry.viewport + 1);
+                expect(geometry.search.scrollWidth).toBeLessThanOrEqual(
+                  geometry.search.clientWidth + 1
+                );
+                if (width < 1280) {
+                  expect(geometry.search.width).toBeCloseTo(44, 0);
+                  expect(geometry.search.copyDisplay).toEqual(['none', 'none']);
+                }
                 if (geometry.scrollWidth > geometry.viewport + 1)
                   measurements.push({
                     stage: 'unresolved-page-overflow',
