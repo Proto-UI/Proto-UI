@@ -2659,4 +2659,198 @@ describe('collectProtoStyleTokens', () => {
 
     expect(await collectProtoStyleTokens(dir)).toContain('data-[second-flag]:bg-accent');
   });
+
+  it('keeps live source and local member alternatives without reviving overwritten states', async () => {
+    await writeFile(
+      path.join(dir, 'producer.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+       export const asFacts = defineAsHook({ name: 'facts', setup(def) {
+         def.state.bool('alpha', false); def.state.bool('beta', false);
+       }, projectHandle(result) {
+         return { ready: result.stateHandles.alpha, backup: result.stateHandles.beta };
+       } });`
+    );
+    const cases = [
+      {
+        body: 'const chosen = condition ? bag.backup : flag; const controls = { ready: bag.ready }; controls.ready = chosen;',
+        subject: 'controls.ready',
+        expected: ['beta', 'local-flag'],
+      },
+      {
+        body: 'const controls = { ready: bag.ready }; controls.ready = flag; if (condition) Object.assign(controls, { ready: bag.backup });',
+        subject: 'controls.ready',
+        expected: ['beta', 'local-flag'],
+      },
+      {
+        body: 'const controls = { borrowed: bag, ready: bag.ready }; controls.ready = flag; unknownConsumer(bag);',
+        subject: 'controls.ready',
+        expected: ['local-flag'],
+      },
+      {
+        body: 'const current = a ? (b ? bag.ready : bag.backup) : bag.ready;',
+        subject: 'current',
+        expected: ['alpha', 'beta'],
+      },
+      {
+        body: 'let controls = externalControls; if (condition) controls = pick ? { ready: bag.ready } : { ready: bag.backup }; const captured = controls.ready;',
+        subject: 'captured',
+        expected: [],
+      },
+      {
+        body: 'let controls = externalControls; if (condition) controls = pick ? { ready: bag.ready } : { ready: bag.backup };',
+        subject: 'controls.ready',
+        expected: ['alpha', 'beta'],
+      },
+      {
+        body: 'const controls = { ready: bag.ready }; controls.ready = flag; unknownConsumer(controls);',
+        subject: 'controls.ready',
+        expected: [],
+      },
+      {
+        body: 'const controls = { ready: unknownState, borrowed: bag }; if (condition) Object.assign(controls, { ready: bag.backup });',
+        subject: 'controls.ready',
+        expected: [],
+      },
+    ];
+    for (const { body, subject, expected } of cases) {
+      await writeFile(
+        path.join(dir, 'widget.proto.ts'),
+        `import { asFacts } from './producer';
+         function setup(def) {
+           const bag = asFacts();
+           const flag = def.state.bool('localFlag', false);
+           def.expose.state('localFlag', flag);
+           ${body}
+           def.rule({ when: w => w.state(${subject}).eq(true),
+             intent: i => i.feedback.style.use(tw('bg-primary')) });
+         }
+         setup(def);`
+      );
+      const tokens = await collectProtoStyleTokens(dir);
+      for (const name of ['alpha', 'beta', 'local-flag']) {
+        const token = `data-[${name}]:bg-primary`;
+        if (expected.includes(name)) expect(tokens, body).toContain(token);
+        else expect(tokens, body).not.toContain(token);
+      }
+    }
+  });
+
+  it('does not contaminate a captured known-hook scalar when another alias changes', async () => {
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      `function setup(def) {
+         const { checked, disabled } = asCheckboxRoot().stateHandles;
+         const saved = disabled; let current = checked;
+         if (enabled) current = disabled;
+         def.rule({ when: w => w.state(saved).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-primary')) });
+       }
+       setup(def);`
+    );
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[disabled]:bg-primary');
+    expect(tokens).not.toContain('data-[checked]:bg-primary');
+  });
+
+  it('resolves source-result handles before selecting their ordinary members', async () => {
+    await writeFile(
+      path.join(dir, 'producer.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+       export const asFacts = defineAsHook({ name: 'facts', setup(def) {
+         def.state.bool('ready', false); def.state.bool('stable', false);
+       } });`
+    );
+    await writeFile(
+      path.join(dir, 'widget.proto.ts'),
+      `import { asFacts } from './producer';
+       function setup(def) {
+         const bag = asFacts().stateHandles;
+         def.rule({ when: w => w.state(bag.ready).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-primary')) });
+         def.rule({ when: w => w.state(asFacts().stateHandles.stable).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-secondary')) });
+       }
+       setup(def);`
+    );
+    const tokens = await collectProtoStyleTokens(dir);
+    expect(tokens).toContain('data-[ready]:bg-primary');
+    expect(tokens).toContain('data-[stable]:bg-secondary');
+  });
+
+  it('keeps the captured receiver distinct from a nested member rebound by its RHS', async () => {
+    await writeFile(
+      path.join(dir, 'producer.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+       export const asA = defineAsHook({ name: 'a', setup(d) { d.state.bool('alpha', false); },
+         projectHandle(r) { return { nested: { ready: r.stateHandles.alpha } }; } });
+       export const asB = defineAsHook({ name: 'b', setup(d) { d.state.bool('beta', false); } });
+       export const asC = defineAsHook({ name: 'c', setup(d) { d.state.bool('gamma', false); },
+         projectHandle(r) { return { ready: r.stateHandles.gamma }; } });`
+    );
+    for (const { write, current, alias } of [
+      {
+        write: 'bag.nested.ready = asB().stateHandles.beta;',
+        current: 'beta',
+        alias: 'beta',
+      },
+      {
+        write: 'bag.nested.ready = asB(bag.nested = asC()).stateHandles.beta;',
+        current: 'gamma',
+        alias: 'beta',
+      },
+    ]) {
+      await writeFile(
+        path.join(dir, 'widget.proto.ts'),
+        `import { asA, asB, asC } from './producer';
+         const bag = asA(); const alias = bag.nested;
+         ${write}
+         def.rule({ when: w => w.state(bag.nested.ready).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-primary')) });
+         def.rule({ when: w => w.state(alias.ready).eq(true),
+           intent: i => i.feedback.style.use(tw('underline')) });`
+      );
+      const tokens = await collectProtoStyleTokens(dir);
+      for (const [utility, expected] of [
+        ['bg-primary', current],
+        ['underline', alias],
+      ]) {
+        for (const name of ['alpha', 'beta', 'gamma']) {
+          const token = `data-[${name}]:${utility}`;
+          if (name === expected) expect(tokens, write).toContain(token);
+          else expect(tokens, write).not.toContain(token);
+        }
+      }
+    }
+  });
+
+  it('does not emit a partial projected member after an unproved logical write', async () => {
+    await writeFile(
+      path.join(dir, 'producer.ts'),
+      `import { defineAsHook } from '@proto.ui/core';
+       export const useFirst = defineAsHook({ name: 'first', setup(d) {
+         d.state.bool('first', false); d.state.bool('stable', false);
+       }, projectHandle(r) { return { ready: r.stateHandles.first, stable: r.stateHandles.stable }; } });
+       export const useOptional = defineAsHook({ name: 'optional', setup(d) {
+         d.state.bool('stable', false);
+       }, projectHandle(r) { return { ready: undefined, stable: r.stateHandles.stable }; } });
+       export const useSecond = defineAsHook({ name: 'second', setup(d) { d.state.bool('second', false); } });`
+    );
+    for (const operator of ['||=', '??=']) {
+      await writeFile(
+        path.join(dir, 'widget.proto.ts'),
+        `import { useFirst, useOptional, useSecond } from './producer';
+         const bag = enabled ? useFirst() : useOptional();
+         bag.ready ${operator} useSecond().stateHandles.second;
+         def.rule({ when: w => w.state(bag.ready).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-primary')) });
+         def.rule({ when: w => w.state(bag.stable).eq(true),
+           intent: i => i.feedback.style.use(tw('bg-secondary')) });`
+      );
+      const tokens = await collectProtoStyleTokens(dir);
+      expect(
+        tokens.filter((token) => token.includes(':')),
+        operator
+      ).toEqual(['data-[stable]:bg-secondary']);
+    }
+  });
 });

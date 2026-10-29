@@ -86,6 +86,144 @@ describe('lowered hook coverage', () => {
     const scanWithFreshSummary = (source: string, file: string) =>
       scanRuleStateReads(source, file, createHookSourceSummaryContext());
 
+    it.each([
+      {
+        body: 'const current=a?(b?bag.ready:bag.backup):bag.ready;',
+        subject: 'current',
+        states: ['alpha', 'beta'],
+        locals: [],
+        unresolved: [],
+        tokens: ['data-[alpha]:bg-primary', 'data-[beta]:bg-primary'],
+      },
+      {
+        body: 'const chosen=condition?bag.backup:flag;const controls={ready:bag.ready};controls.ready=chosen;',
+        subject: 'controls.ready',
+        states: ['beta'],
+        locals: ['local-flag'],
+        unresolved: [],
+        tokens: ['data-[beta]:bg-primary', 'data-[local-flag]:bg-primary'],
+      },
+      {
+        body: 'const controls={ready:bag.ready};controls.ready=flag;if(condition)Object.assign(controls,{ready:bag.backup});',
+        subject: 'controls.ready',
+        states: ['beta'],
+        locals: ['local-flag'],
+        unresolved: [],
+        tokens: ['data-[beta]:bg-primary', 'data-[local-flag]:bg-primary'],
+      },
+      {
+        body: 'const controls={borrowed:bag,ready:bag.ready};controls.ready=flag;unknownConsumer(bag);',
+        subject: 'controls.ready',
+        states: [],
+        locals: ['local-flag'],
+        unresolved: [],
+        tokens: ['data-[local-flag]:bg-primary'],
+      },
+      {
+        body: 'const controls={ready:unknownState,borrowed:bag};if(condition)Object.assign(controls,{ready:bag.backup});',
+        subject: 'controls.ready',
+        states: [],
+        locals: [],
+        unresolved: ['subject'],
+        tokens: [],
+      },
+      {
+        body: 'let controls=externalControls;if(condition)controls=pick?{ready:bag.ready}:{ready:bag.backup};const captured=controls.ready;',
+        subject: 'captured',
+        states: [],
+        locals: [],
+        unresolved: ['subject'],
+        tokens: [],
+      },
+      {
+        body: 'const controls=condition?{ready:bag.ready}:{};const captured=controls.ready;',
+        subject: 'captured',
+        states: [],
+        locals: [],
+        unresolved: ['subject'],
+        tokens: [],
+      },
+      {
+        body: 'const controls={borrowed:bag,ready:bag.ready};unknownConsumer(controls);',
+        subject: 'controls.ready',
+        states: [],
+        locals: [],
+        unresolved: ['subject'],
+        tokens: [],
+      },
+      {
+        body: 'const controls={borrowed:bag,ready:bag.ready};unknownConsumer(bag);',
+        subject: 'controls.borrowed.ready',
+        states: [],
+        locals: [],
+        unresolved: ['subject'],
+        tokens: [],
+      },
+    ])('preserves complete scalar alternatives: $body', async (test) => {
+      const dir = await mkdtemp(path.join(tmpdir(), 'lowered-hook-scalar-alternatives-'));
+      try {
+        const producer = path.join(dir, 'producer.ts');
+        const file = path.join(dir, 'consumer.proto.ts');
+        await writeFile(
+          producer,
+          [
+            "import { defineAsHook } from '@proto.ui/core';",
+            "export const asFacts = defineAsHook({name:'facts', setup(d){d.state.bool('alpha',false);d.state.bool('beta',false)}, projectHandle:r=>({ready:r.stateHandles.alpha,backup:r.stateHandles.beta})});",
+          ].join('\n')
+        );
+        const source = [
+          "import {asFacts} from './producer';",
+          'function setup(def){',
+          'const bag=asFacts();',
+          "const flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);",
+          test.body,
+          rule(`w.state(${test.subject}).eq(true)`),
+          '} setup(def);',
+        ].join('\n');
+        const scan = scanWithFreshSummary(source, file);
+        expect([...new Set(scan.usages.map((usage) => usage.state))].sort(), test.body).toEqual(
+          test.states
+        );
+        for (const usage of scan.usages) {
+          expect(usage.provenance?.declaredName, test.body).toBe(usage.state);
+          expect(usage.provenance?.declaration.file, test.body).toBe(producer);
+        }
+        expect(scan.exposedLocals.map((local) => local.attribute).sort(), test.body).toEqual(
+          test.locals
+        );
+        expect(
+          scan.unresolved.map((miss) => miss.reason),
+          test.body
+        ).toEqual(test.unresolved);
+        await writeFile(file, source);
+        const tokens = await collectProtoStyleTokensFromFiles([file]);
+        for (const token of [
+          'data-[alpha]:bg-primary',
+          'data-[beta]:bg-primary',
+          'data-[local-flag]:bg-primary',
+        ]) {
+          expect(tokens.includes(token), `${test.body}: ${token}`).toBe(
+            test.tokens.includes(token)
+          );
+        }
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    });
+
+    it('does not attach an assigned alias union to a sibling table handle', () => {
+      const source = [
+        'function setup(def){',
+        'const {checked,disabled}=asCheckboxRoot().stateHandles;',
+        'const saved=disabled;let current=checked;if(enabled)current=disabled;',
+        rule('w.state(saved).eq(true)'),
+        '} setup(def);',
+      ].join('\n');
+      const scan = scanRuleStateReads(source);
+      expect(scan.usages.map((usage) => usage.state)).toEqual(['disabled']);
+      expect(scan.unresolved).toEqual([]);
+    });
+
     it('tracks identifier logical writes without executing skipped right sides', async () => {
       const dir = await mkdtemp(path.join(tmpdir(), 'lowered-hook-identifier-logical-'));
       try {

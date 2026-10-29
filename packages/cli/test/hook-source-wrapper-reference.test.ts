@@ -18,16 +18,21 @@ const rule = (subject: string, tokenArgument: string) =>
   `def.rule({ when: (w) => w.state(${subject}).eq(true), intent: (i) => i.feedback.style.use(tw(${tokenArgument})) });`;
 
 async function analyze(statements: string[], subjects: string[], tokenArgument = "'bg-primary'") {
-  const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-wrapper-reference-'));
-  try {
-    await writeFile(path.join(dir, 'producer.ts'), producer);
-    const file = path.join(dir, 'consumer.proto.ts');
-    const source = [
+  return analyzeSource(
+    [
       "import { asFacts } from './producer';",
       'const bag = asFacts();',
       ...statements,
       ...subjects.map((subject) => rule(subject, tokenArgument)),
-    ].join('\n');
+    ].join('\n')
+  );
+}
+
+async function analyzeSource(source: string, producerSource = producer) {
+  const dir = await mkdtemp(path.join(tmpdir(), 'hook-source-wrapper-reference-'));
+  try {
+    await writeFile(path.join(dir, 'producer.ts'), producerSource);
+    const file = path.join(dir, 'consumer.proto.ts');
     await writeFile(file, source);
     return {
       scan: scanRuleStateReads(source, file, createHookSourceSummaryContext()),
@@ -483,5 +488,155 @@ describe('local wrappers retain hook source references', () => {
     expect(scan.usages.map(({ state }) => state)).toEqual(['alpha']);
     expect(scan.unresolved).toEqual([]);
     expect(semanticTokens(tokens)).toEqual(['data-[alpha]:bg-primary']);
+  });
+});
+
+const bindingRouteProducer =
+  "import { defineAsHook } from '@proto.ui/core';\nexport const asFacts = defineAsHook({ name: 'facts', setup(def) {\n  def.state.bool('alpha', false); def.state.bool('beta', false);\n}, projectHandle(result) {\n  return { ready: result.stateHandles.alpha, backup: result.stateHandles.beta };\n} });";
+
+describe('source-backed wrapper binding and copy routes', () => {
+  it.each([
+    {
+      'name': 'pattern-all-known-alternatives',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nlet controls={borrowed:bag.ready,local:flag};\nif(condition)controls={borrowed:bag.ready,local:bag.backup};\nconst {local}=controls;\ndef.rule({when:w=>w.state(local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': ['beta'],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[beta]:bg-primary', 'data-[local-flag]:bg-primary'],
+      },
+    },
+    {
+      'name': 'pattern-unproved-earlier-alternative',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nlet controls={borrowed:bag.ready,local:externalState};\nif(condition)controls={borrowed:bag.ready,local:bag.backup};\nconst {local}=controls;\ndef.rule({when:w=>w.state(local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': ['subject'],
+        'semanticTokens': [],
+      },
+    },
+    {
+      'name': 'object-pattern-alias-write',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst controls={ready:bag.ready};\nconst {alias}={alias:controls};\nalias.ready=bag.backup;\ndef.rule({when:w=>w.state(controls.ready).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': ['beta'],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[beta]:bg-primary'],
+      },
+    },
+    {
+      'name': 'array-pattern-alias-write',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst controls={ready:bag.ready};\nconst [alias]=[controls];\nalias.ready=bag.backup;\ndef.rule({when:w=>w.state(controls.ready).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': ['beta'],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[beta]:bg-primary'],
+      },
+    },
+    {
+      'name': 'pattern-alias-unknown-escape',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst controls={ready:bag.ready};\nconst {alias}={alias:controls};\nunknownConsumer(alias);\ndef.rule({when:w=>w.state(controls.ready).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': ['subject'],
+        'semanticTokens': [],
+      },
+    },
+    {
+      'name': 'inline-pattern-local',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst {local}={borrowed:bag.ready,local:flag};\ndef.rule({when:w=>w.state(local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[local-flag]:bg-primary'],
+      },
+    },
+    {
+      'name': 'inline-array-pattern-local',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst [borrowed,local]=[bag.ready,flag];\ndef.rule({when:w=>w.state(local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[local-flag]:bg-primary'],
+      },
+    },
+    {
+      'name': 'conditional-capture-preserves-local',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst controls={ready:bag.ready};\nlet selected=flag;\nif(condition)selected=controls.ready;\ndef.rule({when:w=>w.state(selected).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': ['alpha'],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[alpha]:bg-primary', 'data-[local-flag]:bg-primary'],
+      },
+    },
+    {
+      'name': 'conditional-capture-preserves-unknown',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst controls={ready:bag.ready};\nlet selected=externalState;\nif(condition)selected=controls.ready;\ndef.rule({when:w=>w.state(selected).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': ['subject'],
+        'semanticTokens': [],
+      },
+    },
+    {
+      'name': 'proven-copy-untouched-local',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst controls={borrowed:bag.ready,local:flag};\nObject.assign(controls,{borrowed:bag.backup});\ndef.rule({when:w=>w.state(controls.local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[local-flag]:bg-primary'],
+      },
+    },
+    {
+      'name': 'proven-copy-written-member-control',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst controls={borrowed:bag.ready,local:flag};\nObject.assign(controls,{local:bag.backup});\ndef.rule({when:w=>w.state(controls.local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': ['beta'],
+        'exposedLocalAttributes': [],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[beta]:bg-primary'],
+      },
+    },
+    {
+      'name': 'inline-member-local-control',
+      'consumer':
+        "import {asFacts} from './producer';\nfunction setup(def){const bag=asFacts();\nconst flag=def.state.bool('localFlag',false);def.expose.state('localFlag',flag);\nconst controls={borrowed:bag.ready,local:flag};\ndef.rule({when:w=>w.state(controls.local).eq(true),intent:i=>i.feedback.style.use(tw('bg-primary'))});}\nsetup(def);",
+      'expected': {
+        'states': [],
+        'exposedLocalAttributes': ['local-flag'],
+        'unresolvedReasons': [],
+        'semanticTokens': ['data-[local-flag]:bg-primary'],
+      },
+    },
+  ])('$name', async ({ consumer, expected }) => {
+    const { scan, tokens } = await analyzeSource(consumer, bindingRouteProducer);
+    expect([...new Set(scan.usages.map(({ state }) => state))].sort()).toEqual(expected.states);
+    expect([...new Set(scan.exposedLocals.map(({ attribute }) => attribute))].sort()).toEqual(
+      expected.exposedLocalAttributes
+    );
+    expect([...new Set(scan.unresolved.map(({ reason }) => reason))].sort()).toEqual(
+      expected.unresolvedReasons
+    );
+    expect(semanticTokens(tokens)).toEqual(expected.semanticTokens);
   });
 });

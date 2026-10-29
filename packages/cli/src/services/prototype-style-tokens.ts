@@ -327,6 +327,10 @@ function bindingSemantics(binding) {
   return [binding.semantic, ...(binding.alternatives ?? [])].filter(Boolean);
 }
 
+function knownBindingSemantics(binding) {
+  return binding ? [binding.semantic, ...(binding.alternatives ?? [])].filter(Boolean) : [];
+}
+
 function bindingHasStatePath(binding) {
   if (!binding || binding.unknownAlternative) return false;
   if (bindingSemantics(binding).length > 0) return true;
@@ -354,19 +358,25 @@ function memberSemantics(entry) {
 // Known writes advance untouched entries; escapes cannot reuse that proof.
 const definitiveLocalMemberWrites = new WeakMap();
 
-function advanceLocalMemberProofs(binding, previousSource, nextSource, writtenMember) {
+function advanceLocalMemberProofs(
+  binding,
+  previousSource,
+  nextSource,
+  writtenMember,
+  nextCandidates
+) {
   const proofs = definitiveLocalMemberWrites.get(binding.semanticMap);
   for (const [key, proof] of proofs ?? []) {
-    if (
-      key !== writtenMember &&
-      proof.sourceValue === previousSource &&
-      proof.entry === binding.semanticMap?.get(key)
-    )
-      proofs.set(key, { ...proof, sourceValue: nextSource });
+    if (writtenMember instanceof Set ? writtenMember.has(key) : key === writtenMember) {
+      proofs.delete(key);
+      continue;
+    }
+    if (proof.sourceValue === previousSource && proof.entry === binding.semanticMap?.get(key))
+      proofs.set(key, { ...proof, sourceValue: nextSource, sources: nextCandidates });
   }
 }
 
-function joinLocalMemberProofs(binding, branches) {
+function joinLocalMemberProofs(binding, branches, scope) {
   if (!binding.semanticMap) return;
   const proofs = new Map();
   for (const [key, entry] of binding.semanticMap ?? []) {
@@ -375,43 +385,45 @@ function joinLocalMemberProofs(binding, branches) {
         const proof = definitiveLocalMemberWrites.get(held.semanticMap)?.get(key);
         return (
           proof &&
+          proof.versions === scope.versions &&
           proof.sourceValue === held.sourceValue &&
+          proof.sources.length === sourceValueCandidates(held).length &&
+          proof.sources.every((source) => sourceValueCandidates(held).includes(source)) &&
+          !proof.unknown &&
           proof.entry === held.semanticMap?.get(key)
         );
       })
     )
-      proofs.set(key, { sourceValue: binding.sourceValue, entry });
+      proofs.set(key, {
+        sourceValue: binding.sourceValue,
+        sources: sourceValueCandidates(binding),
+        versions: scope.versions,
+        entry,
+      });
   }
   definitiveLocalMemberWrites.set(binding.semanticMap, proofs);
 }
 
-function freshLocalMemberSemantics(node, scope) {
+function selectMemberBinding(node, scope) {
   const owner = memberOwner(node);
   const key = memberName(node);
-  if (!owner || key === null) return [];
+  if (!owner || key === null) return null;
   const binding = resolveExpression(owner, scope);
-  const proof = definitiveLocalMemberWrites.get(binding.semanticMap)?.get(key);
+  const branches = binding.containers ?? [binding];
+  // Result and callable graphs are resolved by the source summary, not by
+  // object-member selection. An empty lexical value likewise says nothing
+  // about the member unless it carries a genuine incomplete alternative.
   if (
-    !proof ||
-    proof.sourceValue !== binding.sourceValue ||
-    proof.entry !== binding.semanticMap?.get(key)
+    !binding.unknownAlternative &&
+    !branches.some(
+      (branch) =>
+        branch.unknownAlternative ||
+        branch.semanticMap?.has(key) ||
+        sourceValueCandidates(branch).some((source) => source.kind === 'object')
+    )
   )
-    return [];
-  return memberSemantics(proof.entry);
-}
-
-/** The member entry a `x.name` or `x['name']` read names, if the owner has one. */
-function readMemberSemantics(node, scope) {
-  const owner = memberOwner(node);
-  const name = memberName(node);
-  if (!owner || name === null) return [];
-  const resolved = resolveExpression(owner, scope);
-  if (resolved.unknownAlternative) return [];
-  // A name that may be either of two objects answers for both, and a container
-  // that replaced another conditionally still answers for what it replaced.
-  const values = resolved.containers ?? [resolved];
-  const r = [...new Set(values.flatMap((value) => memberSemantics(value.semanticMap?.get(name))))];
-  return r;
+    return null;
+  return selectPatternMember(binding, key, scope);
 }
 
 /**
@@ -655,11 +667,14 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
         plainAssignment ||
         (operator === ts.SyntaxKind.AmpersandAmpersandEqualsToken && knownStateHandle);
       const rightBinding = writesRight ? resolveBinding(node.right, scope) : null;
-      const written = bindingSemantics(rightBinding);
+      const written = knownBindingSemantics(rightBinding);
       const writtenSource = sourceValueCandidates(rightBinding);
       for (const container of targets) {
         const sourceWrite = writtenSource.length === 1 && hasSourceHookProvenance(writtenSource[0]);
-        const unknownWrite = !writesRight || (written.length === 0 && !sourceWrite);
+        const unknownWrite =
+          !writesRight ||
+          rightBinding?.unknownAlternative ||
+          (written.length === 0 && !sourceWrite);
         // The scope that owns the container object, not the one that declares
         // the name written through: an alias declared inside a callback would
         // otherwise make the write look ordered against itself.
@@ -673,6 +688,10 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           (logicalAssignment && !knownStateHandle) ||
           // A key this cannot read may name any member the container has.
           member === null;
+        const previousSelection =
+          member === null ? null : selectPatternMember(container, member, scope);
+        const previousSemantics = knownBindingSemantics(previousSelection);
+        const previousMemberProven = bindingSemantics(previousSelection).length > 0;
         updateTokenMembers(container, member, rightBinding, uncertain);
         if (written.length > 0 && !container.semanticMap) container.semanticMap = new Map();
         const keys =
@@ -686,23 +705,22 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
                 ]),
               ]
             : [member];
-        // Any subsequent write retires a previous semantic-only proof. A new
-        // proof is admitted below only after a definite local-state write.
+        const previousByKey = new Map(
+          keys.map((key) => [
+            key,
+            member === null ? selectPatternMember(container, key, scope) : previousSelection,
+          ])
+        );
+        // Retire the old entry before installing the joined write result.
         const localProofs = definitiveLocalMemberWrites.get(container.semanticMap);
-        const previousLocalProof = member === null ? null : localProofs?.get(member);
-        const previousMemberProven =
-          previousLocalProof &&
-          previousLocalProof.sourceValue === container.sourceValue &&
-          previousLocalProof.entry === container.semanticMap?.get(member);
         if (member === null) localProofs?.clear();
         else localProofs?.delete(member);
-        // A semantic-only local state has no source declaration to place in
-        // the summary graph. Its local semantic map below is authoritative;
-        // leave the cached source member unchanged rather than inserting an
-        // undefined candidate into a HookSourceValue map.
+        // Local States and multi-source alternatives have no single source
+        // declaration. Keep an unknown graph member and retain their proven
+        // semantics in the exact-entry overlay below.
         if (
           container.sourceValue?.kind === 'object' &&
-          (unknownWrite || writtenSource.length > 0)
+          (unknownWrite || writtenSource.length > 0 || written.length > 0)
         ) {
           // Summary values are cached for the whole source graph. Never mutate
           // their member map in place: a write in one walked file must not
@@ -710,15 +728,14 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           const previousSource = container.sourceValue;
           const previousCandidates = sourceValueCandidates(container);
           const nextMembers = new Map(previousSource.members);
-          if (unknownWrite) {
-            const unknown = { kind: 'unknown', reason: 'possibly overwritten member' };
-            if (member === null) {
-              for (const key of nextMembers.keys()) nextMembers.set(key, unknown);
-            } else {
-              nextMembers.set(member, unknown);
-            }
+          const replacement =
+            !unknownWrite && writtenSource.length === 1 && written.length <= 1
+              ? writtenSource[0]
+              : { kind: 'unknown', reason: 'member has local or unproved alternatives' };
+          if (member === null) {
+            for (const key of nextMembers.keys()) nextMembers.set(key, replacement);
           } else {
-            for (const key of keys) nextMembers.set(key, writtenSource[0]);
+            nextMembers.set(member, replacement);
           }
           const nextSource = { ...previousSource, members: nextMembers };
           // The write reaches every version the container may hold, not only
@@ -729,34 +746,43 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
           for (const version of scope.versions.versions(previousSource)) {
             if (version === previousSource || version.kind !== 'object') continue;
             const otherMembers = new Map(version.members);
-            if (unknownWrite) {
-              const unknown = { kind: 'unknown', reason: 'possibly overwritten member' };
-              if (member === null) {
-                for (const key of otherMembers.keys()) otherMembers.set(key, unknown);
-              } else {
-                otherMembers.set(member, unknown);
-              }
+            if (member === null) {
+              for (const key of otherMembers.keys()) otherMembers.set(key, replacement);
             } else {
-              for (const key of member === null ? [...otherMembers.keys()] : [member]) {
-                otherMembers.set(key, writtenSource[0]);
-              }
+              otherMembers.set(member, replacement);
             }
             others.push({ version, next: { ...version, members: otherMembers } });
           }
-          advanceLocalMemberProofs(container, previousSource, nextSource, member);
-          container.sourceValue = nextSource;
           const nextCandidates = uncertain
             ? [nextSource, ...previousCandidates, previousSource, ...others.map((o) => o.next)]
-            : [nextSource, ...previousCandidates.slice(1), ...others.map((o) => o.next)];
+            : [
+                nextSource,
+                ...previousCandidates.filter(
+                  (candidate) => !scope.versions.sameContainer(candidate, previousSource)
+                ),
+                ...others.map((o) => o.next),
+              ];
+          const uniqueCandidates = [...new Set(nextCandidates)];
+          advanceLocalMemberProofs(container, previousSource, nextSource, member, uniqueCandidates);
+          container.sourceValue = nextSource;
           if (nextCandidates.length > 1 || container.sourceValues)
-            container.sourceValues = [...new Set(nextCandidates)];
+            container.sourceValues = uniqueCandidates;
 
           // Aliases hold the same object identity. Keep their local source
           // pointer in sync without touching the cached summary object.
           for (let owner = scope; owner; owner = owner.parent) {
             for (const held of owner.bindings.values()) {
               if (held === container || held.sourceValue !== previousSource) continue;
-              advanceLocalMemberProofs(held, previousSource, nextSource, member);
+              const heldCandidates = uncertain
+                ? [...new Set([nextSource, ...(held.sourceValues ?? []), previousSource])]
+                : [
+                    nextSource,
+                    ...(held.sourceValues ?? []).filter(
+                      (candidate) => !scope.versions.sameContainer(candidate, previousSource)
+                    ),
+                    ...others.map((other) => other.next),
+                  ];
+              advanceLocalMemberProofs(held, previousSource, nextSource, member, heldCandidates);
               updateTokenMembers(held, member, rightBinding, uncertain);
               held.sourceValue = nextSource;
               if (uncertain) {
@@ -764,10 +790,7 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
                   ...new Set([nextSource, ...(held.sourceValues ?? []), previousSource]),
                 ];
               } else if (held.sourceValues) {
-                held.sourceValues = [
-                  nextSource,
-                  ...held.sourceValues.filter((candidate) => candidate !== previousSource),
-                ];
+                held.sourceValues = [...new Set(heldCandidates)];
               }
               // Only this member changed. Other entries may carry newer
               // local-state semantics absent from the immutable source graph.
@@ -806,33 +829,55 @@ function walk(node, scope, tokens, exposures, rootInventory = null) {
             member ?? undefined
           );
         }
-        if (unknownWrite) {
-          // An unknown member write can replace the state handle with any
-          // runtime value. Do not retain a stale local proof for that member;
-          // a dynamic key invalidates every known member.
-          if (member === null) container.semanticMap?.clear();
-          else container.semanticMap?.delete(member);
+        if (unknownWrite && written.length === 0) {
+          // An unknown write revokes completeness, but a skipped write still
+          // leaves its previously known candidates live for CSS enumeration.
+          for (const key of keys) {
+            const kept = uncertain ? knownBindingSemantics(previousByKey.get(key)) : [];
+            if (kept.length === 0) {
+              container.semanticMap?.delete(key);
+              continue;
+            }
+            if (!container.semanticMap) container.semanticMap = new Map();
+            container.semanticMap.set(key, kept);
+            let proofs = definitiveLocalMemberWrites.get(container.semanticMap);
+            if (!proofs) {
+              proofs = new Map();
+              definitiveLocalMemberWrites.set(container.semanticMap, proofs);
+            }
+            proofs.set(key, {
+              sourceValue: container.sourceValue,
+              sources: sourceValueCandidates(container),
+              versions: scope.versions,
+              entry: kept,
+              unknown: true,
+            });
+          }
         } else if (written.length > 0) {
           for (const key of keys) {
-            const previous = memberSemantics(container.semanticMap.get(key));
+            const previous =
+              member === null ? knownBindingSemantics(previousByKey.get(key)) : previousSemantics;
             const kept = uncertain
               ? previous.filter((candidate) => !written.includes(candidate))
               : [];
             container.semanticMap.set(key, [...written, ...kept]);
-            if (
-              (!uncertain && writtenSource.length === 0) ||
-              (uncertain && previousMemberProven && !rightBinding?.unknownAlternative)
-            ) {
-              let proofs = definitiveLocalMemberWrites.get(container.semanticMap);
-              if (!proofs) {
-                proofs = new Map();
-                definitiveLocalMemberWrites.set(container.semanticMap, proofs);
-              }
-              proofs.set(key, {
-                sourceValue: container.sourceValue,
-                entry: container.semanticMap.get(key),
-              });
+            let proofs = definitiveLocalMemberWrites.get(container.semanticMap);
+            if (!proofs) {
+              proofs = new Map();
+              definitiveLocalMemberWrites.set(container.semanticMap, proofs);
             }
+            proofs.set(key, {
+              sourceValue: container.sourceValue,
+              sources: sourceValueCandidates(container),
+              versions: scope.versions,
+              entry: container.semanticMap.get(key),
+              unknown:
+                unknownWrite ||
+                (uncertain &&
+                  !(member === null
+                    ? bindingSemantics(previousByKey.get(key)).length > 0
+                    : previousMemberProven)),
+            });
           }
         }
       }
@@ -1247,7 +1292,10 @@ function registerDeclaration(decl, scope, exposures) {
     if (
       ts.isIdentifier(unwrapTransparent(decl.initializer)) &&
       binding.semanticMap == null &&
-      local.semanticMap == null
+      local.semanticMap == null &&
+      !binding.semantic &&
+      !binding.unknownAlternative &&
+      binding.sourceValue?.kind !== 'state'
     ) {
       const shared = new Map();
       binding.semanticMap = shared;
@@ -1259,23 +1307,19 @@ function registerDeclaration(decl, scope, exposures) {
 
   if (ts.isArrayBindingPattern(decl.name)) {
     const value = resolveBinding(decl.initializer, scope);
-    if (!value.semanticMap) return;
 
     decl.name.elements.forEach((element, index) => {
       if (ts.isOmittedExpression(element) || !ts.isIdentifier(element.name)) return;
-      const semantics = memberSemantics(value.semanticMap.get(String(index)));
-      if (semantics.length > 0)
-        scope.bindings.set(element.name.text, {
-          ...asSemanticValue(semantics[0]),
-          alternatives: semantics.slice(1),
-        });
+      const selected = element.dotDotDotToken
+        ? emptyValue()
+        : selectPatternMember(value, String(index), scope);
+      scope.bindings.set(element.name.text, selected);
     });
     return;
   }
 
   if (ts.isObjectBindingPattern(decl.name)) {
     const value = resolveBinding(decl.initializer, scope);
-    if (!value.semanticMap) return;
 
     for (const element of decl.name.elements) {
       if (!ts.isIdentifier(element.name)) continue;
@@ -1284,14 +1328,109 @@ function registerDeclaration(decl, scope, exposures) {
         : element.name.text;
       if (!propertyName) continue;
 
-      const semantics = memberSemantics(value.semanticMap.get(propertyName));
-      if (semantics.length > 0)
-        scope.bindings.set(element.name.text, {
-          ...asSemanticValue(semantics[0]),
-          alternatives: semantics.slice(1),
-        });
+      const selected = element.dotDotDotToken
+        ? emptyValue()
+        : selectPatternMember(value, propertyName, scope);
+      scope.bindings.set(element.name.text, selected);
     }
   }
+}
+
+/** Select every live container alternative without manufacturing a member AST. */
+function selectPatternMember(value, key, scope) {
+  const branches = value.containers ?? [value];
+  const selected = branches.map((branch) => {
+    const capturedGraphs = sourceValueCandidates(branch);
+    const graphs = [
+      ...new Set(
+        capturedGraphs.flatMap((graph) =>
+          graph.kind === 'object' ? scope.versions.versions(graph) : [graph]
+        )
+      ),
+    ];
+    const members = graphs.map((graph) =>
+      graph.kind === 'object' ? graph.members.get(key) : undefined
+    );
+    const proof = definitiveLocalMemberWrites.get(branch.semanticMap)?.get(key);
+    const fresh =
+      proof &&
+      proof.versions === scope.versions &&
+      proof.sourceValue === branch.sourceValue &&
+      proof.sources.length === capturedGraphs.length &&
+      proof.sources.every((source) => capturedGraphs.includes(source)) &&
+      proof.entry === branch.semanticMap?.get(key);
+    const semanticCandidates = [];
+    let unknown = Boolean(branch.unknownAlternative || (fresh && proof.unknown));
+    if (fresh) semanticCandidates.push(...memberSemantics(proof.entry));
+    else
+      for (const member of members) {
+        const semantics = member ? sourceValueSemantics(member) : null;
+        if (member && member.kind !== 'state' && member.kind !== 'unknown') continue;
+        const entries = memberSemantics(semantics?.get('__state'));
+        if (entries.length > 0) semanticCandidates.push(...entries);
+        else unknown = true;
+      }
+    if (graphs.length === 0)
+      semanticCandidates.push(...memberSemantics(branch.semanticMap?.get(key)));
+    if (graphs.length === 0 && !branch.semanticMap?.has(key)) unknown = true;
+    const sources = fresh
+      ? []
+      : [
+          ...new Set(
+            members
+              .filter(Boolean)
+              .flatMap((member) =>
+                member.kind === 'object' ? scope.versions.versions(member) : [member]
+              )
+          ),
+        ];
+    // Reuse the actual object binding when it exists: its maps and graph are
+    // shared with aliases, including local proofs and token-map lifetimes.
+    let held;
+    if (
+      sources.length > 0 &&
+      sources.every((member) => member.kind !== 'state' && member.kind !== 'unknown')
+    ) {
+      for (let owner = scope; owner && !held; owner = owner.parent) {
+        for (const binding of owner.bindings.values()) {
+          const candidates = sourceValueCandidates(binding);
+          if (
+            !binding.unknownAlternative &&
+            candidates.length === sources.length &&
+            sources.every((member) => candidates.includes(member))
+          ) {
+            held = binding;
+            break;
+          }
+        }
+      }
+    }
+    const semantics = [...new Set(semanticCandidates)];
+    const strings = branch.map?.get(key) ?? [];
+    return {
+      ...(held ?? (strings.length > 0 ? asStringValue(strings) : emptyValue())),
+      ...(semantics.length > 0 ? { semantic: semantics[0], alternatives: semantics.slice(1) } : {}),
+      ...(sources.length > 0 ? { sourceValue: sources[0], sourceValues: sources } : {}),
+      ...(unknown ? { unknownAlternative: true } : {}),
+    };
+  });
+  const semantics = [...new Set(selected.flatMap(knownBindingSemantics))];
+  const sources = [...new Set(selected.flatMap(sourceValueCandidates))];
+  const strings = [...new Set(selected.flatMap((branch) => branch.strings))];
+  return {
+    ...selected[0],
+    strings,
+    single: strings.length === 1 ? strings[0] : null,
+    semantic: semantics[0] ?? null,
+    alternatives: semantics.slice(1),
+    ...(sources.length > 0 ? { sourceValue: sources[0], sourceValues: sources } : {}),
+    ...(selected.length > 1 ? { containers: selected } : {}),
+    ...(value.unknownAlternative ||
+    selected.some((branch) => branch.unknownAlternative) ||
+    (semantics.length > 0 && selected.some((branch) => bindingSemantics(branch).length === 0))
+      ? { unknownAlternative: true }
+      : {}),
+  };
 }
 
 function loopMemberExpression(value, key) {
@@ -1518,13 +1657,31 @@ function propagateSourceReference(
       );
       if (!replaced.some((candidate, index) => candidate !== candidates[index])) continue;
       const next = uncertain ? [...new Set([...replaced, ...candidates])] : replaced;
-      if (writtenMember !== undefined)
+      if (writtenMember !== undefined && binding.sourceValue === target)
         advanceLocalMemberProofs(
           binding,
           binding.sourceValue,
           next[0],
-          binding.sourceValue === target ? writtenMember : undefined
+          binding.sourceValue === target ? writtenMember : undefined,
+          next
         );
+      else if (
+        binding.sourceValue !== target &&
+        !replacements?.has(binding.sourceValue) &&
+        binding.sourceValue?.kind === 'object' &&
+        replaced[0]?.kind === 'object'
+      ) {
+        // A child mutation rewrites its ancestors without writing their other
+        // members. Reanchor only proofs for unchanged immediate siblings.
+        const before = binding.sourceValue.members;
+        const after = replaced[0].members;
+        const changed = new Set(
+          [...new Set([...before.keys(), ...after.keys()])].filter(
+            (key) => before.get(key) !== after.get(key)
+          )
+        );
+        advanceLocalMemberProofs(binding, binding.sourceValue, next[0], changed, next);
+      }
       binding.sourceValue = next[0];
       if (next.length > 1 || binding.sourceValues) binding.sourceValues = next;
     }
@@ -1576,7 +1733,7 @@ function updateTokenMembers(binding, member, written, uncertain = false) {
  * The selector map of a binding is per binding, so the members a call
  * replaced move there as well as in the source graph.
  */
-function applyCallSemantics(scope, previous, next, copied, proven, uncertain) {
+function applyCallSemantics(scope, previous, next, copied, proven, uncertain, priorProofs) {
   const keys = proven
     ? [
         ...new Set(
@@ -1590,9 +1747,26 @@ function applyCallSemantics(scope, previous, next, copied, proven, uncertain) {
       if (held.sourceValue !== next) continue;
       for (const key of keys) updateTokenMembers(held, key, null);
       if (!held.semanticMap) continue;
-      for (const key of keys) {
+      const affected = proven ? keys : [...new Set([...keys, ...held.semanticMap.keys()])];
+      for (const key of affected) {
         if (!proven) {
-          held.semanticMap.delete(key);
+          const before = priorProofs?.get(held.semanticMap)?.get(key);
+          const kept = uncertain ? knownBindingSemantics(before) : [];
+          if (kept.length > 0) {
+            held.semanticMap.set(key, kept);
+            let proofs = definitiveLocalMemberWrites.get(held.semanticMap);
+            if (!proofs) {
+              proofs = new Map();
+              definitiveLocalMemberWrites.set(held.semanticMap, proofs);
+            }
+            proofs.set(key, {
+              sourceValue: held.sourceValue,
+              sources: sourceValueCandidates(held),
+              versions: scope.versions,
+              entry: held.semanticMap.get(key),
+              unknown: true,
+            });
+          } else held.semanticMap.delete(key);
           continue;
         }
         const written = memberSemantics(semantics.get(key));
@@ -1600,9 +1774,25 @@ function applyCallSemantics(scope, previous, next, copied, proven, uncertain) {
           held.semanticMap.delete(key);
           continue;
         }
-        const before = memberSemantics(held.semanticMap.get(key));
-        const kept = uncertain ? before.filter((entry) => !written.includes(entry)) : [];
+        const before = priorProofs?.get(held.semanticMap)?.get(key);
+        const kept = uncertain
+          ? knownBindingSemantics(before).filter((entry) => !written.includes(entry))
+          : [];
         held.semanticMap.set(key, [...written, ...kept]);
+        if (uncertain && before) {
+          let proofs = definitiveLocalMemberWrites.get(held.semanticMap);
+          if (!proofs) {
+            proofs = new Map();
+            definitiveLocalMemberWrites.set(held.semanticMap, proofs);
+          }
+          proofs.set(key, {
+            sourceValue: held.sourceValue,
+            sources: sourceValueCandidates(held),
+            versions: scope.versions,
+            entry: held.semanticMap.get(key),
+            unknown: before.unknownAlternative || bindingSemantics(before).length === 0,
+          });
+        }
       }
     }
   }
@@ -1798,9 +1988,27 @@ function invalidateUnknownCallGraphs(scope, requests) {
   const publishBatch = (replacements, uncertain) => {
     const first = replacements.entries().next();
     if (first.done) return;
+    const priorProofs = new Map();
+    if (uncertain) {
+      for (let owner = scope; owner; owner = owner.parent) {
+        for (const held of owner.bindings.values()) {
+          if (
+            held.sourceValue?.kind !== 'object' ||
+            !replacements.has(held.sourceValue) ||
+            !held.semanticMap
+          )
+            continue;
+          const keys = new Set([...held.semanticMap.keys(), ...held.sourceValue.members.keys()]);
+          priorProofs.set(
+            held.semanticMap,
+            new Map([...keys].map((key) => [key, selectPatternMember(held, key, scope)]))
+          );
+        }
+      }
+    }
     propagateSourceReference(scope, first.value[0], first.value[1], uncertain, replacements);
     for (const [previous, next] of replacements) {
-      applyCallSemantics(scope, previous, next, [], false, uncertain);
+      applyCallSemantics(scope, previous, next, [], false, uncertain, priorProofs);
     }
   };
   // Definite writes advance the graphs a possible write retained, without
@@ -1981,8 +2189,24 @@ function applyCallSourceMutation(node, scope, captured, receiver, readsOnly) {
       // Object.assign only replaces outer members, even when its sources are
       // unproven; it cannot mutate a previously captured nested container.
       const next = proven ? mutateSourceGraph(current, copied) : mutateSourceGraph(current, null);
-      propagateSourceReference(scope, current, next, uncertain);
-      applyCallSemantics(scope, current, next, copied, proven, uncertain);
+      const copiedKeys = proven
+        ? new Set(copied.flatMap((source) => [...source.members.keys()]))
+        : undefined;
+      const priorProofs = new Map();
+      if (uncertain && copiedKeys) {
+        for (let owner = scope; owner; owner = owner.parent) {
+          for (const held of owner.bindings.values()) {
+            if (held.sourceValue !== current || !held.semanticMap) continue;
+            const valid = new Map();
+            for (const key of copiedKeys) {
+              valid.set(key, selectPatternMember(held, key, scope));
+            }
+            if (valid.size > 0) priorProofs.set(held.semanticMap, valid);
+          }
+        }
+      }
+      propagateSourceReference(scope, current, next, uncertain, undefined, copiedKeys);
+      applyCallSemantics(scope, current, next, copied, proven, uncertain, priorProofs);
     }
   }
   if (mutation.kind === 'unknown') invalidateUnknownCallGraphs(scope, unknownCallValues);
@@ -2077,7 +2301,9 @@ function sourceSummaryValue(node, scope) {
   for (let current = scope; current; current = current.parent) {
     for (const [name, binding] of current.bindings) {
       if (environment.has(name)) continue;
-      if (binding?.sourceValue) environment.set(name, binding.sourceValue);
+      if (binding?.unknownAlternative)
+        environment.set(name, { kind: 'unknown', reason: 'incomplete binding' });
+      else if (binding?.sourceValue) environment.set(name, binding.sourceValue);
       else if (binding?.sourceState)
         environment.set(name, { kind: 'state', state: binding.sourceState });
       else if (binding?.importedBinding || binding?.kind === 'tokenImport') continue;
@@ -2101,7 +2327,7 @@ function sourceSummaryValue(node, scope) {
       if (seen.has(name)) continue;
       seen.add(name);
       if (!referenced.has(name)) continue;
-      const candidates = sourceValueCandidates(binding);
+      const candidates = binding.unknownAlternative ? [] : sourceValueCandidates(binding);
       if (candidates.length > 1) candidateBindings.push({ name, candidates });
     }
   }
@@ -2134,7 +2360,10 @@ function sourceSummaryValue(node, scope) {
   const values = [];
   const seenVersions = new Set();
   for (const candidate of resolutions) {
-    if (!candidate.matched) continue;
+    if (!candidate.matched) {
+      values.push({ kind: 'unknown', reason: 'unmatched source alternative' });
+      continue;
+    }
     const held =
       candidate.value.kind === 'object'
         ? scope.versions.versions(candidate.value)
@@ -2237,6 +2466,7 @@ function resolveExpression(node, scope) {
   // hold tokens and handles at once, so both are read in one pass.
   if (ts.isArrayLiteralExpression(node)) {
     const semantics = new Map();
+    const incomplete = new Set();
     const parts = [];
     let readsAsTokens = true;
     node.elements.forEach((element, index) => {
@@ -2247,9 +2477,11 @@ function resolveExpression(node, scope) {
       const held = resolveBinding(element, scope);
       if (held.unknownAlternative) {
         readsAsTokens = false;
-        return;
+        incomplete.add(String(index));
       }
-      if (held.semantic) semantics.set(String(index), held.semantic);
+      const candidates = knownBindingSemantics(held);
+      if (candidates.length > 0 || held.unknownAlternative)
+        semantics.set(String(index), candidates.length === 1 ? candidates[0] : candidates);
       if (held.single) parts.push(held.single);
       else readsAsTokens = false;
     });
@@ -2260,10 +2492,16 @@ function resolveExpression(node, scope) {
       ? { ...asStringValue([parts.join(',')]), elements: parts }
       : emptyValue();
     const source = sourceSummaryValue(node, scope);
-    if (source && semantics.size > 0) {
+    if (semantics.size > 0) {
       const proofs = new Map();
       for (const [key, entry] of semantics) {
-        proofs.set(key, { sourceValue: source.resolved.value, entry });
+        proofs.set(key, {
+          sourceValue: source?.resolved.value,
+          sources: source ? (source.resolvedValues ?? [source.resolved.value]) : [],
+          versions: scope.versions,
+          entry,
+          unknown: incomplete.has(key),
+        });
       }
       definitiveLocalMemberWrites.set(semantics, proofs);
     }
@@ -2355,18 +2593,9 @@ function resolveExpression(node, scope) {
       // available and never reintroduce a stale source candidate. A null
       // source map means one possible source path is unknown, so even an old
       // local semantic must not certify a convenient branch.
-      const currentSemantics =
-        source.semanticMap === null
-          ? freshLocalMemberSemantics(node, scope)
-          : readMemberSemantics(node, scope);
-      if (currentSemantics.length > 0) {
-        return {
-          ...asSemanticValue(currentSemantics[0]),
-          alternatives: currentSemantics.slice(1),
-          sourceValue: source.resolved.value,
-          sourceValues: source.resolvedValues,
-        };
-      }
+      const selected = selectMemberBinding(node, scope);
+      if (selected && (knownBindingSemantics(selected).length > 0 || selected.unknownAlternative))
+        return selected;
       if (source.semanticMap?.size) {
         if (source.semanticMap.size === 1 && source.semanticMap.has('__state')) {
           const semantic = source.semanticMap.get('__state');
@@ -2422,10 +2651,9 @@ function resolveExpression(node, scope) {
   // leaf resolves to nothing and `w.state(checked)` emits no variant, while the
   // same read through a destructure or through the bag resolves fine.
   if (ts.isPropertyAccessExpression(node) || ts.isElementAccessExpression(node)) {
-    const semantics = readMemberSemantics(node, scope);
-    if (semantics.length > 0) {
-      return { ...asSemanticValue(semantics[0]), alternatives: semantics.slice(1) };
-    }
+    const selected = selectMemberBinding(node, scope);
+    if (selected && (knownBindingSemantics(selected).length > 0 || selected.unknownAlternative))
+      return selected;
   }
 
   if (
@@ -2446,19 +2674,25 @@ function resolveExpression(node, scope) {
   if (ts.isObjectLiteralExpression(node)) {
     const entries = new Map();
     const semantics = new Map();
+    const incomplete = new Set();
     for (const prop of node.properties) {
       if (ts.isPropertyAssignment(prop)) {
         const key = getPropertyName(prop.name);
         if (!key) continue;
         const held = resolveBinding(prop.initializer, scope);
-        if (held.unknownAlternative) continue;
-        if (held.strings.length > 0) entries.set(key, held.strings);
-        if (held.semantic) semantics.set(key, held.semantic);
+        if (held.unknownAlternative) incomplete.add(key);
+        if (!held.unknownAlternative && held.strings.length > 0) entries.set(key, held.strings);
+        const candidates = knownBindingSemantics(held);
+        if (candidates.length > 0 || held.unknownAlternative)
+          semantics.set(key, candidates.length === 1 ? candidates[0] : candidates);
       } else if (ts.isShorthandPropertyAssignment(prop)) {
         const held = lookup(prop.name.text, scope);
-        if (held.unknownAlternative) continue;
-        if (held.strings.length > 0) entries.set(prop.name.text, held.strings);
-        if (held.semantic) semantics.set(prop.name.text, held.semantic);
+        if (held.unknownAlternative) incomplete.add(prop.name.text);
+        if (!held.unknownAlternative && held.strings.length > 0)
+          entries.set(prop.name.text, held.strings);
+        const candidates = knownBindingSemantics(held);
+        if (candidates.length > 0 || held.unknownAlternative)
+          semantics.set(prop.name.text, candidates.length === 1 ? candidates[0] : candidates);
       }
     }
     const value = asMapValue(entries);
@@ -2466,10 +2700,16 @@ function resolveExpression(node, scope) {
     // identity. Retain the summary graph as well so writes and escapes through
     // wrappers reach every alias of the held hook result.
     const source = sourceSummaryValue(node, scope);
-    if (source && semantics.size > 0) {
+    if (semantics.size > 0) {
       const proofs = new Map();
       for (const [key, entry] of semantics) {
-        proofs.set(key, { sourceValue: source.resolved.value, entry });
+        proofs.set(key, {
+          sourceValue: source?.resolved.value,
+          sources: source ? (source.resolvedValues ?? [source.resolved.value]) : [],
+          versions: scope.versions,
+          entry,
+          unknown: incomplete.has(key),
+        });
       }
       definitiveLocalMemberWrites.set(semantics, proofs);
     }
@@ -2569,6 +2809,17 @@ function resolveBinding(node, scope) {
     ];
     const hasUnknownBranch = branches.some((branch) => !bindingHasStatePath(branch));
     const branchSourceValues = branches.map(sourceValueCandidates);
+    const scalarSemantics = [...new Set(branches.flatMap(knownBindingSemantics))];
+    if (scalarSemantics.length > 0) {
+      const allSource = branchSourceValues.every((values) => values.length > 0);
+      const sourceValues = allSource ? [...new Set(branchSourceValues.flat())] : [];
+      return {
+        ...asSemanticValue(scalarSemantics[0]),
+        alternatives: scalarSemantics.slice(1),
+        ...(sourceValues.length > 0 ? { sourceValue: sourceValues[0], sourceValues } : {}),
+        ...(hasUnknownBranch ? { unknownAlternative: true } : {}),
+      };
+    }
     const allSourceBranches = branchSourceValues.every((values) => values.length > 0);
     if (allSourceBranches) {
       const sourceValues = [...new Set(branchSourceValues.flat())];
@@ -2591,18 +2842,7 @@ function resolveBinding(node, scope) {
         containers: [...new Set(branches.flatMap((branch) => branch.containers ?? [branch]))],
         ...(semantics.size > 0 ? { semanticMap: semantics } : {}),
       };
-      joinLocalMemberProofs(source, branches);
-      if (semantics.size > 0) {
-        const entries = [...semantics.values()].flatMap((value) =>
-          Array.isArray(value) ? value : [value]
-        );
-        return {
-          ...source,
-          semantic: entries[0],
-          alternatives: [...new Set(entries.slice(1))],
-          ...(hasUnknownBranch ? { unknownAlternative: true } : {}),
-        };
-      }
+      joinLocalMemberProofs(source, branches, scope);
       return hasUnknownBranch ? { ...source, unknownAlternative: true } : source;
     }
     const semantics = [...new Set(branches.flatMap(bindingSemantics))];
@@ -3740,21 +3980,6 @@ function analyzeWhenVariants(node, scope) {
   }
 }
 
-function resolveStateHandleSemantic(node, scope) {
-  // `w.state(checked!)` and its `as`/parenthesized equivalents name the same
-  // handle as the bare identifier.
-  if (
-    ts.isNonNullExpression(node) ||
-    ts.isParenthesizedExpression(node) ||
-    ts.isAsExpression(node) ||
-    ts.isTypeAssertionExpression(node)
-  ) {
-    return resolveStateHandleSemantic(node.expression, scope);
-  }
-  if (ts.isIdentifier(node)) return lookup(node.text, scope).semantic ?? null;
-  return readMemberSemantics(node, scope)[0] ?? null;
-}
-
 /**
  * `buildSemanticVariant` takes a native variant only for a true comparison, so
  * every other comparison falls back to the attribute the same binding carries.
@@ -3768,25 +3993,23 @@ const NATIVE_VARIANT_ATTRIBUTES = Object.freeze({
 function resolveStateHandleSemantics(node, scope) {
   const inner = unwrapTransparent(node);
   if (ts.isIdentifier(inner)) {
-    const semantics = bindingSemantics(lookup(inner.text, scope));
-    if (semantics.length > 0) return semantics;
+    return bindingSemantics(lookup(inner.text, scope));
   }
   if (ts.isCallExpression(inner)) {
     const resolved = resolveExpression(inner, scope);
-    const semantics = [resolved.semantic, ...(resolved.alternatives ?? [])].filter(Boolean);
+    const semantics = bindingSemantics(resolved);
     if (semantics.length > 0) return semantics;
   }
-  // A source that covers the member but cannot prove it does not hand the
-  // member to the local map: the local map is what a write left behind, and
-  // the source is what the runtime holds. This is the same guard the member
-  // resolution uses, and the source-uncovered path keeps the local map, as it
-  // always did.
-  const source = sourceSummaryValue(inner, scope);
-  if (source && source.semanticMap === null) return freshLocalMemberSemantics(inner, scope);
-  const members = readMemberSemantics(inner, scope);
-  if (members.length > 0) return members;
-  const single = resolveStateHandleSemantic(node, scope);
-  return single ? [single] : [];
+  // Direct member reads enumerate known candidates for CSS; unlike scalar
+  // captures, this projection does not certify an incomplete source-free
+  // binding. A matched source path with unknown members, however, is the
+  // authority for that read and must not be replaced by a partial selector.
+  const selected = selectMemberBinding(inner, scope);
+  const source = selected ? sourceSummaryValue(inner, scope) : null;
+  if (source && source.semanticMap === null) return bindingSemantics(selected);
+  return selected
+    ? knownBindingSemantics(selected)
+    : bindingSemantics(resolveExpression(inner, scope));
 }
 
 function resolveStateEqVariant(semantic, expected, scope) {
@@ -3890,7 +4113,7 @@ function assignIdentifierBinding(node, scope, exposures) {
   }
   if (next.bindingNode) next = { ...next, bindingNode: node };
   if (uncertain && next.semanticMap && next.containers) {
-    joinLocalMemberProofs(next, next.containers);
+    joinLocalMemberProofs(next, next.containers, scope);
   }
   owner.bindings.set(name, next);
 }

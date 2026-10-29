@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { scanRuleStateReads } from '../src/services/lowered-hook-coverage';
 import { createHookSourceSummaryContext } from '../src/services/hook-source-summary';
+import { collectProtoStyleTokensFromFiles } from '../src/services/prototype-style-tokens';
 
 /**
  * Two producers that share one configured name but project different states.
@@ -48,6 +49,159 @@ const scanExtra = async (producerSource: string, consumerLines: string[]) => {
 };
 
 describe('hook source collision order', () => {
+  it.each([
+    [
+      'helper throw reaches caller catch',
+      'function fail() { throw false; } function prime(flag) { try { if (flag) return; fail(); } catch { asA(); } }',
+      'prime(1 === 2);',
+      'alpha',
+      true,
+    ],
+    [
+      'catch own throw does not reach caller continuation',
+      '',
+      'try { throw false; } catch { if (1 === 2) { asA(); throw undefined; } }',
+      'beta',
+      false,
+    ],
+    [
+      'normal finally preserves escaping throw',
+      'function prime(flag) { try { if (flag) { asA(); throw false; } } finally {} }',
+      'prime(1 === 2);',
+      'beta',
+      false,
+    ],
+    [
+      'unreachable finalizer return does not resume throw',
+      'function prime(flag) { try { if (flag) { asA(); throw false; } } finally { if (false) return; } }',
+      'prime(1 === 2);',
+      'beta',
+      false,
+    ],
+    [
+      'finally return resumes throw effects',
+      'function prime(flag) { try { if (flag) { asA(); throw null; } } finally { return; } }',
+      'prime(1 === 1);',
+      'alpha',
+      true,
+    ],
+    [
+      'returning catch preserves normal continuation',
+      'function prime(flag) { try { if (flag) { throw null; } } catch { return; } asA(); }',
+      'prime(1 === 2);',
+      'alpha',
+      true,
+    ],
+    [
+      'throw and return retain reachable catch',
+      'function prime(flag) { try { if (flag) { throw null; } else { return; } } catch { asA(); } }',
+      'prime(1 === 1);',
+      'alpha',
+      true,
+    ],
+    [
+      'nested own getter assignment',
+      'function install({ child }) { if (child) asA(); }',
+      'const source = { nested: { get value() { asA(); return false; } } }; let value; ({ nested: { value } } = source); install({ child: false });',
+      'alpha',
+      true,
+    ],
+    [
+      'known registration through finally',
+      'function prime() { try { asA(); throw null; } finally { return; } }',
+      'prime();',
+      'alpha',
+      false,
+    ],
+    [
+      'ordinary nested own data',
+      'function install({ child }) { if (child) asA(); }',
+      'const source = { nested: { value: false } }; let value; ({ nested: { value } } = source); install({ child: false });',
+      'beta',
+      false,
+    ],
+    [
+      'nested custom iterator',
+      '',
+      'const source = { nested: { [Symbol.iterator]: function* () { asA(); yield false; } } }; let value; ({ nested: [value] } = source);',
+      'alpha',
+      true,
+    ],
+    [
+      'nested pristine array',
+      '',
+      'const source = { nested: [false] }; let value; ({ nested: [value] } = source);',
+      'beta',
+      false,
+    ],
+    [
+      'numeric own keys do not prove iteration',
+      '',
+      'const source = { nested: { 0: false, [Symbol.iterator]: function* () { asA(); yield false; } } }; let value; ({ nested: [value] } = source);',
+      'alpha',
+      true,
+    ],
+    [
+      'falsy false reaches catch before finally return',
+      'function prime() { try { throw false; } catch { asA(); } finally { return; } }',
+      'prime();',
+      'alpha',
+      false,
+    ],
+    [
+      'falsy zero reaches catch',
+      'function prime() { try { throw 0; } catch { asA(); } }',
+      'prime();',
+      'alpha',
+      false,
+    ],
+    [
+      'falsy undefined reaches catch',
+      'function prime() { try { throw undefined; } catch { asA(); } }',
+      'prime();',
+      'alpha',
+      false,
+    ],
+  ])(
+    'retains completion and nested-consumption proof: %s',
+    async (_label, declaration, body, winner, allowUnknown) => {
+      const dir = await mkdtemp(path.join(tmpdir(), 'hook-completion-consumers-'));
+      try {
+        await writeFile(
+          path.join(dir, 'producers.ts'),
+          [
+            PRODUCERS,
+            declaration,
+            `export const asParent = defineAsHook({ name: 'parent', setup() { ${body} } });`,
+          ].join('\n')
+        );
+        const file = path.join(dir, 'consumer.proto.ts');
+        const source = [
+          "import { asParent, asB } from './producers';",
+          'function setup(def) { asParent(); const bag = asB();',
+          rule('w.state(bag.ready).eq(true)'),
+          '} setup(def);',
+        ].join('\n');
+        await writeFile(file, source);
+        const scan = scanRuleStateReads(source, file, createHookSourceSummaryContext());
+        const tokens = await collectProtoStyleTokensFromFiles([file]);
+        if (allowUnknown && scan.unresolved.length > 0) {
+          expect(scan.usages).toEqual([]);
+          expect(scan.unresolved.map(({ expression }) => expression)).toEqual(['bag.ready']);
+        } else {
+          expect(scan.usages.map(({ hook, state }) => ({ hook, state }))).toEqual([
+            { hook: winner === 'alpha' ? 'asA' : 'asB', state: winner },
+          ]);
+          expect(scan.unresolved).toEqual([]);
+        }
+        expect(tokens).not.toContain(`data-[${winner === 'alpha' ? 'beta' : 'alpha'}]:bg-primary`);
+        if (!allowUnknown) expect(tokens).toContain(`data-[${winner}]:bg-primary`);
+      } finally {
+        await rm(dir, { recursive: true, force: true });
+      }
+    }
+  );
+
   it.each([
     [
       'forked captured scalar',

@@ -1901,6 +1901,11 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       toString: true,
       valueOf: true,
     };
+    const normalCompletion = 1;
+    const returnCompletion = 2;
+    const throwCompletion = 4;
+    type Completion = number;
+    let resumptionDepth = 0;
     const runFunction = (
       fn: ts.FunctionLikeDeclaration,
       module: Module,
@@ -1908,16 +1913,16 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       certain: boolean,
       children: Map<string, HookSourceValue>,
       nested: boolean
-    ): void => {
-      if (fn.asteriskToken) return;
+    ): Completion => {
+      if (fn.asteriskToken) return normalCompletion;
       if (activeHelpers.has(fn)) {
         opaque = true;
-        return;
+        return normalCompletion;
       }
       activeHelpers.add(fn);
       activeEnvironments.add(env);
       try {
-        if (fn.body) walk(fn.body, module, env, certain, children, nested);
+        return fn.body ? walk(fn.body, module, env, certain, children, nested) : normalCompletion;
       } finally {
         activeEnvironments.delete(env);
         activeHelpers.delete(fn);
@@ -1983,8 +1988,6 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       entry.initializing = false;
       return installed ?? entry;
     };
-    type Completion = boolean | null | 'throw';
-    let catchDepth = 0;
     const walk = (
       node: ts.Node,
       module: Module,
@@ -2021,7 +2024,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         ])
       );
       const completion = walk(node, module, env, false, children, nested);
-      if (completion === 'throw' && catchDepth === 0) {
+      if (completion === throwCompletion && resumptionDepth === 0) {
         // This alternative cannot reach the caller's next registration. Returns
         // can, as can throws intercepted by an enclosing catch: retain those.
         opaque = beforeOpaque;
@@ -2033,6 +2036,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       }
       return completion;
     };
+    const finalizerMayResume = (node: ts.Node): boolean => {
+      if (isFunctionLike(node)) return false;
+      if (ts.isReturnStatement(node) || ts.isBreakStatement(node) || ts.isContinueStatement(node))
+        return true;
+      return ts.forEachChild(node, finalizerMayResume) === true;
+    };
     const walkNode = (
       node: ts.Node,
       module: Module,
@@ -2041,39 +2050,46 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
       children: Map<string, HookSourceValue>,
       nested: boolean
     ): Completion => {
-      if (ts.isTypeNode(node)) return true;
+      if (ts.isTypeNode(node)) return normalCompletion;
       if (isFunctionLike(node)) {
         if (node.name && ts.isComputedPropertyName(node.name))
-          walk(node.name, module, env, certain, children, nested);
-        return true;
+          return walk(node.name, module, env, certain, children, nested);
+        return normalCompletion;
       }
       if (ts.isComputedPropertyName(node)) {
-        walk(node.expression, module, env, certain, children, nested);
+        const completion = walk(node.expression, module, env, certain, children, nested);
+        if (!(completion & normalCompletion)) return completion;
         const key = literal(node.expression, module, env);
         if (key === unknownLiteral || (typeof key === 'object' && key !== null)) {
           invalidateAggregates();
           opaque = true;
         }
-        return true;
+        return completion;
       }
       if (ts.isExpressionStatement(node))
         return walk(node.expression, module, env, certain, children, nested);
       if (ts.isAwaitExpression(node) || ts.isYieldExpression(node)) {
-        if (node.expression) walk(node.expression, module, env, certain, children, nested);
+        const completion = node.expression
+          ? walk(node.expression, module, env, certain, children, nested)
+          : normalCompletion;
         opaque = true;
-        return false;
+        return (
+          (completion & ~normalCompletion) | (completion & normalCompletion ? returnCompletion : 0)
+        );
       }
       if (ts.isDeleteExpression(node)) {
-        walk(node.expression, module, env, certain, children, nested);
+        const completion = walk(node.expression, module, env, certain, children, nested);
+        if (!(completion & normalCompletion)) return completion;
         invalidateAggregates();
-        return true;
+        return completion;
       }
       if (
         (ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
         (node.operator === ts.SyntaxKind.PlusPlusToken ||
           node.operator === ts.SyntaxKind.MinusMinusToken)
       ) {
-        walk(node.operand, module, env, certain, children, nested);
+        const completion = walk(node.operand, module, env, certain, children, nested);
+        if (!(completion & normalCompletion)) return completion;
         const operand = unwrap(node.operand);
         if (ts.isPropertyAccessExpression(operand) || ts.isElementAccessExpression(operand))
           invalidateAggregates();
@@ -2090,48 +2106,76 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           );
           capabilities(env).set(key, 'unknown');
         }
-        return true;
+        return completion;
       }
       if (ts.isBlock(node)) {
-        let continuationCertain = certain;
-        let conditionalCompletion = false;
+        let completion = normalCompletion;
         for (const statement of node.statements) {
-          const completion = walk(statement, module, env, continuationCertain, children, nested);
-          if (completion === false || completion === 'throw') {
-            // A previous conditional may already have returned to the caller.
-            // A later throw terminates only its surviving alternative, not that
-            // earlier return's effects. Keep the mixed completion conservative.
-            return conditionalCompletion ? null : completion;
-          }
-          if (completion === null) {
-            continuationCertain = false;
-            conditionalCompletion = true;
-          }
+          if (!(completion & normalCompletion)) break;
+          const next = walk(
+            statement,
+            module,
+            env,
+            certain && completion === normalCompletion,
+            children,
+            nested
+          );
+          completion = (completion & ~normalCompletion) | next;
         }
-        return conditionalCompletion ? null : true;
+        return completion;
       }
       if (ts.isReturnStatement(node) || ts.isThrowStatement(node)) {
-        if (node.expression) walk(node.expression, module, env, certain, children, nested);
-        return ts.isThrowStatement(node) ? 'throw' : false;
+        const expression = node.expression
+          ? walk(node.expression, module, env, certain, children, nested)
+          : normalCompletion;
+        return (
+          (expression & ~normalCompletion) |
+          (expression & normalCompletion
+            ? ts.isThrowStatement(node)
+              ? throwCompletion
+              : returnCompletion
+            : 0)
+        );
       }
       if (ts.isTryStatement(node)) {
-        if (node.catchClause) catchDepth++;
+        // A handler can resume only throws from its protected body, not throws
+        // made by that handler itself. A finalizer matters here only if an
+        // abrupt return/break/continue can replace the pending throw.
+        const outerDepth = resumptionDepth;
+        const resumesCatch = !!node.catchClause;
+        const resumesFinally = !!node.finallyBlock && finalizerMayResume(node.finallyBlock);
+        resumptionDepth += Number(resumesCatch) + Number(resumesFinally);
         let completion: Completion;
         try {
           completion = walk(node.tryBlock, module, env, certain, children, nested);
+          if (resumesCatch) resumptionDepth--;
+          if (node.catchClause && completion & throwCompletion) {
+            const caught = walk(
+              node.catchClause.block,
+              module,
+              env,
+              certain && completion === throwCompletion,
+              children,
+              nested
+            );
+            completion = (completion & ~throwCompletion) | caught;
+          }
+          if (node.finallyBlock) {
+            if (resumesFinally) resumptionDepth--;
+            const final = walk(node.finallyBlock, module, env, certain, children, nested);
+            completion = (final & ~normalCompletion) | (final & normalCompletion ? completion : 0);
+          }
         } finally {
-          if (node.catchClause) catchDepth--;
-        }
-        if (node.catchClause && (completion === 'throw' || completion === null))
-          completion = walk(node.catchClause.block, module, env, false, children, nested);
-        if (node.finallyBlock) {
-          const final = walk(node.finallyBlock, module, env, certain, children, nested);
-          if (final === false || final === 'throw') return final;
+          resumptionDepth = outerDepth;
         }
         return completion;
       }
       if (ts.isVariableDeclaration(node)) {
-        if (node.initializer) walk(node.initializer, module, env, certain, children, nested);
+        const completion = node.initializer
+          ? walk(node.initializer, module, env, certain, children, nested)
+          : normalCompletion;
+        if (!(completion & normalCompletion)) return completion;
+        const declarationCertain = certain && completion === normalCompletion;
         if (ts.isIdentifier(node.name)) {
           const key = binding(node.name, module);
           if (key) {
@@ -2146,10 +2190,10 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 ? capabilityOrigin(node.initializer, module, env)
                 : 'authored';
               const value = literal(node.initializer, module, env);
-              env.set(key, certain || !reused ? value : unknownLiteral);
+              env.set(key, declarationCertain || !reused ? value : unknownLiteral);
               capabilities(env).set(
                 key,
-                !reused || certain || previous === next ? next : 'unknown'
+                !reused || declarationCertain || previous === next ? next : 'unknown'
               );
             }
             const initializer = node.initializer ? unwrap(node.initializer) : null;
@@ -2170,11 +2214,11 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
               const result = ownerBinding ? resultBindings.get(ownerBinding) : undefined;
               const callable =
                 typeof method === 'string' ? result?.methods?.get(method) : undefined;
-              if (callable && (!reused || certain)) callableBindings.set(key, callable);
+              if (callable && (!reused || declarationCertain)) callableBindings.set(key, callable);
             }
           }
         }
-        return true;
+        return completion;
       }
       if (ts.isBinaryExpression(node)) {
         const operator = node.operatorToken.kind;
@@ -2186,11 +2230,23 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         const nullish =
           operator === ts.SyntaxKind.QuestionQuestionToken ||
           operator === ts.SyntaxKind.QuestionQuestionEqualsToken;
-        walk(node.left, module, env, certain, children, nested);
+        let completion = walk(node.left, module, env, certain, children, nested);
+        if (!(completion & normalCompletion)) return completion;
         const left = literal(node.left, module, env);
         const runs = and || or || nullish ? registrationRightReachability(operator, left) : true;
-        if (runs !== false)
-          walk(node.right, module, env, certain && runs === true, children, nested);
+        if (runs !== false) {
+          const right = walk(
+            node.right,
+            module,
+            env,
+            certain && completion === normalCompletion && runs === true,
+            children,
+            nested
+          );
+          completion =
+            (completion & ~normalCompletion) | right | (runs === null ? normalCompletion : 0);
+          if (!(completion & normalCompletion)) return completion;
+        }
         if (operator >= ts.SyntaxKind.FirstAssignment && operator <= ts.SyntaxKind.LastAssignment) {
           const target = unwrap(node.left);
           if (
@@ -2198,28 +2254,48 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             (ts.isObjectLiteralExpression(target) || ts.isArrayLiteralExpression(target))
           ) {
             const source = literal(node.right, module, env);
-            const provenData =
-              typeof source === 'object' &&
-              source !== null &&
-              source.epoch === aggregateEpoch &&
-              (ts.isObjectLiteralExpression(target) || (source.array && !aggregateAbsenceUnproved));
-            const ownReads =
-              provenData &&
-              (ts.isObjectLiteralExpression(target)
-                ? target.properties.every((property) => {
+            const consumesOwnData = (pattern: ts.Node, value: Literal): boolean => {
+              const consumed = unwrap(pattern);
+              if (ts.isBinaryExpression(consumed))
+                return consumesOwnData(
+                  consumed.left,
+                  value === undefined ? literal(consumed.right, module, env) : value
+                );
+              if (!ts.isObjectLiteralExpression(consumed) && !ts.isArrayLiteralExpression(consumed))
+                return true;
+              if (
+                typeof value !== 'object' ||
+                value === null ||
+                value.epoch !== aggregateEpoch ||
+                (ts.isArrayLiteralExpression(consumed) &&
+                  (!value.array || aggregateAbsenceUnproved))
+              )
+                return false;
+              return ts.isObjectLiteralExpression(consumed)
+                ? consumed.properties.every((property) => {
                     const name = ts.isShorthandPropertyAssignment(property)
                       ? property.name.text
                       : ts.isPropertyAssignment(property) &&
                           !ts.isComputedPropertyName(property.name)
                         ? property.name.text
                         : null;
-                    return name !== null && source.members.has(name);
+                    return (
+                      name !== null &&
+                      value.members.has(name) &&
+                      (ts.isShorthandPropertyAssignment(property) ||
+                        (ts.isPropertyAssignment(property) &&
+                          consumesOwnData(property.initializer, value.members.get(name))))
+                    );
                   })
-                : target.elements.every(
+                : consumed.elements.every(
                     (element, index) =>
-                      ts.isOmittedExpression(element) || source.members.has(String(index))
-                  ));
-            if (!ownReads) {
+                      ts.isOmittedExpression(element) ||
+                      (!ts.isSpreadElement(element) &&
+                        value.members.has(String(index)) &&
+                        consumesOwnData(element, value.members.get(String(index))))
+                  );
+            };
+            if (!consumesOwnData(target, source)) {
               invalidateAggregates();
               opaque = true;
             }
@@ -2279,7 +2355,12 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 }
               }
             }
-            env.set(key, certain && runs === true ? assigned : unknownLiteral);
+            env.set(
+              key,
+              certain && completion === normalCompletion && runs === true
+                ? assigned
+                : unknownLiteral
+            );
             const previous = capabilities(env).get(key) ?? 'unknown';
             const next =
               operator === ts.SyntaxKind.EqualsToken || and || or || nullish
@@ -2287,60 +2368,85 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 : 'unknown';
             capabilities(env).set(
               key,
-              certain && runs === true ? next : previous === next ? previous : 'unknown'
+              certain && completion === normalCompletion && runs === true
+                ? next
+                : previous === next
+                  ? previous
+                  : 'unknown'
             );
           }
         }
-        return true;
+        return completion;
       }
       if (ts.isIfStatement(node)) {
-        walk(node.expression, module, env, certain, children, nested);
+        const evaluated = walk(node.expression, module, env, certain, children, nested);
+        if (!(evaluated & normalCompletion)) return evaluated;
         const condition = literal(node.expression, module, env);
-        if (condition !== unknownLiteral)
-          return condition
-            ? walk(node.thenStatement, module, env, certain, children, nested)
+        if (condition !== unknownLiteral) {
+          const branch = condition
+            ? walk(
+                node.thenStatement,
+                module,
+                env,
+                certain && evaluated === normalCompletion,
+                children,
+                nested
+              )
             : node.elseStatement
-              ? walk(node.elseStatement, module, env, certain, children, nested)
-              : true;
+              ? walk(
+                  node.elseStatement,
+                  module,
+                  env,
+                  certain && evaluated === normalCompletion,
+                  children,
+                  nested
+                )
+              : normalCompletion;
+          return (evaluated & ~normalCompletion) | branch;
+        }
         const thenEnv = forkEnvironment(env);
         const elseEnv = forkEnvironment(env);
         const first = walkBranch(node.thenStatement, module, thenEnv, children, nested);
         const second = node.elseStatement
           ? walkBranch(node.elseStatement, module, elseEnv, children, nested)
-          : true;
+          : normalCompletion;
         joinCapabilities(env, [
-          ...(first !== false && first !== 'throw' ? [thenEnv] : []),
-          ...(second !== false && second !== 'throw' ? [elseEnv] : []),
+          ...(first & normalCompletion ? [thenEnv] : []),
+          ...(second & normalCompletion ? [elseEnv] : []),
         ]);
         for (const key of env.keys()) env.set(key, unknownLiteral);
-        return first === 'throw' && second === 'throw'
-          ? 'throw'
-          : (first === false || first === 'throw') && (second === false || second === 'throw')
-            ? false
-            : first !== true || second !== true
-              ? null
-              : true;
+        return (evaluated & ~normalCompletion) | first | second;
       }
       if (ts.isConditionalExpression(node)) {
-        walk(node.condition, module, env, certain, children, nested);
+        const evaluated = walk(node.condition, module, env, certain, children, nested);
+        if (!(evaluated & normalCompletion)) return evaluated;
         const condition = literal(node.condition, module, env);
-        if (condition !== unknownLiteral)
-          walk(condition ? node.whenTrue : node.whenFalse, module, env, certain, children, nested);
-        else {
+        if (condition !== unknownLiteral) {
+          const branch = walk(
+            condition ? node.whenTrue : node.whenFalse,
+            module,
+            env,
+            certain && evaluated === normalCompletion,
+            children,
+            nested
+          );
+          return (evaluated & ~normalCompletion) | branch;
+        } else {
           const thenEnv = forkEnvironment(env);
           const elseEnv = forkEnvironment(env);
-          const first = walk(node.whenTrue, module, thenEnv, false, children, nested);
-          const second = walk(node.whenFalse, module, elseEnv, false, children, nested);
+          const first = walkBranch(node.whenTrue, module, thenEnv, children, nested);
+          const second = walkBranch(node.whenFalse, module, elseEnv, children, nested);
           joinCapabilities(env, [
-            ...(first !== false ? [thenEnv] : []),
-            ...(second !== false ? [elseEnv] : []),
+            ...(first & normalCompletion ? [thenEnv] : []),
+            ...(second & normalCompletion ? [elseEnv] : []),
           ]);
           for (const key of env.keys()) env.set(key, unknownLiteral);
+          return (evaluated & ~normalCompletion) | first | second;
         }
-        return true;
       }
       if (ts.isForOfStatement(node)) {
-        walk(node.expression, module, env, certain, children, nested);
+        const evaluated = walk(node.expression, module, env, certain, children, nested);
+        if (!(evaluated & normalCompletion)) return evaluated;
         const loopEnv = forkEnvironment(env);
         const expression = unwrap(node.expression);
         if (
@@ -2354,28 +2460,49 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             if (key) capabilities(loopEnv).set(key, 'native');
           }
         }
-        walk(node.statement, module, loopEnv, false, children, nested);
+        const body = walk(node.statement, module, loopEnv, false, children, nested);
         joinCapabilities(env, [forkEnvironment(env), loopEnv]);
         for (const key of env.keys()) env.set(key, unknownLiteral);
-        return true;
+        return normalCompletion | (evaluated & ~normalCompletion) | (body & ~normalCompletion);
       }
       if (ts.isNewExpression(node)) {
-        walk(node.expression, module, env, certain, children, nested);
-        for (const argument of node.arguments ?? [])
-          walk(argument, module, env, certain, children, nested);
+        let completion = walk(node.expression, module, env, certain, children, nested);
+        for (const argument of node.arguments ?? []) {
+          if (!(completion & normalCompletion)) return completion;
+          const next = walk(
+            argument,
+            module,
+            env,
+            certain && completion === normalCompletion,
+            children,
+            nested
+          );
+          completion = (completion & ~normalCompletion) | next;
+        }
+        if (!(completion & normalCompletion)) return completion;
         // Constructors are not replayed as ordinary helpers. Their unproved
         // effects can both mutate escaped aggregates and install earlier names.
         invalidateAggregates();
         opaque = true;
-        return true;
+        return completion;
       }
       if (ts.isCallExpression(node)) {
-        walk(node.expression, module, env, certain, children, nested);
+        let evaluated = walk(node.expression, module, env, certain, children, nested);
+        if (!(evaluated & normalCompletion)) return evaluated;
         const argumentValues: Literal[] = [];
         const argumentOrigins: CapabilityOrigin[] = [];
         const firstSpread = node.arguments.findIndex(ts.isSpreadElement);
         for (const argument of node.arguments) {
-          walk(argument, module, env, certain, children, nested);
+          const completion = walk(
+            argument,
+            module,
+            env,
+            certain && evaluated === normalCompletion,
+            children,
+            nested
+          );
+          evaluated = (evaluated & ~normalCompletion) | completion;
+          if (!(evaluated & normalCompletion)) return evaluated;
           if (ts.isSpreadElement(argument)) {
             const spread = unwrap(argument.expression);
             // Only a source-local plain array with an unchanged iterator
@@ -2392,6 +2519,7 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           argumentValues.push(literal(argument, module, env));
           argumentOrigins.push(capabilityOrigin(argument, module, env));
         }
+        const callCertain = certain && evaluated === normalCompletion;
         if (memberName(node.expression) === 'method') {
           const owner = memberOwner(node.expression);
           const method = literal(node.arguments[0], module, env);
@@ -2399,15 +2527,15 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
           if (owner && nativeValue(owner, module, env) && typeof method === 'string' && callable) {
             const frame = methodFrames[methodFrames.length - 1];
             if (frame) {
-              const alternative = { ...callable, certain };
-              if (certain) frame.set(method, [alternative]);
+              const alternative = { ...callable, certain: callCertain };
+              if (callCertain) frame.set(method, [alternative]);
               else frame.set(method, [...(frame.get(method) ?? []), alternative]);
             }
           }
         }
         const producer = producerForCall(node, module.source);
         if (producer) {
-          const entry = invoke(producer, certain, nested);
+          const entry = invoke(producer, callCertain, nested);
           const name = producerName(producer);
           if (entry && name !== null) {
             const result = entry.initializing
@@ -2423,18 +2551,23 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
               ]),
             });
           }
-          return true;
+          return evaluated;
         }
-        if (canonicalPrivilegedCall(node, module)) return true;
+        if (canonicalPrivilegedCall(node, module)) return evaluated;
         const calleeBinding = binding(node.expression, module);
         const resolvedHelper = functionFor(node.expression, module);
         const helpers =
           (calleeBinding ? callableBindings.get(calleeBinding) : undefined) ??
           (resolvedHelper ? [{ ...resolvedHelper, certain: true }] : []);
+        let callCompletion = normalCompletion;
         if (helpers.length > 0) {
+          callCompletion = 0;
           for (const helper of helpers) {
-            if (helper.fn.asteriskToken) continue;
-            const helperCertain = certain && helper.certain && helpers.length === 1;
+            if (helper.fn.asteriskToken) {
+              callCompletion |= normalCompletion;
+              continue;
+            }
+            const helperCertain = callCertain && helper.certain && helpers.length === 1;
             const helperEnv = forkEnvironment(env);
             const bindParameter = (
               name: ts.BindingName,
@@ -2544,7 +2677,22 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
                 parameter.initializer
               );
             });
-            runFunction(helper.fn, helper.module, helperEnv, helperCertain, children, nested);
+            const completion = runFunction(
+              helper.fn,
+              helper.module,
+              helperEnv,
+              helperCertain,
+              children,
+              nested
+            );
+            const asyncHelper =
+              ts.canHaveModifiers(helper.fn) &&
+              ts
+                .getModifiers(helper.fn)
+                ?.some((modifier) => modifier.kind === ts.SyntaxKind.AsyncKeyword);
+            if (asyncHelper || completion & (normalCompletion | returnCompletion))
+              callCompletion |= normalCompletion;
+            if (!asyncHelper && completion & throwCompletion) callCompletion |= throwCompletion;
             for (const key of env.keys())
               if (helperEnv.has(key)) {
                 env.set(key, helperEnv.get(key)!);
@@ -2589,16 +2737,26 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
             opaque = true;
           }
         }
-        return true;
+        return (evaluated & ~normalCompletion) | callCompletion;
       }
       const control =
         ts.isIterationStatement(node, false) ||
         ts.isSwitchStatement(node) ||
         ts.isTryStatement(node);
+      let completion = normalCompletion;
       ts.forEachChild(node, (child) => {
-        walk(child, module, env, certain && !control, children, nested);
+        if (!(completion & normalCompletion)) return;
+        const next = walk(
+          child,
+          module,
+          env,
+          certain && !control && completion === normalCompletion,
+          children,
+          nested
+        );
+        completion = (completion & ~normalCompletion) | next;
       });
-      return true;
+      return control ? completion | normalCompletion : completion;
     };
     return {
       entries,
