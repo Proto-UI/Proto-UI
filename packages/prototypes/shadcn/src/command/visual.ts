@@ -1,5 +1,10 @@
 import { createContextKey, tw, type DefHandle, type RunHandle } from '@proto.ui/core';
-import { SHADCN_STYLE_IDS, setupShadcnStyleScope, setupShadcnStyleSelection } from '../style-scope';
+import {
+  SHADCN_STYLE_IDS,
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
 export const COMMAND_PROJECTED_STYLES = SHADCN_STYLE_IDS;
 /** Private owned composition fact; never inferred from wrapped editor DOM. */
 export const COMMAND_INPUT_PAINT = createContextKey<{ command: boolean }>(
@@ -84,14 +89,14 @@ export const COMMAND_PROFILES = {
   },
 } as const;
 
-export function setupCommandStyle(def: DefHandle<any>, root = false) {
+export function setupCommandStyle(def: DefHandle<ShadcnStyleProps>, root = false) {
   if (root) setupShadcnStyleScope(def);
   return setupShadcnStyleSelection(def, 'new-york-v4');
 }
 
-export function setupCommandInputMode(def: DefHandle<any>) {
+export function setupCommandInputMode(def: DefHandle<ShadcnStyleProps>) {
   const command = def.state.bool('commandInputPaint', false);
-  const sync = (run: RunHandle<any>) => {
+  const sync = (run: RunHandle<ShadcnStyleProps>) => {
     command.set(
       run.context.tryRead(COMMAND_INPUT_PAINT)?.command === true,
       'reason: owned Command input wrapper'
@@ -105,7 +110,7 @@ export function setupCommandInputMode(def: DefHandle<any>) {
 }
 
 export function setupCommandPartPaint(
-  def: DefHandle<any>,
+  def: DefHandle<ShadcnStyleProps>,
   part: 'root' | 'wrapper' | 'input' | 'item' | 'empty' | 'list',
   root = false
 ) {

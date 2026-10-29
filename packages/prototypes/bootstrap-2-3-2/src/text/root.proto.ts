@@ -48,7 +48,7 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     });
     def.rule({
       when: (w) => w.prop('size').eq('5xl'),
-      intent: (i) => i.feedback.style.use(tw('text-[60px] leading-[60px]')),
+      intent: (i) => i.feedback.style.use(tw('text-[60px] leading-none')),
     });
     def.rule({
       when: (w) => w.prop('tone').eq('default'),

@@ -192,13 +192,19 @@ describe('bootstrap-2-3-2: Field compositions (simulated WC host)', () => {
 
   it('keeps FieldTextarea standalone policy and rejects external relationship IDs', async () => {
     const standalone = document.createElement(fieldTextarea.name) as Host;
-    setElementProps(standalone, { defaultValue: 'alone', required: true });
+    setElementProps(standalone, { defaultValue: 'alone', required: true, readOnly: true });
     document.body.appendChild(standalone);
     await settle();
     const editor = standalone.querySelector('textarea') as HTMLTextAreaElement;
     expect(editor.value).toBe('alone');
     expect(editor.required).toBe(true);
+    expect(editor.readOnly).toBe(true);
     expect(standalone.getExposes().invalid.get()).toBe(false);
+
+    await update(standalone, { readOnly: false, disabled: true });
+    expect(editor.readOnly).toBe(false);
+    expect(editor.disabled).toBe(true);
+    await update(standalone, { disabled: false });
 
     const rejected = document.createElement(fieldTextarea.name);
     setElementProps(rejected, { labelledBy: 'external-id' });

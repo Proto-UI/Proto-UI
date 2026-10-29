@@ -32,6 +32,15 @@ export default definePrototype<AlertDialogContentProps, AlertDialogContentExpose
           tw('max-w-[min(20rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
         ),
     });
+    const { open } = behavior.stateHandles;
+    def.rule({
+      when: (w) => w.state(open).eq(true),
+      intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
+    });
+    def.rule({
+      when: (w) => w.state(open).eq(false),
+      intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
+    });
     // Existing zero-duration retention is preserved. Modern animation completion
     // cannot be claimed until a lawful profile-selectable Transition default exists.
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });

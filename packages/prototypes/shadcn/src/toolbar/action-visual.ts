@@ -68,9 +68,11 @@ export function setupCollectionHover(def: DefHandle, disabled?: State<boolean>) 
   def.event.on('pointer.leave', clear);
   def.event.on('pointer.cancel', clear);
   def.lifecycle.onUnmounted(clear);
-  disabled?.watch((_run, event) => {
-    if (event.type === 'next' && event.next) clear();
-  });
+  if (disabled && 'watch' in disabled) {
+    disabled.watch((_run, event) => {
+      if (event.type === 'next' && event.next) clear();
+    });
+  }
   return hovered;
 }
 

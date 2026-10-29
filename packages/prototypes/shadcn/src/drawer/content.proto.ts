@@ -15,7 +15,7 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
     for (const profile of ['maia', 'mira', 'luma', 'rhea'] as const) {
       def.rule({
         when: (w) => w.state(style).eq(profile),
-        intent: (i) => i.feedback.style.to(inset).use(tw(DRAWER_INSET[profile])),
+        intent: (i) => i.feedback.style.to(inset).use(DRAWER_INSET[profile]),
       });
     }
     // P-SHADCN-DRAWER-MOTION: fixed Vaul 1.1.2 presentation, separate safety bound.
@@ -84,5 +84,6 @@ export default definePrototype<DrawerContentProps, DrawerContentExposes>({
       entered: { translate: [zero, zero] },
       easing: [0.32, 0.72, 0, 1],
     });
+    return (renderer) => [renderer.decoration(inset), renderer.r.slot()];
   },
 });

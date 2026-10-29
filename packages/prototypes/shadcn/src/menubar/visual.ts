@@ -1,6 +1,7 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { SHADCN_STYLE_IDS } from '../style-scope';
 import { setupMenuStyle } from '../dropdown/visual';
+import type { MenubarRootProps, MenubarTriggerProps } from './types';
 
 /** .cn-menubar and .cn-menubar-trigger, retained 3d98900 style-*.css;
  * independent new-york-v4/ui/menubar.tsx at that pin. */
@@ -40,7 +41,7 @@ const PROFILES = {
   },
 } as const;
 
-export function setupMenubarRootPaint(def: DefHandle<any>) {
+export function setupMenubarRootPaint(def: DefHandle<MenubarRootProps>) {
   const style = setupMenuStyle(def, 'new-york-v4', true);
   def.feedback.style.use(tw('flex min-w-0 items-center'));
   for (const id of SHADCN_STYLE_IDS) {
@@ -52,7 +53,7 @@ export function setupMenubarRootPaint(def: DefHandle<any>) {
 }
 
 export function setupMenubarTriggerPaint(
-  def: DefHandle<any>,
+  def: DefHandle<MenubarTriggerProps>,
   states: {
     disabled: State<boolean>;
     focused: State<boolean>;

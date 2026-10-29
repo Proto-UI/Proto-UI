@@ -63,6 +63,7 @@ interface Unit {
   input(type: string): void;
 }
 function runtimeHarness() {
+  vi.useFakeTimers();
   const parents = new Map<unknown, unknown | null>();
   const prototypes = new Map<unknown, Prototype<any, any>>();
   const globalTarget = document.createElement('div');
@@ -87,8 +88,8 @@ function runtimeHarness() {
       getRawProps: () => props,
       schedule: (task) => task(),
       scheduleDelay(duration, task) {
-        // Forward the Runtime scheduler rather than waiting a guessed duration.
-        // The timeout/pause assertions below drive this bridge with fake time.
+        // The fixture owns fake time; forward the actual Runtime scheduler
+        // without a guessed wall-clock wait or a replacement transition owner.
         const timer = setTimeout(task, duration);
         return { cancel: () => clearTimeout(timer) };
       },
@@ -185,7 +186,11 @@ function runtimeHarness() {
   return {
     create,
     async dispose() {
-      for (const cleanup of cleanups.reverse()) await cleanup();
+      try {
+        for (const cleanup of cleanups.reverse()) await cleanup();
+      } finally {
+        vi.useRealTimers();
+      }
     },
   };
 }
@@ -330,7 +335,6 @@ describe.each(overlays)('Liquid $name functional popup ownership', (parts) => {
 });
 
 it('Toast withdraws its sole surface candidate on timeout and retains Base pause/action ownership', async () => {
-  vi.useFakeTimers();
   const h = runtimeHarness();
   try {
     const viewport = h.create(toast.toastViewport);
@@ -374,7 +378,6 @@ it('Toast withdraws its sole surface candidate on timeout and retains Base pause
     expectOpaqueFallback(root);
   } finally {
     await h.dispose();
-    vi.useRealTimers();
   }
 });
 
@@ -499,6 +502,51 @@ it.each([
       expect(trigger.material().candidates).toEqual([]);
       expectOpaqueFallback(trigger);
     }
+  } finally {
+    await h.dispose();
+  }
+});
+
+it('Dropdown opaque opt-out and raw removal retain one Base command and current-state fallback', async () => {
+  const h = runtimeHarness();
+  const pressedCandidate = (phase: 'rest' | 'pressed') => ({
+    intent: 'liquid-glass',
+    deformation: { kind: 'press', phase, contact: 'pointer' },
+  });
+  try {
+    const root = h.create(dropdown.dropdownRoot);
+    await root.session.mount();
+    const trigger = h.create(dropdown.dropdownTrigger, { material: 'opaque' }, root.target);
+    await trigger.session.mount();
+    const content = h.create(dropdown.dropdownContent, {}, root.target);
+    await content.session.mount();
+    expect(trigger.material()).toEqual({ slot, candidates: [] });
+    expectOpaqueFallback(trigger);
+    trigger.input('pointer.down');
+    expect(trigger.exposes.pressed.get()).toBe(true);
+    expect(trigger.material().candidates).toEqual([]);
+    trigger.input('press.commit');
+    expect(root.exposes.open.get()).toBe(true);
+    expect(root.actions.filter((event) => event.name === 'openChange')).toHaveLength(1);
+    expect(content.material().candidates).toEqual([candidate]);
+    trigger.input('pointer.cancel');
+    trigger.set({});
+    expect(trigger.material().candidates).toEqual([pressedCandidate('rest')]);
+    trigger.input('pointer.down');
+    expect(trigger.material().candidates).toEqual([pressedCandidate('pressed')]);
+    trigger.set({ material: 'opaque' });
+    expect(trigger.exposes.pressed.get()).toBe(true);
+    expect(trigger.material().candidates).toEqual([]);
+    expectOpaqueFallback(trigger);
+    trigger.set({ material: undefined });
+    expect(trigger.material().candidates).toEqual([pressedCandidate('pressed')]);
+    trigger.set({ disabled: true });
+    expect(trigger.exposes.pressed.get()).toBe(false);
+    expect(trigger.material().candidates).toEqual([]);
+    trigger.set({});
+    expect(trigger.material().candidates).toEqual([pressedCandidate('rest')]);
+    expect(root.actions.filter((event) => event.name === 'openChange')).toHaveLength(1);
+    expect(trigger.frames.every((frame) => frame.material.candidates.length <= 1)).toBe(true);
   } finally {
     await h.dispose();
   }
@@ -753,6 +801,20 @@ it('Dropdown group keeps caller content, live label withdrawal and passive short
   item.addEventListener('select', (event) => actions.push((event as CustomEvent).detail));
   shortcut.dispatchEvent(new KeyboardEvent('keydown', { key: 'p', metaKey: true, bubbles: true }));
   expect(actions).toEqual([]);
+  item.focus();
+  await flush();
+  expect(shortcut.getExposes().active.get()).toBe(true);
+  setElementProps(item, { value: 'profile', textValue: 'Profile', disabled: true });
+  item.focus();
+  await flush();
+  expect(item.getExposes().disabled.get()).toBe(true);
+  expect(item.getExposes().focused.get()).toBe(true);
+  expect(shortcut.getExposes().active.get()).toBe(true);
+  expect((shortcut.getAttribute('data-pui-style') ?? '').split(/\s+/)).toContain('text-inherit');
+  item.click();
+  expect(actions).toEqual([]);
+  setElementProps(item, { value: 'profile', textValue: 'Profile' });
+  await flush();
   label.remove();
   await flush();
   expect(group.hasAttribute('aria-labelledby')).toBe(false);

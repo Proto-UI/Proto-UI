@@ -1,4 +1,4 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import { asDrawerMask, type DrawerMaskExposes } from '@proto.ui/prototypes-base/drawer';
 import type { DrawerMaskProps } from './types';
 import { setupOverlayMask } from '../dialog/style';

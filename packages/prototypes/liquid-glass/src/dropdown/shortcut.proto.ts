@@ -8,7 +8,10 @@ export default definePrototype<DropdownShortcutProps>({
     if (!state.stateHandles) throw new Error('Dropdown Shortcut capture missing');
     def.rule({
       when: (w) => w.state(state.stateHandles!.active).eq(true),
-      intent: (i) => i.feedback.style.use(tw('text-accent-foreground')),
+      // Active can also mean a focusable disabled Item. Inherit that Item's
+      // current foreground instead of assuming an enabled accent background.
+      intent: (i) => i.feedback.style.use(tw('text-inherit')),
     });
+    return state.render;
   },
 });

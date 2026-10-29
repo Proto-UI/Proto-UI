@@ -37,7 +37,7 @@ function toPositiveNumber(value: unknown, fallback: number): number {
 }
 
 function renderIndicatorIcon(
-  renderer: Pick<RendererHandle<any>, 'svg'>,
+  renderer: Pick<RendererHandle<ShadcnDropdownTriggerProps>, 'svg'>,
   options: {
     icon: 'chevron-down' | 'chevrons-up-down';
     size: number;

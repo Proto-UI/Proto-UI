@@ -3,10 +3,9 @@ import type {
   ResizableRootExposes,
   ResizablePanelProps,
   ResizablePanelExposes,
-  ResizableHandleProps,
   ResizableHandleExposes,
 } from '@proto.ui/prototypes-base/resizable';
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, tw, delay, type RunHandle } from '@proto.ui/core';
 import {
   asResizableRoot,
   asResizablePanel,
@@ -16,16 +15,16 @@ import {
 import {
   setupShadcnStyleScope,
   setupShadcnStyleSelection,
+  SHADCN_STYLE_SCOPE,
   type ShadcnStyleProps,
 } from '../style-scope';
 export type * from '@proto.ui/prototypes-base/resizable';
 export type ShadcnResizableRootProps = ResizableRootProps & ShadcnStyleProps;
 export type ShadcnResizablePanelProps = ResizablePanelProps & ShadcnStyleProps;
-export type ShadcnResizableHandleProps = ResizableHandleProps &
-  ShadcnStyleProps & {
-    /** Optional inert grip paint, not another drag/focus target. */
-    withHandle?: boolean;
-  };
+export type ShadcnResizableHandleProps = ShadcnStyleProps & {
+  /** Optional inert grip paint, not another drag/focus target. */
+  withHandle?: boolean;
+};
 
 export const resizableRoot = definePrototype<ShadcnResizableRootProps, ResizableRootExposes>({
   name: 'shadcn-resizable-root',
@@ -46,6 +45,7 @@ export const resizablePanel = definePrototype<ShadcnResizablePanelProps, Resizab
   modules: asResizablePanel.modules,
   setup(def) {
     const inherited = asResizablePanel();
+    setupShadcnStyleSelection(def, 'new-york-v4');
     // Base owns complementary size and its percentage flex basis. The
     // upstream Panel is deliberately unstyled; never overwrite that basis.
     return inherited.render;
@@ -61,12 +61,26 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
     const state = inherited.stateHandles!;
     const style = setupShadcnStyleSelection(def, 'new-york-v4');
     const axis = def.state.string('shadcnResizableAxis', 'horizontal');
-    def.context.subscribe(RESIZABLE_CONTEXT, (run) => {
+    let mounted = false;
+    let pending: { cancel(): void } | null = null;
+    const refresh = (run: RunHandle<ShadcnResizableHandleProps>) => {
+      if (!mounted) return;
+      pending?.cancel();
+      pending = delay(0, () => {
+        pending = null;
+        if (mounted) run.update();
+      });
+    };
+    const syncAxis = (run: RunHandle<ShadcnResizableHandleProps>) => {
       axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
-    });
-    def.lifecycle.onCreated((run) => {
-      axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
-    });
+      refresh(run);
+    };
+    def.context.subscribe(RESIZABLE_CONTEXT, syncAxis);
+    def.lifecycle.onCreated(syncAxis);
+    // Observe selector inputs after setupShadcnStyleSelection; its own State
+    // is not an author-watchable borrowed handle.
+    def.context.trySubscribe(SHADCN_STYLE_SCOPE, refresh);
+    def.props.watchRaw(['styleProfile'], refresh);
     def.props.define({ withHandle: { type: 'boolean', empty: 'fallback' } });
     def.props.setDefaults({ withHandle: false });
     def.feedback.style.use(
@@ -95,22 +109,24 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
       intent: (i) => i.feedback.style.use(tw('opacity-50')),
     });
     // Ordinary decorative containers preserve the one inherited input owner.
-    // Upstream's 4px pseudo hit-slop is not replaced with a larger separator;
-    // it requires the shared hit-region capability and separate native proof.
-    let mounted = false;
+    // Upstream's .25rem pseudo hit-slop is not replaced with a wider layout
+    // separator. Exact expansion around 1px needs a mixed-unit self inset;
+    // the current public hit-inset vocabulary accepts only a px or rem length.
     def.lifecycle.onMounted(() => {
       mounted = true;
     });
     def.lifecycle.onUnmounted(() => {
       mounted = false;
+      pending?.cancel();
+      pending = null;
     });
-    for (const fact of [style, axis]) {
-      fact.watch((run, event) => {
-        if (mounted && event.type === 'next') run.update();
-      });
-    }
+    def.lifecycle.onBeforeDispose(() => {
+      mounted = false;
+      pending?.cancel();
+      pending = null;
+    });
     return (r) => {
-      if (!r.props.get().withHandle) return inherited.render ? inherited.render(r) : r.slot();
+      if (!r.read.props.get().withHandle) return inherited.render ? inherited.render(r) : r.slot();
       const vertical = axis.get() === 'vertical';
       if (style.get() === 'new-york-v4') {
         return [
@@ -125,22 +141,26 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
                     'pointer-events-none z-10 flex h-4 w-3 items-center justify-center rounded-xs border border-border bg-border'
                   ),
             },
-            r.svg.root(
-              {
-                viewBox: '0 0 24 24',
-                width: '100%',
-                height: '100%',
-                'aria-hidden': 'true',
-                fill: 'none',
-                stroke: 'currentColor',
-                strokeWidth: 2,
-                strokeLinecap: 'round',
-              },
-              r.svg.path({
-                d: vertical
-                  ? 'M8 9h.01M12 9h.01M16 9h.01M8 15h.01M12 15h.01M16 15h.01'
-                  : 'M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01',
-              })
+            r.el(
+              'span',
+              { style: tw('block size-2.5') },
+              r.svg.root(
+                {
+                  viewBox: '0 0 24 24',
+                  width: '100%',
+                  height: '100%',
+                  'aria-hidden': 'true',
+                  fill: 'none',
+                  stroke: 'currentColor',
+                  strokeWidth: 2,
+                  strokeLinecap: 'round',
+                },
+                r.svg.path({
+                  d: vertical
+                    ? 'M8 9h.01M12 9h.01M16 9h.01M8 15h.01M12 15h.01M16 15h.01'
+                    : 'M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01',
+                })
+              )
             )
           ),
           r.slot(),

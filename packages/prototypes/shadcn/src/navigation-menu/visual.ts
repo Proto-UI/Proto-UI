@@ -1,6 +1,38 @@
-import { tw, type DefHandle, type State } from '@proto.ui/core';
-import { SHADCN_STYLE_IDS } from '../style-scope';
+import { createContextKey, tw, type DefHandle, type RunHandle, type State } from '@proto.ui/core';
+import { SHADCN_STYLE_IDS, type ShadcnStyleProps } from '../style-scope';
 import { setupMenuStyle } from '../dropdown/visual';
+import type { NavigationMenuContentProps } from './types';
+
+type ActionPaintProps = ShadcnStyleProps & { current?: boolean };
+
+export const NAVIGATION_CONTENT_PAINT = createContextKey<{ content: boolean }>(
+  'shadcn-navigation-content-paint'
+);
+const CONTENT_LINK = {
+  vega: 'gap-1.5 rounded-sm p-2 text-sm',
+  nova: 'gap-2 rounded-md p-2 text-sm',
+  maia: 'gap-1.5 rounded-[var(--pui-radius-xl)] p-3 text-sm',
+  lyra: 'gap-2 rounded-none p-2 text-xs',
+  mira: 'gap-1.5 rounded-md p-2 text-xs leading-relaxed',
+  luma: 'gap-1.5 rounded-[var(--pui-radius-2xl)] p-3 text-sm',
+  sera: 'gap-1.5 rounded-none p-3 text-sm',
+  rhea: 'gap-2 rounded-[var(--pui-radius-xl)] p-2 text-sm font-normal w-full',
+  'new-york-v4': 'flex-col gap-1 rounded-sm p-2 text-sm',
+} as const;
+
+function setupNavigationContentMode(def: DefHandle<ActionPaintProps>) {
+  const content = def.state.bool('navigationContentPaint', false);
+  const sync = (run: RunHandle<ActionPaintProps>) =>
+    content.set(
+      run.context.tryRead(NAVIGATION_CONTENT_PAINT)?.content === true,
+      'reason: owned Navigation Content boundary'
+    );
+  def.context.trySubscribe(NAVIGATION_CONTENT_PAINT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.lifecycle.onUpdated(sync);
+  return content;
+}
 
 /** Source: 3d98900 apps/v4/registry/styles/style-*.css, navigation-menu
  * trigger/link/content/popup; independent new-york-v4/ui/navigation-menu.tsx.
@@ -63,16 +95,18 @@ const PROFILES = {
 } as const;
 
 export function setupNavigationActionPaint(
-  def: DefHandle<any>,
+  def: DefHandle<ActionPaintProps>,
   states: {
     disabled: State<boolean>;
     focused: State<boolean>;
     focusVisible: State<boolean>;
     expanded?: State<boolean>;
   },
-  trigger: boolean
+  kind: 'trigger' | 'link' | 'item'
 ) {
+  const trigger = kind === 'trigger';
   const style = setupMenuStyle(def);
+  const content = setupNavigationContentMode(def);
   def.feedback.style.use(
     tw(
       trigger
@@ -83,14 +117,30 @@ export function setupNavigationActionPaint(
   for (const id of SHADCN_STYLE_IDS) {
     const recipe = PROFILES[id];
     def.rule({
-      when: (w) => w.state(style).eq(id),
+      when: (w) =>
+        trigger ? w.state(style).eq(id) : w.all(w.state(style).eq(id), w.state(content).eq(false)),
       intent: (i) => i.feedback.style.use(tw(trigger ? recipe.trigger : recipe.link)),
     });
+    if (!trigger)
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(id), w.state(content).eq(true)),
+        intent: (i) => i.feedback.style.use(tw(CONTENT_LINK[id])),
+      });
     def.rule({
-      when: (w) => w.all(w.state(style).eq(id), w.state(states.focusVisible).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(style).eq(id),
+          w.state(states.focusVisible).eq(true),
+          w.state(content).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw(recipe.focus)),
     });
   }
+  if (!trigger)
+    def.rule({
+      when: (w) => w.all(w.state(content).eq(true), w.state(states.focused).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('ring-0 outline-none')),
+    });
   def.rule({
     when: (w) => w.all(w.not(w.state(style).eq('new-york-v4')), w.state(states.focused).eq(true)),
     intent: (i) => i.feedback.style.use(tw('bg-muted')),
@@ -119,7 +169,7 @@ export function setupNavigationActionPaint(
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/50 text-accent-foreground')),
     });
-  } else {
+  } else if (kind === 'link') {
     // current is the actual public Base native-link fact, not an ancestor selector.
     def.rule({
       when: (w) =>
@@ -146,7 +196,7 @@ export function setupNavigationActionPaint(
   });
 }
 
-export function setupNavigationContentPaint(def: DefHandle<any>) {
+export function setupNavigationContentPaint(def: DefHandle<NavigationMenuContentProps>) {
   const style = setupMenuStyle(def);
   def.feedback.style.use(
     tw(

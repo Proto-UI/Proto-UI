@@ -27,7 +27,7 @@ import { setupCollectionActionVisual, setupCollectionHover } from '../toolbar/ac
 import { setupDataTableText, setupDataTableCell } from './visual';
 export type * from '@proto.ui/prototypes-base/data-table';
 export type ShadcnDataTableRootProps = DataTableRootProps & ShadcnStyleProps;
-export type ShadcnDataTableRowProps = DataTableRowProps & ShadcnStyleProps;
+export type ShadcnDataTableRowProps = DataTableRowProps;
 export type ShadcnDataTableCellProps = DataTableCellProps & ShadcnStyleProps;
 export type ShadcnDataTableHeaderProps = DataTableHeaderProps & ShadcnStyleProps;
 export type ShadcnDataTableCaptionProps = DataTableCaptionProps & ShadcnStyleProps;
@@ -36,6 +36,7 @@ export type ShadcnDataTableNextProps = DataTableNextProps & ShadcnStyleProps;
 
 export const dataTableRoot = definePrototype<ShadcnDataTableRootProps, DataTableRootExposes>({
   name: 'shadcn-data-table-root',
+  modules: asDataTableRoot.modules,
   setup(def) {
     const behavior = asDataTableRoot();
     setupShadcnStyleScope(def);
@@ -48,11 +49,11 @@ export { dataTableRoot as shadcnDataTableRoot };
 
 export const dataTableRow = definePrototype<ShadcnDataTableRowProps, DataTableRowExposes>({
   name: 'shadcn-data-table-row',
+  modules: asDataTableRow.modules,
   setup(def) {
     const behavior = asDataTableRow();
     const state = behavior.stateHandles;
     if (!state) throw new Error('[shadcn-data-table] Row state unavailable.');
-    setupDataTableText(def);
     const hovered = setupCollectionHover(def);
     def.feedback.style.use(tw('table-row border-b border-border transition-colors'));
     def.rule({
@@ -77,6 +78,7 @@ export { dataTableRow as shadcnDataTableRow };
 
 export const dataTableCell = definePrototype<ShadcnDataTableCellProps, DataTableCellExposes>({
   name: 'shadcn-data-table-cell',
+  modules: asDataTableCell.modules,
   setup(def) {
     const behavior = asDataTableCell();
     setupDataTableCell(def);
@@ -87,6 +89,7 @@ export { dataTableCell as shadcnDataTableCell };
 
 export const dataTableHeader = definePrototype<ShadcnDataTableHeaderProps, DataTableHeaderExposes>({
   name: 'shadcn-data-table-header',
+  modules: asDataTableHeader.modules,
   setup(def) {
     const behavior = asDataTableHeader();
     setupDataTableCell(def, true);
@@ -106,6 +109,7 @@ export const dataTableCaption = definePrototype<
   DataTableCaptionExposes
 >({
   name: 'shadcn-data-table-caption',
+  modules: asDataTableCaption.modules,
   setup(def) {
     const behavior = asDataTableCaption();
     setupDataTableText(def);
@@ -120,6 +124,7 @@ export const dataTablePrevious = definePrototype<
   DataTablePreviousExposes
 >({
   name: 'shadcn-data-table-previous',
+  modules: asDataTablePrevious.modules,
   setup(def) {
     const behavior = asDataTablePrevious();
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
@@ -132,6 +137,7 @@ export { dataTablePrevious as shadcnDataTablePrevious };
 
 export const dataTableNext = definePrototype<ShadcnDataTableNextProps, DataTableNextExposes>({
   name: 'shadcn-data-table-next',
+  modules: asDataTableNext.modules,
   setup(def) {
     const behavior = asDataTableNext();
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;

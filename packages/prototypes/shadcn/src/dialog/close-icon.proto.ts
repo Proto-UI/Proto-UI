@@ -12,7 +12,7 @@ const dialogCloseIcon = definePrototype<ShadcnDialogCloseProps, ShadcnDialogClos
     const accessible = asAccessible();
     const state = asDialogClose().stateHandles;
     if (!state) throw new Error('[shadcn-dialog-close-icon] command states are required.');
-    const { disabled, hovered, focusVisible } = state;
+    const { disabled, hovered, focusVisible, pressed } = state;
     const style = setupOverlayPaint(def, DIALOG_CLOSE_ICON);
 
     accessible.name('Close');
@@ -44,6 +44,11 @@ const dialogCloseIcon = definePrototype<ShadcnDialogCloseProps, ShadcnDialogClos
         when: (w) => w.all(w.state(style).eq(profile), w.state(focusVisible).eq(true)),
         intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[profile])),
       });
+      def.rule({
+        when: (w) =>
+          w.all(w.state(style).eq(profile), w.state(pressed).eq(true), w.state(disabled).eq(false)),
+        intent: (i) => i.feedback.style.use(tw('translate-y-px')),
+      });
     }
     def.rule({
       when: (w) => w.state(disabled).eq(true),
@@ -55,8 +60,8 @@ const dialogCloseIcon = definePrototype<ShadcnDialogCloseProps, ShadcnDialogClos
       renderer.svg.root(
         {
           viewBox: '0 0 24 24',
-          width: style.get() === 'mira' ? 12 : 16,
-          height: style.get() === 'mira' ? 12 : 16,
+          width: 16,
+          height: 16,
           fill: 'none',
           stroke: 'currentColor',
           strokeWidth: 2,

@@ -46,11 +46,11 @@ export const resizableHandle = definePrototype<ResizableHandleProps, ResizableHa
     def.feedback.style.use(tw('shrink-0 basis-[5px] border border-[#ccc] bg-[#eee] outline-none'));
     def.rule({
       when: (w) => w.state(state.orientation).eq('vertical'),
-      intent: (i) => i.feedback.style.use(tw('cursor-col-resize')),
+      intent: (i) => i.feedback.style.use(tw('cursor-ew-resize')),
     });
     def.rule({
       when: (w) => w.state(state.orientation).eq('horizontal'),
-      intent: (i) => i.feedback.style.use(tw('cursor-row-resize')),
+      intent: (i) => i.feedback.style.use(tw('cursor-ns-resize')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),

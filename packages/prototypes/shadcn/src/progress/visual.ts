@@ -21,7 +21,7 @@ const TRACK: Record<ShadcnStyleId, StyleHandle> = {
   mira: tw('h-1 rounded-md bg-muted'),
   luma: tw('h-3 rounded-full bg-muted'),
   sera: tw('h-0.5 rounded-none bg-muted'),
-  rhea: tw('h-2 rounded-2xl bg-muted'),
+  rhea: tw('h-2 rounded-[var(--pui-radius-2xl)] bg-muted'),
   'new-york-v4': tw('h-2 rounded-full bg-primary/20'),
 };
 

@@ -21,6 +21,7 @@ export default definePrototype<ShadcnAlertDialogCancelProps, AlertDialogCancelEx
         hovered: state('hovered')!,
         focusVisible: state('focusVisible')!,
         disabled: state('disabled')!,
+        pressed: state('pressed')!,
       },
       'outline'
     );

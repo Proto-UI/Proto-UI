@@ -1,6 +1,7 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { SHADCN_STYLE_IDS, setupShadcnStyleSelection } from '../style-scope';
 import { setupCommandInputMode } from '../command/visual';
+import type { InputShellProps, InputShellControlProps } from './types';
 
 /** MIT shadcn-ui/ui@3d98900 style-*.css .cn-input-group and
  * .cn-command-input-group, plus independent new-york-v4/ui/input-group.tsx.
@@ -59,7 +60,7 @@ const SHELL_PROFILES = {
   },
 } as const;
 
-export function setupInputShellPaint(def: DefHandle<any>) {
+export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   const command = setupCommandInputMode(def);
   def.feedback.style.use(tw('relative flex w-full min-w-0 items-center outline-none'));
@@ -132,7 +133,10 @@ const CONTROL_PROFILES = {
   'new-york-v4': 'h-9 px-3 py-1 text-base',
 } as const;
 
-export function setupInputShellControlPaint(def: DefHandle<any>, disabled: State<boolean>) {
+export function setupInputShellControlPaint(
+  def: DefHandle<InputShellControlProps>,
+  disabled: State<boolean>
+) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(

@@ -81,10 +81,10 @@ export const VALUES_RAIL: Record<
   },
   rhea: {
     horizontal: tw(
-      'pointer-events-none absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 rounded-2xl bg-input/90'
+      'pointer-events-none absolute left-0 top-1/2 h-1 w-full -translate-y-1/2 rounded-[var(--pui-radius-2xl)] bg-input/90'
     ),
     vertical: tw(
-      'pointer-events-none absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 rounded-2xl bg-input/90'
+      'pointer-events-none absolute left-1/2 top-0 h-full w-1 -translate-x-1/2 rounded-[var(--pui-radius-2xl)] bg-input/90'
     ),
   },
   'new-york-v4': {
@@ -130,8 +130,8 @@ export const VALUES_RANGE: Record<
     vertical: tw('h-[calc(var(--pui-extent)*1%)] w-0.5 rounded-none'),
   },
   rhea: {
-    horizontal: tw('w-[calc(var(--pui-extent)*1%)] h-1 rounded-2xl'),
-    vertical: tw('h-[calc(var(--pui-extent)*1%)] w-1 rounded-2xl'),
+    horizontal: tw('w-[calc(var(--pui-extent)*1%)] h-1 rounded-[var(--pui-radius-2xl)]'),
+    vertical: tw('h-[calc(var(--pui-extent)*1%)] w-1 rounded-[var(--pui-radius-2xl)]'),
   },
   'new-york-v4': {
     horizontal: tw('w-[calc(var(--pui-extent)*1%)] h-1.5 rounded-full'),
@@ -236,13 +236,13 @@ export const VALUES_THUMB_PAINT: Record<
   },
   rhea: {
     rest: tw(
-      'pointer-events-none block size-4 shrink-0 rounded-2xl bg-white shadow-md ring-black/10 ring-1 transition-[color,box-shadow] duration-200 select-none'
+      'pointer-events-none block size-4 shrink-0 rounded-[var(--pui-radius-2xl)] bg-white shadow-md ring-black/10 ring-1 transition-[color,box-shadow] duration-200 select-none'
     ),
     hover: tw(
-      'pointer-events-none block size-4 shrink-0 rounded-2xl bg-white shadow-md ring-ring/30 ring-4 transition-[color,box-shadow] duration-200 select-none'
+      'pointer-events-none block size-4 shrink-0 rounded-[var(--pui-radius-2xl)] bg-white shadow-md ring-ring/30 ring-4 transition-[color,box-shadow] duration-200 select-none'
     ),
     focus: tw(
-      'pointer-events-none block size-4 shrink-0 rounded-2xl bg-white shadow-md ring-ring/30 ring-4 forced-colors-focus-outline transition-[color,box-shadow] duration-200 select-none'
+      'pointer-events-none block size-4 shrink-0 rounded-[var(--pui-radius-2xl)] bg-white shadow-md ring-ring/30 ring-4 forced-colors-focus-outline transition-[color,box-shadow] duration-200 select-none'
     ),
   },
   'new-york-v4': {

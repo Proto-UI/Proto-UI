@@ -10,7 +10,11 @@ export default definePrototype<InputOtpInputProps, InputOtpControlExposes>({
     const inherited = asInputOtpControl();
     const binding = inherited.getAsHookHandle!('as-field-control');
     if (!binding) throw new Error('[bootstrap-2-3-2-input-otp-control] Field binding required.');
-    setupInputVisual(def, inherited.stateHandles!, binding.state.invalid);
+    setupInputVisual(
+      def,
+      { ...inherited.stateHandles!, readOnly: binding.state.fieldReadOnly },
+      binding.state.invalid
+    );
     def.feedback.style.use(tw('tabular-nums'));
     return inherited.render;
   },

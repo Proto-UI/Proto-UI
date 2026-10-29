@@ -13,7 +13,11 @@ const dialogMask = definePrototype<ShadcnDialogMaskProps, ShadcnDialogMaskExpose
     dialog.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
-    setupOverlayMask(def, { opaqueFallback: true });
+    const style = setupOverlayMask(def, { opaqueFallback: true });
+    def.rule({
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
+      intent: (i) => i.feedback.style.use(tw('duration-100')),
+    });
 
     def.rule({
       when: (w) => w.state(open).eq(true),

@@ -2,6 +2,7 @@ import type {
   DropdownContentAsHookContract,
   DropdownContentExposes,
   DropdownContentProps,
+  DropdownGroupProps,
   DropdownItemAsHookContract,
   DropdownItemExposes,
   DropdownItemProps,
@@ -9,6 +10,8 @@ import type {
   DropdownRootAsHookContract,
   DropdownRootExposes,
   DropdownRootProps,
+  DropdownSeparatorProps,
+  DropdownShortcutProps,
   DropdownTriggerAsHookContract,
   DropdownTriggerExposes,
   DropdownTriggerProps,
@@ -44,3 +47,6 @@ export type ShadcnDropdownItemAsHookContract = DropdownItemAsHookContract;
 export interface ShadcnDropdownLabelProps extends DropdownLabelProps, ShadcnStyleProps {
   inset?: boolean;
 }
+export type ShadcnDropdownGroupProps = DropdownGroupProps & ShadcnStyleProps;
+export type ShadcnDropdownSeparatorProps = DropdownSeparatorProps & ShadcnStyleProps;
+export type ShadcnDropdownShortcutProps = DropdownShortcutProps & ShadcnStyleProps;

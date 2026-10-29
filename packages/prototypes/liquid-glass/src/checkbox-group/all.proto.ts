@@ -32,6 +32,11 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
     });
     const glyph = checkboxGroupGlyph(def, state);
-    return (renderer) => [glyph(renderer), renderer.r.slot()];
+    const render = inherited.render;
+    if (!render) throw new Error('[liquid-glass-checkbox-group-all] Missing Base renderer.');
+    return (renderer) => {
+      const content = render(renderer);
+      return [glyph(renderer), ...(Array.isArray(content) ? content : [content])];
+    };
   },
 });

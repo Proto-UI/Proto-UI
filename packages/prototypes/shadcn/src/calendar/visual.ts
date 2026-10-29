@@ -13,6 +13,10 @@ import {
  * --spacing(6/7/8) remains 1.5/1.75/2rem through finite spacing tokens.
  * Base is single-date: range segments, week numbers, dropdown captions,
  * multi-month responsive layout and descendant icon recipes are not claimed.
+ * The existing unscoped Nova comparison remains separately bound to the
+ * 2026-10-10 base-nova/calendar.json snapshot, SHA256
+ * cc9ff16599d1664cec2d6a91ba82d0927953d8eedd51a7d56bba48a6522c28eb.
+ * Its p-2 / 1.75rem cells / focused 3px ring are not a New York baseline.
  */
 export const CALENDAR_ROOT_PROFILE = {
   vega: 'p-3',
@@ -35,6 +39,17 @@ export const CALENDAR_CELL_SIZE = {
   sera: 'h-8 w-8',
   rhea: 'h-8 w-8',
   'new-york-v4': 'h-8 w-8',
+} as const satisfies Record<ShadcnStyleId, string>;
+export const CALENDAR_WEEKDAY_WIDTH = {
+  vega: 'w-8',
+  nova: 'w-7',
+  maia: 'w-8',
+  lyra: 'w-7',
+  mira: 'w-6',
+  luma: 'w-8',
+  sera: 'w-8',
+  rhea: 'w-8',
+  'new-york-v4': 'w-8',
 } as const satisfies Record<ShadcnStyleId, string>;
 export const CALENDAR_CAPTION_SIZE = {
   vega: 'h-8',

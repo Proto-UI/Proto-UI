@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  type WebComponentAdapterElement,
+} from '@proto.ui/adapter-web-component';
+import type { AdapterPrototype } from '@proto.ui/adapter-base';
 import { activationTurn } from '../../../modules/native-link/test/no-network';
 import * as autocomplete from '../src/autocomplete';
 import * as combobox from '../src/combobox';
@@ -13,7 +18,6 @@ import * as toggleGroup from '../src/toggle-group';
 
 // These exercise real Adapter/Runtime owners in the simulated WC host. They do
 // not establish browser geometry, painted appearance, motion or native parity.
-type Host = HTMLElement & { getExposes(): Record<string, any> };
 const owned = new Set<HTMLElement>();
 const lives = { created: 0, disposed: 0 };
 const registered = new Set<unknown>();
@@ -32,7 +36,7 @@ for (const family of [
     if (!proto || typeof proto !== 'object' || !('name' in proto) || !('setup' in proto)) continue;
     if (registered.has(proto)) continue;
     registered.add(proto);
-    AdaptToWebComponent(proto as any, {
+    AdaptToWebComponent(proto, {
       diagnostics: {
         onLifecycleEvent(event) {
           if (event.type === 'instance.created') lives.created++;
@@ -45,8 +49,12 @@ for (const family of [
 async function flush() {
   for (let i = 0; i < 20; i++) await Promise.resolve();
 }
-function element(name: string, props: Record<string, unknown> = {}) {
-  const node = document.createElement(name) as Host;
+function element<TProto extends AdapterPrototype>(
+  prototype: TProto,
+  props: Record<string, unknown> = {}
+) {
+  // This exact Prototype registered the constructor above.
+  const node = document.createElement(prototype.name) as WebComponentAdapterElement<TProto>;
   setElementProps(node, props);
   owned.add(node);
   return node;
@@ -55,8 +63,10 @@ function tokens(node: HTMLElement) {
   return (node.getAttribute('data-pui-style') ?? '').split(/\s+/);
 }
 function requests(node: HTMLElement, name: string) {
-  const details: any[] = [];
-  node.addEventListener(name, (event) => details.push((event as CustomEvent).detail));
+  const details: unknown[] = [];
+  node.addEventListener(name, (event) => {
+    if (event instanceof CustomEvent) details.push(event.detail);
+  });
   return details;
 }
 function key(value: string) {
@@ -81,23 +91,53 @@ afterEach(async () => {
   await expect.poll(() => lives.disposed).toBe(lives.created);
 });
 
-const searchFamilies = ['autocomplete', 'combobox', 'command'] as const;
-async function search(slug: (typeof searchFamilies)[number], props: Record<string, unknown> = {}) {
-  const prefix = `bootstrap-2-3-2-${slug}`;
-  const root = element(`${prefix}-root`, props);
-  const input = element(`${prefix}-input`, { a11yLabel: 'Search fruit', name: 'fruit' });
-  const content = element(`${prefix}-content`);
-  const empty = element(`${prefix}-empty`);
+const searchFamilies = [
+  {
+    slug: 'autocomplete',
+    root: autocomplete.autocompleteRoot,
+    input: autocomplete.autocompleteInput,
+    content: autocomplete.autocompleteContent,
+    item: autocomplete.autocompleteItem,
+    empty: autocomplete.autocompleteEmpty,
+    trigger: autocomplete.autocompleteTrigger,
+  },
+  {
+    slug: 'combobox',
+    root: combobox.comboboxRoot,
+    input: combobox.comboboxInput,
+    content: combobox.comboboxContent,
+    item: combobox.comboboxItem,
+    empty: combobox.comboboxEmpty,
+    trigger: combobox.comboboxTrigger,
+  },
+  {
+    slug: 'command',
+    root: command.commandRoot,
+    input: command.commandInput,
+    content: command.commandContent,
+    item: command.commandItem,
+    empty: command.commandEmpty,
+    trigger: null,
+  },
+] as const;
+async function search(
+  family: (typeof searchFamilies)[number],
+  props: Record<string, unknown> = {}
+) {
+  const root = element(family.root, props);
+  const input = element(family.input, { a11yLabel: 'Search fruit', name: 'fruit' });
+  const content = element(family.content);
+  const empty = element(family.empty);
   empty.textContent = 'No matching fruit';
   const items = [
     ['apple', 'Apple'],
     ['pear', 'Pear'],
   ].map(([value, textValue]) => {
-    const item = element(`${prefix}-item`, { value, textValue });
+    const item = element(family.item, { value, textValue });
     item.textContent = textValue;
     return item;
   });
-  const trigger = slug === 'command' ? null : element(`${prefix}-trigger`);
+  const trigger = family.trigger ? element(family.trigger) : null;
   if (trigger) trigger.textContent = 'Show fruit';
   content.append(...items, empty);
   root.append(input, ...(trigger ? [trigger] : []), content);
@@ -106,9 +146,10 @@ async function search(slug: (typeof searchFamilies)[number], props: Record<strin
   return { root, input, content, empty, items, trigger, editor: input.querySelector('input')! };
 }
 
-describe.each(searchFamilies)('historical %s projection', (slug) => {
+describe.each(searchFamilies)('historical $slug projection', (family) => {
+  const { slug } = family;
   it('keeps one physical editor, filtered options and keyboard selection with paint withdrawal', async () => {
-    const p = await search(slug);
+    const p = await search(family);
     expect(p.input.querySelectorAll('input,textarea,[contenteditable]')).toHaveLength(1);
     expect(p.editor.name).toBe('fruit');
     expect(p.editor.getAttribute('role')).toBe('combobox');
@@ -158,7 +199,7 @@ describe.each(searchFamilies)('historical %s projection', (slug) => {
   });
 
   it('preserves IME and reversible readonly/disabled facts without another editor', async () => {
-    const p = await search(slug);
+    const p = await search(family);
     const selected = requests(p.root, slug === 'command' ? 'execute' : 'valueChange');
     p.editor.focus();
     p.editor.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true }));
@@ -190,9 +231,9 @@ describe.each(searchFamilies)('historical %s projection', (slug) => {
   });
 });
 
-for (const slug of ['autocomplete', 'combobox'] as const) {
-  it(`${slug} retains controlled value/query/open and emits one trigger request`, async () => {
-    const p = await search(slug, { value: 'apple', inputValue: '', open: false });
+for (const family of [searchFamilies[0], searchFamilies[1]]) {
+  it(`${family.slug} retains controlled value/query/open and emits one trigger request`, async () => {
+    const p = await search(family, { value: 'apple', inputValue: '', open: false });
     const queries = requests(p.root, 'inputValueChange');
     const opens = requests(p.root, 'openChange');
     const values = requests(p.root, 'valueChange');
@@ -229,9 +270,9 @@ for (const slug of ['autocomplete', 'combobox'] as const) {
 }
 
 it('retains distinct autocomplete free-text, combobox selection and inline command owners', async () => {
-  const auto = await search('autocomplete');
-  const combo = await search('combobox');
-  const inline = await search('command');
+  const auto = await search(searchFamilies[0]);
+  const combo = await search(searchFamilies[1]);
+  const inline = await search(searchFamilies[2]);
   expect(auto.root.getExposes().select('Unlisted', 'free-text')).toBe(true);
   expect(combo.root.getExposes().select('Unlisted', 'free-text')).toBe(false);
   expect(auto.root.getExposes().value.get()).toBe('Unlisted');
@@ -243,17 +284,32 @@ it('retains distinct autocomplete free-text, combobox selection and inline comma
   expect(inline.content.getAttribute('role')).toBe('listbox');
 });
 
-async function menu(slug: 'menubar' | 'navigation-menu', props: Record<string, unknown> = {}) {
-  const prefix = `bootstrap-2-3-2-${slug}`;
-  const root = element(`${prefix}-root`, props);
+const menuFamilies = [
+  {
+    slug: 'menubar',
+    root: menubar.menubarRoot,
+    trigger: menubar.menubarTrigger,
+    content: menubar.menubarContent,
+    item: menubar.menubarItem,
+  },
+  {
+    slug: 'navigation-menu',
+    root: navigation.navigationMenuRoot,
+    trigger: navigation.navigationMenuTrigger,
+    content: navigation.navigationMenuContent,
+    item: navigation.navigationMenuItem,
+  },
+] as const;
+async function menu(family: (typeof menuFamilies)[number], props: Record<string, unknown> = {}) {
+  const root = element(family.root, props);
   const triggers = ['file', 'edit'].map((value) => {
-    const trigger = element(`${prefix}-trigger`, { value });
+    const trigger = element(family.trigger, { value });
     trigger.textContent = value;
     return trigger;
   });
-  const panels = ['file', 'edit'].map((value) => element(`${prefix}-content`, { value }));
+  const panels = ['file', 'edit'].map((value) => element(family.content, { value }));
   const items = ['new', 'undo'].map((value) => {
-    const item = element(`${prefix}-item`, { value, textValue: value });
+    const item = element(family.item, { value, textValue: value });
     item.textContent = value;
     return item;
   });
@@ -263,9 +319,10 @@ async function menu(slug: 'menubar' | 'navigation-menu', props: Record<string, u
   await flush();
   return { root, triggers, panels, items };
 }
-for (const slug of ['menubar', 'navigation-menu'] as const) {
+for (const family of menuFamilies) {
+  const { slug } = family;
   it(`${slug} keeps controlled panel ownership and withdraws open/disabled paint`, async () => {
-    const p = await menu(slug, { value: 'file' });
+    const p = await menu(family, { value: 'file' });
     expect(p.root.getAttribute('role')).toBe(slug === 'menubar' ? 'menubar' : 'navigation');
     expect(p.panels.map((panel) => panel.getExposes().open.get())).toEqual([true, false]);
     expect(tokens(p.triggers[0])).toContain('bg-[#999]');
@@ -296,8 +353,8 @@ for (const slug of ['menubar', 'navigation-menu'] as const) {
 }
 
 it('keeps navigation content in one real anchor with current, disabled and modified intent', async () => {
-  const p = await menu('navigation-menu', { defaultValue: 'file' });
-  const link = element(navigation.navigationMenuLink.name, { href: '#guide', current: true });
+  const p = await menu(menuFamilies[1], { defaultValue: 'file' });
+  const link = element(navigation.navigationMenuLink, { href: '#guide', current: true });
   const text = document.createElement('span');
   text.textContent = 'Guide';
   link.append(text);
@@ -339,11 +396,11 @@ it('keeps navigation content in one real anchor with current, disabled and modif
 });
 
 it('keeps context intent distinct from click and retains controlled open through disabled action', async () => {
-  const root = element(contextMenu.contextMenuRoot.name, { open: false });
-  const trigger = element(contextMenu.contextMenuTrigger.name);
+  const root = element(contextMenu.contextMenuRoot, { open: false });
+  const trigger = element(contextMenu.contextMenuTrigger);
   trigger.textContent = 'Context target';
-  const content = element(contextMenu.contextMenuContent.name, { avoidCollisions: false });
-  const item = element(contextMenu.contextMenuItem.name, { value: 'copy' });
+  const content = element(contextMenu.contextMenuContent, { avoidCollisions: false });
+  const item = element(contextMenu.contextMenuItem, { value: 'copy' });
   item.textContent = 'Copy';
   content.append(item);
   root.append(trigger, content);
@@ -379,23 +436,23 @@ it('keeps context intent distinct from click and retains controlled open through
   await flush();
   expect(selected).toHaveLength(1);
   expect(root.getExposes().open.get()).toBe(true);
-  expect(opens.at(-1).open).toBe(false);
+  expect(opens.at(-1)).toEqual(expect.objectContaining({ open: false }));
 });
 
 it('keeps dropdown group naming, shortcut state and transient action paint scoped to the owner', async () => {
-  const root = element(dropdown.dropdownRoot.name, { open: true });
-  const trigger = element(dropdown.dropdownTrigger.name);
+  const root = element(dropdown.dropdownRoot, { open: true });
+  const trigger = element(dropdown.dropdownTrigger);
   trigger.textContent = 'Actions';
-  const content = element(dropdown.dropdownContent.name);
-  const group = element(dropdown.dropdownGroup.name, { a11yLabel: 'Fallback actions' });
-  const label = element(dropdown.dropdownLabel.name);
+  const content = element(dropdown.dropdownContent);
+  const group = element(dropdown.dropdownGroup, { a11yLabel: 'Fallback actions' });
+  const label = element(dropdown.dropdownLabel);
   label.textContent = 'Editing';
-  const item = element(dropdown.dropdownItem.name, { value: 'copy' });
+  const item = element(dropdown.dropdownItem, { value: 'copy' });
   item.append(document.createTextNode('Copy'));
-  const shortcut = element(dropdown.dropdownShortcut.name);
+  const shortcut = element(dropdown.dropdownShortcut);
   shortcut.textContent = 'Ctrl+C';
   item.append(shortcut);
-  const separator = element(dropdown.dropdownSeparator.name);
+  const separator = element(dropdown.dropdownSeparator);
   group.append(label, item);
   content.append(group, separator);
   root.append(trigger, content);
@@ -424,7 +481,7 @@ it('keeps dropdown group naming, shortcut state and transient action paint scope
   await flush();
   expect(selected).toHaveLength(1);
   expect(opens).toHaveLength(1);
-  expect(opens[0].open).toBe(false);
+  expect(opens[0]).toEqual(expect.objectContaining({ open: false }));
   expect(root.getExposes().open.get()).toBe(true);
   label.remove();
   await flush();
@@ -433,11 +490,11 @@ it('keeps dropdown group naming, shortcut state and transient action paint scope
 });
 
 it('keeps Toolbar actions singular and a retained Separator on the current cross axis', async () => {
-  const first = element(toolbar.toolbarRoot.name, { orientation: 'horizontal' });
-  const second = element(toolbar.toolbarRoot.name, { orientation: 'vertical' });
-  const button = element(toolbar.toolbarButton.name, { value: 'save' });
+  const first = element(toolbar.toolbarRoot, { orientation: 'horizontal' });
+  const second = element(toolbar.toolbarRoot, { orientation: 'vertical' });
+  const button = element(toolbar.toolbarButton, { value: 'save' });
   button.textContent = 'Save';
-  const separator = element(toolbar.toolbarSeparator.name);
+  const separator = element(toolbar.toolbarSeparator);
   separator.append(document.createTextNode('Not separator content'));
   first.append(button, separator);
   document.body.append(first, second);
@@ -473,9 +530,9 @@ it('keeps Toolbar actions singular and a retained Separator on the current cross
 });
 
 it('projects ToggleGroup active/disabled withdrawal while retaining controlled selection and axis', async () => {
-  const root = element(toggleGroup.toggleGroupRoot.name, { value: ['a'] });
-  const a = element(toggleGroup.toggleGroupItem.name, { value: 'a' });
-  const b = element(toggleGroup.toggleGroupItem.name, { value: 'b' });
+  const root = element(toggleGroup.toggleGroupRoot, { value: ['a'] });
+  const a = element(toggleGroup.toggleGroupItem, { value: 'a' });
+  const b = element(toggleGroup.toggleGroupItem, { value: 'b' });
   a.textContent = 'A';
   b.textContent = 'B';
   root.append(a, b);
@@ -507,4 +564,116 @@ it('projects ToggleGroup active/disabled withdrawal while retaining controlled s
   expect(tokens(b)).toContain(pressed);
   expect(root.getExposes().requestToggle('a')).toBe(false);
   expect(root.getExposes().getValue()).toEqual(['b']);
+});
+
+function expectJoinedEdges(
+  item: HTMLElement,
+  first: boolean,
+  last: boolean,
+  axis: 'horizontal' | 'vertical'
+) {
+  const current = tokens(item);
+  for (const [token, active] of [
+    ['rounded-l-[4px]', first && axis === 'horizontal'],
+    ['rounded-r-[4px]', last && axis === 'horizontal'],
+    ['rounded-t-[4px]', first && axis === 'vertical'],
+    ['rounded-b-[4px]', last && axis === 'vertical'],
+    ['ml-[-1px]', !first && axis === 'horizontal'],
+    ['mt-[-1px]', !first && axis === 'vertical'],
+  ] as const) {
+    expect(current.includes(token), token).toBe(active);
+  }
+}
+
+it('updates joined corners and seams from live logical order, including disabled members', async () => {
+  const root = element(toggleGroup.toggleGroupRoot, { value: ['b'] });
+  const a = element(toggleGroup.toggleGroupItem, { value: 'a' });
+  const b = element(toggleGroup.toggleGroupItem, { value: 'b', disabled: true });
+  const c = element(toggleGroup.toggleGroupItem, { value: 'c' });
+  a.textContent = 'A';
+  b.textContent = 'B';
+  c.textContent = 'C';
+  root.append(a, b, c);
+  document.body.append(root);
+  await flush();
+  const changes = requests(root, 'valueChange');
+  expectJoinedEdges(a, true, false, 'horizontal');
+  expectJoinedEdges(b, false, false, 'horizontal');
+  expectJoinedEdges(c, false, true, 'horizontal');
+  root.prepend(c);
+  await flush();
+  expectJoinedEdges(c, true, false, 'horizontal');
+  expectJoinedEdges(a, false, false, 'horizontal');
+  expectJoinedEdges(b, false, true, 'horizontal');
+  setElementProps(root, { value: ['b'], orientation: 'vertical' });
+  await flush();
+  expectJoinedEdges(c, true, false, 'vertical');
+  expectJoinedEdges(a, false, false, 'vertical');
+  expectJoinedEdges(b, false, true, 'vertical');
+  b.remove();
+  await flush();
+  expectJoinedEdges(a, false, true, 'vertical');
+  c.remove();
+  await flush();
+  expectJoinedEdges(a, true, true, 'vertical');
+  root.append(b);
+  await flush();
+  expectJoinedEdges(a, true, false, 'vertical');
+  expectJoinedEdges(b, false, true, 'vertical');
+  setElementProps(root, { value: ['b'], orientation: 'diagonal' });
+  await flush();
+  expect(root.getAttribute('aria-orientation')).toBe('vertical');
+  expectJoinedEdges(a, true, false, 'vertical');
+  expectJoinedEdges(b, false, true, 'vertical');
+  setElementProps(root, { value: ['b'], orientation: 'horizontal' });
+  await flush();
+  expectJoinedEdges(a, true, false, 'horizontal');
+  expectJoinedEdges(b, false, true, 'horizontal');
+  expect(root.getExposes().getValue()).toEqual(['b']);
+  expect(b.getAttribute('aria-pressed')).toBe('true');
+  expect(b.getAttribute('aria-disabled')).toBe('true');
+  expect(changes).toHaveLength(0);
+});
+
+it('rebinds joined edge presentation to the current root and excludes nested domains', async () => {
+  const first = element(toggleGroup.toggleGroupRoot, { value: ['a'] });
+  const second = element(toggleGroup.toggleGroupRoot, { value: ['b'], orientation: 'vertical' });
+  const nested = element(toggleGroup.toggleGroupRoot, { orientation: 'vertical' });
+  const a = element(toggleGroup.toggleGroupItem, { value: 'a' });
+  const b = element(toggleGroup.toggleGroupItem, { value: 'b' });
+  const c = element(toggleGroup.toggleGroupItem, { value: 'c' });
+  const inner = element(toggleGroup.toggleGroupItem, { value: 'inner' });
+  a.textContent = 'A';
+  b.textContent = 'B';
+  c.textContent = 'C';
+  inner.textContent = 'Inner';
+  nested.append(inner);
+  first.append(a, c, nested);
+  second.append(b);
+  document.body.append(first, second);
+  await flush();
+  const firstChanges = requests(first, 'valueChange');
+  const secondChanges = requests(second, 'valueChange');
+  expectJoinedEdges(a, true, false, 'horizontal');
+  expectJoinedEdges(c, false, true, 'horizontal');
+  expectJoinedEdges(inner, true, true, 'vertical');
+  second.append(a);
+  await flush();
+  expectJoinedEdges(c, true, true, 'horizontal');
+  expectJoinedEdges(b, true, false, 'vertical');
+  expectJoinedEdges(a, false, true, 'vertical');
+  expectJoinedEdges(inner, true, true, 'vertical');
+  setElementProps(second, { value: ['b'], orientation: 'horizontal' });
+  await flush();
+  expectJoinedEdges(b, true, false, 'horizontal');
+  expectJoinedEdges(a, false, true, 'horizontal');
+  setElementProps(first, { value: ['a'], orientation: 'vertical' });
+  await flush();
+  expectJoinedEdges(c, true, true, 'vertical');
+  expectJoinedEdges(a, false, true, 'horizontal');
+  expectJoinedEdges(inner, true, true, 'vertical');
+  expect(first.getExposes().getValue()).toEqual(['a']);
+  expect(second.getExposes().getValue()).toEqual(['b']);
+  expect(firstChanges).toHaveLength(0);
+  expect(secondChanges).toHaveLength(0);
 });

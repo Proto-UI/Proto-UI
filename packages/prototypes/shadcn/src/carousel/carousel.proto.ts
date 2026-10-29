@@ -1,7 +1,6 @@
 import type {
   CarouselRootProps,
   CarouselRootExposes,
-  CarouselViewportProps,
   CarouselViewportExposes,
   CarouselSlideProps,
   CarouselSlideExposes,
@@ -18,11 +17,15 @@ import {
   asCarouselPrevious,
   asCarouselNext,
 } from '@proto.ui/prototypes-base/carousel';
-import { setupShadcnStyleScope, type ShadcnStyleProps } from '../style-scope';
+import {
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
 import { setupCarouselAxis, setupCarouselNavigationPaint } from './visual';
 export type * from '@proto.ui/prototypes-base/carousel';
 export type ShadcnCarouselRootProps = CarouselRootProps & ShadcnStyleProps;
-export type ShadcnCarouselViewportProps = CarouselViewportProps & ShadcnStyleProps;
+export type ShadcnCarouselViewportProps = ShadcnStyleProps;
 export type ShadcnCarouselSlideProps = CarouselSlideProps & ShadcnStyleProps;
 export type ShadcnCarouselPreviousProps = CarouselPreviousProps & ShadcnStyleProps;
 export type ShadcnCarouselNextProps = CarouselNextProps & ShadcnStyleProps;
@@ -49,6 +52,7 @@ export const carouselViewport = definePrototype<
   modules: asCarouselViewport.modules,
   setup(def) {
     const inherited = asCarouselViewport();
+    setupShadcnStyleSelection(def, 'new-york-v4');
     def.feedback.style.use(tw('min-w-0 min-h-0 overflow-hidden'));
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.focusVisible).eq(true),
@@ -67,6 +71,7 @@ export const carouselSlide = definePrototype<ShadcnCarouselSlideProps, CarouselS
   modules: asCarouselSlide.modules,
   setup(def) {
     const inherited = asCarouselSlide();
+    setupShadcnStyleSelection(def, 'new-york-v4');
     const axis = setupCarouselAxis(def);
     def.feedback.style.use(tw('min-w-0 shrink-0 grow-0 basis-full'));
     def.rule({

@@ -210,20 +210,20 @@ const SHADCN_MANIFEST = {
       recipeId: 'demo-shadcn-label',
       recipePrototypeIds: [
         'shadcn-label-root',
-        'base-checkbox-root',
-        'base-switch-root',
-        'base-radio-group-root',
-        'base-radio-group-item',
-        'base-input-root',
-        'base-textarea-root',
+        'shadcn-checkbox-root',
+        'shadcn-switch-root',
+        'shadcn-radio-group-root',
+        'shadcn-radio-group-item',
+        'shadcn-input-root',
+        'shadcn-textarea-root',
       ],
       auxiliaryPrototypes: [
-        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
-        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
-        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
-        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'shadcn-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'shadcn-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'shadcn-radio-group-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'shadcn-radio-group-item' },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'shadcn-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'shadcn-textarea-root' },
       ],
       parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' } },
     },
@@ -264,6 +264,7 @@ const SHADCN_MANIFEST = {
         'shadcn-tabs-list',
         'shadcn-tabs-trigger',
         'shadcn-tabs-content',
+        'shadcn-tabs-indicator',
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'shadcn-tabs-root' },
@@ -275,6 +276,10 @@ const SHADCN_MANIFEST = {
         content: {
           basePrototypeId: 'P-BASE-TABS-CONTENT',
           prototypeId: 'shadcn-tabs-content',
+        },
+        indicator: {
+          basePrototypeId: 'P-BASE-TABS-INDICATOR',
+          prototypeId: 'shadcn-tabs-indicator',
         },
       },
     },
@@ -1018,6 +1023,7 @@ const BOOTSTRAP_232_MANIFEST = {
         'bootstrap-2-3-2-tabs-list',
         'bootstrap-2-3-2-tabs-trigger',
         'bootstrap-2-3-2-tabs-content',
+        'bootstrap-2-3-2-tabs-indicator',
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'bootstrap-2-3-2-tabs-root' },
@@ -1030,6 +1036,10 @@ const BOOTSTRAP_232_MANIFEST = {
           basePrototypeId: 'P-BASE-TABS-CONTENT',
           prototypeId: 'bootstrap-2-3-2-tabs-content',
         },
+        indicator: {
+          basePrototypeId: 'P-BASE-TABS-INDICATOR',
+          prototypeId: 'bootstrap-2-3-2-tabs-indicator',
+        },
       },
     },
     select: {
@@ -1041,6 +1051,12 @@ const BOOTSTRAP_232_MANIFEST = {
         'bootstrap-2-3-2-select-value',
         'bootstrap-2-3-2-select-content',
         'bootstrap-2-3-2-select-item',
+        'bootstrap-2-3-2-select-surface',
+        'bootstrap-2-3-2-select-viewport',
+        'bootstrap-2-3-2-select-item-text',
+        'bootstrap-2-3-2-select-group',
+        'bootstrap-2-3-2-select-label',
+        'bootstrap-2-3-2-select-separator',
         'bootstrap-2-3-2-button',
       ],
       auxiliaryPrototypes: [
@@ -1061,6 +1077,30 @@ const BOOTSTRAP_232_MANIFEST = {
           prototypeId: 'bootstrap-2-3-2-select-content',
         },
         item: { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'bootstrap-2-3-2-select-item' },
+        surface: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-surface',
+        },
+        viewport: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-viewport',
+        },
+        itemText: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-item-text',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-separator',
+        },
       },
     },
     field: {
@@ -1171,20 +1211,23 @@ const BOOTSTRAP_232_MANIFEST = {
       recipeId: 'demo-bootstrap-2-3-2-label',
       recipePrototypeIds: [
         'bootstrap-2-3-2-label-root',
-        'base-checkbox-root',
-        'base-switch-root',
-        'base-radio-group-root',
-        'base-radio-group-item',
-        'base-input-root',
-        'base-textarea-root',
+        'bootstrap-2-3-2-checkbox-root',
+        'bootstrap-2-3-2-switch-root',
+        'bootstrap-2-3-2-radio-group-root',
+        'bootstrap-2-3-2-radio-group-item',
+        'bootstrap-2-3-2-input-root',
+        'bootstrap-2-3-2-textarea-root',
       ],
       auxiliaryPrototypes: [
-        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
-        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
-        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
-        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'bootstrap-2-3-2-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'bootstrap-2-3-2-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'bootstrap-2-3-2-radio-group-root' },
+        {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM',
+          prototypeId: 'bootstrap-2-3-2-radio-group-item',
+        },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'bootstrap-2-3-2-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'bootstrap-2-3-2-textarea-root' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'bootstrap-2-3-2-label-root' },
@@ -1278,6 +1321,7 @@ const LIQUID_GLASS_MANIFEST = {
         'liquid-glass-tabs-list',
         'liquid-glass-tabs-trigger',
         'liquid-glass-tabs-content',
+        'liquid-glass-tabs-indicator',
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-TABS', prototypeId: 'liquid-glass-tabs-root' },
@@ -1290,6 +1334,10 @@ const LIQUID_GLASS_MANIFEST = {
           basePrototypeId: 'P-BASE-TABS-CONTENT',
           prototypeId: 'liquid-glass-tabs-content',
         },
+        indicator: {
+          basePrototypeId: 'P-BASE-TABS-INDICATOR',
+          prototypeId: 'liquid-glass-tabs-indicator',
+        },
       },
     },
     select: {
@@ -1301,6 +1349,12 @@ const LIQUID_GLASS_MANIFEST = {
         'liquid-glass-select-value',
         'liquid-glass-select-content',
         'liquid-glass-select-item',
+        'liquid-glass-select-surface',
+        'liquid-glass-select-viewport',
+        'liquid-glass-select-item-text',
+        'liquid-glass-select-group',
+        'liquid-glass-select-label',
+        'liquid-glass-select-separator',
         'liquid-glass-button',
       ],
       auxiliaryPrototypes: [
@@ -1318,6 +1372,30 @@ const LIQUID_GLASS_MANIFEST = {
           prototypeId: 'liquid-glass-select-content',
         },
         item: { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'liquid-glass-select-item' },
+        surface: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-surface',
+        },
+        viewport: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-viewport',
+        },
+        itemText: {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-item-text',
+        },
+        group: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'liquid-glass-select-group',
+        },
+        label: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'liquid-glass-select-label',
+        },
+        separator: {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'liquid-glass-select-separator',
+        },
       },
     },
     field: {
@@ -1467,20 +1545,23 @@ const LIQUID_GLASS_MANIFEST = {
       recipeId: 'demo-liquid-glass-label',
       recipePrototypeIds: [
         'liquid-glass-label-root',
-        'base-checkbox-root',
-        'base-switch-root',
-        'base-radio-group-root',
-        'base-radio-group-item',
-        'base-input-root',
-        'base-textarea-root',
+        'liquid-glass-checkbox-root',
+        'liquid-glass-switch-root',
+        'liquid-glass-radio-group-root',
+        'liquid-glass-radio-group-item',
+        'liquid-glass-input-root',
+        'liquid-glass-textarea-root',
       ],
       auxiliaryPrototypes: [
-        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'base-checkbox-root' },
-        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'base-switch-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'base-radio-group-root' },
-        { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'base-radio-group-item' },
-        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'base-input-root' },
-        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'base-textarea-root' },
+        { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'liquid-glass-checkbox-root' },
+        { basePrototypeId: 'P-BASE-SWITCH', prototypeId: 'liquid-glass-switch-root' },
+        { basePrototypeId: 'P-BASE-RADIO-GROUP', prototypeId: 'liquid-glass-radio-group-root' },
+        {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM',
+          prototypeId: 'liquid-glass-radio-group-item',
+        },
+        { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'liquid-glass-input-root' },
+        { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'liquid-glass-textarea-root' },
       ],
       parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'liquid-glass-label-root' } },
     },
@@ -1603,9 +1684,10 @@ export function validateProjectionFamilyManifest(manifest: ProjectionFamilyManif
     const commonPartIds = REQUIRED_PART_IDS[familyId as ProjectionComponentId];
     const requiredPartIds = commonPartIds && [
       ...commonPartIds,
-      ...(projectionFamilyId === 'shadcn' && familyId === 'select'
+      ...(projectionFamilyId !== 'brutalist' && familyId === 'select'
         ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
         : []),
+      ...(projectionFamilyId !== 'brutalist' && familyId === 'tabs' ? ['indicator'] : []),
     ];
     if (!requiredPartIds) {
       throw new Error(
@@ -1750,7 +1832,7 @@ export function resolveProjectionRecipe(
 /** Complete public Select composition where the family declares it. */
 export type ProjectionSelectParts = Readonly<
   Record<'root' | 'trigger' | 'value' | 'content' | 'item', string> &
-    Partial<Record<'surface' | 'viewport' | 'itemText', string>>
+    Partial<Record<'surface' | 'viewport' | 'itemText' | 'group' | 'label' | 'separator', string>>
 >;
 
 export function resolveProjectionSelectParts(family: ProjectionFamilyId): ProjectionSelectParts {
@@ -1760,7 +1842,9 @@ export function resolveProjectionSelectParts(family: ProjectionFamilyId): Projec
     'value',
     'content',
     'item',
-    ...(family === 'shadcn' ? ['surface', 'viewport', 'itemText'] : []),
+    ...(family !== 'brutalist'
+      ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
+      : []),
   ];
   return Object.fromEntries(
     partIds.map((id) => [id, resolveProjectionPart(family, 'select', id).prototypeId])

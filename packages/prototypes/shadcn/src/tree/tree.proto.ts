@@ -29,7 +29,7 @@ export interface ShadcnTreeRootProps extends TreeRootProps, ShadcnStyleProps {
 export interface ShadcnTreeItemProps extends TreeItemProps, ShadcnStyleProps {
   appearance?: ShadcnTreeAppearance;
 }
-export type ShadcnTreeGroupProps = TreeGroupProps & ShadcnStyleProps;
+export type ShadcnTreeGroupProps = TreeGroupProps;
 export type ShadcnTreeToggleProps = TreeToggleProps & ShadcnStyleProps;
 
 /** Proto Tree extension: no official Tree implementation in the pinned registry.
@@ -63,6 +63,7 @@ const ITEM_PROFILE = {
 
 export const treeRoot = definePrototype<ShadcnTreeRootProps, TreeRootExposes>({
   name: 'shadcn-tree-root',
+  modules: asTreeRoot.modules,
   setup(def) {
     def.props.define({
       appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' },
@@ -97,6 +98,7 @@ export { treeRoot as shadcnTreeRoot };
 
 export const treeItem = definePrototype<ShadcnTreeItemProps, TreeItemExposes>({
   name: 'shadcn-tree-item',
+  modules: asTreeItem.modules,
   setup(def) {
     def.props.define({
       appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' },
@@ -195,9 +197,9 @@ export { treeItem as shadcnTreeItem };
 
 export const treeGroup = definePrototype<ShadcnTreeGroupProps, TreeGroupExposes>({
   name: 'shadcn-tree-group',
+  modules: asTreeGroup.modules,
   setup(def) {
     const behavior = asTreeGroup();
-    setupShadcnStyleSelection(def, 'nova');
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1 pl-4'));
     return behavior.render;
   },
@@ -206,6 +208,7 @@ export { treeGroup as shadcnTreeGroup };
 
 export const treeToggle = definePrototype<ShadcnTreeToggleProps, TreeToggleExposes>({
   name: 'shadcn-tree-toggle',
+  modules: asTreeToggle.modules,
   setup(def) {
     const behavior = asTreeToggle();
     const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;

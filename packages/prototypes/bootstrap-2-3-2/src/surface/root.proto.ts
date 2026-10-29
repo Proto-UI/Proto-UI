@@ -1,8 +1,9 @@
 // Neutral opaque Surface projection. No material/glass or extra family component parity claim.
 import { definePrototype, tw } from '@proto.ui/core';
 import {
-  bootstrapButtonFill,
-  bootstrapButtonActiveFill,
+  bootstrapButtonRestFill,
+  bootstrapButtonInteractiveFill,
+  bootstrapButtonFlatFill,
   bootstrapButtonRaised,
   bootstrapButtonPressed,
 } from '../button/paint';
@@ -119,7 +120,13 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
     });
     def.rule({
       when: (w) => w.prop('variant').eq('solid'),
-      intent: (i) => i.feedback.style.use(tw(bootstrapButtonFill.primary)),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw(
+            bootstrapButtonRestFill.primary,
+            'text-paint-[#fff_0_-1px_0_rgb(0_0_0/25%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_rgb(0_0_0/25%)_rgb(0_0_0/10%)]'
+          )
+        ),
     });
     def.rule({
       when: (w) =>
@@ -157,9 +164,14 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
       when: (w) =>
         w.all(
           w.prop('variant').eq('solid'),
-          w.any(w.prop('hovered').eq(true), w.prop('pressed').eq(true))
+          w.any(w.prop('hovered').eq(true), w.prop('focusVisible').eq(true)),
+          w.prop('pressed').eq(false)
         ),
-      intent: (i) => i.feedback.style.use(tw(bootstrapButtonActiveFill.primary)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonInteractiveFill.primary)),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('variant').eq('solid'), w.prop('pressed').eq(true)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonFlatFill.primary)),
     });
     def.rule({
       when: (w) => w.all(w.prop('pressed').eq(true), w.not(w.prop('variant').eq('solid'))),

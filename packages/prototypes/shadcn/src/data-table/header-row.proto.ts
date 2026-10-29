@@ -9,6 +9,7 @@ export const dataTableHeaderRow = definePrototype<
   DataTableHeaderRowExposes
 >({
   name: 'shadcn-data-table-header-row',
+  modules: asDataTableHeaderRow.modules,
   setup(def) {
     const behavior = asDataTableHeaderRow();
     def.feedback.style.use(tw('table-row border-b border-border transition-colors'));

@@ -28,7 +28,12 @@ import {
  */
 export function setupPassiveOverlayAction(
   def: DefHandle<ShadcnStyleProps & { wrap?: boolean }>,
-  state: { hovered: State<boolean>; focusVisible: State<boolean>; disabled: State<boolean> },
+  state: {
+    hovered: State<boolean>;
+    focusVisible: State<boolean>;
+    disabled: State<boolean>;
+    pressed: State<boolean>;
+  },
   variant: 'default' | 'outline'
 ) {
   def.props.define({ wrap: { type: 'boolean', empty: 'fallback' } });
@@ -109,6 +114,15 @@ export function setupPassiveOverlayAction(
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[profile])),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(state.pressed).eq(true),
+          w.state(state.disabled).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
   }
   if (variant === 'outline') {

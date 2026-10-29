@@ -16,7 +16,7 @@ export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExpose
         focused: behavior.getState!('focused')!,
         focusVisible: behavior.getState!('focusVisible')!,
       },
-      false
+      'item'
     );
   },
 });

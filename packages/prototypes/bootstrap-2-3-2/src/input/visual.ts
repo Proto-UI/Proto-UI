@@ -11,11 +11,13 @@ type TextControlVisualFacts = {
 export function setupInputVisual<Props extends object, Exposes>(
   def: DefHandle<Props, Exposes>,
   state: TextControlVisualFacts,
-  invalid?: State<boolean>
+  invalid?: State<boolean>,
+  mode: 'single' | 'multiline' = 'single'
 ): void {
   def.feedback.style.use(
     tw(
-      'inline-block box-content w-[206px] h-[20px] mb-[10px] rounded-[4px] border border-[#ccc] bg-white px-[6px] py-[4px] font-sans text-[14px] font-normal leading-[20px] text-[#555] align-middle shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] outline-none transition-[border,box-shadow] duration-200 ease-linear'
+      'inline-block box-content w-[206px] mb-[10px] rounded-[4px] border border-[#ccc] bg-white px-[6px] py-[4px] font-sans text-[14px] font-normal leading-[20px] text-[#555] align-middle shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)] outline-none transition-[border,box-shadow] duration-200 ease-linear',
+      mode === 'multiline' ? 'h-auto' : 'h-[20px]'
     )
   );
   // OTP currently transports focusVisible only. Its missing focused/readOnly

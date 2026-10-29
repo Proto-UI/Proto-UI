@@ -1,4 +1,4 @@
-import { tw, type DefHandle, type OwnedStateHandle } from '@proto.ui/core';
+import { tw, type DefHandle, type OwnedStateHandle, type StyleHandle } from '@proto.ui/core';
 import {
   SHADCN_STYLE_IDS,
   setupShadcnStyleSelection,
@@ -6,7 +6,7 @@ import {
   type ShadcnStyleProps,
 } from '../style-scope';
 
-export type OverlayRecipes = Readonly<Record<ShadcnStyleId, string>>;
+export type OverlayRecipes = Readonly<Record<ShadcnStyleId, StyleHandle>>;
 export const MODERN_OVERLAY_STYLES = [
   'vega',
   'nova',
@@ -38,10 +38,9 @@ export function setupOverlayPaint(
 ) {
   const style = setupOverlayStyle(def, compatibility);
   for (const profile of SHADCN_STYLE_IDS) {
-    if (!recipes[profile]) continue; // A source-headless entry deliberately contributes no paint.
     def.rule({
       when: (w) => w.state(style).eq(profile),
-      intent: (i) => i.feedback.style.use(tw(recipes[profile])),
+      intent: (i) => i.feedback.style.use(recipes[profile]),
     });
   }
   return style;
@@ -70,7 +69,7 @@ const MASK_PAINT = {
   sera: 'bg-black/20',
   rhea: 'bg-black/30',
   'new-york-v4': 'bg-black/50',
-} as const satisfies OverlayRecipes;
+} as const satisfies Readonly<Record<ShadcnStyleId, string>>;
 
 export function setupOverlayMask(
   def: DefHandle<ShadcnStyleProps>,

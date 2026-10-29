@@ -1,9 +1,10 @@
-import { definePrototype, tw, delay } from '@proto.ui/core';
+import { definePrototype, tw, delay, type RunHandle } from '@proto.ui/core';
 import {
   asAccordionTrigger,
   type AccordionTriggerExposes,
 } from '@proto.ui/prototypes-base/accordion';
 import { setupAccordionStyle } from './visual';
+import { SHADCN_STYLE_SCOPE } from '../style-scope';
 import type { ShadcnAccordionTriggerProps } from './types';
 export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExposes>({
   name: 'shadcn-accordion-trigger',
@@ -70,22 +71,58 @@ export default definePrototype<ShadcnAccordionTriggerProps, AccordionTriggerExpo
       when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('sera')),
       intent: (i) => i.feedback.style.use(tw('border-ring ring-2 ring-ring/30')),
     });
+    // The remaining source recipes provide no Accordion-specific focus paint;
+    // keep the existing Proto visible-focus safety rather than losing focus.
+    def.rule({
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('maia')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-ring ring-3 ring-ring/50 forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('mira')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-ring ring-2 ring-ring/30 forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.focusVisible).eq(true),
+          w.any(w.state(style).eq('luma'), w.state(style).eq('rhea'))
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('border-ring ring-3 ring-ring/30 forced-colors-focus-outline')),
+    });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none')),
     });
     let pending: { cancel(): void } | null = null;
-    for (const fact of [state.expanded, style]) {
-      fact.watch((run, event) => {
-        if (event.type !== 'next') return;
-        pending?.cancel();
-        pending = delay(0, () => {
-          pending = null;
-          run.update();
-        });
+    let mounted = false;
+    const refresh = (run: RunHandle<ShadcnAccordionTriggerProps>) => {
+      if (!mounted) return;
+      pending?.cancel();
+      pending = delay(0, () => {
+        pending = null;
+        if (mounted) run.update();
       });
-    }
+    };
+    state.expanded.watch((run, event) => {
+      if (event.type === 'next') refresh(run);
+    });
+    // The style selection is owned, not watchable. Observe the same public
+    // selector inputs after its resolver, and update only while mounted.
+    def.context.trySubscribe(SHADCN_STYLE_SCOPE, refresh);
+    def.props.watchRaw(['styleProfile'], refresh);
+    def.lifecycle.onMounted(() => {
+      mounted = true;
+    });
     def.lifecycle.onUnmounted(() => {
+      mounted = false;
+      pending?.cancel();
+      pending = null;
+    });
+    def.lifecycle.onBeforeDispose(() => {
+      mounted = false;
       pending?.cancel();
       pending = null;
     });

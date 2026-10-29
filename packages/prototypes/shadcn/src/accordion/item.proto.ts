@@ -14,19 +14,19 @@ export default definePrototype<ShadcnAccordionItemProps, AccordionItemExposes>({
     const style = setupAccordionStyle(def);
     const followed = def.state.bool('accordionHasFollowingItem', false);
     const syncOrder = (run: RunHandle<ShadcnAccordionItemProps>) => {
-      const last = run.anatomy.order.partsOf(ACCORDION_FAMILY, 'item').at(-1)?.getExpose('value');
-      const lastValue =
-        last && typeof last === 'object' && 'get' in last && typeof last.get === 'function'
-          ? last.get()
-          : undefined;
       followed.set(
-        lastValue !== undefined && lastValue !== inherited.stateHandles!.value.get(),
+        run.anatomy.order.nextOfSelf(ACCORDION_FAMILY, 'item') !== null,
         'accordion item order'
       );
     };
-    def.anatomy.subscribeParts(ACCORDION_FAMILY, 'item', syncOrder);
+    def.anatomy.subscribeParts(ACCORDION_FAMILY, 'item', (run, parts) => {
+      if (parts.length === 0) {
+        followed.set(false, 'accordion item domain withdrawn');
+        return;
+      }
+      syncOrder(run);
+    });
     def.lifecycle.onMounted(syncOrder);
-    def.lifecycle.onUpdated(syncOrder);
     def.feedback.style.use(tw('block min-w-0 border-border'));
     def.rule({
       when: (w) => w.state(followed).eq(true),

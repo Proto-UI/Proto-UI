@@ -21,6 +21,7 @@ export default definePrototype<ShadcnAlertDialogActionProps, AlertDialogActionEx
         hovered: state('hovered')!,
         focusVisible: state('focusVisible')!,
         disabled: state('disabled')!,
+        pressed: state('pressed')!,
       },
       'default'
     );

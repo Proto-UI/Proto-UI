@@ -4,6 +4,7 @@ export { default as sliderTrack } from './track.proto';
 export { default as sliderIndicator } from './indicator.proto';
 export { default as sliderThumb } from './thumb.proto';
 export { default as sliderValue } from './value.proto';
+export type { ShadcnSliderRootProps, ShadcnSliderPartProps } from './scalar-visual';
 export type * from '@proto.ui/prototypes-base/slider';
 export { default as sliderFieldThumb } from './field-thumb.proto';
 export { default as sliderValuesRoot } from './values-root.proto';

@@ -3,6 +3,7 @@ import {
   bootstrapButtonRestFill,
   bootstrapButtonInteractiveFill,
   bootstrapButtonFlatFill,
+  bootstrapButtonPressedFill,
   bootstrapButtonRaised,
   bootstrapButtonPressed,
 } from './paint';
@@ -49,12 +50,32 @@ export function setupButtonVisual<Props extends object, Exposes>(
       intent: (i) =>
         i.feedback.style.use(tw(bootstrapButtonFlatFill[variant], bootstrapButtonPressed)),
     });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.pressed!).eq(true),
+          state.hovered
+            ? w.any(w.state(state.hovered).eq(true), w.state(focused).eq(true))
+            : w.state(focused).eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressedFill[variant])),
+    });
   }
   if (state.active) {
     def.rule({
       when: (w) => w.state(state.active!).eq(true),
       intent: (i) =>
         i.feedback.style.use(tw(bootstrapButtonFlatFill[variant], bootstrapButtonPressed)),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.state(state.active!).eq(true),
+          state.hovered
+            ? w.any(w.state(state.hovered).eq(true), w.state(focused).eq(true))
+            : w.state(focused).eq(true)
+        ),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressedFill[variant])),
     });
   }
   def.rule({

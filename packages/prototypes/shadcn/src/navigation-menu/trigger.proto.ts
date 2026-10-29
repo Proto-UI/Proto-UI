@@ -15,7 +15,7 @@ export default definePrototype<NavigationMenuTriggerProps, NavigationMenuTrigger
         focusVisible: behavior.getState!('focusVisible')!,
         expanded: behavior.getState!('expanded')!,
       },
-      true
+      'trigger'
     );
   },
 });

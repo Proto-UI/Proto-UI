@@ -27,7 +27,7 @@ const SIZE: Record<ShadcnStyleId, StyleHandle> = {
   mira: tw('size-6 rounded-full text-xs leading-relaxed font-medium'),
   luma: tw('size-8 rounded-full text-sm font-medium'),
   sera: tw('size-9 rounded-none text-xs font-semibold uppercase tracking-widest'),
-  rhea: tw('size-7 rounded-2xl text-sm font-medium'),
+  rhea: tw('size-7 rounded-[var(--pui-radius-2xl)] text-sm font-medium'),
   'new-york-v4': tw('size-8 rounded-full text-sm font-medium'),
 };
 
@@ -57,13 +57,26 @@ export function setupCarouselNavigationPaint(
     });
   }
   def.rule({
-    when: (w) => w.state(axis).eq('horizontal'),
+    when: (w) => w.all(w.state(axis).eq('horizontal'), w.state(style).eq('new-york-v4')),
     intent: (i) =>
       i.feedback.style.use(
         side === 'previous'
           ? tw('top-1/2 left-[-3rem] -translate-y-1/2')
           : tw('top-1/2 right-[-3rem] -translate-y-1/2')
       ),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(axis).eq('horizontal'), w.not(w.state(style).eq('new-york-v4'))),
+    intent: (i) =>
+      i.feedback.style.use(
+        side === 'previous'
+          ? tw('top-0 bottom-0 left-[-3rem] my-auto')
+          : tw('top-0 bottom-0 right-[-3rem] my-auto')
+      ),
+  });
+  def.rule({
+    when: (w) => w.not(w.state(style).eq('new-york-v4')),
+    intent: (i) => i.feedback.style.use(tw('touch-manipulation')),
   });
   def.rule({
     when: (w) => w.state(axis).eq('vertical'),

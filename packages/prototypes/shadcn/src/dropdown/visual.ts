@@ -4,6 +4,7 @@ import {
   setupShadcnStyleScope,
   setupShadcnStyleSelection,
   type ShadcnStyleId,
+  type ShadcnStyleProps,
 } from '../style-scope';
 
 /** MIT shadcn-ui/ui 3d98900e9b73c45f035f8109e9d41ba6a51685e7,
@@ -105,7 +106,7 @@ export const MENU_PROFILES = {
 } as const satisfies Record<ShadcnStyleId, object>;
 
 export function setupMenuStyle(
-  def: DefHandle<any>,
+  def: DefHandle<ShadcnStyleProps>,
   fallback: ShadcnStyleId = 'new-york-v4',
   root = false
 ) {
@@ -114,7 +115,7 @@ export function setupMenuStyle(
 }
 
 type MenuKind = 'dropdown' | 'context-menu' | 'menubar';
-export function setupMenuSurface(def: DefHandle<any>, kind: MenuKind) {
+export function setupMenuSurface(def: DefHandle<ShadcnStyleProps>, kind: MenuKind) {
   const style = setupMenuStyle(def, kind === 'dropdown' ? 'nova' : 'new-york-v4');
   def.feedback.style.use(
     tw(
@@ -150,7 +151,11 @@ export function setupMenuSurface(def: DefHandle<any>, kind: MenuKind) {
 
 /** Uses the inherited open fact. Collision-resolved side/transform-origin and
  * per-channel native trajectories remain separate Host/Adapter prerequisites. */
-export function setupMenuOpenPaint(def: DefHandle<any>, open: State<boolean>, hasSide: boolean) {
+export function setupMenuOpenPaint(
+  def: DefHandle<ShadcnStyleProps & { side?: 'top' | 'right' | 'bottom' | 'left' }>,
+  open: State<boolean>,
+  hasSide: boolean
+) {
   def.rule({
     when: (w) => w.state(open).eq(true),
     intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
@@ -182,7 +187,11 @@ type MenuItemStates = {
   hovered?: State<boolean>;
   pressed?: State<boolean>;
 };
-export function setupMenuItemPaint(def: DefHandle<any>, states: MenuItemStates, kind: MenuKind) {
+export function setupMenuItemPaint(
+  def: DefHandle<ShadcnStyleProps & { inset?: boolean; variant?: 'default' | 'destructive' }>,
+  states: MenuItemStates,
+  kind: MenuKind
+) {
   const style = setupMenuStyle(def);
   def.props.define({
     inset: { type: 'boolean', empty: 'fallback' },

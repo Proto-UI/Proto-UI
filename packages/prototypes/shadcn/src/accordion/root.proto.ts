@@ -14,7 +14,10 @@ export default definePrototype<ShadcnAccordionRootProps, AccordionRootExposes>({
     def.rule({
       when: (w) =>
         w.any(w.state(style).eq('maia'), w.state(style).eq('luma'), w.state(style).eq('rhea')),
-      intent: (i) => i.feedback.style.use(tw('rounded-2xl border border-border overflow-hidden')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('rounded-[var(--pui-radius-2xl)] border border-border overflow-hidden')
+        ),
     });
     def.rule({
       when: (w) => w.state(style).eq('mira'),

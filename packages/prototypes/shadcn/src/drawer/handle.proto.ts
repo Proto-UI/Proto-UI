@@ -26,7 +26,7 @@ export default definePrototype<DrawerHandleProps, DrawerHandleExposes>({
     for (const profile of SHADCN_STYLE_IDS) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.state(side).eq('bottom')),
-        intent: (i) => i.feedback.style.use(tw(DRAWER_BOTTOM_HANDLE[profile])),
+        intent: (i) => i.feedback.style.use(DRAWER_BOTTOM_HANDLE[profile]),
       });
     }
   },
