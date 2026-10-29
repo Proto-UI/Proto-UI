@@ -10,24 +10,17 @@ import {
   SHADCN_SECONDARY_HOVER,
 } from '../button/profiles';
 import type { ShadcnActionStyleProfile } from '../button/types';
-import { SHADCN_STYLE_IDS } from '../style-scope';
 
 export interface ShadcnSurfaceRootProps extends SurfaceRootProps {
-  /** Explicit passive appearance only; scope alone never turns a content Surface into an action. */
+  /** Passive appearance only. The native owner retains all interaction semantics. */
   actionProfile?: 'none' | ShadcnActionStyleProfile;
 }
-// Opted-in chrome is the source-bound Button default/secondary/ghost recipe
-// in ../button/profiles.ts and independent New York, never an interaction hook.
 export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, SurfaceRootExposes>({
   name: 'shadcn-surface-root',
   setup(def) {
     asSurfaceRoot();
     def.props.define({
-      actionProfile: {
-        type: 'enum',
-        empty: 'fallback',
-        options: ['none', ...SHADCN_STYLE_IDS, 'new-york'],
-      },
+      actionProfile: { type: 'enum', empty: 'fallback', options: ['none', 'rhea', 'luma'] },
     });
     def.props.setDefaults({ actionProfile: 'none' });
     def.rule({
@@ -141,19 +134,10 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
     def.rule({
       // A pressed fact is not itself an opt-in to Button motion. Ordinary
       // navigation/content surfaces keep their geometry and authored elevation.
-      // Every modern cn-button recipe carries active:not-aria-[haspopup]:translate-y-px,
-      // so opted-in action profiles project that one-pixel translation only;
-      // New York has no source pressed translation and none is never an action.
       when: (w) =>
         w.all(
-          w.prop('pressed').eq(true),
-          w.not(
-            w.any(
-              w.prop('actionProfile').eq('none'),
-              w.prop('actionProfile').eq('new-york-v4'),
-              w.prop('actionProfile').eq('new-york')
-            )
-          )
+          w.any(w.prop('actionProfile').eq('rhea'), w.prop('actionProfile').eq('luma')),
+          w.prop('pressed').eq(true)
         ),
       intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
@@ -166,23 +150,20 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
-    for (const profile of [...SHADCN_STYLE_IDS, 'new-york'] as const) {
+    for (const profile of ['rhea', 'luma'] as const) {
       def.rule({
         when: (w) => w.prop('actionProfile').eq(profile),
         intent: (i) =>
           i.feedback.style.use(
             tw(
-              profile === 'new-york-v4' || profile === 'new-york'
-                ? 'transition-all outline-none'
-                : 'border border-transparent bg-clip-padding transition-all outline-none',
+              'border border-transparent bg-clip-padding transition-all outline-none',
               SHADCN_ACTION_RADIUS[profile]
             )
           ),
       });
       def.rule({
         when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
-        intent: (i) =>
-          i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS[profile])),
+        intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS)),
       });
       def.rule({
         when: (w) =>
@@ -191,14 +172,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
             w.prop('variant').eq('solid'),
             w.prop('hovered').eq(true)
           ),
-        intent: (i) =>
-          i.feedback.style.use(
-            tw(
-              profile === 'new-york-v4' || profile === 'new-york'
-                ? 'bg-primary/90'
-                : 'bg-primary/80'
-            )
-          ),
+        intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
       });
       def.rule({
         when: (w) =>
@@ -207,14 +181,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
             w.prop('variant').eq('secondary'),
             w.prop('hovered').eq(true)
           ),
-        intent: (i) =>
-          i.feedback.style.use(
-            tw(
-              profile === 'new-york-v4' || profile === 'new-york'
-                ? 'bg-secondary/80'
-                : SHADCN_SECONDARY_HOVER
-            )
-          ),
+        intent: (i) => i.feedback.style.use(tw(SHADCN_SECONDARY_HOVER)),
       });
       def.rule({
         when: (w) =>
@@ -223,14 +190,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
             w.prop('variant').eq('transparent'),
             w.prop('hovered').eq(true)
           ),
-        intent: (i) =>
-          i.feedback.style.use(
-            tw(
-              profile === 'new-york-v4' || profile === 'new-york'
-                ? 'bg-accent text-accent-foreground'
-                : 'bg-muted text-foreground'
-            )
-          ),
+        intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
       });
       def.rule({
         when: (w) =>
@@ -240,10 +200,7 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
             w.prop('hovered').eq(true),
             w.meta('colorScheme').eq('dark')
           ),
-        intent: (i) =>
-          i.feedback.style.use(
-            tw(profile === 'new-york-v4' || profile === 'new-york' ? 'bg-accent/50' : 'bg-muted/50')
-          ),
+        intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
       });
     }
     return (renderer) => renderer.r.slot();
