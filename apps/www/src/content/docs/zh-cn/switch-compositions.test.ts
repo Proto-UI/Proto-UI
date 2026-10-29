@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { DemoChild, DemoNode, DemoSetupContext } from '@/components/PrototypePreviewer/demo-types';
+import { loadPrototype } from '@/components/PrototypePreviewer/prototype-modules';
+import { getPrototype } from '@/components/PrototypePreviewer/registry';
 import demo, { SWITCH_COMPOSITION_CASES } from './demo-shadcn-switch-compositions.demo';
 
 function nodes(node: DemoChild): DemoNode[] {
@@ -13,7 +15,15 @@ const proto = (ref: string) => {
   return result;
 };
 
-describe('public Switch compositions, source inventory only', () => {
+describe('public Switch compositions, source inventory and real loaders', () => {
+  it('loads every actual public composition prototype, including FieldSwitch', async () => {
+    const ids = [...new Set(all.flatMap((node) => node.kind === 'proto' ? [node.prototypeId] : []))];
+    expect(ids).toContain('shadcn-field-switch');
+    for (const id of ids) {
+      await loadPrototype(id);
+      expect(getPrototype(id)?.name).toBe(id);
+    }
+  });
   it('keeps default non-dragging and makes two directional enhancements explicit', () => {
     expect(SWITCH_COMPOSITION_CASES).toHaveLength(9);
     expect(SWITCH_COMPOSITION_CASES.filter((entry) => entry.draggable).map((entry) => entry.id))
