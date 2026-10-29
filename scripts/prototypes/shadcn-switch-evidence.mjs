@@ -218,7 +218,9 @@ try {
       }
       await page.waitForTimeout(20);
     } while (Date.now() < deadline);
-    throw new Error('Switch endpoint not reached: ' + label);
+    throw new Error(
+      'Switch endpoint not reached: ' + label + '\n' + JSON.stringify(receipt.lastAttempt)
+    );
   };
   const focus = async (kind) => {
     const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(0);
@@ -490,7 +492,18 @@ try {
             const start = await observe(
               kind,
               label + '/settled',
-              (o) => o.checked === 'false' && o.percentage === 0 && !o.dragging,
+              (o) => {
+                const border = Number.parseFloat(o.borderWidth);
+                const origin = direction === 'rtl' ? o.width - o.thumbWidth - border : border;
+                return (
+                  o.checked === 'false' &&
+                  o.percentage === 0 &&
+                  !o.dragging &&
+                  Math.abs(o.width - ((size === 'sm' ? 24 : 32) * font) / 16) < 0.5 &&
+                  Math.abs(o.thumbWidth - ((size === 'sm' ? 12 : 16) * font) / 16) < 0.5 &&
+                  Math.abs(o.thumbOffset - origin) < 0.5
+                );
+              },
               1
             );
             const travel =
