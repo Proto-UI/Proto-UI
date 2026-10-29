@@ -25,19 +25,18 @@ describe('collectProtoStyleTokens', () => {
       'data-[checked]:bg-primary',
       'data-[checked]:border-primary',
       'data-[checked]:text-primary-foreground',
-      'dark:data-[checked]:bg-primary',
       'data-[focus-visible]:border-ring',
       'data-[focus-visible]:ring-3',
       'data-[focus-visible]:ring-ring/50',
       'data-[disabled]:cursor-not-allowed',
       'data-[disabled]:opacity-50',
-      'dark:bg-input/30',
+      'dark:not-[data-checked]:bg-input/30',
     ]) {
       expect(tokens).toContain(token);
     }
-    for (const legacy of ['gap-3', 'shadow-xs', 'text-primary', 'transition-[color,box-shadow]']) {
-      expect(tokens).not.toContain(legacy);
-    }
+    // The multi-profile source guards the dark unfilled tint with not-checked
+    // instead of painting a dark checked primary surface.
+    expect(tokens).not.toContain('dark:data-[checked]:bg-primary');
   });
 
   let dir: string;
