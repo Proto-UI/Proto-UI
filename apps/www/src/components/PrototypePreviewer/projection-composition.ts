@@ -564,7 +564,7 @@ function createSelectControl<Value extends string>(
   const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.trigger,
     props: {
-      'aria-label': config.label,
+      ...(config.labelPresentation === 'accessible' ? {} : { 'aria-label': config.label }),
       ...(triggerAppearance(config, selectParts.trigger)
         ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
@@ -584,7 +584,13 @@ function createSelectControl<Value extends string>(
       ...(config.minHeight ? { minHeight: config.minHeight } : {}),
       ...(config.paddingBlock ? { paddingBlock: config.paddingBlock } : {}),
     },
-    children: [value],
+    // Select's governed accessible.nameFromContent owns the physical name.
+    // A manual aria-label is cleared by that projection; keep the compact
+    // field label in its semantic content instead of restoring DOM attributes.
+    children:
+      config.labelPresentation === 'accessible'
+        ? [{ ...label, tag: 'span', className: 'sr-only' }, ' ', value]
+        : [value],
   });
   const items = config.options.map((option) =>
     createProjectedProto(selectParts.item, coordinateAttrs, themeSurfaceStyle, {
@@ -926,9 +932,9 @@ export function createProjectionComposition(
         if (!trigger) {
           throw new Error(`[PrototypePreviewer] projection ${id} control trigger is missing.`);
         }
-        if (!(id === 'runtime' && runtimeTabs))
-          trigger.setAttribute('aria-label', options.controls[id].label);
         const config = options.controls[id] as ProjectionControlConfig<string>;
+        if (!(id === 'runtime' && runtimeTabs) && config.labelPresentation !== 'accessible')
+          trigger.setAttribute('aria-label', config.label);
         if (!(id === 'runtime' && runtimeTabs))
           appearanceCleanups.push(
             bindSiteSelectDismissal(context.refs[CONTROL_REFS[id].box]!, (reason) => {

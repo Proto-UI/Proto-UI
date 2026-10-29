@@ -11,7 +11,7 @@ import { PROJECTION_FAMILY_MANIFESTS, SHARED_BASE_FAMILY_IDS } from './projectio
 import { headerSelectControlProps } from '../site-header-control-recipes';
 
 it.each(['wc', 'react', 'vue', 'vue2'] as const)(
-  'keeps compact header labels accessible and projects the explicit frame in %s',
+  'keeps compact labels in Select semantic content and uses native profile in %s',
   (runtimeId) => {
     const config = controls();
     const composition = createProjectionComposition({
@@ -34,7 +34,8 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     );
     if (trigger.kind !== 'proto' || root.kind !== 'proto')
       throw new Error('Expected real Select parts');
-    expect(trigger.props).toMatchObject({ 'aria-label': 'Runtime', appearance: 'default' });
+    expect(trigger.props).toMatchObject({ appearance: 'default' });
+    expect(trigger.props).not.toHaveProperty('aria-label');
     expect(root.props).toMatchObject({ styleProfile: 'rhea', value: runtimeId });
     expect(trigger.surfaceStyle).toMatchObject({
       minHeight: 'var(--site-control-height, 2.75rem)',
@@ -44,7 +45,9 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       if (node.kind === 'box' && node.attrs?.['data-projection-control-label'] === 'runtime')
         labels.push(node);
     });
-    expect(labels).toEqual([]);
+    expect(labels).toHaveLength(1);
+    expect(labels[0]).toMatchObject({ tag: 'span', className: 'sr-only' });
+    expect(trigger.children).toContain(labels[0]);
   }
 );
 

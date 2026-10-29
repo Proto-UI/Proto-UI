@@ -82,9 +82,8 @@ export function createHomepageLocaleSelect(
     };
   const trigger = proto(
     parts.trigger,
-    [value],
+    [{ kind: 'box', tag: 'span', className: 'sr-only', children: [locale.label + ' '] }, value],
     {
-      'aria-label': locale.label,
       appearance:
         family === 'shadcn' ? control.triggerAppearance : control.brutalistTriggerAppearance,
     },
@@ -129,7 +128,6 @@ export function createHomepageLocaleSelect(
         element.setAttribute('data-language-select-root', '');
         element.dataset.currentLocale = locale.value;
         element.dataset.languageSelectInitialized = 'true';
-        trigger.setAttribute('aria-label', locale.label);
         let alive = true;
         const close = (reason: string) =>
           context.api.call('home-locale-root', 'requestOpen', {

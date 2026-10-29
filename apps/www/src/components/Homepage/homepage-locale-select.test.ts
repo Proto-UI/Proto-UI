@@ -31,6 +31,14 @@ describe('homepage locale Select composition', () => {
         prototypeId: `${family}-select-root`,
         props: { value: 'en', closeOnSelect: true },
       });
+      const trigger = all.find(
+        (node) => node.kind === 'proto' && node.ref === 'home-locale-trigger'
+      );
+      expect(trigger).toMatchObject({
+        children: expect.arrayContaining([
+          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Language '] },
+        ]),
+      });
       expect(prototypeIds).toContain(`${family}-select-trigger`);
       if (family === 'shadcn') expect(prototypeIds).toContain('shadcn-select-item-text');
     }
@@ -68,7 +76,6 @@ describe('homepage locale Select composition', () => {
       expect(call).toHaveBeenCalledTimes(1);
       expect(window.location.pathname).toBe('/zh-cn/');
       expect(window.location.search).toBe('?q=1');
-      expect(trigger.getAttribute('aria-label')).toBe('Language');
       if (typeof cleanup === 'function') cleanup();
       callback({ value: 'en' });
       expect(call).toHaveBeenCalledTimes(1);
@@ -94,5 +101,5 @@ it('retains a validated metadata snapshot and explicit shared Header appearance'
   ).toMatchObject({ props: { styleProfile: 'rhea' } });
   expect(
     all.find((node) => node.kind === 'proto' && node.ref === 'home-locale-trigger')
-  ).toMatchObject({ props: { appearance: 'default', 'aria-label': 'Language' } });
+  ).toMatchObject({ props: { appearance: 'default' } });
 });
