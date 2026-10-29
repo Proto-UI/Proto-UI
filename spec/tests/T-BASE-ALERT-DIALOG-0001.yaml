@@ -2,9 +2,10 @@ id: T-BASE-ALERT-DIALOG-0001
 type: test
 title: Base AlertDialog bounded command ownership model tests
 status: draft
+lifecycleRationale: Actual WC DOM-model command tests pass, but native input, focus, AT and motion admission remain unverified; this entity remains draft.
 since: 0.3.0-alpha.1
 summary: Authored actual Adapter/Prototype DOM-model observations, not native input,
-  focus, AT or motion acceptance. Execution remains unverified.
+  focus, AT or motion acceptance. Six command-model cases have local execution evidence.
 cases:
 - id: T-BASE-ALERT-DIALOG-0001-CASE-OWNER
   title: Controlled refusal and later owner acceptance
@@ -38,7 +39,7 @@ cases:
 implementations:
 - id: base-alert-dialog-command-ownership-model
   kind: module-test
-  status: planned
+  status: passing
   path: packages/prototypes/base/test/navigation-overlays/alert-dialog-command-ownership.test.ts
   required: true
   consumesCases:
@@ -48,8 +49,8 @@ implementations:
   exercises:
   - P-BASE-ALERT-DIALOG
   notes:
-  - Six authored DOM-model cases using actual Adapter and public events; not executed
-    at publication. planned is not passing.
+  - Six actual Adapter DOM-model cases passed in the fixed isolated candidate; native
+    composition admission remains planned and is not implied by these results.
   - Programmatic DOM click and zero-duration presence do not prove native double-delivery,
     trap/restoration, AT or motion.
 - id: base-alert-dialog-native-admission-pending
@@ -76,6 +77,9 @@ revisions:
   change: introduced
   summary: Add three bounded case mappings backed by six authored, unverified model
     tests.
+- version: 0.3.0-alpha.1
+  change: revised
+  summary: Record bounded model execution and draft lifecycle rationale; native admission remains planned.
 tags:
 - test
 - base
