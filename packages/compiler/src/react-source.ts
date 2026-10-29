@@ -1134,7 +1134,9 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
         path: transportFile, kind: 'source',
         contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
       }],
-      dependencies: selected.value.dependencies.map((dependency) => ({ ...dependency })),
+      dependencies: selected.value.dependencies
+        .filter((dependency) => interaction || dependency.name !== '@floating-ui/dom')
+        .map((dependency) => ({ ...dependency })),
       provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
     },
   };

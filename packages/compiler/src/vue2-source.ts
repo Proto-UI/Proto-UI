@@ -286,7 +286,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
 `;
   return { ok: true, value: { code, profile,
     supportingFiles: [...(contextArtifacts?.files ?? []), ...staticDeclarations.files, ...(usesStyle ? [nativeStyleArtifact] : []), ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : [])],
-    dependencies: [...selected.value.dependencies.map(dependency => ({ ...dependency })), ...(options.ssr ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }] : [])],
+    dependencies: [...selected.value.dependencies.filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom').map(dependency => ({ ...dependency })), ...(options.ssr ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }] : [])],
     provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile } } };
 }
 
