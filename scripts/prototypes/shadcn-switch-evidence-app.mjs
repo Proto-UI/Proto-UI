@@ -36,6 +36,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     readOnly: false,
     draggable: false,
     direction: 'ltr',
+    checked: undefined,
   };
   const fieldProps = (s) => ({ invalid: s.invalid });
   const switchProps = (s) => ({
@@ -45,6 +46,7 @@ for (const kind of ['wc', 'react', 'vue', 'vue2']) {
     readOnly: s.readOnly,
     draggable: s.draggable,
     direction: s.direction,
+    ...(s.checked === undefined ? {} : { checked: s.checked }),
     ...(kind === 'wc' ? {} : { onCheckedChange }),
   });
   if (kind === 'wc') {
