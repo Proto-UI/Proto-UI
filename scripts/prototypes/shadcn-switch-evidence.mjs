@@ -629,11 +629,24 @@ try {
                 Math.abs(o.thumbOffset - start.thumbOffset - sign * travel) < 0.75,
               1
             );
-            const after = await page.evaluate(
-              (kind) => window.switchEvidence.records.find((r) => r.kind === kind).events.length,
-              kind
+            const after = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+              return {
+                changes: r.events.length,
+                captured: !!down && r.controls()[1].hasPointerCapture(down.pointerId),
+                lostCapture: window.nativeDragTrace.some(
+                  (e) => e.type === 'lostpointercapture' && e.trusted
+                ),
+              };
+            }, kind);
+            assert.equal(
+              after.changes,
+              before + 1,
+              label + ' exactly one change including native click'
             );
-            assert.equal(after, before + 1, label + ' exactly one change including native click');
+            assert.equal(after.captured, false, label + ' terminal pointer capture released');
+            assert.equal(after.lostCapture, true, label + ' trusted terminal lostpointercapture');
           }
           await save(`drag-${font}-${profile}-${size}-${direction}.png`);
         }
