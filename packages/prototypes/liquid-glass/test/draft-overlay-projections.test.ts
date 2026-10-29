@@ -559,11 +559,11 @@ describe('liquid-glass drawer structural parts', () => {
     try {
       expect(facts.headers).toHaveLength(1);
       expect(facts.footers).toHaveLength(1);
-      // Passive slot presentation: family spacing only, no input/expose/material.
+      // Passive slot presentation: family spacing plus the side-driven
+      // vertical-drawer centering recipe, no input/expose/material.
       expect(header.frame().style.tokens).toEqual(
-        expect.arrayContaining(['flex', 'flex-col', 'gap-0.5', 'p-4'])
+        expect.arrayContaining(['flex', 'flex-col', 'gap-0.5', 'p-4', 'text-center'])
       );
-      expect(header.frame().style.tokens).not.toContain('text-center');
       expect(footer.frame().style.tokens).toEqual(
         expect.arrayContaining(['mt-[auto]', 'flex', 'flex-col', 'gap-2', 'p-4'])
       );

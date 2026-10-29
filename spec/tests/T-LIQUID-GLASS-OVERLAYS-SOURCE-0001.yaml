@@ -45,3 +45,18 @@ implementations:
       - P-LIQUID-GLASS-TOOLTIP
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-AUTOCOMPLETE
+    - P-LIQUID-GLASS-COMBOBOX
+    - P-LIQUID-GLASS-COMMAND
+    - P-LIQUID-GLASS-CONTEXT-MENU
+    - P-LIQUID-GLASS-DROPDOWN-MENU
+    - P-LIQUID-GLASS-MENUBAR
+    - P-LIQUID-GLASS-NAVIGATION-MENU
+    - P-LIQUID-GLASS-SLIDER
+    - P-LIQUID-GLASS-SLIDER-FIELD-THUMB
+    - P-LIQUID-GLASS-SLIDER-THUMB
+    - P-LIQUID-GLASS-TOAST
+    - P-LIQUID-GLASS-TOOLTIP

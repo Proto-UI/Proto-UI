@@ -29,3 +29,8 @@ implementations:
       - P-SHADCN-SLIDER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-SLIDER
+    - P-SHADCN-SLIDER-VALUES

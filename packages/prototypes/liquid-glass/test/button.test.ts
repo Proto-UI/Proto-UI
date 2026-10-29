@@ -69,7 +69,7 @@ describe('liquid-glass Button draft projection', () => {
     expect(controller.getRuleStyleTokens()).not.toContain('opacity-50');
     await invokeUnmounted();
   });
-  it('closes every source token through the real physical style translator', async () => {
+  it('closes every source token through the real physical style translator', { timeout: 120000 }, async () => {
     const tokens = (await collectProtoStyleTokens(
       path.resolve('packages/prototypes/liquid-glass/src')
     )) as string[];

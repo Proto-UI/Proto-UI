@@ -32,3 +32,10 @@ implementations:
       - P-BOOTSTRAP-2-3-2-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-FIELD
+    - P-BOOTSTRAP-2-3-2-RADIO-GROUP
+    - P-BOOTSTRAP-2-3-2-RADIO-GROUP-INDICATOR
+    - P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM

@@ -44,3 +44,15 @@ implementations:
       - P-BOOTSTRAP-2-3-2-TABLE-CELL
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-ASYNC-REGION
+    - P-BOOTSTRAP-2-3-2-IMAGE
+    - P-BOOTSTRAP-2-3-2-LIVE-REGION
+    - P-BOOTSTRAP-2-3-2-TABLE
+    - P-BOOTSTRAP-2-3-2-TABLE-CAPTION
+    - P-BOOTSTRAP-2-3-2-TABLE-CELL
+    - P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL
+    - P-BOOTSTRAP-2-3-2-TABLE-ROW
+    - P-BOOTSTRAP-2-3-2-TRANSITION

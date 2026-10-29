@@ -417,9 +417,18 @@ describe.each(menuBars)('Liquid $name distinct popup identity', (parts) => {
       for (const panel of panels) expectOpaqueFallback(panel);
       triggers[1].input('press.commit');
       expect(root.exposes.value.get()).toBe('file');
-      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual([
-        { name: 'valueChange', payload: expect.objectContaining({ value: 'edit' }) },
-      ]);
+      // The controlled owner rejects the committed value: Base records the
+      // refused trigger request — Menubar also records the paired focus-entry
+      // request while NavigationMenu skips content entry — but never an owner
+      // value or an uncontrolled mutation.
+      expect(root.actions.filter((event) => event.name === 'valueChange')).toEqual(
+        parts.name === 'Menubar'
+          ? [
+              { name: 'valueChange', payload: expect.objectContaining({ value: 'edit' }) },
+              { name: 'valueChange', payload: { value: 'edit', reason: 'keyboard' } },
+            ]
+          : [{ name: 'valueChange', payload: expect.objectContaining({ value: 'edit' }) }]
+      );
       expect(panels.map((panel) => panel.material().candidates)).toEqual([[candidate], []]);
       root.set({ value: 'edit' });
       expect(panels.map((panel) => panel.material().candidates)).toEqual([[], [candidate]]);

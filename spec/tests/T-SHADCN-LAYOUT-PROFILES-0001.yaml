@@ -46,3 +46,20 @@ implementations:
       - P-SHADCN-SLIDER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-ACCORDION
+    - P-SHADCN-CAROUSEL
+    - P-SHADCN-COLLAPSIBLE
+    - P-SHADCN-LABEL
+    - P-SHADCN-MESSAGE-SCROLLER
+    - P-SHADCN-METER
+    - P-SHADCN-PROGRESS
+    - P-SHADCN-RESIZABLE
+    - P-SHADCN-SCROLL-AREA
+    - P-SHADCN-SEPARATOR
+    - P-SHADCN-SLIDER
+    - P-SHADCN-SLIDER-FIELD-THUMB
+    - P-SHADCN-SLIDER-THUMB
+    - P-SHADCN-VIRTUAL-LIST

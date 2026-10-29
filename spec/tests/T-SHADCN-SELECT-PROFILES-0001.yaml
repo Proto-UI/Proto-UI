@@ -31,3 +31,10 @@ implementations:
       - P-SHADCN-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-FIELD
+    - P-SHADCN-SELECT
+    - P-SHADCN-SELECT-ALIGNMENT-PARTS
+    - P-SHADCN-SELECT-STRUCTURAL-PARTS

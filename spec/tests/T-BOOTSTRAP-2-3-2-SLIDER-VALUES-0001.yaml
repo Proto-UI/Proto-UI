@@ -23,3 +23,8 @@ implementations:
       - P-BOOTSTRAP-2-3-2-SLIDER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-SLIDER
+    - P-BOOTSTRAP-2-3-2-SLIDER-VALUES

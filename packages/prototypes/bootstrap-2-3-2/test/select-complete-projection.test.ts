@@ -193,19 +193,26 @@ describe('prototypes/bootstrap-2-3-2: select complete projection', () => {
 
     expect(trigger.getAttribute('role')).toBe('combobox');
     expect(trigger.getAttribute('aria-labelledby')).toBe(label.id);
-    expect(trigger.getAttribute('aria-errormessage')).toBe(error.id);
+    // aria-errormessage is only projected while the Field reports invalid;
+    // a present-but-valid error part supplies no premature relation.
+    expect(trigger.getAttribute('aria-errormessage')).toBeNull();
     expect(trigger.getAttribute('aria-invalid')).toBe('false');
     // Field binding owns invalid without rewriting Select's committed value.
     setElementProps(field, { invalid: true, errors: ['Invalid choice'] });
     await settle();
+    expect(trigger.getAttribute('aria-errormessage')).toBe(error.id);
     expect(trigger.getAttribute('aria-invalid')).toBe('true');
     expect(root.getExposes().value.get()).toBe('alpha');
     setElementProps(field, { invalid: false });
     await settle();
     expect(trigger.getAttribute('aria-invalid')).toBe('false');
 
-    // FIELD_LABEL_PAIR still routes label activation to the composed trigger.
+    // FIELD_LABEL_PAIR refuses untrusted synthetic clicks by design; the same
+    // paired target still accepts its own focus route.
     label.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    await settle();
+    expect(document.activeElement).not.toBe(trigger);
+    trigger.getExposes().focusSelf();
     await settle();
     expect(document.activeElement).toBe(trigger);
 

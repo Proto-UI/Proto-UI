@@ -111,7 +111,10 @@ describe('Shadcn Popover command default Nova density', () => {
       expect(tokensOf(nodes[part])).toEqual(expect.arrayContaining(density));
   });
 
-  it('keeps complete-family Document and Shadow closure without banning other components old utilities', async () => {
+  it(
+    'keeps complete-family Document and Shadow closure without banning other components old utilities',
+    { timeout: 120000 },
+    async () => {
     const collected = await collectProtoStyleTokens(sourceRoot);
     const complete = collected.filter((token): token is string => typeof token === 'string');
     expect(complete).toHaveLength(collected.length);

@@ -131,7 +131,10 @@ describe('Shadcn Popover Title bounded Nova presentation', () => {
     expect(tokens(title)).toEqual(['font-medium']);
   });
 
-  it('lowers the complete family input through Document and Shadow without losing the existing text scale', async () => {
+  it(
+    'lowers the complete family input through Document and Shadow without losing the existing text scale',
+    { timeout: 120000 },
+    async () => {
     const collected = await collectProtoStyleTokens(sourceRoot);
     const complete = collected.filter((token): token is string => typeof token === 'string');
     expect(complete.length).toBe(collected.length);

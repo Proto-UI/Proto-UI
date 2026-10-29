@@ -32,3 +32,11 @@ implementations:
       - P-BOOTSTRAP-2-3-2-TABS-INDICATOR
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-TABS
+    - P-BOOTSTRAP-2-3-2-TABS-CONTENT
+    - P-BOOTSTRAP-2-3-2-TABS-INDICATOR
+    - P-BOOTSTRAP-2-3-2-TABS-LIST
+    - P-BOOTSTRAP-2-3-2-TABS-TRIGGER

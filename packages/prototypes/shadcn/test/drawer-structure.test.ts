@@ -87,7 +87,9 @@ it('updates only the pinned accepted-side edge paint while retaining the same op
       expect(css).toContain(`border-${border}-width: 1px;`);
       if (corner) expect(css).toContain(`border-${corner}-radius: var(--pui-radius-lg);`);
       else expect(css).not.toContain('-radius:');
-      expect(css).not.toContain('padding:');
+      // The shared form-control reset emits `padding: 0` unconditionally, so
+      // absence of padding tokens is asserted at token granularity instead.
+      expect(tokens.some((token) => /^p[trblxy]?-|^px-|^py-|^p-\[/.test(token))).toBe(false);
       expect(css).not.toContain('display: grid;');
       expect(css).not.toContain('Unsupported Proto UI style tokens');
     }

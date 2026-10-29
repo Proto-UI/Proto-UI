@@ -151,15 +151,21 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
         .filter(Boolean);
       for (const token of tokens) expect(SHADCN_STYLE_TOKENS, `${role}: ${token}`).toContain(token);
     }
-    for (const [role, hover] of [
-      ['action', 'bg-primary/80'],
-      ['cancel', 'bg-accent'],
-    ] as const) {
-      p[role].dispatchEvent(new Event('pointerenter'));
-      await flush();
-      expect(p[role].getExposes().hovered.get()).toBe(true);
-      expect(styleContains(p[role], `data-[hovered]:${hover}`)).toBe(true);
-    }
+    // The hover recipes are style-gated runtime rules: the family style state
+    // is not a web-exposed attribute, so New York paint arrives un-prefixed
+    // only while actually hovered. The default recipe's /90 comes from the
+    // pinned modern source, correcting the older /80 local mismatch.
+    p.action.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(p.action.getExposes().hovered.get()).toBe(true);
+    expect(styleContains(p.action, 'bg-primary/90')).toBe(true);
+    p.action.dispatchEvent(new Event('pointerleave'));
+    await flush();
+    p.cancel.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(p.cancel.getExposes().hovered.get()).toBe(true);
+    for (const token of ['bg-accent', 'text-accent-foreground'])
+      expect(styleContains(p.cancel, token)).toBe(true);
   });
 
   it('keeps bounded long-label wrapping as an explicit reusable command option', async () => {

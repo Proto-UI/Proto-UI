@@ -44,3 +44,15 @@ implementations:
       - P-LIQUID-GLASS-TABLE-CELL
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-ASYNC-REGION
+    - P-LIQUID-GLASS-IMAGE
+    - P-LIQUID-GLASS-LIVE-REGION
+    - P-LIQUID-GLASS-TABLE
+    - P-LIQUID-GLASS-TABLE-CAPTION
+    - P-LIQUID-GLASS-TABLE-CELL
+    - P-LIQUID-GLASS-TABLE-HEADER-CELL
+    - P-LIQUID-GLASS-TABLE-ROW
+    - P-LIQUID-GLASS-TRANSITION

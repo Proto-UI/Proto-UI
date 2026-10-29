@@ -32,3 +32,11 @@ implementations:
       - P-LIQUID-GLASS-TABS-INDICATOR
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-TABS
+    - P-LIQUID-GLASS-TABS-CONTENT
+    - P-LIQUID-GLASS-TABS-INDICATOR
+    - P-LIQUID-GLASS-TABS-LIST
+    - P-LIQUID-GLASS-TABS-TRIGGER

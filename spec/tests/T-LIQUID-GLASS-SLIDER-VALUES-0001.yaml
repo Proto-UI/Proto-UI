@@ -23,3 +23,8 @@ implementations:
       - P-LIQUID-GLASS-SLIDER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-SLIDER
+    - P-LIQUID-GLASS-SLIDER-VALUES

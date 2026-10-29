@@ -33,3 +33,11 @@ implementations:
       - P-SHADCN-TABS-INDICATOR
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-TABS
+    - P-SHADCN-TABS-CONTENT
+    - P-SHADCN-TABS-INDICATOR
+    - P-SHADCN-TABS-LIST
+    - P-SHADCN-TABS-TRIGGER

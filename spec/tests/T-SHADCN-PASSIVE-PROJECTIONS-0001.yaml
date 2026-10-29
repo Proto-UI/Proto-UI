@@ -53,3 +53,15 @@ implementations:
       - P-SHADCN-TABLE-CELL
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-ASYNC-REGION
+    - P-SHADCN-IMAGE
+    - P-SHADCN-LIVE-REGION
+    - P-SHADCN-TABLE
+    - P-SHADCN-TABLE-CAPTION
+    - P-SHADCN-TABLE-CELL
+    - P-SHADCN-TABLE-HEADER-CELL
+    - P-SHADCN-TABLE-ROW
+    - P-SHADCN-TRANSITION

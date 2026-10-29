@@ -43,3 +43,17 @@ implementations:
       - P-LIQUID-GLASS-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-CHECKBOX
+    - P-LIQUID-GLASS-CHECKBOX-INDICATOR
+    - P-LIQUID-GLASS-FIELD
+    - P-LIQUID-GLASS-INPUT
+    - P-LIQUID-GLASS-RADIO-GROUP
+    - P-LIQUID-GLASS-RADIO-GROUP-INDICATOR
+    - P-LIQUID-GLASS-RADIO-GROUP-ITEM
+    - P-LIQUID-GLASS-SEPARATOR
+    - P-LIQUID-GLASS-SWITCH
+    - P-LIQUID-GLASS-SWITCH-THUMB
+    - P-LIQUID-GLASS-TEXTAREA

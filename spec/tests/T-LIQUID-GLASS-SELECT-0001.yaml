@@ -31,3 +31,11 @@ implementations:
       - P-LIQUID-GLASS-SELECT-TRIGGER
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-FIELD
+    - P-LIQUID-GLASS-SELECT
+    - P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS
+    - P-LIQUID-GLASS-SELECT-STRUCTURAL-PARTS
+    - P-LIQUID-GLASS-SELECT-TRIGGER

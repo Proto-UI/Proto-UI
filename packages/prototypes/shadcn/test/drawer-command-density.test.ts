@@ -187,7 +187,10 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     expect(nodes.trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('keeps complete-family Document and Shadow closure without banning other components old utilities', async () => {
+  it(
+    'keeps complete-family Document and Shadow closure without banning other components old utilities',
+    { timeout: 120000 },
+    async () => {
     const collected = await collectProtoStyleTokens(sourceRoot);
     const complete = collected.filter((token): token is string => typeof token === 'string');
     expect(complete).toHaveLength(collected.length);

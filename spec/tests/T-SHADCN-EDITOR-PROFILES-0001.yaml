@@ -55,3 +55,13 @@ implementations:
       - P-SHADCN-NUMBER-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-FIELD
+    - P-SHADCN-FIELDSET
+    - P-SHADCN-FORM
+    - P-SHADCN-INPUT
+    - P-SHADCN-INPUT-OTP
+    - P-SHADCN-NUMBER-FIELD
+    - P-SHADCN-TEXTAREA

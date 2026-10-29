@@ -31,3 +31,10 @@ implementations:
       - P-BOOTSTRAP-2-3-2-FIELD
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-FIELD
+    - P-BOOTSTRAP-2-3-2-SELECT
+    - P-BOOTSTRAP-2-3-2-SELECT-ALIGNMENT-PARTS
+    - P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS
