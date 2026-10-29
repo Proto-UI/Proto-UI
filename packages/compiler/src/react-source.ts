@@ -45,12 +45,18 @@ export function emitReactSource(
   const reachedFunctions = new Set(admitted.value.functions);
   const interaction = ir.moduleDeclarations.length > 0 || admitted.value.operations.some((operation) =>
     /^(hook\.|event\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(operation));
+  // Demand is derived from reached operations/expressions, never component identity.
+  let usesStyle = admitted.value.operations.some((operation) =>
+    /^(style\.|rule\.|feedback\.style\.)/.test(operation));
   const unsupportedTemplates: ExpressionIR[] = [];
   function inspectTemplate(value: unknown): void {
     if (Array.isArray(value)) for (const item of value) inspectTemplate(item);
     else if (value !== null && typeof value === 'object') {
       const node = value as ExpressionIR;
       if (node.kind === 'function' && !reachedFunctions.has(node.function)) return;
+      if (node.kind === 'style-handle' || node.kind === 'rule'
+          || node.type === 'style-handle' || node.type === 'template-props'
+          || node.type === 'rule-handle') usesStyle = true;
       if (node.kind === 'operation' && node.operation === 'render.el') {
         const props = node.arguments[1];
         if (props?.kind === 'record' && props.entries.length &&
@@ -237,7 +243,7 @@ ${ssr ? `import { ServerTransport as ${p}SharedServerTransport, HydrationTranspo
 import { createContextScope as ${p}CreateContextScope, acceptsContextValue as ${p}Accepts } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import type { ContextScope as ${p}ContextScope } from ${JSON.stringify(contextArtifacts.scopeFile.replace(/\.ts$/, ''))};
 import { ContextTransport as ${p}ContextTransport } from './.proto-ui/context/react-v1';
-import { createNativeStyle as ${p}CreateNativeStyle, templateStyleTokens as ${p}TemplateStyleTokens, type NativeStyle as ${p}NativeStyle, type NativeStyleHandle as ${p}NativeStyleHandle, type NativeRuleHandle as ${p}NativeRuleHandle } from './.proto-ui/style/native-v1';
+${usesStyle ? `import { createNativeStyle as ${p}CreateNativeStyle, templateStyleTokens as ${p}TemplateStyleTokens, type NativeStyle as ${p}NativeStyle, type NativeStyleHandle as ${p}NativeStyleHandle, type NativeRuleHandle as ${p}NativeRuleHandle } from './.proto-ui/style/native-v1';` : ''}
 ${interaction ? `import { createNativeInteraction as ${p}CreateNativeInteraction, type NativeInteraction as ${p}NativeInteraction, type NativeFocus as ${p}NativeFocus, type NativeAccessible as ${p}NativeAccessible, type NativeObservedState as ${p}NativeObservedState, type NativeInput as ${p}NativeInput, type NativeFocusOptions as ${p}NativeFocusOptions } from './.proto-ui/interaction/native-v1';` : ''}
 ${interaction ? `import type { NativeModuleCapability as ${p}NativeModuleCapability } from './.proto-ui/interaction/adapter-modules-v1';` : ''}
 ${contextImports}
@@ -273,7 +279,7 @@ type ${p}DataSchema = string | { kind: string; fields?: readonly { name: string;
 type ${p}PropSpec = { type: ${p}DataSchema; default?: unknown; empty?: 'accept' | 'fallback' | 'error'; options?: readonly string[]; range?: { min?: number; max?: number } };
 type ${p}Run = {
   update(): void;
-  feedback: { style: Pick<${p}NativeStyle, 'patch' | 'suppress' | 'clearPatch'> };
+${usesStyle ? `  feedback: { style: Pick<${p}NativeStyle, 'patch' | 'suppress' | 'clearPatch'> };` : ''}
   props: { get(): ${p}ResolvedProps; getRaw(): Readonly<Record<string, unknown>>; isProvided(key: string): boolean };
   context: {
     read<T>(key: object): T;
@@ -469,7 +475,7 @@ ${propSchemas}
     getParent, isAlive: () => lifetime !== 'disposed', invoke,
     validate: ${contextValidation},
   });
-  function projectStyle(tokens: readonly string[]) {
+${usesStyle ? `  function projectStyle(tokens: readonly string[]) {
     if (!root) return;
     if (tokens.length) root.setAttribute('data-pui-style', tokens.join(' '));
     else root.removeAttribute('data-pui-style');
@@ -480,7 +486,7 @@ ${propSchemas}
     isAlive: () => lifetime !== 'disposed',
     project: projectStyle,
   });
-  function dispatch(list: readonly ((run: ${p}Run) => void)[]) {
+` : ''}  function dispatch(list: readonly ((run: ${p}Run) => void)[]) {
     invoke(() => { for (const callback of list) callback(${p}RunHandle); });
   }
   function schedule() {
@@ -540,7 +546,8 @@ ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !
     }
     if (Object.keys(props).some((key) => key !== 'style'))
       throw new Error('[Template] native template props support only style.');
-    const tokens = Object.hasOwn(props, 'style') ? ${p}TemplateStyleTokens(props.style as ${p}NativeStyleHandle) : '';
+${usesStyle ? `    const tokens = Object.hasOwn(props, 'style') ? ${p}TemplateStyleTokens(props.style as ${p}NativeStyleHandle) : '';` : `    if (Object.hasOwn(props, 'style')) throw new Error('[Template] style requires an admitted style handle.');
+    const tokens = '';`}
     const normalized = normalize(children);
     return ${p}React.createElement(tag, { key: elementSequence++, ...(tokens ? { 'data-pui-style': tokens } : {}) }, ...(Array.isArray(normalized) ? normalized : [normalized]));
   }
@@ -610,7 +617,7 @@ ${ssr ? '    if (server) return;\n' : ''}    if (scheduled || callbackDepth || !
         if (Object.is(value, next)) return;
         const event: ${p}StateEvent<T> = { type: 'next', prev: value, next, reason };
         value = next;
-        ${p}Style.refresh();
+${usesStyle ? `        ${p}Style.refresh();` : ''}
 ${interaction ? `        ${p}Interaction.refresh();\n` : ''}        pendingStateEvents.push(() => { for (const callback of [...subscribers]) callback(event); });
         if (emittingState) return;
         emittingState = true;
@@ -635,7 +642,7 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     const subscribers = new Set<(event: ${p}StateEvent<T>) => void>();
     stateSubscribers.add(subscribers as Set<(event: ${p}StateEvent<unknown>) => void>);
     observedStateCleanups.push(state.subscribe((event) => {
-      ${p}Style.refresh();
+${usesStyle ? `      ${p}Style.refresh();` : ''}
       ${p}Interaction.refresh();
       pendingStateEvents.push(() => { for (const callback of [...subscribers]) callback(event); });
       if (emittingState) return;
@@ -707,7 +714,7 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     finally { for (const off of observedStateCleanups.splice(0)) off(); for (const off of authorStateWatchCleanups.splice(0)) off(); }
   }
 ` : ''}  const ${p}RunHandle: ${p}Run = {
-    feedback: { style: ${p}Style },
+${usesStyle ? `    feedback: { style: ${p}Style },` : ''}
     update() {
       ensurePhase('callback');
       if (lifetime !== 'alive') return;
@@ -749,7 +756,7 @@ ${interaction ? `  const observedStateCleanups: (() => void)[] = [];
     exposes[key] = value;
   }
   const ${p}Def = {
-${interaction ? `    event: ${p}Interaction.event,\n` : ''}    feedback: { style: { use: ${p}Style.use } },
+${interaction ? `    event: ${p}Interaction.event,\n` : ''}${usesStyle ? `    feedback: { style: { use: ${p}Style.use } },` : ''}
     context: Object.freeze({
       provide<T>(key: object, value: T) { ensurePhase('setup'); context.provide(key, value); },
       subscribe<T>(key: object, callback?: (run: ${p}Run, next: T, prev: T) => void) {
@@ -859,7 +866,7 @@ ${hookDefinitions}
   try {
     render = (${fn(ir.setup, 1)})(${p}Def) ?? (() => ${p}Renderer.slot());
     if (typeof render !== 'function') throw new Error('[Prototype] setup must return a render function or void.');
-  } catch (error) { ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${p}Style.dispose(); context.dispose(); throw error; }
+  } catch (error) { ${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); throw error; }
   phase = 'idle';
   function applyProps(nextHost: GeneratedComponentProps) {
     ensureAlive();
@@ -875,7 +882,7 @@ ${hookDefinitions}
     const previousRaw = raw;
     raw = Object.freeze(nextRaw);
     resolved = ${p}ResolveProps(specs, defaults, previousValid, raw, true);
-    ${p}Style.refresh();
+${usesStyle ? `    ${p}Style.refresh();` : ''}
 ${interaction ? `    ${p}Interaction.refresh();\n` : ''}    if (!hydrated) { hydrated = true; return; }
     const nextResolved = resolved, nextRawSnapshot = raw;
     invoke(() => {
@@ -912,7 +919,7 @@ ${ssr ? `  function disposeNow() {
     let failure: unknown;
     try { dispatch(callbacks.beforeDispose); } catch (error) { failure = error; }
     finally {
-${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }
+${interaction ? `      try { disposeInteraction(); } catch (error) { failure ??= error; }\n` : ''}${usesStyle ? `      try { ${p}Style.dispose(); } catch (error) { failure ??= error; }` : ''}
       try { context.dispose(); } catch (error) { failure ??= error; }
       lifetime = 'disposed'; phase = 'idle'; connected = false;
       for (const subscribers of stateSubscribers) subscribers.clear();
@@ -937,7 +944,7 @@ ${interaction ? `        ${p}Interaction.projectAttributes();\n` : ''}        sl
           phase = 'render';
           try { node = normalize(render(${p}Renderer)); } finally { phase = 'idle'; }
         }
-        const tokens = ${p}Style.serverTokens();
+        const tokens = ${usesStyle ? `${p}Style.serverTokens()` : '[]'};
         return { source: ${JSON.stringify(ir.source.sha256)}, present: desiredPresent, rootTag: ${interaction ? `${p}Interaction.rootTag() ?? 'div'` : "'div'"}, properties: ${interaction ? `${p}Interaction.rootProperties()` : '{}'}, template: ${p}EncodeTemplate(node),
           attributes: { 'data-pui-root': '',
             ...(tokens.length ? { 'data-pui-style': tokens.join(' ') } : {}),
@@ -947,9 +954,9 @@ ${interaction ? `            ...${p}Interaction.projectAttributes(),\n` : ''}   
 ` : ''}
     bindRoot(nextRoot) {
       if (root === nextRoot) return;
-${interaction ? `      ${p}Interaction.unmount();\n` : ''}      root?.removeAttribute('data-pui-style');
+${interaction ? `      ${p}Interaction.unmount();\n` : ''}      ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
       root = nextRoot;
-      if (mounted) projectStyle(${p}Style.tokens());
+${usesStyle ? `      if (mounted) projectStyle(${p}Style.tokens());` : ''}
 ${interaction ? `      if (mounted && desiredPresent && viewConnected) ${p}Interaction.mount();\n` : ''}    },
     connect() { connected = true; ++cleanupVersion; },
 ${interaction ? `    connectView() {
@@ -970,14 +977,14 @@ ${interaction ? `        if (expected) hydrationAttributes = Object.fromEntries(
 ` : ''}
 ` : ''}        schedule();
       }
-      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${p}Style.dispose(); context.dispose(); lifetime = 'disposed'; connected = false;`} throw error; }
+      catch (error) { ${ssr ? `try { disposeNow(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Hydration] startup and cleanup failed.'); }` : `${interaction ? 'try { disposeInteraction(); } catch {} ' : ''}${usesStyle ? `${p}Style.dispose(); ` : ''}context.dispose(); lifetime = 'disposed'; connected = false;`} throw error; }
     },
     applyProps,
     accept(frame: ${p}Frame) {
       if (!connected || lifetime !== 'alive' || frame.revision <= acceptedRevision || frame !== latest) return false;
       acceptedRevision = frame.revision;
       if (frame.kind === 'detach') {
-${interaction ? `        ${p}Interaction.unmount();\n` : ''}        ${p}Style.unmount();
+${interaction ? `        ${p}Interaction.unmount();\n` : ''}${usesStyle ? `        ${p}Style.unmount();` : ''}
         if (mounted) { mounted = false; dispatch(callbacks.unmounted); }
       } else if (!desiredPresent) {
         // Physical materialization is not a published mount. Remove the obsolete
@@ -986,7 +993,7 @@ ${interaction ? `        ${p}Interaction.unmount();\n` : ''}        ${p}Style.un
         return false;
       } else if (frame.kind === 'mount') {
         mounted = true;
-        ${p}Style.mount();
+${usesStyle ? `        ${p}Style.mount();` : ''}
 ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callbacks.mounted);
       } else if (mounted && frame.epoch === epoch) dispatch(callbacks.updated);
       schedule();
@@ -1002,15 +1009,15 @@ ${interaction ? `        ${p}Interaction.mount();\n` : ''}        dispatch(callb
         let failure: unknown;
 ${interaction ? `        try { ${p}Interaction.unmount(); }
         catch (error) { failure = error; }
-` : ''}        try { if (mounted) { mounted = false; ${p}Style.unmount(); dispatch(callbacks.unmounted); } }
+` : ''}        try { if (mounted) { mounted = false; ${usesStyle ? `${p}Style.unmount(); ` : ''}dispatch(callbacks.unmounted); } }
         catch (error) { failure ??= error; }
         try { dispatch(callbacks.beforeDispose); }
         catch (error) { failure ??= error; }
         finally {
 ${interaction ? `          try { disposeInteraction(); } catch (error) { failure ??= error; }
-` : ''}          root?.removeAttribute('data-pui-style');
+` : ''}          ${usesStyle ? "root?.removeAttribute('data-pui-style');" : ''}
           root = null;
-          ${p}Style.dispose();
+${usesStyle ? `          ${p}Style.dispose();` : ''}
           context.dispose();
           lifetime = 'disposed'; phase = 'idle';
           for (const subscribers of stateSubscribers) subscribers.clear();
@@ -1123,7 +1130,7 @@ ${componentName}.displayName = ${JSON.stringify(ir.name)};
     value: {
       code,
       profile,
-      supportingFiles: [...contextArtifacts.files, ...staticArtifacts.files, nativeStyleArtifact, ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []), ...(ssr ? [reactSSRTransportArtifact] : []), {
+      supportingFiles: [...contextArtifacts.files, ...staticArtifacts.files, ...(usesStyle ? [nativeStyleArtifact] : []), ...(interaction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []), ...(ssr ? [reactSSRTransportArtifact] : []), {
         path: transportFile, kind: 'source',
         contents: `import { createContext } from 'react';\nimport type { ContextScope } from './scope-v1';\nexport const ContextTransport = createContext<ContextScope | null>(null);\n`,
       }],
