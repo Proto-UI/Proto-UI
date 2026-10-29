@@ -137,10 +137,44 @@ const SHADCN_MANIFEST = {
         'shadcn-field-error',
         'shadcn-field-validity',
         'shadcn-button',
+        'shadcn-field-textarea',
+        'shadcn-field-select-trigger',
+        'shadcn-field-switch',
+        'shadcn-select-root',
+        'shadcn-select-value',
+        'shadcn-select-content',
+        'shadcn-select-surface',
+        'shadcn-select-viewport',
+        'shadcn-select-group',
+        'shadcn-select-label',
+        'shadcn-select-item',
+        'shadcn-select-item-text',
+        'shadcn-switch-thumb',
       ],
-      auxiliaryPrototypes: [{ basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' }],
+      auxiliaryPrototypes: [
+        { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'shadcn-button' },
+        { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'shadcn-select-root' },
+        { basePrototypeId: 'P-BASE-SELECT-VALUE', prototypeId: 'shadcn-select-value' },
+        { basePrototypeId: 'P-BASE-SELECT-CONTENT', prototypeId: 'shadcn-select-content' },
+        { basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS', prototypeId: 'shadcn-select-surface' },
+        { basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS', prototypeId: 'shadcn-select-viewport' },
+        { basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS', prototypeId: 'shadcn-select-group' },
+        { basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS', prototypeId: 'shadcn-select-label' },
+        { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'shadcn-select-item' },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'shadcn-select-item-text',
+        },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'shadcn-switch-thumb' },
+      ],
       parts: {
         root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'shadcn-field-root' },
+        textarea: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'shadcn-field-textarea' },
+        selectTrigger: {
+          basePrototypeId: 'P-BASE-FIELD',
+          prototypeId: 'shadcn-field-select-trigger',
+        },
+        switch: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'shadcn-field-switch' },
         label: { basePrototypeId: 'P-BASE-FIELD-LABEL', prototypeId: 'shadcn-field-label' },
         control: { basePrototypeId: 'P-BASE-FIELD-CONTROL', prototypeId: 'shadcn-field-control' },
         description: {
@@ -216,6 +250,9 @@ const SHADCN_MANIFEST = {
         'shadcn-radio-group-item',
         'shadcn-input-root',
         'shadcn-textarea-root',
+        'shadcn-checkbox-indicator',
+        'shadcn-switch-thumb',
+        'shadcn-radio-group-indicator',
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'shadcn-checkbox-root' },
@@ -224,6 +261,13 @@ const SHADCN_MANIFEST = {
         { basePrototypeId: 'P-BASE-RADIO-GROUP-ITEM', prototypeId: 'shadcn-radio-group-item' },
         { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'shadcn-input-root' },
         { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'shadcn-textarea-root' },
+
+        { basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR', prototypeId: 'shadcn-checkbox-indicator' },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'shadcn-switch-thumb' },
+        {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'shadcn-radio-group-indicator',
+        },
       ],
       parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'shadcn-label-root' } },
     },
@@ -1114,12 +1158,60 @@ const BOOTSTRAP_232_MANIFEST = {
         'bootstrap-2-3-2-field-error',
         'bootstrap-2-3-2-field-validity',
         'bootstrap-2-3-2-button',
+        'bootstrap-2-3-2-field-textarea',
+        'bootstrap-2-3-2-field-select-trigger',
+        'bootstrap-2-3-2-field-switch',
+        'bootstrap-2-3-2-select-root',
+        'bootstrap-2-3-2-select-value',
+        'bootstrap-2-3-2-select-content',
+        'bootstrap-2-3-2-select-surface',
+        'bootstrap-2-3-2-select-viewport',
+        'bootstrap-2-3-2-select-group',
+        'bootstrap-2-3-2-select-label',
+        'bootstrap-2-3-2-select-item',
+        'bootstrap-2-3-2-select-item-text',
+        'bootstrap-2-3-2-switch-thumb',
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'bootstrap-2-3-2-button' },
+
+        { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'bootstrap-2-3-2-select-root' },
+        { basePrototypeId: 'P-BASE-SELECT-VALUE', prototypeId: 'bootstrap-2-3-2-select-value' },
+        { basePrototypeId: 'P-BASE-SELECT-CONTENT', prototypeId: 'bootstrap-2-3-2-select-content' },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-surface',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-viewport',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-group',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-label',
+        },
+        { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'bootstrap-2-3-2-select-item' },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'bootstrap-2-3-2-select-item-text',
+        },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'bootstrap-2-3-2-switch-thumb' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'bootstrap-2-3-2-field-root' },
+        textarea: {
+          basePrototypeId: 'P-BASE-FIELD',
+          prototypeId: 'bootstrap-2-3-2-field-textarea',
+        },
+        selectTrigger: {
+          basePrototypeId: 'P-BASE-FIELD',
+          prototypeId: 'bootstrap-2-3-2-field-select-trigger',
+        },
+        switch: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'bootstrap-2-3-2-field-switch' },
         label: {
           basePrototypeId: 'P-BASE-FIELD-LABEL',
           prototypeId: 'bootstrap-2-3-2-field-label',
@@ -1217,6 +1309,9 @@ const BOOTSTRAP_232_MANIFEST = {
         'bootstrap-2-3-2-radio-group-item',
         'bootstrap-2-3-2-input-root',
         'bootstrap-2-3-2-textarea-root',
+        'bootstrap-2-3-2-checkbox-indicator',
+        'bootstrap-2-3-2-switch-thumb',
+        'bootstrap-2-3-2-radio-group-indicator',
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'bootstrap-2-3-2-checkbox-root' },
@@ -1228,6 +1323,16 @@ const BOOTSTRAP_232_MANIFEST = {
         },
         { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'bootstrap-2-3-2-input-root' },
         { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'bootstrap-2-3-2-textarea-root' },
+
+        {
+          basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+          prototypeId: 'bootstrap-2-3-2-checkbox-indicator',
+        },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'bootstrap-2-3-2-switch-thumb' },
+        {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'bootstrap-2-3-2-radio-group-indicator',
+        },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'bootstrap-2-3-2-label-root' },
@@ -1409,12 +1514,57 @@ const LIQUID_GLASS_MANIFEST = {
         'liquid-glass-field-error',
         'liquid-glass-field-validity',
         'liquid-glass-button',
+        'liquid-glass-field-textarea',
+        'liquid-glass-field-select-trigger',
+        'liquid-glass-field-switch',
+        'liquid-glass-select-root',
+        'liquid-glass-select-value',
+        'liquid-glass-select-content',
+        'liquid-glass-select-surface',
+        'liquid-glass-select-viewport',
+        'liquid-glass-select-group',
+        'liquid-glass-select-label',
+        'liquid-glass-select-item',
+        'liquid-glass-select-item-text',
+        'liquid-glass-switch-thumb',
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-BUTTON', prototypeId: 'liquid-glass-button' },
+
+        { basePrototypeId: 'P-BASE-SELECT', prototypeId: 'liquid-glass-select-root' },
+        { basePrototypeId: 'P-BASE-SELECT-VALUE', prototypeId: 'liquid-glass-select-value' },
+        { basePrototypeId: 'P-BASE-SELECT-CONTENT', prototypeId: 'liquid-glass-select-content' },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-surface',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-viewport',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'liquid-glass-select-group',
+        },
+        {
+          basePrototypeId: 'P-BASE-SELECT-STRUCTURAL-PARTS',
+          prototypeId: 'liquid-glass-select-label',
+        },
+        { basePrototypeId: 'P-BASE-SELECT-ITEM', prototypeId: 'liquid-glass-select-item' },
+        {
+          basePrototypeId: 'P-BASE-SELECT-ALIGNMENT-PARTS',
+          prototypeId: 'liquid-glass-select-item-text',
+        },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'liquid-glass-switch-thumb' },
       ],
       parts: {
         root: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'liquid-glass-field-root' },
+        textarea: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'liquid-glass-field-textarea' },
+        selectTrigger: {
+          basePrototypeId: 'P-BASE-FIELD',
+          prototypeId: 'liquid-glass-field-select-trigger',
+        },
+        switch: { basePrototypeId: 'P-BASE-FIELD', prototypeId: 'liquid-glass-field-switch' },
         label: { basePrototypeId: 'P-BASE-FIELD-LABEL', prototypeId: 'liquid-glass-field-label' },
         control: {
           basePrototypeId: 'P-BASE-FIELD-CONTROL',
@@ -1551,6 +1701,9 @@ const LIQUID_GLASS_MANIFEST = {
         'liquid-glass-radio-group-item',
         'liquid-glass-input-root',
         'liquid-glass-textarea-root',
+        'liquid-glass-checkbox-indicator',
+        'liquid-glass-switch-thumb',
+        'liquid-glass-radio-group-indicator',
       ],
       auxiliaryPrototypes: [
         { basePrototypeId: 'P-BASE-CHECKBOX', prototypeId: 'liquid-glass-checkbox-root' },
@@ -1562,6 +1715,16 @@ const LIQUID_GLASS_MANIFEST = {
         },
         { basePrototypeId: 'P-BASE-INPUT', prototypeId: 'liquid-glass-input-root' },
         { basePrototypeId: 'P-BASE-TEXTAREA', prototypeId: 'liquid-glass-textarea-root' },
+
+        {
+          basePrototypeId: 'P-BASE-CHECKBOX-INDICATOR',
+          prototypeId: 'liquid-glass-checkbox-indicator',
+        },
+        { basePrototypeId: 'P-BASE-SWITCH-THUMB', prototypeId: 'liquid-glass-switch-thumb' },
+        {
+          basePrototypeId: 'P-BASE-RADIO-GROUP-INDICATOR',
+          prototypeId: 'liquid-glass-radio-group-indicator',
+        },
       ],
       parts: { root: { basePrototypeId: 'P-BASE-LABEL', prototypeId: 'liquid-glass-label-root' } },
     },
@@ -1688,6 +1851,9 @@ export function validateProjectionFamilyManifest(manifest: ProjectionFamilyManif
         ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
         : []),
       ...(projectionFamilyId !== 'brutalist' && familyId === 'tabs' ? ['indicator'] : []),
+      ...(projectionFamilyId !== 'brutalist' && familyId === 'field'
+        ? ['textarea', 'selectTrigger', 'switch']
+        : []),
     ];
     if (!requiredPartIds) {
       throw new Error(

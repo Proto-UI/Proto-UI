@@ -1,0 +1,71 @@
+id: P-BOOTSTRAP-2-3-2-RADIO-GROUP
+type: prototype
+title: Bootstrap 2.3.2 Radio Group projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+
+
+summary: Bootstrap Radio Group Root over Base with labeled-row paint; a design-language extension, not native radio parity.
+statement:
+  en: >-
+    The Prototype invokes asRadioGroupRoot() once; Base owns selection, Collection and roving focus. Item rows use the pinned forms.less radio row vocabulary; upstream used native inputs, so this custom control is an explicit family extension.
+
+
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-RADIO-GROUP-BASE
+    text:
+      en: >-
+        Invoke asRadioGroupRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+
+
+  - id: P-BOOTSTRAP-2-3-2-RADIO-GROUP-VISUAL
+    text:
+      en: >-
+        Root establishes the group domain; labeled rows use the historical radio row spacing and typography. Checked state marks remain non-color supplementary indicators.
+
+
+  - id: P-BOOTSTRAP-2-3-2-RADIO-GROUP-EXTENSION
+    text:
+      en: >-
+        Bootstrap 2.3.2 had no custom radio widget; the Proto control preserves Base semantics over pinned forms vocabulary and claims no jQuery or native-element API parity.
+
+
+  - id: P-BOOTSTRAP-2-3-2-RADIO-GROUP-CLOSURE
+    text:
+      en: >-
+        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+
+
+  - id: P-BOOTSTRAP-2-3-2-RADIO-GROUP-BOUNDARY
+    text:
+      en: >-
+        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+
+
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-RADIO-GROUP
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/radio-group/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/radio-group/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/forms.less
+    label: Pinned radio/checkbox row vocabulary reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Radio Group projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - radio-group
+  - draft

@@ -11,7 +11,7 @@ export default definePrototype<Bootstrap232SelectLabelProps, Bootstrap232SelectL
     asSelectLabel();
     def.feedback.style.use(
       tw(
-        'block px-[15px] py-[3px] text-[11px] font-bold leading-5 uppercase text-paint-[#999_0_1px_0_rgb(255_255_255/50%)]'
+        'block px-[20px] py-[3px] text-[11px] font-bold leading-[20px] uppercase text-paint-[#999_0_1px_0_rgb(255_255_255/50%)]'
       )
     );
     return (renderer) => [renderer.r.slot()];

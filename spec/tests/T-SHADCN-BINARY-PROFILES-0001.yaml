@@ -1,0 +1,44 @@
+id: T-SHADCN-BINARY-PROFILES-0001
+type: test
+title: Shadcn binary control profile transitions
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+
+
+summary: Nine-profile Switch, Checkbox, Checkbox Group and Radio Group transitions with owner preservation.
+cases:
+  - id: T-SHADCN-BINARY-PROFILES-0001-CASE-TRANSITIONS
+    title: Typed WC transitions across nine profiles preserve value, focus and owner identity
+    covers:
+      - P-SHADCN-SWITCH-BASE-INHERITANCE
+      - P-SHADCN-CHECKBOX-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+      - P-SHADCN-CHECKBOX-GROUP-ADMISSION
+    expectation: profile-switching-preserves-owners
+  - id: T-SHADCN-BINARY-PROFILES-0001-CASE-POLICY
+    title: Controlled refusal, disabled and Field policy, withdrawal and live palette changes
+    covers:
+      - P-SHADCN-SWITCH-BASE-INHERITANCE
+      - P-SHADCN-CHECKBOX-BASE-INHERITANCE
+      - P-SHADCN-RADIO-GROUP-BASE-INHERITANCE
+      - P-SHADCN-CHECKBOX-GROUP-ADMISSION
+    expectation: policy-and-withdrawal-boundaries
+implementations:
+  - id: shadcn-binary-profile-transitions
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/binary-profile-transitions.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-SWITCH
+      - P-SHADCN-SWITCH-THUMB
+      - P-SHADCN-CHECKBOX
+      - P-SHADCN-CHECKBOX-GROUP
+      - P-SHADCN-RADIO-GROUP
+      - P-SHADCN-RADIO-GROUP-ITEM
+      - P-SHADCN-RADIO-GROUP-INDICATOR
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

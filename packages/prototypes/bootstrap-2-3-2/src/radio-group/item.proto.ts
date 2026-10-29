@@ -19,7 +19,7 @@ export default definePrototype<RadioGroupItemProps, RadioGroupItemExposes>({
     }
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-6 min-w-0 items-center gap-2 font-normal text-sm leading-5 text-foreground outline-none cursor-pointer'
+        'inline-flex min-h-6 min-w-0 items-center gap-2 font-normal text-[14px] leading-[20px] text-foreground outline-none cursor-pointer'
       )
     );
     def.rule({

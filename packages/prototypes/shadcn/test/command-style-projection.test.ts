@@ -150,16 +150,13 @@ describe('actual shared shell consumers', () => {
   });
 });
 
-it.each(['nova', 'vega', 'maia', 'lyra', 'mira', 'luma', 'sera'])(
-  'rejects unprojected %s without a compatibility fallback',
-  async (styleProfile) => {
-    const f = fixture('command');
-    await flush();
-    expect(() => setElementProps(f.control, { styleProfile })).toThrow(
-      'Unsupported style for this consumer'
-    );
-  }
-);
+it('rejects an unknown style without a compatibility fallback', async () => {
+  const f = fixture('command');
+  await flush();
+  expect(() => setElementProps(f.control, { styleProfile: 'unknown' })).toThrow(
+    /Unknown|Unsupported/
+  );
+});
 it('honors explicit family scope, the New York alias and inherit withdrawal', async () => {
   const f = fixture('command');
   await flush();

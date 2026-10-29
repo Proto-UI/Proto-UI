@@ -139,14 +139,23 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       intent: (i) => i.feedback.style.use(tw('bg-primary/80')),
     });
     def.rule({
+      // A pressed fact is not itself an opt-in to Button motion. Ordinary
+      // navigation/content surfaces keep their geometry and authored elevation.
+      // Every modern cn-button recipe carries active:not-aria-[haspopup]:translate-y-px,
+      // so opted-in action profiles project that one-pixel translation only;
+      // New York has no source pressed translation and none is never an action.
       when: (w) =>
         w.all(
           w.prop('pressed').eq(true),
           w.not(
-            w.any(w.prop('actionProfile').eq('new-york-v4'), w.prop('actionProfile').eq('new-york'))
+            w.any(
+              w.prop('actionProfile').eq('none'),
+              w.prop('actionProfile').eq('new-york-v4'),
+              w.prop('actionProfile').eq('new-york')
+            )
           )
         ),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px shadow-none')),
+      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
     });
     def.rule({
       when: (w) =>

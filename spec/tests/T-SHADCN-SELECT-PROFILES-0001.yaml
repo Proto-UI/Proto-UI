@@ -1,0 +1,36 @@
+id: T-SHADCN-SELECT-PROFILES-0001
+type: test
+title: Shadcn Select profile transition coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+
+
+summary: Nine-profile Select transitions, surface/viewport/item-text composition and Field trigger policy.
+cases:
+  - id: T-SHADCN-SELECT-PROFILES-0001-CASE-TRANSITIONS
+    title: Profile transitions on the same open Select preserve caller parts, portal, focused option, scrollport and decoration leaf
+    covers:
+      - P-SHADCN-SELECT-STYLE-SCOPE
+      - P-SHADCN-SELECT-ALIGNMENT-PARTS-VISUAL
+    expectation: open-select-profile-transitions
+  - id: T-SHADCN-SELECT-PROFILES-0001-CASE-FIELD
+    title: Field naming, error relations and invalid-focus restoration stay borrowed from the Field binding
+    covers:
+      - P-SHADCN-SELECT-ALIGNMENT-PARTS-COMPOSITION
+    expectation: field-select-trigger-policy
+implementations:
+  - id: shadcn-select-profile-transitions
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/select-profile-transitions.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-SELECT
+      - P-SHADCN-SELECT-ALIGNMENT-PARTS
+      - P-SHADCN-SELECT-STRUCTURAL-PARTS
+      - P-SHADCN-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

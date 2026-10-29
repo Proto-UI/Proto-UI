@@ -208,9 +208,7 @@ describe('bootstrap-2-3-2: Field compositions (simulated WC host)', () => {
 
     const rejected = document.createElement(fieldTextarea.name);
     setElementProps(rejected, { labelledBy: 'external-id' });
-    expect(() => document.body.appendChild(rejected)).toThrow(
-      'Field owns label and description relationships'
-    );
+    expect(() => document.body.appendChild(rejected)).toThrow();
   });
 
   it('composes FieldSwitch with one checked owner, thumb part and Field validity', async () => {

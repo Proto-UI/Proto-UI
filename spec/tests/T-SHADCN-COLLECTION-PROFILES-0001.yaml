@@ -1,0 +1,37 @@
+id: T-SHADCN-COLLECTION-PROFILES-0001
+type: test
+title: Shadcn collection profile coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+
+
+summary: Calendar, DatePicker, DataTable, ToggleGroup, Toolbar and Tree nine-profile coverage on real consumers.
+cases:
+  - id: T-SHADCN-COLLECTION-PROFILES-0001-CASE-PROFILES
+    title: Nine WC consumer cases change real values, sorting and selection while profiles withdraw without replacing owner state
+    covers:
+      - P-SHADCN-CALENDAR-ADMISSION
+      - P-SHADCN-DATE-PICKER-ADMISSION
+      - P-SHADCN-DATA-TABLE-ADMISSION
+      - P-SHADCN-TOOLBAR-ADMISSION
+      - P-SHADCN-TREE-ADMISSION
+    expectation: collection-profiles-preserve-owners
+implementations:
+  - id: shadcn-collection-profiles-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/collection-profiles-r91.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-CALENDAR
+      - P-SHADCN-DATE-PICKER
+      - P-SHADCN-DATA-TABLE
+      - P-SHADCN-DATA-TABLE-HEADER-ROW
+      - P-SHADCN-TOGGLE-GROUP
+      - P-SHADCN-TOOLBAR
+      - P-SHADCN-TREE
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

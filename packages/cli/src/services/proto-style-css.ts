@@ -51,6 +51,7 @@ const spacing: Record<string, string> = {
   px: '1px',
   '0.25': '0.0625rem',
   '0.5': '0.125rem',
+  '0.75': '0.1875rem',
   '1': '0.25rem',
   '1.5': '0.375rem',
   '2': '0.5rem',
@@ -63,9 +64,11 @@ const spacing: Record<string, string> = {
   '6': '1.5rem',
   '6.25': '1.5625rem',
   '7': '1.75rem',
+  '7.5': '1.875rem',
   '8': '2rem',
   '8.25': '2.0625rem',
   '9': '2.25rem',
+  '9.5': '2.375rem',
   '10': '2.5rem',
   '11': '2.75rem',
   '12': '3rem',
@@ -120,6 +123,123 @@ const colorVars = new Set([
 const staticUtilities: Record<string, string[]> = {
   // Source-bound projection vocabulary; these are ordinary layout/paint
   // properties, not inferred component structure or host behavior.
+  'box-content': ['box-sizing: content-box;'],
+  'float-left': ['float: left;'],
+  'border-[3px]': ['border-width: 3px;', 'border-style: solid;'],
+  'border-[rgb(82_168_236/80%)]': ['border-color: rgb(82 168 236 / 0.8);'],
+  'border-[#953b39]': ['border-color: #953b39;'],
+  'border-[#ccc]': ['border-color: #ccc;'],
+  'border-[#b3b3b3]': ['border-color: #b3b3b3;'],
+  'border-[#ebebeb]': ['border-color: #ebebeb;'],
+  'border-[#fbeed5]': ['border-color: #fbeed5;'],
+  'border-white': ['border-color: #fff;'],
+  'border-b-[#fff]': ['border-bottom-color: #fff;'],
+  'border-[#eee_#eee_#fff_#eee]': ['border-color: #eee #eee #fff #eee;'],
+  'border-[#eee_#fff_#eee_#eee]': ['border-color: #eee #fff #eee #eee;'],
+  'text-[#333]': ['color: #333;'],
+  'bg-[#fff]': ['background-color: #fff;'],
+  'bg-[#999]': ['background-color: #999;'],
+  'bg-[#e5e5e5]': ['background-color: #e5e5e5;'],
+  'bg-[#f7f7f7]': ['background-color: #f7f7f7;'],
+  'bg-[#222]': ['background-color: #222;'],
+  'bg-[#fcf8e3]': ['background-color: #fcf8e3;'],
+  'bg-[#d9edf7]': ['background-color: #d9edf7;'],
+  'bg-[#08c]': ['background-color: #08c;'],
+  'bg-[linear-gradient(#08c,#0077b3)]': [
+    'background-color: #0081c2;',
+    'background-image: linear-gradient(to bottom, #08c, #0077b3);',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[linear-gradient(#f5f5f5,#f9f9f9)]': [
+    'background-color: #f7f7f7;',
+    'background-image: linear-gradient(to bottom, #f5f5f5, #f9f9f9);',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[linear-gradient(#149bdf,#0480be)]': [
+    'background-color: #0e90d2;',
+    'background-image: linear-gradient(to bottom, #149bdf, #0480be);',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[#f7f7f7_linear-gradient(#f5f5f5,#f9f9f9)_0_0_repeat-x]': [
+    'background-color: #f7f7f7;',
+    'background-image: linear-gradient(to bottom, #f5f5f5, #f9f9f9);',
+    'background-position: 0 0;',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[#0e90d2_linear-gradient(#149bdf,#0480be)_0_0_repeat-x]': [
+    'background-color: #0e90d2;',
+    'background-image: linear-gradient(to bottom, #149bdf, #0480be);',
+    'background-position: 0 0;',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[#5eb95e_linear-gradient(#62c462,#57a957)_0_0_repeat-x]': [
+    'background-color: #5eb95e;',
+    'background-image: linear-gradient(to bottom, #62c462, #57a957);',
+    'background-position: 0 0;',
+    'background-repeat: repeat-x;',
+  ],
+  'bg-[#dd514c_linear-gradient(#ee5f5b,#c43c35)_0_0_repeat-x]': [
+    'background-color: #dd514c;',
+    'background-image: linear-gradient(to bottom, #ee5f5b, #c43c35);',
+    'background-position: 0 0;',
+    'background-repeat: repeat-x;',
+  ],
+  'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%),0_0_8px_rgb(82_168_236/60%)]': [
+    '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075), 0 0 8px rgb(82 168 236 / 0.6);',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%),0_0_6px_#d59392]': [
+    '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075), 0 0 6px #d59392;',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_1px_2px_rgb(0_0_0/10%)]': [
+    '--pui-shadow: inset 0 1px 2px rgb(0 0 0 / 0.1);',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_-1px_0_rgb(0_0_0/15%)]': [
+    '--pui-shadow: inset 0 -1px 0 rgb(0 0 0 / 0.15);',
+    ...composedShadow(),
+  ],
+  'text-paint-[#c09853_0_1px_0_rgb(255_255_255/50%)]': [
+    'color: #c09853;',
+    'text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);',
+  ],
+  'text-paint-[#fff_0_-1px_0_rgb(0_0_0/20%)]': [
+    'color: #fff;',
+    'text-shadow: 0 -1px 0 rgb(0 0 0 / 0.2);',
+  ],
+  'text-paint-[#08c_0_1px_0_rgb(255_255_255/50%)]': [
+    'color: #08c;',
+    'text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);',
+  ],
+  'transition-[border,box-shadow]': [
+    'transition-property: border, box-shadow;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
+  'z-[1000]': ['z-index: 1000;'],
+  'z-[1051]': ['z-index: 1051;'],
+  'z-[2]': ['z-index: 2;'],
+  '-z-10': ['z-index: -10;'],
+  'font-[100]': ['font-weight: 100;'],
+  'opacity-90': ['opacity: 0.9;'],
+  'rounded-[23px]': ['border-radius: 23px;'],
+  'rounded-xs': ['border-radius: 0.125rem;'],
+  'rounded-[calc(var(--radius-md)-2px)]': ['border-radius: calc(var(--pui-radius-md) - 2px);'],
+  'rounded-[calc(var(--radius)-3px)]': ['border-radius: calc(var(--pui-radius) - 3px);'],
+  'grid-rows-[auto_1fr]': ['grid-template-rows: auto 1fr;'],
+  'place-items-center': ['place-items: center;'],
+  'text-balance': ['text-wrap: balance;'],
+  'bg-black/10': ['background-color: rgb(0 0 0 / 0.1);'],
+  'bg-black/20': ['background-color: rgb(0 0 0 / 0.2);'],
+  'bg-black/30': ['background-color: rgb(0 0 0 / 0.3);'],
+  'inset-2': ['inset: 0.5rem;'],
+  'ring-offset-1': ['--pui-ring-offset-width: 1px;'],
+  'my-auto': ['margin-block: auto;'],
+  'touch-manipulation': ['touch-action: manipulation;'],
+  'overscroll-contain': ['overscroll-behavior: contain;'],
+  'scrollbar-gutter-stable': ['scrollbar-gutter: stable;'],
+  'contain-content': ['contain: content;'],
   table: ['display: table;'],
   'table-row': ['display: table-row;'],
   'table-cell': ['display: table-cell;'],
@@ -1069,7 +1189,7 @@ function sortUtilityOverrides(rules: CssRule[]): void {
     const utility = splitVariants(rule.token).at(-1) ?? '';
     if (/^(duration|ease|delay)-/.test(utility)) return 1;
     if (/^rounded-[trbl]-/.test(utility)) return 1;
-    if (/^border-b-[a-z]/.test(utility)) return 1;
+    if (/^border-b-(?:[a-z]|\[#)/.test(utility)) return 1;
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
@@ -1092,9 +1212,9 @@ function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleC
     '/* Do not edit by hand. */',
     '',
     '@layer proto-ui {',
-    `  [${PUI_STYLE_ATTR}],`,
-    `  [${PUI_STYLE_ATTR}]::before,`,
-    `  [${PUI_STYLE_ATTR}]::after {`,
+    `  :where([${PUI_STYLE_ATTR}]),`,
+    `  :where([${PUI_STYLE_ATTR}])::before,`,
+    `  :where([${PUI_STYLE_ATTR}])::after {`,
     '    box-sizing: border-box;',
     '  }',
     '',
@@ -1488,7 +1608,7 @@ function renderColorUtility(utility: string): string[] | null {
 
 function renderRoundedUtility(utility: string): string[] | null {
   const directional = utility.match(
-    /^rounded-([trbl])-(sm|md|lg|\[var\(--pui-radius-(?:2xl|3xl|4xl)\)\]|\[(?:3|4|6)px\])$/
+    /^rounded-([trbl])-(sm|md|lg|xl|\[var\(--pui-radius-(?:2xl|3xl|4xl)\)\]|\[(?:3|4|5|6)px\])$/
   );
   if (directional) {
     const [, side, raw] = directional;

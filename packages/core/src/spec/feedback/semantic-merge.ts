@@ -61,6 +61,10 @@ const TEXT_SIZE_TOKENS = new Set([
 const TEXT_ALIGN_TOKENS = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
 
 export function getSemanticGroupKeyV0(token: string): string {
+  if (token === 'box-border' || token === 'box-content') return 'box sizing';
+  if (token === 'float-left' || token === 'float-right') return 'float placement';
+  if (token === 'text-balance') return 'text wrapping';
+  if (/^font-(normal|medium|semibold|bold|black|\[100\])$/.test(token)) return 'font weight';
   if (token === 'border-collapse' || token === 'border-separate') return 'table border model';
   if (token === 'border-spacing-0') return 'table border spacing';
   if (token === 'caption-bottom') return 'table caption side';
@@ -70,8 +74,7 @@ export function getSemanticGroupKeyV0(token: string): string {
   if (roundedSide) return `rounded-${roundedSide[1]}-`;
   if (token === 'scroll-my-1' || token === 'scroll-my-1.5') return 'finite scroll margin block';
   if (isPlaceholderColorTokenV0(token)) return 'placeholder:text-color';
-  if (token === '-z-1' || token === 'z-10' || token === 'z-40' || token === 'z-50')
-    return 'finite z index';
+  if (/^(?:-z-(?:1|10)|z-(?:10|40|50|\[(?:2|1000|1051)\]))$/.test(token)) return 'finite z index';
   if (token === 'backdrop-blur-xs' || token === 'backdrop-filter-[blur(40px)_saturate(1.5)]')
     return 'complete backdrop filter';
   // Keep allowlisted selector targets isolated from the element's ordinary
@@ -123,6 +126,7 @@ export function getSemanticGroupKeyV0(token: string): string {
     token === 'border' ||
     token === 'border-0' ||
     token === 'border-2' ||
+    token === 'border-[3px]' ||
     token === 'border-4' ||
     token === 'border-8'
   ) {

@@ -1,0 +1,33 @@
+id: T-SHADCN-COMMAND-PROFILES-0001
+type: test
+title: Shadcn command profile transitions
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+
+
+summary: Button, Toggle, Surface and Text nine-style selection, precedence and withdrawal.
+cases:
+  - id: T-SHADCN-COMMAND-PROFILES-0001-CASE-SELECTION
+    title: Scoped nine-style selection and compatibility fallbacks preserve handle, focus and node identity
+    covers:
+      - P-SHADCN-BUTTON-BASE-INHERITANCE
+      - P-SHADCN-TOGGLE-BASE-INHERITANCE
+      - P-SHADCN-SURFACE-INPUTS
+      - P-SHADCN-TEXT-PROJECTION
+    expectation: profile-selection-precedence-and-withdrawal
+implementations:
+  - id: shadcn-command-profile-transitions
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/command-profile-transitions.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-BUTTON
+      - P-SHADCN-TOGGLE
+      - P-SHADCN-SURFACE
+      - P-SHADCN-TEXT
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

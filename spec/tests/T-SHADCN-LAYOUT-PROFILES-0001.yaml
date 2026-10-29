@@ -1,0 +1,54 @@
+id: T-SHADCN-LAYOUT-PROFILES-0001
+type: test
+title: Shadcn layout and collection profile coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+
+
+summary: Accordion, Collapsible, Carousel, Resizable, Scroll Area, Progress, Meter, Label, Separator, Message Scroller, Virtual List and scalar Slider profile coverage.
+cases:
+  - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-PROFILES
+    title: Profile recipes preserve each family Base owner, slots and derived facts
+    covers:
+      - P-SHADCN-ACCORDION-INHERITANCE
+      - P-SHADCN-CAROUSEL-ADMISSION
+      - P-SHADCN-RESIZABLE-ADMISSION
+      - P-SHADCN-PROGRESS-ADMISSION
+      - P-SHADCN-METER-ADMISSION
+      - P-SHADCN-SLIDER-ADMISSION
+    expectation: profile-paint-preserves-owners
+  - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-BOUNDARIES
+    title: >-
+      Explicit unimplemented capabilities stay gaps: measured accordion motion, scalar travel alignment, message scroller eligibility, resizable hit expansion
+
+
+    covers:
+      - P-SHADCN-SLIDER-ADMISSION
+      - P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY
+      - P-SHADCN-MESSAGE-SCROLLER-ADMISSION
+      - P-SHADCN-RESIZABLE-ADMISSION
+    expectation: explicit-capability-gaps-preserved
+implementations:
+  - id: shadcn-layout-profiles-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/layout-profiles-r91.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-ACCORDION
+      - P-SHADCN-COLLAPSIBLE
+      - P-SHADCN-CAROUSEL
+      - P-SHADCN-RESIZABLE
+      - P-SHADCN-SCROLL-AREA
+      - P-SHADCN-PROGRESS
+      - P-SHADCN-METER
+      - P-SHADCN-LABEL
+      - P-SHADCN-SEPARATOR
+      - P-SHADCN-MESSAGE-SCROLLER
+      - P-SHADCN-VIRTUAL-LIST
+      - P-SHADCN-SLIDER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

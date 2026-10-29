@@ -8,7 +8,7 @@ export default definePrototype<Bootstrap232SelectViewportProps>({
   name: 'bootstrap-2-3-2-select-viewport',
   setup(def) {
     asSelectViewport();
-    def.feedback.style.use(tw('relative min-w-0 overflow-x-hidden overflow-y-auto'));
+    def.feedback.style.use(tw('relative min-h-0 min-w-0 overflow-x-hidden overflow-y-auto'));
     return (renderer) => [renderer.r.slot()];
   },
 });

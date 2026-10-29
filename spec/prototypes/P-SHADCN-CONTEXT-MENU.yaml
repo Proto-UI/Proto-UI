@@ -19,8 +19,12 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+inherits:
+  prototypes:
+    - P-BASE-CONTEXT-MENU
 verifies:
-  tests: []
+  tests:
+    - T-SHADCN-SEARCH-MENU-PROFILES-0001
 sources:
   - path: packages/prototypes/shadcn/src/context-menu/
 openQuestions:
@@ -33,7 +37,10 @@ openQuestions:
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
-    summary: Cataloged the shadcn contextMenu family as draft.
+    summary: Cataloged the shadcn context menu family as draft.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the implemented family projection to its Base draft inheritance and focused profile coverage.
 tags:
   - prototype
   - shadcn

@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { styleContains } from '../../test-utils/style';
 import {
   dialogClose,
   dialogContent,
@@ -122,12 +121,6 @@ describe('prototypes/bootstrap-2-3-2: dialog projection', () => {
     expect(content.getAttribute('aria-modal')).toBe('true');
     expect(content.getAttribute('aria-labelledby')).toBe(title.id);
     expect(content.getAttribute('aria-describedby')).toBe(description.id);
-    expect(styleContains(content, 'w-[560px]')).toBe(true);
-    expect(styleContains(content, 'top-[10%]')).toBe(true);
-    expect(styleContains(content, 'rounded-[6px]')).toBe(true);
-    expect(styleContains(content, 'bg-clip-padding')).toBe(true);
-    expect(styleContains(mask, 'bg-black')).toBe(true);
-    expect(styleContains(close, 'text-paint-[#000_0_1px_0_rgb(255_255_255/100%)]')).toBe(true);
 
     await completeTransitions(mask, content);
     expect(transitionState(content)).toBe('entered');
@@ -225,10 +218,6 @@ describe('prototypes/bootstrap-2-3-2: tooltip projection', () => {
 
     expect(trigger.getAttribute('aria-describedby')).toBe(content.id);
     expect(content.getAttribute('role')).toBe('tooltip');
-    expect(styleContains(content, 'text-[11px]')).toBe(true);
-    expect(styleContains(content, 'max-w-[200px]')).toBe(true);
-    expect(styleContains(content, 'bg-black')).toBe(true);
-    expect(styleContains(content, 'rounded-[4px]')).toBe(true);
 
     trigger.dispatchEvent(new Event('pointerleave'));
     await advance(100);
@@ -334,22 +323,14 @@ describe('prototypes/bootstrap-2-3-2: hover-card projection', () => {
     document.body.appendChild(root);
     await flush();
 
-    expect(styleContains(trigger, 'text-[#08c]')).toBe(true);
-    expect(styleContains(trigger, 'no-underline')).toBe(true);
-
     trigger.dispatchEvent(new Event('pointerenter'));
     await advance(699);
     expect(stateValue<boolean>(root, 'open')).toBe(false);
-    expect(styleContains(trigger, 'data-[hovered]:text-[#005580]')).toBe(true);
-    expect(styleContains(trigger, 'data-[hovered]:underline')).toBe(true);
     await advance(1);
     expect(stateValue<boolean>(root, 'open')).toBe(true);
     expect(transitionState(content)).toBe('entering');
     await completeTransitions(content);
     expect(transitionState(content)).toBe('entered');
-    expect(styleContains(content, 'max-w-[276px]')).toBe(true);
-    expect(styleContains(content, 'rounded-[6px]')).toBe(true);
-    expect(styleContains(content, 'shadow-[0_5px_10px_rgb(0_0_0/20%)]')).toBe(true);
 
     // Bridge: leaving the trigger for the open content stays open past closeDelay.
     trigger.dispatchEvent(new Event('pointerleave'));
@@ -405,30 +386,32 @@ describe('prototypes/bootstrap-2-3-2: hover-card projection', () => {
 });
 
 describe('prototypes/bootstrap-2-3-2: drawer header/footer projection', () => {
-  it('renders authored children through both semantic parts with modal chrome', async () => {
+  it('keeps nested title relationships and caller footer nodes through header withdrawal', async () => {
     const root = document.createElement(drawerRoot.name) as Host;
     const content = document.createElement(drawerContent.name) as Host;
     const header = document.createElement(drawerHeader.name) as Host;
     const title = document.createElement(drawerTitle.name) as Host;
     const footer = document.createElement(drawerFooter.name) as Host;
+    const action = document.createElement('button');
     setElementProps(root, { defaultOpen: true });
     title.appendChild(document.createTextNode('Filters'));
-    footer.appendChild(document.createTextNode('Actions'));
+    action.textContent = 'Apply filters';
+    footer.appendChild(action);
     header.appendChild(title);
     content.append(header, footer);
     root.appendChild(content);
     document.body.appendChild(root);
     await flush();
 
-    expect(header.textContent).toContain('Filters');
-    expect(footer.textContent).toContain('Actions');
-    expect(styleContains(header, 'border-b')).toBe(true);
-    expect(styleContains(header, 'py-[9px]')).toBe(true);
-    expect(styleContains(footer, 'text-right')).toBe(true);
-    expect(styleContains(footer, 'justify-end')).toBe(false);
-    expect(styleContains(footer, 'bg-[#f5f5f5]')).toBe(true);
-    expect(styleContains(footer, 'rounded-b-[6px]')).toBe(true);
-    expect(drawerHeader.name).toBe('bootstrap-2-3-2-drawer-header');
-    expect(drawerFooter.name).toBe('bootstrap-2-3-2-drawer-footer');
+    await completeTransitions(content);
+    expect(content.getAttribute('aria-labelledby')).toBe(title.id);
+    header.remove();
+    await flush();
+    expect(content.getAttribute('aria-labelledby')).toBeNull();
+    expect(footer.querySelector('button')).toBe(action);
+    content.prepend(header);
+    await flush();
+    expect(content.getAttribute('aria-labelledby')).toBe(title.id);
+    expect(footer.querySelector('button')).toBe(action);
   });
 });

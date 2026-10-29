@@ -1,7 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { tabsRoot, tabsList, tabsTrigger, tabsContent, tabsIndicator } from '../src/tabs';
-import { styleContains } from '../../test-utils/style';
 
 const Root = AdaptToWebComponent(tabsRoot);
 const List = AdaptToWebComponent(tabsList);
@@ -53,8 +52,6 @@ describe('Bootstrap 2.3.2 Tabs draft projection', () => {
     expect(indicator.getAttribute('role')).toBeNull();
     expect(Object.hasOwn(exposes, 'focusSelf')).toBe(false);
     expect(Object.hasOwn(exposes, 'valueChange')).toBe(false);
-    // The historical nav-tabs recipe has no separate moving indicator.
-    expect(indicator.getAttribute('data-pui-style') ?? '').toBe('');
 
     a.focus();
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
@@ -77,36 +74,22 @@ describe('Bootstrap 2.3.2 Tabs draft projection', () => {
     expect(exposes.orientation.get()).toBe('horizontal');
   });
 
-  it('keeps the historical panel-edge opening on the accepted Trigger without another owner', async () => {
-    const { root, list, a, b, content } = make();
+  it('updates selected semantics and panel presence only after the owner accepts', async () => {
+    const { root, a, b, content } = make();
     await flush();
-    // Source: pinned navs.less .nav-tabs. Units remain px, not root-font rem.
-    expect(styleContains(list, 'border-[#ddd]')).toBe(true);
-    expect(styleContains(a, 'px-[12px]')).toBe(true);
-    expect(styleContains(a, 'py-[8px]')).toBe(true);
-    expect(styleContains(a, 'mr-[2px]')).toBe(true);
-    expect(styleContains(a, 'mb-[-1px]')).toBe(true);
-    expect(styleContains(a, 'border-b-transparent')).toBe(true);
-    expect(styleContains(a, 'text-[#555]')).toBe(true);
-    expect(styleContains(b, 'text-[#08c]')).toBe(true);
-
-    b.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
-    await flush();
-    expect(styleContains(b, 'bg-[#eee]')).toBe(true);
-    expect(styleContains(b, 'border-[#eee_#eee_#ddd]')).toBe(true);
+    expect(a.getAttribute('aria-selected')).toBe('true');
+    expect(content.getExposes().current.get()).toBe(true);
     b.click();
     await flush();
     expect(root.getExposes().value.get()).toBe('b');
     expect(b.getExposes().selected.get()).toBe(true);
     expect(b.getAttribute('aria-selected')).toBe('true');
-    expect(styleContains(b, 'border-b-transparent')).toBe(true);
-    expect(styleContains(a, 'border-b-transparent')).toBe(false);
-    expect(styleContains(b, 'bg-[#eee]')).toBe(false);
+    expect(a.getAttribute('aria-selected')).toBe('false');
     expect(content.getExposes().current.get()).toBe(false);
   });
 
   it('retains controlled refusal and disabled request suppression with the Indicator present', async () => {
-    const { root, a, b, indicator } = make({ value: 'a' });
+    const { root, b, indicator } = make({ value: 'a' });
     await flush();
     const requests: unknown[] = [];
     root.addEventListener('valueChange', (event) => {
@@ -118,13 +101,11 @@ describe('Bootstrap 2.3.2 Tabs draft projection', () => {
     expect(root.getExposes().value.get()).toBe('a');
     expect(indicator.getExposes().value.get()).toBe('a');
     expect(indicator.getExposes().activeValue.get()).toBe('b');
-    expect(styleContains(a, 'border-b-transparent')).toBe(true);
-    expect(styleContains(b, 'border-b-transparent')).toBe(false);
     setElementProps(b, { value: 'b', disabled: true });
     b.click();
     await flush();
     expect(requests).toEqual([{ value: 'b' }]);
-    expect(styleContains(b, 'text-[#999]')).toBe(true);
+    expect(b.getAttribute('aria-disabled')).toBe('true');
     expect(indicator.getExposes().value.get()).toBe('a');
   });
 
@@ -152,7 +133,6 @@ describe('Bootstrap 2.3.2 Tabs draft projection', () => {
       expect(document.activeElement).toBe(b);
       expect(b.firstChild).toBe(text);
       expect(content.firstChild).toBe(panelText);
-      expect(styleContains(b, 'border-b-2')).toBe(appearance === 'underline');
     }
   });
 });

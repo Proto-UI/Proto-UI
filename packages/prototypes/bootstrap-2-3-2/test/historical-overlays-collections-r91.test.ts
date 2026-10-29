@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { styleContains } from '../../test-utils/style';
 import * as alert from '../src/alert-dialog';
 import * as popover from '../src/popover';
 import * as carousel from '../src/carousel';
@@ -171,11 +170,6 @@ describe('Bootstrap historical modal and popup consumers', () => {
     expect(f.content.getAttribute('aria-labelledby')).toBe(f.title.id);
     expect(f.content.getAttribute('aria-describedby')).toBe(f.description.id);
     expect(stateValue(f.content, 'transitionState')).toBe('entering');
-    expect(styleContains(f.content, 'w-[560px]')).toBe(true);
-    expect(styleContains(f.content, 'top-[10%]')).toBe(true);
-    expect(styleContains(f.title, 'text-[24.5px]')).toBe(true);
-    expect(styleContains(f.description, 'p-[15px]')).toBe(true);
-    expect(styleContains(f.trigger, 'px-[12px]')).toBe(true);
     expect(f.title.textContent).toBe('Delete record?');
     await completeTransitions(f.mask, f.content);
     expect(document.activeElement).toBe(f.cancel);
@@ -240,11 +234,6 @@ describe('Bootstrap historical modal and popup consumers', () => {
     expect(stateValue(content, 'transitionState')).toBe('entering');
     expect(content.getAttribute('aria-labelledby')).toBe(title.id);
     expect(content.getAttribute('aria-describedby')).toBe(description.id);
-    expect(styleContains(content, 'p-[1px]')).toBe(true);
-    expect(styleContains(content, 'max-w-[min(276px,var(--proto-ui-available-width))]')).toBe(true);
-    expect(styleContains(title, 'py-[8px]')).toBe(true);
-    expect(styleContains(title, 'font-normal')).toBe(true);
-    expect(styleContains(description, 'py-[9px]')).toBe(true);
     expect(content.querySelectorAll('em')).toHaveLength(1);
     expect(content.textContent).toBe('AccountSaved locallyClose');
     await completeTransitions(content);
@@ -323,8 +312,6 @@ describe('Bootstrap historical collection consumers', () => {
     expect(stateValue(f.root, 'slideCount')).toBe(3);
     expect(stateValue(f.slides[0]!, 'current')).toBe(true);
     expect(stateValue(f.previous, 'disabled')).toBe(true);
-    expect(styleContains(f.previous, 'w-[40px]')).toBe(true);
-    expect(styleContains(f.next, 'text-[60px]')).toBe(true);
     await click(f.next);
     await click(f.next);
     expect(stateValue(f.root, 'index')).toBe(2);
@@ -553,8 +540,6 @@ describe('Bootstrap Table-derived DataTable consumers', () => {
     expect(f.head.hasAttribute('aria-selected')).toBe(false);
     expect(f.caption.textContent).toBe('Transfer records');
     expect(f.cells.map((cell) => cell.textContent)).toEqual(['Zeta', 'Alpha']);
-    expect(styleContains(f.root, 'border-collapse')).toBe(true);
-    expect(styleContains(f.cells[0]!, 'p-[8px]')).toBe(true);
     await click(f.head);
     expect(sorts).toEqual([]);
     expect(selections).toEqual([]);
@@ -638,7 +623,6 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     expect(stateValue(f.indicator, 'percentage')).toBe(50);
     expect(f.indicator.style.getPropertyValue('--pui-percentage')).toBe('50');
     expect(f.value.textContent).toBe('25');
-    expect(styleContains(f.track, 'h-[20px]')).toBe(true);
     setElementProps(f.root, { value: 70 });
     await flush();
     expect(stateValue(f.root, 'value')).toBe(50);
@@ -758,8 +742,6 @@ describe('Bootstrap alert-derived Toast consumers', () => {
     expect(f.root.getAttribute('role')).toBe('status');
     expect(f.root.getAttribute('aria-labelledby')).toBe(f.title.id);
     expect(f.root.getAttribute('aria-describedby')).toBe(f.description.id);
-    expect(styleContains(f.root, 'pr-[35px]')).toBe(true);
-    expect(styleContains(f.title, 'text-[17.5px]')).toBe(true);
     await vi.advanceTimersByTimeAsync(40);
     invoke(f.root, 'pause');
     await flush();

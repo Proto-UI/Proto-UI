@@ -14,6 +14,14 @@ statement:
 
 
 criteria:
+  - id: P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW
+    text:
+      en: The opt-in Base draggable enhancement projects the inherited percentage through the existing exposed number.range style channel without owning value, input, geometry or events. New York travel is percentage/100 times the used Thumb width minus 2px; Rhea subtracts 4px. For explicit RTL enhancement the Root starts the Thumb at the opposite edge and travel reverses once. Both sizes retain their rem geometry. While dragging, CSS transform transition is suppressed so paint follows the Root preview; settlement withdraws suppression and restores the source transition. Cancel and controlled refusal follow Root percentage rollback; no checked request is emitted by presentation. draggable=false retains the prior source-bound checked endpoints. Native rendered/AT and all-target evidence remain required.
+    dependsOn:
+      prototypes:
+        - id: P-BASE-SWITCH
+          anchors:
+            - P-BASE-SWITCH-DIRECTIONAL-PREVIEW
   - id: P-SHADCN-SWITCH-THUMB-UPSTREAM-IDENTITY
     text:
       zh-CN: Thumb 必须沿用 Shadcn Switch 固定 revision/path 作为比较基线，并明确本实体只治理 Proto UI 的非官方 anatomy projection。

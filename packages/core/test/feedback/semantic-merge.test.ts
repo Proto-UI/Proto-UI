@@ -2,6 +2,45 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('preserves border width and balanced text when source colors are replaced', () => {
+    expect(
+      mergeTwTokensV0([
+        'border',
+        'border-[3px]',
+        'border-[#ccc]',
+        'border-[#953b39]',
+        'text-balance',
+        'text-sm',
+        'text-[#333]',
+        'text-[#08c]',
+      ]).tokens
+    ).toEqual(['border-[3px]', 'border-[#953b39]', 'text-balance', 'text-sm', 'text-[#08c]']);
+  });
+
+  it('replaces finite placement and weight without losing font family or focus color', () => {
+    expect(
+      mergeTwTokensV0([
+        'box-border',
+        'float-left',
+        'font-sans',
+        'font-bold',
+        'z-50',
+        'ring-primary',
+        'box-content',
+        'float-right',
+        'font-[100]',
+        'z-[1051]',
+      ]).tokens
+    ).toEqual([
+      'box-content',
+      'float-right',
+      'font-sans',
+      'font-[100]',
+      'z-[1051]',
+      'ring-primary',
+    ]);
+  });
+
   it('keeps table layout independent of border paint and resolves cell alignment separately', () => {
     expect(
       mergeTwTokensV0([

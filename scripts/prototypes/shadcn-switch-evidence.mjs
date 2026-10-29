@@ -142,6 +142,14 @@ try {
         const result = {
           kind,
           index,
+          requestedProps: record.requestedProps(),
+          wcRawProps: record.rawProps(root),
+          nativeDraggable: root.draggable,
+          draggableAttribute: root.getAttribute('draggable'),
+          rootTokens: root.getAttribute('data-pui-style'),
+          thumbTokens: thumb.getAttribute('data-pui-style'),
+          nativeTrace: window.nativeDragTrace ?? [],
+          contactStart: window.nativeDragStart ?? null,
           width: box.width,
           height: box.height,
           radius: c.borderRadius,
@@ -149,6 +157,8 @@ try {
           border: c.borderTopColor,
           bg: c.backgroundColor,
           shadow: c.boxShadow,
+          percentage: Number.parseFloat(t.getPropertyValue('--pui-percentage')),
+          dragging: thumb.hasAttribute('data-dragging'),
           thumbWidth: thumb.getBoundingClientRect().width,
           thumbOffset: thumb.getBoundingClientRect().left - box.left,
           thumbShadow: t.boxShadow,
@@ -216,7 +226,9 @@ try {
       }
       await page.waitForTimeout(20);
     } while (Date.now() < deadline);
-    throw new Error('Switch endpoint not reached: ' + label);
+    throw new Error(
+      'Switch endpoint not reached: ' + label + '\n' + JSON.stringify(receipt.lastAttempt)
+    );
   };
   const focus = async (kind) => {
     const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(0);
@@ -233,6 +245,10 @@ try {
     await observe(kind, 'keyboard-focus', (o) => o.focused && o.nativeFocus);
   };
   const save = async (name) => {
+    // Wait for existing finite animations; never disable or rewrite them for evidence.
+    await page.evaluate(async () => {
+      await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
+    });
     await page.screenshot({ path: join(out, name), fullPage: true });
     receipt.artifacts.push({ path: name, sha256: hash(await readFile(join(out, name))) });
   };
@@ -458,6 +474,327 @@ try {
         }
         await save(`${theme}-${profile}-${size}.png`);
       }
+  // Native mouse displacement and capture, not injected percentage/state.
+  // The existing endpoint matrix above remains default draggable=false.
+  for (const font of [16, 32])
+    for (const profile of ['new-york-v4', 'rhea'])
+      for (const size of ['default', 'sm'])
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(
+            ({ font, profile, size, direction }) => {
+              document.documentElement.style.fontSize = font + 'px';
+              document.documentElement.dataset.theme = 'light';
+              window.switchEvidence.set({
+                profile,
+                size,
+                direction,
+                draggable: true,
+                own: 'inherit',
+                invalid: false,
+                disabled: false,
+                readOnly: false,
+              });
+            },
+            { font, profile, size, direction }
+          );
+          for (const kind of ['wc', 'react', 'vue', 'vue2']) {
+            const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(1);
+            if ((await control.getAttribute('aria-checked')) === 'true') await control.click();
+            const label = `native-drag/${font}/${profile}/${size}/${direction}/${kind}`;
+            const start = await observe(
+              kind,
+              label + '/settled',
+              (o) => {
+                const border = Number.parseFloat(o.borderWidth);
+                const origin = direction === 'rtl' ? o.width - o.thumbWidth - border : border;
+                return (
+                  o.checked === 'false' &&
+                  o.percentage === 0 &&
+                  !o.dragging &&
+                  o.width === ((size === 'sm' ? 24 : 32) * font) / 16 &&
+                  o.thumbWidth === ((size === 'sm' ? 12 : 16) * font) / 16 &&
+                  border === (profile === 'rhea' ? 2 : 1) &&
+                  o.thumbOffset === origin
+                );
+              },
+              1
+            );
+            const travel =
+              start.width - start.thumbWidth - 2 * Number.parseFloat(start.borderWidth);
+            assert(travel > 0, 'native layout must provide positive thumb travel');
+            const box = await control.boundingBox();
+            assert(box);
+            const x = box.x + start.thumbOffset + start.thumbWidth / 2;
+            const y = box.y + box.height / 2;
+            const sign = direction === 'rtl' ? -1 : 1;
+            const before = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const root = r.controls()[1];
+              window.nativeDragDispose?.();
+              window.nativeDragTrace = [];
+              const handlers = [];
+              for (const type of [
+                'pointerdown',
+                'pointermove',
+                'pointerup',
+                'pointercancel',
+                'gotpointercapture',
+                'lostpointercapture',
+                'dragstart',
+                'dragend',
+              ]) {
+                const listener = (e) => {
+                  const thumb = root.firstElementChild;
+                  window.nativeDragTrace.push({
+                    type,
+                    trusted: e.isTrusted,
+                    pointerId: e.pointerId,
+                    pointerType: e.pointerType,
+                    primary: e.isPrimary,
+                    button: e.button,
+                    buttons: e.buttons,
+                    x: e.clientX,
+                    y: e.clientY,
+                    prevented: e.defaultPrevented,
+                    capture: e.pointerId !== undefined && root.hasPointerCapture(e.pointerId),
+                    target: e.target.tagName,
+                    path: e
+                      .composedPath()
+                      .slice(0, 5)
+                      .map((n) => n.tagName ?? n.nodeName),
+                    percentage: getComputedStyle(thumb).getPropertyValue('--pui-percentage'),
+                    dragging: thumb.hasAttribute('data-dragging'),
+                    rootWidth: root.getBoundingClientRect().width,
+                    thumbWidth: thumb.getBoundingClientRect().width,
+                  });
+                };
+                root.addEventListener(type, listener);
+                handlers.push([type, listener]);
+              }
+              window.nativeDragDispose = () =>
+                handlers.forEach(([type, fn]) => root.removeEventListener(type, fn));
+              return r.events.length;
+            }, kind);
+            await page.evaluate(
+              ({ x, y, travel, kind }) => {
+                const target = document.elementFromPoint(x, y);
+                window.nativeDragStart = {
+                  x,
+                  y,
+                  travel,
+                  kind,
+                  target: target?.tagName,
+                  targetRole: target?.getAttribute('role'),
+                  targetDraggable: target?.draggable,
+                };
+              },
+              { x, y, travel, kind }
+            );
+            await page.mouse.move(x, y);
+            await page.mouse.down();
+            await page.mouse.move(x + (sign * travel) / 2, y, { steps: 4 });
+            const middle = await observe(
+              kind,
+              label + '/interior',
+              (o) =>
+                o.dragging &&
+                o.checked === 'false' &&
+                Math.abs(o.percentage - 50) < 1 &&
+                o.transition === 'none' &&
+                Math.abs(o.thumbOffset - start.thumbOffset - (sign * travel) / 2) < 0.75,
+              1
+            );
+            assert(middle.dragging);
+            if (font === 32 && profile === 'rhea' && size === 'default' && direction === 'ltr')
+              await save(`drag-interior-${kind}.png`);
+            const capture = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+              return {
+                captured: !!down && r.controls()[1].hasPointerCapture(down.pointerId),
+                changes: r.events.length,
+                trace: window.nativeDragTrace,
+              };
+            }, kind);
+            assert.equal(capture.captured, true, label + ' native pointer capture');
+            assert.equal(capture.changes, before, label + ' preview is not truth');
+            assert(
+              capture.trace.every((e) => e.trusted),
+              label + ' trusted native events'
+            );
+            // Release outside the Root: actual pointer capture must preserve ownership.
+            await page.mouse.move(x + sign * (travel + box.width), y, { steps: 4 });
+            await page.mouse.up();
+            await observe(
+              kind,
+              label + '/committed',
+              (o) =>
+                o.checked === 'true' &&
+                !o.dragging &&
+                o.percentage === 100 &&
+                Math.abs(o.thumbOffset - start.thumbOffset - sign * travel) < 0.75,
+              1
+            );
+            const after = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+              return {
+                changes: r.events.length,
+                captured: !!down && r.controls()[1].hasPointerCapture(down.pointerId),
+                lostCapture: window.nativeDragTrace.some(
+                  (e) => e.type === 'lostpointercapture' && e.trusted
+                ),
+              };
+            }, kind);
+            assert.equal(
+              after.changes,
+              before + 1,
+              label + ' exactly one change including native click'
+            );
+            assert.equal(after.captured, false, label + ' terminal pointer capture released');
+            assert.equal(after.lostCapture, true, label + ' trusted terminal lostpointercapture');
+          }
+          await save(`drag-${font}-${profile}-${size}-${direction}.png`);
+        }
+  // Browser-injected native touch events (CDP), not dispatchEvent simulations.
+  // Keep these explicit terminal cases separate from the 64 mouse combinations.
+  const touchSession = await context.newCDPSession(page);
+  await touchSession.send('Emulation.setTouchEmulationEnabled', {
+    enabled: true,
+    maxTouchPoints: 1,
+  });
+  for (const mode of ['touch-commit', 'touch-cancel', 'controlled-refusal']) {
+    await page.evaluate((mode) => {
+      document.documentElement.style.fontSize = '32px';
+      window.switchEvidence.set({
+        profile: 'rhea',
+        own: 'inherit',
+        size: 'default',
+        draggable: true,
+        direction: 'ltr',
+        disabled: false,
+        readOnly: false,
+        checked: mode === 'controlled-refusal' ? false : undefined,
+      });
+    }, mode);
+    for (const kind of ['wc', 'react', 'vue', 'vue2']) {
+      const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(1);
+      if ((await control.getAttribute('aria-checked')) === 'true') await control.click();
+      const label = `${mode}/${kind}`;
+      const start = await observe(
+        kind,
+        label + '/settled',
+        (o) =>
+          o.checked === 'false' &&
+          !o.dragging &&
+          o.percentage === 0 &&
+          o.width === 64 &&
+          o.thumbWidth === 32 &&
+          o.thumbOffset === 2,
+        1
+      );
+      const box = await control.boundingBox();
+      assert(box);
+      const x = box.x + start.thumbOffset + start.thumbWidth / 2;
+      const y = box.y + box.height / 2;
+      const before = await page.evaluate((kind) => {
+        window.nativeDragDispose?.();
+        window.nativeDragTrace = [];
+        const r = window.switchEvidence.records.find((r) => r.kind === kind);
+        const root = r.controls()[1];
+        const types = [
+          'pointerdown',
+          'pointermove',
+          'pointerup',
+          'pointercancel',
+          'gotpointercapture',
+          'lostpointercapture',
+        ];
+        const listener = (e) =>
+          window.nativeDragTrace.push({
+            type: e.type,
+            trusted: e.isTrusted,
+            pointerType: e.pointerType,
+            pointerId: e.pointerId,
+            capture: root.hasPointerCapture(e.pointerId),
+          });
+        types.forEach((type) => root.addEventListener(type, listener));
+        window.nativeDragDispose = () =>
+          types.forEach((type) => root.removeEventListener(type, listener));
+        return r.events.length;
+      }, kind);
+      const touch = async (type, atX) =>
+        touchSession.send('Input.dispatchTouchEvent', {
+          type,
+          touchPoints:
+            type === 'touchEnd' || type === 'touchCancel'
+              ? []
+              : [{ x: atX, y, id: 1, radiusX: 1, radiusY: 1, force: 1 }],
+        });
+      await touch('touchStart', x);
+      await touch('touchMove', x + 14);
+      const middle = await observe(
+        kind,
+        label + '/interior',
+        (o) =>
+          o.dragging &&
+          o.checked === 'false' &&
+          Math.abs(o.percentage - 50) < 1 &&
+          Math.abs(o.thumbOffset - 16) < 0.75 &&
+          o.transition === 'none',
+        1
+      );
+      assert(middle.nativeTrace.some((e) => e.trusted && e.pointerType === 'touch'));
+      assert.equal(
+        await page.evaluate(
+          (kind) => window.switchEvidence.records.find((r) => r.kind === kind).events.length,
+          kind
+        ),
+        before,
+        label + ' preview is not truth'
+      );
+      if (mode === 'touch-cancel') await touch('touchCancel');
+      else {
+        await touch('touchMove', x + 28);
+        await touch('touchEnd');
+      }
+      const committed = mode === 'touch-commit';
+      const end = await observe(
+        kind,
+        label + '/terminal',
+        (o) =>
+          !o.dragging &&
+          o.checked === String(committed) &&
+          o.percentage === (committed ? 100 : 0) &&
+          Math.abs(o.thumbOffset - (committed ? 30 : 2)) < 0.75,
+        1
+      );
+      const terminal = await page.evaluate((kind) => {
+        const r = window.switchEvidence.records.find((r) => r.kind === kind);
+        const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+        return {
+          count: r.events.length,
+          captured: r.controls()[1].hasPointerCapture(down.pointerId),
+        };
+      }, kind);
+      assert.equal(
+        terminal.count,
+        before + (mode === 'touch-cancel' ? 0 : 1),
+        label + ' exact requests'
+      );
+      assert.equal(terminal.captured, false);
+      assert(end.nativeTrace.some((e) => e.type === 'lostpointercapture' && e.trusted));
+      if (mode === 'touch-cancel')
+        assert(end.nativeTrace.some((e) => e.type === 'pointercancel' && e.trusted));
+      await save(`${mode}-${kind}.png`);
+    }
+  }
+  await touchSession.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  await touchSession.detach();
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '16px';
+    window.switchEvidence.set({ draggable: false, direction: 'ltr', checked: undefined });
+  });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const kind of ['wc', 'react', 'vue', 'vue2'])
     await observe(kind, 'reduced-motion', (o) => o.transition === 'none');

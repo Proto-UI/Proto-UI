@@ -1,0 +1,36 @@
+id: T-BOOTSTRAP-2-3-2-SELECT-0001
+type: test
+title: Bootstrap complete Select coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+
+
+summary: Eleven-part anatomy, item-aligned containment, group naming, contentless separator and Field trigger.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-SELECT-0001-CASE-ANATOMY
+    title: Twelve same-family entries and Content>Surface>Viewport>Item>ItemText containment
+    covers:
+      - P-BOOTSTRAP-2-3-2-SELECT-ALIGNMENT-PARTS-INHERITANCE
+      - P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS-INHERITANCE
+    expectation: complete-item-aligned-anatomy
+  - id: T-BOOTSTRAP-2-3-2-SELECT-0001-CASE-FIELD
+    title: Field-bound trigger relations, invalid paint and readOnly gating
+    covers:
+      - P-BOOTSTRAP-2-3-2-FIELD-ALTERNATIVES
+    expectation: field-select-trigger-policy
+implementations:
+  - id: bootstrap-select-complete-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/select-complete-projection.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-SELECT
+      - P-BOOTSTRAP-2-3-2-SELECT-ALIGNMENT-PARTS
+      - P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS
+      - P-BOOTSTRAP-2-3-2-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

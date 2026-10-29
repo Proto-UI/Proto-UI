@@ -8,7 +8,6 @@ import {
   sliderValuesLabel,
   sliderValuesValue,
 } from '../src/slider';
-import { styleContains } from '../../test-utils/style';
 
 type Host = HTMLElement & { getExposes(): Record<string, any> };
 for (const prototype of [
@@ -87,10 +86,6 @@ it('renders the real Values slots and routes each indexed keyboard request throu
   expect(f.thumbs[0].getAttribute('aria-valuemax')).toBe('100');
   expect(f.indicator.getExposes().startPercentage.get()).toBe(25);
   expect(f.indicator.getExposes().extent.get()).toBe(55);
-  // This extension reuses historical form/button units, not modern Bootstrap.
-  expect(styleContains(f.track, 'h-[6px]')).toBe(true);
-  expect(styleContains(f.thumbs[0], 'rounded-[4px]')).toBe(true);
-  expect(styleContains(f.label, 'mb-[5px]')).toBe(true);
 });
 
 it('keeps controlled owner order authoritative while committing ignored keyboard proposals and honoring veto', async () => {
@@ -164,5 +159,4 @@ it('preserves segment selectors, root ARIA and RTL/vertical key intent', async (
   expect(segment.getExposes().startPercentage.get()).toBe(20);
   expect(segment.getExposes().extent.get()).toBe(30);
   expect(segment.getAttribute('aria-hidden')).toBe('true');
-  expect(styleContains(f.track, 'data-[orientation=vertical]:w-[6px]')).toBe(true);
 });

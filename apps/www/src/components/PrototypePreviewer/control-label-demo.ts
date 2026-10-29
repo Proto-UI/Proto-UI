@@ -1,7 +1,10 @@
 import type { DemoChild, DemoNode, DemoSpec, DemoSetupContext } from './demo-types';
 
 /** App Maker composition only: every association lowers through the public channel. */
-export function createControlLabelDemo(labelPrototypeId: string): DemoSpec {
+export function createControlLabelDemo(
+  labelPrototypeId: string,
+  family: 'base' | 'shadcn' | 'bootstrap-2-3-2' | 'liquid-glass' = 'base'
+): DemoSpec {
   const proto = (
     prototypeId: string,
     ref: string,
@@ -30,6 +33,9 @@ export function createControlLabelDemo(labelPrototypeId: string): DemoSpec {
     className: 'flex flex-wrap items-center gap-3',
     children,
   });
+  const controlChildren = (part: string, ref: string): DemoChild[] =>
+    family === 'base' ? [stateText(ref)] : [proto(`${family}-${part}`, `${ref}-part`)];
+  const externalState = (ref: string): DemoChild[] => (family === 'base' ? [] : [stateText(ref)]);
   return {
     type: 'demo',
     root: {
@@ -37,40 +43,56 @@ export function createControlLabelDemo(labelPrototypeId: string): DemoSpec {
       className: 'flex w-full max-w-xl flex-col gap-5',
       children: [
         row([
-          proto('base-checkbox-root', 'checkbox', {}, [stateText('checkbox')], 'checkbox'),
+          proto(
+            `${family}-checkbox-root`,
+            'checkbox',
+            {},
+            controlChildren('checkbox-indicator', 'checkbox'),
+            'checkbox'
+          ),
           label('Community updates', 'checkbox'),
+          ...externalState('checkbox'),
         ]),
         row([
-          proto('base-switch-root', 'switch', {}, [stateText('switch')], 'switch'),
+          proto(
+            `${family}-switch-root`,
+            'switch',
+            {},
+            controlChildren('switch-thumb', 'switch'),
+            'switch'
+          ),
           label('Enable notifications', 'switch'),
+          ...externalState('switch'),
         ]),
-        proto('base-radio-group-root', 'radio', { defaultValue: 'email' }, [
+        proto(`${family}-radio-group-root`, 'radio', { defaultValue: 'email' }, [
           row([
             proto(
-              'base-radio-group-item',
+              `${family}-radio-group-item`,
               'radio-email',
               { value: 'email' },
-              [stateText('radio-email')],
+              controlChildren('radio-group-indicator', 'radio-email'),
               'radio-email'
             ),
             label('Email delivery', 'radio-email'),
+            ...externalState('radio-email'),
           ]),
           row([
             proto(
-              'base-radio-group-item',
+              `${family}-radio-group-item`,
               'radio-push',
               { value: 'push' },
-              [stateText('radio-push')],
+              controlChildren('radio-group-indicator', 'radio-push'),
               'radio-push'
             ),
             label('Push delivery', 'radio-push'),
+            ...externalState('radio-push'),
           ]),
         ]),
         label('Project name', 'input'),
-        proto('base-input-root', 'input', { defaultValue: 'Proto UI' }, [], 'input'),
+        proto(`${family}-input-root`, 'input', { defaultValue: 'Proto UI' }, [], 'input'),
         label('Project notes', 'textarea'),
         proto(
-          'base-textarea-root',
+          `${family}-textarea-root`,
           'textarea',
           { defaultValue: 'Useful content stays selectable', rows: 3 },
           [],
@@ -78,27 +100,36 @@ export function createControlLabelDemo(labelPrototypeId: string): DemoSpec {
         ),
         row([
           proto(
-            'base-checkbox-root',
+            `${family}-checkbox-root`,
             'disabled',
             { disabled: true },
-            [stateText('disabled')],
+            controlChildren('checkbox-indicator', 'disabled'),
             'disabled'
           ),
           label('Disabled choice', 'disabled'),
+          ...externalState('disabled'),
         ]),
         row([
           proto(
-            'base-checkbox-root',
+            `${family}-checkbox-root`,
             'controlled',
             { checked: false },
-            [stateText('controlled')],
+            controlChildren('checkbox-indicator', 'controlled'),
             'controlled'
           ),
           label('Controlled choice (owner keeps it off)', 'controlled'),
+          ...externalState('controlled'),
         ]),
         row([
-          proto('base-checkbox-root', 'passive', {}, [stateText('passive')], 'passive'),
+          proto(
+            `${family}-checkbox-root`,
+            'passive',
+            {},
+            controlChildren('checkbox-indicator', 'passive'),
+            'passive'
+          ),
           label('Naming only: this text can be copied', 'passive', false),
+          ...externalState('passive'),
         ]),
         {
           kind: 'box',

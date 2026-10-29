@@ -1,0 +1,70 @@
+id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT
+type: prototype
+title: Bootstrap 2.3.2 Scroll Area Viewport Scroll Area projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+
+
+summary: Bootstrap Scroll Area part over P-BASE-SCROLL-AREA-VIEWPORT; a Proto extension with no upstream 2.3.2 counterpart.
+statement:
+  en: >-
+    The Prototype invokes asScrollAreaViewport() once and preserves the exact Base protocol while adding family paint per its stated role.
+
+
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT-BASE
+    text:
+      en: >-
+        Invoke asScrollAreaViewport() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+
+
+  - id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT-VISUAL
+    text:
+      en: >-
+        Viewport remains the sole scrolling and focus owner and renders the actual host scroll surface; no offset surrogate or fixed-height fake scrollport.
+
+
+  - id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT-EXTENSION
+    text:
+      en: >-
+        Bootstrap 2.3.2 had no custom scrollbar component; scroll area paint is a family extension over Base scroll semantics, not jQuery parity.
+
+
+  - id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT-CLOSURE
+    text:
+      en: >-
+        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+
+
+  - id: P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT-BOUNDARY
+    text:
+      en: >-
+        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+
+
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-AS-SCROLL-SURFACE-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-SCROLL-AREA-VIEWPORT
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/scroll-area/viewport.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/scroll-area/index.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Scroll Area Viewport Scroll Area projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - scroll-area
+  - draft

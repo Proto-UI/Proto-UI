@@ -1,0 +1,45 @@
+id: T-BOOTSTRAP-2-3-2-HISTORICAL-SEARCH-NAV-0001
+type: test
+title: Bootstrap search and navigation coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+
+
+summary: Autocomplete, Combobox, Command, Context Menu, Menubar, Navigation Menu, Dropdown, Toolbar and Toggle Group coverage.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-HISTORICAL-SEARCH-NAV-0001-CASE-SEARCH
+    title: Single editor/module transport, IME suppression, filtering, controlled value/query/open refusal and distinct search identities
+    covers:
+      - P-BOOTSTRAP-2-3-2-AUTOCOMPLETE-BASE
+      - P-BOOTSTRAP-2-3-2-COMBOBOX-BASE
+      - P-BOOTSTRAP-2-3-2-COMMAND-BASE
+    expectation: search-family-identities-preserved
+  - id: T-BOOTSTRAP-2-3-2-HISTORICAL-SEARCH-NAV-0001-CASE-MENUS
+    title: Independent menu/popup ownership, link defaults and context-menu intent
+    covers:
+      - P-BOOTSTRAP-2-3-2-CONTEXT-MENU-BASE
+      - P-BOOTSTRAP-2-3-2-MENUBAR-BASE
+      - P-BOOTSTRAP-2-3-2-NAVIGATION-MENU-BASE
+      - P-BOOTSTRAP-2-3-2-TOOLBAR-BASE
+    expectation: menu-navigation-owners-preserved
+implementations:
+  - id: bootstrap-historical-search-nav
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/historical-search-nav-r91.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-AUTOCOMPLETE
+      - P-BOOTSTRAP-2-3-2-COMBOBOX
+      - P-BOOTSTRAP-2-3-2-COMMAND
+      - P-BOOTSTRAP-2-3-2-CONTEXT-MENU
+      - P-BOOTSTRAP-2-3-2-MENUBAR
+      - P-BOOTSTRAP-2-3-2-NAVIGATION-MENU
+      - P-BOOTSTRAP-2-3-2-DROPDOWN-MENU
+      - P-BOOTSTRAP-2-3-2-TOOLBAR
+      - P-BOOTSTRAP-2-3-2-TOGGLE-GROUP
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

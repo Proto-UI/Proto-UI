@@ -1,0 +1,74 @@
+id: P-SHADCN-SELECT-ALIGNMENT-PARTS
+type: prototype
+title: Shadcn Select Surface Viewport and ItemText alignment parts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
+
+
+summary: Three same-family alignment parts completing the eleven-part Select anatomy.
+statement:
+  en: >-
+    The Prototypes invoke asSelectSurface(), asSelectViewport() and asSelectItemText() once each. Surface owns family popup presentation under Content, Viewport exclusively owns the scrollport and ItemText supplies item text identity; none owns selection, positioning, presence, portal or geometry beyond its stated role.
+
+
+criteria:
+  - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-INHERITANCE
+    text:
+      en: >-
+        Each part invokes its matching Base hook exactly once and preserves Base props/exposes, anatomy order, scoped naming and render. The item-aligned composition remains Trigger and Value under Root, and Surface then Viewport then Item with ItemText under Content.
+
+
+  - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-VISUAL
+    text:
+      en: >-
+        Surface projects the profile-bound translucent popup treatment through the owned decoration target while Content retains positioning and presence; New York withdraws its backdrop contribution. Viewport carries bounded overflow and outline space; ItemText is content-level text, not a second item owner.
+
+
+  - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-COMPOSITION
+    text:
+      en: >-
+        Real consumers compose Content > Surface > Viewport > Item > ItemText; the extended incomplete-composition diagnostic rejects unbound modern profiles. Family styling is not upstream positioning, scroll-control or Arrow parity.
+
+
+  - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-CLOSURE
+    text:
+      en: >-
+        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
+
+
+  - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-BOUNDARY
+    text:
+      en: >-
+        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
+
+
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-SELECT-ALIGNMENT-PARTS
+verifies:
+  tests:
+    - T-SHADCN-SELECT-PROFILES-0001
+    - T-SELECT-ALIGNMENT-PARTS-0001
+sources:
+  - path: packages/prototypes/shadcn/src/select/surface.proto.ts
+  - path: packages/prototypes/shadcn/src/select/viewport.proto.ts
+  - path: packages/prototypes/shadcn/src/select/item-text.proto.ts
+  - path: packages/prototypes/shadcn/src/select/index.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/select.tsx
+    label: Pinned Base-select upstream comparison source
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Shadcn Select Surface Viewport and ItemText alignment parts cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - shadcn
+  - select
+  - draft

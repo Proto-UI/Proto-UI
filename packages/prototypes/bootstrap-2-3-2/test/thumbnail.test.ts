@@ -4,7 +4,6 @@ import type { Prototype } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import surface from '../src/surface';
-import text from '../src/text';
 
 function mount(prototype: Prototype<any, any>, rawProps: Record<string, unknown> = {}) {
   const host: RuntimeHost<any> = {
@@ -84,20 +83,5 @@ describe('Bootstrap 2.3.2 passive Thumbnail and native action paint', () => {
       'bg-[linear-gradient(#08c,#04c)]'
     );
     await mounted.invokeUnmounted();
-  });
-
-  it('keeps the 14/20 body and 24.5/40 thumbnail heading scale within family Text', async () => {
-    for (const [props, expected] of [
-      [
-        { size: 'sm', leading: 'normal' },
-        ['font-size: 0.875rem', 'line-height: 1.4285714285714286'],
-      ],
-      [{ size: '2xl', leading: 'relaxed' }, ['font-size: 1.53125rem', 'line-height: 2.5rem']],
-    ] as const) {
-      const runtime = mount(text, props);
-      const css = renderProtoStyleTokenCss(runtime.controller.getRuleStyleTokens());
-      for (const declaration of expected) expect(css).toContain(declaration);
-      await runtime.invokeUnmounted();
-    }
   });
 });

@@ -161,6 +161,43 @@ it('projects opt-in family action paint without changing default Surface/Text re
   expect(tokens(text)).not.toContain('leading-5');
 });
 
+it('keeps ordinary pressed navigation stationary while preserving explicit action feedback', async () => {
+  if (!customElements.get(shadcnSurface.name)) AdaptToWebComponent(shadcnSurface);
+  const surface = document.createElement(shadcnSurface.name);
+  owned.push(surface);
+  document.body.append(surface);
+  const tokens = () => (surface.getAttribute('data-pui-style') ?? '').split(/\s+/);
+  for (const kind of ['sidebar', 'toc', 'nav', 'text'] as const) {
+    setElementProps(
+      surface,
+      linkSurfaceProps('shadcn', kind, 'minimal', {
+        hovered: true,
+        pressed: true,
+        focusVisible: true,
+        current: true,
+      })
+    );
+    await flush();
+    expect(tokens()).not.toContain('translate-y-px');
+    expect(tokens()).not.toContain('shadow-none');
+    expect(tokens()).toContain('forced-colors-focus-outline');
+  }
+  for (const styleProfile of ['rhea', 'luma'] as const) {
+    setElementProps(surface, shadcnActionAppearance({ styleProfile, pressed: true }).surface);
+    await flush();
+    expect(tokens()).toContain('translate-y-px');
+    expect(tokens()).not.toContain('shadow-none');
+    setElementProps(surface, shadcnActionAppearance({ styleProfile, pressed: false }).surface);
+    await flush();
+    expect(tokens()).not.toContain('translate-y-px');
+  }
+  setElementProps(surface, { pressed: true, elevation: 'raised' });
+  await flush();
+  expect(tokens()).toContain('shadow-sm');
+  expect(tokens()).not.toContain('translate-y-px');
+  expect(tokens()).not.toContain('shadow-none');
+});
+
 for (const styleProfile of ['rhea', 'luma'] as const) {
   it(`ships every public ${styleProfile} Button size and wrap branch in the actual generated preset`, async () => {
     if (!customElements.get(shadcnButton.name)) AdaptToWebComponent(shadcnButton);

@@ -1,0 +1,65 @@
+id: P-BOOTSTRAP-2-3-2-CAROUSEL
+type: prototype
+title: Bootstrap 2.3.2 Carousel projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+
+
+summary: Bootstrap Carousel family over P-BASE-CAROUSEL with pinned vocabulary.
+statement:
+  en: >-
+    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Viewport/Slide/Previous/Next preserve the discrete-index Base owner. The upstream 600ms sliding recipe, circular controls, indicators, caption and autoplay are not established; Proto-owned paint stays bounded.
+
+
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-CAROUSEL-BASE
+    text:
+      en: >-
+        Invoke asCarousel* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+
+
+  - id: P-BOOTSTRAP-2-3-2-CAROUSEL-VISUAL
+    text:
+      en: >-
+        Root/Viewport/Slide/Previous/Next preserve the discrete-index Base owner. The upstream 600ms sliding recipe, circular controls, indicators, caption and autoplay are not established; Proto-owned paint stays bounded.
+
+
+  - id: P-BOOTSTRAP-2-3-2-CAROUSEL-CLOSURE
+    text:
+      en: >-
+        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+
+
+  - id: P-BOOTSTRAP-2-3-2-CAROUSEL-BOUNDARY
+    text:
+      en: >-
+        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+
+
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-CAROUSEL
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-OVERLAYS-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/carousel/
+  - path: packages/prototypes/bootstrap-2-3-2/src/carousel/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/carousel.less
+    label: Pinned historical design reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Carousel projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - carousel
+  - draft

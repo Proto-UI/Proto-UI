@@ -50,6 +50,40 @@ const THUMB_CHECKED_TRANSLATE: Readonly<Record<ShadcnStyleId, string>> = {
   rhea: 'translate-x-[calc(100%_-_4px)]',
 };
 
+/*
+ * P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW: the opt-in Base draggable
+ * enhancement projects the inherited percentage through the exposed
+ * number.range style channel; no value, input, geometry or event ownership.
+ * Travel is each recipe's checked translate expression scaled by
+ * var(--pui-percentage)/100. Sera's unchecked thumb starts at translate-x-0.25
+ * (1px), so its preview adds that 1px base and shrinks travel to 100% + 1px;
+ * the endpoints stay continuous at both drag edges.
+ */
+const THUMB_DRAG_PREVIEW_LTR: Readonly<Record<ShadcnStyleId, string>> = {
+  'new-york-v4': 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  vega: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  nova: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  maia: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  lyra: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  mira: 'translate-x-[calc((100%_-_2px)*var(--pui-percentage)/100)]',
+  luma: 'translate-x-[calc((100%_-_8px)*var(--pui-percentage)/100)]',
+  sera: 'translate-x-[calc(1px_+_(100%_+_1px)*var(--pui-percentage)/100)]',
+  rhea: 'translate-x-[calc((100%_-_4px)*var(--pui-percentage)/100)]',
+};
+
+/** For explicit RTL the Root starts the Thumb at the opposite edge and travel reverses once. */
+const THUMB_DRAG_PREVIEW_RTL: Readonly<Record<ShadcnStyleId, string>> = {
+  'new-york-v4': 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  vega: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  nova: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  maia: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  lyra: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  mira: 'translate-x-[calc((2px_-_100%)*var(--pui-percentage)/100)]',
+  luma: 'translate-x-[calc((8px_-_100%)*var(--pui-percentage)/100)]',
+  sera: 'translate-x-[calc(-1px_-_(100%_+_1px)*var(--pui-percentage)/100)]',
+  rhea: 'translate-x-[calc((4px_-_100%)*var(--pui-percentage)/100)]',
+};
+
 const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExposes>({
   name: 'shadcn-switch-thumb',
   setup(def) {
@@ -60,9 +94,10 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
         '[shadcn-switch-thumb] asSwitchThumb must project Switch thumb state handles.'
       );
     }
-    const { checked } = switchState;
-    // Context invalidates, but only this Thumb's actual Switch-domain Root
-    // decides style and size. No second style selector or value owner is added.
+    const { checked, draggable, dragging, direction } = switchState;
+    // P-SHADCN-SWITCH-THUMB-VISUAL-SIZE: Context invalidates, but only this
+    // Thumb's actual Switch-domain Root decides style and size. No second
+    // style selector or value owner is added.
     const size = def.state.enum('switchVisualSize', 'default', { options: ['default', 'sm'] });
     const style = def.state.enum('switchVisualStyle', 'new-york-v4', {
       options: SHADCN_STYLE_IDS,
@@ -118,15 +153,51 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
         });
       }
       def.rule({
-        when: (w) => w.all(w.state(style).eq(profile), w.state(checked).eq(false)),
+        // draggable=false retains the prior source-bound endpoints; the
+        // percentage preview below replaces them only for the opt-in drag path.
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(checked).eq(false),
+            w.state(draggable).eq(false)
+          ),
         intent: (i) =>
           i.feedback.style.use(profile === 'sera' ? tw('translate-x-0.25') : tw('translate-x-0')),
       });
       def.rule({
-        when: (w) => w.all(w.state(style).eq(profile), w.state(checked).eq(true)),
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(checked).eq(true),
+            w.state(draggable).eq(false)
+          ),
         intent: (i) => i.feedback.style.use(tw(THUMB_CHECKED_TRANSLATE[profile])),
       });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(draggable).eq(true),
+            w.state(direction).eq('ltr')
+          ),
+        intent: (i) => i.feedback.style.use(tw(THUMB_DRAG_PREVIEW_LTR[profile])),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(draggable).eq(true),
+            w.state(direction).eq('rtl')
+          ),
+        intent: (i) => i.feedback.style.use(tw(THUMB_DRAG_PREVIEW_RTL[profile])),
+      });
     }
+    // Direct manipulation follows its owner without a trailing CSS animation.
+    // Withdrawal restores the source transition for settled value changes.
+    def.rule({
+      when: (w) => w.state(dragging).eq(true),
+      intent: (i) => i.feedback.style.use(tw('transition-none')),
+    });
     for (const profile of ['luma', 'rhea'] as const) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.not(w.meta('colorScheme').eq('dark'))),

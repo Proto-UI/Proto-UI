@@ -1,0 +1,37 @@
+id: T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001
+type: test
+title: Bootstrap control projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+
+
+summary: Radio Group selection/duplicate/disabled, Field relations/labels and readOnly/disabled restore.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001-CASE-RADIO
+    title: Selection, controlled and duplicate/disabled refusal through real consumers
+    covers:
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP-BASE
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM-BASE
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP-INDICATOR-BASE
+    expectation: radio-selection-and-refusal
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-CONTROL-0001-CASE-FIELD
+    title: Field association, invalid, relations, labelledBy rejection and readOnly/disabled restore
+    covers:
+      - P-BOOTSTRAP-2-3-2-FIELD-ALTERNATIVES
+    expectation: field-composition-policy
+implementations:
+  - id: bootstrap-draft-control-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/draft-control-projections.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP-ITEM
+      - P-BOOTSTRAP-2-3-2-RADIO-GROUP-INDICATOR
+      - P-BOOTSTRAP-2-3-2-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

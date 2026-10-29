@@ -1,0 +1,49 @@
+id: T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001
+type: test
+title: Bootstrap passive atoms coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+
+
+summary: Semantic-only regions, Image, Transition and passive Table coverage.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-REGIONS
+    title: Busy and live updates retain descendants and focus
+    covers:
+      - P-BOOTSTRAP-2-3-2-ASYNC-REGION-BASE
+      - P-BOOTSTRAP-2-3-2-LIVE-REGION-BASE
+    expectation: prop-updates-preserve-content
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-TABLE
+    title: Table slots, spans, header relations, first-row border exception and withdrawal
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABLE-BASE
+      - P-BOOTSTRAP-2-3-2-TABLE-ROW-VISUAL
+      - P-BOOTSTRAP-2-3-2-TABLE-CELL-VISUAL
+    expectation: passive-table-structure-and-recipe
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001-CASE-IMAGE-TRANSITION
+    title: Image target transport and Transition slot/reversal/reduced-motion ordering
+    covers:
+      - P-BOOTSTRAP-2-3-2-IMAGE-BASE
+      - P-BOOTSTRAP-2-3-2-TRANSITION-BASE
+    expectation: host-target-and-phase-ordering
+implementations:
+  - id: bootstrap-draft-passive-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/draft-passive-projections.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-ASYNC-REGION
+      - P-BOOTSTRAP-2-3-2-LIVE-REGION
+      - P-BOOTSTRAP-2-3-2-IMAGE
+      - P-BOOTSTRAP-2-3-2-TRANSITION
+      - P-BOOTSTRAP-2-3-2-TABLE
+      - P-BOOTSTRAP-2-3-2-TABLE-CAPTION
+      - P-BOOTSTRAP-2-3-2-TABLE-ROW
+      - P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL
+      - P-BOOTSTRAP-2-3-2-TABLE-CELL
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

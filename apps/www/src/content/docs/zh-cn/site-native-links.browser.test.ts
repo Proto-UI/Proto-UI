@@ -383,7 +383,9 @@ async function assertSocialPaint(
   await page.mouse.down();
   try {
     await expect.poll(async () => (await linkPaint(first)).nativePressed).toBe(true);
-    await expect.poll(async () => (await linkPaint(first)).tokens).toContain(pressToken);
+    if (family === 'brutalist')
+      await expect.poll(async () => (await linkPaint(first)).tokens).toContain(pressToken);
+    else await expect.poll(async () => (await linkPaint(first)).tokens).not.toContain(pressToken);
   } catch (error) {
     await saveNativeTrace(page, `social-${family}-press-failure`, {
       family,
@@ -392,11 +394,17 @@ async function assertSocialPaint(
     throw error;
   }
   const pressed = await linkPaint(first);
-  expect(pressed.tokens).toContain('shadow-none');
   if (family === 'brutalist') {
+    expect(pressed.tokens).toContain('shadow-none');
     expect(pressed.transform).toBe(hovered.transform);
     expect(pressed.shadow).toBe(hovered.shadow);
-  } else expect(pressed.transform).not.toBe(hovered.transform);
+  } else {
+    // The icon recipe is ordinary actionProfile:none, not an implicit Button.
+    // Native press ownership remains observable without inventing displacement.
+    expect(pressed.tokens).not.toContain('shadow-none');
+    expect(pressed.transform).toBe(hovered.transform);
+    expect(pressed.shadow).toBe(hovered.shadow);
+  }
   await capture('pressed', { baseline: hovered, observed: pressed });
   for (const hit of pressed.edgeHits)
     expect(hit.hitIsAnchor, `${family} pressed ${hit.edge} paint must hit its native anchor`).toBe(

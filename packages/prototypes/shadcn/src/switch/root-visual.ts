@@ -181,6 +181,17 @@ export function setupSwitchRootVisual(
       'peer relative inline-flex shrink-0 items-center p-0 outline-none select-none transition-all duration-150 ease-in-out'
     )
   );
+  // Match the physical origin to the existing direction policy only for
+  // the explicit drag enhancement; ordinary upstream toggle paint is unchanged.
+  // Explicit direction also prevents inherited document direction reversing it twice.
+  def.rule({
+    when: (w) => w.all(w.state(state.draggable).eq(true), w.state(state.direction).eq('ltr')),
+    intent: (i) => i.feedback.style.use(tw('direction-ltr')),
+  });
+  def.rule({
+    when: (w) => w.all(w.state(state.draggable).eq(true), w.state(state.direction).eq('rtl')),
+    intent: (i) => i.feedback.style.use(tw('direction-rtl')),
+  });
   for (const profile of SWITCH_PROJECTED_STYLES) {
     def.rule({
       when: (w) => w.state(style).eq(profile),

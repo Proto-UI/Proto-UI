@@ -1,0 +1,66 @@
+id: P-BOOTSTRAP-2-3-2-TABLE-CAPTION
+type: prototype
+title: Bootstrap 2.3.2 Table Caption passive Table projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: >-
+    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+
+
+summary: Bootstrap passive Table part over the exact P-BASE-TABLE-CAPTION definition with the pinned .table recipe.
+statement:
+  en: >-
+    The Prototype composes the exact Base table-caption prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint.
+
+
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TABLE-CAPTION-BASE
+    text:
+      en: >-
+        Compose the exact Base base-table-caption prototype once through the public defineAsHook({...base-table-caption, name}) pattern and preserve every inherited owner, module, render result, props/exposes and lifecycle.
+
+
+  - id: P-BOOTSTRAP-2-3-2-TABLE-CAPTION-VISUAL
+    text:
+      en: >-
+        Caption slot with family typography only; Table Structure supplies the ordered caption relationship and content remains authored.
+
+
+  - id: P-BOOTSTRAP-2-3-2-TABLE-CAPTION-CLOSURE
+    text:
+      en: >-
+        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+
+
+  - id: P-BOOTSTRAP-2-3-2-TABLE-CAPTION-BOUNDARY
+    text:
+      en: >-
+        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+
+
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABLE-CAPTION
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/table/caption.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/table/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/tables.less
+    label: Pinned .table recipe reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Table Caption passive Table projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - table
+  - draft

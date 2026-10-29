@@ -84,6 +84,7 @@ const PLACEMENT_EXACT_TOKENS = new Set([
   'static',
   'sticky',
   'isolate',
+  'float-left',
   'float-right',
   'align-top',
   'align-middle',

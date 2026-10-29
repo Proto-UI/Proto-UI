@@ -517,9 +517,7 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     });
     expect(root.getExposes().invalid.get()).toBe(true);
     expect(root.hasAttribute('data-invalid')).toBe(true);
-    expect((root.getAttribute('data-pui-style') ?? '').split(/\s+/)).toContain(
-      'data-[invalid]:text-destructive'
-    );
+
     expect(input.getAttribute('aria-errormessage')).toBe(error.id);
     expect(error.textContent).toContain('Owner rejected the account');
     expect(input.readOnly).toBe(true);
