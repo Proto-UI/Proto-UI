@@ -11,6 +11,7 @@ import path from 'node:path';
 import { describe, it } from 'node:test';
 
 import { contrastProvenancePlugin, readContrastProvenance } from './contrast-provenance.mjs';
+import { accordionActivationProbePlugin } from './accordion-activation-probe.mjs';
 
 const CSS_FILES = [
   'apps/www/src/styles/proto-ui-tokens.generated.css',
@@ -118,31 +119,42 @@ async function serve(t, root) {
 
 // Evaluate only the checked-in plugin-list expression with inert production
 // factories. This checks the actual opt-in wiring without executing Astro config.
-function configuredPlugins(root, flag) {
+function configuredPlugins(root, flag, probeDirectory) {
   const config = readFileSync(new URL('../astro.config.mjs', import.meta.url), 'utf8');
   const start = config.indexOf('    plugins: [\n      ...(process.env.PROTO_UI_CONTRAST_AUDIT');
   assert.ok(start >= 0, 'The reviewed audit plugin-list expression must exist');
   const end = config.indexOf('\n    ],', start);
   assert.ok(end > start);
   const expression = config.slice(start + '    plugins: '.length, end + '\n    ]'.length);
-  return new Function(
-    'process',
-    'contrastProvenancePlugin',
-    'repositoryRoot',
-    'protoUiSourcePlugin',
-    'runtimeRetryUrlsPlugin',
-    'websiteBundleGraphPlugin',
-    'tailwindcss',
-    `return (${expression});`
-  )(
-    { env: { PROTO_UI_CONTRAST_AUDIT: flag } },
-    contrastProvenancePlugin,
-    root,
-    { name: 'source-control' },
-    () => ({ name: 'runtime-retry-control' }),
-    () => ({ name: 'bundle-graph-control' }),
-    () => ({ name: 'tailwind-control' })
-  );
+  const probeKey = 'PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR';
+  const previousProbeDirectory = process.env[probeKey];
+  try {
+    if (probeDirectory === undefined) delete process.env[probeKey];
+    else process.env[probeKey] = probeDirectory;
+    return new Function(
+      'process',
+      'contrastProvenancePlugin',
+      'accordionActivationProbePlugin',
+      'repositoryRoot',
+      'protoUiSourcePlugin',
+      'runtimeRetryUrlsPlugin',
+      'websiteBundleGraphPlugin',
+      'tailwindcss',
+      `return (${expression});`
+    )(
+      { env: { PROTO_UI_CONTRAST_AUDIT: flag } },
+      contrastProvenancePlugin,
+      accordionActivationProbePlugin,
+      root,
+      { name: 'source-control' },
+      () => ({ name: 'runtime-retry-control' }),
+      () => ({ name: 'bundle-graph-control' }),
+      () => ({ name: 'tailwind-control' })
+    ).filter(Boolean);
+  } finally {
+    if (previousProbeDirectory === undefined) delete process.env[probeKey];
+    else process.env[probeKey] = previousProbeDirectory;
+  }
 }
 
 describe('contrast source provenance', () => {
@@ -172,12 +184,40 @@ describe('contrast source provenance', () => {
     });
   }
 
+  it('isolates the real probe environment and restores an inherited value', (t) => {
+    const key = 'PROTO_UI_ACCORDION_ACTIVATION_PROBE_DIR';
+    const previous = process.env[key];
+    const root = repository(t);
+    const inherited = path.join(root, 'inherited-probe');
+    try {
+      process.env[key] = inherited;
+      const disabled = configuredPlugins(root, '1');
+      assert.equal(disabled.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'), false);
+      assert.equal(process.env[key], inherited);
+      const enabled = configuredPlugins(root, '1', path.join(root, 'explicit-probe'));
+      const probes = enabled.filter((plugin) => plugin.name === 'proto-ui-accordion-activation-probe');
+      assert.equal(probes.length, 1);
+      assert.equal(probes[0].apply, 'serve');
+      assert.equal(probes[0].enforce, 'pre');
+      assert.equal(process.env[key], inherited);
+      assert.throws(
+        () => configuredPlugins(null, '0', path.join(root, 'invalid-root-probe')),
+        { code: 'ERR_INVALID_ARG_TYPE' }
+      );
+      assert.equal(process.env[key], inherited);
+    } finally {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    }
+  });
+
   it('the installed Vite production resolver excludes the audit plugin even when opted in', async (t) => {
     const root = repository(t);
     const require = createRequire(new URL('../package.json', import.meta.url));
     const vitePath = createRequire(require.resolve('astro')).resolve('vite');
     const { resolveConfig } = await import(pathToFileURL(vitePath).href);
-    const plugins = configuredPlugins(root, '1');
+    const plugins = configuredPlugins(root, '1', path.join(root, 'production-probe'));
+    assert.ok(plugins.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'));
     const auditName = contrastProvenancePlugin(root).name;
     assert.ok(plugins.some((plugin) => plugin.name === auditName));
     const resolved = await resolveConfig(
@@ -186,6 +226,10 @@ describe('contrast source provenance', () => {
     );
     assert.equal(
       resolved.plugins.some((plugin) => plugin.name === auditName),
+      false
+    );
+    assert.equal(
+      resolved.plugins.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'),
       false
     );
   });
