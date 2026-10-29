@@ -329,8 +329,11 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       entry: 'first',
       loop: true,
     });
-    def.expose.method('focusFirst', () => roving.focusFirst({ defer: true }));
-    def.expose.method('focusLast', () => roving.focusLast({ defer: true }));
+    // An anchored Menubar entry must not scroll the document while its portal
+    // and fixed position settle. Navigation Menu retains its existing policy.
+    const entryOptions = navigation ? { defer: true } : { defer: true, preventScroll: true };
+    def.expose.method('focusFirst', () => roving.focusFirst(entryOptions));
+    def.expose.method('focusLast', () => roving.focusLast(entryOptions));
     const overlay = asOverlay<T.MenuContentProps>();
     overlay.configure({
       closeOnEscape: true,

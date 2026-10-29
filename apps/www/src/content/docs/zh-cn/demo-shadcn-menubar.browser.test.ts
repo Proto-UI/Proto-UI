@@ -145,6 +145,7 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
             });
             await capture(bar, `${fontSize}-closed-focus`);
 
+            const scrollBeforeEntry = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
             await page.keyboard.press('ArrowDown');
             await editMenu.waitFor({ state: 'visible' });
             const undo = editMenu.getByRole('menuitem', { name: 'Undo', exact: true });
@@ -152,6 +153,9 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
               .poll(() => undo.evaluate((el) => document.activeElement === el))
               .toBe(true);
             const item = await facts(undo);
+            expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(
+              scrollBeforeEntry
+            );
             expect(item.height).toBeGreaterThanOrEqual(fontSize * 1.75 - 0.1);
             expect(Number.parseFloat(item.paddingLeft)).toBeCloseTo(fontSize * 0.5, 1);
             expect(Number.parseFloat(item.paddingTop)).toBeCloseTo(fontSize * 0.375, 1);
@@ -192,6 +196,8 @@ describe.sequential('Shadcn Menubar public Rhea native projection', () => {
               accent.foreground
             );
             const content = await facts(editMenu);
+            expect(content.y).toBeGreaterThanOrEqual(0);
+            expect(content.y + content.height).toBeLessThanOrEqual(1000);
             expect(Number.parseFloat(content.minWidth)).toBeCloseTo(fontSize * 9, 1);
             expect(content.width).toBeGreaterThanOrEqual(fontSize * 9 - 0.1);
             observations.push({ fontSize, state: 'open-keyboard-item', content, item });
