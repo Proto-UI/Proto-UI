@@ -4,37 +4,72 @@ title: Base alertDialog
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  zh-CN: 'Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。'
-  en: 'Draft implementation direction. Stable admission requires independent review and browser/native evidence.'
+  zh-CN: Draft 实现方向，稳定准入需要独立审查及浏览器/native 证据。
+  en: Draft implementation direction. Stable admission requires independent review
+    and browser/native evidence.
 summary: Base alertDialog protocol with shared Proto UI lifecycle and anatomy boundaries.
 statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
-  en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
+  en: An independently authored Proto UI protocol reusing Base shared capabilities
+    and L1 lifecycle.
 criteria:
-  - id: P-BASE-ALERT-DIALOG-ADMISSION
-    text:
-      zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
-      en: Draft admission requires exact-head browser/native evidence and independent review.
+- id: P-BASE-ALERT-DIALOG-ADMISSION
+  text:
+    zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
+    en: Draft admission requires exact-head browser/native evidence and independent
+      review.
+- id: P-BASE-ALERT-DIALOG-OWNER
+  text:
+    en: Root owns the accepted open fact. Action or Cancel close requests do not replace
+      a supplied controlled open value; the owner may accept by publishing open. Owner
+      publication does not itself emit another command request.
+    zh-CN: Root持有已接受的open事实。Action/Cancel关闭请求不能替代受控open；owner通过发布open接受请求，owner发布本身不再产生命令请求。
+- id: P-BASE-ALERT-DIALOG-COMMAND
+  text:
+    en: An enabled Action activation emits its action signal and requests closure
+      in its own AlertDialog context. Cancel requests closure without an action signal.
+      An unrelated Root must not receive either request.
+    zh-CN: 启用的Action激活发出action信号并向自身AlertDialog上下文请求关闭；Cancel仅请求关闭、不发action。无关Root不得接收该请求。
+- id: P-BASE-ALERT-DIALOG-DISABLED
+  text:
+    en: Root-disabled or part-disabled Action and Cancel suppress action and close
+      requests without suppressing an independently enabled sibling command.
+    zh-CN: Root或part禁用时Action/Cancel均抑制action及关闭请求，不得全局抑制独立启用的兄弟命令。
 dependsOn:
   contracts:
-    - C-PROPS-0001
-    - C-LIFECYCLE-0008
+  - C-PROPS-0001
+  - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests:
+  - T-BASE-ALERT-DIALOG-0001
 sources:
-  - path: packages/prototypes/base/src/alert-dialog/
+- path: packages/prototypes/base/src/alert-dialog/root.proto.ts
+- path: packages/prototypes/base/src/alert-dialog/action.proto.ts
+- path: packages/prototypes/base/src/alert-dialog/cancel.proto.ts
 openQuestions:
-  - id: P-BASE-ALERT-DIALOG-Q-ADMISSION
-    question:
-      zh-CN: 何时完成精确 head 的浏览器/native 证据并准入此 draft？
-      en: When have exact-head browser/native evidence admitted this draft?
-    blocks:
-      - activation:P-BASE-ALERT-DIALOG
+- id: P-BASE-ALERT-DIALOG-Q-ADMISSION
+  question:
+    zh-CN: 何时完成精确 head 的浏览器/native 证据并准入此 draft？
+    en: When have exact-head browser/native evidence admitted this draft?
+  blocks:
+  - activation:P-BASE-ALERT-DIALOG
+- id: P-BASE-ALERT-DIALOG-Q-COMPOSITION
+  question:
+    en: Trigger opening, Mask policy, eligible entry/fallback, restoration, repeated
+      requests, native input/AT and interrupted motion remain separate incomplete
+      composition obligations; when are their policies and exact native evidence reviewed?
+    zh-CN: Trigger开启、Mask策略、有效焦点进入/回退、恢复、重复请求、原生输入/AT与运动中断仍为独立未完成义务，何时审定策略和精确原生证据？
+  blocks:
+  - activation:P-BASE-ALERT-DIALOG
 revisions:
-  - version: 0.3.0-alpha.1
-    change: introduced
-    summary: Cataloged the Base alertDialog family as draft.
+- version: 0.3.0-alpha.1
+  change: introduced
+  summary: Cataloged the Base alertDialog family as draft.
+- version: 0.3.0-alpha.1
+  change: revised
+  summary: Define bounded Root/Action/Cancel ownership and disabled obligations with
+    unverified DOM-model test mapping; other composition protocols remain incomplete.
 tags:
-  - prototype
-  - base
-  - alert-dialog
+- prototype
+- base
+- alert-dialog
