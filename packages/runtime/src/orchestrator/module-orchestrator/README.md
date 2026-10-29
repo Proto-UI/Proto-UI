@@ -71,6 +71,7 @@ Rules:
 
 - Wiring is **flat**: module name → caps entries
 - `reset()` can target a single module or all attached host caps
+- Bulk `reset()` attempts every module and then rethrows the first failure, including a falsy thrown value. A failing vault still stops its own listener sequence, so an attempted reset does not guarantee every resource was released.
 
 ---
 
