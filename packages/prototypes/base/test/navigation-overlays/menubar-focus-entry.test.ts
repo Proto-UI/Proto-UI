@@ -103,20 +103,57 @@ async function bar(mode: Ownership, initial = 'file', rtl = false, props: Menuba
 // These tests interrupt the actual adapter-owned portal acquisition, rather than
 // substituting a ready signal or changing the public demo. Native acceptance
 // remains the separate four-Web browser suite.
+it('allows a committed press from an initially unfocused trigger', async () => {
+  const p = await bar('uncontrolled', '');
+  expect(p.triggers[0]!.getExposes().focused.get()).toBe(false);
+  p.triggers[0]!.click();
+  await flush();
+  expect(p.panels[0]!.parentElement).toBe(document.body);
+  expect(document.activeElement).toBe(p.items[0]![0]);
+  expect(p.root.getExposes().value.get()).toBe('file');
+  expect(p.requests).toEqual([{ value: 'file', reason: 'trigger' }]);
+});
+it('does not let an initially unfocused press steal later author focus', async () => {
+  const p = await bar('uncontrolled', '');
+  const outside = document.createElement('button');
+  document.body.append(outside);
+  owned.add(outside);
+  expect(p.triggers[0]!.getExposes().focused.get()).toBe(false);
+  const append = document.body.appendChild.bind(document.body);
+  let interrupted = false;
+  vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+    const result = append(node);
+    if (node === p.panels[0] && !interrupted) {
+      interrupted = true;
+      outside.focus();
+    }
+    return result;
+  });
+  p.triggers[0]!.click();
+  await flush();
+  expect(interrupted).toBe(true);
+  expect(document.activeElement).toBe(outside);
+  expect(p.root.getExposes().value.get()).toBe('file');
+  setElementProps(p.panels[0]!, { sideOffset: 8 });
+  await flush();
+  expect(document.activeElement).toBe(outside);
+});
 for (const keyName of ['ArrowDown', 'ArrowUp'] as const) {
   it(`${keyName} requests actual focus only after the physical portal acquisition`, async () => {
     const p = await bar('uncontrolled', '');
     await p.focusTrigger(0);
     const target = p.items[0]![keyName === 'ArrowDown' ? 0 : 2]!;
     const observed: boolean[] = [];
+    const focusStacks: string[] = [];
     const original = target.focus.bind(target);
     vi.spyOn(target, 'focus').mockImplementation((options) => {
       observed.push(p.panels[0]!.parentElement === document.body);
+      focusStacks.push(new Error('native focus invocation').stack ?? 'stack unavailable');
       original(options);
     });
     key(keyName);
     await flush();
-    expect(observed).toEqual([true]);
+    expect(observed, JSON.stringify({ focusStacks, requests: p.requests })).toEqual([true]);
     expect(document.activeElement).toBe(target);
     expect(p.requests).toEqual([{ value: 'file', reason: 'keyboard' }]);
   });
@@ -136,11 +173,28 @@ for (const interrupt of [
     document.body.append(outside);
     owned.add(outside);
     const target = p.items[0]![0]!;
-    const focus = vi.spyOn(target, 'focus');
+    const observations: Array<Record<string, unknown>> = [];
+    const observe = (event: string, stack?: string) =>
+      observations.push({
+        event,
+        rootConnected: p.root.isConnected,
+        triggerConnected: p.triggers[0]!.isConnected,
+        contentConnected: p.panels[0]!.isConnected,
+        contentParent: p.panels[0]!.parentElement?.tagName ?? null,
+        active: document.activeElement?.tagName ?? null,
+        stack,
+      });
+    const originalFocus = target.focus.bind(target);
+    const focus = vi.spyOn(target, 'focus').mockImplementation((options) => {
+      observe('focus', new Error('native focus invocation').stack);
+      originalFocus(options);
+    });
     const append = document.body.appendChild.bind(document.body);
     let interrupted = false;
     vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+      if (node === p.panels[0]) observe('portal-append-enter');
       const result = append(node);
+      if (node === p.panels[0]) observe('portal-append-return');
       if (node === p.panels[0] && !interrupted) {
         interrupted = true;
         if (interrupt === 'outside-focus') outside.focus();
@@ -153,14 +207,18 @@ for (const interrupt of [
           if (interrupt === 'close-reopen') setElementProps(p.root, { value: 'file' });
         }
         if (interrupt === 'disable') setElementProps(p.root, { disabled: true });
-        if (interrupt === 'remove') p.root.remove();
+        if (interrupt === 'remove') {
+          observe('remove-before');
+          p.root.remove();
+          observe('remove-after');
+        }
       }
       return result;
     });
     key('ArrowDown');
     await flush();
     expect(interrupted).toBe(true);
-    expect(focus).not.toHaveBeenCalled();
+    expect(focus, JSON.stringify(observations)).not.toHaveBeenCalled();
     expect(document.activeElement).not.toBe(target);
     if (interrupt === 'outside-focus') expect(document.activeElement).toBe(outside);
     // A later reconciliation cannot revive the canceled command.

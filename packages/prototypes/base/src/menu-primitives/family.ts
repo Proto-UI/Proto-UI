@@ -7,6 +7,7 @@ import {
   type DefHandle,
   type RunHandle,
   type NativeLinkNavigate,
+  type AnatomyPartView,
 } from '@proto.ui/core';
 import {
   asAccessible,
@@ -267,10 +268,28 @@ export function createMenuFamily(slug: string, navigation: boolean) {
           invoke(run, 'requestValue', run.props.get().value, 'focus-switch');
       }
     });
-    const enterContent = (run: RunHandle<T.MenuTriggerProps>, last = false) => {
+    const enterContent = (
+      run: RunHandle<T.MenuTriggerProps>,
+      last = false,
+      requireSourceFocus = true,
+      reason = 'keyboard'
+    ) => {
       const epoch = viewEpoch;
       const revision = ++entryRevision;
-      invoke(run, 'requestValue', run.props.get().value, 'keyboard');
+      const sourceFocusEpoch = focusEpoch;
+      const value = run.props.get().value;
+      let prepared: { part: AnatomyPartView; token: number } | undefined;
+      if (!navigation) {
+        for (const part of run.anatomy.partsOf(family, 'content')) {
+          const prepare = part.getExpose('__prepareEntry');
+          const token = typeof prepare === 'function' ? prepare(value) : null;
+          if (typeof token === 'number') {
+            prepared = { part, token };
+            break;
+          }
+        }
+      }
+      invoke(run, 'requestValue', value, reason);
       if (!mounted || viewEpoch !== epoch) return;
       const panels = run.anatomy.partsOf(family, 'content');
       const panel = panels.find((p) => {
@@ -278,9 +297,8 @@ export function createMenuFamily(slug: string, navigation: boolean) {
         return state?.get?.();
       });
       if (!navigation) {
-        const sourceFocusEpoch = focusEpoch;
-        const request = panel?.getExpose('__requestEntry');
-        if (typeof request === 'function')
+        const request = prepared?.part.getExpose('__requestEntry');
+        if (prepared && typeof request === 'function')
           request(
             last,
             () =>
@@ -288,9 +306,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
               viewEpoch === epoch &&
               entryRevision === revision &&
               focusEpoch === sourceFocusEpoch &&
-              focus.focused.get() &&
+              (!requireSourceFocus || focus.focused.get()) &&
               expanded.get() &&
-              !disabled.get()
+              !disabled.get(),
+            prepared.token
           );
         return;
       }
@@ -301,9 +320,14 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       if (disabled.get()) return;
       const epoch = viewEpoch;
       const wasOpen = expanded.get();
+      // Prepare the entry intent before opening can invoke author callbacks.
+      // Preserve the press's existing externally visible request reason.
+      if (!navigation && !wasOpen) {
+        enterContent(run, false, false, 'trigger');
+        return;
+      }
       invoke(run, 'requestValue', wasOpen ? '' : run.props.get().value, 'trigger');
       if (!mounted || viewEpoch !== epoch) return;
-      if (!navigation && !wasOpen) enterContent(run);
     });
     def.event.on('pointer.enter', (run) => {
       const ctx = run.context.read(context);
@@ -383,7 +407,9 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     });
     const boundary = asBoundary();
     boundary.observe('pointer.press');
+    if (!navigation) boundary.observe('focus.move');
     let runNow: RunHandle<T.MenuContentProps> | null = null;
+    let contentValue = '';
     let entryEpoch = 0;
     let cancelEntry: (() => void) | null = null;
     const retireEntry = () => {
@@ -391,21 +417,29 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       cancelEntry?.();
       cancelEntry = null;
     };
-    if (!navigation)
-      def.expose.method('__requestEntry' as any, (last: boolean, current: () => boolean) => {
+    if (!navigation) {
+      def.expose.method('__prepareEntry' as any, (value: string) => {
+        if (value !== contentValue) return null;
         retireEntry();
-        if (!open.get() || typeof current !== 'function' || !current()) return;
-        const epoch = entryEpoch;
-        cancelEntry = overlay.afterViewReconciled(() => {
-          if (entryEpoch !== epoch) return;
-          cancelEntry = null;
-          if (!open.get() || !current()) return;
-          // The consumer still owns first/last policy. Overlay has only finished
-          // its resource pass; Focus continues to own renderer target readiness.
-          if (last) roving.focusLast(entryOptions);
-          else roving.focusFirst(entryOptions);
-        });
+        return entryEpoch;
       });
+      def.expose.method(
+        '__requestEntry' as any,
+        (last: boolean, current: () => boolean, epoch: number) => {
+          if (entryEpoch !== epoch) return;
+          if (!open.get() || typeof current !== 'function' || !current()) return;
+          cancelEntry = overlay.afterViewReconciled(() => {
+            if (entryEpoch !== epoch) return;
+            cancelEntry = null;
+            if (!open.get() || !current()) return;
+            // The consumer still owns first/last policy. Overlay has only finished
+            // its resource pass; Focus continues to own renderer target readiness.
+            if (last) roving.focusLast(entryOptions);
+            else roving.focusFirst(entryOptions);
+          });
+        }
+      );
+    }
     const focusTrigger = (run: RunHandle<T.MenuContentProps>) => {
       const trigger = triggers(run).find((t) => t.data.value === run.props.get().value)?.part;
       const fn = trigger?.getExpose('focusSelf');
@@ -432,6 +466,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       },
     });
     const sync = (run: RunHandle<T.MenuContentProps>, ctx: Context) => {
+      contentValue = run.props.get().value ?? '';
       const next = !!ctx.value && ctx.value === run.props.get().value;
       if (!next) retireEntry();
       id.set(contentId(ctx.id, run.props.get().value), 'reason: menu content id');
@@ -470,7 +505,13 @@ export function createMenuFamily(slug: string, navigation: boolean) {
         overlay.openOverlay('controlled.sync');
       else focusTrigger(run);
     });
-    boundary.subscribeOutside(() => {
+    boundary.subscribeOutside((event) => {
+      if (!navigation && event.observation === 'focus.move') {
+        // Only retire a pending entry. Focus outside does not change the
+        // existing manual-entry Overlay's open/close or restore policy.
+        retireEntry();
+        return;
+      }
       if (runNow && open.get()) invoke(runNow, 'close');
     });
     def.event.onGlobal('key.down', (run, event) => {
