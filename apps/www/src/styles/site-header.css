@@ -104,7 +104,7 @@
 .site-header-search {
   grid-area: search;
   min-width: 0;
-  margin-inline-start: 0.5rem;
+  margin-inline-start: var(--site-header-search-margin, 0.5rem);
 }
 .site-header-theme {
   grid-area: theme;
@@ -128,21 +128,21 @@
 }
 /* Responsive layout inputs consumed by Search's actual family Button. */
 .site-header-search site-search {
-  --site-search-trigger-width: 100%;
-  --site-search-trigger-padding: 0.75rem;
-  --site-search-trigger-justify: flex-start;
+  --site-search-trigger-width: var(--site-header-search-width, 100%);
+  --site-search-trigger-padding: var(--site-header-search-padding, 0.75rem);
+  --site-search-trigger-justify: var(--site-header-search-justify, flex-start);
 }
 .site-header
   .site-header-search
   :is([data-open-modal], [data-search-startup-button])
   .site-search-label {
-  display: inline;
+  display: var(--site-header-search-copy-display, inline);
 }
 .site-header
   .site-header-search
   :is([data-open-modal], [data-search-startup-button])
   .site-search-shortcut {
-  display: inline-flex;
+  display: var(--site-header-search-copy-display, inline-flex);
 }
 .site-header-context {
   grid-area: context;
@@ -299,6 +299,11 @@
 }
 @media (max-width: 68.749rem) {
   .site-header {
+    --site-header-search-width: 2.75rem;
+    --site-header-search-padding: 0;
+    --site-header-search-justify: center;
+    --site-header-search-copy-display: none;
+    --site-header-search-margin: 0;
     grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
     grid-template-rows: var(--site-header-row-height) 3rem;
@@ -316,20 +321,6 @@
     font-size: 0.75rem;
     color: var(--color-muted-foreground);
     white-space: nowrap;
-  }
-  .site-header-search {
-    margin-inline-start: 0;
-  }
-  .site-header-search site-search {
-    --site-search-trigger-width: 2.75rem;
-    --site-search-trigger-padding: 0;
-    --site-search-trigger-justify: center;
-  }
-  .site-header
-    .site-header-search
-    :is([data-open-modal], [data-search-startup-button])
-    :is(.site-search-label, .site-search-shortcut) {
-    display: none !important;
   }
   .site-header-docs-navigation {
     display: flex;
@@ -439,6 +430,11 @@
 }
 @media (max-width: 79.999rem) {
   .home-runtime-header {
+    --site-header-search-width: 2.75rem;
+    --site-header-search-padding: 0;
+    --site-header-search-justify: center;
+    --site-header-search-copy-display: none;
+    --site-header-search-margin: 0;
     grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
     grid-template-rows: var(--site-header-row-height) auto;
@@ -649,6 +645,11 @@
 @media (min-width: 48rem) {
   @container docs-page (max-width: 68.749rem) {
     .site-header[data-docs-site-header] {
+      --site-header-search-width: 2.75rem;
+      --site-header-search-padding: 0;
+      --site-header-search-justify: center;
+      --site-header-search-copy-display: none;
+      --site-header-search-margin: 0;
       grid-template-columns: auto auto minmax(0, 1fr) repeat(3, 2.75rem);
       grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
       grid-template-rows: minmax(var(--site-header-row-height), auto) auto;
@@ -659,20 +660,6 @@
       justify-content: space-between;
       height: auto;
       padding-block: 0.5rem;
-    }
-    .site-header[data-docs-site-header] .site-header-search {
-      margin-inline-start: 0;
-    }
-    .site-header[data-docs-site-header] .site-header-search site-search {
-      --site-search-trigger-width: 2.75rem;
-      --site-search-trigger-padding: 0;
-      --site-search-trigger-justify: center;
-    }
-    .site-header[data-docs-site-header]
-      .site-header-search
-      :is([data-open-modal], [data-search-startup-button])
-      :is(.site-search-label, .site-search-shortcut) {
-      display: none !important;
     }
   }
   @container docs-page (max-width: 42rem) {
