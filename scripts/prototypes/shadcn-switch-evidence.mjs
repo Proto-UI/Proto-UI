@@ -149,6 +149,8 @@ try {
           border: c.borderTopColor,
           bg: c.backgroundColor,
           shadow: c.boxShadow,
+          percentage: Number.parseFloat(t.getPropertyValue('--pui-percentage')),
+          dragging: thumb.hasAttribute('data-dragging'),
           thumbWidth: thumb.getBoundingClientRect().width,
           thumbOffset: thumb.getBoundingClientRect().left - box.left,
           thumbShadow: t.boxShadow,
@@ -458,6 +460,119 @@ try {
         }
         await save(`${theme}-${profile}-${size}.png`);
       }
+  // Native mouse displacement and capture, not injected percentage/state.
+  // The existing endpoint matrix above remains default draggable=false.
+  for (const font of [16, 32])
+    for (const profile of ['new-york-v4', 'rhea'])
+      for (const size of ['default', 'sm'])
+        for (const direction of ['ltr', 'rtl']) {
+          await page.evaluate(
+            ({ font, profile, size, direction }) => {
+              document.documentElement.style.fontSize = font + 'px';
+              document.documentElement.dataset.theme = 'light';
+              window.switchEvidence.set({
+                profile,
+                size,
+                direction,
+                draggable: true,
+                own: 'inherit',
+                invalid: false,
+                disabled: false,
+                readOnly: false,
+              });
+            },
+            { font, profile, size, direction }
+          );
+          for (const kind of ['wc', 'react', 'vue', 'vue2']) {
+            const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(1);
+            if ((await control.getAttribute('aria-checked')) === 'true') await control.click();
+            const label = `native-drag/${font}/${profile}/${size}/${direction}/${kind}`;
+            const start = await observe(
+              kind,
+              label + '/settled',
+              (o) => o.checked === 'false' && o.percentage === 0 && !o.dragging,
+              1
+            );
+            const travel =
+              start.width - start.thumbWidth - 2 * Number.parseFloat(start.borderWidth);
+            assert(travel > 0, 'native layout must provide positive thumb travel');
+            const box = await control.boundingBox();
+            assert(box);
+            const x = box.x + start.thumbOffset + start.thumbWidth / 2;
+            const y = box.y + box.height / 2;
+            const sign = direction === 'rtl' ? -1 : 1;
+            const before = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const root = r.controls()[1];
+              window.nativeDragTrace = [];
+              for (const type of ['pointerdown', 'pointermove', 'pointerup'])
+                root.addEventListener(
+                  type,
+                  (e) =>
+                    window.nativeDragTrace.push({
+                      type,
+                      trusted: e.isTrusted,
+                      pointerId: e.pointerId,
+                    }),
+                  { once: true }
+                );
+              return r.events.length;
+            }, kind);
+            await page.mouse.move(x, y);
+            await page.mouse.down();
+            await page.mouse.move(x + (sign * travel) / 2, y, { steps: 4 });
+            const middle = await observe(
+              kind,
+              label + '/interior',
+              (o) =>
+                o.dragging &&
+                o.checked === 'false' &&
+                Math.abs(o.percentage - 50) < 1 &&
+                o.transition === 'none' &&
+                Math.abs(o.thumbOffset - start.thumbOffset - (sign * travel) / 2) < 0.75,
+              1
+            );
+            assert(middle.dragging);
+            const capture = await page.evaluate((kind) => {
+              const r = window.switchEvidence.records.find((r) => r.kind === kind);
+              const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+              return {
+                captured: !!down && r.controls()[1].hasPointerCapture(down.pointerId),
+                changes: r.events.length,
+                trace: window.nativeDragTrace,
+              };
+            }, kind);
+            assert.equal(capture.captured, true, label + ' native pointer capture');
+            assert.equal(capture.changes, before, label + ' preview is not truth');
+            assert(
+              capture.trace.every((e) => e.trusted),
+              label + ' trusted native events'
+            );
+            // Release outside the Root: actual pointer capture must preserve ownership.
+            await page.mouse.move(x + sign * (travel + box.width), y, { steps: 4 });
+            await page.mouse.up();
+            await observe(
+              kind,
+              label + '/committed',
+              (o) =>
+                o.checked === 'true' &&
+                !o.dragging &&
+                o.percentage === 100 &&
+                Math.abs(o.thumbOffset - start.thumbOffset - sign * travel) < 0.75,
+              1
+            );
+            const after = await page.evaluate(
+              (kind) => window.switchEvidence.records.find((r) => r.kind === kind).events.length,
+              kind
+            );
+            assert.equal(after, before + 1, label + ' exactly one change including native click');
+          }
+          await save(`drag-${font}-${profile}-${size}-${direction}.png`);
+        }
+  await page.evaluate(() => {
+    document.documentElement.style.fontSize = '16px';
+    window.switchEvidence.set({ draggable: false, direction: 'ltr' });
+  });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const kind of ['wc', 'react', 'vue', 'vue2'])
     await observe(kind, 'reduced-motion', (o) => o.transition === 'none');

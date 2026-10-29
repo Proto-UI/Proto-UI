@@ -31,7 +31,7 @@ export default {
             kind: 'proto',
             prototypeId: 'shadcn-switch-thumb',
           },
-          { kind: 'box', className: 'sr-only', children: ['Email alerts — drag or click'] },
+          { kind: 'box', className: 'sr-only', children: ['Email alerts'] },
         ],
       },
       {
