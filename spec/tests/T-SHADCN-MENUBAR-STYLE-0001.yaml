@@ -1,0 +1,50 @@
+id: T-SHADCN-MENUBAR-STYLE-0001
+type: test
+title: Menubar source-bound existing-part style projection
+status: draft
+since: 0.3.0-alpha.1
+summary: Planned and authored checks for two existing-part profiles, not native or complete Menubar acceptance.
+lifecycleRationale:
+  en: Candidate tests have not been executed; independent review and exact-head native/AT evidence remain required.
+cases:
+  - id: T-SHADCN-MENUBAR-STYLE-0001-CASE-PAINT
+    title: Existing Root/Trigger/Content/Item state paint matches separate source recipes
+    covers:
+      - P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
+    expectation: source-specific-default-expanded-focused-disabled-paint
+  - id: T-SHADCN-MENUBAR-STYLE-0001-CASE-NO-RESET
+    title: Shared scope switching withdraws old paint without semantic events or owner replacement
+    covers:
+      - P-SHADCN-MENUBAR-STYLE-SCOPE
+      - P-SHADCN-MENUBAR-BASE-OWNERSHIP
+    expectation: unchanged-base-value-and-logical-parts
+  - id: T-SHADCN-MENUBAR-STYLE-0001-CASE-SOURCE-UNITS
+    title: Static lowering retains source relative and pixel units
+    covers:
+      - P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
+    expectation: rem-and-source-px-remain-distinct
+  - id: T-SHADCN-MENUBAR-STYLE-0001-CASE-NATIVE
+    title: Four Web native input and physical lifecycle evidence remains required
+    covers:
+      - P-SHADCN-MENUBAR-BASE-OWNERSHIP
+      - P-SHADCN-MENUBAR-REMAINING-CLOSURE
+    expectation: no-acceptance-from-synthetic-style-presence
+verifies:
+  prototypes:
+    - id: P-SHADCN-MENUBAR
+      anchors:
+        - P-SHADCN-MENUBAR-STYLE-SCOPE
+        - P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
+        - P-SHADCN-MENUBAR-BASE-OWNERSHIP
+        - P-SHADCN-MENUBAR-REMAINING-CLOSURE
+sources:
+  - path: packages/prototypes/shadcn/test/menubar-style-projection.test.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Describe authored unexecuted projection tests and outstanding native acceptance.
+tags:
+  - prototype
+  - shadcn
+  - menubar
+  - test

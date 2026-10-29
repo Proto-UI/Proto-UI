@@ -11,6 +11,18 @@ statement:
   zh-CN: 独立编写的 Proto UI 协议，复用 Base 共享能力和 L1 lifecycle。
   en: An independently authored Proto UI protocol reusing Base shared capabilities and L1 lifecycle.
 criteria:
+  - id: P-SHADCN-MENUBAR-STYLE-SCOPE
+    text:
+      en: Root establishes the existing Shadcn logical style scope. Explicit styleProfile takes precedence over inherited scope and the new-york-v4 compatibility baseline; the new-york alias is retained. Existing parts consume the shared scope with their explicit override precedence. Only new-york-v4 and rhea are admitted by this slice; unsupported styles fail closed. Style changes must withdraw prior contributions without replacing Base value ownership, signals or logical instances. Arbitrary live reparent invalidation is not newly promised.
+  - id: P-SHADCN-MENUBAR-SOURCE-BOUND-PARTS
+    text:
+      en: The four existing Base atoms project separate fixed New York and Rhea recipes. New York Root uses h-9, gap-1, rounded-md, border, background, p-1 and shadow-xs; Rhea Root uses h-8, modern theme2xl radius, border and 3px padding. Trigger uses the respective source size/radius and existing expanded/focused facts, never DOM attributes, for active paint. Content uses New York 12rem minimum and border/shadow-md or Rhea 9rem minimum, modern theme2xl, shadow-lg and foreground ring1 at 5 percent light/10 percent dark. Item uses px-2/py-1.5, source radius, Rhea min-h-7, disabled opacity and pointer suppression, and focused accent/foreground rather than primary. Rem and source pixel units remain distinct; generic New York radius defaults are not replaced by modern defaults.
+  - id: P-SHADCN-MENUBAR-BASE-OWNERSHIP
+    text:
+      en: createMenuFamily remains the sole existing Base behavior realization. Shadcn adds no menu value, activation, focus, keyboard, dismissal, selection or portal policy. Four Web projections must preserve controlled refusal/delay, menu switching, disabled activation, selection closure, repeated dismissal and L1 lifecycle independently of appearance. The host's real native geometry and AT evidence remain separate from style-token and synthetic runtime evidence.
+  - id: P-SHADCN-MENUBAR-REMAINING-CLOSURE
+    text:
+      en: This first source-bound existing-atom slice does not complete Menubar or reduce the parent goal. Rhea hover requires a governed neutral Base hover fact; inset/destructive appearance, group/checkbox/radio/submenu parts, exact align/alignOffset, translucent content, placement/presence motion and complete native/AT/Compiler evidence remain explicit work under issue 907. The existing Rhea keyboard focus ring is retained as an interim accessible projection, with a forced-colors outline, until exact source focus/hover and outline-hidden lowering are closed; expanded-only paint must not erase closed-trigger focus visibility. This is not claimed as exact upstream focus equivalence. Viewport overflow containment remains a disclosed bounded Proto extension. No page selector or adapter component branch may impersonate missing prototype capability.
   - id: P-SHADCN-MENUBAR-ADMISSION
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
@@ -20,8 +32,15 @@ dependsOn:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests:
+    - T-SHADCN-MENUBAR-STYLE-0001
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/menubar.tsx
+    label: Separate New York source, Git blob 9143baeb5a07224bc4224241d51a00d3c539eb5f
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/radix/ui/menubar.tsx
+    label: Rhea-compatible radix wrapper, Git blob 3074897d043a4442dffe3d96464499773496575b
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css
+    label: Menubar lines 933-986, Git blob 94bbca2a7f78845e7cfbcff68fb8f535e3848a98
   - path: packages/prototypes/shadcn/src/menubar/
 openQuestions:
   - id: P-SHADCN-MENUBAR-Q-ADMISSION
@@ -31,6 +50,9 @@ openQuestions:
     blocks:
       - activation:P-SHADCN-MENUBAR
 revisions:
+  - version: 0.3.0-alpha.1
+    change: expanded
+    summary: Define separate source-bound New York/Rhea existing-part projection and preserve the remaining complete-family acceptance debt.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn menubar family as draft.

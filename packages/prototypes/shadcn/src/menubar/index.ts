@@ -13,3 +13,7 @@ export type {
   MenubarItemProps,
   MenubarItemExposes,
 } from '@proto.ui/prototypes-base/menubar';
+
+
+export { MENUBAR_PROJECTED_STYLES } from './visual';
+export type * from './types';
