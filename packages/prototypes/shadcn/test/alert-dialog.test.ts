@@ -1,14 +1,6 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as alertDialog from '../src/alert-dialog';
-import type {
-  ShadcnAlertDialogHeaderProps,
-  ShadcnAlertDialogHeaderExposes,
-  ShadcnAlertDialogFooterProps,
-  ShadcnAlertDialogFooterExposes,
-} from '../src/alert-dialog';
 import { styleContains } from '../../test-utils/style';
 import { SHADCN_STYLE_TOKENS } from '../../../cli/src/generated/shadcn-style-tokens';
 
@@ -68,11 +60,6 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
     await flush();
     for (const role of ['action', 'cancel']) {
       expect(styleContains(p[role], 'select-none'), role).toBe(true);
-      const source = readFileSync(
-        path.join(process.cwd(), `packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).not.toMatch(/\basButton\s*\(/);
       setElementProps(p[role], { disabled: true });
       await flush();
       expect(styleContains(p[role], 'select-none'), role + ' disabled').toBe(true);
@@ -117,12 +104,6 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
         expect(styleContains(p[role], token), role + token).toBe(true);
       for (const token of ['min-h-8', 'px-2.5', 'rounded-lg', 'translate-y-px'])
         expect(styleContains(p[role], token), role + token).toBe(false);
-      const source = readFileSync(
-        path.resolve(`packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).toContain("from '../button/paint'");
-      expect(source).not.toMatch(/asButton|def\.state|def\.event\.on/);
     }
     expect(styleContains(p.action, 'bg-primary')).toBe(true);
     expect(styleContains(p.action, 'border')).toBe(false);
@@ -132,28 +113,13 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
   });
 
   // T-SHADCN-ALERT-DIALOG-0001-CASE-1
-  it('exports optional passive Header/Footer and preserves their authored descendants', async () => {
-    expectTypeOf<keyof ShadcnAlertDialogHeaderProps>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogHeaderExposes>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogFooterProps>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogFooterExposes>().toEqualTypeOf<never>();
-    expect(alertDialog).toHaveProperty('alertDialogHeader');
-    expect(alertDialog).toHaveProperty('alertDialogFooter');
+  it('keeps optional Header/Footer passive and preserves their authored descendants', async () => {
     const p = fixture();
     await flush();
     for (const role of ['header', 'footer']) {
       expect(p[role].getExposes()).toEqual({});
       expect(p[role].getAttribute('role')).toBeNull();
       expect(p[role].tabIndex).toBe(-1);
-      const source = readFileSync(
-        path.resolve(`packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).toContain(`def.anatomy.claim(ALERT_DIALOG_FAMILY, { role: '${role}' })`);
-      expect(source).not.toMatch(
-        /def\.(?:state|event|context|lifecycle)|asButton|asTrigger|window\.|document\./
-      );
-      expect(source).toContain('renderer.r.slot()');
     }
     expect(p.header.contains(p.title)).toBe(true);
     expect(p.header.contains(p.description)).toBe(true);

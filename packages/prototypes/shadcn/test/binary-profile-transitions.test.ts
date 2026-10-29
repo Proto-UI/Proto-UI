@@ -65,6 +65,20 @@ function focusVisible(target: HTMLElement) {
   document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
   target.focus();
 }
+// Preserve the producer's declarations and match its selectors against the
+// actual host. Lowered dark/state rules need not rewrite their token on change.
+function matchingBackgrounds(target: Element) {
+  const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
+  return [...renderProtoStyleTokenCss(tokens).matchAll(/([^{}]+)\{([^{}]+)\}/g)]
+    .filter(([, selectors, body]) =>
+      body.includes('background-color:') &&
+      selectors.split(',\n').some((selector) => {
+        const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
+        return !!required && tokens.includes(required) && target.matches(selector.trim());
+      })
+    )
+    .flatMap(([, , body]) => [...body.matchAll(/background-color:\s*([^;]+);/g)].map((m) => m[1]));
+}
 const sheet = document.createElement('style');
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
@@ -278,11 +292,12 @@ describe('source-bound binary profiles retain Base ownership', () => {
     await settle();
     const checked = root.getExposes().checked;
     expect(styleContains(root, 'bg-input')).toBe(true);
+    expect(matchingBackgrounds(thumb)).not.toContain('var(--pui-foreground)');
     document.documentElement.dataset.theme = 'dark';
     await settle();
     expect(styleContains(root, 'bg-input/80')).toBe(true);
     expect(styleContains(root, 'bg-input')).toBe(false);
-    expect(styleContains(thumb, 'bg-foreground')).toBe(true);
+    expect(matchingBackgrounds(thumb)).toContain('var(--pui-foreground)');
     setElementProps(scope, { styleProfile: 'luma' });
     await settle();
     expect(styleContains(root, 'bg-input/90')).toBe(true);
@@ -290,7 +305,7 @@ describe('source-bound binary profiles retain Base ownership', () => {
     expect(styleContains(thumb, 'bg-clip-padding')).toBe(false);
     document.documentElement.dataset.theme = 'light';
     await settle();
-    expect(styleContains(thumb, 'bg-foreground')).toBe(false);
+    expect(matchingBackgrounds(thumb)).not.toContain('var(--pui-foreground)');
     expect(styleContains(thumb, 'bg-clip-padding')).toBe(true);
     expect(root.getExposes().checked).toBe(checked);
     expect(checked.get()).toBe(false);

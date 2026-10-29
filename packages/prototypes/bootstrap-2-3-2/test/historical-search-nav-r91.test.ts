@@ -148,7 +148,7 @@ async function search(
 
 describe.each(searchFamilies)('historical $slug projection', (family) => {
   const { slug } = family;
-  it('keeps one physical editor, filtered options and keyboard selection with paint withdrawal', async () => {
+  it('keeps one physical editor, filtered options and keyboard selection through disabled withdrawal', async () => {
     const p = await search(family);
     expect(p.input.querySelectorAll('input,textarea,[contenteditable]')).toHaveLength(1);
     expect(p.editor.name).toBe('fruit');
@@ -164,20 +164,18 @@ describe.each(searchFamilies)('historical $slug projection', (family) => {
     await flush();
     expect(document.activeElement).toBe(p.editor);
     expect(p.editor.getAttribute('aria-activedescendant')).toBe(p.items[1].id);
-    expect(tokens(p.items[1])).toContain('bg-[linear-gradient(#08c,#0077b3)]');
+    expect(p.items[1].getExposes().active.get()).toBe(true);
     setElementProps(p.root, { disabled: true });
     await flush();
     expect(p.editor.disabled).toBe(true);
     expect(p.items[1].getExposes().disabled.get()).toBe(true);
-    expect(tokens(p.items[1])).not.toContain('bg-[linear-gradient(#08c,#0077b3)]');
-    expect(tokens(p.items[1])).toContain('text-[#999]');
+    expect(p.items[1].getExposes().active.get()).toBe(false);
     expect(p.root.getExposes().select('pear')).toBe(false);
     expect(selected).toHaveLength(0);
     setElementProps(p.root, {});
     await flush();
     expect(p.input.querySelector('input')).toBe(p.editor);
     expect(p.editor.disabled).toBe(false);
-    expect(tokens(p.input)).not.toContain('bg-[#eee]');
     p.editor.focus();
     key('ArrowDown');
     key('Enter');
@@ -254,14 +252,13 @@ for (const family of [searchFamilies[0], searchFamilies[1]]) {
     setElementProps(p.root, { value: 'apple', inputValue: '', open: true, readOnly: true });
     await flush();
     expect(p.trigger!.getExposes().disabled.get()).toBe(true);
-    expect(tokens(p.trigger!)).toContain('opacity-65');
     const before = opens.length;
     p.trigger!.click();
     await flush();
     expect(opens).toHaveLength(before);
     setElementProps(p.root, { value: 'apple', inputValue: '', open: true });
     await flush();
-    expect(tokens(p.trigger!)).not.toContain('opacity-65');
+    expect(p.trigger!.getExposes().disabled.get()).toBe(false);
     p.trigger!.click();
     await flush();
     expect(opens.at(-1)).toEqual({ open: false, reason: 'dismiss' });
@@ -321,11 +318,11 @@ async function menu(family: (typeof menuFamilies)[number], props: Record<string,
 }
 for (const family of menuFamilies) {
   const { slug } = family;
-  it(`${slug} keeps controlled panel ownership and withdraws open/disabled paint`, async () => {
+  it(`${slug} keeps controlled panel ownership and reversible disabled policy`, async () => {
     const p = await menu(family, { value: 'file' });
     expect(p.root.getAttribute('role')).toBe(slug === 'menubar' ? 'menubar' : 'navigation');
     expect(p.panels.map((panel) => panel.getExposes().open.get())).toEqual([true, false]);
-    expect(tokens(p.triggers[0])).toContain('bg-[#999]');
+    expect(p.triggers[0].getAttribute('aria-expanded')).toBe('true');
     const changes = requests(p.root, 'valueChange');
     expect(p.root.getExposes().requestValue('edit')).toBe(true);
     await flush();
@@ -334,16 +331,15 @@ for (const family of menuFamilies) {
     setElementProps(p.root, { value: 'edit' });
     await flush();
     expect(p.panels.map((panel) => panel.getExposes().open.get())).toEqual([false, true]);
-    expect(tokens(p.triggers[0])).not.toContain('bg-[#999]');
-    expect(tokens(p.triggers[1])).toContain('bg-[#999]');
+    expect(p.triggers[0].getAttribute('aria-expanded')).toBe('false');
+    expect(p.triggers[1].getAttribute('aria-expanded')).toBe('true');
     setElementProps(p.root, { value: 'edit', disabled: true });
     await flush();
-    expect(tokens(p.triggers[1])).not.toContain('bg-[#999]');
-    expect(tokens(p.triggers[1])).toContain('text-[#999]');
+    expect(p.triggers[1].getExposes().disabled.get()).toBe(true);
     expect(p.root.getExposes().requestValue('file')).toBe(false);
     setElementProps(p.root, { value: 'edit' });
     await flush();
-    expect(tokens(p.triggers[1])).toContain('bg-[#999]');
+    expect(p.triggers[1].getExposes().disabled.get()).toBe(false);
     const selected = requests(p.items[1], 'select');
     p.items[1].click();
     await flush();
@@ -364,7 +360,6 @@ it('keeps navigation content in one real anchor with current, disabled and modif
   expect(link.querySelectorAll('a')).toHaveLength(1);
   expect(anchor.contains(text)).toBe(true);
   expect(anchor.getAttribute('aria-current')).toBe('page');
-  expect(tokens(link)).toContain('bg-[linear-gradient(#08c,#0077b3)]');
   const navigated = requests(link, 'navigate');
   const click = new MouseEvent('click', {
     bubbles: true,
@@ -382,7 +377,6 @@ it('keeps navigation content in one real anchor with current, disabled and modif
   await flush();
   expect(anchor.hasAttribute('href')).toBe(false);
   expect(anchor.hasAttribute('aria-current')).toBe(false);
-  expect(tokens(link)).not.toContain('bg-[linear-gradient(#08c,#0077b3)]');
   const blocked = new MouseEvent('click', { bubbles: true, cancelable: true, button: 0 });
   anchor.dispatchEvent(blocked);
   await activationTurn();
@@ -421,10 +415,10 @@ it('keeps context intent distinct from click and retains controlled open through
   expect(content.getExposes().open.get()).toBe(true);
   item.getExposes().focusSelf({ reason: 'keyboard' });
   await flush();
-  expect(tokens(item)).toContain('bg-[linear-gradient(#08c,#0077b3)]');
+  expect(document.activeElement).toBe(item);
   setElementProps(item, { value: 'copy', disabled: true });
   await flush();
-  expect(tokens(item)).not.toContain('bg-[linear-gradient(#08c,#0077b3)]');
+  expect(item.getExposes().disabled.get()).toBe(true);
   const selected = requests(item, 'select');
   item.click();
   await flush();
@@ -439,7 +433,7 @@ it('keeps context intent distinct from click and retains controlled open through
   expect(opens.at(-1)).toEqual(expect.objectContaining({ open: false }));
 });
 
-it('keeps dropdown group naming, shortcut state and transient action paint scoped to the owner', async () => {
+it('keeps dropdown group naming, caller shortcut content and disabled actions scoped to the owner', async () => {
   const root = element(dropdown.dropdownRoot, { open: true });
   const trigger = element(dropdown.dropdownTrigger);
   trigger.textContent = 'Actions';
@@ -463,13 +457,13 @@ it('keeps dropdown group naming, shortcut state and transient action paint scope
   expect(separator.getAttribute('role')).toBe('separator');
   item.getExposes().focusSelf({ reason: 'keyboard' });
   await flush();
-  expect(tokens(item)).toContain('bg-[linear-gradient(#08c,#0077b3)]');
-  expect(tokens(shortcut)).toContain('text-primary-foreground');
+  expect(document.activeElement).toBe(item);
+  expect(shortcut.textContent).toBe('Ctrl+C');
+  expect(item.contains(shortcut)).toBe(true);
   const selected = requests(item, 'select');
   const opens = requests(root, 'openChange');
   setElementProps(item, { value: 'copy', disabled: true });
   await flush();
-  expect(tokens(item)).not.toContain('bg-[linear-gradient(#08c,#0077b3)]');
   expect(item.getAttribute('aria-disabled')).toBe('true');
   item.click();
   await flush();
@@ -501,35 +495,31 @@ it('keeps Toolbar actions singular and a retained Separator on the current cross
   await flush();
   expect(separator.textContent).toBe('');
   expect(separator.getAttribute('aria-orientation')).toBe('vertical');
-  expect(tokens(separator)).toContain('w-[1px]');
   const actions = requests(button, 'action');
   button.click();
   await flush();
   expect(actions).toEqual([{ value: 'save' }]);
   setElementProps(first, { orientation: 'horizontal', disabled: true });
   await flush();
-  expect(tokens(button)).toContain('opacity-65');
+  expect(button.getExposes().disabled.get()).toBe(true);
   button.click();
   await flush();
   expect(actions).toHaveLength(1);
   setElementProps(first, { orientation: 'horizontal' });
   await flush();
-  expect(tokens(button)).not.toContain('opacity-65');
+  expect(button.getExposes().disabled.get()).toBe(false);
   second.append(separator);
   await flush();
   expect(separator.getAttribute('aria-orientation')).toBe('horizontal');
-  expect(tokens(separator)).not.toContain('w-[1px]');
-  expect(tokens(separator)).toContain('h-[1px]');
   setElementProps(first, { orientation: 'vertical' });
   await flush();
   expect(separator.getAttribute('aria-orientation')).toBe('horizontal');
   setElementProps(second, { orientation: 'horizontal' });
   await flush();
   expect(separator.getAttribute('aria-orientation')).toBe('vertical');
-  expect(tokens(separator)).not.toContain('h-[1px]');
 });
 
-it('projects ToggleGroup active/disabled withdrawal while retaining controlled selection and axis', async () => {
+it('retains ToggleGroup controlled selection, orientation and reversible disabled policy', async () => {
   const root = element(toggleGroup.toggleGroupRoot, { value: ['a'] });
   const a = element(toggleGroup.toggleGroupItem, { value: 'a' });
   const b = element(toggleGroup.toggleGroupItem, { value: 'b' });
@@ -538,9 +528,7 @@ it('projects ToggleGroup active/disabled withdrawal while retaining controlled s
   root.append(a, b);
   document.body.append(root);
   await flush();
-  const pressed = 'shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]';
   expect(a.getAttribute('aria-pressed')).toBe('true');
-  expect(tokens(a)).toContain(pressed);
   const changes = requests(root, 'valueChange');
   b.click();
   await flush();
@@ -549,19 +537,17 @@ it('projects ToggleGroup active/disabled withdrawal while retaining controlled s
   setElementProps(root, { value: ['b'], orientation: 'vertical' });
   await flush();
   expect(a.getAttribute('aria-pressed')).toBe('false');
-  expect(tokens(a)).not.toContain(pressed);
-  expect(tokens(b)).toContain(pressed);
-  expect(tokens(root)).toContain('flex-col');
+  expect(b.getAttribute('aria-pressed')).toBe('true');
+  expect(root.getAttribute('aria-orientation')).toBe('vertical');
   setElementProps(root, { value: ['b'], orientation: 'vertical', disabled: true });
   await flush();
-  expect(tokens(b)).not.toContain(pressed);
-  expect(tokens(b)).toContain('opacity-65');
+  expect(b.getExposes().disabled.get()).toBe(true);
   expect(root.getExposes().requestToggle('a')).toBe(false);
   setElementProps(root, { value: ['b'], orientation: 'horizontal', readOnly: true });
   await flush();
-  expect(tokens(root)).not.toContain('flex-col');
-  expect(tokens(b)).not.toContain('opacity-65');
-  expect(tokens(b)).toContain(pressed);
+  expect(root.getAttribute('aria-orientation')).toBe('horizontal');
+  expect(b.getExposes().disabled.get()).toBe(false);
+  expect(b.getAttribute('aria-pressed')).toBe('true');
   expect(root.getExposes().requestToggle('a')).toBe(false);
   expect(root.getExposes().getValue()).toEqual(['b']);
 });

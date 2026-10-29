@@ -19,6 +19,7 @@ export type ProjectionComponentId =
   | 'field'
   | 'label'
   | 'text'
+  | 'surface'
   | 'checkbox'
   | 'input'
   | 'radio-group'
@@ -62,6 +63,7 @@ const REQUIRED_PART_IDS: Readonly<Record<ProjectionComponentId, readonly string[
   field: ['root', 'label', 'control', 'description', 'error', 'validity'],
   label: ['root'],
   text: ['root'],
+  surface: ['root'],
   button: ['root'],
   toggle: ['root'],
   switch: ['root', 'thumb'],
@@ -108,6 +110,12 @@ const SHADCN_MANIFEST = {
   themeArtifactId: 'website-shadcn-theme',
   themeInputId: 'website-root-computed-pui-theme',
   families: {
+    surface: {
+      baseFamilyId: 'P-BASE-SURFACE',
+      recipeId: 'demo-shadcn-surface',
+      recipePrototypeIds: ['shadcn-surface-root'],
+      parts: { root: { basePrototypeId: 'P-BASE-SURFACE', prototypeId: 'shadcn-surface-root' } },
+    },
     card: {
       baseFamilyId: null,
       recipeId: 'demo-shadcn-card',
@@ -1053,6 +1061,14 @@ const BOOTSTRAP_232_MANIFEST = {
   themeInputId: 'website-bootstrap-2-3-2-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    surface: {
+      baseFamilyId: 'P-BASE-SURFACE',
+      recipeId: 'demo-bootstrap-2-3-2-surface',
+      recipePrototypeIds: ['bootstrap-2-3-2-surface-root'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-SURFACE', prototypeId: 'bootstrap-2-3-2-surface-root' },
+      },
+    },
     text: {
       baseFamilyId: 'P-BASE-TEXT',
       recipeId: 'demo-bootstrap-2-3-2-text',
@@ -1412,6 +1428,14 @@ const LIQUID_GLASS_MANIFEST = {
   themeInputId: 'website-liquid-glass-theme-mode',
   // Partial by design: no missing kind may borrow an implementation.
   families: {
+    surface: {
+      baseFamilyId: 'P-BASE-SURFACE',
+      recipeId: 'demo-liquid-glass-surface',
+      recipePrototypeIds: ['liquid-glass-surface-root'],
+      parts: {
+        root: { basePrototypeId: 'P-BASE-SURFACE', prototypeId: 'liquid-glass-surface-root' },
+      },
+    },
     text: {
       baseFamilyId: 'P-BASE-TEXT',
       recipeId: 'demo-liquid-glass-text',

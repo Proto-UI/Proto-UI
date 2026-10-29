@@ -4,10 +4,7 @@ title: Bootstrap historical overlays and collections coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: AlertDialog, Popover, Carousel, Progress, Meter, Calendar, DatePicker, DataTable, Tree and Toast coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-HISTORICAL-OVERLAYS-0001-CASE-PROTOCOLS

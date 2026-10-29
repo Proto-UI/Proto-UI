@@ -6,12 +6,12 @@ import type { LiquidGlassSelectViewportProps } from './types';
 export default definePrototype<LiquidGlassSelectViewportProps>({
   name: 'liquid-glass-select-viewport',
   setup(def) {
-    asSelectViewport();
+    const inherited = asSelectViewport();
     // The complete-composition scrollport. Space inside keeps item outlines
     // from being clipped, matching the withdrawn legacy Content padding.
     def.feedback.style.use(
       tw('relative flex-1 min-w-0 min-h-0 overflow-x-hidden overflow-y-auto p-2')
     );
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

@@ -7,8 +7,8 @@ import type { Bootstrap232SelectItemTextProps } from './types';
 export default definePrototype<Bootstrap232SelectItemTextProps>({
   name: 'bootstrap-2-3-2-select-item-text',
   setup(def) {
-    asSelectItemText();
+    const inherited = asSelectItemText();
     def.feedback.style.use(tw('min-w-0 whitespace-normal wrap-anywhere'));
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

@@ -1,4 +1,4 @@
-import { tw, type DefHandle, type RendererHandle, type State } from '@proto.ui/core';
+import { tw, type DefHandle, type RenderFn, type State } from '@proto.ui/core';
 import type { SelectTriggerAsHookContract } from '@proto.ui/prototypes-base/select';
 import type { Bootstrap232SelectTriggerProps } from './types';
 import { setupButtonVisual } from '../button/visual';
@@ -14,7 +14,7 @@ export function setupSelectTriggerVisual(
   def: DefHandle<Bootstrap232SelectTriggerProps>,
   state: SelectTriggerAsHookContract['state'],
   invalid?: State<boolean>
-) {
+): RenderFn {
   setupButtonVisual(def, state);
   // The custom Select keeps long labels readable; its historical .btn paint
   // and 2px caret spacing retain the pinned pixel units.
@@ -27,7 +27,7 @@ export function setupSelectTriggerVisual(
       intent: (i) => i.feedback.style.use(tw('border-destructive text-destructive')),
     });
   }
-  return (renderer: RendererHandle<any>) => [
+  return (renderer) => [
     renderer.r.slot(),
     renderer.el(
       'span',
@@ -37,7 +37,7 @@ export function setupSelectTriggerVisual(
         ),
       },
       renderer.svg.root(
-        { viewBox: '0 0 8 4', width: 8, height: 4, fill: 'currentColor' },
+        { viewBox: '0 0 8 4', 'aria-hidden': 'true', width: 8, height: 4, fill: 'currentColor' },
         renderer.svg.path({ d: 'M0 0h8L4 4z' })
       )
     ),

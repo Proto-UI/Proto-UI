@@ -41,7 +41,7 @@ export default definePrototype<LiquidGlassSliderValuesThumbProps, SliderValuesTh
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed shadow-none')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
     });
     def.feedback.material.declare({
       version: 2,

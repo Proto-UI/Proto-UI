@@ -4,47 +4,26 @@ title: Bootstrap 2.3.2 Command projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Command family over P-BASE-COMMAND with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Input/Content/Item/Empty preserve the inline Base Command: no overlay and no trigger entry is invented; menu vocabulary is Proto-owned over pinned menu recipes.
-
-
+    en: 'The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Input/Content/Item/Empty preserve the inline Base Command: no overlay and no trigger entry is invented; menu vocabulary is Proto-owned over pinned menu recipes.'
 criteria:
   - id: P-BOOTSTRAP-2-3-2-COMMAND-BASE
     text:
-      en: >-
-        Invoke asCommand* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asCommand* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-COMMAND-VISUAL
     text:
-      en: >-
-        Root/Input/Content/Item/Empty preserve the inline Base Command: no overlay and no trigger entry is invented; menu vocabulary is Proto-owned over pinned menu recipes.
-
-
+            en: 'Root/Input/Content/Item/Empty preserve the inline Base Command: no overlay and no trigger entry is invented; menu vocabulary is Proto-owned over pinned menu recipes.'
   - id: P-BOOTSTRAP-2-3-2-COMMAND-EXTENSION
     text:
-      en: >-
-        The inline Command is a Proto extension; Bootstrap 2.3.2 had no command-palette widget.
-
-
+            en: The inline Command is a Proto extension; Bootstrap 2.3.2 had no command-palette widget.
   - id: P-BOOTSTRAP-2-3-2-COMMAND-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-COMMAND-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

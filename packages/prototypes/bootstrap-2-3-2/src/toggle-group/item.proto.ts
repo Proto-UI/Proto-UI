@@ -24,12 +24,21 @@ export default definePrototype<ToggleGroupItemProps, ToggleGroupItemExposes>({
     const last = def.state.bool('toggleGroupVisualLast', false);
     const hasPrevious = def.state.bool('toggleGroupVisualPrevious', false);
     const axis = def.state.string('toggleGroupVisualAxis', 'horizontal');
+    const syncAxis = (run: RunHandle<ToggleGroupItemProps>) => {
+      axis.set(
+        run.context.tryRead(TOGGLE_GROUP_VISUAL_AXIS)?.orientation ?? 'horizontal',
+        'reason: joined group observes Base-owned axis'
+      );
+    };
     const withdrawEdges = () => {
       first.set(false, 'reason: joined group membership withdrawn');
       last.set(false, 'reason: joined group membership withdrawn');
       hasPrevious.set(false, 'reason: joined group membership withdrawn');
     };
     const syncOrder = (run: RunHandle<ToggleGroupItemProps>) => {
+      // A logical move changes both the order domain and its axis provider,
+      // even when neither Root has published a new orientation value.
+      syncAxis(run);
       const index = run.anatomy.order.indexOfSelf(TOGGLE_GROUP_FAMILY, 'item');
       first.set(index === 0, 'reason: joined group first logical item');
       last.set(
@@ -45,15 +54,8 @@ export default definePrototype<ToggleGroupItemProps, ToggleGroupItemExposes>({
     def.lifecycle.onMounted(syncOrder);
     def.lifecycle.onUpdated(syncOrder);
     def.lifecycle.onUnmounted(withdrawEdges);
-    const syncAxis = (run: RunHandle<ToggleGroupItemProps>) => {
-      axis.set(
-        run.context.tryRead(TOGGLE_GROUP_VISUAL_AXIS)?.orientation ?? 'horizontal',
-        'reason: joined group observes Base-owned axis'
-      );
-    };
     def.context.trySubscribe(TOGGLE_GROUP_VISUAL_AXIS, syncAxis);
     def.lifecycle.onCreated(syncAxis);
-    def.lifecycle.onMounted(syncAxis);
     def.feedback.style.use(
       tw(
         'relative inline-flex min-w-0 items-center justify-center rounded-none border px-[12px] py-[4px] text-[14px] font-normal leading-[20px] text-paint-[#333_0_1px_1px_rgb(255_255_255/75%)] border-[rgb(0_0_0/10%)_rgb(0_0_0/10%)_#b3b3b3_rgb(0_0_0/10%)] whitespace-nowrap select-none cursor-pointer'

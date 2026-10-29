@@ -7,7 +7,7 @@ import { setupSelectStyle } from './style';
 export default definePrototype<ShadcnSelectViewportProps>({
   name: 'shadcn-select-viewport',
   setup(def) {
-    asSelectViewport();
+    const inherited = asSelectViewport();
     const style = setupSelectStyle(def);
     const position = def.state.string('selectViewportPosition', 'item-aligned');
     def.context.subscribe(SELECT_VISUAL, (_run, next) =>
@@ -37,5 +37,6 @@ export default definePrototype<ShadcnSelectViewportProps>({
           )
         ),
     });
+    return inherited.render;
   },
 });

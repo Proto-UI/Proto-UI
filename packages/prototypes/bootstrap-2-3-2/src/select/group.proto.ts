@@ -7,7 +7,6 @@ import type { Bootstrap232SelectGroupProps, Bootstrap232SelectGroupExposes } fro
 export default definePrototype<Bootstrap232SelectGroupProps, Bootstrap232SelectGroupExposes>({
   name: 'bootstrap-2-3-2-select-group',
   setup() {
-    asSelectGroup();
-    return (renderer) => [renderer.r.slot()];
+    return asSelectGroup().render;
   },
 });

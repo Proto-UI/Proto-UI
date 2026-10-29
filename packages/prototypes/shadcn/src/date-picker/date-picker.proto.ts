@@ -74,7 +74,9 @@ export const datePickerRoot = definePrototype<ShadcnDatePickerRootProps, DatePic
         run.context.update(DATE_PICKER_PRESENTATION, { open: next });
       }
     };
-    open.watch(syncOpen);
+    open.watch((run, event) => {
+      if (event.type === 'next') syncOpen(run);
+    });
     def.lifecycle.onCreated(syncOpen);
     def.lifecycle.onMounted(syncOpen);
     setupShadcnStyleScope(def);

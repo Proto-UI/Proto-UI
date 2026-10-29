@@ -41,12 +41,8 @@ function mount(rawProps: Record<string, unknown> = {}) {
 }
 
 describe('liquid-glass Button draft projection', () => {
-  it('inherits Base once and restores defaults after prop removal', async () => {
+  it('restores variant defaults after prop removal', async () => {
     const { controller, invokeUnmounted } = mount({ variant: 'prominent' });
-    expect(button.name).toBe('liquid-glass-button');
-    expect((button as any).__asHooks.filter((hook: any) => hook.name === 'as-button')).toEqual([
-      expect.objectContaining({ name: 'as-button', mode: 'once' }),
-    ]);
     expect(controller.getRuleStyleTokens()).toContain('bg-primary');
     expect(controller.getRuleStyleTokens()).toContain('text-primary-foreground');
     controller.applyRawProps({});

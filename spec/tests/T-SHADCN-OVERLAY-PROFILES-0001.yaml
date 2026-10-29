@@ -4,21 +4,18 @@ title: Shadcn overlay profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Dialog, Alert Dialog, Drawer, Popover, Hover Card, Tooltip and Toast nine-profile paint on real consumers.
 cases:
   - id: T-SHADCN-OVERLAY-PROFILES-0001-CASE-PROFILES
     title: Nine profile cases preserve open/focus/presence owners and unstyled command projections
     covers:
-      - P-SHADCN-DIALOG-ADMISSION
+      - P-SHADCN-DIALOG-BASE-INHERITANCE
       - P-SHADCN-ALERT-DIALOG-ADMISSION
       - P-SHADCN-DRAWER-ADMISSION
       - P-SHADCN-POPOVER-ADMISSION
-      - P-SHADCN-HOVER-CARD-ADMISSION
-      - P-SHADCN-TOOLTIP-ADMISSION
+      - P-SHADCN-HOVER-CARD-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-BASE-INHERITANCE
       - P-SHADCN-TOAST-ADMISSION
     expectation: overlay-profile-paint-preserves-owners
   - id: T-SHADCN-OVERLAY-PROFILES-0001-CASE-DRAWER

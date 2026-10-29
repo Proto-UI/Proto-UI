@@ -4,16 +4,13 @@ title: Bootstrap Tabs draft projection coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Historical nav recipe reconciliation and passive Indicator facts.
 cases:
   - id: T-BOOTSTRAP-2-3-2-TABS-0001-CASE-RECIPE
     title: Top-nav pixel units, palette and active/disabled paint preserve Base selection
     covers:
-      - P-BOOTSTRAP-2-3-2-TABS-BASE
+      - P-BOOTSTRAP-2-3-2-TABS-BASE-INHERITANCE
     expectation: historical-tabs-recipe
   - id: T-BOOTSTRAP-2-3-2-TABS-0001-CASE-INDICATOR
     title: Semantic-only Indicator derives facts without owning selection or geometry

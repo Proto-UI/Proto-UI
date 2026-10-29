@@ -592,6 +592,17 @@ describe('source-bound layout profiles preserve inherited owners', () => {
     setElementProps(handle, { withHandle: false });
     await settle();
     expect((handle.shadowRoot ?? handle).querySelector('div')).toBeNull();
+    expect(root.getExposes().value).toBe(value);
+    expect(handle.getAttribute('role')).toBe('separator');
+    expect(document.activeElement).toBe(handle);
+    setElementProps(handle, { withHandle: true });
+    await settle();
+    expect(paint(handle).getAttribute('role')).toBeNull();
+    expect(paint(handle).getAttribute('tabindex')).toBeNull();
+    expect(root.getExposes().value).toBe(value);
+    expect(first.getExposes().size.get()).toBe(70);
+    expect(second.getExposes().size.get()).toBe(30);
+    expect(document.activeElement).toBe(handle);
   });
 
   it('never rearms Message follow on appearance/count updates and routes Jump through the actual Scroll Surface', async () => {

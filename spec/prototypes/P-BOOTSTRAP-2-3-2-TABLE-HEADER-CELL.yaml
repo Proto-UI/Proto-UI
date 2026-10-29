@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Table Header Cell passive Table projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap passive Table part over the exact P-BASE-TABLE-HEADER-CELL definition with the pinned .table recipe.
 statement:
-  en: >-
-    The Prototype composes the exact Base table-header-cell prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint.
-
-
+    en: The Prototype composes the exact Base table-header-cell prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL-BASE
     text:
-      en: >-
-        Compose the exact Base base-table-header-cell prototype once through the public defineAsHook({...base-table-header-cell, name}) pattern and preserve every inherited owner, module, render result, props/exposes and lifecycle.
-
-
+            en: 'Compose the exact Base base-table-header-cell prototype once through the public defineAsHook({...base-table-header-cell, name}) pattern and preserve every inherited owner, module, render result, props/exposes and lifecycle.'
   - id: P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL-VISUAL
     text:
-      en: >-
-        Header cells are bold with column headers bottom-aligned, 8px padding and the #ddd 1px top rule. Spans and ordered relationships stay with Table Structure.
-
-
+            en: "Header cells are bold with 8px padding and #ddd rules; column headings bottom-align, row headings top-align. Only a column HeaderCell at the one-based Table Structure row 1 omits the top border. Spans and ordered relationships stay with Table Structure; no thead/tbody owner is invented."
   - id: P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-TABLE-HEADER-CELL-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

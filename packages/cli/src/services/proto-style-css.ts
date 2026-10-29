@@ -123,6 +123,26 @@ const colorVars = new Set([
 const staticUtilities: Record<string, string[]> = {
   // Source-bound projection vocabulary; these are ordinary layout/paint
   // properties, not inferred component structure or host behavior.
+  '-mb-4': ['margin-bottom: -1rem;'],
+  '-mx-4': ['margin-inline: -1rem;'],
+  'max-w-max': ['max-width: max-content;'],
+  'w-max': ['width: max-content;'],
+  'max-w-xs': ['max-width: 20rem;'],
+  'scroll-py-1': ['scroll-padding-block: 0.25rem;'],
+  'scroll-py-1.5': ['scroll-padding-block: 0.375rem;'],
+  'shadow-xl': [
+    '--pui-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);',
+    ...composedShadow(),
+  ],
+  'transition-shadow': [
+    'transition-property: box-shadow;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
+  'ease-linear': ['transition-timing-function: linear;'],
+  'list-none': ['list-style-type: none;'],
+  'opacity-80': ['opacity: 0.8;'],
+  'text-black': ['color: #000;'],
   'box-content': ['box-sizing: content-box;'],
   'float-left': ['float: left;'],
   'border-[3px]': ['border-width: 3px;', 'border-style: solid;'],

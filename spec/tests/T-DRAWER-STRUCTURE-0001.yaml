@@ -31,9 +31,9 @@ cases:
       ]
     expectation: four-directions-invalid-retention-nested-isolation-read-only-and-terminal-cleanup
   - id: T-DRAWER-STRUCTURE-0001-CASE-INTERIOR
-    title: Supported interior recipe and actual demo spacing preserve explicit upstream gaps
+    title: Runtime Header/Footer layout and inherited Title paint follow the accepted side without replacing owners
     covers: [C-DRAWER-STRUCTURE-0001-FAMILY, C-DRAWER-STRUCTURE-0001-INTERIOR]
-    expectation: static-token-closure-and-real-header-footer-body-composition
+    expectation: runtime-header-footer-title-css-facts-and-four-side-edge-paint-preserve-root-owner-and-caller-nodes
 implementations:
   - id: drawer-structure-logical
     kind: runtime-test
@@ -51,16 +51,21 @@ implementations:
     consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-DIRECTION]
   - id: drawer-structure-source
     kind: runtime-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/drawer-structure.test.ts
     required: true
     consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-INTERIOR]
+    notes:
+      - The repaired test observes Header/Footer layout and inherited Title paint through actual source owners, then all four accepted-side border/corner transitions while retaining the same open Root and caller nodes. It replaces obsolete per-file token snapshots, not Base semantics.
+      - Runtime CSS declarations do not establish native layout, clipping or typography inheritance; exact-source execution remains pending.
   - id: drawer-structure-demo
     kind: runtime-test
     status: passing
     path: apps/www/src/content/docs/drawer-auto-demo.test.ts
     required: true
     consumesCases: [T-DRAWER-STRUCTURE-0001-CASE-INTERIOR]
+    notes:
+      - This existing mapping covers authored Header/Footer/body composition only, not the repaired source-owner four-side paint assertions or native layout, clipping and typography inheritance.
   - id: drawer-structure-native
     kind: runtime-test
     status: planned

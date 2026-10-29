@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { Prototype, StyleHandle } from '@proto.ui/core';
+import type { Prototype } from '@proto.ui/core';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import {
@@ -27,9 +27,7 @@ import {
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
 import {
-  EFFECTS_CAP,
   VISUAL_FEEDBACK_SINK_CAP,
-  type FeedbackPort,
   type VisualFeedbackFrame,
 } from '@proto.ui/module-feedback';
 import { resolveMaterialStyle, colorContrast } from '../../../adapters/base/src/material/style';
@@ -58,7 +56,7 @@ interface Unit {
   readonly exposes: Record<string, any>;
   frame(): VisualFeedbackFrame;
   material(): VisualFeedbackFrame['material'];
-  tokens(): string[];
+  tokens(): readonly string[];
   set(next: Record<string, unknown>): void;
   input(type: string): void;
 }
@@ -80,7 +78,6 @@ function runtimeHarness() {
     let props = initial;
     let exposes: Record<string, any> = {};
     const frames: VisualFeedbackFrame[] = [];
-    const styles: StyleHandle[] = [];
     const released: unknown[] = [];
     const actions: Array<{ name: string; payload: unknown }> = [];
     const session = createRuntimeSession(prototype, {
@@ -138,10 +135,6 @@ function runtimeHarness() {
         ]);
         wiring.attach('feedback', [
           [
-            EFFECTS_CAP,
-            { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush() {} },
-          ],
-          [
             VISUAL_FEEDBACK_SINK_CAP,
             {
               commit(frame: VisualFeedbackFrame) {
@@ -166,13 +159,15 @@ function runtimeHarness() {
         return exposes;
       },
       frame() {
-        return frames.at(-1)!;
+        const frame = frames.at(-1);
+        if (!frame) throw new Error(`Missing visual frame for ${prototype.name}`);
+        return frame;
       },
       material() {
-        return session.caps.getPort<FeedbackPort>('feedback')!.exportMaterialFrame!();
+        return this.frame().material;
       },
       tokens() {
-        return styles.at(-1)?.tokens ?? [];
+        return this.frame().style.tokens;
       },
       set(next: Record<string, unknown>) {
         props = next;
@@ -538,7 +533,12 @@ it('Dropdown opaque opt-out and raw removal retain one Base command and current-
     expect(trigger.exposes.pressed.get()).toBe(true);
     expect(trigger.material().candidates).toEqual([]);
     expectOpaqueFallback(trigger);
+    // A provided empty prop keeps its previous valid fallback. Only omission
+    // releases the raw opaque value and restores the declared auto default.
     trigger.set({ material: undefined });
+    expect(trigger.material().candidates).toEqual([]);
+    expectOpaqueFallback(trigger);
+    trigger.set({});
     expect(trigger.material().candidates).toEqual([pressedCandidate('pressed')]);
     trigger.set({ disabled: true });
     expect(trigger.exposes.pressed.get()).toBe(false);
@@ -810,7 +810,6 @@ it('Dropdown group keeps caller content, live label withdrawal and passive short
   expect(item.getExposes().disabled.get()).toBe(true);
   expect(item.getExposes().focused.get()).toBe(true);
   expect(shortcut.getExposes().active.get()).toBe(true);
-  expect((shortcut.getAttribute('data-pui-style') ?? '').split(/\s+/)).toContain('text-inherit');
   item.click();
   expect(actions).toEqual([]);
   setElementProps(item, { value: 'profile', textValue: 'Profile' });

@@ -18,7 +18,7 @@ export const liquidGlassTableCaption = definePrototype<TableCaptionProps, TableC
     const behavior = asLiquidGlassTableCaption();
     // Base owns the caption role within the nearest Table domain and the
     // authored slot. The family adds only secondary caption typography.
-    def.feedback.style.use(tw('min-w-0 max-w-full text-left text-sm text-muted-foreground'));
+    def.feedback.style.use(tw('table-caption min-w-0 max-w-full text-left text-sm text-muted-foreground'));
     return behavior.render;
   },
 });

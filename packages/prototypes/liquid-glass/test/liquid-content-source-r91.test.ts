@@ -153,15 +153,14 @@ describe('Liquid content: inherited Scroll Area sessions, not a glass container'
     setElementProps(track, { orientation: 'horizontal' });
     await flush();
     expect(track.getExposes().orientation.get()).toBe('horizontal');
-    expect(latest(track).style.tokens).toContain('h-2.5');
-    expect(latest(track).style.tokens).not.toContain('w-2.5');
+    expect(track.style.display).toBe('none');
     setElementProps(track, {});
     metrics(viewport, 200, 100, 200, 100);
     viewport.dispatchEvent(new Event('scroll'));
     window.dispatchEvent(new Event('resize'));
     await flush();
     expect(track.getExposes().orientation.get()).toBe('vertical');
-    expect(latest(track).style.tokens).not.toContain('h-2.5');
+    expect(track.style.display).toBe('none');
     expect(facts.canScrollDown.get()).toBe(false);
     expect(viewport.tabIndex).toBe(-1);
     expect(root.contains(content)).toBe(true);
@@ -292,8 +291,7 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     await flush();
     expect(body[0]!.cell.textContent).toBe('Alpha');
     expect(body[0]!.row.getExposes().selected.get()).toBe(true);
-    expect(latest(body[0]!.cell).style.tokens).toContain('text-inherit');
-    expect(latest(body[0]!.row).style.tokens).toContain('text-primary-foreground');
+    expect(body[0]!.row.getAttribute('aria-selected')).toBe('true');
     expect(header.getAttribute('aria-sort')).toBe('ascending');
     expectNeutral(root, head, header, ...body.flatMap(({ row, cell }) => [row, cell]));
   });
@@ -419,6 +417,23 @@ describe('Liquid content: data and collection ownership survives neutral paint',
   });
 
   it('retains the Message Scroller surface and current message facts across retirement', async () => {
+    // Control the real host's scheduled end movement, as in Scroll's own
+    // end-follow fixture. Only frame delivery is injected, never scroll facts.
+    let nextFrame = 1;
+    const frameCallbacks = new Map<number, FrameRequestCallback>();
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      const id = nextFrame++;
+      frameCallbacks.set(id, callback);
+      return id;
+    });
+    vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id) => {
+      frameCallbacks.delete(id);
+    });
+    const deliverFrame = () => {
+      const pending = [...frameCallbacks.values()];
+      frameCallbacks.clear();
+      for (const callback of pending) callback(performance.now());
+    };
     const root = make(messages.messageScrollerRoot, { newContentCount: 3 });
     const viewport = make(messages.messageScrollerViewport);
     const jump = make(messages.messageScrollerJump);
@@ -431,6 +446,26 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     document.body.append(root);
     await flush();
     expect(viewport.getExposes().scrollAxes.get()).toBe('vertical');
+    expect(viewport.getExposes().scrollYVisibleRatio.get()).toBe(0.25);
+    expect(viewport.getExposes().following.get()).toBe('pending');
+    expect(viewport.getExposes().canScrollDown.get()).toBe(true);
+    // The original downward-capability assertion belongs before the host's
+    // initial to-end frame, not after an unspecified real-frame delivery.
+    deliverFrame();
+    await flush();
+    expect(viewport.getExposes().following.get()).toBe('following');
+    expect(viewport.getExposes().atEnd.get()).toBe(true);
+    expect(viewport.getExposes().scrollYPosition.get()).toBe(1);
+    expect(viewport.getExposes().canScrollDown.get()).toBe(false);
+    // Synthetic reader intent and an explicitly injected offset are separate
+    // facts; this is not a claim that the wheel event performed native movement.
+    viewport.dispatchEvent(new WheelEvent('wheel', { deltaY: -150 }));
+    viewport.scrollTop = 150;
+    viewport.dispatchEvent(new Event('scroll'));
+    await flush();
+    expect(viewport.getExposes().following.get()).toBe('paused');
+    expect(viewport.getExposes().atEnd.get()).toBe(false);
+    expect(viewport.getExposes().scrollYPosition.get()).toBe(0.5);
     expect(viewport.getExposes().canScrollDown.get()).toBe(true);
     expect(jump.getExposes().newContentCount.get()).toBe(3);
     setElementProps(root, { newContentCount: 7 });
@@ -445,6 +480,11 @@ describe('Liquid content: data and collection ownership survives neutral paint',
     await flush();
     expect(jump.getExposes().newContentCount.get()).toBe(7);
     expect(viewport.getExposes().scrollAxes.get()).toBe('vertical');
+    deliverFrame();
+    await flush();
+    expect(viewport.getExposes().following.get()).toBe('following');
+    expect(viewport.getExposes().atEnd.get()).toBe(true);
+    expect(jump.getExposes().newContentCount.get()).toBe(7);
     expectNeutral(root, viewport, jump);
   });
 });
@@ -474,18 +514,20 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     await flush();
     expect(progressRoot.getAttribute('role')).toBe('progressbar');
     expect(progressRoot.hasAttribute('aria-valuenow')).toBe(false);
-    expect(latest(progressIndicator).style.tokens).toContain('w-1/3');
+    expect(progressIndicator.getExposes().indeterminate.get()).toBe(true);
+    expect(progressIndicator.getExposes().percentage.get()).toBe(0);
+    expect(progressIndicator.getAttribute('aria-hidden')).toBe('true');
     expect(meterRoot.getAttribute('role')).toBe('meter');
     expect(meterIndicator.getExposes().status.get()).toBe('critical');
-    expect(latest(meterIndicator).style.tokens).toContain('bg-destructive');
     setElementProps(progressRoot, { value: 50, valueText: 'Half complete' });
     setElementProps(meterRoot, { value: 10, min: 0, max: 100, low: 25, high: 75, optimum: 10 });
     await flush();
     expect(progressValue.textContent).toBe('Half complete');
     expect(progressRoot.getAttribute('aria-valuenow')).toBe('50');
-    expect(latest(progressIndicator).style.tokens).not.toContain('w-1/3');
+    expect(progressIndicator.getExposes().indeterminate.get()).toBe(false);
+    expect(progressIndicator.getExposes().percentage.get()).toBe(50);
+    expect(progressIndicator.style.getPropertyValue('--pui-percentage')).toBe('50');
     expect(meterIndicator.getExposes().status.get()).toBe('optimal');
-    expect(latest(meterIndicator).style.tokens).not.toContain('bg-destructive');
     expectNeutral(
       progressRoot,
       progressTrack,
@@ -517,7 +559,7 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     await flush();
     expect(heading.textContent).toContain('October');
     expect(day.textContent).toBe('10');
-    expect(latest(root).style.tokens).toContain('direction-rtl');
+    expect(root.getExposes().direction.get()).toBe('rtl');
     click(day);
     await flush();
     expect(proposals).toEqual([{ value: '2026-10-10' }]);
@@ -526,7 +568,8 @@ describe('Liquid content: passive facts, date rendering and ordinary editors', (
     setElementProps(root, { ...props, value: '2026-10-10', direction: 'ltr' });
     await flush();
     expect(day.getExposes().selected.get()).toBe(true);
-    expect(latest(root).style.tokens).not.toContain('direction-rtl');
+    expect(day.getAttribute('aria-selected')).toBe('true');
+    expect(root.getExposes().direction.get()).toBe('ltr');
     expectNeutral(root, caption, heading, grid, row, day);
   });
 

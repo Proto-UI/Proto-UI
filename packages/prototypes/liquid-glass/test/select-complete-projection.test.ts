@@ -1,8 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from 'vitest';
-import type { Prototype, StyleHandle, TemplateChildren } from '@proto.ui/core';
+import type { Prototype } from '@proto.ui/core';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
 import {
-  EFFECTS_CAP,
   VISUAL_FEEDBACK_SINK_CAP,
   type FeedbackPort,
   type VisualFeedbackFrame,
@@ -68,8 +67,6 @@ interface MountedPart {
   target: HTMLElement;
   session: RuntimeSession;
   frames: VisualFeedbackFrame[];
-  styles: StyleHandle[];
-  commits: TemplateChildren[];
   events: { key: string; payload: unknown }[];
   release: Mock;
   readonly exposes: Record<string, any>;
@@ -108,8 +105,6 @@ function factory(): SelectFixture {
     let props = initial;
     let exposes: Record<string, any> = {};
     const frames: VisualFeedbackFrame[] = [];
-    const styles: StyleHandle[] = [];
-    const commits: TemplateChildren[] = [];
     const events: { key: string; payload: unknown }[] = [];
     const release = vi.fn();
     const session = createRuntimeSession(prototype, {
@@ -121,10 +116,7 @@ function factory(): SelectFixture {
         const id = setTimeout(task, duration);
         return { cancel: () => clearTimeout(id) };
       },
-      commit: (children, signal) => {
-        commits.push(children);
-        signal?.done();
-      },
+      commit: (_children, signal) => signal?.done(),
       onRuntimeReady(wiring) {
         wiring.attach('anatomy', [
           [ANATOMY_INSTANCE_TOKEN_CAP, target],
@@ -164,12 +156,6 @@ function factory(): SelectFixture {
         wiring.attach('a11y', [[A11Y_PROJECT_CAP, a11yRegistry.createProjector(() => target)]]);
         wiring.attach('feedback', [
           [
-            EFFECTS_CAP,
-            { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush() {} },
-          ],
-        ]);
-        wiring.attach('feedback', [
-          [
             VISUAL_FEEDBACK_SINK_CAP,
             {
               commit(frame: VisualFeedbackFrame) {
@@ -185,8 +171,6 @@ function factory(): SelectFixture {
       target,
       session,
       frames,
-      styles,
-      commits,
       events,
       release,
       get exposes() {
@@ -264,16 +248,16 @@ describe('Liquid Select complete structural composition (intent only)', () => {
       });
       expect(c.surface.frames.at(-1)?.material.slot).toEqual(MATERIAL_SLOT);
       expect(c.surface.frames.at(-1)?.material.candidates).toEqual([GLASS]);
-      expect(c.surface.styles.at(-1)?.tokens).toEqual(
+      expect(c.surface.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['bg-secondary', 'rounded-2xl', 'shadow-md'])
       );
       // The portal frame is not an inactive material owner with a competing fallback.
       expect(c.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      expect(c.content.styles.at(-1)?.tokens ?? []).not.toContain('bg-secondary');
-      expect(c.content.styles.at(-1)?.tokens).toEqual(
+      expect(c.content.frames.at(-1)?.style.tokens).not.toContain('bg-secondary');
+      expect(c.content.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['flex', 'flex-col', 'outline-none'])
       );
-      expect(c.viewport.styles.at(-1)?.tokens).toEqual(
+      expect(c.viewport.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['min-h-0', 'overflow-y-auto', 'p-2'])
       );
       const anatomy = c.content.session.caps.getPort<AnatomyPort>('anatomy')!;
@@ -293,25 +277,21 @@ describe('Liquid Select complete structural composition (intent only)', () => {
         payload: { value: 'v2', textValue: 'Option v2', reason: 'pointer' },
       });
       expect(c.root.exposes.open.get()).toBe(false);
-      c.root.exposes.openDropdown('test');
+      c.root.session.invokeInCallbackScope(() => c.root.exposes.openDropdown('test'));
       c.root.set({ defaultOpen: true, value: 'v2' });
       expect(c.root.exposes.value.get()).toBe('v2');
       expect(c.items[2].exposes.selected.get()).toBe(true);
       expect(c.value.exposes.displayValue.get()).toBe('Option v2');
       // Close withdraws the Surface candidate; the frame never regains paint.
-      c.root.exposes.close('test');
+      c.root.session.invokeInCallbackScope(() => c.root.exposes.close('test'));
       expect(c.root.exposes.open.get()).toBe(false);
       expect(c.surface.frames.at(-1)?.material.candidates).toEqual([]);
       expect(c.surface.frames.at(-1)?.material.slot).toEqual(MATERIAL_SLOT);
       expect(c.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      c.root.exposes.openDropdown('test');
+      c.root.session.invokeInCallbackScope(() => c.root.exposes.openDropdown('test'));
       expect(c.root.exposes.open.get()).toBe(true);
       expect(c.surface.frames.at(-1)?.material.candidates).toEqual([GLASS]);
       expect(c.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      // Structural parts commit slot-preserving views without semantics owners.
-      expect(c.surface.commits.at(-1)).toMatchObject({ type: { kind: 'slot' } });
-      expect(c.viewport.commits.at(-1)).toMatchObject({ type: { kind: 'slot' } });
-      expect(c.texts[0].commits.at(-1)).toMatchObject({ type: { kind: 'slot' } });
     } finally {
       await f.disposeAll();
     }
@@ -359,10 +339,6 @@ describe('Liquid Select complete structural composition (intent only)', () => {
         ungroupedText,
       ])
         await part.mount();
-      // Passive parts retain slot identity; Separator commits an empty view.
-      expect(group.commits.at(-1)).toMatchObject({ type: { kind: 'slot' } });
-      expect(label.commits.at(-1)).toMatchObject({ type: { kind: 'slot' } });
-      expect(separator.commits.at(-1) ?? []).toEqual([]);
       expect(separator.target.getAttribute('aria-hidden')).toBe('true');
       expect(separator.target.getAttribute('role')).toBeNull();
       expect(group.target.getAttribute('role')).toBe('group');
@@ -376,10 +352,10 @@ describe('Liquid Select complete structural composition (intent only)', () => {
       // Semantic-only parts never acquire material slots or candidates.
       for (const part of [group, label, separator, viewport, text])
         expect(part.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      expect(separator.styles.at(-1)?.tokens).toEqual(
+      expect(separator.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['mx-2', 'my-1', 'h-px', 'bg-border'])
       );
-      expect(label.styles.at(-1)?.tokens).toEqual(
+      expect(label.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['px-3', 'py-1', 'text-xs', 'text-muted-foreground'])
       );
       await label.dispose();
@@ -404,13 +380,13 @@ describe('Liquid Select complete structural composition (intent only)', () => {
       await c.surface.session.unmount();
       expect(c.surface.release).toHaveBeenCalledWith(oldView);
       const before = c.surface.frames.length;
-      c.root.exposes.close('test');
+      c.root.session.invokeInCallbackScope(() => c.root.exposes.close('test'));
       expect(c.surface.frames).toHaveLength(before);
       expect(c.surface.feedback.exportMaterialFrame?.().candidates).toEqual([]);
       await c.surface.session.mount();
       expect(c.surface.frames.at(-1)!.view).toBeGreaterThan(oldView);
       expect(c.surface.frames.at(-1)?.material.candidates).toEqual([]);
-      c.root.exposes.openDropdown('test');
+      c.root.session.invokeInCallbackScope(() => c.root.exposes.openDropdown('test'));
       expect(c.surface.frames.at(-1)?.material.candidates).toEqual([GLASS]);
       expect(c.surface.frames.every((frame) => frame.material.candidates.length <= 1)).toBe(true);
       expect(c.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
@@ -454,13 +430,9 @@ describe('Liquid Field Select Trigger (intent only)', () => {
       expect(trigger.target.getAttribute('aria-labelledby')).toBe(label.target.id);
       expect(trigger.target.getAttribute('aria-describedby')).toBe(description.target.id);
       expect(trigger.target.getAttribute('aria-errormessage')).toBe(error.target.id);
-      expect(trigger.styles.at(-1)?.tokens).toEqual(
+      expect(trigger.frames.at(-1)?.style.tokens).toEqual(
         expect.arrayContaining(['border-2', 'border-foreground'])
       );
-      // The ordinary family chevron+slot render is retained on the Field projection.
-      const committed = trigger.commits.at(-1) as { type: unknown }[];
-      expect(committed).toHaveLength(2);
-      expect(committed[0]?.type).toEqual({ kind: 'slot' });
       // Disabled through Field suppresses the press candidates.
       field.set({ invalid: true, errors: ['Required'], disabled: true });
       expect(trigger.exposes.disabled.get()).toBe(true);

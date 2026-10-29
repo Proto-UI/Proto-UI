@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Hover Card Content Hover Card projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Hover Card part over P-BASE-HOVER-CARD-CONTENT with pinned popover/link vocabulary.
 statement:
-  en: >-
-    The Prototype invokes asHoverCardContent() once and preserves the exact Base protocol while adding family paint per its stated role. It is not a Tooltip substitute.
-
-
+    en: The Prototype invokes asHoverCardContent() once and preserves the exact Base protocol while adding family paint per its stated role. It is not a Tooltip substitute.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT-BASE
     text:
-      en: >-
-        Invoke asHoverCardContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asHoverCardContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT-VISUAL
     text:
-      en: >-
-        Content reuses the pinned popover shell via a neutral Template wrapper for .popover-content (9px/14px padding) and configures the inherited 150ms linear opacity 0 to 1 fade that Popover inherits from Tooltip defaults.
-
-
+            en: Content reuses the pinned popover shell via a neutral Template wrapper for .popover-content (9px/14px padding) and configures the inherited 150ms linear opacity 0 to 1 fade that Popover inherits from Tooltip defaults.
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

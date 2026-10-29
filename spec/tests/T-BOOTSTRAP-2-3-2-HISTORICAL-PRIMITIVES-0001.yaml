@@ -4,10 +4,7 @@ title: Bootstrap historical primitives and layout coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Scroll Area, Accordion, Collapsible, Button, Checkbox, Field, Fieldset, Form, Input, OTP, Number Field, Separator, Resizable, Message Scroller, Virtual List and scalar Slider coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001-CASE-PROTOCOLS

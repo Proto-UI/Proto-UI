@@ -50,6 +50,20 @@ describe('collectProtoStyleTokens', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  it.each(['', ' as const', ' as const satisfies Readonly<Record<string, string>>'])(
+    'collects finite string-map choices through erased type syntax %s',
+    async (annotation) => {
+      await writeFile(path.join(dir, 'paint.ts'), `
+        import { tw } from '@proto.ui/core';
+        const masks = { rest: 'bg-black/50', dark: 'bg-black/80' }${annotation};
+        export function paint() {
+          for (const profile of ['rest', 'dark'] as const) tw(masks[profile]);
+        }
+      `);
+      expect(await collectProtoStyleTokens(dir)).toEqual(['bg-black/50', 'bg-black/80']);
+    }
+  );
+
   it('separates Root feedback style tokens from Template-node style tokens', async () => {
     await writeFile(
       path.join(dir, 'widget.proto.ts'),

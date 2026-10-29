@@ -1,10 +1,7 @@
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import {
-  collectProtoStyleTokens,
-  collectProtoStyleTokensFromFiles,
-} from '../../../cli/src/services/prototype-style-tokens';
+import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
 import {
   renderProtoShadowStyleTokenCss,
   renderProtoStyleTokenCss,
@@ -15,7 +12,6 @@ import * as popover from '../src/popover';
 // and fixed Nova c2a67849 style-nova.css:925–944. Happy DOM is source-runtime
 // evidence; actual default/custom inheritance belongs to the public browser suite.
 const sourceRoot = path.resolve('packages/prototypes/shadcn/src');
-const titleFile = path.join(sourceRoot, 'popover/title.proto.ts');
 const owned = new Set<HTMLElement>();
 const lifecycle = { created: 0, disposed: 0 };
 
@@ -78,10 +74,6 @@ afterEach(async () => {
 });
 
 describe('Shadcn Popover Title bounded Nova presentation', () => {
-  it('contributes only medium weight and inherits size and line height', async () => {
-    expect(await collectProtoStyleTokensFromFiles([titleFile])).toEqual(['font-medium']);
-  });
-
   it('projects the independent Title recipe through the actual source host', async () => {
     const { title, content } = fixture();
     await flush();

@@ -23,6 +23,6 @@ export default definePrototype<FieldTextareaProps, FieldTextareaExposes>({
     // 64px minimum height and vertical resize; upstream reset.less/forms.less
     // set neither (upstream height is auto with no resize property).
     def.feedback.style.use(tw('min-h-16 resize-y'));
-    return () => null;
+    return textarea.render;
   },
 });

@@ -4,10 +4,7 @@ title: Bootstrap Slider Values family coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Indexed Values anatomy and controlled refusal with historical vocabulary.
 cases:
   - id: T-BOOTSTRAP-2-3-2-SLIDER-VALUES-0001-CASE-ANATOMY

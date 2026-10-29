@@ -40,10 +40,10 @@ export const tableHeaderCell = definePrototype<TableHeaderCellProps, TableHeader
       when: (w) => w.not(w.prop('headerKind').eq('column')),
       intent: (i) => i.feedback.style.use(tw('align-top')),
     });
-    // Preserve the baseline first-heading-row border exception using the
-    // existing computed row coordinate; never infer topology from slot text.
+    // Table Structure publishes one-based coordinates for ARIA. Preserve the
+    // first-heading-row border exception without inferring topology from slot text.
     def.rule({
-      when: (w) => w.not(w.all(w.prop('headerKind').eq('column'), w.state(table.states.row).eq(0))),
+      when: (w) => w.not(w.all(w.prop('headerKind').eq('column'), w.state(table.states.row).eq(1))),
       intent: (i) => i.feedback.style.use(tw('border-t')),
     });
     return behavior.render;

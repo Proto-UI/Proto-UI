@@ -88,7 +88,8 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
   name: 'shadcn-switch-thumb',
   setup(def) {
     // P-SHADCN-SWITCH-THUMB-BASE-INHERITANCE: exactly one borrowed Base indicator.
-    const switchState = asSwitchThumb().stateHandles;
+    const inherited = asSwitchThumb();
+    const switchState = inherited.stateHandles;
     if (!switchState) {
       throw new Error(
         '[shadcn-switch-thumb] asSwitchThumb must project Switch thumb state handles.'
@@ -212,6 +213,7 @@ const switchThumb = definePrototype<ShadcnSwitchThumbProps, ShadcnSwitchThumbExp
       when: (w) => w.all(w.meta('colorScheme').eq('dark'), w.state(checked).eq(true)),
       intent: (i) => i.feedback.style.use(tw('bg-primary-foreground')),
     });
+    return inherited.render;
   },
 });
 

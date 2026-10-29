@@ -78,6 +78,7 @@ interface ValueState<T> {
 interface CalendarConsumer {
   value: ValueState<string>;
   month: ValueState<string>;
+  direction: ValueState<'ltr' | 'rtl'>;
   requestValue(value: string): boolean;
 }
 interface DatePickerConsumer extends CalendarConsumer {
@@ -366,7 +367,8 @@ describe('source-bound collection consumers', () => {
     f.day.getExposes().focusSelf({ reason: 'keyboard' });
     await flush();
     expect(document.activeElement).toBe(f.day);
-    expect(styleContains(f.root, 'direction-rtl')).toBe(true);
+    expect(f.root.getExposes().direction.get()).toBe('rtl');
+    expect(f.root.getAttribute('data-direction')).toBe('rtl');
     f.day.click();
     await flush();
     expect(changes).toEqual([{ value: '2026-10-10' }]);
@@ -428,7 +430,8 @@ describe('source-bound collection consumers', () => {
     expect(day.textContent).toBe('10');
     expect(value.textContent).toBe('2026-10-09');
     expect(styleContains(content, 'p-2')).toBe(true);
-    expect(styleContains(root, 'direction-rtl')).toBe(true);
+    expect(root.getExposes().direction.get()).toBe('rtl');
+    expect(root.getAttribute('data-direction')).toBe('rtl');
     day.click();
     await flush();
     expect(values).toEqual([{ value: '2026-10-10' }]);

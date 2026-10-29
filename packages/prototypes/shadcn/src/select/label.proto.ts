@@ -7,7 +7,7 @@ import { SELECT_LABEL_STYLE, SELECT_TRANSLUCENT_STYLES } from './recipes';
 export default definePrototype<ShadcnSelectLabelProps>({
   name: 'shadcn-select-label',
   setup(def) {
-    asSelectLabel();
+    const inherited = asSelectLabel();
     const style = setupSelectStyle(def);
     for (const profile of SELECT_TRANSLUCENT_STYLES)
       def.rule({
@@ -18,5 +18,6 @@ export default definePrototype<ShadcnSelectLabelProps>({
       when: (w) => w.state(style).eq('new-york-v4'),
       intent: (i) => i.feedback.style.use(tw('px-2 py-1.5 text-xs text-muted-foreground')),
     });
+    return inherited.render;
   },
 });

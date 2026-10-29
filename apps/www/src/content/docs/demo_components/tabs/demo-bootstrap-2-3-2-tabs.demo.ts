@@ -28,11 +28,11 @@ export default {
             props: { value: 'billing', disabled: true },
             children: ['Billing'],
           },
-          {
-            kind: 'proto',
-            prototypeId: 'bootstrap-2-3-2-tabs-indicator',
-          },
         ],
+      },
+      {
+        kind: 'proto',
+        prototypeId: 'bootstrap-2-3-2-tabs-indicator',
       },
       {
         kind: 'proto',

@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Live Region projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap 2.3.2 family projection of P-BASE-LIVE-REGION.
 statement:
-  en: >-
-    The Prototype invokes asLiveRegionRoot() once, forwards modules and render, and preserves the exact Base protocol. Semantic-only: Base owns role/aria-live/aria-atomic and the announcement payload; the family adds ordinary readable foreground and is not presented as a Bootstrap alert.
-
-
+    en: 'The Prototype invokes asLiveRegionRoot() once, forwards modules and render, and preserves the exact Base protocol. Semantic-only: Base owns role/aria-live/aria-atomic and the announcement payload; the family adds ordinary readable foreground and is not presented as a Bootstrap alert.'
 criteria:
   - id: P-BOOTSTRAP-2-3-2-LIVE-REGION-BASE
     text:
-      en: >-
-        Invoke asLiveRegionRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asLiveRegionRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-LIVE-REGION-VISUAL
     text:
-      en: >-
-        Semantic-only: Base owns role/aria-live/aria-atomic and the announcement payload; the family adds ordinary readable foreground and is not presented as a Bootstrap alert.
-
-
+            en: 'Semantic-only: Base owns role/aria-live/aria-atomic and the announcement payload; the family adds ordinary readable foreground and is not presented as a Bootstrap alert.'
   - id: P-BOOTSTRAP-2-3-2-LIVE-REGION-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-LIVE-REGION-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

@@ -6,8 +6,8 @@ import type { LiquidGlassSelectSeparatorProps, LiquidGlassSelectSeparatorExposes
 export default definePrototype<LiquidGlassSelectSeparatorProps, LiquidGlassSelectSeparatorExposes>({
   name: 'liquid-glass-select-separator',
   setup(def) {
-    asSelectSeparator();
+    const inherited = asSelectSeparator();
     def.feedback.style.use(tw('mx-2 my-1 h-px bg-border'));
-    return () => null;
+    return inherited.render;
   },
 });

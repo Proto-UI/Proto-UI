@@ -1,0 +1,47 @@
+id: P-LIQUID-GLASS-DIALOG-DESCRIPTION
+type: prototype
+title: Liquid Glass Dialog Description Dialog projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+summary: Liquid Glass Dialog part over P-BASE-DIALOG-DESCRIPTION.
+statement:
+  en: The Prototype invokes asDialogDescription() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
+criteria:
+  - id: P-LIQUID-GLASS-DIALOG-DESCRIPTION-BASE
+    text:
+      en: Invoke asDialogDescription() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
+  - id: P-LIQUID-GLASS-DIALOG-DESCRIPTION-VISUAL
+    text:
+      en: 'Description carries body typography while Base owns the description relationship and its missing-description diagnostic. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+  - id: P-LIQUID-GLASS-DIALOG-DESCRIPTION-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
+  - id: P-LIQUID-GLASS-DIALOG-DESCRIPTION-BOUNDARY
+    text:
+      en: Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-DIALOG-DESCRIPTION
+verifies:
+  tests:
+    - T-LIQUID-GLASS-DRAFT-OVERLAY-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/dialog/description.proto.ts
+  - path: packages/prototypes/liquid-glass/src/dialog/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Apple HIG Materials design reference only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Liquid Glass Dialog Description Dialog projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - liquid-glass
+  - dialog
+  - draft

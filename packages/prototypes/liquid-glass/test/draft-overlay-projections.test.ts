@@ -1,10 +1,8 @@
 import { afterEach, describe, expect, it, vi, type Mock } from 'vitest';
-import { definePrototype, type Prototype, type StyleHandle } from '@proto.ui/core';
+import { definePrototype, type Prototype } from '@proto.ui/core';
 import { createRuntimeSession, type RuntimeSession } from '@proto.ui/runtime';
 import {
-  EFFECTS_CAP,
   VISUAL_FEEDBACK_SINK_CAP,
-  type FeedbackPort,
   type VisualFeedbackFrame,
 } from '@proto.ui/module-feedback';
 import {
@@ -63,10 +61,9 @@ interface SessionUnit {
   target: HTMLElement;
   session: RuntimeSession<any>;
   frames: VisualFeedbackFrame[];
-  styles: StyleHandle[];
   release: Mock;
   readonly exposes: Record<string, any>;
-  readonly feedback: FeedbackPort;
+  frame(): VisualFeedbackFrame;
   set(next: Record<string, unknown>): void;
   input(type: string): void;
 }
@@ -87,7 +84,6 @@ function createHarness() {
     let props = initial;
     let exposes: Record<string, any> = {};
     const frames: VisualFeedbackFrame[] = [];
-    const styles: StyleHandle[] = [];
     const release = vi.fn();
     const session = createRuntimeSession(prototype, {
       prototypeName: prototype.name,
@@ -134,12 +130,6 @@ function createHarness() {
         ]);
         wiring.attach('feedback', [
           [
-            EFFECTS_CAP,
-            { queueStyle: (style: StyleHandle) => styles.push(style), requestFlush() {} },
-          ],
-        ]);
-        wiring.attach('feedback', [
-          [
             VISUAL_FEEDBACK_SINK_CAP,
             {
               commit(frame: VisualFeedbackFrame) {
@@ -155,13 +145,14 @@ function createHarness() {
       target,
       session,
       frames,
-      styles,
       release,
       get exposes() {
         return exposes;
       },
-      get feedback() {
-        return session.caps.getPort<FeedbackPort>('feedback')!;
+      frame() {
+        const frame = frames.at(-1);
+        if (!frame) throw new Error(`Missing visual frame for ${prototype.name}`);
+        return frame;
       },
       set(next: Record<string, unknown>) {
         props = next;
@@ -254,42 +245,42 @@ describe('liquid-glass dialog projection', () => {
       expect(f.root.exposes.open.get()).toBe(false);
       expect(f.content.exposes.open.get()).toBe(false);
       // Mask keeps an ordinary dimming layer; it never becomes a material owner.
-      expect(f.mask.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      expect(f.mask.styles.at(-1)?.tokens).toEqual(
+      expect(f.mask.frame().material).toEqual({ slot: null, candidates: [] });
+      expect(f.mask.frame().style.tokens).toEqual(
         expect.arrayContaining(['fixed', 'bg-black/50'])
       );
-      expect(f.content.feedback.exportMaterialFrame?.().slot).toEqual({
+      expect(f.content.frame().material.slot).toEqual({
         version: 2,
         shape: { kind: 'rounded-rect', geometry: 'style' },
         source: { kind: 'in-app-backdrop' },
         fallback: { fill: 'style', foreground: 'style' },
       });
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.frame().material.candidates).toEqual([]);
 
       f.trigger.input('press.commit');
       await expect.poll(() => f.root.exposes.open.get()).toBe(true);
       await flush();
       expect(f.content.exposes.open.get()).toBe(true);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([
+      expect(f.content.frame().material.candidates).toEqual([
         { intent: 'liquid-glass' },
       ]);
-      expect(f.content.styles.at(-1)?.tokens).toEqual(
+      expect(f.content.frame().style.tokens).toEqual(
         expect.arrayContaining(['fixed', 'rounded-2xl', 'bg-secondary'])
       );
       // Neutral label parts stay style-only with no expose authority.
       expect(f.title.exposes).toEqual({});
       expect(f.description.exposes).toEqual({});
-      expect(f.title.styles.at(-1)?.tokens).toEqual(expect.arrayContaining(['text-lg']));
-      expect(f.description.styles.at(-1)?.tokens).toEqual(
+      expect(f.title.frame().style.tokens).toEqual(expect.arrayContaining(['text-lg']));
+      expect(f.description.frame().style.tokens).toEqual(
         expect.arrayContaining(['text-muted-foreground'])
       );
-      expect(f.title.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
+      expect(f.title.frame().material).toEqual({ slot: null, candidates: [] });
 
       f.close.input('press.commit');
       await expect.poll(() => f.root.exposes.open.get()).toBe(false);
       await flush();
       expect(f.content.exposes.open.get()).toBe(false);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.frame().material.candidates).toEqual([]);
     } finally {
       await f.dispose();
     }
@@ -306,7 +297,7 @@ describe('liquid-glass dialog projection', () => {
       await flush();
       expect(f.root.exposes.open.get()).toBe(true);
       // The retained complete candidate still describes the open surface.
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([
+      expect(f.content.frame().material.candidates).toEqual([
         { intent: 'liquid-glass' },
       ]);
     } finally {
@@ -319,7 +310,7 @@ describe('liquid-glass dialog projection', () => {
     try {
       for (const command of [f.trigger, f.close]) {
         expect(command.exposes.disabled.get()).toBe(true);
-        expect(command.styles.at(-1)?.tokens).toEqual(
+        expect(command.frame().style.tokens).toEqual(
           expect.arrayContaining([
             'bg-secondary',
             'text-secondary-foreground',
@@ -327,12 +318,12 @@ describe('liquid-glass dialog projection', () => {
             'shadow-none',
           ])
         );
-        expect(command.styles.at(-1)?.tokens).not.toContain('opacity-50');
+        expect(command.frame().style.tokens).not.toContain('opacity-50');
       }
       f.trigger.input('press.commit');
       await flush();
       expect(f.root.exposes.open.get()).toBe(false);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.frame().material.candidates).toEqual([]);
     } finally {
       await f.dispose();
     }
@@ -385,7 +376,7 @@ describe('liquid-glass hover-card projection', () => {
       await vi.advanceTimersByTimeAsync(1);
       expect(f.root.exposes.open.get()).toBe(true);
       expect(f.content.exposes.open.get()).toBe(true);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([
+      expect(f.content.frame().material.candidates).toEqual([
         { intent: 'liquid-glass' },
       ]);
 
@@ -401,7 +392,7 @@ describe('liquid-glass hover-card projection', () => {
       expect(f.root.exposes.open.get()).toBe(true);
       await vi.advanceTimersByTimeAsync(1);
       expect(f.root.exposes.open.get()).toBe(false);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.frame().material.candidates).toEqual([]);
     } finally {
       await f.dispose();
     }
@@ -416,7 +407,7 @@ describe('liquid-glass hover-card projection', () => {
       f.trigger.input('pointer.leave');
       await vi.advanceTimersByTimeAsync(100);
       expect(f.root.exposes.open.get()).toBe(false);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.frame().material.candidates).toEqual([]);
     } finally {
       await f.dispose();
     }
@@ -462,10 +453,16 @@ describe('liquid-glass tooltip projection', () => {
     const secondContent = h.create(tooltipContent, {}, second.target);
     await secondContent.session.mount();
     try {
-      // Semantic-only coordinator: no style frames and no exposed surface.
-      expect(group.styles).toEqual([]);
+      // Semantic-only coordinator: no painted or material output on any frame.
+      expect(
+        group.frames.every(
+          (frame) =>
+            frame.style.tokens.length === 0 &&
+            frame.material.slot === null &&
+            frame.material.candidates.length === 0
+        )
+      ).toBe(true);
       expect(group.exposes).toEqual({});
-      expect(group.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
 
       firstTrigger.input('pointer.enter');
       // Inherits the Group openDelay because Root did not provide its own.
@@ -486,11 +483,11 @@ describe('liquid-glass tooltip projection', () => {
       expect(secondContent.exposes.open.get()).toBe(true);
 
       // Tooltip Content is an ordinary opaque surface: real style, no slot.
-      expect(secondContent.feedback.exportMaterialFrame?.()).toEqual({
+      expect(secondContent.frame().material).toEqual({
         slot: null,
         candidates: [],
       });
-      expect(secondContent.styles.at(-1)?.tokens).toEqual(
+      expect(secondContent.frame().style.tokens).toEqual(
         expect.arrayContaining(['bg-secondary', 'text-secondary-foreground', 'text-xs'])
       );
     } finally {
@@ -533,6 +530,7 @@ describe('liquid-glass drawer structural parts', () => {
     const probe = definePrototype({
       name: 'liquid-glass-drawer-structure-probe',
       setup(def) {
+        def.context.subscribe(DRAWER_CONTEXT);
         def.lifecycle.onMounted((run) => {
           facts.rootId = run.context.read(DRAWER_CONTEXT).rootId;
           facts.headers = run.anatomy.partsOf(DRAWER_FAMILY, 'header');
@@ -562,17 +560,17 @@ describe('liquid-glass drawer structural parts', () => {
       expect(facts.headers).toHaveLength(1);
       expect(facts.footers).toHaveLength(1);
       // Passive slot presentation: family spacing only, no input/expose/material.
-      expect(header.styles.at(-1)?.tokens).toEqual(
+      expect(header.frame().style.tokens).toEqual(
         expect.arrayContaining(['flex', 'flex-col', 'gap-0.5', 'p-4'])
       );
-      expect(header.styles.at(-1)?.tokens).not.toContain('text-center');
-      expect(footer.styles.at(-1)?.tokens).toEqual(
+      expect(header.frame().style.tokens).not.toContain('text-center');
+      expect(footer.frame().style.tokens).toEqual(
         expect.arrayContaining(['mt-[auto]', 'flex', 'flex-col', 'gap-2', 'p-4'])
       );
       expect(header.exposes).toEqual({});
       expect(footer.exposes).toEqual({});
-      expect(header.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      expect(footer.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
+      expect(header.frame().material).toEqual({ slot: null, candidates: [] });
+      expect(footer.frame().material).toEqual({ slot: null, candidates: [] });
 
       // Existing drawer protocol stays intact with the new parts mounted.
       trigger.input('press.commit');

@@ -19,9 +19,10 @@ const selectValue = definePrototype<ShadcnSelectValueProps, ShadcnSelectValueExp
     // P-SHADCN-SELECT-VALUE-BASE-INHERITANCE,
     // P-SHADCN-SELECT-VALUE-CURRENT-BASE-DEVIATIONS,
     // P-SHADCN-SELECT-VALUE-DISPLAY-RENDER
-    const value = asSelectValue().stateHandles;
-    if (!value) throw new Error('[shadcn-select-value] Select Value must project displayValue.');
-    return () => (value.displayValue.get() ? [value.displayValue.get()] : null);
+    const value = asSelectValue();
+    const handles = value.stateHandles;
+    if (!handles) throw new Error('[shadcn-select-value] Select Value must project displayValue.');
+    return value.render ?? (() => (handles.displayValue.get() ? [handles.displayValue.get()] : null));
   },
 });
 

@@ -4,10 +4,7 @@ title: Shadcn search and menu profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Autocomplete, Combobox, Command, Input Shell, Context Menu, Menubar, Navigation Menu and Dropdown profile coverage.
 cases:
   - id: T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-PROFILES

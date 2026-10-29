@@ -11,12 +11,12 @@ export default definePrototype<
 >({
   name: 'bootstrap-2-3-2-select-separator',
   setup(def) {
-    asSelectSeparator();
+    const inherited = asSelectSeparator();
     def.feedback.style.use(
       tw(
         'block pointer-events-none my-[9px] mx-px h-0 border-0 border-t border-b border-[#e5e5e5_#e5e5e5_#fff_#e5e5e5]'
       )
     );
-    return () => null;
+    return inherited.render;
   },
 });

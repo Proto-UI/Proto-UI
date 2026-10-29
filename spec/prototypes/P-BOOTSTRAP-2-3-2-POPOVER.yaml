@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Popover projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Popover family over P-BASE-POPOVER with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content owns the pinned popover shell (1px border, 276px cap with available-space clamp, rgba .2 border, 6px radius, source shadow, default right placement and 10px offset). Title uses the #f7f7f7/#ebebeb header recipe; Close stays a requester.
-
-
+    en: 'The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content owns the pinned popover shell (1px border, 276px cap with available-space clamp, rgba .2 border, 6px radius, source shadow, default right placement and 10px offset). Title uses the #f7f7f7/#ebebeb header recipe; Close stays a requester.'
 criteria:
   - id: P-BOOTSTRAP-2-3-2-POPOVER-BASE
     text:
-      en: >-
-        Invoke asPopover* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asPopover* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-POPOVER-VISUAL
     text:
-      en: >-
-        Root is semantic-only; Content owns the pinned popover shell (1px border, 276px cap with available-space clamp, rgba .2 border, 6px radius, source shadow, default right placement and 10px offset). Title uses the #f7f7f7/#ebebeb header recipe; Close stays a requester.
-
-
+            en: 'Root is semantic-only; Content owns the pinned popover shell (1px border, 276px cap with available-space clamp, rgba .2 border, 6px radius, source shadow, default right placement and 10px offset). Title uses the #f7f7f7/#ebebeb header recipe; Close stays a requester.'
   - id: P-BOOTSTRAP-2-3-2-POPOVER-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-POPOVER-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

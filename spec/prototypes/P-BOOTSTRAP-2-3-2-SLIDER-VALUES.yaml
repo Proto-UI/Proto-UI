@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Slider Values family projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Six indexed Slider Values parts as a separate multi-value family over the Base additive owner.
 statement:
-  en: >-
-    The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots and Track is structural. The scalar family is untouched.
-
-
+    en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots and Track is structural. The scalar family is untouched.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-SLIDER-VALUES-BASE
     text:
-      en: >-
-        Each of the six Values entries composes only with Values Root and preserves Base indexed mapping, controlled acceptance/refusal and keyboard semantics; no Values Thumb is a scalar-Thumb alias.
-
-
+            en: Each of the six Values entries composes only with Values Root and preserves Base indexed mapping, controlled acceptance/refusal and keyboard semantics; no Values Thumb is a scalar-Thumb alias.
   - id: P-BOOTSTRAP-2-3-2-SLIDER-VALUES-VISUAL
     text:
-      en: >-
-        Values parts borrow the scalar track/indicator/thumb vocabulary where the family paint maps real derived facts; family paint never invents pointer capture or measurement ownership.
-
-
+            en: Values parts borrow the scalar track/indicator/thumb vocabulary where the family paint maps real derived facts; family paint never invents pointer capture or measurement ownership.
   - id: P-BOOTSTRAP-2-3-2-SLIDER-VALUES-BOUNDARY
     text:
-      en: >-
-        Values Track stays structural: pointer origin/session association, grouped Field control, native input and Compiler translation remain open Base/host prerequisites recorded on P-BASE-SLIDER-VALUES, not closed here. Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: 'Values Track stays structural: pointer origin/session association, grouped Field control, native input and Compiler translation remain open Base/host prerequisites recorded on P-BASE-SLIDER-VALUES, not closed here. Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.'
   - id: P-BOOTSTRAP-2-3-2-SLIDER-VALUES-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001
@@ -54,10 +36,7 @@ verifies:
 openQuestions:
   - id: P-BOOTSTRAP-2-3-2-SLIDER-VALUES-Q-POINTER
     question:
-      en: >-
-        When do public pointer-origin/session association, grouped Field control and native/Compiler evidence admit the remaining Values scope?
-
-
+            en: When do public pointer-origin/session association, grouped Field control and native/Compiler evidence admit the remaining Values scope?
     blocks:
       - activation:P-BOOTSTRAP-2-3-2-SLIDER-VALUES
 sources:

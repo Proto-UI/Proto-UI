@@ -1,0 +1,63 @@
+id: T-LIQUID-GLASS-CONTENT-SOURCE-0001
+type: test
+title: Liquid Glass content-source projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Scroll Area sessions, collections, passive facts, date rendering, editors and neutral content coverage.
+cases:
+  - id: T-LIQUID-GLASS-CONTENT-SOURCE-0001-CASE-CONTENT
+    title: Auto/system scroll projection, controlled sort/selection/expansion refusal, resizable ratios, carousel index, virtual-list and message-scroller retirement
+    covers:
+      - P-LIQUID-GLASS-SCROLL-AREA-BASE
+      - P-LIQUID-GLASS-DATA-TABLE-BASE
+      - P-LIQUID-GLASS-TREE-BASE
+      - P-LIQUID-GLASS-RESIZABLE-BASE
+      - P-LIQUID-GLASS-CAROUSEL-BASE
+      - P-LIQUID-GLASS-VIRTUAL-LIST-BASE
+      - P-LIQUID-GLASS-MESSAGE-SCROLLER-BASE
+    expectation: content-ownership-survives-neutral-paint
+  - id: T-LIQUID-GLASS-CONTENT-SOURCE-0001-CASE-FACTS
+    title: Progress/Meter distinction, Calendar computed days, DatePicker open-gated material, Checkbox Group glyphs, OTP, NumberField, Form, Toolbar and ToggleGroup
+    covers:
+      - P-LIQUID-GLASS-PROGRESS-BASE
+      - P-LIQUID-GLASS-METER-BASE
+      - P-LIQUID-GLASS-CALENDAR-BASE
+      - P-LIQUID-GLASS-DATE-PICKER-BASE
+      - P-LIQUID-GLASS-CHECKBOX-GROUP-BASE
+      - P-LIQUID-GLASS-INPUT-OTP-BASE
+      - P-LIQUID-GLASS-NUMBER-FIELD-BASE
+      - P-LIQUID-GLASS-FORM-BASE
+      - P-LIQUID-GLASS-TOOLBAR-BASE
+      - P-LIQUID-GLASS-TOGGLE-GROUP-ORIENTATION
+    expectation: passive-facts-and-editors
+implementations:
+  - id: liquid-content-source-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/liquid-content-source-r91.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-SCROLL-AREA
+      - P-LIQUID-GLASS-SCROLL-AREA-VIEWPORT
+      - P-LIQUID-GLASS-SCROLL-AREA-SCROLLBAR
+      - P-LIQUID-GLASS-SCROLL-AREA-THUMB
+      - P-LIQUID-GLASS-DATA-TABLE
+      - P-LIQUID-GLASS-TREE
+      - P-LIQUID-GLASS-RESIZABLE
+      - P-LIQUID-GLASS-CAROUSEL
+      - P-LIQUID-GLASS-VIRTUAL-LIST
+      - P-LIQUID-GLASS-MESSAGE-SCROLLER
+      - P-LIQUID-GLASS-PROGRESS
+      - P-LIQUID-GLASS-METER
+      - P-LIQUID-GLASS-CALENDAR
+      - P-LIQUID-GLASS-DATE-PICKER
+      - P-LIQUID-GLASS-CHECKBOX-GROUP
+      - P-LIQUID-GLASS-INPUT-OTP
+      - P-LIQUID-GLASS-NUMBER-FIELD
+      - P-LIQUID-GLASS-FORM
+      - P-LIQUID-GLASS-TOOLBAR
+      - P-LIQUID-GLASS-TOGGLE-GROUP
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

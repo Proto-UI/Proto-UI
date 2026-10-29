@@ -14,7 +14,7 @@ All profiles retain the fixed source CSS transition declarations instead of the 
 
 Ordinary standalone controls and sibling FieldLabel/FieldSwitch composition retain their own keyboard focus ring. Modern-profile invalid paint is available only through real optional Field facts; New York preserves its established no-invalid-paint baseline. Ring widths and opacity follow each profile rather than mapping all profiles to Rhea. The wrapped card-label outer-ring composition is not supported: upstream ancestor `group-has(:focus-visible)` cannot be replaced by sibling Label focus or a Field-wide focused flag. This limitation remains separate from ordinary profile support and requires a public wrapping-label composition contract.
 
-No drag enhancement from #498, arbitrary CSS, new validation state, caller-node replacement or website-specific paint is introduced. Source/token tests, four-adapter DOM tests, and exact-head native evidence are separate claims.
+The opt-in Base `draggable` enhancement (#498) is projected as an explicit direction + percentage preview only: with `draggable` true, the Thumb's fixed checked endpoints are replaced by the recipe's checked travel scaled by `--pui-percentage` (Sera keeps its 1px unchecked base), RTL mirrors the travel, and `dragging` suppresses the transform transition so paint follows the owner without a trailing animation. `draggable=false` retains the source-bound endpoints. No arbitrary CSS, new validation state, caller-node replacement or website-specific paint is introduced. Source/token tests, four-adapter DOM tests, and exact-head native evidence are separate claims.
 
 ## Draft dynamic-theme evidence debt
 

@@ -26,6 +26,20 @@ const makeRoot = (size?: 'default' | 'sm', name = 'shadcn-switch-root') => {
   return root;
 };
 const makeThumb = () => document.createElement('shadcn-switch-thumb') as any;
+// Selector/declaration evidence on the real host, not native computed paint.
+// A lowered dark/state token remains installed in both light and dark themes.
+function matchingBackgrounds(target: Element) {
+  const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
+  return [...renderProtoStyleTokenCss(tokens).matchAll(/([^{}]+)\{([^{}]+)\}/g)]
+    .filter(([, selectors, body]) =>
+      body.includes('background-color:') &&
+      selectors.split(',\n').some((selector) => {
+        const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
+        return !!required && tokens.includes(required) && target.matches(selector.trim());
+      })
+    )
+    .flatMap(([, , body]) => [...body.matchAll(/background-color:\s*([^;]+);/g)].map((m) => m[1]));
+}
 const expectSize = (thumb: Element, size: 'default' | 'sm') => {
   expect(styleContains(thumb, size === 'sm' ? 'size-3' : 'size-4')).toBe(true);
   expect(styleContains(thumb, size === 'sm' ? 'size-4' : 'size-3')).toBe(false);
@@ -388,7 +402,9 @@ describe('prototypes/shadcn: switch', () => {
       document.body.append(root);
       for (let i = 0; i < 8; i++) await Promise.resolve();
       expect(styleContains(root, checked ? 'bg-primary' : 'bg-input/80')).toBe(true);
-      expect(styleContains(thumb, checked ? 'bg-primary-foreground' : 'bg-foreground')).toBe(true);
+      expect(matchingBackgrounds(thumb)).toContain(
+        checked ? 'var(--pui-primary-foreground)' : 'var(--pui-foreground)'
+      );
       expect(root.getAttribute('role')).toBe('switch');
       expect(root.getAttribute('aria-checked')).toBe(String(checked));
       expect(thumb.hasAttribute('role')).toBe(false);

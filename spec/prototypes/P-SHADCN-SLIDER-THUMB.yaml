@@ -4,41 +4,23 @@ title: Shadcn scalar Slider Thumb projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
-
-
+    en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
 summary: Shadcn scalar Slider Thumb deriving value and focus facts from its scalar Root.
 statement:
-  en: >-
-    The Prototype invokes asSliderThumb() once, borrowing Root focus and deriving accepted pointer, value and percentage facts. Family paint uses passive owned decoration so the painted Thumb need not equal the enlarged input hit box; no second value, input, geometry or event owner is installed.
-
-
+    en: The Prototype invokes asSliderThumb() once, borrowing Root focus and deriving accepted pointer, value and percentage facts. Family paint uses passive owned decoration so the painted Thumb need not equal the enlarged input hit box; no second value, input, geometry or event owner is installed.
 criteria:
   - id: P-SHADCN-SLIDER-THUMB-BASE
     text:
-      en: >-
-        Invoke asSliderThumb() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
-
-
+            en: Invoke asSliderThumb() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
   - id: P-SHADCN-SLIDER-THUMB-VISUAL
     text:
-      en: >-
-        Nine profile Thumb shapes use the retained recipes with passive owned decoration so profile ink may be smaller than the hit region; Base still owns AxisInput, controlled preview, value and focus.
-
-
+            en: Nine profile Thumb shapes use the retained recipes with passive owned decoration so profile ink may be smaller than the hit region; Base still owns AxisInput, controlled preview, value and focus.
   - id: P-SHADCN-SLIDER-THUMB-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
   - id: P-SHADCN-SLIDER-THUMB-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

@@ -21,9 +21,11 @@ export const liquidGlassTableRoot = definePrototype<TableRootProps, TableRootExp
     // Base owns the Table Structure domain, the anonymous descendant slot and
     // getStructure; it synthesizes no Head/Body/RowGroup parts and exposes no
     // sorting, selection, focus or styling channel. The family adds only
-    // neutral readable content typography; native table-grid display and
-    // border-collapse vocabulary are not available in the governed token set.
-    def.feedback.style.use(tw('min-w-0 max-w-full w-full text-foreground text-sm'));
+    // neutral readable content layout. CSS table layout does not realize
+    // native rowspan/colspan; an outer consumer owns overflow scrolling.
+    def.feedback.style.use(
+      tw('table border-collapse border-spacing-0 min-w-0 max-w-full w-full text-foreground text-sm')
+    );
     return behavior.render;
   },
 });

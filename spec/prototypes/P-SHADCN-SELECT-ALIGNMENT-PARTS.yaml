@@ -4,47 +4,26 @@ title: Shadcn Select Surface Viewport and ItemText alignment parts
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
-
-
+    en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
 summary: Three same-family alignment parts completing the eleven-part Select anatomy.
 statement:
-  en: >-
-    The Prototypes invoke asSelectSurface(), asSelectViewport() and asSelectItemText() once each. Surface owns family popup presentation under Content, Viewport exclusively owns the scrollport and ItemText supplies item text identity; none owns selection, positioning, presence, portal or geometry beyond its stated role.
-
-
+    en: The Prototypes invoke asSelectSurface(), asSelectViewport() and asSelectItemText() once each. Surface owns family popup presentation under Content, Viewport exclusively owns the scrollport and ItemText supplies item text identity; none owns selection, positioning, presence, portal or geometry beyond its stated role.
 criteria:
   - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-INHERITANCE
     text:
-      en: >-
-        Each part invokes its matching Base hook exactly once and preserves Base props/exposes, anatomy order, scoped naming and render. The item-aligned composition remains Trigger and Value under Root, and Surface then Viewport then Item with ItemText under Content.
-
-
+            en: Each part invokes its matching Base hook exactly once and preserves Base props/exposes, anatomy order, scoped naming and render. The item-aligned composition remains Trigger and Value under Root, and Surface then Viewport then Item with ItemText under Content.
   - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-VISUAL
     text:
-      en: >-
-        Surface projects the profile-bound translucent popup treatment through the owned decoration target while Content retains positioning and presence; New York withdraws its backdrop contribution. Viewport carries bounded overflow and outline space; ItemText is content-level text, not a second item owner.
-
-
+            en: Surface projects the profile-bound translucent popup treatment through the owned decoration target while Content retains positioning and presence; New York withdraws its backdrop contribution. Viewport carries bounded overflow and outline space; ItemText is content-level text, not a second item owner.
   - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-COMPOSITION
     text:
-      en: >-
-        Real consumers compose Content > Surface > Viewport > Item > ItemText; the extended incomplete-composition diagnostic rejects unbound modern profiles. Family styling is not upstream positioning, scroll-control or Arrow parity.
-
-
+            en: Real consumers compose Content > Surface > Viewport > Item > ItemText; the extended incomplete-composition diagnostic rejects unbound modern profiles. Family styling is not upstream positioning, scroll-control or Arrow parity.
   - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
   - id: P-SHADCN-SELECT-ALIGNMENT-PARTS-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

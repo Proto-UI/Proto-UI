@@ -1,0 +1,47 @@
+id: T-LIQUID-GLASS-OVERLAYS-SOURCE-0001
+type: test
+title: Liquid Glass overlay and menu projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Transient Slider material, Toast, Dropdown, search families, Context Menu, Menubar, Navigation Menu and Tooltip coverage.
+cases:
+  - id: T-LIQUID-GLASS-OVERLAYS-SOURCE-0001-CASE-OVERLAYS
+    title: Open-gated candidates, controlled refusal, timeout withdrawal and one-owner preservation across overlay families
+    covers:
+      - P-LIQUID-GLASS-SLIDER-BASE
+      - P-LIQUID-GLASS-TOAST-BASE
+      - P-LIQUID-GLASS-DROPDOWN-MENU-SEMANTICS-AND-PAINT
+    expectation: transient-material-never-owns-semantics
+  - id: T-LIQUID-GLASS-OVERLAYS-SOURCE-0001-CASE-SEARCH-NAV
+    title: Editor/query refusal, inline Command, context-menu intent, navigation links and popup owners
+    covers:
+      - P-LIQUID-GLASS-AUTOCOMPLETE-BASE
+      - P-LIQUID-GLASS-COMBOBOX-BASE
+      - P-LIQUID-GLASS-COMMAND-BASE
+      - P-LIQUID-GLASS-CONTEXT-MENU-BASE
+      - P-LIQUID-GLASS-MENUBAR-BASE
+      - P-LIQUID-GLASS-NAVIGATION-MENU-BASE
+    expectation: search-and-navigation-identities
+implementations:
+  - id: liquid-overlays-source-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/liquid-overlays-source-r91.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-SLIDER
+      - P-LIQUID-GLASS-SLIDER-THUMB
+      - P-LIQUID-GLASS-SLIDER-FIELD-THUMB
+      - P-LIQUID-GLASS-TOAST
+      - P-LIQUID-GLASS-DROPDOWN-MENU
+      - P-LIQUID-GLASS-AUTOCOMPLETE
+      - P-LIQUID-GLASS-COMBOBOX
+      - P-LIQUID-GLASS-COMMAND
+      - P-LIQUID-GLASS-CONTEXT-MENU
+      - P-LIQUID-GLASS-MENUBAR
+      - P-LIQUID-GLASS-NAVIGATION-MENU
+      - P-LIQUID-GLASS-TOOLTIP
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

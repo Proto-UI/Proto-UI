@@ -4,10 +4,7 @@ title: Shadcn layout and collection profile coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Accordion, Collapsible, Carousel, Resizable, Scroll Area, Progress, Meter, Label, Separator, Message Scroller, Virtual List and scalar Slider profile coverage.
 cases:
   - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-PROFILES
@@ -21,10 +18,7 @@ cases:
       - P-SHADCN-SLIDER-ADMISSION
     expectation: profile-paint-preserves-owners
   - id: T-SHADCN-LAYOUT-PROFILES-0001-CASE-BOUNDARIES
-    title: >-
-      Explicit unimplemented capabilities stay gaps: measured accordion motion, scalar travel alignment, message scroller eligibility, resizable hit expansion
-
-
+    title: 'Explicit unimplemented capabilities stay gaps: measured accordion motion, scalar travel alignment, message scroller eligibility, resizable hit expansion'
     covers:
       - P-SHADCN-SLIDER-ADMISSION
       - P-SHADCN-SCROLL-AREA-OWNERSHIP-BOUNDARY

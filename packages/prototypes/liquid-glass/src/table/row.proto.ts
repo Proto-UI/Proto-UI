@@ -18,8 +18,8 @@ export const liquidGlassTableRow = definePrototype<TableRowProps, TableRowExpose
   setup(def) {
     const behavior = asLiquidGlassTableRow();
     // Base owns row membership, rowIndex projection and the authored slot. The
-    // family adds only a quiet bottom rule, without imposing grid/flex layout.
-    def.feedback.style.use(tw('border-b border-border'));
+    // family contributes a CSS table row and a quiet bottom rule.
+    def.feedback.style.use(tw('table-row border-b border-border'));
     return behavior.render;
   },
 });

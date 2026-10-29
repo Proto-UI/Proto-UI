@@ -1,0 +1,45 @@
+id: T-LIQUID-GLASS-DRAFT-CONTROL-0001
+type: test
+title: Liquid Glass control projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Input, Textarea, Checkbox, Radio Group, Switch, Separator and Field alternatives coverage.
+cases:
+  - id: T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-CONTROLS
+    title: Editors, checkbox/radio/switch selection, controlled refusal and disabled suppression through real consumers
+    covers:
+      - P-LIQUID-GLASS-INPUT-BASE
+      - P-LIQUID-GLASS-TEXTAREA-BASE
+      - P-LIQUID-GLASS-CHECKBOX-BASE
+      - P-LIQUID-GLASS-RADIO-GROUP-BASE
+      - P-LIQUID-GLASS-SWITCH-BASE
+      - P-LIQUID-GLASS-SEPARATOR-BASE
+    expectation: control-ownership-and-refusal
+  - id: T-LIQUID-GLASS-DRAFT-CONTROL-0001-CASE-FIELD
+    title: FieldTextarea, FieldSwitch and Field-bound relationships, invalid, policy and editor preservation
+    covers:
+      - P-LIQUID-GLASS-TEXTAREA-FIELD-COMPOSITION
+      - P-LIQUID-GLASS-SWITCH-FIELD-COMPOSITION
+    expectation: field-composition-policy
+implementations:
+  - id: liquid-draft-control-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/draft-control-projections.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-INPUT
+      - P-LIQUID-GLASS-TEXTAREA
+      - P-LIQUID-GLASS-CHECKBOX
+      - P-LIQUID-GLASS-CHECKBOX-INDICATOR
+      - P-LIQUID-GLASS-RADIO-GROUP
+      - P-LIQUID-GLASS-RADIO-GROUP-ITEM
+      - P-LIQUID-GLASS-RADIO-GROUP-INDICATOR
+      - P-LIQUID-GLASS-SWITCH
+      - P-LIQUID-GLASS-SWITCH-THUMB
+      - P-LIQUID-GLASS-SEPARATOR
+      - P-LIQUID-GLASS-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Data Table projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Data Table family over P-BASE-DATA-TABLE with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Row/HeaderRow/Cell/Header/Caption/Previous/Next preserve the data-view, sorting, selection and pagination owners; HeaderRow remains the separately cataloged passive Table Row-derived composition, not a general Table Row. Selected-row paint uses historical table vocabulary.
-
-
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Row/HeaderRow/Cell/Header/Caption/Previous/Next preserve the data-view, sorting, selection and pagination owners; HeaderRow remains the separately cataloged passive Table Row-derived composition, not a general Table Row. Selected-row paint uses historical table vocabulary.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-BASE
     text:
-      en: >-
-        Invoke asDataTable* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asDataTable* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-VISUAL
     text:
-      en: >-
-        Root/Row/HeaderRow/Cell/Header/Caption/Previous/Next preserve the data-view, sorting, selection and pagination owners; HeaderRow remains the separately cataloged passive Table Row-derived composition, not a general Table Row. Selected-row paint uses historical table vocabulary.
-
-
+            en: Root/Row/HeaderRow/Cell/Header/Caption/Previous/Next preserve the data-view, sorting, selection and pagination owners; HeaderRow remains the separately cataloged passive Table Row-derived composition, not a general Table Row. Selected-row paint uses historical table vocabulary.
   - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-DATA-TABLE-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

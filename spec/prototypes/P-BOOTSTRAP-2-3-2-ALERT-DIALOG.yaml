@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Alert Dialog projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Alert Dialog family over P-BASE-ALERT-DIALOG with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured.
-
-
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG-BASE
     text:
-      en: >-
-        Invoke asAlertDialog* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asAlertDialog* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG-VISUAL
     text:
-      en: >-
-        Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured.
-
-
+            en: Root is semantic-only; Content and Mask own the historical chrome. Commands consume the complete passive Button recipe and Title/Description carry modal-header/modal-body recipes. The upstream containing-block top -25% to 10% motion with distinct easing is an open capability gap; only the opacity channel is configured.
   - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-ALERT-DIALOG-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

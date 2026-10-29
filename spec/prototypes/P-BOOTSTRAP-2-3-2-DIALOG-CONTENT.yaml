@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Dialog Content Dialog projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Dialog part over P-BASE-DIALOG-CONTENT with the pinned modal vocabulary.
 statement:
-  en: >-
-    The Prototype invokes asDialogContent() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
-
-
+    en: The Prototype invokes asDialogContent() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-BASE
     text:
-      en: >-
-        Invoke asDialogContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asDialogContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-VISUAL
     text:
-      en: >-
-        Pinned modal recipe: 560px width, top 10% entered geometry, 1px rgba(0,0,0,.3) border, 6px radius, the source shadow and typography. The upstream containing-block top -25% to 10% motion with distinct top ease-out is recorded as an open capability gap; only the 300ms linear opacity channel is configured.
-
-
+            en: 'Pinned modal recipe: 560px width, top 10% entered geometry, 1px rgba(0,0,0,.3) border, 6px radius, the source shadow and typography. The upstream containing-block top -25% to 10% motion with distinct top ease-out is recorded as an open capability gap; only the 300ms linear opacity channel is configured.'
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001
@@ -52,10 +34,7 @@ verifies:
 openQuestions:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-Q-MOTION
     question:
-      en: >-
-        When does a neutral capability expose containing-block-relative top motion with per-channel easing so the upstream -25% to 10% modal entrance is fully projected?
-
-
+            en: When does a neutral capability expose containing-block-relative top motion with per-channel easing so the upstream -25% to 10% modal entrance is fully projected?
     blocks:
       - criterion:P-BOOTSTRAP-2-3-2-DIALOG-CONTENT#P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-VISUAL
 sources:

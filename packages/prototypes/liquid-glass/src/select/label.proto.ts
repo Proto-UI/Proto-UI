@@ -6,8 +6,8 @@ import type { LiquidGlassSelectLabelProps, LiquidGlassSelectLabelExposes } from 
 export default definePrototype<LiquidGlassSelectLabelProps, LiquidGlassSelectLabelExposes>({
   name: 'liquid-glass-select-label',
   setup(def) {
-    asSelectLabel();
+    const inherited = asSelectLabel();
     def.feedback.style.use(tw('px-3 py-1 text-xs font-medium text-muted-foreground'));
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

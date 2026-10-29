@@ -1,0 +1,34 @@
+id: T-LIQUID-GLASS-TABS-0001
+type: test
+title: Liquid Glass Tabs draft projection coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Functional navigation material, passive Indicator and controlled refusal.
+cases:
+  - id: T-LIQUID-GLASS-TABS-0001-CASE-NAVIGATION
+    title: List functional navigation and selected-Trigger signal preserve Base selection and focus
+    covers:
+      - P-LIQUID-GLASS-TABS-BASE-INHERITANCE
+    expectation: functional-tabs-navigation
+  - id: T-LIQUID-GLASS-TABS-0001-CASE-INDICATOR
+    title: Semantic-only Indicator derives accepted selection, active focus and orientation
+    covers:
+      - P-LIQUID-GLASS-TABS-INDICATOR-BASE
+      - P-LIQUID-GLASS-TABS-INDICATOR-VISUAL
+    expectation: semantic-only-indicator
+implementations:
+  - id: liquid-tabs-draft-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/tabs-draft-projection.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-TABS
+      - P-LIQUID-GLASS-TABS-LIST
+      - P-LIQUID-GLASS-TABS-TRIGGER
+      - P-LIQUID-GLASS-TABS-CONTENT
+      - P-LIQUID-GLASS-TABS-INDICATOR
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

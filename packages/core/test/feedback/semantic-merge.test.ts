@@ -2,6 +2,19 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('replaces signed layout spacing and scroll padding without merging scroll margins', () => {
+    expect(mergeTwTokensV0([
+      'mx-2', 'mb-1', 'scroll-my-1', 'scroll-py-1', '-mx-4', '-mb-4', 'scroll-py-1.5',
+    ]).tokens).toEqual(['-mx-4', '-mb-4', 'scroll-my-1', 'scroll-py-1.5']);
+    expect(mergeTwTokensV0(['-mx-4', 'mx-2', '-mb-4', 'mb-1']).tokens).toEqual(['mx-2', 'mb-1']);
+  });
+
+  it('keeps explicit linear timing separate from the transition-property recipe', () => {
+    expect(mergeTwTokensV0(['ease-in-out', 'transition-shadow', 'ease-linear']).tokens)
+      .toEqual(['ease-linear', 'transition-shadow']);
+    expect(mergeTwTokensV0(['ease-linear', 'ease-in-out']).tokens).toEqual(['ease-in-out']);
+  });
+
   it('preserves border width and balanced text when source colors are replaced', () => {
     expect(
       mergeTwTokensV0([

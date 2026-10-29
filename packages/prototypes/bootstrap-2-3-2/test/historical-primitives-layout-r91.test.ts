@@ -825,11 +825,20 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     expect(jump.getExposes().newContentCount.get()).toBe(4);
     await click(jump);
     expect(viewport.scrollTop).toBe(300);
+    // An unclassified offset write does not withdraw while-at-end ownership.
+    // Inject reader intent separately from the simulated host's applied offset.
+    viewport.dispatchEvent(new WheelEvent('wheel', { deltaY: -100, bubbles: true }));
     viewport.scrollTop = 0;
     viewport.dispatchEvent(new Event('scroll'));
     await update(jump, { disabled: true });
+    expect(viewport.getExposes().following.get()).toBe('paused');
+    expect(viewport.scrollTop).toBe(0);
+    expect(jump.getExposes().disabled.get()).toBe(true);
     await click(jump);
     expect(viewport.scrollTop).toBe(0);
+    await update(jump, { disabled: false });
+    await click(jump);
+    expect(viewport.scrollTop).toBe(300);
     await update(root, { a11yLabel: 'Updated conversation', newContentCount: -2 });
     expect(jump.getExposes().newContentCount.get()).toBe(0);
     expect(viewport.getAttribute('aria-label')).toBe('Updated conversation');

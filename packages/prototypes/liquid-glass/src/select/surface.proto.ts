@@ -8,7 +8,7 @@ import type { LiquidGlassSelectSurfaceProps } from './types';
 export default definePrototype<LiquidGlassSelectSurfaceProps>({
   name: 'liquid-glass-select-surface',
   setup(def) {
-    asSelectSurface();
+    const inherited = asSelectSurface();
     const open = def.state.bool('open', false);
     const sync = (value: { open: boolean }) => {
       open.set(value.open, 'reason: select surface open sync');
@@ -33,6 +33,6 @@ export default definePrototype<LiquidGlassSelectSurfaceProps>({
         'z-50 relative flex flex-col min-w-0 w-[max(var(--proto-ui-anchor-width),12rem)] max-w-[var(--proto-ui-available-width)] max-h-[var(--proto-ui-available-height)] overflow-hidden outline-none rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md'
       )
     );
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

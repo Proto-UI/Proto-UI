@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Tooltip Content Tooltip projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Tooltip part over P-BASE-TOOLTIP-CONTENT with the pinned tooltip vocabulary.
 statement:
-  en: >-
-    The Prototype invokes asTooltipContent() once and preserves the exact Base protocol while adding family paint per its stated role.
-
-
+    en: The Prototype invokes asTooltipContent() once and preserves the exact Base protocol while adding family paint per its stated role.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-BASE
     text:
-      en: >-
-        Invoke asTooltipContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asTooltipContent() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-VISUAL
     text:
-      en: >-
-        Pinned tooltip recipe: 11px text, 200px maximum, 8px padding, dark background and directional chrome; the explicit Base Arrow boundary is retained with no invented arrow owner or host shortcut.
-
-
+            en: 'Pinned tooltip recipe: 11px text, 200px maximum, 8px padding, dark background and directional chrome; the explicit Base Arrow boundary is retained with no invented arrow owner or host shortcut.'
   - id: P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

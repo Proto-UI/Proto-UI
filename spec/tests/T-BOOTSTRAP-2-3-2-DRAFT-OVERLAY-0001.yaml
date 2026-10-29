@@ -4,10 +4,7 @@ title: Bootstrap overlay projections coverage
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
 summary: Dialog, Hover Card, Tooltip and Drawer controlled/refusal, slot, disabled and recipe coverage.
 cases:
   - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-PROTOCOL

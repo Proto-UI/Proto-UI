@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Table passive Table projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap passive Table part over the exact P-BASE-TABLE definition with the pinned .table recipe.
 statement:
-  en: >-
-    The Prototype composes the exact Base table prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint.
-
-
+    en: The Prototype composes the exact Base table prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-TABLE-BASE
     text:
-      en: >-
-        Compose the exact Base base-table prototype once through the public defineAsHook({...base-table, name}) pattern and preserve every inherited owner, module, render result, props/exposes and lifecycle.
-
-
+            en: 'Compose the exact Base base-table prototype once through the public defineAsHook({...base-table, name}) pattern and preserve every inherited owner, module, render result, props/exposes and lifecycle.'
   - id: P-BOOTSTRAP-2-3-2-TABLE-VISUAL
     text:
-      en: >-
-        Baseline .table recipe: full width, 20px bottom margin, collapsed table layout and 14px/20px typography. Table Structure remains the topology owner; no sorting, selection, focus, row-group synthesis or DataTable substitution is added. Bordered/condensed/striped/hover recipe variants are not synthesized.
-
-
+            en: 'Baseline .table recipe: full width, 20px bottom margin, collapsed table layout and 14px/20px typography. Table Structure remains the topology owner; no sorting, selection, focus, row-group synthesis or DataTable substitution is added. Bordered/condensed/striped/hover recipe variants are not synthesized.'
   - id: P-BOOTSTRAP-2-3-2-TABLE-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-TABLE-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

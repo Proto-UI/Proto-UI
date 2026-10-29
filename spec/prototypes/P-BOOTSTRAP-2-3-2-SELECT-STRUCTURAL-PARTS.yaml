@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Select Group Label and Separator structural parts
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Three passive structural parts preserving scoped naming and contentless decoration.
 statement:
-  en: >-
-    The Prototypes invoke asSelectGroup(), asSelectLabel() and asSelectSeparator() once each. Group is semantic-only (the nav-header paint lands on Label), Label uses the nav-header recipe and Separator renders contentless nav-divider paint; none owns selection or naming outside its scope.
-
-
+    en: The Prototypes invoke asSelectGroup(), asSelectLabel() and asSelectSeparator() once each. Group is semantic-only (the nav-header paint lands on Label), Label uses the nav-header recipe and Separator renders contentless nav-divider paint; none owns selection or naming outside its scope.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS-INHERITANCE
     text:
-      en: >-
-        Each part invokes its matching Base hook exactly once; Group keeps its local naming scope, Label supplies the scoped name and Separator remains a decorative, contentless boundary.
-
-
+            en: Each part invokes its matching Base hook exactly once; Group keeps its local naming scope, Label supplies the scoped name and Separator remains a decorative, contentless boundary.
   - id: P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS-VISUAL
     text:
-      en: >-
-        Label uses the pinned nav-header recipe (11px bold uppercase, 15px/3px padding, #999 text with a 1px half-white text-shadow). Separator uses the pinned nav-divider recipe (9px/1px margins, #e5e5e5 top and #fff bottom edges) and explicitly renders null with hidden accessibility.
-
-
+            en: "Label uses the dropdown nav-header override: 11px bold uppercase, 20px horizontal/3px vertical padding, #999 text and half-white text-shadow. Separator uses the pinned divider recipe and explicitly renders null with hidden accessibility. Group retains naming scope without selection ownership."
   - id: P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-SELECT-STRUCTURAL-PARTS-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

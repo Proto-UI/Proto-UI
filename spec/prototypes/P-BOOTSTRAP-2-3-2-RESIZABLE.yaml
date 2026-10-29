@@ -4,47 +4,26 @@ title: Bootstrap 2.3.2 Resizable projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Resizable family over P-BASE-RESIZABLE with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Panel/Handle preserve size ownership and AxisInput requests; handle paint uses historical separator vocabulary over the actual inherited state.
-
-
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Panel/Handle preserve size ownership and AxisInput requests; handle paint uses historical separator vocabulary over the actual inherited state.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-RESIZABLE-BASE
     text:
-      en: >-
-        Invoke asResizable* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asResizable* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-RESIZABLE-VISUAL
     text:
-      en: >-
-        Root/Panel/Handle preserve size ownership and AxisInput requests; handle paint uses historical separator vocabulary over the actual inherited state.
-
-
+            en: Root/Panel/Handle preserve size ownership and AxisInput requests; handle paint uses historical separator vocabulary over the actual inherited state.
   - id: P-BOOTSTRAP-2-3-2-RESIZABLE-EXTENSION
     text:
-      en: >-
-        Resizable is a Proto extension; Bootstrap 2.3.2 had no split-pane control.
-
-
+            en: Resizable is a Proto extension; Bootstrap 2.3.2 had no split-pane control.
   - id: P-BOOTSTRAP-2-3-2-RESIZABLE-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-RESIZABLE-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

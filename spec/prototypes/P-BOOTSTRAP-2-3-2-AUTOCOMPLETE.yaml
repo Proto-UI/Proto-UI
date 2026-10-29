@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Autocomplete projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Autocomplete family over P-BASE-AUTOCOMPLETE with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Input/Trigger/Content/Item/Empty preserve the exact Base search family: one editor, filtering, active-descendant keyboard and controlled value/query/open. Paint uses the pinned 160px typeahead dropdown vocabulary with the historical highlight; upstream typeahead is comparison, not authority.
-
-
+    en: 'The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Input/Trigger/Content/Item/Empty preserve the exact Base search family: one editor, filtering, active-descendant keyboard and controlled value/query/open. Paint uses the pinned 160px typeahead dropdown vocabulary with the historical highlight; upstream typeahead is comparison, not authority.'
 criteria:
   - id: P-BOOTSTRAP-2-3-2-AUTOCOMPLETE-BASE
     text:
-      en: >-
-        Invoke asAutocomplete* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asAutocomplete* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-AUTOCOMPLETE-VISUAL
     text:
-      en: >-
-        Root/Input/Trigger/Content/Item/Empty preserve the exact Base search family: one editor, filtering, active-descendant keyboard and controlled value/query/open. Paint uses the pinned 160px typeahead dropdown vocabulary with the historical highlight; upstream typeahead is comparison, not authority.
-
-
+            en: 'Root/Input/Trigger/Content/Item/Empty preserve the exact Base search family: one editor, filtering, active-descendant keyboard and controlled value/query/open. Paint uses the pinned 160px typeahead dropdown vocabulary with the historical highlight; upstream typeahead is comparison, not authority.'
   - id: P-BOOTSTRAP-2-3-2-AUTOCOMPLETE-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-AUTOCOMPLETE-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

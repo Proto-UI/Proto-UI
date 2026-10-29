@@ -9,7 +9,8 @@ import {
   sliderValuesLabel,
   sliderValuesValue,
 } from '../src/slider';
-import { styleContains } from '../../test-utils/style';
+import { colorContrast, resolveMaterialStyle } from '../../../adapters/base/src/material/style';
+import { THEME } from '../src/theme';
 
 type Host = HTMLElement & { getExposes(): Record<string, any> };
 const visualFrames = new WeakMap<HTMLElement, VisualFeedbackFrame[]>();
@@ -22,12 +23,14 @@ for (const prototype of [
   sliderValuesValue,
 ])
   AdaptToWebComponent(prototype, {
-    createVisualSink(host) {
+    createVisualSink(host, effects) {
       const frames: VisualFeedbackFrame[] = [];
       visualFrames.set(host, frames);
       return {
         commit: (frame) => {
           frames.push(frame);
+          effects.queueStyle({ ...frame.style, tokens: [...frame.style.tokens] });
+          effects.requestFlush();
         },
         release() {},
       };
@@ -36,6 +39,17 @@ for (const prototype of [
 const flush = async () => {
   for (let i = 0; i < 40; i++) await Promise.resolve();
 };
+function expectOpaqueFallback(frame: VisualFeedbackFrame) {
+  expect(frame.style.tokens.some((token) => token.startsWith('opacity-'))).toBe(false);
+  for (const theme of ['light', 'dark'] as const) {
+    const style = resolveMaterialStyle(frame.style.tokens, THEME[theme]);
+    expect(style.provenance).toBe('post-patch-complete');
+    expect(style.competingPaint).toEqual([]);
+    expect(style.fill?.[3]).toBe(1);
+    expect(style.foreground?.[3]).toBe(1);
+    expect(colorContrast(style.fill!, style.foreground!)).toBeGreaterThanOrEqual(4.5);
+  }
+}
 afterEach(async () => {
   document.body.replaceChildren();
   await flush();
@@ -173,7 +187,25 @@ it('projects selected segments and Root orientation/direction without installing
   expect(segment.getExposes().startPercentage.get()).toBe(20);
   expect(segment.getExposes().extent.get()).toBe(30);
   expect(segment.getAttribute('aria-hidden')).toBe('true');
-  expect(styleContains(f.track, 'data-[orientation=vertical]:w-3')).toBe(true);
+  expect(segment.style.getPropertyValue('--pui-start-percentage')).toBe('20');
+  expect(segment.style.getPropertyValue('--pui-extent')).toBe('30');
+  expect(f.track.getExposes().orientation.get()).toBe('vertical');
+  expect(f.track.getExposes().direction.get()).toBe('rtl');
+  for (const target of [f.track, f.thumbs[0]]) {
+    for (const type of ['pointerdown', 'pointermove', 'pointerup'])
+      target.dispatchEvent(
+        new PointerEvent(type, {
+          bubbles: true,
+          pointerId: 9,
+          pointerType: 'mouse',
+          button: 0,
+          clientX: type === 'pointerdown' ? 0 : 100,
+        })
+      );
+  }
+  await flush();
+  expect(f.x.getValue()).toEqual([20, 50, 80]);
+  expect(f.indicator.getExposes().extent.get()).toBe(60);
 });
 
 it('keeps legal opaque fallback and neutral rail while material choices preserve the functional owner', async () => {
@@ -194,12 +226,11 @@ it('keeps legal opaque fallback and neutral rail while material choices preserve
   expect(frames.at(-1)?.material.candidates).toEqual([
     { intent: 'liquid-glass', variant: 'regular' },
   ]);
-  expect(styleContains(f.track, 'bg-muted')).toBe(true);
-  expect(styleContains(thumb, 'bg-background')).toBe(true);
-  expect(styleContains(thumb, 'text-foreground')).toBe(true);
+  expectOpaqueFallback(frames.at(-1)!);
   setElementProps(thumb, { index: 0, material: 'opaque' });
   await flush();
   expect(frames.at(-1)?.material.candidates).toEqual([]);
+  expectOpaqueFallback(frames.at(-1)!);
   await key(thumb, 'ArrowRight');
   expect(f.x.getValue()).toEqual([25, 80]);
   expect(thumb.getExposes().value).toBe(valueState);
@@ -216,6 +247,5 @@ it('keeps legal opaque fallback and neutral rail while material choices preserve
   expect(f.x.getValue()).toEqual([25, 80]);
   expect(thumb.getExposes().value).toBe(valueState);
   expect(thumb.getAttribute('aria-valuenow')).toBe('25');
-  expect(styleContains(thumb, 'bg-background')).toBe(true);
-  expect(styleContains(thumb, 'text-foreground')).toBe(true);
+  expectOpaqueFallback(frames.at(-1)!);
 });

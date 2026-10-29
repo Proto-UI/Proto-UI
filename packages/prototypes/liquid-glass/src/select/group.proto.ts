@@ -6,7 +6,7 @@ import type { LiquidGlassSelectGroupProps, LiquidGlassSelectGroupExposes } from 
 export default definePrototype<LiquidGlassSelectGroupProps, LiquidGlassSelectGroupExposes>({
   name: 'liquid-glass-select-group',
   setup() {
-    asSelectGroup();
-    return (renderer) => [renderer.r.slot()];
+    const inherited = asSelectGroup();
+    return inherited.render;
   },
 });

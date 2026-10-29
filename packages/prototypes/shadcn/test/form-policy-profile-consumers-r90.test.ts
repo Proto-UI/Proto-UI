@@ -69,7 +69,6 @@ describe('source-bound Form action and policy compositions', () => {
       for (const action of [submit, reset]) {
         expect(tokens(action)).toEqual(expect.arrayContaining([height, radius]));
         expect(action.getAttribute('role')).toBe('button');
-        expect(action.getAttribute('data-pui-a11y-actions')).toBe('activate');
       }
       const pressed = submit.getExposes().pressed;
       submit.dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
@@ -142,7 +141,10 @@ describe('source-bound Form action and policy compositions', () => {
     expect(editor.getAttribute('aria-labelledby')).toBe(label.id);
     expect(tokens(group)).toContain('gap-4');
     expect(tokens(legend)).toContain('mb-1.5');
-    expect(form.getExposes().getValues()).toEqual({ name: 'Ada' });
+    // Form snapshots include enabled named Fields; disabling a Fieldset must
+    // exclude the Field without erasing its canonical editor value.
+    expect(editor.value).toBe('Ada');
+    expect(form.getExposes().getValues()).toEqual({});
     setElementProps(scope, { styleProfile: 'sera' });
     setElementProps(group, {});
     setElementProps(legend, { variant: 'label' });

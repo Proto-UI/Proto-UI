@@ -60,11 +60,14 @@ export default definePrototype<Bootstrap232SelectItemProps, Bootstrap232SelectIt
       ),
       renderer.el(
         'span',
-        { style: tw('pointer-events-none flex size-4 shrink-0 items-center justify-center') },
+        {
+          style: tw('pointer-events-none flex size-4 shrink-0 items-center justify-center'),
+        },
         selected.get()
           ? renderer.svg.root(
               {
                 viewBox: '0 0 24 24',
+                'aria-hidden': 'true',
                 width: 16,
                 height: 16,
                 fill: 'none',

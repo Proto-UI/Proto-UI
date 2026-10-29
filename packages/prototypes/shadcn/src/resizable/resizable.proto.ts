@@ -83,6 +83,7 @@ export const resizableHandle = definePrototype<ShadcnResizableHandleProps, Resiz
     def.props.watchRaw(['styleProfile'], refresh);
     def.props.define({ withHandle: { type: 'boolean', empty: 'fallback' } });
     def.props.setDefaults({ withHandle: false });
+    def.props.watch(['withHandle'], refresh);
     def.feedback.style.use(
       tw(
         'relative flex shrink-0 items-center justify-center bg-border ring-offset-background outline-none'

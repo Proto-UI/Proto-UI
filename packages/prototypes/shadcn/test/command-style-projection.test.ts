@@ -102,7 +102,9 @@ describe('actual shared shell consumers', () => {
       expect(editor.value).toBe('Al');
       expect(editor.selectionStart).toBe(0);
       expect(editor.selectionEnd).toBe(1);
-      expect(tokens(f.shell)).toContain('rounded-md');
+      // New York Command's wrapper is headless; ordinary InputGroup keeps
+      // its own rounded border. Source: 3d98900e new-york-v4/ui/command.tsx.
+      expect(tokens(f.shell)).toContain(kind === 'command' ? 'rounded-none' : 'rounded-md');
       expect(tokens(editor)).toContain('border-0');
       expect(tokens(editor)).not.toContain('border-input');
       setElementProps(f.scope, { styleProfile: 'rhea' });
@@ -125,7 +127,8 @@ describe('actual shared shell consumers', () => {
     await flush();
     const editor = input.querySelector('input')!;
     expect(tokens(editor)).toContain('rounded-md');
-    expect(tokens(editor)).toContain('border-input');
+    expect(tokens(editor)).toContain('border-0');
+    expect(tokens(editor)).not.toContain('border-input');
     expect(tokens(editor)).toContain('w-full');
   });
   it('Rhea active paint withdraws black compatibility paint without changing search state', async () => {
@@ -141,7 +144,8 @@ describe('actual shared shell consumers', () => {
     expect(tokens(active)).not.toContain('bg-primary');
     setElementProps(f.scope, { styleProfile: 'new-york-v4' });
     await flush();
-    expect(tokens(active)).toContain('bg-primary');
+    expect(tokens(active)).toContain('bg-accent');
+    expect(tokens(active)).not.toContain('bg-primary');
     expect(tokens(active)).not.toContain('bg-muted');
     setElementProps(f.scope, { styleProfile: 'rhea' });
     await flush();
@@ -164,7 +168,7 @@ it('honors explicit family scope, the New York alias and inherit withdrawal', as
   const editor = f.control.querySelector('input')!;
   setElementProps(root, { styleProfile: 'new-york' });
   await flush();
-  expect(tokens(f.shell)).toContain('rounded-md');
+  expect(tokens(f.shell)).toContain('rounded-none');
   expect(tokens(f.shell)).not.toContain('rounded-[var(--pui-radius-2xl)]');
   setElementProps(root, { styleProfile: 'inherit' });
   await flush();

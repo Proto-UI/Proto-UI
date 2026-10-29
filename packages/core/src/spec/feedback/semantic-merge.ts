@@ -61,6 +61,9 @@ const TEXT_SIZE_TOKENS = new Set([
 const TEXT_ALIGN_TOKENS = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
 
 export function getSemanticGroupKeyV0(token: string): string {
+  if (token === '-mx-4') return 'mx-';
+  if (token === '-mb-4') return 'mb-';
+  if (token === 'ease-linear' || token === 'ease-in-out') return 'transition timing';
   if (token === 'box-border' || token === 'box-content') return 'box sizing';
   if (token === 'float-left' || token === 'float-right') return 'float placement';
   if (token === 'text-balance') return 'text wrapping';
@@ -72,6 +75,7 @@ export function getSemanticGroupKeyV0(token: string): string {
     return 'vertical alignment';
   const roundedSide = token.match(/^rounded-([trbl])-/);
   if (roundedSide) return `rounded-${roundedSide[1]}-`;
+  if (token === 'scroll-py-1' || token === 'scroll-py-1.5') return 'finite scroll padding block';
   if (token === 'scroll-my-1' || token === 'scroll-my-1.5') return 'finite scroll margin block';
   if (isPlaceholderColorTokenV0(token)) return 'placeholder:text-color';
   if (/^(?:-z-(?:1|10)|z-(?:10|40|50|\[(?:2|1000|1051)\]))$/.test(token)) return 'finite z index';

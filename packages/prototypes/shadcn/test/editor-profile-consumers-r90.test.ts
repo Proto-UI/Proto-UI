@@ -11,6 +11,7 @@ import {
   fieldError,
 } from '../src/field';
 import { styleScope } from '../src/style-scope';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 
 AdaptToWebComponent(input);
 AdaptToWebComponent(textarea);
@@ -234,11 +235,11 @@ describe('source-bound editor profile consumers', () => {
       expect(editor.getAttribute('aria-labelledby')).toBe(label.id);
       expect(editor.getAttribute('aria-describedby')).toContain(description.id);
       expect(error.textContent).toContain('Explain the invalid value');
-      expect(
-        tokens(editor).some(
-          (token) => token.endsWith(':border-b-destructive') || token === 'border-b-destructive'
-        )
-      ).toBe(true);
+      // Pinned Sera .cn-input/.cn-textarea dark invalid borders are 50%,
+      // not the opaque light border. Observe declarations on this real editor.
+      expect(renderProtoStyleTokenCss(tokens(editor))).toContain(
+        'border-bottom-color: color-mix(in oklab, var(--pui-destructive) 50%, transparent);'
+      );
       setElementProps(scope, { styleProfile: 'maia' });
       setElementProps(field, { invalid: false, disabled: true });
       await flush();

@@ -334,7 +334,8 @@ describe('source-bound search and menu profiles', () => {
       });
       await flush();
       expect(editor.disabled).toBe(true);
-      expect(tokens(editor)).toContain('opacity-50');
+      expect(editor.hasAttribute('data-disabled')).toBe(true);
+      expect(renderProtoStyleTokenCss(tokens(editor))).toContain('opacity: 0.5;');
       expect(tokens(shell)).not.toContain('opacity-50');
     } finally {
       current = false;
@@ -414,8 +415,11 @@ describe('source-bound search and menu profiles', () => {
         expect(before.open.get()).toBe(true);
         expect(input.querySelector('input')).toBe(editor);
         expect(tokens(beta)).toContain(profile.item);
-        expect(tokens(beta)).toContain('bg-accent');
         expect(beta.getExposes().active.get()).toBe(true);
+        expect(beta.hasAttribute('data-active')).toBe(true);
+        expect(renderProtoStyleTokenCss(tokens(beta))).toContain(
+          'background-color: var(--pui-accent);'
+        );
         expect(beta.getExposes().selected.get()).toBe(false);
         expect(values).toHaveLength(1);
       }

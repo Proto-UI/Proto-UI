@@ -1,5 +1,22 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { AdapterPrototype } from '@proto.ui/adapter-base';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import { createRuntimeSession } from '@proto.ui/runtime';
+import {
+  ANATOMY_GET_PROTO_CAP,
+  ANATOMY_INSTANCE_TOKEN_CAP,
+  ANATOMY_PARENT_CAP,
+  ANATOMY_ROOT_TARGET_CAP,
+} from '@proto.ui/module-anatomy';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
+import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import {
+  AS_TRIGGER_GET_PROTO_CAP,
+  AS_TRIGGER_INSTANCE_CAP,
+  AS_TRIGGER_PARENT_CAP,
+} from '@proto.ui/module-as-trigger';
+import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
+import { EXPOSES_RECORD_SINK_CAP } from '@proto.ui/module-expose-state';
 import * as alert from '../src/alert-dialog';
 import * as popover from '../src/popover';
 import * as carousel from '../src/carousel';
@@ -86,7 +103,7 @@ function node(proto: { name: string }, props: Record<string, unknown> = {}, text
   if (text !== undefined) element.textContent = text;
   return element;
 }
-function stateValue<T>(element: Host, key: string): T {
+function stateValue<T>(element: Pick<Host, 'getExposes'>, key: string): T {
   const state = element.getExposes()[key];
   if (!state || typeof state !== 'object' || !('get' in state) || typeof state.get !== 'function')
     throw new Error(`[historical-r91] Missing readable state ${key}`);
@@ -160,7 +177,7 @@ describe('Bootstrap historical modal and popup consumers', () => {
     expect(stateValue(f.root, 'open')).toBe(false);
     expect(stateValue(f.trigger, 'disabled')).toBe(true);
 
-    setElementProps(f.root, { disabled: false });
+    setElementProps(f.root, { a11yLabel: 'Delete record', disabled: false });
     await flush();
     f.trigger.focus();
     await click(f.trigger);
@@ -277,13 +294,13 @@ describe('Bootstrap historical modal and popup consumers', () => {
     await flush();
     await completeTransitions(content);
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-    setElementProps(root, { disabled: true });
+    setElementProps(root, { open: false, a11yLabel: 'Details', disabled: true });
     await flush();
     const count = requests.length;
     await click(trigger);
     expect(requests).toHaveLength(count);
     expect(stateValue(trigger, 'disabled')).toBe(true);
-    setElementProps(root, { disabled: false });
+    setElementProps(root, { open: false, a11yLabel: 'Details', disabled: false });
     await flush();
     await click(trigger);
     expect(requests).toHaveLength(count + 1);
@@ -339,7 +356,7 @@ describe('Bootstrap historical collection consumers', () => {
     expect(requests).toEqual([{ index: 1 }]);
     expect(stateValue(f.root, 'index')).toBe(0);
     expect(stateValue(f.slides[0]!, 'current')).toBe(true);
-    setElementProps(f.root, { index: 1 });
+    setElementProps(f.root, { index: 1, orientation: 'vertical', direction: 'rtl' });
     await flush();
     f.viewport.focus();
     f.viewport.dispatchEvent(
@@ -348,7 +365,12 @@ describe('Bootstrap historical collection consumers', () => {
     await flush();
     expect(requests.at(-1)).toEqual({ index: 2 });
     expect(stateValue(f.root, 'index')).toBe(1);
-    setElementProps(f.root, { disabled: true });
+    setElementProps(f.root, {
+      index: 1,
+      orientation: 'vertical',
+      direction: 'rtl',
+      disabled: true,
+    });
     await flush();
     await click(f.next);
     expect(requests).toHaveLength(2);
@@ -356,12 +378,13 @@ describe('Bootstrap historical collection consumers', () => {
   });
 
   it('preserves all Calendar renderers, controlled date/month acceptance and row withdrawal', async () => {
-    const root = node(calendar.calendarRoot, {
+    const ownerProps = {
       month: '2026-02',
       value: '2026-02-10',
       locale: 'fr-FR',
       weekStartsOn: 0,
-    });
+    };
+    const root = node(calendar.calendarRoot, ownerProps);
     const caption = node(calendar.calendarCaption);
     const previous = node(calendar.calendarPrevious, {}, '‹');
     const heading = node(calendar.calendarHeading);
@@ -402,13 +425,19 @@ describe('Bootstrap historical collection consumers', () => {
     expect(stateValue(root, 'value')).toBe('2026-02-10');
     expect(stateValue(byDate('2026-02-10'), 'selected')).toBe(true);
     expect(stateValue(byDate('2026-02-12'), 'selected')).toBe(false);
-    setElementProps(root, { value: '2026-02-12', fixedWeeks: true, direction: 'rtl' });
+    const acceptedProps = {
+      ...ownerProps,
+      value: '2026-02-12',
+      fixedWeeks: true,
+      direction: 'rtl',
+    };
+    setElementProps(root, acceptedProps);
     await flush();
     expect(stateValue(byDate('2026-02-10'), 'selected')).toBe(false);
     expect(stateValue(byDate('2026-02-12'), 'selected')).toBe(true);
     expect(stateValue(rows[5]!, 'hidden')).toBe(false);
     expect(stateValue(root, 'direction')).toBe('rtl');
-    setElementProps(root, { disabled: true });
+    setElementProps(root, { ...acceptedProps, disabled: true });
     await flush();
     await click(byDate('2026-02-13'));
     await click(next);
@@ -416,6 +445,7 @@ describe('Bootstrap historical collection consumers', () => {
     expect(monthRequests).toEqual([]);
     expect(stateValue(previous, 'disabled')).toBe(true);
     setElementProps(root, {
+      ...acceptedProps,
       disabled: false,
       readOnly: true,
       min: '2026-02-10',
@@ -428,12 +458,18 @@ describe('Bootstrap historical collection consumers', () => {
     expect(stateValue(byDate('2026-02-21'), 'disabled')).toBe(true);
     await click(byDate('2026-02-13'));
     expect(valueRequests).toHaveLength(1);
-    setElementProps(root, { readOnly: false, min: '', max: '', unavailable: [] });
+    setElementProps(root, {
+      ...acceptedProps,
+      readOnly: false,
+      min: '',
+      max: '',
+      unavailable: [],
+    });
     await flush();
     await click(next);
     expect(monthRequests).toEqual([{ month: '2026-03' }]);
     expect(heading.textContent).toBe('février 2026');
-    setElementProps(root, { month: '2026-03', direction: 'ltr' });
+    setElementProps(root, { ...acceptedProps, month: '2026-03', direction: 'ltr' });
     await flush();
     expect(heading.textContent).toBe('mars 2026');
     expect(previous.textContent).toBe('‹');
@@ -441,11 +477,12 @@ describe('Bootstrap historical collection consumers', () => {
   });
 
   it('retains DatePicker Calendar/Popover composition through controlled refusal and acceptance', async () => {
-    const root = node(picker.datePickerRoot, {
+    const ownerProps = {
       open: false,
       value: '2026-10-01',
       month: '2026-10',
-    });
+    };
+    const root = node(picker.datePickerRoot, ownerProps);
     const trigger = node(picker.datePickerTrigger);
     const value = node(picker.datePickerValue);
     trigger.append(value);
@@ -465,7 +502,7 @@ describe('Bootstrap historical collection consumers', () => {
     await click(trigger);
     expect(openRequests.at(-1)).toEqual(expect.objectContaining({ open: true }));
     expect(stateValue(root, 'open')).toBe(false);
-    setElementProps(root, { open: true });
+    setElementProps(root, { ...ownerProps, open: true });
     await flush();
     await completeTransitions(content);
     expect(content.contains(grid)).toBe(true);
@@ -481,12 +518,13 @@ describe('Bootstrap historical collection consumers', () => {
     expect(stateValue(root, 'value')).toBe('2026-10-01');
     expect(stateValue(root, 'open')).toBe(true);
     expect(value.textContent).toBe('2026-10-01');
-    setElementProps(root, { value: '2026-10-12', open: false });
+    const acceptedProps = { ...ownerProps, value: '2026-10-12', open: false };
+    setElementProps(root, acceptedProps);
     await flush();
     await completeTransitions(content);
     expect(value.textContent).toBe('2026-10-12');
     expect(content.hasAttribute('data-pui-view-detached')).toBe(true);
-    setElementProps(root, { disabled: true });
+    setElementProps(root, { ...acceptedProps, disabled: true });
     await flush();
     const count = openRequests.length;
     await click(trigger);
@@ -556,10 +594,10 @@ describe('Bootstrap Table-derived DataTable consumers', () => {
     expect(selections).toEqual([{ selectedKeys: ['b'] }]);
     await click(f.next);
     expect(f.cells[0]!.textContent).toBe('Zeta');
-    expect(stateValue(f.rows[1]!, 'hidden')).toBe(true);
+    expect(f.rows[1]!.hasAttribute('data-pui-view-detached')).toBe(true);
     await click(f.previous);
     expect(f.cells[0]!.textContent).toBe('Alpha');
-    setElementProps(f.root, { readOnly: true });
+    setElementProps(f.root, { rows: dataRows, pageSize: 2, readOnly: true });
     await flush();
     await click(f.rows[0]!);
     expect(selections).toHaveLength(1);
@@ -581,6 +619,8 @@ describe('Bootstrap Table-derived DataTable consumers', () => {
     expect(f.headers[0]!.getAttribute('aria-sort')).toBe('none');
     expect(stateValue(f.rows[0]!, 'selected')).toBe(false);
     setElementProps(f.root, {
+      rows: dataRows,
+      pageSize: 2,
       sortKey: 'name',
       sortDirection: 'ascending',
       page: 1,
@@ -590,7 +630,15 @@ describe('Bootstrap Table-derived DataTable consumers', () => {
     expect(f.cells[0]!.textContent).toBe('Zeta');
     expect(stateValue(f.rows[0]!, 'selected')).toBe(true);
     expect(f.headers[0]!.getAttribute('aria-sort')).toBe('ascending');
-    setElementProps(f.root, { disabled: true });
+    setElementProps(f.root, {
+      rows: dataRows,
+      pageSize: 2,
+      sortKey: 'name',
+      sortDirection: 'ascending',
+      page: 1,
+      selectedKeys: ['a'],
+      disabled: true,
+    });
     await flush();
     await click(f.headers[1]!);
     await click(f.previous);
@@ -615,7 +663,8 @@ function progressFixture(props: Record<string, unknown>) {
 
 describe('Bootstrap numerical and hierarchical consumers', () => {
   it('preserves Progress clamping, live percentage transport and indeterminate withdrawal', async () => {
-    const f = progressFixture({ value: 25, min: 0, max: 50, ariaLabel: 'Upload status' });
+    const ownerProps = { min: 0, max: 50, ariaLabel: 'Upload status' };
+    const f = progressFixture({ ...ownerProps, value: 25 });
     await flush();
     expect(f.root.getAttribute('role')).toBe('progressbar');
     expect(f.root.getAttribute('aria-labelledby')).toBe(f.label.id);
@@ -623,17 +672,17 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     expect(stateValue(f.indicator, 'percentage')).toBe(50);
     expect(f.indicator.style.getPropertyValue('--pui-percentage')).toBe('50');
     expect(f.value.textContent).toBe('25');
-    setElementProps(f.root, { value: 70 });
+    setElementProps(f.root, { ...ownerProps, value: 70 });
     await flush();
     expect(stateValue(f.root, 'value')).toBe(50);
     expect(stateValue(f.root, 'status')).toBe('complete');
     expect(f.indicator.style.getPropertyValue('--pui-percentage')).toBe('100');
-    setElementProps(f.root, { indeterminate: true });
+    setElementProps(f.root, { ...ownerProps, value: 70, indeterminate: true });
     await flush();
     expect(stateValue(f.indicator, 'indeterminate')).toBe(true);
     expect(f.root.hasAttribute('aria-valuenow')).toBe(false);
     expect(f.value.textContent).toBe('');
-    setElementProps(f.root, { indeterminate: false, value: 10 });
+    setElementProps(f.root, { ...ownerProps, indeterminate: false, value: 10 });
     await flush();
     expect(stateValue(f.indicator, 'indeterminate')).toBe(false);
     expect(f.root.getAttribute('aria-valuenow')).toBe('10');
@@ -642,7 +691,8 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
   });
 
   it('keeps Meter optimal/suboptimal/critical facts separate from percentage and readout', async () => {
-    const root = node(meter.meterRoot, { value: 90, low: 20, high: 70, optimum: 10 });
+    const ownerProps = { low: 20, high: 70, optimum: 10 };
+    const root = node(meter.meterRoot, { ...ownerProps, value: 90 });
     const label = node(meter.meterLabel, {}, 'Pressure');
     const track = node(meter.meterTrack);
     const indicator = node(meter.meterIndicator);
@@ -655,11 +705,11 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     expect(root.getAttribute('aria-labelledby')).toBe(label.id);
     expect(stateValue(indicator, 'status')).toBe('critical');
     expect(indicator.style.getPropertyValue('--pui-percentage')).toBe('90');
-    setElementProps(root, { value: 50 });
+    setElementProps(root, { ...ownerProps, value: 50 });
     await flush();
     expect(stateValue(indicator, 'status')).toBe('suboptimal');
     expect(indicator.style.getPropertyValue('--pui-percentage')).toBe('50');
-    setElementProps(root, { value: 10, valueText: 'Low pressure' });
+    setElementProps(root, { ...ownerProps, value: 10, valueText: 'Low pressure' });
     await flush();
     expect(stateValue(indicator, 'status')).toBe('optimal');
     expect(root.getAttribute('aria-valuenow')).toBe('10');
@@ -689,7 +739,7 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     await click(toggle);
     expect(expansions).toEqual([{ expandedKeys: ['parent'] }]);
     expect(stateValue(child, 'hidden')).toBe(true);
-    setElementProps(root, { expandedKeys: ['parent'] });
+    setElementProps(root, { value: 'parent', expandedKeys: ['parent'] });
     await flush();
     expect(stateValue(child, 'hidden')).toBe(false);
     expect(child.getAttribute('aria-level')).toBe('2');
@@ -698,7 +748,7 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     await click(child);
     expect(values).toEqual([{ value: 'child' }]);
     expect(stateValue(root, 'value')).toBe('parent');
-    setElementProps(root, { value: 'child' });
+    setElementProps(root, { value: 'child', expandedKeys: ['parent'] });
     await flush();
     expect(stateValue(parent, 'selected')).toBe(false);
     expect(stateValue(child, 'selected')).toBe(true);
@@ -710,7 +760,7 @@ describe('Bootstrap numerical and hierarchical consumers', () => {
     await flush();
     expect(document.activeElement).toBe(parent);
     expect(stateValue(root, 'value')).toBe('child');
-    setElementProps(root, { disabled: true });
+    setElementProps(root, { value: 'child', expandedKeys: ['parent'], disabled: true });
     await flush();
     await click(last);
     await click(toggle);
@@ -796,19 +846,85 @@ describe('Bootstrap alert-derived Toast consumers', () => {
     expect(f.root.hasAttribute('data-pui-view-detached')).toBe(true);
   });
 
-  it('does not revive an Action dismissal continuation after its callback retires the command', async () => {
-    const f = toastFixture();
-    const requests = details(f.root, 'openChange');
-    let actions = 0;
-    f.action.addEventListener('action', () => {
-      actions++;
-      f.action.remove();
-    });
-    await flush();
-    await click(f.action);
-    expect(actions).toBe(1);
-    expect(f.root.contains(f.action)).toBe(false);
-    expect(requests).toEqual([]);
-    expect(stateValue(f.root, 'open')).toBe(true);
-  });
+  it.each(['normal', 'unmount', 'dispose'] as const)(
+    'does not revive an Action dismissal continuation after synchronous %s in its application callback',
+    async (operation) => {
+      vi.useFakeTimers();
+      // DOM removal schedules Adapter retirement after the callback turn; it
+      // is not a synchronous Runtime lifetime transition. Drive the actual
+      // application sink and explicitly retire the real projected session.
+      const parents = new Map<unknown, unknown>();
+      const prototypesByTarget = new Map<unknown, AdapterPrototype>();
+      const requests: unknown[] = [];
+      let actions = 0;
+      let onAction = () => {};
+      const make = (prototype: AdapterPrototype, parent: HTMLElement | null = null) => {
+        const target = document.createElement('div');
+        parents.set(target, parent);
+        prototypesByTarget.set(target, prototype);
+        let exposes: Record<string, unknown> = {};
+        const session = createRuntimeSession(prototype, {
+          prototypeName: prototype.name,
+          getRawProps: () => ({ duration: 0 }),
+          schedule: (task) => task(),
+          scheduleDelay: (ms, task) => {
+            const timer = setTimeout(task, ms);
+            return { cancel: () => clearTimeout(timer) };
+          },
+          commit: (_children, signal) => signal?.done(),
+          onRuntimeReady(wiring) {
+            wiring.attach('anatomy', [
+              [ANATOMY_INSTANCE_TOKEN_CAP, target],
+              [ANATOMY_PARENT_CAP, (token) => parents.get(token) ?? null],
+              [ANATOMY_GET_PROTO_CAP, (token) => prototypesByTarget.get(token) ?? null],
+              [ANATOMY_ROOT_TARGET_CAP, (token) => (token instanceof HTMLElement ? token : null)],
+            ]);
+            wiring.attach('context', [
+              [CONTEXT_INSTANCE_TOKEN_CAP, target],
+              [CONTEXT_PARENT_CAP, (token) => parents.get(token) ?? null],
+            ]);
+            wiring.attach('event', [
+              [EVENT_ROOT_TARGET_CAP, () => target],
+              [EVENT_GLOBAL_TARGET_CAP, () => target],
+            ]);
+            wiring.attach('as-trigger', [
+              [AS_TRIGGER_INSTANCE_CAP, target],
+              [AS_TRIGGER_PARENT_CAP, (token) => parents.get(token) ?? null],
+              [AS_TRIGGER_GET_PROTO_CAP, (token) => prototypesByTarget.get(token) ?? null],
+            ]);
+            wiring.attach('expose-state', [[EXPOSES_RECORD_SINK_CAP, (record) => (exposes = record)]]);
+            wiring.attach('expose-event', [
+              [
+                EXPOSE_EVENT_SINK_CAP,
+                (name, payload) => {
+                  if (name === 'openChange') requests.push(payload);
+                  if (name === 'action') {
+                    actions++;
+                    onAction();
+                  }
+                },
+              ],
+            ]);
+          },
+        });
+        return { session, target, getExposes: () => exposes };
+      };
+      const root = make(toast.toastRoot);
+      const action = make(toast.toastAction, root.target);
+      try {
+        await root.session.mount();
+        await action.session.mount();
+        onAction = () => {
+          if (operation !== 'normal') void action.session[operation]();
+        };
+        action.target.dispatchEvent(new Event('press.commit'));
+        expect(actions).toBe(1);
+        expect(requests).toEqual(operation === 'normal' ? [{ open: false, reason: 'action' }] : []);
+        expect(stateValue(root, 'open')).toBe(operation !== 'normal');
+      } finally {
+        await action.session.dispose();
+        await root.session.dispose();
+      }
+    }
+  );
 });

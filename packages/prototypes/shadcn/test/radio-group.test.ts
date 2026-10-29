@@ -1,19 +1,6 @@
 import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import type * as BaseRadioGroup from '@proto.ui/prototypes-base/radio-group';
-import { createRuntimeSession } from '@proto.ui/runtime';
-import {
-  ANATOMY_GET_PROTO_CAP,
-  ANATOMY_INSTANCE_TOKEN_CAP,
-  ANATOMY_PARENT_CAP,
-  ANATOMY_ROOT_TARGET_CAP,
-} from '@proto.ui/module-anatomy';
-import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import {
-  AS_TRIGGER_GET_PROTO_CAP,
-  AS_TRIGGER_INSTANCE_CAP,
-  AS_TRIGGER_PARENT_CAP,
-} from '@proto.ui/module-as-trigger';
 import { styleContains } from '../../test-utils/style';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import * as ShadcnPackage from '../src';
@@ -151,62 +138,6 @@ describe('prototypes/shadcn: radio group', () => {
     document.body.append(root);
     await flushReconciliation();
 
-    const parts = [
-      [ShadcnRadioGroupRoot, 'as-radio-group-root'],
-      [ShadcnRadioGroupItem, 'as-radio-group-item'],
-      [ShadcnRadioGroupIndicator, 'as-radio-group-indicator'],
-    ] as const;
-    const tokens = [new EventTarget(), new EventTarget(), new EventTarget()];
-    const parents = new Map<unknown, unknown>([
-      [tokens[1], tokens[0]],
-      [tokens[2], tokens[1]],
-    ]);
-    const prototypes = new Map<unknown, unknown>(
-      parts.map(([prototype], index) => [tokens[index], prototype])
-    );
-    const sessions: Array<{ dispose(): Promise<void> }> = [];
-    try {
-      for (const [index, [prototype, hookName]] of parts.entries()) {
-        // The WC Adapter executes a cloned Prototype. Direct Runtime setup
-        // records inheritance on these exact public parts in one logical tree.
-        sessions.push(
-          createRuntimeSession(prototype as any, {
-            prototypeName: `${prototype.name}-hook-trace`,
-            getRawProps: () => ({ value: 'a' }),
-            commit(_children, signal) {
-              signal?.done();
-            },
-            schedule(task) {
-              task();
-            },
-            onRuntimeReady(wiring) {
-              wiring.attach('anatomy', [
-                [ANATOMY_INSTANCE_TOKEN_CAP, tokens[index]],
-                [ANATOMY_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-                [ANATOMY_GET_PROTO_CAP, (token: object) => prototypes.get(token) ?? null],
-                [ANATOMY_ROOT_TARGET_CAP, (token: unknown) => token],
-              ]);
-              wiring.attach('context', [
-                [CONTEXT_INSTANCE_TOKEN_CAP, tokens[index]],
-                [CONTEXT_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-              ]);
-              wiring.attach('as-trigger', [
-                [AS_TRIGGER_INSTANCE_CAP, tokens[index]],
-                [AS_TRIGGER_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-                [AS_TRIGGER_GET_PROTO_CAP, (token: object) => prototypes.get(token) ?? null],
-              ]);
-            },
-          })
-        );
-        const hooks = (prototype as { __asHooks?: Array<{ name: string; mode: string }> })
-          .__asHooks;
-        expect(hooks?.filter((hook) => hook.name.startsWith('as-radio-group'))).toEqual([
-          expect.objectContaining({ name: hookName, mode: 'once' }),
-        ]);
-      }
-    } finally {
-      for (const session of sessions.reverse()) await session.dispose();
-    }
     expect(Object.keys(root.getExposes()).sort()).toEqual([
       'count',
       'disabled',

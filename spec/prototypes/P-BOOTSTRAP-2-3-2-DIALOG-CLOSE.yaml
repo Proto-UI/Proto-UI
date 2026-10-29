@@ -4,41 +4,23 @@ title: Bootstrap 2.3.2 Dialog Close Dialog projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Dialog part over P-BASE-DIALOG-CLOSE with the pinned modal vocabulary.
 statement:
-  en: >-
-    The Prototype invokes asDialogClose() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
-
-
+    en: The Prototype invokes asDialogClose() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-BASE
     text:
-      en: >-
-        Invoke asDialogClose() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asDialogClose() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-VISUAL
     text:
-      en: >-
-        Close uses the pinned close recipe: black/white text-shadow, float-right, 20px/20px typography, .2 rest opacity and .4 hover/focus opacity; it requests close only.
-
-
+            en: 'Close uses the pinned close recipe: black/white text-shadow, float-right, 20px/20px typography, .2 rest opacity and .4 hover/focus opacity; it requests close only.'
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-DIALOG-CLOSE-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001

@@ -6,8 +6,8 @@ import type { LiquidGlassSelectItemTextProps } from './types';
 export default definePrototype<LiquidGlassSelectItemTextProps>({
   name: 'liquid-glass-select-item-text',
   setup(def) {
-    asSelectItemText();
+    const inherited = asSelectItemText();
     def.feedback.style.use(tw('min-w-0 whitespace-normal wrap-anywhere'));
-    return (renderer) => [renderer.r.slot()];
+    return inherited.render;
   },
 });

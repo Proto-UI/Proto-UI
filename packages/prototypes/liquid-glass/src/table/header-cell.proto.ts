@@ -24,7 +24,7 @@ export const liquidGlassTableHeaderCell = definePrototype<
     // Base owns headerKey/headerKind/headers/span configuration, row/column
     // index projection and the authored slot. The family adds only restrained
     // header typography and padding; no sorting, selection or focus channel.
-    def.feedback.style.use(tw('px-4 py-3 text-left text-sm font-semibold'));
+    def.feedback.style.use(tw('table-cell align-top px-4 py-3 text-left text-sm font-semibold'));
     return behavior.render;
   },
 });

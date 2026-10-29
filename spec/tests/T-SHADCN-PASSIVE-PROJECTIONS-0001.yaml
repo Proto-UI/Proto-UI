@@ -4,10 +4,7 @@ title: Shadcn passive atoms and Table projections test
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Consumer coverage for semantic-only regions, host-backed Image, standalone Transition and passive Table parts.
 cases:
   - id: T-SHADCN-PASSIVE-PROJECTIONS-0001-CASE-REGIONS

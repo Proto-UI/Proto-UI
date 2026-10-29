@@ -21,12 +21,12 @@ criteria:
       zh-CN: '通过 @proto.ui/prototypes-liquid-glass/select 提供 liquid-glass-select-content 与完整类型；private workspace 源码只允许显式 workspace CLI 生成，不代表 registry 已发布。'
   - id: P-LIQUID-GLASS-SELECT-CONTENT-VISUAL-SAFETY
     text:
-      en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
-      zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
-  - id: P-LIQUID-GLASS-SELECT-CONTENT-MATERIAL-INTENT
+      en: "Use shrinkable logical layout and readable wrapping labels. Content is the nonmaterial portal/lifetime/frame, Surface solely owns popup paint and complete opaque fallback, and Viewport is the one scrollport. Preserve Base focus, disabled state, anchor/available bounds and item text identity without fixed content height or physical text alignment."
+      zh-CN: "使用可收缩逻辑布局和可读换行标签。Content 仅为无材质 portal/lifetime/frame，Surface 独占 popup 绘制与完整不透明 fallback，Viewport 是唯一 scrollport。保留 Base focus、disabled、anchor/available 边界和 ItemText 身份，不引入固定内容高度或物理文字对齐。"
+  - id: "P-LIQUID-GLASS-SELECT-CONTENT-PORTAL-FRAME"
     text:
-      en: 'Declare one shared rounded-rect/style, in-app-backdrop material slot with complete final-style opaque fallback. Trigger consumes Base pressed for mutually exclusive rest/pressed liquid-glass candidates; open Content requests liquid-glass. No adaptive/native-blur substitution, private material flag, new state owner or optical/GPUI paint claim is permitted.'
-      zh-CN: '声明单个 rounded-rect/style、in-app-backdrop 共享 material slot，并保留最终不透明 style fallback。Trigger 使用 Base pressed 互斥选择 rest/pressed liquid-glass；打开的 Content 请求 liquid-glass。不得替代为 adaptive/native blur、引入私有材质标记或新状态 owner，也不得把意图称为光学或 GPUI 绘制证据。'
+      en: "Content preserves asSelectContent portal, collision, focus, dismissal and zero-duration presence, but declares no material slot, candidate, opaque fallback or popup chrome. Surface is the sole popup paint/material owner and Viewport alone scrolls; no inactive competing Content slot remains. Intent and synthetic-DOM cases do not prove optical paint or native positioning."
+      zh-CN: "Content 保留 asSelectContent portal、collision、focus、dismissal 与零时长 presence，但不声明 material slot、candidate、不透明 fallback 或 popup chrome。Surface 独占 popup 绘制/材质，Viewport 唯一负责滚动；Content 不保留竞争性的 inactive slot。意图及 synthetic DOM 测试不证明光学绘制或原生定位。"
 openQuestions:
   - id: P-LIQUID-GLASS-SELECT-CONTENT-Q-ADMISSION
     question:

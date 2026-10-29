@@ -175,7 +175,10 @@ describe('Shadcn Tabs draft source projection', () => {
       const value = root.getExposes().value;
       const selected = b.getExposes().selected;
       const indicatorValue = indicator.getExposes().value;
-      const text = b.firstChild;
+      const firstChild = b.firstChild;
+      const text = Array.from(b.childNodes).find(
+        (node): node is Text => node.nodeType === Node.TEXT_NODE && node.textContent === 'Password'
+      );
       const leaf = decoration(b);
       const input = document.createElement('input');
       input.value = 'retained';
@@ -200,7 +203,8 @@ describe('Shadcn Tabs draft source projection', () => {
       expect(indicator.getExposes().value).toBe(indicatorValue);
       expect(indicatorValue.get()).toBe('b');
       expect(document.activeElement).toBe(b);
-      expect(b.firstChild).toBe(text);
+      expect(b.firstChild).toBe(firstChild);
+      expect(text.parentNode).toBe(b);
       expect(decoration(b)).toBe(leaf);
       expect(input.value).toBe('retained');
       expect(input.selectionStart).toBe(1);

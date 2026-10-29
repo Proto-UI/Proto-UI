@@ -1,0 +1,46 @@
+id: T-LIQUID-GLASS-DRAFT-PASSIVE-0001
+type: test
+title: Liquid Glass passive atoms coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Semantic-only regions, Image, Transition and passive Table coverage.
+cases:
+  - id: T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-REGIONS
+    title: Busy and live updates retain descendants and focus
+    covers:
+      - P-LIQUID-GLASS-ASYNC-REGION-BASE
+      - P-LIQUID-GLASS-LIVE-REGION-BASE
+    expectation: prop-updates-preserve-content
+  - id: T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-TABLE
+    title: Table slots, spans, header relations and orphan-cell diagnostics
+    covers:
+      - P-LIQUID-GLASS-TABLE-BASE
+      - P-LIQUID-GLASS-TABLE-ROW-VISUAL
+      - P-LIQUID-GLASS-TABLE-CELL-VISUAL
+    expectation: passive-table-structure
+  - id: T-LIQUID-GLASS-DRAFT-PASSIVE-0001-CASE-IMAGE-TRANSITION
+    title: Image target transport and Transition slot/reversal/reduced-motion ordering
+    covers:
+      - P-LIQUID-GLASS-IMAGE-BASE
+      - P-LIQUID-GLASS-TRANSITION-BASE
+    expectation: host-target-and-phase-ordering
+implementations:
+  - id: liquid-draft-passive-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/draft-passive-projections.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-ASYNC-REGION
+      - P-LIQUID-GLASS-LIVE-REGION
+      - P-LIQUID-GLASS-IMAGE
+      - P-LIQUID-GLASS-TRANSITION
+      - P-LIQUID-GLASS-TABLE
+      - P-LIQUID-GLASS-TABLE-CAPTION
+      - P-LIQUID-GLASS-TABLE-ROW
+      - P-LIQUID-GLASS-TABLE-HEADER-CELL
+      - P-LIQUID-GLASS-TABLE-CELL
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

@@ -4,10 +4,7 @@ title: Shadcn binary control profile transitions
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
-
-
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
 summary: Nine-profile Switch, Checkbox, Checkbox Group and Radio Group transitions with owner preservation.
 cases:
   - id: T-SHADCN-BINARY-PROFILES-0001-CASE-TRANSITIONS

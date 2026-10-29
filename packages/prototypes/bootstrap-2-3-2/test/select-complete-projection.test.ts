@@ -113,7 +113,7 @@ function createSelect(parent: HTMLElement = document.body, fieldBound = false) {
 describe('prototypes/bootstrap-2-3-2: select complete projection', () => {
   it('retains selection and caller text through scoped groups and a contentless separator', async () => {
     vi.useFakeTimers();
-    const { root, alphaText, alpha, group, groupLabel, beta, betaText, separator, plain } =
+    const { root, trigger, alphaText, alpha, group, groupLabel, beta, betaText, separator, plain } =
       createSelect();
     await settle();
 
@@ -130,6 +130,11 @@ describe('prototypes/bootstrap-2-3-2: select complete projection', () => {
     expect(separator.getAttribute('aria-hidden')).toBe('true');
     expect(separator.getAttribute('role')).toBeNull();
     expect(separator.querySelector('button')).toBeNull();
+    expect(trigger.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(1);
+    expect(trigger.textContent).toBe('Alpha');
+    expect(alpha.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(1);
+    expect(alpha.textContent).toBe('Alpha');
+    expect(beta.querySelector('svg')).toBeNull();
 
     // Wrappers and decorative parts never steal Item selection ownership.
     expect(root.getExposes().value.get()).toBe('alpha');
@@ -140,6 +145,9 @@ describe('prototypes/bootstrap-2-3-2: select complete projection', () => {
     expect(alpha.querySelector(selectItemText.name)).toBe(alphaText);
     expect(beta.querySelector(selectItemText.name)).toBe(betaText);
     expect(betaText.textContent).toBe('Beta');
+    expect(alpha.querySelector('svg')).toBeNull();
+    expect(beta.querySelectorAll('svg[aria-hidden="true"]')).toHaveLength(1);
+    expect(beta.textContent).toBe('Beta');
     expect(plain.getAttribute('role')).toBe('option');
   });
 

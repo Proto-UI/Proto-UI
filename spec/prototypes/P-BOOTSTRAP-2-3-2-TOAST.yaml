@@ -4,47 +4,26 @@ title: Bootstrap 2.3.2 Toast projection
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: >-
-    Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
-
-
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
 summary: Bootstrap Toast family over P-BASE-TOAST with pinned vocabulary.
 statement:
-  en: >-
-    The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Viewport/Title/Description/Action/Close preserve announcement, timing, action and dismissal owners; transient surface paint uses the pinned alert recipe vocabulary.
-
-
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Viewport/Title/Description/Action/Close preserve announcement, timing, action and dismissal owners; transient surface paint uses the pinned alert recipe vocabulary.
 criteria:
   - id: P-BOOTSTRAP-2-3-2-TOAST-BASE
     text:
-      en: >-
-        Invoke asToast* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
-
-
+            en: Invoke asToast* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
   - id: P-BOOTSTRAP-2-3-2-TOAST-VISUAL
     text:
-      en: >-
-        Root/Viewport/Title/Description/Action/Close preserve announcement, timing, action and dismissal owners; transient surface paint uses the pinned alert recipe vocabulary.
-
-
+            en: Root/Viewport/Title/Description/Action/Close preserve announcement, timing, action and dismissal owners; transient surface paint uses the pinned alert recipe vocabulary.
   - id: P-BOOTSTRAP-2-3-2-TOAST-EXTENSION
     text:
-      en: >-
-        Toast is a Proto extension using alert vocabulary; no upstream toast queue exists.
-
-
+            en: Toast is a Proto extension using alert vocabulary; no upstream toast queue exists.
   - id: P-BOOTSTRAP-2-3-2-TOAST-CLOSURE
     text:
-      en: >-
-        All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
-
-
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
   - id: P-BOOTSTRAP-2-3-2-TOAST-BOUNDARY
     text:
-      en: >-
-        Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
-
-
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
 dependsOn:
   contracts:
     - C-AS-HOOK-0001
