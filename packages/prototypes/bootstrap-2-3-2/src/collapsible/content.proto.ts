@@ -12,13 +12,14 @@ const collapsibleContent = definePrototype<
 >({
   name: 'bootstrap-2-3-2-collapsible-content',
   setup(def) {
-    asCollapsibleContent();
+    const inherited = asCollapsibleContent();
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-CONTENT-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere border-t border-border px-[0.9375rem] py-[0.5625rem] text-sm'
+        'min-w-0 max-w-full text-foreground wrap-anywhere border-t border-[#e5e5e5] px-[15px] py-[9px] text-[14px] leading-[20px]'
       )
     );
+    return inherited.render;
   },
 });
 

@@ -12,7 +12,7 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
     // Ordinary checkbox row; card-label presentation is not an implicit variant.
     def.feedback.style.use(
       tw(
-        'inline-flex min-h-6 min-w-0 items-center gap-1 font-normal text-sm leading-5 text-foreground outline-none'
+        'inline-flex min-h-[20px] min-w-0 mb-[5px] items-center gap-[5px] font-normal text-[14px] leading-[20px] text-foreground outline-none'
       )
     );
     const state = inherited.stateHandles!;
@@ -31,7 +31,7 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       renderer.el(
         'span',
         { style: tw('min-w-0 whitespace-normal break-words') },
-        renderer.r.slot()
+        inherited.render ? inherited.render(renderer) : renderer.r.slot()
       ),
     ];
   },

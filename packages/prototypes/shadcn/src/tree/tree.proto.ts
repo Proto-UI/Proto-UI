@@ -1,164 +1,217 @@
-import type {
-  TreeRootProps,
-  TreeRootExposes,
-  TreeItemProps,
-  TreeItemExposes,
-  TreeGroupProps,
-  TreeGroupExposes,
-  TreeToggleProps,
-  TreeToggleExposes,
+import { definePrototype, tw } from '@proto.ui/core';
+import {
+  asTreeRoot,
+  asTreeItem,
+  asTreeGroup,
+  asTreeToggle,
+  type TreeRootProps,
+  type TreeRootExposes,
+  type TreeItemProps,
+  type TreeItemExposes,
+  type TreeGroupProps,
+  type TreeGroupExposes,
+  type TreeToggleProps,
+  type TreeToggleExposes,
 } from '@proto.ui/prototypes-base/tree';
-import { definePrototype, tw, type State } from '@proto.ui/core';
-import { asTreeRoot, asTreeItem, asTreeGroup, asTreeToggle } from '@proto.ui/prototypes-base/tree';
+import {
+  SHADCN_STYLE_IDS,
+  setupShadcnStyleSelection,
+  setupShadcnStyleScope,
+  type ShadcnStyleId,
+  type ShadcnStyleProps,
+} from '../style-scope';
+import { setupCollectionActionVisual, setupCollectionHover } from '../toolbar/action-visual';
 export type * from '@proto.ui/prototypes-base/tree';
 export type ShadcnTreeAppearance = 'default' | 'embedded';
-export interface ShadcnTreeRootProps extends TreeRootProps { appearance?: ShadcnTreeAppearance }
-export interface ShadcnTreeItemProps extends TreeItemProps { appearance?: ShadcnTreeAppearance }
+export interface ShadcnTreeRootProps extends TreeRootProps, ShadcnStyleProps {
+  appearance?: ShadcnTreeAppearance;
+}
+export interface ShadcnTreeItemProps extends TreeItemProps, ShadcnStyleProps {
+  appearance?: ShadcnTreeAppearance;
+}
+export type ShadcnTreeGroupProps = TreeGroupProps & ShadcnStyleProps;
+export type ShadcnTreeToggleProps = TreeToggleProps & ShadcnStyleProps;
+
+/** Proto Tree extension: no official Tree implementation in the pinned registry.
+ * Vocabulary derives from MIT shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7,
+ * style-*.css .cn-button/.cn-toggle/.cn-table and independent New York sources.
+ * The existing card-like default and square embedded appearance remain Proto
+ * choices. They are not advertised as an official upstream component recipe.
+ */
+const ROOT_RADIUS = {
+  vega: 'rounded-md',
+  nova: 'rounded-lg',
+  maia: 'rounded-[var(--pui-radius-4xl)]',
+  lyra: 'rounded-none',
+  mira: 'rounded-md',
+  luma: 'rounded-[var(--pui-radius-3xl)]',
+  sera: 'rounded-none',
+  rhea: 'rounded-[var(--pui-radius-2xl)]',
+  'new-york-v4': 'rounded-md',
+} as const satisfies Record<ShadcnStyleId, string>;
+const ITEM_PROFILE = {
+  vega: 'min-h-9 rounded-md px-3 py-2 text-sm',
+  nova: 'min-h-8 rounded-md px-3 py-2 text-sm',
+  maia: 'min-h-9 rounded-[var(--pui-radius-4xl)] px-3 py-2 text-sm',
+  lyra: 'min-h-8 rounded-none px-2.5 py-2 text-xs',
+  mira: 'min-h-7 rounded-md px-2 py-1 text-xs',
+  luma: 'min-h-9 rounded-[var(--pui-radius-3xl)] px-3 py-2 text-sm',
+  sera: 'min-h-10 rounded-none px-6 py-2 text-xs uppercase tracking-widest',
+  rhea: 'min-h-8 rounded-[var(--pui-radius-2xl)] px-2.5 py-2 text-sm',
+  'new-york-v4': 'min-h-9 rounded-md px-3 py-2 text-sm',
+} as const satisfies Record<ShadcnStyleId, string>;
 
 export const treeRoot = definePrototype<ShadcnTreeRootProps, TreeRootExposes>({
   name: 'shadcn-tree-root',
   setup(def) {
-    def.props.define({ appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' } });
+    def.props.define({
+      appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' },
+    });
     def.props.setDefaults({ appearance: 'default' });
     const behavior = asTreeRoot();
+    setupShadcnStyleScope(def);
+    const style = setupShadcnStyleSelection(def, 'nova');
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground'));
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('rounded-lg border border-border bg-background shadow-sm p-3 gap-2')),
+      intent: (i) =>
+        i.feedback.style.use(tw('border border-border bg-background shadow-sm p-3 gap-2')),
     });
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.prop('appearance').eq('default')),
+        intent: (i) => i.feedback.style.use(tw(ROOT_RADIUS[profile])),
+      });
+    }
     def.rule({
       when: (w) => w.prop('appearance').eq('embedded'),
-      intent: (i) => i.feedback.style.use(tw('flex flex-col gap-1.5 rounded-none border-0 bg-transparent shadow-none p-0')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('flex flex-col gap-1.5 rounded-none border-0 bg-transparent shadow-none p-0')
+        ),
     });
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    return behavior.render;
   },
 });
 export { treeRoot as shadcnTreeRoot };
+
 export const treeItem = definePrototype<ShadcnTreeItemProps, TreeItemExposes>({
   name: 'shadcn-tree-item',
   setup(def) {
-    def.props.define({ appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' } });
+    def.props.define({
+      appearance: { type: 'enum', options: ['default', 'embedded'], empty: 'fallback' },
+    });
     def.props.setDefaults({ appearance: 'default' });
     const behavior = asTreeItem();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground flex items-center gap-2 cursor-pointer'));
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-tree] Item state unavailable.');
+    const style = setupShadcnStyleSelection(def, 'nova');
+    const hovered = setupCollectionHover(def, state.disabled);
+    def.props.watch(['appearance'], () => hovered.set(false, 'tree appearance pointer reset'));
+    def.feedback.style.use(
+      tw('min-w-0 max-w-full text-foreground flex items-center gap-2 cursor-pointer')
+    );
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.prop('appearance').eq('default')),
+        intent: (i) => i.feedback.style.use(tw(ITEM_PROFILE[profile])),
+      });
+    }
     def.rule({
-      when: (w) => w.prop('appearance').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('rounded-md px-3 py-2')),
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.state(state.selected).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.selected).eq(true), w.prop('appearance').eq('default')),
+      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
     def.rule({
       when: (w) => w.prop('appearance').eq('embedded'),
-      intent: (i) => i.feedback.style.use(tw('w-full min-h-8 rounded-none px-2 py-1 text-sm')),
+      intent: (i) => i.feedback.style.use(tw('w-full min-h-8 rounded-none px-2 py-1')),
     });
-    const states = behavior.stateHandles;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.all(w.state(states.selected!).eq(true), w.prop('appearance').eq('default')),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.all(w.state(states.selected!).eq(true), w.prop('appearance').eq('embedded')),
-        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15 font-medium')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.all(w.state(states.selected!).eq(false), w.prop('appearance').eq('embedded')),
-        intent: (i) => i.feedback.style.use(tw('font-normal')),
-      });
-    // Family-only pointer paint; Base retains the sole activation/focus owner.
-    const hovered = def.state.bool('embeddedHovered', false);
-    const clearHover = () => hovered.set(false, 'embedded tree pointer paint reset');
-    def.event.on('pointer.enter', (run) => {
-      if (run.props.get().appearance === 'embedded' && !states?.disabled?.get())
-        hovered.set(true, 'embedded tree pointer enter');
-    });
-    def.event.on('pointer.leave', clearHover);
-    def.event.on('pointer.cancel', clearHover);
-    def.lifecycle.onUnmounted(clearHover);
-    def.props.watch(['appearance'], clearHover);
-    states?.disabled.watch((_run, event) => {
-      if (event.type === 'next' && event.next) clearHover();
-    });
-    if (states?.disabled && states?.selected)
-      def.rule({
-        when: (w) => w.all(w.prop('appearance').eq('embedded'), w.state(hovered).eq(true), w.state(states.disabled!).eq(false), w.state(states.selected!).eq(false)),
-        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
-      });
-    if (states?.focused)
-      def.rule({
-        when: (w) => w.all(w.state(states.focused!).eq(true), w.prop('appearance').eq('embedded')),
-        intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
-      });
-  },
-});
-export { treeItem as shadcnTreeItem };
-export const treeGroup = definePrototype<TreeGroupProps, TreeGroupExposes>({
-  name: 'shadcn-tree-group',
-  setup(def) {
-    const behavior = asTreeGroup();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1 pl-4'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
-  },
-});
-export { treeGroup as shadcnTreeGroup };
-export const treeToggle = definePrototype<TreeToggleProps, TreeToggleExposes>({
-  name: 'shadcn-tree-toggle',
-  setup(def) {
-    const behavior = asTreeToggle();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
-      )
-    );
-    const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
-    if (!states) throw new Error('[shadcn-tree] Required inherited state is unavailable.');
     def.rule({
-      when: (w) => w.state(states.focusVisible).eq(true),
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('embedded'),
+          w.any(w.state(style).eq('lyra'), w.state(style).eq('mira'), w.state(style).eq('sera'))
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-xs')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('embedded'),
+          w.not(
+            w.any(w.state(style).eq('lyra'), w.state(style).eq('mira'), w.state(style).eq('sera'))
+          )
+        ),
+      intent: (i) => i.feedback.style.use(tw('text-sm')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('embedded'), w.state(style).eq('sera')),
+      intent: (i) => i.feedback.style.use(tw('uppercase tracking-widest')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.selected).eq(true), w.prop('appearance').eq('embedded')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15 font-medium')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.selected).eq(false), w.prop('appearance').eq('embedded')),
+      intent: (i) => i.feedback.style.use(tw('font-normal')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('embedded'),
+          w.state(hovered).eq(true),
+          w.state(state.disabled).eq(false),
+          w.state(state.selected).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.focused).eq(true), w.prop('appearance').eq('embedded')),
+      intent: (i) => i.feedback.style.use(tw('bg-muted-foreground/15')),
+    });
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) =>
         i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
     });
     def.rule({
-      when: (w) => w.state(states.disabled).eq(true),
+      when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
     });
-    // Presentation consumes the existing owner; no second interaction hook.
-    def.rule({
-      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
-    });
+    return behavior.render;
+  },
+});
+export { treeItem as shadcnTreeItem };
+
+export const treeGroup = definePrototype<ShadcnTreeGroupProps, TreeGroupExposes>({
+  name: 'shadcn-tree-group',
+  setup(def) {
+    const behavior = asTreeGroup();
+    setupShadcnStyleSelection(def, 'nova');
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground grid gap-1 pl-4'));
+    return behavior.render;
+  },
+});
+export { treeGroup as shadcnTreeGroup };
+
+export const treeToggle = definePrototype<ShadcnTreeToggleProps, TreeToggleExposes>({
+  name: 'shadcn-tree-toggle',
+  setup(def) {
+    const behavior = asTreeToggle();
+    const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!state) throw new Error('[shadcn-tree] Toggle state unavailable.');
+    setupCollectionActionVisual(def, state, 'ghost');
+    return behavior.render;
   },
 });
 export { treeToggle as shadcnTreeToggle };

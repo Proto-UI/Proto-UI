@@ -7,25 +7,16 @@ import {
 } from '@proto.ui/core';
 import { asDropdownTrigger } from '@proto.ui/prototypes-base/dropdown';
 import type { ShadcnDropdownTriggerExposes, ShadcnDropdownTriggerProps } from './types';
-
-const TRIGGER_BASE_TOKENS = [
-  'inline-flex',
-  'items-center',
-  'justify-center',
-  'gap-1.5',
-  'h-8',
-  'rounded-lg',
-  'border',
-  'border-border',
-  'bg-background',
-  'px-2.5',
-  'text-sm',
-  'font-medium',
-  'shadow-xs',
-  'transition-colors',
-  'outline-none',
-  'select-none',
-].join(' ');
+import { SHADCN_STYLE_IDS } from '../style-scope';
+import { setupMenuStyle } from './visual';
+import {
+  SHADCN_ACTION_RADIUS,
+  SHADCN_ACTION_SIZES,
+  SHADCN_ACTION_TEXT,
+  SHADCN_ACTION_FOCUS,
+  SHADCN_BUTTON_OUTLINE,
+  SHADCN_BUTTON_OUTLINE_HOVER,
+} from '../button/profiles';
 
 const DEFAULT_INDICATOR_ICON = 'chevron-down';
 const DEFAULT_INDICATOR_SIZE = 16;
@@ -70,6 +61,7 @@ function renderIndicatorIcon(
 
 const dropdownTrigger = definePrototype<ShadcnDropdownTriggerProps, ShadcnDropdownTriggerExposes>({
   name: 'shadcn-dropdown-trigger',
+  modules: asDropdownTrigger.modules,
   setup(def) {
     // P-SHADCN-DROPDOWN-MENU-TRIGGER-INDICATOR-EXTENSION
     def.props.define({
@@ -98,25 +90,40 @@ const dropdownTrigger = definePrototype<ShadcnDropdownTriggerProps, ShadcnDropdo
       throw new Error('[shadcn-dropdown-trigger] Dropdown Trigger must project command states.');
     }
     const { disabled, hovered, focusVisible, pressed } = buttonState;
-
-    // P-SHADCN-DROPDOWN-MENU-TRIGGER-CURRENT-VISUAL-SURFACE
-    def.feedback.style.use(tw(TRIGGER_BASE_TOKENS));
-
-    // P-SHADCN-DROPDOWN-MENU-TRIGGER-STATE-DRIVEN-STYLES
-    def.rule({
-      when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
-    });
-
-    def.rule({
-      when: (w) => w.state(focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-3 ring-ring/50 ring-offset-2')),
-    });
-
-    def.rule({
-      when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
-    });
+    const style = setupMenuStyle(def, 'nova');
+    // Cataloged Proto extension: upstream Trigger is headless. Reuse only
+    // finite outline paint, never asButton or another interaction owner.
+    def.feedback.style.use(
+      tw(
+        'inline-flex items-center justify-center border outline-none select-none transition-colors'
+      )
+    );
+    for (const id of SHADCN_STYLE_IDS) {
+      const body =
+        id === 'new-york-v4'
+          ? 'h-9 gap-2 px-4 text-sm font-medium border-border bg-background shadow-xs'
+          : `${SHADCN_ACTION_SIZES[`${id}-default`]} ${SHADCN_ACTION_TEXT[id]} ${SHADCN_BUTTON_OUTLINE[id]}`;
+      def.rule({
+        when: (w) => w.state(style).eq(id),
+        intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_RADIUS[id], body)),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(w.state(style).eq(id), w.any(w.state(hovered).eq(true), w.state(pressed).eq(true))),
+        intent: (i) =>
+          i.feedback.style.use(
+            tw(
+              id === 'new-york-v4'
+                ? 'bg-accent text-accent-foreground'
+                : SHADCN_BUTTON_OUTLINE_HOVER[id]
+            )
+          ),
+      });
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(id), w.state(focusVisible).eq(true)),
+        intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[id])),
+      });
+    }
 
     def.rule({
       when: (w) => w.state(disabled).eq(true),

@@ -12,4 +12,4 @@ export type {
   ContextMenuContentExposes,
   ContextMenuItemProps,
   ContextMenuItemExposes,
-} from '@proto.ui/prototypes-base/context-menu';
+} from './types';

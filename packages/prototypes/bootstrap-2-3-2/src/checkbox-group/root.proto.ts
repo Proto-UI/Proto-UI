@@ -8,7 +8,7 @@ export default definePrototype<CheckboxGroupRootProps, CheckboxGroupRootExposes>
   name: 'bootstrap-2-3-2-checkbox-group-root',
   setup(def) {
     const inherited = asCheckboxGroupRoot();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-2 text-foreground'));
+    def.feedback.style.use(tw('flex min-w-0 flex-col text-foreground text-[14px] leading-[20px]'));
     return inherited.render;
   },
 });

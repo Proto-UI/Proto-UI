@@ -11,9 +11,7 @@ export const dataTableHeaderRow = definePrototype<
   name: 'shadcn-data-table-header-row',
   setup(def) {
     const behavior = asDataTableHeaderRow();
-    def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
-    );
+    def.feedback.style.use(tw('table-row border-b border-border transition-colors'));
     return behavior.render;
   },
 });

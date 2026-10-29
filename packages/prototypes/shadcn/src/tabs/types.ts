@@ -3,6 +3,9 @@ import type {
   TabsContentAsHookContract,
   TabsContentExposes,
   TabsContentProps,
+  TabsIndicatorAsHookContract,
+  TabsIndicatorExposes,
+  TabsIndicatorProps,
   TabsListAsHookContract,
   TabsListExposes,
   TabsListProps,
@@ -36,3 +39,7 @@ export type ShadcnTabsTriggerAsHookContract = TabsTriggerAsHookContract;
 export interface ShadcnTabsContentProps extends TabsContentProps, ShadcnStyleProps {}
 export type ShadcnTabsContentExposes = TabsContentExposes;
 export type ShadcnTabsContentAsHookContract = TabsContentAsHookContract;
+
+export interface ShadcnTabsIndicatorProps extends TabsIndicatorProps, ShadcnStyleProps {}
+export type ShadcnTabsIndicatorExposes = TabsIndicatorExposes;
+export type ShadcnTabsIndicatorAsHookContract = TabsIndicatorAsHookContract;

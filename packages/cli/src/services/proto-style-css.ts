@@ -49,6 +49,7 @@ function pushSplitRule(lines: string[], selector: string, declarations: readonly
 const spacing: Record<string, string> = {
   '0': '0px',
   px: '1px',
+  '0.25': '0.0625rem',
   '0.5': '0.125rem',
   '1': '0.25rem',
   '1.5': '0.375rem',
@@ -57,10 +58,13 @@ const spacing: Record<string, string> = {
   '3': '0.75rem',
   '3.5': '0.875rem',
   '4': '1rem',
+  '4.5': '1.125rem',
   '5': '1.25rem',
   '6': '1.5rem',
+  '6.25': '1.5625rem',
   '7': '1.75rem',
   '8': '2rem',
+  '8.25': '2.0625rem',
   '9': '2.25rem',
   '10': '2.5rem',
   '11': '2.75rem',
@@ -114,6 +118,58 @@ const colorVars = new Set([
 ]);
 
 const staticUtilities: Record<string, string[]> = {
+  // Source-bound projection vocabulary; these are ordinary layout/paint
+  // properties, not inferred component structure or host behavior.
+  table: ['display: table;'],
+  'table-row': ['display: table-row;'],
+  'table-cell': ['display: table-cell;'],
+  'table-caption': ['display: table-caption;'],
+  'border-collapse': ['border-collapse: collapse;'],
+  'border-spacing-0': ['border-spacing: 0px;'],
+  'caption-bottom': ['caption-side: bottom;'],
+  'align-top': ['vertical-align: top;'],
+  'align-middle': ['vertical-align: middle;'],
+  'align-bottom': ['vertical-align: bottom;'],
+  'tracking-wide': ['letter-spacing: 0.025em;'],
+  'tracking-wider': ['letter-spacing: 0.05em;'],
+  '-right-1': ['right: -0.25rem;'],
+  'float-right': ['float: right;'],
+  'text-right': ['text-align: right;'],
+  'text-[0.625rem]': ['font-size: 0.625rem;'],
+  'leading-4': ['line-height: 1rem;'],
+  'text-[#08c]': ['color: #08c;'],
+  'text-[#005580]': ['color: #005580;'],
+  'text-[#555]': ['color: #555;'],
+  'text-[#999]': ['color: #999;'],
+  'text-[#000]': ['color: #000;'],
+  'text-paint-[#000_0_1px_0_rgb(255_255_255/100%)]': [
+    'color: #000;',
+    'text-shadow: 0 1px 0 rgb(255 255 255 / 1);',
+  ],
+  'text-paint-[#999_0_1px_0_rgb(255_255_255/50%)]': [
+    'color: #999;',
+    'text-shadow: 0 1px 0 rgb(255 255 255 / 0.5);',
+  ],
+  'bg-[#eee]': ['background-color: #eee;'],
+  'border-[#eee]': ['border-color: #eee;'],
+  'border-[#eee_#eee_#ddd]': ['border-color: #eee #eee #ddd;'],
+  'border-[#e5e5e5_#e5e5e5_#fff_#e5e5e5]': ['border-color: #e5e5e5 #e5e5e5 #fff #e5e5e5;'],
+  'border-[rgb(0_0_0/20%)]': ['border-color: rgb(0 0 0 / 0.2);'],
+  'border-[rgb(0_0_0/30%)]': ['border-color: rgb(0 0 0 / 0.3);'],
+  'shadow-[0_1px_3px_rgb(0_0_0/10%)]': [
+    '--pui-shadow: 0 1px 3px rgb(0 0 0 / 0.1);',
+    ...composedShadow(),
+  ],
+  'shadow-[0_3px_7px_rgb(0_0_0/30%)]': [
+    '--pui-shadow: 0 3px 7px rgb(0 0 0 / 0.3);',
+    ...composedShadow(),
+  ],
+  'shadow-[inset_0_1px_0_#fff]': ['--pui-shadow: inset 0 1px 0 #fff;', ...composedShadow()],
+  'opacity-20': ['opacity: 0.2;'],
+  'opacity-40': ['opacity: 0.4;'],
+  'ring-[3px]': ['--pui-ring-width: 3px;', ...ringShadow()],
+  'ring-4': ['--pui-ring-width: 4px;', ...ringShadow()],
+  'ring-black/10': ['--pui-ring-color: rgb(0 0 0 / 0.1);', ...ringShadow()],
   'bg-[#ccc]': ['background-color: #ccc;'],
   'bg-[#f5f5f5]': ['background-color: #f5f5f5;'],
   'border-[#bbb]': ['border-color: #bbb;'],
@@ -281,6 +337,16 @@ const staticUtilities: Record<string, string[]> = {
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
     'transition-duration: 150ms;',
   ],
+  'transition-[color,border-color]': [
+    'transition-property: color, border-color;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
+  'transition-[color,box-shadow,background-color]': [
+    'transition-property: color, box-shadow, background-color;',
+    'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
+    'transition-duration: 150ms;',
+  ],
   'transition-opacity': [
     'transition-property: opacity;',
     'transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);',
@@ -345,6 +411,15 @@ const staticUtilities: Record<string, string[]> = {
   border: ['border-width: 1px;', 'border-style: solid;'],
   'border-0': ['border-width: 0px;'],
   'border-2': ['border-width: 2px;', 'border-style: solid;'],
+  'border-b-0': ['border-bottom-width: 0px;'],
+  'border-y': [
+    'border-top-width: 1px;',
+    'border-bottom-width: 1px;',
+    'border-top-style: solid;',
+    'border-bottom-style: solid;',
+  ],
+  'border-l': ['border-left-width: 1px;', 'border-left-style: solid;'],
+  'border-r': ['border-right-width: 1px;', 'border-right-style: solid;'],
   'border-b-2': ['border-bottom-width: 2px;', 'border-bottom-style: solid;'],
   'border-t-2': ['border-top-width: 2px;', 'border-top-style: solid;'],
   'border-b': ['border-bottom-width: 1px;', 'border-bottom-style: solid;'],
@@ -643,6 +718,7 @@ const staticUtilities: Record<string, string[]> = {
     '--pui-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);',
     ...composedShadow(),
   ],
+  'shadow-2xl': ['--pui-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);', ...composedShadow()],
   'shadow-[3px_3px_0_0_#000]': ['--pui-shadow: 3px 3px 0 0 #000;', ...composedShadow()],
   'shadow-[4px_4px_0_0_#000]': ['--pui-shadow: 4px 4px 0 0 #000;', ...composedShadow()],
   'shadow-[6px_6px_0_0_#000]': ['--pui-shadow: 6px 6px 0 0 #000;', ...composedShadow()],
@@ -818,7 +894,7 @@ function renderShadowSplitCss(tokens: string[]): string {
     '@layer proto-ui {',
   ];
   const rules = tokens.map(renderTokenRule).filter((rule): rule is CssRule => rule !== null);
-  sortTimingOverrides(rules);
+  sortUtilityOverrides(rules);
   for (const rule of rules) {
     // C-FEEDBACK-STYLE-0004: selection styles paint the browser's static
     // pseudo-element, not the Root box or its sizing/geometry contributions.
@@ -982,16 +1058,18 @@ function splitNativeTextHostResetDeclarations(declaration: string): string[] {
   return property.startsWith('padding') ? [`${property}: 0;`] : [];
 }
 
-function sortTimingOverrides(rules: CssRule[]): void {
+function sortUtilityOverrides(rules: CssRule[]): void {
   // Tailwind cascade ordering: `transition-*` utilities carry the default
   // duration/timing, so explicit `duration-*`/`ease-*`/`delay-*` overrides must
   // be emitted after them. Explicit `leading-*` utilities also override the
   // line-height emitted by composite `text-*` utilities. The incoming token
-  // list is alphabetical, so stable-sort both override classes after their
-  // declarations.
+  // list is alphabetical. Directional colors and corners likewise follow
+  // their all-edge shorthands, regardless of token spelling or input order.
   const overridePriority = (rule: CssRule): number => {
     const utility = splitVariants(rule.token).at(-1) ?? '';
     if (/^(duration|ease|delay)-/.test(utility)) return 1;
+    if (/^rounded-[trbl]-/.test(utility)) return 1;
+    if (/^border-b-[a-z]/.test(utility)) return 1;
     if (/^leading-/.test(utility)) return 2;
     return 0;
   };
@@ -1007,7 +1085,7 @@ function renderProtoStyleTokenCssForTarget(tokens: string[], target: ProtoStyleC
     if (rule) rules.push(rule);
     else unknown.push(token);
   }
-  sortTimingOverrides(rules);
+  sortUtilityOverrides(rules);
 
   const lines = [
     '/* This file is auto-generated by @proto.ui/cli (proto-ui tokens). */',
@@ -1391,7 +1469,9 @@ function renderColorUtility(utility: string): string[] | null {
   if (utility === 'bg-black/50') return ['background-color: rgb(0 0 0 / 0.5);'];
   if (utility === 'bg-black/80') return ['background-color: rgb(0 0 0 / 0.8);'];
 
-  const colorMatch = utility.match(/^(bg|text|border|ring|ring-offset)-([a-z-]+)(?:\/(\d+))?$/);
+  const colorMatch = utility.match(
+    /^(bg|text|border-b|border|ring|ring-offset)-([a-z-]+)(?:\/(\d+))?$/
+  );
   if (!colorMatch) return null;
   const [, kind, name, opacity] = colorMatch;
   if (!colorVars.has(name)) return null;
@@ -1399,6 +1479,7 @@ function renderColorUtility(utility: string): string[] | null {
 
   if (kind === 'bg') return [`background-color: ${color};`];
   if (kind === 'text') return [`color: ${color};`];
+  if (kind === 'border-b') return [`border-bottom-color: ${color};`];
   if (kind === 'border') return [`border-color: ${color};`];
   if (kind === 'ring') return [`--pui-ring-color: ${color};`, ...ringShadow()];
   if (kind === 'ring-offset') return [`--pui-ring-offset-color: ${color};`];
@@ -1406,6 +1487,22 @@ function renderColorUtility(utility: string): string[] | null {
 }
 
 function renderRoundedUtility(utility: string): string[] | null {
+  const directional = utility.match(
+    /^rounded-([trbl])-(sm|md|lg|\[var\(--pui-radius-(?:2xl|3xl|4xl)\)\]|\[(?:3|4|6)px\])$/
+  );
+  if (directional) {
+    const [, side, raw] = directional;
+    const value = raw.startsWith('[') ? raw.slice(1, -1) : `var(--pui-radius-${raw})`;
+    const corners =
+      side === 't'
+        ? ['top-left', 'top-right']
+        : side === 'r'
+          ? ['top-right', 'bottom-right']
+          : side === 'b'
+            ? ['bottom-left', 'bottom-right']
+            : ['top-left', 'bottom-left'];
+    return corners.map((corner) => `border-${corner}-radius: ${value};`);
+  }
   if (utility === 'rounded-[min(var(--pui-radius-4xl),24px)]')
     return ['border-radius: min(var(--pui-radius-4xl), 24px);'];
   if (utility === 'rounded-t-[min(var(--pui-radius-4xl),24px)]')
@@ -1435,7 +1532,18 @@ function renderRoundedUtility(utility: string): string[] | null {
   if (utility === 'rounded-sm') return ['border-radius: var(--pui-radius-sm);'];
   if (utility === 'rounded-[3px]') return ['border-radius: 3px;'];
   if (utility === 'rounded-[4px]') return ['border-radius: 4px;'];
+  if (utility === 'rounded-[5px]') return ['border-radius: 5px;'];
   if (utility === 'rounded-[6px]') return ['border-radius: 6px;'];
+  if (utility === 'rounded-[500px]') return ['border-radius: 500px;'];
+  if (
+    utility === 'rounded-[min(var(--radius-md),10px)]' ||
+    utility === 'rounded-[min(var(--pui-radius-md),10px)]'
+  ) {
+    return ['border-radius: min(var(--pui-radius-md), 10px);'];
+  }
+  if (utility === 'rounded-[min(var(--radius-md),8px)]') {
+    return ['border-radius: min(var(--pui-radius-md), 8px);'];
+  }
   if (utility === 'rounded-[min(var(--radius-md),12px)]') {
     return ['border-radius: min(var(--pui-radius-md), 12px);'];
   }

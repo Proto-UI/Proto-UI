@@ -1,15 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asDrawerMask,
-  type DrawerMaskProps,
-  type DrawerMaskExposes,
-} from '@proto.ui/prototypes-base/drawer';
+import { asDrawerMask, type DrawerMaskExposes } from '@proto.ui/prototypes-base/drawer';
+import type { DrawerMaskProps } from './types';
+import { setupOverlayMask } from '../dialog/style';
 
 export default definePrototype<DrawerMaskProps, DrawerMaskExposes>({
   name: 'shadcn-drawer-mask',
   setup(def) {
     const behavior = asDrawerMask();
-    def.feedback.style.use(tw('fixed inset-0 bg-black/50'));
+    setupOverlayMask(def);
     behavior.asTransition.configure({
       enterDuration: 500,
       leaveDuration: 500,

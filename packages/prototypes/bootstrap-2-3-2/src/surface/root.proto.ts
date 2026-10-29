@@ -14,7 +14,7 @@ import {
 export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootExposes>({
   name: 'bootstrap-2-3-2-surface-root',
   setup(def) {
-    asSurfaceRoot();
+    const inherited = asSurfaceRoot();
     def.rule({
       when: (w) => w.prop('variant').eq('scrim'),
       intent: (i) => i.feedback.style.use(tw('bg-black/80')),
@@ -173,7 +173,7 @@ export const Bootstrap232SurfaceRoot = definePrototype<SurfaceRootProps, Surface
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
-    return (renderer) => renderer.r.slot();
+    return inherited.render;
   },
 });
 export default Bootstrap232SurfaceRoot;

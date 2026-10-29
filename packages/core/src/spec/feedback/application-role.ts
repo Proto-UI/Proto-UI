@@ -29,6 +29,10 @@ const COMPOSITE_DISPLAY_TOKENS = new Set([
   'inline-block',
   'inline-flex',
   'inline-grid',
+  'table',
+  'table-row',
+  'table-cell',
+  'table-caption',
 ]);
 
 // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-L: exact H1 admission, not a
@@ -38,7 +42,10 @@ const ROOT_GEOMETRY_TOKENS = new Set([
   'translate-x-0',
   // D-FEEDBACK-STYLE-ROLE-RESOLUTION-0001-RESIDENT-SPACING: exact 1.25rem only.
   'translate-x-5',
+  'translate-x-0.25',
   'translate-x-[calc(100%_-_2px)]',
+  'translate-x-[calc(100%_+_2px)]',
+  'translate-x-[calc(100%_-_8px)]',
   'scale-[0.98]',
   'will-change-transform',
   // K1 exact additions retain the independent Root geometry domain.
@@ -77,6 +84,10 @@ const PLACEMENT_EXACT_TOKENS = new Set([
   'static',
   'sticky',
   'isolate',
+  'float-right',
+  'align-top',
+  'align-middle',
+  'align-bottom',
 ]);
 
 const PLACEMENT_PREFIXES = [

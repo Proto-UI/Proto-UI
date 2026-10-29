@@ -6,9 +6,10 @@ import {
 } from '@proto.ui/prototypes-base/progress';
 export default definePrototype<ProgressPartProps, ProgressPartExposes>({
   name: 'bootstrap-2-3-2-progress-label',
+  modules: asProgressLabel.modules,
   setup(def) {
     const inherited = asProgressLabel();
-    def.feedback.style.use(tw('text-sm leading-5 font-medium'));
+    def.feedback.style.use(tw('text-[14px] leading-[20px] font-normal'));
     return inherited.render;
   },
 });

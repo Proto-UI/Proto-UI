@@ -15,6 +15,59 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('keeps directional edge paint after all-edge shorthands in document and Shadow CSS', () => {
+    const tokens = [
+      'border',
+      'border-transparent',
+      'border-b-input',
+      'rounded-none',
+      'rounded-l-md',
+      'rounded-r-lg',
+    ];
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      for (const input of [tokens.toSorted(), tokens.toSorted().reverse()]) {
+        const css = render(input);
+        expect(css.indexOf('border-bottom-color: var(--pui-input);')).toBeGreaterThan(
+          css.indexOf('border-color: transparent;')
+        );
+        expect(css.indexOf('border-top-left-radius: var(--pui-radius-md);')).toBeGreaterThan(
+          css.indexOf('border-radius: 0px;')
+        );
+        expect(css.indexOf('border-top-right-radius: var(--pui-radius-lg);')).toBeGreaterThan(
+          css.indexOf('border-radius: 0px;')
+        );
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+    }
+  });
+
+  it('preserves fractional root-relative sizes and affine thumb travel without rounding to pixels', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([
+        'h-4.5',
+        'w-6.25',
+        'w-8.25',
+        'translate-x-0.25',
+        'translate-x-[calc(100%_+_2px)]',
+        'translate-x-[calc(100%_-_8px)]',
+        'rounded-[5px]',
+        'ring-[3px]',
+      ]);
+      expect(css).toContain('height: 1.125rem;');
+      expect(css).toContain('width: 1.5625rem;');
+      expect(css).toContain('width: 2.0625rem;');
+      expect(css).toContain('--pui-translate-x: 0.0625rem;');
+      expect(css).toContain('--pui-translate-x: calc(100% + 2px);');
+      expect(css).toContain('--pui-translate-x: calc(100% - 8px);');
+      expect(css).toContain('border-radius: 5px;');
+      expect(css).toContain('--pui-ring-width: 3px;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const rejected of ['rounded-[5.5px]', 'rounded-[5px;color:red]', 'ring-[3.5px]']) {
+        expect(render([rejected])).toContain('Unsupported Proto UI style tokens');
+      }
+    }
+  });
+
   it('projects only the named Rhea/Luma radii and secondary hover mix', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render([

@@ -37,6 +37,8 @@ const PREFIXES_V0 = [
   // Effects
   'opacity-',
   'shadow-',
+  'tracking-',
+  'transition-',
   'rounded',
 ] as const;
 
@@ -59,6 +61,13 @@ const TEXT_SIZE_TOKENS = new Set([
 const TEXT_ALIGN_TOKENS = new Set(['left', 'right', 'center', 'justify', 'start', 'end']);
 
 export function getSemanticGroupKeyV0(token: string): string {
+  if (token === 'border-collapse' || token === 'border-separate') return 'table border model';
+  if (token === 'border-spacing-0') return 'table border spacing';
+  if (token === 'caption-bottom') return 'table caption side';
+  if (token === 'align-top' || token === 'align-middle' || token === 'align-bottom')
+    return 'vertical alignment';
+  const roundedSide = token.match(/^rounded-([trbl])-/);
+  if (roundedSide) return `rounded-${roundedSide[1]}-`;
   if (token === 'scroll-my-1' || token === 'scroll-my-1.5') return 'finite scroll margin block';
   if (isPlaceholderColorTokenV0(token)) return 'placeholder:text-color';
   if (token === '-z-1' || token === 'z-10' || token === 'z-40' || token === 'z-50')
@@ -94,7 +103,11 @@ export function getSemanticGroupKeyV0(token: string): string {
     token === 'flex' ||
     token === 'inline-flex' ||
     token === 'block' ||
-    token === 'inline-block'
+    token === 'inline-block' ||
+    token === 'table' ||
+    token === 'table-row' ||
+    token === 'table-cell' ||
+    token === 'table-caption'
   ) {
     return 'display';
   }
@@ -119,6 +132,7 @@ export function getSemanticGroupKeyV0(token: string): string {
   if (directionalBorderWidth) {
     return `border-${directionalBorderWidth[1]}-width`;
   }
+  if (token.startsWith('border-b-')) return 'border-b-color';
   if (token.startsWith('border-')) {
     return 'border-color';
   }
@@ -126,6 +140,7 @@ export function getSemanticGroupKeyV0(token: string): string {
   if (token.startsWith('text-')) {
     const suffix = token.slice('text-'.length);
     if (TEXT_ALIGN_TOKENS.has(suffix)) return 'text-align';
+    if (/^\[#[0-9a-fA-F]+\]$/.test(suffix)) return 'text-color';
     if (TEXT_SIZE_TOKENS.has(suffix) || suffix.startsWith('[')) return 'text-size';
     return 'text-color';
   }

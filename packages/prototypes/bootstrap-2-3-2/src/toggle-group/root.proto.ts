@@ -7,16 +7,14 @@ import {
 
 export default definePrototype<ToggleGroupRootProps, ToggleGroupRootExposes>({
   name: 'bootstrap-2-3-2-toggle-group-root',
+  modules: asToggleGroupRoot.modules,
   setup(def) {
     const behavior = asToggleGroupRoot();
-    def.feedback.style.use(
-      tw(
-        'rounded border border-border bg-background text-foreground shadow-md p-2 flex min-w-0 gap-1'
-      )
-    );
+    def.feedback.style.use(tw('relative flex min-w-0 w-fit whitespace-nowrap'));
     def.rule({
       when: (w) => w.state(behavior.stateHandles!.orientation).eq('vertical'),
       intent: (i) => i.feedback.style.use(tw('flex-col')),
     });
+    return behavior.render;
   },
 });

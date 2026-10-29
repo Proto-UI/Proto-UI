@@ -1,15 +1,16 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import {
   asAlertDialogMask,
-  type AlertDialogMaskProps,
   type AlertDialogMaskExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+import type { AlertDialogMaskProps } from './types';
+import { setupOverlayMask } from '../dialog/style';
 
 export default definePrototype<AlertDialogMaskProps, AlertDialogMaskExposes>({
   name: 'shadcn-alert-dialog-mask',
   setup(def) {
     const behavior = asAlertDialogMask();
-    def.feedback.style.use(tw('fixed inset-0 bg-black/50'));
+    setupOverlayMask(def);
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
   },
 });

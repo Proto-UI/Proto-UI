@@ -6,76 +6,160 @@ import type {
   ResizableHandleProps,
   ResizableHandleExposes,
 } from '@proto.ui/prototypes-base/resizable';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asResizableRoot,
   asResizablePanel,
   asResizableHandle,
+  RESIZABLE_CONTEXT,
 } from '@proto.ui/prototypes-base/resizable';
+import {
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
 export type * from '@proto.ui/prototypes-base/resizable';
-export const resizableRoot = definePrototype<ResizableRootProps, ResizableRootExposes>({
+export type ShadcnResizableRootProps = ResizableRootProps & ShadcnStyleProps;
+export type ShadcnResizablePanelProps = ResizablePanelProps & ShadcnStyleProps;
+export type ShadcnResizableHandleProps = ResizableHandleProps &
+  ShadcnStyleProps & {
+    /** Optional inert grip paint, not another drag/focus target. */
+    withHandle?: boolean;
+  };
+
+export const resizableRoot = definePrototype<ShadcnResizableRootProps, ResizableRootExposes>({
   name: 'shadcn-resizable-root',
+  modules: asResizableRoot.modules,
   setup(def) {
-    const behavior = asResizableRoot();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground rounded-lg border border-border bg-background shadow-sm overflow-hidden'
-      )
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    const inherited = asResizableRoot();
+    setupShadcnStyleScope(def);
+    // Both pinned upstream groups use flex h-full w-full. Borders and panel
+    // padding belong to their examples, not to the Resizable primitive.
+    def.feedback.style.use(tw('h-full w-full'));
+    return inherited.render;
   },
 });
 export { resizableRoot as shadcnResizableRoot };
-export const resizablePanel = definePrototype<ResizablePanelProps, ResizablePanelExposes>({
+
+export const resizablePanel = definePrototype<ShadcnResizablePanelProps, ResizablePanelExposes>({
   name: 'shadcn-resizable-panel',
+  modules: asResizablePanel.modules,
   setup(def) {
-    const behavior = asResizablePanel();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground p-4'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    const inherited = asResizablePanel();
+    // Base owns complementary size and its percentage flex basis. The
+    // upstream Panel is deliberately unstyled; never overwrite that basis.
+    return inherited.render;
   },
 });
 export { resizablePanel as shadcnResizablePanel };
-export const resizableHandle = definePrototype<ResizableHandleProps, ResizableHandleExposes>({
+
+export const resizableHandle = definePrototype<ShadcnResizableHandleProps, ResizableHandleExposes>({
   name: 'shadcn-resizable-handle',
+  modules: asResizableHandle.modules,
   setup(def) {
-    const behavior = asResizableHandle();
+    const inherited = asResizableHandle();
+    const state = inherited.stateHandles!;
+    const style = setupShadcnStyleSelection(def, 'new-york-v4');
+    const axis = def.state.string('shadcnResizableAxis', 'horizontal');
+    def.context.subscribe(RESIZABLE_CONTEXT, (run) => {
+      axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
+    });
+    def.lifecycle.onCreated((run) => {
+      axis.set(run.context.read(RESIZABLE_CONTEXT).orientation, 'resizable owner axis');
+    });
+    def.props.define({ withHandle: { type: 'boolean', empty: 'fallback' } });
+    def.props.setDefaults({ withHandle: false });
     def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground shrink-0 basis-2 bg-border cursor-move')
+      tw(
+        'relative flex shrink-0 items-center justify-center bg-border ring-offset-background outline-none'
+      )
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    def.rule({
+      when: (w) => w.state(axis).eq('horizontal'),
+      intent: (i) => i.feedback.style.use(tw('w-px h-full')),
+    });
+    def.rule({
+      when: (w) => w.state(axis).eq('vertical'),
+      intent: (i) => i.feedback.style.use(tw('h-px w-full')),
+    });
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
+      intent: (i) => i.feedback.style.use(tw('ring-1 ring-ring forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(state.focusVisible).eq(true), w.state(style).eq('new-york-v4')),
+      intent: (i) => i.feedback.style.use(tw('ring-offset-1')),
+    });
+    def.rule({
+      when: (w) => w.state(state.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+    });
+    // Ordinary decorative containers preserve the one inherited input owner.
+    // Upstream's 4px pseudo hit-slop is not replaced with a larger separator;
+    // it requires the shared hit-region capability and separate native proof.
+    let mounted = false;
+    def.lifecycle.onMounted(() => {
+      mounted = true;
+    });
+    def.lifecycle.onUnmounted(() => {
+      mounted = false;
+    });
+    for (const fact of [style, axis]) {
+      fact.watch((run, event) => {
+        if (mounted && event.type === 'next') run.update();
       });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    }
+    return (r) => {
+      if (!r.props.get().withHandle) return inherited.render ? inherited.render(r) : r.slot();
+      const vertical = axis.get() === 'vertical';
+      if (style.get() === 'new-york-v4') {
+        return [
+          r.el(
+            'div',
+            {
+              style: vertical
+                ? tw(
+                    'pointer-events-none z-10 flex h-3 w-4 items-center justify-center rounded-xs border border-border bg-border'
+                  )
+                : tw(
+                    'pointer-events-none z-10 flex h-4 w-3 items-center justify-center rounded-xs border border-border bg-border'
+                  ),
+            },
+            r.svg.root(
+              {
+                viewBox: '0 0 24 24',
+                width: '100%',
+                height: '100%',
+                'aria-hidden': 'true',
+                fill: 'none',
+                stroke: 'currentColor',
+                strokeWidth: 2,
+                strokeLinecap: 'round',
+              },
+              r.svg.path({
+                d: vertical
+                  ? 'M8 9h.01M12 9h.01M16 9h.01M8 15h.01M12 15h.01M16 15h.01'
+                  : 'M9 8h.01M9 12h.01M9 16h.01M15 8h.01M15 12h.01M15 16h.01',
+              })
+            )
+          ),
+          r.slot(),
+        ];
+      }
+      const square = style.get() === 'lyra' || style.get() === 'sera';
+      return [
+        r.el('div', {
+          style: vertical
+            ? square
+              ? tw('pointer-events-none z-10 flex shrink-0 h-1 w-6 rounded-none bg-border')
+              : tw('pointer-events-none z-10 flex shrink-0 h-1 w-6 rounded-lg bg-border')
+            : square
+              ? tw('pointer-events-none z-10 flex shrink-0 h-6 w-1 rounded-none bg-border')
+              : tw('pointer-events-none z-10 flex shrink-0 h-6 w-1 rounded-lg bg-border'),
+        }),
+        r.slot(),
+      ];
+    };
   },
 });
 export { resizableHandle as shadcnResizableHandle };

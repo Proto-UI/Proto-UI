@@ -13,7 +13,7 @@ const selectValue = definePrototype<ShadcnSelectValueProps, ShadcnSelectValueExp
       intent: (i) => i.feedback.style.use(tw('gap-2')),
     });
     def.rule({
-      when: (w) => w.state(style).eq('rhea'),
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
       intent: (i) => i.feedback.style.use(tw('flex-1 text-left gap-1.5')),
     });
     // P-SHADCN-SELECT-VALUE-BASE-INHERITANCE,

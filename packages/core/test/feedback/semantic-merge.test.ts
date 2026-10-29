@@ -2,6 +2,65 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('keeps table layout independent of border paint and resolves cell alignment separately', () => {
+    expect(
+      mergeTwTokensV0([
+        'block',
+        'table',
+        'border-collapse',
+        'border-spacing-0',
+        'border-y',
+        'border-border',
+        'border-b-input',
+        'border-b-ring',
+        'align-top',
+        'align-middle',
+      ]).tokens
+    ).toEqual([
+      'table',
+      'border-collapse',
+      'border-spacing-0',
+      'border-y',
+      'border-border',
+      'border-b-ring',
+      'align-middle',
+    ]);
+    expect(mergeTwTokensV0(['table-cell', 'table-caption', 'caption-bottom']).tokens).toEqual([
+      'table-caption',
+      'caption-bottom',
+    ]);
+  });
+
+  it('replaces one endpoint radius without erasing the opposite endpoint or whole-box base', () => {
+    expect(
+      mergeTwTokensV0(['rounded-none', 'rounded-l-md', 'rounded-r-md', 'rounded-l-lg']).tokens
+    ).toEqual(['rounded-none', 'rounded-l-lg', 'rounded-r-md']);
+    expect(
+      mergeTwTokensV0(['rounded-t-[4px]', 'rounded-b-[6px]', 'rounded-t-[3px]']).tokens
+    ).toEqual(['rounded-t-[3px]', 'rounded-b-[6px]']);
+  });
+
+  it('replaces literal foreground and tracking independently of font size and transition duration', () => {
+    expect(
+      mergeTwTokensV0([
+        'text-sm',
+        'text-[#08c]',
+        'text-[#005580]',
+        'tracking-wide',
+        'tracking-wider',
+        'transition-all',
+        'duration-100',
+        'transition-[color,border-color]',
+      ]).tokens
+    ).toEqual([
+      'text-sm',
+      'text-[#005580]',
+      'tracking-wider',
+      'transition-[color,border-color]',
+      'duration-100',
+    ]);
+  });
+
   it('merges finite sizing and resize choices independently without absorbing unknown tokens', () => {
     expect(
       mergeTwTokensV0(['resize-y', 'field-sizing-content', 'resize-none', 'field-sizing-fixed'])

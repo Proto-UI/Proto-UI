@@ -16,12 +16,15 @@ export default definePrototype<CommandInputProps, CommandInputExposes>({
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('forced-colors-focus-outline ring-2 ring-ring ring-offset-2 ring-offset-background')
+        ),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
     });
-    return () => null;
+    return behavior.render;
   },
 });

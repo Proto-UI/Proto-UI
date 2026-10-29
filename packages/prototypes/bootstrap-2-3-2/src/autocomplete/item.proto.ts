@@ -6,24 +6,27 @@ import {
 } from '@proto.ui/prototypes-base/autocomplete';
 export default definePrototype<AutocompleteItemProps, AutocompleteItemExposes>({
   name: 'bootstrap-2-3-2-autocomplete-item',
+  modules: asAutocompleteItem.modules,
   setup(def) {
     const behavior = asAutocompleteItem();
     def.feedback.style.use(
       tw(
-        'flex min-w-0 cursor-default select-none items-center rounded-sm px-3 py-2 text-sm break-words'
+        'block min-w-0 cursor-pointer select-none px-[20px] py-[3px] text-[14px] font-normal leading-[20px] text-foreground whitespace-nowrap'
       )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('text-[#999] cursor-default')),
     });
     def.rule({
-      when: (w) => w.state(behavior.getState!('active')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      when: (w) =>
+        w.all(
+          w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground')),
     });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('selected')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('font-semibold')),
-    });
+    return behavior.render;
   },
 });

@@ -25,7 +25,7 @@ export default definePrototype<ShadcnSelectViewportProps>({
       intent: (i) => i.feedback.style.use(tw('p-1')),
     });
     def.rule({
-      when: (w) => w.state(style).eq('rhea'),
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
       intent: (i) => i.feedback.style.use(tw('p-0')),
     });
     def.rule({

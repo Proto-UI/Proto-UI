@@ -308,6 +308,21 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'ShadcnFieldValidity',
           elementName: 'proto-ui-shadcn-field-validity',
         },
+        {
+          prototypeImport: 'fieldTextarea',
+          exportBaseName: 'ShadcnFieldTextarea',
+          elementName: 'proto-ui-shadcn-field-textarea',
+        },
+        {
+          prototypeImport: 'fieldSelectTrigger',
+          exportBaseName: 'ShadcnFieldSelectTrigger',
+          elementName: 'proto-ui-shadcn-field-select-trigger',
+        },
+        {
+          prototypeImport: 'fieldSwitch',
+          exportBaseName: 'ShadcnFieldSwitch',
+          elementName: 'proto-ui-shadcn-field-switch',
+        },
       ],
       { stylePreset: 'shadcn' }
     ),
@@ -392,6 +407,21 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'Bootstrap232FieldValidity',
           elementName: 'proto-ui-bootstrap-2-3-2-field-validity',
         },
+        {
+          prototypeImport: 'fieldTextarea',
+          exportBaseName: 'Bootstrap232FieldTextarea',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-textarea',
+        },
+        {
+          prototypeImport: 'fieldSelectTrigger',
+          exportBaseName: 'Bootstrap232FieldSelectTrigger',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-select-trigger',
+        },
+        {
+          prototypeImport: 'fieldSwitch',
+          exportBaseName: 'Bootstrap232FieldSwitch',
+          elementName: 'proto-ui-bootstrap-2-3-2-field-switch',
+        },
       ],
       { stylePreset: 'bootstrap-2-3-2' }
     ),
@@ -433,6 +463,21 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           prototypeImport: 'fieldValidity',
           exportBaseName: 'LiquidGlassFieldValidity',
           elementName: 'proto-ui-liquid-glass-field-validity',
+        },
+        {
+          prototypeImport: 'fieldTextarea',
+          exportBaseName: 'LiquidGlassFieldTextarea',
+          elementName: 'proto-ui-liquid-glass-field-textarea',
+        },
+        {
+          prototypeImport: 'fieldSelectTrigger',
+          exportBaseName: 'LiquidGlassFieldSelectTrigger',
+          elementName: 'proto-ui-liquid-glass-field-select-trigger',
+        },
+        {
+          prototypeImport: 'fieldSwitch',
+          exportBaseName: 'LiquidGlassFieldSwitch',
+          elementName: 'proto-ui-liquid-glass-field-switch',
         },
       ],
       { stylePreset: 'liquid-glass' }
@@ -606,6 +651,11 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
       exportBaseName: 'ShadcnTabsContent',
       elementName: 'proto-ui-shadcn-tabs-content',
     },
+    {
+      prototypeImport: 'shadcnTabsIndicator',
+      exportBaseName: 'ShadcnTabsIndicator',
+      elementName: 'proto-ui-shadcn-tabs-indicator',
+    },
   ]),
 
   'shadcn-hover-card': shadcnCompound('shadcn-hover-card', 'shadcn Hover Card', [
@@ -674,6 +724,36 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
       prototypeImport: 'shadcnSelectItem',
       exportBaseName: 'ShadcnSelectItem',
       elementName: 'proto-ui-shadcn-select-item',
+    },
+    {
+      prototypeImport: 'shadcnSelectSurface',
+      exportBaseName: 'ShadcnSelectSurface',
+      elementName: 'proto-ui-shadcn-select-surface',
+    },
+    {
+      prototypeImport: 'shadcnSelectViewport',
+      exportBaseName: 'ShadcnSelectViewport',
+      elementName: 'proto-ui-shadcn-select-viewport',
+    },
+    {
+      prototypeImport: 'shadcnSelectItemText',
+      exportBaseName: 'ShadcnSelectItemText',
+      elementName: 'proto-ui-shadcn-select-item-text',
+    },
+    {
+      prototypeImport: 'shadcnSelectGroup',
+      exportBaseName: 'ShadcnSelectGroup',
+      elementName: 'proto-ui-shadcn-select-group',
+    },
+    {
+      prototypeImport: 'shadcnSelectLabel',
+      exportBaseName: 'ShadcnSelectLabel',
+      elementName: 'proto-ui-shadcn-select-label',
+    },
+    {
+      prototypeImport: 'shadcnSelectSeparator',
+      exportBaseName: 'ShadcnSelectSeparator',
+      elementName: 'proto-ui-shadcn-select-separator',
     },
   ]),
 
@@ -1322,6 +1402,11 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'Bootstrap232TabsContent',
           elementName: 'proto-ui-bootstrap-2-3-2-tabs-content',
         },
+        {
+          prototypeImport: 'tabsIndicator',
+          exportBaseName: 'Bootstrap232TabsIndicator',
+          elementName: 'proto-ui-bootstrap-2-3-2-tabs-indicator',
+        },
       ],
       { stylePreset: 'bootstrap-2-3-2' }
     ),
@@ -1354,6 +1439,11 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           prototypeImport: 'tabsContent',
           exportBaseName: 'LiquidGlassTabsContent',
           elementName: 'proto-ui-liquid-glass-tabs-content',
+        },
+        {
+          prototypeImport: 'tabsIndicator',
+          exportBaseName: 'LiquidGlassTabsIndicator',
+          elementName: 'proto-ui-liquid-glass-tabs-indicator',
         },
       ],
       { stylePreset: 'liquid-glass' }
@@ -1393,6 +1483,36 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           exportBaseName: 'Bootstrap232SelectItem',
           elementName: 'proto-ui-bootstrap-2-3-2-select-item',
         },
+        {
+          prototypeImport: 'selectSurface',
+          exportBaseName: 'Bootstrap232SelectSurface',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-surface',
+        },
+        {
+          prototypeImport: 'selectViewport',
+          exportBaseName: 'Bootstrap232SelectViewport',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-viewport',
+        },
+        {
+          prototypeImport: 'selectItemText',
+          exportBaseName: 'Bootstrap232SelectItemText',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-item-text',
+        },
+        {
+          prototypeImport: 'selectGroup',
+          exportBaseName: 'Bootstrap232SelectGroup',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-group',
+        },
+        {
+          prototypeImport: 'selectLabel',
+          exportBaseName: 'Bootstrap232SelectLabel',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-label',
+        },
+        {
+          prototypeImport: 'selectSeparator',
+          exportBaseName: 'Bootstrap232SelectSeparator',
+          elementName: 'proto-ui-bootstrap-2-3-2-select-separator',
+        },
       ],
       { stylePreset: 'bootstrap-2-3-2' }
     ),
@@ -1430,6 +1550,36 @@ const ALL_COMPONENT_ENTRIES: Record<string, ComponentEntry> = {
           prototypeImport: 'selectItem',
           exportBaseName: 'LiquidGlassSelectItem',
           elementName: 'proto-ui-liquid-glass-select-item',
+        },
+        {
+          prototypeImport: 'selectSurface',
+          exportBaseName: 'LiquidGlassSelectSurface',
+          elementName: 'proto-ui-liquid-glass-select-surface',
+        },
+        {
+          prototypeImport: 'selectViewport',
+          exportBaseName: 'LiquidGlassSelectViewport',
+          elementName: 'proto-ui-liquid-glass-select-viewport',
+        },
+        {
+          prototypeImport: 'selectItemText',
+          exportBaseName: 'LiquidGlassSelectItemText',
+          elementName: 'proto-ui-liquid-glass-select-item-text',
+        },
+        {
+          prototypeImport: 'selectGroup',
+          exportBaseName: 'LiquidGlassSelectGroup',
+          elementName: 'proto-ui-liquid-glass-select-group',
+        },
+        {
+          prototypeImport: 'selectLabel',
+          exportBaseName: 'LiquidGlassSelectLabel',
+          elementName: 'proto-ui-liquid-glass-select-label',
+        },
+        {
+          prototypeImport: 'selectSeparator',
+          exportBaseName: 'LiquidGlassSelectSeparator',
+          elementName: 'proto-ui-liquid-glass-select-separator',
         },
       ],
       { stylePreset: 'liquid-glass' }

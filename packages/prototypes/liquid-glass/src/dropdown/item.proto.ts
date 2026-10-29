@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import { COMMAND_FOCUS_INSET } from '../interactive-surface';
 import {
   asDropdownItem,
   type DropdownItemProps,
@@ -7,7 +8,8 @@ import {
 export default definePrototype<DropdownItemProps, DropdownItemExposes>({
   name: 'liquid-glass-dropdown-item',
   setup(def) {
-    const state = asDropdownItem().stateHandles;
+    const behavior = asDropdownItem();
+    const state = behavior.stateHandles;
     if (!state) throw new Error('Dropdown Item capture missing');
     def.feedback.style.use(
       tw(
@@ -15,16 +17,21 @@ export default definePrototype<DropdownItemProps, DropdownItemExposes>({
       )
     );
     def.rule({
-      when: (w) => w.any(w.state(state.hovered).eq(true), w.state(state.focused).eq(true)),
+      when: (w) =>
+        w.all(
+          w.state(state.disabled).eq(false),
+          w.any(w.state(state.hovered).eq(true), w.state(state.focused).eq(true))
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-inset')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS_INSET)),
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50')),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground cursor-default')),
     });
+    return behavior.render;
   },
 });

@@ -3,22 +3,56 @@ import { asTextRoot } from '@proto.ui/prototypes-base/text';
 import type { TextRootProps, TextRootExposes } from '@proto.ui/prototypes-base/text';
 
 import type { ShadcnActionStyleProfile } from '../button/types';
+import { SHADCN_STYLE_IDS } from '../style-scope';
 export interface ShadcnTextRootProps extends TextRootProps {
+  /** Explicit passive action typography; ordinary omission never inherits action paint. */
   actionProfile?: 'none' | ShadcnActionStyleProfile;
 }
 
 // P-SHADCN-TEXT-PROJECTION: family theme variables own font and ink; all inputs are portable.
+// Explicit action typography follows the retained Button recipes in
+// ../button/profiles.ts, including the independent 02cad611 New York profile.
 const textRoot = definePrototype<ShadcnTextRootProps, TextRootExposes>({
   name: 'shadcn-text-root',
   setup(def) {
     asTextRoot();
     def.props.define({
-      actionProfile: { type: 'enum', empty: 'fallback', options: ['none', 'rhea', 'luma'] },
+      actionProfile: {
+        type: 'enum',
+        empty: 'fallback',
+        options: ['none', ...SHADCN_STYLE_IDS, 'new-york'],
+      },
     });
     def.props.setDefaults({ actionProfile: 'none' });
+    // Action line boxes follow each Button's default text recipe. Caller size,
+    // tone and weight stay Base inputs; the pure appearance helper pairs them.
+    for (const profile of [
+      'vega',
+      'nova',
+      'maia',
+      'luma',
+      'rhea',
+      'new-york-v4',
+      'new-york',
+    ] as const) {
+      def.rule({
+        when: (w) => w.prop('actionProfile').eq(profile),
+        intent: (i) => i.feedback.style.use(tw('leading-5')),
+      });
+    }
+    for (const profile of ['lyra', 'sera'] as const) {
+      def.rule({
+        when: (w) => w.prop('actionProfile').eq(profile),
+        intent: (i) => i.feedback.style.use(tw('leading-4')),
+      });
+    }
     def.rule({
-      when: (w) => w.not(w.prop('actionProfile').eq('none')),
-      intent: (i) => i.feedback.style.use(tw('leading-5')),
+      when: (w) => w.prop('actionProfile').eq('mira'),
+      intent: (i) => i.feedback.style.use(tw('leading-relaxed')),
+    });
+    def.rule({
+      when: (w) => w.prop('actionProfile').eq('sera'),
+      intent: (i) => i.feedback.style.use(tw('uppercase tracking-widest')),
     });
     def.rule({
       when: (w) => w.prop('size').eq('xs'),
@@ -118,15 +152,17 @@ const textRoot = definePrototype<ShadcnTextRootProps, TextRootExposes>({
       intent: (i) => i.feedback.style.use(tw('leading-relaxed')),
     });
     def.rule({
-      when: (w) => w.prop('tracking').eq('normal'),
+      when: (w) =>
+        w.all(w.not(w.prop('actionProfile').eq('sera')), w.prop('tracking').eq('normal')),
       intent: (i) => i.feedback.style.use(tw('tracking-normal')),
     });
     def.rule({
-      when: (w) => w.prop('tracking').eq('tighter'),
+      when: (w) =>
+        w.all(w.not(w.prop('actionProfile').eq('sera')), w.prop('tracking').eq('tighter')),
       intent: (i) => i.feedback.style.use(tw('tracking-tighter')),
     });
     def.rule({
-      when: (w) => w.prop('tracking').eq('tight'),
+      when: (w) => w.all(w.not(w.prop('actionProfile').eq('sera')), w.prop('tracking').eq('tight')),
       intent: (i) => i.feedback.style.use(tw('tracking-tight')),
     });
     def.rule({
