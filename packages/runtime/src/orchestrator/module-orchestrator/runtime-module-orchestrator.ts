@@ -164,13 +164,19 @@ export class RuntimeModuleOrchestrator implements ModuleOrchestrator {
 
       reset: (moduleName?: string) => {
         if (!moduleName) {
+          let failed = false;
+          let firstError: unknown;
           for (const r of this.records) {
             try {
               r.controller.reset();
-            } catch {
-              // ignore v0
+            } catch (error) {
+              if (!failed) {
+                failed = true;
+                firstError = error;
+              }
             }
           }
+          if (failed) throw firstError;
           return;
         }
 
