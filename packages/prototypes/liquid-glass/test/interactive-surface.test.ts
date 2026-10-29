@@ -251,6 +251,11 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
       /(?:^|\s)(?:scale-|translate-|bg-|size-|w-|h-|px-|py-)/
     );
     expect(commandRecipe.COMMAND_HOVER.split(' ')).toEqual(HOVER);
+    expect(commandRecipe.COMMAND_DISABLED.split(' ')).toEqual([
+      'pointer-events-none',
+      'cursor-default',
+      'shadow-none',
+    ]);
   });
   it.each(implementedCommands)(
     '$name separates static hover, press and visible focus without changing fallback or persistent state',
