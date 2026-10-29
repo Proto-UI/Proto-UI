@@ -39,6 +39,7 @@ verifies:
         - P-SHADCN-MENUBAR-REMAINING-CLOSURE
 sources:
   - path: packages/prototypes/shadcn/test/menubar-style-projection.test.ts
+  - path: apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
