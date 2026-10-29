@@ -11,6 +11,8 @@ import {
   linkSurfaceProps,
   linkSurfaceLayout,
   linkTextProps,
+  sidebarTextSurfaceStyle,
+  type SidebarTextRole,
   type SiteLinkAppearance,
   type SiteLinkEmphasis,
 } from './site-link-recipes';
@@ -20,6 +22,13 @@ import { resolveSiteLibraryFamily, type SiteLibraryFamily } from './site-library
 import { resolveProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
 
 const bindings = new WeakMap<HTMLElement, () => void>();
+
+/** Read authored navigation hierarchy, never infer depth from the enhanced wrappers. */
+export function siteSidebarTextRole(link: HTMLElement): SidebarTextRole | undefined {
+  if (!link.closest('.sidebar-pane .top-level')) return undefined;
+  if (link.localName !== 'summary') return 'row';
+  return link.matches('.sidebar-pane .top-level ul summary') ? 'nested-group' : 'top-group';
+}
 
 export function siteLinkAppearance(link: HTMLElement): SiteLinkAppearance {
   if (link.localName === 'summary') return 'nav-group';
@@ -255,9 +264,14 @@ export function initSiteNativeControls(scope: ParentNode = document): () => void
           ...linkSurfaceLayout(family, appearance, siteLinkEmphasis(link), facts),
         },
       };
+      const sidebarRole = siteSidebarTextRole(link);
       const textProps = {
-        ...linkTextProps(appearance, facts, family),
-        surfaceStyle: { ...theme, minWidth: '0' },
+        ...linkTextProps(appearance, facts, family, sidebarRole),
+        surfaceStyle: {
+          ...theme,
+          minWidth: '0',
+          ...(sidebarRole ? sidebarTextSurfaceStyle(sidebarRole) : {}),
+        },
       };
       const owner = surface;
       const revision = ++propsRevision;

@@ -559,6 +559,8 @@ try {
                       label: link.textContent?.trim(),
                       href: link.getAttribute('href'),
                       current: link.getAttribute('aria-current'),
+                      appearance: link.dataset.siteLinkAppearance,
+                      background: s.backgroundColor,
                       inView: link.hasAttribute('in-view'),
                       textHeight: text.getBoundingClientRect().height,
                       textLineHeight: parseFloat(c.lineHeight),
@@ -598,11 +600,13 @@ try {
                   Math.abs(row.surfaceHeight - minimum) <= 1,
                   `Unwrapped ${row.label} must be ${minimum}px, got ${row.surfaceHeight}`
                 );
-              assert.equal(row.fontSize, 14);
+              assert.equal(row.fontSize, row.appearance === 'sidebar' ? 13 : 14);
               assert.equal(
                 row.padding,
-                v.family === 'brutalist' && row.current && row.current !== 'false'
-                  ? '2px 6px'
+                row.appearance === 'sidebar'
+                  ? v.family === 'brutalist' && row.current && row.current !== 'false'
+                    ? '4px 6px'
+                    : '6px 8px'
                   : '4px 8px'
               );
               assert.equal(
@@ -710,15 +714,43 @@ try {
               entry.afterTocNavigation = moved;
               await shot('toc-selected');
               assert.equal(moved.right.filter((x) => x.current && x.current !== 'false').length, 1);
-              if (kind === 'candidate')
+              if (kind === 'candidate') {
                 assert.equal(
                   moved.right.filter((x) =>
-                    x.tokens
-                      ?.split(/\s+/)
-                      .includes(v.family === 'brutalist' ? 'bg-main' : 'bg-accent')
+                    ['bg-main', 'bg-accent', 'bg-muted'].some((fill) =>
+                      x.tokens?.split(/\s+/).includes(fill)
+                    )
                   ).length,
-                  1
+                  0,
+                  'TOC rows must not duplicate the continuous range background'
                 );
+                assert.ok(moved.right.every((row) => row.background === 'rgba(0, 0, 0, 0)'));
+                const range = page.locator(
+                  'sl-toc > [data-site-toc-highlight][aria-hidden="true"]'
+                );
+                assert.equal(await range.count(), 1);
+                const rangePaint = await range.evaluate((element) => {
+                  const surface = element.querySelector<HTMLElement>('[data-pui-root]');
+                  const box = element.getBoundingClientRect();
+                  return {
+                    visible: getComputedStyle(element).visibility,
+                    height: box.height,
+                    width: box.width,
+                    background: surface ? getComputedStyle(surface).backgroundColor : null,
+                    tokens: surface?.getAttribute('data-pui-style'),
+                    pointerEvents: getComputedStyle(element).pointerEvents,
+                  };
+                });
+                entry.tocRangePaint = rangePaint;
+                assert.equal(rangePaint.visible, 'visible');
+                assert.ok(rangePaint.width > 0 && rangePaint.height > 0);
+                assert.ok(rangePaint.tokens?.split(/\s+/).includes('bg-muted'));
+                assert.ok(
+                  rangePaint.background &&
+                    !['transparent', 'rgba(0, 0, 0, 0)'].includes(rangePaint.background)
+                );
+                assert.equal(rangePaint.pointerEvents, 'none');
+              }
               await page.evaluate(() => {
                 document.querySelector('[data-density-unlinked-heading-fixture]')?.remove();
                 window.dispatchEvent(new Event('resize'));

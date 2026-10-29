@@ -1448,9 +1448,21 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           })
         );
         await expect.poll(() => toc.getAttribute('aria-current')).toBe('true');
+        // #843: current belongs to native semantics and Text; only the shared
+        // range paints a background, including while the pointer stays on current.
+        await toc.hover();
+        await expect.poll(async () => (await linkPaint(toc)).background).toBe('rgba(0, 0, 0, 0)');
         await expect
-          .poll(async () => (await linkPaint(toc)).tokens)
-          .toContain(family === 'brutalist' ? 'bg-main' : 'bg-accent');
+          .poll(async () => (await linkPaint(toc)).textTokens)
+          .toContain(family === 'brutalist' ? 'font-semibold' : 'font-medium');
+        expect(await page.locator('sl-toc a[aria-current="true"]').count()).toBe(1);
+        const tocRows = page.locator('sl-toc a[data-site-link-appearance="toc"]');
+        for (const row of await tocRows.all()) {
+          const paint = await linkPaint(row);
+          expect(paint.background).toBe('rgba(0, 0, 0, 0)');
+          for (const fill of ['bg-main', 'bg-accent', 'bg-muted'])
+            expect(paint.tokens).not.toContain(fill);
+        }
         // #843 restores one passive geometry mount, painted only by the
         // existing public family Surface. Keep rejecting legacy private paint.
         const range = page.locator('sl-toc > [data-site-toc-highlight][aria-hidden="true"]');
@@ -1992,3 +2004,78 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
     }
   }, 180_000);
 });
+
+// #1039: native first-frame typography is the independent density oracle.
+// This matrix does not claim that TOC first-frame geometry is repaired.
+it('keeps compact Sidebar typography across root text, viewport and enhancement', async () => {
+  for (const [family, route] of [
+    ['shadcn', '/zh-cn/ui-libraries/shadcn/button/'],
+    ['brutalist', '/zh-cn/ui-libraries/brutalist/components/textarea/'],
+  ] as const) {
+    for (const javaScriptEnabled of [false, true]) {
+      for (const colorScheme of ['light', 'dark'] as const) {
+        const context = await browser.newContext({ javaScriptEnabled, colorScheme });
+        const page = await context.newPage();
+        try {
+          await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+          if (javaScriptEnabled) {
+            await page.waitForFunction(() =>
+              [
+                ...document.querySelectorAll(
+                  '.sidebar-pane .top-level a, .sidebar-pane .top-level summary'
+                ),
+              ].every(
+                (link) =>
+                  link.hasAttribute('data-site-link-enhanced') &&
+                  link.querySelector('[data-site-link-text]')
+              )
+            );
+          }
+          for (const width of [320, 390, 1280, 1920]) {
+            await page.setViewportSize({ width, height: 1000 });
+            for (const rootSize of [16, 20, 24]) {
+              await page.evaluate((size) => {
+                document.documentElement.style.fontSize = `${size}px`;
+              }, rootSize);
+              const rows = await page
+                .locator('.sidebar-pane .top-level a, .sidebar-pane .top-level summary')
+                .evaluateAll((links) =>
+                  links.map((link) => {
+                    const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+                    const surface =
+                      link.querySelector<HTMLElement>('[data-site-link-content]') ?? link;
+                    const style = getComputedStyle(text);
+                    const layout = getComputedStyle(surface);
+                    const topGroup =
+                      link.localName === 'summary' && !link.matches('.top-level ul summary');
+                    return {
+                      topGroup,
+                      size: parseFloat(style.fontSize),
+                      line: parseFloat(style.lineHeight),
+                      margin: parseFloat(layout.marginBottom),
+                      minHeight: parseFloat(layout.minHeight),
+                      enhanced: link.hasAttribute('data-site-link-enhanced'),
+                      role: link.getAttribute('role'),
+                    };
+                  })
+                );
+              expect(rows.length).toBeGreaterThan(0);
+              for (const row of rows) {
+                expect(row.size).toBeCloseTo(rootSize * (row.topGroup ? 0.75 : 0.8125), 2);
+                expect(row.line).toBeCloseTo(rootSize * 1.25, 2);
+                expect(row.margin).toBe(0);
+                expect(row.enhanced).toBe(javaScriptEnabled);
+                expect(row.role).toBeNull();
+                // Both baseline and enhanced retain the responsive target floor.
+                expect(row.minHeight).toBeGreaterThanOrEqual(rootSize * 2);
+                if (width <= 390) expect(row.minHeight).toBeGreaterThanOrEqual(rootSize * 2.75);
+              }
+            }
+          }
+        } finally {
+          await context.close();
+        }
+      }
+    }
+  }
+}, 150_000);

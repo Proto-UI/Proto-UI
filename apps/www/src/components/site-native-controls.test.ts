@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initSiteNativeControls } from './site-native-controls';
+import { initSiteNativeControls, siteSidebarTextRole } from './site-native-controls';
 vi.mock('./PrototypePreviewer/projection-theme', () => ({
   resolveProjectionThemeSurfaceStyle: (family: string) => ({
     '--pui-foreground': family === 'brutalist' ? '#111' : '#222',
@@ -136,3 +136,30 @@ describe('website native anchor composition', () => {
     ).toHaveLength(1);
   });
 });
+
+it.each(['shadcn', 'brutalist'])(
+  'projects %s Sidebar authored hierarchy through the shared compact Text recipe',
+  async (family) => {
+    document.documentElement.dataset.siteLibraryFamily = family;
+    document.body.innerHTML = `<aside class="sidebar-pane"><ul class="top-level"><li><details open><summary id="top">Top</summary><ul><li><a href="#article">Article</a></li><li><details open><summary id="nested">Nested</summary><ul><li><a href="#child">Child</a></li></ul></details></li></ul></details></li></ul></aside><a id="outside" href="#outside">Outside</a>`;
+    expect(siteSidebarTextRole(document.querySelector<HTMLElement>('#outside')!)).toBeUndefined();
+    releases.push(initSiteNativeControls());
+    await settle();
+    for (const [selector, role, fontSize] of [
+      ['#top', 'top-group', '0.75rem'],
+      ['#nested', 'nested-group', '0.8125rem'],
+      ['a[href="#article"]', 'row', '0.8125rem'],
+      ['a[href="#child"]', 'row', '0.8125rem'],
+    ] as const) {
+      const link = document.querySelector<HTMLElement>(selector)!;
+      expect(siteSidebarTextRole(link)).toBe(role);
+      const text = link.querySelector<HTMLElement>('[data-site-link-text]')!;
+      await vi.waitFor(() => expect(text.style.fontSize).toBe(fontSize));
+      expect(text.style.lineHeight).toBe('1.25rem');
+      expect(link.querySelector<HTMLElement>('[data-site-link-content]')!.style.marginBottom).toBe(
+        '0px'
+      );
+      expect(link.hasAttribute('role')).toBe(false);
+    }
+  }
+);
