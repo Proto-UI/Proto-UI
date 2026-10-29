@@ -136,10 +136,16 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
     const specifier = stmt.moduleSpecifier;
     if (!ts.isStringLiteralLike(specifier)) continue;
     if (!specifier.text.startsWith('.')) continue;
-    const resolved = await resolveModuleFile(path.dirname(file), specifier.text);
-    if (!resolved || stack.includes(resolved)) continue;
     const clause = stmt.importClause;
-    if (!clause) continue;
+    if (!clause || clause.isTypeOnly) continue;
+    const namedBindings = clause.namedBindings;
+    const hasNamedValues =
+      namedBindings &&
+      ts.isNamedImports(namedBindings) &&
+      namedBindings.elements.some((element) => !element.isTypeOnly);
+    if (!clause.name && !hasNamedValues) continue;
+    const resolved = await resolveModuleFile(path.dirname(file), specifier.text, hasNamedValues);
+    if (!resolved || stack.includes(resolved)) continue;
     // A default import binds the module's default export, so the local name
     // stands for whatever that export holds. Bind it as an import: the
     // built-in hook table is a spelling fallback, and a default import that
@@ -152,9 +158,10 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
         importSpecifier: specifier.text,
       });
     }
-    if (!clause.namedBindings || !ts.isNamedImports(clause.namedBindings)) continue;
+    if (!hasNamedValues) continue;
     const bindings = await loadModuleBindings(resolved, moduleCache, stack);
-    for (const element of clause.namedBindings.elements) {
+    for (const element of namedBindings.elements) {
+      if (element.isTypeOnly) continue;
       const importedName = (element.propertyName ?? element.name).text;
       const value = bindings.get(importedName);
       if (value) scope.bindings.set(element.name.text, { ...value, importedBinding: true });
@@ -162,7 +169,7 @@ async function applyImportBindings(file, sourceFile, scope, moduleCache, stack) 
   }
 }
 
-async function resolveModuleFile(dir, specifier) {
+async function resolveModuleFile(dir, specifier, failOnNonAbsence) {
   const base = path.resolve(dir, specifier);
   const candidates = [
     base,
@@ -179,8 +186,8 @@ async function resolveModuleFile(dir, specifier) {
     try {
       const stat = await fs.stat(candidate);
       if (stat.isFile()) return candidate;
-    } catch {
-      // try the next candidate
+    } catch (error) {
+      if (failOnNonAbsence && error?.code !== 'ENOENT' && error?.code !== 'ENOTDIR') throw error;
     }
   }
   return null;

@@ -4,8 +4,9 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { beforeAll, describe, expect, it } from 'vitest';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
+import { run as runSourceCli } from '../src/index';
 import { COMPONENT_REGISTRY } from '../src/registry/components';
 import { renderHostIndex, renderRootIndex } from '../src/services/codegen';
 
@@ -50,6 +51,42 @@ async function createTempProject(name: string, packageJson: Record<string, unkno
     'utf8'
   );
   return dir;
+}
+
+const TOKEN_SENTINEL = '/* existing token output */\n';
+
+async function createTokenImportFixture(imports: string, values: string[] = ['PALETTE']) {
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'pui-token-import-'));
+  await fs.mkdir(path.join(dir, 'input'));
+  await fs.mkdir(path.join(dir, 'deps'));
+  await fs.writeFile(
+    path.join(dir, 'input/widget.proto.ts'),
+    [
+      "import { definePrototype, tw } from '@proto.ui/core';",
+      imports,
+      'export const widget = definePrototype({',
+      "  name: 'token-import',",
+      '  setup(def) {',
+      "    def.feedback.style.use(tw('p-4'));",
+      ...values.map((value) => `    def.feedback.style.use(tw(${value}));`),
+      '  },',
+      '});',
+    ].join('\n')
+  );
+  await fs.writeFile(path.join(dir, 'tokens.css'), TOKEN_SENTINEL);
+  return dir;
+}
+
+function tokenArgs(dir: string): string[] {
+  return ['tokens', '--input', path.join(dir, 'input'), '--out', path.join(dir, 'tokens.css')];
+}
+
+function injectStatFailure(candidate: string, error: Error) {
+  const originalStat = fs.stat.bind(fs);
+  return vi.spyOn(fs, 'stat').mockImplementation((file, options) => {
+    if (file === candidate) return Promise.reject(error);
+    return originalStat(file, options);
+  });
 }
 
 describe('@proto.ui/cli', () => {
@@ -782,6 +819,293 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).toContain(`[data-pui-style~="overflow-y-auto"]`);
     expect(tokensCss).toContain(`[data-pui-style~="max-h-[var(--proto-ui-available-height)]"]`);
   }, 30_000);
+
+  describe('relative token import probes', () => {
+    it.each([
+      ['ENOENT', "import { PALETTE } from '../deps/missing';"],
+      ['ENOTDIR', "import { PALETTE } from '../deps/not-dir/palette';"],
+    ])('keeps %s as an ordinary missing import', async (_code, imports) => {
+      const dir = await createTokenImportFixture(imports);
+      try {
+        await fs.writeFile(path.join(dir, 'deps/not-dir'), 'not a directory');
+        const result = runCli(dir, tokenArgs(dir));
+        expect(result.status).toBe(0);
+        expect(result.stderr).toBe('');
+        const css = await fs.readFile(path.join(dir, 'tokens.css'), 'utf8');
+        expect(css).not.toBe(TOKEN_SENTINEL);
+        expect(css).toContain('[data-pui-style~="p-4"]');
+        expect(css).not.toContain('[data-pui-style~="opacity-50"]');
+      } finally {
+        await fs.rm(dir, { recursive: true, force: true });
+      }
+    });
+
+    it.each(['ENOENT', 'ENOTDIR'])('continues to a later extension after %s', async (code) => {
+      const dir = await createTokenImportFixture("import { PALETTE } from '../deps/palette';");
+      try {
+        const candidate = path.join(dir, 'deps/palette');
+        await fs.writeFile(`${candidate}.ts`, "export const PALETTE = 'opacity-50';\n");
+        const stat = injectStatFailure(candidate, Object.assign(new Error(code), { code }));
+        try {
+          await runSourceCli(tokenArgs(dir));
+          expect(
+            stat.mock.calls
+              .map(([file]) => file)
+              .filter((file) => typeof file === 'string' && file.startsWith(candidate))
+          ).toEqual([candidate, `${candidate}.ts`]);
+        } finally {
+          stat.mockRestore();
+        }
+        const css = await fs.readFile(path.join(dir, 'tokens.css'), 'utf8');
+        expect(css).toContain('[data-pui-style~="p-4"]');
+        expect(css).toContain('[data-pui-style~="opacity-50"]');
+      } finally {
+        await fs.rm(dir, { recursive: true, force: true });
+      }
+    });
+
+    it.each(['ELOOP', 'EACCES', 'EIO', undefined])(
+      'immediately propagates a non-absence error %s without writing output',
+      async (code) => {
+        const dir = await createTokenImportFixture("import { PALETTE } from '../deps/palette';");
+        try {
+          const candidate = path.join(dir, 'deps/palette');
+          await fs.writeFile(`${candidate}.ts`, "export const PALETTE = 'opacity-50';\n");
+          const error = Object.assign(new Error('injected stat failure'), { code });
+          const stat = injectStatFailure(candidate, error);
+          try {
+            await expect(runSourceCli(tokenArgs(dir))).rejects.toBe(error);
+            expect(
+              stat.mock.calls
+                .map(([file]) => file)
+                .filter((file) => typeof file === 'string' && file.startsWith(candidate))
+            ).toEqual([candidate]);
+          } finally {
+            stat.mockRestore();
+          }
+          expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toBe(TOKEN_SENTINEL);
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.each([
+      ['type-only declaration', "import type { T } from '../deps/palette';"],
+      ['type-only default', "import type T from '../deps/palette';"],
+      ['type-only specifier', "import { type T } from '../deps/palette';"],
+      ['side-effect-only', "import '../deps/palette';"],
+      ['empty named import', "import {} from '../deps/palette';"],
+      ['nonrelative', "import { PALETTE } from '@fixture/not-installed';"],
+    ])('does not probe %s imports as token values', async (_name, imports) => {
+      const dir = await createTokenImportFixture(imports, []);
+      try {
+        const stat = vi.spyOn(fs, 'stat');
+        try {
+          await runSourceCli(tokenArgs(dir));
+          expect(
+            stat.mock.calls
+              .map(([file]) => file)
+              .filter((file) => typeof file === 'string' && file.startsWith(`${dir}${path.sep}`))
+          ).toEqual([]);
+        } finally {
+          stat.mockRestore();
+        }
+        const css = await fs.readFile(path.join(dir, 'tokens.css'), 'utf8');
+        expect(css).toContain('[data-pui-style~="p-4"]');
+      } finally {
+        await fs.rm(dir, { recursive: true, force: true });
+      }
+    });
+
+    it.each([
+      "import fallback from '../deps/palette';",
+      "import fallback, { type T } from '../deps/palette';",
+    ])('keeps the default-only import probe policy for %s', async (imports) => {
+      const dir = await createTokenImportFixture(imports, []);
+      try {
+        const candidate = path.join(dir, 'deps/palette');
+        await fs.writeFile(`${candidate}.ts`, 'export default 1;\n');
+        const stat = injectStatFailure(
+          candidate,
+          Object.assign(new Error('injected EACCES'), { code: 'EACCES' })
+        );
+        try {
+          await runSourceCli(tokenArgs(dir));
+          expect(
+            stat.mock.calls
+              .map(([file]) => file)
+              .filter((file) => typeof file === 'string' && file.startsWith(candidate))
+          ).toEqual([candidate, `${candidate}.ts`]);
+        } finally {
+          stat.mockRestore();
+        }
+        expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toContain(
+          '[data-pui-style~="p-4"]'
+        );
+      } finally {
+        await fs.rm(dir, { recursive: true, force: true });
+      }
+    });
+
+    // Creating a self-referential file symlink may require elevated privileges on Windows.
+    it.skipIf(process.platform === 'win32').each([
+      ['named', "import { PALETTE } from '../deps/palette';", false, false],
+      ['later extension', "import { PALETTE } from '../deps/palette';", true, false],
+      ['mixed types', "import { type T, PALETTE } from '../deps/palette';", true, false],
+      ['default and named', "import fallback, { PALETTE } from '../deps/palette';", true, false],
+      ['shadow outputs', "import { PALETTE } from '../deps/palette';", true, true],
+    ] as const)(
+      'fails the built CLI on a real ELOOP: %s',
+      async (_name, imports, later, shadow) => {
+        const dir = await createTokenImportFixture(imports);
+        try {
+          const candidate = path.join(dir, 'deps/palette');
+          await fs.symlink('palette', candidate, 'file');
+          if (later)
+            await fs.writeFile(`${candidate}.ts`, "export const PALETTE = 'opacity-50';\n");
+          const shadowFile = path.join(dir, 'shadow.js');
+          const declaration = path.join(dir, 'shadow.d.ts');
+          if (shadow) {
+            await fs.writeFile(shadowFile, 'old shadow module');
+            await fs.writeFile(declaration, 'old shadow declaration');
+          }
+          const args = tokenArgs(dir);
+          if (shadow) args.push('--shadow-out', shadowFile);
+          const result = runCli(dir, args);
+          expect(result.status).toBe(1);
+          expect(result.stderr).toContain('ELOOP');
+          expect(result.stderr).toContain(candidate);
+          expect(result.stdout).not.toContain('wrote');
+          expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toBe(TOKEN_SENTINEL);
+          if (shadow) {
+            expect(await fs.readFile(shadowFile, 'utf8')).toBe('old shadow module');
+            expect(await fs.readFile(declaration, 'utf8')).toBe('old shadow declaration');
+          }
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.skipIf(process.platform === 'win32')(
+      'stops at a failing index candidate even when a later index extension exists',
+      async () => {
+        const dir = await createTokenImportFixture("import { PALETTE } from '../deps/palette';");
+        try {
+          const candidateDir = path.join(dir, 'deps/palette');
+          await fs.mkdir(candidateDir);
+          await fs.symlink('index.ts', path.join(candidateDir, 'index.ts'), 'file');
+          await fs.writeFile(
+            path.join(candidateDir, 'index.tsx'),
+            "export const PALETTE = 'opacity-50';\n"
+          );
+          const result = runCli(dir, tokenArgs(dir));
+          expect(result.status).toBe(1);
+          expect(result.stderr).toContain('ELOOP');
+          expect(result.stderr).toContain(path.join(candidateDir, 'index.ts'));
+          expect(result.stdout).not.toContain('wrote');
+          expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toBe(TOKEN_SENTINEL);
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.skipIf(process.platform === 'win32')(
+      'propagates a nested named import failure without publishing the outer module',
+      async () => {
+        const dir = await createTokenImportFixture("import { PALETTE } from '../deps/palette';");
+        try {
+          await fs.writeFile(
+            path.join(dir, 'deps/palette.ts'),
+            "import { NESTED } from './nested';\nexport const PALETTE = NESTED;\n"
+          );
+          await fs.symlink('nested', path.join(dir, 'deps/nested'), 'file');
+          await fs.writeFile(
+            path.join(dir, 'deps/nested.ts'),
+            "export const NESTED = 'opacity-50';\n"
+          );
+          const result = runCli(dir, tokenArgs(dir));
+          expect(result.status).toBe(1);
+          expect(result.stderr).toContain('ELOOP');
+          expect(result.stderr).toContain(path.join(dir, 'deps/nested'));
+          expect(result.stdout).not.toContain('wrote');
+          expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toBe(TOKEN_SENTINEL);
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.skipIf(process.platform === 'win32').each([false, true])(
+      'does not create new outputs on ELOOP (shadow=%s)',
+      async (shadow) => {
+        const dir = await createTokenImportFixture("import { PALETTE } from '../deps/palette';");
+        try {
+          await fs.symlink('palette', path.join(dir, 'deps/palette'), 'file');
+          const outputDir = path.join(dir, 'not-created');
+          const args = [
+            'tokens',
+            '--input',
+            path.join(dir, 'input'),
+            '--out',
+            path.join(outputDir, 'tokens.css'),
+          ];
+          if (shadow) args.push('--shadow-out', path.join(outputDir, 'shadow.js'));
+          const result = runCli(dir, args);
+          expect(result.status).toBe(1);
+          expect(result.stderr).toContain('ELOOP');
+          await expect(fs.access(outputDir)).rejects.toMatchObject({ code: 'ENOENT' });
+          expect(await fs.readFile(path.join(dir, 'tokens.css'), 'utf8')).toBe(TOKEN_SENTINEL);
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+
+    it.skipIf(process.platform === 'win32')(
+      'resolves mixed value imports without following excluded imports or binding type-only names',
+      async () => {
+        const dir = await createTokenImportFixture(
+          [
+            "import { type TYPE_ONLY, PALETTE } from '../deps/palette';",
+            "import type { T } from '../deps/type-parent';",
+            "import { type T as Again } from '../deps/type-parent';",
+            "import '../deps/side-loop';",
+            "import fallback from '../deps/default-loop';",
+            "import other, { type T as DefaultType } from '../deps/default-mixed-loop';",
+            "import { EXTERNAL } from '@fixture/not-installed';",
+          ].join('\n'),
+          // The scanner does not type-check its source; this deliberately invalid
+          // value use must not make a type-only import contribute token constants.
+          ['PALETTE', 'TYPE_ONLY']
+        );
+        try {
+          await fs.writeFile(
+            path.join(dir, 'deps/palette.ts'),
+            "export const PALETTE = 'opacity-50';\nexport const TYPE_ONLY = 'px-2';\n"
+          );
+          await fs.writeFile(
+            path.join(dir, 'deps/type-parent.ts'),
+            "import { BROKEN } from './type-loop';\nexport type T = typeof BROKEN;\n"
+          );
+          for (const name of ['type-loop', 'side-loop', 'default-loop', 'default-mixed-loop']) {
+            await fs.symlink(name, path.join(dir, 'deps', name), 'file');
+          }
+          const result = runCli(dir, tokenArgs(dir));
+          expect(result.status).toBe(0);
+          expect(result.stderr).toBe('');
+          const css = await fs.readFile(path.join(dir, 'tokens.css'), 'utf8');
+          expect(css).toContain('[data-pui-style~="p-4"]');
+          expect(css).toContain('[data-pui-style~="opacity-50"]');
+          expect(css).not.toContain('[data-pui-style~="px-2"]');
+        } finally {
+          await fs.rm(dir, { recursive: true, force: true });
+        }
+      }
+    );
+  });
 
   it('rejects the removed tailwindcss command with an explicit migration message', () => {
     const result = runCli(process.cwd(), ['tailwindcss', '--out', './unused.css']);

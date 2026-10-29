@@ -54,6 +54,10 @@ Within those admitted projector bodies, `var` remains function-scoped across nes
 
 Default-imported names are resolved through their source module rather than the built-in hook-name table. A matching local spelling cannot certify an unrelated default export; a source-proven default producer still retains its declared state selectors. Rejected authored projections cannot regain state proof from a built-in hook's spelling. Returned object literals containing getters, setters or method declarations do not prove a complete public projection, including through local aliases and spreads. Ordinary alias or parameter rebinding invalidates the previous holder without losing the source declaration itself.
 
+## Static token source imports
+
+`proto-ui tokens` follows relative named value imports when collecting token constants without executing the source. While probing their candidate files, `ENOENT` and `ENOTDIR` allow the next candidate; another filesystem error stops the command immediately, before replacing document CSS or any requested Shadow companion. Type-only bindings and side-effect-only imports are not token value imports. This policy does not change default-only imports or nonrelative package resolution.
+
 ## Opt-in Shadow style companion
 
 The source CLI generates the companion consumed by the Web Component Adapter's explicit experimental `shadow: { mode: 'open', presentation: 'split', styleArtifact }` profile. Pass the imported value as `styleArtifact`; generating it alone does not select that profile. Existing boolean `shadow` options remain unchanged. See the [Adapter guide](../adapters/web-component/README.md) for admitted prototypes, recipes and customization limits. Installing an already-published CLI version does not imply that it includes this source change.
