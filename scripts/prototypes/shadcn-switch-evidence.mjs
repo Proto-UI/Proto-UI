@@ -142,6 +142,14 @@ try {
         const result = {
           kind,
           index,
+          requestedProps: record.requestedProps(),
+          wcRawProps: record.rawProps(root),
+          nativeDraggable: root.draggable,
+          draggableAttribute: root.getAttribute('draggable'),
+          rootTokens: root.getAttribute('data-pui-style'),
+          thumbTokens: thumb.getAttribute('data-pui-style'),
+          nativeTrace: window.nativeDragTrace ?? [],
+          contactStart: window.nativeDragStart ?? null,
           width: box.width,
           height: box.height,
           radius: c.borderRadius,
@@ -517,20 +525,66 @@ try {
             const before = await page.evaluate((kind) => {
               const r = window.switchEvidence.records.find((r) => r.kind === kind);
               const root = r.controls()[1];
+              window.nativeDragDispose?.();
               window.nativeDragTrace = [];
-              for (const type of ['pointerdown', 'pointermove', 'pointerup'])
-                root.addEventListener(
-                  type,
-                  (e) =>
-                    window.nativeDragTrace.push({
-                      type,
-                      trusted: e.isTrusted,
-                      pointerId: e.pointerId,
-                    }),
-                  { once: true }
-                );
+              const handlers = [];
+              for (const type of [
+                'pointerdown',
+                'pointermove',
+                'pointerup',
+                'pointercancel',
+                'gotpointercapture',
+                'lostpointercapture',
+                'dragstart',
+                'dragend',
+              ]) {
+                const listener = (e) => {
+                  const thumb = root.firstElementChild;
+                  window.nativeDragTrace.push({
+                    type,
+                    trusted: e.isTrusted,
+                    pointerId: e.pointerId,
+                    pointerType: e.pointerType,
+                    primary: e.isPrimary,
+                    button: e.button,
+                    buttons: e.buttons,
+                    x: e.clientX,
+                    y: e.clientY,
+                    prevented: e.defaultPrevented,
+                    capture: e.pointerId !== undefined && root.hasPointerCapture(e.pointerId),
+                    target: e.target.tagName,
+                    path: e
+                      .composedPath()
+                      .slice(0, 5)
+                      .map((n) => n.tagName ?? n.nodeName),
+                    percentage: getComputedStyle(thumb).getPropertyValue('--pui-percentage'),
+                    dragging: thumb.hasAttribute('data-dragging'),
+                    rootWidth: root.getBoundingClientRect().width,
+                    thumbWidth: thumb.getBoundingClientRect().width,
+                  });
+                };
+                root.addEventListener(type, listener);
+                handlers.push([type, listener]);
+              }
+              window.nativeDragDispose = () =>
+                handlers.forEach(([type, fn]) => root.removeEventListener(type, fn));
               return r.events.length;
             }, kind);
+            await page.evaluate(
+              ({ x, y, travel, kind }) => {
+                const target = document.elementFromPoint(x, y);
+                window.nativeDragStart = {
+                  x,
+                  y,
+                  travel,
+                  kind,
+                  target: target?.tagName,
+                  targetRole: target?.getAttribute('role'),
+                  targetDraggable: target?.draggable,
+                };
+              },
+              { x, y, travel, kind }
+            );
             await page.mouse.move(x, y);
             await page.mouse.down();
             await page.mouse.move(x + (sign * travel) / 2, y, { steps: 4 });
