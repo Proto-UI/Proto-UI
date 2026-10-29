@@ -648,7 +648,7 @@ const copy = isZh
           <header class="prototype-card__header">
             <div>
               <span>{copy.demo}</span>
-              <h2>{entry.name}</h2>
+              <h2 data-site-typography="overview-card-title">{entry.name}</h2>
             </div>
             {entry.href && (
               <a href={entry.href} aria-label={`${copy.details}: ${entry.name}`}>
@@ -657,7 +657,7 @@ const copy = isZh
               </a>
             )}
           </header>
-          <p>{entry.description}</p>
+          <p data-site-typography="overview-card-description">{entry.description}</p>
           <div class="prototype-card__demo">
             <PrototypePreviewer
               demoId={entry.demoId}

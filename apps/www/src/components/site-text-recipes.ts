@@ -15,9 +15,32 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'label',
   'notice-title',
   'caption',
+  'overview-card-title',
+  'overview-card-description',
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
 export type SiteHeroViewport = 'small' | 'medium' | 'wide';
+
+/** Finite compact card roles preserve their authored native typography.
+ * Public Text projects these layout inputs; document headings stay unchanged. */
+export function siteTextSurfaceStyle(role: SiteTypographyRole): Record<string, string> {
+  if (role === 'overview-card-title')
+    return {
+      fontSize: '1rem',
+      lineHeight: '1.25rem',
+      fontFamily: 'inherit',
+      letterSpacing: 'inherit',
+    };
+  if (role === 'overview-card-description')
+    return {
+      fontSize: '0.76rem',
+      lineHeight: '1.14rem',
+      fontFamily: 'inherit',
+      letterSpacing: 'inherit',
+    };
+  return {};
+}
+
 /** App transaction inputs, not a new Text/viewport Prototype API. */
 export const SITE_TYPOGRAPHY_MEDIA_QUERIES = [
   '(max-width: 47.999rem)',
@@ -31,6 +54,17 @@ export function siteTextRecipe(
   context: 'site' | 'document' = 'site',
   heroViewport: SiteHeroViewport = compact ? 'small' : 'medium'
 ): TextRootProps {
+  if (role === 'overview-card-title' || role === 'overview-card-description')
+    return {
+      size: role === 'overview-card-title' ? 'base' : 'xs',
+      tone: role === 'overview-card-title' ? 'inherit' : 'muted',
+      weight: role === 'overview-card-title' ? 'semibold' : 'normal',
+      font: 'body',
+      leading: 'size',
+      tracking: role === 'overview-card-title' ? 'tight' : 'normal',
+      emphasis: 'normal',
+      decoration: 'none',
+    };
   // These are existing public Text inputs, composed only for ordinary Shadcn
   // document reading. Homepage and notice/chrome owners keep their recipes.
   const reading = context === 'document' && family === 'shadcn';
