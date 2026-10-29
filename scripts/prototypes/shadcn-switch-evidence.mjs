@@ -245,6 +245,10 @@ try {
     await observe(kind, 'keyboard-focus', (o) => o.focused && o.nativeFocus);
   };
   const save = async (name) => {
+    // Wait for existing finite animations; never disable or rewrite them for evidence.
+    await page.evaluate(async () => {
+      await Promise.all(document.getAnimations().map((a) => a.finished.catch(() => {})));
+    });
     await page.screenshot({ path: join(out, name), fullPage: true });
     receipt.artifacts.push({ path: name, sha256: hash(await readFile(join(out, name))) });
   };
@@ -601,6 +605,8 @@ try {
               1
             );
             assert(middle.dragging);
+            if (font === 32 && profile === 'rhea' && size === 'default' && direction === 'ltr')
+              await save(`drag-interior-${kind}.png`);
             const capture = await page.evaluate((kind) => {
               const r = window.switchEvidence.records.find((r) => r.kind === kind);
               const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
@@ -650,9 +656,144 @@ try {
           }
           await save(`drag-${font}-${profile}-${size}-${direction}.png`);
         }
+  // Browser-injected native touch events (CDP), not dispatchEvent simulations.
+  // Keep these explicit terminal cases separate from the 64 mouse combinations.
+  const touchSession = await context.newCDPSession(page);
+  await touchSession.send('Emulation.setTouchEmulationEnabled', {
+    enabled: true,
+    maxTouchPoints: 1,
+  });
+  for (const mode of ['touch-commit', 'touch-cancel', 'controlled-refusal']) {
+    await page.evaluate((mode) => {
+      document.documentElement.style.fontSize = '32px';
+      window.switchEvidence.set({
+        profile: 'rhea',
+        own: 'inherit',
+        size: 'default',
+        draggable: true,
+        direction: 'ltr',
+        disabled: false,
+        readOnly: false,
+        checked: mode === 'controlled-refusal' ? false : undefined,
+      });
+    }, mode);
+    for (const kind of ['wc', 'react', 'vue', 'vue2']) {
+      const control = page.locator(`[data-runtime=${kind}] [role=switch]`).nth(1);
+      if ((await control.getAttribute('aria-checked')) === 'true') await control.click();
+      const label = `${mode}/${kind}`;
+      const start = await observe(
+        kind,
+        label + '/settled',
+        (o) =>
+          o.checked === 'false' &&
+          !o.dragging &&
+          o.percentage === 0 &&
+          o.width === 64 &&
+          o.thumbWidth === 32 &&
+          o.thumbOffset === 2,
+        1
+      );
+      const box = await control.boundingBox();
+      assert(box);
+      const x = box.x + start.thumbOffset + start.thumbWidth / 2;
+      const y = box.y + box.height / 2;
+      const before = await page.evaluate((kind) => {
+        window.nativeDragDispose?.();
+        window.nativeDragTrace = [];
+        const r = window.switchEvidence.records.find((r) => r.kind === kind);
+        const root = r.controls()[1];
+        const types = [
+          'pointerdown',
+          'pointermove',
+          'pointerup',
+          'pointercancel',
+          'gotpointercapture',
+          'lostpointercapture',
+        ];
+        const listener = (e) =>
+          window.nativeDragTrace.push({
+            type: e.type,
+            trusted: e.isTrusted,
+            pointerType: e.pointerType,
+            pointerId: e.pointerId,
+            capture: root.hasPointerCapture(e.pointerId),
+          });
+        types.forEach((type) => root.addEventListener(type, listener));
+        window.nativeDragDispose = () =>
+          types.forEach((type) => root.removeEventListener(type, listener));
+        return r.events.length;
+      }, kind);
+      const touch = async (type, atX) =>
+        touchSession.send('Input.dispatchTouchEvent', {
+          type,
+          touchPoints:
+            type === 'touchEnd' || type === 'touchCancel'
+              ? []
+              : [{ x: atX, y, id: 1, radiusX: 1, radiusY: 1, force: 1 }],
+        });
+      await touch('touchStart', x);
+      await touch('touchMove', x + 14);
+      const middle = await observe(
+        kind,
+        label + '/interior',
+        (o) =>
+          o.dragging &&
+          o.checked === 'false' &&
+          Math.abs(o.percentage - 50) < 1 &&
+          Math.abs(o.thumbOffset - 16) < 0.75 &&
+          o.transition === 'none',
+        1
+      );
+      assert(middle.nativeTrace.some((e) => e.trusted && e.pointerType === 'touch'));
+      assert.equal(
+        await page.evaluate(
+          (kind) => window.switchEvidence.records.find((r) => r.kind === kind).events.length,
+          kind
+        ),
+        before,
+        label + ' preview is not truth'
+      );
+      if (mode === 'touch-cancel') await touch('touchCancel');
+      else {
+        await touch('touchMove', x + 28);
+        await touch('touchEnd');
+      }
+      const committed = mode === 'touch-commit';
+      const end = await observe(
+        kind,
+        label + '/terminal',
+        (o) =>
+          !o.dragging &&
+          o.checked === String(committed) &&
+          o.percentage === (committed ? 100 : 0) &&
+          Math.abs(o.thumbOffset - (committed ? 30 : 2)) < 0.75,
+        1
+      );
+      const terminal = await page.evaluate((kind) => {
+        const r = window.switchEvidence.records.find((r) => r.kind === kind);
+        const down = window.nativeDragTrace.find((e) => e.type === 'pointerdown');
+        return {
+          count: r.events.length,
+          captured: r.controls()[1].hasPointerCapture(down.pointerId),
+        };
+      }, kind);
+      assert.equal(
+        terminal.count,
+        before + (mode === 'touch-cancel' ? 0 : 1),
+        label + ' exact requests'
+      );
+      assert.equal(terminal.captured, false);
+      assert(end.nativeTrace.some((e) => e.type === 'lostpointercapture' && e.trusted));
+      if (mode === 'touch-cancel')
+        assert(end.nativeTrace.some((e) => e.type === 'pointercancel' && e.trusted));
+      await save(`${mode}-${kind}.png`);
+    }
+  }
+  await touchSession.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  await touchSession.detach();
   await page.evaluate(() => {
     document.documentElement.style.fontSize = '16px';
-    window.switchEvidence.set({ draggable: false, direction: 'ltr' });
+    window.switchEvidence.set({ draggable: false, direction: 'ltr', checked: undefined });
   });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const kind of ['wc', 'react', 'vue', 'vue2'])
