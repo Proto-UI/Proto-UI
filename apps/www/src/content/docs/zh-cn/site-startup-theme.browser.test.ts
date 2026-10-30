@@ -69,12 +69,45 @@ async function firstScreen(page: Page) {
   return page.evaluate(() => {
     const frame = document.querySelector('.site-page-frame')!;
     const heading = document.querySelector('h1')!;
+    const textRuns: Array<{
+      text: string;
+      fontSize: string;
+      fontFamily: string;
+      fontWeight: string;
+      lineHeight: string;
+      rects: Array<{ x: number; y: number; width: number; height: number }>;
+    }> = [];
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.textContent?.trim() || !node.parentElement) continue;
+      const style = getComputedStyle(node.parentElement);
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      textRuns.push({
+        text: node.textContent,
+        fontSize: style.fontSize,
+        fontFamily: style.fontFamily,
+        fontWeight: style.fontWeight,
+        lineHeight: style.lineHeight,
+        rects: [...range.getClientRects()].map(({ x, y, width, height }) => ({
+          x,
+          y,
+          width,
+          height,
+        })),
+      });
+    }
     const preview = document.querySelector<HTMLElement>('.proto-previewer .host');
     const status = preview?.querySelector<HTMLElement>('.proto-previewer__skeleton');
     return {
       background: getComputedStyle(frame).backgroundColor,
       color: getComputedStyle(frame).color,
+      // Preserve owner metrics separately: the enhanced public Text paints
+      // its own leaf typography, while the semantic h1 inherits its context.
       headingFontSize: getComputedStyle(heading).fontSize,
+      headingTextRuns: textRuns,
+      headerHeight: document.querySelector('[data-site-header]')!.getBoundingClientRect().height,
       headingFontFamily: getComputedStyle(heading).fontFamily,
       headingTop: heading.getBoundingClientRect().top,
       previewHeight: preview?.getBoundingClientRect().height ?? null,
@@ -138,7 +171,7 @@ for (const width of [2048, 390, 430, 320]) {
               const header = document.querySelector<HTMLElement>('[data-homepage-runtime]')!;
               const canonical = getComputedStyle(header);
               const language = document.querySelector<HTMLElement>(
-                '#home-language [data-projection-generation-state="active"] a'
+                '#home-language [data-projection-generation-state="active"] [role="combobox"]'
               )!;
               const surfaces = [
                 ...document.querySelectorAll<HTMLElement>(
@@ -196,10 +229,12 @@ for (const width of [2048, 390, 430, 320]) {
         }
         await page.keyboard.press('Escape');
         await menu(page).click();
-        await page.locator('#home-language [data-projection-generation-state="active"] a').focus();
+        await page
+          .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
+          .focus();
         expect(
           await page
-            .locator('#home-language [data-projection-generation-state="active"] a')
+            .locator('#home-language [data-projection-generation-state="active"] [role="combobox"]')
             .evaluate((e) => e === document.activeElement)
         ).toBe(true);
         await capture(page, `home-${width}-reopened-keyboard`, {
@@ -290,8 +325,12 @@ for (const width of [2048, 390, 430]) {
         let focusedHref: string | null = null;
         let nativeFocusRetained: (() => Promise<boolean>) | undefined;
         if (isNative) {
+          expect(await fallback.isVisible()).toBe(true);
           await fallback.press('Enter');
           expect(await page.locator('[data-site-header-settings]').isVisible()).toBe(true);
+          const preferences = page.locator('[data-site-header-preferences]');
+          expect(await preferences.count()).toBe(1);
+          expect(await preferences.isVisible()).toBe(true);
           await capture(
             page,
             `cold-native-open-${route.includes('card') ? 'card' : 'home'}-${width}`,
@@ -299,10 +338,14 @@ for (const width of [2048, 390, 430]) {
               scriptsHeld: true,
             }
           );
-          const link = page.locator('[data-site-header-settings] a[href]').first();
-          await link.focus();
-          focusedHref = await link.getAttribute('href');
-          const nativeNode = await link.elementHandle();
+          // Docs exercise the actual native Select (not today's first social
+          // link); the homepage keeps the independent community-anchor journey.
+          const nativeControl = route.includes('/card/')
+            ? page.locator('[data-site-header-settings] [data-language-native-select]')
+            : page.locator('[data-site-header-settings] a[href]').first();
+          await nativeControl.focus();
+          focusedHref = await nativeControl.getAttribute('href');
+          const nativeNode = await nativeControl.elementHandle();
           if (nativeNode)
             nativeFocusRetained = () =>
               nativeNode.evaluate((node) => node.isConnected && node === document.activeElement);
@@ -326,7 +369,19 @@ for (const width of [2048, 390, 430]) {
           expect(initial.bodyWidth).toBeLessThanOrEqual(initial.viewportWidth + 1);
           expect(loaded.bodyWidth).toBeLessThanOrEqual(loaded.viewportWidth + 1);
           expect(loaded.background).toBe(initial.background);
-          expect(loaded.headingFontSize).toBe(initial.headingFontSize);
+          expect(loaded.headerHeight).toBeCloseTo(initial.headerHeight, 0);
+          expect(loaded.headingTextRuns.length).toBeGreaterThan(0);
+          expect(loaded.headingTextRuns).toHaveLength(initial.headingTextRuns.length);
+          for (const [index, run] of loaded.headingTextRuns.entries()) {
+            const before = initial.headingTextRuns[index]!;
+            expect({ ...run, rects: undefined }).toEqual({ ...before, rects: undefined });
+            expect(run.rects).toHaveLength(before.rects.length);
+            for (const [rectIndex, rect] of run.rects.entries()) {
+              const original = before.rects[rectIndex]!;
+              for (const key of ['x', 'y', 'width', 'height'] as const)
+                expect(Math.abs(rect[key] - original[key])).toBeLessThanOrEqual(1);
+            }
+          }
           if (route.includes('/card/')) {
             expect(Number.parseFloat(initial.statusBorder ?? '0')).toBeGreaterThan(0);
             expect(initial.previewText).toContain('正文和源码已可阅读');
@@ -346,11 +401,15 @@ for (const width of [2048, 390, 430]) {
             const realSelect = locale.locator('[data-site-select-root]');
             expect(await nativeFallback.isVisible()).toBe(true);
             expect(await realSelect.isVisible()).toBe(false);
-            expect(await locale.getByRole('combobox').count()).toBe(0);
+            expect(await locale.getByRole('combobox').count()).toBe(1);
+            expect(await nativeFallback.locator('select').inputValue()).toBe('zh-cn');
             if (width === 2048) {
-              await page.keyboard.press('Enter');
-              await page.waitForURL(`${baseUrl}${focusedHref}`);
-              expect(new URL(page.url()).pathname).toBe(focusedHref);
+              const select = nativeFallback.locator('select');
+              const paths = JSON.parse((await select.getAttribute('data-locale-paths'))!);
+              expect(await select.locator('option').first().getAttribute('value')).toBe('en');
+              await page.keyboard.press('Home');
+              await page.waitForURL(`${baseUrl}${paths.en}`);
+              expect(new URL(page.url()).pathname).toBe(paths.en);
             } else {
               await page.keyboard.press(width === 390 ? 'Tab' : 'Shift+Tab');
               await expect.poll(() => realSelect.isVisible()).toBe(true);
