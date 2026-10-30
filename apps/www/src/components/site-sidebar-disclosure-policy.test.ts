@@ -240,7 +240,8 @@ it('unsubscribes pending observers and cancels event tasks at owner retirement',
   groups[0]!.open = false;
   await new Promise((resolve) => window.setTimeout(resolve, 0));
   expect(canceled).not.toHaveBeenCalled();
-  expect(retired).toHaveBeenCalledExactlyOnceWith('retired');
+  expect(retired).toHaveBeenCalledTimes(1);
+  expect(retired).toHaveBeenCalledWith('retired');
   expect(localStorage.getItem(key)).toBeNull();
 });
 
@@ -357,7 +358,8 @@ it.each(['route', 'pageshow'] as const)(
         history.replaceState(null, '', '/next-policy-route/');
         document.dispatchEvent(new Event('astro:page-load'));
       } else window.dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true }));
-      expect(settled).toHaveBeenCalledExactlyOnceWith('settled');
+      expect(settled).toHaveBeenCalledTimes(1);
+      expect(settled).toHaveBeenCalledWith('settled');
       expect(lease.readIntent()).toBe('none');
       expect(groups[1]!.open).toBe(true);
       await new Promise((resolve) => window.setTimeout(resolve, 0));
@@ -384,7 +386,8 @@ it('retires old pending listeners before replacement and does not let old tasks 
   dispose = bootstrap(next.root, ['current', 'other']);
   old.groups[0]!.open = false;
   await new Promise((resolve) => window.setTimeout(resolve, 0));
-  expect(retired).toHaveBeenCalledExactlyOnceWith('retired');
+  expect(retired).toHaveBeenCalledTimes(1);
+  expect(retired).toHaveBeenCalledWith('retired');
   expect(next.groups[0]!.open).toBe(true);
   expect(sidebarDisclosureLease(next.root)!.readIntent()).toBe('none');
   expect(localStorage.getItem(key)).toBeNull();
