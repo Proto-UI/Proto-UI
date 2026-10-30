@@ -1,3 +1,4 @@
+import type { RuntimeHost } from '@proto.ui/runtime';
 import { withWebComponentOwnedRelocation } from '../owned-relocation';
 import { createWebOwnedDecorationPortalGate } from '@proto.ui/adapter-base';
 import { equalOwnedTemplateBlueprint, type InstanceAssociations } from '@proto.ui/core';
@@ -21,6 +22,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
   getInstanceAssociations?: () => InstanceAssociations;
+  viewOperations?: RuntimeHost<Props>['viewOperations'];
   textControlTarget: HTMLElement | null;
   imageViewTarget: HTMLImageElement | null;
   wiring: ReturnType<typeof createHostWiring>;
@@ -254,6 +256,7 @@ export function createWebComponentHostSession<Props extends PropsBaseType>(args:
     {
       getRawProps: () => rawPropsSource.get() as Readonly<Props & PropsBaseType>,
       getInstanceAssociations: args.getInstanceAssociations,
+      viewOperations: args.viewOperations,
       schedule,
       onLifecycleCheckpoint,
       onLifecycleEvent,

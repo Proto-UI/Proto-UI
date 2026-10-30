@@ -456,6 +456,7 @@ export function createVueAdapter(runtime: VueRuntime) {
             schedule,
             rawPropsSource,
             getInstanceAssociations: () => props.instanceAssociations ?? {},
+            viewOperations: { capture: () => owner.captureViewOperation() },
             wiring,
             eventGate: {
               disable: () => eventGateRef.value?.disable(),
@@ -949,6 +950,11 @@ export function createVueAdapter(runtime: VueRuntime) {
           hostSession = owner.attachView({
             modules,
             disposeView,
+            isViewAdmitted: () =>
+              !viewDisposed &&
+              rootRef.value === rootEl &&
+              rootEl.isConnected &&
+              !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: (wiring) => createHostSession(wiring, 'eager'),
           });
 

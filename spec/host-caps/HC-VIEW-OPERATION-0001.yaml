@@ -1,0 +1,34 @@
+id: HC-VIEW-OPERATION-0001
+type: host-cap
+title: Hosts publish source-view withdrawal independently from terminal retirement
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Candidate producer paths are not yet tested or admitted across all hosts.
+summary: Host-owned view identity and withdrawal generations preserve exact transport while rejecting stale source operations.
+criteria:
+  - id: HC-VIEW-OPERATION-0001-IDENTITY
+    text:
+      en: The provider object is stable for a RuntimeSession and captures only an admitted current view and a monotonic withdrawal generation. Supported view rebind replaces its generation, not the provider property; it invalidates old identities before cleanup can publish a replacement. Temporarily replacing and restoring the provider property without invalidating the old generation is outside this contract. A provider must not call author callbacks while checking validity or allow an old identity to revive after same-node reuse. Invalidated identities return false; unexpected producer exceptions remain failures and are not disguised as invalidation.
+  - id: HC-VIEW-OPERATION-0001-TRANSPORT
+    text:
+      en: Only explicitly owned exact same-owner transport may preserve the operation generation. Unrelated removal or remove/reinsert, owner replacement, author removal nested in transport and restored paths after transport finally must not revive an old operation. This does not change deferred terminal retirement or turn all detach into terminal disposal.
+  - id: HC-VIEW-OPERATION-0001-HOST-BOUNDARY
+    text:
+      en: Each host must define its actual controlled teardown, view replacement and transport producer. WC physical disconnect uses its existing custom-element lifecycle and private transport authority; React and Vue controlled framework teardown must not be advertised as arbitrary external DOM-mutation conformance. Actual framework and native evidence remains required independently from Runtime and synthetic DOM tests.
+dependsOn:
+  contracts: [C-LIFECYCLE-VIEW-OPERATION-0001]
+verifies:
+  tests: [T-LIFECYCLE-VIEW-OPERATION-0001]
+sources:
+  - path: packages/runtime/src/instance/host.ts
+  - path: packages/adapters/base/src/host/view-epoch-owner.ts
+  - path: packages/adapters/web-component/src/adapt.ts
+  - path: packages/adapters/web-component/src/owned-relocation.ts
+  - path: packages/adapters/react/src/adapt.ts
+  - path: packages/adapters/vue/src/adapt.ts
+  - path: packages/adapters/vue2/src/adapt.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define an independent source-operation withdrawal producer without moving Focus policy into hosts.

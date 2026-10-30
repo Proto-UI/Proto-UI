@@ -1,4 +1,5 @@
 import type { PropsBaseType } from '@proto.ui/types';
+import type { ViewOperation } from '@proto.ui/core';
 import type { ViewIntentSnapshot } from '@proto.ui/runtime';
 import { createHostWiring } from '../wiring/host-wiring';
 import type { AdapterHostSession } from './adapter-host';
@@ -10,6 +11,10 @@ export type ViewEpochOwner<P extends PropsBaseType> = {
   readonly session: AdapterHostSession<P> | null;
   readonly hasView: boolean;
   readonly viewIntent: ViewIntentSnapshot | null;
+  /** Captures only this owner's current admitted view; never extends its lifetime. */
+  captureViewOperation(): ViewOperation | null;
+  /** Synchronous withdrawal of unfulfilled source operations, not lifecycle retirement. */
+  withdrawViewOperations(): void;
 
   /**
    * Creates the Proto session while it is detached. The supplied wiring must
@@ -24,6 +29,7 @@ export type ViewEpochOwner<P extends PropsBaseType> = {
   attachView(args: {
     modules: WiringSpec;
     disposeView: ViewDisposer;
+    isViewAdmitted?: () => boolean;
     createSession(wiring: ReturnType<typeof createHostWiring>): AdapterHostSession<P>;
   }): AdapterHostSession<P>;
 
@@ -50,14 +56,43 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
   let unsubscribeIntent: (() => void) | null = null;
   let disposed = false;
   let viewVersion = 0;
+  let operationGeneration = 0;
+  let isViewAdmitted: (() => boolean) | null = null;
 
   const disposeView = () => {
     const current = viewDisposer;
     viewDisposer = null;
+    isViewAdmitted = null;
+    operationGeneration += 1;
     current?.();
   };
 
   return {
+    captureViewOperation() {
+      const admitted = isViewAdmitted;
+      if (disposed || !viewDisposer || !admitted?.()) return null;
+      const generation = operationGeneration;
+      const version = viewVersion;
+      let invalid = false;
+      return Object.freeze({
+        isCurrent() {
+          if (invalid) return false;
+          if (
+            disposed ||
+            !viewDisposer ||
+            viewVersion !== version ||
+            operationGeneration !== generation ||
+            isViewAdmitted !== admitted ||
+            !admitted()
+          )
+            invalid = true;
+          return !invalid;
+        },
+      });
+    },
+    withdrawViewOperations() {
+      operationGeneration += 1;
+    },
     get session() {
       return session;
     },
@@ -112,6 +147,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       disposeView();
       const version = ++viewVersion;
       viewDisposer = input.disposeView;
+      isViewAdmitted = input.isViewAdmitted ?? null;
 
       if (!wiring) {
         wiring = createHostWiring({ prototypeName: args.prototypeName, modules: input.modules });
@@ -156,6 +192,7 @@ export function createViewEpochOwner<P extends PropsBaseType>(args: {
       }
     },
     detachView() {
+      operationGeneration += 1;
       const version = viewVersion;
       let result = Promise.resolve();
       try {

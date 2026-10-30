@@ -580,6 +580,7 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           schedule,
           rawPropsSource: rawPropsSourceRef.current as RawPropsSource<Props>,
           getInstanceAssociations: () => propsRef.current.instanceAssociations ?? {},
+          viewOperations: { capture: () => ownerRef.current?.captureViewOperation() ?? null },
           wiring,
           eventGate: {
             disable: () => eventGateRef.current?.disable(),
@@ -992,6 +993,11 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
           const hostSession = owner.attachView({
             modules,
             disposeView,
+            isViewAdmitted: () =>
+              !viewDisposed &&
+              rootRef.current === rootEl &&
+              rootEl.isConnected &&
+              !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             // The optional no-Context runtime constructs its first session
             // here, before its lifetime cleanup effect has mounted. Retain the
             // session before mount can run author render/commit callbacks.
