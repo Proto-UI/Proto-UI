@@ -51,8 +51,48 @@ describe('Vue2 reached native state support', () => {
     expectStateSupport(compile(plain, {}, name), false);
   });
   it('does not retain a dormant declaration or its unused alias', () => {
-    expectStateSupport(compile(`const dormant=()=>{def.state.bool('unused',false);};
-      const alias=dormant; ${plain}`), false);
+    const result = compile(`const dormant=()=>{def.state.bool('unused',false);};
+      const alias=dormant; const again=alias; ${plain}`);
+    expectStateSupport(result, false);
+    const source = ts.createSourceFile('Component.js', result.output.code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    const names = new Set<string>();
+    const visit = (node: ts.Node): void => {
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) names.add(node.name.text);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    for (const name of ['dormant', 'alias', 'again']) expect(names.has(name)).toBe(false);
+  });
+  it('omits an authored hook reachable only inside an uncalled helper', () => {
+    const result = compile(`const dormant=()=>unused(); ${plain}`, {}, 'unused-hook', {
+      'unused.ts': `import {defineAsHook} from '@proto.ui/core';
+        export const unused=defineAsHook({name:'not-a-component-rule',setup(def){def.state.bool('unused',false);}});`,
+    }, `import {unused} from './unused';`);
+    expectStateSupport(result, false);
+    const source = ts.createSourceFile('Component.js', result.output.code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+    const helpers: string[] = [];
+    const visit = (node: ts.Node): void => {
+      if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && /(?:Hook[0-9]+|HookResults)$/.test(node.name.text)) helpers.push(node.name.text);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(helpers).toEqual([]);
+  });
+  it.each([
+    `const x=()=>{}; if(true){const x=x;}`,
+    `const x=()=>{}; if(true){const x=7;const alias=x;}`,
+    `const x=x;`,
+    `const alias=x;const x=7;`,
+  ])('retains existing rejection of shadowing or TDZ-like unbound input: %s', setup => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'lexical-negative',setup(def){${setup} ${plain}}});`);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.diagnostics.some(d => d.code === 'PUI1005')).toBe(true);
+  });
+  it('does not emit statements after an unconditional return', () => {
+    const result = compile(`${plain} const unreachable=def.state.bool('unreachable',false);`);
+    expectStateSupport(result, false);
+    expect(result.output.code).not.toContain('const unreachable =');
   });
   it.each([
     ['bool', `def.state.bool('value',false);`],

@@ -45,6 +45,8 @@ export function emitVue2Source(
     /^(hook\.|event\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
+  const reachedFunctions = new Set(admitted.value.functions);
+  const reachedHooks = new Set(admitted.value.authoredHooks);
   const stateDeclarations = new Set(['state.bool', 'state.string', 'state.enum', 'state.numberDiscrete', 'state.numberRange']);
   const usesState = usesInteraction || admitted.value.operations.some((operation) => stateDeclarations.has(operation));
   if (!validIdentifier(componentName) || ['GeneratedProps', 'GeneratedExposes'].includes(componentName)) {
@@ -178,17 +180,29 @@ export function emitVue2Source(
       }
     }
   }
-  function body(statements: readonly StatementIR[], depth: number): string {
+  function body(statements: readonly StatementIR[], depth: number, deadBindings = new Set<string>()): string {
     const indent = '  '.repeat(depth);
-    return statements.map((statement) => {
+    let output = '';
+    for (const statement of statements) {
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
-      switch (statement.kind) {
-        case 'const': return `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
-        case 'effect': return `${origin}${indent}${expression(statement.expression, depth)};\n`;
-        case 'return': return `${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
-        case 'if': return `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${body(statement.then, depth + 1)}${indent}}${statement.otherwise.length ? ` else {\n${body(statement.otherwise, depth + 1)}${indent}}` : ''}\n`;
+      if (statement.kind === 'const') {
+        if ((statement.value.kind === 'function' && !reachedFunctions.has(statement.value.function)) ||
+            (statement.value.kind === 'reference' && deadBindings.has(statement.value.name))) {
+          deadBindings.add(statement.name);
+          continue;
+        }
+        deadBindings.delete(statement.name);
+        output += `${origin}${indent}const ${statement.name} = ${expression(statement.value, depth)};\n`;
+      } else if (statement.kind === 'effect') {
+        output += `${origin}${indent}${expression(statement.expression, depth)};\n`;
+      } else if (statement.kind === 'return') {
+        output += `${origin}${indent}return${statement.value ? ` ${expression(statement.value, depth)}` : ''};\n`;
+        break;
+      } else {
+        output += `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${body(statement.then, depth + 1, new Set(deadBindings))}${indent}}${statement.otherwise.length ? ` else {\n${body(statement.otherwise, depth + 1, new Set(deadBindings))}${indent}}` : ''}\n`;
       }
-    }).join('');
+    }
+    return output;
   }
   const propsType = ir.props.map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`).join('\n').replace(/\*\//g, '*\\/');
   const exposesType = ir.exposes.filter((entry) => entry.kind !== 'event').map((entry) => {
@@ -198,14 +212,14 @@ export function emitVue2Source(
     return `  ${JSON.stringify(entry.name)}: ${type};`;
   }).join('\n').replace(/\*\//g, '*\\/');
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
-  const hooks = `  const ${prefix}HookResults = new Map();\n` + ir.hooks.map((hook) => `  const ${aliases.get(hook.id)} = () => {
+  const hooks = reachedHooks.size ? `  const ${prefix}HookResults = new Map();\n` + ir.hooks.filter((hook) => reachedHooks.has(hook.id)).map((hook) => `  const ${aliases.get(hook.id)} = () => {
     if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
     (${fn(hook.setup, 1)})(${prefix}Owner.def);
     const result = Object.freeze(Object.create(null));
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
     return result;
-  };`).join('\n');
+  };`).join('\n') : '';
   const styleImport = usesStyle ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n` : '';
   const interactionImport = usesInteraction ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from './.proto-ui/interaction/native-v1';
 /** @template Run @typedef {import('./.proto-ui/interaction/native-v1').NativeInteraction<Run>} ${prefix}NativeInteraction */
