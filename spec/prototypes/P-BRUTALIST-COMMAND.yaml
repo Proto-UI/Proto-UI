@@ -15,14 +15,46 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BRUTALIST-COMMAND-DIALOG-OWNERSHIP
+    text:
+      en: commandDialogContent composes Base asDialogContent once and reuses its Dialog anatomy, controlled open, dismissal, focus trap/return, title/description relations and presence. It does not own Command query or selection. Existing Dialog defaults remain unchanged.
+      zh-CN: commandDialogContent 只组合一次 Base asDialogContent，复用 Dialog anatomy、受控 open、关闭、焦点约束及返回、标题描述关系与 presence，不拥有 Command 查询或选中状态，不改既有 Dialog 默认值。
+    references:
+      prototypes:
+        - id: P-BASE-DIALOG-CONTENT
+          anchors:
+            [
+              P-BASE-DIALOG-CONTENT-PRESENCE,
+              P-BASE-DIALOG-CONTENT-FOCUS,
+              P-BASE-DIALOG-CONTENT-DISMISS,
+              P-BASE-DIALOG-CONTENT-A11Y-RELATIONS,
+            ]
+  - id: P-BRUTALIST-COMMAND-DIALOG-GEOMETRY
+    text:
+      en: The direct zero-padding content recipe is bounded by available-region geometry with root-relative safe insets. It must not inherit p6 and later override it, hide overflowed results, or replace the inner Command anatomy with a page-specific surface. Narrow, short and enlarged-root layouts require native evidence.
+      zh-CN: 直接零内边距 content recipe 用可用区域与 root 相对安全边距约束；不得先继承 p6 再覆盖、裁掉结果或用页面外壳冒充内部 Command anatomy。窄屏、短视口及放大 root 需要 native 证据。
+  - id: P-BRUTALIST-COMMAND-DIALOG-MOTION
+    text:
+      en: Dialog-owned presence must preserve interruption/reversal, reject stale completion, and suppress nonessential CSS motion for reduced or unknown preference. Native timing, focus and cleanup evidence is separate from token or timer assertions.
+      zh-CN: Dialog 所有的 presence 保留中断反转、拒绝旧完成，并在 reduced 或未知偏好禁用非必要 CSS 动画；真实时序、焦点及清理证据独立于 token 或 timer 断言。
+  - id: P-BRUTALIST-COMMAND-DIALOG-GRAMMAR
+    text:
+      en: The adopted neobrutalism3306a802 outer content is centered, square, borderless, zero-padding and hard-shadowed with200ms motion. The inner Command owns its2px border; missing inner anatomy is not fixed by painting the outer content instead.
+      zh-CN: 固定 neobrutalism3306a802 外 content 居中、方角、无边框、零内边距、硬阴影及200ms；内部 Command 拥有2px边框，不能改涂外壳掩盖内部 anatomy 缺口。
+  - id: P-BRUTALIST-COMMAND-ANATOMY
+    text:
+      en: Root owns a full-width vertical single shell; Content is its shrinkable scrollable list, never an independently bordered or shadowed panel. Adopted Rhea retains root p1 and list18rem; New York and Brutalist adopt a root-relative18.75rem list cap from the pinned300px reference. Brutalist owns its sole2px border on Root. min-height0 is an explicit containment safeguard, not proof of native short-viewport acceptance. No wrapping-row root, page CSS repair or generic Group/InputShell parity is claimed.
+      zh-CN: Root 是全宽纵向一体外壳，Content 为可收缩滚动列表，不另加边框阴影；Rhea 保留 root p1/list18rem，NY及Brutalist将固定上游300px采用为root相对18.75rem。Brutalist唯一2px边框属于Root。min-height0为显式容纳策略，不代表短视口已验收；不宣称Group/InputShell完整等价。
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests: [T-COMMAND-DIALOG-CONTENT-0001]
 sources:
   - path: packages/prototypes/brutalist/src/command/
+  - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/command.tsx
+    label: Immutable adopted MIT visual reference; independent Proto semantic implementation, not upstream certification.
 openQuestions:
   - id: P-BRUTALIST-COMMAND-Q-ADMISSION
     question:
@@ -30,10 +62,21 @@ openQuestions:
       en: When have exact-head browser/native evidence admitted this draft?
     blocks:
       - activation:P-BRUTALIST-COMMAND
+  - id: P-BRUTALIST-COMMAND-Q-DIALOG-COMPOSITION
+    question:
+      en: When do the inner Command anatomy and exact-head native focus, motion, short-viewport and root-font journeys close the bounded CommandDialog slice?
+      zh-CN: 何时补齐内部 Command anatomy 及精确 head 的真实焦点、动画、短视口与 root 字号旅程？
+    blocks:
+      - criterion:P-BRUTALIST-COMMAND#P-BRUTALIST-COMMAND-DIALOG-GEOMETRY
+      - criterion:P-BRUTALIST-COMMAND#P-BRUTALIST-COMMAND-DIALOG-MOTION
+      - activation:P-BRUTALIST-COMMAND
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Brutalist command family as draft.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Define the bounded public CommandDialog content projection and unresolved native composition evidence without stable admission.
 tags:
   - prototype
   - brutalist

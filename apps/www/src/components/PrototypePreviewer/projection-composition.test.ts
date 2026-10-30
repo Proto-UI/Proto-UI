@@ -164,7 +164,7 @@ describe('Website projection composition', () => {
         surfaceStyle: { width: '100%', minWidth: '0', maxWidth: '100%' },
       });
       expect(part('trigger')).toMatchObject({
-        props: { 'aria-label': 'Runtime' },
+        props: { accessibleLabel: 'Runtime' },
         surfaceStyle: {
           width: '100%',
           minWidth: '0',
@@ -177,6 +177,7 @@ describe('Website projection composition', () => {
               }),
         },
       });
+      expect(part('trigger')).not.toHaveProperty('props.aria-label');
       expect(part('value')).toMatchObject({
         surfaceStyle: {
           minWidth: '0',

@@ -545,7 +545,11 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
       runtime.useImperativeHandle(ref, () => handleRef.current!, []);
 
-      runtime.useEffect(() => {
+      // Automatic delivery participates in the host commit; manual mode keeps
+      // its existing passive invalidation boundary. Publishing manual raw props
+      // earlier can let a later host-layout callback synchronize them before the
+      // author's explicit update, even without calling update here.
+      const deliverRawProps = () => {
         controllerRef.current?.applyInstanceAssociations(
           propsRef.current.instanceAssociations ?? {}
         );
@@ -558,6 +562,13 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
         for (const cb of subsRef.current) cb();
         if (autoUpdate) controllerRef.current?.update();
+      };
+      // Keep hook order unconditional. Only one phase delivers this snapshot.
+      runtime.useLayoutEffect(() => {
+        if (autoUpdate) deliverRawProps();
+      }, [props, autoUpdate]);
+      runtime.useEffect(() => {
+        if (!autoUpdate) deliverRawProps();
       }, [props, autoUpdate]);
 
       const createHostSession = (

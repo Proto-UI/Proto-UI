@@ -61,6 +61,14 @@ criteria:
     text:
       zh-CN: 本决策不新增 Base Prototype、Template composition、Anatomy 能力、Adapter profile、Host Capability 或公共 package API，不把静态 `inherits.prototypes` 改造成 runtime provider，也不要求 scope 外的 Website chrome 跟随 preview lane；首个实现限定在 Website preview composition，任何公共化或 Adapter-level scoped portal target 都必须另行准入。
       en: This decision creates no Base Prototype, Template-composition feature, Anatomy capability, Adapter profile, Host Capability, or public package API; it does not turn static `inherits.prototypes` into a runtime provider or require Website chrome outside the scope to follow the preview lane. The first implementation is limited to Website preview composition, and any public admission or Adapter-level scoped portal target requires a separate decision.
+  - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-AUTHOR-SLOTS
+    text:
+      zh-CN: >-
+        Website composition 可在有 ref、初始为空的 host box 声明动态作者子树与完整 future Prototype allowlist；materializer 必须在首帧加载声明闭包。四个 Web renderer 通过同一 keyed author-child 更新契约保留静态祖先、Input 与 retained key 实例。保留 key 且根类型不变时，v1 固定所有嵌套结构与 ref，只允许值变化；结构变化必须使用新 key，根类型变化则显式替换实例。更新先复制并完整校验，拒绝重复 key/ref、跨 slot 冲突、未声明 Prototype、嵌套 slot 与非数据值，不得破坏已提交树。只有尚未开始的同 slot 请求可合并；已开始的 host commit 串行完成。commit 仅表示 host/ref 提交，不表示异步 Prototype ready。销毁、移除、portal 与失败均按 generation 所有权撤销 refs、callbacks、association 和 host 资源；host 提交失败不得留下健康假象。此能力仅为 Website composition，不扩展 Base、Adapter 或公共 Maker API，也不承接 Search 数据、导航或 Command 行为。
+
+      en: >-
+        Website composition may declare an initially empty ref-bearing host box with a complete future Prototype allowlist. Materializers load that closure before first mount. All four Web renderers share keyed author-child updates that retain static ancestors, Input and retained-key instances. For a retained key with unchanged root discriminator, v1 fixes nested topology and refs while values may change; shape changes require a new key, and root type changes explicitly replace identity. Copy and validate the complete update before mutation, rejecting duplicate keys/refs, cross-slot collisions, undeclared Prototypes, nested slots and non-data values without disturbing the committed tree. Only queued same-slot work coalesces; started host commits finish serially. Commit acknowledges host/refs, not asynchronous Prototype readiness. Disposal, removal, portals and failure revoke generation-owned refs, callbacks, associations and host resources; a host commit failure must not leave a falsely healthy render. This is Website composition only, not a Base, Adapter or public Maker API, and it does not own Search data, navigation or Command behavior.
+
 openQuestions:
   - id: D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-Q1
     question:
