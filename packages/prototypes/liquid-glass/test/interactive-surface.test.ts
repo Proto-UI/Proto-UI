@@ -1,3 +1,4 @@
+import { COMMAND_DISABLED } from '../src/interactive-surface';
 import { describe, expect, it, vi } from 'vitest';
 import type { Prototype } from '@proto.ui/core';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -233,6 +234,13 @@ async function fixture(
 
 // Portable frames establish ownership and recipe behavior only, not optical paint.
 describe('Liquid command interaction recipe over eight implemented Base owners', () => {
+  it('keeps the complete opaque disabled recipe without whole-host opacity', () => {
+    expect(COMMAND_DISABLED.split(' ')).toEqual([
+      'pointer-events-none',
+      'cursor-default',
+      'shadow-none',
+    ]);
+  });
   it.each(commands)(
     '$name separates static hover, press and visible focus without changing fallback or persistent state',
     async (command) => {
