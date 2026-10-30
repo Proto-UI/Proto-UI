@@ -39,6 +39,13 @@ export function linkSurfaceProps(
   emphasis: SiteLinkEmphasis,
   facts = initial
 ): SurfaceRootProps {
+  if (family === 'shadcn' && appearance === 'nav')
+    return shadcnActionAppearance({
+      styleProfile: 'rhea',
+      emphasis: 'minimal',
+      ...facts,
+      hovered: facts.hovered || facts.current,
+    }).surface;
   if (appearance === 'action') return linkActionAppearance(family, emphasis, facts).surface;
   const action =
     ['icon', 'pagination'].includes(appearance) && !['minimal', 'link'].includes(emphasis);
@@ -82,6 +89,11 @@ export function linkTextProps(
   facts = initial,
   family: SiteLibraryFamily = 'shadcn'
 ): TextRootProps {
+  if (family === 'shadcn' && appearance === 'nav')
+    return {
+      ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).text,
+      weight: facts.current ? 'semibold' : 'medium',
+    };
   if (appearance === 'action') return linkActionAppearance(family, 'primary', facts).text;
   const quietNavigation = family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc');
   return {
@@ -117,6 +129,12 @@ export function linkSurfaceLayout(
   emphasis: SiteLinkEmphasis,
   facts = initial
 ): Record<string, string> {
+  if (family === 'shadcn' && appearance === 'nav')
+    return {
+      ...shadcnActionAppearance({ styleProfile: 'rhea', emphasis: 'minimal', ...facts }).layout,
+      minHeight: 'var(--site-control-height, 2.75rem)',
+      pointerEvents: 'none',
+    };
   if (appearance === 'action') {
     return { ...linkActionAppearance(family, emphasis, facts).layout, pointerEvents: 'none' };
   }

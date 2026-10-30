@@ -47,6 +47,8 @@ export type ProjectionControlOption<Value extends string = string> = Readonly<{
 
 export type ProjectionControlConfig<Value extends string> = Readonly<{
   label: string;
+  /** Compact command bars retain the Trigger's accessible name without a second visual row. */
+  labelPresentation?: 'visible' | 'accessible';
   /** Runtime Box may use a genuine controlled Tabs composition. */
   presentation?: 'select' | 'tabs';
   placeholder?: string;
@@ -61,6 +63,8 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   /** Shadcn presentation; Brutalist retains its separate explicit appearance. */
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
+  /** Explicit family projection; never overrides another family's recipe. */
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -576,7 +580,7 @@ function createSelectControl<Value extends string>(
   const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.trigger,
     props: {
-      'aria-label': config.label,
+      accessibleLabel: config.label,
       ...(triggerAppearance(config, selectParts.trigger)
         ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
@@ -596,6 +600,7 @@ function createSelectControl<Value extends string>(
       ...(config.minHeight ? { minHeight: config.minHeight } : {}),
       ...(config.paddingBlock ? { paddingBlock: config.paddingBlock } : {}),
     },
+    // Public Select owns the stable author name; content is only the current value.
     children: [value],
   });
   const items = config.options.map((option) =>
@@ -631,7 +636,14 @@ function createSelectControl<Value extends string>(
   });
   const root = createProjectedProto(selectParts.root, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.root,
-    props: { value: currentValue, disabled: locked, closeOnSelect: true },
+    props: {
+      value: currentValue,
+      disabled: locked,
+      closeOnSelect: true,
+      ...(selectParts.root === 'shadcn-select-root' && config.shadcnStyleProfile
+        ? { styleProfile: config.shadcnStyleProfile }
+        : {}),
+    },
     // Width is a host-owned normalized surface input projected by every
     // Adapter. Website CSS must not reach through the wrapper to style the
     // physical combobox surface.
@@ -649,7 +661,7 @@ function createSelectControl<Value extends string>(
       'data-projection-id': `${id}-control`,
       'aria-disabled': String(locked),
     },
-    children: [label, root],
+    children: config.labelPresentation === 'accessible' ? [root] : [label, root],
   };
 }
 
@@ -974,9 +986,9 @@ export function createProjectionComposition(
         if (!trigger) {
           throw new Error(`[PrototypePreviewer] projection ${id} control trigger is missing.`);
         }
-        if (!(id === 'runtime' && runtimeTabs))
-          trigger.setAttribute('aria-label', options.controls[id].label);
         const config = options.controls[id] as ProjectionControlConfig<string>;
+        if (!(id === 'runtime' && runtimeTabs) && config.labelPresentation !== 'accessible')
+          trigger.setAttribute('aria-label', config.label);
         if (!(id === 'runtime' && runtimeTabs))
           appearanceCleanups.push(
             bindSiteSelectDismissal(context.refs[CONTROL_REFS[id].box]!, (reason) => {

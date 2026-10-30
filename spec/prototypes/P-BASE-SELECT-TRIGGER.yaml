@@ -5,12 +5,16 @@ status: draft
 since: 0.2.0-rc.0
 summary: Trigger projects the collapsed select control, reports popup relationships, and submits pointer and keyboard open requests to Root.
 statement:
-  zh-CN: Select Trigger 是同域 Root 中至多一个的 focusable command。它投射 select-only combobox role、expanded/controls/disabled facts 与 content-derived name，并将 pointer、Enter、Space、ArrowDown、ArrowUp 的 open intent 提交到 Root；它不得拥有 open 或 selection。
-  en: Select Trigger is the optional, at-most-one focusable command in the Root domain. It projects a select-only combobox role, expanded, controls, and disabled facts, and a content-derived name, and submits pointer, Enter, Space, ArrowDown, and ArrowUp open intent to Root; it must not own open state or selection.
+  zh-CN: Select Trigger 是同域 Root 中至多一个的 focusable command。它投射 select-only combobox role、expanded/controls/disabled facts 与可选 author name，并将 pointer、Enter、Space、ArrowDown、ArrowUp 的 open intent 提交到 Root；它不得拥有 open 或 selection。
+  en: Select Trigger is the optional, at-most-one focusable command in the Root domain. It projects a select-only combobox role, expanded, controls, and disabled facts, and an optional author-provided name, and submits pointer, Enter, Space, ArrowDown, and ArrowUp open intent to Root; it must not own open state or selection.
 criteria:
+  - id: P-BASE-SELECT-TRIGGER-AUTHOR-NAME
+    text:
+      en: Optional accessibleLabel is a stable author-provided name projected through the public accessibility owner and updated reactively. Empty or absent values do not invent a name. Combobox naming cannot be derived from its selected content alone; callers must supply this label or an authoritative Field labelledBy relation. A resolved labelledBy takes precedence according to the accessible name computation. Selected Value content remains independent and is not concatenated into the label or duplicated as hidden label text. Existing Root selection, disabled, keyboard, focus and popup ownership are unchanged.
+      zh-CN: 可选 accessibleLabel 由公共无障碍 owner 投射稳定 author name 并响应更新；空值不编造名称。combobox 不能只靠当前选中内容命名，调用方需传入该属性或权威 Field labelledBy；后者按命名标准优先。Value 内容独立，不拼入 label 或重复隐藏标签。Root 选值、禁用、键盘、焦点及弹层归属不变。
   - id: P-BASE-SELECT-TRIGGER-OPTIONAL-FIELD-COMPOSITION
     text:
-      en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger keeps content-derived naming while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier content-only Trigger surface without replacing selection, popup or focus protocols.
+      en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger accepts an explicit accessibleLabel author name while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier Trigger surface without replacing selection, popup or focus protocols.
     dependsOn:
       contracts: [{ id: C-FIELD-SELECT-0001, since: 0.3.0-alpha.1 }]
   - id: P-BASE-SELECT-TRIGGER-TRANSIENT-CLEANUP
@@ -33,8 +37,8 @@ criteria:
       en: Trigger must directly consume generic Trigger and Focus capabilities, publish disabled, hovered, focused, focusVisible, and pressed state, and must not depend on Base Button for its semantics.
   - id: P-BASE-SELECT-TRIGGER-A11Y
     text:
-      zh-CN: Trigger 必须投射 combobox role、content-derived name、expanded、listbox popup、disabled 与指向稳定 Content identity 的 controls relation。
-      en: Trigger must project a combobox role, content-derived name, expanded state, listbox popup, disabled state, and a controls relation targeting stable Content identity.
+      zh-CN: Trigger 必须投射 combobox role、author-provided name、expanded、listbox popup、disabled 与指向稳定 Content identity 的 controls relation。
+      en: Trigger must project a combobox role, author-provided name, expanded state, listbox popup, disabled state, and a controls relation targeting stable Content identity.
   - id: P-BASE-SELECT-TRIGGER-REQUEST
     text:
       zh-CN: pointer activation 必须 toggle；Enter/Space 必须打开；ArrowDown/ArrowUp 必须阻止宿主默认滚动并以 selected-or-first/selected-or-last entry 请求打开，且每次物理交互只提交一次 request。

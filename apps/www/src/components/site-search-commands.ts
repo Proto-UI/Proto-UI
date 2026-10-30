@@ -1,4 +1,5 @@
 import { siteSearchShortcutLabel } from './site-search-shortcut';
+import { headerButtonProps, headerResponsiveButtonFeedback } from './site-header-control-recipes';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
@@ -96,10 +97,13 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   ): DemoSpec => {
     const label = root.dataset[`${command}Label`] || command;
     const icon = command === 'open' ? 'search' : command === 'close' ? 'x' : null;
-    const props = {
-      variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
-      size: command === 'open' ? 'default' : 'sm',
-    };
+    const isHeaderOpen = command === 'open' && !!root.closest('[data-site-header]');
+    const props = isHeaderOpen
+      ? headerButtonProps(family, 'default')
+      : {
+          variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
+          size: command === 'open' ? 'default' : 'sm',
+        };
     return {
       type: 'demo',
       root: {
@@ -117,6 +121,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                 minHeight: '2.75rem',
                 paddingInline: 'var(--site-search-trigger-padding, 0)',
                 justifyContent: 'var(--site-search-trigger-justify, center)',
+                ...(isHeaderOpen ? headerResponsiveButtonFeedback() : {}),
               }
             : { minHeight: '2.75rem' },
         className:
