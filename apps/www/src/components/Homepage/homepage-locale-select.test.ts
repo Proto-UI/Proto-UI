@@ -35,9 +35,7 @@ describe('homepage locale Select composition', () => {
         (node) => node.kind === 'proto' && node.ref === 'home-locale-trigger'
       );
       expect(trigger).toMatchObject({
-        children: expect.arrayContaining([
-          { kind: 'box', tag: 'span', className: 'sr-only', children: ['Language '] },
-        ]),
+        props: { accessibleLabel: 'Language' },
       });
       expect(prototypeIds).toContain(`${family}-select-trigger`);
       if (family === 'shadcn') expect(prototypeIds).toContain('shadcn-select-item-text');

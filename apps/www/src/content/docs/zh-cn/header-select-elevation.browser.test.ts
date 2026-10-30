@@ -273,7 +273,11 @@ describe.sequential('Header public family presentation and labelled compact fiel
                         ? 'Shadcn'
                         : 'Brutalist';
                   expect(label).toBeTruthy();
-                  expect(await select.ariaSnapshot()).toContain(`combobox "${label} ${selected}"`);
+                  const accessibility = await select.ariaSnapshot();
+                  expect(accessibility).toContain(`combobox "${label}"`);
+                  expect(accessibility).toContain(selected);
+                  expect(await select.textContent()).toContain(selected);
+                  expect(await select.textContent()).not.toContain(label!);
                 }
                 if (appearance === 'family' && family === 'shadcn') {
                   expect(rest.tokens?.split(/\s+/)).toContain('border-transparent');

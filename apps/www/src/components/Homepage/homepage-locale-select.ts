@@ -82,8 +82,9 @@ export function createHomepageLocaleSelect(
     };
   const trigger = proto(
     parts.trigger,
-    [{ kind: 'box', tag: 'span', className: 'sr-only', children: [locale.label + ' '] }, value],
+    [value],
     {
+      accessibleLabel: locale.label,
       appearance:
         family === 'shadcn' ? control.triggerAppearance : control.brutalistTriggerAppearance,
     },

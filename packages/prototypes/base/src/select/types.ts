@@ -54,6 +54,8 @@ export type SelectRootStateHandles = {
 export type SelectRootAsHookContract = { state: SelectRootStateHandles };
 
 export interface SelectTriggerProps {
+  /** Stable author name, separate from the selected Value; Field label takes precedence. */
+  accessibleLabel?: string;
   disabled?: boolean;
 }
 
