@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
+import { afterEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import type * as BaseRadioGroup from '@proto.ui/prototypes-base/radio-group';
 import { styleContains } from '../../test-utils/style';
@@ -219,14 +219,8 @@ describe('prototypes/shadcn: radio group', () => {
       'border-input',
       'bg-transparent',
       'outline-none',
-      'dark:bg-input/30',
-      'data-[checked]:bg-primary',
-      'data-[checked]:text-primary-foreground',
-      'data-[checked]:border-primary',
-      'dark:data-[checked]:bg-primary',
-      'data-[focus-visible]:border-ring',
-      'data-[focus-visible]:ring-3',
-      'data-[focus-visible]:ring-ring/50',
+      // Only profile-independent disabled Rules lower to Web tokens. Checked,
+      // focus and dark paint use the private style selector and remain live.
       'data-[disabled]:cursor-not-allowed',
       'data-[disabled]:opacity-50',
     ])
@@ -237,6 +231,9 @@ describe('prototypes/shadcn: radio group', () => {
       'ring-ring/50',
       'cursor-not-allowed',
       'opacity-50',
+      'bg-primary',
+      'border-primary',
+      'bg-input/30',
     ]) {
       expect(styleContains(first, token), `unscoped ${token}`).toBe(false);
     }
@@ -265,7 +262,6 @@ describe('prototypes/shadcn: radio group', () => {
       )
     );
     expect(css).not.toContain('Unsupported Proto UI style tokens');
-    expect(css).toContain('background-color: var(--pui-primary);');
     expect(css).toContain('color: var(--pui-primary-foreground);');
     expect(css).toContain('gap: 0.5rem;');
     expect(firstIndicator.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
@@ -274,6 +270,59 @@ describe('prototypes/shadcn: radio group', () => {
     expect(first.getAttribute('aria-checked')).toBe('false');
     expect([first.tabIndex, second.tabIndex, disabled.tabIndex]).toEqual([0, -1, -1]);
     expect(disabled.querySelector('svg')).toBeNull();
+  });
+
+  it('applies profile-qualified checked, focus and guarded dark paint as live Rules', async () => {
+    const previousTheme = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = 'dark';
+    const { root, first, second } = group();
+    document.body.append(root);
+    await flushReconciliation();
+    const matches = first.matches.bind(first);
+    const matchesSpy = vi.spyOn(first, 'matches').mockImplementation(
+      (selector) => selector === ':focus-visible' || matches(selector)
+    );
+    try {
+      expect(styleContains(first, 'bg-input/30')).toBe(true);
+      expect(styleContains(second, 'bg-input/30')).toBe(true);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+      first.focus();
+      await flushReconciliation();
+      for (const token of ['border-ring', 'ring-3', 'ring-ring/50']) {
+        expect(styleContains(first, token), token).toBe(true);
+        expect(styleContains(first, `data-[focus-visible]:${token}`), token).toBe(false);
+      }
+      first.blur();
+      await flushReconciliation();
+      for (const token of ['border-ring', 'ring-3', 'ring-ring/50']) {
+        expect(styleContains(first, token), `withdrawn ${token}`).toBe(false);
+      }
+      setElementProps(root, { value: 'a' });
+      await flushReconciliation();
+      // The runtime tint is guarded by unchecked; it must withdraw rather than
+      // compete with Nova's pinned primary fill when selection changes.
+      for (const token of ['bg-primary', 'text-primary-foreground', 'border-primary']) {
+        expect(styleContains(first, token), token).toBe(true);
+        expect(styleContains(first, `data-[checked]:${token}`), token).toBe(false);
+      }
+      expect(styleContains(first, 'bg-input/30')).toBe(false);
+      expect(styleContains(second, 'bg-input/30')).toBe(true);
+      const css = renderProtoStyleTokenCss((first.getAttribute('data-pui-style') ?? '').split(/\s+/));
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(css).toContain('background-color: var(--pui-primary);');
+      expect(css).toContain('color: var(--pui-primary-foreground);');
+      setElementProps(root, { value: 'b' });
+      await flushReconciliation();
+      expect(styleContains(first, 'bg-input/30')).toBe(true);
+      expect(styleContains(first, 'bg-primary')).toBe(false);
+      expect(styleContains(second, 'bg-primary')).toBe(true);
+      expect(styleContains(second, 'bg-input/30')).toBe(false);
+    } finally {
+      matchesSpy.mockRestore();
+      root.remove();
+      if (previousTheme === undefined) delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = previousTheme;
+    }
   });
 
   it('commits uncontrolled selection once and preserves checked across disabled transitions', async () => {

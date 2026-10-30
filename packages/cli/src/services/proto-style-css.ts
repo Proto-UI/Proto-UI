@@ -355,6 +355,7 @@ const staticUtilities: Record<string, string[]> = {
   'overflow-x-auto': ['overflow-x: auto;'],
   'm-0': ['margin: 0;'],
   '-mx-1': ['margin-inline: -0.25rem;'],
+  '-mx-1.5': ['margin-inline: -0.375rem;'],
   'outline-2': ['outline-style: solid;', 'outline-width: 2px;'],
   'outline-offset-2': ['outline-offset: 2px;'],
   'rounded-2xl': ['border-radius: 1rem;'],

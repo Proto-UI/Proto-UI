@@ -46,18 +46,28 @@ for (const [family, entries] of Object.entries(families)) {
   describe(`${family} AlertDialog passive command paint`, () => {
     it('has a primary action and distinct neutral cancel, wrap-safe geometry and no second button owner', async () => {
       const p = fixture();
+      if (family === 'shadcn') {
+        // The pinned shadcn recipe is nowrap by default; wrap-safe geometry is
+        // the Proto `wrap` prop's lawful adaptation, so exercise it here.
+        setElementProps(p.action, { wrap: true });
+        setElementProps(p.cancel, { wrap: true });
+      }
       await flush();
       const primary =
         family === 'brutalist'
           ? 'bg-main'
           : family === 'bootstrap-2-3-2'
-            ? 'bg-[linear-gradient(#08c,#04c)]'
+            ? // Complete Bootstrap 2.3.2 button fill: color + gradient + repeat.
+              'bg-[#006dcc_linear-gradient(#08c,#04c)_0_0_repeat-x]'
             : 'bg-primary';
       const neutral =
         family === 'brutalist'
           ? 'bg-secondary-background'
           : family === 'bootstrap-2-3-2'
-            ? 'bg-[linear-gradient(#fff,#e6e6e6)]'
+            ? // Base AlertDialog opens with focus on the least-destructive
+              // cancel, so the interactive (hover-or-focused) fill is lawful
+              // at rest; either neutral default fill satisfies distinction.
+              'bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x]'
             : family === 'liquid-glass'
               ? 'bg-secondary'
               : 'bg-background';
@@ -79,6 +89,13 @@ for (const [family, entries] of Object.entries(families)) {
     });
     it('borrows hover/press states, cancels press, and emits only the original controlled commands', async () => {
       const p = fixture();
+      if (family === 'shadcn') {
+        // Exercise the modern profile so its authored pressed recipe
+        // (translate-y-px) is covered; the new-york-v4 default lawfully pins
+        // no distinct pressed utility.
+        setElementProps(p.action, { styleProfile: 'nova' });
+        setElementProps(p.cancel, { styleProfile: 'nova' });
+      }
       await flush();
       const actions: unknown[] = [],
         requests: unknown[] = [];
@@ -93,12 +110,13 @@ for (const [family, entries] of Object.entries(families)) {
             ? 'translate-x-1'
             : family === 'bootstrap-2-3-2'
               ? role === 'action'
-                ? 'bg-[#04c]'
-                : 'bg-[#e6e6e6]'
+                ? 'bg-[#04c_linear-gradient(#08c,#04c)_0_-15px_repeat-x]'
+                : 'bg-[#e6e6e6_linear-gradient(#fff,#e6e6e6)_0_-15px_repeat-x]'
               : family === 'liquid-glass'
                 ? 'shadow-md'
                 : role === 'action'
-                  ? 'bg-primary/80'
+                  ? // Modern profiles pin /80; new-york-v4 default is /90.
+                    'bg-primary/80'
                   : 'bg-muted';
         expect(hasIntent(p[role], hovered)).toBe(true);
         p[role].dispatchEvent(new Event('pointerdown'));

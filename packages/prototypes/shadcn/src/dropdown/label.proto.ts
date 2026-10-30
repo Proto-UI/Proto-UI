@@ -13,19 +13,19 @@ export default definePrototype<ShadcnDropdownLabelProps>({
     def.props.setDefaults({ inset: false });
     const style = setupMenuStyle(def);
     for (const id of SHADCN_STYLE_IDS) {
-      const recipe = MENU_PROFILES[id];
       def.rule({
         when: (w) => w.state(style).eq(id),
-        intent: (i) => i.feedback.style.use(tw(recipe.label, recipe.right)),
+        intent: (i) =>
+          i.feedback.style.use(tw(MENU_PROFILES[`${id}-label`], MENU_PROFILES[`${id}-right`])),
       });
       // Physical left remains physical left in RTL, as in the retained source.
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(false)),
-        intent: (i) => i.feedback.style.use(tw(recipe.left)),
+        intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[`${id}-left`])),
       });
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(true)),
-        intent: (i) => i.feedback.style.use(tw(recipe.inset)),
+        intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[`${id}-inset`])),
       });
     }
   },

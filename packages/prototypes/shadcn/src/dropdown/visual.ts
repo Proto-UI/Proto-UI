@@ -12,98 +12,83 @@ import {
  * New York Item/Label retain the independently adopted 02cad611 recipe.
  * These are paint recipes, not a second menu/command interaction owner.
  */
+// Flat profile/part keys preserve literal paint values in source collection as
+// well as at runtime, following Switch's profile/size recipe convention.
+type MenuPaintPart = 'surface' | 'item' | 'left' | 'right' | 'inset' | 'label' | 'separator' | 'width';
 export const MENU_PROFILES = {
-  vega: {
-    surface: 'rounded-md p-1 shadow-md ring-1 ring-foreground/10',
-    item: 'gap-2 rounded-sm py-1.5 text-sm',
-    left: 'pl-2',
-    right: 'pr-2',
-    inset: 'pl-8',
-    label: 'py-1.5 text-xs font-medium text-muted-foreground',
-    separator: '-mx-1 my-1 bg-border',
-    width: 'min-w-36',
-  },
-  nova: {
-    surface: 'rounded-lg p-1 shadow-md ring-1 ring-foreground/10',
-    item: 'gap-1.5 rounded-md py-1 text-sm',
-    left: 'pl-1.5',
-    right: 'pr-1.5',
-    inset: 'pl-7',
-    label: 'py-1 text-xs font-medium text-muted-foreground',
-    separator: '-mx-1 my-1 bg-border',
-    width: 'min-w-36',
-  },
-  maia: {
-    surface: 'rounded-[var(--pui-radius-2xl)] p-1 shadow-2xl ring-1 ring-foreground/5',
-    item: 'gap-2.5 rounded-[var(--pui-radius-xl)] py-2 text-sm',
-    left: 'pl-3',
-    right: 'pr-3',
-    inset: 'pl-9.5',
-    label: 'py-2.5 text-xs text-muted-foreground',
-    separator: '-mx-1 my-1 bg-border/50',
-    width: 'min-w-48',
-  },
-  lyra: {
-    surface: 'rounded-none shadow-md ring-1 ring-foreground/10',
-    item: 'gap-2 rounded-none py-2 text-xs',
-    left: 'pl-2',
-    right: 'pr-2',
-    inset: 'pl-7',
-    label: 'py-2 text-xs text-muted-foreground',
-    separator: '-mx-1 bg-border',
-    width: 'min-w-36',
-  },
-  mira: {
-    surface: 'rounded-lg p-1 shadow-md ring-1 ring-foreground/10',
-    item: 'min-h-7 gap-2 rounded-md py-1 text-xs leading-relaxed',
-    left: 'pl-2',
-    right: 'pr-2',
-    inset: 'pl-7.5',
-    label: 'py-1.5 text-xs text-muted-foreground',
-    separator: '-mx-1 my-1 bg-border/50',
-    width: 'min-w-32',
-  },
-  luma: {
-    surface: 'rounded-[var(--pui-radius-3xl)] p-1.5 shadow-lg ring-1 ring-foreground/5',
-    item: 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 text-sm font-medium',
-    left: 'pl-3',
-    right: 'pr-3',
-    inset: 'pl-9.5',
-    label: 'py-2.5 text-xs text-muted-foreground',
-    separator: '-mx-1.5 my-1.5 bg-border/50',
-    width: 'min-w-48',
-  },
-  sera: {
-    surface: 'rounded-none p-1.5 shadow-md ring-1 ring-foreground/10',
-    item: 'gap-2.5 rounded-none py-2 text-xs font-medium uppercase tracking-wider',
-    left: 'pl-3',
-    right: 'pr-3',
-    inset: 'pl-9.5',
-    label: 'py-2 text-xs uppercase tracking-wider font-semibold text-muted-foreground',
-    separator: '-mx-1.5 my-1.5 bg-border/50',
-    width: 'min-w-48',
-  },
-  rhea: {
-    surface: 'rounded-[var(--pui-radius-2xl)] p-1 shadow-lg ring-1 ring-foreground/5',
-    item: 'gap-2 min-h-7 rounded-[var(--pui-radius-xl)] py-1.5 text-sm',
-    left: 'pl-2',
-    right: 'pr-2',
-    inset: 'pl-7',
-    label: 'py-1 text-xs text-muted-foreground',
-    separator: '-mx-1 my-1 bg-border/50',
-    width: 'min-w-36',
-  },
-  'new-york-v4': {
-    surface: 'rounded-md border border-border p-1 shadow-md',
-    item: 'gap-2 rounded-sm py-1.5 text-sm',
-    left: 'pl-2',
-    right: 'pr-2',
-    inset: 'pl-8',
-    label: 'py-1.5 text-sm font-medium',
-    separator: '-mx-1 my-1 bg-border',
-    width: 'min-w-32',
-  },
-} as const satisfies Record<ShadcnStyleId, object>;
+  'vega-surface': 'rounded-md p-1 shadow-md ring-1 ring-foreground/10',
+  'vega-item': 'gap-2 rounded-sm py-1.5 text-sm',
+  'vega-left': 'pl-2',
+  'vega-right': 'pr-2',
+  'vega-inset': 'pl-8',
+  'vega-label': 'py-1.5 text-xs font-medium text-muted-foreground',
+  'vega-separator': '-mx-1 my-1 bg-border',
+  'vega-width': 'min-w-36',
+  'nova-surface': 'rounded-lg p-1 shadow-md ring-1 ring-foreground/10',
+  'nova-item': 'gap-1.5 rounded-md py-1 text-sm',
+  'nova-left': 'pl-1.5',
+  'nova-right': 'pr-1.5',
+  'nova-inset': 'pl-7',
+  'nova-label': 'py-1 text-xs font-medium text-muted-foreground',
+  'nova-separator': '-mx-1 my-1 bg-border',
+  'nova-width': 'min-w-36',
+  'maia-surface': 'rounded-[var(--pui-radius-2xl)] p-1 shadow-2xl ring-1 ring-foreground/5',
+  'maia-item': 'gap-2.5 rounded-[var(--pui-radius-xl)] py-2 text-sm',
+  'maia-left': 'pl-3',
+  'maia-right': 'pr-3',
+  'maia-inset': 'pl-9.5',
+  'maia-label': 'py-2.5 text-xs text-muted-foreground',
+  'maia-separator': '-mx-1 my-1 bg-border/50',
+  'maia-width': 'min-w-48',
+  'lyra-surface': 'rounded-none shadow-md ring-1 ring-foreground/10',
+  'lyra-item': 'gap-2 rounded-none py-2 text-xs',
+  'lyra-left': 'pl-2',
+  'lyra-right': 'pr-2',
+  'lyra-inset': 'pl-7',
+  'lyra-label': 'py-2 text-xs text-muted-foreground',
+  'lyra-separator': '-mx-1 bg-border',
+  'lyra-width': 'min-w-36',
+  'mira-surface': 'rounded-lg p-1 shadow-md ring-1 ring-foreground/10',
+  'mira-item': 'min-h-7 gap-2 rounded-md py-1 text-xs leading-relaxed',
+  'mira-left': 'pl-2',
+  'mira-right': 'pr-2',
+  'mira-inset': 'pl-7.5',
+  'mira-label': 'py-1.5 text-xs text-muted-foreground',
+  'mira-separator': '-mx-1 my-1 bg-border/50',
+  'mira-width': 'min-w-32',
+  'luma-surface': 'rounded-[var(--pui-radius-3xl)] p-1.5 shadow-lg ring-1 ring-foreground/5',
+  'luma-item': 'gap-2.5 rounded-[var(--pui-radius-2xl)] py-2 text-sm font-medium',
+  'luma-left': 'pl-3',
+  'luma-right': 'pr-3',
+  'luma-inset': 'pl-9.5',
+  'luma-label': 'py-2.5 text-xs text-muted-foreground',
+  'luma-separator': '-mx-1.5 my-1.5 bg-border/50',
+  'luma-width': 'min-w-48',
+  'sera-surface': 'rounded-none p-1.5 shadow-md ring-1 ring-foreground/10',
+  'sera-item': 'gap-2.5 rounded-none py-2 text-xs font-medium uppercase tracking-wider',
+  'sera-left': 'pl-3',
+  'sera-right': 'pr-3',
+  'sera-inset': 'pl-9.5',
+  'sera-label': 'py-2 text-xs uppercase tracking-wider font-semibold text-muted-foreground',
+  'sera-separator': '-mx-1.5 my-1.5 bg-border/50',
+  'sera-width': 'min-w-48',
+  'rhea-surface': 'rounded-[var(--pui-radius-2xl)] p-1 shadow-lg ring-1 ring-foreground/5',
+  'rhea-item': 'gap-2 min-h-7 rounded-[var(--pui-radius-xl)] py-1.5 text-sm',
+  'rhea-left': 'pl-2',
+  'rhea-right': 'pr-2',
+  'rhea-inset': 'pl-7',
+  'rhea-label': 'py-1 text-xs text-muted-foreground',
+  'rhea-separator': '-mx-1 my-1 bg-border/50',
+  'rhea-width': 'min-w-36',
+  'new-york-v4-surface': 'rounded-md border border-border p-1 shadow-md',
+  'new-york-v4-item': 'gap-2 rounded-sm py-1.5 text-sm',
+  'new-york-v4-left': 'pl-2',
+  'new-york-v4-right': 'pr-2',
+  'new-york-v4-inset': 'pl-8',
+  'new-york-v4-label': 'py-1.5 text-sm font-medium',
+  'new-york-v4-separator': '-mx-1 my-1 bg-border',
+  'new-york-v4-width': 'min-w-32',
+} as const satisfies Record<`${ShadcnStyleId}-${MenuPaintPart}`, string>;
 
 export function setupMenuStyle(
   def: DefHandle<ShadcnStyleProps>,
@@ -123,7 +108,6 @@ export function setupMenuSurface(def: DefHandle<ShadcnStyleProps>, kind: MenuKin
     )
   );
   for (const id of SHADCN_STYLE_IDS) {
-    const profile = MENU_PROFILES[id];
     const width =
       kind === 'dropdown'
         ? ['maia', 'luma', 'sera'].includes(id)
@@ -131,12 +115,12 @@ export function setupMenuSurface(def: DefHandle<ShadcnStyleProps>, kind: MenuKin
           : 'min-w-32'
         : kind === 'menubar' && id === 'new-york-v4'
           ? 'min-w-48'
-          : profile.width;
+          : MENU_PROFILES[`${id}-width`];
     def.rule({
       when: (w) => w.state(style).eq(id),
       intent: (i) =>
         i.feedback.style.use(
-          tw(profile.surface, width, id === 'new-york-v4' ? '' : 'duration-100')
+          tw(MENU_PROFILES[`${id}-surface`], width, id === 'new-york-v4' ? '' : 'duration-100')
         ),
     });
     if (id === 'rhea' || id === 'luma' || (id === 'maia' && kind === 'dropdown')) {
@@ -202,18 +186,19 @@ export function setupMenuItemPaint(
     tw('relative flex min-w-0 cursor-default select-none items-center outline-none break-words')
   );
   for (const id of SHADCN_STYLE_IDS) {
-    const recipe = MENU_PROFILES[id];
     // Menubar Sera is text-sm without the Dropdown/Context uppercase recipe.
     const body =
-      kind === 'menubar' && id === 'sera' ? 'gap-2.5 rounded-none py-2 text-sm' : recipe.item;
-    const inset = kind === 'menubar' && id === 'lyra' ? 'pl-8' : recipe.inset;
+      kind === 'menubar' && id === 'sera'
+        ? 'gap-2.5 rounded-none py-2 text-sm'
+        : MENU_PROFILES[`${id}-item`];
+    const inset = kind === 'menubar' && id === 'lyra' ? 'pl-8' : MENU_PROFILES[`${id}-inset`];
     def.rule({
       when: (w) => w.state(style).eq(id),
-      intent: (i) => i.feedback.style.use(tw(body, recipe.right)),
+      intent: (i) => i.feedback.style.use(tw(body, MENU_PROFILES[`${id}-right`])),
     });
     def.rule({
       when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(false)),
-      intent: (i) => i.feedback.style.use(tw(recipe.left)),
+      intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[`${id}-left`])),
     });
     def.rule({
       when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(true)),

@@ -8,6 +8,6 @@ export default definePrototype<ContextMenuContentProps, ContextMenuContentExpose
   setup(def) {
     const behavior = asContextMenuContent();
     setupMenuSurface(def, 'context-menu');
-    setupMenuOpenPaint(def, behavior.getState!('open')!, true);
+    setupMenuOpenPaint(def, behavior.stateHandles.open, true);
   },
 });

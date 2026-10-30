@@ -6,6 +6,7 @@ import {
 } from '@proto.ui/adapter-web-component';
 import type { Prototype } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import '../../../modules/native-link/test/no-network';
 import { styleScope } from '../src/style-scope';
 import * as autocomplete from '../src/autocomplete';

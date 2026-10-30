@@ -17,9 +17,13 @@ describe('Brutalist preset generator', () => {
       for (const relative of [
         'package.json',
         'scripts/styles/generate-brutalist-style-tokens.ts',
+        'scripts/styles/family-style-closure.ts',
         'packages/cli/src/services/prototype-style-tokens.ts',
+        'packages/cli/src/services/hook-source-summary.ts',
+        'packages/cli/src/services/hook-source-module.ts',
         'packages/cli/src/generated/lowered-variant-order.ts',
         'packages/prototypes/brutalist/src',
+        'packages/prototypes/base/src',
       ]) {
         const target = path.join(fixture, relative);
         mkdirSync(path.dirname(target), { recursive: true });

@@ -67,6 +67,17 @@ function focusVisible(target: HTMLElement) {
 }
 // Preserve the producer's declarations and match its selectors against the
 // actual host. Lowered dark/state rules need not rewrite their token on change.
+// HappyDOM's element.matches cannot tokenize literal `]` inside a quoted ~= value
+// (spec-valid CSS; browsers parse it), so the probe value is escaped to the
+// equivalent `\]`/`\[` form for the environment engine only.
+function envMatches(target: Element, selector: string): boolean {
+  const escaped = selector.replace(
+    /\[data-pui-style~="([^"]+)"\]/g,
+    (_all, value: string) =>
+      `[data-pui-style~="${value.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"]`
+  );
+  return target.matches(escaped);
+}
 function matchingBackgrounds(target: Element) {
   const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
   return [...renderProtoStyleTokenCss(tokens).matchAll(/([^{}]+)\{([^{}]+)\}/g)]
@@ -74,7 +85,7 @@ function matchingBackgrounds(target: Element) {
       body.includes('background-color:') &&
       selectors.split(',\n').some((selector) => {
         const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
-        return !!required && tokens.includes(required) && target.matches(selector.trim());
+        return !!required && tokens.includes(required) && envMatches(target, selector.trim());
       })
     )
     .flatMap(([, , body]) => [...body.matchAll(/background-color:\s*([^;]+);/g)].map((m) => m[1]));
@@ -295,7 +306,11 @@ describe('source-bound binary profiles retain Base ownership', () => {
     expect(matchingBackgrounds(thumb)).not.toContain('var(--pui-foreground)');
     document.documentElement.dataset.theme = 'dark';
     await settle();
-    expect(styleContains(root, 'bg-input/80')).toBe(true);
+    // Document theme observation is asynchronous; the Rule's visible output,
+    // not a fixed number of Promise turns, is the repaint completion signal.
+    await vi.waitFor(() =>
+      expect(styleContains(root, 'bg-input/80'), root.getAttribute('data-pui-style')).toBe(true)
+    );
     expect(styleContains(root, 'bg-input')).toBe(false);
     expect(matchingBackgrounds(thumb)).toContain('var(--pui-foreground)');
     setElementProps(scope, { styleProfile: 'luma' });
@@ -305,6 +320,7 @@ describe('source-bound binary profiles retain Base ownership', () => {
     expect(styleContains(thumb, 'bg-clip-padding')).toBe(false);
     document.documentElement.dataset.theme = 'light';
     await settle();
+    await vi.waitFor(() => expect(styleContains(thumb, 'bg-clip-padding')).toBe(true));
     expect(matchingBackgrounds(thumb)).not.toContain('var(--pui-foreground)');
     expect(styleContains(thumb, 'bg-clip-padding')).toBe(true);
     expect(root.getExposes().checked).toBe(checked);

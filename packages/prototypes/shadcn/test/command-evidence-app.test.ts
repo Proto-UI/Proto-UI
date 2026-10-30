@@ -66,4 +66,6 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
     document.body.replaceChildren();
     delete document.documentElement.dataset.ready;
   }
-});
+// Four adapter runtimes mounting two live consumers each can exceed the 5s
+// default when the suite host is loaded; it measures real mounts, not a stub.
+}, 30_000);

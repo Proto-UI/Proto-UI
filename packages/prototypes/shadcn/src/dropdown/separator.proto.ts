@@ -15,7 +15,7 @@ export default definePrototype<DropdownSeparatorProps & ShadcnStyleProps>({
     for (const id of SHADCN_STYLE_IDS) {
       def.rule({
         when: (w) => w.state(style).eq(id),
-        intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[id].separator)),
+        intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[`${id}-separator`])),
       });
     }
   },

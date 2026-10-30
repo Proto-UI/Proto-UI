@@ -58,8 +58,14 @@ describe('Accordion source to Web compiler closure', () => {
       await flush();
       verify();
       expect(trigger.contains(label)).toBe(true);
-      expect(trigger.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
-      expect(trigger.querySelector('path')?.getAttribute('d')).toBe('m6 15 6-6 6 6');
+      // Pinned Bootstrap 2.3.2 accordion-group headings are plain text links
+      // with no chevron; the other families own the decorative disclosure icon.
+      if (name !== 'bootstrap') {
+        expect(trigger.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+        expect(trigger.querySelector('path')?.getAttribute('d')).toBe('m6 15 6-6 6 6');
+      } else {
+        expect(trigger.querySelector('svg')).toBeNull();
+      }
       expect(content.getExposes().open.get()).toBe(true);
       setElementProps(item, { value: 'long-label', disabled: true });
       await flush();

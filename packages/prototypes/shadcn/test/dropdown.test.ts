@@ -68,7 +68,10 @@ describe('prototypes/shadcn: dropdown-menu', () => {
     expect(styleContains(content, 'ring-foreground/10')).toBe(true);
     expect(styleContains(content, 'duration-100')).toBe(true);
     expect(content.getExposes().transitionState.get()).toBe('entering');
-    expect(styleContains(content, 'animate-in')).toBe(true);
+    // The enter animation is keyed on the inherited `open` fact, which the Web
+    // host exposes as `data-open`; the rule therefore lowers to the
+    // `data-[open]:`-prefixed token rather than a runtime-applied bare token.
+    expect(styleContains(content, 'data-[open]:animate-in')).toBe(true);
     expect(document.activeElement).toBe(item);
   });
 

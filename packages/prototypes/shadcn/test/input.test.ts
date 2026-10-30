@@ -1,4 +1,4 @@
-import { describe, expect, expectTypeOf, it } from 'vitest';
+import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
@@ -21,7 +21,9 @@ const SURFACE_TOKENS = [
   'bg-transparent',
   'px-2.5',
   'py-1',
-  'text-base',
+  // At this host's >=768px viewport, the pinned Nova md:text-sm Rule replaces
+  // the mobile text-base utility in the same semantic font-size group.
+  'text-sm',
   'transition-colors',
   'outline-none',
   'selection:bg-primary',
@@ -29,15 +31,9 @@ const SURFACE_TOKENS = [
 ];
 
 const WEB_STATE_TOKENS = [
-  'data-[focus-visible]:border-ring',
-  'data-[focus-visible]:ring-ring/50',
-  'data-[focus-visible]:ring-3',
   'data-[disabled]:pointer-events-none',
   'data-[disabled]:cursor-not-allowed',
   'data-[disabled]:opacity-50',
-  'data-[disabled]:bg-input/50',
-  'dark:data-[disabled]:bg-input/80',
-  'dark:bg-input/30',
 ];
 
 async function flush(): Promise<void> {
@@ -142,7 +138,7 @@ describe('prototypes/shadcn: input', () => {
     el.remove();
   });
 
-  it('lowers focus, disabled, and dark rules as conditional Web presentation', async () => {
+  it('lowers disabled affordance and applies profile-qualified focus paint at runtime', async () => {
     // T-SHADCN-INPUT-0001-CASE-STATE-PRESENTATION
     const el = document.createElement('shadcn-input-root');
     document.body.appendChild(el);
@@ -155,10 +151,33 @@ describe('prototypes/shadcn: input', () => {
         `${token} :: ${target.getAttribute('data-pui-style')}`
       ).toBe(true);
     }
+    // The private profile selector keeps focus/theme palette Rules at runtime;
+    // only the profile-independent disabled affordance lowers to Web tokens.
+    const focusTokens = ['border-ring', 'ring-ring/50', 'ring-3'];
+    for (const token of focusTokens) {
+      expect(styleContains(target, token), `at rest ${token}`).toBe(false);
+      expect(styleContains(target, `data-[focus-visible]:${token}`), token).toBe(false);
+    }
+    const matches = target.matches.bind(target);
+    const matchesSpy = vi.spyOn(target, 'matches').mockImplementation(
+      (selector) => selector === ':focus-visible' || matches(selector)
+    );
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
+    target.focus();
+    await flush();
+    for (const token of focusTokens) expect(styleContains(target, token), token).toBe(true);
+    target.blur();
+    await flush();
+    for (const token of focusTokens) {
+      expect(styleContains(target, token), `withdrawn ${token}`).toBe(false);
+    }
+    matchesSpy.mockRestore();
     el.remove();
   });
 
   it('emits base-nova geometry and the combined dark-disabled palette through the real CSS path', async () => {
+    const previousTheme = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = 'light';
     const el = document.createElement('shadcn-input-root');
     document.body.appendChild(el);
     await flush();
@@ -168,25 +187,49 @@ describe('prototypes/shadcn: input', () => {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     expect(css).toContain('height: 2rem;');
     expect(css).toContain('padding-inline: 0.625rem;');
-    expect(css).toContain('data-[disabled]:bg-input/50');
-    expect(css).toContain('dark:data-[disabled]:bg-input/80');
-    expect(css).toContain('dark:bg-input/30');
-    expect(css).toContain('var(--pui-input) 80%, transparent');
-    expect(css.indexOf('dark:data-[disabled]:bg-input/80')).toBeGreaterThan(
-      css.indexOf('dark:bg-input/30')
-    );
-
-    // The same physical editor retains disabled ownership through repeated
-    // prop updates; CSS output above is not a browser-computed color claim.
-    for (const disabled of [true, false, true, false]) {
-      setElementProps(el, { disabled });
+    // Style-gated palette rules apply bare tokens only while their full
+    // condition holds. Check the live winning fill and its real CSS, including
+    // dark+disabled precedence, rather than expecting static prefixed tokens.
+    const expectPalette = (token: string, declaration: string) => {
+      const liveTokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean);
+      expect(liveTokens).toContain(token);
+      for (const other of ['bg-transparent', 'bg-input/30', 'bg-input/50', 'bg-input/80']) {
+        if (other !== token) expect(liveTokens).not.toContain(other);
+      }
+      const liveCss = renderProtoStyleTokenCss(liveTokens);
+      expect(liveCss).not.toContain('Unsupported Proto UI style tokens');
+      expect(liveCss).toContain(declaration);
+    };
+    try {
+      expectPalette('bg-transparent', 'background-color: transparent;');
+      setElementProps(el, { disabled: true });
       await flush();
-      expect(control(el)).toBe(target);
-      expect(target.disabled).toBe(disabled);
-      expect(target.hasAttribute('data-disabled')).toBe(disabled);
-      expect(el.querySelectorAll('[part="control"]')).toHaveLength(1);
+      expectPalette('bg-input/50', 'background-color: color-mix(in oklab, var(--pui-input) 50%, transparent);');
+      document.documentElement.dataset.theme = 'dark';
+      await vi.waitFor(() => expect(styleContains(target, 'bg-input/80')).toBe(true));
+      expectPalette('bg-input/80', 'background-color: color-mix(in oklab, var(--pui-input) 80%, transparent);');
+      setElementProps(el, { disabled: false });
+      await flush();
+      expectPalette('bg-input/30', 'background-color: color-mix(in oklab, var(--pui-input) 30%, transparent);');
+      document.documentElement.dataset.theme = 'light';
+      await vi.waitFor(() => expect(styleContains(target, 'bg-transparent')).toBe(true));
+      expectPalette('bg-transparent', 'background-color: transparent;');
+
+      // The same physical editor retains disabled ownership through repeated
+      // prop updates; CSS output above is not a browser-computed color claim.
+      for (const disabled of [true, false, true, false]) {
+        setElementProps(el, { disabled });
+        await flush();
+        expect(control(el)).toBe(target);
+        expect(target.disabled).toBe(disabled);
+        expect(target.hasAttribute('data-disabled')).toBe(disabled);
+        expect(el.querySelectorAll('[part="control"]')).toHaveLength(1);
+      }
+    } finally {
+      el.remove();
+      if (previousTheme === undefined) delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = previousTheme;
     }
-    el.remove();
   });
 
   it('keeps the projection contentless and does not add unsupported public props', async () => {

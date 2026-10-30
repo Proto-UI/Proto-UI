@@ -28,6 +28,17 @@ const makeRoot = (size?: 'default' | 'sm', name = 'shadcn-switch-root') => {
 const makeThumb = () => document.createElement('shadcn-switch-thumb') as any;
 // Selector/declaration evidence on the real host, not native computed paint.
 // A lowered dark/state token remains installed in both light and dark themes.
+// HappyDOM's element.matches cannot tokenize literal `]` inside a quoted ~= value
+// (spec-valid CSS; browsers parse it), so the probe value is escaped to the
+// equivalent `\]`/`\[` form for the environment engine only.
+function envMatches(target: Element, selector: string): boolean {
+  const escaped = selector.replace(
+    /\[data-pui-style~="([^"]+)"\]/g,
+    (_all, value: string) =>
+      `[data-pui-style~="${value.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"]`
+  );
+  return target.matches(escaped);
+}
 function matchingBackgrounds(target: Element) {
   const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
   return [...renderProtoStyleTokenCss(tokens).matchAll(/([^{}]+)\{([^{}]+)\}/g)]
@@ -35,7 +46,7 @@ function matchingBackgrounds(target: Element) {
       body.includes('background-color:') &&
       selectors.split(',\n').some((selector) => {
         const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
-        return !!required && tokens.includes(required) && target.matches(selector.trim());
+        return !!required && tokens.includes(required) && envMatches(target, selector.trim());
       })
     )
     .flatMap(([, , body]) => [...body.matchAll(/background-color:\s*([^;]+);/g)].map((m) => m[1]));
