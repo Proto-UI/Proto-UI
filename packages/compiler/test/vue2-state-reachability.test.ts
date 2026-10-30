@@ -60,11 +60,25 @@ describe('Vue2 reached native state support', () => {
       if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) names.add(node.name.text);
       ts.forEachChild(node, visit);
     };
-    visit(source);
+    const setupBodies: ts.Block[] = [];
+    const findSetup = (node: ts.Node): void => {
+      if (ts.isCallExpression(node) && node.arguments.length === 1 &&
+          ts.isPropertyAccessExpression(node.arguments[0]) && node.arguments[0].name.text === 'def') {
+        let callee: ts.Expression = node.expression;
+        while (ts.isParenthesizedExpression(callee)) callee = callee.expression;
+        if (ts.isArrowFunction(callee) && ts.isBlock(callee.body)) setupBodies.push(callee.body);
+      }
+      ts.forEachChild(node, findSetup);
+    };
+    findSetup(source);
+    expect(setupBodies).toHaveLength(1);
+    // Native owner helpers have their own legitimate local `again` binding.
+    // Inspect the authored setup scope, not every binding in the whole module.
+    visit(setupBodies[0]);
     for (const name of ['dormant', 'alias', 'again']) expect(names.has(name)).toBe(false);
   });
-  it('omits an authored hook reachable only inside an uncalled helper', () => {
-    const result = compile(`const dormant=()=>unused(); ${plain}`, {}, 'unused-hook', {
+  it('omits an authored hook after an unconditional setup return', () => {
+    const result = compile(`${plain} unused();`, {}, 'unused-hook', {
       'unused.ts': `import {defineAsHook} from '@proto.ui/core';
         export const unused=defineAsHook({name:'not-a-component-rule',setup(def){def.state.bool('unused',false);}});`,
     }, `import {unused} from './unused';`);
@@ -77,6 +91,18 @@ describe('Vue2 reached native state support', () => {
     };
     visit(source);
     expect(helpers).toEqual([]);
+  });
+  it('retains existing rejection of authored hooks in callback-phase helpers', () => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      import {unused} from './unused';
+      export default definePrototype({name:'hook-phase-negative',setup(def){
+        const dormant=()=>unused(); ${plain}
+      }});`, {fileName:'entry.proto.ts', files:{
+        'unused.ts': `import {defineAsHook} from '@proto.ui/core';
+          export const unused=defineAsHook({name:'ordinary-hook',setup(def){}});`,
+      }});
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.diagnostics.some(d => d.code === 'PUI1007')).toBe(true);
   });
   it.each([
     `const x=()=>{}; if(true){const x=x;}`,
