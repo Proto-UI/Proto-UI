@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { Browser, BrowserContext, CDPSession, Page } from 'playwright-core';
@@ -39,17 +40,131 @@ async function capture(name: string) {
     await page.screenshot({ path: path.join(evidence, `${name}.png`), fullPage: true });
   }
 }
+let qualityWaitSequence = 0;
 async function quality(value: string) {
-  await page.waitForFunction(
-    (expected) =>
-      Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).length ===
-        4 &&
-      Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).every(
-        (el) => el.dataset.materialQuality === expected
-      ),
-    value,
-    { timeout: 20000 }
-  );
+  const sequence = ++qualityWaitSequence;
+  try {
+    await page.waitForFunction(
+      (expected) =>
+        Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).length ===
+          4 &&
+        Array.from(document.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]')).every(
+          (el) => el.dataset.materialQuality === expected
+        ),
+      value,
+      { timeout: 20000 }
+    );
+  } catch (error) {
+    // Failure-only observation: never pause/redraw/rebind or change the original wait.
+    const name = `quality-timeout-${sequence}-${value}`;
+    const diagnostic: Record<string, unknown> = {
+      name,
+      expected: value,
+      timeoutMs: 20000,
+      originalError:
+        error instanceof Error
+          ? { name: error.name, message: error.message }
+          : { value: String(error) },
+    };
+    try {
+      diagnostic.sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], {
+        encoding: 'utf8',
+        timeout: 2000,
+      }).trim();
+      diagnostic.sourceTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
+        encoding: 'utf8',
+        timeout: 2000,
+      }).trim();
+    } catch (sourceError) {
+      diagnostic.sourceBindingError = String(sourceError);
+    }
+    try {
+      diagnostic.nativeSnapshot = await page.evaluate(() => {
+        const rect = (element: Element) => {
+          const bounds = element.getBoundingClientRect();
+          return { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height };
+        };
+        const runtimes = ['wc', 'react', 'vue', 'vue2'];
+        return {
+          observedAtMs: performance.now(),
+          theme: document.documentElement.dataset.theme,
+          ready: document.documentElement.dataset.materialReady,
+          fixtureError: document.documentElement.dataset.materialError,
+          totalRegularNodes: document.querySelectorAll('[data-demo-ref="regular"]').length,
+          // No public lease identifier is emitted by this fixture. Do not infer one
+          // from a frame number, source revision or private framework internals.
+          leaseIdentity: 'not exposed by the existing public diagnostics',
+          runtimes: runtimes.map((runtime) => {
+            const scope = document.querySelector<HTMLElement>(`[data-material-host="${runtime}"]`);
+            const hosts = Array.from(
+              scope?.querySelectorAll<HTMLElement>('[data-demo-ref="regular"]') ?? []
+            );
+            return {
+              runtime,
+              scopePresent: !!scope,
+              scopeGeometry: scope ? rect(scope) : null,
+              regularCount: hosts.length,
+              hosts: hosts.map((host) => ({
+                connected: host.isConnected,
+                geometry: rect(host),
+                quality: host.dataset.materialQuality ?? null,
+                reason: host.dataset.materialReason ?? null,
+                source: host.dataset.materialSource ?? null,
+                frame: host.dataset.materialFrame ?? null,
+                sourceRevision: host.dataset.materialSourceRevision ?? null,
+                backend: host.dataset.materialBackend ?? null,
+                profile: host.dataset.materialProfile ?? null,
+                contact: host.dataset.materialContact ?? null,
+                contactSession: host.dataset.materialContactSession ?? null,
+                carrier: host.getAttribute('data-pui-material-carrier'),
+              })),
+              sourceCanvases: Array.from(
+                scope?.querySelectorAll<HTMLCanvasElement>('[data-material-backdrop]') ?? []
+              ).map((canvas) => ({
+                width: canvas.width,
+                height: canvas.height,
+                connected: canvas.isConnected,
+                geometry: rect(canvas),
+              })),
+            };
+          }),
+        };
+      });
+    } catch (snapshotError) {
+      diagnostic.snapshotError = String(snapshotError);
+    }
+    try {
+      // Existing fixture-owned read-only resource inspector, not a production dependency.
+      diagnostic.resources = await page.evaluate(() =>
+        typeof (window as any).liquidMaterialFixture?.metrics === 'function'
+          ? (window as any).liquidMaterialFixture.metrics()
+          : { available: false, reason: 'fixture metrics unavailable' }
+      );
+    } catch (resourceError) {
+      diagnostic.resourceError = String(resourceError);
+    }
+    observations.push(diagnostic);
+    if (evidence) {
+      try {
+        await mkdir(evidence, { recursive: true });
+        // The four owned fixture scenes only; a later screenshot is not the snapshot's exact frame.
+        await page
+          .locator('.grid')
+          .screenshot({ path: path.join(evidence, `${name}.png`), timeout: 5000 });
+        diagnostic.screenshot = `${name}.png`;
+        diagnostic.screenshotSha256 = createHash('sha256').update(screenshot).digest('hex');
+      } catch (screenshotError) {
+        diagnostic.screenshotError = String(screenshotError);
+      }
+      try {
+        await writeFile(path.join(evidence, `${name}.json`), JSON.stringify(diagnostic, null, 2));
+      } catch (writeError) {
+        diagnostic.writeError = String(writeError);
+        console.error('Material failure diagnostic could not be saved', diagnostic.writeError);
+      }
+    }
+    throw error;
+  }
 }
 beforeAll(async () => {
   baseUrl = await startServer(ROUTE);
