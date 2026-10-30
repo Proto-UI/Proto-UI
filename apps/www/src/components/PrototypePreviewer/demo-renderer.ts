@@ -1,3 +1,4 @@
+import { planMaterialStages, withMaterialStages } from './demo-material-stages';
 import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import {
   createPreviewMaterialSink,
@@ -1007,32 +1008,49 @@ function hasLiquidSurface(node: DemoChild): boolean {
 }
 export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResult> {
   if (opt.isCurrent?.() === false) return EMPTY_DEMO_RENDER;
+  const stages = planMaterialStages(opt.demo.root);
   let lease = claimHostMount(opt.host);
   let scene: ReturnType<
     typeof import('./preview-material-scene').createPreviewMaterialScene
   > | null = null;
-  if (hasLiquidSurface(opt.demo.root) && !findPreviewMaterialProvider(opt.host)) {
-    const { createPreviewMaterialScene } = await import('./preview-material-scene');
-    if (!ownsLease(opt, lease)) return abandonLease(lease);
-    scene = createPreviewMaterialScene(opt.host);
-    const original = lease;
-    lease = {
-      ...original,
-      commit(cleanup) {
-        return original.commit(() => {
-          try {
-            cleanup();
-          } finally {
-            scene?.dispose();
-          }
-        });
-      },
-    };
-    const retiringScene = scene;
-    original.commit(() => retiringScene.dispose());
-    opt = { ...opt, host: scene.mount };
-  }
   try {
+    if (stages.length) {
+      const { attachPreviewMaterialScene } = await import('./preview-material-scene');
+      if (!ownsLease(opt, lease)) return abandonLease(lease);
+      const originalOptions = opt;
+      opt = {
+        ...opt,
+        demo: withMaterialStages(opt.demo, stages, attachPreviewMaterialScene, () =>
+          ownsLease(originalOptions, lease)
+        ),
+      };
+    }
+    if (
+      opt.automaticMaterialScene !== false &&
+      !stages.length &&
+      hasLiquidSurface(opt.demo.root) &&
+      !findPreviewMaterialProvider(opt.host)
+    ) {
+      const { createPreviewMaterialScene } = await import('./preview-material-scene');
+      if (!ownsLease(opt, lease)) return abandonLease(lease);
+      scene = createPreviewMaterialScene(opt.host);
+      const original = lease;
+      lease = {
+        ...original,
+        commit(cleanup) {
+          return original.commit(() => {
+            try {
+              cleanup();
+            } finally {
+              scene?.dispose();
+            }
+          });
+        },
+      };
+      const retiringScene = scene;
+      original.commit(() => retiringScene.dispose());
+      opt = { ...opt, host: scene.mount };
+    }
     switch (opt.runtime) {
       case 'wc':
         return await renderDemoWc(opt, lease);

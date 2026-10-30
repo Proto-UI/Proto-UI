@@ -1,3 +1,4 @@
+import { planMaterialStages } from './demo-material-stages';
 import {
   createPassiveShellComposition,
   type PassiveShellAppearance,
@@ -190,6 +191,9 @@ export function createRuntimePreviewSurface(
       const cleanup = child.setup?.({ ...context, refs });
       active = createPassiveShellComposition({
         runtime,
+        // The shell is a separate renderer. Its tree cannot see borrowed stages.
+        // Re-read this composition's current declaration for each shell generation.
+        automaticMaterialScene: () => planMaterialStages(demo.root).length === 0,
         mount,
         content,
         family: currentFamily,
