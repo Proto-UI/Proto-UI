@@ -13,18 +13,23 @@ import {
   type ShadcnSliderPartProps,
 } from './scalar-visual';
 
+// The thumb's borrowed/observed fact handles plus its orientation, projected
+// from the base slider's state handles. Named so the paint signature does not
+// depend on a temporary inline object type.
+type SliderThumbState = {
+  disabled: BorrowedStateHandle<boolean, SliderPartProps>;
+  hovered: BorrowedStateHandle<boolean, SliderPartProps>;
+  pressed: BorrowedStateHandle<boolean, SliderPartProps>;
+  focusVisible: ObservedStateHandle<boolean, SliderPartProps>;
+  orientation: BorrowedStateHandle<string, SliderPartProps>;
+};
+
 // The styled decoration is passive and has no input, role, focus or event
 // owner. Rule observes source facts and the owned style selection directly;
 // it needs no watch on an owned State or manual lifecycle unsubscription.
 export function sliderThumbPaint<Exposes>(
   def: DefHandle<ShadcnSliderPartProps, Exposes>,
-  state: {
-    disabled: BorrowedStateHandle<boolean, SliderPartProps>;
-    hovered: BorrowedStateHandle<boolean, SliderPartProps>;
-    pressed: BorrowedStateHandle<boolean, SliderPartProps>;
-    focusVisible: ObservedStateHandle<boolean, SliderPartProps>;
-    orientation: BorrowedStateHandle<string, SliderPartProps>;
-  },
+  state: SliderThumbState,
   style: OwnedStateHandle<ShadcnStyleId>
 ) {
   const paint = def.feedback.style.declareDecoration();
