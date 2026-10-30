@@ -75,8 +75,43 @@ function collectSuite() {
 describe('native typography browser ownership and bounded registration', () => {
   it('collects every configured journey without running a browser or hook', () => {
     const { cases, hooks } = collectSuite();
-    assert.equal(cases.length, 33);
-    assert.equal(new Set(cases.map((entry) => entry.name)).size, 33);
+    const expectedNames = [
+      ...['wc', 'react', 'vue', 'vue2'].flatMap((runtime) =>
+        ['shadcn', 'brutalist'].flatMap((family) => [
+          `${runtime}/${family}: native labels, accessibility, original nodes, genuine copy and cross-generation selection`,
+          ...['zh-cn', 'en'].map(
+            (locale) =>
+              `${locale}/${runtime}/${family}: real homepage generation and narrow text resize`
+          ),
+        ])
+      ),
+      ...['shadcn', 'brutalist'].map(
+        (family) =>
+          `${family}: real documentation follows shared runtime preferences with separate scope ownership`
+      ),
+      ...['no-js', 'initial-module-failure'].flatMap((mode) =>
+        ['homepage', 'native-fixture'].map(
+          (target) =>
+            `${target}/${mode}: original SSR hierarchy and native activation remain available`
+        )
+      ),
+      ...['shadcn', 'brutalist', 'homepage'].map(
+        (family) => `${family}: retains its own no-JavaScript heading scale`
+      ),
+      'retains Overview card native density in each runtime and without JavaScript',
+    ];
+    const assertInventory = (registered) => {
+      const names = registered.map((entry) => entry.name);
+      assert.equal(new Set(names).size, names.length, 'no duplicate journeys');
+      assert.deepEqual(
+        names.toSorted(),
+        expectedNames.toSorted(),
+        'every canonical journey is registered exactly once'
+      );
+    };
+    assertInventory(cases);
+    assert.throws(() => assertInventory(cases.slice(0, -1)));
+    assert.throws(() => assertInventory([...cases, cases[0]]));
     assert.equal(hooks.length, 2);
     for (const family of ['shadcn', 'brutalist', 'homepage'])
       assert.equal(

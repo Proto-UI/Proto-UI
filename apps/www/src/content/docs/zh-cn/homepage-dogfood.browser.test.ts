@@ -366,7 +366,29 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         });
         expect(geometry.navHidden, `${width}px navigation is deliberately disclosed`).toBe(false);
         await originalNavigation!.dispose();
-        expect(geometry.preferences).toHaveLength(2);
+        expect(geometry.preferences).toHaveLength(3);
+        // Author labels name each independent Select; selected text is its value,
+        // not a replacement accessible name. Never let a duplicate locale row
+        // satisfy the three-control geometry count.
+        for (const [name, value] of [
+          ['整页 Runtime', 'Web Components'],
+          ['整页组件库', 'Shadcn'],
+          ['语言', '简体中文'],
+        ]) {
+          const control = page.locator('[data-homepage-runtime]').getByRole('combobox', {
+            name,
+            exact: true,
+          });
+          expect(await control.count()).toBe(1);
+          expect(await control.isVisible()).toBe(true);
+          expect((await control.ariaSnapshot()).split('\n')[0]).toContain(`combobox "${name}"`);
+          expect(
+            (
+              await control.locator('[data-projection-prototype$="-select-value"]').textContent()
+            )?.trim()
+          ).toBe(value);
+          expect(await control.getAttribute('aria-expanded')).toBe('false');
+        }
         for (const preference of geometry.preferences) {
           expect(preference.height).toBeGreaterThanOrEqual(44);
           expect(preference.width).toBeGreaterThanOrEqual(120);
@@ -377,7 +399,10 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
             geometry.controls[0]!.y + geometry.controls[0]!.height
           );
         }
-        expect(geometry.preferences[1]!.y).toBeGreaterThan(geometry.preferences[0]!.bottom);
+        for (let index = 1; index < geometry.preferences.length; index++)
+          expect(geometry.preferences[index]!.y).toBeGreaterThan(
+            geometry.preferences[index - 1]!.bottom
+          );
         expect(Math.abs(geometry.panel.top - geometry.headerBottom - 5)).toBeLessThanOrEqual(1);
         expect(Math.abs(geometry.panel.right - (width - 8))).toBeLessThanOrEqual(1);
         expect(geometry.height).toBeLessThanOrEqual(64);
@@ -415,6 +440,41 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
         true
       );
+      // Runtime selection above commits Vue2. Family selection has its own
+      // unchanged 1000ms transaction gate later in this suite. Exercise locale
+      // as navigation, not merely another identically shaped combobox.
+      await revealHeaderPreferences(page);
+      const locale = page.locator('[data-homepage-runtime]').getByRole('combobox', {
+        name: '语言',
+        exact: true,
+      });
+      await locale.click();
+      const localeList = await locale.getAttribute('aria-controls');
+      expect(localeList).toBeTruthy();
+      const options = page.locator(`[id=${JSON.stringify(localeList)}]`);
+      expect(
+        await options
+          .getByRole('option', { name: '简体中文', exact: true })
+          .getAttribute('aria-selected')
+      ).toBe('true');
+      await Promise.all([
+        page.waitForURL(`${baseUrl}/en/`, { timeout: 10_000 }),
+        options.getByRole('option', { name: 'English', exact: true }).click(),
+      ]);
+      expect(new URL(page.url()).origin).toBe(new URL(baseUrl).origin);
+      await ready(page, 'vue2');
+      await revealHeaderPreferences(page);
+      const english = page.locator('[data-homepage-runtime]').getByRole('combobox', {
+        name: 'Language',
+        exact: true,
+      });
+      expect(await english.count()).toBe(1);
+      expect(
+        (
+          await english.locator('[data-projection-prototype$="-select-value"]').textContent()
+        )?.trim()
+      ).toBe('English');
+      expect(await page.evaluate(() => localStorage.getItem('preferred-locale'))).toBe('en');
     } finally {
       await context.close();
     }

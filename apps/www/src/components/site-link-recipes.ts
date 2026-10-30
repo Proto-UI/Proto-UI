@@ -15,6 +15,24 @@ export type SiteLinkAppearance =
   | 'sidebar'
   | 'toc'
   | 'pagination';
+export type SidebarTextRole = 'row' | 'top-group' | 'nested-group';
+
+/** Finite website composition density, matching the native Sidebar first frame.
+ * Applied through the public Text surfaceStyle projection, not selector paint. */
+export function sidebarTextSurfaceStyle(role: SidebarTextRole): Record<string, string> {
+  return { fontSize: role === 'top-group' ? '0.75rem' : '0.8125rem', lineHeight: '1.25rem' };
+}
+
+/** Ordinary reading TOC uses its accepted native .8rem / 1.25 line box. */
+export function readingTocTextSurfaceStyle(): Record<string, string> {
+  return {
+    fontSize: '0.8rem',
+    lineHeight: '1rem',
+    fontFamily: 'inherit',
+    letterSpacing: 'inherit',
+  };
+}
+
 export type SiteLinkEmphasis = 'primary' | 'secondary' | 'minimal' | 'link';
 const initial: NativeLinkFacts = {
   hovered: false,
@@ -39,6 +57,20 @@ export function linkSurfaceProps(
   emphasis: SiteLinkEmphasis,
   facts = initial
 ): SurfaceRootProps {
+  // The shared TOC range owns background selection. The native anchor and
+  // Text still consume current/hover facts; this passive row keeps focus only
+  // (plus the family's existing pressed feedback), never a second fill.
+  if (appearance === 'toc')
+    return {
+      variant: 'transparent',
+      radius: family === 'brutalist' ? 'default' : 'md',
+      border: 'none',
+      elevation: 'none',
+      focusVisible: facts.focusVisible,
+      hovered: false,
+      pressed: facts.pressed,
+      current: false,
+    };
   if (family === 'shadcn' && appearance === 'nav')
     return shadcnActionAppearance({
       styleProfile: 'rhea',
@@ -52,7 +84,7 @@ export function linkSurfaceProps(
   const framedNavigation = family === 'brutalist' && ['brand', 'nav'].includes(appearance);
   const framed = action || framedNavigation;
   const group = appearance === 'nav-group';
-  const row = appearance === 'sidebar' || appearance === 'toc';
+  const row = appearance === 'sidebar';
   return {
     variant:
       row && (facts.current || (family === 'brutalist' && facts.hovered))
@@ -87,7 +119,9 @@ export function linkSurfaceProps(
 export function linkTextProps(
   appearance: SiteLinkAppearance,
   facts = initial,
-  family: SiteLibraryFamily = 'shadcn'
+  family: SiteLibraryFamily = 'shadcn',
+  sidebarRole?: SidebarTextRole,
+  readingToc = false
 ): TextRootProps {
   if (family === 'shadcn' && appearance === 'nav')
     return {
@@ -99,7 +133,10 @@ export function linkTextProps(
   return {
     size: appearance === 'brand' ? 'base' : appearance === 'nav-group' ? 'xs' : 'sm',
     tone:
-      appearance === 'nav-group' && !facts.hovered && !facts.focusVisible
+      appearance === 'nav-group' &&
+      sidebarRole !== 'nested-group' &&
+      !facts.hovered &&
+      !facts.focusVisible
         ? 'muted'
         : appearance === 'toc' && !facts.hovered && !facts.current && !facts.inView
           ? 'muted'
@@ -114,7 +151,8 @@ export function linkTextProps(
         ? 'semibold'
         : 'medium',
     font: 'body',
-    leading: 'normal',
+    leading:
+      appearance === 'sidebar' || appearance === 'nav-group' || readingToc ? 'size' : 'normal',
     tracking: appearance === 'brand' ? 'tight' : 'normal',
     emphasis: 'normal',
     decoration:
@@ -127,7 +165,8 @@ export function linkSurfaceLayout(
   family: SiteLibraryFamily,
   appearance: SiteLinkAppearance,
   emphasis: SiteLinkEmphasis,
-  facts = initial
+  facts = initial,
+  readingToc = false
 ): Record<string, string> {
   if (family === 'shadcn' && appearance === 'nav')
     return {
@@ -138,7 +177,46 @@ export function linkSurfaceLayout(
   if (appearance === 'action') {
     return { ...linkActionAppearance(family, emphasis, facts).layout, pointerEvents: 'none' };
   }
-  const row = ['sidebar', 'toc', 'pagination', 'nav-group'].includes(appearance);
+  if (appearance === 'sidebar' || appearance === 'nav-group') {
+    const borderedRow =
+      family === 'brutalist' && appearance === 'sidebar' && (facts.current || facts.hovered);
+    return {
+      pointerEvents: 'none',
+      display: 'flex',
+      flexShrink: '0',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minWidth: '0',
+      maxWidth: '100%',
+      width: '100%',
+      minHeight: 'var(--site-navigation-row-height, 2rem)',
+      marginBottom: '0',
+      gap: '0.5rem',
+      // Brutalist's existing 2px border remains inside the native 6px/8px inset.
+      padding: borderedRow
+        ? 'calc(0.375rem - 2px) calc(0.5rem - 2px)'
+        : family === 'brutalist' && appearance === 'nav-group'
+          ? '0.375rem 0.5rem calc(0.375rem - 2px)'
+          : '0.375rem 0.5rem',
+    };
+  }
+  if (appearance === 'toc' && readingToc)
+    return {
+      pointerEvents: 'none',
+      display: 'flex',
+      flexShrink: '0',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      minWidth: '0',
+      maxWidth: '100%',
+      width: '100%',
+      minHeight: '1.5rem',
+      marginBottom: '0',
+      padding: '0.25rem 0.5rem',
+      paddingInlineStart: 'calc(1rem * var(--depth, 0) + 0.5rem)',
+      gap: '0.5rem',
+    };
+  const row = ['toc', 'pagination'].includes(appearance);
   const raised =
     family === 'brutalist' &&
     (['brand', 'nav'].includes(appearance) ||
@@ -148,16 +226,10 @@ export function linkSurfaceLayout(
       ? { width: '2.75rem', height: '2.75rem', padding: '0' }
       : appearance === 'pagination'
         ? { minHeight: '2.25rem', padding: '0.25rem 0.75rem', gap: '0.375rem' }
-        : appearance === 'sidebar' || appearance === 'toc' || appearance === 'nav-group'
+        : appearance === 'toc'
           ? {
               minHeight: 'var(--site-navigation-row-height, 2rem)',
-              // Preserve the same 4px/8px content inset when the public border appears.
-              padding:
-                family === 'brutalist' &&
-                appearance !== 'nav-group' &&
-                (facts.current || facts.hovered)
-                  ? '0.125rem 0.375rem'
-                  : '0.25rem 0.5rem',
+              padding: '0.25rem 0.5rem',
               gap: '0.5rem',
             }
           : {

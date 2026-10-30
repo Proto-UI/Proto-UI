@@ -1,4 +1,4 @@
-import { siteTextRecipe, type SiteHeroViewport } from './site-text-recipes';
+import { siteTextRecipe, siteTextSurfaceStyle, type SiteHeroViewport } from './site-text-recipes';
 import { SITE_TYPOGRAPHY_ROLES, type SiteTypographyRole } from './site-text-recipes';
 import { prepareDemoRuntime, renderDemo } from './PrototypePreviewer/demo-renderer';
 import { loadPrototypes } from './PrototypePreviewer/prototype-modules';
@@ -368,7 +368,7 @@ export function siteTypographyParticipant(
                   className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
                   props: { ...siteTextRecipe(role, family, isCompact, context, heroScale) },
-                  surfaceStyle: theme,
+                  surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role, context) },
                   children: [
                     {
                       kind: 'box',
