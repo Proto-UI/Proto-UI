@@ -35,7 +35,7 @@ export function planMaterialStages(root: DemoChild): readonly MaterialStagePlan[
         Object.keys(stage).some((key) => key !== 'mountRef' && key !== 'overlayRef')
       )
         throw new Error('[PrototypePreviewer] invalid material stage declaration.');
-      if (inStage || !node.ref || (node.tag && node.tag !== 'div'))
+      if (node.kind !== 'box' || inStage || !node.ref || (node.tag && node.tag !== 'div'))
         throw new Error(
           '[PrototypePreviewer] material stages require non-nested ref-bearing div boxes.'
         );

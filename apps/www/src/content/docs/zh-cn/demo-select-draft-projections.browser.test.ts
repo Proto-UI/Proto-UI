@@ -96,6 +96,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           const errors: string[] = [];
           page.on('pageerror', (error) => errors.push(error.message));
           const prefix = `${family}-${runtime}-${theme}`;
+          const stageEvidence: Record<string, unknown>[] = [];
           try {
             await page.evaluate((theme) => {
               document.documentElement.classList.remove('light', 'dark');
@@ -107,7 +108,6 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             await waitReady(page, family, runtime);
             const demo = previewer.locator('[data-projection-content]');
             const trigger = demo.locator('[data-demo-ref="uncontrolledTrigger"]');
-            const stageEvidence: Record<string, unknown>[] = [];
             async function stageSnapshot(phase: string) {
               if (family !== 'liquid-glass') return;
               const snapshot = await demo.evaluate((root) => ({
@@ -129,6 +129,11 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                   }
                 ),
               }));
+              stageEvidence.push({
+                phase,
+                elapsedSinceRuntimeSelectionMs: performance.now() - runtimeMountStarted,
+                ...snapshot,
+              });
               expect(snapshot.scenes).toHaveLength(4);
               expect(snapshot.scenes.map((item) => item.ref).sort()).toEqual(
                 ['uncontrolledStage', 'disabledStage', 'controlledStage', 'selectRtlLayout'].sort()
@@ -138,11 +143,6 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 expect(item.parentScene).toBe(false);
                 expect(item.nominalCanvasRgbaBytes).toBeGreaterThan(0);
               }
-              stageEvidence.push({
-                phase,
-                elapsedSinceRuntimeSelectionMs: performance.now() - runtimeMountStarted,
-                ...snapshot,
-              });
             }
             await stageSnapshot('mounted');
             expect(await trigger.getAttribute('aria-expanded')).toBe('false');
@@ -408,6 +408,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               theme,
               error: String(error),
               pageErrors: errors,
+              stageEvidence,
             });
             throw error;
           } finally {

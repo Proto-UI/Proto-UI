@@ -1026,6 +1026,7 @@ export async function renderDemo(opt: DemoRenderOptions): Promise<DemoRenderResu
       };
     }
     if (
+      opt.automaticMaterialScene !== false &&
       !stages.length &&
       hasLiquidSurface(opt.demo.root) &&
       !findPreviewMaterialProvider(opt.host)
