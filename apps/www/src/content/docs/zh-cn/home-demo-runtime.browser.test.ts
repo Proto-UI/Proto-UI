@@ -714,7 +714,7 @@ describe.sequential('Homepage Runtime demobox browser smoke', () => {
               );
             }
           }
-          expect(geometry.triggerHeight).toBeCloseTo(width >= 768 ? 36 : 44, 0);
+          expect(geometry.triggerHeight).toBeCloseTo(44, 0);
           expect(geometry.fits, `${colorScheme} ${width}px overflow`).toBe(true);
         }
         expect(await home.locator('[data-projection-control="component"]').count()).toBe(0);
