@@ -43,6 +43,10 @@ export function emitVue2Source(
     site.operation.startsWith('style.') || site.operation.startsWith('rule.') || site.operation.startsWith('feedback.'));
   const usesInteraction = ir.moduleDeclarations.length > 0 || admitted.value.sites.some((site) =>
     /^(hook\.|event\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
+  // Admission follows referenced functions/aliases, closures and authored hooks.
+  // Interaction supplies createOwnedState and observed-state subscription cleanup.
+  const stateDeclarations = new Set(['state.bool', 'state.string', 'state.enum', 'state.numberDiscrete', 'state.numberRange']);
+  const usesState = usesInteraction || admitted.value.operations.some((operation) => stateDeclarations.has(operation));
   if (!validIdentifier(componentName) || ['GeneratedProps', 'GeneratedExposes'].includes(componentName)) {
     return { ok: false, diagnostics: [{ code: 'PUI3001', category: 'invalid-input',
       message: 'Choose a valid, non-reserved generated component identifier.', span: ir.setup.span }] };
@@ -232,7 +236,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     handle: contextArtifacts ? 'contextScope,' : '',
     dispose: contextArtifacts ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }' : '',
     setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
-  }, usesStyle, usesInteraction, options.ssr === true,
+  }, usesStyle, usesInteraction, usesState, options.ssr === true,
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
     staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined').replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
@@ -291,7 +295,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
 }
 
 // This is target-specific generated host code, never a shared IR interpreter.
-function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean, ssr: boolean, declarations: string, tableFamily: string): string {
+function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean, stateful: boolean, ssr: boolean, declarations: string, tableFamily: string): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   return String.raw`
 /**
@@ -381,14 +385,11 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let specs = Object.create(null);
   const defaults = [];
   const watchers = [];
-  const states = [];
-  const exposed = Object.create(null);
+${stateful ? '  const states = [];\n' : ''}  const exposed = Object.create(null);
   const eventDeclarations = Object.create(null);
   const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
-  const notifications = [];
-  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
-  let notifying = false;
-  let portalAnchor = null, portalRoot = null;
+${stateful ? '  const notifications = [];\n' : ''}  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
+${stateful ? '  let notifying = false;\n' : ''}  let portalAnchor = null, portalRoot = null;
   function syncPortal(target, destination) {
     if (portalRoot && portalRoot !== target) restorePortal();
     if (destination && target?.nodeType === 1) {
@@ -625,7 +626,7 @@ ${context.owner}
   });` : ''}
   const renderer = { el: PUIElement, slot: () => Object.freeze({ slot: true }),
     read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (key) => { alive(); return PUIOwn(raw, key); } }) ${context.read} }) };
-  const createState = (kind, key, initial, configuration = {}) => {
+${stateful ? String.raw`  const createState = (kind, key, initial, configuration = {}) => {
     setupOnly();
     const spec = Object.freeze({ ...configuration, kind });
     const check = (value, initialValue = false) => {
@@ -669,7 +670,7 @@ ${context.owner}
     states.push(handle);
     return handle;
   };
-  const defineProps = (input) => {
+` : ''}  const defineProps = (input) => {
     setupOnly();
     const next = { ...specs };
     const rank = { accept: 0, fallback: 1, error: 2 };
@@ -715,14 +716,14 @@ ${context.owner}
       watchRaw: (keys, fn) => registerPropsWatch('raw', keys, fn),
       watchRawAll: (fn) => registerPropsWatch('raw-all', null, fn),
     },
-    state: {
+${stateful ? String.raw`    state: {
       bool: (key, value) => createState('bool', key, value),
       string: (key, value, spec) => createState('string', key, value, spec),
       enum: (key, value, spec) => createState('enum', key, value, spec),
       numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),
       numberRange: (key, value, spec) => createState('number.range', key, value, spec),
     },
-    expose: {
+` : ''}    expose: {
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'observedExternals.get(handle) ?? ' : ''}handle.external; },
       method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
@@ -900,16 +901,16 @@ ${context.owner}
       let failure;
       try { detach(); } catch (error) { failure = error; }
       ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= error; }
-      for (const state of states) {
+${stateful ? String.raw`      for (const state of states) {
         try { state.dispose(); } catch (error) { failure ??= error; }
       }
-      ${context.dispose}
+` : ''}      ${context.dispose}
       ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= error; }' : ''}
       ${styled ? `try { style.dispose(); } catch (error) { failure ??= error; }
       const target = vm.$el;
       if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');` : ''}
       disposed = true; phase = 'idle';
-      watchers.length = 0; notifications.length = 0; states.length = 0; defaults.length = 0;
+      watchers.length = 0;${stateful ? ' notifications.length = 0; states.length = 0;' : ''} defaults.length = 0;
       for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;
       for (const key of Object.keys(exposed)) delete exposed[key];
       for (const key of Object.keys(eventDeclarations)) delete eventDeclarations[key];
