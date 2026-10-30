@@ -121,6 +121,25 @@ const copy = {
   close: 'Close search',
   count: '{count} documents',
 };
+
+// Test-only transparent completion observation. Return the exact original Promise;
+// a call, an in-flight Promise or a rejected cleanup is not completed retirement.
+function observeSuccessfulDestroy(owner: { destroy(): Promise<void> }) {
+  let completed = false;
+  const original = owner.destroy;
+  vi.spyOn(owner, 'destroy').mockImplementation(function (this: typeof owner) {
+    const pending = original.call(this);
+    void pending.then(
+      () => {
+        completed = true;
+      },
+      () => {}
+    );
+    return pending;
+  });
+  return () => completed;
+}
+
 async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
   const root = document.createElement(`public-search-test-${++serial}`);
   root.dataset.searchComposition = 'command-dialog';
@@ -152,6 +171,7 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
     importModule: loadRuntime,
   };
   let docs!: ReturnType<typeof initDocumentationSearchCommands>;
+  let destroyCompleted = () => false;
   const constructor = new Function(
     'searchCommandParticipant',
     'initDocumentationSearchCommands',
@@ -161,6 +181,7 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
     searchCommandParticipant,
     (participant: Parameters<typeof initDocumentationSearchCommands>[0]) => {
       docs = initDocumentationSearchCommands(participant);
+      destroyCompleted = observeSuccessfulDestroy(docs);
       return docs;
     },
     HTMLElement
@@ -221,7 +242,7 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
       const dialog = ref('dialog');
       // Only explicit owner retirement is absence, never infer a closed live
       // Dialog from a not-yet-mounted or already-detached Content view.
-      if (disposed && !dialog) return false;
+      if ((disposed || destroyCompleted()) && !dialog) return false;
       if (!dialog) throw new Error('Live Search requires its current DialogRoot');
       const context = compositionContexts.get(dialog);
       if (!context || context.refs.dialog !== dialog)
@@ -291,6 +312,58 @@ function type(input: HTMLInputElement, value: string) {
   input.value = value;
   input.dispatchEvent(new Event('input', { bubbles: true, composed: true }));
 }
+
+describe('successful destroy observation used by the real Search fixture', () => {
+  it('keeps synchronous throw as failure, not retirement', () => {
+    const error = new Error('synchronous cleanup failure');
+    const owner = {
+      destroy(): Promise<void> {
+        throw error;
+      },
+    };
+    const completed = observeSuccessfulDestroy(owner);
+    expect(() => owner.destroy()).toThrow(error);
+    expect(completed()).toBe(false);
+  });
+  it('returns the same rejected Promise without marking retirement', async () => {
+    const error = new Error('asynchronous cleanup failure');
+    let reject!: (error: Error) => void;
+    const pending = new Promise<void>((_resolve, fail) => {
+      reject = fail;
+    });
+    const owner = {
+      destroy() {
+        return pending;
+      },
+    };
+    const completed = observeSuccessfulDestroy(owner);
+    const actual = owner.destroy();
+    expect(actual).toBe(pending);
+    expect(completed()).toBe(false);
+    reject(error);
+    await expect(actual).rejects.toBe(error);
+    expect(completed()).toBe(false);
+  });
+  it('marks retirement only after the original Promise fulfills and preserves receiver', async () => {
+    let resolve!: () => void;
+    const pending = new Promise<void>((done) => {
+      resolve = done;
+    });
+    const owner = {
+      destroy() {
+        expect(this).toBe(owner);
+        return pending;
+      },
+    };
+    const completed = observeSuccessfulDestroy(owner);
+    const actual = owner.destroy();
+    expect(actual).toBe(pending);
+    expect(completed()).toBe(false);
+    resolve();
+    await actual;
+    expect(completed()).toBe(true);
+  });
+});
 
 describe('public Search intent and resource lifetime', () => {
   it('does no backend work without intent, then coalesces hover/open without opening during preparation', async () => {
@@ -380,6 +453,7 @@ describe('public Search intent and resource lifetime', () => {
       if (action === 'close') click(f.close);
       else if (action === 'route') document.dispatchEvent(new Event('astro:before-swap'));
       else f.dispose();
+      if (action === 'route') expect(f.docs.destroy).toHaveBeenCalledTimes(1);
       await settle();
       reject(new Error('late offline'));
       await settle();
