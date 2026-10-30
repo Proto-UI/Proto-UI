@@ -235,33 +235,97 @@ describe.sequential('Runtime-only vertical layout parity', () => {
               });
             }
             if (runtime === 'react') {
-              // Narrow negative control: reintroduce only the missing display
-              // declaration. A caption's parent-font strut must then enlarge
-              // its actual line box. Restore before the next runtime pair.
+              // Controlled strut-isolation negative: Rhea Card and caption now
+              // share a small scale, so its native parent strut need not be
+              // taller. Do not pretend inline always grows that real fixture.
+              // First prove block Text ignores a deliberately larger parent
+              // strut, then remove ONLY block display and require real growth.
               const caption = home.locator('.home-gallery__caption').first();
               const before = await caption.boundingBox();
+              expect(before, 'caption exists before controlled strut probe').not.toBeNull();
+              if (!before) throw new Error('Caption geometry missing before strut probe');
               const original = await caption.evaluate((owner) => {
                 const surface = owner.firstElementChild as HTMLElement;
-                const previous = surface.getAttribute('style');
-                surface.style.display = 'inline';
-                return previous;
+                if (!surface) throw new Error('Caption public Text is missing');
+                return {
+                  ownerStyle: owner.getAttribute('style'),
+                  surfaceStyle: surface.getAttribute('style'),
+                  display: getComputedStyle(surface).display,
+                  size: getComputedStyle(surface).fontSize,
+                  leading: getComputedStyle(surface).lineHeight,
+                };
               });
+              expect(original.display).toBe('block');
               try {
+                await caption.evaluate((owner) => {
+                  (owner as HTMLElement).style.fontSize = '32px';
+                  (owner as HTMLElement).style.lineHeight = '48px';
+                });
+                const block = await caption.boundingBox();
+                expect(block, 'block caption remains measurable').not.toBeNull();
+                if (!block) throw new Error('Block caption geometry missing');
+                const ownerPaint = await caption.evaluate((owner) => {
+                  const css = getComputedStyle(owner);
+                  return { size: css.fontSize, leading: css.lineHeight };
+                });
+                expect(ownerPaint).toEqual({ size: '32px', leading: '48px' });
+                const blockedPaint = await caption.evaluate((owner) => {
+                  const surface = owner.firstElementChild!;
+                  const css = getComputedStyle(surface);
+                  return { display: css.display, size: css.fontSize, leading: css.lineHeight };
+                });
+                await capture(
+                  page,
+                  home,
+                  `home-${family}-${width}-${index}-${runtime}-large-strut-block`,
+                  {
+                    ...(await galleryGeometry(home)),
+                    diagnostic: 'controlled parent32px/48px; public Text remains block',
+                    original,
+                    before,
+                    block,
+                    blockedPaint,
+                    ownerPaint,
+                  }
+                );
+                expect(blockedPaint).toEqual({
+                  display: original.display,
+                  size: original.size,
+                  leading: original.leading,
+                });
+                expect(
+                  Math.abs(block.height - before.height),
+                  'block Text excludes the enlarged parent strut'
+                ).toBeLessThanOrEqual(1);
+                await caption.evaluate((owner) => {
+                  (owner.firstElementChild as HTMLElement).style.display = 'inline';
+                });
                 const after = await caption.boundingBox();
+                expect(after, 'inline caption remains measurable').not.toBeNull();
+                if (!after) throw new Error('Inline caption geometry missing');
                 await capture(
                   page,
                   home,
                   `home-${family}-${width}-${index}-${runtime}-inline-negative`,
-                  await galleryGeometry(home)
+                  {
+                    ...(await galleryGeometry(home)),
+                    diagnostic: 'same controlled parent32px/48px; only Text display becomes inline',
+                    before,
+                    block,
+                    after,
+                  }
                 );
                 expect(
-                  after!.height - before!.height,
-                  'inline caption recreates extra vertical spacing'
+                  after.height - block.height,
+                  'inline Text admits the controlled larger parent strut'
                 ).toBeGreaterThan(2);
               } finally {
                 await caption.evaluate((owner, previous) => {
-                  if (previous === null) owner.firstElementChild!.removeAttribute('style');
-                  else owner.firstElementChild!.setAttribute('style', previous);
+                  if (previous.ownerStyle === null) owner.removeAttribute('style');
+                  else owner.setAttribute('style', previous.ownerStyle);
+                  if (previous.surfaceStyle === null)
+                    owner.firstElementChild!.removeAttribute('style');
+                  else owner.firstElementChild!.setAttribute('style', previous.surfaceStyle);
                 }, original);
               }
             }
