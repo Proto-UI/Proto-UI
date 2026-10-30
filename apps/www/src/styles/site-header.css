@@ -553,13 +553,11 @@
   display: none;
 }
 @media (max-width: 47.999rem) {
-  .site-header[data-site-menu-ready],
-  .site-header[data-docs-site-header] {
+  .site-header {
     grid-template-areas: 'brand search theme menu';
     grid-template-rows: minmax(var(--site-header-row-height), auto);
   }
-  .site-header[data-site-menu-ready] > .site-header-context,
-  .site-header[data-docs-site-header] > .site-header-context {
+  .site-header > .site-header-context {
     display: contents;
   }
   .site-header[data-docs-site-header]:has(.site-header-docs-navigation) {
@@ -599,8 +597,7 @@
 /* Text enlargement may reflow the toolbar itself. It must never bring back a
    second settings row or shrink the real PUI touch targets to fit. */
 @container docs-page (max-width: 15rem) {
-  .site-header[data-site-menu-ready],
-  .site-header[data-docs-site-header] {
+  .site-header {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas: 'brand brand brand' 'search theme menu';
     grid-template-rows: auto auto;

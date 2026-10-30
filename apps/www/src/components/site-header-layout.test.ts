@@ -163,19 +163,13 @@ describe('shared compact Header ownership and layout', () => {
       expect(source.indexOf('data-site-header-compact-context')).toBeGreaterThan(
         source.indexOf('data-site-header-panel-content')
       );
-      if (path === 'override/Header.astro') {
-        expect(source).toContain('data-site-header-wide-preferences');
-        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-          source.indexOf('data-site-header-compact-context')
-        );
-        expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
-          source.indexOf('data-site-header-context')
-        );
-      } else {
-        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-          source.indexOf('data-site-header-context')
-        );
-      }
+      expect(source).toContain('data-site-header-wide-preferences');
+      expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+        source.indexOf('data-site-header-compact-context')
+      );
+      expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
+        source.indexOf('data-site-header-context')
+      );
       expect(source).not.toMatch(/role=["'](?:menu|dialog)["']/);
     });
   }
@@ -189,7 +183,7 @@ describe('shared compact Header ownership and layout', () => {
     );
     expect(css).toContain('top: var(--site-header-panel-top, 100%)');
     expect(css).toContain('left: var(--site-header-panel-left, 0)');
-    expect(css).toContain('.site-header[data-site-menu-ready] > .site-header-context');
+    expect(css).toContain('.site-header > .site-header-context');
     expect(css).toContain("grid-template-areas: 'brand contents search theme menu'");
   });
 });
