@@ -9,7 +9,7 @@ export type HookSourceModule = { file: string; source: ts.SourceFile };
 export type HookSourceSymbol = { module: HookSourceModule; declaration: ts.Node };
 
 export type HookSourceModuleContext = {
-  /** Register an already-read source without replacing the caller's text. */
+  /** Register an immutable parsed source; changed text requires a new SourceFile. */
   registerSource(source: ts.SourceFile): void;
   /** Return the module identity corresponding to a registered source. */
   moduleForSource(source: ts.SourceFile): HookSourceModule;
@@ -78,6 +78,7 @@ function isConstantDeclaration(declaration: ts.VariableDeclaration): boolean {
  * initializer installed.
  */
 function hasConflictingWrite(
+  lexicalIndex: LexicalIndex,
   declaration: ts.VariableDeclaration,
   name: string,
   holderObject: ts.Node | null = declaration.initializer ? unwrap(declaration.initializer) : null
@@ -89,7 +90,7 @@ function hasConflictingWrite(
   const aliases = new Set<ts.Node>([declaration]);
   const bindingOf = (expression: ts.Expression): ts.Node | null => {
     const value = unwrap(expression);
-    return ts.isIdentifier(value) ? findLexicalBinding(value, value.text) : null;
+    return ts.isIdentifier(value) ? findLexicalBinding(lexicalIndex, value, value.text) : null;
   };
   const hasHolderThis = (node: ts.Node): boolean => {
     for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
@@ -232,7 +233,7 @@ function hasConflictingWrite(
         const rootName = root(node.expression);
         const written = memberName(node);
         const rootValue = unwrap(node.expression);
-        const binding = rootName ? findLexicalBinding(rootName, rootName.text) : null;
+        const binding = rootName ? findLexicalBinding(lexicalIndex, rootName, rootName.text) : null;
         // A dynamic key can be any property, so it retires every candidate.
         if (
           (rootValue.kind === ts.SyntaxKind.ThisKeyword &&
@@ -260,7 +261,7 @@ function hasConflictingWrite(
         const receiver = expression.expression;
         const receiverRoot = root(receiver);
         const receiverBinding = receiverRoot
-          ? findLexicalBinding(receiverRoot, receiverRoot.text)
+          ? findLexicalBinding(lexicalIndex, receiverRoot, receiverRoot.text)
           : null;
         const member = memberName(expression);
         if (
@@ -341,36 +342,40 @@ function bindingNames(
   return output;
 }
 
-function directVariableBindings(statements: readonly ts.Statement[], name: string): ts.Node | null {
-  for (const statement of statements) {
-    if (ts.isVariableStatement(statement)) {
+type LexicalIndex = {
+  direct: WeakMap<readonly ts.Statement[], ReadonlyMap<string, ts.Node>>;
+  vars: WeakMap<ts.Node, ReadonlyMap<string, ts.Node>>;
+};
+
+function directVariableBindings(
+  lexicalIndex: LexicalIndex,
+  statements: readonly ts.Statement[],
+  name: string
+): ts.Node | null {
+  let bindings = lexicalIndex.direct.get(statements);
+  if (!bindings) {
+    const found = new Map<string, ts.Node>();
+    const first = (name: string, node: ts.Node): void => {
+      if (!found.has(name)) found.set(name, node);
+    };
+    for (const statement of statements) {
       if (hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) continue;
-      for (const declaration of statement.declarationList.declarations) {
-        const names = bindingNames(declaration.name);
-        const found = names.get(name);
-        if (found) return ts.isIdentifier(declaration.name) ? declaration : found;
+      if (ts.isVariableStatement(statement)) {
+        for (const declaration of statement.declarationList.declarations) {
+          for (const [name, binding] of bindingNames(declaration.name))
+            first(name, ts.isIdentifier(declaration.name) ? declaration : binding);
+        }
+      } else if (
+        (ts.isFunctionDeclaration(statement) || ts.isClassDeclaration(statement) ||
+          ts.isEnumDeclaration(statement) || ts.isModuleDeclaration(statement)) && statement.name
+      ) {
+        first(statement.name.text, statement);
       }
     }
-    if (ts.isFunctionDeclaration(statement) && statement.name?.text === name) {
-      if (!hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) return statement;
-    }
-    if (ts.isClassDeclaration(statement) && statement.name?.text === name) {
-      if (!hasModifier(statement, ts.SyntaxKind.DeclareKeyword)) return statement;
-    }
-    if (
-      ts.isEnumDeclaration(statement) &&
-      statement.name.text === name &&
-      !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)
-    )
-      return statement;
-    if (
-      ts.isModuleDeclaration(statement) &&
-      statement.name.text === name &&
-      !hasModifier(statement, ts.SyntaxKind.DeclareKeyword)
-    )
-      return statement;
+    bindings = found;
+    lexicalIndex.direct.set(statements, bindings);
   }
-  return null;
+  return bindings.get(name) ?? null;
 }
 
 function importBinding(
@@ -809,21 +814,21 @@ function runtimePackageEntry(
   return null;
 }
 
-function findLexicalBinding(node: ts.Node, name: string): ts.Node | null {
+function findLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Node, name: string): ts.Node | null {
   let current: ts.Node | undefined = node;
   while (current) {
     if (ts.isSourceFile(current)) {
       const imported = importBinding({ file: current.fileName, source: current }, name);
       if (imported) return imported.declaration;
-      return directVariableBindings(current.statements, name);
+      return directVariableBindings(lexicalIndex, current.statements, name);
     }
     if (ts.isBlock(current) || ts.isModuleBlock(current)) {
-      const found = directVariableBindings(current.statements, name);
+      const found = directVariableBindings(lexicalIndex, current.statements, name);
       if (found) return found;
     }
     if (ts.isCaseBlock(current)) {
       for (const clause of current.clauses) {
-        const found = directVariableBindings(clause.statements, name);
+        const found = directVariableBindings(lexicalIndex, clause.statements, name);
         if (found) return found;
       }
     }
@@ -840,25 +845,31 @@ function findLexicalBinding(node: ts.Node, name: string): ts.Node | null {
         // only a named function expression introduces a separate self binding.
         return ts.isFunctionDeclaration(current) ? current : (current.name ?? null);
       }
-      let varBinding: ts.Node | null = null;
-      const visitVar = (candidate: ts.Node): void => {
-        if (varBinding || (candidate !== current && ts.isFunctionLike(candidate))) return;
-        if (
-          ts.isVariableStatement(candidate) &&
-          (candidate.declarationList.flags & ts.NodeFlags.Let) === 0 &&
-          (candidate.declarationList.flags & ts.NodeFlags.Const) === 0
-        ) {
-          for (const declaration of candidate.declarationList.declarations) {
-            const found = bindingNames(declaration.name).get(name);
-            if (found) {
-              varBinding = ts.isIdentifier(declaration.name) ? declaration : found;
-              return;
+      let vars = lexicalIndex.vars.get(current);
+      if (!vars) {
+        const found = new Map<string, ts.Node>();
+        const functionScope = current;
+        const visitVar = (candidate: ts.Node): void => {
+          if (candidate !== functionScope && ts.isFunctionLike(candidate)) return;
+          if (
+            ts.isVariableStatement(candidate) &&
+            (candidate.declarationList.flags & ts.NodeFlags.Let) === 0 &&
+            (candidate.declarationList.flags & ts.NodeFlags.Const) === 0
+          ) {
+            for (const declaration of candidate.declarationList.declarations) {
+              for (const [name, binding] of bindingNames(declaration.name)) {
+                if (!found.has(name))
+                  found.set(name, ts.isIdentifier(declaration.name) ? declaration : binding);
+              }
             }
           }
-        }
-        ts.forEachChild(candidate, visitVar);
-      };
-      visitVar(current);
+          ts.forEachChild(candidate, visitVar);
+        };
+        visitVar(functionScope);
+        vars = found;
+        lexicalIndex.vars.set(functionScope, vars);
+      }
+      const varBinding = vars.get(name);
       if (varBinding) return varBinding;
     }
     if (ts.isCatchClause(current)) {
@@ -947,6 +958,9 @@ function objectMember(object: ts.ObjectLiteralExpression, name: string): ts.Node
  * tied to the concrete declaration that was reached through that text.
  */
 export function createHookSourceModuleContext(): HookSourceModuleContext {
+  // Immutable AST identity, scoped to one operation. A newly registered source
+  // owns different nodes; no path-keyed/global index survives into its lookup.
+  const lexicalIndex: LexicalIndex = { direct: new WeakMap(), vars: new WeakMap() };
   const modules = new Map<string, HookSourceModule>();
   const moduleFailures = new Set<string>();
   const configCache = new Map<string, ConfigRecord>();
@@ -1136,7 +1150,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   const localDeclaration = (module: HookSourceModule, name: string): ts.Node | null => {
     const imported = importBinding(module, name);
     if (imported) return imported.declaration;
-    return directVariableBindings(module.source.statements, name);
+    return directVariableBindings(lexicalIndex, module.source.statements, name);
   };
 
   const resolveExportInternal: (
@@ -1415,7 +1429,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
         if (ts.isIdentifier(node)) {
           if (node.text !== name.text) return false;
           if (varDeclaration) return true;
-          const binding = findLexicalBinding(node, node.text);
+          const binding = findLexicalBinding(lexicalIndex, node, node.text);
           return binding === declaration || binding === name;
         }
         if (ts.isArrayBindingPattern(node) || ts.isObjectBindingPattern(node)) {
@@ -1572,7 +1586,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     const callee = resolveReference(call.expression, module);
     const returned = callee ? returnedObject(callee) : null;
     if (!returned) return null;
-    if (hasConflictingWrite(holder, name, returned.object)) return null;
+    if (hasConflictingWrite(lexicalIndex, holder, name, returned.object)) return null;
     const property = objectMember(returned.object, name);
     if (!property) return null;
     if (ts.isShorthandPropertyAssignment(property)) {
@@ -1727,7 +1741,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     seen.add(key);
     const declaration = symbol.declaration;
     if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
-      if (!isConstantDeclaration(declaration) || hasConflictingWrite(declaration, name)) {
+      if (!isConstantDeclaration(declaration) || hasConflictingWrite(lexicalIndex, declaration, name)) {
         objectMemberCache.set(cacheKey, null);
         return null;
       }
@@ -1766,7 +1780,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   function resolveReference(node: ts.Node, module: HookSourceModule): HookSourceSymbol | null {
     const value = unwrap(node);
     if (ts.isIdentifier(value)) {
-      const lexical = findLexicalBinding(value, value.text);
+      const lexical = findLexicalBinding(lexicalIndex, value, value.text);
       if (lexical) {
         const imported = importBinding(module, value.text);
         if (imported && imported.declaration === lexical) return resolveLocal(module, value.text);
