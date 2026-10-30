@@ -21,6 +21,8 @@ export type OverlayFacade = {
 };
 
 export type OverlayPort = {
+  /** Synchronous invocation in the Runtime callback scope; never async scheduling. */
+  setCallbackDispatcher(dispatch: (callback: () => void) => void): void;
   configure(patch: OverlayConfigPatch): void;
   open(reason?: OverlayReason): void;
   close(reason?: OverlayReason): void;

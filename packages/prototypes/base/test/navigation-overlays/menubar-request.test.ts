@@ -100,6 +100,35 @@ async function bar(mode: Ownership, initial = 'file', rtl = false, props: Menuba
   return { root, triggers, panels, items, requests, focusItem, focusTrigger };
 }
 
+describe.each<Ownership>(['reject', 'accept', 'uncontrolled'])(
+  'Menubar %s entry scroll policy',
+  (mode) => {
+    for (const [keyName, index] of [
+      ['ArrowDown', 0],
+      ['ArrowUp', 2],
+    ] as const) {
+      it(`${keyName} carries preventScroll only to an accepted native entry`, async () => {
+        const p = await bar(mode, '');
+        await p.focusTrigger(0);
+        const target = p.items[0]![index]!;
+        const focus = vi.spyOn(target, 'focus');
+        key(keyName);
+        await flush();
+        expect(p.requests).toEqual([{ value: 'file', reason: 'keyboard' }]);
+        if (mode === 'reject') {
+          expect(focus).not.toHaveBeenCalled();
+          expect(document.activeElement).toBe(p.triggers[0]);
+          expect(p.panels[0]!.getExposes().open.get()).toBe(false);
+        } else {
+          expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+          expect(p.panels[0]!.getExposes().open.get()).toBe(true);
+          expect(document.activeElement).toBe(target);
+        }
+      });
+    }
+  }
+);
+
 describe.each<Ownership>(['reject', 'accept', 'uncontrolled'])('Menubar %s owner', (mode) => {
   for (const [keyName, from, to] of [
     ['ArrowRight', 0, 1],
