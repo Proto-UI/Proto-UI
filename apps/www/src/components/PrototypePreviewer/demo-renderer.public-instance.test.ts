@@ -58,6 +58,121 @@ afterEach(async () => {
 const flush = async () => {
   for (let i = 0; i < 16; i++) await Promise.resolve();
 };
+// Failure-only public observations: the original assertion runs before any
+// diagnostic get(), since entering a public callback can synchronize raw props.
+async function setDisabledAndAssert(
+  context: DemoSetupContext,
+  ref: string,
+  disabled: boolean,
+  projected: () => boolean | undefined
+) {
+  const instance = context.api.getPublicInstance!(ref);
+  const fact = instance?.getExposes()?.disabled as
+    | {
+        get(): boolean;
+        subscribe(
+          listener: (event: { type: string; prev?: unknown; next?: unknown }) => void
+        ): () => void;
+      }
+    | undefined;
+  const events: unknown[] = [];
+  let dropped = 0;
+  const off = fact?.subscribe((event) => {
+    if (events.length < 32) events.push({ type: event.type, prev: event.prev, next: event.next });
+    else dropped++;
+  });
+  let failed = false;
+  let original: unknown;
+  const diagnosticFailures: unknown[] = [];
+  try {
+    context.api.setProps(ref, { disabled });
+    await flush();
+    expect(projected()).toBe(disabled);
+  } catch (error) {
+    failed = true;
+    original = error;
+    try {
+      const projectedAtOriginalFailure = projected();
+      const observations: unknown[] = [];
+      const observe = (phase: string) => {
+        try {
+          const projectedBeforePublicRead = projected();
+          const current = context.api.getPublicInstance!(ref);
+          const currentFact = current?.getExposes()?.disabled as { get(): boolean } | undefined;
+          observations.push({
+            phase,
+            sameInstance: current === instance,
+            sameFact: currentFact === fact,
+            projectedBeforePublicRead,
+            publicDisabled: currentFact?.get(),
+            projectedAfterPublicRead: projected(),
+          });
+        } catch (cause) {
+          observations.push({ phase, error: String(cause) });
+        }
+      };
+      observe('after-original-assertion-failed');
+      // Bounded post-failure evidence, never a retry of the acceptance assertion.
+      await new Promise<void>((resolve, reject) => {
+        let frame = 0;
+        const timer = setTimeout(() => {
+          try {
+            cancelAnimationFrame(frame);
+            observations.push({ phase: 'post-failure-frame-unavailable' });
+            resolve();
+          } catch (cause) {
+            reject(cause);
+          }
+        }, 250);
+        try {
+          frame = requestAnimationFrame(() => {
+            clearTimeout(timer);
+            try {
+              observe('post-failure-animation-frame');
+              resolve();
+            } catch (cause) {
+              reject(cause);
+            }
+          });
+        } catch (cause) {
+          clearTimeout(timer);
+          reject(cause);
+        }
+      });
+      console.error(
+        '[input-shell-public-fact-diagnostic]',
+        JSON.stringify({
+          ref,
+          requestedDisabled: disabled,
+          projectedAtOriginalFailure,
+          events,
+          dropped,
+          observations,
+          note: 'Post-failure public reads may synchronize props; these are not an acceptance retry.',
+        })
+      );
+    } catch (diagnostic) {
+      diagnosticFailures.push(diagnostic);
+    }
+  } finally {
+    try {
+      off?.();
+    } catch (cleanup) {
+      if (!failed) throw cleanup;
+      diagnosticFailures.push(cleanup);
+    }
+  }
+  if (failed) {
+    if (diagnosticFailures.length)
+      throw new AggregateError(
+        [original, ...diagnosticFailures],
+        'Original binding assertion and diagnostic failures',
+        { cause: original }
+      );
+    throw original;
+  }
+}
+
 async function mount(
   runtime: 'wc' | 'react' | 'vue' | 'vue2',
   host = document.createElement('div')
@@ -264,9 +379,7 @@ describe('actual public prototype instance lookup', () => {
             expect(host.contains(control)).toBe(false);
           }
         });
-        context.api.setProps('control', { disabled: !expectedOpen });
-        await flush();
-        expect(facts.at(-1)?.disabled).toBe(!expectedOpen);
+        await setDisabledAndAssert(context, 'control', !expectedOpen, () => facts.at(-1)?.disabled);
       }
       // No invented close-removal event: compare committed raw identities, not a forced-unmount model.
       for (let index = 1; index < pairs.length; index++) {
@@ -331,9 +444,7 @@ describe('actual public prototype instance lookup', () => {
       await flush();
       expect(events.at(-1)?.value).toBe(context.api.getPublicInstance!('item'));
       expect(events.at(-1)?.value).not.toBe(first);
-      context.api.setProps('item', { disabled: true });
-      await flush();
-      expect(projected.at(-1)?.disabled).toBe(true);
+      await setDisabledAndAssert(context, 'item', true, () => projected.at(-1)?.disabled);
       await context.api.setChildren!('results', []);
       await flush();
       expect(events.at(-1)?.value).toBeUndefined();
@@ -431,9 +542,7 @@ describe('actual public prototype instance lookup', () => {
         target('shell'),
         context.api.getPublicInstance!('control')!
       );
-      context.api.setProps('control', { disabled: false });
-      await flush();
-      expect(projected.get('shell')?.disabled).toBe(false);
+      await setDisabledAndAssert(context, 'control', false, () => projected.get('shell')?.disabled);
       context.api.call('control', 'focusSelf', { reason: 'keyboard' });
       await flush();
       expect(projected.get('shell')?.focusVisible).toBe(
