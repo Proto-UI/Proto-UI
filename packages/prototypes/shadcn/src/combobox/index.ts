@@ -18,4 +18,4 @@ export type {
   ComboboxEmptyExposes,
   ComboboxTriggerProps,
   ComboboxTriggerExposes,
-} from '@proto.ui/prototypes-base/combobox';
+} from './types';

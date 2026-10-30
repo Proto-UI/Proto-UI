@@ -8,7 +8,10 @@ export default definePrototype<NumberFieldRootProps, NumberFieldRootExposes>({
   name: 'bootstrap-2-3-2-number-field-root',
   setup(def) {
     const inherited = asNumberFieldRoot();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-wrap items-center gap-2 text-foreground'));
+    // Numeric composition is a Proto extension, not a Bootstrap 2.3.2 plugin.
+    def.feedback.style.use(
+      tw('flex min-w-0 flex-wrap items-start gap-[5px] text-foreground text-[14px] leading-[20px]')
+    );
     return inherited.render;
   },
 });

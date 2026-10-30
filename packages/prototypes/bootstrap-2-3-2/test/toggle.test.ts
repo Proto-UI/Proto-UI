@@ -12,10 +12,6 @@ import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import toggle from '../src/toggle';
 
-const gradient = 'bg-[linear-gradient(#fff,#e6e6e6)]';
-const raised = 'shadow-[inset_0_1px_0_rgb(255_255_255/20%),0_1px_2px_rgb(0_0_0/5%)]';
-const inset = 'shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]';
-
 function mount(initial: Record<string, unknown>) {
   let props = initial;
   let tokens: string[] = [];
@@ -94,13 +90,14 @@ describe('Bootstrap 2.3.2 Toggle disabled paint (simulated feedback host)', () =
           }
           view.update({ active, disabled: true });
           const assertDisabled = () => {
-            expect(view.tokens()).toEqual(
-              expect.arrayContaining(['bg-[#e6e6e6]', 'shadow-none', 'opacity-65'])
-            );
-            expect(view.tokens()).not.toContain(gradient);
-            expect(view.tokens()).not.toContain(raised);
-            expect(view.tokens()).not.toContain(inset);
+            const css = renderProtoStyleTokenCss(view.tokens());
+            expect(css).toContain('background-color: #e6e6e6;');
+            expect(css).toContain('background-image: none;');
+            expect(css).toContain('--pui-shadow: 0 0 #0000;');
+            expect(css).not.toContain('background-image: linear-gradient');
+            expect(css).not.toContain('--pui-shadow: inset');
             expect(view.exposes().active.get()).toBe(active);
+            expect(view.exposes().disabled.get()).toBe(true);
             expect(view.exposes().hovered.get()).toBe(false);
             expect(view.exposes().pressed.get()).toBe(false);
           };
@@ -109,18 +106,14 @@ describe('Bootstrap 2.3.2 Toggle disabled paint (simulated feedback host)', () =
             view.root.dispatchEvent(new CustomEvent(event));
             assertDisabled();
           }
-          const css = renderProtoStyleTokenCss(view.tokens());
-          expect(css).not.toContain('Unsupported Proto UI style tokens');
-          expect(css).toContain('background-color: #e6e6e6;');
-          expect(css).toContain('background-image: none;');
-          expect(css).toContain('--pui-shadow: 0 0 #0000;');
-          expect(css).not.toContain('background-image: linear-gradient');
-          expect(css).not.toContain('--pui-shadow: inset');
           view.update({ active });
           expect(view.tokens()).not.toContain('opacity-65');
           expect(view.tokens()).not.toContain('shadow-none');
-          expect(view.tokens()).toContain(active ? inset : raised);
-          expect(view.tokens()).toContain(active ? 'bg-[#e6e6e6]' : gradient);
+          const css = renderProtoStyleTokenCss(view.tokens());
+          expect(css).toContain(
+            active ? 'background-image: none;' : 'background-image: linear-gradient'
+          );
+          expect(css).toContain('--pui-shadow: inset');
           expect(view.exposes().disabled.get()).toBe(false);
         } finally {
           await view.invokeUnmounted();

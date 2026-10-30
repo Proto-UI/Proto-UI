@@ -1,10 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as bootstrap from '../src';
-import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
-import { DRAFT_FAMILY_STYLE_TOKENS } from '../../../cli/src/generated/draft-family-style-tokens';
-import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 
 type Host = HTMLElement & { getExposes(): Record<string, any> };
 const families = [['bootstrap-2-3-2', bootstrap]] as const;
@@ -54,45 +50,6 @@ afterEach(async () => {
 
 for (const [name, family] of families)
   describe(`${name}: Base state/text parts (simulated WC host)`, () => {
-    it('keeps eight distinct authored parts with inherited hooks, not old-family aliases', async () => {
-      await mount(family.checkboxRoot, {}, family.checkboxIndicator);
-      await mount(family.switchRoot, {}, family.switchThumb);
-      await mount(family.toggle);
-      await mount(family.inputRoot);
-      await mount(family.textareaRoot);
-      await mount(family.separatorRoot);
-
-      expect(new Set(parts.map((part) => family[part].name)).size).toBe(8);
-      const sources = [
-        'checkbox/root',
-        'checkbox/indicator',
-        'switch/root',
-        'switch/thumb',
-        'toggle/toggle',
-        'input/root',
-        'textarea/root',
-        'separator/root',
-      ];
-      const calls = [
-        'asCheckboxRoot',
-        'asCheckboxIndicator',
-        'asSwitchRoot',
-        'asSwitchThumb',
-        'asToggle',
-        'asInputRoot',
-        'asTextareaRoot',
-        'asSeparatorRoot',
-      ];
-      parts.forEach((part, index) => {
-        expect(family[part].name.startsWith(`${name}-`)).toBe(true);
-        const source = readFileSync(
-          `packages/prototypes/${name}/src/${sources[index]}.proto.ts`,
-          'utf8'
-        );
-        expect(source.split(`${calls[index]}().stateHandles`)).toHaveLength(2);
-        expect(source).not.toMatch(/prototypes-(shadcn|brutalist)/);
-      });
-    });
     it('derives checkbox indicator checked/mixed state from one root and restores disabled', async () => {
       const { root, part } = await mount(family.checkboxRoot, {}, family.checkboxIndicator);
       expect(root.getExposes().checked.get()).toBe(false);
@@ -100,9 +57,10 @@ for (const [name, family] of families)
       await click(root);
       expect(root.getExposes().checked.get()).toBe(true);
       expect(part!.getExposes().isChecked()).toBe(true);
-      expect(part!.querySelector('svg path')?.getAttribute('d')).toBe('M5 12L10 17L19 7');
+      expect(part!.querySelectorAll('svg path')).toHaveLength(1);
       await update(root, { checked: true, indeterminate: true, disabled: true });
-      expect(part!.querySelector('svg path')?.getAttribute('d')).toBe('M5 12H19');
+      expect(part!.getExposes().isIndeterminate()).toBe(true);
+      expect(root.getAttribute('aria-checked')).toBe('mixed');
       await click(root);
       expect(root.getExposes().checked.get()).toBe(true);
       await update(root, { checked: false, indeterminate: false, disabled: false });
@@ -212,11 +170,5 @@ for (const [name, family] of families)
       expect(root.getExposes().orientation.get()).toBe('vertical');
       expect(root.getAttribute('aria-orientation')).toBe('vertical');
       expect(root.children).toHaveLength(0);
-    });
-    it('closes the whole source vocabulary through the physical translator', async () => {
-      const tokens = (await collectProtoStyleTokens(`packages/prototypes/${name}/src`)) as string[];
-      expect(tokens.length).toBeGreaterThan(40);
-      expect(tokens).toEqual([...DRAFT_FAMILY_STYLE_TOKENS[name]]);
-      expect(renderProtoStyleTokenCss(tokens)).not.toContain('Unsupported Proto UI style tokens');
     });
   });

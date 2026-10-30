@@ -1,0 +1,53 @@
+id: P-LIQUID-GLASS-SLIDER
+type: prototype
+title: Liquid Glass scalar Slider projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+summary: Scalar Liquid Glass Slider family over Base with transient functional material.
+statement:
+  en: The family composes the seven scalar entries Root, Label, Track, Indicator, Thumb, Value and FieldThumb, each consuming its matching hook once. Thumb-level material is a transient pointer-bound request that never owns value or capture; it withdraws on opt-out, cancellation and retirement.
+criteria:
+  - id: P-LIQUID-GLASS-SLIDER-BASE
+    text:
+      en: 'Invoke asSlider{Root,Label,Track,Indicator,Thumb,Value,FieldThumb}() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.'
+  - id: P-LIQUID-GLASS-SLIDER-VISUAL
+    text:
+      en: 'Thumb/FieldThumb request bounded transient material tied to accepted pointer facts; the rail stays neutral. Scalar Slider is a Proto extension, not an Apple widget. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+  - id: P-LIQUID-GLASS-SLIDER-EXTENSION
+    text:
+      en: Material choices preserve the functional owner; value, session, pointer capture and measurement stay Base-owned with legal opaque fallback at every state.
+  - id: P-LIQUID-GLASS-SLIDER-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
+  - id: P-LIQUID-GLASS-SLIDER-BOUNDARY
+    text:
+      en: Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-SLIDER-VALUE-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+inherits:
+  prototypes:
+    - P-BASE-SLIDER
+verifies:
+  tests:
+    - T-LIQUID-GLASS-OVERLAYS-SOURCE-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/slider/root.proto.ts
+  - path: packages/prototypes/liquid-glass/src/slider/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Apple HIG Materials design reference only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Liquid Glass scalar Slider projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - liquid-glass
+  - slider
+  - draft

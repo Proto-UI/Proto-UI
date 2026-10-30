@@ -1,0 +1,49 @@
+id: P-LIQUID-GLASS-ALERT-DIALOG
+type: prototype
+title: Liquid Glass Alert Dialog projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+summary: Liquid Glass Alert Dialog family over P-BASE-ALERT-DIALOG.
+statement:
+  en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root is semantic-only; Content is the governed functional material owner while open and Mask owns dimming. Commands keep the family control recipe and Title/Description carry section typography; Base keeps controlled open, dismissal and admission.
+criteria:
+  - id: P-LIQUID-GLASS-ALERT-DIALOG-BASE
+    text:
+      en: Invoke asAlertDialog* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
+  - id: P-LIQUID-GLASS-ALERT-DIALOG-VISUAL
+    text:
+      en: 'Root is semantic-only; Content is the governed functional material owner while open and Mask owns dimming. Commands keep the family control recipe and Title/Description carry section typography; Base keeps controlled open, dismissal and admission. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+  - id: P-LIQUID-GLASS-ALERT-DIALOG-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
+  - id: P-LIQUID-GLASS-ALERT-DIALOG-BOUNDARY
+    text:
+      en: Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+inherits:
+  prototypes:
+    - P-BASE-ALERT-DIALOG
+verifies:
+  tests:
+    - T-LIQUID-GLASS-DRAFT-OVERLAY-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/alert-dialog/
+  - path: packages/prototypes/liquid-glass/src/alert-dialog/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Apple HIG Materials design reference only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Liquid Glass Alert Dialog projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - liquid-glass
+  - alert-dialog
+  - draft

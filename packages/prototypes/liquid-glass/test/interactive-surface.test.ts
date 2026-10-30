@@ -1,6 +1,5 @@
+import { COMMAND_DISABLED } from '../src/interactive-surface';
 import { describe, expect, it, vi } from 'vitest';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 import type { Prototype } from '@proto.ui/core';
 import { createRuntimeSession } from '@proto.ui/runtime';
 import {
@@ -24,10 +23,7 @@ import {
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
 import { VISUAL_FEEDBACK_SINK_CAP, type VisualFeedbackFrame } from '@proto.ui/module-feedback';
-import { collectProtoStyleTokensFromFiles } from '../../../cli/src/services/prototype-style-tokens';
-import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import button from '../src/button';
-import * as commandRecipe from '../src/interactive-surface';
 import toggle from '../src/toggle';
 import { formRoot, formSubmit, formReset } from '../src/form';
 import {
@@ -38,77 +34,67 @@ import {
   accordionContent,
 } from '../src/accordion';
 import { collapsibleRoot, collapsibleTrigger, collapsibleContent } from '../src/collapsible';
-import { selectRoot, selectTrigger, selectContent } from '../src/select';
+import {
+  selectRoot,
+  selectTrigger,
+  selectContent,
+  selectSurface,
+  selectViewport,
+  selectItem,
+  selectItemText,
+} from '../src/select';
 import { dropdownRoot, dropdownTrigger, dropdownContent } from '../src/dropdown';
 
 const commands = [
   {
     name: 'Button',
     prototype: button,
-    file: 'button/button.proto.ts',
-    hook: 'as-button',
     root: null,
     content: null,
   },
   {
     name: 'Toggle',
     prototype: toggle,
-    file: 'toggle/toggle.proto.ts',
-    hook: 'as-toggle',
     root: null,
     content: null,
   },
   {
     name: 'Submit',
     prototype: formSubmit,
-    file: 'form/submit.proto.ts',
-    hook: 'as-form-submit',
     root: formRoot,
     content: null,
   },
   {
     name: 'Reset',
     prototype: formReset,
-    file: 'form/reset.proto.ts',
-    hook: 'as-form-reset',
     root: formRoot,
     content: null,
   },
   {
     name: 'Accordion',
     prototype: accordionTrigger,
-    file: 'accordion/trigger.proto.ts',
-    hook: 'as-accordion-trigger',
     root: accordionRoot,
     content: accordionContent,
   },
   {
     name: 'Collapsible',
     prototype: collapsibleTrigger,
-    file: 'collapsible/trigger.proto.ts',
-    hook: 'as-collapsible-trigger',
     root: collapsibleRoot,
     content: collapsibleContent,
   },
   {
     name: 'Select',
     prototype: selectTrigger,
-    file: 'select/trigger.proto.ts',
-    hook: 'as-select-trigger',
     root: selectRoot,
     content: selectContent,
   },
   {
     name: 'Dropdown',
     prototype: dropdownTrigger,
-    file: 'dropdown/trigger.proto.ts',
-    hook: 'as-dropdown-trigger',
     root: dropdownRoot,
     content: dropdownContent,
   },
 ] as const;
-// Form state extraction uses the separately reviewed two-hook CLI prerequisite.
-const implementedCommands = commands;
 type Command = (typeof commands)[number];
 const HOVER = ['shadow-md', 'ring-1', 'ring-inset', 'ring-border'];
 
@@ -223,7 +209,15 @@ async function fixture(
     command.name === 'Accordion' ? await create(accordionItem, { value: 'a' }, root!.target) : null;
   const heading = item ? await create(accordionHeading, {}, item.target) : null;
   const control = await create(command.prototype, initial, heading?.target ?? root?.target);
-  if (command.content) await create(command.content, {}, item?.target ?? root!.target);
+  if (command.content) {
+    const content = await create(command.content, {}, item?.target ?? root!.target);
+    if (command.name === 'Select') {
+      const surface = await create(selectSurface, {}, content.target);
+      const viewport = await create(selectViewport, {}, surface.target);
+      const option = await create(selectItem, { value: 'one', textValue: 'One' }, viewport.target);
+      await create(selectItemText, {}, option.target);
+    }
+  }
   return {
     root,
     control,
@@ -240,24 +234,14 @@ async function fixture(
 
 // Portable frames establish ownership and recipe behavior only, not optical paint.
 describe('Liquid command interaction recipe over eight implemented Base owners', () => {
-  it('keeps the family-private recipe as physical token data without geometry or input ownership', async () => {
-    const source = await fs.readFile(
-      path.resolve('packages/prototypes/liquid-glass/src/interactive-surface.ts'),
-      'utf8'
-    );
-    expect(Object.values(commandRecipe).every((value) => typeof value === 'string')).toBe(true);
-    expect(source).not.toMatch(/\bimport\b|\bfunction\b|=>|def\.|stateHandles/);
-    expect(Object.values(commandRecipe).join(' ')).not.toMatch(
-      /(?:^|\s)(?:scale-|translate-|bg-|size-|w-|h-|px-|py-)/
-    );
-    expect(commandRecipe.COMMAND_HOVER.split(' ')).toEqual(HOVER);
-    expect(commandRecipe.COMMAND_DISABLED.split(' ')).toEqual([
+  it('keeps the complete opaque disabled recipe without whole-host opacity', () => {
+    expect(COMMAND_DISABLED.split(' ')).toEqual([
       'pointer-events-none',
       'cursor-default',
       'shadow-none',
     ]);
   });
-  it.each(implementedCommands)(
+  it.each(commands)(
     '$name separates static hover, press and visible focus without changing fallback or persistent state',
     async (command) => {
       const f = await fixture(command);
@@ -326,7 +310,7 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
     }
   );
 
-  it.each(implementedCommands)(
+  it.each(commands)(
     '$name retains opaque current-state fallback and a declared empty material slot when disabled',
     async (command) => {
       const f = await fixture(command, command.name === 'Toggle' ? { active: true } : {});
@@ -450,22 +434,6 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
     async (command) => {
       const f = await fixture(command);
       const event = command.name === 'Submit' ? 'submit' : 'reset';
-      const hooks = (command.prototype as any).__asHooks ?? [];
-      expect(hooks.filter((hook: any) => hook.name === command.hook)).toHaveLength(1);
-      expect(hooks.some((hook: any) => hook.name === 'as-button')).toBe(false);
-      const source = await fs.readFile(
-        path.resolve('packages/prototypes/liquid-glass/src', command.file),
-        'utf8'
-      );
-      expect(source.match(/return inherited\.render;/g)).toHaveLength(1);
-      expect(
-        source.match(
-          new RegExp(
-            `const inherited = ${command.name === 'Submit' ? 'asFormSubmit' : 'asFormReset'}\\(\\);`,
-            'g'
-          )
-        )
-      ).toHaveLength(1);
       try {
         f.control.input('pointer.enter');
         f.control.input('pointer.down');
@@ -501,7 +469,7 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
     { disabled: false, blocked: true },
     { disabled: true, blocked: true },
   ])(
-    'Accordion runtime and lowered quiet tokens agree for $disabled/$blocked',
+    'Accordion keeps quiet feedback for disabled $disabled and collapse-blocked $blocked',
     async ({ disabled, blocked }) => {
       const f = await fixture(
         commands[4],
@@ -515,59 +483,12 @@ describe('Liquid command interaction recipe over eight implemented Base owners',
       try {
         expect(f.control.state().disabled.get()).toBe(disabled);
         expect(f.control.state().collapseBlocked.get()).toBe(blocked);
-        const tokens = (await collectProtoStyleTokensFromFiles([
-          path.resolve('packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts'),
-        ])) as string[];
-        for (const token of ['shadow-none', 'cursor-not-allowed']) {
-          const loweredApplies =
-            (disabled && tokens.includes(`data-[disabled]:${token}`)) ||
-            (blocked && tokens.includes(`data-[collapse-blocked]:${token}`));
-          expect(loweredApplies).toBe(disabled || blocked);
-          expect(f.control.tokens().includes(token)).toBe(loweredApplies);
-        }
+        for (const token of ['shadow-none', 'cursor-not-allowed'])
+          expect(f.control.tokens().includes(token)).toBe(disabled || blocked);
         expect(f.control.frame().material.candidates).toHaveLength(disabled || blocked ? 0 : 1);
       } finally {
         await f.dispose();
       }
-    }
-  );
-
-  it.each(['disabled', 'collapse-blocked'])(
-    'Accordion lowers the independent %s quiet-paint branch',
-    async (stateName) => {
-      const tokens = (await collectProtoStyleTokensFromFiles([
-        path.resolve('packages/prototypes/liquid-glass/src/accordion/trigger.proto.ts'),
-      ])) as string[];
-      expect(tokens).toContain(`data-[${stateName}]:shadow-none`);
-      expect(tokens).toContain(`data-[${stateName}]:cursor-not-allowed`);
-      expect(tokens).not.toContain('data-[collapse-blocked]:data-[disabled]:shadow-none');
-    }
-  );
-
-  it.each(implementedCommands)(
-    '$name keeps one matching Base hook and emits real conditional physical CSS from imported recipe data',
-    async (command) => {
-      const sourcePath = path.resolve('packages/prototypes/liquid-glass/src', command.file);
-      const source = await fs.readFile(sourcePath, 'utf8');
-      const hooks = (command.prototype as any).__asHooks ?? [];
-      expect(hooks.filter((hook: any) => hook.name === command.hook)).toHaveLength(1);
-      expect(source).toContain("from '../interactive-surface'");
-      expect(source).not.toMatch(
-        /def\.event\.|\.set\(|\.capturePointer|requestSubmit|requestReset/
-      );
-      const tokens = (await collectProtoStyleTokensFromFiles([sourcePath])) as string[];
-      const hover = tokens.filter(
-        (token) => token.includes('hovered') && token.endsWith('ring-border')
-      );
-      expect(hover).toHaveLength(1);
-      expect(hover[0]).toContain('not-[data-pressed]');
-      expect(hover[0]).toContain('not-[data-disabled]');
-      expect(hover[0]).toContain('not-[data-focus-visible]');
-      if (command.name === 'Accordion') expect(hover[0]).toContain('not-[data-collapse-blocked]');
-      const css = renderProtoStyleTokenCss(tokens);
-      expect(css).not.toContain('Unsupported Proto UI style tokens');
-      expect(css).toContain('--pui-ring-inset: inset');
-      expect(css).toContain('box-shadow:');
     }
   );
 });

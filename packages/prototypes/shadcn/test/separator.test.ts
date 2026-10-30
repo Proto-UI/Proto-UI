@@ -8,20 +8,6 @@ type HasAsChild<Props> = 'asChild' extends keyof Props ? true : false;
 
 AdaptToWebComponent(separatorRoot);
 
-/**
- * Web-host lowering of the two orientation rules. These tokens are evidence that
- * the inherited orientation state reaches the style projection; they are not a
- * portable guarantee of this projection.
- */
-const WEB_GEOMETRY_TOKENS = [
-  'data-[orientation=horizontal]:h-px',
-  'data-[orientation=horizontal]:w-full',
-  'data-[orientation=vertical]:h-full',
-  'data-[orientation=vertical]:w-px',
-];
-
-const UNSCOPED_GEOMETRY_TOKENS = ['h-px', 'w-full', 'h-full', 'w-px'];
-
 describe('prototypes/shadcn: separator', () => {
   it('exposes the Root projection through exact package entries', () => {
     // T-SHADCN-SEPARATOR-0001-CASE-EXPORTS
@@ -104,19 +90,52 @@ describe('prototypes/shadcn: separator', () => {
     el.remove();
   });
 
-  it('lowers both orientation rules into conditional web geometry', async () => {
+  it('lowers orientation rules into conditional web geometry', async () => {
     // T-SHADCN-SEPARATOR-0001-CASE-WEB-GEOMETRY-EVIDENCE
     const el = document.createElement('shadcn-separator-root');
     document.body.appendChild(el);
     await Promise.resolve();
     await Promise.resolve();
 
-    for (const token of WEB_GEOMETRY_TOKENS) {
+    // The horizontal rule is fully exposed to web selector lowering; the two
+    // style-gated vertical branches stay runtime rules because the family
+    // style state is not a web-exposed attribute. The physical geometry is
+    // carried by the prefixed selector tokens alone.
+    for (const token of [
+      'data-[orientation=horizontal]:h-px',
+      'data-[orientation=horizontal]:w-full',
+    ]) {
       expect(styleContains(el, token)).toBe(true);
     }
-    for (const token of UNSCOPED_GEOMETRY_TOKENS) {
+    for (const token of [
+      'data-[orientation=vertical]:h-full',
+      'data-[orientation=vertical]:w-px',
+      'h-px',
+      'w-full',
+      'h-full',
+      'w-px',
+      'self-stretch',
+    ]) {
       expect(styleContains(el, token)).toBe(false);
     }
+
+    // New York vertical geometry comes from the style-gated runtime rule.
+    setElementProps(el, { orientation: 'vertical' });
+    await Promise.resolve();
+    await Promise.resolve();
+    for (const token of ['h-full', 'w-px']) {
+      expect(styleContains(el, token)).toBe(true);
+    }
+    expect(styleContains(el, 'self-stretch')).toBe(false);
+
+    // A non-New York profile uses the stretched vertical geometry instead.
+    setElementProps(el, { orientation: 'vertical', styleProfile: 'vega' });
+    await Promise.resolve();
+    await Promise.resolve();
+    for (const token of ['w-px', 'self-stretch']) {
+      expect(styleContains(el, token)).toBe(true);
+    }
+    expect(styleContains(el, 'h-full')).toBe(false);
     el.remove();
   });
 });

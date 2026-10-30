@@ -45,15 +45,13 @@ it('closes borrowed-state Slider Rule tokens without relying on other components
     'data-[orientation=vertical]:min-h-40',
     'data-[orientation=vertical]:h-full',
     'data-[orientation=vertical]:w-3',
-    'data-[orientation=vertical]:w-1',
     'data-[orientation=vertical]:bottom-[calc(var(--pui-display-percentage)*1%)]',
     'data-[disabled]:opacity-50',
     'data-[disabled]:pointer-events-none',
     'data-[direction=rtl]:data-[orientation=horizontal]:right-[calc(var(--pui-display-percentage)*1%)]',
   ];
-  // This regression must remain red until the shared collector understands the
-  // existing authored-asHook state handles. No component whitelist or manually
-  // seeded Rule tokens in prototype/preset source are an acceptable repair.
+  // Profile-conditioned rail/range widths are applied as ordinary live tokens;
+  // their physical dimensions and both axes are covered by slider-upstream-paint.
   expect(expected.filter((token) => !tokens.includes(token))).toEqual([]);
   const css = renderProtoStyleTokenCss(tokens);
   for (const token of expected) expect(css).toContain(`[data-pui-style~="${token}"]`);

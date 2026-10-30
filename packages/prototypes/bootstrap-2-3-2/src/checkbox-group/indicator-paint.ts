@@ -44,10 +44,10 @@ export function checkboxGroupGlyph(
         : null;
     const boxStyle = path
       ? tw(
-          'pointer-events-none inline-flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-primary bg-primary text-primary-foreground shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+          'pointer-events-none inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-primary bg-primary text-primary-foreground shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
         )
       : tw(
-          'pointer-events-none inline-flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-secondary text-secondary-foreground shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+          'pointer-events-none inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-foreground shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
         );
     return r.el(
       'span',

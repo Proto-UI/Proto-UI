@@ -15,8 +15,9 @@ criteria:
     text:
       zh-CN: 保留对应Base定义的语义与生命周期；视觉源、偏差和未验证边界须显式记录。
       en: Preserve the corresponding Base semantics and lifecycle; record the visual reference, deviations and unverified boundaries explicitly.
-dependsOn:
-  prototypes: [P-BASE-DROPDOWN-MENU-GROUP]
+inherits:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU-GROUP
 verifies:
   tests: [T-BASE-DROPDOWN-COMPOSITION-0001]
 sources:

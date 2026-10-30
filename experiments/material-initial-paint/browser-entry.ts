@@ -73,7 +73,13 @@ async function enhance() {
   }
   // SSR supplies the exact rest props before upgrade. The native <a> outside
   // this static Surface remains the one keyboard/click owner.
-  setElementProps(host, { variant: 'outline', radius: 'full', border: 'none', elevation: 'none' });
+  setElementProps(host, {
+    variant: 'outline',
+    radius: 'full',
+    border: 'none',
+    elevation: 'none',
+    material: 'auto',
+  });
   AdaptToWebComponent(surface, {
     registerAs: 'initial-paint-surface',
     createVisualSink: (element, effects) => createWebMaterialSink(element, effects, options),

@@ -5,6 +5,10 @@ import path from 'node:path';
 import type { Browser, BrowserContext, Page, Response } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  renderProtoStyleTokenCss,
+  renderProtoShadowStyleTokenCss,
+} from '../../../../../../packages/cli/src/services/proto-style-css';
+import {
   COLOR_SCHEMES,
   RUNTIMES,
   launchBrowser,
@@ -168,6 +172,59 @@ afterAll(async () => {
 }, 60_000);
 
 describe.sequential('Prototype style closure without Website CSS', () => {
+  it('keeps the scoped box baseline overridable by authored sizing without resetting unrelated content', async () => {
+    // T-WEB-STYLE-BASELINE-0001-CASE-SCOPED-BORDER-BOX
+    // T-WEB-STYLE-BASELINE-0001-CASE-NO-GLOBAL-RESET
+    // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
+    const probe = await context.newPage();
+    try {
+      const tokens = ['w-[40px]', 'p-[10px]', 'border-2', 'box-content'];
+      await probe.setContent('<main></main>');
+      const facts = await probe.evaluate(
+        ({ documentCss, shadowCss }) => {
+          const specimens = `
+          <div id="baseline" data-pui-style="w-[40px] p-[10px] border-2"></div>
+          <div id="authored" data-pui-style="w-[40px] p-[10px] border-2 box-content"></div>
+          <div id="unrelated" style="width:40px;padding:10px;border:2px solid"></div>`;
+          const host = document.querySelector('main')!;
+          host.innerHTML = `<style>${documentCss}</style>${specimens}<section></section>`;
+          const shadow = host.querySelector('section')!.attachShadow({ mode: 'open' });
+          shadow.innerHTML = `<style>${shadowCss}</style>${specimens}`;
+          const inspect = (root: ParentNode) =>
+            Object.fromEntries(
+              ['baseline', 'authored', 'unrelated'].map((id) => {
+                const element = root.querySelector<HTMLElement>(`#${id}`)!;
+                return [
+                  id,
+                  {
+                    box: getComputedStyle(element).boxSizing,
+                    pseudoBox: getComputedStyle(element, '::before').boxSizing,
+                    width: element.getBoundingClientRect().width,
+                  },
+                ];
+              })
+            );
+          return { document: inspect(host), shadow: inspect(shadow) };
+        },
+        {
+          documentCss: renderProtoStyleTokenCss(tokens),
+          shadowCss: renderProtoShadowStyleTokenCss(tokens),
+        }
+      );
+      for (const target of Object.values(facts)) {
+        expect(target.baseline).toEqual({ box: 'border-box', pseudoBox: 'border-box', width: 40 });
+        expect(target.authored).toEqual({ box: 'content-box', pseudoBox: 'border-box', width: 64 });
+        expect(target.unrelated).toEqual({
+          box: 'content-box',
+          pseudoBox: 'content-box',
+          width: 64,
+        });
+      }
+    } finally {
+      await probe.close();
+    }
+  });
+
   it('loads only scoped Proto UI physical styles and mounts every real runtime', async () => {
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-NORMALIZATION-SCOPE
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-STANDALONE-FOUR-RUNTIMES

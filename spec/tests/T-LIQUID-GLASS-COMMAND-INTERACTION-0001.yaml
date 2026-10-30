@@ -3,7 +3,7 @@ type: test
 title: Liquid Glass command hover and existing press-contact conformance
 status: draft
 since: 0.3.0-alpha.1
-lifecycleRationale: The shared recipe retains prior portable/closure evidence; the 2026-10-29 disabled-opacity regression has failing same-environment main/candidate tests and pending repaired exact-head evidence. Source availability does not admit all family roles, moving hover optics or cross-host equivalence.
+lifecycleRationale: The shared recipe retains prior portable/closure evidence and the recorded 2026-10-29 failing baseline. Main independently corrected disabled host opacity; portable and native validation of this reconciled tree remains pending. Source availability does not admit all family roles, moving hover optics or cross-host equivalence.
 summary: Separate semantic ownership, generated physical closure and exact-head native hover/material evidence for eight existing command parts.
 cases:
   - id: T-LIQUID-GLASS-COMMAND-INTERACTION-0001-CASE-STATE
@@ -76,6 +76,9 @@ sources:
   - path: packages/prototypes/base/test/form-actions-material.test.ts
   - path: packages/prototypes/base/test/form-actions-quality.test.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Reconciled the existing disabled regression with the independently corrected main recipe and expanded tests; retained the opaque neutral fixture and keyboard suppression checks, with combined-tree validation pending.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Define state, closure and native obligations without borrowing old Toggle acceptance or weakening optical gates.

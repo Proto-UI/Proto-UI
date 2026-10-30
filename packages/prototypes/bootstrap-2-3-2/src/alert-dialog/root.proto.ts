@@ -1,4 +1,4 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import {
   asAlertDialogRoot,
   type AlertDialogRootProps,
@@ -7,8 +7,9 @@ import {
 
 export default definePrototype<AlertDialogRootProps, AlertDialogRootExposes>({
   name: 'bootstrap-2-3-2-alert-dialog-root',
-  setup(def) {
-    const behavior = asAlertDialogRoot();
-    def.feedback.style.use(tw('relative inline-flex min-w-0'));
+  modules: asAlertDialogRoot.modules,
+  setup() {
+    // Semantic open owner only; the modal surface belongs to Content.
+    return asAlertDialogRoot().render;
   },
 });

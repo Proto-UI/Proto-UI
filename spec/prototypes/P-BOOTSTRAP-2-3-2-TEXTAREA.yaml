@@ -23,6 +23,12 @@ criteria:
   - id: P-BOOTSTRAP-2-3-2-TEXTAREA-BOUNDARY
     text:
       en: The package is private and unreleased. Documentation and demos expose the real parts. Actual four-Web browser rendering, general Compiler and GPUI/Flutter/Qt conformance need separate collected evidence; source availability alone is insufficient.
+  - id: P-BOOTSTRAP-2-3-2-TEXTAREA-FIELD-COMPOSITION
+    text:
+      en: The public fieldTextarea entry composes asFieldTextarea once with the same editor and family paint. The optional Field binding remains sole owner of invalid, pending, policy and relationships; ordinary Root retains independent explicit-label semantics and no Field policy leaks into it.
+    dependsOn:
+      contracts:
+        - C-FIELD-TEXTAREA-0001
 sources:
   - path: packages/prototypes/bootstrap-2-3-2/src/textarea/root.proto.ts
   - path: packages/prototypes/bootstrap-2-3-2/src/theme.ts

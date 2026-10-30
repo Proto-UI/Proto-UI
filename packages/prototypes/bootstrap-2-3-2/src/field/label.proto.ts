@@ -8,11 +8,9 @@ export default definePrototype<FieldLabelProps, FieldLabelExposes>({
   name: 'bootstrap-2-3-2-field-label',
   setup(def) {
     const inherited = asFieldLabel();
-    def.feedback.style.use(tw('block text-sm font-normal leading-5 break-words'));
-    def.rule({
-      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50')),
-    });
+    def.feedback.style.use(
+      tw('block mb-[5px] text-[14px] font-normal leading-[20px] text-inherit break-words')
+    );
     return inherited.render;
   },
 });

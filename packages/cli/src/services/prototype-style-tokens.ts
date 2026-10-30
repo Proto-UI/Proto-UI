@@ -2322,6 +2322,7 @@ function resolveExpression(node, scope) {
   if (
     ts.isParenthesizedExpression(node) ||
     ts.isAsExpression(node) ||
+    ts.isSatisfiesExpression(node) ||
     ts.isTypeAssertionExpression(node) ||
     // `asHook().stateHandles!` — the bag is optional on the hook result type,
     // so authors reach it through a non-null assertion.
@@ -2503,6 +2504,7 @@ function resolveBinding(node, scope) {
 function unwrapTransparent(node) {
   return ts.isParenthesizedExpression(node) ||
     ts.isAsExpression(node) ||
+    ts.isSatisfiesExpression(node) ||
     ts.isTypeAssertionExpression(node) ||
     ts.isNonNullExpression(node)
     ? unwrapTransparent(node.expression)

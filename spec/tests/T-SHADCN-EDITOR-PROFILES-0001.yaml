@@ -1,0 +1,67 @@
+id: T-SHADCN-EDITOR-PROFILES-0001
+type: test
+title: Shadcn editor and form policy profile coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Input, Textarea, Field, Fieldset, Form, Input OTP and Number Field nine-profile consumer coverage.
+cases:
+  - id: T-SHADCN-EDITOR-PROFILES-0001-CASE-EDITORS
+    title: Real editors keep IME, selection, controlled refusal and module transport across profile changes
+    covers:
+      - P-SHADCN-INPUT-BASE-INHERITANCE
+      - P-SHADCN-TEXTAREA-BASE-INHERITANCE
+      - P-SHADCN-INPUT-OTP-ADMISSION
+      - P-SHADCN-NUMBER-FIELD-ADMISSION
+    expectation: editor-profiles-preserve-owners
+  - id: T-SHADCN-EDITOR-PROFILES-0001-CASE-POLICY
+    title: Field/Form policy, validation relations and submit/reset ownership stay Base-owned
+    covers:
+      - P-SHADCN-FIELD-INHERITANCE
+      - P-SHADCN-FIELDSET-INHERITANCE
+      - P-SHADCN-FORM-ADMISSION
+    expectation: form-policy-preserved
+implementations:
+  - id: shadcn-editor-profile-consumers
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/editor-profile-consumers-r90.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-INPUT
+      - P-SHADCN-TEXTAREA
+      - P-SHADCN-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+  - id: shadcn-form-policy-profile-consumers
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/form-policy-profile-consumers-r90.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-FIELD
+      - P-SHADCN-FIELDSET
+      - P-SHADCN-FORM
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+  - id: shadcn-numeric-profile-consumers
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/numeric-profile-consumers-r90.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-INPUT-OTP
+      - P-SHADCN-NUMBER-FIELD
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-FIELD
+    - P-SHADCN-FIELDSET
+    - P-SHADCN-FORM
+    - P-SHADCN-INPUT
+    - P-SHADCN-INPUT-OTP
+    - P-SHADCN-NUMBER-FIELD
+    - P-SHADCN-TEXTAREA

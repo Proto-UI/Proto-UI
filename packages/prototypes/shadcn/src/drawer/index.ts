@@ -8,26 +8,31 @@ export { default as drawerMask } from './mask.proto';
 export { default as drawerHandle } from './handle.proto';
 export { default } from './root.proto';
 export type {
-  DrawerHandleProps,
   DrawerHandleExposes,
-  DrawerRootProps,
   DrawerRootExposes,
   DrawerTriggerExposes,
-  DrawerContentProps,
   DrawerContentExposes,
-  DrawerTitleProps,
   DrawerTitleExposes,
-  DrawerDescriptionProps,
   DrawerDescriptionExposes,
   DrawerCloseExposes,
-  DrawerMaskProps,
   DrawerMaskExposes,
 } from '@proto.ui/prototypes-base/drawer';
 
 export { default as drawerFooter } from './footer.proto';
-export type { DrawerFooterProps, DrawerFooterExposes } from '@proto.ui/prototypes-base/drawer';
+export type { DrawerFooterExposes } from '@proto.ui/prototypes-base/drawer';
 
 export { default as drawerHeader } from './header.proto';
-export type { DrawerHeaderProps, DrawerHeaderExposes } from '@proto.ui/prototypes-base/drawer';
+export type { DrawerHeaderExposes } from '@proto.ui/prototypes-base/drawer';
 
-export type { DrawerTriggerProps, DrawerCloseProps } from './types';
+export type {
+  DrawerTriggerProps,
+  DrawerCloseProps,
+  DrawerRootProps,
+  DrawerContentProps,
+  DrawerMaskProps,
+  DrawerHandleProps,
+  DrawerHeaderProps,
+  DrawerFooterProps,
+  DrawerTitleProps,
+  DrawerDescriptionProps,
+} from './types';

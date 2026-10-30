@@ -1,14 +1,22 @@
-// Static optical surface intent. Unavailable or nonopaque source/style inputs preserve the ordinary Surface presentation.
+// Ordinary content by default; an eligible functional shell may explicitly opt into material.
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asSurfaceRoot,
-  type SurfaceRootProps,
+  type SurfaceRootProps as BaseSurfaceRootProps,
   type SurfaceRootExposes,
 } from '@proto.ui/prototypes-base/surface';
+export type SurfaceRootProps = BaseSurfaceRootProps & {
+  /** Explicitly request the existing material capability; ordinary paint is the default. */
+  material?: 'auto' | 'opaque';
+};
 export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceRootExposes>({
   name: 'liquid-glass-surface-root',
   setup(def) {
-    asSurfaceRoot();
+    const inherited = asSurfaceRoot();
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'opaque' });
     def.feedback.material.declare({
       version: 2,
       shape: { kind: 'rounded-rect', geometry: 'style' },
@@ -17,10 +25,13 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
     });
     def.rule({
       when: (w) =>
-        w.any(
-          w.prop('variant').eq('outline'),
-          w.prop('variant').eq('secondary'),
-          w.prop('variant').eq('muted')
+        w.all(
+          w.prop('material').eq('auto'),
+          w.any(
+            w.prop('variant').eq('outline'),
+            w.prop('variant').eq('secondary'),
+            w.prop('variant').eq('muted')
+          )
         ),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
     });
@@ -139,7 +150,7 @@ export const LiquidGlassSurfaceRoot = definePrototype<SurfaceRootProps, SurfaceR
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted text-foreground')),
     });
-    return (renderer) => renderer.r.slot();
+    return inherited.render;
   },
 });
 export default LiquidGlassSurfaceRoot;

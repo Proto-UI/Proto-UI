@@ -60,7 +60,9 @@ describe('Passive atom documentation recipes', () => {
       const demo = createSurfaceAtomDemo(family);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       expect(demo.setup).toBeUndefined();
-      expect(atoms(demo)).toHaveLength(4);
+      // Liquid Glass adds a fifth case disclosing the explicit `material`
+      // opt-in; the other families keep the four pinned variants.
+      expect(atoms(demo)).toHaveLength(family === 'liquid-glass' ? 5 : 4);
       for (const node of atoms(demo)) {
         if (node.kind !== 'proto') throw new Error('Expected the actual Surface atom');
         expect(node.prototypeId).toBe(`${family}-surface-root`);
@@ -79,6 +81,7 @@ describe('Passive atom documentation recipes', () => {
               'focusVisible',
               'pressed',
               'current',
+              'material',
             ].includes(key)
           )
         ).toBe(true);

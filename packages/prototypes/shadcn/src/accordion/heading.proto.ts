@@ -1,13 +1,17 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asAccordionHeading,
-  type AccordionHeadingProps,
   type AccordionHeadingExposes,
 } from '@proto.ui/prototypes-base/accordion';
-export default definePrototype<AccordionHeadingProps, AccordionHeadingExposes>({
+import { setupAccordionStyle } from './visual';
+import type { ShadcnAccordionHeadingProps } from './types';
+export default definePrototype<ShadcnAccordionHeadingProps, AccordionHeadingExposes>({
   name: 'shadcn-accordion-heading',
+  modules: asAccordionHeading.modules,
   setup(def) {
-    asAccordionHeading();
-    def.feedback.style.use(tw('block m-0 min-w-0'));
+    const inherited = asAccordionHeading();
+    setupAccordionStyle(def);
+    def.feedback.style.use(tw('flex m-0 min-w-0'));
+    return inherited.render;
   },
 });

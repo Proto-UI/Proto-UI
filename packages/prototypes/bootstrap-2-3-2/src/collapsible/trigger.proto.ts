@@ -12,23 +12,20 @@ const collapsibleTrigger = definePrototype<
 >({
   name: 'bootstrap-2-3-2-collapsible-trigger',
   setup(def) {
-    const state = asCollapsibleTrigger().stateHandles;
+    const inherited = asCollapsibleTrigger();
+    const state = inherited.stateHandles;
     if (!state)
       throw new Error('[bootstrap-2-3-2-collapsible-trigger] Missing Base state handles.');
-    const { hovered, pressed, focusVisible, disabled } = state;
+    const { hovered, focusVisible, disabled } = state;
     // P-BOOTSTRAP-2-3-2-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none inline-flex items-center justify-start rounded-[4px] px-[0.9375rem] py-2 text-sm font-normal text-primary'
+        'block w-full min-w-0 max-w-full wrap-anywhere whitespace-break-spaces text-left cursor-pointer select-none px-[15px] py-[8px] text-[14px] leading-[20px] font-normal text-[#08c]'
       )
     );
     def.rule({
       when: (w) => w.state(hovered).eq(true),
-      intent: (i) => i.feedback.style.use(tw('underline')),
-    });
-    def.rule({
-      when: (w) => w.state(pressed).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
+      intent: (i) => i.feedback.style.use(tw('text-[#005580] underline')),
     });
     def.rule({
       when: (w) => w.state(focusVisible).eq(true),
@@ -41,8 +38,9 @@ const collapsibleTrigger = definePrototype<
     });
     def.rule({
       when: (w) => w.state(disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('opacity-65 pointer-events-none cursor-default')),
     });
+    return inherited.render;
   },
 });
 
