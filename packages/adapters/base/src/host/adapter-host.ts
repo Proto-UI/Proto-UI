@@ -20,6 +20,7 @@ export type AdapterHostInput<P extends PropsBaseType> = Pick<
   | 'onLifecycleCheckpoint'
   | 'onLifecycleEvent'
   | 'presenceLifecycle'
+  | 'viewOperations'
 >;
 
 export type AdapterHostOptions = {
@@ -64,6 +65,7 @@ export function createAdapterHost<P extends PropsBaseType>(
     onLifecycleCheckpoint: host.onLifecycleCheckpoint,
     onLifecycleEvent: host.onLifecycleEvent,
     presenceLifecycle: host.presenceLifecycle,
+    viewOperations: host.viewOperations,
     onRuntimeReady: hooks.onRuntimeReady,
     onUnmountBegin: hooks.onUnmountBegin,
   });

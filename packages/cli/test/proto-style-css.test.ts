@@ -15,6 +15,35 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('lowers zero scroll padding in light and shadow CSS without accepting unknown scroll tokens', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['scroll-py-0']);
+      const block = css.split('}').find((entry) => entry.includes('[data-pui-style~="scroll-py-0"]'));
+      expect(block).toBeDefined();
+      expect(block).toMatch(/\{\s*scroll-padding-block: 0px;\s*$/);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const token of ['scroll-py-unknown', '-scroll-py-0', 'scroll-py-[0px;color:red]']) {
+        const unsupported = render([token]);
+        expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
+      }
+    }
+  });
+
+  it('lowers scroll-py-1 in light and shadow CSS without widening the token vocabulary', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['scroll-py-1', 'scroll-my-1']);
+      expect(css).toContain('[data-pui-style~="scroll-py-1"]');
+      expect(css).toContain('scroll-padding-block: 0.25rem;');
+      expect(css).toContain('scroll-margin-block: 0.25rem;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const token of ['scroll-py-unknown', '-scroll-py-1', 'scroll-py-[1px;color:red]']) {
+        const unsupported = render([token]);
+        expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
+      }
+    }
+  });
   it('retains the opaque source fallback when a menu or progress gradient is selected', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       for (const [token, color] of [

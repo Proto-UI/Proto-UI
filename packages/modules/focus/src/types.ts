@@ -11,6 +11,7 @@ import type {
   FocusRovingEntryRequestOptions,
   FocusScopeConfig,
   FocusRequestOptions,
+  FocusScopeActivationOptions,
   FocusScopeConfigPatch,
   FocusScopeHandle,
   FocusScopeKey,
@@ -49,7 +50,7 @@ export type FocusPort = {
   focusPrev(): void;
   focusSelected(options?: FocusRovingEntryRequestOptions): void;
   restoreFocus(): void;
-  activateScope(options?: FocusRequestOptions): void;
+  activateScope(options?: FocusScopeActivationOptions): void;
   deactivateScope(options?: FocusRequestOptions): void;
   isScopeActive(): boolean;
   getEffectiveRovingKey(): FocusRovingKey | undefined;

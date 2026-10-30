@@ -128,6 +128,7 @@ const staticUtilities: Record<string, string[]> = {
   'max-w-max': ['max-width: max-content;'],
   'w-max': ['width: max-content;'],
   'max-w-xs': ['max-width: 20rem;'],
+  'scroll-py-0': ['scroll-padding-block: 0px;'],
   'scroll-py-1': ['scroll-padding-block: 0.25rem;'],
   'scroll-py-1.5': ['scroll-padding-block: 0.375rem;'],
   'shadow-xl': [

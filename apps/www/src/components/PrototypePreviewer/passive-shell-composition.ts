@@ -41,6 +41,8 @@ export function createPassiveShellComposition(options: {
   layout: Record<string, string>;
   className: string;
   surfaceRef?: string;
+  /** Re-evaluate the current borrowed content plan for every new shell generation. */
+  automaticMaterialScene?(): boolean;
   /** Prepared without side effects; joins actual publication/rollback, not loading. */
   prepareAppearance?(appearance: PassiveShellAppearance): AppearancePublication;
 }) {
@@ -106,6 +108,7 @@ export function createPassiveShellComposition(options: {
       const prototypeId = options.prototypeId(request.selection.projectionFamilyId);
       await loadPrototypes([prototypeId]);
       if (!alive) throw new Error('Passive shell composition disposed');
+      const automaticMaterialScene = options.automaticMaterialScene?.();
       const host = document.createElement('div');
       host.hidden = true;
       host.style.width = '100%';
@@ -158,6 +161,7 @@ export function createPassiveShellComposition(options: {
         assertProjectionRecipeClosure(demo.root, [prototypeId], `passive-shell:${prototypeId}`);
         rendered = await renderDemo({
           runtime: options.runtime,
+          automaticMaterialScene,
           host,
           isCurrent: () => alive,
           demo,

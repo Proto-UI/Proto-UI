@@ -141,6 +141,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/field');
     registerPrototype('shadcn-field-control', mod.fieldControl);
   },
+  'shadcn-field-switch': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-switch', mod.fieldSwitch);
+  },
   'shadcn-field-description': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/field');
     registerPrototype('shadcn-field-description', mod.fieldDescription);
@@ -1220,6 +1224,63 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/input');
     registerPrototype('shadcn-input-root', mod.default);
   },
+  'shadcn-command-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/root.proto');
+    registerPrototype('shadcn-command-root', mod.default);
+  },
+  'shadcn-command-input': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/input.proto');
+    registerPrototype('shadcn-command-input', mod.default);
+  },
+  'shadcn-command-content': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/content.proto');
+    registerPrototype('shadcn-command-content', mod.default);
+  },
+  'shadcn-command-item': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/item.proto');
+    registerPrototype('shadcn-command-item', mod.default);
+  },
+  'shadcn-command-empty': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/empty.proto');
+    registerPrototype('shadcn-command-empty', mod.default);
+  },
+  'shadcn-command-dialog-mask': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/dialog-mask.proto');
+    registerPrototype('shadcn-command-dialog-mask', mod.default);
+  },
+  'shadcn-command-dialog-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/shadcn/src/command/dialog-content.proto');
+    registerPrototype('shadcn-command-dialog-content', mod.default);
+  },
+  'brutalist-command-root': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/command/root.proto');
+    registerPrototype('brutalist-command-root', mod.default);
+  },
+  'brutalist-command-input': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/command/input.proto');
+    registerPrototype('brutalist-command-input', mod.default);
+  },
+  'brutalist-command-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/command/content.proto');
+    registerPrototype('brutalist-command-content', mod.default);
+  },
+  'brutalist-command-item': async () => {
+    const mod = await import('../../../../../packages/prototypes/brutalist/src/command/item.proto');
+    registerPrototype('brutalist-command-item', mod.default);
+  },
+  'brutalist-command-empty': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/command/empty.proto');
+    registerPrototype('brutalist-command-empty', mod.default);
+  },
+  'brutalist-command-dialog-content': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/brutalist/src/command/dialog-content.proto');
+    registerPrototype('brutalist-command-dialog-content', mod.default);
+  },
   'shadcn-dialog-footer': async () => {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/dialog/footer.proto');
     registerPrototype('shadcn-dialog-footer', mod.default);
@@ -1311,3 +1372,4 @@ export async function loadPrototypes(prototypeIds: string[]): Promise<void> {
 export function getAvailablePrototypes(): string[] {
   return Object.keys(prototypeModules);
 }
+

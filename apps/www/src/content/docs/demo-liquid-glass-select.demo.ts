@@ -88,6 +88,18 @@ function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
     ],
   };
 }
+function materialStage(ref: string, children: DemoNode[]): Extract<DemoNode, { kind: 'box' }> {
+  return {
+    kind: 'box',
+    ref,
+    className: 'min-w-0 w-full',
+    materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
+    children: [
+      { kind: 'box', ref: `${ref}Flow`, children },
+      { kind: 'box', ref: `${ref}Overlay`, children: [] },
+    ],
+  };
+}
 export default {
   type: 'demo',
   root: {
@@ -95,47 +107,52 @@ export default {
     ref: 'selectLayout',
     className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
     children: [
-      { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm' },
-      select('uncontrolled', { defaultValue: 'alpha' }),
-      { kind: 'box', children: ['Disabled selection'], className: 'text-sm' },
-      select('disabled', { defaultValue: 'beta', disabled: true }),
+      materialStage('uncontrolledStage', [
+        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-2' },
+        select('uncontrolled', { defaultValue: 'alpha' }),
+      ]),
+      materialStage('disabledStage', [
+        { kind: 'box', children: ['Disabled selection'], className: 'text-sm mb-2' },
+        select('disabled', { defaultValue: 'beta', disabled: true }),
+      ]),
+      materialStage('controlledStage', [
+        {
+          kind: 'box',
+          children: ['Controlled value: accept the pending request above the selection'],
+          className: 'text-sm',
+        },
+        {
+          kind: 'box',
+          ref: 'requestStatus',
+          attrs: { 'aria-live': 'polite' },
+          className: 'text-sm break-words mb-2',
+          children: ['No pending request.'],
+        },
+        {
+          kind: 'proto',
+          prototypeId: 'liquid-glass-button',
+          ref: 'accept',
+          className: 'min-w-0 max-w-full mb-2',
+          children: [
+            {
+              kind: 'box',
+              tag: 'span',
+              ref: 'acceptLabel',
+              className: 'min-w-0 whitespace-normal wrap-anywhere',
+              children: ['Accept selection'],
+            },
+          ],
+        },
+        select('controlled', { value: 'alpha' }),
+      ]),
       {
-        kind: 'box',
-        children: ['Controlled value: accept the pending request below'],
-        className: 'text-sm',
-      },
-      select('controlled', { value: 'alpha' }),
-      {
-        kind: 'box',
-        ref: 'requestStatus',
-        attrs: { 'aria-live': 'polite' },
-        className: 'text-sm break-words',
-        children: ['No pending request.'],
-      },
-      {
-        kind: 'proto',
-        prototypeId: 'liquid-glass-button',
-        ref: 'accept',
-        className: 'min-w-0 max-w-full',
-        children: [
-          {
-            kind: 'box',
-            tag: 'span',
-            ref: 'acceptLabel',
-            className: 'min-w-0 whitespace-normal wrap-anywhere',
-            children: ['Accept selection'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        attrs: { dir: 'rtl' },
-        ref: 'selectRtlLayout',
-        className: 'grid grid-cols-1 min-w-0 gap-2',
-        children: [
+        ...materialStage('selectRtlLayout', [
           { kind: 'box', children: ['RTL · long selected label'], className: 'text-sm' },
           select('rtl', { defaultValue: 'long' }),
-        ],
+        ]),
+        kind: 'box',
+        attrs: { dir: 'rtl' },
+        className: 'grid grid-cols-1 min-w-0 gap-2',
       },
     ],
   },

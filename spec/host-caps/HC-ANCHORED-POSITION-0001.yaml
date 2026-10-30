@@ -13,6 +13,10 @@ criteria:
     text:
       en: 'Only the current computation of a live lease may publish geometry, size variables or resolved placement. Replacement, newer updates and disposal invalidate older work. Disposal revokes observation and cannot be undone by update; observation never enables animation-frame polling by default.'
       zh-CN: '仅 live lease 的当前计算可发布几何、尺寸变量或 resolved placement。替换、更新及 dispose 使旧工作失效。dispose 撤销 observation，update 不得将其复活；observation 默认不启用 animation-frame polling。'
+  - id: HC-ANCHORED-POSITION-0001-VISUAL
+    text:
+      en: 'For an explicitly opted-in visual-gap connection, resolve host-issued generation-bound four-edge footprint facts for the declared anchor and floating paint targets, including a distinct Surface inside the floating frame. Normalize expanded paint bounds against the actual positioning reference border boxes before using effective edges; bind both reference and paint geometry revisions, and reject unsupported projection instead of assuming coextensive boxes. Keep target resolution and pixel arithmetic host-local; no prototype/page measurement or unbounded global observer bus is introduced. Native host/CSS realization may satisfy the relation directly; otherwise reuse one current positioning lease, batch updates, and invalidate stale writes when either paint target, fact, view or provider changes. Missing facts and infeasible visual collision bounds report unavailable rather than fabricating zeros or declaring clearance achieved.'
+      zh-CN: '对显式 opt-in visual-gap 连接，解析声明的 anchor/floating 绘制目标（包括 floating frame 内独立 Surface）的宿主签发、generation 绑定四边 footprint 事实。使用 effective edges 前，须将扩展绘制边界相对实际定位参考 border box 归一，绑定参考与绘制两侧 geometry revision；不支持投射时拒绝，不假设框重合。目标解析与像素运算留在宿主，不引入原型/页面测量或无界全局 observer 总线。原生宿主或 CSS 可直接实现关系，否则复用唯一当前 positioning lease 并批量更新；任一绘制目标、事实、view 或 provider 改变均使旧写入失效。事实缺失或视觉碰撞边界不可满足时报告 unavailable，不伪造零或宣称间距成立。'
 satisfies:
   contracts:
     - C-ANCHORED-POSITIONING-0001
@@ -22,6 +26,9 @@ sources:
   - path: packages/modules/positioning/src/caps.ts
   - path: packages/modules/positioning/src/web/floating-ui-host.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added definition-only opt-in paint-footprint visual separation with planned evidence; default border-box positioning remains unchanged.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added host-issued revocable input-origin associations while retaining collision, Portal, and stale-computation boundaries.
