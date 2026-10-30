@@ -1,6 +1,9 @@
 /** Independent source-bound real-browser evidence. No repository writes or shared server reuse. */
 import { createRequire } from 'node:module';
-import { createPageErrorDiagnostics } from './page-error-diagnostics.mjs';
+import {
+  createPageErrorDiagnostics,
+  createDocumentResponseDiagnostics,
+} from './page-error-diagnostics.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -57,6 +60,14 @@ const pageErrors = createPageErrorDiagnostics({
   fail: (message) => report.failures.push(message),
 });
 report.pageErrors = pageErrors.report;
+const documentResponses = createDocumentResponseDiagnostics({
+  hash: sha256,
+  write: async (filename, bytes) => {
+    await writeFile(path.join(out, filename), bytes);
+    await artifact(filename, 'original-public-document-response');
+  },
+});
+report.documentResponses = documentResponses.report;
 await mkdir(out, { recursive: true });
 const save = () =>
   writeFile(path.join(out, 'toc-motion.json'), JSON.stringify(report, null, 2) + '\n');
@@ -580,8 +591,21 @@ async function makeContext(options = {}) {
   return context;
 }
 async function ready(page) {
-  await page.goto(report.baseUrl + route, { waitUntil: 'networkidle' });
-  await observeReady(page);
+  const response = await page.goto(report.baseUrl + route, { waitUntil: 'networkidle' });
+  // Start the original readiness gate immediately. Saving response bytes must
+  // never grant an extra diagnostic grace period before observing the product.
+  const readiness = observeReady(page);
+  const capture = documentResponses.retain(response, report.baseUrl + route, report.source);
+  const outcomes = await Promise.allSettled([readiness, capture]);
+  outcomes.push(...(await Promise.allSettled([save()])));
+  const failures = outcomes
+    .filter((outcome) => outcome.status === 'rejected')
+    .map((outcome) => outcome.reason);
+  if (failures.length === 1) throw failures[0];
+  if (failures.length)
+    throw new AggregateError(failures, 'Readiness and response diagnostic failures', {
+      cause: failures[0],
+    });
 }
 async function observeReady(page) {
   await page.waitForFunction(() => {
@@ -676,6 +700,10 @@ try {
   if (process.env.PROTO_UI_BROWSER_BASE_URL)
     throw Error('External/shared server override is refused; own preview only');
   report.source = readSourceBinding(expectedHead, root);
+  report.source.actualGitTree = execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {
+    cwd: root,
+    encoding: 'utf8',
+  }).trim();
   report.runner = {
     path: path.relative(root, fileURLToPath(import.meta.url)).startsWith('..')
       ? 'external/capture-toc-motion.mjs'

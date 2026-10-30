@@ -68,3 +68,95 @@ export function createPageErrorDiagnostics({ sanitize, fail, limit = 64, textLim
     },
   };
 }
+
+/** Retain only the original own public fixture response, never serialized live DOM. */
+export function createDocumentResponseDiagnostics({
+  hash,
+  write,
+  limit = 8,
+  byteLimit = 2_097_152,
+  readTimeoutMs = 1000,
+}) {
+  if (
+    !Number.isInteger(limit) ||
+    limit < 1 ||
+    !Number.isInteger(byteLimit) ||
+    byteLimit < 1 ||
+    !Number.isInteger(readTimeoutMs) ||
+    readTimeoutMs < 1
+  )
+    throw new Error('Invalid document response diagnostic bounds');
+  const report = { limit, byteLimit, readTimeoutMs, total: 0, dropped: 0, entries: [] };
+  return {
+    report,
+    async retain(response, expectedURL, source) {
+      report.total++;
+      if (report.entries.length >= limit) {
+        report.dropped++;
+        return;
+      }
+      const sequence = report.total;
+      const entry = {
+        sequence,
+        sourceHead: source?.actualGitHead,
+        sourceTree: source?.actualGitTree,
+        expectedHead: source?.expectedHead,
+      };
+      let timeout;
+      report.entries.push(entry);
+      try {
+        const expected = new URL(expectedURL);
+        if (
+          !['127.0.0.1', 'localhost', '[::1]'].includes(expected.hostname) ||
+          !['http:', 'https:'].includes(expected.protocol) ||
+          expected.username ||
+          expected.password ||
+          expected.pathname !== '/zh-cn/start-here/quick-start/' ||
+          expected.search ||
+          expected.hash
+        )
+          throw new Error('Not the own public quick-start fixture');
+        if (
+          !response ||
+          response.url() !== expectedURL ||
+          response.status() !== 200 ||
+          !response.request().isNavigationRequest() ||
+          response.request().method() !== 'GET' ||
+          response.request().resourceType() !== 'document' ||
+          !/^text\/html(?:;|$)/i.test(response.headers()['content-type'] ?? '')
+        )
+          throw new Error('Exact public document response admission failed');
+        if (
+          ![entry.sourceHead, entry.sourceTree, entry.expectedHead].every((value) =>
+            /^[0-9a-f]{40}$/.test(value ?? '')
+          ) ||
+          entry.sourceHead !== entry.expectedHead
+        )
+          throw new Error('Document response source binding failed');
+        entry.url = expectedURL;
+        entry.status = response.status();
+        const bytes = await Promise.race([
+          response.body(),
+          new Promise((_, reject) => {
+            timeout = setTimeout(
+              () => reject(new Error('Document response body exceeded diagnostic deadline')),
+              readTimeoutMs
+            );
+          }),
+        ]);
+        entry.bytes = bytes.length;
+        if (bytes.length > byteLimit) throw new Error('Document response exceeds byte cap');
+        entry.sha256 = hash(bytes);
+        entry.path = `original-document-${sequence}.html`;
+        await write(entry.path, bytes);
+        entry.saved = true;
+      } catch (error) {
+        entry.saved = false;
+        // Do not copy rejected page URLs, HTML or user input into the diagnostic.
+        entry.error = error instanceof Error ? error.message : 'Document response capture failed';
+      } finally {
+        clearTimeout(timeout);
+      }
+    },
+  };
+}
