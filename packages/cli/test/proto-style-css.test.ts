@@ -44,7 +44,6 @@ describe('proto style css renderer', () => {
       }
     }
   });
-
   it('retains the opaque source fallback when a menu or progress gradient is selected', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       for (const [token, color] of [
