@@ -312,6 +312,8 @@ export function collectPrototypeIds(node: DemoChild, out: Set<string>) {
 }
 
 export type DemoRenderOptions = {
+  /** Composition-owned opt-out for an automatic backdrop only; explicit stages remain enabled. */
+  automaticMaterialScene?: boolean;
   runtime: RuntimeId;
   demo: DemoSpec;
   host: HTMLElement;
