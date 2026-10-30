@@ -500,7 +500,13 @@ describe.sequential('Header public family presentation and labelled compact fiel
                   '[data-homepage-runtime] [data-projection-control="locale"] [role="combobox"]'
                 );
                 expect(await locale.count()).toBe(1);
-                expect(await locale.ariaSnapshot()).toContain('combobox "语言 简体中文"');
+                // The author name is stable; the selected value is a separate
+                // AX value/text node, never concatenated into the name.
+                expect(await locale.ariaSnapshot()).toBe(
+                  family === 'shadcn'
+                    ? '- combobox "语言": 简体中文'
+                    : '- combobox "语言":\n  - text: 简体中文\n  - img'
+                );
                 expect(await locale.evaluate((element) => element.localName)).not.toBe('a');
                 expect((await sample(locale)).height).toBeCloseTo(44, 0);
                 await capture(`${width}-shared-composition`);
