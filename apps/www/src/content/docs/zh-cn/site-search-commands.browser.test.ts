@@ -1461,55 +1461,114 @@ for (const width of [320, 390]) {
         await page.keyboard.press('Escape');
         // The root-font gate covers the actual public modal as well as its trigger.
         // A short viewport must not clip the editor/Close just because the result list shrinks.
-        const originalViewport = page.viewportSize();
-        if (!originalViewport) throw new Error('Expected explicit Search test viewport');
-        await page.setViewportSize({ width: originalViewport.width, height: 390 });
-        await header
-          .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
-          .click();
-        const panel = await searchPart(page, 'panel');
-        const editor = await searchInput(page);
-        const close = await searchPart(page, 'close');
-        await editor.waitFor({ state: 'visible' });
-        const [panelGeometry, editorGeometry, closeGeometry] = await Promise.all(
-          [panel, editor, close].map((part) =>
-            part.evaluate((node) => {
-              const box = node.getBoundingClientRect();
-              const center = document.elementFromPoint(
-                box.x + box.width / 2,
-                box.y + box.height / 2
-              );
-              return {
-                box: box.toJSON(),
-                ownsCenter: center === node || (!!center && node.contains(center)),
-              };
-            })
-          )
-        );
-        const modal = {
-          panel: panelGeometry,
-          editor: editorGeometry,
-          close: closeGeometry,
-          width: originalViewport.width,
-          height: 390,
-        };
-        await capture(page, id, 'root-font-short-modal');
-        await writeFile(
-          path.join(evidenceDirectory, `${id}-modal-rects.json`),
-          JSON.stringify({ source, family, width, modal }, null, 2)
-        );
-        for (const part of [modal.panel, modal.editor, modal.close]) {
-          expect(part.box.width).toBeGreaterThan(0);
-          expect(part.box.height).toBeGreaterThan(0);
-          expect(part.box.left).toBeGreaterThanOrEqual(-1);
-          expect(part.box.right).toBeLessThanOrEqual(modal.width + 1);
-          expect(part.box.top).toBeGreaterThanOrEqual(-1);
-          expect(part.box.bottom).toBeLessThanOrEqual(modal.height + 1);
+        for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+          const modalId = `${id}-${runtime}`;
+          if ((await page.locator('site-search').getAttribute('data-search-runtime')) !== runtime) {
+            await revealHeaderPreferences(page);
+            await select.click();
+            const optionsId = await select.getAttribute('aria-controls');
+            expect(optionsId).toBeTruthy();
+            await page
+              .locator(`[id=${JSON.stringify(optionsId)}]`)
+              .getByRole('option', { name: runtimeLabels[runtime], exact: true })
+              .click();
+          }
+          await page.waitForFunction((runtime) => {
+            const search = document.querySelector<HTMLElement>('site-search');
+            return (
+              search?.dataset.searchRuntime === runtime && search.dataset.searchView === 'ready'
+            );
+          }, runtime);
+          const originalViewport = page.viewportSize();
+          if (!originalViewport) throw new Error('Expected explicit Search test viewport');
+          await page.setViewportSize({ width: originalViewport.width, height: 390 });
+          await header
+            .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+            .click();
+          const panel = await searchPart(page, 'panel');
+          const editor = await searchInput(page);
+          const close = await searchPart(page, 'close');
+          const scrollBody = await searchPart(page, 'scroll-body');
+          const list = await searchPart(page, 'list');
+          const status = await searchPart(page, 'status');
+          expect(await scrollBody.evaluate((node) => getComputedStyle(node).overflowY)).toBe(
+            'auto'
+          );
+          expect(await list.evaluate((node) => getComputedStyle(node).overflowY)).toBe('auto');
+          expect(await list.evaluate((node) => getComputedStyle(node).maxHeight)).not.toBe('none');
+          await editor.waitFor({ state: 'visible' });
+          const [panelGeometry, editorGeometry, closeGeometry] = await Promise.all(
+            [panel, editor, close].map((part) =>
+              part.evaluate((node) => {
+                const box = node.getBoundingClientRect();
+                const center = document.elementFromPoint(
+                  box.x + box.width / 2,
+                  box.y + box.height / 2
+                );
+                return {
+                  box: box.toJSON(),
+                  ownsCenter: center === node || (!!center && node.contains(center)),
+                };
+              })
+            )
+          );
+          const modal = {
+            panel: panelGeometry,
+            editor: editorGeometry,
+            close: closeGeometry,
+            width: originalViewport.width,
+            height: 390,
+          };
+          await capture(page, modalId, 'root-font-short-modal');
+          await writeFile(
+            path.join(evidenceDirectory, `${modalId}-modal-rects.json`),
+            JSON.stringify({ source, family, runtime, width, modal }, null, 2)
+          );
+          for (const part of [modal.panel, modal.editor, modal.close]) {
+            expect(part.box.width).toBeGreaterThan(0);
+            expect(part.box.height).toBeGreaterThan(0);
+            expect(part.box.left).toBeGreaterThanOrEqual(-1);
+            expect(part.box.right).toBeLessThanOrEqual(modal.width + 1);
+            expect(part.box.top).toBeGreaterThanOrEqual(-1);
+            expect(part.box.bottom).toBeLessThanOrEqual(modal.height + 1);
+          }
+          expect(modal.editor.ownsCenter).toBe(true);
+          expect(modal.close.ownsCenter).toBe(true);
+          const statusText = await status.textContent();
+          expect(statusText?.trim()).toBeTruthy();
+          await status.evaluate((node) => node.scrollIntoView({ block: 'end' }));
+          const lastText = await status.evaluate((node) => {
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+            let last: Text | null = null;
+            for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+              if (text.textContent?.length) last = text as Text;
+            }
+            if (!last) throw new Error('Expected complete live status text');
+            const range = document.createRange();
+            range.setStart(last, last.length - 1);
+            range.setEnd(last, last.length);
+            return range.getBoundingClientRect().toJSON();
+          });
+          const bodyBox = await scrollBody.boundingBox();
+          expect(bodyBox).not.toBeNull();
+          if (!bodyBox) throw new Error('Expected visible Search scroll body');
+          expect(lastText.bottom).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 1);
+          expect(await status.textContent()).toBe(statusText);
+          await close.click();
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(false);
+          await header
+            .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+            .click();
+          const keyboardClose = await searchPart(page, 'close');
+          await keyboardClose.focus();
+          await page.keyboard.press('Enter');
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(false);
+          await page.setViewportSize(originalViewport);
         }
-        expect(modal.editor.ownsCenter).toBe(true);
-        expect(modal.close.ownsCenter).toBe(true);
-        await close.click();
-        await page.setViewportSize(originalViewport);
         // Keep all geometry assertions on the Button page above. Brutalist
         // Button has no authored section heading, so verify sticky offsets on
         // the same family's real Card contract section instead.
@@ -1585,6 +1644,182 @@ for (const width of [320, 390]) {
         expect(panelBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
         expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(1001);
         await capture(page, id, 'menu-and-heading');
+        expect(errors).toEqual([]);
+      } catch (error) {
+        await captureFailure(page);
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+}
+
+// Transport-only fixture: real page, Dialog/Command, adapters, keyboard and scroll.
+// This does not replace the separate generated Pagefind index acceptance.
+for (const family of ['shadcn', 'brutalist'] as const) {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`Search ${family}/${runtime} keeps nested scrollports and dismissal reachable at 200%`, async () => {
+      const context = await browser.newContext({
+        viewport: { width: 320, height: 390 },
+        hasTouch: true,
+      });
+      const page = await context.newPage();
+      const id = `search-scroll-${family}-${runtime}`;
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      stage(page, id, 'controlled-data-navigation');
+      await page.route('**/pagefind/pagefind.js', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'text/javascript',
+          body: `let failed = false;
+          export async function options() {}
+          export async function search(query) {
+            if (query === 'failure' && !failed) { failed = true; throw new Error('Controlled data failure'); }
+            if (query === 'loading') await new Promise(resolve => window.addEventListener('release-search-data', resolve, {once:true}));
+            if (query === 'empty' || query === 'failure' || query === 'loading') return {results:[]};
+            return {results:Array.from({length:20}, (_,i)=>({id:String(i),data:async()=>({url:'/docs/result-'+i,meta:{title:'Result '+i+' — documentation details'}})}))};
+          }`,
+        })
+      );
+      try {
+        expect(
+          (await page.goto(`${baseUrl}${searchRoute(family)}`, { waitUntil: 'networkidle' }))?.ok()
+        ).toBe(true);
+        const header = page.locator('[data-docs-site-header]');
+        const select = header.locator('[data-adapter-select] [data-site-select-trigger]').first();
+        await revealHeaderPreferences(page);
+        if ((await page.locator('site-search').getAttribute('data-search-runtime')) !== runtime) {
+          await select.click();
+          const optionsId = await select.getAttribute('aria-controls');
+          expect(optionsId).toBeTruthy();
+          await page
+            .locator(`[id=${JSON.stringify(optionsId)}]`)
+            .getByRole('option', { name: runtimeLabels[runtime], exact: true })
+            .click();
+        }
+        await page.waitForFunction((runtime) => {
+          const search = document.querySelector<HTMLElement>('site-search');
+          return search?.dataset.searchRuntime === runtime && search.dataset.searchView === 'ready';
+        }, runtime);
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = '200%';
+        });
+        await header
+          .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+          .click();
+        const editor = await searchInput(page);
+        const list = await searchPart(page, 'list');
+        const body = await searchPart(page, 'scroll-body');
+        const close = await searchPart(page, 'close');
+        const status = await searchPart(page, 'status');
+        const checkClose = async () => {
+          const geometry = await close.evaluate((node) => {
+            const box = node.getBoundingClientRect();
+            const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+            return { box: box.toJSON(), hit: hit === node || (!!hit && node.contains(hit)) };
+          });
+          expect(geometry.box.top).toBeGreaterThanOrEqual(-1);
+          expect(geometry.box.bottom).toBeLessThanOrEqual(391);
+          expect(geometry.box.left).toBeGreaterThanOrEqual(-1);
+          expect(geometry.box.right).toBeLessThanOrEqual(321);
+          expect(geometry.hit).toBe(true);
+          return geometry;
+        };
+        await editor.fill('many');
+        await expect.poll(() => list.getByRole('option').count()).toBe(20);
+        await editor.press('End');
+        const last = list.getByRole('option').last();
+        await expect.poll(() => last.getAttribute('aria-selected')).toBe('true');
+        const lastBox = await last.boundingBox();
+        const bodyBox = await body.boundingBox();
+        expect(lastBox).not.toBeNull();
+        expect(bodyBox).not.toBeNull();
+        if (!lastBox || !bodyBox) throw new Error('Expected last result inside live scroll body');
+        expect(lastBox.y).toBeGreaterThanOrEqual(bodyBox.y - 1);
+        expect(lastBox.y + lastBox.height).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 1);
+        await checkClose();
+        await editor.press('Home');
+        await expect
+          .poll(() => list.getByRole('option').first().getAttribute('aria-selected'))
+          .toBe('true');
+        const before = await Promise.all([
+          list.evaluate((n) => n.scrollTop),
+          body.evaluate((n) => n.scrollTop),
+        ]);
+        const touch = await context.newCDPSession(page);
+        try {
+          const box = await body.boundingBox();
+          if (!box || box.height < 20) throw new Error('Expected touch-scrollable body');
+          const x = box.x + box.width / 2,
+            y = box.y + box.height - 5;
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchStart',
+            touchPoints: [{ x, y }],
+          });
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x, y: box.y + 5 }],
+          });
+          await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+          await expect
+            .poll(async () => {
+              const after = await Promise.all([
+                list.evaluate((n) => n.scrollTop),
+                body.evaluate((n) => n.scrollTop),
+              ]);
+              return after.some((value, index) => value > before[index]!);
+            })
+            .toBe(true);
+        } finally {
+          await touch.detach();
+        }
+        await checkClose();
+        const phases: unknown[] = [];
+        for (const query of ['failure', 'loading', 'empty']) {
+          await editor.fill(query);
+          const expected =
+            query === 'failure'
+              ? '搜索暂不可用，请重试'
+              : query === 'loading'
+                ? '正在加载搜索…'
+                : '0 条匹配文档';
+          await expect.poll(() => status.textContent()).toBe(expected);
+          phases.push({
+            query,
+            renderedStatus: await status.textContent(),
+            close: await checkClose(),
+          });
+          if (query === 'failure') {
+            const retry = await searchPart(page, 'search-page-action');
+            await retry.scrollIntoViewIfNeeded();
+            await retry.click();
+            await expect.poll(() => status.textContent()).toBe('0 条匹配文档');
+          }
+          if (query === 'loading')
+            await page.evaluate(() => window.dispatchEvent(new Event('release-search-data')));
+        }
+        await capture(page, id, 'keyboard-touch-state-geometry');
+        await writeFile(
+          path.join(evidenceDirectory, `${id}-states.json`),
+          JSON.stringify(
+            {
+              source,
+              family,
+              runtime,
+              phases,
+              scope: 'controlled Pagefind data only; real native composition',
+            },
+            null,
+            2
+          )
+        );
+        await close.focus();
+        await page.keyboard.press('Enter');
+        await expect
+          .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+          .toBe(false);
         expect(errors).toEqual([]);
       } catch (error) {
         await captureFailure(page);

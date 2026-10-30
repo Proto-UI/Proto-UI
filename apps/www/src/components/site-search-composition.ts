@@ -53,7 +53,7 @@ export function createSiteSearchComposition(options: {
           children: [proto('input-shell', { ref: 'query-shell', props: style, children: [input] })],
         })
       : input;
-  const footer: DemoNode = {
+  const statusAndActions: DemoNode = {
     kind: 'box',
     tag: 'div',
     className: 'flex shrink-0 min-w-0 flex-wrap items-center gap-2 p-2',
@@ -75,6 +75,14 @@ export function createSiteSearchComposition(options: {
         },
         children: [],
       },
+    ],
+  };
+  const footer: DemoNode = {
+    kind: 'box',
+    ref: 'dismissal',
+    tag: 'div',
+    className: 'flex shrink-0 min-w-0 items-center justify-end p-2',
+    children: [
       proto('dialog-close', {
         ref: 'close',
         surfaceStyle: {
@@ -121,21 +129,33 @@ export function createSiteSearchComposition(options: {
               },
               children: [
                 editor,
-                proto('command-content', {
-                  props: style,
-                  surfaceStyle: { flex: '1 1 auto' },
+                {
+                  kind: 'box',
+                  tag: 'div',
+                  ref: 'scroll-body',
+                  // Error/loading text and actions may wrap at enlarged text sizes.
+                  // This middle region contains status/actions overflow; the family list
+                  // retains its own scrolling limit. Dismissal remains outside both.
+                  className: 'min-h-0 min-w-0 flex-1 overflow-y-auto',
                   children: [
-                    {
-                      kind: 'box',
-                      tag: 'div',
-                      ref: 'results',
-                      dynamicChildren: {
-                        prototypeIds: [`${family}-command-item`, `${family}-command-empty`],
-                      },
-                      children: [],
-                    },
+                    proto('command-content', {
+                      props: style,
+                      ref: 'list',
+                      children: [
+                        {
+                          kind: 'box',
+                          tag: 'div',
+                          ref: 'results',
+                          dynamicChildren: {
+                            prototypeIds: [`${family}-command-item`, `${family}-command-empty`],
+                          },
+                          children: [],
+                        },
+                      ],
+                    }),
+                    statusAndActions,
                   ],
-                }),
+                },
                 footer,
               ],
             }),

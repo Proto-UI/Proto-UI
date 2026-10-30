@@ -66,6 +66,14 @@ describe('public Search composition, actual prototype loaders and four hosts', (
       it(`${runtime}/${family}: latest prepared query, stable editor, async rows, close and reopen`, async () => {
         const searched: string[] = [];
         const navigate = vi.fn();
+        const longError = 'Search is temporarily unavailable; retain all explanatory text. '.repeat(
+          8
+        );
+        const longRetry = 'Retry the complete documentation search';
+        const longLoading = 'Loading the complete documentation search, please wait. '.repeat(6);
+        let firstFailure = true;
+        let retryBarrier: Promise<void> | undefined;
+        let releaseRetry: (() => void) | undefined;
         let reopenBarrier: Promise<void> | undefined;
         let releaseReopen: (() => void) | undefined;
         const session = createSiteSearchSession({
@@ -75,6 +83,14 @@ describe('public Search composition, actual prototype loaders and four hosts', (
             search: async (query) => {
               searched.push(query);
               if (reopenBarrier) await reopenBarrier;
+              if (query === 'failed-query') {
+                if (firstFailure) {
+                  firstFailure = false;
+                  throw new Error('Controlled transport failure');
+                }
+                if (retryBarrier) await retryBarrier;
+                return { results: [] };
+              }
               if (query === 'unmatched-query') return { results: [] };
               return {
                 results: Array.from({ length: 23 }, (_, i) => ({
@@ -95,7 +111,7 @@ describe('public Search composition, actual prototype loaders and four hosts', (
           family,
           shadcnStyle: 'rhea',
           session,
-          copy,
+          copy: { ...copy, error: longError, retry: longRetry, loading: longLoading },
           isCurrent: () => active,
           onFailure: (error) => errors.push(error),
         });
@@ -127,9 +143,46 @@ describe('public Search composition, actual prototype loaders and four hosts', (
           expect(context.refs.results.textContent).toContain('prepared-latest 19');
           expect(editor().value).toBe('prepared-latest');
         });
+        const scrollBody = context.refs['scroll-body'];
+        const dismissal = context.refs.dismissal;
+        expect(scrollBody.contains(context.refs.results)).toBe(true);
+        expect(scrollBody.contains(context.refs.status)).toBe(true);
+        expect(scrollBody.contains(context.refs.actions)).toBe(true);
+        expect(scrollBody.contains(context.refs.close)).toBe(false);
+        expect(dismissal.contains(context.refs.close)).toBe(true);
+        expect(scrollBody.parentElement).toBe(dismissal.parentElement);
+        expect(context.refs.status.getAttribute('role')).toBe('status');
+        expect(context.refs.status.getAttribute('aria-live')).toBe('polite');
         const input = editor();
         const instance = context.api.getPublicInstance!('query');
         expect(searched).toEqual(['prepared-latest']);
+        context.api.call('command', 'setInputValue', 'failed-query', false);
+        await vi.waitFor(() => {
+          expect(session.read().snapshot.phase).toBe('error');
+          expect(context.refs.status.textContent).toBe(longError);
+          expect(context.refs.actions.textContent).toBe(longRetry);
+          expect(context.refs['search-page-action']).toBeDefined();
+        });
+        expect(scrollBody.contains(context.refs['search-page-action'])).toBe(true);
+        expect(dismissal.contains(context.refs.close)).toBe(true);
+        retryBarrier = new Promise<void>((resolve) => {
+          releaseRetry = resolve;
+        });
+        context.refs['search-page-action'].click();
+        await vi.waitFor(() => {
+          expect(context.refs.actions.textContent).toBe(longLoading);
+          expect(dismissal.contains(context.refs.close)).toBe(true);
+        });
+        releaseRetry!();
+        await vi.waitFor(() => {
+          expect(session.read().snapshot.phase).toBe('empty');
+          expect(context.refs.results.textContent).toBe('No results');
+          expect(context.refs.status.textContent).toBe('0 documents');
+          expect(context.refs.actions.textContent).toBe('');
+        });
+        expect(editor()).toBe(input);
+        expect(context.api.getPublicInstance!('query')).toBe(instance);
+
         context.api.call('command', 'setInputValue', 'unmatched-query', false);
         await vi.waitFor(() => expect(context.refs.results.textContent).toBe('No results'));
         expect(editor()).toBe(input);
