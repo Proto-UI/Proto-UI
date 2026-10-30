@@ -25,19 +25,18 @@ describe('collectProtoStyleTokens', () => {
       'data-[checked]:bg-primary',
       'data-[checked]:border-primary',
       'data-[checked]:text-primary-foreground',
-      'dark:data-[checked]:bg-primary',
       'data-[focus-visible]:border-ring',
       'data-[focus-visible]:ring-3',
       'data-[focus-visible]:ring-ring/50',
       'data-[disabled]:cursor-not-allowed',
       'data-[disabled]:opacity-50',
-      'dark:bg-input/30',
+      'dark:not-[data-checked]:bg-input/30',
     ]) {
       expect(tokens).toContain(token);
     }
-    for (const legacy of ['gap-3', 'shadow-xs', 'text-primary', 'transition-[color,box-shadow]']) {
-      expect(tokens).not.toContain(legacy);
-    }
+    // The multi-profile source guards the dark unfilled tint with not-checked
+    // instead of painting a dark checked primary surface.
+    expect(tokens).not.toContain('dark:data-[checked]:bg-primary');
   });
 
   let dir: string;
@@ -49,6 +48,20 @@ describe('collectProtoStyleTokens', () => {
   afterEach(async () => {
     await rm(dir, { recursive: true, force: true });
   });
+
+  it.each(['', ' as const', ' as const satisfies Readonly<Record<string, string>>'])(
+    'collects finite string-map choices through erased type syntax %s',
+    async (annotation) => {
+      await writeFile(path.join(dir, 'paint.ts'), `
+        import { tw } from '@proto.ui/core';
+        const masks = { rest: 'bg-black/50', dark: 'bg-black/80' }${annotation};
+        export function paint() {
+          for (const profile of ['rest', 'dark'] as const) tw(masks[profile]);
+        }
+      `);
+      expect(await collectProtoStyleTokens(dir)).toEqual(['bg-black/50', 'bg-black/80']);
+    }
+  );
 
   it('separates Root feedback style tokens from Template-node style tokens', async () => {
     await writeFile(

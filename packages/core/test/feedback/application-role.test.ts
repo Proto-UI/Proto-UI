@@ -54,6 +54,10 @@ describe('feedback style application-role classification v0', () => {
     'w-full',
     'min-h-28',
     'size-5',
+    'float-right',
+    'align-top',
+    'align-middle',
+    'align-bottom',
   ])('classifies %s as a canonical placement token', (token) => {
     expect(classifyTwTokenApplicationRoleV0(token)).toEqual({
       token,
@@ -62,16 +66,24 @@ describe('feedback style application-role classification v0', () => {
     });
   });
 
-  it.each(['flex', 'inline-flex', 'grid', 'inline-grid', 'block', 'inline-block'])(
-    'classifies %s as a canonical composite token',
-    (token) => {
-      expect(classifyTwTokenApplicationRoleV0(token)).toEqual({
-        token,
-        role: 'composite',
-        roleSource: 'canonical',
-      });
-    }
-  );
+  it.each([
+    'flex',
+    'inline-flex',
+    'grid',
+    'inline-grid',
+    'block',
+    'inline-block',
+    'table',
+    'table-row',
+    'table-cell',
+    'table-caption',
+  ])('classifies %s as a canonical composite token', (token) => {
+    expect(classifyTwTokenApplicationRoleV0(token)).toEqual({
+      token,
+      role: 'composite',
+      roleSource: 'canonical',
+    });
+  });
 
   it.each([
     'invisible',
@@ -107,6 +119,29 @@ describe('feedback style application-role classification v0', () => {
       roleSource: 'fallback',
     });
   });
+});
+
+it('admits only the source-bound fractional and affine Root geometry additions', () => {
+  for (const token of [
+    'translate-x-0.25',
+    'translate-x-[calc(100%_+_2px)]',
+    'translate-x-[calc(100%_-_8px)]',
+  ]) {
+    expect(classifyTwTokenApplicationRoleV0(token)).toEqual({
+      token,
+      role: 'root-geometry',
+      roleSource: 'canonical',
+    });
+  }
+  for (const token of [
+    'translate-x-0.5',
+    '-translate-x-0.25',
+    'translate-y-0.25',
+    'translate-x-[calc(100%_+_3px)]',
+    'translate-y-[calc(100%_-_8px)]',
+  ]) {
+    expect(classifyTwTokenApplicationRoleV0(token).role).toBe('unresolved');
+  }
 });
 
 it('admits only the exact font-relative resident spacing token, independently of component identity', () => {

@@ -6,8 +6,10 @@ import {
 } from '@proto.ui/prototypes-base/autocomplete';
 export default definePrototype<AutocompleteRootProps, AutocompleteRootExposes>({
   name: 'bootstrap-2-3-2-autocomplete-root',
+  modules: asAutocompleteRoot.modules,
   setup(def) {
     const behavior = asAutocompleteRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md flex-wrap gap-2'));
+    def.feedback.style.use(tw('relative inline-flex min-w-0 items-start'));
+    return behavior.render;
   },
 });

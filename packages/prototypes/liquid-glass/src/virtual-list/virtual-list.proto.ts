@@ -6,7 +6,7 @@ import type {
   VirtualListContentProps,
   VirtualListContentExposes,
 } from '@proto.ui/prototypes-base/virtual-list';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asVirtualListRoot,
   asVirtualListViewport,
@@ -19,28 +19,9 @@ export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualList
     const behavior = asVirtualListRoot();
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-secondary shadow-lg grid gap-0'
+        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-background grid gap-0'
       )
     );
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });
@@ -52,19 +33,15 @@ export const virtualListViewport = definePrototype<
   name: 'liquid-glass-virtual-list-viewport',
   setup(def) {
     const behavior = asVirtualListViewport();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground min-h-0 overflow-auto'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground min-h-0'));
+    const states = behavior.getAsHookHandle?.('as-scroll-area-viewport')?.stateHandles;
+    if (!states)
+      throw new Error('[liquid-glass-virtual-list] Required viewport focus state is unavailable.');
+    def.rule({
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
     return behavior.render;
   },
 });
@@ -77,18 +54,6 @@ export const virtualListContent = definePrototype<
   setup(def) {
     const behavior = asVirtualListContent();
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground relative'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });

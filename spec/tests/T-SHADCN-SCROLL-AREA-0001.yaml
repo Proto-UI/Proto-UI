@@ -4,10 +4,7 @@ title: shadcn Scroll Area inheritance, fallback, package, geometry, and rendered
 status: draft
 lifecycleRationale: This execution map accompanies the draft Shadcn four-part slice. Direct fallback, package, geometry and browser tests are technical evidence for independent review, not activation of the mapped prototypes.
 since: 0.3.0-alpha.0
-summary: >-
-  Covers exact package and CLI surfaces, complete visual tokens, a fallible composed preference, direct unsupported-composed fallback evidence, two-axis host behavior, passive controls, lifecycle teardown, and real cross-runtime geometry.
-
-
+summary: "Covers four-part API boundaries, independently mapped package/CLI checks, retained New York paint, a fallible composed preference, unsupported-composed fallback, two-axis host behavior, passive controls, teardown and separately mapped real cross-runtime geometry. The modified module consumer remains unrun."
 cases:
   - id: T-SHADCN-SCROLL-AREA-0001-CASE-CORNER
     title: Rendered tracks reserve a continuous unpainted lower-right intersection with no second control
@@ -15,7 +12,7 @@ cases:
       - P-SHADCN-SCROLL-AREA-SCROLLBAR-CORNER
     expectation: measured-inset-keeps-controls-out-of-unpainted-corner-across-four-web-runtimes
   - id: T-SHADCN-SCROLL-AREA-0001-CASE-PUBLIC-SURFACE
-    title: The package and CLI expose exactly Root Viewport Scrollbar and Thumb
+    title: Portable four-part APIs reject unsupported host-specific props while package and CLI checks retain their own coverage
     covers:
       - P-SHADCN-SCROLL-AREA-UPSTREAM-IDENTITY
       - P-SHADCN-SCROLL-AREA-DIRECT-ENTRY
@@ -24,9 +21,9 @@ cases:
       - P-SHADCN-SCROLL-AREA-VIEWPORT-DIRECT-ENTRY
       - P-SHADCN-SCROLL-AREA-SCROLLBAR-DIRECT-ENTRY
       - P-SHADCN-SCROLL-AREA-THUMB-DIRECT-ENTRY
-    expectation: shadcn-scroll-area-exports-only-the-portable-four-part-family
+    expectation: portable-four-part-props-and-independent-package-cli-surfaces-without-an-exhaustive-module-export-snapshot
   - id: T-SHADCN-SCROLL-AREA-0001-CASE-SURFACES
-    title: Root Viewport Scrollbar orientations and Thumb project every governed token
+    title: New York Viewport inherits radius and oriented tracks retain inward borders with a borderless passive Thumb
     covers:
       - P-SHADCN-SCROLL-AREA-CURRENT-VISUAL-SURFACE
       - P-SHADCN-SCROLL-AREA-VIEWPORT-CURRENT-VISUAL-SURFACE
@@ -79,7 +76,7 @@ implementations:
       - Dedicated real-browser geometry, transparent corner absence, strict hit-testing, pointer drag, hidden-track zero-paint clipping, fractional resize, overflow and focus coverage across Web Components, React, Vue and Vue 2. Execution remains pending until the exact candidate CI run.
   - id: prototypes-shadcn-scroll-area-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/shadcn/test/scroll-area.test.ts
     required: true
     consumesCases:
@@ -87,6 +84,9 @@ implementations:
       - T-SHADCN-SCROLL-AREA-0001-CASE-SURFACES
       - T-SHADCN-SCROLL-AREA-0001-CASE-COMPOSED-PREFERENCE
       - T-SHADCN-SCROLL-AREA-0001-CASE-HOST-BEHAVIOR
+    notes:
+      - The repaired consumer retains unsupported-prop type checks, real host behavior and lifecycle assertions; an incidental exhaustive module-export snapshot is not evidence for this implementation. CLI and package type checks remain independently mapped.
+      - New York paint follows the existing f31ed819 baseline and retained 3d98900e comparison with inherited Viewport radius, left/top track borders and no Thumb border. Exact-source execution and native forced-color acceptance remain pending.
     exercises: &scroll-area-prototypes
       - P-BASE-SCROLL-AREA
       - P-BASE-SCROLL-AREA-VIEWPORT
@@ -112,10 +112,12 @@ implementations:
     exercises: *scroll-area-prototypes
   - id: www-shadcn-scroll-area-browser
     kind: adapter-test
-    status: passing
+    status: planned
     path: apps/www/src/content/docs/zh-cn/demo-shadcn-scroll-area.browser.test.ts
     required: true
     consumesCases: [T-SHADCN-SCROLL-AREA-0001-CASE-BROWSER]
+    notes:
+      - Current inherited Viewport radius, inward track borders and borderless Thumb require exact-source native geometry and visibility evidence; earlier execution is not acceptance of this paint revision.
     exercises: *scroll-area-prototypes
 verifies:
   prototypes:

@@ -130,6 +130,11 @@ export class RuleModuleImpl<Props extends PropsBaseType> {
 
   onInstancePhase(phase: InstancePhase): void {
     this.instancePhase = phase;
+    // Instance disposal tears the decoration registry down before the
+    // 'unmounted' proto phase stops this driver. A late watched-state write in
+    // that window would evaluate into a disposed registry, so the driver goes
+    // idle as soon as the instance turns terminal.
+    if (phase === 'disposing' || phase === 'disposed') this.stopDriver();
   }
 
   onProtoPhase(phase: 'setup' | 'mounted' | 'updated' | 'unmounted'): void {

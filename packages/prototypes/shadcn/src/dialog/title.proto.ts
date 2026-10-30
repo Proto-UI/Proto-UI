@@ -1,6 +1,8 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import { asDialogTitle } from '@proto.ui/prototypes-base/dialog';
 import type { ShadcnDialogTitleExposes, ShadcnDialogTitleProps } from './types';
+import { setupOverlayPaint } from './style';
+import { DIALOG_TITLE } from './recipes';
 
 const dialogTitle = definePrototype<ShadcnDialogTitleProps, ShadcnDialogTitleExposes>({
   name: 'shadcn-dialog-title',
@@ -8,7 +10,7 @@ const dialogTitle = definePrototype<ShadcnDialogTitleProps, ShadcnDialogTitleExp
     // P-SHADCN-DIALOG-TITLE-BASE-INHERITANCE,
     // P-SHADCN-DIALOG-TITLE-CURRENT-VISUAL-SURFACE
     asDialogTitle();
-    def.feedback.style.use(tw('text-lg font-semibold leading-none tracking-tight'));
+    setupOverlayPaint(def, DIALOG_TITLE);
   },
 });
 

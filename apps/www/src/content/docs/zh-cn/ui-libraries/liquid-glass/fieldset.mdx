@@ -42,10 +42,10 @@ Base 与四个视觉 family 共享语义 atoms。synthetic WebComponent 测试�
 
 ## Family 外观
 
-- Root: 圆角边框内边距分组，gap-3；声明 version-2 in-app-backdrop 材质、style fallback 与 liquid-glass 意图。材质意图不证明光学绘制。
+- Root: 普通圆角边框内边距内容分组，gap-3；不声明 material slot 或 candidate，disabled 时也不隐式请求玻璃。
 - Legend: 半粗体正文尺寸被动 legend。
 - Description: 小号弱化色被动 description。
 
 这些是 draft 外观标准，不是像素一致性声明。
 
-光学绘制、对比度与降低透明度 fallback 仍需原生证据。材质声明本身不建立这些保证，也不声称 Apple 视觉一致。
+Fieldset 保持普通内容；功能子项保留各自既有的呈现与材质策略，不增加外层材质 owner。普通绘制与对比度仍需原生证据，不声称 Apple 视觉一致。[Apple 材质指南](https://developer.apple.com/design/human-interface-guidelines/materials) 区分功能/导航玻璃与内容层；家族名称不意味着所有分组都是玻璃表面。

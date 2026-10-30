@@ -9,7 +9,8 @@ import type {
   CheckboxGroupItemProps,
   CheckboxGroupItemExposes,
 } from '@proto.ui/prototypes-base/checkbox-group';
-// Passive glyph grammar from the shared Checkbox decorative SVG grammar; no separate Liquid Checkbox exists in this snapshot.
+// Passive glyph grammar shared with Checkbox decoration; the standalone Liquid
+// Checkbox is a separate owner and is not composed for this Group's paint.
 // No interaction/context/focus owner; checked and mixed remain solely the Group's state.
 export function checkboxGroupGlyph(
   def: DefHandle<CheckboxGroupItemProps, CheckboxGroupItemExposes>,

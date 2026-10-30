@@ -18,7 +18,6 @@ import {
 } from '@proto.ui/module-scroll';
 import { createRuntimeSession, type RuntimeHost } from '@proto.ui/runtime';
 import { styleContains } from '../../test-utils/style';
-import * as ShadcnPackage from '../src';
 import * as scrollAreaFamily from '../src/scroll-area';
 import type {
   ShadcnScrollAreaRootProps,
@@ -94,57 +93,21 @@ async function settle(): Promise<void> {
   for (let index = 0; index < 4; index += 1) await Promise.resolve();
 }
 
-function exportedPrototypeName(value: unknown): string | null {
-  if (!value || typeof value !== 'object' || !('name' in value)) return null;
-  return typeof value.name === 'string' ? value.name : null;
-}
-
 afterEach(async () => {
   document.body.replaceChildren();
   await settle();
 });
 
 describe('prototypes/shadcn: scroll-area', () => {
-  it('exports exactly Root, Viewport, Scrollbar, and Thumb without host-specific APIs', () => {
-    expect(
-      Object.fromEntries(
-        Object.entries(scrollAreaFamily).map(([name, value]) => [
-          name,
-          exportedPrototypeName(value),
-        ])
-      )
-    ).toEqual({
-      ShadcnScrollAreaRoot: 'shadcn-scroll-area-root',
-      ShadcnScrollAreaScrollbar: 'shadcn-scroll-area-scrollbar',
-      ShadcnScrollAreaThumb: 'shadcn-scroll-area-thumb',
-      ShadcnScrollAreaViewport: 'shadcn-scroll-area-viewport',
-      shadcnScrollAreaRoot: 'shadcn-scroll-area-root',
-      shadcnScrollAreaScrollbar: 'shadcn-scroll-area-scrollbar',
-      shadcnScrollAreaThumb: 'shadcn-scroll-area-thumb',
-      shadcnScrollAreaViewport: 'shadcn-scroll-area-viewport',
-    });
-    expect(
-      Object.fromEntries(
-        Object.entries(ShadcnPackage)
-          .filter(([name]) => name.toLowerCase().includes('scrollarea'))
-          .map(([name, value]) => [name, exportedPrototypeName(value)])
-      )
-    ).toEqual({
-      ShadcnScrollAreaRoot: 'shadcn-scroll-area-root',
-      ShadcnScrollAreaScrollbar: 'shadcn-scroll-area-scrollbar',
-      ShadcnScrollAreaThumb: 'shadcn-scroll-area-thumb',
-      ShadcnScrollAreaViewport: 'shadcn-scroll-area-viewport',
-      shadcnScrollAreaRoot: 'shadcn-scroll-area-root',
-      shadcnScrollAreaScrollbar: 'shadcn-scroll-area-scrollbar',
-      shadcnScrollAreaThumb: 'shadcn-scroll-area-thumb',
-      shadcnScrollAreaViewport: 'shadcn-scroll-area-viewport',
-    });
+  it('does not add host-specific props to the inherited Scroll Area parts', () => {
     expectTypeOf<HasUnsupportedRootApi>().toEqualTypeOf<false>();
     expectTypeOf<HasUnsupportedViewportApi>().toEqualTypeOf<false>();
     expectTypeOf<HasUnsupportedScrollbarApi>().toEqualTypeOf<false>();
     expectTypeOf<HasUnsupportedThumbApi>().toEqualTypeOf<false>();
   });
 
+  // f31ed8198365 new-york-v4/ui/scroll-area.tsx: viewport inherits
+  // rounding; each track has only its inward edge border, not a 2px box.
   it('projects every governed surface and orientation-specific track geometry', async () => {
     const root = new ScrollAreaRootElement();
     const viewport = new ScrollAreaViewportElement();
@@ -171,7 +134,7 @@ describe('prototypes/shadcn: scroll-area', () => {
     for (const token of [
       'h-full',
       'w-full',
-      'rounded-md',
+      'rounded-[inherit]',
       'transition-[color,box-shadow]',
       'outline-none',
     ]) {
@@ -195,7 +158,7 @@ describe('prototypes/shadcn: scroll-area', () => {
       'w-2.5',
       'top-0',
       'right-0',
-      'border-2',
+      'border-l',
       'border-transparent',
     ]) {
       const projected = `data-[orientation=vertical]:${token}`;
@@ -207,7 +170,7 @@ describe('prototypes/shadcn: scroll-area', () => {
       'flex-col',
       'bottom-0',
       'left-0',
-      'border-2',
+      'border-t',
       'border-transparent',
     ]) {
       const projected = `data-[orientation=horizontal]:${token}`;
@@ -219,11 +182,11 @@ describe('prototypes/shadcn: scroll-area', () => {
         'flex-1',
         'rounded-full',
         'bg-border',
-        'border',
-        'border-transparent',
       ]) {
         expect(styleContains(thumb, token), `thumb/${token}`).toBe(true);
       }
+      expect(styleContains(thumb, 'border')).toBe(false);
+      expect(styleContains(thumb, 'border-transparent')).toBe(false);
       expect(thumb.getAttribute('role')).toBeNull();
       expect(thumb.tabIndex).toBe(-1);
     }

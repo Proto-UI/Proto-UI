@@ -11,7 +11,7 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
     const behavior = asToastRoot();
     def.feedback.style.use(
       tw(
-        'rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md p-2 grid gap-2 min-w-0 w-full p-4'
+        'rounded-2xl border border-border bg-secondary text-secondary-foreground shadow-md grid gap-2 min-w-0 w-full p-4'
       )
     );
     def.feedback.material.declare({
@@ -20,6 +20,10 @@ export default definePrototype<ToastRootProps, ToastRootExposes>({
       source: { kind: 'in-app-backdrop' },
       fallback: { fill: 'style', foreground: 'style' },
     });
-    def.feedback.material.use({ intent: 'liquid-glass' });
+    def.rule({
+      when: (w) => w.state(behavior.getState!('open')!).eq(true),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass' }),
+    });
+    return behavior.render;
   },
 });

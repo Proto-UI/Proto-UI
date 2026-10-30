@@ -2,6 +2,117 @@ import { describe, it, expect } from 'vitest';
 import { mergeTwTokensV0 } from '../../src/spec/feedback/semantic-merge';
 
 describe('feedback.semantic-merge.v0', () => {
+  it('replaces signed layout spacing and scroll padding without merging scroll margins', () => {
+    expect(mergeTwTokensV0([
+      'mx-2', 'mb-1', 'scroll-my-1', 'scroll-py-1', '-mx-4', '-mb-4', 'scroll-py-1.5',
+    ]).tokens).toEqual(['-mx-4', '-mb-4', 'scroll-my-1', 'scroll-py-1.5']);
+    expect(mergeTwTokensV0(['-mx-4', 'mx-2', '-mb-4', 'mb-1']).tokens).toEqual(['mx-2', 'mb-1']);
+  });
+
+  it('keeps explicit linear timing separate from the transition-property recipe', () => {
+    expect(mergeTwTokensV0(['ease-in-out', 'transition-shadow', 'ease-linear']).tokens)
+      .toEqual(['ease-linear', 'transition-shadow']);
+    expect(mergeTwTokensV0(['ease-linear', 'ease-in-out']).tokens).toEqual(['ease-in-out']);
+  });
+
+  it('preserves border width and balanced text when source colors are replaced', () => {
+    expect(
+      mergeTwTokensV0([
+        'border',
+        'border-[3px]',
+        'border-[#ccc]',
+        'border-[#953b39]',
+        'text-balance',
+        'text-sm',
+        'text-[#333]',
+        'text-[#08c]',
+      ]).tokens
+    ).toEqual(['border-[3px]', 'border-[#953b39]', 'text-balance', 'text-sm', 'text-[#08c]']);
+  });
+
+  it('replaces finite placement and weight without losing font family or focus color', () => {
+    expect(
+      mergeTwTokensV0([
+        'box-border',
+        'float-left',
+        'font-sans',
+        'font-bold',
+        'z-50',
+        'ring-primary',
+        'box-content',
+        'float-right',
+        'font-[100]',
+        'z-[1051]',
+      ]).tokens
+    ).toEqual([
+      'box-content',
+      'float-right',
+      'font-sans',
+      'font-[100]',
+      'z-[1051]',
+      'ring-primary',
+    ]);
+  });
+
+  it('keeps table layout independent of border paint and resolves cell alignment separately', () => {
+    expect(
+      mergeTwTokensV0([
+        'block',
+        'table',
+        'border-collapse',
+        'border-spacing-0',
+        'border-y',
+        'border-border',
+        'border-b-input',
+        'border-b-ring',
+        'align-top',
+        'align-middle',
+      ]).tokens
+    ).toEqual([
+      'table',
+      'border-collapse',
+      'border-spacing-0',
+      'border-y',
+      'border-border',
+      'border-b-ring',
+      'align-middle',
+    ]);
+    expect(mergeTwTokensV0(['table-cell', 'table-caption', 'caption-bottom']).tokens).toEqual([
+      'table-caption',
+      'caption-bottom',
+    ]);
+  });
+
+  it('replaces one endpoint radius without erasing the opposite endpoint or whole-box base', () => {
+    expect(
+      mergeTwTokensV0(['rounded-none', 'rounded-l-md', 'rounded-r-md', 'rounded-l-lg']).tokens
+    ).toEqual(['rounded-none', 'rounded-l-lg', 'rounded-r-md']);
+    expect(
+      mergeTwTokensV0(['rounded-t-[4px]', 'rounded-b-[6px]', 'rounded-t-[3px]']).tokens
+    ).toEqual(['rounded-t-[3px]', 'rounded-b-[6px]']);
+  });
+
+  it('replaces literal foreground and tracking independently of font size and transition duration', () => {
+    expect(
+      mergeTwTokensV0([
+        'text-sm',
+        'text-[#08c]',
+        'text-[#005580]',
+        'tracking-wide',
+        'tracking-wider',
+        'transition-all',
+        'duration-100',
+        'transition-[color,border-color]',
+      ]).tokens
+    ).toEqual([
+      'text-sm',
+      'text-[#005580]',
+      'tracking-wider',
+      'transition-[color,border-color]',
+      'duration-100',
+    ]);
+  });
+
   it('merges finite sizing and resize choices independently without absorbing unknown tokens', () => {
     expect(
       mergeTwTokensV0(['resize-y', 'field-sizing-content', 'resize-none', 'field-sizing-fixed'])

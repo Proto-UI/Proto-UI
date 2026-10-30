@@ -32,6 +32,10 @@ export default {
       },
       {
         kind: 'proto',
+        prototypeId: 'bootstrap-2-3-2-tabs-indicator',
+      },
+      {
+        kind: 'proto',
         prototypeId: 'bootstrap-2-3-2-tabs-content',
         props: { value: 'account' },
         children: ['Make changes to your account here.'],

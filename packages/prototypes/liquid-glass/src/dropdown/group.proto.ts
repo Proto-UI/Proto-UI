@@ -3,6 +3,8 @@ import { asDropdownGroup, type DropdownGroupProps } from '@proto.ui/prototypes-b
 export default definePrototype<DropdownGroupProps>({
   name: 'liquid-glass-dropdown-group',
   setup(def) {
-    asDropdownGroup();
+    const behavior = asDropdownGroup();
+    def.feedback.style.use(tw('min-w-0 py-1 text-sm text-secondary-foreground'));
+    return behavior.render;
   },
 });

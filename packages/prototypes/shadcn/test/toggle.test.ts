@@ -8,6 +8,7 @@ import {
   FOCUS_SET_FOCUSABLE_CAP,
 } from '@proto.ui/module-focus';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
@@ -70,6 +71,10 @@ describe('prototypes/shadcn: toggle', () => {
         task();
       },
       onRuntimeReady(wiring) {
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, rootTarget],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
         wiring.attach('event', [
           [EVENT_ROOT_TARGET_CAP, () => rootTarget],
           [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],

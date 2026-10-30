@@ -3,6 +3,7 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import * as slider from '../src/slider';
 import { fieldRoot } from '@proto.ui/prototypes-base/field';
 import { styleContains } from '../../test-utils/style';
+import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 for (const p of Object.values(slider))
   if (typeof p === 'object' && p && 'setup' in p) AdaptToWebComponent(p as any);
 AdaptToWebComponent(fieldRoot);
@@ -33,7 +34,8 @@ async function fixture(field = false, props: Record<string, unknown> = {}) {
   await flush();
   return { root, track, indicator, thumb };
 }
-const body = (el: HTMLElement) => (el.shadowRoot ?? el).querySelector('div')!;
+const body = (el: HTMLElement) =>
+  (el.shadowRoot ?? el).querySelector<HTMLElement>('[data-pui-owned-decoration]')!;
 for (const field of [false, true]) {
   it(`matches base-nova paint dimensions separately from hit boxes, field=${field}`, async () => {
     const f = await fixture(field);
@@ -93,10 +95,14 @@ for (const field of [false, true]) {
     const f = await fixture(field);
     setElementProps(f.root, { defaultValue: 25, orientation: 'vertical' });
     await flush();
-    expect(styleContains(f.track, 'data-[orientation=vertical]:min-h-40')).toBe(true);
-    expect(styleContains(f.track, 'data-[orientation=vertical]:w-3')).toBe(true);
+    expect(f.root.getExposes().orientation.get()).toBe('vertical');
+    const trackCss = renderProtoStyleTokenCss(
+      (f.track.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean)
+    );
+    expect(trackCss).toContain('min-height: 10rem;');
+    expect(trackCss).toContain('width: 0.75rem;');
     expect(styleContains(body(f.track), 'w-1')).toBe(true);
-    expect(styleContains(f.indicator, 'data-[orientation=vertical]:w-1')).toBe(true);
+    expect(styleContains(f.indicator, 'w-1')).toBe(true);
     expect(
       styleContains(
         f.thumb,

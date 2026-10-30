@@ -7,8 +7,11 @@ import { setupSelectPaint } from './visual';
 export default definePrototype<ShadcnSelectSurfaceProps>({
   name: 'shadcn-select-surface',
   setup(def) {
-    asSelectSurface();
+    const inherited = asSelectSurface();
     const backdrop = setupSelectPaint(def);
-    return (r) => [r.decoration(backdrop), r.r.slot()];
+    return (r) => {
+      const body = inherited.render?.(r) ?? r.r.slot();
+      return [r.decoration(backdrop), ...(Array.isArray(body) ? body : [body])];
+    };
   },
 });

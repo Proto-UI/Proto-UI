@@ -29,6 +29,11 @@ criteria:
       en: Uses family-owned layout, wrapping, focus-visible, disabled and invalid presentation derived from
         canonical Base state. Invalidity includes a textual Error; color is never the only explanation. Native
         layout, text scaling and visual parity require source-bound browser evidence.
+  - id: P-SHADCN-FIELD-ALTERNATIVES
+    text:
+      en: The public fieldTextarea, fieldSelectTrigger and fieldSwitch entries compose their matching Base optional-Field hooks once and share standalone family paint. The canonical Field binding alone owns invalid, pending, policy and relationships; ordinary controls remain independent and no second editor or selection owner is introduced.
+    dependsOn:
+      contracts: [C-FIELD-TEXTAREA-0001, C-FIELD-SELECT-0001, C-FIELD-SWITCH-0001]
 inherits:
   prototypes:
     - P-BASE-FIELD
@@ -38,9 +43,14 @@ dependsOn:
 verifies:
   tests:
     - T-BASE-FIELD-0001
+    - T-SHADCN-EDITOR-PROFILES-0001
+    - T-SHADCN-SELECT-PROFILES-0001
 sources:
   - path: packages/prototypes/shadcn/src/field/root.proto.ts
   - path: packages/prototypes/shadcn/src/field/index.ts
+  - path: packages/prototypes/shadcn/src/field/textarea.proto.ts
+  - path: packages/prototypes/shadcn/src/field/select-trigger.proto.ts
+  - path: packages/prototypes/shadcn/src/field/switch.proto.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

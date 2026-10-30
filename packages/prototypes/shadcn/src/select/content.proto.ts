@@ -136,14 +136,15 @@ const selectContent = definePrototype<ShadcnSelectContentProps, ShadcnSelectCont
         ),
       intent: (i) => i.feedback.style.use(tw('slide-in-from-left-2')),
     });
-    // Rhea's translucent paint belongs to the existing public Surface owner.
+    // Every modern source recipe includes cn-menu-translucent. Its paint
+    // belongs to the existing public Surface owner, not a second popup owner.
     // Content performs alignment updates and cannot own a fixed decoration lease.
     let compositionCommitted = false;
     const validateComposition = () => {
       if (!compositionCommitted) return;
-      if (open.get() && style.get() === 'rhea' && !alignmentFull.get()) {
+      if (open.get() && style.get() !== 'new-york-v4' && !alignmentFull.get()) {
         throw new Error(
-          '[shadcn-select] Rhea requires the complete Select Surface/Viewport/ItemText composition.'
+          `[shadcn-select] ${style.get()} requires the complete Select Surface/Viewport/ItemText composition.`
         );
       }
     };

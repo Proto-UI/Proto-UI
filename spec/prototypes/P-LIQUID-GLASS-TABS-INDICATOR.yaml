@@ -1,0 +1,47 @@
+id: P-LIQUID-GLASS-TABS-INDICATOR
+type: prototype
+title: Liquid Glass Tabs Indicator passive projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+summary: Optional repeatable Indicator deriving facts only; List and selected Trigger own the visual signals.
+statement:
+  en: The Prototype invokes asTabsIndicator() once, retaining Base-derived value, activeValue and orientation.
+criteria:
+  - id: P-LIQUID-GLASS-TABS-INDICATOR-BASE
+    text:
+      en: Invoke asTabsIndicator() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
+  - id: P-LIQUID-GLASS-TABS-INDICATOR-VISUAL
+    text:
+      en: 'Explicitly semantic-only in this family: no paint, selection, focus, event or layout-measurement ownership is added. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+  - id: P-LIQUID-GLASS-TABS-INDICATOR-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
+  - id: P-LIQUID-GLASS-TABS-INDICATOR-BOUNDARY
+    text:
+      en: Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-INDICATOR
+verifies:
+  tests:
+    - T-LIQUID-GLASS-TABS-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/tabs/indicator.proto.ts
+  - path: packages/prototypes/liquid-glass/src/tabs/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Apple HIG Materials design reference only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Liquid Glass Tabs Indicator passive projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - liquid-glass
+  - tabs-indicator
+  - draft

@@ -1,0 +1,30 @@
+id: T-LIQUID-GLASS-SLIDER-VALUES-0001
+type: test
+title: Liquid Glass Slider Values family coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Indexed Values anatomy, controlled refusal, vetoable proposals and keyboard completion.
+cases:
+  - id: T-LIQUID-GLASS-SLIDER-VALUES-0001-CASE-ANATOMY
+    title: Six Values parts map indexed slots, reject duplicate/empty mapping and disabled/readOnly policy
+    covers:
+      - P-LIQUID-GLASS-SLIDER-VALUES-BASE
+    expectation: indexed-values-anatomy-and-refusal
+implementations:
+  - id: liquid-slider-values-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/slider-values-projection.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-SLIDER-VALUES
+      - P-LIQUID-GLASS-SLIDER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-SLIDER
+    - P-LIQUID-GLASS-SLIDER-VALUES

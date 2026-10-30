@@ -3,6 +3,20 @@ import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-ty
 type ValueRequest = { value: string; textValue: string; reason: string };
 const longLabel =
   'A translated option with enough detail to wrap safely · 選択肢の説明 · VeryLongUnbrokenOptionLabelsMustRemainReadableAtTwoHundredPercentTextSize';
+function item(value: string, textValue: string, disabled = false): DemoNode {
+  return {
+    kind: 'proto',
+    prototypeId: 'liquid-glass-select-item',
+    props: { value, textValue, disabled },
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: 'liquid-glass-select-item-text',
+        children: [textValue],
+      },
+    ],
+  };
+}
 function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
   return {
     kind: 'proto',
@@ -30,27 +44,44 @@ function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
         children: [
           {
             kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'alpha', textValue: 'Alpha' },
-            children: ['Alpha'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'beta', textValue: 'Beta' },
-            children: ['Beta'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'disabled', textValue: 'Unavailable option', disabled: true },
-            children: ['Unavailable option'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'long', textValue: longLabel },
-            children: [longLabel],
+            prototypeId: 'liquid-glass-select-surface',
+            ref: `${ref}Surface`,
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'liquid-glass-select-viewport',
+                ref: `${ref}Viewport`,
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-select-group',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-select-label',
+                        children: ['Available options'],
+                      },
+                      item('alpha', 'Alpha'),
+                      item('beta', 'Beta'),
+                    ],
+                  },
+                  { kind: 'proto', prototypeId: 'liquid-glass-select-separator' },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-select-group',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-select-label',
+                        children: ['Additional options'],
+                      },
+                      item('disabled', 'Unavailable option', true),
+                      item('long', longLabel),
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },

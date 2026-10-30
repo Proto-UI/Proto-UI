@@ -75,3 +75,19 @@ export * from './data-table';
 export * from './dropdown';
 
 export * from './tabs';
+
+export * from './async-region';
+export * from './live-region';
+export * from './image';
+export * from './table';
+export * from './transition';
+export * from './dialog';
+export * from './hover-card';
+export * from './tooltip';
+export * from './checkbox';
+export * from './switch';
+export * from './radio-group';
+export * from './input';
+export * from './textarea';
+export * from './separator';
+export * from './scroll-area';

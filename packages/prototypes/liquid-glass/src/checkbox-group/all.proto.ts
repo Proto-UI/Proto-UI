@@ -17,7 +17,7 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
     const state = inherited.stateHandles!;
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
     });
     def.rule({
       when: (w) => w.state(state.checked).eq(true),
@@ -31,14 +31,12 @@ export default definePrototype<CheckboxGroupItemProps, CheckboxGroupItemExposes>
       when: (w) => w.state(state.focusVisible).eq(true),
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
     });
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
     const glyph = checkboxGroupGlyph(def, state);
-    return (renderer) => [glyph(renderer), renderer.r.slot()];
+    const render = inherited.render;
+    if (!render) throw new Error('[liquid-glass-checkbox-group-all] Missing Base renderer.');
+    return (renderer) => {
+      const content = render(renderer);
+      return [glyph(renderer), ...(Array.isArray(content) ? content : [content])];
+    };
   },
 });

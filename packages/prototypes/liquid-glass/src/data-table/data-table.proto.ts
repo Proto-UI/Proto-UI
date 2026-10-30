@@ -14,7 +14,7 @@ import type {
   DataTableNextProps,
   DataTableNextExposes,
 } from '@proto.ui/prototypes-base/data-table';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asDataTableRoot,
   asDataTableRow,
@@ -31,28 +31,9 @@ export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootEx
     const behavior = asDataTableRoot();
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-secondary shadow-lg grid gap-0'
+        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-background grid gap-0'
       )
     );
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });
@@ -64,18 +45,16 @@ export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExpos
     def.feedback.style.use(
       tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    const states = behavior.stateHandles!;
+    def.rule({
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.state(states.selected).eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+    });
     return behavior.render;
   },
 });
@@ -84,19 +63,7 @@ export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellEx
   name: 'liquid-glass-data-table-cell',
   setup(def) {
     const behavior = asDataTableCell();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground px-4 py-3 text-left text-sm'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    def.feedback.style.use(tw('min-w-0 max-w-full text-inherit px-4 py-3 text-left text-sm'));
     return behavior.render;
   },
 });
@@ -110,18 +77,10 @@ export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHe
         'min-w-0 max-w-full text-foreground px-4 py-3 text-left text-sm font-semibold cursor-pointer'
       )
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    def.rule({
+      when: (w) => w.prop('sortable').eq(false),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
     return behavior.render;
   },
 });
@@ -133,18 +92,6 @@ export const dataTableCaption = definePrototype<DataTableCaptionProps, DataTable
     def.feedback.style.use(
       tw('min-w-0 max-w-full text-foreground px-4 py-3 text-left font-semibold')
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });
@@ -168,7 +115,7 @@ export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTab
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
     // Presentation consumes the existing owner; no second interaction hook.
     def.rule({
@@ -198,7 +145,7 @@ export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextEx
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
     // Presentation consumes the existing owner; no second interaction hook.
     def.rule({

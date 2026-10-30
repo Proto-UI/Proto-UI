@@ -173,6 +173,66 @@
     "./tabs": {
       "types": "./src/tabs/index.ts",
       "default": "./src/tabs/index.ts"
+    },
+    "./async-region": {
+      "types": "./src/async-region/index.ts",
+      "default": "./src/async-region/index.ts"
+    },
+    "./live-region": {
+      "types": "./src/live-region/index.ts",
+      "default": "./src/live-region/index.ts"
+    },
+    "./image": {
+      "types": "./src/image/index.ts",
+      "default": "./src/image/index.ts"
+    },
+    "./table": {
+      "types": "./src/table/index.ts",
+      "default": "./src/table/index.ts"
+    },
+    "./transition": {
+      "types": "./src/transition/index.ts",
+      "default": "./src/transition/index.ts"
+    },
+    "./dialog": {
+      "types": "./src/dialog/index.ts",
+      "default": "./src/dialog/index.ts"
+    },
+    "./hover-card": {
+      "types": "./src/hover-card/index.ts",
+      "default": "./src/hover-card/index.ts"
+    },
+    "./tooltip": {
+      "types": "./src/tooltip/index.ts",
+      "default": "./src/tooltip/index.ts"
+    },
+    "./checkbox": {
+      "types": "./src/checkbox/index.ts",
+      "default": "./src/checkbox/index.ts"
+    },
+    "./switch": {
+      "types": "./src/switch/index.ts",
+      "default": "./src/switch/index.ts"
+    },
+    "./radio-group": {
+      "types": "./src/radio-group/index.ts",
+      "default": "./src/radio-group/index.ts"
+    },
+    "./input": {
+      "types": "./src/input/index.ts",
+      "default": "./src/input/index.ts"
+    },
+    "./textarea": {
+      "types": "./src/textarea/index.ts",
+      "default": "./src/textarea/index.ts"
+    },
+    "./separator": {
+      "types": "./src/separator/index.ts",
+      "default": "./src/separator/index.ts"
+    },
+    "./scroll-area": {
+      "types": "./src/scroll-area/index.ts",
+      "default": "./src/scroll-area/index.ts"
     }
   },
   "dependencies": {

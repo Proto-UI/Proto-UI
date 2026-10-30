@@ -6,7 +6,7 @@ import type {
   ResizableHandleProps,
   ResizableHandleExposes,
 } from '@proto.ui/prototypes-base/resizable';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asResizableRoot,
   asResizablePanel,
@@ -19,28 +19,10 @@ export const resizableRoot = definePrototype<ResizableRootProps, ResizableRootEx
     const behavior = asResizableRoot();
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-secondary shadow-lg overflow-hidden'
+        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-background overflow-hidden'
       )
     );
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    return behavior.render;
   },
 });
 export { resizableRoot as liquidGlassResizableRoot };
@@ -49,18 +31,7 @@ export const resizablePanel = definePrototype<ResizablePanelProps, ResizablePane
   setup(def) {
     const behavior = asResizablePanel();
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground p-4'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    return behavior.render;
   },
 });
 export { resizablePanel as liquidGlassResizablePanel };
@@ -71,18 +42,17 @@ export const resizableHandle = definePrototype<ResizableHandleProps, ResizableHa
     def.feedback.style.use(
       tw('min-w-0 max-w-full text-foreground shrink-0 basis-2 bg-border cursor-move')
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.disabled)
-      def.rule({
-        when: (w) => w.state(states.disabled!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-      });
+    const states = behavior.stateHandles!;
+    def.rule({
+      when: (w) => w.state(states.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
+    def.rule({
+      when: (w) => w.state(states.disabled).eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
+    return behavior.render;
   },
 });
 export { resizableHandle as liquidGlassResizableHandle };

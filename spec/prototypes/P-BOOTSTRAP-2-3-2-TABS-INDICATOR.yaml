@@ -1,0 +1,47 @@
+id: P-BOOTSTRAP-2-3-2-TABS-INDICATOR
+type: prototype
+title: Bootstrap 2.3.2 Tabs Indicator passive projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Optional repeatable Tabs Indicator deriving facts only; the selected Trigger already carries the visual signal.
+statement:
+    en: 'The Prototype invokes asTabsIndicator() once, retaining Base-derived value, activeValue and orientation. It is explicitly semantic-only in this family: no paint, selection, focus, event or layout-measurement ownership is added.'
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TABS-INDICATOR-BASE
+    text:
+            en: Invoke asTabsIndicator() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-TABS-INDICATOR-VISUAL
+    text:
+            en: 'Semantic-only: the selected Trigger already supplies the pinned active-tab signal, so the Indicator contributes no duplicate chrome; its presence and facts remain Base-owned.'
+  - id: P-BOOTSTRAP-2-3-2-TABS-INDICATOR-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-TABS-INDICATOR-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABS-INDICATOR
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-TABS-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/indicator.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/index.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/tabs/README.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Tabs Indicator passive projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - tabs
+  - indicator
+  - draft

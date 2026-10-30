@@ -45,9 +45,14 @@ describe('draft Shadcn Card public consumption', () => {
     );
     expect(renderProtoStyleTokenCss(tokens)).not.toContain('Unsupported Proto UI style tokens');
   });
-  it('keeps the two new grid lowerings finite and rejects unknown or injected forms', () => {
+  it('keeps the finite grid lowerings bounded and rejects unknown or injected forms', () => {
+    // `grid-rows-[auto_1fr]` joined the finite vocabulary when the multi-profile
+    // AlertDialog recipes landed; it must render, still without opening an
+    // expression parser.
+    const admitted = renderProtoStyleTokenCss(['grid-rows-[auto_1fr]']);
+    expect(admitted).not.toContain('Unsupported Proto UI style tokens');
+    expect(admitted).toContain('grid-template-rows: auto 1fr;');
     for (const token of [
-      'grid-rows-[auto_1fr]',
       'auto-rows-max',
       'auto-rows-[1fr]',
       'grid-rows-[auto_auto];color:red',

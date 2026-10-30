@@ -11,14 +11,19 @@ describe('Select existing preferred-width lowering', () => {
       const tokens = (
         await collectProtoStyleTokens(path.resolve(`packages/prototypes/${family}/src/select`))
       ).filter((token): token is string => typeof token === 'string');
-      expect(tokens).toContain('w-[max(var(--proto-ui-anchor-width),12rem)]');
+      // Bootstrap 2.3.2 pins the .dropdown-menu floor at 160px; Liquid Glass
+      // keeps the 12rem floor.
+      const floor = family === 'liquid-glass' ? '12rem' : '160px';
+      expect(tokens).toContain(`w-[max(var(--proto-ui-anchor-width),${floor})]`);
       expect(tokens).toContain('min-w-0');
       expect(tokens).toContain('max-w-[var(--proto-ui-available-width)]');
       expect(tokens).toContain('size-4');
-      expect(tokens).toContain('gap-2');
-      expect(tokens).toContain(family === 'liquid-glass' ? 'px-3' : 'px-5');
+      // Pinned item spacing: Bootstrap uses literal pixel gaps, Liquid rem.
+      expect(tokens).toContain(family === 'liquid-glass' ? 'gap-2' : 'gap-[2px]');
+      // Bootstrap pins .dropdown-menu item padding at 20px inline.
+      expect(tokens).toContain(family === 'liquid-glass' ? 'px-3' : 'px-[20px]');
       const css = renderProtoStyleTokenCss(tokens);
-      expect(css).toContain('width: max(var(--proto-ui-anchor-width),12rem)');
+      expect(css).toContain(`width: max(var(--proto-ui-anchor-width),${floor})`);
       expect(css).toContain('max-width: var(--proto-ui-available-width)');
       expect(css).not.toContain('min-width: 12rem');
       expect(() =>
@@ -27,7 +32,9 @@ describe('Select existing preferred-width lowering', () => {
           templateTokens: [],
         })
       ).not.toThrow();
-    });
+      // Multi-profile family sources make the real source scan slower than
+      // the 5s default; keep the unfiltered collection.
+    }, 120_000);
   }
   it('keeps unsupported fluid padding outside the production Shadow-split contract', () => {
     for (const token of [
