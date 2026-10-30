@@ -39,6 +39,91 @@ afterAll(async () => {
   await stopServer();
 }, 60_000);
 
+// Arm before changing viewport: do not wait for transitionend or discard early
+// overflowing frames. The finite sample window exceeds the actual family
+// feedback duration; responsive geometry itself must already be discrete.
+async function captureSearchResizeFrames(page: Page, width: number) {
+  await page.evaluate((targetWidth) => {
+    const state = {
+      samples: [] as any[],
+      done: false,
+      error: null as string | null,
+      targetSeenAt: null as number | null,
+    };
+    const started = performance.now();
+    const sample = () => {
+      const button = document.querySelector<HTMLElement>('[data-site-header] [data-open-modal]');
+      if (!button) throw new Error('Header Search button missing during resize');
+      const css = getComputedStyle(button);
+      const elapsed = performance.now() - started;
+      if (innerWidth === targetWidth && state.targetSeenAt === null) state.targetSeenAt = elapsed;
+      state.samples.push({
+        time: elapsed,
+        viewport: innerWidth,
+        width: button.getBoundingClientRect().width,
+        clientWidth: button.clientWidth,
+        scrollWidth: button.scrollWidth,
+        transitionProperty: css.transitionProperty,
+        transitionDuration: css.transitionDuration,
+        transitionDelay: css.transitionDelay,
+        triggerWidth: css.getPropertyValue('--site-search-trigger-width').trim(),
+        headerWidth: css.getPropertyValue('--site-header-search-width').trim(),
+        copyDisplay: [...button.querySelectorAll('.site-search-label, .site-search-shortcut')].map(
+          (element) => getComputedStyle(element).display
+        ),
+        animations: button.getAnimations().map((animation) => ({
+          playState: animation.playState,
+          frames: animation.effect instanceof KeyframeEffect ? animation.effect.getKeyframes() : [],
+        })),
+      });
+    };
+    (window as any).__puiHeaderResizeCapture = { state, sample };
+    const tick = () => {
+      try {
+        sample();
+      } catch (error) {
+        state.error = String(error);
+        state.done = true;
+        return;
+      }
+      if (state.targetSeenAt !== null && performance.now() - started - state.targetSeenAt >= 400)
+        state.done = true;
+      else if (state.samples.length >= 256) {
+        state.error = 'Resize sample cap reached before the complete target viewport window';
+        state.done = true;
+      } else requestAnimationFrame(tick);
+    };
+    tick();
+  }, width);
+  await page.setViewportSize({ width, height: 1000 });
+  await page.evaluate(() => (window as any).__puiHeaderResizeCapture.sample());
+  await page.waitForFunction(() => (window as any).__puiHeaderResizeCapture.state.done, undefined, {
+    timeout: 2_000,
+  });
+  return page.evaluate(() => {
+    const value = (window as any).__puiHeaderResizeCapture.state;
+    delete (window as any).__puiHeaderResizeCapture;
+    return value as {
+      samples: Array<{
+        time: number;
+        viewport: number;
+        width: number;
+        clientWidth: number;
+        scrollWidth: number;
+        transitionProperty: string;
+        transitionDuration: string;
+        transitionDelay: string;
+        triggerWidth: string;
+        headerWidth: string;
+        copyDisplay: string[];
+        animations: Array<{ playState: string; frames: Array<Record<string, unknown>> }>;
+      }>;
+      done: boolean;
+      error: string | null;
+    };
+  });
+}
+
 async function ready(page: Page, runtime: string) {
   await page.waitForFunction(
     (runtime) => {
@@ -510,6 +595,94 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 expect(await locale.evaluate((element) => element.localName)).not.toBe('a');
                 expect((await sample(locale)).height).toBeCloseTo(44, 0);
                 await capture(`${width}-shared-composition`);
+              }
+              for (const [from, to] of [
+                [1279, 1280],
+                [1280, 1279],
+              ]) {
+                await page.setViewportSize({ width: from, height: 1000 });
+                await revealHeaderPreferences(page);
+                const trace = await captureSearchResizeFrames(page, to);
+                measurements.push({ stage: 'responsive-search-every-frame', from, to, trace });
+                await capture(`${from}-to-${to}-search-resize`);
+                expect(trace.error).toBeNull();
+                expect(trace.done).toBe(true);
+                const frames = trace.samples.filter((frame) => frame.viewport === to);
+                expect(frames.length).toBeGreaterThanOrEqual(2);
+                for (const frame of frames) {
+                  expect(frame.scrollWidth, `resize frame ${frame.time}ms`).toBeLessThanOrEqual(
+                    frame.clientWidth + 1
+                  );
+                  const properties = frame.transitionProperty
+                    .split(',')
+                    .map((property) => property.trim());
+                  expect(properties).toContain('background-color');
+                  expect(properties).toContain('transform');
+                  const milliseconds = (value: string) =>
+                    value.trim().endsWith('ms') ? parseFloat(value) : parseFloat(value) * 1000;
+                  const durations = frame.transitionDuration.split(',').map(milliseconds);
+                  const delays = frame.transitionDelay.split(',').map(milliseconds);
+                  expect(Math.max(...durations) + Math.max(0, ...delays)).toBeLessThanOrEqual(400);
+                  for (const forbidden of [
+                    'all',
+                    'width',
+                    'height',
+                    'padding',
+                    'padding-inline',
+                    '--site-search-trigger-width',
+                    '--site-header-search-width',
+                  ])
+                    expect(properties).not.toContain(forbidden);
+                  for (const animation of frame.animations)
+                    for (const keyframe of animation.frames)
+                      for (const geometry of [
+                        'width',
+                        'height',
+                        'padding',
+                        'paddingInline',
+                        '--site-search-trigger-width',
+                        '--site-header-search-width',
+                      ])
+                        expect(keyframe).not.toHaveProperty(geometry);
+                  if (to < 1280) {
+                    expect(frame.width).toBeCloseTo(44, 0);
+                    expect(frame.copyDisplay).toEqual(['none', 'none']);
+                  } else expect(frame.copyDisplay).toEqual(['block', 'flex']);
+                }
+                const search = page.locator('[data-site-header] [data-open-modal]');
+                expect(
+                  await page
+                    .locator('[data-site-header]')
+                    .getByRole('button', { name: '搜索', exact: true })
+                    .count()
+                ).toBe(1);
+                expect(await search.getAttribute('aria-keyshortcuts')).toMatch(
+                  /^(Control|Meta)\+K$/
+                );
+              }
+              if (family === 'brutalist') {
+                // The family owns reduced-motion. Restricting responsive
+                // properties must not restore a removed transition clock.
+                await page.emulateMedia({ reducedMotion: 'reduce' });
+                const search = page.locator('[data-site-header] [data-open-modal]');
+                await expect
+                  .poll(() => search.getAttribute('data-pui-style'))
+                  .toContain('transition-none');
+                await search.hover();
+                const reduced = await search.evaluate((button) => ({
+                  duration: getComputedStyle(button).transitionDuration,
+                  activeAnimations: button
+                    .getAnimations()
+                    .filter((animation) => animation.playState === 'running' || animation.pending)
+                    .length,
+                }));
+                measurements.push({ stage: 'responsive-search-reduced-motion', reduced });
+                expect(reduced.duration.split(',').map((value) => parseFloat(value))).toEqual([0]);
+                expect(reduced.activeAnimations).toBe(0);
+                await page.emulateMedia({ reducedMotion: 'no-preference' });
+                await expect
+                  .poll(() => search.getAttribute('data-pui-style'))
+                  .toContain('transition-all');
               }
               // Keep the existing compact original-edge input journey intact.
               await page.setViewportSize({ width: 390, height: 1000 });

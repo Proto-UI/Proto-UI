@@ -1,5 +1,9 @@
 import { expect, it } from 'vitest';
-import { headerButtonProps, headerSelectControlProps } from './site-header-control-recipes';
+import {
+  headerButtonProps,
+  headerSelectControlProps,
+  headerResponsiveButtonFeedback,
+} from './site-header-control-recipes';
 import { linkSurfaceProps, linkSurfaceLayout, linkTextProps } from './site-link-recipes';
 
 const idle = { hovered: false, focusVisible: false, pressed: false, current: false };
@@ -41,4 +45,17 @@ it('uses public ghost feedback for navigation, not text-link underline', () => {
   }
   expect(linkTextProps('text', { ...idle, hovered: true }, 'shadcn').decoration).toBe('underline');
   expect(linkTextProps('nav', { ...idle, current: true }, 'shadcn').weight).toBe('semibold');
+});
+
+it('keeps responsive geometry discrete while retaining family feedback transitions', () => {
+  const layout = headerResponsiveButtonFeedback();
+  expect(layout).toEqual({
+    transitionProperty:
+      'color, background-color, border-color, outline-color, box-shadow, opacity, transform, translate, scale',
+  });
+  const properties = layout.transitionProperty.split(',').map((value) => value.trim());
+  for (const geometry of ['all', 'width', 'height', 'padding', 'padding-inline', 'font-size'])
+    expect(properties).not.toContain(geometry);
+  expect(layout).not.toHaveProperty('transitionDuration');
+  expect(layout).not.toHaveProperty('transitionTimingFunction');
 });

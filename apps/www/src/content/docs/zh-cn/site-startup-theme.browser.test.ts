@@ -220,7 +220,7 @@ for (const width of [2048, 390, 430, 320]) {
           if (!baseline)
             for (const facts of [immediateFacts, settledFacts]) {
               expect(facts.open).toBe('true');
-              expect(facts.language.text).toContain('English');
+              expect(facts.language.text?.trim()).toBe('简体中文');
               expect(facts.language.width).toBeGreaterThan(20);
               expect(facts.surfaces).toHaveLength(2);
               for (const surface of facts.surfaces) expect(surface).toEqual(facts.canonical);
@@ -240,6 +240,32 @@ for (const width of [2048, 390, 430, 320]) {
         await capture(page, `home-${width}-reopened-keyboard`, {
           input: 'native Escape, click, keyboard focus',
         });
+        if (!baseline) {
+          // The menu above remains on zh-cn; English is an option, not its
+          // current value. Exercise the real Select before expecting English.
+          const locale = page.locator(
+            '#home-language [data-projection-generation-state="active"] [role="combobox"]'
+          );
+          await locale.press('Enter');
+          await page
+            .getByRole('option', { name: 'English', exact: true })
+            .waitFor({ state: 'visible' });
+          await page.keyboard.press('Home');
+          await page.keyboard.press('Enter');
+          await page.waitForURL((url) => url.pathname === '/en/');
+          await homeReady(page);
+          await menu(page).click();
+          const changed = page.locator(
+            '#home-language [data-projection-generation-state="active"] [role="combobox"]'
+          );
+          await expect.poll(() => changed.textContent()).toBe('English');
+          expect(await changed.ariaSnapshot()).toBe('- combobox "Language": English');
+          await capture(page, `home-${width}-locale-native-selection`, {
+            input: 'native Enter, Home, Enter',
+            route: new URL(page.url()).pathname,
+            accessibility: await changed.ariaSnapshot(),
+          });
+        }
       } finally {
         await context.close();
       }
@@ -313,12 +339,25 @@ for (const width of [2048, 390, 430]) {
           );
         });
         const initial = await firstScreen(page);
+        const startupSearchFeedback = !baseline
+          ? await page
+              .locator('[data-search-startup-button]')
+              .evaluate((element) => getComputedStyle(element).transitionProperty)
+          : null;
+        if (!baseline) {
+          const properties = startupSearchFeedback!.split(',').map((value) => value.trim());
+          expect(properties).toContain('background-color');
+          expect(properties).not.toContain('all');
+          expect(properties).not.toContain('width');
+          expect(properties).not.toContain('padding-inline');
+        }
         const settingsVisible = await page.locator('[data-site-header-settings]').isVisible();
         const fallback = page.locator('[data-site-header-fallback-summary]');
         const isNative = (await fallback.count()) === 1;
         await capture(page, `cold-${route.includes('card') ? 'card' : 'home'}-${width}`, {
           scriptsHeld: true,
           initial,
+          startupSearchFeedback,
           settingsVisible,
           isNative,
         });
