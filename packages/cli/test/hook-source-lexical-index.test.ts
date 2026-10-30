@@ -145,3 +145,99 @@ describe('source registration canonicalization', () => {
     }
   });
 });
+
+
+describe('public module query canonicalization', () => {
+  it('resolves repeated paths once per query but observes later symlink targets', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-module-query-'));
+    const from = path.join(directory, 'entry.ts');
+    const link = path.join(directory, 'dependency.ts');
+    const first = path.join(directory, 'first.ts');
+    const second = path.join(directory, 'second.ts');
+    writeFileSync(from, `import { value } from './dependency';`);
+    writeFileSync(first, `export const value = 1;`);
+    writeFileSync(second, `export const value = 2;`);
+    writeFileSync(path.join(directory, 'tsconfig.json'), '{}');
+    symlinkSync(first, link);
+    const spy = vi.spyOn(realpathSync, 'native');
+    try {
+      const context = createHookSourceModuleContext();
+      const before = context.resolveModule(from, './dependency');
+      expect(before?.file).toBe(first);
+      expect(before?.source.text).toBe(`export const value = 1;`);
+      expect(spy.mock.calls.filter(([file]) => String(file) === from)).toHaveLength(1);
+      unlinkSync(link);
+      symlinkSync(second, link);
+      const after = context.resolveModule(from, './dependency');
+      expect(after?.file).toBe(second);
+      expect(after?.source.text).toBe(`export const value = 2;`);
+      expect(spy.mock.calls.filter(([file]) => String(file) === from)).toHaveLength(2);
+    } finally {
+      spy.mockRestore();
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+  it('drops query-local paths after an exception and isolates a nested lookup', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-module-query-lifetime-'));
+    const from = path.join(directory, 'entry.ts');
+    const dependency = path.join(directory, 'dependency.ts');
+    writeFileSync(from, `import { value } from './dependency';`);
+    writeFileSync(dependency, `export const value = 1;`);
+    writeFileSync(path.join(directory, 'tsconfig.json'), '{}');
+    const context = createHookSourceModuleContext();
+    const originalExists = ts.sys.fileExists;
+    const realpathSpy = vi.spyOn(realpathSync, 'native');
+    const existsSpy = vi.spyOn(ts.sys, 'fileExists');
+    try {
+      existsSpy.mockImplementationOnce(() => { throw new Error('query observation failed'); });
+      expect(() => context.resolveModule(from, './dependency')).toThrow('query observation failed');
+      existsSpy.mockImplementation(originalExists);
+      expect(context.resolveModule(from, './dependency')?.file).toBe(dependency);
+      expect(realpathSpy.mock.calls.filter(([file]) => String(file) === from)).toHaveLength(2);
+
+      realpathSpy.mockClear();
+      let nested = false;
+      existsSpy.mockImplementation(file => {
+        if (!nested) {
+          nested = true;
+          expect(context.resolveModule(from, './dependency')?.file).toBe(dependency);
+        }
+        return originalExists(file);
+      });
+      expect(context.resolveModule(from, './dependency')?.file).toBe(dependency);
+      expect(nested).toBe(true);
+      // Each public call owns a fresh scope; the resumed outer query retains
+      // its original observation rather than inheriting/clearing the inner one.
+      expect(realpathSpy.mock.calls.filter(([file]) => String(file) === from)).toHaveLength(2);
+    } finally {
+      existsSpy.mockRestore();
+      realpathSpy.mockRestore();
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('shares repeated successful observations only within one recursive export query', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-export-query-'));
+    const from = path.join(directory, 'entry.ts');
+    const config = path.join(directory, 'tsconfig.json');
+    const text = `export * from './first'; export * from './second';`;
+    writeFileSync(from, text);
+    writeFileSync(config, '{}');
+    writeFileSync(path.join(directory, 'first.ts'), `export const value = 1;`);
+    writeFileSync(path.join(directory, 'second.ts'), `export const value = 2;`);
+    const context = createHookSourceModuleContext();
+    const module = context.moduleForSource(ts.createSourceFile(from, text, ts.ScriptTarget.Latest, true));
+    const spy = vi.spyOn(realpathSync, 'native');
+    try {
+      // Conflicting star exports remain ambiguous; caching must not choose one.
+      expect(context.resolveExport(module, 'value')).toBeNull();
+      expect(spy.mock.calls.filter(([file]) => String(file) === config)).toHaveLength(1);
+      expect(context.resolveExport(module, 'value')).toBeNull();
+      expect(spy.mock.calls.filter(([file]) => String(file) === config)).toHaveLength(2);
+    } finally {
+      spy.mockRestore();
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+});

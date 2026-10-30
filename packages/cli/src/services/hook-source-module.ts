@@ -968,11 +968,30 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   const objectMemberCache = new Map<string, HookSourceSymbol | null>();
   const coreStarFactoryNames = new WeakMap<HookSourceSymbol, string>();
 
+  // A synchronous public lookup is one filesystem-identity observation. Share
+  // duplicate path resolution only inside that lookup, never across calls.
+  // Source/AST and parsed-module caches retain their existing separate rules.
+  let canonicalQueryCache: Map<string, string> | undefined;
+  const inCanonicalQuery = <T>(lookup: () => T): T => {
+    const previous = canonicalQueryCache;
+    canonicalQueryCache = new Map();
+    try {
+      return lookup();
+    } finally {
+      canonicalQueryCache = previous;
+    }
+  };
+
   const canonical = (file: string): string => {
     const absolute = path.resolve(file);
+    const cached = canonicalQueryCache?.get(absolute);
+    if (cached !== undefined) return cached;
     try {
-      return realpathSync.native(absolute);
+      const physical = realpathSync.native(absolute);
+      canonicalQueryCache?.set(absolute, physical);
+      return physical;
     } catch {
+      // Do not cache failed observations, even within the current lookup.
       return absolute;
     }
   };
@@ -998,8 +1017,8 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     return registerSource(source);
   };
 
-  const parseModule = (file: string): HookSourceModule | null => {
-    const key = canonical(file);
+  // Internal caller resolveModulePath already returns a physical path.
+  const parseModule = (key: string): HookSourceModule | null => {
     const existing = modules.get(key);
     if (existing) return existing;
     if (moduleFailures.has(key) || isDeclarationFile(key)) return null;
@@ -1020,8 +1039,9 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     }
   };
 
+  // Internal caller passes its already-canonical containing-file path.
   const configFor = (from: string): ConfigRecord => {
-    const start = path.dirname(canonical(from));
+    const start = path.dirname(from);
     const configFile = ts.findConfigFile(start, ts.sys.fileExists, 'tsconfig.json');
     if (!configFile) return null;
     const key = canonical(configFile);
@@ -1900,14 +1920,14 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     isDefineReference(node, module, new Set(), 'defineHook');
 
   return {
-    registerSource,
-    moduleForSource,
-    resolveModule,
-    resolveLocal,
-    resolveExport,
-    resolveReference,
-    isDefineAsHookReference,
-    isDefinePrototypeReference,
-    isDefineHookReference,
+    registerSource: source => inCanonicalQuery(() => registerSource(source)),
+    moduleForSource: source => inCanonicalQuery(() => moduleForSource(source)),
+    resolveModule: (from, specifier) => inCanonicalQuery(() => resolveModule(from, specifier)),
+    resolveLocal: (module, name) => inCanonicalQuery(() => resolveLocal(module, name)),
+    resolveExport: (module, name) => inCanonicalQuery(() => resolveExport(module, name)),
+    resolveReference: (node, module) => inCanonicalQuery(() => resolveReference(node, module)),
+    isDefineAsHookReference: (node, module) => inCanonicalQuery(() => isDefineAsHookReference(node, module)),
+    isDefinePrototypeReference: (node, module) => inCanonicalQuery(() => isDefinePrototypeReference(node, module)),
+    isDefineHookReference: (node, module) => inCanonicalQuery(() => isDefineHookReference(node, module)),
   };
 }
