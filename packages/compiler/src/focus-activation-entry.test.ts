@@ -1,6 +1,10 @@
 // @vitest-environment happy-dom
 import { createRequire } from 'node:module';
 import ts from 'typescript';
+import { posix } from 'node:path';
+import * as React from 'react';
+import { createRoot } from 'react-dom/client';
+import * as Vue from 'vue';
 import { describe, expect, it } from 'vitest';
 import { parsePrototype } from './parser';
 import { emitReactSource } from './react-source';
@@ -117,5 +121,113 @@ describe('direct native activation entry policy (shared four-Web support)',()=>{
       expect(Object.hasOwn(f.requests[0],'entry')).toBe(false);f.scope.deactivate();
       const request={reason:'pointer',preventScroll:false};f.scope.activate(request);expect(f.requests[1]).toBe(request);
     }finally{f.cleanup();}
+  });
+});
+
+interface ConsumerAPI {manual():void;configured():void;deactivate():void;focus():void}
+interface ConsumerHandle {getExposes():Partial<ConsumerAPI>}
+type Framework='react'|'vue'|'vue2'|'wc';
+const scopeSource=`import {definePrototype} from '@proto.ui/core';import {asFocusScope} from '@proto.ui/hooks';
+export default definePrototype({name:'ordinary-scope',setup(def){const scope=asFocusScope();scope.configure({trap:true,loop:true,entry:'first',restore:'previous'});
+def.expose.method('manual',()=>{scope.activate({entry:'manual'});});
+def.expose.method('configured',()=>{scope.activate({entry:'configured'});});
+def.expose.method('deactivate',()=>{scope.deactivate();});return r=>r.el('section',r.slot());}});`;
+const childSource=`import {definePrototype} from '@proto.ui/core';import {asFocusable} from '@proto.ui/hooks';
+export default definePrototype({name:'ordinary-focus-child',setup(def){const focus=asFocusable();
+def.expose.method('focus',()=>{focus.focusSelf({reason:'keyboard'});});return r=>r.el('button','inside focus');}});`;
+function consumerProject(framework:Framework):Record<string,Record<string,unknown>> {
+  const files=new Map<string,string>(),require=createRequire(import.meta.url);
+  for(const [name,source] of Object.entries({Scope:scopeSource,Child:childSource})){
+    const parsed=parsePrototype(source,{fileName:`${name}.proto.ts`});
+    if(!parsed.ok)throw new Error(JSON.stringify(parsed.diagnostics));
+    const result=framework==='react'?emitReactSource(parsed.value,{componentName:name}):framework==='vue'?emitVueSource(parsed.value,{componentName:name}):framework==='vue2'?emitVue2Source(parsed.value,{componentName:name}):emitWebComponentSource(parsed.value,{className:name,tagName:`test-${name.toLowerCase()}`,shadow:false});
+    if(!result.ok)throw new Error(JSON.stringify(result.diagnostics));
+    files.set(`${name}.tsx`,result.value.code);
+    for(const file of result.value.supportingFiles??[]){
+      const old=files.get(file.path);if(old!==undefined&&old!==file.contents)throw new Error(`Shared artifact differs: ${file.path}`);
+      files.set(file.path,file.contents);
+    }
+  }
+  const cache=new Map<string,Record<string,unknown>>();
+  const load=(file:string):Record<string,unknown>=>{
+    const prior=cache.get(file);if(prior)return prior;
+    const text=files.get(file);if(text===undefined)throw new Error(`Missing generated artifact ${file}`);
+    const exports:Record<string,unknown>={};cache.set(file,exports);
+    const js=ts.transpileModule(text,{fileName:file,compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.React}}).outputText;
+    new Function('require','exports',js)((specifier:string)=>{
+      if(specifier.startsWith('.'))return load(posix.normalize(posix.join(posix.dirname(file),`${specifier}.ts`)));
+      if(specifier==='react')return React;if(specifier==='vue')return Vue;
+      if(specifier==='@floating-ui/dom')return createRequire(new URL('../../modules/positioning/package.json',import.meta.url))(specifier);
+      if(specifier==='react-dom'||specifier==='react-dom/client'||specifier==='react/jsx-runtime')return require(specifier);
+      throw new Error(`Unexpected generated dependency ${specifier}`);
+    },exports);
+    return exports;
+  };
+  return {Scope:load('Scope.tsx'),Child:load('Child.tsx')};
+}
+interface Vue2VM extends ConsumerHandle {$el:HTMLElement;$refs:Record<string,Vue2VM>;$mount():Vue2VM;$destroy():void}
+interface Vue2Constructor {new(options:Record<string,unknown>):Vue2VM;version:string;nextTick():Promise<void>}
+let customElementSequence=0;
+async function mountConsumer(framework:Framework,host:HTMLElement){
+  const modules=consumerProject(framework);let scope:ConsumerHandle|null=null,child:ConsumerHandle|null=null;
+  let cleanup:()=>Promise<void>,settle:()=>Promise<void>,wcTarget:HTMLElement|undefined;
+  if(framework==='react'){
+    const actKey='IS_REACT_ACT_ENVIRONMENT',actDescriptor=Object.getOwnPropertyDescriptor(globalThis,actKey);
+    const restoreAct=()=>{if(actDescriptor)Object.defineProperty(globalThis,actKey,actDescriptor);else Reflect.deleteProperty(globalThis,actKey);};
+    Object.defineProperty(globalThis,actKey,{configurable:true,writable:true,value:true});
+    const Scope=modules.Scope.Scope as React.ForwardRefExoticComponent<React.PropsWithChildren&React.RefAttributes<ConsumerHandle>>;
+    const Child=modules.Child.Child as React.ForwardRefExoticComponent<React.RefAttributes<ConsumerHandle>>;
+    const root=(()=>{try{return createRoot(host);}catch(error){restoreAct();throw error;}})();
+    try{await React.act(async()=>{root.render(React.createElement(Scope,{ref:(value)=>{scope=value;}},React.createElement(Child,{ref:(value)=>{child=value;}})));});}
+    catch(error){try{await React.act(async()=>root.unmount());}finally{restoreAct();}throw error;}
+    settle=async()=>{await React.act(async()=>{await Promise.resolve();});};
+    cleanup=async()=>{try{await React.act(async()=>root.unmount());}finally{restoreAct();}};
+  }else if(framework==='vue'){
+    const app=Vue.createApp({render:()=>Vue.h(modules.Scope.default as Vue.Component,{ref:(value:unknown)=>{scope=value as ConsumerHandle;}},
+      {default:()=>[Vue.h(modules.Child.default as Vue.Component,{ref:(value:unknown)=>{child=value as ConsumerHandle;}})]})});
+    try{app.mount(host);}catch(error){app.unmount();throw error;}
+    settle=async()=>{await Vue.nextTick();};cleanup=async()=>{app.unmount();await Vue.nextTick();};
+  }else if(framework==='vue2'){
+    const Vue2=createRequire(new URL('../../adapters/vue2/package.json',import.meta.url))('vue') as Vue2Constructor;
+    expect(Vue2.version).toBe('2.6.14');
+    const vm=new Vue2({render(h:(tag:unknown,data?:unknown,children?:unknown)=>unknown){return h(modules.Scope.default,{ref:'scope'},[h(modules.Child.default,{ref:'child'})]);}});
+    try{vm.$mount();host.append(vm.$el);}catch(error){vm.$destroy();vm.$el?.remove();throw error;}
+    scope=vm.$refs.scope;child=vm.$refs.child;
+    settle=async()=>{await Vue2.nextTick();};cleanup=async()=>{vm.$destroy();vm.$el.remove();await Vue2.nextTick();};
+  }else{
+    const id=++customElementSequence;
+    (modules.Scope.register as (name:string)=>unknown)(`activation-scope-${id}`);
+    (modules.Child.register as (name:string)=>unknown)(`activation-child-${id}`);
+    const parent=document.createElement(`activation-scope-${id}`) as HTMLElement&ConsumerHandle;
+    const nested=document.createElement(`activation-child-${id}`) as HTMLElement&ConsumerHandle;
+    parent.append(nested);host.append(parent);scope=parent;child=nested;wcTarget=nested;
+    settle=async()=>{for(let i=0;i<8;i++)await Promise.resolve();};cleanup=async()=>{parent.remove();await settle();};
+  }
+  try{await settle();}catch(error){await cleanup();throw error;}
+  const scopeHandle=scope as ConsumerHandle|null,childHandle=child as ConsumerHandle|null;
+  if(!scopeHandle||!childHandle){await cleanup();throw new Error('Native consumer did not expose both generated owners');}
+  // DOM identity is selected before requesting focus, never inferred from the result.
+  const button=host.querySelector('button');
+  const expectedFocus=wcTarget??button?.closest('[data-pui-root]');
+  if(!(expectedFocus instanceof HTMLElement)){await cleanup();throw new Error('Missing exact child physical Root');}
+  if(!wcTarget&&expectedFocus===host.querySelector('[data-pui-root]')){await cleanup();throw new Error('Child focus target incorrectly resolved to the scope Root');}
+  return {scope:scopeHandle,child:childHandle,expectedFocus,settle,cleanup};
+}
+describe('ordinary native-framework consumers of generated activation',()=>{
+  it.each<Framework>(['react','vue','vue2','wc'])('%s preserves manual entry, restoration and later configured entry',async framework=>{
+    const host=document.createElement('div'),outside=document.createElement('button');document.body.append(outside,host);
+    let mounted:Awaited<ReturnType<typeof mountConsumer>>|undefined;
+    try{
+      mounted=await mountConsumer(framework,host);
+      outside.focus();expect(document.activeElement).toBe(outside);
+      const scope=mounted.scope.getExposes(),child=mounted.child.getExposes();
+      expect(typeof scope.manual).toBe('function');expect(typeof scope.configured).toBe('function');expect(typeof scope.deactivate).toBe('function');expect(typeof child.focus).toBe('function');
+      scope.manual!();await mounted.settle();expect(document.activeElement).toBe(outside);
+      child.focus!();await mounted.settle();const inside=mounted.expectedFocus;expect(document.activeElement).toBe(inside);expect(inside).not.toBe(outside);
+      scope.deactivate!();await mounted.settle();expect(document.activeElement).toBe(outside);
+      scope.configured!();await mounted.settle();expect(document.activeElement).toBe(inside);
+      scope.deactivate!();await mounted.settle();expect(document.activeElement).toBe(outside);
+    }finally{try{await mounted?.cleanup();}finally{host.remove();outside.remove();}}
+    expect(host.childElementCount).toBe(0);
   });
 });
