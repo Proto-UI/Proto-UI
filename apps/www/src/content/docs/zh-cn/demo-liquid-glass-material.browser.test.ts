@@ -148,7 +148,7 @@ async function quality(value: string) {
       try {
         await mkdir(evidence, { recursive: true });
         // The four owned fixture scenes only; a later screenshot is not the snapshot's exact frame.
-        await page
+        const screenshot = await page
           .locator('.grid')
           .screenshot({ path: path.join(evidence, `${name}.png`), timeout: 5000 });
         diagnostic.screenshot = `${name}.png`;
