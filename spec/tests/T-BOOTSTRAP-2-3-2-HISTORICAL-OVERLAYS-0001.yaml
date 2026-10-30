@@ -1,0 +1,42 @@
+id: T-BOOTSTRAP-2-3-2-HISTORICAL-OVERLAYS-0001
+type: test
+title: Bootstrap historical overlays and collections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+summary: AlertDialog, Popover, Carousel, Progress, Meter, Calendar, DatePicker, DataTable, Tree and Toast coverage.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-HISTORICAL-OVERLAYS-0001-CASE-PROTOCOLS
+    title: Controlled refusal, relations, slots, availability and owner preservation across all ten families
+    covers:
+      - P-BOOTSTRAP-2-3-2-ALERT-DIALOG-BASE
+      - P-BOOTSTRAP-2-3-2-POPOVER-BASE
+      - P-BOOTSTRAP-2-3-2-CAROUSEL-BASE
+      - P-BOOTSTRAP-2-3-2-PROGRESS-BASE
+      - P-BOOTSTRAP-2-3-2-METER-BASE
+      - P-BOOTSTRAP-2-3-2-CALENDAR-BASE
+      - P-BOOTSTRAP-2-3-2-DATE-PICKER-BASE
+      - P-BOOTSTRAP-2-3-2-DATA-TABLE-BASE
+      - P-BOOTSTRAP-2-3-2-TREE-BASE
+      - P-BOOTSTRAP-2-3-2-TOAST-BASE
+    expectation: historical-recipes-preserve-owners
+implementations:
+  - id: bootstrap-historical-overlays-collections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/historical-overlays-collections-r91.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-ALERT-DIALOG
+      - P-BOOTSTRAP-2-3-2-POPOVER
+      - P-BOOTSTRAP-2-3-2-CAROUSEL
+      - P-BOOTSTRAP-2-3-2-PROGRESS
+      - P-BOOTSTRAP-2-3-2-METER
+      - P-BOOTSTRAP-2-3-2-CALENDAR
+      - P-BOOTSTRAP-2-3-2-DATE-PICKER
+      - P-BOOTSTRAP-2-3-2-DATA-TABLE
+      - P-BOOTSTRAP-2-3-2-TREE
+      - P-BOOTSTRAP-2-3-2-TOAST
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

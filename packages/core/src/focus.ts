@@ -48,6 +48,13 @@ export type FocusRequestOptions = Readonly<{
   preventScroll?: boolean;
 }>;
 
+/** Per-activation entry policy; does not mutate the scope's setup configuration. */
+export type FocusScopeActivationOptions = FocusRequestOptions &
+  Readonly<{
+    /** Omitted/configured follows setup policy; manual suppresses only this automatic entry. */
+    entry?: 'configured' | 'manual';
+  }>;
+
 export type FocusRovingEntryRequestOptions = FocusRequestOptions &
   Readonly<{
     defer?: boolean;
@@ -184,7 +191,7 @@ export interface FocusScopeHandle<P extends PropsBaseType = PropsBaseType> {
   focusPrev(): void;
   focusSelected(): void;
   restoreFocus(): void;
-  activate(options?: FocusRequestOptions): void;
+  activate(options?: FocusScopeActivationOptions): void;
   deactivate(options?: FocusRequestOptions): void;
   isActive(): boolean;
 

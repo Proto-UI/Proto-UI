@@ -1,6 +1,7 @@
-import { createContextKey, tw, type DefHandle } from '@proto.ui/core';
+import { createContextKey, tw, type DefHandle, type OwnedStateHandle } from '@proto.ui/core';
 import { setupSelectStyle } from './style';
-import type { ShadcnStyleProps } from '../style-scope';
+import type { ShadcnStyleId, ShadcnStyleProps } from '../style-scope';
+import { SELECT_SURFACE_STYLE, SELECT_TRANSLUCENT_STYLES } from './recipes';
 
 /** Private visual projection; Base Content is the sole presence owner. */
 export const SELECT_VISUAL = createContextKey<{
@@ -31,18 +32,23 @@ export function setupSelectPaint(def: DefHandle<ShadcnStyleProps>) {
         )
       ),
   });
-  def.rule({
-    when: (w) => w.state(style).eq('rhea'),
-    intent: (i) => i.feedback.style.use(RHEA_SELECT_SURFACE),
-  });
-  def.rule({
-    when: (w) => w.all(w.state(style).eq('rhea'), w.meta('colorScheme').eq('dark')),
-    intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
-  });
-  def.rule({
-    when: (w) => w.all(w.state(style).eq('rhea'), w.not(w.meta('colorScheme').eq('dark'))),
-    intent: (i) => i.feedback.style.use(tw('ring-foreground/5')),
-  });
+  // P-SHADCN-SELECT-STYLE: pinned cn-select-content + cn-menu-translucent per style.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.state(style).eq(profile),
+      intent: (i) => i.feedback.style.use(SELECT_SURFACE_STYLE[profile]),
+    });
+  }
+  for (const profile of ['luma', 'rhea'] as const) {
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
+      intent: (i) => i.feedback.style.use(tw('ring-foreground/10')),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.not(w.meta('colorScheme').eq('dark'))),
+      intent: (i) => i.feedback.style.use(tw('ring-foreground/5')),
+    });
+  }
   def.rule({
     when: (w) =>
       w.all(
@@ -80,22 +86,23 @@ export function setupSelectPaint(def: DefHandle<ShadcnStyleProps>) {
 }
 
 /** Translucent is part of the fixed upstream Select Content composition, not an opt-in skin. */
-export const RHEA_SELECT_SURFACE = tw(
-  'relative isolate z-50 flex flex-col box-border min-w-36 max-h-full overflow-x-hidden overflow-y-auto rounded-[var(--pui-radius-2xl)] bg-popover/70 text-popover-foreground shadow-lg ring-1 outline-none duration-100 animate-none'
-);
 function setupSelectBackdrop(
   def: DefHandle<ShadcnStyleProps>,
-  style: ReturnType<typeof setupSelectStyle>
+  style: OwnedStateHandle<ShadcnStyleId>
 ) {
   const target = def.feedback.style.declareDecoration();
-  def.rule({
-    when: (w) => w.state(style).eq('rhea'),
-    intent: (i) =>
-      i.feedback.style
-        .to(target)
-        .use(
-          tw('absolute inset-0 -z-1 rounded-[inherit] backdrop-filter-[blur(40px)_saturate(1.5)]')
-        ),
-  });
+  // cn-menu-translucent before: backdrop-blur-2xl backdrop-saturate-150 on every
+  // modern profile; New York v4 has no translucent decoration upstream.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.state(style).eq(profile),
+      intent: (i) =>
+        i.feedback.style
+          .to(target)
+          .use(
+            tw('absolute inset-0 -z-1 rounded-[inherit] backdrop-filter-[blur(40px)_saturate(1.5)]')
+          ),
+    });
+  }
   return target;
 }

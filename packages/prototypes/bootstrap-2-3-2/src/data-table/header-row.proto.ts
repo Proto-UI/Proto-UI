@@ -9,11 +9,10 @@ export const dataTableHeaderRow = definePrototype<
   DataTableHeaderRowExposes
 >({
   name: 'bootstrap-2-3-2-data-table-header-row',
+  modules: asDataTableHeaderRow.modules,
   setup(def) {
     const behavior = asDataTableHeaderRow();
-    def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
-    );
+    def.feedback.style.use(tw('table-row'));
     return behavior.render;
   },
 });

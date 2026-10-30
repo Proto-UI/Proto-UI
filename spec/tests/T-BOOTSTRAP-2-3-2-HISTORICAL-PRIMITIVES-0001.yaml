@@ -1,0 +1,75 @@
+id: T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001
+type: test
+title: Bootstrap historical primitives and layout coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+summary: Scroll Area, Accordion, Collapsible, Button, Checkbox, Field, Fieldset, Form, Input, OTP, Number Field, Separator, Resizable, Message Scroller, Virtual List and scalar Slider coverage.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001-CASE-PROTOCOLS
+    title: System/composed scroll, controlled refusal, Field/Form policy, editor modules, OTP composition and passive slots
+    covers:
+      - P-BOOTSTRAP-2-3-2-SCROLL-AREA-BASE
+      - P-BOOTSTRAP-2-3-2-CHECKBOX-GROUP-BASE
+      - P-BOOTSTRAP-2-3-2-FORM-BASE
+      - P-BOOTSTRAP-2-3-2-INPUT-OTP-BASE
+      - P-BOOTSTRAP-2-3-2-NUMBER-FIELD-BASE
+      - P-BOOTSTRAP-2-3-2-MESSAGE-SCROLLER-BASE
+      - P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-BASE
+      - P-BOOTSTRAP-2-3-2-SLIDER-BASE
+    expectation: historical-vocabulary-preserves-owners
+implementations:
+  - id: bootstrap-historical-primitives-layout
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/historical-primitives-layout-r91.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-SCROLL-AREA
+      - P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT
+      - P-BOOTSTRAP-2-3-2-SCROLL-AREA-SCROLLBAR
+      - P-BOOTSTRAP-2-3-2-SCROLL-AREA-THUMB
+      - P-BOOTSTRAP-2-3-2-ACCORDION
+      - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+      - P-BOOTSTRAP-2-3-2-BUTTON
+      - P-BOOTSTRAP-2-3-2-CHECKBOX
+      - P-BOOTSTRAP-2-3-2-CHECKBOX-GROUP
+      - P-BOOTSTRAP-2-3-2-FIELD
+      - P-BOOTSTRAP-2-3-2-FIELDSET
+      - P-BOOTSTRAP-2-3-2-FORM
+      - P-BOOTSTRAP-2-3-2-INPUT
+      - P-BOOTSTRAP-2-3-2-INPUT-OTP
+      - P-BOOTSTRAP-2-3-2-NUMBER-FIELD
+      - P-BOOTSTRAP-2-3-2-SEPARATOR
+      - P-BOOTSTRAP-2-3-2-RESIZABLE
+      - P-BOOTSTRAP-2-3-2-MESSAGE-SCROLLER
+      - P-BOOTSTRAP-2-3-2-VIRTUAL-LIST
+      - P-BOOTSTRAP-2-3-2-SLIDER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-ACCORDION
+    - P-BOOTSTRAP-2-3-2-BUTTON
+    - P-BOOTSTRAP-2-3-2-CHECKBOX
+    - P-BOOTSTRAP-2-3-2-CHECKBOX-GROUP
+    - P-BOOTSTRAP-2-3-2-COLLAPSIBLE
+    - P-BOOTSTRAP-2-3-2-FIELD
+    - P-BOOTSTRAP-2-3-2-FIELDSET
+    - P-BOOTSTRAP-2-3-2-FORM
+    - P-BOOTSTRAP-2-3-2-INPUT
+    - P-BOOTSTRAP-2-3-2-INPUT-OTP
+    - P-BOOTSTRAP-2-3-2-MESSAGE-SCROLLER
+    - P-BOOTSTRAP-2-3-2-NUMBER-FIELD
+    - P-BOOTSTRAP-2-3-2-RESIZABLE
+    - P-BOOTSTRAP-2-3-2-SCROLL-AREA
+    - P-BOOTSTRAP-2-3-2-SCROLL-AREA-SCROLLBAR
+    - P-BOOTSTRAP-2-3-2-SCROLL-AREA-THUMB
+    - P-BOOTSTRAP-2-3-2-SCROLL-AREA-VIEWPORT
+    - P-BOOTSTRAP-2-3-2-SEPARATOR
+    - P-BOOTSTRAP-2-3-2-SLIDER
+    - P-BOOTSTRAP-2-3-2-SLIDER-FIELD-THUMB
+    - P-BOOTSTRAP-2-3-2-SLIDER-THUMB
+    - P-BOOTSTRAP-2-3-2-VIRTUAL-LIST

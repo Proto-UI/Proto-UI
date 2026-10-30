@@ -192,18 +192,22 @@ describe('contrast source provenance', () => {
     try {
       process.env[key] = inherited;
       const disabled = configuredPlugins(root, '1');
-      assert.equal(disabled.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'), false);
+      assert.equal(
+        disabled.some((plugin) => plugin.name === 'proto-ui-accordion-activation-probe'),
+        false
+      );
       assert.equal(process.env[key], inherited);
       const enabled = configuredPlugins(root, '1', path.join(root, 'explicit-probe'));
-      const probes = enabled.filter((plugin) => plugin.name === 'proto-ui-accordion-activation-probe');
+      const probes = enabled.filter(
+        (plugin) => plugin.name === 'proto-ui-accordion-activation-probe'
+      );
       assert.equal(probes.length, 1);
       assert.equal(probes[0].apply, 'serve');
       assert.equal(probes[0].enforce, 'pre');
       assert.equal(process.env[key], inherited);
-      assert.throws(
-        () => configuredPlugins(null, '0', path.join(root, 'invalid-root-probe')),
-        { code: 'ERR_INVALID_ARG_TYPE' }
-      );
+      assert.throws(() => configuredPlugins(null, '0', path.join(root, 'invalid-root-probe')), {
+        code: 'ERR_INVALID_ARG_TYPE',
+      });
       assert.equal(process.env[key], inherited);
     } finally {
       if (previous === undefined) delete process.env[key];

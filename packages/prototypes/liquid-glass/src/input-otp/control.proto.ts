@@ -18,15 +18,8 @@ export default definePrototype<InputOtpInputProps, InputOtpControlExposes>({
     });
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
     });
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
     return inherited.render;
   },
 });

@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asFieldDescription,
-  type FieldDescriptionProps,
-  type FieldDescriptionExposes,
-} from '@proto.ui/prototypes-base/field';
-export default definePrototype<FieldDescriptionProps, FieldDescriptionExposes>({
+import { definePrototype } from '@proto.ui/core';
+import { asFieldDescription, type FieldDescriptionExposes } from '@proto.ui/prototypes-base/field';
+import type { ShadcnFieldDescriptionProps } from './types';
+import { setupFieldTextVisual } from './visual';
+export default definePrototype<ShadcnFieldDescriptionProps, FieldDescriptionExposes>({
   name: 'shadcn-field-description',
+  modules: asFieldDescription.modules,
   setup(def) {
     const inherited = asFieldDescription();
-    def.feedback.style.use(tw('block text-sm leading-normal text-muted-foreground break-words'));
+    setupFieldTextVisual(def, 'description');
     return inherited.render;
   },
 });

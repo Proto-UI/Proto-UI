@@ -6,16 +6,18 @@ export { default as popoverDescription } from './description.proto';
 export { default as popoverClose } from './close.proto';
 export { default } from './root.proto';
 export type {
-  PopoverRootProps,
   PopoverRootExposes,
-  PopoverTriggerProps,
   PopoverTriggerExposes,
-  PopoverContentProps,
   PopoverContentExposes,
-  PopoverTitleProps,
   PopoverTitleExposes,
-  PopoverDescriptionProps,
   PopoverDescriptionExposes,
-  PopoverCloseProps,
   PopoverCloseExposes,
 } from '@proto.ui/prototypes-base/popover';
+export type {
+  PopoverRootProps,
+  PopoverTriggerProps,
+  PopoverContentProps,
+  PopoverTitleProps,
+  PopoverDescriptionProps,
+  PopoverCloseProps,
+} from './types';

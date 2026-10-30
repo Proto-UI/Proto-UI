@@ -21,18 +21,23 @@ criteria:
       zh-CN: '通过 @proto.ui/prototypes-liquid-glass/select 提供 liquid-glass-select-trigger 与完整类型；private workspace 源码只允许显式 workspace CLI 生成，不代表 registry 已发布。'
   - id: P-LIQUID-GLASS-SELECT-TRIGGER-VISUAL-SAFETY
     text:
-      en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
-      zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
+      en: "Use shrinkable logical layout and readable wrapping labels. Content is the nonmaterial portal/lifetime/frame, Surface solely owns popup paint and complete opaque fallback, and Viewport is the one scrollport. Preserve Base focus, disabled state, anchor/available bounds and item text identity without fixed content height or physical text alignment."
+      zh-CN: "使用可收缩逻辑布局和可读换行标签。Content 仅为无材质 portal/lifetime/frame，Surface 独占 popup 绘制与完整不透明 fallback，Viewport 是唯一 scrollport。保留 Base focus、disabled、anchor/available 边界和 ItemText 身份，不引入固定内容高度或物理文字对齐。"
   - id: P-LIQUID-GLASS-SELECT-TRIGGER-MATERIAL-INTENT
     text:
-      en: Declare one shared rounded-rect/style, in-app-backdrop material slot with complete final-style opaque fallback. Trigger consumes Base pressed for mutually exclusive rest/pressed liquid-glass candidates; open Content requests liquid-glass. No adaptive/native-blur substitution, private material flag, new state owner or optical/GPUI paint claim is permitted. Exactly one candidate includes existing pointer self-contact only while eligible; disabled contributes zero candidates while retaining the slot and readable fallback. This does not grant pointer-following hover optics.
-      zh-CN: 声明单个 rounded-rect/style、in-app-backdrop 共享 material slot，并保留最终不透明 style fallback。Trigger 使用 Base pressed 互斥选择 rest/pressed liquid-glass；打开的 Content 请求 liquid-glass。不得替代为 adaptive/native blur、引入私有材质标记或新状态 owner，也不得把意图称为光学或 GPUI 绘制证据。 仅可交互时唯一候选包含既有 pointer self-contact；disabled 时保留 slot 和可读 fallback，但提交零候选。这不代表已实现跟随指针的 hover 光学。
+      en: "Declare one shared rounded-rect/style, in-app-backdrop material slot with complete final-style opaque fallback. Trigger consumes Base pressed for mutually exclusive rest/pressed liquid-glass candidates; open Surface requests liquid-glass. No adaptive/native-blur substitution, private material flag, new state owner or optical/GPUI paint claim is permitted. Exactly one candidate includes existing pointer self-contact only while eligible; disabled contributes zero candidates while retaining the slot and readable fallback. This does not grant pointer-following hover optics."
+      zh-CN: "声明单个 rounded-rect/style、in-app-backdrop 共享 material slot，并保留最终不透明 style fallback。Trigger 使用 Base pressed 互斥选择 rest/pressed liquid-glass；打开的 Surface 请求 liquid-glass。不得替代为 adaptive/native blur、引入私有材质标记或新状态 owner，也不得把意图称为光学或 GPUI 绘制证据。 仅可交互时唯一候选包含既有 pointer self-contact；disabled 时保留 slot 和可读 fallback，但提交零候选。这不代表已实现跟随指针的 hover 光学。"
   - id: P-LIQUID-GLASS-SELECT-TRIGGER-COMMAND-INTERACTION
     text:
       en: Follow the bounded shared command recipe; eligible static hover is independent of pressed, persistent selection and focus-visible. Base owns all transient and semantic state; the family only projects data-only physical tokens through Rules in its owning setup. Disabled commands retain readable same-state opaque fallback without whole-host opacity. Exact-head native images and current contact footprint acceptance remain required.
       zh-CN: 遵守有界共享 command 配方：可交互静态 hover 与 pressed、持久选择和 focus-visible 独立。所有瞬态及语义状态仍由 Base 拥有，family 仅在本 setup 内通过 Rules 投影数据型物理 tokens。禁用后保留可读的同状态不透明 fallback，不降低整个宿主的透明度。仍须精确源码 native 图像与当前 contact 绘制边界验收。
     dependsOn:
       contracts: [C-LIQUID-GLASS-COMMAND-INTERACTION-0001]
+  - id: P-LIQUID-GLASS-SELECT-TRIGGER-FIELD-COMPOSITION
+    text:
+      en: The public fieldSelectTrigger entry invokes asFieldSelectTrigger once and reuses the same Trigger visual helper, material slot and candidate policy. The optional Field binding alone owns invalid, pending, policy and relationships; Select keeps selection, focus and open ownership, with no second material or semantic owner.
+    dependsOn:
+      contracts: [C-FIELD-SELECT-0001]
 openQuestions:
   - id: P-LIQUID-GLASS-SELECT-TRIGGER-Q-ADMISSION
     question:

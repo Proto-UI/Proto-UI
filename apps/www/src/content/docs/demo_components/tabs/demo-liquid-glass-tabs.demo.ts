@@ -32,6 +32,10 @@ export default {
       },
       {
         kind: 'proto',
+        prototypeId: 'liquid-glass-tabs-indicator',
+      },
+      {
+        kind: 'proto',
         prototypeId: 'liquid-glass-tabs-content',
         props: { value: 'account' },
         children: ['Make changes to your account here.'],

@@ -7,7 +7,10 @@ import {
 export default definePrototype<AccordionRootProps, AccordionRootExposes>({
   name: 'bootstrap-2-3-2-accordion-root',
   setup(def) {
-    asAccordionRoot();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-0.5 text-foreground'));
+    const inherited = asAccordionRoot();
+    def.feedback.style.use(
+      tw('block min-w-0 mb-[20px] text-foreground text-[14px] leading-[20px]')
+    );
+    return inherited.render;
   },
 });

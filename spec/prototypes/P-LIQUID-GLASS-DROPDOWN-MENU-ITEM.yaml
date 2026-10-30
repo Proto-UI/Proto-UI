@@ -15,8 +15,9 @@ criteria:
     text:
       zh-CN: 全部行为继续遵守共同定义；本家源码配方和实际绘制证据分开验收，不能用fallback冒充光学效果完成。
       en: All behavior follows the common definition; source recipes and actual paint require separate acceptance, and fallback does not prove optical material completion.
-dependsOn:
-  prototypes: [P-BASE-DROPDOWN-MENU-ITEM]
+inherits:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU-ITEM
 verifies:
   tests: [T-BASE-DROPDOWN-COMPOSITION-0001]
 sources:

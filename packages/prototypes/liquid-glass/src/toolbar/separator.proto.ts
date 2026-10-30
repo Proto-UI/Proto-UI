@@ -14,5 +14,6 @@ export default definePrototype<ToolbarSeparatorProps, ToolbarSeparatorExposes>({
       when: (w) => w.state(behavior.getState!('orientation')!).eq('horizontal'),
       intent: (i) => i.feedback.style.use(tw('h-px w-auto my-1 mx-0')),
     });
+    return behavior.render;
   },
 });

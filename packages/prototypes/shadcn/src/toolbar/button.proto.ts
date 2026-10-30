@@ -1,24 +1,16 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asToolbarButton,
-  type ToolbarButtonProps,
-  type ToolbarButtonExposes,
-} from '@proto.ui/prototypes-base/toolbar';
+import { definePrototype } from '@proto.ui/core';
+import { asToolbarButton } from '@proto.ui/prototypes-base/toolbar';
+import { setupCollectionActionVisual } from './action-visual';
+import type { ShadcnToolbarButtonProps, ShadcnToolbarButtonExposes } from './types';
 
-export default definePrototype<ToolbarButtonProps, ToolbarButtonExposes>({
+export default definePrototype<ShadcnToolbarButtonProps, ShadcnToolbarButtonExposes>({
   name: 'shadcn-toolbar-button',
+  modules: asToolbarButton.modules,
   setup(def) {
     const behavior = asToolbarButton();
-    def.feedback.style.use(
-      tw('rounded-md inline-flex min-w-0 items-center justify-center px-3 py-2 outline-none')
-    );
-    def.rule({
-      when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
-    });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
-    });
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-toolbar] Button state unavailable.');
+    setupCollectionActionVisual(def, state, 'ghost');
+    return behavior.render;
   },
 });

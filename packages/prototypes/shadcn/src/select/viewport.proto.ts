@@ -7,7 +7,7 @@ import { setupSelectStyle } from './style';
 export default definePrototype<ShadcnSelectViewportProps>({
   name: 'shadcn-select-viewport',
   setup(def) {
-    asSelectViewport();
+    const inherited = asSelectViewport();
     const style = setupSelectStyle(def);
     const position = def.state.string('selectViewportPosition', 'item-aligned');
     def.context.subscribe(SELECT_VISUAL, (_run, next) =>
@@ -25,7 +25,7 @@ export default definePrototype<ShadcnSelectViewportProps>({
       intent: (i) => i.feedback.style.use(tw('p-1')),
     });
     def.rule({
-      when: (w) => w.state(style).eq('rhea'),
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
       intent: (i) => i.feedback.style.use(tw('p-0')),
     });
     def.rule({
@@ -37,5 +37,6 @@ export default definePrototype<ShadcnSelectViewportProps>({
           )
         ),
     });
+    return inherited.render;
   },
 });

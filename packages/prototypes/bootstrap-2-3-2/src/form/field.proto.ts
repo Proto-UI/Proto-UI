@@ -5,7 +5,16 @@ export default definePrototype<FormFieldProps, FormFieldExposes>({
   name: 'bootstrap-2-3-2-form-field',
   setup(def) {
     const inherited = asFormField();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-2'));
+    const field = inherited.getAsHookHandle!('as-field-root');
+    if (!field?.stateHandles)
+      throw new Error('[bootstrap-2-3-2-form-field] Base Field facts required.');
+    def.feedback.style.use(
+      tw('block min-w-0 mb-[10px] text-foreground text-[14px] leading-[20px]')
+    );
+    def.rule({
+      when: (w) => w.state(field.stateHandles!.invalid).eq(true),
+      intent: (i) => i.feedback.style.use(tw('text-destructive')),
+    });
     return inherited.render;
   },
 });

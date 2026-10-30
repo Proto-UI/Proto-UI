@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type MeterPartProps,
-  type MeterPartExposes,
-  asMeterLabel,
-} from '@proto.ui/prototypes-base/meter';
-export default definePrototype<MeterPartProps, MeterPartExposes>({
+import { definePrototype } from '@proto.ui/core';
+import { type MeterPartExposes, asMeterLabel } from '@proto.ui/prototypes-base/meter';
+import { setupMeterLabelPaint } from './visual';
+import type { ShadcnMeterPartProps } from './types';
+export default definePrototype<ShadcnMeterPartProps, MeterPartExposes>({
   name: 'shadcn-meter-label',
+  modules: asMeterLabel.modules,
   setup(def) {
     const inherited = asMeterLabel();
-    def.feedback.style.use(tw('text-sm font-medium'));
+    setupMeterLabelPaint(def);
     return inherited.render;
   },
 });

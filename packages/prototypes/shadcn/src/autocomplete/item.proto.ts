@@ -1,29 +1,15 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asAutocompleteItem,
-  type AutocompleteItemProps,
-  type AutocompleteItemExposes,
-} from '@proto.ui/prototypes-base/autocomplete';
+import { definePrototype } from '@proto.ui/core';
+import { asAutocompleteItem } from '@proto.ui/prototypes-base/autocomplete';
+import type { AutocompleteItemProps, AutocompleteItemExposes } from './types';
+import { setupSearchItemPaint } from '../combobox/visual';
 export default definePrototype<AutocompleteItemProps, AutocompleteItemExposes>({
   name: 'shadcn-autocomplete-item',
+  modules: asAutocompleteItem.modules,
   setup(def) {
     const behavior = asAutocompleteItem();
-    def.feedback.style.use(
-      tw(
-        'flex min-w-0 cursor-default select-none items-center rounded-sm px-3 py-2 text-sm break-words'
-      )
-    );
-    def.rule({
-      when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
-    });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('active')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-    });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('selected')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('font-semibold')),
+    setupSearchItemPaint(def, {
+      disabled: behavior.getState!('disabled')!,
+      active: behavior.getState!('active')!,
     });
   },
 });

@@ -108,7 +108,7 @@ describe('source-scanned Shadow Template/Root separation', () => {
     ).rejects.toThrow(/verified length recipe/);
   });
 
-  it.each(['p-[10%]', 'p-[var(--space)]', 'placeholder:p-4'])(
+  it.each(['p-[10%]', 'p-[var(--space)]', 'placeholder:text-muted-foreground'])(
     'keeps Template-only %s in ordinary Shadow CSS without a Root receipt',
     async (token) => {
       const { artifact, documentCss } = await generate(template(token));
@@ -139,11 +139,11 @@ describe('source-scanned Shadow Template/Root separation', () => {
             r.el('span', { style: tw('p-[10%]') }),
             r.el('div', r.el('span', { style: tw('p-[var(--space)]') })),
           ]),
-          r.el('input', { style: tw('placeholder:p-4') }),
-        ];
+          r.el('input', { style: tw('placeholder:text-muted-foreground') }),
+        ]);
       }});
     `);
-    for (const token of ['p-[10%]', 'p-[var(--space)]', 'placeholder:p-4']) {
+    for (const token of ['p-[10%]', 'p-[var(--space)]', 'placeholder:text-muted-foreground']) {
       expect(artifact.cssText).toContain(`[data-pui-style~="${token}"]`);
       expect(artifact.cssText).not.toContain(`[data-pui-split-root-style~="${token}"]`);
     }
@@ -229,11 +229,17 @@ describe('source-scanned Shadow Template/Root separation', () => {
   });
 
   it('keeps unclassified flat delivery conservative, including preset-style closures', () => {
-    for (const token of ['p-[10%]', 'placeholder:p-4']) {
+    for (const token of ['p-[10%]', 'md:p-4']) {
       expect(() => renderShadowStyleDelivery(['p-2', token], 'artifact')).toThrow(
         /verified length recipe|unsupported condition/
       );
     }
+    // Non-color `placeholder:` payloads are outside the finite vocabulary:
+    // they are reported unsupported rather than rendered as ::placeholder CSS.
+    const placeholder = renderShadowStyleDelivery(['p-2', 'placeholder:p-4'], 'artifact');
+    expect(placeholder.documentCss).toContain('placeholder:p-4');
+    expect(placeholder.documentCss).toContain('Unsupported Proto UI style tokens');
+    expect(placeholder.documentCss).not.toContain('::placeholder {');
   });
 
   it.each([

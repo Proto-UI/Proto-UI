@@ -13,11 +13,21 @@ async function settleVue(): Promise<void> {
 
 afterEach(() => vi.useRealTimers());
 
-for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, selectValue }] of [
+for (const [family, projection] of [
   ['base', base],
   ['bootstrap-2-3-2', bootstrap],
   ['liquid-glass', glass],
 ] as const) {
+  const {
+    selectContent,
+    selectSurface,
+    selectViewport,
+    selectItem,
+    selectItemText,
+    selectRoot,
+    selectTrigger,
+    selectValue,
+  } = projection;
   describe(`adapter-vue: ${family} select compound protocol`, () => {
     it('projects select-only ARIA and keyboard selection through Vue', async () => {
       vi.useFakeTimers();
@@ -26,7 +36,10 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
       const Trigger = adapter(selectTrigger);
       const Value = adapter(selectValue);
       const Content = adapter(selectContent);
+      const Surface = adapter(selectSurface);
+      const Viewport = adapter(selectViewport);
       const Item = adapter(selectItem);
+      const ItemText = adapter(selectItemText);
       const refs: Record<string, any> = {};
       const host = document.createElement('div');
       document.body.appendChild(host);
@@ -49,24 +62,28 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
                   }),
                 ]),
                 VueAny.h(Content, { ref: (el: any) => (refs.content = el) }, () => [
-                  VueAny.h(
-                    Item,
-                    {
-                      value: 'alpha',
-                      textValue: 'Alpha',
-                      ref: (el: any) => (refs.alpha = el),
-                    },
-                    () => 'Alpha'
-                  ),
-                  VueAny.h(
-                    Item,
-                    {
-                      value: 'beta',
-                      textValue: 'Beta',
-                      ref: (el: any) => (refs.beta = el),
-                    },
-                    () => 'Beta'
-                  ),
+                  VueAny.h(Surface, { ref: (el: unknown) => (refs.surface = el) }, () => [
+                    VueAny.h(Viewport, { ref: (el: unknown) => (refs.viewport = el) }, () => [
+                      VueAny.h(
+                        Item,
+                        {
+                          value: 'alpha',
+                          textValue: 'Alpha',
+                          ref: (el: unknown) => (refs.alpha = el),
+                        },
+                        () => [VueAny.h(ItemText, null, () => 'Alpha')]
+                      ),
+                      VueAny.h(
+                        Item,
+                        {
+                          value: 'beta',
+                          textValue: 'Beta',
+                          ref: (el: unknown) => (refs.beta = el),
+                        },
+                        () => [VueAny.h(ItemText, null, () => 'Beta')]
+                      ),
+                    ]),
+                  ]),
                 ]),
               ]
             );
@@ -83,6 +100,9 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
         const contentEl = document.getElementById(refs.trigger?.$el.getAttribute('aria-controls'));
         expect(contentEl?.getAttribute('role')).toBe('listbox');
         expect(contentEl?.getAttribute('id')).toBe(refs.trigger?.$el.getAttribute('aria-controls'));
+        expect(contentEl?.contains(refs.surface?.$el)).toBe(true);
+        expect(refs.surface?.$el.contains(refs.viewport?.$el)).toBe(true);
+        expect(refs.viewport?.$el.contains(refs.alpha?.$el)).toBe(true);
         expect(refs.alpha?.$el.getAttribute('role')).toBe('option');
         expect(refs.alpha?.$el.getAttribute('aria-selected')).toBe('true');
         expect(refs.beta?.$el.getAttribute('aria-selected')).toBe('false');

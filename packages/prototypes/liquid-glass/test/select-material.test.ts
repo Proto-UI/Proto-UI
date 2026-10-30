@@ -26,7 +26,16 @@ import {
   FOCUS_PARENT_CAP,
   FOCUS_ROOT_TARGET_CAP,
 } from '@proto.ui/module-focus';
-import { selectRoot, selectTrigger, selectContent } from '../src/select';
+import {
+  selectRoot,
+  selectTrigger,
+  selectValue,
+  selectContent,
+  selectSurface,
+  selectViewport,
+  selectItem,
+  selectItemText,
+} from '../src/select';
 
 async function fixture(sink = true) {
   const parents = new Map<unknown, unknown | null>();
@@ -132,14 +141,33 @@ async function fixture(sink = true) {
   await root.session.mount();
   const trigger = create(selectTrigger, {}, root.target);
   await trigger.session.mount();
+  const value = create(selectValue, {}, trigger.target);
+  await value.session.mount();
   const content = create(selectContent, {}, root.target);
   await content.session.mount();
+  const surface = create(selectSurface, {}, content.target);
+  await surface.session.mount();
+  const viewport = create(selectViewport, {}, surface.target);
+  await viewport.session.mount();
+  const item = create(selectItem, { value: 'one', textValue: 'One' }, viewport.target);
+  await item.session.mount();
+  const text = create(selectItemText, {}, item.target);
+  await text.session.mount();
   return {
     root,
     trigger,
     content,
+    surface,
+    viewport,
+    item,
+    text,
     async dispose() {
+      await text.session.dispose();
+      await item.session.dispose();
+      await viewport.session.dispose();
+      await surface.session.dispose();
       await content.session.dispose();
+      await value.session.dispose();
       await trigger.session.dispose();
       await root.session.dispose();
     },
@@ -162,10 +190,12 @@ describe('Liquid Select shared material consumer (intent only, no paint claim)',
       });
       expect(f.trigger.frames.at(-1)?.material.candidates).toEqual([candidate('rest')]);
       expect(f.root.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
-      expect(f.content.feedback.exportMaterialFrame?.().slot).toEqual(
+      expect(f.surface.feedback.exportMaterialFrame?.().slot).toEqual(
         f.trigger.frames.at(-1)?.material.slot
       );
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.surface.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      for (const part of [f.content, f.viewport, f.item, f.text])
+        expect(part.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
       f.trigger.input('pointer.down');
       expect(f.trigger.exposes.pressed.get()).toBe(true);
       expect(f.trigger.frames.at(-1)?.material.candidates).toEqual([candidate('pressed')]);
@@ -200,13 +230,19 @@ describe('Liquid Select shared material consumer (intent only, no paint claim)',
       f.trigger.input('press.commit');
       expect(f.root.exposes.open.get()).toBe(true);
       expect(f.content.exposes.open.get()).toBe(true);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([
+      expect(f.surface.feedback.exportMaterialFrame?.().candidates).toEqual([
         { intent: 'liquid-glass' },
       ]);
+      expect(f.surface.styles.at(-1)?.tokens).toEqual(
+        expect.arrayContaining(['bg-secondary', 'text-secondary-foreground', 'overflow-hidden'])
+      );
+      expect(f.viewport.styles.at(-1)?.tokens).toContain('overflow-y-auto');
+      expect(f.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
       f.trigger.input('press.commit');
       expect(f.root.exposes.open.get()).toBe(false);
       expect(f.content.exposes.open.get()).toBe(false);
-      expect(f.content.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.surface.feedback.exportMaterialFrame?.().candidates).toEqual([]);
+      expect(f.content.feedback.exportMaterialFrame?.()).toEqual({ slot: null, candidates: [] });
       expect(f.trigger.feedback.exportMaterialFrame?.().candidates).toEqual([candidate('rest')]);
     } finally {
       await f.dispose();

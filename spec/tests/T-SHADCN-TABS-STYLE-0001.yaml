@@ -1,14 +1,12 @@
 id: T-SHADCN-TABS-STYLE-0001
 type: test
-title: Production Tabs text/default style projection and no-reset scope switching
+title: Tabs nine-profile default and line paint with no-reset scope switching
 status: draft
 since: 0.3.0-alpha.1
-summary: Bounded three-style text/default evidence, not complete Tabs or
-  all-adapter parity.
+summary: Authored nine-profile default/line consumers and live owned decoration; not executed here and not native or all-adapter parity.
 cases:
   - id: T-SHADCN-TABS-STYLE-0001-CASE-MATRIX
-    title: Three styles across horizontal/vertical and light/dark with hover, focus,
-      selected and disabled paint
+    title: Nine source-distinct profiles retain Base state through default and line paint updates
     covers:
       - P-SHADCN-TABS-STYLE-SCOPE
       - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
@@ -29,42 +27,30 @@ cases:
       - P-SHADCN-TABS-CONTENT-STYLE-SCOPE
     expectation: same-live-behavior-and-owned-user-nodes
   - id: T-SHADCN-TABS-STYLE-0001-CASE-FAIL-CLOSED
-    title: Reject unsupported/unknown style and upstream line while retaining
-      independent underline compatibility
+    title: Reject unknown style while keeping independent Proto underline separate from upstream line
     covers:
       - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
       - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
       - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
       - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
     expectation: explicit-capability-boundary-without-silent-fallback
-  - id: T-SHADCN-TABS-STYLE-0001-CASE-SOURCE
-    title: Fixed source bytes and exhaustive style statuses
-    covers:
-      - P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
-      - P-SHADCN-TABS-LIST-SOURCE-BOUND-TEXT-DEFAULT
-      - P-SHADCN-TABS-TRIGGER-SOURCE-BOUND-TEXT-DEFAULT
-      - P-SHADCN-TABS-CONTENT-SOURCE-BOUND-TEXT-DEFAULT
-    expectation: hashes-and-coverage-match-fixed-source
 implementations:
   - id: prototypes-shadcn-tabs-style-projection
     kind: module-test
-    status: passing
-    path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+    status: planned
+    path: packages/prototypes/shadcn/test/tabs-draft-projection.test.ts
     required: true
     consumesCases:
       - T-SHADCN-TABS-STYLE-0001-CASE-MATRIX
       - T-SHADCN-TABS-STYLE-0001-CASE-NO-RESET
       - T-SHADCN-TABS-STYLE-0001-CASE-FAIL-CLOSED
-      - T-SHADCN-TABS-STYLE-0001-CASE-SOURCE
     exercises: &a1
       - P-SHADCN-TABS
       - P-SHADCN-TABS-LIST
       - P-SHADCN-TABS-TRIGGER
       - P-SHADCN-TABS-CONTENT
     notes:
-      - Approved fixed runtime plus authored changes. Happy DOM evidence does
-        not establish native browser screenshots, pixel parity, portal, or every
-        adapter.
+      - Authored actual WC/Runtime consumers cover nine-profile paint, default/line switching, controlled refusal, disabled requests, nested Root isolation, caller leaf identity and unknown style rejection. No tests were run for this source handoff; synthetic DOM does not establish native pixels or every Adapter.
 verifies:
   prototypes:
     - id: P-SHADCN-TABS
@@ -87,6 +73,9 @@ exercises:
   prototypes: *a1
 revisions:
   - version: 0.3.0-alpha.1
+    change: revised
+    summary: Replace deleted source/metadata assertions with the actual nine-profile default/line consumer suite; retain planned execution and native acceptance boundaries.
+  - version: 0.3.0-alpha.1
     change: introduced
     summary: Added bounded production style matrix and no-reset/fail-closed/source
       evidence.
@@ -97,6 +86,4 @@ tags:
   - style
   - test
 lifecycleRationale:
-  en: The three-style text/default test matrix is bounded; six styles, line, glyph
-    and complete native acceptance remain open, and the first native capture
-    failed its incomplete fixture theme.
+  en: The new nine-profile default/line consumer suite is authored but unrun here. Glyph selectors and complete native acceptance remain open; historical native fixture failures are not erased or treated as current success.

@@ -18,6 +18,6 @@ export default definePrototype<ShadcnFieldTextareaProps, ShadcnFieldTextareaExpo
     if (!textarea.stateHandles || !binding)
       throw new Error('[shadcn-field-textarea] Missing Base/Field facts.');
     setupTextareaVisual(def, textarea.stateHandles, binding.state.invalid);
-    return () => null;
+    return textarea.render;
   },
 });
