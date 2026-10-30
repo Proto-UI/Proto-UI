@@ -17,6 +17,7 @@ export const SITE_TYPOGRAPHY_ROLES = [
   'caption',
   'overview-card-title',
   'overview-card-description',
+  'reading-toc-title',
 ] as const;
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
 export type SiteHeroViewport = 'small' | 'medium' | 'wide';
@@ -24,6 +25,14 @@ export type SiteHeroViewport = 'small' | 'medium' | 'wide';
 /** Finite compact card roles preserve their authored native typography.
  * Public Text projects these layout inputs; document headings stay unchanged. */
 export function siteTextSurfaceStyle(role: SiteTypographyRole): Record<string, string> {
+  if (role === 'reading-toc-title')
+    return {
+      fontSize: '0.75rem',
+      lineHeight: '1rem',
+      fontFamily: 'inherit',
+      fontWeight: 'inherit',
+      letterSpacing: 'inherit',
+    };
   if (role === 'overview-card-title')
     return {
       fontSize: '1rem',
@@ -54,6 +63,17 @@ export function siteTextRecipe(
   context: 'site' | 'document' = 'site',
   heroViewport: SiteHeroViewport = compact ? 'small' : 'medium'
 ): TextRootProps {
+  if (role === 'reading-toc-title')
+    return {
+      size: 'xs',
+      tone: 'inherit',
+      weight: 'normal',
+      font: 'body',
+      leading: 'size',
+      tracking: 'normal',
+      emphasis: 'normal',
+      decoration: 'none',
+    };
   if (role === 'overview-card-title' || role === 'overview-card-description')
     return {
       size: role === 'overview-card-title' ? 'base' : 'xs',

@@ -2131,7 +2131,36 @@ it('keeps reading TOC native row boxes, depth padding and multiline growth throu
                   };
                 })
             );
-            samples.push({ width, rootSize, rows });
+            const title = page.locator('.right-sidebar sl-toc h2#starlight__on-this-page');
+            if (javaScriptEnabled) await title.locator('[data-typography-prototype]').waitFor();
+            const titlePaint = await title.evaluate((native) => {
+              const surface =
+                native.querySelector<HTMLElement>('[data-typography-prototype]') ?? native;
+              const style = getComputedStyle(surface),
+                parent = getComputedStyle(native);
+              return {
+                tag: native.tagName,
+                text: native.textContent?.trim(),
+                size: parseFloat(style.fontSize),
+                line: parseFloat(style.lineHeight),
+                font: style.fontFamily,
+                nativeFont: parent.fontFamily,
+                weight: style.fontWeight,
+                nativeWeight: parent.fontWeight,
+                tracking: style.letterSpacing,
+                nativeTracking: parent.letterSpacing,
+                labelledBy: native.closest('nav')?.getAttribute('aria-labelledby'),
+              };
+            });
+            samples.push({ width, rootSize, rows, titlePaint });
+            expect(titlePaint.tag).toBe('H2');
+            expect(titlePaint.text).toBeTruthy();
+            expect(titlePaint.labelledBy).toBe('starlight__on-this-page');
+            expect(titlePaint.size).toBeCloseTo(rootSize * 0.75, 2);
+            expect(titlePaint.line).toBeCloseTo(rootSize, 2);
+            expect(titlePaint.font).toBe(titlePaint.nativeFont);
+            expect(titlePaint.weight).toBe(titlePaint.nativeWeight);
+            expect(titlePaint.tracking).toBe(titlePaint.nativeTracking);
             expect(rows.length).toBeGreaterThan(0);
             for (const row of rows) {
               expect(row.size).toBeCloseTo(rootSize * 0.8, 2);

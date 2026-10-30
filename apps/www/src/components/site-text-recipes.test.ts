@@ -263,3 +263,31 @@ it('keeps authored Overview card roles compact without changing document or Hero
     expect(siteTextSurfaceStyle('slogan')).toEqual({});
   }
 });
+
+it('preserves the native reading TOC title without changing generic labels', () => {
+  const source = readFileSync(
+    'apps/www/src/components/override/TableOfContents/TableOfContents.astro',
+    'utf8'
+  );
+  expect(source).toContain(
+    '<h2 data-site-typography="reading-toc-title" id="starlight__on-this-page">'
+  );
+  expect(source).toContain('aria-labelledby="starlight__on-this-page"');
+  expect(siteTextSurfaceStyle('reading-toc-title')).toEqual({
+    fontSize: '0.75rem',
+    lineHeight: '1rem',
+    fontFamily: 'inherit',
+    fontWeight: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    expect(siteTextRecipe('reading-toc-title', family)).toMatchObject({
+      size: 'xs',
+      tone: 'inherit',
+      leading: 'size',
+    });
+    expect(siteTextRecipe('label', family).size).toBe('sm');
+    expect(siteTextRecipe('h2', family).size).toBe('2xl');
+    expect(siteTextSurfaceStyle('label')).toEqual({});
+  }
+});
