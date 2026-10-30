@@ -90,7 +90,7 @@ function hasConflictingWrite(
   const aliases = new Set<ts.Node>([declaration]);
   const bindingOf = (expression: ts.Expression): ts.Node | null => {
     const value = unwrap(expression);
-    return ts.isIdentifier(value) ? findLexicalBinding(lexicalIndex, value, value.text) : null;
+    return ts.isIdentifier(value) ? findLexicalBinding(lexicalIndex, value) : null;
   };
   const hasHolderThis = (node: ts.Node): boolean => {
     for (let current: ts.Node | undefined = node.parent; current; current = current.parent) {
@@ -233,7 +233,7 @@ function hasConflictingWrite(
         const rootName = root(node.expression);
         const written = memberName(node);
         const rootValue = unwrap(node.expression);
-        const binding = rootName ? findLexicalBinding(lexicalIndex, rootName, rootName.text) : null;
+        const binding = rootName ? findLexicalBinding(lexicalIndex, rootName) : null;
         // A dynamic key can be any property, so it retires every candidate.
         if (
           (rootValue.kind === ts.SyntaxKind.ThisKeyword &&
@@ -261,7 +261,7 @@ function hasConflictingWrite(
         const receiver = expression.expression;
         const receiverRoot = root(receiver);
         const receiverBinding = receiverRoot
-          ? findLexicalBinding(lexicalIndex, receiverRoot, receiverRoot.text)
+          ? findLexicalBinding(lexicalIndex, receiverRoot)
           : null;
         const member = memberName(expression);
         if (
@@ -343,6 +343,7 @@ function bindingNames(
 }
 
 type LexicalIndex = {
+  references: WeakMap<ts.Identifier, ts.Node | null>;
   direct: WeakMap<readonly ts.Statement[], ReadonlyMap<string, ts.Node>>;
   vars: WeakMap<ts.Node, ReadonlyMap<string, ts.Node>>;
 };
@@ -814,7 +815,17 @@ function runtimePackageEntry(
   return null;
 }
 
-function findLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Node, name: string): ts.Node | null {
+function findLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Identifier): ts.Node | null {
+  // Only immutable AST lexical identity is memoized, never module resolution or
+  // filesystem observations. Replacement SourceFiles carry distinct node keys.
+  if (lexicalIndex.references.has(node)) return lexicalIndex.references.get(node)!;
+  const result = findUncachedLexicalBinding(lexicalIndex, node);
+  lexicalIndex.references.set(node, result);
+  return result;
+}
+
+function findUncachedLexicalBinding(lexicalIndex: LexicalIndex, node: ts.Identifier): ts.Node | null {
+  const name = node.text;
   let current: ts.Node | undefined = node;
   while (current) {
     if (ts.isSourceFile(current)) {
@@ -960,7 +971,7 @@ function objectMember(object: ts.ObjectLiteralExpression, name: string): ts.Node
 export function createHookSourceModuleContext(): HookSourceModuleContext {
   // Immutable AST identity, scoped to one operation. A newly registered source
   // owns different nodes; no path-keyed/global index survives into its lookup.
-  const lexicalIndex: LexicalIndex = { direct: new WeakMap(), vars: new WeakMap() };
+  const lexicalIndex: LexicalIndex = { direct: new WeakMap(), vars: new WeakMap(), references: new WeakMap() };
   const modules = new Map<string, HookSourceModule>();
   const moduleFailures = new Set<string>();
   const configCache = new Map<string, ConfigRecord>();
@@ -1452,7 +1463,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
         if (ts.isIdentifier(node)) {
           if (node.text !== name.text) return false;
           if (varDeclaration) return true;
-          const binding = findLexicalBinding(lexicalIndex, node, node.text);
+          const binding = findLexicalBinding(lexicalIndex, node);
           return binding === declaration || binding === name;
         }
         if (ts.isArrayBindingPattern(node) || ts.isObjectBindingPattern(node)) {
@@ -1803,7 +1814,7 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
   function resolveReference(node: ts.Node, module: HookSourceModule): HookSourceSymbol | null {
     const value = unwrap(node);
     if (ts.isIdentifier(value)) {
-      const lexical = findLexicalBinding(lexicalIndex, value, value.text);
+      const lexical = findLexicalBinding(lexicalIndex, value);
       if (lexical) {
         const imported = importBinding(module, value.text);
         if (imported && imported.declaration === lexical) return resolveLocal(module, value.text);

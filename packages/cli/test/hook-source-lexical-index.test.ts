@@ -241,3 +241,59 @@ describe('public module query canonicalization', () => {
   });
 
 });
+
+
+describe('immutable AST lexical query identities', () => {
+  it.each(['target', 'absent'])('reuses the ancestor lookup for %s including a missing binding', name => {
+    const file = source(`const target = 1; function f() { { read(${name}); } }`);
+    const context = createHookSourceModuleContext(); const module = context.moduleForSource(file);
+    const query = reads(file)[0], parent = query.parent; let parentReads = 0;
+    Object.defineProperty(query, 'parent', { get() { parentReads++; return parent; } });
+    const expected = name === 'target' ? nodes(file, ts.isVariableDeclaration)[0] : undefined;
+    expect(context.resolveReference(query, module)?.declaration).toBe(expected);
+    const first = parentReads; expect(first).toBeGreaterThan(0);
+    for (let i = 0; i < 20; i++) expect(context.resolveReference(query, module)?.declaration).toBe(expected);
+    expect(parentReads).toBe(first);
+  });
+
+  it('does not share a cached miss with a replacement SourceFile at the same path', () => {
+    const context = createHookSourceModuleContext();
+    const before = source(`function f() { read(value); }`);
+    const first = context.moduleForSource(before);
+    expect(context.resolveReference(reads(before)[0], first)).toBeNull();
+    const after = source(`function f() { read(value); const value = 'new'; }`);
+    const second = context.moduleForSource(after);
+    expect(context.resolveReference(reads(after)[0], second)?.declaration)
+      .toBe(nodes(after, ts.isVariableDeclaration)[0]);
+    // The immutable old syntax still has no lexical binding; it must not acquire
+    // the replacement AST's declaration through a path/name cache.
+    expect(context.resolveReference(reads(before)[0], first)).toBeNull();
+  });
+  it('still resolves the imported target afresh for the same identifier AST', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-lexical-import-'));
+    const first = path.join(directory, 'first.ts'), second = path.join(directory, 'second.ts');
+    const link = path.join(directory, 'linked.ts'), entry = path.join(directory, 'entry.ts');
+    writeFileSync(first, 'export const value = 1;'); writeFileSync(second, 'export const value = 2;');
+    symlinkSync(first, link); writeFileSync(path.join(directory, 'tsconfig.json'), '{}');
+    const file = ts.createSourceFile(entry, `import { value } from './linked'; read(value);`, ts.ScriptTarget.Latest, true);
+    const context = createHookSourceModuleContext(), module = context.moduleForSource(file), query = reads(file)[0];
+    try {
+      expect(context.resolveReference(query, module)?.module.file).toBe(first);
+      unlinkSync(link); symlinkSync(second, link);
+      expect(context.resolveReference(query, module)?.module.file).toBe(second);
+    } finally { rmSync(directory, { recursive: true, force: true }); }
+  });
+
+  it('keeps distinct names in the public module-local lookup independent of reference caching', () => {
+    const file = source(`const first = 1, second = 2; read(first); read(second);`);
+    const context = createHookSourceModuleContext(), module = context.moduleForSource(file);
+    const declarations = nodes(file, ts.isVariableDeclaration);
+    for (let i = 0; i < 3; i++) {
+      expect(context.resolveReference(reads(file)[0], module)?.declaration).toBe(declarations[0]);
+      expect(context.resolveLocal(module, 'second')?.declaration).toBe(declarations[1]);
+      expect(context.resolveReference(reads(file)[1], module)?.declaration).toBe(declarations[1]);
+      expect(context.resolveLocal(module, 'first')?.declaration).toBe(declarations[0]);
+    }
+  });
+
+});
