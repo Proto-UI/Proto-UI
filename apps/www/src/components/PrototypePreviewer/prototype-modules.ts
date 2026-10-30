@@ -1240,6 +1240,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/shadcn/src/command/empty.proto');
     registerPrototype('shadcn-command-empty', mod.default);
   },
+  'shadcn-command-dialog-mask': async () => {
+    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/dialog-mask.proto');
+    registerPrototype('shadcn-command-dialog-mask', mod.default);
+  },
   'shadcn-command-dialog-content': async () => {
     const mod =
       await import('../../../../../packages/prototypes/shadcn/src/command/dialog-content.proto');

@@ -32,7 +32,18 @@ cases:
     title: One column shell contains an unframed shrinkable results list
     covers: [P-SHADCN-COMMAND-ANATOMY, P-BRUTALIST-COMMAND-ANATOMY]
     expectation: root-column-and-only-brutalist-root-border-with-preserved-listbox-controls-and-native-overflow-evidence-still-required
+  - id: T-COMMAND-DIALOG-CONTENT-0001-CASE-MASK
+    title: Transparent Search paint keeps real modal behavior
+    covers: [P-SHADCN-COMMAND-DIALOG-MASK]
+    expectation: transparent-is-not-passthrough-and-one-dialog-owner-blocks-background-with-correct-focus-and-retirement
 implementations:
+  - id: shadcn-command-dialog-mask
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/command-dialog-mask.test.ts
+    required: true
+    consumesCases: [T-COMMAND-DIALOG-CONTENT-0001-CASE-MASK]
+    notes: [Unexecuted static candidate; real modal background and focus behavior requires full Search native evidence.]
   - id: shadcn-command-dialog-content
     kind: module-test
     status: planned
@@ -63,6 +74,7 @@ verifies:
       anchors:
         [
           P-SHADCN-COMMAND-ANATOMY,
+          P-SHADCN-COMMAND-DIALOG-MASK,
           P-SHADCN-COMMAND-DIALOG-OWNERSHIP,
           P-SHADCN-COMMAND-DIALOG-GEOMETRY,
           P-SHADCN-COMMAND-DIALOG-PROFILE,

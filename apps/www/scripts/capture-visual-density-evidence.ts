@@ -300,8 +300,7 @@ try {
           assert.equal(selects.length, 2);
           for (const select of selects) {
             assert.ok(select.overflow <= 1);
-            if (kind === 'candidate')
-              assert.ok(Math.abs(select.height - (v.width === 390 ? 44 : 36)) <= 1);
+            if (kind === 'candidate') assert.ok(Math.abs(select.height - 44) <= 1);
           }
           if (v.width === 390) await page.keyboard.press('Escape');
         } else if (target === 'quick-start') {

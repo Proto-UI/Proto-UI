@@ -10,6 +10,9 @@ on:
       - 'packages/adapters/**/src/**'
       - 'packages/cli/src/services/proto-style-css.ts'
       - 'scripts/prototypes/shadcn-command-evidence*'
+      - 'apps/www/src/components/site-search-*.ts'
+      - 'apps/www/src/components/site-pagefind-resource*.ts'
+      - 'apps/www/src/components/override/Search*'
       - 'apps/www/src/components/PrototypePreviewer/demo-*.ts'
       - 'apps/www/src/components/PrototypePreviewer/projection-composition*.ts'
       - 'apps/www/src/components/PrototypePreviewer/prototype-modules*.ts'
@@ -95,6 +98,16 @@ jobs:
           apps/www/src/components/PrototypePreviewer/demo-renderer.import-laziness.test.ts
           apps/www/src/components/PrototypePreviewer/projection-composition.test.ts
           apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts
+          apps/www/src/components/site-pagefind-resource.test.ts
+          apps/www/src/components/site-search-data.test.ts
+          apps/www/src/components/site-search-session.test.ts
+          apps/www/src/components/site-search-owner.test.ts
+          apps/www/src/components/site-search-composition.test.ts
+          apps/www/src/components/site-search-commands.public-mode.test.ts
+          apps/www/src/components/override/Search.test.ts
+          apps/www/src/components/override/Search.commands.test.ts
+          apps/www/src/components/override/Search.styles.test.ts
+          packages/prototypes/shadcn/test/command-dialog-mask.test.ts
           TESTS
           while IFS= read -r file; do test -s "$file"; done < "$EVIDENCE/required-tests.txt"
       - name: Install original locked dependencies

@@ -82,8 +82,8 @@ describe('Homepage page-owned runtime', () => {
     await settle();
     expect(document.querySelector<HTMLElement>('[data-homepage-fallback]')!.hidden).toBe(false);
     expect(fakes.materialize.mock.calls[0]![1].controlIds).toEqual(['runtime', 'family']);
-    expect(fakes.materialize.mock.calls[0]![1].controls.runtime.triggerAppearance).toBe('ghost');
-    expect(fakes.materialize.mock.calls[0]![1].controls.family.triggerAppearance).toBe('ghost');
+    expect(fakes.materialize.mock.calls[0]![1].controls.runtime.triggerAppearance).toBe('default');
+    expect(fakes.materialize.mock.calls[0]![1].controls.family.triggerAppearance).toBe('default');
     expect(fakes.materialize.mock.calls[1]![1].controlIds).toEqual([]);
     gate.resolve(candidate());
     await settle();
@@ -428,8 +428,8 @@ describe('Homepage page-owned runtime', () => {
     await settle();
     expect(root.dataset.runtimeState).toBe('ready');
     expect(fakes.materialize.mock.calls[0]![1].controlIds).toEqual(['runtime', 'family']);
-    expect(fakes.materialize.mock.calls[0]![1].controls.runtime.triggerAppearance).toBe('ghost');
-    expect(fakes.materialize.mock.calls[0]![1].controls.family.triggerAppearance).toBe('ghost');
+    expect(fakes.materialize.mock.calls[0]![1].controls.runtime.triggerAppearance).toBe('default');
+    expect(fakes.materialize.mock.calls[0]![1].controls.family.triggerAppearance).toBe('default');
   });
 });
 

@@ -1,4 +1,7 @@
+import { createSiteSearchOwner } from './site-search-owner';
+import { createSiteSearchComposition } from './site-search-composition';
 import { siteSearchShortcutLabel } from './site-search-shortcut';
+import { headerButtonProps, headerResponsiveButtonFeedback } from './site-header-control-recipes';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
@@ -15,7 +18,7 @@ import {
   type MaterializedProjectionCandidate,
 } from './PrototypePreviewer/projection-materializer';
 import { watchProjectionThemeSurfaceStyle } from './PrototypePreviewer/projection-theme';
-import type { DemoSpec } from './PrototypePreviewer/demo-types';
+import { collectPrototypeIds, type DemoSpec } from './PrototypePreviewer/demo-types';
 import type { SiteLibraryFamily } from './site-library-family';
 
 // These fixed glyphs are required by every Search generation. Keep them in
@@ -31,6 +34,8 @@ export type SearchCommandParticipant = {
   root: HTMLElement;
   mounts: HTMLElement[];
   bind(callbacks: SearchCallbacks): void;
+  open(): void;
+  toggle(): void;
   setRetryDisabled(value: boolean): void;
   focus(command: SearchCommand): void;
   materialize(
@@ -40,7 +45,7 @@ export type SearchCommandParticipant = {
   prepareCommit(commit: ProjectionScopeCommit): { publish(): void; rollback(): void };
   dispose(): void;
 };
-const commands: SearchCommand[] = ['open', 'close', 'retry'];
+const legacyCommands: SearchCommand[] = ['open', 'close', 'retry'];
 const participants = new WeakMap<HTMLElement, SearchCommandParticipant>();
 let serial = 0;
 const controls = {
@@ -49,19 +54,34 @@ const controls = {
   component: { label: 'Component', options: [], onValueChange() {} },
 };
 
-/** Website composition only. The native dialog and Pagefind owner outlive every view. */
+/** Website data ownership outlives projection generations; Dialog remains a public composition. */
 export function searchCommandParticipant(root: HTMLElement): SearchCommandParticipant {
   const existing = participants.get(root);
   if (existing) return existing;
   const document = root.ownerDocument;
   const view = document.defaultView!;
   const owner = `site-search-${++serial}`;
+  const publicComposition = root.dataset.searchComposition === 'command-dialog';
+  const commands: SearchCommand[] = publicComposition ? ['open'] : legacyCommands;
+  const search = publicComposition ? createSiteSearchOwner(root) : null;
+  const dialogMount = publicComposition
+    ? root.querySelector<HTMLElement>('[data-search-dialog-mount]')
+    : null;
+  if (publicComposition && !dialogMount) throw new Error('Public Search dialog mount is missing');
   const mounts = commands.map((command) => {
     const mount = root.querySelector<HTMLElement>(`[data-search-command-mount="${command}"]`);
     if (!mount) throw new Error(`Search ${command} mount is missing`);
     return mount;
   });
-  let callbacks: SearchCallbacks | null = null;
+  if (dialogMount) mounts.push(dialogMount);
+  let callbacks: SearchCallbacks | null = search
+    ? {
+        open: () => search.session.setOpen(true),
+        close: () => search.session.setOpen(false),
+        retry: () => search.session.retry(),
+        prepare: () => search.prepare(),
+      }
+    : null;
   let retryDisabled = false;
   let alive = true;
   const subscribers = new Set<() => void>();
@@ -96,10 +116,13 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   ): DemoSpec => {
     const label = root.dataset[`${command}Label`] || command;
     const icon = command === 'open' ? 'search' : command === 'close' ? 'x' : null;
-    const props = {
-      variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
-      size: command === 'open' ? 'default' : 'sm',
-    };
+    const isHeaderOpen = command === 'open' && !!root.closest('[data-site-header]');
+    const props = isHeaderOpen
+      ? headerButtonProps(family, 'default')
+      : {
+          variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
+          size: command === 'open' ? 'default' : 'sm',
+        };
     return {
       type: 'demo',
       root: {
@@ -117,6 +140,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
                 minHeight: '2.75rem',
                 paddingInline: 'var(--site-search-trigger-padding, 0)',
                 justifyContent: 'var(--site-search-trigger-justify, center)',
+                ...(isHeaderOpen ? headerResponsiveButtonFeedback() : {}),
               }
             : { minHeight: '2.75rem' },
         className:
@@ -245,6 +269,14 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   const handle = {
     root,
     mounts,
+    open() {
+      if (alive) callbacks?.open();
+    },
+    toggle() {
+      if (!alive) return;
+      if (search) search.session.setOpen(!search.session.read().open);
+      else callbacks?.open();
+    },
     bind(next: SearchCallbacks) {
       callbacks = next;
       publishState();
@@ -269,8 +301,53 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
         });
       const family = request.selection.projectionFamilyId as SiteLibraryFamily;
       const runtime = request.selection.runtimeId as RuntimeId;
-      const outcomes = await Promise.allSettled(
-        commands.map(async (command, index) => {
+      const materializeDialog = async (): Promise<MaterializedProjectionCandidate> => {
+        if (!search || !dialogMount) throw new Error('Public Search owner is missing');
+        let candidate: MaterializedProjectionCandidate | undefined;
+        const current = () =>
+          !!candidate &&
+          candidate.host.dataset.projectionGenerationState === 'active' &&
+          !candidate.host.inert;
+        const composition = createSiteSearchComposition({
+          family,
+          shadcnStyle: root.dataset.searchStyle === 'new-york-v4' ? 'new-york-v4' : 'rhea',
+          session: search.session,
+          copy: search.copy,
+          isCurrent: current,
+          onFailure: (error) => {
+            if (current()) search.fail(error);
+          },
+        });
+        const ids = new Set<string>();
+        collectPrototypeIds(composition.demo.root, ids);
+        const ownerId = `${owner}-${namespace}-dialog`;
+        dialogMount.dataset.projectionOwner = ownerId;
+        candidate = await materializeProjectionCandidate(request, {
+          mount: dialogMount,
+          ownerId,
+          componentId: 'dialog',
+          controls,
+          controlIds: [],
+          content: {
+            demo: composition.demo,
+            recipe: {
+              id: 'website-search-command-dialog',
+              prototypeIds: [...ids],
+              rootPrototypeId: `${family}-dialog-root`,
+            },
+          },
+        });
+        const prepared = candidate;
+        return {
+          ...prepared,
+          activate() {
+            prepared.activate();
+            composition.activate();
+          },
+        };
+      };
+      const outcomes = await Promise.allSettled([
+        ...commands.map(async (command, index) => {
           let candidate: MaterializedProjectionCandidate | undefined;
           const ownerId = `${owner}-${namespace}-${command}`;
           mounts[index]!.dataset.projectionOwner = ownerId;
@@ -301,8 +378,9 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
             },
           });
           return candidate;
-        })
-      );
+        }),
+        ...(search ? [materializeDialog()] : []),
+      ]);
       const candidates = outcomes.flatMap((outcome) =>
         outcome.status === 'fulfilled' ? [outcome.value] : []
       );
@@ -355,6 +433,7 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
     dispose() {
       alive = false;
       callbacks = null;
+      search?.dispose();
       subscribers.clear();
       focusTargets.clear();
       rememberedFocus.clear();

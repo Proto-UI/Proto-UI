@@ -21,7 +21,7 @@ describe('startup paint comes from actual prototype style output', () => {
       expect(menu).not.toContain('opacity-50');
       if (family === 'shadcn') {
         expect(menu).toContain('border-transparent');
-        expect(menu).toContain('bg-transparent');
+        expect(menu).toContain('bg-secondary');
       }
     });
   }

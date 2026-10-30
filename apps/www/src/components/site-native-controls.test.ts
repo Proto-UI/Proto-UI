@@ -29,13 +29,13 @@ describe('website native anchor composition', () => {
       expect(link.dataset.siteLinkAppearance).toBe('nav');
       link.setAttribute('aria-current', 'page');
       await vi.waitFor(() =>
-        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline')
+        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('font-semibold')
       );
-      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline');
+      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline');
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('font-semibold');
       link.removeAttribute('aria-current');
       await vi.waitFor(() =>
-        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline')
+        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('font-semibold')
       );
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline');
       expect(link.getAttribute('href')).toBe('/docs/');

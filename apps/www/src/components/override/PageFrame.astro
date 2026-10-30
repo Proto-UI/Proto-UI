@@ -19,18 +19,19 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   <script>
     import '../../scripts/proto-concept';
   </script>
+  <!-- Header owns the full-width chrome; reading content keeps its own canvas. -->
+  <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
   <div
     class:list={[
       'bg-background container-wrapper flex flex-1 flex-col',
       { 'docs-shell': hasSidebar },
     ]}
   >
-    <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
     <noscript>
       <style is:inline>
         /* Without measurements, keep document navigation in normal flow so
            enlarged headings cannot scroll behind an estimated sticky header. */
-        .site-page-frame > .container-wrapper > header:has([data-docs-site-header]) {
+        .site-page-frame > header:has([data-docs-site-header]) {
           position: static !important;
         }
         @media (max-width: 63.999rem) {
@@ -117,12 +118,12 @@ const { hasSidebar } = Astro.locals.starlightRoute;
 
 <style>
   .site-page-frame {
-    --header-height: 4rem;
+    --header-height: 4.5rem;
     --sl-nav-height: var(--header-height);
   }
   @media (max-width: 68.749rem) {
     .site-page-frame {
-      --header-height: 7rem;
+      --header-height: 7.5rem;
     }
   }
   @media (max-width: 47.999rem) {
@@ -130,7 +131,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
       --header-height: 3.5rem;
     }
   }
-  :global(.site-page-frame > .container-wrapper > header:has([data-site-header])) {
+  :global(.site-page-frame > header:has([data-site-header])) {
     container: docs-page / inline-size;
   }
   /* Our measured Header margin owns anchor clearance for every native main
@@ -151,7 +152,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   :global(.site-page-frame:has([data-docs-site-header]) main h1[data-site-typography='h1']) {
     scroll-margin-top: calc(var(--header-height) + var(--docs-reading-inset, 1rem));
   }
-  /* Keep the header and all three documentation columns on one centered canvas. */
+  /* Reading columns share a centered canvas; Header is deliberately independent. */
   .docs-shell {
     container: docs-canvas / inline-size;
     max-width: 85rem;
