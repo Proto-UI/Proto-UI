@@ -19,6 +19,8 @@ export type DemoNode =
       className?: string;
       attrs?: DemoBoxAttrs;
       ref?: string;
+      /** Static website-owned visible source; preserved through projection cloning. */
+      materialStage?: Readonly<{ mountRef: string; overlayRef: string }>;
       children?: DemoChild[];
     }
   | {
