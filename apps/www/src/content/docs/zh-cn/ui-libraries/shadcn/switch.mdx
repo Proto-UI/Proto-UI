@@ -12,3 +12,15 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 [固定 New York 源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 使用 rem：默认 Root 为 2rem × 1.15rem，Thumb 为 1rem；小尺寸 Root 为 1.5rem × 0.875rem，Thumb 为 0.75rem。checked 位移为实际 Thumb 宽度减 2px。这些源码尺寸不代表跨目标渲染已验收；完整上游 transition 通道与 API 一致性仍未完成。
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
+
+## 组合与可选拖动能力
+
+默认 Switch 组合保持点击/Space 激活，拖动仅由 `draggable: true` 明确开启，不改上游默认。上方尺寸示例只有“Email alerts”启用拖动；下方两个独立增强示例分别展示 LTR 和 RTL 拖动。
+
+下方真实页面组合复用现有 Field 的 Label、Description 和 Switch owner。Choice Card 的卡片空白区域可点击，但不创建第二个按钮或转发 click；卡内“Learn more”链接保持自己的操作。卡片选中色跟随已接受的 checked 值，受控 owner 拒绝请求时不乐观变色。disabled 和 readOnly 示例不得发出改值请求。
+
+上游[Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7f1aa10580a3741664e2a77c721206c00/apps/v4/examples/base/switch-choice-card.tsx)由 FieldLabel 包住 Field。Proto 保留自己的 Field anatomy 和独立 description 关联，不导入该框架，也不改变当前样式 profile。这不是 Liquid Glass Switch 的实现。
+
+<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
+
+<div id="switch-composition-details">Label 命名控件，Description 提供帮助。拖动按住期间只预览位置，释放才请求值；Root 始终是 checked 的唯一 owner。</div>
