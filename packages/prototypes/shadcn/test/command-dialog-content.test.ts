@@ -65,7 +65,7 @@ async function fixture(controlled = false, profile: 'rhea' | 'new-york-v4' = 'rh
   scope.append(root);
   document.body.append(scope);
   await flush();
-  return { scope, root, trigger, content, title, description, command, input };
+  return { scope, root, trigger, content, title, description, command, input, list };
 }
 describe('Shadcn public CommandDialog content', () => {
   it('keeps its narrowed public surface and direct entry', () => {
@@ -198,3 +198,29 @@ describe('Shadcn public CommandDialog content', () => {
     }
   });
 });
+
+it.each(['rhea', 'new-york-v4'] as const)(
+  '%s keeps one column shell and a shrinkable unframed results list',
+  async (profile) => {
+    const f = await fixture(true, profile);
+    const rootTokens = tokens(f.command);
+    expect(rootTokens).toEqual(
+      expect.arrayContaining(['flex-col', 'h-full', 'min-h-0', 'overflow-hidden'])
+    );
+    for (const token of ['flex-wrap', 'gap-2', 'max-w-md']) expect(rootTokens).not.toContain(token);
+    const listTokens = tokens(f.list);
+    expect(listTokens).toEqual(
+      expect.arrayContaining([
+        'min-h-0',
+        'scroll-py-1',
+        'overflow-y-auto',
+        profile === 'rhea' ? 'max-h-72' : 'max-h-[18.75rem]',
+      ])
+    );
+    for (const token of ['border', 'border-2', 'shadow-md', 'p-1'])
+      expect(listTokens).not.toContain(token);
+    expect(f.list.id).not.toBe('');
+    expect(f.list.getAttribute('role')).toBe('listbox');
+    expect(f.input.querySelector('input')!.getAttribute('aria-controls')).toBe(f.list.id);
+  }
+);

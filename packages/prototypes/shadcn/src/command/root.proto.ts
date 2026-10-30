@@ -10,14 +10,18 @@ export default definePrototype<CommandRootProps, CommandRootExposes>({
     def.rule({
       when: (w) => w.state(style).eq('new-york-v4'),
       intent: (i) =>
-        i.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md flex-wrap gap-2')),
+        i.feedback.style.use(
+          tw(
+            'flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground'
+          )
+        ),
     });
     def.rule({
       when: (w) => w.state(style).eq('rhea'),
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'flex flex-col min-w-0 w-full overflow-hidden rounded-[var(--pui-radius-3xl)] bg-popover text-popover-foreground p-1'
+            'flex h-full min-h-0 flex-col min-w-0 w-full overflow-hidden rounded-[var(--pui-radius-3xl)] bg-popover text-popover-foreground p-1'
           )
         ),
     });

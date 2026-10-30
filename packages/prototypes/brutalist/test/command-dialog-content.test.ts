@@ -57,7 +57,7 @@ async function fixture(controlled = false) {
   root.append(trigger, content);
   document.body.append(root);
   await flush();
-  return { root, trigger, content, title, description, command, input };
+  return { root, trigger, content, title, description, command, input, list };
 }
 describe('Brutalist public CommandDialog content', () => {
   it('keeps its narrowed public surface and direct entry', () => {
@@ -145,4 +145,24 @@ describe('Brutalist public CommandDialog content', () => {
     expect(tokens(f.content)).not.toContain('animate-out');
     await vi.waitFor(() => expect(f.content.getExposes().isPresent.get()).toBe(false));
   });
+});
+
+it('places the sole two-pixel border on the column shell, not a second list panel', async () => {
+  const f = await fixture(true);
+  const rootTokens = tokens(f.command);
+  expect(rootTokens).toEqual(
+    expect.arrayContaining(['flex-col', 'h-full', 'min-h-0', 'border-2', 'border-border'])
+  );
+  for (const token of ['flex-wrap', 'gap-2', 'max-w-md']) expect(rootTokens).not.toContain(token);
+  const listTokens = tokens(f.list);
+  expect(listTokens).toEqual(
+    expect.arrayContaining(['min-h-0', 'max-h-[18.75rem]', 'scroll-py-1', 'overflow-y-auto'])
+  );
+  expect(listTokens.some((token) => token.startsWith('border') || token.startsWith('shadow'))).toBe(
+    false
+  );
+  expect(listTokens).not.toContain('p-1');
+  expect(f.list.id).not.toBe('');
+  expect(f.list.getAttribute('role')).toBe('listbox');
+  expect(f.input.querySelector('input')!.getAttribute('aria-controls')).toBe(f.list.id);
 });

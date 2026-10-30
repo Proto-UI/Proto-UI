@@ -28,6 +28,10 @@ cases:
       - P-SHADCN-COMMAND-DIALOG-MOTION
       - P-BRUTALIST-COMMAND-DIALOG-MOTION
     expectation: close-reopen-retains-owner-and-editor-with-no-css-motion-under-reduced-preference
+  - id: T-COMMAND-DIALOG-CONTENT-0001-CASE-ANATOMY
+    title: One column shell contains an unframed shrinkable results list
+    covers: [P-SHADCN-COMMAND-ANATOMY, P-BRUTALIST-COMMAND-ANATOMY]
+    expectation: root-column-and-only-brutalist-root-border-with-preserved-listbox-controls-and-native-overflow-evidence-still-required
 implementations:
   - id: shadcn-command-dialog-content
     kind: module-test
@@ -38,6 +42,7 @@ implementations:
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-OWNERSHIP
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-RECIPE
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-MOTION
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-ANATOMY
     notes:
       - Newly authored candidate not executed. Token or Happy DOM assertions do not prove native timing, real Search, viewport geometry or style extraction.
   - id: brutalist-command-dialog-content
@@ -49,13 +54,15 @@ implementations:
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-OWNERSHIP
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-RECIPE
       - T-COMMAND-DIALOG-CONTENT-0001-CASE-MOTION
+      - T-COMMAND-DIALOG-CONTENT-0001-CASE-ANATOMY
     notes:
-      - Newly authored candidate not executed; inner Command border and full composition are separately incomplete.
+      - Newly authored candidate not executed; anatomy assertions are authored but native geometry and full Search composition remain unverified.
 verifies:
   prototypes:
     - id: P-SHADCN-COMMAND
       anchors:
         [
+          P-SHADCN-COMMAND-ANATOMY,
           P-SHADCN-COMMAND-DIALOG-OWNERSHIP,
           P-SHADCN-COMMAND-DIALOG-GEOMETRY,
           P-SHADCN-COMMAND-DIALOG-PROFILE,
@@ -64,6 +71,7 @@ verifies:
     - id: P-BRUTALIST-COMMAND
       anchors:
         [
+          P-BRUTALIST-COMMAND-ANATOMY,
           P-BRUTALIST-COMMAND-DIALOG-OWNERSHIP,
           P-BRUTALIST-COMMAND-DIALOG-GEOMETRY,
           P-BRUTALIST-COMMAND-DIALOG-GRAMMAR,

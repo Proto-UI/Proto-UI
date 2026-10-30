@@ -12,7 +12,7 @@ export default definePrototype<CommandContentProps, CommandContentExposes>({
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'rounded-lg border border-border bg-popover text-popover-foreground shadow-md min-w-0 w-full max-h-80 overflow-y-auto p-1'
+            'min-h-0 min-w-0 w-full max-h-[18.75rem] scroll-py-1 overflow-x-hidden overflow-y-auto'
           )
         ),
     });
@@ -20,7 +20,9 @@ export default definePrototype<CommandContentProps, CommandContentExposes>({
       when: (w) => w.state(style).eq('rhea'),
       intent: (i) =>
         i.feedback.style.use(
-          tw('min-w-0 w-full max-h-72 overflow-x-hidden overflow-y-auto outline-none')
+          tw(
+            'min-h-0 min-w-0 w-full max-h-72 scroll-py-1 overflow-x-hidden overflow-y-auto outline-none'
+          )
         ),
     });
   },

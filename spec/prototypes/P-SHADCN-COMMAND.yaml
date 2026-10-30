@@ -41,6 +41,10 @@ criteria:
     text:
       en: Explicit styleProfile or a common outer public style scope selects Rhea or New York; a child CommandRoot scope is not read upward. Rhea uses the adopted top-third, 28rem cap, rounded3xl and 100ms recipe; New York uses centered32rem, rounded-lg and200ms. Required public enterDuration/leaveDuration are bound from the same profile by the consumer; no runtime configure or second timer. No hidden switch to New York or fabricated full cmdk parity.
       zh-CN: 显式 styleProfile 或共同外层公共 style scope 选择 Rhea/NY，不向上读取内部 CommandRoot scope。Rhea 按固定上游第三屏、28rem 上限、rounded3xl 和100ms；NY 居中32rem、rounded-lg 和200ms。不得静默切回 NY 或宣称完整 cmdk 等价。
+  - id: P-SHADCN-COMMAND-ANATOMY
+    text:
+      en: Root owns a full-width vertical single shell; Content is its shrinkable scrollable list, never an independently bordered or shadowed panel. Adopted Rhea retains root p1 and list18rem; New York and Brutalist adopt a root-relative18.75rem list cap from the pinned300px reference. Brutalist owns its sole2px border on Root. min-height0 is an explicit containment safeguard, not proof of native short-viewport acceptance. No wrapping-row root, page CSS repair or generic Group/InputShell parity is claimed.
+      zh-CN: Root 是全宽纵向一体外壳，Content 为可收缩滚动列表，不另加边框阴影；Rhea 保留 root p1/list18rem，NY及Brutalist将固定上游300px采用为root相对18.75rem。Brutalist唯一2px边框属于Root。min-height0为显式容纳策略，不代表短视口已验收；不宣称Group/InputShell完整等价。
 dependsOn:
   contracts:
     - C-PROPS-0001
