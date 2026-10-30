@@ -34,6 +34,7 @@ type Request = { value: string; reason: string };
 type Ownership = 'reject' | 'accept' | 'uncontrolled';
 const values = ['file', 'edit', 'view'];
 const owned = new Set<HTMLElement>();
+const observationCleanups: Array<() => void> = [];
 const flush = async () => {
   for (let i = 0; i < 16; i++) await Promise.resolve();
 };
@@ -111,6 +112,7 @@ function traceEntry() {
   return () => ({ events, dropped });
 }
 afterEach(async () => {
+  for (const off of observationCleanups.splice(0)) off();
   for (const root of owned) root.remove();
   owned.clear();
   vi.restoreAllMocks();
@@ -175,6 +177,70 @@ async function bar(mode: Ownership, initial = 'file', rtl = false, props: Menuba
   };
   return { root, triggers, panels, items, requests, focusItem, focusTrigger };
 }
+function observePhysicalEntry(p: Awaited<ReturnType<typeof bar>>) {
+  const trace = traceEntry();
+  const transfers: EventTarget[] = [];
+  const calls: Array<{
+    target: HTMLElement;
+    afterPortal: boolean;
+    sourceConnected: boolean;
+    targetConnected: boolean;
+    stack: string;
+  }> = [];
+  let selections = 0;
+  const focusIn = (event: Event) => {
+    if (event.target) transfers.push(event.target);
+  };
+  document.addEventListener('focusin', focusIn);
+  observationCleanups.push(() => document.removeEventListener('focusin', focusIn));
+  for (const [menu, items] of p.items.entries()) {
+    for (const item of items) {
+      item.addEventListener('select', () => selections++);
+      const original = item.focus.bind(item);
+      vi.spyOn(item, 'focus').mockImplementation((options) => {
+        calls.push({
+          target: item,
+          afterPortal: p.panels[menu]!.parentElement === document.body,
+          sourceConnected: p.root.isConnected && p.triggers[menu]!.isConnected,
+          targetConnected: item.isConnected,
+          stack: invocationStack(),
+        });
+        original(options);
+      });
+    }
+  }
+  return { trace, transfers, calls, selections: () => selections };
+}
+function verifySingleEntry(
+  observed: ReturnType<typeof observePhysicalEntry>,
+  target: HTMLElement,
+  operation: 'first' | 'last'
+) {
+  const trace = observed.trace();
+  expect(trace.dropped).toBe(0);
+  expect(trace.events.filter((event) => event.event === 'barrier-register')).toHaveLength(1);
+  expect(trace.events.filter((event) => event.event === 'barrier-deliver')).toHaveLength(1);
+  const requests = trace.events.filter((event) => event.event === 'focusInRoving');
+  expect(requests, 'exactly one logical entry request').toHaveLength(1);
+  expect(requests[0]!.op).toBe(operation);
+  const applications = trace.events.filter((event) => event.event === 'applyFocusInRoving');
+  expect(applications.length).toBeGreaterThan(0);
+  expect(applications.every((event) => event.provider === requests[0]!.provider)).toBe(true);
+  expect(applications.every((event) => event.op === operation)).toBe(true);
+  expect(new Set(applications.map((event) => event.intent)).size).toBe(1);
+  expect(applications[0]!.intent).not.toBeNull();
+  expect(observed.transfers, 'one actual DOM focus transfer').toEqual([target]);
+  expect(observed.calls.length).toBeGreaterThan(0);
+  expect(
+    observed.calls.every(
+      (call) =>
+        call.target === target && call.afterPortal && call.sourceConnected && call.targetConnected
+    ),
+    'every native application retains the same live target and source'
+  ).toBe(true);
+  expect(observed.selections(), 'entry does not select or repeat an action').toBe(0);
+  expect(document.activeElement).toBe(target);
+}
 
 // These tests interrupt the actual adapter-owned portal acquisition, rather than
 // substituting a ready signal or changing the public demo. Native acceptance
@@ -191,7 +257,8 @@ it('allows a committed press from an initially unfocused trigger', async () => {
 });
 it('does not let an initially unfocused press steal later author focus', async () => {
   const p = await bar('uncontrolled', '');
-  const trace = traceEntry();
+  const observed = observePhysicalEntry(p);
+  const trace = observed.trace;
   const outside = document.createElement('button');
   document.body.append(outside);
   owned.add(outside);
@@ -210,34 +277,54 @@ it('does not let an initially unfocused press steal later author focus', async (
   await flush();
   expect(interrupted).toBe(true);
   expect(document.activeElement, JSON.stringify(trace())).toBe(outside);
+  expect(observed.calls, 'canceled press never applies item focus').toHaveLength(0);
+  expect(observed.transfers).toEqual([outside]);
+  expect(observed.selections()).toBe(0);
   expect(p.root.getExposes().value.get()).toBe('file');
   setElementProps(p.panels[0]!, { sideOffset: 8 });
   await flush();
   expect(document.activeElement).toBe(outside);
 });
 for (const keyName of ['ArrowDown', 'ArrowUp'] as const) {
-  it(`${keyName} requests actual focus only after the physical portal acquisition`, async () => {
+  it(`${keyName} admits one logical entry and one focus transfer after portal acquisition`, async () => {
     const p = await bar('uncontrolled', '');
     await p.focusTrigger(0);
     const target = p.items[0]![keyName === 'ArrowDown' ? 0 : 2]!;
-    const trace = traceEntry();
-    const observed: boolean[] = [];
-    const focusStacks: string[] = [];
-    const original = target.focus.bind(target);
-    vi.spyOn(target, 'focus').mockImplementation((options) => {
-      observed.push(p.panels[0]!.parentElement === document.body);
-      focusStacks.push(invocationStack());
-      original(options);
-    });
+    const observed = observePhysicalEntry(p);
     key(keyName);
     await flush();
-    expect(observed, JSON.stringify({ focusStacks, requests: p.requests, trace: trace() })).toEqual(
-      [true]
+    // C-AS-FOCUSABLE-0001-G permits established-owner readiness re-projection.
+    // db117 proved one entry plus two such native calls, not three entry intents.
+    // Preserve that raw evidence while enforcing the actual ownership boundary.
+    console.info(
+      '[menubar-entry-observation]',
+      JSON.stringify({
+        keyName,
+        nativeCalls: observed.calls.length,
+        focusTransfers: observed.transfers.length,
+        selections: observed.selections(),
+        trace: observed.trace(),
+      })
     );
-    expect(document.activeElement).toBe(target);
+    verifySingleEntry(observed, target, keyName === 'ArrowDown' ? 'first' : 'last');
     expect(p.requests).toEqual([{ value: 'file', reason: 'keyboard' }]);
   });
 }
+it('the entry oracle rejects a real duplicate logical request even without a second focus transfer', async () => {
+  const p = await bar('uncontrolled', '');
+  await p.focusTrigger(0);
+  const observed = observePhysicalEntry(p);
+  key('ArrowDown');
+  await flush();
+  p.panels[0]!.getExposes().focusFirst();
+  await flush();
+  expect(observed.trace().events.filter((event) => event.event === 'focusInRoving')).toHaveLength(
+    2
+  );
+  expect(() => verifySingleEntry(observed, p.items[0]![0]!, 'first')).toThrow(
+    /exactly one logical entry/
+  );
+});
 for (const interrupt of [
   'outside-focus',
   'blur-refocus',

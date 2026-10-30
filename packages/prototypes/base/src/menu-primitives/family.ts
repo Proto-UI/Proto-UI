@@ -234,6 +234,16 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       viewEpoch = 0,
       focusEpoch = 0,
       entryRevision = 0;
+    if (!navigation) {
+      // The source view observes focus while the destination is still mounting.
+      // An initially unfocused press must also yield to later author focus.
+      // Boundary owns observation cleanup; no DOM or global host listener here.
+      const entryBoundary = asBoundary();
+      entryBoundary.observe('focus.move');
+      entryBoundary.subscribeOutside((event) => {
+        if (event.observation === 'focus.move') focusEpoch++;
+      });
+    }
     const sync = (run: RunHandle<T.MenuTriggerProps>, ctx: Context) => {
       disabled.set(ctx.disabled || !!run.props.get().disabled, 'reason: menu trigger disabled');
       expanded.set(
@@ -407,7 +417,6 @@ export function createMenuFamily(slug: string, navigation: boolean) {
     });
     const boundary = asBoundary();
     boundary.observe('pointer.press');
-    if (!navigation) boundary.observe('focus.move');
     let runNow: RunHandle<T.MenuContentProps> | null = null;
     let contentValue = '';
     let entryEpoch = 0;
@@ -505,13 +514,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
         overlay.openOverlay('controlled.sync');
       else focusTrigger(run);
     });
-    boundary.subscribeOutside((event) => {
-      if (!navigation && event.observation === 'focus.move') {
-        // Only retire a pending entry. Focus outside does not change the
-        // existing manual-entry Overlay's open/close or restore policy.
-        retireEntry();
-        return;
-      }
+    boundary.subscribeOutside(() => {
       if (runNow && open.get()) invoke(runNow, 'close');
     });
     def.event.onGlobal('key.down', (run, event) => {
