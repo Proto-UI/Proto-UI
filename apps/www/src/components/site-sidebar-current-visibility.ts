@@ -1,3 +1,5 @@
+import { sidebarDisclosureLease } from './site-sidebar-disclosure-policy';
+
 /** One route-entry layout request. Article identity remains Starlight's native
  * aria-current=page link; this helper never owns selection, focus or navigation. */
 const owners = new WeakMap<HTMLElement, () => void>();
@@ -56,6 +58,16 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
   let stableFrames = 0;
   let previousGeometry = '';
   let measured = false;
+  let policyWaiting = false;
+  let policyGeneration = 0;
+  let releasePolicyWait: (() => void) | undefined;
+  const cancelPolicyWait = () => {
+    policyGeneration++;
+    policyWaiting = false;
+    const release = releasePolicyWait;
+    releasePolicyWait = undefined;
+    release?.();
+  };
   let expectedScroll: { owner: HTMLElement; top: number } | null = null;
   const currentLink = () =>
     boundary.querySelector<HTMLAnchorElement>('.top-level a[aria-current="page"]');
@@ -64,15 +76,46 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
     frame = undefined;
   };
   const yieldToUser = () => {
+    cancelPolicyWait();
     yielded = true;
     pending = false;
     cancelFrame();
   };
   const schedule = () => {
-    if (!alive || !pending || yielded || frame !== undefined) return;
+    if (!alive || policyWaiting || !pending || yielded || frame !== undefined) return;
     frame = view.requestAnimationFrame(measure);
   };
   const request = () => {
+    cancelPolicyWait();
+    if (!alive) return;
+    const policy = sidebarDisclosureLease(boundary);
+    const intent = policy?.readIntent();
+    if (intent === 'manual') {
+      yieldToUser();
+      return;
+    }
+    if (intent === 'pending' && policy) {
+      cancelFrame();
+      pending = false;
+      policyWaiting = true;
+      const generation = policyGeneration;
+      let completed = false;
+      const release = policy.afterSettled((status) => {
+        if (completed) return;
+        completed = true;
+        if (!alive || generation !== policyGeneration) return;
+        if (status === 'retired') {
+          yieldToUser();
+          return;
+        }
+        request(); // Re-read current route/owner intent; never replay cached open state.
+      });
+      // A legal observer may settle synchronously. Never restore its old off
+      // after a nested request, user yield or disposal has retired this wait.
+      if (completed || !alive || generation !== policyGeneration) release();
+      else releasePolicyWait = release;
+      return;
+    }
     if (current) resize?.unobserve(current);
     current = currentLink();
     if (current) resize?.observe(current);
@@ -97,7 +140,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
   };
   function measure() {
     frame = undefined;
-    if (!alive || !pending || yielded) return;
+    if (!alive || policyWaiting || !pending || yielded) return;
     if (!boundary.isConnected) {
       destroy();
       return;
@@ -211,6 +254,7 @@ export function initSidebarCurrentVisibility(boundary: HTMLElement): () => void 
   function destroy() {
     if (!alive) return;
     alive = false;
+    cancelPolicyWait();
     cancelFrame();
     mutations.disconnect();
     resize?.disconnect();
