@@ -988,11 +988,66 @@ describe('native navigation precondition evidence', () => {
     'utf8'
   );
   it('uses a real Brutalist document with substantive headings for TOC journeys', () => {
-    const tocJourneys = source.slice(source.indexOf("it('renders docs navigation through"));
-    assert.equal(
-      (tocJourneys.match(/\/zh-cn\/ui-libraries\/brutalist\/components\/textarea\//g) ?? []).length,
-      4
-    );
+    // Register exact journeys, not a stale count over an arbitrary file tail.
+    // The first journey contains light+dark; the other four each own one route.
+    const expected = [
+      [
+        'renders docs navigation through the same Prototype while preserving native targets and caption projection',
+        2,
+      ],
+      [
+        'opens the actual narrow-screen contents drawer and keeps long pagination labels within the page',
+        1,
+      ],
+      [
+        'keeps docs native destinations, current truth, heading navigation and keyboard focus without JavaScript',
+        1,
+      ],
+      ['keeps compact Sidebar typography across root text, viewport and enhancement', 1],
+      [
+        'keeps reading TOC native row boxes, depth padding and multiline growth through enhancement',
+        1,
+      ],
+    ];
+    const route = '/zh-cn/ui-libraries/brutalist/components/textarea/';
+    const verify = (input) => {
+      const parsed = ts.createSourceFile('native-links.ts', input, ts.ScriptTarget.Latest, true);
+      const registrations = [];
+      const visit = (node) => {
+        if (
+          ts.isCallExpression(node) &&
+          ts.isIdentifier(node.expression) &&
+          node.expression.text === 'it'
+        ) {
+          const [name, callback] = node.arguments;
+          if (name && ts.isStringLiteral(name) && callback)
+            registrations.push({ name: name.text, nameNode: name, callback });
+        }
+        ts.forEachChild(node, visit);
+      };
+      visit(parsed);
+      const admitted = [];
+      for (const [name, count] of expected) {
+        const matches = registrations.filter((entry) => entry.name === name);
+        assert.equal(matches.length, 1, `one non-skipped registration: ${name}`);
+        const routes = [];
+        const countRoutes = (node) => {
+          if (ts.isStringLiteral(node) && node.text === route) routes.push(node);
+          ts.forEachChild(node, countRoutes);
+        };
+        countRoutes(matches[0].callback);
+        assert.equal(routes.length, count, `real headed document fixtures: ${name}`);
+        admitted.push({ nameNode: matches[0].nameNode, routeNode: routes[0] });
+      }
+      return admitted;
+    };
+    const admitted = verify(source);
+    const replaceNode = (node, value) =>
+      source.slice(0, node.getStart()) + JSON.stringify(value) + source.slice(node.end);
+    for (const { nameNode, routeNode } of admitted) {
+      assert.throws(() => verify(replaceNode(nameNode, 'removed registered journey')));
+      assert.throws(() => verify(replaceNode(routeNode, '/invalid-no-heading-fixture/')));
+    }
     const document = readFileSync(
       'apps/www/src/content/docs/zh-cn/ui-libraries/brutalist/components/textarea.mdx',
       'utf8'
