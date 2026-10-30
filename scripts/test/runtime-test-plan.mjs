@@ -77,6 +77,7 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'packages/adapters/web-component/test/native-text-width.browser.test.ts',
   'packages/prototypes/shadcn/test/drawer-presence.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',

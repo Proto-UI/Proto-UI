@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { definePrototype, type RunHandle, type ViewOperation } from '@proto.ui/core';
-import { AdaptToWebComponent } from '../src/adapt';
-import { withWebComponentOwnedRelocation } from '../src/owned-relocation';
+import { AdaptToWebComponent } from '../../src/adapt';
+import { withWebComponentOwnedRelocation } from '../../src/owned-relocation';
 
 let sequence = 0;
 afterEach(async () => {

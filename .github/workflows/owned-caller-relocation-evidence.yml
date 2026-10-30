@@ -8,6 +8,9 @@ on:
       - 'packages/adapters/base/src/host/**'
       - 'packages/adapters/base/test/view-*.test.ts'
       - 'packages/adapters/*/test/view-operation-withdrawal.test.ts'
+      - 'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts'
+      - 'packages/adapters/web-component/test/view-operation-receipt.test.ts'
+      - 'scripts/feedback/view-operation-receipt.mjs'
       - 'spec/contracts/C-LIFECYCLE-VIEW-OPERATION-0001.yaml'
       - 'spec/host-caps/HC-VIEW-OPERATION-0001.yaml'
       - 'spec/tests/T-LIFECYCLE-VIEW-OPERATION-0001.yaml'
@@ -92,7 +95,7 @@ jobs:
           files=(
             packages/runtime/test/contract/lifecycle.view-operation.contract.test.ts
             packages/adapters/base/test/view-operation-owner.test.ts
-            packages/adapters/web-component/test/view-operation-withdrawal.test.ts
+            packages/adapters/web-component/test/view-operation-receipt.test.ts
             packages/adapters/react/test/view-operation-withdrawal.test.ts
             packages/adapters/vue/test/view-operation-withdrawal.test.ts
             packages/adapters/vue2/test/view-operation-withdrawal.test.ts

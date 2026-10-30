@@ -4,7 +4,7 @@ title: Source-view operation admission and monotonic withdrawal
 status: draft
 since: 0.3.0-alpha.1
 lifecycleRationale:
-  en: Static test candidates are not execution evidence; cross-host and consumer acceptance remains pending.
+  en: Physical WC obligations require native browser execution through the mandatory runtime inventory; the migration and four-host consumer acceptance remain pending.
 summary: Distinguish unsupported capability, unavailable current view, accepted intent withdrawal, exact transport and retained Focus ownership.
 cases:
   - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-RUNTIME
@@ -38,6 +38,38 @@ cases:
     title: Actual framework view and terminal lifetime invalidate old source identities
     covers: [HC-VIEW-OPERATION-0001-IDENTITY, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
     expectation: real-react-vue-vue2-view-replacement-keeps-logical-setup-once-but-does-not-revive-prior-operation
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-ROOT
+    title: Root removal invalidates before retirement
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: root-remove-invalid-before-terminal
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-SOURCE
+    title: Source-only removal invalidates before retirement
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: source-remove-invalid-before-terminal
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-REINSERT
+    title: Unrelated reinsert cannot revive an old operation
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: old-false-new-current-without-terminal
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-REPLACE
+    title: Terminal owner replacement cannot revive an old operation
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: terminal-count-one-old-false-new-current
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-TRANSPORT
+    title: Exact owned transport retains validity
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: same-owner-connected-destination-operation-current-after-finally
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-NESTED
+    title: Author removal nested in transport withdraws permanently
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: first-legal-move-current-then-author-remove-invalid-after-finally
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-RECONNECT
+    title: Rejected second reconnect invalidates without an intermediate query
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: two-real-reaction-pairs-old-false-after-finally
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-THROW
+    title: Aborted transport preserves error and unchanged operation
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: same-error-original-parent-still-current-no-move-reactions
 implementations:
   - id: runtime-source-view-operation
     kind: runtime-test
@@ -45,20 +77,55 @@ implementations:
     path: packages/runtime/test/contract/lifecycle.view-operation.contract.test.ts
     required: true
     consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-RUNTIME]
-    notes: [Authored but not run; not proof of browser focus or controlled component semantics.]
+    notes:
+      [
+        Nine Runtime assertions passed on f6; not proof of browser focus or controlled component semantics. New migration head still needs required validation.,
+      ]
   - id: shared-view-operation-owner
     kind: adapter-test
     status: planned
     path: packages/adapters/base/test/view-operation-owner.test.ts
     required: true
     consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-OWNER]
-  - id: wc-view-operation-withdrawal
+  - id: wc-view-operation-withdrawal-native
     kind: adapter-test
     status: planned
-    path: packages/adapters/web-component/test/view-operation-withdrawal.test.ts
+    path: packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts
+    required: true
+    consumesCases:
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-ROOT
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-SOURCE
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-REINSERT
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-REPLACE
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-TRANSPORT
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-NESTED
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-RECONNECT
+      - T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC-THROW
+    notes:
+      - All eight physical obligations are required by browser inventory and the normal source-bound runtime gate; isolated native evidence does not complete migration.
+      - f6 native diagnostic passed eight cases; the same source HappyDOM15.11.7 retained two transport-positive failures. Original assertions remain reproducible separately.
+  - id: view-operation-native-receipt-controls
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/view-operation-receipt.test.ts
     required: true
     consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC]
-    notes: [Synthetic DOM Adapter tests do not establish four-Web native conformance.]
+    notes:
+      [
+        Pure verifier controls reject missing registration or receipt,
+        stale identity,
+        empty or skipped cases,
+        physical failures and weakened expectations; not native execution evidence.,
+      ]
+  - id: wc-view-operation-happydom-diagnostic
+    kind: fixture
+    status: failing
+    path: packages/adapters/web-component/test/diagnostics/view-operation-withdrawal.happy-dom.ts
+    required: false
+    consumesCases: []
+    notes:
+      - Exact original eight assertions with import relocation only; explicit diagnostic config retains the two observed HappyDOM15.11.7 failures and is not acceptance success.
   - id: react-view-operation-framework
     kind: adapter-test
     status: planned
@@ -85,4 +152,4 @@ verifies:
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
-    summary: Preserve actual execution debt and keep consumer/native acceptance separate from atom tests.
+    summary: Preserve original simulator failures while mapping all eight physical obligations into mandatory native inventory with discriminating receipt controls; consumer acceptance remains separate.

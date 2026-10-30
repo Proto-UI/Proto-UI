@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { VIEW_OPERATION_CASES, assertViewOperationCase } from './view-operation-receipt.mjs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
@@ -33,6 +34,7 @@ await writeFile(
 const boundPaths = [
   source,
   'scripts/feedback/view-operation-evidence.mjs',
+  'scripts/feedback/view-operation-receipt.mjs',
   '.github/workflows/owned-caller-relocation-evidence.yml',
   'pnpm-lock.yaml',
   'packages/core/src/handles.ts',
@@ -95,28 +97,13 @@ try {
     path: 'native-cases.png',
     sha256: hash(await readFile(join(out, 'native-cases.png'))),
   });
-  const expected = [
-    'remove-root',
-    'remove-source',
-    'unrelated-reinsert',
-    'terminal-replacement',
-    'owned-transport',
-    'nested-author-remove',
-    'second-reconnect',
-    'aborted-transport',
-  ];
-  assert.deepEqual(observation.cases, expected);
+  assert.deepEqual(observation.cases, VIEW_OPERATION_CASES);
   assert.deepEqual(
     observation.results.map((entry) => entry.name),
-    expected
+    VIEW_OPERATION_CASES
   );
-  for (const result of observation.results) {
-    assert(result.checks.length > 0, `${result.name}: no assertions observed`);
-    assert.equal(result.pass, true, `${result.name}: ${result.failure}`);
-    assert(
-      result.checks.every((check) => check.actual === check.expected),
-      `${result.name}: invalid assertion receipt`
-    );
+  for (const [index, name] of VIEW_OPERATION_CASES.entries()) {
+    assertViewOperationCase(observation.results[index], name);
   }
   assert.deepEqual(pageErrors, []);
   assert.equal(git(['status', '--porcelain=v1', '--untracked-files=no']), '');
