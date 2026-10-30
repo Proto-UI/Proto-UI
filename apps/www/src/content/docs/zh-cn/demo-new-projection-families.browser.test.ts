@@ -122,8 +122,30 @@ describe.sequential('draft family real Web host evidence', () => {
           const disabled = host.getByRole('button', { name: 'Unavailable', exact: true });
           expect(await disabled.getAttribute('aria-disabled')).toBe('true');
           expect(await disabled.evaluate((el) => getComputedStyle(el).opacity)).toBe(
-            family === 'bootstrap-2-3-2' ? '0.65' : '0.5'
+            family === 'bootstrap-2-3-2' ? '0.65' : '1'
           );
+          if (family === 'liquid-glass') {
+            // This neutral opaque fixture keeps its same-state palette when disabled.
+            // The command contract forbids fading the whole host.
+            const disabledPaint = await disabled.evaluate((el) => {
+              const style = getComputedStyle(el);
+              return {
+                background: style.backgroundColor,
+                foreground: style.color,
+                image: style.backgroundImage,
+                pointerEvents: style.pointerEvents,
+              };
+            });
+            expect(disabledPaint).toEqual({
+              background: facts.background,
+              foreground: facts.color,
+              image: 'none',
+              pointerEvents: 'none',
+            });
+            expect(disabledPaint.background).toBe(
+              theme === 'light' ? 'rgb(255, 255, 255)' : 'rgb(44, 44, 46)'
+            );
+          }
           if (family === 'bootstrap-2-3-2')
             expect(await disabled.evaluate((el) => getComputedStyle(el).backgroundImage)).toBe(
               'none'
