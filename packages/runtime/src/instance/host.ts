@@ -1,4 +1,4 @@
-import type { InstanceAssociations } from '@proto.ui/core';
+import type { InstanceAssociations, ViewOperation } from '@proto.ui/core';
 // packages/runtime/src/instance/host.ts
 import type { TemplateChildren } from '@proto.ui/core';
 import type { PropsBaseType } from '@proto.ui/types';
@@ -15,6 +15,12 @@ export type ScheduledDelayTask = {
 };
 
 export interface RuntimeHost<P extends PropsBaseType> {
+  /**
+   * Stable for this RuntimeSession. Rebinding must synchronously invalidate old
+   * host generations, never temporarily replace/restore this provider property.
+   * Source-view identity is independent of temporary focus readiness.
+   */
+  readonly viewOperations?: { capture(): ViewOperation | null };
   /** For diagnostics / errors */
   readonly prototypeName: string;
 

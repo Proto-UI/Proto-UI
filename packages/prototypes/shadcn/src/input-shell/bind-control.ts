@@ -1,7 +1,8 @@
+import type { StateSubscribeCallback } from '@proto.ui/core';
 /** Facts are read from the actual public instance; never from a DOM query or copied state. */
 export interface InputShellFact {
   get(): boolean;
-  subscribe(listener: () => void): () => void;
+  subscribe(listener: StateSubscribeCallback<boolean>): () => void;
 }
 export interface InputShellControlInstance {
   getExposes(): unknown;
@@ -169,8 +170,12 @@ export function bindInputShellControl(
           break;
         }
         if (current !== generation || source !== attachedSource) break;
-        const off = fact.subscribe(() => {
-          if (current === generation) sync();
+        const off = fact.subscribe((event) => {
+          if (current !== generation || source !== attachedSource) return;
+          // A terminal public StateEvent is not another fact snapshot. The
+          // source may already reject reads; retire without entering it again.
+          if (event.type === 'disconnect') dispose();
+          else sync();
         });
         if (typeof off !== 'function') fail('Control subscription cleanup is required');
         if (disposed || current !== generation) off();

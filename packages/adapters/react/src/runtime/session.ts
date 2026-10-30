@@ -1,3 +1,4 @@
+import type { RuntimeHost } from '@proto.ui/runtime';
 import type { InstanceAssociations } from '@proto.ui/core';
 import { createAdapterHost, createHostWiring } from '@proto.ui/adapter-base';
 import type { CommitSignal, RuntimeCheckpoint, RuntimeLifecycleEvent } from '@proto.ui/runtime';
@@ -10,6 +11,7 @@ export function createReactHostSession<Props extends PropsBaseType>(args: {
   schedule: (task: () => void) => void;
   rawPropsSource: RawPropsSource<Props>;
   getInstanceAssociations?: () => InstanceAssociations;
+  viewOperations?: RuntimeHost<Props>['viewOperations'];
   wiring: ReturnType<typeof createHostWiring>;
   eventGate: {
     disable(): void;
@@ -43,6 +45,7 @@ export function createReactHostSession<Props extends PropsBaseType>(args: {
     {
       getRawProps: () => rawPropsSource.get() as Readonly<Props & PropsBaseType>,
       getInstanceAssociations: args.getInstanceAssociations,
+      viewOperations: args.viewOperations,
       schedule,
       onLifecycleCheckpoint,
       onLifecycleEvent,

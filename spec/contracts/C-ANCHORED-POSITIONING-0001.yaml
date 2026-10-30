@@ -50,17 +50,29 @@ criteria:
     text:
       zh-CN: 宿主完成回调必须先进入实例的 Runtime callback 作用域，再调用消费者回调。Module 在分发前和进入分发后都必须拒绝已替换连接、provider epoch、已断开或终止 owner 的结果。重入的 lease attach/update/dispose 不得安装或恢复旧租约。断开会清除分类 snapshot；终止后 reconnect 不得复活。该保护补充而不替代宿主的几何写入取消。
       en: Host completion must pass through the instance Runtime callback scope before invoking consumer callbacks. Both before dispatch and inside dispatch, the module must reject replaced connections, provider epochs, disconnected or terminal owners. Reentrant lease attach, update or disposal must not install or restore an obsolete lease. Disconnect clears the categorical snapshot and terminal disposal cannot be revived by reconnect. This guard supplements rather than replaces host-side geometry-write cancellation.
+  - id: C-ANCHORED-POSITIONING-0001-VISUAL-GAP
+    text:
+      en: "An explicit visual-gap policy may relate current host-local anchor and floating paint targets to the existing positioning connection. Omission preserves border-box sideOffset semantics and every existing default. For distinct paint and positioning targets, the host first projects the paint target's expanded bounds into the corresponding anchor/floating reference coordinate frame and derives nonnegative effective edges relative to that reference border box, including internal offsets and overflow; unsupported projection is unavailable, never an assumption that boxes coincide. In visual mode, the requested nonnegative clearance applies between conservative painted boundaries: for resolved side s, border-box separation must be at least the maximum of existing sideOffset and effective anchor-reference edge on s plus effective floating-reference edge on its opposing side plus clearance. Resolve asymmetric edges after flip; shift and available-space calculations must not conceal paint clipping. The logical anchor, floating lifecycle frame, focus and Portal remain unchanged even when a distinct associated Surface owns paint."
+      zh-CN: '显式 visual-gap 策略可将当前宿主侧 anchor 与 floating 绘制目标关联到现定位连接；省略时保持 border-box sideOffset 语义和全部默认行为。绘制与定位目标不同时，host 先把绘制目标的扩展边界投射到对应 anchor/floating 参考坐标域，再相对参考 border box 计算含内部偏移与溢出的非负 effective edges；不支持投射时 unavailable，不得假设两框重合。视觉模式的非负 clearance 作用于保守绘制边界：resolved side s 的 border-box 分离至少为现 sideOffset 与 anchor-reference 在 s 边的 effective edge、floating-reference 对向 effective edge 及 clearance 之和两者的最大值。flip 后按非对称边求解，shift 与可用空间计算不得掩盖绘制裁切。独立关联 Surface 拥有绘制时仍保留 logical anchor、floating 生命周期框、focus 与 Portal。'
+  - id: C-ANCHORED-POSITIONING-0001-VISUAL-UNAVAILABLE
+    text:
+      en: 'Visual-gap readiness requires both current footprint facts and a feasible current placement. Unknown, stale or revoked footprint is unavailable, not zero. A fallback placement may retain the existing border-box policy and Base interactions, but must report visual clearance unavailable and preserve complete opaque material fallback; it cannot claim optical or visual-ready success. Footprint updates use the current active positioning lease, never restart Overlay entry, and obey existing current-computation and Runtime callback cancellation.'
+      zh-CN: 'visual-gap 就绪要求两侧当前 footprint 事实及可满足的当前定位；未知、过期或撤销范围为 unavailable 而非零。回退定位可保留原 border-box 策略与 Base 交互，但必须报告视觉间距不可用并保留完整不透明材质回退，不得宣称光学或 visual-ready 成功。范围更新使用当前 active positioning lease，不重启 Overlay entry，并遵守现 current-computation 与 Runtime callback 取消约束。'
 sources:
   - path: packages/core/src/positioning.ts
   - path: packages/modules/positioning/src/impl.ts
   - path: packages/modules/positioning/src/web/floating-ui-host.ts
 dependsOn:
+  contracts: [C-MATERIAL-PAINT-FOOTPRINT-0001]
   decisions:
     - D-ANATOMY-PARTVIEW-TARGET-0001
 verifies:
   tests:
     - T-ANCHORED-POSITIONING-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added definition-only opt-in paint-footprint visual separation with planned evidence; default border-box positioning remains unchanged.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added revocable host-local input-origin associations and current-connection callback-phase delivery with reentrant lease cancellation, without exporting geometry or replacing logical anchor ownership.
@@ -70,4 +82,8 @@ revisions:
   - version: 0.2.0-rc.0
     change: introduced
     summary: Defined host-mediated anchored geometry, collision defaults, output projection, Portal separation, and bounded observation lifetime.
+openQuestions:
+  - id: C-ANCHORED-POSITIONING-0001-Q-VISUAL
+    question: Which reviewed host-local association syntax and exact-source native evidence implement the opt-in visual-gap criteria without weakening defaults or source safety?
+    blocks: [activation:C-ANCHORED-POSITIONING-0001]
 tags: [positioning, overlay, geometry, collision, host-capability]

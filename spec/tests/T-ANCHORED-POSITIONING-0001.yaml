@@ -59,7 +59,24 @@ cases:
     covers:
       [C-ANCHORED-POSITIONING-0001-H, HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B]
     expectation: zero-area-pointer-reference-or-keyboard-element-without-portable-geometry-and-no-writes-after-revocation
+  - id: T-ANCHORED-POSITIONING-0001-CASE-VISUAL-GAP
+    title: Opt-in asymmetric paint boundaries preserve ordinary offset defaults
+    covers: [C-ANCHORED-POSITIONING-0001-VISUAL-GAP, HC-ANCHORED-POSITION-0001-VISUAL]
+    expectation: all-four-resolved-sides-offset-overflowing-surface-normalization-flip-shift-and-unchanged-non-opted-border-offsets
+  - id: T-ANCHORED-POSITIONING-0001-CASE-VISUAL-UNAVAILABLE
+    title: Missing or revoked paint facts retain Base interaction without false optical readiness
+    covers: [C-ANCHORED-POSITIONING-0001-VISUAL-UNAVAILABLE, HC-ANCHORED-POSITION-0001-VISUAL]
+    expectation: explicit-unavailable-no-zero-substitution-no-stale-write-or-entry-restart
 implementations:
+  - id: positioning-visual-gap-planned
+    kind: module-test
+    status: planned
+    required: true
+    consumesCases:
+      [
+        T-ANCHORED-POSITIONING-0001-CASE-VISUAL-GAP,
+        T-ANCHORED-POSITIONING-0001-CASE-VISUAL-UNAVAILABLE,
+      ]
   - id: positioning-callback-delivery
     kind: module-test
     status: passing
@@ -139,7 +156,8 @@ verifies:
       anchors: [M-POSITIONING-0001-A, M-POSITIONING-0001-B, M-POSITIONING-0001-C]
   hostCaps:
     - id: HC-ANCHORED-POSITION-0001
-      anchors: [HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B]
+      anchors:
+        [HC-ANCHORED-POSITION-0001-A, HC-ANCHORED-POSITION-0001-B, HC-ANCHORED-POSITION-0001-VISUAL]
   adapters:
     - id: A-VUE-2-0001
       since: 0.3.0-alpha.0
@@ -164,10 +182,15 @@ verifies:
         - C-ANCHORED-POSITIONING-0001-F
         - C-ANCHORED-POSITIONING-0001-G
         - C-ANCHORED-POSITIONING-0001-I
+        - C-ANCHORED-POSITIONING-0001-VISUAL-GAP
+        - C-ANCHORED-POSITIONING-0001-VISUAL-UNAVAILABLE
 exercises:
   modules: [M-POSITIONING-0001]
   hostCaps: [HC-ANCHORED-POSITION-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Added definition-only opt-in paint-footprint visual separation with planned evidence; default border-box positioning remains unchanged.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Added actual Runtime callback-phase State-write evidence and module stale/reentrant completion cancellation cases.
@@ -180,4 +203,12 @@ revisions:
   - version: 0.2.0-rc.0
     change: clarified
     summary: Required the Web host test to verify anchor and available-size CSS variable projection.
+openQuestions:
+  - id: T-ANCHORED-POSITIONING-0001-Q-VISUAL
+    question: Which new executable implementation validates both planned visual-gap cases independently of existing passing border-box coverage?
+    blocks:
+      [
+        activation:T-ANCHORED-POSITIONING-0001,
+        'implementation:T-ANCHORED-POSITIONING-0001#positioning-visual-gap-planned',
+      ]
 tags: [positioning, overlay, hover-card, test]
