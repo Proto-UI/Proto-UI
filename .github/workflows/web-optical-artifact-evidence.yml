@@ -61,7 +61,7 @@ jobs:
         run: |
           EVIDENCE=/tmp/pui-native-focus-stimulus
           mkdir -p "$EVIDENCE"
-          printf '%s  %s\n' 'dd0cea3a5bd5ab778f4395bce5551715ad4d005c3c22ec1c497db5bba9797a98' 'apps/www/scripts/native-focus-repro.mjs' | sha256sum -c -
+          printf '%s  %s\n' 'ca2142dfcc571d59b0515da8f0287be04e28f65ffcbdde79f7f1c620c8285c25' 'apps/www/scripts/native-focus-repro.mjs' | sha256sum -c -
           sha256sum "$CHROME_PATH" apps/www/node_modules/playwright-core/package.json > "$EVIDENCE/binding.sha256"
           git rev-parse HEAD HEAD^{tree} > "$EVIDENCE/source.txt"
           git status --porcelain --untracked-files=no > "$EVIDENCE/tracked-before.txt"

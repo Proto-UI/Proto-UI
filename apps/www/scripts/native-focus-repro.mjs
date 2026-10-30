@@ -1,4 +1,4 @@
-// Product-free, fixed Playwright 1.58.2 native-focus diagnostic. Not executed yet.
+// Product-free Playwright 1.58.2 native-focus diagnostic; original dd0cea evidence retained.
 import assert from 'node:assert/strict';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
@@ -32,7 +32,9 @@ try {
       report.requestsDenied.push(route.request().url());
       return route.abort();
     });
-    await context.addInitScript(() => {
+    // setContent uses document.open(), which removes the document/window listeners.
+    // Install on each final owned document, before any native input or focus transfer.
+    const installObserver = (page) => page.evaluate(() => {
       window.__nativeFocusEvents = [];
       for (const type of ['focus', 'blur', 'focusin', 'focusout', 'pointerdown', 'pointerup', 'click', 'visibilitychange']) {
         addEventListener(type, (event) => window.__nativeFocusEvents.push({
@@ -64,6 +66,7 @@ try {
       first = await action('first.newPage', () => context.newPage());
       await first.goto('about:blank');
       await first.setContent('<!doctype html><button style="position:absolute;left:100px;top:100px;width:120px;height:60px">Owned native control</button>');
+      await installObserver(first);
       firstCdp = await context.newCDPSession(first);
       if (disableFocusEmulation) await action('first.Emulation.setFocusEmulationEnabled(false)',
         () => firstCdp.send('Emulation.setFocusEmulationEnabled', { enabled: false }));
@@ -72,9 +75,12 @@ try {
       await snapshot('before-down');
       await action('first.mouse.down', () => first.mouse.down());
       await first.waitForTimeout(40);
-      await snapshot('after-down-before-other');
+      const afterDown = await snapshot('after-down-before-other');
+      assert.ok(afterDown.events.some((event) => event.type === 'pointerdown' && event.trusted && event.target === 'BUTTON'),
+        'the final-document observer must record the actual native button down before switching pages');
       other = await action('other.newPage', () => context.newPage());
       await other.goto('about:blank');
+      await installObserver(other);
       otherCdp = await context.newCDPSession(other);
       if (disableFocusEmulation) await action('other.Emulation.setFocusEmulationEnabled(false)',
         () => otherCdp.send('Emulation.setFocusEmulationEnabled', { enabled: false }));
