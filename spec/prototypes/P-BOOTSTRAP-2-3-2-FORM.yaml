@@ -1,0 +1,47 @@
+id: P-BOOTSTRAP-2-3-2-FORM
+type: prototype
+title: Bootstrap 2.3.2 Form projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Form family over P-BASE-FORM with pinned vocabulary.
+statement:
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Field/Submit/Reset preserve form operations, typed serialization and stale-async-validation ownership; Submit/Reset consume the complete passive Button recipe through the form action setup, not a second Button owner.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-FORM-BASE
+    text:
+            en: Invoke asForm* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-FORM-VISUAL
+    text:
+            en: Root/Field/Submit/Reset preserve form operations, typed serialization and stale-async-validation ownership; Submit/Reset consume the complete passive Button recipe through the form action setup, not a second Button owner.
+  - id: P-BOOTSTRAP-2-3-2-FORM-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-FORM-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-FORM
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/form/
+  - path: packages/prototypes/bootstrap-2-3-2/src/form/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/forms.less
+    label: Pinned historical design reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Form projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - form
+  - draft

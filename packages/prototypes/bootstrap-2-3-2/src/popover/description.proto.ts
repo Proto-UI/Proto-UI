@@ -7,8 +7,11 @@ import {
 
 export default definePrototype<PopoverDescriptionProps, PopoverDescriptionExposes>({
   name: 'bootstrap-2-3-2-popover-description',
+  modules: asPopoverDescription.modules,
   setup(def) {
     const behavior = asPopoverDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    // Body copy maps to .popover-content; Title keeps its independent inset.
+    def.feedback.style.use(tw('px-[14px] py-[9px] text-[14px] leading-[20px] text-foreground'));
+    return behavior.render;
   },
 });

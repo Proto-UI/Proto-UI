@@ -123,7 +123,20 @@ it('restores disabled and required from parent without latching inherited policy
     m.root.getExposes().requestValue({ value: 'beta', textValue: 'Beta', reason: 'keyboard' })
   ).toBe(true);
 });
-it('keeps a plain trigger content-labelled and outside optional Field composition', async () => {
+it('retains Field labelledBy authority alongside an optional author fallback name', async () => {
+  // T-BASE-SELECT-TRIGGER-0001-CASE-AUTHOR-NAME
+  const m = mount();
+  setElementProps(m.trigger, { accessibleLabel: 'Fallback label' });
+  await flush();
+  expect(m.trigger.getAttribute('aria-label')).toBe('Fallback label');
+  expect(m.trigger.getAttribute('aria-labelledby')).toBe(m.label.id);
+  expect(document.getElementById(m.label.id)?.textContent).toBe('Choice');
+  setElementProps(m.trigger, { accessibleLabel: '' });
+  await flush();
+  expect(m.trigger.hasAttribute('aria-label')).toBe(false);
+  expect(m.trigger.getAttribute('aria-labelledby')).toBe(m.label.id);
+});
+it('keeps a plain trigger outside optional Field composition without inventing an author name', async () => {
   const field = document.createElement(fieldRoot.name),
     root = document.createElement(selectRoot.name),
     trigger = document.createElement(selectTrigger.name);

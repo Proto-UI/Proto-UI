@@ -1,13 +1,12 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asMenubarRoot,
-  type MenubarRootProps,
-  type MenubarRootExposes,
-} from '@proto.ui/prototypes-base/menubar';
+import { definePrototype } from '@proto.ui/core';
+import { asMenubarRoot } from '@proto.ui/prototypes-base/menubar';
+import type { MenubarRootProps, MenubarRootExposes } from './types';
+import { setupMenubarRootPaint } from './visual';
 export default definePrototype<MenubarRootProps, MenubarRootExposes>({
   name: 'shadcn-menubar-root',
+  modules: asMenubarRoot.modules,
   setup(def) {
-    const behavior = asMenubarRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-center gap-1'));
+    asMenubarRoot();
+    setupMenubarRootPaint(def);
   },
 });

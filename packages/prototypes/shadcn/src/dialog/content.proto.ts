@@ -1,6 +1,8 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asDialogContent } from '@proto.ui/prototypes-base/dialog';
 import type { ShadcnDialogContentExposes, ShadcnDialogContentProps } from './types';
+import { setupOverlayDarkRing, setupOverlayPaint } from './style';
+import { DIALOG_PANEL } from './recipes';
 
 const dialogContent = definePrototype<ShadcnDialogContentProps, ShadcnDialogContentExposes>({
   name: 'shadcn-dialog-content',
@@ -12,10 +14,12 @@ const dialogContent = definePrototype<ShadcnDialogContentProps, ShadcnDialogCont
     dialog.asTransition.configure({ enterDuration: 200, leaveDuration: 200 });
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
+    const style = setupOverlayPaint(def, DIALOG_PANEL);
+    setupOverlayDarkRing(def, style);
     // P-SHADCN-DIALOG-CONTENT-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
       tw(
-        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid grid-cols-1 w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto gap-4 -translate-x-1/2 -translate-y-1/2 rounded-lg border border-border bg-background p-6 shadow-lg transition-opacity duration-200 outline-none'
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] grid grid-cols-1 w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto -translate-x-1/2 -translate-y-1/2 outline-none'
       )
     );
 

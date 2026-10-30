@@ -1,0 +1,48 @@
+id: P-BOOTSTRAP-2-3-2-IMAGE
+type: prototype
+title: Bootstrap 2.3.2 Image projection over the host-owned Image View
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Image root forwards asImageRoot modules and its host-owned render with pinned appearance recipes.
+statement:
+    en: 'The Prototype invokes asImageRoot() once, forwards the static Image View modules and the actual empty render; the host-owned image target performs rendering and loading. Source, alternative text, fit and loading generation remain Base facts. The family adds an appearance input: default responsive, rounded 6px radius, polaroid 4px padding with white background and rgba shadow, or exact 500px circle radius, matching the pinned img-rounded/img-polaroid/img-circle vocabulary.'
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-IMAGE-BASE
+    text:
+            en: Invoke asImageRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-IMAGE-VISUAL
+    text:
+            en: appearance is default | rounded | polaroid | circle (default default). Polaroid uses 4px padding, white background, 1px rgba(0,0,0,.2) border and a 0/1/3px rgba(0,0,0,.1) shadow; circle uses the historical 500px radius. These are presentation facts over the host-owned target, not a second image owner.
+  - id: P-BOOTSTRAP-2-3-2-IMAGE-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-IMAGE-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-IMAGE-VIEW-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-IMAGE
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-DRAFT-PASSIVE-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/image/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/image/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/scaffolding.less
+    label: Pinned image treatments reference (img-rounded/img-polaroid/img-circle)
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Image projection over the host-owned Image View cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - image
+  - draft

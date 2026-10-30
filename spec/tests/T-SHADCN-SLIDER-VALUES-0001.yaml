@@ -1,0 +1,36 @@
+id: T-SHADCN-SLIDER-VALUES-0001
+type: test
+title: Shadcn Slider Values family coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Indexed Values anatomy, sorted slots, controlled refusal and theme-relative profile paint.
+cases:
+  - id: T-SHADCN-SLIDER-VALUES-0001-CASE-ANATOMY
+    title: Six Values parts map indexed slots and reject unmapped composition
+    covers:
+      - P-SHADCN-SLIDER-VALUES-INHERITANCE
+    expectation: indexed-values-anatomy-and-refusal
+  - id: T-SHADCN-SLIDER-VALUES-0001-CASE-VISUAL
+    title: Theme-relative profile paint and owned decoration without pointer or Field ownership
+    covers:
+      - P-SHADCN-SLIDER-VALUES-VISUAL
+      - P-SHADCN-SLIDER-VALUES-BOUNDARY
+    expectation: theme-relative-paint-no-owner-invention
+implementations:
+  - id: shadcn-slider-values-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/slider-values-projection.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-SLIDER-VALUES
+      - P-SHADCN-SLIDER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-SLIDER
+    - P-SHADCN-SLIDER-VALUES

@@ -133,6 +133,9 @@ export type OverlayTargetAlignmentBinding = Readonly<{
 export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   open: ObservedStateHandle<boolean, P>;
 
+  /** One current open-view resource pass; not renderer/native readiness. */
+  afterViewReconciled(callback: () => void): () => void;
+
   isOpen(): boolean;
   openOverlay(reason?: OverlayReason): void;
   close(reason?: OverlayReason): void;

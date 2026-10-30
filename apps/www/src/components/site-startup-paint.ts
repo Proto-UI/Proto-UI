@@ -4,6 +4,7 @@ import { ShadcnSurfaceRoot } from '@proto.ui/prototypes-shadcn/surface';
 import { BrutalistSurfaceRoot } from '@proto.ui/prototypes-brutalist/surface';
 import { createStyleSnapshotter, renderSnapshotTokenCss } from './snapshot-prototype-style';
 import type { SiteLibraryFamily } from './site-library-family';
+import { headerButtonProps } from './site-header-control-recipes';
 
 export const snapshotStartupStyle = createStyleSnapshotter(
   {
@@ -15,10 +16,7 @@ export const snapshotStartupStyle = createStyleSnapshotter(
   ['shadcn-button', 'brutalist-button']
 );
 
-export const startupButtonProps = (family: SiteLibraryFamily, size = 'icon') => ({
-  variant: family === 'brutalist' ? 'surface' : 'ghost',
-  size,
-});
+export const startupButtonProps = headerButtonProps;
 
 /** Surface snapshots contain only static paint declarations. Store those at
  * each family boundary as inherited inputs, so the nearest scope wins exactly

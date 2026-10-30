@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 // Astro compiles on first request. Keep the shared runner's readiness inventory
 // importable without starting its server or running Vitest.
 export const READY_ROUTES = Object.freeze([
+  '/en/ui-libraries/shadcn/menubar/',
   '/en/test/style-isolation/',
   '/en/test/new-projection-families/',
   '/en/test/bootstrap-state-controls/',
@@ -77,6 +78,7 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
   'packages/adapters/web-component/test/native-text-width.browser.test.ts',
   'packages/prototypes/shadcn/test/drawer-presence.browser.test.ts',
   'packages/adapters/base/test/focus-intent-retries.browser.test.ts',

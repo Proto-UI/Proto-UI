@@ -1,20 +1,4 @@
-import type {
-  DataTableRootProps,
-  DataTableRootExposes,
-  DataTableRowProps,
-  DataTableRowExposes,
-  DataTableCellProps,
-  DataTableCellExposes,
-  DataTableHeaderProps,
-  DataTableHeaderExposes,
-  DataTableCaptionProps,
-  DataTableCaptionExposes,
-  DataTablePreviousProps,
-  DataTablePreviousExposes,
-  DataTableNextProps,
-  DataTableNextExposes,
-} from '@proto.ui/prototypes-base/data-table';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asDataTableRoot,
   asDataTableRow,
@@ -23,179 +7,142 @@ import {
   asDataTableCaption,
   asDataTablePrevious,
   asDataTableNext,
+  type DataTableRootProps,
+  type DataTableRootExposes,
+  type DataTableRowProps,
+  type DataTableRowExposes,
+  type DataTableCellProps,
+  type DataTableCellExposes,
+  type DataTableHeaderProps,
+  type DataTableHeaderExposes,
+  type DataTableCaptionProps,
+  type DataTableCaptionExposes,
+  type DataTablePreviousProps,
+  type DataTablePreviousExposes,
+  type DataTableNextProps,
+  type DataTableNextExposes,
 } from '@proto.ui/prototypes-base/data-table';
+import { setupShadcnStyleScope, type ShadcnStyleProps } from '../style-scope';
+import { setupCollectionActionVisual, setupCollectionHover } from '../toolbar/action-visual';
+import { setupDataTableText, setupDataTableCell } from './visual';
 export type * from '@proto.ui/prototypes-base/data-table';
-export const dataTableRoot = definePrototype<DataTableRootProps, DataTableRootExposes>({
+export type ShadcnDataTableRootProps = DataTableRootProps & ShadcnStyleProps;
+export type ShadcnDataTableRowProps = DataTableRowProps;
+export type ShadcnDataTableCellProps = DataTableCellProps & ShadcnStyleProps;
+export type ShadcnDataTableHeaderProps = DataTableHeaderProps & ShadcnStyleProps;
+export type ShadcnDataTableCaptionProps = DataTableCaptionProps & ShadcnStyleProps;
+export type ShadcnDataTablePreviousProps = DataTablePreviousProps & ShadcnStyleProps;
+export type ShadcnDataTableNextProps = DataTableNextProps & ShadcnStyleProps;
+
+export const dataTableRoot = definePrototype<ShadcnDataTableRootProps, DataTableRootExposes>({
   name: 'shadcn-data-table-root',
+  modules: asDataTableRoot.modules,
   setup(def) {
     const behavior = asDataTableRoot();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground rounded-lg border border-border bg-background shadow-sm grid gap-0'
-      )
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    setupShadcnStyleScope(def);
+    setupDataTableText(def);
+    def.feedback.style.use(tw('table w-full min-w-0 caption-bottom text-foreground'));
     return behavior.render;
   },
 });
 export { dataTableRoot as shadcnDataTableRoot };
-export const dataTableRow = definePrototype<DataTableRowProps, DataTableRowExposes>({
+
+export const dataTableRow = definePrototype<ShadcnDataTableRowProps, DataTableRowExposes>({
   name: 'shadcn-data-table-row',
+  modules: asDataTableRow.modules,
   setup(def) {
     const behavior = asDataTableRow();
-    def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground grid items-stretch border-b border-border')
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-data-table] Row state unavailable.');
+    const hovered = setupCollectionHover(def);
+    def.feedback.style.use(tw('table-row border-b border-border transition-colors'));
+    def.rule({
+      when: (w) => w.all(w.state(hovered).eq(true), w.state(state.selected).eq(false)),
+      intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
+    });
+    def.rule({
+      when: (w) => w.state(state.selected).eq(true),
+      intent: (i) => i.feedback.style.use(tw('bg-muted')),
+    });
+    // Proto's selectable row adds this keyboard affordance; upstream TableRow
+    // is not itself an interaction or focus owner.
+    def.rule({
+      when: (w) => w.state(state.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
+    });
     return behavior.render;
   },
 });
 export { dataTableRow as shadcnDataTableRow };
-export const dataTableCell = definePrototype<DataTableCellProps, DataTableCellExposes>({
+
+export const dataTableCell = definePrototype<ShadcnDataTableCellProps, DataTableCellExposes>({
   name: 'shadcn-data-table-cell',
+  modules: asDataTableCell.modules,
   setup(def) {
     const behavior = asDataTableCell();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground px-4 py-3 text-left text-sm'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    setupDataTableCell(def);
     return behavior.render;
   },
 });
 export { dataTableCell as shadcnDataTableCell };
-export const dataTableHeader = definePrototype<DataTableHeaderProps, DataTableHeaderExposes>({
+
+export const dataTableHeader = definePrototype<ShadcnDataTableHeaderProps, DataTableHeaderExposes>({
   name: 'shadcn-data-table-header',
+  modules: asDataTableHeader.modules,
   setup(def) {
     const behavior = asDataTableHeader();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground px-4 py-3 text-left text-sm font-semibold cursor-pointer'
-      )
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    setupDataTableCell(def, true);
+    def.rule({
+      when: (w) => w.prop('sortable').eq(true),
+      intent: (i) => i.feedback.style.use(tw('cursor-pointer')),
+    });
+    // Its public hook exposes sort only; do not fabricate focus/selected facts
+    // by probing undeclared states or install a second focus owner for paint.
     return behavior.render;
   },
 });
 export { dataTableHeader as shadcnDataTableHeader };
-export const dataTableCaption = definePrototype<DataTableCaptionProps, DataTableCaptionExposes>({
+
+export const dataTableCaption = definePrototype<
+  ShadcnDataTableCaptionProps,
+  DataTableCaptionExposes
+>({
   name: 'shadcn-data-table-caption',
+  modules: asDataTableCaption.modules,
   setup(def) {
     const behavior = asDataTableCaption();
-    def.feedback.style.use(
-      tw('min-w-0 max-w-full text-foreground px-4 py-3 text-left font-semibold')
-    );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    setupDataTableText(def);
+    def.feedback.style.use(tw('table-caption mt-4 text-muted-foreground'));
     return behavior.render;
   },
 });
 export { dataTableCaption as shadcnDataTableCaption };
-export const dataTablePrevious = definePrototype<DataTablePreviousProps, DataTablePreviousExposes>({
+
+export const dataTablePrevious = definePrototype<
+  ShadcnDataTablePreviousProps,
+  DataTablePreviousExposes
+>({
   name: 'shadcn-data-table-previous',
+  modules: asDataTablePrevious.modules,
   setup(def) {
     const behavior = asDataTablePrevious();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
-      )
-    );
-    const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
-    if (!states) throw new Error('[shadcn-data-table] Required inherited state is unavailable.');
-    def.rule({
-      when: (w) => w.state(states.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-    });
-    def.rule({
-      when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-    });
-    // Presentation consumes the existing owner; no second interaction hook.
-    def.rule({
-      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
-    });
+    const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!state) throw new Error('[shadcn-data-table] Previous state unavailable.');
+    setupCollectionActionVisual(def, state, 'outline');
     return behavior.render;
   },
 });
 export { dataTablePrevious as shadcnDataTablePrevious };
-export const dataTableNext = definePrototype<DataTableNextProps, DataTableNextExposes>({
+
+export const dataTableNext = definePrototype<ShadcnDataTableNextProps, DataTableNextExposes>({
   name: 'shadcn-data-table-next',
+  modules: asDataTableNext.modules,
   setup(def) {
     const behavior = asDataTableNext();
-    def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground inline-flex min-h-9 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm cursor-pointer'
-      )
-    );
-    const states = behavior.getAsHookHandle?.('as-button')?.stateHandles;
-    if (!states) throw new Error('[shadcn-data-table] Required inherited state is unavailable.');
-    def.rule({
-      when: (w) => w.state(states.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-    });
-    def.rule({
-      when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-    });
-    // Presentation consumes the existing owner; no second interaction hook.
-    def.rule({
-      when: (w) => w.all(w.state(states.pressed).eq(true), w.state(states.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('translate-y-px')),
-    });
+    const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!state) throw new Error('[shadcn-data-table] Next state unavailable.');
+    setupCollectionActionVisual(def, state, 'outline');
     return behavior.render;
   },
 });

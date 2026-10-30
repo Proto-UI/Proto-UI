@@ -20,4 +20,30 @@ export type {
   FieldErrorExposes,
   FieldValidityProps,
   FieldValidityExposes,
+  FieldTextareaProps,
+  FieldTextareaExposes,
+  FieldTextareaAsHookContract,
+  FieldSelectTriggerProps,
+  FieldSelectTriggerExposes,
+  FieldSelectTriggerAsHookContract,
+  FieldSwitchProps,
+  FieldSwitchExposes,
+  FieldSwitchAsHookContract,
 } from '@proto.ui/prototypes-base/field';
+
+export { default as fieldTextarea, default as liquidGlassFieldTextarea } from './textarea.proto';
+export type {
+  LiquidGlassFieldTextareaProps,
+  LiquidGlassFieldTextareaExposes,
+} from './textarea.proto';
+export {
+  default as fieldSelectTrigger,
+  default as liquidGlassFieldSelectTrigger,
+} from './select-trigger.proto';
+export type {
+  LiquidGlassFieldSelectTriggerProps,
+  LiquidGlassFieldSelectTriggerExposes,
+  LiquidGlassFieldSelectTriggerAsHookContract,
+} from './select-trigger.proto';
+export { default as fieldSwitch, default as liquidGlassFieldSwitch } from './switch.proto';
+export type { LiquidGlassFieldSwitchProps, LiquidGlassFieldSwitchExposes } from './switch.proto';

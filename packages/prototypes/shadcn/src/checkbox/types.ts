@@ -8,8 +8,9 @@ import type {
   CheckboxRootProps,
   CheckboxRootStateHandles,
 } from '@proto.ui/prototypes-base/checkbox';
+import type { ShadcnStyleProps } from '../style-scope';
 
-export interface ShadcnCheckboxRootProps extends CheckboxRootProps {}
+export interface ShadcnCheckboxRootProps extends CheckboxRootProps, ShadcnStyleProps {}
 
 export type ShadcnCheckboxRootExposes = CheckboxRootExposes;
 

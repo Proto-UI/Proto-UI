@@ -13,6 +13,7 @@ import {
   type FocusScopeConfig,
   illegalPhase,
   FocusRequestOptions,
+  FocusScopeActivationOptions,
   FocusScopeConfigPatch,
   FocusScopeHandle,
   FocusScopeKey,
@@ -264,7 +265,7 @@ class FocusModuleImpl extends ModuleBase {
       focusPrev: () => this.focusPrev(),
       focusSelected: () => this.focusSelected(),
       restoreFocus: () => this.restoreFocus(),
-      activate: (options?: FocusRequestOptions) => this.activateScope(options),
+      activate: (options?: FocusScopeActivationOptions) => this.activateScope(options),
       deactivate: (options?: FocusRequestOptions) => this.deactivateScope(options),
       isActive: () => this.isScopeActive(),
       configure: (patch: FocusScopeConfigPatch) => this.configureScope(patch),
@@ -1302,7 +1303,7 @@ class FocusModuleImpl extends ModuleBase {
     this.requestFocus({ reason: 'programmatic' });
   }
 
-  activateScope(options?: FocusRequestOptions): void {
+  activateScope(options?: FocusScopeActivationOptions): void {
     this.declareScope();
     const entry = this.createCenterEntry();
     if (!entry) return;

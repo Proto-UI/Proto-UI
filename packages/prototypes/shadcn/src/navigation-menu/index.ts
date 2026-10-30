@@ -15,4 +15,4 @@ export type {
   NavigationMenuItemExposes,
   NavigationMenuLinkProps,
   NavigationMenuLinkExposes,
-} from '@proto.ui/prototypes-base/navigation-menu';
+} from './types';

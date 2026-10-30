@@ -19,6 +19,8 @@ export type DemoNode =
       className?: string;
       attrs?: DemoBoxAttrs;
       ref?: string;
+      /** Static website-owned visible source; preserved through projection cloning. */
+      materialStage?: Readonly<{ mountRef: string; overlayRef: string }>;
       children?: DemoChild[];
     }
   | {
@@ -310,6 +312,8 @@ export function collectPrototypeIds(node: DemoChild, out: Set<string>) {
 }
 
 export type DemoRenderOptions = {
+  /** Composition-owned opt-out for an automatic backdrop only; explicit stages remain enabled. */
+  automaticMaterialScene?: boolean;
   runtime: RuntimeId;
   demo: DemoSpec;
   host: HTMLElement;

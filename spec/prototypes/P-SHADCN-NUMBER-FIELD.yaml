@@ -19,8 +19,12 @@ dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+inherits:
+  prototypes:
+    - P-BASE-NUMBER-FIELD
 verifies:
-  tests: []
+  tests:
+    - T-SHADCN-EDITOR-PROFILES-0001
 sources:
   - path: packages/prototypes/shadcn/src/number-field/
 openQuestions:
@@ -33,7 +37,10 @@ openQuestions:
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
-    summary: Cataloged the shadcn numberField family as draft.
+    summary: Cataloged the shadcn number field family as draft.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Bound the implemented family projection to its Base draft inheritance and focused profile coverage.
 tags:
   - prototype
   - shadcn

@@ -80,6 +80,8 @@ describe('real family preset inherited physical closure', () => {
         expect(css).not.toContain('Unsupported Proto UI style tokens');
         expect(css).toContain('align-content: flex-start;');
       }
-    });
+      // The full family+Base closure scan is far past the 5s default now that
+      // multi-profile recipes are projected.
+    }, 120_000);
   }
 });

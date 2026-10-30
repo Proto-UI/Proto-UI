@@ -6,8 +6,10 @@ import {
   renderProtoShadowStyleTokenCss,
 } from '../src/services/proto-style-css';
 import {
-  bootstrapButtonFill,
-  bootstrapButtonActiveFill,
+  bootstrapButtonRestFill,
+  bootstrapButtonInteractiveFill,
+  bootstrapButtonFlatFill,
+  bootstrapButtonPressedFill,
   bootstrapButtonRaised,
   bootstrapButtonPressed,
 } from '../../prototypes/bootstrap-2-3-2/src/button/paint';
@@ -115,17 +117,20 @@ describe('finite Bootstrap complete paint recipes', () => {
     const tokens = [
       ...new Set(
         [
-          ...Object.values(bootstrapButtonFill),
-          ...Object.values(bootstrapButtonActiveFill),
+          ...Object.values(bootstrapButtonRestFill),
+          ...Object.values(bootstrapButtonInteractiveFill),
+          ...Object.values(bootstrapButtonFlatFill),
+          ...Object.values(bootstrapButtonPressedFill),
           bootstrapButtonRaised,
           bootstrapButtonPressed,
         ].flatMap((value) => value.split(' '))
       ),
     ].sort();
-    // Measured from exact 61653e5795a8b881b200c4a2f061152cb967ce6b before edits.
+    // Byte-pinned output of the complete finite paint recipe set; re-pinned
+    // after the 2.3.2 recipe tokens replaced the legacy shorthand exports.
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       expect(createHash('sha256').update(render(tokens)).digest('hex')).toBe(
-        '20b89ceb8c2efaaa7c107326a3e04488cd86616771531fe299b6fea05aac1324'
+        '76f413d79db45e7d2d6a70d699dfd7db243882037669c13d5b5738ed6c9bc0bf'
       );
     }
   });

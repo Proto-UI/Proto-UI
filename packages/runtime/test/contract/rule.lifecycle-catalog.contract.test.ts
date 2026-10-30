@@ -1,11 +1,67 @@
 import { describe, expect, it } from 'vitest';
-import { tw, type OwnedStateHandle, type StyleHandle } from '@proto.ui/core';
-import { EFFECTS_CAP } from '@proto.ui/module-feedback';
+import { tw, type OwnedStateHandle, type OwnedDecorationTarget, type StyleHandle } from '@proto.ui/core';
+import { EFFECTS_CAP, OWNED_DECORATION_CAP, type FeedbackPort } from '@proto.ui/module-feedback';
 import { RAW_PROPS_SOURCE_CAP } from '@proto.ui/module-props';
 import type { RulePort } from '@proto.ui/module-rule';
 import { createRuntimeSession } from '../../src';
 
 describe('Rule Runtime catalog', () => {
+  it('retires decoration Rules before unmounted callbacks clear their active State', async () => {
+    let state!: OwnedStateHandle<boolean>;
+    let target!: OwnedDecorationTarget;
+    let unmounted = false;
+    const styles: StyleHandle[] = [];
+    const decoration = document.createElement('span');
+    const session = createRuntimeSession(
+      {
+        name: 'rule-active-source-retirement',
+        setup(def) {
+          state = def.state.bool('active', false);
+          target = def.feedback.style.declareDecoration();
+          def.feedback.style.to(target).use(tw('bg-red-500'));
+          def.feedback.style.use(tw('text-white'));
+          def.rule({
+            when: (w) => w.state(state).eq(true),
+            intent: (i) => i.feedback.style.to(target).use(tw('opacity-50')),
+          });
+          def.lifecycle.onUnmounted(() => {
+            unmounted = true;
+            state.set(false);
+          });
+          return (r) => r.decoration(target);
+        },
+      },
+      {
+        prototypeName: 'rule-active-source-retirement',
+        getRawProps: () => ({}),
+        schedule: (task) => task(),
+        commit: (_children, signal) => {
+          const feedback = session.caps.getPort<FeedbackPort>('feedback')!;
+          feedback.bindDecorations!([
+            { target, sink: (style) => { decoration.className = style.tokens.join(' '); } },
+          ], feedback.captureDecorationLease!());
+          signal?.done();
+        },
+        onRuntimeReady: (wiring) => wiring.attach('feedback', [
+          [OWNED_DECORATION_CAP, true],
+          [EFFECTS_CAP, {
+            queueStyle: (style: StyleHandle) => styles.push(style),
+            requestFlush: () => {},
+          }],
+        ]),
+      }
+    );
+    await session.mount();
+    session.invokeInCallbackScope(() => state.set(true));
+    expect(decoration.className).toBe('bg-red-500 opacity-50');
+    styles.length = 0;
+    await session.dispose();
+    expect(session.instancePhase).toBe('disposed');
+    expect(unmounted).toBe(true);
+    expect(styles).toEqual([]);
+    expect(() => state.get()).toThrow(/disposed/i);
+  });
+
   it('delivers changed resolved Props to Rule styles after author watches without a template commit', async () => {
     let raw: Record<string, unknown> = { accent: false };
     const subscribers = new Set<() => void>();

@@ -3,6 +3,7 @@ type: contract
 title: Focus scope activation gates focus and restores the previous owner
 status: draft
 since: 0.1.0
+lifecycleRationale: Draft scope policy; per-activation entry override requires focused execution, independent review and separate compiler admission and consumer conformance.
 summary: A focus scope may exist inactive in the logical tree; activation captures previous focus, moves focus into the scope, gates outside focus requests, and deactivation restores the captured owner.
 statement:
   zh-CN: >-
@@ -55,6 +56,17 @@ criteria:
     text:
       zh-CN: 支持顺序焦点采样的宿主可以提供当前 scope 内的有序可 Tab targets 与实际 focused target。Focus 必须仍拥有 top active scope、方向、loop 与默认遍历阻止策略；采样必须尊重已投射的导航参与、隐藏与 entry fallback，不得把程序化可聚焦等同于可 Tab。采样仅用于当前顺序遍历，不得伪造 logical focus facts；无该能力时保留 logical member 路径。
       en: A host supporting sequential-focus sampling may supply ordered tabbable targets inside the current scope and the actual focused target. Focus retains ownership of the top active scope, direction, loop and default-traversal prevention. Sampling must respect projected navigation participation, hiding and entry fallback, and must not equate programmatic focusability with tabbability. Samples serve current sequential traversal only and must not fabricate logical focus facts; hosts without the capability retain the logical-member path.
+  - id: C-AS-FOCUS-SCOPE-0002-K
+    since: 0.3.0-alpha.1
+    text:
+      zh-CN: >-
+        activate(options) 可通过 entry: manual 仅抑制本次激活的自动入场；省略 entry 或 entry: configured 必须遵循原 setup 配置，而不能强制覆盖已配置的 manual。在非类型化 Runtime 边界仅字面量 manual 抑制入场，其他值遵循 configured 分支；这不扩展静态或 Compiler 接受的枚举。该选项不修改持久配置；后续激活独立选择。manual 仍激活相同的 scope 边界并保留 trap、loop、previous owner 捕获与停用恢复，允许作者随后显式请求内部焦点。该选项不得作为新的 Host Focus 请求字段下发，不提供目标选择、ready 保证或取消既有 pending 请求的能力。调用 activate 仍是显式激活；此选项本身不提供运行中 props watcher 或自动重新激活。
+
+
+      en: >-
+        activate(options) may suppress only this activation's automatic entry using entry: manual. Omitted entry or entry: configured follows the original setup policy and cannot force automatic entry over configured manual. At the untyped Runtime boundary only the literal manual suppresses entry; other values follow the configured branch, without extending the statically or compiler-admitted enum. This option does not mutate persistent configuration; later activations choose independently. Manual still activates the same scope boundary with trapping, looping, previous-owner capture and deactivation restoration, and allows subsequent explicit inside-focus requests. The option must not be forwarded as a new Host Focus request field. It provides neither target selection, readiness nor cancellation of existing pending requests. Calling activate remains an explicit activation; the option does not itself install a runtime props watcher or automatically reactivate a scope.
+
+
 sources:
   - path: internal/contracts/focus/base-text/focus-scope.v0.md
     sections:
@@ -92,6 +104,9 @@ verifies:
   tests:
     - T-FOCUS-SCOPE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Define a per-activation manual entry override without mutating setup policy, host request semantics or pending focus ownership.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Bound optional host sequential sampling so trapped traversal composes native entry and projected tab stops without moving scope policy to the host.

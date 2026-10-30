@@ -28,6 +28,7 @@ import type { AnatomyFacade } from '@proto.ui/module-anatomy';
 import type { ExecPhase } from '@proto.ui/module-base';
 import { attachAsHookRuntime } from './as-hook';
 import { createViewIntent, type RuntimeViewIntent } from './view-intent';
+import { createViewOperations } from './view-operation';
 
 export type Kernel<P extends PropsBaseType> = {
   getPhase(): Phase;
@@ -35,6 +36,7 @@ export type Kernel<P extends PropsBaseType> = {
 
   lifecycle: LifecycleRegistry<P>;
   viewIntent: RuntimeViewIntent;
+  viewOperations: ReturnType<typeof createViewOperations>;
   rules: RuleFacade<P>;
 
   run: RunHandle<P>;
@@ -74,6 +76,7 @@ export function createKernel<P extends PropsBaseType>(
 
   const lifecycle = createLifecycleRegistry<P>();
   const viewIntent = createViewIntent(st);
+  const viewOperations = createViewOperations(st);
   const rules = modules.getFacades()['rule'] as RuleFacade<P>;
 
   const def = createDefHandle<P>(st, lifecycle, rules, modules, opt?.eventSink);
@@ -120,7 +123,8 @@ export function createKernel<P extends PropsBaseType>(
       runUpdateImpl();
     },
     modules,
-    (present) => viewIntent.setPresent(present)
+    (present) => viewIntent.setPresent(present),
+    () => viewOperations.capture()
   );
 
   // ----------------
@@ -232,6 +236,7 @@ export function createKernel<P extends PropsBaseType>(
 
     lifecycle,
     viewIntent,
+    viewOperations,
     rules,
 
     run,

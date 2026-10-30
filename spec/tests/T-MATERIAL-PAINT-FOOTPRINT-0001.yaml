@@ -1,0 +1,64 @@
+id: T-MATERIAL-PAINT-FOOTPRINT-0001
+type: test
+title: Planned material footprint and explicit reservation conformance
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: Definition and acceptance matrix only; no new executable implementation or native/GPU result is claimed.
+summary: Preserves border-box semantics and source safety while testing footprint facts, explicit reservation and cancellation independently.
+cases:
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-FACT
+    title: Four distinct edges and conservative profile bounds are not a universal contact constant
+    covers: [C-MATERIAL-PAINT-FOOTPRINT-0001-FACT]
+    expectation: independently-derived-all-contact-state-bounds-with-static-profile-negative-control
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-UNAVAILABLE
+    title: Missing, detached, zero-sized, unsupported and stale facts never become zero-ready
+    covers: [C-MATERIAL-PAINT-FOOTPRINT-0001-UNAVAILABLE]
+    expectation: explicit-unavailable-with-complete-fallback-and-base-semantics-preserved
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-RESERVATION
+    title: Explicit independent part preserves target border box and consumer padding
+    covers: [C-MATERIAL-PAINT-FOOTPRINT-0001-RESERVATION]
+    expectation: unique-owned-association-no-ancestor-write-no-recursive-layout-growth
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-LIFETIME
+    title: Replacement, same-node new generation, reentry and cleanup reject obsolete writes
+    covers: [C-MATERIAL-PAINT-FOOTPRINT-0001-LIFETIME]
+    expectation: one-current-lease-bounded-batches-and-no-resources-after-disposal
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-SAFETY
+    title: Empty zero-area boxes are distinguished from overflow paint and real neighbors
+    covers: [C-MATERIAL-PAINT-FOOTPRINT-0001-SAFETY]
+    expectation: original-source-guards-and-optical-thresholds-retained
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-NATIVE
+    title: Four Web hosts, RTL, 200 percent text, narrow layout and actual resource cost
+    covers:
+      [
+        C-MATERIAL-PAINT-FOOTPRINT-0001-FACT,
+        C-MATERIAL-PAINT-FOOTPRINT-0001-RESERVATION,
+        C-MATERIAL-PAINT-FOOTPRINT-0001-SAFETY,
+      ]
+    expectation: source-bound-native-button-toggle-and-four-select-example-evidence-not-simulated-layout
+implementations:
+  - id: material-footprint-definition-matrix
+    kind: fixture
+    status: planned
+    required: true
+    consumesCases:
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-FACT
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-UNAVAILABLE
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-RESERVATION
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-LIFETIME
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-SAFETY
+      - T-MATERIAL-PAINT-FOOTPRINT-0001-CASE-NATIVE
+verifies:
+  contracts: [C-MATERIAL-PAINT-FOOTPRINT-0001]
+openQuestions:
+  - id: T-MATERIAL-PAINT-FOOTPRINT-0001-Q-EXECUTABLE
+    question: Which source-independent executable fixtures and final-tree native receipts implement this matrix?
+    blocks:
+      [
+        activation:T-MATERIAL-PAINT-FOOTPRINT-0001,
+        'implementation:T-MATERIAL-PAINT-FOOTPRINT-0001#material-footprint-definition-matrix',
+      ]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added planned acceptance cases without claiming executable or optical completion.
+tags: [material, layout, test, lifecycle]

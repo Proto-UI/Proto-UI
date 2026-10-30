@@ -22,6 +22,12 @@ export function createDemoAssociationScope() {
       }
       return result;
     },
+    /** Call after host/model commit, with static plus every committed dynamic key. */
+    reconcile(liveKeys: Iterable<string>) {
+      if (disposed) throw new Error('[Demo associations] render instance is disposed');
+      const live = new Set(liveKeys);
+      for (const key of pairs.keys()) if (!live.has(key)) pairs.delete(key);
+    },
     dispose() {
       disposed = true;
       pairs.clear();

@@ -16,3 +16,9 @@ export type {
   CommandEmptyProps,
   CommandEmptyExposes,
 } from '@proto.ui/prototypes-base/command';
+
+export { default as commandDialogContent } from './dialog-content.proto';
+export type {
+  CommandDialogContentProps,
+  CommandDialogContentExposes,
+} from './dialog-content.proto';

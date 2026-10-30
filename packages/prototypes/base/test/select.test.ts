@@ -60,6 +60,30 @@ afterEach(async () => {
 });
 
 describe('prototypes/base: select', () => {
+  it('projects a stable public author name independently of selected text and clears removed labels', async () => {
+    // T-BASE-SELECT-TRIGGER-0001-CASE-AUTHOR-NAME
+    vi.useFakeTimers();
+    const { root, trigger, value } = createSelect({
+      root: { defaultValue: 'alpha' },
+      trigger: { accessibleLabel: 'Runtime' },
+    });
+    await settle();
+    expect(trigger.getAttribute('aria-label')).toBe('Runtime');
+    expect(value.textContent).toBe('Alpha');
+    setElementProps(root, { value: 'beta' });
+    await settle();
+    expect(trigger.getAttribute('aria-label')).toBe('Runtime');
+    expect(value.textContent).toBe('Beta');
+    setElementProps(trigger, { accessibleLabel: '运行时' });
+    await settle();
+    expect(trigger.getAttribute('aria-label')).toBe('运行时');
+    setElementProps(trigger, { accessibleLabel: '' });
+    await settle();
+    expect(trigger.hasAttribute('aria-label')).toBe(false);
+    expect(value.textContent).toBe('Beta');
+    expect(root.getExposes().value.get()).toBe('beta');
+  });
+
   it('owns single-selection facts, collection, anatomy, and live selected text', async () => {
     // T-BASE-SELECT-0001-CASE-ROOT-OWNERSHIP
     // T-BASE-SELECT-0001-CASE-SELECTION-TEXT

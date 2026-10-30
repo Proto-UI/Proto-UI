@@ -1,6 +1,7 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asDialogMask } from '@proto.ui/prototypes-base/dialog';
 import type { ShadcnDialogMaskExposes, ShadcnDialogMaskProps } from './types';
+import { setupOverlayMask } from './style';
 
 const dialogMask = definePrototype<ShadcnDialogMaskProps, ShadcnDialogMaskExposes>({
   name: 'shadcn-dialog-mask',
@@ -12,18 +13,10 @@ const dialogMask = definePrototype<ShadcnDialogMaskProps, ShadcnDialogMaskExpose
     dialog.asTransition.configure({ enterDuration: 150, leaveDuration: 150 });
     const dialogState = dialog.stateHandles;
     const { open } = dialogState;
-    // P-SHADCN-DIALOG-MASK-CURRENT-VISUAL-SURFACE
-    // The opaque surface is the safe initial/unknown/lost-source presentation.
-    // Live preference and support leases may enable the existing 4px material.
-    def.feedback.style.use(tw('fixed inset-0 bg-background'));
+    const style = setupOverlayMask(def, { opaqueFallback: true });
     def.rule({
-      when: (w) =>
-        w.all(
-          w.meta('preference.reducedTransparency').eq('no-preference'),
-          w.meta('preference.forcedColors').eq('none'),
-          w.meta('styleSupport.backdropBlur4px').eq(true)
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-black/50 backdrop-blur-xs')),
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
+      intent: (i) => i.feedback.style.use(tw('duration-100')),
     });
 
     def.rule({

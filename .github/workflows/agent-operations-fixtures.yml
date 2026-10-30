@@ -1,0 +1,115 @@
+name: Agent Operations Local Fixtures
+
+on:
+  pull_request:
+    paths:
+      - 'AGENTS.md'
+      - '.agents/**'
+      - 'internal/agent-operations/**'
+      - 'internal/compiler/**'
+      - 'scripts/agent-operations/**'
+      - '.github/workflows/agent-operations-fixtures.yml'
+
+# Supplemental evidence only: no existing check, requirement or permission is replaced.
+permissions: {}
+
+concurrency:
+  group: agent-local-fixtures-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  local-fixtures:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+    steps:
+      - name: Fetch the exact public candidate without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]
+          mkdir -p "$RUNNER_TEMP/agent-fixtures-home"
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/agent-fixtures-home" \
+            GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null \
+            CANDIDATE_SHA="$CANDIDATE_SHA" bash --noprofile --norc -eu -o pipefail -c '
+              git init .
+              git remote add origin https://github.com/Proto-UI/Proto-UI.git
+              git -c credential.helper= fetch --no-tags --depth=1 origin "$CANDIDATE_SHA"
+              git checkout --detach "$CANDIDATE_SHA"
+              test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+              git rev-parse HEAD
+              git rev-parse HEAD^{tree}
+            '
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.22.1
+          token: ''
+
+      - name: Restore the existing lock without lifecycle scripts or credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          install_status=0
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/agent-fixtures-home" \
+            CI=1 COREPACK_ENABLE_DOWNLOAD_PROMPT=0 \
+            corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts || install_status=$?
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/agent-fixtures-home" \
+            GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null \
+            CANDIDATE_SHA="$CANDIDATE_SHA" bash --noprofile --norc -eu -o pipefail -c '
+              echo "Post-install source binding:"
+              git rev-parse HEAD HEAD^{tree}
+              git status --porcelain=v1 --untracked-files=no
+              test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+              test -z "$(git status --porcelain=v1 --untracked-files=no)"
+            '
+          exit "$install_status"
+
+      - name: Run unchanged policy checks and local fixture tests offline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/agent-fixtures-tmp"
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/agent-fixtures-home" \
+            TMPDIR="$RUNNER_TEMP/agent-fixtures-tmp" CI=1 NO_COLOR=1 \
+            GIT_CONFIG_NOSYSTEM=1 GIT_CONFIG_GLOBAL=/dev/null \
+            CANDIDATE_SHA="$CANDIDATE_SHA" \
+            python3 - <<'PY'
+          import ctypes, ctypes.util, errno, glob, os, subprocess
+          library = ctypes.util.find_library('seccomp')
+          if not library:
+              raise RuntimeError('libseccomp is required; refusing an unrestricted test run')
+          lib = ctypes.CDLL(library, use_errno=True)
+          lib.seccomp_init.argtypes = [ctypes.c_uint32]
+          lib.seccomp_init.restype = ctypes.c_void_p
+          lib.seccomp_syscall_resolve_name.argtypes = [ctypes.c_char_p]
+          lib.seccomp_syscall_resolve_name.restype = ctypes.c_int
+          lib.seccomp_rule_add.argtypes = [ctypes.c_void_p, ctypes.c_uint32, ctypes.c_int, ctypes.c_uint]
+          lib.seccomp_load.argtypes = [ctypes.c_void_p]
+          lib.seccomp_release.argtypes = [ctypes.c_void_p]
+          ctx = lib.seccomp_init(0x7fff0000)
+          syscall = lib.seccomp_syscall_resolve_name(b'socket')
+          if not ctx or syscall < 0 or lib.seccomp_rule_add(ctx, 0x50000 | errno.EPERM, syscall, 0) != 0:
+              raise RuntimeError('cannot prepare socket denial')
+          if lib.seccomp_load(ctx) != 0:
+              raise RuntimeError('cannot enforce socket denial')
+          lib.seccomp_release(ctx)
+          try:
+              subprocess.run(['node', 'scripts/agent-operations/check-agent-operations.mjs'], check=True)
+              subprocess.run(['node', 'scripts/agent-operations/check-contributor-skills.mjs'], check=True)
+              tests = sorted(glob.glob('scripts/agent-operations/test/*.test.mjs'))
+              tracked = sorted(subprocess.check_output(['git', 'ls-files', 'scripts/agent-operations/test/*.test.mjs'], text=True).splitlines())
+              if not tests or tests != tracked:
+                  raise RuntimeError('fixture inventory must equal the tracked candidate inventory')
+              print(f'Running all {len(tests)} fixture files; sockets denied', flush=True)
+              subprocess.run(['node', '--test', *tests], check=True)
+          finally:
+              print('Post-test source binding (including failed tests):', flush=True)
+              subprocess.run(['git', 'rev-parse', 'HEAD', 'HEAD^{tree}'], check=True)
+              status = subprocess.check_output(['git', 'status', '--porcelain=v1', '--untracked-files=no'], text=True)
+              print(status or '(tracked source clean)', flush=True)
+              head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+              if status or head != os.environ['CANDIDATE_SHA']:
+                  raise RuntimeError('candidate source changed during validation')
+          PY

@@ -3,9 +3,22 @@ import {
   SHADCN_STYLE_SCOPE,
   setupShadcnStyleScope,
   setupShadcnStyleSelection,
+  type ShadcnStyleId,
   type ShadcnStyleProps,
 } from '../style-scope';
-export const SELECT_PROJECTED_STYLES = ['new-york-v4', 'rhea'] as const;
+// P-SHADCN-SELECT-STYLE: every shared identifier is mapped for Select; the
+// compatibility default remains new-york-v4 when nothing selects a profile.
+export const SELECT_PROJECTED_STYLES = [
+  'vega',
+  'nova',
+  'maia',
+  'lyra',
+  'mira',
+  'luma',
+  'sera',
+  'rhea',
+  'new-york-v4',
+] as const satisfies readonly ShadcnStyleId[];
 export function setupSelectStyle(def: DefHandle<ShadcnStyleProps>) {
   return setupShadcnStyleSelection(def, 'new-york-v4', {
     supportedStyles: SELECT_PROJECTED_STYLES,

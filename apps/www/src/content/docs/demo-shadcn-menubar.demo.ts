@@ -88,6 +88,7 @@ export default {
         ],
         'props': {
           'a11yLabel': 'Project commands',
+          'styleProfile': 'rhea',
         },
         'ref': 'root',
       },

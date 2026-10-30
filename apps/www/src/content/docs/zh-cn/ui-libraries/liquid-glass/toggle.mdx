@@ -11,7 +11,7 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 这是 [Base Toggle](/zh-cn/ui-libraries/base/toggle/) 的 Proto 设计语言扩展草案，不是 Apple Toggle 复刻，也不声明 Apple 光学效果完全等价。
 
-未激活状态请求中性的 regular 玻璃，使用主题 secondary 填色与前景色。已激活状态从已治理的 primary 填色请求 regular style-fill tint，并使用 primary-foreground。小型 currentColor 装饰勾选在两个状态中占据相同的预留空间，提供非颜色选择标记，不再默认添加下划线。已有的 1px 选择边框与外部几何保持不变。指针短暂按压引起的形变与持久 active 状态分别处理。
+未激活状态请求中性的 regular 玻璃，使用主题 secondary 填色与前景色。已激活状态从已治理的 primary 填色请求 regular style-fill tint，并使用 primary-foreground。小型 currentColor 装饰勾选在两个状态中占据相同的预留空间，提供非颜色选择标记，不再默认添加下划线。首尾等宽预留让文字或图标本身居中，紧凑的对称内边距避免原先只有尾部预留造成的留白偏移。已有的 1px 选择边框与外部几何在选择切换中保持不变。指针短暂按压引起的形变与持久 active 状态分别处理。
 
 用页面顶部选择器切换 Web Components、React、Vue 3、Vue 2。Bold 初始未激活，Italic 初始已激活；点击、Space 和 Enter 发出 active 变更请求。Unavailable 禁用后仍保留 active。状态文本只观察真实 Base activeChange 信号。
 

@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type MeterPartProps,
-  type MeterPartExposes,
-  asMeterValue,
-} from '@proto.ui/prototypes-base/meter';
-export default definePrototype<MeterPartProps, MeterPartExposes>({
+import { definePrototype } from '@proto.ui/core';
+import { type MeterPartExposes, asMeterValue } from '@proto.ui/prototypes-base/meter';
+import { setupMeterValuePaint } from './visual';
+import type { ShadcnMeterPartProps } from './types';
+export default definePrototype<ShadcnMeterPartProps, MeterPartExposes>({
   name: 'shadcn-meter-value',
+  modules: asMeterValue.modules,
   setup(def) {
     const inherited = asMeterValue();
-    def.feedback.style.use(tw('text-sm tabular-nums text-muted-foreground'));
+    setupMeterValuePaint(def);
     return inherited.render;
   },
 });
