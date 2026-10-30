@@ -36,10 +36,17 @@ function candidate(): {
   made.push(value);
   return value;
 }
-function mount() {
+function mount(family: 'shadcn' | 'brutalist' = 'shadcn', inHeader = false) {
   document.body.innerHTML =
     '<site-search data-search-initial-family="shadcn"><div data-search-command-mount="open"></div><dialog><div data-search-command-mount="close"></div><div data-search-command-mount="retry"></div></dialog></site-search>';
   const root = document.querySelector<HTMLElement>('site-search')!;
+  root.dataset.searchInitialFamily = family;
+  if (inHeader) {
+    const header = document.createElement('header');
+    header.dataset.siteHeader = '';
+    root.replaceWith(header);
+    header.append(root);
+  }
   const owner = searchCommandParticipant(root);
   owners.push(owner);
   owner.bind({ open() {}, close() {}, retry() {} });
@@ -133,3 +140,27 @@ it('registers Search fixed glyph prototypes before starting any command generati
   expect(getPrototype('lucide-x-icon')).toBe(closeIcon);
   expect(faults.materialize).not.toHaveBeenCalled();
 });
+
+it.each(['shadcn', 'brutalist'] as const)(
+  'keeps %s Header open recipe separate from non-Header and dialog commands',
+  async (family) => {
+    for (const inHeader of [false, true]) {
+      faults.materialize.mockClear();
+      const { handle } = mount(family, inHeader);
+      await handle.ready;
+      const props = faults.materialize.mock.calls.map(
+        ([, options]) => options.content.demo.root.props
+      );
+      expect(props).toEqual([
+        family === 'brutalist'
+          ? { variant: 'surface', size: 'default', disabled: false }
+          : inHeader
+            ? { styleProfile: 'rhea', variant: 'secondary', size: 'default', disabled: false }
+            : { variant: 'ghost', size: 'default', disabled: false },
+        { variant: family === 'brutalist' ? 'surface' : 'ghost', size: 'sm', disabled: false },
+        { variant: family === 'brutalist' ? 'surface' : 'secondary', size: 'sm', disabled: false },
+      ]);
+      await handle.destroy();
+    }
+  }
+);

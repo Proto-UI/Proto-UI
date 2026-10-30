@@ -97,13 +97,14 @@ export function searchCommandParticipant(root: HTMLElement): SearchCommandPartic
   ): DemoSpec => {
     const label = root.dataset[`${command}Label`] || command;
     const icon = command === 'open' ? 'search' : command === 'close' ? 'x' : null;
-    const props = {
-      variant: family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
-      size: command === 'open' ? 'default' : 'sm',
-      ...(command === 'open' && root.closest('[data-site-header]')
+    const props =
+      command === 'open' && root.closest('[data-site-header]')
         ? headerButtonProps(family, 'default')
-        : {}),
-    };
+        : {
+            variant:
+              family === 'brutalist' ? 'surface' : command === 'retry' ? 'secondary' : 'ghost',
+            size: command === 'open' ? 'default' : 'sm',
+          };
     return {
       type: 'demo',
       root: {
