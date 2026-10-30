@@ -78,6 +78,8 @@ export const READY_ROUTES = Object.freeze([
 ]);
 
 export const BROWSER_SUITES = Object.freeze([
+  'apps/www/src/content/docs/zh-cn/demo-shadcn-switch-compositions.browser.test.ts',
+  'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-shadcn-menubar.browser.test.ts',
   'packages/adapters/web-component/test/native-text-width.browser.test.ts',
   'packages/prototypes/shadcn/test/drawer-presence.browser.test.ts',
