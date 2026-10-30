@@ -160,6 +160,15 @@ it.each(['shadcn', 'brutalist'] as const)(
         { variant: family === 'brutalist' ? 'surface' : 'ghost', size: 'sm', disabled: false },
         { variant: family === 'brutalist' ? 'surface' : 'secondary', size: 'sm', disabled: false },
       ]);
+      const styles = faults.materialize.mock.calls.map(
+        ([, options]) => options.content.demo.root.surfaceStyle
+      );
+      if (inHeader)
+        expect(styles[0].transitionProperty).toBe(
+          'color, background-color, border-color, outline-color, box-shadow, opacity, transform, translate, scale'
+        );
+      else expect(styles[0]).not.toHaveProperty('transitionProperty');
+      for (const style of styles.slice(1)) expect(style).not.toHaveProperty('transitionProperty');
       await handle.destroy();
     }
   }

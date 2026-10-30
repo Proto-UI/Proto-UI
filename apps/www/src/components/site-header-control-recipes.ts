@@ -32,3 +32,13 @@ export function headerIconButtonLayout() {
     fontFamily: 'inherit',
   };
 }
+
+/** Header breakpoints change layout and visible copy atomically. Preserve family
+ * feedback transitions, but never interpolate width/padding while text appears.
+ * No colors, radii, duration, easing or reduced-motion policy are overridden. */
+export function headerResponsiveButtonFeedback() {
+  return {
+    transitionProperty:
+      'color, background-color, border-color, outline-color, box-shadow, opacity, transform, translate, scale',
+  };
+}
