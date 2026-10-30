@@ -23,6 +23,8 @@ on:
       - 'packages/adapters/vue/src/**'
       - 'packages/adapters/vue2/src/**'
       - 'scripts/feedback/owned-caller-relocation-evidence*'
+      - 'scripts/feedback/view-operation-evidence.mjs'
+      - 'packages/adapters/web-component/test/fixtures/view-operation-evidence-app.ts'
       - '.github/workflows/owned-caller-relocation-evidence.yml'
   workflow_dispatch:
 permissions:
@@ -136,5 +138,40 @@ jobs:
         with:
           name: view-operation-contract-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           path: ${{ runner.temp }}/view-operation-contract/
+          if-no-files-found: error
+          retention-days: 30
+  view-operation-native:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install original locked dependencies
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+      - name: Observe eight native source-operation and custom-element reaction cases
+        timeout-minutes: 10
+        env:
+          EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/view-operation-native"
+          node --version > "$RUNNER_TEMP/view-operation-native/node-version.txt"
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          "$CHROME" --version > "$RUNNER_TEMP/view-operation-native/chrome-version.txt"
+          node --import tsx scripts/feedback/view-operation-evidence.mjs "$RUNNER_TEMP/view-operation-native" \
+            2>&1 | tee "$RUNNER_TEMP/view-operation-native/native.log"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: view-operation-native-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/view-operation-native/
           if-no-files-found: error
           retention-days: 30
