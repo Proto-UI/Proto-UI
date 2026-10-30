@@ -33,7 +33,8 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
       disabled: { type: 'boolean', empty: 'fallback' },
     });
     def.props.setDefaults({ variant: 'default', size: 'default', disabled: false });
-    const state = asButton().stateHandles;
+    const inherited = asButton();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-button] Base Button states are required.');
     const { hovered, pressed, focused, focusVisible, disabled } = state;
 
@@ -143,5 +144,6 @@ export default definePrototype<ButtonProjectionProps, ButtonExposes>({
       intent: (i) =>
         i.feedback.style.use(tw('opacity-65 pointer-events-none cursor-default shadow-none')),
     });
+    return inherited.render;
   },
 });

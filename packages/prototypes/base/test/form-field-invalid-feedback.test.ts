@@ -60,8 +60,11 @@ afterEach(async () => {
 });
 
 for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass']) {
-  const ink = family === 'shadcn' ? 'text-destructive' : 'text-destructive-ink';
-  const projectsInk = family === 'shadcn' || family === 'brutalist';
+  // Bootstrap projects the pinned 2.3.2 error-group recipe: the theme maps
+  // `text-destructive` to the historical #b94a48 help/error ink.
+  const ink =
+    family === 'brutalist' ? 'text-destructive-ink' : 'text-destructive';
+  const projectsInk = family !== 'liquid-glass';
   it(`${family} FormField keeps validation, error relations and reset under the inherited owner`, async () => {
     const { form, field, control, error, editor } = mount(family);
     const invalid: unknown[] = [],
@@ -88,7 +91,7 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
       expect(tokens(field)).toContain(`data-[invalid]:${ink}`);
       expect(field.hasAttribute('data-invalid')).toBe(true);
     } else {
-      // No new visual policy is inferred for Bootstrap or Liquid from the other families.
+      // No new visual policy is inferred for Liquid from the other families.
       expect(tokens(field).some((token) => /invalid.*text-/.test(token))).toBe(false);
     }
     editor().value = 'Ada';

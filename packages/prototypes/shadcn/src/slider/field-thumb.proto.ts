@@ -1,18 +1,42 @@
 import { sliderThumbPaint } from './paint';
 import type { SliderFieldThumbExposes } from '@proto.ui/prototypes-base/slider';
-import type { SliderPartProps } from '@proto.ui/prototypes-base/slider';
 import { definePrototype, tw } from '@proto.ui/core';
-import { asSliderFieldThumb, SLIDER_FAMILY } from '@proto.ui/prototypes-base/slider';
-import { FIELD_FAMILY } from '@proto.ui/prototypes-base/field';
-export default definePrototype<SliderPartProps, SliderFieldThumbExposes>({
+import { asSliderFieldThumb } from '@proto.ui/prototypes-base/slider';
+import { SHADCN_STYLE_IDS } from '../style-scope';
+import {
+  setupScalarSliderStyle,
+  SCALAR_THUMB_HIT,
+  type ShadcnSliderPartProps,
+} from './scalar-visual';
+export default definePrototype<ShadcnSliderPartProps, SliderFieldThumbExposes>({
   name: 'shadcn-slider-field-thumb',
+  modules: asSliderFieldThumb.modules,
   setup(def) {
     const inherited = asSliderFieldThumb();
+    const style = setupScalarSliderStyle(def);
     def.feedback.style.use(
       tw(
-        'absolute left-[calc(var(--pui-display-percentage)*1%)] top-1/2 flex size-7 items-center justify-center -translate-x-1/2 -translate-y-1/2 outline-none select-none'
+        'absolute left-[calc(var(--pui-display-percentage)*1%)] top-1/2 flex items-center justify-center -translate-x-1/2 -translate-y-1/2 outline-none select-none'
       )
     );
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(inherited.stateHandles!.orientation).eq('horizontal')
+          ),
+        intent: (i) => i.feedback.style.use(SCALAR_THUMB_HIT[profile].horizontal),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(inherited.stateHandles!.orientation).eq('vertical')
+          ),
+        intent: (i) => i.feedback.style.use(SCALAR_THUMB_HIT[profile].vertical),
+      });
+    }
     def.rule({
       when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('pointer-events-none')),
@@ -35,7 +59,7 @@ export default definePrototype<SliderPartProps, SliderFieldThumbExposes>({
           tw('left-auto right-[calc(var(--pui-display-percentage)*1%)] translate-x-1/2')
         ),
     });
-    const paint = sliderThumbPaint(def, inherited.stateHandles!, [SLIDER_FAMILY, FIELD_FAMILY]);
-    return (r) => [paint(r), r.slot()];
+    const paint = sliderThumbPaint(def, inherited.stateHandles!, style);
+    return (r) => [r.decoration(paint), inherited.render ? inherited.render(r) : r.slot()];
   },
 });

@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type ProgressPartProps,
-  type ProgressPartExposes,
-  asProgressValue,
-} from '@proto.ui/prototypes-base/progress';
-export default definePrototype<ProgressPartProps, ProgressPartExposes>({
+import { definePrototype } from '@proto.ui/core';
+import { type ProgressPartExposes, asProgressValue } from '@proto.ui/prototypes-base/progress';
+import { setupProgressValuePaint } from './visual';
+import type { ShadcnProgressPartProps } from './types';
+export default definePrototype<ShadcnProgressPartProps, ProgressPartExposes>({
   name: 'shadcn-progress-value',
+  modules: asProgressValue.modules,
   setup(def) {
     const inherited = asProgressValue();
-    def.feedback.style.use(tw('text-sm tabular-nums text-muted-foreground'));
+    setupProgressValuePaint(def);
     return inherited.render;
   },
 });

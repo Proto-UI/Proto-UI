@@ -4,10 +4,10 @@ title: shadcn Scroll Area Thumb projects passive host-driven feedback
 status: draft
 lifecycleRationale: This passive Shadcn Thumb presentation remains a draft Base projection; host-owned movement and cleanup evidence does not grant a new interaction protocol or stable lifecycle.
 since: 0.3.0-alpha.0
-summary: shadcn Scroll Area Thumb inherits Base passive geometry and Move hit routing and adds the current rounded fill.
+summary: shadcn Scroll Area Thumb inherits Base passive geometry and Move hit routing and adds the selected profile's fill and corner shape.
 statement:
-  en: Thumb remains a passive, non-focusable, roleless host-projected subregion and adds only its flexible rounded surface.
-  zh-CN: Thumb 继续作为 passive、不可聚焦、roleless 的 host-projected subregion，仅增加 flexible rounded surface。
+  en: Thumb remains a passive, non-focusable, roleless host-projected subregion and adds only its flexible fill and profile-specific corner shape.
+  zh-CN: Thumb 继续作为 passive、不可聚焦、roleless 的 host-projected subregion，仅增加 flexible fill 与 profile-specific corner shape。
 criteria:
   - id: P-SHADCN-SCROLL-AREA-THUMB-BASE-INHERITANCE
     text:
@@ -19,8 +19,8 @@ criteria:
       zh-CN: Thumb direct entry 为 shadcn-scroll-area-thumb，且本层不提供 authored asHook。
   - id: P-SHADCN-SCROLL-AREA-THUMB-CURRENT-VISUAL-SURFACE
     text:
-      en: Thumb must project relative flex-1 rounded-full bg-border border border-transparent while host facts determine its border-box size and offset. The transparent border preserves ordinary fill and lets a forced-color host draw an indicator outline without opting out of the user palette.
-      zh-CN: Thumb 必须投射 relative flex-1 rounded-full bg-border border border-transparent，而 border-box size 与 offset 由 host facts 决定。透明边框保留普通 fill，并允许 forced-color host 绘制可见 indicator 轮廓，不退出用户色板。
+      en: Thumb must project relative flex-1 bg-border without an authored border while host facts determine its border-box size and offset. New York and the nonsquare profiles use rounded-full; Lyra and Sera use rounded-none. The retained New York source does not add a transparent Thumb border. Native forced-color visibility requires separate evidence and is not certified by this ordinary fill recipe.
+      zh-CN: Thumb 必须投射 relative flex-1 bg-border，不添加 authored border；border-box size 与 offset 仍由 host facts 决定。New York 与非方角 profiles 使用 rounded-full，Lyra 与 Sera 使用 rounded-none。保留的 New York 源不添加透明 Thumb border；native forced-color 可见性需要独立证据，普通 fill recipe 不构成认证。
   - id: P-SHADCN-SCROLL-AREA-THUMB-PASSIVE-BOUNDARY
     text:
       en: Thumb must remain roleless and outside sequential focus; movement requests must retain Base pointer guards and teardown.
@@ -39,6 +39,9 @@ relates:
 verifies:
   tests: [T-SHADCN-SCROLL-AREA-0001]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Reconciled retained New York borderless Thumb paint and square Lyra/Sera profiles; supersedes the earlier transparent-border recipe without claiming native forced-color acceptance.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Added a transparent one-pixel Thumb border to retain visible position feedback under forced colors without changing host geometry or opting out of the user palette.

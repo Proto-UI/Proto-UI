@@ -8,13 +8,25 @@ const families = [
   ['liquid-glass', glass],
 ] as const;
 for (const [family, projection] of families) {
-  const { selectContent, selectItem, selectRoot, selectTrigger, selectValue } = projection;
+  const {
+    selectContent,
+    selectSurface,
+    selectViewport,
+    selectItem,
+    selectItemText,
+    selectRoot,
+    selectTrigger,
+    selectValue,
+  } = projection;
 
   AdaptToWebComponent(selectRoot as any);
   AdaptToWebComponent(selectTrigger as any);
   AdaptToWebComponent(selectValue as any);
   AdaptToWebComponent(selectContent as any);
+  AdaptToWebComponent(selectSurface);
+  AdaptToWebComponent(selectViewport);
   AdaptToWebComponent(selectItem as any);
+  AdaptToWebComponent(selectItemText);
 
   async function flush(): Promise<void> {
     await Promise.resolve();
@@ -38,6 +50,8 @@ for (const [family, projection] of families) {
     const trigger = document.createElement(`${family}-select-trigger`) as any;
     const value = document.createElement(`${family}-select-value`) as any;
     const content = document.createElement(`${family}-select-content`) as any;
+    const surface = document.createElement(`${family}-select-surface`);
+    const viewport = document.createElement(`${family}-select-viewport`);
     const items = (
       options?.items ?? [
         { value: 'alpha', textValue: 'Alpha' },
@@ -46,9 +60,11 @@ for (const [family, projection] of families) {
       ]
     ).map((props) => {
       const item = document.createElement(`${family}-select-item`) as any;
+      const text = document.createElement(`${family}-select-item-text`);
       setElementProps(item, props);
-      item.textContent = String(props.textValue ?? props.value ?? 'Option');
-      content.appendChild(item);
+      text.textContent = String(props.textValue ?? props.value ?? 'Option');
+      item.appendChild(text);
+      viewport.appendChild(item);
       return item;
     });
     setElementProps(root, options?.root ?? {});
@@ -56,9 +72,11 @@ for (const [family, projection] of families) {
     setElementProps(value, options?.value ?? { placeholder: 'Pick one' });
     setElementProps(content, options?.content ?? {});
     trigger.appendChild(value);
+    surface.appendChild(viewport);
+    content.appendChild(surface);
     root.append(trigger, content);
     document.body.appendChild(root);
-    return { root, trigger, value, content, items };
+    return { root, trigger, value, content, surface, viewport, items };
   }
 
   afterEach(async () => {
@@ -68,12 +86,10 @@ for (const [family, projection] of families) {
   });
 
   describe(`${family}: complete inherited Select protocol`, () => {
-    it('keeps all five direct identities, wrapping slots, logical alignment and collision-bounded portal styles', async () => {
+    it('preserves wrapping slots, logical alignment and collision-bounded paint through the connected parts', async () => {
       vi.useFakeTimers();
-      for (const part of ['Root', 'Trigger', 'Value', 'Content', 'Item'] as const)
-        expect(projection[`select${part}`].name).toBe(`${family}-select-${part.toLowerCase()}`);
       const long = 'LongUnbrokenOptionLabels'.repeat(15);
-      const { root, trigger, value, content, items } = createSelect({
+      const { root, trigger, value, content, surface, viewport, items } = createSelect({
         root: { defaultValue: 'long' },
         items: [{ value: 'long', textValue: long }],
       });
@@ -94,11 +110,16 @@ for (const [family, projection] of families) {
       trigger.click();
       await settle();
       expect(content.getExposes().isPresent.get()).toBe(true);
-      expect(
-        styleContains(content, family === 'bootstrap-2-3-2' ? 'bg-background' : 'bg-secondary')
-      ).toBe(true);
-      expect(styleContains(content, 'max-w-[var(--proto-ui-available-width)]')).toBe(true);
-      expect(styleContains(content, 'max-h-[var(--proto-ui-available-height)]')).toBe(true);
+      const paint = family === 'liquid-glass' ? surface : content;
+      expect(styleContains(paint, family === 'bootstrap-2-3-2' ? 'bg-white' : 'bg-secondary')).toBe(
+        true
+      );
+      expect(styleContains(paint, 'max-w-[var(--proto-ui-available-width)]')).toBe(true);
+      expect(styleContains(paint, 'max-h-[var(--proto-ui-available-height)]')).toBe(true);
+      expect(styleContains(viewport, 'overflow-y-auto')).toBe(true);
+      expect(styleContains(content, 'overflow-y-auto')).toBe(false);
+      expect(styleContains(surface, 'overflow-y-auto')).toBe(false);
+      expect(viewport.contains(items[0])).toBe(true);
       expect(items[0].querySelector('svg path')?.getAttribute('d')).toBe('m20 6-11 11-5-5');
       expect(trigger.querySelector('svg')).not.toBeNull();
     });

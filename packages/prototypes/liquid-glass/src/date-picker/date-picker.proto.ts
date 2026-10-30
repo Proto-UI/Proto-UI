@@ -10,7 +10,7 @@ import type {
   DatePickerValueProps,
   DatePickerValueExposes,
 } from '@proto.ui/prototypes-base/date-picker';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asDatePickerRoot,
   asDatePickerTrigger,
@@ -24,18 +24,6 @@ export const datePickerRoot = definePrototype<DatePickerRootProps, DatePickerRoo
   setup(def) {
     const behavior = asDatePickerRoot();
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground inline-grid gap-2'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });
@@ -59,7 +47,7 @@ export const datePickerTrigger = definePrototype<DatePickerTriggerProps, DatePic
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
     // Presentation consumes the existing owner; no second interaction hook.
     def.rule({
@@ -74,9 +62,12 @@ export const datePickerContent = definePrototype<DatePickerContentProps, DatePic
   name: 'liquid-glass-date-picker-content',
   setup(def) {
     const behavior = asDatePickerContent();
+    const states = behavior.getAsHookHandle?.('as-popover-content')?.stateHandles;
+    if (!states)
+      throw new Error('[liquid-glass-date-picker] Required inherited popup state is unavailable.');
     def.feedback.style.use(
       tw(
-        'min-w-0 max-w-full text-foreground rounded-2xl border border-border bg-secondary shadow-lg p-3'
+        'min-w-0 max-w-full text-secondary-foreground rounded-2xl border border-border bg-secondary shadow-lg p-3'
       )
     );
     def.feedback.material.declare({
@@ -85,19 +76,10 @@ export const datePickerContent = definePrototype<DatePickerContentProps, DatePic
       source: { kind: 'in-app-backdrop' },
       fallback: { fill: 'style', foreground: 'style' },
     });
-    def.feedback.material.use({ intent: 'liquid-glass' });
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
+    def.rule({
+      when: (w) => w.state(states.open).eq(true),
+      intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
+    });
     return behavior.render;
   },
 });
@@ -125,7 +107,7 @@ export const datePickerDay = definePrototype<DatePickerDayProps, DatePickerDayEx
     });
     def.rule({
       when: (w) => w.state(states.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
     // Presentation consumes the existing owner; no second interaction hook.
     def.rule({
@@ -141,18 +123,6 @@ export const datePickerValue = definePrototype<DatePickerValueProps, DatePickerV
   setup(def) {
     const behavior = asDatePickerValue();
     def.feedback.style.use(tw('min-w-0 max-w-full text-foreground text-sm'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
     return behavior.render;
   },
 });

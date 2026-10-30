@@ -7,7 +7,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 `liquid-glass-surface-root` is a draft workspace Surface atom. It preserves one content slot and consumes visual inputs without becoming a Button, link, code panel, preview panel, or page-specific component. Liquid Glass inherits the [Base Surface](/en/ui-libraries/base/surface/) contract through `asSurfaceRoot()` and realizes it with family feedback rules.
 
-This is a conventional, non-refractive Surface projection. The default outline is opaque; transparent and scrim are explicit ordinary-paint variants. It establishes neither full family coverage nor an upstream component API compatibility claim. In particular, the Liquid Glass Surface adds no blur, refraction or experimental material consumer; ordinary transparent/scrim paint and opacity fades are not optical Liquid Glass.
+Surface uses ordinary paint by default: `material="opaque"` is the default, including when the prop is absent. The default outline is opaque; transparent and scrim remain ordinary-paint variants. An eligible functional or navigation shell may explicitly opt into the existing shared material capability with `material="auto"`. This is not a reason to put glass on content groups, text or every decorative child, and it establishes neither full family coverage nor an upstream component API compatibility claim.
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-surface"
@@ -35,7 +35,7 @@ export function Summary() {
 }
 ```
 
-The `/surface` subpath and package root export `surfaceRoot`; `SurfaceRootProps` and `SurfaceRootExposes` describe the shared contract. Base additionally exports `asSurfaceRoot` and `SurfaceRootAsHookContract` for family authoring. Do not put a Surface inside an interactive owner and give it another role, tab stop or activation handler. When using a native anchor, retain navigation, keyboard behavior, target and download on that anchor.
+The `/surface` subpath and package root export `surfaceRoot`; this family's `SurfaceRootProps` extends the shared inputs with `material`, while `SurfaceRootExposes` remains empty. Base additionally exports `asSurfaceRoot` and `SurfaceRootAsHookContract` for family authoring. Do not put a Surface inside an interactive owner and give it another role, tab stop or activation handler. When using a native anchor, retain navigation, keyboard behavior, target and download on that anchor.
 
 ## Inputs
 
@@ -45,6 +45,7 @@ The `/surface` subpath and package root export `surfaceRoot`; `SurfaceRootProps`
 | `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
 | `border` | `all`, `bottom`, `none` | `all` |
 | `elevation` | `none`, `raised` | `none` |
+| `material` | `auto`, `opaque` | `opaque` |
 | `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
 | `fade` | boolean | `false` |
 | `hovered` | boolean | `false` |
@@ -55,6 +56,12 @@ The `/surface` subpath and package root export `surfaceRoot`; `SurfaceRootProps`
 `hovered`, `focusVisible`, `pressed` and `current` are facts supplied by the existing semantic owner. Surface does not detect pointer, focus, keyboard, selection or navigation state itself. It owns no exposed state, event, method, accessible role or native property. `current` is a presentation input, not an `aria-current` implementation. A caller that needs a real Button should compose the governed Button protocol.
 
 Removing an input restores its default. `secondary` selects the family secondary foreground/background rather than deriving a variant from elevation. Default radius and paint are family-specific; a shared prop vocabulary does not imply identical appearance. Content and layout remain consumer-owned. Use Text with `tone="inherit"` when a styled Text child must retain the enclosing Surface foreground.
+
+### Explicit material opt-in
+
+For an eligible functional shell, `<Surface material="auto" variant="secondary">…</Surface>` requests the existing complete `liquid-glass` candidate with the `regular` variant. Only `outline`, `secondary` and `muted` participate; `transparent`, `accent`, `solid` and `scrim` remain ordinary paint even with `auto`. Setting `opaque` or removing `material` withdraws the candidate without changing content, geometry or semantic ownership. One version-2 `in-app-backdrop` slot uses the final style fill and foreground as its fallback; zero candidates retain that slot and ordinary presentation, not optical enhancement.
+
+The shared host policy still checks actual source leases, provider support, contrast and accessibility preferences. Missing or rejected support preserves legal ordinary styling and truthful diagnostics; `auto` cannot force a provider, acquire a source or replace explicit glass with adaptive blur. This projection adds no shader, observer, input owner or second lifecycle. Intent-frame tests do not prove optical paint, Apple-native parity or native Compiler support. See [Apple's material guidance](https://developer.apple.com/design/human-interface-guidelines/materials) for the functional-versus-content distinction, not an implementation source.
 
 ## Observe an existing Transition
 

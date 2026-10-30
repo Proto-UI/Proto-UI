@@ -8,13 +8,6 @@ export default definePrototype<FieldsetRootProps, FieldsetRootExposes>({
     def.feedback.style.use(
       tw('flex w-full min-w-0 flex-col gap-3 text-foreground rounded-2xl border border-border p-4')
     );
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
     return inherited.render;
   },
 });

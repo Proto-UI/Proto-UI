@@ -48,18 +48,18 @@ cases:
       - P-LIQUID-GLASS-SELECT-VALUE-VISUAL-SAFETY
       - P-LIQUID-GLASS-SELECT-CONTENT-VISUAL-SAFETY
       - P-LIQUID-GLASS-SELECT-ITEM-VISUAL-SAFETY
-    expectation: Source checks establish logical alignment, shrinkability, full token closure and wrapping. Actual framework composition exercises native owner boundaries and family toolbar controls. Native browser geometry/input/paint must be separately executed.
+    expectation: "Real consumer compositions retain logical layout, readable wrapping, actual selection/focus/disabled owners and complete popup parts; physical tokens and material intent do not establish native geometry, input or paint acceptance."
   - id: T-SELECT-DRAFT-PROJECTIONS-0001-CASE-MATERIAL-INTENT
     title: Shared whole optical intent and view lifecycle
     covers:
       - P-LIQUID-GLASS-SELECT-TRIGGER-MATERIAL-INTENT
-      - P-LIQUID-GLASS-SELECT-CONTENT-MATERIAL-INTENT
+      - "P-LIQUID-GLASS-SELECT-CONTENT-PORTAL-FRAME"
       - P-BASE-SELECT-TRIGGER-VIEW-LIFETIME
-    expectation: A real Runtime records mutually exclusive Trigger rest/pressed, Content open intent, disabled/cancel/withdrawal resets, view release/remount and opaque fallback without a visual sink; no optical paint or GPUI execution is inferred.
+    expectation: "A real Runtime records mutually exclusive Trigger rest/pressed and committed-open Surface intent, with Content/Viewport nonmaterial, disabled/cancel/withdrawal resets, view release/remount and complete opaque fallback without a visual sink. No optical paint, native positioning or GPUI execution is inferred."
 implementations:
   - id: projection-protocol
     kind: adapter-test
-    status: passing
+    status: "planned"
     required: true
     path: packages/prototypes/test-utils/test/select-projections.behavior.test.ts
     consumesCases:
@@ -80,7 +80,7 @@ implementations:
       - P-BASE-SELECT-TRIGGER
   - id: projection-compiler
     kind: module-test
-    status: passing
+    status: "planned"
     required: true
     path: packages/cli/test/select-projections.test.ts
     consumesCases:
@@ -89,7 +89,7 @@ implementations:
     exercises: *a1
   - id: real-framework-previewer
     kind: adapter-test
-    status: passing
+    status: "planned"
     required: true
     path: apps/www/src/components/PrototypePreviewer/select-draft-projections.integration.test.ts
     consumesCases:
@@ -99,7 +99,7 @@ implementations:
     exercises: *a1
   - id: liquid-material-intent
     kind: runtime-test
-    status: passing
+    status: "planned"
     required: true
     path: packages/prototypes/liquid-glass/test/select-material.test.ts
     consumesCases:
@@ -162,7 +162,7 @@ verifies:
         - P-LIQUID-GLASS-SELECT-CONTENT-BASE-INHERITANCE
         - P-LIQUID-GLASS-SELECT-CONTENT-DIRECT-ENTRY
         - P-LIQUID-GLASS-SELECT-CONTENT-VISUAL-SAFETY
-        - P-LIQUID-GLASS-SELECT-CONTENT-MATERIAL-INTENT
+        - "P-LIQUID-GLASS-SELECT-CONTENT-PORTAL-FRAME"
     - id: P-LIQUID-GLASS-SELECT-ITEM
       anchors:
         - P-LIQUID-GLASS-SELECT-ITEM-BASE-INHERITANCE

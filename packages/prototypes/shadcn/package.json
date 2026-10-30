@@ -296,6 +296,31 @@
       "types": "./dist/input-shell/index.d.ts",
       "import": "./dist/input-shell/index.js",
       "default": "./dist/input-shell/index.js"
+    },
+    "./async-region": {
+      "types": "./dist/async-region/index.d.ts",
+      "import": "./dist/async-region/index.js",
+      "default": "./dist/async-region/index.js"
+    },
+    "./live-region": {
+      "types": "./dist/live-region/index.d.ts",
+      "import": "./dist/live-region/index.js",
+      "default": "./dist/live-region/index.js"
+    },
+    "./image": {
+      "types": "./dist/image/index.d.ts",
+      "import": "./dist/image/index.js",
+      "default": "./dist/image/index.js"
+    },
+    "./table": {
+      "types": "./dist/table/index.d.ts",
+      "import": "./dist/table/index.js",
+      "default": "./dist/table/index.js"
+    },
+    "./transition": {
+      "types": "./dist/transition/index.d.ts",
+      "import": "./dist/transition/index.js",
+      "default": "./dist/transition/index.js"
     }
   },
   "description": "shadcn-style Proto UI prototype library for adapter-driven components.",

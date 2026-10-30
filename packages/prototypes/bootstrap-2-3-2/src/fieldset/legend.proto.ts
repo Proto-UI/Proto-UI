@@ -7,7 +7,7 @@ export default definePrototype<FieldsetPartProps, FieldsetRootExposes>({
     const inherited = asFieldsetLegend();
     def.feedback.style.use(
       tw(
-        'block w-full m-0 mb-5 p-0 border-0 border-b border-[#e5e5e5] text-[1.3125rem] font-normal leading-[2.5rem] text-foreground'
+        'block w-full m-0 mb-[20px] p-0 border-0 border-b border-[#e5e5e5] text-[21px] font-normal leading-[40px] text-foreground'
       )
     );
     return inherited.render;

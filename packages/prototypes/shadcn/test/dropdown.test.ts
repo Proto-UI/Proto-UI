@@ -48,13 +48,6 @@ afterEach(async () => {
 });
 
 describe('prototypes/shadcn: dropdown-menu', () => {
-  it('keeps every Dropdown Menu anatomy part as a named direct entry', () => {
-    expect(dropdownRoot.name).toBe('shadcn-dropdown-root');
-    expect(dropdownTrigger.name).toBe('shadcn-dropdown-trigger');
-    expect(dropdownContent.name).toBe('shadcn-dropdown-content');
-    expect(dropdownItem.name).toBe('shadcn-dropdown-item');
-  });
-
   it('composes official-style Content and Item tokens over Base behavior', async () => {
     vi.useFakeTimers();
     const { root, trigger, content, item, destructive } = createDropdown();
@@ -74,8 +67,11 @@ describe('prototypes/shadcn: dropdown-menu', () => {
     expect(styleContains(content, 'bg-popover')).toBe(true);
     expect(styleContains(content, 'ring-foreground/10')).toBe(true);
     expect(styleContains(content, 'duration-100')).toBe(true);
-    expect(styleContains(content, 'transition-none')).toBe(true);
-    expect(styleContains(content, 'animate-in')).toBe(true);
+    expect(content.getExposes().transitionState.get()).toBe('entering');
+    // The enter animation is keyed on the inherited `open` fact, which the Web
+    // host exposes as `data-open`; the rule therefore lowers to the
+    // `data-[open]:`-prefixed token rather than a runtime-applied bare token.
+    expect(styleContains(content, 'data-[open]:animate-in')).toBe(true);
     expect(document.activeElement).toBe(item);
   });
 

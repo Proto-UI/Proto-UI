@@ -12,4 +12,4 @@ export type {
   MenubarContentExposes,
   MenubarItemProps,
   MenubarItemExposes,
-} from '@proto.ui/prototypes-base/menubar';
+} from './types';

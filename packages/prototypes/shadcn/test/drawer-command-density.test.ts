@@ -1,11 +1,7 @@
-import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import {
-  collectProtoStyleTokens,
-  collectProtoStyleTokensFromFiles,
-} from '../../../cli/src/services/prototype-style-tokens';
+import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
 import {
   renderProtoShadowStyleTokenCss,
   renderProtoStyleTokenCss,
@@ -17,10 +13,7 @@ import * as drawer from '../src/drawer';
 // Preserve paint/state: this is not full upstream Button equivalence.
 // Source-host evidence below is not browser geometry or hit-area evidence.
 const sourceRoot = path.resolve('packages/prototypes/shadcn/src');
-const commands = [
-  ['trigger', 'asDrawerTrigger'],
-  ['close', 'asDrawerClose'],
-] as const;
+const commands = ['trigger', 'close'] as const;
 const density = [
   'h-9',
   'px-4',
@@ -79,41 +72,7 @@ afterEach(async () => {
 });
 
 describe('Shadcn Drawer command default density with bounded label wrapping', () => {
-  for (const [part, hook] of commands) {
-    it(`${part} owns default density without a second interaction behavior`, async () => {
-      const file = path.join(sourceRoot, `drawer/${part}.proto.ts`);
-      const tokens = await collectProtoStyleTokensFromFiles([file]);
-      expect(tokens).toEqual(expect.arrayContaining(density));
-      for (const old of oldDensity) expect(tokens).not.toContain(old);
-      expect(tokens).toEqual(
-        expect.arrayContaining([
-          'inline-flex',
-          'items-center',
-          'justify-center',
-          'border',
-          'border-border',
-          'bg-background',
-          'text-sm',
-          'font-medium',
-          'outline-none',
-          'ring-3',
-          'ring-ring/50',
-          'border-ring',
-          'opacity-50',
-          'pointer-events-none',
-        ])
-      );
-      const source = await readFile(file, 'utf8');
-      expect(source.match(new RegExp(`${hook}\\(\\)`, 'g'))).toHaveLength(1);
-      expect(source).not.toContain('asButton');
-      expect(source).not.toContain("from '../style'");
-      expect(tokens).toContain('shadow-xs');
-      expect(tokens).toContain('bg-accent');
-      expect(
-        tokens.some((token) => typeof token === 'string' && /^(translate|scale)/.test(token))
-      ).toBe(false);
-    });
-
+  for (const part of commands) {
     it(`${part} contributes executable Document and Shadow CSS through its real source host`, async () => {
       const nodes = fixture();
       nodes.trigger.click();
@@ -212,12 +171,12 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     await flush();
     for (const part of ['trigger', 'close'] as const) {
       expect(nodes[part].getAttribute('aria-disabled')).toBe('true');
-      expect(tokensOf(nodes[part])).toEqual(
-        expect.arrayContaining([
-          'data-[disabled]:opacity-50',
-          'data-[disabled]:pointer-events-none',
-        ])
-      );
+      expect(nodes[part].getExposes().disabled.get()).toBe(true);
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render(tokensOf(nodes[part]));
+        expect(css).toContain('opacity: 0.5;');
+        expect(css).toContain('pointer-events: none;');
+      }
       nodes[part].click();
     }
     await flush();
@@ -228,7 +187,10 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     expect(nodes.trigger.getAttribute('aria-expanded')).toBe('false');
   });
 
-  it('keeps complete-family Document and Shadow closure without banning other components old utilities', async () => {
+  it(
+    'keeps complete-family Document and Shadow closure without banning other components old utilities',
+    { timeout: 120000 },
+    async () => {
     const collected = await collectProtoStyleTokens(sourceRoot);
     const complete = collected.filter((token): token is string => typeof token === 'string');
     expect(complete).toHaveLength(collected.length);

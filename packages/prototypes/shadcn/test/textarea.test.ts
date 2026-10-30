@@ -24,9 +24,9 @@ const SURFACE_TOKENS = [
   'placeholder:text-muted-foreground',
   'text-foreground',
   'shadow-xs',
+  // The pinned New York recipe selects the transition property, with no
+  // authored duration/easing utilities; the renderer supplies its defaults.
   'transition-[color,box-shadow]',
-  'duration-150',
-  'ease-in-out',
   'outline-none',
 ];
 

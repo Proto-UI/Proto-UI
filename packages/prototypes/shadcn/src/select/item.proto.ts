@@ -1,21 +1,27 @@
 import { setupSelectStyle } from './style';
-import { SHADCN_STYLE_SCOPE } from '../style-scope';
+import { SHADCN_STYLE_SCOPE, type ShadcnStyleId } from '../style-scope';
 import { definePrototype, delay, type RendererHandle, tw } from '@proto.ui/core';
 import { asSelectItem } from '@proto.ui/prototypes-base/select';
 import type { ShadcnSelectItemExposes, ShadcnSelectItemProps } from './types';
+import {
+  SELECT_ITEM_INDICATOR_SIZE,
+  SELECT_ITEM_SURFACE,
+  SELECT_TRANSLUCENT_STYLES,
+} from './recipes';
 
 function renderCheck(
-  renderer: Pick<RendererHandle<any>, 'svg' | 'el'>,
+  renderer: Pick<RendererHandle<ShadcnSelectItemProps>, 'svg' | 'el'>,
   selected: boolean,
-  rhea: boolean
+  profile: ShadcnStyleId
 ) {
+  const px = profile === 'mira' || profile === 'sera' ? 14 : 16;
+  const size = profile === 'new-york-v4' ? 'size-3.5' : SELECT_ITEM_INDICATOR_SIZE[profile];
   return renderer.el(
     'span',
     {
       style: tw(
-        rhea
-          ? 'pointer-events-none absolute right-2 flex size-4 shrink-0 items-center justify-center'
-          : 'pointer-events-none absolute right-2 flex size-3.5 shrink-0 items-center justify-center'
+        'pointer-events-none absolute right-2 flex shrink-0 items-center justify-center',
+        size ?? ''
       ),
     },
     selected
@@ -23,8 +29,8 @@ function renderCheck(
           {
             viewBox: '0 0 24 24',
             'aria-hidden': 'true',
-            width: 16,
-            height: 16,
+            width: px,
+            height: px,
             fill: 'none',
             stroke: 'currentColor',
             strokeWidth: 2,
@@ -49,18 +55,17 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
 
     // P-SHADCN-SELECT-ITEM-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(
-      tw(
-        'relative flex w-full cursor-default items-center gap-2 pl-2 pr-8 py-1.5 text-sm outline-none select-none'
-      )
+      tw('relative flex w-full cursor-default items-center outline-none select-none')
     );
     def.rule({
       when: (w) => w.state(style).eq('new-york-v4'),
-      intent: (i) => i.feedback.style.use(tw('rounded-sm')),
+      intent: (i) => i.feedback.style.use(tw('gap-2 rounded-sm pl-2 pr-8 py-1.5 text-sm')),
     });
-    def.rule({
-      when: (w) => w.state(style).eq('rhea'),
-      intent: (i) => i.feedback.style.use(tw('min-h-7 rounded-[var(--pui-radius-xl)]')),
-    });
+    for (const profile of SELECT_TRANSLUCENT_STYLES)
+      def.rule({
+        when: (w) => w.state(style).eq(profile),
+        intent: (i) => i.feedback.style.use(tw(SELECT_ITEM_SURFACE[profile])),
+      });
     // P-SHADCN-SELECT-ITEM-STATE-DRIVEN-STYLES
     def.rule({
       when: (w) =>
@@ -87,7 +92,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
     def.rule({
       when: (w) =>
         w.all(
-          w.state(style).eq('rhea'),
+          w.not(w.state(style).eq('new-york-v4')),
           w.any(
             w.state(active).eq(true),
             w.state(hovered).eq(true),
@@ -131,7 +136,7 @@ const selectItem = definePrototype<ShadcnSelectItemProps, ShadcnSelectItemExpose
 
     return (renderer) => {
       renderedStyle = style.get();
-      return [renderer.r.slot(), renderCheck(renderer, selected.get(), renderedStyle === 'rhea')];
+      return [renderer.r.slot(), renderCheck(renderer, selected.get(), renderedStyle)];
     };
   },
 });

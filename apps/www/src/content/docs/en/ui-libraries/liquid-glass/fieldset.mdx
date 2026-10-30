@@ -42,10 +42,10 @@ Base and the four visual families share the same semantic atoms. Synthetic WebCo
 
 ## Family presentation
 
-- Root: Rounded bordered padded group with gap-3 and a version-2 in-app-backdrop material declaration, style fallback and liquid-glass intent. Material intent does not prove optical rendering.
+- Root: Ordinary rounded bordered padded content group with gap-3. It declares no material slot or candidate and never implicitly requests glass, including when disabled.
 - Legend: Semibold base-size passive legend.
 - Description: Small muted passive description.
 
 These are draft presentation criteria, not a pixel-parity claim.
 
-Optical paint, contrast and reduced-transparency fallback still need native evidence. The material declaration alone establishes none of these, and no Apple visual parity is claimed.
+Fieldset remains ordinary content; functional descendants retain their own existing presentation and material policy without an extra enclosing material owner. Ordinary paint and contrast still need native evidence, and no Apple visual parity is claimed. [Apple's material guidance](https://developer.apple.com/design/human-interface-guidelines/materials) distinguishes functional/navigation glass from the content layer; the family name does not make every group a glass surface.

@@ -26,7 +26,7 @@ export default definePrototype<FieldControlProps, FieldControlExposes>({
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed')),
     });
     def.rule({
       when: (w) => w.state(binding.state.invalid).eq(true),

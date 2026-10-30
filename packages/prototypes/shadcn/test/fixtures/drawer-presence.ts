@@ -67,7 +67,7 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
   const contentPrototype = definePrototype({
     ...drawer.drawerContent,
     setup(def) {
-      drawer.drawerContent.setup(def);
+      const render = drawer.drawerContent.setup(def);
       const scroll = asScrollSurface();
       const acceptedSide = asDrawerContent().acceptedSide;
       def.expose.method('__testAcceptedSide', () => acceptedSide.read());
@@ -75,6 +75,7 @@ export function createDrawerScrollFixture(options: Parameters<typeof AdaptToWebC
       def.expose.method('__testScrollTo', (position: number) =>
         scroll.request({ kind: 'to', axis: 'vertical', position })
       );
+      return render;
     },
   });
   for (const prototype of [drawer.drawerRoot, contentPrototype, drawer.drawerMask])

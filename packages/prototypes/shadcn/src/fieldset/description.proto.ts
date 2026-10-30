@@ -1,13 +1,14 @@
-import type { FieldsetPartProps, FieldsetRootExposes } from '@proto.ui/prototypes-base/fieldset';
-import { definePrototype, tw } from '@proto.ui/core';
+import type { FieldsetRootExposes } from '@proto.ui/prototypes-base/fieldset';
+import { definePrototype } from '@proto.ui/core';
 import { asFieldsetDescription } from '@proto.ui/prototypes-base/fieldset';
-export default definePrototype<FieldsetPartProps, FieldsetRootExposes>({
+import type { ShadcnFieldsetPartProps } from './types';
+import { setupFieldTextVisual } from '../field/visual';
+export default definePrototype<ShadcnFieldsetPartProps, FieldsetRootExposes>({
   name: 'shadcn-fieldset-description',
+  modules: asFieldsetDescription.modules,
   setup(def) {
     const inherited = asFieldsetDescription();
-    def.feedback.style.use(
-      tw('text-left text-sm font-normal leading-normal text-muted-foreground break-words')
-    );
+    setupFieldTextVisual(def, 'description');
     return inherited.render;
   },
 });

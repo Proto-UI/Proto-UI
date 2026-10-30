@@ -1,11 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asSeparatorRoot } from '@proto.ui/prototypes-base/separator';
+import { setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnSeparatorRootExposes, ShadcnSeparatorRootProps } from './types';
 
 const ROOT_BASE_TOKENS = ['shrink-0', 'bg-border'].join(' ');
 
 const separatorRoot = definePrototype<ShadcnSeparatorRootProps, ShadcnSeparatorRootExposes>({
   name: 'shadcn-separator-root',
+  modules: asSeparatorRoot.modules,
   setup(def) {
     // P-SHADCN-SEPARATOR-BASE-INHERITANCE,
     // P-SHADCN-SEPARATOR-CURRENT-BASE-DEVIATIONS
@@ -16,6 +18,7 @@ const separatorRoot = definePrototype<ShadcnSeparatorRootProps, ShadcnSeparatorR
       );
     }
     const { orientation } = separatorState;
+    const style = setupShadcnStyleSelection(def, 'new-york-v4');
 
     // P-SHADCN-SEPARATOR-CURRENT-VISUAL-SURFACE
     def.feedback.style.use(tw(ROOT_BASE_TOKENS));
@@ -27,8 +30,13 @@ const separatorRoot = definePrototype<ShadcnSeparatorRootProps, ShadcnSeparatorR
     });
 
     def.rule({
-      when: (w) => w.state(orientation).eq('vertical'),
+      when: (w) => w.all(w.state(orientation).eq('vertical'), w.state(style).eq('new-york-v4')),
       intent: (i) => i.feedback.style.use(tw('h-full w-px')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(w.state(orientation).eq('vertical'), w.not(w.state(style).eq('new-york-v4'))),
+      intent: (i) => i.feedback.style.use(tw('w-px self-stretch')),
     });
 
     // P-SHADCN-SEPARATOR-CONTENTLESS: the caller prototype owns its own renderer,

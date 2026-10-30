@@ -8,7 +8,7 @@ import {
 export default definePrototype<DrawerDescriptionProps, DrawerDescriptionExposes>({
   name: 'bootstrap-2-3-2-drawer-description',
   setup(def) {
-    const behavior = asDrawerDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    asDrawerDescription();
+    def.feedback.style.use(tw('p-[15px] text-[14px] leading-[20px] text-[#333]'));
   },
 });

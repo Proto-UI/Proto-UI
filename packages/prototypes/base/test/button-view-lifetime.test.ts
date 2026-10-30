@@ -3,6 +3,10 @@ import { definePrototype, type OwnedStateHandle, type Prototype } from '@proto.u
 import { createRuntimeSession, type RuntimeHost } from '@proto.ui/runtime';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import {
+  CONTEXT_INSTANCE_TOKEN_CAP,
+  CONTEXT_PARENT_CAP,
+} from '@proto.ui/module-context';
+import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
@@ -63,6 +67,12 @@ function createHost(source: Prototype<any, any>) {
       task();
     },
     onRuntimeReady(wiring) {
+      // Family profile projections subscribe to the style scope through the
+      // context module; the harness must provide a lawful instance token.
+      wiring.attach('context', [
+        [CONTEXT_INSTANCE_TOKEN_CAP, identity],
+        [CONTEXT_PARENT_CAP, () => null],
+      ]);
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => target],
         [EVENT_GLOBAL_TARGET_CAP, () => target],
