@@ -7,6 +7,8 @@ import {
   type DemoBoxAttrs,
   type DemoChild,
   type DemoKeyedChild,
+  type DemoPublicInstancesListener,
+  type DemoPublicInstance,
   type DemoNode,
   type DemoSetupContext,
   type DemoSpec,
@@ -879,6 +881,22 @@ export function createProjectionComposition(
     activeContext = context;
     const listeners: Array<Readonly<{ element: HTMLElement; listener: EventListener }>> = [];
     const appearanceCleanups: Array<() => void> = [];
+    const instanceSubscriptions = new Set<() => void>();
+    let acceptingInstanceSubscriptions = true;
+    const stopInstanceSubscriptions = () => {
+      acceptingInstanceSubscriptions = false;
+      const pending = [...instanceSubscriptions];
+      const errors: unknown[] = [];
+      for (const off of pending) {
+        try {
+          off();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+      if (errors.length)
+        throw new AggregateError(errors, 'Projection instance subscription cleanup failed');
+    };
     const document = contentHost.ownerDocument;
     const view = document.defaultView;
     if (!view) {
@@ -1071,7 +1089,46 @@ export function createProjectionComposition(
           })
         : childRefsWithin(contentHost, context.refs);
       const childApi: DemoSetupContext['api'] = {
-        ...context.api,
+        // Enumerate capabilities: never spread an unfiltered reserved-ref lookup.
+        ...(context.api.getPublicInstance
+          ? {
+              getPublicInstance(ref: string) {
+                if (activeContext !== context) return undefined;
+                assertChildApiRef(ref);
+                return context.api.getPublicInstance!(ref);
+              },
+            }
+          : {}),
+        ...(context.api.subscribePublicInstances
+          ? {
+              subscribePublicInstances(
+                refs: readonly string[],
+                listener: DemoPublicInstancesListener
+              ) {
+                if (activeContext !== context || !acceptingInstanceSubscriptions) return () => {};
+                // Validate the complete batch before forwarding any private ref.
+                const names = Object.freeze([...new Set(refs)]);
+                for (const ref of names) assertChildApiRef(ref);
+                const off = context.api.subscribePublicInstances!(names, (snapshot, revision) => {
+                  if (activeContext !== context || !acceptingInstanceSubscriptions) return;
+                  const filtered: Record<string, DemoPublicInstance | undefined> =
+                    Object.create(null);
+                  for (const ref of names) filtered[ref] = snapshot[ref];
+                  listener(Object.freeze(filtered), revision);
+                });
+                if (activeContext !== context || !acceptingInstanceSubscriptions) {
+                  off();
+                  return () => {};
+                }
+                const dispose = () => {
+                  if (!instanceSubscriptions.delete(dispose)) return;
+                  off();
+                };
+                instanceSubscriptions.add(dispose);
+                return dispose;
+              },
+            }
+          : {}),
         call(ref, path, ...args) {
           assertChildApiRef(ref);
           return context.api.call(ref, path, ...args);
@@ -1154,21 +1211,28 @@ export function createProjectionComposition(
       );
       applyLocked(context);
     } catch (error) {
-      clearDynamicChildren();
-      stopObservingMarkerChanges();
-      for (const cleanup of appearanceCleanups) cleanup();
-      for (const { element, listener } of listeners) {
-        element.removeEventListener('valueChange', listener);
-      }
-      try {
-        if (typeof childCleanup === 'function') childCleanup();
-      } finally {
-        if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
-          stampActiveProjectionSurfaces = null;
+      const failures: unknown[] = [error];
+      const attempt = (operation: () => void) => {
+        try {
+          operation();
+        } catch (failure) {
+          failures.push(failure);
         }
-        activeContext = null;
-        applyActiveDynamicTheme = null;
+      };
+      attempt(stopInstanceSubscriptions);
+      attempt(clearDynamicChildren);
+      attempt(stopObservingMarkerChanges);
+      for (const cleanup of appearanceCleanups) attempt(cleanup);
+      for (const { element, listener } of listeners) {
+        attempt(() => element.removeEventListener('valueChange', listener));
       }
+      if (typeof childCleanup === 'function') attempt(childCleanup);
+      if (stampActiveProjectionSurfaces === stampProjectionSurfaces)
+        stampActiveProjectionSurfaces = null;
+      activeContext = null;
+      applyActiveDynamicTheme = null;
+      if (failures.length > 1)
+        throw new AggregateError(failures, 'Projection setup and cleanup failed', { cause: error });
       throw error;
     }
 
@@ -1190,6 +1254,7 @@ export function createProjectionComposition(
         }
       };
 
+      attempt(stopInstanceSubscriptions);
       attempt(clearDynamicChildren);
       attempt(stopObservingMarkerChanges);
       for (const cleanup of appearanceCleanups) attempt(cleanup);

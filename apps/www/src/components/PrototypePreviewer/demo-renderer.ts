@@ -1,3 +1,4 @@
+import { appendDemoPublicInstanceHook, createDemoPublicInstances } from './demo-public-instances';
 import { createDynamicChildrenModel, type DynamicChildEntry } from './demo-dynamic-children';
 import { createDynamicCommitQueue } from './demo-dynamic-commit-queue';
 import { createCanonicalMotionPalette } from './canonical-motion-palette';
@@ -18,6 +19,7 @@ import type {
   DemoRenderOptions,
   DemoRenderResult,
   DemoRuntimeApi,
+  DemoPublicInstance,
   DemoSurfaceStyle,
 } from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
@@ -399,6 +401,7 @@ async function renderDemoWc(
   const associations = createDemoAssociationScope();
   const dynamic = createDynamicChildrenModel(demo);
   for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
   let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
   let dynamicCleanup = () => dynamic.dispose();
   const owner = `demo-${++nextDemoOwner}`;
@@ -414,6 +417,7 @@ async function renderDemoWc(
       const currentCleanup = cleanup;
       cleanup = undefined;
       const cleanupSteps: Array<() => void> = [
+        () => publicInstances?.retire(),
         () => dynamicCleanup(),
         () => callbacks.dispose(),
         () => {
@@ -443,6 +447,9 @@ async function renderDemoWc(
     element.setAttribute('data-demo-owner', owner);
   refs = ownedDemoRefs(host, owner);
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
     setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease)) return;
@@ -460,6 +467,12 @@ async function renderDemoWc(
       const fn = resolvePath(exposes, path);
       if (typeof fn !== 'function') return;
       return fn(...args);
+    },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref] as (DemoInstance & HTMLElement) | undefined;
+      if (!el || !wcRawProps.has(el) || typeof el.getExposes !== 'function') return;
+      return el as DemoPublicInstance;
     },
     getExposes(ref) {
       if (!ownsLease(opt, lease)) return;
@@ -502,6 +515,12 @@ async function renderDemoWc(
       if (ownsLease(opt, lease)) el.update?.();
     },
   };
+
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
 
   type WcOwnedNode = { authored: DemoChild; node: Node; children: WcOwnedNode[] };
   const managed = new Map<string, Map<number, WcOwnedNode>>();
@@ -746,6 +765,7 @@ async function renderDemoWc(
         await Promise.resolve();
         if (!current()) return;
         publishDynamicRefs();
+        publicInstances?.schedule();
       } catch (error) {
         // A host failure is terminal for this render, never a partially healthy
         // committed tree. Invalid authored updates were rejected before mutation.
@@ -916,6 +936,7 @@ async function renderDemoReact(
   for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
   const owner = `demo-${++nextDemoOwner}`;
   const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
   let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
   const refs: Record<string, HTMLElement> = Object.create(null);
   let stopRefObservation: (() => void) | undefined;
@@ -1040,6 +1061,7 @@ async function renderDemoReact(
         if (!ownsLease(opt, lease)) return;
         if (instance) componentRefs.set(node.ref!, instance as DemoInstance);
         else componentRefs.delete(node.ref!);
+        publicInstances?.schedule();
       };
     }
     mergedProps.hostClassName = demoOwnerHostClass(mergedProps.hostClassName, owner);
@@ -1070,6 +1092,7 @@ async function renderDemoReact(
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
@@ -1106,6 +1129,9 @@ async function renderDemoReact(
   publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
     setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
@@ -1125,6 +1151,12 @@ async function renderDemoReact(
         inst.update?.();
       });
       return result;
+    },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
     },
     getExposes(ref) {
       if (!ownsLease(opt, lease)) return;
@@ -1162,6 +1194,12 @@ async function renderDemoReact(
     },
   };
 
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
+
   dynamicQueue = createDynamicCommitQueue(
     dynamic,
     () => ownsLease(opt, lease),
@@ -1189,6 +1227,7 @@ async function renderDemoReact(
         flushReact(() => root.render(renderTree()));
         if (!current()) return;
         publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
         if (!current()) return;
       } catch (error) {
         // A framework commit may have partially mutated its host. Fail closed:
@@ -1233,6 +1272,7 @@ async function renderDemoVue(
   for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
   const owner = `demo-${++nextDemoOwner}`;
   const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
   let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
   const refs: Record<string, HTMLElement> = Object.create(null);
   let stopRefObservation: (() => void) | undefined;
@@ -1288,6 +1328,7 @@ async function renderDemoVue(
                 if (!ownsLease(opt, lease)) return;
                 if (el) componentRefs.set(node.ref!, el as DemoInstance);
                 else componentRefs.delete(node.ref!);
+                publicInstances?.schedule();
               }
             : undefined,
         },
@@ -1319,6 +1360,7 @@ async function renderDemoVue(
         if (!ownsLease(opt, lease)) return;
         if (el) componentRefs.set(node.ref!, el as DemoInstance);
         else componentRefs.delete(node.ref!);
+        publicInstances?.schedule();
       };
     }
     mergedProps.hostClass = [mergedProps.hostClass, `pui-owner-${owner}`];
@@ -1347,6 +1389,7 @@ async function renderDemoVue(
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
@@ -1370,6 +1413,9 @@ async function renderDemoVue(
   publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
     setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap[ref]) return;
@@ -1385,6 +1431,12 @@ async function renderDemoVue(
       const result = callInScope(inst, () => fn(...args));
       inst.update?.();
       return result;
+    },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !Object.hasOwn(propsMap, ref)) return;
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
     },
     getExposes(ref) {
       if (!ownsLease(opt, lease)) return;
@@ -1408,6 +1460,12 @@ async function renderDemoVue(
       // commit with an unchanged one and lose a later controlled prop's paint.
     },
   };
+
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
 
   dynamicQueue = createDynamicCommitQueue(
     dynamic,
@@ -1435,6 +1493,7 @@ async function renderDemoVue(
         await Vue.nextTick();
         if (!current()) return;
         publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
         if (!current()) return;
       } catch (error) {
         // A framework commit may have partially mutated its host. Fail closed:
@@ -1479,6 +1538,7 @@ async function renderDemoVue2(
   for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
   const owner = `demo-${++nextDemoOwner}`;
   const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
   let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
   const refs: Record<string, HTMLElement> = Object.create(null);
   let stopRefObservation: (() => void) | undefined;
@@ -1573,8 +1633,22 @@ async function renderDemoVue2(
     if (surfaceStyle !== undefined)
       mergedProps.surfaceStyle = normalizeVueSurfaceStyle(surfaceStyle, host.ownerDocument);
 
-    const data = { ...toVue2ComponentData(mergedProps), key };
-    if (node.ref) data.ref = node.ref;
+    const data: ReturnType<typeof toVue2ComponentData> & {
+      key: string | number | undefined;
+      hook?: Record<string, (...args: any[]) => void>;
+    } = { ...toVue2ComponentData(mergedProps), key };
+    if (node.ref) {
+      data.ref = node.ref;
+      // Preserve existing vnode hooks; Vue2 merges its component hooks with these.
+      const hooks = data.hook ?? {};
+      const mergedHooks = { ...hooks };
+      data.hook = mergedHooks;
+      for (const phase of ['insert', 'postpatch', 'destroy']) {
+        mergedHooks[phase] = appendDemoPublicInstanceHook(hooks[phase], () =>
+          publicInstances?.schedule()
+        );
+      }
+    }
     return h(Component, data, kids);
   }
 
@@ -1608,6 +1682,7 @@ async function renderDemoVue2(
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
@@ -1634,6 +1709,9 @@ async function renderDemoVue2(
   publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
     setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap[ref]) return;
@@ -1651,6 +1729,13 @@ async function renderDemoVue2(
       const result = callInScope(inst, () => fn(...args));
       inst.update?.();
       return result;
+    },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !Object.hasOwn(propsMap, ref)) return;
+      refreshComponentRefs(app);
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
     },
     getExposes(ref) {
       if (!ownsLease(opt, lease)) return;
@@ -1679,6 +1764,12 @@ async function renderDemoVue2(
       // Public call/getExposes refresh component refs when they are consumed.
     },
   };
+
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
 
   dynamicQueue = createDynamicCommitQueue(
     dynamic,
@@ -1709,6 +1800,7 @@ async function renderDemoVue2(
         if (current()) refreshComponentRefs(app);
         if (!current()) return;
         publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
         if (!current()) return;
       } catch (error) {
         // A framework commit may have partially mutated its host. Fail closed:

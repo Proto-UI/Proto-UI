@@ -299,4 +299,141 @@ describe('Website dynamic projection wrapper', () => {
     });
     expect(setSurfaceStyle.mock.calls.some(([ref]) => ref === 'rejected')).toBe(false);
   });
+  it('filters complete subscription batches and owns listener teardown', () => {
+    let ctx!: DemoSetupContext;
+    const view = composition(
+      child((context) => {
+        ctx = context;
+      })
+    );
+    const mounted = mount(view.demo);
+    const actual = { getExposes: () => ({}) };
+    let notify!: (
+      snapshot: Readonly<Record<string, typeof actual | undefined>>,
+      revision: number
+    ) => void;
+    const off = vi.fn();
+    const subscribePublicInstances = vi.fn((refs, listener) => {
+      notify = listener;
+      listener(Object.freeze({ result: actual, __pui_projection__private: actual }), 0);
+      return off;
+    });
+    const api: DemoRuntimeApi = {
+      call() {},
+      getExposes() {
+        return undefined;
+      },
+      setProps() {},
+      subscribePublicInstances,
+    };
+    const cleanup = view.demo.setup!({ ...mounted, api }) as () => void;
+    cleanups.push(cleanup);
+    const listener = vi.fn();
+    expect(() =>
+      ctx.api.subscribePublicInstances!(['result', '__pui_projection__private'], listener)
+    ).toThrow(/reserved/);
+    expect(subscribePublicInstances).not.toHaveBeenCalled();
+    ctx.api.subscribePublicInstances!(['result'], listener);
+    expect(listener).toHaveBeenCalledWith({ result: actual }, 0);
+    cleanup();
+    expect(off).toHaveBeenCalledTimes(1);
+    notify({ result: undefined }, 1);
+    expect(listener).toHaveBeenCalledTimes(1);
+    ctx.api.subscribePublicInstances!(['result'], listener);
+    expect(subscribePublicInstances).toHaveBeenCalledTimes(1);
+  });
+  it('forwards only live child public instance lookups, without wrapping or leaking reserved refs', () => {
+    let childContext!: DemoSetupContext;
+    const view = composition(
+      child((context) => {
+        childContext = context;
+      })
+    );
+    const mounted = mount(view.demo);
+    const instance = { getExposes: () => ({ value: 'actual' }) };
+    const getPublicInstance = vi.fn((ref: string) => (ref === 'result' ? instance : undefined));
+    const api: DemoRuntimeApi = {
+      call() {},
+      getExposes() {
+        return undefined;
+      },
+      setProps() {},
+      getPublicInstance,
+    };
+    const cleanup = view.demo.setup!({ ...mounted, api }) as () => void;
+    cleanups.push(cleanup);
+    expect(childContext.api.getPublicInstance!('result')).toBe(instance);
+    expect(childContext.api.getPublicInstance!('result')).toBe(instance);
+    const count = getPublicInstance.mock.calls.length;
+    expect(() => childContext.api.getPublicInstance!('__pui_projection__private')).toThrow(
+      /reserved/
+    );
+    expect(getPublicInstance).toHaveBeenCalledTimes(count);
+    cleanup();
+    expect(childContext.api.getPublicInstance!('result')).toBeUndefined();
+    expect(childContext.api.getPublicInstance!('__pui_projection__private')).toBeUndefined();
+    expect(getPublicInstance).toHaveBeenCalledTimes(count);
+  });
+  it('does not manufacture public instance access for an external API without it', () => {
+    let childContext!: DemoSetupContext;
+    const view = composition(
+      child((context) => {
+        childContext = context;
+      })
+    );
+    const mounted = mount(view.demo);
+    const api: DemoRuntimeApi = {
+      call() {},
+      getExposes() {
+        return undefined;
+      },
+      setProps() {},
+    };
+    cleanups.push(view.demo.setup!({ ...mounted, api }) as () => void);
+    expect(childContext.api.getPublicInstance).toBeUndefined();
+  });
+  it('explicitly preserves every standard API capability but not nonstandard external extensions', async () => {
+    let ctx!: DemoSetupContext;
+    const view = composition(
+      child((context) => {
+        ctx = context;
+      })
+    );
+    const mounted = mount(view.demo);
+    const instance = { getExposes: () => ({}) };
+    const api = {
+      call: vi.fn(() => 'called'),
+      getExposes: vi.fn(() => ({ exposed: true })),
+      setProps: vi.fn(),
+      removeProps: vi.fn(),
+      setSurfaceStyle: vi.fn(),
+      setChildren: vi.fn(async () => 'committed' as const),
+      getPublicInstance: vi.fn(() => instance),
+      externalUnfilteredLookup: vi.fn(),
+    };
+    cleanups.push(view.demo.setup!({ ...mounted, api }) as () => void);
+    expect(Object.keys(ctx.api).sort()).toEqual(
+      [
+        'call',
+        'getExposes',
+        'getPublicInstance',
+        'removeProps',
+        'setChildren',
+        'setProps',
+        'setSurfaceStyle',
+      ].sort()
+    );
+    expect(ctx.api.call('result', 'focusSelf')).toBe('called');
+    expect(ctx.api.getExposes('result')).toEqual({ exposed: true });
+    expect(ctx.api.getPublicInstance!('result')).toBe(instance);
+    ctx.api.setProps('result', { disabled: true });
+    expect(api.setProps).toHaveBeenLastCalledWith('result', { disabled: true });
+    ctx.api.removeProps!('result', ['disabled']);
+    expect(api.removeProps).toHaveBeenLastCalledWith('result', ['disabled']);
+    ctx.api.setSurfaceStyle!('result', { color: 'red' });
+    expect(api.setSurfaceStyle).toHaveBeenLastCalledWith('result', { color: 'red' });
+    await expect(ctx.api.setChildren!('results', [])).resolves.toBe('committed');
+    expect(api.setChildren).toHaveBeenCalledWith('results', []);
+    expect(api.externalUnfilteredLookup).not.toHaveBeenCalled();
+  });
 });

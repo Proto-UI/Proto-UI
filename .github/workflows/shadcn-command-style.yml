@@ -77,6 +77,8 @@ jobs:
           test ! -s "$EVIDENCE/preinstall-dirty.txt"
           node --version > "$EVIDENCE/node-version.txt"
           cat > "$EVIDENCE/required-tests.txt" <<'TESTS'
+          apps/www/src/components/PrototypePreviewer/demo-public-instances.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.public-instance.test.ts
           apps/www/src/components/PrototypePreviewer/demo-dynamic-children.test.ts
           apps/www/src/components/PrototypePreviewer/demo-dynamic-commit-queue.test.ts
           apps/www/src/components/PrototypePreviewer/demo-renderer.dynamic-children.test.ts

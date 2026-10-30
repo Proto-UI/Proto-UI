@@ -46,7 +46,39 @@ export type DemoChild = DemoNode | string;
 export type DemoKeyedChild = Readonly<{ key: string; node: DemoChild }>;
 export type DemoChildrenCommit = 'committed' | 'superseded' | 'disposed';
 
+/** Actual adapter-owned handle/element identity, not a snapshot or native-readiness promise. */
+export type DemoPublicInstance = {
+  getExposes(): Record<string, unknown> | undefined;
+};
+
+export type DemoPublicInstancesSnapshot = Readonly<Record<string, DemoPublicInstance | undefined>>;
+export type DemoPublicInstancesListener = (
+  snapshot: DemoPublicInstancesSnapshot,
+  revision: number
+) => void;
+
+/** Projection wrappers forward the named capabilities below explicitly.
+ * Nonstandard extensions on an external/custom API are not part of this contract
+ * and are not forwarded; copying them could bypass reserved-ref isolation.
+ */
 export type DemoRuntimeApi = {
+  /**
+   * Return the current owned prototype instance without wrapping it. Missing,
+   * nonprototype, removed or retired refs return undefined. Same-key/type
+   * updates retain identity; replacement returns a different instance.
+   * This is a lookup, not a readiness wait/subscription. Consumers dispose their
+   * bindings before replacement; previously returned handles are not revoked.
+   * Optional only for external/custom APIs; every built-in host implements it.
+   */
+  getPublicInstance?(ref: string): DemoPublicInstance | undefined;
+  /** Initial synchronous snapshot, then microtask-batched actual identity changes.
+   * Revisions are monotonic per subscription. Not native readiness or an authorization grant.
+   * Dispose old bindings before binding a changed snapshot. Retirement publishes undefined.
+   */
+  subscribePublicInstances?(
+    refs: readonly string[],
+    listener: DemoPublicInstancesListener
+  ): () => void;
   /**
    * Replace only a declared box's managed keyed author children, preserving the
    * static prototype ancestors. Same key/type retains its instance with fixed
