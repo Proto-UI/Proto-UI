@@ -130,6 +130,7 @@ const staticUtilities: Record<string, string[]> = {
     '-webkit-box-orient: vertical;',
     '-webkit-line-clamp: 1;',
   ],
+  'scroll-py-1': ['scroll-padding-block: 0.25rem;'],
   'scroll-my-1': ['scroll-margin-block: 0.25rem;'],
   'scroll-my-1.5': ['scroll-margin-block: 0.375rem;'],
   'border-dashed': ['border-style: dashed;'],
