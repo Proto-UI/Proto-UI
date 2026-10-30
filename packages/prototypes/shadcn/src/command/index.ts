@@ -13,3 +13,6 @@ export type {
   CommandDialogContentProps,
   CommandDialogContentExposes,
 } from './dialog-content.proto';
+
+export { default as commandDialogMask } from './dialog-mask.proto';
+export type { CommandDialogMaskProps } from './dialog-mask.proto';

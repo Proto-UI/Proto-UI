@@ -41,6 +41,10 @@ criteria:
     text:
       en: Explicit styleProfile or a common outer public style scope selects Rhea or New York; a child CommandRoot scope is not read upward. Rhea uses the adopted top-third, 28rem cap, rounded3xl and 100ms recipe; New York uses centered32rem, rounded-lg and200ms. Required public enterDuration/leaveDuration are bound from the same profile by the consumer; no runtime configure or second timer. No hidden switch to New York or fabricated full cmdk parity.
       zh-CN: 显式 styleProfile 或共同外层公共 style scope 选择 Rhea/NY，不向上读取内部 CommandRoot scope。Rhea 按固定上游第三屏、28rem 上限、rounded3xl 和100ms；NY 居中32rem、rounded-lg 和200ms。不得静默切回 NY 或宣称完整 cmdk 等价。
+  - id: P-SHADCN-COMMAND-DIALOG-MASK
+    text:
+      en: Search CommandDialog uses a transparent dedicated Mask that inherits Base modal blocking, pointer participation and presence without a second open or query owner. The pinned website omits visible DialogOverlay while Radix retains modality; Proto UI explicitly retains its semantic Mask because Content alone is non-modal. Ordinary Shadcn DialogMask paint is unchanged. Mask and Content use the same consumer-selected durations. Transparent paint is not passthrough, and native outside-press, Escape, focus return and underlying-page blocking remain required evidence.
+      zh-CN: Search CommandDialog 使用专用透明 Mask，继承 Base 模态阻隔、指针参与和 presence，不另建 open/query owner。固定官网省略可见 DialogOverlay 而 Radix 保留模态；Proto UI 的 Content 单独非模态，因此明确保留语义 Mask。普通 Shadcn DialogMask 外观不变，Mask/Content 时长来自同一消费 profile；透明不等于穿透，真实外点、Escape、回焦和底页阻隔仍需证据。
   - id: P-SHADCN-COMMAND-ANATOMY
     text:
       en: Root owns a full-width vertical single shell; Content is its shrinkable scrollable list, never an independently bordered or shadowed panel. Adopted Rhea retains root p1 and list18rem; New York and Brutalist adopt a root-relative18.75rem list cap from the pinned300px reference. Brutalist owns its sole2px border on Root. min-height0 is an explicit containment safeguard, not proof of native short-viewport acceptance. No wrapping-row root, page CSS repair or generic Group/InputShell parity is claimed.
