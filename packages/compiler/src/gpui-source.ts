@@ -56,6 +56,14 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     'positioning.connect', 'positioning.update', 'positioning.requestUpdate', 'positioning.disconnect', 'positioning.getSnapshot',
     'binding.release', 'subscription.release',
   ]);
+  const activationSites = admitted.value.sites.filter((site) => site.operation === 'focus.activate');
+  const reachedActivation = (node: ExpressionIR): boolean => activationSites.some((site) =>
+    site.span.file === node.span.file && site.span.start === node.span.start && site.span.end === node.span.end);
+  function hasActivationEntry(type: DataType): boolean {
+    return typeof type !== 'string' && (type.kind === 'record'
+      ? type.fields.some((field) => field.name === 'entry')
+      : type.kind === 'union' && type.members.some(hasActivationEntry));
+  }
   function inspect(value: unknown, enclosingSpan = ir.setup.span): void {
     if (Array.isArray(value)) { value.forEach((item) => inspect(item, enclosingSpan)); return; }
     if (!value || typeof value !== 'object') return;
@@ -70,6 +78,9 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     const handles = node.kind === 'style-handle' ? [node.handle] : node.kind === 'rule' ? node.declaration.intent.ops.flatMap((operation) => operation.handles) : [];
     for (const handle of handles) for (const token of handle.tokens) styleTokens.set(token, node.span);
     if (node.kind === 'operation' && !supported.has(node.operation)) diagnostics.push({ code: 'PUI_GPUI_HOST_REQUIRED', category: 'unsupported-input', message: `GPUI operation ${node.operation} has no concrete pinned host lowering. No success fallback is emitted.`, span: node.span });
+    if (node.kind === 'operation' && node.operation === 'focus.activate' && reachedActivation(node) && node.arguments[0] &&
+        isDataValueType(node.arguments[0].type) && hasActivationEntry(node.arguments[0].type))
+      diagnostics.push({ code: 'PUI_GPUI_FOCUS_ACTIVATION_REQUIRED', category: 'unsupported-input', message: 'Per-activation focus entry policy has no pinned GPUI lowering. Existing focus activation without entry remains supported.', span: node.arguments[0].span });
     if (node.kind === 'operation' && node.operation === 'event.on' && node.arguments[2]?.kind === 'record') {
       const type = node.arguments[0];
       const phaseMapped = type?.kind === 'literal' && ['host:mousedown', 'host:mouseup', 'host:keydown', 'host:keyup'].includes(String(type.value));

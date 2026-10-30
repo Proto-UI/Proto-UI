@@ -5,6 +5,15 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Content transition presence, focus containment, dismissal requests, controlled ownership, and accessible modal semantics.
 cases:
+  - id: T-BASE-DIALOG-CONTENT-0001-CASE-ENTRY-POLICY
+    title: Optional manual entry preserves explicit focus and next-activation semantics
+    covers:
+      [
+        P-BASE-DIALOG-CONTENT-ENTRY-POLICY,
+        P-BASE-DIALOG-CONTENT-FOCUS,
+        P-BASE-DIALOG-CONTENT-CONTROLLED,
+      ]
+    expectation: default-auto-manual-no-entry-active-prop-no-refocus-next-activation-and-controlled-refusal
   - id: T-BASE-DIALOG-CONTENT-0001-CASE-CLOSED-PAINT
     title: Closed Dialog stays visually absent after settings changes and leave completion
     covers: [P-BASE-DIALOG-CONTENT-PRESENCE]
@@ -35,6 +44,14 @@ cases:
       - P-BASE-DIALOG-CONTENT-DISMISS
     expectation: mask-rematerialization-does-not-steal-content-outside-owner
 implementations:
+  - id: dialog-entry-policy-contract
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/dialog-focus-entry.test.ts
+    required: true
+    consumesCases: [T-BASE-DIALOG-CONTENT-0001-CASE-ENTRY-POLICY]
+    notes:
+      - Six synthetic WC cases retain real public prototype focus and controlled owner behavior; not native portal timing, pending-request cancellation, Compiler support or Search continuity.
   - id: s4-closed-paint-browser
     kind: runtime-test
     status: passing

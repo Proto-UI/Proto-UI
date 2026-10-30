@@ -155,6 +155,12 @@ export const FOCUS_OPTIONS_TYPE: DataType = { kind: 'record', fields: [
   ] } },
   { name: 'preventScroll', optional: true, type: 'boolean' },
 ] };
+export const FOCUS_ACTIVATION_OPTIONS_TYPE: DataType = { kind: 'record', fields: [
+  ...FOCUS_OPTIONS_TYPE.fields,
+  { name: 'entry', optional: true, type: { kind: 'union', members: [
+    { kind: 'literal', value: 'configured' }, { kind: 'literal', value: 'manual' },
+  ] } },
+] };
 const rovingOptions: ArgumentRule = { role:'value', optional:true, schema: { kind: 'record', fields: [
   ...FOCUS_OPTIONS_TYPE.fields, { name: 'defer', type: 'boolean', optional: true },
 ] } };
@@ -282,7 +288,7 @@ export const OPERATION_RULES = {
   'focus.focusPrev': rule('focus-scope', 'focusPrev', callbackPhase, 'void', [], [effect('write', 'focus')]),
   'focus.focusSelected': rule('focus-scope', 'focusSelected', callbackPhase, 'void', [], [effect('write', 'focus')]),
   'focus.restoreFocus': rule('focus-scope', 'restoreFocus', callbackPhase, 'void', [], [effect('write', 'focus')]),
-  'focus.activate': rule('focus-scope', 'activate', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
+  'focus.activate': rule('focus-scope', 'activate', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_ACTIVATION_OPTIONS_TYPE }], [effect('write', 'focus')]),
   'focus.deactivate': rule('focus-scope', 'deactivate', callbackPhase, 'void', [{ role: 'value', optional: true, schema: FOCUS_OPTIONS_TYPE }], [effect('write', 'focus')]),
   'focus.setLoop': rule('focus-roving', 'setLoop', callbackPhase, 'void', [boolean], [effect('write', 'focus')]),
   'focus.setOrientation': rule('focus-roving', 'setOrientation', callbackPhase, 'void', [{ role: 'value', types: ['string'] }], [effect('write', 'focus')]),
@@ -624,6 +630,17 @@ export function validateOperationArguments(operation: string, args: readonly Ope
       const actual = argumentData(argument);
       const expected: DataType = requirement.optional ? { kind:'union', members:[requirement.schema,'void'] } : requirement.schema;
       if (!actual || !isAssignable(actual, expected)) reject('argument-type', `Argument ${index + 1} does not satisfy its data schema.`);
+      // Activation policy is not a Host Focus request option. Preserve structural
+      // data typing elsewhere, but do not silently drop this capability option.
+      const fields = (type: DataType): readonly string[] => typeof type === 'string' ? []
+        : type.kind === 'record' ? type.fields.map((field) => field.name)
+        : type.kind === 'union' ? type.members.flatMap(fields) : [];
+      const keys = actual ? fields(actual) : [];
+      if (requirement.schema === FOCUS_ACTIVATION_OPTIONS_TYPE && keys.some((key) => !['reason', 'preventScroll', 'entry'].includes(key)))
+        reject('argument-type', 'Focus activation options contain an unsupported field.');
+      if ((requirement.schema === FOCUS_OPTIONS_TYPE || requirement.schema === rovingOptions.schema) && keys.includes('entry'))
+        reject('argument-type', 'The entry override is only admitted by focus scope activation.');
+
     }
     switch (requirement.role) {
       case 'host-target':
