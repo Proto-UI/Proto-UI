@@ -1,15 +1,24 @@
 ---
 import { resolveSiteLibraryFamily, siteControlTags } from '../site-library-family';
+import { headerButtonProps, headerIconButtonLayout } from '../site-header-control-recipes';
+import { snapshotStartupStyle } from '../site-startup-paint';
+import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
 const family = resolveSiteLibraryFamily(Astro.url.pathname);
 const { Button } = siteControlTags(family);
+const buttonProps = headerButtonProps(family);
+const startupTokens = await snapshotStartupStyle(`${family}-button`, buttonProps);
 ---
 
+<style is:inline set:html={renderSnapshotTokenCss(startupTokens, '[data-theme-toggle]')}></style>
 <Button
   data-site-button
   data-site-control-family={family}
   data-theme-toggle
-  data-variant={family === 'brutalist' ? 'surface' : 'ghost'}
-  data-size="icon"
+  style={headerIconButtonLayout()}
+  data-variant={buttonProps.variant}
+  data-size={buttonProps.size}
+  data-style-profile={family === 'shadcn' ? 'rhea' : undefined}
+  data-pui-style={startupTokens.join(' ')}
   class="group/toggle extend-touch-target shrink-0 [&_svg]:pointer-events-none"
   type="button"
   aria-label="Toggle color theme"

@@ -8,6 +8,47 @@ import {
   type ProjectionCompositionControls,
 } from './projection-composition';
 import { PROJECTION_FAMILY_MANIFESTS, SHARED_BASE_FAMILY_IDS } from './projection-families';
+import { headerSelectControlProps } from '../site-header-control-recipes';
+
+it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+  'provides a stable public Select author label and uses native profile in %s',
+  (runtimeId) => {
+    const config = controls();
+    const composition = createProjectionComposition({
+      ownerId: 'header-one-row',
+      runtimeId,
+      projectionFamilyId: 'shadcn',
+      generation: 1,
+      componentId: 'button',
+      childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
+      controls: { ...config, runtime: { ...config.runtime, ...headerSelectControlProps() } },
+      controlIds: ['runtime'],
+    });
+    const trigger = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-trigger'
+    );
+    const root = findNode(
+      composition.demo,
+      (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-root'
+    );
+    if (trigger.kind !== 'proto' || root.kind !== 'proto')
+      throw new Error('Expected real Select parts');
+    expect(trigger.props).toMatchObject({ appearance: 'default', accessibleLabel: 'Runtime' });
+    expect(trigger.props).not.toHaveProperty('aria-label');
+    expect(root.props).toMatchObject({ styleProfile: 'rhea', value: runtimeId });
+    expect(trigger.surfaceStyle).toMatchObject({
+      minHeight: 'var(--site-control-height, 2.75rem)',
+    });
+    const labels: DemoNode[] = [];
+    walk(composition.demo.root, (node) => {
+      if (node.kind === 'box' && node.attrs?.['data-projection-control-label'] === 'runtime')
+        labels.push(node);
+    });
+    expect(labels).toHaveLength(0);
+    expect(trigger.children).toHaveLength(1);
+  }
+);
 
 function controls(events: string[] = []): ProjectionCompositionControls {
   return {

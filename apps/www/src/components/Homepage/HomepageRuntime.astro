@@ -3,11 +3,16 @@ import config from 'virtual:starlight/user-config';
 import context from 'virtual:starlight/project-context';
 import { localizedUrl } from '../../utils/localizedUrl';
 import HomeActions from './HomeActions.astro';
+import LanguageSelect from '../override/LanguageSelect.astro';
 const locale = Astro.locals.starlightRoute.locale || 'en';
 const zh = locale === 'zh-cn';
 const path = (pathname: string) =>
   localizedUrl(new URL(pathname, Astro.url), locale, context.trailingSlash).pathname;
-const otherLocale = Object.keys(config.locales ?? {}).find((key) => key !== locale);
+const localeOptions = Object.entries(config.locales ?? {}).map(([value, option]) => ({
+  value,
+  label: option.label || value,
+  path: localizedUrl(Astro.url, value, context.trailingSlash).pathname,
+}));
 const actions = [
   {
     text: zh ? '文档' : 'Docs',
@@ -21,20 +26,6 @@ const actions = [
     variant: 'minimal' as const,
   },
 ];
-const localeActions = otherLocale
-  ? [
-      {
-        text: config.locales![otherLocale].label || otherLocale,
-        link: localizedUrl(Astro.url, otherLocale, context.trailingSlash).pathname,
-        variant: 'minimal' as const,
-        attrs: {
-          'data-home-locale': otherLocale,
-          'data-site-link-appearance': 'nav',
-          hreflang: otherLocale,
-        },
-      },
-    ]
-  : [];
 ---
 
 <div
@@ -85,16 +76,34 @@ const localeActions = otherLocale
           <span class="site-header-group-label">{zh ? '浏览' : 'Explore'}</span>
           <HomeActions id="home-navigation-mobile" {actions} />
         </nav>
-        <div data-site-header-compact-context></div>
+        <div data-site-header-compact-context>
+          <div class="site-header-runtime home-runtime-preferences" data-site-header-preferences>
+            <HomeActions id="home-preferences" actions={[]} runtimeControl />
+          </div>
+        </div>
         <div class="site-header-settings" id="site-header-settings" data-site-header-settings>
           <span class="site-header-group-label"
             >{zh ? '偏好与社区' : 'Preferences and community'}</span
           >
           {
-            localeActions.length > 0 && (
+            localeOptions.length > 0 && (
               <div class="site-header-setting">
                 <span class="site-header-setting-label">{zh ? '语言' : 'Language'}</span>
-                <HomeActions id="home-language" actions={localeActions} />
+                <div
+                  id="home-language"
+                  class="home-actions"
+                  data-homepage-actions
+                  data-homepage-locale={JSON.stringify({
+                    value: locale,
+                    label: zh ? '语言' : 'Language',
+                    options: localeOptions,
+                  })}
+                >
+                  <div class="home-actions-fallback" data-homepage-fallback>
+                    <LanguageSelect />
+                  </div>
+                  <div data-homepage-mount />
+                </div>
               </div>
             )
           }
@@ -106,11 +115,7 @@ const localeActions = otherLocale
       </div>
     </div>
   </details>
-  <div class="site-header-context" data-site-header-context>
-    <div class="site-header-runtime home-runtime-preferences" data-site-header-preferences>
-      <HomeActions id="home-preferences" actions={[]} runtimeControl />
-    </div>
-  </div>
+  <div class="site-header-context" data-site-header-context data-site-header-wide-preferences></div>
   <div class="site-header-search" data-homepage-shell-tools><slot name="search" /></div>
   <div class="site-header-theme">
     <HomeActions id="home-theme-controls" actions={[]} themeButton themeIcon />

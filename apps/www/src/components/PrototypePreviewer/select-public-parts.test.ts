@@ -100,10 +100,15 @@ describe('website public Shadcn Select compositions', () => {
       parts(result.demo.root, 'shadcn-select-item').find((n) => n.props?.value === 'react')?.props
         ?.disabled
     ).toBe(true);
+    expect(
+      parts(result.demo.root, 'shadcn-select-trigger').map(
+        (trigger) => trigger.props?.accessibleLabel
+      )
+    ).toEqual([controls.runtime.label, controls.family.label, controls.component.label]);
     for (const trigger of parts(result.demo.root, 'shadcn-select-trigger')) {
       expect(trigger.surfaceStyle).not.toHaveProperty('minHeight');
       expect(trigger.surfaceStyle).not.toHaveProperty('paddingBlock');
-      expect(trigger.props?.['aria-label']).toBeTruthy();
+      expect(trigger.props).not.toHaveProperty('aria-label');
     }
   });
   it.each(['brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)(
