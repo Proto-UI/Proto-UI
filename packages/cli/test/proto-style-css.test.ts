@@ -15,6 +15,21 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('lowers scroll-py-1 in light and shadow CSS without widening the token vocabulary', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['scroll-py-1', 'scroll-my-1']);
+      expect(css).toContain('[data-pui-style~="scroll-py-1"]');
+      expect(css).toContain('scroll-padding-block: 0.25rem;');
+      expect(css).toContain('scroll-margin-block: 0.25rem;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const token of ['scroll-py-unknown', '-scroll-py-1', 'scroll-py-[1px;color:red]']) {
+        const unsupported = render([token]);
+        expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
+      }
+    }
+  });
+
   it('projects only the named Rhea/Luma radii and secondary hover mix', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render([
