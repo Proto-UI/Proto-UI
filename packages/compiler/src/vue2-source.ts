@@ -277,28 +277,41 @@ ${hooks}
   return (${fn(ir.setup, 1)})(${prefix}Owner.def);
 }
 
+/** @typedef {import('vue').default & { readonly ${ownerKey}: ReturnType<typeof ${prefix}CreateOwner>${contextArtifacts ? `; readonly ${JSON.stringify(`${prefix}ParentScope`)}?: ReturnType<typeof ${prefix}CreateContextScope> | null` : ''} }} ${prefix}NativeInstance */
 export const ${componentName} = {
   name: ${JSON.stringify(ir.name)},
   inheritAttrs: false,
   props: { ${propDeclarations} },
   ${contextArtifacts ? `inject: { [${JSON.stringify(`${prefix}ParentScope`)}]: { from: ${prefix}ScopeKey, default: null } },
+  /** @this {${prefix}NativeInstance} */
   provide() { return { [${prefix}ScopeKey]: this[${ownerKey}].contextScope }; },` : ''}
+  /** @this {${prefix}NativeInstance} */
   beforeCreate() {
     Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.autoUpdateOnPropsChange !== false}) });
     ${options.ssr ? `const session = ${prefix}FindSession(this);
     if (session) this[${ownerKey}].bindSession(session, ${JSON.stringify(ir.source.sha256)});` : ''}
   },
+  /** @this {${prefix}NativeInstance} */
   created() { this[${ownerKey}].initialize(); },
+  /** @this {${prefix}NativeInstance} */
   mounted() { this[${ownerKey}].hostMounted(); },
+  /** @this {${prefix}NativeInstance} */
   updated() { this[${ownerKey}].afterCommit(); },
+  /** @this {${prefix}NativeInstance} */
   activated() { this[${ownerKey}].activate(); },
+  /** @this {${prefix}NativeInstance} */
   deactivated() { this[${ownerKey}].deactivate(); },
+  /** @this {${prefix}NativeInstance} */
   beforeDestroy() { this[${ownerKey}].dispose(); },
   methods: {
+    /** @this {${prefix}NativeInstance} */
     update() { this[${ownerKey}].update(); },
+    /** @this {${prefix}NativeInstance} */
     getExposes() { return this[${ownerKey}].getExposes(); },
+    /** @this {${prefix}NativeInstance} @template T @param {() => T} callback */
     invokeInCallbackScope(callback) { return this[${ownerKey}].invokePublic(callback); },
   },
+  /** @this {${prefix}NativeInstance} @param {import('vue').CreateElement} h */
   render(h) { return this[${ownerKey}].render(h); },
 };
 export default ${componentName};
