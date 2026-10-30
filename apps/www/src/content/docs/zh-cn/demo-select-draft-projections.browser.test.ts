@@ -27,101 +27,23 @@ const source = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).
 const captureDir = process.env.PROTO_UI_SELECT_SCREENSHOT_DIR;
 async function captureFailure(page: Page, id: string, details: Record<string, unknown>) {
   if (!captureDir) return;
-  const receipt: Record<string, unknown> = {
-    source,
-    ...details,
-    opticalPaintClaim: false,
-    gpuiClaim: false,
-  };
-  const save = () =>
-    writeFile(path.join(captureDir, `${id}-failure.json`), JSON.stringify(receipt, null, 2));
   try {
-    await save();
-  } catch (error) {
-    console.error('Select failure JSON could not be saved', String(error));
-  }
-  try {
-    await page.screenshot({ path: path.join(captureDir, `${id}-failure.png`), timeout: 5000 });
-  } catch (error) {
-    receipt.screenshotError = String(error);
-    try {
-      await save();
-    } catch (writeError) {
-      console.error('Select screenshot failure could not be recorded', String(writeError));
-    }
-  }
-  // Capture failures never replace the original assertion failure.
-}
-
-// Diagnostic snapshots are read-only, separate observations, not a claim that
-// the snapshot and later screenshot represent the same renderer frame.
-async function selectMaterialSnapshot(previewer: Locator, phase: string) {
-  try {
-    return await previewer.evaluate((root, phase) => {
-      const rect = (node: Element) => {
-        const value = node.getBoundingClientRect();
-        return {
-          left: value.left,
-          top: value.top,
-          right: value.right,
-          bottom: value.bottom,
-          width: value.width,
-          height: value.height,
-        };
-      };
-      const describe = (node: HTMLElement) => {
-        const css = getComputedStyle(node);
-        return {
-          tag: node.tagName,
-          ref: node.dataset.demoRef ?? null,
-          role: node.getAttribute('role'),
-          connected: node.isConnected,
-          bounds: rect(node),
-          quality: node.dataset.materialQuality ?? null,
-          reason: node.dataset.materialReason ?? null,
-          source: node.dataset.materialSource ?? null,
-          frame: node.dataset.materialFrame ?? null,
-          sourceRevision: node.dataset.materialSourceRevision ?? null,
-          carrier: node.getAttribute('data-pui-material-carrier'),
-          display: css.display,
-          visibility: css.visibility,
-          opacity: css.opacity,
-          overflowX: css.overflowX,
-          overflowY: css.overflowY,
-          contain: css.contain,
-          transform: css.transform,
-        };
-      };
-      const stages = Array.from(
-        root.querySelectorAll<HTMLElement>('[data-projection-content] [data-material-scene]')
-      );
-      return {
-        phase,
-        observedAtMs: performance.now(),
-        privateLeaseState: 'unavailable; public attributes only',
-        // Record geometry rather than reimplement the private carrier validity
-        // or paint-outset admission algorithm in this diagnostic test.
-        stageCount: stages.length,
-        omittedStageCount: Math.max(0, stages.length - 8),
-        stages: stages.slice(0, 8).map((stage) => {
-          const descendants = Array.from(stage.querySelectorAll<HTMLElement>('*'));
-          const projection = stage.closest<HTMLElement>('[data-projection-scope]');
-          return {
-            stage: describe(stage),
-            previewerId:
-              stage.closest<HTMLElement>('[data-previewer-id]')?.dataset.previewerId ?? null,
-            projectionState: projection?.dataset.projectionState ?? null,
-            projectionRuntime: projection?.dataset.projectionRuntime ?? null,
-            inertAncestor: !!stage.closest('[inert]'),
-            descendantCount: descendants.length,
-            omittedDescendantCount: Math.max(0, descendants.length - 200),
-            descendants: descendants.slice(0, 200).map(describe),
-          };
-        }),
-      };
-    }, phase);
-  } catch (error) {
-    return { phase, observationError: String(error) };
+    await page.screenshot({ path: path.join(captureDir, `${id}-failure.png`) });
+    await writeFile(
+      path.join(captureDir, `${id}-failure.json`),
+      JSON.stringify(
+        {
+          source,
+          ...details,
+          opticalPaintClaim: false,
+          gpuiClaim: false,
+        },
+        null,
+        2
+      )
+    );
+  } catch {
+    /* Capture failure must not replace the original assertion failure. */
   }
 }
 
@@ -174,8 +96,6 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           const errors: string[] = [];
           page.on('pageerror', (error) => errors.push(error.message));
           const prefix = `${family}-${runtime}-${theme}`;
-          const stageEvidence: Record<string, unknown>[] = [];
-          const materialEvidence: unknown[] = [];
           try {
             await page.evaluate((theme) => {
               document.documentElement.classList.remove('light', 'dark');
@@ -187,6 +107,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             await waitReady(page, family, runtime);
             const demo = previewer.locator('[data-projection-content]');
             const trigger = demo.locator('[data-demo-ref="uncontrolledTrigger"]');
+            const stageEvidence: Record<string, unknown>[] = [];
             async function stageSnapshot(phase: string) {
               if (family !== 'liquid-glass') return;
               const snapshot = await demo.evaluate((root) => ({
@@ -208,11 +129,6 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                   }
                 ),
               }));
-              stageEvidence.push({
-                phase,
-                elapsedSinceRuntimeSelectionMs: performance.now() - runtimeMountStarted,
-                ...snapshot,
-              });
               expect(snapshot.scenes).toHaveLength(4);
               expect(snapshot.scenes.map((item) => item.ref).sort()).toEqual(
                 ['uncontrolledStage', 'disabledStage', 'controlledStage', 'selectRtlLayout'].sort()
@@ -222,6 +138,11 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 expect(item.parentScene).toBe(false);
                 expect(item.nominalCanvasRgbaBytes).toBeGreaterThan(0);
               }
+              stageEvidence.push({
+                phase,
+                elapsedSinceRuntimeSelectionMs: performance.now() - runtimeMountStarted,
+                ...snapshot,
+              });
             }
             await stageSnapshot('mounted');
             expect(await trigger.getAttribute('aria-expanded')).toBe('false');
@@ -304,13 +225,10 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                 ).__previewer__?.getCurrentRuntime?.()
               )
             ).toBe(runtime);
-            if (family === 'liquid-glass')
-              materialEvidence.push(await selectMaterialSnapshot(previewer, 'before-open'));
             await trigger.focus();
             await page.keyboard.press('ArrowDown');
             const firstContent = await popup(page, trigger);
             if (family === 'liquid-glass') {
-              materialEvidence.push(await selectMaterialSnapshot(previewer, 'popup-visible'));
               // Real wrapped page positive control: missing box metadata or an
               // unconsumed plan must fail, not silently pass via opaque fallback.
               await expect
@@ -484,16 +402,12 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             }
             expect(errors).toEqual([]);
           } catch (error) {
-            if (family === 'liquid-glass')
-              materialEvidence.push(await selectMaterialSnapshot(previewer, 'assertion-failure'));
             await captureFailure(page, prefix, {
               family,
               runtime,
               theme,
               error: String(error),
               pageErrors: errors,
-              stageEvidence,
-              materialEvidence,
             });
             throw error;
           } finally {
