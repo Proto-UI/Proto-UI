@@ -109,6 +109,7 @@ jobs:
           # the complete general preflight, original portal job and failures.
           files=(
             packages/modules/focus/test/scope-activation-entry.test.ts
+            packages/prototypes/base/test/dialog-focus-entry.test.ts
             packages/modules/focus/test/center.test.ts
             packages/modules/focus/test/center-order.test.ts
             packages/runtime/test/contract/focus.v0.contract.test.ts
@@ -134,6 +135,7 @@ jobs:
             assert.ok(result, `Missing required suite: ${path}`);
             assert.ok(result.assertionResults.length > 0, `Empty required suite: ${path}`);
             if (path.endsWith('/scope-activation-entry.test.ts')) assert.equal(result.assertionResults.length, 11, 'All new policy controls must run');
+            if (path.endsWith('/dialog-focus-entry.test.ts')) assert.equal(result.assertionResults.length, 6, 'All Dialog consumer policy controls must run');
             assert.ok(result.assertionResults.every((entry) => entry.status === 'passed'), `Incomplete suite: ${path}`);
           }
           JS
