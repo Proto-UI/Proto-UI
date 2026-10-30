@@ -16,7 +16,18 @@ describe('finite nested token inventories without semantic proof laundering', ()
   }
   const table = `const table = { a: { root: 'max-h-72', trigger: 'py-[2px]' }, b: { root: 'pb-0', trigger: 'scroll-py-0' } };`;
   const cases: Array<[string, string, string[]]> = [
-    ['two static indices', `${table} tw(table['a']['root']);`, ['max-h-72']],
+    ["finite array join", "const a=['p-2','h-4']; tw(a.join(' '));", ["h-4", "p-2"]],
+    ["nested joined template", "const base=['p-2','h-4'].join(' '); const table={root:`${base} bg-mint`}; tw(table.root);", ["bg-mint", "h-4", "p-2"]],
+    ["opaque template islands", "tw(`p-2 ${external()} h-4`);", ["h-4", "p-2"]],
+    ["opaque template no fragments", "tw(`bg-${external()}-500`);", []],
+    ["opaque adjacency", "tw(`${external()}p-2`);", []],
+    ["nested opaque template", "const inner=`p-2 ${external()} h-4`; tw(`${inner}`);", ["h-4", "p-2"]],
+    ["unknown join spaces", "const a=['p-2',external(),'h-4']; tw(a.join(' '));", ["h-4", "p-2"]],
+    ["unknown join empty", "const a=['bg-',external(),'-500']; tw(a.join(''));", []],
+    ["finite join alternatives", "tw(['bg-',choose?'red':'blue','-500'].join(''));", ["bg-blue-500", "bg-red-500"]],
+    ["nested opaque outer boundaries", "const inner=`2 ${external()} h-`; tw(`p-${inner}4`);", ["h-4", "p-2"]],
+    ['repeat finite join', `const a=['p-2','h-4']; const x=a.join(' '); const y=a.join(' '); tw(y);`, ['h-4','p-2']],
+    ['two static indices' , `${table} tw(table['a']['root']);`, ['max-h-72']],
     ['property chain', `${table} tw(table.a.trigger);`, ['py-[2px]']],
     ['unknown first key', `${table} tw(table[external()].root);`, ['max-h-72', 'pb-0']],
     ['unknown second key', `${table} tw(table.a[external()]);`, ['max-h-72', 'py-[2px]']],
@@ -100,6 +111,31 @@ describe('finite nested token inventories without semantic proof laundering', ()
       def.expose.state(${expose}, flag);
       def.rule({when:w=>w.state(flag).eq(${expected}), intent:i=>i.feedback.style.use(tw('opacity-50'))});
     }});`;
+  it.each([
+    `const names=['owned']; const selected=names.join(mutate(names));`,
+    `const names=['owned']; const selected=names.join('',mutate(names));`,
+    `const selected=['owned',external()].join('');`,
+    `const selected=\`owned\${external()}\`;`,
+    `const names=['owned']; names.extra='other'; const selected=names.join('');`,
+    `const names=['owned']; delete names[0]; const selected=names.join('');`,
+    `const names=['owned']; names.length=0; const selected=names.join('');`,
+    `const names=['owned']; names.join=external(); const selected=names.join('');`,
+  ])('does not certify opaque join/template or mutated array shape: %s', async (declarations) => {
+    const result=await collect(rule(declarations, 'selected', `'visible'`, `'hot'`));
+    expect(result).not.toContain('data-[owned=hot]:opacity-50');
+    expect(result).not.toContain('data-[ownedother=hot]:opacity-50');
+    expect(result).not.toContain('data-[visible=hot]:opacity-50');
+  });
+  it('does not certify opaque joined Rule expected value', async () => {
+    const result=await collect(rule(`const selected=['hot',external()].join('');`, `'owned'`, `'owned'`, 'selected'));
+    expect(result).not.toContain('data-[owned=hot]:opacity-50');
+  });
+  it('retains imported joined templates through a barrel', async () => {
+    expect(await collect(`import {tokens} from './bridge'; tw(\`bg-mint \${tokens} h-4\`);`, {
+      'style.ts': `export const tokens=['p-2','text-sm'].join(' ');`,
+      'bridge.ts': `export {tokens} from './style';`,
+    })).toEqual(['bg-mint','h-4','p-2','text-sm']);
+  });
   it('does not certify known-plus-unknown state name', async () => {
     const result = await collect(rule(`const names={a:{name:'owned'}}; const key=externalCondition?'a':external();`, `names[key].name`, `'visible'`, `'hot'`));
     expect(result).not.toContain('data-[owned=hot]:opacity-50');
