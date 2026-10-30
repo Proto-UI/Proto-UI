@@ -19,3 +19,13 @@ Root.value identifies one open panel. Trigger.value and Content.value pair a pan
 Parts: Root, Trigger, Content, Item.
 
 Draft source. Nested submenus, complete native/GPUI/compiler evidence, consumer/visual acceptance and independent lifecycle admission remain open.
+
+## Source-bound appearance / 固定来源呈现
+
+The demo explicitly selects `styleProfile="rhea"`. Root and the existing Trigger/Content/Item consume the shared Shadcn style scope; `new-york-v4` (alias `new-york`) remains separate. Only these two profiles are admitted by this bounded slice; others fail closed. Style changes retain the Base value, events and logical parts.
+
+New York: [02cad611 menubar.tsx](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/menubar.tsx). Rhea: [3d98900 radix wrapper](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/radix/ui/menubar.tsx) and [style-rhea.css](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css#L933-L986). These are distinct source identities, not a universal latest-style claim.
+
+Existing Base expanded/focused/disabled facts drive paint. This does **not** complete Menubar: Rhea hover still needs a neutral Base fact; inset/destructive, group/checkbox/radio/submenu parts, exact alignment policy, translucent content and placement/presence motion remain tracked in #907. Four-Web native input, AT, narrow/font-scaled geometry and independent exact-head evidence are still required. No DOM selector or page-only behavior substitutes for those missing capabilities.
+
+Rhea retains the existing keyboard focus ring while closed, plus a forced-colors outline. Exact upstream focus/hover and `outline-hidden` projection still require closure; expanded paint alone is not a focus affordance.

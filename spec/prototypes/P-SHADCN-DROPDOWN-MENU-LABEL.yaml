@@ -19,8 +19,9 @@ criteria:
     text:
       zh-CN: 本家 inset 视觉 prop 默认 false；true 投射固定 New York 的物理左侧 pl-8（包括 RTL），右侧 pr-2，动态变更不改变 Base 的最近 Group 命名、被动焦点边界或生命周期。
       en: The family-only inset visual prop defaults to false; true projects the fixed New York physical-left pl-8 and right pr-2 recipe, including RTL. Dynamic changes do not alter Base nearest-Group naming, passive focus boundaries or lifecycle.
-dependsOn:
-  prototypes: [P-BASE-DROPDOWN-MENU-LABEL]
+inherits:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU-LABEL
 verifies:
   tests: [T-BASE-DROPDOWN-COMPOSITION-0001, T-SHADCN-DROPDOWN-MENU-LABEL-0001]
 sources:

@@ -23,6 +23,12 @@ criteria:
     text:
       en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
       zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
+  - id: P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-FIELD-COMPOSITION
+    text:
+      en: The public fieldSelectTrigger entry composes asFieldSelectTrigger once. The optional Field binding remains sole owner of invalid, pending, policy and relationships; the standalone Trigger keeps its own behavior when no Field provider exists and adds no second Select owner.
+    dependsOn:
+      contracts:
+        - C-FIELD-SELECT-0001
 openQuestions:
   - id: P-BOOTSTRAP-2-3-2-SELECT-TRIGGER-Q-ADMISSION
     question:

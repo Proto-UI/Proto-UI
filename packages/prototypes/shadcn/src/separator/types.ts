@@ -4,8 +4,9 @@ import type {
   SeparatorRootProps,
   SeparatorRootStateHandles,
 } from '@proto.ui/prototypes-base/separator';
+import type { ShadcnStyleProps } from '../style-scope';
 
-export interface ShadcnSeparatorRootProps extends SeparatorRootProps {}
+export interface ShadcnSeparatorRootProps extends SeparatorRootProps, ShadcnStyleProps {}
 
 export type ShadcnSeparatorRootExposes = SeparatorRootExposes;
 

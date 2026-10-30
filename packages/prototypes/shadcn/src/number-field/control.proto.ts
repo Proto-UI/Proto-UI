@@ -1,25 +1,19 @@
 import type { NumberFieldControlExposes } from '@proto.ui/prototypes-base/number-field';
-import type { NumberFieldPartProps } from '@proto.ui/prototypes-base/number-field';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asNumberFieldControl } from '@proto.ui/prototypes-base/number-field';
-export default definePrototype<NumberFieldPartProps, NumberFieldControlExposes>({
+import { setupInputVisual } from '../input/visual';
+import type { ShadcnNumberFieldPartProps } from './types';
+
+export default definePrototype<ShadcnNumberFieldPartProps, NumberFieldControlExposes>({
   name: 'shadcn-number-field-control',
   modules: asNumberFieldControl.modules,
   setup(def) {
     const inherited = asNumberFieldControl();
-    def.feedback.style.use(
-      tw(
-        'block min-h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-base tabular-nums text-foreground outline-none'
-      )
-    );
-    def.rule({
-      when: (w) => w.state(inherited.stateHandles!.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
-    });
-    def.rule({
-      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
-    });
+    const binding = inherited.getAsHookHandle?.('as-field-control');
+    if (!inherited.stateHandles || !binding)
+      throw new Error('[shadcn-number-field-control] Missing Base editor or Field binding.');
+    setupInputVisual(def, inherited.stateHandles, binding.state.invalid, true);
+    def.feedback.style.use(tw('block flex-1 tabular-nums'));
     return inherited.render;
   },
 });

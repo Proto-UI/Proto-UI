@@ -1,25 +1,19 @@
 import type { InputOtpControlExposes } from '@proto.ui/prototypes-base/input-otp';
-import type { InputOtpInputProps } from '@proto.ui/prototypes-base/input-otp';
 import { definePrototype, tw } from '@proto.ui/core';
 import { asInputOtpControl } from '@proto.ui/prototypes-base/input-otp';
-export default definePrototype<InputOtpInputProps, InputOtpControlExposes>({
+import { setupInputVisual } from '../input/visual';
+import type { ShadcnInputOtpInputProps } from './types';
+
+export default definePrototype<ShadcnInputOtpInputProps, InputOtpControlExposes>({
   name: 'shadcn-input-otp-control',
   modules: asInputOtpControl.modules,
   setup(def) {
     const inherited = asInputOtpControl();
-    def.feedback.style.use(
-      tw(
-        'block min-h-10 min-w-0 flex-1 rounded-md border border-border bg-background px-3 py-2 text-base tabular-nums text-foreground outline-none'
-      )
-    );
-    def.rule({
-      when: (w) => w.state(inherited.stateHandles!.focusVisible).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
-    });
-    def.rule({
-      when: (w) => w.state(inherited.stateHandles!.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
-    });
+    const binding = inherited.getAsHookHandle?.('as-field-control');
+    if (!inherited.stateHandles || !binding)
+      throw new Error('[shadcn-input-otp-control] Missing Base editor or Field binding.');
+    setupInputVisual(def, inherited.stateHandles, binding.state.invalid, true);
+    def.feedback.style.use(tw('block flex-1 tabular-nums'));
     return inherited.render;
   },
 });

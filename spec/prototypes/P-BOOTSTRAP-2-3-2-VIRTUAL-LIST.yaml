@@ -1,0 +1,50 @@
+id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST
+type: prototype
+title: Bootstrap 2.3.2 Virtual List projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Virtual List family over P-BASE-VIRTUAL-LIST with pinned vocabulary.
+statement:
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Viewport/Content compose Scroll Area and the windowed collection owner; family paint uses actual inherited state and render, not speculative handles.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-BASE
+    text:
+            en: Invoke asVirtualList* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-VISUAL
+    text:
+            en: Root/Viewport/Content compose Scroll Area and the windowed collection owner; family paint uses actual inherited state and render, not speculative handles.
+  - id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-EXTENSION
+    text:
+            en: Virtual List is a Proto extension with no upstream counterpart.
+  - id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-VIRTUAL-LIST-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-VIRTUAL-LIST
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-PRIMITIVES-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/virtual-list/
+  - path: packages/prototypes/bootstrap-2-3-2/src/virtual-list/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/variables.less
+    label: Pinned historical design reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Virtual List projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - virtual-list
+  - draft

@@ -27,15 +27,18 @@ describe('fixed New York Switch recipe delivery', () => {
       'p-0',
       'rounded-full',
       'shadow-xs',
+      // Vega/Nova/Maia/Lyra and Luma pinned profile geometries project
+      // through the same collected source; they are recipe units, not
+      // fabricated ones.
+      'h-[18.4px]',
+      'w-[32px]',
+      'w-11',
     ]) {
       expect(tokens).toContain(token);
       expect(SHADCN_STYLE_TOKENS).toContain(token);
     }
     for (const token of [
-      'h-[18.4px]',
-      'w-[32px]',
       'h-6',
-      'w-11',
       'size-5',
       'px-0.5',
       'shadow-lg',
@@ -56,6 +59,9 @@ describe('fixed New York Switch recipe delivery', () => {
         'width: 1.5rem;',
         'width: 0.75rem;',
         'height: 0.75rem;',
+        'height: 18.4px;',
+        'width: 32px;',
+        'width: 2.75rem;',
         '--pui-translate-x: calc(100% - 2px);',
         'border-radius: 9999px;',
         'box-sizing: border-box;',
@@ -66,7 +72,15 @@ describe('fixed New York Switch recipe delivery', () => {
       expect(css).toContain('transition-property: transform, translate, scale, rotate;');
     }
     const splitCss = renderProtoShadowSplitStyleArtifact(tokens).cssText;
-    for (const token of ['h-[1.15rem]', 'w-8', 'h-3.5', 'w-6'])
+    for (const token of [
+      'h-[1.15rem]',
+      'w-8',
+      'h-3.5',
+      'w-6',
+      'h-[18.4px]',
+      'w-[32px]',
+      'w-11',
+    ])
       expect(splitCss).toContain(`:host([data-pui-split-root-style~="${token}"])`);
   });
 

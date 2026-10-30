@@ -11,11 +11,12 @@ import {
 export default definePrototype<CheckboxRootProps, CheckboxRootExposes>({
   name: 'bootstrap-2-3-2-checkbox-root',
   setup(def) {
-    const state = asCheckboxRoot().stateHandles;
+    const inherited = asCheckboxRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[bootstrap-2-3-2-checkbox-root] Base state handles required.');
     def.feedback.style.use(
       tw(
-        'inline-flex size-5 shrink-0 items-center justify-center rounded-[4px] border border-border bg-secondary text-secondary-foreground select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
+        'inline-flex w-[20px] h-[20px] shrink-0 items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-foreground select-none cursor-pointer shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%)]'
       )
     );
     def.rule({
@@ -37,5 +38,6 @@ export default definePrototype<CheckboxRootProps, CheckboxRootExposes>({
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-65 cursor-not-allowed')),
     });
+    return inherited.render;
   },
 });

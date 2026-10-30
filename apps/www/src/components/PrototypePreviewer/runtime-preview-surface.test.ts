@@ -412,3 +412,69 @@ describe('passive public shell lease interruption', () => {
       ).toThrow('reserved surface ref');
   });
 });
+
+describe('RuntimeBox explicit child material stages versus the independent shell', () => {
+  const stagedChild = (): DemoSpec => ({
+    type: 'demo',
+    root: {
+      kind: 'box',
+      children: ['one', 'two', 'three', 'four'].map((ref) => ({
+        kind: 'box' as const,
+        ref,
+        materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
+        children: [
+          { kind: 'box' as const, ref: `${ref}Flow`, children: [ref] },
+          { kind: 'box' as const, ref: `${ref}Overlay` },
+        ],
+      })),
+    },
+  });
+  it('keeps four explicit stages with a real Liquid shell and through family replacements', async () => {
+    const child = stagedChild();
+    const surface = createRuntimePreviewSurface(child, 'liquid-glass');
+    const host = document.createElement('div');
+    document.body.append(host);
+    // The automatic opt-out cannot disable explicit stage attachment.
+    const result = await renderDemo({
+      runtime: 'wc',
+      host,
+      demo: surface.demo,
+      automaticMaterialScene: false,
+    });
+    try {
+      await surface.ready;
+      const scenes = [...host.querySelectorAll<HTMLElement>('[data-material-scene]')];
+      expect(scenes).toHaveLength(4);
+      expect(scenes.map((scope) => scope.dataset.demoRef).sort()).toEqual([
+        'four',
+        'one',
+        'three',
+        'two',
+      ]);
+      expect(host.querySelectorAll('[data-material-backdrop]')).toHaveLength(4);
+      for (const family of ['shadcn', 'liquid-glass', 'brutalist', 'liquid-glass'] as const) {
+        await surface.setAppearance(family, {});
+        expect([...host.querySelectorAll('[data-material-scene]')]).toEqual(scenes);
+        expect(host.querySelectorAll('[data-material-backdrop]')).toHaveLength(4);
+        for (const scope of scenes)
+          expect(scope.parentElement?.closest('[data-material-scene]')).toBeNull();
+      }
+    } finally {
+      await result.destroy();
+    }
+    expect(host.querySelectorAll('[data-material-backdrop]')).toHaveLength(0);
+    // A new content lifetime computes its own plan, not the old stage decision.
+    const replacement = createRuntimePreviewSurface(
+      { type: 'demo', root: { kind: 'box', children: ['Ordinary content'] } },
+      'liquid-glass'
+    );
+    const next = await renderDemo({ runtime: 'wc', host, demo: replacement.demo });
+    try {
+      await replacement.ready;
+      expect(host.querySelectorAll('[data-material-scene]')).toHaveLength(1);
+    } finally {
+      await next.destroy();
+    }
+    expect(host.querySelectorAll('[data-material-scene]')).toHaveLength(0);
+  });
+});

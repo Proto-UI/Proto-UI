@@ -12,7 +12,7 @@ This private, unreleased source package projects Base Button into a functional-c
 
 ## V2 material and source ownership
 
-Enabled auto Button requests one complete regular `liquid-glass` candidate and consumes Base press state. Regular is neutral; prominent requests finite `tint: 'style-fill'` in both rest and pressed phases using its existing primary fill/foreground pair. Prominence changes neither geometry nor size. Surface supports static optical candidates independently of Button. Final opaque fill and foreground tokens remain the designated fallback; the host resolves their palette provenance after Rule/runtime patches. Neither Prototype contains browser observers, shader fields or GPU uniforms.
+Enabled auto Button requests one complete regular `liquid-glass` candidate and consumes Base press state. Regular is neutral; prominent requests finite `tint: 'style-fill'` in both rest and pressed phases using its existing primary fill/foreground pair. Prominence changes neither geometry nor size. Surface is ordinary opaque content by default (`material: 'opaque'`); only explicit `material: 'auto'` on an eligible outline, secondary or muted Surface opts into the existing static optical candidate. Fieldset remains ordinary, nonmaterial grouping. Final opaque fill and foreground tokens remain the designated fallback; the host resolves their palette provenance after Rule/runtime patches. Neither Prototype contains browser observers, shader fields or GPU uniforms.
 
 An opt-in consumer imports `@proto.ui/adapter-base/web-material` and passes its `createVisualSink` factory to the chosen Web Adapter. It supplies a revocable visible canvas lease and an explicit current palette. The same provider works through Web Components, React, Vue and Vue 2; asynchronous framework style delivery must be observed before publishing optics. A provider-free Adapter retains ordinary opaque source style.
 
@@ -22,23 +22,31 @@ Reduced/unknown motion selects static optics. Reduced/unknown transparency, unsa
 
 ## Entry points and evidence
 
-- `src/button`, `src/select`, `src/text` and the package root are genuine source exports
+- Anatomy-family subpaths and the package root expose genuine Base-inheriting workspace sources, including passive regions, Image, Table, Transition, controls, overlays, search/navigation, collection/layout families and scalar/indexed Sliders
 - `src/theme` owns light/dark values and the theme renderer
 - `/en/ui-libraries/liquid-glass/` and `/zh-cn/ui-libraries/liquid-glass/` register the implemented family parts, including Select and Text, with operable four-runtime documentation demos
 - `/en/test/liquid-glass-material/` is the exact-source real-Web material fixture; its negative controls compare decoded optical press/rest pixels and revoke the visible source or insert unrepresented overlapping content
 - `/en/test/new-projection-families/` deliberately sets `material: opaque` to retain explicit fallback evidence
 
-The full family remains incomplete (#792). The partial manifest rejects missing kinds instead of aliasing another family. Homepage-wide selection awaits the real parts/compositions its gallery needs. General Compiler admission remains #732/#733. GPUI requires the real root Feedback transaction path in #719 plus native paint/input/focus/a11y evidence; #798's token data alone is insufficient. Flutter/Qt need actual backends. Native effects remain explicit gaps, not silently dropped success.
+Full family acceptance remains incomplete (#792), even where current Base draft sources and catalog relations exist. Source manifests reject unavailable kinds instead of aliasing another family; homepage selection and each composition need their own actual consumer evidence. General Compiler admission remains #732/#733. GPUI requires the real root Feedback transaction path in #719 plus native paint/input/focus/a11y evidence; #798's token data alone is insufficient. Flutter/Qt need actual backends. Native effects remain explicit gaps, not silently dropped success.
 
 Current new material browser evidence is planned until the combined exact-head Actions fixture has run and its actual captures have been inspected. Existing Button fallback evidence is retained separately.
 
-Select Root/Trigger/Value/Content/Item and Text now have independent direct Base consumers and private `/select` and `/text` source exports, including source-only four-Web CLI facades. Real Select and Text provide the family toolbar. Select Trigger/Content consume shared explicit liquid-glass material intent and complete opaque fallback; the optional provider realizes supported owned-source optics, while exact-head optical/native paint acceptance remains pending. Text retains all eight Base axes and inherits the owning context’s selection policy.
+Select has eleven direct parts: Root, Trigger, Value, Content, Surface, Viewport, Item, ItemText, Group, Label and Separator. Compose Content > Surface > Viewport, with Group/Label and Item/ItemText inside Viewport and contentless Separators between groups. Content is the nonmaterial portal/lifetime/frame, Surface solely owns popup paint and its complete opaque fallback, and Viewport alone scrolls. Trigger and open Surface consume the shared explicit liquid-glass material intent; the optional provider realizes supported owned-source optics, while exact-head optical/native paint acceptance remains pending. The private `/select` and `/text` source exports have source-only four-Web CLI facades. Text retains all eight Base axes and inherits the owning context’s selection policy.
 
 ## Field (draft workspace source)
 
 The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
 
+`fieldTextarea`, `fieldSelectTrigger` and `fieldSwitch` are the matching optional-Field compositions, not second controls or alternate style products. They reuse each standalone family recipe and borrow invalid/pending, policy and relationships only from the canonical Field binding. Ordinary standalone controls do not automatically absorb a surrounding Field.
+
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Draft source and design-reference boundary
+
+Passive regions, Image, Table, ordinary text/editors, Calendar, collections and content containers do not acquire glass simply because they belong to this family. Eligible functional/navigation surfaces keep the existing typed candidate, complete opaque fallback and revocable source/preference/lifetime policy. Tabs Indicator and Tooltip Group are semantic-only; Drawer accepted-side/scroll definitions are helper boundaries, not extra rendered components. Indexed Slider Values is separate from scalar Slider; its structural Track does not manufacture pointer-origin/session or grouped Field capabilities.
+
+Apple's public [Materials](https://developer.apple.com/design/human-interface-guidelines/materials) and [Color](https://developer.apple.com/design/human-interface-guidelines/color) guidance informs independently authored Proto recipes. No Apple implementation, shader, asset, font or icon was copied by these family projections. The optional shared Web provider retains its own upstream notices; this README does not replace them. Draft source, catalog or intent-test availability does not prove four-Web rendering, optics, native animation, assistive technology, Compiler support or Apple-native equivalence.
 
 ### Held pointer contact (draft Web slice)
 

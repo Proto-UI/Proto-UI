@@ -86,6 +86,10 @@ All target paths and generated content are checked before replacing any file. Ta
 
 Rerun the same command after changing tokens; keep CSS, JavaScript and declarations together. There is no runtime generation-digest check. Generating a preset closure does not establish that every prototype or Root token in it is split-compatible. Theme custom properties remain document/host-owned and inherit into Shadow roots.
 
+Family projections use a finite physical vocabulary, not arbitrary Tailwind or CSS admission. The source collector follows each family's actual Base dependencies; regenerate the presets after changing a recipe. Unsupported tokens remain explicit diagnostics rather than silently disappearing. The vocabulary includes source-bound table layout, fractional spacing, directional corners, complete Bootstrap gradient/shadow recipes and separate text wrapping, foreground and font-size intents. The scoped border-box baseline has zero selector specificity so an authored `box-content` token can override it without resetting unrelated host elements.
+
+Successful token generation establishes CSS translation only. It does not establish native layout, input, material effects, accessibility or split-Root compatibility; those require the corresponding real consumer evidence.
+
 ## Internal Structure
 
 - `src/commands/`

@@ -12,9 +12,12 @@ describe('Shadcn AlertDialog complete physical style closure', () => {
   it('enumerates every authored part and imported passive Button paint in document and Shadow CSS', async () => {
     const root = path.resolve('packages/prototypes/shadcn/src/alert-dialog');
     const files = (await readdir(root))
-      .filter((name) => name.endsWith('.proto.ts'))
+      .filter((name) => name.endsWith('.ts'))
       .map((name) => path.join(root, name));
-    expect(files).toHaveLength(10);
+    files.push(
+      path.resolve('packages/prototypes/shadcn/src/dialog/style.ts'),
+      path.resolve('packages/prototypes/shadcn/src/dialog/action-paint.ts')
+    );
     const tokens = (await collectProtoStyleTokensFromFiles(files)) as string[];
     for (const token of [
       'p-6',

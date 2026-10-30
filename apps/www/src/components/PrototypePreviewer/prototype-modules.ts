@@ -141,6 +141,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-shadcn/field');
     registerPrototype('shadcn-field-control', mod.fieldControl);
   },
+  'shadcn-field-switch': async () => {
+    const mod = await import('@proto.ui/prototypes-shadcn/field');
+    registerPrototype('shadcn-field-switch', mod.fieldSwitch);
+  },
   'shadcn-field-description': async () => {
     const mod = await import('@proto.ui/prototypes-shadcn/field');
     registerPrototype('shadcn-field-description', mod.fieldDescription);
@@ -1311,3 +1315,4 @@ export async function loadPrototypes(prototypeIds: string[]): Promise<void> {
 export function getAvailablePrototypes(): string[] {
   return Object.keys(prototypeModules);
 }
+

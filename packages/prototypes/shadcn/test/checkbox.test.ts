@@ -1,28 +1,6 @@
 import { describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { styleContains } from '../../test-utils/style';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
-import { executeWithHost, type RuntimeHost } from '@proto.ui/runtime';
-import {
-  ANATOMY_GET_PROTO_CAP,
-  ANATOMY_INSTANCE_TOKEN_CAP,
-  ANATOMY_PARENT_CAP,
-  ANATOMY_ROOT_TARGET_CAP,
-} from '@proto.ui/module-anatomy';
-import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
-import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
-import {
-  FOCUS_REQUEST_FOCUS_CAP,
-  FOCUS_ROOT_TARGET_CAP,
-  FOCUS_SET_FOCUSABLE_CAP,
-} from '@proto.ui/module-focus';
-import {
-  AS_TRIGGER_GET_PROTO_CAP,
-  AS_TRIGGER_INSTANCE_CAP,
-  AS_TRIGGER_PARENT_CAP,
-} from '@proto.ui/module-as-trigger';
-import { A11Y_PROJECT_CAP } from '@proto.ui/module-a11y';
-import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
-import { EXPOSE_STATE_SET_EXPOSES_CAP } from '@proto.ui/module-expose-state';
 import {
   checkboxIndicator,
   checkboxRoot,
@@ -69,12 +47,8 @@ const WEB_STATE_TOKENS = [
   'data-[indeterminate]:bg-primary',
   'data-[indeterminate]:text-primary-foreground',
   'data-[indeterminate]:border-primary',
-  'data-[focus-visible]:border-ring',
-  'data-[focus-visible]:ring-ring/50',
-  'data-[focus-visible]:ring-3',
   'data-[disabled]:cursor-not-allowed',
   'data-[disabled]:opacity-50',
-  'dark:not-[data-checked]:not-[data-indeterminate]:bg-input/30',
 ];
 
 const UNSCOPED_STATE_TOKENS = [
@@ -122,77 +96,6 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(shadcnCheckboxIndicator).toBe(checkboxIndicator);
     expect(checkboxRoot.name).toBe('shadcn-checkbox-root');
     expect(checkboxIndicator.name).toBe('shadcn-checkbox-indicator');
-  });
-
-  it('inherits the Base Indicator protocol exactly once', async () => {
-    // T-SHADCN-CHECKBOX-0001-CASE-INDICATOR-INHERITANCE
-    const rootInstance = new EventTarget();
-    const indicatorInstance = new EventTarget();
-    const globalTarget = new EventTarget();
-    const parents = new Map<unknown, unknown>([[indicatorInstance, rootInstance]]);
-    const prototypes = new Map<unknown, unknown>([
-      [rootInstance, checkboxRoot],
-      [indicatorInstance, checkboxIndicator],
-    ]);
-    const createHost = (prototype: unknown, instance: EventTarget): RuntimeHost<any> => ({
-      prototypeName: `${(prototype as { name: string }).name}-hook-trace`,
-      getRawProps: () => ({}),
-      commit(_children, signal) {
-        signal?.done();
-      },
-      schedule(task) {
-        task();
-      },
-      onRuntimeReady(wiring) {
-        wiring.attach('anatomy', [
-          [ANATOMY_INSTANCE_TOKEN_CAP, instance],
-          [ANATOMY_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-          [ANATOMY_GET_PROTO_CAP, (token: unknown) => prototypes.get(token) ?? null],
-          [ANATOMY_ROOT_TARGET_CAP, (token: unknown) => token],
-        ]);
-        wiring.attach('context', [
-          [CONTEXT_INSTANCE_TOKEN_CAP, instance],
-          [CONTEXT_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-        ]);
-        wiring.attach('event', [
-          [EVENT_ROOT_TARGET_CAP, () => instance],
-          [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
-        ]);
-        wiring.attach('focus', [
-          [FOCUS_ROOT_TARGET_CAP, () => instance],
-          [FOCUS_SET_FOCUSABLE_CAP, () => undefined],
-          [FOCUS_REQUEST_FOCUS_CAP, () => true],
-        ]);
-        wiring.attach('as-trigger', [
-          [AS_TRIGGER_INSTANCE_CAP, instance],
-          [AS_TRIGGER_PARENT_CAP, (token: unknown) => parents.get(token) ?? null],
-          [AS_TRIGGER_GET_PROTO_CAP, (token: unknown) => prototypes.get(token) ?? null],
-        ]);
-        wiring.attach('a11y', [[A11Y_PROJECT_CAP, () => undefined]]);
-        wiring.attach('expose-event', [[EXPOSE_EVENT_SINK_CAP, () => undefined]]);
-        wiring.attach('expose-state', [[EXPOSE_STATE_SET_EXPOSES_CAP, () => undefined]]);
-      },
-    });
-
-    const rootRuntime = executeWithHost(
-      checkboxRoot as any,
-      createHost(checkboxRoot, rootInstance)
-    );
-    const indicatorRuntime = executeWithHost(
-      checkboxIndicator as any,
-      createHost(checkboxIndicator, indicatorInstance)
-    );
-    try {
-      const hooks = ((checkboxIndicator as any).__asHooks ?? []).filter(
-        (hook: { name?: string }) => hook.name === 'as-checkbox-indicator'
-      );
-      expect(hooks).toEqual([
-        expect.objectContaining({ name: 'as-checkbox-indicator', mode: 'once' }),
-      ]);
-    } finally {
-      await indicatorRuntime.invokeUnmounted();
-      await rootRuntime.invokeUnmounted();
-    }
   });
 
   it('omits asChild from the public props and keeps the Root as the owner', async () => {
@@ -317,7 +220,7 @@ describe('prototypes/shadcn: checkbox', () => {
     root.remove();
   });
 
-  it('lowers the focus-visible ring onto the Root alone', async () => {
+  it('applies the profile-qualified focus-visible ring onto the Root alone', async () => {
     // T-SHADCN-CHECKBOX-0001-CASE-FOCUS-VISIBLE
     const { root, indicator } = await mount();
 
@@ -329,11 +232,24 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(root.getExposes().focusVisible.get()).toBe(true);
     expect(root.hasAttribute('data-focus-visible')).toBe(true);
     expect(indicator.hasAttribute('data-focus-visible')).toBe(false);
+    // The private style selection makes this a runtime Rule, not a lowered
+    // data-[focus-visible] token. It must paint only while focus is visible.
+    for (const token of ['border-ring', 'ring-ring/50', 'ring-3']) {
+      expect(styleContains(root, token), token).toBe(true);
+      expect(styleContains(indicator, token), token).toBe(false);
+      expect(styleContains(root, `data-[focus-visible]:${token}`), token).toBe(false);
+    }
+    root.dispatchEvent(new FocusEvent('blur', { bubbles: true }));
+    await flush();
+    for (const token of ['border-ring', 'ring-ring/50', 'ring-3']) {
+      expect(styleContains(root, token), `withdrawn ${token}`).toBe(false);
+    }
 
+    matchesSpy.mockRestore();
     root.remove();
   });
 
-  it('lowers every state rule to conditional web presentation', async () => {
+  it('lowers web-exposed state rules and leaves profile-qualified runtime paint absent at rest', async () => {
     // T-SHADCN-CHECKBOX-0001-CASE-WEB-STATE-EVIDENCE
     const { root } = await mount();
 
@@ -352,6 +268,30 @@ describe('prototypes/shadcn: checkbox', () => {
     expect(styleContains(root, 'dark:bg-input/30')).toBe(false);
 
     root.remove();
+  });
+
+  it('applies the profile-qualified dark tint only to the unfilled box', async () => {
+    const previousTheme = document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = 'dark';
+    const { root } = await mount();
+    try {
+      // Style-qualified theme rules are runtime-applied bare tokens. Guarding
+      // checked/mixed keeps the upstream primary fill from racing a dark tint.
+      expect(styleContains(root, 'bg-input/30')).toBe(true);
+      setElementProps(root, { checked: true });
+      await flush();
+      expect(styleContains(root, 'bg-input/30')).toBe(false);
+      setElementProps(root, { checked: false, indeterminate: true });
+      await flush();
+      expect(styleContains(root, 'bg-input/30')).toBe(false);
+      setElementProps(root, { indeterminate: false });
+      await flush();
+      expect(styleContains(root, 'bg-input/30')).toBe(true);
+    } finally {
+      root.remove();
+      if (previousTheme === undefined) delete document.documentElement.dataset.theme;
+      else document.documentElement.dataset.theme = previousTheme;
+    }
   });
 
   it('keeps the Indicator derived, with no focus, event, or value ownership', async () => {

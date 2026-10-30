@@ -1,11 +1,11 @@
 ---
 title: 'Select'
-description: 'Liquid Glass Select: five direct Base parts, controlled selection and anchored popup.'
+description: 'Liquid Glass Select: 十一个直接 Base parts、受控选择、anchored popup 与唯一材质 Surface。'
 ---
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
-Liquid Glass Select 提供 Root、Trigger、Value、Content、Item 五个真实原型，每个 part 直接消费对应 Base hook。当前是 draft workspace 源码；源码和 synthetic DOM 测试不等于原生宿主验收通过。
+Liquid Glass Select 提供 Root、Trigger、Value、Content、Surface、Viewport、Item、ItemText、Group、Label、Separator 共十一个真实原型，每个 part 直接消费对应 Base hook。当前是 draft workspace 源码；源码和 synthetic DOM 测试不等于原生宿主验收通过。
 
 <PrototypePreviewer
   class="select-content-preview"
@@ -19,17 +19,21 @@ Liquid Glass Select 提供 Root、Trigger、Value、Content、Item 五个真实�
 
 四个例子分别展示非受控 value、禁用、受控 value、RTL 长标签。受控示例选择一个选项后，需要点击 **Accept selection** 才会提供新的 owner value；popup 可以先关闭，已提交值保持原状。预览工具栏使用本体系真实 Select parts 切换 WC、React、Vue、Vue 2。
 
-## 五个 part，一个 owner
+## 十一个 part，一个 owner
 
 - Root 持有 `open`、`value`、selected text、collection 和请求。分别传入 `open`/`value` 时进入独立受控模式；`defaultOpen`/`defaultValue` 初始化非受控状态。保留 `disabled` 与 `closeOnSelect`。
 - Trigger 投射 combobox 关系、effective disabled 和交互状态。指针激活 toggle；Enter/Space 打开；ArrowDown/ArrowUp 从已选项或首/末可用项进入。
 - Value 按 selected text、raw value、placeholder、空内容回退，不拥有输入或 focus。
-- Content 持有 listbox、fixed anchored portal、碰撞处理和键盘导航。保留 `side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 和 Transition props；本投影使用零时长 presence。
+- Content 只是透明的 portal 外框：保留 Base portal、碰撞处理、focus、dismissal 与零时长 presence。`side`、`align`、`sideOffset`、`alignOffset`、`avoidCollisions`、`collisionPadding` 和 Transition props 仍然可用。Content 不拥有任何绘制或材质。
+- Surface 是 popup 绘制与材质槽的唯一 owner，并保留不透明 fill/foreground fallback；在连通组合中仅在打开时请求显式 `liquid-glass` 光学。
+- Viewport 是 Surface 内唯一的 scrollport，保留相对 overflow 滚动，并留出空间避免 item focus 轮廓被裁剪。
 - Item 持有 option identity 与派生 selected/active。指针、Enter、Space 提交可用项；导航和 hover 不提交 value，禁用项从导航中跳过。
+- ItemText 提供被选中项 textValue 解析所消费的选项文本身份。
+- Group 仅提供选项命名作用域，不拥有选择；Label 提供分组的可访问名称；Separator 是装饰性、无内容的分组分隔。
 
-Escape 取消并返回 Trigger focus，Tab 关闭但不阻止遍历，outside press 关闭。Root 请求仍为 `openChange` 与 `valueChange`，Item 另发出 `select`。更新已选 Item 的 `textValue` 会刷新显示标签。
+完整组合为 Content > Surface > Viewport > Item > ItemText；Group 包含自己的 Label 与 Items，Separator 在 Viewport 内分隔各组。Base 默认 `position: 'popper'`。显式 `position: 'item-aligned'` 使用此完整真实 parts 结构，但仍受 Base presentation admission 与实际宿主 target/geometry 支持约束；结构齐全不证明对齐成功。Escape 取消并返回 Trigger focus，Tab 关闭但不阻止遍历，outside press 关闭。Root 请求仍为 `openChange` 与 `valueChange`，Item 另发出 `select`。更新已选 Item 的 `textValue` 会刷新显示标签。
 
-长标签换行且可收缩；Content 受宿主 available width/height 约束，文字对齐和尾部指示符遵循逻辑方向。外部需给 Trigger focus ring 留白。此处是 select-only 单选协议；form submission、editable search、multi-select、虚拟化和 item-aligned positioning 不属于当前 Base 保证。
+长标签换行且可收缩；popup 受宿主 available width/height 约束，文字对齐和尾部指示符遵循逻辑方向。外部需给 Trigger focus ring 留白。此处是 select-only 单选协议；form submission、editable search、multi-select、虚拟化与 scroll buttons 不在本切片内。源码可用不代表原生定位、辅助技术或绘制验收。
 
 ## 使用 workspace 源码
 
@@ -39,15 +43,25 @@ import {
   selectTrigger,
   selectValue,
   selectContent,
+  selectSurface,
+  selectViewport,
   selectItem,
+  selectItemText,
+  selectGroup,
+  selectLabel,
+  selectSeparator,
 } from '@proto.ui/prototypes-liquid-glass/select';
 ```
 
-source-only CLI 项 `liquid-glass-select` 仅在显式 workspace source mode 下生成四种 Web facade 的完整五 part。包仍是 private、未发布；GPUI facade generation 尚未实现。
+source-only CLI 项 `liquid-glass-select` 仅在显式 workspace source mode 下生成四种 Web facade 的完整 part 集合。包仍是 private、未发布；GPUI facade generation 尚未实现。
 
 ## 材质边界
 
-Trigger 与 Content 使用共享 typed `liquid-glass` 光学意图，并保留完整不透明 fill/foreground fallback。Trigger 从 Base 派生 rest/pressed deformation，Content 只在打开时请求玻璃；Root、Value、Item 不增加材质 owner。显式玻璃不得换成 `adaptive` native blur。意图帧与生命周期测试不证明自实现折射、native paint 或 GPUI parity；缺少材质 host 时保留不透明表现并报告 unavailable。
+Trigger 与 Surface 使用共享 typed `liquid-glass` 光学意图，各自保留完整不透明 fill/foreground fallback。Trigger 从 Base 派生 rest/pressed deformation；Surface 只在打开时请求玻璃。Content 是不含材质的 portal 外框，其他 part 不增加材质 owner。显式玻璃不得换成 `adaptive` native blur。意图帧与生命周期测试不证明自实现折射、native paint 或 GPUI parity；缺少材质 host 时保留不透明表现并报告 unavailable。
+
+四个例子各自使用可见 canvas 场景，但仍在同一框架树和原 Runtime Tabs 上下文中。受控状态和 Accept 位于对应 Trigger 之前，避免普通向下弹出的菜单覆盖后续控件。这是网站显式拥有的图像源，不是任意页面 DOM 截图；碰撞后的菜单若覆盖真实内容、越出图像源，或偏好不可用、宿主不支持，仍保留诚实的不透明回退。四个场景增加真实 canvas/provider 资源，其成本与各宿主光学表现须以实测确认，不能由源码推定。连续水滴式展开和收回仍未完成。静态场景暂不支持 dynamicChildren，也不覆盖已有祖先材质 provider。
+
+四个例子各自使用可见 canvas 场景，但仍在同一框架树和原 Runtime Tabs 上下文中。受控状态和 Accept 位于对应 Trigger 之前，避免普通向下弹出的菜单覆盖后续控件。这是网站显式拥有的图像源，不是任意页面 DOM 截图；碰撞后的菜单若覆盖真实内容、越出图像源，或偏好不可用、宿主不支持，仍保留诚实的不透明回退。四个场景增加真实 canvas/provider 资源，其成本与各宿主光学表现须以实测确认，不能由源码推定。连续水滴式展开和收回仍未完成。静态场景暂不支持 dynamicChildren，也不覆盖已有祖先材质 provider。
 
 - [Base Select](/zh-cn/ui-libraries/base/select/)
 - [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/select)

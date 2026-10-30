@@ -17,11 +17,21 @@ async function settleVue2(): Promise<void> {
 
 afterEach(() => vi.useRealTimers());
 
-for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, selectValue }] of [
+for (const [family, projection] of [
   ['base', base],
   ['bootstrap-2-3-2', bootstrap],
   ['liquid-glass', glass],
 ] as const) {
+  const {
+    selectContent,
+    selectSurface,
+    selectViewport,
+    selectItem,
+    selectItemText,
+    selectRoot,
+    selectTrigger,
+    selectValue,
+  } = projection;
   describe(`adapter-vue2: ${family} select compound protocol`, () => {
     it('projects select ARIA, keyboard navigation, and committed value through Vue 2', async () => {
       vi.useFakeTimers();
@@ -30,7 +40,10 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
       const Trigger = adapt(selectTrigger);
       const Value = adapt(selectValue);
       const Content = adapt(selectContent);
+      const Surface = adapt(selectSurface);
+      const Viewport = adapt(selectViewport);
       const Item = adapt(selectItem);
+      const ItemText = adapt(selectItemText);
       const host = document.createElement('div');
       document.body.appendChild(host);
 
@@ -41,8 +54,16 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
               h(Value, { attrs: { placeholder: 'Pick one' }, ref: 'value' }),
             ]),
             h(Content, { ref: 'content' }, [
-              h(Item, { attrs: { value: 'alpha', textValue: 'Alpha' }, ref: 'alpha' }, ['Alpha']),
-              h(Item, { attrs: { value: 'beta', textValue: 'Beta' }, ref: 'beta' }, ['Beta']),
+              h(Surface, { ref: 'surface' }, [
+                h(Viewport, { ref: 'viewport' }, [
+                  h(Item, { attrs: { value: 'alpha', textValue: 'Alpha' }, ref: 'alpha' }, [
+                    h(ItemText, ['Alpha']),
+                  ]),
+                  h(Item, { attrs: { value: 'beta', textValue: 'Beta' }, ref: 'beta' }, [
+                    h(ItemText, ['Beta']),
+                  ]),
+                ]),
+              ]),
             ]),
           ]);
         },
@@ -60,6 +81,9 @@ for (const [family, { selectContent, selectItem, selectRoot, selectTrigger, sele
         expect(refs.trigger?.$el.getAttribute('aria-expanded')).toBe('true');
         const contentEl = document.getElementById(refs.trigger?.$el.getAttribute('aria-controls'));
         expect(contentEl?.getAttribute('role')).toBe('listbox');
+        expect(contentEl?.contains(refs.surface?.$el)).toBe(true);
+        expect(refs.surface?.$el.contains(refs.viewport?.$el)).toBe(true);
+        expect(refs.viewport?.$el.contains(refs.alpha?.$el)).toBe(true);
         expect(refs.alpha?.$el.getAttribute('role')).toBe('option');
         expect(refs.alpha?.$el.getAttribute('aria-selected')).toBe('true');
         expect(refs.beta?.$el.getAttribute('aria-selected')).toBe('false');

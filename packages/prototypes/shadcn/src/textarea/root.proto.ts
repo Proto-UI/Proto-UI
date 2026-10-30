@@ -10,9 +10,10 @@ export const ShadcnTextareaRoot = definePrototype<
   name: 'shadcn-textarea-root',
   modules: asTextareaRoot.modules,
   setup(def) {
-    const state = asTextareaRoot().stateHandles;
+    const inherited = asTextareaRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[shadcn-textarea-root] Missing Base Textarea state handles.');
     setupTextareaVisual(def, state);
-    return () => null;
+    return inherited.render;
   },
 });

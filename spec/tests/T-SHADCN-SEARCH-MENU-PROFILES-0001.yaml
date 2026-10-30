@@ -1,0 +1,36 @@
+id: T-SHADCN-SEARCH-MENU-PROFILES-0001
+type: test
+title: Shadcn search and menu profile coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Autocomplete, Combobox, Command, Input Shell, Context Menu, Menubar, Navigation Menu and Dropdown profile coverage.
+cases:
+  - id: T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-PROFILES
+    title: Nine-profile recipes preserve single-editor, collection, link and popup owners
+    covers:
+      - P-SHADCN-AUTOCOMPLETE-ADMISSION
+      - P-SHADCN-COMBOBOX-ADMISSION
+      - P-SHADCN-COMMAND-ADMISSION
+      - P-SHADCN-CONTEXT-MENU-ADMISSION
+      - P-SHADCN-MENUBAR-ADMISSION
+      - P-SHADCN-NAVIGATION-MENU-ADMISSION
+    expectation: search-menu-profiles-preserve-owners
+implementations:
+  - id: shadcn-search-menu-profiles-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/search-menu-profiles-r91.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-AUTOCOMPLETE
+      - P-SHADCN-COMBOBOX
+      - P-SHADCN-COMMAND
+      - P-SHADCN-INPUT-SHELL
+      - P-SHADCN-CONTEXT-MENU
+      - P-SHADCN-MENUBAR
+      - P-SHADCN-NAVIGATION-MENU
+      - P-SHADCN-DROPDOWN-MENU
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

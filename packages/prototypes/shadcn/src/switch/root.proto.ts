@@ -6,8 +6,10 @@ export default definePrototype<ShadcnSwitchRootProps, ShadcnSwitchRootExposes>({
   name: 'shadcn-switch-root',
   modules: asSwitchRoot.modules,
   setup(def) {
-    const state = asSwitchRoot().stateHandles;
+    const inherited = asSwitchRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('[shadcn-switch-root] Missing Base Switch facts');
     setupSwitchRootVisual(def, state);
+    return inherited.render;
   },
 });

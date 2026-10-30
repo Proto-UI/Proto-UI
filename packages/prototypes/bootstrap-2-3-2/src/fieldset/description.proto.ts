@@ -6,7 +6,7 @@ export default definePrototype<FieldsetPartProps, FieldsetRootExposes>({
   setup(def) {
     const inherited = asFieldsetDescription();
     def.feedback.style.use(
-      tw('block text-sm font-normal leading-5 text-muted-foreground break-words')
+      tw('block mb-[10px] text-[14px] font-normal leading-[20px] text-[#555] break-words')
     );
     return inherited.render;
   },

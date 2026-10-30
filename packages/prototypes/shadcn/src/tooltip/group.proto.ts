@@ -1,11 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asTooltipGroup } from '@proto.ui/prototypes-base/tooltip';
 import type { ShadcnTooltipGroupExposes, ShadcnTooltipGroupProps } from './types';
+import { setupShadcnStyleScope } from '../style-scope';
 
 const tooltipGroup = definePrototype<ShadcnTooltipGroupProps, ShadcnTooltipGroupExposes>({
   name: 'shadcn-tooltip-group',
   setup(def) {
     asTooltipGroup();
+    setupShadcnStyleScope(def);
     def.feedback.style.use(tw('inline-flex'));
   },
 });

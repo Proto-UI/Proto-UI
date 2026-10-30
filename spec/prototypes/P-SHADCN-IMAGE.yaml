@@ -1,0 +1,48 @@
+id: P-SHADCN-IMAGE
+type: prototype
+title: Shadcn Image projection over the host-owned Image View
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
+summary: Shadcn Image root forwards asImageRoot modules and its host-owned render with neutral presentation.
+statement:
+    en: The Prototype invokes asImageRoot() once, forwards its static Image View modules and its actual null render; the host-owned image target performs rendering, loading and accessibility. Source, alternative text, fit and loading generation remain Base facts; family presentation adds only ordinary framing and radius vocabulary without a fabricated slot or second image owner.
+criteria:
+  - id: P-SHADCN-IMAGE-BASE
+    text:
+            en: Invoke asImageRoot() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.
+  - id: P-SHADCN-IMAGE-VISUAL
+    text:
+            en: 'Neutral family presentation frames the host-owned image target only: responsive sizing and optional rounded corners. Informative/decorative modes, alternative text, fit, source and loadingStatus stay with the Base/Image View owner.'
+  - id: P-SHADCN-IMAGE-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
+  - id: P-SHADCN-IMAGE-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-IMAGE-VIEW-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-IMAGE
+verifies:
+  tests:
+    - T-SHADCN-PASSIVE-PROJECTIONS-0001
+sources:
+  - path: packages/prototypes/shadcn/src/image/root.proto.ts
+  - path: packages/prototypes/shadcn/src/image/index.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/avatar.tsx
+    label: Bounded upstream comparison only; Avatar is not an interchangeable replacement
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Shadcn Image projection over the host-owned Image View cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - shadcn
+  - image
+  - draft

@@ -5,7 +5,10 @@ export default definePrototype<InputOtpRootProps, InputOtpRootExposes>({
   name: 'bootstrap-2-3-2-input-otp-root',
   setup(def) {
     const inherited = asInputOtpRoot();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-wrap items-center gap-2 text-foreground'));
+    // OTP is a Proto extension using the historical text-control vocabulary.
+    def.feedback.style.use(
+      tw('flex min-w-0 flex-wrap items-center gap-[5px] text-foreground text-[14px] leading-[20px]')
+    );
     return inherited.render;
   },
 });

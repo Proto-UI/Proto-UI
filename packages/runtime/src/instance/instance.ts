@@ -26,7 +26,7 @@ import { AsTriggerModuleDef } from '@proto.ui/module-as-trigger';
 import { FocusModuleDef } from '@proto.ui/module-focus';
 import { BoundaryModuleDef } from '@proto.ui/module-boundary';
 import { HitParticipationModuleDef } from '@proto.ui/module-hit-participation';
-import { OverlayModuleDef } from '@proto.ui/module-overlay';
+import { OverlayModuleDef, type OverlayPort } from '@proto.ui/module-overlay';
 import { PositioningModuleDef, type PositioningPort } from '@proto.ui/module-positioning';
 import { AxisInputModuleDef } from '@proto.ui/module-axis-input';
 import { ScrollModuleDef } from '@proto.ui/module-scroll';
@@ -158,6 +158,10 @@ export function createRuntimeInstance<P extends PropsBaseType>(
   });
   const positioningPort = moduleHub.getPort<PositioningPort>('positioning');
   positioningPort?.setCallbackDispatcher?.((fn) => {
+    callbackScope.runNoSync(kernel.run, fn);
+  });
+  const overlayPort = moduleHub.getPort<OverlayPort>('overlay');
+  overlayPort?.setCallbackDispatcher?.((fn) => {
     callbackScope.runNoSync(kernel.run, fn);
   });
   const anatomyPort = moduleHub.getPort<AnatomyPort>('anatomy');

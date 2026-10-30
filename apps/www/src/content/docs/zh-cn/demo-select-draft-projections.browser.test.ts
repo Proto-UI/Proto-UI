@@ -96,16 +96,55 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
           const errors: string[] = [];
           page.on('pageerror', (error) => errors.push(error.message));
           const prefix = `${family}-${runtime}-${theme}`;
+          const stageEvidence: Record<string, unknown>[] = [];
           try {
             await page.evaluate((theme) => {
               document.documentElement.classList.remove('light', 'dark');
               document.documentElement.classList.add(theme);
               document.documentElement.dataset.theme = theme;
             }, theme);
+            const runtimeMountStarted = performance.now();
             await choosePreviewRuntime(page, previewer, runtime);
             await waitReady(page, family, runtime);
             const demo = previewer.locator('[data-projection-content]');
             const trigger = demo.locator('[data-demo-ref="uncontrolledTrigger"]');
+            async function stageSnapshot(phase: string) {
+              if (family !== 'liquid-glass') return;
+              const snapshot = await demo.evaluate((root) => ({
+                scenes: [...root.querySelectorAll<HTMLElement>('[data-material-scene]')].map(
+                  (scope) => {
+                    const canvas = scope.querySelector<HTMLCanvasElement>(
+                      ':scope > canvas[data-material-backdrop]'
+                    );
+                    const rect = scope.getBoundingClientRect();
+                    return {
+                      ref: scope.dataset.demoRef,
+                      width: rect.width,
+                      height: rect.height,
+                      canvasCount: scope.querySelectorAll(':scope > canvas[data-material-backdrop]')
+                        .length,
+                      nominalCanvasRgbaBytes: canvas ? canvas.width * canvas.height * 4 : 0,
+                      parentScene: !!scope.parentElement?.closest('[data-material-scene]'),
+                    };
+                  }
+                ),
+              }));
+              stageEvidence.push({
+                phase,
+                elapsedSinceRuntimeSelectionMs: performance.now() - runtimeMountStarted,
+                ...snapshot,
+              });
+              expect(snapshot.scenes).toHaveLength(4);
+              expect(snapshot.scenes.map((item) => item.ref).sort()).toEqual(
+                ['uncontrolledStage', 'disabledStage', 'controlledStage', 'selectRtlLayout'].sort()
+              );
+              for (const item of snapshot.scenes) {
+                expect(item.canvasCount).toBe(1);
+                expect(item.parentScene).toBe(false);
+                expect(item.nominalCanvasRgbaBytes).toBeGreaterThan(0);
+              }
+            }
+            await stageSnapshot('mounted');
             expect(await trigger.getAttribute('aria-expanded')).toBe('false');
             expect((await trigger.textContent())?.trim()).toBe('Alpha');
             // Runtime chrome is the active family's real Tabs recipe, separate
@@ -188,7 +227,27 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             ).toBe(runtime);
             await trigger.focus();
             await page.keyboard.press('ArrowDown');
-            await popup(page, trigger);
+            const firstContent = await popup(page, trigger);
+            if (family === 'liquid-glass') {
+              // Real wrapped page positive control: missing box metadata or an
+              // unconsumed plan must fail, not silently pass via opaque fallback.
+              await expect
+                .poll(() => firstContent.getAttribute('data-material-quality'), { timeout: 20000 })
+                .toBe('self-optical');
+              await expect
+                .poll(() => trigger.getAttribute('data-material-quality'), { timeout: 20000 })
+                .toBe('self-optical');
+              expect(
+                await firstContent.evaluate(
+                  (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef
+                )
+              ).toBe('uncontrolledStage');
+              await stageSnapshot('uncontrolled-open');
+              if (captureDir)
+                await previewer.screenshot({
+                  path: path.join(captureDir, `${prefix}-owned-stage-open.png`),
+                });
+            }
             await page.waitForFunction(
               () =>
                 document.activeElement?.getAttribute('role') === 'option' &&
@@ -224,6 +283,14 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
             const controlled = demo.locator('[data-demo-ref="controlledTrigger"]');
             await controlled.click();
             const controlledContent = await popup(page, controlled);
+            if (family === 'liquid-glass') {
+              expect(
+                await controlledContent.evaluate(
+                  (node) => node.closest<HTMLElement>('[data-material-scene]')?.dataset.demoRef
+                )
+              ).toBe('controlledStage');
+              await stageSnapshot('controlled-open');
+            }
             await controlledContent.getByRole('option', { name: 'Beta', exact: true }).click();
             expect((await controlled.textContent())?.trim()).toBe('Alpha');
             await demo.getByRole('button', { name: 'Accept selection', exact: true }).click();
@@ -307,6 +374,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               (error) => console.warn('Select overflow observation unavailable', error),
               1000
             );
+            await stageSnapshot('rtl-320-text200-open');
             if (captureDir) {
               await page.screenshot({
                 path: path.join(captureDir, `${prefix}-320-text200-rtl-open.png`),
@@ -322,6 +390,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
                     viewport: { width: 320, height: 900 },
                     rootFontPx: 32,
                     geometry,
+                    stageEvidence,
                     errors,
                     opticalPaintClaim: false,
                     gpuiClaim: false,
@@ -339,6 +408,7 @@ describe.sequential('actual Bootstrap/Liquid Select input, layout and source-bou
               theme,
               error: String(error),
               pageErrors: errors,
+              stageEvidence,
             });
             throw error;
           } finally {

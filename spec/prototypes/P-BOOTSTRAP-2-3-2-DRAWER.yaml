@@ -1,0 +1,50 @@
+id: P-BOOTSTRAP-2-3-2-DRAWER
+type: prototype
+title: Bootstrap 2.3.2 Drawer projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Drawer family over the Base Drawer protocol with modal-vocabulary sheet chrome.
+statement:
+    en: The family composes the eight exported Base Drawer parts (Root, Trigger, Mask, Content, Title, Description, Close, Handle) plus the implemented Header and Footer parts, each consuming its matching hook once. DRAWER-SCROLL is the Content-owned semantic scroll declaration and DRAWER-ACCEPTED-SIDE is a read-only owner observation helper; neither is a rendered part or a cataloged family entity.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DRAWER-BASE
+    text:
+            en: 'Invoke asDrawer{Root,Trigger,Mask,Content,Title,Description,Close,Handle}() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.'
+  - id: P-BOOTSTRAP-2-3-2-DRAWER-VISUAL
+    text:
+            en: Sheet chrome reuses the pinned modal vocabulary (mask fade, radius, border and shadow recipes) with edge-specific paint consumed through the established handle/edge helper; Base keeps open, admission, presence and scroll ownership.
+  - id: P-BOOTSTRAP-2-3-2-DRAWER-EXTENSION
+    text:
+            en: P-BASE-DRAWER-SCROLL and P-BASE-DRAWER-ACCEPTED-SIDE are helper/boundary definitions consumed by Content and presentation, not manufactured family parts; they are intentionally uncataloged as standalone entities.
+  - id: P-BOOTSTRAP-2-3-2-DRAWER-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-DRAWER-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-DRAWER
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/drawer/root.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/drawer/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/modals.less
+    label: Pinned modal vocabulary reference; Drawer itself is a Proto extension
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Drawer projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - drawer
+  - draft

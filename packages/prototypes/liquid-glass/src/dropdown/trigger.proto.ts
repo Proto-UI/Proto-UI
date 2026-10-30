@@ -8,13 +8,24 @@ import {
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asDropdownTrigger,
-  type DropdownTriggerProps,
+  type DropdownTriggerProps as BaseDropdownTriggerProps,
   type DropdownTriggerExposes,
 } from '@proto.ui/prototypes-base/dropdown';
+
+export interface DropdownTriggerProps extends BaseDropdownTriggerProps {
+  /** Opaque retains the same command paint without requesting optical material. */
+  material?: 'auto' | 'opaque';
+}
+
 export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
   name: 'liquid-glass-dropdown-trigger',
   setup(def) {
-    const state = asDropdownTrigger().stateHandles;
+    def.props.define({
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
+    });
+    def.props.setDefaults({ material: 'auto' });
+    const behavior = asDropdownTrigger();
+    const state = behavior.stateHandles;
     if (!state) throw new Error('Dropdown Trigger capture missing');
     // One shared optical slot consumes the existing Dropdown command state.
     // Unsupported source/host/preferences retain the complete opaque recipe.
@@ -26,7 +37,12 @@ export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
     });
     for (const isPressed of [false, true]) {
       def.rule({
-        when: (w) => w.all(w.state(state.pressed).eq(isPressed), w.state(state.disabled).eq(false)),
+        when: (w) =>
+          w.all(
+            w.prop('material').eq('auto'),
+            w.state(state.pressed).eq(isPressed),
+            w.state(state.disabled).eq(false)
+          ),
         intent: (i) =>
           i.feedback.material.use({
             intent: 'liquid-glass',
@@ -78,5 +94,6 @@ export default definePrototype<DropdownTriggerProps, DropdownTriggerExposes>({
       // Whole-host opacity composites both over an uncontrolled backdrop.
       intent: (i) => i.feedback.style.use(tw(COMMAND_DISABLED_FOCUSABLE)),
     });
+    return behavior.render;
   },
 });

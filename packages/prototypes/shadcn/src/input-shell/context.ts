@@ -1,9 +1,10 @@
 import { createContextKey, type DefHandle, type RunHandle } from '@proto.ui/core';
+import type { ShadcnStyleProps } from '../style-scope';
 // Private visual containment only. Not a semantic Association or another editor state source.
 export const INPUT_SHELL_PAINT = createContextKey<{ grouped: true }>('shadcn-input-shell-paint');
-export function setupInputShellContainment(def: DefHandle<any>) {
+export function setupInputShellContainment(def: DefHandle<ShadcnStyleProps>) {
   const grouped = def.state.bool('insideInputShell', false);
-  const sync = (run: RunHandle<any>) =>
+  const sync = (run: RunHandle<ShadcnStyleProps>) =>
     grouped.set(
       run.context.tryRead(INPUT_SHELL_PAINT)?.grouped === true,
       'reason: observe passive input shell paint'
