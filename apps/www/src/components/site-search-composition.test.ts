@@ -66,12 +66,15 @@ describe('public Search composition, actual prototype loaders and four hosts', (
       it(`${runtime}/${family}: latest prepared query, stable editor, async rows, close and reopen`, async () => {
         const searched: string[] = [];
         const navigate = vi.fn();
+        let reopenBarrier: Promise<void> | undefined;
+        let releaseReopen: (() => void) | undefined;
         const session = createSiteSearchSession({
           origin: 'https://docs.test',
           navigate,
           load: async () => ({
             search: async (query) => {
               searched.push(query);
+              if (reopenBarrier) await reopenBarrier;
               if (query === 'unmatched-query') return { results: [] };
               return {
                 results: Array.from({ length: 23 }, (_, i) => ({
@@ -138,12 +141,34 @@ describe('public Search composition, actual prototype loaders and four hosts', (
         session.loadMore();
         await vi.waitFor(() => expect(context.refs.results.textContent).toContain('next 22'));
         expect(context.refs.close.querySelector('[role=button], button')).toBeNull();
+        const retiredRow = session.read().snapshot.rows[0]!;
         context.refs.close.click();
         await vi.waitFor(() => expect(session.read().open).toBe(false));
+        expect(session.execute(retiredRow.id)).toBe(false);
+        expect(navigate).not.toHaveBeenCalled();
+        reopenBarrier = new Promise<void>((resolve) => {
+          releaseReopen = resolve;
+        });
         session.setOpen(true);
-        await vi.waitFor(() => expect(context.refs.results.textContent).toContain('next 19'));
+        expect(session.read().snapshot.phase).toBe('loading');
+        expect(session.read().snapshot.rows).toEqual([]);
+        // A retained exit/reentry DOM row is not authorization to execute it.
+        context.api.call('command', 'select', retiredRow.id);
+        expect(session.execute(retiredRow.id)).toBe(false);
+        expect(session.read().open).toBe(true);
+        expect(navigate).not.toHaveBeenCalled();
+        releaseReopen!();
+        await vi.waitFor(() => {
+          const current = session.read().snapshot;
+          expect(current.phase).toBe('ready');
+          expect(current.query).toBe('next');
+          expect(current.rows).toHaveLength(20);
+          expect(context.refs.results.textContent).toContain('next 19');
+          expect(context.refs.results.textContent).not.toContain('next 22');
+        });
+        expect(editor()).toBe(input);
         expect(editor().value).toBe('next');
-        const row = session.read().snapshot.rows[0];
+        const row = session.read().snapshot.rows[0]!;
         context.api.call('command', 'select', row.id);
         await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/docs/next/0'));
         expect(session.read().open).toBe(false);

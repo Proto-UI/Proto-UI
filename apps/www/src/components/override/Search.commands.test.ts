@@ -5,6 +5,33 @@ import { siteSearchShortcutLabel } from '../site-search-shortcut';
 import { PREFERRED_ADAPTER_EVENT } from '../adapter-preference';
 import { searchCommandParticipant, initDocumentationSearchCommands } from '../site-search-commands';
 vi.setConfig({ testTimeout: 20_000 });
+// Observe the actual public composition context without replacing host handles,
+// setup behavior, its return cleanup, or the original factory contract.
+const compositionContexts = vi.hoisted(
+  () => new WeakMap<HTMLElement, import('../PrototypePreviewer/demo-types').DemoSetupContext>()
+);
+vi.mock('../site-search-composition', async (original) => {
+  const actual = await original<typeof import('../site-search-composition')>();
+  return {
+    ...actual,
+    createSiteSearchComposition(...args: Parameters<typeof actual.createSiteSearchComposition>) {
+      const composition = actual.createSiteSearchComposition(...args);
+      const setup = composition.demo.setup;
+      if (!setup) throw new Error('Search composition must retain its real setup');
+      composition.demo.setup = (context) => {
+        const root = context.refs.dialog;
+        if (!root) throw new Error('Search setup requires its actual DialogRoot');
+        const previous = compositionContexts.get(root);
+        if (previous && previous !== context)
+          throw new Error('DialogRoot cannot belong to two setup contexts');
+        const result = setup(context);
+        compositionContexts.set(root, context);
+        return result;
+      };
+      return composition;
+    },
+  };
+});
 const resourceBoundary = vi.hoisted(() => ({
   current: null as null | { fetch: typeof fetch; importModule(url: string): Promise<unknown> },
 }));
@@ -138,8 +165,16 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
     },
     HTMLElement
   );
-  const initialize = () => constructor.prototype.connectedCallback.call(root);
-  const dispose = () => constructor.prototype.disconnectedCallback.call(root);
+  let disposed = false;
+  const initialize = () => {
+    disposed = false;
+    return constructor.prototype.connectedCallback.call(root);
+  };
+  const dispose = () => {
+    const result = constructor.prototype.disconnectedCallback.call(root);
+    disposed = true;
+    return result;
+  };
   initialize();
   await docs.ready;
   await settle();
@@ -183,6 +218,19 @@ async function mount(family: 'shadcn' | 'brutalist', firstProbeOK = true) {
       return ref('search-page-action');
     },
     get open() {
+      const dialog = ref('dialog');
+      // Only explicit owner retirement is absence, never infer a closed live
+      // Dialog from a not-yet-mounted or already-detached Content view.
+      if (disposed && !dialog) return false;
+      if (!dialog) throw new Error('Live Search requires its current DialogRoot');
+      const context = compositionContexts.get(dialog);
+      if (!context || context.refs.dialog !== dialog)
+        throw new Error('Missing current DialogRoot context');
+      const state = context.api.getExposes('dialog')?.open as { get(): boolean } | undefined;
+      if (!state) throw new Error('DialogRoot must expose its real open state');
+      return state.get();
+    },
+    get present() {
       const panel = ref('panel');
       return !!panel?.isConnected && !panel.hasAttribute('data-pui-view-detached');
     },
@@ -254,6 +302,7 @@ describe('public Search intent and resource lifetime', () => {
     await settle();
     expect(f.fetchIndex).toHaveBeenCalledTimes(1);
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     expect(f.loadRuntime).not.toHaveBeenCalled();
     click(f.trigger);
     await settle();
@@ -262,6 +311,7 @@ describe('public Search intent and resource lifetime', () => {
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.loadRuntime).toHaveBeenCalledTimes(1);
     expect(f.open).toBe(true);
+    expect(f.present).toBe(true);
   });
   it('keeps failed intent silent, permits explicit retry, and reuses one prepared backend', async () => {
     const f = await mount('shadcn', false);
@@ -269,12 +319,14 @@ describe('public Search intent and resource lifetime', () => {
     await settle();
     expect(f.fetchIndex).toHaveBeenCalledTimes(1);
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     expect(f.retry).toBeUndefined();
     f.setProbe(true);
     click(f.trigger);
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.fetchIndex).toHaveBeenCalledTimes(2);
     expect(f.open).toBe(true);
+    expect(f.present).toBe(true);
     click(f.close);
     await settle();
     click(f.trigger);
@@ -292,6 +344,7 @@ describe('public Search intent and resource lifetime', () => {
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.fetchIndex).toHaveBeenCalledTimes(2);
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
   });
   it('close/reopen during pending preparation only publishes to the newest open session', async () => {
     const f = await mount('shadcn');
@@ -301,11 +354,13 @@ describe('public Search intent and resource lifetime', () => {
     click(f.close);
     await settle();
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     click(f.trigger);
     await settle();
     release();
     await vi.waitFor(() => expect(f.configure).toHaveBeenCalledTimes(1));
     expect(f.open).toBe(true);
+    expect(f.present).toBe(true);
     expect(f.fetchIndex).toHaveBeenCalledTimes(1);
     expect(f.input).toBe(document.activeElement);
   });
@@ -329,11 +384,13 @@ describe('public Search intent and resource lifetime', () => {
       reject(new Error('late offline'));
       await settle();
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
       if (action !== 'close') {
         click(oldTrigger);
         shortcut();
         await settle();
         expect(f.open).toBe(false);
+        await vi.waitFor(() => expect(f.present).toBe(false));
       }
       expect(f.root.dataset.searchCompositionError).toBeUndefined();
     });
@@ -349,6 +406,7 @@ describe('public Search intent and resource lifetime', () => {
     release();
     await settle();
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     expect(f.loadRuntime).toHaveBeenCalledTimes(1);
     click(f.trigger);
     await vi.waitFor(() => expect(f.open).toBe(true));
@@ -372,6 +430,7 @@ describe('public Search intent and resource lifetime', () => {
     resolve({ options: f.configure, search: f.search });
     await settle();
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     shortcut();
     await vi.waitFor(() => expect(f.open).toBe(true));
     expect(f.fetchIndex).toHaveBeenCalledTimes(2);
@@ -393,6 +452,7 @@ describe('public Search intent and resource lifetime', () => {
     await settle();
     expect(f.loadRuntime).not.toHaveBeenCalled();
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     expect(f.fetchIndex).toHaveBeenCalledTimes(1);
   });
   it('retains the 5000ms import timeout, recovers on intent, and ignores a late timed-out module', async () => {
@@ -411,6 +471,7 @@ describe('public Search intent and resource lifetime', () => {
       await settle();
       await vi.advanceTimersByTimeAsync(5001);
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
       expect(f.retry).toBeUndefined();
       click(f.trigger);
       await settle();
@@ -432,15 +493,18 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       trigger.dispatchEvent(new CustomEvent('click', { bubbles: true }));
       await settle();
       expect(f.open).toBe(true);
+      expect(f.present).toBe(true);
       click(trigger);
       await settle();
       expect(f.open).toBe(true);
+      expect(f.present).toBe(true);
       expect(f.fetchIndex).toHaveBeenCalledTimes(1);
       expect(f.loadRuntime).toHaveBeenCalledTimes(1);
       expect(f.input).toBe(document.activeElement);
       click(f.close);
       await settle();
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
       expect(document.activeElement).toBe(f.trigger);
     });
     it('retains query on Enter/Space reopen and does not execute a result from the opening key', async () => {
@@ -463,6 +527,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         expect(f.input).toBe(document.activeElement);
         // Search remains open: the opener's key cannot select an existing result.
         expect(f.open).toBe(true);
+        expect(f.present).toBe(true);
       }
     });
     it('preserves shortcut toggles and ignores composed/modified/prevented shortcuts', async () => {
@@ -471,12 +536,14 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, ...init }));
         await settle();
         expect(f.open).toBe(false);
+        await vi.waitFor(() => expect(f.present).toBe(false));
       }
       const prevented = new KeyboardEvent('keydown', { key: 'k', ctrlKey: true, cancelable: true });
       prevented.preventDefault();
       window.dispatchEvent(prevented);
       await settle();
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
       for (const meta of [false, true]) {
         shortcut(meta);
         await vi.waitFor(() => expect(f.open).toBe(true));
@@ -487,6 +554,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       shortcut();
       await settle();
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
     });
     it('keeps retry disabled/presentation during host replacement and closes before late recovery', async () => {
       const f = await mount(family, false);
@@ -508,6 +576,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       release();
       await settle();
       expect(f.open).toBe(false);
+      await vi.waitFor(() => expect(f.present).toBe(false));
       click(f.trigger);
       await vi.waitFor(() => expect(f.open).toBe(true));
       await vi.waitFor(() => expect(f.retry).toBeUndefined());
@@ -527,6 +596,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         f.trigger.focus();
         await vi.waitFor(() => expect(f.loadRuntime).toHaveBeenCalledTimes(1));
         expect(f.open).toBe(false);
+        await vi.waitFor(() => expect(f.present).toBe(false));
         click(f.trigger);
         await vi.waitFor(() => expect(f.open).toBe(true));
         type(f.input!, 'Retained');
@@ -539,6 +609,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
         await settle();
         await vi.waitFor(() => expect(f.input?.value).toBe('Retained'));
         expect(f.open).toBe(true);
+        expect(f.present).toBe(true);
         expect(f.fetchIndex).toHaveBeenCalledTimes(1);
         if (oldInput !== f.input) {
           expect(oldInput?.isConnected).toBe(false);
@@ -547,10 +618,12 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           await settle();
           expect(f.input?.value).toBe('Retained');
           expect(f.open).toBe(true);
+          expect(f.present).toBe(true);
         }
         click(f.close);
         await settle();
         expect(f.open).toBe(false);
+        await vi.waitFor(() => expect(f.present).toBe(false));
       });
     }
   });
@@ -562,6 +635,7 @@ for (const stage of ['import', 'configure'] as const) {
     hover(f.trigger);
     await settle();
     expect(f.open).toBe(false);
+    await vi.waitFor(() => expect(f.present).toBe(false));
     expect(f.retry).toBeUndefined();
     click(f.trigger);
     await vi.waitFor(() => expect(f.open).toBe(true));
@@ -607,6 +681,7 @@ for (const family of ['shadcn', 'brutalist'] as const) {
       await settle();
       expect(document.activeElement).toBe(f.input);
       expect(f.open).toBe(true);
+      expect(f.present).toBe(true);
     });
   }
 }

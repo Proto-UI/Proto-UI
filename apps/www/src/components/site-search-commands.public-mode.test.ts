@@ -98,6 +98,14 @@ function mount(family: 'shadcn' | 'brutalist') {
     root.style.setProperty(`--pui-${token}`, token.startsWith('radius') ? '0.5rem' : '#f5f5f5');
   root.innerHTML =
     '<div data-search-composition-mount><div data-search-command-mount="open"></div><div data-search-dialog-mount></div></div>';
+  // Happy DOM does not inherit custom properties onto these reader scopes.
+  // Supply the same explicit fixture theme on the actual two mounts; keep the
+  // real theme reader and its missing-token rejection in the production path.
+  for (const mount of root.querySelectorAll<HTMLElement>(
+    '[data-search-command-mount], [data-search-dialog-mount]'
+  ))
+    for (const token of WEBSITE_SHADCN_THEME_TOKENS)
+      mount.style.setProperty(`--pui-${token}`, root.style.getPropertyValue(`--pui-${token}`));
   document.body.append(root);
   const owner = searchCommandParticipant(root);
   owners.push(owner);
