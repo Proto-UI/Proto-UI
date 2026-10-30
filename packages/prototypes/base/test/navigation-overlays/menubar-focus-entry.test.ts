@@ -80,7 +80,7 @@ function traceEntry() {
       return Reflect.apply(original, this, args);
     });
   }
-  const overlay = OverlayModuleImpl.prototype as any;
+  const overlay = OverlayModuleImpl.prototype;
   const reconcile = overlay.afterViewReconciled;
   vi.spyOn(overlay, 'afterViewReconciled').mockImplementation(function (
     this: any,
