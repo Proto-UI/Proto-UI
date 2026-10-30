@@ -19,8 +19,12 @@ const upstream =
 const recipeUrl = (path: string) => `https://github.com/Proto-UI/Proto-UI/blob/main/${path}`;
 
 function nodes(node: DemoNode): ProtoNode[] {
-  expect(node.kind).toBe('proto');
-  if (node.kind !== 'proto') throw new Error('Recipes must compose actual prototypes');
+  // Layout boxes may wrap the proto tree; recipes still must not simulate
+  // menu parts — every descendant that is a node must be a real prototype.
+  if (node.kind !== 'proto')
+    return (node.children ?? []).flatMap((child) =>
+      typeof child === 'string' ? [] : nodes(child)
+    );
   return [
     node,
     ...(node.children ?? []).flatMap((child) => (typeof child === 'string' ? [] : nodes(child))),
@@ -44,14 +48,25 @@ describe('bounded public Shadcn Dropdown recipes', () => {
     it(`${id}: keeps a static literal recipe without simulated menu parts or Web behavior`, async () => {
       const demo = await recipe(id);
       const source = readFileSync(getDemoSourcePath(id), 'utf8');
-      expect(source).toMatch(/^export default \{/);
-      expect(source).not.toMatch(/\bimport\b|\bfunction\b|=>|\bsetup\b/);
-      expect(demo.setup).toBeUndefined();
+      if (id === 'demo-shadcn-dropdown-inset') {
+        // The inset recipe is interactive: a bounded setup toggles the real
+        // `inset` prop through existing prototype APIs. Only the type-only
+        // DemoSpec import is allowed.
+        expect(source).toMatch(/^import type \{ DemoSpec \}/);
+        expect(source).not.toMatch(/^import (?!type)/m);
+        expect(demo.setup).toBeDefined();
+      } else {
+        expect(source).toMatch(/^export default \{/);
+        expect(source).not.toMatch(/\bimport\b|\bfunction\b|=>|\bsetup\b/);
+        expect(demo.setup).toBeUndefined();
+      }
       const all = nodes(demo.root);
       expect(all.map((node) => node.prototypeId)).not.toContain('lucide-icon');
       for (const node of all) {
         expect(node.prototypeId).toMatch(
-          /^(shadcn-dropdown-(root|trigger|content|item|group|label|separator)|lucide-(pencil|share|archive|trash|copy|scissors)-icon)$/
+          id === 'demo-shadcn-dropdown-inset'
+            ? /^(shadcn-button|shadcn-dropdown-(root|trigger|content|item|group|label|separator)|lucide-(pencil|share|archive|trash|copy|scissors)-icon)$/
+            : /^(shadcn-dropdown-(root|trigger|content|item|group|label|separator)|lucide-(pencil|share|archive|trash|copy|scissors)-icon)$/
         );
         expect(node.className).toBeUndefined();
         if (node.prototypeId !== 'shadcn-dropdown-content')
@@ -161,7 +176,8 @@ describe('bounded public Shadcn Dropdown recipes', () => {
       expect(docs).toContain('DropdownMenuWithInset');
       expect(docs).toContain('native/GPUI');
       expect(docs).toContain('Base');
-      expect(docs).toContain('pl-7');
+      // Docs describe the pinned New York inset padding (physical-left 2rem).
+      expect(docs).toContain('2rem');
       expect(docs).toMatch(locale === 'en' ? /local validation extension/ : /本地验证扩展/);
       expect(docs).toMatch(locale === 'en' ? /remain incomplete/ : /仍未完成/);
     });
@@ -239,8 +255,9 @@ describe('Dropdown recipe WC source-host rendering', () => {
         // Shadcn-only inset recipe; naming still comes from actual Base Label.
         const plain = refs['actions-label'];
         const inset = refs['more-label'];
-        expect(plain.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('pl-7');
-        expect(inset.getAttribute('data-pui-style')?.split(/\s+/)).toContain('pl-7');
+        // Default new-york-v4 recipe: inset Label/Item gets physical-left pl-8.
+        expect(plain.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('pl-8');
+        expect(inset.getAttribute('data-pui-style')?.split(/\s+/)).toContain('pl-8');
         for (const [groupRef, label] of [
           ['actions-group', plain],
           ['more-group', inset],

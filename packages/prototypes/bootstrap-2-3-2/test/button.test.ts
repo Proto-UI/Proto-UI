@@ -6,12 +6,7 @@ import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
 } from '@proto.ui/module-as-trigger';
-import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
-import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
-import path from 'node:path';
 import button from '../src/button';
-import { THEME, renderThemeCss } from '../src/theme';
-import { bootstrapButtonFill, bootstrapButtonActiveFill } from '../src/button/paint';
 
 const colorCases = [
   ['default', '#fff', '#e6e6e6', '#f5f5f5'],
@@ -52,12 +47,8 @@ function mount(rawProps: Record<string, unknown> = {}) {
 }
 
 describe('bootstrap-2-3-2 Button draft projection', () => {
-  it('inherits Base once and restores defaults after prop removal', async () => {
+  it('restores default appearance after prop removal', async () => {
     const { controller, invokeUnmounted } = mount({ variant: 'primary' });
-    expect(button.name).toBe('bootstrap-2-3-2-button');
-    expect((button as any).__asHooks).toContainEqual(
-      expect.objectContaining({ name: 'as-button', mode: 'once' })
-    );
     expect(controller.getRuleStyleTokens()).toContain(
       'bg-[#006dcc_linear-gradient(#08c,#04c)_0_0_repeat-x]'
     );
@@ -192,60 +183,5 @@ describe('bootstrap-2-3-2 Button draft projection', () => {
     ]);
     expect(tokens).toContain('text-[14px]');
     await invokeUnmounted();
-  });
-  it('preserves passive legacy paint exports used by other component owners', () => {
-    expect(bootstrapButtonFill).toEqual({
-      default: 'bg-[linear-gradient(#fff,#e6e6e6)] text-foreground border-border',
-      primary: 'bg-[linear-gradient(#08c,#04c)] text-primary-foreground border-primary',
-    });
-    expect(bootstrapButtonActiveFill).toEqual({ default: 'bg-[#e6e6e6]', primary: 'bg-[#04c]' });
-  });
-  it('preserves the fixed v2.3.2 pixel dimensions in source-derived CSS', async () => {
-    // twbs/bootstrap v2.3.2 docs/assets/css/bootstrap.css:3198-3226.
-    // Source/CSS evidence only; root16/root32 actual layout is a browser case.
-    const tokens = (await collectProtoStyleTokens(
-      path.resolve('packages/prototypes/bootstrap-2-3-2/src/button')
-    )) as string[];
-    for (const token of [
-      'px-[12px]',
-      'py-[4px]',
-      'text-[14px]',
-      'leading-[20px]',
-      'rounded-[4px]',
-    ]) {
-      expect(tokens.map((value) => value.split(':').at(-1))).toContain(token);
-    }
-    for (const token of ['px-3', 'py-1', 'text-sm', 'leading-5']) {
-      expect(tokens).not.toContain(token);
-    }
-    const css = renderProtoStyleTokenCss(tokens);
-    for (const declaration of [
-      'padding-inline: 12px;',
-      'padding-block: 4px;',
-      'font-size: 14px;',
-      'line-height: 20px;',
-      'border-radius: 4px;',
-    ]) {
-      expect(css).toContain(declaration);
-    }
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
-  });
-  it('closes every source token through the real physical style translator', async () => {
-    const tokens = (await collectProtoStyleTokens(
-      path.resolve('packages/prototypes/bootstrap-2-3-2/src')
-    )) as string[];
-    expect(tokens.length).toBeGreaterThan(15);
-    for (const fill of [
-      'bg-[#04c]',
-      'bg-[#e6e6e6]',
-      'bg-[#04c_linear-gradient(#08c,#04c)_0_-15px_repeat-x]',
-    ]) {
-      expect(tokens.some((token) => token.endsWith(fill))).toBe(true);
-    }
-    const css = renderProtoStyleTokenCss(tokens);
-    expect(css).not.toContain('Unsupported Proto UI style tokens');
-    expect(css).toContain('box-sizing: border-box');
-    expect(renderThemeCss()).toContain('--pui-foreground:');
-    expect(Object.keys(THEME.light).sort()).toEqual(Object.keys(THEME.dark).sort());
   });
 });

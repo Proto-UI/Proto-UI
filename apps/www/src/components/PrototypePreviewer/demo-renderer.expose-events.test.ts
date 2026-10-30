@@ -42,6 +42,7 @@ async function mount(
 ) {
   if (!host.isConnected) document.body.append(host);
   let context!: DemoSetupContext;
+  let element!: HTMLElement;
   const view = await renderDemo({
     runtime: 'wc',
     host,
@@ -50,12 +51,13 @@ async function mount(
       root: { kind: 'proto', prototypeId, ref: 'subject' },
       setup(next) {
         context = next;
+        element = next.refs.subject!;
         return setup?.(next);
       },
     },
   });
   views.push(view);
-  return { ...context, view, element: context.refs.subject! };
+  return { ...context, view, element };
 }
 
 const send = (api: DemoRuntimeApi, payload: unknown, key = 'valueChange') =>
@@ -263,6 +265,8 @@ describe('WC DemoRuntimeApi callback projection', () => {
     });
     const current = await replacement;
     expect(cleanup).toHaveBeenCalledTimes(1);
+    expect(old.refs.subject).toBeUndefined();
+    expect(old.element.isConnected).toBe(false);
     old.api.setProps('subject', { onValueChange: first });
     dispatch(old.element, 'retired');
     send(current.api, 'current');

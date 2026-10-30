@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import { COMMAND_FOCUS_INSET } from '../interactive-surface';
 import {
   asContextMenuItem,
   type ContextMenuItemProps,
@@ -13,15 +14,20 @@ export default definePrototype<ContextMenuItemProps, ContextMenuItemExposes>({
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground cursor-not-allowed')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-inset ring-ring')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS_INSET)),
     });
     def.rule({
-      when: (w) => w.state(behavior.getState!('focused')!).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(behavior.getState!('focused')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
+    return behavior.render;
   },
 });

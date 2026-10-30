@@ -1,7 +1,7 @@
 // packages/runtime/src/kernel/handles/run.ts
 import { PropsBaseType } from '@proto.ui/types';
 import type { ModuleOrchestratorFacadeView } from '../../orchestrator/module-orchestrator/types';
-import { RunHandle } from '@proto.ui/core';
+import { RunHandle, capUnavailable } from '@proto.ui/core';
 import { PropsFacade } from '@proto.ui/module-props';
 import { ContextFacade } from '@proto.ui/module-context';
 import { ExposeEventFacade } from '@proto.ui/module-expose-event';
@@ -12,7 +12,10 @@ import type { RuleMetaFacade } from '@proto.ui/module-rule-meta';
 export const createRunHandle = <P extends PropsBaseType>(
   update: RunHandle<P>['update'],
   moduleHub: ModuleOrchestratorFacadeView,
-  setPresent: RunHandle<P>['lifecycle']['setPresent']
+  setPresent: RunHandle<P>['lifecycle']['setPresent'],
+  captureViewOperation: RunHandle<P>['lifecycle']['captureViewOperation'] = () => {
+    throw capUnavailable('lifecycle.view-operation');
+  }
 ): RunHandle<P> => {
   const facades = moduleHub.getFacades();
   const props = facades['props'] as PropsFacade<P>;
@@ -26,6 +29,7 @@ export const createRunHandle = <P extends PropsBaseType>(
     update,
     lifecycle: {
       setPresent,
+      captureViewOperation,
     },
     meta: meta
       ? {

@@ -1,18 +1,35 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asTabsList,
+  TABS_CONTEXT,
   type TabsListProps,
   type TabsListExposes,
 } from '@proto.ui/prototypes-base/tabs';
-export type FamilyTabsListProps = TabsListProps & { appearance?: 'default' | 'underline' };
+export type FamilyTabsListProps = TabsListProps & {
+  appearance?: 'default' | 'underline';
+  material?: 'auto' | 'opaque';
+};
 export default definePrototype<FamilyTabsListProps, TabsListExposes>({
   name: 'liquid-glass-tabs-list',
   setup(def) {
     def.props.define({
       appearance: { type: 'enum', options: ['default', 'underline'], empty: 'fallback' },
+      material: { type: 'enum', options: ['auto', 'opaque'], empty: 'fallback' },
     });
-    def.props.setDefaults({ appearance: 'default' });
+    def.props.setDefaults({ appearance: 'default', material: 'auto' });
     asTabsList();
+    const orientation = def.state.enum('liquidTabsVisualOrientation', 'horizontal', {
+      options: ['horizontal', 'vertical'],
+    });
+    def.context.subscribe(TABS_CONTEXT, (_run, next) => {
+      orientation.set(next.orientation, 'reason: observe Base Tabs orientation for paint');
+    });
+    def.lifecycle.onMounted((run) => {
+      orientation.set(
+        run.context.read(TABS_CONTEXT).orientation,
+        'reason: observe Base Tabs orientation for paint'
+      );
+    });
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
       intent: (i) =>
@@ -21,6 +38,10 @@ export default definePrototype<FamilyTabsListProps, TabsListExposes>({
             'inline-flex w-fit max-w-full items-center gap-1 rounded-2xl border border-border bg-secondary p-1 text-secondary-foreground shadow-sm'
           )
         ),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('vertical')),
+      intent: (i) => i.feedback.style.use(tw('flex-col items-stretch')),
     });
     def.rule({
       when: (w) => w.prop('appearance').eq('underline'),
@@ -39,7 +60,7 @@ export default definePrototype<FamilyTabsListProps, TabsListExposes>({
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.rule({
-      when: (w) => w.prop('appearance').eq('default'),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.prop('material').eq('auto')),
       intent: (i) => i.feedback.material.use({ intent: 'liquid-glass', variant: 'regular' }),
     });
   },

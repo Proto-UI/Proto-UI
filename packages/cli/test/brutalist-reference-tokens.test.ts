@@ -16,14 +16,16 @@ describe('source-aligned Brutalist style closure', () => {
       'font-bold',
       'rounded-base',
       'rounded-full',
-      'transition-transform',
     ])
       expect(BRUTALIST_STYLE_TOKENS).toContain(token);
+    // The family recipes now animate via explicit transition-none/duration
+    // tokens; `transition-transform` is no longer authored but still lowers.
+    expect(BRUTALIST_STYLE_TOKENS).toContain('transition-none');
     expect(css).toContain(
       'font-family: var(--pui-font-sans, ui-sans-serif, system-ui, sans-serif);'
     );
     expect(css).toContain('border-radius: var(--pui-radius);');
-    expect(css).toContain('transition-property: transform, translate, scale, rotate;');
+    expect(css).toContain('transition-property: none;');
     expect(css).not.toContain('Unsupported Proto UI style tokens');
     const reduced = renderProtoStyleTokenCss(['transition-transform']).split(
       '@media (prefers-reduced-motion: reduce)'
@@ -50,7 +52,11 @@ describe('source-aligned Brutalist style closure', () => {
       )
     ).flat();
     expect(ordinary).not.toContain('font-mono');
-    expect(BRUTALIST_STYLE_TOKENS).not.toContain('uppercase');
+    // Progress and Meter labels author `uppercase` in the pinned neobrutalism
+    // recipes, so it is now a lawful preset member.
+    expect(BRUTALIST_STYLE_TOKENS).toContain('uppercase');
     expect(BRUTALIST_THEME.light.main).toBe('#5294ff');
-  });
+    // Per-directory source scans across the whole family exceed the 5s
+    // default since the multi-profile sources landed.
+  }, 120_000);
 });

@@ -8,7 +8,8 @@ import {
 export default definePrototype<LabelRootProps, LabelRootExposes>({
   name: 'liquid-glass-label-root',
   setup(def) {
-    asLabelRoot();
+    const inherited = asLabelRoot();
     def.feedback.style.use(tw('text-sm font-medium leading-normal text-foreground'));
+    return inherited.render;
   },
 });

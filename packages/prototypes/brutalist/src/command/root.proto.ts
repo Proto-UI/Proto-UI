@@ -8,6 +8,10 @@ export default definePrototype<CommandRootProps, CommandRootExposes>({
   name: 'brutalist-command-root',
   setup(def) {
     const behavior = asCommandRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md flex-wrap gap-2'));
+    def.feedback.style.use(
+      tw(
+        'flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden rounded-none border-2 border-border bg-background text-foreground font-sans font-medium'
+      )
+    );
   },
 });

@@ -44,7 +44,9 @@ verifies:
   contracts: [C-ANATOMY-SCOPED-QUERY-0001]
   prototypes: [P-BASE-SELECT-ALIGNMENT-PARTS]
 exercises:
-  prototypes: [P-BASE-SELECT-ALIGNMENT-PARTS]
+  prototypes:
+    - P-BASE-SELECT-ALIGNMENT-PARTS
+    - P-SHADCN-SELECT-ALIGNMENT-PARTS
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

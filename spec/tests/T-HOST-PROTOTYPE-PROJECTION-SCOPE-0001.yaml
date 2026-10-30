@@ -95,7 +95,57 @@ cases:
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-STATE-BOUNDARY
       - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-ATOMIC-GENERATION
     expectation: teardown-runs-every-owned-cleanup-step-and-rethrows-the-first-failure-only-after-all-leases-are-revoked
+  - id: T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    title: declared author slots preserve static identities and generation-owned resources across keyed updates in all four Web hosts
+    covers:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-AUTHOR-SLOTS
+    expectation: complete-future-loader-closure-admission-before-mutation-fixed-retained-shape-serial-commit-and-exhaustive-disposal-without-stale-refs-or-portals
 implementations:
+  - id: www-demo-dynamic-children-unit
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/PrototypePreviewer/demo-dynamic-children.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-demo-dynamic-commit-queue-unit
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/PrototypePreviewer/demo-dynamic-commit-queue.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-demo-renderer-dynamic-children-unit
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/PrototypePreviewer/demo-renderer.dynamic-children.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-projection-composition-dynamic-children-unit
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
+  - id: www-prototype-modules-command-unit
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/PrototypePreviewer/prototype-modules.command.test.ts
+    required: true
+    consumesCases:
+      - T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001-CASE-AUTHOR-SLOTS
+    exercises:
+      - D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001
   - id: www-projection-family-manifest-unit
     kind: module-test
     status: passing

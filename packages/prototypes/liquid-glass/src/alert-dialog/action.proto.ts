@@ -1,12 +1,17 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import {
+  COMMAND_BLOCKED,
+  COMMAND_FOCUS,
+  COMMAND_HOVER,
+  COMMAND_PRESS,
+} from '../interactive-surface';
+import {
   asAlertDialogAction,
   type AlertDialogActionProps,
   type AlertDialogActionExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
 
-// Passive family Button paint; the inherited AlertDialog command keeps sole action ownership.
-// Keep the valid borrowed getState pattern. Source collector coverage is a separate owner.
+// Family command paint; AlertDialog keeps sole activation and focus ownership.
 export default definePrototype<AlertDialogActionProps, AlertDialogActionExposes>({
   name: 'liquid-glass-alert-dialog-action',
   setup(def) {
@@ -19,23 +24,28 @@ export default definePrototype<AlertDialogActionProps, AlertDialogActionExposes>
     );
     def.feedback.style.use(tw('bg-primary text-primary-foreground'));
     def.rule({
-      when: (w) => w.state(state('hovered')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('shadow-md')),
+      when: (w) =>
+        w.all(
+          w.state(state('hovered')!).eq(true),
+          w.state(state('pressed')!).eq(false),
+          w.state(state('focusVisible')!).eq(false),
+          w.state(state('disabled')!).eq(false)
+        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_HOVER)),
     });
     def.rule({
-      when: (w) => w.state(state('pressed')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('shadow-xs')),
+      when: (w) =>
+        w.all(w.state(state('pressed')!).eq(true), w.state(state('disabled')!).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_PRESS)),
     });
     def.rule({
       when: (w) => w.state(state('focusVisible')!).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('outline-none ring-2 ring-ring ring-offset-2 ring-offset-background')
-        ),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
     });
     def.rule({
       when: (w) => w.state(state('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none cursor-default')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
+    return behavior.render;
   },
 });

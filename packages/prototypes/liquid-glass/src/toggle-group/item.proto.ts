@@ -16,7 +16,7 @@ export default definePrototype<ToggleGroupItemProps, ToggleGroupItemExposes>({
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
@@ -26,5 +26,6 @@ export default definePrototype<ToggleGroupItemProps, ToggleGroupItemExposes>({
       when: (w) => w.state(behavior.getState!('active')!).eq(true),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
+    return behavior.render;
   },
 });

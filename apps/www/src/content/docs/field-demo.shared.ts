@@ -29,11 +29,12 @@ export function createFieldDemo(family: string): DemoSpec {
     props: Record<string, unknown> = {},
     controlProps: Record<string, unknown> = {},
     help = 'Visible name, help and current errors are linked to one editor. 标签、帮助及当前错误关联唯一编辑器。',
-    actions: DemoChild[] = []
+    actions: DemoChild[] = [],
+    control?: DemoNode
   ) =>
     atom('root', `${id}Root`, props, [
       atom('label', `${id}Label`, {}, [label]),
-      atom('control', `${id}Control`, controlProps),
+      control ?? atom('control', `${id}Control`, controlProps),
       atom('description', `${id}Description`, {}, [help]),
       // Keep commands before feedback that can detach or wrap during a native
       // change on blur, so that feedback does not move a pressed command.
@@ -48,6 +49,77 @@ export function createFieldDemo(family: string): DemoSpec {
     children: [text],
     className: 'rounded border px-3 py-2',
   });
+  const part = (
+    role: string,
+    ref: string,
+    props: Record<string, unknown> = {},
+    children: DemoChild[] = []
+  ): DemoNode => ({ kind: 'proto', prototypeId: `${family}-${role}`, ref, props, children });
+  const additionalControls =
+    family === 'shadcn' || family === 'bootstrap-2-3-2' || family === 'liquid-glass'
+      ? [
+          field(
+            'multiline',
+            'Project summary · 项目简介',
+            { required: true },
+            {},
+            'A multiline editor shares the same Field validation owner. 多行编辑器沿用同一 Field 校验所有者。',
+            [],
+            atom('textarea', 'multilineControl', {
+              rows: 3,
+              defaultValue: 'A portable component system.',
+            })
+          ),
+          field(
+            'delivery',
+            'Delivery method · 通知方式',
+            { required: true },
+            {},
+            'The Select owner commits the value; Field observes its bound trigger. Select 所有者提交值，Field 观察绑定的触发器。',
+            [],
+            part('select-root', 'deliverySelect', { defaultValue: 'email' }, [
+              atom('select-trigger', 'deliveryControl', {}, [
+                part('select-value', 'deliveryValue', {
+                  placeholder: 'Choose a method · 选择方式',
+                }),
+              ]),
+              part('select-content', 'deliveryContent', {}, [
+                part('select-surface', 'deliverySurface', {}, [
+                  part('select-viewport', 'deliveryViewport', {}, [
+                    part('select-group', 'deliveryGroup', {}, [
+                      part('select-label', 'deliveryGroupLabel', {}, ['Delivery · 通知']),
+                      part('select-item', 'deliveryEmail', { value: 'email', textValue: 'Email' }, [
+                        part('select-item-text', 'deliveryEmailText', {}, ['Email · 邮件']),
+                      ]),
+                      part(
+                        'select-item',
+                        'deliveryPush',
+                        { value: 'push', textValue: 'Push notification' },
+                        [
+                          part('select-item-text', 'deliveryPushText', {}, [
+                            'Push notification · 推送',
+                          ]),
+                        ]
+                      ),
+                    ]),
+                  ]),
+                ]),
+              ]),
+            ])
+          ),
+          field(
+            'notifications',
+            'Allow notifications · 允许通知',
+            {},
+            {},
+            'The Switch is the one canonical boolean control. Switch 是唯一的布尔值控件。',
+            [],
+            atom('switch', 'notificationsControl', { defaultChecked: true }, [
+              part('switch-thumb', 'notificationsThumb'),
+            ])
+          ),
+        ]
+      : [];
   return {
     type: 'demo',
     root: {
@@ -116,6 +188,7 @@ export function createFieldDemo(family: string): DemoSpec {
           {},
           'Long help text wraps without creating a second editor or an extra tab stop. 长帮助文本自然换行，不创建第二个编辑器或额外 Tab 焦点。'
         ),
+        ...additionalControls,
       ],
     },
     setup({ refs, api }) {

@@ -101,7 +101,16 @@ export function loadConsumerStyles(
     throw new Error('consumer CSS smoke: unsupported generated entry/import order');
   }
   const theme = unwrapGeneratedThemeSelectionLayer(originals[1].bytes.toString('utf8'));
-  const tokens = unwrapGeneratedTokenLayer(originals[2].bytes.toString('utf8'));
+  // HappyDOM can attach an unparseable quoted bracket-token selector's
+  // declarations to the preceding rule (e.g. h-[1.15rem] overwrites h-8).
+  // Escape only literal brackets in the generated token attribute values:
+  // this is an equivalent CSS string, not a filtered stylesheet or paint fix.
+  // Original browser/build bytes above remain untouched and are hashed below.
+  const tokens = unwrapGeneratedTokenLayer(originals[2].bytes.toString('utf8')).replace(
+    /\[data-pui-style~="((?:\\.|[^"\\])*)"\]/g,
+    (_selector, value) =>
+      `[data-pui-style~="${value.replace(/\[/g, '\\[').replace(/\]/g, '\\]')}"]`
+  );
   const evidenceDir = join(root, 'consumer-css-evidence', evidenceName);
   mkdirSync(evidenceDir, { recursive: true });
   const files = originals.map(({ name, bytes }) => {
@@ -113,7 +122,7 @@ export function loadConsumerStyles(
     };
   });
   const limitation =
-    'HappyDOM only: explicit theme then token load; single outer proto-ui layer and exact canonical theme selection wrapper removed. ' +
+    'HappyDOM only: explicit theme then token load; single outer proto-ui layer and exact canonical theme selection wrapper removed; token selector string brackets escaped equivalently. ' +
     'No cascade-layer, selection-paint, width/layout, paint, or native hit-testing equivalence is claimed. ' +
     'Browser/build entry consumes the original complete stylesheet.';
   writeFileSync(

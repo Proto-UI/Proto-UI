@@ -14,30 +14,32 @@ export default definePrototype<FamilyTabsTriggerProps, TabsTriggerExposes>({
     def.props.setDefaults({ appearance: 'default' });
     const triggerState = asTabsTrigger().stateHandles;
     if (!triggerState) throw new Error('Tabs Trigger capture missing');
-    const { selected, hovered, focusVisible, disabled } = triggerState;
+    const { selected, hovered, focused, focusVisible, disabled } = triggerState;
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
       intent: (i) =>
         i.feedback.style.use(
           tw(
-            'inline-flex flex-none items-center justify-center px-3 py-2 mr-0.5 border border-transparent rounded-t-[0.25rem] text-sm leading-5 text-primary outline-none'
+            'inline-flex flex-none items-center justify-center px-[12px] py-[8px] mr-[2px] mb-[-1px] border border-transparent rounded-t-[4px] text-[14px] leading-[20px] text-[#08c] outline-none'
           )
-        ),
-    });
-    def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true)),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('bg-background text-foreground border-border border-b-transparent')
         ),
     });
     def.rule({
       when: (w) =>
         w.all(
           w.prop('appearance').eq('default'),
-          w.all(w.state(hovered).eq(true), w.state(selected).eq(false))
+          w.any(w.state(hovered).eq(true), w.state(focused).eq(true)),
+          w.state(selected).eq(false),
+          w.state(disabled).eq(false)
         ),
-      intent: (i) => i.feedback.style.use(tw('bg-muted border-border')),
+      intent: (i) => i.feedback.style.use(tw('bg-[#eee] border-[#eee_#eee_#ddd]')),
+    });
+    def.rule({
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(selected).eq(true)),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('bg-white text-[#555] border-[#ddd] border-b-transparent cursor-default')
+        ),
     });
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('default'), w.state(focusVisible).eq(true)),
@@ -45,7 +47,16 @@ export default definePrototype<FamilyTabsTriggerProps, TabsTriggerExposes>({
     });
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('default'), w.state(disabled).eq(true)),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('text-[#999] cursor-default')),
+    });
+    def.rule({
+      when: (w) =>
+        w.all(
+          w.prop('appearance').eq('default'),
+          w.state(disabled).eq(true),
+          w.any(w.state(hovered).eq(true), w.state(focused).eq(true))
+        ),
+      intent: (i) => i.feedback.style.use(tw('bg-transparent')),
     });
     def.rule({
       when: (w) => w.prop('appearance').eq('underline'),

@@ -10,7 +10,7 @@ cases:
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-BINDING
     title: Public facts and explicit view lifetime
     covers: [P-SHADCN-INPUT-SHELL-BINDING-FACTS, P-SHADCN-INPUT-SHELL-BINDING-LIFETIME]
-    expectation: Missing/malformed facts and duplicate real identities fail; replacement, disposal and owner retirement detach subscriptions, and stale or reentrant callbacks never publish retired facts. Caller fact merging must retain authored presentation inputs.
+    expectation: Missing/malformed facts and duplicate real identities fail; replacement, disposal and owner retirement detach subscriptions, and stale or reentrant callbacks never publish retired facts. Caller fact merging must retain authored presentation inputs. Public terminal disconnect must release both identity reservations and every subscription without reading the dead source, including synchronous disconnect during attachment and cleanup failure; a stale generation disconnect must not retire its replacement.
   - id: T-SHADCN-INPUT-SHELL-0001-CASE-CONSUMERS
     title: Command and ordinary Input retain one actual editor through style changes
     covers:

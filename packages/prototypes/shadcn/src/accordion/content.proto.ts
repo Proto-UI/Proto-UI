@@ -1,15 +1,16 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import {
   asAccordionContent,
-  type AccordionContentProps,
   type AccordionContentExposes,
 } from '@proto.ui/prototypes-base/accordion';
-export default definePrototype<AccordionContentProps, AccordionContentExposes>({
+import { setupAccordionContentPaint } from './visual';
+import type { ShadcnAccordionContentProps } from './types';
+export default definePrototype<ShadcnAccordionContentProps, AccordionContentExposes>({
   name: 'shadcn-accordion-content',
+  modules: asAccordionContent.modules,
   setup(def) {
-    asAccordionContent();
-    def.feedback.style.use(
-      tw('block min-w-0 pb-2.5 text-sm leading-relaxed break-words overflow-x-auto')
-    );
+    const inherited = asAccordionContent();
+    setupAccordionContentPaint(def);
+    return inherited.render;
   },
 });

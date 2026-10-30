@@ -3,6 +3,9 @@ import { SITE_LINK_ICONS, type SiteLinkIcon } from '../../prototypes/site-link-i
 import '../../styles/site-native-links.css';
 import { linkActionAppearance, type SiteLinkAppearance } from '../site-link-recipes';
 import { resolveSiteLibraryFamily } from '../site-library-family';
+import { headerButtonProps, headerIconButtonLayout } from '../site-header-control-recipes';
+import { snapshotStartupStyle } from '../site-startup-paint';
+import { renderSnapshotTokenCss } from '../snapshot-prototype-style';
 import { HOME_ACTION_ICONS, homeActionIcon } from './home-action-icons';
 export interface HomeAction {
   text: string;
@@ -35,9 +38,19 @@ const {
 const locale = Astro.locals.starlightRoute.locale;
 const initialFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 const themeLabel = locale === 'zh-cn' ? '切换主题' : 'Toggle theme';
+const themeTokens = themeButton
+  ? await snapshotStartupStyle(
+      `${initialFamily}-button`,
+      headerButtonProps(initialFamily, themeIcon ? 'icon' : 'default')
+    )
+  : [];
 const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and settings';
 ---
 
+<style
+  is:inline
+  set:html={themeButton ? renderSnapshotTokenCss(themeTokens, `[data-homepage-theme]`) : ''}
+></style>
 <div
   id={id}
   class:list={['home-actions', className]}
@@ -106,7 +119,13 @@ const menuLabel = locale === 'zh-cn' ? '导航与设置' : 'Navigation and setti
     }
     {
       themeButton && (
-        <button type="button" data-homepage-theme aria-label={themeLabel}>
+        <button
+          type="button"
+          data-homepage-theme
+          aria-label={themeLabel}
+          data-pui-style={themeTokens.join(' ')}
+          style={headerIconButtonLayout()}
+        >
           {themeIcon ? <span class="site-header-theme-icon" aria-hidden="true" /> : themeLabel}
         </button>
       )

@@ -1,0 +1,42 @@
+id: T-BOOTSTRAP-2-3-2-TABS-0001
+type: test
+title: Bootstrap Tabs draft projection coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+summary: Historical nav recipe reconciliation and passive Indicator facts.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-TABS-0001-CASE-RECIPE
+    title: Top-nav pixel units, palette and active/disabled paint preserve Base selection
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-BASE-INHERITANCE
+    expectation: historical-tabs-recipe
+  - id: T-BOOTSTRAP-2-3-2-TABS-0001-CASE-INDICATOR
+    title: Semantic-only Indicator derives facts without owning selection or geometry
+    covers:
+      - P-BOOTSTRAP-2-3-2-TABS-INDICATOR-BASE
+      - P-BOOTSTRAP-2-3-2-TABS-INDICATOR-VISUAL
+    expectation: semantic-only-indicator
+implementations:
+  - id: bootstrap-tabs-draft-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/tabs-draft-projection.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-TABS
+      - P-BOOTSTRAP-2-3-2-TABS-LIST
+      - P-BOOTSTRAP-2-3-2-TABS-TRIGGER
+      - P-BOOTSTRAP-2-3-2-TABS-CONTENT
+      - P-BOOTSTRAP-2-3-2-TABS-INDICATOR
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-TABS
+    - P-BOOTSTRAP-2-3-2-TABS-CONTENT
+    - P-BOOTSTRAP-2-3-2-TABS-INDICATOR
+    - P-BOOTSTRAP-2-3-2-TABS-LIST
+    - P-BOOTSTRAP-2-3-2-TABS-TRIGGER

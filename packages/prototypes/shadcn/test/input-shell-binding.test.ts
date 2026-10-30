@@ -1,3 +1,4 @@
+import type { StateSubscribeCallback } from '@proto.ui/core';
 import { describe, it, expect } from 'vitest';
 import { bindInputShellControl } from '../src/input-shell/bind-control';
 const cleanupFailures: Array<[string, unknown]> = [
@@ -10,18 +11,20 @@ const cleanupFailures: Array<[string, unknown]> = [
 ];
 function fact(initial = false) {
   let value: unknown = initial;
-  const listeners = new Set<() => void>();
+  const listeners = new Set<StateSubscribeCallback<boolean>>();
   return {
     get: () => value as boolean,
-    subscribe(fn: () => void) {
+    subscribe(fn: StateSubscribeCallback<boolean>) {
       listeners.add(fn);
       return () => {
         listeners.delete(fn);
       };
     },
     set(next: unknown) {
+      const prev = value;
       value = next;
-      for (const fn of [...listeners]) fn();
+      for (const fn of [...listeners])
+        fn({ type: 'next', prev: prev as boolean, next: next as boolean });
     },
     count: () => listeners.size,
   };
@@ -77,11 +80,11 @@ function ownerWithCleanupFailure(cleanupError: unknown) {
   };
 }
 function failingUnsubscribe(
-  source: { subscribe(listener: () => void): () => void },
+  source: { subscribe(listener: StateSubscribeCallback<boolean>): () => void },
   error: unknown
 ) {
   const subscribe = source.subscribe;
-  source.subscribe = (listener: () => void) => {
+  source.subscribe = (listener: StateSubscribeCallback<boolean>) => {
     const off = subscribe(listener);
     return () => {
       off();
@@ -90,6 +93,86 @@ function failingUnsubscribe(
   };
 }
 describe('single-control input shell composition lifecycle', () => {
+  it('retires terminal facts without reading the disconnected source and releases both identities', () => {
+    const o = owner(),
+      c = control(),
+      t = target();
+    let terminal = false;
+    let notify: StateSubscribeCallback<boolean> = () => {};
+    const subscribe = c.disabled.subscribe;
+    c.disabled.subscribe = (fn) => {
+      notify = fn;
+      return subscribe(fn);
+    };
+    const read = c.getExposes;
+    c.getExposes = () => {
+      if (terminal) throw new Error('terminal source read');
+      return read();
+    };
+    const binding = bindInputShellControl(o, t, c);
+    terminal = true;
+    expect(() => notify({ type: 'disconnect', reason: 'unmount' })).not.toThrow();
+    expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+    binding.sync();
+    expect(t.writes).toHaveLength(1);
+    const nextOwner = owner();
+    const next = bindInputShellControl(nextOwner, t, control());
+    next.dispose();
+    terminal = false;
+    const sourceOwner = owner();
+    bindInputShellControl(sourceOwner, target(), c).dispose();
+    expect(sourceOwner.count()).toBe(0);
+  });
+  it('attempts every unsubscribe and preserves a terminal cleanup failure', () => {
+    const o = owner(),
+      c = control(),
+      t = target();
+    const failure = new Error('terminal unsubscribe');
+    let notify: StateSubscribeCallback<boolean> = () => {};
+    const subscribe = c.disabled.subscribe;
+    c.disabled.subscribe = (fn) => {
+      notify = fn;
+      return subscribe(fn);
+    };
+    failingUnsubscribe(c.focusVisible, failure);
+    bindInputShellControl(o, t, c);
+    expect(() => notify({ type: 'disconnect', reason: 'unmount' })).toThrow(failure);
+    expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+    expect(t.writes).toHaveLength(1);
+  });
+  it('does not let an old generation disconnect retire its replacement', () => {
+    const o = owner(),
+      first = control(),
+      second = control(),
+      t = target();
+    let old: StateSubscribeCallback<boolean> = () => {};
+    const subscribe = first.disabled.subscribe;
+    first.disabled.subscribe = (fn) => {
+      old = fn;
+      return subscribe(fn);
+    };
+    const binding = bindInputShellControl(o, t, first);
+    binding.replace(second);
+    old({ type: 'disconnect', reason: 'unmount' });
+    second.disabled.set(true);
+    expect(t.writes.at(-1)?.disabled).toBe(true);
+    expect([second.focusVisible.count(), second.disabled.count(), o.count()]).toEqual([1, 1, 1]);
+    binding.dispose();
+  });
+  it('cleans subscriptions returned after synchronous terminal notification before writing', () => {
+    const o = owner(),
+      c = control(),
+      t = target();
+    const subscribe = c.focusVisible.subscribe;
+    c.focusVisible.subscribe = (fn) => {
+      fn({ type: 'disconnect', reason: 'unmount' });
+      return subscribe(fn);
+    };
+    bindInputShellControl(o, t, c);
+    expect(t.writes).toHaveLength(0);
+    expect([c.focusVisible.count(), c.disabled.count(), o.count()]).toEqual([0, 0, 0]);
+  });
+
   it('reads current public facts and detaches all subscriptions exactly once', () => {
     const o = owner(),
       c = control(),
@@ -166,7 +249,7 @@ describe('single-control input shell composition lifecycle', () => {
     for (const f of [c.focusVisible, c.disabled]) {
       const sub = f.subscribe;
       f.subscribe = (fn) => {
-        fn();
+        fn({ type: 'next', prev: f.get(), next: f.get() });
         return sub(fn);
       };
     }
@@ -223,7 +306,7 @@ describe('single-control input shell composition lifecycle', () => {
     const o = owner(),
       c = control(),
       t = target();
-    let stale = () => {};
+    let stale: StateSubscribeCallback<boolean> = () => {};
     const sub = c.focusVisible.subscribe;
     c.focusVisible.subscribe = (fn) => {
       stale = fn;
@@ -232,7 +315,7 @@ describe('single-control input shell composition lifecycle', () => {
     const b = bindInputShellControl(o, t, c);
     b.replace(control());
     const before = t.writes.length;
-    stale();
+    stale({ type: 'next', prev: false, next: true });
     expect(t.writes).toHaveLength(before);
     o.destroy();
   });

@@ -38,6 +38,66 @@ function createImmediateHost(
 }
 
 describe('runtime contract: lifecycle module resource ownership (v1)', () => {
+  it.each([
+    ['bulk', 'undefined', undefined],
+    ['bulk', 'Error', new Error('bulk Props release failed')],
+    ['named', 'Error', new Error('named Props release failed')],
+  ])(
+    'reports a %s Props reset %s failure without skipping unrelated bulk reset',
+    async (mode, _label, failure) => {
+      const records: Record<string, unknown>[] = [];
+      let releases = 0;
+      const proto = definePrototype({
+        name: 'wiring-reset-props-failure',
+        setup(def) {
+          def.props.define({ step: { type: 'number' } });
+          const retained = def.state.bool('retained', false);
+          def.expose.state('retained', retained);
+        },
+      });
+      const session = createRuntimeSession(
+        proto,
+        createImmediateHost((wiring) => {
+          wiring.attach('props', [
+            [
+              RAW_PROPS_SOURCE_CAP,
+              {
+                get: () => ({ step: 0 }),
+                subscribe: () => () => {
+                  releases += 1;
+                  if (releases === 1) throw failure;
+                },
+              },
+            ],
+          ]);
+          wiring.attach('expose-state', [
+            [EXPOSES_RECORD_SINK_CAP, (record: Record<string, unknown>) => records.push(record)],
+          ]);
+        })
+      );
+      const before = records.at(-1);
+      expect(before).toHaveProperty('retained');
+
+      let didThrow = false;
+      let thrown: unknown;
+      try {
+        const wiring = session.caps.getWiring();
+        if (mode === 'bulk') wiring.reset();
+        else wiring.reset('props');
+      } catch (error) {
+        didThrow = true;
+        thrown = error;
+      }
+
+      expect(didThrow).toBe(true);
+      expect(thrown).toBe(failure);
+      expect(releases).toBe(1);
+      if (mode === 'bulk') expect(records.at(-1)).toEqual({});
+      else expect(records.at(-1)).toBe(before);
+      await session.dispose();
+    }
+  );
+
   it('stops ordinary authored disposal callbacks after failure while retiring acquired resources', async () => {
     const failure = new Error('authored disposal failure');
     const calls: string[] = [];

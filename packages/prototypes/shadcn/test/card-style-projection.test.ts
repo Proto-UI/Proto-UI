@@ -37,8 +37,9 @@ describe('public passive Card style scope', () => {
         schedule: (fn) => fn(),
         commit: (_c, s) => s?.done(),
         onRuntimeReady(w) {
+          const token = new EventTarget();
           w.attach('context', [
-            [CONTEXT_INSTANCE_TOKEN_CAP, {}],
+            [CONTEXT_INSTANCE_TOKEN_CAP, token],
             [CONTEXT_PARENT_CAP, () => null],
           ]);
         },

@@ -1,0 +1,41 @@
+id: C-LIFECYCLE-VIEW-OPERATION-0001
+type: contract
+title: Captured source-view operations have monotonic validity
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: New definition under issue 1071; source candidates require independent review, exact-head tests and host conformance before activation.
+summary: A read-only lifecycle identity lets consumers reject an unfulfilled operation after its initiating view is withdrawn without changing retained Focus ownership.
+criteria:
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-CAPTURE
+    text:
+      en: run.lifecycle.captureViewOperation is callback-only. Missing host support throws E_CAP_UNAVAILABLE. A supported host with no admitted current view returns null. Capture requires an alive instance, a committed mounted view and effective present ViewIntent; it neither waits nor requests a render.
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-READ
+    text:
+      en: The returned ViewOperation exposes only isCurrent, a read-only query permitted in any caller phase, including a different instance callback. It does not enter or keep alive a RunHandle, subscribe, schedule, focus, close or restore. Invalidated identities return false permanently. Unexpected producer failures remain failures rather than successful no-ops.
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-INVALIDATION
+    text:
+      en: Validity binds the source logical owner, current view epoch, host provider and withdrawal generation. Effective absent ViewIntent, view withdrawal or replacement, epoch end and terminal teardown invalidate old operations. A rejected controlled request that never changes resolved ViewIntent does not invalidate them. An effective absent-then-present transition cannot revive the old operation even if physical reconciliation coalesces it.
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-BOUNDARY
+    text:
+      en: The host owns withdrawal and explicit same-owner transport dispositions. Runtime and Base must not infer them from DOM containment. Temporary acquisition-readiness closure alone is not withdrawal. The atom does not cancel an already delivered logical Focus request or change C-AS-FOCUS-ROVING-0001-K; one-shot delivery remains the consumer's responsibility.
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-SUPPORT
+    text:
+      en: Consumers requiring this capability must expose unsupported admission as failure, not silently omit keyboard behavior and report conformance. Compiler and native targets require explicit operation and host realization or rejection; a registry entry or private view epoch is not implementation evidence.
+dependsOn:
+  contracts: [C-LIFECYCLE-0006, C-LIFECYCLE-0007, C-LIFECYCLE-0008, C-AS-FOCUS-ROVING-0001]
+verifies:
+  tests: [T-LIFECYCLE-VIEW-OPERATION-0001]
+sources:
+  - path: packages/core/src/handles.ts
+  - path: packages/runtime/src/kernel/view-operation.ts
+  - path: packages/runtime/src/instance/session.ts
+openQuestions:
+  - id: C-LIFECYCLE-VIEW-OPERATION-0001-Q-ADMISSION
+    question:
+      en: Have independent definition review and exact-head Runtime, four-Web and Compiler admission evidence established the supported boundary?
+    blocks: [activation:C-LIFECYCLE-VIEW-OPERATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Draft source-view operation validity independently from retained Focus request ownership.

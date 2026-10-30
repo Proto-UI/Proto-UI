@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { navigateSiteLocale } from '../site-locale-navigation';
 
 const source = readFileSync(
   resolve(process.cwd(), 'apps/www/src/components/override/LanguageSelect.astro'),
@@ -17,7 +18,12 @@ if (!processedScript.includes(importStatement)) {
   throw new Error('LanguageSelect must retain its existing site controls initialization');
 }
 const inlineScript = ts.transpileModule(
-  processedScript.replace(importStatement, 'const initSiteControls = () => {};'),
+  processedScript
+    .replace(importStatement, 'const initSiteControls = () => {};')
+    .replace(
+      "import { navigateSiteLocale } from '../site-locale-navigation';",
+      'const navigateSiteLocale = window.__testNavigateSiteLocale;'
+    ),
   { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }
 ).outputText;
 
@@ -40,6 +46,9 @@ const languageSelect = (family = 'shadcn') => `
 
 describe('documentation language selector', () => {
   beforeEach(() => {
+    (
+      window as unknown as { __testNavigateSiteLocale: typeof navigateSiteLocale }
+    ).__testNavigateSiteLocale = navigateSiteLocale;
     localStorage.clear();
     document.cookie = 'preferred-locale=; Max-Age=0; path=/';
     window.history.replaceState(null, '', '/en/docs/');
@@ -77,4 +86,25 @@ describe('documentation language selector', () => {
     expect(localStorage.getItem('preferred-locale')).toBe('zh-cn');
     expect(setItem).toHaveBeenCalledTimes(1);
   });
+});
+
+it('renders a genuine native Select recovery path rather than changing control semantics to links', () => {
+  expect(source).toContain('data-language-native-select');
+  expect(source).toContain('<option value={option.value}');
+  expect(source).not.toContain('<a href={option.path}');
+});
+
+it('routes the native Select recovery path through the same locale policy', () => {
+  (
+    window as unknown as { __testNavigateSiteLocale: typeof navigateSiteLocale }
+  ).__testNavigateSiteLocale = navigateSiteLocale;
+  window.history.replaceState(null, '', '/en/docs/?query=1#heading');
+  document.body.innerHTML = `<select data-language-native-select data-current-locale="en" data-locale-paths='{"en":"/en/docs/","zh-cn":"/zh-cn/docs/"}'><option value="en">English</option><option value="zh-cn">简体中文</option></select>`;
+  window.eval(inlineScript);
+  const native = document.querySelector<HTMLSelectElement>('select')!;
+  native.value = 'zh-cn';
+  native.dispatchEvent(new Event('change', { bubbles: true }));
+  expect(window.location.pathname).toBe('/zh-cn/docs/');
+  expect(window.location.search).toBe('?query=1');
+  expect(window.location.hash).toBe('#heading');
 });

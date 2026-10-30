@@ -87,6 +87,11 @@ criteria:
     text:
       en: 'Public appearance is default | ghost and defaults to default. Default preserves the existing bordered input surface and shadow. Ghost is an additive Proto UI visual extension: transparent resting border/background, no resting shadow, inherited foreground, and existing size/chevron anatomy. Omission or removal restores default even during active interaction; no Base behavior or Content presentation changes.'
       zh-CN: 公开 appearance 为 default | ghost，缺省为 default。default 保留既有有框输入表面与阴影；ghost 是 Proto UI 自有视觉扩展：静止边框与背景透明、无静止阴影、继承前景，保留 size 与 chevron anatomy。缺省或移除即使在交互中也恢复 default，不改变 Base 行为或 Content 呈现。
+  - id: P-SHADCN-SELECT-TRIGGER-FIELD-COMPOSITION
+    text:
+      en: The public fieldSelectTrigger entry invokes asFieldSelectTrigger once and reuses the standalone Trigger paint. Only the canonical optional Field binding supplies invalid, pending, policy and relationships; selection, focus, open requests and accepted truth remain with Base Select. Ordinary Trigger does not absorb a surrounding Field.
+    dependsOn:
+      contracts: [C-FIELD-SELECT-0001]
 openQuestions:
   - id: P-SHADCN-SELECT-TRIGGER-Q-UPSTREAM-DIFFERENCES
     question:

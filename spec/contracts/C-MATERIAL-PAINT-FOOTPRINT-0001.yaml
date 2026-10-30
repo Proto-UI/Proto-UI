@@ -1,0 +1,52 @@
+id: C-MATERIAL-PAINT-FOOTPRINT-0001
+type: contract
+title: Material paint footprints are revocable host facts with explicit layout reservation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: 'Definition-first slice only. Host association and reservation syntax, native geometry/optical conformance, resource budgets and independent review are not implemented or evidenced; existing contactPaintOutset is only a pure profile budget.'
+  zh-CN: '仅定义先行切片。宿主关联与保留空间语法、原生几何及光学一致性、资源预算与独立评审尚未实现或验证；现有 contactPaintOutset 仅是纯 profile 预算。'
+summary: One explicit material target and independent reservation part preserve input and border-box ownership while host-local four-edge paint facts remain generation-bound.
+statement:
+  en: 'A layout owner may explicitly associate one material paint target with its independently owned reservation part. The host, not page or prototype code, resolves a conservative four-sided paint footprint relative to the target border box. Reservation neither changes that border box nor mutates arbitrary ancestors. Unavailable facts never become zero-sized footprints or an optical readiness claim.'
+  zh-CN: '布局 owner 可显式关联一个材质绘制目标与其独立拥有的空间保留 part。由宿主而非页面或原型代码解析相对目标 border box 的保守四边绘制范围；保留空间不得改变该 border box 或修改任意祖先。不可用事实不得变成零范围或光学就绪声明。'
+criteria:
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-FACT
+    text:
+      en: "A ready footprint consists of finite nonnegative top/right/bottom/left distances in the host coordinate domain used for placement, bound to the exact target, view generation and current profile/geometry revision. It conservatively covers the declared profile's entire supported contact/deformation interval, not only the current idle pixels. Pixel values stay host-local and never enter portable props, State or Context. Static materials use their own declared footprint; pointer-contact budgets are not applied to every Surface."
+      zh-CN: 'ready footprint 为定位宿主坐标域中的有限非负 top/right/bottom/left 距离，绑定精确 target、view generation 与当前 profile/geometry revision；保守覆盖声明 profile 支持的完整接触形变区间而非仅静止像素。像素值留在宿主侧，不进入 portable props、State 或 Context；静态材质采用自身声明范围，不向所有 Surface 套用 pointer-contact 预算。'
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-UNAVAILABLE
+    text:
+      en: 'Missing capability or declaration, detached or zero-sized target, invalid geometry, unsupported transform/paint, stale revision and lost ownership produce explicit unavailable status. A measured and declared border-box-only profile may report four zeros; unknown is never equivalent to that profile. Unavailable reservation/visual clearance must not admit optical paint through an inferred zero: preserve the complete opaque fallback and original source safety checks. It does not disable selection, focus, dismissal or other Base semantics.'
+      zh-CN: '能力或声明缺失、目标分离或零尺寸、无效几何、不支持的 transform/paint、过期 revision 与所有权丢失均产生显式 unavailable。测量且声明为仅 border-box 的 profile 可报告四个零，但未知不等价于该 profile。不可用的保留空间或视觉间距不得借推定零值准入光学绘制；保留完整不透明回退及原 source 安全检查，不禁用 Base 选择、焦点或关闭语义。'
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-RESERVATION
+    text:
+      en: "The layout owner explicitly identifies a unique material target and a distinct dedicated reservation part in the same owned composition. No ancestor search or implicit wrapper selection is permitted. The reservation part owns only its declared reservation extent; consumer padding and the material target's layout border box, input/focus identity and accessible structure remain unchanged. Native host/CSS layout is preferred when it realizes the exact bounded footprint; otherwise use one thin host lease. Infeasible constraints report unavailable rather than repeatedly growing layout."
+      zh-CN: '布局 owner 显式指定同一自有组合中唯一材质目标与独立专用 reservation part，禁止祖先搜索或隐式 wrapper 选择。该 part 仅拥有声明的保留范围；消费者 padding、材质目标 layout border box、输入/焦点身份及可访问结构保持不变。原生宿主或 CSS 能实现精确有界范围时优先采用，否则使用单个薄宿主 lease；约束不可满足时报告 unavailable，不反复扩大布局。'
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-LIFETIME
+    text:
+      en: 'Reservation observation and writes belong to one current association lease. Measure the material target independently of the reservation extent, batch reads before writes, suppress unchanged writes and never poll animation frames by default. Replacement, including a new generation on the same physical node, revocation and disposal invalidate pending work before cleanup; reentry cannot revive or erase a successor. Remove only owned resources, never borrowed children or consumer styles.'
+      zh-CN: '空间保留的观察与写入属于唯一当前关联 lease；测量材质目标而非自身保留范围，批量先读后写、跳过未改变写入、默认不逐帧轮询。同物理节点新 generation、替换、撤销或销毁在清理前使待完成工作失效；重入不得复活旧者或清除后继。仅移除自有资源，不移除借用子树或消费者样式。'
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-SAFETY
+    text:
+      en: 'A footprint or completed reservation is not proof of backdrop completeness or optical rendering. Keep clipping, expanded-source bounds, foreign content overlap, freshness and preference guards. Zero-area DOM elements with borders, shadows, pseudo paint or visible overflowing descendants are not categorically safe. If available source or layout space is insufficient, keep honest fallback; do not hide blockers, reduce budgets or modify the optical ROI/threshold to pass.'
+      zh-CN: 'footprint 或空间保留完成不证明 backdrop 完整或已光学渲染；保留 clipping、扩展 source 边界、外部内容重叠、时效与偏好门。零面积但有 border、shadow、伪元素或可见溢出后代的 DOM 不可一概视为安全。source 或布局空间不足时诚实回退，不隐藏阻挡者、缩减预算或修改光学 ROI/阈值求通过。'
+dependsOn:
+  contracts: [C-FEEDBACK-MATERIAL-0001]
+verifies:
+  tests: [T-MATERIAL-PAINT-FOOTPRINT-0001]
+sources:
+  - path: packages/adapters/base/src/material/contact-profile.ts
+  - path: internal/records/2026-10-30-material-paint-footprint-definition.md
+openQuestions:
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-Q-SYNTAX
+    question: Which independently reviewable host association and reservation-part declaration realizes these responsibilities without page-specific observers, portable geometry or a new runtime bus?
+    blocks: [activation:C-MATERIAL-PAINT-FOOTPRINT-0001]
+  - id: C-MATERIAL-PAINT-FOOTPRINT-0001-Q-NATIVE
+    question: Which exact-source four-Web layout, optical, accessibility and measured resource evidence admits the reservation and unavailable-to-fallback behavior?
+    blocks: [activation:C-MATERIAL-PAINT-FOOTPRINT-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined explicit independent reservation and revocable four-edge paint facts; implementation, native proof and public syntax remain pending.
+tags: [material, geometry, layout, positioning, lifecycle]

@@ -6,83 +6,58 @@ import type {
   VirtualListContentProps,
   VirtualListContentExposes,
 } from '@proto.ui/prototypes-base/virtual-list';
-import { definePrototype, tw, type State } from '@proto.ui/core';
+import { definePrototype, tw } from '@proto.ui/core';
 import {
   asVirtualListRoot,
   asVirtualListViewport,
   asVirtualListContent,
 } from '@proto.ui/prototypes-base/virtual-list';
 export type * from '@proto.ui/prototypes-base/virtual-list';
+
+// Proto extension, not a Bootstrap 2.3.2 collection widget. Materialization and
+// logical collection state stay in Base and its existing public host boundary.
 export const virtualListRoot = definePrototype<VirtualListRootProps, VirtualListRootExposes>({
   name: 'bootstrap-2-3-2-virtual-list-root',
   setup(def) {
-    const behavior = asVirtualListRoot();
+    const inherited = asVirtualListRoot();
     def.feedback.style.use(
-      tw(
-        'min-w-0 max-w-full text-foreground rounded-[4px] border border-border bg-background shadow-sm grid gap-0'
-      )
+      tw('min-w-0 min-h-0 max-w-full text-foreground text-[14px] leading-[20px]')
     );
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
-    return behavior.render;
+    return inherited.render;
   },
 });
 export { virtualListRoot as bootstrap232VirtualListRoot };
+
 export const virtualListViewport = definePrototype<
   VirtualListViewportProps,
   VirtualListViewportExposes
 >({
   name: 'bootstrap-2-3-2-virtual-list-viewport',
   setup(def) {
-    const behavior = asVirtualListViewport();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground min-h-0 overflow-auto'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
-    return behavior.render;
+    const inherited = asVirtualListViewport();
+    const viewport = inherited.getAsHookHandle!('as-scroll-area-viewport');
+    if (!viewport?.stateHandles)
+      throw new Error('[bootstrap-2-3-2-virtual-list-viewport] Base focus facts required.');
+    def.feedback.style.use(tw('min-w-0 min-h-0 max-w-full outline-none'));
+    def.rule({
+      when: (w) => w.state(viewport.stateHandles!.focusVisible).eq(true),
+      intent: (i) =>
+        i.feedback.style.use(tw('ring-2 ring-ring ring-inset forced-colors-focus-outline')),
+    });
+    return inherited.render;
   },
 });
 export { virtualListViewport as bootstrap232VirtualListViewport };
+
 export const virtualListContent = definePrototype<
   VirtualListContentProps,
   VirtualListContentExposes
 >({
   name: 'bootstrap-2-3-2-virtual-list-content',
   setup(def) {
-    const behavior = asVirtualListContent();
-    def.feedback.style.use(tw('min-w-0 max-w-full text-foreground relative'));
-    const states = behavior.stateHandles as Record<string, State<boolean>> | undefined;
-    if (states?.focusVisible)
-      def.rule({
-        when: (w) => w.state(states.focusVisible!).eq(true),
-        intent: (i) =>
-          i.feedback.style.use(tw('outline-none ring-2 ring-ring forced-colors-focus-outline')),
-      });
-    if (states?.selected)
-      def.rule({
-        when: (w) => w.state(states.selected!).eq(true),
-        intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-      });
-    return behavior.render;
+    const inherited = asVirtualListContent();
+    def.feedback.style.use(tw('relative min-w-0 min-h-0 text-inherit'));
+    return inherited.render;
   },
 });
 export { virtualListContent as bootstrap232VirtualListContent };

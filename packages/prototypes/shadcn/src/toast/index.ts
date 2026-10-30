@@ -6,16 +6,18 @@ export { default as toastAction } from './action.proto';
 export { default as toastClose } from './close.proto';
 export { default } from './root.proto';
 export type {
-  ToastRootProps,
   ToastRootExposes,
-  ToastViewportProps,
   ToastViewportExposes,
-  ToastTitleProps,
   ToastTitleExposes,
-  ToastDescriptionProps,
   ToastDescriptionExposes,
-  ToastActionProps,
   ToastActionExposes,
-  ToastCloseProps,
   ToastCloseExposes,
 } from '@proto.ui/prototypes-base/toast';
+export type {
+  ToastRootProps,
+  ToastViewportProps,
+  ToastTitleProps,
+  ToastDescriptionProps,
+  ToastActionProps,
+  ToastCloseProps,
+} from './types';

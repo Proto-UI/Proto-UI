@@ -3,8 +3,21 @@ type: test
 title: Focus scope activation runtime contract tests
 status: draft
 since: 0.1.0
+lifecycleRationale: Existing scope evidence is retained; new per-activation Module policy cases are planned until their exact source executes, and do not prove native Dialog or Search continuity.
 summary: Runtime contract tests for explicit focus scope activation, previous focus restoration, and outside focus request gating.
 cases:
+  - id: T-FOCUS-SCOPE-0001-CASE-ACTIVATION-ENTRY-OVERRIDE
+    title: Manual override is activation-local and preserves the scope boundary and restoration
+    covers:
+      [
+        C-AS-FOCUS-SCOPE-0002-K,
+        C-AS-FOCUS-SCOPE-0002-B,
+        C-AS-FOCUS-SCOPE-0002-C,
+        C-AS-FOCUS-SCOPE-0002-D,
+        C-AS-FOCUS-SCOPE-0002-E,
+        C-AS-FOCUS-SCOPE-0002-F,
+      ]
+    expectation: manual-zero-auto-entry-default-reasons-and-next-activation-preserved
   - id: T-FOCUS-SCOPE-0001-CASE-ENTRY-ELIGIBILITY-MUTATIONS
     title: Entry fallback follows current native descendant eligibility and revokes observation on cleanup
     covers: [C-AS-FOCUS-SCOPE-0002-J]
@@ -38,6 +51,15 @@ cases:
       - C-AS-FOCUS-SCOPE-0002-B
     expectation: scope-without-target-remains-inactive
 implementations:
+  - id: module-scope-activation-entry-policy
+    kind: module-test
+    status: planned
+    path: packages/modules/focus/test/scope-activation-entry.test.ts
+    required: true
+    consumesCases: [T-FOCUS-SCOPE-0001-CASE-ACTIVATION-ENTRY-OVERRIDE]
+    notes:
+      - Direct FocusCenter policy controls preserve default request options, manual gating and explicit inside entry, previous-owner restoration, subsequent configured activation, configured manual and empty-scope behavior.
+      - Synthetic request outcomes are not native focus or trap traversal evidence. Dialog controlled refusal and runtime-replacement continuity remain separate consumer obligations; compiler support is not implied.
   - id: wc-entry-eligibility-observer
     kind: adapter-test
     status: passing
@@ -95,7 +117,11 @@ verifies:
         - C-AS-FOCUS-SCOPE-0002-H
         - C-AS-FOCUS-SCOPE-0002-I
         - C-AS-FOCUS-SCOPE-0002-J
+        - C-AS-FOCUS-SCOPE-0002-K
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Add planned discriminating per-activation entry policy controls while retaining all existing scope evidence.
   - version: 0.3.0-alpha.0
     change: revised
     summary: Added native radio-group traversal and live entry-eligibility mutation evidence without promoting the draft contract.

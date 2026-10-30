@@ -76,7 +76,8 @@ function delayNextLoad() {
 function startShell(
   runtime: RuntimeId = 'wc',
   style?: string,
-  prepareAppearance?: Parameters<typeof createPassiveShellComposition>[0]['prepareAppearance']
+  prepareAppearance?: Parameters<typeof createPassiveShellComposition>[0]['prepareAppearance'],
+  automaticMaterialScene?: () => boolean
 ) {
   const home = document.createElement('div');
   const mount = document.createElement('div');
@@ -100,6 +101,7 @@ function startShell(
     layout: { display: 'block', width: '100%' },
     className: 'transaction-shell',
     prepareAppearance,
+    automaticMaterialScene,
   });
   compositions.push(shell);
   const surface = () => content.closest<HTMLElement>('.transaction-shell')!;
@@ -638,3 +640,61 @@ for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
     expect(fixture.content.parentNode).not.toBe(originalSlot);
   });
 }
+
+it('re-evaluates the current content scene policy after loading each replacement shell', async () => {
+  let hasOwnedStages = true;
+  const policy = vi.fn(() => !hasOwnedStages);
+  const fixture = startShell('wc', undefined, undefined, policy);
+  await fixture.shell.ready;
+  expect(vi.mocked(renderDemo).mock.calls.at(-1)![0].automaticMaterialScene).toBe(false);
+  const originalInput = fixture.input;
+  const gate = delayNextLoad();
+  const replacement = fixture.shell.update('liquid-glass', NEXT);
+  hasOwnedStages = false;
+  gate.resolve();
+  await replacement;
+  expect(vi.mocked(renderDemo).mock.calls.at(-1)![0].automaticMaterialScene).toBe(true);
+  expect(fixture.content.closest('[data-material-scene]')).not.toBeNull();
+  hasOwnedStages = true;
+  await fixture.shell.update('brutalist', LATEST);
+  await fixture.shell.update('liquid-glass', NEXT);
+  expect(vi.mocked(renderDemo).mock.calls.at(-1)![0].automaticMaterialScene).toBe(false);
+  expect(fixture.content.closest('[data-material-scene]')).toBeNull();
+  expect(fixture.content.querySelector('input')).toBe(originalInput);
+  expect(policy).toHaveBeenCalledTimes(4);
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+  expect(fixture.mount.childNodes).toHaveLength(0);
+});
+
+it('keeps the automatic-scene default and retains content when current-plan admission fails', async () => {
+  const ordinary = await mountShell();
+  expect(vi.mocked(renderDemo).mock.calls.at(-1)![0].automaticMaterialScene).toBeUndefined();
+  await ordinary.shell.update('liquid-glass', NEXT);
+  expect(ordinary.content.closest('[data-material-scene]')).not.toBeNull();
+  let rejectPlan = false;
+  const fixture = startShell('wc', undefined, undefined, () => {
+    if (rejectPlan) throw new Error('current content plan rejected');
+    return false;
+  });
+  await fixture.shell.ready;
+  const retained = fixture.surface();
+  const count = fixture.mount.childNodes.length;
+  const renders = vi.mocked(renderDemo).mock.calls.length;
+  rejectPlan = true;
+  await expect(fixture.shell.update('liquid-glass', NEXT)).rejects.toThrow(
+    'current content plan rejected'
+  );
+  expect(fixture.surface()).toBe(retained);
+  expect(fixture.mount.childNodes).toHaveLength(count);
+  expect(vi.mocked(renderDemo).mock.calls).toHaveLength(renders);
+  expect(fixture.content.querySelector('input')).toBe(fixture.input);
+  rejectPlan = false;
+  vi.mocked(renderDemo).mockRejectedValueOnce(new Error('shell renderer failed'));
+  await expect(fixture.shell.update('liquid-glass', NEXT)).rejects.toThrow('shell renderer failed');
+  expect(fixture.surface()).toBe(retained);
+  expect(fixture.mount.childNodes).toHaveLength(count);
+  expect(fixture.content.querySelector('input')).toBe(fixture.input);
+  await fixture.shell.destroy();
+  expectReturned(fixture);
+});

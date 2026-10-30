@@ -65,7 +65,8 @@ export interface ModuleWiring {
 
   /**
    * Reset host caps for a module.
-   * If moduleName is omitted, reset all attached host caps.
+   * If moduleName is omitted, attempt to reset all modules, then rethrow the
+   * first failure unchanged. A failing vault still stops its own listeners.
    */
   reset(moduleName?: string): void;
 }

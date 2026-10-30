@@ -8,7 +8,7 @@ export default definePrototype<InputOtpSlotProps, InputOtpSlotExposes>({
     const inherited = asInputOtpSlot();
     def.feedback.style.use(
       tw(
-        'inline-flex size-8 items-center justify-center rounded-[4px] border border-border bg-background text-lg font-medium tabular-nums text-foreground'
+        'inline-flex w-[30px] h-[30px] items-center justify-center rounded-[4px] border border-[#ccc] bg-white text-[14px] leading-[20px] font-normal tabular-nums text-[#555]'
       )
     );
     def.rule({

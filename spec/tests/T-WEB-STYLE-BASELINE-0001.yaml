@@ -26,17 +26,6 @@ cases:
     covers: [D-WEB-STYLE-BASELINE-0001-D]
     expectation: proto-ui-layered-baseline-remains-below-explicit-consumer-layer
 implementations:
-  - id: cli-proto-style-css-box-model-test
-    kind: module-test
-    status: passing
-    path: packages/cli/test/proto-style-css.test.ts
-    required: true
-    consumesCases:
-      [
-        T-WEB-STYLE-BASELINE-0001-CASE-SCOPED-BORDER-BOX,
-        T-WEB-STYLE-BASELINE-0001-CASE-NO-GLOBAL-RESET,
-        T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT,
-      ]
   - id: cli-init-box-model-output-test
     kind: module-test
     status: passing
@@ -60,6 +49,22 @@ implementations:
       - D-WEB-STYLE-BASELINE-0001
     notes:
       - The four-runtime Light and Dark fixture proves a base-layer content-box sentinel loses to the Proto UI baseline while an explicit later consumer content-box override wins.
+  - id: www-prototype-style-closure-box-model-native-test
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/demo-prototype-style-closure.browser.test.ts
+    required: true
+    consumesCases:
+      [
+        T-WEB-STYLE-BASELINE-0001-CASE-SCOPED-BORDER-BOX,
+        T-WEB-STYLE-BASELINE-0001-CASE-NO-GLOBAL-RESET,
+        T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT,
+      ]
+    exercises:
+      - C-PROTOTYPE-STYLE-CLOSURE-0001
+      - D-WEB-STYLE-BASELINE-0001
+    notes:
+      - Genuine native Chromium box-model scenario authored after the zero-specificity baseline selector repair; not yet executed. Parent runs the exact scenario via managed Chromium and retains the receipt.
 verifies:
   decisions:
     - id: D-WEB-STYLE-BASELINE-0001
@@ -71,6 +76,9 @@ verifies:
           D-WEB-STYLE-BASELINE-0001-D,
         ]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Replaced the deleted source-spelling baseline unit test with a planned genuine native box-model scenario covering the scoped border-box, no-global-reset and layer-placement cases.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Added generated and four-runtime evidence that the layered baseline stays below explicit named consumer presentation.

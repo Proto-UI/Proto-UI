@@ -1,14 +1,16 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import {
   asAlertDialogDescription,
-  type AlertDialogDescriptionProps,
   type AlertDialogDescriptionExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+import type { AlertDialogDescriptionProps } from './types';
+import { setupOverlayPaint } from '../dialog/style';
+import { ALERT_DESCRIPTION } from './recipes';
 
 export default definePrototype<AlertDialogDescriptionProps, AlertDialogDescriptionExposes>({
   name: 'shadcn-alert-dialog-description',
   setup(def) {
     const behavior = asAlertDialogDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    setupOverlayPaint(def, ALERT_DESCRIPTION);
   },
 });

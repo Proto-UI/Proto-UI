@@ -1,13 +1,12 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asContextMenuRoot,
-  type ContextMenuRootProps,
-  type ContextMenuRootExposes,
-} from '@proto.ui/prototypes-base/context-menu';
+import { definePrototype } from '@proto.ui/core';
+import { asContextMenuRoot } from '@proto.ui/prototypes-base/context-menu';
+import type { ContextMenuRootProps, ContextMenuRootExposes } from './types';
+import { setupShadcnStyleScope } from '../style-scope';
 export default definePrototype<ContextMenuRootProps, ContextMenuRootExposes>({
   name: 'shadcn-context-menu-root',
+  modules: asContextMenuRoot.modules,
   setup(def) {
-    const behavior = asContextMenuRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-center gap-1'));
+    asContextMenuRoot();
+    setupShadcnStyleScope(def);
   },
 });

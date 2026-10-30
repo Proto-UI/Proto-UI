@@ -1,5 +1,6 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asCollapsibleTrigger } from '@proto.ui/prototypes-base/collapsible';
+import { setupShadcnStyleSelection } from '../style-scope';
 import type { ShadcnCollapsibleTriggerProps, ShadcnCollapsibleTriggerExposes } from './types';
 
 // P-SHADCN-COLLAPSIBLE-TRIGGER-BASE-INHERITANCE: Base is the only semantic owner.
@@ -9,8 +10,11 @@ const collapsibleTrigger = definePrototype<
   ShadcnCollapsibleTriggerExposes
 >({
   name: 'shadcn-collapsible-trigger',
+  modules: asCollapsibleTrigger.modules,
   setup(def) {
-    const state = asCollapsibleTrigger().stateHandles;
+    const inherited = asCollapsibleTrigger();
+    const state = inherited.stateHandles;
+    setupShadcnStyleSelection(def, 'new-york-v4');
     if (!state) throw new Error('[shadcn-collapsible-trigger] Missing Base state handles.');
     const { hovered, pressed, focusVisible, disabled } = state;
     // P-SHADCN-COLLAPSIBLE-TRIGGER-VISUAL-SAFETY: no fixed width/height or clipped long label.
@@ -40,6 +44,7 @@ const collapsibleTrigger = definePrototype<
       when: (w) => w.state(disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50 pointer-events-none cursor-default')),
     });
+    return inherited.render;
   },
 });
 
