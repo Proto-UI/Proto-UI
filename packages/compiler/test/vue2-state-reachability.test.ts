@@ -76,11 +76,22 @@ describe('Vue2 reached native state support', () => {
   });
   it('retains state captured by a passed callback and returned renderer', () => {
     const result = compile(`const value=def.state.numberDiscrete('value',0);
-      const write=()=>{value.set(value.get()+1);}; def.expose.method('write',write);
+      const write=()=>{value.set(value.get()+1);}; def.expose.method('write',()=>write());
       return r=>r.el('output',value.get());`);
     expect(result.operations).toContain('state.set');
     expect(result.operations).toContain('state.get');
     expectStateSupport(result, true);
+  });
+  it('keeps the existing inline-callback admission boundary explicit', () => {
+    const parsed = parsePrototype(`import {definePrototype} from '@proto.ui/core';
+      export default definePrototype({name:'callback-negative',setup(def){
+        const value=def.state.numberDiscrete('value',0);
+        const write=()=>{value.set(value.get()+1);};
+        def.expose.method('write',write);return r=>r.el('output',value.get());
+      }});`);
+    expect(parsed.ok).toBe(false);
+    if (!parsed.ok) expect(parsed.diagnostics.some(d => d.code === 'PUI1005'
+      && d.message.includes('inline checked callback'))).toBe(true);
   });
   it('follows state declarations across authored hook files', () => {
     const result = compile(`outer(); ${plain}`, {}, 'hooks', {
