@@ -1,0 +1,67 @@
+id: C-COMPILER-RELATIONAL-0001
+type: contract
+title: Portable relational comparison admission and ordering
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale: >-
+  Current human-directed Proto language direction for the bounded Compiler slice.
+  Admission tightens previously accepted primitive coercion; migration and independent
+  review remain required. Native consumer execution and complete host string-domain
+  evidence are missing, so this is not a stable cross-target guarantee.
+summary: Same-kind numeric or UTF-16 string relations with explicit diagnostics and ordered operand evaluation.
+statement:
+  en: >-
+    Proto is an independent language with an initially cropped TypeScript surface.
+    The relational operators <, <=, > and >= admit number/number or string/string
+    only. This slice neither inherits all JavaScript coercions nor changes strict
+    equality, concatenation, Rule gte, or portable-data admission.
+  zh-CN: >-
+    Proto 是独立语言，初期使用裁剪的 TypeScript 表面语法。
+    关系运算符仅准入 number/number 或 string/string；不继承完整 JS coercion，
+    不改变严格相等、拼接、Rule gte 或 portable-data 的准入边界。
+criteria:
+  - id: C-COMPILER-RELATIONAL-0001-ADMISSION
+    text: >-
+      Every Cartesian pair of union alternatives must have one shared number or
+      string primitive kind. Literal alternatives use their primitive kind.
+      Mixed, nullish, boolean, capability and structured operands reject with an
+      explicit source diagnostic and also reject when supplied as forged IR.
+      Existing unreachable bottom-expression typing is retained; it adds no values.
+  - id: C-COMPILER-RELATIONAL-0001-NUMBER
+    text: >-
+      Numbers compare as binary64 with ordered predicates. A NaN on either side
+      makes all four relations false; +0 and -0 compare equally. This rule covers
+      numeric expression results, not admission of nonfinite portable-data payloads.
+      In particular <= is not implemented as the negation of >.
+  - id: C-COMPILER-RELATIONAL-0001-STRING
+    text: >-
+      Strings compare lexicographically by UTF-16 code units, shorter prefixes first.
+      No locale collation or Unicode normalization occurs. U+10000 sorts before
+      U+E000. Escape-like text and control characters retain their original values.
+      A host unable to represent a string must report it unsupported rather than
+      silently replace it. GPUI Rust strings cannot represent lone surrogates;
+      all strings sent to Rust string literals, including record keys, members,
+      configuration and type fields, reject explicitly. Opaque authored-hook
+      registry names retain their separate injective UTF-16 key encoding. This slice does not expand the
+      host string transport domain or claim complete dynamic-host validation.
+  - id: C-COMPILER-RELATIONAL-0001-EVALUATION
+    text: Evaluate each operand exactly once, left before right, preserving observable effects and failures before comparing.
+  - id: C-COMPILER-RELATIONAL-0001-MIGRATION
+    text: >-
+      Previously accepted mixed/nullish comparisons require explicit narrowing or
+      author-chosen conversion to a shared admitted kind. Retain rejection evidence;
+      do not silently select a coercion or alter unrelated operators to restore acceptance.
+openQuestions:
+  - id: C-COMPILER-RELATIONAL-0001-Q-NATIVE-EVIDENCE
+    question: Complete independent review and native GPUI, Flutter and Qt consumer evidence, including host string transport boundaries, before stable admission.
+    blocks:
+      - activation:C-COMPILER-RELATIONAL-0001
+sources:
+  - path: packages/compiler/src/expression-types.ts
+  - path: packages/compiler/src/gpui-source.ts
+  - path: internal/records/2026-10-27-compiler-relational-admission.md
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Define the bounded same-kind relational migration and independent ordering criteria as draft direction.
+tags: [compiler, relational, portable-semantics]

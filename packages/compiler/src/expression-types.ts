@@ -49,6 +49,14 @@ function requireScalar(type: AtomicDataType, operator: string): string {
   return kind;
 }
 
+/** Relational operands have one shared primitive domain, including literal unions. */
+export function relationalOperandKind(left: DataType, right: DataType): 'number' | 'string' {
+  const kinds = [...alternatives(left), ...alternatives(right)].map(primitive);
+  if (kinds.every((kind) => kind === 'string')) return 'string';
+  if (kinds.every((kind) => kind === 'number')) return 'number';
+  throw new TypeError('Relational comparison requires number×number or string×string for every union alternative; mixed, nullish, boolean and structured operands require explicit narrowing or conversion.');
+}
+
 function truthy(type: AtomicDataType): AtomicDataType | undefined {
   if (isNullish(type)) return undefined;
   if (type === 'boolean') return { kind: 'literal', value: true };
@@ -106,9 +114,13 @@ export function inferBinaryType(operator: string, left: DataType, right: DataTyp
     throw new TypeError(`Unsupported binary operator ${operator}.`);
   if (leftMembers.length === 0 || rightMembers.length === 0) return union([]);
 
+  if (['<', '<=', '>', '>='].includes(operator)) {
+    relationalOperandKind(left, right);
+    return 'boolean';
+  }
+
   const leftKinds = leftMembers.map((member) => requireScalar(member, operator));
   const rightKinds = rightMembers.map((member) => requireScalar(member, operator));
-  if (['<', '<=', '>', '>='].includes(operator)) return 'boolean';
   if (operator !== '+') return 'number';
 
   const result: DataType[] = [];
