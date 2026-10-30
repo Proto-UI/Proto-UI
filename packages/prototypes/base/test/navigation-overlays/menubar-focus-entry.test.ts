@@ -1,4 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { FOCUS_CENTER } from '../../../../modules/focus/src/center';
+import { OverlayModuleImpl } from '../../../../modules/overlay/src/impl';
+import { BoundaryModuleImpl } from '../../../../modules/boundary/src/impl';
 import {
   AdaptToWebComponent,
   setElementProps,
@@ -34,6 +37,79 @@ const owned = new Set<HTMLElement>();
 const flush = async () => {
   for (let i = 0; i < 16; i++) await Promise.resolve();
 };
+function invocationStack() {
+  const previous = Error.stackTraceLimit;
+  try {
+    Error.stackTraceLimit = 32;
+    return new Error('entry diagnostic').stack ?? 'stack unavailable';
+  } finally {
+    Error.stackTraceLimit = previous;
+  }
+}
+// Test-only observation: preserve arguments, return values and thrown errors.
+// No host getters are sampled and no request/cancellation method is invoked.
+function traceEntry() {
+  const events: Array<Record<string, unknown>> = [];
+  let dropped = 0;
+  const ids = new Map<unknown, number>();
+  const id = (value: unknown) => {
+    if (value == null) return null;
+    if (!ids.has(value)) ids.set(value, ids.size + 1);
+    return ids.get(value);
+  };
+  const record = (event: Record<string, unknown>) => {
+    if (events.length < 160) events.push(event);
+    else dropped++;
+  };
+  for (const method of ['focusInRoving', 'applyFocusInRoving'] as const) {
+    const center = FOCUS_CENTER as any;
+    const original = center[method];
+    vi.spyOn(center, method).mockImplementation(function (this: any, ...args: any[]) {
+      record({
+        event: method,
+        provider: id(args[0]?.instance),
+        op: args[1],
+        intent: id(args[3]),
+        requireFocusedMember: args[2]?.requireFocusedMember,
+        defer: args[2]?.entryRequest?.defer,
+        requestEpoch: this.requestEpoch,
+        ownerEpoch: this.ownerEpoch,
+        pending: this.pendingRovingEntries?.size ?? null,
+      });
+      return Reflect.apply(original, this, args);
+    });
+  }
+  const overlay = OverlayModuleImpl.prototype as any;
+  const reconcile = overlay.afterViewReconciled;
+  vi.spyOn(overlay, 'afterViewReconciled').mockImplementation(function (
+    this: any,
+    callback: () => void
+  ) {
+    const owner = id(this);
+    record({ event: 'barrier-register', owner, mountPhase: this.mountPhase });
+    return Reflect.apply(reconcile, this, [
+      () => {
+        record({ event: 'barrier-deliver', owner, mountPhase: this.mountPhase });
+        return callback();
+      },
+    ]);
+  });
+  const boundary = BoundaryModuleImpl.prototype as any;
+  const notify = boundary.notifyObserved;
+  vi.spyOn(boundary, 'notifyObserved').mockImplementation(function (this: any, ...args: any[]) {
+    if (args[1] === 'focus.move')
+      record({
+        event: 'boundary-focus',
+        owner: id(this),
+        prototypeName: this.prototypeName,
+        suspended: this.stackEntry?.suspended ?? null,
+        stackActive: this.stackActive,
+        mountPhase: this.mountPhase,
+      });
+    return Reflect.apply(notify, this, args);
+  });
+  return () => ({ events, dropped });
+}
 afterEach(async () => {
   for (const root of owned) root.remove();
   owned.clear();
@@ -115,6 +191,7 @@ it('allows a committed press from an initially unfocused trigger', async () => {
 });
 it('does not let an initially unfocused press steal later author focus', async () => {
   const p = await bar('uncontrolled', '');
+  const trace = traceEntry();
   const outside = document.createElement('button');
   document.body.append(outside);
   owned.add(outside);
@@ -132,7 +209,7 @@ it('does not let an initially unfocused press steal later author focus', async (
   p.triggers[0]!.click();
   await flush();
   expect(interrupted).toBe(true);
-  expect(document.activeElement).toBe(outside);
+  expect(document.activeElement, JSON.stringify(trace())).toBe(outside);
   expect(p.root.getExposes().value.get()).toBe('file');
   setElementProps(p.panels[0]!, { sideOffset: 8 });
   await flush();
@@ -143,17 +220,20 @@ for (const keyName of ['ArrowDown', 'ArrowUp'] as const) {
     const p = await bar('uncontrolled', '');
     await p.focusTrigger(0);
     const target = p.items[0]![keyName === 'ArrowDown' ? 0 : 2]!;
+    const trace = traceEntry();
     const observed: boolean[] = [];
     const focusStacks: string[] = [];
     const original = target.focus.bind(target);
     vi.spyOn(target, 'focus').mockImplementation((options) => {
       observed.push(p.panels[0]!.parentElement === document.body);
-      focusStacks.push(new Error('native focus invocation').stack ?? 'stack unavailable');
+      focusStacks.push(invocationStack());
       original(options);
     });
     key(keyName);
     await flush();
-    expect(observed, JSON.stringify({ focusStacks, requests: p.requests })).toEqual([true]);
+    expect(observed, JSON.stringify({ focusStacks, requests: p.requests, trace: trace() })).toEqual(
+      [true]
+    );
     expect(document.activeElement).toBe(target);
     expect(p.requests).toEqual([{ value: 'file', reason: 'keyboard' }]);
   });
@@ -173,6 +253,7 @@ for (const interrupt of [
     document.body.append(outside);
     owned.add(outside);
     const target = p.items[0]![0]!;
+    const trace = traceEntry();
     const observations: Array<Record<string, unknown>> = [];
     const observe = (event: string, stack?: string) =>
       observations.push({
@@ -186,7 +267,7 @@ for (const interrupt of [
       });
     const originalFocus = target.focus.bind(target);
     const focus = vi.spyOn(target, 'focus').mockImplementation((options) => {
-      observe('focus', new Error('native focus invocation').stack);
+      observe('focus', invocationStack());
       originalFocus(options);
     });
     const append = document.body.appendChild.bind(document.body);
@@ -218,7 +299,7 @@ for (const interrupt of [
     key('ArrowDown');
     await flush();
     expect(interrupted).toBe(true);
-    expect(focus, JSON.stringify(observations)).not.toHaveBeenCalled();
+    expect(focus, JSON.stringify({ observations, trace: trace() })).not.toHaveBeenCalled();
     expect(document.activeElement).not.toBe(target);
     if (interrupt === 'outside-focus') expect(document.activeElement).toBe(outside);
     // A later reconciliation cannot revive the canceled command.
