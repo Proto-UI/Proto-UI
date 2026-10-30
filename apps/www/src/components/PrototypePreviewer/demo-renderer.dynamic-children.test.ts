@@ -148,8 +148,13 @@ describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
       const { ctx, api } = await mount(runtime);
       const root = ctx.refs.command,
         inputHost = ctx.refs.editor;
-      await vi.waitFor(() => expect(inputHost.querySelector('input')).not.toBeNull());
-      const input = inputHost.querySelector('input')!;
+      const editor = () =>
+        inputHost.matches('input')
+          ? (inputHost as HTMLInputElement)
+          : inputHost.querySelector('input');
+      await vi.waitFor(() => expect(editor()).not.toBeNull());
+      const input = editor()!;
+      expect(input.tagName).toBe('INPUT');
       input.focus();
       input.value = 'retained';
       input.dispatchEvent(
@@ -168,7 +173,7 @@ describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
       ).resolves.toBe('committed');
       expect(ctx.refs.command).toBe(root);
       expect(ctx.refs.editor).toBe(inputHost);
-      expect(inputHost.querySelector('input')).toBe(input);
+      expect(editor()).toBe(input);
       expect(ctx.refs.a).toBe(a);
       expect(ctx.refs.b).toBe(b);
       expect([...ctx.refs.results.children].map((el) => el.getAttribute('data-demo-ref'))).toEqual([
@@ -753,6 +758,37 @@ describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
         expect(element.style.getPropertyValue('--dynamic-string')).toBe('mixed');
         expect(element.style.getPropertyValue('--dynamic-object')).toBe('object');
       });
+      if (runtime === 'vue' || runtime === 'vue2') {
+        const map = Object.freeze({ '--dynamic-object': 'snapshot' });
+        api.setSurfaceStyle!('styled', [
+          'color: rgb(1, 2, 3) !important; --dynamic-string: ordered',
+          map,
+        ]);
+        await vi.waitFor(() => {
+          expect(element.style.getPropertyValue('--dynamic-string')).toBe('ordered');
+          expect(element.style.getPropertyValue('--dynamic-object')).toBe('snapshot');
+          expect(element.style.getPropertyPriority('color')).toBe('important');
+        });
+        expect(map).toEqual({ '--dynamic-object': 'snapshot' });
+        // Both author forms name the same CSS property. Reverse ordering in a
+        // later commit must reverse the winner, not retain two alias keys.
+        api.setSurfaceStyle!('styled', [
+          'font-size: 18px; background-color: rgb(1, 2, 3)',
+          { fontSize: '21px', backgroundColor: 'rgb(4, 5, 6)' },
+        ]);
+        await vi.waitFor(() => {
+          expect(element.style.fontSize).toBe('21px');
+          expect(element.style.backgroundColor).toBe('rgb(4, 5, 6)');
+        });
+        api.setSurfaceStyle!('styled', [
+          { fontSize: '21px', backgroundColor: 'rgb(4, 5, 6)' },
+          'font-size: 18px; background-color: rgb(1, 2, 3)',
+        ]);
+        await vi.waitFor(() => {
+          expect(element.style.fontSize).toBe('18px');
+          expect(element.style.backgroundColor).toBe('rgb(1, 2, 3)');
+        });
+      }
       api.setSurfaceStyle!('styled', '');
       api.setProps('styled', { disabled: true });
       await vi.waitFor(() => {
@@ -760,6 +796,7 @@ describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
         expect(element.style.getPropertyValue('--dynamic-string')).toBe('');
         expect(element.style.getPropertyValue('--dynamic-object')).toBe('');
         expect(element.style.getPropertyValue('--dynamic-original')).toBe('');
+        expect(element.style.getPropertyPriority('color')).toBe('');
       });
       expect(ctx.refs.styled).toBe(element);
     }, 20_000);

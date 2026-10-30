@@ -239,7 +239,7 @@ describe('public dynamic-child admission and lifetime model (no renderer)', () =
       createDynamicChildrenModel(initial({ ...slot('r'), children: ['not empty'] }))
     ).toThrow(/requires nonempty ref and empty initial children/);
     expect(() => createDynamicChildrenModel(initial(slot('r', ['a', 'a'])))).toThrow(
-      /duplicate declared/
+      /requires unique explicit prototypeIds/
     );
     expect(() =>
       createDynamicChildrenModel(initial({ kind: 'box', children: [slot('r'), slot('r')] }))

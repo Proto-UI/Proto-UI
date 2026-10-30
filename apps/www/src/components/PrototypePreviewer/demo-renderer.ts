@@ -159,6 +159,32 @@ function normalizeReactSurfaceStyle(
   return normalized;
 }
 
+/** Snapshot Vue surface entries on every framework render. A retained mutable
+ * theme object must not alias the previous VNode's style, and mixed string/map
+ * input must never be spread as numeric CSSStyleDeclaration properties. */
+function normalizeVueSurfaceStyle(
+  surfaceStyle: DemoSurfaceStyle,
+  document: Document
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  for (const entry of Array.isArray(surfaceStyle) ? surfaceStyle : [surfaceStyle]) {
+    if (typeof entry === 'string') {
+      const declaration = document.createElement('span').style;
+      declaration.cssText = entry;
+      for (let index = 0; index < declaration.length; index++) {
+        const property = declaration.item(index);
+        const priority = declaration.getPropertyPriority(property);
+        normalized[reactStylePropertyName(property)] =
+          declaration.getPropertyValue(property) + (priority ? ' !' + priority : '');
+      }
+    } else {
+      for (const [property, value] of Object.entries(entry))
+        normalized[reactStylePropertyName(property)] = value;
+    }
+  }
+  return normalized;
+}
+
 function getScopedComponentCache<T extends object>(
   cache: WeakMap<object, Map<string, T>>,
   adapter: object
@@ -1300,7 +1326,8 @@ async function renderDemoVue(
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
     const surfaceStyle = (node.ref ? surfaceStyles[node.ref] : undefined) ?? node.surfaceStyle;
-    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
+    if (surfaceStyle !== undefined)
+      mergedProps.surfaceStyle = normalizeVueSurfaceStyle(surfaceStyle, host.ownerDocument);
     return Vue.h(Component, mergedProps, () => kids);
   }
 
@@ -1543,7 +1570,8 @@ async function renderDemoVue2(
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
     const surfaceStyle = (node.ref ? surfaceStyles.get(node.ref) : undefined) ?? node.surfaceStyle;
-    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
+    if (surfaceStyle !== undefined)
+      mergedProps.surfaceStyle = normalizeVueSurfaceStyle(surfaceStyle, host.ownerDocument);
 
     const data = { ...toVue2ComponentData(mergedProps), key };
     if (node.ref) data.ref = node.ref;
