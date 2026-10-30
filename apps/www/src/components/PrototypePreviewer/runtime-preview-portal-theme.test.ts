@@ -368,7 +368,14 @@ describe('generic preview owned portal theme', () => {
             const update = next.api.setSurfaceStyle!;
             next.api.setSurfaceStyle = (ref, style) => {
               update(ref, style);
-              if (armed && ref === 'mask' && style['--pui-background'] === '#222222') {
+              if (
+                armed &&
+                ref === 'mask' &&
+                style &&
+                typeof style === 'object' &&
+                !Array.isArray(style) &&
+                style['--pui-background'] === '#222222'
+              ) {
                 armed = false;
                 nested = surface.setAppearance(nextFamily, { '--pui-background': '#333333' });
               }
@@ -415,7 +422,14 @@ describe('generic preview owned portal theme', () => {
             const update = value.api.setSurfaceStyle!.bind(value.api);
             value.api.setSurfaceStyle = (ref, style) => {
               update(ref, style);
-              if (fail && ref === 'mask' && style['--pui-background'] === '#222222') {
+              if (
+                fail &&
+                ref === 'mask' &&
+                style &&
+                typeof style === 'object' &&
+                !Array.isArray(style) &&
+                style['--pui-background'] === '#222222'
+              ) {
                 fail = false;
                 throw new Error('injected normalized surface publication failure');
               }

@@ -1,3 +1,4 @@
+import { snapshotDemoValue } from './demo-dynamic-children';
 import { bindSiteSelectDismissal } from '../site-select-dismissal';
 import { siteTextRecipe } from '../site-text-recipes';
 import type { RuntimeId } from './runtimes/ids';
@@ -5,6 +6,7 @@ import {
   assertDemoSpec,
   type DemoBoxAttrs,
   type DemoChild,
+  type DemoKeyedChild,
   type DemoNode,
   type DemoSetupContext,
   type DemoSpec,
@@ -370,6 +372,9 @@ export function assertProjectionRecipeClosure(
   const collect = (child: DemoChild): void => {
     if (typeof child === 'string' || child.kind === 'text') return;
     if (child.kind === 'proto') actualPrototypeIds.add(child.prototypeId);
+    if (child.kind === 'box')
+      for (const prototypeId of child.dynamicChildren?.prototypeIds ?? [])
+        actualPrototypeIds.add(prototypeId);
     for (const nested of child.children ?? []) collect(nested);
   };
   collect(node);
@@ -468,8 +473,17 @@ function cloneProjectedChild(
     )
   );
   if (node.kind === 'box') {
+    for (const prototypeId of node.dynamicChildren?.prototypeIds ?? []) {
+      if (!allowedPrototypeIds.has(prototypeId))
+        throw new Error(
+          `[PrototypePreviewer] dynamic Prototype "${prototypeId}" is not declared by the selected projection family.`
+        );
+    }
     return {
       ...node,
+      dynamicChildren: node.dynamicChildren
+        ? { prototypeIds: [...node.dynamicChildren.prototypeIds] }
+        : undefined,
       attrs: { ...(node.attrs ?? {}), ...coordinateAttrs },
       className: mergeClassName(node.className, 'pui-projection-box'),
       children,
@@ -648,6 +662,31 @@ function callbackValue(detail: unknown): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
+/** Internal renderer handles for author Prototypes without public refs. */
+function dynamicProjectionRefs(
+  slotRef: string,
+  key: string,
+  node: DemoChild,
+  path: readonly number[] = []
+): DemoChild {
+  if (typeof node === 'string' || node.kind === 'text') return node;
+  return {
+    ...node,
+    ...(node.kind === 'proto' && node.ref === undefined
+      ? {
+          ref: `${REF_PREFIX}dynamic_${encodeURIComponent(JSON.stringify([slotRef, key, path]))}`,
+        }
+      : {}),
+    children: node.children?.map((child, index) =>
+      dynamicProjectionRefs(slotRef, key, child, [...path, index])
+    ),
+  };
+}
+function assertChildApiRef(ref: string): void {
+  if (ref.startsWith(REF_PREFIX))
+    throw new Error('[PrototypePreviewer] reserved projection ref is not a child API handle.');
+}
+
 function childRefsWithin(
   contentHost: HTMLElement,
   refs: Record<string, HTMLElement>
@@ -756,6 +795,7 @@ export function createProjectionComposition(
   const rendererThemeSurfaceStyle = themeSurfaceStyle ?? {};
   let activeContext: DemoSetupContext | null = null;
   let stampActiveProjectionSurfaces: (() => void) | null = null;
+  let applyActiveDynamicTheme: (() => void) | null = null;
   const projectedChild = cloneProjectedChild(
     options.childDemo.root,
     coordinateAttrs,
@@ -903,6 +943,7 @@ export function createProjectionComposition(
     };
     stampActiveProjectionSurfaces = stampProjectionSurfaces;
     let stopObservingMarkerChanges = () => {};
+    let clearDynamicChildren = () => {};
     let childCleanup: void | (() => void) = undefined;
     try {
       for (const id of controlIds) {
@@ -972,10 +1013,137 @@ export function createProjectionComposition(
         }
       }
 
+      const committedDynamic = new Map<
+        string,
+        { sequence: number; children: readonly DemoKeyedChild[] }
+      >();
+      clearDynamicChildren = () => committedDynamic.clear();
+      let nextDynamicSequence = 0;
+      const applyDynamicTheme = () => {
+        if (activeContext !== context) return;
+        const apply = (node: DemoChild) => {
+          if (activeContext !== context || typeof node === 'string' || node.kind === 'text') return;
+          if (node.kind === 'proto') {
+            const authored = mergeSurfaceStyle(
+              node.surfaceStyle,
+              node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
+            );
+            context.api.setSurfaceStyle!(
+              node.ref!,
+              mergeSurfaceStyle(authored, themeSurfaceStyle ?? {}) ?? {}
+            );
+          }
+          for (const nested of node.children ?? []) apply(nested);
+        };
+        for (const value of committedDynamic.values())
+          for (const child of value.children) apply(child.node);
+      };
+      applyActiveDynamicTheme = applyDynamicTheme;
+      const childRefs = context.api.setChildren
+        ? new Proxy(Object.create(null) as Record<string, HTMLElement>, {
+            get: (_target, key) =>
+              activeContext === context && typeof key === 'string' && !key.startsWith(REF_PREFIX)
+                ? context.refs[key]
+                : undefined,
+            has: (_target, key) =>
+              activeContext === context &&
+              typeof key === 'string' &&
+              !key.startsWith(REF_PREFIX) &&
+              Object.hasOwn(context.refs, key),
+            ownKeys: () =>
+              activeContext === context
+                ? Object.keys(context.refs).filter((ref) => !ref.startsWith(REF_PREFIX))
+                : [],
+            getOwnPropertyDescriptor: (_target, key) =>
+              activeContext === context &&
+              typeof key === 'string' &&
+              !key.startsWith(REF_PREFIX) &&
+              Object.hasOwn(context.refs, key)
+                ? {
+                    configurable: true,
+                    enumerable: true,
+                    value: context.refs[key],
+                    writable: false,
+                  }
+                : undefined,
+            set: () => false,
+            deleteProperty: () => false,
+          })
+        : childRefsWithin(contentHost, context.refs);
+      const childApi: DemoSetupContext['api'] = {
+        ...context.api,
+        call(ref, path, ...args) {
+          assertChildApiRef(ref);
+          return context.api.call(ref, path, ...args);
+        },
+        getExposes(ref) {
+          assertChildApiRef(ref);
+          return context.api.getExposes(ref);
+        },
+        setProps(ref, props) {
+          assertChildApiRef(ref);
+          context.api.setProps(ref, props);
+        },
+        ...(context.api.removeProps
+          ? {
+              removeProps(ref: string, names: readonly string[]) {
+                assertChildApiRef(ref);
+                context.api.removeProps!(ref, names);
+              },
+            }
+          : {}),
+        ...(context.api.setSurfaceStyle
+          ? {
+              setSurfaceStyle(ref: string, style: DemoSurfaceStyle) {
+                assertChildApiRef(ref);
+                context.api.setSurfaceStyle!(ref, style);
+              },
+            }
+          : {}),
+        ...(context.api.setChildren
+          ? {
+              async setChildren(slotRef: string, incoming: readonly DemoKeyedChild[]) {
+                if (activeContext !== context) return 'disposed' as const;
+                assertChildApiRef(slotRef);
+                if (!context.api.setSurfaceStyle)
+                  throw new Error(
+                    '[PrototypePreviewer] dynamic projection requires the public surface-style capability.'
+                  );
+                // Snapshot before projection: accessors and later caller mutation
+                // cannot bypass admission or mutate an in-flight update.
+                const children = snapshotDemoValue(incoming).map(({ key, node }) => {
+                  assertReservedRefsAvailable(node);
+                  return { key, node: dynamicProjectionRefs(slotRef, key, node) };
+                });
+                const projected = children.map(({ key, node }) => ({
+                  key,
+                  node: cloneProjectedChild(
+                    node,
+                    coordinateAttrs,
+                    themeSurfaceStyle ?? {},
+                    allowedPrototypeIds,
+                    componentRootPrototypeId
+                  ),
+                }));
+                const sequence = ++nextDynamicSequence;
+                if (activeContext !== context) return 'disposed' as const;
+                const status = await context.api.setChildren!(slotRef, projected);
+                if (status === 'committed' && activeContext === context) {
+                  // A newer rejected request must not erase the last successful tree.
+                  if (sequence > (committedDynamic.get(slotRef)?.sequence ?? 0))
+                    committedDynamic.set(slotRef, { sequence, children });
+                  applyDynamicTheme();
+                  stampProjectionSurfaces();
+                }
+                return status;
+              },
+            }
+          : {}),
+      };
       childCleanup = options.childDemo.setup?.({
         host: contentHost,
-        refs: childRefsWithin(contentHost, context.refs),
-        api: context.api,
+        refs: childRefs,
+        api: childApi,
       });
       stampProjectionSurfaces();
       stopObservingMarkerChanges = observeProjectionSurfaceMarkers(
@@ -986,6 +1154,7 @@ export function createProjectionComposition(
       );
       applyLocked(context);
     } catch (error) {
+      clearDynamicChildren();
       stopObservingMarkerChanges();
       for (const cleanup of appearanceCleanups) cleanup();
       for (const { element, listener } of listeners) {
@@ -998,6 +1167,7 @@ export function createProjectionComposition(
           stampActiveProjectionSurfaces = null;
         }
         activeContext = null;
+        applyActiveDynamicTheme = null;
       }
       throw error;
     }
@@ -1020,6 +1190,7 @@ export function createProjectionComposition(
         }
       };
 
+      attempt(clearDynamicChildren);
       attempt(stopObservingMarkerChanges);
       for (const cleanup of appearanceCleanups) attempt(cleanup);
       for (const id of controlIds) {
@@ -1034,6 +1205,7 @@ export function createProjectionComposition(
       if (typeof childCleanup === 'function') attempt(childCleanup);
       if (activeContext === context) {
         activeContext = null;
+        applyActiveDynamicTheme = null;
         if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
           stampActiveProjectionSurfaces = null;
         }
@@ -1130,6 +1302,7 @@ export function createProjectionComposition(
       const nextTheme = copyThemeSurfaceStyle(nextThemeSurfaceStyle, themeSurfaceStyle);
       updateRendererThemeSurfaceStyles(demo.root, nextTheme);
       themeSurfaceStyle = nextTheme;
+      applyActiveDynamicTheme?.();
       stampActiveProjectionSurfaces?.();
     },
     restoreFocus(focusKey) {

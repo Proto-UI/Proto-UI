@@ -19,6 +19,8 @@ export type DemoNode =
       className?: string;
       attrs?: DemoBoxAttrs;
       ref?: string;
+      /** Explicit initially empty author slot; every future prototype must be declared. */
+      dynamicChildren?: { prototypeIds: readonly string[] };
       children?: DemoChild[];
     }
   | {
@@ -41,7 +43,21 @@ export type DemoAssociationKeys = Readonly<{ controlLabel: string }>;
 
 export type DemoChild = DemoNode | string;
 
+export type DemoKeyedChild = Readonly<{ key: string; node: DemoChild }>;
+export type DemoChildrenCommit = 'committed' | 'superseded' | 'disposed';
+
 export type DemoRuntimeApi = {
+  /**
+   * Replace only a declared box's managed keyed author children, preserving the
+   * static prototype ancestors. Same key/type retains its instance with fixed
+   * nested topology and refs; values may change. Use a new key for subtree shape
+   * changes. Root type changes retire that entry. Invalid input rejects before mutation. The promise marks
+   * host/ref commit, not asynchronous Prototype readiness. Queued updates for the
+   * same slot coalesce; an already-started host commit finishes before the next.
+   * Built-ins implement
+   * this; optional only for compatibility with external/custom APIs.
+   */
+  setChildren?(slotRef: string, children: readonly DemoKeyedChild[]): Promise<DemoChildrenCommit>;
   call(ref: string, path: string, ...args: unknown[]): unknown;
   getExposes(ref: string): Record<string, unknown> | undefined;
   /**
@@ -57,7 +73,7 @@ export type DemoRuntimeApi = {
    */
   removeProps?(ref: string, names: readonly string[]): void;
   /** Website composition surface channel; available in all four built-in renderers. */
-  setSurfaceStyle?(ref: string, next: Record<string, string>): void;
+  setSurfaceStyle?(ref: string, next: DemoSurfaceStyle): void;
 };
 
 export type DemoSetupContext = {
@@ -226,6 +242,25 @@ export function assertDemoSpec(demo: DemoSpec) {
           }
         }
       }
+      if (node.dynamicChildren !== undefined) {
+        const declaration = node.dynamicChildren;
+        if (!node.ref?.trim() || (node.children?.length ?? 0) !== 0)
+          throw new Error(
+            '[PrototypePreviewer] dynamic box requires nonempty ref and empty initial children.'
+          );
+        if (
+          !declaration ||
+          typeof declaration !== 'object' ||
+          Array.isArray(declaration) ||
+          Object.keys(declaration).some((key) => key !== 'prototypeIds') ||
+          !Array.isArray(declaration.prototypeIds) ||
+          declaration.prototypeIds.some((id) => typeof id !== 'string' || !id.trim()) ||
+          new Set(declaration.prototypeIds).size !== declaration.prototypeIds.length
+        )
+          throw new Error(
+            '[PrototypePreviewer] dynamic box requires unique explicit prototypeIds.'
+          );
+      }
       assertClassName((node as any).className, [...path, 'className']);
       assertBoxAttrs((node as any).attrs, [...path, 'attrs']);
       if ((node as any).surfaceStyle !== undefined) {
@@ -305,6 +340,8 @@ export function collectPrototypeIds(node: DemoChild, out: Set<string>) {
     out.add(node.prototypeId);
   }
   if (node.kind === 'text') return;
+  if (node.kind === 'box')
+    for (const prototypeId of node.dynamicChildren?.prototypeIds ?? []) out.add(prototypeId);
   const kids = node.children ?? [];
   for (const child of kids) collectPrototypeIds(child, out);
 }
