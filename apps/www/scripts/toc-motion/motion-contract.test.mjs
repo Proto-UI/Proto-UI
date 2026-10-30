@@ -138,3 +138,84 @@ test('native wheel diagnostics disclose hit targets without retargeting or weake
   assert.throws(() => verify(source.replace(composedPathCall, '')));
   for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
 });
+
+import { createPageErrorDiagnostics } from './page-error-diagnostics.mjs';
+test('page errors retain bounded stack, source, phase and trusted input without changing failure truth', () => {
+  const failures = [];
+  const recorder = createPageErrorDiagnostics({
+    sanitize: (text) => text.replaceAll('private-query', '[redacted]'),
+    fail: (message) => failures.push(message),
+    limit: 2,
+    textLimit: 120,
+  });
+  const entry = recorder.record(
+    {
+      name: 'RangeError',
+      message: 'Maximum call stack size exceeded',
+      stack: 'RangeError\n at https://site.test/source.js?private-query:10:2',
+    },
+    {
+      sourceHead: 'actual-head',
+      expectedHead: 'expected-head',
+      phase: 'continuous-reverse',
+      pageURL: 'https://site.test/route?private-query',
+      observedAtUTC: 'now',
+    }
+  );
+  assert.equal(failures.length, 1);
+  assert.equal(entry.sourceHead, 'actual-head');
+  assert.equal(entry.phase, 'continuous-reverse');
+  assert.match(entry.stack, /source.js/);
+  assert.doesNotMatch(JSON.stringify(entry), /private-query/);
+  recorder.annotate(entry, {
+    attribution: 'at-error-event',
+    route: 'https://site.test/route',
+    sourceURL: 'https://site.test/source.js',
+    line: 10,
+    column: 2,
+    phase: 'continuous-reverse',
+    browserDropped: 0,
+    lastTrustedInput: { type: 'wheel', key: '', targetTag: 'MAIN', timestamp: 123 },
+  });
+  assert.deepEqual(entry.inputContext.lastTrustedInput, {
+    type: 'wheel',
+    key: '',
+    targetTag: 'MAIN',
+    timestamp: 123,
+  });
+  assert.equal(entry.inputContext.sourceURL, 'https://site.test/source.js');
+  assert.equal(entry.inputContext.line, 10);
+  recorder.contextFailed(entry, new Error('Page closed before context read'));
+  assert.equal(entry.inputContextError, 'Page closed before context read');
+  assert.equal(failures.length, 1, 'enrichment does not erase or duplicate the original failure');
+  const second = recorder.record({ message: 'second', stack: 'x'.repeat(1000) }, {});
+  assert.equal(second.stack.length, 120);
+  for (let i = 0; i < 20; i++) assert.equal(recorder.record(new Error('overflow'), {}), null);
+  assert.equal(recorder.report.total, 22);
+  assert.equal(recorder.report.entries.length, 2);
+  assert.equal(recorder.report.dropped, 20);
+  assert.equal(failures.length, 3, 'two original errors and one capped diagnostic failure');
+  assert.ok(failures.every((value) => value.startsWith('pageerror:')));
+  assert.throws(() => createPageErrorDiagnostics({ sanitize: String, fail() {}, limit: 0 }));
+});
+test('page error capture preserves fatal status and bounded context reads', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const source = await readFile(new URL('./capture-toc-motion.mjs', import.meta.url), 'utf8');
+  const required = [
+    "page.on('pageerror'",
+    'pageErrors.record(error',
+    'sourceHead: report.source?.actualGitHead',
+    'phase: activeCase',
+    'pageURL: page.url()',
+    'if (!event.isTrusted) return',
+    'pageErrors.contextFailed(entry, failure)',
+    'pendingErrorContexts.delete(work)',
+    'await Promise.allSettled([...pendingErrorContexts])',
+    'if (report.failures.length) process.exitCode = 1',
+  ];
+  const verify = (input) => {
+    for (const part of required) assert.ok(input.includes(part), part);
+  };
+  verify(source);
+  for (const part of required) assert.throws(() => verify(source.replaceAll(part, '')));
+});

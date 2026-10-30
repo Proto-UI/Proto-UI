@@ -1,5 +1,6 @@
 /** Independent source-bound real-browser evidence. No repository writes or shared server reuse. */
 import { createRequire } from 'node:module';
+import { createPageErrorDiagnostics } from './page-error-diagnostics.mjs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { mkdir, readFile, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
@@ -49,6 +50,13 @@ const report = {
   artifacts: [],
   debt: [],
 };
+let activeCase = 'startup';
+const pendingErrorContexts = new Set();
+const pageErrors = createPageErrorDiagnostics({
+  sanitize: sanitizeDiagnostic,
+  fail: (message) => report.failures.push(message),
+});
+report.pageErrors = pageErrors.report;
 await mkdir(out, { recursive: true });
 const save = () =>
   writeFile(path.join(out, 'toc-motion.json'), JSON.stringify(report, null, 2) + '\n');
@@ -443,6 +451,7 @@ async function finishStage(page, entry) {
 async function addCase(name, fn) {
   const entry = { name, failures: [] };
   report.cases.push(entry);
+  activeCase = name;
   try {
     await fn(entry);
   } catch (error) {
@@ -461,11 +470,104 @@ async function makeContext(options = {}) {
     serviceWorkers: 'block',
     ...options,
   });
-  context.on('page', (page) =>
-    page.on('pageerror', (error) =>
-      report.failures.push(`pageerror: ${sanitizeDiagnostic(error.message)}`)
-    )
-  );
+  // Read-only observation: no event cancellation, focus or product callback wrapping.
+  await context.addInitScript(() => {
+    const state = { lastTrustedInput: null, errors: [], dropped: 0 };
+    window.__tocErrorDiagnostics = state;
+    for (const type of ['pointerdown', 'click', 'keydown', 'wheel'])
+      window.addEventListener(
+        type,
+        (event) => {
+          if (!event.isTrusted) return;
+          state.lastTrustedInput = {
+            type: event.type,
+            key: [
+              'Tab',
+              'Enter',
+              'Escape',
+              'Home',
+              'End',
+              'ArrowUp',
+              'ArrowDown',
+              'ArrowLeft',
+              'ArrowRight',
+              ' ',
+            ].includes(event.key)
+              ? event.key
+              : '',
+            targetTag: event.target instanceof Element ? event.target.tagName : '',
+            timestamp: performance.now(),
+          };
+        },
+        { capture: true, passive: true }
+      );
+    const remember = (message, sourceURL = '', line = null, column = null) => {
+      if (state.errors.length >= 64) {
+        state.dropped++;
+        return;
+      }
+      state.errors.push({
+        message: String(message).slice(0, 16384),
+        attribution: 'at-error-event',
+        phase: window.__tocEvidence?.stage ?? 'before-observer',
+        route: location.href,
+        sourceURL,
+        line,
+        column,
+        lastTrustedInput: state.lastTrustedInput,
+      });
+    };
+    window.addEventListener('error', (event) =>
+      remember(event.error?.message ?? event.message, event.filename, event.lineno, event.colno)
+    );
+    window.addEventListener('unhandledrejection', (event) =>
+      remember(event.reason?.message ?? event.reason)
+    );
+  });
+  context.on('page', (page) => {
+    page.on('pageerror', (error) => {
+      const entry = pageErrors.record(error, {
+        sourceHead: report.source?.actualGitHead,
+        expectedHead,
+        phase: activeCase,
+        pageURL: page.url(),
+        observedAtUTC: new Date().toISOString(),
+      });
+      if (!entry) return;
+      let timeout;
+      const work = Promise.race([
+        page.evaluate((message) => {
+          const state = window.__tocErrorDiagnostics;
+          const index = state?.errors.findIndex((entry) => entry.message === message) ?? -1;
+          const event =
+            index >= 0
+              ? state.errors.splice(index, 1)[0]
+              : {
+                  attribution: 'after-pageerror-context-only',
+                  phase: window.__tocEvidence?.stage ?? 'before-observer',
+                  route: location.href,
+                  lastTrustedInput: state?.lastTrustedInput ?? null,
+                };
+          return { ...event, browserDropped: state?.dropped ?? 0 };
+        }, error.message),
+        new Promise((_, reject) => {
+          timeout = setTimeout(
+            () => reject(new Error('Page-error context read exceeded 1000ms')),
+            1000
+          );
+        }),
+      ])
+        .then(
+          (value) => pageErrors.annotate(entry, value),
+          (failure) => pageErrors.contextFailed(entry, failure)
+        )
+        .finally(() => {
+          clearTimeout(timeout);
+          pendingErrorContexts.delete(work);
+        });
+      pendingErrorContexts.add(work);
+    });
+  });
   await context.route('**/*', (r) =>
     routeOwnResponse(r, report.baseUrl, (failure) =>
       report.failures.push(`network boundary: ${JSON.stringify(failure)}`)
@@ -1083,7 +1185,11 @@ try {
 } catch (error) {
   report.failures.push(sanitizeDiagnostic(error.stack ?? error));
 } finally {
+  // Each context read is individually bounded. Diagnostic failures never erase
+  // the synchronous pageerror failure/stack already recorded above.
+  await Promise.allSettled([...pendingErrorContexts]);
   await browser?.close().catch(() => {});
+  await Promise.allSettled([...pendingErrorContexts]);
   await preview?.stop().catch(() => {});
   report.finishedAtUTC = new Date().toISOString();
   report.status = report.failures.length ? 'failed' : report.debt.length ? 'partial' : 'passed';
