@@ -45,6 +45,8 @@ export function emitVue2Source(
     /^(hook\.|event\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
+  // Only admitted Overlay capability can produce a non-null portal target.
+  const usesPortal = admitted.value.operations.includes('hook.asOverlay');
   const reachedFunctions = new Set(admitted.value.functions);
   const reachedHooks = new Set(admitted.value.authoredHooks);
   const stateDeclarations = new Set(['state.bool', 'state.string', 'state.enum', 'state.numberDiscrete', 'state.numberRange']);
@@ -250,7 +252,7 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     handle: contextArtifacts ? 'contextScope,' : '',
     dispose: contextArtifacts ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }' : '',
     setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
-  }, usesStyle, usesInteraction, usesState, options.ssr === true,
+  }, usesStyle, usesInteraction, usesState, usesPortal, options.ssr === true,
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
     staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined').replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
@@ -309,7 +311,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
 }
 
 // This is target-specific generated host code, never a shared IR interpreter.
-function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean, stateful: boolean, ssr: boolean, declarations: string, tableFamily: string): string {
+function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean, stateful: boolean, portal: boolean, ssr: boolean, declarations: string, tableFamily: string): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   return String.raw`
 /**
@@ -403,7 +405,7 @@ ${stateful ? '  const states = [];\n' : ''}  const exposed = Object.create(null)
   const eventDeclarations = Object.create(null);
   const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
 ${stateful ? '  const notifications = [];\n' : ''}  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
-${stateful ? '  let notifying = false;\n' : ''}  let portalAnchor = null, portalRoot = null;
+${stateful ? '  let notifying = false;\n' : ''}${portal ? `  let portalAnchor = null, portalRoot = null;
   function syncPortal(target, destination) {
     if (portalRoot && portalRoot !== target) restorePortal();
     if (destination && target?.nodeType === 1) {
@@ -437,7 +439,7 @@ ${stateful ? '  let notifying = false;\n' : ''}  let portalAnchor = null, portal
     if (failures.length) throw failures.length === 1 ? failures[0]
       : new AggregateError(failures, '[Vue2 native] Portal restoration and cleanup failed.');
   }
-  let dispatchingProps = false;
+` : ''}  let dispatchingProps = false;
   const alive = () => { if (disposed) throw new Error('[Vue2 native] logical instance has been disposed.'); };
   const publicAlive = () => { if (terminal) throw new Error('[Vue2 native] exposed target has been terminally invalidated.'); };
   const callback = () => { alive(); if (phase !== 'callback') throw new Error('[Vue2 native] mutation requires callback scope.'); };
@@ -579,7 +581,7 @@ ${styled ? `  const style = PUICreateNativeStyle({
     const requestedEpoch = epoch, failures = [];
     // Vue must patch at the owned anchor, not leave its replacement comment
     // in the Portal host and later resurrect the already-removed Root.
-    if (!next) { try { restorePortal(); } catch (error) { failures.push(error); } }
+    ${portal ? 'if (!next) { try { restorePortal(); } catch (error) { failures.push(error); } }' : ''}
     if (!terminal && epoch === requestedEpoch && present === next) {
       ${interactive ? 'if (!next) { try { interaction.unmount(); } catch (error) { failures.push(error); } }' : ''}
       if (!terminal && epoch === requestedEpoch && present === next) {
@@ -782,7 +784,7 @@ ${stateful ? String.raw`    state: {
   const detach = () => {
     if (!viewActive) return;
     viewActive = false; pending = null; queued = false;
-    restorePortal();
+    ${portal ? 'restorePortal();' : ''}
     ${interactive ? 'interaction.unmount();' : ''}
     ${styled ? "style.unmount();\n    if (activeRoot) activeRoot.removeAttribute('data-pui-style');" : ''}
     ${styled || interactive ? 'activeRoot = null;' : ''}
@@ -801,7 +803,7 @@ ${stateful ? String.raw`    state: {
     vm.$nextTick(() => {
       if (terminal || commit.epoch !== epoch || commit.version !== commitVersion || vm.$el !== target || commit.vnode.elm !== target) return;
       if (!present || !hostActive) return;
-      ${interactive ? 'syncPortal(target, interaction.portalTarget());' : ''}
+      ${portal ? 'syncPortal(target, interaction.portalTarget());' : ''}
       const kind = commit.kind;
       if (kind === 'mount' && !viewActive) {
         viewActive = true;

@@ -193,3 +193,64 @@ describe('Vue2 reached native state support', () => {
     expectStateSupport(compile((stateful ? `def.state.bool('value',false);` : '') + plain, {ssr:true}), stateful);
   });
 });
+
+function expectPortalSupport(result: ReturnType<typeof compile>, expected: boolean) {
+  const source = ts.createSourceFile('Component.js', result.output.code, ts.ScriptTarget.Latest, true, ts.ScriptKind.JS);
+  const owners = source.statements.filter(ts.isFunctionDeclaration).filter(node => node.name?.text.endsWith('CreateOwner'));
+  expect(owners).toHaveLength(1);
+  const bindings = new Set<string>(), calls = new Set<string>();
+  const visit = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name)) bindings.add(node.name.text);
+    if (ts.isFunctionDeclaration(node) && node.name) bindings.add(node.name.text);
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) calls.add(node.expression.text);
+    ts.forEachChild(node, visit);
+  };
+  visit(owners[0]);
+  for (const name of ['portalAnchor', 'portalRoot', 'syncPortal', 'restorePortal']) expect(bindings.has(name), name).toBe(expected);
+  for (const name of ['syncPortal', 'restorePortal']) expect(calls.has(name), `${name} call`).toBe(expected);
+  // Non-trigger generated owners remain real prototype boundaries; this patch
+  // does not erase Context/logical-parent identity to reduce helper bytes.
+  expect(result.output.code).toContain('contextScope.dispose()');
+}
+
+describe('Vue2 reached Portal host moves', () => {
+  it.each(['empty', 'Overlay', 'Button'])('does not infer Portal from the component name %s', name => {
+    expectPortalSupport(compile(plain, {}, name), false);
+  });
+  it('omits Portal for state-only output and its SSR option', () => {
+    for (const options of [{}, {ssr:true}]) expectPortalSupport(compile(`def.state.bool('value',false);${plain}`,options), false);
+  });
+  it('omits Portal for a context subscriber without interaction', () => {
+    const result=compile(`def.context.subscribe(KEY,(run)=>run.update());return r=>r.el('output',r.read.context.read(KEY).value);`,{},'context',{
+      'keys.ts':`import {createContextKey} from '@proto.ui/core';export const KEY=createContextKey<{value:number}>('key');`,
+    },`import {KEY} from './keys';`);
+    expectPortalSupport(result,false);
+  });
+  it('keeps focus interaction while omitting unreachable Portal host moves', () => {
+    const result=compile(`const focus=asFocusable();focus.configure({disabled:false});${plain}`);
+    expect(result.operations).toContain('hook.asFocusable');
+    expect(result.output.supportingFiles?.some(file=>file.path.includes('/interaction/'))).toBe(true);
+    expectPortalSupport(result,false);
+  });
+  it('omits an Overlay operation after the unconditional setup return', () => {
+    const result=compile(`${plain} asOverlay();`,{},'dormant',undefined,`import {asOverlay} from '@proto.ui/hooks';`);
+    expect(result.operations).not.toContain('hook.asOverlay');
+    expectPortalSupport(result,false);
+  });
+  it('retains reached imported Overlay aliases and captured runtime handle reads', () => {
+    const result=compile(`const overlay=renamed();overlay.configure({portal:true,defaultOpen:true});
+      def.expose.method('isOpen',()=>overlay.isOpen());${plain}`,{},'renamed',undefined,
+      `import {asOverlay as renamed} from '@proto.ui/hooks';`);
+    expect(result.operations).toContain('hook.asOverlay');
+    expect(result.operations).toContain('overlay.isOpen');
+    expectPortalSupport(result,true);
+  });
+  it('retains Overlay reached through authored hook composition', () => {
+    const result=compile(`outer();${plain}`,{},'composed',{
+      'outer.ts':`import {defineAsHook} from '@proto.ui/core';import {inner} from './inner';export const outer=defineAsHook({name:'outer',setup(){inner();}});`,
+      'inner.ts':`import {defineAsHook} from '@proto.ui/core';import {asOverlay as create} from '@proto.ui/hooks';export const inner=defineAsHook({name:'inner',setup(){const overlay=create();overlay.configure({portal:true});}});`,
+    },`import {outer} from './outer';`);
+    expect(result.operations).toContain('hook.asOverlay');
+    expectPortalSupport(result,true);
+  });
+});
