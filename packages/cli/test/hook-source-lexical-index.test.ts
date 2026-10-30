@@ -1,6 +1,8 @@
 import path from 'node:path';
+import { mkdtempSync, realpathSync, rmSync, symlinkSync, unlinkSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import ts from 'typescript';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createHookSourceModuleContext } from '../src/services/hook-source-module';
 
 function source(text: string) {
@@ -92,5 +94,54 @@ describe('operation-owned lexical indexes', () => {
     expect(expected).not.toBe(old);
     const fresh = createHookSourceModuleContext(); const freshModule = fresh.moduleForSource(after);
     expect(fresh.resolveReference(reads(after)[0], freshModule)?.declaration).toBe(expected);
+  });
+});
+
+describe('source registration canonicalization', () => {
+  it('resolves a source registration once, without caching a later registration', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-source-registration-'));
+    const fileName = path.join(directory, 'source.ts');
+    writeFileSync(fileName, `export const value = 1;`);
+    const file = ts.createSourceFile(fileName, `export const value = 1;`, ts.ScriptTarget.Latest, true);
+    const expectedPath = realpathSync.native(fileName);
+    const spy = vi.spyOn(realpathSync, 'native');
+    try {
+      const context = createHookSourceModuleContext();
+      const first = context.moduleForSource(file);
+      expect(first.file).toBe(expectedPath);
+      expect(first.source).toBe(file);
+      expect(spy).toHaveBeenCalledTimes(1);
+      context.moduleForSource(file);
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally {
+      spy.mockRestore();
+      rmSync(directory, { recursive: true, force: true });
+    }
+  });
+
+  it('observes symlink retargeting for the same AST and new AST/context', () => {
+    const directory = mkdtempSync(path.join(tmpdir(), 'proto-source-retarget-'));
+    try {
+      const firstPath = path.join(directory, 'first.ts');
+      const secondPath = path.join(directory, 'second.ts');
+      const link = path.join(directory, 'source.ts');
+      writeFileSync(firstPath, `export const value = 1;`);
+      writeFileSync(secondPath, `export const value = 2;`);
+      symlinkSync(firstPath, link);
+      const file = ts.createSourceFile(link, `export const value = 1;`, ts.ScriptTarget.Latest, true);
+      const context = createHookSourceModuleContext();
+      expect(context.moduleForSource(file).file).toBe(realpathSync.native(firstPath));
+      unlinkSync(link);
+      symlinkSync(secondPath, link);
+      expect(context.moduleForSource(file).file).toBe(realpathSync.native(secondPath));
+      const replacement = ts.createSourceFile(link, `export const value = 2;`, ts.ScriptTarget.Latest, true);
+      const replaced = context.moduleForSource(replacement);
+      expect(replaced.file).toBe(realpathSync.native(secondPath));
+      expect(replaced.source).toBe(replacement);
+      expect(createHookSourceModuleContext().moduleForSource(replacement).file)
+        .toBe(realpathSync.native(secondPath));
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 });

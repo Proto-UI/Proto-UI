@@ -982,17 +982,20 @@ export function createHookSourceModuleContext(): HookSourceModuleContext {
     objectMemberCache.clear();
   };
 
-  const registerSource = (source: ts.SourceFile): void => {
+  const registerSource = (source: ts.SourceFile): HookSourceModule => {
     const file = canonical(source.fileName);
     const previous = modules.get(file);
     if (previous && previous.source !== source) clearSymbolCaches();
-    modules.set(file, { file, source });
+    const module = { file, source };
+    modules.set(file, module);
     moduleFailures.delete(file);
+    return module;
   };
 
   const moduleForSource = (source: ts.SourceFile): HookSourceModule => {
-    registerSource(source);
-    return modules.get(canonical(source.fileName))!;
+    // Registration already resolved this exact source path. Do not resolve it
+    // again or retain a path cache across later registrations/symlink changes.
+    return registerSource(source);
   };
 
   const parseModule = (file: string): HookSourceModule | null => {
