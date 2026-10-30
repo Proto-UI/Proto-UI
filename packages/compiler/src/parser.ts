@@ -4,7 +4,7 @@ import { CompilerRejection } from './diagnostics';
 
 import {
   OPERATION_RULES, PACKAGED_HOOKS, operationCallbackRule, operationArgumentRule, operationResultType,
-  validateOperationArguments, validateOperationPhase, isTemplateChildType, capabilityMemberType, capabilityBinaryType, stateValue, FOCUS_OPTIONS_TYPE,
+  validateOperationArguments, validateOperationPhase, isTemplateChildType, capabilityMemberType, capabilityBinaryType, stateValue, FOCUS_OPTIONS_TYPE, FOCUS_ACTIVATION_OPTIONS_TYPE,
   type ArgumentRule, type CallbackContext, type OperationBindings, type OperationRule, type SemanticOperation,
 } from './operations';
 import {
@@ -113,6 +113,16 @@ class Frontend {
       if (ts.isTypeReferenceNode(parameter.type) && ts.isIdentifier(parameter.type.typeName)) {
         const name = parameter.type.typeName.text;
         if (name === 'FocusRequestOptions') return FOCUS_OPTIONS_TYPE;
+        const activationImport = module.file.statements.some((statement) =>
+          ts.isImportDeclaration(statement) && ts.isStringLiteral(statement.moduleSpecifier) &&
+          statement.moduleSpecifier.text === '@proto.ui/core' && statement.importClause?.namedBindings &&
+          ts.isNamedImports(statement.importClause.namedBindings) &&
+          statement.importClause.namedBindings.elements.some((binding) => binding.name.text === name &&
+            (binding.propertyName?.text ?? binding.name.text) === 'FocusScopeActivationOptions'));
+        const shadowsActivationImport = module.file.statements.some((statement) =>
+          (ts.isTypeAliasDeclaration(statement) || ts.isInterfaceDeclaration(statement)) && statement.name.text === name);
+        if (activationImport && !shadowsActivationImport && !parameter.type.typeArguments?.length) return FOCUS_ACTIVATION_OPTIONS_TYPE;
+
         if (expected && typeof expected === 'string' && CAPABILITY_ANNOTATIONS[expected] === name) return expected;
       }
       return parseSourceDataType(module, parameter.type);
