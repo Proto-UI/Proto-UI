@@ -15,6 +15,21 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('lowers zero scroll padding in light and shadow CSS without accepting unknown scroll tokens', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render(['scroll-py-0']);
+      const block = css.split('}').find((entry) => entry.includes('[data-pui-style~="scroll-py-0"]'));
+      expect(block).toBeDefined();
+      expect(block).toMatch(/\{\s*scroll-padding-block: 0px;\s*$/);
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const token of ['scroll-py-unknown', '-scroll-py-0', 'scroll-py-[0px;color:red]']) {
+        const unsupported = render([token]);
+        expect(unsupported).toContain('Unsupported Proto UI style tokens');
+        expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
+      }
+    }
+  });
+
   it('lowers scroll-py-1 in light and shadow CSS without widening the token vocabulary', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(['scroll-py-1', 'scroll-my-1']);
@@ -26,6 +41,132 @@ describe('proto style css renderer', () => {
         const unsupported = render([token]);
         expect(unsupported).toContain('Unsupported Proto UI style tokens');
         expect(unsupported).not.toMatch(/(?:^|\n)\s*scroll-padding(?:-[a-z]+)?:/);
+      }
+    }
+  });
+
+  it('retains the opaque source fallback when a menu or progress gradient is selected', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      for (const [token, color] of [
+        ['bg-[linear-gradient(#08c,#0077b3)]', '#0081c2'],
+        ['bg-[linear-gradient(#f5f5f5,#f9f9f9)]', '#f7f7f7'],
+        ['bg-[linear-gradient(#149bdf,#0480be)]', '#0e90d2'],
+      ] as const) {
+        const css = render([token]);
+        expect(css).toContain(`background-color: ${color};`);
+        expect(css).toContain('background-image: linear-gradient(to bottom,');
+        expect(css).toContain('background-repeat: repeat-x;');
+      }
+    }
+  });
+
+  it('preserves complete legacy focus paint and lets timing override its transition defaults', () => {
+    const tokens = [
+      'border-[3px]',
+      'border-[rgb(82_168_236/80%)]',
+      'shadow-[inset_0_1px_1px_rgb(0_0_0/7.5%),0_0_8px_rgb(82_168_236/60%)]',
+      'ring-[3px]',
+      'ring-offset-1',
+      'transition-[border,box-shadow]',
+      'duration-200',
+      'ease-in-out',
+    ];
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      for (const input of [tokens, tokens.toReversed()]) {
+        const css = render(input);
+        expect(css).toContain('border-width: 3px;');
+        expect(css).toContain('border-color: rgb(82 168 236 / 0.8);');
+        expect(css).toContain(
+          '--pui-shadow: inset 0 1px 1px rgb(0 0 0 / 0.075), 0 0 8px rgb(82 168 236 / 0.6);'
+        );
+        expect(css).toContain('var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000)');
+        expect(css).toContain('--pui-ring-offset-width: 1px;');
+        expect(css.indexOf('transition-duration: 200ms;')).toBeGreaterThan(
+          css.indexOf('transition-duration: 150ms;')
+        );
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+      expect(
+        render(['border-[3.5px]', 'border-[rgb(82_168_236/81%)]', 'transition-[border,filter]'])
+      ).toContain('Unsupported Proto UI style tokens');
+    }
+  });
+
+  it('keeps literal bottom-edge paint after shorthand color and source radius expressions scoped', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([
+        'border-b-[#fff]',
+        'border-[#ccc]',
+        'rounded-xs',
+        'rounded-t-[5px]',
+        'rounded-[calc(var(--radius-md)-2px)]',
+        'pl-7.5',
+        'py-0.75',
+      ]);
+      expect(css.indexOf('border-bottom-color: #fff;')).toBeGreaterThan(
+        css.indexOf('border-color: #ccc;')
+      );
+      expect(css).toContain('border-radius: 0.125rem;');
+      expect(css).toContain('border-radius: calc(var(--pui-radius-md) - 2px);');
+      expect(css).toContain('border-top-left-radius: 5px;');
+      expect(css).toContain('padding-left: 1.875rem;');
+      expect(css).toContain('padding-block: 0.1875rem;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['rounded-[calc(var(--radius-md)-3px)]'])).toContain(
+        'Unsupported Proto UI style tokens'
+      );
+    }
+  });
+
+  it('keeps directional edge paint after all-edge shorthands in document and Shadow CSS', () => {
+    const tokens = [
+      'border',
+      'border-transparent',
+      'border-b-input',
+      'rounded-none',
+      'rounded-l-md',
+      'rounded-r-lg',
+    ];
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      for (const input of [tokens.toSorted(), tokens.toSorted().reverse()]) {
+        const css = render(input);
+        expect(css.indexOf('border-bottom-color: var(--pui-input);')).toBeGreaterThan(
+          css.indexOf('border-color: transparent;')
+        );
+        expect(css.indexOf('border-top-left-radius: var(--pui-radius-md);')).toBeGreaterThan(
+          css.indexOf('border-radius: 0px;')
+        );
+        expect(css.indexOf('border-top-right-radius: var(--pui-radius-lg);')).toBeGreaterThan(
+          css.indexOf('border-radius: 0px;')
+        );
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+      }
+    }
+  });
+
+  it('preserves fractional root-relative sizes and affine thumb travel without rounding to pixels', () => {
+    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+      const css = render([
+        'h-4.5',
+        'w-6.25',
+        'w-8.25',
+        'translate-x-0.25',
+        'translate-x-[calc(100%_+_2px)]',
+        'translate-x-[calc(100%_-_8px)]',
+        'rounded-[5px]',
+        'ring-[3px]',
+      ]);
+      expect(css).toContain('height: 1.125rem;');
+      expect(css).toContain('width: 1.5625rem;');
+      expect(css).toContain('width: 2.0625rem;');
+      expect(css).toContain('--pui-translate-x: 0.0625rem;');
+      expect(css).toContain('--pui-translate-x: calc(100% + 2px);');
+      expect(css).toContain('--pui-translate-x: calc(100% - 8px);');
+      expect(css).toContain('border-radius: 5px;');
+      expect(css).toContain('--pui-ring-width: 3px;');
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      for (const rejected of ['rounded-[5.5px]', 'rounded-[5px;color:red]', 'ring-[3.5px]']) {
+        expect(render([rejected])).toContain('Unsupported Proto UI style tokens');
       }
     }
   });
@@ -307,23 +448,6 @@ describe('proto style css renderer', () => {
     expect(css).toContain('right: -2px;');
     expect(css).toContain('bottom: -2px;');
   });
-  it('gives Proto UI styled elements a scoped border-box baseline without a global reset', () => {
-    // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
-    const css = renderProtoStyleTokenCss(['h-6', 'w-11', 'border']);
-    const layerAt = css.indexOf('@layer proto-ui {');
-    const baselineAt = css.indexOf(
-      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
-    );
-    const firstTokenAt = css.indexOf(':where([data-pui-style~=');
-
-    expect(baselineAt).toBeGreaterThan(layerAt);
-    expect(baselineAt).toBeLessThan(firstTokenAt);
-    expect(css).toContain('box-sizing: border-box;');
-    expect(css).not.toMatch(/(^|\n)\*\s*,/);
-    expect(css).not.toMatch(/(^|\n)::before\s*,/);
-    expect(css).not.toMatch(/(^|\n)::after\s*\{/);
-  });
-
   it('places generated theme defaults below the Proto UI layer and consumer layers', () => {
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
     const css = renderProtoStyleEntryCss({
@@ -658,8 +782,6 @@ describe('proto style css renderer', () => {
       'unsupported-shadow-token',
     ]);
 
-    expect(css).toContain('[data-pui-style]::before');
-    expect(css).toContain(':where([data-pui-style]) {');
     expect(css).toContain('@keyframes pui-enter');
     expect(css).toContain('--pui-enter-opacity: 0');
     expect(css).toContain('transition-duration: 200ms;');

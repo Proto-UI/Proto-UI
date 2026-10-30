@@ -1,0 +1,49 @@
+id: P-BOOTSTRAP-2-3-2-DIALOG-MASK
+type: prototype
+title: Bootstrap 2.3.2 Dialog Mask Dialog projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Dialog part over P-BASE-DIALOG-MASK with the pinned modal vocabulary.
+statement:
+    en: The Prototype invokes asDialogMask() once and preserves the exact Base protocol while adding family paint per its stated role. AlertDialog is not a substitute for this independent Dialog family.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-MASK-BASE
+    text:
+            en: Invoke asDialogMask() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-MASK-VISUAL
+    text:
+            en: Black mask fading to 0.8 over 150ms linear on presence, matching the pinned modal-backdrop recipe; the mask remains a presence/overlay consumer, not a dismissal owner.
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-MASK-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-DIALOG-MASK-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-DIALOG-MASK
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/dialog/mask.proto.ts
+  - path: packages/prototypes/bootstrap-2-3-2/src/dialog/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/modals.less
+    label: Pinned modal recipe reference
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/close.less
+    label: Pinned close recipe reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Dialog Mask Dialog projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - dialog
+  - draft

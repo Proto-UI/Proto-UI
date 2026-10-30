@@ -12,13 +12,14 @@ import type {
   RadioGroupRootProps,
   RadioGroupRootStateHandles,
 } from '@proto.ui/prototypes-base/radio-group';
+import type { ShadcnStyleProps } from '../style-scope';
 
-export interface ShadcnRadioGroupRootProps extends RadioGroupRootProps {}
+export interface ShadcnRadioGroupRootProps extends RadioGroupRootProps, ShadcnStyleProps {}
 export type ShadcnRadioGroupRootExposes = RadioGroupRootExposes;
 export type ShadcnRadioGroupRootStateHandles = RadioGroupRootStateHandles;
 export type ShadcnRadioGroupRootAsHookContract = RadioGroupRootAsHookContract;
 
-export interface ShadcnRadioGroupItemProps extends RadioGroupItemProps {}
+export interface ShadcnRadioGroupItemProps extends RadioGroupItemProps, ShadcnStyleProps {}
 export type ShadcnRadioGroupItemExposes = RadioGroupItemExposes;
 export type ShadcnRadioGroupItemStateHandles = RadioGroupItemStateHandles;
 export type ShadcnRadioGroupItemAsHookContract = RadioGroupItemAsHookContract;

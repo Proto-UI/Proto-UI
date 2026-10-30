@@ -16,11 +16,12 @@ export default definePrototype<ToolbarButtonProps, ToolbarButtonExposes>({
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed shadow-none')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
     });
+    return behavior.render;
   },
 });

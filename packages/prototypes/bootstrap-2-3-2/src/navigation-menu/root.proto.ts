@@ -6,8 +6,10 @@ import {
 } from '@proto.ui/prototypes-base/navigation-menu';
 export default definePrototype<NavigationMenuRootProps, NavigationMenuRootExposes>({
   name: 'bootstrap-2-3-2-navigation-menu-root',
+  modules: asNavigationMenuRoot.modules,
   setup(def) {
     const behavior = asNavigationMenuRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-center gap-1'));
+    def.feedback.style.use(tw('relative flex min-w-0 flex-wrap items-start mb-[20px]'));
+    return behavior.render;
   },
 });

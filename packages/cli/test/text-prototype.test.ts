@@ -57,11 +57,41 @@ describe('Text public compiler consumption', () => {
         familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
       }
       if (family === 'bootstrap-2-3-2') {
-        delete familyRequired['text-2xl'];
         delete familyRequired['leading-normal'];
-        familyRequired['text-[1.53125rem]'] = 'font-size: 1.53125rem;';
+        // The retained 2.3.2 variables/type/hero-unit recipes author pinned
+        // pixel sizes with their own line boxes instead of the named
+        // Tailwind scale, and mute with the historical #999 literal.
+        for (const named of [
+          'text-xs',
+          'text-sm',
+          'text-base',
+          'text-lg',
+          'text-xl',
+          'text-2xl',
+          'text-3xl',
+          'text-4xl',
+          'text-5xl',
+          'text-muted-foreground',
+        ]) {
+          delete familyRequired[named];
+        }
+        familyRequired['text-[10.5px]'] = 'font-size: 10.5px;';
+        familyRequired['text-[11.9px]'] = 'font-size: 11.9px;';
+        familyRequired['text-[14px]'] = 'font-size: 14px;';
+        familyRequired['text-[17.5px]'] = 'font-size: 17.5px;';
+        familyRequired['text-[21px]'] = 'font-size: 21px;';
+        familyRequired['text-[24.5px]'] = 'font-size: 24.5px;';
+        familyRequired['text-[31.5px]'] = 'font-size: 31.5px;';
+        familyRequired['text-[38.5px]'] = 'font-size: 38.5px;';
+        familyRequired['text-[60px]'] = 'font-size: 60px;';
+        familyRequired['leading-[20px]'] = 'line-height: 20px;';
+        familyRequired['leading-[30px]'] = 'line-height: 30px;';
+        familyRequired['leading-[40px]'] = 'line-height: 40px;';
+        familyRequired['leading-none'] = 'line-height: 1;';
+        familyRequired['leading-[1.1]'] = 'line-height: 1.1;';
+        familyRequired['tracking-tighter'] = 'letter-spacing: -0.05em;';
+        familyRequired['text-[#999]'] = 'color: #999;';
         familyRequired['leading-[1.4285714285714286]'] = 'line-height: 1.4285714285714286;';
-        familyRequired['leading-[2.5rem]'] = 'line-height: 2.5rem;';
       }
       for (const [token, declaration] of Object.entries(familyRequired)) {
         expect(tokens).toContain(token);
@@ -73,7 +103,7 @@ describe('Text public compiler consumption', () => {
           'font-heading',
           'font-mono',
           'text-foreground',
-          'text-muted-foreground',
+          ...(family === 'bootstrap-2-3-2' ? ['text-inherit'] : ['text-muted-foreground']),
         ])
       );
       expect(css).toContain('var(--pui-font-heading');
@@ -81,10 +111,16 @@ describe('Text public compiler consumption', () => {
       expect(
         css.indexOf(
           family === 'bootstrap-2-3-2'
-            ? 'data-pui-style~="leading-[1.4285714285714286]"'
+            ? 'data-pui-style~="leading-[40px]"'
             : 'data-pui-style~="leading-normal"'
         )
-      ).toBeGreaterThan(css.indexOf('data-pui-style~="text-5xl"'));
+      ).toBeGreaterThan(
+        css.indexOf(
+          family === 'bootstrap-2-3-2'
+            ? 'data-pui-style~="text-[60px]"'
+            : 'data-pui-style~="text-5xl"'
+        )
+      );
       expect(css).not.toMatch(/(?:^|\n)\s*(?:body|h1|h2|p|label|a)\s*\{/);
     }
   );
@@ -220,6 +256,10 @@ describe('Text density token closure', () => {
         const css = render([...preset]);
         expect(css).not.toContain('Unsupported Proto UI style tokens');
       }
-    }
+      // Full family+Base source collection far exceeds the 5s default once
+      // multi-profile recipes are projected; under concurrent suites it can
+      // also exceed 120s, so keep the real scan unfiltered.
+    },
+    300_000
   );
 });

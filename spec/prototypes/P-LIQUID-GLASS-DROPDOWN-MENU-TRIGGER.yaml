@@ -25,9 +25,13 @@ criteria:
       zh-CN: 遵守有界共享 command 配方：可交互静态 hover 与 pressed、持久选择和 focus-visible 独立。所有瞬态及语义状态仍由 Base 拥有，family 仅在本 setup 内通过 Rules 投影数据型物理 tokens。禁用后保留可读的同状态不透明 fallback，不降低整个宿主的透明度。仍须精确源码 native 图像与当前 contact 绘制边界验收。
     dependsOn:
       contracts: [C-LIQUID-GLASS-COMMAND-INTERACTION-0001]
+inherits:
+  prototypes:
+    - P-BASE-DROPDOWN-MENU-TRIGGER
 dependsOn:
-  contracts: [C-FEEDBACK-MATERIAL-0001, C-RULE-INTENT-FEEDBACK-MATERIAL-0001]
-  prototypes: [P-BASE-DROPDOWN-MENU-TRIGGER]
+  contracts:
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
 verifies:
   tests:
     [

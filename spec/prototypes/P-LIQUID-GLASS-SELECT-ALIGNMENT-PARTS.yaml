@@ -1,0 +1,51 @@
+id: P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS
+type: prototype
+title: Liquid Glass Select Surface, Viewport and ItemText alignment parts
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native and material-host evidence plus independent review; source presence, private package availability and intent frames are not release, conformance or Apple-equivalence admission.
+summary: Three same-family alignment parts completing the eleven-part Select anatomy.
+statement:
+  en: The Prototypes invoke asSelectSurface(), asSelectViewport() and asSelectItemText() once each. Content is the transparent portal/lifetime/frame; Surface is the sole popup paint and material owner with complete opaque fallback; Viewport is the one scrollport; ItemText supplies item text identity.
+criteria:
+  - id: P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS-INHERITANCE
+    text:
+      en: Each part invokes its matching Base hook exactly once and preserves Base props/exposes, anatomy order, scoped naming and render. The item-aligned composition is Content > Surface > Viewport > Item > ItemText.
+  - id: P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS-VISUAL
+    text:
+      en: 'Surface declares the shared version-2 liquid-glass candidate requested only while open; Content and Viewport hold no material slot. No overlapping nested owners exist. Exact functional material clauses are provisional: real provider capability, missing-host opaque fallback and bounded source leases stay governed by the shared V2 material contract.'
+  - id: P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS-CLOSURE
+    text:
+      en: All family appearance is authored through feedback tokens, typed material intent and Rules with explicit finite physical translation; no website-only CSS, private Apple asset or Adapter component-name dispatch may supply default intent, and explicit liquid-glass intent is never silently replaced by adaptive native blur.
+  - id: P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS-BOUNDARY
+    text:
+      en: Exact-head browser, native, material-provider and Compiler evidence plus independent review remain open; the package is private and source-only. Apple documentation is a design reference, not implementation, asset or equivalence evidence. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-FEEDBACK-MATERIAL-0001
+    - C-RULE-INTENT-FEEDBACK-MATERIAL-0001
+inherits:
+  prototypes:
+    - P-BASE-SELECT-ALIGNMENT-PARTS
+verifies:
+  tests:
+    - T-LIQUID-GLASS-SELECT-0001
+sources:
+  - path: packages/prototypes/liquid-glass/src/select/surface.proto.ts
+  - path: packages/prototypes/liquid-glass/src/select/viewport.proto.ts
+  - path: packages/prototypes/liquid-glass/src/select/item-text.proto.ts
+  - path: packages/prototypes/liquid-glass/src/select/index.ts
+  - path: https://developer.apple.com/design/human-interface-guidelines/materials
+    label: Apple HIG Materials design reference only
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Liquid Glass Select Surface, Viewport and ItemText alignment parts cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - liquid-glass
+  - select
+  - draft

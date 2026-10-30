@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers Switch Thumb identity, Base indicator inheritance, context-driven checked state, current visual surface, and its bounded upstream composition claim.
 cases:
+  - id: T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-PREVIEW
+    title: Inherited drag preview follows logical direction and rolls back controlled refusal
+    covers: [P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW]
+    expectation: inherited-percentage-projects-without-another-checked-request
   - id: T-SHADCN-SWITCH-THUMB-0001-CASE-VISUAL-SIZE
     title: Family-only default and sm sizes follow the actual logical Root across updates and remounts
     covers: [P-SHADCN-SWITCH-THUMB-VISUAL-SIZE]
@@ -28,6 +32,15 @@ cases:
     covers: [P-SHADCN-SWITCH-THUMB-COMPATIBILITY-SUBSET]
     expectation: shadcn-switch-thumb-does-not-overclaim-upstream-parity
 implementations:
+  - id: t-shadcn-switch-thumb-directional-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/switch-directional-projection.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SWITCH-THUMB-0001-CASE-DIRECTIONAL-PREVIEW]
+    exercises: [P-SHADCN-SWITCH-THUMB, P-BASE-SWITCH]
+    notes:
+      - Authored actual WC consumers with synthetic geometry/contact for New York and Rhea LTR/RTL; not executed here and not native capture, layout or seven-other-profile evidence.
   - id: t-shadcn-switch-thumb-0001-size-lifecycle
     kind: module-test
     status: planned
@@ -68,6 +81,7 @@ verifies:
       anchors:
         [
           P-SHADCN-SWITCH-THUMB-VISUAL-SIZE,
+          P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW,
           P-SHADCN-SWITCH-THUMB-UPSTREAM-IDENTITY,
           P-SHADCN-SWITCH-THUMB-BASE-INHERITANCE,
           P-SHADCN-SWITCH-THUMB-CURRENT-BASE-DEVIATIONS,

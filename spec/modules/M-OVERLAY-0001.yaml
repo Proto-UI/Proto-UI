@@ -29,6 +29,11 @@ criteria:
     text:
       en: Physical resource reconciliation resolves one current host target before acquiring output. A host-neutral resolver can supply a verified opaque object; missing or foreign targets withdraw previous output without changing logical open state. Native support cannot be inferred from the legacy guarded Web target path.
       zh-CN: 物理资源协调在获取输出前解析当前宿主target；host-neutral resolver可提供经验证opaque object，缺失/foreign目标撤旧输出而不改变logical open。不能从兼容Web target路径推断native支持。
+  - id: M-OVERLAY-0001-RECONCILE-REQUEST
+    text:
+      en: Cancellable consumer notifications follow C-AS-OVERLAY-0001-RECONCILE-REQUEST and are delivered by an injected Runtime callback dispatcher after a current resource transaction, without automatic focus policy or Adapter-specific component logic.
+      zh-CN: 可取消的消费者通知遵守 C-AS-OVERLAY-0001-RECONCILE-REQUEST，在当前资源事务完成后由注入的 Runtime callback dispatcher 交付，不增加自动 focus policy 或 Adapter 组件特判。
+
 satisfies:
   contracts:
     - C-AS-OVERLAY-0001

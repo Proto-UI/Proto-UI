@@ -142,6 +142,9 @@ exercises:
     - C-SLIDER-VALUE-0001
   prototypes:
     - P-BASE-SLIDER-VALUES
+    - P-BOOTSTRAP-2-3-2-SLIDER-VALUES
+    - P-LIQUID-GLASS-SLIDER-VALUES
+    - P-SHADCN-SLIDER-VALUES
 sources:
   - path: packages/prototypes/base/test/slider-values-numeric.test.ts
   - path: internal/records/2026-10-11-slider-values-reconstruction-plan.md

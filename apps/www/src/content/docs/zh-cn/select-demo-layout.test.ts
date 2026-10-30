@@ -107,3 +107,28 @@ it('uses only an opt-in Select preview inset and removes duplicate narrow demo p
     expect(tokens(demo.root)).not.toContain('p-2');
   }
 });
+
+it('keeps all four Liquid examples in independent declared static stages', () => {
+  const all = nodes(liquid.root);
+  const stages = all.filter((node) => node.kind === 'box' && node.materialStage);
+  expect(stages).toHaveLength(4);
+  for (const stage of stages) {
+    if (stage.kind !== 'box' || !stage.materialStage) throw Error('Missing stage');
+    expect(stage.ref).toBeTruthy();
+    const descendants = nodes(stage);
+    expect(
+      descendants.filter(
+        (node) => node.kind === 'proto' && node.prototypeId === 'liquid-glass-select-root'
+      )
+    ).toHaveLength(1);
+    const overlay = descendants.find(
+      (node) => 'ref' in node && node.ref === stage.materialStage!.overlayRef
+    );
+    expect(overlay?.kind).toBe('box');
+    if (overlay?.kind === 'box') expect(overlay.children).toEqual([]);
+  }
+  const controlled = stages.find((node) => 'ref' in node && node.ref === 'controlledStage')!;
+  const order = nodes(controlled).flatMap((node) => ('ref' in node && node.ref ? [node.ref] : []));
+  expect(order.indexOf('requestStatus')).toBeLessThan(order.indexOf('controlledTrigger'));
+  expect(order.indexOf('accept')).toBeLessThan(order.indexOf('controlledTrigger'));
+});

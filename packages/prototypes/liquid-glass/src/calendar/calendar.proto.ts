@@ -36,17 +36,18 @@ import {
 export type * from '@proto.ui/prototypes-base/calendar';
 
 // Apple-inspired composition, not a public Apple Calendar implementation.
-// Material intent is an enhancement; the rounded opaque surface is a complete
-// fallback and does not establish optical/material acceptance.
+// Calendar is ordinary date content. A containing DatePicker popup, when used,
+// owns its own single material surface; these parts do not create nested glass.
 
 export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExposes>({
   name: 'liquid-glass-calendar-root',
   setup(def) {
-    const state = asCalendarRoot().stateHandles;
+    const inherited = asCalendarRoot();
+    const state = inherited.stateHandles;
     if (!state) throw new Error('Calendar root state unavailable');
     def.feedback.style.use(
       tw(
-        'inline-grid w-fit min-w-0 max-w-full gap-3 rounded-2xl border border-border bg-secondary p-4 font-sans text-secondary-foreground shadow-lg'
+        'inline-grid w-fit min-w-0 max-w-full gap-3 rounded-2xl border border-border bg-background p-4 font-sans text-foreground'
       )
     );
     def.rule({
@@ -57,14 +58,7 @@ export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExpos
       when: (w) => w.state(state.direction).eq('rtl'),
       intent: (i) => i.feedback.style.use(tw('direction-rtl')),
     });
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarRoot as liquidGlassCalendarRoot };
@@ -72,9 +66,9 @@ export { calendarRoot as liquidGlassCalendarRoot };
 export const calendarCaption = definePrototype<CalendarCaptionProps, CalendarCaptionExposes>({
   name: 'liquid-glass-calendar-caption',
   setup(def) {
-    asCalendarCaption();
+    const inherited = asCalendarCaption();
     def.feedback.style.use(tw('flex h-9 w-full items-center justify-between gap-2'));
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarCaption as liquidGlassCalendarCaption };
@@ -82,9 +76,9 @@ export { calendarCaption as liquidGlassCalendarCaption };
 export const calendarGrid = definePrototype<CalendarGridProps, CalendarGridExposes>({
   name: 'liquid-glass-calendar-grid',
   setup(def) {
-    asCalendarGrid();
+    const inherited = asCalendarGrid();
     def.feedback.style.use(tw('grid w-full gap-1'));
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarGrid as liquidGlassCalendarGrid };
@@ -92,9 +86,9 @@ export { calendarGrid as liquidGlassCalendarGrid };
 export const calendarWeekdays = definePrototype<CalendarWeekdaysProps, CalendarWeekdaysExposes>({
   name: 'liquid-glass-calendar-weekdays',
   setup(def) {
-    asCalendarWeekdays();
+    const inherited = asCalendarWeekdays();
     def.feedback.style.use(tw('grid w-full grid-cols-7 gap-1'));
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarWeekdays as liquidGlassCalendarWeekdays };
@@ -114,9 +108,9 @@ export { calendarWeekday as liquidGlassCalendarWeekday };
 export const calendarRow = definePrototype<CalendarRowProps, CalendarRowExposes>({
   name: 'liquid-glass-calendar-row',
   setup(def) {
-    asCalendarRow();
+    const inherited = asCalendarRow();
     def.feedback.style.use(tw('grid w-full grid-cols-7 gap-1'));
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarRow as liquidGlassCalendarRow };
@@ -129,7 +123,7 @@ export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>
     if (!state) throw new Error('Calendar day state unavailable');
     def.feedback.style.use(
       tw(
-        'relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-center text-sm font-medium text-secondary-foreground select-none cursor-pointer'
+        'relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-0 bg-transparent p-0 text-center text-sm font-medium text-foreground select-none cursor-pointer'
       )
     );
     def.rule({
@@ -164,7 +158,7 @@ export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
     def.rule({
       when: (w) => w.state(state.focusVisible).eq(true),
@@ -183,10 +177,9 @@ export { calendarDay as liquidGlassCalendarDay };
 export const calendarHeading = definePrototype<CalendarHeadingProps, CalendarHeadingExposes>({
   name: 'liquid-glass-calendar-heading',
   setup(def) {
-    const state = asCalendarHeading().stateHandles;
-    if (!state) throw new Error('Calendar heading state unavailable');
+    const inherited = asCalendarHeading();
     def.feedback.style.use(tw('min-w-0 flex-1 text-center text-sm font-semibold tracking-tight'));
-    return () => [state.displayValue.get()];
+    return inherited.render;
   },
 });
 export { calendarHeading as liquidGlassCalendarHeading };
@@ -194,7 +187,8 @@ export { calendarHeading as liquidGlassCalendarHeading };
 export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarPreviousExposes>({
   name: 'liquid-glass-calendar-previous',
   setup(def) {
-    const state = asCalendarPrevious().getAsHookHandle?.('as-button')?.stateHandles;
+    const inherited = asCalendarPrevious();
+    const state = inherited.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('Calendar navigation state unavailable');
     def.feedback.style.use(
       tw(
@@ -220,9 +214,9 @@ export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarP
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarPrevious as liquidGlassCalendarPrevious };
@@ -230,7 +224,8 @@ export { calendarPrevious as liquidGlassCalendarPrevious };
 export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExposes>({
   name: 'liquid-glass-calendar-next',
   setup(def) {
-    const state = asCalendarNext().getAsHookHandle?.('as-button')?.stateHandles;
+    const inherited = asCalendarNext();
+    const state = inherited.getAsHookHandle?.('as-button')?.stateHandles;
     if (!state) throw new Error('Calendar navigation state unavailable');
     def.feedback.style.use(
       tw(
@@ -256,9 +251,9 @@ export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExpos
     });
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
+      intent: (i) => i.feedback.style.use(tw('cursor-default shadow-none')),
     });
-    return (render) => render.slot();
+    return inherited.render;
   },
 });
 export { calendarNext as liquidGlassCalendarNext };

@@ -1,0 +1,47 @@
+id: P-BOOTSTRAP-2-3-2-COMBOBOX
+type: prototype
+title: Bootstrap 2.3.2 Combobox projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Combobox family over P-BASE-COMBOBOX with pinned vocabulary.
+statement:
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Input/Trigger/Content/Item/Empty preserve the strict-option Base search identity distinct from Autocomplete and Command; paint uses pinned typeahead/dropdown vocabulary without aliasing one protocol to another.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-COMBOBOX-BASE
+    text:
+            en: Invoke asCombobox* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-COMBOBOX-VISUAL
+    text:
+            en: Root/Input/Trigger/Content/Item/Empty preserve the strict-option Base search identity distinct from Autocomplete and Command; paint uses pinned typeahead/dropdown vocabulary without aliasing one protocol to another.
+  - id: P-BOOTSTRAP-2-3-2-COMBOBOX-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-COMBOBOX-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-COMBOBOX
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-SEARCH-NAV-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/combobox/
+  - path: packages/prototypes/bootstrap-2-3-2/src/combobox/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/dropdowns.less
+    label: Pinned historical design reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Combobox projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - combobox
+  - draft

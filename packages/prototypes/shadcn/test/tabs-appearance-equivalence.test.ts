@@ -4,7 +4,10 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import { createReactAdapter, type ReactRuntime } from '@proto.ui/adapter-react';
 import { tabsRoot, tabsList, tabsTrigger, tabsContent } from '../src/tabs';
 import beforeTrigger from './fixtures/tabs-trigger-before-underline';
-import { collectProtoStyleTokens } from '../../../cli/src/services/prototype-style-tokens';
+import {
+  collectProtoStyleTokens,
+  collectProtoStyleTokensFromFiles,
+} from '../../../cli/src/services/prototype-style-tokens';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 import path from 'node:path';
 
@@ -42,9 +45,9 @@ afterEach(() => {
 });
 it('compares pre/post default CSS facts, restores default tokens, and bounds simulated paint evidence', async () => {
   const raw = await collectProtoStyleTokens(path.resolve('packages/prototypes/shadcn/src/tabs'));
-  const old = await collectProtoStyleTokens(
-    path.resolve('packages/prototypes/shadcn/test/fixtures')
-  );
+  const old = await collectProtoStyleTokensFromFiles([
+    path.resolve('packages/prototypes/shadcn/test/fixtures/tabs-trigger-before-underline.ts'),
+  ]);
   const all = [...raw, ...old];
   if (!all.every((token): token is string => typeof token === 'string'))
     throw new Error('Non-string token');

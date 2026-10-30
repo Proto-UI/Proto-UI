@@ -1,13 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type MeterPartProps,
-  type MeterPartExposes,
-  asMeterIndicator,
-} from '@proto.ui/prototypes-base/meter';
-export default definePrototype<MeterPartProps, MeterPartExposes>({
+import { type MeterPartExposes, asMeterIndicator } from '@proto.ui/prototypes-base/meter';
+import { setupMeterStyle } from './visual';
+import type { ShadcnMeterPartProps } from './types';
+export default definePrototype<ShadcnMeterPartProps, MeterPartExposes>({
   name: 'shadcn-meter-indicator',
+  modules: asMeterIndicator.modules,
   setup(def) {
     const inherited = asMeterIndicator();
+    setupMeterStyle(def);
     def.feedback.style.use(
       tw('block h-full w-[calc(var(--pui-percentage)*1%)] bg-primary transition-all')
     );

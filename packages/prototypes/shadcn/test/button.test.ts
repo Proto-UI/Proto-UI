@@ -3,6 +3,7 @@ import type { RuntimeHost } from '@proto.ui/runtime';
 import { executeWithHost } from '@proto.ui/runtime';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
   AS_TRIGGER_INSTANCE_CAP,
@@ -33,6 +34,10 @@ describe('prototypes/shadcn: button', () => {
         task();
       },
       onRuntimeReady(wiring) {
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, rootTarget],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
         wiring.attach('event', [
           [EVENT_ROOT_TARGET_CAP, () => rootTarget],
           [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
@@ -166,6 +171,10 @@ describe('prototypes/shadcn: button', () => {
         task();
       },
       onRuntimeReady(wiring) {
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, rootTarget],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
         wiring.attach('event', [
           [EVENT_ROOT_TARGET_CAP, () => rootTarget],
           [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],
@@ -217,6 +226,10 @@ describe('prototypes/shadcn: button', () => {
         task();
       },
       onRuntimeReady(wiring) {
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, rootTarget],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
         wiring.attach('event', [
           [EVENT_ROOT_TARGET_CAP, () => rootTarget],
           [EVENT_GLOBAL_TARGET_CAP, () => globalTarget],

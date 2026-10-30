@@ -74,7 +74,28 @@ cases:
     covers:
       - M-OVERLAY-0001-A
     expectation: one-logical-owner-and-one-presence-driver-with-distinct-view-lifetime
+  - id: T-AS-OVERLAY-0001-CASE-RECONCILE-REQUEST
+    title: Cancellable resource reconciliation notifications preserve callback and view ownership
+    covers: [C-AS-OVERLAY-0001-RECONCILE-REQUEST, M-OVERLAY-0001-RECONCILE-REQUEST]
+    expectation: after-transaction-once-only-current-view-no-stale-revival
+
 implementations:
+  - id: overlay-resource-reconciliation-barrier
+    kind: module-test
+    status: planned
+    path: packages/modules/overlay/test/resource-reconciliation-barrier.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-RECONCILE-REQUEST]
+    notes:
+      - Candidate authored but not executed; no native or renderer acceptance inferred.
+  - id: menubar-resource-entry-interruptions
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/navigation-overlays/menubar-focus-entry.test.ts
+    required: true
+    consumesCases: [T-AS-OVERLAY-0001-CASE-RECONCILE-REQUEST]
+    notes:
+      - Real WC adapter DOM composition with synchronous acquisition interruptions; native four-Web evidence remains separate and currently four-pass/four-fail.
   - id: wc-portal-origin-ownership
     kind: adapter-test
     status: passing
@@ -166,6 +187,7 @@ verifies:
         - C-AS-OVERLAY-0001-M
         - C-AS-OVERLAY-0001-N
         - C-AS-OVERLAY-0001-O
+        - C-AS-OVERLAY-0001-RECONCILE-REQUEST
     - id: C-LIFECYCLE-0008
       anchors:
         - C-LIFECYCLE-0008-E
@@ -175,6 +197,7 @@ verifies:
       since: 0.3.0-alpha.0
       anchors:
         - M-OVERLAY-0001-A
+        - M-OVERLAY-0001-RECONCILE-REQUEST
   adapters:
     - id: A-WEB-COMPONENT-0001
       since: 0.3.0-alpha.0

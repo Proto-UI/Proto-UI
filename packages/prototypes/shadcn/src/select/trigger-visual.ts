@@ -2,6 +2,7 @@ import {
   delay,
   tw,
   type DefHandle,
+  type RenderFn,
   type RendererHandle,
   type RunHandle,
   type State,
@@ -9,21 +10,38 @@ import {
 import type { SelectTriggerAsHookContract } from '@proto.ui/prototypes-base/select';
 import type { ShadcnSelectTriggerProps } from './types';
 import { setupSelectStyle } from './style';
-import { SHADCN_STYLE_SCOPE } from '../style-scope';
-function renderChevron(renderer: Pick<RendererHandle<any>, 'svg' | 'el'>, rhea: boolean) {
+import { SHADCN_STYLE_SCOPE, type ShadcnStyleId } from '../style-scope';
+import {
+  SELECT_TRANSLUCENT_STYLES,
+  SELECT_TRIGGER_FOCUS,
+  SELECT_TRIGGER_INVALID,
+  SELECT_TRIGGER_SIZE,
+  SELECT_TRIGGER_SM_RADIUS,
+  SELECT_TRIGGER_SURFACE,
+  SELECT_TRIGGER_SURFACE_BG,
+} from './recipes';
+
+/** New York keeps its size-4 opacity-50 chevron; modern profiles size the icon per recipe. */
+function renderChevron(
+  renderer: Pick<RendererHandle<ShadcnSelectTriggerProps>, 'svg' | 'el'>,
+  style: ShadcnStyleId
+) {
+  const px = style === 'mira' || style === 'sera' ? 14 : 16;
   return renderer.el(
     'span',
     {
-      style: rhea
-        ? tw('pointer-events-none flex shrink-0 items-center text-muted-foreground')
-        : tw('pointer-events-none flex shrink-0 items-center text-muted-foreground opacity-50'),
+      style: tw(
+        style === 'new-york-v4'
+          ? 'pointer-events-none flex shrink-0 items-center text-muted-foreground opacity-50'
+          : 'pointer-events-none flex shrink-0 items-center text-muted-foreground'
+      ),
     },
     renderer.svg.root(
       {
         viewBox: '0 0 24 24',
         'aria-hidden': 'true',
-        width: 16,
-        height: 16,
+        width: px,
+        height: px,
         fill: 'none',
         stroke: 'currentColor',
         strokeWidth: 2,
@@ -56,21 +74,35 @@ export function setupSelectTriggerVisual(
 
   // P-SHADCN-SELECT-TRIGGER-CURRENT-VISUAL-SURFACE
   def.feedback.style.use(
-    tw(
-      'flex w-fit items-center justify-between border px-3 py-2 text-sm whitespace-nowrap transition-[color,box-shadow] outline-none select-none'
-    )
+    tw('flex w-fit items-center justify-between whitespace-nowrap outline-none select-none')
   );
   // P-SHADCN-SELECT-TRIGGER-APPEARANCE: visual delta only; Base owns behavior.
   def.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('appearance').eq('default')),
     intent: (i) =>
-      i.feedback.style.use(tw('gap-2 rounded-md bg-transparent border-input shadow-xs')),
+      i.feedback.style.use(
+        tw(
+          'gap-2 rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs transition-[color,box-shadow]'
+        )
+      ),
   });
   def.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('appearance').eq('ghost')),
     intent: (i) =>
-      i.feedback.style.use(tw('gap-2 rounded-md bg-transparent border-transparent shadow-none')),
+      i.feedback.style.use(
+        tw(
+          'gap-2 rounded-md border border-transparent bg-transparent px-3 py-2 text-sm shadow-none transition-[color,box-shadow]'
+        )
+      ),
   });
+  // P-SHADCN-SELECT-STYLE: pinned cn-select-trigger recipes for the seven
+  // modern styles plus retained Rhea; ghost is rejected outside New York.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.state(style).eq(profile),
+      intent: (i) => i.feedback.style.use(tw(SELECT_TRIGGER_SURFACE[profile])),
+    });
+  }
   // P-SHADCN-SELECT-TRIGGER-STATE-DRIVEN-STYLES
   def.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('size').eq('default')),
@@ -80,6 +112,22 @@ export function setupSelectTriggerVisual(
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('size').eq('sm')),
     intent: (i) => i.feedback.style.use(tw('h-8')),
   });
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.prop('size').eq('default')),
+      intent: (i) => i.feedback.style.use(tw(SELECT_TRIGGER_SIZE[profile].default)),
+    });
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.prop('size').eq('sm')),
+      intent: (i) => i.feedback.style.use(tw(SELECT_TRIGGER_SIZE[profile].sm)),
+    });
+    const smRadius = SELECT_TRIGGER_SM_RADIUS[profile];
+    if (smRadius)
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.prop('size').eq('sm')),
+        intent: (i) => i.feedback.style.use(tw(smRadius)),
+      });
+  }
   def.rule({
     when: (w) =>
       w.all(
@@ -94,6 +142,13 @@ export function setupSelectTriggerVisual(
       ),
     intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
   });
+  // data-placeholder:text-muted-foreground is unconditional in modern recipes.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.state(placeholder).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
+    });
+  }
   def.rule({
     when: (w) =>
       w.all(
@@ -114,6 +169,26 @@ export function setupSelectTriggerVisual(
       ),
     intent: (i) => i.feedback.style.use(tw('bg-input/50')),
   });
+  // Per-style input-surface backgrounds: several modern recipes apply the dark
+  // fill unconditionally in dark mode plus a dark-only hover delta.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    const { dark, darkHover } = SELECT_TRIGGER_SURFACE_BG[profile];
+    if (dark)
+      def.rule({
+        when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
+        intent: (i) => i.feedback.style.use(tw(dark)),
+      });
+    if (darkHover)
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.meta('colorScheme').eq('dark'),
+            w.state(hovered).eq(true)
+          ),
+        intent: (i) => i.feedback.style.use(tw(darkHover)),
+      });
+  }
   def.rule({
     when: (w) =>
       w.all(
@@ -139,38 +214,25 @@ export function setupSelectTriggerVisual(
     intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
   });
 
-  def.rule({
-    when: (w) => w.state(style).eq('rhea'),
-    intent: (i) =>
-      i.feedback.style.use(
-        tw('gap-1.5 rounded-[var(--pui-radius-2xl)] border-transparent bg-input/50 duration-200')
-      ),
-  });
-  for (const [size, token] of [
-    ['default', tw('h-8')],
-    ['sm', tw('h-7')],
-  ] as const)
+  // focus-visible per pinned recipe; Field invalid suppresses the focus ring.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
     def.rule({
-      when: (w) => w.all(w.state(style).eq('rhea'), w.prop('size').eq(size)),
-      intent: (i) => i.feedback.style.use(token),
+      when: (w) =>
+        w.all(
+          w.state(style).eq(profile),
+          w.state(focusVisible).eq(true),
+          ...(invalid ? [w.state(invalid).eq(false)] : [])
+        ),
+      intent: (i) => i.feedback.style.use(tw(SELECT_TRIGGER_FOCUS[profile])),
     });
-  def.rule({
-    when: (w) => w.all(w.state(style).eq('rhea'), w.state(placeholder).eq(true)),
-    intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
-  });
-  def.rule({
-    when: (w) =>
-      w.all(
-        w.state(style).eq('rhea'),
-        w.state(focusVisible).eq(true),
-        ...(invalid ? [w.state(invalid).eq(false)] : [])
-      ),
-    intent: (i) => i.feedback.style.use(tw('border-ring ring-ring/30 ring-3')),
-  });
-  def.rule({
-    when: (w) => w.all(w.state(style).eq('rhea'), w.state(disabled).eq(true)),
-    intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
-  });
+  }
+  // disabled:cursor-not-allowed disabled:opacity-50 from upstream select.tsx.
+  for (const profile of SELECT_TRANSLUCENT_STYLES) {
+    def.rule({
+      when: (w) => w.all(w.state(style).eq(profile), w.state(disabled).eq(true)),
+      intent: (i) => i.feedback.style.use(tw('cursor-not-allowed opacity-50')),
+    });
+  }
   if (invalid) {
     def.rule({
       when: (w) =>
@@ -182,22 +244,36 @@ export function setupSelectTriggerVisual(
       intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/40')),
     });
     def.rule({
-      when: (w) => w.all(w.state(invalid).eq(true), w.not(w.meta('colorScheme').eq('dark'))),
-      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/20')),
-    });
-    def.rule({
       when: (w) =>
         w.all(
-          w.state(style).eq('rhea'),
           w.state(invalid).eq(true),
-          w.meta('colorScheme').eq('dark')
+          w.state(style).eq('new-york-v4'),
+          w.not(w.meta('colorScheme').eq('dark'))
         ),
-      intent: (i) => i.feedback.style.use(tw('border-destructive/50 ring-destructive/40')),
+      intent: (i) => i.feedback.style.use(tw('border-destructive ring-destructive/20')),
     });
-    def.rule({
-      when: (w) => w.all(w.state(invalid).eq(true), w.state(style).eq('rhea')),
-      intent: (i) => i.feedback.style.use(tw('ring-3')),
-    });
+    // aria-invalid recipes are unconditional in every modern profile.
+    for (const profile of SELECT_TRANSLUCENT_STYLES) {
+      const recipe = SELECT_TRIGGER_INVALID[profile];
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(invalid).eq(true),
+            w.not(w.meta('colorScheme').eq('dark'))
+          ),
+        intent: (i) => i.feedback.style.use(tw(recipe.light)),
+      });
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(invalid).eq(true),
+            w.meta('colorScheme').eq('dark')
+          ),
+        intent: (i) => i.feedback.style.use(tw(recipe.dark)),
+      });
+    }
     def.rule({
       when: (w) =>
         w.all(
@@ -209,8 +285,8 @@ export function setupSelectTriggerVisual(
     });
   }
   const validate = (run: RunHandle<ShadcnSelectTriggerProps>) => {
-    if (style.get() === 'rhea' && run.props.get().appearance === 'ghost')
-      throw new Error('[shadcn-select-trigger] Rhea does not define ghost appearance');
+    if (style.get() !== 'new-york-v4' && run.props.get().appearance === 'ghost')
+      throw new Error(`[shadcn-select-trigger] ${style.get()} does not define ghost appearance`);
   };
   def.props.watch(['appearance'], validate);
   def.lifecycle.onCreated(validate);
@@ -236,8 +312,9 @@ export function setupSelectTriggerVisual(
   };
   def.lifecycle.onUnmounted(cancel);
   def.lifecycle.onBeforeDispose(cancel);
-  return (renderer: RendererHandle<any>) => {
+  const render: RenderFn = (renderer) => {
     renderedStyle = style.get();
-    return [renderer.r.slot(), renderChevron(renderer, renderedStyle === 'rhea')];
+    return [renderer.r.slot(), renderChevron(renderer, renderedStyle)];
   };
+  return render;
 }

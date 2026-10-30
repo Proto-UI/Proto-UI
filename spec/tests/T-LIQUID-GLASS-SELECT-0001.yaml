@@ -1,0 +1,41 @@
+id: T-LIQUID-GLASS-SELECT-0001
+type: test
+title: Liquid Glass complete Select coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Eleven-part anatomy, single Surface material owner, structural parts and Field trigger.
+cases:
+  - id: T-LIQUID-GLASS-SELECT-0001-CASE-ANATOMY
+    title: Content > Surface > Viewport > Item > ItemText containment with Surface as sole popup paint/material owner
+    covers:
+      - P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS-INHERITANCE
+      - P-LIQUID-GLASS-SELECT-STRUCTURAL-PARTS-INHERITANCE
+    expectation: complete-item-aligned-anatomy
+  - id: T-LIQUID-GLASS-SELECT-0001-CASE-FIELD
+    title: Field-bound trigger relations, invalid paint and standalone fallback
+    covers:
+      - P-LIQUID-GLASS-SELECT-TRIGGER-FIELD-COMPOSITION
+    expectation: field-select-trigger-policy
+implementations:
+  - id: liquid-select-complete-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/select-complete-projection.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-SELECT
+      - P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS
+      - P-LIQUID-GLASS-SELECT-STRUCTURAL-PARTS
+      - P-LIQUID-GLASS-SELECT-TRIGGER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-FIELD
+    - P-LIQUID-GLASS-SELECT
+    - P-LIQUID-GLASS-SELECT-ALIGNMENT-PARTS
+    - P-LIQUID-GLASS-SELECT-STRUCTURAL-PARTS
+    - P-LIQUID-GLASS-SELECT-TRIGGER

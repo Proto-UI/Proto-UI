@@ -15,13 +15,6 @@ export default definePrototype<InputOtpSlotProps, InputOtpSlotExposes>({
       when: (w) => w.state(inherited.stateHandles!.active).eq(true),
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring')),
     });
-    def.feedback.material.declare({
-      version: 2,
-      shape: { kind: 'rounded-rect', geometry: 'style' },
-      source: { kind: 'in-app-backdrop' },
-      fallback: { fill: 'style', foreground: 'style' },
-    });
-    def.feedback.material.use({ intent: 'liquid-glass' });
     return inherited.render;
   },
 });

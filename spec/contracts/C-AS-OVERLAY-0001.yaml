@@ -78,7 +78,14 @@ criteria:
     text:
       en: 'Within one global input scope, one Escape sample selects at most the most recently activated eligible Overlay. Eligibility requires logical open, active presence, a mounted view and closeOnEscape opt-in. Opted-out or detached instances do not block eligible instances. Selection is fixed before callbacks: closing, disposing or synchronously reopening the selected instance cannot deliver that sample to another candidate. Logical activation order is independent of z-index; repeated open on an already eligible instance does not reorder it.'
       zh-CN: 同一 global input scope 中，一次 Escape sample 至多选择最近激活的合格 Overlay。资格要求 logical open、active presence、mounted view 与 closeOnEscape opt-in。未启用或 detached 实例不阻挡合格实例。调用 callback 前固定选择；被选实例关闭、销毁或同步重新打开，都不能将同一 sample 传给另一候选。逻辑激活顺序独立于 z-index；已合格实例重复 open 不改变顺序。
+  - id: C-AS-OVERLAY-0001-RECONCILE-REQUEST
+    text:
+      en: afterViewReconciled(callback) registers a cancellable one-shot during callback phase for the current logical open request. Registration does not synchronously invoke the callback, including an already settled view. An initially detached request may await its first active mounted view; once bound, close, detach, terminal retirement, target replacement or host-capability epoch replacement cancels it. A missing target or failed acquisition cancels the attempt without later revival. Delivery occurs only after the final successful guarded resource pass has left its acquisition transaction, through a synchronous Runtime callback dispatcher (not a promise or asynchronous scheduler). Exact disposal remains effective during callback preparation. The request is consumed before invocation; exact disposal cannot cancel a successor, and callback failures preserve cleanup and the original failure. This boundary reports resource reconciliation, not renderer commit, stable geometry, paint or native-focus readiness. Overlay never chooses focus entry; consumers retain request validity and Focus handles target readiness.
+      zh-CN: afterViewReconciled(callback) 仅在 callback phase 为当前 logical open 请求登记可取消的一次性通知；即使 view 已协调，登记也不得同步调用。初始 detached 请求可等待首次 active mounted view；绑定后 close、detach、终止、target 替换或 host-capability epoch 替换取消请求。target 缺失或获取失败取消当次且不得随后复活。只有最后一轮成功且仍属当前 view 的资源协调已退出获取事务后，才经同步 Runtime callback dispatcher 交付（非 Promise 或异步调度）；callback preparation 中精确取消仍须有效；调用前消费请求，精确 disposer 不取消后继，回调异常保留清理与原始失败。该边界不承诺 renderer commit、稳定几何、绘制或 native focus ready；Overlay 不选择焦点入口，消费者保持意图有效性，Focus 继续负责 target readiness。
+
 sources:
+  - path: packages/core/src/overlay.ts
+  - path: packages/runtime/src/instance/instance.ts
   - path: internal/contracts/overlay/as-overlay.v0.md
   - path: packages/hooks/src/as-overlay.ts
     sections:

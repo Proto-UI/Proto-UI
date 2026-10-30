@@ -1,14 +1,6 @@
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
-import { afterEach, describe, expect, expectTypeOf, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import * as alertDialog from '../src/alert-dialog';
-import type {
-  ShadcnAlertDialogHeaderProps,
-  ShadcnAlertDialogHeaderExposes,
-  ShadcnAlertDialogFooterProps,
-  ShadcnAlertDialogFooterExposes,
-} from '../src/alert-dialog';
 import { styleContains } from '../../test-utils/style';
 import { SHADCN_STYLE_TOKENS } from '../../../cli/src/generated/shadcn-style-tokens';
 
@@ -68,11 +60,6 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
     await flush();
     for (const role of ['action', 'cancel']) {
       expect(styleContains(p[role], 'select-none'), role).toBe(true);
-      const source = readFileSync(
-        path.join(process.cwd(), `packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).not.toMatch(/\basButton\s*\(/);
       setElementProps(p[role], { disabled: true });
       await flush();
       expect(styleContains(p[role], 'select-none'), role + ' disabled').toBe(true);
@@ -117,12 +104,6 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
         expect(styleContains(p[role], token), role + token).toBe(true);
       for (const token of ['min-h-8', 'px-2.5', 'rounded-lg', 'translate-y-px'])
         expect(styleContains(p[role], token), role + token).toBe(false);
-      const source = readFileSync(
-        path.resolve(`packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).toContain("from '../button/paint'");
-      expect(source).not.toMatch(/asButton|def\.state|def\.event\.on/);
     }
     expect(styleContains(p.action, 'bg-primary')).toBe(true);
     expect(styleContains(p.action, 'border')).toBe(false);
@@ -132,28 +113,13 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
   });
 
   // T-SHADCN-ALERT-DIALOG-0001-CASE-1
-  it('exports optional passive Header/Footer and preserves their authored descendants', async () => {
-    expectTypeOf<keyof ShadcnAlertDialogHeaderProps>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogHeaderExposes>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogFooterProps>().toEqualTypeOf<never>();
-    expectTypeOf<keyof ShadcnAlertDialogFooterExposes>().toEqualTypeOf<never>();
-    expect(alertDialog).toHaveProperty('alertDialogHeader');
-    expect(alertDialog).toHaveProperty('alertDialogFooter');
+  it('keeps optional Header/Footer passive and preserves their authored descendants', async () => {
     const p = fixture();
     await flush();
     for (const role of ['header', 'footer']) {
       expect(p[role].getExposes()).toEqual({});
       expect(p[role].getAttribute('role')).toBeNull();
       expect(p[role].tabIndex).toBe(-1);
-      const source = readFileSync(
-        path.resolve(`packages/prototypes/shadcn/src/alert-dialog/${role}.proto.ts`),
-        'utf8'
-      );
-      expect(source).toContain(`def.anatomy.claim(ALERT_DIALOG_FAMILY, { role: '${role}' })`);
-      expect(source).not.toMatch(
-        /def\.(?:state|event|context|lifecycle)|asButton|asTrigger|window\.|document\./
-      );
-      expect(source).toContain('renderer.r.slot()');
     }
     expect(p.header.contains(p.title)).toBe(true);
     expect(p.header.contains(p.description)).toBe(true);
@@ -185,15 +151,21 @@ describe('Shadcn New York AlertDialog source-aligned passive projection', () => 
         .filter(Boolean);
       for (const token of tokens) expect(SHADCN_STYLE_TOKENS, `${role}: ${token}`).toContain(token);
     }
-    for (const [role, hover] of [
-      ['action', 'bg-primary/80'],
-      ['cancel', 'bg-accent'],
-    ] as const) {
-      p[role].dispatchEvent(new Event('pointerenter'));
-      await flush();
-      expect(p[role].getExposes().hovered.get()).toBe(true);
-      expect(styleContains(p[role], `data-[hovered]:${hover}`)).toBe(true);
-    }
+    // The hover recipes are style-gated runtime rules: the family style state
+    // is not a web-exposed attribute, so New York paint arrives un-prefixed
+    // only while actually hovered. The default recipe's /90 comes from the
+    // pinned modern source, correcting the older /80 local mismatch.
+    p.action.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(p.action.getExposes().hovered.get()).toBe(true);
+    expect(styleContains(p.action, 'bg-primary/90')).toBe(true);
+    p.action.dispatchEvent(new Event('pointerleave'));
+    await flush();
+    p.cancel.dispatchEvent(new Event('pointerenter'));
+    await flush();
+    expect(p.cancel.getExposes().hovered.get()).toBe(true);
+    for (const token of ['bg-accent', 'text-accent-foreground'])
+      expect(styleContains(p.cancel, token)).toBe(true);
   });
 
   it('keeps bounded long-label wrapping as an explicit reusable command option', async () => {

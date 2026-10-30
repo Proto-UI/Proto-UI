@@ -1,29 +1,16 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asCommandRoot, type CommandRootExposes } from '@proto.ui/prototypes-base/command';
 import type { CommandRootProps } from './types';
-import { setupCommandStyle } from './visual';
+import { COMMAND_INPUT_PAINT, setupCommandPartPaint } from './visual';
 export default definePrototype<CommandRootProps, CommandRootExposes>({
   name: 'shadcn-command-root',
+  modules: asCommandRoot.modules,
   setup(def) {
-    const behavior = asCommandRoot();
-    const style = setupCommandStyle(def, true);
-    def.rule({
-      when: (w) => w.state(style).eq('new-york-v4'),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw(
-            'flex h-full min-h-0 min-w-0 w-full flex-col overflow-hidden rounded-md bg-popover text-popover-foreground'
-          )
-        ),
-    });
-    def.rule({
-      when: (w) => w.state(style).eq('rhea'),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw(
-            'flex h-full min-h-0 flex-col min-w-0 w-full overflow-hidden rounded-[var(--pui-radius-3xl)] bg-popover text-popover-foreground p-1'
-          )
-        ),
-    });
+    asCommandRoot();
+    def.context.provide(COMMAND_INPUT_PAINT, { command: false });
+    setupCommandPartPaint(def, 'root', true);
+    def.feedback.style.use(
+      tw('flex h-full w-full flex-col min-w-0 overflow-hidden bg-popover text-popover-foreground')
+    );
   },
 });

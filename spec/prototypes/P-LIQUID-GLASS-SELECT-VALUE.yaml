@@ -21,8 +21,8 @@ criteria:
       zh-CN: '通过 @proto.ui/prototypes-liquid-glass/select 提供 liquid-glass-select-value 与完整类型；private workspace 源码只允许显式 workspace CLI 生成，不代表 registry 已发布。'
   - id: P-LIQUID-GLASS-SELECT-VALUE-VISUAL-SAFETY
     text:
-      en: 'Use shrinkable logical layout, readable long labels and scalable padding. Trigger/Item consume Base focus and disabled state; Content retains anchored portal bounds and scrollport space without introducing fixed content height or physical left/right text alignment.'
-      zh-CN: '使用可收缩逻辑布局、可读长标签与可缩放留白。Trigger/Item 消费 Base focus 与 disabled；Content 保留 anchor portal 边界和滚动留白，不引入固定内容高度或物理左右文字对齐。'
+      en: "Use shrinkable logical layout and readable wrapping labels. Content is the nonmaterial portal/lifetime/frame, Surface solely owns popup paint and complete opaque fallback, and Viewport is the one scrollport. Preserve Base focus, disabled state, anchor/available bounds and item text identity without fixed content height or physical text alignment."
+      zh-CN: "使用可收缩逻辑布局和可读换行标签。Content 仅为无材质 portal/lifetime/frame，Surface 独占 popup 绘制与完整不透明 fallback，Viewport 是唯一 scrollport。保留 Base focus、disabled、anchor/available 边界和 ItemText 身份，不引入固定内容高度或物理文字对齐。"
 openQuestions:
   - id: P-LIQUID-GLASS-SELECT-VALUE-Q-ADMISSION
     question:

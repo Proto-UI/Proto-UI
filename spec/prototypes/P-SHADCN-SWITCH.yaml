@@ -108,8 +108,8 @@ criteria:
       zh-CN: Root在后代挂载前初始化size，Props变化时发布尺寸失效通知。每个Thumb在mount、update、相关Anatomy membership变化与视觉Context通知时重新解析当前owner，不信任旧owner缓存或通知payload。view detach清除派生尺寸，remount重读当前owner，terminal dispose释放module自有订阅。多个Thumb独立派生；preset默认、替换、省略均不新增视觉owner。native、browser与compiler实现仍须分别验收。
   - id: P-SHADCN-SWITCH-SHARED-PROFILES
     text:
-      en: Absent or inherit styleProfile follows the nearest shared scope with compatibility fallback new-york-v4. Only new-york-v4 (alias new-york) and rhea are supported; other style IDs fail closed. Root publishes visual style and size invalidation, while Thumb re-reads its actual anatomy Root. Neither style switching nor optional Field integration replaces checked, axis, focus or caller Thumb identity.
-      zh-CN: 缺省或 inherit 的 styleProfile 继承最近公共 scope，以 new-york-v4 兼容回退。仅支持 new-york-v4（别名 new-york）与 rhea，其余 ID 明确拒绝。Root 发布视觉尺寸与样式失效通知，Thumb 重读实际 anatomy Root；样式切换和可选 Field 接入不替换 checked、axis、focus 或 caller Thumb 身份。
+      en: Absent or inherit styleProfile follows the nearest shared scope with compatibility fallback new-york-v4. Supported profiles are New York (alias new-york), vega, nova, maia, lyra, mira, luma, sera and rhea; unknown IDs fail closed. Root publishes visual style and size invalidation, while Thumb re-reads its actual anatomy Root. Neither style switching nor optional Field integration replaces checked, axis, focus or caller Thumb identity. Source and authored test coverage do not establish native acceptance for every profile.
+      zh-CN: 缺省或 inherit 的 styleProfile 继承最近公共 scope，以 new-york-v4 兼容回退。支持 New York（别名 new-york）、vega、nova、maia、lyra、mira、luma、sera、rhea，未知 ID 明确拒绝。Root 发布视觉尺寸与样式失效通知，Thumb 重读实际 anatomy Root；样式切换和可选 Field 接入不替换 checked、axis、focus 或 caller Thumb 身份。源码和已编写测试不等于各 profile 均获原生验收。
   - id: P-SHADCN-SWITCH-RHEA-SURFACE
     text:
       en: Rhea uses default 20 by 32 and small 16 by 24 CSS pixels at 16px root font, theme2xl corners, 2px border and no root shadow. Unchecked is input90; checked is primary. Valid focus uses ring30 and border-ring. Only the Field entry consumes existing invalid facts for destructive20 (dark40) ring and destructive (dark50) border. Thumb uses theme2xl, shadow-sm, light padding clip and checked travel 100%-4px. Ordinary standalone or sibling FieldLabel anatomy retains its keyboard ring; wrapped card-label outer-ring composition is not supported and no Field-wide focus boolean is substituted for that ancestor selector.
@@ -118,6 +118,11 @@ criteria:
     text:
       en: Root retains a positioned padding box across styles as a disclosed host baseline. Only mounted Rhea acquires one owner-relative self-region lease with .75rem horizontal and .5rem vertical inset. New York, detach and disposal release it. Positioning is not itself an acquisition marker; disabled/readOnly activation and checked ownership remain Base behavior. No drag enhancement is added.
       zh-CN: Root 跨样式保留定位 padding box，作为明确披露的宿主基线。仅已挂载 Rhea 获取一个 owner-relative self-region lease，水平 .75rem、垂直 .5rem；NY、detach 和 dispose 均撤回。定位不等于命中扩展，disabled/readOnly 激活与 checked 所有权仍属于 Base，不新增拖动增强。
+  - id: P-SHADCN-SWITCH-FIELD-COMPOSITION
+    text:
+      en: The public fieldSwitch entry composes asFieldSwitch once and reuses standalone Switch paint. The optional canonical Field binding alone owns invalid, pending, readOnly/disabled policy and label relationships; checked requests and accepted truth remain with Base Switch.
+    dependsOn:
+      contracts: [C-FIELD-SWITCH-0001]
 openQuestions:
   - id: P-SHADCN-SWITCH-Q-UPSTREAM-DIFFERENCES
     question:

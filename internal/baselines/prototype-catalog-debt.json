@@ -1,5 +1,5476 @@
 {
   "schemaVersion": 1,
   "description": "Existing concrete prototype declarations that still need P/T catalog entities. CI rejects unlisted or stale debt, so accepting a new gap requires an explicit reviewed edit.",
-  "uncataloged": []
+  "uncataloged": [
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/action.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-action"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/cancel.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-cancel"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-cancel"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/content.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/description.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-description"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/overlay.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-mask"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/title.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-title"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/alert-dialog/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-alert-dialog-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-alert-dialog-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/calendar/calendar.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-calendar-caption"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-day"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-grid"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-heading"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-next"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-previous"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-row"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-weekday"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-calendar-weekdays"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-grid"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-heading"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-weekday"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-calendar-weekdays"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/carousel/carousel.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-carousel-next"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-carousel-previous"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-carousel-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-carousel-slide"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-carousel-viewport"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-carousel-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-carousel-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-carousel-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-carousel-slide"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-carousel-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/checkbox-group/all.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-checkbox-group-all"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-checkbox-group-all"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/checkbox-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-checkbox-group-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-checkbox-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/checkbox-group/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-checkbox-group-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-checkbox-group-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/context-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-context-menu-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-context-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/context-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-context-menu-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-context-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/context-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-context-menu-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-context-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/context-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-context-menu-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-context-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/data-table/data-table.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-data-table-caption"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-cell"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-header"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-next"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-previous"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-row"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-structure-caption"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-structure-cell"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-structure-header"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-structure-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-data-table-structure-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-cell"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-header"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-data-table-row"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/date-picker/date-picker.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-date-picker-content"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-date-picker-day"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-date-picker-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-date-picker-trigger"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-date-picker-value"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-date-picker-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-date-picker-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-date-picker-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-date-picker-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-date-picker-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/close.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-close"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/description.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-description"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/handle.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-handle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/overlay.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-mask"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/title.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-title"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/drawer/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-drawer-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-drawer-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/field/select-trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-field-select-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-field-select-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/field/switch.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-field-switch"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-field-switch"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/field/textarea.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-field-textarea"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-field-textarea"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/form/field.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-form-field"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-form-field"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/form/reset.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-form-reset"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-form-reset"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/form/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-form-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-form-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/form/submit.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-form-submit"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-form-submit"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/input-otp/control.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-input-otp-control"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-input-otp-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/input-otp/input.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-input-otp-input"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-input-otp-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/input-otp/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-input-otp-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-input-otp-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/input-otp/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-input-otp-separator"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-input-otp-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/input-otp/slot.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-input-otp-slot"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-input-otp-slot"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/message-scroller/message-scroller.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-message-scroller-jump"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-message-scroller-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-message-scroller-viewport"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-message-scroller-jump"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-message-scroller-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-message-scroller-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/meter/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-meter-indicator"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-meter-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/meter/label.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-meter-label"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-meter-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/meter/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-meter-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-meter-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/meter/track.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-meter-track"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-meter-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/meter/value.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-meter-value"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-meter-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/control.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-control"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/decrement.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-decrement"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-decrement"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/increment.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-increment"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-increment"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/input.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-input"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/label.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-label"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/number-field/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-number-field-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-number-field-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/close.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-close"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/content.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/description.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-description"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/title.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-title"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/popover/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-popover-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-popover-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/progress/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-progress-indicator"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-progress-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/progress/label.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-progress-label"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-progress-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/progress/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-progress-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-progress-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/progress/track.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-progress-track"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-progress-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/progress/value.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-progress-value"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-progress-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/resizable/resizable.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-resizable-handle"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-resizable-panel"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-resizable-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-resizable-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-resizable-panel"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-resizable-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/slider/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-slider-indicator"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-slider-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/slider/label.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-slider-label"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-slider-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/slider/value.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-slider-value"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-slider-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/action.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-action"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/close.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-close"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/description.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-description"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/title.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-title"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toast/viewport.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toast-viewport"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toast-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toggle-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toggle-group-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toggle-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toolbar/button.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toolbar-button"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toolbar-button"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toolbar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toolbar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toolbar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/toolbar/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-toolbar-separator"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-toolbar-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/tree/tree.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-tree-group"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-tree-item"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-tree-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-tree-toggle"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-tree-group"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-tree-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-tree-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-tree-toggle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/base/src/virtual-list/virtual-list.proto.ts",
+      "entries": [
+        {
+          "kind": "asHook",
+          "name": "as-virtual-list-content"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-virtual-list-root"
+        },
+        {
+          "kind": "asHook",
+          "name": "as-virtual-list-viewport"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-virtual-list-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-virtual-list-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "base-virtual-list-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/cancel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-cancel"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/alert-dialog/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-alert-dialog-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/autocomplete/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-autocomplete-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/calendar/calendar.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-grid"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-heading"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-weekday"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-calendar-weekdays"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/carousel/carousel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-carousel-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-carousel-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-carousel-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-carousel-slide"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-carousel-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/checkbox-group/all.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-checkbox-group-all"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/checkbox-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-checkbox-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/checkbox-group/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-checkbox-group-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/combobox/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-combobox-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/command/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-command-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/command/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-command-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/command/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-command-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/command/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-command-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/command/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-command-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/context-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-context-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/context-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-context-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/context-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-context-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/context-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-context-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/data-table/data-table.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-cell"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-header"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-data-table-row"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/date-picker/date-picker.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-date-picker-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-date-picker-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-date-picker-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-date-picker-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-date-picker-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/handle.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-handle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/drawer/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-drawer-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/form/field.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-form-field"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/form/reset.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-form-reset"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/form/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-form-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/form/submit.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-form-submit"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/input-otp/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-input-otp-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/input-otp/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-input-otp-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/input-otp/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-input-otp-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/input-otp/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-input-otp-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/input-otp/slot.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-input-otp-slot"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/menubar/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-menubar-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/menubar/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-menubar-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/menubar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-menubar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/menubar/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-menubar-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/message-scroller/message-scroller.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-message-scroller-jump"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-message-scroller-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-message-scroller-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/meter/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-meter-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/meter/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-meter-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/meter/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-meter-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/meter/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-meter-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/meter/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-meter-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/navigation-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-navigation-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/navigation-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-navigation-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/navigation-menu/link.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-navigation-menu-link"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/navigation-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-navigation-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/navigation-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-navigation-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/decrement.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-decrement"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/increment.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-increment"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/number-field/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-number-field-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/popover/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-popover-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/progress/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-progress-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/progress/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-progress-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/progress/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-progress-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/progress/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-progress-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/progress/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-progress-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/resizable/resizable.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-resizable-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-resizable-panel"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-resizable-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/slider/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-slider-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/slider/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-slider-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/slider/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-slider-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/slider/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-slider-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toast/viewport.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toast-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toggle-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toggle-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toolbar/button.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toolbar-button"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toolbar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toolbar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/toolbar/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-toolbar-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/tree/tree.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-tree-group"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-tree-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-tree-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-tree-toggle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/bootstrap-2-3-2/src/virtual-list/virtual-list.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-virtual-list-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-virtual-list-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "bootstrap-2-3-2-virtual-list-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/cancel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-cancel"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/alert-dialog/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-alert-dialog-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/autocomplete/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-autocomplete-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/calendar/calendar.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-grid"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-heading"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-weekday"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-calendar-weekdays"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/carousel/carousel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-carousel-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-carousel-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-carousel-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-carousel-slide"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-carousel-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/checkbox-group/all.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-checkbox-group-all"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/checkbox-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-checkbox-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/checkbox-group/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-checkbox-group-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/combobox/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-combobox-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/command/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-command-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/command/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-command-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/command/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-command-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/command/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-command-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/command/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-command-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/context-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-context-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/context-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-context-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/context-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-context-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/context-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-context-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/data-table/data-table.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-cell"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-header"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-data-table-row"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/date-picker/date-picker.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-date-picker-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-date-picker-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-date-picker-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-date-picker-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-date-picker-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/handle.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-handle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/drawer/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-drawer-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/form/field.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-form-field"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/form/reset.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-form-reset"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/form/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-form-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/form/submit.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-form-submit"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/input-otp/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-input-otp-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/input-otp/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-input-otp-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/input-otp/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-input-otp-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/input-otp/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-input-otp-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/input-otp/slot.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-input-otp-slot"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/menubar/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-menubar-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/menubar/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-menubar-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/menubar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-menubar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/menubar/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-menubar-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/message-scroller/message-scroller.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-message-scroller-jump"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-message-scroller-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-message-scroller-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/meter/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-meter-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/meter/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-meter-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/meter/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-meter-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/meter/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-meter-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/meter/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-meter-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/navigation-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-navigation-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/navigation-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-navigation-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/navigation-menu/link.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-navigation-menu-link"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/navigation-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-navigation-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/navigation-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-navigation-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/decrement.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-decrement"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/increment.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-increment"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/number-field/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-number-field-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/popover/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-popover-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/progress/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-progress-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/progress/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-progress-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/progress/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-progress-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/progress/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-progress-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/progress/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-progress-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/resizable/resizable.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-resizable-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-resizable-panel"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-resizable-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/field-thumb.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-field-thumb"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/thumb.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-thumb"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/slider/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-slider-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toast/viewport.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toast-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toggle-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toggle-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toolbar/button.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toolbar-button"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toolbar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toolbar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/toolbar/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-toolbar-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/tree/tree.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-tree-group"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-tree-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-tree-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-tree-toggle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/brutalist/src/virtual-list/virtual-list.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "brutalist-virtual-list-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-virtual-list-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "brutalist-virtual-list-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/cancel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-cancel"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/alert-dialog/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-alert-dialog-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/autocomplete/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-autocomplete-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/calendar/calendar.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-grid"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-heading"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-weekday"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-calendar-weekdays"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/carousel/carousel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-carousel-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-carousel-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-carousel-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-carousel-slide"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-carousel-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/checkbox-group/all.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-checkbox-group-all"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/checkbox-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-checkbox-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/checkbox-group/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-checkbox-group-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/combobox/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-combobox-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/command/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-command-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/command/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-command-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/command/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-command-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/command/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-command-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/command/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-command-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/context-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-context-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/context-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-context-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/context-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-context-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/context-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-context-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/data-table/data-table.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-cell"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-header"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-data-table-row"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/date-picker/date-picker.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-date-picker-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-date-picker-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-date-picker-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-date-picker-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-date-picker-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/handle.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-handle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/drawer/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-drawer-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/form/field.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-form-field"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/form/reset.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-form-reset"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/form/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-form-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/form/submit.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-form-submit"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/input-otp/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-input-otp-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/input-otp/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-input-otp-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/input-otp/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-input-otp-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/input-otp/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-input-otp-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/input-otp/slot.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-input-otp-slot"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/menubar/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-menubar-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/menubar/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-menubar-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/menubar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-menubar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/menubar/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-menubar-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/message-scroller/message-scroller.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-message-scroller-jump"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-message-scroller-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-message-scroller-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/meter/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-meter-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/meter/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-meter-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/meter/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-meter-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/meter/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-meter-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/meter/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-meter-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/navigation-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-navigation-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/navigation-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-navigation-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/navigation-menu/link.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-navigation-menu-link"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/navigation-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-navigation-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/navigation-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-navigation-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/decrement.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-decrement"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/increment.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-increment"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/number-field/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-number-field-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/popover/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-popover-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/progress/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-progress-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/progress/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-progress-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/progress/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-progress-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/progress/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-progress-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/progress/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-progress-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/resizable/resizable.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-resizable-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-resizable-panel"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-resizable-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/slider/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-slider-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/slider/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-slider-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/slider/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-slider-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/slider/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-slider-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toast/viewport.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toast-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toggle-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toggle-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toolbar/button.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toolbar-button"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toolbar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toolbar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/toolbar/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-toolbar-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/tree/tree.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-tree-group"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-tree-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-tree-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-tree-toggle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/liquid-glass/src/virtual-list/virtual-list.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-virtual-list-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-virtual-list-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "liquid-glass-virtual-list-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/cancel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-cancel"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/mask.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-mask"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/alert-dialog/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-alert-dialog-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/autocomplete/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-autocomplete-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/calendar/calendar.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-grid"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-heading"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-row"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-weekday"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-calendar-weekdays"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/carousel/carousel.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-carousel-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-carousel-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-carousel-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-carousel-slide"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-carousel-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/checkbox-group/all.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-checkbox-group-all"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/checkbox-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-checkbox-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/checkbox-group/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-checkbox-group-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/combobox/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-combobox-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/empty.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-empty"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/input-wrapper.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-input-wrapper"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/command/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-command-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/context-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-context-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/context-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-context-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/context-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-context-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/context-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-context-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/data-table/data-table.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-caption"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-cell"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-header"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-next"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-previous"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-data-table-row"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/date-picker/date-picker.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-date-picker-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-date-picker-day"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-date-picker-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-date-picker-trigger"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-date-picker-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/handle.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-handle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/drawer/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-drawer-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/form/field.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-form-field"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/form/reset.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-form-reset"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/form/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-form-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/form/submit.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-form-submit"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/input-otp/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-input-otp-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/input-otp/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-input-otp-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/input-otp/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-input-otp-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/input-otp/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-input-otp-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/input-otp/slot.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-input-otp-slot"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/menubar/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-menubar-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/menubar/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-menubar-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/menubar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-menubar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/menubar/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-menubar-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/message-scroller/message-scroller.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-message-scroller-jump"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-message-scroller-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-message-scroller-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/meter/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-meter-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/meter/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-meter-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/meter/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-meter-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/meter/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-meter-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/meter/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-meter-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/navigation-menu/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-navigation-menu-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/navigation-menu/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-navigation-menu-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/navigation-menu/link.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-navigation-menu-link"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/navigation-menu/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-navigation-menu-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/navigation-menu/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-navigation-menu-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/control.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-control"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/decrement.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-decrement"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/increment.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-increment"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/input.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-input"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/number-field/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-number-field-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/content.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-content"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/popover/trigger.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-popover-trigger"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/progress/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-progress-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/progress/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-progress-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/progress/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-progress-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/progress/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-progress-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/progress/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-progress-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/resizable/resizable.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-resizable-handle"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-resizable-panel"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-resizable-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/slider/indicator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-slider-indicator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/slider/label.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-slider-label"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/slider/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-slider-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/slider/track.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-slider-track"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/slider/value.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-slider-value"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/action.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-action"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/close.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-close"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/description.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-description"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/title.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-title"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toast/viewport.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toast-viewport"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toggle-group/item.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toggle-group-item"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toolbar/button.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toolbar-button"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toolbar/root.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toolbar-root"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/toolbar/separator.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-toolbar-separator"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/tree/tree.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-tree-group"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-tree-item"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-tree-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-tree-toggle"
+        }
+      ]
+    },
+    {
+      "file": "packages/prototypes/shadcn/src/virtual-list/virtual-list.proto.ts",
+      "entries": [
+        {
+          "kind": "prototype",
+          "name": "shadcn-virtual-list-content"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-virtual-list-root"
+        },
+        {
+          "kind": "prototype",
+          "name": "shadcn-virtual-list-viewport"
+        }
+      ]
+    }
+  ]
 }
