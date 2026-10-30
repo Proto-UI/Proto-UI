@@ -92,7 +92,11 @@ export type DialogMaskHandles = {
   asTransition: TransitionHandles;
 };
 
-export type DialogContentProps = TransitionProps;
+export type DialogContentProps = TransitionProps & {
+  // P-BASE-DIALOG-CONTENT-ENTRY-POLICY
+  // Applies to the next actual scope activation, not an active-view refocus.
+  focusEntry?: 'auto' | 'manual';
+};
 
 export type DialogContentExposes = TransitionExposes & {
   // P-BASE-DIALOG-CONTENT-PRESENCE
