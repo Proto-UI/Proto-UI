@@ -412,8 +412,30 @@ ${stateful ? '  let notifying = false;\n' : ''}  let portalAnchor = null, portal
     } else restorePortal();
   }
   function restorePortal() {
-    if (portalRoot && portalAnchor?.parentNode) portalAnchor.parentNode.insertBefore(portalRoot, portalAnchor);
-    portalAnchor?.remove(); portalAnchor = portalRoot = null;
+    const target = portalRoot, anchor = portalAnchor, moveEpoch = epoch;
+    // Relinquish this move before DOM callbacks can reenter the same owner.
+    portalAnchor = portalRoot = null;
+    const failures = [];
+    let restored = false;
+    if (target && anchor?.parentNode) {
+      try { anchor.parentNode.insertBefore(target, anchor); restored = true; }
+      catch (error) { failures.push(error); }
+    }
+    // A failed DOM operation may have admitted a newer open synchronously.
+    // Transfer this still-owned move to it rather than erase its Root/anchor.
+    const handedToNewer = target && !restored && !terminal && present
+      && epoch !== moveEpoch && !portalRoot && !portalAnchor;
+    if (handedToNewer) { portalRoot = target; portalAnchor = anchor; }
+    // A lost/failed anchor must not strand an old view in the Portal host.
+    // Never remove resources already claimed by a newer reentrant move.
+    if (!handedToNewer && target && !restored && portalRoot !== target) {
+      try { target.remove(); } catch (error) { failures.push(error); }
+    }
+    if (!handedToNewer && anchor && portalAnchor !== anchor) {
+      try { anchor.remove(); } catch (error) { failures.push(error); }
+    }
+    if (failures.length) throw failures.length === 1 ? failures[0]
+      : new AggregateError(failures, '[Vue2 native] Portal restoration and cleanup failed.');
   }
   let dispatchingProps = false;
   const alive = () => { if (disposed) throw new Error('[Vue2 native] logical instance has been disposed.'); };
@@ -554,11 +576,22 @@ ${styled ? `  const style = PUICreateNativeStyle({
     if (terminal) throw new Error('[Vue2 native] presence is locked for terminal disposal.');
     if (present === next) return;
     present = next; ++epoch; pending = null; renderedCommit = null; queued = false;
-    ${interactive ? 'if (!next) interaction.unmount();' : ''}
-    // A fresh mount always re-renders retained logical state. A canceled detach is
-    // still a presence request, not a React-style reactive state write.
-    if (next && nativeMounted && hostActive && viewActive) renderSemantic();
-    force();
+    const requestedEpoch = epoch, failures = [];
+    // Vue must patch at the owned anchor, not leave its replacement comment
+    // in the Portal host and later resurrect the already-removed Root.
+    if (!next) { try { restorePortal(); } catch (error) { failures.push(error); } }
+    if (!terminal && epoch === requestedEpoch && present === next) {
+      ${interactive ? 'if (!next) { try { interaction.unmount(); } catch (error) { failures.push(error); } }' : ''}
+      if (!terminal && epoch === requestedEpoch && present === next) {
+        // A newer presence request or terminal disposal always wins reentry.
+        try {
+          if (next && nativeMounted && hostActive && viewActive) renderSemantic();
+          force();
+        } catch (error) { failures.push(error); }
+      }
+    }
+    if (failures.length) throw failures.length === 1 ? failures[0]
+      : new AggregateError(failures, '[Vue2 native] presence withdrawal failed.');
   };
 ${context.owner}
   const run = {
