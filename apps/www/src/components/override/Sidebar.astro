@@ -1,0 +1,32 @@
+---
+import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
+import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
+import config from 'virtual:starlight/user-config';
+import bootstrap from '../site-sidebar-disclosure-bootstrap.js?raw';
+import {
+  collapsedSidebar,
+  sidebarGroupIdentities,
+  sidebarManagedGroups,
+  legacySidebarHash,
+} from '../site-sidebar-disclosure-policy';
+
+const locales = Object.keys(config.locales ?? {});
+const entries = collapsedSidebar(Astro.locals.starlightRoute.sidebar, locales);
+const managed = sidebarManagedGroups(entries, locales);
+const legacyHash = legacySidebarHash(Astro.locals.starlightRoute.sidebar);
+const identities = sidebarGroupIdentities(entries, Object.keys(config.locales ?? {}));
+---
+
+<sl-sidebar-state-persist class="contents" data-site-sidebar-policy data-hash={legacyHash}>
+  <SidebarSublist sublist={entries} />
+  <script
+    is:inline
+    aria-hidden="true"
+    data-sidebar-identities={JSON.stringify(identities)}
+    data-sidebar-managed={JSON.stringify(managed)}
+    set:html={bootstrap}
+  />
+</sl-sidebar-state-persist>
+<div class="md:sl-hidden">
+  <MobileMenuFooter />
+</div>
