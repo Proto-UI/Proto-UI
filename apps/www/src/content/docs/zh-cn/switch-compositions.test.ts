@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { DemoChild, DemoNode, DemoSetupContext } from '@/components/PrototypePreviewer/demo-types';
-import { loadPrototype } from '@/components/PrototypePreviewer/prototype-modules';
-import { getPrototype } from '@/components/PrototypePreviewer/registry';
+import type { DemoChild, DemoNode, DemoSetupContext } from '../../../components/PrototypePreviewer/demo-types';
+import { loadPrototype } from '../../../components/PrototypePreviewer/prototype-modules';
+import { getPrototype } from '../../../components/PrototypePreviewer/registry';
 import demo, { SWITCH_COMPOSITION_CASES } from './demo-shadcn-switch-compositions.demo';
 
 function nodes(node: DemoChild): DemoNode[] {
