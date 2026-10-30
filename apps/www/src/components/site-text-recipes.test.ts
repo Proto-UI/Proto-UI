@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { siteTextRecipe } from './site-text-recipes';
+import { siteTextRecipe, siteTextSurfaceStyle } from './site-text-recipes';
 describe('documentation reading scale consumes public Text props', () => {
   for (const family of ['shadcn', 'brutalist'] as const) {
     it(`${family}: keeps body and family weight while reducing section hierarchy`, () => {
@@ -225,4 +225,97 @@ it('Hero native fallback and public recipes share the finite source breakpoints 
   expect(hero).not.toContain('[data-typography-prototype]');
   expect(hero).toContain('whitepaperHref');
   expect(hero).toContain('actions={actions}');
+});
+
+it('keeps authored Overview card roles compact without changing document or Hero recipes', () => {
+  const source = readFileSync('apps/www/src/components/PrototypeLibraryOverview.astro', 'utf8');
+  expect(source).toContain('<h2 data-site-typography="overview-card-title">');
+  expect(source).toContain('<p data-site-typography="overview-card-description">');
+  expect(source).toContain('<span>{copy.demo}</span>');
+  expect(siteTextSurfaceStyle('overview-card-title')).toEqual({
+    fontSize: '1rem',
+    lineHeight: '1.25rem',
+    fontFamily: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  expect(siteTextSurfaceStyle('overview-card-description')).toEqual({
+    fontSize: '0.76rem',
+    lineHeight: '1.14rem',
+    fontFamily: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    expect(siteTextRecipe('overview-card-title', family)).toMatchObject({
+      size: 'base',
+      weight: 'semibold',
+      leading: 'size',
+      tracking: 'tight',
+    });
+    expect(siteTextRecipe('overview-card-description', family)).toMatchObject({
+      size: 'xs',
+      weight: 'normal',
+      tone: 'muted',
+      leading: 'size',
+    });
+    expect(siteTextRecipe('h2', family).size).toBe('2xl');
+    expect(siteTextRecipe('body', family).size).toBe('base');
+    expect(siteTextSurfaceStyle('h2')).toEqual({});
+    expect(siteTextSurfaceStyle('slogan')).toEqual({});
+  }
+});
+
+it('preserves the native reading TOC title without changing generic labels', () => {
+  const source = readFileSync(
+    'apps/www/src/components/override/TableOfContents/TableOfContents.astro',
+    'utf8'
+  );
+  expect(source).toContain(
+    '<h2 data-site-typography="reading-toc-title" id="starlight__on-this-page">'
+  );
+  expect(source).toContain('aria-labelledby="starlight__on-this-page"');
+  expect(siteTextSurfaceStyle('reading-toc-title')).toEqual({
+    fontSize: '0.75rem',
+    lineHeight: '1rem',
+    fontFamily: 'inherit',
+    fontWeight: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    expect(siteTextRecipe('reading-toc-title', family)).toMatchObject({
+      size: 'xs',
+      tone: 'inherit',
+      leading: 'size',
+    });
+    expect(siteTextRecipe('label', family).size).toBe('sm');
+    expect(siteTextRecipe('h2', family).size).toBe('2xl');
+    expect(siteTextSurfaceStyle('label')).toEqual({});
+  }
+});
+
+it('document-heading inherits the single native responsive reading scale, not a late family font', () => {
+  expect(siteTextSurfaceStyle('h1', 'document')).toEqual({
+    fontSize: 'inherit',
+    lineHeight: 'inherit',
+    fontFamily: 'inherit',
+    fontWeight: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  // Scope negatives: normal headings, Hero and component-owned text retain
+  // their existing family contracts; this is not a Base Text default change.
+  expect(siteTextSurfaceStyle('h1')).toEqual({});
+  expect(siteTextSurfaceStyle('h1', 'site')).toEqual({});
+  expect(siteTextSurfaceStyle('h2', 'document')).toEqual({});
+  expect(siteTextSurfaceStyle('slogan', 'document')).toEqual({});
+  expect(siteTextRecipe('h1', 'brutalist')).toMatchObject({
+    size: '4xl',
+    weight: 'bold',
+    font: 'heading',
+    leading: 'tight',
+  });
+  const typography = readFileSync('apps/www/src/components/site-typography.ts', 'utf8');
+  expect(typography).toContain('...siteTextSurfaceStyle(role, context)');
+  const css = readFileSync('apps/www/src/styles/markdown.css', 'utf8');
+  expect(css).toMatch(
+    /main\[data-pagefind-body\] h1\s*\{\s*@apply scroll-m-20 text-\[2rem\] leading-\[2\.5rem\] font-semibold tracking-tight md:text-\[2\.25rem\] md:leading-\[2\.75rem\];/
+  );
 });

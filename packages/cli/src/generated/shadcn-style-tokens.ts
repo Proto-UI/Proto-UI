@@ -3,7 +3,6 @@
  * scripts/styles/generate-shadcn-style-tokens.ts.
  * Do not edit by hand.
  */
-export const SHADCN_STYLE_TOKENS: string[] = [  '-mb-4',
   '-mx-1',
   '-mx-1.5',
   '-mx-4',
@@ -520,6 +519,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [  '-mb-4',
   'line-through',
   'm-0',
   'max-h-72',
+  'max-h-80',
   'max-h-[18.75rem]',
   'max-h-[calc(100vh_-_2rem)]',
   'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',

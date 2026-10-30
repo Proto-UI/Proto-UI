@@ -43,6 +43,12 @@ a[data-site-link-enhanced][data-site-link-appearance='toc'] {
   margin-inline-start: calc(1rem * var(--depth, 0));
   width: calc(100% - 1rem * var(--depth, 0));
 }
+/* Ordinary reading TOC preserves the native full-width anchor. The shared
+   Surface owns depth padding, so range reads see identical anchor geometry. */
+.right-sidebar sl-toc a[data-site-link-enhanced][data-site-link-appearance='toc']:not(.isMobile a) {
+  margin-inline-start: 0;
+  width: 100%;
+}
 a[data-site-link-enhanced] > [data-site-link-content] {
   max-width: 100%;
 }

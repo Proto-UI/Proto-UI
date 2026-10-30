@@ -5,14 +5,18 @@ status: draft
 since: 0.2.0-rc.0
 summary: Shadcn Switch Thumb inherits the Base context-driven indicator protocol and adds the currently implemented thumb shape, sizing, surface, and motion tokens.
 statement:
-  zh-CN: "Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 source CSS transform transition declaration。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。"
+  zh-CN: >-
+    Shadcn Switch Thumb 是 `P-BASE-SWITCH-THUMB` 之上的 direct anatomy part。它继续从同域 Root context 派生 checked/disabled display state，不拥有 value、activation、focus 或 event 语义，并增加当前实现的 thumb 尺寸、形状、surface 与 source CSS transform transition declaration。固定 upstream Shadcn wrapper 将 Thumb 作为内部结构，而 Proto UI 当前将它公开为可组合原型；该差异及 token parity 集中记录为 compatibility differences。
 
-  en: "Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and source CSS transform transition declaration. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences."
+
+  en: >-
+    Shadcn Switch Thumb is a direct anatomy part over `P-BASE-SWITCH-THUMB`. It continues to derive checked and disabled display state from same-domain Root context, owns no value, activation, focus, or event semantics, and adds the currently implemented thumb dimensions, shape, surface, and source CSS transform transition declaration. The pinned upstream Shadcn wrapper keeps Thumb internal while Proto UI currently exposes it as a composable prototype; that difference and token parity are centralized as compatibility differences.
+
 
 criteria:
   - id: P-SHADCN-SWITCH-THUMB-DIRECTIONAL-PREVIEW
     text:
-      en: The opt-in Base draggable enhancement projects inherited percentage through the exposed number.range style channel without owning value, input, geometry or events. New York, Vega, Nova, Maia, Lyra and Mira travel is percentage/100 times used Thumb width minus 2px; Rhea subtracts 4px and Luma 8px. Sera starts at 1px and travels used Thumb width plus 1px, preserving both source endpoints. Explicit RTL mirrors the base offset and travel once from the opposite Root edge. Both sizes retain their profile geometry. Dragging suppresses the transform transition; settlement restores the source transition. Cancel and controlled refusal follow Root rollback with no presentation-owned checked request. draggable=false retains source checked endpoints. Authored directional consumer cases cover New York/Rhea with synthetic geometry; the seven added profile drag recipes have no native acceptance claim. Rendered, assistive-technology and all-target evidence remain required.
+      en: The opt-in Base draggable enhancement projects the inherited percentage through the existing exposed number.range style channel without owning value, input, geometry or events. New York travel is percentage/100 times the used Thumb width minus 2px; Rhea subtracts 4px. For explicit RTL enhancement the Root starts the Thumb at the opposite edge and travel reverses once. Both sizes retain their rem geometry. While dragging, CSS transform transition is suppressed so paint follows the Root preview; settlement withdraws suppression and restores the source transition. Cancel and controlled refusal follow Root percentage rollback; no checked request is emitted by presentation. draggable=false retains the prior source-bound checked endpoints. Native rendered/AT and all-target evidence remain required.
     dependsOn:
       prototypes:
         - id: P-BASE-SWITCH

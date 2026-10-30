@@ -61,6 +61,7 @@ Trigger 与 Surface 使用共享 typed `liquid-glass` 光学意图，各自保�
 
 四个例子各自使用可见 canvas 场景，但仍在同一框架树和原 Runtime Tabs 上下文中。受控状态和 Accept 位于对应 Trigger 之前，避免普通向下弹出的菜单覆盖后续控件。这是网站显式拥有的图像源，不是任意页面 DOM 截图；碰撞后的菜单若覆盖真实内容、越出图像源，或偏好不可用、宿主不支持，仍保留诚实的不透明回退。四个场景增加真实 canvas/provider 资源，其成本与各宿主光学表现须以实测确认，不能由源码推定。连续水滴式展开和收回仍未完成。静态场景暂不支持 dynamicChildren，也不覆盖已有祖先材质 provider。
 
+四个例子各自使用可见 canvas 场景，但仍在同一框架树和原 Runtime Tabs 上下文中。受控状态和 Accept 位于对应 Trigger 之前，避免普通向下弹出的菜单覆盖后续控件。这是网站显式拥有的图像源，不是任意页面 DOM 截图；碰撞后的菜单若覆盖真实内容、越出图像源，或偏好不可用、宿主不支持，仍保留诚实的不透明回退。四个场景增加真实 canvas/provider 资源，其成本与各宿主光学表现须以实测确认，不能由源码推定。连续水滴式展开和收回仍未完成。静态场景暂不支持 dynamicChildren，也不覆盖已有祖先材质 provider。
 - [Base Select](/zh-cn/ui-libraries/base/select/)
 - [Source](https://github.com/Proto-UI/Proto-UI/tree/main/packages/prototypes/liquid-glass/src/select)
 - [Evidence map](https://github.com/Proto-UI/Proto-UI/blob/main/spec/tests/T-SELECT-DRAFT-PROJECTIONS-0001.yaml)

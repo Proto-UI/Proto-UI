@@ -895,3 +895,103 @@ describe.sequential('document reading native fallback', () => {
     }, 90_000);
   }
 });
+
+// #1039: actual Overview cards, not the homepage Hero or a replacement fixture.
+// Eight enhanced loads plus four no-JS loads; root/width samples are cheap reads.
+it('retains Overview card native density in each runtime and without JavaScript', async () => {
+  for (const family of FAMILIES) {
+    const cases = [
+      ...RUNTIMES.map((runtime, index) => ({
+        runtime,
+        noJS: false,
+        locale: index % 2 ? 'zh-cn' : 'en',
+      })),
+      { runtime: 'wc', noJS: true, locale: 'en' },
+      { runtime: 'wc', noJS: true, locale: 'zh-cn' },
+    ];
+    for (const [index, subject] of cases.entries()) {
+      const colorScheme = index % 2 ? 'dark' : 'light';
+      const id = `overview-${family}-${subject.runtime}-${subject.locale}-${subject.noJS ? 'nojs' : 'enhanced'}-${colorScheme}`;
+      await runCase(
+        id,
+        async (page, context, record) => {
+          await page.emulateMedia({ colorScheme });
+          record.family = family;
+          record.locale = subject.locale;
+          record.runtime = subject.runtime;
+          record.colorScheme = colorScheme;
+          record.noJS = subject.noJS;
+          const samples: unknown[] = [];
+          record.samples = samples;
+          await page.goto(`${baseUrl}/${subject.locale}/ui-libraries/${family}/`, {
+            waitUntil: 'networkidle',
+          });
+          if (!subject.noJS)
+            await page.waitForFunction((runtime) => {
+              const title = document.querySelector<HTMLElement>('.prototype-card h2');
+              return (
+                title?.dataset.typographyRuntime === runtime &&
+                title.querySelector('[data-typography-prototype]')
+              );
+            }, subject.runtime);
+          for (const width of [320, 390, 1280, 1920]) {
+            await page.setViewportSize({ width, height: 1000 });
+            for (const rootSize of [16, 20, 24]) {
+              await page.evaluate((value) => {
+                document.documentElement.style.fontSize = `${value}px`;
+              }, rootSize);
+              const observed = await page
+                .locator('.prototype-card')
+                .first()
+                .evaluate((card) => {
+                  const read = (selector: string) => {
+                    const native = card.querySelector<HTMLElement>(selector)!;
+                    const leaf =
+                      native.querySelector<HTMLElement>('[data-typography-prototype]') ?? native;
+                    const style = getComputedStyle(leaf);
+                    return {
+                      tag: native.localName,
+                      text: native.textContent,
+                      enhanced: leaf !== native,
+                      size: parseFloat(style.fontSize),
+                      line: parseFloat(style.lineHeight),
+                      font: style.fontFamily,
+                      nativeFont: getComputedStyle(native).fontFamily,
+                      tracking: style.letterSpacing,
+                      nativeTracking: getComputedStyle(native).letterSpacing,
+                      weight: style.fontWeight,
+                    };
+                  };
+                  return {
+                    title: read('h2'),
+                    description: read(':scope > p'),
+                    eyebrow: card.querySelector('header > div > span')?.textContent,
+                  };
+                });
+              samples.push({ width, rootSize, observed });
+              expect(observed.title.tag).toBe('h2');
+              expect(observed.description.tag).toBe('p');
+              expect(observed.title.size).toBeCloseTo(rootSize, 2);
+              expect(observed.title.line).toBeCloseTo(rootSize * 1.25, 2);
+              expect(observed.description.size).toBeCloseTo(rootSize * 0.76, 2);
+              expect(observed.description.line).toBeCloseTo(rootSize * 1.14, 2);
+              expect(observed.title.weight).toBe('600');
+              expect(observed.description.weight).toBe('400');
+              for (const text of [observed.title, observed.description]) {
+                expect(text.enhanced).toBe(!subject.noJS);
+                expect(text.font).toBe(text.nativeFont);
+                expect(text.tracking).toBe(text.nativeTracking);
+                expect(text.text?.trim()).toBeTruthy();
+              }
+              if (rootSize === 16 && (width === 320 || width === 1920)) {
+                await page.locator('.prototype-card').first().scrollIntoViewIfNeeded();
+                await capture(page, record, `${id}-${width}-root16`);
+              }
+            }
+          }
+        },
+        { runtime: subject.runtime, noJS: subject.noJS }
+      );
+    }
+  }
+}, 150_000);

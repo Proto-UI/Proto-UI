@@ -1090,7 +1090,9 @@ test('density observer rejects missing cards and incorrect physical multicol spa
     assert.ok(observe(broken, 24).length > 0);
   }
   assert.match(source, /assert\.deepEqual\(\s*gallerySpacingIssues\(facts\.gallerySpacing,/);
-  assert.match(source, /select\.height - \(v\.width === 390 \? 44 : 36\)/);
+  const headerHeight = /select\.height\s*-\s*44\)\s*<=\s*1/;
+  assert.match(source, headerHeight);
+  assert.doesNotMatch(source.replace(headerHeight, 'select.height - 36) <= 1'), headerHeight);
 });
 
 test('only composition restores a hash-keyed font package without extending existing budgets', () => {
@@ -1447,7 +1449,6 @@ test('Hero native evidence measures actual Text paint, real resize and unchanged
   for (const fragment of required) assert.throws(() => verify(source.replaceAll(fragment, '')));
 });
 
-
 test('density candidate uses the independent exact family heading oracle without relaxing other checks', () => {
   const source = readFileSync(
     new URL('capture-visual-density-evidence.ts', import.meta.url),
@@ -1501,4 +1502,3 @@ test('density candidate uses the independent exact family heading oracle without
     source.includes("assert.equal(facts.caption.fontSize, v.family === 'shadcn' ? 14 : 12)")
   );
 });
-
