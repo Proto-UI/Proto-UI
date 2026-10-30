@@ -1,9 +1,9 @@
 /* One website-owned layout for the homepage and documentation. Actual PUI
    Button/Select surfaces still belong to the selected library and runtime. */
 .site-header {
-  --site-header-row-height: 4rem;
+  --site-header-row-height: 4.5rem;
   --site-control-height: 2.75rem;
-  --site-select-control-height: 2.25rem;
+  --site-select-control-height: 2.75rem;
   --site-select-control-padding-block: 0.25rem;
   --site-header-navigation-gap: 1.5rem;
   --site-header-brand-navigation-gap: 2rem;
@@ -16,9 +16,9 @@
   column-gap: 0.25rem;
   width: 100%;
   min-height: var(--site-header-row-height);
-  max-width: 82.5rem;
-  padding-inline: 1.5rem;
-  margin-inline: auto;
+  max-width: none;
+  padding-inline: clamp(1rem, 2vw, 2rem);
+  margin-inline: 0;
   color: var(--color-foreground);
   font-family: var(--font-sans);
   font-size: 0.875rem;
@@ -104,7 +104,7 @@
 .site-header-search {
   grid-area: search;
   min-width: 0;
-  margin-inline-start: 0.5rem;
+  margin-inline-start: var(--site-header-search-margin, 0.5rem);
 }
 .site-header-theme {
   grid-area: theme;
@@ -128,21 +128,21 @@
 }
 /* Responsive layout inputs consumed by Search's actual family Button. */
 .site-header-search site-search {
-  --site-search-trigger-width: 100%;
-  --site-search-trigger-padding: 0.75rem;
-  --site-search-trigger-justify: flex-start;
+  --site-search-trigger-width: var(--site-header-search-width, 100%);
+  --site-search-trigger-padding: var(--site-header-search-padding, 0.75rem);
+  --site-search-trigger-justify: var(--site-header-search-justify, flex-start);
 }
 .site-header
   .site-header-search
   :is([data-open-modal], [data-search-startup-button])
   .site-search-label {
-  display: inline;
+  display: var(--site-header-search-copy-display, inline);
 }
 .site-header
   .site-header-search
   :is([data-open-modal], [data-search-startup-button])
   .site-search-shortcut {
-  display: inline-flex;
+  display: var(--site-header-search-copy-display, inline-flex);
 }
 .site-header-context {
   grid-area: context;
@@ -299,6 +299,11 @@
 }
 @media (max-width: 68.749rem) {
   .site-header {
+    --site-header-search-width: 2.75rem;
+    --site-header-search-padding: 0;
+    --site-header-search-justify: center;
+    --site-header-search-copy-display: none;
+    --site-header-search-margin: 0;
     grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
     grid-template-rows: var(--site-header-row-height) 3rem;
@@ -316,20 +321,6 @@
     font-size: 0.75rem;
     color: var(--color-muted-foreground);
     white-space: nowrap;
-  }
-  .site-header-search {
-    margin-inline-start: 0;
-  }
-  .site-header-search site-search {
-    --site-search-trigger-width: 2.75rem;
-    --site-search-trigger-padding: 0;
-    --site-search-trigger-justify: center;
-  }
-  .site-header
-    .site-header-search
-    :is([data-open-modal], [data-search-startup-button])
-    :is(.site-search-label, .site-search-shortcut) {
-    display: none !important;
   }
   .site-header-docs-navigation {
     display: flex;
@@ -439,6 +430,11 @@
 }
 @media (max-width: 79.999rem) {
   .home-runtime-header {
+    --site-header-search-width: 2.75rem;
+    --site-header-search-padding: 0;
+    --site-header-search-justify: center;
+    --site-header-search-copy-display: none;
+    --site-header-search-margin: 0;
     grid-template-columns: auto auto minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
     grid-template-rows: var(--site-header-row-height) auto;
@@ -452,7 +448,7 @@
   .home-runtime-header {
     grid-template-columns: minmax(0, 1fr) 2.75rem 2.75rem 2.75rem;
     grid-template-areas: 'brand search theme menu' 'context context context context';
-    padding-inline: 0.25rem;
+    padding-inline: 1rem;
   }
   .home-runtime-header .home-runtime-preferences .pui-projection-controls {
     grid-template-columns: minmax(12rem, 1.45fr) minmax(7.5rem, 1fr);
@@ -464,13 +460,8 @@
   }
 }
 
-/* Labels occupy the line above the shared control baseline. */
-@media (min-width: 80rem) {
-  .home-runtime-header {
-    align-items: end;
-    padding-block-end: 0.5rem;
-  }
-}
+/* Accessible control names do not add a visual label row. The common Header
+   centers brand, navigation and controls on one shared baseline. */
 
 /* Docs gives its longest Runtime value real space. Text can wrap through the
    Select's public surface inputs when enlargement needs more than one line. */
@@ -562,13 +553,11 @@
   display: none;
 }
 @media (max-width: 47.999rem) {
-  .site-header[data-site-menu-ready],
-  .site-header[data-docs-site-header] {
+  .site-header {
     grid-template-areas: 'brand search theme menu';
     grid-template-rows: minmax(var(--site-header-row-height), auto);
   }
-  .site-header[data-site-menu-ready] > .site-header-context,
-  .site-header[data-docs-site-header] > .site-header-context {
+  .site-header > .site-header-context {
     display: contents;
   }
   .site-header[data-docs-site-header]:has(.site-header-docs-navigation) {
@@ -608,8 +597,7 @@
 /* Text enlargement may reflow the toolbar itself. It must never bring back a
    second settings row or shrink the real PUI touch targets to fit. */
 @container docs-page (max-width: 15rem) {
-  .site-header[data-site-menu-ready],
-  .site-header[data-docs-site-header] {
+  .site-header {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     grid-template-areas: 'brand brand brand' 'search theme menu';
     grid-template-rows: auto auto;
@@ -654,6 +642,11 @@
 @media (min-width: 48rem) {
   @container docs-page (max-width: 68.749rem) {
     .site-header[data-docs-site-header] {
+      --site-header-search-width: 2.75rem;
+      --site-header-search-padding: 0;
+      --site-header-search-justify: center;
+      --site-header-search-copy-display: none;
+      --site-header-search-margin: 0;
       grid-template-columns: auto auto minmax(0, 1fr) repeat(3, 2.75rem);
       grid-template-areas: 'brand navigation . search theme menu' 'context context context context context context';
       grid-template-rows: minmax(var(--site-header-row-height), auto) auto;
@@ -664,20 +657,6 @@
       justify-content: space-between;
       height: auto;
       padding-block: 0.5rem;
-    }
-    .site-header[data-docs-site-header] .site-header-search {
-      margin-inline-start: 0;
-    }
-    .site-header[data-docs-site-header] .site-header-search site-search {
-      --site-search-trigger-width: 2.75rem;
-      --site-search-trigger-padding: 0;
-      --site-search-trigger-justify: center;
-    }
-    .site-header[data-docs-site-header]
-      .site-header-search
-      :is([data-open-modal], [data-search-startup-button])
-      :is(.site-search-label, .site-search-shortcut) {
-      display: none !important;
     }
   }
   @container docs-page (max-width: 42rem) {

@@ -28,8 +28,8 @@ criteria:
       zh-CN: Viewport direct entry 为 shadcn-scroll-area-viewport，且本层不提供 authored asHook。
   - id: P-SHADCN-SCROLL-AREA-VIEWPORT-CURRENT-VISUAL-SURFACE
     text:
-      en: Viewport must project h-full w-full rounded-md transition-[color,box-shadow] outline-none while consumer layout owns Root dimensions.
-      zh-CN: Viewport 必须投射 h-full w-full rounded-md transition-[color,box-shadow] outline-none，而 Root dimensions 由 consumer layout 所有。
+      en: Viewport must project h-full w-full rounded-[inherit] transition-[color,box-shadow] outline-none while consumer layout owns Root dimensions. Its radius follows the authored parent rather than forcing a separate rounded-md surface.
+      zh-CN: Viewport 必须投射 h-full w-full rounded-[inherit] transition-[color,box-shadow] outline-none，而 Root dimensions 由 consumer layout 所有。圆角继承 authored parent，不另行强制 rounded-md surface。
   - id: P-SHADCN-SCROLL-AREA-VIEWPORT-FOCUS-FEEDBACK
     text:
       en: >-

@@ -24,15 +24,13 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
       app.set({ style });
       await vi.waitFor(() => {
         for (const [i, record] of app.records.entries()) {
-          const shell = Array.from(record.host.querySelectorAll('[data-pui-style]')).find(
-            (node: any) =>
-              node
-                .getAttribute('data-pui-style')
-                .split(/\s+/)
-                .includes('transition-[color,box-shadow]')
-          ) as Element | undefined;
+          // Locate the actual shell owner above the editor's own Root, not a
+          // transition token that New York Command does not author.
+          const control = record.editor().closest('[data-pui-root]');
+          const shell = control?.parentElement?.closest('[data-pui-root]');
+          expect(shell, `${record.kind}/${record.type}`).not.toBeNull();
           expect(shell?.getAttribute('data-pui-style'), `${record.kind}/${record.type}`).toContain(
-            radius
+            style === 'new-york-v4' && record.type === 'command' ? 'rounded-none' : radius
           );
           expect(record.editor()).toBe(editors[i]);
           expect(record.editor().getAttribute('data-pui-style')).toContain('border-0');
@@ -68,4 +66,6 @@ it('mounts the actual four-adapter two-consumer evidence app with shared scope a
     document.body.replaceChildren();
     delete document.documentElement.dataset.ready;
   }
-});
+// Four adapter runtimes mounting two live consumers each can exceed the 5s
+// default when the suite host is loaded; it measures real mounts, not a stub.
+}, 30_000);

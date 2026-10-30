@@ -1,7 +1,16 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, type RunHandle, tw } from '@proto.ui/core';
 import { asTabsList } from '@proto.ui/prototypes-base/tabs';
 import { setupShadcnStyleScope } from '../style-scope';
-import { setupTabsVisual } from './visual';
+import {
+  setupTabsVisual,
+  TABS_LIST_VARIANT,
+  TABS_PROJECTED_STYLES,
+  TAB_LIST_HEIGHT,
+  TAB_LIST_LINE_ROUNDED,
+  TAB_LIST_PADDED,
+  TAB_LIST_ROUNDED,
+  TAB_LIST_VERTICAL,
+} from './visual';
 import type { ShadcnTabsListExposes, ShadcnTabsListProps } from './types';
 const tabsList = definePrototype<ShadcnTabsListProps, ShadcnTabsListExposes>({
   name: 'shadcn-tabs-list',
@@ -14,57 +23,96 @@ const tabsList = definePrototype<ShadcnTabsListProps, ShadcnTabsListExposes>({
     asTabsList();
     setupShadcnStyleScope(def);
     const { style, orientation } = setupTabsVisual(def);
-    const rejectUnsupportedVariant = (run: any) => {
-      const variant = run.props.getRaw().variant;
-      if (variant != null && variant !== 'default')
-        throw new Error(
-          '[shadcn-tabs-list] Unsupported upstream line variant: owned decorative feedback target is not implemented'
-        );
+
+    // Upstream `variant` prop transport for descendant Trigger rules
+    // (`group-data-[variant=…]/tabs-list` correspondence without prop drilling).
+    def.context.provide(TABS_LIST_VARIANT, { variant: 'default' });
+    const publishVariant = (run: RunHandle<ShadcnTabsListProps>) => {
+      run.context.update(TABS_LIST_VARIANT, {
+        variant: run.props.get().variant ?? 'default',
+      });
     };
-    def.props.watchRaw(['variant'], rejectUnsupportedVariant);
-    def.lifecycle.onCreated(rejectUnsupportedVariant);
+    def.props.watch(['variant'], publishVariant);
+    def.lifecycle.onCreated(publishVariant);
+    def.lifecycle.onMounted(publishVariant);
+
+    // Universal list shell from apps/v4/registry/bases/base/ui/tabs.tsx.
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
       intent: (i) =>
         i.feedback.style.use(
-          tw(
-            'inline-flex w-fit items-center justify-center rounded-lg p-[3px] text-muted-foreground'
-          )
+          tw('inline-flex w-fit items-center justify-center p-[3px] text-muted-foreground')
         ),
     });
-    def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(style).eq('rhea')),
-      intent: (i) => i.feedback.style.use(tw('rounded-2xl')),
-    });
+    // Per-style `.cn-tabs-list` overrides (rounding, padding, horizontal height).
+    for (const id of TABS_PROJECTED_STYLES) {
+      const recipe = TAB_LIST_ROUNDED[id];
+      if (!recipe) continue;
+      def.rule({
+        when: (w) => w.all(w.prop('appearance').eq('default'), w.state(style).eq(id)),
+        intent: (i) => i.feedback.style.use(recipe),
+      });
+    }
+    for (const id of TABS_PROJECTED_STYLES) {
+      const recipe = TAB_LIST_PADDED[id];
+      if (!recipe) continue;
+      def.rule({
+        when: (w) => w.all(w.prop('appearance').eq('default'), w.state(style).eq(id)),
+        intent: (i) => i.feedback.style.use(recipe),
+      });
+    }
+    for (const id of TABS_PROJECTED_STYLES) {
+      const recipe = TAB_LIST_HEIGHT[id];
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('appearance').eq('default'),
+            w.state(orientation).eq('horizontal'),
+            w.state(style).eq(id)
+          ),
+        intent: (i) => i.feedback.style.use(recipe),
+      });
+    }
+    for (const id of TABS_PROJECTED_STYLES) {
+      const recipe = TAB_LIST_VERTICAL[id];
+      if (!recipe) continue;
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('appearance').eq('default'),
+            w.state(orientation).eq('vertical'),
+            w.state(style).eq(id)
+          ),
+        intent: (i) => i.feedback.style.use(recipe),
+      });
+    }
+
+    // cva `default` variant shell; `line` variant gets gap-1 bg-transparent
+    // (+rounded-none where the style's default list rounds).
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('default'), w.prop('variant').eq('default')),
       intent: (i) => i.feedback.style.use(tw('bg-muted')),
     });
     def.rule({
-      when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('horizontal')),
-      intent: (i) => i.feedback.style.use(tw('h-8')),
+      when: (w) => w.all(w.prop('appearance').eq('default'), w.prop('variant').eq('line')),
+      intent: (i) => i.feedback.style.use(tw('gap-1 bg-transparent')),
     });
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.prop('appearance').eq('default'),
-          w.state(orientation).eq('horizontal'),
-          w.state(style).eq('new-york-v4')
-        ),
-      intent: (i) => i.feedback.style.use(tw('h-9')),
-    });
+    for (const id of TAB_LIST_LINE_ROUNDED) {
+      def.rule({
+        when: (w) =>
+          w.all(
+            w.prop('appearance').eq('default'),
+            w.prop('variant').eq('line'),
+            w.state(style).eq(id)
+          ),
+        intent: (i) => i.feedback.style.use(tw('rounded-none')),
+      });
+    }
+
+    // Universal orientation rules.
     def.rule({
       when: (w) => w.all(w.prop('appearance').eq('default'), w.state(orientation).eq('vertical')),
       intent: (i) => i.feedback.style.use(tw('h-fit flex-col')),
-    });
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.prop('appearance').eq('default'),
-          w.state(orientation).eq('vertical'),
-          w.state(style).eq('rhea')
-        ),
-      intent: (i) => i.feedback.style.use(tw('p-1')),
     });
     // Existing Proto underline is a separately named compatibility surface, not upstream line.
     def.rule({

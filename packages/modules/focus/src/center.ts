@@ -1,6 +1,7 @@
 import { createFocusRequestIntent, retainFocusRequestIntent } from './request-intent';
 import type {
   FocusRequestOptions,
+  FocusScopeActivationOptions,
   FocusRovingKey,
   FocusableConfig,
   FocusRovingConfig,
@@ -311,7 +312,7 @@ export class FocusCenter {
     }
   }
 
-  activateScope(scope: FocusCenterEntry, options?: FocusRequestOptions): boolean {
+  activateScope(scope: FocusCenterEntry, options?: FocusScopeActivationOptions): boolean {
     if (!scope.isScopeProvider()) return false;
 
     // A retained logical owner may request activation before its next host view
@@ -329,13 +330,15 @@ export class FocusCenter {
     this.activeScopes.push({ scope: scope.instance, previous });
     scope.setScopeActive(true);
 
-    if (scope.getScopeConfig().entry === 'manual') return true;
+    if (options?.entry === 'manual' || scope.getScopeConfig().entry === 'manual') return true;
 
     const target = scope.isRovingProvider()
       ? (this.getRovingMembers(scope)[0] ?? null)
       : (this.getScopeMembers(scope)[0] ?? null);
     if (target) {
-      this.requestFocus(target, options ?? { reason: 'programmatic' }, { syncFacts: true });
+      // Entry is a scope policy, not a new Host Focus request field.
+      const { entry: _entry, ...request } = options ?? { reason: 'programmatic' as const };
+      this.requestFocus(target, request, { syncFacts: true });
       return true;
     }
 

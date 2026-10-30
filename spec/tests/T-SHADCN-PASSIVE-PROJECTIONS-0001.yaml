@@ -1,0 +1,67 @@
+id: T-SHADCN-PASSIVE-PROJECTIONS-0001
+type: test
+title: Shadcn passive atoms and Table projections test
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Consumer coverage for semantic-only regions, host-backed Image, standalone Transition and passive Table parts.
+cases:
+  - id: T-SHADCN-PASSIVE-PROJECTIONS-0001-CASE-REGIONS
+    title: Busy and live region updates retain descendant and focus identity
+    covers:
+      - P-SHADCN-ASYNC-REGION-BASE
+      - P-SHADCN-LIVE-REGION-BASE
+    expectation: prop-updates-preserve-content-and-focus
+  - id: T-SHADCN-PASSIVE-PROJECTIONS-0001-CASE-IMAGE
+    title: Image View source, alternative text, fit and loading transitions through the host-owned target
+    covers:
+      - P-SHADCN-IMAGE-BASE
+      - P-SHADCN-IMAGE-VISUAL
+    expectation: image-view-module-transport-and-lifecycle
+  - id: T-SHADCN-PASSIVE-PROJECTIONS-0001-CASE-TRANSITION
+    title: Standalone Transition slot identity, phase endpoints, reversal and reduced motion
+    covers:
+      - P-SHADCN-TRANSITION-BASE
+      - P-SHADCN-TRANSITION-VISUAL
+    expectation: slot-preserving-phase-sequencing
+  - id: T-SHADCN-PASSIVE-PROJECTIONS-0001-CASE-TABLE
+    title: Table topology, spans, ordered header relationships, section borders, profile switching and withdrawal
+    covers:
+      - P-SHADCN-TABLE-BASE
+      - P-SHADCN-TABLE-VISUAL
+      - P-SHADCN-TABLE-ROW-VISUAL
+      - P-SHADCN-TABLE-CELL-VISUAL
+      - P-SHADCN-TABLE-HEADER-CELL-VISUAL
+      - P-SHADCN-TABLE-CAPTION-VISUAL
+    expectation: passive-table-structure-and-paint
+implementations:
+  - id: shadcn-draft-passive-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/draft-passive-projections.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-ASYNC-REGION
+      - P-SHADCN-LIVE-REGION
+      - P-SHADCN-IMAGE
+      - P-SHADCN-TRANSITION
+      - P-SHADCN-TABLE
+      - P-SHADCN-TABLE-CAPTION
+      - P-SHADCN-TABLE-ROW
+      - P-SHADCN-TABLE-HEADER-CELL
+      - P-SHADCN-TABLE-CELL
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-ASYNC-REGION
+    - P-SHADCN-IMAGE
+    - P-SHADCN-LIVE-REGION
+    - P-SHADCN-TABLE
+    - P-SHADCN-TABLE-CAPTION
+    - P-SHADCN-TABLE-CELL
+    - P-SHADCN-TABLE-HEADER-CELL
+    - P-SHADCN-TABLE-ROW
+    - P-SHADCN-TRANSITION

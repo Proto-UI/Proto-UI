@@ -1,25 +1,3 @@
-import type {
-  CalendarRootProps,
-  CalendarRootExposes,
-  CalendarCaptionProps,
-  CalendarCaptionExposes,
-  CalendarGridProps,
-  CalendarGridExposes,
-  CalendarWeekdaysProps,
-  CalendarWeekdaysExposes,
-  CalendarWeekdayProps,
-  CalendarWeekdayExposes,
-  CalendarRowProps,
-  CalendarRowExposes,
-  CalendarDayProps,
-  CalendarDayExposes,
-  CalendarHeadingProps,
-  CalendarHeadingExposes,
-  CalendarPreviousProps,
-  CalendarPreviousExposes,
-  CalendarNextProps,
-  CalendarNextExposes,
-} from '@proto.ui/prototypes-base/calendar';
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asCalendarRoot,
@@ -32,20 +10,70 @@ import {
   asCalendarHeading,
   asCalendarPrevious,
   asCalendarNext,
+  type CalendarRootProps,
+  type CalendarRootExposes,
+  type CalendarCaptionProps,
+  type CalendarCaptionExposes,
+  type CalendarGridProps,
+  type CalendarGridExposes,
+  type CalendarWeekdaysProps,
+  type CalendarWeekdaysExposes,
+  type CalendarWeekdayProps,
+  type CalendarWeekdayExposes,
+  type CalendarRowProps,
+  type CalendarRowExposes,
+  type CalendarDayProps,
+  type CalendarDayExposes,
+  type CalendarHeadingExposes,
+  type CalendarPreviousProps,
+  type CalendarPreviousExposes,
+  type CalendarNextProps,
+  type CalendarNextExposes,
 } from '@proto.ui/prototypes-base/calendar';
+import {
+  SHADCN_STYLE_IDS,
+  setupShadcnStyleScope,
+  setupShadcnStyleSelection,
+  type ShadcnStyleProps,
+} from '../style-scope';
+import { setupCollectionActionVisual } from '../toolbar/action-visual';
+import {
+  CALENDAR_ROOT_PROFILE,
+  CALENDAR_WEEKDAY_WIDTH,
+  CALENDAR_CELL_RADIUS,
+  CALENDAR_CAPTION_SIZE,
+  setupCalendarDayVisual,
+} from './visual';
 export type * from '@proto.ui/prototypes-base/calendar';
+export type ShadcnCalendarRootProps = CalendarRootProps & ShadcnStyleProps;
+export type ShadcnCalendarCaptionProps = CalendarCaptionProps & ShadcnStyleProps;
+export type ShadcnCalendarGridProps = CalendarGridProps;
+export type ShadcnCalendarWeekdaysProps = CalendarWeekdaysProps;
+export type ShadcnCalendarWeekdayProps = CalendarWeekdayProps & ShadcnStyleProps;
+export type ShadcnCalendarRowProps = CalendarRowProps;
+export type ShadcnCalendarDayProps = CalendarDayProps & ShadcnStyleProps;
+export type ShadcnCalendarHeadingProps = ShadcnStyleProps;
+export type ShadcnCalendarPreviousProps = CalendarPreviousProps & ShadcnStyleProps;
+export type ShadcnCalendarNextProps = CalendarNextProps & ShadcnStyleProps;
 
-// Visual recipe: shadcn/ui base-nova Calendar (2026-10-10 static reference).
-// The demo owns its optional outer border; Base owns all date and focus semantics.
-
-export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExposes>({
+export const calendarRoot = definePrototype<ShadcnCalendarRootProps, CalendarRootExposes>({
   name: 'shadcn-calendar-root',
+  modules: asCalendarRoot.modules,
   setup(def) {
-    const state = asCalendarRoot().stateHandles;
-    if (!state) throw new Error('Calendar root state unavailable');
+    const behavior = asCalendarRoot();
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-calendar] Root state unavailable.');
+    setupShadcnStyleScope(def);
+    const style = setupShadcnStyleSelection(def, 'nova');
     def.feedback.style.use(
-      tw('inline-grid w-fit min-w-0 max-w-full gap-4 bg-background p-2 font-sans text-foreground')
+      tw('inline-grid w-fit min-w-0 max-w-full gap-4 bg-background text-foreground')
     );
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) => w.state(style).eq(profile),
+        intent: (i) => i.feedback.style.use(tw(CALENDAR_ROOT_PROFILE[profile])),
+      });
+    }
     def.rule({
       when: (w) => w.state(state.direction).eq('ltr'),
       intent: (i) => i.feedback.style.use(tw('direction-ltr')),
@@ -54,199 +82,149 @@ export const calendarRoot = definePrototype<CalendarRootProps, CalendarRootExpos
       when: (w) => w.state(state.direction).eq('rtl'),
       intent: (i) => i.feedback.style.use(tw('direction-rtl')),
     });
-    return (render) => render.slot();
+    return behavior.render;
   },
 });
 export { calendarRoot as shadcnCalendarRoot };
 
-export const calendarCaption = definePrototype<CalendarCaptionProps, CalendarCaptionExposes>({
+export const calendarCaption = definePrototype<ShadcnCalendarCaptionProps, CalendarCaptionExposes>({
   name: 'shadcn-calendar-caption',
+  modules: asCalendarCaption.modules,
   setup(def) {
-    asCalendarCaption();
-    def.feedback.style.use(tw('flex h-7 w-full items-center justify-between gap-1'));
-    return (render) => render.slot();
+    const behavior = asCalendarCaption();
+    const style = setupShadcnStyleSelection(def, 'nova');
+    // Base caption composes previous/heading/next instead of the source's
+    // absolutely positioned nav sibling. This is the public Proto anatomy.
+    def.feedback.style.use(tw('flex w-full items-center justify-between gap-1'));
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) => w.state(style).eq(profile),
+        intent: (i) => i.feedback.style.use(tw(CALENDAR_CAPTION_SIZE[profile])),
+      });
+    }
+    return behavior.render;
   },
 });
 export { calendarCaption as shadcnCalendarCaption };
 
-export const calendarGrid = definePrototype<CalendarGridProps, CalendarGridExposes>({
+export const calendarGrid = definePrototype<ShadcnCalendarGridProps, CalendarGridExposes>({
   name: 'shadcn-calendar-grid',
+  modules: asCalendarGrid.modules,
   setup(def) {
-    asCalendarGrid();
+    const behavior = asCalendarGrid();
     def.feedback.style.use(tw('grid w-full'));
-    return (render) => render.slot();
+    return behavior.render;
   },
 });
 export { calendarGrid as shadcnCalendarGrid };
 
-export const calendarWeekdays = definePrototype<CalendarWeekdaysProps, CalendarWeekdaysExposes>({
+export const calendarWeekdays = definePrototype<
+  ShadcnCalendarWeekdaysProps,
+  CalendarWeekdaysExposes
+>({
   name: 'shadcn-calendar-weekdays',
+  modules: asCalendarWeekdays.modules,
   setup(def) {
-    asCalendarWeekdays();
+    const behavior = asCalendarWeekdays();
     def.feedback.style.use(tw('grid w-full grid-cols-7'));
-    return (render) => render.slot();
+    return behavior.render;
   },
 });
 export { calendarWeekdays as shadcnCalendarWeekdays };
 
-export const calendarWeekday = definePrototype<CalendarWeekdayProps, CalendarWeekdayExposes>({
+export const calendarWeekday = definePrototype<ShadcnCalendarWeekdayProps, CalendarWeekdayExposes>({
   name: 'shadcn-calendar-weekday',
+  modules: asCalendarWeekday.modules,
   setup(def) {
-    const inherited = asCalendarWeekday();
+    const behavior = asCalendarWeekday();
+    const style = setupShadcnStyleSelection(def, 'nova');
     def.feedback.style.use(
-      tw('w-7 rounded-md text-center text-[0.8rem] font-normal text-muted-foreground select-none')
+      tw('flex-1 text-center text-[0.8rem] font-normal text-muted-foreground select-none')
     );
-    return inherited.render;
+    for (const profile of SHADCN_STYLE_IDS) {
+      def.rule({
+        when: (w) => w.state(style).eq(profile),
+        intent: (i) => i.feedback.style.use(tw(CALENDAR_WEEKDAY_WIDTH[profile])),
+      });
+      def.rule({
+        when: (w) => w.state(style).eq(profile),
+        intent: (i) => i.feedback.style.use(tw(CALENDAR_CELL_RADIUS[profile])),
+      });
+    }
+    return behavior.render;
   },
 });
 export { calendarWeekday as shadcnCalendarWeekday };
 
-export const calendarRow = definePrototype<CalendarRowProps, CalendarRowExposes>({
+export const calendarRow = definePrototype<ShadcnCalendarRowProps, CalendarRowExposes>({
   name: 'shadcn-calendar-row',
+  modules: asCalendarRow.modules,
   setup(def) {
-    asCalendarRow();
+    const behavior = asCalendarRow();
     def.feedback.style.use(tw('mt-2 grid w-full grid-cols-7'));
-    return (render) => render.slot();
+    return behavior.render;
   },
 });
 export { calendarRow as shadcnCalendarRow };
 
-export const calendarDay = definePrototype<CalendarDayProps, CalendarDayExposes>({
+export const calendarDay = definePrototype<ShadcnCalendarDayProps, CalendarDayExposes>({
   name: 'shadcn-calendar-day',
+  modules: asCalendarDay.modules,
   setup(def) {
-    const inherited = asCalendarDay();
-    const state = inherited.stateHandles;
-    if (!state) throw new Error('Calendar day state unavailable');
-    def.feedback.style.use(
-      tw(
-        'relative inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border-0 bg-transparent p-0 text-center text-sm font-normal leading-none select-none cursor-pointer'
-      )
-    );
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.state(state.hovered).eq(true),
-          w.state(state.disabled).eq(false),
-          w.state(state.selected).eq(false)
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) =>
-        w.all(
-          w.state(state.pressed).eq(true),
-          w.state(state.disabled).eq(false),
-          w.state(state.selected).eq(false)
-        ),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.state(state.selected).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.today).eq(true), w.state(state.selected).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.outside).eq(true), w.state(state.selected).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
-    });
-    def.rule({
-      when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.disabled).eq(true), w.state(state.selected).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),
-    });
-    def.rule({
-      when: (w) => w.state(state.focused).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('z-10 outline-none ring-3 ring-ring/50 forced-colors-focus-outline')
-        ),
-    });
-    return inherited.render;
+    const behavior = asCalendarDay();
+    const state = behavior.stateHandles;
+    if (!state) throw new Error('[shadcn-calendar] Day state unavailable.');
+    setupCalendarDayVisual(def, state);
+    return behavior.render;
   },
 });
 export { calendarDay as shadcnCalendarDay };
 
-export const calendarHeading = definePrototype<CalendarHeadingProps, CalendarHeadingExposes>({
+export const calendarHeading = definePrototype<ShadcnCalendarHeadingProps, CalendarHeadingExposes>({
   name: 'shadcn-calendar-heading',
+  modules: asCalendarHeading.modules,
   setup(def) {
-    const state = asCalendarHeading().stateHandles;
-    if (!state) throw new Error('Calendar heading state unavailable');
-    def.feedback.style.use(tw('min-w-0 flex-1 text-center text-sm font-medium select-none'));
-    return () => [state.displayValue.get()];
+    const behavior = asCalendarHeading();
+    const style = setupShadcnStyleSelection(def, 'nova');
+    def.feedback.style.use(tw('min-w-0 flex-1 text-center font-medium select-none'));
+    def.rule({
+      when: (w) => w.not(w.state(style).eq('sera')),
+      intent: (i) => i.feedback.style.use(tw('text-sm')),
+    });
+    def.rule({
+      when: (w) => w.state(style).eq('sera'),
+      intent: (i) => i.feedback.style.use(tw('text-xs font-semibold uppercase tracking-wide')),
+    });
+    return behavior.render;
   },
 });
 export { calendarHeading as shadcnCalendarHeading };
 
-export const calendarPrevious = definePrototype<CalendarPreviousProps, CalendarPreviousExposes>({
+export const calendarPrevious = definePrototype<
+  ShadcnCalendarPreviousProps,
+  CalendarPreviousExposes
+>({
   name: 'shadcn-calendar-previous',
+  modules: asCalendarPrevious.modules,
   setup(def) {
-    const state = asCalendarPrevious().getAsHookHandle?.('as-button')?.stateHandles;
-    if (!state) throw new Error('Calendar navigation state unavailable');
-    def.feedback.style.use(
-      tw(
-        'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-sm font-medium text-foreground select-none cursor-pointer transition-colors'
-      )
-    );
-    def.rule({
-      when: (w) => w.all(w.state(state.hovered).eq(true), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('outline-none border-ring ring-3 ring-ring/50 forced-colors-focus-outline')
-        ),
-    });
-    def.rule({
-      when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-    });
-    return (render) => render.slot();
+    const behavior = asCalendarPrevious();
+    const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!state) throw new Error('[shadcn-calendar] Navigation state unavailable.');
+    setupCollectionActionVisual(def, state, 'ghost', true);
+    return behavior.render;
   },
 });
 export { calendarPrevious as shadcnCalendarPrevious };
 
-export const calendarNext = definePrototype<CalendarNextProps, CalendarNextExposes>({
+export const calendarNext = definePrototype<ShadcnCalendarNextProps, CalendarNextExposes>({
   name: 'shadcn-calendar-next',
+  modules: asCalendarNext.modules,
   setup(def) {
-    const state = asCalendarNext().getAsHookHandle?.('as-button')?.stateHandles;
-    if (!state) throw new Error('Calendar navigation state unavailable');
-    def.feedback.style.use(
-      tw(
-        'inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border border-transparent bg-transparent p-0 text-sm font-medium text-foreground select-none cursor-pointer transition-colors'
-      )
-    );
-    def.rule({
-      when: (w) => w.all(w.state(state.hovered).eq(true), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),
-      intent: (i) => i.feedback.style.use(tw('bg-muted')),
-    });
-    def.rule({
-      when: (w) => w.state(state.focusVisible).eq(true),
-      intent: (i) =>
-        i.feedback.style.use(
-          tw('outline-none border-ring ring-3 ring-ring/50 forced-colors-focus-outline')
-        ),
-    });
-    def.rule({
-      when: (w) => w.state(state.disabled).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-default')),
-    });
-    return (render) => render.slot();
+    const behavior = asCalendarNext();
+    const state = behavior.getAsHookHandle?.('as-button')?.stateHandles;
+    if (!state) throw new Error('[shadcn-calendar] Navigation state unavailable.');
+    setupCollectionActionVisual(def, state, 'ghost', true);
+    return behavior.render;
   },
 });
 export { calendarNext as shadcnCalendarNext };

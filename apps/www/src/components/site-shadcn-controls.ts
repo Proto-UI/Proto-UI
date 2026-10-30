@@ -1,4 +1,5 @@
 import { PREFERRED_ADAPTER_KEY } from './adapter-preference-key';
+import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
 import { bindSiteSelectDismissal } from './site-select-dismissal';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import brutalistButton from '@proto.ui/prototypes-brutalist/button';
@@ -110,6 +111,11 @@ function closeSelectAfterValueChange(root: SiteSelectRoot): void {
 }
 
 export function registerSiteControls(): void {
+  // define upgrades all connected hosts. Seed adapter WeakMap props first so
+  // the first mount consumes the same recipe as SSR, never Button defaults.
+  document
+    .querySelectorAll<HTMLElement>('wc-shadcn-button[data-site-shadcn-button], [data-site-button]')
+    .forEach(initializeButton);
   for (const [tagName, prototype] of siteProjections) {
     if (customElements.get(tagName)) continue;
     const constructor = AdaptToWebComponent(prototype, {
@@ -179,19 +185,13 @@ function headerSurfaceStyle(element: HTMLElement, kind: 'button' | 'root' | 'tri
       width: '100%',
       minWidth: '0',
       maxWidth: '100%',
-      minHeight: 'var(--site-select-control-height, var(--site-control-height, 2.75rem))',
-      paddingBlock: 'var(--site-select-control-padding-block, 0.5rem)',
+      minHeight: 'var(--site-control-height, 2.75rem)',
+      paddingBlock: '0.25rem',
       ...(docsRuntime ? { height: 'auto' } : {}),
       fontFamily: 'inherit',
       fontSize: '0.875rem',
     };
-  return {
-    width: '2.75rem',
-    height: '2.75rem',
-    minHeight: '2.75rem',
-    padding: '0',
-    fontFamily: 'inherit',
-  };
+  return headerIconButtonLayout();
 }
 
 function initializeButton(button: HTMLElement): void {
@@ -209,6 +209,14 @@ function initializeButton(button: HTMLElement): void {
         : button.dataset.variant;
   }
   if (button.dataset.size) props.size = button.dataset.size;
+  if (button.closest('[data-site-header]'))
+    Object.assign(
+      props,
+      headerButtonProps(
+        button.localName === 'wc-brutalist-button' ? 'brutalist' : 'shadcn',
+        button.dataset.size ?? 'icon'
+      )
+    );
   if (button.dataset.disabled === 'true') props.disabled = true;
   const surfaceStyle = headerSurfaceStyle(button, 'button');
   if (surfaceStyle) props.surfaceStyle = surfaceStyle;
@@ -313,6 +321,9 @@ function initializeSelect(root: SiteSelectRoot): void {
       value,
       disabled: root.dataset.disabled === 'true',
       closeOnSelect: true,
+      ...(family === 'shadcn' && root.closest('[data-site-header]')
+        ? { styleProfile: 'rhea' }
+        : {}),
       ...(selectSurfaceStyle(root, 'root')
         ? { surfaceStyle: selectSurfaceStyle(root, 'root') }
         : {}),
@@ -327,14 +338,8 @@ function initializeSelect(root: SiteSelectRoot): void {
       size: trigger.dataset.size ?? 'default',
       ...(root.closest('[data-site-header]')
         ? {
-            appearance:
-              family === 'brutalist'
-                ? (trigger.dataset.appearance ?? 'flat')
-                : (!!root.closest('[data-site-header-preferences]') ||
-                      !root.closest('[data-site-header-panel]')) &&
-                    !root.ownerDocument.defaultView?.matchMedia?.('(max-width: 47.999rem)').matches
-                  ? 'ghost'
-                  : 'default',
+            appearance: family === 'brutalist' ? (trigger.dataset.appearance ?? 'flat') : 'default',
+            ...(family === 'shadcn' ? { styleProfile: 'rhea' } : {}),
           }
         : {}),
       ...(family === 'brutalist' &&

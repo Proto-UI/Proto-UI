@@ -7,7 +7,7 @@ lifecycleRationale: Tests cover the bounded visual foundation; stable and cross-
 summary: Unit state/token closure plus a collected real-four-Web Button fixture; native/compiler remain outside this slice.
 cases:
   - id: T-LIQUID-GLASS-BUTTON-0001-CASE-INHERITANCE
-    title: Identity, inherited Base states and restored defaults
+    title: Inherited Base states and restored defaults
     covers:
       - P-LIQUID-GLASS-BUTTON-BASE
       - P-LIQUID-GLASS-BUTTON-API
@@ -43,12 +43,14 @@ implementations:
       - Replaces only the historical enabled prominent zero-candidate assertion after the explicit draft revision; opaque and disabled remain zero. Portable intent does not prove optical paint.
   - id: liquid-glass-button-contract
     kind: module-test
-    status: passing
+    status: planned
     path: packages/prototypes/liquid-glass/test/button.test.ts
     required: true
     consumesCases:
       - T-LIQUID-GLASS-BUTTON-0001-CASE-INHERITANCE
       - T-LIQUID-GLASS-BUTTON-0001-CASE-TOKENS
+    notes:
+      - The repaired default/state assertions do not test reflected prototype identity. Exact-source execution remains pending; the unchanged five-second source-token closure case is unresolved, not passing evidence.
   - id: liquid-glass-button-browser
     kind: runtime-test
     status: passing

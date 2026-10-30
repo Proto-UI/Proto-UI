@@ -3,6 +3,20 @@ import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-ty
 type ValueRequest = { value: string; textValue: string; reason: string };
 const longLabel =
   'A translated option with enough detail to wrap safely · 選択肢の説明 · VeryLongUnbrokenOptionLabelsMustRemainReadableAtTwoHundredPercentTextSize';
+function item(value: string, textValue: string, disabled = false): DemoNode {
+  return {
+    kind: 'proto',
+    prototypeId: 'liquid-glass-select-item',
+    props: { value, textValue, disabled },
+    children: [
+      {
+        kind: 'proto',
+        prototypeId: 'liquid-glass-select-item-text',
+        children: [textValue],
+      },
+    ],
+  };
+}
 function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
   return {
     kind: 'proto',
@@ -30,30 +44,59 @@ function select(ref: string, props: Record<string, unknown> = {}): DemoNode {
         children: [
           {
             kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'alpha', textValue: 'Alpha' },
-            children: ['Alpha'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'beta', textValue: 'Beta' },
-            children: ['Beta'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'disabled', textValue: 'Unavailable option', disabled: true },
-            children: ['Unavailable option'],
-          },
-          {
-            kind: 'proto',
-            prototypeId: 'liquid-glass-select-item',
-            props: { value: 'long', textValue: longLabel },
-            children: [longLabel],
+            prototypeId: 'liquid-glass-select-surface',
+            ref: `${ref}Surface`,
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: 'liquid-glass-select-viewport',
+                ref: `${ref}Viewport`,
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-select-group',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-select-label',
+                        children: ['Available options'],
+                      },
+                      item('alpha', 'Alpha'),
+                      item('beta', 'Beta'),
+                    ],
+                  },
+                  { kind: 'proto', prototypeId: 'liquid-glass-select-separator' },
+                  {
+                    kind: 'proto',
+                    prototypeId: 'liquid-glass-select-group',
+                    children: [
+                      {
+                        kind: 'proto',
+                        prototypeId: 'liquid-glass-select-label',
+                        children: ['Additional options'],
+                      },
+                      item('disabled', 'Unavailable option', true),
+                      item('long', longLabel),
+                    ],
+                  },
+                ],
+              },
+            ],
           },
         ],
       },
+    ],
+  };
+}
+function materialStage(ref: string, children: DemoNode[]): Extract<DemoNode, { kind: 'box' }> {
+  return {
+    kind: 'box',
+    ref,
+    className: 'min-w-0 w-full',
+    materialStage: { mountRef: `${ref}Flow`, overlayRef: `${ref}Overlay` },
+    children: [
+      { kind: 'box', ref: `${ref}Flow`, children },
+      { kind: 'box', ref: `${ref}Overlay`, children: [] },
     ],
   };
 }
@@ -64,47 +107,52 @@ export default {
     ref: 'selectLayout',
     className: 'grid grid-cols-1 min-w-0 w-full max-w-lg gap-5 p-0 sm:p-2 wrap-anywhere',
     children: [
-      { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm' },
-      select('uncontrolled', { defaultValue: 'alpha' }),
-      { kind: 'box', children: ['Disabled selection'], className: 'text-sm' },
-      select('disabled', { defaultValue: 'beta', disabled: true }),
+      materialStage('uncontrolledStage', [
+        { kind: 'box', children: ['Uncontrolled selection'], className: 'text-sm mb-2' },
+        select('uncontrolled', { defaultValue: 'alpha' }),
+      ]),
+      materialStage('disabledStage', [
+        { kind: 'box', children: ['Disabled selection'], className: 'text-sm mb-2' },
+        select('disabled', { defaultValue: 'beta', disabled: true }),
+      ]),
+      materialStage('controlledStage', [
+        {
+          kind: 'box',
+          children: ['Controlled value: accept the pending request above the selection'],
+          className: 'text-sm',
+        },
+        {
+          kind: 'box',
+          ref: 'requestStatus',
+          attrs: { 'aria-live': 'polite' },
+          className: 'text-sm break-words mb-2',
+          children: ['No pending request.'],
+        },
+        {
+          kind: 'proto',
+          prototypeId: 'liquid-glass-button',
+          ref: 'accept',
+          className: 'min-w-0 max-w-full mb-2',
+          children: [
+            {
+              kind: 'box',
+              tag: 'span',
+              ref: 'acceptLabel',
+              className: 'min-w-0 whitespace-normal wrap-anywhere',
+              children: ['Accept selection'],
+            },
+          ],
+        },
+        select('controlled', { value: 'alpha' }),
+      ]),
       {
-        kind: 'box',
-        children: ['Controlled value: accept the pending request below'],
-        className: 'text-sm',
-      },
-      select('controlled', { value: 'alpha' }),
-      {
-        kind: 'box',
-        ref: 'requestStatus',
-        attrs: { 'aria-live': 'polite' },
-        className: 'text-sm break-words',
-        children: ['No pending request.'],
-      },
-      {
-        kind: 'proto',
-        prototypeId: 'liquid-glass-button',
-        ref: 'accept',
-        className: 'min-w-0 max-w-full',
-        children: [
-          {
-            kind: 'box',
-            tag: 'span',
-            ref: 'acceptLabel',
-            className: 'min-w-0 whitespace-normal wrap-anywhere',
-            children: ['Accept selection'],
-          },
-        ],
-      },
-      {
-        kind: 'box',
-        attrs: { dir: 'rtl' },
-        ref: 'selectRtlLayout',
-        className: 'grid grid-cols-1 min-w-0 gap-2',
-        children: [
+        ...materialStage('selectRtlLayout', [
           { kind: 'box', children: ['RTL · long selected label'], className: 'text-sm' },
           select('rtl', { defaultValue: 'long' }),
-        ],
+        ]),
+        kind: 'box',
+        attrs: { dir: 'rtl' },
+        className: 'grid grid-cols-1 min-w-0 gap-2',
       },
     ],
   },

@@ -9,9 +9,7 @@ export default definePrototype<CommandContentProps, CommandContentExposes>({
   setup(def) {
     const behavior = asCommandContent();
     def.feedback.style.use(
-      tw(
-        'rounded-none border-2 border-foreground bg-background text-foreground shadow-[3px_3px_0_0_var(--pui-foreground)] min-w-0 w-full max-h-80 overflow-y-auto p-1'
-      )
+      tw('min-h-0 min-w-0 w-full max-h-[18.75rem] scroll-py-1 overflow-x-hidden overflow-y-auto')
     );
   },
 });

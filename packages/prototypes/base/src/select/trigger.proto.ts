@@ -22,6 +22,9 @@ export function setupSelectTrigger(
 ): void {
   const binding = options.fieldBinding ? asOptionalFieldControl() : null;
   const accessible = asAccessible();
+  def.props.define({ accessibleLabel: { type: 'string', empty: 'fallback' } });
+  def.props.setDefaults({ accessibleLabel: '' });
+  const accessibleLabel = def.state.string('selectAccessibleLabel', '');
   def.anatomy.claim(SELECT_FAMILY, { role: 'trigger' });
   const command = setupSelectCommand(def, 'select trigger');
   const expanded = def.state.bool('selectExpanded', false);
@@ -31,8 +34,9 @@ export function setupSelectTrigger(
   def.expose.state('placeholder', placeholder);
 
   accessible.role('combobox');
-  // Field labelledBy remains authoritative when resolved; content naming is the no-provider fallback.
-  accessible.nameFromContent();
+  // Combobox names come from the author, not from its current selected content.
+  // A resolved Field labelledBy relation remains authoritative over this label.
+  accessible.name(accessibleLabel);
   accessible.state('disabled', command.disabled);
   accessible.state('expanded', expanded);
   accessible.state('hasPopup', hasPopup);
@@ -77,6 +81,7 @@ export function setupSelectTrigger(
   }
   const sync = (run: any, ctx: SelectContextValue) => {
     currentRun = run;
+    accessibleLabel.set(run.props.get().accessibleLabel ?? '', 'reason: select author label');
     const epoch = viewEpoch;
     const current = () => currentRun === run && viewEpoch === epoch;
     binding?.setPolicy({ disabled: !!ctx.controlDisabled, readOnly: !!ctx.controlReadOnly });
@@ -107,7 +112,9 @@ export function setupSelectTrigger(
     currentRun = null;
   });
   def.lifecycle.onMounted((run) => sync(run, run.context.read(SELECT_CONTEXT)));
-  def.props.watch(['disabled'], (run) => sync(run, run.context.read(SELECT_CONTEXT)));
+  def.props.watch(['disabled', 'accessibleLabel'], (run) =>
+    sync(run, run.context.read(SELECT_CONTEXT))
+  );
 
   def.event.on('press.commit', (run, ev) => {
     if (command.disabled.get()) return;

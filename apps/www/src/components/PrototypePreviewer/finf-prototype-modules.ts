@@ -2,7 +2,500 @@ import type { Prototype } from '@proto.ui/core';
 import { registerPrototype } from './registry';
 
 // Explicit source slices. This registry does not confer catalog or release admission.
+// Runtime-selected preview loaders keep unselected source families out of eager initialization.
 export const finfPrototypeModules: Record<string, () => Promise<void>> = {
+  'shadcn-async-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/async-region');
+    registerExactPrototype('shadcn-async-region-root', module.asyncRegionRoot);
+  },
+  'shadcn-live-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/live-region');
+    registerExactPrototype('shadcn-live-region-root', module.liveRegionRoot);
+  },
+  'shadcn-image-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/image');
+    registerExactPrototype('shadcn-image-root', module.imageRoot);
+  },
+  'shadcn-table-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/table');
+    registerExactPrototype('shadcn-table-root', module.tableRoot);
+  },
+  'shadcn-table-caption': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/table');
+    registerExactPrototype('shadcn-table-caption', module.tableCaption);
+  },
+  'shadcn-table-row': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/table');
+    registerExactPrototype('shadcn-table-row', module.tableRow);
+  },
+  'shadcn-table-header-cell': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/table');
+    registerExactPrototype('shadcn-table-header-cell', module.tableHeaderCell);
+  },
+  'shadcn-table-cell': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/table');
+    registerExactPrototype('shadcn-table-cell', module.tableCell);
+  },
+  'shadcn-transition': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/transition');
+    registerExactPrototype('shadcn-transition', module.transition);
+  },
+  'shadcn-slider-values-root': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-root', module.sliderValuesRoot);
+  },
+  'shadcn-slider-values-track': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-track', module.sliderValuesTrack);
+  },
+  'shadcn-slider-values-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-thumb', module.sliderValuesThumb);
+  },
+  'shadcn-slider-values-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-indicator', module.sliderValuesIndicator);
+  },
+  'shadcn-slider-values-label': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-label', module.sliderValuesLabel);
+  },
+  'shadcn-slider-values-value': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/slider');
+    registerExactPrototype('shadcn-slider-values-value', module.sliderValuesValue);
+  },
+  'shadcn-input-shell-control': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/input-shell');
+    registerExactPrototype('shadcn-input-shell-control', module.inputShellControl);
+  },
+  'bootstrap-2-3-2-async-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/async-region');
+    registerExactPrototype('bootstrap-2-3-2-async-region-root', module.asyncRegionRoot);
+  },
+  'bootstrap-2-3-2-live-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/live-region');
+    registerExactPrototype('bootstrap-2-3-2-live-region-root', module.liveRegionRoot);
+  },
+  'bootstrap-2-3-2-image-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/image');
+    registerExactPrototype('bootstrap-2-3-2-image-root', module.imageRoot);
+  },
+  'bootstrap-2-3-2-table-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/table');
+    registerExactPrototype('bootstrap-2-3-2-table-root', module.tableRoot);
+  },
+  'bootstrap-2-3-2-table-caption': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/table');
+    registerExactPrototype('bootstrap-2-3-2-table-caption', module.tableCaption);
+  },
+  'bootstrap-2-3-2-table-row': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/table');
+    registerExactPrototype('bootstrap-2-3-2-table-row', module.tableRow);
+  },
+  'bootstrap-2-3-2-table-header-cell': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/table');
+    registerExactPrototype('bootstrap-2-3-2-table-header-cell', module.tableHeaderCell);
+  },
+  'bootstrap-2-3-2-table-cell': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/table');
+    registerExactPrototype('bootstrap-2-3-2-table-cell', module.tableCell);
+  },
+  'bootstrap-2-3-2-transition': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/transition');
+    registerExactPrototype('bootstrap-2-3-2-transition', module.transition);
+  },
+  'bootstrap-2-3-2-slider-values-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-root', module.sliderValuesRoot);
+  },
+  'bootstrap-2-3-2-slider-values-track': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-track', module.sliderValuesTrack);
+  },
+  'bootstrap-2-3-2-slider-values-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-thumb', module.sliderValuesThumb);
+  },
+  'bootstrap-2-3-2-slider-values-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-indicator', module.sliderValuesIndicator);
+  },
+  'bootstrap-2-3-2-slider-values-label': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-label', module.sliderValuesLabel);
+  },
+  'bootstrap-2-3-2-slider-values-value': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/slider');
+    registerExactPrototype('bootstrap-2-3-2-slider-values-value', module.sliderValuesValue);
+  },
+  'bootstrap-2-3-2-dialog-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-root', module.dialogRoot);
+  },
+  'bootstrap-2-3-2-dialog-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-trigger', module.dialogTrigger);
+  },
+  'bootstrap-2-3-2-dialog-mask': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-mask', module.dialogMask);
+  },
+  'bootstrap-2-3-2-dialog-content': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-content', module.dialogContent);
+  },
+  'bootstrap-2-3-2-dialog-title': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-title', module.dialogTitle);
+  },
+  'bootstrap-2-3-2-dialog-description': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-description', module.dialogDescription);
+  },
+  'bootstrap-2-3-2-dialog-close': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/dialog');
+    registerExactPrototype('bootstrap-2-3-2-dialog-close', module.dialogClose);
+  },
+  'bootstrap-2-3-2-hover-card-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/hover-card');
+    registerExactPrototype('bootstrap-2-3-2-hover-card-root', module.hoverCardRoot);
+  },
+  'bootstrap-2-3-2-hover-card-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/hover-card');
+    registerExactPrototype('bootstrap-2-3-2-hover-card-trigger', module.hoverCardTrigger);
+  },
+  'bootstrap-2-3-2-hover-card-content': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/hover-card');
+    registerExactPrototype('bootstrap-2-3-2-hover-card-content', module.hoverCardContent);
+  },
+  'bootstrap-2-3-2-tooltip-group': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/tooltip');
+    registerExactPrototype('bootstrap-2-3-2-tooltip-group', module.tooltipGroup);
+  },
+  'bootstrap-2-3-2-tooltip-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/tooltip');
+    registerExactPrototype('bootstrap-2-3-2-tooltip-root', module.tooltipRoot);
+  },
+  'bootstrap-2-3-2-tooltip-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/tooltip');
+    registerExactPrototype('bootstrap-2-3-2-tooltip-trigger', module.tooltipTrigger);
+  },
+  'bootstrap-2-3-2-tooltip-content': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/tooltip');
+    registerExactPrototype('bootstrap-2-3-2-tooltip-content', module.tooltipContent);
+  },
+  'bootstrap-2-3-2-radio-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/radio-group');
+    registerExactPrototype('bootstrap-2-3-2-radio-group-root', module.radioGroupRoot);
+  },
+  'bootstrap-2-3-2-radio-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/radio-group');
+    registerExactPrototype('bootstrap-2-3-2-radio-group-item', module.radioGroupItem);
+  },
+  'bootstrap-2-3-2-radio-group-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/radio-group');
+    registerExactPrototype('bootstrap-2-3-2-radio-group-indicator', module.radioGroupIndicator);
+  },
+  'bootstrap-2-3-2-scroll-area-root': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/scroll-area');
+    registerExactPrototype('bootstrap-2-3-2-scroll-area-root', module.scrollAreaRoot);
+  },
+  'bootstrap-2-3-2-scroll-area-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/scroll-area');
+    registerExactPrototype('bootstrap-2-3-2-scroll-area-viewport', module.scrollAreaViewport);
+  },
+  'bootstrap-2-3-2-scroll-area-scrollbar': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/scroll-area');
+    registerExactPrototype('bootstrap-2-3-2-scroll-area-scrollbar', module.scrollAreaScrollbar);
+  },
+  'bootstrap-2-3-2-scroll-area-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/scroll-area');
+    registerExactPrototype('bootstrap-2-3-2-scroll-area-thumb', module.scrollAreaThumb);
+  },
+  'liquid-glass-async-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/async-region');
+    registerExactPrototype('liquid-glass-async-region-root', module.asyncRegionRoot);
+  },
+  'liquid-glass-live-region-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/live-region');
+    registerExactPrototype('liquid-glass-live-region-root', module.liveRegionRoot);
+  },
+  'liquid-glass-image-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/image');
+    registerExactPrototype('liquid-glass-image-root', module.imageRoot);
+  },
+  'liquid-glass-table-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/table');
+    registerExactPrototype('liquid-glass-table-root', module.tableRoot);
+  },
+  'liquid-glass-table-caption': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/table');
+    registerExactPrototype('liquid-glass-table-caption', module.tableCaption);
+  },
+  'liquid-glass-table-row': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/table');
+    registerExactPrototype('liquid-glass-table-row', module.tableRow);
+  },
+  'liquid-glass-table-header-cell': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/table');
+    registerExactPrototype('liquid-glass-table-header-cell', module.tableHeaderCell);
+  },
+  'liquid-glass-table-cell': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/table');
+    registerExactPrototype('liquid-glass-table-cell', module.tableCell);
+  },
+  'liquid-glass-transition': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/transition');
+    registerExactPrototype('liquid-glass-transition', module.transition);
+  },
+  'liquid-glass-slider-values-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-root', module.sliderValuesRoot);
+  },
+  'liquid-glass-slider-values-track': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-track', module.sliderValuesTrack);
+  },
+  'liquid-glass-slider-values-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-thumb', module.sliderValuesThumb);
+  },
+  'liquid-glass-slider-values-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-indicator', module.sliderValuesIndicator);
+  },
+  'liquid-glass-slider-values-label': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-label', module.sliderValuesLabel);
+  },
+  'liquid-glass-slider-values-value': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/slider');
+    registerExactPrototype('liquid-glass-slider-values-value', module.sliderValuesValue);
+  },
+  'liquid-glass-dialog-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-root', module.dialogRoot);
+  },
+  'liquid-glass-dialog-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-trigger', module.dialogTrigger);
+  },
+  'liquid-glass-dialog-mask': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-mask', module.dialogMask);
+  },
+  'liquid-glass-dialog-content': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-content', module.dialogContent);
+  },
+  'liquid-glass-dialog-title': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-title', module.dialogTitle);
+  },
+  'liquid-glass-dialog-description': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-description', module.dialogDescription);
+  },
+  'liquid-glass-dialog-close': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/dialog');
+    registerExactPrototype('liquid-glass-dialog-close', module.dialogClose);
+  },
+  'liquid-glass-hover-card-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/hover-card');
+    registerExactPrototype('liquid-glass-hover-card-root', module.hoverCardRoot);
+  },
+  'liquid-glass-hover-card-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/hover-card');
+    registerExactPrototype('liquid-glass-hover-card-trigger', module.hoverCardTrigger);
+  },
+  'liquid-glass-hover-card-content': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/hover-card');
+    registerExactPrototype('liquid-glass-hover-card-content', module.hoverCardContent);
+  },
+  'liquid-glass-tooltip-group': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/tooltip');
+    registerExactPrototype('liquid-glass-tooltip-group', module.tooltipGroup);
+  },
+  'liquid-glass-tooltip-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/tooltip');
+    registerExactPrototype('liquid-glass-tooltip-root', module.tooltipRoot);
+  },
+  'liquid-glass-tooltip-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/tooltip');
+    registerExactPrototype('liquid-glass-tooltip-trigger', module.tooltipTrigger);
+  },
+  'liquid-glass-tooltip-content': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/tooltip');
+    registerExactPrototype('liquid-glass-tooltip-content', module.tooltipContent);
+  },
+  'liquid-glass-radio-group-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/radio-group');
+    registerExactPrototype('liquid-glass-radio-group-root', module.radioGroupRoot);
+  },
+  'liquid-glass-radio-group-item': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/radio-group');
+    registerExactPrototype('liquid-glass-radio-group-item', module.radioGroupItem);
+  },
+  'liquid-glass-radio-group-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/radio-group');
+    registerExactPrototype('liquid-glass-radio-group-indicator', module.radioGroupIndicator);
+  },
+  'liquid-glass-scroll-area-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/scroll-area');
+    registerExactPrototype('liquid-glass-scroll-area-root', module.scrollAreaRoot);
+  },
+  'liquid-glass-scroll-area-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/scroll-area');
+    registerExactPrototype('liquid-glass-scroll-area-viewport', module.scrollAreaViewport);
+  },
+  'liquid-glass-scroll-area-scrollbar': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/scroll-area');
+    registerExactPrototype('liquid-glass-scroll-area-scrollbar', module.scrollAreaScrollbar);
+  },
+  'liquid-glass-scroll-area-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/scroll-area');
+    registerExactPrototype('liquid-glass-scroll-area-thumb', module.scrollAreaThumb);
+  },
+  'liquid-glass-checkbox-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/checkbox');
+    registerExactPrototype('liquid-glass-checkbox-root', module.checkboxRoot);
+  },
+  'liquid-glass-checkbox-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/checkbox');
+    registerExactPrototype('liquid-glass-checkbox-indicator', module.checkboxIndicator);
+  },
+  'liquid-glass-switch-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/switch');
+    registerExactPrototype('liquid-glass-switch-root', module.switchRoot);
+  },
+  'liquid-glass-switch-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/switch');
+    registerExactPrototype('liquid-glass-switch-thumb', module.switchThumb);
+  },
+  'liquid-glass-input-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/input');
+    registerExactPrototype('liquid-glass-input-root', module.inputRoot);
+  },
+  'liquid-glass-textarea-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/textarea');
+    registerExactPrototype('liquid-glass-textarea-root', module.textareaRoot);
+  },
+  'liquid-glass-separator-root': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/separator');
+    registerExactPrototype('liquid-glass-separator-root', module.separatorRoot);
+  },
+  'shadcn-field-textarea': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/field');
+    registerExactPrototype('shadcn-field-textarea', module.fieldTextarea);
+  },
+  'shadcn-field-select-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/field');
+    registerExactPrototype('shadcn-field-select-trigger', module.fieldSelectTrigger);
+  },
+  'shadcn-field-switch': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/field');
+    registerExactPrototype('shadcn-field-switch', module.fieldSwitch);
+  },
+  'shadcn-tabs-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-shadcn/tabs');
+    registerExactPrototype('shadcn-tabs-indicator', module.shadcnTabsIndicator);
+  },
+  'bootstrap-2-3-2-field-textarea': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerExactPrototype('bootstrap-2-3-2-field-textarea', module.fieldTextarea);
+  },
+  'bootstrap-2-3-2-field-select-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerExactPrototype('bootstrap-2-3-2-field-select-trigger', module.fieldSelectTrigger);
+  },
+  'bootstrap-2-3-2-field-switch': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/field');
+    registerExactPrototype('bootstrap-2-3-2-field-switch', module.fieldSwitch);
+  },
+  'bootstrap-2-3-2-tabs-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/tabs');
+    registerExactPrototype('bootstrap-2-3-2-tabs-indicator', module.tabsIndicator);
+  },
+  'bootstrap-2-3-2-select-surface': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-surface', module.selectSurface);
+  },
+  'bootstrap-2-3-2-select-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-viewport', module.selectViewport);
+  },
+  'bootstrap-2-3-2-select-item-text': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-item-text', module.selectItemText);
+  },
+  'bootstrap-2-3-2-select-group': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-group', module.selectGroup);
+  },
+  'bootstrap-2-3-2-select-label': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-label', module.selectLabel);
+  },
+  'bootstrap-2-3-2-select-separator': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/select');
+    registerExactPrototype('bootstrap-2-3-2-select-separator', module.selectSeparator);
+  },
+  'bootstrap-2-3-2-drawer-header': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
+    registerExactPrototype('bootstrap-2-3-2-drawer-header', module.drawerHeader);
+  },
+  'bootstrap-2-3-2-drawer-footer': async () => {
+    const module = await import('@proto.ui/prototypes-bootstrap-2-3-2/drawer');
+    registerExactPrototype('bootstrap-2-3-2-drawer-footer', module.drawerFooter);
+  },
+  'liquid-glass-field-textarea': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerExactPrototype('liquid-glass-field-textarea', module.fieldTextarea);
+  },
+  'liquid-glass-field-select-trigger': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerExactPrototype('liquid-glass-field-select-trigger', module.fieldSelectTrigger);
+  },
+  'liquid-glass-field-switch': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/field');
+    registerExactPrototype('liquid-glass-field-switch', module.fieldSwitch);
+  },
+  'liquid-glass-tabs-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/tabs');
+    registerExactPrototype('liquid-glass-tabs-indicator', module.tabsIndicator);
+  },
+  'liquid-glass-select-surface': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-surface', module.selectSurface);
+  },
+  'liquid-glass-select-viewport': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-viewport', module.selectViewport);
+  },
+  'liquid-glass-select-item-text': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-item-text', module.selectItemText);
+  },
+  'liquid-glass-select-group': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-group', module.selectGroup);
+  },
+  'liquid-glass-select-label': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-label', module.selectLabel);
+  },
+  'liquid-glass-select-separator': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/select');
+    registerExactPrototype('liquid-glass-select-separator', module.selectSeparator);
+  },
+  'liquid-glass-drawer-header': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/drawer');
+    registerExactPrototype('liquid-glass-drawer-header', module.drawerHeader);
+  },
+  'liquid-glass-drawer-footer': async () => {
+    const module = await import('@proto.ui/prototypes-liquid-glass/drawer');
+    registerExactPrototype('liquid-glass-drawer-footer', module.drawerFooter);
+  },
   'shadcn-select-group': async () => {
     const module = await import('@proto.ui/prototypes-shadcn/select');
     registerExactPrototype('shadcn-select-group', module.selectGroup);

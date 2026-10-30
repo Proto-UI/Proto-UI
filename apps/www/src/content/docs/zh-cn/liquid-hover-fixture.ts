@@ -79,18 +79,26 @@ export function liquidHoverDemo(
       atom('collapsible-trigger', 'subject', {}, [slot]),
       atom('collapsible-content', 'content', {}, ['Owned disclosure content']),
     ]);
-  else
-    root = atom(
-      `${part}-root`,
-      'owner',
-      { open: false, ...(part === 'select' ? { value: 'one' } : {}) },
-      [
-        atom(`${part}-trigger`, 'subject', {}, [slot]),
-        atom(`${part}-content`, 'content', {}, [
-          atom(`${part}-item`, 'option', { value: 'one', textValue: 'One' }, ['One']),
+  else if (part === 'select')
+    root = atom('select-root', 'owner', { open: false, value: 'one' }, [
+      atom('select-trigger', 'subject', {}, [slot]),
+      atom('select-content', 'content', {}, [
+        atom('select-surface', 'surface', {}, [
+          atom('select-viewport', 'viewport', {}, [
+            atom('select-item', 'option', { value: 'one', textValue: 'One' }, [
+              atom('select-item-text', 'optionText', {}, ['One']),
+            ]),
+          ]),
         ]),
-      ]
-    );
+      ]),
+    ]);
+  else
+    root = atom(`${part}-root`, 'owner', { open: false }, [
+      atom(`${part}-trigger`, 'subject', {}, [slot]),
+      atom(`${part}-content`, 'content', {}, [
+        atom(`${part}-item`, 'option', { value: 'one', textValue: 'One' }, ['One']),
+      ]),
+    ]);
   return {
     type: 'demo',
     root: { kind: 'box', className: 'liquid-hover-layout', children: [root] },

@@ -7,7 +7,7 @@ import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreview
 
 `liquid-glass-surface-root` 是 draft 工作区 Surface 原子。它保留一个内容槽、消费视觉输入，不变成 Button、链接、代码面板、预览面板或页面专用组件。Liquid Glass 通过 `asSurfaceRoot()` 继承 [Base Surface](/zh-cn/ui-libraries/base/surface/) 契约，再由家族反馈 Rule 实现呈现。
 
-这是常规、无折射的 Surface 投射。默认 outline 不透明，transparent 与 scrim 是显式的普通绘制变体；不代表完整家族覆盖，也不承诺兼容上游同名组件 API。特别是 Liquid Glass Surface 不增加模糊、折射或实验材质 consumer；普通 transparent/scrim 绘制和 opacity 渐变不等于光学 Liquid Glass。
+Surface 默认使用普通绘制：`material="opaque"` 为默认值，移除该 prop 时也如此。默认 outline 不透明，transparent 与 scrim 仍是普通绘制变体。适用的功能或导航外壳可以通过 `material="auto"` 显式请求既有共享材质能力；这不是给内容分组、正文或每个装饰子项加玻璃的理由，也不代表完整家族覆盖或兼容上游同名组件 API。
 
 <PrototypePreviewer
   demoId="demo-liquid-glass-surface"
@@ -35,7 +35,7 @@ export function Summary() {
 }
 ```
 
-`/surface` subpath 与包根导出 `surfaceRoot`；`SurfaceRootProps`、`SurfaceRootExposes` 描述共用契约。Base 还导出用于家族编写的 `asSurfaceRoot` 和 `SurfaceRootAsHookContract`。不要在交互 owner 内加入 Surface 后，再给它另一份 role、tab stop 或激活处理。使用原生 anchor 时，导航、键盘行为、target、download 仍归该 anchor。
+`/surface` subpath 与包根导出 `surfaceRoot`；此家族的 `SurfaceRootProps` 在共用输入上增加 `material`，`SurfaceRootExposes` 仍为空。Base 还导出用于家族编写的 `asSurfaceRoot` 和 `SurfaceRootAsHookContract`。不要在交互 owner 内加入 Surface 后，再给它另一份 role、tab stop 或激活处理。使用原生 anchor 时，导航、键盘行为、target、download 仍归该 anchor。
 
 ## 输入
 
@@ -45,6 +45,7 @@ export function Summary() {
 | `radius` | `default`, `none`, `sm`, `md`, `lg`, `xl`, `full` | `default` |
 | `border` | `all`, `bottom`, `none` | `all` |
 | `elevation` | `none`, `raised` | `none` |
+| `material` | `auto`, `opaque` | `opaque` |
 | `transitionState` | `closed`, `entering`, `entered`, `leaving` | `entered` |
 | `fade` | boolean | `false` |
 | `hovered` | boolean | `false` |
@@ -55,6 +56,12 @@ export function Summary() {
 `hovered`、`focusVisible`、`pressed`、`current` 都是现有语义 owner 提供的事实；Surface 不自行检测指针、焦点、键盘、选择或导航状态。它没有 exposed state、event、method、无障碍 role 或 native property。`current` 是呈现输入，不是 `aria-current` 实现；需要真实 Button 时应组合受治理的 Button 协议。
 
 移除输入后恢复默认值。`secondary` 选择家族的次级前景/背景，不通过 elevation 推断变体。默认圆角和绘制由各家族决定，共用 prop 词汇不等于外观一致。内容与布局继续归消费者；当带风格的 Text 子项需要保留外层 Surface 前景时，使用 `tone="inherit"`。
+
+### 显式材质选择
+
+适用的功能外壳可用 `<Surface material="auto" variant="secondary">…</Surface>` 请求既有的完整 `liquid-glass` candidate，variant 为 `regular`。只有 `outline`、`secondary`、`muted` 参与；`transparent`、`accent`、`solid`、`scrim` 即使设为 `auto` 也保持普通绘制。改为 `opaque` 或移除 `material` 会撤回 candidate，不改变内容、几何或语义所有权。唯一的 version-2 `in-app-backdrop` slot 使用最终 style fill 和 foreground 作为 fallback；零 candidate 保留 slot 与普通呈现，不表示光学增强。
+
+共享宿主策略仍检查真实来源 lease、provider 支持、对比度与无障碍偏好。支持缺失或拒绝时保留合法普通样式与真实诊断；`auto` 不能强制 provider、获取来源或把显式玻璃替换成 adaptive blur。此投射不增加 shader、observer、输入 owner 或第二生命周期。intent frame 测试不证明光学绘制、Apple 原生一致性或原生 Compiler 支持。[Apple 材质指南](https://developer.apple.com/design/human-interface-guidelines/materials) 是功能层与内容层区分的依据，不是实现源码。
 
 ## 观察已有 Transition
 

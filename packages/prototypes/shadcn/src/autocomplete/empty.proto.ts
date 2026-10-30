@@ -1,13 +1,12 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asAutocompleteEmpty,
-  type AutocompleteEmptyProps,
-  type AutocompleteEmptyExposes,
-} from '@proto.ui/prototypes-base/autocomplete';
+import { definePrototype } from '@proto.ui/core';
+import { asAutocompleteEmpty } from '@proto.ui/prototypes-base/autocomplete';
+import type { AutocompleteEmptyProps, AutocompleteEmptyExposes } from './types';
+import { setupSearchEmptyPaint } from '../combobox/visual';
 export default definePrototype<AutocompleteEmptyProps, AutocompleteEmptyExposes>({
   name: 'shadcn-autocomplete-empty',
+  modules: asAutocompleteEmpty.modules,
   setup(def) {
     const behavior = asAutocompleteEmpty();
-    def.feedback.style.use(tw('px-3 py-6 text-center text-sm text-muted-foreground'));
+    setupSearchEmptyPaint(def, behavior.getState!('visible')!);
   },
 });

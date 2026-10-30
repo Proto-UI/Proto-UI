@@ -90,15 +90,20 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
     </SelectContent>
   </SelectRoot>
   <span class="language-select-fallback" data-site-select-fallback>
-    {
-      localeOptions
-        .filter((option) => !option.isCurrent)
-        .map((option) => (
-          <a href={option.path} hreflang={option.value}>
+    <select
+      aria-labelledby={labelId}
+      data-language-native-select
+      data-current-locale={selectedLocale}
+      data-locale-paths={JSON.stringify(localePaths)}
+    >
+      {
+        localeOptions.map((option) => (
+          <option value={option.value} selected={option.value === selectedLocale}>
             {option.label}
-          </a>
+          </option>
         ))
-    }
+      }
+    </select>
   </span>
 </div>
 
@@ -114,6 +119,11 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
   }
 
   .language-select-wrapper [data-site-select-root] {
+    display: none;
+  }
+
+  .language-select-wrapper
+    [data-site-shadcn-initialized='1']:not([data-site-select-fallback-retained]) {
     display: inline-flex;
   }
 
@@ -128,9 +138,18 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
 
 <script>
   import { initSiteControls } from '../site-shadcn-controls';
+  import { navigateSiteLocale } from '../site-locale-navigation';
 
-  initSiteControls(document);
-  document.addEventListener('astro:page-load', () => initSiteControls(document));
+  // Keep the native Select usable if Prototype enhancement fails.
+  const enhance = () => {
+    try {
+      initSiteControls(document);
+    } catch (error) {
+      console.error('[Language Select] Native Select retained:', error);
+    }
+  };
+  enhance();
+  document.addEventListener('astro:page-load', enhance);
 
   // One processed module owns all language controls in this document.
   (function () {
@@ -183,11 +202,7 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
         const newLocale = detail && detail.value ? detail.value : readValue(select);
         const newPath = localePaths[newLocale];
 
-        if (newPath && newLocale && newLocale !== currentLocale) {
-          setPreference(newLocale);
-          console.log('[Language Switch] Saved locale preference:', newLocale);
-          window.location.pathname = newPath;
-        }
+        if (newPath && newLocale) navigateSiteLocale(window, currentLocale, localePaths, newLocale);
       }
 
       // If localStorage has a preferred locale, keep cookie in sync
@@ -205,6 +220,21 @@ const labelId = `language-select-label-${Math.random().toString(36).slice(2)}`;
     }
 
     function initLanguageSelects() {
+      document
+        .querySelectorAll<HTMLSelectElement>('[data-language-native-select]')
+        .forEach((select) => {
+          if (select.dataset.languageSelectInitialized === 'true') return;
+          let paths: Record<string, string>;
+          try {
+            paths = JSON.parse(select.dataset.localePaths || '{}');
+          } catch {
+            return;
+          }
+          select.dataset.languageSelectInitialized = 'true';
+          select.addEventListener('change', () =>
+            navigateSiteLocale(window, select.dataset.currentLocale || '', paths, select.value)
+          );
+        });
       document
         .querySelectorAll<LanguageSelectRoot>('[data-language-select-root]')
         .forEach(initLanguageSelect);

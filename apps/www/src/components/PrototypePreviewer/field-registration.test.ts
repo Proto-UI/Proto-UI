@@ -24,12 +24,17 @@ describe('Field actual DemoSpec registration', () => {
       const demo = await loadDemo(recipeId);
       expect(() => assertDemoSpec(demo)).not.toThrow();
       const ids = [...new Set(prototypes(demo.root))].sort();
-      expect(ids).toEqual(
-        ['root', 'label', 'control', 'description', 'error', 'validity']
-          .map((role) => `${family}-field-${role}`)
-          .concat(`${family}-button`)
-          .sort()
-      );
+      const fieldAtoms = ['root', 'label', 'control', 'description', 'error', 'validity']
+        .map((role) => `${family}-field-${role}`)
+        .concat(`${family}-button`);
+      // shadcn/bootstrap-2-3-2/liquid-glass Field demos also bind real
+      // Textarea, Select and Switch controls inside Fields; their complete
+      // id set is exactly what the projection manifest declares.
+      const expected =
+        family === 'base' || family === 'brutalist'
+          ? fieldAtoms
+          : [...PROJECTION_FAMILY_MANIFESTS[family].families.field.recipePrototypeIds];
+      expect(ids).toEqual([...expected].sort());
       for (const id of ids) {
         await loadPrototype(id);
         expect(getPrototype(id)?.name).toBe(id);
@@ -43,7 +48,8 @@ describe('Field actual DemoSpec registration', () => {
           [...PROJECTION_FAMILY_MANIFESTS[family].families.field.recipePrototypeIds].sort()
         ).toEqual(ids);
       }
-    });
+      // Loading every declared prototype id is well past the 5s default.
+    }, 60_000);
   }
 });
 

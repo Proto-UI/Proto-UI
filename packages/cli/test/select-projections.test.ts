@@ -43,7 +43,8 @@ for (const family of ['bootstrap-2-3-2', 'liquid-glass']) {
       expect(css).toContain('overflow-wrap: anywhere');
       expect(css).toContain('outline: 2px solid transparent');
       if (family === 'bootstrap-2-3-2') {
-        expect(css).toContain('linear-gradient(to bottom, #0077b3, #005580)');
+        // Pinned 2.3.2 hover gradient: linkColor #08c darkened to #0077b3.
+        expect(css).toContain('linear-gradient(to bottom, #08c, #0077b3)');
         expect(css).toContain('--pui-shadow: 0 5px 10px rgb(0 0 0 / 0.2)');
       }
     });

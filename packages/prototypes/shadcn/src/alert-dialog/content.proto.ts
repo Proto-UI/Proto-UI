@@ -1,19 +1,48 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import {
   asAlertDialogContent,
-  type AlertDialogContentProps,
   type AlertDialogContentExposes,
 } from '@proto.ui/prototypes-base/alert-dialog';
+import type { AlertDialogContentProps } from './types';
+import { setupOverlayDarkRing, setupOverlayPaint } from '../dialog/style';
+import { ALERT_PANEL } from './recipes';
 
 export default definePrototype<AlertDialogContentProps, AlertDialogContentExposes>({
   name: 'shadcn-alert-dialog-content',
   setup(def) {
     const behavior = asAlertDialogContent();
+    const style = setupOverlayPaint(def, ALERT_PANEL);
+    setupOverlayDarkRing(def, style);
     def.feedback.style.use(
       tw(
-        'rounded-lg border border-border bg-background text-foreground shadow-lg p-6 fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] -translate-x-1/2 -translate-y-1/2 w-full max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))] max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid gap-4'
+        'fixed left-[var(--proto-ui-available-region-center-x,50%)] top-[var(--proto-ui-available-region-center-y,50%)] -translate-x-1/2 -translate-y-1/2 w-full max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)] overflow-y-auto grid'
       )
     );
+    def.rule({
+      when: (w) => w.state(style).eq('new-york-v4'),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('max-w-[min(32rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
+        ),
+    });
+    def.rule({
+      when: (w) => w.not(w.state(style).eq('new-york-v4')),
+      intent: (i) =>
+        i.feedback.style.use(
+          tw('max-w-[min(20rem,calc(var(--proto-ui-available-region-width,100%)_-_2rem))]')
+        ),
+    });
+    const { open } = behavior.stateHandles;
+    def.rule({
+      when: (w) => w.state(open).eq(true),
+      intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
+    });
+    def.rule({
+      when: (w) => w.state(open).eq(false),
+      intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
+    });
+    // Existing zero-duration retention is preserved. Modern animation completion
+    // cannot be claimed until a lawful profile-selectable Transition default exists.
     behavior.asTransition.configure({ enterDuration: 0, leaveDuration: 0 });
   },
 });

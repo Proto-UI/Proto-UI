@@ -85,6 +85,7 @@ const installOverlay = definePrivilegedAsHook<PropsBaseType, OverlayHandle<Props
     const handle: OverlayHandle<PropsBaseType> = {
       open: raw.open,
       isOpen: () => raw.isOpen(),
+      afterViewReconciled: (callback) => raw.afterViewReconciled(callback),
       openOverlay: (reason) => raw.openOverlay(reason),
       close: (reason) => raw.close(reason),
       toggle: (reason) => raw.toggle(reason),

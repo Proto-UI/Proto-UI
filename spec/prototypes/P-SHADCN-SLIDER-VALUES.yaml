@@ -1,0 +1,65 @@
+id: P-SHADCN-SLIDER-VALUES
+type: prototype
+title: Shadcn Slider Values family projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
+summary: Six indexed Slider Values parts as a separate multi-value family, not scalar Thumb aliases.
+statement:
+    en: The Prototypes invoke asSliderValuesRoot, asSliderValuesTrack, asSliderValuesThumb, asSliderValuesIndicator, asSliderValuesLabel and asSliderValuesValue once each. Values Root remains the sole unwrapped owner; Thumbs select sorted display slots, Track is structural, and the separate scalar family is untouched. Base gaps for pointer-origin association, grouped Field, native and Compiler admission are inherited, not resolved by family paint.
+criteria:
+  - id: P-SHADCN-SLIDER-VALUES-INHERITANCE
+    text:
+            en: Each of the six Values entries composes only with Values Root and preserves Base indexed mapping, controlled acceptance/refusal and keyboard semantics. Scalar Slider and Values remain distinct owners; no Values Thumb is a scalar-Thumb alias.
+  - id: P-SHADCN-SLIDER-VALUES-VISUAL
+    text:
+            en: Profile rail, range and thumb paint uses theme-relative radius tokens (including Rhea rounded-[var(--pui-radius-2xl)]) and owned decoration targets so painted geometry may differ from input geometry. Family paint never invents pointer capture or measurement ownership.
+  - id: P-SHADCN-SLIDER-VALUES-BOUNDARY
+    text:
+            en: 'Values Track stays structural: pointer origin/session association, grouped Field control, family-complete native input and Compiler translation remain open Base/host prerequisites recorded on P-BASE-SLIDER-VALUES, not closed here.'
+  - id: P-SHADCN-SLIDER-VALUES-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
+  - id: P-SHADCN-SLIDER-VALUES-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-SLIDER-VALUE-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-SLIDER-VALUES
+verifies:
+  tests:
+    - T-SHADCN-SLIDER-VALUES-0001
+    - T-SLIDER-VALUES-RUNTIME-0001
+openQuestions:
+  - id: P-SHADCN-SLIDER-VALUES-Q-POINTER
+    question:
+            en: When do public pointer-origin/session association, grouped Field control and native/Compiler evidence admit the remaining Values scope?
+    blocks:
+      - activation:P-SHADCN-SLIDER-VALUES
+sources:
+  - path: packages/prototypes/shadcn/src/slider/values-root.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-track.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-thumb.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-indicator.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-label.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-value.proto.ts
+  - path: packages/prototypes/shadcn/src/slider/values-visual.ts
+  - path: packages/prototypes/shadcn/src/slider/index.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/slider.tsx
+    label: Pinned Slider upstream comparison source
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Shadcn Slider Values family projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - shadcn
+  - slider
+  - values
+  - draft

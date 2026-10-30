@@ -163,19 +163,13 @@ describe('shared compact Header ownership and layout', () => {
       expect(source.indexOf('data-site-header-compact-context')).toBeGreaterThan(
         source.indexOf('data-site-header-panel-content')
       );
-      if (path === 'override/Header.astro') {
-        expect(source).toContain('data-site-header-wide-preferences');
-        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-          source.indexOf('data-site-header-compact-context')
-        );
-        expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
-          source.indexOf('data-site-header-context')
-        );
-      } else {
-        expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
-          source.indexOf('data-site-header-context')
-        );
-      }
+      expect(source).toContain('data-site-header-wide-preferences');
+      expect(source.indexOf('data-site-header-preferences')).toBeGreaterThan(
+        source.indexOf('data-site-header-compact-context')
+      );
+      expect(source.indexOf('data-site-header-preferences')).toBeLessThan(
+        source.indexOf('data-site-header-context')
+      );
       expect(source).not.toMatch(/role=["'](?:menu|dialog)["']/);
     });
   }
@@ -189,7 +183,7 @@ describe('shared compact Header ownership and layout', () => {
     );
     expect(css).toContain('top: var(--site-header-panel-top, 100%)');
     expect(css).toContain('left: var(--site-header-panel-left, 0)');
-    expect(css).toContain('.site-header[data-site-menu-ready] > .site-header-context');
+    expect(css).toContain('.site-header > .site-header-context');
     expect(css).toContain("grid-template-areas: 'brand contents search theme menu'");
   });
 });
@@ -290,3 +284,39 @@ it.each(['en', 'zh-cn'])(
     expect(titleRule[2]).toBe('calc(var(--header-height) + var(--docs-reading-inset, 1rem))');
   }
 );
+
+it('separates full-width Header chrome from the bounded reading canvas', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  expect(frame.indexOf('<slot name="header" />')).toBeLessThan(frame.indexOf('class:list={['));
+  expect(frame).toContain('.site-page-frame > header:has([data-site-header])');
+  expect(frame).not.toContain('.site-page-frame > .container-wrapper > header');
+  expect(frame).toMatch(/\.docs-shell\s*\{[^}]*max-width: 85rem/);
+  const root = css.match(/\.site-header\s*\{([^}]+)\}/)![1];
+  expect(root).toContain('max-width: none');
+  expect(root).toContain('padding-inline: clamp(1rem, 2vw, 2rem)');
+  expect(root).toContain('--site-header-row-height: 4.5rem');
+  expect(root).toContain('--site-control-height: 2.75rem');
+  expect(root).toContain('--site-select-control-height: 2.75rem');
+  expect(css).not.toContain('max-width: 82.5rem');
+  expect(css).not.toContain('Labels occupy the line above');
+});
+
+it('couples compact Search geometry and copy at every Header composition breakpoint', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  for (const [query, owner] of [
+    ['@media (max-width: 68.749rem)', '.site-header'],
+    ['@media (max-width: 79.999rem)', '.home-runtime-header'],
+    ['@container docs-page (max-width: 68.749rem)', '.site-header[data-docs-site-header]'],
+  ]) {
+    const section = css.slice(css.indexOf(query));
+    const start = section.indexOf(owner + ' {');
+    const rule = section.slice(start, section.indexOf('}', start));
+    expect(rule).toContain('--site-header-search-width: 2.75rem');
+    expect(rule).toContain('--site-header-search-padding: 0');
+    expect(rule).toContain('--site-header-search-justify: center');
+    expect(rule).toContain('--site-header-search-copy-display: none');
+    expect(rule).toContain('--site-header-search-margin: 0');
+  }
+  expect(css).toContain('display: var(--site-header-search-copy-display, inline)');
+  expect(css).toContain('display: var(--site-header-search-copy-display, inline-flex)');
+});

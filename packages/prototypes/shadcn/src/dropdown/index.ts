@@ -17,6 +17,9 @@ export type {
   ShadcnDropdownItemExposes,
   ShadcnDropdownItemAsHookContract,
   ShadcnDropdownLabelProps,
+  ShadcnDropdownGroupProps,
+  ShadcnDropdownSeparatorProps,
+  ShadcnDropdownShortcutProps,
 } from './types';
 
 export { dropdownRoot, dropdownTrigger, dropdownContent, dropdownItem };

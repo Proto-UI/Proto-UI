@@ -11,20 +11,26 @@ export default definePrototype<NavigationMenuLinkProps, NavigationMenuLinkExpose
     const behavior = asNavigationMenuLink();
     def.feedback.style.use(
       tw(
-        'flex min-w-0 items-center rounded-sm px-3 py-2 text-sm underline underline-offset-4 outline-none break-words'
+        'block min-w-0 px-[20px] py-[3px] text-[14px] font-normal leading-[20px] text-foreground whitespace-nowrap'
       )
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('text-[#999] cursor-default')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
       intent: (i) => i.feedback.style.use(tw('ring-2 ring-inset ring-ring')),
     });
     def.rule({
-      when: (w) => w.state(behavior.getState!('focused')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
+      when: (w) =>
+        w.all(
+          w.any(w.state(behavior.getState!('focused')!).eq(true), w.prop('current').eq(true)),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
+      intent: (i) =>
+        i.feedback.style.use(tw('bg-[linear-gradient(#08c,#0077b3)] text-primary-foreground')),
     });
+    return behavior.render;
   },
 });

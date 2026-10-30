@@ -29,6 +29,14 @@ criteria:
       en: Uses family-owned layout, wrapping, focus-visible, disabled and invalid presentation derived from
         canonical Base state. Invalidity includes a textual Error; color is never the only explanation. Native
         layout, text scaling and visual parity require source-bound browser evidence.
+  - id: P-LIQUID-GLASS-FIELD-ALTERNATIVES
+    text:
+      en: The public fieldTextarea, fieldSelectTrigger and fieldSwitch entries compose asFieldTextarea, asFieldSelectTrigger and asFieldSwitch once each. Each shares the corresponding standalone family editor or control and keeps the optional Field binding as sole owner of invalid, pending, policy and relationships; no entry is a second semantic owner or parallel style product.
+    dependsOn:
+      contracts:
+        - C-FIELD-TEXTAREA-0001
+        - C-FIELD-SELECT-0001
+        - C-FIELD-SWITCH-0001
 inherits:
   prototypes:
     - P-BASE-FIELD
@@ -38,9 +46,14 @@ dependsOn:
 verifies:
   tests:
     - T-BASE-FIELD-0001
+    - T-LIQUID-GLASS-DRAFT-CONTROL-0001
+    - T-LIQUID-GLASS-SELECT-0001
 sources:
   - path: packages/prototypes/liquid-glass/src/field/root.proto.ts
   - path: packages/prototypes/liquid-glass/src/field/index.ts
+  - path: packages/prototypes/liquid-glass/src/field/textarea.proto.ts
+  - path: packages/prototypes/liquid-glass/src/field/select-trigger.proto.ts
+  - path: packages/prototypes/liquid-glass/src/field/switch.proto.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

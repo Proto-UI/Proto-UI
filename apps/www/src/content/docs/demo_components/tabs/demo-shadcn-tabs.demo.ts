@@ -32,6 +32,11 @@ export default {
       },
       {
         kind: 'proto',
+        prototypeId: 'shadcn-tabs-indicator',
+        className: 'block h-0.5',
+      },
+      {
+        kind: 'proto',
         prototypeId: 'shadcn-tabs-content',
         props: { value: 'account' },
         children: ['Make changes to your account here.'],

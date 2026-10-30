@@ -1,0 +1,43 @@
+id: T-SHADCN-TABS-PROJECTION-0001
+type: test
+title: Shadcn Tabs draft projection coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Tabs profiles, owned line decoration and passive Indicator facts on real consumers.
+cases:
+  - id: T-SHADCN-TABS-PROJECTION-0001-CASE-PROFILES
+    title: Nine profile and New York transitions preserve Base selection and owners
+    covers:
+      - P-SHADCN-TABS-BASE-INHERITANCE
+      - P-SHADCN-TABS-STYLE-SCOPE
+    expectation: profile-transitions-preserve-base-ownership
+  - id: T-SHADCN-TABS-PROJECTION-0001-CASE-INDICATOR
+    title: Passive Indicator derives facts only and withdraws paint without owning selection or geometry
+    covers:
+      - P-SHADCN-TABS-INDICATOR-BASE
+      - P-SHADCN-TABS-INDICATOR-VISUAL
+    expectation: passive-indicator-facts-no-owner
+implementations:
+  - id: shadcn-tabs-draft-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/tabs-draft-projection.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-TABS
+      - P-SHADCN-TABS-LIST
+      - P-SHADCN-TABS-TRIGGER
+      - P-SHADCN-TABS-CONTENT
+      - P-SHADCN-TABS-INDICATOR
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-SHADCN-TABS
+    - P-SHADCN-TABS-CONTENT
+    - P-SHADCN-TABS-INDICATOR
+    - P-SHADCN-TABS-LIST
+    - P-SHADCN-TABS-TRIGGER

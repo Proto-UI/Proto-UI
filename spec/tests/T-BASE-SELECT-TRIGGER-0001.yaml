@@ -5,6 +5,10 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers independent command state, combobox relationships, pointer and keyboard entry, disabled gating, and absence of selection ownership.
 cases:
+  - id: T-BASE-SELECT-TRIGGER-0001-CASE-AUTHOR-NAME
+    title: Stable author name remains independent of selected content and Field naming
+    covers: [P-BASE-SELECT-TRIGGER-AUTHOR-NAME]
+    expectation: author-label-updates-and-clears-without-selection-mutation-and-resolved-field-label-retains-priority
   - id: T-BASE-SELECT-TRIGGER-0001-CASE-TRANSIENT-CLEANUP
     title: Cancellation and view withdrawal clear transient state while preserving semantic owner facts
     covers: [P-BASE-SELECT-TRIGGER-TRANSIENT-CLEANUP]
@@ -31,6 +35,22 @@ cases:
     covers: [P-BASE-SELECT-TRIGGER-DISABLED]
     expectation: disabled-select-trigger-never-opens-or-focuses
 implementations:
+  - id: prototypes-base-select-trigger-author-name
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/select.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-TRIGGER-0001-CASE-AUTHOR-NAME]
+    exercises: [P-BASE-SELECT-TRIGGER]
+    notes:
+      - Candidate authored but unexecuted. Existing exact-038 browser evidence demonstrates absent author names; new browser acceptance remains required, not inferred from DOM attributes.
+  - id: prototypes-base-select-trigger-field-author-name
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/field-select-trigger.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-TRIGGER-0001-CASE-AUTHOR-NAME]
+    exercises: [P-BASE-SELECT-TRIGGER]
   - id: prototypes-base-select-trigger-transient-cleanup
     kind: module-test
     status: passing

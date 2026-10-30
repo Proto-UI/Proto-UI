@@ -8,7 +8,7 @@ export default definePrototype<FieldValidityProps, FieldValidityExposes>({
   name: 'bootstrap-2-3-2-field-validity',
   setup(def) {
     const inherited = asFieldValidity();
-    def.feedback.style.use(tw('block text-sm text-foreground'));
+    def.feedback.style.use(tw('block text-[14px] leading-[20px] text-inherit'));
     return inherited.render;
   },
 });

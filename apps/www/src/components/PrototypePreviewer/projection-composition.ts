@@ -1,3 +1,4 @@
+import { snapshotDemoValue } from './demo-dynamic-children';
 import { bindSiteSelectDismissal } from '../site-select-dismissal';
 import { siteTextRecipe } from '../site-text-recipes';
 import type { RuntimeId } from './runtimes/ids';
@@ -5,6 +6,9 @@ import {
   assertDemoSpec,
   type DemoBoxAttrs,
   type DemoChild,
+  type DemoKeyedChild,
+  type DemoPublicInstancesListener,
+  type DemoPublicInstance,
   type DemoNode,
   type DemoSetupContext,
   type DemoSpec,
@@ -43,6 +47,8 @@ export type ProjectionControlOption<Value extends string = string> = Readonly<{
 
 export type ProjectionControlConfig<Value extends string> = Readonly<{
   label: string;
+  /** Compact command bars retain the Trigger's accessible name without a second visual row. */
+  labelPresentation?: 'visible' | 'accessible';
   /** Runtime Box may use a genuine controlled Tabs composition. */
   presentation?: 'select' | 'tabs';
   placeholder?: string;
@@ -57,6 +63,8 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   /** Shadcn presentation; Brutalist retains its separate explicit appearance. */
   triggerAppearance?: 'default' | 'ghost';
   compactTriggerAppearance?: 'default' | 'ghost';
+  /** Explicit family projection; never overrides another family's recipe. */
+  shadcnStyleProfile?: 'new-york-v4' | 'rhea';
   options: readonly ProjectionControlOption<Value>[];
   onValueChange(value: Value): void;
 }>;
@@ -370,6 +378,9 @@ export function assertProjectionRecipeClosure(
   const collect = (child: DemoChild): void => {
     if (typeof child === 'string' || child.kind === 'text') return;
     if (child.kind === 'proto') actualPrototypeIds.add(child.prototypeId);
+    if (child.kind === 'box')
+      for (const prototypeId of child.dynamicChildren?.prototypeIds ?? [])
+        actualPrototypeIds.add(prototypeId);
     for (const nested of child.children ?? []) collect(nested);
   };
   collect(node);
@@ -468,8 +479,17 @@ function cloneProjectedChild(
     )
   );
   if (node.kind === 'box') {
+    for (const prototypeId of node.dynamicChildren?.prototypeIds ?? []) {
+      if (!allowedPrototypeIds.has(prototypeId))
+        throw new Error(
+          `[PrototypePreviewer] dynamic Prototype "${prototypeId}" is not declared by the selected projection family.`
+        );
+    }
     return {
       ...node,
+      dynamicChildren: node.dynamicChildren
+        ? { prototypeIds: [...node.dynamicChildren.prototypeIds] }
+        : undefined,
       attrs: { ...(node.attrs ?? {}), ...coordinateAttrs },
       className: mergeClassName(node.className, 'pui-projection-box'),
       children,
@@ -560,7 +580,7 @@ function createSelectControl<Value extends string>(
   const trigger = createProjectedProto(selectParts.trigger, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.trigger,
     props: {
-      'aria-label': config.label,
+      accessibleLabel: config.label,
       ...(triggerAppearance(config, selectParts.trigger)
         ? { appearance: triggerAppearance(config, selectParts.trigger) }
         : {}),
@@ -580,6 +600,7 @@ function createSelectControl<Value extends string>(
       ...(config.minHeight ? { minHeight: config.minHeight } : {}),
       ...(config.paddingBlock ? { paddingBlock: config.paddingBlock } : {}),
     },
+    // Public Select owns the stable author name; content is only the current value.
     children: [value],
   });
   const items = config.options.map((option) =>
@@ -615,7 +636,14 @@ function createSelectControl<Value extends string>(
   });
   const root = createProjectedProto(selectParts.root, coordinateAttrs, themeSurfaceStyle, {
     ref: refs.root,
-    props: { value: currentValue, disabled: locked, closeOnSelect: true },
+    props: {
+      value: currentValue,
+      disabled: locked,
+      closeOnSelect: true,
+      ...(selectParts.root === 'shadcn-select-root' && config.shadcnStyleProfile
+        ? { styleProfile: config.shadcnStyleProfile }
+        : {}),
+    },
     // Width is a host-owned normalized surface input projected by every
     // Adapter. Website CSS must not reach through the wrapper to style the
     // physical combobox surface.
@@ -633,7 +661,7 @@ function createSelectControl<Value extends string>(
       'data-projection-id': `${id}-control`,
       'aria-disabled': String(locked),
     },
-    children: [label, root],
+    children: config.labelPresentation === 'accessible' ? [root] : [label, root],
   };
 }
 
@@ -646,6 +674,31 @@ function callbackValue(detail: unknown): string | undefined {
   if (!detail || typeof detail !== 'object') return undefined;
   const value = (detail as { value?: unknown }).value;
   return typeof value === 'string' ? value : undefined;
+}
+
+/** Internal renderer handles for author Prototypes without public refs. */
+function dynamicProjectionRefs(
+  slotRef: string,
+  key: string,
+  node: DemoChild,
+  path: readonly number[] = []
+): DemoChild {
+  if (typeof node === 'string' || node.kind === 'text') return node;
+  return {
+    ...node,
+    ...(node.kind === 'proto' && node.ref === undefined
+      ? {
+          ref: `${REF_PREFIX}dynamic_${encodeURIComponent(JSON.stringify([slotRef, key, path]))}`,
+        }
+      : {}),
+    children: node.children?.map((child, index) =>
+      dynamicProjectionRefs(slotRef, key, child, [...path, index])
+    ),
+  };
+}
+function assertChildApiRef(ref: string): void {
+  if (ref.startsWith(REF_PREFIX))
+    throw new Error('[PrototypePreviewer] reserved projection ref is not a child API handle.');
 }
 
 function childRefsWithin(
@@ -756,6 +809,7 @@ export function createProjectionComposition(
   const rendererThemeSurfaceStyle = themeSurfaceStyle ?? {};
   let activeContext: DemoSetupContext | null = null;
   let stampActiveProjectionSurfaces: (() => void) | null = null;
+  let applyActiveDynamicTheme: (() => void) | null = null;
   const projectedChild = cloneProjectedChild(
     options.childDemo.root,
     coordinateAttrs,
@@ -839,6 +893,22 @@ export function createProjectionComposition(
     activeContext = context;
     const listeners: Array<Readonly<{ element: HTMLElement; listener: EventListener }>> = [];
     const appearanceCleanups: Array<() => void> = [];
+    const instanceSubscriptions = new Set<() => void>();
+    let acceptingInstanceSubscriptions = true;
+    const stopInstanceSubscriptions = () => {
+      acceptingInstanceSubscriptions = false;
+      const pending = [...instanceSubscriptions];
+      const errors: unknown[] = [];
+      for (const off of pending) {
+        try {
+          off();
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+      if (errors.length)
+        throw new AggregateError(errors, 'Projection instance subscription cleanup failed');
+    };
     const document = contentHost.ownerDocument;
     const view = document.defaultView;
     if (!view) {
@@ -903,6 +973,7 @@ export function createProjectionComposition(
     };
     stampActiveProjectionSurfaces = stampProjectionSurfaces;
     let stopObservingMarkerChanges = () => {};
+    let clearDynamicChildren = () => {};
     let childCleanup: void | (() => void) = undefined;
     try {
       for (const id of controlIds) {
@@ -915,9 +986,9 @@ export function createProjectionComposition(
         if (!trigger) {
           throw new Error(`[PrototypePreviewer] projection ${id} control trigger is missing.`);
         }
-        if (!(id === 'runtime' && runtimeTabs))
-          trigger.setAttribute('aria-label', options.controls[id].label);
         const config = options.controls[id] as ProjectionControlConfig<string>;
+        if (!(id === 'runtime' && runtimeTabs) && config.labelPresentation !== 'accessible')
+          trigger.setAttribute('aria-label', config.label);
         if (!(id === 'runtime' && runtimeTabs))
           appearanceCleanups.push(
             bindSiteSelectDismissal(context.refs[CONTROL_REFS[id].box]!, (reason) => {
@@ -972,10 +1043,176 @@ export function createProjectionComposition(
         }
       }
 
+      const committedDynamic = new Map<
+        string,
+        { sequence: number; children: readonly DemoKeyedChild[] }
+      >();
+      clearDynamicChildren = () => committedDynamic.clear();
+      let nextDynamicSequence = 0;
+      const applyDynamicTheme = () => {
+        if (activeContext !== context) return;
+        const apply = (node: DemoChild) => {
+          if (activeContext !== context || typeof node === 'string' || node.kind === 'text') return;
+          if (node.kind === 'proto') {
+            const authored = mergeSurfaceStyle(
+              node.surfaceStyle,
+              node.prototypeId === componentRootPrototypeId ? { maxWidth: '100%' } : undefined
+            );
+            context.api.setSurfaceStyle!(
+              node.ref!,
+              mergeSurfaceStyle(authored, themeSurfaceStyle ?? {}) ?? {}
+            );
+          }
+          for (const nested of node.children ?? []) apply(nested);
+        };
+        for (const value of committedDynamic.values())
+          for (const child of value.children) apply(child.node);
+      };
+      applyActiveDynamicTheme = applyDynamicTheme;
+      const childRefs = context.api.setChildren
+        ? new Proxy(Object.create(null) as Record<string, HTMLElement>, {
+            get: (_target, key) =>
+              activeContext === context && typeof key === 'string' && !key.startsWith(REF_PREFIX)
+                ? context.refs[key]
+                : undefined,
+            has: (_target, key) =>
+              activeContext === context &&
+              typeof key === 'string' &&
+              !key.startsWith(REF_PREFIX) &&
+              Object.hasOwn(context.refs, key),
+            ownKeys: () =>
+              activeContext === context
+                ? Object.keys(context.refs).filter((ref) => !ref.startsWith(REF_PREFIX))
+                : [],
+            getOwnPropertyDescriptor: (_target, key) =>
+              activeContext === context &&
+              typeof key === 'string' &&
+              !key.startsWith(REF_PREFIX) &&
+              Object.hasOwn(context.refs, key)
+                ? {
+                    configurable: true,
+                    enumerable: true,
+                    value: context.refs[key],
+                    writable: false,
+                  }
+                : undefined,
+            set: () => false,
+            deleteProperty: () => false,
+          })
+        : childRefsWithin(contentHost, context.refs);
+      const childApi: DemoSetupContext['api'] = {
+        // Enumerate capabilities: never spread an unfiltered reserved-ref lookup.
+        ...(context.api.getPublicInstance
+          ? {
+              getPublicInstance(ref: string) {
+                if (activeContext !== context) return undefined;
+                assertChildApiRef(ref);
+                return context.api.getPublicInstance!(ref);
+              },
+            }
+          : {}),
+        ...(context.api.subscribePublicInstances
+          ? {
+              subscribePublicInstances(
+                refs: readonly string[],
+                listener: DemoPublicInstancesListener
+              ) {
+                if (activeContext !== context || !acceptingInstanceSubscriptions) return () => {};
+                // Validate the complete batch before forwarding any private ref.
+                const names = Object.freeze([...new Set(refs)]);
+                for (const ref of names) assertChildApiRef(ref);
+                const off = context.api.subscribePublicInstances!(names, (snapshot, revision) => {
+                  if (activeContext !== context || !acceptingInstanceSubscriptions) return;
+                  const filtered: Record<string, DemoPublicInstance | undefined> =
+                    Object.create(null);
+                  for (const ref of names) filtered[ref] = snapshot[ref];
+                  listener(Object.freeze(filtered), revision);
+                });
+                if (activeContext !== context || !acceptingInstanceSubscriptions) {
+                  off();
+                  return () => {};
+                }
+                const dispose = () => {
+                  if (!instanceSubscriptions.delete(dispose)) return;
+                  off();
+                };
+                instanceSubscriptions.add(dispose);
+                return dispose;
+              },
+            }
+          : {}),
+        call(ref, path, ...args) {
+          assertChildApiRef(ref);
+          return context.api.call(ref, path, ...args);
+        },
+        getExposes(ref) {
+          assertChildApiRef(ref);
+          return context.api.getExposes(ref);
+        },
+        setProps(ref, props) {
+          assertChildApiRef(ref);
+          context.api.setProps(ref, props);
+        },
+        ...(context.api.removeProps
+          ? {
+              removeProps(ref: string, names: readonly string[]) {
+                assertChildApiRef(ref);
+                context.api.removeProps!(ref, names);
+              },
+            }
+          : {}),
+        ...(context.api.setSurfaceStyle
+          ? {
+              setSurfaceStyle(ref: string, style: DemoSurfaceStyle) {
+                assertChildApiRef(ref);
+                context.api.setSurfaceStyle!(ref, style);
+              },
+            }
+          : {}),
+        ...(context.api.setChildren
+          ? {
+              async setChildren(slotRef: string, incoming: readonly DemoKeyedChild[]) {
+                if (activeContext !== context) return 'disposed' as const;
+                assertChildApiRef(slotRef);
+                if (!context.api.setSurfaceStyle)
+                  throw new Error(
+                    '[PrototypePreviewer] dynamic projection requires the public surface-style capability.'
+                  );
+                // Snapshot before projection: accessors and later caller mutation
+                // cannot bypass admission or mutate an in-flight update.
+                const children = snapshotDemoValue(incoming).map(({ key, node }) => {
+                  assertReservedRefsAvailable(node);
+                  return { key, node: dynamicProjectionRefs(slotRef, key, node) };
+                });
+                const projected = children.map(({ key, node }) => ({
+                  key,
+                  node: cloneProjectedChild(
+                    node,
+                    coordinateAttrs,
+                    themeSurfaceStyle ?? {},
+                    allowedPrototypeIds,
+                    componentRootPrototypeId
+                  ),
+                }));
+                const sequence = ++nextDynamicSequence;
+                if (activeContext !== context) return 'disposed' as const;
+                const status = await context.api.setChildren!(slotRef, projected);
+                if (status === 'committed' && activeContext === context) {
+                  // A newer rejected request must not erase the last successful tree.
+                  if (sequence > (committedDynamic.get(slotRef)?.sequence ?? 0))
+                    committedDynamic.set(slotRef, { sequence, children });
+                  applyDynamicTheme();
+                  stampProjectionSurfaces();
+                }
+                return status;
+              },
+            }
+          : {}),
+      };
       childCleanup = options.childDemo.setup?.({
         host: contentHost,
-        refs: childRefsWithin(contentHost, context.refs),
-        api: context.api,
+        refs: childRefs,
+        api: childApi,
       });
       stampProjectionSurfaces();
       stopObservingMarkerChanges = observeProjectionSurfaceMarkers(
@@ -986,19 +1223,28 @@ export function createProjectionComposition(
       );
       applyLocked(context);
     } catch (error) {
-      stopObservingMarkerChanges();
-      for (const cleanup of appearanceCleanups) cleanup();
-      for (const { element, listener } of listeners) {
-        element.removeEventListener('valueChange', listener);
-      }
-      try {
-        if (typeof childCleanup === 'function') childCleanup();
-      } finally {
-        if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
-          stampActiveProjectionSurfaces = null;
+      const failures: unknown[] = [error];
+      const attempt = (operation: () => void) => {
+        try {
+          operation();
+        } catch (failure) {
+          failures.push(failure);
         }
-        activeContext = null;
+      };
+      attempt(stopInstanceSubscriptions);
+      attempt(clearDynamicChildren);
+      attempt(stopObservingMarkerChanges);
+      for (const cleanup of appearanceCleanups) attempt(cleanup);
+      for (const { element, listener } of listeners) {
+        attempt(() => element.removeEventListener('valueChange', listener));
       }
+      if (typeof childCleanup === 'function') attempt(childCleanup);
+      if (stampActiveProjectionSurfaces === stampProjectionSurfaces)
+        stampActiveProjectionSurfaces = null;
+      activeContext = null;
+      applyActiveDynamicTheme = null;
+      if (failures.length > 1)
+        throw new AggregateError(failures, 'Projection setup and cleanup failed', { cause: error });
       throw error;
     }
 
@@ -1020,6 +1266,8 @@ export function createProjectionComposition(
         }
       };
 
+      attempt(stopInstanceSubscriptions);
+      attempt(clearDynamicChildren);
       attempt(stopObservingMarkerChanges);
       for (const cleanup of appearanceCleanups) attempt(cleanup);
       for (const id of controlIds) {
@@ -1034,6 +1282,7 @@ export function createProjectionComposition(
       if (typeof childCleanup === 'function') attempt(childCleanup);
       if (activeContext === context) {
         activeContext = null;
+        applyActiveDynamicTheme = null;
         if (stampActiveProjectionSurfaces === stampProjectionSurfaces) {
           stampActiveProjectionSurfaces = null;
         }
@@ -1130,6 +1379,7 @@ export function createProjectionComposition(
       const nextTheme = copyThemeSurfaceStyle(nextThemeSurfaceStyle, themeSurfaceStyle);
       updateRendererThemeSurfaceStyles(demo.root, nextTheme);
       themeSurfaceStyle = nextTheme;
+      applyActiveDynamicTheme?.();
       stampActiveProjectionSurfaces?.();
     },
     restoreFocus(focusKey) {

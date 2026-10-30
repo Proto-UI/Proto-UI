@@ -610,6 +610,35 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
     { source: ts.SourceFile; target: ts.Node; written: boolean }
   >();
 
+  // These are syntax candidates only, not binding or filesystem conclusions.
+  // SourceFile nodes are immutable within one summary context; replacement
+  // source text has a different key. Preserve the original preorder, including
+  // nested functions: they can write a captured outer binding.
+  const writeSyntax = new WeakMap<ts.SourceFile, readonly ts.Node[]>();
+  const potentialWrites = (source: ts.SourceFile): readonly ts.Node[] => {
+    const cached = writeSyntax.get(source);
+    if (cached) return cached;
+    const candidates: ts.Node[] = [];
+    const visit = (node: ts.Node): void => {
+      if (
+        (ts.isBinaryExpression(node) &&
+          node.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+          node.operatorToken.kind <= ts.SyntaxKind.LastAssignment) ||
+        ts.isForOfStatement(node) || ts.isForInStatement(node) ||
+        (ts.isVariableDeclaration(node) && node.initializer &&
+          ts.isVariableDeclarationList(node.parent) &&
+          (node.parent.flags & ts.NodeFlags.BlockScoped) === 0) ||
+        ((ts.isPrefixUnaryExpression(node) || ts.isPostfixUnaryExpression(node)) &&
+          (node.operator === ts.SyntaxKind.PlusPlusToken ||
+            node.operator === ts.SyntaxKind.MinusMinusToken))
+      ) candidates.push(node);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    writeSyntax.set(source, candidates);
+    return candidates;
+  };
+
   /** A source alias is usable only while its exact binding still holds its initializer. */
   const hasBindingWrite = (bindingNode: ts.Node, module: Module): boolean => {
     if (!ts.isIdentifier(bindingNode)) return true;
@@ -690,9 +719,11 @@ export function createHookSourceSummaryContext(): HookSourceSummaryContext {
         )
           changed = writesBinding(node.operand);
       }
-      ts.forEachChild(node, visit);
     };
-    visit(module.source);
+    for (const node of potentialWrites(module.source)) {
+      if (changed) break;
+      visit(node);
+    }
     bindingWriteFacts.set(bindingNode, {
       source: module.source,
       target: target.declaration,

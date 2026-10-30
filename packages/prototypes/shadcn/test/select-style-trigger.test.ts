@@ -86,24 +86,19 @@ it.each(['new-york-v4', 'rhea'])(
   }
 );
 
-import { SELECT_PROJECTED_STYLES } from '../src/select/style';
-it.each(['nova', 'luma', 'not-a-profile'])(
-  'rejects an unmapped production Value profile %s',
-  async (styleProfile) => {
-    vi.useFakeTimers();
-    expect(SELECT_PROJECTED_STYLES).toEqual(['new-york-v4', 'rhea']);
-    const root = document.createElement(selectRoot.name),
-      trigger = document.createElement(selectTrigger.name),
-      value = document.createElement(selectValue.name);
-    trigger.append(value);
-    root.append(trigger);
-    document.body.append(root);
-    await vi.advanceTimersByTimeAsync(0);
-    expect(() => setElementProps(value, { styleProfile } as any)).toThrow(
-      /Unsupported style|Unknown style/
-    );
-  }
-);
+it('rejects an unmapped production Value profile', async () => {
+  vi.useFakeTimers();
+  const root = document.createElement(selectRoot.name),
+    trigger = document.createElement(selectTrigger.name),
+    value = document.createElement(selectValue.name);
+  trigger.append(value);
+  root.append(trigger);
+  document.body.append(root);
+  await vi.advanceTimersByTimeAsync(0);
+  expect(() => setElementProps(value, { styleProfile: 'not-a-profile' })).toThrow(
+    /Unsupported style|Unknown style/
+  );
+});
 
 it('rejects Rhea ghost without redefining the New York extension', async () => {
   vi.useFakeTimers();

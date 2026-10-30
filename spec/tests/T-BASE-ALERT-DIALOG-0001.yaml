@@ -1,0 +1,86 @@
+id: T-BASE-ALERT-DIALOG-0001
+type: test
+title: Base AlertDialog bounded command ownership model tests
+status: draft
+lifecycleRationale: Actual WC DOM-model command tests pass, but native input, focus, AT and motion admission remain unverified; this entity remains draft.
+since: 0.3.0-alpha.1
+summary: Authored actual Adapter/Prototype DOM-model observations, not native input,
+  focus, AT or motion acceptance. Six command-model cases have local execution evidence.
+cases:
+- id: T-BASE-ALERT-DIALOG-0001-CASE-OWNER
+  title: Controlled refusal and later owner acceptance
+  covers:
+  - P-BASE-ALERT-DIALOG-OWNER
+  expectation: Activate actual Action once with controlled open=true. Observe exactly
+    one action and close request, open remains true; publish open=false, observe accepted
+    false with no extra request. A local optimistic close or duplicate owner-publication
+    request fails.
+- id: T-BASE-ALERT-DIALOG-0001-CASE-COMMAND
+  title: Cancel identity and unrelated Root isolation
+  covers:
+  - P-BASE-ALERT-DIALOG-COMMAND
+  expectation: Activate actual Cancel with two independent roots. Observe one cancel
+    close request, zero action signal, unchanged controlled open and no sibling requests.
+    Cross-root propagation or conflated Action fails.
+- id: T-BASE-ALERT-DIALOG-0001-CASE-DISABLED
+  title: Root and part disabled with enabled controls
+  covers:
+  - P-BASE-ALERT-DIALOG-DISABLED
+  expectation: For Action and Cancel separately, disable Root then only the command.
+    Observe zero requests/signals while independently enabled sibling or other command
+    remains usable. Global suppression fails the positive control.
+- id: T-BASE-ALERT-DIALOG-0001-CASE-ADMISSION
+  title: Uncompleted native composition admission
+  covers:
+  - P-BASE-ALERT-DIALOG-ADMISSION
+  expectation: Exact-head native/browser and independent review remain required; model
+    clicks, metadata registration and planned case links are insufficient. No native
+    pass is claimed by this test entity.
+implementations:
+- id: base-alert-dialog-command-ownership-model
+  kind: module-test
+  status: passing
+  path: packages/prototypes/base/test/navigation-overlays/alert-dialog-command-ownership.test.ts
+  required: true
+  consumesCases:
+  - T-BASE-ALERT-DIALOG-0001-CASE-OWNER
+  - T-BASE-ALERT-DIALOG-0001-CASE-COMMAND
+  - T-BASE-ALERT-DIALOG-0001-CASE-DISABLED
+  exercises:
+  - P-BASE-ALERT-DIALOG
+  notes:
+  - Six actual Adapter DOM-model cases passed in the fixed isolated candidate; native
+    composition admission remains planned and is not implied by these results.
+  - Programmatic DOM click and zero-duration presence do not prove native double-delivery,
+    trap/restoration, AT or motion.
+- id: base-alert-dialog-native-admission-pending
+  kind: adapter-test
+  status: planned
+  required: true
+  consumesCases:
+  - T-BASE-ALERT-DIALOG-0001-CASE-ADMISSION
+  exercises:
+  - P-BASE-ALERT-DIALOG
+  notes:
+  - No native implementation or execution evidence is delivered by this bounded command-model
+    slice.
+verifies:
+  prototypes:
+  - P-BASE-ALERT-DIALOG
+exercises:
+  prototypes:
+  - P-BASE-ALERT-DIALOG
+sources:
+- path: packages/prototypes/base/test/navigation-overlays/alert-dialog-command-ownership.test.ts
+revisions:
+- version: 0.3.0-alpha.1
+  change: introduced
+  summary: Add three bounded case mappings backed by six authored, unverified model
+    tests.
+- version: 0.3.0-alpha.1
+  change: revised
+  summary: Record bounded model execution and draft lifecycle rationale; native admission remains planned.
+tags:
+- test
+- base
+- alert-dialog

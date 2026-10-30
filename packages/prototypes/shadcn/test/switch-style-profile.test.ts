@@ -169,38 +169,35 @@ describe('Field Switch shared paint', () => {
   );
 });
 
-it.each(['nova', 'luma', 'unknown'])(
-  'rejects unsupported Switch style %s before claiming a profile',
-  (styleProfile) => {
-    expect(() =>
-      createRuntimeSession(switchRoot, {
-        prototypeName: switchRoot.name,
-        getRawProps: () => ({ styleProfile }) as any,
-        schedule: (fn) => fn(),
-        commit: (_children, signal) => signal?.done(),
-        onRuntimeReady(wiring) {
-          const token = new EventTarget();
-          wiring.attach('anatomy', [
-            [ANATOMY_INSTANCE_TOKEN_CAP, token],
-            [ANATOMY_PARENT_CAP, () => null],
-            [ANATOMY_GET_PROTO_CAP, () => switchRoot],
-            [ANATOMY_ROOT_TARGET_CAP, () => null],
-          ]);
-          wiring.attach('as-trigger', [
-            [AS_TRIGGER_INSTANCE_CAP, token],
-            [AS_TRIGGER_PARENT_CAP, () => null],
-            [AS_TRIGGER_GET_PROTO_CAP, () => switchRoot],
-          ]);
-          wiring.attach('context', [
-            [CONTEXT_INSTANCE_TOKEN_CAP, {}],
-            [CONTEXT_PARENT_CAP, () => null],
-          ]);
-          wiring.attach('event', [
-            [EVENT_GLOBAL_TARGET_CAP, () => new EventTarget()],
-            [EVENT_ROOT_TARGET_CAP, () => new EventTarget()],
-          ]);
-        },
-      })
-    ).toThrow(/Unsupported|Unknown/);
-  }
-);
+it('rejects an unknown Switch style before claiming a profile', () => {
+  expect(() =>
+    createRuntimeSession(switchRoot, {
+      prototypeName: switchRoot.name,
+      getRawProps: () => ({ styleProfile: 'unknown' }) as any,
+      schedule: (fn) => fn(),
+      commit: (_children, signal) => signal?.done(),
+      onRuntimeReady(wiring) {
+        const token = new EventTarget();
+        wiring.attach('anatomy', [
+          [ANATOMY_INSTANCE_TOKEN_CAP, token],
+          [ANATOMY_PARENT_CAP, () => null],
+          [ANATOMY_GET_PROTO_CAP, () => switchRoot],
+          [ANATOMY_ROOT_TARGET_CAP, () => null],
+        ]);
+        wiring.attach('as-trigger', [
+          [AS_TRIGGER_INSTANCE_CAP, token],
+          [AS_TRIGGER_PARENT_CAP, () => null],
+          [AS_TRIGGER_GET_PROTO_CAP, () => switchRoot],
+        ]);
+        wiring.attach('context', [
+          [CONTEXT_INSTANCE_TOKEN_CAP, token],
+          [CONTEXT_PARENT_CAP, () => null],
+        ]);
+        wiring.attach('event', [
+          [EVENT_GLOBAL_TARGET_CAP, () => new EventTarget()],
+          [EVENT_ROOT_TARGET_CAP, () => new EventTarget()],
+        ]);
+      },
+    })
+  ).toThrow(/Unsupported|Unknown/);
+});

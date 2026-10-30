@@ -25,5 +25,6 @@ export default definePrototype<ToolbarRootProps, ToolbarRootExposes>({
       fallback: { fill: 'style', foreground: 'style' },
     });
     def.feedback.material.use({ intent: 'liquid-glass' });
+    return behavior.render;
   },
 });

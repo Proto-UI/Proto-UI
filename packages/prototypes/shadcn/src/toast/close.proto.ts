@@ -1,14 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asToastClose,
-  type ToastCloseProps,
-  type ToastCloseExposes,
-} from '@proto.ui/prototypes-base/toast';
+import { asToastClose, type ToastCloseExposes } from '@proto.ui/prototypes-base/toast';
+import type { ToastCloseProps } from './types';
+import { setupOverlayStyle } from '../dialog/style';
 
 export default definePrototype<ToastCloseProps, ToastCloseExposes>({
   name: 'shadcn-toast-close',
   setup(def) {
     const behavior = asToastClose();
+    setupOverlayStyle(def);
     def.feedback.style.use(
       tw('rounded-md inline-flex min-w-0 items-center justify-center px-3 py-2 outline-none')
     );

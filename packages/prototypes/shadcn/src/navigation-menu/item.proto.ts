@@ -1,27 +1,22 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  asNavigationMenuItem,
-  type NavigationMenuItemProps,
-  type NavigationMenuItemExposes,
-} from '@proto.ui/prototypes-base/navigation-menu';
+import { definePrototype } from '@proto.ui/core';
+import { asNavigationMenuItem } from '@proto.ui/prototypes-base/navigation-menu';
+import type { NavigationMenuItemProps, NavigationMenuItemExposes } from './types';
+import { setupNavigationActionPaint } from './visual';
 export default definePrototype<NavigationMenuItemProps, NavigationMenuItemExposes>({
   name: 'shadcn-navigation-menu-item',
+  modules: asNavigationMenuItem.modules,
   setup(def) {
     const behavior = asNavigationMenuItem();
-    def.feedback.style.use(
-      tw('flex min-w-0 items-center rounded-sm px-3 py-2 text-sm outline-none break-words')
+    // Proto's action Item is not upstream's passive Item container. Use the
+    // family's link grammar without replacing its actual Base action owner.
+    setupNavigationActionPaint(
+      def,
+      {
+        disabled: behavior.getState!('disabled')!,
+        focused: behavior.getState!('focused')!,
+        focusVisible: behavior.getState!('focusVisible')!,
+      },
+      'item'
     );
-    def.rule({
-      when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
-    });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-inset ring-ring')),
-    });
-    def.rule({
-      when: (w) => w.state(behavior.getState!('focused')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
-    });
   },
 });

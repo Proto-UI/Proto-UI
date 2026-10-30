@@ -80,7 +80,11 @@ describe('@proto.ui/cli', () => {
           '--no-interactive',
         ]);
         expect(result.status).not.toBe(0);
-        expect(result.stderr).toContain(`unsupported component "${family}-surface"`);
+        // Private family surfaces are workspace-source-only: the CLI must
+        // refuse before registry planning, install or facade output.
+        expect(result.stderr).toContain(
+          `${family}-surface is workspace-source-only; installed-consumer add is unsupported`
+        );
         expect(result.stdout).not.toContain('npm install');
         expect(result.stdout).not.toContain('generated');
         expect(await fs.readFile(configPath, 'utf8')).toBe(originalConfig);
@@ -680,14 +684,14 @@ describe('@proto.ui/cli', () => {
     // T-WEB-STYLE-BASELINE-0001-CASE-PROTO-LAYER-PLACEMENT
     // T-PROTOTYPE-STYLE-CLOSURE-0001-CASE-GENERATED-LAYER-SLOT
     const baselineAt = tokensCss.indexOf(
-      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
+      `  :where([data-pui-style]),\n  :where([data-pui-style])::before,\n  :where([data-pui-style])::after {`
     );
     const protoLayerAt = tokensCss.indexOf('@layer proto-ui {');
     const firstTokenAt = tokensCss.indexOf(':where([data-pui-style~="bg-primary"])');
 
     expect(tokensCss).toContain(`[data-pui-style~="bg-primary"]`);
     expect(tokensCss).toContain(
-      `  [data-pui-style],\n  [data-pui-style]::before,\n  [data-pui-style]::after {`
+      `  :where([data-pui-style]),\n  :where([data-pui-style])::before,\n  :where([data-pui-style])::after {`
     );
     expect(baselineAt).toBeGreaterThan(protoLayerAt);
     expect(baselineAt).toBeLessThan(firstTokenAt);
@@ -783,7 +787,9 @@ describe('@proto.ui/cli', () => {
     expect(tokensCss).toContain(`[data-pui-style~="overflow-x-hidden"]`);
     expect(tokensCss).toContain(`[data-pui-style~="overflow-y-auto"]`);
     expect(tokensCss).toContain(`[data-pui-style~="max-h-[var(--proto-ui-available-height)]"]`);
-  }, 30_000);
+    // Full source collection now covers the multi-profile family recipes too;
+    // the measured scan is ~150s and exceeds 240s under a loaded suite host.
+  }, 420_000);
 
   it('rejects the removed tailwindcss command with an explicit migration message', () => {
     const result = runCli(process.cwd(), ['tailwindcss', '--out', './unused.css']);
