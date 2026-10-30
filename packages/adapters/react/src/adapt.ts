@@ -545,7 +545,12 @@ export function createReactAdapter(runtimeInput: ReactRuntimeInput) {
 
       runtime.useImperativeHandle(ref, () => handleRef.current!, []);
 
-      runtime.useEffect(() => {
+      // Prop delivery participates in the host commit. A passive effect can
+      // enqueue the Runtime template after the caller's synchronous React
+      // commit; a second update then only queues behind that unacknowledged
+      // template. Layout delivery keeps prop-driven work in the host commit
+      // phase instead of starting it from a later passive-effect phase.
+      runtime.useLayoutEffect(() => {
         controllerRef.current?.applyInstanceAssociations(
           propsRef.current.instanceAssociations ?? {}
         );
