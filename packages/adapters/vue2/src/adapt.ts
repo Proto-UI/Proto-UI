@@ -420,6 +420,7 @@ export function createVue2Adapter(runtime: Vue2Runtime) {
             schedule,
             rawPropsSource,
             getInstanceAssociations: () => vm.instanceAssociations ?? {},
+            viewOperations: { capture: () => state.owner.captureViewOperation() },
             wiring,
             eventGate: {
               disable: () => state.eventGate?.disable(),
@@ -978,12 +979,18 @@ function initSession<Props extends PropsBaseType>(
   state.hostSession = state.owner.attachView({
     modules,
     disposeView,
+    isViewAdmitted: () =>
+      !viewDisposed &&
+      getRootElement(vm) === rootEl &&
+      rootEl.isConnected &&
+      !rootEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
     createSession: (wiring) =>
       createVue2HostSession({
         proto: targetProto,
         schedule: targetOptions.schedule,
         rawPropsSource: state.rawPropsSource!,
         getInstanceAssociations: () => vm.instanceAssociations ?? {},
+        viewOperations: { capture: () => state.owner.captureViewOperation() },
         wiring,
         eventGate: {
           disable: () => state.eventGate?.disable(),

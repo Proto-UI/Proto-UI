@@ -1,0 +1,88 @@
+id: T-LIFECYCLE-VIEW-OPERATION-0001
+type: test
+title: Source-view operation admission and monotonic withdrawal
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Static test candidates are not execution evidence; cross-host and consumer acceptance remains pending.
+summary: Distinguish unsupported capability, unavailable current view, accepted intent withdrawal, exact transport and retained Focus ownership.
+cases:
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-RUNTIME
+    title: Capture phase and independent identity invalidation
+    covers:
+      [
+        C-LIFECYCLE-VIEW-OPERATION-0001-CAPTURE,
+        C-LIFECYCLE-VIEW-OPERATION-0001-READ,
+        C-LIFECYCLE-VIEW-OPERATION-0001-INVALIDATION,
+        C-LIFECYCLE-VIEW-OPERATION-0001-SUPPORT,
+      ]
+    expectation: unsupported-error-or-no-view-null-distinct-from-current-with-no-stale-revival
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-OWNER
+    title: Shared owner generation is separate from terminal lifetime
+    covers: [HC-VIEW-OPERATION-0001-IDENTITY, C-LIFECYCLE-VIEW-OPERATION-0001-BOUNDARY]
+    expectation: withdrawal-invalidates-without-unmount-or-dispose-and-replacement-never-revives
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC
+    title: WC physical withdrawal and exact transport are distinct
+    covers: [HC-VIEW-OPERATION-0001-TRANSPORT, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: root-and-trigger-removal-invalidate-before-retirement-owned-move-retains-nested-author-removal-never-revives
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-CONSUMER
+    title: Four-Web consumer preserves keyboard and author focus ownership
+    covers:
+      [
+        C-LIFECYCLE-VIEW-OPERATION-0001-BOUNDARY,
+        C-LIFECYCLE-VIEW-OPERATION-0001-SUPPORT,
+        HC-VIEW-OPERATION-0001-HOST-BOUNDARY,
+      ]
+    expectation: actual-four-host-source-withdrawal-no-focus-steal-with-retained-destination-roving-unchanged
+  - id: T-LIFECYCLE-VIEW-OPERATION-0001-CASE-FRAMEWORK
+    title: Actual framework view and terminal lifetime invalidate old source identities
+    covers: [HC-VIEW-OPERATION-0001-IDENTITY, HC-VIEW-OPERATION-0001-HOST-BOUNDARY]
+    expectation: real-react-vue-vue2-view-replacement-keeps-logical-setup-once-but-does-not-revive-prior-operation
+implementations:
+  - id: runtime-source-view-operation
+    kind: runtime-test
+    status: planned
+    path: packages/runtime/test/contract/lifecycle.view-operation.contract.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-RUNTIME]
+    notes: [Authored but not run; not proof of browser focus or controlled component semantics.]
+  - id: shared-view-operation-owner
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/base/test/view-operation-owner.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-OWNER]
+  - id: wc-view-operation-withdrawal
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/view-operation-withdrawal.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-WC]
+    notes: [Synthetic DOM Adapter tests do not establish four-Web native conformance.]
+  - id: react-view-operation-framework
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/react/test/view-operation-withdrawal.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-FRAMEWORK]
+    notes:
+      [Actual framework in synthetic DOM; not native paint or controlled menu refusal acceptance.]
+  - id: vue-view-operation-framework
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue/test/view-operation-withdrawal.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-FRAMEWORK]
+  - id: vue2-view-operation-framework
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue2/test/view-operation-withdrawal.test.ts
+    required: true
+    consumesCases: [T-LIFECYCLE-VIEW-OPERATION-0001-CASE-FRAMEWORK]
+verifies:
+  contracts: [C-LIFECYCLE-VIEW-OPERATION-0001]
+  hostCaps: [HC-VIEW-OPERATION-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Preserve actual execution debt and keep consumer/native acceptance separate from atom tests.

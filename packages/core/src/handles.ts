@@ -166,6 +166,12 @@ export type RuleSpec<Props extends PropsBaseType> = {
 
 export type Phase = 'setup' | 'render' | 'callback' | 'unknown';
 
+/** Captured source-view validity; a read-only query, not a scheduler or focus request. */
+export interface ViewOperation {
+  /** Any caller phase may query. Invalidated operations never become current again. */
+  isCurrent(): boolean;
+}
+
 export interface RunHandle<Props extends PropsBaseType> {
   update(): void;
 
@@ -175,6 +181,8 @@ export interface RunHandle<Props extends PropsBaseType> {
      * Actual mount/unmount is reconciled by the lifecycle owner.
      */
     setPresent(present: boolean): void;
+    /** Callback-only capture. Missing host support throws E_CAP_UNAVAILABLE; no admitted view returns null. */
+    captureViewOperation(): ViewOperation | null;
   };
 
   /** Optional getter for the host DOM element (provided by adapters). */
