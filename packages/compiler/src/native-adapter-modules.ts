@@ -12,6 +12,7 @@ export type NativeOwnedStateSpec = { kind: 'bool' | 'string' | 'enum' | 'number.
 export type NativeTransitionHooks = { created(): void; mounted(): void; unmounted(): void; beforeDispose(): void; propsChanged(): void };
 type NativeStateCell<T> = { handle: NativeOwnedState<T>; set(value: T): void };
 export type NativeFocusRequest = { reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean; defer?: boolean };
+export type NativeFocusScopeActivation = NativeFocusRequest & { entry?: 'configured' | 'manual' };
 export type NativeFocusBase = { focused: NativeObserved<boolean>; focusVisible: NativeObserved<boolean>; focusable: NativeObserved<boolean>; configure(config: NativeConfig): void; setDisabled(value: boolean): void; focusSelf(options?: NativeFocusRequest): void };
 export interface NativeFocusEntry { configure(config: NativeConfig): void; setDisabled(value: boolean): void; focus(options?: NativeFocusRequest): void }
 export interface NativeFocusRoving {
@@ -19,7 +20,7 @@ export interface NativeFocusRoving {
   configure(config: NativeConfig): void; setLoop(value: boolean): void; setOrientation(value: string): void;
   focusFirst(options?: NativeFocusRequest): void; focusLast(options?: NativeFocusRequest): void; focusSelected(options?: NativeFocusRequest): void; focusNext(): void; focusPrev(): void;
 }
-export interface NativeFocusScope { active: NativeObserved<boolean>; hasFocused: NativeObserved<boolean>; configure(config: NativeConfig): void; focusFirst(): void; focusLast(): void; focusNext(): void; focusPrev(): void; focusSelected(): void; activate(options?: NativeFocusRequest): void; deactivate(options?: NativeFocusRequest): void; restoreFocus(): void; isActive(): boolean; getRoving(): NativeFocusRoving | null }
+export interface NativeFocusScope { active: NativeObserved<boolean>; hasFocused: NativeObserved<boolean>; configure(config: NativeConfig): void; focusFirst(): void; focusLast(): void; focusNext(): void; focusPrev(): void; focusSelected(): void; activate(options?: NativeFocusScopeActivation): void; deactivate(options?: NativeFocusRequest): void; restoreFocus(): void; isActive(): boolean; getRoving(): NativeFocusRoving | null }
 export type NativeAnatomyFamily = { debugName: string; roles: Readonly<Record<string, { cardinality: { min: number; max: number | '*' }; requires?: readonly { kind: string; name: string }[] }>>; relations?: readonly unknown[]; profiles?: Readonly<Record<string, unknown>> };
 export interface NativeAnatomyPart { readonly role: string; hasExpose(key: string): boolean; getExpose(key: string): unknown | null; hasHook(name: string): boolean }
 export interface NativeAnatomyOrder {
@@ -386,9 +387,12 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
       if (ready()) { const current = root!.ownerDocument.activeElement; if (current && !contains(root!, current)) restoreTarget = current as HTMLElement; }
       const index = activeScopes.indexOf(owner); if (index >= 0) activeScopes.splice(index, 1); activeScopes.push(owner);
       owner.scopeActive = true; scopeActive.set(true);
-      if (scopeConfig.entry !== 'manual') {
+      if (request?.entry !== 'manual' && scopeConfig.entry !== 'manual') {
         const candidates = focusCandidates(owner.rovingDeclared);
-        if (candidates.length) candidates[0].focus(request ?? { reason: 'programmatic' });
+        // Strip only activation policy; omitted requests retain the old default.
+        let focusRequest: NativeFocusRequest = request ?? { reason: 'programmatic' };
+        if (request && Object.hasOwn(request, 'entry')) { const { entry: _entry, ...nativeRequest } = request; focusRequest = nativeRequest; }
+        if (candidates.length) candidates[0].focus(focusRequest);
         else if (scopeConfig.emptyPolicy !== 'container') { activeScopes.pop(); owner.scopeActive = false; scopeActive.set(false); }
       }
     },

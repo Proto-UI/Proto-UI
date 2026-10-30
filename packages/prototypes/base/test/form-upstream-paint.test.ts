@@ -47,11 +47,13 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2']) {
     expect(root.getAttribute('aria-describedby')).toBe(description.id);
     if (family === 'bootstrap-2-3-2') {
       expect(tokens(root)).toEqual(expect.arrayContaining(['m-0', 'p-0', 'border-0']));
+      // Bootstrap 2.3.2 legend keeps historical px values: 20px bottom
+      // margin, 21px size, 40px line box.
       expect(tokens(legend)).toEqual(
         expect.arrayContaining([
-          'text-[1.3125rem]',
-          'leading-[2.5rem]',
-          'mb-5',
+          'text-[21px]',
+          'leading-[40px]',
+          'mb-[20px]',
           'border-b',
           'font-normal',
         ])
@@ -77,8 +79,10 @@ it('standalone Labels retain their own family typography and layout', async () =
   await flush();
   expect(tokens(neo)).toEqual(expect.arrayContaining(['font-sans', 'font-bold']));
   expect(tokens(shadcn)).toEqual(expect.arrayContaining(['flex', 'items-center', 'gap-2']));
+  // Bootstrap 2.3.2 recipes are pinned in historical px, not the rem scale:
+  // 5px bottom margin, 14px/20px body text.
   expect(tokens(bootstrap)).toEqual(
-    expect.arrayContaining(['block', 'mb-[0.3125rem]', 'leading-5', 'font-normal'])
+    expect.arrayContaining(['block', 'mb-[5px]', 'text-[14px]', 'leading-[20px]', 'font-normal'])
   );
   for (const el of [neo, shadcn, bootstrap]) expect(tokens(el)).not.toContain('select-none');
 });
@@ -110,8 +114,10 @@ for (const family of ['shadcn', 'brutalist']) {
       );
       expect(tokens(input()).some((x) => x.startsWith('shadow-'))).toBe(false);
     } else {
+      // The multi-profile input surface uses the compact sm text recipe; the
+      // full profile-gated rule set is exercised by the shadcn package suite.
       expect(tokens(input())).toEqual(
-        expect.arrayContaining(['h-8', 'rounded-lg', 'px-2.5', 'bg-transparent', 'text-base'])
+        expect.arrayContaining(['h-8', 'rounded-lg', 'px-2.5', 'bg-transparent', 'text-sm'])
       );
       expect(tokens(input())).not.toContain('shadow-xs');
     }
@@ -121,12 +127,10 @@ for (const family of ['shadcn', 'brutalist']) {
     expect(control.getExposes().focusVisible.get()).toBe(true);
     expect(tokens(input())).toContain('data-[focus-visible]:forced-colors-focus-outline');
     if (family === 'shadcn')
+      // Profile-gated focus recipes stay runtime rules: the ring vocabulary
+      // applies unprefixed while the style/focus pair holds.
       expect(tokens(input())).toEqual(
-        expect.arrayContaining([
-          'data-[focus-visible]:border-ring',
-          'data-[focus-visible]:ring-3',
-          'data-[focus-visible]:ring-ring/50',
-        ])
+        expect.arrayContaining(['border-ring', 'ring-3', 'ring-ring/50'])
       );
     setElementProps(root, { invalid: true, errors: ['Enter a valid name'] });
     await flush();
@@ -148,17 +152,14 @@ for (const family of ['shadcn', 'brutalist']) {
     expect(input().value).toBe('Ada');
     expect(error.getAttribute('role')).not.toBe('alert');
     if (family === 'shadcn')
+      // Invalid paint is also profile-gated: the collector keeps it unprefixed.
       expect(tokens(input())).toEqual(
-        expect.arrayContaining([
-          'data-[invalid]:border-destructive',
-          'data-[invalid]:ring-3',
-          'data-[invalid]:ring-destructive/20',
-        ])
+        expect.arrayContaining(['border-destructive', 'ring-3', 'ring-destructive/20'])
       );
     setElementProps(root, { disabled: true });
     await flush();
     expect(input().disabled).toBe(true);
-    if (family === 'shadcn') expect(tokens(input())).toContain('data-[disabled]:bg-input/50');
+    if (family === 'shadcn') expect(tokens(input())).toContain('bg-input/50');
     setElementProps(root, { disabled: false, invalid: false });
     await flush();
     expect(input().value).toBe('Ada');

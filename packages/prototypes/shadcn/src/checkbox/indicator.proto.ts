@@ -1,4 +1,10 @@
-import { definePrototype, delay, type RendererHandle, tw } from '@proto.ui/core';
+import {
+  definePrototype,
+  delay,
+  type RendererHandle,
+  type StateWatchCallback,
+  tw,
+} from '@proto.ui/core';
 import { asCheckboxIndicator } from '@proto.ui/prototypes-base/checkbox';
 import type { ShadcnCheckboxIndicatorExposes, ShadcnCheckboxIndicatorProps } from './types';
 
@@ -17,7 +23,7 @@ function glyphPath(checked: boolean, indeterminate: boolean): string | null {
   return null;
 }
 
-function renderGlyph(renderer: Pick<RendererHandle<any>, 'svg'>, d: string | null) {
+function renderGlyph(renderer: RendererHandle<ShadcnCheckboxIndicatorProps>, d: string | null) {
   if (!d) return null;
   return renderer.svg.root(
     {
@@ -58,7 +64,10 @@ const checkboxIndicator = definePrototype<
 
     let renderTask: { cancel(): void } | null = null;
     // P-SHADCN-CHECKBOX-INDICATOR-GLYPH-SELECTION
-    const requestGlyphUpdate = (run: any, event: { type: string }) => {
+    const requestGlyphUpdate: StateWatchCallback<boolean, ShadcnCheckboxIndicatorProps> = (
+      run,
+      event
+    ) => {
       if (event.type !== 'next') return;
       renderTask?.cancel();
       renderTask = delay(0, () => {

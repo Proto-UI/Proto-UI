@@ -10,6 +10,15 @@ on:
       - 'packages/adapters/**/src/**'
       - 'packages/cli/src/services/proto-style-css.ts'
       - 'scripts/prototypes/shadcn-command-evidence*'
+      - 'apps/www/src/components/site-search-*.ts'
+      - 'apps/www/src/components/site-pagefind-resource*.ts'
+      - 'apps/www/src/components/override/Search*'
+      - 'apps/www/src/components/PrototypePreviewer/demo-*.ts'
+      - 'apps/www/src/components/PrototypePreviewer/projection-composition*.ts'
+      - 'apps/www/src/components/PrototypePreviewer/prototype-modules*.ts'
+      - 'apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts'
+      - 'spec/decisions/D-HOST-PROTOTYPE-PROJECTION-SCOPE-0001.yaml'
+      - 'spec/tests/T-HOST-PROTOTYPE-PROJECTION-SCOPE-0001.yaml'
       - '.github/workflows/shadcn-command-style.yml'
   workflow_dispatch:
 permissions:
@@ -44,4 +53,133 @@ jobs:
           name: shadcn-command-shared-style-${{ github.event.pull_request.head.sha || github.sha }}
           path: /tmp/pui-shadcn-command-evidence/
           if-no-files-found: warn
+          retention-days: 30
+
+  dynamic-composition-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      EVIDENCE_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EVIDENCE_HEAD_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Record exact source and required unit inventory before install
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/dynamic-composition-contract"
+          EVIDENCE="$RUNNER_TEMP/dynamic-composition-contract"
+          git rev-parse HEAD > "$EVIDENCE/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE/source-tree.txt"
+          test "$(cat "$EVIDENCE/source-sha.txt")" = "$EVIDENCE_HEAD_SHA"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE/preinstall-dirty.txt"
+          test ! -s "$EVIDENCE/preinstall-dirty.txt"
+          node --version > "$EVIDENCE/node-version.txt"
+          cat > "$EVIDENCE/required-tests.txt" <<'TESTS'
+          apps/www/src/components/PrototypePreviewer/demo-public-instances.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.public-instance.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-dynamic-children.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-dynamic-commit-queue.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.dynamic-children.test.ts
+          apps/www/src/components/PrototypePreviewer/projection-composition.dynamic-children.test.ts
+          apps/www/src/components/PrototypePreviewer/prototype-modules.command.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-associations.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.callback-consumers.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.expose-events.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.optional-props.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.native-facts.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.material-mount.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.hover-reenable.test.ts
+          apps/www/src/components/PrototypePreviewer/demo-renderer.import-laziness.test.ts
+          apps/www/src/components/PrototypePreviewer/projection-composition.test.ts
+          apps/www/src/components/PrototypePreviewer/runtime-preview-portal-theme.test.ts
+          apps/www/src/components/site-pagefind-resource.test.ts
+          apps/www/src/components/site-search-data.test.ts
+          apps/www/src/components/site-search-session.test.ts
+          apps/www/src/components/site-search-owner.test.ts
+          apps/www/src/components/site-search-composition.test.ts
+          apps/www/src/components/site-search-commands.public-mode.test.ts
+          apps/www/src/components/override/Search.test.ts
+          apps/www/src/components/override/Search.commands.test.ts
+          apps/www/src/components/override/Search.styles.test.ts
+          packages/prototypes/shadcn/test/command-dialog-mask.test.ts
+          TESTS
+          while IFS= read -r file; do test -s "$file"; done < "$EVIDENCE/required-tests.txt"
+      - name: Install original locked dependencies
+        run: |
+          set -euo pipefail
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile 2>&1 | tee "$RUNNER_TEMP/dynamic-composition-contract/install.log"
+      - name: Verify post-install source identity and clean checkout
+        if: always()
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/dynamic-composition-contract"
+          mkdir -p "$EVIDENCE"
+          git rev-parse HEAD > "$EVIDENCE/postinstall-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE/postinstall-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE/postinstall-dirty.txt"
+          test "$(cat "$EVIDENCE/postinstall-sha.txt")" = "$EVIDENCE_HEAD_SHA"
+          cmp "$EVIDENCE/source-tree.txt" "$EVIDENCE/postinstall-tree.txt"
+          test ! -s "$EVIDENCE/postinstall-dirty.txt"
+      - name: Run complete declared composition and compatibility unit inventory
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/dynamic-composition-contract"
+          mapfile -t TESTS < "$EVIDENCE/required-tests.txt"
+          # Actual adapters/frameworks in a synthetic DOM. This is not trusted
+          # native focus/IME/scroll evidence and never replaces the original CI.
+          node node_modules/vitest/vitest.mjs run "${TESTS[@]}" \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$EVIDENCE/vitest.json" 2>&1 | tee "$EVIDENCE/unit.log"
+      - name: Verify every required file ran nonempty with no skipped or failed cases
+        if: always()
+        run: |
+          set -euo pipefail
+          node --input-type=module - "$RUNNER_TEMP/dynamic-composition-contract" <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import assert from 'node:assert/strict';
+          const dir = process.argv[2];
+          const required = fs.readFileSync(path.join(dir, 'required-tests.txt'), 'utf8').trim().split(/\r?\n/);
+          const report = JSON.parse(fs.readFileSync(path.join(dir, 'vitest.json'), 'utf8'));
+          assert.equal(new Set(required).size, required.length);
+          const matches = [];
+          for (const file of required) {
+            const suites = report.testResults.filter((suite) => path.resolve(suite.name) === path.resolve(file));
+            assert.equal(suites.length, 1, `${file}: exactly one actual result is required`);
+            const suite = suites[0];
+            assert.equal(suite.status, 'passed', `${file}: suite must pass`);
+            assert.ok(suite.assertionResults.length > 0, `${file}: empty collection cannot pass`);
+            for (const test of suite.assertionResults) assert.equal(test.status, 'passed', `${file}: ${test.fullName}`);
+            matches.push({ file, tests: suite.assertionResults.length });
+          }
+          assert.equal(report.numFailedTests, 0);
+          fs.writeFileSync(path.join(dir, 'inventory-receipt.json'), JSON.stringify({ head: process.env.EVIDENCE_HEAD_SHA, required: matches }, null, 2));
+          JS
+      - name: Retain post-test exact source and dirty receipt even after failure
+        if: always()
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/dynamic-composition-contract"
+          mkdir -p "$EVIDENCE"
+          git rev-parse HEAD > "$EVIDENCE/posttest-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$EVIDENCE/posttest-tree.txt"
+          git status --porcelain=v1 --untracked-files=all > "$EVIDENCE/posttest-dirty.txt"
+          test "$(cat "$EVIDENCE/posttest-sha.txt")" = "$EVIDENCE_HEAD_SHA"
+          cmp "$EVIDENCE/source-tree.txt" "$EVIDENCE/posttest-tree.txt"
+          test ! -s "$EVIDENCE/posttest-dirty.txt"
+      - name: Retain exact-head unit receipts and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dynamic-composition-contract-${{ env.EVIDENCE_HEAD_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/dynamic-composition-contract
+          if-no-files-found: error
           retention-days: 30

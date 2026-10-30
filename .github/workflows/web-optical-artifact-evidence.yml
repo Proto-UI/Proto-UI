@@ -56,12 +56,62 @@ jobs:
       - name: Exercise continuous emitted package contact and optical lifetime
         if: ${{ !cancelled() }}
         run: node --import tsx experiments/material-v2/continuous-browser.test.mjs /tmp/pui-material-v2-packed /tmp/pui-material-v2-packed-continuous
+      - name: Diagnose native focus stimulus without product code
+        if: ${{ !cancelled() }}
+        run: |
+          EVIDENCE=/tmp/pui-native-focus-stimulus
+          mkdir -p "$EVIDENCE"
+          printf '%s  %s\n' 'ca2142dfcc571d59b0515da8f0287be04e28f65ffcbdde79f7f1c620c8285c25' 'apps/www/scripts/native-focus-repro.mjs' | sha256sum -c -
+          sha256sum "$CHROME_PATH" apps/www/node_modules/playwright-core/package.json > "$EVIDENCE/binding.sha256"
+          git rev-parse HEAD HEAD^{tree} > "$EVIDENCE/source.txt"
+          git status --porcelain --untracked-files=no > "$EVIDENCE/tracked-before.txt"
+          test ! -s "$EVIDENCE/tracked-before.txt"
+          HOME_DIR=$(mktemp -d)
+          export FOCUS_DIAG_NODE="$(command -v node)" FOCUS_DIAG_HOME="$HOME_DIR" FOCUS_DIAG_OUT="$EVIDENCE"
+          python3 - <<'PY'
+          import ctypes, ctypes.util, errno, os, subprocess, json
+          class Arg(ctypes.Structure):
+              _fields_ = [('arg', ctypes.c_uint), ('op', ctypes.c_int), ('a', ctypes.c_uint64), ('b', ctypes.c_uint64)]
+          lib = ctypes.CDLL(ctypes.util.find_library('seccomp'), use_errno=True)
+          lib.seccomp_init.argtypes=[ctypes.c_uint32]; lib.seccomp_init.restype=ctypes.c_void_p
+          lib.seccomp_syscall_resolve_name.argtypes=[ctypes.c_char_p]; lib.seccomp_syscall_resolve_name.restype=ctypes.c_int
+          lib.seccomp_rule_add_array.argtypes=[ctypes.c_void_p,ctypes.c_uint32,ctypes.c_int,ctypes.c_uint,ctypes.POINTER(Arg)]
+          lib.seccomp_load.argtypes=[ctypes.c_void_p]
+          ctx=lib.seccomp_init(0x7fff0000)
+          if not ctx: raise RuntimeError('seccomp init failed')
+          # Unix IPC only. This adds restrictions in the existing hosted runner;
+          # no sudo, namespace privilege, network access or local sandbox retry.
+          for name in [b'socket', b'socketpair']:
+              syscall=lib.seccomp_syscall_resolve_name(name)
+              condition=Arg(0,1,1,0)  # argument 0 != AF_UNIX
+              if syscall < 0 or lib.seccomp_rule_add_array(ctx,0x50000|errno.EPERM,syscall,1,ctypes.byref(condition)) != 0:
+                  raise RuntimeError('seccomp rule failed')
+          if lib.seccomp_load(ctx) != 0: raise RuntimeError('seccomp load failed')
+          env={'PATH':os.environ['PATH'],'HOME':os.environ['FOCUS_DIAG_HOME'],'TMPDIR':os.environ['FOCUS_DIAG_HOME'],'CHROME_PATH':os.environ['CHROME_PATH'],'LANG':'C.UTF-8'}
+          command=[os.environ['FOCUS_DIAG_NODE'],'apps/www/scripts/native-focus-repro.mjs',os.environ['FOCUS_DIAG_OUT']]
+          try:
+              result=subprocess.run(command,env=env,timeout=90)
+              code=result.returncode
+          except subprocess.TimeoutExpired:
+              code=124
+          with open(os.path.join(os.environ['FOCUS_DIAG_OUT'],'exit.json'),'w') as output:
+              json.dump({'exit':code,'scope':'fixed two blank-page headless diagnostic; Unix IPC only'},output)
+          raise SystemExit(code)
+          PY
+      - name: Bind focus diagnostic source after execution
+        if: always()
+        run: |
+          mkdir -p /tmp/pui-native-focus-stimulus
+          git rev-parse HEAD HEAD^{tree} > /tmp/pui-native-focus-stimulus/source-after.txt
+          git status --porcelain --untracked-files=no > /tmp/pui-native-focus-stimulus/tracked-after.txt
+          test ! -s /tmp/pui-native-focus-stimulus/tracked-after.txt
       - name: Retain exact-head real output and consumer graph
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: web-optical-v2-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
           path: |
+            /tmp/pui-native-focus-stimulus/
             /tmp/pui-material-v2-source/source.json
             /tmp/pui-material-v2-source-evidence/
             /tmp/pui-material-v2-source-continuous/

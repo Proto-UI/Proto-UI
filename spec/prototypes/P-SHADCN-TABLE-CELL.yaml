@@ -1,0 +1,50 @@
+id: P-SHADCN-TABLE-CELL
+type: prototype
+title: Shadcn Table Cell passive Table projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection. Stable admission requires real consumers, browser/native evidence and independent review; source presence is not conformance or release admission.
+summary: Shadcn passive Table part over the exact P-BASE-TABLE-CELL definition with pinned profile recipes.
+statement:
+    en: The Prototype composes the exact Base table-cell prototype through the public defineAsHook pattern demonstrated by base/src/data-table/header-row.proto.ts, preserving modules, render and Table Structure ownership while adding family paint. It is a real implemented projection, not an alias for the interactive Data Table family.
+criteria:
+  - id: P-SHADCN-TABLE-CELL-BASE
+    text:
+            en: 'Compose the exact Base tableCell prototype once through the public defineAsHook({...baseTableCell, name}) pattern and and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias or Base.setup call.'
+  - id: P-SHADCN-TABLE-CELL-VISUAL
+    text:
+            en: Cell projects profile padding, foreground and alignment only; spans and content remain authored.
+  - id: P-SHADCN-TABLE-CELL-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, raw host escape or Adapter component-name dispatch may supply default intent.
+  - id: P-SHADCN-TABLE-CELL-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+    - C-PROTOTYPE-STYLE-CLOSURE-0001
+inherits:
+  prototypes:
+    - P-BASE-TABLE-CELL
+verifies:
+  tests:
+    - T-SHADCN-PASSIVE-PROJECTIONS-0001
+sources:
+  - path: packages/prototypes/shadcn/src/table/cell.proto.ts
+  - path: packages/prototypes/shadcn/src/table/index.ts
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/table.tsx
+    label: Pinned Base-table upstream comparison source
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/new-york-v4/ui/table.tsx
+    label: Independent New York Table comparison source
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Shadcn Table Cell passive Table projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - shadcn
+  - table
+  - draft

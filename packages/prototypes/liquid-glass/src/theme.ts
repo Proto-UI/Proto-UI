@@ -1,4 +1,8 @@
 /** Family-owned semantic palette. The consumer owns font resources and theme activation. */
+// Accent reuses this family's secondary pair. Danger fills reuse the project
+// defaults in packages/cli/src/legacy/type.ts with explicit family foregrounds;
+// these are independent project colors, not Apple dynamic/native color values.
+// Native sRGB contrast and optical readability remain separate acceptance.
 export const THEME = {
   'light': {
     'muted-foreground': '#626267',
@@ -9,6 +13,10 @@ export const THEME = {
     'foreground': '#1d1d1f',
     'secondary': '#ffffff',
     'secondary-foreground': '#1d1d1f',
+    'accent': '#ffffff',
+    'accent-foreground': '#1d1d1f',
+    'destructive': 'lab(48.4493% 77.4328 61.5452)',
+    'destructive-foreground': '#ffffff',
     'primary': '#0061cc',
     'primary-foreground': '#ffffff',
     'border': '#c7c7cc',
@@ -29,6 +37,10 @@ export const THEME = {
     'foreground': '#f5f5f7',
     'secondary': '#2c2c2e',
     'secondary-foreground': '#f5f5f7',
+    'accent': '#2c2c2e',
+    'accent-foreground': '#f5f5f7',
+    'destructive': 'lab(63.7053% 60.745 31.3109)',
+    'destructive-foreground': '#1c1c1e',
     'primary': '#0a6cdb',
     'primary-foreground': '#ffffff',
     'border': '#636366',

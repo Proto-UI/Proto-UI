@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import { COMMAND_BLOCKED, COMMAND_FOCUS } from '../interactive-surface';
 import {
   asDrawerClose,
   type DrawerCloseProps,
@@ -17,11 +18,12 @@ export default definePrototype<DrawerCloseProps, DrawerCloseExposes>({
     const state = behavior.getState!;
     def.rule({
       when: (w) => w.state(state('focusVisible')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('ring-2 ring-ring ring-offset-2')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_FOCUS)),
     });
     def.rule({
       when: (w) => w.state(state('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw(COMMAND_BLOCKED)),
     });
+    return behavior.render;
   },
 });

@@ -1,6 +1,7 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asTooltipTrigger } from '@proto.ui/prototypes-base/tooltip';
 import type { ShadcnTooltipTriggerExposes, ShadcnTooltipTriggerProps } from './types';
+import { setupOverlayStyle } from '../dialog/style';
 
 const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipTriggerExposes>({
   name: 'shadcn-tooltip-trigger',
@@ -13,7 +14,10 @@ const tooltipTrigger = definePrototype<ShadcnTooltipTriggerProps, ShadcnTooltipT
     }
     const { disabled, hovered, focusVisible } = state;
     const pressed = def.state.fromInteraction('pressed');
+    setupOverlayStyle(def, 'nova');
 
+    // Existing Proto feedback extension, not Button activation or a claim that
+    // upstream's headless Trigger prescribes this appearance in any profile.
     def.feedback.style.use(tw('inline-flex cursor-pointer outline-none'));
     def.rule({
       when: (when) => when.state(hovered).eq(true),

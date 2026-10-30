@@ -160,6 +160,7 @@ describe('portable Drawer structural parts', () => {
 });
 
 import { createRuntimeSession } from '@proto.ui/runtime';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import {
   ANATOMY_INSTANCE_TOKEN_CAP,
   ANATOMY_PARENT_CAP,
@@ -203,7 +204,7 @@ it.each(['children-first', 'owner-first'] as const)(
         getRawProps: () => ({}),
         schedule: (t) => t(),
         commit: (_c, s) => s?.done(),
-        onRuntimeReady: (w) =>
+        onRuntimeReady: (w) => {
           w.attach('anatomy', [
             [ANATOMY_INSTANCE_TOKEN_CAP, token],
             [ANATOMY_PARENT_CAP, (instance: unknown) => parents.get(instance as object) ?? null],
@@ -218,7 +219,14 @@ it.each(['children-first', 'owner-first'] as const)(
                 };
               },
             ],
-          ]),
+          ]);
+          // Styled family parts lawfully subscribe to the style scope; the
+          // neutral host supplies the same instance/parent capabilities.
+          w.attach('context', [
+            [CONTEXT_INSTANCE_TOKEN_CAP, token],
+            [CONTEXT_PARENT_CAP, (instance: unknown) => parents.get(instance as object) ?? null],
+          ]);
+        },
       });
       sessions.push(session);
       return session;

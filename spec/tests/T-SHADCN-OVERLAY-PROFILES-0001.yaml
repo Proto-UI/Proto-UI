@@ -1,0 +1,41 @@
+id: T-SHADCN-OVERLAY-PROFILES-0001
+type: test
+title: Shadcn overlay profile coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, optical or independent acceptance.
+summary: Dialog, Alert Dialog, Drawer, Popover, Hover Card, Tooltip and Toast nine-profile paint on real consumers.
+cases:
+  - id: T-SHADCN-OVERLAY-PROFILES-0001-CASE-PROFILES
+    title: Nine profile cases preserve open/focus/presence owners and unstyled command projections
+    covers:
+      - P-SHADCN-DIALOG-BASE-INHERITANCE
+      - P-SHADCN-ALERT-DIALOG-ADMISSION
+      - P-SHADCN-DRAWER-ADMISSION
+      - P-SHADCN-POPOVER-ADMISSION
+      - P-SHADCN-HOVER-CARD-BASE-INHERITANCE
+      - P-SHADCN-TOOLTIP-BASE-INHERITANCE
+      - P-SHADCN-TOAST-ADMISSION
+    expectation: overlay-profile-paint-preserves-owners
+  - id: T-SHADCN-OVERLAY-PROFILES-0001-CASE-DRAWER
+    title: Drawer accepted-side observation, decoration and scroll boundary stay Base-owned
+    covers:
+      - P-SHADCN-DRAWER-ADMISSION
+    expectation: drawer-helper-boundaries-preserved
+implementations:
+  - id: shadcn-overlay-profiles-r91
+    kind: module-test
+    status: planned
+    path: packages/prototypes/shadcn/test/overlay-profiles-r91.test.ts
+    required: true
+    exercises:
+      - P-SHADCN-DIALOG
+      - P-SHADCN-ALERT-DIALOG
+      - P-SHADCN-DRAWER
+      - P-SHADCN-POPOVER
+      - P-SHADCN-HOVER-CARD
+      - P-SHADCN-TOOLTIP
+      - P-SHADCN-TOAST
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.

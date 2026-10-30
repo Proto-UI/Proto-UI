@@ -1,14 +1,13 @@
-import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type MeterPartProps,
-  type MeterPartExposes,
-  asMeterTrack,
-} from '@proto.ui/prototypes-base/meter';
-export default definePrototype<MeterPartProps, MeterPartExposes>({
+import { definePrototype } from '@proto.ui/core';
+import { type MeterPartExposes, asMeterTrack } from '@proto.ui/prototypes-base/meter';
+import { setupMeterTrackPaint } from './visual';
+import type { ShadcnMeterPartProps } from './types';
+export default definePrototype<ShadcnMeterPartProps, MeterPartExposes>({
   name: 'shadcn-meter-track',
+  modules: asMeterTrack.modules,
   setup(def) {
     const inherited = asMeterTrack();
-    def.feedback.style.use(tw('block h-3 w-full overflow-hidden rounded-full bg-muted'));
+    setupMeterTrackPaint(def);
     return inherited.render;
   },
 });

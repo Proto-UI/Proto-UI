@@ -30,6 +30,10 @@ function projectDialogContentHandle(
 }
 
 function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExposes>): void {
+  def.props.define({
+    focusEntry: { type: 'enum', empty: 'fallback', options: ['auto', 'manual'] },
+  });
+  def.props.setDefaults({ focusEntry: 'auto' });
   const accessible = asAccessible();
   // P-BASE-DIALOG-CONTENT-PRESENCE, P-BASE-DIALOG-CONTENT-A11Y-ROLE
   def.anatomy.claim(DIALOG_FAMILY, { role: 'content' });
@@ -151,7 +155,14 @@ function setupDialogContent(def: DefHandle<DialogContentProps, DialogContentExpo
     if (!mountedRun) return;
     if (nextOpen) {
       if (!prevOpen || !focusScope.isActive()) {
-        focusScope.activate({ reason: options?.focusReason ?? 'programmatic' });
+        // P-BASE-DIALOG-CONTENT-ENTRY-POLICY: read only for this activation.
+        // Prop changes while active do not configure or reactivate the scope.
+        const focusReason = options?.focusReason ?? 'programmatic';
+        if (mountedRun.props.get().focusEntry === 'manual') {
+          focusScope.activate({ reason: focusReason, entry: 'manual' });
+        } else {
+          focusScope.activate({ reason: focusReason });
+        }
       }
     } else {
       if (prevOpen) focusScope.deactivate({ reason: options?.focusReason ?? 'programmatic' });

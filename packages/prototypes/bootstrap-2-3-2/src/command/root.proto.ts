@@ -6,8 +6,11 @@ import {
 } from '@proto.ui/prototypes-base/command';
 export default definePrototype<CommandRootProps, CommandRootExposes>({
   name: 'bootstrap-2-3-2-command-root',
+  modules: asCommandRoot.modules,
   setup(def) {
     const behavior = asCommandRoot();
-    def.feedback.style.use(tw('relative flex min-w-0 w-full max-w-md flex-wrap gap-2'));
+    // Command is an inline Proto extension, not the historical Typeahead plugin.
+    def.feedback.style.use(tw('relative flex min-w-0 flex-col items-start'));
+    return behavior.render;
   },
 });

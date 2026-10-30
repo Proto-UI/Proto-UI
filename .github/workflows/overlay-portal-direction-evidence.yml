@@ -75,3 +75,169 @@ jobs:
           path: ${{ runner.temp }}/overlay-portal-direction
           if-no-files-found: error
           retention-days: 30
+  reconciliation-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Record exact source and install original locked dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/overlay-reconciliation-contract"
+          git rev-parse HEAD > "$RUNNER_TEMP/overlay-reconciliation-contract/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/overlay-reconciliation-contract/source-tree.txt"
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/overlay-reconciliation-contract/tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/overlay-reconciliation-contract/tracked-status.txt"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/overlay-reconciliation-contract/lock-sha256.txt"
+          node --version > "$RUNNER_TEMP/overlay-reconciliation-contract/node-environment.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/overlay-reconciliation-contract/post-install-tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/overlay-reconciliation-contract/post-install-tracked-status.txt"
+      - name: Run bounded Overlay and Menubar regression contracts
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          # Supplementary evidence. Preserve the original general catalog gate,
+          # browser job, failures, permissions and all existing runtime budgets.
+          corepack pnpm@10.32.1 exec vitest run \
+            packages/modules/overlay/test/resource-reconciliation-barrier.test.ts \
+            packages/modules/overlay/test/resource-lifetime.test.ts \
+            packages/modules/overlay/test/host-callback-reentrancy.test.ts \
+            packages/modules/overlay/test/host-neutral-target.test.ts \
+            packages/modules/overlay/test/target-alignment-binding.test.ts \
+            packages/modules/overlay/test/modal-lock.test.ts \
+            packages/prototypes/base/test/navigation-overlays/menubar-focus-entry.test.ts \
+            packages/prototypes/base/test/navigation-overlays/menubar-request.test.ts \
+            packages/prototypes/base/test/navigation-overlays/menus.test.ts \
+            packages/prototypes/shadcn/test/menubar-style-projection.test.ts \
+            packages/runtime/test/contract/overlay.v0.contract.test.ts \
+            packages/prototypes/base/test/as-transition.test.ts \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/overlay-reconciliation-contract/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/overlay-reconciliation-contract/tests.log"
+          node --input-type=module - "$RUNNER_TEMP/overlay-reconciliation-contract/vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const report = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          assert.equal(report.numFailedTests, 0);
+          const required = [
+            'packages/modules/overlay/test/resource-reconciliation-barrier.test.ts',
+            'packages/modules/overlay/test/resource-lifetime.test.ts',
+            'packages/modules/overlay/test/host-callback-reentrancy.test.ts',
+            'packages/modules/overlay/test/host-neutral-target.test.ts',
+            'packages/modules/overlay/test/target-alignment-binding.test.ts',
+            'packages/modules/overlay/test/modal-lock.test.ts',
+            'packages/prototypes/base/test/navigation-overlays/menubar-focus-entry.test.ts',
+            'packages/prototypes/base/test/navigation-overlays/menubar-request.test.ts',
+            'packages/prototypes/base/test/navigation-overlays/menus.test.ts',
+            'packages/prototypes/shadcn/test/menubar-style-projection.test.ts',
+            'packages/runtime/test/contract/overlay.v0.contract.test.ts',
+            'packages/prototypes/base/test/as-transition.test.ts',
+          ];
+          for (const path of required) {
+            const result = report.testResults.find((entry) => entry.name.endsWith('/' + path));
+            assert.ok(result, `Missing required suite: ${path}`);
+            assert.ok(result.assertionResults.length > 0, `Empty required suite: ${path}`);
+            assert.ok(result.assertionResults.every((test) => test.status === 'passed'),
+              `Every required assertion must execute and pass: ${path}`);
+          }
+          JS
+      - name: Record final tracked source state even after test failure
+        if: always()
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/overlay-reconciliation-contract"
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/overlay-reconciliation-contract/post-test-tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/overlay-reconciliation-contract/post-test-tracked-status.txt"
+      - name: Retain exact-source unit results including failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: overlay-reconciliation-contract-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/overlay-reconciliation-contract
+          if-no-files-found: error
+          retention-days: 30
+
+  focus-activation-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Record exact source and install existing locked dependencies
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/focus-activation-contract"
+          git rev-parse HEAD > "$RUNNER_TEMP/focus-activation-contract/source-sha.txt"
+          git rev-parse HEAD^{tree} > "$RUNNER_TEMP/focus-activation-contract/source-tree.txt"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/focus-activation-contract/lock-sha256.txt"
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/focus-activation-contract/tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/focus-activation-contract/tracked-status.txt"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts
+          node --version > "$RUNNER_TEMP/focus-activation-contract/node-environment.txt"
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/focus-activation-contract/post-install-tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/focus-activation-contract/post-install-tracked-status.txt"
+      - name: Run activation policy and existing Focus regression contracts
+        timeout-minutes: 10
+        run: |
+          set -euo pipefail
+          # Supplementary policy evidence, not native Search conformance. Preserve
+          # the complete general preflight, original portal job and failures.
+          files=(
+            packages/modules/focus/test/scope-activation-entry.test.ts
+            packages/prototypes/base/test/dialog-focus-entry.test.ts
+            packages/modules/focus/test/center.test.ts
+            packages/modules/focus/test/center-order.test.ts
+            packages/runtime/test/contract/focus.v0.contract.test.ts
+            packages/adapters/web-component/test/dialog-overlay.test.ts
+          )
+          for file in "${files[@]}"; do test -f "$file"; done
+          printf '%s\n' "${files[@]}" > "$RUNNER_TEMP/focus-activation-contract/required-files.txt"
+          node node_modules/vitest/vitest.mjs run "${files[@]}" \
+            --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+            --outputFile="$RUNNER_TEMP/focus-activation-contract/vitest.json" \
+            2>&1 | tee "$RUNNER_TEMP/focus-activation-contract/tests.log"
+          node --input-type=module - "$RUNNER_TEMP/focus-activation-contract" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const dir = process.argv[2];
+          const report = JSON.parse(fs.readFileSync(`${dir}/vitest.json`, 'utf8'));
+          const required = fs.readFileSync(`${dir}/required-files.txt`, 'utf8').trim().split('\n');
+          assert.equal(report.success, true);
+          assert.equal(report.numFailedTests, 0);
+          assert.equal(report.testResults.length, required.length);
+          for (const path of required) {
+            const result = report.testResults.find((entry) => entry.name.endsWith('/' + path));
+            assert.ok(result, `Missing required suite: ${path}`);
+            assert.ok(result.assertionResults.length > 0, `Empty required suite: ${path}`);
+            if (path.endsWith('/scope-activation-entry.test.ts')) assert.equal(result.assertionResults.length, 11, 'All new policy controls must run');
+            if (path.endsWith('/dialog-focus-entry.test.ts')) assert.equal(result.assertionResults.length, 6, 'All Dialog consumer policy controls must run');
+            assert.ok(result.assertionResults.every((entry) => entry.status === 'passed'), `Incomplete suite: ${path}`);
+          }
+          JS
+      - name: Record post-test source status
+        if: always()
+        run: |
+          mkdir -p "$RUNNER_TEMP/focus-activation-contract"
+          git status --porcelain --untracked-files=no > "$RUNNER_TEMP/focus-activation-contract/post-test-tracked-status.txt"
+          test ! -s "$RUNNER_TEMP/focus-activation-contract/post-test-tracked-status.txt"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: focus-activation-contract-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/focus-activation-contract/
+          if-no-files-found: error
+          retention-days: 30

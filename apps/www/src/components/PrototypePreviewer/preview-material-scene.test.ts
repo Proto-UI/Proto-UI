@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { resolveWebPortalDestination } from '@proto.ui/adapter-base';
 import { inspectCanvasBackdrop } from '@proto.ui/adapter-base/web-material';
-import { createPreviewMaterialScene } from './preview-material-scene';
+import { createPreviewMaterialScene, attachPreviewMaterialScene } from './preview-material-scene';
 import { findPreviewMaterialProvider } from './preview-material-provider';
 
 // Deterministic layout/source-lease evidence only. Pixels and layout below are
@@ -245,5 +245,83 @@ describe('bounded visible Previewer source layout', () => {
     s.dispose();
     expect(frames.size).toBe(0);
     expect(s.scope.isConnected).toBe(false);
+  });
+});
+
+describe('framework-owned static stage attachments', () => {
+  function boxes() {
+    const scope = document.createElement('div'),
+      mount = document.createElement('div'),
+      overlay = document.createElement('div');
+    const button = document.createElement('button');
+    button.textContent = 'Real framework child';
+    mount.append(button);
+    scope.append(mount, overlay);
+    document.body.append(scope);
+    return { scope, mount, overlay, button };
+  }
+  it('keeps borrowed box/child identity and restores only styles it still owns', () => {
+    const { scope, mount, overlay, button } = boxes();
+    scope.style.position = 'sticky';
+    const instance = attachPreviewMaterialScene(scope, mount, overlay);
+    cleanups.push(() => instance.dispose());
+    expect(scope.querySelectorAll('canvas[data-material-backdrop]')).toHaveLength(1);
+    expect(findPreviewMaterialProvider(button)).not.toBeNull();
+    const popup = document.createElement('div');
+    expect(resolveWebPortalDestination(button, popup)).toBe(overlay);
+    scope.style.paddingInline = '7px'; // Later framework owner, not ours to reset.
+    instance.dispose();
+    instance.dispose();
+    expect(scope.isConnected).toBe(true);
+    expect(mount.firstChild).toBe(button);
+    expect(scope.children).toHaveLength(2);
+    expect(scope.style.position).toBe('sticky');
+    expect(scope.style.paddingInline).toBe('7px');
+    expect(scope.hasAttribute('data-material-scene')).toBe(false);
+    expect(findPreviewMaterialProvider(button)).toBeNull();
+    expect(resolveWebPortalDestination(button, popup)).toBe(document.body);
+    expect(frames.size).toBe(0);
+  });
+  it('rejects duplicate attachment without disturbing the first owner', () => {
+    const { scope, mount, overlay, button } = boxes();
+    const instance = attachPreviewMaterialScene(scope, mount, overlay);
+    cleanups.push(() => instance.dispose());
+    const provider = findPreviewMaterialProvider(button);
+    expect(() => attachPreviewMaterialScene(scope, mount, overlay)).toThrow();
+    expect(findPreviewMaterialProvider(button)).toBe(provider);
+    expect(scope.querySelectorAll('canvas[data-material-backdrop]')).toHaveLength(1);
+  });
+  it('rejects an existing ancestor provider before creating a nested source', () => {
+    const outer = scene();
+    const { scope, mount, overlay, button } = boxes();
+    outer.mount.append(scope);
+    const provider = findPreviewMaterialProvider(button),
+      oldMarkup = scope.outerHTML;
+    expect(() => attachPreviewMaterialScene(scope, mount, overlay)).toThrow();
+    expect(scope.outerHTML).toBe(oldMarkup);
+    expect(findPreviewMaterialProvider(button)).toBe(provider);
+  });
+  it('rolls back canvas, destination, styles and provider after observer construction throws', () => {
+    const { scope, mount, overlay, button } = boxes();
+    const before = scope.outerHTML;
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor() {
+          throw undefined;
+        }
+      }
+    );
+    let failure: unknown = 'not thrown';
+    try {
+      attachPreviewMaterialScene(scope, mount, overlay);
+    } catch (error) {
+      failure = error;
+    }
+    expect(failure).toBeUndefined();
+    expect(resolveWebPortalDestination(button, document.createElement('div'))).toBe(document.body);
+    expect(scope.outerHTML).toBe(before);
+    expect(findPreviewMaterialProvider(button)).toBeNull();
+    expect(frames.size).toBe(0);
   });
 });

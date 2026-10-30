@@ -1,13 +1,13 @@
 import { definePrototype, tw } from '@proto.ui/core';
-import {
-  type ProgressPartProps,
-  type ProgressPartExposes,
-  asProgressIndicator,
-} from '@proto.ui/prototypes-base/progress';
-export default definePrototype<ProgressPartProps, ProgressPartExposes>({
+import { type ProgressPartExposes, asProgressIndicator } from '@proto.ui/prototypes-base/progress';
+import { setupProgressStyle } from './visual';
+import type { ShadcnProgressPartProps } from './types';
+export default definePrototype<ShadcnProgressPartProps, ProgressPartExposes>({
   name: 'shadcn-progress-indicator',
+  modules: asProgressIndicator.modules,
   setup(def) {
     const inherited = asProgressIndicator();
+    setupProgressStyle(def);
     def.feedback.style.use(
       tw('block h-full w-[calc(var(--pui-percentage)*1%)] bg-primary transition-all')
     );

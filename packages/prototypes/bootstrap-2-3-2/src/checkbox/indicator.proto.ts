@@ -11,11 +11,14 @@ import {
 export default definePrototype<CheckboxIndicatorProps, CheckboxIndicatorExposes>({
   name: 'bootstrap-2-3-2-checkbox-indicator',
   setup(def) {
-    const state = asCheckboxIndicator().stateHandles;
+    const inherited = asCheckboxIndicator();
+    const state = inherited.stateHandles;
     if (!state)
       throw new Error('[bootstrap-2-3-2-checkbox-indicator] Base context state required.');
     def.feedback.style.use(
-      tw('inline-flex size-3.5 items-center justify-center text-current pointer-events-none')
+      tw(
+        'inline-flex w-[14px] h-[14px] items-center justify-center text-current pointer-events-none'
+      )
     );
     let update: { cancel(): void } | null = null;
     const refresh = (run: { update(): void }, event: { type: string }) => {
@@ -39,7 +42,7 @@ export default definePrototype<CheckboxIndicatorProps, CheckboxIndicatorExposes>
           ? 'M5 12L10 17L19 7'
           : null;
       return [
-        renderer.r.slot(),
+        inherited.render ? inherited.render(renderer) : renderer.r.slot(),
         d
           ? renderer.svg.root(
               {

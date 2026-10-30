@@ -1,4 +1,4 @@
-import type { ShadcnStyleProps } from '../style-scope';
+import type { ShadcnStyleId, ShadcnStyleProps } from '../style-scope';
 import type { ExposeMethod } from '@proto.ui/core';
 import type {
   SwitchRootAsHookContract,
@@ -20,7 +20,7 @@ export interface ShadcnSwitchRootProps extends SwitchRootProps, ShadcnStyleProps
 export type ShadcnSwitchRootExposes = SwitchRootExposes & {
   /** Family visual capability; consumed only through the actual Switch-domain Root. */
   getVisualSize: ExposeMethod<() => ShadcnSwitchSize>;
-  getVisualStyle: ExposeMethod<() => 'new-york-v4' | 'rhea'>;
+  getVisualStyle: ExposeMethod<() => ShadcnStyleId>;
 };
 
 export type ShadcnSwitchRootStateHandles = SwitchRootStateHandles;

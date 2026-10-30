@@ -57,9 +57,19 @@ describe('core: feedback.style runtime patch v0 contract', () => {
       const token = `border-${direction}-transparent`;
       recorder.use(tw(`border-2 ${token}`));
       recorder.patch(tw('border-foreground'));
-      expect(recorder.export().tokens).toEqual(['border-2', 'border-foreground']);
-      recorder.suppress(tw('border-foreground'));
-      expect(recorder.export().tokens).toEqual(['border-2']);
+      if (direction === 'b') {
+        // v0 keeps bottom-edge color in its own `border-b-color` group so a
+        // directional recipe intent (for example `border-b-input`) can coexist
+        // with an all-edge color instead of deduplicating against it. Patch and
+        // suppress therefore only touch the all-edge `border-color` group.
+        expect(recorder.export().tokens).toEqual(['border-2', token, 'border-foreground']);
+        recorder.suppress(tw('border-foreground'));
+        expect(recorder.export().tokens).toEqual(['border-2', token]);
+      } else {
+        expect(recorder.export().tokens).toEqual(['border-2', 'border-foreground']);
+        recorder.suppress(tw('border-foreground'));
+        expect(recorder.export().tokens).toEqual(['border-2']);
+      }
       recorder.clearPatch();
       expect(recorder.export().tokens).toEqual(['border-2', token]);
     }

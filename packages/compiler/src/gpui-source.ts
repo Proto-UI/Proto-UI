@@ -7,6 +7,7 @@ import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import { GPUI_NATIVE_SDK_PATH, GPUI_NATIVE_SDK_VERSION, gpuiNativeSdkFiles } from './gpui-native-sdk';
 import type { DataType } from './data-types';
 import { isDataValueType, isPublicValueType } from './ir';
+import { inferBinaryType, relationalOperandKind } from './expression-types';
 import type { RuleCondition } from './rule-declarations';
 import type { CompileResult, CompilerDiagnostic, ExpressionIR, FunctionIR, GeneratedModule, PrototypeIR, StatementIR } from './ir';
 
@@ -20,6 +21,7 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
   const componentName = options.componentName ?? 'CompiledComponent';
   if (!validIdentifier(componentName) || !/^[A-Z][A-Za-z0-9_]*$/.test(componentName) || ['Self', 'Owner', 'Value', 'GeneratedProps'].includes(componentName)) return { ok: false, diagnostics: [{ code: 'PUI_GPUI_NAME', category: 'invalid-input', message: 'Choose a non-reserved PascalCase Rust component identifier.', span: ir.setup.span }] };
   const diagnostics: CompilerDiagnostic[] = [];
+  const hasLoneSurrogate = (value: string): boolean => /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/u.test(value);
   const styleTokens = new Map<string, ExpressionIR['span']>();
   const reached = new Set(admitted.value.functions);
   const hookNames = new Map(ir.hooks.map((hook, index) => [hook.id, `authored_hook_${index}`]));
@@ -54,45 +56,74 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     'positioning.connect', 'positioning.update', 'positioning.requestUpdate', 'positioning.disconnect', 'positioning.getSnapshot',
     'binding.release', 'subscription.release',
   ]);
-  function inspect(value: unknown): void {
-    if (Array.isArray(value)) { value.forEach(inspect); return; }
+  const activationSites = admitted.value.sites.filter((site) => site.operation === 'focus.activate');
+  const reachedActivation = (node: ExpressionIR): boolean => activationSites.some((site) =>
+    site.span.file === node.span.file && site.span.start === node.span.start && site.span.end === node.span.end);
+  function hasActivationEntry(type: DataType): boolean {
+    return typeof type !== 'string' && (type.kind === 'record'
+      ? type.fields.some((field) => field.name === 'entry')
+      : type.kind === 'union' && type.members.some(hasActivationEntry));
+  }
+  function inspect(value: unknown, enclosingSpan = ir.setup.span): void {
+    if (Array.isArray(value)) { value.forEach((item) => inspect(item, enclosingSpan)); return; }
     if (!value || typeof value !== 'object') return;
     const node = value as ExpressionIR;
+    // DataType literal nodes share the expression discriminant but have no span.
+    // Carry the nearest real IR owner (e.g. the typed parameter), never invent one.
+    const span = node.span ?? enclosingSpan;
     if (node.kind === 'function' && !reached.has(node.function)) return;
+    if (node.kind === 'literal' && typeof node.value === 'string' && hasLoneSurrogate(node.value)) {
+      diagnostics.push({ code: 'PUI_GPUI_STRING_UNSUPPORTED', category: 'unsupported-input', message: 'GPUI Rust strings cannot represent lone UTF-16 surrogates; no replacement encoding is emitted.', span });
+    }
     const handles = node.kind === 'style-handle' ? [node.handle] : node.kind === 'rule' ? node.declaration.intent.ops.flatMap((operation) => operation.handles) : [];
     for (const handle of handles) for (const token of handle.tokens) styleTokens.set(token, node.span);
     if (node.kind === 'operation' && !supported.has(node.operation)) diagnostics.push({ code: 'PUI_GPUI_HOST_REQUIRED', category: 'unsupported-input', message: `GPUI operation ${node.operation} has no concrete pinned host lowering. No success fallback is emitted.`, span: node.span });
+    if (node.kind === 'operation' && node.operation === 'focus.activate' && reachedActivation(node) && node.arguments[0] &&
+        isDataValueType(node.arguments[0].type) && hasActivationEntry(node.arguments[0].type))
+      diagnostics.push({ code: 'PUI_GPUI_FOCUS_ACTIVATION_REQUIRED', category: 'unsupported-input', message: 'Per-activation focus entry policy has no pinned GPUI lowering. Existing focus activation without entry remains supported.', span: node.arguments[0].span });
     if (node.kind === 'operation' && node.operation === 'event.on' && node.arguments[2]?.kind === 'record') {
       const type = node.arguments[0];
       const phaseMapped = type?.kind === 'literal' && ['host:mousedown', 'host:mouseup', 'host:keydown', 'host:keyup'].includes(String(type.value));
       for (const entry of node.arguments[2].entries) if (!phaseMapped && entry.key === 'capture' && entry.value.kind === 'literal' && entry.value.value === true) diagnostics.push({ code: 'PUI_GPUI_INPUT_REQUIRED', category: 'unsupported-input', message: 'This raw host event requires a native capture-phase mapping.', span: entry.value.span });
     }
-    Object.values(value).forEach(inspect);
+    Object.values(value).forEach((child) => inspect(child, span));
   }
   for (const declaration of ir.moduleDeclarations) {
     if (!['@proto.ui/text-control/declaration', '@proto.ui/image-view/declaration'].includes(declaration.id)) diagnostics.push({ code: 'PUI_GPUI_MODULE_REQUIRED', category: 'unsupported-input', message: `GPUI Module ${declaration.id} has no concrete pinned host consumer.`, span: declaration.span });
   }
-  admitted.value.functions.forEach((fn) => inspect(fn.body));
+  admitted.value.functions.forEach((fn) => inspect(fn.body, fn.span));
   const nativeStyle = buildGpuiNativeStyleFiles(styleTokens.keys());
   for (const token of nativeStyle.unknown) diagnostics.push({ code: 'PUI_GPUI_STYLE', category: 'unsupported-input', message: `The authoritative Proto style producer has no native declarations for ${JSON.stringify(token)}.`, span: styleTokens.get(token) ?? ir.setup.span });
   if (diagnostics.length) return { ok: false, diagnostics };
   const local = (name: string) => `v_${Buffer.from(name, 'utf8').toString('hex')}`;
-  const string = (value: string): string => JSON.stringify(value).replace(/\\u([0-9a-fA-F]{4})/g, (_match, digits: string) => `\\u{${digits}}`);
-  function staticValue(value: unknown): string {
+  // Encode original characters, never rewrite escape-like substrings in authored text.
+  const string = (value: string, span = ir.setup.span): string => {
+    if (hasLoneSurrogate(value)) {
+      diagnostics.push({ code: 'PUI_GPUI_STRING_UNSUPPORTED', category: 'unsupported-input', message: 'GPUI Rust strings cannot represent lone UTF-16 surrogates; no replacement encoding is emitted.', span });
+      // Finish collecting diagnostics, then discard the entire generated module below.
+      return '""';
+    }
+    return '"' + Array.from(value, (character) => {
+      if (character === '"' || character === '\\') return '\\' + character;
+      const point = character.codePointAt(0)!;
+      return point < 0x20 || point === 0x7f ? `\\u{${point.toString(16)}}` : character;
+    }).join('') + '"';
+  };
+  function staticValue(value: unknown, span = ir.setup.span): string {
     if (value === undefined) return 'Value::Undefined';
-    if (Array.isArray(value)) return `Value::Array(Rc::new(vec![${value.map(staticValue).join(', ')}]))`;
-    if (value !== null && typeof value === 'object') return `record(vec![${Object.entries(value).map(([key, item]) => `(${string(key)}, ${staticValue(item)})`).join(', ')}])`;
-    return literal(value as string | number | boolean | null);
+    if (Array.isArray(value)) return `Value::Array(Rc::new(vec![${value.map((item) => staticValue(item, span)).join(', ')}]))`;
+    if (value !== null && typeof value === 'object') return `record(vec![${Object.entries(value).map(([key, item]) => `(${string(key, span)}, ${staticValue(item, span)})`).join(', ')}])`;
+    return literal(value as string | number | boolean | null, span);
   }
   const staticArtifacts = ir.staticDeclarations.map((declaration) => {
     const digest = createHash('sha256').update(declaration.id).digest('hex').slice(0, 32);
     const name = `declaration_${digest}`;
     const path = `.proto-ui/declaration/${digest}.rs`;
-    return { id: declaration.id, name, path, kind: 'source' as const, contents: `// Original static declaration ${JSON.stringify(declaration.id)}\nuse crate::native::gpui_native_owner::*;\nuse std::rc::Rc;\nuse serde_json::Value as Json;\npub static DECLARATION: StaticDeclaration = StaticDeclaration { id: ${string(declaration.id)}, kind: ${string(declaration.kind)}, config: || ${staticValue(declaration.config)} };\n` };
+    return { id: declaration.id, name, path, kind: 'source' as const, contents: `// Original static declaration ${JSON.stringify(declaration.id)}\nuse crate::native::gpui_native_owner::*;\nuse std::rc::Rc;\nuse serde_json::Value as Json;\npub static DECLARATION: StaticDeclaration = StaticDeclaration { id: ${string(declaration.id)}, kind: ${string(declaration.kind)}, config: || ${staticValue(declaration.config, declaration.span)} };\n` };
   });
-  function literal(value: string | number | boolean | null): string {
+  function literal(value: string | number | boolean | null, span = ir.setup.span): string {
     if (value === null) return 'Value::Json(Json::Null)';
-    if (typeof value === 'string') return `Value::string(${string(value)})`;
+    if (typeof value === 'string') return `Value::string(${string(value, span)})`;
     if (typeof value === 'boolean') return `Value::boolean(${value})`;
     return `Value::number(${Object.is(value, -0) ? '-0.0' : Number.isInteger(value) ? `${value}.0` : String(value)})`;
   }
@@ -123,11 +154,11 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     const receiver = () => emittedReceiver ??= node.kind === 'operation' && node.receiver ? expression(node.receiver, environment, depth) : `capability(&${ownerReference()})`;
     const receiverOwner = () => `&(${receiver()}).owner()`;
     switch (node.kind) {
-      case 'literal': return literal(node.value);
+      case 'literal': return literal(node.value, node.span);
       case 'reference': uses.names.add(node.name); return `${local(node.name)}.clone()`;
       case 'context-key': return `Value::string(${string(node.keyId)})`;
       case 'style-handle': return `Value::Style(vec![${node.handle.tokens.map((token) => `(${string(token)}.into(), ${string(getSemanticGroupKeyV0(token))}.into())`).join(', ')}])`;
-      case 'member': return `(${expression(node.object, environment, depth)}).member(${string(node.property)}, ${node.optional})`;
+      case 'member': return `(${expression(node.object, environment, depth)}).member(${string(node.property, node.span)}, ${node.optional})`;
       case 'unary': {
         const operand = expression(node.operand, environment, depth);
         return node.operator === '!' ? `Value::boolean(!(${operand}).truthy())` : `Value::number(${node.operator === '-' ? '-' : ''}(${operand}).scalar_number())`;
@@ -138,11 +169,28 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
         if (node.operator === '??') return `{ let left = ${left}; if left.nullish() { ${right} } else { left } }`;
         if (node.operator === '===' || node.operator === '!==') return `Value::boolean(${node.operator === '!==' ? '!' : ''}strict_equal(&(${left}), &(${right})))`;
         if (node.operator === '+') return `add(${left}, ${right})`;
-        if (['<', '<=', '>', '>='].includes(node.operator)) return typeof node.left.type === 'string' && node.left.type === 'string' ? `Value::boolean((${left}).text() ${node.operator} (${right}).text())` : `Value::boolean((${left}).scalar_number() ${node.operator} (${right}).scalar_number())`;
+        if (['<', '<=', '>', '>='].includes(node.operator)) {
+          if (!isDataValueType(node.left.type) || !isDataValueType(node.right.type)) throw new Error('Validated relational operands must be data.');
+          const resultType = inferBinaryType(node.operator, node.left.type, node.right.type);
+          if (typeof resultType !== 'string' && resultType.kind === 'union' && resultType.members.length === 0) {
+            // Shared inference retains bottom for unreachable comparisons, even when the
+            // other operand has no relational domain. Recompute the validated semantic result
+            // rather than inspecting the raw IR union representation. A typed divergent
+            // result gives method-receiver positions a Value type without fabricating one.
+            return `{ let _relational_left = ${left}; let _relational_right = ${right}; let _relational_result: Value = unreachable!("uninhabited Proto relational expression"); _relational_result }`;
+          }
+          const kind = relationalOperandKind(node.left.type, node.right.type);
+          // Bind Value operands before reading either, preserving left-to-right, once-only evaluation.
+          // Rust str ordering is Unicode scalar ordering; Proto compares UTF-16 code units.
+          const compare = kind === 'string'
+            ? `relational_left.text().encode_utf16().cmp(relational_right.text().encode_utf16()) ${node.operator} std::cmp::Ordering::Equal`
+            : `relational_left.scalar_number() ${node.operator} relational_right.scalar_number()`;
+          return `{ let relational_left = ${left}; let relational_right = ${right}; Value::boolean(${compare}) }`;
+        }
         return `Value::number((${left}).scalar_number() ${node.operator} (${right}).scalar_number())`;
       }
       case 'array': return `Value::Array(Rc::new(vec![${node.elements.map((item) => expression(item, environment, depth)).join(', ')}]))`;
-      case 'record': return `record(vec![${node.entries.map((entry) => `(${string(entry.key)}, ${expression(entry.value, environment, depth)})`).join(', ')}])`;
+      case 'record': return `record(vec![${node.entries.map((entry) => `(${string(entry.key, node.span)}, ${expression(entry.value, environment, depth)})`).join(', ')}])`;
       case 'function': return functionValue(node.function, environment, depth);
       case 'helper-call': uses.names.add(node.name); return `${local(node.name)}.call(vec![${args.join(', ')}])`;
       case 'authored-hook': return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}))`;
@@ -324,71 +372,71 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     }
     return complete ? `${code}${indent}Value::Undefined\n` : code;
   }
-  function accepts(value: string, type: DataType): string {
+  function accepts(value: string, type: DataType, span = ir.setup.span): string {
     if (typeof type === 'string') return type === 'number' ? `${value}.as_f64().is_some_and(f64::is_finite)` : type === 'null' || type === 'void' ? `${value}.is_null()` : `${value}.is_${type === 'boolean' ? 'boolean' : 'string'}()`;
     if (type.kind === 'literal') {
       if (type.value === null) return `${value}.is_null()`;
-      if (typeof type.value === 'string') return `${value}.as_str() == Some(${string(type.value)})`;
+      if (typeof type.value === 'string') return `${value}.as_str() == Some(${string(type.value, span)})`;
       if (typeof type.value === 'boolean') return `${value}.as_bool() == Some(${type.value})`;
       return `${value}.as_f64() == Some(${Number.isInteger(type.value) ? `${type.value}.0` : String(type.value)})`;
     }
-    if (type.kind === 'union') return `(${type.members.map((member) => accepts(value, member)).join(' || ')})`;
-    if (type.kind === 'array') return `${value}.as_array().is_some_and(|items| items.iter().all(|item| ${accepts('item', type.element)}))`;
-    return `(${value}.is_object() && ${type.fields.map((field) => `${value}.get(${string(field.name)}).map_or(${Boolean(field.optional)}, |field| ${accepts('field', field.type)})`).join(' && ') || 'true'})`;
+    if (type.kind === 'union') return `(${type.members.map((member) => accepts(value, member, span)).join(' || ')})`;
+    if (type.kind === 'array') return `${value}.as_array().is_some_and(|items| items.iter().all(|item| ${accepts('item', type.element, span)}))`;
+    return `(${value}.is_object() && ${type.fields.map((field) => `${value}.get(${string(field.name, span)}).map_or(${Boolean(field.optional)}, |field| ${accepts('field', field.type, span)})`).join(' && ') || 'true'})`;
   }
-  const propValidChecks = ir.props.map((prop) => `${string(prop.name)} => ${accepts('value', prop.type)},`).join('\n        ');
-  const contextChecks = ir.contextKeys.map((key) => `${string(key.id)} => ${accepts('value', key.type)},`).join('\n        ');
-  const propChecks = ir.props.map((prop) => `value.get(${string(prop.name)}).map_or(true, |prop| prop.is_null() || ${accepts('prop', prop.type)})`).join(' && ') || 'true';
+  const propValidChecks = ir.props.map((prop) => `${string(prop.name, prop.span)} => ${accepts('value', prop.type, prop.span)},`).join('\n        ');
+  const contextChecks = ir.contextKeys.map((key) => `${string(key.id)} => ${accepts('value', key.type, key.span)},`).join('\n        ');
+  const propChecks = ir.props.map((prop) => `value.get(${string(prop.name, prop.span)}).map_or(true, |prop| prop.is_null() || ${accepts('prop', prop.type, prop.span)})`).join(' && ') || 'true';
   const dataDeclarations: string[] = [];
   const dataNames = new Map<string, string>();
-  function rustType(type: DataType): string {
+  function rustType(type: DataType, span = ir.setup.span): string {
     if (typeof type === 'string') return ({ boolean: 'bool', number: 'f64', string: 'String', null: '()', void: '()' } as const)[type];
     if (type.kind === 'literal') return type.value === null ? '()' : rustType(typeof type.value === 'boolean' ? 'boolean' : typeof type.value === 'number' ? 'number' : 'string');
-    if (type.kind === 'array') return `Vec<${rustType(type.element)}>`;
+    if (type.kind === 'array') return `Vec<${rustType(type.element, span)}>`;
     const key = JSON.stringify(type), prior = dataNames.get(key);
     if (prior) return prior;
     const name = `GeneratedData${dataNames.size}`;
     dataNames.set(key, name);
-    if (type.kind === 'record') dataDeclarations.push(`#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]\npub struct ${name} {\n${type.fields.map((field, index) => `    #[serde(rename = ${string(field.name)}${field.optional ? ', default, skip_serializing_if = "Option::is_none"' : ''})]\n    pub field_${index}: ${field.optional ? `Option<${rustType(field.type)}>` : rustType(field.type)},`).join('\n')}\n}`);
-    else dataDeclarations.push(`#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]\n#[serde(untagged)]\npub enum ${name} {\n${type.members.map((member, index) => `    Alternative${index}(${rustType(member)}),`).join('\n')}\n}`);
+    if (type.kind === 'record') dataDeclarations.push(`#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]\npub struct ${name} {\n${type.fields.map((field, index) => `    #[serde(rename = ${string(field.name, span)}${field.optional ? ', default, skip_serializing_if = "Option::is_none"' : ''})]\n    pub field_${index}: ${field.optional ? `Option<${rustType(field.type, span)}>` : rustType(field.type, span)},`).join('\n')}\n}`);
+    else dataDeclarations.push(`#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]\n#[serde(untagged)]\npub enum ${name} {\n${type.members.map((member, index) => `    Alternative${index}(${rustType(member, span)}),`).join('\n')}\n}`);
     return name;
   }
   const propsType = rustType({ kind: 'record', fields: ir.props.map((prop) => ({ name: prop.name, type: prop.type, optional: true })) });
   const typedMethods: string[] = [], methodChecks: string[] = [];
   for (const [index, exposure] of ir.exposes.entries()) {
     if (exposure.kind === 'value') {
-      typedMethods.push(`    pub fn value_${index}(&self) -> Value { ensure(&Rc::downgrade(&self.owner)); self.owner.borrow().exposes.get(${string(exposure.name)}).expect("exposed value").clone() }`);
+      typedMethods.push(`    pub fn value_${index}(&self) -> Value { ensure(&Rc::downgrade(&self.owner)); self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).expect("exposed value").clone() }`);
       continue;
     }
     if (exposure.kind === 'state') {
-      typedMethods.push(`    pub fn state_${index}(&self) -> ${rustType(exposure.type)} { serde_json::from_value(self.state(${string(exposure.name)})).expect("checked exposed State") }`);
+      typedMethods.push(`    pub fn state_${index}(&self) -> ${rustType(exposure.type, exposure.span)} { serde_json::from_value(self.state(${string(exposure.name, exposure.span)})).expect("checked exposed State") }`);
       continue;
     }
     if (exposure.kind !== 'method') continue;
     if (!isPublicValueType(exposure.returnType) || exposure.parameters.some((parameter) => !isDataValueType(parameter.type))) return { ok: false, diagnostics: [{ code: 'PUI_GPUI_PUBLIC_DATA', category: 'unsupported-input', message: 'Native exposed methods require portable arguments and concrete public data or read-only nominal results.', span: exposure.span }] };
     const portableReturn = isDataValueType(exposure.returnType);
     const returnType = exposure.returnType as DataType;
-    const parameters = exposure.parameters.map((parameter, parameterIndex) => `argument_${parameterIndex}: ${parameter.optional ? `Option<${rustType(parameter.type as DataType)}>` : rustType(parameter.type as DataType)}`).join(', ');
+    const parameters = exposure.parameters.map((parameter, parameterIndex) => `argument_${parameterIndex}: ${parameter.optional ? `Option<${rustType(parameter.type as DataType, exposure.span)}>` : rustType(parameter.type as DataType, exposure.span)}`).join(', ');
     const args = exposure.parameters.map((parameter, parameterIndex) => parameter.optional ? `argument_${parameterIndex}.map(|value| Value::json(serde_json::to_value(value).expect("portable argument"))).unwrap_or(Value::Undefined)` : `Value::json(serde_json::to_value(argument_${parameterIndex}).expect("portable argument"))`).join(', ');
-    typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> ${portableReturn ? rustType(returnType) : 'Value'} {
+    typedMethods.push(`    pub fn method_${index}(&self, ${parameters}${parameters ? ', ' : ''}window: &mut Window, cx: &mut App) -> ${portableReturn ? rustType(returnType, exposure.span) : 'Value'} {
         let arguments = vec![${args}];
-        let callback = self.owner.borrow().exposes.get(${string(exposure.name)}).expect("exposed method").clone();
-        check_method(${string(exposure.name)}, &arguments);
+        let callback = self.owner.borrow().exposes.get(${string(exposure.name, exposure.span)}).expect("exposed method").clone();
+        check_method(${string(exposure.name, exposure.span)}, &arguments);
         let result = invoke(&self.owner, "expose-method", &callback, arguments);
         let drive = self.owner.borrow().native_drive.clone(); if let Some(drive) = drive { drive(window, cx); }
         ${portableReturn ? `let result = if matches!(result, Value::Undefined) { Json::Null } else { result.data() };
-        assert!(${accepts('result', returnType)}, "exposed method returned invalid portable data");
+        assert!(${accepts('result', returnType, exposure.span)}, "exposed method returned invalid portable data");
         serde_json::from_value(result).expect("checked exposed method result")` : 'result'}
     }`);
-    const checks = exposure.parameters.map((parameter, parameterIndex) => `arguments.get(${parameterIndex}).map_or(${Boolean(parameter.optional)}, |value| ${parameter.optional ? 'matches!(value, Value::Undefined) || ' : ''}{let value = value.data(); ${accepts('value', parameter.type as DataType)}})`).join(' && ') || 'true';
-    methodChecks.push(`        ${string(exposure.name)} => assert!(arguments.len() <= ${exposure.parameters.length} && ${checks}, "invalid exposed method arguments"),`);
+    const checks = exposure.parameters.map((parameter, parameterIndex) => `arguments.get(${parameterIndex}).map_or(${Boolean(parameter.optional)}, |value| ${parameter.optional ? 'matches!(value, Value::Undefined) || ' : ''}{let value = value.data(); ${accepts('value', parameter.type as DataType, exposure.span)}})`).join(' && ') || 'true';
+    methodChecks.push(`        ${string(exposure.name, exposure.span)} => assert!(arguments.len() <= ${exposure.parameters.length} && ${checks}, "invalid exposed method arguments"),`);
   }
   // Registry keys preserve UTF-16 name equality, including lone surrogates, without Rust escapes.
   const authoredHookKey = (name: string): string => JSON.stringify('u16:' + name.split('').map((unit) => unit.charCodeAt(0).toString(16).padStart(4, '0')).join(''));
   const hooks = ir.hooks.filter((hook) => admitted.value.authoredHooks.includes(hook.id)).map((hook) => `fn ${hookNames.get(hook.id)}(definition: Value) -> Value {\n    let owner = definition.owner();\n    authored_hook(&owner, ${authoredHookKey(hook.name)}, || { ${functionValue(hook.setup, new Set(), 1)}.call(vec![definition]); })\n}`).join('\n');
   const moduleSetups = ir.moduleDeclarations.map((declaration) => declaration.id === '@proto.ui/text-control/declaration'
     ? `        text_declaration(&owner, ${declaration.config.lineMode === 'multiline'});`
-    : `        image_declaration(&owner, ${staticValue(declaration.config)});`).join('\n');
+    : `        image_declaration(&owner, ${staticValue(declaration.config, declaration.span)});`).join('\n');
   const code = `// Direct checked-source GPUI component. Supporting files are ordinary editable Rust.
   pub use proto_ui_gpui_native as native;
   use gpui::{prelude::*, App, Context, FocusHandle, Subscription, Window};
@@ -504,6 +552,7 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
   [dev-dependencies]
   gpui = { git = "https://github.com/zed-industries/zed", rev = "62e5991dd0f0c8a3af8d5e7e9c4652490d468db8", features = ["test-support"] }
   `;
+  if (diagnostics.length) return { ok: false, diagnostics };
   return { ok: true, value: {
       code, profile: 'gpui-source-v1',
       supportingFiles: [

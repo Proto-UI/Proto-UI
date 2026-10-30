@@ -1,6 +1,8 @@
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype } from '@proto.ui/core';
 import { asDialogDescription } from '@proto.ui/prototypes-base/dialog';
 import type { ShadcnDialogDescriptionExposes, ShadcnDialogDescriptionProps } from './types';
+import { setupOverlayPaint } from './style';
+import { DIALOG_DESCRIPTION } from './recipes';
 
 const dialogDescription = definePrototype<
   ShadcnDialogDescriptionProps,
@@ -11,7 +13,7 @@ const dialogDescription = definePrototype<
     // P-SHADCN-DIALOG-DESCRIPTION-BASE-INHERITANCE,
     // P-SHADCN-DIALOG-DESCRIPTION-CURRENT-VISUAL-SURFACE
     asDialogDescription();
-    def.feedback.style.use(tw('text-sm text-muted-foreground'));
+    setupOverlayPaint(def, DIALOG_DESCRIPTION);
   },
 });
 

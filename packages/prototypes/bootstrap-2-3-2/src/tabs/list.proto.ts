@@ -15,7 +15,7 @@ export default definePrototype<FamilyTabsListProps, TabsListExposes>({
     asTabsList();
     def.rule({
       when: (w) => w.prop('appearance').eq('default'),
-      intent: (i) => i.feedback.style.use(tw('flex min-w-0 items-end border-b border-border')),
+      intent: (i) => i.feedback.style.use(tw('flex min-w-0 items-end border-b border-[#ddd]')),
     });
     def.rule({
       when: (w) => w.prop('appearance').eq('underline'),

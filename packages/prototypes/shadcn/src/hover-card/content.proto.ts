@@ -1,6 +1,9 @@
 import { definePrototype, tw } from '@proto.ui/core';
 import { asHoverCardContent } from '@proto.ui/prototypes-base/hover-card';
 import type { ShadcnHoverCardContentExposes, ShadcnHoverCardContentProps } from './types';
+import { setupOverlayDarkRing, setupOverlayPaint } from '../dialog/style';
+import { HOVER_CARD_PANEL } from './recipes';
+import { setupPopupMotion } from '../popover/motion';
 
 const hoverCardContent = definePrototype<
   ShadcnHoverCardContentProps,
@@ -14,39 +17,13 @@ const hoverCardContent = definePrototype<
     // P-SHADCN-HOVER-CARD-CONTENT-TRANSITION
     hoverCard.asTransition.configure({ enterDuration: 200, leaveDuration: 200 });
     const { open } = hoverCard.stateHandles;
+    const style = setupOverlayPaint(def, HOVER_CARD_PANEL);
+    setupOverlayDarkRing(def, style);
 
     // P-SHADCN-HOVER-CARD-CONTENT-CURRENT-VISUAL-SURFACE
-    def.feedback.style.use(
-      tw(
-        'z-50 w-64 rounded-md border border-border bg-popover p-4 text-sm text-popover-foreground shadow-md outline-none transition-none duration-200'
-      )
-    );
+    def.feedback.style.use(tw('z-50 outline-none'));
 
-    // P-SHADCN-HOVER-CARD-CONTENT-OPEN-AND-SIDE-STYLES
-    def.rule({
-      when: (w) => w.state(open).eq(true),
-      intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
-    });
-    def.rule({
-      when: (w) => w.state(open).eq(false),
-      intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('bottom')),
-      intent: (i) => i.feedback.style.use(tw('slide-in-from-top-2')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('top')),
-      intent: (i) => i.feedback.style.use(tw('slide-in-from-bottom-2')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('left')),
-      intent: (i) => i.feedback.style.use(tw('slide-in-from-right-2')),
-    });
-    def.rule({
-      when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq('right')),
-      intent: (i) => i.feedback.style.use(tw('slide-in-from-left-2')),
-    });
+    setupPopupMotion(def, open);
   },
 });
 

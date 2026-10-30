@@ -135,7 +135,103 @@ function completeOverlayResourceWork(steps: readonly (() => void)[]): void {
   if (failed) throw firstError;
 }
 
+type ReconciliationRequest = {
+  callback: () => void;
+  openRevision: number;
+  viewEpoch: number | null;
+  capsEpoch: number | null;
+  target: unknown | null;
+  cancelled: boolean;
+};
+
 export class OverlayModuleImpl extends ModuleBase {
+  private callbackDispatcher: ((callback: () => void) => void) | null = null;
+  private readonly reconciliationRequests = new Set<ReconciliationRequest>();
+
+  /** Runtime must invoke synchronously in its live callback scope, or throw. */
+  setCallbackDispatcher(dispatch: (callback: () => void) => void): void {
+    this.callbackDispatcher = dispatch;
+  }
+
+  afterViewReconciled(callback: () => void): () => void {
+    this.sys?.ensureCallback('overlay.afterViewReconciled');
+    if (!this.callbackDispatcher || !this.sys?.deferAfterCallback)
+      throw new Error('[Overlay] runtime reconciliation callback dispatcher unavailable.');
+    if (!this.isOpen() || this.protoPhase === 'unmounted') return () => {};
+    const mounted = this.mountPhase === 'mounted';
+    const revision = this.openRevision,
+      viewEpoch = this.mountedEpoch,
+      capsEpoch = this.caps.epoch;
+    const target = mounted ? this.resolveHostElement() : null;
+    if (
+      mounted &&
+      (!target ||
+        revision !== this.openRevision ||
+        viewEpoch !== this.mountedEpoch ||
+        capsEpoch !== this.caps.epoch ||
+        !this.isOpen() ||
+        this.mountPhase !== 'mounted')
+    )
+      return () => {};
+    const request: ReconciliationRequest = {
+      callback,
+      openRevision: this.openRevision,
+      viewEpoch: mounted ? this.mountedEpoch : null,
+      capsEpoch: mounted ? this.caps.epoch : null,
+      target,
+      cancelled: false,
+    };
+    this.reconciliationRequests.add(request);
+    // Even a settled view gets a fresh after-callback pass. Registration never
+    // synchronously invokes author code, and first mounting is not fake readiness.
+    if (mounted && this.viewActive) this.reconcileViewResourcesAfterCallback();
+    return () => {
+      request.cancelled = true;
+      this.reconciliationRequests.delete(request);
+    };
+  }
+
+  private deliverReconciliationRequests(): void {
+    const config = this.config,
+      registration = this.registration;
+    const requests = [...this.reconciliationRequests];
+    completeOverlayResourceWork(
+      requests.map((request) => () => {
+        if (!this.reconciliationRequests.delete(request)) return;
+        if (
+          !this.isOpen() ||
+          !this.viewActive ||
+          this.mountPhase !== 'mounted' ||
+          request.openRevision !== this.openRevision ||
+          request.viewEpoch !== this.mountedEpoch ||
+          request.capsEpoch !== this.caps.epoch
+        )
+          return;
+        this.callbackDispatcher?.(() => {
+          if (request.cancelled) return;
+          // Resolver output can change without replacing its capability object.
+          // Revalidate inside callback dispatch too: props work may have reentered.
+          const target = this.resolveHostElement();
+          if (
+            this.config !== config ||
+            this.registration !== registration ||
+            target !== request.target ||
+            !target ||
+            !this.isOpen() ||
+            !this.viewActive ||
+            this.mountPhase !== 'mounted' ||
+            request.openRevision !== this.openRevision ||
+            request.viewEpoch !== this.mountedEpoch ||
+            request.capsEpoch !== this.caps.epoch
+          )
+            return;
+          request.cancelled = true;
+          request.callback();
+        });
+      })
+    );
+  }
+
   private config: OverlayConfig = DEFAULT_CONFIG;
   private presenceBound = false;
   private readonly prototypeName: string;
@@ -243,6 +339,9 @@ export class OverlayModuleImpl extends ModuleBase {
   }
 
   protected override onCapsEpoch(_epoch: number): void {
+    for (const request of this.reconciliationRequests)
+      if (request.capsEpoch !== null && request.capsEpoch !== this.caps.epoch)
+        this.reconciliationRequests.delete(request);
     this.refreshHostCaps();
     this.syncEscapeCandidate();
   }
@@ -250,6 +349,7 @@ export class OverlayModuleImpl extends ModuleBase {
   override onProtoPhase(phase: ProtoPhase): void {
     super.onProtoPhase(phase);
     if (phase !== 'unmounted') return;
+    this.reconciliationRequests.clear();
     this.viewReconciliationVersion += 1;
     this.leaveEscapeScope?.();
     this.leaveEscapeScope = null;
@@ -270,10 +370,17 @@ export class OverlayModuleImpl extends ModuleBase {
     this.mountedEpoch = epoch;
     this.syncEscapeCandidate();
     if (phase === 'unmounting' || phase === 'detached') {
+      this.reconciliationRequests.clear();
       this.teardownMountedViewSideEffects();
       return;
     }
     if (phase === 'mounted') {
+      for (const request of this.reconciliationRequests) {
+        if (request.viewEpoch === null) {
+          request.viewEpoch = epoch;
+          request.capsEpoch = this.caps.epoch;
+        } else if (request.viewEpoch !== epoch) this.reconciliationRequests.delete(request);
+      }
       if (this.viewActive) this.syncViewSideEffects();
     }
   }
@@ -476,40 +583,51 @@ export class OverlayModuleImpl extends ModuleBase {
       return;
     }
     this.reconcilingView = true;
+    let completed = false;
     try {
       do {
         this.reconcileViewAgain = false;
-        this.syncCurrentViewSideEffects();
+        completed = this.syncCurrentViewSideEffects();
       } while (this.reconcileViewAgain && this.mountPhase === 'mounted' && this.viewActive);
+    } catch (error) {
+      this.reconciliationRequests.clear();
+      throw error;
     } finally {
       this.reconcilingView = false;
     }
+    if (completed) this.deliverReconciliationRequests();
+    else this.reconciliationRequests.clear();
   }
 
-  private syncCurrentViewSideEffects(): void {
+  private syncCurrentViewSideEffects(): boolean {
     const validView = this.currentViewGuard();
-    if (!validView()) return;
+    if (!validView()) return false;
     this.syncAnchorPartRegistration();
-    if (!validView()) return;
+    if (!validView()) return false;
     this.targetAlignment.syncSurface();
-    if (!validView()) return;
+    if (!validView()) return false;
     const registration = this.registration;
     const config = this.config;
     const current = () =>
       validView() && registration === this.registration && config === this.config;
     const hostEl = this.resolveHostElement();
-    if (!current()) return;
+    if (!current()) return false;
     if (!hostEl) {
       this.teardownMountedViewSideEffects();
-      return;
+      return false;
+    }
+    for (const request of this.reconciliationRequests) {
+      if (request.target === null) request.target = hostEl;
+      else if (request.target !== hostEl) this.reconciliationRequests.delete(request);
     }
     this.mountGlobalIfNeeded(hostEl, current);
-    if (!current()) return;
+    if (!current()) return false;
     this.applyLayerIfNeeded(hostEl, current);
-    if (!current()) return;
+    if (!current()) return false;
     this.syncAnchoredPosition(hostEl, current);
-    if (!current()) return;
+    if (!current()) return false;
     this.lockModalIfNeeded(current);
+    return current();
   }
 
   private deferResourceReentry(work: () => void): void {
@@ -564,6 +682,7 @@ export class OverlayModuleImpl extends ModuleBase {
     }
 
     if (!next) {
+      this.reconciliationRequests.clear();
       this.leaveEscapeScope?.();
       this.leaveEscapeScope = null;
       this.escapeScope = null;
@@ -595,6 +714,7 @@ export class OverlayModuleImpl extends ModuleBase {
     }
 
     this.viewActive = active;
+    if (!active) this.reconciliationRequests.clear();
     this.syncEscapeCandidate();
     this.viewReconciliationVersion += 1;
     if (active) {
@@ -620,6 +740,8 @@ export class OverlayModuleImpl extends ModuleBase {
 
   private replaceRegistration(next: Partial<OverlayRegistration>) {
     const prev = this.registration;
+    if (next.content !== undefined && prev.content !== null && next.content !== prev.content)
+      this.reconciliationRequests.clear();
     this.registration = Object.freeze({
       trigger: typeof next.trigger === 'undefined' ? this.registration.trigger : next.trigger,
       anchor: typeof next.anchor === 'undefined' ? this.registration.anchor : next.anchor,
@@ -871,6 +993,7 @@ export class OverlayModuleImpl extends ModuleBase {
   readonly handle: OverlayModuleHandle<any> = {
     open: this.openState.handle,
     isOpen: () => this.isOpen(),
+    afterViewReconciled: (callback) => this.afterViewReconciled(callback),
     openOverlay: (reason?: OverlayReason) => this.open(reason),
     close: (reason?: OverlayReason) => this.close(reason),
     toggle: (reason?: OverlayReason) => this.toggle(reason),

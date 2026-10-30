@@ -1,0 +1,47 @@
+id: P-BOOTSTRAP-2-3-2-TOOLBAR
+type: prototype
+title: Bootstrap 2.3.2 Toolbar projection
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Draft catalog relation for an implemented family projection against the pinned Bootstrap 2.3.2 vocabulary. Stable admission requires real consumers, browser/native evidence and independent review; source presence and private package availability are not release or conformance admission.
+summary: Bootstrap Toolbar family over P-BASE-TOOLBAR with pinned vocabulary.
+statement:
+    en: The family parts each invoke their matching public Base hook exactly once and preserve the complete Base protocol. Root/Button/Separator preserve the toolbar domain and roving policy; joined button-group edges are projected through public Anatomy order and private borrowed-axis transport rather than DOM sibling inference.
+criteria:
+  - id: P-BOOTSTRAP-2-3-2-TOOLBAR-BASE
+    text:
+            en: Invoke asToolbar* hooks() exactly once and preserve every inherited owner, module, render result, props/exposes and lifecycle; no second semantic owner, cross-family alias, jQuery/plugin API or Base.setup call.
+  - id: P-BOOTSTRAP-2-3-2-TOOLBAR-VISUAL
+    text:
+            en: Root/Button/Separator preserve the toolbar domain and roving policy; joined button-group edges are projected through public Anatomy order and private borrowed-axis transport rather than DOM sibling inference.
+  - id: P-BOOTSTRAP-2-3-2-TOOLBAR-CLOSURE
+    text:
+            en: All family appearance is authored through feedback tokens and Rules with explicit finite physical translation; no website-only CSS, Glyphicons, upstream JavaScript or Adapter component-name dispatch may supply default intent.
+  - id: P-BOOTSTRAP-2-3-2-TOOLBAR-BOUNDARY
+    text:
+            en: Exact-head browser, native, assistive-technology and Compiler evidence plus independent review remain open; the package is private and source-only. Catalog presence is a draft relation, not acceptance.
+dependsOn:
+  contracts:
+    - C-AS-HOOK-0001
+    - C-RULE-INTENT-FEEDBACK-STYLE-0001
+inherits:
+  prototypes:
+    - P-BASE-TOOLBAR
+verifies:
+  tests:
+    - T-BOOTSTRAP-2-3-2-HISTORICAL-SEARCH-NAV-0001
+sources:
+  - path: packages/prototypes/bootstrap-2-3-2/src/toolbar/
+  - path: packages/prototypes/bootstrap-2-3-2/src/toolbar/index.ts
+  - path: https://github.com/twbs/bootstrap/blob/b4c4072679943773a7582daa63f545ba818fa627/less/button-groups.less
+    label: Pinned historical design reference
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Bootstrap 2.3.2 Toolbar projection cataloged as a draft family projection over the implemented source slice.
+tags:
+  - prototype
+  - bootstrap-2-3-2
+  - toolbar
+  - draft

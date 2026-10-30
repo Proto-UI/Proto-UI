@@ -38,9 +38,15 @@ it('runs the styled consumer oracle against the real default Button host and gen
   const element = document.createElement(button.name);
   element.className = 'consumer-owned';
   element.textContent = 'Consumer button';
+  const arbitraryHeight = document.createElement('div');
+  arbitraryHeight.setAttribute('data-pui-style', 'h-[1.15rem]');
   try {
-    document.body.append(element);
+    document.body.append(element, arbitraryHeight);
     await flush();
+    // The full generated sheet includes Switch's arbitrary height. Both rules
+    // must stay independent in the HappyDOM structural oracle: h-8 is still
+    // 2rem/32px, never 1.15rem/18.4px from the unrelated selector.
+    expect(document.defaultView!.getComputedStyle(arbitraryHeight).height).toBe('18.4px');
     assertStyledButton(element, 'source Web Component');
     expect(element.className).toBe('consumer-owned');
     expect(element.textContent).toBe('Consumer button');
@@ -58,6 +64,7 @@ it('runs the styled consumer oracle against the real default Button host and gen
     assertStyledButton(element, 'restored Button');
   } finally {
     element.remove();
+    arbitraryHeight.remove();
     for (const style of styles) style.remove();
     rmSync(directory, { recursive: true, force: true });
     await flush();

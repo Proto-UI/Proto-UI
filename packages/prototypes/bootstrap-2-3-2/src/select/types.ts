@@ -14,6 +14,15 @@ import type {
   SelectItemProps,
   SelectItemExposes,
   SelectItemAsHookContract,
+  SelectGroupProps,
+  SelectGroupExposes,
+  SelectGroupAsHookContract,
+  SelectLabelProps,
+  SelectLabelExposes,
+  SelectLabelAsHookContract,
+  SelectSeparatorProps,
+  SelectSeparatorExposes,
+  SelectSeparatorAsHookContract,
 } from '@proto.ui/prototypes-base/select';
 
 export type Bootstrap232SelectRootProps = SelectRootProps;
@@ -31,3 +40,18 @@ export type Bootstrap232SelectContentAsHookContract = SelectContentAsHookContrac
 export type Bootstrap232SelectItemProps = SelectItemProps;
 export type Bootstrap232SelectItemExposes = SelectItemExposes;
 export type Bootstrap232SelectItemAsHookContract = SelectItemAsHookContract;
+
+export type Bootstrap232SelectGroupProps = SelectGroupProps;
+export type Bootstrap232SelectGroupExposes = SelectGroupExposes;
+export type Bootstrap232SelectGroupAsHookContract = SelectGroupAsHookContract;
+export type Bootstrap232SelectLabelProps = SelectLabelProps;
+export type Bootstrap232SelectLabelExposes = SelectLabelExposes;
+export type Bootstrap232SelectLabelAsHookContract = SelectLabelAsHookContract;
+export type Bootstrap232SelectSeparatorProps = SelectSeparatorProps;
+export type Bootstrap232SelectSeparatorExposes = SelectSeparatorExposes;
+export type Bootstrap232SelectSeparatorAsHookContract = SelectSeparatorAsHookContract;
+
+/** Structural slot parts carry no public props or exposes beyond the slot. */
+export type Bootstrap232SelectSurfaceProps = {};
+export type Bootstrap232SelectViewportProps = {};
+export type Bootstrap232SelectItemTextProps = {};

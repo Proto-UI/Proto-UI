@@ -94,6 +94,12 @@ Pause for one concise decision packet only when either (a) product authority lea
 
 Never widen the user's task or external mutation scope merely because the workflow can automate more actions.
 
+## Compiler architecture and final acceptance
+
+For any compiler/parser/IR/emitter/support change, apply [the thin compiler completion standard](../../../internal/compiler/atomic-lowering-completion.md). Trace authored ability -> compile-time IR -> native target operation and its reached helper closure. Reject component-name/path/package-specific business protocol copies, runtime semantic interpretation and second-framework reactive systems as final architecture. Intrinsics must have independently defined atomic host semantics; do not delete necessary callbacks, state or cleanup merely because they run at runtime.
+
+Use the full backend/operation/consumer matrix, not a single fast path. Publish source, retained bundle/link and initialization evidence separately. Ordinary framework-native imports, props/events/slots, reactive updates and mixed native children must work without a special Proto launcher. Preserve independent semantic tests and exact failed/unrun evidence; new source execution requires the applicable fixed-version authorization. This standard changes neither skill routing nor authority, DCO, review or protection requirements.
+
 ## Communicate
 
 Apply `internal/agent-operations/visual-evidence.md` to Agent-authored or materially advanced Issues and PRs, including historical backfill. Agents own reproduction, uploaded visuals, sanitized request paraphrases, and evidence debt; humans may submit plain descriptions. This is a soft gate, not a new human intake requirement or external-write authority. Read `internal/agent-operations/github-evidence-upload.md` before choosing an upload method.

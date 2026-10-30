@@ -61,6 +61,10 @@ The highest engineering principle for prototype work is independent implementati
 - Validate prototype conformance, compiler coverage, and host realization separately, then exercise their real composition. A rejected input identifies a coverage or conformance question to investigate; an explicit unsupported diagnostic is not an implemented capability. Source presence, a passing isolated test, or a declared backend mapping does not establish the remaining acceptance conditions.
 - Attribute a composition failure to the relevant definition or implementation with a reproducible case and send it to that owner. For the current Finf prototype workstream, Compiler and IR implementation belong to their existing owner: do not modify them to accommodate these prototypes. Continue prototype-side definition review, implementation, and applicable evidence without taking over that workstream.
 
+## Thin compiler delivery
+
+For compiler work, follow [the thin compiler completion standard](internal/compiler/atomic-lowering-completion.md). Compile shared definitions and authored atomic abilities through compile-time IR into the final native target representation; do not embed component protocols, dispatch on component identity, or ship an IR interpreter or a second framework runtime. Use target-native reactivity, lifecycle and ordinary component imports. Keep only reached host support and necessary native state/callbacks/cleanup. Bounded patches are delivery units, not permission to stop at a minimal Button implementation. This engineering direction does not promote a spec lifecycle or assert current conformance.
+
 ## Repository map
 
 - `spec/**`: cataloged contracts, prototypes, modules, Adapter profiles, decisions, host capabilities, tests, versions, and knowledge.

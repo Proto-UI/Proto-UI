@@ -1,0 +1,30 @@
+id: T-BOOTSTRAP-2-3-2-SLIDER-VALUES-0001
+type: test
+title: Bootstrap Slider Values family coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+summary: Indexed Values anatomy and controlled refusal with historical vocabulary.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-SLIDER-VALUES-0001-CASE-ANATOMY
+    title: Six Values parts map indexed slots and reject unmapped composition
+    covers:
+      - P-BOOTSTRAP-2-3-2-SLIDER-VALUES-BASE
+    expectation: indexed-values-anatomy-and-refusal
+implementations:
+  - id: bootstrap-slider-values-projection
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/slider-values-projection.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-SLIDER-VALUES
+      - P-BOOTSTRAP-2-3-2-SLIDER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-SLIDER
+    - P-BOOTSTRAP-2-3-2-SLIDER-VALUES

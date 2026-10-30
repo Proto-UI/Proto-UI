@@ -44,7 +44,8 @@ describe('target-independent expression types', () => {
     expect(inferBinaryType('===', record, 'null')).toBe('boolean');
     expect(inferBinaryType('!==', { kind: 'array', element: 'number' }, record)).toBe('boolean');
     expect(inferBinaryType('<', 'string', 'string')).toBe('boolean');
-    expect(inferBinaryType('>=', 'null', 'number')).toBe('boolean');
+    // Relational admission migration: null is no longer implicitly coerced to zero.
+    expect(() => inferBinaryType('>=', 'null', 'number')).toThrow(TypeError);
   });
 
   it('retains the operands actually returned by logical short circuiting', () => {

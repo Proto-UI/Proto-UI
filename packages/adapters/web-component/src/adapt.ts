@@ -1,4 +1,7 @@
-import { claimWebComponentOwnedRelocation } from './owned-relocation';
+import {
+  claimWebComponentOwnedRelocation,
+  isWebComponentOwnedRelocating,
+} from './owned-relocation';
 import type { WebResidentMotionOptions } from '@proto.ui/adapter-base';
 import {
   NATIVE_LINK_DECLARATION,
@@ -230,6 +233,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private _releaseOwnerResources: (() => void) | null = null;
     private _terminalCleanupComplete = false;
     private _disconnectVersion = 0;
+    private _withdrawViewOperations: (() => void) | null = null;
     private _pendingOwnedTokens: string[] | null = null;
     private _controller: RuntimeController | null = null;
     private _anatomyPort: AnatomyPort | null = null;
@@ -396,6 +400,10 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       // detached this element. Do not publish a false owner/topology change
       // or request a terminal reconnect; a real later connection retries.
       if (!this.isConnected) return;
+      // A rejected/second reconnect claim is a withdrawal disposition even
+      // when custom-element reactions observe the restored destination path.
+      // Do not let path restoration or transport finally revive the old token.
+      if (this._mountedOnce && !relocation) this._withdrawViewOperations?.();
       if (this._terminalDisposing) {
         this._terminalReconnectRequested = true;
         return;
@@ -478,6 +486,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
       const nativeLinkTarget = this._nativeLinkTarget;
       let nativeLinkProjectionObserver: MutationObserver | null = null;
       const owner = createViewEpochOwner<Props>({ prototypeName: tagName });
+      this._withdrawViewOperations = () => owner.withdrawViewOperations();
       let splitResources: ShadowSplitResources | null = null;
       let defaultKeyedMetaSources = this._defaultKeyedMetaSources;
       const propsObservers = new Set<MutationObserver>();
@@ -726,6 +735,7 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
           schedule,
           rawPropsSource,
           getInstanceAssociations: () => getElementAssociations(thisEl),
+          viewOperations: { capture: () => owner.captureViewOperation() },
           textControlTarget: this._textControlTarget,
           imageViewTarget: this._imageViewTarget,
           wiring,
@@ -1170,6 +1180,12 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
               overlayLayerScheduler,
             }),
             disposeView,
+            isViewAdmitted: () =>
+              !disposed &&
+              !ownerResourcesReleased &&
+              !this._terminalDisposing &&
+              (thisEl.isConnected || isWebComponentOwnedRelocating(thisEl)) &&
+              !thisEl.closest(`[${PUI_VIEW_DETACHED_ATTR}]`),
             createSession: createHostSession,
           });
           acquiringProjection = false;
@@ -1327,6 +1343,9 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
 
     disconnectedCallback() {
       if (this._terminalDisposing) return;
+      // Invalidate only unfulfilled source operations. Terminal retirement keeps
+      // its existing deferred policy; exact adapter-owned transport is retained.
+      if (!isWebComponentOwnedRelocating(this)) this._withdrawViewOperations?.();
       this._pendingOwnedTokens = this._applier ? Array.from(this._applier.getOwned()) : null;
       this._applier?.clear();
       this._hostDisplay?.sync();
@@ -1359,6 +1378,8 @@ export function AdaptToWebComponent<TProto extends Prototype<any, any>>(
     private async retireOwner(): Promise<void> {
       if (this._terminalDisposing) return;
       this._terminalDisposing = true;
+      this._withdrawViewOperations?.();
+      this._withdrawViewOperations = null;
       this._terminalReconnectRequested = false;
       const token = this._instanceToken;
       const dispose = this._invokeUnmounted;
