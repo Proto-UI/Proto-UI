@@ -19,13 +19,12 @@ criteria:
       en: Consume asFieldsetRoot once and retain the inherited renderer, Props, exposes and modules; add no second policy or relationship owner.
   - id: P-LIQUID-GLASS-FIELDSET-PRESENTATION
     text:
-      zh-CN: 圆角边框内边距分组，gap-3；声明 version-2 in-app-backdrop 材质、style fallback 与 liquid-glass 意图。材质意图不证明光学绘制。
-      en: Rounded bordered padded group with gap-3 and a version-2 in-app-backdrop material declaration, style fallback and liquid-glass intent. Material intent does not prove optical rendering.
+      zh-CN: 普通圆角边框内边距内容分组，gap-3；不声明 material slot、candidate 或隐式材质。disabled 与名称/描述关系继续由继承的 Base owner 管理，不因家族名称而给内容增加玻璃。
+      en: Ordinary rounded bordered padded content group with gap-3; declare no material slot, candidate or implicit material. Disabled policy and naming/description relations remain with the inherited Base owner; the family name does not turn content into glass.
 dependsOn:
   contracts:
     - C-FIELDSET-0001
     - C-FEEDBACK-STYLE-0003
-    - C-FEEDBACK-MATERIAL-0001
 verifies:
   tests:
     - T-BASE-FIELDSET-0001
@@ -38,11 +37,14 @@ inherits:
 openQuestions:
   - id: P-LIQUID-GLASS-FIELDSET-Q-ACCEPTANCE
     question:
-      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。 光学绘制、对比度及降低透明度 fallback 证据缺失；不声称 Apple 视觉一致。
-      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these. Optical paint, contrast and reduced-transparency fallback evidence is missing; no Apple visual parity is claimed.
+      zh-CN: 何时完成完整重复目标 fail-closed、关系清理/重挂载、原生名称/描述、键盘、跨 Adapter 与 GPUI 的精确 head 验收？现有 runtime 检查不覆盖全部条件。普通外观与对比度仍需原生证据；Fieldset 不请求材质，也不声称 Apple 视觉一致。
+      en: When will complete duplicate-target fail-closed, relation teardown/remount, native accessible-name/description, keyboard, cross-Adapter and GPUI evidence close exact-head acceptance? Existing runtime checks do not answer all of these. Ordinary paint and contrast still need native evidence; Fieldset requests no material and claims no Apple visual parity.
     blocks:
       - activation:P-LIQUID-GLASS-FIELDSET
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Removed implicit material from ordinary Fieldset content while preserving Base policy, relationships and draft evidence boundaries.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Introduced draft Fieldset definition with explicit evidence limits; no stable admission.

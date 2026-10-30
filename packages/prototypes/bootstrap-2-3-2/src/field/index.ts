@@ -20,4 +20,25 @@ export type {
   FieldErrorExposes,
   FieldValidityProps,
   FieldValidityExposes,
+  FieldTextareaProps,
+  FieldTextareaExposes,
+  FieldTextareaAsHookContract,
+  FieldSelectTriggerProps,
+  FieldSelectTriggerExposes,
+  FieldSelectTriggerAsHookContract,
+  FieldSwitchProps,
+  FieldSwitchExposes,
+  FieldSwitchAsHookContract,
 } from '@proto.ui/prototypes-base/field';
+
+export { default as fieldTextarea, default as bootstrap232FieldTextarea } from './textarea.proto';
+export {
+  default as fieldSelectTrigger,
+  default as bootstrap232FieldSelectTrigger,
+} from './select-trigger.proto';
+export type {
+  Bootstrap232FieldSelectTriggerProps,
+  Bootstrap232FieldSelectTriggerExposes,
+  Bootstrap232FieldSelectTriggerAsHookContract,
+} from './select-trigger.proto';
+export { default as fieldSwitch, default as bootstrap232FieldSwitch } from './switch.proto';

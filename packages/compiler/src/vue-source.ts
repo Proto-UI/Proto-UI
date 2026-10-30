@@ -1127,7 +1127,7 @@ export default ${componentName};
     value: {
       code, profile,
       ...((usesStyle || usesInteraction || contextArtifacts || ssr || staticDeclarations.files.length) ? { supportingFiles: [...(contextArtifacts?.files ?? []), ...staticDeclarations.files, ...(usesStyle ? [nativeStyleArtifact] : []), ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []), ...(ssr ? [vueSsrSupportArtifact] : [])] } : {}),
-      dependencies: [...TARGET_PROFILES['vue-source-v1'].dependencies.map((dependency) => ({ ...dependency })), ...(ssr ? [{ name: '@vue/server-renderer', version: '3.5.31', role: 'target' as const }] : [])],
+      dependencies: [...TARGET_PROFILES['vue-source-v1'].dependencies.filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom').map((dependency) => ({ ...dependency })), ...(ssr ? [{ name: '@vue/server-renderer', version: '3.5.31', role: 'target' as const }] : [])],
       provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
     },
   };

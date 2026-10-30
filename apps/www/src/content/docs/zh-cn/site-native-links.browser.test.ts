@@ -1448,9 +1448,21 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
           })
         );
         await expect.poll(() => toc.getAttribute('aria-current')).toBe('true');
+        // #843: current belongs to native semantics and Text; only the shared
+        // range paints a background, including while the pointer stays on current.
+        await toc.hover();
+        await expect.poll(async () => (await linkPaint(toc)).background).toBe('rgba(0, 0, 0, 0)');
         await expect
-          .poll(async () => (await linkPaint(toc)).tokens)
-          .toContain(family === 'brutalist' ? 'bg-main' : 'bg-accent');
+          .poll(async () => (await linkPaint(toc)).textTokens)
+          .toContain(family === 'brutalist' ? 'font-semibold' : 'font-medium');
+        expect(await page.locator('sl-toc a[aria-current="true"]').count()).toBe(1);
+        const tocRows = page.locator('sl-toc a[data-site-link-appearance="toc"]');
+        for (const row of await tocRows.all()) {
+          const paint = await linkPaint(row);
+          expect(paint.background).toBe('rgba(0, 0, 0, 0)');
+          for (const fill of ['bg-main', 'bg-accent', 'bg-muted'])
+            expect(paint.tokens).not.toContain(fill);
+        }
         // #843 restores one passive geometry mount, painted only by the
         // existing public family Surface. Keep rejecting legacy private paint.
         const range = page.locator('sl-toc > [data-site-toc-highlight][aria-hidden="true"]');
@@ -1992,3 +2004,226 @@ describe.sequential('native links with app-owned Proto visual surfaces', () => {
     }
   }, 180_000);
 });
+
+// #1039: native first-frame typography is the independent density oracle.
+// This matrix does not claim that TOC first-frame geometry is repaired.
+it('keeps compact Sidebar typography across root text, viewport and enhancement', async () => {
+  for (const [family, route] of [
+    ['shadcn', '/zh-cn/ui-libraries/shadcn/button/'],
+    ['brutalist', '/zh-cn/ui-libraries/brutalist/components/textarea/'],
+  ] as const) {
+    for (const javaScriptEnabled of [false, true]) {
+      for (const colorScheme of ['light', 'dark'] as const) {
+        const context = await browser.newContext({ javaScriptEnabled, colorScheme });
+        const page = await context.newPage();
+        try {
+          await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+          if (javaScriptEnabled) {
+            await page.waitForFunction(() =>
+              [
+                ...document.querySelectorAll(
+                  '.sidebar-pane .top-level a, .sidebar-pane .top-level summary'
+                ),
+              ].every(
+                (link) =>
+                  link.hasAttribute('data-site-link-enhanced') &&
+                  link.querySelector('[data-site-link-text]')
+              )
+            );
+          }
+          for (const width of [320, 390, 1280, 1920]) {
+            await page.setViewportSize({ width, height: 1000 });
+            for (const rootSize of [16, 20, 24]) {
+              await page.evaluate((size) => {
+                document.documentElement.style.fontSize = `${size}px`;
+              }, rootSize);
+              const rows = await page
+                .locator('.sidebar-pane .top-level a, .sidebar-pane .top-level summary')
+                .evaluateAll((links) =>
+                  links.map((link) => {
+                    const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+                    const surface =
+                      link.querySelector<HTMLElement>('[data-site-link-content]') ?? link;
+                    const style = getComputedStyle(text);
+                    const layout = getComputedStyle(surface);
+                    const topGroup =
+                      link.localName === 'summary' && !link.matches('.top-level ul summary');
+                    return {
+                      topGroup,
+                      size: parseFloat(style.fontSize),
+                      line: parseFloat(style.lineHeight),
+                      margin: parseFloat(layout.marginBottom),
+                      minHeight: parseFloat(layout.minHeight),
+                      enhanced: link.hasAttribute('data-site-link-enhanced'),
+                      role: link.getAttribute('role'),
+                    };
+                  })
+                );
+              expect(rows.length).toBeGreaterThan(0);
+              for (const row of rows) {
+                expect(row.size).toBeCloseTo(rootSize * (row.topGroup ? 0.75 : 0.8125), 2);
+                expect(row.line).toBeCloseTo(rootSize * 1.25, 2);
+                expect(row.margin).toBe(0);
+                expect(row.enhanced).toBe(javaScriptEnabled);
+                expect(row.role).toBeNull();
+                // Both baseline and enhanced retain the responsive target floor.
+                expect(row.minHeight).toBeGreaterThanOrEqual(rootSize * 2);
+                if (width <= 390) expect(row.minHeight).toBeGreaterThanOrEqual(rootSize * 2.75);
+              }
+            }
+          }
+        } finally {
+          await context.close();
+        }
+      }
+    }
+  }
+}, 150_000);
+
+it('keeps reading TOC native row boxes, depth padding and multiline growth through enhancement', async () => {
+  for (const [family, route] of [
+    ['shadcn', '/zh-cn/ui-libraries/shadcn/button/'],
+    ['brutalist', '/zh-cn/ui-libraries/brutalist/components/textarea/'],
+  ] as const) {
+    for (const javaScriptEnabled of [false, true]) {
+      const context = await browser.newContext({
+        javaScriptEnabled,
+        viewport: { width: 1920, height: 1000 },
+      });
+      const page = await context.newPage();
+      const id = `reading-toc-${family}-${javaScriptEnabled ? 'enhanced' : 'nojs'}`;
+      const samples: unknown[] = [];
+      try {
+        await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+        if (javaScriptEnabled)
+          await page.waitForFunction(() =>
+            document.querySelector(
+              '.right-sidebar sl-toc a[data-site-link-enhanced] [data-site-link-text]'
+            )
+          );
+        for (const width of [1280, 1920]) {
+          await page.setViewportSize({ width, height: 1000 });
+          for (const rootSize of [16, 20, 24]) {
+            await page.evaluate((size) => {
+              document.documentElement.style.fontSize = `${size}px`;
+            }, rootSize);
+            const rows = await page.locator('.right-sidebar sl-toc a').evaluateAll((links) =>
+              links
+                .filter((link) => link.checkVisibility())
+                .map((link) => {
+                  const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+                  const leaf = link.querySelector<HTMLElement>('[data-site-link-content]') ?? link;
+                  const rect = link.getBoundingClientRect();
+                  const parent = link.parentElement!.getBoundingClientRect();
+                  const style = getComputedStyle(text),
+                    layout = getComputedStyle(leaf);
+                  return {
+                    size: parseFloat(style.fontSize),
+                    line: parseFloat(style.lineHeight),
+                    height: rect.height,
+                    left: rect.left,
+                    width: rect.width,
+                    parentLeft: parent.left,
+                    parentWidth: parent.width,
+                    paddingStart: parseFloat(layout.paddingInlineStart),
+                    depth: parseFloat(getComputedStyle(link).getPropertyValue('--depth')) || 0,
+                    margin: parseFloat(layout.marginBottom),
+                  };
+                })
+            );
+            const title = page.locator('.right-sidebar sl-toc h2#starlight__on-this-page');
+            if (javaScriptEnabled) await title.locator('[data-typography-prototype]').waitFor();
+            const titlePaint = await title.evaluate((native) => {
+              const surface =
+                native.querySelector<HTMLElement>('[data-typography-prototype]') ?? native;
+              const style = getComputedStyle(surface),
+                parent = getComputedStyle(native);
+              return {
+                tag: native.tagName,
+                text: native.textContent?.trim(),
+                size: parseFloat(style.fontSize),
+                line: parseFloat(style.lineHeight),
+                font: style.fontFamily,
+                nativeFont: parent.fontFamily,
+                weight: style.fontWeight,
+                nativeWeight: parent.fontWeight,
+                tracking: style.letterSpacing,
+                nativeTracking: parent.letterSpacing,
+                labelledBy: native.closest('nav')?.getAttribute('aria-labelledby'),
+              };
+            });
+            samples.push({ width, rootSize, rows, titlePaint });
+            expect(titlePaint.tag).toBe('H2');
+            expect(titlePaint.text).toBeTruthy();
+            expect(titlePaint.labelledBy).toBe('starlight__on-this-page');
+            expect(titlePaint.size).toBeCloseTo(rootSize * 0.75, 2);
+            expect(titlePaint.line).toBeCloseTo(rootSize, 2);
+            expect(titlePaint.font).toBe(titlePaint.nativeFont);
+            expect(titlePaint.weight).toBe(titlePaint.nativeWeight);
+            expect(titlePaint.tracking).toBe(titlePaint.nativeTracking);
+            expect(rows.length).toBeGreaterThan(0);
+            for (const row of rows) {
+              expect(row.size).toBeCloseTo(rootSize * 0.8, 2);
+              expect(row.line).toBeCloseTo(rootSize, 2);
+              expect(row.height).toBeGreaterThanOrEqual(rootSize * 1.5 - 0.1);
+              expect(row.left).toBeCloseTo(row.parentLeft, 0);
+              expect(row.width).toBeCloseTo(row.parentWidth, 0);
+              expect(row.paddingStart).toBeCloseTo(rootSize * (row.depth + 0.5), 2);
+              expect(row.margin).toBe(0);
+            }
+            if (width === 1920 && rootSize === 16)
+              await captureLinks(page, id, family, 'wc', 'reading-toc-native-density', { samples });
+          }
+        }
+        const first = page.locator('.right-sidebar sl-toc a').first();
+        await first.evaluate((link) => {
+          const source =
+            link.querySelector('[data-site-link-text]')?.firstElementChild ??
+            link.querySelector('span')!;
+          source.textContent =
+            'A deliberately long reading TOC destination that wraps across several lines without a fixed-height clipping shortcut';
+        });
+        const multiline = await first.evaluate((link) => {
+          const text = link.querySelector<HTMLElement>('[data-site-link-text]') ?? link;
+          return {
+            height: link.getBoundingClientRect().height,
+            line: parseFloat(getComputedStyle(text).lineHeight),
+            root: parseFloat(getComputedStyle(document.documentElement).fontSize),
+          };
+        });
+        samples.push({ multiline });
+        expect(multiline.height).toBeGreaterThan(multiline.root * 1.5);
+        expect(multiline.height).toBeGreaterThanOrEqual(
+          multiline.line * 2 + multiline.root * 0.5 - 1
+        );
+        if (javaScriptEnabled) {
+          await assertNavigationFocus(page, first);
+          for (const position of ['bottom', 'top'] as const) {
+            await page.evaluate(
+              (position) =>
+                window.scrollTo(
+                  0,
+                  position === 'bottom' ? document.documentElement.scrollHeight : 0
+                ),
+              position
+            );
+            await expect
+              .poll(() => page.locator('.right-sidebar sl-toc a[aria-current="true"]').count())
+              .toBe(1);
+            const range = page.locator('.right-sidebar sl-toc > [data-site-toc-highlight]');
+            await expect.poll(() => range.getAttribute('data-toc-range-visible')).not.toBeNull();
+            expect(await range.locator('[data-pui-root]').count()).toBe(1);
+          }
+        }
+      } catch (error) {
+        await captureLinks(page, `${id}-failure`, family, 'wc', 'reading-toc-density-failure', {
+          samples,
+          error: String(error),
+        });
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }
+  }
+}, 150_000);

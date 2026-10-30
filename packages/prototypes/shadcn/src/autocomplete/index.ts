@@ -18,4 +18,4 @@ export type {
   AutocompleteEmptyExposes,
   AutocompleteTriggerProps,
   AutocompleteTriggerExposes,
-} from '@proto.ui/prototypes-base/autocomplete';
+} from './types';

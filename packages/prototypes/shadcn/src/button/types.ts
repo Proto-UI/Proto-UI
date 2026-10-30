@@ -1,4 +1,5 @@
 import type { ButtonExposes, ButtonProps } from '@proto.ui/prototypes-base/button';
+import type { ShadcnStyleChoice, ShadcnStyleId, ShadcnStyleProps } from '../style-scope';
 
 export type ShadcnButtonVariant =
   | 'default'
@@ -8,13 +9,14 @@ export type ShadcnButtonVariant =
   | 'ghost'
   | 'link';
 
-export type ShadcnActionStyleProfile = 'rhea' | 'luma';
-export type ShadcnButtonStyleProfile = ShadcnActionStyleProfile | 'new-york';
+/** Explicit passive appearance; omission still preserves the ordinary atom. */
+export type ShadcnActionStyleProfile = ShadcnStyleId | 'new-york';
+export type ShadcnButtonStyleProfile = ShadcnStyleChoice;
 
 export type ShadcnButtonSize = 'default' | 'sm' | 'lg' | 'icon' | 'icon-compact';
 
-export interface ShadcnButtonProps extends ButtonProps {
-  /** Rhea is the homepage card profile; Luma is the explicit hero profile; new-york retains the pinned legacy direct Button. */
+export interface ShadcnButtonProps extends ButtonProps, ShadcnStyleProps {
+  /** Explicit choice, then nearest scope, then the existing Rhea compatibility recipe. */
   styleProfile?: ShadcnButtonStyleProfile;
   variant?: ShadcnButtonVariant;
   size?: ShadcnButtonSize;

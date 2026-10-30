@@ -79,16 +79,29 @@ for (const family of ['shadcn', 'brutalist', 'bootstrap-2-3-2', 'liquid-glass'])
     expect(editor.getAttribute('aria-invalid')).toBe('true');
     expect(editor.hasAttribute('data-invalid')).toBe(true);
     const tokens = (editor.getAttribute('data-pui-style') ?? '').split(/\s+/);
-    expect(tokens).toContain(
-      family === 'liquid-glass'
-        ? 'border-foreground'
-        : ['shadcn', 'bootstrap-2-3-2'].includes(family)
-          ? 'data-[invalid]:border-destructive'
-          : 'data-[invalid]:border-foreground'
-    );
+    if (family === 'shadcn') {
+      // Invalid paint is profile-driven (nova): destructive border/ring apply
+      // live while invalid instead of a data-[invalid] variant.
+      expect(tokens).toContain('border-destructive');
+      expect(tokens).toContain('ring-destructive/20');
+      expect(tokens).toContain('ring-3');
+    } else {
+      expect(tokens).toContain(
+        family === 'liquid-glass'
+          ? 'border-foreground'
+          : family === 'bootstrap-2-3-2'
+            ? 'data-[invalid]:border-destructive'
+            : 'data-[invalid]:border-foreground'
+      );
+    }
     setElementProps(root, { invalid: false });
     await flush();
     expect(editor.hasAttribute('data-invalid')).toBe(false);
+    if (family === 'shadcn') {
+      const cleared = (editor.getAttribute('data-pui-style') ?? '').split(/\s+/);
+      expect(cleared).toContain('border-input');
+      expect(cleared).not.toContain('border-destructive');
+    }
     if (family === 'liquid-glass') {
       expect(editor.getAttribute('data-pui-style')).toContain('border-border');
       expect((editor.getAttribute('data-pui-style') ?? '').split(/\s+/)).not.toContain(

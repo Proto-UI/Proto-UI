@@ -1977,7 +1977,9 @@ describe('lowered hook coverage', () => {
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
-  });
+    // Eight producer directories each run a full registration + rule-state
+    // scan; the shared suite host exceeds the 5s default.
+  }, 60_000);
 
   it('keeps destructured setup capture open instead of suppressing optional rules', async () => {
     const dir = await mkdtemp(path.join(tmpdir(), 'lowered-hook-destructured-setup-'));
@@ -5135,5 +5137,7 @@ describe('lowered hook coverage', () => {
       unshaped.map(({ hook, state }) => `${hook}().${state}`),
       'hook states whose declared source name cannot lower to a data selector'
     ).toEqual([]);
-  }, 60_000);
+    // The whole-tree rule-state scan outgrew 60s once the R91 multi-profile
+    // family sources landed; keep the unfiltered scan.
+  }, 240_000);
 });

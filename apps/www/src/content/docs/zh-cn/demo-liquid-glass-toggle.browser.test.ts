@@ -222,6 +222,30 @@ async function capture(
       pointerEvents: css.pointerEvents,
     };
   });
+  const contentGeometry = await subject.evaluate((host) => {
+    const walker = document.createTreeWalker(host, NodeFilter.SHOW_TEXT);
+    const boxes: DOMRect[] = [];
+    while (walker.nextNode()) {
+      const node = walker.currentNode;
+      if (!node.textContent?.trim() || node.parentElement?.closest('svg')) continue;
+      const range = document.createRange();
+      range.selectNodeContents(node);
+      const box = range.getBoundingClientRect();
+      if (box.width > 0 && box.height > 0) boxes.push(box);
+    }
+    const icon = host.querySelector('[data-liquid-toggle-icon-content]');
+    const iconBox = icon?.getBoundingClientRect();
+    const contentBoxes = iconBox ? [iconBox] : boxes;
+    if (!contentBoxes.length || contentBoxes.some((box) => box.width <= 0 || box.height <= 0))
+      return null;
+    const outer = host.getBoundingClientRect();
+    const left = Math.min(...contentBoxes.map((box) => box.left));
+    const right = Math.max(...contentBoxes.map((box) => box.right));
+    return {
+      kind: iconBox ? 'icon' : 'text',
+      centerOffset: (left + right - outer.left - outer.right) / 2,
+    };
+  });
   const paint = facts.paint;
 
   const { uri, image, paint: _paint, receipt: _receipt, ...summary } = facts;
@@ -244,6 +268,7 @@ async function capture(
     ...details,
     ...summary,
     selectionMarker,
+    contentGeometry,
     carrier: carrierObservation,
     receipt,
     screenshotTiming:
@@ -264,6 +289,11 @@ async function capture(
   expect(selectionMarker.width).toBe(12);
   expect(selectionMarker.height).toBe(12);
   expect(selectionMarker.pointerEvents).toBe('none');
+  expect(
+    contentGeometry,
+    'Every named text/icon capture requires measurable content'
+  ).not.toBeNull();
+  expect(Math.abs(contentGeometry!.centerOffset)).toBeLessThanOrEqual(1);
   expect(facts.underline).toBe('none');
   expect(selectionMarker.strokeRgba).toEqual(facts.foreground);
   if (facts.quality === 'self-optical') {
@@ -397,6 +427,37 @@ describe.sequential('Liquid Toggle native input and self-optical material', () =
           expect(bareActive.underline).toBe('none');
           opaqueState(bareActive, theme, true);
           expect(bareActive.background).not.toEqual(bareInactive.background);
+          // Isolate geometry from optical admission; keep source/provider assertions above.
+          const originalGeometryStyle = await bare.evaluate((host) => ({
+            dir: host.getAttribute('dir'),
+            fontSize: (host as HTMLElement).style.fontSize,
+          }));
+          try {
+            for (const direction of ['ltr', 'rtl'] as const) {
+              await bare.evaluate(
+                (host, dir) => {
+                  host.setAttribute('dir', dir);
+                  (host as HTMLElement).style.fontSize = '28px';
+                },
+                direction
+              );
+              await capture(
+                `${runtime}-${theme}-no-provider-${direction}-large-text`,
+                bare,
+                observations,
+                { direction, textScale: 2 }
+              );
+            }
+          } finally {
+            await bare.evaluate(
+              (host, original) => {
+                if (original.dir === null) host.removeAttribute('dir');
+                else host.setAttribute('dir', original.dir);
+                (host as HTMLElement).style.fontSize = original.fontSize;
+              },
+              originalGeometryStyle
+            );
+          }
           expect(await subject('disabled').getAttribute('aria-pressed')).toBe('true');
 
           const iconOnly = subject('icon-only');

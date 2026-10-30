@@ -4,6 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { createRequire } from 'node:module';
 import os from 'node:os';
 import path from 'node:path';
+import { searchPart, searchInput, readSearchPublicState } from './site-search-public-browser';
 import { revealHeaderPreferences } from './site-header-browser';
 import type { Browser, Page, Request } from 'playwright-core';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
@@ -233,6 +234,7 @@ afterEach(async () => {
 async function capture(page: Page, id: string, state: string) {
   await mkdir(evidenceDirectory, { recursive: true });
   const screenshot = `${id}-${state}.png`;
+  const publicSearch = await page.evaluate(readSearchPublicState);
   const observed = await page.locator('site-search').evaluate((search) => ({
     family: document.documentElement.dataset.siteLibraryFamily,
     searchState: { ...(search as HTMLElement).dataset },
@@ -306,7 +308,7 @@ async function capture(page: Page, id: string, state: string) {
     timeline: (window as any).__puiSearchTimeline ?? [],
     theme: document.documentElement.dataset.theme,
     dialogOpen: search.querySelector('dialog')?.open,
-    service: search.querySelector('.search-failure') ? 'production-pagefind' : 'dev-warning',
+    service: 'public-dialog-command-pagefind-api',
     focused:
       document.activeElement?.getAttribute('aria-label') ?? document.activeElement?.className,
     commands: [
@@ -406,6 +408,7 @@ async function capture(page: Page, id: string, state: string) {
         url: page.url(),
         viewport: page.viewportSize(),
         observed,
+        publicSearch,
         errors: diagnosticPages.get(page)?.errors ?? [],
         pendingRequests: pendingRequests.map(({ url, type }) => [url, type]),
         summary,
@@ -413,7 +416,7 @@ async function capture(page: Page, id: string, state: string) {
         lateObservation: diagnosticPages.get(page)?.lateObservation,
         renderer: 'Real Chromium via existing repository browser harness',
         scope:
-          'Search trigger/close/retry Buttons only; native dialog and Pagefind visuals remain CSS-owned',
+          'Public family Dialog + Command composition; development harness does not prove generated-index results',
       },
       null,
       2
@@ -426,29 +429,56 @@ async function installOpenCounter(page: Page) {
   await page.addInitScript(() => {
     const timeline: unknown[] = [];
     (window as any).__puiSearchTimeline = timeline;
-    const describe = (node: EventTarget | null) =>
-      node instanceof Element
-        ? {
-            tag: node.localName,
-            id: node.id,
-            command: (node as HTMLElement).dataset.searchCommand,
-            role: node.getAttribute('role'),
-            disabled: node.getAttribute('aria-disabled'),
-            generation: (node as HTMLElement).dataset.projectionGeneration,
-            connected: node.isConnected,
-          }
-        : null;
+    (window as any).__puiSearchOpenCount = 0;
+    const seen = new WeakSet<Element>();
+    const stops: Array<() => void> = [];
+    const currentOwner = () =>
+      document.querySelector<HTMLElement>('site-search [data-search-dialog-mount]')?.dataset
+        .projectionOwner;
     const record = (type: string, target: EventTarget | null, extra: unknown = null) => {
       timeline.push({
         at: performance.now(),
         type,
-        target: describe(target),
-        active: describe(document.activeElement),
-        open: document.querySelector('site-search dialog')?.hasAttribute('open'),
+        target:
+          target instanceof Element
+            ? {
+                tag: target.localName,
+                ref: target.getAttribute('data-demo-ref'),
+                connected: target.isConnected,
+              }
+            : null,
+        active: document.activeElement?.outerHTML.slice(0, 800),
         extra,
       });
       if (timeline.length > 160) timeline.shift();
     };
+    const scan = () => {
+      const owner = currentOwner();
+      if (!owner) return;
+      for (const element of document.querySelectorAll<HTMLElement>(
+        `[data-projection-owner="${CSS.escape(owner)}"][data-demo-ref="dialog"]`
+      )) {
+        // The activation matrix uses WC. Observe its actual public open state,
+        // not monkeypatched HTMLDialogElement methods or test-authored DOM state.
+        const state = (element as any).getExposes?.()?.open;
+        if (seen.has(element) || !state?.subscribe) continue;
+        seen.add(element);
+        stops.push(
+          state.subscribe((event: any) => {
+            if (event.type !== 'next') return;
+            record('public-dialog-open', element, { open: event.next });
+            if (event.next === true) (window as any).__puiSearchOpenCount++;
+          })
+        );
+      }
+    };
+    const observer = new MutationObserver(scan);
+    observer.observe(document, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['data-projection-owner', 'data-demo-ref'],
+    });
     for (const type of [
       'pointerdown',
       'pointerup',
@@ -457,53 +487,41 @@ async function installOpenCounter(page: Page) {
       'keyup',
       'focusin',
       'focusout',
-      'cancel',
-      'close',
     ]) {
       for (const capture of [true, false])
         window.addEventListener(
           type,
           (event) => {
+            const target = event.target;
+            const owner = currentOwner();
+            if (!(target instanceof Element)) return;
+            const scoped = target.closest('[data-projection-owner]');
             if (
-              document.querySelector('site-search dialog[open]') ||
-              (event.target instanceof Element && event.target.closest('site-search'))
-            ) {
-              record(`${type}:${capture ? 'capture' : 'bubble'}`, event.target, {
+              target.closest('site-search') ||
+              (owner && scoped?.getAttribute('data-projection-owner') === owner)
+            )
+              record(`${type}:${capture ? 'capture' : 'bubble'}`, target, {
                 key: (event as KeyboardEvent).key,
-                x: (event as MouseEvent).clientX,
-                y: (event as MouseEvent).clientY,
                 trusted: event.isTrusted,
-                kind: event.constructor.name,
+                defaultPrevented: event.defaultPrevented,
               });
-            }
           },
           capture
         );
     }
-    const originalFocus = HTMLElement.prototype.focus;
-    HTMLElement.prototype.focus = function (...args) {
-      const tracked = this.hasAttribute('data-search-command');
-      if (tracked) record('native-focus:before', this);
-      const result = originalFocus.apply(this, args);
-      if (tracked) record('native-focus:after', this);
-      return result;
-    };
-    const originalClose = HTMLDialogElement.prototype.close;
-    HTMLDialogElement.prototype.close = function (...args) {
-      record('dialog-close:before', this);
-      const result = originalClose.apply(this, args);
-      record('dialog-close:after', this);
-      return result;
-    };
-    const original = HTMLDialogElement.prototype.showModal;
-    HTMLDialogElement.prototype.showModal = function () {
-      this.dataset.testOpenCount = String(Number(this.dataset.testOpenCount ?? 0) + 1);
-      return original.call(this);
-    };
+    window.addEventListener(
+      'pagehide',
+      () => {
+        observer.disconnect();
+        for (const off of stops) off();
+      },
+      { once: true }
+    );
+    scan();
   });
 }
 
-// The standard harness serves Astro dev. That path intentionally renders the
+// The standard harness serves Astro dev; actual generated-index search is proved
 // development warning instead of Pagefind. These cases prove actual command
 // projection, responsive layout, modal activation and focus restoration; they
 // do not claim a live production index or retry has been exercised.
@@ -535,10 +553,7 @@ describe.sequential('Search family Button commands', () => {
             const trigger = page.locator(
               'site-search [data-projection-generation-state="active"] [data-open-modal]'
             );
-            const dialog = page.locator('site-search dialog');
-            const close = page.locator(
-              'site-search [data-projection-generation-state="active"] [data-close-modal]'
-            );
+
             stage(page, id, 'initial-ready');
             try {
               const entry = diagnosticPages.get(page)!;
@@ -578,6 +593,7 @@ describe.sequential('Search family Button commands', () => {
               throw error;
             }
             await page.evaluate(() => (window as any).__puiSearchStartup?.stop());
+            const close = await searchPart(page, 'close');
             expect(await trigger.evaluate((button) => button.localName)).toBe(
               `wc-${family}-button`
             );
@@ -586,7 +602,7 @@ describe.sequential('Search family Button commands', () => {
             // Each Header consumes its public family Button presentation.
             const triggerTokens = await trigger.getAttribute('data-pui-style');
             expect(triggerTokens).toContain(
-              family === 'brutalist' ? 'bg-secondary-background' : 'bg-transparent'
+              family === 'brutalist' ? 'bg-secondary-background' : 'bg-secondary'
             );
             if (family === 'shadcn') {
               expect(triggerTokens).toContain('border-transparent');
@@ -595,7 +611,7 @@ describe.sequential('Search family Button commands', () => {
                 background: getComputedStyle(node).backgroundColor,
               }));
               expect(rest.border).toBe('rgba(0, 0, 0, 0)');
-              expect(rest.background).toBe('rgba(0, 0, 0, 0)');
+              expect(rest.background).not.toBe('rgba(0, 0, 0, 0)');
             } else {
               expect(triggerTokens).toContain('border-black');
               expect(triggerTokens).toContain('shadow-[4px_4px_0_0_#000]');
@@ -607,30 +623,32 @@ describe.sequential('Search family Button commands', () => {
             await capture(page, id, 'trigger');
             await trigger.locator('svg').click();
             await expect
-              .poll(() => dialog.evaluate((element) => (element as HTMLDialogElement).open))
+              .poll(async () => (await page.evaluate(readSearchPublicState)).open)
               .toBe(true);
-            expect(await dialog.getAttribute('data-test-open-count')).toBe('1');
-            expect(await close.evaluate((button) => button.localName)).toBe(`wc-${family}-button`);
-            expect(await close.getAttribute('data-pui-style')).toContain(
-              family === 'brutalist' ? 'bg-secondary-background' : 'bg-transparent'
-            );
+            expect((await page.evaluate(readSearchPublicState)).openCount).toBe(1);
+            expect(await close.getAttribute('role')).toBe('button');
+            expect(await close.locator('[role=button],button').count()).toBe(0);
             await capture(page, id, 'open');
-            await close.locator('svg').click();
+            await close.click();
             await expect
               .poll(() => trigger.evaluate((element) => element === document.activeElement))
               .toBe(true);
             await trigger.press('Enter');
-            await expect.poll(() => dialog.getAttribute('data-test-open-count')).toBe('2');
+            await expect
+              .poll(async () => (await page.evaluate(readSearchPublicState)).openCount)
+              .toBe(2);
             await page.keyboard.press('Escape');
             await expect
               .poll(() => trigger.evaluate((element) => element === document.activeElement))
               .toBe(true);
             await trigger.press('Space');
-            await expect.poll(() => dialog.getAttribute('data-test-open-count')).toBe('3');
+            await expect
+              .poll(async () => (await page.evaluate(readSearchPublicState)).openCount)
+              .toBe(3);
             stage(page, id, 'backdrop');
             await page.mouse.click(2, 2);
             await expect
-              .poll(() => dialog.evaluate((element) => (element as HTMLDialogElement).open))
+              .poll(async () => (await page.evaluate(readSearchPublicState)).open)
               .toBe(false);
             await expect
               .poll(() => trigger.evaluate((element) => element === document.activeElement))
@@ -638,15 +656,90 @@ describe.sequential('Search family Button commands', () => {
             for (const key of ['Control+k', 'Meta+k']) {
               await page.keyboard.press(key);
               await expect
-                .poll(() => dialog.evaluate((element) => (element as HTMLDialogElement).open))
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
                 .toBe(true);
               await page.keyboard.press(key);
               await expect
-                .poll(() => dialog.evaluate((element) => (element as HTMLDialogElement).open))
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
                 .toBe(false);
               await expect
                 .poll(() => trigger.evaluate((element) => element === document.activeElement))
                 .toBe(true);
+            }
+            for (const closeKey of ['Enter', 'Space']) {
+              await trigger.click();
+              await expect
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+                .toBe(true);
+              await close.press(closeKey);
+              await expect
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+                .toBe(false);
+              await expect
+                .poll(() => trigger.evaluate((node) => node === document.activeElement))
+                .toBe(true);
+            }
+            expect((await page.evaluate(readSearchPublicState)).openCount).toBe(7);
+            await capture(page, id, 'keyboard-close');
+            if (width === 1440) {
+              // User-reported bottom Ctrl+K regression: modal semantics may make
+              // background inert, but cannot visually remove or relocate the rails.
+              await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+              const rails = () =>
+                page.evaluate(() => ({
+                  scrollY,
+                  anchorY: document.querySelector('main')!.getBoundingClientRect().y,
+                  nodes: ['#starlight__sidebar', '.right-sidebar'].map((selector) => {
+                    const node = document.querySelector<HTMLElement>(selector);
+                    if (!node) throw new Error(`Missing required desktop rail: ${selector}`);
+                    return {
+                      selector,
+                      box: node.getBoundingClientRect().toJSON(),
+                      visible: node.checkVisibility({
+                        checkOpacity: true,
+                        checkVisibilityCSS: true,
+                      }),
+                      display: getComputedStyle(node).display,
+                      visibility: getComputedStyle(node).visibility,
+                      opacity: getComputedStyle(node).opacity,
+                    };
+                  }),
+                }));
+              const before = await rails();
+              for (const rail of before.nodes) expect(rail.visible).toBe(true);
+              await page.keyboard.press('Control+k');
+              await expect
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+                .toBe(true);
+              const opened = await rails();
+              await writeFile(
+                path.join(evidenceDirectory, `${id}-bottom-rails.json`),
+                JSON.stringify({ source, before, opened }, null, 2)
+              );
+              for (const [index, rail] of opened.nodes.entries()) {
+                expect(rail.visible).toBe(true);
+                for (const key of ['x', 'y', 'width', 'height'] as const)
+                  expect(
+                    Math.abs(rail.box[key] - before.nodes[index].box[key])
+                  ).toBeLessThanOrEqual(1);
+              }
+              expect(Math.abs(opened.anchorY - before.anchorY)).toBeLessThanOrEqual(1);
+              await capture(page, id, 'bottom-open');
+              await page.keyboard.press('Escape');
+              await expect
+                .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+                .toBe(false);
+              const closed = await rails();
+              await writeFile(
+                path.join(evidenceDirectory, `${id}-bottom-rails.json`),
+                JSON.stringify({ source, before, opened, closed }, null, 2)
+              );
+              expect(Math.abs(closed.scrollY - before.scrollY)).toBeLessThanOrEqual(1);
+              for (const rail of closed.nodes) expect(rail.visible).toBe(true);
+              await writeFile(
+                path.join(evidenceDirectory, `${id}-bottom-rails.json`),
+                JSON.stringify({ source, before, opened, closed }, null, 2)
+              );
             }
             expect(errors).toEqual([]);
           } catch (error) {
@@ -742,6 +835,8 @@ for (const width of [1280, 1440, 2048]) {
                 name,
                 trigger: rect(trigger),
                 label: rect(label),
+                labelText: label.textContent?.trim(),
+                expectedLabel: (home as HTMLElement).dataset[`${name}Label`],
                 value: value ? rect(value) : null,
                 text: trigger.textContent,
               };
@@ -773,17 +868,35 @@ for (const width of [1280, 1440, 2048]) {
             JSON.stringify({ source, width, family, runtime, geometry }, null, 2)
           );
           expect(geometry.overflow).toBeLessThanOrEqual(1);
-          expect(geometry.commands).toHaveLength(3);
+          expect(geometry.commands).toHaveLength(1);
+          expect(geometry.commands[0].command).toBe('open');
+          const panel = await searchPart(page, 'panel');
+          expect(await panel.getAttribute('data-projection-generation')).toBe(
+            geometry.pageGeneration
+          );
+          expect(await panel.getAttribute('data-projection-runtime')).toBe(runtime);
+          expect(await panel.getAttribute('data-projection-family')).toBe(family);
           expect(Math.abs(geometry.search.height - 44)).toBeLessThanOrEqual(1);
           for (const selector of geometry.selectors) {
-            expect(Math.abs(selector.trigger.height - 36)).toBeLessThanOrEqual(1);
+            expect(Math.abs(selector.trigger.height - 44)).toBeLessThanOrEqual(1);
             expect(Math.abs(selector.trigger.bottom - geometry.search.bottom)).toBeLessThanOrEqual(
               1
             );
+            expect(Math.abs(selector.trigger.center - geometry.search.center)).toBeLessThanOrEqual(
+              1
+            );
+            // The approved Header composition keeps labels accessible, not a
+            // separate visible row above 36px controls. Assert exact authored AX name.
+            expect(selector.expectedLabel).toBeTruthy();
+            expect(selector.labelText).toBe(selector.expectedLabel);
             expect(
-              Math.abs(selector.trigger.center - geometry.search.center - 4)
-            ).toBeLessThanOrEqual(1);
-            expect(selector.label.bottom).toBeLessThanOrEqual(selector.trigger.y + 1);
+              await page
+                .locator(
+                  `[data-homepage-runtime] [data-projection-generation-state="active"] [data-projection-control="${selector.name}"]`
+                )
+                .getByRole('combobox', { name: selector.expectedLabel, exact: true })
+                .count()
+            ).toBe(1);
             expect(selector.trigger.scrollWidth - selector.trigger.clientWidth).toBeLessThanOrEqual(
               1
             );
@@ -803,11 +916,9 @@ for (const width of [1280, 1440, 2048]) {
             'site-search [data-projection-generation-state="active"] [data-open-modal]'
           );
           await trigger.locator('svg').click();
-          expect(
-            await page
-              .locator('site-search dialog')
-              .evaluate((dialog) => (dialog as HTMLDialogElement).open)
-          ).toBe(true);
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(true);
           await page.keyboard.press('Escape');
           await expect
             .poll(() => trigger.evaluate((node) => node === document.activeElement))
@@ -821,7 +932,7 @@ for (const width of [1280, 1440, 2048]) {
   }
 }
 
-it('homepage keeps one native dialog through open-runtime transitions and repeat initialization', async () => {
+it('homepage keeps one active public Search session through runtime transitions and repeat initialization', async () => {
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
   const page = await context.newPage();
   await installOpenCounter(page);
@@ -832,17 +943,22 @@ it('homepage keeps one native dialog through open-runtime transitions and repeat
     await page
       .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
       .click();
+    await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+    await (await searchInput(page)).fill('public-session-retained');
+    await expect
+      .poll(async () => (await page.evaluate(readSearchPublicState)).query)
+      .toBe('public-session-retained');
     await page.evaluate(() => {
       const search = document.querySelector('site-search') as HTMLElement & {
         connectedCallback(): void;
       };
-      Object.assign(window, { __originalSearchDialog: search.querySelector('dialog') });
       search.connectedCallback();
       search.connectedCallback();
     });
     for (const runtime of ['react', 'vue', 'vue2', 'wc']) {
-      // Existing page preference ingress, including updates while native modal
-      // inertness prevents interacting with the Header's Select itself.
+      const previousPanel = await (await searchPart(page, 'panel')).elementHandle();
+      expect(previousPanel).not.toBeNull();
+      const previousState = await page.evaluate(readSearchPublicState);
       await page.evaluate(
         (runtime) =>
           document.dispatchEvent(
@@ -851,22 +967,16 @@ it('homepage keeps one native dialog through open-runtime transitions and repeat
         runtime
       );
       await homeReady(page, 'shadcn', runtime);
-      expect(
-        await page.evaluate(
-          () =>
-            document.querySelector('site-search dialog') === (window as any).__originalSearchDialog
-        )
-      ).toBe(true);
-      expect(
-        await page
-          .locator('site-search dialog')
-          .evaluate((dialog) => (dialog as HTMLDialogElement).open)
-      ).toBe(true);
-      const close = page.locator(
-        'site-search [data-projection-generation-state="active"] [data-close-modal]'
-      );
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+      await expect.poll(() => previousPanel!.evaluate((node) => node.isConnected)).toBe(false);
+      const currentState = await page.evaluate(readSearchPublicState);
+      expect(currentState.generation).not.toBe(previousState.generation);
+      expect(currentState.query).toBe(previousState.query);
+      const panel = await searchPart(page, 'panel');
+      expect(await panel.count()).toBe(1);
+      expect(await panel.getAttribute('data-projection-runtime')).toBe(runtime);
       stage(page, 'home-open-runtime', `${runtime}-close-focus`);
-      await close.click();
+      await (await searchPart(page, 'close')).click();
       const trigger = page.locator(
         'site-search [data-projection-generation-state="active"] [data-open-modal]'
       );
@@ -874,6 +984,8 @@ it('homepage keeps one native dialog through open-runtime transitions and repeat
         .poll(() => trigger.evaluate((node) => node === document.activeElement))
         .toBe(true);
       await trigger.press('Space');
+      await expect.poll(async () => (await page.evaluate(readSearchPublicState)).open).toBe(true);
+      await previousPanel!.dispose();
     }
     await capture(page, 'home-open-runtime', 'final');
   } catch (error) {
@@ -1347,6 +1459,116 @@ for (const width of [320, 390]) {
         expect(await page.locator(`[id=${JSON.stringify(listboxId)}]`).isVisible()).toBe(true);
         expect((await header.boundingBox())!.height).toBe(beforePortal!.height);
         await page.keyboard.press('Escape');
+        // The root-font gate covers the actual public modal as well as its trigger.
+        // A short viewport must not clip the editor/Close just because the result list shrinks.
+        for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+          const modalId = `${id}-${runtime}`;
+          if ((await page.locator('site-search').getAttribute('data-search-runtime')) !== runtime) {
+            await revealHeaderPreferences(page);
+            await select.click();
+            const optionsId = await select.getAttribute('aria-controls');
+            expect(optionsId).toBeTruthy();
+            await page
+              .locator(`[id=${JSON.stringify(optionsId)}]`)
+              .getByRole('option', { name: runtimeLabels[runtime], exact: true })
+              .click();
+          }
+          await page.waitForFunction((runtime) => {
+            const search = document.querySelector<HTMLElement>('site-search');
+            return (
+              search?.dataset.searchRuntime === runtime && search.dataset.searchView === 'ready'
+            );
+          }, runtime);
+          const originalViewport = page.viewportSize();
+          if (!originalViewport) throw new Error('Expected explicit Search test viewport');
+          await page.setViewportSize({ width: originalViewport.width, height: 390 });
+          await header
+            .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+            .click();
+          const panel = await searchPart(page, 'panel');
+          const editor = await searchInput(page);
+          const close = await searchPart(page, 'close');
+          const scrollBody = await searchPart(page, 'scroll-body');
+          const list = await searchPart(page, 'list');
+          const status = await searchPart(page, 'status');
+          expect(await scrollBody.evaluate((node) => getComputedStyle(node).overflowY)).toBe(
+            'auto'
+          );
+          expect(await list.evaluate((node) => getComputedStyle(node).overflowY)).toBe('auto');
+          expect(await list.evaluate((node) => getComputedStyle(node).maxHeight)).not.toBe('none');
+          await editor.waitFor({ state: 'visible' });
+          const [panelGeometry, editorGeometry, closeGeometry] = await Promise.all(
+            [panel, editor, close].map((part) =>
+              part.evaluate((node) => {
+                const box = node.getBoundingClientRect();
+                const center = document.elementFromPoint(
+                  box.x + box.width / 2,
+                  box.y + box.height / 2
+                );
+                return {
+                  box: box.toJSON(),
+                  ownsCenter: center === node || (!!center && node.contains(center)),
+                };
+              })
+            )
+          );
+          const modal = {
+            panel: panelGeometry,
+            editor: editorGeometry,
+            close: closeGeometry,
+            width: originalViewport.width,
+            height: 390,
+          };
+          await capture(page, modalId, 'root-font-short-modal');
+          await writeFile(
+            path.join(evidenceDirectory, `${modalId}-modal-rects.json`),
+            JSON.stringify({ source, family, runtime, width, modal }, null, 2)
+          );
+          for (const part of [modal.panel, modal.editor, modal.close]) {
+            expect(part.box.width).toBeGreaterThan(0);
+            expect(part.box.height).toBeGreaterThan(0);
+            expect(part.box.left).toBeGreaterThanOrEqual(-1);
+            expect(part.box.right).toBeLessThanOrEqual(modal.width + 1);
+            expect(part.box.top).toBeGreaterThanOrEqual(-1);
+            expect(part.box.bottom).toBeLessThanOrEqual(modal.height + 1);
+          }
+          expect(modal.editor.ownsCenter).toBe(true);
+          expect(modal.close.ownsCenter).toBe(true);
+          const statusText = await status.textContent();
+          expect(statusText?.trim()).toBeTruthy();
+          await status.evaluate((node) => node.scrollIntoView({ block: 'end' }));
+          const lastText = await status.evaluate((node) => {
+            const walker = document.createTreeWalker(node, NodeFilter.SHOW_TEXT);
+            let last: Text | null = null;
+            for (let text = walker.nextNode(); text; text = walker.nextNode()) {
+              if (text.textContent?.length) last = text as Text;
+            }
+            if (!last) throw new Error('Expected complete live status text');
+            const range = document.createRange();
+            range.setStart(last, last.length - 1);
+            range.setEnd(last, last.length);
+            return range.getBoundingClientRect().toJSON();
+          });
+          const bodyBox = await scrollBody.boundingBox();
+          expect(bodyBox).not.toBeNull();
+          if (!bodyBox) throw new Error('Expected visible Search scroll body');
+          expect(lastText.bottom).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 1);
+          expect(await status.textContent()).toBe(statusText);
+          await close.click();
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(false);
+          await header
+            .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+            .click();
+          const keyboardClose = await searchPart(page, 'close');
+          await keyboardClose.focus();
+          await page.keyboard.press('Enter');
+          await expect
+            .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+            .toBe(false);
+          await page.setViewportSize(originalViewport);
+        }
         // Keep all geometry assertions on the Button page above. Brutalist
         // Button has no authored section heading, so verify sticky offsets on
         // the same family's real Card contract section instead.
@@ -1412,16 +1634,192 @@ for (const width of [320, 390]) {
         // the different-route Brutalist journey has a new closed disclosure.
         // Follow its actual state rather than toggling the first one closed.
         await revealHeaderPreferences(page);
-        const panel = header.locator('[data-site-header-panel]');
+        const preferencesPanel = header.locator('[data-site-header-panel]');
         expect(await header.locator('[data-site-menu-button]').getAttribute('aria-expanded')).toBe(
           'true'
         );
-        expect(await panel.isVisible()).toBe(true);
-        const panelBox = (await panel.boundingBox())!;
+        expect(await preferencesPanel.isVisible()).toBe(true);
+        const panelBox = (await preferencesPanel.boundingBox())!;
         const headerBox = (await header.boundingBox())!;
         expect(panelBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
         expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(1001);
         await capture(page, id, 'menu-and-heading');
+        expect(errors).toEqual([]);
+      } catch (error) {
+        await captureFailure(page);
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+}
+
+// Transport-only fixture: real page, Dialog/Command, adapters, keyboard and scroll.
+// This does not replace the separate generated Pagefind index acceptance.
+for (const family of ['shadcn', 'brutalist'] as const) {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`Search ${family}/${runtime} keeps nested scrollports and dismissal reachable at 200%`, async () => {
+      const context = await browser.newContext({
+        viewport: { width: 320, height: 390 },
+        hasTouch: true,
+      });
+      const page = await context.newPage();
+      const id = `search-scroll-${family}-${runtime}`;
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      stage(page, id, 'controlled-data-navigation');
+      await page.route('**/pagefind/pagefind.js', (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: 'text/javascript',
+          body: `let failed = false;
+          export async function options() {}
+          export async function search(query) {
+            if (query === 'failure' && !failed) { failed = true; throw new Error('Controlled data failure'); }
+            if (query === 'loading') await new Promise(resolve => window.addEventListener('release-search-data', resolve, {once:true}));
+            if (query === 'empty' || query === 'failure' || query === 'loading') return {results:[]};
+            return {results:Array.from({length:20}, (_,i)=>({id:String(i),data:async()=>({url:'/docs/result-'+i,meta:{title:'Result '+i+' — documentation details'}})}))};
+          }`,
+        })
+      );
+      try {
+        expect(
+          (await page.goto(`${baseUrl}${searchRoute(family)}`, { waitUntil: 'networkidle' }))?.ok()
+        ).toBe(true);
+        const header = page.locator('[data-docs-site-header]');
+        const select = header.locator('[data-adapter-select] [data-site-select-trigger]').first();
+        await revealHeaderPreferences(page);
+        if ((await page.locator('site-search').getAttribute('data-search-runtime')) !== runtime) {
+          await select.click();
+          const optionsId = await select.getAttribute('aria-controls');
+          expect(optionsId).toBeTruthy();
+          await page
+            .locator(`[id=${JSON.stringify(optionsId)}]`)
+            .getByRole('option', { name: runtimeLabels[runtime], exact: true })
+            .click();
+        }
+        await page.waitForFunction((runtime) => {
+          const search = document.querySelector<HTMLElement>('site-search');
+          return search?.dataset.searchRuntime === runtime && search.dataset.searchView === 'ready';
+        }, runtime);
+        await page.evaluate(() => {
+          document.documentElement.style.fontSize = '200%';
+        });
+        await header
+          .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+          .click();
+        const editor = await searchInput(page);
+        const list = await searchPart(page, 'list');
+        const body = await searchPart(page, 'scroll-body');
+        const close = await searchPart(page, 'close');
+        const status = await searchPart(page, 'status');
+        const checkClose = async () => {
+          const geometry = await close.evaluate((node) => {
+            const box = node.getBoundingClientRect();
+            const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2);
+            return { box: box.toJSON(), hit: hit === node || (!!hit && node.contains(hit)) };
+          });
+          expect(geometry.box.top).toBeGreaterThanOrEqual(-1);
+          expect(geometry.box.bottom).toBeLessThanOrEqual(391);
+          expect(geometry.box.left).toBeGreaterThanOrEqual(-1);
+          expect(geometry.box.right).toBeLessThanOrEqual(321);
+          expect(geometry.hit).toBe(true);
+          return geometry;
+        };
+        await editor.fill('many');
+        await expect.poll(() => list.getByRole('option').count()).toBe(20);
+        await editor.press('End');
+        const last = list.getByRole('option').last();
+        await expect.poll(() => last.getAttribute('aria-selected')).toBe('true');
+        const lastBox = await last.boundingBox();
+        const bodyBox = await body.boundingBox();
+        expect(lastBox).not.toBeNull();
+        expect(bodyBox).not.toBeNull();
+        if (!lastBox || !bodyBox) throw new Error('Expected last result inside live scroll body');
+        expect(lastBox.y).toBeGreaterThanOrEqual(bodyBox.y - 1);
+        expect(lastBox.y + lastBox.height).toBeLessThanOrEqual(bodyBox.y + bodyBox.height + 1);
+        await checkClose();
+        await editor.press('Home');
+        await expect
+          .poll(() => list.getByRole('option').first().getAttribute('aria-selected'))
+          .toBe('true');
+        const before = await Promise.all([
+          list.evaluate((n) => n.scrollTop),
+          body.evaluate((n) => n.scrollTop),
+        ]);
+        const touch = await context.newCDPSession(page);
+        try {
+          const box = await body.boundingBox();
+          if (!box || box.height < 20) throw new Error('Expected touch-scrollable body');
+          const x = box.x + box.width / 2,
+            y = box.y + box.height - 5;
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchStart',
+            touchPoints: [{ x, y }],
+          });
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x, y: box.y + 5 }],
+          });
+          await touch.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+          await expect
+            .poll(async () => {
+              const after = await Promise.all([
+                list.evaluate((n) => n.scrollTop),
+                body.evaluate((n) => n.scrollTop),
+              ]);
+              return after.some((value, index) => value > before[index]!);
+            })
+            .toBe(true);
+        } finally {
+          await touch.detach();
+        }
+        await checkClose();
+        const phases: unknown[] = [];
+        for (const query of ['failure', 'loading', 'empty']) {
+          await editor.fill(query);
+          const expected =
+            query === 'failure'
+              ? '搜索暂不可用，请重试'
+              : query === 'loading'
+                ? '正在加载搜索…'
+                : '0 条匹配文档';
+          await expect.poll(() => status.textContent()).toBe(expected);
+          phases.push({
+            query,
+            renderedStatus: await status.textContent(),
+            close: await checkClose(),
+          });
+          if (query === 'failure') {
+            const retry = await searchPart(page, 'search-page-action');
+            await retry.scrollIntoViewIfNeeded();
+            await retry.click();
+            await expect.poll(() => status.textContent()).toBe('0 条匹配文档');
+          }
+          if (query === 'loading')
+            await page.evaluate(() => window.dispatchEvent(new Event('release-search-data')));
+        }
+        await capture(page, id, 'keyboard-touch-state-geometry');
+        await writeFile(
+          path.join(evidenceDirectory, `${id}-states.json`),
+          JSON.stringify(
+            {
+              source,
+              family,
+              runtime,
+              phases,
+              scope: 'controlled Pagefind data only; real native composition',
+            },
+            null,
+            2
+          )
+        );
+        await close.focus();
+        await page.keyboard.press('Enter');
+        await expect
+          .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+          .toBe(false);
         expect(errors).toEqual([]);
       } catch (error) {
         await captureFailure(page);

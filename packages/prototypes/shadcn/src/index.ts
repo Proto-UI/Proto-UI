@@ -16,22 +16,14 @@ export { default as shadcnCheckboxIndicator } from './checkbox/indicator.proto';
 export { switchRoot, switchThumb } from './switch';
 export { default as shadcnSwitchRoot } from './switch/root.proto';
 export { default as shadcnSwitchThumb } from './switch/thumb.proto';
-export { tabsRoot, tabsList, tabsTrigger, tabsContent } from './tabs';
+export * from './tabs';
 export { hoverCardRoot, hoverCardTrigger, hoverCardContent } from './hover-card';
-export { dropdownRoot, dropdownTrigger, dropdownContent, dropdownItem } from './dropdown';
+export * from './dropdown';
 export { selectRoot, selectTrigger, selectValue, selectContent, selectItem } from './select';
 export { default as shadcnSeparatorRoot } from './separator';
-export { default as shadcnTabsRoot } from './tabs/root.proto';
-export { default as shadcnTabsList } from './tabs/list.proto';
-export { default as shadcnTabsTrigger } from './tabs/trigger.proto';
-export { default as shadcnTabsContent } from './tabs/content.proto';
 export { default as shadcnHoverCardRoot } from './hover-card/root.proto';
 export { default as shadcnHoverCardTrigger } from './hover-card/trigger.proto';
 export { default as shadcnHoverCardContent } from './hover-card/content.proto';
-export { default as shadcnDropdownRoot } from './dropdown/root.proto';
-export { default as shadcnDropdownTrigger } from './dropdown/trigger.proto';
-export { default as shadcnDropdownContent } from './dropdown/content.proto';
-export { default as shadcnDropdownItem } from './dropdown/item.proto';
 export { default as shadcnSelectRoot } from './select/root.proto';
 export { default as shadcnSelectTrigger } from './select/trigger.proto';
 export { default as shadcnSelectValue } from './select/value.proto';
@@ -91,21 +83,6 @@ export type {
   ShadcnSwitchThumbAsHookContract,
 } from './switch/types';
 export type {
-  ShadcnTabsRootProps,
-  ShadcnTabsRootExposes,
-  ShadcnTabsRootAsHookContract,
-  ShadcnTabsListProps,
-  ShadcnTabsListExposes,
-  ShadcnTabsListAsHookContract,
-  ShadcnTabsTriggerProps,
-  ShadcnTabsTriggerExposes,
-  ShadcnTabsTriggerStateHandles,
-  ShadcnTabsTriggerAsHookContract,
-  ShadcnTabsContentProps,
-  ShadcnTabsContentExposes,
-  ShadcnTabsContentAsHookContract,
-} from './tabs/types';
-export type {
   ShadcnHoverCardRootProps,
   ShadcnHoverCardRootExposes,
   ShadcnHoverCardRootAsHookContract,
@@ -116,21 +93,6 @@ export type {
   ShadcnHoverCardContentExposes,
   ShadcnHoverCardContentAsHookContract,
 } from './hover-card/types';
-export type {
-  ShadcnDropdownRootProps,
-  ShadcnDropdownRootExposes,
-  ShadcnDropdownRootAsHookContract,
-  ShadcnDropdownTriggerProps,
-  ShadcnDropdownTriggerExposes,
-  ShadcnDropdownTriggerAsHookContract,
-  ShadcnDropdownContentProps,
-  ShadcnDropdownContentExposes,
-  ShadcnDropdownContentAsHookContract,
-  ShadcnDropdownItemProps,
-  ShadcnDropdownItemExposes,
-  ShadcnDropdownItemAsHookContract,
-  ShadcnDropdownLabelProps,
-} from './dropdown/types';
 export type {
   ShadcnSelectRootProps,
   ShadcnSelectRootExposes,
@@ -330,6 +292,12 @@ export * from './date-picker';
 
 export * from './data-table';
 
+export * from './async-region';
+export * from './live-region';
+export * from './image';
+export * from './table';
+export * from './transition';
+
 export { default as selectSurface, default as shadcnSelectSurface } from './select/surface.proto';
 export {
   default as selectViewport,
@@ -339,6 +307,11 @@ export {
   default as selectItemText,
   default as shadcnSelectItemText,
 } from './select/item-text.proto';
+export type {
+  ShadcnSelectSurfaceProps,
+  ShadcnSelectViewportProps,
+  ShadcnSelectItemTextProps,
+} from './select';
 
 export { default as selectGroup, default as shadcnSelectGroup } from './select/group.proto';
 export type {

@@ -9,7 +9,9 @@ import * as glass from '../../liquid-glass/src/collapsible';
 const families = [
   ['shadcn', shadcn, 'rounded-md'],
   ['brutalist', brutalist, 'border-2'],
-  ['bootstrap-2-3-2', bootstrap, 'rounded-[4px]'],
+  // bootstrap-2-3-2's pinned collapsible trigger is a link-styled toggle with
+  // no chrome; its historical link color is the family visual marker.
+  ['bootstrap-2-3-2', bootstrap, 'text-[#08c]'],
   ['liquid-glass', glass, 'rounded-xl'],
 ] as const;
 async function flush() {
@@ -55,7 +57,9 @@ for (const [family, entries, visualToken] of families) {
           family === 'brutalist'
             ? 'text-main-foreground'
             : family === 'bootstrap-2-3-2'
-              ? 'text-primary'
+              ? // Pinned Bootstrap 2.3.2 link ink on the bare collapsible
+                // toggle; there is no theme-primary token in this family.
+                'text-[#08c]'
               : 'text-foreground'
         )
       ).toBe(true);
@@ -68,8 +72,9 @@ for (const [family, entries, visualToken] of families) {
         expect(styleContains(content, 'font-medium')).toBe(true);
       }
       if (family === 'bootstrap-2-3-2') {
-        expect(styleContains(trigger, 'px-[0.9375rem]')).toBe(true);
-        expect(styleContains(content, 'py-[0.5625rem]')).toBe(true);
+        // Historical pixel units, not rem-projected equivalents.
+        expect(styleContains(trigger, 'px-[15px]')).toBe(true);
+        expect(styleContains(content, 'py-[9px]')).toBe(true);
       }
       trigger.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       await flush();
@@ -86,7 +91,16 @@ for (const [family, entries, visualToken] of families) {
       expect(
         styleContains(
           trigger,
-          family === 'liquid-glass' ? 'opacity-50' : 'data-[disabled]:opacity-50'
+          family === 'liquid-glass'
+            ? // Disabled withdraws optical elevation rather than dimming the
+              // control (COMMAND_DISABLED keeps an opaque quiet surface). Its
+              // compound material rules evaluate at runtime, so the quiet
+              // paint materializes unprefixed while disabled is true.
+              'shadow-none'
+            : family === 'bootstrap-2-3-2'
+              ? // Pinned Bootstrap link/button disabled opacity is 65%.
+                'data-[disabled]:opacity-65'
+              : 'data-[disabled]:opacity-50'
         )
       ).toBe(true);
     });

@@ -936,3 +936,78 @@ describe('homepage typography media-query transaction integration', () => {
     });
   }
 });
+
+for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+  it(`${runtime}: keeps compact Overview source owners and authored roles through family replacement`, async () => {
+    document.body.innerHTML = `<main data-site-family-scope data-pagefind-body><div data-doc-flow><article><header><span id="eyebrow">Basic demo</span><h2 id="card-title" data-site-typography="overview-card-title">Button</h2></header><p id="card-description" data-site-typography="overview-card-description">Original <em>description</em></p></article><h2 id="ordinary">Ordinary heading</h2></div></main>`;
+    const root = document.querySelector<HTMLElement>('main')!;
+    const title = root.querySelector<HTMLElement>('#card-title')!;
+    const description = root.querySelector<HTMLElement>('#card-description')!;
+    const titleSource = title.firstChild;
+    const descriptionSource = description.firstChild;
+    expect(
+      collectSiteTypographyTargets(root, true).find((target) => target.native === title)?.role
+    ).toBe('overview-card-title');
+    const participant = siteTypographyParticipant(root, { docsOnly: true });
+    for (const [index, family] of ['shadcn', 'brutalist', 'shadcn'].entries()) {
+      const candidate = await participant.materialize(
+        request(runtime, index + 1, family as 'shadcn' | 'brutalist')
+      );
+      candidates.push(candidate);
+      candidate.activate();
+      await settle();
+      for (const [native, size, line, original] of [
+        [title, '1rem', '1.25rem', titleSource],
+        [description, '0.76rem', '1.14rem', descriptionSource],
+      ] as const) {
+        const leaf = native.querySelector<HTMLElement>('[data-typography-prototype]')!;
+        expect(leaf.style.fontSize).toBe(size);
+        expect(leaf.style.lineHeight).toBe(line);
+        expect(leaf.style.fontFamily).toBe('inherit');
+        expect(leaf.style.letterSpacing).toBe('inherit');
+        expect(native.querySelector('[data-site-typography-slot]')!.firstChild).toBe(original);
+        expect(native.hasAttribute('role')).toBe(false);
+      }
+      expect(root.querySelector('#eyebrow [data-typography-prototype]')).toBeNull();
+      expect(
+        root.querySelector('#ordinary [data-typography-prototype]')!.getAttribute('data-pui-style')
+      ).toContain('text-2xl');
+    }
+  });
+}
+
+describe('document-heading public surface inherits its stable semantic owner', () => {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const)
+    for (const family of ['shadcn', 'brutalist'] as const)
+      it(`${runtime}/${family}: projects all five inherited inputs and retains source identity`, async () => {
+        document.body.innerHTML =
+          '<main data-pagefind-body><h1 data-site-typography="h1">Native document title</h1><aside><h1 data-site-typography="h1">Independent notice</h1></aside><div data-previewer-id="example"><h1 data-site-typography="h1">Component title</h1></div></main>';
+        const root = document.querySelector<HTMLElement>('main')!;
+        const heading = root.querySelector<HTMLElement>('h1')!;
+        const text = heading.firstChild;
+        const participant = siteTypographyParticipant(root, { docsOnly: true });
+        const candidate = await participant.materialize(request(runtime, 1, family));
+        candidates.push(candidate);
+        candidate.activate();
+        await settle();
+        const surface = heading.querySelector<HTMLElement>('[data-typography-prototype]');
+        expect(surface).not.toBeNull();
+        for (const property of [
+          'font-size',
+          'line-height',
+          'font-family',
+          'font-weight',
+          'letter-spacing',
+        ])
+          expect(surface!.style.getPropertyValue(property)).toBe('inherit');
+        expect(heading.querySelector('[data-site-typography-slot]')!.firstChild).toBe(text);
+        expect(heading.tagName).toBe('H1');
+        const notice = root.querySelector<HTMLElement>('aside [data-typography-prototype]');
+        expect(notice).not.toBeNull();
+        expect(notice!.style.getPropertyValue('font-size')).not.toBe('inherit');
+        expect(root.querySelector('[data-previewer-id] [data-typography-prototype]')).toBeNull();
+        await candidate.dispose();
+        expect(heading.firstChild).toBe(text);
+        expect(heading.querySelector('[data-typography-prototype]')).toBeNull();
+      });
+});

@@ -1,4 +1,4 @@
-import { validateInstanceAssociations } from '@proto.ui/core';
+import { capUnavailable, validateInstanceAssociations } from '@proto.ui/core';
 import type {
   InstancePhase,
   MountPhase,
@@ -93,6 +93,35 @@ export function createRuntimeSession<P extends PropsBaseType>(
   let unmountWaitingForPresence = false;
   let disposePending: Promise<void> | undefined;
   const pendingDelayTasks = new Set<{ cancel(): void }>();
+
+  kernel.viewOperations.setCapture(() => {
+    const provider = host.viewOperations;
+    if (!provider) throw capUnavailable('lifecycle.view-operation');
+    const intent = kernel.viewIntent.getSnapshot();
+    if (instancePhase !== 'alive' || mountPhase !== 'mounted' || !intent.present) return null;
+    const epoch = mountEpoch;
+    const operation = provider.capture();
+    if (!operation) return null;
+    let invalid = false;
+    return Object.freeze({
+      isCurrent() {
+        if (invalid) return false;
+        if (
+          instancePhase !== 'alive' ||
+          mountPhase !== 'mounted' ||
+          mountEpoch !== epoch ||
+          host.viewOperations !== provider ||
+          kernel.viewIntent.getSnapshot().version !== intent.version
+        ) {
+          invalid = true;
+          return false;
+        }
+        // Host checks are read-only. Unexpected producer failures are not swallowed.
+        if (!operation.isCurrent()) invalid = true;
+        return !invalid;
+      },
+    });
+  });
 
   const cancelPendingDelayTasks = () => {
     let failed = false;

@@ -9,6 +9,8 @@ export { default as dropdownShortcut } from './shortcut.proto';
 export { default as dropdownRoot } from './root.proto';
 
 export { default as dropdownTrigger } from './trigger.proto';
+export type { DropdownTriggerProps } from './trigger.proto';
+export type { DropdownTriggerExposes } from '@proto.ui/prototypes-base/dropdown';
 
 export { default as dropdownContent } from './content.proto';
 

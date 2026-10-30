@@ -83,20 +83,10 @@ criteria:
         - D-AS-CHILD-OMISSION-0001
   - id: P-SHADCN-TABS-STYLE-SCOPE
     text:
-      en: Use the shared style-scope singleton. Explicit selection wins over nearest
-        scope and then New York compatibility fallback. Root/List may provide
-        local inherited selection. Style-only changes do not mutate Base
-        value/orientation, replace handles or user nodes, or reset
-        focus/selection. Unsupported canonical and unknown raw choices reject
-        rather than silently selecting another style.
+      en: "Shared style selection preserves the actual Base owner, value, focus, handles and caller nodes while switching among New York and the eight modern profiles. Explicit leaf selection overrides scope; absence preserves the component compatibility default. Unknown profiles fail closed rather than borrowing another recipe."
   - id: P-SHADCN-TABS-SOURCE-BOUND-TEXT-DEFAULT
     text:
-      en: "The complete style ID inventory remains eight latest styles plus separate
-        legacy New York. This slice implements only New York/Nova/Rhea
-        text/default; all six others reject. Upstream line remains explicitly
-        unsupported pending #935; nested SVG and inline-glyph handling remain
-        unprojected. Existing appearance=underline is separately preserved.
-        Source hashes, fixture references and tests must remain current."
+      en: "The fixed inventory is eight modern styles (vega, nova, maia, lyra, mira, luma, sera, rhea) plus independent New York. Each has source-distinct default and line paint; List variant changes update an owned decorative line without replacing Trigger leaves, caller content, Base selection or focus. Content and the optional semantic-only Indicator gain no selection owner. Proto appearance=underline remains separate. Nested SVG/inline-glyph selector parity, full API and native/cross-adapter acceptance remain open."
 openQuestions:
   - id: P-SHADCN-TABS-Q-UPSTREAM-DIFFERENCES
     question:
@@ -104,17 +94,7 @@ openQuestions:
       en: How should every Shadcn Tabs Root difference from the pinned upstream
         baseline be classified and converged?
     context:
-      en: "Current implementation adds shared-scope selection and source-bound
-        text/default New York/Nova/Rhea paint in both orientations and
-        light/dark; this does not close full upstream parity. Remaining gaps:
-        six other styles, upstream line (explicit rejection pending #935 owned
-        decorative feedback), nested SVG/default or overridden icon
-        size/inline-icon placement, className/native prop forwarding,
-        data-slot/state naming correspondence, and native/cross-adapter visual
-        acceptance. asChild remains intentionally omitted. Existing Proto
-        underline is a compatibility identity, not upstream line. Raw unknown
-        style choices are explicitly rejected. See #934 and the coverage
-        inventory."
+      en: "The nine source-distinct default/line recipes and live owned line decoration have authored consumer cases, not exact-head execution or native acceptance. Remaining gaps include nested SVG/inline-glyph sizing and placement, className/native forwarding, upstream data-slot/state correspondence, all-adapter paint, motion, assistive technology and independent review. Scope changes must preserve Base owners, live caller nodes and controlled refusal."
     blocks:
       - shadcn tabs root parity roadmap
 sources:
@@ -126,7 +106,7 @@ sources:
     label: Historical New York baseline, retained for provenance; current source
       binding is 3d989 coverage inventory
   - path: internal/fixtures/shadcn-tabs-style/coverage.json
-  - path: packages/prototypes/shadcn/test/tabs-style-projection.test.ts
+  - path: "packages/prototypes/shadcn/test/tabs-draft-projection.test.ts"
   - path: https://github.com/Proto-UI/Proto-UI/issues/934
 dependsOn:
   contracts:

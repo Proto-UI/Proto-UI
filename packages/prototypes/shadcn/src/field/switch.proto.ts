@@ -17,5 +17,6 @@ export default definePrototype<ShadcnFieldSwitchProps, ShadcnFieldSwitchExposes>
     if (!control.stateHandles || !binding)
       throw new Error('[shadcn-field-switch] Missing Base/Field facts');
     setupSwitchRootVisual(def, control.stateHandles, binding.state.invalid);
+    return control.render;
   },
 });

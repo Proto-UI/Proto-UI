@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { initSiteNativeControls } from './site-native-controls';
+import {
+  initSiteNativeControls,
+  siteSidebarTextRole,
+  siteIsReadingToc,
+} from './site-native-controls';
 vi.mock('./PrototypePreviewer/projection-theme', () => ({
   resolveProjectionThemeSurfaceStyle: (family: string) => ({
     '--pui-foreground': family === 'brutalist' ? '#111' : '#222',
@@ -29,13 +33,13 @@ describe('website native anchor composition', () => {
       expect(link.dataset.siteLinkAppearance).toBe('nav');
       link.setAttribute('aria-current', 'page');
       await vi.waitFor(() =>
-        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline')
+        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('font-semibold')
       );
-      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('underline');
+      expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline');
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).toContain('font-semibold');
       link.removeAttribute('aria-current');
       await vi.waitFor(() =>
-        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline')
+        expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('font-semibold')
       );
       expect(surface.getAttribute('data-pui-style')?.split(/\s+/)).not.toContain('underline');
       expect(link.getAttribute('href')).toBe('/docs/');
@@ -135,4 +139,50 @@ describe('website native anchor composition', () => {
       document.querySelectorAll('wc-site-shadcn-surface, wc-site-brutalist-surface')
     ).toHaveLength(1);
   });
+});
+
+it.each(['shadcn', 'brutalist'])(
+  'projects %s Sidebar authored hierarchy through the shared compact Text recipe',
+  async (family) => {
+    document.documentElement.dataset.siteLibraryFamily = family;
+    document.body.innerHTML = `<aside class="sidebar-pane"><ul class="top-level"><li><details open><summary id="top">Top</summary><ul><li><a href="#article">Article</a></li><li><details open><summary id="nested">Nested</summary><ul><li><a href="#child">Child</a></li></ul></details></li></ul></details></li></ul></aside><a id="outside" href="#outside">Outside</a>`;
+    expect(siteSidebarTextRole(document.querySelector<HTMLElement>('#outside')!)).toBeUndefined();
+    releases.push(initSiteNativeControls());
+    await settle();
+    for (const [selector, role, fontSize] of [
+      ['#top', 'top-group', '0.75rem'],
+      ['#nested', 'nested-group', '0.8125rem'],
+      ['a[href="#article"]', 'row', '0.8125rem'],
+      ['a[href="#child"]', 'row', '0.8125rem'],
+    ] as const) {
+      const link = document.querySelector<HTMLElement>(selector)!;
+      expect(siteSidebarTextRole(link)).toBe(role);
+      const text = link.querySelector<HTMLElement>('[data-site-link-text]')!;
+      await vi.waitFor(() => expect(text.style.fontSize).toBe(fontSize));
+      expect(text.style.lineHeight).toBe('1.25rem');
+      expect(link.querySelector<HTMLElement>('[data-site-link-content]')!.style.marginBottom).toBe(
+        '0px'
+      );
+      expect(link.hasAttribute('role')).toBe(false);
+    }
+  }
+);
+
+it('projects only ordinary right reading TOC through its finite compact recipe', async () => {
+  document.body.innerHTML = `<aside class="right-sidebar"><sl-toc><a id="reading" href="#one" data-site-native-link data-site-link-appearance="toc"><span>One</span></a><ul class="isMobile"><li><a id="mobile" href="#two" data-site-native-link data-site-link-appearance="toc">Two</a></li></ul></sl-toc></aside><sl-toc><a id="other" href="#three">Three</a></sl-toc>`;
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#reading')!)).toBe(true);
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#mobile')!)).toBe(false);
+  expect(siteIsReadingToc(document.querySelector<HTMLElement>('#other')!)).toBe(false);
+  releases.push(initSiteNativeControls());
+  await settle();
+  const reading = document.querySelector<HTMLElement>('#reading')!;
+  const text = reading.querySelector<HTMLElement>('[data-site-link-text]')!;
+  await vi.waitFor(() => expect(text.style.fontSize).toBe('0.8rem'));
+  expect(text.style.lineHeight).toBe('1rem');
+  expect(reading.querySelector<HTMLElement>('[data-site-link-content]')!.style.minHeight).toBe(
+    '1.5rem'
+  );
+  expect(
+    document.querySelector<HTMLElement>('#mobile [data-site-link-content]')!.style.minHeight
+  ).toBe('var(--site-navigation-row-height, 2rem)');
 });

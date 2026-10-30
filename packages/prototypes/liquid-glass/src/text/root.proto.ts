@@ -11,7 +11,7 @@ export default definePrototype<TextRootProps, TextRootExposes>({
     // Base owns the eight finite presentation inputs, defaults and untouched slot.
     // No selection override: document text is selectable, control text inherits
     // its actual owner's selection policy, including inside portaled controls.
-    asTextRoot();
+    const inherited = asTextRoot();
     def.rule({
       when: (w) => w.prop('size').eq('xs'),
       intent: (i) => i.feedback.style.use(tw('text-xs')),
@@ -132,5 +132,6 @@ export default definePrototype<TextRootProps, TextRootExposes>({
       when: (w) => w.prop('decoration').eq('line-through'),
       intent: (i) => i.feedback.style.use(tw('line-through')),
     });
+    return inherited.render;
   },
 });

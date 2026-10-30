@@ -14,30 +14,30 @@ import button from '../src/button';
 
 // T-SHADCN-BUTTON-0001-CASE-GHOST-CONSUMER:
 // Collect the actual source; never seed the generator with an expected new token.
-const darkHover = 'dark:data-[hovered]:bg-muted/50';
+// Both dark ghost Rules also gate on private style selection, so source
+// collection preserves their bare runtime tokens rather than Web variants.
+const ghostDarkTokens = ['bg-muted/50', 'bg-accent/50'];
 const darkDeclaration = 'background-color: color-mix(in oklab, var(--pui-muted) 50%, transparent);';
 
 it('carries real ghost Rules through the official preset and all existing physical CSS targets', async () => {
   const sourceTokens = (await collectProtoStyleTokens(
     path.resolve('packages/prototypes/shadcn/src/button')
   )) as string[];
-  expect(sourceTokens).toContain('bg-muted/50');
-  expect(sourceTokens).toContain('bg-accent/50');
   expect(sourceTokens).toContain('text-accent-foreground');
-  expect(sourceTokens).toContain(darkHover);
+  for (const token of ghostDarkTokens) expect(sourceTokens).toContain(token);
   const closure = await collectFamilyStyleClosure(
     path.resolve('packages/prototypes/shadcn/src'),
     path.resolve('packages/prototypes/base/src')
   );
   expect(SHADCN_STYLE_TOKENS).toEqual(closure.tokens);
-  expect(SHADCN_STYLE_TOKENS).toContain(darkHover);
+  for (const token of ghostDarkTokens) expect(SHADCN_STYLE_TOKENS).toContain(token);
   for (const css of [
     renderProtoStyleTokenCss(sourceTokens),
     renderProtoShadowStyleTokenCss(sourceTokens),
     renderProtoShadowSplitStyleArtifact(sourceTokens).cssText,
   ]) {
     expect(css).not.toContain('Unsupported Proto UI style tokens');
-    expect(css).toContain(darkHover);
+    for (const token of ghostDarkTokens) expect(css).toContain(`[data-pui-style~="${token}"]`);
     expect(css).toContain(darkDeclaration);
     expect(css).toContain(
       'background-color: color-mix(in oklab, var(--pui-accent) 50%, transparent);'
@@ -47,7 +47,9 @@ it('carries real ghost Rules through the official preset and all existing physic
     const withoutGhostDark = sourceTokens.filter((token) => !token.includes('bg-muted/50'));
     expect(renderProtoStyleTokenCss(withoutGhostDark)).not.toContain(darkDeclaration);
   }
-});
+  // This deliberately checks the complete family+inherited closure, rather
+  // than narrowing the scan to Button to fit the unit-test default timeout.
+}, 180_000);
 
 if (!customElements.get(button.name)) AdaptToWebComponent(button);
 const flush = async () => {

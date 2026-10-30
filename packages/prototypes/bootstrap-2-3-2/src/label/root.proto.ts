@@ -8,9 +8,10 @@ import {
 export default definePrototype<LabelRootProps, LabelRootExposes>({
   name: 'bootstrap-2-3-2-label-root',
   setup(def) {
-    asLabelRoot();
+    const inherited = asLabelRoot();
     def.feedback.style.use(
-      tw('block mb-[0.3125rem] text-sm font-normal leading-5 text-foreground')
+      tw('block mb-[5px] text-[14px] font-normal leading-[20px] text-foreground')
     );
+    return inherited.render;
   },
 });

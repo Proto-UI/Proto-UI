@@ -15,15 +15,20 @@ export default definePrototype<CommandItemProps, CommandItemExposes>({
     );
     def.rule({
       when: (w) => w.state(behavior.getState!('disabled')!).eq(true),
-      intent: (i) => i.feedback.style.use(tw('opacity-50 cursor-not-allowed')),
+      intent: (i) => i.feedback.style.use(tw('text-muted-foreground cursor-not-allowed')),
     });
     def.rule({
-      when: (w) => w.state(behavior.getState!('active')!).eq(true),
+      when: (w) =>
+        w.all(
+          w.state(behavior.getState!('active')!).eq(true),
+          w.state(behavior.getState!('disabled')!).eq(false)
+        ),
       intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
     });
     def.rule({
       when: (w) => w.state(behavior.getState!('selected')!).eq(true),
       intent: (i) => i.feedback.style.use(tw('font-semibold')),
     });
+    return behavior.render;
   },
 });

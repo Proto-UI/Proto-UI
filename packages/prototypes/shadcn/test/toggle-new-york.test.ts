@@ -2,6 +2,7 @@ import { expect, it } from 'vitest';
 import { createRuntimeSession, type RuntimeHost } from '@proto.ui/runtime';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { RULE_META_GET_CAP } from '@proto.ui/module-rule-meta';
+import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EXPOSE_EVENT_SINK_CAP } from '@proto.ui/module-expose-event';
 import {
   AS_TRIGGER_GET_PROTO_CAP,
@@ -37,6 +38,10 @@ async function fixture(
       task();
     },
     onRuntimeReady(wiring) {
+      wiring.attach('context', [
+        [CONTEXT_INSTANCE_TOKEN_CAP, root],
+        [CONTEXT_PARENT_CAP, () => null],
+      ]);
       wiring.attach('event', [
         [EVENT_ROOT_TARGET_CAP, () => root],
         [EVENT_GLOBAL_TARGET_CAP, () => global],

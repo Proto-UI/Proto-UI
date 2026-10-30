@@ -1,0 +1,66 @@
+id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001
+type: test
+title: Bootstrap overlay projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+    en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native or independent acceptance.
+summary: Dialog, Hover Card, Tooltip and Drawer controlled/refusal, slot, disabled and recipe coverage.
+cases:
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-PROTOCOL
+    title: Controlled refusal, focus return, live relations and disabled suppression across the four protocols
+    covers:
+      - P-BOOTSTRAP-2-3-2-DIALOG-BASE
+      - P-BOOTSTRAP-2-3-2-HOVER-CARD-BASE
+      - P-BOOTSTRAP-2-3-2-TOOLTIP-BASE
+      - P-BOOTSTRAP-2-3-2-DRAWER-BASE
+    expectation: base-protocol-preservation
+  - id: T-BOOTSTRAP-2-3-2-DRAFT-OVERLAY-0001-CASE-RECIPE
+    title: Pinned modal, popover, tooltip and drawer recipes and slots render correctly
+    covers:
+      - P-BOOTSTRAP-2-3-2-DIALOG-CONTENT-VISUAL
+      - P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT-VISUAL
+      - P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT-VISUAL
+      - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER-VISUAL
+    expectation: pinned-recipe-paint
+implementations:
+  - id: bootstrap-draft-overlay-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/bootstrap-2-3-2/test/draft-overlay-projections.test.ts
+    required: true
+    exercises:
+      - P-BOOTSTRAP-2-3-2-DIALOG
+      - P-BOOTSTRAP-2-3-2-DIALOG-TRIGGER
+      - P-BOOTSTRAP-2-3-2-DIALOG-MASK
+      - P-BOOTSTRAP-2-3-2-DIALOG-CONTENT
+      - P-BOOTSTRAP-2-3-2-DIALOG-TITLE
+      - P-BOOTSTRAP-2-3-2-DIALOG-DESCRIPTION
+      - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE
+      - P-BOOTSTRAP-2-3-2-HOVER-CARD
+      - P-BOOTSTRAP-2-3-2-TOOLTIP
+      - P-BOOTSTRAP-2-3-2-DRAWER
+      - P-BOOTSTRAP-2-3-2-DRAWER-HEADER
+      - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-BOOTSTRAP-2-3-2-DIALOG
+    - P-BOOTSTRAP-2-3-2-DIALOG-CLOSE
+    - P-BOOTSTRAP-2-3-2-DIALOG-CONTENT
+    - P-BOOTSTRAP-2-3-2-DIALOG-DESCRIPTION
+    - P-BOOTSTRAP-2-3-2-DIALOG-MASK
+    - P-BOOTSTRAP-2-3-2-DIALOG-TITLE
+    - P-BOOTSTRAP-2-3-2-DIALOG-TRIGGER
+    - P-BOOTSTRAP-2-3-2-DRAWER
+    - P-BOOTSTRAP-2-3-2-DRAWER-FOOTER
+    - P-BOOTSTRAP-2-3-2-DRAWER-HEADER
+    - P-BOOTSTRAP-2-3-2-HOVER-CARD
+    - P-BOOTSTRAP-2-3-2-HOVER-CARD-CONTENT
+    - P-BOOTSTRAP-2-3-2-HOVER-CARD-TRIGGER
+    - P-BOOTSTRAP-2-3-2-TOOLTIP
+    - P-BOOTSTRAP-2-3-2-TOOLTIP-CONTENT
+    - P-BOOTSTRAP-2-3-2-TOOLTIP-GROUP
+    - P-BOOTSTRAP-2-3-2-TOOLTIP-TRIGGER

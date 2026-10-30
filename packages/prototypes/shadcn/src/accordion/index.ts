@@ -3,6 +3,7 @@ export { default as accordionItem, default as shadcnAccordionItem } from './item
 export { default as accordionHeading, default as shadcnAccordionHeading } from './heading.proto';
 export { default as accordionTrigger, default as shadcnAccordionTrigger } from './trigger.proto';
 export { default as accordionContent, default as shadcnAccordionContent } from './content.proto';
+export type * from './types';
 export type {
   AccordionRootProps,
   AccordionRootExposes,

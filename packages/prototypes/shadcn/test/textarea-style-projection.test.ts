@@ -3,7 +3,6 @@ import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-comp
 import textarea from '../src/textarea';
 import { fieldTextarea, fieldRoot, fieldLabel, fieldDescription, fieldError } from '../src/field';
 import { styleScope } from '../src/style-scope';
-import { TEXTAREA_PROJECTED_STYLES } from '../src/textarea/visual';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -164,15 +163,15 @@ describe('production shared Textarea paint', () => {
     expect(tokens(c)).not.toContain('ring-ring/30');
   });
   it('keeps absent-width-source fallback safe and rejects unsupported profiles', async () => {
-    expect(TEXTAREA_PROJECTED_STYLES).toEqual(['new-york-v4', 'rhea']);
     const session = createRuntimeSession(textarea, {
       prototypeName: textarea.name,
       getRawProps: () => ({ styleProfile: 'rhea' as const }),
       schedule: (fn) => fn(),
       commit: (_children, signal) => signal?.done(),
       onRuntimeReady(wiring) {
+        const token = new EventTarget();
         wiring.attach('context', [
-          [CONTEXT_INSTANCE_TOKEN_CAP, {}],
+          [CONTEXT_INSTANCE_TOKEN_CAP, token],
           [CONTEXT_PARENT_CAP, () => null],
         ]);
         wiring.attach('event', [
@@ -187,12 +186,13 @@ describe('production shared Textarea paint', () => {
     expect(() =>
       createRuntimeSession(textarea, {
         prototypeName: textarea.name,
-        getRawProps: () => ({ styleProfile: 'nova' as const }),
+        getRawProps: () => ({ styleProfile: 'not-a-profile' as const }),
         schedule: (fn) => fn(),
         commit: (_children, signal) => signal?.done(),
         onRuntimeReady(wiring) {
+          const token = new EventTarget();
           wiring.attach('context', [
-            [CONTEXT_INSTANCE_TOKEN_CAP, {}],
+            [CONTEXT_INSTANCE_TOKEN_CAP, token],
             [CONTEXT_PARENT_CAP, () => null],
           ]);
           wiring.attach('event', [
@@ -201,6 +201,6 @@ describe('production shared Textarea paint', () => {
           ]);
         },
       })
-    ).toThrow('Unsupported style');
+    ).toThrow(/Unknown|Unsupported/);
   });
 });

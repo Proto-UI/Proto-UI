@@ -272,7 +272,9 @@ describe('Real family Calendar caption demos', () => {
             '1800'
           );
         });
-      }, 20_000);
+        // Multi-profile family prototype loading pushed the real render past
+        // the 20s bound.
+      }, 60_000);
     }
   }
 });

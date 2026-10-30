@@ -11,7 +11,7 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 This draft is a Proto design-language extension of [Base Toggle](/en/ui-libraries/base/toggle/). It is not an Apple Toggle replica or a claim of exact Apple optical parity.
 
-Inactive controls request neutral regular glass with the secondary theme fill and foreground. Active selection requests regular style-fill tint from its governed primary fill, paired with the primary foreground. A small decorative currentColor check occupies the same reserved space in both states, supplying non-color selection feedback without imposing underline. The 1px selection border and outer geometry remain stable. Transient pointer pressing deforms the material independently of persistent active selection.
+Inactive controls request neutral regular glass with the secondary theme fill and foreground. Active selection requests regular style-fill tint from its governed primary fill, paired with the primary foreground. A small decorative currentColor check occupies the same reserved space in both states, supplying non-color selection feedback without imposing underline. Equal leading/trailing reserves center the label or icon itself; compact symmetric padding avoids the former trailing-only whitespace bias. The 1px selection border and outer geometry remain stable across selection. Transient pointer pressing deforms the material independently of persistent active selection.
 
 Use the page runtime selector for Web Components, React, Vue 3 and Vue 2. Bold starts inactive; Italic starts active. Click, Space and Enter request active changes. Unavailable keeps its active state while disabled. The status only observes the real Base activeChange signal.
 

@@ -12,3 +12,15 @@ Set `size="sm"` on the Root for the small recipe; omit `size` or use `size="defa
 The [pinned New York source](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) uses rem dimensions: default Root 2rem × 1.15rem with a 1rem Thumb; small Root 1.5rem × 0.875rem with a 0.75rem Thumb. Checked travel is the used Thumb width minus 2px. These source dimensions do not establish cross-target rendered parity; full upstream transition channels and API parity remain incomplete.
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
+
+## Compositions and optional drag
+
+Default Switch compositions remain click/Space controls. Drag is an explicit enhancement (`draggable: true`), not a change to upstream defaults. In the size example above only “Email alerts” opts in; the two dedicated examples below make LTR and RTL drag visible separately.
+
+The following public composition uses the existing Field label, description and Switch owners. Choice Cards make the blank card area clickable without creating another button or forwarding a click; the nested “Learn more” link retains its own action. Selected paint follows the accepted checked value, including when a controlled owner rejects a request. Disabled and read-only examples must not request a change.
+
+The upstream [Choice Card anatomy](https://github.com/shadcn-ui/ui/blob/96da9cc7f1aa10580a3741664e2a77c721206c00/apps/v4/examples/base/switch-choice-card.tsx) wraps Field inside FieldLabel. Proto keeps its existing Field anatomy and separate accessible description rather than importing that framework or changing the current style profile. This composition is not a Liquid Glass Switch implementation.
+
+<PrototypePreviewer demoId="demo-shadcn-switch-compositions" initialRuntime="wc" />
+
+<div id="switch-composition-details">The label names the control; the description supplies help. Drag previews a position while held and requests a value only on release. The root remains the sole checked-value owner.</div>

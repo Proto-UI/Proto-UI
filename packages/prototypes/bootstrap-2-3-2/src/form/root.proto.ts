@@ -5,7 +5,9 @@ export default definePrototype<FormRootProps, FormRootExposes>({
   name: 'bootstrap-2-3-2-form-root',
   setup(def) {
     const inherited = asFormRoot();
-    def.feedback.style.use(tw('flex w-full min-w-0 flex-col gap-2 text-foreground'));
+    def.feedback.style.use(
+      tw('block min-w-0 m-0 mb-[20px] text-foreground text-[14px] leading-[20px]')
+    );
     return inherited.render;
   },
 });

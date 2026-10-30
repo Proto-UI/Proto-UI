@@ -181,7 +181,7 @@ function fixture(delayed = false) {
     invalidate: () => {
       for (const fn of sourceListeners) fn();
     },
-    source(value: boolean, revision = 3) {
+    source(value: boolean, revision = 3, notify = true) {
       source = value
         ? {
             revision,
@@ -192,7 +192,7 @@ function fixture(delayed = false) {
             pixels: new Uint8Array(400 * 240 * 4).fill(255),
           }
         : null;
-      for (const fn of sourceListeners) fn();
+      if (notify) for (const fn of sourceListeners) fn();
     },
     motion(value: typeof reducedMotion) {
       reducedMotion = value;
@@ -1681,5 +1681,281 @@ describe('style-fill tint ownership (mock GPU/decode, not pixel evidence)', () =
     expect(f.host.dataset.materialQuality).toBe('opaque-fallback');
     expect(f.host.style.backgroundImage).toBe('none');
     f.sink.release(1);
+  });
+});
+
+describe('source cadence versus controlled decode completion (logical time, not browser performance)', () => {
+  function diagnostic(label: string, initialDelay: number) {
+    type Ticket = {
+      id: number;
+      source: number;
+      due: number;
+      cancelled: boolean;
+      completed: boolean;
+      ready: () => void;
+    };
+    const timeline: Record<string, unknown>[] = [];
+    const tickets: Ticket[] = [];
+    let now = 0,
+      delay = initialDelay,
+      sourceRevision = 1,
+      sourceOwnerGeneration = 1,
+      renderedSource = 0;
+    const f = fixture();
+    let observation: MutationObserver | undefined;
+    function drainAttributes() {
+      const mutations = observation?.takeRecords() ?? [];
+      for (let index = 0; index < mutations.length; index++) {
+        const mutation = mutations[index],
+          name = mutation.attributeName!;
+        const next = mutations.slice(index + 1).find((entry) => entry.attributeName === name);
+        timeline.push({
+          logicalMs: now,
+          event: 'diagnostic-attribute',
+          sourceRevision,
+          sourceOwnerGeneration,
+          attribute: name,
+          before: mutation.oldValue,
+          after: next ? next.oldValue : f.host.getAttribute(name),
+        });
+      }
+    }
+    const record = (event: string, extra: Record<string, unknown> = {}) => {
+      drainAttributes();
+      const modelPendingPreparations = tickets.filter(
+        (ticket) => !ticket.cancelled && !ticket.completed
+      ).length;
+      expect(modelPendingPreparations).toBeLessThanOrEqual(1);
+      timeline.push({
+        modelPendingPreparations,
+        logicalMs: now,
+        event,
+        sourceRevision,
+        sourceOwnerGeneration,
+        quality: f?.host.dataset.materialQuality ?? null,
+        reason: f?.host.dataset.materialReason ?? null,
+        paintedSource: f?.host.dataset.materialSourceRevision ?? null,
+        ...extra,
+      });
+    };
+    optical.render.mockImplementation((frame: any) => {
+      renderedSource = frame.source.revision;
+      record('render-start', { renderedSource });
+      return 'data:image/png;base64,AA==';
+    });
+    decoding.prepare.mockImplementation((_doc, _image, ready) => {
+      const ticket: Ticket = {
+        id: tickets.length + 1,
+        source: renderedSource,
+        due: now + delay,
+        cancelled: false,
+        completed: false,
+        ready,
+      };
+      tickets.push(ticket);
+      record('prepare-start', {
+        ticket: ticket.id,
+        preparedSource: ticket.source,
+        completesAt: ticket.due,
+      });
+      return () => {
+        if (ticket.cancelled) return;
+        ticket.cancelled = true;
+        record('prepare-cancel', { ticket: ticket.id, preparedSource: ticket.source });
+      };
+    });
+    observation = new MutationObserver(() => {});
+    observation.observe(f.host, {
+      attributes: true,
+      attributeOldValue: true,
+      attributeFilter: [
+        'data-material-quality',
+        'data-material-reason',
+        'data-material-source-revision',
+        'data-material-frame',
+      ],
+    });
+    const advance = (to: number) => {
+      while (true) {
+        const ticket = tickets
+          .filter((entry) => !entry.completed && entry.due <= to)
+          .sort((a, b) => a.due - b.due || a.id - b.id)[0];
+        if (!ticket) break;
+        now = ticket.due;
+        ticket.completed = true;
+        const previous = f.host.dataset.materialFrame;
+        record('prepare-complete', {
+          ticket: ticket.id,
+          preparedSource: ticket.source,
+          alreadyCancelled: ticket.cancelled,
+        });
+        // A cancellation need not physically stop an already-delivered callback.
+        // Deliberately deliver it to exercise the real stale-ticket guard.
+        ticket.ready();
+        record(
+          f.host.dataset.materialFrame !== previous &&
+            f.host.dataset.materialQuality === 'self-optical'
+            ? 'paint-published'
+            : 'completion-not-published',
+          { ticket: ticket.id, preparedSource: ticket.source }
+        );
+      }
+      now = to;
+    };
+    const update = (revision: number, notify = true) => {
+      sourceRevision = revision;
+      record(notify ? 'compatible-source-notify' : 'compatible-source-silent');
+      f.source(true, revision, notify);
+      record('source-update-returned');
+      expect(
+        tickets.filter((ticket) => !ticket.cancelled && !ticket.completed).length
+      ).toBeLessThanOrEqual(1);
+    };
+    return {
+      f,
+      tickets,
+      timeline,
+      advance,
+      update,
+      record,
+      setDelay(value: number) {
+        delay = value;
+      },
+      rebind() {
+        sourceOwnerGeneration++;
+        record('source-owner-rebind');
+        f.rebindSource();
+      },
+      finish() {
+        f.sink.release(1);
+        record('disposed');
+        observation?.disconnect();
+        console.info(
+          '[liquid-decode-cadence-diagnostic]',
+          JSON.stringify({
+            label,
+            timeDomain: 'controlled logical milliseconds',
+            gpuAndDecode: 'mocked',
+            productionSourceCadenceModelMs: 120,
+            timeline,
+          })
+        );
+      },
+    };
+  }
+
+  it('publishes each source when decode settles before the unchanged120ms source cadence', () => {
+    const d = diagnostic('fast-cold', 60);
+    try {
+      d.f.sink.commit(d.f.frame(1));
+      d.advance(60);
+      expect(d.f.host.dataset.materialSourceRevision).toBe('1');
+      for (let revision = 2; revision <= 5; revision++) {
+        d.advance((revision - 1) * 120);
+        d.update(revision);
+        d.advance((revision - 1) * 120 + 60);
+        expect(d.f.host.dataset.materialQuality).toBe('self-optical');
+        expect(d.f.host.dataset.materialSourceRevision).toBe(String(revision));
+      }
+      expect(d.tickets).toHaveLength(5);
+      expect(d.timeline.filter((row) => row.event === 'paint-published')).toHaveLength(5);
+    } finally {
+      d.finish();
+    }
+  });
+
+  it('records cold-start supersession without inventing a latency-driven downgrade tier, then recovers on a stable source', () => {
+    const d = diagnostic('slow-cold', 180);
+    try {
+      d.f.sink.commit(d.f.frame(1));
+      for (let revision = 2; revision <= 5; revision++) {
+        d.advance((revision - 1) * 120);
+        d.update(revision);
+        expect(d.f.host.dataset.materialQuality).toBe('opaque-fallback');
+        expect(d.f.host.dataset.materialReason).toBe('preparing');
+      }
+      d.advance(659);
+      expect(d.timeline.filter((row) => row.event === 'paint-published')).toHaveLength(0);
+      expect(d.tickets.filter((ticket) => ticket.cancelled)).toHaveLength(4);
+      expect(
+        d.timeline.some(
+          (row) =>
+            row.event === 'diagnostic-attribute' &&
+            row.after === 'lease-replaced-during-image-prepare'
+        )
+      ).toBe(false);
+      d.advance(660);
+      expect(d.f.host.dataset.materialQuality).toBe('self-optical');
+      expect(d.f.host.dataset.materialSourceRevision).toBe('5');
+      expect(d.tickets).toHaveLength(5);
+      expect(d.timeline.filter((row) => row.event === 'completion-not-published')).toHaveLength(4);
+    } finally {
+      d.finish();
+    }
+  });
+
+  it('distinguishes compatible warm-paint bridging from opaque fallback while newer decodes are superseded', () => {
+    const d = diagnostic('slow-warm', 60);
+    try {
+      d.f.sink.commit(d.f.frame(1));
+      d.advance(60);
+      d.setDelay(180);
+      for (let revision = 2; revision <= 5; revision++) {
+        d.advance((revision - 1) * 120);
+        d.update(revision);
+        expect(d.f.host.dataset.materialQuality).toBe('self-optical');
+        expect(d.f.host.dataset.materialSourceRevision).toBe('1');
+      }
+      d.advance(660);
+      expect(d.f.host.dataset.materialSourceRevision).toBe('5');
+      expect(d.timeline.filter((row) => row.event === 'paint-published')).toHaveLength(2);
+    } finally {
+      d.finish();
+    }
+  });
+
+  it('keeps silent replacement, genuine source revocation, preferences and disposal distinct', () => {
+    const d = diagnostic('revocation-controls', 180);
+    try {
+      d.f.sink.commit(d.f.frame(1));
+      d.advance(120);
+      d.update(2, false);
+      d.advance(180);
+      // Silent replacement reaches the completion guard; a notified successor
+      // instead cancels before that guard. Both refuse obsolete publication.
+      expect(d.timeline.filter((row) => row.event === 'paint-published')).toHaveLength(0);
+      expect(d.tickets).toHaveLength(2);
+      expect(
+        d.timeline.some(
+          (row) =>
+            row.event === 'diagnostic-attribute' &&
+            row.attribute === 'data-material-reason' &&
+            row.after === 'lease-replaced-during-image-prepare'
+        )
+      ).toBe(true);
+      d.advance(360);
+      expect(d.f.host.dataset.materialSourceRevision).toBe('2');
+      d.record('source-revoked');
+      d.f.source(false);
+      expect(d.f.host.dataset.materialQuality).toBe('opaque-fallback');
+      expect(d.f.host.style.backgroundImage).toBe('none');
+      d.update(3);
+      d.rebind();
+      expect(d.f.host.dataset.materialQuality).not.toBe('self-optical');
+      d.record('transparency-revoked');
+      d.f.transparency('reduce');
+      d.advance(540);
+      expect(d.f.host.dataset.materialQuality).not.toBe('self-optical');
+      d.f.transparency('no-preference');
+      d.f.sink.release(1);
+      d.record('released-before-decode');
+      const renders = optical.render.mock.calls.length;
+      d.advance(1000);
+      expect(optical.render).toHaveBeenCalledTimes(renders);
+      expect(d.f.host.dataset.materialQuality).toBeUndefined();
+      expect(d.f.sourceListeners.size).toBe(0);
+    } finally {
+      d.finish();
+    }
   });
 });

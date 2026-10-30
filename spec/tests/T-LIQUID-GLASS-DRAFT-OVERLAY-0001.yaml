@@ -1,0 +1,72 @@
+id: T-LIQUID-GLASS-DRAFT-OVERLAY-0001
+type: test
+title: Liquid Glass overlay projections coverage
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Authored focused consumer cases exist but have not been executed; local module coverage does not establish browser, native, material-host or independent acceptance.
+summary: Dialog, Hover Card, Tooltip and Drawer controlled/refusal, slot, disabled and material-ownership coverage.
+cases:
+  - id: T-LIQUID-GLASS-DRAFT-OVERLAY-0001-CASE-PROTOCOL
+    title: Controlled refusal, focus return, live relations and disabled suppression across the four protocols
+    covers:
+      - P-LIQUID-GLASS-DIALOG-BASE
+      - P-LIQUID-GLASS-HOVER-CARD-BASE
+      - P-LIQUID-GLASS-TOOLTIP-BASE
+      - P-LIQUID-GLASS-DRAWER-BASE
+    expectation: base-protocol-preservation
+  - id: T-LIQUID-GLASS-DRAFT-OVERLAY-0001-CASE-MATERIAL
+    title: Open-gated functional material ownership, opaque fallback and structural slots
+    covers:
+      - P-LIQUID-GLASS-DIALOG-CONTENT-VISUAL
+      - P-LIQUID-GLASS-HOVER-CARD-CONTENT-VISUAL
+      - P-LIQUID-GLASS-DRAWER-VISUAL
+    expectation: functional-material-ownership
+implementations:
+  - id: liquid-draft-overlay-projections
+    kind: module-test
+    status: planned
+    path: packages/prototypes/liquid-glass/test/draft-overlay-projections.test.ts
+    required: true
+    exercises:
+      - P-LIQUID-GLASS-DIALOG
+      - P-LIQUID-GLASS-DIALOG-TRIGGER
+      - P-LIQUID-GLASS-DIALOG-MASK
+      - P-LIQUID-GLASS-DIALOG-CONTENT
+      - P-LIQUID-GLASS-DIALOG-TITLE
+      - P-LIQUID-GLASS-DIALOG-DESCRIPTION
+      - P-LIQUID-GLASS-DIALOG-CLOSE
+      - P-LIQUID-GLASS-HOVER-CARD
+      - P-LIQUID-GLASS-HOVER-CARD-TRIGGER
+      - P-LIQUID-GLASS-HOVER-CARD-CONTENT
+      - P-LIQUID-GLASS-TOOLTIP
+      - P-LIQUID-GLASS-TOOLTIP-GROUP
+      - P-LIQUID-GLASS-TOOLTIP-TRIGGER
+      - P-LIQUID-GLASS-TOOLTIP-CONTENT
+      - P-LIQUID-GLASS-DRAWER
+      - P-LIQUID-GLASS-DRAWER-HEADER
+      - P-LIQUID-GLASS-DRAWER-FOOTER
+      - P-LIQUID-GLASS-ALERT-DIALOG
+    notes:
+      - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+
+exercises:
+  prototypes:
+    - P-LIQUID-GLASS-ALERT-DIALOG
+    - P-LIQUID-GLASS-DIALOG
+    - P-LIQUID-GLASS-DIALOG-CLOSE
+    - P-LIQUID-GLASS-DIALOG-CONTENT
+    - P-LIQUID-GLASS-DIALOG-DESCRIPTION
+    - P-LIQUID-GLASS-DIALOG-MASK
+    - P-LIQUID-GLASS-DIALOG-TITLE
+    - P-LIQUID-GLASS-DIALOG-TRIGGER
+    - P-LIQUID-GLASS-DRAWER
+    - P-LIQUID-GLASS-DRAWER-FOOTER
+    - P-LIQUID-GLASS-DRAWER-HEADER
+    - P-LIQUID-GLASS-HOVER-CARD
+    - P-LIQUID-GLASS-HOVER-CARD-CONTENT
+    - P-LIQUID-GLASS-HOVER-CARD-TRIGGER
+    - P-LIQUID-GLASS-TOOLTIP
+    - P-LIQUID-GLASS-TOOLTIP-CONTENT
+    - P-LIQUID-GLASS-TOOLTIP-GROUP
+    - P-LIQUID-GLASS-TOOLTIP-TRIGGER

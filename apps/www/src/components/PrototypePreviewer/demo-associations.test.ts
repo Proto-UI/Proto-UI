@@ -4,6 +4,18 @@ import { createDemoAssociationScope } from './demo-associations';
 import { assertDemoSpec } from './demo-types';
 
 describe('data-only demo association lowering', () => {
+  it('prunes only retired keys while retaining live association identity', () => {
+    const scope = createDemoAssociationScope();
+    const retained = scope.resolve({ controlLabel: 'keep' });
+    const retired = scope.resolve({ controlLabel: 'retire' });
+    scope.reconcile(['keep']);
+    expect(scope.resolve({ controlLabel: 'keep' })).toBe(retained);
+    expect(scope.resolve({ controlLabel: 'retire' })).not.toBe(retired);
+    scope.reconcile([]);
+    expect(scope.resolve({ controlLabel: 'keep' })).not.toBe(retained);
+    scope.dispose();
+    expect(() => scope.reconcile([])).toThrow(/disposed/);
+  });
   it('materializes stable public references inside one render but never across renders', () => {
     const one = createDemoAssociationScope();
     const two = createDemoAssociationScope();

@@ -40,6 +40,7 @@ export function createOverlayModule(ctx: ModuleFactoryArgs): OverlayModule {
           onProtoPhase: (p) => impl.onProtoPhase(p),
         },
         port: {
+          setCallbackDispatcher: (dispatch) => impl.setCallbackDispatcher(dispatch),
           configure: (patch) => impl.configure(patch),
           open: (reason) => impl.open(reason),
           close: (reason) => impl.close(reason),

@@ -8,7 +8,10 @@ describe('Popover bounded surface recipes', () => {
     [
       'shadcn',
       ['w-72', 'p-2.5', 'gap-2.5', 'ring-1', 'ring-foreground/10'],
-      ['w-80', 'p-4', 'border'],
+      // Multi-profile recipes now live in recipes.ts: p-4/border remain lawful
+      // on vega/maia/luma/rhea/new-york-v4, so only genuinely absent panel
+      // values stay forbidden.
+      ['w-80', 'border-2'],
     ],
     [
       'brutalist',
@@ -17,9 +20,13 @@ describe('Popover bounded surface recipes', () => {
     ],
   ] as const) {
     it(`${family} has the component recipe rather than a generic elevated panel`, async () => {
-      const tokens = await collectProtoStyleTokensFromFiles([
-        path.resolve(`packages/prototypes/${family}/src/popover/content.proto.ts`),
-      ]);
+      const files = [`packages/prototypes/${family}/src/popover/content.proto.ts`];
+      // Shadcn recipes were moved to the shared profile table; collect both so
+      // the closure still sees every authored recipe token.
+      if (family === 'shadcn') files.push(`packages/prototypes/${family}/src/popover/recipes.ts`);
+      const tokens = await collectProtoStyleTokensFromFiles(
+        files.map((file) => path.resolve(file))
+      );
       for (const token of required) expect(tokens).toContain(token);
       for (const token of forbidden) expect(tokens).not.toContain(token);
       if (family === 'brutalist')

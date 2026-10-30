@@ -16,17 +16,25 @@ Text controls and Toggle use normal 14/20 typography at a 16px root. Checkbox/Sw
 
 All component paint lives in Prototype tokens, Rule contributions and the shared finite physical token translator. Load family `renderThemeCss()` plus CSS generated from its source by `collectProtoStyleTokens` / `renderProtoStyleTokenCss`. The generated draft preset uses that same source vocabulary. Consumers own fonts, outer layout and theme activation. [Attribution and deliberate changes](THIRD_PARTY_NOTICES.md) travel with the source; the public CLI archive independently contains the Apache license and notice for its derived values.
 
-The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose the implemented kinds and their genuine recipes. Their preview toolbars now use genuine Bootstrap Select parts and Text labels, while retaining the page's four-Web runtime preference. Missing kinds continue to fail explicitly, and the incomplete family is not offered by the eleven-kind homepage selector.
+The bilingual `/en/ui-libraries/bootstrap-2-3-2/` and `/zh-cn/ui-libraries/bootstrap-2-3-2/` pages expose the implemented kinds and their genuine recipes. Their preview toolbars use genuine Bootstrap Select parts and Text labels, while retaining the page's four-Web runtime preference. Missing kinds continue to fail explicitly; source/catalog coverage does not establish homepage, release or full-family acceptance.
 
 The Button fixture is `/en/test/new-projection-families/`; the controls fixture is `/en/test/bootstrap-state-controls/`. A prepared read-only Actions workflow binds real browser evidence to the exact candidate SHA. Local simulated-host, physical CSS, source/preset and package checks do not establish real browser paint, general Prototype Compiler, GPUI, Flutter or Qt conformance. Source-derived GPUI token data preserves unsupported-property diagnostics and is not native component execution. #792 stays open for all remaining Base parts and host/compiler evidence.
 
-Select Root/Trigger/Value/Content/Item and Text now have independent direct Base consumers and private `/select` and `/text` source exports. Select is a button-dropdown design-language extension, not native HTML select or jQuery API parity. Both CLI entries require explicit workspace source mode. All eight Text axes are retained, with no user-selection override.
+Select has eleven direct parts: Root, Trigger, Value, Content, Surface, Viewport, Item, ItemText, Group, Label and Separator. Content owns the pinned dropdown-menu chrome, Surface is structural and Viewport is the one scrollport. Compose Content > Surface > Viewport > Item > ItemText, with named Groups and contentless Separators inside Viewport. Select is a button-dropdown design-language extension, not native HTML select or jQuery API parity. Private `/select` and `/text` CLI entries require explicit workspace source mode. All eight Text axes are retained, with no user-selection override.
 
 ## Field (draft workspace source)
 
 The `./field` subpath exports `fieldRoot`, `fieldLabel`, `fieldControl`, `fieldDescription`, `fieldError` and `fieldValidity`. Root owns validation and consumer-owned async request leases; the default Control owns one host text editor. All six atoms share the same Base protocol, including controlled validity, required/length checks, disabled/readOnly, exact label/help/error relationships and stale-result rejection.
 
+`fieldTextarea`, `fieldSelectTrigger` and `fieldSwitch` reuse the corresponding standalone family recipe through the exact matching Base optional-Field composition. Field remains the sole invalid/pending, policy and relationship owner; ordinary controls do not absorb nearby Field state.
+
 This is not Fieldset/Form or form submission. Native TextControl transport, OS accessibility, browser screenshots and optical/GPUI evidence remain separate gates. Package source and synthetic-DOM tests do not imply stable release admission.
+
+## Base draft projection sources
+
+The workspace additionally contains passive regions, Image, Table, Transition, Radio Group, Scroll Area, Dialog, Hover Card, Tooltip, Drawer Header/Footer, the optional Tabs Indicator, separate scalar/indexed Slider families, and the existing form, search/navigation, data and collection compositions. Every entry preserves its actual Base owner/modules/render. Semantic-only coordinators and helper boundaries are not extra widgets. Modern parts without a Bootstrap 2.3.2 counterpart are explicit Proto extensions, not retroactive upstream component or plugin parity.
+
+All historical comparisons are pinned to `twbs/bootstrap@b4c4072679943773a7582daa63f545ba818fa627`. Source pixel units, palette, shadows and supplied slots remain distinct from deliberate readable-label/focus extensions. Motion gaps are not faked: modal top -25% to 10% needs containing-block-relative geometry and per-channel easing, Button background-position needs its resident 100ms channel, and Carousel/Progress choreography needs the governed retained-slide/width/stripe capabilities. Static paint and zero-duration presence do not satisfy those gaps. Parent-owned exact-head execution, package/CLI consumers, four-Web paint, accessibility, Compiler and native hosts remain separate evidence gates.
 
 ## Text-capable Thumbnail composition
 
