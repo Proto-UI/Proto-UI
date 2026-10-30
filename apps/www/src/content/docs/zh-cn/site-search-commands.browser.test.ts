@@ -1575,12 +1575,12 @@ for (const width of [320, 390]) {
         // the different-route Brutalist journey has a new closed disclosure.
         // Follow its actual state rather than toggling the first one closed.
         await revealHeaderPreferences(page);
-        const panel = header.locator('[data-site-header-panel]');
+        const preferencesPanel = header.locator('[data-site-header-panel]');
         expect(await header.locator('[data-site-menu-button]').getAttribute('aria-expanded')).toBe(
           'true'
         );
-        expect(await panel.isVisible()).toBe(true);
-        const panelBox = (await panel.boundingBox())!;
+        expect(await preferencesPanel.isVisible()).toBe(true);
+        const panelBox = (await preferencesPanel.boundingBox())!;
         const headerBox = (await header.boundingBox())!;
         expect(panelBox.y).toBeGreaterThanOrEqual(headerBox.y + headerBox.height - 1);
         expect(panelBox.y + panelBox.height).toBeLessThanOrEqual(1001);

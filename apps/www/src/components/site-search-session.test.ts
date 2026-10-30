@@ -28,10 +28,12 @@ describe('Search data lifetime is separate from reusable views', () => {
     expect(search).not.toHaveBeenCalled();
     session.input('中文', false);
     await flush();
-    expect(search).toHaveBeenCalledExactlyOnceWith('中文');
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(search).toHaveBeenCalledWith('中文');
     const selected = session.read().snapshot.rows[0]!;
     expect(session.execute(selected.id)).toBe(true);
-    expect(navigate).toHaveBeenCalledExactlyOnceWith('/%E4%B8%AD%E6%96%87/');
+    expect(navigate).toHaveBeenCalledTimes(1);
+    expect(navigate).toHaveBeenCalledWith('/%E4%B8%AD%E6%96%87/');
     expect(session.read().open).toBe(false);
     expect(session.execute(selected.id)).toBe(false);
     session.setOpen(true);
@@ -88,7 +90,8 @@ it('prepares on empty-query open, exposes failure and retries without submitting
   expect(search).not.toHaveBeenCalled();
   session.input('button', false);
   await flush();
-  expect(search).toHaveBeenCalledExactlyOnceWith('button');
+  expect(search).toHaveBeenCalledTimes(1);
+  expect(search).toHaveBeenCalledWith('button');
   session.dispose();
 });
 

@@ -20,10 +20,10 @@ describe('Pagefind data API resource, never default UI', () => {
     });
     const [first, second] = await Promise.all([resource.load(), resource.load()]);
     expect(first).toBe(second);
-    expect(importModule).toHaveBeenCalledExactlyOnceWith(
-      'https://proto-ui.dev/docs/pagefind/pagefind.js'
-    );
-    expect(configure).toHaveBeenCalledExactlyOnceWith({ baseUrl: '/docs/' });
+    expect(importModule).toHaveBeenCalledTimes(1);
+    expect(importModule).toHaveBeenCalledWith('https://proto-ui.dev/docs/pagefind/pagefind.js');
+    expect(configure).toHaveBeenCalledTimes(1);
+    expect(configure).toHaveBeenCalledWith({ baseUrl: '/docs/' });
     const found = await first.search('test');
     expect(found.results).toHaveLength(55);
     expect(data).not.toHaveBeenCalled();
@@ -82,12 +82,18 @@ describe('Pagefind data API resource, never default UI', () => {
 
 it('preserves falsy resource rejection instead of treating it as a successful value', async () => {
   const resource = createSitePagefindResource({
-    bundleURL: '/pagefind/', origin: 'https://proto-ui.dev',
+    bundleURL: '/pagefind/',
+    origin: 'https://proto-ui.dev',
     fetch: vi.fn(async () => new Response(null, { status: 200 })),
     importModule: async () => Promise.reject(undefined),
   });
   let rejected = false;
-  try { await resource.load(); } catch (error) { rejected = true; expect(error).toBeUndefined(); }
+  try {
+    await resource.load();
+  } catch (error) {
+    rejected = true;
+    expect(error).toBeUndefined();
+  }
   expect(rejected).toBe(true);
   resource.dispose();
 });
