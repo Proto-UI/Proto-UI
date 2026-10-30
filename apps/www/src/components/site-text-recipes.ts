@@ -22,9 +22,24 @@ export const SITE_TYPOGRAPHY_ROLES = [
 export type SiteTypographyRole = (typeof SITE_TYPOGRAPHY_ROLES)[number];
 export type SiteHeroViewport = 'small' | 'medium' | 'wide';
 
-/** Finite compact card roles preserve their authored native typography.
- * Public Text projects these layout inputs; document headings stay unchanged. */
-export function siteTextSurfaceStyle(role: SiteTypographyRole): Record<string, string> {
+/** App composition roles preserve their authored native typography.
+ * The document-heading role is (h1, document): its retained semantic owner is
+ * the single responsive size/font source before and after enhancement. Public
+ * Text inherits through the unstyled carrier; no second breakpoint table or
+ * late heading-font swap is introduced. Component and Hero headings are not
+ * document reading owners and keep their family recipes. */
+export function siteTextSurfaceStyle(
+  role: SiteTypographyRole,
+  context: 'site' | 'document' = 'site'
+): Record<string, string> {
+  if (role === 'h1' && context === 'document')
+    return {
+      fontSize: 'inherit',
+      lineHeight: 'inherit',
+      fontFamily: 'inherit',
+      fontWeight: 'inherit',
+      letterSpacing: 'inherit',
+    };
   if (role === 'reading-toc-title')
     return {
       fontSize: '0.75rem',

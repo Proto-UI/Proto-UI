@@ -291,3 +291,31 @@ it('preserves the native reading TOC title without changing generic labels', () 
     expect(siteTextSurfaceStyle('label')).toEqual({});
   }
 });
+
+it('document-heading inherits the single native responsive reading scale, not a late family font', () => {
+  expect(siteTextSurfaceStyle('h1', 'document')).toEqual({
+    fontSize: 'inherit',
+    lineHeight: 'inherit',
+    fontFamily: 'inherit',
+    fontWeight: 'inherit',
+    letterSpacing: 'inherit',
+  });
+  // Scope negatives: normal headings, Hero and component-owned text retain
+  // their existing family contracts; this is not a Base Text default change.
+  expect(siteTextSurfaceStyle('h1')).toEqual({});
+  expect(siteTextSurfaceStyle('h1', 'site')).toEqual({});
+  expect(siteTextSurfaceStyle('h2', 'document')).toEqual({});
+  expect(siteTextSurfaceStyle('slogan', 'document')).toEqual({});
+  expect(siteTextRecipe('h1', 'brutalist')).toMatchObject({
+    size: '4xl',
+    weight: 'bold',
+    font: 'heading',
+    leading: 'tight',
+  });
+  const typography = readFileSync('apps/www/src/components/site-typography.ts', 'utf8');
+  expect(typography).toContain('...siteTextSurfaceStyle(role, context)');
+  const css = readFileSync('apps/www/src/styles/markdown.css', 'utf8');
+  expect(css).toMatch(
+    /main\[data-pagefind-body\] h1\s*\{\s*@apply scroll-m-20 text-\[2rem\] leading-\[2\.5rem\] font-semibold tracking-tight md:text-\[2\.25rem\] md:leading-\[2\.75rem\];/
+  );
+});

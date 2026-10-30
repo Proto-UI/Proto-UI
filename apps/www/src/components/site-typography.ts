@@ -368,7 +368,7 @@ export function siteTypographyParticipant(
                   className: native.matches('h1,h2,h3,h4,h5,h6,p,figcaption') ? 'block' : undefined,
                   ref: `surface-${index}`,
                   props: { ...siteTextRecipe(role, family, isCompact, context, heroScale) },
-                  surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role) },
+                  surfaceStyle: { ...theme, ...siteTextSurfaceStyle(role, context) },
                   children: [
                     {
                       kind: 'box',
