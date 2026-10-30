@@ -261,14 +261,139 @@ describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
       const portal = ctx.refs.portaled;
       await vi.waitFor(() => expect(host.contains(portal)).toBe(false));
       expect(ctx.refs.shell.getAttribute('data-demo-owner')).toMatch(/^demo-/);
-      expect(portal.getAttribute('data-demo-owner')).toBe(
-        ctx.refs.shell.getAttribute('data-demo-owner')
-      );
+      const owner = ctx.refs.shell.getAttribute('data-demo-owner');
+      if (runtime === 'wc') expect(portal.getAttribute('data-demo-owner')).toBe(owner);
+      else expect(portal.classList.contains(`pui-owner-${owner}`)).toBe(true);
       await api.setChildren!('actions', []);
       await vi.waitFor(() => expect(portal.isConnected).toBe(false));
       expect(ctx.refs.portaled).toBeUndefined();
       expect(ctx.refs.portalAction).toBeUndefined();
       expect(api.getExposes('portalAction')).toBeUndefined();
+    }, 20_000);
+
+    it('isolates identical refs in two trees and retains ownership through host-class updates and retirement', async () => {
+      const first = await mount(runtime);
+      const second = await mount(runtime);
+      const firstRoot = first.ctx.refs.command;
+      const secondRoot = second.ctx.refs.command;
+      expect(firstRoot).toBeDefined();
+      expect(secondRoot).toBeDefined();
+      expect(firstRoot).not.toBe(secondRoot);
+      await first.api.setChildren!('actions', [action('same')]);
+      await second.api.setChildren!('actions', [action('same')]);
+      const firstItem = first.ctx.refs.same;
+      const secondItem = second.ctx.refs.same;
+      expect(firstItem).toBeDefined();
+      expect(secondItem).toBeDefined();
+      expect(firstItem).not.toBe(secondItem);
+      expect(first.host.contains(firstItem)).toBe(true);
+      expect(second.host.contains(secondItem)).toBe(true);
+      const hostClass = runtime === 'react' ? 'hostClassName' : 'hostClass';
+      const authoredClass =
+        runtime === 'react' || runtime === 'wc'
+          ? 'authored-host'
+          : ['authored-host', { 'authored-object': true, 'authored-disabled': false }];
+      first.api.setProps('same', { [hostClass]: authoredClass });
+      const owner = first.ctx.refs.shell.getAttribute('data-demo-owner');
+      const assertIdentity = () => {
+        expect(first.ctx.refs.same).toBe(firstItem);
+        expect(second.ctx.refs.same).toBe(secondItem);
+        if (runtime === 'wc') expect(firstItem.getAttribute('data-demo-owner')).toBe(owner);
+        else expect(firstItem.classList.contains(`pui-owner-${owner}`)).toBe(true);
+      };
+      await vi.waitFor(() => {
+        assertIdentity();
+        if (runtime !== 'wc') expect(firstItem.classList.contains('authored-host')).toBe(true);
+      });
+      await first.api.setChildren!('actions', [action('same'), action('next')]);
+      expect(first.ctx.refs.same).toBe(firstItem);
+      expect(second.ctx.refs.same).toBe(secondItem);
+      if (runtime !== 'wc') {
+        expect(firstItem.classList.contains('authored-host')).toBe(true);
+        if (runtime !== 'react') {
+          expect(firstItem.classList.contains('authored-object')).toBe(true);
+          expect(firstItem.classList.contains('authored-disabled')).toBe(false);
+        }
+      }
+      first.api.setProps('same', { [hostClass]: '' });
+      await vi.waitFor(() => {
+        assertIdentity();
+        if (runtime !== 'wc') expect(firstItem.classList.contains('authored-host')).toBe(false);
+      });
+      await first.api.setChildren!('actions', [action('same')]);
+      expect(first.ctx.refs.same).toBe(firstItem);
+      if (runtime !== 'wc') expect(firstItem.classList.contains('authored-host')).toBe(false);
+      const retired = first.api.setChildren!('actions', [action('late')]);
+      await first.view.destroy();
+      await expect(retired).resolves.toBe('disposed');
+      expect(first.ctx.refs.same).toBeUndefined();
+      expect(firstItem.isConnected).toBe(false);
+      await second.api.setChildren!('actions', [action('same'), action('live')]);
+      expect(second.ctx.refs.same).toBe(secondItem);
+      expect(second.ctx.refs.live).toBeDefined();
+      expect(secondItem.isConnected).toBe(true);
+      expect(second.ctx.refs.late).toBeUndefined();
+    }, 20_000);
+
+    it('keeps two same-named portals in their own generations after one is removed and rebuilt', async () => {
+      const first = await mount(runtime);
+      const second = await mount(runtime);
+      const dialog = (): DemoKeyedChild => ({
+        key: 'dialog',
+        node: {
+          kind: 'proto',
+          prototypeId: dialogRoot.name,
+          ref: 'dialog',
+          props: { open: true },
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: dialogContent.name,
+              ref: 'portal',
+              children: [
+                { kind: 'proto', prototypeId: dialogTitle.name, ref: 'title', children: ['Title'] },
+              ],
+            },
+          ],
+        },
+      });
+      await first.api.setChildren!('actions', [dialog()]);
+      await second.api.setChildren!('actions', [dialog()]);
+      await vi.waitFor(() => {
+        expect(first.ctx.refs.portal?.isConnected).toBe(true);
+        expect(second.ctx.refs.portal?.isConnected).toBe(true);
+        expect(first.host.contains(first.ctx.refs.portal)).toBe(false);
+        expect(second.host.contains(second.ctx.refs.portal)).toBe(false);
+      });
+      const firstPortal = first.ctx.refs.portal;
+      const secondPortal = second.ctx.refs.portal;
+      expect(firstPortal).not.toBe(secondPortal);
+      for (const [current, other] of [
+        [first, second],
+        [second, first],
+      ]) {
+        const own = current.ctx.refs.shell.getAttribute('data-demo-owner');
+        const foreign = other.ctx.refs.shell.getAttribute('data-demo-owner');
+        expect(own).not.toBe(foreign);
+        if (runtime === 'wc')
+          expect(current.ctx.refs.portal.getAttribute('data-demo-owner')).toBe(own);
+        else {
+          expect(current.ctx.refs.portal.classList.contains(`pui-owner-${own}`)).toBe(true);
+          expect(current.ctx.refs.portal.classList.contains(`pui-owner-${foreign}`)).toBe(false);
+        }
+      }
+      await first.api.setChildren!('actions', []);
+      expect(first.ctx.refs.portal).toBeUndefined();
+      expect(firstPortal.isConnected).toBe(false);
+      expect(second.ctx.refs.portal).toBe(secondPortal);
+      await first.api.setChildren!('actions', [dialog()]);
+      await vi.waitFor(() => expect(first.ctx.refs.portal?.isConnected).toBe(true));
+      expect(first.ctx.refs.portal).not.toBe(firstPortal);
+      expect(first.ctx.refs.portal).not.toBe(secondPortal);
+      expect(second.ctx.refs.portal).toBe(secondPortal);
+      await first.view.destroy();
+      expect(secondPortal.isConnected).toBe(true);
+      expect(second.ctx.refs.portal).toBe(secondPortal);
     }, 20_000);
 
     it('rejects invalid updates without destroying the existing tree, coalesces queued work, and disposes refs', async () => {

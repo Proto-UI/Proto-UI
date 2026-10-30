@@ -769,9 +769,24 @@ async function renderDemoWc(
 }
 
 let nextDemoOwner = 0;
+// The generated token contains only CSS identifier characters. It is an
+// ownership marker, not a style rule or security boundary. Native boxes/WC
+// retain their directly owned data marker; framework prototypes consume the
+// adapters' existing generic host-class channel (not a new demo-only prop).
+function demoOwnerSelector(owner: string): string {
+  return `[data-demo-owner="${owner}"], .pui-owner-${owner}`;
+}
+function demoOwnedRefSelector(owner: string): string {
+  return `[data-demo-owner="${owner}"][data-demo-ref], .pui-owner-${owner}[data-demo-ref]`;
+}
+function demoOwnerHostClass(authored: unknown, owner: string): string {
+  return [typeof authored === 'string' ? authored : '', `pui-owner-${owner}`]
+    .filter(Boolean)
+    .join(' ');
+}
 function ownedDemoRefs(host: HTMLElement, owner: string): Record<string, HTMLElement> {
   const refs: Record<string, HTMLElement> = Object.create(null);
-  const selector = `[data-demo-owner="${owner}"][data-demo-ref]`;
+  const selector = demoOwnedRefSelector(owner);
   const nodes = new Set([
     ...host.querySelectorAll<HTMLElement>(selector),
     ...host.ownerDocument.querySelectorAll<HTMLElement>(selector),
@@ -793,7 +808,7 @@ function observeOwnedDemoRefs(
   refs: Record<string, HTMLElement>,
   current: () => boolean
 ): () => void {
-  const selector = `[data-demo-owner="${owner}"]`;
+  const selector = demoOwnerSelector(owner);
   const Observer = host.ownerDocument.defaultView?.MutationObserver;
   if (!Observer) return () => {};
   const containsOwner = (node: Node) =>
@@ -1001,7 +1016,7 @@ async function renderDemoReact(
         else componentRefs.delete(node.ref!);
       };
     }
-    mergedProps['data-demo-owner'] = owner;
+    mergedProps.hostClassName = demoOwnerHostClass(mergedProps.hostClassName, owner);
     mergedProps.key = key;
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClassName = node.className;
@@ -1280,7 +1295,7 @@ async function renderDemoVue(
         else componentRefs.delete(node.ref!);
       };
     }
-    mergedProps['data-demo-owner'] = owner;
+    mergedProps.hostClass = [mergedProps.hostClass, `pui-owner-${owner}`];
     mergedProps.key = key;
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
@@ -1524,7 +1539,7 @@ async function renderDemoVue2(
       componentRefNames.add(node.ref);
       mergedProps['data-demo-ref'] = node.ref;
     }
-    mergedProps['data-demo-owner'] = owner;
+    mergedProps.hostClass = [mergedProps.hostClass, `pui-owner-${owner}`];
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
     const surfaceStyle = (node.ref ? surfaceStyles.get(node.ref) : undefined) ?? node.surfaceStyle;

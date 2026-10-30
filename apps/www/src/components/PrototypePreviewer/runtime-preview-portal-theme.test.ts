@@ -128,6 +128,35 @@ describe('generic preview owned portal theme', () => {
       document.body.append(host);
       let context!: DemoSetupContext;
       const cleanup = vi.fn();
+      // Failure-only public-boundary observations; not readiness or a substitute
+      // for the exact dark palette assertions below. Never inspect Adapter state.
+      const observations: Record<string, unknown>[] = [];
+      const identities = new WeakMap<object, number>();
+      let nextIdentity = 0;
+      const identity = (value: object | null | undefined) => {
+        if (!value) return null;
+        if (!identities.has(value)) identities.set(value, ++nextIdentity);
+        return identities.get(value)!;
+      };
+      const record = (value: Record<string, unknown>) => {
+        if (observations.length < 32) observations.push(value);
+      };
+      const describeRefs = () =>
+        ['mask', 'content'].map((ref) => {
+          const declared = context?.refs[ref];
+          const projected = document.querySelector<HTMLElement>(`[data-demo-ref="${ref}"]`);
+          return {
+            ref,
+            declared: identity(declared),
+            projected: identity(projected),
+            same: declared === projected,
+            connected: declared?.isConnected ?? false,
+            inHost: !!declared && host.contains(declared),
+            background: projected
+              ? actualSurface(projected).style.getPropertyValue('--pui-background')
+              : null,
+          };
+        });
       const light = resolveProjectionThemeSurfaceStyle('brutalist', host);
       const original = fixture((next) => {
         context = next;
@@ -143,8 +172,24 @@ describe('generic preview owned portal theme', () => {
       try {
         await surface.ready;
         // Match previewer-client: subscribe only after the initial shell is ready.
+        const setSurfaceStyle = context.api.setSurfaceStyle;
+        if (setSurfaceStyle) {
+          context.api.setSurfaceStyle = (ref, next) => {
+            record({ event: 'public-setSurfaceStyle', ref, next, refs: describeRefs() });
+            return setSurfaceStyle.call(context.api, ref, next);
+          };
+        }
         stop = watchProjectionThemeSurfaceStyle('brutalist', host, (theme) => {
-          void surface.setAppearance('brutalist', theme);
+          record({ event: 'appearance-request', theme, refs: describeRefs() });
+          const requested = surface.setAppearance('brutalist', theme);
+          // Observe without consuming the original promise's failure semantics.
+          void requested.then(
+            () => record({ event: 'appearance-resolved', refs: describeRefs() }),
+            (error) => {
+              record({ event: 'appearance-rejected', error: String(error), refs: describeRefs() });
+              throw error;
+            }
+          );
         });
         await vi.waitFor(() => {
           for (const ref of ['mask', 'content']) {
@@ -186,6 +231,12 @@ describe('generic preview owned portal theme', () => {
         expect(document.body.style.getPropertyValue('--pui-main')).toBe('#ff00ff');
         expect(document.body.style.getPropertyValue('--pui-background')).toBe('');
         lastContent = current('content');
+      } catch (error) {
+        console.error(
+          '[portal-theme-public-diagnostic]',
+          JSON.stringify({ runtime, observations, refs: describeRefs() })
+        );
+        throw error;
       } finally {
         stop();
         await rendered.destroy();
@@ -315,14 +366,18 @@ describe('generic preview owned portal theme', () => {
       );
       const child: DemoSpec = {
         type: 'demo',
-        // A host-only custom element exercises a real synchronous connected
-        // callback; no Prototype or Adapter behavior is replaced.
+        // The declared host box remains legal. Its setup owns a native probe
+        // with a real synchronous connected callback, not a forged box tag or
+        // a mocked Prototype/Adapter lifecycle.
         root: {
           kind: 'box',
-          children: [{ kind: 'box', tag: tag as 'div' }, fixture(() => () => {}).root],
+          children: [{ kind: 'box', ref: 'reentryProbeMount' }, fixture(() => () => {}).root],
         },
         setup(next) {
           context = next;
+          const probe = host.ownerDocument.createElement(tag);
+          next.refs.reentryProbeMount.append(probe);
+          return () => probe.remove();
         },
       };
       surface = createRuntimePreviewSurface(
