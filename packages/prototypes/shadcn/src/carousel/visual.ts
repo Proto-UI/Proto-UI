@@ -1,4 +1,4 @@
-import { tw, type DefHandle, type ObservedStateHandle, type StyleHandle } from '@proto.ui/core';
+import { tw, type DefHandle, type State, type StyleHandle } from '@proto.ui/core';
 import type { RunHandle } from '@proto.ui/core';
 import { CAROUSEL_CONTEXT } from '@proto.ui/prototypes-base/carousel';
 import {
@@ -32,10 +32,10 @@ const SIZE: Record<ShadcnStyleId, StyleHandle> = {
 };
 
 type ButtonFacts = {
-  hovered: ObservedStateHandle<boolean, any>;
-  pressed: ObservedStateHandle<boolean, any>;
-  focusVisible: ObservedStateHandle<boolean, any>;
-  disabled: ObservedStateHandle<boolean, any>;
+  hovered: State<boolean>;
+  pressed: State<boolean>;
+  focusVisible: State<boolean>;
+  disabled: State<boolean>;
 };
 
 export function setupCarouselNavigationPaint(

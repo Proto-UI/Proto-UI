@@ -16,8 +16,8 @@ import {
 // The styled decoration is passive and has no input, role, focus or event
 // owner. Rule observes source facts and the owned style selection directly;
 // it needs no watch on an owned State or manual lifecycle unsubscription.
-export function sliderThumbPaint(
-  def: DefHandle<ShadcnSliderPartProps, any>,
+export function sliderThumbPaint<Exposes>(
+  def: DefHandle<ShadcnSliderPartProps, Exposes>,
   state: {
     disabled: BorrowedStateHandle<boolean, SliderPartProps>;
     hovered: BorrowedStateHandle<boolean, SliderPartProps>;
