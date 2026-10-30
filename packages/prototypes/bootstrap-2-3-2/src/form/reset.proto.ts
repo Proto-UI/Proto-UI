@@ -4,13 +4,13 @@ import {
   type FormActionExposes,
   type FormActionProps,
 } from '@proto.ui/prototypes-base/form';
-import { setupButtonVisual } from '../button/visual';
+import { setupFormActionVisual } from './action-visual';
 // Passive bootstrap-2-3-2 Button paint; Base Form remains the sole action owner.
 export default definePrototype<FormActionProps, FormActionExposes>({
   name: 'bootstrap-2-3-2-form-reset',
   setup(def) {
     const inherited = asFormReset();
-    setupButtonVisual(def, inherited.stateHandles!);
+    setupFormActionVisual(def, inherited.stateHandles!);
     return inherited.render;
   },
 });

@@ -161,6 +161,18 @@ export function setupCalendarDayVisual(
     when: (w) => w.state(state.selected).eq(true),
     intent: (i) => i.feedback.style.use(tw('bg-primary text-primary-foreground')),
   });
+  // Pressed keeps the family's command vocabulary: New York has no press
+  // translation; every other profile shares the modern translate-y-px.
+  def.rule({
+    when: (w) =>
+      w.all(
+        w.state(state.pressed).eq(true),
+        w.state(state.disabled).eq(false),
+        w.state(state.selected).eq(false),
+        w.not(w.state(style).eq('new-york-v4'))
+      ),
+    intent: (i) => i.feedback.style.use(tw('translate-y-px')),
+  });
   def.rule({
     when: (w) => w.state(state.outside).eq(true),
     intent: (i) => i.feedback.style.use(tw('text-muted-foreground')),

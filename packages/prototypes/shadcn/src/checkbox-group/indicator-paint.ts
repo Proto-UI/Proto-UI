@@ -71,6 +71,12 @@ export function checkboxGroupGlyph(
       intent: (i) => i.feedback.style.use(tw(ROW_FOCUS[profile])),
     });
   }
+  // Every profile shares the same forced-colors outline; project it on the
+  // web-exposed focus fact so forced-colors media keeps a painted row signal.
+  def.rule({
+    when: (w) => w.state(state.focusVisible).eq(true),
+    intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline')),
+  });
   let refresh: DelayTask | null = null;
   const request = (run: { update(): void }) => {
     refresh?.cancel();

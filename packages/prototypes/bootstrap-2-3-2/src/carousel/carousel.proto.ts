@@ -11,6 +11,7 @@ import type {
   CarouselNextExposes,
 } from '@proto.ui/prototypes-base/carousel';
 import { definePrototype, tw } from '@proto.ui/core';
+import { bootstrapButtonPressed } from '../button/paint';
 import {
   asCarouselRoot,
   asCarouselViewport,
@@ -98,6 +99,11 @@ export const carouselPrevious = definePrototype<CarouselPreviousProps, CarouselP
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('cursor-default')),
     });
+    // Presentation consumes the existing owner; no second interaction hook.
+    def.rule({
+      when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
+    });
     return behavior.render;
   },
 });
@@ -132,6 +138,11 @@ export const carouselNext = definePrototype<CarouselNextProps, CarouselNextExpos
     def.rule({
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('cursor-default')),
+    });
+    // Presentation consumes the existing owner; no second interaction hook.
+    def.rule({
+      when: (w) => w.all(w.state(state.pressed).eq(true), w.state(state.disabled).eq(false)),
+      intent: (i) => i.feedback.style.use(tw(bootstrapButtonPressed)),
     });
     return behavior.render;
   },

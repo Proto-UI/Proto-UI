@@ -55,6 +55,54 @@ const pressToken = {
   'bootstrap-2-3-2': 'shadow-[inset_0_2px_4px_rgb(0_0_0/15%),0_1px_2px_rgb(0_0_0/5%)]',
   'liquid-glass': 'shadow-xs',
 };
+// Registered feedback vocabularies differ per family and consumer: web-exposed
+// states project as data-[state] variants, while profile-gated paint is dynamic.
+const disabledTokens = (family: string, component: string): string[] => {
+  if (family === 'liquid-glass')
+    // Liquid disabled commands withdraw optional material without whole-control
+    // opacity (README: no opacity suppression for disabled commands).
+    return ['data-[disabled]:cursor-default', 'data-[disabled]:shadow-none'];
+  if (family === 'bootstrap-2-3-2')
+    return component === 'carousel'
+      ? ['data-[disabled]:cursor-default']
+      : ['data-[disabled]:opacity-65'];
+  if (family === 'shadcn') return ['data-[disabled]:opacity-50'];
+  return ['data-[disabled]:opacity-50'];
+};
+const focusVisibleToken = (family: string, component: string, part: string): string | null => {
+  if (family !== 'shadcn') return 'data-[focus-visible]:ring-2';
+  if (part === 'day') return 'data-[focused]:ring-3';
+  if (component === 'carousel' || component === 'message-scroller')
+    // Profile-gated ring paints dynamically; asserted in the focused phase.
+    return null;
+  return 'data-[focus-visible]:forced-colors-focus-outline';
+};
+const pressedToken = (family: string, component: string, part: string): string | null => {
+  if (family === 'shadcn')
+    // Multi-profile press paint is dynamic; asserted in the pressed phase.
+    return null;
+  const token = `data-[pressed]:not-[data-disabled]:${pressToken[family as keyof typeof pressToken]}`;
+  if (family === 'bootstrap-2-3-2') {
+    if (component === 'message-scroller')
+      // Jump consumes the shared Button recipe whose press paint is unguarded.
+      return `data-[pressed]:${pressToken['bootstrap-2-3-2']}`;
+    if (part === 'day')
+      return `data-[pressed]:not-[data-disabled]:not-[data-selected]:${pressToken['bootstrap-2-3-2']}`;
+  }
+  return token;
+};
+// Profiles without a static press variant keep pressed feedback dynamic; the
+// New York profile and popup triggers intentionally register none.
+const dynamicPressed: Record<string, Record<string, string[]>> = {
+  shadcn: {
+    tree: ['translate-y-px'],
+    'data-table': ['translate-y-px'],
+    'date-picker': [],
+    carousel: [],
+    'message-scroller': [],
+  },
+};
+const shadcnDayPressed = ['translate-y-px'];
 for (const [family, modules] of Object.entries(families)) {
   for (const module of modules)
     for (const proto of new Set(Object.values(module)))
@@ -88,11 +136,12 @@ for (const [family, modules] of Object.entries(families)) {
       expect(exposed.disabled.get()).toBe(true);
       expect(control.getAttribute('aria-disabled')).toBe('true');
       const tokens = () => (control.getAttribute('data-pui-style') ?? '').split(/\s+/);
-      expect(tokens()).toContain('data-[disabled]:opacity-50');
-      expect(tokens()).toContain('data-[focus-visible]:ring-2');
-      expect(tokens()).toContain(
-        `data-[pressed]:not-[data-disabled]:${pressToken[family as keyof typeof pressToken]}`
-      );
+      for (const token of disabledTokens(family, component)) expect(tokens()).toContain(token);
+      if (family === 'liquid-glass') expect(tokens()).not.toContain('data-[disabled]:opacity-50');
+      const staticFocus = focusVisibleToken(family, component, part);
+      if (staticFocus) expect(tokens()).toContain(staticFocus);
+      const staticPressed = pressedToken(family, component, part);
+      if (staticPressed) expect(tokens()).toContain(staticPressed);
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
       expect(exposed.pressed.get()).toBe(false);
@@ -104,10 +153,21 @@ for (const [family, modules] of Object.entries(families)) {
       await flush();
       expect(exposed.focusVisible.get()).toBe(true);
       expect(control.hasAttribute('data-focus-visible')).toBe(true);
+      if (family === 'shadcn' && part !== 'day') {
+        // Profile-driven focus paint applies dynamically while focusVisible.
+        expect(tokens()).toContain('ring-3');
+        expect(tokens()).toContain('ring-ring/50');
+        expect(tokens()).toContain('border-ring');
+      }
       control.dispatchEvent(new Event('pointerdown'));
       await flush();
       expect(exposed.pressed.get()).toBe(true);
       expect(control.hasAttribute('data-pressed')).toBe(true);
+      const gained =
+        part === 'day' && family === 'shadcn'
+          ? shadcnDayPressed
+          : (dynamicPressed[family]?.[component] ?? null);
+      if (gained) for (const token of gained) expect(tokens()).toContain(token);
       control.dispatchEvent(new Event('pointercancel'));
       await flush();
       expect(exposed.pressed.get()).toBe(false);
@@ -129,9 +189,18 @@ for (const [family, modules] of Object.entries(families)) {
         expect(root.getExposes().value.get()).toBe('2026-10-12');
         expect(root.getExposes().open.get()).toBe(false);
         expect(exposed.selected.get()).toBe(true);
-        expect(tokens().some((token: string) => token.startsWith('data-[selected]:bg-'))).toBe(
-          true
-        );
+        if (family === 'bootstrap-2-3-2') {
+          // Selected paint is interaction-resolved: the variant carries the
+          // shared primary text/border recipe while the fill applies live.
+          expect(tokens().some((token: string) => token.startsWith('data-[selected]:'))).toBe(
+            true
+          );
+          expect(tokens().some((token: string) => token.startsWith('bg-[#006dcc_'))).toBe(true);
+        } else {
+          expect(tokens().some((token: string) => token.startsWith('data-[selected]:bg-'))).toBe(
+            true
+          );
+        }
       }
     });
 }
