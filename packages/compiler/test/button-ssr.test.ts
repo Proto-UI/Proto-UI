@@ -525,7 +525,20 @@ describe('experimental source-generated Button SSR', () => {
         diagnostics: [{ message: expect.stringContaining('non-reserved') }],
       });
     }
-    const emitted = emitWebComponentSource(parsed.value, { ssr: true });
+    const supported = emitWebComponentSource(parsed.value, { ssr: true });
+    expect(supported.ok).toBe(true);
+    if (!supported.ok) throw new Error(JSON.stringify(supported.diagnostics));
+    const css = supported.value.supportingFiles?.find((file) => file.path === 'Component.css');
+    expect(css?.contents).toContain('color: #000;');
+    expect(css?.contents).not.toContain('Unsupported Proto UI style tokens:');
+
+    // Valid author grammar is distinct from the renderer's finite recipe support.
+    // The CLI renderer regression explicitly keeps ring-black/50 unsupported.
+    const missingRecipe = parsePrototype(
+      "import {definePrototype,tw} from '@proto.ui/core'; export default definePrototype({name:'css-negative',setup(def){def.feedback.style.use(tw('ring-black/50'));}});"
+    );
+    if (!missingRecipe.ok) throw new Error(JSON.stringify(missingRecipe.diagnostics));
+    const emitted = emitWebComponentSource(missingRecipe.value, { ssr: true });
     expect(emitted).toMatchObject({
       ok: false,
       diagnostics: [{ code: 'PUI3301', message: expect.stringContaining('complete CSS artifact') }],

@@ -434,6 +434,7 @@ describe('actual internal family producer boundary', () => {
     options = f.options;
     const capture = armExperimentalInitialPaintCapture(f.host, f.layout);
     setElementProps(f.host, {
+      material: 'auto',
       variant: 'outline',
       radius: 'full',
       border: 'none',
@@ -1233,6 +1234,7 @@ describe('WC acquisition preserves the registered initial plane (synthetic layou
     });
     f = fixture('seed-transaction-control', false);
     setElementProps(f.host, {
+      material: 'auto',
       variant: 'outline',
       radius: 'full',
       border: 'none',

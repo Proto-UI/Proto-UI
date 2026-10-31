@@ -1,0 +1,89 @@
+name: Ordinary compiler WC native browser evidence
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compiler-wc-native-evidence.yml'
+      - 'packages/**'
+      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
+      - 'apps/www/package.json'
+      - 'scripts/test/server-readiness.mjs'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'pnpm-workspace.yaml'
+      - 'vitest.config.ts'
+      - 'scripts/test/runtime-test-plan.mjs'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: compiler-wc-native-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+jobs:
+  ordinary-native-browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CANDIDATE_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install locked dependencies (networked installation stage only)
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/compiler-wc-native"
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          corepack enable
+          corepack pnpm@10.32.1 install --frozen-lockfile
+          CHROME=$(command -v google-chrome || command -v chromium || command -v chromium-browser)
+          echo "CHROME_PATH=$CHROME" >> "$GITHUB_ENV"
+          "$CHROME" --version > "$RUNNER_TEMP/compiler-wc-native/browser-environment.txt"
+          node --version > "$RUNNER_TEMP/compiler-wc-native/node-environment.txt"
+          git rev-parse HEAD > "$RUNNER_TEMP/compiler-wc-native/source-sha.txt"
+          git rev-parse 'HEAD^{tree}' > "$RUNNER_TEMP/compiler-wc-native/source-tree.txt"
+          sha256sum pnpm-lock.yaml > "$RUNNER_TEMP/compiler-wc-native/lockfile.sha256"
+      - name: Run ordinary WC journeys with loopback only and no credential environment
+        timeout-minutes: 12
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/compiler-wc-native"
+          TEST_HOME=$(mktemp -d "$RUNNER_TEMP/compiler-wc-native-home.XXXXXX")
+          # A new unprivileged user/network namespace has no external interfaces/routes.
+          # Fail closed if unavailable. Never sudo, modify runner firewall, or fallback
+          # to an unrestricted test/browser process.
+          unshare --user --map-root-user --net sh -c '
+            set -eu
+            ip link set lo up
+            exec env -i PATH="$1" HOME="$2" CI=1 NODE_ENV=test \
+              CHROME_PATH="$3" CANDIDATE_SHA="$4" \
+              COMPILER_WC_NATIVE_EVIDENCE_DIR="$5/browser" \
+              GITHUB_RUN_ID="$6" GITHUB_RUN_ATTEMPT="$7" \
+              node node_modules/vitest/vitest.mjs run \
+                packages/compiler/test/web-component-native.browser.test.ts \
+                --maxWorkers=1 --minWorkers=1 --reporter=default --reporter=json \
+                --outputFile="$5/browser-vitest.json"
+          ' sh "$PATH" "$TEST_HOME" "$CHROME_PATH" "$CANDIDATE_SHA" "$EVIDENCE" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" \
+            2>&1 | tee "$EVIDENCE/browser.log"
+          node --input-type=module - "$EVIDENCE/browser-vitest.json" <<'JS'
+          import fs from 'node:fs';
+          import assert from 'node:assert/strict';
+          const result=JSON.parse(fs.readFileSync(process.argv[2],'utf8'));
+          assert.equal(result.numTotalTests,12,'All light/shadow ordinary-native journeys must run.');
+          assert.equal(result.numPassedTests,12);
+          assert.equal(result.numFailedTests,0);
+          assert.equal(result.numPendingTests,0);
+          assert.equal(result.success,true);
+          JS
+      - name: Retain head-bound native-only pages, artifacts, screenshots, traces and failures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: compiler-wc-native-${{ env.CANDIDATE_SHA }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/compiler-wc-native
+          if-no-files-found: error
+          retention-days: 30
+          include-hidden-files: false

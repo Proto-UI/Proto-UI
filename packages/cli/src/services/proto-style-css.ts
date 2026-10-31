@@ -248,6 +248,7 @@ const staticUtilities: Record<string, string[]> = {
   'rounded-xs': ['border-radius: 0.125rem;'],
   'rounded-[calc(var(--radius-md)-2px)]': ['border-radius: calc(var(--pui-radius-md) - 2px);'],
   'rounded-[calc(var(--radius)-3px)]': ['border-radius: calc(var(--pui-radius) - 3px);'],
+  'rounded-[calc(var(--radius)-5px)]': ['border-radius: calc(var(--pui-radius) - 5px);'],
   'grid-rows-[auto_1fr]': ['grid-template-rows: auto 1fr;'],
   'place-items-center': ['place-items: center;'],
   'text-balance': ['text-wrap: balance;'],
@@ -848,6 +849,11 @@ const staticUtilities: Record<string, string[]> = {
     ...composedShadow(),
   ],
   'shadow-xs': ['--pui-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);', ...composedShadow()],
+  // Bare shadow retains the upstream compatibility scale (v4 shadow-sm).
+  shadow: [
+    '--pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);',
+    ...composedShadow(),
+  ],
   'shadow-sm': [
     '--pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);',
     ...composedShadow(),

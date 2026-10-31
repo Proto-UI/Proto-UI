@@ -163,7 +163,8 @@ export const ShadcnSurfaceRoot = definePrototype<ShadcnSurfaceRootProps, Surface
       });
       def.rule({
         when: (w) => w.all(w.prop('actionProfile').eq(profile), w.prop('focusVisible').eq(true)),
-        intent: (i) => i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS)),
+        intent: (i) =>
+          i.feedback.style.use(tw('forced-colors-focus-outline', SHADCN_ACTION_FOCUS[profile])),
       });
       def.rule({
         when: (w) =>
