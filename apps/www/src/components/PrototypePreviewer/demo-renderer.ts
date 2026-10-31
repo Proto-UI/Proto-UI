@@ -8,10 +8,15 @@ import {
   findPreviewMaterialProvider,
 } from './preview-material-provider';
 import { createDemoAssociationScope } from './demo-associations';
-import { setElementProps, setElementAssociations } from '@proto.ui/adapter-web-component';
+import {
+  getElementProps,
+  getElementAssociations,
+  setElementProps,
+  setElementAssociations,
+} from '@proto.ui/adapter-web-component';
 import type { ReactRuntime } from '@proto.ui/adapter-react';
 import type { VueRuntime as AdapterVueRuntime } from '@proto.ui/adapter-vue';
-import type { Prototype } from '@proto.ui/core';
+import type { InstanceAssociations, Prototype } from '@proto.ui/core';
 import { getPrototype } from './registry';
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
 import type {
@@ -57,6 +62,51 @@ const reactComponentCache = new WeakMap<object, Map<string, any>>();
 const vueComponentCache = new WeakMap<object, Map<string, any>>();
 const wcSurfaceProps = new WeakMap<HTMLElement, Record<string, unknown>>();
 const wcRawProps = new WeakMap<HTMLElement, Record<string, unknown>>();
+
+/** Only primitive values and identical function references can prove a no-op.
+ * Object-valued props/styles may be mutable or carry identity-sensitive semantics;
+ * even equal-looking objects keep the existing update path. Presence is significant.
+ */
+function sameNonObjectSnapshot(
+  previous: Record<string, unknown>,
+  next: Record<string, unknown>
+): boolean {
+  const keys = Object.keys(previous);
+  return (
+    keys.length === Object.keys(next).length &&
+    keys.every((key) => {
+      const value = next[key];
+      return (
+        Object.hasOwn(next, key) &&
+        (value === null || typeof value !== 'object') &&
+        Object.is(previous[key], value)
+      );
+    })
+  );
+}
+
+/** Authored children have already been copied, frozen and validated as data.
+ * This comparison only decides the parent's render intent: every descendant is
+ * still patched independently, including its identity-sensitive object props.
+ */
+function sameAuthoredChildData(previous: unknown, next: unknown): boolean {
+  if (Object.is(previous, next)) return true;
+  if (
+    !previous ||
+    !next ||
+    typeof previous !== 'object' ||
+    typeof next !== 'object' ||
+    Array.isArray(previous) !== Array.isArray(next)
+  )
+    return false;
+  const before = previous as Record<string, unknown>;
+  const after = next as Record<string, unknown>;
+  const keys = Object.keys(before);
+  return (
+    keys.length === Object.keys(after).length &&
+    keys.every((key) => Object.hasOwn(after, key) && sameAuthoredChildData(before[key], after[key]))
+  );
+}
 
 const EMPTY_DEMO_RENDER: DemoRenderResult = { destroy: () => {} };
 
@@ -686,6 +736,20 @@ async function renderDemoWc(
             : next.surfaceStyle,
       };
       const previousProps = wcRawProps.get(element) ?? {};
+      const nextAssociations: InstanceAssociations = associations.resolve(next.associations) ?? {};
+      const needsUpdate =
+        !sameRef ||
+        !sameNonObjectSnapshot(previousProps, props) ||
+        // Public Adapter handles can change the same owner outside this API.
+        // Restoring authored values after such a write still needs a render.
+        !sameNonObjectSnapshot(getElementProps(element) ?? {}, props) ||
+        !sameNonObjectSnapshot(previousSurface ?? {}, surface) ||
+        !sameNonObjectSnapshot(previous.associations ?? {}, next.associations ?? {}) ||
+        !Object.is(
+          getElementAssociations(element).controlLabel ?? null,
+          nextAssociations.controlLabel ?? null
+        ) ||
+        !sameAuthoredChildData(previous.children ?? [], next.children ?? []);
       callbacks.patch(element, {
         ...props,
         ...Object.fromEntries(
@@ -697,10 +761,14 @@ async function renderDemoWc(
       if (!current()) return record;
       wcRawProps.set(element, props);
       wcSurfaceProps.set(element, surface);
-      setElementAssociations(element, associations.resolve(next.associations) ?? {});
+      setElementAssociations(element, nextAssociations);
       if (!current()) return record;
       setElementProps(element, { ...props, ...surface });
-      if (current()) (element as HTMLElement & DemoInstance).update?.();
+      // setChildren is a keyed author-value commit, not a forced render API.
+      // Keep delivery, association/style synchronization and descendant patching;
+      // omit only this redundant host update intent. Explicit public update/call
+      // paths and any independently scheduled Runtime work remain untouched.
+      if (current() && needsUpdate) (element as HTMLElement & DemoInstance).update?.();
     }
     if (!current()) return record;
     element.setAttribute('data-demo-owner', owner);

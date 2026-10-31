@@ -1,4 +1,10 @@
-import { definePrototype } from '@proto.ui/core';
+import { createControlLabelRef, definePrototype } from '@proto.ui/core';
+import { asControlLabel } from '@proto.ui/hooks';
+import {
+  getElementAssociations,
+  setElementAssociations,
+  setElementProps,
+} from '@proto.ui/adapter-web-component';
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest';
 import { renderDemo, revokeFailedDemoRender } from './demo-renderer';
 import { claimHostMount } from './runtimes/host-mount';
@@ -735,6 +741,301 @@ it('WC fallback keyed reorder retains the actual Proto setup identity and intern
   } finally {
     if (descriptor) Object.defineProperty(slot, 'moveBefore', descriptor);
     else Reflect.deleteProperty(slot, 'moveBefore');
+  }
+}, 20_000);
+
+it('WC repeated 174-row author snapshots do not request 174 redundant retained-item updates', async () => {
+  const { ctx, api } = await mount('wc');
+  const rows = () => Array.from({ length: 174 }, (_, index) => result(`row-${index}`));
+  await api.setChildren!('results', rows());
+  const elements = rows().map(({ key }) => ctx.refs[key]!);
+  const editor = ctx.refs.editor.matches('input')
+    ? (ctx.refs.editor as HTMLInputElement)
+    : ctx.refs.editor.querySelector('input')!;
+  editor.focus();
+  editor.value = 'se';
+  editor.dispatchEvent(
+    new InputEvent('input', { bubbles: true, inputType: 'insertText', data: 'se' })
+  );
+  editor.setSelectionRange(1, 2);
+  const instances = elements.map((element) =>
+    api.getPublicInstance!(element.getAttribute('data-demo-ref')!)
+  );
+  expect(instances.every(Boolean)).toBe(true);
+  const updates = elements.map((element) =>
+    vi.spyOn(element as HTMLElement & { update(): void }, 'update')
+  );
+  try {
+    await expect(api.setChildren!('results', rows())).resolves.toBe('committed');
+    expect(updates.reduce((count, update) => count + update.mock.calls.length, 0)).toBe(0);
+    expect(rows().map(({ key }) => ctx.refs[key])).toEqual(elements);
+    expect(rows().map(({ key }) => api.getPublicInstance!(key))).toEqual(instances);
+    expect(document.activeElement).toBe(editor);
+    expect(editor.value).toBe('se');
+    expect([editor.selectionStart, editor.selectionEnd]).toEqual([1, 2]);
+
+    const changed = rows();
+    const changedNode = changed[83]!.node;
+    if (typeof changedNode === 'string' || changedNode.kind !== 'proto')
+      throw new Error('Expected a real Command Item');
+    changedNode.props = { ...changedNode.props, textValue: 'updated result' };
+    changed.push(result('row-174'));
+    await expect(api.setChildren!('results', changed)).resolves.toBe('committed');
+    expect(updates.map((update) => update.mock.calls.length)).toEqual(
+      Array.from({ length: 174 }, (_, index) => (index === 83 ? 1 : 0))
+    );
+    expect(updates[83]!.mock.contexts).toEqual([elements[83]]);
+    expect(ctx.refs['row-174']).toBeDefined();
+    expect(rows().map(({ key }) => ctx.refs[key])).toEqual(elements);
+    expect(document.activeElement).toBe(editor);
+    expect([editor.selectionStart, editor.selectionEnd]).toEqual([1, 2]);
+  } finally {
+    for (const update of updates) update.mockRestore();
+  }
+}, 20_000);
+
+it('WC no-op suppression preserves changed children, scalar presence, Object.is and object-identity updates', async () => {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const watched: unknown[][] = [];
+  let setupCount = 0;
+  const probe = definePrototype({
+    name: 'test-demo-dynamic-wc-noop-props',
+    setup(def) {
+      setupCount++;
+      def.props.define({ value: { type: 'number' }, payload: { type: 'object' } });
+      def.props.watchAll((_run, next, previous) => {
+        watched.push([previous.value, next.value, previous.payload, next.payload]);
+      });
+    },
+  });
+  registerPrototype(probe.name, probe);
+  let ctx!: DemoSetupContext;
+  const view = await renderDemo({
+    host,
+    runtime: 'wc',
+    demo: {
+      type: 'demo',
+      root: {
+        kind: 'box',
+        ref: 'slot',
+        dynamicChildren: { prototypeIds: [probe.name] },
+        children: [],
+      },
+      setup(context) {
+        ctx = context;
+      },
+    },
+  });
+  views.push(view);
+  const row = (props: Record<string, unknown>, text = 'original'): DemoKeyedChild => ({
+    key: 'stable',
+    node: { kind: 'proto', prototypeId: probe.name, ref: 'stable', props, children: [text] },
+  });
+  await ctx.api.setChildren!('slot', [row({ value: 0 })]);
+  const element = ctx.refs.stable as HTMLElement & { update(): void };
+  const update = vi.spyOn(element, 'update');
+  try {
+    watched.length = 0;
+    await ctx.api.setChildren!('slot', [row({ value: 0 })]);
+    expect(update).not.toHaveBeenCalled();
+    expect(watched).toEqual([]);
+
+    await ctx.api.setChildren!('slot', [row({ value: -0 })]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(watched).toHaveLength(1);
+    expect(Object.is(watched[0]![0], 0)).toBe(true);
+    expect(Object.is(watched[0]![1], -0)).toBe(true);
+    update.mockClear();
+
+    await ctx.api.setChildren!('slot', [row({ value: -0 }, 'changed child')]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(element.textContent).toContain('changed child');
+    expect(watched).toHaveLength(1); // Children changes are not props diffs.
+    update.mockClear();
+
+    await ctx.api.setChildren!('slot', [row({}, 'changed child')]);
+    expect(update).toHaveBeenCalledTimes(1); // Withdrawal is not the old scalar value.
+    update.mockClear();
+
+    await ctx.api.setChildren!('slot', [row({ payload: { nested: { value: 1 } } })]);
+    update.mockClear();
+    const beforeObjectReplay = watched.length;
+    await ctx.api.setChildren!('slot', [row({ payload: { nested: { value: 1 } } })]);
+    expect(update).toHaveBeenCalledTimes(1); // Equal-looking object is a new prop identity.
+    expect(watched.length).toBeGreaterThan(beforeObjectReplay);
+    update.mockClear();
+    await ctx.api.setChildren!('slot', [row({ payload: { nested: { value: 2 } } })]);
+    expect(update).toHaveBeenCalledTimes(1);
+    update.mockClear();
+
+    // The existing author-data admission rejects NaN; the optimization must not
+    // bypass it or partially mutate the committed element/props.
+    await expect(ctx.api.setChildren!('slot', [row({ value: Number.NaN })])).rejects.toThrow();
+    expect(update).not.toHaveBeenCalled();
+    expect(ctx.refs.stable).toBe(element);
+    expect(setupCount).toBe(1);
+  } finally {
+    update.mockRestore();
+  }
+}, 20_000);
+
+it('WC retained no-op checks keep mutable imperative props, surface sync and public update available', async () => {
+  const { ctx, api } = await mount('wc');
+  await api.setChildren!('actions', [action('stable')]);
+  const element = ctx.refs.stable as HTMLElement & { update(): void };
+  const callback = vi.fn();
+  const payload = { nested: { value: 1 } };
+  const surface = { '--retained-surface': 'old' };
+  api.setProps('stable', { onClick: callback, diagnosticPayload: payload });
+  api.setSurfaceStyle!('stable', surface);
+  const update = vi.spyOn(element, 'update');
+  try {
+    payload.nested.value = 2;
+    surface['--retained-surface'] = 'new';
+    await api.setChildren!('actions', [action('stable')]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update.mock.contexts).toEqual([element]);
+    expect(element.style.getPropertyValue('--retained-surface')).toBe('new');
+    element.click();
+    expect(callback).toHaveBeenCalledTimes(1);
+    update.mockClear();
+    // Explicit callers still own their update intent; it is not suppressed.
+    element.update();
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(update.mock.contexts).toEqual([element]);
+  } finally {
+    update.mockRestore();
+  }
+}, 20_000);
+
+it('WC retained updates preserve association and scalar surface changes without changing receiver identity', async () => {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const probe = definePrototype({
+    name: 'test-demo-dynamic-wc-noop-association',
+    setup() {
+      asControlLabel().target(() => {});
+    },
+  });
+  registerPrototype(probe.name, probe);
+  let ctx!: DemoSetupContext;
+  const view = await renderDemo({
+    host,
+    runtime: 'wc',
+    demo: {
+      type: 'demo',
+      root: {
+        kind: 'box',
+        ref: 'actions',
+        dynamicChildren: { prototypeIds: [probe.name] },
+        children: [],
+      },
+      setup(context) {
+        ctx = context;
+      },
+    },
+  });
+  views.push(view);
+  const { api } = ctx;
+  const row = (
+    label: string,
+    className = 'first',
+    surfaceStyle = 'color: red'
+  ): DemoKeyedChild => ({
+    key: 'stable',
+    node: {
+      kind: 'proto',
+      prototypeId: probe.name,
+      ref: 'stable',
+      associations: { controlLabel: label },
+      className,
+      surfaceStyle,
+      children: ['stable'],
+    },
+  });
+  await api.setChildren!('actions', [row('first-label')]);
+  const element = ctx.refs.stable as HTMLElement & { update(): void };
+  const update = vi.spyOn(element, 'update');
+  try {
+    await api.setChildren!('actions', [row('first-label')]);
+    expect(update).not.toHaveBeenCalled();
+    await api.setChildren!('actions', [row('second-label')]);
+    expect(update).toHaveBeenCalledTimes(1);
+    await api.setChildren!('actions', [row('second-label', 'second')]);
+    expect(update).toHaveBeenCalledTimes(2);
+    await api.setChildren!('actions', [row('second-label', 'second', 'color: blue')]);
+    expect(update).toHaveBeenCalledTimes(3);
+    expect(update.mock.contexts).toEqual([element, element, element]);
+    expect(ctx.refs.stable).toBe(element);
+    expect(element.classList.contains('second')).toBe(true);
+    expect(element.style.color).toBe('blue');
+  } finally {
+    update.mockRestore();
+  }
+}, 20_000);
+
+it('WC identical authored rows still render after public Adapter props or associations diverge', async () => {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const probe = definePrototype<{ value: string }>({
+    name: 'test-demo-dynamic-wc-noop-public-adapter',
+    setup(def) {
+      def.props.define({ value: { type: 'string' } });
+      asControlLabel().target(() => {});
+      return (renderer) => renderer.el('span', renderer.read.props.get().value);
+    },
+  });
+  registerPrototype(probe.name, probe);
+  let ctx!: DemoSetupContext;
+  const view = await renderDemo({
+    host,
+    runtime: 'wc',
+    demo: {
+      type: 'demo',
+      root: {
+        kind: 'box',
+        ref: 'slot',
+        dynamicChildren: { prototypeIds: [probe.name] },
+        children: [],
+      },
+      setup(context) {
+        ctx = context;
+      },
+    },
+  });
+  views.push(view);
+  const row = (): DemoKeyedChild => ({
+    key: 'stable',
+    node: {
+      kind: 'proto',
+      prototypeId: probe.name,
+      ref: 'stable',
+      props: { value: 'authored' },
+      associations: { controlLabel: 'authored-label' },
+    },
+  });
+  await ctx.api.setChildren!('slot', [row()]);
+  const element = ctx.refs.stable as HTMLElement & { update(): void };
+  await vi.waitFor(() => expect(element.textContent).toBe('authored'));
+  const authoredAssociation = getElementAssociations(element).controlLabel;
+  setElementProps(element, { value: 'external' });
+  element.update();
+  await vi.waitFor(() => expect(element.textContent).toBe('external'));
+  const update = vi.spyOn(element, 'update');
+  try {
+    await ctx.api.setChildren!('slot', [row()]);
+    expect(update).toHaveBeenCalledTimes(1);
+    await vi.waitFor(() => expect(element.textContent).toBe('authored'));
+    update.mockClear();
+    setElementAssociations(element, { controlLabel: createControlLabelRef() });
+    await ctx.api.setChildren!('slot', [row()]);
+    expect(update).toHaveBeenCalledTimes(1);
+    expect(getElementAssociations(element).controlLabel).toBe(authoredAssociation);
+    expect(update.mock.contexts).toEqual([element]);
+    expect(ctx.refs.stable).toBe(element);
+  } finally {
+    update.mockRestore();
   }
 }, 20_000);
 
