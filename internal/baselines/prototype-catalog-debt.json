@@ -4987,42 +4987,6 @@
       ]
     },
     {
-      "file": "packages/prototypes/shadcn/src/menubar/content.proto.ts",
-      "entries": [
-        {
-          "kind": "prototype",
-          "name": "shadcn-menubar-content"
-        }
-      ]
-    },
-    {
-      "file": "packages/prototypes/shadcn/src/menubar/item.proto.ts",
-      "entries": [
-        {
-          "kind": "prototype",
-          "name": "shadcn-menubar-item"
-        }
-      ]
-    },
-    {
-      "file": "packages/prototypes/shadcn/src/menubar/root.proto.ts",
-      "entries": [
-        {
-          "kind": "prototype",
-          "name": "shadcn-menubar-root"
-        }
-      ]
-    },
-    {
-      "file": "packages/prototypes/shadcn/src/menubar/trigger.proto.ts",
-      "entries": [
-        {
-          "kind": "prototype",
-          "name": "shadcn-menubar-trigger"
-        }
-      ]
-    },
-    {
       "file": "packages/prototypes/shadcn/src/message-scroller/message-scroller.proto.ts",
       "entries": [
         {

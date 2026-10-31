@@ -501,7 +501,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'line-through',
   'm-0',
   'max-h-72',
-  'max-h-[300px]',
+  'max-h-[18.75rem]',
   'max-h-[calc(100vh_-_2rem)]',
   'max-h-[calc(var(--proto-ui-available-region-height,100%)_-_2rem)]',
   'max-h-[calc(var(--proto-ui-available-region-height,100vh)*2/3_-_1rem)]',

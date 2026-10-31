@@ -85,7 +85,7 @@ export const COMMAND_PROFILES = {
     input: 'flex h-10 py-3 text-sm',
     item: 'gap-2 rounded-sm px-2 py-1.5 text-sm',
     empty: 'text-sm',
-    list: 'max-h-[300px] scroll-py-1',
+    list: 'max-h-[18.75rem] scroll-py-1',
   },
 } as const;
 

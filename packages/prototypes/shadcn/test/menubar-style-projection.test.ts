@@ -5,6 +5,8 @@ import { styleContains } from '../../test-utils/style';
 import { renderProtoStyleTokenCss } from '../../../cli/src/services/proto-style-css';
 for (const p of [menubarRoot, menubarTrigger, menubarContent, menubarItem])
   AdaptToWebComponent(p as any);
+const acceptedStyleTokens = (node: Element) =>
+  new Set((node.getAttribute('data-pui-style') ?? '').split(/\s+/).filter(Boolean));
 const settle = async () => {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 };
@@ -47,16 +49,40 @@ describe('Menubar bounded New York / Rhea projection', () => {
       expect(f.trigger.getExposes().expanded.get()).toBe(true);
       expect(styleContains(f.trigger, profile === 'rhea' ? 'bg-muted' : 'bg-accent')).toBe(true);
       expect(styleContains(f.content, profile === 'rhea' ? 'min-w-36' : 'min-w-48')).toBe(true);
+      // Opening can request first-item focus. Establish actual Trigger focus
+      // before the negative control instead of assuming the click left Item blurred.
+      f.trigger.focus();
+      await settle();
+      expect(document.activeElement).toBe(f.trigger);
+      expect(f.root.getExposes().value.get()).toBe('file');
+      expect(f.item.getExposes().focused.get()).toBe(false);
+      expect(f.item.getExposes().focusVisible.get()).toBe(false);
+      expect(f.item.hasAttribute('data-focused')).toBe(false);
+      expect(acceptedStyleTokens(f.item).has('bg-accent')).toBe(false);
+      expect(acceptedStyleTokens(f.item).has('text-accent-foreground')).toBe(false);
       f.item.focus();
       await settle();
+      expect(document.activeElement).toBe(f.item);
       expect(f.item.getExposes().focused.get()).toBe(true);
       expect(f.item.hasAttribute('data-focused')).toBe(true);
-      expect(styleContains(f.item, 'data-[focused]:bg-accent')).toBe(true);
-      expect(styleContains(f.item, 'data-[focused]:text-accent-foreground')).toBe(true);
+      // Compound variant/focus paint is an accepted contribution, not a selector substring.
+      expect(acceptedStyleTokens(f.item).has('bg-accent')).toBe(true);
+      expect(acceptedStyleTokens(f.item).has('text-accent-foreground')).toBe(true);
       expect(styleContains(f.item, 'bg-primary')).toBe(false);
       expect(styleContains(f.item, 'data-[focused]:bg-primary')).toBe(false);
-      expect(styleContains(f.item, 'px-2')).toBe(true);
+      // Shared menu paint owns the equivalent left/right contributions separately.
+      expect(styleContains(f.item, 'pl-2')).toBe(true);
+      expect(styleContains(f.item, 'pr-2')).toBe(true);
       expect(styleContains(f.item, 'py-1.5')).toBe(true);
+      f.trigger.focus();
+      await settle();
+      expect(document.activeElement).toBe(f.trigger);
+      expect(f.root.getExposes().value.get()).toBe('file');
+      expect(f.item.getExposes().focused.get()).toBe(false);
+      expect(f.item.getExposes().focusVisible.get()).toBe(false);
+      expect(f.item.hasAttribute('data-focused')).toBe(false);
+      expect(acceptedStyleTokens(f.item).has('bg-accent')).toBe(false);
+      expect(acceptedStyleTokens(f.item).has('text-accent-foreground')).toBe(false);
     }
   );
   it('withdraws old profile contributions without changing value or part identity', async () => {

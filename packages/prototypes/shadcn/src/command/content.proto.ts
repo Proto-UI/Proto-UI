@@ -8,6 +8,6 @@ export default definePrototype<CommandContentProps, CommandContentExposes>({
   setup(def) {
     asCommandContent();
     setupCommandPartPaint(def, 'list');
-    def.feedback.style.use(tw('min-w-0 w-full overflow-x-hidden overflow-y-auto'));
+    def.feedback.style.use(tw('min-h-0 min-w-0 w-full overflow-x-hidden overflow-y-auto'));
   },
 });

@@ -10,7 +10,9 @@ export default definePrototype<CommandRootProps, CommandRootExposes>({
     def.context.provide(COMMAND_INPUT_PAINT, { command: false });
     setupCommandPartPaint(def, 'root', true);
     def.feedback.style.use(
-      tw('flex h-full w-full flex-col min-w-0 overflow-hidden bg-popover text-popover-foreground')
+      tw(
+        'flex h-full min-h-0 w-full flex-col min-w-0 overflow-hidden bg-popover text-popover-foreground'
+      )
     );
   },
 });
