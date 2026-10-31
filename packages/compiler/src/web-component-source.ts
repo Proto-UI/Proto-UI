@@ -14,6 +14,7 @@ import {
   type SsrStyleEnvironment,
 } from './web-component-ssr-style';
 import { webComponentSsrSupport } from './web-component-ssr-support';
+import { webComponentBrowserSupport } from './web-component-browser-support';
 import { createHash } from 'node:crypto';
 import { renderProtoStyleTokenCss } from '../../cli/src/services/proto-style-css';
 import type {
@@ -321,6 +322,7 @@ export function emitWebComponentSource(
     if (type === 'def') return `${prefix}Def`;
     if (type === 'run') return `${prefix}Run`;
     if (type === 'render') return `${prefix}Renderer`;
+    if (!options.ssr && type === 'template') return '(()=>Node)';
     if (type.startsWith('state:')) return `${prefix}State<${type.slice(6)}>`;
     if (type.startsWith('observed:')) return `${prefix}NativeObservedState<${type.slice(9)}>`;
     if (type === 'focus') return `${prefix}NativeFocus`;
@@ -336,9 +338,242 @@ export function emitWebComponentSource(
       ? `${prefix}NativeModuleCapability<${JSON.stringify(type)}, ${prefix}Run>`
       : 'unknown';
   }
-  function fn(node: FunctionIR, depth: number): string {
-    return `(${node.parameters.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ')}) => {\n${statements(node.body, depth + 1)}${'  '.repeat(depth)}}`;
+  // Lexical shape information stays in the compiler; it is never delivered as IR.
+  const nativeBindings: Map<string, ExpressionIR>[] = [new Map()];
+  let nativeSequence = 0;
+  function nativeBinding(name: string): ExpressionIR | undefined {
+    for (let index = nativeBindings.length - 1; index >= 0; --index) {
+      const value = nativeBindings[index].get(name);
+      if (value) return value;
+    }
   }
+  type NativeShape =
+    | { kind: 'node' | 'text' | 'empty' | 'invalid' }
+    | { kind: 'array'; items: NativeShape[] }
+    | { kind: 'union'; items: NativeShape[] };
+  function shapeFromType(type: ValueType): NativeShape | null {
+    if (type === 'template') return { kind: 'node' };
+    if (type === 'string' || type === 'number') return { kind: 'text' };
+    if (type === 'null') return { kind: 'empty' };
+    if (type === 'void') return { kind: 'invalid' };
+    if (type === 'boolean') return { kind: 'invalid' };
+    if (typeof type === 'object') {
+      if (type.kind === 'literal')
+        return type.value === null
+          ? { kind: 'empty' }
+          : typeof type.value === 'boolean'
+            ? { kind: 'invalid' }
+            : { kind: 'text' };
+      if (type.kind === 'array') {
+        const item = shapeFromType(type.element);
+        return item ? { kind: 'array', items: [item] } : null;
+      }
+      if (type.kind === 'union') {
+        const items = type.members.map(shapeFromType);
+        return items.every((item): item is NativeShape => item !== null)
+          ? { kind: 'union', items }
+          : null;
+      }
+      if (type.kind === 'record') return { kind: 'invalid' };
+    }
+    return null;
+  }
+  function nativeShape(
+    expression: ExpressionIR,
+    bindings: Map<string, ExpressionIR>,
+    parameters = new Map<string, NativeShape>(),
+    seen = new Set<ExpressionIR>()
+  ): NativeShape | null {
+    // Helper/alias body shape is more precise than the IR's legacy first-return type.
+    if (seen.has(expression)) return null;
+    const next = new Set(seen);
+    next.add(expression);
+    const resolve = (value: ExpressionIR) => nativeShape(value, bindings, parameters, next);
+    if (expression.kind === 'array') {
+      const items = expression.elements.map(resolve);
+      return items.every((item): item is NativeShape => item !== null)
+        ? { kind: 'array', items }
+        : null;
+    }
+    if (expression.kind === 'reference') {
+      const parameter = parameters.get(expression.name);
+      if (parameter) return parameter;
+      const value = bindings.get(expression.name);
+      return value ? resolve(value) : shapeFromType(expression.type);
+    }
+    if (expression.kind === 'binary' && ['&&', '||', '??'].includes(expression.operator)) {
+      const left = resolve(expression.left),
+        right = resolve(expression.right);
+      return left && right ? { kind: 'union', items: [left, right] } : null;
+    }
+    if (expression.kind === 'member') {
+      let object = expression.object;
+      const aliases = new Set<string>();
+      while (object.kind === 'reference' && !aliases.has(object.name)) {
+        aliases.add(object.name);
+        const binding = bindings.get(object.name);
+        if (!binding) break;
+        object = binding;
+      }
+      if (object.kind === 'record') {
+        const value = object.entries.find((entry) => entry.key === expression.property)?.value;
+        return value ? resolve(value) : null;
+      }
+    }
+    if (expression.kind === 'helper-call') {
+      let binding = bindings.get(expression.name);
+      const aliases = new Set<string>();
+      while (binding?.kind === 'reference' && !aliases.has(binding.name)) {
+        aliases.add(binding.name);
+        binding = bindings.get(binding.name);
+      }
+      if (binding?.kind !== 'function') return null;
+      const argumentShapes = expression.arguments.map(resolve),
+        localParameters = new Map(parameters);
+      binding.function.parameters.forEach((parameter, index) => {
+        const shape = argumentShapes[index];
+        if (shape) localParameters.set(parameter.name, shape);
+        else localParameters.delete(parameter.name);
+      });
+      const results: NativeShape[] = [];
+      let unresolved = false;
+      function collect(
+        body: readonly StatementIR[],
+        scope: Map<string, ExpressionIR>,
+        params: Map<string, NativeShape>
+      ): boolean {
+        for (const statement of body) {
+          if (statement.kind === 'const') {
+            scope.set(statement.name, statement.value);
+            params.delete(statement.name);
+          } else if (statement.kind === 'return') {
+            if (!statement.value) {
+              results.push({ kind: 'invalid' });
+              return true;
+            }
+            const shape = nativeShape(statement.value, scope, params, next);
+            if (shape) results.push(shape);
+            else unresolved = true;
+            return true;
+          } else if (statement.kind === 'if') {
+            const thenReturns = collect(statement.then, new Map(scope), new Map(params));
+            const elseReturns = collect(statement.otherwise, new Map(scope), new Map(params));
+            if (thenReturns && elseReturns) return true;
+          }
+        }
+        return false;
+      }
+      if (!collect(binding.function.body, new Map(bindings), localParameters))
+        results.push({ kind: 'invalid' });
+      return !unresolved && results.length ? { kind: 'union', items: results } : null;
+    }
+    const typed = shapeFromType(expression.type);
+    if (typed) return typed;
+    if (expression.kind === 'record' || expression.kind === 'literal') return { kind: 'invalid' };
+    return null;
+  }
+  function appendShape(shape: NativeShape, value: string, parent: string, frame: string): string {
+    if (shape.kind === 'node') return `${parent}.appendChild((${value} as ()=>Node)());`;
+    if (shape.kind === 'text')
+      return `${parent}.appendChild(${frame}.document.createTextNode(String(${value})));`;
+    if (shape.kind === 'empty') return '';
+    if (shape.kind === 'invalid') return `throw new TypeError('Invalid template child');`;
+    if (shape.kind === 'array') {
+      const item = `${prefix}Item${nativeSequence++}`;
+      return `for(const ${item} of (${value} as unknown[])){${appendShape({ kind: 'union', items: shape.items }, item, parent, frame)}}`;
+    }
+    if (shape.kind !== 'union') throw new Error('Unknown native construction shape');
+    const flattened: NativeShape[] = [];
+    const flatten = (item: NativeShape) => {
+      if (item.kind === 'union') item.items.forEach(flatten);
+      else flattened.push(item);
+    };
+    shape.items.forEach(flatten);
+    const kinds = new Set(flattened.map((item) => item.kind));
+    const clauses: string[] = [];
+    if (kinds.has('node'))
+      clauses.push(
+        `if(typeof ${value}==='function'){${appendShape({ kind: 'node' }, value, parent, frame)}}`
+      );
+    if (kinds.has('text'))
+      clauses.push(
+        `if(typeof ${value}==='string'||typeof ${value}==='number'){${appendShape({ kind: 'text' }, value, parent, frame)}}`
+      );
+    if (kinds.has('empty')) clauses.push(`if(${value}===null){}`);
+    const arrays = flattened.filter(
+      (item): item is Extract<NativeShape, { kind: 'array' }> => item.kind === 'array'
+    );
+    if (arrays.length)
+      clauses.push(
+        `if(Array.isArray(${value})){${appendShape({ kind: 'array', items: arrays.flatMap((item) => item.items) }, value, parent, frame)}}`
+      );
+    // Each branch follows a finite statically inferred union; no tag/IR or unknown
+    // recursive Template tree is passed to a general runtime dispatcher.
+    return clauses.length
+      ? clauses.join(' else ') + ` else {throw new TypeError('Invalid template child');}`
+      : `throw new TypeError('Invalid template child');`;
+  }
+  function nativeAppend(
+    expression: ExpressionIR | undefined,
+    value: string,
+    parent: string,
+    frame: string
+  ): string {
+    if (!expression) return `throw new TypeError('Invalid template child');`;
+    const bindings = new Map<string, ExpressionIR>();
+    for (const scope of nativeBindings)
+      for (const [name, binding] of scope) bindings.set(name, binding);
+    const shape = nativeShape(expression, bindings);
+    if (!shape)
+      throw new Error(
+        `WC native candidate: unresolved ${expression.kind}/${JSON.stringify(expression.type)} at ${expression.span.line}`
+      );
+    return appendShape(shape, value, parent, frame);
+  }
+  function nativeElement(
+    node: Extract<ExpressionIR, { kind: 'operation' }>,
+    depth: number
+  ): string {
+    const receiver = `${prefix}Receiver${nativeSequence++}`,
+      tag = `${prefix}Tag${nativeSequence++}`;
+    const a = `${prefix}Arg${nativeSequence++}`,
+      b = `${prefix}Arg${nativeSequence++}`,
+      element = `${prefix}Element${nativeSequence++}`;
+    const args = node.arguments;
+    const props =
+      args.length > 2
+        ? args[1]
+        : args[1]?.type === 'template-props' ||
+            (typeof args[1]?.type === 'object' &&
+              args[1].type.kind === 'record' &&
+              args[1].type.fields.length === 0)
+          ? args[1]
+          : undefined;
+    const child = args.length > 2 ? args[2] : props ? undefined : args[1];
+    const value = args.length > 2 ? b : a;
+    const style = props?.type === 'template-props';
+    const tokens = `${prefix}Tokens${nativeSequence++}`;
+    return `((${receiver}: ${prefix}Renderer, ${tag}: string, ${a}?: unknown, ${b}?: unknown) => {
+      if(!/^[A-Za-z][A-Za-z0-9:_-]*$/.test(${tag}))throw new TypeError('Invalid template tag');
+      ${style ? `const ${tokens}=${prefix}TemplateStyleTokens((${a} as {style:${prefix}NativeStyleHandle}).style);` : ''}
+      return () => {const ${element}=${receiver}.nativeFrame.document.createElement(${tag});
+        ${style ? `${element}.setAttribute('data-pui-style',${tokens});` : ''}
+        ${child ? nativeAppend(child, `(${value} as ${child.type === 'template' ? '()=>Node' : child.kind === 'array' ? 'unknown[]' : child.type === 'string' ? 'string' : child.type === 'number' ? 'number' : 'unknown'})`, element, `${receiver}.nativeFrame`) : ''}
+        return ${element};};
+    })(${expr(node.receiver!, depth)}, ${args.map((arg) => expr(arg, depth)).join(', ')})`;
+  }
+
+  function fn(node: FunctionIR, depth: number): string {
+    nativeBindings.push(new Map());
+    try {
+      const renderer =
+        !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
+      return `(${node.parameters.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ')}) => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
+    } finally {
+      nativeBindings.pop();
+    }
+  }
+
   function expr(node: ExpressionIR, depth: number): string {
     switch (node.kind) {
       case 'literal':
@@ -375,6 +610,7 @@ export function emitWebComponentSource(
       case 'static-capability':
         return staticNames.get(node.declarationId)!;
       case 'operation': {
+        if (!options.ssr && node.operation === 'render.el') return nativeElement(node, depth);
         const args = node.arguments.map((value) => expr(value, depth)).join(', ');
         if (OPERATION_RULES[node.operation].path === 'call')
           return `${expr(node.receiver!, depth)}(${args})`;
@@ -384,7 +620,11 @@ export function emitWebComponentSource(
       }
     }
   }
-  function statements(body: readonly StatementIR[], depth: number): string {
+  function statements(
+    body: readonly StatementIR[],
+    depth: number,
+    nativeRenderer?: string
+  ): string {
     const indent = '  '.repeat(depth);
     const terminator = body.findIndex((statement) => statement.kind === 'return');
     const deadBindings = new Set<string>();
@@ -406,21 +646,39 @@ export function emitWebComponentSource(
         const origin = `${indent}// Source ${sourceFile}:${statement.span.line}:${statement.span.column}\n`;
         switch (statement.kind) {
           case 'const':
+            nativeBindings[nativeBindings.length - 1].set(statement.name, statement.value);
             return `${origin}${indent}const ${statement.name} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
           case 'return':
+            if (nativeRenderer) {
+              const output = `${prefix}Output${nativeSequence++}`,
+                fragment = `${prefix}Fragment${nativeSequence++}`;
+              const frame = `${nativeRenderer}.nativeFrame`;
+              return `${origin}${indent}const ${output}=${statement.value ? expr(statement.value, depth) : 'undefined'};\n${indent}const ${fragment}=${frame}.document.createDocumentFragment();\n${nativeAppend(statement.value, output, fragment, frame)}\n${indent}return ${fragment};\n`;
+            }
             return `${origin}${indent}return${statement.value ? ` ${expr(statement.value, depth)}` : ''};\n`;
-          case 'if':
-            return `${origin}${indent}if (${expr(statement.condition, depth)}) {\n${statements(statement.then, depth + 1)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, depth + 1)}${indent}}` : ''}\n`;
+          case 'if': {
+            const branch = (body: readonly StatementIR[]) => {
+              nativeBindings.push(new Map());
+              try {
+                return statements(body, depth + 1, nativeRenderer);
+              } finally {
+                nativeBindings.pop();
+              }
+            };
+            return `${origin}${indent}if (${expr(statement.condition, depth)}) {\n${branch(statement.then)}${indent}}${statement.otherwise.length ? ` else {\n${branch(statement.otherwise)}${indent}}` : ''}\n`;
+          }
         }
       })
       .join('');
   }
-  const hookCode = `    const ${prefix}HookResults = new Map<string, object | undefined>();\n` + ir.hooks
-    .filter((hook) => reachedHooks.has(hook.id))
-    .map(
-      (hook) => `    const ${hooks.get(hook.id)} = () => {
+  const hookCode =
+    `    const ${prefix}HookResults = new Map<string, object | undefined>();\n` +
+    ir.hooks
+      .filter((hook) => reachedHooks.has(hook.id))
+      .map(
+        (hook) => `    const ${hooks.get(hook.id)} = () => {
       if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
       ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
       (${fn(hook.setup, 2)})(${prefix}Def);
@@ -428,8 +686,8 @@ export function emitWebComponentSource(
       ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
       return result;
     };\n`
-    )
-    .join('');
+      )
+      .join('');
   const props = ir.props
     .map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`)
     .join('\n');
@@ -614,7 +872,7 @@ ${context ? '// Context cost: shared reference-key modules, owner scopes, checke
 // setPresent detaches only the view; explicit dispose permanently closes this element.
 ${contextImports}
 ${staticImports}
-import { createBrowserPort, type BrowserPort, type HostPort, type Presentation, presentationElement, presentationChildren, isPresentation } from './.proto-ui/web-component/ssr-v1';
+import { createNativeBrowserPort, type NativeBrowserPort as BrowserPort, type NativeBrowserPort as HostPort, type NativeFrameBuilder } from './.proto-ui/web-component/browser-v1';
 const ${prefix}PropTypes = ${JSON.stringify(Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type])))};
 ${styled ? `import {createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens, type NativeStyle as ${prefix}Style, type NativeStyleHandle as ${prefix}NativeStyleHandle, type NativeRuleHandle as ${prefix}NativeRuleHandle} from './.proto-ui/style/native-v1';\n` : ''}
 ${interactionArtifact ? `import {${interacting ? `createNativeInteraction as ${prefix}CreateNativeInteraction, type NativeInteraction as ${prefix}NativeInteraction, type NativeFocus as ${prefix}NativeFocus, type NativeAccessible as ${prefix}NativeAccessible, type NativeObservedState as ${prefix}NativeObservedState, type NativeInput as ${prefix}NativeInput, type NativeFocusOptions as ${prefix}NativeFocusOptions, ` : ''}${outwardEvents ? `markNativeExposeEvent as ${prefix}MarkNativeExposeEvent` : ''}} from './.proto-ui/interaction/native-v1';\n` : ''}
@@ -627,7 +885,7 @@ ${resolvedProps}
 export type GeneratedExposes = {
 ${exposes}
 };
-${nativeHelpers(prefix, contextValidation, styled, interacting, outwardEvents, true, JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))), staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined')}
+${nativeHelpers(prefix, contextValidation, styled, interacting, outwardEvents, true, JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))), staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined', true)}
 export class ${className} extends HTMLElement {
   private ${prefix}Owner: ${prefix}Owner | null = null;
   private ${prefix}Port: BrowserPort | null = null;
@@ -640,7 +898,7 @@ export class ${className} extends HTMLElement {
   connectedCallback(): void {
     ++this.${prefix}Disconnect;
     if (this.${prefix}Closed || this.${prefix}Owner) return;
-    const port = createBrowserPort(this, ${options.shadow ? "'shadow'" : "'light'"}, null, false);
+    const port = createNativeBrowserPort(this, ${options.shadow ? 'true' : 'false'});
     this.${prefix}Port = port;
     const owner = ${prefix}CreateOwner(port);
     this.${prefix}Owner = owner;
@@ -708,7 +966,7 @@ export default ${className};
         ...(styled ? [nativeStyleArtifact] : []),
         nativeInteractionArtifact,
         nativeAdapterModulesArtifact,
-        webComponentSsrSupport({ className, tagName, binding: ir.source.sha256 }).files[0],
+        webComponentBrowserSupport,
       ],
       dependencies: [...selected.value.dependencies],
       provenance: {
@@ -728,7 +986,8 @@ function nativeHelpers(
   outwardEvents: boolean,
   ssr = false,
   declarations = '[]',
-  tableFamily = 'undefined'
+  tableFamily = 'undefined',
+  nativeBrowser = false
 ): string {
   const context = !!contextValidation;
   const contextTypes = context
@@ -763,7 +1022,7 @@ type ${p}StateOptions = {options?: readonly ${p}Scalar[]; min?: number; max?: nu
 type ${p}State<T extends ${p}Scalar = ${p}Scalar> = {get(): T; setDefault(next: T): void; set(next: T, reason?: unknown): void; external: ${p}ExternalState<T>; subscribers: Set<Function>};
 ${contextTypes}type ${p}PropsRead = Readonly<{get(): ${p}PropsSnapshot; getRaw(): Readonly<Record<string, unknown>>; isProvided(key: string): boolean}>;
 type ${p}Run = {host: {get(): HTMLElement | null}; ${styled ? `readonly feedback: {readonly style: ${p}Style}; ` : ''}${context ? `readonly context: ${p}ContextRun; ` : ''}update(): void; props: ${p}PropsRead; lifecycle: {setPresent(next: boolean): void}; expose: {emit(key: string, payload?: unknown, options?: CustomEventInit): void}};
-type ${p}Renderer = {el(tag: string, a?: unknown, b?: unknown): ${ssr ? 'Presentation' : 'Node'}; slot(): ${ssr ? 'Presentation' : 'Node'}; readonly props: ${p}PropsRead; readonly read: Readonly<{readonly props: ${p}PropsRead${context ? `; readonly context: ${p}ContextRead` : ''}}>};
+type ${p}Renderer = {${nativeBrowser ? '' : `el(tag: string, a?: unknown, b?: unknown): ${ssr ? 'Presentation' : 'Node'};`} slot(): ${nativeBrowser ? '(()=>Node)' : ssr ? 'Presentation' : 'Node'}; ${nativeBrowser ? 'readonly nativeFrame:NativeFrameBuilder; ' : ''}readonly props: ${p}PropsRead; readonly read: Readonly<{readonly props: ${p}PropsRead${context ? `; readonly context: ${p}ContextRead` : ''}}>};
 type ${p}Def = {
 ${styled ? `  readonly feedback: {readonly style: ${p}Style};\n` : ''}
 ${interacting ? `  readonly event: ${p}NativeInteraction<${p}Run>['event'];\n` : ''}
@@ -772,7 +1031,7 @@ ${context ? `  context: ${p}ContextDef;\n` : ''}  props: {define(input: Record<s
   expose: {value(key: string, value: unknown): void; state(key: string, handle: ${p}State${interacting ? ` | ${p}NativeObservedState<boolean | string | number>` : ''}): void; method(key: string, fn: Function): void; event(key: string, spec?: object): void};
   lifecycle: {onCreated(fn: Function): void; onMounted(fn: Function): void; onUpdated(fn: Function): void; onUnmounted(fn: Function): void; onBeforeDispose(fn: Function): void};
 };
-type ${p}Owner = {identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
+type ${p}Owner = {identity: symbol; def: ${p}Def; exposes: Record<string, unknown>; render?: Function | void; readonly epoch: number; readonly view: boolean; ${ssr && !nativeBrowser ? 'serialize(): void; validateHydration(): void; ' : ''}${interacting ? `readonly interaction: ${p}NativeInteraction<${p}Run>; ` : ''}${styled ? `readonly style: ${p}Style; props(): ${p}PropsSnapshot; ` : ''}hydrate(input: Record<string, unknown>): void; update(): void; reconcile(): void; created(): void; dispose(): void};
 function ${p}CreateOwner(host: ${ssr ? 'HostPort' : 'HTMLElement, root: ShadowRoot'}): ${p}Owner {
   let alive = true, disposing = false, setup = true, callbackDepth = 0;
 ${
@@ -1003,7 +1262,23 @@ ${interacting ? `        ${p}Interaction.refresh();\n` : ''}
   }
 ${
   ssr
-    ? `  function element(tag: string, a?: unknown, b?: unknown): Presentation {
+    ? `${
+        nativeBrowser
+          ? `  let slotUsed = false;
+${interacting ? '  let interactionAdopted = false;\n' : ''}
+  function render(): void {
+    slotUsed = false;
+    const nativeFrame=host.createFrame();
+    const props: ${p}PropsRead=Object.freeze({get:()=>resolved as ${p}PropsSnapshot,getRaw:()=>raw,isProvided:(key:string)=>own(raw,key)});
+    const renderer: ${p}Renderer={nativeFrame,slot(){if(slotUsed)throw new Error('Multiple slots are unsupported');slotUsed=true;return ()=>nativeFrame.slot();},props,read:Object.freeze({props${context ? ', context: contextRead' : ''}})};
+    projectHost();
+    let fragment:DocumentFragment;
+    if(typeof owner.render==='function')fragment=owner.render(renderer) as DocumentFragment;
+    else {fragment=nativeFrame.document.createDocumentFragment();fragment.appendChild(renderer.slot()());}
+    host.commit(nativeFrame.finish(fragment));
+  }
+`
+          : `  function element(tag: string, a?: unknown, b?: unknown): Presentation {
     const props = arguments.length > 2 ? a : a != null && typeof a === 'object' && !Array.isArray(a) && !isPresentation(a) ? a : undefined;
     const children = arguments.length === 1 ? null : arguments.length > 2 ? b : props === undefined ? a : null;
     return presentationElement(tag, ${styled ? `props && Object.hasOwn(props, 'style') ? ${p}TemplateStyleTokens((props as {style: ${p}NativeStyleHandle}).style) : undefined` : 'undefined'}, children);
@@ -1017,7 +1292,8 @@ ${interacting ? '  let interactionAdopted = false;\n' : ''}
     projectHost();
     host.commit(presentationChildren(typeof owner.render === 'function' ? owner.render(renderer) : renderer.slot()));
   }
-  function projectHost(): void {
+`
+      }  function projectHost(): void {
     host.projectRoot(${interacting ? `${p}Interaction.rootTag(), ${p}Interaction.rootProperties(), host.server ? null : ${p}Interaction.portalTarget()` : 'null, {}, null'});
   }
   function detach(): void {
@@ -1172,7 +1448,7 @@ ${styled ? `    style: ${p}Style, props: () => resolved as ${p}PropsSnapshot,\n`
     get epoch() { return epoch; }, get view() { return view; },
     hydrate, update: () => schedule(true), reconcile,
 ${
-  ssr
+  ssr && !nativeBrowser
     ? `    validateHydration() {
       host.validateInitial?.({present: intent, attributes: {${styled ? "'data-pui-style': intent ? " + p + "Style.serverTokens().join(' ') || null : null," : ''}${interacting ? '...' + p + 'Interaction.projectAttributes()' : ''}}});
     },
