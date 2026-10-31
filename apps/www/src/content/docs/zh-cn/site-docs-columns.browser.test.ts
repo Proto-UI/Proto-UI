@@ -27,8 +27,8 @@ const candidatePaths = [
   'scripts/test/runtime-test-plan.mjs',
 ];
 const evidence = path.join(
-  process.env.RUNNER_TEMP ?? os.tmpdir(),
-  'homepage-evidence',
+  process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR ??
+    path.join(process.env.RUNNER_TEMP ?? os.tmpdir(), 'homepage-evidence'),
   'docs-columns'
 );
 beforeAll(async () => {
