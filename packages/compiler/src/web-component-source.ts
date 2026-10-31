@@ -679,7 +679,7 @@ export function createHydrationOwner(port: HostPort, raw: Record<string, unknown
   const ${prefix}Def = owner.def;
 ${styled ? `  const ${prefix}Style = owner.style;\n  const ${prefix}OwnerProps = owner.props;\n` : ''}${interacting ? `  const ${prefix}Interaction = owner.interaction;\n` : ''}${hookCode}
   try {
-    owner.render = (${fn(ir.setup, 2)})(${prefix}Def);
+    owner.render = (${fn(ir.setup, 2)})(${ir.setup.parameters.length === 0 ? '' : `${prefix}Def`});
     owner.hydrate(raw);
     owner.created();
     return owner;
@@ -785,7 +785,7 @@ export class ${className} extends HTMLElement {
 ${styled ? `    const ${prefix}Style = owner.style;\n    const ${prefix}OwnerProps = owner.props;\n` : ''}
 ${interacting ? `    const ${prefix}Interaction = owner.interaction;\n` : ''}
 ${hookCode}    try {
-      owner.render = (${fn(ir.setup, 3)})(${prefix}Def);
+      owner.render = (${fn(ir.setup, 3)})(${ir.setup.parameters.length === 0 ? '' : `${prefix}Def`});
       owner.hydrate(this.${prefix}Raw);
       owner.created();
       owner.reconcile();
