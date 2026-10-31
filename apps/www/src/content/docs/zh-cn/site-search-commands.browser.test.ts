@@ -785,6 +785,199 @@ async function homeReady(page: Page, family: string, runtime: string) {
   );
 }
 
+const headerTriggerViewports = [
+  { name: 'mobile', width: 390, height: 844 },
+  { name: 'desktop', width: 1180, height: 757 },
+] as const;
+
+for (const viewport of headerTriggerViewports) {
+  for (const family of ['shadcn', 'brutalist'] as const) {
+    for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+      it(`homepage ${family}/${runtime} ${viewport.name} keeps the Search trigger centered through closed/open/reopen`, async () => {
+        const context = await browser.newContext({
+          viewport: { width: viewport.width, height: viewport.height },
+        });
+        const page = await context.newPage();
+        const id = `header-trigger-${family}-${runtime}-${viewport.name}`;
+        stage(page, id, 'navigate');
+        try {
+          expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(
+            true
+          );
+          await homeReady(page, 'shadcn', 'wc');
+          if (family === 'brutalist') {
+            await choosePageControl(page, 'family', 'Brutalist');
+            await homeReady(page, family, 'wc');
+          }
+          if (runtime !== 'wc') {
+            await choosePageControl(page, 'runtime', runtimeLabels[runtime]);
+            await homeReady(page, family, runtime);
+          }
+          // Compact runtime selection uses the real Header menu. Close that
+          // disclosure before testing Search; do not force hidden controls.
+          const menu = page.locator(
+            '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+          );
+          if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+          const trigger = page.locator(
+            'site-search [data-projection-generation-state="active"] [data-open-modal]'
+          );
+          const waitForClosedPortals = async () => {
+            for (const ref of ['mask', 'panel']) {
+              const part = await searchPart(page, ref);
+              await expect
+                .poll(async () => {
+                  if ((await part.count()) === 0) return true;
+                  return part.evaluate(
+                    (node) =>
+                      node.hasAttribute('data-pui-view-detached') &&
+                      getComputedStyle(node).display === 'none'
+                  );
+                })
+                .toBe(true);
+            }
+          };
+          const readGeometry = () =>
+            page.locator('[data-homepage-runtime]').evaluate((header) => {
+              const required = (selector: string, root: Element = header) => {
+                const node = root.querySelector<HTMLElement>(selector);
+                if (!node) throw new Error(`Missing Header geometry target: ${selector}`);
+                return node;
+              };
+              const rect = (node: HTMLElement) => {
+                const box = node.getBoundingClientRect();
+                return {
+                  x: box.x,
+                  y: box.y,
+                  width: box.width,
+                  height: box.height,
+                  center: box.y + box.height / 2,
+                  display: getComputedStyle(node).display,
+                  lineHeight: getComputedStyle(node).lineHeight,
+                };
+              };
+              const active = '[data-projection-generation-state="active"]';
+              const search = required('site-search');
+              const dialogMount = required('[data-search-dialog-mount]', search);
+              const dialogContent = required(
+                `${active} > .pui-projection-scope > .pui-projection-content`,
+                dialogMount
+              );
+              const portalSelector =
+                `[data-projection-owner="${CSS.escape(dialogMount.dataset.projectionOwner!)}"]` +
+                `[data-projection-generation="${CSS.escape(search.dataset.searchGeneration!)}"]`;
+              return {
+                family: search.dataset.searchFamily,
+                runtime: search.dataset.searchRuntime,
+                generation: search.dataset.searchGeneration,
+                wrapper: rect(required('.site-header-search')),
+                trigger: rect(required(`${active} [data-open-modal]`, search)),
+                peers: ['home-theme', 'home-menu'].map((ref) => ({
+                  ref,
+                  ...rect(required(`${active} [data-demo-ref="${ref}"]`)),
+                })),
+                dialogMount: rect(dialogMount),
+                dialogContent: rect(dialogContent),
+                dialogRoot: rect(required('[data-demo-ref="dialog"]', dialogContent)),
+                portals: ['mask', 'panel'].map((ref) => ({
+                  ref,
+                  nodes: [
+                    ...document.querySelectorAll<HTMLElement>(
+                      `${portalSelector}[data-demo-ref="${ref}"]`
+                    ),
+                  ].map((node) => ({
+                    ...rect(node),
+                    transition: node.getAttribute('data-transition-state'),
+                    detached: node.hasAttribute('data-pui-view-detached'),
+                    outsideSearch: !search.contains(node),
+                  })),
+                })),
+              };
+            });
+          // Visibility may become false at the start of leave because the
+          // portal is inert. Require actual view retirement, not that early
+          // snapshot, before measuring a closed owner or reopening it.
+          await waitForClosedPortals();
+          const initial = await readGeometry();
+          expect(initial.generation).toBeTruthy();
+          const recordGeometry = async (state: string, closed: boolean) => {
+            stage(page, id, state);
+            const geometry = await readGeometry();
+            const publicState = await page.evaluate(readSearchPublicState);
+            await mkdir(evidenceDirectory, { recursive: true });
+            await writeFile(
+              path.join(evidenceDirectory, `${id}-${state}-header-geometry.json`),
+              JSON.stringify({ source, family, runtime, viewport, geometry, publicState }, null, 2)
+            );
+            await capture(page, id, state);
+            expect(geometry.family).toBe(family);
+            expect(geometry.runtime).toBe(runtime);
+            expect(publicState.open).toBe(!closed);
+            // Soft geometry assertions preserve every state measurement on the
+            // negative control. They still fail the case, with the original 1px
+            // geometry tolerance, instead of stopping at the first closed frame.
+            expect.soft(Math.abs(geometry.trigger.height - 44)).toBeLessThanOrEqual(1);
+            expect
+              .soft(Math.abs(geometry.wrapper.height - geometry.trigger.height))
+              .toBeLessThanOrEqual(1);
+            expect.soft(Math.abs(geometry.trigger.y - initial.trigger.y)).toBeLessThanOrEqual(1);
+            for (const peer of geometry.peers) {
+              expect.soft(Math.abs(peer.height - 44)).toBeLessThanOrEqual(1);
+              expect
+                .soft(Math.abs(peer.center - geometry.trigger.center), peer.ref)
+                .toBeLessThanOrEqual(1);
+            }
+            if (closed) {
+              expect.soft(geometry.dialogMount.height).toBeLessThanOrEqual(1);
+              expect.soft(geometry.dialogContent.height).toBeLessThanOrEqual(1);
+              expect.soft(geometry.dialogRoot.height).toBeLessThanOrEqual(1);
+            }
+          };
+          await recordGeometry('closed', true);
+          for (const cycle of [0, 1]) {
+            stage(page, id, cycle === 0 ? 'open' : 'reopen');
+            if (cycle === 0) await trigger.click();
+            else await trigger.press('Enter');
+            await expect
+              .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+              .toBe(true);
+            for (const ref of ['mask', 'panel']) {
+              const part = await searchPart(page, ref);
+              await expect.poll(() => part.getAttribute('data-transition-state')).toBe('entered');
+            }
+            const panel = await searchPart(page, 'panel');
+            expect(await panel.count()).toBe(1);
+            expect(await panel.getAttribute('data-projection-generation')).toBe(initial.generation);
+            expect(await panel.getAttribute('data-projection-family')).toBe(family);
+            expect(await panel.getAttribute('data-projection-runtime')).toBe(runtime);
+            expect(await panel.evaluate((node) => node.closest('site-search') === null)).toBe(true);
+            await recordGeometry(cycle === 0 ? 'opened' : 'reopened', false);
+            await expect
+              .poll(async () => (await page.evaluate(readSearchPublicState)).inputFocused)
+              .toBe(true);
+            if (cycle === 0) await page.keyboard.press('Escape');
+            else await (await searchPart(page, 'close')).click();
+            await expect
+              .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+              .toBe(false);
+            await waitForClosedPortals();
+            await recordGeometry(cycle === 0 ? 'closed-after-escape' : 'closed-after-button', true);
+            await expect
+              .poll(() => trigger.evaluate((node) => node === document.activeElement))
+              .toBe(true);
+          }
+          expect(diagnosticPages.get(page)!.errors).toEqual([]);
+        } catch (error) {
+          await captureFailure(page);
+          throw error;
+        } finally {
+          await context.close();
+        }
+      }, 60_000);
+    }
+  }
+}
+
 for (const width of [1280, 1440, 2048]) {
   for (const family of ['shadcn', 'brutalist'] as const) {
     it(`homepage ${family} ${width}px aligns actual Search and both selectors in every runtime`, async () => {

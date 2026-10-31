@@ -35,6 +35,27 @@ function layoutOnly(css: string) {
     !/@apply\s+[^;]*(?:bg-|shadow|border|rounded|text-)/.test(code)
   );
 }
+function ownerContentFlow(css: string) {
+  const code = css.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s+/g, ' ');
+  const selector =
+    'site-search [data-search-composition-mount] ' +
+    '> :is([data-search-command-mount], [data-search-dialog-mount]) ' +
+    '> .pui-projection-generation > .pui-projection-scope > .pui-projection-content';
+  const start = code.indexOf(`${selector} {`);
+  if (start < 0) return false;
+  const body = code.slice(start + selector.length + 2).split('}')[0];
+  const declarations = Object.fromEntries(
+    body
+      .split(';')
+      .map((declaration) => declaration.split(':').map((part) => part.trim()))
+      .filter(([property, value]) => property && value)
+  );
+  return (
+    declarations.display === 'flex' &&
+    declarations['align-items'] === 'center' &&
+    Object.keys(declarations).every((property) => ['display', 'align-items'].includes(property))
+  );
+}
 describe('Search public presentation boundary', () => {
   it('has no default-ui/native-modal page skin while retaining startup/trigger layout', () => {
     expect(search).not.toContain('@pagefind/default-ui');
@@ -45,6 +66,19 @@ describe('Search public presentation boundary', () => {
     expect(website).toContain('data-search-startup-button');
     expect(website).toContain('data-search-view');
     expect(website).toContain('@layer components');
+  });
+  it('lays out both direct Search owner roots without inline struts or hiding the Dialog', () => {
+    expect(ownerContentFlow(website)).toBe(true);
+    expect(ownerContentFlow(website.replace('display: flex;', 'display: block;'))).toBe(false);
+    expect(
+      ownerContentFlow(website.replace('align-items: center;', 'align-items: baseline;'))
+    ).toBe(false);
+    expect(
+      ownerContentFlow(website.replace('[data-search-dialog-mount]', '[data-other-dialog-mount]'))
+    ).toBe(false);
+    expect(ownerContentFlow(website.replace('display: flex;', 'display: flex; height: 0;'))).toBe(
+      false
+    );
   });
   it('keeps a transparent public semantic Mask, not no blocker or a CSS-only backdrop', () => {
     expect(publicMask(mask)).toBe(true);
