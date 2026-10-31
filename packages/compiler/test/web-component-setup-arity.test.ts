@@ -5,7 +5,10 @@ import { parsePrototype } from '../src/parser';
 import { emitWebComponentSource } from '../src/web-component-source';
 
 // Full generated graph, strict semantic diagnostics (not transpile-only).
-function strictDiagnostics(code: string, supportingFiles: { path: string; contents: string }[]) {
+function strictDiagnostics(
+  code: string,
+  supportingFiles: readonly { path: string; contents: string }[]
+) {
   const root = resolve('packages/compiler/.setup-arity-consumer/Component.ts');
   const files = new Map([[root, code]]);
   for (const file of supportingFiles) files.set(resolve(dirname(root), file.path), file.contents);
