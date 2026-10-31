@@ -19,6 +19,10 @@ criteria:
     text:
       zh-CN: 拥有本family tokens，支持最小宽度收缩、标签折行、正常内容流与溢出容纳；Trigger焦点与展开视觉派生自Base。不定高裁剪，不自建激活回调。
       en: Owns family tokens with min-width shrink safety, wrapping labels, normal content flow and overflow containment. Trigger focus and expanded visuals derive from Base. No fixed-height clipping or own activation callbacks.
+  - id: P-SHADCN-ACCORDION-CONTENT-FLOW
+    text:
+      zh-CN: 展开 Content 的 family presentation 显式提供 block 内容格式化，使普通块级作者子内容参与自身 profile padding 与正常垂直流。该样式只派生自既有 Base open fact；关闭时仍由 Base hidden 与 keepMounted/L1 presence 控制，不新增状态、动画或宿主全局 display reset，不依赖文档或落地页 CSS。
+      en: The open Content family presentation explicitly supplies block formatting so ordinary authored block children participate in its profile padding and normal vertical flow. This style derives only from the existing Base open fact. Closed views remain governed by Base hidden and keepMounted/L1 presence, without new state, animation, global host display reset, or documentation/landing-page CSS dependency.
   - id: P-SHADCN-ACCORDION-CONTENT-EVIDENCE
     text:
       zh-CN: 参考相似度、native交互、长标签/字号安全与GPUI parity分别提供证据；当前源码和synthetic DOM不认证native视觉同等。
@@ -37,6 +41,9 @@ sources:
   - path: packages/prototypes/shadcn/src/accordion/content.proto.ts
   - path: packages/prototypes/shadcn/src/accordion/index.ts
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Explicitly bound the open family panel formatting context to existing Base state; native flow and retained-hidden regressions remain pending.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Added the independent Base-consuming presentation, without claiming release or complete material/native parity.
