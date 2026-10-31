@@ -560,7 +560,7 @@ export function emitWebComponentSource(
         (hook) => `    const ${hooks.get(hook.id)} = () => {
       if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
       ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
-      (${fn(hook.setup, 2)})(${prefix}Def);
+      (${fn(hook.setup, 2)})(${hook.setup.parameters.length === 0 ? '' : `${prefix}Def`});
       const result = Object.freeze(Object.create(null));
       ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
       return result;
