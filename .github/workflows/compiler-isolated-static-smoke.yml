@@ -1,0 +1,129 @@
+name: Compiler isolated static browser smoke
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compiler-isolated-static-smoke.yml'
+  workflow_dispatch:
+permissions: {}
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - name: Prepare and execute frozen own static smoke only
+        shell: bash
+        run: |
+          set -euo pipefail
+          export INPUT="$RUNNER_TEMP/wc-smoke-input"
+          export EVIDENCE="$RUNNER_TEMP/wc-smoke-evidence"
+          mkdir -m 755 "$INPUT"
+          cat > "$INPUT/smoke.cjs" <<'WC_SMOKE_JS'
+          'use strict';
+          // Own static-page smoke only. No repository source, credentials or external page.
+          const assert = require('node:assert/strict');
+          const fs = require('node:fs/promises');
+          const http = require('node:http');
+          const { chromium } = require('/input/package');
+          const out = '/evidence';
+          const pageHtml = '<!doctype html><meta charset="utf-8"><title>WC isolation smoke</title><h1>Own static browser smoke</h1><button>Focus target</button>';
+          let server, browserServer, browser;
+          (async () => {
+            assert.notEqual(process.getuid(), 0, 'Non-root required');
+            assert.equal(process.versions.node.split('.')[0], '24', 'Pinned image must supply Node 24');
+            assert.equal(require('/input/package/package.json').version, '1.58.2');
+            await fs.writeFile(out + '/runtime.json', JSON.stringify({ node:process.version, uid:process.getuid(), gid:process.getgid(), playwright:'1.58.2' }, null, 2));
+            const status = await fs.readFile('/proc/self/status', 'utf8');
+            await fs.writeFile(out + '/process-isolation.txt', status.split('\n').filter(l => /^(Uid|Gid|CapEff|NoNewPrivs|Seccomp):/.test(l)).join('\n'));
+            assert.match(status, /^NoNewPrivs:\s+1$/m);
+            assert.match(status, /^CapEff:\s+0+$/m);
+            assert.match(status, /^Seccomp:\s+2$/m);
+            server = http.createServer((req,res) => {
+              if (req.url !== '/') { res.writeHead(404); return res.end(); }
+              res.writeHead(200, { 'Content-Type':'text/html', 'Content-Security-Policy':"default-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'" });
+              res.end(pageHtml);
+            });
+            await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+            const origin = 'http://127.0.0.1:' + server.address().port;
+            browserServer = await chromium.launchServer({ headless:true, chromiumSandbox:true, timeout:30000 });
+            const cmd = (await fs.readFile('/proc/' + browserServer.process().pid + '/cmdline','utf8')).split('\0').filter(Boolean);
+            await fs.writeFile(out + '/browser-command.json', JSON.stringify(cmd,null,2));
+            assert(!cmd.some(arg => /^--(?:no-sandbox|disable-setuid-sandbox|disable-namespace-sandbox|disable-seccomp-filter-sandbox|single-process)(?:=|$)/.test(arg)));
+            browser = await chromium.connect(browserServer.wsEndpoint());
+            assert.equal(browser.version(), '145.0.7632.6');
+            const context = await browser.newContext({ serviceWorkers:'block' });
+            await context.route('**/*', route => route.request().url() === origin + '/' ? route.continue() : route.abort('blockedbyclient'));
+            const page = await context.newPage();
+            await page.goto(origin + '/');
+            assert.equal(await page.title(), 'WC isolation smoke');
+            await page.getByRole('button',{name:'Focus target'}).focus();
+            await page.screenshot({path:out + '/own-static-page.png'});
+            // Browser-internal diagnostic only; no network URL or account page.
+            const diagnostic = await context.newPage();
+            await diagnostic.goto('chrome://sandbox/');
+            const sandbox = await diagnostic.locator('body').innerText();
+            await fs.writeFile(out + '/chromium-sandbox.txt', sandbox);
+            assert.match(sandbox, /Namespace sandbox\s+Yes/i);
+            assert.match(sandbox, /Seccomp-BPF sandbox\s+Yes/i);
+            await fs.writeFile(out + '/result.json', JSON.stringify({success:true,scope:'own static smoke only; no Proto journeys',chromium:browser.version()},null,2));
+          })().catch(async error => {
+            await fs.writeFile(out + '/failure.txt', String(error.stack || error));
+            process.exitCode = 1;
+          }).finally(async () => {
+            if (browser) await browser.close();
+            if (browserServer) await browserServer.close();
+            if (server) await new Promise(resolve => server.close(resolve));
+          });
+          WC_SMOKE_JS
+          cat > "$INPUT/run-smoke.sh" <<'WC_SMOKE_SH'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          # Static candidate: execute only after exact-hash approval, on ephemeral hosted runner.
+          # Requires reviewed smoke.cjs in $INPUT; no repository checkout/source/dependency install.
+          : "${INPUT:?dedicated input directory}"
+          : "${EVIDENCE:?empty dedicated evidence directory}"
+          test "$(id -u)" = 1001
+          test "$(id -g)" = 1001
+          test -d "$INPUT" && test -f "$INPUT/smoke.cjs"
+          mkdir -m 700 "$EVIDENCE"
+          IMAGE=mcr.microsoft.com/playwright@sha256:65cefd09a5e943921ecd3a6e5414c603db2eb161e9eb48f2e2ccc63486dc7dc0
+          # Networked preparation: fixed public bytes only. No npm scripts or repo execution.
+          curl --fail --location --proto '=https' --tlsv1.2 --max-time 120 \
+            https://registry.npmjs.org/playwright-core/-/playwright-core-1.58.2.tgz -o "$INPUT/playwright-core.tgz"
+          printf '%s  %s\n' 'c99904b5fb60c12f02b1f628ee79b4284f23b2f9ba8bf3d3815b41f032fbdbac0d7fa1f620cb03bb10a9263e7d2836b10ad4a7ad66a7d80783a8cec905aba5b6' "$INPUT/playwright-core.tgz" | sha512sum --check --strict
+          tar --extract --gzip --file "$INPUT/playwright-core.tgz" --directory "$INPUT" --no-same-owner --no-same-permissions
+          docker pull --platform linux/amd64 "$IMAGE"
+          docker image inspect --format '{{.Id}} {{json .RepoDigests}} {{.Os}}/{{.Architecture}}' "$IMAGE" > "$EVIDENCE/image.txt"
+          sha256sum "$INPUT/smoke.cjs" > "$EVIDENCE/smoke.sha256"
+          cleanup() {
+            if test -s "$INPUT/container.cid"; then
+              CID=$(cat "$INPUT/container.cid")
+              [[ "$CID" =~ ^[0-9a-f]{64}$ ]] && docker rm --force "$CID" >/dev/null 2>&1 || true
+            fi
+          }
+          trap cleanup EXIT
+          # No inherited environment, host network/IPC, socket, policy relaxation or credentials.
+          # Test/browser cannot access Docker daemon. Default seccomp + AppArmor remain in place.
+          timeout --signal=TERM --kill-after=15s 100s docker run --rm --init --pull=never --cidfile "$INPUT/container.cid" \
+            --platform linux/amd64 --network none --ipc private --shm-size 256m \
+            --read-only --user 1001:1001 --cap-drop ALL --security-opt no-new-privileges \
+            --memory 1g --cpus 2 --pids-limit 256 \
+            --tmpfs /tmp:rw,nosuid,nodev,size=256m,mode=1777 \
+            --tmpfs /home/smoke:rw,nosuid,nodev,noexec,size=32m,uid=1001,gid=1001,mode=700 \
+            --mount "type=bind,src=$INPUT,dst=/input,readonly" \
+            --mount "type=bind,src=$EVIDENCE,dst=/evidence" \
+            --workdir /tmp --entrypoint /usr/bin/env "$IMAGE" \
+            -i PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+            HOME=/home/smoke TMPDIR=/tmp LANG=C.UTF-8 PLAYWRIGHT_BROWSERS_PATH=/ms-playwright \
+            node /input/smoke.cjs > "$EVIDENCE/container.log" 2>&1
+          # Any failure stops without a relaxed retry. Always retain evidence via separate CI finally step.
+          WC_SMOKE_SH
+          bash "$INPUT/run-smoke.sh"
+      - name: Preserve smoke screenshots and failures, never private home
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: static-smoke-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/wc-smoke-evidence
+          if-no-files-found: error
+          include-hidden-files: false
+          retention-days: 14
