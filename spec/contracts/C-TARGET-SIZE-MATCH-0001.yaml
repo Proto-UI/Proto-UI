@@ -1,0 +1,38 @@
+id: C-TARGET-SIZE-MATCH-0001
+type: contract
+title: Scoped geometry leases match declared used-layout border boxes
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: The item-aligned consumer and neutral lease are a new bounded candidate. Native four-Web geometry, all profiles, popper reuse and independent acceptance remain open; no lifecycle promotion or compiler parity is asserted.
+summary: A consumer selects safe size targets while Positioning privately measures and verifies their used-layout border boxes under an identity-owned lease.
+criteria:
+  - id: C-TARGET-SIZE-MATCH-0001-ASSOCIATION
+    text:
+      en: A target-alignment binding may add a size-match reference and nonempty unique target list. All parts must be current in the same anatomy domain; the reference is the block-reference instance and each target is contained by the bound scrollport. Physical targets are resolved only behind the host boundary and revalidated at delivery. Same-instance inline endpoints are permitted; foreign, duplicate, stale or physically replaced size targets cannot deliver success.
+  - id: C-TARGET-SIZE-MATCH-0001-GEOMETRY
+    text:
+      en: "The size lease matches each declared target's used-layout border-box width and height to the reference in CSS pixels. Both sides use the same untransformed layout coordinate space; hover, press and ancestor paint transforms do not feed row sizes. Successful style writes do not prove a match: actual used layout extents must agree within one CSS pixel, reflecting CSSOM integer rounding. Outer borders, ancestor inline padding and reserved scrollbar space are accounted outside the row size. RTL changes alignment direction, not the width or height contract."
+  - id: C-TARGET-SIZE-MATCH-0001-OWNERSHIP
+    text:
+      en: Initial authored inline sizing, including important priority, is not silently replaced. Existing still-owned internal claims may transfer by identity. Later author writes or min/max constraints that defeat the match cause a named unavailable result. Any partial sizing writes are rolled back immediately only while still owned by that lease; old cleanup never erases a newer owner. Resize observation and repeated requests are bounded by the existing current-geometry lifetime.
+  - id: C-TARGET-SIZE-MATCH-0001-CONTENT
+    text:
+      en: A matched row may not claim success by clipping overflowing text or allowing unreported horizontal or vertical overflow. Intrinsic layout is the explicit escape hatch for multi-line content or author sizing overrides. Nonfinite, zero, detached, conflicted and overflowing targets return a named unavailable or pending result, not fabricated equality. The existing collision plan remains authoritative; impossible viewport overlap is not called exact contour matching.
+  - id: C-TARGET-SIZE-MATCH-0001-SCOPE
+    text:
+      en: This bounded implementation connects the existing item-aligned policy only. It does not change selection, hover, keyboard focus, material rendering or popup ownership. Popper support and compiled/native consumer coverage are separately tracked; an explicitly requested unsupported policy must be diagnosed rather than silently ignored. Public composition defaults are declared by their consumer recipe, not hidden in host code or selected by component identity.
+dependsOn:
+  contracts: [C-TARGET-ALIGNMENT-BINDING-0001, C-TARGET-ALIGNMENT-PLAN-0001]
+verifies:
+  tests: [T-TARGET-SIZE-MATCH-0001]
+sources:
+  - path: packages/modules/positioning/src/web/border-box-size-lease.ts
+  - path: packages/modules/positioning/src/web/owned-style-lease.ts
+  - path: packages/modules/positioning/src/web/target-alignment-host.ts
+  - path: packages/modules/overlay/src/target-alignment-binding.ts
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Declared bounded safe-part size matching, used-layout readback, outer chrome and transactional ownership without claiming native acceptance.
+tags: [positioning, geometry, size, ownership, draft]

@@ -287,3 +287,22 @@ describe('neutral scroll expansion requests', () => {
     });
   });
 });
+
+describe('size-matched outer chrome constraints', () => {
+  it.each(['ltr', 'rtl'] as const)('retains a192px row plus25px chrome in %s', (direction) => {
+    const m = metrics();
+    const result = plan({ ...m, direction, target: { ...m.target, minimumOuterInlineSpan: 217 } });
+    expect(result.inline.minimumSpan).toBe(217);
+    expect(result.inline.edge).toBe(direction === 'rtl' ? 'right' : 'left');
+  });
+  it.each([-1, Number.NaN, Number.POSITIVE_INFINITY])(
+    'rejects invalid outer extent %s',
+    (minimumOuterInlineSpan) => {
+      const m = metrics();
+      expect(
+        solveTargetAlignment({ ...m, target: { ...m.target, minimumOuterInlineSpan } }, constraints)
+          .kind
+      ).toBe('invalid');
+    }
+  );
+});

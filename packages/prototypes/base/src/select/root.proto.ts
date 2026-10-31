@@ -46,6 +46,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     disabled: { type: 'boolean', empty: 'fallback' },
     readOnly: { type: 'boolean', empty: 'fallback' },
     closeOnSelect: { type: 'boolean', empty: 'fallback' },
+    itemSizing: { type: 'enum', empty: 'fallback', options: ['intrinsic', 'match-trigger'] },
   });
   def.props.setDefaults({
     defaultOpen: false,
@@ -53,6 +54,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     disabled: false,
     readOnly: false,
     closeOnSelect: true,
+    itemSizing: 'intrinsic',
   });
 
   const initialContext: SelectContextValue = {
@@ -67,6 +69,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     readOnly: false,
     activeValue: '',
     closeOnSelect: true,
+    itemSizing: 'intrinsic',
     requestReason: null,
     requestFocusReason: null,
     requestEntry: null,
@@ -145,6 +148,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   const syncContext = (run: any) => {
     const next = {
       ...snapshot,
+      itemSizing: run.props.get().itemSizing ?? 'intrinsic',
       controlDisabled: !!run.props.get().disabled,
       controlReadOnly: !!run.props.get().readOnly,
       disabled: !!run.props.get().disabled || !!run.context.tryRead(FIELD_CONTEXT)?.disabled,
@@ -169,6 +173,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
       value: String(item.value ?? ''),
       textValue: String(item.textValue ?? ''),
       disabled: item.disabled === true,
+      itemSizing: item.itemSizing === 'intrinsic' ? 'intrinsic' : 'inherit',
     }));
     const nextSnapshot = JSON.stringify(records);
     if (nextSnapshot !== collectionSnapshot) {
@@ -347,7 +352,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
   def.lifecycle.onUnmounted(retireView);
   def.lifecycle.onBeforeDispose(retireView);
 
-  def.props.watch(['value', 'disabled', 'readOnly', 'closeOnSelect'], (run, next) => {
+  def.props.watch(['value', 'disabled', 'readOnly', 'closeOnSelect', 'itemSizing'], (run, next) => {
     const previousValue = value.get();
     const epoch = viewEpoch;
     const controlledValue = run.props.isProvided('value');

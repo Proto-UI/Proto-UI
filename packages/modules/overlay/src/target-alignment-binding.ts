@@ -84,13 +84,28 @@ export class OverlayTargetAlignment {
       binding.blockTarget,
       binding.inlineTarget,
     ];
+    if (!parts.every((part) => this.anatomy.isCurrentPart(binding.family, part))) return false;
+    const sizing = binding.sizeMatch;
+    const sizeValid =
+      !sizing ||
+      (this.anatomy.isCurrentPart(binding.family, sizing.reference) &&
+        this.anatomy.resolvePartInstance(sizing.reference) ===
+          this.anatomy.resolvePartInstance(binding.blockReference) &&
+        sizing.targets.length > 0 &&
+        sizing.targets.every((part) => this.anatomy.isCurrentPart(binding.family, part)) &&
+        new Set(sizing.targets.map((part) => this.anatomy.resolvePartInstance(part))).size ===
+          sizing.targets.length &&
+        sizing.targets.every((part) => this.isDescendant(binding, binding.scrollport, part)));
+    const sameOrDescendant = (parent: AnatomyPartView, child: AnatomyPartView) =>
+      this.anatomy.resolvePartInstance(parent) === this.anatomy.resolvePartInstance(child) ||
+      this.isDescendant(binding, parent, child);
     return (
-      parts.every((part) => this.anatomy.isCurrentPart(binding.family, part)) &&
+      sizeValid &&
       this.ownsSurface(binding) &&
       this.isDescendant(binding, binding.surface, binding.scrollport) &&
       this.isDescendant(binding, binding.scrollport, binding.blockTarget) &&
-      this.isDescendant(binding, binding.blockTarget, binding.inlineTarget) &&
-      this.isDescendant(binding, binding.blockReference, binding.inlineReference)
+      sameOrDescendant(binding.blockTarget, binding.inlineTarget) &&
+      sameOrDescendant(binding.blockReference, binding.inlineReference)
     );
   }
 
@@ -130,6 +145,14 @@ export class OverlayTargetAlignment {
       atStart: binding.atStart,
       atEnd: binding.atEnd,
       constraints: binding.constraints,
+      ...(binding.sizeMatch
+        ? {
+            sizeMatch: {
+              reference: target(binding.sizeMatch.reference),
+              targets: binding.sizeMatch.targets.map(target),
+            },
+          }
+        : {}),
     };
     return {
       targetAlignment,
@@ -152,7 +175,19 @@ export class OverlayTargetAlignment {
         const unchanged = keys.every((key) =>
           Object.is(this.anatomy.resolvePartTarget(binding[key]), targetAlignment[key])
         );
-        if (!current() || !unchanged) return;
+        const sizeUnchanged =
+          !binding.sizeMatch ||
+          (Object.is(
+            this.anatomy.resolvePartTarget(binding.sizeMatch.reference),
+            targetAlignment.sizeMatch?.reference
+          ) &&
+            binding.sizeMatch.targets.every((part, index) =>
+              Object.is(
+                this.anatomy.resolvePartTarget(part),
+                targetAlignment.sizeMatch?.targets[index]
+              )
+            ));
+        if (!current() || !unchanged || !sizeUnchanged) return;
         binding.onAlignment(status);
       },
     };
