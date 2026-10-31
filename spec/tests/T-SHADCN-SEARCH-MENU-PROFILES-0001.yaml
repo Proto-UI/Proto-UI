@@ -17,6 +17,10 @@ cases:
       - P-SHADCN-MENUBAR-ADMISSION
       - P-SHADCN-NAVIGATION-MENU-ADMISSION
     expectation: search-menu-profiles-preserve-owners
+  - id: T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-NO-ADDON-INSET
+    title: Icon-free grouped Command editors retain profile inset and editor identity
+    covers: [P-SHADCN-COMMAND-NO-ADDON-INSET]
+    expectation: no-addon-profile-inset-without-editor-replacement
 exercises:
   prototypes:
     - P-SHADCN-MENUBAR
@@ -37,3 +41,21 @@ implementations:
       - P-SHADCN-DROPDOWN-MENU
     notes:
       - Authored for this projection slice; not yet executed. Parent runs after shared integration.
+  - id: command-no-addon-inset
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/shadcn/test/command-input-inset.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-NO-ADDON-INSET]
+    exercises: [P-SHADCN-COMMAND, P-SHADCN-INPUT-SHELL]
+    notes:
+      - Focused adapter cases do not establish native geometry or full addon conformance.
+  - id: website-command-no-addon-inset
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/site-search-commands.browser.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-NO-ADDON-INSET]
+    exercises: [P-SHADCN-COMMAND, P-SHADCN-INPUT-SHELL]
+    notes:
+      - New Rhea four-host mobile/desktop inset observations are unexecuted. Preserve all prior 54 case names and assertions; the 16 Header cases receive explicit successful test data, paired with eight separate missing-data Retry-focus controls. Original focus/scroll failures remain historical evidence. Other profile native geometry remains unverified.
