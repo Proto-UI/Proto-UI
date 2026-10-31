@@ -52,6 +52,88 @@ const recipes = [
 ] as const;
 
 describe('Accordion component-specific recipe source closure', () => {
+  for (const profile of [
+    'vega',
+    'nova',
+    'maia',
+    'lyra',
+    'mira',
+    'luma',
+    'sera',
+    'rhea',
+    'new-york-v4',
+  ]) {
+    for (const keepMounted of [false, true]) {
+      it(`shadcn ${profile} derives panel block flow from open without replacing hidden/presence (keepMounted=${keepMounted})`, async () => {
+        for (const proto of Object.values(shadcn))
+          if (typeof proto === 'object' && 'name' in proto && !customElements.get(proto.name))
+            AdaptToWebComponent(proto);
+        const root = document.createElement('shadcn-accordion-root') as any;
+        const item = document.createElement('shadcn-accordion-item');
+        const heading = document.createElement('shadcn-accordion-heading');
+        const trigger = document.createElement('shadcn-accordion-trigger') as any;
+        const content = document.createElement('shadcn-accordion-content') as any;
+        const payload = document.createElement('div');
+        payload.textContent = 'A caller-owned block child, not a page layout workaround.';
+        trigger.textContent = 'Toggle flow';
+        setElementProps(root, { openItems: ['one'] });
+        setElementProps(item, { value: 'one' });
+        setElementProps(content, { keepMounted, styleProfile: profile });
+        content.append(payload);
+        heading.append(trigger);
+        item.append(heading, content);
+        root.append(item);
+        document.body.append(root);
+        await flush();
+        const open = content.getExposes().open;
+        const hidden = content.getExposes().hidden;
+        const requests: unknown[] = [];
+        root.addEventListener('openChange', (event: CustomEvent) => requests.push(event.detail));
+        const tokens = () => (content.getAttribute('data-pui-style') ?? '').split(/\s+/);
+        const assertOpen = () => {
+          expect(open.get()).toBe(true);
+          expect(hidden.get()).toBe(false);
+          expect(content.hasAttribute('data-open')).toBe(true);
+          expect(content.hasAttribute('data-hidden')).toBe(false);
+          expect(content.hasAttribute('data-pui-view-detached')).toBe(false);
+          expect(tokens()).toContain('data-[open]:block');
+          expect(tokens()).toContain('data-[hidden]:hidden');
+          expect(tokens()).not.toContain('block');
+          expect(tokens()).toContain(profile === 'nova' || profile === 'lyra' ? 'pb-2.5' : 'pb-4');
+          expect(tokens().includes('px-4')).toBe(['maia', 'luma', 'rhea'].includes(profile));
+          expect(tokens().includes('px-2')).toBe(profile === 'mira');
+        };
+        assertOpen();
+        // A request must not alter this controlled Root's canonical open state.
+        trigger.click();
+        await flush();
+        expect(requests).toHaveLength(1);
+        assertOpen();
+        setElementProps(root, { openItems: [] });
+        await flush();
+        expect(open.get()).toBe(false);
+        expect(hidden.get()).toBe(true);
+        expect(content.hasAttribute('data-pui-view-detached')).toBe(!keepMounted);
+        if (keepMounted) {
+          expect(content.contains(payload)).toBe(true);
+          expect(content.hasAttribute('data-hidden')).toBe(true);
+          expect(content.hasAttribute('data-open')).toBe(false);
+          expect(tokens()).toContain('data-[hidden]:hidden');
+          expect(tokens()).not.toContain('block');
+        }
+        setElementProps(root, { openItems: ['one'] });
+        await flush();
+        expect(content.getExposes().open).toBe(open);
+        expect(content.getExposes().hidden).toBe(hidden);
+        assertOpen();
+        if (keepMounted) expect(content.contains(payload)).toBe(true);
+        expect(requests).toHaveLength(1);
+        // No simulated-DOM geometry assertion is substituted for the native
+        // child inset, bottom padding and retained display:none checks.
+      });
+    }
+  }
+
   for (const [family, part, required, forbidden] of recipes) {
     it(`${family} ${part} keeps the reviewed recipe and rejects its superseded shell`, async () => {
       const files = [`packages/prototypes/${family}/src/accordion/${part}.proto.ts`];

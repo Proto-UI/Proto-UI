@@ -255,6 +255,7 @@ export const SHADCN_STYLE_TOKENS: string[] = [
   'data-[indeterminate]:w-1/3',
   'data-[open]:animate-in',
   'data-[open]:bg-muted/50',
+  'data-[open]:block',
   'data-[open]:fade-in-0',
   'data-[open]:not-[data-alignment-full]:slide-in-from-bottom-2',
   'data-[open]:not-[data-alignment-full]:slide-in-from-left-2',

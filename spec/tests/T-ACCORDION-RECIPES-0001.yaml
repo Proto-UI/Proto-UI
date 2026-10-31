@@ -26,6 +26,13 @@ cases:
       - P-LIQUID-GLASS-ACCORDION-CONTENT-EVIDENCE
       - P-LIQUID-GLASS-ACCORDION-TRIGGER-MATERIAL
     expectation: Item remains transparent with no material candidate; Trigger retains existing optical intent and opaque fallback; Content retains its own opaque background and corner radius. Runtime style evidence is not optical pixel acceptance.
+  - id: T-ACCORDION-RECIPES-0001-CASE-SHADCN-FLOW
+    title: Open Shadcn content owns block flow without overriding Base hidden or presence
+    covers:
+      - P-SHADCN-ACCORDION-CONTENT-FLOW
+      - P-SHADCN-ACCORDION-CONTENT-STYLE
+      - P-BASE-ACCORDION-CONTENT-PRESENCE
+    expectation: Nine profiles keep their existing padding and a conditional Base-open-derived block rule. Controlled refusal leaves visibility unchanged; retained closed content remains display none, and L1 detach/reopen retains Base ownership. Four native Web runtimes render an actual Rhea homepage block child inside horizontal and bottom padding at normal and 200 percent root text size. Source/resident-token evidence alone does not establish native geometry.
 implementations:
   - id: liquid-composition-runtime
     kind: module-test
@@ -55,6 +62,30 @@ implementations:
       - P-LIQUID-GLASS-ACCORDION-TRIGGER
     notes:
       - Nine regressions fail against c2cbb8 before the repair. A source collector and CSS renderer are exercised without changing their semantics.
+  - id: shadcn-open-flow-source
+    kind: module-test
+    status: planned
+    required: true
+    path: packages/prototypes/test-utils/test/accordion-recipes.test.ts
+    consumesCases:
+      - T-ACCORDION-RECIPES-0001-CASE-SHADCN-FLOW
+    exercises:
+      - P-SHADCN-ACCORDION-CONTENT
+      - P-BASE-ACCORDION-CONTENT
+    notes:
+      - Newly authored nine-profile retained/detached and controlled-refusal controls are unexecuted. Existing passing recipe records above are historical evidence, not a pass for this addition.
+  - id: shadcn-open-flow-native
+    kind: workspace-check
+    status: planned
+    required: true
+    path: apps/www/src/content/docs/zh-cn/demo-accordion-family.browser.test.ts
+    consumesCases:
+      - T-ACCORDION-RECIPES-0001-CASE-SHADCN-FLOW
+    exercises:
+      - P-SHADCN-ACCORDION-CONTENT
+      - P-BASE-ACCORDION-CONTENT
+    notes:
+      - New real Rhea homepage geometry cases cover four runtimes at 1180px/100 percent and 390px/200 percent root text. Existing family journeys gain a retained closed display-none check. All new assertions and exact-candidate screenshots remain unexecuted.
   - id: native-narrow-glyph
     kind: workspace-check
     status: planned
@@ -82,6 +113,9 @@ sources:
   - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/accordion.tsx
     label: MIT source; static inspection only
 revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Register pending Shadcn open-flow and retained-hidden regressions without changing existing historical pass records.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Recorded bounded source recipe and decorative glyph regressions; no stable admission.

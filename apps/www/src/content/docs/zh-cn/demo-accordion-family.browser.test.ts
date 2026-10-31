@@ -140,10 +140,56 @@ async function observeLayout(page: Page) {
   });
 }
 
+async function observeContentFlow(content: Locator) {
+  return content.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const child = element.firstElementChild;
+    const childRect = child?.getBoundingClientRect();
+    return {
+      tag: element.tagName,
+      runtime: element.getAttribute('data-projection-runtime'),
+      tokens: element.getAttribute('data-pui-style'),
+      display: style.display,
+      paddingLeft: parseFloat(style.paddingLeft),
+      paddingRight: parseFloat(style.paddingRight),
+      paddingBottom: parseFloat(style.paddingBottom),
+      borderLeft: parseFloat(style.borderLeftWidth),
+      borderRight: parseFloat(style.borderRightWidth),
+      borderBottom: parseFloat(style.borderBottomWidth),
+      rect: { left: rect.left, right: rect.right, bottom: rect.bottom, height: rect.height },
+      child: childRect
+        ? {
+            left: childRect.left,
+            right: childRect.right,
+            bottom: childRect.bottom,
+            height: childRect.height,
+          }
+        : null,
+      rootFontSize: parseFloat(getComputedStyle(document.documentElement).fontSize),
+    };
+  });
+}
+
+function assertContentFlow(facts: Awaited<ReturnType<typeof observeContentFlow>>) {
+  expect(facts.display).toBe('block');
+  expect(facts.child).not.toBeNull();
+  expect(facts.child!.height).toBeGreaterThan(0);
+  expect(
+    Math.abs(facts.child!.left - facts.rect.left - facts.borderLeft - facts.paddingLeft)
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.abs(facts.rect.right - facts.child!.right - facts.borderRight - facts.paddingRight)
+  ).toBeLessThanOrEqual(1);
+  expect(facts.rect.bottom - facts.child!.bottom - facts.borderBottom).toBeGreaterThanOrEqual(
+    facts.paddingBottom - 1
+  );
+}
+
 async function capture(
   previewer: Locator,
   name: string,
-  subject: { family: string; runtime: string; state: string }
+  subject: { family: string; runtime: string; state: string; contentFlow?: unknown }
 ) {
   const base =
     process.env.PROTO_UI_ACCORDION_SCREENSHOT_DIR ??
@@ -312,6 +358,15 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
           await expanded(required, false);
           expect(await required.getAttribute('aria-controls')).toBe(retainedId);
           expect(await ref(previewer, 'multiple-a-content').isVisible()).toBe(false);
+          if (family === 'shadcn') {
+            // The family open-flow rule must not defeat retained Base hiding.
+            expect(await ref(previewer, 'multiple-a-content').count()).toBe(1);
+            expect(
+              await ref(previewer, 'multiple-a-content').evaluate(
+                (el) => getComputedStyle(el).display
+              )
+            ).toBe('none');
+          }
           const rtl = ref(previewer, 'rtl-a-trigger');
           await rtl.focus();
           await page.keyboard.press('ArrowLeft');
@@ -440,4 +495,104 @@ describe.sequential('Accordion five families / four native Web consumers', () =>
         await context.close();
       }
     }, 90_000);
+  for (const runtime of RUNTIMES) {
+    for (const scenario of [
+      { width: 1180, rootPercent: 100 },
+      { width: 390, rootPercent: 200 },
+    ]) {
+      it(`shadcn ${runtime} Rhea homepage block child respects profile padding at ${scenario.width}px / ${scenario.rootPercent}% text`, async () => {
+        const context = await browser.newContext({
+          viewport: { width: scenario.width, height: 1000 },
+        });
+        const page = await context.newPage();
+        const pageErrors: string[] = [];
+        page.on('pageerror', (error) => pageErrors.push(error.message));
+        const label = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' }[runtime];
+        try {
+          await page.goto(`${baseUrl}/en/`, { waitUntil: 'networkidle' });
+          await applyColorScheme(page, 'light');
+          const gallery = page.getByRole('region', {
+            name: 'Interactive component gallery',
+            exact: true,
+          });
+          await gallery.waitFor({ state: 'visible' });
+          await page
+            .getByText('Web Components · Ready', { exact: true })
+            .waitFor({ state: 'visible' });
+          if (runtime !== 'wc') {
+            const openedMenu = await revealHeaderPreferences(page);
+            const runtimeTrigger = page.getByRole('combobox', {
+              name: 'Page runtime',
+              exact: true,
+            });
+            await runtimeTrigger.click();
+            const popupId = await runtimeTrigger.getAttribute('aria-controls');
+            expect(popupId).toBeTruthy();
+            await page
+              .locator(`[id=${JSON.stringify(popupId)}]`)
+              .getByRole('option', { name: label, exact: true })
+              .click();
+            await page.getByText(`${label} · Ready`, { exact: true }).waitFor({ state: 'visible' });
+            if (openedMenu) {
+              const menu = page.locator(
+                '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+              );
+              if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+            }
+          }
+          await page.getByText(`${label} · Ready`, { exact: true }).waitFor({ state: 'visible' });
+          // Isolated test environment only, not a production DOM style patch.
+          await page.evaluate((percent) => {
+            document.documentElement.style.fontSize = `${percent}%`;
+          }, scenario.rootPercent);
+          await page.evaluate(async () => {
+            await document.fonts.ready;
+            await new Promise<void>((resolve) =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+            );
+          });
+          const trigger = gallery.getByRole('button', { name: 'Where do I start?', exact: true });
+          const accordion = gallery.locator('[data-demo-ref="composition-help"]');
+          const content = accordion
+            .locator('[data-projection-prototype="shadcn-accordion-content"]')
+            .first();
+          await expanded(trigger, true);
+          await materialized(content);
+          await expect.poll(() => content.getAttribute('data-projection-runtime')).toBe(runtime);
+          const facts = await observeContentFlow(content);
+          const shot = `shadcn-${runtime}-rhea-flow-${scenario.width}-text${scenario.rootPercent}`;
+          await capture(accordion, shot, {
+            family: 'shadcn',
+            runtime,
+            state: 'rhea-open-block-child',
+            contentFlow: facts,
+          });
+          // This fixture intentionally binds the real Rhea consumer, rather
+          // than mistaking the documentation's Nova compatibility default for it.
+          expect(facts.tokens?.split(/\s+/)).toContain('px-4');
+          expect(facts.paddingLeft).toBe(facts.rootFontSize);
+          expect(facts.paddingRight).toBe(facts.rootFontSize);
+          expect(facts.paddingBottom).toBe(facts.rootFontSize);
+          assertContentFlow(facts);
+          await trigger.click();
+          await expanded(trigger, false);
+          await expect.poll(() => content.isVisible()).toBe(false);
+          await trigger.click();
+          await expanded(trigger, true);
+          await materialized(content);
+          const reopened = await observeContentFlow(content);
+          await capture(accordion, `${shot}-reopened`, {
+            family: 'shadcn',
+            runtime,
+            state: 'rhea-reopened-block-child',
+            contentFlow: reopened,
+          });
+          assertContentFlow(reopened);
+          expect(pageErrors).toEqual([]);
+        } finally {
+          await context.close();
+        }
+      }, 90_000);
+    }
+  }
 });
