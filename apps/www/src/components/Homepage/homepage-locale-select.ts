@@ -1,4 +1,4 @@
-import type { DemoNode, DemoSpec } from '../PrototypePreviewer/demo-types';
+import { collectPrototypeIds, type DemoNode, type DemoSpec } from '../PrototypePreviewer/demo-types';
 import { resolveProjectionSelectParts } from '../PrototypePreviewer/projection-families';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/ids';
 import type { SiteLibraryFamily } from '../site-library-family';
@@ -110,16 +110,19 @@ export function createHomepageLocaleSelect(
     'home-locale-root'
   );
   const paths = Object.fromEntries(locale.options.map(({ value, path }) => [value, path]));
+  const demoRoot: DemoNode = {
+    kind: 'box',
+    ref: 'home-locale-owner',
+    attrs: { 'data-projection-control': 'locale' },
+    children: [root],
+  };
+  const prototypeIds = new Set<string>();
+  collectPrototypeIds(demoRoot, prototypeIds);
   return {
-    prototypeIds: Object.values(parts),
+    prototypeIds: [...prototypeIds],
     demo: {
       type: 'demo',
-      root: {
-        kind: 'box',
-        ref: 'home-locale-owner',
-        attrs: { 'data-projection-control': 'locale' },
-        children: [root],
-      },
+      root: demoRoot,
       setup(context) {
         const owner = context.refs['home-locale-owner'];
         const element = context.refs['home-locale-root'];

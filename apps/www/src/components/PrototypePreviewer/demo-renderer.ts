@@ -1,4 +1,7 @@
 import { planMaterialStages, withMaterialStages } from './demo-material-stages';
+import { appendDemoPublicInstanceHook, createDemoPublicInstances } from './demo-public-instances';
+import { createDynamicChildrenModel, type DynamicChildEntry } from './demo-dynamic-children';
+import { createDynamicCommitQueue } from './demo-dynamic-commit-queue';
 import { createCanonicalMotionPalette } from './canonical-motion-palette';
 import {
   createPreviewMaterialSink,
@@ -13,9 +16,11 @@ import { getPrototype } from './registry';
 import { claimHostMount, type HostMountLease } from './runtimes/host-mount';
 import type {
   DemoChild,
+  DemoNode,
   DemoRenderOptions,
   DemoRenderResult,
   DemoRuntimeApi,
+  DemoPublicInstance,
   DemoSurfaceStyle,
 } from './demo-types';
 import { ensurePreviewWcRegistered } from './wc-registry';
@@ -89,6 +94,23 @@ function ownsLease(opt: DemoRenderOptions, lease: HostMountLease): boolean {
   return lease.isCurrent() && opt.isCurrent?.() !== false;
 }
 
+/** Revoke failed host work without hiding either the original or cleanup error. */
+export function revokeFailedDemoRender(
+  lease: Pick<HostMountLease, 'release'>,
+  failure: unknown
+): never {
+  try {
+    lease.release();
+  } catch (cleanupFailure) {
+    throw new AggregateError(
+      [failure, cleanupFailure],
+      '[PrototypePreviewer] dynamic host commit failed and render cleanup also failed',
+      { cause: failure }
+    );
+  }
+  throw failure;
+}
+
 function abandonLease(lease: HostMountLease): DemoRenderResult {
   lease.release();
   return EMPTY_DEMO_RENDER;
@@ -135,6 +157,32 @@ function normalizeReactSurfaceStyle(
     }
     for (const [property, value] of Object.entries(entry)) {
       normalized[reactStylePropertyName(property)] = value;
+    }
+  }
+  return normalized;
+}
+
+/** Snapshot Vue surface entries on every framework render. A retained mutable
+ * theme object must not alias the previous VNode's style, and mixed string/map
+ * input must never be spread as numeric CSSStyleDeclaration properties. */
+function normalizeVueSurfaceStyle(
+  surfaceStyle: DemoSurfaceStyle,
+  document: Document
+): Record<string, string> {
+  const normalized: Record<string, string> = {};
+  for (const entry of Array.isArray(surfaceStyle) ? surfaceStyle : [surfaceStyle]) {
+    if (typeof entry === 'string') {
+      const declaration = document.createElement('span').style;
+      declaration.cssText = entry;
+      for (let index = 0; index < declaration.length; index++) {
+        const property = declaration.item(index);
+        const priority = declaration.getPropertyPriority(property);
+        normalized[reactStylePropertyName(property)] =
+          declaration.getPropertyValue(property) + (priority ? ' !' + priority : '');
+      }
+    } else {
+      for (const [property, value] of Object.entries(entry))
+        normalized[reactStylePropertyName(property)] = value;
     }
   }
   return normalized;
@@ -231,7 +279,7 @@ function renderDemoNodeWc(
 }
 
 function collectDemoRefs(host: HTMLElement): Record<string, HTMLElement> {
-  const refs: Record<string, HTMLElement> = {};
+  const refs: Record<string, HTMLElement> = Object.create(null);
   host.querySelectorAll('[data-demo-ref]').forEach((el) => {
     const ref = el.getAttribute('data-demo-ref');
     if (ref) refs[ref] = el as HTMLElement;
@@ -321,6 +369,18 @@ function createWcDemoCallbacks(isCurrent: () => boolean) {
         }
       }
     },
+    release(element: HTMLElement) {
+      const owned = bindings.get(element);
+      if (!owned) return;
+      bindings.delete(element);
+      runCleanupSteps(
+        [...owned].map(
+          ([key, binding]) =>
+            () =>
+              element.removeEventListener(key, binding.listener)
+        )
+      );
+    },
     dispose() {
       if (!live) return;
       live = false;
@@ -340,6 +400,13 @@ async function renderDemoWc(
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
   const associations = createDemoAssociationScope();
+  const dynamic = createDynamicChildrenModel(demo);
+  for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
+  let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
+  let dynamicCleanup = () => dynamic.dispose();
+  const owner = `demo-${++nextDemoOwner}`;
+  let refs: Record<string, HTMLElement> = Object.create(null);
   const instances: HTMLElement[] = [];
   const callbacks = createWcDemoCallbacks(() => ownsLease(opt, lease));
   let cleanup: ReturnType<NonNullable<typeof demo.setup>>;
@@ -351,6 +418,8 @@ async function renderDemoWc(
       const currentCleanup = cleanup;
       cleanup = undefined;
       const cleanupSteps: Array<() => void> = [
+        () => publicInstances?.retire(),
+        () => dynamicCleanup(),
         () => callbacks.dispose(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
@@ -364,6 +433,9 @@ async function renderDemoWc(
         if (instance) cleanupSteps.push(() => instance.remove());
       }
       cleanupSteps.push(() => associations.dispose());
+      cleanupSteps.push(() => {
+        for (const ref of Object.keys(refs)) delete refs[ref];
+      });
       runCleanupSteps(cleanupSteps);
     })
   )
@@ -371,8 +443,15 @@ async function renderDemoWc(
 
   renderDemoNodeWc(demo.root, host, instances, associations, () => ownsLease(opt, lease));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  const refs = collectDemoRefs(host);
+  for (const instance of instances) instance.setAttribute('data-demo-owner', owner);
+  for (const element of host.querySelectorAll('[data-demo-ref]'))
+    element.setAttribute('data-demo-owner', owner);
+  refs = ownedDemoRefs(host, owner);
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
+    setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease)) return;
       const el = refs[ref];
@@ -389,6 +468,12 @@ async function renderDemoWc(
       const fn = resolvePath(exposes, path);
       if (typeof fn !== 'function') return;
       return fn(...args);
+    },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease)) return;
+      const el = refs[ref] as (DemoInstance & HTMLElement) | undefined;
+      if (!el || !wcRawProps.has(el) || typeof el.getExposes !== 'function') return;
+      return el as DemoPublicInstance;
     },
     getExposes(ref) {
       if (!ownsLease(opt, lease)) return;
@@ -432,6 +517,290 @@ async function renderDemoWc(
     },
   };
 
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
+
+  type WcOwnedNode = { authored: DemoChild; node: Node; children: WcOwnedNode[] };
+  const managed = new Map<string, Map<number, WcOwnedNode>>();
+  const dynamicRefsOwned = new Set<string>();
+  const kind = (node: DemoChild): string =>
+    typeof node === 'string' || node.kind === 'text'
+      ? 'text'
+      : node.kind === 'box'
+        ? `box:${node.tag ?? 'div'}`
+        : `proto:${node.prototypeId}:${node.rootTag ?? 'div'}`;
+  const textValue = (node: DemoChild) =>
+    typeof node === 'string' ? node : node.kind === 'text' ? node.text : '';
+  const childKey = (node: DemoChild, index: number) =>
+    typeof node !== 'string' && node.kind !== 'text' && node.ref
+      ? `ref:${node.ref}`
+      : `index:${index}`;
+  function retireOwned(record: WcOwnedNode) {
+    const authored = record.authored;
+    const steps: Array<() => void> = record.children.map((child) => () => retireOwned(child));
+    if (typeof authored !== 'string' && authored.kind !== 'text') {
+      if (authored.ref)
+        steps.push(() => {
+          if (refs[authored.ref!] === record.node) delete refs[authored.ref!];
+        });
+      if (authored.kind === 'proto') {
+        const element = record.node as HTMLElement;
+        steps.push(() => callbacks.release(element));
+        steps.push(() => {
+          wcRawProps.delete(element);
+          wcSurfaceProps.delete(element);
+          const index = instances.indexOf(element);
+          if (index >= 0) instances.splice(index, 1);
+        });
+      }
+    }
+    steps.push(() => {
+      record.node.parentNode?.removeChild(record.node);
+    });
+    runCleanupSteps(steps);
+  }
+
+  function createOwned(authored: DemoChild): WcOwnedNode {
+    const document = host.ownerDocument;
+    if (typeof authored === 'string' || authored.kind === 'text')
+      return { authored, node: document.createTextNode(textValue(authored)), children: [] };
+    const element =
+      authored.kind === 'box'
+        ? document.createElement(authored.tag ?? 'div')
+        : document.createElement(
+            ensurePreviewWcRegistered(authored.prototypeId, getPrototype(authored.prototypeId))
+          );
+    const record: WcOwnedNode = { authored, node: element, children: [] };
+    element.setAttribute('data-demo-owner', owner);
+    if (authored.ref) element.setAttribute('data-demo-ref', authored.ref);
+    if (authored.kind === 'box') {
+      for (const [name, value] of Object.entries(authored.attrs ?? {}))
+        element.setAttribute(name, value);
+      if (authored.className) element.className = authored.className;
+    } else {
+      instances.push(element);
+      const surface = { surfaceClassName: authored.className, surfaceStyle: authored.surfaceStyle };
+      wcSurfaceProps.set(element, surface);
+      wcRawProps.set(element, { ...(authored.props ?? {}) });
+      setElementAssociations(element, associations.resolve(authored.associations) ?? {});
+      setElementProps(element, { ...(authored.props ?? {}), ...surface });
+    }
+    element.setAttribute('data-demo-owner', owner);
+    if (authored.ref) element.setAttribute('data-demo-ref', authored.ref);
+    else element.removeAttribute('data-demo-ref');
+    for (const child of authored.children ?? []) {
+      const rendered = createOwned(child);
+      record.children.push(rendered);
+      element.appendChild(rendered.node);
+    }
+    return record;
+  }
+  function placeOwned(
+    parent: HTMLElement,
+    ordered: readonly WcOwnedNode[],
+    current: () => boolean
+  ) {
+    if (!current()) return;
+    // Existing nested authored slots retain shape in this first public version.
+    // A same-order list (including Adapter-projected children) needs no moves.
+    const present = ordered.filter((record) => parent.contains(record.node));
+    if (
+      present.length === ordered.length &&
+      present.every(
+        (record, index) =>
+          index === 0 ||
+          !!(
+            present[index - 1]!.node.compareDocumentPosition(record.node) &
+            Node.DOCUMENT_POSITION_FOLLOWING
+          )
+      )
+    )
+      return;
+    let anchor: Node | null = null;
+    for (let index = ordered.length - 1; index >= 0; index--) {
+      if (!current()) return;
+      const node = ordered[index]!.node;
+      // Portaled descendants remain owned for disposal, never reclaimed.
+      if (node.isConnected && !parent.contains(node)) continue;
+      if (node.parentNode === parent && node.nextSibling === anchor) {
+        anchor = node;
+        continue;
+      }
+      if (anchor && anchor.parentNode !== parent)
+        throw new Error('[PrototypePreviewer] nested dynamic structure changes require a new key');
+      const move = (
+        parent as HTMLElement & { moveBefore?: (node: Node, before: Node | null) => void }
+      ).moveBefore;
+      if (typeof move === 'function' && node.isConnected && parent.isConnected)
+        move.call(parent, node, anchor);
+      else parent.insertBefore(node, anchor);
+      if (!current()) return;
+      anchor = node;
+    }
+  }
+
+  function patchOwned(record: WcOwnedNode, next: DemoChild, current: () => boolean): WcOwnedNode {
+    if (!current()) return record;
+    if (kind(record.authored) !== kind(next)) {
+      const replacement = createOwned(next);
+      retireOwned(record);
+      return replacement;
+    }
+    const previous = record.authored;
+    if (typeof next === 'string' || next.kind === 'text') {
+      if (record.node.textContent !== textValue(next)) record.node.textContent = textValue(next);
+      record.authored = next;
+      return record;
+    }
+    if (typeof previous === 'string' || previous.kind === 'text')
+      throw new Error('Unexpected dynamic node identity');
+    const element = record.node as HTMLElement;
+    if (previous.ref !== next.ref) {
+      if (previous.ref && refs[previous.ref] === element) delete refs[previous.ref];
+      if (next.ref) element.setAttribute('data-demo-ref', next.ref);
+      else element.removeAttribute('data-demo-ref');
+    }
+    if (next.kind === 'box' && previous.kind === 'box') {
+      for (const name of Object.keys(previous.attrs ?? {}))
+        if (!Object.hasOwn(next.attrs ?? {}, name)) element.removeAttribute(name);
+      for (const [name, value] of Object.entries(next.attrs ?? {}))
+        element.setAttribute(name, value);
+      if (next.className) element.className = next.className;
+      else element.removeAttribute('class');
+    } else if (next.kind === 'proto' && previous.kind === 'proto') {
+      const sameRef = previous.ref === next.ref;
+      if (!sameRef) callbacks.release(element);
+      const props = sameRef ? { ...(wcRawProps.get(element) ?? {}) } : {};
+      for (const name of Object.keys(previous.props ?? {}))
+        if (!Object.hasOwn(next.props ?? {}, name)) delete props[name];
+      Object.assign(props, next.props ?? {});
+      const previousSurface = wcSurfaceProps.get(element);
+      const surface = {
+        surfaceClassName: next.className,
+        surfaceStyle:
+          sameRef && previousSurface?.surfaceStyle !== previous.surfaceStyle
+            ? previousSurface?.surfaceStyle
+            : next.surfaceStyle,
+      };
+      const previousProps = wcRawProps.get(element) ?? {};
+      callbacks.patch(element, {
+        ...props,
+        ...Object.fromEntries(
+          Object.keys(previousProps)
+            .filter((name) => !Object.hasOwn(props, name))
+            .map((name) => [name, undefined])
+        ),
+      });
+      if (!current()) return record;
+      wcRawProps.set(element, props);
+      wcSurfaceProps.set(element, surface);
+      setElementAssociations(element, associations.resolve(next.associations) ?? {});
+      if (!current()) return record;
+      setElementProps(element, { ...props, ...surface });
+      if (current()) (element as HTMLElement & DemoInstance).update?.();
+    }
+    if (!current()) return record;
+    element.setAttribute('data-demo-owner', owner);
+    if (next.ref) element.setAttribute('data-demo-ref', next.ref);
+    else element.removeAttribute('data-demo-ref');
+    const oldChildren = new Map(
+      record.children.map((child, index) => [childKey(child.authored, index), child])
+    );
+    const children: WcOwnedNode[] = [];
+    for (const [index, child] of (next.children ?? []).entries()) {
+      if (!current()) return record;
+      const key = childKey(child, index),
+        old = oldChildren.get(key);
+      if (old) oldChildren.delete(key);
+      children.push(old ? patchOwned(old, child, current) : createOwned(child));
+    }
+    for (const old of oldChildren.values()) retireOwned(old);
+    if (!current()) return record;
+    placeOwned(element, children, current);
+    if (!current()) return record;
+    record.children = children;
+    record.authored = next;
+    return record;
+  }
+  const publishDynamicRefs = () => {
+    for (const ref of dynamicRefsOwned) delete refs[ref];
+    dynamicRefsOwned.clear();
+    const visit = (record: WcOwnedNode) => {
+      const node = record.authored;
+      if (typeof node !== 'string' && node.kind !== 'text' && node.ref) {
+        refs[node.ref] = record.node as HTMLElement;
+        dynamicRefsOwned.add(node.ref);
+      }
+      for (const child of record.children) visit(child);
+    };
+    for (const slot of managed.values()) for (const record of slot.values()) visit(record);
+  };
+  dynamicQueue = createDynamicCommitQueue(
+    dynamic,
+    () => ownsLease(opt, lease),
+    async (tx, current) => {
+      try {
+        if (!current()) return;
+        const parent = refs[tx.slotRef];
+        if (!parent) throw new Error(`[PrototypePreviewer] missing dynamic slot ${tx.slotRef}`);
+        const old = managed.get(tx.slotRef) ?? new Map<number, WcOwnedNode>();
+        const next = new Map<number, WcOwnedNode>();
+        for (const entry of tx.entries) {
+          if (!current()) return;
+          const record = old.get(entry.identity);
+          next.set(
+            entry.identity,
+            record ? patchOwned(record, entry.node, current) : createOwned(entry.node)
+          );
+        }
+        for (const [identity, record] of old) if (!next.has(identity)) retireOwned(record);
+        if (!current()) return;
+        managed.set(tx.slotRef, next);
+        placeOwned(parent, [...next.values()], current);
+        if (!current()) return;
+        // Let the existing Adapter project newly authored slot children; this is
+        // not an assertion that every asynchronous Prototype effect has settled.
+        await Promise.resolve();
+        if (!current()) return;
+        publishDynamicRefs();
+        publicInstances?.schedule();
+      } catch (error) {
+        // A host failure is terminal for this render, never a partially healthy
+        // committed tree. Invalid authored updates were rejected before mutation.
+        revokeFailedDemoRender(lease, error);
+      }
+    },
+    () => {
+      if (!ownsLease(opt, lease)) return;
+      try {
+        associations.reconcile(
+          associationKeys(
+            dynamic.root,
+            dynamic.slotRefs.map((ref) => dynamic.getCommitted(ref))
+          )
+        );
+      } catch (error) {
+        revokeFailedDemoRender(lease, error);
+      }
+    }
+  );
+  dynamicCleanup = () => {
+    dynamicQueue?.dispose();
+    const steps: Array<() => void> = [];
+    for (const slot of managed.values())
+      for (const record of slot.values()) steps.push(() => retireOwned(record));
+    steps.push(() => {
+      managed.clear();
+      for (const ref of dynamicRefsOwned) delete refs[ref];
+      dynamicRefsOwned.clear();
+      dynamic.dispose();
+    });
+    runCleanupSteps(steps);
+  };
+
   const setupCleanup = demo.setup?.({ host, refs, api });
   if (!ownsLease(opt, lease)) {
     if (typeof setupCleanup === 'function') setupCleanup();
@@ -446,12 +815,132 @@ async function renderDemoWc(
   };
 }
 
+let nextDemoOwner = 0;
+// The generated token contains only CSS identifier characters. It is an
+// ownership marker, not a style rule or security boundary. Native boxes/WC
+// retain their directly owned data marker; framework prototypes consume the
+// adapters' existing generic host-class channel (not a new demo-only prop).
+function demoOwnerSelector(owner: string): string {
+  return `[data-demo-owner="${owner}"], .pui-owner-${owner}`;
+}
+function demoOwnedRefSelector(owner: string): string {
+  return `[data-demo-owner="${owner}"][data-demo-ref], .pui-owner-${owner}[data-demo-ref]`;
+}
+function demoOwnerHostClass(authored: unknown, owner: string): string {
+  return [typeof authored === 'string' ? authored : '', `pui-owner-${owner}`]
+    .filter(Boolean)
+    .join(' ');
+}
+function ownedDemoRefs(host: HTMLElement, owner: string): Record<string, HTMLElement> {
+  const refs: Record<string, HTMLElement> = Object.create(null);
+  const selector = demoOwnedRefSelector(owner);
+  const nodes = new Set([
+    ...host.querySelectorAll<HTMLElement>(selector),
+    ...host.ownerDocument.querySelectorAll<HTMLElement>(selector),
+  ]);
+  if (host.matches(selector)) nodes.add(host);
+  for (const node of nodes) {
+    const ref = node.getAttribute('data-demo-ref');
+    if (ref) refs[ref] = node;
+  }
+  return refs;
+}
+function publishDemoRefs(target: Record<string, HTMLElement>, next: Record<string, HTMLElement>) {
+  for (const ref of Object.keys(target)) if (!Object.hasOwn(next, ref)) delete target[ref];
+  Object.assign(target, next);
+}
+function observeOwnedDemoRefs(
+  host: HTMLElement,
+  owner: string,
+  refs: Record<string, HTMLElement>,
+  current: () => boolean
+): () => void {
+  const selector = demoOwnerSelector(owner);
+  const Observer = host.ownerDocument.defaultView?.MutationObserver;
+  if (!Observer) return () => {};
+  const containsOwner = (node: Node) =>
+    node.nodeType === 1 &&
+    ((node as Element).matches(selector) || !!(node as Element).querySelector(selector));
+  const observer = new Observer((records) => {
+    if (!current()) return;
+    if (
+      !records.some((record) => [...record.addedNodes, ...record.removedNodes].some(containsOwner))
+    )
+      return;
+    const next = ownedDemoRefs(host, owner);
+    if (current()) publishDemoRefs(refs, next);
+  });
+  observer.observe(host, { childList: true, subtree: true });
+  if (host.ownerDocument.documentElement)
+    observer.observe(host.ownerDocument.documentElement, { childList: true, subtree: true });
+  return () => observer.disconnect();
+}
+function associationKeys(
+  root: DemoChild,
+  entries: Iterable<readonly DynamicChildEntry[]>
+): Set<string> {
+  const keys = new Set<string>();
+  const walk = (node: DemoChild) => {
+    if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'proto' && node.associations) keys.add(node.associations.controlLabel);
+    for (const child of node.children ?? []) walk(child);
+  };
+  walk(root);
+  for (const children of entries) for (const entry of children) walk(entry.node);
+  return keys;
+}
+function dynamicRefs(entries: readonly DynamicChildEntry[]) {
+  const refs = new Map<string, { node: Exclude<DemoNode, { kind: 'text' }>; identity: string }>();
+  const walk = (node: DemoChild, owner: number) => {
+    if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.ref)
+      refs.set(node.ref, {
+        node,
+        identity: `${owner}:${node.kind}:${node.kind === 'proto' ? node.prototypeId + ':' + (node.rootTag ?? 'div') : (node.tag ?? 'div')}`,
+      });
+    for (const child of node.children ?? []) walk(child, owner);
+  };
+  for (const entry of entries) walk(entry.node, entry.identity);
+  return refs;
+}
+/** Retain imperative-only callback patches, replace the incoming authored snapshot. */
+function reconcileDynamicProps(
+  previous: readonly DynamicChildEntry[],
+  next: readonly DynamicChildEntry[],
+  get: (ref: string) => Record<string, unknown> | undefined,
+  put: (ref: string, props: Record<string, unknown>) => void,
+  retire: (ref: string) => void
+) {
+  const before = dynamicRefs(previous),
+    after = dynamicRefs(next);
+  for (const [ref, old] of before) if (after.get(ref)?.identity !== old.identity) retire(ref);
+  for (const [ref, current] of after) {
+    if (current.node.kind !== 'proto') continue;
+    const old = before.get(ref);
+    const retained = old?.identity === current.identity && old.node.kind === 'proto';
+    const props = retained ? { ...(get(ref) ?? {}) } : {};
+    if (retained && old.node.kind === 'proto')
+      for (const key of Object.keys(old.node.props ?? {}))
+        if (!Object.hasOwn(current.node.props ?? {}, key)) delete props[key];
+    Object.assign(props, current.node.props ?? {});
+    put(ref, props);
+  }
+}
+
 async function renderDemoReact(
   opt: DemoRenderOptions,
   lease: HostMountLease
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
   const associations = createDemoAssociationScope();
+  const dynamic = createDynamicChildrenModel(demo);
+  for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
+  const owner = `demo-${++nextDemoOwner}`;
+  const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
+  let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
+  const refs: Record<string, HTMLElement> = Object.create(null);
+  let stopRefObservation: (() => void) | undefined;
 
   // Non-WC modules join the graph only when this runtime is selected. A
   // superseded owner must not proceed to CDN loading after that import boundary.
@@ -495,12 +984,42 @@ async function renderDemoReact(
     for (const child of node.children ?? []) initProps(child);
   }
   initProps(demo.root);
+  const dynamicNativeAttrs = new WeakMap<HTMLElement, Set<string>>();
+  function initDynamicBoxRefs(node: DemoChild) {
+    if (typeof node === 'string' || node.kind === 'text') return;
+    if (node.kind === 'box') {
+      const attrs = Object.entries(node.attrs ?? {}).filter(([name]) =>
+        nativeStringAttributes.has(name.toLowerCase())
+      );
+      boxAttributeRefs.set(node, (element) => {
+        if (!element || !ownsLease(opt, lease)) return;
+        const names = new Set(attrs.map(([name]) => name));
+        for (const old of dynamicNativeAttrs.get(element) ?? [])
+          if (!names.has(old)) element.removeAttribute(old);
+        for (const [name, value] of attrs) element.setAttribute(name, value);
+        dynamicNativeAttrs.set(element, names);
+      });
+    }
+    for (const child of node.children ?? []) initDynamicBoxRefs(child);
+  }
 
-  function renderNode(node: DemoChild): any {
+  function childNodes(node: Exclude<DemoNode, { kind: 'text' }>): any[] {
+    if (node.kind === 'box' && node.dynamicChildren && node.ref)
+      return (renderedSlots.get(node.ref) ?? []).map((entry) =>
+        renderNode(entry.node, entry.identity)
+      );
+    return (node.children ?? []).map((child, index) =>
+      renderNode(
+        child,
+        typeof child !== 'string' && child.kind !== 'text' ? (child.ref ?? index) : index
+      )
+    );
+  }
+  function renderNode(node: DemoChild, key?: string | number): any {
     if (typeof node === 'string') return node;
     if (node.kind === 'text') return node.text;
     if (node.kind === 'box') {
-      const kids = (node.children ?? []).map((child) => renderNode(child));
+      const kids = childNodes(node);
       return React.createElement(
         node.tag ?? 'div',
         {
@@ -509,8 +1028,10 @@ async function renderDemoReact(
               ([name]) => !nativeStringAttributes.has(name.toLowerCase())
             )
           ),
+          key,
           className: node.className,
           'data-demo-ref': node.ref,
+          'data-demo-owner': owner,
           ref: boxAttributeRefs.get(node),
         },
         ...kids
@@ -529,7 +1050,7 @@ async function renderDemoReact(
       });
       scopedCache.set(componentKey, Component);
     }
-    const kids = (node.children ?? []).map((child) => renderNode(child));
+    const kids = childNodes(node);
     // Refs are initialized with all authored props once. Reapplying node.props
     // here would resurrect a key explicitly withdrawn through removeProps.
     const mergedProps: Record<string, unknown> = {
@@ -538,13 +1059,17 @@ async function renderDemoReact(
     if (node.ref) {
       mergedProps['data-demo-ref'] = node.ref;
       mergedProps.ref = (instance: unknown) => {
+        if (!ownsLease(opt, lease)) return;
         if (instance) componentRefs.set(node.ref!, instance as DemoInstance);
         else componentRefs.delete(node.ref!);
+        publicInstances?.schedule();
       };
     }
+    mergedProps.hostClassName = demoOwnerHostClass(mergedProps.hostClassName, owner);
+    mergedProps.key = key;
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClassName = node.className;
-    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
+    const surfaceStyle = (node.ref ? surfaceStyles.get(node.ref) : undefined) ?? node.surfaceStyle;
     if (surfaceStyle) {
       mergedProps.surfaceStyle = normalizeReactSurfaceStyle(surfaceStyle, host.ownerDocument);
     }
@@ -562,13 +1087,24 @@ async function renderDemoReact(
     !lease.commit(() => {
       for (const frame of pendingRefreshFrames) cancelAnimationFrame(frame);
       pendingRefreshFrames.clear();
+      stopRefObservation?.();
+      dynamicQueue?.dispose();
+      dynamic.dispose();
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => root.unmount(),
+        () => {
+          propsMap.clear();
+          surfaceStyles.clear();
+          componentRefs.clear();
+          renderedSlots.clear();
+          for (const ref of Object.keys(refs)) delete refs[ref];
+        },
         () => associations.dispose(),
       ]);
     })
@@ -591,15 +1127,20 @@ async function renderDemoReact(
 
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  const refs = collectDemoRefs(host);
+  publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
+    setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
       surfaceStyles.set(ref, next);
       api.setProps(ref, {});
     },
     call(ref, path, ...args) {
+      if (!ownsLease(opt, lease)) return;
       const inst = componentRefs.get(ref);
       if (!inst) return;
       const exposes = inst.getExposes?.() ?? {};
@@ -612,7 +1153,14 @@ async function renderDemoReact(
       });
       return result;
     },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !propsMap.has(ref)) return;
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
+    },
     getExposes(ref) {
+      if (!ownsLease(opt, lease)) return;
       const inst = componentRefs.get(ref);
       return inst?.getExposes?.();
     },
@@ -647,6 +1195,65 @@ async function renderDemoReact(
     },
   };
 
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
+
+  dynamicQueue = createDynamicCommitQueue(
+    dynamic,
+    () => ownsLease(opt, lease),
+    async (tx, current) => {
+      if (!current()) return;
+      try {
+        reconcileDynamicProps(
+          renderedSlots.get(tx.slotRef) ?? [],
+          tx.entries,
+          (ref) => propsMap.get(ref),
+          (ref, props) => {
+            propsMap.set(ref, props);
+          },
+          (ref) => {
+            propsMap.delete(ref);
+            surfaceStyles.delete(ref);
+            componentRefs.delete(ref);
+          }
+        );
+        for (const entry of tx.entries) initDynamicBoxRefs(entry.node);
+        renderedSlots.set(tx.slotRef, tx.entries);
+        if (!current()) return;
+        if (typeof flushSync !== 'function')
+          throw new Error('[PrototypePreviewer] dynamic React children require public flushSync');
+        flushReact(() => root.render(renderTree()));
+        if (!current()) return;
+        publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
+        if (!current()) return;
+      } catch (error) {
+        // A framework commit may have partially mutated its host. Fail closed:
+        // never leave a partially committed tree claiming a healthy model.
+        revokeFailedDemoRender(lease, error);
+      }
+    },
+    () => {
+      if (!ownsLease(opt, lease)) return;
+      try {
+        associations.reconcile(
+          associationKeys(
+            dynamic.root,
+            dynamic.slotRefs.map((ref) => dynamic.getCommitted(ref))
+          )
+        );
+      } catch (error) {
+        revokeFailedDemoRender(lease, error);
+      }
+    }
+  );
+
+  stopRefObservation = dynamic.slotRefs.length
+    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
+    : () => {};
   cleanup = demo.setup?.({ host, refs, api });
 
   return {
@@ -662,6 +1269,14 @@ async function renderDemoVue(
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
   const associations = createDemoAssociationScope();
+  const dynamic = createDynamicChildrenModel(demo);
+  for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
+  const owner = `demo-${++nextDemoOwner}`;
+  const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
+  let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
+  const refs: Record<string, HTMLElement> = Object.create(null);
+  let stopRefObservation: (() => void) | undefined;
 
   const [{ createVueAdapter }, { loadVue }] = await vueModules();
   if (!ownsLease(opt, lease)) return abandonLease(lease);
@@ -670,8 +1285,8 @@ async function renderDemoVue(
   const adapter = createVueAdapter(Vue as unknown as AdapterVueRuntime);
 
   const componentRefs = new Map<string, DemoInstance>();
-  const propsMap = Vue.reactive<Record<string, Record<string, unknown>>>({});
-  const surfaceStyles = Vue.reactive<Record<string, DemoSurfaceStyle>>({});
+  const propsMap = Vue.reactive<Record<string, Record<string, unknown>>>(Object.create(null));
+  const surfaceStyles = Vue.reactive<Record<string, DemoSurfaceStyle>>(Object.create(null));
 
   function initProps(node: DemoChild) {
     if (typeof node === 'string' || node.kind === 'text') return;
@@ -682,20 +1297,39 @@ async function renderDemoVue(
   }
   initProps(demo.root);
 
-  function renderNode(node: DemoChild): any {
+  const slotEpoch = Vue.reactive({ value: 0 });
+  function childNodes(node: Exclude<DemoNode, { kind: 'text' }>): any[] {
+    void slotEpoch.value;
+    if (node.kind === 'box' && node.dynamicChildren && node.ref)
+      return (renderedSlots.get(node.ref) ?? []).map((entry) =>
+        renderNode(entry.node, entry.identity)
+      );
+    return (node.children ?? []).map((child, index) =>
+      renderNode(
+        child,
+        typeof child !== 'string' && child.kind !== 'text' ? (child.ref ?? index) : index
+      )
+    );
+  }
+  function renderNode(node: DemoChild, key?: string | number): any {
     if (typeof node === 'string') return node;
     if (node.kind === 'text') return node.text;
     if (node.kind === 'box') {
-      const kids = (node.children ?? []).map((child) => renderNode(child));
+      const kids = childNodes(node);
       return Vue.h(
         node.tag ?? 'div',
         {
           ...node.attrs,
+          key,
           class: node.className,
           'data-demo-ref': node.ref,
+          'data-demo-owner': owner,
           ref: node.ref
             ? (el: unknown) => {
+                if (!ownsLease(opt, lease)) return;
                 if (el) componentRefs.set(node.ref!, el as DemoInstance);
+                else componentRefs.delete(node.ref!);
+                publicInstances?.schedule();
               }
             : undefined,
         },
@@ -715,7 +1349,7 @@ async function renderDemoVue(
       });
       scopedCache.set(componentKey, Component);
     }
-    const kids = (node.children ?? []).map((child) => renderNode(child));
+    const kids = childNodes(node);
     // Refs are initialized with all authored props once. Reapplying node.props
     // here would resurrect a key explicitly withdrawn through removeProps.
     const mergedProps: Record<string, unknown> = {
@@ -724,13 +1358,19 @@ async function renderDemoVue(
     if (node.ref) {
       mergedProps['data-demo-ref'] = node.ref;
       mergedProps.ref = (el: unknown) => {
+        if (!ownsLease(opt, lease)) return;
         if (el) componentRefs.set(node.ref!, el as DemoInstance);
+        else componentRefs.delete(node.ref!);
+        publicInstances?.schedule();
       };
     }
+    mergedProps.hostClass = [mergedProps.hostClass, `pui-owner-${owner}`];
+    mergedProps.key = key;
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    const surfaceStyle = (node.ref && surfaceStyles[node.ref]) || node.surfaceStyle;
-    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
+    const surfaceStyle = (node.ref ? surfaceStyles[node.ref] : undefined) ?? node.surfaceStyle;
+    if (surfaceStyle !== undefined)
+      mergedProps.surfaceStyle = normalizeVueSurfaceStyle(surfaceStyle, host.ownerDocument);
     return Vue.h(Component, mergedProps, () => kids);
   }
 
@@ -744,13 +1384,24 @@ async function renderDemoVue(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
+      stopRefObservation?.();
+      dynamicQueue?.dispose();
+      dynamic.dispose();
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.unmount(),
+        () => {
+          for (const ref of Object.keys(propsMap)) delete propsMap[ref];
+          for (const ref of Object.keys(surfaceStyles)) delete surfaceStyles[ref];
+          componentRefs.clear();
+          renderedSlots.clear();
+          for (const ref of Object.keys(refs)) delete refs[ref];
+        },
         () => associations.dispose(),
       ]);
     })
@@ -760,14 +1411,19 @@ async function renderDemoVue(
 
   await new Promise((resolve) => requestAnimationFrame(resolve));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  const refs = collectDemoRefs(host);
+  publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
+    setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap[ref]) return;
       surfaceStyles[ref] = next;
     },
     call(ref, path, ...args) {
+      if (!ownsLease(opt, lease)) return;
       const inst = componentRefs.get(ref);
       if (!inst) return;
       const exposes = inst.getExposes?.() ?? {};
@@ -777,7 +1433,14 @@ async function renderDemoVue(
       inst.update?.();
       return result;
     },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !Object.hasOwn(propsMap, ref)) return;
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
+    },
     getExposes(ref) {
+      if (!ownsLease(opt, lease)) return;
       const inst = componentRefs.get(ref);
       return inst?.getExposes?.();
     },
@@ -789,6 +1452,7 @@ async function renderDemoVue(
       // Vue owns the reactive deletion commit just as it owns setProps.
     },
     setProps(ref, next) {
+      if (!ownsLease(opt, lease)) return;
       if (propsMap[ref]) {
         Object.assign(propsMap[ref], next);
       }
@@ -798,6 +1462,64 @@ async function renderDemoVue(
     },
   };
 
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
+
+  dynamicQueue = createDynamicCommitQueue(
+    dynamic,
+    () => ownsLease(opt, lease),
+    async (tx, current) => {
+      if (!current()) return;
+      try {
+        reconcileDynamicProps(
+          renderedSlots.get(tx.slotRef) ?? [],
+          tx.entries,
+          (ref) => propsMap[ref],
+          (ref, props) => {
+            propsMap[ref] = props;
+          },
+          (ref) => {
+            delete propsMap[ref];
+            delete surfaceStyles[ref];
+            componentRefs.delete(ref);
+          }
+        );
+
+        renderedSlots.set(tx.slotRef, tx.entries);
+        if (!current()) return;
+        slotEpoch.value++;
+        await Vue.nextTick();
+        if (!current()) return;
+        publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
+        if (!current()) return;
+      } catch (error) {
+        // A framework commit may have partially mutated its host. Fail closed:
+        // never leave a partially committed tree claiming a healthy model.
+        revokeFailedDemoRender(lease, error);
+      }
+    },
+    () => {
+      if (!ownsLease(opt, lease)) return;
+      try {
+        associations.reconcile(
+          associationKeys(
+            dynamic.root,
+            dynamic.slotRefs.map((ref) => dynamic.getCommitted(ref))
+          )
+        );
+      } catch (error) {
+        revokeFailedDemoRender(lease, error);
+      }
+    }
+  );
+
+  stopRefObservation = dynamic.slotRefs.length
+    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
+    : () => {};
   cleanup = demo.setup?.({ host, refs, api });
 
   return {
@@ -813,6 +1535,14 @@ async function renderDemoVue2(
 ): Promise<DemoRenderResult> {
   const { host, demo } = opt;
   const associations = createDemoAssociationScope();
+  const dynamic = createDynamicChildrenModel(demo);
+  for (const prototypeId of dynamic.prototypeIds) getPrototype(prototypeId);
+  const owner = `demo-${++nextDemoOwner}`;
+  const renderedSlots = new Map<string, readonly DynamicChildEntry[]>();
+  let publicInstances: ReturnType<typeof createDemoPublicInstances> | undefined;
+  let dynamicQueue: ReturnType<typeof createDynamicCommitQueue> | undefined;
+  const refs: Record<string, HTMLElement> = Object.create(null);
+  let stopRefObservation: (() => void) | undefined;
 
   const [{ createVue2Adapter }, { loadVue2, toVue2ComponentData, toVue2Runtime }] =
     await vue2Modules();
@@ -824,10 +1554,9 @@ async function renderDemoVue2(
   const componentRefs = new Map<string, DemoInstance>();
   const componentRefNames = new Set<string>();
   const surfaceStyles = new Map<string, DemoSurfaceStyle>();
-  const propsMap = ((Vue as any).observable ? (Vue as any).observable({}) : {}) as Record<
-    string,
-    Record<string, unknown>
-  >;
+  const propsMap = (
+    (Vue as any).observable ? (Vue as any).observable(Object.create(null)) : Object.create(null)
+  ) as Record<string, Record<string, unknown>>;
 
   function setReactive(target: Record<string, unknown>, key: string, value: unknown) {
     if (typeof Vue.set === 'function') Vue.set(target, key, value);
@@ -843,18 +1572,33 @@ async function renderDemoVue2(
   }
   initProps(demo.root);
 
-  function renderNode(node: DemoChild, h: any): any {
+  function childNodes(node: Exclude<DemoNode, { kind: 'text' }>, h: any): any[] {
+    if (node.kind === 'box' && node.dynamicChildren && node.ref)
+      return (renderedSlots.get(node.ref) ?? []).map((entry) =>
+        renderNode(entry.node, h, entry.identity)
+      );
+    return (node.children ?? []).map((child, index) =>
+      renderNode(
+        child,
+        h,
+        typeof child !== 'string' && child.kind !== 'text' ? (child.ref ?? index) : index
+      )
+    );
+  }
+  function renderNode(node: DemoChild, h: any, key?: string | number): any {
     if (typeof node === 'string') return node;
     if (node.kind === 'text') return node.text;
     if (node.kind === 'box') {
-      const kids = (node.children ?? []).map((child) => renderNode(child, h));
+      const kids = childNodes(node, h);
       return h(
         node.tag ?? 'div',
         {
+          key,
           class: node.className,
           attrs: {
             ...node.attrs,
             'data-demo-ref': node.ref,
+            'data-demo-owner': owner,
           },
         },
         kids
@@ -873,7 +1617,7 @@ async function renderDemoVue2(
       });
       scopedCache.set(componentKey, Component);
     }
-    const kids = (node.children ?? []).map((child) => renderNode(child, h));
+    const kids = childNodes(node, h);
     // Refs are initialized with all authored props once. Reapplying node.props
     // here would resurrect a key explicitly withdrawn through removeProps.
     const mergedProps: Record<string, unknown> = {
@@ -883,13 +1627,29 @@ async function renderDemoVue2(
       componentRefNames.add(node.ref);
       mergedProps['data-demo-ref'] = node.ref;
     }
+    mergedProps.hostClass = [mergedProps.hostClass, `pui-owner-${owner}`];
     mergedProps.instanceAssociations = associations.resolve(node.associations);
     if (node.className) mergedProps.surfaceClass = node.className;
-    const surfaceStyle = (node.ref && surfaceStyles.get(node.ref)) || node.surfaceStyle;
-    if (surfaceStyle) mergedProps.surfaceStyle = surfaceStyle;
+    const surfaceStyle = (node.ref ? surfaceStyles.get(node.ref) : undefined) ?? node.surfaceStyle;
+    if (surfaceStyle !== undefined)
+      mergedProps.surfaceStyle = normalizeVueSurfaceStyle(surfaceStyle, host.ownerDocument);
 
-    const data = toVue2ComponentData(mergedProps);
-    if (node.ref) data.ref = node.ref;
+    const data: ReturnType<typeof toVue2ComponentData> & {
+      key: string | number | undefined;
+      hook?: Record<string, (...args: any[]) => void>;
+    } = { ...toVue2ComponentData(mergedProps), key };
+    if (node.ref) {
+      data.ref = node.ref;
+      // Preserve existing vnode hooks; Vue2 merges its component hooks with these.
+      const hooks = data.hook ?? {};
+      const mergedHooks = { ...hooks };
+      data.hook = mergedHooks;
+      for (const phase of ['insert', 'postpatch', 'destroy']) {
+        mergedHooks[phase] = appendDemoPublicInstanceHook(hooks[phase], () =>
+          publicInstances?.schedule()
+        );
+      }
+    }
     return h(Component, data, kids);
   }
 
@@ -917,13 +1677,25 @@ async function renderDemoVue2(
   let cleanup: void | (() => void);
   if (
     !lease.commit(() => {
+      stopRefObservation?.();
+      dynamicQueue?.dispose();
+      dynamic.dispose();
       const currentCleanup = cleanup;
       cleanup = undefined;
       runCleanupSteps([
+        () => publicInstances?.retire(),
         () => {
           if (typeof currentCleanup === 'function') currentCleanup();
         },
         () => app.$destroy(),
+        () => {
+          for (const ref of Object.keys(propsMap)) delete propsMap[ref];
+          surfaceStyles.clear();
+          componentRefNames.clear();
+          componentRefs.clear();
+          renderedSlots.clear();
+          for (const ref of Object.keys(refs)) delete refs[ref];
+        },
         () => associations.dispose(),
       ]);
     })
@@ -935,15 +1707,20 @@ async function renderDemoVue2(
   await new Promise((resolve) => requestAnimationFrame(resolve));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   refreshComponentRefs(app);
-  const refs = collectDemoRefs(host);
+  publishDemoRefs(refs, ownedDemoRefs(host, owner));
 
   const api: DemoRuntimeApi = {
+    subscribePublicInstances(refs, listener) {
+      return publicInstances!.subscribe(refs, listener);
+    },
+    setChildren: (ref, children) => dynamicQueue!.setChildren(ref, children),
     setSurfaceStyle(ref, next) {
       if (!ownsLease(opt, lease) || !propsMap[ref]) return;
       surfaceStyles.set(ref, next);
       app.$forceUpdate?.();
     },
     call(ref, path, ...args) {
+      if (!ownsLease(opt, lease)) return;
       refreshComponentRefs(app);
       const inst = componentRefs.get(ref);
       if (!inst) return;
@@ -954,7 +1731,15 @@ async function renderDemoVue2(
       inst.update?.();
       return result;
     },
+    getPublicInstance(ref) {
+      if (!ownsLease(opt, lease) || !Object.hasOwn(propsMap, ref)) return;
+      refreshComponentRefs(app);
+      const inst = componentRefs.get(ref);
+      if (typeof inst?.getExposes !== 'function') return;
+      return inst as DemoPublicInstance;
+    },
     getExposes(ref) {
+      if (!ownsLease(opt, lease)) return;
       refreshComponentRefs(app);
       const inst = componentRefs.get(ref);
       return inst?.getExposes?.();
@@ -970,7 +1755,8 @@ async function renderDemoVue2(
       app.$forceUpdate?.();
     },
     setProps(ref, next) {
-      if (!propsMap[ref]) setReactive(propsMap, ref, {});
+      if (!ownsLease(opt, lease)) return;
+      if (!Object.hasOwn(propsMap, ref)) return;
       for (const [key, value] of Object.entries(next)) {
         setReactive(propsMap[ref], key, value);
       }
@@ -980,6 +1766,67 @@ async function renderDemoVue2(
     },
   };
 
+  publicInstances = createDemoPublicInstances({
+    read: (ref) => api.getPublicInstance!(ref),
+    current: () => ownsLease(opt, lease),
+    fail: (error) => revokeFailedDemoRender(lease, error),
+  });
+
+  dynamicQueue = createDynamicCommitQueue(
+    dynamic,
+    () => ownsLease(opt, lease),
+    async (tx, current) => {
+      if (!current()) return;
+      try {
+        reconcileDynamicProps(
+          renderedSlots.get(tx.slotRef) ?? [],
+          tx.entries,
+          (ref) => propsMap[ref],
+          (ref, props) => {
+            setReactive(propsMap, ref, props);
+          },
+          (ref) => {
+            if (typeof Vue.delete === 'function') Vue.delete(propsMap, ref);
+            else delete propsMap[ref];
+            surfaceStyles.delete(ref);
+            componentRefNames.delete(ref);
+            componentRefs.delete(ref);
+          }
+        );
+
+        renderedSlots.set(tx.slotRef, tx.entries);
+        if (!current()) return;
+        app.$forceUpdate();
+        await nextVue2(Vue);
+        if (current()) refreshComponentRefs(app);
+        if (!current()) return;
+        publishDemoRefs(refs, ownedDemoRefs(host, owner));
+        publicInstances?.schedule();
+        if (!current()) return;
+      } catch (error) {
+        // A framework commit may have partially mutated its host. Fail closed:
+        // never leave a partially committed tree claiming a healthy model.
+        revokeFailedDemoRender(lease, error);
+      }
+    },
+    () => {
+      if (!ownsLease(opt, lease)) return;
+      try {
+        associations.reconcile(
+          associationKeys(
+            dynamic.root,
+            dynamic.slotRefs.map((ref) => dynamic.getCommitted(ref))
+          )
+        );
+      } catch (error) {
+        revokeFailedDemoRender(lease, error);
+      }
+    }
+  );
+
+  stopRefObservation = dynamic.slotRefs.length
+    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
+    : () => {};
   cleanup = demo.setup?.({ host, refs, api });
 
   return {

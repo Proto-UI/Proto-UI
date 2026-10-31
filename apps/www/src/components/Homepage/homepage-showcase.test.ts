@@ -5,7 +5,10 @@ import {
   type DemoChild,
   type DemoSetupContext,
 } from '../PrototypePreviewer/demo-types';
-import { createProjectionComposition } from '../PrototypePreviewer/projection-composition';
+import {
+  assertProjectionRecipeClosure,
+  createProjectionComposition,
+} from '../PrototypePreviewer/projection-composition';
 import { createHomepageShowcase, HOMEPAGE_SHOWCASE_ID } from './homepage-showcase';
 import { PREVIEW_SURFACE_ID } from './homepage-live-preview';
 import type { RuntimeId } from '../PrototypePreviewer/runtimes/registry';
@@ -75,6 +78,39 @@ function mount(runtime: RuntimeId, locale = 'en') {
 afterEach(() => document.body.replaceChildren());
 
 for (const family of ['shadcn', 'brutalist'] as const) {
+  it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+    `${family}/%s derives the final gallery recipe without unused Select parts`,
+    (runtime) => {
+      for (const locale of ['en', 'zh-cn']) {
+        const content = createHomepageShowcase(family, runtime, locale, () => true);
+        assertDemoSpec(content.demo);
+        expect(() =>
+          assertProjectionRecipeClosure(content.demo.root, content.recipe.prototypeIds, content.recipe.id)
+        ).not.toThrow();
+        expect(content.recipe.prototypeIds).not.toContain(`${family}-select-label`);
+        expect(content.recipe.prototypeIds).not.toContain(`${family}-select-separator`);
+        if (family === 'shadcn')
+          expect(content.recipe.prototypeIds).toContain('shadcn-select-group');
+        const required = `${family}-command-item`;
+        expect(content.recipe.prototypeIds).toContain(required);
+        expect(() =>
+          assertProjectionRecipeClosure(
+            content.demo.root,
+            content.recipe.prototypeIds.filter((id) => id !== required),
+            content.recipe.id
+          )
+        ).toThrow(`uses undeclared Prototype(s): ${required}`);
+        expect(() =>
+          assertProjectionRecipeClosure(
+            content.demo.root,
+            [...content.recipe.prototypeIds, `${family}-select-separator`],
+            content.recipe.id
+          )
+        ).toThrow(`missing required Prototype(s): ${family}-select-separator`);
+      }
+    }
+  );
+
   it(`${family} has a closed explicit recipe using real lane parts and family-owned passive card surfaces`, () => {
     const content = createHomepageShowcase(family, 'wc', 'en', () => true);
     assertDemoSpec(content.demo);
