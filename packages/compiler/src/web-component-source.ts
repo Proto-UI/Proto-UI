@@ -1,3 +1,4 @@
+import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
 import { dataTypeEqual, formatDataType } from './data-types';
 import { isDataValueType } from './ir';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -339,145 +340,19 @@ export function emitWebComponentSource(
       : 'unknown';
   }
   // Lexical shape information stays in the compiler; it is never delivered as IR.
-  const nativeBindings: Map<string, ExpressionIR>[] = [new Map()];
+  let nativeScope = NativeLexicalScope.empty();
   let nativeSequence = 0;
   function nativeBinding(name: string): ExpressionIR | undefined {
-    for (let index = nativeBindings.length - 1; index >= 0; --index) {
-      const value = nativeBindings[index].get(name);
-      if (value) return value;
-    }
-  }
-  type NativeShape =
-    | { kind: 'node' | 'text' | 'empty' | 'invalid' }
-    | { kind: 'array'; items: NativeShape[] }
-    | { kind: 'union'; items: NativeShape[] };
-  function shapeFromType(type: ValueType): NativeShape | null {
-    if (type === 'template') return { kind: 'node' };
-    if (type === 'string' || type === 'number') return { kind: 'text' };
-    if (type === 'null') return { kind: 'empty' };
-    if (type === 'void') return { kind: 'invalid' };
-    if (type === 'boolean') return { kind: 'invalid' };
-    if (typeof type === 'object') {
-      if (type.kind === 'literal')
-        return type.value === null
-          ? { kind: 'empty' }
-          : typeof type.value === 'boolean'
-            ? { kind: 'invalid' }
-            : { kind: 'text' };
-      if (type.kind === 'array') {
-        const item = shapeFromType(type.element);
-        return item ? { kind: 'array', items: [item] } : null;
-      }
-      if (type.kind === 'union') {
-        const items = type.members.map(shapeFromType);
-        return items.every((item): item is NativeShape => item !== null)
-          ? { kind: 'union', items }
-          : null;
-      }
-      if (type.kind === 'record') return { kind: 'invalid' };
-    }
-    return null;
-  }
-  function nativeShape(
-    expression: ExpressionIR,
-    bindings: Map<string, ExpressionIR>,
-    parameters = new Map<string, NativeShape>(),
-    seen = new Set<ExpressionIR>()
-  ): NativeShape | null {
-    // Helper/alias body shape is more precise than the IR's legacy first-return type.
-    if (seen.has(expression)) return null;
-    const next = new Set(seen);
-    next.add(expression);
-    const resolve = (value: ExpressionIR) => nativeShape(value, bindings, parameters, next);
-    if (expression.kind === 'array') {
-      const items = expression.elements.map(resolve);
-      return items.every((item): item is NativeShape => item !== null)
-        ? { kind: 'array', items }
-        : null;
-    }
-    if (expression.kind === 'reference') {
-      const parameter = parameters.get(expression.name);
-      if (parameter) return parameter;
-      const value = bindings.get(expression.name);
-      return value ? resolve(value) : shapeFromType(expression.type);
-    }
-    if (expression.kind === 'binary' && ['&&', '||', '??'].includes(expression.operator)) {
-      const left = resolve(expression.left),
-        right = resolve(expression.right);
-      return left && right ? { kind: 'union', items: [left, right] } : null;
-    }
-    if (expression.kind === 'member') {
-      let object = expression.object;
-      const aliases = new Set<string>();
-      while (object.kind === 'reference' && !aliases.has(object.name)) {
-        aliases.add(object.name);
-        const binding = bindings.get(object.name);
-        if (!binding) break;
-        object = binding;
-      }
-      if (object.kind === 'record') {
-        const value = object.entries.find((entry) => entry.key === expression.property)?.value;
-        return value ? resolve(value) : null;
-      }
-    }
-    if (expression.kind === 'helper-call') {
-      let binding = bindings.get(expression.name);
-      const aliases = new Set<string>();
-      while (binding?.kind === 'reference' && !aliases.has(binding.name)) {
-        aliases.add(binding.name);
-        binding = bindings.get(binding.name);
-      }
-      if (binding?.kind !== 'function') return null;
-      const argumentShapes = expression.arguments.map(resolve),
-        localParameters = new Map(parameters);
-      binding.function.parameters.forEach((parameter, index) => {
-        const shape = argumentShapes[index];
-        if (shape) localParameters.set(parameter.name, shape);
-        else localParameters.delete(parameter.name);
-      });
-      const results: NativeShape[] = [];
-      let unresolved = false;
-      function collect(
-        body: readonly StatementIR[],
-        scope: Map<string, ExpressionIR>,
-        params: Map<string, NativeShape>
-      ): boolean {
-        for (const statement of body) {
-          if (statement.kind === 'const') {
-            scope.set(statement.name, statement.value);
-            params.delete(statement.name);
-          } else if (statement.kind === 'return') {
-            if (!statement.value) {
-              results.push({ kind: 'invalid' });
-              return true;
-            }
-            const shape = nativeShape(statement.value, scope, params, next);
-            if (shape) results.push(shape);
-            else unresolved = true;
-            return true;
-          } else if (statement.kind === 'if') {
-            const thenReturns = collect(statement.then, new Map(scope), new Map(params));
-            const elseReturns = collect(statement.otherwise, new Map(scope), new Map(params));
-            if (thenReturns && elseReturns) return true;
-          }
-        }
-        return false;
-      }
-      if (!collect(binding.function.body, new Map(bindings), localParameters))
-        results.push({ kind: 'invalid' });
-      return !unresolved && results.length ? { kind: 'union', items: results } : null;
-    }
-    const typed = shapeFromType(expression.type);
-    if (typed) return typed;
-    if (expression.kind === 'record' || expression.kind === 'literal') return { kind: 'invalid' };
-    return null;
+    return nativeScope.lookup(name)?.value;
   }
   function appendShape(shape: NativeShape, value: string, parent: string, frame: string): string {
-    if (shape.kind === 'node') return `${parent}.appendChild((${value} as ()=>Node)());`;
+    if (shape.kind === 'node' || shape.kind === 'legacy-template')
+      return `${parent}.appendChild((${value} as ()=>Node)());`;
     if (shape.kind === 'text')
       return `${parent}.appendChild(${frame}.document.createTextNode(String(${value})));`;
-    if (shape.kind === 'empty') return '';
-    if (shape.kind === 'invalid') return `throw new TypeError('Invalid template child');`;
+    if (shape.kind === 'null') return '';
+    if (shape.kind === 'invalid' || shape.kind === 'undefined')
+      return `throw new TypeError('Invalid template child');`;
     if (shape.kind === 'array') {
       const item = `${prefix}Item${nativeSequence++}`;
       return `for(const ${item} of (${value} as unknown[])){${appendShape({ kind: 'union', items: shape.items }, item, parent, frame)}}`;
@@ -491,7 +366,7 @@ export function emitWebComponentSource(
     shape.items.forEach(flatten);
     const kinds = new Set(flattened.map((item) => item.kind));
     const clauses: string[] = [];
-    if (kinds.has('node'))
+    if (kinds.has('node') || kinds.has('legacy-template'))
       clauses.push(
         `if(typeof ${value}==='function'){${appendShape({ kind: 'node' }, value, parent, frame)}}`
       );
@@ -499,7 +374,7 @@ export function emitWebComponentSource(
       clauses.push(
         `if(typeof ${value}==='string'||typeof ${value}==='number'){${appendShape({ kind: 'text' }, value, parent, frame)}}`
       );
-    if (kinds.has('empty')) clauses.push(`if(${value}===null){}`);
+    if (kinds.has('null')) clauses.push(`if(${value}===null){}`);
     const arrays = flattened.filter(
       (item): item is Extract<NativeShape, { kind: 'array' }> => item.kind === 'array'
     );
@@ -520,10 +395,7 @@ export function emitWebComponentSource(
     frame: string
   ): string {
     if (!expression) return `throw new TypeError('Invalid template child');`;
-    const bindings = new Map<string, ExpressionIR>();
-    for (const scope of nativeBindings)
-      for (const [name, binding] of scope) bindings.set(name, binding);
-    const shape = nativeShape(expression, bindings);
+    const shape = nativeShape(expression, nativeScope);
     if (!shape)
       throw new Error(
         `WC native candidate: unresolved ${expression.kind}/${JSON.stringify(expression.type)} at ${expression.span.line}`
@@ -564,13 +436,20 @@ export function emitWebComponentSource(
   }
 
   function fn(node: FunctionIR, depth: number): string {
-    nativeBindings.push(new Map());
+    const savedNativeScope = nativeScope;
+    for (const parameter of node.parameters)
+      nativeScope = nativeScope.bind(parameter.name, {
+        kind: 'reference',
+        name: '\0formal-' + parameter.name,
+        type: parameter.type,
+        span: node.span,
+      });
     try {
       const renderer =
         !options.ssr && node.parameters[0]?.type === 'render' ? node.parameters[0].name : undefined;
       return `(${node.parameters.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ')}) => {\n${statements(node.body, depth + 1, renderer)}${'  '.repeat(depth)}}`;
     } finally {
-      nativeBindings.pop();
+      nativeScope = savedNativeScope;
     }
   }
 
@@ -646,7 +525,7 @@ export function emitWebComponentSource(
         const origin = `${indent}// Source ${sourceFile}:${statement.span.line}:${statement.span.column}\n`;
         switch (statement.kind) {
           case 'const':
-            nativeBindings[nativeBindings.length - 1].set(statement.name, statement.value);
+            nativeScope = nativeScope.bind(statement.name, statement.value);
             return `${origin}${indent}const ${statement.name} = ${expr(statement.value, depth)};\n`;
           case 'effect':
             return `${origin}${indent}${expr(statement.expression, depth)};\n`;
@@ -660,11 +539,11 @@ export function emitWebComponentSource(
             return `${origin}${indent}return${statement.value ? ` ${expr(statement.value, depth)}` : ''};\n`;
           case 'if': {
             const branch = (body: readonly StatementIR[]) => {
-              nativeBindings.push(new Map());
+              const savedNativeScope = nativeScope;
               try {
                 return statements(body, depth + 1, nativeRenderer);
               } finally {
-                nativeBindings.pop();
+                nativeScope = savedNativeScope;
               }
             };
             return `${origin}${indent}if (${expr(statement.condition, depth)}) {\n${branch(statement.then)}${indent}}${statement.otherwise.length ? ` else {\n${branch(statement.otherwise)}${indent}}` : ''}\n`;
