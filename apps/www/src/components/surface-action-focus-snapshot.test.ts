@@ -22,7 +22,12 @@ describe('Surface action focus map consumer regression', () => {
         actionProfile,
         focusVisible: true,
       });
-      for (const token of ['forced-colors-focus-outline', 'border-ring', 'ring-3', 'ring-ring/30']) {
+      for (const token of [
+        'forced-colors-focus-outline',
+        'border-ring',
+        'ring-3',
+        'ring-ring/30',
+      ]) {
         expect(focused).toContain(token);
         expect(rest).not.toContain(token);
       }
