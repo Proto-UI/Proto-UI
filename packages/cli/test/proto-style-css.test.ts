@@ -15,6 +15,50 @@ import { BRUTALIST_STYLE_TOKENS } from '../src/generated/brutalist-style-tokens'
 import { SHADCN_THEME_PAINT_CSS, SHADCN_THEME_VARIABLES_CSS } from '../src/legacy/type';
 
 describe('proto style css renderer', () => {
+  it('lowers finite recovered radius and legacy shadow recipes without arbitrary CSS admission', () => {
+    const renderers = [
+      renderProtoStyleTokenCss,
+      renderProtoShadowStyleTokenCss,
+      (tokens: string[]) => renderProtoShadowSplitStyleArtifact(tokens).cssText,
+    ];
+    for (const render of renderers) {
+      const css = render(['rounded-[calc(var(--radius)-5px)]', 'shadow', 'ring-1']);
+      const radiusBlock = css.split('}').find((block) =>
+        block.includes('[data-pui-style~="rounded-[calc(var(--radius)-5px)]"]')
+      );
+      expect(radiusBlock).toBeDefined();
+      expect(radiusBlock).toMatch(/\{\s*border-radius: calc\(var\(--pui-radius\) - 5px\);(?:\s*--pui-split-compiled-receipt: [a-z0-9]+;)?\s*$/);
+      const shadowBlock = css.split('}').find((block) => block.includes('[data-pui-style~="shadow"]'));
+      expect(shadowBlock).toBeDefined();
+      expect(shadowBlock).toContain(
+        '--pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);'
+      );
+      expect(shadowBlock).toContain(
+        'box-shadow: var(--pui-ring-offset-shadow, 0 0 #0000), var(--pui-ring-shadow, 0 0 #0000), var(--pui-shadow, 0 0 #0000);'
+      );
+      expect(css).not.toContain('Unsupported Proto UI style tokens');
+      expect(render(['shadow-sm'])).toContain(
+        '--pui-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);'
+      );
+      expect(render(['rounded-[calc(var(--radius)-3px)]'])).toContain(
+        'border-radius: calc(var(--pui-radius) - 3px);'
+      );
+      for (const token of [
+        'rounded-[calc(var(--radius)-6px)]',
+        'rounded-[calc(var(--private-radius)-5px)]',
+        'rounded-[calc(var(--radius)-5px);color:red]',
+        'shadow-unknown',
+        '-shadow',
+        'shadow-[0_0_0_red;color:red]',
+      ]) {
+        const rejected = render([token]);
+        expect(rejected).toContain('Unsupported Proto UI style tokens');
+        expect(rejected).not.toMatch(/(?:^|\n)\s*(?:border-radius|box-shadow):/);
+        expect(rejected).not.toMatch(/(?:^|\n)\s*--pui-shadow:\s*(?!initial;)[^\s]/);
+      }
+    }
+  });
+
   it('lowers zero scroll padding in light and shadow CSS without accepting unknown scroll tokens', () => {
     for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
       const css = render(['scroll-py-0']);
