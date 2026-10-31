@@ -174,6 +174,18 @@ export function conditionRefinements(condition: ExpressionIR, truth: boolean): r
   if (condition.kind === 'unary' && condition.operator === '!') return conditionRefinements(condition.operand,!truth);
   if (condition.kind === 'binary' && (condition.operator === '&&' && truth || condition.operator === '||' && !truth))
     return [...conditionRefinements(condition.left,truth),...conditionRefinements(condition.right,truth)];
+  // Positive strict identity is the only refinement from the inert join.
+  // A false equality (or true inequality) says nothing about which alternative remains.
+  if (condition.kind === 'binary' &&
+      (condition.operator === '===' && truth || condition.operator === '!==' && !truth)) {
+    const refine = (target: ExpressionIR, proven: ExpressionIR): readonly [string, ValueType][] =>
+      target.kind === 'reference' && target.type === 'event-or-control' &&
+      (proven.type === 'event' || proven.type === 'event-control') ? [[target.name, proven.type]] : [];
+    const left = refine(condition.left, condition.right);
+    if (left.length) return left;
+    const right = refine(condition.right, condition.left);
+    if (right.length) return right;
+  }
   let target: ExpressionIR = condition, literal: string | number | boolean | null | undefined;
   let equality = truth;
   if (condition.kind === 'binary' && (condition.operator === '===' || condition.operator === '!==')) {

@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { dataTypeEqual, formatDataType } from './data-types';
 import type { DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -29,6 +30,10 @@ export function emitReactSource(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  if (options.ssr) {
+    const pointerDiagnostics = unsupportedPointerFacts(ir,'react-source SSR');
+    if (pointerDiagnostics.length) return {ok:false,diagnostics:pointerDiagnostics};
+  }
   const ssr = options.ssr === true;
   const profile = ssr ? 'react-dom-ssr-v1' : 'react-dom-source-v1';
   const selected = resolveTargetProfile('react-dom-source-v1');
@@ -44,7 +49,7 @@ export function emitReactSource(
   };
   const reachedFunctions = new Set(admitted.value.functions);
   const interaction = ir.moduleDeclarations.length > 0 || admitted.value.operations.some((operation) =>
-    /^(hook\.|event\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(operation));
+    /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.|collection\.|collectionItem\.|boundary\.|hitParticipation\.|positioning\.|overlay\.|scroll\.|textControl\.|imageView\.|transition\.|tableStructure\.)/.test(operation));
   // Demand is derived from reached operations/expressions, never component identity.
   let usesStyle = admitted.value.operations.some((operation) =>
     /^(style\.|rule\.|feedback\.style\.)/.test(operation));
@@ -142,6 +147,8 @@ export function emitReactSource(
     if (type === 'focus') return `${p}NativeFocus`;
     if (type === 'accessible') return `${p}NativeAccessible`;
     if (type === 'event') return `${p}NativeInput`;
+    if (type === 'event-control') return `${p}NativeInput['control']`;
+    if (type === 'event-or-control') return `(${p}NativeInput | ${p}NativeInput['control'])`;
     if (type === 'host-event') return 'Event';
     if (type.startsWith('observed:')) return `${p}NativeObservedState<${type.slice(9)}>`;
     if (type.startsWith('state:')) return `${p}State<${type.slice(6)}>`;

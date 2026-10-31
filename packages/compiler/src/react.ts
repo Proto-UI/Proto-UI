@@ -35,6 +35,8 @@ export function emitReact(input: PrototypeIR, options: {componentName?:string} =
     if (type === 'render') return `Parameters<${core}.RenderFn>[0]`;
     if (type === 'props') return `${core}.PropsSnapshot<GeneratedProps>`;
     if (type === 'event') return `Parameters<${core}.ProtoEventCallback<GeneratedProps>>[1]`;
+    if (type === 'event-control') return `Parameters<${core}.ProtoEventCallback<GeneratedProps>>[1]['control']`;
+    if (type === 'event-or-control') return `(Parameters<${core}.ProtoEventCallback<GeneratedProps>>[1] | Parameters<${core}.ProtoEventCallback<GeneratedProps>>[1]['control'])`;
     if (type === 'style-handle') return `${core}.StyleHandle`;
     if (type === 'rule-handle') return `${core}.RuleHandle`;
     if (typeof type === 'string' && type.startsWith('state:')) return `${core}.State<${type.slice(6)}>`;

@@ -34,6 +34,18 @@ criteria:
     text:
       zh-CN: Optional medium event 可以由宿主原生输入直接映射，也可以由 adapter 合成；合成策略属于 adapter 职责。
       en: Optional medium events may be directly mapped from host-native input or synthesized by adapters; synthesis strategy is an adapter responsibility.
+  - id: C-EVENT-TYPE-0003-F
+    text:
+      zh-CN: 对六个 pointer medium event，每次 callback 的 pointerType 必须为 mouse、touch、pen 或 unknown；pointerButtons 必须为 none、active 或 unknown。none 只表示当前 sample 确知无按下按钮，active 表示当前 sample 确知至少一个按下按钮。它不是 changed button、持久 pressed lease、gesture identity 或上一 sample 的推断；不支持或不可信事实必须报告 unknown，不能默认为 mouse/none。
+      en: For each of the six pointer medium events, every callback's pointerType is mouse, touch, pen or unknown and pointerButtons is none, active or unknown. None means this sample is known to have no pressed buttons; active means this sample is known to have at least one. This is not a changed button, persistent pressed lease, gesture identity or inference from a previous sample. Unsupported or untrustworthy facts must be unknown, never defaulted to mouse or none.
+  - id: C-EVENT-TYPE-0003-G
+    text:
+      zh-CN: 当前四个 official interactive Web profiles 的 Runtime 与四个 compiled Web consumers 必须对同一输入采用相同有限映射：native pointerType 仅接受精确 mouse/touch/pen；native buttons 仅接受有限非负整数，0 映射 none，正值映射 active，其余映射 unknown。不得使用 button、mouse-event 名称或 touch 状态补猜。未实现该能力的其它 target 必须在准入时显式拒绝新事实，而不是静默输出 undefined 或声称完成。
+      en: The four current official interactive Web Runtime profiles and four compiled Web consumers must use the same finite mapping for equivalent input. Native pointerType accepts only exact mouse, touch or pen; native buttons accepts only finite nonnegative integers, mapping zero to none and positive values to active, otherwise unknown. Do not infer from button, mouse event names or touch state. Other targets without this capability must explicitly reject new facts at admission rather than silently emit undefined or claim implementation.
+  - id: C-EVENT-TYPE-0003-H
+    text:
+      zh-CN: 支持 pointer event 的 Web profile 必须保留 root/global 两种既有 scope：global 仅在该语义类型有有效注册时获取对应 native sample listener，并在最后注册释放时解除。非 bubbling enter/leave 只能观察真实输入，不能伪造一次额外 sample。每个 callback 均须重新检查当前 instance/route epoch 与启用状态；同一次 dispatch 内 disable、dispose、replacement 后不得继续旧 callback。被 gate 拒绝的 callback 不得消耗 once，cleanup/abort 必须释放 demand。
+      en: A Web profile supporting pointer events must preserve both existing root and global scopes. Global routing acquires a native sample listener only while that semantic type has a live registration and releases it with the last registration. Non-bubbling enter/leave must observe actual input, not fabricate another sample. Every callback rechecks the current instance/route epoch and enabled state; disable, disposal or replacement during a dispatch prevents subsequent old callbacks. A gate-rejected callback does not consume once, and cleanup or abort releases demand.
 sources:
   - path: internal/contracts/event/event-type.v0.md
     sections:
@@ -47,6 +59,9 @@ dependsOn:
   contracts:
     - C-EVENT-TYPE-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Specified finite per-sample pointer facts, conservative Web normalization, scope ownership and callback-time lifetime checks; retained draft lifecycle.
   - version: 0.1.0
     change: introduced
     summary: Captured optional medium event semantics and conditional support.

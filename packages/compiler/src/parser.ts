@@ -1,3 +1,4 @@
+import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import ts from 'typescript';
 import { createHash } from 'node:crypto';
 import { CompilerRejection } from './diagnostics';
@@ -52,6 +53,8 @@ function assignable(actual: ValueType, expected: ValueType): boolean {
 function union(types: readonly ValueType[], node: ts.Node): ValueType {
   if (!types.length) return 'void';
   if (types.every((type) => sameType(type, types[0]))) return types[0];
+  const eventJoin = eventValueJoin(types);
+  if (eventJoin !== undefined) return eventJoin;
   if (!types.every(isDataValueType) && types.every(isTemplateChildType)) return 'template';
   if (!types.every(isDataValueType)) rejectNode(node, 'PUI1006', 'Branches return incompatible semantic capabilities.');
   return parseDataType({ kind: 'union', members: types });
@@ -352,8 +355,7 @@ class Frontend {
         const prop = this.props.get(property);
         if (!prop) rejectNode(node, 'PUI1006', `Read of undeclared prop ${property}.`);
         type = prop.type;
-      } else if (object.type === 'event' && ['key', 'type', 'control'].includes(property)) type = property === 'control' ? 'event' : property === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
-      else if (object.type === 'event' && ['shiftKey', 'ctrlKey', 'altKey', 'metaKey', 'repeat'].includes(property)) type = parseDataType({kind:'union',members:['boolean','void']});
+      } else if (eventPayloadMemberType(object.type, property) !== undefined) type = eventPayloadMemberType(object.type, property)!;
       else if (isDataValueType(object.type)) type = this.checkedData(node, () => memberDataType(object.type as DataType, property, { optional }));
       else rejectNode(node, 'PUI1004', `Unsupported member ${property} on ${String(object.type)}.`);
       return { kind: 'member', object, property, optional, type, span };

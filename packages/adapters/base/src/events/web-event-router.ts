@@ -18,6 +18,14 @@ const PROTO_INSTANCE_MARKS = [
 ] as const;
 const TRIGGER_OWNER_MARK = Symbol.for('@proto.ui/as-trigger/confirm-owner');
 const REJECTED_TRIGGER_ROUTE = Symbol('rejected-trigger-route');
+const POINTER_SAMPLE_NATIVE_TYPES: Readonly<Record<string, string>> = {
+  'pointer.down': 'pointerdown',
+  'pointer.move': 'pointermove',
+  'pointer.up': 'pointerup',
+  'pointer.cancel': 'pointercancel',
+  'pointer.enter': 'pointerenter',
+  'pointer.leave': 'pointerleave',
+};
 const GLOBAL_ROOT_EVENT_TYPES: Record<string, string> = {
   pointerdown: 'pointer.down',
   pointermove: 'pointer.move',
@@ -667,10 +675,43 @@ export function createWebProtoEventRouter(opt: {
     // 注：rootProxy 不做“解释”，只做“路由 + gating”
   });
 
+  // Global semantic pointer samples are broadcast only when an actual global
+  // subscriber asks for that type. Existing root/Portal fallback is unchanged.
+  const globalPointerBindings = new Map<string, { stop: Unsub }>();
+  function setGlobalPointerDemand(type: string, wanted: boolean) {
+    if (!Object.hasOwn(POINTER_SAMPLE_NATIVE_TYPES, type)) return;
+    const nativeType = POINTER_SAMPLE_NATIVE_TYPES[type];
+    if (!wanted) {
+      const lease = globalPointerBindings.get(type);
+      // Retire logical ownership before physical cleanup. Even a throwing
+      // host remover cannot let a stale lease deliver into a newer binding.
+      globalPointerBindings.delete(type);
+      lease?.stop();
+      return;
+    }
+    if (globalPointerBindings.has(type)) return;
+    const capture = nativeType === 'pointerenter' || nativeType === 'pointerleave';
+    const lease: { stop: Unsub } = { stop: () => globalEl.removeEventListener(nativeType, callback, capture) };
+    const callback = (event: Event): void => {
+      if (globalPointerBindings.get(type) === lease && isEnabled()) emit(protoGlobalBus, type, event);
+    };
+    // enter/leave do not bubble: capture observes actual samples without
+    // redispatching an event or inventing mouseover-derived semantics.
+    globalPointerBindings.set(type, lease);
+    try {
+      globalEl.addEventListener(nativeType, callback, capture);
+    } catch (error) {
+      globalPointerBindings.delete(type);
+      try { lease.stop(); } catch { /* Keep the original attachment failure. */ }
+      throw error;
+    }
+  }
+
   const globalProxy = createProxyTarget({
     protoBus: protoGlobalBus,
     hostTarget: globalEl,
     isEnabled,
+    onProtoDemandChange: setGlobalPointerDemand,
   });
 
   return {
@@ -716,6 +757,15 @@ function createProtoEventPayload(type: string, native: any) {
       typeof native?.stopPropagation === 'function' ? () => native.stopPropagation() : undefined,
   };
 
+  if (Object.hasOwn(POINTER_SAMPLE_NATIVE_TYPES, type)) {
+    const kind: unknown = native?.pointerType;
+    const buttons: unknown = native?.buttons;
+    target.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
+    target.pointerButtons = typeof buttons === 'number' && Number.isInteger(buttons) && buttons >= 0
+      ? buttons === 0 ? 'none' : 'active'
+      : 'unknown';
+  }
+
   if (!native || (typeof native !== 'object' && typeof native !== 'function')) return target;
 
   let sharedState = payloadStateByNativeEvent.get(native);
@@ -746,6 +796,7 @@ function createProxyTarget(args: {
   hostTarget: EventTarget;
   focusEventTarget?: EventTarget;
   isEnabled: () => boolean;
+  onProtoDemandChange?: (type: string, wanted: boolean) => void;
 }) {
   // 记录已转发到 host 的监听器，便于 remove 时精确解绑
   const hostListeners: Listener[] = [];
@@ -792,20 +843,33 @@ function createProxyTarget(args: {
           protoListeners.splice(index, 1);
           args.protoBus.removeEventListener(p.inner, record.wrapped, capture);
           signal?.removeEventListener('abort', record.cleanup);
+          if (!protoListeners.some((r) => r.type === p.inner)) args.onProtoDemandChange?.(p.inner, false);
         };
         record.wrapped = (event: Event) => {
+          // Recheck each callback: an earlier callback may disable, dispose or
+          // replace this router during the same native/semantic dispatch.
+          if (!args.isEnabled() || !protoListeners.includes(record)) return;
           if (once) record.cleanup();
           if (typeof cb === 'function') cb.call(args.protoBus, event);
           else cb.handleEvent(event);
         };
         args.protoBus.addEventListener(p.inner, record.wrapped, {
           capture,
-          once,
+          // A rejected callback must not consume its once registration.
+          once: false,
           signal,
           passive: Boolean(options?.passive),
         });
         protoListeners.push(record);
         signal?.addEventListener('abort', record.cleanup, { once: true });
+        if (protoListeners.filter((r) => r.type === p.inner).length === 1) {
+          try {
+            args.onProtoDemandChange?.(p.inner, true);
+          } catch (error) {
+            try { record.cleanup(); } catch { /* Preserve the attachment error. */ }
+            throw error;
+          }
+        }
         return;
       }
 

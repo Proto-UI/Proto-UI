@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
@@ -28,6 +29,10 @@ export function emitVue2Source(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  if (options.ssr) {
+    const pointerDiagnostics = unsupportedPointerFacts(ir,'vue2-source SSR');
+    if (pointerDiagnostics.length) return {ok:false,diagnostics:pointerDiagnostics};
+  }
   const profile = options.ssr ? 'vue2-ssr-v1' : 'vue2-source-v1';
   const selected = resolveTargetProfile('vue2-source-v1');
   if (!selected.ok) return selected;
@@ -42,7 +47,7 @@ export function emitVue2Source(
   const usesStyle = admitted.value.sites.some((site) =>
     site.operation.startsWith('style.') || site.operation.startsWith('rule.') || site.operation.startsWith('feedback.'));
   const usesInteraction = ir.moduleDeclarations.length > 0 || admitted.value.sites.some((site) =>
-    /^(hook\.|event\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
+    /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
   // Only admitted Overlay capability can produce a non-null portal target.
@@ -144,6 +149,8 @@ export function emitVue2Source(
     if (type === 'focus') return `${prefix}NativeFocus`;
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
+    if (type === 'event-control') return `${prefix}NativeInput['control']`;
+    if (type === 'event-or-control') return `(${prefix}NativeInput | ${prefix}NativeInput['control'])`;
     if (type === 'host-event') return 'Event';
     if (type === 'host-target') return 'HTMLElement | null';
     if (type === 'observed:boolean') return `${prefix}NativeObservedState<boolean>`;

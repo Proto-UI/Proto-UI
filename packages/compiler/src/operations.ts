@@ -232,6 +232,9 @@ export const OPERATION_RULES = {
   'event.requestDefaultActionPrevention': rule('event', 'control.requestDefaultActionPrevention', callbackPhase, 'void', [{ ...optionalRecord, schema: { kind: 'record', fields: [
     { name: 'reason', type: 'string', optional: true }, { name: 'source', type: 'string', optional: true },
   ] } }], [effect('write', 'event-route', 'view')], { contexts: ['event'], requiredCapabilities: ['input-events'] }),
+  'eventControl.requestDefaultActionPrevention': rule('event-control', 'requestDefaultActionPrevention', callbackPhase, 'void', [{ ...optionalRecord, schema: { kind: 'record', fields: [
+    { name: 'reason', type: 'string', optional: true }, { name: 'source', type: 'string', optional: true },
+  ] } }], [effect('write', 'event-route', 'view')], { contexts: ['event'], requiredCapabilities: ['input-events'] }),
   'focus.configure': rule('focus', 'configure', setup, 'void', [capabilityConfig], [effect('declare', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'focus.setDisabled': rule('focus', 'setDisabled', callbackPhase, 'void', [boolean], [effect('write', 'focus')], { requiredCapabilities: ['focus-target'] }),
   'focus.focusSelf': rule('focus', 'focusSelf', callbackPhase, 'void', [{ role: 'value', schema: FOCUS_OPTIONS_TYPE, optional: true }], [effect('signal', 'focus', 'view')], { requiredCapabilities: ['focus-target'] }),

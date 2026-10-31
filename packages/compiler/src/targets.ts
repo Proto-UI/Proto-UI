@@ -149,6 +149,8 @@ function unimplemented(framework: Exclude<FrameworkId, 'react'>): TargetProfile 
   });
 }
 
+const webOperations: readonly Operation[] = Object.freeze([...nativeOperations, 'eventControl.requestDefaultActionPrevention']);
+
 /** The only target registry: future identities are explicit metadata, never emitter fallbacks. */
 export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> = Object.freeze({
   'react-runtime-v1': freezeProfile({
@@ -169,7 +171,7 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   }),
   'react-dom-source-v1': freezeProfile({
     id: 'react-dom-source-v1', framework: 'react', version: '19.2.6', mode: 'source',
-    implemented: true, operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
+    implemented: true, operations: webOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [...reactDependencies, ...floatingUiDependency],
     helpers: [
       { name: 'createOwner', version: '1', classification: 'native-lowering', delivery: 'inline' },
@@ -181,19 +183,19 @@ export const TARGET_PROFILES: Readonly<Record<TargetProfileId, TargetProfile>> =
   }),
   'vue-source-v1': freezeProfile({
     id: 'vue-source-v1', framework: 'vue', version: '3.5.31', mode: 'source', implemented: true,
-    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
+    operations: webOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [{name:'vue',version:'3.5.31',role:'target'}, ...floatingUiDependency],
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'vue2-source-v1': freezeProfile({
     id: 'vue2-source-v1', framework: 'vue2', version: '2.6.14', mode: 'source', implemented: true,
-    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
+    operations: webOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: [{name:'vue',version:'2.6.14',role:'target'}, ...floatingUiDependency],
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
   'web-component-source-v1': freezeProfile({
     id: 'web-component-source-v1', framework: 'web-component', version: 'custom-elements-v1', mode: 'source', implemented: true,
-    operations: nativeOperations, hostCapabilities: nativeHostCapabilities,
+    operations: webOperations, hostCapabilities: nativeHostCapabilities,
     dependencies: floatingUiDependency,
     helpers: [{name:'createOwner',version:'1',classification:'native-lowering',delivery:'inline'}, ...nativeSharedHelpers],
   }),
@@ -345,7 +347,11 @@ export function checkTargetOperations(
         if (binding) fn(binding.fn, binding.scope);
         return;
       }
-      case 'member': expression(value.object, scope); return;
+      case 'member':
+        if (value.object.type === 'event' && ['pointerType','pointerButtons'].includes(value.property) &&
+            !['react-runtime-v1','react-dom-source-v1','vue-source-v1','vue2-source-v1','web-component-source-v1'].includes(selected.id))
+          diagnostic('PUI4003',`Portable pointer sample facts are not implemented by ${selected.id}.`,value.span);
+        expression(value.object, scope); return;
       case 'unary': expression(value.operand, scope); return;
       case 'binary': expression(value.left, scope); expression(value.right, scope); return;
       case 'array': for (const element of value.elements) expression(element, scope); return;

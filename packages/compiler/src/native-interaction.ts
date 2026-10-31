@@ -252,7 +252,7 @@ import { createNativeAdapterModules, type NativeAccessibleExtension, type Native
 export type { NativeModuleCapability, NativeAnatomy, NativeAnatomyFamily, NativeAnatomyPart, NativeAnatomyOrder, NativeAnatomy as NativeAnatomyChannel } from './adapter-modules-v1';
 export type NativeState<T = unknown> = { get(): T };
 export type NativeObservedState<T> = NativeState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
-export type NativeInput = Readonly<{ type: string; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean; control: Readonly<{ requestDefaultActionPrevention(options?: { reason?: string; source?: string }): void }> }>;
+export type NativeInput = Readonly<{ type: string; pointerType?: 'mouse' | 'touch' | 'pen' | 'unknown'; pointerButtons?: 'none' | 'active' | 'unknown'; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean; control: Readonly<{ requestDefaultActionPrevention(options?: { reason?: string; source?: string }): void }> }>;
 export type NativeHostOptions = Readonly<{ capture?: boolean; once?: boolean; passive?: boolean }>;
 export type NativeFocusOptions = Readonly<{ reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }>;
 export type NativeFocus = {
@@ -287,6 +287,7 @@ type RootOwner = { identity: object; parent(): object | null; trigger(): boolean
 const rootOwners = new WeakMap<HTMLElement, RootOwner>();
 const logicalOwners = new Map<object, RootOwner>();
 const exposeSignals = new WeakSet<Event>();
+const defaultPreventedSamples = new WeakSet<Event>();
 /** Mark ONLY an outward Expose signal before dispatching it on the host. */
 export function markNativeExposeEvent<T extends Event>(event: T): T { exposeSignals.add(event); return event; }
 
@@ -439,14 +440,20 @@ export function createNativeInteraction<Run>(options: {
     for (const registration of registrations) {
       if (registration.kind !== kind || registration.type !== type || !deliverable(epoch, target)) continue;
       let deadline = true;
-      const payload: { type: string; control: NativeInput['control']; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean } = { type, control: Object.freeze({
+      const payload: { type: string; pointerType?: NativeInput['pointerType']; pointerButtons?: NativeInput['pointerButtons']; control: NativeInput['control']; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean } = { type, control: Object.freeze({
         requestDefaultActionPrevention(_request?: { reason?: string; source?: string }) {
           options.ensureEvent('event.control.requestDefaultActionPrevention');
           if (!deadline || !deliverable(epoch, target)) throw new Error('[Event] default-action control is outside its callback window.');
-          native.preventDefault();
+          if (!defaultPreventedSamples.has(native)) { native.preventDefault(); defaultPreventedSamples.add(native); }
         },
       }) };
       const source = native as unknown as Record<string, unknown>;
+      if (['pointer.down','pointer.move','pointer.up','pointer.cancel','pointer.enter','pointer.leave'].includes(type)) {
+        const kind = source.pointerType, buttons = source.buttons;
+        payload.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
+        payload.pointerButtons = typeof buttons === 'number' && Number.isFinite(buttons) && Number.isInteger(buttons) && buttons >= 0
+          ? buttons === 0 ? 'none' : 'active' : 'unknown';
+      }
       if (typeof source.key === 'string') payload.key = source.key;
       for (const field of ['ctrlKey', 'metaKey', 'altKey', 'shiftKey', 'repeat'] as const) if (typeof source[field] === 'boolean') payload[field] = source[field];
       try { options.invoke(() => registration.callback(options.getRun(), Object.freeze(payload))); }
@@ -642,7 +649,7 @@ export function createNativeInteraction<Run>(options: {
           if (name === 'pointerdown' && event.button === 0 && globalPointer === null) { globalPointer = event.pointerId; globalEmit('press.start', native); }
           else if (name === 'pointerup' && globalPointer === event.pointerId) { globalPointer = null; globalEmit('press.end', native); }
           else if (name === 'pointercancel' && globalPointer === event.pointerId) { globalPointer = null; globalEmit('press.cancel', native); }
-        });
+        }, { capture: name === 'pointerenter' || name === 'pointerleave' });
       }
       listen(global, 'click', (native: MouseEvent) => {
         if (typeof native.clientX !== 'number' || typeof native.button !== 'number' || typeof native.detail !== 'number' || native.button !== 0) return;

@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType, parseDataType, type DataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
@@ -22,6 +23,10 @@ export function emitVueSource(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  if (options.ssr) {
+    const pointerDiagnostics = unsupportedPointerFacts(ir,'vue-source SSR');
+    if (pointerDiagnostics.length) return {ok:false,diagnostics:pointerDiagnostics};
+  }
   const ssr = options.ssr === true;
   const profile = ssr ? 'vue-ssr-v1' : 'vue-source-v1';
   const admitted = checkTargetOperations(ir, TARGET_PROFILES['vue-source-v1']);
@@ -78,7 +83,7 @@ export function emitVueSource(
       case 'operation':
         if (node.operation === 'props.watchRaw' || node.operation === 'props.watchRawAll') usesRawWatchers = true;
         if (node.operation.startsWith('feedback.style.')) usesStyle = true;
-        if (['hook.', 'event.', 'focus.', 'accessible.', 'anatomy.', 'collection.', 'collectionItem.', 'boundary.', 'hitParticipation.', 'overlay.', 'scroll.', 'textControl.', 'imageView.', 'positioning.'].some((family) => node.operation.startsWith(family))) usesInteraction = true;
+        if (['hook.', 'event.', 'eventControl.', 'focus.', 'accessible.', 'anatomy.', 'collection.', 'collectionItem.', 'boundary.', 'hitParticipation.', 'overlay.', 'scroll.', 'textControl.', 'imageView.', 'positioning.'].some((family) => node.operation.startsWith(family))) usesInteraction = true;
         if (['expose.state', 'expose.method', 'expose.event', 'expose.value'].includes(node.operation)) {
           const key = node.arguments[0];
           if (key?.kind === 'literal' && typeof key.value === 'string') exposureNames.add(key.value);
@@ -148,6 +153,8 @@ export function emitVueSource(
       case 'focus': return n('Focus');
       case 'accessible': return n('Accessible');
       case 'event': return n('Input');
+      case 'event-control': return `${n('Input')}['control']`;
+      case 'event-or-control': return `(${n('Input')} | ${n('Input')}['control'])`;
       case 'host-event': return 'Event';
       case 'host-target': return 'HTMLElement | null';
       case 'template': return `${n('Vue')}.VNodeChild`;
@@ -197,6 +204,7 @@ export function emitVueSource(
           case 'event.on':
           case 'event.onGlobal': return `${n('Interaction')}.event.${node.operation === 'event.on' ? 'on' : 'onGlobal'}(${args.join(', ')})`;
           case 'event.requestDefaultActionPrevention': return `${receiver}.control.requestDefaultActionPrevention(${args.join(', ')})`;
+          case 'eventControl.requestDefaultActionPrevention': return `${receiver}.requestDefaultActionPrevention(${args.join(', ')})`;
           case 'focus.configure': return `${receiver}.configure(${args.join(', ')})`;
           case 'focus.setDisabled': return `${receiver}.setDisabled(${args.join(', ')})`;
           case 'focus.focusSelf': return `${receiver}.focusSelf(${args.join(', ')})`;

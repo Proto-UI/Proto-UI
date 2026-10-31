@@ -75,6 +75,10 @@ export type ProtoEventPayload = Readonly<{
   altKey?: boolean;
   shiftKey?: boolean;
   repeat?: boolean;
+  /** Present only on the six pointer samples; unknown never implies mouse. */
+  pointerType?: 'mouse' | 'touch' | 'pen' | 'unknown';
+  /** Current sample state, not the changed button or a persistent contact lease. */
+  pointerButtons?: 'none' | 'active' | 'unknown';
   control: ProtoEventControl;
 }>;
 

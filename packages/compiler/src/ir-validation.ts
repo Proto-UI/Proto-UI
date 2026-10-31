@@ -1,3 +1,5 @@
+import { types as nodeTypes } from 'node:util';
+import { eventPayloadMemberType, eventValueJoin } from './event-types';
 import { createHash } from 'node:crypto';
 import { CompilerRejection, reject } from './diagnostics';
 import {
@@ -18,7 +20,7 @@ import { assertTwTokenV0 } from '../../core/src/spec/feedback/tokens';
 import { acceptsValue } from './data-types';
 import type { RuleCondition, RuleDeclarationIR } from './rule-declarations';
 
-const CAPABILITIES = new Set(['unknown','def','run','render','event','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string', ...MODULE_CAPABILITY_TYPES]);
+const CAPABILITIES = new Set(['unknown','def','run','render','event','event-control','event-or-control','host-event','props','focus','accessible','context-key','style-handle','style-disposer','template-props','rule-handle','function','record','array','template','state:boolean','observed:boolean','state:number','state:string', ...MODULE_CAPABILITY_TYPES]);
 CAPABILITIES.add('authored-result');
 const CONTEXTS = new Set(['setup','render','helper','event','props-watch','context-watch','context-update','state-watch','collection-meta','positioning','created','mounted','updated','unmounted','before-dispose','expose-method']);
 const RESERVED = new Set('await break case catch class const continue debugger default delete do else enum export extends false finally for function if import in instanceof let new null return super switch this throw true try typeof var void while with yield'.split(' '));
@@ -157,12 +159,94 @@ function dataAction(location: SourceSpan, action: () => DataType): DataType {
   try { return action(); } catch (error) { if (error instanceof TypeError) bad(error.message, location); throw error; }
 }
 const EXPRESSION_FIELDS = ['kind','type','span','value','name','object','property','optional','operator','operand','left','right','elements','entries','operation','receiver','arguments','hookId','keyId','declarationId','function','handle','declaration','states'];
-interface Parameter { name: string; type: ValueType; optional?: boolean }
-interface Binding { type: ValueType; helper?: FunctionIR; keyId?: string }
+/** Validate the complete data graph before any semantic read or normalization.
+ * In particular, unused fields cannot smuggle an accessor into a later copy.
+ */
+function assertDataGraph(input: unknown): void {
+  const active = new Set<object>(), checked = new Set<object>();
+  function visit(value: unknown): void {
+    if (value === null || value === undefined || ['string','boolean','number'].includes(typeof value)) return;
+    if (typeof value !== 'object' || nodeTypes.isProxy(value)) bad('IR requires inert non-proxy data.');
+    if (active.has(value)) bad('IR data cannot contain cycles.');
+    if (checked.has(value)) return;
+    const isArray = Array.isArray(value);
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== null && prototype !== (isArray ? Array.prototype : Object.prototype)) bad('IR contains a foreign prototype.');
+    active.add(value);
+    const descriptors = Object.getOwnPropertyDescriptors(value);
+    for (const key of Reflect.ownKeys(descriptors)) {
+      if (typeof key !== 'string') bad('IR symbol fields are forbidden.');
+      const descriptor = descriptors[key];
+      if (!('value' in descriptor) || !descriptor.enumerable && !(isArray && key === 'length')) bad('IR accessors/non-data fields are forbidden.');
+      visit(descriptor.value);
+    }
+    if (isArray) array(value);
+    active.delete(value); checked.add(value);
+  }
+  visit(input);
+}
+const EXPRESSION_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  literal: ['value'], reference: ['name'], 'context-key': ['keyId'],
+  'static-capability': ['declarationId'], 'style-handle': ['handle'],
+  rule: ['declaration','receiver','states'], member: ['object','property','optional'],
+  unary: ['operator','operand'], binary: ['operator','left','right'],
+  array: ['elements'], record: ['entries'], function: ['function'],
+  'helper-call': ['name','arguments'], 'authored-hook': ['hookId'],
+  operation: ['operation','receiver','arguments'],
+};
+const STATEMENT_KIND_FIELDS: Readonly<Record<string, readonly string[]>> = {
+  const: ['name','value'], effect: ['expression'], if: ['condition','then','otherwise'], return: ['value'],
+};
+function exactKindFields(node: Record<string, unknown>, kinds: Readonly<Record<string, readonly string[]>>, base: readonly string[]): void {
+  if (typeof node.kind !== 'string' || !Object.hasOwn(kinds,node.kind)) bad('Unknown IR node kind.');
+  object(node,[...base,...kinds[node.kind]]);
+}
+
+interface Parameter { name: string; type: ValueType; optional?: boolean; origin: object }
+interface Binding { type: ValueType; origin: object; helper?: FunctionIR; helperOrigin?: object; keyId?: string }
 type Scope = Map<string, Binding>;
 
 export function validateIR(input: unknown): CompileResult<PrototypeIR> {
   try {
+    assertDataGraph(input);
+    const replacements = new Map<object, Record<string, unknown>>();
+    const provenExpressions = new Map<object, ValueType>();
+    const provenReturns = new Map<object, ValueType>();
+    // Target walkers memoize by FunctionIR identity. A shared function must not
+    // denote different lexical helper closures in different occurrences.
+    const provenCaptures = new Map<object, ReadonlyMap<string, Binding>>();
+    const captureFrames: { outer: Scope; parameters: ReadonlySet<string>; captures: Map<string, Binding> }[] = [];
+    function readBinding(name: string, scope: Scope): Binding | undefined {
+      const binding = scope.get(name), frame = captureFrames[captureFrames.length - 1];
+      const captured = frame?.outer.get(name);
+      // Parameters/local declarations may shadow an outer name. Aliases preserve
+      // their value origin; record the immutable entry binding, not local narrowing.
+      if (frame && !frame.parameters.has(name) && binding && captured && binding.origin === captured.origin) frame.captures.set(name,captured);
+      return binding;
+    }
+    function sameCapture(a: Binding, b: Binding): boolean {
+      if (!sameType(a.type,b.type) || a.keyId !== b.keyId) return false;
+      return a.helperOrigin || b.helperOrigin
+        ? a.helperOrigin !== undefined && a.helperOrigin === b.helperOrigin
+        : a.origin === b.origin;
+    }
+    function replaceField(node: object, field: string, value: unknown): void {
+      replacements.set(node,{...replacements.get(node),[field]:value});
+    }
+    // Copy only after data safety has been established; descriptor values never invoke getters.
+    function canonicalCopy<T>(value: T, copies = new Map<object, unknown>()): T {
+      if (!value || typeof value !== 'object') return value;
+      if (copies.has(value)) return copies.get(value) as T;
+      const output: unknown[] | Record<string, unknown> = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value));
+      copies.set(value,output);
+      const changes = replacements.get(value);
+      for (const key of Object.keys(value)) {
+        const descriptor = Object.getOwnPropertyDescriptor(value,key)!;
+        const child = changes && Object.hasOwn(changes,key) ? changes[key] : descriptor.value;
+        Object.defineProperty(output,key,{value:canonicalCopy(child,copies),enumerable:true,writable:true,configurable:true});
+      }
+      return output as T;
+    }
     const root = object(input,['schemaVersion','name','source','sourceFiles','setup','hooks','contextKeys','staticDeclarations','moduleDeclarations','props','exposes','requirements']);
     if (root.schemaVersion !== IR_VERSION) reject('PUI2001','Unsupported private IR schema version.',FALLBACK,'invalid-ir');
     text(root.name);
@@ -261,7 +345,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
         if (optionalSeen && param.optional !== true) bad('Required parameter follows an optional parameter.');
         optionalSeen ||= param.optional === true;
         names.add(param.name);
-        return { name:param.name, type:valueType(param.type), ...(param.optional === true ? {optional:true}: {}) };
+        return { name:param.name, type:valueType(param.type), origin:param, ...(param.optional === true ? {optional:true}: {}) };
       });
     }
     function fn(value: unknown, outer: Scope, expectedPhase?: Phase): FunctionIR {
@@ -270,17 +354,36 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       if (!['setup','callback','render'].includes(phase) || (expectedPhase && phase !== expectedPhase) || !CONTEXTS.has(context) ||
           (context !== 'helper' && (phase !== 'callback' ? context !== phase : context === 'setup' || context === 'render'))) bad('Function phase/context mismatch.',location);
       if (expectedPhase === 'setup' && context !== 'setup') bad('Function phase/context mismatch.',location);
-      const params = parameters(func.parameters), declaredReturn = valueType(func.returnType,location);
+      const params = parameters(func.parameters);
+      let declaredReturn = valueType(func.returnType,location);
       if (context === 'setup' && (params.length > 1 || (params.length === 1 && params[0].type !== 'def'))) bad('Setup signature must receive its definition handle.',location);
       if (context === 'setup' && declaredReturn !== 'function' && declaredReturn !== 'void')
         bad('Setup must return a render function or void.',location);
       const scope = new Map(outer);
-      for (const parameter of params) scope.set(parameter.name,{type: parameter.optional && isDataValueType(parameter.type) ? parseDataType({kind:'union',members:[parameter.type,'void']}) : parameter.type});
-      const returns: ValueType[] = [];
-      const terminal = statements(func.body,scope,phase,context,returns);
+      for (const parameter of params) scope.set(parameter.name,{type: parameter.optional && isDataValueType(parameter.type) ? parseDataType({kind:'union',members:[parameter.type,'void']}) : parameter.type,origin:parameter.origin});
+      const returns: ValueType[] = [], captures = new Map<string, Binding>();
+      captureFrames.push({outer,parameters:new Set(params.map((parameter) => parameter.name)),captures});
+      let terminal: boolean;
+      try { terminal = statements(func.body,scope,phase,context,returns); }
+      finally { captureFrames.pop(); }
+      const priorCaptures = provenCaptures.get(func);
+      if (priorCaptures && (priorCaptures.size !== captures.size ||
+          [...captures].some(([name,binding]) => !priorCaptures.has(name) || !sameCapture(priorCaptures.get(name)!,binding))))
+        bad('Shared IR function has inconsistent lexical capture provenance.',location);
+      provenCaptures.set(func,captures);
       if (!terminal) returns.push('void');
+      // IR5 producers historically labelled control values as event. Normalize only
+      // a result proven by this function's validated body, never from a supplied label.
+      const inferredEventReturn = eventValueJoin(returns);
+      if (declaredReturn === 'event' && inferredEventReturn !== undefined && inferredEventReturn !== 'event') {
+        declaredReturn = inferredEventReturn;
+        replaceField(func,'returnType',declaredReturn);
+      }
       if (!returns.every((type) => assignable(type,declaredReturn))) bad('Function returns do not satisfy recorded result type.',location);
-      return func as unknown as FunctionIR;
+      const priorReturn = provenReturns.get(func);
+      if (priorReturn !== undefined && !sameType(priorReturn,declaredReturn)) bad('Shared IR function has inconsistent result provenance.',location);
+      provenReturns.set(func,declaredReturn);
+      return (replacements.has(func) ? {...func,returnType:declaredReturn} : func) as unknown as FunctionIR;
     }
     function helperContext(helper: FunctionIR, context: FunctionContext, phase: Phase): void {
       const inspect = (value: unknown): void => {
@@ -298,6 +401,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     function expression(value: unknown, scope: Scope, phase: Phase, context: FunctionContext, allowFunction = false, argumentRule?: ArgumentRule): ValueType {
       const node = object(value,EXPRESSION_FIELDS), location = span(node.span);
+      exactKindFields(node,EXPRESSION_KIND_FIELDS,['kind','type','span']);
       if (active.has(node)) bad('Cyclic IR expression.',location);
       active.add(node);
       try {
@@ -308,7 +412,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             type = node.value === null ? 'null' : typeof node.value as ValueType; break;
           case 'reference':
             if (!validIdentifier(node.name) || !scope.has(node.name)) bad('Unbound IR reference.',location);
-            type = scope.get(node.name)!.type; break;
+            type = readBinding(node.name,scope)!.type; break;
           case 'static-capability':
             const declarationId = text(node.declarationId);
             if (!staticCapabilities.has(declarationId)) bad('Unknown static capability declaration.',location);
@@ -398,8 +502,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             const capabilityType = capabilityMemberType(owner,key,node.optional as boolean);
             if (capabilityType !== undefined) type = capabilityType;
             else if (owner === 'props' && props.has(key)) type = props.get(key)!;
-            else if (owner === 'event' && ['key','type','control'].includes(key)) type = key === 'control' ? 'event' : key === 'type' ? 'string' : parseDataType({kind:'union',members:['string','void']});
-            else if (owner === 'event' && ['shiftKey','ctrlKey','altKey','metaKey','repeat'].includes(key)) type = parseDataType({kind:'union',members:['boolean','void']});
+            else if (eventPayloadMemberType(owner,key) !== undefined) type = eventPayloadMemberType(owner,key)!;
             else if (isDataValueType(owner)) type = dataAction(location,() => memberDataType(owner,key,{optional:node.optional as boolean}));
             else bad('Unsupported IR property access.',location);
             break;
@@ -409,7 +512,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             fn(node.function,scope); type = 'function'; break;
           case 'helper-call': {
             if (!validIdentifier(node.name)) bad('Invalid helper name.',location);
-            const helper = scope.get(node.name)?.helper;
+            const helper = readBinding(node.name,scope)?.helper;
             if (!helper) bad('Unknown or recursive helper call.',location);
             const args = array(node.arguments), required = helper.parameters.filter((param) => !param.optional).length;
             if (args.length < required || args.length > helper.parameters.length) bad('Helper argument count mismatch.',location);
@@ -449,8 +552,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
             args.forEach((argument,index) => {
               const callback = operationCallbackRule(operation,index);
               const record = object(argument,EXPRESSION_FIELDS);
+              exactKindFields(record,EXPRESSION_KIND_FIELDS,['kind','type','span']);
               if (callback && (!callback.acceptsValue || record.kind === 'function')) {
-                if (record.kind !== 'function') bad('Operation requires a checked callback.',location);
+                if (record.kind !== 'function' || valueType(record.type,location) !== 'function') bad('Operation requires a checked callback.',location);
                 const checked = fn(record.function,scope,callback.phase);
                 const expectedContext = callback.contextFrom === 'caller' ? context:callback.context;
                 if (checked.context !== expectedContext) bad('Callback origin cannot grant another lifecycle authority.',location);
@@ -475,7 +579,12 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
           }
           default: bad('Unknown IR expression kind.',location);
         }
-        if (!sameType(valueType(node.type,location),type)) bad('IR expression type mismatch.',location);
+        const priorType = provenExpressions.get(node);
+        if (priorType !== undefined && !sameType(priorType,type)) bad('Shared IR expression has inconsistent provenance.',location);
+        provenExpressions.set(node,type);
+        const recordedType = valueType(node.type,location);
+        if (recordedType === 'event' && (type === 'event-control' || type === 'event-or-control')) replaceField(node,'type',type);
+        else if (!sameType(recordedType,type)) bad('IR expression type mismatch.',location);
         return type;
       } finally { active.delete(node); }
     }
@@ -483,6 +592,9 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
       let terminal = false;
       for (const item of array(value)) {
         const node = object(item,['kind','span','name','value','expression','condition','then','otherwise']), location = span(node.span);
+        exactKindFields(node,STATEMENT_KIND_FIELDS,['kind','span']);
+        // Still validate unreachable syntax, but it cannot change a helper's reachable result.
+        const reachableReturns = terminal ? [] : returns;
         if (active.has(node)) bad('Cyclic IR statements.',location);
         active.add(node);
         try {
@@ -491,7 +603,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               if (!validIdentifier(node.name) || scope.has(node.name)) bad('Invalid/rebound local identifier.',location);
               const val = object(node.value,EXPRESSION_FIELDS), type = expression(val,scope,phase,context,val.kind === 'function');
               const alias = val.kind === 'reference' ? scope.get(String(val.name)) : undefined;
-              scope.set(node.name,{...alias,type,...(val.kind === 'function' ? {helper:fn(val.function,scope)}: {})});
+              scope.set(node.name,{...alias,type,origin:alias?.origin ?? node,...(val.kind === 'function' ? {helper:fn(val.function,scope),helperOrigin:val.function as object}: {})});
               break;
             }
             case 'effect': expression(node.expression,scope,phase,context); break;
@@ -499,17 +611,17 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
               expression(node.condition,scope,phase,context);
               const branch = (truth: boolean): Scope => {
                 const next = new Map(scope);
-                for (const [name,type] of conditionRefinements(node.condition as ExpressionIR,truth)) if (next.has(name)) next.set(name,{...next.get(name)!,type});
+                for (const [name,type] of conditionRefinements(canonicalCopy(node.condition) as ExpressionIR,truth)) if (next.has(name)) next.set(name,{...next.get(name)!,type});
                 return next;
               };
               const thenScope = branch(true), elseScope = branch(false);
-              const a = statements(node.then,thenScope,phase,context,returns), b = statements(node.otherwise,elseScope,phase,context,returns);
+              const a = statements(node.then,thenScope,phase,context,reachableReturns), b = statements(node.otherwise,elseScope,phase,context,reachableReturns);
               const continuing = a ? elseScope : b ? thenScope : undefined;
               if (continuing) for (const name of scope.keys()) scope.set(name,continuing.get(name)!);
               terminal ||= a && b; break;
             }
             case 'return':
-              returns.push(node.value === undefined ? 'void' : expression(node.value,scope,phase,context,phase === 'setup'));
+              reachableReturns.push(node.value === undefined ? 'void' : expression(node.value,scope,phase,context,phase === 'setup'));
               terminal = true; break;
             default: bad('Unknown IR statement.',location);
           }
@@ -519,7 +631,7 @@ export function validateIR(input: unknown): CompileResult<PrototypeIR> {
     }
     for (const hook of hooks) fn(hook.setup,new Map(),'setup');
     fn(root.setup,new Map(),'setup');
-    return {ok:true,value:input as PrototypeIR};
+    return {ok:true,value:replacements.size ? canonicalCopy(input) as PrototypeIR : input as PrototypeIR};
   } catch (error) {
     if (error instanceof CompilerRejection) return {ok:false,diagnostics:[error.diagnostic]};
     return {ok:false,diagnostics:[{code:'PUI2002',category:'invalid-ir',message:`Invalid IR: ${error instanceof Error ? error.message:String(error)}`,span:FALLBACK}]};

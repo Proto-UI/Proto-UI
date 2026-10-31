@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { validateIR, validIdentifier } from './ir-validation';
 import { OPERATION_RULES } from './operations';
 import { buildQtContextArtifacts, emitQtContextValidation } from './qt-native-context';
@@ -21,6 +22,8 @@ export function emitQtSource(input: PrototypeIR, options: { componentName?: stri
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = checked.value;
+  const pointerDiagnostics = unsupportedPointerFacts(ir,'qt-source','emitted-declarations');
+  if (pointerDiagnostics.length) return {ok:false,diagnostics:pointerDiagnostics};
   const componentName = options.componentName ?? 'CompiledComponent';
   if (!validIdentifier(componentName)) return { ok: false, diagnostics: [{ code: 'PUI_QT_NAME', category: 'invalid-input', message: 'Choose a valid Qt component identifier.', span: ir.setup.span }] };
   const names = new Set<string>();
