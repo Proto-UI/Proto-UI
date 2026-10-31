@@ -1,0 +1,40 @@
+name: Compiler WC runner metadata preflight
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/compiler-wc-runner-preflight.yml'
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: compiler-wc-runner-preflight-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  metadata-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Read narrowly scoped runner and isolation metadata only
+        shell: bash
+        run: |
+          set -euo pipefail
+          # No checkout, repository scripts, containers, installs, sudo or policy changes.
+          # Do not print the full environment, Docker info/config, credentials or user files.
+          printf 'runner_os=%s\nrunner_arch=%s\n' "$RUNNER_OS" "$RUNNER_ARCH"
+          printf 'image_os=%s\nimage_version=%s\n' "${ImageOS:-unknown}" "${ImageVersion:-unknown}"
+          printf 'uid='; id -u
+          printf 'gid='; id -g
+          printf 'kernel='; uname -r
+          for setting in \
+            /proc/sys/kernel/unprivileged_userns_clone \
+            /proc/sys/user/max_user_namespaces \
+            /proc/sys/kernel/apparmor_restrict_unprivileged_userns; do
+            if test -r "$setting"; then
+              printf '%s=' "$setting"
+              cat "$setting"
+            else
+              printf '%s=unavailable\n' "$setting"
+            fi
+          done
+          # Version query only. Any daemon-access error fails closed; never sudo/retry.
+          command -v docker
+          docker version --format 'docker_client={{.Client.Version}} docker_server={{.Server.Version}}'
