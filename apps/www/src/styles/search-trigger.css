@@ -15,6 +15,19 @@
   site-search .pui-projection-controls:empty {
     display: none;
   }
+  /* A projection owner is layout, not an inline text line. Blockify its direct
+     public root as a flex item: an empty, portaled Dialog must not reserve a
+     line-height strut below the Button and displace the centered Header slot.
+     Keep both owners mounted; public Dialog/Command still own their portals. */
+  site-search
+    [data-search-composition-mount]
+    > :is([data-search-command-mount], [data-search-dialog-mount])
+    > .pui-projection-generation
+    > .pui-projection-scope
+    > .pui-projection-content {
+    display: flex;
+    align-items: center;
+  }
   site-search
     [data-search-command-mount='open']
     :is(.pui-projection-scope, .pui-projection-content) {
