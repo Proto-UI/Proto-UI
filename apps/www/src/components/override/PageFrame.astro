@@ -64,7 +64,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </noscript>
     <div
       data-page-frame-layout
-      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:15rem] lg:[--top-spacing:calc(var(--spacing)*4)]"
+      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:15rem] lg:[--top-spacing:calc(var(--spacing)*4)]"
     >
       {
         hasSidebar && (
@@ -152,11 +152,25 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   :global(.site-page-frame:has([data-docs-site-header]) main h1[data-site-typography='h1']) {
     scroll-margin-top: calc(var(--header-height) + var(--docs-reading-inset, 1rem));
   }
-  /* Reading columns share a centered canvas; Header is deliberately independent. */
-  .docs-shell {
+  /* Documentation composition: independent outer gutters, rails and reading
+     measure. Do not constrain both navigation rails to the prose canvas. */
+  .site-page-frame > .docs-shell {
+    --docs-shell-gutter: clamp(1rem, 2vw, 2rem);
+    --docs-column-gap: clamp(1rem, 2vw, 2rem);
+    --docs-reading-width: 42rem;
+    --docs-toc-width: 18rem;
     container: docs-canvas / inline-size;
-    max-width: 85rem;
-    margin-inline: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: var(--docs-shell-gutter);
+  }
+
+  @media (min-width: 64rem) {
+    .docs-shell > [data-page-frame-layout] {
+      column-gap: var(--docs-column-gap);
+    }
   }
 
   .docs-sidebar {

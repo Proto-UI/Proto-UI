@@ -145,6 +145,7 @@ export const BROWSER_SUITES = Object.freeze([
   'apps/www/src/content/docs/zh-cn/demo-select-first-paint.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/demo-select-draft-projections.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/docs-content-flow.browser.test.ts',
+  'apps/www/src/content/docs/zh-cn/site-docs-columns.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/home-demo-runtime.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/homepage-button-contract.browser.test.ts',
   'apps/www/src/content/docs/zh-cn/overlay-scrollbar-geometry.browser.test.ts',
