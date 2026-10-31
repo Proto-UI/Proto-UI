@@ -57,6 +57,7 @@ export function setupMenubarTriggerPaint(
   states: {
     disabled: State<boolean>;
     focused: State<boolean>;
+    focusVisible: State<boolean>;
     expanded: State<boolean>;
   }
 ) {
@@ -81,6 +82,13 @@ export function setupMenubarTriggerPaint(
         w.any(w.state(states.focused).eq(true), w.state(states.expanded).eq(true))
       ),
     intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
+  });
+  // Expanded paint is not a closed-trigger keyboard focus affordance.
+  // Preserve the existing Rhea fallback until exact source focus/hover closure.
+  def.rule({
+    when: (w) => w.all(w.state(style).eq('rhea'), w.state(states.focusVisible).eq(true)),
+    intent: (i) =>
+      i.feedback.style.use(tw('ring-2 ring-inset ring-ring forced-colors-focus-outline')),
   });
   def.rule({
     when: (w) => w.state(states.disabled).eq(true),

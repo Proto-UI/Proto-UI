@@ -10,6 +10,7 @@ export default definePrototype<MenubarTriggerProps, MenubarTriggerExposes>({
     setupMenubarTriggerPaint(def, {
       disabled: behavior.getState!('disabled')!,
       focused: behavior.getState!('focused')!,
+      focusVisible: behavior.getState!('focusVisible')!,
       expanded: behavior.getState!('expanded')!,
     });
   },

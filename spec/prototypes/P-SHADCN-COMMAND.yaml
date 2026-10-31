@@ -15,6 +15,40 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-SHADCN-COMMAND-DIALOG-OWNERSHIP
+    text:
+      en: commandDialogContent composes Base asDialogContent once and reuses its Dialog anatomy, controlled open, dismissal, focus trap/return, title/description relations and presence. It does not own Command query or selection. Existing Dialog defaults remain unchanged.
+      zh-CN: commandDialogContent 只组合一次 Base asDialogContent，复用 Dialog anatomy、受控 open、关闭、焦点约束及返回、标题描述关系与 presence，不拥有 Command 查询或选中状态，不改既有 Dialog 默认值。
+    references:
+      prototypes:
+        - id: P-BASE-DIALOG-CONTENT
+          anchors:
+            [
+              P-BASE-DIALOG-CONTENT-PRESENCE,
+              P-BASE-DIALOG-CONTENT-FOCUS,
+              P-BASE-DIALOG-CONTENT-DISMISS,
+              P-BASE-DIALOG-CONTENT-A11Y-RELATIONS,
+            ]
+  - id: P-SHADCN-COMMAND-DIALOG-GEOMETRY
+    text:
+      en: The direct zero-padding content recipe is bounded by available-region geometry with root-relative safe insets. It must not inherit p6 and later override it, hide overflowed results, or replace the inner Command anatomy with a page-specific surface. Narrow, short and enlarged-root layouts require native evidence.
+      zh-CN: 直接零内边距 content recipe 用可用区域与 root 相对安全边距约束；不得先继承 p6 再覆盖、裁掉结果或用页面外壳冒充内部 Command anatomy。窄屏、短视口及放大 root 需要 native 证据。
+  - id: P-SHADCN-COMMAND-DIALOG-MOTION
+    text:
+      en: Dialog-owned presence must preserve interruption/reversal, reject stale completion, and suppress nonessential CSS motion for reduced or unknown preference. Native timing, focus and cleanup evidence is separate from token or timer assertions.
+      zh-CN: Dialog 所有的 presence 保留中断反转、拒绝旧完成，并在 reduced 或未知偏好禁用非必要 CSS 动画；真实时序、焦点及清理证据独立于 token 或 timer 断言。
+  - id: P-SHADCN-COMMAND-DIALOG-PROFILE
+    text:
+      en: Explicit styleProfile or a common outer public style scope selects Rhea or New York; a child CommandRoot scope is not read upward. Rhea uses the adopted top-third, 28rem cap, rounded3xl and 100ms recipe; New York uses centered32rem, rounded-lg and200ms. Required public enterDuration/leaveDuration are bound from the same profile by the consumer; no runtime configure or second timer. No hidden switch to New York or fabricated full cmdk parity.
+      zh-CN: 显式 styleProfile 或共同外层公共 style scope 选择 Rhea/NY，不向上读取内部 CommandRoot scope。Rhea 按固定上游第三屏、28rem 上限、rounded3xl 和100ms；NY 居中32rem、rounded-lg 和200ms。不得静默切回 NY 或宣称完整 cmdk 等价。
+  - id: P-SHADCN-COMMAND-DIALOG-MASK
+    text:
+      en: Search CommandDialog uses a transparent dedicated Mask that inherits Base modal blocking, pointer participation and presence without a second open or query owner. The pinned website omits visible DialogOverlay while Radix retains modality; Proto UI explicitly retains its semantic Mask because Content alone is non-modal. Ordinary Shadcn DialogMask paint is unchanged. Mask and Content use the same consumer-selected durations. Transparent paint is not passthrough, and native outside-press, Escape, focus return and underlying-page blocking remain required evidence.
+      zh-CN: Search CommandDialog 使用专用透明 Mask，继承 Base 模态阻隔、指针参与和 presence，不另建 open/query owner。固定官网省略可见 DialogOverlay 而 Radix 保留模态；Proto UI 的 Content 单独非模态，因此明确保留语义 Mask。普通 Shadcn DialogMask 外观不变，Mask/Content 时长来自同一消费 profile；透明不等于穿透，真实外点、Escape、回焦和底页阻隔仍需证据。
+  - id: P-SHADCN-COMMAND-ANATOMY
+    text:
+      en: Root owns a full-width vertical single shell; Content is its shrinkable scrollable list, never an independently bordered or shadowed panel. Adopted Rhea retains root p1 and list18rem; New York and Brutalist adopt a root-relative18.75rem list cap from the pinned300px reference. Brutalist owns its sole2px border on Root. min-height0 is an explicit containment safeguard, not proof of native short-viewport acceptance. No wrapping-row root, page CSS repair or generic Group/InputShell parity is claimed.
+      zh-CN: Root 是全宽纵向一体外壳，Content 为可收缩滚动列表，不另加边框阴影；Rhea 保留 root p1/list18rem，NY及Brutalist将固定上游300px采用为root相对18.75rem。Brutalist唯一2px边框属于Root。min-height0为显式容纳策略，不代表短视口已验收；不宣称Group/InputShell完整等价。
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -25,8 +59,11 @@ inherits:
 verifies:
   tests:
     - T-SHADCN-SEARCH-MENU-PROFILES-0001
+    - T-COMMAND-DIALOG-CONTENT-0001
 sources:
   - path: packages/prototypes/shadcn/src/command/
+  - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/command.tsx
+    label: Immutable adopted MIT visual reference; independent Proto semantic implementation, not upstream certification.
 openQuestions:
   - id: P-SHADCN-COMMAND-Q-ADMISSION
     question:
@@ -34,13 +71,34 @@ openQuestions:
       en: When have exact-head browser/native evidence admitted this draft?
     blocks:
       - activation:P-SHADCN-COMMAND
+  - id: P-SHADCN-COMMAND-Q-DIALOG-COMPOSITION
+    question:
+      en: When do the inner Command anatomy and exact-head native focus, motion, short-viewport and root-font journeys close the bounded CommandDialog slice?
+      zh-CN: 何时补齐内部 Command anatomy 及精确 head 的真实焦点、动画、短视口与 root 字号旅程？
+    blocks:
+      - criterion:P-SHADCN-COMMAND#P-SHADCN-COMMAND-DIALOG-GEOMETRY
+      - criterion:P-SHADCN-COMMAND#P-SHADCN-COMMAND-DIALOG-MOTION
+      - activation:P-SHADCN-COMMAND
+  - id: P-SHADCN-COMMAND-Q-PROFILE-TIMING
+    question:
+      en: When does exact-head evidence validate required public enterDuration/leaveDuration bound from the same profile selection (Rhea100ms, NY200ms), including runtime changes before the next phase? Style scope alone never derives duration.
+      zh-CN: 何时以精确 head 证据验证与 profile 同源的必填公开 enterDuration/leaveDuration（Rhea100ms、NY200ms）及下一 phase 前切换？单独 style scope 不自动推导时长。
+    blocks:
+      - criterion:P-SHADCN-COMMAND#P-SHADCN-COMMAND-DIALOG-PROFILE
+      - activation:P-SHADCN-COMMAND
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the shadcn command family as draft.
   - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Define the bounded public CommandDialog content projection and unresolved native composition evidence without stable admission.
+  - version: 0.3.0-alpha.1
     change: revised
     summary: Bound the implemented family projection to its Base draft inheritance and focused profile coverage.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Restore the lost CommandDialog and shrinkable-list criteria alongside retained Base inheritance and nine-profile coverage; native acceptance remains open.
 tags:
   - prototype
   - shadcn
