@@ -18,6 +18,7 @@ export type SelectValueRequest = Readonly<{
 
 export type SelectContextValue = {
   rootId: string;
+  itemSizing?: 'intrinsic' | 'match-trigger';
   /** Internal scalar collection fact revision, not part identity or readiness. */
   collectionRevision?: number;
   open: boolean;

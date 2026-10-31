@@ -2,6 +2,8 @@ id: P-BASE-SELECT
 type: prototype
 title: Base Select is a root-owned select-only single-selection protocol
 status: draft
+lifecycleRationale:
+  en: Existing Select remains draft; the new item-sizing policy still requires fixed-source regression and native geometry evidence.
 since: 0.2.0-rc.0
 summary: Base Select is a compound select-only protocol whose Root owns open state, committed value, selected text, collection order, request arbitration, and shared selection facts.
 statement:
@@ -39,6 +41,11 @@ anatomy:
     - { kind: contains, parent: group, child: label }
     - { kind: contains, parent: content, child: separator }
 criteria:
+  - id: P-BASE-SELECT-ITEM-SIZING
+    text:
+      en: Root accepts itemSizing intrinsic or match-trigger; omission preserves intrinsic base parts. The item-aligned composition may request all inherited rows, including disabled rows, to match Trigger used-layout border-box width and height through C-TARGET-SIZE-MATCH-0001. Only safe part identities and policy cross the prototype boundary; geometry never becomes author State or Context. Public common item-aligned controls default to matching once at the composition owner, not per-demo copied dimensions. Explicit popper plus match-trigger currently reports select.sizing.popper-not-supported; preserving intrinsic popper compatibility does not complete the overall composition sizing goal.
+    dependsOn:
+      contracts: [{ id: C-TARGET-SIZE-MATCH-0001, since: 0.3.0-alpha.1 }]
   - id: P-BASE-SELECT-OPTIONAL-FIELD-COMPOSITION
     text:
       en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger keeps content-derived naming while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier content-only Trigger surface without replacing selection, popup or focus protocols.
@@ -99,8 +106,11 @@ dependsOn:
   contracts:
     [C-ANATOMY-0002, C-AS-COLLECTION-0001, C-CONTEXT-0001, C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
-verifies: { tests: [T-BASE-SELECT-0001] }
+verifies: { tests: [T-BASE-SELECT-0001, { id: T-TARGET-SIZE-MATCH-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared opt-in Root itemSizing and shared composition default ownership with explicit unrun native/popup-mode boundaries.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Reconciled optional structural anatomy and narrowed deferred parts to the actual remaining gaps.

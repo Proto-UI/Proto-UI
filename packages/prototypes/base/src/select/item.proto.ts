@@ -26,6 +26,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
         value: props.value ?? '',
         textValue: props.textValue ?? props.value ?? '',
         disabled: !!props.disabled,
+        itemSizing: props.itemSizing ?? 'inherit',
       };
     },
   });
@@ -35,6 +36,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     value: { type: 'string', empty: 'fallback' },
     textValue: { type: 'string', empty: 'fallback' },
     closeOnSelect: { type: 'boolean', empty: 'fallback' },
+    itemSizing: { type: 'enum', empty: 'fallback', options: ['inherit', 'intrinsic'] },
   });
   def.props.setDefaults({ disabled: false, value: '', textValue: '' });
 
@@ -85,7 +87,7 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
   def.lifecycle.onBeforeDispose(() => {
     disposed = true;
   });
-  def.props.watch(['value', 'textValue', 'disabled'], (run) => {
+  def.props.watch(['value', 'textValue', 'disabled', 'itemSizing'], (run) => {
     const nextOwnDisabled = !!run.props.get().disabled;
     // Disabling publishes while old focus ownership remains observable.
     // Re-enabling must restore focus eligibility before admission can focus it.

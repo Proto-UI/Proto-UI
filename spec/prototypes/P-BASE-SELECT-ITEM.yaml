@@ -2,12 +2,19 @@ id: P-BASE-SELECT-ITEM
 type: prototype
 title: Base Select Item is a selectable collection option
 status: draft
+lifecycleRationale:
+  en: Existing Item semantics remain draft; explicit size inheritance and override have unrun regressions and no new native geometry acceptance.
 since: 0.2.0-rc.0
 summary: Item publishes ordered option metadata, separates transient active state from committed selected state, and submits enabled commits to Root.
 statement:
   zh-CN: Select Item 是 Content 中可重复出现的 option。它发布 value/textValue/disabled collection snapshot、option semantics、committed selected 与 transient active state。focus 或 enabled pointer intent 可以改变 popup active option；Enter、Space 或 pointer activation 发出 select 并请求 Root commit。disabled Item 必须同时退出 focus navigation 与 commit。
   en: Select Item is a repeatable option within Content. It publishes value, textValue, and disabled collection snapshots, option semantics, committed selected state, and transient active state. Focus or enabled pointer intent may change the popup active option, while Enter, Space, or pointer activation emits select and requests a Root commit. A disabled Item must leave both focus navigation and commit.
 criteria:
+  - id: P-BASE-SELECT-ITEM-SIZE-OVERRIDE
+    text:
+      en: Item accepts itemSizing inherit or intrinsic. Omission inherits Root policy; explicit intrinsic removes the row from size matching without changing value, selected state, disabled behavior or focus. Multi-line content and explicit author size constraints use intrinsic rather than clipping text to force equality. Policy changes publish collection metadata revision so an old pending size callback cannot apply to the new selection of targets.
+    dependsOn:
+      contracts: [{ id: C-TARGET-SIZE-MATCH-0001, since: 0.3.0-alpha.1 }]
   - id: P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP
     text:
       zh-CN: 'press.cancel、pointer.cancel 与 view unmount 必须清除本 part 的 hovered/pressed；清理不得改变 canonical Root open/value or committed selected 或发出 activation/request。逻辑实例 remount 不得重放旧瞬态；pointer.leave 的语义清理不等于取消 Host 持有的 contact。'
@@ -58,8 +65,12 @@ sources:
 dependsOn:
   prototypes: [P-BASE-SELECT, P-BASE-SELECT-CONTENT]
   contracts: [C-A11Y-0001, C-AS-COLLECTION-ITEM-0001, C-AS-FOCUSABLE-0001, C-AS-TRIGGER-0001]
-verifies: { tests: [T-BASE-SELECT-ITEM-0001] }
+verifies:
+  { tests: [T-BASE-SELECT-ITEM-0001, { id: T-TARGET-SIZE-MATCH-0001, since: 0.3.0-alpha.1 }] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Declared inherited size matching and explicit intrinsic item override without changing selection or navigation facts.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Item collection, option a11y, active and selected separation, commit requests, controlled behavior, and disabled gating.

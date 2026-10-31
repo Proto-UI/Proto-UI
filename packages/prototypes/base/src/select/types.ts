@@ -23,6 +23,8 @@ export interface SelectRootProps {
   disabled?: boolean;
   readOnly?: boolean;
   closeOnSelect?: boolean;
+  /** Item-aligned composition layout policy. Omitted retains intrinsic upstream parts. */
+  itemSizing?: 'intrinsic' | 'match-trigger';
 }
 
 export type SelectRootExposes = {
@@ -123,6 +125,8 @@ export type SelectContentHandles = {
 };
 
 export interface SelectItemProps {
+  /** Explicit intrinsic layout opts this row out of the inherited match policy. */
+  itemSizing?: 'inherit' | 'intrinsic';
   disabled?: boolean;
   value?: string;
   textValue?: string;

@@ -1064,7 +1064,6 @@ describe('Website native-only content recipes', () => {
   });
 });
 
-
 it('keeps full-value wrapping an explicit consumer opt-in rather than changing preview defaults', () => {
   for (const wrapValue of [false, true]) {
     const settings = controls();
@@ -1112,4 +1111,79 @@ it('keeps full-value wrapping an explicit consumer opt-in rather than changing p
         'height'
       );
   }
+});
+
+describe('public Select composition size policy', () => {
+  for (const runtimeId of ['wc', 'react', 'vue', 'vue2'] as const) {
+    for (const projectionFamilyId of [
+      'shadcn',
+      'brutalist',
+      'bootstrap-2-3-2',
+      'liquid-glass',
+    ] as const) {
+      it(`${projectionFamilyId}/${runtimeId} declares its original mode and the corresponding bounded default`, () => {
+        const composition = createProjectionComposition({
+          ownerId: 'size-policy',
+          runtimeId,
+          projectionFamilyId,
+          generation: 1,
+          componentId: 'button',
+          childDemo: {
+            type: 'demo',
+            root: { kind: 'proto', prototypeId: `${projectionFamilyId}-button` },
+          },
+          controls: controls(),
+          controlIds: ['runtime'],
+        });
+        const root = findNode(
+          composition.demo,
+          (node) =>
+            node.kind === 'proto' && node.prototypeId === `${projectionFamilyId}-select-root`
+        );
+        const content = findNode(
+          composition.demo,
+          (node) =>
+            node.kind === 'proto' && node.prototypeId === `${projectionFamilyId}-select-content`
+        );
+        if (root.kind !== 'proto' || content.kind !== 'proto')
+          throw new Error('Expected actual public Select parts');
+        expect(root.props?.itemSizing).toBe(
+          projectionFamilyId === 'shadcn' ? 'match-trigger' : 'intrinsic'
+        );
+        expect(content.props?.position).toBe(
+          projectionFamilyId === 'shadcn' ? 'item-aligned' : 'popper'
+        );
+      });
+    }
+  }
+  it.each(['intrinsic', 'match-trigger'] as const)(
+    'preserves the explicit public %s policy without silently rewriting popper',
+    (itemSizing) => {
+      const config = controls();
+      const composition = createProjectionComposition({
+        ownerId: 'size-override',
+        runtimeId: 'wc',
+        projectionFamilyId: 'shadcn',
+        generation: 1,
+        componentId: 'button',
+        childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
+        controls: { ...config, runtime: { ...config.runtime, position: 'popper', itemSizing } },
+        controlIds: ['runtime'],
+      });
+      const root = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-root'
+      );
+      const content = findNode(
+        composition.demo,
+        (node) => node.kind === 'proto' && node.prototypeId === 'shadcn-select-content'
+      );
+      if (root.kind !== 'proto' || content.kind !== 'proto')
+        throw new Error('Expected actual public Select parts');
+      expect(root.props?.itemSizing).toBe(itemSizing);
+      expect(content.props?.position).toBe('popper');
+      // This source-level test proves transport, not capability. The Base
+      // controller separately diagnoses explicit popper + match-trigger.
+    }
+  );
 });
