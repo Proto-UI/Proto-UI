@@ -49,6 +49,10 @@ criteria:
     text:
       en: Root owns a full-width vertical single shell; Content is its shrinkable scrollable list, never an independently bordered or shadowed panel. Adopted Rhea retains root p1 and list18rem; New York and Brutalist adopt a root-relative18.75rem list cap from the pinned300px reference. Brutalist owns its sole2px border on Root. min-height0 is an explicit containment safeguard, not proof of native short-viewport acceptance. No wrapping-row root, page CSS repair or generic Group/InputShell parity is claimed.
       zh-CN: Root 是全宽纵向一体外壳，Content 为可收缩滚动列表，不另加边框阴影；Rhea 保留 root p1/list18rem，NY及Brutalist将固定上游300px采用为root相对18.75rem。Brutalist唯一2px边框属于Root。min-height0为显式容纳策略，不代表短视口已验收；不宣称Group/InputShell完整等价。
+  - id: P-SHADCN-COMMAND-NO-ADDON-INSET
+    text:
+      en: In the existing bounded single-control InputShell composition without addons, the Command editor owns its profile-specific inline inset instead of depending on an absent decorative prefix. Grouped Vega, Nova, Lyra and Rhea use 0.625rem per side; Maia and Luma use 0.75rem; Mira uses 0.5rem. These are adopted from the corresponding pinned ordinary Input recipes, not a claim that the icon-free composition equals upstream CommandInput with its Search addon. Sera retains its existing editor px2 and outer shell px3; New York retains the existing wrapper px3 and adds no editor inset. Outside InputShell, existing standalone recipes are unchanged. Profile changes preserve the one real editor, query, selection, focus and composition lifetime. No DOM child detection, page override, new addon API or semantic input owner is introduced.
+      zh-CN: 现有无 addon 的单编辑器 InputShell 组合由 Command 编辑器提供 profile 内联留白，不能依赖不存在的装饰前缀。Vega、Nova、Lyra、Rhea 每侧采用对应普通 Input 的0.625rem，Maia/Luma为0.75rem，Mira为0.5rem；Sera保留原编辑器px2及外壳px3，NY保留wrapper px3且不叠加编辑器留白。未置于InputShell的独立recipe不变，profile切换保留真实编辑器、query、selection、focus及composition生命周期；不增DOM探测、页面补丁或addon语义，不宣称与带Search图标的上游CommandInput完全一致。
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -64,6 +68,8 @@ sources:
   - path: packages/prototypes/shadcn/src/command/
   - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/command.tsx
     label: Immutable adopted MIT visual reference; independent Proto semantic implementation, not upstream certification.
+  - path: https://github.com/shadcn-ui/ui/blob/24a16429815cc4d691f38b49d0f4ffc11a9daef4/apps/v4/registry/styles/style-rhea.css
+    label: Immutable MIT ordinary Input inset reference for the explicitly icon-free bounded composition, not full CommandInput addon parity.
 openQuestions:
   - id: P-SHADCN-COMMAND-Q-ADMISSION
     question:
@@ -99,6 +105,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Restore the lost CommandDialog and shrinkable-list criteria alongside retained Base inheritance and nine-profile coverage; native acceptance remains open.
+  - version: 0.3.0-alpha.1
+    change: revised
+    summary: Define profile-specific editor inset for the bounded no-addon InputShell composition without changing standalone recipes or claiming full addon/native conformance.
 tags:
   - prototype
   - shadcn

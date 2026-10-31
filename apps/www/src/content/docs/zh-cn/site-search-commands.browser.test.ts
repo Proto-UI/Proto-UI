@@ -785,6 +785,20 @@ async function homeReady(page: Page, family: string, runtime: string) {
   );
 }
 
+// Geometry/focus success controls need a successful data outcome: Astro dev
+// has no generated production Pagefind index. Only that external data boundary
+// is controlled; the real Search/session/Command/Dialog and focus owners run.
+async function installSuccessfulEmptySearchData(page: Page) {
+  await page.route('**/pagefind/pagefind.js', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'text/javascript',
+      body: `export async function options(_options) {}
+        export async function search(_query) { return { results: [] }; }`,
+    })
+  );
+}
+
 const headerTriggerViewports = [
   { name: 'mobile', width: 390, height: 844 },
   { name: 'desktop', width: 1180, height: 757 },
@@ -801,6 +815,7 @@ for (const viewport of headerTriggerViewports) {
         const id = `header-trigger-${family}-${runtime}-${viewport.name}`;
         stage(page, id, 'navigate');
         try {
+          await installSuccessfulEmptySearchData(page);
           expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(
             true
           );
@@ -2014,6 +2029,220 @@ for (const family of ['shadcn', 'brutalist'] as const) {
           .poll(async () => (await page.evaluate(readSearchPublicState)).open)
           .toBe(false);
         expect(errors).toEqual([]);
+      } catch (error) {
+        await captureFailure(page);
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+}
+
+// These cases observe the actual editor and physical portal, not only a Header
+// runtime label. An empty controlled Pagefind response is not production search
+// relevance, multi-result scrolling or latency evidence.
+for (const viewport of headerTriggerViewports) {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`homepage shadcn/${runtime} ${viewport.name} keeps the no-addon Rhea editor inset`, async () => {
+      const context = await browser.newContext({
+        viewport: { width: viewport.width, height: viewport.height },
+      });
+      const page = await context.newPage();
+      const id = `command-inset-shadcn-${runtime}-${viewport.name}`;
+      stage(page, id, 'navigate');
+      try {
+        await installSuccessfulEmptySearchData(page);
+        expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(
+          true
+        );
+        await homeReady(page, 'shadcn', 'wc');
+        if (runtime !== 'wc') {
+          await choosePageControl(page, 'runtime', runtimeLabels[runtime]);
+          await homeReady(page, 'shadcn', runtime);
+        }
+        const menu = page.locator(
+          '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+        );
+        if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+        const trigger = page.locator(
+          'site-search [data-projection-generation-state="active"] [data-open-modal]'
+        );
+        await trigger.click();
+        const panel = await searchPart(page, 'panel');
+        await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+        expect(await panel.getAttribute('data-projection-runtime')).toBe(runtime);
+        const queryPart = await searchPart(page, 'query');
+        expect(await queryPart.getAttribute('data-projection-runtime')).toBe(runtime);
+        const editor = await searchInput(page);
+        const shell = await searchPart(page, 'query-shell');
+        expect(await shell.count()).toBe(1);
+        const geometry = await editor.evaluate((node) => {
+          const owner = node.closest<HTMLElement>(
+            '[data-projection-prototype="shadcn-input-shell"]'
+          );
+          if (!owner) throw new Error('Missing actual Command InputShell ancestor');
+          const input = node.getBoundingClientRect();
+          const box = owner.getBoundingClientRect();
+          const style = getComputedStyle(node);
+          return {
+            input: input.toJSON(),
+            shell: box.toJSON(),
+            paddingStart: parseFloat(style.paddingInlineStart),
+            paddingEnd: parseFloat(style.paddingInlineEnd),
+            rootFont: parseFloat(getComputedStyle(document.documentElement).fontSize),
+            textInset:
+              input.left +
+              parseFloat(style.borderLeftWidth) +
+              parseFloat(style.paddingLeft) -
+              box.left,
+            inputRole: node.getAttribute('role'),
+            shellRole: owner.getAttribute('role'),
+            shellTabIndex: owner.getAttribute('tabindex'),
+          };
+        });
+        const state = await page.evaluate(readSearchPublicState);
+        await mkdir(evidenceDirectory, { recursive: true });
+        await writeFile(
+          path.join(evidenceDirectory, `${id}-geometry.json`),
+          JSON.stringify(
+            {
+              source,
+              runtime,
+              viewport,
+              geometry,
+              state,
+              dataFixture: 'successful empty Pagefind boundary; real native composition',
+            },
+            null,
+            2
+          )
+        );
+        await capture(page, id, 'actual-editor-inset');
+        const inset = geometry.rootFont * 0.625;
+        expect(Math.abs(geometry.paddingStart - inset)).toBeLessThanOrEqual(0.1);
+        expect(Math.abs(geometry.paddingEnd - inset)).toBeLessThanOrEqual(0.1);
+        expect(geometry.textInset).toBeGreaterThanOrEqual(inset);
+        expect(geometry.textInset).toBeLessThanOrEqual(inset + 1);
+        expect(geometry.input.right - geometry.shell.right).toBeLessThanOrEqual(1);
+        expect(geometry.inputRole).toBe('combobox');
+        expect(geometry.shellRole).toBeNull();
+        expect(geometry.shellTabIndex).toBeNull();
+        await expect
+          .poll(async () => (await page.evaluate(readSearchPublicState)).inputFocused)
+          .toBe(true);
+        const identity = await editor.elementHandle();
+        if (!identity) throw new Error('Missing real editor handle');
+        await editor.fill('inset query');
+        await expect
+          .poll(async () => (await page.evaluate(readSearchPublicState)).query)
+          .toBe('inset query');
+        expect(await editor.evaluate((node, previous) => node === previous, identity)).toBe(true);
+        await page.keyboard.press('Escape');
+        await expect
+          .poll(async () => (await page.evaluate(readSearchPublicState)).open)
+          .toBe(false);
+        await expect
+          .poll(() => trigger.evaluate((node) => node === document.activeElement))
+          .toBe(true);
+        expect(diagnosticPages.get(page)!.errors).toEqual([]);
+      } catch (error) {
+        await captureFailure(page);
+        throw error;
+      } finally {
+        await context.close();
+      }
+    }, 90_000);
+  }
+}
+
+// The prior Header native run encountered this real product state. Preserve it
+// independently: a missing index intentionally focuses the actual Retry Button,
+// and must not be misclassified as CSS-induced input focus loss.
+for (const family of ['shadcn', 'brutalist'] as const) {
+  for (const runtime of ['wc', 'react', 'vue', 'vue2'] as const) {
+    it(`homepage ${family}/${runtime} missing Pagefind keeps the real Retry action focused`, async () => {
+      const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+      const page = await context.newPage();
+      const id = `search-missing-index-${family}-${runtime}`;
+      let failedDataResponses = 0;
+      const expectedDataConsoleErrors: string[] = [];
+      stage(page, id, 'navigate');
+      try {
+        page.on('response', (response) => {
+          if (
+            new URL(response.url()).pathname.endsWith('/pagefind/pagefind.js') &&
+            response.status() === 404
+          )
+            failedDataResponses++;
+        });
+        page.on('console', (message) => {
+          if (message.type() !== 'error' || !message.text().includes('404 (Not Found)')) return;
+          const location = message.location().url;
+          if (
+            location &&
+            new URL(location).origin === new URL(baseUrl).origin &&
+            new URL(location).pathname.endsWith('/pagefind/pagefind.js')
+          ) {
+            expectedDataConsoleErrors.push(`console: ${message.text()}`);
+          }
+        });
+        await page.route('**/pagefind/pagefind.js', (route) =>
+          route.fulfill({
+            status: 404,
+            contentType: 'text/plain',
+            body: 'Controlled missing test index',
+          })
+        );
+        expect((await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' }))?.ok()).toBe(
+          true
+        );
+        await homeReady(page, 'shadcn', 'wc');
+        if (family !== 'shadcn') {
+          await choosePageControl(page, 'family', 'Brutalist');
+          await homeReady(page, family, 'wc');
+        }
+        if (runtime !== 'wc') {
+          await choosePageControl(page, 'runtime', runtimeLabels[runtime]);
+          await homeReady(page, family, runtime);
+        }
+        const menu = page.locator(
+          '[data-site-header] .site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
+        );
+        if ((await menu.getAttribute('aria-expanded')) === 'true') await menu.click();
+        await page
+          .locator('site-search [data-projection-generation-state="active"] [data-open-modal]')
+          .click();
+        const panel = await searchPart(page, 'panel');
+        await expect.poll(() => panel.getAttribute('data-transition-state')).toBe('entered');
+        expect(await panel.getAttribute('data-projection-runtime')).toBe(runtime);
+        expect(
+          await (await searchPart(page, 'query')).getAttribute('data-projection-runtime')
+        ).toBe(runtime);
+        const retry = await searchPart(page, 'search-page-action');
+        await expect.poll(() => retry.textContent()).toBe('重试');
+        await expect
+          .poll(() => retry.evaluate((node) => node === document.activeElement))
+          .toBe(true);
+        const state = await page.evaluate(readSearchPublicState);
+        expect(state.open).toBe(true);
+        expect(state.inputFocused).toBe(false);
+        expect(failedDataResponses).toBeGreaterThan(0);
+        expect(await (await searchPart(page, 'status')).textContent()).toBe('搜索暂不可用，请重试');
+        await capture(page, id, 'actual-retry-focus');
+        await writeFile(
+          path.join(evidenceDirectory, `${id}-focus.json`),
+          JSON.stringify({ source, family, runtime, state, failedDataResponses }, null, 2)
+        );
+        const unexpectedErrors = [...diagnosticPages.get(page)!.errors];
+        for (const expected of expectedDataConsoleErrors) {
+          const index = unexpectedErrors.indexOf(expected);
+          expect(index).toBeGreaterThanOrEqual(0);
+          unexpectedErrors.splice(index, 1);
+        }
+        // A generic asset404 or unrelated page error is not excused by the
+        // controlled Pagefind404. Only exact same-origin console provenance is.
+        expect(unexpectedErrors).toEqual([]);
       } catch (error) {
         await captureFailure(page);
         throw error;
