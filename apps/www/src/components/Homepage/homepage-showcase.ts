@@ -1,6 +1,11 @@
 import { composeHomepageText, setHomepageText } from './homepage-text';
 import { createHomepageGalleryParts } from './homepage-gallery-parts';
-import type { DemoNode, DemoSetupContext, DemoSpec } from '../PrototypePreviewer/demo-types';
+import {
+  collectPrototypeIds,
+  type DemoNode,
+  type DemoSetupContext,
+  type DemoSpec,
+} from '../PrototypePreviewer/demo-types';
 import type { ProjectionContentRecipe } from '../PrototypePreviewer/projection-composition';
 import {
   resolveProjectionPart,
@@ -112,15 +117,8 @@ export function createHomepageShowcase(
   const result: { demo: DemoSpec; recipe: ProjectionContentRecipe } = {
     recipe: {
       id: HOMEPAGE_SHOWCASE_ID,
-      prototypeIds: [
-        ...new Set([
-          ...Object.values(parts),
-          ...Object.values(selectParts),
-          ...(selectGroup ? [selectGroup] : []),
-          ...gallery.ids,
-          `${family}-text-root`,
-        ]),
-      ],
+      // Final dependency closure is derived after all authored compositions below.
+      prototypeIds: [],
       rootPrototypeId: parts.select,
     },
     demo: {
@@ -482,5 +480,8 @@ export function createHomepageShowcase(
     children: gallery.columns(form),
   };
   result.demo.root = composeHomepageText(result.demo.root, family);
+  const prototypeIds = new Set<string>();
+  collectPrototypeIds(result.demo.root, prototypeIds);
+  result.recipe = { ...result.recipe, prototypeIds: [...prototypeIds] };
   return result;
 }

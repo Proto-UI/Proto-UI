@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createHomepageLocaleSelect, parseHomepageLocale } from './homepage-locale-select';
 import type { DemoNode } from '../PrototypePreviewer/demo-types';
+import { assertProjectionRecipeClosure } from '../PrototypePreviewer/projection-composition';
 
 const locale = {
   value: 'en',
@@ -19,6 +20,47 @@ function nodes(node: DemoNode): DemoNode[] {
   ];
 }
 describe('homepage locale Select composition', () => {
+  describe.each(['shadcn', 'brutalist'] as const)('%s exact authored recipe', (family) => {
+    it.each(['wc', 'react', 'vue', 'vue2'] as const)(
+      '%s declares only the actual locale Select anatomy',
+      (runtime) => {
+        const { demo, prototypeIds } = createHomepageLocaleSelect(locale, family, runtime, () => true);
+        const expected = ['root', 'trigger', 'value', 'content', 'item'].map(
+          (part) => `${family}-select-${part}`
+        );
+        if (family === 'shadcn')
+          expected.push('shadcn-select-surface', 'shadcn-select-viewport', 'shadcn-select-item-text');
+        expect([...prototypeIds].sort()).toEqual(expected.sort());
+        expect(new Set(prototypeIds).size).toBe(prototypeIds.length);
+        expect(() =>
+          assertProjectionRecipeClosure(demo.root, prototypeIds, 'homepage-home-language')
+        ).not.toThrow();
+        const authored = nodes(demo.root)
+          .filter((node) => node.kind === 'proto')
+          .map((node) => node.prototypeId);
+        expect([...new Set(authored)].sort()).toEqual([...prototypeIds].sort());
+      }
+    );
+
+    it('still rejects an undeclared trigger and an unused required part', () => {
+      const { demo, prototypeIds } = createHomepageLocaleSelect(locale, family, 'wc', () => true);
+      expect(() =>
+        assertProjectionRecipeClosure(
+          demo.root,
+          prototypeIds.filter((id) => id !== `${family}-select-trigger`),
+          'homepage-home-language'
+        )
+      ).toThrow(`uses undeclared Prototype(s): ${family}-select-trigger`);
+      expect(() =>
+        assertProjectionRecipeClosure(
+          demo.root,
+          [...prototypeIds, `${family}-select-group`],
+          'homepage-home-language'
+        )
+      ).toThrow(`missing required Prototype(s): ${family}-select-group`);
+    });
+  });
+
   it.each(['shadcn', 'brutalist'] as const)(
     '%s uses public Select anatomy and the current locale',
     (family) => {
