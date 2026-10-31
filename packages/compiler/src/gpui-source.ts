@@ -6,6 +6,7 @@ import { getSemanticGroupKeyV0 } from '../../core/src/spec/feedback/semantic-mer
 import { buildGpuiNativeStyleFiles } from './gpui-native-style';
 import { GPUI_NATIVE_SDK_PATH, GPUI_NATIVE_SDK_VERSION, gpuiNativeSdkFiles } from './gpui-native-sdk';
 import type { DataType } from './data-types';
+import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
 import { isDataValueType, isPublicValueType } from './ir';
 import { inferBinaryType, relationalOperandKind } from './expression-types';
 import type { RuleCondition } from './rule-declarations';
@@ -127,6 +128,267 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     if (typeof value === 'boolean') return `Value::boolean(${value})`;
     return `Value::number(${Object.is(value, -0) ? '-0.0' : Number.isInteger(value) ? `${value}.0` : String(value)})`;
   }
+  let templateScope = NativeLexicalScope.empty();
+  const functionDeclarations = new Map<FunctionIR, NativeLexicalScope>();
+  function nativeFunctionParameter(fn: FunctionIR, index: number): boolean {
+    const type = fn.parameters[index]?.type;
+    // The semantic template/array capabilities use the native child ABI.
+    // Portable DataType arrays remain ordinary data, not native factories.
+    return type === 'template' || type === 'array';
+  }
+  function parameterScope(fn: FunctionIR, declaration: NativeLexicalScope): NativeLexicalScope {
+    return fn.parameters.reduce((scope, parameter, index) => scope.bind(parameter.name, {
+      kind: 'reference', name: '\0gpui-parameter-' + parameter.name,
+      type: nativeFunctionParameter(fn, index) ? 'template' : parameter.type, span: fn.span,
+    }), declaration);
+  }
+  function indexExpression(node: ExpressionIR, scope: NativeLexicalScope): void {
+    if (node.kind === 'function') {
+      functionDeclarations.set(node.function, scope);
+      indexBody(node.function.body, parameterScope(node.function, scope));
+    } else if (node.kind === 'array') node.elements.forEach(item => indexExpression(item, scope));
+    else if (node.kind === 'record') node.entries.forEach(entry => indexExpression(entry.value, scope));
+    else if (node.kind === 'binary') { indexExpression(node.left, scope); indexExpression(node.right, scope); }
+    else if (node.kind === 'unary') indexExpression(node.operand, scope);
+    else if (node.kind === 'member') indexExpression(node.object, scope);
+    else if (node.kind === 'operation' || node.kind === 'helper-call') {
+      if (node.kind === 'operation' && node.receiver) indexExpression(node.receiver, scope);
+      node.arguments.forEach(argument => indexExpression(argument, scope));
+    } else if (node.kind === 'rule') {
+      indexExpression(node.receiver, scope);
+      node.states.forEach(state => indexExpression(state.value, scope));
+    }
+  }
+  function indexBody(body: readonly StatementIR[], initial: NativeLexicalScope): void {
+    let scope = initial;
+    for (const statement of body) {
+      if (statement.kind === 'const') {
+        indexExpression(statement.value, scope);
+        scope = scope.bind(statement.name, statement.value);
+      } else if (statement.kind === 'effect') indexExpression(statement.expression, scope);
+      else if (statement.kind === 'return') { if (statement.value) indexExpression(statement.value, scope); }
+      else {
+        indexExpression(statement.condition, scope);
+        indexBody(statement.then, scope); indexBody(statement.otherwise, scope);
+      }
+    }
+  }
+  functionDeclarations.set(ir.setup, NativeLexicalScope.empty());
+  indexBody(ir.setup.body, parameterScope(ir.setup, NativeLexicalScope.empty()));
+  // Authored-hook functions have their own lexical entry rather than inheriting
+  // a caller's same-spelled locals. The canonical admitted function objects are reused.
+  for (const fn of admitted.value.functions) {
+    if (!functionDeclarations.has(fn)) {
+      functionDeclarations.set(fn, NativeLexicalScope.empty());
+      indexBody(fn.body, parameterScope(fn, NativeLexicalScope.empty()));
+    }
+  }
+  function helperFunction(name: string, scope = templateScope): FunctionIR | undefined {
+    const seen = new Set<object>();
+    let binding = scope.lookup(name);
+    while (binding?.value && !seen.has(binding)) {
+      seen.add(binding);
+      const value = binding.value;
+      if (value.kind === 'function') return value.function;
+      if (value.kind !== 'reference') return undefined;
+      binding = binding.environment.lookup(value.name);
+    }
+    return undefined;
+  }
+  const nativeReturns = new Map<FunctionIR, boolean>();
+  const activeNativeReturns = new Set<FunctionIR>();
+  function shapeHasNative(shape: NativeShape | null): boolean {
+    return !!shape && (shape.kind === 'node' || shape.kind === 'legacy-template' ||
+      (shape.kind === 'array' || shape.kind === 'union') && shape.items.some(shapeHasNative));
+  }
+  function snapshotAbi(node: ExpressionIR, scope = templateScope, seen = new Set<object>()): boolean {
+    if (node.kind === 'operation') return node.operation === 'render.el' || node.operation === 'render.slot';
+    if (node.kind === 'helper-call') {
+      const fn = helperFunction(node.name, scope);
+      return !!fn && returnsNative(fn);
+    }
+    if (node.kind === 'reference') {
+      const binding = scope.lookup(node.name);
+      if (binding?.value && !seen.has(binding)) {
+        const next = new Set(seen); next.add(binding);
+        return snapshotAbi(binding.value, binding.environment, next);
+      }
+      return node.type === 'template' || node.type === 'array';
+    }
+    if (node.kind === 'array') return node.elements.some(item => snapshotAbi(item, scope, seen));
+    if (node.kind === 'binary' && ['&&', '||', '??'].includes(node.operator))
+      return snapshotAbi(node.left, scope, seen) || snapshotAbi(node.right, scope, seen);
+    // Canonical template facts stay owned by the shared lexical analyzer. This
+    // predicate chooses a Rust ABI; it is not an emitted template representation.
+    return shapeHasNative(nativeShape(node, scope));
+  }
+  function returnsNative(fn: FunctionIR): boolean {
+    const previous = nativeReturns.get(fn);
+    if (previous !== undefined) return previous;
+    if (activeNativeReturns.has(fn)) throw new Error('Recursive helper escaped checked GPUI ABI admission.');
+    activeNativeReturns.add(fn);
+    try {
+      function returned(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
+        let scope = initial;
+        for (const statement of body) {
+          if (statement.kind === 'const') scope = scope.bind(statement.name, statement.value);
+          else if (statement.kind === 'return') return !!statement.value && snapshotAbi(statement.value, scope);
+          else if (statement.kind === 'if' && (returned(statement.then, scope) || returned(statement.otherwise, scope))) return true;
+        }
+        return false;
+      }
+      const result = fn !== ir.setup && returned(fn.body, parameterScope(fn, functionDeclarations.get(fn) ?? NativeLexicalScope.empty()));
+      nativeReturns.set(fn, result);
+      return result;
+    } finally { activeNativeReturns.delete(fn); }
+  }
+  function typedFunction(fn: FunctionIR): boolean {
+    return fn !== ir.setup && (returnsNative(fn) || fn.parameters.some((_, index) => nativeFunctionParameter(fn, index)));
+  }
+  let nativeIndex = 0;
+  const freshNative = (): string => `pui_native_${nativeIndex++}`;
+  function snapshotExpression(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
+    const value = expression(node, environment, depth);
+    return snapshotAbi(node) ? value : snapshotData(nativeShape(node, templateScope) ?? { kind: 'invalid' }, value);
+  }
+
+  function snapshotData(shape: NativeShape, value: string): string {
+    if (shape.kind === 'legacy-template') throw new Error('Legacy template annotation requires lexical provenance before native snapshot emission.');
+    if (shape.kind === 'node') throw new Error('Native node requires the typed native ABI, not Value coercion.');
+    if (shape.kind === 'text') return `native::gpui_native_owner::NativeSnapshot::text_value(${value})`;
+    if (shape.kind === 'null') return `{ let _ = ${value}; native::gpui_native_owner::NativeSnapshot::empty() }`;
+    if ((shape.kind === 'invalid' || shape.kind === 'undefined')) return `native::gpui_native_owner::NativeSnapshot::invalid(${value})`;
+    if (shape.kind === 'array') {
+      const array = freshNative(), item = freshNative();
+      return `{ let ${array} = ${value}; native::gpui_native_owner::NativeSnapshot::sequence(${array}.items().into_iter().map(|${item}| ${snapshotData({ kind: 'union', items: shape.items }, item)}).collect(), Some(${array})) }`;
+    }
+    if (shape.kind !== 'union') throw new Error('Unknown native data shape reached snapshot conversion.');
+    const alternatives: NativeShape[] = [];
+    const flatten = (item: NativeShape): void => { if (item.kind === 'union') item.items.forEach(flatten); else alternatives.push(item); };
+    shape.items.forEach(flatten);
+    const current = freshNative(), cases: string[] = [];
+    if (alternatives.some(item => item.kind === 'legacy-template')) throw new Error('Legacy template union requires lexical provenance before native snapshot emission.');
+    if (alternatives.some(item => item.kind === 'node')) throw new Error('A mixed native return must use its native function ABI.');
+    if (alternatives.some(item => item.kind === 'null')) cases.push(`if matches!(&${current}, Value::Json(Json::Null)) { native::gpui_native_owner::NativeSnapshot::empty() }`);
+    if (alternatives.some(item => item.kind === 'text')) cases.push(`if matches!(&${current}, Value::Number(_)|Value::Json(Json::String(_)|Json::Number(_))) { native::gpui_native_owner::NativeSnapshot::text_value(${current}) }`);
+    const arrays = alternatives.filter((item): item is Extract<NativeShape, { kind: 'array' }> => item.kind === 'array');
+    if (arrays.length) cases.push(`if matches!(&${current},Value::Array(_)|Value::Json(Json::Array(_))) { ${snapshotData({ kind:'array',items:arrays.flatMap(item=>item.items) },current)} }`);
+    return `{ let ${current} = ${value}; ${cases.length ? cases.join(' else ') + ' else ' : ''}{ native::gpui_native_owner::NativeSnapshot::invalid(${current}) } }`;
+  }
+
+  function nativeElement(node: Extract<ExpressionIR, { kind:'operation' }>, environment: ReadonlySet<string>, depth: number): string {
+    const [tag, second, third] = node.arguments;
+    const props = second && (second.type === 'template-props' || typeof second.type === 'object' && second.type.kind === 'record' && second.type.fields.length === 0);
+    const tagName = freshNative(), propsName = freshNative(), childrenName = freshNative(), stylesName = freshNative();
+    const child = node.arguments.length === 3 ? third : props ? undefined : second;
+    const tagCode = tag ? expression(tag,environment,depth) : 'Value::Undefined';
+    const propsCode = props && second ? expression(second,environment,depth) : 'Value::Undefined';
+    const childCode = child ? snapshotExpression(child,environment,depth) : 'native::gpui_native_owner::NativeSnapshot::empty()';
+    return `{ let ${tagName} = ${tagCode}; let _ = ${tagName}; let ${propsName} = ${propsCode}; let ${childrenName} = ${childCode};
+      let ${stylesName} = if ${propsName}.nullish() { Vec::new() } else { let style = ${propsName}.member("style",false); if style.nullish(){Vec::new()}else{style_items(vec![style])} };
+      let frame_children = ${childrenName}.clone(); let text_children = ${childrenName}.clone();
+      native::gpui_native_owner::NativeSnapshot { identity:Rc::new(()),observation:None,valid:${childrenName}.valid,slot_count:${childrenName}.slot_count,
+        frame:Rc::new(move |owner,focus,parent_path,drive,slot,index| {
+          let path=format!("{parent_path}-{}",*index);*index+=1;
+          let tokens:Vec<String> = ${stylesName}.iter().map(|(token,_)|token.clone()).collect();
+          let(style,fixed,translation)=native_presentation(owner,&tokens);
+          let mut element=gpui::div().id(gpui::ElementId::Name(path.to_owned().into())); *element.style()=style;
+          let mut child_index=0;for child in (frame_children.frame)(owner,focus,&path,drive,slot,&mut child_index){element=element.child(child);}
+          let element=translated_element(element.into_any_element(),translation,None); vec![if fixed{viewport_root(element)}else{element}]
+        }),text:Rc::new(move|slot|(text_children.text)(slot)) }
+    }`;
+  }
+
+  function nativeCallable(node: ExpressionIR): FunctionIR | undefined {
+    const fn = node.kind === 'function' ? node.function : node.kind === 'reference' ? helperFunction(node.name) : undefined;
+    return fn && typedFunction(fn) ? fn : undefined;
+  }
+  // Follow callable provenance only. Template-result facts remain owned by
+  // nativeShape; no source is evaluated and no plan is emitted to the consumer.
+  function callableTargets(value: ExpressionIR, environment: NativeLexicalScope): { fn: FunctionIR; environment: NativeLexicalScope }[] {
+    const active = new Set<ExpressionIR>();
+    const parameterFacts = new WeakMap<object, { fn: FunctionIR; environment: NativeLexicalScope }[]>();
+    function resolve(node: ExpressionIR, scope: NativeLexicalScope): { fn: FunctionIR; environment: NativeLexicalScope }[] {
+      if (node.kind === 'function') return [{ fn: node.function, environment: scope }];
+      if (node.kind === 'reference') {
+        const binding = scope.lookup(node.name);
+        return binding && parameterFacts.has(binding) ? parameterFacts.get(binding)! : binding?.value ? resolve(binding.value, binding.environment) : [];
+      }
+      if (node.kind !== 'helper-call') return [];
+      const binding = scope.lookup(node.name);
+      if (!binding?.value) return [];
+      const functions = resolve(binding.value, binding.environment);
+      // Analyze caller arguments before entering the callee. Finite repeated
+      // wrapper(wrapper(draw)) may revisit one body call expression through a
+      // different actual argument; it is not recursive authored execution.
+      const arguments_ = node.arguments.map(argument => argument.type === 'function' ? resolve(argument, scope) : undefined);
+      if (active.has(node)) return [];
+      active.add(node);
+      try {
+        const found: { fn: FunctionIR; environment: NativeLexicalScope }[] = [];
+        for (const target of functions) {
+          let local = target.environment;
+          target.fn.parameters.forEach((parameter, index) => {
+            local = local.parameter(parameter.name, node.arguments[index], scope,
+              node.arguments[index] ? nativeShape(node.arguments[index], scope) : { kind: 'undefined' });
+            if (parameter.type === 'function') parameterFacts.set(local.lookup(parameter.name)!, arguments_[index] ?? []);
+          });
+          function returns(body: readonly StatementIR[], initial: NativeLexicalScope): boolean {
+            let current = initial;
+            for (const statement of body) {
+              if (statement.kind === 'const') current = current.bind(statement.name, statement.value);
+              else if (statement.kind === 'return') {
+                if (statement.value) found.push(...resolve(statement.value, current));
+                return true;
+              } else if (statement.kind === 'if') {
+                const then = returns(statement.then, current), otherwise = returns(statement.otherwise, current);
+                if (then && otherwise) return true;
+              }
+            }
+            return false;
+          }
+          returns(target.fn.body, local);
+        }
+        return found;
+      } finally { active.delete(node); }
+    }
+    return resolve(value, environment);
+  }
+  function callableResultShape(fn: FunctionIR, declaration: NativeLexicalScope): NativeShape {
+    const name = '\0gpui-render-entry';
+    const bindings = declaration.bind(name, { kind:'function', function:fn, type:'function', span:fn.span });
+    const arguments_ = fn.parameters.map(parameter => ({ kind:'reference', name:'\0entry-'+parameter.name, type:parameter.type, span:fn.span }) as ExpressionIR);
+    // Non-child capabilities/function values remain invalid children. This does
+    // not turn an unknown template provenance into a runtime tree conversion.
+    return nativeShape({ kind:'helper-call', name, arguments:arguments_, type:fn.returnType, span:fn.span }, bindings) ?? { kind:'invalid' };
+  }
+  function callableValue(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
+    const fn = nativeCallable(node);
+    if (!fn) return expression(node, environment, depth);
+    const name = freshNative(), value = expression(node, environment, depth);
+    const args = fn.parameters.map((_, index) => nativeFunctionParameter(fn,index)
+      ? `native::gpui_native_owner::NativeSnapshot::invalid(arg(&arguments,${index}))`
+      : `arg(&arguments,${index})`).join(', ');
+    const called = `(${name}.call)(${args})`;
+    const result = returnsNative(fn) ? called : snapshotData(callableResultShape(fn,functionDeclarations.get(fn) ?? templateScope), called);
+    return `{ let ${name}=${value}; Value::NativeFunction{identity:${name}.identity.clone(),render:Rc::new(move |arguments:Vec<Value>| {${result}})} }`;
+  }
+  function rendererEntry(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
+    const value = callableValue(node, environment, depth);
+    const functions = callableTargets(node, templateScope);
+    const scalarShapes = functions.filter(target => !typedFunction(target.fn)).map(target => callableResultShape(target.fn,target.environment));
+    const result = scalarShapes.length ? snapshotData({kind:'union',items:scalarShapes},'callback(arguments)')
+      : 'panic!("checked native renderer entry has no scalar callback alternative")';
+    // Capture the evaluated callable once. Only projection invokes it; native
+    // repaint never re-runs a factory or reconstructs a lexical environment.
+    return `{ let callable=${value}; match callable {
+      Value::NativeFunction{render,..} => Value::Renderer(render),
+      Value::Renderer(render) => Value::Renderer(render),
+      Value::Function(callback) => Value::Renderer(Rc::new(move |arguments:Vec<Value>| { ${result} })),
+      _ => panic!("checked setup result must be a callable")
+    } }`;
+  }
+
   let uses = { names: new Set<string>(), owner: false };
   function ownerReference(): string { uses.owner = true; return 'owner'; }
   function functionValue(fn: FunctionIR, environment: ReadonlySet<string>, depth: number): string {
@@ -136,7 +398,12 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     parameterNames.forEach((name) => scope.add(name));
     const parentUses = uses;
     uses = { names: new Set<string>(), owner: false };
-    const body = statements(fn.body, scope, depth + 1);
+    const nativeReturn = returnsNative(fn);
+    const savedTemplateScope = templateScope;
+    templateScope = functionDeclarations.get(fn) ?? templateScope;
+    for(const [index,parameter] of fn.parameters.entries()) templateScope=templateScope.bind(parameter.name, {kind:'reference',name:'\0'+parameter.name,type:nativeFunctionParameter(fn,index)?'template':parameter.type,span:fn.span});
+    const body = statements(fn.body, scope, depth + 1, true, nativeReturn, fn === ir.setup);
+    templateScope = savedTemplateScope;
     const functionUses = uses;
     uses = parentUses;
     const captures = [...environment].filter((name) => functionUses.names.has(name) && !parameterNames.has(name)).map((name) => {
@@ -145,10 +412,34 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
     }).join(' ');
     const parameters = fn.parameters.flatMap((parameter, index) => functionUses.names.has(parameter.name) ? [`${indent}    let ${local(parameter.name)} = arg(&arguments, ${index});\n`] : []).join('');
     const owner = functionUses.owner ? `let owner = ${ownerReference()}.clone();` : '';
-    return `{ ${owner} ${captures} Value::Function(Rc::new(move |${parameters ? 'arguments' : '_'}: Vec<Value>| {\n${parameters}${body}${indent}})) }`;
+    if (typedFunction(fn)) {
+      const signature = fn.parameters.map((parameter,index) => `${local(parameter.name)}: ${nativeFunctionParameter(fn,index) ? 'native::gpui_native_owner::NativeSnapshot' : 'Value'}`).join(', ');
+      const parameterTypes = fn.parameters.map((_,index) => nativeFunctionParameter(fn,index) ? 'native::gpui_native_owner::NativeSnapshot' : 'Value').join(', ');
+      const resultType = nativeReturn ? 'native::gpui_native_owner::NativeSnapshot' : 'Value';
+      return `{ ${owner} ${captures} let call:Rc<dyn Fn(${parameterTypes})->${resultType}>=Rc::new(move |${signature}| -> ${resultType} {\n${body}${indent}}); NativeCallable { identity:Rc::new(()), call } }`;
+    }
+    return `{ ${owner} ${captures} Value::${nativeReturn ? 'Renderer' : 'Function'}(Rc::new(move |${parameters ? 'arguments' : '_'}: Vec<Value>| {\n${parameters}${body}${indent}})) }`;
   }
   function expression(node: ExpressionIR, environment: ReadonlySet<string>, depth: number): string {
-    const args = node.kind === 'operation' || node.kind === 'helper-call' ? node.arguments.map((arg) => expression(arg, environment, depth)) : [];
+    if (node.kind === 'operation' && node.operation === 'render.el') return nativeElement(node, environment, depth);
+    if (node.kind === 'operation' && node.operation === 'render.slot') return 'native::gpui_native_owner::NativeSnapshot::slot()';
+    if (node.kind === 'helper-call') {
+      uses.names.add(node.name);
+      const fn = helperFunction(node.name);
+      const args = node.arguments.map((argument, index) => fn && nativeFunctionParameter(fn, index)
+        ? snapshotExpression(argument, environment, depth)
+        : argument.type === 'function' ? callableValue(argument, environment, depth) : expression(argument, environment, depth));
+      if (fn && typedFunction(fn)) {
+        // Optional native formals receive the same explicit undefined observation
+        // as an omitted Value formal; validity is checked only if selected as output.
+        for (let index = args.length; index < fn.parameters.length; index++) args.push(nativeFunctionParameter(fn, index)
+          ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)' : 'Value::Undefined');
+        return `(${local(node.name)}.call)(${args.join(', ')})`;
+      }
+      return `${local(node.name)}.call(vec![${args.join(', ')}])`;
+    }
+    const args = node.kind === 'operation' ? node.arguments.map((argument) => argument.type === 'function'
+      ? callableValue(argument, environment, depth) : expression(argument, environment, depth)) : [];
     const argument = (index: number) => args[index] ?? 'Value::Undefined';
     let emittedReceiver: string | undefined;
     const receiver = () => emittedReceiver ??= node.kind === 'operation' && node.receiver ? expression(node.receiver, environment, depth) : `capability(&${ownerReference()})`;
@@ -164,10 +455,30 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
         return node.operator === '!' ? `Value::boolean(!(${operand}).truthy())` : `Value::number(${node.operator === '-' ? '-' : ''}(${operand}).scalar_number())`;
       }
       case 'binary': {
+        if (['&&', '||', '??'].includes(node.operator) && snapshotAbi(node)) {
+          const left = snapshotExpression(node.left, environment, depth), right = snapshotExpression(node.right, environment, depth);
+          const selectRight = node.operator === '??' ? 'left.nullish()' : `${node.operator === '||' ? '!' : ''}left.truthy()`;
+          return `{ let left = ${left}; if ${selectRight} { ${right} } else { left } }`;
+        }
         const left = expression(node.left, environment, depth), right = expression(node.right, environment, depth);
         if (node.operator === '&&' || node.operator === '||') return `{ let left = ${left}; if ${node.operator === '&&' ? '' : '!'}left.truthy() { ${right} } else { left } }`;
         if (node.operator === '??') return `{ let left = ${left}; if left.nullish() { ${right} } else { left } }`;
-        if (node.operator === '===' || node.operator === '!==') return `Value::boolean(${node.operator === '!==' ? '!' : ''}strict_equal(&(${left}), &(${right})))`;
+        if (node.operator === '===' || node.operator === '!==') {
+          const leftNative = snapshotAbi(node.left), rightNative = snapshotAbi(node.right);
+          const leftCallable = !!nativeCallable(node.left), rightCallable = !!nativeCallable(node.right);
+          if (!leftNative && !rightNative && !leftCallable && !rightCallable)
+            return `Value::boolean(${node.operator === '!==' ? '!' : ''}strict_equal(&(${left}), &(${right})))`;
+          const leftName = freshNative(), rightName = freshNative();
+          let equality: string;
+          if (leftNative && rightCallable || leftCallable && rightNative) equality = 'false';
+          else if (leftCallable && rightCallable) equality = `${leftName}.equals_native(&${rightName})`;
+          else if (leftCallable || leftNative) equality = `${leftName}.${leftNative && rightNative ? 'equals' : 'equals_value'}(&${rightName})`;
+          else if (rightCallable || rightNative) equality = `${rightName}.equals_value(&${leftName})`;
+          else equality = `strict_equal(&${leftName}, &${rightName})`;
+          // Every category, including provably unequal native child/callable,
+          // evaluates both authored operands once in left-to-right order.
+          return `{ let ${leftName} = ${left}; let ${rightName} = ${right}; Value::boolean(${node.operator === '!==' ? '!' : ''}${equality}) }`;
+        }
         if (node.operator === '+') return `add(${left}, ${right})`;
         if (['<', '<=', '>', '>='].includes(node.operator)) {
           if (!isDataValueType(node.left.type) || !isDataValueType(node.right.type)) throw new Error('Validated relational operands must be data.');
@@ -189,10 +500,12 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
         }
         return `Value::number((${left}).scalar_number() ${node.operator} (${right}).scalar_number())`;
       }
-      case 'array': return `Value::Array(Rc::new(vec![${node.elements.map((item) => expression(item, environment, depth)).join(', ')}]))`;
+      case 'array': return snapshotAbi(node)
+        ? `native::gpui_native_owner::NativeSnapshot::sequence(vec![${node.elements.map(item => snapshotExpression(item, environment, depth)).join(', ')}], None)`
+        : `Value::Array(Rc::new(vec![${node.elements.map(item => expression(item, environment, depth)).join(', ')}]))`;
       case 'record': return `record(vec![${node.entries.map((entry) => `(${string(entry.key, node.span)}, ${expression(entry.value, environment, depth)})`).join(', ')}])`;
       case 'function': return functionValue(node.function, environment, depth);
-      case 'helper-call': uses.names.add(node.name); return `${local(node.name)}.call(vec![${args.join(', ')}])`;
+
       case 'authored-hook': return `${hookNames.get(node.hookId)}(capability(&${ownerReference()}))`;
       case 'static-capability': return `Value::StaticCapability(&${staticArtifacts.find((declaration) => declaration.id === node.declarationId)!.name}::DECLARATION)`;
       case 'rule': {
@@ -251,8 +564,8 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
           case 'expose.emit': return `emit(${receiverOwner()}, ${argument(0)}, ${argument(1)})`;
           case 'lifecycle.setPresent': return `set_present(${receiverOwner()}, ${argument(0)})`;
           case 'lifecycle.onCreated': case 'lifecycle.onMounted': case 'lifecycle.onUpdated': case 'lifecycle.onUnmounted': case 'lifecycle.onBeforeDispose': return `register_life(&${ownerReference()}, ${string(({ 'lifecycle.onCreated': 'created', 'lifecycle.onMounted': 'mounted', 'lifecycle.onUpdated': 'updated', 'lifecycle.onUnmounted': 'unmounted', 'lifecycle.onBeforeDispose': 'before-dispose' } as const)[node.operation])}, ${argument(0)})`;
-          case 'render.el': return `element(${argument(0)}, ${argument(1)}, ${argument(2)})`;
-          case 'render.slot': return 'slot()';
+
+
           case 'context.provide': return `context_provide(&${ownerReference()}, ${argument(0)}, ${argument(1)})`;
           case 'context.subscribe': case 'context.trySubscribe': return `context_subscribe(&${ownerReference()}, ${argument(0)}, ${node.operation === 'context.trySubscribe'}, ${argument(1)})`;
           case 'context.read': case 'context.tryRead': case 'render.read.context.read': case 'render.read.context.tryRead': return `context_read(${receiverOwner()}, ${argument(0)}, ${node.operation.endsWith('tryRead')})`;
@@ -359,18 +672,20 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
       }
     }
   }
-  function statements(body: readonly StatementIR[], inherited: ReadonlySet<string>, depth: number, complete = true): string {
+  function statements(body: readonly StatementIR[], inherited: ReadonlySet<string>, depth: number, complete = true, nativeReturn = false, rendererResult = false): string {
     const scope = new Set(inherited), indent = '    '.repeat(depth);
     let code = '';
+    const savedTemplateScope=templateScope;
     for (const statement of body) {
       if (statement.kind === 'const' && statement.value.kind === 'function' && !reached.has(statement.value.function)) continue;
       code += `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
-      if (statement.kind === 'const') { code += `${indent}let ${local(statement.name)} = ${expression(statement.value, scope, depth)};\n`; scope.add(statement.name); }
+      if (statement.kind === 'const') { code += `${indent}let ${local(statement.name)} = ${expression(statement.value, scope, depth)};\n`; scope.add(statement.name); templateScope=templateScope.bind(statement.name,statement.value); }
       else if (statement.kind === 'effect') code += `${indent}${expression(statement.expression, scope, depth)};\n`;
-      else if (statement.kind === 'return') { code += `${indent}return ${statement.value ? expression(statement.value, scope, depth) : 'Value::Undefined'};\n`; return code; }
-      else code += `${indent}if (${expression(statement.condition, scope, depth)}).truthy() {\n${statements(statement.then, scope, depth + 1, false)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, scope, depth + 1, false)}${indent}}` : ''}\n`;
+      else if (statement.kind === 'return') { code += `${indent}return ${statement.value ? rendererResult && statement.value.type === 'function' ? rendererEntry(statement.value, scope, depth) : nativeReturn ? snapshotExpression(statement.value, scope, depth) : statement.value.type === 'function' ? callableValue(statement.value, scope, depth) : expression(statement.value, scope, depth) : nativeReturn ? 'native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)' : 'Value::Undefined'};\n`; templateScope=savedTemplateScope; return code; }
+      else code += `${indent}if (${expression(statement.condition, scope, depth)}).truthy() {\n${statements(statement.then, scope, depth + 1, false, nativeReturn, rendererResult)}${indent}}${statement.otherwise.length ? ` else {\n${statements(statement.otherwise, scope, depth + 1, false, nativeReturn, rendererResult)}${indent}}` : ''}\n`;
     }
-    return complete ? `${code}${indent}Value::Undefined\n` : code;
+    templateScope=savedTemplateScope;
+    return complete ? `${code}${indent}${nativeReturn ? "native::gpui_native_owner::NativeSnapshot::invalid(Value::Undefined)" : "Value::Undefined"}\n` : code;
   }
   function accepts(value: string, type: DataType, span = ir.setup.span): string {
     if (typeof type === 'string') return type === 'number' ? `${value}.as_f64().is_some_and(f64::is_finite)` : type === 'null' || type === 'void' ? `${value}.is_null()` : `${value}.is_${type === 'boolean' ? 'boolean' : 'string'}()`;
@@ -506,7 +821,7 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
       }
       pub fn handle(&self) -> ${componentName}Handle { ${componentName}Handle { owner: self.owner.clone() } }
       pub fn set_props(&mut self, raw: Json, window: &mut Window, cx: &mut Context<Self>) { replace_props(&self.owner, raw); self.drive(window, cx); }
-      pub fn set_slot(&mut self, slot: Vec<Value>, cx: &mut Context<Self>) { let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }
+      pub fn set_slot(&mut self, slot: Vec<NativeSnapshot>, cx: &mut Context<Self>) { ensure(&Rc::downgrade(&self.owner)); assert_native_slot_children(&slot); let mut owner = self.owner.borrow_mut(); owner.slot = slot; owner.dirty = true; cx.notify(); }
       pub fn set_parent(&mut self, parent: Option<OwnerWeak>, cx: &mut Context<Self>) -> Result<(), &'static str> { set_native_parent(&self.owner, parent.unwrap_or_default())?; cx.notify(); Ok(()) }
       pub fn drive(&mut self, window: &mut Window, cx: &mut Context<Self>) {
           if self.owner.borrow().disposed { cx.notify(); return; }
@@ -524,9 +839,9 @@ export function emitGpuiSource(input: PrototypeIR, options: { componentName?: st
           if self.owner.borrow().disposed || !self.owner.borrow().present { return gpui::div().into_any_element(); }
           let drive = self.owner.borrow().native_drive.as_ref().expect("live native owner drive").clone();
           self.owner.borrow_mut().dirty = false;
-          let value = self.owner.borrow().projection.clone();
+          let snapshot = self.owner.borrow().projection.clone().expect("live native projection");
           self.focus = self.focus.clone().tab_stop(native_tab_participation(&self.owner));
-          let element = paint(&value, &self.owner, &self.focus, true, format!("compiled-root-{}", Rc::as_ptr(&self.owner) as usize), drive);
+          let element = paint_native_root(&snapshot, &self.owner, &self.focus, format!("compiled-root-{}", Rc::as_ptr(&self.owner) as usize), drive);
           if let Some(focus) = &self.window_input { window_input_scope(element, focus, &self.owner) } else { element }
       }
   }
