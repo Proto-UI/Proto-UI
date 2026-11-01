@@ -122,7 +122,9 @@ criteria:
     text:
       en: The public fieldSwitch entry composes asFieldSwitch once and reuses standalone Switch paint. The optional canonical Field binding alone owns invalid, pending, readOnly/disabled policy and label relationships; checked requests and accepted truth remain with Base Switch.
     dependsOn:
-      contracts: [C-FIELD-SWITCH-0001]
+      contracts:
+        - id: C-FIELD-SWITCH-0001
+          since: 0.3.0-alpha.1
 openQuestions:
   - id: P-SHADCN-SWITCH-Q-UPSTREAM-DIFFERENCES
     question:

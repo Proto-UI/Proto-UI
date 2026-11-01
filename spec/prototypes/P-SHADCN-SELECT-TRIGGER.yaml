@@ -91,7 +91,9 @@ criteria:
     text:
       en: The public fieldSelectTrigger entry invokes asFieldSelectTrigger once and reuses the standalone Trigger paint. Only the canonical optional Field binding supplies invalid, pending, policy and relationships; selection, focus, open requests and accepted truth remain with Base Select. Ordinary Trigger does not absorb a surrounding Field.
     dependsOn:
-      contracts: [C-FIELD-SELECT-0001]
+      contracts:
+        - id: C-FIELD-SELECT-0001
+          since: 0.3.0-alpha.1
 openQuestions:
   - id: P-SHADCN-SELECT-TRIGGER-Q-UPSTREAM-DIFFERENCES
     question:
