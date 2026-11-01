@@ -15,14 +15,23 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BASE-MENUBAR-SOURCE-ENTRY
+    text:
+      en: An unfulfilled Trigger-initiated opening entry captures the initiating Trigger's current source-view operation before author callbacks can withdraw it. First or last entry is delivered only while that same operation and the existing opening, focus, enabled and revision guards remain current. Withdrawal or unrelated reinsertion cannot revive it; cancellation itself neither commits selection nor emits a new close or restoration request.
+  - id: P-BASE-MENUBAR-DELIVERED-FOCUS
+    text:
+      en: After one valid logical opening entry is delivered, existing Focus retained-intent and target-readiness rules remain authoritative. Multiple permitted native re-projections are not additional logical entries. Source-operation adoption does not redefine Navigation Menu entry or suppress native effects solely because logical focus is already true.
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
+    - C-LIFECYCLE-VIEW-OPERATION-0001
+    - C-AS-FOCUS-ROVING-0001
 verifies:
-  tests: []
+  tests: [T-BASE-MENUBAR-SOURCE-ENTRY-0001]
 sources:
   - path: packages/prototypes/base/src/menubar/
+  - path: packages/prototypes/base/src/menu-primitives/family.ts
 openQuestions:
   - id: P-BASE-MENUBAR-Q-ADMISSION
     question:
@@ -30,7 +39,16 @@ openQuestions:
       en: When have exact-head browser/native evidence admitted this draft?
     blocks:
       - activation:P-BASE-MENUBAR
+  - id: P-BASE-MENUBAR-Q-SOURCE-OPERATION
+    question:
+      en: Have same-head source-withdrawal consumer tests, four-Web native/framework evidence, independent review and the shared Compiler capture/check closure established this draft adoption without regressing an admitted consumer?
+    blocks:
+      - criterion:P-BASE-MENUBAR#P-BASE-MENUBAR-SOURCE-ENTRY
+      - activation:P-BASE-MENUBAR
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Define consumption of the existing source-view operation for an undelivered opening entry without changing retained Focus ownership. Candidate source remains unexecuted and Compiler admission is an explicit dependency.
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the Base menubar family as draft.

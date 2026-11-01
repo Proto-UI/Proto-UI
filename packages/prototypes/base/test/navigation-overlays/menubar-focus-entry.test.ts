@@ -395,3 +395,72 @@ for (const interrupt of [
     expect(focus).not.toHaveBeenCalled();
   });
 }
+
+// Controlled WC evidence: actual public removal/reinsertion and runtime/router,
+// with the existing appendChild seam placing withdrawal inside portal acquisition.
+// This is not native browser or four-framework transport acceptance.
+for (const withdrawal of [
+  'root-remove',
+  'trigger-remove',
+  'root-reinsert',
+  'trigger-reinsert',
+] as const) {
+  it(`rejects undelivered entry after ${withdrawal} without author focus effects`, async () => {
+    const p = await bar('accept', '');
+    await p.focusTrigger(0);
+    const target = p.items[0]![0]!;
+    const trace = traceEntry();
+    const authorFocus = vi.fn();
+    const authorSelect = vi.fn();
+    target.addEventListener('focus', authorFocus);
+    target.addEventListener('select', authorSelect);
+    observationCleanups.push(() => {
+      target.removeEventListener('focus', authorFocus);
+      target.removeEventListener('select', authorSelect);
+    });
+    const nativeFocus = vi.spyOn(target, 'focus');
+    const append = document.body.appendChild.bind(document.body);
+    let interruptions = 0;
+    let sourceDisconnected = false;
+    let sourceReconnected = false;
+    vi.spyOn(document.body, 'appendChild').mockImplementation((node) => {
+      const result = append(node);
+      if (node === p.panels[0] && interruptions === 0) {
+        interruptions++;
+        if (withdrawal.startsWith('root-')) {
+          p.root.remove();
+          sourceDisconnected = !p.triggers[0]!.isConnected;
+          if (withdrawal === 'root-reinsert') document.body.append(p.root);
+        } else {
+          p.triggers[0]!.remove();
+          sourceDisconnected = !p.triggers[0]!.isConnected;
+          if (withdrawal === 'trigger-reinsert') p.root.prepend(p.triggers[0]!);
+        }
+        sourceReconnected = p.triggers[0]!.isConnected;
+      }
+      return result;
+    });
+    key('ArrowDown');
+    await flush();
+    expect(interruptions).toBe(1);
+    expect(sourceDisconnected).toBe(true);
+    expect(sourceReconnected).toBe(withdrawal.endsWith('reinsert'));
+    expect(trace().dropped).toBe(0);
+    // Reject before the first logical Focus request, rather than suppressing
+    // later native effects of a legitimately delivered retained request.
+    expect(trace().events.filter((event) => event.event === 'focusInRoving')).toHaveLength(0);
+    expect(nativeFocus).not.toHaveBeenCalled();
+    expect(authorFocus).not.toHaveBeenCalled();
+    expect(authorSelect).not.toHaveBeenCalled();
+    expect(document.activeElement).not.toBe(target);
+    // Opening was accepted before acquisition. Cancellation does not emit a
+    // new close/selection request or manufacture focus restoration.
+    expect(p.requests).toEqual([{ value: 'file', reason: 'keyboard' }]);
+    if (p.root.isConnected) setElementProps(p.panels[0]!, { sideOffset: 8 });
+    await flush();
+    expect(trace().events.filter((event) => event.event === 'focusInRoving')).toHaveLength(0);
+    expect(nativeFocus).not.toHaveBeenCalled();
+    expect(authorFocus).not.toHaveBeenCalled();
+    expect(authorSelect).not.toHaveBeenCalled();
+  });
+}

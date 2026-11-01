@@ -284,6 +284,10 @@ export function createMenuFamily(slug: string, navigation: boolean) {
       requireSourceFocus = true,
       reason = 'keyboard'
     ) => {
+      // Capture the initiating Trigger's admitted view, not the portaled Content.
+      // Reconciliation checks this same identity; it must never recapture a
+      // withdrawn source or cancel Focus ownership after valid entry delivery.
+      const sourceOperation = navigation ? null : run.lifecycle.captureViewOperation();
       const epoch = viewEpoch;
       const revision = ++entryRevision;
       const sourceFocusEpoch = focusEpoch;
@@ -312,6 +316,7 @@ export function createMenuFamily(slug: string, navigation: boolean) {
           request(
             last,
             () =>
+              sourceOperation?.isCurrent() === true &&
               mounted &&
               viewEpoch === epoch &&
               entryRevision === revision &&
