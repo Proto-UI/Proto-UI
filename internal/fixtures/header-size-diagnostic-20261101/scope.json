@@ -74,5 +74,6 @@
       "version": "1:20230817+repack1-3",
       "sha256": "7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c"
     }
-  ]
+  ],
+  "chromeBinarySha256": "95dc9473b4f904cb3ab0800fc7206081fcae12abc094a088bd741a13f1747b72"
 }

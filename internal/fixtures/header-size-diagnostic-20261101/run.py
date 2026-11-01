@@ -241,7 +241,11 @@ def main():
           'nodeSha256':SHA((node/'bin/node').read_bytes()),
           'chromeSha256':SHA(pathlib.Path('/opt/google/chrome/chrome').read_bytes())})
     if node_actual != 'v' + S['nodeVersion']: fail('Node version drift')
-    if chrome_actual != 'Google Chrome ' + S['chromeVersion']: fail('Chrome image version drift; no update fallback')
+    chrome_version = version_details['chrome']
+    if chrome_version['returnCode'] != 0 or chrome_version['truncated'] or chrome_version['stdout'].strip() != 'Google Chrome ' + S['chromeVersion']:
+        fail('Chrome stdout version/exit mismatch; no update fallback')
+    if SHA(pathlib.Path('/opt/google/chrome/chrome').read_bytes()) != S['chromeBinarySha256']:
+        fail('Chrome binary hash drift; no update fallback')
     for pkg in S['aptPackages']:
         if command(['dpkg-query', '-W', '-f=${Version}', pkg['name']]) != pkg['version']: fail('OS package version drift')
     if not pathlib.Path('/usr/bin/bwrap').is_file(): fail('bubblewrap missing')
