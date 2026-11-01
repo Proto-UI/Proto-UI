@@ -147,7 +147,13 @@ export function createHomepageContent(
       kind: 'box',
       tag: 'a',
       ref: `home-link-${index}`,
-      attrs: { ...attrs, 'data-site-link-enhanced': 'true' },
+      attrs: {
+        ...attrs,
+        'data-site-link-enhanced': 'true',
+        // Carry the resolved appearance, including context-inferred brand/nav/text.
+        // The native anchor keeps focus; its passive Surface owns focus paint.
+        'data-site-link-appearance': siteLinkAppearance(link),
+      },
       className: 'site-native-link home-runtime-link',
       children: [
         {
