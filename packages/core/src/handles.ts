@@ -25,7 +25,7 @@ import {
   OwnedDecorationTarget,
   TemplateType,
   TemplateProps,
-  TemplateChildren,
+  TemplateChildrenInput,
   TemplateNode,
   SvgFactories,
 } from './spec';
@@ -362,8 +362,8 @@ export interface RenderReadHandle<Props extends PropsBaseType> {
 
 export interface ElementFactory {
   (type: TemplateType): TemplateNode;
-  (type: TemplateType, children: TemplateChildren): TemplateNode;
-  (type: TemplateType, props: TemplateProps, children?: TemplateChildren): TemplateNode;
+  (type: TemplateType, children: TemplateChildrenInput): TemplateNode;
+  (type: TemplateType, props: TemplateProps, children?: TemplateChildrenInput): TemplateNode;
 }
 
 export interface RendererHandle<Props extends PropsBaseType> {
