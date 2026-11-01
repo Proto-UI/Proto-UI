@@ -1,5 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { contentsPanelParticipant } from './site-contents-panel';
+import { initSiteNativeControls } from './site-native-controls';
+import type { DemoRuntimeApi } from './PrototypePreviewer/demo-types';
 import { contentsCommandParticipant } from './site-contents-command';
 import { initDocumentationHeaderSurface } from './site-header-surface';
 import {
@@ -45,7 +48,11 @@ vi.mock('./PrototypePreviewer/projection-theme', () => ({
     return () => {};
   },
 }));
-const faults = vi.hoisted(() => ({ failReact: false, calls: [] as string[] }));
+const faults = vi.hoisted(() => ({
+  failReact: false,
+  calls: [] as string[],
+  panelApis: [] as DemoRuntimeApi[],
+}));
 vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
   const actual = await original<typeof import('./PrototypePreviewer/projection-materializer')>();
   return {
@@ -60,30 +67,56 @@ vi.mock('./PrototypePreviewer/projection-materializer', async (original) => {
         args[1].ownerId.startsWith('site-contents-')
       )
         throw new Error('renderer unavailable');
+      if (args[1].content?.demo && args[1].componentId === 'dialog') {
+        const options = args[1],
+          content = options.content!;
+        const originalSetup = content.demo.setup;
+        return actual.materializeProjectionCandidate(args[0], {
+          ...options,
+          content: {
+            ...content,
+            demo: {
+              ...content.demo,
+              setup(context) {
+                faults.panelApis.push(context.api);
+                return originalSetup?.(context);
+              },
+            },
+          },
+        });
+      }
       return actual.materializeProjectionCandidate(...args);
     },
   };
 });
 
+const nativeControlsReleases: Array<() => void> = [];
+const panels: Array<NonNullable<ReturnType<typeof contentsPanelParticipant>>> = [];
 const candidates: MaterializedProjectionCandidate[] = [];
 const handles: Array<{ destroy(): void | Promise<void> }> = [];
 const participants: Array<NonNullable<ReturnType<typeof contentsCommandParticipant>>> = [];
 afterEach(async () => {
+  for (const panel of panels.splice(0)) panel.dispose();
   for (const handle of handles.splice(0)) await handle.destroy();
   for (const candidate of candidates.splice(0)) await candidate.dispose();
   for (const participant of participants.splice(0)) participant.dispose();
+  for (const release of nativeControlsReleases.splice(0)) release();
+  delete document.documentElement.dataset.siteLibraryFamily;
   initSiteContentsNavigation(document)?.();
   document.body.replaceChildren();
   document.body.removeAttribute('data-mobile-menu-expanded');
   localStorage.clear();
   faults.failReact = false;
   faults.calls.length = 0;
+  faults.panelApis.length = 0;
   vi.restoreAllMocks();
 });
 function fixture() {
   // Read production SSR markup; replace only Astro's localized label input.
   const command = readFileSync('apps/www/src/components/SiteContentsCommand.astro', 'utf8')
     .replace(/^---[\s\S]*?---\s*/, '')
+    .replace(/<style\b[\s\S]*?<\/style>/g, '')
+    .replace(/\s(?:data-site-control-family|data-pui-style|style)=\{[^\n]*\}/g, '')
     .replace(/=\{label\}/g, '="Page contents"');
   document.body.innerHTML = `<header data-site-header><div data-site-header-panel id="panel"><div data-site-header-surface-mount></div><div data-site-header-panel-content><nav data-site-header-navigation><a href="/docs/">Docs</a></nav><input aria-label="setting" /></div></div>${command}<button data-menu>Navigation</button></header><div id="starlight__sidebar"><a href="/article/">Article</a></div><button data-outside>Outside</button>`;
   const header = document.querySelector<HTMLElement>('header')!;
@@ -140,6 +173,7 @@ describe('Docs Contents actual family Button command', () => {
         const { header, root, fallback } = fixture();
         const participant = contentsCommandParticipant(header)!;
         participants.push(participant);
+        document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
         fallback.focus();
         const commit = request(runtime, family);
         const candidate = await participant.materialize(commit);
@@ -162,12 +196,28 @@ describe('Docs Contents actual family Button command', () => {
         expect(button.getAttribute('aria-expanded')).toBe('false');
         expect(button.querySelector('button, [role="button"]')).toBeNull();
         const tokens = button.getAttribute('data-pui-style')!;
-        expect(tokens).toContain(family === 'shadcn' ? 'border-transparent' : 'rounded-base');
-        expect(tokens).toContain(family === 'shadcn' ? 'bg-transparent' : 'border-2');
-        expect(tokens).toContain(family === 'shadcn' ? 'border-transparent' : 'border-black');
-        expect(tokens).toContain(
-          family === 'shadcn' ? 'bg-transparent' : 'bg-secondary-background'
-        );
+        // The opener is keyboard-focused: public Rhea focus paint legitimately
+        // replaces its resting transparent border, without losing secondary fill.
+        if (family === 'shadcn') {
+          for (const token of [
+            'border-ring',
+            'ring-3',
+            'ring-ring/30',
+            'bg-secondary',
+            'text-secondary-foreground',
+            'rounded-[var(--pui-radius-2xl)]',
+          ])
+            expect(tokens.split(/\s+/), tokens).toContain(token);
+          expect(tokens.split(/\s+/)).not.toContain('bg-transparent');
+        } else {
+          for (const token of [
+            'rounded-base',
+            'border-2',
+            'border-black',
+            'bg-secondary-background',
+          ])
+            expect(tokens.split(/\s+/), tokens).toContain(token);
+        }
         expect(tokens.includes('shadow-[4px_4px_0_0_#000]')).toBe(family === 'brutalist');
         click(button);
         await settle();
@@ -363,3 +413,152 @@ describe('Docs Contents actual family Button command', () => {
     expect(root.getAttribute('aria-expanded')).toBe('false');
   }, 30000);
 });
+
+// Real materializer + real four framework hosts; only framework package loaders
+// and theme paint are substituted above. This is DOM-host conformance, NOT native
+// focus/scroll/paint acceptance. No private family Transition props are supplied.
+it.each(
+  (['wc', 'react', 'vue', 'vue2'] as const).flatMap((runtime) =>
+    (['shadcn', 'brutalist'] as const).flatMap((family) =>
+      (['no-preference', 'reduce'] as const).map((motion) => ({ runtime, family, motion }))
+    )
+  )
+)(
+  '$runtime/$family initially-closed public Dialog retains facts and the one native tree ($motion)',
+  async ({ runtime, family, motion }) => {
+    const originalMatchMedia = window.matchMedia.bind(window);
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) => {
+      if (!query.includes('prefers-reduced-motion')) return originalMatchMedia(query);
+      return Object.assign(new EventTarget(), {
+        media: query,
+        matches: motion === 'reduce',
+        onchange: null,
+        addListener() {},
+        removeListener() {},
+      }) as MediaQueryList;
+    });
+    const { header } = fixture();
+    const pane = document.getElementById('starlight__sidebar')!;
+    const home = document.createElement('section'),
+      tree = document.createElement('nav');
+    tree.className = 'docs-sidebar';
+    pane.before(home);
+    home.append(tree);
+    tree.append(pane);
+    const disclosure = document.createElement('details');
+    disclosure.innerHTML = '<summary>UI Libraries</summary>';
+    const link = pane.querySelector<HTMLAnchorElement>('a')!;
+    const authoredLabel = link.firstChild;
+    link.setAttribute('aria-current', 'page');
+    pane.className = 'sidebar-pane';
+    const list = document.createElement('ul');
+    list.className = 'top-level';
+    const groupItem = document.createElement('li'),
+      leafItem = document.createElement('li');
+    groupItem.append(disclosure);
+    leafItem.append(link);
+    list.append(groupItem, leafItem);
+    pane.append(list);
+    document.documentElement.dataset.siteLibraryFamily = family;
+    nativeControlsReleases.push(initSiteNativeControls(tree));
+    type PassiveNode = HTMLElement & { getExposes(): Record<string, unknown> };
+    await vi.waitFor(() => expect(link.dataset.siteLinkEnhanced).toBe('true'));
+    const leafSurface = link.querySelector<PassiveNode>(`wc-site-${family}-surface`)!;
+    const leafText = link.querySelector<PassiveNode>(`wc-site-${family}-text`)!;
+    const groupSurface = disclosure.querySelector<PassiveNode>(`wc-site-${family}-surface`)!;
+    const groupText = disclosure.querySelector<PassiveNode>(`wc-site-${family}-text`)!;
+    const passiveNodes = [leafSurface, leafText, groupSurface, groupText];
+    await vi.waitFor(() => {
+      for (const node of passiveNodes) expect(typeof node?.getExposes).toBe('function');
+    });
+    const exposed = passiveNodes.map((node) => node.getExposes());
+    let retainedEvents = 0;
+    link.addEventListener('retained-native-link', () => retainedEvents++);
+    const assertNativeComposition = () => {
+      expect(tree.querySelector('[aria-current="page"]')).toBe(link);
+      expect(tree.querySelector('details')).toBe(disclosure);
+      expect(link.getAttribute('href')).toBe('/article/');
+      expect(leafText.contains(authoredLabel)).toBe(true);
+      expect(link.querySelector(`wc-site-${family}-surface`)).toBe(leafSurface);
+      expect(link.querySelector(`wc-site-${family}-text`)).toBe(leafText);
+      expect(disclosure.querySelector(`wc-site-${family}-surface`)).toBe(groupSurface);
+      expect(disclosure.querySelector(`wc-site-${family}-text`)).toBe(groupText);
+      passiveNodes.forEach((node, index) => {
+        expect(node.isConnected).toBe(true);
+        expect(node.getExposes()).toEqual(exposed[index]);
+        expect(node.getAttribute('role')).toBeNull();
+        expect(node.getAttribute('tabindex')).toBeNull();
+      });
+      const paint = leafSurface.getAttribute('data-pui-style')?.split(/\s+/);
+      expect(paint).toContain(family === 'shadcn' ? 'bg-accent' : 'bg-main');
+      expect(paint).toContain(family === 'shadcn' ? 'rounded-md' : 'rounded-base');
+      expect(leafText.getAttribute('data-pui-style')?.split(/\s+/)).toContain(
+        family === 'shadcn' ? 'font-medium' : 'font-semibold'
+      );
+      const previousEvents = retainedEvents;
+      link.dispatchEvent(new Event('retained-native-link'));
+      expect(retainedEvents).toBe(previousEvents + 1);
+    };
+    await vi.waitFor(assertNativeComposition);
+    const mount = document.createElement('div');
+    mount.dataset.siteContentsPanelMount = '';
+    home.before(mount);
+    const participant = contentsPanelParticipant(header)!;
+    panels.push(participant);
+    const request = {
+      generation: 1,
+      selection: { runtimeId: runtime, projectionFamilyId: family },
+    };
+    const candidate = await participant.materialize(request);
+    candidates.push(candidate);
+    const api = faults.panelApis.at(-1)!;
+    const initial = api.getPublicInstance!('contents-panel');
+    expect(initial).toBeDefined();
+    const fact = (key: string) =>
+      (api.getExposes('contents-panel')?.[key] as { get(): unknown }).get();
+    expect(fact('open')).toBe(false);
+    expect(fact('isPresent')).toBe(false);
+    assertNativeComposition();
+    candidate.activate();
+    participant.prepareCommit(request).publish();
+    const navigation = siteContentsNavigation(document)!;
+    // Cancel before the framework has necessarily materialized its lazy view.
+    navigation.toggle();
+    navigation.close();
+    await vi.waitFor(() => {
+      expect(fact('open')).toBe(false);
+      expect(fact('isPresent')).toBe(false);
+      expect(tree.parentElement).toBe(home);
+      assertNativeComposition();
+    });
+    navigation.toggle();
+    await vi.waitFor(() => {
+      expect(fact('open')).toBe(true);
+      expect(tree.parentElement?.hasAttribute('data-site-contents-slot')).toBe(true);
+    });
+    await vi.waitFor(assertNativeComposition);
+    disclosure.open = true;
+    // Interrupt a close with a same-view reopen without cloning or losing folds.
+    navigation.close();
+    navigation.toggle();
+    await vi.waitFor(() => {
+      expect(fact('open')).toBe(true);
+      expect(tree.parentElement?.hasAttribute('data-site-contents-slot')).toBe(true);
+    });
+    expect(tree.querySelector('details')).toBe(disclosure);
+    expect(disclosure.open).toBe(true);
+    await vi.waitFor(assertNativeComposition);
+    navigation.close();
+    await vi.waitFor(() => {
+      expect(fact('isPresent')).toBe(false);
+      expect(tree.parentElement).toBe(home);
+    });
+    await vi.waitFor(assertNativeComposition);
+    expect(disclosure.open).toBe(true);
+    expect(api.getPublicInstance!('contents-panel')).toBe(initial);
+    expect(document.querySelectorAll('nav.docs-sidebar')).toHaveLength(1);
+    await candidate.dispose();
+    expect(tree.parentElement).toBe(home);
+  },
+  15_000
+);

@@ -276,13 +276,114 @@ it('spaces unframed text separately from framed controls without changing compac
   expect(framed).toContain('--site-header-brand-navigation-gap: 0.75rem');
 });
 
-it('keeps the compact docs header offset identical before and after enhancement', () => {
-  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
-  expect(frame).toMatch(/@media \(max-width: 47\.999rem\)[\s\S]*?--header-height: 3\.5rem;/);
-  expect(css).toMatch(
-    /\.site-header\[data-docs-site-header\] \{\s*grid-template-areas: 'brand search theme menu';/
+// Source contracts only, not a substitute for the native compact cascade/height.
+function cssBlocks(source: string, head: string): string[] {
+  const clean = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  const blocks: string[] = [];
+  let cursor = 0;
+  while (cursor < clean.length) {
+    const start = clean.indexOf(head, cursor);
+    if (start < 0) break;
+    const opening = start + head.length;
+    const gap = clean.slice(opening).match(/^\s*\{/);
+    cursor = opening;
+    if (!gap) continue;
+    const body = opening + gap[0].length;
+    let depth = 1,
+      quote = '',
+      index = body;
+    for (; index < clean.length && depth; index++) {
+      const token = clean[index]!;
+      if (quote) {
+        if (token === '\\') index++;
+        else if (token === quote) quote = '';
+      } else if (token === "'" || token === '"') quote = token;
+      else if (token === '{') depth++;
+      else if (token === '}') depth--;
+    }
+    if (depth) throw new Error(`Unclosed CSS block: ${head}`);
+    blocks.push(clean.slice(body, index - 1));
+    cursor = index;
+  }
+  return blocks;
+}
+function compactHeaderContract(css: string, pageFrame: string, disclosure: string) {
+  const media = cssBlocks(css, '@media (max-width: 47.999rem)').join('\n');
+  const declaration = (selector: string, property: string) => {
+    const values = cssBlocks(media, selector).flatMap((block) =>
+      [...block.matchAll(/(?:^|;)\s*([\w-]+)\s*:\s*([^;]+)(?=;)/g)]
+        .filter((match) => match[1] === property)
+        .map((match) => match[2]!.trim())
+    );
+    return values.at(-1);
+  };
+  const docs = '.site-header[data-docs-site-header]:has(.site-header-docs-navigation)';
+  expect(declaration('.site-header', '--site-header-row-height')).toBe('3.5rem');
+  expect(declaration('.site-header', 'grid-template-areas')).toBe("'brand search theme menu'");
+  expect(declaration('.site-header', 'grid-template-rows')).toBe(
+    'minmax(var(--site-header-row-height), auto)'
   );
-  expect(css).toContain('.site-header[data-docs-site-header]:has(.site-header-docs-navigation)');
+  expect(declaration(docs, 'grid-template-areas')).toBe("'brand contents search theme menu'");
+  expect(declaration(docs, 'grid-template-columns')).toBe('minmax(0, 1fr) repeat(4, 2.75rem)');
+  // Both rules are present without an enhancement-only marker: SSR and hydrated
+  // Docs retain the Contents column. The 15rem extreme-width exception stays.
+  const tiny = cssBlocks(css, '@container docs-page (max-width: 15rem)').join('\n');
+  expect(cssBlocks(tiny, '.site-header').join('\n')).toContain(
+    "'brand brand brand' 'search theme menu'"
+  );
+  expect(cssBlocks(tiny, docs).join('\n')).toContain("'brand brand contents' 'search theme menu'");
+  const compactFrame = cssBlocks(pageFrame, '@media (max-width: 47.999rem)').join('\n');
+  expect(cssBlocks(compactFrame, '.site-page-frame').join('\n')).toMatch(
+    /--header-height:\s*3\.5rem;/
+  );
+  expect(disclosure).toContain('const height = root.offsetHeight;');
+  expect(disclosure).toContain("frame.style.setProperty('--header-height', next)");
+  expect(disclosure).toContain(
+    "frame.style.setProperty('--header-height', originalHeight, originalHeightPriority)"
+  );
+}
+it('keeps SSR and enhanced compact Header branches with and without Contents and the 3.5rem offset contract', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  const disclosure = readFileSync('apps/www/src/components/site-header-disclosure.ts', 'utf8');
+  compactHeaderContract(css, frame, disclosure);
+});
+it('rejects compact Header rule loss, wrong scope, missing Contents, extra rows and incorrect offsets', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  const disclosure = readFileSync('apps/www/src/components/site-header-disclosure.ts', 'utf8');
+  // Each mutation starts from the positive fixture, not an already-red parent.
+  compactHeaderContract(css, frame, disclosure);
+  const damages = [
+    css.replace(
+      "grid-template-areas: 'brand search theme menu';",
+      "grid-template-areas: 'brand search theme menu' 'context context context context';"
+    ),
+    css.replace(
+      "grid-template-areas: 'brand contents search theme menu';",
+      "grid-template-areas: 'brand search theme menu';"
+    ),
+    css.replaceAll(
+      '.site-header[data-docs-site-header]:has(.site-header-docs-navigation)',
+      '.site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation)'
+    ),
+    css.replaceAll('@media (max-width: 47.999rem)', '@media (min-width: 47.999rem)'),
+    css.replace('--site-header-row-height: 3.5rem;', '--site-header-row-height: 4.5rem;'),
+  ];
+  for (const damaged of damages)
+    expect(() => compactHeaderContract(damaged, frame, disclosure)).toThrow();
+  expect(() =>
+    compactHeaderContract(
+      css,
+      frame.replace('--header-height: 3.5rem;', '--header-height: 7.5rem;'),
+      disclosure
+    )
+  ).toThrow();
+  expect(() =>
+    compactHeaderContract(
+      css,
+      frame,
+      disclosure.replace('const height = root.offsetHeight;', 'const height = 56;')
+    )
+  ).toThrow();
 });
 
 it('keeps the page-top anchor at the initial reading inset when deferred modules finish loading', () => {

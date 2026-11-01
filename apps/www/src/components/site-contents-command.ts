@@ -7,6 +7,7 @@ import type {
   ProjectionScopeMaterializeRequest,
 } from './PrototypePreviewer/projection-scope';
 import { siteContentsNavigation } from './site-header-disclosure';
+import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
 
 const controls = {
   runtime: { label: 'Runtime', options: [], onValueChange() {} },
@@ -68,7 +69,7 @@ export function contentsCommandParticipant(header: HTMLElement) {
         !!candidate &&
         candidate.host.dataset.projectionGenerationState === 'active' &&
         !candidate.host.inert;
-      const props = { variant: family === 'brutalist' ? 'surface' : 'ghost', size: 'icon' };
+      const props = headerButtonProps(family);
       candidate = await materializeProjectionCandidate(request, {
         mount,
         ownerId: `${owner}-${namespace}`,
@@ -88,12 +89,7 @@ export function contentsCommandParticipant(header: HTMLElement) {
               prototypeId: `${family}-button`,
               ref: 'contents-command',
               props: { ...props, disabled },
-              surfaceStyle: {
-                width: '2.75rem',
-                height: '2.75rem',
-                minWidth: '2.75rem',
-                minHeight: '2.75rem',
-              },
+              surfaceStyle: headerIconButtonLayout(),
               children: [
                 {
                   kind: 'box',

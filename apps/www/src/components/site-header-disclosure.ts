@@ -412,8 +412,16 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
 /** The application retains one directory-disclosure owner across replaceable
  * command views. The legacy host branch remains compatible with old consumers;
  * the Docs Header uses an ordinary app-owned host, with no upstream listener. */
+/** A replaceable public Dialog view, not another open/focus/scroll owner. */
+export interface SiteContentsPresentation {
+  available(): boolean;
+  setOpen(open: boolean): void;
+  controlsId(): string | null;
+}
+
 export interface SiteContentsNavigation {
   bindButton(button: HTMLElement, active: () => boolean, focus: () => void): () => void;
+  bindPresentation(presentation: SiteContentsPresentation): () => void;
   toggle(): void;
   close(restoreFocus?: boolean): void;
   focus(): void;
@@ -445,6 +453,7 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
   document.addEventListener('focusin', onFocus, true);
   let expanded = false;
   let destroyed = false;
+  let presentation: SiteContentsPresentation | undefined;
   const focus = () => {
     if (destroyed) return;
     pendingFocus = true;
@@ -458,18 +467,28 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     const next = menuHost.getAttribute('aria-expanded') === 'true';
     for (const button of bindings.keys()) {
       button.setAttribute('aria-expanded', String(next));
-      button.setAttribute('aria-controls', 'starlight__sidebar');
+      button.setAttribute('aria-controls', presentation?.controlsId() || 'starlight__sidebar');
+      if (presentation) button.setAttribute('aria-haspopup', 'dialog');
+      else button.removeAttribute('aria-haspopup');
     }
     const newlyOpened = next && !expanded;
+    const changed = next !== expanded;
     expanded = next;
+    document.body.toggleAttribute('data-mobile-menu-expanded', next);
+    document.body.toggleAttribute('data-site-contents-dialog', !!presentation);
+    if (changed) presentation?.setOpen(next);
     if (newlyOpened) document.dispatchEvent(new view.CustomEvent(SITE_CONTENTS_OPEN_EVENT));
   };
   const collapseMenu = (restoreFocus = false) => {
     if (destroyed) return;
+    const alreadyClosed = !expanded;
     menuHost.setAttribute('aria-expanded', 'false');
     document.body.removeAttribute('data-mobile-menu-expanded');
     syncExpandedState();
-    if (restoreFocus) focus();
+    if (alreadyClosed) presentation?.setOpen(false);
+    // Public Dialog owns modal close/restore. The in-flow fallback retains its
+    // old application command return, without a second modal focus policy.
+    if (restoreFocus && !presentation) focus();
   };
   const toggle = () => {
     if (destroyed) return;
@@ -489,12 +508,12 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
   };
   const onHeaderOpen = () => collapseMenu();
   const onEscape = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape' || event.defaultPrevented || !expanded) return;
+    if (presentation || event.key !== 'Escape' || event.defaultPrevented || !expanded) return;
     event.preventDefault();
     collapseMenu(true);
   };
   const onOutside = (event: Event) => {
-    if (!expanded || !(event.target instanceof view.Element)) return;
+    if (presentation || !expanded || !(event.target instanceof view.Element)) return;
     const sidebar = document.getElementById('starlight__sidebar');
     if (
       menuHost.contains(event.target) ||
@@ -509,9 +528,16 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     collapseMenu();
   };
   const onNavigation = (event: Event) => {
-    if (!(event.target instanceof view.Element)) return;
-    if (event.target.closest('#starlight__sidebar a[href]')) collapseMenu();
+    if (!(event.target instanceof view.Element) || event.defaultPrevented) return;
+    if (
+      event instanceof view.MouseEvent &&
+      (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+    )
+      return;
+    const link = event.target.closest<HTMLAnchorElement>('#starlight__sidebar a[href]');
+    if (link && !link.download && (!link.target || link.target === '_self')) collapseMenu();
   };
+  const onRouteChange = () => collapseMenu();
   const observer = new view.MutationObserver(syncExpandedState);
   observer.observe(menuHost, { attributes: true, attributeFilter: ['aria-expanded'] });
   const destroy = () => {
@@ -520,6 +546,8 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     destroyed = true;
     observer.disconnect();
     desktopQuery.removeEventListener('change', collapseOnDesktop);
+    view.removeEventListener('popstate', onRouteChange);
+    view.removeEventListener('hashchange', onRouteChange);
     fallback.removeEventListener('click', onFallback);
     document.removeEventListener(SITE_HEADER_OPEN_EVENT, onHeaderOpen);
     document.removeEventListener('keyup', onEscape);
@@ -527,10 +555,29 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.removeEventListener('click', onNavigation);
     document.removeEventListener('astro:before-swap', destroy);
     document.removeEventListener('focusin', onFocus, true);
+    presentation = undefined;
+    document.body.removeAttribute('data-site-contents-dialog');
     bindings.clear();
     contentsNavigations.delete(menuHost);
   };
   const handle: SiteContentsNavigation = {
+    bindPresentation(next) {
+      if (destroyed) return () => {};
+      const previous = presentation;
+      previous?.setOpen(false);
+      presentation = next;
+      next.setOpen(expanded);
+      syncExpandedState();
+      return () => {
+        // An old generation must never retire its successor. A failed
+        // publication may restore only a still-live previous view.
+        if (presentation !== next) return;
+        next.setOpen(false);
+        presentation = previous?.available() ? previous : undefined;
+        presentation?.setOpen(expanded);
+        syncExpandedState();
+      };
+    },
     bindButton(button, active, focus) {
       if (destroyed) return () => {};
       const binding = { active, focus };
@@ -556,6 +603,8 @@ export function siteContentsNavigation(document: Document): SiteContentsNavigati
     document.addEventListener('click', onNavigation);
   }
   desktopQuery.addEventListener('change', collapseOnDesktop);
+  view.addEventListener('popstate', onRouteChange);
+  view.addEventListener('hashchange', onRouteChange);
   document.addEventListener(SITE_HEADER_OPEN_EVENT, onHeaderOpen);
   document.addEventListener('keyup', onEscape);
   document.addEventListener('astro:before-swap', destroy);
