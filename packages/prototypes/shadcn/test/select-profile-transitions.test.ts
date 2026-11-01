@@ -1,17 +1,15 @@
 import { afterEach, expect, it, vi } from 'vitest';
-import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
+import {
+  AdaptToWebComponent,
+  setElementProps,
+  type WebComponentAdapterElement,
+} from '@proto.ui/adapter-web-component';
 import {
   fieldRoot,
   fieldLabel,
   fieldDescription,
   fieldError,
 } from '@proto.ui/prototypes-base/field';
-import type {
-  SelectRootExposes,
-  SelectTriggerExposes,
-  SelectContentExposes,
-  SelectItemExposes,
-} from '@proto.ui/prototypes-base/select';
 import {
   selectRoot,
   selectTrigger,
@@ -50,7 +48,6 @@ for (const prototype of [
 ])
   AdaptToWebComponent(prototype);
 
-type ExposedElement<E> = HTMLElement & { getExposes(): E };
 const tokens = (element: Element) => (element.getAttribute('data-pui-style') ?? '').split(/\s+/);
 const settle = async () => {
   await vi.advanceTimersByTimeAsync(0);
@@ -59,14 +56,16 @@ const settle = async () => {
 
 function fixture(rootProps: ShadcnSelectRootProps = { defaultValue: 'alpha' }, field = false) {
   const scope = document.createElement(styleScope.name);
-  const root = document.createElement(selectRoot.name) as ExposedElement<SelectRootExposes>;
+  const root = document.createElement(selectRoot.name) as WebComponentAdapterElement<
+    typeof selectRoot
+  >;
   const trigger = document.createElement(
     field ? fieldSelectTrigger.name : selectTrigger.name
-  ) as ExposedElement<SelectTriggerExposes>;
+  ) as WebComponentAdapterElement<typeof selectTrigger | typeof fieldSelectTrigger>;
   const value = document.createElement(selectValue.name);
-  const content = document.createElement(
-    selectContent.name
-  ) as ExposedElement<SelectContentExposes>;
+  const content = document.createElement(selectContent.name) as WebComponentAdapterElement<
+    typeof selectContent
+  >;
   const surface = document.createElement(selectSurface.name);
   const viewport = document.createElement(selectViewport.name);
   const group = document.createElement(selectGroup.name);
@@ -74,7 +73,9 @@ function fixture(rootProps: ShadcnSelectRootProps = { defaultValue: 'alpha' }, f
   const separator = document.createElement(selectSeparator.name);
   label.textContent = 'Letters';
   const items = ['alpha', 'beta'].map((entry) => {
-    const item = document.createElement(selectItem.name) as ExposedElement<SelectItemExposes>;
+    const item = document.createElement(selectItem.name) as WebComponentAdapterElement<
+      typeof selectItem
+    >;
     const text = document.createElement(selectItemText.name);
     text.textContent = entry === 'alpha' ? 'Alpha' : 'Beta';
     setElementProps(item, { value: entry, textValue: text.textContent });
@@ -467,7 +468,9 @@ it.each(['vega', 'nova', 'maia', 'lyra', 'mira', 'luma', 'sera'] as const)(
   'rejects incomplete translucent %s composition rather than painting it as Rhea or New York',
   async (styleProfile) => {
     vi.useFakeTimers();
-    const root = document.createElement(selectRoot.name) as ExposedElement<SelectRootExposes>;
+    const root = document.createElement(selectRoot.name) as WebComponentAdapterElement<
+      typeof selectRoot
+    >;
     const trigger = document.createElement(selectTrigger.name);
     const content = document.createElement(selectContent.name);
     const item = document.createElement(selectItem.name);
