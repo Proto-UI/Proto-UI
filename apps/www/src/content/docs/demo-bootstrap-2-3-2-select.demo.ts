@@ -154,5 +154,22 @@ export default {
     };
     update();
     api.setProps('accept', { onClick: accept });
+    // The demo owns each trigger's accessible name. A host that rewrites the
+    // attribute must not take that ownership, so the demo re-asserts it.
+    const labels = ['uncontrolled', 'disabled', 'controlled', 'rtl'];
+    const labelTriggers = () => {
+      for (const id of labels) refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
+    };
+    labelTriggers();
+    const observer = new MutationObserver(() => {
+      for (const id of labels)
+        if (refs[`${id}Trigger`].getAttribute('aria-label') !== `${id} selection`)
+          refs[`${id}Trigger`].setAttribute('aria-label', `${id} selection`);
+    });
+    for (const id of labels)
+      observer.observe(refs[`${id}Trigger`], { attributes: true, attributeFilter: ['aria-label'] });
+    return () => {
+      observer.disconnect();
+    };
   },
 } satisfies DemoSpec;
