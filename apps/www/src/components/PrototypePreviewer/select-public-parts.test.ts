@@ -28,8 +28,21 @@ function verifyContent(content: DemoProtoNode) {
   const viewport = surface.children?.[0] as DemoProtoNode;
   expect(viewport.prototypeId).toBe('shadcn-select-viewport');
   expect(viewport.children?.length).toBeGreaterThan(0);
-  for (const child of viewport.children ?? []) {
-    const item = child as DemoProtoNode;
+  // The viewport may hold items directly or inside a passive Group. The
+  // Select spec keeps the Content-to-Item relation valid through Group
+  // wrappers and allows mixed grouped and ungrouped items. A Group without a
+  // Label has no accessible name; the relation fails closed rather than
+  // raising, so the Label is optional.
+  const items = (viewport.children ?? []).flatMap((child) => {
+    const node = child as DemoProtoNode;
+    if (node.prototypeId === 'shadcn-select-group') {
+      const groupChildren = (node.children ?? []) as DemoProtoNode[];
+      return groupChildren.filter((entry) => entry.prototypeId !== 'shadcn-select-label');
+    }
+    return [node];
+  });
+  expect(items.length).toBeGreaterThan(0);
+  for (const item of items) {
     expect(item.prototypeId).toBe('shadcn-select-item');
     const text = item.children?.[0] as DemoProtoNode;
     expect(text.prototypeId).toBe('shadcn-select-item-text');
@@ -70,8 +83,15 @@ describe('website public Shadcn Select compositions', () => {
       expect(contents.length).toBe(1);
       contents.forEach(verifyContent);
       expect(parts(result.demo.root, 'shadcn-select-root')[0]?.props?.value).toBe('list');
-      for (const id of Object.values(resolveProjectionSelectParts('shadcn')))
-        expect(result.recipe.prototypeIds).toContain(id);
+      // The recipe declares exactly the Select parts the composition uses.
+      // The homepage deliberately composes no Select Label and no Separator,
+      // so the recipe must not declare them either.
+      const selectParts = resolveProjectionSelectParts('shadcn');
+      for (const id of Object.values(selectParts))
+        if (id !== selectParts.label && id !== selectParts.separator)
+          expect(result.recipe.prototypeIds).toContain(id);
+      expect(result.recipe.prototypeIds).not.toContain(selectParts.label);
+      expect(result.recipe.prototypeIds).not.toContain(selectParts.separator);
     }
   );
   it('preserves controlled current value and disabled option with full generated parts', () => {
@@ -126,11 +146,25 @@ describe('website public Shadcn Select compositions', () => {
         },
         controls,
       });
-      expect(parts(result.demo.root, `${family}-select-content`)[0]?.props?.position).toBe(
-        'popper'
-      );
+      const contents = parts(result.demo.root, `${family}-select-content`);
+      const roots = parts(result.demo.root, `${family}-select-root`);
+      // Every Select root owns exactly one content, so a missing or
+      // misidentified content cannot satisfy the checks below vacuously.
+      expect(contents).toHaveLength(roots.length);
+      expect(contents.length).toBeGreaterThan(0);
+      const ownSurface = parts(result.demo.root, `${family}-select-surface`);
+      // A family that owns the Surface structural part projects it; a family
+      // without one keeps the plain positioning prop on the content.
+      if (ownSurface.length > 0) {
+        expect(contents.every((entry) => entry.props?.position === undefined)).toBe(true);
+        expect(ownSurface).toHaveLength(contents.length);
+      } else {
+        expect(contents.every((entry) => entry.props?.position === 'popper')).toBe(true);
+      }
       expect(parts(result.demo.root, 'shadcn-select-surface')).toHaveLength(0);
-      expect(resolveProjectionSelectParts(family).surface).toBeUndefined();
+      expect(resolveProjectionSelectParts(family).surface).toBe(
+        ownSurface.length > 0 ? `${family}-select-surface` : undefined
+      );
     }
   );
   it.each(['AdapterSelect', 'LanguageSelect'])(
