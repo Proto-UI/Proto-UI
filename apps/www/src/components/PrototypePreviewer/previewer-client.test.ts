@@ -538,6 +538,12 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     expect(recovery.textContent).toContain('lazy-loaded chunk');
     const buttons = Array.from(recovery.querySelectorAll('button'));
     expect(buttons.map((button) => button.textContent)).toEqual(['Retry', 'Reload page']);
+    // The recovery labels must not rely on an inherited foreground: a fixed
+    // background with `color: inherit` is unreadable in the dark theme.
+    for (const button of buttons) {
+      expect(button.style.color).toContain('var(--color-');
+      expect(button.style.background).toContain('var(--color-');
+    }
     await (root as any).__previewer__.destroy();
     root.remove();
   });

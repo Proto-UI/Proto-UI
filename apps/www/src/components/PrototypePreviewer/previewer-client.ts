@@ -255,15 +255,16 @@ export function initPreviewer(options: PreviewerOptions) {
     const container = document.createElement('div');
     container.setAttribute('data-preview-recovery', chunkFailure ? 'chunk' : 'error');
     container.style.cssText =
-      'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:system-ui,sans-serif;';
+      'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:var(--font-sans,system-ui,sans-serif);';
     const title = document.createElement('p');
     title.textContent = chunkFailure ? 'Prototype module failed to load' : 'Preview error';
     title.style.cssText = 'font-size:1.1rem;font-weight:600;margin:0;';
+    title.style.color = 'var(--color-foreground,#111)';
     container.appendChild(title);
     const detail = document.createElement('p');
     detail.textContent = chunkFailure ? describeLazyChunkFailure() : message;
-    detail.style.cssText =
-      'margin:0;color:#555;font-size:0.9rem;max-width:36rem;text-align:center;';
+    detail.style.cssText = 'margin:0;font-size:0.9rem;max-width:36rem;text-align:center;';
+    detail.style.color = 'var(--color-muted-foreground,#555)';
     container.appendChild(detail);
     if (chunkFailure) {
       const actions = document.createElement('div');
@@ -271,8 +272,12 @@ export function initPreviewer(options: PreviewerOptions) {
       const retry = document.createElement('button');
       retry.type = 'button';
       retry.textContent = 'Retry';
+      // Paired theme tokens keep the label readable in both themes; a fixed
+      // background with an inherited foreground is unreadable in dark mode.
       retry.style.cssText =
-        'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#fff;cursor:pointer;font-size:0.85rem;';
+        'padding:0.4rem 1rem;border:1px solid var(--color-border,#999);border-radius:4px;cursor:pointer;font-size:0.85rem;';
+      retry.style.background = 'var(--color-foreground,#111)';
+      retry.style.color = 'var(--color-background,#fff)';
       retry.addEventListener('click', () => {
         // A rejected loader promise must not be reused; clear it so the forced
         // switch re-attempts the dynamic import.
@@ -284,7 +289,9 @@ export function initPreviewer(options: PreviewerOptions) {
       reload.type = 'button';
       reload.textContent = 'Reload page';
       reload.style.cssText =
-        'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#f5f5f5;cursor:pointer;font-size:0.85rem;';
+        'padding:0.4rem 1rem;border:1px solid var(--color-border,#999);border-radius:4px;cursor:pointer;font-size:0.85rem;';
+      reload.style.background = 'var(--color-background,#fff)';
+      reload.style.color = 'var(--color-foreground,#111)';
       reload.addEventListener('click', () => {
         window.location.reload();
       });
@@ -294,7 +301,7 @@ export function initPreviewer(options: PreviewerOptions) {
     const pre = document.createElement('pre');
     pre.textContent = (err as any)?.stack || message;
     pre.style.whiteSpace = 'pre-wrap';
-    pre.style.color = '#888';
+    pre.style.color = 'var(--color-muted-foreground,#888)';
     pre.style.fontSize = '0.75rem';
     pre.style.maxWidth = '100%';
     pre.style.overflow = 'auto';
