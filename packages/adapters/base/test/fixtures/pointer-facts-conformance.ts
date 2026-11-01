@@ -79,6 +79,75 @@ export function pointerFactsConformance(
       },
     });
   describe(`${name}: public author pointer sample contract`, () => {
+    for (const scope of ['root', 'global'] as const) {
+      for (const unavailable of ['pointerType', 'buttons', 'both'] as const)
+        it(`${scope}: throwing ${unavailable} getter preserves independent unknown author facts`, async () => {
+          for (const type of pointerTypes) {
+            const received: ProtoEventPayload[] = [];
+            const mounted = await mount(make(type, scope, (event) => received.push(event)));
+            try {
+              await mounted.flush();
+              const event = new Event(type.replace('.', ''), {
+                bubbles: type !== 'pointer.enter' && type !== 'pointer.leave',
+                composed: true,
+                cancelable: true,
+              });
+              Object.defineProperties(event, {
+                pointerType: {
+                  get() {
+                    if (unavailable !== 'buttons') throw new Error('unavailable pointerType');
+                    return 'mouse';
+                  },
+                },
+                buttons: {
+                  get() {
+                    if (unavailable !== 'pointerType') throw new Error('unavailable buttons');
+                    return 0;
+                  },
+                },
+              });
+              const keys = Reflect.ownKeys(event);
+              await mounted.dispatch(scope === 'root' ? mounted.root : window, event);
+              await mounted.flush();
+              expect(received).toHaveLength(2);
+              expect(received[0]).not.toBe(received[1]);
+              for (const payload of received)
+                assertPortable(
+                  payload,
+                  type,
+                  unavailable === 'buttons' ? 'mouse' : 'unknown',
+                  unavailable === 'pointerType' ? 'none' : 'unknown'
+                );
+              expect(Reflect.ownKeys(event)).toEqual(keys);
+              expect(event.defaultPrevented).toBe(false);
+            } finally {
+              await mounted.unmount();
+            }
+          }
+        });
+      it(`${scope}: key callbacks never read unavailable pointer fields`, async () => {
+        const received: ProtoEventPayload[] = [];
+        const mounted = await mount(make('key.down', scope, (event) => received.push(event)));
+        try {
+          await mounted.flush();
+          const read = vi.fn(() => {
+            throw new Error('must not read pointer facts');
+          });
+          const event = new KeyboardEvent('keydown', { key: 'x', bubbles: true });
+          Object.defineProperties(event, { pointerType: { get: read }, buttons: { get: read } });
+          await mounted.dispatch(scope === 'root' ? mounted.root : window, event);
+          expect(received).toHaveLength(2);
+          for (const payload of received) {
+            expect(payload.type).toBe('key.down');
+            expect(Object.hasOwn(payload, 'pointerType')).toBe(false);
+            expect(Object.hasOwn(payload, 'pointerButtons')).toBe(false);
+          }
+          expect(read).not.toHaveBeenCalled();
+        } finally {
+          await mounted.unmount();
+        }
+      });
+    }
     for (const type of pointerTypes)
       for (const scope of ['root', 'global'] as const) {
         for (const [kind, rawButtons, expectedKind, expectedButtons] of [

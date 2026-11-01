@@ -391,6 +391,69 @@ async function mountPresenceBoundary(target: PointerWebTarget) {
 
 for (const target of WEB_TARGETS)
   describe(`${target}: complete emitted pointer consumer`, () => {
+    for (const scope of ['root', 'global'] as const) {
+      for (const unavailable of ['pointerType', 'buttons', 'both'] as const)
+        it(`${scope}: throwing ${unavailable} native getter yields only independent unknown facts`, async () => {
+          const mounted = await mount(target, scope);
+          try {
+            let calls = 0;
+            for (const type of POINTER_TYPES) {
+              const event = new Event(type.replace('.', ''), {
+                bubbles: type !== 'pointer.enter' && type !== 'pointer.leave',
+                composed: true,
+                cancelable: true,
+              });
+              Object.defineProperties(event, {
+                pointerType: {
+                  get() {
+                    if (unavailable !== 'buttons') throw new Error('unavailable pointerType');
+                    return 'mouse';
+                  },
+                },
+                buttons: {
+                  get() {
+                    if (unavailable !== 'pointerType') throw new Error('unavailable buttons');
+                    return 0;
+                  },
+                },
+              });
+              const keys = Reflect.ownKeys(event);
+              await mounted.dispatch(event);
+              calls++;
+              expect(mounted.read('type')).toBe(type);
+              expect(mounted.read('kind')).toBe(unavailable === 'buttons' ? 'mouse' : 'unknown');
+              expect(mounted.read('buttons')).toBe(
+                unavailable === 'pointerType' ? 'none' : 'unknown'
+              );
+              expect(mounted.read('calls')).toBe(calls);
+              expect(mounted.read('hover')).toBe(0);
+              expect(mounted.read('commits')).toBe(0);
+              expect(Reflect.ownKeys(event)).toEqual(keys);
+              expect(event.defaultPrevented).toBe(false);
+            }
+          } finally {
+            await mounted.close();
+          }
+        });
+      it(`${scope}: emitted key consumer never reads throwing pointer getters`, async () => {
+        const mounted = await mount(target, scope);
+        try {
+          const read = vi.fn(() => {
+            throw new Error('must not read pointer facts');
+          });
+          const event = new KeyboardEvent('keydown', { key: 'x', bubbles: true });
+          Object.defineProperties(event, { pointerType: { get: read }, buttons: { get: read } });
+          await mounted.dispatch(event);
+          expect(mounted.read('type')).toBe('key.down');
+          expect(mounted.read('key')).toBe('x');
+          expect(mounted.read('kind')).toBe('absent');
+          expect(mounted.read('buttons')).toBe('absent');
+          expect(read).not.toHaveBeenCalled();
+        } finally {
+          await mounted.close();
+        }
+      });
+    }
     it('distinguishes initial null, provided-null recovery, and missing-default restoration through real host props', async () => {
       const mounted = await mountPresenceBoundary(target);
       try {

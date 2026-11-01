@@ -1,4 +1,5 @@
 // packages/adapters/base/src/events/web-event-router.ts
+import { readPointerSampleField } from './pointer-sample';
 import { createWebPointerContactWriter, type WebPointerContact } from './pointer-contact';
 import {
   observeDirectionalPointerDown,
@@ -745,6 +746,8 @@ function listen(t: any, type: string, cb: (ev: any) => void): Unsub {
   return () => t.removeEventListener(type, cb as any);
 }
 
+/** A failed host field read is unavailable evidence, not a failed semantic dispatch. */
+
 function createProtoEventPayload(type: string, native: any) {
   const target: Record<PropertyKey, unknown> = {
     type,
@@ -765,8 +768,8 @@ function createProtoEventPayload(type: string, native: any) {
   };
 
   if (Object.hasOwn(POINTER_SAMPLE_NATIVE_TYPES, type)) {
-    const kind: unknown = native?.pointerType;
-    const buttons: unknown = native?.buttons;
+    const kind = readPointerSampleField(native, 'pointerType').value;
+    const buttons = readPointerSampleField(native, 'buttons').value;
     target.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
     target.pointerButtons =
       typeof buttons === 'number' && Number.isInteger(buttons) && buttons >= 0

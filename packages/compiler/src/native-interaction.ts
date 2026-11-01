@@ -254,6 +254,12 @@ export type NativeState<T = unknown> = { get(): T };
 export type NativeObservedState<T> = NativeState<T> & { watch<R>(callback: (run: R, event: NativeStateEvent<T>) => void): () => void; subscribe(callback: (event: { type: 'next'; prev: T; next: T; reason?: unknown }) => void): () => void };
 export type NativeInput = Readonly<{ type: string; pointerType?: 'mouse' | 'touch' | 'pen' | 'unknown'; pointerButtons?: 'none' | 'active' | 'unknown'; key?: string; ctrlKey?: boolean; metaKey?: boolean; altKey?: boolean; shiftKey?: boolean; repeat?: boolean; control: Readonly<{ requestDefaultActionPrevention(options?: { reason?: string; source?: string }): void }> }>;
 export type NativeHostOptions = Readonly<{ capture?: boolean; once?: boolean; passive?: boolean }>;
+// Catch only the individual host fact read, never callback/default-action failures.
+function readPointerSampleField(native: unknown, field: 'pointerType' | 'buttons'): unknown {
+  if (!native || (typeof native !== 'object' && typeof native !== 'function')) return undefined;
+  try { return (native as Record<string, unknown>)[field]; }
+  catch { return undefined; }
+}
 export type NativeFocusOptions = Readonly<{ reason?: 'programmatic' | 'keyboard' | 'pointer'; preventScroll?: boolean }>;
 export type NativeFocus = {
   focused: NativeObservedState<boolean>; focusVisible: NativeObservedState<boolean>; focusable: NativeObservedState<boolean>;
@@ -449,7 +455,7 @@ export function createNativeInteraction<Run>(options: {
       }) };
       const source = native as unknown as Record<string, unknown>;
       if (['pointer.down','pointer.move','pointer.up','pointer.cancel','pointer.enter','pointer.leave'].includes(type)) {
-        const kind = source.pointerType, buttons = source.buttons;
+        const kind = readPointerSampleField(native, 'pointerType'), buttons = readPointerSampleField(native, 'buttons');
         payload.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
         payload.pointerButtons = typeof buttons === 'number' && Number.isFinite(buttons) && Number.isInteger(buttons) && buttons >= 0
           ? buttons === 0 ? 'none' : 'active' : 'unknown';

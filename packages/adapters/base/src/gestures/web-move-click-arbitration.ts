@@ -1,3 +1,5 @@
+import { readPointerSampleField, type PointerSampleFieldRead } from '../events/pointer-sample';
+
 /**
  * Adapter-private correlation between an accepted directional contact and its
  * trailing semantic click. No new DOM listener or author-visible flag is used.
@@ -23,30 +25,39 @@ function retire(target: HTMLElement, pointerId: number) {
   if (records?.size === 0) contacts.delete(target);
 }
 
-function pointerType(event: PointerEvent): string {
-  return ['mouse', 'touch', 'pen'].includes(event.pointerType) ? event.pointerType : 'unknown';
+function pointerType(value: unknown): string {
+  return value === 'mouse' || value === 'touch' || value === 'pen' ? value : 'unknown';
 }
-function retireSuperseded(target: HTMLElement, event: PointerEvent) {
-  const kind = pointerType(event);
+function retireSuperseded(
+  target: HTMLElement,
+  event: PointerEvent,
+  sample: PointerSampleFieldRead = readPointerSampleField(event, 'pointerType')
+) {
+  const kind = pointerType(sample.value);
   for (const current of contacts.get(target)?.values() ?? []) {
     // Only one primary contact exists per native pointer type. This also bounds
     // records when a terminal event was lost outside the document: at most one
     // mouse, touch, pen and unknown record can remain on a live target.
     if (
       current.pointerId === event.pointerId ||
-      (event.isPrimary !== false && event.button === 0 && current.pointerType === kind)
+      (sample.readable &&
+        event.isPrimary !== false &&
+        event.button === 0 &&
+        current.pointerType === kind)
     )
       retire(target, current.pointerId);
   }
 }
 
 export function beginDirectionalClickContact(target: HTMLElement, event: PointerEvent): void {
-  retireSuperseded(target, event);
+  const sample = readPointerSampleField(event, 'pointerType');
+  retireSuperseded(target, event, sample);
+  if (!sample.readable) return;
   let records = contacts.get(target);
   if (!records) contacts.set(target, (records = new Map()));
   records.set(event.pointerId, {
     pointerId: event.pointerId,
-    pointerType: pointerType(event),
+    pointerType: pointerType(sample.value),
     released: false,
     legacyRelease: null,
     legacyTimer: null,
@@ -82,9 +93,13 @@ export function suppressDirectionalClick(target: HTMLElement, event: MouseEvent)
   const current = candidates[0];
   if (!current.released) return false;
   const release = current.legacyRelease;
+  const sample = hasPointerIdentity ? readPointerSampleField(pointer, 'pointerType') : undefined;
+  // A failed read is not the legitimate missing kind of a legacy click.
+  if (sample && !sample.readable) return false;
+  const rawKind = sample?.value;
   const matches = hasPointerIdentity
     ? pointer.pointerId === current.pointerId &&
-      (!pointer.pointerType || pointerType(pointer) === current.pointerType)
+      (!rawKind || pointerType(rawKind) === current.pointerType)
     : !!release &&
       event.button === release.button &&
       event.clientX === release.clientX &&

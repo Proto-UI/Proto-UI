@@ -1,3 +1,4 @@
+import { readPointerSampleField } from '../events/pointer-sample';
 import type {
   MoveGestureCancelReason,
   MoveGestureHost,
@@ -75,9 +76,10 @@ function point(event: PointerEvent): MoveGesturePoint {
 }
 
 function inputOf(event: PointerEvent): MoveGestureInput {
-  if (event.pointerType === 'mouse') return 'mouse';
-  if (event.pointerType === 'touch') return 'touch';
-  if (event.pointerType === 'pen') return 'pen';
+  const kind = readPointerSampleField(event, 'pointerType').value;
+  if (kind === 'mouse') return 'mouse';
+  if (kind === 'touch') return 'touch';
+  if (kind === 'pen') return 'pen';
   return 'unknown';
 }
 
@@ -95,7 +97,9 @@ function sampleOf(event: PointerEvent, active?: ActiveMove): MoveGestureSample {
 }
 
 function isPrimaryContact(event: PointerEvent): boolean {
-  if (event.pointerType === 'mouse' && event.button !== 0) return false;
+  const sample = readPointerSampleField(event, 'pointerType');
+  if (!sample.readable) return false;
+  if (sample.value === 'mouse' && event.button !== 0) return false;
   return event.isPrimary !== false;
 }
 

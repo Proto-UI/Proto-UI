@@ -45,6 +45,117 @@ function facts(event: Event) {
 }
 
 describe('router: independent pointer sample mapping and scope', () => {
+  for (const type of types)
+    for (const scope of ['root', 'global'] as const)
+      for (const unavailable of ['pointerType', 'buttons', 'both'] as const) {
+        it(`${scope} ${type}: throwing ${unavailable} getter only withdraws that fact`, () => {
+          const x = setup();
+          const received: Record<string, unknown>[] = [];
+          const target = scope === 'root' ? x.router.rootTarget : x.router.globalTarget;
+          const ingress = scope === 'root' ? x.rootEl : x.globalEl;
+          target.addEventListener(type, (event) => received.push(facts(event)));
+          const event = new Event(type.replace('.', ''), { bubbles: true, cancelable: true });
+          const readKind = vi.fn(() => {
+            if (unavailable !== 'buttons') throw new Error('unavailable pointerType');
+            return 'mouse';
+          });
+          const readButtons = vi.fn(() => {
+            if (unavailable !== 'pointerType') throw new Error('unavailable buttons');
+            return 0;
+          });
+          Object.defineProperties(event, {
+            pointerType: { get: readKind },
+            buttons: { get: readButtons },
+          });
+          const keys = Reflect.ownKeys(event);
+          expect(() => ingress.dispatchEvent(event)).not.toThrow();
+          expect(received).toHaveLength(1);
+          expect(received[0]).toMatchObject({
+            type,
+            pointerType: unavailable === 'buttons' ? 'mouse' : 'unknown',
+            pointerButtons: unavailable === 'pointerType' ? 'none' : 'unknown',
+          });
+          // This ingress also runs directional arbitration; each extraction is independent.
+          expect(readKind).toHaveBeenCalled();
+          expect(readButtons).toHaveBeenCalledTimes(1);
+          expect(Reflect.ownKeys(event)).toEqual(keys);
+          expect(event.defaultPrevented).toBe(false);
+        });
+      }
+  for (const scope of ['root', 'global'] as const) {
+    it(`${scope}: nonpointer routing does not evaluate throwing pointer getters`, () => {
+      const x = setup(scope === 'root' ? window : new EventTarget());
+      if (scope === 'root') {
+        x.rootEl.tabIndex = 0;
+        x.rootEl.focus();
+        expect(document.activeElement).toBe(x.rootEl);
+      }
+      const received: Record<string, unknown>[] = [];
+      const target = scope === 'root' ? x.router.rootTarget : x.router.globalTarget;
+      const ingress = scope === 'root' ? x.rootEl : x.globalEl;
+      target.addEventListener('key.down', (event) => received.push(facts(event)));
+      const read = vi.fn(() => {
+        throw new Error('must not read pointer facts');
+      });
+      const event = new KeyboardEvent('keydown', { key: 'x', bubbles: true });
+      Object.defineProperties(event, { pointerType: { get: read }, buttons: { get: read } });
+      ingress.dispatchEvent(event);
+      expect(received).toHaveLength(1);
+      expect(received[0].key).toBe('x');
+      expect(Object.hasOwn(received[0], 'pointerType')).toBe(false);
+      expect(Object.hasOwn(received[0], 'pointerButtons')).toBe(false);
+      expect(read).not.toHaveBeenCalled();
+    });
+    it(`${scope}: pointer field recovery preserves the host callback-error reporting channel`, () => {
+      const x = setup();
+      const target = scope === 'root' ? x.router.rootTarget : x.router.globalTarget;
+      const ingress = scope === 'root' ? x.rootEl : x.globalEl;
+      // Native DOM may report listener exceptions through window.error instead of
+      // throwing from dispatchEvent. Compare the current host's actual channel.
+      const observe = (failure: Error, dispatch: () => void) => {
+        let reported = 0;
+        let thrown: unknown;
+        const onError = (event: ErrorEvent) => {
+          if (event.error !== failure) return;
+          reported++;
+          event.preventDefault(); // only this expected negative-control report
+        };
+        window.addEventListener('error', onError);
+        try {
+          dispatch();
+        } catch (error) {
+          thrown = error;
+        } finally {
+          window.removeEventListener('error', onError);
+        }
+        if (thrown !== undefined) expect(thrown).toBe(failure);
+        return { reported, thrown: thrown === failure };
+      };
+      const directFailure = new Error('direct host callback failure');
+      const directCallback = () => {
+        throw directFailure;
+      };
+      ingress.addEventListener('test-control-failure', directCallback);
+      const direct = (() => {
+        try {
+          return observe(directFailure, () =>
+            ingress.dispatchEvent(new Event('test-control-failure'))
+          );
+        } finally {
+          ingress.removeEventListener('test-control-failure', directCallback);
+        }
+      })();
+      expect(direct.reported + Number(direct.thrown)).toBeGreaterThan(0);
+      const failure = new Error('semantic callback failure');
+      target.addEventListener('pointer.move', () => {
+        throw failure;
+      });
+      const semantic = observe(failure, () =>
+        ingress.dispatchEvent(sample('pointer.move', 'mouse', 0))
+      );
+      expect(semantic).toEqual(direct);
+    });
+  }
   for (const type of types) {
     for (const [kind, buttons, expectedKind, expectedButtons] of [
       ['mouse', 0, 'mouse', 'none'],
