@@ -24,6 +24,7 @@ cases:
 exercises:
   prototypes:
     - P-SHADCN-MENUBAR
+    - P-SHADCN-COMMAND
 implementations:
   - id: shadcn-search-menu-profiles-r91
     kind: module-test
