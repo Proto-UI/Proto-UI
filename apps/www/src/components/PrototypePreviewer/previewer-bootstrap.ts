@@ -1,5 +1,6 @@
 import type { RuntimeId } from './runtimes/ids';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
+import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
 
 type PreviewerRoot = HTMLElement & { __previewer__?: { destroy(): unknown } };
 type Client = typeof import('./previewer-client');
@@ -86,7 +87,7 @@ export function initPreviewerBootstrap(
       const fallback = root.querySelector<HTMLElement>('.proto-previewer__skeleton');
       if (fallback)
         fallback.textContent =
-          '[Preview Error] ' + (error instanceof Error ? error.message : String(error));
+          PREVIEW_ERROR_MARKER + ' ' + (error instanceof Error ? error.message : String(error));
       console.error(error);
     } finally {
       if (pending.get(root) === entry) delete root.dataset.mounting;

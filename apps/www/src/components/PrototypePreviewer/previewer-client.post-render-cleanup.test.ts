@@ -83,6 +83,7 @@ vi.mock('./demo-renderer', async (original) => {
 
 import { initPreviewer } from './previewer-client';
 import { WEBSITE_SHADCN_THEME_TOKENS } from './projection-theme';
+import { isPreviewErrorSurface, previewErrorKind } from './preview-error-surface';
 
 type PreviewerHandle = { destroy(): Promise<void>; getCurrentRuntime(): string | null };
 const roots: Array<HTMLElement & { __previewer__?: PreviewerHandle }> = [];
@@ -167,8 +168,9 @@ describe('generic preview post-render preparation cleanup', () => {
         control.failLoad = fault === 'surface-load';
         release();
         await vi.waitFor(() =>
-          expect(root.querySelector('.host')?.textContent).toContain('[Preview Error]')
+          expect(isPreviewErrorSurface(root.querySelector('.host'))).toBe(true)
         );
+        expect(previewErrorKind(root.querySelector('.host'))).toBe('error');
         expect(errors).toHaveBeenCalledOnce();
         expect(published).not.toHaveBeenCalled();
         expect(root.__previewer__?.getCurrentRuntime()).toBeNull();

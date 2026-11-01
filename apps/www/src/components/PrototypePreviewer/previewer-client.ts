@@ -22,6 +22,7 @@ import {
 import { initProjectedPreviewer } from './projected-previewer-client';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
 import { describeLazyChunkFailure, isLazyChunkFailure } from './lazy-chunk-recovery';
+import { PREVIEW_ERROR_MARKER, PREVIEW_RECOVERY_ATTRIBUTE } from './preview-error-surface';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 // Bind our one public preference event to its initiating logical request. A
@@ -253,7 +254,7 @@ export function initPreviewer(options: PreviewerOptions) {
     const message = (err as any)?.message || String(err);
     const chunkFailure = isLazyChunkFailure(err);
     const container = document.createElement('div');
-    container.setAttribute('data-preview-recovery', chunkFailure ? 'chunk' : 'error');
+    container.setAttribute(PREVIEW_RECOVERY_ATTRIBUTE, chunkFailure ? 'chunk' : 'error');
     container.style.cssText =
       'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:var(--font-sans,system-ui,sans-serif);';
     const title = document.createElement('p');
@@ -299,7 +300,9 @@ export function initPreviewer(options: PreviewerOptions) {
       container.appendChild(actions);
     }
     const pre = document.createElement('pre');
-    pre.textContent = (err as any)?.stack || message;
+    // Keep the shared marker text so the demo matrix and the browser harness
+    // still recognize this surface as a failed preview.
+    pre.textContent = `${PREVIEW_ERROR_MARKER}\n${(err as any)?.stack || message}`;
     pre.style.whiteSpace = 'pre-wrap';
     pre.style.color = 'var(--color-muted-foreground,#888)';
     pre.style.fontSize = '0.75rem';
