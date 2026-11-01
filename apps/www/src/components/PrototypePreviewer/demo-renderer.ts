@@ -1,3 +1,9 @@
+import {
+  collectOwnedDemoRefs,
+  ownedDemoRefs,
+  publishDemoRefs,
+  observeOwnedDemoRefs,
+} from './demo-ref-observer';
 import { planMaterialStages, withMaterialStages } from './demo-material-stages';
 import { appendDemoPublicInstanceHook, createDemoPublicInstances } from './demo-public-instances';
 import { createDynamicChildrenModel, type DynamicChildEntry } from './demo-dynamic-children';
@@ -888,61 +894,12 @@ let nextDemoOwner = 0;
 // ownership marker, not a style rule or security boundary. Native boxes/WC
 // retain their directly owned data marker; framework prototypes consume the
 // adapters' existing generic host-class channel (not a new demo-only prop).
-function demoOwnerSelector(owner: string): string {
-  return `[data-demo-owner="${owner}"], .pui-owner-${owner}`;
-}
-function demoOwnedRefSelector(owner: string): string {
-  return `[data-demo-owner="${owner}"][data-demo-ref], .pui-owner-${owner}[data-demo-ref]`;
-}
 function demoOwnerHostClass(authored: unknown, owner: string): string {
   return [typeof authored === 'string' ? authored : '', `pui-owner-${owner}`]
     .filter(Boolean)
     .join(' ');
 }
-function ownedDemoRefs(host: HTMLElement, owner: string): Record<string, HTMLElement> {
-  const refs: Record<string, HTMLElement> = Object.create(null);
-  const selector = demoOwnedRefSelector(owner);
-  const nodes = new Set([
-    ...host.querySelectorAll<HTMLElement>(selector),
-    ...host.ownerDocument.querySelectorAll<HTMLElement>(selector),
-  ]);
-  if (host.matches(selector)) nodes.add(host);
-  for (const node of nodes) {
-    const ref = node.getAttribute('data-demo-ref');
-    if (ref) refs[ref] = node;
-  }
-  return refs;
-}
-function publishDemoRefs(target: Record<string, HTMLElement>, next: Record<string, HTMLElement>) {
-  for (const ref of Object.keys(target)) if (!Object.hasOwn(next, ref)) delete target[ref];
-  Object.assign(target, next);
-}
-function observeOwnedDemoRefs(
-  host: HTMLElement,
-  owner: string,
-  refs: Record<string, HTMLElement>,
-  current: () => boolean
-): () => void {
-  const selector = demoOwnerSelector(owner);
-  const Observer = host.ownerDocument.defaultView?.MutationObserver;
-  if (!Observer) return () => {};
-  const containsOwner = (node: Node) =>
-    node.nodeType === 1 &&
-    ((node as Element).matches(selector) || !!(node as Element).querySelector(selector));
-  const observer = new Observer((records) => {
-    if (!current()) return;
-    if (
-      !records.some((record) => [...record.addedNodes, ...record.removedNodes].some(containsOwner))
-    )
-      return;
-    const next = ownedDemoRefs(host, owner);
-    if (current()) publishDemoRefs(refs, next);
-  });
-  observer.observe(host, { childList: true, subtree: true });
-  if (host.ownerDocument.documentElement)
-    observer.observe(host.ownerDocument.documentElement, { childList: true, subtree: true });
-  return () => observer.disconnect();
-}
+
 function associationKeys(
   root: DemoChild,
   entries: Iterable<readonly DynamicChildEntry[]>
@@ -1195,7 +1152,8 @@ async function renderDemoReact(
 
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  publishDemoRefs(refs, ownedDemoRefs(host, owner));
+  const initialRefCollection = collectOwnedDemoRefs(host, owner);
+  publishDemoRefs(refs, initialRefCollection.refs);
 
   const api: DemoRuntimeApi = {
     subscribePublicInstances(refs, listener) {
@@ -1319,9 +1277,15 @@ async function renderDemoReact(
     }
   );
 
-  stopRefObservation = dynamic.slotRefs.length
-    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
-    : () => {};
+  // Physical host replacement also occurs in ordinary static compositions.
+  // Share document discovery; this owner retains only its own ref index.
+  stopRefObservation = observeOwnedDemoRefs(
+    host,
+    owner,
+    refs,
+    () => ownsLease(opt, lease),
+    initialRefCollection.nodes
+  );
   cleanup = demo.setup?.({ host, refs, api });
 
   return {
@@ -1479,7 +1443,8 @@ async function renderDemoVue(
 
   await new Promise((resolve) => requestAnimationFrame(resolve));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
-  publishDemoRefs(refs, ownedDemoRefs(host, owner));
+  const initialRefCollection = collectOwnedDemoRefs(host, owner);
+  publishDemoRefs(refs, initialRefCollection.refs);
 
   const api: DemoRuntimeApi = {
     subscribePublicInstances(refs, listener) {
@@ -1585,9 +1550,15 @@ async function renderDemoVue(
     }
   );
 
-  stopRefObservation = dynamic.slotRefs.length
-    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
-    : () => {};
+  // Physical host replacement also occurs in ordinary static compositions.
+  // Share document discovery; this owner retains only its own ref index.
+  stopRefObservation = observeOwnedDemoRefs(
+    host,
+    owner,
+    refs,
+    () => ownsLease(opt, lease),
+    initialRefCollection.nodes
+  );
   cleanup = demo.setup?.({ host, refs, api });
 
   return {
@@ -1775,7 +1746,8 @@ async function renderDemoVue2(
   await new Promise((resolve) => requestAnimationFrame(resolve));
   if (!ownsLease(opt, lease)) return abandonLease(lease);
   refreshComponentRefs(app);
-  publishDemoRefs(refs, ownedDemoRefs(host, owner));
+  const initialRefCollection = collectOwnedDemoRefs(host, owner);
+  publishDemoRefs(refs, initialRefCollection.refs);
 
   const api: DemoRuntimeApi = {
     subscribePublicInstances(refs, listener) {
@@ -1892,9 +1864,15 @@ async function renderDemoVue2(
     }
   );
 
-  stopRefObservation = dynamic.slotRefs.length
-    ? observeOwnedDemoRefs(host, owner, refs, () => ownsLease(opt, lease))
-    : () => {};
+  // Physical host replacement also occurs in ordinary static compositions.
+  // Share document discovery; this owner retains only its own ref index.
+  stopRefObservation = observeOwnedDemoRefs(
+    host,
+    owner,
+    refs,
+    () => ownsLease(opt, lease),
+    initialRefCollection.nodes
+  );
   cleanup = demo.setup?.({ host, refs, api });
 
   return {
