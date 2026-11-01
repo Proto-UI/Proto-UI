@@ -15,7 +15,7 @@ for (const [family, exports] of [
   ['bootstrap-2-3-2', bootstrap],
   ['liquid-glass', liquid],
 ] as const)
-  it(`${family} registers exactly four real draft Tabs exports, demo parts and source-only CLI entry`, async () => {
+  it(`${family} registers exactly five real draft Tabs exports, demo parts and source-only CLI entry`, async () => {
     const entry = WORKSPACE_COMPONENT_REGISTRY[`${family}-tabs`]!;
     expect(COMPONENT_REGISTRY[`${family}-tabs`]).toBeUndefined();
     expect(entry.sourceOnly).toBe(true);
@@ -24,18 +24,22 @@ for (const [family, exports] of [
       'tabsList',
       'tabsTrigger',
       'tabsContent',
+      'tabsIndicator',
     ]);
     const ids = new Set<string>();
     const demo = await loadDemo(`demo-${family}-tabs`);
     collectPrototypeIds(demo.root, ids);
     expect([...ids].sort()).toEqual(
-      ['root', 'list', 'trigger', 'content'].map((part) => `${family}-tabs-${part}`).sort()
+      ['root', 'list', 'trigger', 'content', 'indicator']
+        .map((part) => `${family}-tabs-${part}`)
+        .sort()
     );
     for (const [part, key] of [
       ['root', 'tabsRoot'],
       ['list', 'tabsList'],
       ['trigger', 'tabsTrigger'],
       ['content', 'tabsContent'],
+      ['indicator', 'tabsIndicator'],
     ] as const) {
       const id = `${family}-tabs-${part}`;
       expect(exports[key].name).toBe(id);
