@@ -42,6 +42,10 @@ criteria:
     text:
       zh-CN: 当合法的 logical focus request 发生时 host target 尚未完成 projection，Focus 必须只保留最新 pending request，并在该实例后续 commit/mounted readiness 使 target 与 logical parent 可用后重新经过 Focus Center policy 再兑现；host focus capability 必须能够拒绝当前尚不可应用的 target，且拒绝不得被解释为成功或产生 facts。当宿主的 connected 与 focus-ready 不是同一时刻时，adapter 必须通过窄化的 target-readiness host capability 发出就绪信号。retained view detach 仅结束当前 host view epoch，不得丢弃 logical owner 的 pending request；若 Portal 或后续 retained view epoch 移动或替换 native target，同一就绪信号必须把 pending 或既有 focus owner 投射到新 target，而不得伪造或改写 semantic facts。`preventScroll` request policy 必须由支持该能力的宿主投射为保持 viewport 的原生 focus option，不支持的宿主可以忽略该 policy，但不得拒绝 logical focus。pending 期间不得伪造 focus facts，显式 blur、更新的 request、logical instance 的 terminal unmount 或 dispose 必须取消或取代旧 request；target disabled 只取消 target/target-self pending request，不得取消仍启用的 entry role 的 pending request。
       en: When a valid logical focus request occurs before its host target has completed projection, Focus must retain only the latest pending request and re-run it through Focus Center policy after a later commit or mounted-readiness boundary makes both the target and logical parent available; the host focus capability must be able to reject a target that is not yet applicable, and rejection must not be interpreted as success or produce facts. When host connectedness and focus-readiness occur at different times, the adapter must publish readiness through a narrow target-readiness host capability. A retained view detach ends only the current host view epoch and must not discard the logical owner's pending request; if a portal or later retained view epoch moves or replaces the native target, the same readiness signal must project the pending or established focus owner onto the new target without fabricating or rewriting semantic facts. A host that supports the `preventScroll` request policy must project it to native focus while preserving the viewport; a host without that capability may ignore the policy but must not reject logical focus. While pending, focus facts must not be fabricated, and explicit blur, a newer request, terminal unmount of the logical instance, or dispose must cancel or replace the older request; target disabled cancels only target/target-self pending requests and must not cancel a pending request of a still-enabled entry role.
+  - id: C-AS-FOCUSABLE-0001-H
+    text:
+      zh-CN: 对已由宿主观察为当前 focus owner 的同一 target，成功且未被取代的 native target-self request 必须刷新该 owner 的 focusVisible 观察，即使宿主没有再次报告 focus。支持原生 visibility 查询时保留查询的 true 或 false，仅在无法查询时使用当前输入 modality fallback；不得为了指针输入强行清除仍为 true 的原生结果。采样期间的新请求、owner/target 变更或取消必须阻止旧采样写回。仅有 request 成功、逻辑 focused 或 retargeted host 的活动状态不得被用来伪造新 owner，也不得被视为省略必要原生 focus 效果的充分证明。
+      en: For the same target already observed by the host as the current focus owner, a successful, unsuperseded native target-self request must refresh that owner's focusVisible observation even when the host reports no new focus event. Preserve either true or false from a supported native visibility query and use current input-modality fallback only when the query is unavailable; pointer input must not force a true native result to false. A newer request, owner or target change, or cancellation during sampling must prevent a stale write. Request success alone, logical focused state, or activity of a retargeted host must neither fabricate a new owner nor suffice to omit a necessary native focus effect.
 sources:
   - path: internal/contracts/focus/base-text/as-focusable.v0.md
   - path: packages/hooks/src/as-focusable.ts
@@ -76,6 +80,9 @@ verifies:
   tests:
     - T-FOCUS-0001
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Defined guarded visibility resampling for an already observed native target without admitting native-effect deduplication or promoting draft lifecycle.
   - version: 0.3.0-alpha.1
     change: refined
     summary: Clarified target-role disable cancellation without cancelling an independently enabled entry role.
