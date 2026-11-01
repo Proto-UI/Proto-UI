@@ -125,6 +125,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Register exact CommandDialog declaration sources under existing draft criteria and test relations; native admission remains open.
+  - version: 0.3.0-alpha.1
     change: revised
     summary: Add an explicit website-menu presentation and real bounded navigation consumer without changing default recipes or claiming clickable-prefix/target-reveal/native completion.
 tags:
