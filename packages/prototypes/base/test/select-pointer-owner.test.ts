@@ -71,9 +71,18 @@ async function fixture(onContextChange?: (next: SelectContextValue) => void) {
   // Each new case must prove the intended pre-cache-update window, or fail.
   root.append(trigger, ...(observer ? [observer] : []), content);
   const requests: Array<{ event: string; detail: unknown }> = [];
-  for (const event of ['openChange', 'valueChange', 'select']) {
+  for (const event of ['openChange', 'valueChange']) {
     root.addEventListener(event, (value) =>
       requests.push({ event, detail: (value as CustomEvent<unknown>).detail })
+    );
+  }
+  // The Item emits its select signal on the Item. The Content is portaled
+  // under the document body, so that signal does not bubble through the
+  // logical Select Root; observe it on the Item itself, otherwise the
+  // negative selection assertions below would never see it.
+  for (const item of items) {
+    item.addEventListener('select', (value) =>
+      requests.push({ event: 'select', detail: (value as CustomEvent<unknown>).detail })
     );
   }
   document.body.append(root);
@@ -390,4 +399,7 @@ it('keeps selection commit separate from mouse navigation', async () => {
   expect(f.root.getExposes().open.get()).toBe(false);
   expect(f.items.map((item) => item.getExposes().selected.get())).toEqual([false, true, false]);
   expect(f.requests.filter((row) => row.event === 'valueChange')).toHaveLength(1);
+  // The Item select signal is observed on the Item, so the negative
+  // selection assertions are live rather than silently blind.
+  expect(f.requests.filter((row) => row.event === 'select')).toHaveLength(1);
 });
