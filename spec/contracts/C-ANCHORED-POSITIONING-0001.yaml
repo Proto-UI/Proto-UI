@@ -63,7 +63,9 @@ sources:
   - path: packages/modules/positioning/src/impl.ts
   - path: packages/modules/positioning/src/web/floating-ui-host.ts
 dependsOn:
-  contracts: [C-MATERIAL-PAINT-FOOTPRINT-0001]
+  contracts:
+    - id: C-MATERIAL-PAINT-FOOTPRINT-0001
+      since: 0.3.0-alpha.1
   decisions:
     - D-ANATOMY-PARTVIEW-TARGET-0001
 verifies:
