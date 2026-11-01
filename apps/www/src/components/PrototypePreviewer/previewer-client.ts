@@ -155,10 +155,6 @@ export function initPreviewer(options: PreviewerOptions) {
 
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
   let requestedRuntime: RuntimeId | null = null;
-  // The runtime that a failed chunk load should retry. `requestedRuntime` is
-  // cleared once a switch settles, so the recovery control keeps its own
-  // reference to the runtime that actually failed.
-  let retryRuntime: RuntimeId | null = null;
   let version = 0;
   let destroyed = false;
   let mounted = false;
@@ -270,25 +266,17 @@ export function initPreviewer(options: PreviewerOptions) {
     if (chunkFailure) {
       const actions = document.createElement('div');
       actions.style.cssText = 'display:flex;gap:0.5rem;';
-      const retry = document.createElement('button');
-      retry.type = 'button';
-      retry.textContent = 'Retry';
-      // Paired theme tokens keep the label readable in both themes; a fixed
-      // background with an inherited foreground is unreadable in dark mode.
-      retry.style.cssText =
-        'padding:0.4rem 1rem;border:1px solid var(--color-border,#999);border-radius:4px;cursor:pointer;font-size:0.85rem;';
-      retry.style.background = 'var(--color-foreground,#111)';
-      retry.style.color = 'var(--color-background,#fff)';
-      retry.addEventListener('click', () => {
-        // A rejected loader promise must not be reused; clear it so the forced
-        // switch re-attempts the dynamic import.
-        loaderPromise = null;
-        if (!retryRuntime) return;
-        void switchTo(retryRuntime, { force: true });
-      });
+      // A failed dynamic import is cached by URL in the browser's module map,
+      // so re-importing the same build-bound URL cannot recover it. Only a
+      // fresh document can, because the page itself is served from the new
+      // build and therefore references the new chunk URLs. The repository's
+      // fresh-URL retry mechanism covers the runtime and adapter entries and
+      // does not reach the glob-loaded prototype and demo modules.
       const reload = document.createElement('button');
       reload.type = 'button';
       reload.textContent = 'Reload page';
+      // Paired theme tokens keep the label readable in both themes; a fixed
+      // background with an inherited foreground is unreadable in dark mode.
       reload.style.cssText =
         'padding:0.4rem 1rem;border:1px solid var(--color-border,#999);border-radius:4px;cursor:pointer;font-size:0.85rem;';
       reload.style.background = 'var(--color-background,#fff)';
@@ -296,7 +284,7 @@ export function initPreviewer(options: PreviewerOptions) {
       reload.addEventListener('click', () => {
         window.location.reload();
       });
-      actions.append(retry, reload);
+      actions.appendChild(reload);
       container.appendChild(actions);
     }
     const pre = document.createElement('pre');
@@ -338,7 +326,6 @@ export function initPreviewer(options: PreviewerOptions) {
     activeFocusLease = focusLease;
     let committed = false;
     requestedRuntime = runtime;
-    retryRuntime = runtime;
     const myVersion = ++version;
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.

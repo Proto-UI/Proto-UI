@@ -40,13 +40,17 @@ describe('lazy chunk failure detection', () => {
 
   it('recognizes an unavailable published chunk URL', () => {
     expect(isLazyChunkFailure(new Error('GET /_astro/demo.a1b2.js returned 404'))).toBe(true);
-    expect(isLazyChunkFailure(new Error('chunk not found'))).toBe(true);
+    expect(isLazyChunkFailure(new Error('404 for /_astro/demo.a1b2.js'))).toBe(true);
   });
 
   it('does not classify unrelated preview defects as chunk failures', () => {
     expect(isLazyChunkFailure(new Error('vue2 failed'))).toBe(false);
     expect(isLazyChunkFailure(new Error('missing prototypeId'))).toBe(false);
     expect(isLazyChunkFailure(new Error('mount rejected'))).toBe(false);
+    // A runtime failure that merely mentions a missing port must keep its own
+    // message instead of being reported as a chunk failure.
+    expect(isLazyChunkFailure(new Error('props port not found'))).toBe(false);
+    expect(isLazyChunkFailure(new Error('adapter host 404 response'))).toBe(false);
   });
 
   it('does not classify an empty or unknown failure as a chunk failure', () => {

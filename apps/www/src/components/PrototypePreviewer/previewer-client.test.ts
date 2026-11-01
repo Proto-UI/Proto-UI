@@ -537,49 +537,16 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     expect(recovery.textContent).toContain('Prototype module failed to load');
     expect(recovery.textContent).toContain('lazy-loaded chunk');
     const buttons = Array.from(recovery.querySelectorAll('button'));
-    expect(buttons.map((button) => button.textContent)).toEqual(['Retry', 'Reload page']);
+    // A failed dynamic import is cached by URL in the browser's module map, so
+    // re-importing the same build-bound URL cannot recover it. Only a fresh
+    // document can, so the surface must not offer an ineffective retry.
+    expect(buttons.map((button) => button.textContent)).toEqual(['Reload page']);
     // The recovery labels must not rely on an inherited foreground: a fixed
     // background with `color: inherit` is unreadable in the dark theme.
     for (const button of buttons) {
       expect(button.style.color).toContain('var(--color-');
       expect(button.style.background).toContain('var(--color-');
     }
-    await (root as any).__previewer__.destroy();
-    root.remove();
-  });
-
-  it('re-attempts the dynamic import when the recovery control retries', async () => {
-    loadPrototypeSpy.mockRejectedValueOnce(
-      new Error(
-        '[PrototypePreviewer] 加载原型模块 "demo" 失败: error loading dynamically imported module: /_astro/demo.hash.js'
-      )
-    );
-    const root = createPreviewerRoot();
-
-    initPreviewer({
-      root,
-      prototypeId: 'demo',
-      initialRuntime: 'wc',
-      demoProps: {},
-      runtimeList: ['wc', 'vue2'],
-    });
-
-    const retry = await vi.waitFor(() => {
-      const button = root.querySelector<HTMLButtonElement>(
-        '[data-preview-recovery="chunk"] button'
-      );
-      expect(button).not.toBeNull();
-      return button!;
-    });
-    expect(loadPrototypeSpy).toHaveBeenCalledTimes(1);
-
-    retry.click();
-
-    await vi.waitFor(() => expect(loadPrototypeSpy).toHaveBeenCalledTimes(2));
-    await vi.waitFor(() =>
-      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
-    );
-    expect(root.querySelector('[data-preview-recovery="chunk"]')).toBeNull();
     await (root as any).__previewer__.destroy();
     root.remove();
   });

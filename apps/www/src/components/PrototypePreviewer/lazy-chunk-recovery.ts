@@ -14,22 +14,22 @@
 
 /** Native dynamic-import failure wording, per engine. */
 const CHUNK_FAILURE_PATTERNS: readonly RegExp[] = [
-  // Chrome / Edge / Chromium: "Failed to fetch dynamically imported module"
-  /failed to fetch dynamically imported module/i,
-  // Firefox: "error loading dynamically imported module"
-  /error loading dynamically imported module/i,
+  // Chromium: "Failed to fetch dynamically imported module: <url>"
+  // Chromium: "Failed to load dynamically imported module: <url>"
+  // Firefox: "error loading dynamically imported module: <url>"
+  /dynamically imported module/i,
   // Safari: "Importing a module script failed."
-  /importing a module script failed/i,
-  // Older Safari wording.
-  /loading module scripts? failed/i,
-  // Generic transport failures.
-  /failed to fetch/i,
-  /network ?error/i,
-  /failed to load resource/i,
-  // A published chunk URL that no longer resolves.
-  /\b404\b/,
-  /not found/i,
+  // Older Safari: "Loading module script failed."
+  /(importing|loading) (a )?module scripts? failed/i,
 ];
+
+/**
+ * A published chunk URL that no longer resolves. The status and the asset
+ * name can appear in either order, so both have to be present.
+ */
+function mentionsUnavailableChunk(text: string): boolean {
+  return /\b404\b/.test(text) && /\.js\b/.test(text);
+}
 
 function errorText(err: unknown): string {
   if (err instanceof Error) return `${err.name}: ${err.message}`;
@@ -53,7 +53,8 @@ function errorText(err: unknown): string {
 export function isLazyChunkFailure(err: unknown): boolean {
   const text = errorText(err);
   if (!text) return false;
-  return CHUNK_FAILURE_PATTERNS.some((pattern) => pattern.test(text));
+  if (CHUNK_FAILURE_PATTERNS.some((pattern) => pattern.test(text))) return true;
+  return mentionsUnavailableChunk(text);
 }
 
 /**
@@ -63,6 +64,6 @@ export function describeLazyChunkFailure(): string {
   return (
     'The lazy-loaded chunk for this prototype is unavailable. ' +
     'This can happen when the site was updated and the previously published ' +
-    'chunk URL is no longer valid. Try retrying, or reload the page.'
+    'chunk URL is no longer valid. Reload the page to load the current build.'
   );
 }
