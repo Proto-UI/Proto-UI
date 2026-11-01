@@ -31,7 +31,12 @@ export default definePrototype<CommandInputProps, CommandInputExposes>({
     ] as const;
     for (const [profile, inset] of noAddonInsets) {
       def.rule({
-        when: (w) => w.all(w.state(style).eq(profile), w.state(grouped).eq(true)),
+        when: (w) =>
+          w.all(
+            w.state(style).eq(profile),
+            w.state(grouped).eq(true),
+            w.prop('presentation').eq('default')
+          ),
         intent: (i) => i.feedback.style.use(tw(inset)),
       });
     }

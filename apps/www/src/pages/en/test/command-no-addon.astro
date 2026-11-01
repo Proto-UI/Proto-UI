@@ -1,0 +1,118 @@
+---
+import '../../../styles/global.css';
+import SiteLibraryStyle from '../../../components/SiteLibraryStyle.astro';
+import { renderProtoStyleTokenCss } from '../../../../../../packages/cli/src/services/proto-style-css';
+import { SHADCN_STYLE_TOKENS } from '../../../../../../packages/cli/src/generated/shadcn-style-tokens';
+const css = renderProtoStyleTokenCss(SHADCN_STYLE_TOKENS);
+---
+
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Default no-addon Command compatibility fixture</title>
+    <SiteLibraryStyle />
+    <style is:global data-command-default-css set:html={css}></style>
+  </head>
+  <body>
+    <main data-site-family-scope data-site-library-family="shadcn">
+      <h1>Default public Command, no addon</h1>
+      <p>
+        The website menu is an opt-in recipe. This independent fixture retains the original default.
+      </p>
+      <div data-command-default-host data-mount-state="pending"></div>
+      <button type="button" data-fixture-blur>Outside editor focus control</button>
+      <p data-command-default-error role="alert"></p>
+    </main>
+    <script>
+      import { renderDemo } from '../../../components/PrototypePreviewer/demo-renderer';
+      import { loadPrototypes } from '../../../components/PrototypePreviewer/prototype-modules';
+      import {
+        collectPrototypeIds,
+        type DemoSpec,
+        type DemoRenderResult,
+      } from '../../../components/PrototypePreviewer/demo-types';
+      import { isRuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
+      const runtime = new URL(location.href).searchParams.get('runtime') ?? 'wc';
+      if (!isRuntimeId(runtime) || !['wc', 'react', 'vue', 'vue2'].includes(runtime))
+        throw new Error('Unsupported default Command fixture runtime');
+      const host = document.querySelector<HTMLElement>('[data-command-default-host]')!;
+      let current = true;
+      let view: DemoRenderResult | undefined;
+      const report = (error: unknown) => {
+        host.dataset.mountState = 'error';
+        document.querySelector('[data-command-default-error]')!.textContent = String(error);
+        console.error(error);
+      };
+      const demo: DemoSpec = {
+        type: 'demo',
+        root: {
+          kind: 'proto',
+          prototypeId: 'shadcn-command-root',
+          ref: 'command',
+          props: { styleProfile: 'rhea', a11yLabel: 'Default Command' },
+          children: [
+            {
+              kind: 'proto',
+              prototypeId: 'shadcn-command-input-wrapper',
+              ref: 'wrapper',
+              children: [
+                {
+                  kind: 'proto',
+                  prototypeId: 'shadcn-input-shell',
+                  ref: 'shell',
+                  children: [
+                    {
+                      kind: 'proto',
+                      prototypeId: 'shadcn-command-input',
+                      ref: 'input',
+                      props: { a11yLabel: 'Default search', placeholder: 'Default search' },
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      };
+      async function mount() {
+        const ids = new Set<string>();
+        collectPrototypeIds(demo.root, ids);
+        await loadPrototypes([...ids]);
+        if (!current) return;
+        const candidate = await renderDemo({ host, runtime, demo, isCurrent: () => current });
+        if (!current) {
+          await candidate.destroy();
+          return;
+        }
+        view = candidate;
+        host.dataset.renderedRuntime = runtime;
+        host.dataset.mountState = 'ready';
+      }
+      window.addEventListener(
+        'pagehide',
+        () => {
+          current = false;
+          host.dataset.mountState = 'retired';
+          if (view) void Promise.resolve(view.destroy()).catch(report);
+        },
+        { once: true }
+      );
+      void mount().catch(report);
+    </script>
+  </body>
+</html>
+<style>
+  body {
+    margin: 16px;
+  }
+  main {
+    max-width: 32rem;
+  }
+  h1,
+  p {
+    overflow-wrap: anywhere;
+  }
+</style>

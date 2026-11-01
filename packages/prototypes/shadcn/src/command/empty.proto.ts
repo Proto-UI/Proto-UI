@@ -8,6 +8,10 @@ export default definePrototype<CommandEmptyProps, CommandEmptyExposes>({
   setup(def) {
     asCommandEmpty();
     setupCommandPartPaint(def, 'empty');
-    def.feedback.style.use(tw('py-6 text-center'));
+    def.feedback.style.use(tw('text-center'));
+    def.rule({
+      when: (w) => w.prop('presentation').eq('default'),
+      intent: (i) => i.feedback.style.use(tw('py-6')),
+    });
   },
 });

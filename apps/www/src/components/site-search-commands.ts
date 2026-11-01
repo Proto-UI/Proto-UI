@@ -4,6 +4,7 @@ import { siteSearchShortcutLabel } from './site-search-shortcut';
 import { headerButtonProps, headerResponsiveButtonFeedback } from './site-header-control-recipes';
 import type { ExposeStateExternalHandle } from '@proto.ui/module-expose-state';
 import searchIcon from '../../../../packages/prototypes/lucide/src/icons/search';
+import arrowRightIcon from '../../../../packages/prototypes/lucide/src/icons/arrow-right';
 import closeIcon from '../../../../packages/prototypes/lucide/src/icons/x';
 import { registerPrototype } from './PrototypePreviewer/registry';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
@@ -27,6 +28,7 @@ import type { SiteLibraryFamily } from './site-library-family';
 // rendering the registered prototypes and committing all three commands.
 registerPrototype('lucide-search-icon', searchIcon);
 registerPrototype('lucide-x-icon', closeIcon);
+registerPrototype('lucide-arrow-right-icon', arrowRightIcon);
 
 export type SearchCommand = 'open' | 'close' | 'retry';
 type SearchCallbacks = Record<SearchCommand, () => unknown> & { prepare?: () => unknown };
