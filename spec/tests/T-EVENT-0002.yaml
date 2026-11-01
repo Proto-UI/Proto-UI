@@ -44,6 +44,15 @@ cases:
       - C-EVENT-0002-G
       - C-EVENT-0002-H
     expectation: expose-emit-is-expose
+  - id: T-EVENT-0002-CASE-POINTER-FACTS
+    title: Six pointer events expose finite sample facts without host leakage
+    covers:
+      - C-EVENT-0002-L
+      - M-EVENT-0001-L
+      - C-EVENT-TYPE-0003-F
+      - C-EVENT-TYPE-0003-G
+      - C-EVENT-TYPE-0003-H
+    expectation: pointer-sample-facts
 implementations:
   - id: event-type-payload-fixture
     kind: fixture
@@ -56,6 +65,7 @@ implementations:
       - T-EVENT-0002-CASE-OPTIONAL-PAYLOAD
       - T-EVENT-0002-CASE-HOST-BOUND
       - T-EVENT-0002-CASE-EXPOSE-EMIT
+      - T-EVENT-0002-CASE-POINTER-FACTS
   - id: module-event-type-validation-contract
     kind: module-test
     status: passing
@@ -86,7 +96,60 @@ implementations:
     required: true
     consumesCases:
       - T-EVENT-0002-CASE-EXPOSE-EMIT
+  - id: module-pointer-facts-contract
+    kind: module-test
+    status: planned
+    path: packages/modules/event/test/contract/pointer-facts.v0.contract.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: web-pointer-router-contract
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/base/test/pointer-facts-router.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: web-component-pointer-author-callback
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/web-component/test/pointer-facts.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: react-pointer-author-callback
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/react/test/pointer-facts.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: vue-pointer-author-callback
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue/test/pointer-facts.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: vue2-pointer-author-callback
+    kind: adapter-test
+    status: planned
+    path: packages/adapters/vue2/test/pointer-facts.integration.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
+  - id: compiled-web-pointer-consumers
+    kind: adapter-test
+    status: planned
+    path: packages/compiler/test/pointer-facts-native.test.ts
+    required: true
+    consumesCases:
+      - T-EVENT-0002-CASE-POINTER-FACTS
 verifies:
+  modules:
+    - id: M-EVENT-0001
+      anchors:
+        - M-EVENT-0001-L
   contracts:
     - id: C-EVENT-0002
       anchors:
@@ -95,6 +158,7 @@ verifies:
         - C-EVENT-0002-I
         - C-EVENT-0002-J
         - C-EVENT-0002-K
+        - C-EVENT-0002-L
     - id: C-EVENT-TYPE-0001
       anchors:
         - C-EVENT-TYPE-0001-A
@@ -108,6 +172,9 @@ verifies:
         - C-EVENT-TYPE-0003-B
         - C-EVENT-TYPE-0003-C
         - C-EVENT-TYPE-0003-D
+        - C-EVENT-TYPE-0003-F
+        - C-EVENT-TYPE-0003-G
+        - C-EVENT-TYPE-0003-H
     - id: C-EVENT-TYPE-0004
       anchors:
         - C-EVENT-TYPE-0004-A
@@ -122,6 +189,9 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Exercises the Event/expose channel boundary for emitted expose events.
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added pointer sample conformance case; new implementations are planned and do not claim executed acceptance.
   - version: 0.1.0
     change: introduced
     summary: Added event type, payload, host-bound event, and expose emit ownership test entity.

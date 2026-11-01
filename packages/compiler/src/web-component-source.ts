@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { nativeShape, NativeLexicalScope, type NativeShape } from './template-shape';
 import { dataTypeEqual, formatDataType } from './data-types';
 import { isDataValueType } from './ir';
@@ -81,6 +82,7 @@ const SUPPORTED: Record<string, true> = {
   'event.on': true,
   'event.onGlobal': true,
   'event.requestDefaultActionPrevention': true,
+  'eventControl.requestDefaultActionPrevention': true,
   'focus.configure': true,
   'focus.setDisabled': true,
   'focus.focusSelf': true,
@@ -104,6 +106,10 @@ export function emitWebComponentSource(
   const checked = validateIR(input);
   if (!checked.ok) return checked;
   const ir = checked.value;
+  if (options.ssr) {
+    const pointerDiagnostics = unsupportedPointerFacts(ir, 'web-component-source SSR');
+    if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
+  }
   const selected = resolveTargetProfile('web-component-source-v1');
   if (!selected.ok) return selected;
   const admitted = checkTargetOperations(ir, selected.value);
@@ -329,6 +335,9 @@ export function emitWebComponentSource(
     if (type === 'focus') return `${prefix}NativeFocus`;
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
+    if (type === 'event-control') return `${prefix}NativeInput['control']`;
+    if (type === 'event-or-control')
+      return `(${prefix}NativeInput | ${prefix}NativeInput['control'])`;
     if (type === 'host-event') return 'Event';
     if (type === 'props') return `${prefix}PropsSnapshot`;
     if (type === 'record') return 'Record<string, unknown>';

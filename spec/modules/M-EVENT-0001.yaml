@@ -65,6 +65,10 @@ criteria:
       en: Privileged consumers may obtain an opaque global-input scope and, only during synchronous portable dispatch, the opaque identity of that input sample. Adapter wrappers for the same native sample preserve that identity. This metadata is not added to the author payload, gives no host access, and does not change broadcast or default-action behavior. Scope uses the explicitly wired shared input source when available, otherwise the current global binding target.
       zh-CN: 特权消费者可读取不透明 global-input scope，并仅在 portable dispatch 的同步窗口内读取该次 input sample 的不透明身份。同一 native sample 的 Adapter wrapper 保持同一身份。metadata 不加入作者 payload、不提供 host 访问，也不改变广播或 default-action 行为。scope 优先使用显式接入的共享输入源，否则使用当前 global binding target。
 
+  - id: M-EVENT-0001-L
+    text:
+      zh-CN: Module 必须仅为六个 pointer medium event 从已翻译输入复制有限 pointerType/pointerButtons；缺失或非法值变 unknown，其它 semantic event 省略二者。每个 callback 获得独立 immutable data view，不保留原对象、不带入宿主字段、不从前一 sample 补值；既有 callback-window default-action control 与去重不变。
+      en: The module copies finite pointerType/pointerButtons from translated input only for the six pointer medium events; missing or invalid values become unknown, and other semantic events omit both. Each callback gets its own immutable data view without retaining the original object, importing host fields or filling values from a previous sample. Existing callback-window default-action control and deduplication remain unchanged.
 satisfies:
   contracts:
     - C-EVENT-0001
@@ -133,6 +137,9 @@ openQuestions:
       en: The current Runtime installs the Event module and every official Web profile supports it; because no host cap is needed without registrations, package installation and an actual host requirement are not equivalent.
     blocks: [configurable-runtime-module-selection, adapter-module-omission-diagnostics]
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Added whitelisted finite pointer projection without widening the Event binding or default-action capability.
   - version: 0.3.0-alpha.0
     change: refined
     summary: Defined transactional attach rollback with fail-closed unbound state, idempotent cleanup, immutable data-only portable payload with window-bounded and deduplicated default-action control, and semantic registration options rejection.

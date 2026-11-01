@@ -58,6 +58,10 @@ criteria:
     text:
       zh-CN: 宿主原生事件对象、具体 target 与宿主控制方法可以作为 host-local escape hatch 暴露，但不得被解释为 portable payload 保证。
       en: Native host event objects, concrete targets, and host control methods may be exposed as host-local escape hatches, but must not be interpreted as portable payload guarantees.
+  - id: C-EVENT-0002-L
+    text:
+      zh-CN: 六个 pointer medium event 的 portable payload 必须携带 C-EVENT-TYPE-0003 定义的有限 pointerType 与 pointerButtons sample 事实；其它 semantic event 不得因宿主对象附有同名字段而获得这些字段。数据 view 与 default-action control 仍是分离的权限边界，不得泄露 nativeEvent、target、pointerId、坐标、pressure 或任意宿主字段。
+      en: The six pointer medium events must carry the finite pointerType and pointerButtons sample facts defined by C-EVENT-TYPE-0003. Other semantic events must not acquire these fields merely because their host object contains similarly named properties. The data view and default-action control remain distinct authority boundaries; nativeEvent, target, pointerId, coordinates, pressure and arbitrary host fields must not leak into the portable view.
 openQuestions:
   - id: C-EVENT-0002-Q-RUNTIME-ESCAPE-HATCH
     question:
@@ -88,6 +92,9 @@ dependsOn:
     - C-LIFECYCLE-0001
     - C-CORE-SYNTAX-0002
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Defined finite pointer sample data and nonpointer omission without exposing native input or widening default-action authority.
   - version: 0.1.0
     change: introduced
     summary: Split setup-time event listener registration from runtime callback dispatch.

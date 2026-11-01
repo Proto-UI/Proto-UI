@@ -117,6 +117,8 @@ export type ValueType =
   | 'authored-result'
   | 'render'
   | 'event'
+  | 'event-control'
+  | 'event-or-control'
   | 'host-event'
   | 'props'
   | 'focus'
@@ -176,6 +178,8 @@ export function isPublicValueType(type: ValueType): boolean {
 }
 
 export function isCapabilityAssignable(actual: ValueType, expected: ValueType): boolean {
+  // An identity-only join grants neither payload members nor control operations.
+  if (expected === 'event-or-control') return actual === 'event' || actual === 'event-control';
   if (typeof expected !== 'string' || !/^(nullable|optional):/.test(expected)) return false;
   return (
     actual === expected.slice(expected.indexOf(':') + 1) ||

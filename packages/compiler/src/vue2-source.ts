@@ -1,3 +1,4 @@
+import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
@@ -9,8 +10,15 @@ import { OPERATION_RULES } from './operations';
 import { vue2SsrEntrypoints } from './vue2-ssr-entry';
 import { checkTargetOperations, resolveTargetProfile } from './targets';
 import type {
-  CompileResult, CompilerDiagnostic, ExpressionIR, FunctionIR, GeneratedModule,
-  ParameterIR, PrototypeIR, StatementIR, ValueType,
+  CompileResult,
+  CompilerDiagnostic,
+  ExpressionIR,
+  FunctionIR,
+  GeneratedModule,
+  ParameterIR,
+  PrototypeIR,
+  StatementIR,
+  ValueType,
 } from './ir';
 
 export interface Vue2SourceOptions {
@@ -28,6 +36,10 @@ export function emitVue2Source(
   const validated = validateIR(input);
   if (!validated.ok) return validated;
   const ir = validated.value;
+  if (options.ssr) {
+    const pointerDiagnostics = unsupportedPointerFacts(ir, 'vue2-source SSR');
+    if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
+  }
   const profile = options.ssr ? 'vue2-ssr-v1' : 'vue2-source-v1';
   const selected = resolveTargetProfile('vue2-source-v1');
   if (!selected.ok) return selected;
@@ -39,21 +51,48 @@ export function emitVue2Source(
   const reject = (message: string, span = ir.setup.span): void => {
     diagnostics.push({ code: 'PUI4102', category: 'unsupported-input', message, span });
   };
-  const usesStyle = admitted.value.sites.some((site) =>
-    site.operation.startsWith('style.') || site.operation.startsWith('rule.') || site.operation.startsWith('feedback.'));
-  const usesInteraction = ir.moduleDeclarations.length > 0 || admitted.value.sites.some((site) =>
-    /^(hook\.|event\.|focus\.|accessible\.|anatomy\.)/.test(site.operation));
+  const usesStyle = admitted.value.sites.some(
+    (site) =>
+      site.operation.startsWith('style.') ||
+      site.operation.startsWith('rule.') ||
+      site.operation.startsWith('feedback.')
+  );
+  const usesInteraction =
+    ir.moduleDeclarations.length > 0 ||
+    admitted.value.sites.some((site) =>
+      /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.)/.test(site.operation)
+    );
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
   // Only admitted Overlay capability can produce a non-null portal target.
   const usesPortal = admitted.value.operations.includes('hook.asOverlay');
   const reachedFunctions = new Set(admitted.value.functions);
   const reachedHooks = new Set(admitted.value.authoredHooks);
-  const stateDeclarations = new Set(['state.bool', 'state.string', 'state.enum', 'state.numberDiscrete', 'state.numberRange']);
-  const usesState = usesInteraction || admitted.value.operations.some((operation) => stateDeclarations.has(operation));
-  if (!validIdentifier(componentName) || ['GeneratedProps', 'GeneratedExposes'].includes(componentName)) {
-    return { ok: false, diagnostics: [{ code: 'PUI3001', category: 'invalid-input',
-      message: 'Choose a valid, non-reserved generated component identifier.', span: ir.setup.span }] };
+  const stateDeclarations = new Set([
+    'state.bool',
+    'state.string',
+    'state.enum',
+    'state.numberDiscrete',
+    'state.numberRange',
+  ]);
+  const usesState =
+    usesInteraction ||
+    admitted.value.operations.some((operation) => stateDeclarations.has(operation));
+  if (
+    !validIdentifier(componentName) ||
+    ['GeneratedProps', 'GeneratedExposes'].includes(componentName)
+  ) {
+    return {
+      ok: false,
+      diagnostics: [
+        {
+          code: 'PUI3001',
+          category: 'invalid-input',
+          message: 'Choose a valid, non-reserved generated component identifier.',
+          span: ir.setup.span,
+        },
+      ],
+    };
   }
   if (!/^[a-z][a-z0-9-]*$/.test(rootTag)) {
     reject('The Vue2 native rootTag must be a static lowercase DOM tag.');
@@ -62,8 +101,11 @@ export function emitVue2Source(
   for (const prop of ir.props) {
     const hostName = prop.name.replace(/-(\w)/g, (_match, letter: string) => letter.toUpperCase());
     const prior = hostPropNames.get(hostName);
-    if (hostName === '__proto__' || prior !== undefined && prior !== prop.name) {
-      reject(`Prop ${JSON.stringify(prop.name)} cannot be represented without a Vue2 prop-name collision.`, prop.span);
+    if (hostName === '__proto__' || (prior !== undefined && prior !== prop.name)) {
+      reject(
+        `Prop ${JSON.stringify(prop.name)} cannot be represented without a Vue2 prop-name collision.`,
+        prop.span
+      );
     }
     hostPropNames.set(hostName, prop.name);
   }
@@ -73,10 +115,24 @@ export function emitVue2Source(
     if (node.kind === 'operation') {
       if (node.operation === 'render.el') {
         const props = node.arguments[1];
-        const record = props && (props.kind === 'record' || props.type === 'template-props' || props.type === 'record' || typeof props.type === 'object' && props.type.kind === 'record');
-        if (record && (props.kind !== 'record' || props.entries.length > 1
-          || props.entries.some((entry) => entry.key !== 'style' || entry.value.type !== 'style-handle'))) {
-          reject('vue2-source-v1 TemplateProps supports only one static tw handle under style.', props.span);
+        const record =
+          props &&
+          (props.kind === 'record' ||
+            props.type === 'template-props' ||
+            props.type === 'record' ||
+            (typeof props.type === 'object' && props.type.kind === 'record'));
+        if (
+          record &&
+          (props.kind !== 'record' ||
+            props.entries.length > 1 ||
+            props.entries.some(
+              (entry) => entry.key !== 'style' || entry.value.type !== 'style-handle'
+            ))
+        ) {
+          reject(
+            'vue2-source-v1 TemplateProps supports only one static tw handle under style.',
+            props.span
+          );
         }
       }
       if (node.operation === 'props.define' && node.arguments[0]?.kind === 'record') {
@@ -84,7 +140,10 @@ export function emitVue2Source(
           if (entry.value.kind !== 'record') continue;
           for (const field of entry.value.entries) {
             if (!['type', 'default', 'empty', 'options', 'range'].includes(field.key)) {
-              reject(`vue2-source-v1 does not implement prop descriptor field ${JSON.stringify(field.key)}.`, field.value.span);
+              reject(
+                `vue2-source-v1 does not implement prop descriptor field ${JSON.stringify(field.key)}.`,
+                field.value.span
+              );
             }
           }
         }
@@ -94,8 +153,10 @@ export function emitVue2Source(
     } else if (node.kind === 'function') inspectBody(node.function.body);
     else if (node.kind === 'member') inspect(node.object);
     else if (node.kind === 'unary') inspect(node.operand);
-    else if (node.kind === 'binary') { inspect(node.left); inspect(node.right); }
-    else if (node.kind === 'array') node.elements.forEach(inspect);
+    else if (node.kind === 'binary') {
+      inspect(node.left);
+      inspect(node.right);
+    } else if (node.kind === 'array') node.elements.forEach(inspect);
     else if (node.kind === 'record') node.entries.forEach((entry) => inspect(entry.value));
     else if (node.kind === 'helper-call') node.arguments.forEach(inspect);
   }
@@ -105,7 +166,9 @@ export function emitVue2Source(
       else if (statement.kind === 'effect') inspect(statement.expression);
       else if (statement.kind === 'return' && statement.value) inspect(statement.value);
       else if (statement.kind === 'if') {
-        inspect(statement.condition); inspectBody(statement.then); inspectBody(statement.otherwise);
+        inspect(statement.condition);
+        inspectBody(statement.then);
+        inspectBody(statement.otherwise);
       }
     }
   }
@@ -127,15 +190,22 @@ export function emitVue2Source(
   let prefix = '__pui';
   while ([...names].some((name) => name.startsWith(prefix))) prefix += '_';
   const contextArtifacts = buildNativeContextArtifacts(ir);
-  const staticDeclarations = buildNativeStaticDeclarations(ir.staticDeclarations, ir.moduleDeclarations);
+  const staticDeclarations = buildNativeStaticDeclarations(
+    ir.staticDeclarations,
+    ir.moduleDeclarations
+  );
   const staticNames = new Map<string, string>();
   let staticSequence = 0;
-  const staticImports = [...staticDeclarations.capabilities].map(([id, entry]) => {
-    const name = `${prefix}Static${staticSequence++}`;
-    staticNames.set(id, name);
-    return `import { declaration as ${name} } from ${JSON.stringify('./' + entry.file.replace(/\.ts$/, ''))};`;
-  }).join('\n');
-  const contextNames = new Map(ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`]));
+  const staticImports = [...staticDeclarations.capabilities]
+    .map(([id, entry]) => {
+      const name = `${prefix}Static${staticSequence++}`;
+      staticNames.set(id, name);
+      return `import { declaration as ${name} } from ${JSON.stringify('./' + entry.file.replace(/\.ts$/, ''))};`;
+    })
+    .join('\n');
+  const contextNames = new Map(
+    ir.contextKeys.map((key, index) => [key.id, `${prefix}ContextKey${index}`])
+  );
   const aliases = new Map(ir.hooks.map((hook, index) => [hook.id, `${prefix}Hook${index}`]));
   function typeName(type: ValueType): string {
     if (typeof type === 'object') return formatDataType(type);
@@ -144,36 +214,65 @@ export function emitVue2Source(
     if (type === 'focus') return `${prefix}NativeFocus`;
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
+    if (type === 'event-control') return `${prefix}NativeInput['control']`;
+    if (type === 'event-or-control')
+      return `(${prefix}NativeInput | ${prefix}NativeInput['control'])`;
     if (type === 'host-event') return 'Event';
     if (type === 'host-target') return 'HTMLElement | null';
     if (type === 'observed:boolean') return `${prefix}NativeObservedState<boolean>`;
     return 'unknown';
   }
   function parameters(values: readonly ParameterIR[]): string {
-    return values.map((parameter) => `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`).join(', ');
+    return values
+      .map(
+        (parameter) =>
+          `${parameter.name}${parameter.optional ? '?' : ''}: ${typeName(parameter.type)}`
+      )
+      .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
     return `(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
   }
   function expression(value: ExpressionIR, depth: number): string {
     switch (value.kind) {
-      case 'literal': return JSON.stringify(value.value);
-      case 'reference': return value.name;
-      case 'context-key': return contextNames.get(value.keyId)!;
-      case 'style-handle': return emitNativeStyleHandle(value.handle, false);
-      case 'rule': return emitNativeRule(value, (item) => expression(item, depth), `${prefix}Owner.def.feedback.style`, `${prefix}Owner.resolvedProps`, false);
-      case 'member': return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
-      case 'unary': return `(${value.operator}${expression(value.operand, depth)})`;
-      case 'binary': return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
-      case 'array': return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
-      case 'record': return `{ ${value.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expression(entry.value, depth)}`).join(', ')} }`;
-      case 'function': return fn(value.function, depth);
-      case 'helper-call': return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
-      case 'authored-hook': return `${aliases.get(value.hookId)}()`;
-      case 'static-capability': return staticNames.get(value.declarationId)!;
+      case 'literal':
+        return JSON.stringify(value.value);
+      case 'reference':
+        return value.name;
+      case 'context-key':
+        return contextNames.get(value.keyId)!;
+      case 'style-handle':
+        return emitNativeStyleHandle(value.handle, false);
+      case 'rule':
+        return emitNativeRule(
+          value,
+          (item) => expression(item, depth),
+          `${prefix}Owner.def.feedback.style`,
+          `${prefix}Owner.resolvedProps`,
+          false
+        );
+      case 'member':
+        return `(${expression(value.object, depth)})${value.optional ? '?.' : ''}[${JSON.stringify(value.property)}]`;
+      case 'unary':
+        return `(${value.operator}${expression(value.operand, depth)})`;
+      case 'binary':
+        return `(${expression(value.left, depth)} ${value.operator} ${expression(value.right, depth)})`;
+      case 'array':
+        return `[${value.elements.map((item) => expression(item, depth)).join(', ')}]`;
+      case 'record':
+        return `{ ${value.entries.map((entry) => `[${JSON.stringify(entry.key)}]: ${expression(entry.value, depth)}`).join(', ')} }`;
+      case 'function':
+        return fn(value.function, depth);
+      case 'helper-call':
+        return `${value.name}(${value.arguments.map((item) => expression(item, depth)).join(', ')})`;
+      case 'authored-hook':
+        return `${aliases.get(value.hookId)}()`;
+      case 'static-capability':
+        return staticNames.get(value.declarationId)!;
       case 'operation': {
         const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
-        if (OPERATION_RULES[value.operation].path === 'call') return `${expression(value.receiver!, depth)}(${argumentsCode})`;
+        if (OPERATION_RULES[value.operation].path === 'call')
+          return `${expression(value.receiver!, depth)}(${argumentsCode})`;
         if (value.operation.startsWith('hook.') || value.operation.startsWith('anatomy.')) {
           return `${prefix}Owner.interaction.${OPERATION_RULES[value.operation].path}(${argumentsCode})`;
         }
@@ -182,14 +281,21 @@ export function emitVue2Source(
       }
     }
   }
-  function body(statements: readonly StatementIR[], depth: number, deadBindings = new Set<string>()): string {
+  function body(
+    statements: readonly StatementIR[],
+    depth: number,
+    deadBindings = new Set<string>()
+  ): string {
     const indent = '  '.repeat(depth);
     let output = '';
     for (const statement of statements) {
       const origin = `${indent}// Source ${JSON.stringify(statement.span.file)}:${statement.span.line}:${statement.span.column}\n`;
       if (statement.kind === 'const') {
-        if ((statement.value.kind === 'function' && !reachedFunctions.has(statement.value.function)) ||
-            (statement.value.kind === 'reference' && deadBindings.has(statement.value.name))) {
+        if (
+          (statement.value.kind === 'function' &&
+            !reachedFunctions.has(statement.value.function)) ||
+          (statement.value.kind === 'reference' && deadBindings.has(statement.value.name))
+        ) {
           deadBindings.add(statement.name);
           continue;
         }
@@ -206,33 +312,61 @@ export function emitVue2Source(
     }
     return output;
   }
-  const propsType = ir.props.map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`).join('\n').replace(/\*\//g, '*\\/');
-  const exposesType = ir.exposes.filter((entry) => entry.kind !== 'event').map((entry) => {
-    const type = entry.kind === 'state' ? `${prefix}ExternalState<${typeName(entry.type)}>`
-      : entry.kind === 'value' ? typeName(entry.type)
-      : `(${parameters(entry.parameters)}) => ${typeName(entry.returnType)}`;
-    return `  ${JSON.stringify(entry.name)}: ${type};`;
-  }).join('\n').replace(/\*\//g, '*\\/');
+  const propsType = ir.props
+    .map((prop) => `  ${JSON.stringify(prop.name)}?: ${typeName(prop.type)} | null;`)
+    .join('\n')
+    .replace(/\*\//g, '*\\/');
+  const exposesType = ir.exposes
+    .filter((entry) => entry.kind !== 'event')
+    .map((entry) => {
+      const type =
+        entry.kind === 'state'
+          ? `${prefix}ExternalState<${typeName(entry.type)}>`
+          : entry.kind === 'value'
+            ? typeName(entry.type)
+            : `(${parameters(entry.parameters)}) => ${typeName(entry.returnType)}`;
+      return `  ${JSON.stringify(entry.name)}: ${type};`;
+    })
+    .join('\n')
+    .replace(/\*\//g, '*\\/');
   const propTypes = Object.fromEntries(ir.props.map((prop) => [prop.name, prop.type]));
-  const hooks = reachedHooks.size ? `  const ${prefix}HookResults = new Map();\n` + ir.hooks.filter((hook) => reachedHooks.has(hook.id)).map((hook) => `  const ${aliases.get(hook.id)} = () => {
+  const hooks = reachedHooks.size
+    ? `  const ${prefix}HookResults = new Map();\n` +
+      ir.hooks
+        .filter((hook) => reachedHooks.has(hook.id))
+        .map(
+          (hook) => `  const ${aliases.get(hook.id)} = () => {
     if (${prefix}HookResults.has(${JSON.stringify(hook.name)})) return ${prefix}HookResults.get(${JSON.stringify(hook.name)}) ?? Object.freeze(Object.create(null));
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, undefined);
     (${fn(hook.setup, 1)})(${prefix}Owner.def);
     const result = Object.freeze(Object.create(null));
     ${prefix}HookResults.set(${JSON.stringify(hook.name)}, result);
     return result;
-  };`).join('\n') : '';
-  const styleImport = usesStyle ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n` : '';
-  const interactionImport = usesInteraction ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from './.proto-ui/interaction/native-v1';
+  };`
+        )
+        .join('\n')
+    : '';
+  const styleImport = usesStyle
+    ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n`
+    : '';
+  const interactionImport = usesInteraction
+    ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from './.proto-ui/interaction/native-v1';
 /** @template Run @typedef {import('./.proto-ui/interaction/native-v1').NativeInteraction<Run>} ${prefix}NativeInteraction */
 /** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocus} ${prefix}NativeFocus */
 /** @typedef {import('./.proto-ui/interaction/native-v1').NativeAccessible} ${prefix}NativeAccessible */
 /** @template T @typedef {import('./.proto-ui/interaction/native-v1').NativeObservedState<T>} ${prefix}NativeObservedState */
 /** @typedef {import('./.proto-ui/interaction/native-v1').NativeInput} ${prefix}NativeInput */
 /** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocusOptions} ${prefix}NativeFocusOptions */
-` : '';
-  const contextImports = styleImport + interactionImport + (contextArtifacts ? `import { createContextScope as ${prefix}CreateContextScope, scopeKey as ${prefix}ScopeKey, acceptsContextValue as ${prefix}AcceptsContextValue } from '${contextArtifacts.scopeFile.replace(/\.ts$/, '')}';\n${ir.contextKeys.map((key) => `import { key as ${contextNames.get(key.id)} } from '${contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, '')}';`).join('\n')}` : '');
-  const contextCode = contextArtifacts ? `
+`
+    : '';
+  const contextImports =
+    styleImport +
+    interactionImport +
+    (contextArtifacts
+      ? `import { createContextScope as ${prefix}CreateContextScope, scopeKey as ${prefix}ScopeKey, acceptsContextValue as ${prefix}AcceptsContextValue } from '${contextArtifacts.scopeFile.replace(/\.ts$/, '')}';\n${ir.contextKeys.map((key) => `import { key as ${contextNames.get(key.id)} } from '${contextArtifacts.keys.get(key.id)!.file.replace(/\.ts$/, '')}';`).join('\n')}`
+      : '');
+  const contextCode = contextArtifacts
+    ? `
   const contextChecks = new Map([
 ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${prefix}AcceptsContextValue(${JSON.stringify(key.type)}, value)],`).join('\n')}
   ]);
@@ -243,18 +377,32 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     validate: (key, value) => contextChecks.get(key)?.(value) === true,
   });
   const contextRead = Object.freeze({ read: (key) => { alive(); return contextScope.read(key); }, tryRead: (key) => { alive(); return contextScope.tryRead(key); } });
-` : '';
-  const helpers = nativeHelpers({
-    owner: contextCode,
-    run: contextArtifacts ? `context: { ...contextRead, update: (key, value) => { callback(); contextScope.update(key, value); }, tryUpdate: (key, value) => { callback(); return contextScope.tryUpdate(key, value); } },` : '',
-    read: contextArtifacts ? ', context: contextRead' : '',
-    def: contextArtifacts ? `context: { provide: (key, value) => { setupOnly(); contextScope.provide(key, value); }, subscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }, trySubscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); } },` : '',
-    handle: contextArtifacts ? 'contextScope,' : '',
-    dispose: contextArtifacts ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }' : '',
-    setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
-  }, usesStyle, usesInteraction, usesState, usesPortal, options.ssr === true,
+`
+    : '';
+  const helpers = nativeHelpers(
+    {
+      owner: contextCode,
+      run: contextArtifacts
+        ? `context: { ...contextRead, update: (key, value) => { callback(); contextScope.update(key, value); }, tryUpdate: (key, value) => { callback(); return contextScope.tryUpdate(key, value); } },`
+        : '',
+      read: contextArtifacts ? ', context: contextRead' : '',
+      def: contextArtifacts
+        ? `context: { provide: (key, value) => { setupOnly(); contextScope.provide(key, value); }, subscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'required', fn ? (next, prev) => fn(run, next, prev) : undefined); }, trySubscribe: (key, fn) => { setupOnly(); return contextScope.subscribe(key, 'optional', fn ? (next, prev) => fn(run, next, prev) : undefined); } },`
+        : '',
+      handle: contextArtifacts ? 'contextScope,' : '',
+      dispose: contextArtifacts
+        ? 'try { contextScope.dispose(); } catch (error) { failure ??= error; }'
+        : '',
+      setupFailure: contextArtifacts ? 'contextScope.dispose();' : '',
+    },
+    usesStyle,
+    usesInteraction,
+    usesState,
+    usesPortal,
+    options.ssr === true,
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
-    staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined').replace(/\bPUI/g, prefix);
+    staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'
+  ).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
   const propDeclarations = ir.props.map((prop) => `[${JSON.stringify(prop.name)}]: {}`).join(', ');
   const code = `// Editable generated Vue 2.6.14 component options. Profile: ${profile}.
@@ -282,14 +430,22 @@ export const ${componentName} = {
   name: ${JSON.stringify(ir.name)},
   inheritAttrs: false,
   props: { ${propDeclarations} },
-  ${contextArtifacts ? `inject: { [${JSON.stringify(`${prefix}ParentScope`)}]: { from: ${prefix}ScopeKey, default: null } },
+  ${
+    contextArtifacts
+      ? `inject: { [${JSON.stringify(`${prefix}ParentScope`)}]: { from: ${prefix}ScopeKey, default: null } },
   /** @this {${prefix}NativeInstance} */
-  provide() { return { [${prefix}ScopeKey]: this[${ownerKey}].contextScope }; },` : ''}
+  provide() { return { [${prefix}ScopeKey]: this[${ownerKey}].contextScope }; },`
+      : ''
+  }
   /** @this {${prefix}NativeInstance} */
   beforeCreate() {
     Object.defineProperty(this, ${ownerKey}, { value: ${prefix}CreateOwner(this, ${prefix}Setup, ${JSON.stringify(propTypes)}, ${JSON.stringify(rootTag)}, ${options.autoUpdateOnPropsChange !== false}) });
-    ${options.ssr ? `const session = ${prefix}FindSession(this);
-    if (session) this[${ownerKey}].bindSession(session, ${JSON.stringify(ir.source.sha256)});` : ''}
+    ${
+      options.ssr
+        ? `const session = ${prefix}FindSession(this);
+    if (session) this[${ownerKey}].bindSession(session, ${JSON.stringify(ir.source.sha256)});`
+        : ''
+    }
   },
   /** @this {${prefix}NativeInstance} */
   created() { this[${ownerKey}].initialize(); },
@@ -317,14 +473,49 @@ export const ${componentName} = {
 export default ${componentName};
 ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''}
 `;
-  return { ok: true, value: { code, profile,
-    supportingFiles: [...(contextArtifacts?.files ?? []), ...staticDeclarations.files, ...(usesStyle ? [nativeStyleArtifact] : []), ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : [])],
-    dependencies: [...selected.value.dependencies.filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom').map(dependency => ({ ...dependency })), ...(options.ssr ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }] : [])],
-    provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile } } };
+  return {
+    ok: true,
+    value: {
+      code,
+      profile,
+      supportingFiles: [
+        ...(contextArtifacts?.files ?? []),
+        ...staticDeclarations.files,
+        ...(usesStyle ? [nativeStyleArtifact] : []),
+        ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []),
+      ],
+      dependencies: [
+        ...selected.value.dependencies
+          .filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom')
+          .map((dependency) => ({ ...dependency })),
+        ...(options.ssr
+          ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }]
+          : []),
+      ],
+      provenance: { source: ir.source, irVersion: ir.schemaVersion, backend: profile },
+    },
+  };
 }
 
 // This is target-specific generated host code, never a shared IR interpreter.
-function nativeHelpers(context: { owner: string; run: string; read: string; def: string; handle: string; dispose: string; setupFailure: string }, styled: boolean, interactive: boolean, stateful: boolean, portal: boolean, ssr: boolean, declarations: string, tableFamily: string): string {
+function nativeHelpers(
+  context: {
+    owner: string;
+    run: string;
+    read: string;
+    def: string;
+    handle: string;
+    dispose: string;
+    setupFailure: string;
+  },
+  styled: boolean,
+  interactive: boolean,
+  stateful: boolean,
+  portal: boolean,
+  ssr: boolean,
+  declarations: string,
+  tableFamily: string
+): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   return String.raw`
 /**
@@ -384,11 +575,15 @@ function PUIRootData(properties, attrs, initial) {
   return result;
 }
 function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
-  ${ssr ? `let session, initialProjection, requestIndex, sourceIdentity;
+  ${
+    ssr
+      ? `let session, initialProjection, requestIndex, sourceIdentity;
   let initialized = false;
   let shell = false;
   let bootRaw = false;
-  let firstContinuation = false;` : ''}
+  let firstContinuation = false;`
+      : ''
+  }
   let phase = 'setup';
   let terminal = false;
   let disposed = false;
@@ -418,7 +613,9 @@ ${stateful ? '  const states = [];\n' : ''}  const exposed = Object.create(null)
   const eventDeclarations = Object.create(null);
   const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
 ${stateful ? '  const notifications = [];\n' : ''}  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
-${stateful ? '  let notifying = false;\n' : ''}${portal ? `  let portalAnchor = null, portalRoot = null;
+${stateful ? '  let notifying = false;\n' : ''}${
+    portal
+      ? `  let portalAnchor = null, portalRoot = null;
   function syncPortal(target, destination) {
     if (portalRoot && portalRoot !== target) restorePortal();
     if (destination && target?.nodeType === 1) {
@@ -452,12 +649,16 @@ ${stateful ? '  let notifying = false;\n' : ''}${portal ? `  let portalAnchor = 
     if (failures.length) throw failures.length === 1 ? failures[0]
       : new AggregateError(failures, '[Vue2 native] Portal restoration and cleanup failed.');
   }
-` : ''}  let dispatchingProps = false;
+`
+      : ''
+  }  let dispatchingProps = false;
   const alive = () => { if (disposed) throw new Error('[Vue2 native] logical instance has been disposed.'); };
   const publicAlive = () => { if (terminal) throw new Error('[Vue2 native] exposed target has been terminally invalidated.'); };
   const callback = () => { alive(); if (phase !== 'callback') throw new Error('[Vue2 native] mutation requires callback scope.'); };
   const setupOnly = () => { alive(); if (phase !== 'setup') throw new Error('[Vue2 native] declaration requires setup scope.'); };
-${styled ? `  const style = PUICreateNativeStyle({
+${
+  styled
+    ? `  const style = PUICreateNativeStyle({
     ensureSetup: setupOnly,
     ensureRuntime: callback,
     isAlive: () => !terminal && !disposed,
@@ -466,7 +667,9 @@ ${styled ? `  const style = PUICreateNativeStyle({
       if (tokens.length) activeRoot.setAttribute('data-pui-style', tokens.join(' '));
       else activeRoot.removeAttribute('data-pui-style');
     },
-  });` : ''}
+  });`
+    : ''
+}
   const hostRaw = () => {
     ${ssr ? `if (bootRaw) return PUIDecodeRaw(initialProjection.raw);` : ''}
     // Full snapshots preserve omission and explicit undefined. Vue Boolean casting and
@@ -628,7 +831,9 @@ ${context.owner}
       try { vm.$emit(key, payload, options); } catch {}
     } },
   };
-  ${interactive ? `/** @type {PUINativeInteraction<typeof run>} */
+  ${
+    interactive
+      ? `/** @type {PUINativeInteraction<typeof run>} */
   const interaction = PUICreateNativeInteraction({
     ensureSetup: setupOnly,
     ensureRuntime: callback,
@@ -685,10 +890,14 @@ ${context.owner}
         finally { subscribers.clear(); }
       } });
     },
-  });` : ''}
+  });`
+      : ''
+  }
   const renderer = { el: PUIElement, slot: () => Object.freeze({ slot: true }),
     read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (key) => { alive(); return PUIOwn(raw, key); } }) ${context.read} }) };
-${stateful ? String.raw`  const createState = (kind, key, initial, configuration = {}) => {
+${
+  stateful
+    ? String.raw`  const createState = (kind, key, initial, configuration = {}) => {
     setupOnly();
     const spec = Object.freeze({ ...configuration, kind });
     const check = (value, initialValue = false) => {
@@ -732,7 +941,9 @@ ${stateful ? String.raw`  const createState = (kind, key, initial, configuration
     states.push(handle);
     return handle;
   };
-` : ''}  const defineProps = (input) => {
+`
+    : ''
+}  const defineProps = (input) => {
     setupOnly();
     const next = { ...specs };
     const rank = { accept: 0, fallback: 1, error: 2 };
@@ -778,14 +989,18 @@ ${stateful ? String.raw`  const createState = (kind, key, initial, configuration
       watchRaw: (keys, fn) => registerPropsWatch('raw', keys, fn),
       watchRawAll: (fn) => registerPropsWatch('raw-all', null, fn),
     },
-${stateful ? String.raw`    state: {
+${
+  stateful
+    ? String.raw`    state: {
       bool: (key, value) => createState('bool', key, value),
       string: (key, value, spec) => createState('string', key, value, spec),
       enum: (key, value, spec) => createState('enum', key, value, spec),
       numberDiscrete: (key, value, spec) => createState('number.discrete', key, value, spec),
       numberRange: (key, value, spec) => createState('number.range', key, value, spec),
     },
-` : ''}    expose: {
+`
+    : ''
+}    expose: {
       value: (key, value) => { setupOnly(); if (PUIOwn(exposed, key)) throw new Error('[Expose] duplicate declaration'); exposed[key] = value; },
       state: (key, handle) => { setupOnly(); exposed[key] = ${interactive ? 'observedExternals.get(handle) ?? ' : ''}handle.external; },
       method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
@@ -821,19 +1036,27 @@ ${stateful ? String.raw`    state: {
       if (kind === 'mount' && !viewActive) {
         viewActive = true;
         ${styled || interactive ? 'activeRoot = target;' : ''}
-        ${interactive ? `activeEpoch = epoch;
+        ${
+          interactive
+            ? `activeEpoch = epoch;
         ${ssr ? 'if (firstContinuation) interaction.adoptAttributes(initialProjection.attributes);' : ''}
-        interaction.mount();` : ''}
+        interaction.mount();`
+            : ''
+        }
         ${interactive ? 'if (terminal || commit.epoch !== epoch || !present || !hostActive) return;' : ''}
         ${styled ? 'style.mount();' : ''}
         fire('mounted');
         ${ssr ? `if (firstContinuation) { firstContinuation = false; syncHost(true); }` : ''}
       } else if (viewActive) {
-        ${interactive ? `if (activeRoot !== target || activeEpoch !== epoch) {
+        ${
+          interactive
+            ? `if (activeRoot !== target || activeEpoch !== epoch) {
           activeRoot = target; activeEpoch = epoch;
           interaction.mount();
         }
-        if (terminal || commit.epoch !== epoch || !present || !hostActive) return;` : ''}
+        if (terminal || commit.epoch !== epoch || !present || !hostActive) return;`
+            : ''
+        }
         if (kind !== 'update' || !pending || pending.revision !== commit.revision) return;
         pending = null;
         const again = queued; queued = false;
@@ -848,7 +1071,9 @@ ${stateful ? String.raw`    state: {
     ${interactive ? 'interaction,' : ''}
     def,
     get resolvedProps() { return resolved; },
-    ${ssr ? `bindSession(value, source) {
+    ${
+      ssr
+        ? `bindSession(value, source) {
       session = value; sourceIdentity = source;
       if (session.closed) { owner.dispose(); throw new Error('[Vue2 SSR] request already retired.'); }
       requestIndex = session.owners.length;
@@ -883,10 +1108,16 @@ ${stateful ? String.raw`    state: {
       owner.hostMounted();
       if (present !== initialProjection.present) force();
       if (!initialProjection.present) syncHost(true);
-    },` : ''}
+    },`
+        : ''
+    }
     initialize() {
-      ${ssr ? `if (shell && !bootRaw || initialized) return;
-      initialized = true;` : ''}
+      ${
+        ssr
+          ? `if (shell && !bootRaw || initialized) return;
+      initialized = true;`
+          : ''
+      }
       try {
         renderFunction = setup(owner);
         if (typeof renderFunction !== 'function') renderFunction = (renderer) => renderer.slot();
@@ -895,22 +1126,28 @@ ${stateful ? String.raw`    state: {
         fire('created');
         ${ssr ? `if (!session || session.mode === 'client' && !bootRaw)` : ''} unwatch = vm.$watch(() => hostRaw(), () => syncHost(true), { deep: true });
       } catch (error) {
-        ${ssr ? `try { owner.dispose(); }
+        ${
+          ssr
+            ? `try { owner.dispose(); }
         catch (cleanupError) { throw new AggregateError([error, cleanupError], '[Vue2 SSR] initialization and cleanup failed.'); }
-        throw error;` : `
+        throw error;`
+            : `
         terminal = true;
         ${interactive ? 'try { interaction.dispose(); } catch {}\n        for (const state of states) { try { state.dispose(); } catch {} }' : ''}
         ${styled ? 'try { style.dispose(); } catch {}' : ''}
         ${context.setupFailure ? `try { ${context.setupFailure} } catch {}` : ''}
         disposed = true;
         phase = 'idle';
-        throw error;`}
+        throw error;`
+        }
       }
     },
     hostMounted() { ${ssr ? 'if (shell) return;' : ''} nativeMounted = true; afterCommit(); },
     afterCommit,
     render(h) {
-      ${ssr ? `if (shell) {
+      ${
+        ssr
+          ? `if (shell) {
         const vnode = initialProjection.present
           ? h(initialProjection.rootTag, PUIRootData(initialProjection.properties, initialProjection.attrs, true), PUIChildren(initialProjection.template, h, vm, { used: false })) : h();
         renderedCommit = { epoch, version: ++commitVersion, present: initialProjection.present, vnode, kind: initialProjection.present ? 'mount' : 'detach' };
@@ -929,7 +1166,9 @@ ${stateful ? String.raw`    state: {
         if (!PUIJson(projection)) throw new TypeError('[Vue2 SSR] render projection is not serializable.');
         session.projections[requestIndex] = projection;
         return projection.present ? h(tag, PUIRootData(properties, attrs, true), children) : h();
-      }` : ''}
+      }`
+          : ''
+      }
       if (terminal || !present || !hostActive) {
         const vnode = h();
         renderedCommit = { epoch, version: ++commitVersion, present: false, vnode, kind: 'detach' };
@@ -963,24 +1202,36 @@ ${stateful ? String.raw`    state: {
       let failure;
       try { detach(); } catch (error) { failure = error; }
       ${ssr ? 'if (initialized)' : ''} try { fire('beforeDispose'); } catch (error) { failure ??= error; }
-${stateful ? String.raw`      for (const state of states) {
+${
+  stateful
+    ? String.raw`      for (const state of states) {
         try { state.dispose(); } catch (error) { failure ??= error; }
       }
-` : ''}      ${context.dispose}
+`
+    : ''
+}      ${context.dispose}
       ${interactive ? 'try { interaction.dispose(); } catch (error) { failure ??= error; }' : ''}
-      ${styled ? `try { style.dispose(); } catch (error) { failure ??= error; }
+      ${
+        styled
+          ? `try { style.dispose(); } catch (error) { failure ??= error; }
       const target = vm.$el;
-      if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');` : ''}
+      if (target && target.nodeType === 1 && target.hasAttribute('data-pui-root')) target.removeAttribute('data-pui-style');`
+          : ''
+      }
       disposed = true; phase = 'idle';
       watchers.length = 0;${stateful ? ' notifications.length = 0; states.length = 0;' : ''} defaults.length = 0;
       for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;
       for (const key of Object.keys(exposed)) delete exposed[key];
       for (const key of Object.keys(eventDeclarations)) delete eventDeclarations[key];
       specs = Object.create(null); previousValid = Object.create(null); raw = resolved = Object.freeze({}); template = renderFunction = null;
-      ${ssr ? `if (session && session.mode === 'client') {
+      ${
+        ssr
+          ? `if (session && session.mode === 'client') {
         const index = session.owners.indexOf(owner);
         if (index >= 0) session.owners.splice(index, 1);
-      }` : ''}
+      }`
+          : ''
+      }
       if (failure) throw failure;
     },
   };

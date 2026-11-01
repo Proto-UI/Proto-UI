@@ -2,6 +2,7 @@ export type EventTypePayloadExpectation =
   | 'type-layer-validation'
   | 'core-event-payload'
   | 'optional-event-payload'
+  | 'pointer-sample-facts'
   | 'host-bound-event'
   | 'expose-emit-is-expose';
 
@@ -70,6 +71,27 @@ export const EVENT_TYPE_PAYLOAD_CASES = [
     covers: ['C-EVENT-0002-G', 'C-EVENT-0002-H'],
     acceptedTypes: [],
     expectation: 'expose-emit-is-expose',
+  },
+  {
+    id: 'event-pointer-sample-facts',
+    title: 'six pointer events carry finite sample facts without host leakage',
+    specCase: 'T-EVENT-0002-CASE-POINTER-FACTS',
+    covers: [
+      'C-EVENT-0002-L',
+      'M-EVENT-0001-L',
+      'C-EVENT-TYPE-0003-F',
+      'C-EVENT-TYPE-0003-G',
+      'C-EVENT-TYPE-0003-H',
+    ],
+    acceptedTypes: [
+      'pointer.down',
+      'pointer.move',
+      'pointer.up',
+      'pointer.cancel',
+      'pointer.enter',
+      'pointer.leave',
+    ],
+    expectation: 'pointer-sample-facts',
   },
 ] as const satisfies readonly EventTypePayloadCase[];
 

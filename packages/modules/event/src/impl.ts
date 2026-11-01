@@ -74,6 +74,22 @@ function createPortableEventPayload(
     const value = source[field];
     if (typeof value === 'string' || typeof value === 'boolean') payload[field] = value;
   }
+  if (
+    [
+      'pointer.down',
+      'pointer.move',
+      'pointer.up',
+      'pointer.cancel',
+      'pointer.enter',
+      'pointer.leave',
+    ].includes(type)
+  ) {
+    // Accept only the portable finite vocabulary, never raw DOM buttons/data.
+    const kind = source.pointerType;
+    const buttons = source.pointerButtons;
+    payload.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
+    payload.pointerButtons = buttons === 'none' || buttons === 'active' ? buttons : 'unknown';
+  }
   return Object.freeze(payload) as ProtoEventPayload;
 }
 
