@@ -487,9 +487,11 @@ function cloneProjectedChild(
     }
     return {
       ...node,
-      dynamicChildren: node.dynamicChildren
-        ? { prototypeIds: [...node.dynamicChildren.prototypeIds] }
-        : undefined,
+      // Preserve absence: static material-stage admission distinguishes an
+      // authored dynamic slot from a box without that optional declaration.
+      ...(node.dynamicChildren
+        ? { dynamicChildren: { prototypeIds: [...node.dynamicChildren.prototypeIds] } }
+        : {}),
       attrs: { ...(node.attrs ?? {}), ...coordinateAttrs },
       className: mergeClassName(node.className, 'pui-projection-box'),
       children,
