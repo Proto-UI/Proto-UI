@@ -5,6 +5,7 @@ import path from 'node:path';
 import test from 'node:test';
 import { extractBoundedZip, materializeBoundedZip } from './extract-artifact.mjs';
 import { PREVIEW_LIMITS, sanitizePreviewTree } from './sanitize-tree.mjs';
+import { formatProducerStats, summarizeProducerStats } from './producer-stat-inventory.mjs';
 
 const artifact = process.env.PREVIEW_GENERATED_ARTIFACT;
 
@@ -27,6 +28,14 @@ test(
   { skip: artifact ? false : 'run after the canonical apps-www build with its complete ZIP' },
   async (t) => {
     assert.ok(process.env.PREVIEW_GENERATED_SOURCE, 'the complete producer directory is required');
+    // Diagnostic only: observe the builder's canonical dist before the existing
+    // ZIP guard. Unknown stats never authorize admission or skip that guard.
+    const sourceRoot = path.resolve(process.env.PREVIEW_GENERATED_SOURCE);
+    const stats =
+      sourceRoot === path.resolve('apps/www/dist')
+        ? await summarizeProducerStats(sourceRoot)
+        : { status: 'unavailable', reason: 'not-canonical-dist' };
+    t.diagnostic(`producer-stat-inventory ${formatProducerStats(stats)}`);
     const bytes = await readFile(artifact);
     assert.ok(bytes.length <= PREVIEW_LIMITS.maxCompressedBytes, 'the compressed artifact fits');
     // Use the publisher's defaults, including its hostile-archive checks. A
