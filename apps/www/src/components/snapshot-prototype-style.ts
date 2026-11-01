@@ -6,6 +6,12 @@ import {
 import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
 import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
 import {
+  CONTEXT_INSTANCE_TOKEN_CAP,
+  CONTEXT_PARENT_CAP,
+} from '../../../../packages/modules/context/src';
+import { EFFECTS_CAP } from '../../../../packages/modules/feedback/src';
+import { renderProtoStyleTokenCss } from '../../../../packages/cli/src/services/proto-style-css';
+import {
   AS_TRIGGER_INSTANCE_CAP,
   AS_TRIGGER_PARENT_CAP,
   AS_TRIGGER_GET_PROTO_CAP,
@@ -52,8 +58,8 @@ async function snapshotPrototypeStyle(
   mode: 'passive' | 'command-style' = 'passive'
 ): Promise<string[]> {
   let tokens: string[] = [];
-  // A detached, never-dispatched identity lets command recipes declare their
-  // standard hooks without connecting input or implying an interactive host.
+  // One detached identity owns this snapshot's Context root and lets command
+  // recipes declare hooks without connecting input or an interactive host.
   const identity = new EventTarget();
   const session = createRuntimeSession(prototype, {
     prototypeName: prototype.name,
