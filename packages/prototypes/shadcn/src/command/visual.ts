@@ -117,13 +117,15 @@ export function setupCommandInputMode<
   return command;
 }
 
-export function setupCommandPresentation(def: {
-  props: Pick<DefHandle<CommandPresentationProps>['props'], 'define' | 'setDefaults'>;
-}) {
-  def.props.define({
+export function setupCommandPresentation<
+  Props extends ShadcnStyleProps & CommandPresentationProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
+  const cdef = def as unknown as DefHandle<ShadcnStyleProps & CommandPresentationProps>;
+  cdef.props.define({
     presentation: { type: 'enum', options: ['default', 'menu'], empty: 'fallback' },
   });
-  def.props.setDefaults({ presentation: 'default' });
+  cdef.props.setDefaults({ presentation: 'default' });
 }
 
 /** Private wrapper-owned presentation, never optional prefix/Anatomy presence. */
@@ -153,21 +155,27 @@ const COMMAND_MENU_PARTS = {
   list: 'min-h-0 max-h-[none] flex-1 scroll-pt-2 scroll-pb-1.5 outline-none',
 } as const;
 
-export function setupCommandPartPaint(
-  def: DefHandle<ShadcnStyleProps & CommandPresentationProps>,
+export function setupCommandPartPaint<
+  Props extends ShadcnStyleProps & { presentation?: 'default' | 'menu' },
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   part: 'root' | 'wrapper' | 'input' | 'item' | 'empty' | 'list',
   root = false
 ) {
   const style = setupCommandStyle(def, root);
   setupCommandPresentation(def);
-  def.rule({
+  const cdef = def as unknown as DefHandle<
+    ShadcnStyleProps & { presentation?: 'default' | 'menu' }
+  >;
+  cdef.rule({
     when: (w) => w.prop('presentation').eq('menu'),
     intent: (i) => i.feedback.style.use(tw(COMMAND_MENU_PARTS[part])),
   });
   for (const id of SHADCN_STYLE_IDS) {
     const tokens = COMMAND_PROFILES[id][part];
     if (tokens)
-      def.rule({
+      cdef.rule({
         when: (w) => w.all(w.state(style).eq(id), w.prop('presentation').eq('default')),
         intent: (i) => i.feedback.style.use(tw(tokens)),
       });

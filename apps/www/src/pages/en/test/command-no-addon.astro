@@ -34,10 +34,17 @@ const css = renderProtoStyleTokenCss(SHADCN_STYLE_TOKENS);
         type DemoSpec,
         type DemoRenderResult,
       } from '../../../components/PrototypePreviewer/demo-types';
-      import { isRuntimeId } from '../../../components/PrototypePreviewer/runtimes/ids';
-      const runtime = new URL(location.href).searchParams.get('runtime') ?? 'wc';
-      if (!isRuntimeId(runtime) || !['wc', 'react', 'vue', 'vue2'].includes(runtime))
+      import {
+        isRuntimeId,
+        type RuntimeId,
+      } from '../../../components/PrototypePreviewer/runtimes/ids';
+      const requestedRuntime = new URL(location.href).searchParams.get('runtime') ?? 'wc';
+      if (
+        !isRuntimeId(requestedRuntime) ||
+        !['wc', 'react', 'vue', 'vue2'].includes(requestedRuntime)
+      )
         throw new Error('Unsupported default Command fixture runtime');
+      const runtime: RuntimeId = requestedRuntime;
       const host = document.querySelector<HTMLElement>('[data-command-default-host]')!;
       let current = true;
       let view: DemoRenderResult | undefined;
