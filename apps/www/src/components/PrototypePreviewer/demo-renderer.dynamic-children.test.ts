@@ -150,6 +150,134 @@ async function mount(runtime: 'wc' | 'react' | 'vue' | 'vue2') {
 describe.each(['wc', 'react', 'vue', 'vue2'] as const)(
   '%s public dynamic composition',
   (runtime) => {
+    async function mountStaticPortal(host = document.createElement('div')) {
+      if (!host.isConnected) document.body.append(host);
+      let ctx!: DemoSetupContext;
+      const view = await renderDemo({
+        runtime,
+        host,
+        demo: {
+          type: 'demo',
+          root: {
+            kind: 'box',
+            ref: 'shell',
+            children: [
+              {
+                kind: 'proto',
+                prototypeId: dialogRoot.name,
+                ref: 'dialog',
+                props: { open: false },
+                children: [
+                  {
+                    kind: 'proto',
+                    prototypeId: dialogContent.name,
+                    ref: 'portal',
+                    children: [
+                      { kind: 'proto', prototypeId: dialogTitle.name, children: ['Static title'] },
+                      {
+                        kind: 'proto',
+                        prototypeId: button.name,
+                        ref: 'action',
+                        children: ['Action'],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+          setup(context) {
+            ctx = context;
+          },
+        },
+      });
+      views.push(view);
+      const content = () =>
+        ctx.api.getExposes('portal') as {
+          transitionState: { get(): string };
+          isPresent: { get(): boolean };
+        };
+      const setOpen = async (open: boolean) => {
+        ctx.api.setProps('dialog', { open });
+        await vi.waitFor(() => {
+          expect(content().transitionState.get()).toBe(open ? 'entered' : 'closed');
+          expect(content().isPresent.get()).toBe(open);
+          if (open) {
+            expect(ctx.refs.portal?.isConnected).toBe(true);
+            expect(ctx.refs.action?.isConnected).toBe(true);
+            expect(ctx.refs.portal.contains(ctx.refs.action)).toBe(true);
+            expect(host.contains(ctx.refs.portal)).toBe(false);
+          }
+        });
+      };
+      return { host, ctx, view, setOpen };
+    }
+
+    it('refreshes static no-slot portal refs through close/reopen without borrowing another owner', async () => {
+      const first = await mountStaticPortal();
+      const second = await mountStaticPortal();
+      const firstRefs = first.ctx.refs;
+      const secondRefs = second.ctx.refs;
+      const firstOwner = first.ctx.refs.shell.getAttribute('data-demo-owner');
+      const secondOwner = second.ctx.refs.shell.getAttribute('data-demo-owner');
+      expect(firstOwner).not.toBe(secondOwner);
+      await first.setOpen(true);
+      await second.setOpen(true);
+      const secondAction = second.ctx.refs.action;
+      for (let round = 0; round < 2; round += 1) {
+        await first.setOpen(false);
+        await first.setOpen(true);
+        expect(first.ctx.refs).toBe(firstRefs);
+        expect(second.ctx.refs).toBe(secondRefs);
+        expect(first.ctx.refs.action).not.toBe(secondAction);
+        expect(second.ctx.refs.action).toBe(secondAction);
+        expect(secondAction.isConnected).toBe(true);
+        if (runtime === 'wc') {
+          expect(first.ctx.refs.action.getAttribute('data-demo-owner')).toBe(firstOwner);
+        } else {
+          expect(first.ctx.refs.action.classList.contains(`pui-owner-${firstOwner}`)).toBe(true);
+          expect(first.ctx.refs.action.classList.contains(`pui-owner-${secondOwner}`)).toBe(false);
+        }
+      }
+    }, 20_000);
+
+    it('disconnects a static ref observer on retirement and rejects late old-owner DOM after host reuse', async () => {
+      const first = await mountStaticPortal();
+      await first.setOpen(true);
+      const retiredRefs = first.ctx.refs;
+      const oldPortal = retiredRefs.portal;
+      const retiredShell = retiredRefs.shell;
+      const oldOwner = retiredShell.getAttribute('data-demo-owner');
+      const oldAction = retiredRefs.action;
+      await first.view.destroy();
+      await vi.waitFor(() => {
+        expect(oldPortal.isConnected).toBe(false);
+        expect(Object.keys(retiredRefs)).toEqual([]);
+      });
+      const replacement = await mountStaticPortal(first.host);
+      await replacement.setOpen(true);
+      const liveAction = replacement.ctx.refs.action;
+      // Controlled negative: the retired authored box, with its real owner
+      // marker, reappears. Do not remount disposed Dialog Content outside its
+      // provider: that is a new, invalid component mount rather than a ref fact.
+      expect(retiredShell.tagName).toBe('DIV');
+      expect(oldOwner).toMatch(/^demo-/);
+      retiredShell.replaceChildren();
+      expect(retiredShell.getAttribute('data-demo-owner')).toBe(oldOwner);
+      document.body.append(retiredShell);
+      retiredShell.append(document.createElement('span'));
+      await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      expect(Object.keys(retiredRefs)).toEqual([]);
+      expect(replacement.ctx.refs.action).toBe(liveAction);
+      expect(replacement.ctx.refs.action).not.toBe(oldAction);
+      expect(liveAction.isConnected).toBe(true);
+      retiredShell.remove();
+      await replacement.setOpen(false);
+      await replacement.setOpen(true);
+      expect(Object.keys(retiredRefs)).toEqual([]);
+      expect(replacement.ctx.refs.action?.isConnected).toBe(true);
+    }, 20_000);
+
     it('retains Root/Input and keyed items through append/reorder/remove, publishing live refs', async () => {
       const { ctx, api } = await mount(runtime);
       const root = ctx.refs.command,
