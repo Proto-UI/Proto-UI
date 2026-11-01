@@ -23,12 +23,18 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
 }
 afterEach(() => document.body.replaceChildren());
 
-it('reflows enlarged desktop reading columns and Header by container space, preserving original owners', () => {
+it('keeps reading navigation lateral or hidden and preserves the Header and single native-tree owners', () => {
   const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const header = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   expect(frame).toContain('container: docs-canvas / inline-size');
   expect(frame).toContain('lg:[--sidebar-width:15rem]');
-  expect(columns).toContain('@container docs-canvas (max-width: 72rem)');
+  expect(columns).toMatch(/@container docs-canvas \(max-width: [\d.]+rem\)/);
+  expect(columns).not.toMatch(/flex-direction:\s*column|order:\s*0/);
+  expect(columns).toMatch(/> \.right-sidebar-container\s*\{\s*display:\s*none;/);
+  expect(columns.match(/<slot name="right-sidebar"/g)).toHaveLength(1);
+  expect(frame.match(/<slot name="sidebar"/g)).toHaveLength(1);
+  expect(frame).toContain('<noscript>');
+  expect(frame).toContain('initSiteContentsNavigation');
   expect(columns).toContain('class="docs-reading-columns lg:sl-flex"');
   expect(columns).toMatch(/\.right-sidebar-container[\s\S]*width: 100%/);
   expect(columns).toMatch(
@@ -53,14 +59,14 @@ it('keeps the outer canvas as the only narrow reading gutter without changing sp
   expect(classes[1]).toContain('md:px-6');
 });
 
-describe('reading reflow query boundaries (source arithmetic, not browser paint)', () => {
+describe('reading rail visibility query boundaries (source arithmetic, not browser paint)', () => {
   const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const query = columns.match(
     /@media \(min-width: ([\d.]+)rem\)\s*\{\s*@container docs-canvas \(max-width: ([\d.]+)rem\)/
   );
   // Media rem uses the initial font; container rem follows the root font. Read
   // the actual owner thresholds so restoring the inclusive 80/80 defect fails.
-  const reflows = (viewport: number, contentWidth: number, root: number) => {
+  const hidesRightForTextBudget = (viewport: number, contentWidth: number, root: number) => {
     expect(query).not.toBeNull();
     return viewport >= Number(query![1]) * 16 && contentWidth <= Number(query![2]) * root;
   };
@@ -79,32 +85,48 @@ describe('reading reflow query boundaries (source arithmetic, not browser paint)
       for (const scrollbar of [0, 15]) {
         // The 15px scrollbar is modelled, not a browser capture. No 85rem cap.
         const contentWidth = canvasWidth(viewport, 16, scrollbar);
-        expect(reflows(viewport, contentWidth, 16), `${viewport}px, scrollbar ${scrollbar}`).toBe(
-          false
-        );
+        expect(
+          hidesRightForTextBudget(viewport, contentWidth, 16),
+          `${viewport}px, scrollbar ${scrollbar}`
+        ).toBe(false);
       }
   });
 
-  it('retains root-relative enlarged reflow at the existing column budget and viewport gate', () => {
+  it('keeps ordinary1440/root20 lateral and hides enlarged rails without an above-article mode', () => {
     const columnBudget = Number(query![2]);
     expect(Number(query![1])).toBe(80);
-    expect(columnBudget).toBe(72);
-    expect(reflows(1440, canvasWidth(1440, 32), 32)).toBe(true);
-    expect(reflows(1279, canvasWidth(1279, 32), 32)).toBe(false);
+    // Do not canonize an implementation constant: independently required
+    // samples keep the ordinary1440 and enlarged20px TOC on the right.
+    for (const root of [16, 20])
+      for (const scrollbar of [0, 15])
+        expect(hidesRightForTextBudget(1440, canvasWidth(1440, root, scrollbar), root)).toBe(false);
+    expect(hidesRightForTextBudget(1440, canvasWidth(1440, 24), 24)).toBe(true);
+    const guard = columns.slice(query!.index);
+    expect(guard).toMatch(
+      /:has\(> \.right-sidebar-container\)\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\);/
+    );
+    expect(guard).toMatch(/> \.right-sidebar-container\s*\{\s*display:\s*none;/);
+    expect(guard).not.toMatch(/flex-direction:\s*column|order:\s*0/);
+    expect(hidesRightForTextBudget(1440, canvasWidth(1440, 32), 32)).toBe(true);
+    expect(hidesRightForTextBudget(1279, canvasWidth(1279, 32), 32)).toBe(false);
     for (const root of [20, 24, 32])
       for (const scrollbar of [0, 15]) {
         // At this boundary 2vw is between the 1rem/2rem clamp endpoints:
-        // viewport - scrollbar - 2 * .02 * viewport = 72 * root.
+        // viewport - scrollbar - 2 * .02 * viewport = columnBudget * root.
         const viewport = (columnBudget * root + scrollbar) / 0.96;
         const boundary = canvasWidth(viewport, root, scrollbar);
         expect(boundary).toBeCloseTo(columnBudget * root, 8);
-        expect(reflows(viewport - 1, canvasWidth(viewport - 1, root, scrollbar), root)).toBe(true);
-        expect(reflows(viewport, columnBudget * root, root)).toBe(true);
-        expect(reflows(viewport + 1, canvasWidth(viewport + 1, root, scrollbar), root)).toBe(false);
+        expect(
+          hidesRightForTextBudget(viewport - 1, canvasWidth(viewport - 1, root, scrollbar), root)
+        ).toBe(true);
+        expect(hidesRightForTextBudget(viewport, columnBudget * root, root)).toBe(true);
+        expect(
+          hidesRightForTextBudget(viewport + 1, canvasWidth(viewport + 1, root, scrollbar), root)
+        ).toBe(false);
       }
     // At very wide viewports the 2rem gutter cap must not become a canvas cap.
     expect(canvasWidth(2560, 16)).toBe(2560 - 4 * 16);
-    expect(reflows(2560, canvasWidth(2560, 16), 16)).toBe(false);
+    expect(hidesRightForTextBudget(2560, canvasWidth(2560, 16), 16)).toBe(false);
   });
 });
 
