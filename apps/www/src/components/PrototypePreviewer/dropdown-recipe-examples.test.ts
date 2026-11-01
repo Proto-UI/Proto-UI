@@ -266,9 +266,12 @@ describe('Dropdown recipe WC source-host rendering', () => {
           expect(refs[groupRef].getAttribute('aria-labelledby')).toBe(label.id);
         }
       }
+      // The renderer releases its refs map on teardown, so capture the
+      // element first and observe its detachment afterwards.
+      const content = refs.content;
       await view.destroy();
       expect(host.childElementCount).toBe(0);
-      expect(refs.content.isConnected).toBe(false);
+      expect(content.isConnected).toBe(false);
     }, 20_000);
   }
 });
