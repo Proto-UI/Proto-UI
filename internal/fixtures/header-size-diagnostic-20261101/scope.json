@@ -1,0 +1,78 @@
+{
+  "status": "STATIC_DESIGN_NOT_PUBLISHED_NOT_EXECUTED",
+  "subjects": [
+    {
+      "role": "stacked-baseline",
+      "commit": "242f0f141a627c2ae4c08a80d535d503800330c8",
+      "tree": "e9043e6f1d610f8603a40eb164afbf886b12b2eb"
+    },
+    {
+      "role": "candidate",
+      "commit": "e813167870510051a0645c1a7b2a16a174c0c639",
+      "tree": "5a312153cdcec05ccc6496c12985c6c5453bfc93"
+    }
+  ],
+  "overlayPatchSha256": "0eb0d998e910877d6218d16de52c0b09fcfe01e0f93c7663b5ae84c89f7c5fc3",
+  "overlayFiles": [
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+      "beforeSha256": "1e5eae77aa2ca6f44501e30f087c38766add32567ad3c96dd7fdf05129bdc86e",
+      "afterSha256": "f6ed1086d41943e5a6c8710162ee4b1700248037fc63a6a456c12617157ed15b",
+      "gitBlob": "717412ff8e55302e734213563e13fb4fbb2fbb32"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-size-read-probe.test.ts",
+      "beforeSha256": null,
+      "afterSha256": "71263bd4def7869d312fec7fb225933162ed5eff9b2cbdc89c22e018c19a5c51",
+      "gitBlob": "07c0e7944bfee4fb6fa5edd59f64785024e31e69"
+    },
+    {
+      "path": "apps/www/src/content/docs/zh-cn/header-size-read-probe.ts",
+      "beforeSha256": null,
+      "afterSha256": "7edd2d17f782a98dc079261c2eb1ad1d212e1ebb23197794cc0b69424b3ab04a",
+      "gitBlob": "fe8da40cc25e6d9117839c5153a176fd7a6cf1f6"
+    }
+  ],
+  "lockSha256": "3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422",
+  "testFile": "apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts",
+  "pattern": "shadcn/wc/(light|dark):",
+  "expectedCollectedPerPhase": 2,
+  "expectedActualJourneys": 8,
+  "phaseOrder": [
+    "242f-control",
+    "e813-control",
+    "242f-trace",
+    "e813-trace"
+  ],
+  "nativeExecuted": 0,
+  "requirements": [
+    "exact-checkout-HEAD-not-carrier",
+    "only-three-overlay-paths-dirty",
+    "lock-full-linux-closure-not-unit105",
+    "one-worker-normal-file-isolation",
+    "private-pid-net-mount-ipc",
+    "loopback-only-no-host-credentials",
+    "chromiumSandbox:true",
+    "no-security-downgrade",
+    "no-follow-output-admission",
+    "source-and-dependency-pre-post-hashes"
+  ],
+  "publication": "NOT AUTHORIZED: new diagnostic branch/workflow and any incidental Vercel preview require parent/user decision",
+  "execution": "NOT AUTHORIZED: full hosted closure plus native8 requires final fixed runner review and explicit scope approval",
+  "nodeVersion": "24.22.1",
+  "chromeVersion": "156.0.8078.47",
+  "pnpmVersion": "10.32.1",
+  "branch": "diagnostic/header-size-native8-20261101",
+  "aptPackages": [
+    {
+      "name": "bubblewrap",
+      "version": "0.9.0-1ubuntu0.3",
+      "sha256": "2461f1beee9cb04c8942739fe1a2b37e7b7c2a3d518f0779dc75f9245baa3094"
+    },
+    {
+      "name": "fonts-noto-cjk",
+      "version": "1:20230817+repack1-3",
+      "sha256": "7d64b985f6fe128c99eae5610d5c047338e572bdcfb2bb09736be01b824a7f6c"
+    }
+  ]
+}

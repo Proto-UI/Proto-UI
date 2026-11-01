@@ -1,0 +1,134 @@
+name: Bounded Header size native diagnostic
+on:
+  push:
+    branches: [diagnostic/header-size-native8-20261101]
+permissions:
+  contents: read
+concurrency:
+  group: header-size-native8-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  native8:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ github.sha }}
+          path: carrier
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: 242f0f141a627c2ae4c08a80d535d503800330c8
+          path: baseline
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: e813167870510051a0645c1a7b2a16a174c0c639
+          path: candidate
+          persist-credentials: false
+          submodules: false
+          lfs: false
+      - name: Verify fixed carrier harness and unchanged diagnostic overlay
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE/carrier"
+          sha256sum --check <<'HASHES'
+          f6ed1086d41943e5a6c8710162ee4b1700248037fc63a6a456c12617157ed15b  apps/www/src/content/docs/zh-cn/header-select-elevation.browser.test.ts
+          71263bd4def7869d312fec7fb225933162ed5eff9b2cbdc89c22e018c19a5c51  apps/www/src/content/docs/zh-cn/header-size-read-probe.test.ts
+          7edd2d17f782a98dc079261c2eb1ad1d212e1ebb23197794cc0b69424b3ab04a  apps/www/src/content/docs/zh-cn/header-size-read-probe.ts
+          650dcc420d1094add4b9eb01b122dce5b3321ee57e0030ec1f4ad4325ac17a7e  internal/fixtures/header-size-diagnostic-20261101/probe.py
+          fe131d2ce8b7401430cb45c306424cac1d0164afed8e8f239563e6e4a13aac9f  internal/fixtures/header-size-diagnostic-20261101/run.py
+          b7f043c1567d7f61481bdd3e63aa4520262bec93daad7227c73c1ac6f5bf4651  internal/fixtures/header-size-diagnostic-20261101/scope.json
+          34ccd8f49bfde0ff6cd44dc6f5580e7ec5699ff46f04b3578928fe472f6f156a  internal/fixtures/header-size-diagnostic-20261101/vitest.selection.ts
+          HASHES
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24.22.1
+          check-latest: false
+      # Requires specific approval: these two exact standard Ubuntu packages,
+      # including bubblewrap's default profile; never sysctl/AppArmor disable.
+      - name: Acquire only two pinned Ubuntu packages, retaining signature and digest checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          EVIDENCE="$RUNNER_TEMP/header-size-os"
+          mkdir -p "$EVIDENCE/packages"
+          cat > "$EVIDENCE/ubuntu.sources" <<'SOURCES'
+          Types: deb
+          URIs: https://archive.ubuntu.com/ubuntu
+          Suites: noble noble-updates
+          Components: main
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+
+          Types: deb
+          URIs: https://security.ubuntu.com/ubuntu
+          Suites: noble-security
+          Components: main
+          Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+          SOURCES
+          mkdir -p "$EVIDENCE/apt-lists/partial"
+          APT=(-o Acquire::Retries=2 -o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30
+               -o "Dir::Etc::sourcelist=$EVIDENCE/ubuntu.sources" -o Dir::Etc::sourceparts=-
+               -o "Dir::State::lists=$EVIDENCE/apt-lists")
+          sudo apt-get "${APT[@]}" update > "$EVIDENCE/apt-update.log" 2>&1
+          PACKAGES=(bubblewrap=0.9.0-1ubuntu0.3 fonts-noto-cjk=1:20230817+repack1-3)
+          sudo apt-get "${APT[@]}" --simulate --no-install-recommends --no-remove install "${PACKAGES[@]}" > "$EVIDENCE/apt-simulation.log" 2>&1
+          python3 - "$EVIDENCE/apt-simulation.log" <<'PY'
+          import pathlib,re,sys
+          text=pathlib.Path(sys.argv[1]).read_text()
+          if re.search(r'^(Remv|Purg) ',text,re.M): raise SystemExit('package removal is out of scope')
+          changes=set(re.findall(r'^Inst ([^ :]+)',text,re.M))
+          if not changes <= {'bubblewrap','fonts-noto-cjk'}: raise SystemExit('additional OS package changes: '+repr(changes))
+          PY
+          cd "$EVIDENCE/packages"
+          apt-get "${APT[@]}" download "${PACKAGES[@]}" > "$EVIDENCE/apt-download.log" 2>&1
+          # apt filename's epoch escaping is normalized by exact package metadata,
+          # not by changing package bytes or accepting a different digest.
+          python3 - "$GITHUB_WORKSPACE/carrier/internal/fixtures/header-size-diagnostic-20261101/scope.json" "$EVIDENCE" <<'PY'
+          import hashlib,json,pathlib,subprocess,sys
+          scope=json.loads(pathlib.Path(sys.argv[1]).read_text());root=pathlib.Path(sys.argv[2]);records=[]
+          files=list((root/'packages').glob('*.deb'))
+          if len(files)!=2: raise SystemExit('expected two exact package archives')
+          expected={x['name']:x for x in scope['aptPackages']}
+          for p in files:
+              name,version=subprocess.check_output(['dpkg-deb','-f',str(p),'Package','Version'],text=True).strip().splitlines()
+              name=name.removeprefix('Package: ');version=version.removeprefix('Version: ')
+              e=expected.pop(name);digest=hashlib.sha256(p.read_bytes()).hexdigest()
+              assert version==e['version'] and digest==e['sha256']
+              records.append({'name':name,'version':version,'sha256':digest,'bytes':p.stat().st_size})
+          assert not expected
+          (root/'package-receipt.json').write_text(json.dumps(records,indent=2)+'\n')
+          PY
+          sudo apt-get "${APT[@]}" --yes --no-install-recommends --no-remove install "${PACKAGES[@]}" > "$EVIDENCE/apt-install.log" 2>&1
+          dpkg-query -W -f='${Package} ${Version}\n' bubblewrap fonts-noto-cjk > "$EVIDENCE/installed.txt"
+          dpkg -V bubblewrap fonts-noto-cjk > "$EVIDENCE/installed-verification.txt"
+          test ! -s "$EVIDENCE/installed-verification.txt"
+          sha256sum /usr/bin/bwrap /opt/google/chrome/chrome > "$EVIDENCE/system-binaries-sha256.txt"
+          /opt/google/chrome/chrome --version > "$EVIDENCE/chrome-version.txt"
+          # No package archive is published, only its verified public digest.
+          rm -- "$EVIDENCE"/packages/*.deb
+          rmdir "$EVIDENCE/packages"
+      - name: Locked acquisition, private namespace preflight, exact native8 and admitted artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 "$GITHUB_WORKSPACE/carrier/internal/fixtures/header-size-diagnostic-20261101/run.py" \
+            --workspace "$GITHUB_WORKSPACE" --output "$RUNNER_TEMP/header-size-native8" \
+            --node "$(command -v node)" --carrier "$GITHUB_SHA"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: header-size-native8-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/header-size-native8/admitted
+            ${{ runner.temp }}/header-size-os/*.log
+            ${{ runner.temp }}/header-size-os/*.json
+            ${{ runner.temp }}/header-size-os/*.txt
+          if-no-files-found: warn
+          retention-days: 14

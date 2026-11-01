@@ -2,9 +2,10 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import type { Browser, Locator, Page } from 'playwright-core';
+import { chromium, type Browser, type Locator, type Page } from 'playwright-core';
+import { installHeaderSizeReadProbe } from './header-size-read-probe';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { launchBrowser, RUNTIMES, startServer, stopServer } from './browser-harness';
+import { chromeExecutable, RUNTIMES, startServer, stopServer } from './browser-harness';
 import { revealHeaderPreferences } from './site-header-browser';
 import {
   headerPopupSettled,
@@ -12,6 +13,15 @@ import {
   popupOptionContrast,
 } from './header-popup-evidence';
 import { measureHeaderPreferenceFocusRing } from './site-header-breakpoint-evidence';
+
+declare global {
+  interface Window {
+    __headerSizeReadProbe?: ReturnType<typeof installHeaderSizeReadProbe>;
+  }
+}
+const diagnosticMode = process.env.PROTO_UI_HEADER_SIZE_DIAGNOSTIC;
+if (diagnosticMode !== 'control' && diagnosticMode !== 'trace')
+  throw new Error('This temporary probe requires explicit control or trace mode');
 
 const LABELS = { wc: 'Web Components', react: 'React', vue: 'Vue', vue2: 'Vue 2' } as const;
 const appearance = process.env.PROTO_UI_HEADER_SELECT_APPEARANCE ?? 'family';
@@ -23,6 +33,14 @@ const output =
     ? path.join(process.env.PROTO_UI_RUNTIME_EVIDENCE_DIR, 'header-select-elevation')
     : undefined);
 const sourceSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+if (
+  ![
+    'e813167870510051a0645c1a7b2a16a174c0c639',
+    '242f0f141a627c2ae4c08a80d535d503800330c8',
+  ].includes(sourceSha)
+)
+  throw new Error('Diagnostic subject must be exact e813 or stacked baseline 242f');
+if (!output) throw new Error('Diagnostic artifact output is required');
 const HISTORICAL_FLAT_SHA = '8856a7112e86aa974f2ba388c3b8b70417268394';
 if (appearance === 'flat' && sourceSha !== HISTORICAL_FLAT_SHA)
   throw new Error('Historical flat negative is bound only to its immutable baseline');
@@ -31,7 +49,11 @@ let browser: Browser;
 let baseUrl: string;
 beforeAll(async () => {
   baseUrl = await startServer('/zh-cn/');
-  browser = await launchBrowser();
+  browser = await chromium.launch({
+    executablePath: await chromeExecutable(),
+    headless: true,
+    chromiumSandbox: true,
+  });
   if (output) await mkdir(output, { recursive: true });
 }, 150_000);
 afterAll(async () => {
@@ -232,6 +254,12 @@ describe.sequential('Header public family presentation and labelled compact fiel
             viewport: { width: 1440, height: 1000 },
             colorScheme: theme,
           });
+          await context.route('**/*', (route) => {
+            const requested = new URL(route.request().url());
+            return requested.origin === new URL(baseUrl).origin
+              ? route.continue()
+              : route.abort('blockedbyclient');
+          });
           const page = await context.newPage();
           const errors: string[] = [];
           page.on('pageerror', (error) => errors.push(error.message));
@@ -244,6 +272,7 @@ describe.sequential('Header public family presentation and labelled compact fiel
               });
           };
           try {
+            if (diagnosticMode === 'trace') await page.addInitScript(installHeaderSizeReadProbe);
             await page.goto(`${baseUrl}/zh-cn/`, { waitUntil: 'networkidle' });
             await ready(page, 'wc');
             if (family === 'brutalist') await choose(page, 'family', 'Brutalist');
@@ -323,6 +352,10 @@ describe.sequential('Header public family presentation and labelled compact fiel
               }
             }
             for (const width of [1440, 390]) {
+              await page.evaluate(
+                (width) => window.__headerSizeReadProbe?.phase(`before-viewport-${width}`),
+                width
+              );
               await page.setViewportSize({ width, height: 1000 });
               await revealHeaderPreferences(page);
               await page.mouse.move(0, 900);
@@ -337,6 +370,11 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 await revealHeaderPreferences(page);
               }
               for (const control of ['runtime', 'family'] as const) {
+                await page.evaluate(
+                  ({ width, control }) =>
+                    window.__headerSizeReadProbe?.phase(`${width}-${control}-before-open`),
+                  { width, control }
+                );
                 const select = trigger(page, control);
                 const rest = await sample(select);
                 expect(rest.hit).toBe(true);
@@ -410,6 +448,11 @@ describe.sequential('Header public family presentation and labelled compact fiel
                 const id = await select.getAttribute('aria-controls');
                 const popup = page.locator(`[id=${JSON.stringify(id)}]`);
                 await popup.waitFor({ state: 'visible' });
+                await page.evaluate(
+                  ({ width, control }) =>
+                    window.__headerSizeReadProbe?.phase(`${width}-${control}-visible`),
+                  { width, control }
+                );
                 measurements.push({
                   stage: 'popup-first-visible',
                   width,
@@ -790,6 +833,14 @@ describe.sequential('Header public family presentation and labelled compact fiel
             }
             throw error;
           } finally {
+            let sizeDiagnostic: unknown;
+            try {
+              sizeDiagnostic = await page.evaluate(
+                () => window.__headerSizeReadProbe?.finish() ?? null
+              );
+            } catch (diagnosticError) {
+              sizeDiagnostic = { unavailable: String(diagnosticError) };
+            }
             if (output)
               await writeFile(
                 path.join(output, `${family}-${runtime}-${theme}-${appearance}.json`),
@@ -811,6 +862,8 @@ describe.sequential('Header public family presentation and labelled compact fiel
                     theme,
                     measurements,
                     errors,
+                    diagnosticMode,
+                    sizeDiagnostic,
                   },
                   null,
                   2
