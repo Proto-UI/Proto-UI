@@ -691,9 +691,12 @@ export function createWebProtoEventRouter(opt: {
     }
     if (globalPointerBindings.has(type)) return;
     const capture = nativeType === 'pointerenter' || nativeType === 'pointerleave';
-    const lease: { stop: Unsub } = { stop: () => globalEl.removeEventListener(nativeType, callback, capture) };
+    const lease: { stop: Unsub } = {
+      stop: () => globalEl.removeEventListener(nativeType, callback, capture),
+    };
     const callback = (event: Event): void => {
-      if (globalPointerBindings.get(type) === lease && isEnabled()) emit(protoGlobalBus, type, event);
+      if (globalPointerBindings.get(type) === lease && isEnabled())
+        emit(protoGlobalBus, type, event);
     };
     // enter/leave do not bubble: capture observes actual samples without
     // redispatching an event or inventing mouseover-derived semantics.
@@ -702,7 +705,11 @@ export function createWebProtoEventRouter(opt: {
       globalEl.addEventListener(nativeType, callback, capture);
     } catch (error) {
       globalPointerBindings.delete(type);
-      try { lease.stop(); } catch { /* Keep the original attachment failure. */ }
+      try {
+        lease.stop();
+      } catch {
+        /* Keep the original attachment failure. */
+      }
       throw error;
     }
   }
@@ -761,9 +768,12 @@ function createProtoEventPayload(type: string, native: any) {
     const kind: unknown = native?.pointerType;
     const buttons: unknown = native?.buttons;
     target.pointerType = kind === 'mouse' || kind === 'touch' || kind === 'pen' ? kind : 'unknown';
-    target.pointerButtons = typeof buttons === 'number' && Number.isInteger(buttons) && buttons >= 0
-      ? buttons === 0 ? 'none' : 'active'
-      : 'unknown';
+    target.pointerButtons =
+      typeof buttons === 'number' && Number.isInteger(buttons) && buttons >= 0
+        ? buttons === 0
+          ? 'none'
+          : 'active'
+        : 'unknown';
   }
 
   if (!native || (typeof native !== 'object' && typeof native !== 'function')) return target;
@@ -843,7 +853,8 @@ function createProxyTarget(args: {
           protoListeners.splice(index, 1);
           args.protoBus.removeEventListener(p.inner, record.wrapped, capture);
           signal?.removeEventListener('abort', record.cleanup);
-          if (!protoListeners.some((r) => r.type === p.inner)) args.onProtoDemandChange?.(p.inner, false);
+          if (!protoListeners.some((r) => r.type === p.inner))
+            args.onProtoDemandChange?.(p.inner, false);
         };
         record.wrapped = (event: Event) => {
           // Recheck each callback: an earlier callback may disable, dispose or
@@ -866,7 +877,11 @@ function createProxyTarget(args: {
           try {
             args.onProtoDemandChange?.(p.inner, true);
           } catch (error) {
-            try { record.cleanup(); } catch { /* Preserve the attachment error. */ }
+            try {
+              record.cleanup();
+            } catch {
+              /* Preserve the attachment error. */
+            }
             throw error;
           }
         }

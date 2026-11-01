@@ -76,8 +76,21 @@ export const EVENT_TYPE_PAYLOAD_CASES = [
     id: 'event-pointer-sample-facts',
     title: 'six pointer events carry finite sample facts without host leakage',
     specCase: 'T-EVENT-0002-CASE-POINTER-FACTS',
-    covers: ['C-EVENT-0002-L', 'M-EVENT-0001-L', 'C-EVENT-TYPE-0003-F', 'C-EVENT-TYPE-0003-G', 'C-EVENT-TYPE-0003-H'],
-    acceptedTypes: ['pointer.down', 'pointer.move', 'pointer.up', 'pointer.cancel', 'pointer.enter', 'pointer.leave'],
+    covers: [
+      'C-EVENT-0002-L',
+      'M-EVENT-0001-L',
+      'C-EVENT-TYPE-0003-F',
+      'C-EVENT-TYPE-0003-G',
+      'C-EVENT-TYPE-0003-H',
+    ],
+    acceptedTypes: [
+      'pointer.down',
+      'pointer.move',
+      'pointer.up',
+      'pointer.cancel',
+      'pointer.enter',
+      'pointer.leave',
+    ],
     expectation: 'pointer-sample-facts',
   },
 ] as const satisfies readonly EventTypePayloadCase[];

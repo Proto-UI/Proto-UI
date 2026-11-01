@@ -107,8 +107,8 @@ export function emitWebComponentSource(
   if (!checked.ok) return checked;
   const ir = checked.value;
   if (options.ssr) {
-    const pointerDiagnostics = unsupportedPointerFacts(ir,'web-component-source SSR');
-    if (pointerDiagnostics.length) return {ok:false,diagnostics:pointerDiagnostics};
+    const pointerDiagnostics = unsupportedPointerFacts(ir, 'web-component-source SSR');
+    if (pointerDiagnostics.length) return { ok: false, diagnostics: pointerDiagnostics };
   }
   const selected = resolveTargetProfile('web-component-source-v1');
   if (!selected.ok) return selected;
@@ -336,7 +336,8 @@ export function emitWebComponentSource(
     if (type === 'accessible') return `${prefix}NativeAccessible`;
     if (type === 'event') return `${prefix}NativeInput`;
     if (type === 'event-control') return `${prefix}NativeInput['control']`;
-    if (type === 'event-or-control') return `(${prefix}NativeInput | ${prefix}NativeInput['control'])`;
+    if (type === 'event-or-control')
+      return `(${prefix}NativeInput | ${prefix}NativeInput['control'])`;
     if (type === 'host-event') return 'Event';
     if (type === 'props') return `${prefix}PropsSnapshot`;
     if (type === 'record') return 'Record<string, unknown>';

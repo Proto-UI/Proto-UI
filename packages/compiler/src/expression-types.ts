@@ -3,14 +3,25 @@ import type { ExpressionIR, ValueType } from './ir';
 
 export type UnaryOperator = '!' | '-' | '+';
 export type BinaryOperator =
-  | '===' | '!==' | '<' | '<=' | '>' | '>='
-  | '+' | '-' | '*' | '/' | '%' | '&&' | '||' | '??';
+  | '==='
+  | '!=='
+  | '<'
+  | '<='
+  | '>'
+  | '>='
+  | '+'
+  | '-'
+  | '*'
+  | '/'
+  | '%'
+  | '&&'
+  | '||'
+  | '??';
 
 type AtomicDataType = Exclude<DataType, { kind: 'union' }>;
 
 function alternatives(type: DataType): AtomicDataType[] {
-  if (typeof type !== 'string' && type.kind === 'union')
-    return type.members.flatMap(alternatives);
+  if (typeof type !== 'string' && type.kind === 'union') return type.members.flatMap(alternatives);
   return [type];
 }
 
@@ -27,9 +38,11 @@ function union(types: readonly DataType[]): DataType {
     if (members.some((member) => dataTypeEqual(member, candidate))) continue;
     members.push(candidate);
   }
-  const normalized = members.filter((member) =>
-    typeof member === 'string' || member.kind !== 'literal' ||
-    !members.some((other) => typeof other === 'string' && other === primitive(member))
+  const normalized = members.filter(
+    (member) =>
+      typeof member === 'string' ||
+      member.kind !== 'literal' ||
+      !members.some((other) => typeof other === 'string' && other === primitive(member))
   );
   if (normalized.length === 0) return { kind: 'union', members: [] };
   if (normalized.length === 1) return normalized[0];
@@ -45,7 +58,9 @@ function isNullish(type: AtomicDataType): boolean {
 function requireScalar(type: AtomicDataType, operator: string): string {
   const kind = primitive(type);
   if (kind === undefined)
-    throw new TypeError(`Operator ${operator} requires primitive operands; record and array coercion is unsupported.`);
+    throw new TypeError(
+      `Operator ${operator} requires primitive operands; record and array coercion is unsupported.`
+    );
   return kind;
 }
 
@@ -54,14 +69,15 @@ export function relationalOperandKind(left: DataType, right: DataType): 'number'
   const kinds = [...alternatives(left), ...alternatives(right)].map(primitive);
   if (kinds.every((kind) => kind === 'string')) return 'string';
   if (kinds.every((kind) => kind === 'number')) return 'number';
-  throw new TypeError('Relational comparison requires number×number or string×string for every union alternative; mixed, nullish, boolean and structured operands require explicit narrowing or conversion.');
+  throw new TypeError(
+    'Relational comparison requires number×number or string×string for every union alternative; mixed, nullish, boolean and structured operands require explicit narrowing or conversion.'
+  );
 }
 
 function truthy(type: AtomicDataType): AtomicDataType | undefined {
   if (isNullish(type)) return undefined;
   if (type === 'boolean') return { kind: 'literal', value: true };
-  if (typeof type !== 'string' && type.kind === 'literal')
-    return type.value ? type : undefined;
+  if (typeof type !== 'string' && type.kind === 'literal') return type.value ? type : undefined;
   return type;
 }
 
@@ -71,8 +87,7 @@ function falsy(type: AtomicDataType): AtomicDataType | undefined {
   if (type === 'string') return { kind: 'literal', value: '' };
   // Number includes both zero and NaN. There is no NaN literal in the shared schema.
   if (type === 'number') return type;
-  if (typeof type !== 'string' && type.kind === 'literal')
-    return type.value ? undefined : type;
+  if (typeof type !== 'string' && type.kind === 'literal') return type.value ? undefined : type;
   return undefined;
 }
 
@@ -98,8 +113,8 @@ export function inferBinaryType(operator: string, left: DataType, right: DataTyp
     const retained = leftMembers
       .map(operator === '&&' ? falsy : truthy)
       .filter((member): member is AtomicDataType => member !== undefined);
-    const reachesRight = leftMembers.some((member) =>
-      (operator === '&&' ? truthy(member) : falsy(member)) !== undefined
+    const reachesRight = leftMembers.some(
+      (member) => (operator === '&&' ? truthy(member) : falsy(member)) !== undefined
     );
     return union(reachesRight ? [...retained, right] : retained);
   }
@@ -149,7 +164,8 @@ export function memberDataType(
   const results: DataType[] = [];
   for (const member of alternatives(type)) {
     if (isNullish(member)) {
-      if (!optional) throw new TypeError(`Cannot access member ${String(key)} on a nullish receiver.`);
+      if (!optional)
+        throw new TypeError(`Cannot access member ${String(key)} on a nullish receiver.`);
       results.push('void');
       continue;
     }
@@ -170,57 +186,108 @@ export function memberDataType(
 }
 
 /** Refine only immutable lexical values; calls and mutable State reads are never narrowed. */
-export function conditionRefinements(condition: ExpressionIR, truth: boolean): readonly [string, ValueType][] {
-  if (condition.kind === 'unary' && condition.operator === '!') return conditionRefinements(condition.operand,!truth);
-  if (condition.kind === 'binary' && (condition.operator === '&&' && truth || condition.operator === '||' && !truth))
-    return [...conditionRefinements(condition.left,truth),...conditionRefinements(condition.right,truth)];
+export function conditionRefinements(
+  condition: ExpressionIR,
+  truth: boolean
+): readonly [string, ValueType][] {
+  if (condition.kind === 'unary' && condition.operator === '!')
+    return conditionRefinements(condition.operand, !truth);
+  if (
+    condition.kind === 'binary' &&
+    ((condition.operator === '&&' && truth) || (condition.operator === '||' && !truth))
+  )
+    return [
+      ...conditionRefinements(condition.left, truth),
+      ...conditionRefinements(condition.right, truth),
+    ];
   // Positive strict identity is the only refinement from the inert join.
   // A false equality (or true inequality) says nothing about which alternative remains.
-  if (condition.kind === 'binary' &&
-      (condition.operator === '===' && truth || condition.operator === '!==' && !truth)) {
+  if (
+    condition.kind === 'binary' &&
+    ((condition.operator === '===' && truth) || (condition.operator === '!==' && !truth))
+  ) {
     const refine = (target: ExpressionIR, proven: ExpressionIR): readonly [string, ValueType][] =>
-      target.kind === 'reference' && target.type === 'event-or-control' &&
-      (proven.type === 'event' || proven.type === 'event-control') ? [[target.name, proven.type]] : [];
+      target.kind === 'reference' &&
+      target.type === 'event-or-control' &&
+      (proven.type === 'event' || proven.type === 'event-control')
+        ? [[target.name, proven.type]]
+        : [];
     const left = refine(condition.left, condition.right);
     if (left.length) return left;
     const right = refine(condition.right, condition.left);
     if (right.length) return right;
   }
-  let target: ExpressionIR = condition, literal: string | number | boolean | null | undefined;
+  let target: ExpressionIR = condition,
+    literal: string | number | boolean | null | undefined;
   let equality = truth;
-  if (condition.kind === 'binary' && (condition.operator === '===' || condition.operator === '!==')) {
-    const constant = condition.right.kind === 'literal' ? condition.right : condition.left.kind === 'literal' ? condition.left : undefined;
+  if (
+    condition.kind === 'binary' &&
+    (condition.operator === '===' || condition.operator === '!==')
+  ) {
+    const constant =
+      condition.right.kind === 'literal'
+        ? condition.right
+        : condition.left.kind === 'literal'
+          ? condition.left
+          : undefined;
     if (!constant) return [];
     target = constant === condition.right ? condition.left : condition.right;
-    literal = constant.value; equality = condition.operator === '===' ? truth : !truth;
+    literal = constant.value;
+    equality = condition.operator === '===' ? truth : !truth;
   }
-  const reference = target.kind === 'reference' ? target : target.kind === 'member' && target.object.kind === 'reference' ? target.object : undefined;
+  const reference =
+    target.kind === 'reference'
+      ? target
+      : target.kind === 'member' && target.object.kind === 'reference'
+        ? target.object
+        : undefined;
   if (!reference) return [];
   const type = reference.type;
   if (typeof type === 'string') {
-    if (type.startsWith('state-event:') && target.kind === 'member' && target.property === 'type' && (literal === 'next' || literal === 'disconnect')) {
+    if (
+      type.startsWith('state-event:') &&
+      target.kind === 'member' &&
+      target.property === 'type' &&
+      (literal === 'next' || literal === 'disconnect')
+    ) {
       const next = literal === 'next' ? equality : !equality;
-      return [[reference.name,next ? `state-next:${type.slice('state-event:'.length)}` as ValueType : 'state-disconnect']];
+      return [
+        [
+          reference.name,
+          next
+            ? (`state-next:${type.slice('state-event:'.length)}` as ValueType)
+            : 'state-disconnect',
+        ],
+      ];
     }
     if (target.kind !== 'reference' || !/^(nullable|optional):/.test(type)) return [];
     if (literal !== undefined && literal !== null) return [];
     if (literal === null && type.startsWith('optional:')) return [];
     const absent = type.startsWith('nullable:') ? 'null' : 'void';
     const present = literal === null ? !equality : truth;
-    return [[reference.name,present ? type.slice(type.indexOf(':')+1) as ValueType : absent]];
+    return [[reference.name, present ? (type.slice(type.indexOf(':') + 1) as ValueType) : absent]];
   }
   const members = alternatives(type);
   const kept = members.filter((member) => {
     if (target.kind === 'reference') {
-      if (literal === null) return isNullish(member) && primitive(member) === 'null' ? equality : !equality;
-      if (literal === undefined) return truth ? truthy(member) !== undefined : falsy(member) !== undefined;
-      if (typeof member !== 'string' && member.kind === 'literal') return (member.value === literal) === equality;
+      if (literal === null)
+        return isNullish(member) && primitive(member) === 'null' ? equality : !equality;
+      if (literal === undefined)
+        return truth ? truthy(member) !== undefined : falsy(member) !== undefined;
+      if (typeof member !== 'string' && member.kind === 'literal')
+        return (member.value === literal) === equality;
       return true;
     }
-    if (target.kind !== 'member' || literal === undefined || typeof member === 'string' || member.kind !== 'record') return true;
+    if (
+      target.kind !== 'member' ||
+      literal === undefined ||
+      typeof member === 'string' ||
+      member.kind !== 'record'
+    )
+      return true;
     const field = member.fields.find((field) => field.name === target.property);
     if (!field || typeof field.type === 'string' || field.type.kind !== 'literal') return true;
     return (field.type.value === literal) === equality;
   });
-  return [[reference.name,union(kept)]];
+  return [[reference.name, union(kept)]];
 }

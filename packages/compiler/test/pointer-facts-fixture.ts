@@ -1,4 +1,11 @@
-export const POINTER_TYPES = ['pointer.down', 'pointer.move', 'pointer.up', 'pointer.cancel', 'pointer.enter', 'pointer.leave'] as const;
+export const POINTER_TYPES = [
+  'pointer.down',
+  'pointer.move',
+  'pointer.up',
+  'pointer.cancel',
+  'pointer.enter',
+  'pointer.leave',
+] as const;
 export const WEB_TARGETS = ['wc', 'react', 'vue', 'vue2'] as const;
 export type PointerWebTarget = (typeof WEB_TARGETS)[number];
 
@@ -15,7 +22,7 @@ export default definePrototype({name:'pointer-facts-native-probe',setup(def){
   const hover=def.state.numberDiscrete('pointer.hover',0);
   const commits=def.state.numberDiscrete('pointer.commits',0);
   const enabled=def.state.bool('pointer.enabled',true);
-  const present=def.state.bool('pointer.present',true);
+  def.props.define({present:{type:'boolean',default:true}});
   const prevent=def.state.bool('pointer.prevent',false);
   const preventionCalls=def.state.numberDiscrete('pointer.preventions',0);
   const identity=def.state.string('pointer.identity','initial');
@@ -28,17 +35,18 @@ export default definePrototype({name:'pointer-facts-native-probe',setup(def){
   def.expose.method('hover',()=>hover.get());
   def.expose.method('commits',()=>commits.get());
   def.expose.method('enabled',(next:boolean)=>{enabled.set(next);});
-  def.expose.method('present',(next:boolean)=>{present.set(next);});
   def.expose.method('prevent',(next:boolean)=>{prevent.set(next);});
   def.expose.method('preventions',()=>preventionCalls.get());
   def.expose.method('identity',()=>identity.get());
-  present.watch((run,event)=>{if(event.type==='next')run.lifecycle.setPresent(event.next);});
-${POINTER_TYPES.map((type) => `  def.event.${register}('${type}',(run,event)=>{
+  def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present ?? true);});
+${POINTER_TYPES.map(
+  (type) => `  def.event.${register}('${type}',(run,event)=>{
     kind.set(event.pointerType ?? 'absent');buttons.set(event.pointerButtons ?? 'absent');lastType.set(event.type);calls.set(calls.get()+1);
     if(event.type==='pointer.move' && event.pointerType==='mouse' && event.pointerButtons==='none' && enabled.get())hover.set(hover.get()+1);
     run.expose.emit('sample',{type:event.type,kind:event.pointerType ?? 'absent',buttons:event.pointerButtons ?? 'absent'});
     run.update();
-  });`).join('\n')}
+  });`
+).join('\n')}
   def.event.${register}('pointer.move',(run,event)=>{
     const control=event.control;
     const choose=(payload:boolean)=>{if(payload)return event;return control;};

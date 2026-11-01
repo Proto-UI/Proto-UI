@@ -6,6 +6,22 @@ import { pointerFactsConformance } from '../../base/test/fixtures/pointer-facts-
 // not evidence of strict Vue2Runtime signature compatibility.
 pointerFactsConformance('vue2', async (prototype) => {
   const mounted = createMountedVue2Adapter(prototype);
-  if (!mounted.root) { mounted.unmount(); throw new Error('Vue2 author fixture did not mount a physical Proto root'); }
-  return { root: mounted.root, async flush() { await flushVue2(); await flushVue2(); }, async dispatch(target, sample) { target.dispatchEvent(sample); }, async unmount() { mounted.unmount(); await flushVue2(); } };
+  if (!mounted.root) {
+    mounted.unmount();
+    throw new Error('Vue2 author fixture did not mount a physical Proto root');
+  }
+  return {
+    root: mounted.root,
+    async flush() {
+      await flushVue2();
+      await flushVue2();
+    },
+    async dispatch(target, sample) {
+      target.dispatchEvent(sample);
+    },
+    async unmount() {
+      mounted.unmount();
+      await flushVue2();
+    },
+  };
 });
