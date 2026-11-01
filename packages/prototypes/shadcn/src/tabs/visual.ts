@@ -24,7 +24,9 @@ export const TABS_LIST_VARIANT = createContextKey<{ variant: 'default' | 'line' 
 );
 
 /** Derived visual observation only: Base remains the sole orientation/selection owner. */
-export function setupTabsVisual(def: DefHandle<ShadcnStyleProps>) {
+export function setupTabsVisual<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4', {
     supportedStyles: TABS_PROJECTED_STYLES,
   });
@@ -34,7 +36,7 @@ export function setupTabsVisual(def: DefHandle<ShadcnStyleProps>) {
   const variant = def.state.enum('shadcnTabsListVariant', 'default', {
     options: ['default', 'line'],
   });
-  const sync = (run: RunHandle<ShadcnStyleProps>) => {
+  const sync = (run: RunHandle<Props>) => {
     orientation.set(
       run.context.read(TABS_CONTEXT).orientation,
       'reason: observe Base Tabs orientation for paint'

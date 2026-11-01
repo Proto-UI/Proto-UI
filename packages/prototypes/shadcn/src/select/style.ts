@@ -19,15 +19,19 @@ export const SELECT_PROJECTED_STYLES = [
   'rhea',
   'new-york-v4',
 ] as const satisfies readonly ShadcnStyleId[];
-export function setupSelectStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupSelectStyle<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   return setupShadcnStyleSelection(def, 'new-york-v4', {
     supportedStyles: SELECT_PROJECTED_STYLES,
   });
 }
 /** The Root delegates resolution to the shared family boundary, including portal logical descendants. */
-export function setupSelectScope(def: DefHandle<ShadcnStyleProps>) {
+export function setupSelectScope<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   setupShadcnStyleScope(def);
-  const validate = (run: RunHandle<ShadcnStyleProps>) => {
+  const validate = (run: RunHandle<Props>) => {
     const style = run.context.tryRead(SHADCN_STYLE_SCOPE)?.style ?? 'new-york-v4';
     if (!SELECT_PROJECTED_STYLES.includes(style as (typeof SELECT_PROJECTED_STYLES)[number]))
       throw new Error(`[shadcn-select] Unsupported style: ${style}`);

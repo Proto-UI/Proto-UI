@@ -5,11 +5,15 @@ import { setupShadcnStyleSelection, type ShadcnStyleProps } from '../style-scope
 // apps/v4/registry/styles/style-{vega,nova,maia,lyra,mira,luma,sera,rhea}.css
 // (.cn-table*) and the independent apps/v4/registry/new-york-v4/ui/table.tsx.
 // The finite rules below map each retained profile, not aliases to another style.
-export function setupTableStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupTableStyle<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   return setupShadcnStyleSelection(def, 'new-york-v4');
 }
 
-export function setupTableText(def: DefHandle<ShadcnStyleProps>) {
+export function setupTableText<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   const style = setupTableStyle(def);
   def.rule({
     when: (w) => w.any(w.state(style).eq('lyra'), w.state(style).eq('mira')),
@@ -21,7 +25,10 @@ export function setupTableText(def: DefHandle<ShadcnStyleProps>) {
   });
 }
 
-export function setupTableHeaderCellPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupTableHeaderCellPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupTableStyle(def);
   def.feedback.style.use(tw('table-cell text-left align-middle font-medium whitespace-nowrap'));
   def.rule({
@@ -47,7 +54,10 @@ export function setupTableHeaderCellPaint(def: DefHandle<ShadcnStyleProps>) {
   });
 }
 
-export function setupTableCellPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupTableCellPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupTableStyle(def);
   def.feedback.style.use(tw('table-cell align-middle whitespace-nowrap'));
   def.rule({

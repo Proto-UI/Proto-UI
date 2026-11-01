@@ -47,8 +47,11 @@ const DARK_OUTLINE_HOVER = {
  * explicit modern profile maps its own default outline Button paint only.
  * No Button hook, event, variant/size API or second activation owner is added.
  */
-export function setupPopoverCommandPaint(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupPopoverCommandPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: {
     hovered: State<boolean>;
     focusVisible: State<boolean>;

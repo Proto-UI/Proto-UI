@@ -1,4 +1,5 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
+import type { PropsBaseType } from '@proto.ui/types';
 import {
   SHADCN_STYLE_IDS,
   setupShadcnStyleSelection,
@@ -59,7 +60,10 @@ const OUTLINE = {
 } as const satisfies Record<ShadcnStyleId, string>;
 
 /** Local pointer paint only. No Trigger, focus, selection or activation owner. */
-export function setupCollectionHover(def: DefHandle, disabled?: State<boolean>) {
+export function setupCollectionHover<
+  Props extends PropsBaseType,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, disabled?: State<boolean>) {
   const hovered = def.state.bool('collectionPointerPaint', false);
   const clear = () => hovered.set(false, 'collection pointer paint reset');
   def.event.on('pointer.enter', () => {
@@ -76,8 +80,11 @@ export function setupCollectionHover(def: DefHandle, disabled?: State<boolean>) 
   return hovered;
 }
 
-export function setupCollectionActionVisual(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupCollectionActionVisual<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: {
     disabled: State<boolean>;
     focusVisible: State<boolean>;

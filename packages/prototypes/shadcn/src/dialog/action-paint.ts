@@ -26,8 +26,11 @@ import {
  * AlertDialog New York keeps 02cad611, modern recipes keep 3d98900e9b73.
  * wrap is the existing Proto long-label adaptation, not an upstream size.
  */
-export function setupPassiveOverlayAction(
-  def: DefHandle<ShadcnStyleProps & { wrap?: boolean }>,
+export function setupPassiveOverlayAction<
+  Props extends ShadcnStyleProps & { wrap?: boolean },
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: {
     hovered: State<boolean>;
     focusVisible: State<boolean>;
@@ -36,10 +39,11 @@ export function setupPassiveOverlayAction(
   },
   variant: 'default' | 'outline'
 ) {
-  def.props.define({ wrap: { type: 'boolean', empty: 'fallback' } });
-  def.props.setDefaults({ wrap: false });
+  const cdef = def as unknown as DefHandle<ShadcnStyleProps & { wrap?: boolean }>;
+  cdef.props.define({ wrap: { type: 'boolean', empty: 'fallback' } });
+  cdef.props.setDefaults({ wrap: false });
   const style = setupOverlayStyle(def);
-  def.rule({
+  cdef.rule({
     when: (w) => w.state(style).eq('new-york-v4'),
     intent: (i) =>
       i.feedback.style.use(
@@ -51,15 +55,15 @@ export function setupPassiveOverlayAction(
         )
       ),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('wrap').eq(false)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DEFAULT_SIZE_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('wrap').eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_WRAP_DEFAULT_SIZE_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) =>
       w.all(
         w.state(style).eq('new-york-v4'),
@@ -72,12 +76,12 @@ export function setupPassiveOverlayAction(
         tw(variant === 'default' ? 'bg-primary/90' : SHADCN_BUTTON_OUTLINE_HOVER_TOKENS)
       ),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(state.focusVisible).eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_FOCUS_TOKENS)),
   });
   for (const profile of MODERN_OVERLAY_STYLES) {
-    def.rule({
+    cdef.rule({
       when: (w) => w.state(style).eq(profile),
       intent: (i) =>
         i.feedback.style.use(
@@ -91,15 +95,15 @@ export function setupPassiveOverlayAction(
           )
         ),
     });
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.prop('wrap').eq(false)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_SIZES[`${profile}-default`])),
     });
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.prop('wrap').eq(true)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_WRAP_SIZES[`${profile}-default`])),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq(profile),
@@ -111,11 +115,11 @@ export function setupPassiveOverlayAction(
           tw(variant === 'default' ? 'bg-primary/80' : SHADCN_BUTTON_OUTLINE_HOVER[profile])
         ),
     });
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.state(state.focusVisible).eq(true)),
       intent: (i) => i.feedback.style.use(tw(SHADCN_ACTION_FOCUS[profile])),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq(profile),
@@ -127,11 +131,11 @@ export function setupPassiveOverlayAction(
   }
   if (variant === 'outline') {
     for (const profile of ['vega', 'nova', 'lyra', 'new-york-v4'] as const) {
-      def.rule({
+      cdef.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
         intent: (i) => i.feedback.style.use(tw('border-input bg-input/30')),
       });
-      def.rule({
+      cdef.rule({
         when: (w) =>
           w.all(
             w.state(style).eq(profile),
@@ -142,12 +146,12 @@ export function setupPassiveOverlayAction(
         intent: (i) => i.feedback.style.use(tw('bg-input/50')),
       });
     }
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq('mira'), w.meta('colorScheme').eq('dark')),
       intent: (i) => i.feedback.style.use(tw('bg-input/30')),
     });
     for (const profile of ['maia', 'mira'] as const) {
-      def.rule({
+      cdef.rule({
         when: (w) =>
           w.all(
             w.state(style).eq(profile),
@@ -159,13 +163,13 @@ export function setupPassiveOverlayAction(
       });
     }
     for (const profile of ['luma', 'rhea'] as const) {
-      def.rule({
+      cdef.rule({
         when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
         intent: (i) => i.feedback.style.use(tw('bg-transparent')),
       });
     }
     for (const profile of ['luma', 'sera', 'rhea'] as const) {
-      def.rule({
+      cdef.rule({
         when: (w) =>
           w.all(
             w.state(style).eq(profile),
@@ -177,7 +181,7 @@ export function setupPassiveOverlayAction(
       });
     }
   }
-  def.rule({
+  cdef.rule({
     when: (w) => w.state(state.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DISABLED_TOKENS)),
   });

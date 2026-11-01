@@ -9,7 +9,10 @@ import {
 // shadcn-ui/ui@3d98900e, style-*.css .cn-progress*; independent
 // new-york-v4/ui/progress.tsx. Existing h-3 compatibility paint is retained
 // through Luma selection; this does not retroactively assign it provenance.
-export function setupProgressStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupProgressStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   return setupShadcnStyleSelection(def, 'luma');
 }
 
@@ -25,7 +28,10 @@ const TRACK: Record<ShadcnStyleId, StyleHandle> = {
   'new-york-v4': tw('h-2 rounded-full bg-primary/20'),
 };
 
-export function setupProgressTrackPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupProgressTrackPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupProgressStyle(def);
   def.feedback.style.use(tw('relative flex w-full items-center overflow-hidden'));
   for (const profile of SHADCN_STYLE_IDS) {
@@ -36,7 +42,10 @@ export function setupProgressTrackPaint(def: DefHandle<ShadcnStyleProps>) {
   }
 }
 
-export function setupProgressLabelPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupProgressLabelPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupProgressStyle(def);
   def.rule({
     when: (w) => w.state(style).eq('lyra'),
@@ -57,7 +66,10 @@ export function setupProgressLabelPaint(def: DefHandle<ShadcnStyleProps>) {
   });
 }
 
-export function setupProgressValuePaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupProgressValuePaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupProgressStyle(def);
   def.feedback.style.use(tw('ml-auto tabular-nums text-muted-foreground'));
   def.rule({

@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import type { ShadcnStyleId } from '../style-scope';
 import {
   asSliderValuesTrack,
   type SliderValuesPartExposes,
@@ -31,7 +32,10 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesPartExpo
       when: (w) => w.state(state.disabled).eq(true),
       intent: (i) => i.feedback.style.use(tw('opacity-50')),
     });
-    for (const [id, recipe] of Object.entries(VALUES_RAIL)) {
+    for (const [id, recipe] of Object.entries(VALUES_RAIL) as [
+      ShadcnStyleId,
+      (typeof VALUES_RAIL)[ShadcnStyleId],
+    ][]) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.state(state.orientation).eq('horizontal')),
         intent: (i) => i.feedback.style.to(rail).use(recipe.horizontal),

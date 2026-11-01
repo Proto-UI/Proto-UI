@@ -48,14 +48,14 @@ export type ExposeEvent<Payload = any> = {
 export type ExposeMethod<F extends Function = (...args: any[]) => any> = {
   kind: 'method';
   fn: F;
-};
+} & ((...args: any[]) => any);
 
 export type ExposeValue<V = any> = {
   kind: 'value';
   value: V;
 };
 
-export type ExposeState<V = any> = State<V> | { kind: 'state'; state: State<V> };
+export type ExposeState<V = any> = State<V>;
 
 export type ExposeMap = Record<
   string,

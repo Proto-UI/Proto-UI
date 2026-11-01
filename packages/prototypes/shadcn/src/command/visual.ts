@@ -89,14 +89,20 @@ export const COMMAND_PROFILES = {
   },
 } as const;
 
-export function setupCommandStyle(def: DefHandle<ShadcnStyleProps>, root = false) {
+export function setupCommandStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, root = false) {
   if (root) setupShadcnStyleScope(def);
   return setupShadcnStyleSelection(def, 'new-york-v4');
 }
 
-export function setupCommandInputMode(def: DefHandle<ShadcnStyleProps>) {
+export function setupCommandInputMode<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const command = def.state.bool('commandInputPaint', false);
-  const sync = (run: RunHandle<ShadcnStyleProps>) => {
+  const sync = (run: RunHandle<Props>) => {
     command.set(
       run.context.tryRead(COMMAND_INPUT_PAINT)?.command === true,
       'reason: owned Command input wrapper'
@@ -109,8 +115,11 @@ export function setupCommandInputMode(def: DefHandle<ShadcnStyleProps>) {
   return command;
 }
 
-export function setupCommandPartPaint(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupCommandPartPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   part: 'root' | 'wrapper' | 'input' | 'item' | 'empty' | 'list',
   root = false
 ) {

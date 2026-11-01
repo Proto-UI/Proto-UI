@@ -8,9 +8,12 @@ import {
   type ShadcnStyleProps,
 } from '../style-scope';
 
-export function setupCarouselAxis(def: DefHandle<ShadcnStyleProps>) {
+export function setupCarouselAxis<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const axis = def.state.string('shadcnCarouselAxis', 'horizontal');
-  const sync = (run: RunHandle<ShadcnStyleProps>) =>
+  const sync = (run: RunHandle<Props>) =>
     axis.set(run.context.read(CAROUSEL_CONTEXT).orientation, 'carousel owner axis');
   def.context.subscribe(CAROUSEL_CONTEXT, sync);
   def.lifecycle.onCreated(sync);
@@ -38,11 +41,10 @@ type ButtonFacts = {
   disabled: State<boolean>;
 };
 
-export function setupCarouselNavigationPaint(
-  def: DefHandle<ShadcnStyleProps>,
-  state: ButtonFacts,
-  side: 'previous' | 'next'
-) {
+export function setupCarouselNavigationPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, state: ButtonFacts, side: 'previous' | 'next') {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   const axis = setupCarouselAxis(def);
   def.feedback.style.use(

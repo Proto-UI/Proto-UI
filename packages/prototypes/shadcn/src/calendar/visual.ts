@@ -85,10 +85,10 @@ const DAY_PROFILE = {
   'new-york-v4': 'rounded-md text-sm',
 } as const satisfies Record<ShadcnStyleId, string>;
 
-export function setupCalendarDayVisual(
-  def: DefHandle<ShadcnStyleProps>,
-  state: CalendarDayContract['state']
-) {
+export function setupCalendarDayVisual<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, state: CalendarDayContract['state']) {
   // Existing content-pinned default remains Nova, separate from New York.
   const style = setupShadcnStyleSelection(def, 'nova');
   def.feedback.style.use(

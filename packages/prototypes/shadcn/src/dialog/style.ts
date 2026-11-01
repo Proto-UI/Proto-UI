@@ -24,15 +24,18 @@ export const MODERN_OVERLAY_STYLES = [
  * New York recipes retain their component-specific pins; see each recipes.ts.
  * MIT Copyright (c) 2023 shadcn; package THIRD_PARTY_NOTICES.md retains the license.
  */
-export function setupOverlayStyle(
-  def: DefHandle<ShadcnStyleProps>,
-  compatibility: ShadcnStyleId = 'new-york-v4'
-) {
+export function setupOverlayStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, compatibility: ShadcnStyleId = 'new-york-v4') {
   return setupShadcnStyleSelection(def, compatibility, { supportedStyles: SHADCN_STYLE_IDS });
 }
 
-export function setupOverlayPaint(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupOverlayPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   recipes: OverlayRecipes,
   compatibility: ShadcnStyleId = 'new-york-v4'
 ) {
@@ -47,10 +50,10 @@ export function setupOverlayPaint(
 }
 
 /** Luma and Rhea explicitly strengthen their five-percent surface ring in dark mode. */
-export function setupOverlayDarkRing(
-  def: DefHandle<ShadcnStyleProps>,
-  style: OwnedStateHandle<ShadcnStyleId>
-) {
+export function setupOverlayDarkRing<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, style: OwnedStateHandle<ShadcnStyleId>) {
   for (const profile of ['luma', 'rhea'] as const) {
     def.rule({
       when: (w) => w.all(w.state(style).eq(profile), w.meta('colorScheme').eq('dark')),
@@ -71,8 +74,8 @@ const MASK_PAINT = {
   'new-york-v4': 'bg-black/50',
 } as const satisfies Readonly<Record<ShadcnStyleId, string>>;
 
-export function setupOverlayMask(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupOverlayMask<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
   options: { opaqueFallback?: boolean } = {}
 ) {
   const style = setupOverlayStyle(def);

@@ -135,7 +135,15 @@ export type SvgTemplateNode =
   | SvgPolygonNode;
 
 // NOTE: undefined is intentionally excluded to keep authoring syntax portable.
-export type TemplateChild = TemplateNode | SvgTemplateNode | string | number | null;
+// TemplateChild includes nested arrays: normalizeChildren deep-flattens them,
+// so authoring with nested arrays (e.g. [child, [null, alias], slot]) is portable.
+export type TemplateChild =
+  | TemplateNode
+  | SvgTemplateNode
+  | string
+  | number
+  | null
+  | TemplateChild[];
 export type TemplateChildren = TemplateChild | TemplateChild[] | null;
 
 export interface NormalizeOptions {

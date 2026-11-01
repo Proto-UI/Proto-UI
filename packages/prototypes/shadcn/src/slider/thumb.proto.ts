@@ -1,6 +1,6 @@
 import { sliderThumbPaint } from './paint';
 import type { SliderThumbExposes } from '@proto.ui/prototypes-base/slider';
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, type TemplateChild, tw } from '@proto.ui/core';
 import { asSliderThumb } from '@proto.ui/prototypes-base/slider';
 import { SHADCN_STYLE_IDS } from '../style-scope';
 import {
@@ -60,6 +60,9 @@ export default definePrototype<ShadcnSliderPartProps, SliderThumbExposes>({
         ),
     });
     const paint = sliderThumbPaint(def, inherited.stateHandles!, style);
-    return (r) => [r.decoration(paint), inherited.render ? inherited.render(r) : r.slot()];
+    return (r) => [
+      r.decoration(paint),
+      inherited.render ? (inherited.render(r) as TemplateChild) : r.slot(),
+    ];
   },
 });

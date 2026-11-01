@@ -14,7 +14,15 @@ import {
  */
 // Flat profile/part keys preserve literal paint values in source collection as
 // well as at runtime, following Switch's profile/size recipe convention.
-type MenuPaintPart = 'surface' | 'item' | 'left' | 'right' | 'inset' | 'label' | 'separator' | 'width';
+type MenuPaintPart =
+  | 'surface'
+  | 'item'
+  | 'left'
+  | 'right'
+  | 'inset'
+  | 'label'
+  | 'separator'
+  | 'width';
 export const MENU_PROFILES = {
   'vega-surface': 'rounded-md p-1 shadow-md ring-1 ring-foreground/10',
   'vega-item': 'gap-2 rounded-sm py-1.5 text-sm',
@@ -90,8 +98,8 @@ export const MENU_PROFILES = {
   'new-york-v4-width': 'min-w-32',
 } as const satisfies Record<`${ShadcnStyleId}-${MenuPaintPart}`, string>;
 
-export function setupMenuStyle(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupMenuStyle<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
   fallback: ShadcnStyleId = 'new-york-v4',
   root = false
 ) {
@@ -100,7 +108,10 @@ export function setupMenuStyle(
 }
 
 type MenuKind = 'dropdown' | 'context-menu' | 'menubar';
-export function setupMenuSurface(def: DefHandle<ShadcnStyleProps>, kind: MenuKind) {
+export function setupMenuSurface<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
+  kind: MenuKind
+) {
   const style = setupMenuStyle(def, kind === 'dropdown' ? 'nova' : 'new-york-v4');
   def.feedback.style.use(
     tw(
@@ -135,16 +146,18 @@ export function setupMenuSurface(def: DefHandle<ShadcnStyleProps>, kind: MenuKin
 
 /** Uses the inherited open fact. Collision-resolved side/transform-origin and
  * per-channel native trajectories remain separate Host/Adapter prerequisites. */
-export function setupMenuOpenPaint(
-  def: DefHandle<ShadcnStyleProps & { side?: 'top' | 'right' | 'bottom' | 'left' }>,
-  open: State<boolean>,
-  hasSide: boolean
-) {
-  def.rule({
+export function setupMenuOpenPaint<
+  Props extends ShadcnStyleProps & { side?: 'top' | 'right' | 'bottom' | 'left' },
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, open: State<boolean>, hasSide: boolean) {
+  const cdef = def as unknown as DefHandle<
+    ShadcnStyleProps & { side?: 'top' | 'right' | 'bottom' | 'left' }
+  >;
+  cdef.rule({
     when: (w) => w.state(open).eq(true),
     intent: (i) => i.feedback.style.use(tw('animate-in fade-in-0 zoom-in-95')),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.state(open).eq(false),
     intent: (i) => i.feedback.style.use(tw('animate-out fade-out-0 zoom-out-95')),
   });
@@ -155,7 +168,7 @@ export function setupMenuOpenPaint(
       ['left', 'slide-in-from-right-2'],
       ['right', 'slide-in-from-left-2'],
     ] as const) {
-      def.rule({
+      cdef.rule({
         when: (w) => w.all(w.state(open).eq(true), w.prop('side').eq(side)),
         intent: (i) => i.feedback.style.use(tw(token)),
       });
@@ -171,18 +184,20 @@ type MenuItemStates = {
   hovered?: State<boolean>;
   pressed?: State<boolean>;
 };
-export function setupMenuItemPaint(
-  def: DefHandle<ShadcnStyleProps & { inset?: boolean; variant?: 'default' | 'destructive' }>,
-  states: MenuItemStates,
-  kind: MenuKind
-) {
+export function setupMenuItemPaint<
+  Props extends ShadcnStyleProps & { inset?: boolean; variant?: 'default' | 'destructive' },
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, states: MenuItemStates, kind: MenuKind) {
+  const cdef = def as unknown as DefHandle<
+    ShadcnStyleProps & { inset?: boolean; variant?: 'default' | 'destructive' }
+  >;
   const style = setupMenuStyle(def);
-  def.props.define({
+  cdef.props.define({
     inset: { type: 'boolean', empty: 'fallback' },
     variant: { type: 'enum', options: ['default', 'destructive'], empty: 'fallback' },
   });
-  def.props.setDefaults({ inset: false, variant: 'default' });
-  def.feedback.style.use(
+  cdef.props.setDefaults({ inset: false, variant: 'default' });
+  cdef.feedback.style.use(
     tw('relative flex min-w-0 cursor-default select-none items-center outline-none break-words')
   );
   for (const id of SHADCN_STYLE_IDS) {
@@ -192,20 +207,20 @@ export function setupMenuItemPaint(
         ? 'gap-2.5 rounded-none py-2 text-sm'
         : MENU_PROFILES[`${id}-item`];
     const inset = kind === 'menubar' && id === 'lyra' ? 'pl-8' : MENU_PROFILES[`${id}-inset`];
-    def.rule({
+    cdef.rule({
       when: (w) => w.state(style).eq(id),
       intent: (i) => i.feedback.style.use(tw(body, MENU_PROFILES[`${id}-right`])),
     });
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(false)),
       intent: (i) => i.feedback.style.use(tw(MENU_PROFILES[`${id}-left`])),
     });
-    def.rule({
+    cdef.rule({
       when: (w) => w.all(w.state(style).eq(id), w.prop('inset').eq(true)),
       intent: (i) => i.feedback.style.use(tw(inset)),
     });
   }
-  def.rule({
+  cdef.rule({
     when: (w) =>
       w.all(
         w.prop('variant').eq('default'),
@@ -213,11 +228,11 @@ export function setupMenuItemPaint(
       ),
     intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.prop('variant').eq('destructive'),
     intent: (i) => i.feedback.style.use(tw('text-destructive')),
   });
-  def.rule({
+  cdef.rule({
     when: (w) =>
       w.all(
         w.prop('variant').eq('destructive'),
@@ -225,7 +240,7 @@ export function setupMenuItemPaint(
       ),
     intent: (i) => i.feedback.style.use(tw('bg-destructive/10 text-destructive')),
   });
-  def.rule({
+  cdef.rule({
     when: (w) =>
       w.all(
         w.prop('variant').eq('destructive'),
@@ -238,7 +253,7 @@ export function setupMenuItemPaint(
   // silently promoted into every modern profile's source focus-only surface.
   if (kind === 'dropdown' && states.active && states.hovered && states.pressed) {
     const { active, hovered, pressed } = states;
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
@@ -247,7 +262,7 @@ export function setupMenuItemPaint(
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent text-accent-foreground')),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
@@ -256,7 +271,7 @@ export function setupMenuItemPaint(
         ),
       intent: (i) => i.feedback.style.use(tw('bg-accent/80')),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
@@ -265,7 +280,7 @@ export function setupMenuItemPaint(
         ),
       intent: (i) => i.feedback.style.use(tw('bg-destructive/10 text-destructive')),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),
@@ -276,7 +291,7 @@ export function setupMenuItemPaint(
       intent: (i) => i.feedback.style.use(tw('bg-destructive/20')),
     });
   }
-  def.rule({
+  cdef.rule({
     when: (w) => w.state(states.disabled).eq(true),
     intent: (i) => i.feedback.style.use(tw('pointer-events-none opacity-50')),
   });

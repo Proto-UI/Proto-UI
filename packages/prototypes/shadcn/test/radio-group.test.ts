@@ -101,30 +101,24 @@ describe('prototypes/shadcn: radio group', () => {
     ]);
     expectTypeOf<
       [
-        radioGroupFamily.ShadcnRadioGroupRootProps,
         radioGroupFamily.ShadcnRadioGroupRootExposes,
         radioGroupFamily.ShadcnRadioGroupRootStateHandles,
         radioGroupFamily.ShadcnRadioGroupRootAsHookContract,
-        radioGroupFamily.ShadcnRadioGroupItemProps,
         radioGroupFamily.ShadcnRadioGroupItemExposes,
         radioGroupFamily.ShadcnRadioGroupItemStateHandles,
         radioGroupFamily.ShadcnRadioGroupItemAsHookContract,
-        radioGroupFamily.ShadcnRadioGroupIndicatorProps,
         radioGroupFamily.ShadcnRadioGroupIndicatorExposes,
         radioGroupFamily.ShadcnRadioGroupIndicatorStateHandles,
         radioGroupFamily.ShadcnRadioGroupIndicatorAsHookContract,
       ]
     >().toEqualTypeOf<
       [
-        BaseRadioGroup.RadioGroupRootProps,
         BaseRadioGroup.RadioGroupRootExposes,
         BaseRadioGroup.RadioGroupRootStateHandles,
         BaseRadioGroup.RadioGroupRootAsHookContract,
-        BaseRadioGroup.RadioGroupItemProps,
         BaseRadioGroup.RadioGroupItemExposes,
         BaseRadioGroup.RadioGroupItemStateHandles,
         BaseRadioGroup.RadioGroupItemAsHookContract,
-        BaseRadioGroup.RadioGroupIndicatorProps,
         BaseRadioGroup.RadioGroupIndicatorExposes,
         BaseRadioGroup.RadioGroupIndicatorStateHandles,
         BaseRadioGroup.RadioGroupIndicatorAsHookContract,
@@ -279,9 +273,9 @@ describe('prototypes/shadcn: radio group', () => {
     document.body.append(root);
     await flushReconciliation();
     const matches = first.matches.bind(first);
-    const matchesSpy = vi.spyOn(first, 'matches').mockImplementation(
-      (selector) => selector === ':focus-visible' || matches(selector)
-    );
+    const matchesSpy = vi
+      .spyOn(first, 'matches')
+      .mockImplementation((selector) => selector === ':focus-visible' || matches(selector));
     try {
       expect(styleContains(first, 'bg-input/30')).toBe(true);
       expect(styleContains(second, 'bg-input/30')).toBe(true);
@@ -307,7 +301,9 @@ describe('prototypes/shadcn: radio group', () => {
       }
       expect(styleContains(first, 'bg-input/30')).toBe(false);
       expect(styleContains(second, 'bg-input/30')).toBe(true);
-      const css = renderProtoStyleTokenCss((first.getAttribute('data-pui-style') ?? '').split(/\s+/));
+      const css = renderProtoStyleTokenCss(
+        (first.getAttribute('data-pui-style') ?? '').split(/\s+/)
+      );
       expect(css).not.toContain('Unsupported Proto UI style tokens');
       expect(css).toContain('background-color: var(--pui-primary);');
       expect(css).toContain('color: var(--pui-primary-foreground);');

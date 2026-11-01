@@ -20,9 +20,12 @@ const CONTENT_LINK = {
   'new-york-v4': 'flex-col gap-1 rounded-sm p-2 text-sm',
 } as const;
 
-function setupNavigationContentMode(def: DefHandle<ActionPaintProps>) {
+function setupNavigationContentMode<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const content = def.state.bool('navigationContentPaint', false);
-  const sync = (run: RunHandle<ActionPaintProps>) =>
+  const sync = (run: RunHandle<Props>) =>
     content.set(
       run.context.tryRead(NAVIGATION_CONTENT_PAINT)?.content === true,
       'reason: owned Navigation Content boundary'
@@ -94,8 +97,11 @@ const PROFILES = {
   },
 } as const;
 
-export function setupNavigationActionPaint(
-  def: DefHandle<ActionPaintProps>,
+export function setupNavigationActionPaint<
+  Props extends ShadcnStyleProps & { current?: boolean },
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   states: {
     disabled: State<boolean>;
     focused: State<boolean>;
@@ -171,7 +177,8 @@ export function setupNavigationActionPaint(
     });
   } else if (kind === 'link') {
     // current is the actual public Base native-link fact, not an ancestor selector.
-    def.rule({
+    const cdef = def as unknown as DefHandle<ActionPaintProps>;
+    cdef.rule({
       when: (w) =>
         w.all(
           w.not(w.state(style).eq('new-york-v4')),
@@ -180,7 +187,7 @@ export function setupNavigationActionPaint(
         ),
       intent: (i) => i.feedback.style.use(tw('bg-muted/50')),
     });
-    def.rule({
+    cdef.rule({
       when: (w) =>
         w.all(
           w.state(style).eq('new-york-v4'),

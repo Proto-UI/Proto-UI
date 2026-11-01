@@ -81,12 +81,13 @@ function envMatches(target: Element, selector: string): boolean {
 function matchingBackgrounds(target: Element) {
   const tokens = (target.getAttribute('data-pui-style') ?? '').split(/\s+/);
   return [...renderProtoStyleTokenCss(tokens).matchAll(/([^{}]+)\{([^{}]+)\}/g)]
-    .filter(([, selectors, body]) =>
-      body.includes('background-color:') &&
-      selectors.split(',\n').some((selector) => {
-        const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
-        return !!required && tokens.includes(required) && envMatches(target, selector.trim());
-      })
+    .filter(
+      ([, selectors, body]) =>
+        body.includes('background-color:') &&
+        selectors.split(',\n').some((selector) => {
+          const required = /\[data-pui-style~="([^"]+)"\]/.exec(selector)?.[1];
+          return !!required && tokens.includes(required) && envMatches(target, selector.trim());
+        })
     )
     .flatMap(([, , body]) => [...body.matchAll(/background-color:\s*([^;]+);/g)].map((m) => m[1]));
 }
@@ -309,7 +310,9 @@ describe('source-bound binary profiles retain Base ownership', () => {
     // Document theme observation is asynchronous; the Rule's visible output,
     // not a fixed number of Promise turns, is the repaint completion signal.
     await vi.waitFor(() =>
-      expect(styleContains(root, 'bg-input/80'), root.getAttribute('data-pui-style')).toBe(true)
+      expect(styleContains(root, 'bg-input/80'), root.getAttribute('data-pui-style') ?? '').toBe(
+        true
+      )
     );
     expect(styleContains(root, 'bg-input')).toBe(false);
     expect(matchingBackgrounds(thumb)).toContain('var(--pui-foreground)');

@@ -90,8 +90,11 @@ const PROFILES = {
   },
 } as const;
 
-export function setupSearchInputPaint(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupSearchInputPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: { disabled: State<boolean>; focusVisible: State<boolean> }
 ) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
@@ -144,8 +147,11 @@ export function setupSearchInputPaint(
   });
 }
 
-export function setupSearchTriggerPaint(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupSearchTriggerPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: { disabled: State<boolean>; focusVisible: State<boolean> }
 ) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
@@ -170,7 +176,10 @@ export function setupSearchTriggerPaint(
   });
 }
 
-export function setupSearchContentPaint(def: DefHandle<ShadcnStyleProps>, open: State<boolean>) {
+export function setupSearchContentPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, open: State<boolean>) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(
@@ -205,10 +214,10 @@ export function setupSearchContentPaint(def: DefHandle<ShadcnStyleProps>, open: 
   setupMenuOpenPaint(def, open, true);
 }
 
-export function setupSearchItemPaint(
-  def: DefHandle<ShadcnStyleProps>,
-  state: { disabled: State<boolean>; active: State<boolean> }
-) {
+export function setupSearchItemPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, state: { disabled: State<boolean>; active: State<boolean> }) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(
@@ -231,7 +240,10 @@ export function setupSearchItemPaint(
   });
 }
 
-export function setupSearchEmptyPaint(def: DefHandle<ShadcnStyleProps>, visible: State<boolean>) {
+export function setupSearchEmptyPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, visible: State<boolean>) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(tw('w-full justify-center py-2 text-center text-muted-foreground'));
   for (const id of SHADCN_STYLE_IDS) {
