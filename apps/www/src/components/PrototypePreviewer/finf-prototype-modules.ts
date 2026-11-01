@@ -1899,6 +1899,30 @@ export const finfPrototypeModules: Record<string, () => Promise<void>> = {
     const module = await import('@proto.ui/prototypes-base/slider');
     registerExactPrototype('base-slider-value', module.sliderValue);
   },
+  'base-slider-values-root': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-root', module.sliderValuesRoot);
+  },
+  'base-slider-values-track': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-track', module.sliderValuesTrack);
+  },
+  'base-slider-values-thumb': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-thumb', module.sliderValuesThumb);
+  },
+  'base-slider-values-indicator': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-indicator', module.sliderValuesIndicator);
+  },
+  'base-slider-values-label': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-label', module.sliderValuesLabel);
+  },
+  'base-slider-values-value': async () => {
+    const module = await import('@proto.ui/prototypes-base/slider');
+    registerExactPrototype('base-slider-values-value', module.sliderValuesValue);
+  },
   'base-slider-field-thumb': async () => {
     const module = await import('@proto.ui/prototypes-base/slider');
     registerExactPrototype('base-slider-field-thumb', module.sliderFieldThumb);
