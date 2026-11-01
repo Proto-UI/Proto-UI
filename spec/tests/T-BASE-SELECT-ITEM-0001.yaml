@@ -5,6 +5,27 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers ordered option metadata, option a11y, active and selected separation, controlled and uncontrolled commits, close policy, and disabled gating.
 cases:
+  - id: T-BASE-SELECT-ITEM-0001-CASE-MOUSE-FOCUS-HANDOFF
+    title: Admitted mouse movement transfers the shared navigation owner without selection
+    covers: [P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF, P-BASE-SELECT-ITEM-STATE-SEPARATION]
+    expectation: after-settled-keyboard-to-mouse-and-mouse-to-keyboard-handoff-exactly-one-item-is-active-and-committed-selected-value-open-and-request-signals-stay-unchanged
+    notes:
+      - 'Controlled source acceptance was executed on fixed union81c: 20 of 21 new WC cases passed, with one shared throwing-buttons-getter producer failure retained. No native or independently compiled Select acceptance is claimed.'
+  - id: T-BASE-SELECT-ITEM-0001-CASE-MOUSE-HANDOFF-NEGATIVE
+    title: Non-navigation and stale pointer inputs do not prepublish an option
+    covers:
+      [
+        P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF,
+        P-BASE-SELECT-ITEM-DISABLED,
+        P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP,
+      ]
+    expectation: enter-only-touch-pen-unknown-held-buttons-disabled-closed-rejected-and-withdrawn-views-do-not-transfer-active-or-commit-selection
+  - id: T-BASE-SELECT-ITEM-0001-CASE-DISABLED-REENTRANCY
+    title: Current public Root or Item disabled truth rejects movement before a derived Command cache settles
+    covers: [P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF, P-BASE-SELECT-ITEM-DISABLED]
+    expectation: a-real-earlier-public-context-callback-observes-canonical-disabled-true-command-cache-false-and-cannot-transfer-focus-active-or-commit-selection
+    notes:
+      - The current-main 3acf1d13 six-path composition remains unexecuted. On historical fixed tree b46ccd0b, the complete 23-case fixture passed 23/23 at 2026-11-01 22:37 UTC, including both reentrant-disabled cases. Each case witnessed real public callback ordering; no private-state mutation or removed assertion was used.
   - id: T-BASE-SELECT-ITEM-0001-CASE-TRANSIENT-CLEANUP
     title: Cancellation and view withdrawal clear transient state while preserving semantic owner facts
     covers: [P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP]
@@ -27,9 +48,9 @@ cases:
     covers: [P-BASE-SELECT-ITEM-STATE-SEPARATION]
     expectation: select-item-active-navigation-remains-distinct-from-selected
   - id: T-BASE-SELECT-ITEM-0001-CASE-TRANSIENT-RESET
-    title: Pointer leave and popup close clear stale Item highlight and focus facts
+    title: Non-focused pointer leave and popup close clear their respective transient facts
     covers: [P-BASE-SELECT-ITEM-STATE-SEPARATION]
-    expectation: select-item-transient-interaction-state-never-survives-leave-or-close
+    expectation: non-focused-pointer-highlight-clears-on-leave-and-all-item-transients-clear-on-popup-close
   - id: T-BASE-SELECT-ITEM-0001-CASE-COMMIT
     title: Enabled activation emits select, requests value, and applies close policy under controlled ownership
     covers: [P-BASE-SELECT-ITEM-COMMIT, P-BASE-SELECT-ITEM-CONTROLLED]
@@ -39,6 +60,22 @@ cases:
     covers: [P-BASE-SELECT-ITEM-DISABLED]
     expectation: disabled-select-item-never-focuses-selects-or-closes
 implementations:
+  - id: prototypes-base-select-pointer-owner
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/select-pointer-owner.test.ts
+    required: true
+    consumesCases:
+      [
+        T-BASE-SELECT-ITEM-0001-CASE-MOUSE-FOCUS-HANDOFF,
+        T-BASE-SELECT-ITEM-0001-CASE-MOUSE-HANDOFF-NEGATIVE,
+        T-BASE-SELECT-ITEM-0001-CASE-DISABLED-REENTRANCY,
+      ]
+    exercises: [P-BASE-SELECT-ITEM]
+    notes:
+      - The current-main 3acf1d13 six-path composition remains planned and unexecuted. Historical fixed tree b46ccd0b actually collected and passed all 23 cases at 2026-11-01 22:37 UTC, retaining the original 21 assertions plus two reentrant-disabled cases. Its 893/894 overall unit result is not a current-main acceptance result.
+      - Executed fixed union81c with pointer1190 and Focus1189 dependencies; candidate20/21 versus baseline6/21, fourteen new red-to-green cases. The same throwing native buttons getter fails in both at the producer boundary before callback; assertions stay intact and require a separately frozen repair union.
+      - Synthetic native-source events and explicit element-query, refused-focus and unavailable-getter seams are not native input, native paint or independently compiled acceptance.
   - id: prototypes-base-select-item-transient-cleanup
     kind: module-test
     status: passing
@@ -66,7 +103,10 @@ implementations:
     exercises: [P-BASE-SELECT-ITEM]
   - id: prototypes-base-select-item-contract
     kind: module-test
-    status: passing
+    status: planned
+    notes:
+      - The current-main 3acf1d13 six-path composition remains unexecuted. Historical b46ccd0b Select passed 26/26 and its pointer-owner fixture passed 23/23; derived f799b572 later passed only spec and format, without rerunning unit tests. These distinct fixed subjects do not promote this planned implementation.
+      - Historical main source was marked passing. The reviewed enter-only expectation changed explicitly with the draft definition; this exact source suite actually passed26/26 in union81c. Its one changed oracle fails on the dependency baseline; the original historical passing result is preserved, not reclassified.
     path: packages/prototypes/base/test/select.test.ts
     required: true
     consumesCases:
@@ -86,11 +126,18 @@ verifies:
           P-BASE-SELECT-ITEM-COLLECTION,
           P-BASE-SELECT-ITEM-A11Y,
           P-BASE-SELECT-ITEM-STATE-SEPARATION,
+          P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF,
           P-BASE-SELECT-ITEM-COMMIT,
           P-BASE-SELECT-ITEM-DISABLED,
         ]
 exercises: { prototypes: [P-BASE-SELECT-ITEM] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Prepare two current-canonical disabled reentry cases and a new dependency-bound 23-case composition without reclassifying historical union81c failure or transferring separate producer acceptance.
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: 'Defined mouse-focus handoff and negative controls, preserving the historical non-focused-only leave criterion and explicit oracle delta. Fixed union81c source evidence is partial: new fixture20/21 with a shared producer getter failure; existing Select suite26/26. No native, four compiled or stable acceptance is claimed.'
   - version: 0.2.0-rc.0
     change: introduced
     summary: Added Item collection, a11y, state separation, commit, controlled ownership, close policy, and disabled coverage.

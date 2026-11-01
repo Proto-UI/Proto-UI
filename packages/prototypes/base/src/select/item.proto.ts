@@ -156,10 +156,13 @@ function setupSelectItem(def: DefHandle<SelectItemProps, SelectItemExposes>): vo
     const ctx = readContext(run);
     if (ctx) sync(run, ctx);
   });
-  def.event.on('pointer.enter', (run) => {
+  def.event.on('pointer.move', (run, ev) => {
     const ctx = readContext(run);
-    if (command.disabled.get() || !ctx?.open) return;
-    updateActiveValue(run);
+    if (!ctx?.open || ctx.disabled || run.props.get().disabled || command.disabled.get()) return;
+    // Only an admitted mouse-hover sample may request the shared Focus owner.
+    // Unknown, pen, touch and pressed movement never imply navigation intent.
+    if (ev.pointerType !== 'mouse' || ev.pointerButtons !== 'none') return;
+    command.focusSelf({ reason: 'pointer', preventScroll: true });
   });
   def.event.on('pointer.leave', (run) => {
     if (command.focused.get()) return;
