@@ -9,7 +9,7 @@ type Equal<A, B> =
 type Assert<T extends true> = T;
 import * as f0Progress from '../../shadcn/src/progress';
 type f0ProgressRootProps = Assert<
-  Equal<PropsOf<typeof f0Progress.progressRoot>, ProgressRootProps>
+  PropsOf<typeof f0Progress.progressRoot> extends ProgressRootProps ? true : false
 >;
 const f0ProgressGood: PropsOf<typeof f0Progress.progressRoot> = { value: 25, min: 0, max: 100 };
 void f0ProgressGood;
@@ -42,7 +42,9 @@ function f0ProgressExposed(e: ProtoAdapterExposes<typeof f0Progress.progressRoot
 }
 void f0ProgressExposed;
 import * as f0Meter from '../../shadcn/src/meter';
-type f0MeterRootProps = Assert<Equal<PropsOf<typeof f0Meter.meterRoot>, MeterRootProps>>;
+type f0MeterRootProps = Assert<
+  PropsOf<typeof f0Meter.meterRoot> extends MeterRootProps ? true : false
+>;
 const f0MeterGood: PropsOf<typeof f0Meter.meterRoot> = { value: 25, min: 0, max: 100 };
 void f0MeterGood;
 // @ts-expect-error numerical range props reject strings

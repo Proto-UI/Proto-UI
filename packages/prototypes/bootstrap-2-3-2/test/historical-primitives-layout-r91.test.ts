@@ -552,7 +552,7 @@ describe('Bootstrap 2.3.2 primitives/layout: real WC runtime, not native paint a
     const submitted: unknown[] = [];
     const resets: unknown[] = [];
     form.addEventListener('submit', (event) =>
-      submitted.push((event as CustomEvent<unknown>).detail)
+      submitted.push((event as unknown as CustomEvent<unknown>).detail)
     );
     form.addEventListener('reset', (event) => resets.push((event as CustomEvent<unknown>).detail));
     await settle();

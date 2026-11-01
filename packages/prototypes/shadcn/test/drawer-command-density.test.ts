@@ -171,7 +171,10 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     await flush();
     for (const part of ['trigger', 'close'] as const) {
       expect(nodes[part].getAttribute('aria-disabled')).toBe('true');
-      expect(nodes[part].getExposes().disabled.get()).toBe(true);
+      // The web-component runtime attaches getExposes to the live element; the
+      // static createElement type does not expose it.
+      const live = nodes[part] as unknown as { getExposes(): { disabled: { get(): boolean } } };
+      expect(live.getExposes().disabled.get()).toBe(true);
       for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
         const css = render(tokensOf(nodes[part]));
         expect(css).toContain('opacity: 0.5;');
@@ -191,17 +194,18 @@ describe('Shadcn Drawer command default density with bounded label wrapping', ()
     'keeps complete-family Document and Shadow closure without banning other components old utilities',
     { timeout: 120000 },
     async () => {
-    const collected = await collectProtoStyleTokens(sourceRoot);
-    const complete = collected.filter((token): token is string => typeof token === 'string');
-    expect(complete).toHaveLength(collected.length);
-    expect(complete).toEqual(expect.arrayContaining([...density, 'text-sm']));
-    for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
-      const css = render(complete);
-      expect(css).not.toContain('Unsupported Proto UI style tokens');
-      expect(css).toContain('height: 2.25rem;');
-      expect(css).toContain('padding-inline: 1rem;');
-      expect(css).toContain('font-size: 0.875rem;');
-      expect(css).toContain('line-height: 1.25rem;');
+      const collected = await collectProtoStyleTokens(sourceRoot);
+      const complete = collected.filter((token): token is string => typeof token === 'string');
+      expect(complete).toHaveLength(collected.length);
+      expect(complete).toEqual(expect.arrayContaining([...density, 'text-sm']));
+      for (const render of [renderProtoStyleTokenCss, renderProtoShadowStyleTokenCss]) {
+        const css = render(complete);
+        expect(css).not.toContain('Unsupported Proto UI style tokens');
+        expect(css).toContain('height: 2.25rem;');
+        expect(css).toContain('padding-inline: 1rem;');
+        expect(css).toContain('font-size: 0.875rem;');
+        expect(css).toContain('line-height: 1.25rem;');
+      }
     }
-  });
+  );
 });

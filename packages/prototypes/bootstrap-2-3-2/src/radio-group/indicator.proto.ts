@@ -46,7 +46,6 @@ export default definePrototype<RadioGroupIndicatorProps, RadioGroupIndicatorExpo
         style: state.checked.get()
           ? tw('block size-2 rounded-full bg-primary-foreground')
           : tw('hidden'),
-        'aria-hidden': 'true',
       }),
     ];
   },

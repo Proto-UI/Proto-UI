@@ -2,7 +2,10 @@ import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { setupShadcnStyleSelection, SHADCN_STYLE_IDS, type ShadcnStyleProps } from '../style-scope';
 
 /** Pinned .cn-field gap/invalid paint; Base alone owns validation and relationships. */
-export function setupFieldRootVisual(def: DefHandle<ShadcnStyleProps>, invalid: State<boolean>) {
+export function setupFieldRootVisual<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, invalid: State<boolean>) {
   const style = setupShadcnStyleSelection(def, 'nova');
   def.feedback.style.use(tw('flex w-full min-w-0 flex-col text-foreground'));
   for (const profile of SHADCN_STYLE_IDS) {
@@ -34,8 +37,11 @@ const FIELD_LABEL = {
 } as const;
 
 /** .cn-field-label + .cn-label, .cn-field-description/error. No selector-based anatomy inference. */
-export function setupFieldTextVisual(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupFieldTextVisual<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   part: 'label' | 'description' | 'error' | 'validity',
   disabled?: State<boolean>
 ) {

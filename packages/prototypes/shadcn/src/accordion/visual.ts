@@ -4,11 +4,17 @@ import { setupShadcnStyleSelection, type ShadcnStyleProps } from '../style-scope
 // shadcn-ui/ui@3d98900e: apps/v4/registry/styles/style-*.css,
 // .cn-accordion*, and the independent new-york-v4/ui/accordion.tsx.
 // Nova is the existing projection's compatibility recipe, not a universal default.
-export function setupAccordionStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupAccordionStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   return setupShadcnStyleSelection(def, 'nova');
 }
 
-export function setupAccordionContentPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupAccordionContentPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupAccordionStyle(def);
   def.feedback.style.use(tw('min-w-0 break-words overflow-x-auto'));
   def.rule({

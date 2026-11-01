@@ -28,7 +28,10 @@ type ButtonFacts = {
   disabled: State<boolean>;
 };
 
-export function setupMessageJumpPaint(def: DefHandle<ShadcnStyleProps>, state: ButtonFacts) {
+export function setupMessageJumpPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, state: ButtonFacts) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(

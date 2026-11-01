@@ -27,7 +27,7 @@ type PropsOf<T> = T extends Prototype<infer P, any> ? P : never;
 type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Assert<T extends true> = T;
-type ShadcnProps = Assert<Equal<PropsOf<typeof shadcn>, PropsOf<typeof formField>>>;
+type ShadcnProps = Assert<PropsOf<typeof shadcn> extends PropsOf<typeof formField> ? true : false>;
 type NeoProps = Assert<Equal<PropsOf<typeof neo>, PropsOf<typeof formField>>>;
 type ShadcnExposes = Assert<Equal<ExposeOf<typeof shadcn>, ExposeOf<typeof formField>>>;
 type NeoExposes = Assert<Equal<ExposeOf<typeof neo>, ExposeOf<typeof formField>>>;

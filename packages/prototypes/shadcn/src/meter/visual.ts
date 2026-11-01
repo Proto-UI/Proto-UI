@@ -9,7 +9,9 @@ import {
 // Meter is a Proto extension: there is no meter.tsx in the pinned upstream
 // component inventory. Paint adapts .cn-progress* from shadcn-ui/ui@3d98900e;
 // the distinct Base Meter still owns range, optimum and quality status.
-export function setupMeterStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupMeterStyle<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   return setupShadcnStyleSelection(def, 'luma');
 }
 
@@ -25,7 +27,10 @@ const TRACK: Record<ShadcnStyleId, StyleHandle> = {
   'new-york-v4': tw('h-2 rounded-full bg-primary/20'),
 };
 
-export function setupMeterTrackPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupMeterTrackPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupMeterStyle(def);
   def.feedback.style.use(tw('relative flex w-full items-center overflow-hidden'));
   for (const profile of SHADCN_STYLE_IDS) {
@@ -36,7 +41,10 @@ export function setupMeterTrackPaint(def: DefHandle<ShadcnStyleProps>) {
   }
 }
 
-export function setupMeterLabelPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupMeterLabelPaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupMeterStyle(def);
   def.rule({
     when: (w) => w.state(style).eq('lyra'),
@@ -57,7 +65,10 @@ export function setupMeterLabelPaint(def: DefHandle<ShadcnStyleProps>) {
   });
 }
 
-export function setupMeterValuePaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupMeterValuePaint<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupMeterStyle(def);
   def.feedback.style.use(tw('ml-auto tabular-nums text-muted-foreground'));
   def.rule({

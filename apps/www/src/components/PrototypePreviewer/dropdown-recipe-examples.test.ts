@@ -21,6 +21,7 @@ const recipeUrl = (path: string) => `https://github.com/Proto-UI/Proto-UI/blob/m
 function nodes(node: DemoNode): ProtoNode[] {
   // Layout boxes may wrap the proto tree; recipes still must not simulate
   // menu parts — every descendant that is a node must be a real prototype.
+  if (node.kind === 'text') return [];
   if (node.kind !== 'proto')
     return (node.children ?? []).flatMap((child) =>
       typeof child === 'string' ? [] : nodes(child)

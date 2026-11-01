@@ -40,11 +40,10 @@ const TEXTAREA_INVALID = {
 } as const;
 
 /** Same Base editor and optional Field binding; no value/focus/validation ownership here. */
-export function setupTextareaVisual(
-  def: DefHandle<ShadcnStyleProps>,
-  state: TextareaRootStateHandles,
-  invalid?: State<boolean>
-) {
+export function setupTextareaVisual<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, state: TextareaRootStateHandles, invalid?: State<boolean>) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   def.feedback.style.use(
     tw(

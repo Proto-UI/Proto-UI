@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
 import textarea from '../src/textarea';
 import { fieldTextarea, fieldRoot, fieldLabel, fieldDescription, fieldError } from '../src/field';
-import { styleScope } from '../src/style-scope';
+import { styleScope, type ShadcnStyleChoice } from '../src/style-scope';
 import { CONTEXT_INSTANCE_TOKEN_CAP, CONTEXT_PARENT_CAP } from '@proto.ui/module-context';
 import { EVENT_GLOBAL_TARGET_CAP, EVENT_ROOT_TARGET_CAP } from '@proto.ui/module-event';
 import { createRuntimeSession } from '@proto.ui/runtime';
@@ -186,7 +186,7 @@ describe('production shared Textarea paint', () => {
     expect(() =>
       createRuntimeSession(textarea, {
         prototypeName: textarea.name,
-        getRawProps: () => ({ styleProfile: 'not-a-profile' as const }),
+        getRawProps: () => ({ styleProfile: 'not-a-profile' as ShadcnStyleChoice }),
         schedule: (fn) => fn(),
         commit: (_children, signal) => signal?.done(),
         onRuntimeReady(wiring) {

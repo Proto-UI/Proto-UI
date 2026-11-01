@@ -281,7 +281,7 @@ describe('source-bound search and menu profiles', () => {
     const shell = make(inputShell);
     const control = make(inputShellControl, {
       defaultValue: 'Retained editor',
-      a11yLabel: 'Search text',
+      ariaLabel: 'Search text',
     });
     shell.append(control);
     scope.append(shell);

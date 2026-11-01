@@ -10,7 +10,9 @@ export const SELECT_VISUAL = createContextKey<{
   position: string;
 }>('shadcn-select-visual');
 
-export function setupSelectPaint(def: DefHandle<ShadcnStyleProps>) {
+export function setupSelectPaint<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
   const style = setupSelectStyle(def);
   const backdrop = setupSelectBackdrop(def, style);
   const phase = def.state.string('selectPaintPhase', 'closed');
@@ -86,8 +88,8 @@ export function setupSelectPaint(def: DefHandle<ShadcnStyleProps>) {
 }
 
 /** Translucent is part of the fixed upstream Select Content composition, not an opt-in skin. */
-function setupSelectBackdrop(
-  def: DefHandle<ShadcnStyleProps>,
+function setupSelectBackdrop<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
   style: OwnedStateHandle<ShadcnStyleId>
 ) {
   const target = def.feedback.style.declareDecoration();

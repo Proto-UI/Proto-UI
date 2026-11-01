@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import type { ShadcnStyleId } from '../style-scope';
 import {
   asSliderValuesIndicator,
   type SliderValuesPartExposes,
@@ -29,7 +30,10 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesPartExpo
           )
         ),
     });
-    for (const [id, recipe] of Object.entries(VALUES_RANGE)) {
+    for (const [id, recipe] of Object.entries(VALUES_RANGE) as [
+      ShadcnStyleId,
+      (typeof VALUES_RANGE)[ShadcnStyleId],
+    ][]) {
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.state(state.orientation).eq('horizontal')),
         intent: (i) => i.feedback.style.use(recipe.horizontal),

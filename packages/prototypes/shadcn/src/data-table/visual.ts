@@ -7,7 +7,10 @@ import { setupShadcnStyleSelection, type ShadcnStyleProps } from '../style-scope
  * protocol is Proto-owned, not TanStack or an upstream DataTable API.
  * No descendant checkbox/expanded selector or last-body-row fact is inferred.
  */
-export function setupDataTableText(def: DefHandle<ShadcnStyleProps>) {
+export function setupDataTableText<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   const style = setupShadcnStyleSelection(def, 'nova');
   def.rule({
     when: (w) => w.any(w.state(style).eq('lyra'), w.state(style).eq('mira')),
@@ -20,7 +23,10 @@ export function setupDataTableText(def: DefHandle<ShadcnStyleProps>) {
   return style;
 }
 
-export function setupDataTableCell(def: DefHandle<ShadcnStyleProps>, header = false) {
+export function setupDataTableCell<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>, header = false) {
   const style = setupDataTableText(def);
   def.feedback.style.use(tw('table-cell text-left align-middle whitespace-nowrap'));
   if (header) {
