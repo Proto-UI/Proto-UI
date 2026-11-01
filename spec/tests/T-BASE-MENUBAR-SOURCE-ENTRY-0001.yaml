@@ -1,0 +1,70 @@
+id: T-BASE-MENUBAR-SOURCE-ENTRY-0001
+type: test
+title: Menubar opening source withdrawal and delivered Focus ownership
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Fixed 32fd source-only validation completed with four new and one original Menubar case red-to-green; the other 445 statuses retain ten original Focus failures. Native four-host consumer and shared Compiler operation closure remain separate admission blockers.
+summary: Reject an undelivered opening entry from a withdrawn Trigger without redefining retained Focus or Navigation Menu.
+cases:
+  - id: T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-WITHDRAW
+    title: Root or Trigger withdrawal rejects first logical entry before author focus effects
+    covers: [P-BASE-MENUBAR-SOURCE-ENTRY]
+    expectation: one-accepted-open-request-but-zero-logical-entry-native-focus-author-focus-and-selection-after-source-withdrawal
+  - id: T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-REINSERT
+    title: Reconnected physical source does not revive its old opening identity
+    covers: [P-BASE-MENUBAR-SOURCE-ENTRY]
+    expectation: original-captured-operation-stays-invalid-through-root-or-trigger-reinsert-and-later-content-reconciliation
+  - id: T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-VALID-ENTRY
+    title: Valid first and last entry retain one logical request and permitted native re-projections
+    covers: [P-BASE-MENUBAR-DELIVERED-FOCUS]
+    expectation: one-logical-entry-and-one-focus-transfer-without-an-exact-one-native-call-shortcut
+  - id: T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-RETAINED
+    title: A legitimately delivered Focus intent survives the existing retained-view boundary
+    covers: [P-BASE-MENUBAR-DELIVERED-FOCUS]
+    expectation: retained-pending-and-replacement-readiness-remain-owned-by-Focus-not-the-expired-opening-source
+implementations:
+  - id: controlled-wc-menubar-source-entry
+    kind: module-test
+    status: passing
+    path: packages/prototypes/base/test/navigation-overlays/menubar-focus-entry.test.ts
+    required: true
+    consumesCases:
+      - T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-WITHDRAW
+      - T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-REINSERT
+      - T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-VALID-ENTRY
+    exercises: [P-BASE-MENUBAR]
+    notes:
+      - Actual WC and Runtime in HappyDOM with the existing portal appendChild reentry seam. Fixed 32fd collected 15 cases in this file and passed 15; the same fixture against main 971 and guard-only rollback each passed 10 and failed 5. Not native browser or four-framework consumer acceptance.
+      - Original interrupted-entry assertions remain unchanged; the original root-removal failure and four new cases pass only with the candidate guard. Historical failures remain archived. The positive oracle distinguishes logical requests, physical transfers and native calls.
+  - id: retained-focus-entry-regressions
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/focus-entry-readiness.contract.test.ts
+    required: true
+    consumesCases: [T-BASE-MENUBAR-SOURCE-ENTRY-0001-CASE-RETAINED]
+    exercises: [P-BASE-MENUBAR]
+    notes:
+      - Existing owning-layer regression suite was rerun and passed on both exact main 971 baseline and 32fd adoption source. This does not constitute a four-host Menubar consumer journey.
+verifies:
+  prototypes:
+    - id: P-BASE-MENUBAR
+      anchors: [P-BASE-MENUBAR-SOURCE-ENTRY, P-BASE-MENUBAR-DELIVERED-FOCUS]
+exercises:
+  prototypes: [P-BASE-MENUBAR]
+sources:
+  - path: packages/prototypes/base/test/navigation-overlays/menubar-focus-entry.test.ts
+  - path: packages/runtime/test/contract/focus-entry-readiness.contract.test.ts
+openQuestions:
+  - id: T-BASE-MENUBAR-SOURCE-ENTRY-0001-Q-ADMISSION
+    question:
+      en: Does exact-source evidence reject stale opening while preserving valid entry across every required host and independently compiled consumer, including explicit unsupported admission where the atom is not realized?
+    blocks: [activation:T-BASE-MENUBAR-SOURCE-ENTRY-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Record bounded 32fd controlled and retained-owner evidence without promoting native or Compiler admission.
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Map planned controlled source-withdrawal evidence separately from retained Focus and unresolved native or Compiler consumer acceptance.
+tags: [prototype, base, menubar, lifecycle, focus, test]
