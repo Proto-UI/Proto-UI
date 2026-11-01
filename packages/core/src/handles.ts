@@ -48,7 +48,7 @@ export type ExposeEvent<Payload = any> = {
 export type ExposeMethod<F extends Function = (...args: any[]) => any> = {
   kind: 'method';
   fn: F;
-} & ((...args: any[]) => any);
+};
 
 export type ExposeValue<V = any> = {
   kind: 'value';
