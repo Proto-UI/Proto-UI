@@ -8,6 +8,7 @@ const hostMountSpies = vi.hoisted(() => ({
   release: vi.fn(),
 }));
 const prototypeSpies = vi.hoisted(() => ({ loadMany: vi.fn(async (_ids: string[]) => {}) }));
+const loadPrototypeSpy = vi.hoisted(() => vi.fn(async (_prototypeId: string) => true));
 const demoSpies = vi.hoisted(() => ({
   render: vi.fn(),
 }));
@@ -31,7 +32,7 @@ vi.mock('./runtimes/registry', () => ({
 
 vi.mock('./registry', () => ({ getPrototype: () => ({}) }));
 vi.mock('./prototype-modules', () => ({
-  loadPrototype: async () => {},
+  loadPrototype: (prototypeId: string) => loadPrototypeSpy(prototypeId),
   loadPrototypes: prototypeSpies.loadMany,
 }));
 vi.mock('./demo-modules', () => ({
@@ -99,6 +100,7 @@ function createProjectedPreviewerRoot() {
 describe('PrototypePreviewer adapter preference synchronization', () => {
   beforeEach(() => {
     prototypeSpies.loadMany.mockReset().mockResolvedValue(undefined);
+    loadPrototypeSpy.mockReset().mockResolvedValue(true);
     runtimeSpies.mount.mockReset();
     runtimeSpies.unmount.mockReset();
     hostMountSpies.release.mockReset();
@@ -502,8 +504,104 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.dispatchEvent(
       new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
     );
-    await vi.waitFor(() => expect(root.textContent).toContain('[Preview Error]'));
+    await vi.waitFor(() =>
+      expect(root.querySelector('[data-preview-recovery="error"]')).not.toBeNull()
+    );
+    expect(root.textContent).toContain('vue2 failed');
     expect((root as any).__previewer__.getCurrentRuntime()).toBeNull();
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('offers a recovery path when a lazy-loaded chunk fails to load', async () => {
+    loadPrototypeSpy.mockRejectedValue(
+      new Error(
+        '[PrototypePreviewer] 加载原型模块 "demo" 失败: Failed to fetch dynamically imported module: /_astro/demo.hash.js'
+      )
+    );
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+
+    const recovery = await vi.waitFor(() => {
+      const found = root.querySelector<HTMLElement>('[data-preview-recovery="chunk"]');
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(recovery.textContent).toContain('Prototype module failed to load');
+    expect(recovery.textContent).toContain('lazy-loaded chunk');
+    const buttons = Array.from(recovery.querySelectorAll('button'));
+    expect(buttons.map((button) => button.textContent)).toEqual(['Retry', 'Reload page']);
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('re-attempts the dynamic import when the recovery control retries', async () => {
+    loadPrototypeSpy.mockRejectedValueOnce(
+      new Error(
+        '[PrototypePreviewer] 加载原型模块 "demo" 失败: error loading dynamically imported module: /_astro/demo.hash.js'
+      )
+    );
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+
+    const retry = await vi.waitFor(() => {
+      const button = root.querySelector<HTMLButtonElement>(
+        '[data-preview-recovery="chunk"] button'
+      );
+      expect(button).not.toBeNull();
+      return button!;
+    });
+    expect(loadPrototypeSpy).toHaveBeenCalledTimes(1);
+
+    retry.click();
+
+    await vi.waitFor(() => expect(loadPrototypeSpy).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+    expect(root.querySelector('[data-preview-recovery="chunk"]')).toBeNull();
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('keeps unrelated preview failures free of the chunk recovery controls', async () => {
+    runtimeSpies.mount.mockImplementation((id: string) => {
+      if (id === 'vue2') throw new Error('vue2 failed');
+    });
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+
+    document.dispatchEvent(
+      new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
+    );
+    await vi.waitFor(() =>
+      expect(root.querySelector('[data-preview-recovery="error"]')).not.toBeNull()
+    );
+    expect(root.querySelectorAll('[data-preview-recovery="chunk"] button')).toHaveLength(0);
     await (root as any).__previewer__.destroy();
     root.remove();
   });

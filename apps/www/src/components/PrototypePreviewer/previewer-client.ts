@@ -21,6 +21,7 @@ import {
 } from '../site-shadcn-controls';
 import { initProjectedPreviewer } from './projected-previewer-client';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
+import { describeLazyChunkFailure, isLazyChunkFailure } from './lazy-chunk-recovery';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 // Bind our one public preference event to its initiating logical request. A
@@ -153,6 +154,10 @@ export function initPreviewer(options: PreviewerOptions) {
 
   let currentDemo: { id: string; destroy: () => Promise<void> | void } | null = null;
   let requestedRuntime: RuntimeId | null = null;
+  // The runtime that a failed chunk load should retry. `requestedRuntime` is
+  // cleared once a switch settles, so the recovery control keeps its own
+  // reference to the runtime that actually failed.
+  let retryRuntime: RuntimeId | null = null;
   let version = 0;
   let destroyed = false;
   let mounted = false;
@@ -245,11 +250,56 @@ export function initPreviewer(options: PreviewerOptions) {
 
   const reportSwitchError = (err: unknown) => {
     host.innerHTML = '';
+    const message = (err as any)?.message || String(err);
+    const chunkFailure = isLazyChunkFailure(err);
+    const container = document.createElement('div');
+    container.setAttribute('data-preview-recovery', chunkFailure ? 'chunk' : 'error');
+    container.style.cssText =
+      'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:system-ui,sans-serif;';
+    const title = document.createElement('p');
+    title.textContent = chunkFailure ? 'Prototype module failed to load' : 'Preview error';
+    title.style.cssText = 'font-size:1.1rem;font-weight:600;margin:0;';
+    container.appendChild(title);
+    const detail = document.createElement('p');
+    detail.textContent = chunkFailure ? describeLazyChunkFailure() : message;
+    detail.style.cssText =
+      'margin:0;color:#555;font-size:0.9rem;max-width:36rem;text-align:center;';
+    container.appendChild(detail);
+    if (chunkFailure) {
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:0.5rem;';
+      const retry = document.createElement('button');
+      retry.type = 'button';
+      retry.textContent = 'Retry';
+      retry.style.cssText =
+        'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#fff;cursor:pointer;font-size:0.85rem;';
+      retry.addEventListener('click', () => {
+        // A rejected loader promise must not be reused; clear it so the forced
+        // switch re-attempts the dynamic import.
+        loaderPromise = null;
+        if (!retryRuntime) return;
+        void switchTo(retryRuntime, { force: true });
+      });
+      const reload = document.createElement('button');
+      reload.type = 'button';
+      reload.textContent = 'Reload page';
+      reload.style.cssText =
+        'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#f5f5f5;cursor:pointer;font-size:0.85rem;';
+      reload.addEventListener('click', () => {
+        window.location.reload();
+      });
+      actions.append(retry, reload);
+      container.appendChild(actions);
+    }
     const pre = document.createElement('pre');
-    pre.textContent =
-      '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
+    pre.textContent = (err as any)?.stack || message;
     pre.style.whiteSpace = 'pre-wrap';
-    host.appendChild(pre);
+    pre.style.color = '#888';
+    pre.style.fontSize = '0.75rem';
+    pre.style.maxWidth = '100%';
+    pre.style.overflow = 'auto';
+    container.appendChild(pre);
+    host.appendChild(container);
     finishStartup();
     console.error(err);
     dispatch('error', { error: err });
@@ -278,6 +328,7 @@ export function initPreviewer(options: PreviewerOptions) {
     activeFocusLease = focusLease;
     let committed = false;
     requestedRuntime = runtime;
+    retryRuntime = runtime;
     const myVersion = ++version;
     // Invalidate a runtime that is still awaiting its loader before this
     // switch reaches the next runtime's mount() call.
