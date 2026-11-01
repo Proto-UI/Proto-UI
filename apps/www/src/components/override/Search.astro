@@ -24,7 +24,10 @@ const loadingLabel = isChinese ? '正在加载搜索…' : 'Loading search…';
 const copy = {
   title: Astro.locals.t('search.label'),
   description: isChinese ? '搜索全部文档并打开结果' : 'Search all documentation and open a result',
-  placeholder: Astro.locals.t('search.label'),
+  placeholder: isChinese ? '搜索文档…' : 'Search documentation…',
+  pages: isChinese ? '页面' : 'Pages',
+  results: isChinese ? '搜索结果' : 'Search results',
+  goToPage: isChinese ? '打开页面' : 'Go to page',
   hint: isChinese ? '输入关键词搜索全部文档' : 'Search across all documentation',
   loading: loadingLabel,
   empty: isChinese ? '未找到结果' : 'No results found',
@@ -34,6 +37,21 @@ const copy = {
   close: Astro.locals.t('search.cancelLabel'),
   count: isChinese ? '{count} 条匹配文档' : '{count} matching documents',
 };
+// Real destinations already used by the site Header; these are navigation,
+// never fake search hits, and stay available if the data engine is unavailable.
+const navigation = [
+  { title: isChinese ? '首页' : 'Home', href: '/' },
+  { title: isChinese ? '文档' : 'Docs', href: '/start-here/what-you-saw/' },
+  { title: isChinese ? '组件库' : 'Libraries', href: '/ui-libraries/' },
+  { title: isChinese ? '白皮书' : 'Whitepaper', href: '/whitepaper/0-preface/' },
+].map((entry) => ({
+  ...entry,
+  href: localizedUrl(
+    new URL(entry.href, Astro.url),
+    Astro.locals.starlightRoute.locale || 'en',
+    project.trailingSlash
+  ).pathname,
+}));
 const bundlePath = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
 ---
 
@@ -42,6 +60,7 @@ const bundlePath = import.meta.env.BASE_URL.replace(/\/$/, '') + '/pagefind/';
   data-search-composition="command-dialog"
   data-search-style="rhea"
   data-search-copy={JSON.stringify(copy)}
+  data-search-navigation={JSON.stringify(navigation)}
   data-pagefind-bundle={bundlePath}
   data-strip-trailing-slash={project.trailingSlash === 'never' ? '' : undefined}
   data-search-initial-family={family}

@@ -854,6 +854,10 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icon/index');
     registerPrototype('lucide-icon', mod.default);
   },
+  'lucide-arrow-right-icon': async () => {
+    const mod = await import('../../../../../packages/prototypes/lucide/src/icons/arrow-right');
+    registerPrototype('lucide-arrow-right-icon', mod.default);
+  },
   'lucide-search-icon': async () => {
     const mod = await import('../../../../../packages/prototypes/lucide/src/icons/search');
     registerPrototype('lucide-search-icon', mod.default);
@@ -1245,7 +1249,8 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     registerPrototype('shadcn-command-empty', mod.default);
   },
   'shadcn-command-dialog-mask': async () => {
-    const mod = await import('../../../../../packages/prototypes/shadcn/src/command/dialog-mask.proto');
+    const mod =
+      await import('../../../../../packages/prototypes/shadcn/src/command/dialog-mask.proto');
     registerPrototype('shadcn-command-dialog-mask', mod.default);
   },
   'shadcn-command-dialog-content': async () => {
@@ -1372,4 +1377,3 @@ export async function loadPrototypes(prototypeIds: string[]): Promise<void> {
 export function getAvailablePrototypes(): string[] {
   return Object.keys(prototypeModules);
 }
-

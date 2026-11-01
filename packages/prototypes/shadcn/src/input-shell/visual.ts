@@ -1,6 +1,6 @@
 import { tw, type DefHandle, type State } from '@proto.ui/core';
 import { SHADCN_STYLE_IDS, setupShadcnStyleSelection } from '../style-scope';
-import { setupCommandInputMode } from '../command/visual';
+import { setupCommandInputMode, setupCommandMenuInputMode } from '../command/visual';
 import type { InputShellProps, InputShellControlProps } from './types';
 
 /** MIT shadcn-ui/ui@3d98900 style-*.css .cn-input-group and
@@ -63,6 +63,7 @@ const SHELL_PROFILES = {
 export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
   const style = setupShadcnStyleSelection(def, 'new-york-v4');
   const command = setupCommandInputMode(def);
+  const menu = setupCommandMenuInputMode(def);
   def.feedback.style.use(tw('relative flex w-full min-w-0 items-center outline-none'));
   for (const id of SHADCN_STYLE_IDS) {
     const profile = SHELL_PROFILES[id];
@@ -71,7 +72,7 @@ export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
       intent: (i) => i.feedback.style.use(tw('border', profile.shell)),
     });
     def.rule({
-      when: (w) => w.all(w.state(style).eq(id), w.state(command).eq(true)),
+      when: (w) => w.all(w.state(style).eq(id), w.state(command).eq(true), w.state(menu).eq(false)),
       intent: (i) =>
         i.feedback.style.use(
           tw(id === 'lyra' || id === 'new-york-v4' ? '' : 'border', profile.command)
@@ -88,6 +89,13 @@ export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
       intent: (i) => i.feedback.style.use(tw(profile.focus)),
     });
   }
+  // Border/inset belong to the opted-in Command wrapper. This still wraps
+  // exactly one editor; no addon or additional focus/interaction owner.
+  def.rule({
+    when: (w) => w.state(menu).eq(true),
+    intent: (i) =>
+      i.feedback.style.use(tw('h-9 flex-1 rounded-none border-0 bg-transparent shadow-none')),
+  });
   for (const id of ['vega', 'nova', 'lyra', 'mira', 'new-york-v4'] as const) {
     def.rule({
       when: (w) =>
@@ -97,7 +105,12 @@ export function setupInputShellPaint(def: DefHandle<InputShellProps>) {
   }
   def.rule({
     when: (w) =>
-      w.all(w.state(style).eq('mira'), w.state(command).eq(true), w.meta('colorScheme').eq('dark')),
+      w.all(
+        w.state(style).eq('mira'),
+        w.state(command).eq(true),
+        w.state(menu).eq(false),
+        w.meta('colorScheme').eq('dark')
+      ),
     intent: (i) => i.feedback.style.use(tw('bg-input/30')),
   });
   // The actual editor remains the sole opacity/disabled/focus owner.

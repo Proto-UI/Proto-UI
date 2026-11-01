@@ -56,6 +56,73 @@ function ownerContentFlow(css: string) {
     Object.keys(declarations).every((property) => ['display', 'align-items'].includes(property))
   );
 }
+// Static anatomy guard, not native hit-testing evidence. Only the passive,
+// hidden search glyph may suppress pointer events; controls and their wrappers may not.
+function pointerSuppressionIsDecorative(source: string) {
+  const root = ts.createSourceFile('composition.ts', source, ts.ScriptTarget.Latest, true);
+  const diagnostics = (root as ts.SourceFile & { parseDiagnostics: readonly ts.Diagnostic[] })
+    .parseDiagnostics;
+  if (diagnostics.length) return false;
+  const prop = (node: ts.ObjectLiteralExpression, name: string) =>
+    node.properties.find(
+      (entry): entry is ts.PropertyAssignment =>
+        ts.isPropertyAssignment(entry) &&
+        (ts.isIdentifier(entry.name) || ts.isStringLiteralLike(entry.name)) &&
+        entry.name.text === name
+    )?.initializer;
+  const text = (node: ts.Node | undefined) =>
+    node && ts.isStringLiteralLike(node) ? node.text : undefined;
+  let valid = true;
+  const visit = (node: ts.Node) => {
+    if (ts.isStringLiteralLike(node) && node.text.split(/\s+/).includes('pointer-events-none')) {
+      const property = node.parent;
+      const box = property?.parent;
+      if (
+        !property ||
+        !ts.isPropertyAssignment(property) ||
+        !box ||
+        !ts.isObjectLiteralExpression(box) ||
+        prop(box, 'className') !== node ||
+        text(prop(box, 'kind')) !== 'box' ||
+        text(prop(box, 'tag')) !== 'span' ||
+        text(prop(box, 'ref')) !== 'query-decoration'
+      )
+        valid = false;
+      else {
+        const allowedKeys = new Set(['kind', 'tag', 'ref', 'attrs', 'className', 'children']);
+        if (
+          !box.properties.every(
+            (entry) =>
+              ts.isPropertyAssignment(entry) &&
+              (ts.isIdentifier(entry.name) || ts.isStringLiteralLike(entry.name)) &&
+              allowedKeys.has(entry.name.text)
+          )
+        )
+          valid = false;
+        const attrs = prop(box, 'attrs');
+        const children = prop(box, 'children');
+        const child =
+          children && ts.isArrayLiteralExpression(children) && children.elements.length === 1
+            ? children.elements[0]
+            : undefined;
+        if (
+          !attrs ||
+          !ts.isObjectLiteralExpression(attrs) ||
+          attrs.properties.length !== 1 ||
+          text(prop(attrs, 'aria-hidden')) !== 'true' ||
+          !child ||
+          !ts.isObjectLiteralExpression(child) ||
+          text(prop(child, 'kind')) !== 'proto' ||
+          text(prop(child, 'prototypeId')) !== 'lucide-search-icon'
+        )
+          valid = false;
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(root);
+  return valid;
+}
 describe('Search public presentation boundary', () => {
   it('has no default-ui/native-modal page skin while retaining startup/trigger layout', () => {
     expect(search).not.toContain('@pagefind/default-ui');
@@ -114,6 +181,57 @@ describe('Search public presentation boundary', () => {
     visit(root);
     expect(item && execute).toBe(true);
     expect(composition).toContain('data-search-result-url');
-    expect(composition).not.toContain('pointer-events-none');
+    expect(pointerSuppressionIsDecorative(composition)).toBe(true);
+    expect(pointerSuppressionIsDecorative(composition + '\nconst malformed = {')).toBe(false);
+    for (const interactive of [
+      'onClick: () => {},',
+      'tabIndex: 0,',
+      "role: 'button',",
+      '...interactiveProps,',
+    ]) {
+      expect(
+        pointerSuppressionIsDecorative(
+          composition.replace("ref: 'query-decoration',", `ref: 'query-decoration', ${interactive}`)
+        )
+      ).toBe(false);
+    }
+    // The former whole-file ban rejected the hidden passive glyph. Retain the
+    // actual control boundary with mutation controls rather than dropping it.
+    expect(
+      pointerSuppressionIsDecorative(composition.replace("ref: 'query-decoration'", "ref: 'query'"))
+    ).toBe(false);
+    expect(
+      pointerSuppressionIsDecorative(
+        composition.replace("'aria-hidden': 'true'", "'aria-hidden': 'false'")
+      )
+    ).toBe(false);
+    // Match this exact author box across formatter line breaks; a no-op mutation
+    // must fail the fixture instead of certifying an untested negative control.
+    const decorationTag = /tag:\s*'span',\s*ref:\s*'query-decoration'/g;
+    expect([...composition.matchAll(decorationTag)]).toHaveLength(1);
+    const interactiveDecoration = composition.replace(
+      decorationTag,
+      "tag: 'button', ref: 'query-decoration'"
+    );
+    expect(interactiveDecoration).not.toBe(composition);
+    expect(pointerSuppressionIsDecorative(interactiveDecoration)).toBe(false);
+    expect(
+      pointerSuppressionIsDecorative(
+        composition +
+          "\nconst badInput = {kind:'proto', prototypeId:'shadcn-command-input', className:'pointer-events-none'};"
+      )
+    ).toBe(false);
+    expect(
+      pointerSuppressionIsDecorative(
+        composition +
+          "\nconst badItem = {kind:'proto', prototypeId:'shadcn-command-item', className:'pointer-events-none'};"
+      )
+    ).toBe(false);
+    expect(
+      pointerSuppressionIsDecorative(
+        composition +
+          "\nconst blockedAncestor = {kind:'box', tag:'div', className:'pointer-events-none', children:[{kind:'proto', prototypeId:'shadcn-command-input'}]};"
+      )
+    ).toBe(false);
   });
 });

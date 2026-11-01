@@ -24,6 +24,9 @@ export function createSiteSearchOwner(root: HTMLElement) {
     retry: text('retry'),
     more: text('more'),
     close: text('close'),
+    pages: typeof raw.pages === 'string' ? raw.pages : undefined,
+    results: typeof raw.results === 'string' ? raw.results : undefined,
+    goToPage: typeof raw.goToPage === 'string' ? raw.goToPage : undefined,
     count: (count) => countTemplate.replace('{count}', String(count)),
   };
   if (!root.dataset.pagefindBundle) throw new Error('Missing Pagefind bundle URL');
@@ -32,7 +35,22 @@ export function createSiteSearchOwner(root: HTMLElement) {
     origin: view.location.origin,
     importModule: (url) => import(/* @vite-ignore */ url),
   });
+  const rawNavigation: unknown = JSON.parse(root.dataset.searchNavigation || '[]');
+  if (!Array.isArray(rawNavigation)) throw new Error('Malformed default Search navigation');
+  const navigation = rawNavigation.map((entry: unknown) => {
+    if (
+      !entry ||
+      typeof entry !== 'object' ||
+      !('title' in entry) ||
+      !('href' in entry) ||
+      typeof entry.title !== 'string' ||
+      typeof entry.href !== 'string'
+    )
+      throw new Error('Malformed default Search navigation');
+    return { title: entry.title, href: entry.href };
+  });
   const session = createSiteSearchSession({
+    navigation,
     load: resource.load,
     origin: view.location.origin,
     navigate(href) {

@@ -5,11 +5,13 @@ import {
   setupShadcnStyleSelection,
   type ShadcnStyleProps,
 } from '../style-scope';
+import type { CommandPresentationProps } from './types';
 export const COMMAND_PROJECTED_STYLES = SHADCN_STYLE_IDS;
 /** Private owned composition fact; never inferred from wrapped editor DOM. */
-export const COMMAND_INPUT_PAINT = createContextKey<{ command: boolean }>(
-  'shadcn-command-input-paint'
-);
+export const COMMAND_INPUT_PAINT = createContextKey<{
+  command: boolean;
+  presentation?: 'default' | 'menu';
+}>('shadcn-command-input-paint');
 
 /** MIT source-only mapping, shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7,
  * style-*.css .cn-command*, base/ui/command.tsx and independent
@@ -115,8 +117,46 @@ export function setupCommandInputMode<
   return command;
 }
 
+export function setupCommandPresentation<
+  Props extends ShadcnStyleProps & CommandPresentationProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
+  const cdef = def as unknown as DefHandle<ShadcnStyleProps & CommandPresentationProps>;
+  cdef.props.define({
+    presentation: { type: 'enum', options: ['default', 'menu'], empty: 'fallback' },
+  });
+  cdef.props.setDefaults({ presentation: 'default' });
+}
+
+/** Private wrapper-owned presentation, never optional prefix/Anatomy presence. */
+export function setupCommandMenuInputMode(def: DefHandle<ShadcnStyleProps>) {
+  const menu = def.state.bool('commandMenuInputPaint', false);
+  const sync = (run: RunHandle<ShadcnStyleProps>) => {
+    const paint = run.context.tryRead(COMMAND_INPUT_PAINT);
+    menu.set(
+      paint?.command === true && paint.presentation === 'menu',
+      'reason: explicit Command wrapper menu presentation'
+    );
+  };
+  def.context.trySubscribe(COMMAND_INPUT_PAINT, sync);
+  def.lifecycle.onCreated(sync);
+  def.lifecycle.onMounted(sync);
+  def.lifecycle.onUpdated(sync);
+  return menu;
+}
+
+/** MIT website CommandMenu@24a1642, not the ordinary registry recipe. */
+const COMMAND_MENU_PARTS = {
+  root: 'rounded-none p-0 bg-transparent',
+  wrapper: 'flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-input/50 px-3',
+  input: 'h-9 px-0 py-0 text-sm',
+  item: 'min-h-9 gap-2 rounded-md border border-transparent px-3 py-1.5 text-sm font-medium',
+  empty: 'py-12 text-center text-sm text-muted-foreground',
+  list: 'min-h-0 max-h-[none] flex-1 scroll-pt-2 scroll-pb-1.5 outline-none',
+} as const;
+
 export function setupCommandPartPaint<
-  Props extends ShadcnStyleProps,
+  Props extends ShadcnStyleProps & { presentation?: 'default' | 'menu' },
   Exposes = Record<string, unknown>,
 >(
   def: DefHandle<Props, Exposes>,
@@ -124,11 +164,19 @@ export function setupCommandPartPaint<
   root = false
 ) {
   const style = setupCommandStyle(def, root);
+  setupCommandPresentation(def);
+  const cdef = def as unknown as DefHandle<
+    ShadcnStyleProps & { presentation?: 'default' | 'menu' }
+  >;
+  cdef.rule({
+    when: (w) => w.prop('presentation').eq('menu'),
+    intent: (i) => i.feedback.style.use(tw(COMMAND_MENU_PARTS[part])),
+  });
   for (const id of SHADCN_STYLE_IDS) {
     const tokens = COMMAND_PROFILES[id][part];
     if (tokens)
-      def.rule({
-        when: (w) => w.state(style).eq(id),
+      cdef.rule({
+        when: (w) => w.all(w.state(style).eq(id), w.prop('presentation').eq('default')),
         intent: (i) => i.feedback.style.use(tw(tokens)),
       });
   }
