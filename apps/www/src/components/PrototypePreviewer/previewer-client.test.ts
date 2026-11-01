@@ -8,6 +8,7 @@ const hostMountSpies = vi.hoisted(() => ({
   release: vi.fn(),
 }));
 const prototypeSpies = vi.hoisted(() => ({ loadMany: vi.fn(async (_ids: string[]) => {}) }));
+const loadPrototypeSpy = vi.hoisted(() => vi.fn(async (_prototypeId: string) => true));
 const demoSpies = vi.hoisted(() => ({
   render: vi.fn(),
 }));
@@ -31,7 +32,7 @@ vi.mock('./runtimes/registry', () => ({
 
 vi.mock('./registry', () => ({ getPrototype: () => ({}) }));
 vi.mock('./prototype-modules', () => ({
-  loadPrototype: async () => {},
+  loadPrototype: (prototypeId: string) => loadPrototypeSpy(prototypeId),
   loadPrototypes: prototypeSpies.loadMany,
 }));
 vi.mock('./demo-modules', () => ({
@@ -99,6 +100,7 @@ function createProjectedPreviewerRoot() {
 describe('PrototypePreviewer adapter preference synchronization', () => {
   beforeEach(() => {
     prototypeSpies.loadMany.mockReset().mockResolvedValue(undefined);
+    loadPrototypeSpy.mockReset().mockResolvedValue(true);
     runtimeSpies.mount.mockReset();
     runtimeSpies.unmount.mockReset();
     hostMountSpies.release.mockReset();
@@ -502,8 +504,77 @@ describe('PrototypePreviewer adapter preference synchronization', () => {
     document.dispatchEvent(
       new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
     );
-    await vi.waitFor(() => expect(root.textContent).toContain('[Preview Error]'));
+    await vi.waitFor(() =>
+      expect(root.querySelector('[data-preview-recovery="error"]')).not.toBeNull()
+    );
+    expect(root.textContent).toContain('vue2 failed');
     expect((root as any).__previewer__.getCurrentRuntime()).toBeNull();
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('offers a recovery path when a lazy-loaded chunk fails to load', async () => {
+    loadPrototypeSpy.mockRejectedValue(
+      new Error(
+        '[PrototypePreviewer] 加载原型模块 "demo" 失败: Failed to fetch dynamically imported module: /_astro/demo.hash.js'
+      )
+    );
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+
+    const recovery = await vi.waitFor(() => {
+      const found = root.querySelector<HTMLElement>('[data-preview-recovery="chunk"]');
+      expect(found).not.toBeNull();
+      return found!;
+    });
+    expect(recovery.textContent).toContain('Prototype module failed to load');
+    expect(recovery.textContent).toContain('lazy-loaded chunk');
+    const buttons = Array.from(recovery.querySelectorAll('button'));
+    // A failed dynamic import is cached by URL in the browser's module map, so
+    // re-importing the same build-bound URL cannot recover it. Only a fresh
+    // document can, so the surface must not offer an ineffective retry.
+    expect(buttons.map((button) => button.textContent)).toEqual(['Reload page']);
+    // The recovery labels must not rely on an inherited foreground: a fixed
+    // background with `color: inherit` is unreadable in the dark theme.
+    for (const button of buttons) {
+      expect(button.style.color).toContain('var(--color-');
+      expect(button.style.background).toContain('var(--color-');
+    }
+    await (root as any).__previewer__.destroy();
+    root.remove();
+  });
+
+  it('keeps unrelated preview failures free of the chunk recovery controls', async () => {
+    runtimeSpies.mount.mockImplementation((id: string) => {
+      if (id === 'vue2') throw new Error('vue2 failed');
+    });
+    const root = createPreviewerRoot();
+
+    initPreviewer({
+      root,
+      prototypeId: 'demo',
+      initialRuntime: 'wc',
+      demoProps: {},
+      runtimeList: ['wc', 'vue2'],
+    });
+    await vi.waitFor(() =>
+      expect(runtimeSpies.mount).toHaveBeenCalledWith('wc', expect.anything())
+    );
+
+    document.dispatchEvent(
+      new CustomEvent('proto-adapter:change', { detail: { adapter: 'vue2' } })
+    );
+    await vi.waitFor(() =>
+      expect(root.querySelector('[data-preview-recovery="error"]')).not.toBeNull()
+    );
+    expect(root.querySelectorAll('[data-preview-recovery="chunk"] button')).toHaveLength(0);
     await (root as any).__previewer__.destroy();
     root.remove();
   });

@@ -206,9 +206,11 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/components/PrototypePreviewer/home-demo-client.ts` | `www.demo.home-demo-select` | `788d1a4db8a454247bbeda462f3d8087e32158ec0a044bbd8143e4b86023eeba` |
 | `apps/www/src/components/PrototypePreviewer/native-content-lease.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel`, `www.shell.native-link-presentation` | `0cd96b3a1acc210bd6afda937d533f8bd0c4aee1da60fab43e12175b9ae36bb0` |
 | `apps/www/src/components/PrototypePreviewer/passive-shell-composition.ts` | `www.demo.preview-surface`, `www.shell.mobile-menu-panel` | `a8d1901e5ddd675a1a7d516b7c06571e6dcabe3c9ae038fb8dd7e646cd3fbabb` |
-| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `5ee543910fb2ff91897bb86f07c74c7758cd46463860007a08f1d5603490e04d` |
-| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `17b855fd7724f12c2305a02f163541c077468034a77237853bd9ed0b09b76053` |
-| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `0137f3bec891c2090fd6a154120b420b95ef9657b1915e3ca860c77173180ba6` |
+| `apps/www/src/components/PrototypePreviewer/lazy-chunk-recovery.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `8bbcce8ef3feb1c0475fba7627624e373e57749e13007fbff01092024ab77376` |
+| `apps/www/src/components/PrototypePreviewer/preview-error-surface.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `2e87c9b3070858d025dc741cd7815c1c97e8c207ff1d681bd8149daed19e1d93` |
+| `apps/www/src/components/PrototypePreviewer/previewer-bootstrap.ts` | `www.demo.lazy-mount-observer`, `www.demo.prototype-previewer`, `www.demo.runtime-select` | `f9e18f47c7711d553647fc0bf4aed7c5b52788c9191276822dec6c50b184571a` |
+| `apps/www/src/components/PrototypePreviewer/previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `76f03e2f04839e26521ef603892bd1a35db4e6b73443d1a7ef233d20761ca4d7` |
+| `apps/www/src/components/PrototypePreviewer/projected-previewer-client.ts` | `www.demo.prototype-previewer`, `www.demo.runtime-select` | `a9d57ca9d09ef6c73160bdad92cfddb5a449432d657ad4df549ad894fdf37913` |
 | `apps/www/src/components/PrototypePreviewer/projection-composition.ts` | `www.demo.home-demo-select`, `www.demo.runtime-select` | `790a774f44646bb2793e03b7851eea3673b1efe61c80d97fecd20b38f1bc7cb0` |
 | `apps/www/src/components/PrototypePreviewer/projection-materializer.ts` | `www.demo.prototype-previewer` | `20542fe478bcaa2865ae91a42ad2ef02069f80c9ca7e840ff1ed07f6b8f10c2a` |
 | `apps/www/src/components/PrototypePreviewer/projection-theme.ts` | `www.demo.brutalist-theme-style`, `www.demo.demo-matrix` | `0e66a95c763857d27f6282f6c6ba92fc7a930edf309c4cdabc49e5c7ee249ac3` |

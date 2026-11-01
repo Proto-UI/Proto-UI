@@ -21,6 +21,8 @@ import {
 } from '../site-shadcn-controls';
 import { initProjectedPreviewer } from './projected-previewer-client';
 import type { ProjectionComponentId, ProjectionFamilyId } from './projection-families';
+import { describeLazyChunkFailure, isLazyChunkFailure } from './lazy-chunk-recovery';
+import { PREVIEW_ERROR_MARKER, PREVIEW_RECOVERY_ATTRIBUTE } from './preview-error-surface';
 
 const PREFERRED_ADAPTER_KEY = 'preferred-prototypes-adapter';
 // Bind our one public preference event to its initiating logical request. A
@@ -245,11 +247,57 @@ export function initPreviewer(options: PreviewerOptions) {
 
   const reportSwitchError = (err: unknown) => {
     host.innerHTML = '';
+    const message = (err as any)?.message || String(err);
+    const chunkFailure = isLazyChunkFailure(err);
+    const container = document.createElement('div');
+    container.setAttribute(PREVIEW_RECOVERY_ATTRIBUTE, chunkFailure ? 'chunk' : 'error');
+    container.style.cssText =
+      'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:var(--font-sans,system-ui,sans-serif);';
+    const title = document.createElement('p');
+    title.textContent = chunkFailure ? 'Prototype module failed to load' : 'Preview error';
+    title.style.cssText = 'font-size:1.1rem;font-weight:600;margin:0;';
+    title.style.color = 'var(--color-foreground,#111)';
+    container.appendChild(title);
+    const detail = document.createElement('p');
+    detail.textContent = chunkFailure ? describeLazyChunkFailure() : message;
+    detail.style.cssText = 'margin:0;font-size:0.9rem;max-width:36rem;text-align:center;';
+    detail.style.color = 'var(--color-muted-foreground,#555)';
+    container.appendChild(detail);
+    if (chunkFailure) {
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:0.5rem;';
+      // A failed dynamic import is cached by URL in the browser's module map,
+      // so re-importing the same build-bound URL cannot recover it. Only a
+      // fresh document can, because the page itself is served from the new
+      // build and therefore references the new chunk URLs. The repository's
+      // fresh-URL retry mechanism covers the runtime and adapter entries and
+      // does not reach the glob-loaded prototype and demo modules.
+      const reload = document.createElement('button');
+      reload.type = 'button';
+      reload.textContent = 'Reload page';
+      // Paired theme tokens keep the label readable in both themes; a fixed
+      // background with an inherited foreground is unreadable in dark mode.
+      reload.style.cssText =
+        'padding:0.4rem 1rem;border:1px solid var(--color-border,#999);border-radius:4px;cursor:pointer;font-size:0.85rem;';
+      reload.style.background = 'var(--color-background,#fff)';
+      reload.style.color = 'var(--color-foreground,#111)';
+      reload.addEventListener('click', () => {
+        window.location.reload();
+      });
+      actions.appendChild(reload);
+      container.appendChild(actions);
+    }
     const pre = document.createElement('pre');
-    pre.textContent =
-      '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
+    // Keep the shared marker text so the demo matrix and the browser harness
+    // still recognize this surface as a failed preview.
+    pre.textContent = `${PREVIEW_ERROR_MARKER}\n${(err as any)?.stack || message}`;
     pre.style.whiteSpace = 'pre-wrap';
-    host.appendChild(pre);
+    pre.style.color = 'var(--color-muted-foreground,#888)';
+    pre.style.fontSize = '0.75rem';
+    pre.style.maxWidth = '100%';
+    pre.style.overflow = 'auto';
+    container.appendChild(pre);
+    host.appendChild(container);
     finishStartup();
     console.error(err);
     dispatch('error', { error: err });

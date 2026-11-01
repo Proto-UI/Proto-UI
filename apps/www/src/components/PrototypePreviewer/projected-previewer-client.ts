@@ -1,5 +1,6 @@
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from '../adapter-preference';
 import { refreshCodePanel } from './code-panel-client';
+import { PREVIEW_ERROR_MARKER } from './preview-error-surface';
 import {
   PROJECTION_FOCUS_KEYS,
   type ProjectionCompositionControls,
@@ -118,7 +119,7 @@ export function initProjectedPreviewer(options: ProjectedPreviewerOptions): void
   const renderInitialError = (error: unknown): void => {
     const pre = root.ownerDocument.createElement('pre');
     const detail = error instanceof Error ? error.stack || error.message : String(error);
-    pre.textContent = `[Preview Error]\n${detail}`;
+    pre.textContent = `${PREVIEW_ERROR_MARKER}\n${detail}`;
     pre.style.whiteSpace = 'pre-wrap';
     initialErrorSurface = pre;
     mount.replaceChildren(pre);
