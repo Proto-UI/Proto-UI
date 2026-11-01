@@ -73,6 +73,7 @@ async function measure(page: Page) {
     const main = columns.querySelector<HTMLElement>('.main-pane')!;
     const right = columns.querySelector<HTMLElement>('.right-sidebar-container')!;
     const innerRight = right.querySelector<HTMLElement>('.right-sidebar')!;
+    const paragraph = main.querySelector<HTMLElement>('[data-doc-flow] > p');
     const style = getComputedStyle(shell);
     const box = (element: HTMLElement) => {
       const r = element.getBoundingClientRect();
@@ -86,6 +87,17 @@ async function measure(page: Page) {
       };
     };
     return {
+      cssViewport: { width: innerWidth, height: innerHeight },
+      devicePixelRatio,
+      visualViewport: window.visualViewport
+        ? {
+            width: window.visualViewport.width,
+            height: window.visualViewport.height,
+            scale: window.visualViewport.scale,
+          }
+        : null,
+      xlMediaMatches: matchMedia('(min-width: 80rem)').matches,
+      textSizing: 'explicit inline html font-size; not browser zoom or default-font preference',
       root: parseFloat(getComputedStyle(document.documentElement).fontSize),
       viewport: document.documentElement.clientWidth,
       overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -99,6 +111,7 @@ async function measure(page: Page) {
         scrollHeight: left.scrollHeight,
       },
       main: box(main),
+      paragraph: paragraph ? box(paragraph) : null,
       right: box(right),
       rightOwner: {
         position: getComputedStyle(right).position,
@@ -116,6 +129,9 @@ async function measure(page: Page) {
       mode: getComputedStyle(columns).display,
       rightVisible:
         getComputedStyle(right).display !== 'none' && right.getBoundingClientRect().width > 0,
+      tocLinkWidths: [...right.querySelectorAll<HTMLElement>('a[href]')].map(
+        (link) => link.getBoundingClientRect().width
+      ),
       tocCount: columns.querySelectorAll('sl-toc').length,
       currentCount: left.querySelectorAll('a[aria-current="page"]').length,
       focused: document.activeElement?.tagName,
@@ -139,23 +155,31 @@ async function settleNativeScroll(page: Page) {
     throw new Error('Native rail/document scrolling did not settle within 120 frames');
   });
 }
+// Expected user-visible behavior comes from the upstream viewport policy and
+// readable article requirements, not a reimplementation of the CSS66rem guard.
+// Inline font tests must not be described as browser zoom or default-font tests.
 const scenarios = [
-  { width: 320, root: 16 },
-  { width: 390, root: 24 },
-  { width: 1279, root: 16 },
-  { width: 1280, root: 16 },
-  { width: 1440, root: 20 },
-  { width: 1440, root: 24 },
-  { width: 1440, root: 32 },
-  { width: 1920, root: 16 },
-  { width: 1920, root: 24 },
-];
+  { width: 320, root: 16, toc: 'hidden', locale: 'en' },
+  { width: 390, root: 24, toc: 'hidden', locale: 'en' },
+  { width: 1188, root: 16, toc: 'hidden', locale: 'en' },
+  { width: 1279, root: 16, toc: 'hidden', locale: 'en' },
+  { width: 1280, root: 16, toc: 'right', locale: 'en' },
+  { width: 1440, root: 16, toc: 'right', locale: 'en' },
+  { width: 1440, root: 20, toc: 'right', locale: 'en' },
+  { width: 1440, root: 24, toc: 'hidden', locale: 'en' },
+  { width: 1440, root: 32, toc: 'hidden', locale: 'en' },
+  { width: 1920, root: 16, toc: 'right', locale: 'en' },
+  { width: 1920, root: 24, toc: 'right', locale: 'en' },
+  { width: 1440, root: 16, toc: 'right', locale: 'zh-cn' },
+  { width: 1440, root: 20, toc: 'right', locale: 'zh-cn' },
+] as const;
 for (const family of ['shadcn', 'brutalist'] as const)
   for (const theme of ['light', 'dark'] as const)
-    it(`${family}/${theme} keeps safe edge rails, bounded prose and root-scaled reflow`, async () => {
+    it(`${family}/${theme} keeps the TOC on the right or hidden, never above readable prose`, async () => {
       const context = await browser.newContext({
         viewport: { width: 1920, height: 1000 },
         colorScheme: theme,
+        deviceScaleFactor: 1,
       });
       await context.route('**/*', (route) =>
         new URL(route.request().url()).origin === new URL(baseUrl).origin
@@ -171,7 +195,12 @@ for (const family of ['shadcn', 'brutalist'] as const)
           waitUntil: 'networkidle',
         });
         expect(response?.status()).toBe(200);
-        for (const { width, root } of scenarios) {
+        for (const { width, root, toc, locale } of scenarios) {
+          const route = `/${locale}/ui-libraries/${family}/${article}`;
+          if (new URL(page.url()).pathname !== route) {
+            const response = await page.goto(`${baseUrl}${route}`, { waitUntil: 'networkidle' });
+            expect(response?.status()).toBe(200);
+          }
           await page.setViewportSize({ width, height: 1000 });
           await page.evaluate((root) => {
             document.documentElement.style.fontSize = `${root}px`;
@@ -183,7 +212,7 @@ for (const family of ['shadcn', 'brutalist'] as const)
             );
           });
           const metrics = await measure(page);
-          const id = `${family}-${theme}-${width}-root${root}`;
+          const id = `${locale}-${family}-${theme}-${width}-root${root}`;
           await writeFile(
             path.join(evidence, `${id}.json`),
             JSON.stringify(
@@ -197,8 +226,23 @@ for (const family of ['shadcn', 'brutalist'] as const)
           expect(metrics.main.width).toBeLessThanOrEqual(42 * root + 1);
           expect(metrics.main.width).toBeGreaterThan(0);
           expect(metrics.currentCount).toBe(1);
-          if (width >= 1280 && metrics.canvas > 72 * root) {
+          expect(metrics.cssViewport.width).toBe(width);
+          expect(metrics.root).toBe(root);
+          expect(metrics.devicePixelRatio).toBe(1);
+          expect(metrics.visualViewport?.scale).toBe(1);
+          if (toc === 'right') {
+            expect(metrics.xlMediaMatches).toBe(true);
             expect(metrics.mode).toBe('grid');
+            expect(metrics.main.width / root).toBeGreaterThanOrEqual(28);
+            expect(metrics.paragraph, 'the real article must expose readable prose').not.toBeNull();
+            expect(metrics.paragraph!.width / root).toBeGreaterThanOrEqual(24);
+            if (width === 1440 && root === 20)
+              expect(metrics.main.width / root).toBeGreaterThanOrEqual(30);
+            expect(metrics.right.bottom).toBeGreaterThan(metrics.main.top);
+            expect(metrics.right.top).toBeLessThan(metrics.main.bottom);
+            expect(metrics.tocLinkWidths.length).toBeGreaterThan(0);
+            for (const width of metrics.tocLinkWidths)
+              expect(width / root).toBeGreaterThanOrEqual(12);
             expect(metrics.left.left).toBeCloseTo(metrics.gutter, 0);
             expect(metrics.right.right).toBeCloseTo(metrics.viewport - metrics.gutter, 0);
             expect(metrics.left.right).toBeLessThan(metrics.main.left);
@@ -210,16 +254,24 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(metrics.rightOwner.innerPosition).toBe('static');
             expect(metrics.rightOwner.innerOverflowY).toBe('visible');
             expect(metrics.rightOwner.innerPaddingTop).toBe(0);
-          } else if (width >= 1280) {
-            expect(metrics.mode).toBe('flex');
-            expect(metrics.rightVisible).toBe(true);
-            expect(metrics.right.bottom).toBeLessThanOrEqual(metrics.main.top + 1);
-            expect(metrics.rightOwner.position).toBe('static');
-            expect(metrics.rightOwner.overflowY).toBe('visible');
-          } else if (width < 1024) {
+          } else {
             expect(metrics.rightVisible).toBe(false);
-            expect(metrics.main.left).toBeGreaterThanOrEqual(metrics.gutter - 1);
-            expect(metrics.main.right).toBeLessThanOrEqual(metrics.viewport - metrics.gutter + 1);
+            expect(metrics.right.width).toBe(0);
+            if (width >= 1280) {
+              // Even at200% inline text size the article must retain a usable
+              // reading width. Passing merely because it has nonzero width is
+              // not sufficient; the hidden TOC must also relinquish its track.
+              expect(metrics.mode).toBe('grid');
+              expect(metrics.main.width / root).toBeGreaterThanOrEqual(24);
+              expect(metrics.paragraph, 'enlargement must not crush actual prose').not.toBeNull();
+              expect(metrics.paragraph!.width / root).toBeGreaterThanOrEqual(24);
+              expect(metrics.leftOwner.position).toBe('sticky');
+              expect(metrics.left.right).toBeLessThan(metrics.main.left);
+            }
+            if (width < 1024) {
+              expect(metrics.main.left).toBeGreaterThanOrEqual(metrics.gutter - 1);
+              expect(metrics.main.right).toBeLessThanOrEqual(metrics.viewport - metrics.gutter + 1);
+            }
           }
           expect(metrics.tocCount).toBe(1);
         }

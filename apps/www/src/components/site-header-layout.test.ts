@@ -23,12 +23,18 @@ function actualMarkdownFixture(section = '<h2 id="actual-doc-heading">Installati
 }
 afterEach(() => document.body.replaceChildren());
 
-it('reflows enlarged desktop reading columns and Header by container space, preserving original owners', () => {
+it('keeps reading navigation lateral or hidden and preserves the Header and single native-tree owners', () => {
   const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const header = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   expect(frame).toContain('container: docs-canvas / inline-size');
   expect(frame).toContain('lg:[--sidebar-width:15rem]');
-  expect(columns).toContain('@container docs-canvas (max-width: 72rem)');
+  expect(columns).toMatch(/@container docs-canvas \(max-width: [\d.]+rem\)/);
+  expect(columns).not.toMatch(/flex-direction:\s*column|order:\s*0/);
+  expect(columns).toMatch(/> \.right-sidebar-container\s*\{\s*display:\s*none;/);
+  expect(columns.match(/<slot name="right-sidebar"/g)).toHaveLength(1);
+  expect(frame.match(/<slot name="sidebar"/g)).toHaveLength(1);
+  expect(frame).toContain('<noscript>');
+  expect(frame).toContain('initSiteContentsNavigation');
   expect(columns).toContain('class="docs-reading-columns lg:sl-flex"');
   expect(columns).toMatch(/\.right-sidebar-container[\s\S]*width: 100%/);
   expect(columns).toMatch(
@@ -53,14 +59,14 @@ it('keeps the outer canvas as the only narrow reading gutter without changing sp
   expect(classes[1]).toContain('md:px-6');
 });
 
-describe('reading reflow query boundaries (source arithmetic, not browser paint)', () => {
+describe('reading rail visibility query boundaries (source arithmetic, not browser paint)', () => {
   const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
   const query = columns.match(
     /@media \(min-width: ([\d.]+)rem\)\s*\{\s*@container docs-canvas \(max-width: ([\d.]+)rem\)/
   );
   // Media rem uses the initial font; container rem follows the root font. Read
   // the actual owner thresholds so restoring the inclusive 80/80 defect fails.
-  const reflows = (viewport: number, contentWidth: number, root: number) => {
+  const hidesRightForTextBudget = (viewport: number, contentWidth: number, root: number) => {
     expect(query).not.toBeNull();
     return viewport >= Number(query![1]) * 16 && contentWidth <= Number(query![2]) * root;
   };
@@ -79,32 +85,48 @@ describe('reading reflow query boundaries (source arithmetic, not browser paint)
       for (const scrollbar of [0, 15]) {
         // The 15px scrollbar is modelled, not a browser capture. No 85rem cap.
         const contentWidth = canvasWidth(viewport, 16, scrollbar);
-        expect(reflows(viewport, contentWidth, 16), `${viewport}px, scrollbar ${scrollbar}`).toBe(
-          false
-        );
+        expect(
+          hidesRightForTextBudget(viewport, contentWidth, 16),
+          `${viewport}px, scrollbar ${scrollbar}`
+        ).toBe(false);
       }
   });
 
-  it('retains root-relative enlarged reflow at the existing column budget and viewport gate', () => {
+  it('keeps ordinary1440/root20 lateral and hides enlarged rails without an above-article mode', () => {
     const columnBudget = Number(query![2]);
     expect(Number(query![1])).toBe(80);
-    expect(columnBudget).toBe(72);
-    expect(reflows(1440, canvasWidth(1440, 32), 32)).toBe(true);
-    expect(reflows(1279, canvasWidth(1279, 32), 32)).toBe(false);
+    // Do not canonize an implementation constant: independently required
+    // samples keep the ordinary1440 and enlarged20px TOC on the right.
+    for (const root of [16, 20])
+      for (const scrollbar of [0, 15])
+        expect(hidesRightForTextBudget(1440, canvasWidth(1440, root, scrollbar), root)).toBe(false);
+    expect(hidesRightForTextBudget(1440, canvasWidth(1440, 24), 24)).toBe(true);
+    const guard = columns.slice(query!.index);
+    expect(guard).toMatch(
+      /:has\(> \.right-sidebar-container\)\s*\{\s*grid-template-columns:\s*minmax\(0, 1fr\);/
+    );
+    expect(guard).toMatch(/> \.right-sidebar-container\s*\{\s*display:\s*none;/);
+    expect(guard).not.toMatch(/flex-direction:\s*column|order:\s*0/);
+    expect(hidesRightForTextBudget(1440, canvasWidth(1440, 32), 32)).toBe(true);
+    expect(hidesRightForTextBudget(1279, canvasWidth(1279, 32), 32)).toBe(false);
     for (const root of [20, 24, 32])
       for (const scrollbar of [0, 15]) {
         // At this boundary 2vw is between the 1rem/2rem clamp endpoints:
-        // viewport - scrollbar - 2 * .02 * viewport = 72 * root.
+        // viewport - scrollbar - 2 * .02 * viewport = columnBudget * root.
         const viewport = (columnBudget * root + scrollbar) / 0.96;
         const boundary = canvasWidth(viewport, root, scrollbar);
         expect(boundary).toBeCloseTo(columnBudget * root, 8);
-        expect(reflows(viewport - 1, canvasWidth(viewport - 1, root, scrollbar), root)).toBe(true);
-        expect(reflows(viewport, columnBudget * root, root)).toBe(true);
-        expect(reflows(viewport + 1, canvasWidth(viewport + 1, root, scrollbar), root)).toBe(false);
+        expect(
+          hidesRightForTextBudget(viewport - 1, canvasWidth(viewport - 1, root, scrollbar), root)
+        ).toBe(true);
+        expect(hidesRightForTextBudget(viewport, columnBudget * root, root)).toBe(true);
+        expect(
+          hidesRightForTextBudget(viewport + 1, canvasWidth(viewport + 1, root, scrollbar), root)
+        ).toBe(false);
       }
     // At very wide viewports the 2rem gutter cap must not become a canvas cap.
     expect(canvasWidth(2560, 16)).toBe(2560 - 4 * 16);
-    expect(reflows(2560, canvasWidth(2560, 16), 16)).toBe(false);
+    expect(hidesRightForTextBudget(2560, canvasWidth(2560, 16), 16)).toBe(false);
   });
 });
 
@@ -254,13 +276,114 @@ it('spaces unframed text separately from framed controls without changing compac
   expect(framed).toContain('--site-header-brand-navigation-gap: 0.75rem');
 });
 
-it('keeps the compact docs header offset identical before and after enhancement', () => {
-  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
-  expect(frame).toMatch(/@media \(max-width: 47\.999rem\)[\s\S]*?--header-height: 3\.5rem;/);
-  expect(css).toMatch(
-    /\.site-header\[data-docs-site-header\] \{\s*grid-template-areas: 'brand search theme menu';/
+// Source contracts only, not a substitute for the native compact cascade/height.
+function cssBlocks(source: string, head: string): string[] {
+  const clean = source.replace(/\/\*[\s\S]*?\*\//g, '');
+  const blocks: string[] = [];
+  let cursor = 0;
+  while (cursor < clean.length) {
+    const start = clean.indexOf(head, cursor);
+    if (start < 0) break;
+    const opening = start + head.length;
+    const gap = clean.slice(opening).match(/^\s*\{/);
+    cursor = opening;
+    if (!gap) continue;
+    const body = opening + gap[0].length;
+    let depth = 1,
+      quote = '',
+      index = body;
+    for (; index < clean.length && depth; index++) {
+      const token = clean[index]!;
+      if (quote) {
+        if (token === '\\') index++;
+        else if (token === quote) quote = '';
+      } else if (token === "'" || token === '"') quote = token;
+      else if (token === '{') depth++;
+      else if (token === '}') depth--;
+    }
+    if (depth) throw new Error(`Unclosed CSS block: ${head}`);
+    blocks.push(clean.slice(body, index - 1));
+    cursor = index;
+  }
+  return blocks;
+}
+function compactHeaderContract(css: string, pageFrame: string, disclosure: string) {
+  const media = cssBlocks(css, '@media (max-width: 47.999rem)').join('\n');
+  const declaration = (selector: string, property: string) => {
+    const values = cssBlocks(media, selector).flatMap((block) =>
+      [...block.matchAll(/(?:^|;)\s*([\w-]+)\s*:\s*([^;]+)(?=;)/g)]
+        .filter((match) => match[1] === property)
+        .map((match) => match[2]!.trim())
+    );
+    return values.at(-1);
+  };
+  const docs = '.site-header[data-docs-site-header]:has(.site-header-docs-navigation)';
+  expect(declaration('.site-header', '--site-header-row-height')).toBe('3.5rem');
+  expect(declaration('.site-header', 'grid-template-areas')).toBe("'brand search theme menu'");
+  expect(declaration('.site-header', 'grid-template-rows')).toBe(
+    'minmax(var(--site-header-row-height), auto)'
   );
-  expect(css).toContain('.site-header[data-docs-site-header]:has(.site-header-docs-navigation)');
+  expect(declaration(docs, 'grid-template-areas')).toBe("'brand contents search theme menu'");
+  expect(declaration(docs, 'grid-template-columns')).toBe('minmax(0, 1fr) repeat(4, 2.75rem)');
+  // Both rules are present without an enhancement-only marker: SSR and hydrated
+  // Docs retain the Contents column. The 15rem extreme-width exception stays.
+  const tiny = cssBlocks(css, '@container docs-page (max-width: 15rem)').join('\n');
+  expect(cssBlocks(tiny, '.site-header').join('\n')).toContain(
+    "'brand brand brand' 'search theme menu'"
+  );
+  expect(cssBlocks(tiny, docs).join('\n')).toContain("'brand brand contents' 'search theme menu'");
+  const compactFrame = cssBlocks(pageFrame, '@media (max-width: 47.999rem)').join('\n');
+  expect(cssBlocks(compactFrame, '.site-page-frame').join('\n')).toMatch(
+    /--header-height:\s*3\.5rem;/
+  );
+  expect(disclosure).toContain('const height = root.offsetHeight;');
+  expect(disclosure).toContain("frame.style.setProperty('--header-height', next)");
+  expect(disclosure).toContain(
+    "frame.style.setProperty('--header-height', originalHeight, originalHeightPriority)"
+  );
+}
+it('keeps SSR and enhanced compact Header branches with and without Contents and the 3.5rem offset contract', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  const disclosure = readFileSync('apps/www/src/components/site-header-disclosure.ts', 'utf8');
+  compactHeaderContract(css, frame, disclosure);
+});
+it('rejects compact Header rule loss, wrong scope, missing Contents, extra rows and incorrect offsets', () => {
+  const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
+  const disclosure = readFileSync('apps/www/src/components/site-header-disclosure.ts', 'utf8');
+  // Each mutation starts from the positive fixture, not an already-red parent.
+  compactHeaderContract(css, frame, disclosure);
+  const damages = [
+    css.replace(
+      "grid-template-areas: 'brand search theme menu';",
+      "grid-template-areas: 'brand search theme menu' 'context context context context';"
+    ),
+    css.replace(
+      "grid-template-areas: 'brand contents search theme menu';",
+      "grid-template-areas: 'brand search theme menu';"
+    ),
+    css.replaceAll(
+      '.site-header[data-docs-site-header]:has(.site-header-docs-navigation)',
+      '.site-header[data-docs-site-header][data-site-menu-ready]:has(.site-header-docs-navigation)'
+    ),
+    css.replaceAll('@media (max-width: 47.999rem)', '@media (min-width: 47.999rem)'),
+    css.replace('--site-header-row-height: 3.5rem;', '--site-header-row-height: 4.5rem;'),
+  ];
+  for (const damaged of damages)
+    expect(() => compactHeaderContract(damaged, frame, disclosure)).toThrow();
+  expect(() =>
+    compactHeaderContract(
+      css,
+      frame.replace('--header-height: 3.5rem;', '--header-height: 7.5rem;'),
+      disclosure
+    )
+  ).toThrow();
+  expect(() =>
+    compactHeaderContract(
+      css,
+      frame,
+      disclosure.replace('const height = root.offsetHeight;', 'const height = 56;')
+    )
+  ).toThrow();
 });
 
 it('keeps the page-top anchor at the initial reading inset when deferred modules finish loading', () => {

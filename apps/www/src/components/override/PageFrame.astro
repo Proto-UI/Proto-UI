@@ -6,6 +6,7 @@ const siteLibraryFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 import DocumentationImagePreview from '../DocumentationImagePreview.astro';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
+const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
 ---
 
 <SiteLibraryStyle />
@@ -21,6 +22,15 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   </script>
   <!-- Header owns the full-width chrome; reading content keeps its own canvas. -->
   <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
+  {
+    hasSidebar && (
+      <div
+        data-site-contents-panel-mount
+        data-contents-title={Astro.locals.t('sidebarNav.accessibleLabel')}
+        data-contents-close={zh ? '关闭目录' : 'Close navigation'}
+      />
+    )
+  }
   <div
     class:list={[
       'bg-background container-wrapper flex flex-1 flex-col',
@@ -174,30 +184,31 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   }
 
   .docs-sidebar {
-    width: 0;
+    width: 100%;
     flex: none;
   }
 
+  @media (max-width: 63.999rem) {
+    .docs-shell > [data-page-frame-layout] {
+      flex-direction: column;
+    }
+  }
+
+  /* Before public Dialog preparation, retain a reachable in-flow disclosure.
+     This is not the retired fixed full-screen mobile menu. */
   .mobile-sidebar-pane {
-    position: fixed;
-    z-index: 40;
-    inset: var(--header-height) 0 0;
+    position: static;
     display: none;
     width: 100%;
+    max-height: min(60svh, 32rem);
     padding: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     background: var(--color-background);
   }
 
-  :global([data-mobile-menu-expanded]) .mobile-sidebar-pane {
+  :global(body[data-mobile-menu-expanded]:not([data-site-contents-dialog])) .mobile-sidebar-pane {
     display: flex;
-  }
-
-  @media (max-width: 63.999rem) {
-    :global(body[data-mobile-menu-expanded]) {
-      overflow: hidden;
-    }
   }
 
   .mobile-sidebar-content {
@@ -229,11 +240,37 @@ const { hasSidebar } = Astro.locals.starlightRoute;
       width: var(--sidebar-width);
       padding-block: 1rem 3rem;
       overflow: visible;
+      max-height: none;
       background: transparent;
     }
 
     .mobile-sidebar-content {
       padding: 0;
     }
+  }
+
+  /* The very same nav retains its logical/native owners while physically
+     placed in the public Dialog. Only composition geometry changes; family
+     Dialog and Sidebar primitives continue to own all paint and behavior. */
+  .docs-sidebar[data-site-contents-dialog-tree] {
+    position: static;
+    z-index: auto;
+    top: auto;
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    overflow: visible;
+  }
+  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-pane {
+    position: static;
+    display: flex;
+    width: 100%;
+    max-height: min(60svh, 32rem);
+    padding: 0;
+    overflow-y: auto;
+  }
+  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-content {
+    padding: 0;
   }
 </style>

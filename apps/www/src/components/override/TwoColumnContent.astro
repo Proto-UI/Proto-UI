@@ -30,6 +30,10 @@ const mainPaneClass = isSplash
     isolation: isolate;
   }
 
+  .docs-reading-columns[data-layout='docs'] > .right-sidebar-container {
+    display: none;
+  }
+
   /* The middle reading measure is independent of the two edge rails. This
      replaces legacy viewport-minus-sidebar arithmetic with real grid tracks. */
   @media (min-width: 80rem) {
@@ -81,63 +85,19 @@ const mainPaneClass = isSplash
       min-width: 0;
     }
   }
-</style>
 
-<style>
-  /* Viewport media queries use the initial font size. The actual reading canvas
-     must also respond to enlarged root text, before the old column arithmetic
-     compresses the TOC into individual letters. Use the existing 72rem column
-     budget in root-relative canvas space: an 80rem container limit overlaps
-     the normal 80rem viewport because docs-shell has inline padding. Keep the
-     same native TOC in normal flow without a duplicate or new disclosure. */
+  /* Text enlargement is not browser zoom: viewport media rem uses the initial
+     font, while this canvas budget follows computed root text. Preserve a
+     usable article rather than moving the TOC above it. The budget reserves
+     15rem left +18rem right +up to4rem gaps +29rem prose. Actual geometry, not
+     this estimate, is the native acceptance oracle. */
   @media (min-width: 80rem) {
-    @container docs-canvas (max-width: 72rem) {
-      .docs-reading-columns[data-layout='docs'] {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
-        width: 100%;
-        gap: 1rem;
+    @container docs-canvas (max-width: 66rem) {
+      .docs-reading-columns[data-layout='docs']:has(> .right-sidebar-container) {
+        grid-template-columns: minmax(0, 1fr);
       }
       .docs-reading-columns[data-layout='docs'] > .right-sidebar-container {
-        display: flex;
-        position: static;
-        order: 0;
-        width: 100%;
-        min-width: 0;
-        flex: none;
-        align-self: stretch;
-        height: auto;
-        padding-bottom: 0;
-        overflow: visible;
-      }
-      .docs-reading-columns[data-layout='docs'] .right-sidebar {
-        position: static;
-        width: 100%;
-        min-width: 0;
-        flex: none;
-        align-self: stretch;
-        height: auto;
-        padding-block: 0;
-        overflow: visible;
-      }
-      .right-sidebar :global(sl-toc),
-      .right-sidebar :global(sl-toc nav) {
-        display: block;
-        width: 100%;
-        min-width: 0;
-      }
-      /* PageSidebar's slotted legacy container has a viewport-minus-rem
-         quarter-width cap of its own. Reset that layout cap too, not just the
-         outer Surface lane, so the actual native links gain the reading room. */
-      .right-sidebar :global(.right-sidebar-panel .sl-container) {
-        width: 100%;
-        max-width: none;
-        min-width: 0;
-      }
-      .docs-reading-columns[data-layout='docs'] > .main-pane {
-        order: 1;
-        width: 100%;
+        display: none;
       }
     }
   }

@@ -1,5 +1,6 @@
 import { surfacePrototypeId, panelSurfaceProps, panelSurfaceLayout } from './surface-recipes';
 import { contentsCommandParticipant } from './site-contents-command';
+import { contentsPanelParticipant } from './site-contents-panel';
 import { PREFERRED_ADAPTER_EVENT, PREFERRED_ADAPTER_KEY } from './adapter-preference';
 import { isRuntimeId, type RuntimeId } from './PrototypePreviewer/runtimes/ids';
 import {
@@ -149,6 +150,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
   let alive = true;
   const retired = new Set<Promise<void>>();
   const contents = contentsCommandParticipant(header);
+  const contentsPanel = contentsPanelParticipant(header);
   let attempt = 0;
   const create = () => {
     const participant = headerSurfaceParticipant(header)!;
@@ -159,6 +161,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         const outcomes = await Promise.allSettled([
           participant.materialize(request),
           ...(contents ? [contents.materialize(request, namespace)] : []),
+          ...(contentsPanel ? [contentsPanel.materialize(request, namespace)] : []),
         ]);
         const candidates = outcomes.flatMap((outcome) =>
           outcome.status === 'fulfilled' ? [outcome.value] : []
@@ -168,6 +171,9 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           await Promise.allSettled(candidates.map((candidate) => candidate.dispose()));
           throw failure.reason;
         }
+        const panelOutcome = contentsPanel ? outcomes.at(-1) : undefined;
+        const panelCandidate =
+          panelOutcome?.status === 'fulfilled' ? panelOutcome.value : undefined;
         let stop: () => void;
         try {
           stop = watchProjectionThemeSurfaceStyle(family, header, (theme) =>
@@ -186,9 +192,19 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
           },
           async dispose() {
             stop();
-            const results = await Promise.allSettled(
-              candidates.map((candidate) => candidate.dispose())
+            // Keep the opener alive until public Dialog close/focus return and
+            // native-tree handback finish; framework teardown must not win that race.
+            const panelResults = await Promise.allSettled(
+              panelCandidate ? [panelCandidate.dispose()] : []
             );
+            const results = [
+              ...panelResults,
+              ...(await Promise.allSettled(
+                candidates
+                  .filter((candidate) => candidate !== panelCandidate)
+                  .map((candidate) => candidate.dispose())
+              )),
+            ];
             const failure = results.find((result) => result.status === 'rejected');
             if (failure?.status === 'rejected') throw failure.reason;
           },
@@ -198,6 +214,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
         const publications = [participant.prepareCommit(commit)];
         try {
           if (contents) publications.push(contents.prepareCommit(commit));
+          if (contentsPanel) publications.push(contentsPanel.prepareCommit(commit));
         } catch (error) {
           for (const publication of publications.reverse()) publication.rollback();
           throw error;
@@ -249,6 +266,7 @@ export function initDocumentationHeaderSurface(header: HTMLElement) {
     destroy() {
       return (destroyPromise ??= (async () => {
         alive = false;
+        contentsPanel?.dispose();
         contents?.revoke();
         observer.disconnect();
         document.removeEventListener(PREFERRED_ADAPTER_EVENT, onPreference);

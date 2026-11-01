@@ -5,6 +5,8 @@ import {
   settleFamilyQueryBatch,
 } from './family-query-observer';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { installDocsCallTimingObserver } from './docs-query-timing.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -595,12 +597,34 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
       sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
       dirty: execFileSync('git', ['status', '--porcelain'], { encoding: 'utf8' }).trim() !== '',
       expectedSha: process.env.CANDIDATE_SHA ?? null,
+      files: Object.fromEntries(
+        [
+          'components/SiteContentsCommand.astro',
+          'components/site-contents-command.ts',
+          'components/site-contents-panel.ts',
+          'components/site-header-surface.ts',
+          'components/site-header-disclosure.ts',
+          'components/override/Sidebar.astro',
+          'components/override/PageFrame.astro',
+          'styles/site-contents-command.css',
+        ].map((file) => [
+          file,
+          createHash('sha256')
+            .update(readFileSync(`apps/www/src/${file}`))
+            .digest('hex'),
+        ])
+      ),
     };
     for (const family of ['shadcn', 'brutalist'] as const) {
       const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
         colorScheme: 'dark',
       });
+      await context.route('**/*', (route) =>
+        new URL(route.request().url()).origin === new URL(baseUrl).origin
+          ? route.continue()
+          : route.abort()
+      );
       const page = await context.newPage();
       const pageErrors: string[] = [];
       page.on('pageerror', (error) => pageErrors.push(error.message));
@@ -641,6 +665,15 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           '[data-projection-generation-state="active"] [data-site-contents-button]'
         );
         const menu = page.locator('[data-docs-site-header] [data-site-menu-button]');
+        await page.evaluate(() =>
+          Object.assign(window, {
+            __contentsOriginalTree: document.querySelector('nav.docs-sidebar'),
+            __contentsOriginalDetails: [...document.querySelectorAll('nav.docs-sidebar details')],
+            __contentsOriginalCurrent: document.querySelector(
+              'nav.docs-sidebar [aria-current="page"]'
+            ),
+          })
+        );
         for (const runtime of RUNTIMES) {
           await revealHeaderPreferences(page);
           const select = page.locator('[data-adapter-select] [role="combobox"]');
@@ -743,6 +776,11 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
           }
           if (originalError) throw originalError;
           expect(await root.getAttribute('data-contents-family')).toBe(family);
+          expect(
+            await page
+              .locator('[data-site-contents-panel-mount]')
+              .getAttribute('data-contents-panel-runtime')
+          ).toBe(runtime);
           expect(await root.getAttribute('data-contents-generation')).toBe(
             await page
               .locator('[data-site-header-panel]')
@@ -759,12 +797,164 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
               await page.keyboard.press(action);
             }
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('true');
-            expect(await page.locator('#starlight__sidebar').isVisible()).toBe(true);
+            await expect
+              .poll(() =>
+                page.locator('nav.docs-sidebar[data-site-contents-dialog-tree]').isVisible()
+              )
+              .toBe(true);
+            expect(await command.getAttribute('aria-controls')).toBe('starlight__sidebar');
+            const dialog = page.getByRole('dialog');
+            expect(await dialog.count()).toBe(1);
+            expect(await dialog.getAttribute('aria-modal')).toBe('true');
+            expect(
+              await dialog.evaluate((surface) => {
+                let node: Node | null = document.querySelector('nav.docs-sidebar');
+                while (node) {
+                  if (node === surface) return true;
+                  node =
+                    (node as Element).assignedSlot ??
+                    node.parentNode ??
+                    (node.getRootNode() as ShadowRoot).host ??
+                    null;
+                }
+                return false;
+              })
+            ).toBe(true);
+            expect(await page.locator('nav.docs-sidebar').count()).toBe(1);
+            expect(
+              await page
+                .locator('nav.docs-sidebar select, nav.docs-sidebar .mobile-menu-footer')
+                .count()
+            ).toBe(0);
+            expect(
+              await page.evaluate(() => {
+                const state = window as typeof window & {
+                  __contentsOriginalTree?: Element;
+                  __contentsOriginalDetails?: Element[];
+                  __contentsOriginalCurrent?: Element;
+                };
+                const tree = document.querySelector('nav.docs-sidebar');
+                if (!tree) return false;
+                return (
+                  tree === state.__contentsOriginalTree &&
+                  tree.querySelector('[aria-current="page"]') === state.__contentsOriginalCurrent &&
+                  [...tree.querySelectorAll('details')].every(
+                    (node, index) => node === state.__contentsOriginalDetails?.[index]
+                  )
+                );
+              })
+            ).toBe(true);
+            // Native tab traversal must remain within the real public modal,
+            // including the original anchors and disclosure summaries.
+            await page.keyboard.press('Tab');
+            expect(
+              await dialog.evaluate((surface) => {
+                let active = document.activeElement;
+                while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+                let node: Node | null = active;
+                while (node) {
+                  if (node === surface) return true;
+                  node =
+                    (node as Element).assignedSlot ??
+                    node.parentNode ??
+                    (node.getRootNode() as ShadowRoot).host ??
+                    null;
+                }
+                return false;
+              })
+            ).toBe(true);
+            await page.keyboard.press('Shift+Tab');
+            expect(
+              await dialog.evaluate((surface) => {
+                let active = document.activeElement;
+                while (active?.shadowRoot?.activeElement) active = active.shadowRoot.activeElement;
+                let node: Node | null = active;
+                while (node) {
+                  if (node === surface) return true;
+                  node =
+                    (node as Element).assignedSlot ??
+                    node.parentNode ??
+                    (node.getRootNode() as ShadowRoot).host ??
+                    null;
+                }
+                return false;
+              })
+            ).toBe(true);
+            const beforeScroll = await page.evaluate(() => scrollY);
+            await page.mouse.move(2, 800);
+            await page.mouse.wheel(0, 500);
+            await page.evaluate(
+              () =>
+                new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+                )
+            );
+            expect(await page.evaluate(() => scrollY)).toBe(beforeScroll);
+            if (action === 'click') {
+              const id = `${family}-${runtime}-public-dialog-open`;
+              const metrics = await dialog.evaluate((element) => {
+                const panel = element.getBoundingClientRect();
+                const tree = document.querySelector('nav.docs-sidebar')!;
+                const treeRect = tree.getBoundingClientRect();
+                return {
+                  panel: { x: panel.x, y: panel.y, width: panel.width, height: panel.height },
+                  tree: {
+                    x: treeRect.x,
+                    y: treeRect.y,
+                    width: treeRect.width,
+                    height: treeRect.height,
+                  },
+                  treePosition: getComputedStyle(tree).position,
+                  overflow: document.documentElement.scrollWidth - innerWidth,
+                  rootFont: getComputedStyle(document.documentElement).fontSize,
+                  dpr: devicePixelRatio,
+                  scale: visualViewport?.scale,
+                };
+              });
+              await writeFile(
+                path.join(directory, `${id}.json`),
+                JSON.stringify(
+                  {
+                    source,
+                    family,
+                    runtime,
+                    viewport: page.viewportSize(),
+                    metrics,
+                    screenshotComplete: false,
+                  },
+                  null,
+                  2
+                )
+              );
+              await page.screenshot({ path: path.join(directory, `${id}.png`) });
+              await writeFile(
+                path.join(directory, `${id}.json`),
+                JSON.stringify(
+                  {
+                    source,
+                    family,
+                    runtime,
+                    viewport: page.viewportSize(),
+                    metrics,
+                    screenshotComplete: true,
+                  },
+                  null,
+                  2
+                )
+              );
+              expect(metrics.overflow).toBeLessThanOrEqual(1);
+              expect(metrics.treePosition).toBe('static');
+              expect(metrics.tree.width).toBeGreaterThan(120);
+            }
             await page.keyboard.press('Escape');
             await expect.poll(() => command.getAttribute('aria-expanded')).toBe('false');
             expect(await command.evaluate((element) => document.activeElement === element)).toBe(
               true
             );
+            expect(await page.locator('.docs-shell nav.docs-sidebar').count()).toBe(1);
+            expect(
+              await page.locator('nav.docs-sidebar').getAttribute('data-site-contents-dialog-tree')
+            ).toBeNull();
           }
           // Real keyboard navigation selects the focus-visible state for the capture.
           await page.keyboard.press('Tab');
@@ -816,6 +1006,11 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
   }, 180_000);
   it('uses the same mobile shell on documentation with independent global navigation and contents', async () => {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
+    await context.route('**/*', (route) =>
+      new URL(route.request().url()).origin === new URL(baseUrl).origin
+        ? route.continue()
+        : route.abort()
+    );
     const page = await context.newPage();
     const source = {
       sha: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
@@ -947,11 +1142,30 @@ describe.sequential('Homepage end-to-end dogfood boundary', () => {
         await contents.click();
         expect(await page.locator('body').getAttribute('data-mobile-menu-expanded')).not.toBeNull();
         expect(await menu.getAttribute('aria-expanded')).toBe('false');
-        // Opening global navigation closes contents without transferring focus.
+        // Public modal blocks background Header interaction; close it normally
+        // before entering Navigation and settings, rather than clicking through.
+        expect(await contents.getAttribute('aria-controls')).toBe('starlight__sidebar');
+        const dialog = page.getByRole('dialog');
+        await expect.poll(() => dialog.isVisible()).toBe(true);
+        const menuHit = await menu.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return element.contains(
+            document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+          );
+        });
+        expect(menuHit).toBe(false);
+        await page.keyboard.press('Escape');
+        await expect.poll(() => contents.getAttribute('aria-expanded')).toBe('false');
+        await expect.poll(() => dialog.count()).toBe(0);
         await menu.click();
         expect(await menu.getAttribute('aria-expanded')).toBe('true');
         expect(await contents.getAttribute('aria-expanded')).toBe('false');
         expect(await page.locator('body').getAttribute('data-mobile-menu-expanded')).toBeNull();
+        expect(await header.locator('[data-language-select]').isVisible()).toBe(true);
+        expect(await header.locator('[data-theme-toggle]').isVisible()).toBe(true);
+        expect(
+          await header.locator('[data-site-header-settings] a[href*="github.com"]').count()
+        ).toBeGreaterThan(0);
         await page.keyboard.press('Escape');
         expect(await menu.evaluate((element) => document.activeElement === element)).toBe(true);
         // Reverse the order and exercise the complete keydown + keyup Escape.
