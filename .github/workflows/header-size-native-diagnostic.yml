@@ -43,7 +43,7 @@ jobs:
           71263bd4def7869d312fec7fb225933162ed5eff9b2cbdc89c22e018c19a5c51  apps/www/src/content/docs/zh-cn/header-size-read-probe.test.ts
           7edd2d17f782a98dc079261c2eb1ad1d212e1ebb23197794cc0b69424b3ab04a  apps/www/src/content/docs/zh-cn/header-size-read-probe.ts
           650dcc420d1094add4b9eb01b122dce5b3321ee57e0030ec1f4ad4325ac17a7e  internal/fixtures/header-size-diagnostic-20261101/probe.py
-          fe131d2ce8b7401430cb45c306424cac1d0164afed8e8f239563e6e4a13aac9f  internal/fixtures/header-size-diagnostic-20261101/run.py
+          d5558973fc9c6e077df8472a2adbdd407fdb3097f534b18a20650ffca1793068  internal/fixtures/header-size-diagnostic-20261101/run.py
           b7f043c1567d7f61481bdd3e63aa4520262bec93daad7227c73c1ac6f5bf4651  internal/fixtures/header-size-diagnostic-20261101/scope.json
           34ccd8f49bfde0ff6cd44dc6f5580e7ec5699ff46f04b3578928fe472f6f156a  internal/fixtures/header-size-diagnostic-20261101/vitest.selection.ts
           HASHES

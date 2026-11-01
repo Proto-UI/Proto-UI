@@ -221,6 +221,25 @@ def main():
     node = pathlib.Path(args.node).resolve().parent.parent
     node_actual = command([str(node/'bin/node'), '--version'])
     chrome_actual = command(['/opt/google/chrome/chrome', '--version'])
+    # Keep the original merged observations and comparisons unchanged. Separate
+    # stdout/stderr are a second fixed --version invocation, not falsely relabeled
+    # as streams from the first invocation; neither runs browser journeys.
+    version_details = {}
+    for label, argv in [('node', [str(node/'bin/node'), '--version']),
+                        ('chrome', ['/opt/google/chrome/chrome', '--version'])]:
+        observed = subprocess.run(argv, env=ENV, stdin=subprocess.DEVNULL,
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                  timeout=10, check=False)
+        version_details[label] = {'returnCode': observed.returncode,
+              'stdout': observed.stdout.decode('utf-8', errors='replace')[:8192],
+              'stderr': observed.stderr.decode('utf-8', errors='replace')[:8192],
+              'truncated': len(observed.stdout)>8192 or len(observed.stderr)>8192}
+    write(external/'version-preflight.json', {
+          'originalMergedNode':node_actual, 'originalMergedChrome':chrome_actual,
+          'expectedNode':'v'+S['nodeVersion'], 'expectedChrome':'Google Chrome '+S['chromeVersion'],
+          'separateSecondInvocation':version_details,
+          'nodeSha256':SHA((node/'bin/node').read_bytes()),
+          'chromeSha256':SHA(pathlib.Path('/opt/google/chrome/chrome').read_bytes())})
     if node_actual != 'v' + S['nodeVersion']: fail('Node version drift')
     if chrome_actual != 'Google Chrome ' + S['chromeVersion']: fail('Chrome image version drift; no update fallback')
     for pkg in S['aptPackages']:
