@@ -8,6 +8,12 @@ statement:
   zh-CN: Select Item 是 Content 中可重复出现的 option。它发布 value/textValue/disabled collection snapshot、option semantics、committed selected 与 transient active state。focus 或 enabled pointer intent 可以改变 popup active option；Enter、Space 或 pointer activation 发出 select 并请求 Root commit。disabled Item 必须同时退出 focus navigation 与 commit。
   en: Select Item is a repeatable option within Content. It publishes value, textValue, and disabled collection snapshots, option semantics, committed selected state, and transient active state. Focus or enabled pointer intent may change the popup active option, while Enter, Space, or pointer activation emits select and requests a Root commit. A disabled Item must leave both focus navigation and commit.
 criteria:
+  - id: P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF
+    text:
+      zh-CN: 在已打开且 Root/Item 均 enabled 的 popup 中，仅真实 pointer.move 的已知 mouse 且已知无按键样本可请求当前 Item 的共享 Focus owner，支持时保留滚动位置；不得只因 pointer.enter、touch、pen、unknown 或持键移动而接管导航。Item 不得在请求被接受和宿主焦点观察前预先把另一个 option 发布为 active，且不得在此回调独立写 focused/focusVisible 或改变 committed selected/value/open。共享焦点交接稳定后，同一域只保留一个 active option；新的键盘导航继续通过同一 Focus owner 仲裁。相同已 focused Item 的合法新输入意图仍交给 Focus，不能以局部 early-return 丢弃 modality 观察。既有非 focused pointerleave 清理不变，focused Item 不因离开就自动恢复 selected option。
+      en: In an open popup with both Root and Item enabled, only a real pointer.move sample known to be mouse input with no buttons may request the current Item's shared Focus owner, preserving scroll where supported. Pointer enter alone, touch, pen, unknown facts and button-held movement must not take over navigation. Item must not prepublish another option as active before request admission and host focus observation, independently write focused or focusVisible in this callback, or change committed selected, value or open. After the shared focus transition settles, the domain retains only one active option, and later keyboard navigation arbitrates through the same Focus owner. A legitimate new input intent on an already focused Item still reaches Focus; a local early return must not discard modality observation. Existing non-focused pointerleave cleanup remains unchanged; leaving a focused Item does not automatically restore the selected option.
+    dependsOn:
+      contracts: [C-EVENT-0002, C-EVENT-TYPE-0003, C-AS-FOCUSABLE-0001, C-FOCUS-0001]
   - id: P-BASE-SELECT-ITEM-TRANSIENT-CLEANUP
     text:
       zh-CN: 'press.cancel、pointer.cancel 与 view unmount 必须清除本 part 的 hovered/pressed；清理不得改变 canonical Root open/value or committed selected 或发出 activation/request。逻辑实例 remount 不得重放旧瞬态；pointer.leave 的语义清理不等于取消 Host 持有的 contact。'
@@ -60,6 +66,9 @@ dependsOn:
   contracts: [C-A11Y-0001, C-AS-COLLECTION-ITEM-0001, C-AS-FOCUSABLE-0001, C-AS-TRIGGER-0001]
 verifies: { tests: [T-BASE-SELECT-ITEM-0001] }
 revisions:
+  - version: 0.3.0-alpha.1
+    change: refined
+    summary: Draft mouse-move admission hands navigation to the shared Focus owner, explicitly separating selected state and preserving the focused/non-focused leave distinction; source and native evidence remain pending.
   - version: 0.2.0-rc.0
     change: introduced
     summary: Cataloged Item collection, option a11y, active and selected separation, commit requests, controlled behavior, and disabled gating.

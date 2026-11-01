@@ -255,7 +255,7 @@ describe('prototypes/base: select', () => {
     expect(items[1].getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('clears pointer highlight on leave and resets every transient Item state on close', async () => {
+  it('clears non-focused pointer transient state on leave and resets every Item on close', async () => {
     // T-BASE-SELECT-ITEM-0001-CASE-TRANSIENT-RESET
     // T-BASE-SELECT-CONTENT-0001-CASE-ENTRY-STABILITY
     vi.useFakeTimers();
@@ -268,7 +268,9 @@ describe('prototypes/base: select', () => {
     items[1].dispatchEvent(new PointerEvent('pointerenter', { bubbles: true }));
     await flush();
     expect(items[1].getExposes().hovered.get()).toBe(true);
-    expect(items[1].getExposes().active.get()).toBe(true);
+    // Definition delta: enter alone is hover, not admitted mouse navigation.
+    expect(items[1].getExposes().active.get()).toBe(false);
+    expect(items[0].getExposes().active.get()).toBe(true);
     expect(root.getExposes().value.get()).toBe('alpha');
 
     items[1].dispatchEvent(new PointerEvent('pointerleave', { bubbles: true }));
