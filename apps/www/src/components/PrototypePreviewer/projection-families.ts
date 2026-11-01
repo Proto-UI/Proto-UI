@@ -43,6 +43,8 @@ export type ProjectionPartManifest = Readonly<{
 export type ProjectionComponentFamilyManifest = Readonly<{
   baseFamilyId: string | null;
   recipeId: string;
+  /** Declared Select composition position, matching the family Content default. */
+  selectPosition?: 'item-aligned' | 'popper';
   recipePrototypeIds: readonly string[];
   auxiliaryPrototypes?: readonly ProjectionPartManifest[];
   parts: Readonly<Record<string, ProjectionPartManifest>>;
@@ -408,6 +410,7 @@ const SHADCN_MANIFEST = {
     },
     select: {
       baseFamilyId: 'P-BASE-SELECT',
+      selectPosition: 'item-aligned',
       recipeId: 'demo-shadcn-select',
       recipePrototypeIds: [
         'shadcn-select-root',
@@ -828,6 +831,7 @@ const BRUTALIST_MANIFEST = {
     },
     select: {
       baseFamilyId: 'P-BASE-SELECT',
+      selectPosition: 'popper',
       recipeId: 'demo-brutalist-select',
       recipePrototypeIds: [
         'brutalist-select-root',
@@ -1104,6 +1108,7 @@ const BOOTSTRAP_232_MANIFEST = {
     },
     select: {
       baseFamilyId: 'P-BASE-SELECT',
+      selectPosition: 'popper',
       recipeId: 'demo-bootstrap-2-3-2-select',
       recipePrototypeIds: [
         'bootstrap-2-3-2-select-root',
@@ -1471,6 +1476,7 @@ const LIQUID_GLASS_MANIFEST = {
     },
     select: {
       baseFamilyId: 'P-BASE-SELECT',
+      selectPosition: 'popper',
       recipeId: 'demo-liquid-glass-select',
       recipePrototypeIds: [
         'liquid-glass-select-root',
@@ -2021,7 +2027,10 @@ export function resolveProjectionRecipe(
 
 /** Complete public Select composition where the family declares it. */
 export type ProjectionSelectParts = Readonly<
-  Record<'root' | 'trigger' | 'value' | 'content' | 'item', string> &
+  { position: 'item-aligned' | 'popper' } & Record<
+    'root' | 'trigger' | 'value' | 'content' | 'item',
+    string
+  > &
     Partial<Record<'surface' | 'viewport' | 'itemText' | 'group' | 'label' | 'separator', string>>
 >;
 
@@ -2036,7 +2045,10 @@ export function resolveProjectionSelectParts(family: ProjectionFamilyId): Projec
       ? ['surface', 'viewport', 'itemText', 'group', 'label', 'separator']
       : []),
   ];
-  return Object.fromEntries(
-    partIds.map((id) => [id, resolveProjectionPart(family, 'select', id).prototypeId])
-  ) as ProjectionSelectParts;
+  return {
+    position: PROJECTION_FAMILY_MANIFESTS[family].families.select.selectPosition,
+    ...Object.fromEntries(
+      partIds.map((id) => [id, resolveProjectionPart(family, 'select', id).prototypeId])
+    ),
+  } as ProjectionSelectParts;
 }

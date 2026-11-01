@@ -1,0 +1,72 @@
+id: T-TARGET-SIZE-MATCH-0001
+type: test
+title: Scoped size matching preserves geometry, content and ownership
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: Deterministic source-level tests do not establish native geometry, four compiled-target composition coverage or independent acceptance. Those gates remain open, so this entity remains draft.
+summary: Explicitly separates neutral numerical and ownership regressions from outstanding native composition evidence.
+cases:
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-SAFE
+    title: Same-domain current safe size associations and stale callback rejection
+    covers: [C-TARGET-SIZE-MATCH-0001-ASSOCIATION]
+    expectation: valid-size-targets-or-explicit-rejection
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-LEASE
+    title: Used192x44 boxes, resize, paint-scale independence and immediate rollback
+    covers:
+      [
+        C-TARGET-SIZE-MATCH-0001-GEOMETRY,
+        C-TARGET-SIZE-MATCH-0001-OWNERSHIP,
+        C-TARGET-SIZE-MATCH-0001-CONTENT,
+      ]
+    expectation: measured-layout-equality-not-write-success
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-CONSUMER
+    title: Root policy inheritance, disabled rows, explicit intrinsic and unsupported popper
+    covers:
+      [P-BASE-SELECT-ITEM-SIZING, P-BASE-SELECT-ITEM-SIZE-OVERRIDE, C-TARGET-SIZE-MATCH-0001-SCOPE]
+    expectation: same-owner-public-policy-with-explicit-capability-boundary
+implementations:
+  - id: size-association
+    kind: module-test
+    status: needs-review
+    path: packages/modules/overlay/test/target-alignment-binding.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-SAFE]
+  - id: size-lease
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/border-box-size-lease.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-LEASE]
+  - id: size-plan
+    kind: module-test
+    status: needs-review
+    path: packages/modules/positioning/test/target-alignment.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-LEASE]
+  - id: select-size-policy
+    kind: runtime-test
+    status: needs-review
+    path: packages/prototypes/base/test/select-alignment-controller.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-CONSUMER]
+  - id: composition-default
+    kind: runtime-test
+    status: needs-review
+    path: apps/www/src/components/PrototypePreviewer/projection-composition.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-CONSUMER]
+verifies:
+  contracts: [C-TARGET-SIZE-MATCH-0001]
+exercises:
+  prototypes: [P-BASE-SELECT, P-BASE-SELECT-ITEM]
+openQuestions:
+  - id: T-TARGET-SIZE-MATCH-0001-Q-NATIVE
+    question:
+      en: What exact four-host native evidence establishes default192x44 matching with RTL, scrollbars, text scaling, close/reopen and explicit overrides?
+    blocks: [activation:T-TARGET-SIZE-MATCH-0001]
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Added unrun source definitions and explicit native evidence debt for the bounded size lease.
+tags: [positioning, select, size, conformance]

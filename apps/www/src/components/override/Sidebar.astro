@@ -1,6 +1,5 @@
 ---
 import SidebarSublist from '@astrojs/starlight/components/SidebarSublist.astro';
-import MobileMenuFooter from '@astrojs/starlight/components/MobileMenuFooter.astro';
 import config from 'virtual:starlight/user-config';
 import bootstrap from '../site-sidebar-disclosure-bootstrap.js?raw';
 import {
@@ -27,6 +26,5 @@ const identities = sidebarGroupIdentities(entries, Object.keys(config.locales ??
     set:html={bootstrap}
   />
 </sl-sidebar-state-persist>
-<div class="md:sl-hidden">
-  <MobileMenuFooter />
-</div>
+<!-- Theme remains in the Header; language and social destinations remain in
+     its shared Navigation and settings disclosure. Do not duplicate them here. -->

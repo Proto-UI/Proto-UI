@@ -54,6 +54,10 @@ export type ProjectionControlConfig<Value extends string> = Readonly<{
   placeholder?: string;
   /** Consumer opt-in for full selected values under narrow/text-enlarged layout. */
   wrapValue?: boolean;
+  /** Common composition policy; intrinsic explicitly preserves source row density. */
+  itemSizing?: 'intrinsic' | 'match-trigger';
+  /** Explicit shared composition positioning; omission retains the family recipe. */
+  position?: 'item-aligned' | 'popper';
   /** Consumer-owned minimum target height. */
   minHeight?: string;
   /** Consumer-owned vertical spacing. */
@@ -540,6 +544,7 @@ function createSelectControl<Value extends string>(
   locked: boolean
 ): DemoBoxNode {
   const refs = CONTROL_REFS[id];
+  const position = config.position ?? selectParts.position;
   const label = {
     kind: 'box',
     className: 'pui-projection-control-label',
@@ -622,7 +627,7 @@ function createSelectControl<Value extends string>(
     })
   );
   const content = createProjectedProto(selectParts.content, coordinateAttrs, themeSurfaceStyle, {
-    ...(selectParts.surface ? {} : { props: { position: 'popper', align: 'start' } }),
+    props: { position, ...(selectParts.surface ? {} : { align: 'start' }) },
     children:
       selectParts.surface && selectParts.viewport
         ? [
@@ -642,6 +647,11 @@ function createSelectControl<Value extends string>(
       value: currentValue,
       disabled: locked,
       closeOnSelect: true,
+      // The full item-aligned public composition owns default size matching.
+      // Legacy/explicit popper remains an independently tracked capability.
+      itemSizing:
+        config.itemSizing ??
+        (selectParts.surface && position === 'item-aligned' ? 'match-trigger' : 'intrinsic'),
       ...(selectParts.root === 'shadcn-select-root' && config.shadcnStyleProfile
         ? { styleProfile: config.shadcnStyleProfile }
         : {}),

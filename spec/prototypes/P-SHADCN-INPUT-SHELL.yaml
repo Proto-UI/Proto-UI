@@ -35,6 +35,9 @@ criteria:
   - id: P-SHADCN-INPUT-SHELL-FOCUS-PAINT
     text:
       en: focusVisible and disabled are projected facts defaulting false, not semantic state. focusIndicator defaults ring; ring plus focusVisible projects border-ring and ring-3 with ring-ring/50 for New York or ring-ring/30 for Rhea. Command composition uses none to match its command-input slot boundary; ordinary Input uses ring. Root must not duplicate the control's disabled opacity.
+  - id: P-SHADCN-INPUT-SHELL-COMMAND-MENU-CONTAINMENT
+    text:
+      en: An explicit enclosing Command menu InputWrapper may own the border, inset and external passive glyph. In that context this shell remains a roleless transparent 2.25rem single-editor containment surface with no second inset or border. The glyph is outside this shell, so this does not admit InputShell addons, click-to-focus, ControlLabel pairing or multiple controls. Private paint transports only the enclosing presentation, never claims optional semantic Anatomy presence; existing ordinary/default recipes and public fact-binding lifetime remain unchanged.
   - id: P-SHADCN-INPUT-SHELL-BINDING-FACTS
     text:
       en: bindInputShellControl requires actual public control and target identities and an explicit owner with isCurrent/onDispose. It reads boolean focusVisible/disabled through public getExposes get/subscribe interfaces and rejects missing or malformed facts. target.setFacts must merge only those facts with authored props, retaining styleProfile and focusIndicator. No facts may be inferred from DOM or independently maintained editor state.
@@ -67,4 +70,7 @@ revisions:
   - version: 0.3.0-alpha.1
     change: introduced
     summary: Cataloged the already bounded single-control presentation and binding contract in its existing workspace train, without claiming historical activation or full InputGroup parity.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Define transparent one-editor containment under an explicit external Command menu wrapper without admitting addons or changing ordinary defaults.
 tags: [prototype, shadcn, input-shell, passive, composition]

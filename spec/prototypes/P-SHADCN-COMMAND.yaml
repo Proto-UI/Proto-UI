@@ -53,6 +53,16 @@ criteria:
     text:
       en: In the existing bounded single-control InputShell composition without addons, the Command editor owns its profile-specific inline inset instead of depending on an absent decorative prefix. Grouped Vega, Nova, Lyra and Rhea use 0.625rem per side; Maia and Luma use 0.75rem; Mira uses 0.5rem. These are adopted from the corresponding pinned ordinary Input recipes, not a claim that the icon-free composition equals upstream CommandInput with its Search addon. Sera retains its existing editor px2 and outer shell px3; New York retains the existing wrapper px3 and adds no editor inset. Outside InputShell, existing standalone recipes are unchanged. Profile changes preserve the one real editor, query, selection, focus and composition lifetime. No DOM child detection, page override, new addon API or semantic input owner is introduced.
       zh-CN: 现有无 addon 的单编辑器 InputShell 组合由 Command 编辑器提供 profile 内联留白，不能依赖不存在的装饰前缀。Vega、Nova、Lyra、Rhea 每侧采用对应普通 Input 的0.625rem，Maia/Luma为0.75rem，Mira为0.5rem；Sera保留原编辑器px2及外壳px3，NY保留wrapper px3且不叠加编辑器留白。未置于InputShell的独立recipe不变，profile切换保留真实编辑器、query、selection、focus及composition生命周期；不增DOM探测、页面补丁或addon语义，不宣称与带Search图标的上游CommandInput完全一致。
+  - id: P-SHADCN-COMMAND-MENU-PRESENTATION
+    text:
+      en: presentation defaults to default on Command Root, InputWrapper, Input, Content, Item, Empty and DialogContent. Explicit menu adopts the MIT-pinned website CommandMenu layout independently of the ordinary registry recipe; the selected styleProfile and Base semantic owners remain unchanged. Menu Dialog uses available-region top 15 percent, a 32rem width cap, root-relative safe edges, rounded-xl and bounded height. Its input wrapper owns a 2.25rem rectangular bordered surface, 0.75rem inline inset and 0.5rem inter-child gap; the one actual editor has no duplicate inline inset. Menu items have a 2.25rem minimum rather than fixed height so wrapping remains visible, a selected background and border. Content is shrinkable with no independent panel border. Default Rhea top-third/28rem and all nine ordinary part recipes retain their previous behavior. Presentation changes must not replace the editor or alter query, selection, composition, open, current collection or focus authority.
+      zh-CN: Root、InputWrapper、Input、Content、Item、Empty、DialogContent 的 presentation 默认 default；显式 menu 独立采用固定官网 CommandMenu 布局，不混淆普通 registry 默认，保留 styleProfile 选择及 Base 语义 owner。弹层按可用区域15%位置、32rem宽上限和root安全边距；输入 wrapper 拥有2.25rem矩形边框、每侧0.75rem留白和0.5rem子项间距，真实editor不叠加留白；item最小2.25rem允许换行，并展示选中背景与边框。切换不替换editor或更改查询、选择、IME、open、collection与focus责任。
+  - id: P-SHADCN-COMMAND-MENU-DECORATION
+    text:
+      en: The opted-in menu InputWrapper may contain an aria-hidden passive decorative glyph next to the existing single-control InputShell. The glyph is not an InputShell addon, ControlLabel, command item, input naming source, focusable target or interactive prefix; it must not install a DOM focus listener. Wrapper spacing belongs to the explicit presentation whether decoration exists or not and is never inferred as optional Anatomy presence from command paint context. A real clickable prefix remains a separately governed atomic capability and is not claimed by this visual slice.
+  - id: P-SHADCN-COMMAND-MENU-CONSUMER
+    text:
+      en: Website Search composes this menu with its actual localized navigation when the current query is blank, a labeled Pages group, decorative row arrows and a noninteractive Enter instruction, while retaining a real Cancel action. Default navigation is distinct from Pagefind rows and result counts, remains useful when index preparation fails, and executes only from the current open blank-query session against normalized same-origin HTTP(S) targets. Nonempty query or IME invalidates old navigation execution; no row retained by a previous view gains authority. Real search preserves all returned document anchors, loading, empty, error, Retry and LoadMore. Its preferred 20rem middle region must shrink in bounded/short/enlarged layouts rather than force inaccessible footer content. Active-target reveal, interactive-prefix focus, full upstream data/features and native acceptance remain separate unfinished criteria.
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -65,7 +75,11 @@ verifies:
     - T-SHADCN-SEARCH-MENU-PROFILES-0001
     - T-COMMAND-DIALOG-CONTENT-0001
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/24a16429815cc4d691f38b49d0f4ffc11a9daef4/apps/v4/components/command-menu.tsx
+    label: Immutable MIT website layout reference, distinct from registry defaults.
   - path: packages/prototypes/shadcn/src/command/
+  - path: packages/prototypes/shadcn/src/command/dialog-content.proto.ts
+  - path: packages/prototypes/shadcn/src/command/dialog-mask.proto.ts
   - path: https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/bases/base/ui/command.tsx
     label: Immutable adopted MIT visual reference; independent Proto semantic implementation, not upstream certification.
   - path: https://github.com/shadcn-ui/ui/blob/24a16429815cc4d691f38b49d0f4ffc11a9daef4/apps/v4/registry/styles/style-rhea.css
@@ -108,6 +122,11 @@ revisions:
   - version: 0.3.0-alpha.1
     change: revised
     summary: Define profile-specific editor inset for the bounded no-addon InputShell composition without changing standalone recipes or claiming full addon/native conformance.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Register exact CommandDialog declaration sources under existing draft criteria and test relations; native admission remains open.
+    change: revised
+    summary: Add an explicit website-menu presentation and real bounded navigation consumer without changing default recipes or claiming clickable-prefix/target-reveal/native completion.
 tags:
   - prototype
   - shadcn

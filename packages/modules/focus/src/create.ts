@@ -719,14 +719,19 @@ class FocusModuleImpl extends ModuleBase {
     this.hostFocusTargetGeneration += 1;
   }
 
-  private resampleCurrentFocusVisible(reason: string): void {
+  private resampleCurrentFocusVisible(reason: string, isCurrent?: () => boolean): void {
+    if (isCurrent && !isCurrent()) return;
     if (!this.focusableDeclared || this.focusableConfig.disabled) return;
     if (!this.focusedOwned.get()) return;
     const generation = this.hostFocusTargetGeneration;
     const target = this.currentHostFocusTarget;
     const native = readNativeFocusVisible(target);
     const next = native.supported ? native.value : this.keyboardModality;
-    if (generation !== this.hostFocusTargetGeneration || target !== this.currentHostFocusTarget) {
+    if (
+      (isCurrent && !isCurrent()) ||
+      generation !== this.hostFocusTargetGeneration ||
+      target !== this.currentHostFocusTarget
+    ) {
       return;
     }
     this.setFocusState(this.focusVisibleOwned, next, reason);
@@ -1091,6 +1096,15 @@ class FocusModuleImpl extends ModuleBase {
       if (applied === false) {
         this.queuePendingFocus(options, syncFacts);
         return 'pending';
+      }
+      // A same-target native request need not emit another host:focus event.
+      // Refresh only the already observed owner; an accepted request alone does
+      // not establish focused ownership or prove an exact native active target.
+      if (!syncFacts && this.currentHostFocusTarget === target) {
+        this.resampleCurrentFocusVisible(
+          'reason: focus.native request => focusVisible resample',
+          current
+        );
       }
       if (
         syncFacts &&

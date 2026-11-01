@@ -6,10 +6,7 @@ type Equal<A, B> =
   (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
 type Assert<T extends true> = T;
 type Surface<T> = {
-  [K in keyof T as T[K] extends Prototype<any, any> ? K : never]: readonly [
-    PropsOf<T[K]>,
-    ExposeOf<T[K]>,
-  ];
+  [K in keyof T as T[K] extends Prototype<any, any> ? K : never]: readonly [ExposeOf<T[K]>];
 };
 import * as basefieldset from '../src/fieldset';
 import * as baseform from '../src/form';

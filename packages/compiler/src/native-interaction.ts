@@ -8,6 +8,8 @@ import {
 } from './ir';
 import { isAssignable } from './data-types';
 import { FOCUS_OPTIONS_TYPE } from './operations';
+import { NativeLexicalScope } from './template-shape';
+import { interactionValueAlternatives } from './interaction-value-shape';
 
 const interactionFile = '.proto-ui/interaction/native-v1.ts';
 const semanticEvents = [
@@ -81,52 +83,69 @@ export function validateNativeInteraction(
       span: expression.span,
     });
   }
-  function visitFunction(fn: FunctionIR, inherited = new Map<string, ExpressionIR>()) {
+  function visitFunction(fn: FunctionIR, inherited = NativeLexicalScope.empty()) {
     if (reached && !reached.has(fn)) return;
-    const bindings = new Map(inherited);
-    const resolve = (value: ExpressionIR): ExpressionIR => {
-      const seen = new Set<string>();
-      while (value.kind === 'reference' && bindings.has(value.name) && !seen.has(value.name)) {
-        seen.add(value.name);
-        value = bindings.get(value.name)!;
-      }
-      return value;
-    };
+    let bindings = inherited;
+    // Unknown callback formals shadow captures. No caller annotation may invent
+    // a record value; a helper result is followed through its actual call frame.
+    for (const parameter of fn.parameters)
+      bindings = bindings.parameter(parameter.name, undefined, inherited, null);
+    const resolve = (value: ExpressionIR, scope = bindings) =>
+      interactionValueAlternatives(value, scope) ?? [{ value, scope }];
     function shape(
       value: ExpressionIR | undefined,
       fields: readonly string[],
       operation: ExpressionIR
-    ) {
-      if (!value) return;
-      const record = resolve(value);
-      if (record.kind !== 'record') {
-        reject(operation, 'Native interaction options require a statically known record shape.');
-        return;
+    ): { value: Extract<ExpressionIR, { kind: 'record' }>; scope: NativeLexicalScope }[] {
+      if (!value) return [];
+      const records: {
+        value: Extract<ExpressionIR, { kind: 'record' }>;
+        scope: NativeLexicalScope;
+      }[] = [];
+      for (const alternative of resolve(value)) {
+        if (alternative.value?.kind !== 'record') {
+          reject(operation, 'Native interaction options require a statically known record shape.');
+          continue;
+        }
+        records.push({ value: alternative.value, scope: alternative.scope });
+        for (const entry of alternative.value.entries) {
+          if (!fields.includes(entry.key))
+            reject(entry.value, 'Native interaction v1 does not support option ' + entry.key + '.');
+        }
       }
-      for (const entry of record.entries) {
-        if (!fields.includes(entry.key))
-          reject(entry.value, 'Native interaction v1 does not support option ' + entry.key + '.');
-      }
+      return records;
     }
     function expression(value: ExpressionIR) {
       if (value.kind === 'operation') {
         const args = value.arguments;
         if (value.operation === 'event.on' || value.operation === 'event.onGlobal') {
-          const type = args[0] && resolve(args[0]);
+          const types = args[0] ? resolve(args[0]) : [];
           if (
-            !type ||
-            type.kind !== 'literal' ||
-            typeof type.value !== 'string' ||
-            !(
-              semanticEvents.includes(type.value) ||
-              (type.value.startsWith('host:') && type.value.length > 5)
+            !types.length ||
+            types.some(
+              ({ value: type }) =>
+                !type ||
+                type.kind !== 'literal' ||
+                typeof type.value !== 'string' ||
+                !(
+                  semanticEvents.includes(type.value) ||
+                  (type.value.startsWith('host:') && type.value.length > 5)
+                )
             )
           ) {
             reject(
               value,
               'Native interaction requires a supported static Proto input type or nonempty host:* extension.'
             );
-          } else if (!type.value.startsWith('host:') && args[2]) {
+          } else if (
+            args[2] &&
+            types.some(
+              ({ value: type }) =>
+                type?.kind === 'literal' &&
+                typeof type.value === 'string' &&
+                !type.value.startsWith('host:')
+            )
+          ) {
             reject(
               value,
               'Portable semantic listeners do not accept capture/once/passive options; only host:* does.'
@@ -135,30 +154,29 @@ export function validateNativeInteraction(
           shape(args[2], ['capture', 'once', 'passive'], value);
         }
         if (value.operation === 'focus.configure') {
-          shape(
+          const patches = shape(
             args[0],
             ['scopeKey', 'groupKey', 'autoFocus', 'disabled', 'navParticipation', 'meta'],
             value
           );
-          const patch = args[0] && resolve(args[0]);
-          if (patch?.kind === 'record')
-            for (const entry of patch.entries) {
-              const setting = resolve(entry.value);
-              if (entry.key === 'scopeKey' && setting.type !== 'focus-scope-key')
-                reject(entry.value, 'Focus scopeKey requires a declared scope identity.');
-              if (entry.key === 'groupKey' && setting.type !== 'focus-roving-key')
-                reject(entry.value, 'Focus groupKey requires a declared roving identity.');
-              if (
-                entry.key === 'navParticipation' &&
-                !(setting.kind === 'literal' && ['auto', 'none'].includes(String(setting.value)))
-              )
-                reject(
-                  entry.value,
-                  'Native focus navParticipation must be the static value auto or none.'
-                );
-              if (['autoFocus', 'disabled'].includes(entry.key) && setting.type !== 'boolean')
-                reject(entry.value, 'Native focus ' + entry.key + ' must be boolean.');
-            }
+          for (const patch of patches)
+            for (const entry of patch.value.entries)
+              for (const { value: setting } of resolve(entry.value, patch.scope)) {
+                if (entry.key === 'scopeKey' && setting?.type !== 'focus-scope-key')
+                  reject(entry.value, 'Focus scopeKey requires a declared scope identity.');
+                if (entry.key === 'groupKey' && setting?.type !== 'focus-roving-key')
+                  reject(entry.value, 'Focus groupKey requires a declared roving identity.');
+                if (
+                  entry.key === 'navParticipation' &&
+                  !(setting?.kind === 'literal' && ['auto', 'none'].includes(String(setting.value)))
+                )
+                  reject(
+                    entry.value,
+                    'Native focus navParticipation must be the static value auto or none.'
+                  );
+                if (['autoFocus', 'disabled'].includes(entry.key) && setting?.type !== 'boolean')
+                  reject(entry.value, 'Native focus ' + entry.key + ' must be boolean.');
+              }
         }
         if (
           value.operation === 'focus.focusSelf' &&
@@ -168,32 +186,33 @@ export function validateNativeInteraction(
             isAssignable(args[0].type, { kind: 'union', members: [FOCUS_OPTIONS_TYPE, 'void'] })
           )
         ) {
-          shape(args[0], ['reason', 'preventScroll'], value);
-          const options = args[0] && resolve(args[0]);
-          if (options?.kind === 'record')
-            for (const entry of options.entries) {
-              const setting = resolve(entry.value);
-              if (
-                entry.key === 'reason' &&
-                !(
-                  setting.kind === 'literal' &&
-                  ['programmatic', 'keyboard', 'pointer'].includes(String(setting.value))
+          const alternatives = shape(args[0], ['reason', 'preventScroll'], value);
+          for (const options of alternatives)
+            for (const entry of options.value.entries)
+              for (const { value: setting } of resolve(entry.value, options.scope)) {
+                if (
+                  entry.key === 'reason' &&
+                  !(
+                    setting?.kind === 'literal' &&
+                    ['programmatic', 'keyboard', 'pointer'].includes(String(setting.value))
+                  )
                 )
-              )
-                reject(
-                  entry.value,
-                  'Native focus reason must be programmatic, keyboard or pointer.'
-                );
-              if (entry.key === 'preventScroll' && setting.type !== 'boolean')
-                reject(entry.value, 'Native focus preventScroll must be boolean.');
-            }
+                  reject(
+                    entry.value,
+                    'Native focus reason must be programmatic, keyboard or pointer.'
+                  );
+                if (entry.key === 'preventScroll' && setting?.type !== 'boolean')
+                  reject(entry.value, 'Native focus preventScroll must be boolean.');
+              }
         }
         if (value.operation === 'accessible.action') {
-          shape(args[1], ['event'], value);
-          const spec = args[1] && resolve(args[1]);
+          const specs = shape(args[1], ['event'], value);
           if (
-            spec?.kind === 'record' &&
-            spec.entries.some((entry) => entry.value.type !== 'string')
+            specs.some((spec) =>
+              spec.value.entries.some((entry) =>
+                resolve(entry.value, spec.scope).some((setting) => setting.value?.type !== 'string')
+              )
+            )
           )
             reject(value, 'Accessible action event must be an outward Expose event name.');
         }
@@ -217,19 +236,17 @@ export function validateNativeInteraction(
       for (const statement of body) {
         if (statement.kind === 'const') {
           expression(statement.value);
-          bindings.set(statement.name, statement.value);
+          bindings = bindings.bind(statement.name, statement.value);
         } else if (statement.kind === 'effect') expression(statement.expression);
         else if (statement.kind === 'return') {
           if (statement.value) expression(statement.value);
         } else {
           expression(statement.condition);
-          const saved = new Map(bindings);
+          const saved = bindings;
           statements(statement.then);
-          bindings.clear();
-          saved.forEach((v, k) => bindings.set(k, v));
+          bindings = saved;
           statements(statement.otherwise);
-          bindings.clear();
-          saved.forEach((v, k) => bindings.set(k, v));
+          bindings = saved;
         }
       }
     }

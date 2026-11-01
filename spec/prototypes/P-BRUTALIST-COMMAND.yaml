@@ -53,6 +53,7 @@ verifies:
   tests: [T-COMMAND-DIALOG-CONTENT-0001]
 sources:
   - path: packages/prototypes/brutalist/src/command/
+  - path: packages/prototypes/brutalist/src/command/dialog-content.proto.ts
   - path: https://github.com/ekmas/neobrutalism-components/blob/3306a802724874a85f93079702b2795370a279d4/src/components/ui/command.tsx
     label: Immutable adopted MIT visual reference; independent Proto semantic implementation, not upstream certification.
 openQuestions:
@@ -77,6 +78,9 @@ revisions:
   - version: 0.3.0-alpha.1
     change: clarified
     summary: Define the bounded public CommandDialog content projection and unresolved native composition evidence without stable admission.
+  - version: 0.3.0-alpha.1
+    change: clarified
+    summary: Register exact CommandDialog declaration sources under existing draft criteria and test relations; native admission remains open.
 tags:
   - prototype
   - brutalist

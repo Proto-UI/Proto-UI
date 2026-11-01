@@ -1,0 +1,38 @@
+id: C-WEB-SCROLL-PADDING-STYLE-0001
+type: contract
+title: Finite physical Web scroll padding translation
+status: draft
+since: 0.3.0-alpha.1
+lifecycleRationale:
+  en: This finite translation slice is statically defined for document and shadow CSS. New exact-source execution, independent review, actual browser scrolling and broader host support remain pending; no native reveal capability is implied.
+summary: Two ordinary physical scroll padding utilities express distinct top and bottom viewport insets without component-specific lowering.
+statement:
+  en: In this bounded Web CSS vocabulary, scroll-pt-2 expresses a physical top scroll-padding inset of 0.5rem and scroll-pb-1.5 a physical bottom inset of 0.375rem. Translation targets the element bearing the author token, preserves both independent sides, and does not own active-item choice, focus, scrolling requests or scroll-container discovery.
+criteria:
+  - id: C-WEB-SCROLL-PADDING-STYLE-0001-VALUES
+    text:
+      en: Document, ordinary shadow and split shadow CSS must emit the exact scoped declarations scroll-padding-top 0.5rem and scroll-padding-bottom 0.375rem for these respective tokens. Output order must not suppress either distinct side. Split output may additionally retain its existing content-bound receipt.
+  - id: C-WEB-SCROLL-PADDING-STYLE-0001-BOUNDS
+    text:
+      en: Only the two named tokens are admitted by this slice. Unknown suffixes, negative forms, other numeric values, arbitrary values and injection-shaped forms remain explicitly unsupported and emit no scroll-padding declaration. Existing logical scroll-py-0, scroll-py-1, scroll-py-1.5 and scroll-my-1 mappings retain their semantics.
+  - id: C-WEB-SCROLL-PADDING-STYLE-0001-OWNERSHIP
+    text:
+      en: Translation must use the shared ordinary style vocabulary, without component-name or source-path dispatch, page selectors, generated-file hand edits, or weakening unsupported-token diagnostics. Physical CSS serialization is not evidence of canonical role classification, semantic merging with overlapping logical-side utilities, actual native scrolling or all-host support.
+openQuestions:
+  - id: C-WEB-SCROLL-PADDING-STYLE-0001-Q-ADMISSION
+    question:
+      en: Which independently reviewed host profiles realize this finite physical inset and compose it with logical-axis choices and active-target reveal?
+    context:
+      en: Existing unknown-token surface fallback remains unchanged. This bounded CSS implementation does not introduce canonical application roles, arbitrary scroll vocabulary, a new reveal operation or a browser acceptance claim.
+    blocks: [activation:C-WEB-SCROLL-PADDING-STYLE-0001]
+dependsOn:
+  contracts: [C-FEEDBACK-STYLE-0003, C-FEEDBACK-STYLE-0004, C-PROTOTYPE-STYLE-CLOSURE-0001]
+sources:
+  - path: packages/cli/src/services/proto-style-css.ts
+  - path: packages/cli/test/proto-style-css.test.ts
+  - path: https://github.com/Proto-UI/Proto-UI/issues/1073
+revisions:
+  - version: 0.3.0-alpha.1
+    change: introduced
+    summary: Defined finite physical top and bottom scroll padding translation without claiming native reveal or broader host conformance.
+tags: [style, web, cli, scroll-padding, finite-vocabulary]

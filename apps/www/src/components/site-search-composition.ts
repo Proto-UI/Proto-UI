@@ -18,6 +18,9 @@ export interface SiteSearchCopy {
   retry: string;
   more: string;
   close: string;
+  pages?: string;
+  results?: string;
+  goToPage?: string;
   count(count: number): string;
 }
 
@@ -32,7 +35,8 @@ export function createSiteSearchComposition(options: {
 }): { demo: DemoSpec; activate(): void } {
   const { family, shadcnStyle, session, copy } = options;
   const initial = session.read();
-  const style = family === 'shadcn' ? { styleProfile: shadcnStyle } : {};
+  const style = family === 'shadcn' ? { styleProfile: shadcnStyle, presentation: 'menu' } : {};
+  const shellStyle = family === 'shadcn' ? { styleProfile: shadcnStyle } : {};
   const duration = family === 'shadcn' && shadcnStyle === 'rhea' ? 100 : 200;
   const proto = (
     name: string,
@@ -50,7 +54,17 @@ export function createSiteSearchComposition(options: {
     family === 'shadcn'
       ? proto('command-input-wrapper', {
           props: style,
-          children: [proto('input-shell', { ref: 'query-shell', props: style, children: [input] })],
+          children: [
+            {
+              kind: 'box',
+              tag: 'span',
+              ref: 'query-decoration',
+              attrs: { 'aria-hidden': 'true' },
+              className: 'shrink-0 text-muted-foreground pointer-events-none',
+              children: [{ kind: 'proto', prototypeId: 'lucide-search-icon', props: { size: 16 } }],
+            },
+            proto('input-shell', { ref: 'query-shell', props: shellStyle, children: [input] }),
+          ],
         })
       : input;
   const statusAndActions: DemoNode = {
@@ -81,8 +95,19 @@ export function createSiteSearchComposition(options: {
     kind: 'box',
     ref: 'dismissal',
     tag: 'div',
-    className: 'flex shrink-0 min-w-0 items-center justify-end p-2',
+    className:
+      family === 'shadcn'
+        ? 'flex min-h-11 shrink-0 min-w-0 flex-wrap items-center justify-between gap-2 border-t border-border bg-muted/50 px-4 text-xs text-muted-foreground'
+        : 'flex shrink-0 min-w-0 items-center justify-end p-2',
     children: [
+      {
+        kind: 'box',
+        tag: 'div',
+        ref: 'keyboard-hint',
+        className: 'flex min-w-0 items-center gap-2',
+        dynamicChildren: { prototypeIds: [] },
+        children: [],
+      },
       proto('dialog-close', {
         ref: 'close',
         surfaceStyle: {
@@ -128,7 +153,12 @@ export function createSiteSearchComposition(options: {
                 a11yLabel: copy.title,
               },
               children: [
-                editor,
+                {
+                  kind: 'box',
+                  tag: 'div',
+                  className: family === 'shadcn' ? 'shrink-0 p-2' : '',
+                  children: [editor],
+                },
                 {
                   kind: 'box',
                   tag: 'div',
@@ -136,7 +166,12 @@ export function createSiteSearchComposition(options: {
                   // Error/loading text and actions may wrap at enlarged text sizes.
                   // This middle region contains status/actions overflow; the family list
                   // retains its own scrolling limit. Dismissal remains outside both.
-                  className: 'min-h-0 min-w-0 flex-1 overflow-y-auto',
+                  className:
+                    family === 'shadcn'
+                      ? 'min-h-0 min-w-0 flex-1 basis-80 overflow-y-auto px-2 pb-2'
+                      : 'min-h-0 min-w-0 flex-1 overflow-y-auto',
+                  // Preferred menu list height yields to the bounded Dialog on
+                  // short/enlarged viewports; it is not a mandatory clipping min.
                   children: [
                     proto('command-content', {
                       props: style,
@@ -146,8 +181,13 @@ export function createSiteSearchComposition(options: {
                           kind: 'box',
                           tag: 'div',
                           ref: 'results',
+                          attrs: { role: 'group', 'aria-label': copy.pages ?? copy.title },
                           dynamicChildren: {
-                            prototypeIds: [`${family}-command-item`, `${family}-command-empty`],
+                            prototypeIds: [
+                              `${family}-command-item`,
+                              `${family}-command-empty`,
+                              'lucide-arrow-right-icon',
+                            ],
                           },
                           children: [],
                         },
@@ -170,6 +210,9 @@ export function createSiteSearchComposition(options: {
       let seedingQuery = false;
       let seededCommand: DemoPublicInstance | undefined;
       let focusedFailureAction: DemoPublicInstance | undefined;
+      type HintRequest = { target: HTMLElement; visible: boolean };
+      let committedHint: HintRequest | undefined;
+      let pendingHint: HintRequest | undefined;
       let binding: ReturnType<typeof bindInputShellControl> | undefined;
       const current = () => live && options.isCurrent();
       const disposers = new Set<() => void>();
@@ -187,9 +230,13 @@ export function createSiteSearchComposition(options: {
       });
       const paint = async () => {
         const epoch = ++paintEpoch;
-        const { open, snapshot, retrying } = session.read();
+        const { open, snapshot, retrying, navigation } = session.read();
         if (!live) return;
         if (!current() || !open) {
+          // Late author-slot completions from a closed generation cannot certify
+          // a later reopen, even if its retained DOM box identity is unchanged.
+          pendingHint = undefined;
+          committedHint = undefined;
           api.setProps('dialog', { open: false });
           return;
         }
@@ -217,38 +264,134 @@ export function createSiteSearchComposition(options: {
         if (!current() || epoch !== paintEpoch) return;
         // Never rewrite the static editor or its inputValue during result updates:
         // Command owns the real edit/IME/selection state throughout this generation.
+        const isNavigation = !snapshot.query.trim() && navigation.length > 0;
+        const visibleRows = isNavigation ? navigation : snapshot.rows;
+        const groupLabel = isNavigation ? (copy.pages ?? copy.title) : (copy.results ?? copy.title);
         const rows: DemoKeyedChild[] =
-          snapshot.phase === 'empty'
+          !isNavigation && snapshot.phase === 'empty'
             ? [
                 {
                   key: 'empty-state',
                   node: proto('command-empty', { props: style, children: [copy.empty] }),
                 },
               ]
-            : snapshot.rows.map((row) => ({
+            : visibleRows.map((row) => ({
                 key: row.id,
                 node: proto('command-item', {
                   props: { ...style, value: row.id, textValue: row.title },
                   children: [
                     {
                       kind: 'box',
+                      tag: 'span',
+                      attrs: { 'aria-hidden': 'true' },
+                      className: 'shrink-0',
+                      children: [
+                        {
+                          kind: 'proto',
+                          prototypeId: 'lucide-arrow-right-icon',
+                          props: { size: 16 },
+                        },
+                      ],
+                    },
+                    {
+                      kind: 'box',
                       className: 'flex min-w-0 flex-col',
                       children: [
                         row.title,
-                        {
-                          kind: 'box',
-                          attrs: { 'data-search-result-url': '' },
-                          className: 'text-xs opacity-70 break-words',
-                          children: [row.href],
-                        },
+                        ...(!isNavigation
+                          ? [
+                              {
+                                kind: 'box' as const,
+                                attrs: { 'data-search-result-url': '' },
+                                className: 'text-xs opacity-70 break-words',
+                                children: [row.href],
+                              },
+                            ]
+                          : []),
                       ],
                     },
                   ],
                 }),
               }));
+        if (visibleRows.length)
+          rows.unshift({
+            key: 'group-heading',
+            node: {
+              kind: 'box',
+              tag: 'div',
+              className: 'px-3 pt-3 pb-1 text-xs font-medium text-muted-foreground',
+              attrs: { 'aria-hidden': 'true' },
+              children: [groupLabel],
+            },
+          });
+        // This noninteractive hint is independent of result mounting. Retain its
+        // subtree while visibility/copy and the actual author-box identity are
+        // unchanged; query characters must not enqueue another transaction.
+        // With authored page navigation this is a stable keyboard instruction,
+        // not a live enabled action/status. Keep it across query-loading phases.
+        const showHint = navigation.length > 0 || visibleRows.length > 0;
+        const syncHint = (target: HTMLElement) => {
+          const matches = (request: HintRequest | undefined) =>
+            !!request && request.target === target && request.visible === showHint;
+          // A different pending write may invalidate an older committed fact;
+          // supersede it rather than trusting that earlier cache entry.
+          if (!matches(pendingHint) && (pendingHint || !matches(committedHint))) {
+            const request: HintRequest = { target, visible: showHint };
+            pendingHint = request;
+            void (async () => {
+              try {
+                const outcome = await api.setChildren!(
+                  'keyboard-hint',
+                  showHint
+                    ? [
+                        {
+                          key: 'enter',
+                          node: {
+                            kind: 'box',
+                            tag: 'span',
+                            className: 'rounded border bg-background px-1 font-sans text-xs',
+                            attrs: { 'aria-label': 'Enter' },
+                            children: ['↵'],
+                          },
+                        },
+                        { key: 'instruction', node: copy.goToPage ?? copy.hint },
+                      ]
+                    : []
+                );
+                if (pendingHint !== request) return;
+                pendingHint = undefined;
+                if (!current() || !session.read().open || refs['keyboard-hint'] !== target) return;
+                committedHint = outcome === 'committed' ? request : undefined;
+                // Non-commit is eligible for the next real paint; never spin/retry.
+              } catch (error) {
+                if (pendingHint !== request) return;
+                pendingHint = undefined;
+                committedHint = undefined;
+                if (current()) options.onFailure(error);
+              }
+            })();
+          }
+        };
+        // A public instance may exist before its physical author box. Do not
+        // submit or cache an undefined target during that preparation window.
+        const preparedHintTarget = refs['keyboard-hint'];
+        if (preparedHintTarget) syncHint(preparedHintTarget);
         const committed = await api.setChildren!('results', rows);
         if (!current() || !session.read().open || epoch !== paintEpoch || committed !== 'committed')
           return;
+        // Public Prototype identity can publish before all author-box refs.
+        // Only the current committed author-slot transaction admits DOM attributes;
+        // a closed/superseded generation above is not a missing-ready-box error.
+        const resultsTarget = refs.results;
+        if (!resultsTarget)
+          throw new Error('Search committed results without its current author box');
+        const committedHintTarget = refs['keyboard-hint'];
+        if (!committedHintTarget)
+          throw new Error('Search committed results without its current keyboard hint author box');
+        // The committed transaction also admits author refs that published after
+        // the public instance. This independent hint transaction never gates results.
+        if (committedHintTarget !== preparedHintTarget) syncHint(committedHintTarget);
+        resultsTarget.setAttribute('aria-label', groupLabel);
         refs.status.textContent =
           snapshot.phase === 'loading'
             ? copy.loading
@@ -359,6 +502,8 @@ export function createSiteSearchComposition(options: {
         live = false;
         activateView = undefined;
         paintEpoch++;
+        pendingHint = undefined;
+        committedHint = undefined;
         const errors: unknown[] = [];
         for (const stop of [off, offInstances, () => binding?.dispose()]) {
           try {

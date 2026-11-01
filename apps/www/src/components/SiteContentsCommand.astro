@@ -1,15 +1,27 @@
 ---
 import '../styles/site-contents-command.css';
+import { resolveSiteLibraryFamily } from './site-library-family';
+import { headerButtonProps, headerIconButtonLayout } from './site-header-control-recipes';
+import { snapshotStartupStyle } from './site-startup-paint';
+import { renderSnapshotTokenCss } from './snapshot-prototype-style';
 interface Props {
   label: string;
 }
 const { label } = Astro.props;
+const family = resolveSiteLibraryFamily(Astro.url.pathname);
+const buttonProps = headerButtonProps(family);
+const startupTokens = await snapshotStartupStyle(`${family}-button`, buttonProps);
 ---
 
+<style is:inline set:html={renderSnapshotTokenCss(startupTokens, '[data-site-contents-fallback]')}
+></style>
 <div data-site-contents-command data-contents-label={label} aria-expanded="false">
   <button
     type="button"
     data-site-contents-fallback
+    data-site-control-family={family}
+    data-pui-style={startupTokens.join(' ')}
+    style={headerIconButtonLayout()}
     aria-label={label}
     aria-expanded="false"
     aria-controls="starlight__sidebar"

@@ -25,7 +25,7 @@ import {
   OwnedDecorationTarget,
   TemplateType,
   TemplateProps,
-  TemplateChildren,
+  TemplateChildrenInput,
   TemplateNode,
   SvgFactories,
 } from './spec';
@@ -48,14 +48,14 @@ export type ExposeEvent<Payload = any> = {
 export type ExposeMethod<F extends Function = (...args: any[]) => any> = {
   kind: 'method';
   fn: F;
-};
+} & ((...args: any[]) => any);
 
 export type ExposeValue<V = any> = {
   kind: 'value';
   value: V;
 };
 
-export type ExposeState<V = any> = State<V> | { kind: 'state'; state: State<V> };
+export type ExposeState<V = any> = State<V>;
 
 export type ExposeMap = Record<
   string,
@@ -362,8 +362,8 @@ export interface RenderReadHandle<Props extends PropsBaseType> {
 
 export interface ElementFactory {
   (type: TemplateType): TemplateNode;
-  (type: TemplateType, children: TemplateChildren): TemplateNode;
-  (type: TemplateType, props: TemplateProps, children?: TemplateChildren): TemplateNode;
+  (type: TemplateType, children: TemplateChildrenInput): TemplateNode;
+  (type: TemplateType, props: TemplateProps, children?: TemplateChildrenInput): TemplateNode;
 }
 
 export interface RendererHandle<Props extends PropsBaseType> {

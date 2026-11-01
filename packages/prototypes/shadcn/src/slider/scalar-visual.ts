@@ -12,7 +12,10 @@ export type ShadcnSliderPartProps = SliderPartProps & ShadcnStyleProps;
 // Independent scalar projection of shadcn-ui/ui@3d98900e .cn-slider*,
 // base/ui/slider.tsx and new-york-v4/ui/slider.tsx. These are paint recipes,
 // not aliases to the separate indexed Values protocol.
-export function setupScalarSliderStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupScalarSliderStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   return setupShadcnStyleSelection(def, 'nova');
 }
 

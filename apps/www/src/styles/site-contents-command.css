@@ -9,7 +9,8 @@
 [data-site-contents-mount]:empty {
   display: none;
 }
-/* The unenhanced native fallback is intentionally plain, not a library skin. */
+/* SSR paint comes from the same public Button snapshot as the live view.
+   This rule owns target geometry only, never a second family recipe. */
 [data-site-contents-fallback] {
   display: inline-flex;
   align-items: center;
@@ -17,9 +18,6 @@
   width: 2.75rem;
   height: 2.75rem;
   padding: 0;
-  color: inherit;
-  background: transparent;
-  border: 0;
 }
 [data-site-contents-fallback][hidden] {
   display: none;

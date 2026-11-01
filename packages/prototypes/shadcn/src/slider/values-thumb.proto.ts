@@ -1,4 +1,5 @@
 import { definePrototype, tw } from '@proto.ui/core';
+import type { ShadcnStyleId } from '../style-scope';
 import {
   asSliderValuesThumb,
   type SliderValuesThumbExposes,
@@ -22,7 +23,10 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
         'absolute left-[calc(var(--pui-percentage)*1%)] top-1/2 flex shrink-0 items-center justify-center -translate-x-1/2 -translate-y-1/2 outline-none select-none'
       )
     );
-    for (const [id, recipe] of Object.entries(VALUES_THUMB_HIT))
+    for (const [id, recipe] of Object.entries(VALUES_THUMB_HIT) as [
+      ShadcnStyleId,
+      (typeof VALUES_THUMB_HIT)[ShadcnStyleId],
+    ][])
       def.rule({
         when: (w) => w.state(style).eq(id),
         intent: (i) => i.feedback.style.use(recipe),
@@ -50,7 +54,10 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
           tw('left-auto right-[calc(var(--pui-percentage)*1%)] translate-x-1/2')
         ),
     });
-    for (const [id, recipe] of Object.entries(VALUES_THUMB_PAINT)) {
+    for (const [id, recipe] of Object.entries(VALUES_THUMB_PAINT) as [
+      ShadcnStyleId,
+      (typeof VALUES_THUMB_PAINT)[ShadcnStyleId],
+    ][]) {
       def.rule({
         when: (w) =>
           w.all(
@@ -86,7 +93,7 @@ export default definePrototype<ShadcnSliderValuesPartProps, SliderValuesThumbExp
       when: (w) => w.all(w.state(style).eq('luma'), w.state(state.orientation).eq('vertical')),
       intent: (i) => i.feedback.style.to(paint).use(tw('h-6 w-4')),
     });
-    for (const id of ['luma', 'rhea'])
+    for (const id of ['luma', 'rhea'] as const)
       def.rule({
         when: (w) => w.all(w.state(style).eq(id), w.not(w.meta('colorScheme').eq('dark'))),
         intent: (i) => i.feedback.style.to(paint).use(tw('bg-clip-padding')),

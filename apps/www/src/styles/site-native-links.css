@@ -7,6 +7,18 @@
   color: inherit;
   text-decoration: none;
 }
+/* Only the enhanced Homepage link whose passive public Surface owns visible
+   focus suppresses the duplicate native outline. Unenhanced/failure fallback
+   anchors retain browser focus, and Surface retains forced-colors paint. */
+a.home-runtime-link[data-site-link-enhanced='true']:is(
+    [data-site-link-appearance='brand'],
+    [data-site-link-appearance='nav'],
+    [data-site-link-appearance='action'],
+    [data-site-link-appearance='text']
+  ) {
+  outline: none;
+}
+
 .site-social-links {
   display: flex;
   align-items: center;

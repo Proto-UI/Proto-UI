@@ -13,7 +13,10 @@ export type ShadcnSliderValuesPartProps = SliderValuesPartProps & ShadcnStylePro
 // apps/v4/registry/styles/style-{vega,nova,maia,lyra,mira,luma,sera,rhea}.css.
 // New York is independently sourced from registry/new-york-v4/ui/slider.tsx.
 // The compatibility baseline remains the existing scalar Slider's base-Nova paint.
-export function setupSliderValuesStyle(def: DefHandle<ShadcnStyleProps>) {
+export function setupSliderValuesStyle<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   return setupShadcnStyleSelection(def, 'nova', { supportedStyles: SHADCN_STYLE_IDS });
 }
 

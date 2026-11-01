@@ -21,10 +21,54 @@ cases:
     title: Icon-free grouped Command editors retain profile inset and editor identity
     covers: [P-SHADCN-COMMAND-NO-ADDON-INSET]
     expectation: no-addon-profile-inset-without-editor-replacement
+  - id: T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-MENU
+    title: Explicit menu presentation preserves defaults and editor identity while composing real current navigation
+    covers:
+      [
+        P-SHADCN-COMMAND-MENU-PRESENTATION,
+        P-SHADCN-COMMAND-MENU-DECORATION,
+        P-SHADCN-COMMAND-MENU-CONSUMER,
+        P-SHADCN-INPUT-SHELL-COMMAND-MENU-CONTAINMENT,
+      ]
+    expectation: opt-in-website-menu-not-registry-default-or-prefix-admission
 exercises:
   prototypes:
     - P-SHADCN-MENUBAR
+    - P-SHADCN-COMMAND
 implementations:
+  - id: command-menu-presentation
+    kind: adapter-test
+    status: planned
+    path: packages/prototypes/shadcn/test/command-menu-presentation.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-MENU]
+    exercises: [P-SHADCN-COMMAND, P-SHADCN-INPUT-SHELL]
+    notes:
+      [
+        Exact-version results are recorded separately; token and identity tests are not native geometry acceptance.,
+      ]
+  - id: website-menu-current-navigation
+    kind: module-test
+    status: planned
+    path: apps/www/src/components/site-search-navigation.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-MENU]
+    exercises: [P-SHADCN-COMMAND]
+    notes:
+      [
+        Real navigation targets stay distinct from Pagefind results; execution results are version-bound.,
+      ]
+  - id: website-menu-four-runtime-composition
+    kind: runtime-test
+    status: planned
+    path: apps/www/src/components/site-search-composition.test.ts
+    required: true
+    consumesCases: [T-SHADCN-SEARCH-MENU-PROFILES-0001-CASE-MENU]
+    exercises: [P-SHADCN-COMMAND, P-SHADCN-INPUT-SHELL]
+    notes:
+      [
+        Exact-version actual-host results are recorded separately; preserve existing async query/Retry/More/close tests and failures.,
+      ]
   - id: shadcn-search-menu-profiles-r91
     kind: module-test
     status: planned

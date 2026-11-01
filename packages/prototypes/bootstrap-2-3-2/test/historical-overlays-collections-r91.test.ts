@@ -875,13 +875,16 @@ describe('Bootstrap alert-derived Toast consumers', () => {
           onRuntimeReady(wiring) {
             wiring.attach('anatomy', [
               [ANATOMY_INSTANCE_TOKEN_CAP, target],
-              [ANATOMY_PARENT_CAP, (token) => parents.get(token) ?? null],
-              [ANATOMY_GET_PROTO_CAP, (token) => prototypesByTarget.get(token) ?? null],
-              [ANATOMY_ROOT_TARGET_CAP, (token) => (token instanceof HTMLElement ? token : null)],
+              [ANATOMY_PARENT_CAP, (token: any) => parents.get(token) ?? null],
+              [ANATOMY_GET_PROTO_CAP, (token: any) => prototypesByTarget.get(token) ?? null],
+              [
+                ANATOMY_ROOT_TARGET_CAP,
+                (token: any) => (token instanceof HTMLElement ? token : null),
+              ],
             ]);
             wiring.attach('context', [
               [CONTEXT_INSTANCE_TOKEN_CAP, target],
-              [CONTEXT_PARENT_CAP, (token) => parents.get(token) ?? null],
+              [CONTEXT_PARENT_CAP, (token: any) => parents.get(token) ?? null],
             ]);
             wiring.attach('event', [
               [EVENT_ROOT_TARGET_CAP, () => target],
@@ -889,14 +892,16 @@ describe('Bootstrap alert-derived Toast consumers', () => {
             ]);
             wiring.attach('as-trigger', [
               [AS_TRIGGER_INSTANCE_CAP, target],
-              [AS_TRIGGER_PARENT_CAP, (token) => parents.get(token) ?? null],
-              [AS_TRIGGER_GET_PROTO_CAP, (token) => prototypesByTarget.get(token) ?? null],
+              [AS_TRIGGER_PARENT_CAP, (token: any) => parents.get(token) ?? null],
+              [AS_TRIGGER_GET_PROTO_CAP, (token: any) => prototypesByTarget.get(token) ?? null],
             ]);
-            wiring.attach('expose-state', [[EXPOSES_RECORD_SINK_CAP, (record) => (exposes = record)]]);
+            wiring.attach('expose-state', [
+              [EXPOSES_RECORD_SINK_CAP, (record: any) => (exposes = record)],
+            ]);
             wiring.attach('expose-event', [
               [
                 EXPOSE_EVENT_SINK_CAP,
-                (name, payload) => {
+                (name: any, payload: any) => {
                   if (name === 'openChange') requests.push(payload);
                   if (name === 'action') {
                     actions++;

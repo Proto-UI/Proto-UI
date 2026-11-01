@@ -8,6 +8,7 @@ import {
   type State,
   type RunHandle,
 } from '@proto.ui/core';
+import type { PropsBaseType } from '@proto.ui/types';
 import type {
   CheckboxGroupItemProps,
   CheckboxGroupItemExposes,
@@ -106,7 +107,7 @@ export function checkboxGroupGlyph(
   };
   def.lifecycle.onUnmounted(cancel);
   def.lifecycle.onBeforeDispose(cancel);
-  return (r: RendererHandle<GroupVisualProps>) => {
+  return <P extends PropsBaseType>(r: RendererHandle<P>) => {
     renderedStyle = style.get();
     const path = state.indeterminate.get()
       ? 'M5 12h14'

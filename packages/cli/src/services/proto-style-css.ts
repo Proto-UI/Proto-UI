@@ -131,6 +131,8 @@ const staticUtilities: Record<string, string[]> = {
   'scroll-py-0': ['scroll-padding-block: 0px;'],
   'scroll-py-1': ['scroll-padding-block: 0.25rem;'],
   'scroll-py-1.5': ['scroll-padding-block: 0.375rem;'],
+  'scroll-pt-2': ['scroll-padding-top: 0.5rem;'],
+  'scroll-pb-1.5': ['scroll-padding-bottom: 0.375rem;'],
   'shadow-xl': [
     '--pui-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);',
     ...composedShadow(),

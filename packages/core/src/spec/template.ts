@@ -136,7 +136,12 @@ export type SvgTemplateNode =
 
 // NOTE: undefined is intentionally excluded to keep authoring syntax portable.
 export type TemplateChild = TemplateNode | SvgTemplateNode | string | number | null;
+// Canonical factory output stays flat. Authoring arrays are normalized at the
+// el / SVG factory boundary; they must not widen TemplateNode.children.
 export type TemplateChildren = TemplateChild | TemplateChild[] | null;
+
+/** Nested authoring input for factories that normalize children (C-TEMPLATE-0004). */
+export type TemplateChildrenInput = TemplateChild | readonly TemplateChildrenInput[];
 
 export interface NormalizeOptions {
   flatten?: 'none' | 'shallow' | 'deep';
@@ -243,8 +248,8 @@ export interface RendererPrimitivesOptions {
 }
 
 export interface SvgFactories {
-  root(props: SvgRootProps, children?: TemplateChildren): SvgRootNode;
-  g(props?: SvgGroupProps, children?: TemplateChildren): SvgGroupNode;
+  root(props: SvgRootProps, children?: TemplateChildrenInput): SvgRootNode;
+  g(props?: SvgGroupProps, children?: TemplateChildrenInput): SvgGroupNode;
   path(props: SvgPathProps): SvgPathNode;
   circle(props: SvgCircleProps): SvgCircleNode;
   rect(props: SvgRectProps): SvgRectNode;

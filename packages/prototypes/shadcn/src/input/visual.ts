@@ -38,8 +38,8 @@ const INPUT_INVALID = {
 } as const;
 
 /** Paint only: callers supply their one real Base editor and optional Field invalid fact. */
-export function setupInputVisual(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupInputVisual<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>,
   state: { disabled: State<boolean>; focusVisible: State<boolean> },
   invalid?: State<boolean>,
   fieldControl = false

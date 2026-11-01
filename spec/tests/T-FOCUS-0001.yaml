@@ -5,6 +5,20 @@ status: draft
 since: 0.1.0
 summary: Runtime and bounded React/Vue evidence for asFocusable target facts, asFocusEntry region policy, setup-only configuration, disabled focus requests, autofocus, scopes, native reveal readiness, one-shot commit effects, and nested surface-owner readiness.
 cases:
+  - id: T-FOCUS-0001-CASE-SAME-TARGET-VISIBILITY
+    title: Successful native requests refresh only the already observed current owner
+    covers:
+      [
+        C-AS-FOCUSABLE-0001-C,
+        C-AS-FOCUSABLE-0001-G,
+        C-AS-FOCUSABLE-0001-H,
+        C-FOCUS-0001-E,
+        C-FOCUS-0001-F,
+      ]
+    expectation: native-visibility-or-unsupported-fallback-refreshes-without-a-second-focus-event-and-stale-request-or-owner-samples-cannot-overwrite-newer-facts
+    notes:
+      - Controlled Runtime and FocusCenter evidence uses an element-local native-query seam. Candidate e2178cdc passed all 14 new cases, versus 4 of 14 on its exact baseline. No native browser, exact native target, four-Adapter same-target journey or compiled-target conformance is established.
+      - Native host-effect idempotence remains separate and unimplemented; logical ownership and own-root activity are not an exact-target certificate.
   - id: T-FOCUS-0001-CASE-TARGET-SUPERSESSION-ADMISSION
     title: Enabled target requests supersede old entry before scope admission
     covers: [C-AS-FOCUSABLE-0001-G, C-AS-FOCUS-ENTRY-0001-H, C-FOCUS-0001-H]
@@ -302,6 +316,14 @@ cases:
       - Discriminating red/green execution uses installed framework runtimes in a simulated DOM. It neither injects gate state nor synthesizes focus facts, and does not claim native browser or all-version conformance.
 
 implementations:
+  - id: runtime-focus-same-target-visibility
+    kind: runtime-test
+    status: passing
+    path: packages/runtime/test/contract/focus-same-target-visibility.contract.test.ts
+    required: true
+    consumesCases: [T-FOCUS-0001-CASE-SAME-TARGET-VISIBILITY]
+    notes:
+      - Exact e2178cdc controlled source execution passed these 14 cases. The remaining 618 old cases kept identical statuses, including 10 old preflight failures; no full-group, native or compiled acceptance. Existing implementation statuses are historical and unchanged.
   - id: runtime-focus-scope-supersession
     kind: runtime-test
     status: passing
@@ -681,6 +703,7 @@ verifies:
         - C-AS-FOCUSABLE-0001-E
         - C-AS-FOCUSABLE-0001-F
         - C-AS-FOCUSABLE-0001-G
+        - C-AS-FOCUSABLE-0001-H
     - id: C-AS-FOCUS-SCOPE-0001
       anchors:
         - C-AS-FOCUS-SCOPE-0001-A
@@ -729,6 +752,12 @@ exercises:
       coverageImpact: exercises-test-surface
       note: Bounded real React commit fixtures, including nested resolved-owner readiness, and the selected-entry/End/Home Chromium journey exercise current Focus and observation delivery, not the whole React version range or profile.
 revisions:
+  - version: 0.3.0-alpha.1
+    change: strengthened
+    summary: Recorded the finite e2178cdc controlled same-target results, retaining 10 old preflight failures and native/compiled acceptance debt without lifecycle promotion.
+  - version: 0.3.0-alpha.1
+    change: strengthened
+    summary: Added planned same-target native visibility refresh and stale-sample controls; no new execution, acceptance or lifecycle promotion.
   - version: 0.3.0-alpha.1
     change: strengthened
     summary: Added bounded React optional-runtime startup rollback evidence with actual ErrorBoundary cleanup, preserving the existing Focus policy and native-exception limits.

@@ -199,3 +199,73 @@ it('rejects old resolution generations and physically replaced targets at delive
     f.dispose();
   }
 });
+
+describe('neutral border-box size associations', () => {
+  it('admits same-part inline endpoints and scoped size targets without exposing host targets', () => {
+    const f = fixture();
+    try {
+      f.helper.set({
+        ...f.binding,
+        inlineReference: f.binding.blockReference,
+        inlineTarget: f.binding.blockTarget,
+        sizeMatch: { reference: f.binding.blockReference, targets: [f.binding.blockTarget] },
+      });
+      const resolved = f.helper.resolve()!;
+      expect(resolved.targetAlignment.sizeMatch).toEqual({
+        reference: f.trigger.target,
+        targets: [f.row.target],
+      });
+      resolved.onAlignment({ status: 'applied' });
+      expect(f.onAlignment).toHaveBeenCalledWith({ status: 'applied' });
+    } finally {
+      f.dispose();
+    }
+  });
+  it('rejects an unrelated reference, duplicate targets and a same-family target outside scrollport', () => {
+    const f = fixture();
+    try {
+      for (const sizeMatch of [
+        { reference: f.binding.inlineReference, targets: [f.binding.blockTarget] },
+        {
+          reference: f.binding.blockReference,
+          targets: [f.binding.blockTarget, f.binding.blockTarget],
+        },
+        { reference: f.binding.blockReference, targets: [f.binding.blockReference] },
+      ]) {
+        f.onAlignment.mockClear();
+        f.helper.set({ ...f.binding, sizeMatch });
+        f.helper.resolve()!.onAlignment({ status: 'applied' });
+        expect(f.onAlignment).toHaveBeenCalledWith({
+          status: 'unavailable',
+          reason: 'invalid-association',
+        });
+      }
+    } finally {
+      f.dispose();
+    }
+  });
+  it('does not deliver success from a replaced size-only physical target', () => {
+    const f = fixture();
+    try {
+      const another = f.add('item', f.scrollport.token);
+      const parts = f.owner.impl.partsOf(f.binding.family, 'item');
+      if (!parts) throw new Error('Expected registered item parts in the fixed fixture');
+      const part = parts.find((p) => f.owner.impl.port.resolvePartInstance(p) === another.token);
+      if (!part) throw new Error('Expected the added item part in the fixed fixture');
+      f.helper.set({
+        ...f.binding,
+        sizeMatch: { reference: f.binding.blockReference, targets: [part] },
+      });
+      const resolved = f.helper.resolve()!;
+      const original = f.owner.impl.port.resolvePartTarget;
+      const spy = vi
+        .spyOn(f.owner.impl.port, 'resolvePartTarget')
+        .mockImplementation((p) => (p === part ? {} : original(p)));
+      resolved.onAlignment({ status: 'applied' });
+      expect(f.onAlignment).not.toHaveBeenCalled();
+      spy.mockRestore();
+    } finally {
+      f.dispose();
+    }
+  });
+});

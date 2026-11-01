@@ -1,4 +1,4 @@
-import { definePrototype, delay, tw } from '@proto.ui/core';
+import { definePrototype, delay, type TemplateChild, tw } from '@proto.ui/core';
 import {
   asCheckboxIndicator,
   type CheckboxIndicatorProps,
@@ -42,7 +42,7 @@ export default definePrototype<CheckboxIndicatorProps, CheckboxIndicatorExposes>
           ? 'M5 12L10 17L19 7'
           : null;
       return [
-        inherited.render ? inherited.render(renderer) : renderer.r.slot(),
+        inherited.render ? (inherited.render(renderer) as TemplateChild) : renderer.r.slot(),
         d
           ? renderer.svg.root(
               {

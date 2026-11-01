@@ -6,6 +6,7 @@ const siteLibraryFamily = resolveSiteLibraryFamily(Astro.url.pathname);
 import DocumentationImagePreview from '../DocumentationImagePreview.astro';
 
 const { hasSidebar } = Astro.locals.starlightRoute;
+const zh = Astro.locals.starlightRoute.locale === 'zh-cn';
 ---
 
 <SiteLibraryStyle />
@@ -21,6 +22,15 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   </script>
   <!-- Header owns the full-width chrome; reading content keeps its own canvas. -->
   <header class="bg-background sticky top-0 z-50 w-full"><slot name="header" /></header>
+  {
+    hasSidebar && (
+      <div
+        data-site-contents-panel-mount
+        data-contents-title={Astro.locals.t('sidebarNav.accessibleLabel')}
+        data-contents-close={zh ? '关闭目录' : 'Close navigation'}
+      />
+    )
+  }
   <div
     class:list={[
       'bg-background container-wrapper flex flex-1 flex-col',
@@ -64,7 +74,7 @@ const { hasSidebar } = Astro.locals.starlightRoute;
     </noscript>
     <div
       data-page-frame-layout
-      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full 3xl:fixed:container 3xl:fixed:px-3 min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:15rem] lg:[--top-spacing:calc(var(--spacing)*4)]"
+      class="bg-background group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-w-0 w-full min-h-min flex-1 items-start px-0 [--sidebar-width:220px] [--top-spacing:0] lg:grid lg:grid-cols-[var(--sidebar-width)_minmax(0,1fr)] lg:[--sidebar-width:15rem] lg:[--top-spacing:calc(var(--spacing)*4)]"
     >
       {
         hasSidebar && (
@@ -152,38 +162,53 @@ const { hasSidebar } = Astro.locals.starlightRoute;
   :global(.site-page-frame:has([data-docs-site-header]) main h1[data-site-typography='h1']) {
     scroll-margin-top: calc(var(--header-height) + var(--docs-reading-inset, 1rem));
   }
-  /* Reading columns share a centered canvas; Header is deliberately independent. */
-  .docs-shell {
+  /* Documentation composition: independent outer gutters, rails and reading
+     measure. Do not constrain both navigation rails to the prose canvas. */
+  .site-page-frame > .docs-shell {
+    --docs-shell-gutter: clamp(1rem, 2vw, 2rem);
+    --docs-column-gap: clamp(1rem, 2vw, 2rem);
+    --docs-reading-width: 42rem;
+    --docs-toc-width: 18rem;
     container: docs-canvas / inline-size;
-    max-width: 85rem;
-    margin-inline: auto;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    margin-inline: 0;
+    padding-inline: var(--docs-shell-gutter);
+  }
+
+  @media (min-width: 64rem) {
+    .docs-shell > [data-page-frame-layout] {
+      column-gap: var(--docs-column-gap);
+    }
   }
 
   .docs-sidebar {
-    width: 0;
+    width: 100%;
     flex: none;
   }
 
+  @media (max-width: 63.999rem) {
+    .docs-shell > [data-page-frame-layout] {
+      flex-direction: column;
+    }
+  }
+
+  /* Before public Dialog preparation, retain a reachable in-flow disclosure.
+     This is not the retired fixed full-screen mobile menu. */
   .mobile-sidebar-pane {
-    position: fixed;
-    z-index: 40;
-    inset: var(--header-height) 0 0;
+    position: static;
     display: none;
     width: 100%;
+    max-height: min(60svh, 32rem);
     padding: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     background: var(--color-background);
   }
 
-  :global([data-mobile-menu-expanded]) .mobile-sidebar-pane {
+  :global(body[data-mobile-menu-expanded]:not([data-site-contents-dialog])) .mobile-sidebar-pane {
     display: flex;
-  }
-
-  @media (max-width: 63.999rem) {
-    :global(body[data-mobile-menu-expanded]) {
-      overflow: hidden;
-    }
   }
 
   .mobile-sidebar-content {
@@ -215,11 +240,37 @@ const { hasSidebar } = Astro.locals.starlightRoute;
       width: var(--sidebar-width);
       padding-block: 1rem 3rem;
       overflow: visible;
+      max-height: none;
       background: transparent;
     }
 
     .mobile-sidebar-content {
       padding: 0;
     }
+  }
+
+  /* The very same nav retains its logical/native owners while physically
+     placed in the public Dialog. Only composition geometry changes; family
+     Dialog and Sidebar primitives continue to own all paint and behavior. */
+  .docs-sidebar[data-site-contents-dialog-tree] {
+    position: static;
+    z-index: auto;
+    top: auto;
+    display: flex;
+    width: 100%;
+    height: auto;
+    min-width: 0;
+    overflow: visible;
+  }
+  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-pane {
+    position: static;
+    display: flex;
+    width: 100%;
+    max-height: min(60svh, 32rem);
+    padding: 0;
+    overflow-y: auto;
+  }
+  .docs-sidebar[data-site-contents-dialog-tree] .mobile-sidebar-content {
+    padding: 0;
   }
 </style>

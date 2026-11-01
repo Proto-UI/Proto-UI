@@ -1,5 +1,5 @@
 import type { SliderPartExposes } from '@proto.ui/prototypes-base/slider';
-import { definePrototype, tw } from '@proto.ui/core';
+import { definePrototype, type TemplateChild, tw } from '@proto.ui/core';
 import { asSliderTrack } from '@proto.ui/prototypes-base/slider';
 import { SHADCN_STYLE_IDS } from '../style-scope';
 import { setupScalarSliderStyle, SCALAR_RAIL, type ShadcnSliderPartProps } from './scalar-visual';
@@ -94,6 +94,9 @@ export default definePrototype<ShadcnSliderPartProps, SliderPartExposes>({
         intent: (i) => i.feedback.style.to(rail).use(SCALAR_RAIL[profile].vertical),
       });
     }
-    return (r) => [r.decoration(rail), inherited.render ? inherited.render(r) : r.slot()];
+    return (r) => [
+      r.decoration(rail),
+      inherited.render ? (inherited.render(r) as TemplateChild) : r.slot(),
+    ];
   },
 });

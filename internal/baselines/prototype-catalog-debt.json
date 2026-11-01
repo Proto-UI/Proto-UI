@@ -3,32 +3,6 @@
   "description": "Existing concrete prototype declarations that still need P/T catalog entities. CI rejects unlisted or stale debt, so accepting a new gap requires an explicit reviewed edit.",
   "uncataloged": [
     {
-      "file": "packages/prototypes/base/src/alert-dialog/action.proto.ts",
-      "entries": [
-        {
-          "kind": "asHook",
-          "name": "as-alert-dialog-action"
-        },
-        {
-          "kind": "prototype",
-          "name": "base-alert-dialog-action"
-        }
-      ]
-    },
-    {
-      "file": "packages/prototypes/base/src/alert-dialog/cancel.proto.ts",
-      "entries": [
-        {
-          "kind": "asHook",
-          "name": "as-alert-dialog-cancel"
-        },
-        {
-          "kind": "prototype",
-          "name": "base-alert-dialog-cancel"
-        }
-      ]
-    },
-    {
       "file": "packages/prototypes/base/src/alert-dialog/content.proto.ts",
       "entries": [
         {
@@ -64,19 +38,6 @@
         {
           "kind": "prototype",
           "name": "base-alert-dialog-mask"
-        }
-      ]
-    },
-    {
-      "file": "packages/prototypes/base/src/alert-dialog/root.proto.ts",
-      "entries": [
-        {
-          "kind": "asHook",
-          "name": "as-alert-dialog-root"
-        },
-        {
-          "kind": "prototype",
-          "name": "base-alert-dialog-root"
         }
       ]
     },

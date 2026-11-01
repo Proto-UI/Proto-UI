@@ -7,8 +7,11 @@ import {
   type ShadcnStyleProps,
 } from './context';
 
-function declareChoice(def: DefHandle<ShadcnStyleProps>) {
-  def.props.define({
+function declareChoice<Props extends ShadcnStyleProps, Exposes = Record<string, unknown>>(
+  def: DefHandle<Props, Exposes>
+) {
+  const cdef = def as unknown as DefHandle<ShadcnStyleProps>;
+  cdef.props.define({
     styleProfile: {
       type: 'enum',
       options: [...SHADCN_STYLE_IDS, 'new-york', 'inherit'],
@@ -16,12 +19,15 @@ function declareChoice(def: DefHandle<ShadcnStyleProps>) {
     },
   });
   // Only a non-selecting sentinel may default: a concrete default would mask inheritance.
-  def.props.setDefaults({ styleProfile: 'inherit' });
+  cdef.props.setDefaults({ styleProfile: 'inherit' });
 }
 
 /** Derives paint only. Does not own Base state or mutate host/editor instances. */
-export function setupShadcnStyleSelection(
-  def: DefHandle<ShadcnStyleProps>,
+export function setupShadcnStyleSelection<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   compatibilityStyle: ShadcnStyleId,
   options: { supportedStyles?: readonly ShadcnStyleId[] } = {}
 ) {
@@ -29,7 +35,7 @@ export function setupShadcnStyleSelection(
   const selected = def.state.enum('shadcnStyleSelection', compatibilityStyle, {
     options: SHADCN_STYLE_IDS,
   });
-  const sync = (run: RunHandle<ShadcnStyleProps>) => {
+  const sync = (run: RunHandle<Props>) => {
     const explicit = normalizeShadcnStyle(run.props.getRaw().styleProfile);
     const inherited = run.context.tryRead(SHADCN_STYLE_SCOPE)?.style ?? null;
     const next = explicit ?? inherited ?? compatibilityStyle;
@@ -49,10 +55,13 @@ export function setupShadcnStyleSelection(
 }
 
 /** Nested scope inherits strictly above itself; null preserves each leaf's baseline. */
-export function setupShadcnStyleScope(def: DefHandle<ShadcnStyleProps>) {
+export function setupShadcnStyleScope<
+  Props extends ShadcnStyleProps,
+  Exposes = Record<string, unknown>,
+>(def: DefHandle<Props, Exposes>) {
   declareChoice(def);
   def.context.provide(SHADCN_STYLE_SCOPE, { style: null });
-  const sync = (run: RunHandle<ShadcnStyleProps>) => {
+  const sync = (run: RunHandle<Props>) => {
     const next =
       normalizeShadcnStyle(run.props.getRaw().styleProfile) ??
       run.context.tryReadAncestor(SHADCN_STYLE_SCOPE)?.style ??

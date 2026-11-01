@@ -15,27 +15,31 @@ import {
  * The modern upstream Trigger and Close are headless, so selecting one of
  * those profiles withdraws this paint without changing the Drawer command.
  */
-export function setupDrawerCommandPaint(
-  def: DefHandle<ShadcnStyleProps & { wrap?: boolean }>,
+export function setupDrawerCommandPaint<
+  Props extends ShadcnStyleProps & { wrap?: boolean },
+  Exposes = Record<string, unknown>,
+>(
+  def: DefHandle<Props, Exposes>,
   state: { hovered: State<boolean>; focusVisible: State<boolean>; disabled: State<boolean> }
 ) {
-  def.props.define({ wrap: { type: 'boolean', empty: 'fallback' } });
-  def.props.setDefaults({ wrap: false });
+  const cdef = def as unknown as DefHandle<ShadcnStyleProps & { wrap?: boolean }>;
+  cdef.props.define({ wrap: { type: 'boolean', empty: 'fallback' } });
+  cdef.props.setDefaults({ wrap: false });
   const style = setupOverlayStyle(def);
-  def.rule({
+  cdef.rule({
     when: (w) => w.state(style).eq('new-york-v4'),
     intent: (i) =>
       i.feedback.style.use(tw(SHADCN_BUTTON_BASE_TOKENS, SHADCN_BUTTON_OUTLINE_VARIANT_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('wrap').eq(false)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DEFAULT_SIZE_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.prop('wrap').eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_WRAP_DEFAULT_SIZE_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) =>
       w.all(
         w.state(style).eq('new-york-v4'),
@@ -44,11 +48,11 @@ export function setupDrawerCommandPaint(
       ),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_OUTLINE_HOVER_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(state.focusVisible).eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_FOCUS_TOKENS)),
   });
-  def.rule({
+  cdef.rule({
     when: (w) => w.all(w.state(style).eq('new-york-v4'), w.state(state.disabled).eq(true)),
     intent: (i) => i.feedback.style.use(tw(SHADCN_BUTTON_DISABLED_TOKENS)),
   });

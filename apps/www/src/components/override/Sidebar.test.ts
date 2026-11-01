@@ -63,6 +63,7 @@ it('uses the public native tree with one scoped restore owner and the existing l
   expect(source).toContain('data-hash={legacyHash}');
   expect(source).not.toMatch(/\.toString\s*\(|new\s+Function\s*\(|\beval\s*\(/);
   expect(source).toContain('<SidebarSublist sublist={entries} />');
+  expect(source).not.toContain('MobileMenuFooter');
   expect(source).not.toMatch(/<style|SidebarPersister|sl-sidebar-restore|opacity|visibility/);
 });
 it('keeps requested actual family order, textual Experimental badge and existing WIP declarations', () => {
