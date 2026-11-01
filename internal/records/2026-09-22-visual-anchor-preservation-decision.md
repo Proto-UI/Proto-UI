@@ -98,9 +98,9 @@ AnchorRequests:
 
 No extent, pixel, offset, rectangle, DOM element, controller, observer or framework key enters portable facts. The host-local captured offset lives only inside the lease.
 
-### Complete transition and result table (bounded, test-ready)
+### Proposed transition and result table (timeout bound unresolved)
 
-States: `idle → captured → (settling) → terminal`. Exactly one terminal status+reason per request; the terminal row wins over every in-flight event; after a terminal result the lease is closed and every later callback is a no-op that is logged, never a state change. Timeout boundary: the settling window is bounded by the existing `HC-SCROLL-SURFACE-0001` lease timeout — the same bound that governs end-follow; when it expires un-settled, the result is `rejected: layout-unsettled`.
+States: `idle → captured → (settling) → terminal`. Exactly one terminal status+reason per request; the terminal row wins over every in-flight event; after a terminal result the lease is closed and every later callback is a no-op that is logged, never a state change. Timeout boundary remains an unresolved proposal input: `HC-SCROLL-SURFACE-0001` governs session lifetime, layout readiness, coalescing and cleanup, but does not define a settling-timeout bound that this proposal can inherit. The later C/M/HC/T proposal must govern the bound and its observation basis, including the rematerialization window, before timeout cases are test-ready. Expiry is proposed to return `rejected: layout-unsettled`; no duration or existing end-follow timeout is claimed here.
 
 | # | Event in state `captured` | Result (status: reason) | Movement |
 | --- | --- | --- | --- |
@@ -114,11 +114,11 @@ States: `idle → captured → (settling) → terminal`. Exactly one terminal st
 | T8 | Anchor dematerialized after valid capture (windowing) | wait bounded rematerialization window → `applied`, else `degraded: anchor-unmaterialized` | correction only on rematerialization |
 | T9 | Target replaced / detached-remounted / disposed | `superseded: target-replaced` | none; late callbacks never mutate the replacement lease |
 | T10 | Callback from any generation except captured and its expected post-commit successor | `superseded: stale-generation` | none |
-| T11 | Settling window exceeds the lease timeout | `rejected: layout-unsettled` | none |
+| T11 | Settling window exceeds its later-governed timeout bound (unresolved) | `rejected: layout-unsettled` | none |
 | T12 | `releaseAnchor` before terminal | `superseded: released` | none |
 | T13 | Capability absent at capture or during settling | `rejected: capability-absent` | none |
 
-Outcome precedence when competing events co-occur in one settling window: terminal states already reached win (T2/T9/T12/T3/T5 are terminal at the moment they are observed); if two competing events are observed in the same callback, the safety order is `user-scroll-active > viewport-changed > target-replaced > end-follow-following > stale-generation > layout-unsettled` — the earliest observed event in that order fixes the single terminal result. `applied` never competes with a rejection: if any rejection event is observed before the settled measurement is applied, the rejection wins. This table is the bounded, observable contract a later C/M/HC/T proposal and its T-\* mapping must encode; fake-host matrix additions must cover each row exactly once.
+Outcome precedence when competing events co-occur in one settling window: terminal states already reached win (T2/T9/T12/T3/T5 are terminal at the moment they are observed); if two competing events are observed in the same callback, the safety order is `user-scroll-active > viewport-changed > target-replaced > end-follow-following > stale-generation > layout-unsettled` — the earliest observed event in that order fixes the single terminal result. `applied` never competes with a rejection: if any rejection event is observed before the settled measurement is applied, the rejection wins. This table is a proposed outcome map for a later C/M/HC/T proposal, not a complete test-ready contract while the timeout bound remains unresolved; the later T-\* mapping and fake-host matrix must cover each admitted row.
 
 ## Transaction rules
 
@@ -159,4 +159,4 @@ A later fake-host matrix must add: bounded layout-settle timeout; supersede-on-r
 
 Residual risks: no non-Web executable evidence; host measurement variance across engines for the layout-ready moment; degraded-successor choice may surprise apps with non-trivial successor semantics; virtual accessibility for AT cursors is investigated-only, not guaranteed; no smoothing/transition guarantee (deferred to #685).
 
-Smallest human decision: **accept, revise or reject a later C/M/HC/T proposal for the bounded anchor-preservation transaction above.** Acceptance authorizes spec proposal work only — not a dependency, implementation, Adapter support, public component, end-follow change, #521/#523/#530 integration, or release.
+Smallest human decision: **accept, revise or reject the proposed deferral of #520 case 10 and its responsive-resize/200%-zoom evidence to the follow-up anchor-viewport slice.** Until that owner decision, those acceptance items remain open and unchanged. A later C/M/HC/T proposal must also settle the timeout bound and its observation basis; the existing Scroll Surface capability supplies neither that duration nor approval of the proposed outcomes. Acceptance of this decision packet authorizes spec proposal work only — not a dependency, implementation, Adapter support, public component, end-follow change, #521/#523/#530 integration, or release.

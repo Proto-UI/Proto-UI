@@ -256,17 +256,49 @@ export function initPreviewer(options: PreviewerOptions) {
       dispatch('runtime:changed', { id: runtime });
     } catch (err) {
       if (destroyed || myVersion !== version) return;
-      // 如果是原型未找到的错误，不需要重试（动态加载应该已经处理了）
-      // 旧的重试逻辑已被更可靠的动态加载机制取代
-
-      // 显示错误信息
       host.innerHTML = '';
+      const message = (err as any)?.message || String(err);
+      const isChunkError = /failed to fetch|network|404|not found/i.test(message);
+      const container = document.createElement('div');
+      container.style.cssText =
+        'display:flex;flex-direction:column;align-items:center;gap:0.75rem;padding:2rem;font-family:system-ui,sans-serif;';
+      const title = document.createElement('p');
+      title.textContent = isChunkError ? 'Prototype module failed to load' : 'Preview error';
+      title.style.cssText = 'font-size:1.1rem;font-weight:600;margin:0;';
+      const detail = document.createElement('p');
+      detail.textContent = isChunkError
+        ? 'The lazy-loaded chunk for this prototype is unavailable. This can happen when the site was updated and the previous chunk URL is no longer valid. Try retrying, or reload the page.'
+        : message;
+      detail.style.cssText =
+        'margin:0;color:#555;font-size:0.9rem;max-width:36rem;text-align:center;';
+      container.append(title, detail);
+      const actions = document.createElement('div');
+      actions.style.cssText = 'display:flex;gap:0.5rem;';
+      if (isChunkError) {
+        const retryBtn = document.createElement('button');
+        retryBtn.textContent = 'Retry';
+        retryBtn.style.cssText =
+          'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#fff;cursor:pointer;font-size:0.85rem;';
+        retryBtn.addEventListener('click', () => {
+          loaderPromise = null;
+          void switchTo(id, { force: true });
+        });
+        const reloadBtn = document.createElement('button');
+        reloadBtn.textContent = 'Reload page';
+        reloadBtn.style.cssText =
+          'padding:0.4rem 1rem;border:1px solid #999;border-radius:4px;background:#f5f5f5;cursor:pointer;font-size:0.85rem;';
+        reloadBtn.addEventListener('click', () => {
+          window.location.reload();
+        });
+        actions.append(retryBtn, reloadBtn);
+        container.appendChild(actions);
+      }
       const pre = document.createElement('pre');
-      pre.textContent =
-        '[Preview Error]\n' + (err && ((err as any).stack || (err as any).message || String(err)));
-      pre.style.whiteSpace = 'pre-wrap';
-      pre.style.color = 'crimson';
-      host.appendChild(pre);
+      pre.textContent = (err as any)?.stack || message;
+      pre.style.cssText =
+        'white-space:pre-wrap;color:#888;font-size:0.75rem;max-width:100%;overflow:auto;';
+      container.appendChild(pre);
+      host.appendChild(container);
       console.error(err);
       dispatch('error', { error: err });
     } finally {
