@@ -99,7 +99,7 @@ fn generated_component_preserves_native_children_and_requested_projection(cx: &m
         component.set_props(json!({"next":1,"requested":false}), window, cx);
     }).unwrap();
     draw(&mut visual);
-    assert_eq!(handle.state("count"), json!(1));
+    assert_eq!(handle.state("count").as_f64(), Some(1.0));
     assert_eq!(owner.borrow().projection_revision, revision);
     assert_eq!(text_content(&owner.borrow().projection, &owner.borrow().slot), "A0A0external");
 
