@@ -65,12 +65,20 @@ describe('reading reflow query boundaries (source arithmetic, not browser paint)
     return viewport >= Number(query![1]) * 16 && contentWidth <= Number(query![2]) * root;
   };
 
+  // Model the shared full-width border box and its actual clamp gutter. A
+  // classic scrollbar reduces layout width but not viewport-based 2vw.
+  const canvasWidth = (viewport: number, root: number, scrollbar = 0) => {
+    expect(frame).toContain('--docs-shell-gutter: clamp(1rem, 2vw, 2rem)');
+    expect(frame).toContain('padding-inline: var(--docs-shell-gutter)');
+    const gutter = Math.max(root, Math.min(viewport * 0.02, root * 2));
+    return viewport - scrollbar - 2 * gutter;
+  };
+
   it('keeps the ordinary desktop TOC lateral through the padded overlap and its neighbours', () => {
     for (const viewport of [1279, 1280, 1281, 1296, 1312, 1313, 1327, 1328, 1360, 1361, 1440])
       for (const scrollbar of [0, 15]) {
-        // PageFrame caps the border box at 85rem; global.css pads each side by
-        // 1rem. The 15px case is a modelled classic scrollbar, not a capture.
-        const contentWidth = Math.min(viewport - scrollbar, 85 * 16) - 2 * 16;
+        // The 15px scrollbar is modelled, not a browser capture. No 85rem cap.
+        const contentWidth = canvasWidth(viewport, 16, scrollbar);
         expect(reflows(viewport, contentWidth, 16), `${viewport}px, scrollbar ${scrollbar}`).toBe(
           false
         );
@@ -78,17 +86,25 @@ describe('reading reflow query boundaries (source arithmetic, not browser paint)
   });
 
   it('retains root-relative enlarged reflow at the existing column budget and viewport gate', () => {
-    const columnBudget = Number(columns.match(/@media \(min-width: ([\d.]+)rem\)/)![1]);
-    expect(Number(query![2])).toBe(columnBudget);
-    expect(reflows(1440, 1440 - 2 * 32, 32)).toBe(true);
-    expect(reflows(1279, 1279 - 2 * 32, 32)).toBe(false);
-    for (const root of [20, 24, 32]) {
-      const boundary = columnBudget * root;
-      const viewport = boundary + 2 * root;
-      expect(reflows(viewport - 1, boundary - 1, root)).toBe(true);
-      expect(reflows(viewport, boundary, root)).toBe(true);
-      expect(reflows(viewport + 1, boundary + 1, root)).toBe(false);
-    }
+    const columnBudget = Number(query![2]);
+    expect(Number(query![1])).toBe(80);
+    expect(columnBudget).toBe(72);
+    expect(reflows(1440, canvasWidth(1440, 32), 32)).toBe(true);
+    expect(reflows(1279, canvasWidth(1279, 32), 32)).toBe(false);
+    for (const root of [20, 24, 32])
+      for (const scrollbar of [0, 15]) {
+        // At this boundary 2vw is between the 1rem/2rem clamp endpoints:
+        // viewport - scrollbar - 2 * .02 * viewport = 72 * root.
+        const viewport = (columnBudget * root + scrollbar) / 0.96;
+        const boundary = canvasWidth(viewport, root, scrollbar);
+        expect(boundary).toBeCloseTo(columnBudget * root, 8);
+        expect(reflows(viewport - 1, canvasWidth(viewport - 1, root, scrollbar), root)).toBe(true);
+        expect(reflows(viewport, columnBudget * root, root)).toBe(true);
+        expect(reflows(viewport + 1, canvasWidth(viewport + 1, root, scrollbar), root)).toBe(false);
+      }
+    // At very wide viewports the 2rem gutter cap must not become a canvas cap.
+    expect(canvasWidth(2560, 16)).toBe(2560 - 4 * 16);
+    expect(reflows(2560, canvasWidth(2560, 16), 16)).toBe(false);
   });
 });
 
@@ -285,12 +301,16 @@ it.each(['en', 'zh-cn'])(
   }
 );
 
-it('separates full-width Header chrome from the bounded reading canvas', () => {
+it('separates full-width Header chrome and edge rails from the bounded reading measure', () => {
   const css = readFileSync('apps/www/src/styles/site-header.css', 'utf8');
   expect(frame.indexOf('<slot name="header" />')).toBeLessThan(frame.indexOf('class:list={['));
   expect(frame).toContain('.site-page-frame > header:has([data-site-header])');
   expect(frame).not.toContain('.site-page-frame > .container-wrapper > header');
-  expect(frame).toMatch(/\.docs-shell\s*\{[^}]*max-width: 85rem/);
+  expect(frame).toMatch(/\.site-page-frame > \.docs-shell\s*\{[^}]*max-width: none/);
+  expect(frame).toContain('--docs-reading-width: 42rem');
+  expect(frame).toContain('--docs-shell-gutter: clamp(1rem, 2vw, 2rem)');
+  const columns = readFileSync('apps/www/src/components/override/TwoColumnContent.astro', 'utf8');
+  expect(columns).toContain('max-width: var(--docs-reading-width, 42rem)');
   const root = css.match(/\.site-header\s*\{([^}]+)\}/)![1];
   expect(root).toContain('max-width: none');
   expect(root).toContain('padding-inline: clamp(1rem, 2vw, 2rem)');
