@@ -68,7 +68,7 @@
     "check:styles:preset": "node --import tsx scripts/styles/generate-shadcn-style-tokens.ts --check && node --import tsx scripts/styles/generate-brutalist-style-tokens.ts --check && node --import tsx scripts/styles/generate-draft-family-style-tokens.ts --check && node --import tsx scripts/styles/generate-shadcn-motion-palette.ts --check && node --import tsx --test scripts/styles/test/shadcn-motion-palette.test.ts",
     "component-presets:generate": "node --import tsx scripts/components/generate-shadcn-component-presets.mjs",
     "check:component-presets": "node --import tsx scripts/components/generate-shadcn-component-presets.mjs --check",
-    "check:prototype-catalog": "node scripts/spec/check-prototype-catalog.mjs",
+    "check:prototype-catalog": "node scripts/spec/check-prototype-catalog.mjs && node --test scripts/spec/bounded-map.test.mjs",
     "check:coverage-matrices": "node scripts/coverage-matrices/check-coverage-matrices.mjs && node --test scripts/coverage-matrices/test/*.test.mjs",
     "coverage:governance:refresh": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --write",
     "check:coverage-governance-live": "node scripts/coverage-matrices/sync-github-governance-snapshot.mjs --check",
