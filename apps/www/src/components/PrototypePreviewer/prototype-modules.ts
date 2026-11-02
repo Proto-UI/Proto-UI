@@ -529,6 +529,26 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/tree');
     registerPrototype('base-tree-toggle', mod.treeToggle);
   },
+  'base-carousel-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-root', mod.carouselRoot);
+  },
+  'base-carousel-viewport': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-viewport', mod.carouselViewport);
+  },
+  'base-carousel-slide': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-slide', mod.carouselSlide);
+  },
+  'base-carousel-previous': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-previous', mod.carouselPrevious);
+  },
+  'base-carousel-next': async () => {
+    const mod = await import('@proto.ui/prototypes-base/carousel');
+    registerPrototype('base-carousel-next', mod.carouselNext);
+  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
