@@ -15,36 +15,45 @@ function prototypes(node: DemoChild): string[] {
   ];
 }
 
-// Input is published for base, shadcn, and brutalist. All three declare the demo
-// with `initialRuntime="wc"` (a plain root atom, no runtimes array). base/shadcn
+// Input is published for base, shadcn, brutalist, and bootstrap-2-3-2. All four
+// declare the demo with initialRuntime="wc". base and bootstrap additionally
+// expose a runtimes selector; shadcn/brutalist do not. base/shadcn/bootstrap
 // use a plain `input.mdx`; brutalist publishes at `components/input.mdx`. base
-// has no projection-manifest entry, so its id list is not manifest-bound.
+// has no projection-manifest entry, so its id list is not manifest-bound; the
+// other three are bound to recipePrototypeIds.
 const INPUT_FAMILIES = [
   {
     family: 'base',
     mdxPath: 'input.mdx',
-    runtime: 'initialRuntime="wc"',
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
     slug: 'ui-libraries/base/input',
     manifestBound: false,
   },
   {
     family: 'shadcn',
     mdxPath: 'input.mdx',
-    runtime: 'initialRuntime="wc"',
+    runtimes: null,
     slug: 'ui-libraries/shadcn/input',
     manifestBound: true,
   },
   {
     family: 'brutalist',
     mdxPath: 'components/input.mdx',
-    runtime: 'initialRuntime="wc"',
+    runtimes: null,
     slug: 'ui-libraries/brutalist/components/input',
+    manifestBound: true,
+  },
+  {
+    family: 'bootstrap-2-3-2',
+    mdxPath: 'input.mdx',
+    runtimes: "runtimes={['wc', 'react', 'vue', 'vue2']}",
+    slug: 'ui-libraries/bootstrap-2-3-2/input',
     manifestBound: true,
   },
 ] as const;
 
 describe('Input actual DemoSpec registration', () => {
-  for (const { family, mdxPath, runtime, slug, manifestBound } of INPUT_FAMILIES) {
+  for (const { family, mdxPath, runtimes, slug, manifestBound } of INPUT_FAMILIES) {
     it(`${family} loads only real family input atoms`, async () => {
       const recipeId = `demo-${family}-input`;
       const demo = await loadDemo(recipeId);
@@ -74,7 +83,10 @@ describe('Input actual DemoSpec registration', () => {
           'utf8'
         );
         expect(source).toContain(`demoId="demo-${family}-input"`);
-        expect(source).toContain(runtime);
+        expect(source).toContain('initialRuntime="wc"');
+        if (runtimes) {
+          expect(source).toContain(runtimes);
+        }
       });
     }
 
