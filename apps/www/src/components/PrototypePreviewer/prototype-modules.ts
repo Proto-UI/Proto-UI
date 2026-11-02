@@ -605,34 +605,6 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/calendar');
     registerPrototype('base-calendar-row', mod.calendarRow);
   },
-  'base-calendar-root': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-root', mod.calendarRoot);
-  },
-  'base-calendar-caption': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-caption', mod.calendarCaption);
-  },
-  'base-calendar-weekday': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-weekday', mod.calendarWeekday);
-  },
-  'base-calendar-weekdays': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-weekdays', mod.calendarWeekdays);
-  },
-  'base-calendar-day': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-day', mod.calendarDay);
-  },
-  'base-calendar-previous': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-previous', mod.calendarPrevious);
-  },
-  'base-calendar-next': async () => {
-    const mod = await import('@proto.ui/prototypes-base/calendar');
-    registerPrototype('base-calendar-next', mod.calendarNext);
-  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
