@@ -14,6 +14,22 @@ export const PROBE_HASHES = {
   'subject/scripts/test/server-readiness.mjs':
     '4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda',
 };
+// Current input binding is deliberately NOT historical calibration. This full
+// closure may produce a new paired artifact, but verifyExpectedBaseline below
+// must continue rejecting it until its actual evidence is independently reviewed.
+export const CURRENT_PROBE_HASHES = {
+  'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts':
+    '181f88d9a711103f00437fd1866a30e5a383612c14aad8b0a63c46a043b5df88',
+  'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts':
+    '0f150fc216d71dbd02abe14da46d38713c318a10668f7c8737cc16f7d6c52a23',
+  'subject/scripts/test/server-readiness.mjs':
+    '4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda',
+};
+
+export function verifyCurrentProbeClosure(probeHashes) {
+  assert.deepEqual(probeHashes, CURRENT_PROBE_HASHES, 'Current probe source binding mismatch');
+}
+
 const journey =
   'live available region bounds content, leaves Mask full-size, scrolls long text and restores on close';
 const insetError = 'AssertionError: expected 0 to be greater than or equal to 15';

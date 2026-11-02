@@ -2,7 +2,12 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
-import { PROBE_HASHES, verifyExpectedBaseline } from './check-dialog-baseline-evidence.mjs';
+import {
+  CURRENT_PROBE_HASHES,
+  PROBE_HASHES,
+  verifyCurrentProbeClosure,
+  verifyExpectedBaseline,
+} from './check-dialog-baseline-evidence.mjs';
 import { fixture, rect } from './dialog-baseline-fixture.mjs';
 const verify = (f, exit = 1) => verifyExpectedBaseline(f.report, f.observations, exit, f.binding);
 const row = (f, id = 'shadcn-wc-390-settled') =>
@@ -10,12 +15,54 @@ const row = (f, id = 'shadcn-wc-390-settled') =>
 const title = (f) => row(f, 'brutalist-wc-390-settled-title-clearance').fact;
 const results = (f) => f.report.testResults[0].assertionResults;
 
-test('the calibrated closure matches the actual candidate-owned probe source', () => {
-  for (const [file, expected] of Object.entries(PROBE_HASHES)) {
-    const bytes = readFileSync(new URL(`../../${file.replace(/^subject\//, '')}`, import.meta.url));
-    assert.equal(createHash('sha256').update(bytes).digest('hex'), expected, file);
-  }
+const probePaths = [
+  'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts',
+  'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts',
+  'subject/scripts/test/server-readiness.mjs',
+];
+
+test('the current complete closure matches the actual candidate-owned probe source', () => {
+  const actual = Object.fromEntries(
+    probePaths.map((file) => {
+      const bytes = readFileSync(
+        new URL(`../../${file.replace(/^subject\//, '')}`, import.meta.url)
+      );
+      return [file, createHash('sha256').update(bytes).digest('hex')];
+    })
+  );
+  verifyCurrentProbeClosure(actual);
 });
+
+test('keeps the historical calibration unchanged rather than rebinding its old observations', () => {
+  assert.deepEqual(PROBE_HASHES, {
+    'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts':
+      '181f88d9a711103f00437fd1866a30e5a383612c14aad8b0a63c46a043b5df88',
+    'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts':
+      'e3792a3e0003b79385c3aae90b08728c51d7564bf1abd16a32a47ff9f37fca9d',
+    'subject/scripts/test/server-readiness.mjs':
+      '4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda',
+  });
+});
+
+test('rejects the current uncalibrated closure even with otherwise valid historical fixtures', () => {
+  const f = fixture();
+  f.binding.probeHashes = { ...CURRENT_PROBE_HASHES };
+  assert.throws(() => verify(f), /Uncalibrated probe closure/);
+});
+
+for (const [name, mutate] of [
+  ['missing member', (hashes) => delete hashes[probePaths[0]]],
+  ['additional member', (hashes) => (hashes['subject/other.ts'] = 'a'.repeat(64))],
+  ...probePaths.map((file) => [
+    `changed member ${file}`,
+    (hashes) => (hashes[file] = 'c'.repeat(64)),
+  ]),
+])
+  test(`rejects current source binding with ${name}`, () => {
+    const hashes = { ...CURRENT_PROBE_HASHES };
+    mutate(hashes);
+    assert.throws(() => verifyCurrentProbeClosure(hashes), /Current probe source binding mismatch/);
+  });
 
 test('the workflow binds classification to its independently selected candidate SHA', () => {
   const workflow = readFileSync(
