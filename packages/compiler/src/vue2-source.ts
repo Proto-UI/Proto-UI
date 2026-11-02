@@ -601,6 +601,14 @@ function nativeHelpers(
   tableFamily: string
 ): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
+  // Derive the generated finite registry and its key enumeration from the same
+  // canonical operation metadata; no independent callback-shape analysis.
+  const lifecycleKeys = Object.values(OPERATION_RULES)
+    .filter((rule) => rule.receiver === 'def' && rule.path.startsWith('lifecycle.on'))
+    .map((rule) => {
+      const event = rule.path.slice('lifecycle.on'.length);
+      return event.slice(0, 1).toLowerCase() + event.slice(1);
+    });
   return String.raw`
 /**
  * @template T
@@ -618,6 +626,8 @@ ${
 /** @typedef {{ changedKeysAll: string[], changedKeysMatched: string[] }} PUIPropsWatchInfo */
 /** @template Run @template Snapshot @typedef {(run: Run, next: Snapshot, previous: Snapshot, info: PUIPropsWatchInfo) => void} PUIPropsWatchCallback */
 /** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIRawProps> }} PUIPropsWatchRegistration */
+/** @typedef {${lifecycleKeys.map((key) => JSON.stringify(key)).join(' | ')}} PUILifecycleKind */
+/** @template Run @typedef {(run: Run) => void} PUILifecycleCallback */
 /** @typedef {{ epoch: number, revision: number, kind: 'update' }} PUIPendingCommit */
 /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} PUIRenderedCommit */
 /** @param {unknown} value @param {PropertyKey} key */
@@ -724,7 +734,8 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   const watchers = [];
 ${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = [];\n' : ''}  const exposed = Object.create(null);
   const eventDeclarations = Object.create(null);
-  const lifecycle = { created: [], mounted: [], updated: [], unmounted: [], beforeDispose: [] };
+  /** @type {Record<PUILifecycleKind, Array<PUILifecycleCallback<typeof run>>>} */
+  const lifecycle = { ${lifecycleKeys.map((key) => `${JSON.stringify(key)}: []`).join(', ')} };
 ${stateful ? '  /** @type {Array<() => void>} */\n  const notifications = [];\n' : ''}  ${interactive ? 'const observedExternals = new WeakMap();' : ''}
 ${stateful ? '  let notifying = false;\n' : ''}${
     portal
@@ -1124,6 +1135,8 @@ ${
     watchers.push(watch);
     return () => { watch.active = false; };
   };
+  /** @type {readonly PUILifecycleKind[]} */
+  const lifecycleKeys = ${JSON.stringify(lifecycleKeys)};
   const def = {
     ${context.def}
     ${styled ? 'feedback: { style },' : ''}
@@ -1161,8 +1174,13 @@ ${
       method: (key, fn) => { setupOnly(); exposed[key] = (...args) => { publicAlive(); return invoke(() => fn(...args)); }; },
       event: (key, spec) => { setupOnly(); eventDeclarations[key] = spec; },
     },
-    lifecycle: Object.fromEntries(Object.keys(lifecycle).map((key) => ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }])),
+    lifecycle: Object.fromEntries(lifecycleKeys.map((key) => {
+      /** @type {[string, (fn: PUILifecycleCallback<typeof run>) => void]} */
+      const entry = ['on' + key[0].toUpperCase() + key.slice(1), (fn) => { setupOnly(); lifecycle[key].push(fn); }];
+      return entry;
+    })),
   };
+  /** @param {PUILifecycleKind} kind */
   const fire = (kind) => invoke(() => { for (const fn of lifecycle[kind]) fn(run); }, !terminal);
   const detach = () => {
     if (!viewActive) return;
@@ -1376,7 +1394,7 @@ ${
       }
       disposed = true; phase = 'idle';
       watchers.length = 0;${stateful ? ' notifications.length = 0; states.length = 0;' : ''} defaults.length = 0;
-      for (const key of Object.keys(lifecycle)) lifecycle[key].length = 0;
+      for (const callbacks of Object.values(lifecycle)) callbacks.length = 0;
       for (const key of Object.keys(exposed)) delete exposed[key];
       for (const key of Object.keys(eventDeclarations)) delete eventDeclarations[key];
       specs = Object.create(null); previousValid = Object.create(null); raw = resolved = Object.freeze({}); template = renderFunction = null;

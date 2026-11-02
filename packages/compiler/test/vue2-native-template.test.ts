@@ -44,7 +44,7 @@ function capture(directory: string | undefined, relative: string, contents: stri
 function compile(input: PrototypeIR): GeneratedModule {
   let directory: string | undefined;
   if (evidenceRoot) {
-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 36)
+    if (!path.isAbsolute(evidenceRoot) || ++compilations > 38)
       throw new Error('Unexpected native evidence root or compilation count');
     mkdirSync(evidenceRoot, { recursive: true });
     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
@@ -161,6 +161,148 @@ function renderFunction(ir: PrototypeIR): FunctionIR {
 }
 
 describe('Vue2 compiler-native child construction', () => {
+  it('preserves lifecycle registration order and run binding across native view epochs', async () => {
+    const module = compile(
+      prototype(`
+      def.props.define({present:{type:'boolean',default:true},marker:{type:'string',default:'P'}});
+      def.expose.event('trace',{payload:'json'});
+      def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
+      def.lifecycle.onCreated(run=>{run.expose.emit('trace','created-1:'+run.props.get().marker);});
+      def.lifecycle.onCreated(run=>{run.expose.emit('trace','created-2:'+run.props.get().marker);});
+      def.lifecycle.onMounted(run=>{run.expose.emit('trace','mounted-1:'+run.props.get().marker);});
+      def.lifecycle.onMounted(run=>{run.expose.emit('trace','mounted-2:'+run.props.get().marker);});
+      def.lifecycle.onUpdated(run=>{run.expose.emit('trace','updated-1:'+run.props.get().marker);});
+      def.lifecycle.onUpdated(run=>{run.expose.emit('trace','updated-2:'+run.props.get().marker);});
+      def.lifecycle.onUnmounted(run=>{run.expose.emit('trace','unmounted-1:'+run.props.get().marker);});
+      def.lifecycle.onUnmounted(run=>{run.expose.emit('trace','unmounted-2:'+run.props.get().marker);});
+      def.lifecycle.onBeforeDispose(run=>{run.expose.emit('trace','dispose-1:'+run.props.get().marker);});
+      def.lifecycle.onBeforeDispose(run=>{run.expose.emit('trace','dispose-2:'+run.props.get().marker);});
+      return r=>r.el('output',['view',r.slot()]);
+    `)
+    );
+    const native = options(module),
+      input = Vue2.observable({ present: true, slot: 'S0' });
+    const events: unknown[] = [];
+    const app = new Vue2({
+      render(h) {
+        return h(native, {
+          props: { present: input.present },
+          on: {
+            trace: (payload: unknown) => {
+              events.push(payload);
+            },
+          },
+          scopedSlots: { default: () => [h('em', input.slot)] },
+        });
+      },
+    });
+    const host = document.createElement('div');
+    document.body.append(host);
+    cleanup.push(() => {
+      app.$destroy();
+      host.remove();
+    });
+    const flush = async () => {
+      for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
+    };
+    app.$mount();
+    host.append(app.$el);
+    await flush();
+    const child = app.$children[0];
+    const initial = ['created-1:P', 'created-2:P', 'mounted-1:P', 'mounted-2:P'];
+    expect(events).toEqual(initial);
+    expect(host.querySelector('output')?.textContent).toBe('viewS0');
+    input.slot = 'S1';
+    await flush();
+    expect(events).toEqual(initial); // Slot paint is not an authored lifecycle commit.
+    expect(host.querySelector('output')?.textContent).toBe('viewS1');
+    nativeMethod(child, 'update')();
+    await flush();
+    const updated = [...initial, 'updated-1:P', 'updated-2:P'];
+    expect(events).toEqual(updated);
+    input.present = false;
+    await flush();
+    const detached = [...updated, 'unmounted-1:P', 'unmounted-2:P'];
+    expect(events).toEqual(detached);
+    expect(host.querySelector('output')).toBeNull();
+    input.slot = 'S2';
+    await flush();
+    expect(events).toEqual(detached);
+    input.present = true;
+    await flush();
+    const reopened = [...detached, 'mounted-1:P', 'mounted-2:P'];
+    expect(events).toEqual(reopened);
+    expect(host.querySelector('output')?.textContent).toBe('viewS2');
+    app.$destroy();
+    const disposed = [...reopened, 'unmounted-1:P', 'unmounted-2:P', 'dispose-1:P', 'dispose-2:P'];
+    expect(events).toEqual(disposed);
+    app.$destroy();
+    input.present = false;
+    input.slot = 'S3';
+    await flush();
+    expect(events).toEqual(disposed);
+    expect(nativeMethod(child, 'getExposes')()).toEqual({});
+  });
+
+  it('keeps lifecycle throw order while finishing terminal state cleanup and invalidation', async () => {
+    const view = await mount(
+      prototype(`
+      const first=def.state.numberRange('first',0,{min:0,max:1});
+      const second=def.state.numberRange('second',0,{min:0,max:1});
+      def.expose.state('first',first);def.expose.state('second',second);
+      def.expose.method('write',(next:number)=>first.set(next));
+      def.expose.event('trace',{payload:'json'});
+      def.lifecycle.onUnmounted(run=>{run.expose.emit('trace','unmounted-1');first.set(2);});
+      def.lifecycle.onUnmounted(run=>{run.expose.emit('trace','unmounted-2');});
+      def.lifecycle.onBeforeDispose(run=>{run.expose.emit('trace','dispose-1');second.set(2);});
+      def.lifecycle.onBeforeDispose(run=>{run.expose.emit('trace','dispose-2');});
+      return r=>r.el('output',[first.get(),second.get(),r.slot()]);
+    `)
+    );
+    const exposed = nativeMethod(view.child, 'getExposes')();
+    const first = nativeField(exposed, 'first'),
+      second = nativeField(exposed, 'second');
+    const write = nativeMethod(exposed, 'write'),
+      readFirst = nativeMethod(first, 'get');
+    const events: unknown[] = [],
+      errors: unknown[] = [];
+    view.child.$on('trace', (payload: unknown) => {
+      events.push(payload);
+    });
+    nativeMethod(
+      first,
+      'subscribe'
+    )((event: unknown) => {
+      if (nativeField(event, 'type') === 'disconnect') events.push('disconnect-first');
+    });
+    nativeMethod(
+      second,
+      'subscribe'
+    )((event: unknown) => {
+      if (nativeField(event, 'type') === 'disconnect') events.push('disconnect-second');
+    });
+    const previousHandler = Vue2.config.errorHandler;
+    Vue2.config.errorHandler = (error) => {
+      errors.push(error);
+    };
+    try {
+      view.close();
+    } finally {
+      Vue2.config.errorHandler = previousHandler;
+    }
+    expect(events).toEqual(['unmounted-1', 'dispose-1', 'disconnect-first', 'disconnect-second']);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toBeInstanceOf(Error);
+    expect(nativeField(errors[0], 'message')).toBe('[Vue2 native] state value out of range: first');
+    expect(() => readFirst()).toThrow('terminally invalidated');
+    expect(() => write(1)).toThrow('terminally invalidated');
+    expect(() => nativeMethod(second, 'get')()).toThrow('terminally invalidated');
+    expect(nativeMethod(view.child, 'getExposes')()).toEqual({});
+    view.close();
+    expect(events).toEqual(['unmounted-1', 'dispose-1', 'disconnect-first', 'disconnect-second']);
+    expect(view.host.isConnected).toBe(false);
+  });
+
   it('preserves resolved watcher hydration, coalesced snapshots, registration order and run binding', async () => {
     const module = compile(
       prototype(`
