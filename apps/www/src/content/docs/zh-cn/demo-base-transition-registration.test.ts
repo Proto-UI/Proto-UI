@@ -27,7 +27,11 @@ describe('Base Transition documentation registration', () => {
       expect(existsSync(path)).toBe(true);
       const text = readFileSync(path, 'utf8');
       expect(text).toContain('demo-base-transition-command');
-      expect(text).toContain("runtimes={['wc', 'react', 'vue']}");
+      // transition.mdx renders two demos (command and controlled) that share the
+      // same three-runtime array; bind the assertion to the command demo's block
+      // so a scope regression on the registered demo cannot pass via the other.
+      const commandBlock = /demoId="demo-base-transition-command"[\s\S]*?\/>/.exec(text)?.[0] ?? '';
+      expect(commandBlock).toContain("runtimes={['wc', 'react', 'vue']}");
     }
   );
   it('makes Base Transition discoverable in the sidebar', () => {
