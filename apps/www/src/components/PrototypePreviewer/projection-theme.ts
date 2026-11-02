@@ -1,6 +1,7 @@
 import { THEME as BOOTSTRAP_THEME } from '../../../../../packages/prototypes/bootstrap-2-3-2/src/theme';
 import { THEME as LIQUID_GLASS_THEME } from '../../../../../packages/prototypes/liquid-glass/src/theme';
 import { BRUTALIST_THEME } from '../../../../../packages/prototypes/brutalist/src/theme';
+import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
 
 import type { ProjectionFamilyId } from './projection-families';
 
@@ -93,7 +94,15 @@ function readWebsiteShadcnTheme(scope: Element): ProjectionThemeSurfaceStyle {
     }
     return [property, value] as const;
   });
-  return Object.freeze(Object.fromEntries(entries)) as ProjectionThemeSurfaceStyle;
+  // Font selection is an opt-in consumer preset, unlike the required palette.
+  // Read its dedicated bank, never a retained other-family --pui-font value.
+  const typography = Object.entries(SHADCN_TYPOGRAPHY).map(([name, fallback]) => [
+    `--pui-${name}`,
+    computed.getPropertyValue(`--site-shadcn-${name}`).trim() || fallback,
+  ]);
+  return Object.freeze(
+    Object.fromEntries([...entries, ...typography])
+  ) as ProjectionThemeSurfaceStyle;
 }
 
 function readBrutalistTheme(scope: Element): ProjectionThemeSurfaceStyle {

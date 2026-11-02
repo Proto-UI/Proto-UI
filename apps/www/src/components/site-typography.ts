@@ -289,20 +289,9 @@ export function siteTypographyParticipant(
       let disposed = false;
       let theme: ProjectionThemeSurfaceStyle;
       const applyTheme = () => {
-        // Shadcn keeps its existing system-sans contract even when the retained
-        // native parent still inherits a previous Brutalist font theme.
-        const fontTheme =
-          family === 'shadcn'
-            ? {
-                ...theme,
-                '--pui-font-sans':
-                  document.defaultView
-                    ?.getComputedStyle(document.documentElement)
-                    .getPropertyValue('--font-sans')
-                    .trim() || 'ui-sans-serif, system-ui, sans-serif',
-              }
-            : theme;
-        for (const view of views) applyProjectionThemeSurfaceStyle(view.surface, fontTheme);
+        // Typography uses the same selected-family map as ordinary controls,
+        // previews and portals; no second system-font override after staging.
+        for (const view of views) applyProjectionThemeSurfaceStyle(view.surface, theme);
       };
       const restoreNative = () =>
         preserveSelection(document, () => {

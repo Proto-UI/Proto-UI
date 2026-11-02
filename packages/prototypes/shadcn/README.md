@@ -53,6 +53,12 @@ import {
 
 The root package export remains available for compatibility. Shadcn families do not depend on sibling Shadcn families.
 
+### Opt-in typography preset (draft)
+
+`SHADCN_TYPOGRAPHY`, exported from the root and `/text`, supplies the ordinary `font-sans` and `font-heading` family values for a consumer that chooses the Geist-based Shadcn website typography. It does not select a component profile, change existing component defaults, fetch/bundle fonts, or change Surface's no-font-policy contract. The consumer binds these values through its theme's existing `--pui-font-sans` / `--pui-font-heading` inputs and owns licensed font delivery. A generic authored scope supplies inheritance for ordinary labels and editors; detached portal surfaces must carry the same selected-family input.
+
+The website's source font is unmodified Geist 1.800 with complete OFL attribution. Chinese glyphs use the explicit platform fallback tail, not Geist. Other families retain their own font maps. Source/token transport is not actual glyph, layout stability, all-profile parity or native/compiler acceptance.
+
 Radio Group composes its three parts explicitly. Base owns the selected value, Collection, roving focus, selection requests, and accessibility; Shadcn adds the circular control and passive selected dot. The family has no native form, `asChild`, public orientation/loop, or visual-variant API. Its catalog entries remain draft.
 
 ## Current Base draft projections

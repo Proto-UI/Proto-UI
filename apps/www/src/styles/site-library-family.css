@@ -1,5 +1,27 @@
-/* Application-owned chrome recipes. PUI controls retain their own Prototype
-   surfaces; canonical document --pui-* remains the Shadcn theme source. */
+/* Family font selection is a default, below authored utilities in global.css. */
+@layer base {
+  /* Application-owned chrome recipes. PUI controls retain their own Prototype
+     surfaces; canonical document --pui-* remains the Shadcn theme source. */
+  /* SSR and enhanced content read the same opt-in family bank. Do not replace
+     the ordinary system --font-sans globally or give Surface a font policy. */
+  [data-site-family-scope][data-site-library-family='shadcn'],
+  [data-site-control-family='shadcn'] {
+    --font-sans: var(--site-shadcn-font-sans);
+    font-family: var(--site-shadcn-font-sans);
+  }
+
+  /* These are generic authored theme boundaries, not component-name paint.
+     Each real projection supplies its own family map, including escaped portal
+     surfaces. Defaults stay below author utilities; explicit authored inline font-family also wins. */
+  .pui-projection-scope,
+  .pui-projection-prototype,
+  .pui-runtime-preview-surface,
+  .pui-runtime-preview-owned-surface {
+    --font-sans: var(--pui-font-sans);
+    font-family: var(--pui-font-sans);
+  }
+}
+
 :root,
 [data-site-family-scope] {
   --site-surface-radius: var(--pui-radius-md);

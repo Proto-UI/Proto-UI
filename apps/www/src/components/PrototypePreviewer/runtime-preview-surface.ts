@@ -60,6 +60,9 @@ function portalSurfaceStyle(
   authored?: DemoSurfaceStyle
 ): Record<string, string> {
   const declarations = new Map<string, string>(Object.entries(theme));
+  // Theme variables cross the portal through normalized surfaceStyle.
+  // Its generic owned-surface class selects the font in the low-priority base
+  // layer, so author utilities and explicit inline declarations remain stronger.
   const rejectImportant = (value: string) => {
     // The Demo surface contract forbids priority. Reuse its conservative
     // fallback before CSSOM parsing (including case/comment variations).
@@ -143,6 +146,8 @@ export function createRuntimePreviewSurface(
       const projected = {
         ...node,
         children,
+        // A theme boundary, not the single RuntimeBox canvas identity.
+        className: [node.className, 'pui-runtime-preview-owned-surface'].filter(Boolean).join(' '),
         surfaceStyle: portalSurfaceStyle(theme, node.surfaceStyle),
       };
       ownedSurfaces.set(node.ref!, { node: projected, authored: node.surfaceStyle });
@@ -173,11 +178,79 @@ export function createRuntimePreviewSurface(
       ],
     },
     setup(context) {
-      const {
-        [`${SURFACE_REF}-mount`]: mount,
-        [`${SURFACE_REF}-content`]: content,
-        ...refs
-      } = context.refs;
+      const mount = context.refs[`${SURFACE_REF}-mount`];
+      const content = context.refs[`${SURFACE_REF}-content`];
+      // Default reads follow renderer-owned membership. Child writes keep the
+      // previous local-copy semantics: overrides/deletions never mutate refs
+      // owned by the renderer, and reserved composition refs remain private.
+      let rendererRefs = context.refs;
+      const localRefs = Object.create(null) as Record<string, HTMLElement>;
+      const deletedRefs = new Set<PropertyKey>();
+      const isReservedRef = (key: PropertyKey) =>
+        key === SURFACE_REF || key === `${SURFACE_REF}-mount` || key === `${SURFACE_REF}-content`;
+      const isLiveRef = (key: PropertyKey): key is string =>
+        Reflect.isExtensible(localRefs) &&
+        typeof key === 'string' &&
+        !isReservedRef(key) &&
+        !deletedRefs.has(key) &&
+        Object.hasOwn(rendererRefs, key);
+      const liveDescriptor = (key: string): PropertyDescriptor => ({
+        configurable: true,
+        enumerable: true,
+        writable: true,
+        value: rendererRefs[key],
+      });
+      const materializeLiveRef = (key: PropertyKey) => {
+        if (!Object.hasOwn(localRefs, key) && isLiveRef(key))
+          Reflect.defineProperty(localRefs, key, liveDescriptor(key));
+      };
+      const refs = new Proxy(localRefs, {
+        get: (target, key, receiver) =>
+          Object.hasOwn(target, key)
+            ? Reflect.get(target, key, receiver)
+            : isLiveRef(key)
+              ? rendererRefs[key]
+              : undefined,
+        has: (target, key) => Object.hasOwn(target, key) || isLiveRef(key),
+        ownKeys: (target) => [
+          ...new Set([...Reflect.ownKeys(target), ...Object.keys(rendererRefs).filter(isLiveRef)]),
+        ],
+        getOwnPropertyDescriptor: (target, key) =>
+          Reflect.getOwnPropertyDescriptor(target, key) ??
+          (isLiveRef(key) ? liveDescriptor(key) : undefined),
+        set: (target, key, value, receiver) => {
+          if (isReservedRef(key)) return false;
+          const written = Object.hasOwn(target, key)
+            ? Reflect.set(target, key, value, receiver)
+            : Reflect.defineProperty(target, key, {
+                configurable: true,
+                enumerable: true,
+                writable: true,
+                value,
+              });
+          if (written) deletedRefs.delete(key);
+          return written;
+        },
+        defineProperty: (target, key, descriptor) => {
+          if (isReservedRef(key)) return false;
+          materializeLiveRef(key);
+          const written = Reflect.defineProperty(target, key, descriptor);
+          if (written) deletedRefs.delete(key);
+          return written;
+        },
+        deleteProperty: (target, key) => {
+          if (isReservedRef(key)) return false;
+          const removed = Reflect.deleteProperty(target, key);
+          if (removed) deletedRefs.add(key);
+          return removed;
+        },
+        preventExtensions: (target) => {
+          // Object.seal/freeze explicitly turn the current local view into a
+          // snapshot; Proxy invariants cannot admit new live keys afterwards.
+          for (const key of Object.keys(rendererRefs)) materializeLiveRef(key);
+          return Reflect.preventExtensions(target);
+        },
+      });
       if (!mount || !content || active) throw new Error('Invalid RuntimeBox shell composition');
       if (ownedSurfaces.size && !context.api.setSurfaceStyle) {
         throw new Error('[RuntimeBox] renderer lacks the normalized surface update channel.');
@@ -259,6 +332,13 @@ export function createRuntimePreviewSurface(
         console.error('[RuntimeBox] Native demo retained after shell failure.', error)
       );
       return () => {
+        // Snapshot at retirement entry, before shell movement or caller cleanup
+        // can reenter another generation. Late child onUnmounted callbacks keep
+        // the previous local-copy readability, never a new owner's live refs.
+        const retiredRefs = Object.create(null) as Record<string, HTMLElement>;
+        for (const key of Object.keys(rendererRefs))
+          if (!isReservedRef(key)) retiredRefs[key] = rendererRefs[key];
+        rendererRefs = retiredRefs;
         disposed = true;
         surfaceApi = null;
         const retiring = active;
@@ -269,6 +349,8 @@ export function createRuntimePreviewSurface(
         void retiring
           ?.destroy()
           .catch((error) => console.error('[RuntimeBox] Shell cleanup failed.', error));
+        // Caller writes stay local, including during cleanup and late unmount.
+        // No unrelated shell Promise is used to guess child retirement timing.
         cleanup?.();
       };
     },

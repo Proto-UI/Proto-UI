@@ -63,6 +63,16 @@
   font-display: swap;
 }
 
+/* Declaring a face does not select a family. Only the explicit Shadcn consumer
+   theme opts in; no font request originates in a Prototype or Adapter. */
+@font-face {
+  font-family: 'Geist';
+  src: url('./assets/font/geist/Geist-Variable.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 @layer base {
   :root {
     --radius-xl: calc(var(--radius) + 4px);

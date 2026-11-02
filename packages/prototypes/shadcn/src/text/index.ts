@@ -10,3 +10,4 @@ export type {
   TextRootExposes as ShadcnTextRootExposes,
 } from '@proto.ui/prototypes-base/text';
 export type { ShadcnTextRootProps } from './root.proto';
+export { SHADCN_TYPOGRAPHY } from './typography';

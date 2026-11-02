@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { BRUTALIST_THEME } from '../../../../../packages/prototypes/brutalist/src/theme';
+import { SHADCN_TYPOGRAPHY } from '../../../../../packages/prototypes/shadcn/src/text/typography';
 import {
   applyProjectionThemeSurfaceStyle,
   resolveProjectionThemeSurfaceStyle,
@@ -25,13 +26,58 @@ describe('Website projection theme inputs', () => {
     const theme = resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement);
 
     expect(theme['--pui-background']).toBe('value-background');
-    expect(Object.keys(theme)).toHaveLength(WEBSITE_SHADCN_THEME_TOKENS.length);
+    expect(Object.keys(theme)).toHaveLength(WEBSITE_SHADCN_THEME_TOKENS.length + 2);
+    expect(theme['--pui-font-sans']).toBe(SHADCN_TYPOGRAPHY['font-sans']);
+    expect(theme['--pui-font-heading']).toBe(SHADCN_TYPOGRAPHY['font-heading']);
     expect(theme).not.toHaveProperty('--page-private-token');
 
     document.documentElement.style.removeProperty('--pui-popover');
     expect(() => resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement)).toThrow(
       /missing required --pui-popover/
     );
+  });
+
+  it('reads explicit Shadcn typography overrides without borrowing a retained other-family font', () => {
+    for (const name of WEBSITE_SHADCN_THEME_TOKENS)
+      document.documentElement.style.setProperty(`--pui-${name}`, `value-${name}`);
+    document.documentElement.style.setProperty('--pui-font-sans', 'Retained Brutalist');
+    document.documentElement.style.setProperty('--site-shadcn-font-sans', 'Authored Sans');
+    const first = resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement);
+    expect(first['--pui-font-sans']).toBe('Authored Sans');
+    expect(first['--pui-font-heading']).toBe(SHADCN_TYPOGRAPHY['font-heading']);
+    document.documentElement.style.removeProperty('--site-shadcn-font-sans');
+    expect(
+      resolveProjectionThemeSurfaceStyle('shadcn', document.documentElement)['--pui-font-sans']
+    ).toBe(SHADCN_TYPOGRAPHY['font-sans']);
+    expect(
+      resolveProjectionThemeSurfaceStyle('brutalist', document.documentElement)['--pui-font-sans']
+    ).toBe(BRUTALIST_THEME.light['font-sans']);
+    expect(
+      resolveProjectionThemeSurfaceStyle('liquid-glass', document.documentElement)[
+        '--pui-font-sans'
+      ]
+    ).not.toContain('Geist');
+    expect(
+      resolveProjectionThemeSurfaceStyle('bootstrap-2-3-2', document.documentElement)[
+        '--pui-font-sans'
+      ]
+    ).not.toContain('Geist');
+  });
+
+  it('withdraws a previous family font with the owned theme map and leaves caller style alone', () => {
+    const surface = document.createElement('div');
+    surface.style.fontFamily = 'Authored Family';
+    const authoredFont = surface.style.fontFamily;
+    applyProjectionThemeSurfaceStyle(surface, {
+      '--pui-font-sans': SHADCN_TYPOGRAPHY['font-sans'],
+    });
+    applyProjectionThemeSurfaceStyle(surface, {
+      '--pui-font-sans': BRUTALIST_THEME.light['font-sans']!,
+    });
+    expect(surface.style.getPropertyValue('--pui-font-sans')).not.toContain('Geist');
+    applyProjectionThemeSurfaceStyle(surface, {});
+    expect(surface.style.getPropertyValue('--pui-font-sans')).toBe('');
+    expect(surface.style.fontFamily).toBe(authoredFont);
   });
 
   it('uses the Prototype-owned Brutalist theme for the active Website color mode', () => {
