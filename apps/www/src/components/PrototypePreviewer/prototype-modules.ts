@@ -474,7 +474,7 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     registerPrototype('liquid-glass-button', mod.default);
   },
   'base-button': async () => {
-    const mod = await import('@proto.ui/prototypes-base');
+    const mod = await import('@proto.ui/prototypes-base/button');
     registerPrototype('base-button', mod.button);
   },
   'base-toggle': async () => {
