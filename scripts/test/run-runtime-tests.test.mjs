@@ -463,6 +463,26 @@ describe('bounded documentation readiness', () => {
     assert.match(runner, /finally \{\s*await stopServer\(\)/);
   });
 
+  it('keeps the style generation outside every browser readiness window', () => {
+    const harness = readFileSync('apps/www/src/content/docs/zh-cn/browser-harness.ts', 'utf8');
+    assert.match(harness, /export function runStyleGeneration\(/);
+    for (const file of [
+      'browser-harness.ts',
+      'demo-base-controls.browser.test.ts',
+      'demo-brutalist-controls.browser.test.ts',
+    ]) {
+      const source = readFileSync(`apps/www/src/content/docs/zh-cn/${file}`, 'utf8');
+      // The apps-www dev script folds the style/CLI generation into the same
+      // spawn, so a readiness probe would be charged for build tooling it does
+      // not measure. The generation is awaited first and astro dev is spawned
+      // directly, so the bounded budget covers only the server start and the
+      // route's first compile.
+      assert.match(source, /await runStyleGeneration\(executable\)/);
+      assert.doesNotMatch(source, /'apps-www',\s*\n\s*'dev',\s*\n/);
+      assert.match(source, /'apps-www',\s*\n\s*'exec',\s*\n\s*'astro',\s*\n\s*'dev',\s*\n/);
+    }
+  });
+
   // Execute the production helper with a deterministic clock and HTTP
   // transport. No socket or browser is started by these negative controls.
   function fixture(t, replies) {
