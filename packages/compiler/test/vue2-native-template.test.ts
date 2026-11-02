@@ -44,7 +44,7 @@ function capture(directory: string | undefined, relative: string, contents: stri
 function compile(input: PrototypeIR): GeneratedModule {
   let directory: string | undefined;
   if (evidenceRoot) {
-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 34)
+    if (!path.isAbsolute(evidenceRoot) || ++compilations > 36)
       throw new Error('Unexpected native evidence root or compilation count');
     mkdirSync(evidenceRoot, { recursive: true });
     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
@@ -161,6 +161,140 @@ function renderFunction(ir: PrototypeIR): FunctionIR {
 }
 
 describe('Vue2 compiler-native child construction', () => {
+  it('preserves resolved watcher hydration, coalesced snapshots, registration order and run binding', async () => {
+    const module = compile(
+      prototype(`
+      def.props.define({value:{type:'number',default:0},other:{type:'number',default:10}});
+      def.expose.event('observed',{payload:'json'});
+      def.props.watch(['value'],(run,next,previous)=>{
+        run.expose.emit('observed',{name:'first',next:next.value,previous:previous.value,
+          bound:run.props.get().value,provided:run.props.isProvided('value')});
+      });
+      def.props.watch(['value','other'],(run,next,previous)=>{
+        run.expose.emit('observed',{name:'second',next:next.value,previous:previous.value,
+          bound:run.props.get().value,provided:run.props.isProvided('value')});
+      });
+      return r=>r.el('output',[r.read.props.get().value,r.slot()]);
+    `)
+    );
+    const native = options(module);
+    const input = Vue2.observable({ props: {} as Record<string, unknown>, slot: 'S0' });
+    const events: unknown[] = [];
+    const app = new Vue2({
+      render(h) {
+        return h(native, {
+          props: input.props,
+          on: {
+            observed: (payload: unknown) => {
+              events.push(payload);
+            },
+          },
+          scopedSlots: { default: () => [h('em', input.slot)] },
+        });
+      },
+    });
+    const host = document.createElement('div');
+    document.body.append(host);
+    cleanup.push(() => {
+      app.$destroy();
+      host.remove();
+    });
+    app.$mount();
+    host.append(app.$el);
+    const flush = async () => {
+      for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
+    };
+    await flush();
+    expect(events).toEqual([]);
+    expect(host.querySelector('output')?.textContent).toBe('0S0');
+    input.props = { value: 1 };
+    input.props = { value: 2 };
+    await flush();
+    expect(events).toEqual([
+      { name: 'first', next: 2, previous: 0, bound: 2, provided: true },
+      { name: 'second', next: 2, previous: 0, bound: 2, provided: true },
+    ]);
+    expect(host.querySelector('output')?.textContent).toBe('2S0');
+    events.length = 0;
+    input.props = { value: 'invalid raw number' };
+    input.slot = 'S1';
+    await flush();
+    expect(events).toEqual([]);
+    expect(host.querySelector('output')?.textContent).toBe('2S1');
+    input.props = { value: 2, other: 11 };
+    await flush();
+    expect(events).toEqual([{ name: 'second', next: 2, previous: 2, bound: 2, provided: true }]);
+    events.length = 0;
+    input.props = { value: -0, other: 11 };
+    await flush();
+    expect(events).toEqual([
+      { name: 'first', next: -0, previous: 2, bound: -0, provided: true },
+      { name: 'second', next: -0, previous: 2, bound: -0, provided: true },
+    ]);
+    events.length = 0;
+    input.props = { value: 0, other: 11 };
+    await flush();
+    expect(events).toEqual([
+      { name: 'first', next: 0, previous: -0, bound: 0, provided: true },
+      { name: 'second', next: 0, previous: -0, bound: 0, provided: true },
+    ]);
+    expect(host.querySelector('output')?.textContent).toBe('0S1');
+  });
+
+  it('keeps a setup-returned props watcher disposer inactive through repeated native invocation and cleanup', async () => {
+    const module = compile(
+      prototype(`
+      def.props.define({value:{type:'number',default:0}});
+      def.expose.event('observed',{payload:'json'});
+      const stop=def.props.watch(['value'],(run,next)=>{run.expose.emit('observed',next.value);});
+      return stop;
+    `)
+    );
+    const native = options(module);
+    const input = Vue2.observable({ value: 0 });
+    const events: unknown[] = [];
+    const app = new Vue2({
+      render(h) {
+        return h(native, {
+          props: { value: input.value },
+          on: {
+            observed: (payload: unknown) => {
+              events.push(payload);
+            },
+          },
+          scopedSlots: { default: () => [h('em', 'not-an-authored-renderer')] },
+        });
+      },
+    });
+    const host = document.createElement('div');
+    document.body.append(host);
+    cleanup.push(() => {
+      app.$destroy();
+      host.remove();
+    });
+    app.$mount();
+    host.append(app.$el);
+    const flush = async () => {
+      for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
+    };
+    await flush();
+    expect(events).toEqual([]);
+    expect(host.textContent).toBe('');
+    const child = app.$children[0];
+    nativeMethod(child, 'update')();
+    nativeMethod(child, 'update')();
+    input.value = 1;
+    await flush();
+    input.value = 2;
+    await flush();
+    expect(events).toEqual([]);
+    expect(host.textContent).toBe('');
+    app.$destroy();
+    input.value = 3;
+    await flush();
+    expect(events).toEqual([]);
+  });
+
   it('preserves queued native update commits without treating live-slot paint as an authored commit', async () => {
     const view = await mount(
       prototype(`
