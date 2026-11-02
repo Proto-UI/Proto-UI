@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "record": "R6 native Vue2 WIP owned-state cell / full failing strict graph",
+  "status": "core41PASS_2FAIL_regression41PASS_sourceStrictPASS_notCompilerAcceptance",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "b25a1d925a4a49d6d8bcd49fcc6a8d0c3cabbb9f",
+  "candidateTree": "d15cb53aa92177a56d7d6dad798e4de2485c8627",
+  "publicationParent": "c373a1dbf5134382e5e0fe628de9042f3d62ec00",
+  "publicationBoundary": "Static byte-preserving continuation of original r2 PR; publication commit itself was not run. Source trees are diagnostic identities, not prior published commits.",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/test/vue2-native-template-commit-contract.test.ts",
+      "sha256": "aa27faa0b485b5416a6f9bf83e6c115b9fcd5516cdd22de4db51b0bc32bb08e1",
+      "bytes": 21509,
+      "gitBlob": "f7e21de0001ef5376e691afbb3e5e8a759562860"
+    },
+    {
+      "path": "packages/compiler/src/vue2-native-template.ts",
+      "sha256": "7b32afd9c560218eab22938629415a6c233e367b2ca9629814955e49c2ceb259",
+      "bytes": 21720,
+      "gitBlob": "7452c7e97a9d1527de7b1bcc1d9eb36340bdc8c0"
+    },
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "sha256": "5bc9595af9d2ed7240abefa09ad9ccc80ee57513c028f35c74718c57e657e479",
+      "bytes": 66565,
+      "gitBlob": "cee7fdfce2c0ea3dd8426face04f1863c7d3a2d9"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-template.test.ts",
+      "sha256": "d265658967bfefec399fa499e5c6323250b7a394968e24726f0eaf9c5b382718",
+      "bytes": 26773,
+      "gitBlob": "b57d4e0358f1c2464e595f9d5196353e128abc95"
+    },
+    {
+      "path": "packages/compiler/test/vue2-native-this-boundary.test.ts",
+      "sha256": "a3286f68ad0cc940e7ead3d75e823bbfecd7bdd121411a75cda403390ec2a6da",
+      "bytes": 8362,
+      "gitBlob": "53aad2bb89e455238d6c1a82e89c73b5eba0cf5b"
+    },
+    {
+      "path": "packages/compiler/test/vue2-state-reachability.test.ts",
+      "sha256": "105726e8b44615e5e4745a0bb9ead7e7f39d94d660b642ce861dc994a5975ff5",
+      "bytes": 17617,
+      "gitBlob": "d1c40b8f39b8ebc0e1675c94a56a07e17ca519da"
+    }
+  ],
+  "toolchain": {
+    "node": "24.22.1",
+    "typescript": "5.9.3",
+    "vue": "2.6.14",
+    "vitest": "2.1.9",
+    "happy-dom": "15.11.7",
+    "lockedPackages": 105,
+    "lockedDependencySnapshotSHA256": "b4b127c0edb81b26abfed50ec434b1c1ddfabcede646be1978a8ffded480ed05",
+    "pnpmLockSHA256": "3ac437fda5666f744c02587d9c90b47a927a6e2521973f6a18b47cc3c7cbe422"
+  },
+  "fixedRunner": {
+    "sha256": "497e05b67f7a99c0717451a9e0f9a6b948c7b340060c8ed99892ca4e0b40bb96",
+    "gateSHA256": "9fc3acac99720c3a6d67f6d63e78d3bae30d4c783616c1919cca87b7fb66a56a",
+    "phasesPerVariant": [
+      "collect",
+      "source-strict",
+      "unit",
+      "regression-collect",
+      "regression-unit"
+    ],
+    "network": "denied",
+    "credentials": "absent",
+    "sourceAndDependencyGuards": "pre/post each subprocess and final; no drift/evidenceIssues"
+  },
+  "results": {
+    "eachCore": {
+      "collected": 43,
+      "passed": 41,
+      "failed": 2,
+      "originalBehaviorPassed": 11,
+      "nativePassed": 30,
+      "nativeFailed": 1,
+      "generatedStrictFailed": 1,
+      "nativeRejectionControls": 3,
+      "skipped": 0
+    },
+    "eachRegression": {
+      "collected": 41,
+      "passed": 41,
+      "failed": 0
+    },
+    "eachSourceStrictDiagnostics": 0,
+    "generatedStrict": {
+      "control": 143,
+      "candidate": 134,
+      "common": 134,
+      "controlOnly": 9,
+      "candidateOnly": 0,
+      "codes": {
+        "7006": 87,
+        "2339": 19,
+        "7034": 7,
+        "7005": 11,
+        "7053": 9,
+        "7019": 1
+      }
+    },
+    "allCapturedArtifactFiles": 1182,
+    "allCapturedArtifactBytes": 20804830,
+    "allArtifactHashesVerified": true
+  },
+  "testBoundaries": {
+    "originalR2Cases": 12,
+    "originalR2ExpectSites": 43,
+    "all31NativeInputsCaptured": true,
+    "newStateControls": "Family/default/commit/live-slot, snapshot/reentry/throw queue, structurally admitted extra fields, multi-cell cleanup failure/terminal handles; all four pass on both trees. Bool bad-mutation not covered.",
+    "noStrictSuppressionOrAnyFacade": true
+  },
+  "artifacts": [
+    {
+      "path": "authored.proto.ts.txt",
+      "originalArtifact": "authored.proto.ts",
+      "kind": "original-unchanged-bytes",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682",
+      "originalSHA256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "originalArtifact": "emitted/module.json",
+      "kind": "original-unchanged-bytes",
+      "bytes": 45969,
+      "sha256": "b91c9e9178c64662c6c1a8847b204899bb89573138607e9bf38435fe4a003daf",
+      "originalSHA256": "b91c9e9178c64662c6c1a8847b204899bb89573138607e9bf38435fe4a003daf"
+    },
+    {
+      "path": "graph/Component.js.txt",
+      "originalArtifact": "strict/files/Component.js",
+      "kind": "original-unchanged-bytes",
+      "bytes": 35633,
+      "sha256": "fe8b34cb17bd975bc3e447a01077a522eceeb4757a92edf3af0eab7f5e2617b5",
+      "originalSHA256": "fe8b34cb17bd975bc3e447a01077a522eceeb4757a92edf3af0eab7f5e2617b5"
+    },
+    {
+      "path": "graph/Consumer.ts.txt",
+      "originalArtifact": "strict/files/Consumer.ts",
+      "kind": "original-unchanged-bytes",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f",
+      "originalSHA256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts.txt",
+      "originalArtifact": "strict/files/.proto-ui/context/scope-v1.ts",
+      "kind": "original-unchanged-bytes",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+      "originalSHA256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "originalArtifact": "strict/diagnostics.json",
+      "kind": "path-prefix-only-derived",
+      "bytes": 40535,
+      "sha256": "fd1f4e7f67bac0943f41ad5e558810dc1f7df115eaafce527b05d4df65e75f51",
+      "originalSHA256": "abc3c8b7690225b74841d63029f16062415e93ac040438cf0d01b23a351dd40c"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "originalArtifact": "strict/request.json",
+      "kind": "path-prefix-only-derived",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5",
+      "originalSHA256": "b0e79acb1eea9ba7975505fcf052a0e940e7c466e8463c85e2fc36016928a0e0"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "originalArtifact": "strict/program.json",
+      "kind": "path-prefix-only-derived",
+      "bytes": 41791,
+      "sha256": "1569feb3193429f3c3b2c5fcad14724aaa7741ee310c369e4b9e05337dda93da",
+      "originalSHA256": "b453cc4abe1b3999a7c7552e79940e58319f56c081468188a0ae4943c3603f7c"
+    }
+  ],
+  "placeholders": {
+    "<generated>": "Temporary actual strict input directory; only prefix replaced.",
+    "<repo>": "Measured isolated repository root.",
+    "<vue2-declaration-root>": "Real Vue2.6.14 package declaration root.",
+    "<locked-dependencies>": "Pinned dependency root; original package identifier and relative paths preserved."
+  },
+  "preservation": {
+    "original167Carrier": "Parent directory remains unchanged; historical r2 output is not overwritten.",
+    "priorEntryFailure": "12:11 inode resource gate exit1 before project source; full raw receipt/logs retained locally. Same fixed source/threshold recovery12:22–12:27 supplied actual ten stages.",
+    "familyCheckerSHA256": "6fc1d3765d825d369548399014c40f79d820e726f4bf1ac0165e6c92f99ee8ac",
+    "familyCheckerBytes": 1228,
+    "completeOriginalDiagnosticsRetained": true
+  },
+  "remaining": "134 strict diagnostics; statefactory/config relationships stillimplicit; legal uncalled identity-observed legacy-template-formal regression; same-source native SSR/hydration; Context/reached capability costs; real browser/ordinary production/mixed consumers and complete backend/operation matrix. Independent static review is not APPROVE.",
+  "publicSource": "https://github.com/Proto-UI/Proto-UI/issues/1055#issuecomment-6569582240"
+}
