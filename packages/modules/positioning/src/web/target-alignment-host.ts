@@ -1,3 +1,5 @@
+import { ownStyles } from './owned-style-lease';
+import { createBorderBoxSizeLease, measureBorderBoxInlineGutter } from './border-box-size-lease';
 import type {
   AnchoredPositionConnection,
   TargetAlignmentConnection,
@@ -48,58 +50,6 @@ function layoutLeft(node: HTMLElement): number {
   return left;
 }
 
-type StyleClaim = { before: string; priority: string; written: string };
-const styleOwners = new WeakMap<HTMLElement, Map<string, StyleClaim>>();
-
-/** Claims are identity-owned across synchronous lease handoffs, not merely value-owned. */
-function ownStyles(target: HTMLElement) {
-  const fields = new Map<string, StyleClaim>();
-  let owners = styleOwners.get(target);
-  if (!owners) {
-    owners = new Map();
-    styleOwners.set(target, owners);
-  }
-  const currentOwners = owners;
-  let lost = false;
-  const matches = (name: string, record: StyleClaim) =>
-    target.style.getPropertyValue(name) === record.written &&
-    target.style.getPropertyPriority(name) === '';
-  return {
-    write(name: string, value: string): boolean {
-      if (lost) return false;
-      let record = fields.get(name);
-      if (record && (currentOwners.get(name) !== record || !matches(name, record))) {
-        lost = true;
-        return false;
-      }
-      if (!record) {
-        const prior = currentOwners.get(name);
-        const inherit = prior && matches(name, prior);
-        record = {
-          before: inherit ? prior.before : target.style.getPropertyValue(name),
-          priority: inherit ? prior.priority : target.style.getPropertyPriority(name),
-          written: '',
-        };
-        fields.set(name, record);
-        currentOwners.set(name, record);
-      }
-      target.style.setProperty(name, value);
-      record.written = target.style.getPropertyValue(name);
-      return true;
-    },
-    restore() {
-      for (const [name, record] of fields) {
-        if (currentOwners.get(name) !== record) continue;
-        currentOwners.delete(name);
-        if (!matches(name, record)) continue;
-        if (record.before) target.style.setProperty(name, record.before, record.priority);
-        else target.style.removeProperty(name);
-      }
-      fields.clear();
-    },
-  };
-}
-
 type Targets = {
   [K in
     | 'surface'
@@ -114,7 +64,15 @@ function sameGeometry(a: AnchoredPositionConnection, b: AnchoredPositionConnecti
   const x = a.targetAlignment,
     y = b.targetAlignment;
   if (!x || !y || a.floating !== b.floating) return false;
+  const sameSize =
+    (!x.sizeMatch && !y.sizeMatch) ||
+    (!!x.sizeMatch &&
+      !!y.sizeMatch &&
+      x.sizeMatch.reference === y.sizeMatch.reference &&
+      x.sizeMatch.targets.length === y.sizeMatch.targets.length &&
+      x.sizeMatch.targets.every((target, index) => target === y.sizeMatch?.targets[index]));
   return (
+    sameSize &&
     (
       [
         'surface',
@@ -188,8 +146,29 @@ export function createTargetAlignmentLease(
       report({ status: 'pending-target', reason: 'detached-target' });
       return;
     }
+    const sizing = descriptor.sizeMatch;
+    if (
+      sizing &&
+      (!element(sizing.reference) || sizing.targets.length === 0 || !sizing.targets.every(element))
+    ) {
+      report({ status: 'pending-target', reason: 'missing-target' });
+      return;
+    }
+    const sizeTargets = sizing ? (sizing.targets as readonly HTMLElement[]) : [];
+    const sizeLease = sizing
+      ? createBorderBoxSizeLease(sizing.reference as HTMLElement, sizeTargets, live)
+      : null;
     const owned = ownStyles(frame);
-    restore = () => owned.restore();
+    const rejectAdmission = (reason: 'invalid-geometry' | 'ownership-lost') => {
+      // Admission failure is observable synchronously. Roll back our sizing
+      // before delivery; pending layout keeps its identity claims instead.
+      sizeLease?.abort(reason);
+      report({ status: 'unavailable', reason });
+    };
+    restore = () => {
+      owned.restore();
+      sizeLease?.restore();
+    };
     let plan: TargetAlignmentPlan | null = null;
     let requestedSpan = 0;
     let previousScroll = targets.scrollport.scrollTop;
@@ -202,14 +181,15 @@ export function createTargetAlignmentLease(
       if (!live() || ownershipLost) return false;
       if (!owned.write(name, value)) {
         ownershipLost = true;
-        report({ status: 'unavailable', reason: 'ownership-lost' });
+        rejectAdmission('ownership-lost');
         return false;
       }
       return true;
     };
     const connected = () =>
       frame.isConnected &&
-      keys.every((key) => targets[key].isConnected && targets[key].ownerDocument === doc);
+      keys.every((key) => targets[key].isConnected && targets[key].ownerDocument === doc) &&
+      sizeTargets.every((target) => target.isConnected && target.ownerDocument === doc);
     const readPlan = (): TargetAlignmentPlan | null => {
       if (!live() || !connected()) {
         if (live()) report({ status: 'pending-target', reason: 'detached-target' });
@@ -230,6 +210,16 @@ export function createTargetAlignmentLease(
       const paint = view.getComputedStyle(targets.surface);
       const scroll = view.getComputedStyle(targets.scrollport);
       const css = (text: string) => Number.parseInt(text, 10);
+      const gutters = sizeTargets.map((target) =>
+        measureBorderBoxInlineGutter(target, targets.surface)
+      );
+      if (gutters.some((gutter) => gutter === null)) {
+        rejectAdmission('invalid-geometry');
+        return null;
+      }
+      const minimumOuterInlineSpan = sizeTargets.length
+        ? (sizing?.reference as HTMLElement).offsetWidth + Math.max(...(gutters as number[]))
+        : undefined;
       const result = solveTargetAlignment(
         {
           direction: view.getComputedStyle(frame).direction === 'rtl' ? 'rtl' : 'ltr',
@@ -260,6 +250,7 @@ export function createTargetAlignmentLease(
             height: targets.blockTarget.offsetHeight,
             atStart: descriptor.atStart,
             atEnd: descriptor.atEnd,
+            ...(minimumOuterInlineSpan === undefined ? {} : { minimumOuterInlineSpan }),
           },
           scrollport: {
             scrollHeight: targets.scrollport.scrollHeight,
@@ -273,7 +264,7 @@ export function createTargetAlignmentLease(
       );
       if (!live()) return null;
       if (result.kind !== 'plan') {
-        report({ status: 'unavailable', reason: 'invalid-geometry' });
+        rejectAdmission('invalid-geometry');
         return null;
       }
       return result.plan;
@@ -299,6 +290,17 @@ export function createTargetAlignmentLease(
           ...(!applied ? { 'justify-content': 'normal' } : {}),
         }))
           if (!write(name, value)) return;
+        if (sizeLease) {
+          const sized = sizeLease.prepare();
+          if (sized.kind !== 'prepared') {
+            if (sized.kind === 'pending')
+              report({ status: 'pending-target', reason: 'missing-target' });
+            else if (sized.reason === 'detached-target')
+              report({ status: 'pending-target', reason: 'detached-target' });
+            else report({ status: 'unavailable', reason: sized.reason });
+            return;
+          }
+        }
         // Inline constraints can reflow preceding rows. Never use pre-width block metrics.
         let candidate = readPlan();
         if (!candidate) return;
@@ -309,6 +311,17 @@ export function createTargetAlignmentLease(
             [candidate.inline.edge === 'left' ? 'right' : 'left']: '',
           }))
             if (!write(name, value)) return;
+          if (sizeLease) {
+            const sized = sizeLease.prepare();
+            if (sized.kind !== 'prepared') {
+              if (sized.kind === 'pending')
+                report({ status: 'pending-target', reason: 'missing-target' });
+              else if (sized.reason === 'detached-target')
+                report({ status: 'pending-target', reason: 'detached-target' });
+              else report({ status: 'unavailable', reason: sized.reason });
+              return;
+            }
+          }
           const constrained = readPlan();
           if (!constrained) return;
           plan = constrained;
@@ -331,6 +344,33 @@ export function createTargetAlignmentLease(
           const settled = readPlan();
           if (!settled) return;
           if (equivalent(candidate, constrained) && equivalent(constrained, settled)) {
+            // Certify the dimensions already used by this plan without writing
+            // again. A late reference resize consumes another existing bounded
+            // solve pass; it cannot silently admit a plan for an earlier size.
+            const sized = sizeLease?.verify();
+            if (sized?.kind === 'reference-changed') {
+              const prepared = sizeLease!.prepare();
+              if (prepared.kind !== 'prepared') {
+                if (prepared.kind === 'pending')
+                  report({ status: 'pending-target', reason: 'missing-target' });
+                else if (prepared.reason === 'detached-target')
+                  report({ status: 'pending-target', reason: 'detached-target' });
+                else report({ status: 'unavailable', reason: prepared.reason });
+                return;
+              }
+              const resized = readPlan();
+              if (!resized) return;
+              candidate = resized;
+              continue;
+            }
+            if (sized?.kind === 'unavailable' || sized?.kind === 'pending') {
+              if (sized.kind === 'pending')
+                report({ status: 'pending-target', reason: 'missing-target' });
+              else if (sized.reason === 'detached-target')
+                report({ status: 'pending-target', reason: 'detached-target' });
+              else report({ status: 'unavailable', reason: sized.reason });
+              return;
+            }
             stable = true;
             break;
           }
@@ -341,13 +381,16 @@ export function createTargetAlignmentLease(
       }
       if (!live()) return;
       if (!stable) {
-        report({ status: 'unavailable', reason: 'invalid-geometry' });
+        rejectAdmission('invalid-geometry');
         return;
       }
-      if (!applied) {
+      const firstApply = !applied;
+      if (firstApply || lastStatus?.status !== 'applied') {
         applied = true;
         report({ status: 'applied' });
         if (!live()) return;
+      }
+      if (firstApply) {
         frameTask = view.requestAnimationFrame(() => {
           frameTask = null;
           if (live()) expand = descriptor.constraints.expandOnScroll;
@@ -385,7 +428,7 @@ export function createTargetAlignmentLease(
     const onOuterScroll = (event: Event) => {
       if (event.target !== targets.scrollport) position();
     };
-    const observedTargets = new Set([frame, ...keys.map((key) => targets[key])]);
+    const observedTargets = new Set([frame, ...keys.map((key) => targets[key]), ...sizeTargets]);
     // These metrics use both boxes. One observer cannot retain two box registrations per target.
     const observers =
       typeof view.ResizeObserver === 'function'

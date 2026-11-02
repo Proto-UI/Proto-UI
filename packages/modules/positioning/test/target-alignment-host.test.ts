@@ -92,12 +92,194 @@ function fixture() {
   };
   return { frame, surface, scrollport, blockTarget, connection, onAlignment };
 }
+// Deterministic used-layout facts, not a native CSS layout engine. The row
+// cannot grow until the same host has installed the containing minimum span.
+function sizingFixture() {
+  const f = fixture();
+  const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+  let width = 340;
+  let ready = true;
+  let maximumRowWidth = Infinity;
+  dimensions(reference, { offsetHeight: 44 });
+  Object.defineProperty(reference, 'offsetWidth', { configurable: true, get: () => width });
+  reference.getBoundingClientRect = () => rect(180, 240, width, 44);
+  f.surface.style.margin = '0px';
+  f.scrollport.style.border = '0px';
+  f.scrollport.style.margin = '0px';
+  f.blockTarget.style.margin = '0px';
+  const get = (node: HTMLElement, key: string, read: () => number) =>
+    Object.defineProperty(node, key, { configurable: true, get: read });
+  get(f.surface, 'offsetWidth', () =>
+    Math.max(180, Number.parseFloat(f.frame.style.minWidth) || 0)
+  );
+  get(f.surface, 'clientWidth', () => f.surface.offsetWidth - 2);
+  get(f.scrollport, 'offsetWidth', () => f.surface.clientWidth);
+  get(f.scrollport, 'clientWidth', () => f.scrollport.offsetWidth);
+  get(f.blockTarget, 'offsetWidth', () =>
+    Math.min(
+      Number.parseFloat(f.blockTarget.style.width) || 32,
+      f.scrollport.clientWidth - 8,
+      maximumRowWidth
+    )
+  );
+  get(f.blockTarget, 'offsetHeight', () =>
+    ready ? Number.parseFloat(f.blockTarget.style.height) || 32 : 0
+  );
+  get(f.blockTarget, 'clientWidth', () => f.blockTarget.offsetWidth);
+  get(f.blockTarget, 'scrollWidth', () => f.blockTarget.clientWidth);
+  get(f.blockTarget, 'clientHeight', () => f.blockTarget.offsetHeight);
+  get(f.blockTarget, 'scrollHeight', () => f.blockTarget.clientHeight);
+  const connection: AnchoredPositionConnection = {
+    ...f.connection,
+    targetAlignment: {
+      ...f.connection.targetAlignment!,
+      sizeMatch: { reference, targets: [f.blockTarget] },
+    },
+  };
+  return {
+    ...f,
+    connection,
+    setReady(value: boolean) {
+      ready = value;
+    },
+    resize(value: number) {
+      width = value;
+    },
+    constrainRow(value: number) {
+      maximumRowWidth = value;
+    },
+  };
+}
+
 afterEach(() => {
   document.body.replaceChildren();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 describe('neutral target geometry host', () => {
+  it('rolls back size writes before reporting a failed containing-layout plan', () => {
+    const f = sizingFixture();
+    const atFailure: string[][] = [];
+    const lease = createTargetAlignmentLease({
+      ...f.connection,
+      onAlignment(status) {
+        f.onAlignment(status);
+        if (status.status === 'unavailable')
+          atFailure.push([f.blockTarget.style.width, f.blockTarget.style.height]);
+      },
+    });
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    // Keep the row connected but invalidate its containing-layout association.
+    document.body.append(f.scrollport);
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'unavailable',
+      reason: 'invalid-geometry',
+    });
+    expect(atFailure).toEqual([['', '']]);
+    expect([f.blockTarget.style.width, f.blockTarget.style.height]).toEqual(['', '']);
+    f.surface.append(f.scrollport);
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'unavailable',
+      reason: 'invalid-geometry',
+    });
+    expect([f.blockTarget.style.width, f.blockTarget.style.height]).toEqual(['', '']);
+    lease.dispose();
+  });
+
+  it('rolls back owned row sizing but preserves a frame author override on admission failure', () => {
+    const f = sizingFixture();
+    const atFailure: string[][] = [];
+    const lease = createTargetAlignmentLease({
+      ...f.connection,
+      onAlignment(status) {
+        f.onAlignment(status);
+        if (status.status === 'unavailable')
+          atFailure.push([f.blockTarget.style.width, f.blockTarget.style.height]);
+      },
+    });
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    f.frame.style.setProperty('min-width', '900px', 'important');
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'unavailable',
+      reason: 'ownership-lost',
+    });
+    expect(atFailure).toEqual([['', '']]);
+    expect([f.blockTarget.style.width, f.blockTarget.style.height]).toEqual(['', '']);
+    lease.dispose();
+    expect(f.frame.style.getPropertyValue('min-width')).toBe('900px');
+    expect(f.frame.style.getPropertyPriority('min-width')).toBe('important');
+  });
+
+  it('recovers an initially missing reference box through the same current host lease', () => {
+    const control = controlledBoxObservers();
+    const f = sizingFixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    f.resize(0);
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'pending-target',
+      reason: 'missing-target',
+    });
+    expect(f.onAlignment.mock.calls.some(([status]) => status.status === 'applied')).toBe(false);
+    expect(f.blockTarget.style.width).toBe('');
+    f.resize(208);
+    control.notify(reference, 'border-box');
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+    expect(f.frame.style.minWidth).toBe('218px');
+    lease.dispose();
+  });
+
+  it('reports recovered applied status after layout disappears without scheduling another entry frame', () => {
+    const control = controlledBoxObservers();
+    const f = sizingFixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+    f.resize(0);
+    control.notify(reference, 'border-box');
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'pending-target',
+      reason: 'missing-target',
+    });
+    f.resize(208);
+    control.notify(reference, 'border-box');
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect(f.onAlignment.mock.calls.map(([status]) => status.status)).toEqual([
+      'applied',
+      'pending-target',
+      'applied',
+    ]);
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+    expect(window.requestAnimationFrame).toHaveBeenCalledTimes(1);
+    control.notify(reference, 'content-box');
+    expect(f.onAlignment).toHaveBeenCalledTimes(3);
+    lease.dispose();
+  });
+
+  it('does not resume a pending lease after disposal or overwrite an author edit', () => {
+    const control = controlledBoxObservers();
+    const f = sizingFixture();
+    f.resize(0);
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'pending-target',
+      reason: 'missing-target',
+    });
+    lease.dispose();
+    f.blockTarget.style.height = '73px';
+    f.resize(208);
+    for (const observer of control.observers) observer.replayQueued();
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenCalledTimes(1);
+    expect(f.blockTarget.style.height).toBe('73px');
+    expect(f.blockTarget.style.width).toBe('');
+  });
+
   it('applies the fixed-source plan and restores only its owned frame styles', () => {
     const f = fixture();
     f.frame.style.height = '23px';
@@ -113,6 +295,116 @@ describe('neutral target geometry host', () => {
     expect(f.frame.style.height).toBe('23px');
     expect(f.frame.style.position).toBe('');
   });
+  it('admits matching row width and height only after the containing span is installed', () => {
+    const f = sizingFixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect(f.frame.style.minWidth).toBe('350px');
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([340, 44]);
+    f.resize(208);
+    lease.requestUpdate();
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+    expect(f.onAlignment.mock.calls.every(([status]) => status.status !== 'unavailable')).toBe(
+      true
+    );
+    lease.dispose();
+    expect(f.blockTarget.style.width).toBe('');
+    expect(f.blockTarget.style.height).toBe('');
+  });
+
+  it('keeps missing row layout pending and can admit the same lease when actual layout appears', () => {
+    const f = sizingFixture();
+    f.setReady(false);
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'pending-target',
+      reason: 'missing-target',
+    });
+    expect(f.onAlignment.mock.calls.some(([status]) => status.status === 'applied')).toBe(false);
+    f.setReady(true);
+    lease.requestUpdate();
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([340, 44]);
+    lease.dispose();
+  });
+
+  it('still rejects a real row max-size conflict after solving the outer constraints', () => {
+    const f = sizingFixture();
+    f.constrainRow(320);
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(f.frame.style.minWidth).toBe('350px');
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'unavailable',
+      reason: 'size-conflict',
+    });
+    expect(f.onAlignment.mock.calls.some(([status]) => status.status === 'applied')).toBe(false);
+    expect(f.blockTarget.style.width).toBe('');
+    expect(f.blockTarget.style.height).toBe('');
+    lease.dispose();
+  });
+
+  it('re-solves a reference resize at final readback instead of admitting the older plan', () => {
+    const f = sizingFixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    let reads = 0;
+    let boundary: { minimumSpan: string; rowWidth: string } | undefined;
+    // Deterministic layout-read seam: the sixth read is after the first
+    // constrained/settled plan, at final size verification. Not native evidence.
+    Object.defineProperty(reference, 'offsetWidth', {
+      configurable: true,
+      get() {
+        reads++;
+        if (reads === 6) {
+          boundary = { minimumSpan: f.frame.style.minWidth, rowWidth: f.blockTarget.style.width };
+          f.resize(208);
+        }
+        return reads >= 6 ? 208 : 340;
+      },
+    });
+    const lease = createTargetAlignmentLease(f.connection);
+    expect(reads).toBeGreaterThan(6);
+    expect(boundary).toEqual({ minimumSpan: '350px', rowWidth: '340px' });
+    expect(f.onAlignment).toHaveBeenLastCalledWith({ status: 'applied' });
+    expect(f.frame.style.minWidth).toBe('218px');
+    expect([f.blockTarget.offsetWidth, f.blockTarget.offsetHeight]).toEqual([208, 44]);
+    lease.dispose();
+  });
+
+  it('does not report applied when reference layout never stabilizes within the existing passes', () => {
+    const f = sizingFixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    let reads = 0;
+    Object.defineProperty(reference, 'offsetWidth', {
+      configurable: true,
+      get() {
+        reads++;
+        const width = reads % 2 ? 340 : 208;
+        f.resize(width);
+        return width;
+      },
+    });
+    const atFailure: string[][] = [];
+    const lease = createTargetAlignmentLease({
+      ...f.connection,
+      onAlignment(status) {
+        f.onAlignment(status);
+        if (status.status === 'unavailable')
+          atFailure.push([f.blockTarget.style.width, f.blockTarget.style.height]);
+      },
+    });
+    expect(f.onAlignment).toHaveBeenLastCalledWith({
+      status: 'unavailable',
+      reason: 'invalid-geometry',
+    });
+    expect(f.onAlignment.mock.calls.some(([status]) => status.status === 'applied')).toBe(false);
+    expect(reads).toBeLessThanOrEqual(32);
+    expect(atFailure).toEqual([['', '']]);
+    expect([f.blockTarget.style.width, f.blockTarget.style.height]).toEqual(['', '']);
+    lease.dispose();
+    expect(f.blockTarget.style.width).toBe('');
+    expect(f.blockTarget.style.height).toBe('');
+  });
+
   it('does not report missing or detached targets as successful geometry', () => {
     const f = fixture();
     f.blockTarget.remove();

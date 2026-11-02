@@ -44,7 +44,12 @@ export type TargetAlignmentStatus =
   | Readonly<{ status: 'pending-target'; reason: 'missing-target' | 'detached-target' }>
   | Readonly<{
       status: 'unavailable';
-      reason: 'unsupported-host' | 'invalid-association' | 'invalid-geometry' | 'ownership-lost';
+      reason:
+        | 'unsupported-host'
+        | 'invalid-association'
+        | 'invalid-geometry'
+        | 'ownership-lost'
+        | 'size-conflict';
     }>;
 
 /** Opaque host geometry roles. Semantic selection remains with the declaring prototype. */
@@ -58,6 +63,8 @@ export type TargetAlignmentConnection = Readonly<{
   atStart: boolean;
   atEnd: boolean;
   constraints: TargetAlignmentConstraints;
+  /** Optional neutral used-border-box matching, owned by this geometry lease. */
+  sizeMatch?: Readonly<{ reference: unknown; targets: readonly unknown[] }>;
 }>;
 
 export type AnchoredPositionConnection = Readonly<{

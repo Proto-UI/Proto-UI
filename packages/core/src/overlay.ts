@@ -127,6 +127,8 @@ export type OverlayTargetAlignmentBinding = Readonly<{
   atStart: boolean;
   atEnd: boolean;
   constraints: import('./positioning').TargetAlignmentConstraints;
+  /** Safe parts only; physical size facts stay inside Positioning. */
+  sizeMatch?: Readonly<{ reference: AnatomyPartView; targets: readonly AnatomyPartView[] }>;
   onAlignment(status: import('./positioning').TargetAlignmentStatus): void;
 }>;
 
