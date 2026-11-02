@@ -549,6 +549,30 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/carousel');
     registerPrototype('base-carousel-next', mod.carouselNext);
   },
+  'base-data-table-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-root', mod.dataTableRoot);
+  },
+  'base-data-table-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-row', mod.dataTableRow);
+  },
+  'base-data-table-cell': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-cell', mod.dataTableCell);
+  },
+  'base-data-table-header': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-header', mod.dataTableHeader);
+  },
+  'base-data-table-caption': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-caption', mod.dataTableCaption);
+  },
+  'base-data-table-header-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/data-table');
+    registerPrototype('base-data-table-header-row', mod.dataTableHeaderRow);
+  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
