@@ -1048,6 +1048,23 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('../../../../../packages/prototypes/base/src/dropdown/item.proto');
     registerPrototype('base-dropdown-item', mod.default);
   },
+  'base-dropdown-group': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/group.proto');
+    registerPrototype('base-dropdown-group', mod.default);
+  },
+  'base-dropdown-label': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/label.proto');
+    registerPrototype('base-dropdown-label', mod.default);
+  },
+  'base-dropdown-separator': async () => {
+    const mod =
+      await import('../../../../../packages/prototypes/base/src/dropdown/separator.proto');
+    registerPrototype('base-dropdown-separator', mod.default);
+  },
+  'base-dropdown-shortcut': async () => {
+    const mod = await import('../../../../../packages/prototypes/base/src/dropdown/shortcut.proto');
+    registerPrototype('base-dropdown-shortcut', mod.default);
+  },
   'base-checkbox-root': async () => {
     const mod = await import('../../../../../packages/prototypes/base/src/checkbox/root.proto');
     registerPrototype('base-checkbox-root', mod.default);
