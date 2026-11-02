@@ -1,0 +1,134 @@
+--- a/packages/compiler/src/vue2-source.ts
++++ b/packages/compiler/src/vue2-source.ts
+@@ -577,6 +577,8 @@
+ ${stateful ? String.raw`/** @template T @typedef {{ type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }} PUIStateEvent */
+ /** @template T @typedef {{ get: () => T, setDefault: (value: T) => void, set: (value: T, reason?: unknown) => void, external: PUIExternalState<T>, dispose: () => void }} PUIOwnedState */
+ ` : ''}/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
++/** @typedef {{ epoch: number, revision: number, kind: 'update' }} PUIPendingCommit */
++/** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} PUIRenderedCommit */
+ /** @param {unknown} value @param {PropertyKey} key */
+ const PUIOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+ /** @param {PUIDataType} type @param {unknown} value @returns {boolean} */
+@@ -656,12 +658,15 @@
+   let revision = 0;
+   let commitVersion = 0;
+   let queued = false;
++  /** @type {PUIPendingCommit | null} */
+   let pending = null;
++  /** @type {PUIRenderedCommit | null} */
+   let renderedCommit = null;
+   ${styled || interactive ? 'let activeRoot = null;' : ''}
+   ${interactive ? 'let activeEpoch = -1;' : ''}
+   let template = null;
+   let renderFunction;
++  /** @type {(() => void) | undefined} */
+   let unwatch;
+   let raw = Object.freeze({});
+   let resolved = Object.freeze({});
+@@ -1225,6 +1230,7 @@
+     },
+     hostMounted() { ${ssr ? 'if (shell) return;' : ''} nativeMounted = true; afterCommit(); },
+     afterCommit,
++    /** @param {import('vue').CreateElement} h */
+     render(h) {
+       ${
+         ssr
+--- a/packages/compiler/test/vue2-native-template.test.ts
++++ b/packages/compiler/test/vue2-native-template.test.ts
+@@ -39,7 +39,7 @@
+ function compile(input: PrototypeIR): GeneratedModule {
+   let directory: string | undefined;
+   if (evidenceRoot) {
+-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 32)
++    if (!path.isAbsolute(evidenceRoot) || ++compilations > 34)
+       throw new Error('Unexpected native evidence root or compilation count');
+     mkdirSync(evidenceRoot, { recursive: true });
+     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
+@@ -122,6 +122,87 @@
+ }
+ 
+ describe('Vue2 compiler-native child construction', () => {
++  it('preserves queued native update commits without treating live-slot paint as an authored commit', async () => {
++    const view = await mount(prototype(`
++      const value=def.state.numberDiscrete('value',0);
++      const updates=def.state.numberDiscrete('updates',0);
++      def.lifecycle.onUpdated(()=>{updates.set(updates.get()+1);});
++      def.expose.state('value',value);def.expose.state('updates',updates);
++      def.expose.method('write',(next:number)=>value.set(next));
++      return r=>r.el('output',[value.get(),r.slot()]);
++    `));
++    const exposed = nativeMethod(view.child, 'getExposes')();
++    const write = nativeMethod(exposed, 'write');
++    const updates = nativeField(exposed, 'updates');
++    const committed: Array<string | null | undefined> = [];
++    // Actual Vue hook observation after its DOM patch, not an emitter mock or
++    // a replacement commit callback.
++    view.child.$on('hook:updated', () => {
++      committed.push(view.host.querySelector('output')?.textContent);
++    });
++    write(1);nativeMethod(view.child, 'update')();
++    write(2);nativeMethod(view.child, 'update')();
++    expect(view.host.querySelector('output')?.textContent).toBe('0S0');
++    expect(nativeMethod(updates, 'get')()).toBe(0);
++    // Two native patches and their two owner post-patch callbacks.
++    for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
++    expect(committed).toEqual(['1S0', '2S0']);
++    expect(nativeMethod(updates, 'get')()).toBe(2);
++    expect(view.host.querySelector('output')?.textContent).toBe('2S0');
++    view.slot.text = 'S1';await Vue2.nextTick();await Vue2.nextTick();
++    expect(committed).toEqual(['1S0', '2S0', '2S1']);
++    expect(nativeMethod(updates, 'get')()).toBe(2);
++    expect(view.host.querySelector('output')?.textContent).toBe('2S1');
++  });
++
++  it('retires the old queued commit when an updated callback detaches and a later prop reopens', async () => {
++    const module = compile(prototype(`
++      def.props.define({present:{type:'boolean',default:true}});
++      def.props.watch(['present'],(run,next)=>{run.lifecycle.setPresent(next.present);});
++      const value=def.state.numberDiscrete('value',0);
++      const mounts=def.state.numberDiscrete('mounts',0);
++      const updates=def.state.numberDiscrete('updates',0);
++      const unmounts=def.state.numberDiscrete('unmounts',0);
++      def.lifecycle.onMounted(()=>{mounts.set(mounts.get()+1);});
++      def.lifecycle.onUnmounted(()=>{unmounts.set(unmounts.get()+1);});
++      def.lifecycle.onUpdated(run=>{
++        updates.set(updates.get()+1);
++        if(updates.get()===1)run.lifecycle.setPresent(false);
++      });
++      def.expose.state('mounts',mounts);def.expose.state('updates',updates);
++      def.expose.state('unmounts',unmounts);
++      def.expose.method('write',(next:number)=>value.set(next));
++      return r=>r.el('output',[value.get(),r.slot()]);
++    `));
++    const native = options(module), input = Vue2.observable({ present: true, slot: 'S0' });
++    const app = new Vue2({ render(h) { return h(native, {
++      props: { present: input.present },
++      scopedSlots: { default: () => [h('em', input.slot)] },
++    }); } });
++    const host = document.createElement('div');document.body.append(host);
++    cleanup.push(() => { app.$destroy();host.remove(); });
++    app.$mount();host.append(app.$el);await Vue2.nextTick();await Vue2.nextTick();
++    const child = app.$children[0], exposed = nativeMethod(child, 'getExposes')();
++    const count = (name: string) => nativeMethod(nativeField(exposed, name), 'get')();
++    expect(host.querySelector('output')?.textContent).toBe('0S0');
++    expect([count('mounts'), count('updates'), count('unmounts')]).toEqual([1, 0, 0]);
++    nativeMethod(exposed, 'write')(1);
++    nativeMethod(child, 'update')();nativeMethod(child, 'update')();
++    for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
++    expect(host.querySelector('output')).toBeNull();
++    expect([count('mounts'), count('updates'), count('unmounts')]).toEqual([1, 1, 1]);
++    input.present = false;await Vue2.nextTick();await Vue2.nextTick();
++    input.slot = 'S1';input.present = true;
++    for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
++    expect(host.querySelector('output')?.textContent).toBe('1S1');
++    expect([count('mounts'), count('updates'), count('unmounts')]).toEqual([2, 1, 1]);
++    nativeMethod(exposed, 'write')(2);nativeMethod(child, 'update')();
++    for (let tick = 0; tick < 4; tick += 1) await Vue2.nextTick();
++    expect(host.querySelector('output')?.textContent).toBe('2S1');
++    expect([count('mounts'), count('updates'), count('unmounts')]).toEqual([2, 2, 1]);
++  });
++
++
+   it('preserves owned state family validation, defaults and committed native publication', async () => {
+     const view = await mount(prototype(`
+       const flag=def.state.bool('flag',false);

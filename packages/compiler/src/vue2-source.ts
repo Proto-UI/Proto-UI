@@ -1,5 +1,8 @@
 import { NativeLexicalScope } from './template-shape';
-import { collectVue2NativeChildShapes, createVue2NativeTemplateEmitter } from './vue2-native-template';
+import {
+  collectVue2NativeChildShapes,
+  createVue2NativeTemplateEmitter,
+} from './vue2-native-template';
 import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
@@ -195,9 +198,15 @@ export function emitVue2Source(
   // part of this same candidate; this switch must disappear before completion.
   let nativeScope = NativeLexicalScope.empty();
   const nativePlan = options.ssr ? undefined : collectVue2NativeChildShapes(ir);
-  const nativeTemplate = nativePlan && createVue2NativeTemplateEmitter({
-    prefix, styled: usesStyle, ...nativePlan, expression, scope: () => nativeScope,
-  });
+  const nativeTemplate =
+    nativePlan &&
+    createVue2NativeTemplateEmitter({
+      prefix,
+      styled: usesStyle,
+      ...nativePlan,
+      expression,
+      scope: () => nativeScope,
+    });
   const contextArtifacts = buildNativeContextArtifacts(ir);
   const staticDeclarations = buildNativeStaticDeclarations(
     ir.staticDeclarations,
@@ -242,12 +251,18 @@ export function emitVue2Source(
   function fn(value: FunctionIR, depth: number): string {
     const saved = nativeScope;
     for (const parameter of value.parameters) {
-      nativeScope = nativeScope.bind(parameter.name, { kind: 'reference',
-        name: '\0vue2-formal-' + parameter.name, type: parameter.type, span: value.span });
+      nativeScope = nativeScope.bind(parameter.name, {
+        kind: 'reference',
+        name: '\0vue2-formal-' + parameter.name,
+        type: parameter.type,
+        span: value.span,
+      });
     }
     try {
       return `(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {\n${body(value.body, depth + 1)}${'  '.repeat(depth)}}`;
-    } finally { nativeScope = saved; }
+    } finally {
+      nativeScope = saved;
+    }
   }
 
   function expression(value: ExpressionIR, depth: number): string {
@@ -287,8 +302,10 @@ export function emitVue2Source(
       case 'static-capability':
         return staticNames.get(value.declarationId)!;
       case 'operation': {
-        if (nativeTemplate && value.operation === 'render.el') return nativeTemplate.element(value, depth);
-        if (nativeTemplate && value.operation === 'render.slot') return nativeTemplate.slot(value, depth);
+        if (nativeTemplate && value.operation === 'render.el')
+          return nativeTemplate.element(value, depth);
+        if (nativeTemplate && value.operation === 'render.slot')
+          return nativeTemplate.slot(value, depth);
         const argumentsCode = value.arguments.map((item) => expression(item, depth)).join(', ');
         if (OPERATION_RULES[value.operation].path === 'call')
           return `${expression(value.receiver!, depth)}(${argumentsCode})`;
@@ -303,7 +320,8 @@ export function emitVue2Source(
   function terminates(statements: readonly StatementIR[]): boolean {
     for (const statement of statements) {
       if (statement.kind === 'return') return true;
-      if (statement.kind === 'if' && terminates(statement.then) && terminates(statement.otherwise)) return true;
+      if (statement.kind === 'if' && terminates(statement.then) && terminates(statement.otherwise))
+        return true;
     }
     return false;
   }
@@ -336,8 +354,11 @@ export function emitVue2Source(
       } else {
         const branch = (statements: readonly StatementIR[]) => {
           const saved = nativeScope;
-          try { return body(statements, depth + 1, new Set(deadBindings)); }
-          finally { nativeScope = saved; }
+          try {
+            return body(statements, depth + 1, new Set(deadBindings));
+          } finally {
+            nativeScope = saved;
+          }
         };
         output += `${origin}${indent}if (${expression(statement.condition, depth)}) {\n${branch(statement.then)}${indent}}${statement.otherwise.length ? ` else {\n${branch(statement.otherwise)}${indent}}` : ''}\n`;
         if (terminates(statement.then) && terminates(statement.otherwise)) break;
@@ -452,29 +473,40 @@ ${propsType}
 ${exposesType}
 }} GeneratedExposes */
 ${nativeTemplate?.declarations ?? ''}
-${nativeTemplate ? `/** @typedef {{
+${
+  nativeTemplate
+    ? `/** @typedef {{
  * slot: () => ${prefix}NativePaint,
  * read: {
  *   props: {
  *     get: () => Readonly<GeneratedProps>,
  *     getRaw: () => Readonly<Record<string, unknown>>,
  *     isProvided: (key: PropertyKey) => boolean
- *   }${contextArtifacts ? `,
+ *   }${
+   contextArtifacts
+     ? `,
  *   context: {
  *     read: (key: object) => ReturnType<import('${contextArtifacts.scopeFile.replace(/\.ts$/, '')}').ContextScope['read']>,
  *     tryRead: (key: object) => ReturnType<import('${contextArtifacts.scopeFile.replace(/\.ts$/, '')}').ContextScope['tryRead']>
- *   }` : ''}
+ *   }`
+     : ''
+ }
  * }
- * }} ${prefix}NativeRenderer */` : ''}
+ * }} ${prefix}NativeRenderer */`
+    : ''
+}
 ${usesStyle ? `/** @typedef {import('./.proto-ui/style/native-v1').NativeStyleHandle} ${prefix}NativeStyleHandle */` : ''}
 ${helpers}
 
 function ${prefix}Setup(${prefix}Owner) {
 ${hooks}
-  ${nativeTemplate ? `const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
+  ${
+    nativeTemplate
+      ? `const ${prefix}AuthoredRenderer = (${fn(ir.setup, 1)})(${prefix}Owner.def);
   if (typeof ${prefix}AuthoredRenderer !== 'function') return ${prefix}AuthoredRenderer;
   return (/** @param {${prefix}NativeRenderer} ${prefix}Renderer */ (${prefix}Renderer) => ${nativeTemplate.publication(`${prefix}AuthoredRenderer(${prefix}Renderer)`)});`
-    : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`}
+      : `return (${fn(ir.setup, 1)})(${prefix}Owner.def);`
+  }
 }
 
 /** @typedef {import('vue').default & { readonly ${ownerKey}: ReturnType<typeof ${prefix}CreateOwner>${contextArtifacts ? `; readonly ${JSON.stringify(`${prefix}ParentScope`)}?: ReturnType<typeof ${prefix}CreateContextScope> | null` : ''} }} ${prefix}NativeInstance */
@@ -574,9 +606,15 @@ function nativeHelpers(
  * @template T
  * @typedef {{ get: () => T, subscribe: (callback: (event: { type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }) => void) => (() => void), unsubscribe: (off: () => void) => void, spec: Readonly<Record<string, unknown>> }} PUIExternalState
  */
-${stateful ? String.raw`/** @template T @typedef {{ type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }} PUIStateEvent */
+${
+  stateful
+    ? String.raw`/** @template T @typedef {{ type: 'next', prev: T, next: T, reason?: unknown } | { type: 'disconnect', reason: 'unmount' }} PUIStateEvent */
 /** @template T @typedef {{ get: () => T, setDefault: (value: T) => void, set: (value: T, reason?: unknown) => void, external: PUIExternalState<T>, dispose: () => void }} PUIOwnedState */
-` : ''}/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
+`
+    : ''
+}/** @typedef {'boolean' | 'number' | 'string' | 'null' | 'void' | { kind: 'literal', value: string | number | boolean | null } | { kind: 'array', element: PUIDataType } | { kind: 'union', members: readonly PUIDataType[] } | { kind: 'record', fields: readonly { name: string, type: PUIDataType, optional?: boolean }[] }} PUIDataType */
+/** @typedef {{ epoch: number, revision: number, kind: 'update' }} PUIPendingCommit */
+/** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} PUIRenderedCommit */
 /** @param {unknown} value @param {PropertyKey} key */
 const PUIOwn = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
 /** @param {PUIDataType} type @param {unknown} value @returns {boolean} */
@@ -603,7 +641,9 @@ function PUIJson(value, seen = new Set()) {
   seen.delete(value);
   return valid;
 }
-${ssr ? String.raw`function PUIElement(tag, a, b) {
+${
+  ssr
+    ? String.raw`function PUIElement(tag, a, b) {
   const props = a !== null && typeof a === 'object' && !Array.isArray(a) && !PUIOwn(a, 'tag') && !PUIOwn(a, 'slot');
   const children = arguments.length > 2 ? b : props ? null : a;
   ${styled ? "const tokens = props && PUIOwn(a, 'style') ? PUITemplateStyleTokens(a.style) : undefined;" : ''}
@@ -624,7 +664,9 @@ function PUIChildren(value, h, vm, slots) {
   if (typeof value.tag !== 'string') throw new TypeError('[Vue2 native] invalid semantic element.');
   // Vue2's pre flag prevents a registered component from hijacking a semantic DOM tag.
   return [h(value.tag, { pre: true${styled ? ", attrs: value.tokens === undefined ? {} : { 'data-pui-style': value.tokens }" : ''} }, PUIChildren(value.children, h, vm, slots))];
-}` : ''}
+}`
+    : ''
+}
 function PUIRootData(properties, attrs, initial) {
   const result = { pre: true, attrs: { ...attrs } };
   for (const [key, value] of Object.entries(properties)) {
@@ -656,12 +698,15 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let revision = 0;
   let commitVersion = 0;
   let queued = false;
+  /** @type {PUIPendingCommit | null} */
   let pending = null;
+  /** @type {PUIRenderedCommit | null} */
   let renderedCommit = null;
   ${styled || interactive ? 'let activeRoot = null;' : ''}
   ${interactive ? 'let activeEpoch = -1;' : ''}
   let template = null;
   let renderFunction;
+  /** @type {(() => void) | undefined} */
   let unwatch;
   let raw = Object.freeze({});
   let resolved = Object.freeze({});
@@ -955,13 +1000,17 @@ ${context.owner}
       : ''
   }
   ${ssr ? '' : '/** @type {PUINativeRenderer} */'}
-  const renderer = { ${ssr ? 'el: PUIElement, slot: () => Object.freeze({ slot: true }),' : `
+  const renderer = { ${
+    ssr
+      ? 'el: PUIElement, slot: () => Object.freeze({ slot: true }),'
+      : `
     slot: () => /** @type {PUINativePaint} */ ((_h, nativeVm, slots) => {
       if (slots.used) throw new Error('[Vue2 native] only one default slot is supported.');
       slots.used = true;
       const scoped = nativeVm.$scopedSlots.default;
       return (scoped ? scoped({}) : nativeVm.$slots.default) || [];
-    }),`}
+    }),`
+  }
     read: Object.freeze({ props: Object.freeze({ get: () => { alive(); return resolved; }, getRaw: () => { alive(); return raw; }, isProvided: (key) => { alive(); return PUIOwn(raw, key); } }) ${context.read} }) };
 ${
   stateful
@@ -1225,6 +1274,7 @@ ${
     },
     hostMounted() { ${ssr ? 'if (shell) return;' : ''} nativeMounted = true; afterCommit(); },
     afterCommit,
+    /** @param {import('vue').CreateElement} h */
     render(h) {
       ${
         ssr
