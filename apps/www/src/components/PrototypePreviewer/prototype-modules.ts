@@ -517,6 +517,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/virtual-list');
     registerPrototype('base-virtual-list-content', mod.virtualListContent);
   },
+  'base-tree-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-root', mod.treeRoot);
+  },
+  'base-tree-item': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-item', mod.treeItem);
+  },
+  'base-tree-toggle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/tree');
+    registerPrototype('base-tree-toggle', mod.treeToggle);
+  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
