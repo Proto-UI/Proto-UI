@@ -90,6 +90,8 @@ describe('Base Calendar documentation registration', () => {
           1
         );
         expect(children.filter((c: any) => c.prototypeId === 'base-calendar-grid').length).toBe(1);
+        const heading = children.find((c: any) => c.prototypeId === 'base-calendar-heading');
+        expect(heading?.className).toContain('sr-only');
         const caption = children.find((c: any) => c.prototypeId === 'base-calendar-caption');
         const captionChildren = protoChildren(caption);
         expect(
