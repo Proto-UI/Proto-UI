@@ -1,0 +1,195 @@
+---
+import ThemeProvider from '../../../../components/override/ThemeProvider.astro';
+import '../../../../styles/global.css';
+
+export function getStaticPaths() {
+  return ['wc', 'react', 'vue', 'vue2'].map((runtime) => ({
+    params: { runtime },
+    props: { runtime },
+  }));
+}
+const { runtime } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Shadcn Card New York compatibility — {runtime}</title>
+    <ThemeProvider />
+  </head>
+  <body>
+    <main>
+      <h1 id="card-contract">Card New York compatibility</h1>
+      <p>The original passive Card composition, separate from the ordinary Rhea example.</p>
+      <div data-card-compat-host={runtime} data-mount-state="pending"></div>
+      <p data-card-compat-error role="alert"></p>
+    </main>
+    <script>
+      import demo from '../../../../../test/fixtures/shadcn-card-new-york';
+      import type {
+        ProjectionCompositionControls,
+        ProjectionContentRecipe,
+      } from '../../../../components/PrototypePreviewer/projection-composition';
+      import {
+        materializeProjectionCandidate,
+        type MaterializedProjectionCandidate,
+      } from '../../../../components/PrototypePreviewer/projection-materializer';
+      import { createProjectionScopeController } from '../../../../components/PrototypePreviewer/projection-scope';
+      import {
+        resolveProjectionThemeSurfaceStyle,
+        watchProjectionThemeSurfaceStyle,
+      } from '../../../../components/PrototypePreviewer/projection-theme';
+      import { createRuntimePreviewSurface } from '../../../../components/PrototypePreviewer/runtime-preview-surface';
+      import { isRuntimeId } from '../../../../components/PrototypePreviewer/runtimes/ids';
+
+      const host = document.querySelector<HTMLElement>('[data-card-compat-host]')!;
+      const runtime = host.dataset.cardCompatHost;
+      if (!isRuntimeId(runtime)) throw new Error('Unsupported Card compatibility runtime');
+      const ownerId = `shadcn-card-new-york-${runtime}`;
+      host.dataset.projectionOwner = ownerId;
+      const recipe = {
+        id: 'test-shadcn-card-new-york',
+        prototypeIds: [
+          'shadcn-card-root',
+          'shadcn-card-header',
+          'shadcn-card-content',
+          'shadcn-card-footer',
+          'shadcn-text-root',
+        ],
+        rootPrototypeId: 'shadcn-card-root',
+      } satisfies ProjectionContentRecipe;
+      const fixedSelection = () => {
+        throw new Error('Card compatibility coordinates are fixed by the route');
+      };
+      const controls: ProjectionCompositionControls = {
+        runtime: {
+          label: 'Runtime',
+          options: [{ value: runtime, label: runtime }],
+          onValueChange: fixedSelection,
+        },
+        family: {
+          label: 'Component Library',
+          options: [{ value: 'shadcn', label: 'Shadcn' }],
+          onValueChange: fixedSelection,
+        },
+        component: {
+          label: 'Component',
+          options: [{ value: 'card', label: 'Card' }],
+          onValueChange: fixedSelection,
+        },
+      };
+      let current = true;
+      const report = (error: unknown) => {
+        if (current) {
+          host.dataset.mountState = 'error';
+          document.querySelector('[data-card-compat-error]')!.textContent =
+            error instanceof Error ? error.message : String(error);
+        }
+        console.error(error);
+      };
+      const controller = createProjectionScopeController({
+        initialSelection: { runtimeId: runtime, projectionFamilyId: 'shadcn' },
+        async materialize(request) {
+          // Keep the real Website RuntimeBox and per-Proto theme projection.
+          // Bare renderDemo would test a different consumer's inheritance.
+          const surface = createRuntimePreviewSurface(
+            demo,
+            'shadcn',
+            resolveProjectionThemeSurfaceStyle('shadcn', host),
+            runtime
+          );
+          const child = await materializeProjectionCandidate(request, {
+            mount: host,
+            ownerId,
+            componentId: 'card',
+            controls,
+            controlIds: [],
+            content: { demo: surface.demo, recipe },
+          });
+          let live = true;
+          let appearanceUpdate: Promise<unknown> = Promise.resolve();
+          let stopThemeWatcher: (() => void) | undefined;
+          const candidate: MaterializedProjectionCandidate = {
+            ...child,
+            setThemeSurfaceStyle(theme) {
+              if (!live) return;
+              child.setThemeSurfaceStyle(theme);
+              appearanceUpdate = surface.setAppearance('shadcn', theme);
+              void appearanceUpdate.catch(report);
+            },
+            async dispose() {
+              if (!live) return;
+              live = false;
+              try {
+                stopThemeWatcher?.();
+              } finally {
+                // The materializer destroys the composition; its setup cleanup
+                // retires the independent RuntimeBox shell and restores content.
+                await child.dispose();
+              }
+            },
+          };
+          try {
+            await surface.ready;
+            if (current) {
+              stopThemeWatcher = watchProjectionThemeSurfaceStyle('shadcn', host, (theme) => {
+                candidate.setThemeSurfaceStyle(theme);
+              });
+              await appearanceUpdate;
+            }
+            return candidate;
+          } catch (error) {
+            await candidate.dispose();
+            throw error;
+          }
+        },
+      });
+      window.addEventListener(
+        'pagehide',
+        () => {
+          current = false;
+          host.dataset.mountState = 'retired';
+          void controller.destroy().catch(report);
+        },
+        { once: true }
+      );
+      void controller
+        .start()
+        .then((snapshot) => {
+          if (!current) return;
+          if (host.dataset.mountState === 'error') {
+            throw new Error('Card compatibility appearance failed before activation completed');
+          }
+          if (snapshot.phase !== 'ready' || snapshot.generation !== 1) {
+            throw new Error('Card compatibility generation did not commit');
+          }
+          // Observation of a completed real activation, not a readiness stub.
+          host.dataset.mountState = 'ready';
+        })
+        .catch((error) => {
+          report(error);
+          void controller.destroy().catch(report);
+        });
+    </script>
+  </body>
+</html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 2rem;
+    background: var(--pui-background);
+    color: var(--pui-foreground);
+    font-family: var(--font-sans);
+  }
+  main {
+    max-width: 64rem;
+    margin: 0 auto;
+  }
+  [data-card-compat-host] {
+    margin: 2rem 0;
+  }
+</style>

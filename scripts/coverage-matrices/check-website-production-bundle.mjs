@@ -29,6 +29,7 @@ const APPROVED_DEMONSTRATION_ENTRY_FACADES = new Set([
   'apps/www/src/pages/en/test/style-isolation.astro?astro&type=script&index=0&lang.ts',
   // Exact native test entries retain the existing lazy renderer owner.
   'apps/www/src/pages/en/test/button-ghost/[runtime].astro?astro&type=script&index=0&lang.ts',
+  'apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/command-width.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-hover.astro?astro&type=script&index=0&lang.ts',
   'apps/www/src/pages/en/test/liquid-glass-portal.astro?astro&type=script&index=0&lang.ts',

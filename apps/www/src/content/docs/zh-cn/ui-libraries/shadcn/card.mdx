@@ -5,18 +5,19 @@ description: Draft passive Shadcn Card on Proto UI.
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
-本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+本页常规演示显式选择 **Shadcn Rhea** 外观配置；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
 
 Shadcn Card 是 draft 四部分被动视觉容器，没有 Base Card counterpart。
 
 <h2 id="card-contract">Card 契约</h2>
 
 - 从 `@proto.ui/prototypes-shadcn/card` 导入 `ShadcnCardRoot`、`ShadcnCardHeader`、`ShadcnCardContent`、`ShadcnCardFooter`；同时提供小写 facade alias。
-- Root 拥有 `bg-card`、`text-card-foreground`、`rounded-xl`、border、轻阴影与垂直间距；Header、Content、Footer 拥有各自区域间距。
+- 两种外观均使用 `bg-card`、`text-card-foreground` 与轻阴影。Root 未显式选择外观时继承最近的 style scope；无外层 scope 时仍保留 New York 兼容默认值。
+- New York 使用 `rounded-xl`、显式主题边框、默认 24px 间距/内边距与 8px Header 网格间距。Rhea 无边框，使用前景色 ring、受主题限制的圆角、默认 20px 间距/内边距与 6px Header 网格间距。Header、Content、Footer 仍拥有各自区域间距。
 - 标题与描述仍是普通内容。按需要组合原生 heading/paragraph；嵌套 Shadcn Text 标题与正文显式使用 `tone: 'inherit'`，muted 描述有意使用 `tone: 'muted'`。
 - 四部分均不添加 role、tabindex、事件或状态；anchor/control 保留自己的导航与激活语义。
 - 有界子集不提供上游 CardTitle、CardDescription、CardAction、基于 action 的列布局、Header container-query 标记、border-presence selector 或 `asChild`，不宣称完整上游兼容。
 
-对照来源固定为 [shadcn/ui f31ed819 Card](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/card.tsx)，遵循 [MIT notice](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/LICENSE.md)。Proto UI 是独立实现。当前 revision 的原生截图、首帧与跨宿主验收仍是独立门槛；draft 源码不代表 stable 或 Finf 目标完成。
+New York 对照来源固定为 [shadcn/ui f31ed819 Card](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/apps/v4/registry/new-york-v4/ui/card.tsx)，遵循 [MIT notice](https://github.com/shadcn-ui/ui/blob/f31ed81983653919dd4fe77aee4b4859f610f1dc/LICENSE.md)。Proto UI 是独立实现；上述外观说明仅描述其有界 Card 子集，不宣称完整 Rhea 源码对齐。当前 revision 的原生截图、首帧与跨宿主验收仍是独立门槛；draft 源码不代表 stable 或 Finf 目标完成。
 
 <PrototypePreviewer demoId="demo-shadcn-card" initialRuntime="wc" />

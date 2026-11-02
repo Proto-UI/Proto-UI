@@ -285,6 +285,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/content/docs/zh-cn/whitepaper/7-evolving-within-boundaries.md` | `www.docs.whitepaper-diagram-viewer` | `f4bc3b3cb0d2791d03ef1b02199f83059c1de8f6561b0cd3d7ecdc97f65120ef` |
 | `apps/www/src/pages/en/test/liquid-glass-material.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `660e17ed48a165dac18f67d6699f088f273a5c14a0dd824af7cad6a33ee41387` |
 | `apps/www/src/pages/en/test/new-projection-families.astro` | `www.demo.authored-controllers`, `www.demo.demo-matrix` | `2a0c1838bf6d3f8392af14befa51796b9bd598cf38615222b385838a0a140afa` |
+| `apps/www/src/pages/en/test/shadcn-card-compat/[runtime].astro` | `www.demo.demo-matrix` | `d33300f2f4fd5c0c32e583f92beeac7f6d96a00ac9b8a28f4f348da7966dccf4` |
 | `apps/www/src/pages/en/test/site-typography.astro` | `www.content.typography-presentation`, `www.demo.authored-controllers` | `deb9a55385b6db74a35e4653c0c3d9d09b8597fbfcc33dcf1f46c93f8095f096` |
 | `apps/www/src/pages/en/test/style-isolation.astro` | `www.demo.prototype-previewer`, `www.demo.raw-adapter-runtimes` | `8fb1136b0a7c267073ab1f2c52b135ef199e9109c449b0ef3aadd422ab429ca3` |
 | `apps/www/src/pages/index.astro` | `www.route.root-locale-redirect` | `e50e3349709f152a1f53de9e85fecb17dceb443282b147c917d2ff1a8c37c4a8` |
