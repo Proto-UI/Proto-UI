@@ -9,8 +9,17 @@ import type {
 import type { ShadcnStyleProps } from '../style-scope';
 
 export type PopoverRootProps = BaseRootProps & ShadcnStyleProps;
-export type PopoverTriggerProps = BaseTriggerProps & ShadcnStyleProps;
-export type PopoverContentProps = BaseContentProps & ShadcnStyleProps;
+/** Opt-in navigation is a family presentation; Base remains the sole owner
+ * of trigger activation, disabled, focus, expansion and anchoring semantics. */
+export interface PopoverNavigationPresentationProps {
+  presentation?: 'default' | 'navigation';
+}
+export type PopoverTriggerProps = BaseTriggerProps &
+  ShadcnStyleProps &
+  PopoverNavigationPresentationProps;
+export type PopoverContentProps = BaseContentProps &
+  ShadcnStyleProps &
+  PopoverNavigationPresentationProps;
 export type PopoverCloseProps = BaseCloseProps & ShadcnStyleProps;
 export type PopoverTitleProps = BaseTitleProps & ShadcnStyleProps;
 export type PopoverDescriptionProps = BaseDescriptionProps & ShadcnStyleProps;

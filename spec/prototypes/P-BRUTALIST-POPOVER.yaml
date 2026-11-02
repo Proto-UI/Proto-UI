@@ -15,12 +15,18 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-BRUTALIST-POPOVER-NAVIGATION
+    text:
+      en: Explicit presentation navigation on Trigger and Content preserves the single Base Popover protocol and nonmodal focus policy. Trigger reuses shared Brutalist control feedback; Content retains Brutalist panel grammar with available-space geometry and one scroll surface. Omitted/default presentation is byte-compatible in paint, and no Button activation hook is added.
+  - id: P-BRUTALIST-POPOVER-NAVIGATION-CSS-CLOSURE
+    text:
+      en: Canonical generated Brutalist preset tokens and actual document/shadow preset command output include the navigation available-size and overscroll rules. Direct rendering of live element tokens does not establish preset delivery.
 dependsOn:
   contracts:
     - C-PROPS-0001
     - C-LIFECYCLE-0008
 verifies:
-  tests: []
+  tests: [T-POPOVER-NAVIGATION-PRESENTATION-0001]
 sources:
   - path: packages/prototypes/brutalist/src/popover/
 openQuestions:

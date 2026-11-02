@@ -15,6 +15,26 @@ criteria:
     text:
       zh-CN: Draft 准入需要精确 head 的浏览器/native 证据和独立审查。
       en: Draft admission requires exact-head browser/native evidence and independent review.
+  - id: P-SHADCN-POPOVER-NAVIGATION-PRESENTATION
+    text:
+      en: 'Explicit presentation=navigation selects an available-size, borderless square scrollable navigation surface rather than the default Popover card. Family paint consumes generic available-width/height host facts, never page paths, DOM measurement, copied navigation data, or another overlay owner. Default presentation and all existing profile recipes remain unchanged. The website selects new-york-v4 explicitly for this surface; demo Rhea defaults do not determine website surface selection.'
+      zh-CN: '显式 presentation=navigation 选择可用空间尺寸、无边框直角可滚动导航面，而不是默认 Popover 卡片。家族外观消费通用 available-width/height host facts，不判定页面路径、不测量 DOM、不复制导航树、不另建浮层 owner。默认 presentation 和既有各 profile 配方不变。官网明确为此浮层选择 new-york-v4；demo 的 Rhea 默认不决定网站浮层选择。'
+  - id: P-SHADCN-POPOVER-NAVIGATION-TRIGGER
+    text:
+      en: 'The navigation Trigger remains one Base Popover Trigger. The current secondary/icon visual candidate is provisional and requires project design review against the fixed upstream ghost/h-8/Menu trigger; it is not claimed as exact upstream alignment or an approved adaptation. It installs no Button hook, duplicate interaction facts, press protocol, focus owner or anchoring bridge. Authored Menu/X content and an accessible open/close label follow public Root open; ordinary trigger expansion, controls and anchor anatomy remain Base-owned.'
+      zh-CN: 'navigation Trigger 仍是唯一 Base Popover Trigger。当前 secondary/icon 视觉候选需对照固定上游 ghost/h-8/Menu trigger 做项目设计核对，尚不声称精确上游对齐或已批准适配；不安装 Button hook、不重复交互 facts、press 协议、focus owner 或锚点桥。作者的 Menu/X 内容和可达开关名称读取公开 Root open，expanded、controls 与锚点 anatomy 仍由 Base 拥有。'
+  - id: P-SHADCN-POPOVER-NAVIGATION-SEMANTICS
+    text:
+      en: 'Navigation presentation does not turn nonmodal Popover into a Dialog: no modal mask, focus trap or application scroll lock. Escape/trigger close restores the public Trigger, outside press/focus does not steal focus back, and native links retain modifier/middle-click/context-menu semantics. Borrowing and returning the website native navigation tree, native link integration and fatal renderer retirement are separate consumer responsibilities tracked in Issue1191/1177, not completed by these public prototype tests. Public open=false/isPresent=false alone do not establish terminal teardown or focus release.'
+      zh-CN: '导航外观不把非模态 Popover 变成 Dialog：不加 modal mask、focus trap 或应用层 scroll lock。Escape/trigger 关闭恢复公开 Trigger，外部 press/focus 不抢回焦点，原生链接保留修饰键、中键和上下文菜单语义。网站导航原生树的借用/归还、原生链接集成及 fatal renderer 退出属于 Issue1191/1177 的独立 consumer 责任，公共原型测试不能结算。公开 open=false/isPresent=false 本身不证明终态 teardown 或 focus release。'
+  - id: P-SHADCN-POPOVER-NAVIGATION-CSS-CLOSURE
+    text:
+      en: 'Canonical generated Shadcn preset tokens include the navigation available-size and overscroll rules. Actual document and shadow preset command output must realize those rules; rendering live element tokens directly is supplementary, not preset-delivery evidence.'
+      zh-CN: '规范生成的 Shadcn preset token 必须包含导航可用尺寸和 overscroll 规则。真实 document/shadow preset 命令产物须兑现这些规则；直接渲染 live element tokens 只是补充，不是 preset 交付证据。'
+  - id: P-SHADCN-POPOVER-NAVIGATION-MOTION-SUPPORT
+    text:
+      en: 'Navigation opens without the default card entrance animation. Explicit public Transition duration props still govern retention; CSS tokens alone are not proof of completion. Transparency is opaque on unknown support, reduced transparency or forced colors. The current supported 4px enhancement is a bounded Proto adaptation, not a claim of exact upstream bare-backdrop-blur equivalence.'
+      zh-CN: '导航打开时不使用默认卡片入场动画。显式公开 Transition duration props 继续控制保留，CSS token 不能证明退出完成。未知支持、降低透明度或强制颜色时保持不透明；现有受支持的 4px 增强是有限 Proto 适配，不声称等于上游 bare backdrop-blur。'
 dependsOn:
   contracts:
     - C-PROPS-0001
@@ -25,9 +45,18 @@ inherits:
 verifies:
   tests:
     - T-SHADCN-OVERLAY-PROFILES-0001
+    - T-POPOVER-NAVIGATION-PRESENTATION-0001
 sources:
+  - path: https://github.com/shadcn-ui/ui/blob/c0d63c339d6cd2fc26135590a54cf1f362269451/apps/v4/components/mobile-nav.tsx
+    label: Fixed official mobile navigation presentation
   - path: packages/prototypes/shadcn/src/popover/
 openQuestions:
+  - id: P-SHADCN-POPOVER-Q-NAVIGATION-TRIGGER-DESIGN
+    question:
+      en: Does the project accept the provisional secondary/icon trigger, or should navigation follow the fixed upstream ghost/h-8/Menu appearance?
+      zh-CN: 项目是否接受暂定 secondary/icon trigger，还是应按固定上游 ghost/h-8/Menu 外观完成导航？
+    blocks:
+      - activation:P-SHADCN-POPOVER
   - id: P-SHADCN-POPOVER-Q-ADMISSION
     question:
       zh-CN: 何时完成精确 head 的浏览器/native 证据并准入此 draft？
