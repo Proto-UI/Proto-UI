@@ -58,14 +58,17 @@ describe('Base Resizable documentation registration', () => {
       for (const child of node.children ?? []) count += countIn(child, protoId);
       return count;
     };
+    let rootCount = 0;
     const collectRoots = (node: any) => {
       if (!node || typeof node !== 'object') return;
       if (node.kind === 'proto' && node.prototypeId === 'base-resizable-root') {
+        rootCount += 1;
         expect(countIn(node, 'base-resizable-panel')).toBe(2);
         expect(countIn(node, 'base-resizable-handle')).toBe(1);
       }
       for (const child of node.children ?? []) collectRoots(child);
     };
     collectRoots((recipe as any).root);
+    expect(rootCount).toBe(1);
   });
 });
