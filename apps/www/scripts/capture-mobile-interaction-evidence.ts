@@ -4,6 +4,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
+import { writeSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,6 +38,7 @@ const out = path.resolve(values.out);
 await mkdir(out, { recursive: true });
 const cases: Array<Record<string, unknown>> = [];
 const failures: string[] = [];
+const lifecycle: Array<{ stage: string; at: string; activeResources: string[] }> = [];
 const report = {
   quickPreview,
   revisionKind: kind,
@@ -54,8 +56,49 @@ const report = {
     '390/430 CSS-pixel mobile simulations, not a physical OnePlus 13T or complete assistive-technology/engine coverage. 320px/200% is stress-only.',
   cases,
   failures,
+  lifecycle,
 };
 const save = () => writeFile(path.join(out, 'metrics.json'), JSON.stringify(report, null, 2));
+const recordLifecycleFailure = (stage: string, error: unknown) => {
+  const failure = `lifecycle ${stage}: ${String(error)}`;
+  failures.push(failure);
+  process.exitCode = 1;
+  try {
+    writeSync(process.stderr.fd, `${failure}\n`);
+  } catch {
+    // The nonzero exit and in-memory failure remain even if stderr is unavailable.
+  }
+};
+const recordLifecycle = async (stage: string) => {
+  try {
+    const observation = {
+      stage,
+      at: new Date().toISOString(),
+      activeResources: process.getActiveResourcesInfo(),
+    };
+    lifecycle.push(observation);
+    writeSync(process.stdout.fd, `[mobile-evidence-lifecycle] ${JSON.stringify(observation)}\n`);
+    await save();
+  } catch (error) {
+    // Evidence failure must fail the job without skipping the original cleanup.
+    recordLifecycleFailure(stage, error);
+  }
+};
+// Observation only: no extra timer, forced exit, signal interception or timeout change.
+process.once('beforeExit', () => {
+  try {
+    writeSync(
+      process.stdout.fd,
+      `[mobile-evidence-lifecycle] ${JSON.stringify({
+        stage: 'process-before-exit',
+        at: new Date().toISOString(),
+        activeResources: process.getActiveResourcesInfo(),
+      })}\n`
+    );
+  } catch (error) {
+    recordLifecycleFailure('process-before-exit', error);
+  }
+});
 const homeMenu = (page: Page) =>
   page.locator(
     '.site-header-menu [data-projection-generation-state="active"] [data-demo-ref="home-menu"]'
@@ -65,8 +108,11 @@ const readyHome = (page: Page, runtime = 'wc') =>
     const root = document.querySelector<HTMLElement>('[data-homepage-runtime]');
     return root?.dataset.runtimeState === 'ready' && root.dataset.runtime === runtime;
   }, runtime);
+await recordLifecycle('server-start-requested');
 const base = await startServer(['/zh-cn/', '/en/ui-libraries/base/transition/']);
+await recordLifecycle('server-ready');
 const browser = await launchBrowser();
+await recordLifecycle('browser-ready');
 try {
   for (const width of quickPreview ? [390] : [390, 430])
     for (const locale of quickPreview ? ['zh-cn'] : ['zh-cn', 'en'])
@@ -781,9 +827,14 @@ try {
         await save();
       }
     }
+  await recordLifecycle('cases-loop-finished');
 } finally {
+  await recordLifecycle('browser-close-started');
   await browser.close();
+  await recordLifecycle('browser-close-finished');
+  await recordLifecycle('server-stop-started');
   await stopServer();
+  await recordLifecycle('server-stop-finished');
   await save();
 }
 assert.deepEqual(
@@ -791,3 +842,4 @@ assert.deepEqual(
   [],
   'All mobile cases must pass; retain actual failure screenshots and measurements'
 );
+await recordLifecycle('assertions-complete');
