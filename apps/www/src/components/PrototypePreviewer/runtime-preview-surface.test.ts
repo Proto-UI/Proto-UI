@@ -110,17 +110,18 @@ describe('RuntimeBox canvas composition', () => {
             kind: 'proto',
             prototypeId: `${family}-button`,
             ref: 'actual-button',
-            props: { onClick },
             children: ['Actual partial-family Button'],
           },
           setup(next) {
             context = next;
-            const onCustomClick = (event: Event) => {
-              if (event instanceof CustomEvent) onClick();
-            };
-            context.refs['actual-button'].addEventListener('click', onCustomClick);
+            // The outward signal is delivered per profile: a Web Component
+            // listener prop, a React handler prop or a Vue listener.
+            // M-EXPOSE-EVENT-0001 states that these are profile-specific
+            // translations with no cross-host equivalence yet, so the
+            // activation is delivered through the sanctioned runtime channel
+            // rather than through a Web Component CustomEvent.
+            next.api.setProps('actual-button', { onClick });
             return () => {
-              context.refs['actual-button'].removeEventListener('click', onCustomClick);
               cleanup();
             };
           },
@@ -135,12 +136,21 @@ describe('RuntimeBox canvas composition', () => {
         );
         expect(surface.demo.root.kind).toBe('box');
         expect(runtimePreviewRecipe(family, 'button').prototypeIds).toEqual([`${family}-button`]);
+        // The closed Select recipe declares the family's own Select parts,
+        // including the structural Surface, Viewport, ItemText, Group, Label
+        // and Separator parts this family projects.
         expect(runtimePreviewRecipe(family, 'select').prototypeIds).toEqual([
           `${family}-select-root`,
           `${family}-select-trigger`,
           `${family}-select-value`,
           `${family}-select-content`,
           `${family}-select-item`,
+          `${family}-select-surface`,
+          `${family}-select-viewport`,
+          `${family}-select-item-text`,
+          `${family}-select-group`,
+          `${family}-select-label`,
+          `${family}-select-separator`,
           `${family}-button`,
         ]);
         expect(() =>
