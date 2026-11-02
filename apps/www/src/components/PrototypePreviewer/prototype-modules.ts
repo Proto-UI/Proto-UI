@@ -573,6 +573,38 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/data-table');
     registerPrototype('base-data-table-header-row', mod.dataTableHeaderRow);
   },
+  'base-date-picker-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-root', mod.datePickerRoot);
+  },
+  'base-date-picker-trigger': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-trigger', mod.datePickerTrigger);
+  },
+  'base-date-picker-value': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-value', mod.datePickerValue);
+  },
+  'base-date-picker-content': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-content', mod.datePickerContent);
+  },
+  'base-date-picker-day': async () => {
+    const mod = await import('@proto.ui/prototypes-base/date-picker');
+    registerPrototype('base-date-picker-day', mod.datePickerDay);
+  },
+  'base-calendar-heading': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-heading', mod.calendarHeading);
+  },
+  'base-calendar-grid': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-grid', mod.calendarGrid);
+  },
+  'base-calendar-row': async () => {
+    const mod = await import('@proto.ui/prototypes-base/calendar');
+    registerPrototype('base-calendar-row', mod.calendarRow);
+  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
