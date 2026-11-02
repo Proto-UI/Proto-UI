@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
 import type { WindowedCollection } from '@proto.ui/prototypes-base/virtual-list';

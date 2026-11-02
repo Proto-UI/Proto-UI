@@ -275,7 +275,7 @@ The 2026-10-08 startup prerender review adds a finite source-hashed build-time R
 | `apps/www/src/content/docs/zh-cn/demo-base-transition-controlled.demo.ts` | `www.demo.authored-controllers` | `2dd09fc318f19b1fa34d46f0bec17cab0375da92b939113e6b1baf7760025b9d` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-select.demo.ts` | `www.demo.authored-controllers` | `cc88bc8d07c0fa55229974d5aa7e32c8e5b7a3c219a09f5532652378944c5657` |
 | `apps/www/src/content/docs/zh-cn/demo-brutalist-separator.demo.ts` | `www.demo.brutalist-separator` | `58d963578d9f80a4d17db85d431838fee464ea653a59241c3167c66c95a230b6` |
-| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `c2f2d9b91205a15129c487dcf90549df1ef18fc9dfd772765f3a968805127fea` |
+| `apps/www/src/content/docs/zh-cn/demo-shadcn-radio-group.demo.ts` | `www.demo.authored-controllers` | `7a34a4f5babaff7d487b23247e0f2e985ae797fdec94dfe144f8c472893af5da` |
 | `apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts` | `www.demo.authored-controllers` | `e0853379e6d8a241101bc82e78f43f4dec9db1d14e522f8c4b72ee46ff05cdb3` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/2-interaction-relations.md` | `www.content.native-disclosures` | `a8d277d42f1a6df4196cc098ddc02bec4d891640d501bda337b509fac40de7e7` |
 | `apps/www/src/content/docs/zh-cn/whitepaper/3-component-boundary.md` | `www.content.native-disclosures`, `www.docs.whitepaper-diagram-viewer` | `0d454d776303bde8c20454560d595788eaabff0b1298e3392fd2febf1e7374ee` |

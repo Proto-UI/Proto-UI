@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from '../../shadcn-demo-style';
 export default withShadcnRheaDemo({
   type: 'demo',
   root: {

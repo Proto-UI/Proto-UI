@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 
 type OpenRequest = { open: boolean; reason: 'pointer' | 'keyboard' | 'programmatic' };

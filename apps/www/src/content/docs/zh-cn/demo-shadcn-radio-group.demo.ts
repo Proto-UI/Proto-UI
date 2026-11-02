@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import type { DemoNode, DemoSetupContext } from '../../../components/PrototypePreviewer/demo-types';
 
 function option(group: string, value: string, label: string, disabled = false): DemoNode {

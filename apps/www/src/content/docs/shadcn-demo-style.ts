@@ -1,4 +1,4 @@
-import type { DemoSpec } from '@/components/PrototypePreviewer/demo-types';
+import type { DemoSpec } from '../../components/PrototypePreviewer/demo-types';
 
 /** Website example policy, not a change to any public component default. */
 export const SHADCN_DEMO_STYLE_PROFILE = 'rhea' as const;

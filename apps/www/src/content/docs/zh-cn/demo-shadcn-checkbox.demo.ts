@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from '../shadcn-demo-style';
 import { shadcnCheckboxDemoChildren } from '../../../components/PrototypePreviewer/shadcn-checkbox-composition';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 

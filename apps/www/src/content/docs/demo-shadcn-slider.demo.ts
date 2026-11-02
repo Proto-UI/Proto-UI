@@ -1,4 +1,4 @@
-import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+import { withShadcnRheaDemo } from './shadcn-demo-style';
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 type Proto = Extract<DemoNode, { kind: 'proto' }>;
 const part = (part: string, ref: string, children: Proto['children'] = [], props = {}): Proto => ({
