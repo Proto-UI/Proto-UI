@@ -15,6 +15,22 @@ const disclosures = new WeakMap<HTMLElement, SiteHeaderDisclosure>();
 const contentsNavigations = new WeakMap<HTMLElement, SiteContentsNavigation>();
 const FOCUSABLE = 'a[href], button, [role="button"], [role="combobox"], [tabindex="0"]';
 
+/**
+ * IDREF and expanded state alone do not make an overlay an Escape owner.
+ * This Header uses light DOM. Reject display:none ancestry without requiring
+ * layout boxes: pending entry and DOM-only hosts may both have zero-sized rects.
+ * This is not a general cross-shadow visibility predicate.
+ */
+function hasAvailablePresentation(element: Element): boolean {
+  if (!element.isConnected || element.closest('[hidden], [inert]')) return false;
+  const window = element.ownerDocument.defaultView;
+  if (!window) return true;
+  for (let current: Element | null = element; current; current = current.parentElement) {
+    if (window.getComputedStyle(current).display === 'none') return false;
+  }
+  return true;
+}
+
 /** Resolve escaped Select ownership through this disclosure's own IDREFs.
  * The caller chooses the eligible triggers; unrelated portals are never inside. */
 function ownsSelectPopupForRoot(
@@ -210,6 +226,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
     // Its delayed initial focus may still be on its trigger.
     const nestedOpen = [...root.querySelectorAll('[aria-controls][aria-expanded="true"]')].some(
       (trigger) =>
+        hasAvailablePresentation(trigger) &&
         trigger
           .getAttribute('aria-controls')
           ?.split(/\s+/)
@@ -217,7 +234,7 @@ export function initSiteHeaderDisclosure(root: HTMLElement): SiteHeaderDisclosur
             const popup = document.getElementById(id);
             return (
               popup?.matches('[role="listbox"], [data-site-select-content]') &&
-              !popup.closest('[hidden], [inert]')
+              hasAvailablePresentation(popup)
             );
           })
     );
