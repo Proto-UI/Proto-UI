@@ -95,15 +95,52 @@ function recordServerOutput(chunk: Buffer): void {
   serverOutput = `${serverOutput}${chunk.toString()}`.slice(-20_000);
 }
 
+/**
+ * The style/CLI generation runs before the dev server exists and is unrelated
+ * to server readiness. Awaiting it separately keeps the readiness budget
+ * measuring only the Astro start and the route's first compile; folding it
+ * into the same spawn charges build tooling to the readiness deadline.
+ */
+export function runStyleGeneration(
+  executable: string = process.platform === 'win32' ? 'corepack.cmd' : 'corepack'
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const generation = spawn(
+      executable,
+      ['pnpm@10.32.1', '--filter', 'apps-www', 'run', 'generate:proto-ui-style'],
+      {
+        cwd: process.cwd(),
+        env: process.env,
+        stdio: ['ignore', 'pipe', 'pipe'],
+      }
+    );
+    let output = '';
+    const collect = (chunk: Buffer) => {
+      output = `${output}${chunk.toString()}`.slice(-8_000);
+    };
+    generation.stdout?.on('data', collect);
+    generation.stderr?.on('data', collect);
+    generation.on('error', reject);
+    generation.on('exit', (code) =>
+      code === 0
+        ? resolve()
+        : reject(new Error(`generate:proto-ui-style exited with code ${String(code)}\n${output}`))
+    );
+  });
+}
+
 async function spawnServer(readyRoutes: readonly string[]): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  await runStyleGeneration(executable);
   devServer = spawn(
     executable,
     [
       'pnpm@10.32.1',
       '--filter',
       'apps-www',
+      'exec',
+      'astro',
       'dev',
       '--host',
       '127.0.0.1',

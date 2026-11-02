@@ -12,7 +12,11 @@ import {
   type Page,
 } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { runtimeSelectTrigger, selectRuntime as selectPreviewRuntime } from './browser-harness';
+import {
+  runStyleGeneration,
+  runtimeSelectTrigger,
+  selectRuntime as selectPreviewRuntime,
+} from './browser-harness';
 
 const RUNTIMES = ['wc', 'react', 'vue'] as const;
 type RuntimeId = (typeof RUNTIMES)[number];
@@ -103,12 +107,15 @@ function recordServerOutput(chunk: Buffer): void {
 async function spawnServer(): Promise<string> {
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
+  await runStyleGeneration(executable);
   devServer = spawn(
     executable,
     [
       'pnpm@10.32.1',
       '--filter',
       'apps-www',
+      'exec',
+      'astro',
       'dev',
       '--host',
       '127.0.0.1',
