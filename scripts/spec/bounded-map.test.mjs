@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import test from 'node:test';
@@ -62,6 +62,10 @@ test('handles more inputs than the limit without omission or duplication', async
 test('reports the accurate file on a read failure and fails the batch', async () => {
   const directory = await mkdtemp(path.join(tmpdir(), 'bounded-map-'));
   try {
+    // Only `missing.ts` is absent; the other two exist, so the single ENOENT
+    // deterministically names missing.ts (no chronological-rejection race).
+    await writeFile(path.join(directory, 'a.ts'), 'export const a = 1;\n');
+    await writeFile(path.join(directory, 'b.ts'), 'export const b = 2;\n');
     const files = [
       path.join(directory, 'missing.ts'),
       path.join(directory, 'a.ts'),
