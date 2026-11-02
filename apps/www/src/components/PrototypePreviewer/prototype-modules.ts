@@ -481,6 +481,18 @@ const manualPrototypeModules: Record<string, PrototypeModuleLoader> = {
     const mod = await import('@proto.ui/prototypes-base/toggle');
     registerPrototype('base-toggle', mod.toggle);
   },
+  'base-resizable-root': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-root', mod.resizableRoot);
+  },
+  'base-resizable-panel': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-panel', mod.resizablePanel);
+  },
+  'base-resizable-handle': async () => {
+    const mod = await import('@proto.ui/prototypes-base/resizable');
+    registerPrototype('base-resizable-handle', mod.resizableHandle);
+  },
   // Runtime registry loaders keep each preview family out of the initial bundle.
   'base-collapsible-root': async () => {
     const mod = await import('@proto.ui/prototypes-base/collapsible');
