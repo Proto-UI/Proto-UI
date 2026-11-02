@@ -5,7 +5,12 @@ import { SHADCN_SWITCH_DEMO_CASES, SHADCN_SWITCH_REM_GEOMETRY } from './switch-d
 // Source inventory only. Native readiness and geometry remain browser assertions.
 describe('Shadcn Switch public demo acceptance inventory', () => {
   it('keeps exact readiness count and named variant expectations aligned with the real demo', () => {
-    const actual = demo.root.children
+    expect(demo.root.prototypeId).toBe('shadcn-style-scope');
+    expect(demo.root.props).toEqual({ styleProfile: 'rhea' });
+    expect(demo.root.children).toHaveLength(1);
+    const authoredRoot = demo.root.children[0];
+    expect(authoredRoot.kind).toBe('box');
+    const actual = authoredRoot.children
       .filter((node) => node.kind === 'proto' && node.prototypeId === 'shadcn-switch-root')
       .map((root) => ({
         name: root.children.find((part) => part.kind === 'box')!.children!.join(''),

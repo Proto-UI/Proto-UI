@@ -1,4 +1,4 @@
-import { formatCode } from '@/utils/conversionUtils';
+import { formatCode } from '../../../../utils/conversionUtils';
 import type { RuntimeId } from '@/components/PrototypePreviewer/runtimes/ids';
 
 export const codeMap: Partial<Record<RuntimeId, Record<string, string>>> = {

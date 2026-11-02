@@ -13,6 +13,7 @@ import {
   validateProjectionFamilyManifest,
   type ProjectionFamilyManifest,
 } from '../src/components/PrototypePreviewer/projection-families';
+import { withShadcnRheaDemo } from '../src/content/docs/shadcn-demo-style';
 import { createGhostDemo } from '../src/content/docs/demo_components/button/demo-button-ghost.demo';
 import demo0 from '../src/content/docs/demo_components/button/demo-button.demo';
 import demo1 from '../src/content/docs/demo_components/button/demo-button-default.demo';
@@ -155,6 +156,39 @@ function visit(node: DemoChild, action: (node: Exclude<DemoChild, string>) => vo
 }
 
 describe('ordinary Shadcn documentation demo policy', () => {
+  it('preserves required setup and authored child types while declaring the real scope root', () => {
+    const cleanup = () => undefined;
+    const authored = {
+      type: 'demo',
+      root: { kind: 'box', children: ['typed authored child'] },
+      setup: () => cleanup,
+      authorKey: 'preserved',
+    } satisfies DemoSpec & { authorKey: string };
+    const wrapped = withShadcnRheaDemo(authored);
+    const setup: typeof authored.setup = wrapped.setup;
+    const child: typeof authored.root = wrapped.root.children[0];
+    const kind: 'proto' = wrapped.root.kind;
+    const prototypeId: 'shadcn-style-scope' = wrapped.root.prototypeId;
+    const profile: 'rhea' = wrapped.root.props.styleProfile;
+    const compatible: DemoSpec = wrapped;
+    expect(setup).toBe(authored.setup);
+    expect(setup()).toBe(cleanup);
+    expect(child).toBe(authored.root);
+    expect(wrapped.root).not.toBe(authored.root);
+    expect(wrapped.root.children).toHaveLength(1);
+    expect([kind, prototypeId, profile]).toEqual(['proto', 'shadcn-style-scope', 'rhea']);
+    expect(compatible).toBe(wrapped);
+    expect(wrapped.authorKey).toBe(authored.authorKey);
+  });
+
+  it('does not invent setup for an authored demo that has no setup', () => {
+    const authored = { type: 'demo', root: { kind: 'text', text: 'static' } } satisfies DemoSpec;
+    const wrapped = withShadcnRheaDemo(authored);
+    const child: typeof authored.root = wrapped.root.children[0];
+    expect(child).toBe(authored.root);
+    expect('setup' in wrapped).toBe(false);
+  });
+
   it('covers every actual Shadcn page demo ID, not a selected subset', () => {
     const found = new Set<string>();
     for (const locale of ['en', 'zh-cn']) {
