@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "record": "vue2-r10-private-registration-increment",
+  "status": "WIP_FULL_STRICT97_AND_LAWFUL_HELPER_REGRESSION_REMAIN",
+  "basePublicCommit": "83a560f449489529c5729a493a3ae2c9156918ba",
+  "basePublicRecord": "internal/records/2026-11-02-vue2-commit-contract-r2/r9-lifecycle-registry",
+  "executedBase": "783ac833a77102365489d4050f7279c758114ec4",
+  "controlTree": "a90472e123d0933ef4396c16d222444f728796b0",
+  "candidateTree": "9db936d579dffe2c8debb61e43783a1205986b4e",
+  "sourceFiles": [
+    {
+      "path": "packages/compiler/src/vue2-source.ts",
+      "bytes": 70173,
+      "sha256": "f0bc98540310f26170748b0c131ecf4df046bda6ea33797ffd97441a08f3f7e6"
+    }
+  ],
+  "baseFiles": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 38625,
+      "sha256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 49032,
+      "sha256": "c2ebb3a983c58d3722b08e39de81d052bb9d1c976a816743d4b08a7c77ffab68"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "68b5ce62f2c0a426ed28844b84a49dcd85bb335e968ff2a90f24ae99c88c2aad"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "component": {
+    "basePath": "graph/Component.js",
+    "baseSHA256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579",
+    "resultSHA256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2",
+    "edits": [
+      {
+        "byteOffset": 3383,
+        "delete": "",
+        "insert": "/** @template Run @typedef {__puiPropsWatchRegistration<Run> & { active: boolean }} __puiPropsWatcher */\n"
+      },
+      {
+        "byteOffset": 6689,
+        "delete": "  /** @type {Array<__puiPropsWatchRegistration<typeof run> & { active: boolean }>} */\n",
+        "insert": "  /** @type {Array<__puiPropsWatcher<typeof run>>} */\n"
+      },
+      {
+        "byteOffset": 22416,
+        "delete": "  /** @param {__puiPropsWatchRegistration<typeof run>} registration */\n  const registerPropsWatch = (registration) => {\n",
+        "insert": "  /** @param {__puiPropsWatcher<typeof run>} watch */\n  const registerPropsWatch = (watch) => {\n"
+      },
+      {
+        "byteOffset": 22553,
+        "delete": "    const { kind, keys } = registration;\n",
+        "insert": "    const { kind, keys } = watch;\n"
+      },
+      {
+        "byteOffset": 22812,
+        "delete": "    const watch = { ...registration, keys: keys === null ? null : [...keys], active: true };\n",
+        "insert": "    watch.keys = keys === null ? null : [...keys];\n"
+      },
+      {
+        "byteOffset": 23986,
+        "delete": "      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn }),\n",
+        "insert": "      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn, active: true }),\n"
+      },
+      {
+        "byteOffset": 24146,
+        "delete": "      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn }),\n",
+        "insert": "      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn, active: true }),\n"
+      },
+      {
+        "byteOffset": 24340,
+        "delete": "      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn }),\n",
+        "insert": "      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn, active: true }),\n"
+      },
+      {
+        "byteOffset": 24493,
+        "delete": "      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn }),\n",
+        "insert": "      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn, active: true }),\n"
+      }
+    ],
+    "runtimeStatementChanges": "Reuse private literal registration as stored watch; preserve actual key copy, validation, callback receiver, active cancellation and cleanup. No shared analyzer or runtime layer."
+  },
+  "moduleTransformation": "Only replace the exact JSON-quoted code string with the reconstructed actual Component; preserve every other byte and field.",
+  "programTransformation": {
+    "entries": 215,
+    "replacementCount": 1,
+    "oldComponentSHA256": "aba68ebd85737761c3f3ed7509fbecbea2e2510e5b7dc8ea5d178afe37ccf579",
+    "newComponentSHA256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2",
+    "allOtherBytesUnchanged": true
+  },
+  "copiedFiles": [
+    {
+      "basePath": "graph/.proto-ui/context/scope-v1.ts",
+      "outputPath": "graph/.proto-ui/context/scope-v1.ts"
+    },
+    {
+      "basePath": "graph/Consumer.ts",
+      "outputPath": "graph/Consumer.ts"
+    },
+    {
+      "basePath": "authored.proto.ts.txt",
+      "outputPath": "authored.proto.ts.txt"
+    },
+    {
+      "basePath": "strict-request.portable.json",
+      "outputPath": "strict-request.portable.json"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "graph/Component.js",
+      "bytes": 38681,
+      "sha256": "521f5e0d21b71cdab9504c516a8068c9ab08c5b67926910a5c4d8d58d2803ee2"
+    },
+    {
+      "path": "actual-generated-module.json",
+      "bytes": 49089,
+      "sha256": "74182c9e0f3c01361c27f8a4a6f51182ddb7102715765661b751d29a2d59a6d0"
+    },
+    {
+      "path": "strict-program.portable.json",
+      "bytes": 41791,
+      "sha256": "970be4d5ef5b94ec2db31815a1f0c49604b61417f3b9ededf9075ac56b90bd50"
+    },
+    {
+      "path": "strict-request.portable.json",
+      "bytes": 4142,
+      "sha256": "db168de7347ef019a4efbda46a33875809a3e215a1a635b58949178993509be5"
+    },
+    {
+      "path": "diagnostics.portable.json",
+      "bytes": 26534,
+      "sha256": "5a018220709b372666f5de55da9eab4afc5c3efcc42018a99609cd3360abad4a"
+    },
+    {
+      "path": "graph/.proto-ui/context/scope-v1.ts",
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    {
+      "path": "graph/Consumer.ts",
+      "bytes": 178,
+      "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+    },
+    {
+      "path": "authored.proto.ts.txt",
+      "bytes": 799,
+      "sha256": "1625e58459f4cd8234e37e8304b703e76eaa57259f7fb9809610d1c5f5c0c682"
+    }
+  ],
+  "rawStrictHashes": {
+    "diagnostics.json": "6e94e90bb6ecd878c3182be9cd8ae404bbf1ecbad9b729d4ef701ce96dfe240c",
+    "program.json": "062a1c97b7f94ea65e53b197e9fcc903149cd5704ed8fd89b2ba192bdd0ae900",
+    "request.json": "07717a4ee0fbd7dd97e93f1415708a52d261e6be0ac606346a69a7e9b262581d"
+  },
+  "normalization": "Only four temporary prefix placeholders as the immutable R6 manifest; source/code/consumer/support not normalized. Every original diagnostic/program/request field and ordering is retained. Full inverse byte proof kept locally.",
+  "results": {
+    "coreEach": {
+      "collected": 49,
+      "passed": 47,
+      "failed": 2,
+      "skipped": 0
+    },
+    "regressionEach": {
+      "collected": 41,
+      "passed": 41
+    },
+    "sourceStrictEach": 0,
+    "generatedStrict": {
+      "control": 97,
+      "candidate": 97,
+      "common": 97,
+      "oldOnly": 0,
+      "newOnly": 0,
+      "exactSourceLineSpanMatches": 97
+    },
+    "artifacts": 1230,
+    "artifactBytes": 23308109,
+    "allArtifactHashesVerified": true,
+    "newControlsAdded": 0,
+    "unchangedNativeCases": 37,
+    "originalR2Cases": 12,
+    "originalR2ExpectSites": 43,
+    "unsupportedRejectionControls": 3
+  },
+  "runnerSHA256": "1e3e053ab8afb53bc421348c55c61d219f1b78081d56ae2406cf715dfdfb2c39",
+  "gateSHA256": "9fb89bf4269ad56d161b4cb3b212d9b83ac4b850f2e0def5b550658b00a8bee9",
+  "publicationBoundary": "One product source file is the exact executed candidate bytes. Existing test bytes remain identical to 83a. A public continuation on 83a is not a separate run of its complete ancestry/current main. No ready/merge/close or independent approval.",
+  "formatStatus": "Actual Prettier3.8.1 data export and read-only recheck both0 before the first R10 project run; the exact final source and unchanged test were executed. Original pre-format inputs retained.",
+  "remaining": [
+    "97 full generated strict diagnostics, lawful legacy-template helper regression, native SSR/hydration old walker path",
+    "Statefactory35/props14/owner14/Context12/Expose12/rootVNode5/authoredEntry5",
+    "Ordinary production mixed consumers/browser, reachable capability cost and complete backend/operation acceptance"
+  ],
+  "actualRegistrationCost": {
+    "status": "ACTUAL_CAPTURE_BYTE_COMPARISON_NOT_HEAP_TIMING_OR_BUNDLE_BENCHMARK",
+    "subjects": [
+      {
+        "test": "Vue2 compiler-native child construction > keeps a setup-returned props watcher disposer inactive through repeated native invocation and cleanup",
+        "inputByteIdentical": true,
+        "inputSHA256": "d550c932cd555f794df228f1f6a420b7921fafd30515e4819436580267df7ac4",
+        "controlR9ByteIdentical": true,
+        "control": {
+          "bytes": 29248,
+          "sha256": "9e30383d5102e18a5051622139e4c245c83ec731cd9e80db75c18fae39e3c5d1",
+          "resultSHA256": "5be1c7c7a6604ad89f74d3b4e1aa40c47202de97682219b398c4a559cdb88112"
+        },
+        "candidate": {
+          "bytes": 29304,
+          "sha256": "229194a73b939cc1460fe4808c8e59d14dc7c3cd1d7f417b0c7e8e9bec074c73",
+          "resultSHA256": "59123abc3e89c7825a921598b0e66f1cf521705b5d5760a57c3a2b66ad5fabf6"
+        },
+        "generatedCodeByteDelta": 56,
+        "exactEightSubstitutionsOnly": true,
+        "allOtherGeneratedModuleBytesIdentical": true,
+        "privateLiteralSitesEach": 4,
+        "helperSecondRecordSites": {
+          "control": 1,
+          "candidate": 0
+        },
+        "keysCopyAndCancellationClosurePreserved": true,
+        "actualConsumerStatus": {
+          "control": "passed",
+          "candidate": "passed"
+        }
+      },
+      {
+        "test": "Vue2 compiler-native child construction > preserves resolved watcher hydration, coalesced snapshots, registration order and run binding",
+        "inputByteIdentical": true,
+        "inputSHA256": "bd8c6f276f3bca380ef2e6765c9346387d4bbdcad2d7fc5cd2228230659a1905",
+        "controlR9ByteIdentical": true,
+        "control": {
+          "bytes": 31458,
+          "sha256": "4ba3561a31e92eb352d9fb92486a6877c41fd91686e2e9bc9e6cc89be55211f7",
+          "resultSHA256": "cb565a104443bd05da47ca509f2880cb9f573b569111c4d887bcd4768082746d"
+        },
+        "candidate": {
+          "bytes": 31514,
+          "sha256": "3855ce3bfc4350825f5621b17a4bc2c323dbc93dd9baf422cce2dc18cee8a0c9",
+          "resultSHA256": "b34c4be874f426b4fa2ad98123fd04d0d0f80fde73234692e47f55a55d15e17a"
+        },
+        "generatedCodeByteDelta": 56,
+        "exactEightSubstitutionsOnly": true,
+        "allOtherGeneratedModuleBytesIdentical": true,
+        "privateLiteralSitesEach": 4,
+        "helperSecondRecordSites": {
+          "control": 1,
+          "candidate": 0
+        },
+        "keysCopyAndCancellationClosurePreserved": true,
+        "actualConsumerStatus": {
+          "control": "passed",
+          "candidate": "passed"
+        }
+      }
+    ],
+    "constructionSiteBoundary": "Every selected emitted helper retains four private literal callsites and one real keys-array copy/cancellation closure. Successful registration source constructs a private callsite record and previously a second spread record (2), now retains the private record (1). This does not measure optimizer allocations, heap, GC, wall-time, initialized instances, or final optimized bundle bytes.",
+    "source": "New R10 control/candidate exact unit captures; full actual input, GeneratedModule, strict artifacts remain retained."
+  },
+  "unchangedTestSHA256": "8be12d08282ac8d10f1e4d8a11f5d4236d3db2eba644d1c3a560865fa46ebd7f"
+}

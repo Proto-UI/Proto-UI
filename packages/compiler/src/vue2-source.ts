@@ -628,6 +628,7 @@ ${
 /** @template Run @typedef {{ kind: 'resolved' | 'resolved-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIResolvedProps> } | { kind: 'raw' | 'raw-all', keys: readonly string[] | null, fn: PUIPropsWatchCallback<Run, PUIRawProps> }} PUIPropsWatchRegistration */
 /** @typedef {${lifecycleKeys.map((key) => JSON.stringify(key)).join(' | ')}} PUILifecycleKind */
 /** @template Run @typedef {(run: Run) => void} PUILifecycleCallback */
+/** @template Run @typedef {PUIPropsWatchRegistration<Run> & { active: boolean }} PUIPropsWatcher */
 /** @typedef {{ epoch: number, revision: number, kind: 'update' }} PUIPendingCommit */
 /** @typedef {{ epoch: number, version: number, present: boolean, vnode: import('vue').VNode, kind: 'mount' | 'update' | 'none' | 'detach', revision?: number | null }} PUIRenderedCommit */
 /** @param {unknown} value @param {PropertyKey} key */
@@ -730,7 +731,7 @@ function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   let previousValid = Object.create(null);
   let specs = Object.create(null);
   const defaults = [];
-  /** @type {Array<PUIPropsWatchRegistration<typeof run> & { active: boolean }>} */
+  /** @type {Array<PUIPropsWatcher<typeof run>>} */
   const watchers = [];
 ${stateful ? '  /** @type {Array<{ dispose: () => void }>} */\n  const states = [];\n' : ''}  const exposed = Object.create(null);
   const eventDeclarations = Object.create(null);
@@ -1125,13 +1126,13 @@ ${
     }
     specs = next; resolved = resolveProps(raw, false).snapshot;
   };
-  /** @param {PUIPropsWatchRegistration<typeof run>} registration */
-  const registerPropsWatch = (registration) => {
+  /** @param {PUIPropsWatcher<typeof run>} watch */
+  const registerPropsWatch = (watch) => {
     setupOnly();
-    const { kind, keys } = registration;
+    const { kind, keys } = watch;
     if (keys !== null && (!keys.length || keys.some((key) => typeof key !== 'string'
       || kind === 'resolved' && !PUIOwn(specs, key)))) throw new Error('[Vue2 native] watch requires non-empty valid prop keys.');
-    const watch = { ...registration, keys: keys === null ? null : [...keys], active: true };
+    watch.keys = keys === null ? null : [...keys];
     watchers.push(watch);
     return () => { watch.active = false; };
   };
@@ -1149,13 +1150,13 @@ ${
         defaults.unshift({ ...layer }); resolved = resolveProps(raw, false).snapshot;
       },
       /** @param {readonly string[]} keys @param {PUIPropsWatchCallback<typeof run, PUIResolvedProps>} fn */
-      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn }),
+      watch: (keys, fn) => registerPropsWatch({ kind: 'resolved', keys, fn, active: true }),
       /** @param {PUIPropsWatchCallback<typeof run, PUIResolvedProps>} fn */
-      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn }),
+      watchAll: (fn) => registerPropsWatch({ kind: 'resolved-all', keys: null, fn, active: true }),
       /** @param {readonly string[]} keys @param {PUIPropsWatchCallback<typeof run, PUIRawProps>} fn */
-      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn }),
+      watchRaw: (keys, fn) => registerPropsWatch({ kind: 'raw', keys, fn, active: true }),
       /** @param {PUIPropsWatchCallback<typeof run, PUIRawProps>} fn */
-      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn }),
+      watchRawAll: (fn) => registerPropsWatch({ kind: 'raw-all', keys: null, fn, active: true }),
     },
 ${
   stateful
