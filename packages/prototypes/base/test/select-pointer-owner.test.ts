@@ -37,7 +37,10 @@ const pointer = (type: string, pointerType = 'mouse', buttons = 0) =>
 
 let contextObserverSequence = 0;
 
-async function fixture(onContextChange?: (next: SelectContextValue) => void) {
+async function fixture(
+  onContextChange?: (next: SelectContextValue) => void,
+  rootProps: Record<string, unknown> = {}
+) {
   vi.useFakeTimers();
   const root = new Root();
   const content = new Content();
@@ -66,7 +69,7 @@ async function fixture(onContextChange?: (next: SelectContextValue) => void) {
     content.append(item);
     return item;
   });
-  setElementProps(root, { defaultOpen: true, defaultValue: 'alpha' });
+  setElementProps(root, { defaultOpen: true, defaultValue: 'alpha', ...rootProps });
   // The public context observer is created and attached before Item subscribers.
   // Each new case must prove the intended pre-cache-update window, or fail.
   root.append(trigger, ...(observer ? [observer] : []), content);
@@ -138,6 +141,89 @@ it('hands A to B through Focus instead of publishing two active items', async ()
   expect(f.states()).toMatchObject({ active: [false, true, false], focused: [false, true, false] });
   expect(document.activeElement).toBe(f.items[1]);
   f.unchangedSelection();
+});
+
+it.each([
+  ['uncontrolled', {}],
+  ['controlled', { open: true, value: 'alpha' }],
+] as const)(
+  'preserves the single active owner across repeated public open (%s)',
+  async (_mode, rootProps) => {
+    // T-BASE-SELECT-ITEM-0001-CASE-REPEATED-OPEN
+    const f = await fixture(undefined, rootProps);
+    await f.move(1);
+    const expected = {
+      active: [false, true, false],
+      focused: [false, true, false],
+      selected: [true, false, false],
+      value: 'alpha',
+      open: true,
+    };
+    expect(f.states()).toEqual(expected);
+    expect(document.activeElement).toBe(f.items[1]);
+    expect(f.requests).toEqual([]);
+    expect(
+      f.root.getExposes().requestOpen({
+        open: true,
+        reason: 'repeat-open-regression',
+        focusReason: 'programmatic',
+        entry: 'selected-or-last',
+      })
+    ).toBe(true);
+    await settle();
+    expect(f.states()).toEqual(expected);
+    expect(document.activeElement).toBe(f.items[1]);
+    expect(f.requests).toEqual([
+      {
+        event: 'openChange',
+        detail: { open: true, reason: 'repeat-open-regression', focusReason: 'programmatic' },
+      },
+    ]);
+    // A second legitimate intent on the same focused Item must not revive A.
+    f.items[1].dispatchEvent(pointer('pointermove'));
+    await settle();
+    expect(f.states()).toEqual(expected);
+    expect(document.activeElement).toBe(f.items[1]);
+    expect(f.requests).toHaveLength(1);
+  }
+);
+
+it('starts a genuinely new open epoch at the selected entry after closing from B', async () => {
+  // T-BASE-SELECT-ITEM-0001-CASE-REPEATED-OPEN
+  const f = await fixture();
+  await f.move(1);
+  expect(f.states().active).toEqual([false, true, false]);
+  f.root.getExposes().requestOpen({
+    open: false,
+    reason: 'close-regression',
+    focusReason: 'programmatic',
+  });
+  await settle();
+  expect(f.states()).toMatchObject({ active: [false, false, false], value: 'alpha', open: false });
+  f.root.getExposes().requestOpen({
+    open: true,
+    reason: 'reopen-regression',
+    focusReason: 'programmatic',
+  });
+  await settle();
+  expect(f.states()).toEqual({
+    active: [true, false, false],
+    focused: [true, false, false],
+    selected: [true, false, false],
+    value: 'alpha',
+    open: true,
+  });
+  expect(document.activeElement).toBe(f.items[0]);
+  expect(f.requests).toEqual([
+    {
+      event: 'openChange',
+      detail: { open: false, reason: 'close-regression', focusReason: 'programmatic' },
+    },
+    {
+      event: 'openChange',
+      detail: { open: true, reason: 'reopen-regression', focusReason: 'programmatic' },
+    },
+  ]);
 });
 
 it('hands pointer navigation back to keyboard and back to another mouse item', async () => {

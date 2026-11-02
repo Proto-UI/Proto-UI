@@ -5,6 +5,13 @@ status: draft
 since: 0.2.0-rc.0
 summary: Covers ordered option metadata, option a11y, active and selected separation, controlled and uncontrolled commits, close policy, and disabled gating.
 cases:
+  - id: T-BASE-SELECT-ITEM-0001-CASE-REPEATED-OPEN
+    title: Repeated public open preserves the settled active owner without selecting
+    covers: [P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF, P-BASE-SELECT-ITEM-STATE-SEPARATION]
+    expectation: repeated-open-and-same-item-mouse-move-keep-one-active-option-under-controlled-or-uncontrolled-open-while-a-genuine-close-reopen-enters-selected
+    notes:
+      - 'Prepared against main d850c28a on 2026-11-02; current source execution is pending. The historical b46 diagnostic remains 23 old cases passing and the added repeated-open case failing.'
+      - 'Execution addendum 2026-11-02: fixed tree 971100155b0fc67b05e85f136c6399b51b8de921 passed pointer-owner 26/26; old Root and sole-Root revert each fail exactly the two controlled/uncontrolled repeated-open cases. Same-item follow-on focus/state/event checks pass on candidate. Native browser and exact-head CI remain pending.'
   - id: T-BASE-SELECT-ITEM-0001-CASE-MOUSE-FOCUS-HANDOFF
     title: Admitted mouse movement transfers the shared navigation owner without selection
     covers: [P-BASE-SELECT-ITEM-MOUSE-FOCUS-HANDOFF, P-BASE-SELECT-ITEM-STATE-SEPARATION]
@@ -60,6 +67,13 @@ cases:
     covers: [P-BASE-SELECT-ITEM-DISABLED]
     expectation: disabled-select-item-never-focuses-selects-or-closes
 implementations:
+  - id: prototypes-base-select-repeated-open-owner
+    kind: module-test
+    status: planned
+    path: packages/prototypes/base/test/select-pointer-owner.test.ts
+    required: true
+    consumesCases: [T-BASE-SELECT-ITEM-0001-CASE-REPEATED-OPEN]
+    exercises: [P-BASE-SELECT-ITEM]
   - id: prototypes-base-select-pointer-owner
     kind: module-test
     status: planned

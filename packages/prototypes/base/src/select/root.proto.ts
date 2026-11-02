@@ -201,7 +201,7 @@ function setupSelectRoot(def: DefHandle<SelectRootProps, SelectRootExposes>): vo
     const epoch = viewEpoch;
     snapshot = {
       ...snapshot,
-      activeValue: request.open ? snapshot.value : '',
+      activeValue: request.open ? (snapshot.open ? snapshot.activeValue : snapshot.value) : '',
       requestReason: request.reason,
       requestFocusReason: request.focusReason,
       requestEntry: request.open ? (request.entry ?? 'selected-or-first') : null,
