@@ -131,7 +131,7 @@ for (const [family, demo] of [
         // explicitly; the exact state assertion and 20s case budget are unchanged.
         await vi.waitFor(
           () => expect(root.dataset.projectionState, root.textContent ?? '').toBe('ready'),
-          { timeout: 5000 }
+          { timeout: 8000 }
         );
         const content = root.querySelector('[data-projection-content]')!;
         const query = (ref: string) =>
@@ -189,10 +189,16 @@ for (const [family, demo] of [
         const next = runtime === 'react' ? 'vue' : 'react';
         const nextTab = [...initial.tabs].find((tab) => tab.textContent === runtimeLabels[next])!;
         nextTab.click();
-        await vi.waitFor(() => {
-          expect(root.dataset.projectionState).toBe('ready');
-          expect(root.dataset.projectionRuntime).toBe(next);
-        });
+        // Switching the runtime crosses the same cold boundary: it loads
+        // another adapter and re-materializes the complete family demo before
+        // it can commit ready.
+        await vi.waitFor(
+          () => {
+            expect(root.dataset.projectionState).toBe('ready');
+            expect(root.dataset.projectionRuntime).toBe(next);
+          },
+          { timeout: 8000 }
+        );
         const current = expectRuntimeToolbar(root, family, next);
 
         // These are deliberate negative mutations of the real adapter DOM/API,
