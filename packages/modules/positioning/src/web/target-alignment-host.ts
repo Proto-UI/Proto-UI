@@ -385,15 +385,21 @@ export function createTargetAlignmentLease(
     const onOuterScroll = (event: Event) => {
       if (event.target !== targets.scrollport) position();
     };
-    const observer =
-      typeof view.ResizeObserver === 'function' ? new view.ResizeObserver(() => position()) : null;
-    for (const target of new Set([frame, ...keys.map((key) => targets[key])]))
-      observer?.observe(target);
+    const observedTargets = new Set([frame, ...keys.map((key) => targets[key])]);
+    // These metrics use both boxes. One observer cannot retain two box registrations per target.
+    const observers =
+      typeof view.ResizeObserver === 'function'
+        ? (['content-box', 'border-box'] as const).map((box) => {
+            const observer = new view.ResizeObserver(() => position());
+            for (const target of observedTargets) observer.observe(target, { box });
+            return observer;
+          })
+        : [];
     targets.scrollport.addEventListener('scroll', onScroll);
     doc.addEventListener('scroll', onOuterScroll, true);
     view.addEventListener('resize', position);
     stop = () => {
-      observer?.disconnect();
+      for (const observer of observers) observer.disconnect();
       targets.scrollport.removeEventListener('scroll', onScroll);
       doc.removeEventListener('scroll', onOuterScroll, true);
       view.removeEventListener('resize', position);

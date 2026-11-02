@@ -95,6 +95,7 @@ function fixture() {
 afterEach(() => {
   document.body.replaceChildren();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
 });
 describe('neutral target geometry host', () => {
   it('applies the fixed-source plan and restores only its owned frame styles', () => {
@@ -339,4 +340,219 @@ it('does not report applied for non-settling constraint feedback', () => {
   expect(f.onAlignment).not.toHaveBeenCalledWith({ status: 'applied' });
   expect(f.onAlignment).toHaveBeenCalledWith({ status: 'unavailable', reason: 'invalid-geometry' });
   lease.dispose();
+});
+
+// This fixture models notification selection, not native CSS layout or ResizeObserver delivery.
+function controlledBoxObservers() {
+  const observers: ControlledObserver[] = [];
+  class ControlledObserver implements ResizeObserver {
+    readonly targets = new Map<Element, ResizeObserverBoxOptions>();
+    active = true;
+    constructor(readonly callback: ResizeObserverCallback) {
+      observers.push(this);
+    }
+    readonly observe = vi.fn((target: Element, options: ResizeObserverOptions = {}) => {
+      this.targets.set(target, options.box ?? 'content-box');
+    });
+    readonly unobserve = vi.fn((target: Element) => {
+      this.targets.delete(target);
+    });
+    readonly disconnect = vi.fn(() => {
+      this.active = false;
+      this.targets.clear();
+    });
+    notify(target: Element, changedBox: ResizeObserverBoxOptions) {
+      if (this.active && this.targets.get(target) === changedBox) this.callback([], this);
+    }
+    replayQueued() {
+      this.callback([], this);
+    }
+  }
+  vi.stubGlobal('ResizeObserver', ControlledObserver);
+  vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(1);
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => {});
+  return {
+    observers,
+    notify(target: Element, changedBox: ResizeObserverBoxOptions) {
+      for (const observer of observers) observer.notify(target, changedBox);
+    },
+  };
+}
+
+describe('neutral target geometry box-observation contract', () => {
+  it('observes the independent literal target set once for each measured box', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const targets = f.connection.targetAlignment!;
+    const expected = [
+      f.frame,
+      f.surface,
+      f.scrollport,
+      targets.blockReference,
+      targets.inlineReference,
+      f.blockTarget,
+      targets.inlineTarget,
+    ];
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(control.observers).toHaveLength(2);
+      for (const [index, box] of ['content-box', 'border-box'].entries()) {
+        expect(control.observers[index].observe.mock.calls).toEqual(
+          expected.map((target) => [target, { box }])
+        );
+      }
+    } finally {
+      lease.dispose();
+    }
+    for (const observer of control.observers) expect(observer.disconnect).toHaveBeenCalledOnce();
+  });
+
+  it('deduplicates aliased physical target identities separately for both boxes', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const targets = f.connection.targetAlignment!;
+    const lease = createTargetAlignmentLease({
+      ...f.connection,
+      targetAlignment: { ...targets, inlineTarget: f.blockTarget },
+    });
+    try {
+      expect(control.observers).toHaveLength(2);
+      for (const observer of control.observers) {
+        expect(observer.observe).toHaveBeenCalledTimes(6);
+        expect(
+          observer.observe.mock.calls.filter(([target]) => target === f.blockTarget)
+        ).toHaveLength(1);
+      }
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  for (const changedPart of ['border', 'padding'] as const) {
+    it(`remeasures ${changedPart}-only reference growth without an unrelated resize or scroll`, () => {
+      const control = controlledBoxObservers();
+      const f = fixture();
+      const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+      const contentWidth = 176;
+      let border = 2;
+      let padding = 0;
+      reference.getBoundingClientRect = () =>
+        rect(180, 240, contentWidth + 2 * border + 2 * padding, 36);
+      const lease = createTargetAlignmentLease(f.connection);
+      try {
+        expect(f.frame.style.minWidth).toBe('180px');
+        if (changedPart === 'border') border = 12;
+        else padding = 10;
+        expect(f.frame.style.minWidth).toBe('180px');
+        control.notify(reference, 'border-box');
+        expect(f.frame.style.minWidth).toBe('200px');
+      } finally {
+        lease.dispose();
+      }
+    });
+  }
+
+  it('retains content-only invalidation when a fixed outer box gains inner padding', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.frame.style.minHeight).toBe('106px');
+      // Explicit fixture facts: outer Surface/scrollport sizes stay fixed. Only inner position
+      // and the Surface content box change; no observed target has a border-box size change.
+      f.surface.style.paddingTop = '4px';
+      dimensions(f.scrollport, { offsetTop: 4 });
+      expect(f.surface.offsetHeight).toBe(106);
+      expect(f.scrollport.offsetHeight).toBe(104);
+      expect(f.frame.style.minHeight).toBe('106px');
+      control.notify(f.surface, 'content-box');
+      expect(f.frame.style.minHeight).toBe('110px');
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('keeps ordinary content growth observable without extra applied notifications', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    let contentWidth = 176;
+    reference.getBoundingClientRect = () => rect(180, 240, contentWidth + 4, 36);
+    const lease = createTargetAlignmentLease(f.connection);
+    try {
+      expect(f.frame.style.minWidth).toBe('180px');
+      f.onAlignment.mockClear();
+      contentWidth = 196;
+      control.notify(reference, 'content-box');
+      control.notify(reference, 'border-box');
+      expect(f.frame.style.minWidth).toBe('200px');
+      expect(f.onAlignment).not.toHaveBeenCalled();
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('retires both old observers on target replacement while the new pair remains usable', () => {
+    const control = controlledBoxObservers();
+    const first = fixture();
+    const second = fixture();
+    const lease = createTargetAlignmentLease(first.connection);
+    const oldObservers = [...control.observers];
+    try {
+      lease.update(second.connection);
+      expect(control.observers).toHaveLength(4);
+      for (const observer of oldObservers) expect(observer.disconnect).toHaveBeenCalledOnce();
+      expect(first.frame.style.minWidth).toBe('');
+      second.onAlignment.mockClear();
+      const reference = second.connection.targetAlignment!.blockReference as HTMLElement;
+      reference.getBoundingClientRect = () => rect(180, 240, 200, 36);
+      for (const observer of oldObservers) observer.replayQueued();
+      expect(first.frame.style.minWidth).toBe('');
+      expect(second.frame.style.minWidth).toBe('180px');
+      expect(second.onAlignment).not.toHaveBeenCalled();
+      control.notify(reference, 'border-box');
+      expect(second.frame.style.minWidth).toBe('200px');
+    } finally {
+      lease.dispose();
+    }
+  });
+
+  it('does not let queued callbacks overwrite author styles after disposal', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const lease = createTargetAlignmentLease(f.connection);
+    lease.dispose();
+    f.frame.style.minWidth = '777px';
+    f.onAlignment.mockClear();
+    for (const observer of control.observers) {
+      expect(observer.disconnect).toHaveBeenCalledOnce();
+      observer.replayQueued();
+    }
+    expect(f.frame.style.minWidth).toBe('777px');
+    expect(f.onAlignment).not.toHaveBeenCalled();
+  });
+
+  it('measures current geometry on reopen and ignores the preceding pair', () => {
+    const control = controlledBoxObservers();
+    const f = fixture();
+    const reference = f.connection.targetAlignment!.blockReference as HTMLElement;
+    let width = 180;
+    reference.getBoundingClientRect = () => rect(180, 240, width, 36);
+    const first = createTargetAlignmentLease(f.connection);
+    const oldObservers = [...control.observers];
+    first.dispose();
+    width = 200;
+    const reopened = createTargetAlignmentLease(f.connection);
+    try {
+      expect(control.observers).toHaveLength(4);
+      expect(f.frame.style.minWidth).toBe('200px');
+      width = 300;
+      for (const observer of oldObservers) observer.replayQueued();
+      expect(f.frame.style.minWidth).toBe('200px');
+      control.notify(reference, 'border-box');
+      expect(f.frame.style.minWidth).toBe('300px');
+    } finally {
+      reopened.dispose();
+    }
+  });
 });
