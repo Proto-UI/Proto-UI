@@ -51,6 +51,8 @@ The guarded budgets are unchanged: the browser suites keep `timeoutMs: 120_000`,
 
 `scripts/test/run-runtime-tests.test.mjs` passes 127 tests after the change.
 
+The same folded spawn also existed in `.github/workflows/brutalist-contrast-evidence.yml`, where a 180-attempt curl loop waits for the server. The generation was measured at 123.6-166 s, so that loop was charged for build tooling as well and would leave the server only a few seconds of its own budget. A follow-up applies the same split there: the generation is awaited first and the server is started with `--filter apps-www exec astro dev`, and the workflow's own guard (`scripts/test/brutalist-contrast-toolbar.test.mjs`) is updated to match the new command and to require the split.
+
 ## Not yet established
 
 The measurements are local and under Node 22, so they are not a CI result. The split-phase fix still needs exact-head CI on the Node 24 baseline, and the browser suites themselves need Chrome, which this seat does not have. No native receipt, screenshot or browser acceptance is claimed here.
