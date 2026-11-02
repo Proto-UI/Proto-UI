@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { runInNewContext } from 'node:vm';
 import ts from 'typescript';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { renderDemo } from './demo-renderer';
@@ -30,15 +29,36 @@ function fixtureDemo(page: string, family: string, runtime: RuntimeId): DemoSpec
   const code = ts.transpileModule(`(${demos[0].getText(ast)});`, {
     compilerOptions: { target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  return runInNewContext(code, {
+  // Evaluate in the host realm. A fresh VM context gives every demo node that
+  // realm's Object.prototype, and the demo node contract requires plain host
+  // objects, so a cross-realm node is rejected as a non-plain object.
+  const factory = new Function(
+    'document',
+    'CustomEvent',
+    'family',
+    'runtime',
+    'isBootstrap',
+    'key',
+    'updates',
+    `return ${code}`
+  ) as (
+    document: Document,
+    customEvent: typeof CustomEvent,
+    family: string,
+    runtime: RuntimeId,
+    isBootstrap: boolean,
+    key: string,
+    updates: Map<string, unknown>
+  ) => DemoSpec;
+  return factory(
     document,
     CustomEvent,
     family,
     runtime,
-    isBootstrap: family === 'bootstrap-2-3-2',
-    key: `${family}-${runtime}`,
-    updates: new Map(),
-  }) as DemoSpec;
+    family === 'bootstrap-2-3-2',
+    `${family}-${runtime}`,
+    new Map()
+  );
 }
 
 const cleanups: Array<() => void | Promise<void>> = [];
