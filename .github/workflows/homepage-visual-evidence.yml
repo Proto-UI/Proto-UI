@@ -255,6 +255,7 @@ jobs:
         include:
           - name: native-links
             suite: site-native-links
+          # Dedicated owner: apps/www/src/content/docs/zh-cn/brutalist-action-motion.browser.test.ts
           - name: brutalist-action-motion
             suite: brutalist-action-motion
           - name: code-surfaces
