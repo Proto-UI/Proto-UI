@@ -108,8 +108,9 @@ describe('bounded visible Previewer source layout', () => {
     const outside = document.createElement('div');
     parent.append(outside);
     const s = scene(parent);
-    expect(s.scope.style.paddingBlock).toBe('2rem');
-    expect(s.scope.style.paddingInline).toBe('min(2rem, 8%)');
+    // The scene writes the logical padding properties by their CSSOM names.
+    expect(s.scope.style.getPropertyValue('padding-block')).toBe('2rem');
+    expect(s.scope.style.getPropertyValue('padding-inline')).toBe('min(2rem, 8%)');
     expect(s.scope.style.getPropertyValue('--runtime-box-content-min')).toBe('0px');
     expect(s.scope.style.getPropertyValue('--runtime-box-content-padding')).toBe('0px');
     expect(parent.style.getPropertyValue('--runtime-box-content-min')).toBe('10rem');
@@ -269,14 +270,16 @@ describe('framework-owned static stage attachments', () => {
     expect(findPreviewMaterialProvider(button)).not.toBeNull();
     const popup = document.createElement('div');
     expect(resolveWebPortalDestination(button, popup)).toBe(overlay);
-    scope.style.paddingInline = '7px'; // Later framework owner, not ours to reset.
+    // Later framework owner, not ours to reset. Write it as a real CSS
+    // declaration so the scene's own snapshot and restore can observe it.
+    scope.style.setProperty('padding-inline', '7px');
     instance.dispose();
     instance.dispose();
     expect(scope.isConnected).toBe(true);
     expect(mount.firstChild).toBe(button);
     expect(scope.children).toHaveLength(2);
     expect(scope.style.position).toBe('sticky');
-    expect(scope.style.paddingInline).toBe('7px');
+    expect(scope.style.getPropertyValue('padding-inline')).toBe('7px');
     expect(scope.hasAttribute('data-material-scene')).toBe(false);
     expect(findPreviewMaterialProvider(button)).toBeNull();
     expect(resolveWebPortalDestination(button, popup)).toBe(document.body);
