@@ -10,7 +10,7 @@ import {
 import { getPrototype } from '../../../components/PrototypePreviewer/registry';
 import { assertDemoSpec, type DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
-const recipes = import.meta.glob('./demo-base-checkbox.demo.ts', { eager: true });
+const recipes = import.meta.glob('./demo-base-checkbox-controlled-states.demo.ts', { eager: true });
 const docs = (locale: string) =>
   resolve(process.cwd(), 'apps/www/src/content/docs', locale, 'ui-libraries/base/checkbox.mdx');
 
@@ -43,8 +43,11 @@ describe('Base Checkbox documentation registration', () => {
     expect(config).toContain("slug: 'ui-libraries/base/checkbox'");
   });
   it('admits a Base-only declarative recipe with a root and one indicator per example', () => {
-    const recipe = (recipes['./demo-base-checkbox.demo.ts'] as { default?: DemoSpec } | undefined)
-      ?.default;
+    const recipe = (
+      recipes['./demo-base-checkbox-controlled-states.demo.ts'] as
+        | { default?: DemoSpec }
+        | undefined
+    )?.default;
     expect(recipe).toBeDefined();
     if (!recipe) throw new Error('The actual Base Checkbox recipe is missing.');
     assertDemoSpec(recipe);
@@ -66,7 +69,9 @@ describe('Base Checkbox documentation registration', () => {
   });
   it('accepts controlled checked/indeterminate proposals, rejects malformed ones, and cleans up', () => {
     const recipe = (
-      recipes['./demo-base-checkbox.demo.ts'] as { default: { setup: (ctx: any) => () => void } }
+      recipes['./demo-base-checkbox-controlled-states.demo.ts'] as {
+        default: { setup: (ctx: any) => () => void };
+      }
     ).default;
     const host = document.createElement('div');
     const controlled = document.createElement('button');
