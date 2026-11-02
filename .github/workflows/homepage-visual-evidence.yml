@@ -255,6 +255,8 @@ jobs:
         include:
           - name: native-links
             suite: site-native-links
+          - name: brutalist-action-motion
+            suite: brutalist-action-motion
           - name: code-surfaces
             suite: code-surfaces
           - name: code-surface-grammar
