@@ -107,7 +107,9 @@ export function createAccordionDemo(family: string): DemoSpec {
           prototypeId: `${family}-button`,
           ref: 'accept',
           className:
-            'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere rounded border px-3 py-2',
+            family === 'shadcn'
+              ? 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere'
+              : 'min-w-0 max-w-full h-auto whitespace-normal wrap-anywhere rounded border px-3 py-2',
           children: ['Accept pending request · 接受请求'],
         },
       ],

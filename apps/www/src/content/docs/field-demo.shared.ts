@@ -47,7 +47,7 @@ export function createFieldDemo(family: string): DemoSpec {
     prototypeId: `${family}-button`,
     ref,
     children: [text],
-    className: 'rounded border px-3 py-2',
+    ...(family === 'shadcn' ? {} : { className: 'rounded border px-3 py-2' }),
   });
   const part = (
     role: string,

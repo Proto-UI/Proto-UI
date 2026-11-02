@@ -9,6 +9,15 @@ import {
 } from './projection-composition';
 import { PROJECTION_FAMILY_MANIFESTS, SHARED_BASE_FAMILY_IDS } from './projection-families';
 import { headerSelectControlProps } from '../site-header-control-recipes';
+import { withShadcnRheaDemo } from '../../content/docs/shadcn-demo-style';
+
+// These hand-authored Button fixtures declare their own narrow content recipe;
+// canonical recipe coverage below still loads and validates the real demos.
+const buttonFixtureRecipe = (family: string) => ({
+  id: 'button',
+  prototypeIds: [`${family}-button`],
+  rootPrototypeId: `${family}-button`,
+});
 
 it.each(['wc', 'react', 'vue', 'vue2'] as const)(
   'provides a stable public Select author label and uses native profile in %s',
@@ -20,6 +29,7 @@ it.each(['wc', 'react', 'vue', 'vue2'] as const)(
       projectionFamilyId: 'shadcn',
       generation: 1,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
       controls: { ...config, runtime: { ...config.runtime, ...headerSelectControlProps() } },
       controlIds: ['runtime'],
@@ -147,6 +157,7 @@ describe('Website projection composition', () => {
         projectionFamilyId,
         generation: 1,
         componentId: 'button',
+        contentRecipe: buttonFixtureRecipe(projectionFamilyId),
         childDemo: {
           type: 'demo',
           root: { kind: 'proto', prototypeId: `${projectionFamilyId}-button` },
@@ -213,6 +224,7 @@ describe('Website projection composition', () => {
           projectionFamilyId: family,
           generation: 1,
           componentId: 'button',
+          contentRecipe: buttonFixtureRecipe(family),
           childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: `${family}-button` } },
           controls: {
             ...config,
@@ -262,6 +274,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 7,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo,
       controls: controls(),
       themeSurfaceStyle: { '--pui-background': '#fff' },
@@ -435,10 +448,10 @@ describe('Website projection composition', () => {
     {
       label: 'compound part',
       componentId: 'switch' as const,
-      childDemo: {
+      childDemo: withShadcnRheaDemo({
         type: 'demo',
         root: { kind: 'proto', prototypeId: 'shadcn-switch-root' },
-      } satisfies DemoSpec,
+      } satisfies DemoSpec),
       missingPrototypeId: 'shadcn-switch-thumb',
     },
   ])('fails closed when a projection recipe omits its required $label', (testCase) => {
@@ -475,6 +488,7 @@ describe('Website projection composition', () => {
             projectionFamilyId: 'shadcn',
             generation: 1,
             componentId: 'button',
+            contentRecipe: buttonFixtureRecipe('shadcn'),
             childDemo: {
               type: 'demo',
               root: {
@@ -511,6 +525,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 3,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo,
       controls: controls(order),
     });
@@ -606,6 +621,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 1,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo: {
         type: 'demo',
         setup: () => childCleanup,
@@ -656,6 +672,7 @@ describe('Website projection composition', () => {
         projectionFamilyId: 'shadcn',
         generation: 1,
         componentId: 'button',
+        contentRecipe: buttonFixtureRecipe('shadcn'),
         childDemo: {
           type: 'demo',
           root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Child'] },
@@ -717,6 +734,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 9,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo,
       controls: controls(),
       themeSurfaceStyle: {
@@ -794,6 +812,7 @@ describe('Website projection composition', () => {
         projectionFamilyId: 'shadcn',
         generation: 1,
         componentId: 'button',
+        contentRecipe: buttonFixtureRecipe('shadcn'),
         childDemo,
         controls: controls(),
         controlIds: [],
@@ -848,6 +867,7 @@ describe('Website projection composition', () => {
         projectionFamilyId: 'shadcn',
         generation: 9,
         componentId: 'button',
+        contentRecipe: buttonFixtureRecipe('shadcn'),
         childDemo: {
           type: 'demo',
           root: { kind: 'proto', prototypeId: 'shadcn-button', ref: 'editor' },
@@ -902,6 +922,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 9,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo: { type: 'demo', root: { kind: 'proto', prototypeId: 'shadcn-button' } },
       controls: controls(),
       controlIds: ['runtime'],
@@ -988,6 +1009,7 @@ describe('Website projection composition', () => {
       projectionFamilyId: 'shadcn',
       generation: 1,
       componentId: 'button',
+      contentRecipe: buttonFixtureRecipe('shadcn'),
       childDemo,
       controls: controls(),
     });
@@ -1063,7 +1085,6 @@ describe('Website native-only content recipes', () => {
     ).toThrow('native-only');
   });
 });
-
 
 it('keeps full-value wrapping an explicit consumer opt-in rather than changing preview defaults', () => {
   for (const wrapValue of [false, true]) {

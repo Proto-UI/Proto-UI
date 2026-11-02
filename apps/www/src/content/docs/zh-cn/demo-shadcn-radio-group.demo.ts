@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import type { DemoNode, DemoSetupContext } from '../../../components/PrototypePreviewer/demo-types';
 
 function option(group: string, value: string, label: string, disabled = false): DemoNode {
@@ -45,7 +46,7 @@ function group(ref: string, title: string, defaultValue: string, disabled = fals
   };
 }
 
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   setup({ host, refs, api }: DemoSetupContext) {
     const label = refs.selectedValue;
@@ -96,4 +97,4 @@ export default {
       },
     ],
   },
-};
+});

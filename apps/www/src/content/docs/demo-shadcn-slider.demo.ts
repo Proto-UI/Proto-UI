@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import type { DemoNode, DemoSpec } from '@/components/PrototypePreviewer/demo-types';
 type Proto = Extract<DemoNode, { kind: 'proto' }>;
 const part = (part: string, ref: string, children: Proto['children'] = [], props = {}): Proto => ({
@@ -42,7 +43,7 @@ const row = (
     ],
   };
 };
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
@@ -56,4 +57,4 @@ export default {
       row('vertical', 'Vertical · 垂直', { orientation: 'vertical' }),
     ],
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

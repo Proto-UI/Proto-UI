@@ -73,6 +73,69 @@ const controls: ProjectionCompositionControls = {
   },
 };
 
+// Independent fixture contracts, not inferred from the composition's output
+// or from the same resolver that creates it. See each family's Select Content
+// and alignment-parts definitions; all remain draft, not stable guarantees.
+const FAMILY_SELECT_CONTRACTS = [
+  { family: 'brutalist', surface: undefined, position: 'popper' },
+  { family: 'bootstrap-2-3-2', surface: 'bootstrap-2-3-2-select-surface', position: undefined },
+  { family: 'liquid-glass', surface: 'liquid-glass-select-surface', position: undefined },
+] as const;
+type FamilySelectContract = (typeof FAMILY_SELECT_CONTRACTS)[number];
+type ControlId = 'runtime' | 'family' | 'component';
+
+function familyComposition(contract: FamilySelectContract, controlIds?: readonly ControlId[]) {
+  return createProjectionComposition({
+    ownerId: `parts-${contract.family}`,
+    runtimeId: 'wc',
+    projectionFamilyId: contract.family,
+    generation: 1,
+    componentId: 'button',
+    controlIds,
+    childDemo: {
+      type: 'demo',
+      root: { kind: 'proto', prototypeId: `${contract.family}-button`, children: ['Test'] },
+    },
+    controls,
+  });
+}
+
+function verifyFamilyControls(root: DemoChild, contract: FamilySelectContract) {
+  const { family, surface, position } = contract;
+  const roots = parts(root, `${family}-select-root`);
+  const contents = parts(root, `${family}-select-content`);
+  const triggers = parts(root, `${family}-select-trigger`);
+  expect(roots).toHaveLength(3);
+  expect(contents).toHaveLength(3);
+  expect(triggers).toHaveLength(3);
+  expect(roots.map((entry) => entry.props?.value)).toEqual(['wc', family, 'button']);
+  expect(triggers.map((entry) => entry.props?.accessibleLabel)).toEqual([
+    'Runtime',
+    'Family',
+    'Component',
+  ]);
+  for (const entry of roots) {
+    const owned = parts(entry, `${family}-select-content`);
+    expect(owned).toHaveLength(1);
+    expect(parts(entry, `${family}-select-trigger`)).toHaveLength(1);
+    const content = owned[0]!;
+    expect(content.props?.position).toBe(position);
+    if (surface) {
+      const surfaces = parts(content, surface);
+      expect(surfaces).toHaveLength(1);
+      expect(content.children?.[0]).toBe(surfaces[0]);
+      const viewports = parts(surfaces[0]!, `${family}-select-viewport`);
+      expect(viewports).toHaveLength(1);
+      expect(surfaces[0]!.children?.[0]).toBe(viewports[0]);
+    }
+  }
+  for (const candidate of ['brutalist', 'bootstrap-2-3-2', 'liquid-glass', 'shadcn']) {
+    expect(parts(root, `${candidate}-select-surface`)).toHaveLength(
+      surface === `${candidate}-select-surface` ? 3 : 0
+    );
+  }
+}
+
 describe('website public Shadcn Select compositions', () => {
   it.each(['wc', 'react', 'vue', 'vue2'] as const)(
     'keeps homepage controlled recipe complete in %s',
@@ -101,6 +164,11 @@ describe('website public Shadcn Select compositions', () => {
       projectionFamilyId: 'shadcn',
       generation: 1,
       componentId: 'button',
+      contentRecipe: {
+        id: 'button',
+        prototypeIds: ['shadcn-button'],
+        rootPrototypeId: 'shadcn-button',
+      },
       childDemo: {
         type: 'demo',
         root: { kind: 'proto', prototypeId: 'shadcn-button', children: ['Test'] },
@@ -131,40 +199,53 @@ describe('website public Shadcn Select compositions', () => {
       expect(trigger.props).not.toHaveProperty('aria-label');
     }
   });
-  it.each(['brutalist', 'bootstrap-2-3-2', 'liquid-glass'] as const)(
-    'does not invent new parts for %s',
-    (family) => {
-      const result = createProjectionComposition({
-        ownerId: `parts-${family}`,
-        runtimeId: 'wc',
-        projectionFamilyId: family,
-        generation: 1,
-        componentId: 'button',
-        childDemo: {
-          type: 'demo',
-          root: { kind: 'proto', prototypeId: `${family}-button`, children: ['Test'] },
-        },
-        controls,
-      });
-      const contents = parts(result.demo.root, `${family}-select-content`);
-      const roots = parts(result.demo.root, `${family}-select-root`);
-      // Every Select root owns exactly one content, so a missing or
-      // misidentified content cannot satisfy the checks below vacuously.
-      expect(contents).toHaveLength(roots.length);
-      expect(contents.length).toBeGreaterThan(0);
-      const ownSurface = parts(result.demo.root, `${family}-select-surface`);
-      // A family that owns the Surface structural part projects it; a family
-      // without one keeps the plain positioning prop on the content.
-      if (ownSurface.length > 0) {
-        expect(contents.every((entry) => entry.props?.position === undefined)).toBe(true);
-        expect(ownSurface).toHaveLength(contents.length);
-      } else {
-        expect(contents.every((entry) => entry.props?.position === 'popper')).toBe(true);
+  it.each(FAMILY_SELECT_CONTRACTS)(
+    'pins all three controls and the independent Surface contract for $family',
+    (contract) => {
+      const result = familyComposition(contract);
+      assertDemoSpec(result.demo);
+      verifyFamilyControls(result.demo.root, contract);
+      expect(resolveProjectionSelectParts(contract.family).surface).toBe(contract.surface);
+    }
+  );
+  it.each(FAMILY_SELECT_CONTRACTS)(
+    'rejects deletion of each independently required control for $family',
+    (contract) => {
+      verifyFamilyControls(familyComposition(contract).demo.root, contract);
+      for (const omitted of ['runtime', 'family', 'component'] as const) {
+        const controlIds = (['runtime', 'family', 'component'] as const).filter(
+          (id) => id !== omitted
+        );
+        const result = familyComposition(contract, controlIds);
+        expect(parts(result.demo.root, `${contract.family}-select-root`)).toHaveLength(2);
+        expect(() => verifyFamilyControls(result.demo.root, contract)).toThrow();
       }
-      expect(parts(result.demo.root, 'shadcn-select-surface')).toHaveLength(0);
-      expect(resolveProjectionSelectParts(family).surface).toBe(
-        ownSurface.length > 0 ? `${family}-select-surface` : undefined
-      );
+    }
+  );
+  it.each(FAMILY_SELECT_CONTRACTS.filter((contract) => contract.surface))(
+    'rejects missing required Surfaces even with a self-consistent legacy shape for $family',
+    (contract) => {
+      const result = familyComposition(contract);
+      verifyFamilyControls(result.demo.root, contract);
+      for (const content of parts(result.demo.root, `${contract.family}-select-content`)) {
+        const surface = content.children?.[0] as DemoProtoNode;
+        content.children = surface.children;
+        content.props = { ...content.props, position: 'popper' };
+      }
+      expect(parts(result.demo.root, contract.surface!)).toHaveLength(0);
+      expect(() => verifyFamilyControls(result.demo.root, contract)).toThrow();
+    }
+  );
+  it.each(FAMILY_SELECT_CONTRACTS.filter((contract) => contract.surface))(
+    'rejects the right total Surface count under the wrong Content for $family',
+    (contract) => {
+      const result = familyComposition(contract);
+      verifyFamilyControls(result.demo.root, contract);
+      const contents = parts(result.demo.root, `${contract.family}-select-content`);
+      const moved = contents[0]!.children!.shift()!;
+      contents[1]!.children!.push(moved);
+      expect(parts(result.demo.root, contract.surface!)).toHaveLength(3);
+      expect(() => verifyFamilyControls(result.demo.root, contract)).toThrow();
     }
   );
   it.each(['AdapterSelect', 'LanguageSelect'])(

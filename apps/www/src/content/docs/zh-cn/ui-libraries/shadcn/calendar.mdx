@@ -5,6 +5,8 @@ description: 'Gregorian date selection, localized weekdays and explicit caption 
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 Calendar 是单日期公历控件。`value` 使用 YYYY-MM-DD，权威显示月份 `month` 使用 YYYY-MM；两者可分别受控。`requestMonth` 返回成功表示已提出请求，不等于 owner 接受。跨月键盘请求被拒绝或仍在等待时保留当前有效 Tab 入口；只有月份真正接受且重新检查可用性后，才 materialize 并聚焦目标。焦点已离开日历时不抢回。
 
 默认按 canonical month 与 weekStartsOn 显示覆盖全月的最少 4、5 或 6 周；`fixedWeeks=true` 才显式固定六周。Root 公开 `weekCount`。应用可以保留 `index` 0–5 的六个 Row、`offset` 0–41 的 Day 作为容量；多余 Row/Day 公开 `hidden`，投影隐藏语义，多余 Day 禁用且不进入焦点或选择。未给 index 的 Row 与显式 date 仍由应用排布。
@@ -19,7 +21,7 @@ host 通过民用日期字符串 `today` 提供当前日期。Base 不读取时�
 
 演示通过 `bindCalendarCaption(source, {month, year})`，使用 Calendar 公开的 month/disabled 状态及 `requestMonth`，组合真实的本家 Select。Caption 自身仅为语义组。月/年选择器属于应用组合，不是 Calendar 内部依赖 Select。helper 对拒绝或尚未接受的请求始终恢复权威值，订阅后续接受，并用 `dispose()` 清理。演示拥有显式有界年份选项（不是 Calendar 限制）、本地时钟 today、午夜/页面恢复更新，以及完整的受控 props 记录。两个 Select trigger 的 slot 内包含真实的 Month/Year 语义文本，为既有 Select 协议提供命名内容，演示不写入 Adapter 拥有的 ARIA 属性。当前 Web 内容命名投影是否产生符合角色要求的可访问名称，仍需相关 owner 验证。
 
-Shadcn 对照上游 base-nova 的单日期配方：28px 日期与导航、p2 留白、today/outside muted 状态及 3px 焦点环。参考 https://ui.shadcn.com/docs/components/base/calendar 和 https://ui.shadcn.com/r/styles/base-nova/calendar.json（2026-10-10 只读存档）。这不代表完整兼容 react-day-picker。
+本页选择 Rhea 的32px日期/导航格（`h-8 w-8`）及`p-3`布局（以16px根字号计），来源为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。独立 [base-nova registry](https://ui.shadcn.com/r/styles/base-nova/calendar.json) 的2026-10-10参考仍保留28px/p-2兼容配方；两者都不为匹配截图随意放大。真实focus与selected仍是相互独立的Base事实；这不是完整react-day-picker兼容或原生视觉验收。
 
 ## 验证边界
 
@@ -31,4 +33,4 @@ Shadcn 对照上游 base-nova 的单日期配方：28px 日期与导航、p2 留
   runtimes={['wc', 'react', 'vue', 'vue2']}
 />
 
-Shadcn 示例年份恢复为当前年减 100 至当前年的 101 项；其他家族的 ±10 年仅是应用样例范围。月份 caption 默认使用宿主 Intl 短月份格式，`createCalendarDemo(family, {captionLocale})` 可独立于星期语言选择，因此可复现中文月份与英语星期。焦点环依据实际 focused，与 selected 独立叠加，覆盖 pointer focus；28px 源配方不按截图缩放随意放大。本例使用本族 Select，上游弹层为原生 select，不声称两者原生弹层像素一致。101 项的实际 Happy DOM 打开成本仍偏高，未截断范围隐瞒该缺口。
+Shadcn 示例年份恢复为当前年减 100 至当前年的 101 项；其他家族的 ±10 年仅是应用样例范围。月份 caption 默认使用宿主 Intl 短月份格式，`createCalendarDemo(family, {captionLocale})` 可独立于星期语言选择，因此可复现中文月份与英语星期。焦点环依据实际 focused，与 selected 独立叠加，覆盖 pointer focus；源配方依据显式profile选择，不按截图随意放大。本例使用本族 Select，上游弹层为原生 select，不声称两者原生弹层像素一致。101 项的实际 Happy DOM 打开成本仍偏高，未截断范围隐瞒该缺口。

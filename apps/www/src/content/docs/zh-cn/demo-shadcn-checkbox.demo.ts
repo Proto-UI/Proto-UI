@@ -1,3 +1,4 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import { shadcnCheckboxDemoChildren } from '../../../components/PrototypePreviewer/shadcn-checkbox-composition';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 
@@ -9,7 +10,7 @@ const examples = [
   { label: 'Tab here for the focus ring', props: { defaultChecked: false } },
 ];
 
-export default {
+export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
@@ -24,4 +25,4 @@ export default {
       }),
     })),
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

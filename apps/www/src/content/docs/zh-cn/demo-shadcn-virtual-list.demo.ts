@@ -1,7 +1,8 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
 import { attachWebVirtualList } from '@proto.ui/prototypes-base/virtual-list/web';
 import type { WindowedCollection } from '@proto.ui/prototypes-base/virtual-list';
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'proto',
@@ -17,7 +18,7 @@ export default {
             'ref': 'content',
           },
         ],
-        'className': 'h-64 overflow-auto border border-slate-300',
+        'className': 'h-64 overflow-auto border border-border',
         'ref': 'viewport',
       },
     ],
@@ -45,4 +46,4 @@ export default {
     });
     return () => host.dispose();
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

@@ -5,12 +5,15 @@ description: 'Shadcn modal Dialog projected over the Proto UI Base Dialog protoc
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+Ordinary demos on this page explicitly use **Shadcn Rhea**, with matching examples. This does not change public compatibility defaults or imply complete browser, native-host or visual acceptance. Neutral Surface/Text atoms retain their own public semantics; the consumer composition supplies the family presentation theme.
+
 > Availability: `@proto.ui/prototypes-shadcn@0.2.0` is published under npm `latest` as part of [v0.2.0](https://github.com/Proto-UI/Proto-UI/releases/tag/v0.2.0). Lifecycle: the [Shadcn Dialog](https://github.com/Proto-UI/Proto-UI/blob/main/spec/prototypes/P-SHADCN-DIALOG.yaml) family and its inherited Base entities remain `draft`; this page documents the released and tested 0.2 surface, not an active protocol guarantee.
 
 Shadcn Dialog is a styled projection over [Base Dialog](../../base/dialog/). Base owns modal state, commands, focus, dismissal, presence, and accessibility relations. The Shadcn layer adds the centered panel, backdrop, motion, typography, layout groups, and a replaceable default X close surface.
 
 <div class="dialog-demo-container">
-  <PrototypePreviewer
+
+<PrototypePreviewer
     demoId="demo-shadcn-dialog"
     initialRuntime="wc"
     runtimes={['wc', 'react', 'vue', 'vue2']}

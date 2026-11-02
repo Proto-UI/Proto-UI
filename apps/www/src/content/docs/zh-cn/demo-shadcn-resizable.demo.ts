@@ -1,5 +1,6 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'proto',
@@ -17,7 +18,6 @@ export default {
       {
         'kind': 'proto',
         'prototypeId': 'shadcn-resizable-handle',
-        'className': 'basis-2 shrink-0 bg-slate-300',
       },
       {
         'kind': 'proto',
@@ -34,6 +34,6 @@ export default {
       'min': 15,
       'max': 75,
     },
-    'className': 'flex min-h-40 w-full max-w-xl border border-slate-300',
+    'className': 'flex min-h-40 w-full max-w-xl border border-border',
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

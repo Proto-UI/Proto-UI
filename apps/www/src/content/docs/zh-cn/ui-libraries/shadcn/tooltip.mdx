@@ -5,11 +5,13 @@ description: '覆盖在 Base Tooltip family 之上的 shadcn 草案呈现。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页以 **Shadcn Rhea** 为目标，支持profile的parts均显式选择Rhea；下文headless触发器/action-body缺口仍开放，尚不称整页外观统一。这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 这个 draft family 包含 Group、Root、Trigger 与 Content。open state、controlled ownership、disabled、pointer/focus intent、delay 与 dismissal sequencing、`aria-describedby`、presence、Escape、renderer-owned Portal projection 与 anchored positioning 继续只由 Base Tooltip 持有。shadcn 层仅增加 Group layout、Trigger feedback 与紧凑 Content surface。
 
-比较基线固定为 shadcn-ui/ui revision `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`。upstream Provider 的 pointer delay 默认为 0ms；Proto UI 有意保留 Base Group 的 700ms open、100ms close 与 300ms skip defaults。upstream Content 的 `sideOffset` 默认为 0，Proto UI 继承 Base 默认值 4。Portal 继续是 renderer projection；当前没有受治理的 arrow geometry channel，因此 Arrow 缺席。
+历史 API 比较来源为 shadcn-ui/ui `f31ed81983653919dd4fe77aee4b4859f610f1dc` 的 `apps/v4/registry/new-york-v4/ui/tooltip.tsx`，不是本页选择的外观 profile。该 Provider 默认 pointer delay 为0ms；Proto UI 保留 Base Group 的700ms open、100ms close和300ms skip。该 Content 默认 sideOffset 为0，Proto UI 保留4。Portal 仍归 renderer，Arrow 在受治理的几何通道缺失时仍不可用。
 
-Content 静态 surface 另参考 2026-10-10 获取的 [base-nova registry snapshot](https://ui.shadcn.com/r/styles/base-nova/tooltip.json)（JSON SHA256 `2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395`；MIT）。部署 Git SHA 未取得；这是内容固定的视觉参考，不替换 API baseline。该 snapshot 的 `sideOffset` 为 4。surface 使用主题 `foreground` 作底色、`background` 作文字色，Light/Dark 可反转，不固定为黑白；采用 inline-flex、fit-content、20rem 最大宽度与 6px gap，不再添加旧 border、shadow 或 overflow clipping。既有 `max-w-80` 表达 upstream 默认 `max-w-xs` 上限。Arrow、transform-origin、方向 enter/exit motion 与 kbd descendant styling 仍未对齐；这次静态配方迁移不代表完整 Tooltip parity。
+Content 选择 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)：inline-flex、fit-content、20rem最大宽度、6px gap和`rounded-xl`，使用foreground/background主题色反转形成提示表面。2026-10-10 的 [base-nova snapshot](https://ui.shadcn.com/r/styles/base-nova/tooltip.json)（SHA256 `2f55867faecee2d3616cfd8c6a80b538909a21e62fdfa2788b1ead56093e5395`）只保留为未选profile时的兼容参考。Trigger是带既有Proto反馈的headless语义owner，不是Button；替换演示旧作者paint仍需公共Rhea被动action-body组合，不能再增加焦点/激活owner。Arrow、transform-origin、方向motion、kbd后代样式及原生视觉验收仍开放。
 
 从 `@proto.ui/prototypes-shadcn/tooltip` 导入该 family，或使用 `proto-ui add react shadcn-tooltip` 生成 React facade。Content 保持 supplementary、不可聚焦且非任务必要；交互式任务内容应使用 Popover 或 non-modal Dialog。
 

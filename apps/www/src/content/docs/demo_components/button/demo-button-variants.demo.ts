@@ -1,4 +1,5 @@
-export default {
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
+export default withShadcnRheaDemo({
   type: 'demo',
   root: {
     kind: 'box',
@@ -37,4 +38,4 @@ export default {
       },
     ],
   },
-};
+});

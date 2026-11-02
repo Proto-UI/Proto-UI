@@ -10,8 +10,11 @@ import SpecEntityLinks from '@/components/SpecEntityLinks.astro';
 import { codeMap } from '@/content/docs/demo_components/button/buttonCode';
 import { getCode } from '@/utils/conversionUtils';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 <div data-adapter-panel="wc">
-  <PrototypePreviewer
+
+<PrototypePreviewer
     demoId="demo-button-variants"
     initialRuntime="wc"
     toolbar={false}
@@ -208,9 +211,9 @@ import { getCode } from '@/utils/conversionUtils';
   />
 </div>
 
-### ghost 虚化（New York）
+### ghost 虚化（Rhea）
 
-此示例显式选择 `styleProfile="new-york"`，对应固定旧版 New York 的 accent hover。默认 Rhea 与 Luma 使用各自的 muted 配方，不以旧版预期替代。
+此常规示例显式选择 `styleProfile="rhea"`，使用 Rhea 的 muted 配方。旧版 New York 的 accent hover 仍由显式 legacy 工厂和独立回归覆盖，不再作为页面的默认展示。
 
 <div data-adapter-panel="wc">
   <PrototypePreviewer

@@ -5,11 +5,18 @@ description: Atomic Field labeling, value reporting and controlled or consumer-v
 
 import { PrototypePreviewer } from '@/components/PrototypePreviewer';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 Draft workspace family。六个 atoms 共享一个 Base 协议；native/AT/material/GPUI 完成门槛尚未全部通过。
 
 Compact rounded controls, restrained spacing, muted help and explicit error text.
 
-<PrototypePreviewer demoId="demo-shadcn-field" initialRuntime="wc" runtimes={['wc', 'react', 'vue', 'vue2']} codePanel={false} />
+<PrototypePreviewer
+  demoId="demo-shadcn-field"
+  initialRuntime="wc"
+  runtimes={['wc', 'react', 'vue', 'vue2']}
+  codePanel={false}
+/>
 
 ## Anatomy 与所有权
 

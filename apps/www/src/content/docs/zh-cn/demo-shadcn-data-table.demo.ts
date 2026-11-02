@@ -1,5 +1,6 @@
+import { withShadcnRheaDemo } from '@/content/docs/shadcn-demo-style';
 import type { DemoSpec } from '../../../components/PrototypePreviewer/demo-types';
-export default {
+export default withShadcnRheaDemo({
   'type': 'demo',
   'root': {
     'kind': 'proto',
@@ -134,6 +135,6 @@ export default {
       ],
       'pageSize': 3,
     },
-    'className': 'grid w-full max-w-xl border border-slate-300',
+    'className': 'grid w-full max-w-xl border border-border',
   },
-} satisfies DemoSpec;
+} satisfies DemoSpec);

@@ -5,11 +5,14 @@ description: '基于 Proto UI 重构的 Shadcn Switch。'
 
 import PrototypePreviewer from '@/components/PrototypePreviewer/PrototypePreviewer.astro';
 
+本页常规演示显式采用 **Shadcn Rhea** 外观，示例代码保持一致；这不修改公共组件的兼容默认值，也不代表全部浏览器、原生宿主和视觉验收已完成。Surface/Text 等中性原子仍保留各自公开语义，外观主题由消费组合提供。
+
 当前页面展示 Proto UI 中 `shadcn` 风格的 `switch` 条目。
 
 在 Root 上设置 `size="sm"` 使用小尺寸；省略 `size` 或设置 `size="default"` 使用默认尺寸。Thumb 从实际所属的逻辑 Switch Root 派生尺寸，没有独立 size prop。尺寸变化不会改变 checked 值或发出 `checkedChange`。
 
-[固定 New York 源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 使用 rem：默认 Root 为 2rem × 1.15rem，Thumb 为 1rem；小尺寸 Root 为 1.5rem × 0.875rem，Thumb 为 0.75rem。checked 位移为实际 Thumb 宽度减 2px。这些源码尺寸不代表跨目标渲染已验收；完整上游 transition 通道与 API 一致性仍未完成。
+本页 Rhea 配方的默认Root为2rem × 1.25rem，小号为1.5rem × 1rem，Thumb分别为1rem/0.75rem，使用2px透明边框与家族`radius-2xl`；选中位移为Thumb宽减4px。来源为 [Rhea 样式源码](https://github.com/shadcn-ui/ui/blob/3d98900e9b73c45f035f8109e9d41ba6a51685e7/apps/v4/registry/styles/style-rhea.css)。独立 [02cad611 New York源码](https://github.com/shadcn-ui/ui/blob/02cad61166c4c20edbc8a3f71bd720eed4c1f49b/apps/v4/registry/new-york-v4/ui/switch.tsx) 仍保留2rem × 1.15rem / 1.5rem × 0.875rem与减2px位移，属于兼容profile；两者不混称跨宿主已视觉等价。
+
 
 <PrototypePreviewer demoId="demo-shadcn-switch" initialRuntime="wc" />
 
