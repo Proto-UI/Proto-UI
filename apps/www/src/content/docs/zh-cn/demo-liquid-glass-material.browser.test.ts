@@ -873,20 +873,77 @@ type PublicPoolBinding = {
   transformedBytes: number;
 };
 
+// Fixed browser source, not a host function for Vitest to rewrite and serialize.
+// The only interpolated value is a validated, JSON-encoded data argument below.
+const PUBLIC_POOL_READER_SOURCE = String.raw`async (binding) => {
+  const url = new URL(binding.url);
+  if (!['http:', 'https:'].includes(url.protocol) || url.origin !== location.origin ||
+      url.username || url.password || url.hash || url.href !== binding.url ||
+      !/\/packages\/adapters\/base\/src\/material\/program-pool\.ts$/.test(url.pathname))
+    throw new Error('Observed resource inspector URL is not the exact same-origin module');
+  if (!/^[a-f0-9]{64}$/.test(binding.transformedSha256) ||
+      !Number.isSafeInteger(binding.transformedBytes) || binding.transformedBytes <= 0 ||
+      binding.transformedBytes > 1024 * 1024)
+    throw new Error('Observed resource inspector response binding is invalid');
+  // Reuse the exact already-loaded URL, including query. No cache buster,
+  // guessed path, second module identity, acquire, render or production global.
+  const module = await import(binding.url);
+  if (typeof module.inspectWebOpticalResources !== 'function')
+    throw new Error('Actual public module does not expose its existing inspector');
+  const actual = module.inspectWebOpticalResources(document);
+  const emptyDocument = document.implementation.createHTMLDocument('owned-empty-control');
+  const empty = module.inspectWebOpticalResources(emptyDocument);
+  return { binding, actual, empty, documentUrl: location.href };
+}`;
+
+function publicPoolReadExpression(binding: PublicPoolBinding, documentUrl: string) {
+  const url = new URL(binding.url);
+  if (
+    !['http:', 'https:'].includes(url.protocol) ||
+    url.origin !== new URL(documentUrl).origin ||
+    url.username ||
+    url.password ||
+    url.hash ||
+    url.href !== binding.url ||
+    !/\/packages\/adapters\/base\/src\/material\/program-pool\.ts$/.test(url.pathname)
+  )
+    throw new Error('Observed resource inspector URL is not the exact same-origin module');
+  if (
+    !/^[a-f0-9]{64}$/.test(binding.transformedSha256) ||
+    !Number.isSafeInteger(binding.transformedBytes) ||
+    binding.transformedBytes <= 0 ||
+    binding.transformedBytes > 1024 * 1024
+  )
+    throw new Error('Observed resource inspector response binding is invalid');
+  const argument = JSON.stringify({
+    url: binding.url,
+    transformedSha256: binding.transformedSha256,
+    transformedBytes: binding.transformedBytes,
+  })
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+  return `(${PUBLIC_POOL_READER_SOURCE})(${argument})`;
+}
+
+function poolRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 async function readPublicPool(page: Page, binding: PublicPoolBinding) {
-  return page.evaluate(async (binding) => {
-    if (new URL(binding.url).origin !== location.origin)
-      throw new Error('Observed resource inspector is not same-origin');
-    // Reuse the exact already-loaded URL, including query. No second copy,
-    // guessed path, cache buster, acquire, render or production global.
-    const module = await import(/* @vite-ignore */ binding.url);
-    if (typeof module.inspectWebOpticalResources !== 'function')
-      throw new Error('Actual public module does not expose its existing inspector');
-    const actual = module.inspectWebOpticalResources(document);
-    const emptyDocument = document.implementation.createHTMLDocument('owned-empty-control');
-    const empty = module.inspectWebOpticalResources(emptyDocument);
-    return { binding, actual, empty, documentUrl: location.href };
-  }, binding);
+  const result = await page.evaluate<unknown>(publicPoolReadExpression(binding, page.url()));
+  if (
+    !poolRecord(result) ||
+    !poolRecord(result.binding) ||
+    result.binding.url !== binding.url ||
+    result.binding.transformedSha256 !== binding.transformedSha256 ||
+    result.binding.transformedBytes !== binding.transformedBytes ||
+    !poolRecord(result.actual) ||
+    !poolRecord(result.empty) ||
+    typeof result.documentUrl !== 'string' ||
+    result.documentUrl !== page.url()
+  )
+    throw new Error('Actual public inspector returned an unbound or malformed observation');
+  return { binding, actual: result.actual, empty: result.empty, documentUrl: result.documentUrl };
 }
 
 function requireMaterialCounters(value: Record<string, unknown>) {
