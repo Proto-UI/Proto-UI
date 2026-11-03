@@ -1,28 +1,8 @@
 name: Material source specialization
 on:
-  pull_request:
-    paths:
-      - 'experiments/material-specializer/**'
-      - 'packages/**'
-      - 'scripts/build/**'
-      - 'apps/www/package.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig*.json'
-      - '.github/workflows/material-source-specializer.yml'
-  push:
-    branches: [main]
-    paths:
-      - 'experiments/material-specializer/**'
-      - 'packages/**'
-      - 'scripts/build/**'
-      - 'apps/www/package.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'tsconfig*.json'
-      - '.github/workflows/material-source-specializer.yml'
+  workflow_dispatch:
+  workflow_call:
+
 permissions:
   contents: read
 jobs:

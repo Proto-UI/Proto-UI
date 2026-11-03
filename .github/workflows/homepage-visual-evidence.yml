@@ -1,15 +1,8 @@
 name: Homepage visual evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/homepage-visual-evidence.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Public homepage only; no secrets, deployment, repository writes or privileged
 # PR context. Artifacts are review evidence, not a new branch-protection gate.

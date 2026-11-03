@@ -1,10 +1,18 @@
 name: Intranet preview build
-run-name: 'Intranet preview build PR #${{ inputs.pr_number || github.event.pull_request.number }}'
+run-name: 'Intranet preview build PR #${{ inputs.pr_number }}'
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review, converted_to_draft]
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Open pull request number to bootstrap or rebuild
+        required: true
+        type: number
+      expected_head_sha:
+        description: Full live pull request head SHA
+        required: true
+        type: string
+  workflow_call:
     inputs:
       pr_number:
         description: Open pull request number to bootstrap or rebuild
@@ -21,7 +29,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: intranet-preview-build-${{ inputs.pr_number || github.event.pull_request.number }}
+  group: intranet-preview-build-${{ inputs.pr_number }}
   cancel-in-progress: true
 
 jobs:
@@ -34,8 +42,8 @@ jobs:
         id: pr
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         env:
-          REQUESTED_PR: ${{ inputs.pr_number || github.event.pull_request.number }}
-          EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha || github.event.pull_request.head.sha }}
+          REQUESTED_PR: ${{ inputs.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ inputs.expected_head_sha }}
         with:
           script: |
             const number = Number(process.env.REQUESTED_PR);

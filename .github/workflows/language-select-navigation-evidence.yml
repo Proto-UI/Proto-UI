@@ -1,13 +1,7 @@
 name: Language selector navigation evidence
 on:
-  pull_request:
-    paths:
-      - 'apps/www/src/components/override/LanguageSelect.astro'
-      - 'apps/www/src/content/docs/zh-cn/language-select-navigation.browser.test.ts'
-      - 'scripts/test/language-select-navigation-evidence.test.mjs'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - '.github/workflows/language-select-navigation-evidence.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

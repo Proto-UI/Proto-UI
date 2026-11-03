@@ -1,15 +1,7 @@
 name: Bounded preference source evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/preference-source-evidence.yml'
-      - 'packages/modules/rule-meta/**'
-      - 'packages/adapters/base/src/platform/web-preference*'
-      - 'packages/adapters/base/src/platform/web-style-support*'
-      - 'packages/adapters/*/src/adapt.ts'
-      - 'packages/adapters/*/src/runtime/modules.ts'
-      - 'apps/www/test/preferences.browser.test.ts'
-      - 'apps/www/test/fixtures/preferences/**'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -22,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -50,7 +42,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: preference-evidence-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: preference-evidence-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: |
             ${{ runner.temp }}/preference-evidence/*.json
             ${{ runner.temp }}/preference-evidence/*.txt

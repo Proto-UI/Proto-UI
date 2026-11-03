@@ -1,37 +1,7 @@
 name: Bootstrap state-controls evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/bootstrap-state-controls-evidence.yml'
-      - 'packages/prototypes/bootstrap-2-3-2/**'
-      - 'packages/prototypes/base/**'
-      - 'packages/adapters/base/**'
-      - 'packages/adapters/web-component/**'
-      - 'packages/adapters/react/**'
-      - 'packages/adapters/vue/**'
-      - 'packages/adapters/vue2/**'
-      - 'packages/core/**'
-      - 'packages/hooks/**'
-      - 'packages/runtime/**'
-      - 'packages/modules/**'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'apps/www/astro.config.mjs'
-      - 'apps/www/package.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'packages/cli/src/services/prototype-style-tokens.ts'
-      - 'packages/cli/src/generated/draft-family-style-tokens.ts'
-      - 'scripts/styles/generate-draft-family-style-tokens.ts'
-      - 'apps/www/src/pages/en/test/bootstrap-state-controls.astro'
-      - 'apps/www/src/content/docs/zh-cn/demo-bootstrap-state-controls.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/native-editor-evidence.ts'
-      - 'apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.ts'
-      - 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/components/PrototypePreviewer/demo-renderer.ts'
-      - 'scripts/test/bootstrap-state-controls-evidence.test.mjs'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -42,11 +12,11 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      PROTO_UI_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -117,7 +87,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: bootstrap-state-controls-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: bootstrap-state-controls-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/bootstrap-state-controls-evidence
           if-no-files-found: error
           retention-days: 30

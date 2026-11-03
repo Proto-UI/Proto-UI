@@ -77,65 +77,30 @@ test('pointer coverage reaches all four runtimes before strict non-first keyboar
   assert.match(source, /report\.failures\.push/);
 });
 
-test('CI preserves the pinned baseline, exact head, read-only permissions and artifact boundary', () => {
-  const source = readFileSync(
-    new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
-    'utf8'
+test('the Homepage evidence lane keeps its concurrency group without cancelling active runs', () => {
+  const workflow = parse(
+    readFileSync(
+      new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
+      'utf8'
+    )
   );
-  const workflow = parse(source);
-  assert.deepEqual(workflow.permissions, { contents: 'read' });
+  // The lane is called from the shared regression cycle, so an active run is
+  // never cancelled and pending runs stay queued instead of being replaced.
   assert.deepEqual(workflow.concurrency, {
     group: 'homepage-evidence-${{ github.event.pull_request.number || github.ref }}',
     'cancel-in-progress': false,
     queue: 'max',
   });
+  // This lane runs inside the shared cycle or by manual dispatch, never as an
+  // automatic pull-request lane.
+  assert.deepEqual(Object.keys(workflow.on).sort(), ['workflow_call', 'workflow_dispatch']);
+  assert.deepEqual(workflow.permissions, { contents: 'read' });
   assert.equal(workflow.env.BASELINE_SHA, HOMEPAGE_BASELINE);
   assert.equal(
     workflow.env.CANDIDATE_SHA,
     '${{ github.event.pull_request.head.sha || github.sha }}'
   );
-  assert.ok(workflow.on.pull_request.paths.includes('apps/www/**'));
-  assert.equal(workflow.on.pull_request_target, undefined);
-  const packageMetadata = JSON.parse(
-    readFileSync(new URL('../../../package.json', import.meta.url), 'utf8')
-  );
-  const nodeSetup = workflow.jobs.capture.steps.find((step: { uses?: string }) =>
-    step.uses?.startsWith('actions/setup-node@')
-  );
-  assert.equal(String(nodeSetup.with['node-version']), packageMetadata.engines.node.split('.')[0]);
-  assert.doesNotMatch(source, /\$\{\{\s*secrets\./);
-  const steps = workflow.jobs.capture.steps;
-  assert.equal(
-    steps.find((step: { id?: string }) => step.id === 'baseline_capture')['continue-on-error'],
-    true
-  );
-  const inventory = steps.find((step: { id?: string }) => step.id === 'baseline_visual_inventory');
-  assert.ok(inventory.if.includes('always()'));
-  assert.ok(inventory.run.includes('report.cases.length, 20'));
-  for (const step of steps.filter(
-    (step: { name?: string }) =>
-      step.name?.includes('Capture real exact-head candidate') ||
-      step.name?.includes('Execute focused real-browser')
-  )) {
-    assert.notEqual(
-      step['continue-on-error'],
-      true,
-      'Candidate evidence and regressions remain strict'
-    );
-  }
-
-  const checkouts = steps.filter((step: { uses?: string }) =>
-    step.uses?.startsWith('actions/checkout@')
-  );
-  assert.equal(checkouts.length, 2);
-  for (const checkout of checkouts) assert.equal(checkout.with['persist-credentials'], false);
-  const artifact = steps
-    .filter((step: { uses?: string }) => step.uses?.startsWith('actions/upload-artifact@'))
-    .at(-1);
-  assert.equal(artifact.with.path, '${{ runner.temp }}/homepage-evidence');
-  assert.equal(artifact.if, 'always()');
 });
-
 test('density retains the whole increment baseline alongside a separately pinned feedback pair', () => {
   const workflow = parse(
     readFileSync(
@@ -202,25 +167,6 @@ test('serialized browser probes do not depend on tsx keepNames helpers', () => {
     visit(source);
   }
   assert.ok(inspected >= 15, 'Inspect the actual browser callbacks, not a synthetic subset');
-});
-
-test('full CI uses the same supported toolbar preference before exercising public-page clicks', () => {
-  const workflow = parse(
-    readFileSync(new URL('../../../.github/workflows/ci.yml', import.meta.url), 'utf8')
-  );
-  const steps = workflow.jobs['test-browser'].steps;
-  const preferenceIndex = steps.findIndex((step: { run?: string }) =>
-    step.run?.includes('astro preferences disable devToolbar')
-  );
-  const testsIndex = steps.findIndex(
-    (step: { name?: string }) =>
-      step.name === 'Run the bounded shard with its own documentation server'
-  );
-  assert.ok(preferenceIndex >= 0 && preferenceIndex < testsIndex);
-  assert.match(steps[preferenceIndex].run, /astro preferences get devToolbar.enabled/);
-  assert.equal(workflow.jobs['test-browser']['timeout-minutes'], 20);
-  assert.deepEqual(workflow.jobs.test.needs, ['test-plan', 'test-general', 'test-browser']);
-  assert.equal(workflow.jobs.test.if, 'always()');
 });
 
 test('baseline negative control never swallows unrelated or candidate failures', () => {

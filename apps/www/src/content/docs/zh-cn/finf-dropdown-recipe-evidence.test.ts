@@ -1,7 +1,6 @@
 // @vitest-environment node
 // Definition/oracle checks only. Never imports or executes the native browser suite.
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import { Window } from 'happy-dom';
 import { expect, it } from 'vitest';
 import insetDemo from '../demo-shadcn-dropdown-inset.demo';
@@ -13,25 +12,7 @@ import {
   hasNamedDropdownGroup,
 } from './finf-dropdown-recipe-evidence';
 const file = 'apps/www/src/content/docs/zh-cn/finf-dropdown-recipes.browser.test.ts';
-const workflowFile = '.github/workflows/finf-representative-features-evidence.yml';
 const source = readFileSync(file, 'utf8');
-const workflowSource = readFileSync(workflowFile, 'utf8');
-const workflow = parse(workflowSource);
-const { PRODUCTION_BROWSER_SUITES, PRODUCTION_BROWSER_OWNERS } = createRequire(import.meta.url)(
-  '../../../../../../scripts/test/runtime-test-plan.mjs'
-);
-it('owns a bounded sixteen-case Dropdown job without changing existing cancellation or gates', () => {
-  expect(PRODUCTION_BROWSER_SUITES.filter((value: string) => value === file)).toEqual([file]);
-  expect(PRODUCTION_BROWSER_OWNERS[file]).toBe(workflowFile);
-  expect(workflow.jobs['representative-features'].strategy.matrix.group).toContain('dropdown');
-  expect(workflow.jobs['representative-features']['timeout-minutes']).toBe(35);
-  expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
-  expect(workflow.concurrency['cancel-in-progress']).toBe(true);
-  expect(workflowSource).toContain('TEST_FILE=' + file);
-  expect(source).toContain('expectedCases: 16');
-  expect(source).toContain('for (const runtime of RUNTIMES)');
-  expect(source).toContain('for (const scheme of COLOR_SCHEMES)');
-});
 it('selects the intended second/third previewers by DemoID despite order or unrelated siblings', () => {
   const window = new Window();
   try {

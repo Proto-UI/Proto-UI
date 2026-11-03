@@ -1,24 +1,7 @@
 name: Draft fixed-blueprint default-props native evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/core/src/handles.ts'
-      - 'packages/core/src/spec/template.ts'
-      - 'packages/core/src/spec/owned-template-blueprint.ts'
-      - 'packages/core/src/spec/index.ts'
-      - 'packages/runtime/src/kernel/kernel.ts'
-      - 'packages/modules/feedback/**'
-      - 'packages/modules/rule/**'
-      - 'packages/modules/rule-expose-state-web/**'
-      - 'packages/adapters/web-component/src/**'
-      - 'packages/adapters/base/src/platform/web-owned-decoration.ts'
-      - 'packages/adapters/react/src/**'
-      - 'packages/adapters/react/test/fixtures/owned-blueprint-reuse-evidence-app.ts'
-      - 'packages/adapters/vue/src/**'
-      - 'packages/adapters/vue2/src/**'
-      - 'scripts/feedback/owned-blueprint-reuse-evidence*'
-      - '.github/workflows/owned-blueprint-reuse-evidence.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

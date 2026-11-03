@@ -2,6 +2,8 @@
 
 > Internal governance document. This policy defines how Proto UI packages should be classified for the `v0.2.0-rc.0` public launch, which packages are part of the launch commitment surface, and what kinds of new packages may still enter the launch scope during the final preparation window.
 
+For the current November 2026 train, the exact package roles come from `launch-package-governance.json`, and [the 0.3 execution plan](release-0.3-plan.md) fixes the release scope, feature freeze and acceptance stages. Base, Shadcn, Brutalist and Lucide are the committed UI libraries; every other UI library remains WIP / Experimental outside the 0.3 commitment. The historical first-launch sections below do not expand that current scope or exclude its required shared dependencies.
+
 ---
 
 ## 1. Purpose
