@@ -11,7 +11,7 @@ permissions:
   contents: read
 concurrency:
   group: site-startup-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
   BASELINE_SHA: ${{ inputs.baseline_sha || '48b80f8b8b0b94dbac04919e3516bc6a1ed2c37c' }}

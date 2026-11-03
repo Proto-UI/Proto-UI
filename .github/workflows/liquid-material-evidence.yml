@@ -6,7 +6,7 @@ permissions:
   contents: read
 concurrency:
   group: liquid-material-evidence-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:

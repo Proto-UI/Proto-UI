@@ -218,6 +218,41 @@ export function collectViolations(dir = path.join(repoRoot, WORKFLOW_DIR)) {
     });
   }
 
+  // A manual invocation shares the leaf's concurrency group with a called
+  // cycle. Traverse nested calls too: cancelling a leaf loses active evidence.
+  const cycleWorkflows = new Set([REGRESSION_OWNER]);
+  const pendingWorkflows = [ownerDoc];
+  while (pendingWorkflows.length > 0) {
+    const workflow = pendingWorkflows.pop();
+    for (const job of Object.values(workflow.jobs ?? {})) {
+      const file =
+        typeof job.uses === 'string'
+          ? job.uses.match(/^\.\/(\.github\/workflows\/[^/]+\.ya?ml)$/u)?.[1]
+          : null;
+      if (!file || cycleWorkflows.has(file)) continue;
+      cycleWorkflows.add(file);
+      if (!entries.includes(path.basename(file))) {
+        violations.push({
+          file,
+          rule: 'cycle-callee-missing',
+          detail: 'called cycle workflow is missing',
+        });
+        continue;
+      }
+      const called = parse(readFileSync(path.join(dir, path.basename(file)), 'utf8'));
+      const cancellation = called.concurrency?.['cancel-in-progress'];
+      if (cancellation !== undefined && cancellation !== false) {
+        violations.push({
+          file,
+          rule: 'cycle-callee-cancellation',
+          detail:
+            'a shared cycle workflow must not cancel active evidence when manually dispatched',
+        });
+      }
+      pendingWorkflows.push(called);
+    }
+  }
+
   for (const file of REUSABLE_LANES) {
     if (!entries.includes(path.basename(file))) continue;
     const doc = parse(readFileSync(path.join(dir, path.basename(file)), 'utf8'));

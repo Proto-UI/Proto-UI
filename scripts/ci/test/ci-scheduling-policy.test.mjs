@@ -192,3 +192,40 @@ test('an OR bypass cannot turn a scheduled-only condition into a PR flood', () =
   });
   assert.ok(collectViolations(dir).some((v) => v.rule === 'heavy-pr-fanout'));
 });
+
+test('nested cycle evidence cannot be cancelled by a manual dispatch', (t) => {
+  for (const cancellation of ['false', 'true', '${{ true }}']) {
+    const dir = fixtureWorkflowDir({
+      'ci.yml': ciSkeleton.replace(
+        'jobs:\n',
+        `jobs:\n  production:\n    if: "github.event_name != 'pull_request'"\n    uses: ./.github/workflows/production.yml\n`
+      ),
+      'production.yml': `
+on:
+  workflow_call:
+permissions:
+  contents: read
+jobs:
+  native:
+    uses: ./.github/workflows/native.yml
+`,
+      'native.yml': `
+on:
+  workflow_call:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: native-main
+  cancel-in-progress: ${cancellation}
+jobs: {}
+`,
+    });
+    t.after(() => rmSync(dir, { recursive: true, force: true }));
+    const violations = collectViolations(dir).filter((v) => v.rule === 'cycle-callee-cancellation');
+    assert.deepEqual(
+      violations.map((v) => v.file),
+      cancellation === 'false' ? [] : [`${WORKFLOW_DIR}/native.yml`]
+    );
+  }
+});

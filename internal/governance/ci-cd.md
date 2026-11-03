@@ -86,12 +86,14 @@ The `pull_request` allowlist above is enforced by `scripts/ci/check-ci-schedule.
 
 - Workflows that can run without a pull-request event must not read `github.event.pull_request.*` without a fallback; the source audit in `scripts/ci/check-ci-schedule.mjs` enforces this and is itself executed by the `ci-config-audit` job on every lane.
 - Scheduled and dispatched cycles check out `github.sha` exactly. `cycle-plan` binds the spec-authoring delta to the last successful scheduled source on the same branch, or to the policy-introduction parent before the first green cycle. It verifies that base is an ancestor. Checking only `HEAD^1` would miss earlier commits between daily cycles and is deliberately not used.
+- Coverage-matrix validation is a full source snapshot, not a changed-file delta: `collectCoverageMatrixIssues` iterates every matrix on every invocation. Scheduled/manual `COVERAGE_BASE_REVISION` and `COVERAGE_HEAD_REVISION` deliberately remain the exact checkout SHA, preserving the pre-policy main-lane behavior. These values provide evidence-promotion ancestry context; equal values do not skip matrices. Do not substitute the spec-authoring delta base or claim that a zero delta proves coverage.
 - The trusted CI evidence contract (`workflowNames: [CI]`, `workflowPaths: [.github/workflows/ci.yml]`, check names `lockstep-check`, `public_package_plan`, `type-check`, `test`, `release-scan` in `internal/agent-operations/capability-policy.yaml`) is unchanged; the DCO attribution gate is the external probot app configured in `.github/dco.yml` and is unchanged.
 
 ### Protected lanes
 
 - Publication and release are unaffected: `release-packages.yml` remains manual-only with its existing environment/OIDC protections; `release-cadence.yml` remains a weekly reminder. The regression cycle never publishes, deploys, or mutates access, secrets, rulesets or branch protections.
 - Queue recovery operates only on identified regression runs; the cycle never cancels a release or another owner's diagnostic.
+- A manually dispatched production leaf can share its concurrency group with an active scheduled caller. Shared cycle leaves use `cancel-in-progress: false`, preserving the active evidence run and serializing same-group diagnosis rather than creating parallel duplicate work. The config audit follows local workflow calls recursively and rejects a reachable leaf that can cancel active work; replacing a pending duplicate is not an executed regression result.
 
 ### Verification plan
 
