@@ -18,7 +18,8 @@ permissions:
 
 concurrency:
   group: homepage-evidence-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 env:
   BASELINE_SHA: 1fd4c08a067a8322295c78b2b708d2b4cbc01304
