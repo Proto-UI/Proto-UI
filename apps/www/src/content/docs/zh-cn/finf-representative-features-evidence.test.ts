@@ -168,6 +168,11 @@ describe('Finf representative evidence harness, no native browser', () => {
       'popover-title': 0,
       'resident-motion-capability': 0,
       'shadcn-card': 0,
+      'liquid-dropdown': 0,
+      'shadcn-toggle': 0,
+      'shadcn-switch-consumer': 0,
+      'shadcn-drawer-presence': 0,
+      'brutalist-switch-consumer': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
