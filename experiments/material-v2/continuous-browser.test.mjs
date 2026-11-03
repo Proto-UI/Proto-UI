@@ -622,6 +622,7 @@ try {
         native: captureNative,
       });
     }
+    // Blur observation is a real page focus change, asserted by native trace.
     // Keep the pinned driver's default as a real negative stimulus control.
     // Only the second arm changes focus emulation; neither arm mocks events.
     for (const disableFocusEmulation of [false, true]) {
@@ -646,11 +647,16 @@ try {
       let upPending = false,
         armError;
       const action = async (name, run) => {
-        const operation = { name, startedAt: performance.now(), completedAt: null, error: null };
+        const operation = {
+          name,
+          startedAt: globalThis.performance.now(),
+          completedAt: null,
+          error: null,
+        };
         focusEvidence.operations.push(operation);
         try {
           const result = await run();
-          operation.completedAt = performance.now();
+          operation.completedAt = globalThis.performance.now();
           return result;
         } catch (error) {
           operation.error = String(error?.stack ?? error);
@@ -765,7 +771,7 @@ try {
           if (target.isClosed()) {
             focusEvidence.operations.push({
               name: `${name}.restore-skipped-closed`,
-              at: performance.now(),
+              at: globalThis.performance.now(),
             });
           } else {
             await cleanup(`${name}.focusEmulation(true)-restore`, () =>
@@ -777,7 +783,7 @@ try {
           if (other.isClosed()) {
             focusEvidence.operations.push({
               name: 'other.detach-skipped-target-closed',
-              at: performance.now(),
+              at: globalThis.performance.now(),
             });
           } else {
             await cleanup('other.cdp.detach', () => otherCdp.detach());
@@ -787,10 +793,10 @@ try {
         if (!page.isClosed()) await cleanup('main.bringToFront-cleanup', () => page.bringToFront());
         focusEvidence.mainClosed = page.isClosed();
         focusEvidence.otherClosed = other ? other.isClosed() : null;
-        if (armError || focusEvidence.cleanupErrors.length) {
+        if (focusEvidence.error !== null || focusEvidence.cleanupErrors.length) {
           throw new AggregateError(
             [
-              ...(armError ? [armError] : []),
+              ...(focusEvidence.error !== null ? [armError] : []),
               ...focusEvidence.cleanupErrors.map(
                 (entry) => new Error(`${entry.name}: ${entry.error}`)
               ),
