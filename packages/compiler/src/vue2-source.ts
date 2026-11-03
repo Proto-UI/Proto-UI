@@ -692,7 +692,9 @@ function PUIChildren(value, h, vm, slots) {
 }`
     : ''
 }
-function PUIRootData(properties, attrs, initial) {
+${
+  interactive || ssr
+    ? `function PUIRootData(properties, attrs, initial) {
   const result = { pre: true, attrs: { ...attrs } };
   for (const [key, value] of Object.entries(properties)) {
     if (key === 'value') { if (initial) result.domProps = { value }; }
@@ -700,6 +702,8 @@ function PUIRootData(properties, attrs, initial) {
     else result.attrs[key] = value === false ? null : value === true ? '' : value;
   }
   return result;
+}`
+    : ''
 }
 function PUICreateOwner(vm, setup, types, rootTag, autoUpdate) {
   ${
@@ -1362,7 +1366,11 @@ ${
       const tag = ${interactive ? 'interaction.rootTag() || rootTag' : 'rootTag'};
       const children = ${ssr ? 'PUIChildren(template, h, vm, { used: false })' : 'template ? template(h, vm, { used: false }) : []'};
       if (['input', 'textarea', 'img'].includes(tag) && children.length) throw new Error('[Template] physical control Root requires empty children.');
-      const vnode = h(tag, PUIRootData(${interactive ? 'interaction.rootProperties()' : '{}'}, { 'data-pui-root': '' }, !viewActive), children);
+      ${interactive || ssr ? '' : "const rootData = { pre: true, attrs: { 'data-pui-root': '' } };\n      "}const vnode = h(tag, ${
+        interactive || ssr
+          ? `PUIRootData(${interactive ? 'interaction.rootProperties()' : '{}'}, { 'data-pui-root': '' }, !viewActive)`
+          : 'rootData'
+      }, children);
       renderedCommit = { epoch, version: ++commitVersion, present: true, vnode, kind: !viewActive ? 'mount' : pending ? 'update' : 'none', revision: pending && pending.revision };
       return vnode;
     },

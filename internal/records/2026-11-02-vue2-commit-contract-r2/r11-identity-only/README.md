@@ -30,8 +30,9 @@ exclusive shared slot; no installation, production deployment or browser claim.
 | Separate original regressions | 41/41 | 41/41 |
 | Aggregate core | 47/49, exit 1 | 68/69, exit 1 |
 
-All original assertions and the historical no-DCE comment remain. Removing only
-five added imports, reverting the capture cap 40→38, and removing the appended
+All original assertions and the historical no-DCE comment remain. Removing the
+five added import declarations and the added `rmSync` named specifier from the
+pre-existing `node:fs` import, reverting the capture cap 40→38, and removing the appended
 R11 block reproduces original native test SHA-256 `8be12d08282ac8d10f1e4d8a11f5d4236d3db2eba644d1c3a560865fa46ebd7f`
 byte-for-byte. No skip, xfail, expectation relaxation, renamed original case or
 replacement of the original full strict graph was used. Candidate-only tests

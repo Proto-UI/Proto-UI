@@ -46,10 +46,13 @@ function capture(directory: string | undefined, relative: string, contents: stri
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, contents, { flag: 'wx' });
 }
-function compile(input: PrototypeIR): GeneratedModule {
+function compile(
+  input: PrototypeIR,
+  emitterOptions?: Parameters<typeof emitVue2Source>[1]
+): GeneratedModule {
   let directory: string | undefined;
   if (evidenceRoot) {
-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 40)
+    if (!path.isAbsolute(evidenceRoot) || ++compilations > 45)
       throw new Error('Unexpected native evidence root or compilation count');
     mkdirSync(evidenceRoot, { recursive: true });
     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
@@ -62,6 +65,7 @@ function compile(input: PrototypeIR): GeneratedModule {
         {
           test: expect.getState().currentTestName,
           checkedIR: input,
+          ...(emitterOptions === undefined ? {} : { emitterOptions }),
           authoredGraph: input.sourceFiles,
           note: 'Actual checked-IR emitter input; runtime transpilation is not strict validation.',
         },
@@ -70,7 +74,7 @@ function compile(input: PrototypeIR): GeneratedModule {
       )
     );
   }
-  const result = emitVue2Source(input);
+  const result = emitVue2Source(input, emitterOptions);
   capture(directory, 'result.json', JSON.stringify(result, null, 2));
   if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
   for (const file of [
@@ -82,7 +86,7 @@ function compile(input: PrototypeIR): GeneratedModule {
   return result.value;
 }
 
-function options(module: GeneratedModule): ComponentOptions<Vue2> {
+function options(module: GeneratedModule, allowPositioning = false): ComponentOptions<Vue2> {
   const sources = new Map([
     ['Component.js', module.code],
     ...(module.supportingFiles ?? []).map((file) => [file.path, file.contents] as [string, string]),
@@ -104,6 +108,11 @@ function options(module: GeneratedModule): ComponentOptions<Vue2> {
     }).outputText;
     new Function('require', 'exports', javascript)((specifier: string) => {
       if (specifier === 'vue') return Vue2;
+      if (allowPositioning && specifier === '@floating-ui/dom') {
+        return createRequire(
+          fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+        )(specifier);
+      }
       if (!specifier.startsWith('.')) throw new Error(`Unexpected dependency ${specifier}`);
       const base = path.posix.normalize(path.posix.join(path.posix.dirname(file), specifier));
       const resolved = [base, `${base}.ts`, `${base}.js`].find((candidate) =>
@@ -132,9 +141,13 @@ const cleanup: Array<() => void> = [];
 afterEach(() => {
   for (const close of cleanup.splice(0).reverse()) close();
 });
-async function mount(input: PrototypeIR, components?: ComponentOptions<Vue2>['components']) {
+async function mount(
+  input: PrototypeIR,
+  components?: ComponentOptions<Vue2>['components'],
+  allowPositioning = false
+) {
   const module = compile(input);
-  const native = options(module);
+  const native = options(module, allowPositioning);
   if (components) native.components = components;
   const slot = Vue2.observable({ text: 'S0' });
   const app = new Vue2({
@@ -1538,4 +1551,127 @@ export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{def
     expect(view.host.querySelector('i')).toBeNull();
     strictGraph(view.module);
   });
+});
+
+describe('Vue2 compile-time root-data demand', () => {
+  function physical(kind: 'image' | 'text'): PrototypeIR {
+    const declaration =
+      kind === 'image'
+        ? "declareImageView({source:'',alternativeText:'',a11yMode:'decorative',fit:'contain'})"
+        : "declareTextControl({content:'plain-text',lineMode:'multiline',engine:'host'})";
+    const setup =
+      kind === 'image'
+        ? 'asImageView();'
+        : "const editor=asTextControl();def.lifecycle.onCreated(()=>editor.sync({defaultValue:'seed',valueMode:'uncontrolled',rows:3,minLength:-1,placeholder:'hint',readOnly:true}));";
+    const parsed = parsePrototype(
+      `import {definePrototype} from '@proto.ui/core';
+      import {asImageView,asTextControl} from '@proto.ui/hooks';
+      import {declareImageView} from '@proto.ui/module-image-view';
+      import {declareTextControl} from '@proto.ui/module-text-control';
+      export default definePrototype({name:'root-data-${kind}',modules:[${declaration}],setup(def){${setup}return()=>null;}});`,
+      { fileName: `root-data-${kind}.proto.ts` }
+    );
+    if (!parsed.ok) throw new Error(JSON.stringify(parsed.diagnostics));
+    return parsed.value;
+  }
+
+  it('constructs fresh native root data directly when no root-property producer is reached', async () => {
+    const view = await mount(prototype("return r=>r.el('b','direct-root');"));
+    expect(view.host.textContent).toBe('direct-root');
+    expect(view.child.$el.getAttribute('data-pui-root')).toBe('');
+    const first = nativeField(nativeField(view.child, '_vnode'), 'data');
+    const firstAttrs = nativeField(first, 'attrs');
+    expect(nativeField(first, 'pre')).toBe(true);
+    expect(firstAttrs).toEqual({ 'data-pui-root': '' });
+    view.child.$forceUpdate();
+    await Vue2.nextTick();
+    const next = nativeField(nativeField(view.child, '_vnode'), 'data');
+    expect(next).not.toBe(first);
+    expect(nativeField(next, 'attrs')).not.toBe(firstAttrs);
+    expect(nativeField(next, 'pre')).toBe(true);
+    expect(nativeField(next, 'attrs')).toEqual({ 'data-pui-root': '' });
+    expect(view.host.textContent).toBe('direct-root');
+    expect(view.module.code).not.toContain('function __puiRootData(');
+    expect(view.module.code).not.toContain('__puiRootData(');
+    expect(view.module.code).toContain(
+      "const rootData = { pre: true, attrs: { 'data-pui-root': '' } };"
+    );
+    expect(view.module.code).toContain('h(tag, rootData, children)');
+  });
+
+  it('retains root-property lowering for a reached native interaction', async () => {
+    const view = await mount(
+      prototype(`
+      const count=def.state.numberDiscrete('count',0);
+      def.event.on('host:sample',run=>{count.set(count.get()+1);run.update();});
+      return r=>r.el('b',count.get());
+    `),
+      undefined,
+      true
+    );
+    expect(view.module.code).toContain('function __puiRootData(');
+    expect(view.module.code).toContain(
+      "__puiRootData(interaction.rootProperties(), { 'data-pui-root': '' }, !viewActive)"
+    );
+    expect(view.host.textContent).toBe('0');
+    view.child.$el.dispatchEvent(new Event('sample', { bubbles: true }));
+    await Vue2.nextTick();
+    await Vue2.nextTick();
+    expect(view.host.textContent).toBe('1');
+    expect(view.child.$el.getAttribute('data-pui-root')).toBe('');
+  });
+
+  it.each(['image', 'text'] as const)(
+    'preserves legal physical root attributes and style: %s',
+    async (kind) => {
+      const view = await mount(physical(kind), undefined, true);
+      const root = view.child.$el;
+      const data = nativeField(nativeField(view.child, '_vnode'), 'data');
+      expect(view.module.code).toContain('function __puiRootData(');
+      expect(root.getAttribute('data-pui-root')).toBe('');
+      if (kind === 'image') {
+        expect(root.tagName).toBe('IMG');
+        expect(nativeField(data, 'style')).toBe('object-fit:contain');
+        expect(nativeField(data, 'attrs')).toMatchObject({ src: null, alt: '' });
+        expect(nativeField(nativeField(root, 'style'), 'objectFit')).toBe('contain');
+        expect(root.getAttribute('src')).toBeNull();
+        expect(root.getAttribute('alt')).toBe('');
+      } else {
+        expect(root.tagName).toBe('TEXTAREA');
+        expect(nativeField(data, 'style')).toBeUndefined();
+        expect(nativeField(data, 'attrs')).toMatchObject({
+          rows: 3,
+          minLength: null,
+          placeholder: 'hint',
+          readOnly: '',
+        });
+        expect(nativeField(root, 'value')).toBe('seed');
+        expect(nativeField(root, 'rows')).toBe(3);
+        expect(nativeField(root, 'readOnly')).toBe(true);
+        expect(root.getAttribute('minlength')).toBeNull();
+        expect(root.getAttribute('placeholder')).toBe('hint');
+      }
+    }
+  );
+
+  it.each([false, true])(
+    'retains the full SSR transport root-data path (interaction=%s)',
+    (interaction) => {
+      const input = prototype(
+        `${interaction ? "def.event.on('host:sample',()=>{});" : ''}return r=>r.el('b','ssr-root');`
+      );
+      const module = compile(input, { ssr: true });
+      expect(module.code).toContain('function __puiRootData(');
+      expect(module.code).toContain(
+        '__puiRootData(initialProjection.properties, initialProjection.attrs, true)'
+      );
+      expect(module.code).toContain('__puiRootData(properties, attrs, true)');
+      expect(module.code).toContain(
+        '__puiRootData(' +
+          (interaction ? 'interaction.rootProperties()' : '{}') +
+          ", { 'data-pui-root': '' }, !viewActive)"
+      );
+      // This is emitter-boundary evidence, not a real SSR server/hydration pass.
+    }
+  );
 });

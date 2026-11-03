@@ -1,0 +1,608 @@
+[
+  {
+    "label": "image",
+    "test": "Vue2 compile-time root-data demand > preserves legal physical root attributes and style: image",
+    "inputRawSHA256": "c4d06694d79fbc302d7f95247387cf970f2e3a34dbc892ac12a20b25c33a172b",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": true,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "d4eb01851f3a0e4fde48a416e876412389943780c11ec42f3520d48382775ab5",
+        "actualResultBytes": 223275,
+        "codeSHA256": "a49dbdd0519dc937c03a3c2df2b8b030f943767ac81f71cb6ddbff6f428f995a",
+        "codeBytes": 38678,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "root-data-image.proto.ts",
+              "exportName": "default",
+              "sha256": "30aebe01231c31c1d376e1c0ea83353cef7d0c4541b075199c1356a8b15a1be4"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "d4eb01851f3a0e4fde48a416e876412389943780c11ec42f3520d48382775ab5",
+        "actualResultBytes": 223275,
+        "codeSHA256": "a49dbdd0519dc937c03a3c2df2b8b030f943767ac81f71cb6ddbff6f428f995a",
+        "codeBytes": 38678,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "root-data-image.proto.ts",
+              "exportName": "default",
+              "sha256": "30aebe01231c31c1d376e1c0ea83353cef7d0c4541b075199c1356a8b15a1be4"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "ssr-static",
+    "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=false)",
+    "inputRawSHA256": "18580d8cd006861454f01734dc5f7212083888197c443e978ae8d0f66541a146",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": true,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "5f4b5e1434983e48ba3d45c6d9d3bd5a02862dd484ab8e55f1b5bfa46e15f090",
+        "actualResultBytes": 52750,
+        "codeSHA256": "a143c6e867ce1c785684bff8bc5b9f19cb196571a4b56b6536cbd31300663a06",
+        "codeBytes": 42182,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-ssr-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "vue-server-renderer",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "7001e0b90049a8a866a395c1f0789e969d6c5ab5944f070b8694d591c539133b"
+            },
+            "irVersion": 5,
+            "backend": "vue2-ssr-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "5f4b5e1434983e48ba3d45c6d9d3bd5a02862dd484ab8e55f1b5bfa46e15f090",
+        "actualResultBytes": 52750,
+        "codeSHA256": "a143c6e867ce1c785684bff8bc5b9f19cb196571a4b56b6536cbd31300663a06",
+        "codeBytes": 42182,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-ssr-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "vue-server-renderer",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "7001e0b90049a8a866a395c1f0789e969d6c5ab5944f070b8694d591c539133b"
+            },
+            "irVersion": 5,
+            "backend": "vue2-ssr-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "ssr-interactive",
+    "test": "Vue2 compile-time root-data demand > retains the full SSR transport root-data path (interaction=true)",
+    "inputRawSHA256": "6c779367c58cba9cc66601c943565ce822ad134f70abc62f27a8b0b7dc0af0b9",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": true,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "3b41e6d2658b986d00fc11516253ca8ceaad90acc923b8f281b20b87380ab9cc",
+        "actualResultBytes": 236831,
+        "codeSHA256": "08139e7c7d7db5c8cd9024170b5d73244243a6a8a6ef082041781b0e9cebb0aa",
+        "codeBytes": 51922,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-ssr-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            },
+            {
+              "name": "vue-server-renderer",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "370fafa9dfed6759bcbf5c03d67ba32806ab002e4b0bb7e37f3ade75cdad2c4c"
+            },
+            "irVersion": 5,
+            "backend": "vue2-ssr-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "3b41e6d2658b986d00fc11516253ca8ceaad90acc923b8f281b20b87380ab9cc",
+        "actualResultBytes": 236831,
+        "codeSHA256": "08139e7c7d7db5c8cd9024170b5d73244243a6a8a6ef082041781b0e9cebb0aa",
+        "codeBytes": 51922,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-ssr-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            },
+            {
+              "name": "vue-server-renderer",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "370fafa9dfed6759bcbf5c03d67ba32806ab002e4b0bb7e37f3ade75cdad2c4c"
+            },
+            "irVersion": 5,
+            "backend": "vue2-ssr-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "direct-root",
+    "test": "Vue2 compile-time root-data demand > constructs fresh native root data directly when no root-property producer is reached",
+    "inputRawSHA256": "0303f29cffff4773110ba7eab9658755a34a4efa621dc040ab275d0a2de4b7c4",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": false,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "9dd15b62ab451d218457871153fd00f41a3c56f8e6450a434dcf861f7dcdc459",
+        "actualResultBytes": 39828,
+        "codeSHA256": "29e76a34813e0f0f9ab2c37f29d2dd9988b62ef56a1586441e543fe196505276",
+        "codeBytes": 29582,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "43c646de595eed927e7c5767701fe5f8fca9da7bde5468a28d581a1506a63e07"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "074df92be1186fe2e7c94728d65a4d985c163dbc479a6ed3620ca38e2499512c",
+        "actualResultBytes": 39451,
+        "codeSHA256": "593e6afc9baf98c258b1bfb0d752b58edeaa84d1901b3646f24ab3dd2d4df8e0",
+        "codeBytes": 29212,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "43c646de595eed927e7c5767701fe5f8fca9da7bde5468a28d581a1506a63e07"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "event",
+    "test": "Vue2 compile-time root-data demand > retains root-property lowering for a reached native interaction",
+    "inputRawSHA256": "01d9a5ceb84982440d9e4e68feb994cc55dc9a7d7d98d8b42a63a540a8fd1cd1",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": true,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "681e60e0b9bf3d9189db10d3ba4474dbaef3687047e6649472525ef409e13f27",
+        "actualResultBytes": 224094,
+        "codeSHA256": "3c5cfa52712710271bf3a75b06f277a64ae7814cf4f29fe3138963a1879aa801",
+        "codeBytes": 39494,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "bfb21810ec6db61caa34cacdd53719ec8c6f22a3a61de6cac73e6411b6cbff46"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "681e60e0b9bf3d9189db10d3ba4474dbaef3687047e6649472525ef409e13f27",
+        "actualResultBytes": 224094,
+        "codeSHA256": "3c5cfa52712710271bf3a75b06f277a64ae7814cf4f29fe3138963a1879aa801",
+        "codeBytes": 39494,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "native-shapes.proto.ts",
+              "exportName": "default",
+              "sha256": "bfb21810ec6db61caa34cacdd53719ec8c6f22a3a61de6cac73e6411b6cbff46"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      }
+    }
+  },
+  {
+    "label": "text",
+    "test": "Vue2 compile-time root-data demand > preserves legal physical root attributes and style: text",
+    "inputRawSHA256": "806a9f587513a6abb140485e0f398f0a7109f636a7667d58e875d8c3b83909d9",
+    "inputBytesExactlySame": true,
+    "entireGeneratedModuleBytesExactlySame": true,
+    "modules": {
+      "control": {
+        "actualResultSHA256": "257425fccb9594525bc6bafafbe194a0a3eb57b5bff27ea374c2fc28d23ee63f",
+        "actualResultBytes": 223605,
+        "codeSHA256": "14a5335f1f7dd9697e8afb2aa6904f5d2dbc87314b38d9e3956a4728f5d89267",
+        "codeBytes": 38986,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "root-data-text.proto.ts",
+              "exportName": "default",
+              "sha256": "b2757273eef6300f26f2bf9ad1f002f46802f7c61cb9601eae811f45a16ba469"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      },
+      "candidate": {
+        "actualResultSHA256": "257425fccb9594525bc6bafafbe194a0a3eb57b5bff27ea374c2fc28d23ee63f",
+        "actualResultBytes": 223605,
+        "codeSHA256": "14a5335f1f7dd9697e8afb2aa6904f5d2dbc87314b38d9e3956a4728f5d89267",
+        "codeBytes": 38986,
+        "moduleFieldsExceptSource": {
+          "profile": "vue2-source-v1",
+          "dependencies": [
+            {
+              "name": "vue",
+              "version": "2.6.14",
+              "role": "target"
+            },
+            {
+              "name": "@floating-ui/dom",
+              "version": "1.8.0",
+              "role": "target"
+            }
+          ],
+          "provenance": {
+            "source": {
+              "file": "root-data-text.proto.ts",
+              "exportName": "default",
+              "sha256": "b2757273eef6300f26f2bf9ad1f002f46802f7c61cb9601eae811f45a16ba469"
+            },
+            "irVersion": 5,
+            "backend": "vue2-source-v1"
+          }
+        },
+        "supportingFiles": [
+          {
+            "path": ".proto-ui/context/scope-v1.ts",
+            "kind": "source",
+            "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794",
+            "bytes": 8797
+          },
+          {
+            "path": ".proto-ui/interaction/native-v1.ts",
+            "kind": "source",
+            "sha256": "fa24714e204980f4d8a1d4f4999f85f7722e6bcc84406bfc733029286ccc6585",
+            "bytes": 39195
+          },
+          {
+            "path": ".proto-ui/interaction/adapter-modules-v1.ts",
+            "kind": "source",
+            "sha256": "dcbc4d2e9f1c141d8961475f8b96598d7a8096e96a49fcf95c9db3dd9747e66a",
+            "bytes": 132532
+          }
+        ]
+      }
+    }
+  }
+]
