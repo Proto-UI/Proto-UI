@@ -3,7 +3,7 @@ import fs, { globSync, mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { EventEmitter, getEventListeners } from 'node:events';
 import { runInNewContext } from 'node:vm';
@@ -465,22 +465,40 @@ describe('bounded documentation readiness', () => {
 
   it('keeps the style generation outside every browser readiness window', () => {
     const harness = readFileSync('apps/www/src/content/docs/zh-cn/browser-harness.ts', 'utf8');
-    assert.match(harness, /export function runStyleGeneration\(/);
+    assert.match(harness, /export function createStyleGenerationOwner\(/);
     for (const file of [
       'browser-harness.ts',
       'demo-base-controls.browser.test.ts',
       'demo-brutalist-controls.browser.test.ts',
     ]) {
       const source = readFileSync(`apps/www/src/content/docs/zh-cn/${file}`, 'utf8');
-      // The apps-www dev script folds the style/CLI generation into the same
-      // spawn, so a readiness probe would be charged for build tooling it does
-      // not measure. The generation is awaited first and astro dev is spawned
-      // directly, so the bounded budget covers only the server start and the
-      // route's first compile.
-      assert.match(source, /await runStyleGeneration\(executable\)/);
-      assert.doesNotMatch(source, /'apps-www',\s*\n\s*'dev',\s*\n/);
-      assert.match(source, /'apps-www',\s*\n\s*'exec',\s*\n\s*'astro',\s*\n\s*'dev',\s*\n/);
+      // Each browser readiness owner uses the shared generation owner, and no
+      // owner folds the generation back into the dev-server spawn, so the
+      // readiness budget never pays for build tooling it does not measure.
+      assert.match(source, /createStyleGenerationOwner/);
+      assert.match(source, /await generation\.run\(/);
+      // A folded spawn must be rejected however its arguments are laid out.
+      assert.doesNotMatch(source, /'apps-www',\s*'dev',/);
     }
+  });
+
+  it('runs the startup ownership suite in the general phase', () => {
+    const plan = createRuntimeTestPlan([]);
+    const general = plan[0];
+    // The general phase excludes the browser suites instead of naming files,
+    // so every configured non-browser test file is collected by that phase.
+    const positional = general.args.filter(
+      (argument, index) => !argument.startsWith('--') && general.args[index - 1] !== '--exclude'
+    );
+    assert.deepEqual(positional, [], 'The general phase must not name test files.');
+    const excluded = general.args.filter(
+      (argument, index) => general.args[index - 1] === '--exclude'
+    );
+    const suite = 'apps/www/src/content/docs/zh-cn/browser-harness-startup.test.ts';
+    assert.ok(!excluded.includes(suite));
+    assert.ok(existsSync(suite), 'The startup ownership suite must exist.');
+    const config = readFileSync('vitest.config.ts', 'utf8');
+    assert.match(config, /apps\/www\/src\/\*\*\/\*\.test\.ts/);
   });
 
   // Execute the production helper with a deterministic clock and HTTP
