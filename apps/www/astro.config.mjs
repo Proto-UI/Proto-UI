@@ -1179,6 +1179,7 @@ export default defineConfig({
             },
             {
               label: 'Bootstrap 2.3.2',
+              badge: { text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }, class: 'docs-wip-badge' },
               translations: { en: 'Bootstrap 2.3.2', 'zh-CN': 'Bootstrap 2.3.2' },
               items: [
                 {
@@ -1396,7 +1397,7 @@ export default defineConfig({
             },
             {
               label: 'Liquid Glass',
-              badge: { text: { en: 'Experimental', 'zh-CN': '实验性' }, class: 'docs-wip-badge' },
+              badge: { text: { en: 'WIP / Experimental', 'zh-CN': 'WIP / 实验性' }, class: 'docs-wip-badge' },
               translations: { en: 'Liquid Glass', 'zh-CN': 'Liquid Glass' },
               items: [
                 {

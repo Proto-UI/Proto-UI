@@ -5,6 +5,8 @@ description: Select, run, and report proportional Proto UI validation for a comp
 
 # Validate a change
 
+Apply the [release-stage and completion policy](../../../internal/governance/release-0.3-plan.md). Report per-criterion results, not just an aggregate count: which bounded development condition is now satisfied, which acceptance condition remains unverified, and the next executable action. Do not withhold a satisfied subcriterion because an unrelated umbrella is open. Per-change focused evidence and scheduled full integration acceptance remain separately SHA-bound; neither an old green baseline nor a queued cycle is a new-head pass.
+
 For state/ownership or rendered-projection changes, selective test commands, or resource-related failures, read `internal/agent-operations/testing-method.md`. Confirm the intended files ran and keep candidate-bound failures, controlled reruns and omitted evidence distinct.
 
 1. Read `AGENTS.md`, the actual diff, the `pui-trace` map, and the governed validation boundary.

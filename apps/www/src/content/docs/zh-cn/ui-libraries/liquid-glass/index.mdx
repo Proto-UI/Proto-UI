@@ -8,6 +8,8 @@ import DraftProjectionStyle from '@/components/DraftProjectionStyle.astro';
 
 <DraftProjectionStyle />
 
+**WIP / 实验性——归入 0.4 工作流，不属于 0.3 发布承诺。** 保留现有源码与预览供评估，不将其表述为稳定的 0.3 支持。
+
 V2 Liquid Glass 意图已接入可选 Web 自实现光学 provider。Previewer 的可见动态应用 canvas 就是被采样的背景本体。当前不捕获任意 DOM 或浏览器 compositor：介入的其他绘制、跨 scope portal、来源或偏好不可用时保留可读回退。减弱动态效果使用静态光学路径。此 draft provider 仍需 exact-head 浏览器证据后才能接纳；native、Apple 私有实现、group/morph 与完整 Compiler 等价性仍未验证。
 
 Button、Surface、Text、Label、Collapsible、Accordion 和五 part Select 已有独立的直接 Base 投影。Select Trigger/Content 声明共享显式光学意图与不透明 fallback；实际光学绘制仍须 exact-head 浏览器证据接纳。其他 Base 部件正在逐项补齐，不会借用其他族冒充；通用 Compiler 与 GPUI/Flutter/Qt 完整呈现尚未验证。源码包仍为 private/unreleased。

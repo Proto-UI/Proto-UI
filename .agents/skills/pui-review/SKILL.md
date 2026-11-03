@@ -5,6 +5,8 @@ description: Independently review a Proto UI change against current authority, b
 
 # Review independently
 
+Use the [development/acceptance distinction](../../../internal/governance/release-0.3-plan.md). Review the exact bounded criteria and their actual evidence; report satisfied subcriteria and actionable remaining findings separately. Do not deny a completed repair because an unrelated umbrella is open, or approve missing in-scope acceptance by calling it unrelated debt. Keep rights, DCO, independence and platform approval requirements intact.
+
 ## Distinguish deferral from review
 
 [Explicit current-user connected operations](../../../internal/agent-operations/contributor-agents.md#explicit-current-user-connected-operations) is a separate execution branch, not a relaxed `APPROVE`. When the current user explicitly defers review/CI/thread criteria for an exact integration, retain every finding, active change request, thread and failed/unrun observation in the complete source-bound debt ledger. Do not manufacture an approval, published-review packet or current-head technical verdict. Return any actual completed local review as its honest terminal handoff; the newly oriented `pui-dev` entrypoint prepares the registered human-directed operation for `pui-integrate` or `pui-collaborate` without requiring an unproduced review artifact. This leaf's independent-review handoff requirements below are unchanged.

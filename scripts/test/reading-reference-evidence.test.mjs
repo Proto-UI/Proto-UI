@@ -695,28 +695,6 @@ describe('bounded reading-reference runner and workflow', () => {
   });
   it('retains failures, uses read-only exact-head checkout and an independent bounded job', () => {
     assert.deepEqual(workflow.permissions, { contents: 'read' });
-    for (const owner of [
-      'apps/www/scripts/search-production-preview.mjs',
-      'apps/www/package.json',
-      'apps/www/src/content/docs/zh-cn/start-here/quick-start.mdx',
-      'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/radio-group.mdx',
-      'apps/www/src/content/docs/zh-cn/browser-harness.ts',
-      'scripts/test/server-readiness.mjs',
-      'scripts/test/server-readiness.d.mts',
-      'apps/www/src/components/site-text-recipes*',
-      'apps/www/src/components/site-typography*',
-      'apps/www/src/components/override/MarkdownContent.astro',
-      'apps/www/src/components/override/TwoColumnContent.astro',
-      'apps/www/src/styles/markdown.css',
-      'packages/prototypes/base/src/text/**',
-      'packages/prototypes/shadcn/src/text/**',
-      'packages/cli/src/services/proto-style-css.ts',
-    ])
-      assert.ok(
-        workflow.on.pull_request.paths.includes(owner),
-        `Missing reading owner trigger ${owner}`
-      );
-
     assert.deepEqual(Object.keys(workflow.jobs), ['capture']);
     const job = workflow.jobs.capture;
     assert.equal(job.strategy, undefined);

@@ -1,20 +1,14 @@
 name: Agent Operations Local Fixtures
 
 on:
-  pull_request:
-    paths:
-      - 'AGENTS.md'
-      - '.agents/**'
-      - 'internal/agent-operations/**'
-      - 'internal/compiler/**'
-      - 'scripts/agent-operations/**'
-      - '.github/workflows/agent-operations-fixtures.yml'
+  workflow_dispatch:
+  workflow_call:
 
 # Supplemental evidence only: no existing check, requirement or permission is replaced.
 permissions: {}
 
 concurrency:
-  group: agent-local-fixtures-${{ github.event.pull_request.number }}
+  group: agent-local-fixtures-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -22,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Fetch the exact public candidate without credentials
         shell: bash

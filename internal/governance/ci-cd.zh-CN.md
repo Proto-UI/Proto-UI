@@ -8,7 +8,7 @@
 
 | 工作流 | 文件 | 作用 |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | PR 与主干的类型、测试、spec 和全局版本门禁 |
+| CI | `.github/workflows/ci.yml` | PR 的类型、测试、spec 和全局版本门禁，以及唯一的定时回归 cycle |
 | Release Packages | `.github/workflows/release-packages.yml` | 手动执行 release scan、stage 彩排或全量发布 |
 | Release Cadence | `.github/workflows/release-cadence.yml` | 定期检查距最近 `v*` release 的时间并提醒维护者 |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | 只读的 Issue 与 PR intake/reconciliation lane |
@@ -16,9 +16,11 @@
 | Intranet preview build | `.github/workflows/intranet-preview-build.yml` | 无部署 secret 的 exact-PR-head 文档 artifact 构建 |
 | Intranet preview checks | `.github/workflows/intranet-preview-checks.yml` | artifact 准入、发布与静态服务的 focused checks |
 
+其余文件的 event inventory 见下文[回归 cadence 与 event inventory](#回归-cadence-与-event-inventory)。
+
 ## CI 工作流（`ci.yml`）
 
-CI 在 pull request、`main` push 和手动触发时运行。除常规类型与测试外，它会执行 `check-version-governance`，确保：
+CI 在 pull request、手动触发，以及每天三次针对默认分支 head 的定时回归 cycle 中运行。仓库内任何 workflow 都不再使用 `push` 触发；定时 cycle 是主干回归的唯一入口。除常规类型与测试外，它会执行 `check-version-governance`，确保：
 
 - 根 `VERSION` 与全部公开 `@proto.ui/*` package 精确一致
 - 当前版本有且只有一个对应的 V 实体
@@ -32,6 +34,79 @@ CI 在 pull request、`main` push 和手动触发时运行。除常规类型与�
 `public_package_plan` 会根据 pull request diff 推导受影响的公开 package 图。package 变化会选中改动 package、它的反向消费者，以及构建该集合所需的全部上游公开依赖；仓库级构建、release、预算、lockfile、manifest 或 workflow 变化则选中全部公开 package。后续 build job 会检查生成式 manifest、产出 JavaScript 与声明文件、执行原生 ESM import smoke，并检查代表性 gzip 预算。如果 PR 的受影响公开 package 图为空，release stage 与隔离 consumer job 可以跳过；`main` 与手动触发仍运行全量集合。
 
 `release-consumer-react` 会从当前源码构建全部公开 package tarball，并在 monorepo 外的临时 React + Vite 项目中安装当前发布依赖闭包。该门禁禁止 `@proto.ui/*` 回退到 npm registry 或 workspace 源码，验证 staged manifest 的全部非通配 export target，并验证 CLI facade 生成、TypeScript、production build 和基础运行时行为。在扩展完整 fixture 前，它还会先只生成 Shadcn Button，并检查最终 Rollup module graph 不包含其他 Base/Shadcn prototype family；这是一项 family 边界检测，不是固定 bundle 大小预算。
+
+PR 更新只自动运行策略解析、精确版本核对、package 计划和 browser inventory 计划，不自动运行全量构建、类型检查、Rust、浏览器或 package consumer。完整检查仅由定时 cycle 或显式 exact-ref dispatch 运行。跳过不是通过：可信 CI/DCO、独立 exact-head review 与实际平台门禁保持不变，旧 main baseline 不能补齐新 head 缺失的检查；需要时在分支完成并受评审后显式运行一次，而不是每次开发 push 都扇出。
+
+## 回归 cadence 与 event inventory
+
+release 层面的 cadence 策略——红灯规则、repair-only 模式与恢复条件——由 [release-0.3-plan.md](release-0.3-plan.md) 统一给出；本节只记录 workflow 实现与触发事实，不重复该策略正文。
+
+### 定时回归 cycle
+
+`.github/workflows/ci.yml` 是仓库内唯一拥有回归 schedule 的 workflow。它在每天三个固定 slot 对默认分支 head 运行完整 CI lane 集合——lockstep、package plan/build、types、Rust、`runtime-ci.mjs` 完整套件计划（已注册 browser suite 全量清单；plan 对未注册或未分配 suite 一律 fail closed）、release scan/stage、隔离 consumer，以及以 reusable job 形式并入的 coverage-governance 与 agent-operations fixture 检查：
+
+| Cron         | 计划时间（UTC） | 东八区（Asia/Shanghai）等价时间 |
+| ------------ | --------------- | ------------------------------- |
+| `0 0 * * *`  | 00:00           | 08:00                           |
+| `0 8 * * *`  | 08:00           | 16:00                           |
+| `0 16 * * *` | 16:00           | 00:00（次日）                   |
+
+GitHub cron 只能尽力调度，可能延迟或被跳过；cycle 不承诺精确墙钟时刻。每个 cycle 都以 `cycle-report` job 收尾，把确切 source revision、完整 lane inventory 及逐 lane 结果、计划 slot、实际开始时间、queue 延迟、错过的 slot、连续非绿 cycle 数和距上次有效 baseline 的小时数写入 `regression-cycle-<sha>-<run>-attempt-<n>` artifact（保留 30 天）。从未开始的 lane 记为 unknown，unknown 不等于通过：只要任一 lane 结果不是 `success`，`cycle-report` 就 fail closed。超过 60 分钟的 queue 延迟和错过的 slot 以 workflow annotation 和 receipt incident 形式呈现，而不是伪造绿色结果。
+
+`workflow_dispatch` 手动触发运行同一组完整 lane，用于定向诊断，并生成 `scheduledSlot: null` 的同类 receipt；它不会代替 schedule 产生 cycle。只有完整成功的 cycle 才构成 baseline；queued、未结束、cancelled 或失败的 cycle 一律计入非绿（包括当前 cycle 自身），slot/遗漏分析自策略生效时刻起算，早期历史不会伪造出遗漏 slot。
+
+`ci-production-suites.yml` 调用全部 29 个已注册 production browser suite 的专属 owner；production Search 由 `homepage-visual-evidence.yml` 实际运行，不因 shared-dev 分片排除而漏跑。两条独立依赖链限制重工作流扇出，保留各自 artifact；前项失败不阻止后项，取消整个 cycle 除外。四条原 push-only source-check lane 也每轮调用一次。Experimental 套件保留真实失败，执行它们不代表把其他家族准入 0.3。
+
+策略生效时间从完整源码历史读取：沿 first-parent 找到首次引入 `scripts/ci/cycle-report.mjs` 的实际集成提交时间，不硬编码规划日期。当前完整绿色 cycle 重置连续红灯计数，另行统计连续两轮 scheduled green 供恢复判断；没有绿色 baseline 时，24 小时计时从实际生效开始。手动运行不能伪造定时恢复轮次。
+
+### 并发与取消策略
+
+- Pull-request lane 按 `ci-<ref>-pr` 分组且 `cancel-in-progress: true`：同一 PR 的新提交只取代该 PR 自身的过期运行。
+- 定时与手动 cycle 按 `ci-<ref>-cycle` 分组且 `cancel-in-progress: false`：正在进行的证据产出运行永不取消，同一源线上重复的排队 cycle 合并为最新的一条待执行运行。
+- 其他 workflow 均不持有回归 schedule，cycle 是唯一协调入口；专用证据 lane 不再随 pull request 自动运行（保留 manual/callable 用于 exact-ref 诊断），也不被复制成定时任务。
+
+### Event inventory 审计
+
+在 no-push 策略下审计了每个 workflow 的 event 触发。保留的触发及理由：
+
+| 文件 | 变更后的触发 | 理由 |
+| --- | --- | --- |
+| `ci.yml` | `pull_request`、`workflow_dispatch`、`schedule`（3 个 slot） | PR 只自动执行轻量 metadata；全量回归在 schedule 或显式 exact-ref dispatch 执行。可信 check 名与合入要求不变，skipped 不能冒充集成许可 |
+| `effect-graph-model.yml`、`shadcn-style-source.yml`、`intranet-preview-checks.yml`、`compiler-isolated-static-smoke.yml`、`compiler-wc-runner-preflight.yml` | `pull_request`（带 paths）、`workflow_dispatch`、`workflow_call` | 轻量平台检查 allowlist：有界 node 运行——无浏览器、无 docs/package 构建、无全量 workspace install；ci.yml 之外仅存的自动 PR 触发 |
+| `coverage-governance.yml`、`agent-operations-fixtures.yml`、`ci-production-suites.yml` | `workflow_dispatch`、`workflow_call` | ci.yml 的全量 cycle 调用；cycle-report 保留终态结果 |
+| `agent-operations-shadow.yml` | `schedule`（`17 * * * *`）、`workflow_dispatch` | 只读 intake/reconciliation lane 的每小时定时；与回归执行无关 |
+| `release-cadence.yml` | `schedule`（`7 10 * * 4`）、`workflow_dispatch` | 仅每周发布提醒 |
+| `release-packages.yml`、`reposteward-portfolio-shadow.yml` | `workflow_dispatch` | 手动发布彩排/发布与只读 portfolio 实验；不变 |
+| `intranet-preview-build.yml` | `workflow_dispatch`（必填 `pr_number`/`expected_head_sha` inputs）、`workflow_call` | PR 预览构建改为按需手动：30 分钟 builder 不再随每次 synchronize 触发；dispatch 后仍如常把预览发布到指定 PR |
+| 其余证据/诊断 lane | `workflow_dispatch`、`workflow_call`（带受保护 ref 绑定） | per-change 证据扇出已关闭：共享套件由 ci.yml cycle 覆盖，所有专用 lane 保留 exact-ref 诊断能力；重 lane 不持有任何自动触发 |
+
+上述 `pull_request` allowlist 由 `scripts/ci/check-ci-schedule.mjs`（`pull-request-not-allowed`）强制：给其他任何文件新增自动 PR 触发会使 `ci-config-audit` lane fail。manual/callable lane 中 `github.event.pull_request.*` 仅出现在 `|| github.sha` 一类回退之后，因此永远不会渲染出空 ref。
+
+### Event context 与来源规则
+
+- 能在无 pull_request 事件下运行的 workflow，不得无回退地读取 `github.event.pull_request.*`；`scripts/ci/check-ci-schedule.mjs` 的源码审计强制该规则，并由每条 lane 上的 `ci-config-audit` job 执行。
+- 定时与手动 cycle 按 `github.sha` 精确 checkout；`cycle-plan` 将 spec-authoring delta 绑定到同分支最近一次成功定时 cycle 的源码，首轮绿色之前则用策略引入提交的 parent，并验证 ancestor。不能只比较 `HEAD^1`，否则每天两轮之间较早的提交会漏检。
+- 可信 CI 证据契约（`workflowNames: [CI]`、`workflowPaths: [.github/workflows/ci.yml]`、check 名 `lockstep-check`、`public_package_plan`、`type-check`、`test`、`release-scan`，见 `internal/agent-operations/capability-policy.yaml`）不变；DCO 归属门禁是 `.github/dco.yml` 配置的外部 probot app，保持不变。
+
+### 受保护的 lane
+
+- 发布与发行不受影响：`release-packages.yml` 仍为手动触发并保留 environment/OIDC 保护；`release-cadence.yml` 仍为每周提醒。回归 cycle 不发布、不部署、不改变 access、secrets、ruleset 或分支保护。
+- Queue 恢复只作用于已识别的回归运行；cycle 不取消发布运行或其他所有者的诊断运行。
+
+### 验证计划
+
+配置解析验证（在每条 CI lane 上的 `ci-config-audit` job 中执行）：
+
+- `node scripts/ci/check-ci-schedule.mjs` 审计每个 workflow 文件：无 `push`/`merge_group`/`pull_request_target` 触发、唯一回归 schedule 持有者与三个 slot、无重复 schedule、非 PR 事件下 `pull_request` context 均有回退、声明了 permissions、`ci.yml` 中 trusted job 名齐全、reusable lane 保持可用。
+- `ci.yml` 没有 workflow 层级 token grant。读取运行历史的 `cycle-plan` 与 `cycle-report` 显式声明 `contents: read`、`actions: read`；callable coverage-governance 保留已声明的只读 Issue/PR 权限。cycle 不授予写权限。
+- `node --test scripts/ci/test/ci-scheduling-policy.test.mjs` 用正反 fixture inventory 与真实仓库状态覆盖同一组规则。
+
+行为验证（由父代理在合入后的首个 cycle 上执行）：
+
+- 首个定时 slot 后，确认 `event=schedule` 的 `ci.yml` 运行产出 `regression-cycle-<sha>` artifact，其 `sourceRevision` 等于触发时的默认分支 head，lane inventory 覆盖 `cycle-report.needs` 全部条目（含 production suites），receipt 记录 cron slot、实际开始与 queue 延迟。
+- 确认一次 `workflow_dispatch` 运行产出 `scheduledSlot: null` 的同类 receipt，重复排队的 cycle 合并而不取消活动运行。
+- 确认对原 push lane（如 `shadcn-style-source.yml`）的一次 `workflow_dispatch` 在无 pull_request context 错误下完成。
+- 确认 PR 更新只运行 metadata lane 与 DCO，完整检查明确 skipped 而非伪造 success；集成前的 exact-ref dispatch 提供真实完整检查结果。PR lane 不运行 `cycle-report`。
 
 ## Agent Operations Shadow 工作流（`agent-operations-shadow.yml`）
 

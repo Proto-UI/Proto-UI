@@ -1,19 +1,7 @@
 name: Collapsible projection evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/collapsible-projections-evidence.yml'
-      - 'packages/prototypes/**/src/collapsible/**'
-      - 'packages/adapters/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/cli/src/**'
-      - 'apps/www/src/content/docs/**/collapsible.mdx'
-      - 'apps/www/src/content/docs/demo-*-collapsible.demo.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-collapsible-projections.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/collapsible-focus-observation*'
-      - 'apps/www/src/content/docs/zh-cn/collapsible-focus-path-probe*'
-      - 'apps/www/src/components/PrototypePreviewer/**'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -26,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -67,7 +55,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: collapsible-projections-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: collapsible-projections-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/collapsible-projections
           if-no-files-found: warn
           retention-days: 30

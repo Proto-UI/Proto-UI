@@ -1,19 +1,8 @@
 name: Whitepaper diagram evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/whitepaper-diagram-evidence.yml'
-      - 'apps/www/scripts/capture-whitepaper-diagram-evidence.mjs'
-      - 'apps/www/scripts/whitepaper-diagram-evidence-profiles.mjs'
-      - 'scripts/docs/test/whitepaper-diagram-evidence*.test.mjs'
-      - 'scripts/docs/test/generated-whitepaper-diagrams.test.mjs'
-      - 'apps/www/scripts/generate-whitepaper-diagrams.mjs'
-      - 'apps/www/scripts/whitepaper-diagram-fonts.json'
-      - 'apps/www/public/diagrams/**'
-      - 'apps/www/src/content/docs/*/whitepaper/**'
-      - 'apps/www/src/styles/markdown.css'
-      - 'pnpm-lock.yaml'
+  workflow_dispatch:
+  workflow_call:
 
 # Exact candidate, loopback-only built documentation. No secrets, deployments,
 # repository writes, arbitrary URLs, login, or new branch-protection gate.
@@ -29,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha }}
+      CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       DIAGRAM_EVIDENCE_DIR: /tmp/whitepaper-diagram-evidence
       ASTRO_TELEMETRY_DISABLED: '1'
     steps:
