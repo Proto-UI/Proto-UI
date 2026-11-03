@@ -121,3 +121,30 @@ it('keeps the default targets and permits the explicit Liquid family diagnostic'
     );
   }
 });
+
+it('keeps the existing default and reads the three font-boundary consumers explicitly', async () => {
+  for (const family of ['base', 'shadcn', 'lucide'] as const) {
+    const selectors: string[] = [];
+    const send = vi.fn(async (method: string, params?: { selector?: string }) => {
+      if (method === 'DOM.getDocument') return { root: { nodeId: 1 } };
+      if (method === 'DOM.querySelector') {
+        selectors.push(params!.selector!);
+        return { nodeId: 2 };
+      }
+      if (method === 'CSS.getPlatformFontsForNode')
+        return { fonts: [{ familyName: 'Observed face', glyphCount: 3, isCustomFont: false }] };
+      return {};
+    });
+    const result = await readLibraryPlatformFonts(
+      pageFor(async () => ({ send, detach: async () => {} })),
+      family
+    );
+    expect(selectors).toHaveLength(3);
+    expect(selectors.every((selector) => selector.startsWith(`[data-library="${family}"] `))).toBe(
+      true
+    );
+    expect(result.nodes.map((node) => node.name)).toEqual(['caption', 'title', 'action']);
+    expect(result.error).toBeUndefined();
+    expect(result.cleanup).toEqual([]);
+  }
+});

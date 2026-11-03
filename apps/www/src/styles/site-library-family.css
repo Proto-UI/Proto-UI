@@ -20,6 +20,22 @@
     --font-sans: var(--pui-font-sans);
     font-family: var(--pui-font-sans);
   }
+
+  /* App-private authored font scope on a descendant, never the bank's root.
+     Supply a complete font input (literal or independent bank), not a reference
+     back to this scope's --font-sans. Explicit same-node author scope wins over
+     family/projection defaults; utility classes and inline font declarations
+     still outrank this base-layer default. This is not a runtime marker. */
+  [data-site-font-scope]:not(:root) {
+    --font-sans: var(--site-font-sans);
+    font-family: var(--site-font-sans);
+  }
+}
+
+/* Resolve the ordinary site font at the root before descendant family scopes
+   select their own --font-sans. This bank introduces no font bytes or request. */
+:root {
+  --site-default-font-sans: var(--font-sans);
 }
 
 :root,

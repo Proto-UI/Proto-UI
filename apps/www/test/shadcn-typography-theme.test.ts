@@ -533,3 +533,33 @@ describe('shared Shadcn typography outside the Text prototype', () => {
     });
   }
 });
+
+// Source guards only. Native cascade evidence belongs to the real browser suite.
+describe('application-authored independent font scope', () => {
+  it('keeps the ordinary root font bank separate from descendant Shadcn selection', () => {
+    const css = readFileSync(
+      new NodeURL('../src/styles/site-library-family.css', import.meta.url),
+      'utf8'
+    );
+    expect(css).toMatch(/:root\s*\{\s*--site-default-font-sans: var\(--font-sans\);\s*\}/);
+    const boundary = css.indexOf('[data-site-font-scope]');
+    const baseStart = css.indexOf('@layer base {');
+    const baseEnd = css.indexOf('\n}\n', baseStart);
+    expect(boundary).toBeGreaterThan(baseStart);
+    expect(boundary).toBeGreaterThan(css.indexOf('.pui-runtime-preview-owned-surface'));
+    expect(boundary).toBeGreaterThan(css.indexOf("[data-site-control-family='shadcn']"));
+    expect(boundary).toBeLessThan(baseEnd);
+    const rule = css.match(/\[data-site-font-scope\]:not\(:root\)\s*\{([^}]+)\}/)?.[1];
+    expect(rule).toContain('--font-sans: var(--site-font-sans);');
+    expect(rule).toContain('font-family: var(--site-font-sans);');
+    expect(rule).not.toMatch(/Geist|library|shadcn|brutalist|!important|--pui-/i);
+    const original = readFileSync(
+      new NodeURL('../src/styles/tailwindcss.css', import.meta.url),
+      'utf8'
+    );
+    const sans = original.match(/--font-sans:([\s\S]*?);/)?.[1];
+    expect(sans).toContain('ui-sans-serif, system-ui');
+    expect(sans).not.toContain('--site-default-font-sans');
+    expect(sans).not.toContain('Geist');
+  });
+});

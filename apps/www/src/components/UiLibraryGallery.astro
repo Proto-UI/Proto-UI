@@ -268,7 +268,12 @@ const themeCss = Object.entries(familyThemes)
 ---
 
 <style is:inline set:html={themeCss}></style>
-<section class="library-gallery" aria-label={copy.aria}>
+<section
+  class="library-gallery"
+  aria-label={copy.aria}
+  data-site-font-scope
+  style={{ '--site-font-sans': 'var(--site-default-font-sans)' }}
+>
   <p class="library-gallery__summary">{copy.componentCount} · {copy.iconCount}</p>
   <div class="library-gallery__grid">
     {
@@ -413,19 +418,13 @@ const themeCss = Object.entries(familyThemes)
                     >
                       {shadcn ? (
                         <>
-                          <LibraryCardPart
-                            part={`${family}-text`}
-                            props={{ ...action.text }}
-                          >
+                          <LibraryCardPart part={`${family}-text`} props={{ ...action.text }}>
                             {library.cta}
                           </LibraryCardPart>
                           <StaticFamilyIcon family={library.id} name="arrow-right" size="1rem" />
                         </>
                       ) : (
-                        <LibraryCardPart
-                          part={`${family}-text`}
-                          props={{ ...action.text }}
-                        >
+                        <LibraryCardPart part={`${family}-text`} props={{ ...action.text }}>
                           {library.cta} <StaticFamilyIcon family={library.id} name="arrow-right" />
                         </LibraryCardPart>
                       )}

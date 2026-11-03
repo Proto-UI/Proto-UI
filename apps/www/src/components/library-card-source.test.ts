@@ -173,3 +173,18 @@ it('measures the actual title Text and verifies real fonts in both reload phases
   expect([...records.matchAll(/^\s+platformFonts,$/gm)]).toHaveLength(2);
   expect([...records.matchAll(/^\s+reloadFontFaces,$/gm)]).toHaveLength(2);
 });
+
+it('declares a private author font scope without changing family recipes or runtime ownership', () => {
+  const source = readFileSync('apps/www/src/components/UiLibraryGallery.astro', 'utf8');
+  const section = source.match(/<section[\s\S]*?>/)?.[0];
+  expect(section).toContain('data-site-font-scope');
+  expect(section).toContain("'--site-font-sans': 'var(--site-default-font-sans)'");
+  expect(section).not.toMatch(/font-family|--pui-|data-projection-family|pui-projection-scope/);
+  expect(source).not.toContain('Geist-Variable.ttf?inline');
+  expect(source).not.toContain('SHADCN_TYPOGRAPHY');
+  const css = readFileSync('apps/www/src/styles/site-library-family.css', 'utf8');
+  const rule = css.match(/\[data-site-font-scope\]:not\(:root\)\s*\{([^}]+)\}/)?.[1];
+  expect(rule).toContain('--font-sans: var(--site-font-sans);');
+  expect(rule).toContain('font-family: var(--site-font-sans);');
+  expect(rule).not.toMatch(/important|width|height|opacity|visibility|display|--pui-/);
+});
