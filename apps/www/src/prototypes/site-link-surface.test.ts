@@ -28,6 +28,111 @@ const settle = async () => {
   for (let i = 0; i < 12; i++) await Promise.resolve();
 };
 afterEach(() => document.body.replaceChildren());
+
+// The accepted website target remains 44px, not upstream Rhea's size-8.
+// Paint/focus/press literals follow the public passive Rhea contract; no
+// Button, synthetic activation, or page-specific paint is installed here.
+for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
+  it(`Shadcn community ${emphasis}: real Rhea Surface/Text retires feedback without replacing the anchor`, async () => {
+    const link = document.createElement('a');
+    link.href = 'https://github.com/Proto-UI/Proto-UI';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.setAttribute('aria-label', 'GitHub community');
+    const surface = new Constructors.shadcn();
+    const text = new Texts.shadcn();
+    appendSiteLinkGlyph(text, 'github');
+    const glyph = text.querySelector('svg');
+    surface.append(text);
+    link.append(surface);
+    document.body.append(link);
+    const idle = { hovered: false, pressed: false, focusVisible: false, current: false };
+    for (const facts of [
+      idle,
+      { ...idle, hovered: true },
+      { ...idle, focusVisible: true },
+      { ...idle, pressed: true },
+      idle,
+    ]) {
+      setElementProps(surface, {
+        ...linkSurfaceProps('shadcn', 'icon', emphasis, facts),
+        surfaceStyle: linkSurfaceLayout('shadcn', 'icon', emphasis, facts),
+      });
+      setElementProps(text, linkTextProps('icon', facts, 'shadcn'));
+      surface.update();
+      text.update();
+      await settle();
+      const tokens = new Set((surface.getAttribute('data-pui-style') ?? '').split(/\s+/));
+      for (const token of [
+        'rounded-[var(--pui-radius-2xl)]',
+        'border',
+        'bg-clip-padding',
+        'transition-all',
+      ])
+        expect(tokens.has(token)).toBe(true);
+      expect(tokens.has('rounded-lg')).toBe(false);
+      expect(tokens.has('rounded-[var(--pui-radius-4xl)]')).toBe(false);
+      expect(tokens.has('ring-3')).toBe(facts.focusVisible);
+      expect(tokens.has('ring-ring/30')).toBe(facts.focusVisible);
+      expect(tokens.has('ring-2')).toBe(false);
+      expect(tokens.has('translate-y-px')).toBe(facts.pressed);
+      expect(tokens.has('shadow-none')).toBe(false);
+      const hoverToken =
+        emphasis === 'primary'
+          ? 'bg-primary/80'
+          : emphasis === 'secondary'
+            ? 'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]'
+            : 'bg-muted';
+      expect(tokens.has(hoverToken)).toBe(facts.hovered);
+      const ink = new Set((text.getAttribute('data-pui-style') ?? '').split(/\s+/));
+      expect(ink.has('leading-5')).toBe(true);
+      expect(ink.has('font-medium')).toBe(true);
+      expect(ink.has('font-semibold')).toBe(false);
+      expect(surface.style.width).toBe('2.75rem');
+      expect(surface.style.height).toBe('2.75rem');
+      expect(surface.style.padding).toBe('0px');
+      expect(surface.style.marginBottom).toBe('1px');
+      expect(surface.style.pointerEvents).toBe('none');
+      for (const passive of [surface, text]) {
+        expect(passive.hasAttribute('role')).toBe(false);
+        expect(passive.hasAttribute('tabindex')).toBe(false);
+        expect(passive.getExposes()).toEqual({});
+      }
+      expect(link.firstElementChild).toBe(surface);
+      expect(text.querySelector('svg')).toBe(glyph);
+      expect(glyph?.getAttribute('aria-hidden')).toBe('true');
+      expect(glyph?.querySelector('path')?.getAttribute('d')).toBeTruthy();
+      expect(link.getAttribute('href')).toBe('https://github.com/Proto-UI/Proto-UI');
+      expect(link.getAttribute('target')).toBe('_blank');
+      expect(link.getAttribute('rel')).toBe('noopener noreferrer');
+      expect(link.getAttribute('aria-label')).toBe('GitHub community');
+      expect(link.hasAttribute('role')).toBe(false);
+      expect(link.hasAttribute('tabindex')).toBe(false);
+      link.focus();
+      expect(document.activeElement).toBe(link);
+    }
+  });
+}
+
+it('ordinary public Shadcn Surface omission still has no Rhea action feedback', async () => {
+  const surface = new Constructors.shadcn();
+  document.body.append(surface);
+  for (const active of [false, true, false]) {
+    setElementProps(surface, { hovered: active, pressed: active, focusVisible: active });
+    surface.update();
+    await settle();
+    const tokens = new Set((surface.getAttribute('data-pui-style') ?? '').split(/\s+/));
+    expect(tokens.has('rounded-xl')).toBe(true);
+    expect(tokens.has('ring-2')).toBe(active);
+    expect(tokens.has('ring-3')).toBe(false);
+    expect(tokens.has('translate-y-px')).toBe(false);
+    expect(tokens.has('rounded-[var(--pui-radius-2xl)]')).toBe(false);
+    expect(surface.hasAttribute('role')).toBe(false);
+    expect(surface.hasAttribute('tabindex')).toBe(false);
+    expect(surface.getExposes()).toEqual({});
+  }
+});
+
 for (const family of ['shadcn', 'brutalist'] as const)
   for (const appearance of [
     'action',
@@ -88,17 +193,18 @@ for (const family of ['shadcn', 'brutalist'] as const)
             expect(tokens).not.toContain('bg-muted');
           }
           expect(getElementProps(surface)?.pressed).toBe(facts.pressed);
-          if (family === 'shadcn' && appearance !== 'action') {
+          const shadcnAction = family === 'shadcn' && ['action', 'icon'].includes(appearance);
+          if (family === 'shadcn' && !shadcnAction) {
             expect(tokens).not.toContain('translate-y-px');
             expect(tokens).not.toContain('shadow-none');
           } else if (!raised && facts.pressed) expect(tokens).toContain('translate-y-px');
-          const focusToken = family === 'shadcn' && appearance === 'action' ? 'ring-3' : 'ring-2';
+          const focusToken = shadcnAction ? 'ring-3' : 'ring-2';
           expect(tokens.includes(focusToken)).toBe(facts.focusVisible);
           if (raised)
             expect(tokens).toContain(facts.pressed ? 'translate-y-1' : 'shadow-[4px_4px_0_0_#000]');
           else if (family === 'brutalist') expect(tokens).not.toContain('shadow-');
           expect(text.getAttribute('data-pui-style')).toContain(
-            appearance === 'action'
+            appearance === 'action' || (family === 'shadcn' && appearance === 'icon')
               ? 'font-medium'
               : family === 'shadcn' && (appearance === 'sidebar' || appearance === 'toc')
                 ? facts.current

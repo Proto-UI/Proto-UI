@@ -7,6 +7,102 @@ import {
   readingTocTextSurfaceStyle,
 } from './site-link-recipes';
 const idle = { hovered: false, pressed: false, focusVisible: false, current: false, inView: false };
+
+// P-SHADCN-SURFACE-ACTION-APPEARANCE: explicit passive Rhea paint.
+// Literal expectations are independent of shadcnActionAppearance's output.
+for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
+  it(`Shadcn community ${emphasis} selects Rhea while retaining the 44px native target`, () => {
+    for (const facts of [
+      idle,
+      { ...idle, hovered: true },
+      { ...idle, focusVisible: true },
+      { ...idle, pressed: true },
+      { ...idle, current: true, inView: true },
+      idle,
+    ]) {
+      expect(linkSurfaceProps('shadcn', 'icon', emphasis, facts)).toEqual({
+        actionProfile: 'rhea',
+        variant:
+          emphasis === 'primary' ? 'solid' : emphasis === 'secondary' ? 'secondary' : 'transparent',
+        radius: 'none',
+        border: 'none',
+        elevation: 'none',
+        hovered: facts.hovered,
+        pressed: facts.pressed,
+        focusVisible: facts.focusVisible,
+        current: false,
+      });
+      expect(linkTextProps('icon', facts, 'shadcn')).toEqual({
+        actionProfile: 'rhea',
+        size: 'sm',
+        tone: 'inherit',
+        weight: 'medium',
+        font: 'body',
+        leading: 'normal',
+        decoration: 'none',
+      });
+      expect(linkSurfaceLayout('shadcn', 'icon', emphasis, facts)).toEqual({
+        pointerEvents: 'none',
+        display: 'inline-flex',
+        flexShrink: '0',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: '0',
+        maxWidth: '100%',
+        marginBottom: '1px',
+        width: '2.75rem',
+        height: '2.75rem',
+        padding: '0',
+      });
+    }
+  });
+}
+
+it('community opt-in leaves existing Rhea nav, luma actions and ordinary Shadcn rows separate', () => {
+  expect(linkSurfaceProps('shadcn', 'nav', 'minimal')).toMatchObject({
+    actionProfile: 'rhea',
+    variant: 'transparent',
+  });
+  expect(linkTextProps('nav', idle, 'shadcn')).toMatchObject({ actionProfile: 'rhea' });
+  expect(linkSurfaceProps('shadcn', 'action', 'primary')).toMatchObject({
+    actionProfile: 'luma',
+    variant: 'solid',
+  });
+  expect(linkTextProps('action', idle, 'shadcn')).toMatchObject({ actionProfile: 'luma' });
+  expect(linkSurfaceLayout('shadcn', 'action', 'primary').minHeight).toBe('2.25rem');
+  for (const appearance of [
+    'brand',
+    'text',
+    'nav-group',
+    'sidebar',
+    'toc',
+    'pagination',
+  ] as const) {
+    expect(linkSurfaceProps('shadcn', appearance, 'secondary')).not.toHaveProperty('actionProfile');
+    expect(linkTextProps(appearance, idle, 'shadcn')).not.toHaveProperty('actionProfile');
+  }
+});
+
+it('community opt-in leaves Brutalist raised and minimal icon recipes unchanged', () => {
+  for (const emphasis of ['primary', 'secondary', 'minimal', 'link'] as const) {
+    const raised = emphasis === 'primary' || emphasis === 'secondary';
+    expect(linkSurfaceProps('brutalist', 'icon', emphasis)).toMatchObject({
+      variant: raised ? 'secondary' : 'transparent',
+      radius: raised ? 'default' : 'none',
+      border: raised ? 'all' : 'none',
+      elevation: raised ? 'raised' : 'none',
+    });
+    expect(linkSurfaceProps('brutalist', 'icon', emphasis)).not.toHaveProperty('actionProfile');
+    expect(linkTextProps('icon', idle, 'brutalist')).not.toHaveProperty('actionProfile');
+    expect(linkSurfaceLayout('brutalist', 'icon', emphasis)).toMatchObject({
+      width: '2.75rem',
+      height: '2.75rem',
+      padding: '0',
+      marginBottom: raised ? '0.25rem' : '1px',
+    });
+  }
+});
+
 describe('consumer navigation density preserves native selection and family identity', () => {
   for (const family of ['shadcn', 'brutalist'] as const)
     for (const appearance of ['sidebar', 'toc'] as const) {

@@ -351,10 +351,18 @@ async function assertSocialPaint(
 ) {
   const first = links.first();
   await page.mouse.move(1400, 950);
-  const hoverToken = family === 'brutalist' ? 'translate-x-1' : 'bg-muted';
+  // P-SHADCN-SURFACE-ACTION-APPEARANCE (draft): community icons opt into Rhea.
+  // MIT shadcn-ui/ui@3d98900e9b73c45f035f8109e9d41ba6a51685e7,
+  // style-rhea.css .cn-button and .cn-button-variant-secondary.
+  // Both SocialIcons entries and the static chrome default author secondary.
+  const hoverToken =
+    family === 'brutalist'
+      ? 'translate-x-1'
+      : 'bg-[color-mix(in_oklch,var(--secondary),var(--foreground)_5%)]';
   const pressToken = family === 'brutalist' ? 'translate-y-1' : 'translate-y-px';
   await expect.poll(async () => (await linkPaint(first)).tokens).not.toContain(hoverToken);
   const baseline = await linkPaint(first);
+  if (family === 'shadcn') expect(baseline.tokens).toContain('bg-secondary');
   await capture('baseline', { observed: baseline });
   await first.hover();
   await expect.poll(async () => (await linkPaint(first)).tokens).toContain(hoverToken);
@@ -385,7 +393,14 @@ async function assertSocialPaint(
     await expect.poll(async () => (await linkPaint(first)).nativePressed).toBe(true);
     if (family === 'brutalist')
       await expect.poll(async () => (await linkPaint(first)).tokens).toContain(pressToken);
-    else await expect.poll(async () => (await linkPaint(first)).tokens).not.toContain(pressToken);
+    else {
+      await expect.poll(async () => (await linkPaint(first)).tokens).toContain(pressToken);
+      // transition-all is the repository's 150ms emitter; sample its endpoint
+      // within the unchanged 1000ms Vitest poll budget, not a longer delay.
+      await expect
+        .poll(async () => (await linkPaint(first)).transform, { timeout: 1000 })
+        .toBe('matrix(1, 0, 0, 1, 0, 1)');
+    }
   } catch (error) {
     await saveNativeTrace(page, `social-${family}-press-failure`, {
       family,
@@ -399,10 +414,10 @@ async function assertSocialPaint(
     expect(pressed.transform).toBe(hovered.transform);
     expect(pressed.shadow).toBe(hovered.shadow);
   } else {
-    // The icon recipe is ordinary actionProfile:none, not an implicit Button.
-    // Native press ownership remains observable without inventing displacement.
+    // Explicit Rhea appearance adds only the specified one-pixel press feedback.
+    // The anchor still owns activation; no Button semantics or shadow removal.
     expect(pressed.tokens).not.toContain('shadow-none');
-    expect(pressed.transform).toBe(hovered.transform);
+    expect(pressed.transform).toBe('matrix(1, 0, 0, 1, 0, 1)');
     expect(pressed.shadow).toBe(hovered.shadow);
   }
   await capture('pressed', { baseline: hovered, observed: pressed });
@@ -420,16 +435,25 @@ async function assertSocialPaint(
   await page.keyboard.press('Tab');
   expect(await links.nth(1).evaluate((anchor) => anchor === document.activeElement)).toBe(true);
   const unfocused = await linkPaint(first);
-  expect(unfocused.tokens).not.toContain('ring-2');
+  const focusToken = family === 'brutalist' ? 'ring-2' : 'ring-3';
+  expect(unfocused.tokens).not.toContain(focusToken);
   await page.keyboard.press('Shift+Tab');
-  await expect.poll(async () => (await linkPaint(first)).tokens).toContain('ring-2');
+  await expect.poll(async () => (await linkPaint(first)).tokens).toContain(focusToken);
   const focused = await linkPaint(first);
   expect(focused.focused).toBe(true);
-  expect(focused.tokens).toEqual(
-    expect.arrayContaining(['ring-ring', 'ring-offset-2', 'ring-offset-background'])
-  );
-  expect(focused.ringWidth).toBe('2px');
-  expect(focused.ringOffset).toBe('2px');
+  if (family === 'brutalist') {
+    expect(focused.tokens).toEqual(
+      expect.arrayContaining(['ring-ring', 'ring-offset-2', 'ring-offset-background'])
+    );
+    expect(focused.ringWidth).toBe('2px');
+    expect(focused.ringOffset).toBe('2px');
+  } else {
+    expect(focused.tokens).toEqual(expect.arrayContaining(['border-ring', 'ring-ring/30']));
+    expect(focused.tokens).not.toContain('ring-offset-2');
+    expect(focused.ringWidth).toBe('3px');
+    // No offset is authored; the CSS emitter uses a 0px fallback when unset.
+    expect(['', '0px']).toContain(focused.ringOffset);
+  }
   expect(focused.ringColor).not.toMatch(/^(?:|transparent|rgba\(0, 0, 0, 0\))$/);
   expect(focused.shadow).not.toBe(unfocused.shadow);
   expect(focused.visibleTarget).toBe(true);
