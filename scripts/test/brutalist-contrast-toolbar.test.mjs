@@ -18,7 +18,9 @@ const job = (workflow) => workflow.jobs['family-audit-evidence'];
 function assertToolbarSetup(workflow) {
   const steps = job(workflow).steps;
   const setupIndex = steps.findIndex((step) => step.run?.includes(disable));
-  const serverIndex = steps.findIndex((step) => step.run?.includes('--filter apps-www dev --host'));
+  const serverIndex = steps.findIndex((step) =>
+    step.run?.includes('--filter apps-www exec astro dev --host')
+  );
   assert.ok(
     setupIndex >= 0 && setupIndex < serverIndex,
     'Disable the official Astro developer toolbar before starting the audit server.'
@@ -163,11 +165,23 @@ test('toolbar setup preserves all current manifest families, bounded jobs and ex
     (step) => step.name === 'Calibrate paint acceptance and bounded evidence storage'
   );
   assert.ok(calibration.run.includes(testPath), 'Run this contract in the evidence workflow.');
-  const observe = audit.steps.find((step) => step.run?.includes('--filter apps-www dev --host'));
+  const observe = audit.steps.find((step) =>
+    step.run?.includes('--filter apps-www exec astro dev --host')
+  );
   assert.equal(observe.env.PROTO_UI_CONTRAST_FAMILIES, '${{ matrix.families }}');
   assert.equal(observe.env.PROTO_UI_CONTRAST_AUDIT, '1');
   assert.match(observe.run, /seq 1 180/);
   assert.match(observe.run, /audit-brutalist-contrast\.mts/);
+  // The apps-www dev script folds the style/CLI generation into the same
+  // spawn, so the readiness loop would be charged for build tooling it does
+  // not measure. The generation is awaited first and astro dev is spawned
+  // directly, so the loop only waits for the server.
+  assert.match(
+    observe.run,
+    /--filter apps-www run generate:proto-ui-style[\s\S]*--filter apps-www exec astro dev --host/,
+    'The style generation must run before the server spawn, outside the readiness loop.'
+  );
+  assert.doesNotMatch(observe.run, /--filter apps-www dev --host/);
 });
 
 // Native startup is infrastructure setup, not a product latency assertion.

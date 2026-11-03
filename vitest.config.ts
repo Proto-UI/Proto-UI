@@ -92,6 +92,23 @@ export default defineConfig({
         return null;
       },
     },
+    {
+      name: 'proto-ui-app-alias',
+      enforce: 'pre',
+      resolveId(id) {
+        if (!id.startsWith('@/')) return null;
+        const appSrc = path.resolve(__dirname, 'apps/www/src');
+        const target = path.resolve(appSrc, id.slice(2));
+        // Stay inside apps/www/src, matching the `@` -> ./src alias Astro uses.
+        if (target !== appSrc && !target.startsWith(`${appSrc}${path.sep}`)) return null;
+        if (fs.existsSync(`${target}.ts`)) return `${target}.ts`;
+        if (fs.existsSync(`${target}.tsx`)) return `${target}.tsx`;
+        const index = path.join(target, 'index.ts');
+        if (fs.existsSync(index)) return index;
+        if (fs.existsSync(target) && fs.statSync(target).isFile()) return target;
+        return null;
+      },
+    },
   ],
   test: {
     environment: 'happy-dom',
