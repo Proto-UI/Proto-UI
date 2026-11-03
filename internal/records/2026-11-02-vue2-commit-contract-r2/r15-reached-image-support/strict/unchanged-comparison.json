@@ -1,0 +1,34 @@
+{
+  "baselinePublicCommit": "869c479201d4dfed1d618814c4ae55cd1acd2a27",
+  "normalization": "Only each request verified generated directory prefix differs; no diagnostic filtering, count reduction, source-line relocation or message edits. Full source hashes and diagnostic field objects match.",
+  "graphs": [
+    {
+      "test": "Vue2 closed identity-only body proof > keeps the full body when an identity-observed alias is actually invoked",
+      "oldDiagnostics": 55,
+      "newDiagnostics": 55,
+      "requestExactExceptVerifiedGeneratedDirectory": true,
+      "allDiagnosticFieldsExactExceptVerifiedGeneratedDirectory": true,
+      "completeProgramAndEverySourceHashExactExceptVerifiedGeneratedDirectory": true,
+      "programFiles": 215
+    },
+    {
+      "test": "Vue2 closed identity-only body proof > preserves separate function identities and original arity with no runtime projector",
+      "oldDiagnostics": 54,
+      "newDiagnostics": 54,
+      "requestExactExceptVerifiedGeneratedDirectory": true,
+      "allDiagnosticFieldsExactExceptVerifiedGeneratedDirectory": true,
+      "completeProgramAndEverySourceHashExactExceptVerifiedGeneratedDirectory": true,
+      "programFiles": 215
+    },
+    {
+      "test": "original-generated-strict",
+      "oldDiagnostics": 92,
+      "newDiagnostics": 92,
+      "requestExactExceptVerifiedGeneratedDirectory": true,
+      "allDiagnosticFieldsExactExceptVerifiedGeneratedDirectory": true,
+      "completeProgramAndEverySourceHashExactExceptVerifiedGeneratedDirectory": true,
+      "programFiles": 215
+    }
+  ],
+  "fullStrictPass": false
+}

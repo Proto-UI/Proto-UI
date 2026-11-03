@@ -72,10 +72,10 @@ export function emitVue2Source(
       /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.)/.test(site.operation)
     );
   const interactionSelection = selectNativeSupport(ir, admitted.value);
-  const textInteraction = usesInteraction && !options.ssr && interactionSelection !== 'full';
+  const atomicInteraction = usesInteraction && !options.ssr && interactionSelection !== 'full';
   const interactionPath = options.ssr
     ? './.proto-ui/interaction/native-v1'
-    : textInteraction
+    : atomicInteraction
       ? './.proto-ui/interaction/' + interactionSelection + '-v1'
       : './.proto-ui/interaction/native-v1';
   // Admission follows referenced functions/aliases, closures and authored hooks.
@@ -92,7 +92,7 @@ export function emitVue2Source(
     'state.numberRange',
   ]);
   const usesState =
-    (usesInteraction && !textInteraction) ||
+    (usesInteraction && !atomicInteraction) ||
     admitted.value.operations.some((operation) => stateDeclarations.has(operation));
   if (
     !validIdentifier(componentName) ||
@@ -427,7 +427,7 @@ export function emitVue2Source(
     ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from '${interactionPath}';
 /** @template Run @typedef {import('${interactionPath}').NativeInteraction<Run>} ${prefix}NativeInteraction */
 ${
-  textInteraction
+  atomicInteraction
     ? ''
     : `/** @typedef {import('${interactionPath}').NativeFocus} ${prefix}NativeFocus */
 /** @typedef {import('${interactionPath}').NativeAccessible} ${prefix}NativeAccessible */
@@ -480,7 +480,8 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     options.ssr === true,
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
     staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined',
-    textInteraction
+    atomicInteraction,
+    interactionSelection === 'image' ? JSON.stringify(ir.moduleDeclarations[0].config) : null
   ).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
   const propDeclarations = ir.props.map((prop) => `[${JSON.stringify(prop.name)}]: {}`).join(', ');
@@ -601,7 +602,7 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
         ...selected.value.dependencies
           .filter(
             (dependency) =>
-              (usesInteraction && !textInteraction) || dependency.name !== '@floating-ui/dom'
+              (usesInteraction && !atomicInteraction) || dependency.name !== '@floating-ui/dom'
           )
           .map((dependency) => ({ ...dependency })),
         ...(options.ssr
@@ -631,7 +632,8 @@ function nativeHelpers(
   ssr: boolean,
   declarations: string,
   tableFamily: string,
-  textInteractive: boolean
+  atomicInteractive: boolean,
+  imageConfig: string | null
 ): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   // Derive the generated finite registry and its key enumeration from the same
@@ -1007,10 +1009,10 @@ ${context.owner}
   };
   ${
     interactive
-      ? textInteractive
+      ? atomicInteractive
         ? `/** @type {PUINativeInteraction<typeof run>} */
   const interaction = PUICreateNativeInteraction({
-    ensureSetup: setupOnly, ensureRuntime: callback,
+    ${imageConfig ? 'imageConfig: ' + imageConfig + ',\n    ' : ''}ensureSetup: setupOnly, ensureRuntime: callback,
     isAlive: () => !terminal && !disposed,
     isReady: () => phase !== 'setup' && viewActive && present && hostActive && !terminal,
     invoke: (fn) => invoke(fn), getRun: () => run,
@@ -1190,7 +1192,7 @@ ${
   const def = {
     ${context.def}
     ${styled ? 'feedback: { style },' : ''}
-    ${interactive && !textInteractive ? 'event: interaction.event,' : ''}
+    ${interactive && !atomicInteractive ? 'event: interaction.event,' : ''}
     props: {
       define: defineProps,
       setDefaults: (layer) => {

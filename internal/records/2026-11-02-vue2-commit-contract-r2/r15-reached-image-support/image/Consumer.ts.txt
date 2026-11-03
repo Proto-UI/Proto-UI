@@ -1,0 +1,3 @@
+import Vue from 'vue';
+import Component from './Component.js';
+export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{default:()=>[h('em','native')]}});}});

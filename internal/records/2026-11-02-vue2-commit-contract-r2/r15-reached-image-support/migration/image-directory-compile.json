@@ -1,0 +1,9 @@
+{
+  "input": "import {definePrototype} from '@proto.ui/core';\nimport {asImageView as usePicture} from '@proto.ui/hooks';\nimport {declareImageView} from '@proto.ui/module-image-view';\nexport default definePrototype({name:'ordinary-inner-picture',\n modules:[declareImageView({source:'',alternativeText:'Image',a11yMode:'informative',fit:'cover'})],\n setup(def){\n  def.props.define({source:{type:'string',default:'image:a'},present:{type:'boolean',default:true}});\n  const image=usePicture();def.expose.event('status',{payload:'json'});\n  image.on('loadingStatusChange',(run,event)=>run.expose.emit('status',event));\n  def.lifecycle.onCreated(run=>image.sync({source:run.props.get().source}));\n  def.props.watch(['source'],(run,next)=>image.sync({source:next.source}));\n  def.props.watch(['present'],(run,next)=>run.lifecycle.setPresent(next.present));\n  def.expose.method('read',()=>image.snapshot());return()=>null;\n }});",
+  "inputSHA256": "d8cb68d40f4ecfd30a69ee4d0ec6c1877d1ac876962275929f4856686441dfe2",
+  "cli": {
+    "code": 0,
+    "stdout": "{\"ok\":true,\"command\":\"compile\",\"result\":{\"directory\":\"<project-temp-1>/new-image\",\"files\":[\"<project-temp-1>/new-image/.proto-ui/context/scope-v1.ts\",\"<project-temp-1>/new-image/.proto-ui/interaction/image-v1.ts\",\"<project-temp-1>/new-image/.proto-ui/interaction/ownership-v1.ts\",\"<project-temp-1>/new-image/Component.js\",\"<project-temp-1>/new-image/Component.js.map\",\"<project-temp-1>/new-image/provenance.json\"]},\"diagnostics\":[]}\n",
+    "stderr": ""
+  }
+}

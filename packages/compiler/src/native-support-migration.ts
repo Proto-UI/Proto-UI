@@ -242,7 +242,7 @@ function normalizeInteraction(artifacts: readonly OutputArtifact[]): OutputArtif
       ...nativeInteractionArtifacts('full'),
     ];
   }
-  for (const selection of ['full', 'text-single', 'text-multiline'] as const) {
+  for (const selection of ['full', 'text-single', 'text-multiline', 'image'] as const) {
     const expected = nativeInteractionArtifacts(selection);
     if (
       selected.length === expected.length &&

@@ -1440,3 +1440,585 @@ describe.runIf(stage !== 'capture-old')('actual CLI native-support directory mig
     });
   });
 });
+
+// Image extends the explicit directory migration contract. The historical
+// old/old and old/new Text/Overlay controls above stay unchanged. No historical
+// Image capture is invented: this input is made by the current actual CLI.
+const imageMigrationSource = `import {definePrototype} from '@proto.ui/core';
+import {asImageView as usePicture} from '@proto.ui/hooks';
+import {declareImageView} from '@proto.ui/module-image-view';
+export default definePrototype({name:'ordinary-inner-picture',
+ modules:[declareImageView({source:'',alternativeText:'Image',a11yMode:'informative',fit:'cover'})],
+ setup(def){
+  def.props.define({source:{type:'string',default:'image:a'},present:{type:'boolean',default:true}});
+  const image=usePicture();def.expose.event('status',{payload:'json'});
+  image.on('loadingStatusChange',(run,event)=>run.expose.emit('status',event));
+  def.lifecycle.onCreated(run=>image.sync({source:run.props.get().source}));
+  def.props.watch(['source'],(run,next)=>image.sync({source:next.source}));
+  def.props.watch(['present'],(run,next)=>run.lifecycle.setPresent(next.present));
+  def.expose.method('read',()=>image.snapshot());return()=>null;
+ }});`;
+type ImageDirectoryMode = 'independent' | 'migrated' | 'split';
+async function imageDirectoryConsumer(directory: string, label: string, mode: ImageDirectoryMode) {
+  const buildRoot = await fresh('image-bundle');
+  const vueEntry = createRequire(
+    fileURLToPath(new NodeURL('../../adapters/vue2/package.json', import.meta.url))
+  ).resolve('vue');
+  const floatingEntry = createRequire(
+    fileURLToPath(new NodeURL('../../modules/positioning/package.json', import.meta.url))
+  ).resolve('@floating-ui/dom');
+  const entry = path.join(buildRoot, 'consumer.ts'),
+    outfile = path.join(buildRoot, 'consumer.cjs');
+  const lines = [
+    `export { default as Vue } from ${JSON.stringify(vueEntry)};`,
+    `export { default as first } from ${JSON.stringify(path.join(directory, 'old-trigger/Component.js'))};`,
+    `export { default as second } from ${JSON.stringify(path.join(directory, 'new-image/Component.js'))};`,
+    `export * as imageOwnership from ${JSON.stringify(path.join(directory, 'new-image/.proto-ui/interaction/ownership-v1.ts'))};`,
+  ];
+  if (mode !== 'independent')
+    lines.push(
+      `export * as outerOwnership from ${JSON.stringify(path.join(directory, 'old-trigger/.proto-ui/interaction/ownership-v1.ts'))};`
+    );
+  await writeFile(entry, lines.join('\n') + '\n');
+  expect(esbuildVersion).toBe('0.25.12');
+  // Only target dependencies are resolved explicitly. All generated components,
+  // facades and support modules use their actual ordinary filesystem imports.
+  const result = await build({
+    absWorkingDir: buildRoot,
+    entryPoints: [entry],
+    outfile,
+    bundle: true,
+    platform: 'node',
+    format: 'cjs',
+    target: 'node24',
+    metafile: true,
+    sourcemap: 'external',
+    write: true,
+    alias: { vue: vueEntry, '@floating-ui/dom': floatingEntry },
+    external: [vueEntry],
+    logLevel: 'silent',
+  });
+  const files = Object.keys(result.metafile.inputs).map((file) => path.resolve(buildRoot, file));
+  await saveEvidence(label + '-bundle', {
+    mode,
+    esbuildVersion,
+    vueEntry,
+    floatingEntry,
+    files,
+    metafile: result.metafile,
+  });
+  await copyEvidence(label + '-consumer', buildRoot);
+  const loaded: unknown = require(outfile);
+  assertConsumer(loaded);
+  const namespaces = object(loaded);
+  const imageOwnership = object(namespaces.imageOwnership);
+  const outerOwnership = mode === 'independent' ? undefined : object(namespaces.outerOwnership);
+  for (const id of ['old-trigger', 'new-image'])
+    expect(files).toContain(path.join(directory, id, 'Component.js'));
+  expect(
+    files.filter((file) => /packages\/(?:core|runtime|hooks|adapters)\/(?:.+\/)?src\//.test(file))
+  ).toEqual([]);
+  expect(
+    files.filter(
+      (file) =>
+        /\/ownership-(?:v1|counterfactual)\.ts$/.test(file) &&
+        (mode === 'independent' || file.includes('/.proto-ui/shared/interaction/'))
+    )
+  ).toHaveLength(mode === 'split' ? 2 : 1);
+  return { ...loaded, imageOwnership, outerOwnership, files };
+}
+async function imageDirectoryJourney(directory: string, label: string, mode: ImageDirectoryMode) {
+  const trace: Record<string, unknown> = {
+    mode,
+    hostEvidence:
+      'Controlled HappyDOM decode promises and synthetic load/error/click events; not browser network, cache or native event-bubbling proof.',
+  };
+  const failures: unknown[] = [],
+    vueErrors: unknown[] = [];
+  const requests: Array<{
+    resolve(): void;
+    reject(): void;
+    target: HTMLImageElement;
+    source: string | null;
+  }> = [];
+  const events: unknown[] = [],
+    activated: unknown[] = [];
+  const descriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'decode');
+  let vm: Vue2 | undefined,
+    Vue: typeof Vue2 | undefined,
+    restoreErrorHandler: (() => void) | undefined;
+  let host: HTMLDivElement | undefined,
+    patched = false,
+    handlerPatched = false,
+    destroyed = false;
+  let nativeEvents = 0,
+    bubbledClicks = 0;
+  try {
+    const loaded = await imageDirectoryConsumer(directory, label, mode);
+    trace.files = loaded.files;
+    Vue = loaded.Vue;
+    const previousHandler = loaded.Vue.config.errorHandler;
+    restoreErrorHandler = () => {
+      loaded.Vue.config.errorHandler = previousHandler;
+    };
+    Vue.config.errorHandler = (error) => vueErrors.push(error);
+    handlerPatched = true;
+    Object.defineProperty(HTMLImageElement.prototype, 'decode', {
+      configurable: true,
+      value: function (this: HTMLImageElement) {
+        const target = this;
+        return new Promise<void>((resolve, reject) =>
+          requests.push({
+            resolve,
+            reject: () => reject(new Error('Controlled image decode failure')),
+            target,
+            source: target.getAttribute('src'),
+          })
+        );
+      },
+    });
+    patched = true;
+    const flush = async () => {
+      await Promise.resolve();
+      await settle(loaded.Vue);
+    };
+    const state = Vue.observable({ source: 'image:a', present: true });
+    vm = new Vue({
+      render(h) {
+        return h(loaded.first, {
+          on: { activated: (value: unknown) => activated.push(value) },
+          scopedSlots: {
+            default: () => [
+              h(loaded.second, {
+                props: { source: state.source, present: state.present },
+                on: { status: (value: unknown) => events.push(value) },
+              }),
+            ],
+          },
+        });
+      },
+    });
+    host = document.createElement('div');
+    document.body.append(host);
+    host.addEventListener('load', () => ++nativeEvents);
+    host.addEventListener('error', () => ++nativeEvents);
+    host.addEventListener('click', () => ++bubbledClicks);
+    vm.$mount();
+    host.append(vm.$el);
+    await flush();
+    const image = host.querySelector('img');
+    if (!image) throw new Error('Actual CLI Image root missing');
+    const instance = vm.$children[0].$children.find((child) => child.$el === image);
+    if (!instance) throw new Error('Actual CLI Image owner missing');
+    const read = () => method(method(instance, 'getExposes'), 'read');
+    const physical = loaded.imageOwnership.rootOwners,
+      logical = loaded.imageOwnership.logicalOwners;
+    const modules = loaded.imageOwnership.owners;
+    const identity = object(method(physical, 'get', image)).identity;
+    const owner = method(modules, 'get', identity);
+    trace.identity = {
+      imageRegistered: method(physical, 'has', image),
+      outerVisibleToImage: method(physical, 'has', vm.$el),
+      sharedRegistry: loaded.outerOwnership ? loaded.outerOwnership.rootOwners === physical : false,
+    };
+    expect(trace.identity).toEqual({
+      imageRegistered: true,
+      outerVisibleToImage: mode === 'migrated',
+      sharedRegistry: mode === 'migrated',
+    });
+    expect(method(logical, 'has', identity)).toBe(true);
+    expect(owner).toBeDefined();
+    if (loaded.outerOwnership) {
+      const outerIdentity = object(
+        method(loaded.outerOwnership.rootOwners, 'get', vm.$el)
+      ).identity;
+      expect(identity).not.toBe(outerIdentity);
+      expect(method(owner, 'parent')).toBe(outerIdentity);
+      for (const key of ['rootOwners', 'logicalOwners', 'owners']) {
+        if (mode === 'migrated')
+          expect(loaded.imageOwnership[key]).toBe(loaded.outerOwnership[key]);
+        else expect(loaded.imageOwnership[key]).not.toBe(loaded.outerOwnership[key]);
+      }
+    }
+    trace.initial = {
+      source: image.getAttribute('src'),
+      alt: image.alt,
+      fit: image.style.objectFit,
+      snapshot: read(),
+      requests: requests.length,
+    };
+    expect(trace.initial).toEqual({
+      source: 'image:a',
+      alt: 'Image',
+      fit: 'cover',
+      snapshot: { source: 'image:a', loadingStatus: 'loading', fit: 'cover' },
+      requests: 1,
+    });
+    image.dispatchEvent(new Event('load', { bubbles: true }));
+    image.dispatchEvent(new Event('error', { bubbles: true }));
+    trace.syntheticBoundary = { propagated: nativeEvents, snapshot: read() };
+    expect(trace.syntheticBoundary).toEqual({
+      propagated: 0,
+      snapshot: { source: 'image:a', loadingStatus: 'loading', fit: 'cover' },
+    });
+    image.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    trace.afterImageClick = { activated: [...activated], bubbledClicks };
+    expect(trace.afterImageClick).toEqual({
+      activated: mode === 'migrated' ? [] : ['outer'],
+      bubbledClicks: 1,
+    });
+    // Click still reaches this ordinary parent observer. Ownership, not an
+    // Image stopPropagation workaround, must isolate the outer Trigger.
+    vm.$el.dispatchEvent(new MouseEvent('click', { bubbles: true, composed: true }));
+    expect(activated).toEqual(mode === 'migrated' ? ['outer'] : ['outer', 'outer']);
+    expect(bubbledClicks).toBe(2);
+    state.source = 'image:b';
+    await flush();
+    expect(requests).toHaveLength(2);
+    requests[0].resolve();
+    await flush();
+    trace.afterStale = read();
+    expect(trace.afterStale).toEqual({ source: 'image:b', loadingStatus: 'loading', fit: 'cover' });
+    requests[1].resolve();
+    await flush();
+    trace.afterCurrent = read();
+    expect(trace.afterCurrent).toEqual({
+      source: 'image:b',
+      loadingStatus: 'loaded',
+      fit: 'cover',
+    });
+    const terminalCount = events.length;
+    image.dispatchEvent(new Event('load', { bubbles: true }));
+    image.dispatchEvent(new Event('error', { bubbles: true }));
+    await flush();
+    expect(events).toHaveLength(terminalCount);
+    state.present = false;
+    await flush();
+    trace.detached = {
+      physical: method(physical, 'has', image),
+      logical: method(logical, 'has', identity),
+      module: method(modules, 'get', identity) === owner,
+      target: method(owner, 'target'),
+    };
+    expect(trace.detached).toEqual({ physical: false, logical: false, module: true, target: null });
+    state.present = true;
+    await flush();
+    const next = host.querySelector('img');
+    if (!next) throw new Error('Actual CLI Image did not remount');
+    trace.remounted = {
+      differentTarget: next !== image,
+      sameIdentity: object(method(physical, 'get', next)).identity === identity,
+      snapshot: read(),
+      requests: requests.length,
+    };
+    expect(trace.remounted).toEqual({
+      differentTarget: true,
+      sameIdentity: true,
+      snapshot: { source: 'image:b', loadingStatus: 'loading', fit: 'cover' },
+      requests: 3,
+    });
+    requests[2].reject();
+    await flush();
+    trace.afterError = read();
+    expect(trace.afterError).toEqual({ source: 'image:b', loadingStatus: 'error', fit: 'cover' });
+    state.source = '';
+    await flush();
+    expect(read()).toEqual({ source: '', loadingStatus: 'idle', fit: 'cover' });
+    expect(next.getAttribute('src')).toBe(null);
+    state.source = 'image:c';
+    await flush();
+    expect(requests).toHaveLength(4);
+    const beforeDispose = events.length;
+    vm.$destroy();
+    destroyed = true;
+    requests[3].resolve();
+    await flush();
+    trace.disposed = {
+      physical: method(physical, 'has', next),
+      logical: method(logical, 'has', identity),
+      module: method(modules, 'has', identity),
+      lateEvents: events.length - beforeDispose,
+    };
+    expect(trace.disposed).toEqual({
+      physical: false,
+      logical: false,
+      module: false,
+      lateEvents: 0,
+    });
+    expect(Reflect.get(modules as object, 'size')).toBe(0);
+    if (loaded.outerOwnership)
+      expect(Reflect.get(loaded.outerOwnership.owners as object, 'size')).toBe(0);
+  } catch (error) {
+    failures.push(error);
+  } finally {
+    try {
+      if (!destroyed) vm?.$destroy();
+    } catch (error) {
+      failures.push(error);
+    }
+    try {
+      host?.remove();
+    } catch (error) {
+      failures.push(error);
+    }
+    try {
+      if (handlerPatched) restoreErrorHandler?.();
+    } catch (error) {
+      failures.push(error);
+    }
+    try {
+      if (patched) {
+        if (descriptor) Object.defineProperty(HTMLImageElement.prototype, 'decode', descriptor);
+        else if (!Reflect.deleteProperty(HTMLImageElement.prototype, 'decode'))
+          throw new Error('Could not restore image decode');
+      }
+    } catch (error) {
+      failures.push(error);
+    }
+    trace.events = events;
+    trace.requests = requests.map((request) => ({ source: request.source }));
+    trace.vueErrors = vueErrors.map(String);
+    trace.failuresBeforeCapture = failures.map(String);
+    try {
+      await saveEvidence(label + '-trace', trace);
+    } catch (error) {
+      failures.push(error);
+    }
+  }
+  if (vueErrors.length)
+    failures.push(new AggregateError(vueErrors, 'Vue Image errors, including disposal'));
+  if (failures.length) throw new AggregateError(failures, 'Filesystem Image observation failed');
+}
+
+describe.runIf(stage !== 'capture-old')(
+  'actual CLI Image native-support directory migration',
+  () => {
+    let directory: string, cohort: string, planFile: string, corpus: string;
+    let before: Record<string, string>, capturedBefore: Record<string, string>;
+    beforeAll(async () => {
+      expect(stage).toBe('verify');
+      corpus = verifiedCorpus ?? (await corpusForVerification());
+      capturedBefore = await inventory(corpus);
+      const capture = object(JSON.parse(await readFile(path.join(corpus, 'capture.json'), 'utf8')));
+      expect(capture).toMatchObject({
+        version: 1,
+        origin: 'actual-old-compiler-cli',
+        emitterSHA256: oldEmitterSHA256,
+        legacyHashes,
+      });
+      const record = object(object(capture.records).trigger);
+      verifyCapturedCli(record);
+      expect(record.input).toBe(sourceFixtures.trigger);
+      expect(record.inputSHA256).toBe(digest(sourceFixtures.trigger));
+      expect(await inventory(path.join(corpus, 'trigger'))).toEqual(record.files);
+      directory = await fresh('image-cli');
+      await cp(path.join(corpus, 'trigger'), path.join(directory, 'old-trigger'), {
+        recursive: true,
+      });
+      await owned(path.join(directory, 'old-trigger'));
+      expect(digest(await readFile(path.join(directory, 'old-trigger/provenance.json')))).toBe(
+        record.provenanceSHA256
+      );
+      for (const [file, expected] of Object.entries(legacyHashes))
+        expect(digest(await readFile(path.join(directory, 'old-trigger', file)))).toBe(expected);
+      await mkdir(path.join(directory, 'inputs'));
+      await writeFile(path.join(directory, 'inputs/picture.proto.ts'), imageMigrationSource);
+      const compile = await invoke(directory, [
+        'compile',
+        'inputs/picture.proto.ts',
+        '--profile',
+        'vue2-source-v1',
+        '--output',
+        'new-image',
+        '--json',
+      ]);
+      await saveEvidence('image-directory-compile', {
+        input: imageMigrationSource,
+        inputSHA256: digest(imageMigrationSource),
+        cli: compile,
+      });
+      expect(compile).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(compile.stdout)).toMatchObject({
+        ok: true,
+        command: 'compile',
+        result: { directory: path.join(directory, 'new-image') },
+      });
+      const image = await owned(path.join(directory, 'new-image'));
+      expect(
+        image.artifacts
+          .filter((file) => file.path.startsWith('.proto-ui/interaction/'))
+          .map((file) => file.path)
+          .sort()
+      ).toEqual(['.proto-ui/interaction/image-v1.ts', '.proto-ui/interaction/ownership-v1.ts']);
+      const inputs = await Promise.all(
+        ['old-trigger', 'new-image'].map(async (id) => ({
+          id,
+          directory: id,
+          provenanceSHA256: digest(await readFile(path.join(directory, id, 'provenance.json'))),
+        }))
+      );
+      planFile = await writePlan(directory, { version: 1, inputs });
+      before = await inventory(directory);
+      cohort = path.join(await fresh('image-cohort'), 'output');
+      const cli = await invoke(directory, [
+        'migrate-native-support',
+        planFile,
+        '--output',
+        cohort,
+        '--json',
+      ]);
+      await saveEvidence('image-directory-migration', { cli, inputs, before });
+      expect(cli).toMatchObject({ code: 0, stderr: '' });
+      expect(JSON.parse(cli.stdout)).toMatchObject({
+        ok: true,
+        command: 'migrate-native-support',
+        result: { directory: cohort },
+      });
+      await copyEvidence('image-directory-inputs', directory);
+      await copyEvidence('image-directory-output', cohort);
+    });
+    afterAll(async () => {
+      if (before) expect(await inventory(directory)).toEqual(before);
+      if (capturedBefore) expect(await inventory(corpus)).toEqual(capturedBefore);
+    });
+
+    it('migrates actual old Trigger and new Image directories with preserved bytes and relocated identity', async () => {
+      await imageDirectoryJourney(directory, 'image-unmigrated', 'independent');
+      const top = object(JSON.parse(await readFile(path.join(cohort, 'provenance.json'), 'utf8')));
+      expect(top).toMatchObject({ kind: 'native-support-migration-v1', version: 1 });
+      const records = artifactRecords(top.artifacts);
+      expect(records.map((file) => file.path).sort()).toEqual(
+        (await plainFiles(cohort)).filter((file) => file !== 'provenance.json').sort()
+      );
+      for (const file of records)
+        expect(digest(await readFile(path.join(cohort, file.path)))).toBe(file.sha256);
+      for (const id of ['old-trigger', 'new-image']) {
+        const original = path.join(directory, id),
+          target = path.join(cohort, id);
+        const next = await owned(target);
+        expect(next.migration).toMatchObject({
+          version: 1,
+          sourceManifestSHA256: digest(await readFile(path.join(original, 'provenance.json'))),
+          sharedRoot: '../.proto-ui/shared',
+        });
+        for (const filename of ['Component.js', 'Component.js.map'])
+          expect(await readFile(path.join(target, filename))).toEqual(
+            await readFile(path.join(original, filename))
+          );
+        expect(
+          await readFile(path.join(cohort, '.proto-ui/migration-inputs', id + '.json'))
+        ).toEqual(await readFile(path.join(original, 'provenance.json')));
+      }
+      const relocation = await fresh('image-relocation'),
+        original = path.join(relocation, 'first/nested/output');
+      await mkdir(path.dirname(original), { recursive: true });
+      const cli = await invoke(directory, [
+        'migrate-native-support',
+        planFile,
+        '--output',
+        original,
+        '--json',
+      ]);
+      await saveEvidence('image-relocation-cli', cli);
+      expect(cli).toMatchObject({ code: 0, stderr: '' });
+      const prior = await inventory(original),
+        moved = path.join(relocation, 'moved/deeper/consumer');
+      await mkdir(path.dirname(moved), { recursive: true });
+      await rename(original, moved);
+      await expect(lstat(original)).rejects.toMatchObject({ code: 'ENOENT' });
+      expect(await inventory(moved)).toEqual(prior);
+      await copyEvidence('image-relocated-output', moved);
+      await imageDirectoryJourney(moved, 'image-migrated-relocated', 'migrated');
+      expect(await inventory(moved)).toEqual(prior);
+      expect(await inventory(directory)).toEqual(before);
+      await saveEvidence('image-relocation', { before: prior, after: await inventory(moved) });
+    });
+
+    it('detects split physical Image ownership while ordinary imports and request cleanup still work', async () => {
+      const split = path.join(await fresh('image-split'), 'output');
+      await cp(cohort, split, { recursive: true });
+      const prior = await inventory(split),
+        shared = path.join(split, '.proto-ui/shared/interaction');
+      const image = await readFile(path.join(shared, 'image-v1.ts'), 'utf8');
+      expect(image.split("'./ownership-v1'")).toHaveLength(2);
+      await writeFile(
+        path.join(shared, 'image-counterfactual.ts'),
+        image.replace("'./ownership-v1'", "'./ownership-counterfactual'"),
+        { flag: 'wx' }
+      );
+      await cp(
+        path.join(shared, 'ownership-v1.ts'),
+        path.join(shared, 'ownership-counterfactual.ts'),
+        { force: false, errorOnExist: true }
+      );
+      for (const name of ['image', 'ownership']) {
+        const filename = path.join(split, 'new-image/.proto-ui/interaction', name + '-v1.ts');
+        const facade = await readFile(filename, 'utf8');
+        expect(facade.split(name + '-v1')).toHaveLength(2);
+        await writeFile(filename, facade.replace(name + '-v1', name + '-counterfactual'));
+      }
+      const after = await inventory(split);
+      expect(
+        Object.keys(after)
+          .filter((file) => prior[file] !== after[file])
+          .sort()
+      ).toEqual([
+        '.proto-ui/shared/interaction/image-counterfactual.ts',
+        '.proto-ui/shared/interaction/ownership-counterfactual.ts',
+        'new-image/.proto-ui/interaction/image-v1.ts',
+        'new-image/.proto-ui/interaction/ownership-v1.ts',
+      ]);
+      // A test mutation, never resealed or represented as valid migration output.
+      await saveEvidence('image-split-delta', { before: prior, after });
+      await copyEvidence('image-split-output', split);
+      await imageDirectoryJourney(split, 'image-split', 'split');
+      expect(await inventory(split)).toEqual(after);
+    });
+
+    it('rejects a resealed modified Image helper before opening or leaving any output', async () => {
+      const test = await fresh('image-reject');
+      for (const id of ['old-trigger', 'new-image'])
+        await cp(path.join(directory, id), path.join(test, id), { recursive: true });
+      const target = path.join(test, 'new-image'),
+        filename = '.proto-ui/interaction/image-v1.ts';
+      const value = await manifest(target),
+        bytes = (await readFile(path.join(target, filename), 'utf8')) + '\n// unknown image ABI\n';
+      await writeFile(path.join(target, filename), bytes);
+      const record = value.artifacts.find((file) => file.path === filename);
+      if (!record) throw new Error('Missing actual CLI Image helper');
+      record.sha256 = digest(bytes);
+      await writeFile(path.join(target, 'provenance.json'), JSON.stringify(value, null, 2) + '\n');
+      const inputs = await Promise.all(
+        ['old-trigger', 'new-image'].map(async (id) => ({
+          id,
+          directory: id,
+          provenanceSHA256: digest(await readFile(path.join(test, id, 'provenance.json'))),
+        }))
+      );
+      const plan = await writePlan(test, { version: 1, inputs }),
+        output = path.join(test, 'output');
+      const prior = await inventory(test);
+      let opens = 0;
+      const result = await migrate(plan, output, async (filename) => {
+        ++opens;
+        return open(filename, 'wx');
+      });
+      const cli = await invoke(test, [
+        'migrate-native-support',
+        plan,
+        '--output',
+        output,
+        '--json',
+      ]);
+      await saveEvidence('image-resealed-rejection', { result, cli, opens, inputs });
+      await copyEvidence('image-resealed-inputs', test);
+      expect(result.ok).toBe(false);
+      expect(opens).toBe(0);
+      expect(JSON.stringify(result)).toContain('Unknown or modified native support ABI');
+      expect(cli).toMatchObject({ code: 1, stderr: '' });
+      expect(JSON.parse(cli.stdout)).toMatchObject({ ok: false });
+      await expect(lstat(output)).rejects.toMatchObject({ code: 'ENOENT' });
+      expect(await inventory(test)).toEqual(prior);
+    });
+  }
+);

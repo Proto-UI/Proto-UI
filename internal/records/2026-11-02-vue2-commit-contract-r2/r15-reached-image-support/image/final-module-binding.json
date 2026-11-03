@@ -1,0 +1,20 @@
+{
+  "typedGeneratedModuleSHA256": "bf70e6d06ef19f8ad3279136b4b7086523677932bb200d8a5c80a2aa998fdae1",
+  "finalActualMatchingModules": [
+    "image-journey-result.json"
+  ],
+  "allPriorFourImageCapturesBytesEqual": [
+    "image-demand-input.json",
+    "image-demand-result.json",
+    "image-edge-accessibility-trace.json",
+    "image-edge-cache-trace.json",
+    "image-edge-input.json",
+    "image-edge-result.json",
+    "image-journey-input.json",
+    "image-journey-outer-input.json",
+    "image-journey-outer-result.json",
+    "image-journey-result.json",
+    "image-journey-trace.json"
+  ],
+  "strictInterpretation": "The actual final modules exactly match the module whose entire graph has71 diagnostics/217files. Not a clean type check or native browser load."
+}

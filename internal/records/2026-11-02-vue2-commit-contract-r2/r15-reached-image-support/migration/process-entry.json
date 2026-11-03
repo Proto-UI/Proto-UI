@@ -1,0 +1,120 @@
+{
+  "status": "ACTUAL_IMAGE_PROCESS_ENTRY_PASS",
+  "inputIds": [
+    "old-trigger",
+    "new-image"
+  ],
+  "commands": [
+    {
+      "label": "success",
+      "exitCode": 0,
+      "signal": null,
+      "error": null
+    },
+    {
+      "label": "wrong-anchor",
+      "exitCode": 1,
+      "signal": null,
+      "error": null
+    },
+    {
+      "label": "missing-output",
+      "exitCode": 2,
+      "signal": null,
+      "error": null
+    }
+  ],
+  "exactOutputFiles": {
+    ".proto-ui/migration-inputs/new-image.json": {
+      "bytes": 1450,
+      "sha256": "bff912f27851dfc7120d2268d9bd6ab3ec29e321267babe05b91092a1431e88d"
+    },
+    ".proto-ui/migration-inputs/old-trigger.json": {
+      "bytes": 1553,
+      "sha256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+    },
+    ".proto-ui/shared/context/scope-v1.ts": {
+      "bytes": 8797,
+      "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+    },
+    ".proto-ui/shared/interaction/adapter-modules-v1.ts": {
+      "bytes": 129577,
+      "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08"
+    },
+    ".proto-ui/shared/interaction/image-v1.ts": {
+      "bytes": 14247,
+      "sha256": "0e9dba13c41e7359a04059c01fe8a8d46e833d99e99a9fb5463b4a1e82ca3640"
+    },
+    ".proto-ui/shared/interaction/native-v1.ts": {
+      "bytes": 38998,
+      "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07"
+    },
+    ".proto-ui/shared/interaction/ownership-v1.ts": {
+      "bytes": 4229,
+      "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44"
+    },
+    "new-image/.proto-ui/context/scope-v1.ts": {
+      "bytes": 130,
+      "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+    },
+    "new-image/.proto-ui/interaction/image-v1.ts": {
+      "bytes": 134,
+      "sha256": "f51d0eb214a6910b7965c7a13104fa1f694b51dbdb2cac1389b5f163f792d25c"
+    },
+    "new-image/.proto-ui/interaction/ownership-v1.ts": {
+      "bytes": 138,
+      "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+    },
+    "new-image/Component.js": {
+      "bytes": 32314,
+      "sha256": "b4f65e948497ec3ea91a632065c2bcdc41049f4e4894333cb29ca17b1d55e1eb"
+    },
+    "new-image/Component.js.map": {
+      "bytes": 1683,
+      "sha256": "a8921e75510daa786cebaacbcd9644bef593bbee01029a5303d001d08d6e9145"
+    },
+    "new-image/provenance.json": {
+      "bytes": 1626,
+      "sha256": "cd6f75ae875994aae20cef96685de42e5109e553c73f673621d97c83545fa67d"
+    },
+    "old-trigger/.proto-ui/context/scope-v1.ts": {
+      "bytes": 130,
+      "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+    },
+    "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": {
+      "bytes": 144,
+      "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+    },
+    "old-trigger/.proto-ui/interaction/native-v1.ts": {
+      "bytes": 135,
+      "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+    },
+    "old-trigger/.proto-ui/interaction/ownership-v1.ts": {
+      "bytes": 138,
+      "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+    },
+    "old-trigger/Component.js": {
+      "bytes": 40217,
+      "sha256": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb"
+    },
+    "old-trigger/Component.js.map": {
+      "bytes": 1168,
+      "sha256": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242"
+    },
+    "old-trigger/provenance.json": {
+      "bytes": 1904,
+      "sha256": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b"
+    },
+    "provenance.json": {
+      "bytes": 7214,
+      "sha256": "a5f1f0fc834eab92783fd53b3aa3564d7756bdd2dabf1602309e58aaf9ac1688"
+    }
+  },
+  "completeOutputMatchesPriorHandler": true,
+  "originalInputsUnchanged": true,
+  "componentAndMapBytesUnchanged": true,
+  "originalManifestBytesRetained": true,
+  "expectedCaptureUnchanged": true,
+  "wrongAnchorNoOutput": true,
+  "missingOutputUsageExit": 2
+}

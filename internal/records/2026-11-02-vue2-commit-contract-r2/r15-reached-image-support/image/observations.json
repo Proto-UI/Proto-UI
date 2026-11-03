@@ -1,0 +1,239 @@
+{
+  "environment": "Vue2.6.14 and HappyDOM15.11.7; controlled decode promises/complete and naturalWidth properties, synthetic load/error events with bubbles:true, and synthetic clicks. Not real browser networking, cache or native event-bubbling proof.",
+  "traces": {
+    "image-journey-trace": {
+      "initial": {
+        "tag": "img",
+        "source": "image:a",
+        "alt": "Image",
+        "fit": "cover",
+        "snapshot": {
+          "source": "image:a",
+          "loadingStatus": "loading",
+          "fit": "cover"
+        },
+        "requests": 1
+      },
+      "nativeBoundary": {
+        "propagated": 0,
+        "snapshot": {
+          "source": "image:a",
+          "loadingStatus": "loading",
+          "fit": "cover"
+        }
+      },
+      "afterImageClick": [],
+      "replacement": {
+        "source": "image:b",
+        "alt": "Image",
+        "fit": "cover",
+        "requests": 2
+      },
+      "afterStale": {
+        "source": "image:b",
+        "loadingStatus": "loading",
+        "fit": "cover"
+      },
+      "afterCurrent": {
+        "source": "image:b",
+        "loadingStatus": "loaded",
+        "fit": "cover"
+      },
+      "terminalOnce": true,
+      "detached": {
+        "physical": false,
+        "logical": false,
+        "module": true,
+        "target": null
+      },
+      "remounted": {
+        "changedTarget": true,
+        "sameIdentity": true,
+        "snapshot": {
+          "source": "image:b",
+          "loadingStatus": "loading",
+          "fit": "cover"
+        },
+        "requests": 3
+      },
+      "afterError": {
+        "source": "image:b",
+        "loadingStatus": "error",
+        "fit": "cover"
+      },
+      "cleared": {
+        "source": null,
+        "snapshot": {
+          "source": "",
+          "loadingStatus": "idle",
+          "fit": "cover"
+        }
+      },
+      "disposed": {
+        "physical": false,
+        "logical": false,
+        "module": false,
+        "lateEvents": 0
+      },
+      "events": [
+        {
+          "status": "loading",
+          "previousStatus": "idle",
+          "source": "image:a"
+        },
+        {
+          "status": "loaded",
+          "previousStatus": "loading",
+          "source": "image:b"
+        },
+        {
+          "status": "loading",
+          "previousStatus": "loaded",
+          "source": "image:b"
+        },
+        {
+          "status": "error",
+          "previousStatus": "loading",
+          "source": "image:b"
+        },
+        {
+          "status": "idle",
+          "previousStatus": "error",
+          "source": ""
+        },
+        {
+          "status": "loading",
+          "previousStatus": "idle",
+          "source": "image:c"
+        }
+      ],
+      "cancelled": [],
+      "requests": [
+        {
+          "source": "image:a"
+        },
+        {
+          "source": "image:b"
+        },
+        {
+          "source": "image:b"
+        },
+        {
+          "source": "image:c"
+        }
+      ]
+    },
+    "image-edge-cache-trace": {
+      "hostEvidence": "Controlled HappyDOM getters/decode; no network loading or browser cache claim.",
+      "immediate": {
+        "snapshot": {
+          "source": "image:cached",
+          "loadingStatus": "loaded",
+          "fit": "cover"
+        },
+        "source": "image:cached",
+        "decodeCalls": 0,
+        "events": [
+          {
+            "status": "loading",
+            "previousStatus": "idle",
+            "source": "image:cached"
+          },
+          {
+            "status": "loaded",
+            "previousStatus": "loading",
+            "source": "image:cached"
+          }
+        ]
+      },
+      "vueErrors": [],
+      "events": [
+        {
+          "status": "loading",
+          "previousStatus": "idle",
+          "source": "image:cached"
+        },
+        {
+          "status": "loaded",
+          "previousStatus": "loading",
+          "source": "image:cached"
+        }
+      ]
+    },
+    "image-edge-accessibility-trace": {
+      "hostEvidence": "Controlled HappyDOM getters/decode; no network loading or browser cache claim.",
+      "patches": {
+        "missingAlternative": {
+          "snapshot": {
+            "source": "",
+            "loadingStatus": "idle",
+            "fit": "cover"
+          },
+          "source": null,
+          "alt": "",
+          "fit": "cover",
+          "decodeCalls": 0
+        },
+        "informativeRecovery": {
+          "snapshot": {
+            "source": "image:informative",
+            "loadingStatus": "loading",
+            "fit": "cover"
+          },
+          "source": "image:informative",
+          "alt": "An image",
+          "fit": "cover",
+          "decodeCalls": 1
+        },
+        "contradictoryDecorative": {
+          "snapshot": {
+            "source": "",
+            "loadingStatus": "idle",
+            "fit": "cover"
+          },
+          "source": null,
+          "alt": "",
+          "fit": "cover",
+          "decodeCalls": 1
+        },
+        "decorativeRecovery": {
+          "snapshot": {
+            "source": "image:decorative",
+            "loadingStatus": "loading",
+            "fit": "cover"
+          },
+          "source": "image:decorative",
+          "alt": "",
+          "fit": "cover",
+          "decodeCalls": 2
+        }
+      },
+      "vueErrors": [],
+      "events": [
+        {
+          "status": "loading",
+          "previousStatus": "idle",
+          "source": "image:informative"
+        },
+        {
+          "status": "idle",
+          "previousStatus": "loading",
+          "source": ""
+        },
+        {
+          "status": "loading",
+          "previousStatus": "idle",
+          "source": "image:decorative"
+        }
+      ]
+    }
+  },
+  "contractSources": [
+    "spec/decisions/D-IMAGE-VIEW-PROJECTION-0001.yaml",
+    "spec/contracts/C-IMAGE-VIEW-0001.yaml",
+    "spec/modules/M-IMAGE-VIEW-0001.yaml",
+    "spec/host-caps/HC-IMAGE-VIEW-0001.yaml",
+    "spec/tests/T-IMAGE-VIEW-0001.yaml"
+  ],
+  "lifecycle": "Current draft direction, not promoted to a stable all-host guarantee."
+}
