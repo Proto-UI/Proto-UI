@@ -25,6 +25,9 @@ criteria:
   - id: C-TARGET-SIZE-MATCH-0001-EDGE
     text:
       en: An edge-positioned connection may explicitly request the same neutral size lease without selecting target-alignment geometry. The reference is its live element anchor and the unique targets are contained by its floating frame in the same document. A Host must declare size support before the module admits this request. Omission preserves ordinary edge behavior; unsupported, invalid or conflicting requests report a named failure rather than silently ignoring the size policy. Existing side, alignment, offsets, collision and rendered-anchor placement semantics remain authoritative.
+  - id: C-TARGET-SIZE-MATCH-0001-EDGE-SAFE
+    text:
+      en: An edge Overlay may register an independent safe-part size association without a target-alignment binding. The surface must belong to the registering overlay owner, the reference and nonempty unique targets must be current in the same anatomy domain, and every target must descend from that surface. Behind the private boundary, the reference must resolve to the current element anchor; only the owned surface becomes the floating size frame. Pending physical targets remain recoverable. Invalid logical membership or an unrelated anchor is explicit unavailability, never ordinary placement with an ignored policy. Delivery revalidates logical and physical identities and current view, capability, binding and resolution generations; replacement, withdrawal, close or disposal cannot deliver stale success. The edge and target-alignment registrations are alternative geometry intents, not concurrent implicit policies.
   - id: C-TARGET-SIZE-MATCH-0001-EDGE-LIFETIME
     text:
       en: Edge sizing prepares used boxes and accounts for outer frame chrome before solving placement. It reports applied only after the current asynchronous solve and actual size readback both succeed. Every middleware write and delivery is bounded by the current connection generation; reconfiguration, target replacement, withdrawal and disposal invalidate older work. Missing layout remains recoverable under the current identity, while partial failure restores only still-owned sizing. A stable current size result does not itself schedule or repeat semantic focus entry.
@@ -42,6 +45,8 @@ sources:
   - path: packages/modules/positioning/src/web/floating-ui-host.ts
   - path: packages/modules/positioning/src/impl.ts
   - path: packages/modules/overlay/src/target-alignment-binding.ts
+  - path: packages/modules/overlay/src/size-match-binding.ts
+  - path: packages/hooks/src/as-overlay.ts
 revisions:
   - version: 0.3.0-alpha.1
     change: introduced

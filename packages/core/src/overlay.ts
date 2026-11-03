@@ -132,6 +132,15 @@ export type OverlayTargetAlignmentBinding = Readonly<{
   onAlignment(status: import('./positioning').TargetAlignmentStatus): void;
 }>;
 
+/** Independent safe-part edge sizing; no physical target or selection policy reaches the author. */
+export type OverlaySizeMatchBinding = Readonly<{
+  family: import('./anatomy').AnatomyFamily;
+  surface: AnatomyPartView;
+  reference: AnatomyPartView;
+  targets: readonly AnatomyPartView[];
+  onSizeMatch(status: import('./positioning').TargetAlignmentStatus): void;
+}>;
+
 export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   open: ObservedStateHandle<boolean, P>;
 
@@ -153,6 +162,7 @@ export interface OverlayModuleHandle<P extends PropsBaseType = PropsBaseType> {
   registerAnchorPart(part: AnatomyPartView): void;
   registerContent(target: unknown): void;
   registerTargetAlignment(binding: OverlayTargetAlignmentBinding | null): void;
+  registerSizeMatch(binding: OverlaySizeMatchBinding | null): void;
   getPositionSnapshot(): AnchoredPositionSnapshot | null;
 }
 

@@ -26,7 +26,17 @@ cases:
     title: Explicit size request cannot be silently treated as ordinary edge placement
     covers: [C-TARGET-SIZE-MATCH-0001-EDGE, C-TARGET-SIZE-MATCH-0001-EDGE-LIFETIME]
     expectation: current-size-and-edge-result-or-explicit-unavailable
+  - id: T-TARGET-SIZE-MATCH-0001-CASE-EDGE-SAFE
+    title: Independent safe edge parts preserve placement and reject stale or invalid delivery
+    covers: [C-TARGET-SIZE-MATCH-0001-EDGE-SAFE]
+    expectation: current-owned-edge-size-association-or-explicit-rejection
 implementations:
+  - id: edge-size-safe-bridge
+    kind: module-test
+    status: needs-review
+    path: packages/modules/overlay/test/size-match-binding.test.ts
+    required: true
+    consumesCases: [T-TARGET-SIZE-MATCH-0001-CASE-EDGE-SAFE]
   - id: size-association
     kind: module-test
     status: needs-review
