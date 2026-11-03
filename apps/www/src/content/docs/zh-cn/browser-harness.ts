@@ -32,8 +32,8 @@ let styleGeneration: ReturnType<typeof createStyleGenerationOwner> | null = null
 // A static child program keeps the process-group leader alive until the real
 // generator has exited and closed its output. Keeping it in this file also
 // preserves the source-bound browser probe closure copied by evidence jobs.
-const styleSupervisor = String.raw`
-const { spawn } = require('node:child_process');
+export const styleSupervisorSource = String.raw`
+const { spawn } = process.getBuiltinModule('node:child_process');
 const executable = process.argv[2];
 if (!executable || !process.send) throw new Error('Missing generation supervisor inputs.');
 
@@ -273,7 +273,7 @@ export function createStyleGenerationOwner() {
       if (stopped) return Promise.reject(new Error('Style generation was cancelled.'));
       const generation = spawn(
         process.execPath,
-        ['--eval', styleSupervisor, '--', '--style-generation-supervisor', executable],
+        ['--eval', styleSupervisorSource, '--', '--style-generation-supervisor', executable],
         {
           cwd: process.cwd(),
           env: process.env,
@@ -408,7 +408,11 @@ export function createStyleGenerationOwner() {
           if (stopped) reject(new Error('Style generation was cancelled.'));
           else if (!childDrained || !childSucceeded || signal || code !== 0) {
             stopped = true;
-            reject(new Error('Style generation supervisor exited before reporting completion.'));
+            reject(
+              new Error(
+                `Style generation supervisor exited before reporting completion.\n${output}`
+              )
+            );
           } else resolve();
         });
       });

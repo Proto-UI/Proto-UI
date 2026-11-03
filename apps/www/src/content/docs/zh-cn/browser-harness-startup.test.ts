@@ -3,7 +3,12 @@ import { chmod, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { delimiter, join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createStyleGenerationOwner, startServer, stopServer } from './browser-harness';
+import {
+  createStyleGenerationOwner,
+  startServer,
+  stopServer,
+  styleSupervisorSource,
+} from './browser-harness';
 
 async function bounded<T>(promise: Promise<T>, milliseconds: number): Promise<T | 'pending'> {
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -192,6 +197,15 @@ describe('documentation server startup ownership', () => {
       await control.cleanup(running, false);
     }
   }, 20_000);
+
+  it('keeps the embedded supervisor program valid and independent of host interpolation', () => {
+    // The program travels as one argument, so it must not interpolate the host
+    // scope, and it must compile regardless of how Node classifies the module
+    // system of an evaluated program.
+    expect(styleSupervisorSource).not.toContain('${');
+    expect(styleSupervisorSource).toContain("process.getBuiltinModule('node:child_process')");
+    expect(() => new Function(styleSupervisorSource)).not.toThrow();
+  });
 
   it('stops pending generation and its descendant without starting a server after teardown', async () => {
     const control = await fixture();
