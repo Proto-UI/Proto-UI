@@ -8,6 +8,10 @@ summary: >-
 
 
 cases:
+  - id: T-BRUTALIST-SELECT-0001-CASE-MOTION
+    title: Elevated Trigger timing preserves flat geometry and Base state
+    covers: [P-BRUTALIST-SELECT-TRIGGER-MOTION]
+    expectation: One timing writer follows live preference, retains existing hover/press endpoints and withdraws on category removal; negative controls preserve flat/default/fade behavior. Native animation curves remain separately unverified.
   - id: T-BRUTALIST-SELECT-0001-CASE-CURRENT-PIN-RECIPE
     title: Current fixed Neo recipe owns indicator gutter, Value layout and centered edge placement
     covers:
@@ -77,6 +81,14 @@ cases:
       - P-BRUTALIST-SELECT-CONTENT-VISUAL-GRAMMAR
     expectation: p-brutalist-select-trigger-opt-in-elevation
 implementations:
+  - id: brutalist-select-action-motion
+    kind: module-test
+    status: planned
+    path: packages/prototypes/brutalist/test/action-control-motion.test.ts
+    required: true
+    consumesCases: [T-BRUTALIST-SELECT-0001-CASE-MOTION]
+    exercises: [P-BRUTALIST-SELECT-TRIGGER]
+    notes: [Static candidate only; no executed result or browser timing acceptance.]
   - id: brutalist-select-current-pin-recipe
     kind: module-test
     status: passing

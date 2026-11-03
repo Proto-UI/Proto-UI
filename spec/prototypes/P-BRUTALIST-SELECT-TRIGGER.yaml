@@ -11,6 +11,10 @@ statement:
   zh-CN: P-BRUTALIST-SELECT-TRIGGER 保留已声明的语义、anatomy 与 API owner。draft 视觉投射遵循下列按组件定义的字体、几何、填色、深度与状态准则，并向 neobrutalism-components 3306a802 对齐；不准入新的 Base 语义、host support 或上游 API 兼容性。
 
 criteria:
+  - id: P-BRUTALIST-SELECT-TRIGGER-MOTION
+    text:
+      en: Explicit elevated appearance uses the same single CSS timing writer as the draft Button motion criterion. With preference.reducedMotion equal to no-preference, transition-all uses 150ms cubic-bezier(0.4,0,0.2,1) for entry and release, including transform and hard box-shadow. Reduce or unknown selects transition-none and live preference changes affect the mounted Trigger. Hover and press retain their existing shared endpoint without added displacement. Removing elevated appearance withdraws these timing and elevation rules. Flat geometry remains unchanged; current flat rest/hover/press color endpoints are identical, so this slice makes no visible flat-hover animation claim. Content, Item, Base activation/value/focus and disabled ownership are not changed.
+      zh-CN: 显式 elevated appearance 使用与 draft Button motion 相同的单一 CSS 时序写入者。preference.reducedMotion 为 no-preference 时，transition-all 对进入与释放使用 150ms cubic-bezier(0.4,0,0.2,1)，含 transform 与硬 box-shadow；reduce 或未知时为 transition-none，偏好实时作用于同一 Trigger。hover 与 press 保留共用端点，不叠加位移；移除 elevated 时撤回这些时序与 elevation 规则。flat 几何不变，其当前静止/hover/press 颜色端点相同，本片不声称产生可见 flat-hover 动画。不改 Content、Item、Base 激活/value/focus 与 disabled 归属。
   - id: P-BRUTALIST-SELECT-TRIGGER-CURRENT-PIN-RECIPE
     text:
       zh-CN: 默认 Trigger 使用 w-full；flat/elevated 扩展保留。
