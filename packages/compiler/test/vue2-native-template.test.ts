@@ -1,11 +1,16 @@
 // @vitest-environment happy-dom
 import path from 'node:path';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { createHash } from 'node:crypto';
+import { fileURLToPath, URL as NodeURL } from 'node:url';
 import ts from 'typescript';
 import Vue2, { type ComponentOptions } from '../../adapters/vue2/node_modules/vue';
 import { afterEach, describe, expect, it } from 'vitest';
 import { parsePrototype } from '../src/parser';
 import { emitVue2Source } from '../src/vue2-source';
+import { validateIR } from '../src/ir-validation';
+import { collectVue2IdentityOnlyFunctions } from '../src/vue2-native-template';
 import type { ExpressionIR, FunctionIR, GeneratedModule, PrototypeIR } from '../src/ir';
 
 // The original 12 commit/slot cases remain separate and unchanged. These are
@@ -44,7 +49,7 @@ function capture(directory: string | undefined, relative: string, contents: stri
 function compile(input: PrototypeIR): GeneratedModule {
   let directory: string | undefined;
   if (evidenceRoot) {
-    if (!path.isAbsolute(evidenceRoot) || ++compilations > 38)
+    if (!path.isAbsolute(evidenceRoot) || ++compilations > 40)
       throw new Error('Unexpected native evidence root or compilation count');
     mkdirSync(evidenceRoot, { recursive: true });
     directory = mkdtempSync(path.join(evidenceRoot, 'compile-'));
@@ -1047,5 +1052,490 @@ describe('Vue2 compiler-native child construction', () => {
     expect(() => compile(input)).toThrow(
       `"code":"PUI4003","category":"unsupported-input","message":"Operation ${operation} is not implemented by vue2-source-v1.`
     );
+  });
+});
+
+// R11 strategy: the earlier body's no-DCE comment remains verbatim above as
+// history. Complete non-escape/use proof now permits only an unobservable-body
+// optimization. This does not implement general legacy-template callables.
+describe('Vue2 closed identity-only body proof', () => {
+  let proofCaptures = 0;
+  let strictCaptures = 0;
+  function helper(ir: PrototypeIR, name = 'make'): FunctionIR {
+    const statement = renderFunction(ir).body.find(
+      (item) => item.kind === 'const' && item.name === name
+    );
+    if (statement?.kind !== 'const' || statement.value.kind !== 'function')
+      throw new Error(`Missing helper ${name}`);
+    return statement.value.function;
+  }
+  function validated(ir: PrototypeIR, invoked = new Set<FunctionIR>()) {
+    let directory: string | undefined;
+    if (evidenceRoot) {
+      if (!path.isAbsolute(evidenceRoot) || ++proofCaptures > 20)
+        throw new Error('Unexpected proof evidence root or capture count');
+      mkdirSync(evidenceRoot, { recursive: true });
+      directory = mkdtempSync(path.join(evidenceRoot, 'proof-'));
+      const identities = new Map<object, { id: number; paths: string[] }>();
+      function identify(value: object, pointer: string) {
+        let entry = identities.get(value);
+        if (!entry) {
+          entry = { id: identities.size, paths: [] };
+          identities.set(value, entry);
+        }
+        entry.paths.push(pointer);
+      }
+      identify(ir.setup, '/setup');
+      ir.hooks.forEach((hook, index) => identify(hook.setup, `/hooks/${index}/setup`));
+      const active = new Set<object>();
+      function recordIdentities(value: unknown, pointer: string) {
+        if (value === null || typeof value !== 'object') return;
+        if (active.has(value)) throw new Error('Cyclic proof evidence graph');
+        active.add(value);
+        for (const [key, item] of Object.entries(value)) {
+          const child = `${pointer}/${key.replace(/~/g, '~0').replace(/\//g, '~1')}`;
+          if (
+            key === 'function' &&
+            'kind' in value &&
+            value.kind === 'function' &&
+            item !== null &&
+            typeof item === 'object'
+          )
+            identify(item, child);
+          recordIdentities(item, child);
+        }
+        active.delete(value);
+      }
+      recordIdentities(ir, '');
+      const knownInvokedIds = [...invoked].map((fn) => {
+        const entry = identities.get(fn);
+        if (!entry) throw new Error('Invoked proof identity is not in the captured IR');
+        return entry.id;
+      });
+      capture(
+        directory,
+        'input.json',
+        JSON.stringify(
+          {
+            test: expect.getState().currentTestName,
+            checkedIR: ir,
+            knownInvoked: [...invoked].map((fn) => fn.span),
+            identityGraph: {
+              functions: [...identities.values()],
+              knownInvokedIds,
+              note: 'Actual FunctionIR object identity. To replay, coalesce JSON-pointer paths with the same id before validation/proof. Plain JSON alone does not preserve shared objects.',
+            },
+            note: 'Actual proof/admission input; not an emitted component or native implementation.',
+          },
+          null,
+          2
+        )
+      );
+    }
+    const result = validateIR(ir);
+    capture(directory, 'admission.json', JSON.stringify(result, null, 2));
+    return { result, directory };
+  }
+  function checked(ir: PrototypeIR, invoked = new Set<FunctionIR>()) {
+    const { result, directory } = validated(ir, invoked);
+    if (!result.ok) throw new Error(JSON.stringify(result.diagnostics));
+    const proof = collectVue2IdentityOnlyFunctions(result.value, invoked);
+    capture(
+      directory,
+      'proof.json',
+      JSON.stringify(
+        {
+          incomplete: [...proof.incomplete],
+          eligible: [...proof.eligible].map((fn) => fn.span),
+          entries: [...proof.entries.values()].map((entry) => ({
+            function: entry.fn.span,
+            creations: entry.creations,
+            blocked: [...entry.blocked],
+            uses: entry.uses.map((use) => ({ use: use.use, expression: use.expression.span })),
+          })),
+        },
+        null,
+        2
+      )
+    );
+    return proof;
+  }
+  function strictGraph(module: GeneratedModule) {
+    let evidence: string | undefined;
+    if (evidenceRoot) {
+      if (!path.isAbsolute(evidenceRoot) || ++strictCaptures > 2)
+        throw new Error('Unexpected identity strict capture count');
+      evidence = mkdtempSync(path.join(evidenceRoot, 'strict-identity-'));
+    }
+    const files = new Map<string, string>();
+    for (const file of [
+      { path: 'Component.js', kind: 'source', contents: module.code },
+      ...(module.supportingFiles ?? []),
+    ]) {
+      if (
+        file.kind !== 'source' ||
+        path.posix.isAbsolute(file.path) ||
+        file.path.includes('\\') ||
+        file.path.split('/').some((part) => !part || part === '.' || part === '..') ||
+        files.has(file.path)
+      )
+        throw new Error('Unexpected actual identity output graph');
+      files.set(file.path, file.contents);
+    }
+    files.set(
+      'Consumer.ts',
+      `import Vue from 'vue';
+import Component from './Component.js';
+export const consumer = new Vue({render(h){return h(Component, {scopedSlots:{default:()=>[h('em','native')]}});}});`
+    );
+    const parent = fileURLToPath(new NodeURL('./generated-modules/', import.meta.url));
+    mkdirSync(parent, { recursive: true });
+    const directory = mkdtempSync(path.join(parent, 'vue2-identity-strict-'));
+    cleanup.push(() => rmSync(directory, { recursive: true, force: true }));
+    for (const [file, contents] of files) {
+      capture(evidence, `files/${file}`, contents);
+      const destination = path.join(directory, file);
+      mkdirSync(path.dirname(destination), { recursive: true });
+      writeFileSync(destination, contents, { flag: 'wx' });
+    }
+    function diagnosticRecord(diagnostic: ts.Diagnostic): unknown {
+      return {
+        category: diagnostic.category,
+        code: diagnostic.code,
+        file: diagnostic.file?.fileName,
+        start: diagnostic.start,
+        length: diagnostic.length,
+        messageText: diagnostic.messageText,
+        message: ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'),
+        relatedInformation: diagnostic.relatedInformation?.map(diagnosticRecord),
+      };
+    }
+    const repository = fileURLToPath(new NodeURL('../../../', import.meta.url));
+    const config = ts.readConfigFile(path.join(repository, 'tsconfig.json'), ts.sys.readFile);
+    if (config.error) {
+      capture(
+        evidence,
+        'diagnostics.json',
+        JSON.stringify([diagnosticRecord(config.error)], null, 2)
+      );
+      throw new Error(ts.flattenDiagnosticMessageText(config.error.messageText, '\n'));
+    }
+    const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, repository);
+    const vue2 = createRequire(new NodeURL('../../adapters/vue2/package.json', import.meta.url));
+    const rootNames = [...files.keys()].map((file) => path.join(directory, file));
+    const options: ts.CompilerOptions = {
+      ...parsed.options,
+      paths: { ...parsed.options.paths, vue: [path.dirname(vue2.resolve('vue/package.json'))] },
+      noEmit: true,
+      strict: true,
+      skipLibCheck: false,
+      allowJs: true,
+      checkJs: true,
+    };
+    capture(
+      evidence,
+      'request.json',
+      JSON.stringify(
+        {
+          test: expect.getState().currentTestName,
+          rootNames,
+          options,
+          typescript: ts.version,
+          vueDeclarationRoot: path.dirname(vue2.resolve('vue/package.json')),
+          note: 'Complete additional actual graph diagnostics, not the original 97-diagnostic fixture or full graph acceptance.',
+        },
+        null,
+        2
+      )
+    );
+    const program = ts.createProgram(rootNames, options);
+    const diagnostics = [...parsed.errors, ...ts.getPreEmitDiagnostics(program)].map(
+      diagnosticRecord
+    );
+    capture(evidence, 'diagnostics.json', JSON.stringify(diagnostics, null, 2));
+    capture(
+      evidence,
+      'program.json',
+      JSON.stringify(
+        program.getSourceFiles().map((file) => ({
+          file: file.fileName,
+          sha256: createHash('sha256').update(file.text).digest('hex'),
+          isDeclarationFile: file.isDeclarationFile,
+        })),
+        null,
+        2
+      )
+    );
+    const source = program.getSourceFile(path.join(directory, 'Component.js'));
+    if (!source) throw new Error('Missing actual generated Component.js in strict program');
+    // All diagnostics above remain evidence, including unrelated helper debt.
+    // Only opaque-formal typing is asserted below; original full strict remains
+    // separate, unchanged, unfiltered and blocking.
+    return { program, source, evidence };
+  }
+  function legacy(fn: FunctionIR) {
+    fn.parameters[0].type = 'template';
+    const returned = fn.body[0];
+    if (returned.kind !== 'return' || returned.value?.kind !== 'operation')
+      throw new Error('Expected direct native child');
+    returned.value.arguments[1].type = 'template';
+  }
+  function identity(tail = "return r.el('i','not-called');") {
+    return prototype(`return r=>{
+      const make=(text:string)=>r.el('b',text);const alias=make;
+      if(make!==alias)return null;${tail}
+    };`);
+  }
+
+  it('requires complete identity uses, preserves checked types, and honors an independent invocation veto', () => {
+    const ir = identity();
+    const make = helper(ir);
+    legacy(make);
+    const before = JSON.stringify(ir);
+    const proof = checked(ir);
+    expect(proof.incomplete.size).toBe(0);
+    expect([...proof.eligible]).toEqual([make]);
+    expect(proof.entries.get(make)?.uses.map((use) => use.use)).toEqual([
+      'declaration',
+      'alias',
+      'identity',
+      'identity',
+    ]);
+    expect(checked(ir, new Set([make])).eligible.size).toBe(0);
+    expect(proof.eligible.has(ir.setup)).toBe(false);
+    expect(proof.eligible.has(renderFunction(ir))).toBe(false);
+    expect(JSON.stringify(ir)).toBe(before);
+  });
+
+  it.each([
+    ['direct', "return make('called');"],
+    ['alias', "return alias('called');"],
+    ['after-return', "return r.el('i','not-called');alias('unreachable');"],
+    ['nested-unused-body', "const later=()=>alias('nested');return r.el('i','not-called');"],
+    ['dead-branch', "if(false)return alias('dead');return r.el('i','not-called');"],
+  ])('does not infer non-invocation from an empty collector set: %s', (_name, tail) => {
+    const ir = identity(tail);
+    const make = helper(ir);
+    const proof = checked(ir); // deliberately empty invocation set
+    expect(proof.eligible.has(make)).toBe(false);
+    expect(proof.entries.get(make)?.blocked.has('invoke')).toBe(true);
+  });
+
+  it('does not discard calls in a checked inline callback', () => {
+    const ir = prototype(`const make=(text:string)=>text;const alias=make;
+      const same=make===alias;
+      def.props.define({value:{type:'number',default:0}});
+      def.props.watch(['value'],()=>{const value=alias('callback');});
+      return r=>r.el('i','native');`);
+    const declaration = ir.setup.body[0];
+    if (declaration.kind !== 'const' || declaration.value.kind !== 'function')
+      throw new Error('Expected setup helper');
+    const make = declaration.value.function;
+    const proof = checked(ir);
+    expect(proof.eligible.has(make)).toBe(false);
+    expect(proof.entries.get(make)?.blocked.has('invoke')).toBe(true);
+  });
+
+  it.each(['return alias;', 'const factory=()=>draw;return factory();'])(
+    'retains returned/factory callable bodies: %s',
+    (tail) => {
+      const ir = prototype(`const text='captured';const draw=()=>text;const alias=draw;
+        const same=draw===alias;${tail}`);
+      const declaration = ir.setup.body[1];
+      if (declaration.kind !== 'const' || declaration.value.kind !== 'function')
+        throw new Error('Expected returned helper');
+      const draw = declaration.value.function;
+      const proof = checked(ir);
+      expect(proof.eligible.has(draw)).toBe(false);
+      expect(proof.entries.get(draw)?.blocked.has('other')).toBe(true);
+    }
+  );
+
+  it('resolves a captured alias separately from a caller parameter with the same name', () => {
+    const ir = identity(`const later=(make:string)=>alias('captured');
+      return r.el('i','not-called');`);
+    const make = helper(ir);
+    const proof = checked(ir);
+    expect(proof.eligible.has(make)).toBe(false);
+    expect(proof.entries.get(make)?.blocked.has('invoke')).toBe(true);
+  });
+
+  it('closes a direct alias chain using each declaration environment', () => {
+    const ir = prototype(`return r=>{
+      const make=(text:string)=>r.el('b',text);const middle=make;const alias=middle;
+      if(make!==alias)return null;return r.el('i','not-called');
+    };`);
+    const make = helper(ir);
+    legacy(make);
+    const proof = checked(ir);
+    expect(proof.incomplete.size).toBe(0);
+    expect([...proof.eligible]).toEqual([make]);
+    expect(proof.entries.get(make)?.uses.filter((use) => use.use === 'alias').length).toBe(2);
+  });
+
+  it('does not collapse multiple valid creations sharing one FunctionIR and the same captures', () => {
+    const ir = prototype(`return r=>{
+      const first=(text:string)=>r.el('b',text);const second=(text:string)=>r.el('b',text);
+      if(first===second)return null;return r.el('i','distinct');
+    };`);
+    const first = helper(ir, 'first');
+    const second = renderFunction(ir).body[1];
+    if (second.kind !== 'const' || second.value.kind !== 'function')
+      throw new Error('Expected second creation');
+    second.value.function = first;
+    // Same capture origin is deliberate. Inconsistent captured bindings are a
+    // different upstream-invalid case, not evidence for this creation guard.
+    const proof = checked(ir);
+    expect(proof.entries.get(first)?.creations).toBe(2);
+    expect(proof.eligible.has(first)).toBe(false);
+    expect(proof.entries.get(first)?.blocked.has('non-unique-creation-syntax')).toBe(true);
+  });
+
+  it.each(['name', 'length', 'toString'])(
+    'retains upstream rejection of callable reflection: %s',
+    (property) => {
+      const ir = identity();
+      const fn = renderFunction(ir);
+      const span = fn.span;
+      fn.body.splice(2, 0, {
+        kind: 'effect',
+        span,
+        expression: {
+          kind: 'member',
+          type: 'unknown',
+          optional: false,
+          property,
+          span,
+          object: { kind: 'reference', type: 'function', name: 'alias', span },
+        },
+      });
+      const { result } = validated(ir);
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(
+          result.diagnostics.some((item) => item.message.includes('Unsupported IR property access'))
+        ).toBe(true);
+      // Invalid input is not evidence of supported reflection or safe escape.
+    }
+  );
+
+  it.each(['array', 'record'] as const)(
+    'retains upstream rejection of callable container escape: %s',
+    (kind) => {
+      const ir = identity();
+      const fn = renderFunction(ir);
+      const span = fn.span;
+      const reference: ExpressionIR = { kind: 'reference', type: 'function', name: 'alias', span };
+      const value: ExpressionIR =
+        kind === 'array'
+          ? { kind, type: 'array', elements: [reference], span }
+          : { kind, type: 'record', entries: [{ key: 'callback', value: reference }], span };
+      fn.body.splice(2, 0, { kind: 'const', name: 'escaped', value, span });
+      const { result } = validated(ir);
+      expect(result.ok).toBe(false);
+      if (!result.ok)
+        expect(
+          result.diagnostics.some((item) =>
+            item.message.includes(
+              kind === 'array'
+                ? 'Data arrays cannot contain semantic handles'
+                : 'Configuration records cannot contain execution-scope handles or escaping callbacks'
+            )
+          )
+        ).toBe(true);
+    }
+  );
+
+  it('retains upstream rejection of recursive aliases', () => {
+    const ir = identity();
+    const make = helper(ir);
+    make.body.unshift({
+      kind: 'effect',
+      span: make.span,
+      expression: {
+        kind: 'helper-call',
+        type: 'template',
+        name: 'make',
+        arguments: [],
+        span: make.span,
+      },
+    });
+    const { result } = validated(ir);
+    expect(result.ok).toBe(false);
+    if (!result.ok)
+      expect(
+        result.diagnostics.some((item) => item.message.includes('Unknown or recursive helper call'))
+      ).toBe(true);
+  });
+
+  it('preserves separate function identities and original arity with no runtime projector', async () => {
+    const ir = prototype(`return r=>{
+      const first=(text:string,extra?:string)=>r.el('b',text);
+      const second=(text:string,extra?:string)=>r.el('b',text);
+      const alias=first;const secondAlias=second;
+      if(first!==alias)return null;if(second!==secondAlias)return null;
+      if(first===second)return r.el('i','wrong-shared-identity');
+      return r.el('i','distinct');
+    };`);
+    legacy(helper(ir, 'first'));
+    legacy(helper(ir, 'second'));
+    const view = await mount(ir);
+    expect(view.host.textContent).toBe('distinct');
+    const { program, source, evidence } = strictGraph(view.module);
+    const checker = program.getTypeChecker();
+    const declarations: ts.VariableDeclaration[] = [];
+    const formalTypes: Array<{ name: string; flags: number; type: string }> = [];
+    const visit = (node: ts.Node) => {
+      if (
+        ts.isVariableDeclaration(node) &&
+        ts.isIdentifier(node.name) &&
+        ['first', 'second'].includes(node.name.text)
+      )
+        declarations.push(node);
+      ts.forEachChild(node, visit);
+    };
+    visit(source);
+    expect(declarations.length).toBe(2);
+    for (const declaration of declarations) {
+      const fn = declaration.initializer;
+      expect(fn && ts.isArrowFunction(fn)).toBe(true);
+      if (!fn || !ts.isArrowFunction(fn)) throw new Error('Expected original arrow creation');
+      expect(fn.parameters.map((parameter) => parameter.name.getText(source))).toEqual([
+        'text',
+        'extra',
+      ]);
+      for (const parameter of fn.parameters) {
+        const type = checker.getTypeAtLocation(parameter);
+        formalTypes.push({
+          name: parameter.name.getText(source),
+          flags: type.flags,
+          type: checker.typeToString(type),
+        });
+      }
+      expect(ts.isBlock(fn.body) && fn.body.statements.length).toBe(0);
+      // No hoisting: the original creation is still nested in the authored renderer.
+      let parent: ts.Node | undefined = declaration.parent;
+      while (parent && !ts.isArrowFunction(parent)) parent = parent.parent;
+      expect(
+        parent &&
+          ts.isArrowFunction(parent) &&
+          parent.parameters.map((parameter) => parameter.name.getText(source))
+      ).toEqual(['r']);
+    }
+    capture(evidence, 'formal-types.json', JSON.stringify(formalTypes, null, 2));
+    expect(formalTypes.length).toBe(4);
+    expect(formalTypes.every((type) => type.flags === ts.TypeFlags.Unknown)).toBe(true);
+    expect(view.module.code).not.toContain('unreachable authored callable');
+  });
+
+  it('keeps the full body when an identity-observed alias is actually invoked', async () => {
+    const ir = identity("return alias('called');");
+    legacy(helper(ir));
+    const proof = checked(ir);
+    expect(proof.eligible.has(helper(ir))).toBe(false);
+    const view = await mount(ir);
+    expect(view.host.querySelector('b')?.textContent).toBe('called');
+    expect(view.host.querySelector('i')).toBeNull();
+    strictGraph(view.module);
   });
 });

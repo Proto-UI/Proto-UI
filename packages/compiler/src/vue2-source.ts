@@ -249,6 +249,15 @@ export function emitVue2Source(
       .join(', ');
   }
   function fn(value: FunctionIR, depth: number): string {
+    if (nativePlan?.identityOnly.has(value)) {
+      // Complete lexical use proof, not absence from the invocation collector.
+      // Preserve this allocation site and original arity. Opaque unused formals
+      // are not node provenance or an expanded callable interface.
+      const opaque = value.parameters
+        .map((parameter) => ` * @param {unknown} ${parameter.name}`)
+        .join('\n');
+      return `${opaque ? `/**\n${opaque}\n */ ` : ''}(${value.parameters.map((parameter) => parameter.name).join(', ')}) => {}`;
+    }
     const saved = nativeScope;
     for (const parameter of value.parameters) {
       nativeScope = nativeScope.bind(parameter.name, {
