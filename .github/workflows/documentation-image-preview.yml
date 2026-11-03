@@ -1,16 +1,8 @@
 name: Documentation image preview evidence
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/documentation-image-preview.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/**'
-      - 'packages/modules/**'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 
 # Exact-head public-page evidence only: no secrets, deployment or repository writes.
 permissions:

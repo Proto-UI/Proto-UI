@@ -1,20 +1,7 @@
 name: Private initial optical paint evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/material-initial-paint-evidence.yml'
-      - 'experiments/material-initial-paint/**'
-      - 'packages/**'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/content/docs/zh-cn/library-card-capture.ts'
-      - 'scripts/test/server-readiness.mjs'
-      - 'scripts/build/**'
-      - 'scripts/release/test/material-initial-paint-workflow.test.mjs'
-      - '.npmrc'
-      - 'pnpm-workspace.yaml'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'tsconfig*.json'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -27,11 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - name: Verify exact pull request head
         env:
-          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: test "$(git rev-parse HEAD)" = "$EXPECTED_SOURCE_SHA"
       - uses: actions/setup-node@v4
         with:
@@ -58,7 +45,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: material-initial-paint-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: material-initial-paint-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: |
             /tmp/pui-initial-paint/
             /tmp/pui-initial-paint-evidence/

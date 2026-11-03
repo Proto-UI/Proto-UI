@@ -5,6 +5,8 @@ description: Reproduce and repair a bounded Proto UI regression whose expected b
 
 # Repair a governed regression
 
+Use `pui-dev`'s bounded-completion loop and the [release-stage policy](../../../internal/governance/release-0.3-plan.md). Retain the failing consumer observation, repair the owning layer, and continue through validation, independent review and lawful integration. Return the exact development checkbox the repair can complete, plus separate acceptance work still requiring evidence; unrelated remaining criteria do not invalidate a completed repair.
+
 For event ordering, input attribution, CSS ownership or a suspect fixture, read `internal/agent-operations/testing-method.md` before designing the red case. Separate injected facts from observations and retain meaningful assertions when correcting an older test.
 
 1. Require a minimal reproduction, `pui-trace` map, fixed expected behavior, affected surfaces, and explicit exclusions.

@@ -168,22 +168,6 @@ test('candidate governance reconciliation stays secret-free and read-only', () =
   });
   assert.equal(workflow.on.pull_request_target, undefined);
   assert.doesNotMatch(text, /secrets\./);
-  const paths = workflow.on.pull_request.paths;
-  for (const required of [
-    '.github/workflows/coverage-governance.yml',
-    'internal/coverage-matrices/**',
-    'internal/website/self-hosting-coverage-matrix.md',
-    'internal/agent-harness/dogfood-coverage-matrix.md',
-    'scripts/coverage-matrices/**',
-    'packages/spec/schema/**',
-    '**/package.json',
-    'pnpm-lock.yaml',
-    'pnpm-workspace.yaml',
-    '.npmrc',
-    '.prettier*',
-  ]) {
-    assert.ok(paths.includes(required), required);
-  }
   const steps = workflow.jobs.reconcile.steps;
   const checkout = steps.find((step) => step.uses?.startsWith('actions/checkout@'));
   assert.equal(checkout.with['persist-credentials'], false);

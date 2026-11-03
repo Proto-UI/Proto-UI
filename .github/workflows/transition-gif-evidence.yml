@@ -1,15 +1,7 @@
 name: Actual transition GIF source frames
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/transition-gif-evidence.yml'
-      - 'apps/www/scripts/capture-transition-frames.ts'
-      - 'apps/www/src/content/docs/**'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'apps/www/src/styles/**'
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

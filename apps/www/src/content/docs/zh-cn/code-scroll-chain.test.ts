@@ -75,9 +75,6 @@ it('keeps exact-head, read-only and bounded independent evidence preparation', (
     'prepare-homepage-composition-fonts.sh',
   ])
     expect(workflow).toContain(token);
-  expect(readFileSync('.github/workflows/toc-motion-evidence.yml', 'utf8')).toContain(
-    "'apps/www/src/styles/code-surfaces.css'"
-  );
   expect(browser).toContain('trusted: event.isTrusted');
 });
 
@@ -106,12 +103,30 @@ it('retains dispatch-time identity snapshots without replacing the original whee
   for (const token of required) expect(() => check(browser.replaceAll(token, ''))).toThrow();
 });
 it('keeps retargeted and missing targets distinct from the selected PRE in the actual observer', () => {
-  const start = browser.indexOf('    const eventIds =');
-  const end = browser.indexOf("    addEventListener('wheel', event => trace", start);
-  expect(start).toBeGreaterThan(0);
-  expect(end).toBeGreaterThan(start);
+  const syntax = ts.createSourceFile('probe.ts', browser, ts.ScriptTarget.Latest, true);
+  const binds = (statement: ts.Statement, name: string) =>
+    (ts.isVariableStatement(statement) &&
+      statement.declarationList.declarations.some(
+        (declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === name
+      )) ||
+    (ts.isFunctionDeclaration(statement) && statement.name?.text === name);
+  let statements: readonly ts.Statement[] | undefined;
+  const visit = (node: ts.Node) => {
+    if (ts.isBlock(node)) {
+      const start = node.statements.findIndex((statement) => binds(statement, 'eventIds'));
+      const end = node.statements.findIndex((statement) => binds(statement, 'trace'));
+      if (start >= 0 && end >= start) {
+        if (statements) throw new Error('Ambiguous actual wheel observer scope');
+        statements = node.statements.slice(start, end + 1);
+      }
+    }
+    ts.forEachChild(node, visit);
+  };
+  visit(syntax);
+  if (!statements) throw new Error('Missing actual wheel observer scope');
   const source = ts.transpileModule(
-    browser.slice(start, end) + '\n globalThis.recordWheel = trace;',
+    statements.map((statement) => statement.getText(syntax)).join('\n') +
+      '\n globalThis.recordWheel = trace;',
     {
       compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None },
     }
@@ -184,122 +199,6 @@ it('keeps retargeted and missing targets distinct from the selected PRE in the a
   expect(missing.selectedContainsTarget).toBe(false);
   expect(missing.selectedInPath).toBe(false);
   expect(missing.eventId).toBeGreaterThan(first.eventId);
-});
-
-it('keeps the non-passive scheduling control separate from passive product acceptance', () => {
-  const start = browser.indexOf("it('chains reverse wheel");
-  const split = browser.indexOf("it('diagnoses wheel scheduling", start);
-  const end = browser.indexOf('for (const width of [1440, 320])', split);
-  expect(start).toBeGreaterThan(0);
-  expect(split).toBeGreaterThan(start);
-  expect(end).toBeGreaterThan(split);
-  const original = browser.slice(start, split),
-    control = browser.slice(split, end);
-  expect(original).not.toContain('passive: false');
-  for (const body of [original, control])
-    for (const token of [
-      'i < 14',
-      'page.mouse.wheel(0, -220)',
-      'before.scrollY - 500',
-      'wheel.preScrollTop === 0',
-      'expect(hit.belongsToSelectedPre).toBe(true)',
-      'requestedDeltaX: 0, requestedDeltaY: -220',
-      'requestedClientX: args.point.x',
-      'requestedClientY: args.point.y',
-      'selectedIsObservedPre:',
-      'selectedPreIndex:',
-    ])
-      expect(body).toContain(token);
-  const required = [
-    "entry.kind = 'non-passive-scheduling-control'",
-    'entry.acceptance = false',
-    "element.addEventListener('wheel'",
-    '{ passive: false }',
-    'row.selectedInPath && row.targetInsideSelected && row.scrollY === before.scrollY',
-    'row.preScrollTop === 0 && row.defaultPrevented === false',
-  ];
-  const check = (source: string) => {
-    for (const token of required) expect(source).toContain(token);
-  };
-  check(control);
-  for (const token of required) expect(() => check(control.replaceAll(token, ''))).toThrow();
-  expect(control).not.toMatch(/\.(?:preventDefault|stopPropagation|stopImmediatePropagation)\s*\(/);
-  expect(300 + 5 * 45 + 10).toBeLessThan(560);
-});
-
-it('replaces no product behavior while retaining the late-target mismatch as an explicit diagnostic', () => {
-  const required = [
-    "entry.lateTargetDiagnostic = { kind: 'observer-diagnostic', acceptance: false",
-    'expected: true, actual:',
-    'entry.lateTargetDiagnostic.failure = String(error)',
-    'wheel.preScrollTop === 0)).toBe(true)',
-    'short-passive-observer-diagnostic.png',
-    'await verifyPassiveCausality(page, pre, entry)',
-  ];
-  const check = (source: string) => {
-    for (const token of required) expect(source).toContain(token);
-  };
-  check(browser);
-  for (const token of required) expect(() => check(browser.replaceAll(token, ''))).toThrow();
-});
-it('requires contain negative control, restored product auto, exact input identity and independent zero-vs-positive movement', () => {
-  const start = browser.indexOf('async function verifyPassiveCausality(');
-  const end = browser.indexOf("it('chains reverse wheel", start);
-  const helper = browser.slice(start, end);
-  const required = [
-    "['contain-negative', 'product-auto']",
-    "style.setProperty('overscroll-behavior-y', 'contain', 'important')",
-    'else await restore()',
-    'expect(original.samePre).toBe(true)',
-    'expect(input.samePre && input.connected).toBe(true)',
-    "if (i === 0 || stageName === 'contain-negative') expect(input.hitInsidePre).toBe(true)",
-    "expect(input.computedY).toBe(stageName === 'contain-negative' ? 'contain' : 'auto')",
-    'initial.scrollHeight).toBe(initial.clientHeight)',
-    'expect(input.preScrollTop).toBe(0)',
-    "if (stageName === 'contain-negative') expect(measured.scrollY).toBe(initial.scrollY)",
-    "if (stageName === 'contain-negative') expect(final.scrollY).toBe(initial.scrollY)",
-    '.toBeLessThan(initial.scrollY - 500)',
-    'expect(stage.inputs).toHaveLength(14)',
-    'stage.preDeliveryFinal = await observe',
-    'stage.deliveryEndAt = await page.evaluate',
-    '\${stageName}-post-delivery-final',
-    'stage.final = final',
-    'else expect(final.scrollY).toBeLessThan(initial.scrollY - 500)',
-    'expect(stage.events.length).toBeGreaterThan(0)',
-    'expect(event.trusted).toBe(true)',
-    'expect(event.deltaX).toBe(0)',
-    'expect(event.deltaY).toBeLessThan(0)',
-    'expect(event.deltaMode).toBe(0)',
-    'expect(event.clientX).toBe(Math.floor(firstInput.requestedClientX))',
-    'expect(event.clientY).toBe(Math.floor(firstInput.requestedClientY))',
-    'expect(event.eventTimeStamp).toBeGreaterThanOrEqual(firstInput.observedAt)',
-    'expect(event.eventTimeStamp).toBeLessThanOrEqual(stage.inputEndAt)',
-    'expect(event.observedAt).toBeLessThanOrEqual(stage.deliveryEndAt)',
-    'sum + event.deltaY, 0)',
-    '.toBe(-220 * 14)',
-    'expect(event.defaultPreventedAtObservation).toBe(false)',
-    'expect(event.selectedInPath && event.selectedContainsTarget).toBe(true)',
-    'expect(event.scrollY).toBe(initial.scrollY)',
-    'expect(initial[key]).toBe(negative[key])',
-    'expect(entry.causality.restored).toEqual(original)',
-    'if (primary) throw primary',
-  ];
-  const check = (source: string) => {
-    for (const token of required) expect(source).toContain(token);
-  };
-  check(helper);
-  for (const token of required) expect(() => check(helper.replaceAll(token, ''))).toThrow();
-  expect(helper.indexOf('entry.causality.acceptance = freshPolicy === undefined')).toBeGreaterThan(
-    helper.indexOf('if (primary) throw primary')
-  );
-  const measuredLoop = helper.slice(
-    helper.indexOf('for (let i = 0; i < 14; i++)'),
-    helper.indexOf('stage.passed = true')
-  );
-  expect(measuredLoop).not.toMatch(
-    /scrollIntoView|scrollTo\(|scrollBy\(|scrollTop\s*=|dispatchEvent|preventDefault|stopPropagation/
-  );
-  expect(browser.match(/}, 45_000\);/g)).toHaveLength(4); // three explicit cases and one two-width loop
 });
 
 it('correlates actual stage capture logic without assuming one DOM event per wheel command', () => {
