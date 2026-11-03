@@ -81,7 +81,7 @@ describe('Textarea actual DemoSpec registration', () => {
           [...PROJECTION_FAMILY_MANIFESTS[family].families.textarea.recipePrototypeIds].sort()
         ).toEqual(ids);
       } else {
-        expect(ids).toEqual([...(expectedIds as string[])].sort());
+        expect(ids).toEqual([...expectedIds].sort());
       }
       for (const id of ids) {
         await loadPrototype(id);
