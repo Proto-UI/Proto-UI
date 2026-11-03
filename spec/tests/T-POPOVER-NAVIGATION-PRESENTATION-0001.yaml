@@ -33,6 +33,20 @@ cases:
       - P-SHADCN-POPOVER-NAVIGATION-CSS-CLOSURE
       - P-BRUTALIST-POPOVER-NAVIGATION-CSS-CLOSURE
     expectation: canonical-generated-manifest-and-preset-command-css-with-missing-token-countercontrols
+  - id: T-POPOVER-NAVIGATION-PRESENTATION-0001-CASE-CONSUMER
+    title: Ordinary public navigation demos retain exact dependency and native-owner boundaries
+    covers:
+      - P-SHADCN-POPOVER-NAVIGATION-TRIGGER
+      - P-SHADCN-POPOVER-NAVIGATION-SEMANTICS
+      - P-BRUTALIST-POPOVER-NAVIGATION
+    expectation: literal-ordinary-demo-glob-and-exact-public-loader-with-missing-dependency-countercontrol
+  - id: T-POPOVER-NAVIGATION-PRESENTATION-0001-CASE-NATIVE
+    title: Uncontrolled navigation consumers realize available-size scrolling and dismissal across four Web runtimes
+    covers:
+      - P-SHADCN-POPOVER-NAVIGATION-PRESENTATION
+      - P-SHADCN-POPOVER-NAVIGATION-SEMANTICS
+      - P-BRUTALIST-POPOVER-NAVIGATION
+    expectation: real-pointer-wheel-tab-outside-focus-escape-and-resized-reopen-with-source-bound-images
 implementations:
   - id: popover-navigation-host
     kind: module-test
@@ -61,3 +75,24 @@ implementations:
       - P-BRUTALIST-POPOVER
     notes:
       - 'Real source CLI preset command writes document CSS and a serialized shadow artifact from the canonical generated manifests. Each navigation token is removed in a restored in-memory countercontrol; no generated source is hand-edited.'
+  - id: popover-navigation-public-consumer
+    kind: module-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/popover-navigation-evidence.test.ts
+    required: true
+    consumesCases:
+      - T-POPOVER-NAVIGATION-PRESENTATION-0001-CASE-CONSUMER
+    exercises: [P-SHADCN-POPOVER, P-BRUTALIST-POPOVER]
+    notes:
+      - 'Ordinary full demo glob and real renderer/loader checks, including a genuinely missing reached Root, are host-source evidence rather than native geometry or focus acceptance.'
+  - id: popover-navigation-public-native
+    kind: adapter-test
+    status: planned
+    path: apps/www/src/content/docs/zh-cn/popover-navigation.browser.test.ts
+    required: true
+    consumesCases:
+      - T-POPOVER-NAVIGATION-PRESENTATION-0001-CASE-NATIVE
+    exercises: [P-SHADCN-POPOVER, P-BRUTALIST-POPOVER]
+    notes:
+      - 'Thirty-two planned family/runtime/theme/viewport subjects use real public MDX consumers and one exact-head loopback CI owner. Only actual terminal per-case receipts and their commit-bound screenshots establish execution.'
+      - 'This uncontrolled reduced-motion consumer does not certify the separate controlled cold-cancellation case, modifier/context-menu/no-JS activation, unreduced motion, Trigger design parity, website borrowed-tree handback or fatal retirement.'

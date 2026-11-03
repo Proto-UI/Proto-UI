@@ -165,6 +165,7 @@ describe('Finf representative evidence harness, no native browser', () => {
       'neo-popover-title': 0,
       'popover-command-density': 0,
       'popover-title': 0,
+      'popover-navigation': 0, // Dedicated 32-subject suite, not a representative case.
       'resident-motion-capability': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
