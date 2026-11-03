@@ -1,0 +1,370 @@
+{
+  "scope": "Three actual child processes invoking unchanged repository cli-entry.ts with final production CLI. Separate from62 handler-path tests.",
+  "command": "node --import tsx packages/compiler/src/cli-entry.ts migrate-native-support plan.json --output cohort --json",
+  "normalization": "Only absolute path roots at lexical boundaries are mapped; project-relative .proto-ui/migration-inputs paths are preserved. Original process output and complete output inventory remain byte-reconstructable.",
+  "tooling": {
+    "tsx": "4.21.0",
+    "tsxEsbuild": "0.27.4",
+    "consumerEsbuild": "0.25.12"
+  },
+  "processes": [
+    {
+      "label": "success",
+      "argv": [
+        "--import",
+        "tsx",
+        "packages/compiler/src/cli-entry.ts",
+        "migrate-native-support",
+        "<output>/plan.json",
+        "--output",
+        "<output>/migrated",
+        "--json"
+      ],
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "stdout": "{\"ok\":true,\"command\":\"migrate-native-support\",\"result\":{\"directory\":\"<output>/migrated\",\"files\":[\"<output>/migrated/.proto-ui/migration-inputs/new-boundary.json\",\"<output>/migrated/.proto-ui/migration-inputs/new-modal.json\",\"<output>/migrated/.proto-ui/migration-inputs/new-text.json\",\"<output>/migrated/.proto-ui/migration-inputs/new-trigger.json\",\"<output>/migrated/.proto-ui/migration-inputs/old-boundary.json\",\"<output>/migrated/.proto-ui/migration-inputs/old-modal.json\",\"<output>/migrated/.proto-ui/migration-inputs/old-text.json\",\"<output>/migrated/.proto-ui/migration-inputs/old-trigger.json\",\"<output>/migrated/.proto-ui/shared/context/scope-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/adapter-modules-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/native-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/ownership-v1.ts\",\"<output>/migrated/.proto-ui/shared/interaction/text-multiline-v1.ts\",\"<output>/migrated/new-boundary/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/new-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/new-boundary/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/new-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/new-boundary/Component.js\",\"<output>/migrated/new-boundary/Component.js.map\",\"<output>/migrated/new-boundary/provenance.json\",\"<output>/migrated/new-modal/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/new-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/new-modal/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/new-modal/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/new-modal/Component.js\",\"<output>/migrated/new-modal/Component.js.map\",\"<output>/migrated/new-modal/provenance.json\",\"<output>/migrated/new-text/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/new-text/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/new-text/.proto-ui/interaction/text-multiline-v1.ts\",\"<output>/migrated/new-text/Component.js\",\"<output>/migrated/new-text/Component.js.map\",\"<output>/migrated/new-text/provenance.json\",\"<output>/migrated/new-trigger/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/new-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/new-trigger/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/new-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/new-trigger/Component.js\",\"<output>/migrated/new-trigger/Component.js.map\",\"<output>/migrated/new-trigger/provenance.json\",\"<output>/migrated/old-boundary/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/old-boundary/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/old-boundary/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/old-boundary/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/old-boundary/Component.js\",\"<output>/migrated/old-boundary/Component.js.map\",\"<output>/migrated/old-boundary/provenance.json\",\"<output>/migrated/old-modal/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/old-modal/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/old-modal/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/old-modal/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/old-modal/Component.js\",\"<output>/migrated/old-modal/Component.js.map\",\"<output>/migrated/old-modal/provenance.json\",\"<output>/migrated/old-text/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/old-text/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/old-text/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/old-text/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/old-text/Component.js\",\"<output>/migrated/old-text/Component.js.map\",\"<output>/migrated/old-text/provenance.json\",\"<output>/migrated/old-trigger/.proto-ui/context/scope-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/adapter-modules-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/native-v1.ts\",\"<output>/migrated/old-trigger/.proto-ui/interaction/ownership-v1.ts\",\"<output>/migrated/old-trigger/Component.js\",\"<output>/migrated/old-trigger/Component.js.map\",\"<output>/migrated/old-trigger/provenance.json\",\"<output>/migrated/provenance.json\"]},\"diagnostics\":[]}\n",
+      "stderr": ""
+    },
+    {
+      "label": "wrong-anchor",
+      "argv": [
+        "--import",
+        "tsx",
+        "packages/compiler/src/cli-entry.ts",
+        "migrate-native-support",
+        "<output>/bad-plan.json",
+        "--output",
+        "<output>/must-not-exist",
+        "--json"
+      ],
+      "exitCode": 1,
+      "signal": null,
+      "error": null,
+      "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI5001\",\"category\":\"output-conflict\",\"message\":\"Native support migration rejected: Trusted provenance SHA does not match input: old-trigger\",\"span\":{\"file\":\"<source>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+      "stderr": ""
+    },
+    {
+      "label": "missing-output",
+      "argv": [
+        "--import",
+        "tsx",
+        "packages/compiler/src/cli-entry.ts",
+        "migrate-native-support",
+        "<output>/plan.json",
+        "--json"
+      ],
+      "exitCode": 2,
+      "signal": null,
+      "error": null,
+      "stdout": "{\"ok\":false,\"command\":\"migrate-native-support\",\"diagnostics\":[{\"code\":\"PUI9001\",\"category\":\"invalid-input\",\"message\":\"migrate-native-support requires an explicit --output directory\",\"span\":{\"file\":\"<cli>\",\"start\":0,\"end\":0,\"line\":1,\"column\":1,\"endLine\":1,\"endColumn\":1}}]}\n",
+      "stderr": ""
+    }
+  ],
+  "actualResult": {
+    "status": "ACTUAL_PROCESS_ENTRY_PASS",
+    "commands": [
+      {
+        "label": "success",
+        "exitCode": 0,
+        "signal": null,
+        "error": null
+      },
+      {
+        "label": "wrong-anchor",
+        "exitCode": 1,
+        "signal": null,
+        "error": null
+      },
+      {
+        "label": "missing-output",
+        "exitCode": 2,
+        "signal": null,
+        "error": null
+      }
+    ],
+    "exactOutputFiles": {
+      ".proto-ui/migration-inputs/new-boundary.json": {
+        "bytes": 1730,
+        "sha256": "92666fe4661687b1f8cfff8556bcc0cdcf1b7c267a69d70c98c8c744a60d07cb"
+      },
+      ".proto-ui/migration-inputs/new-modal.json": {
+        "bytes": 1724,
+        "sha256": "d66a790d47e4291715dc468b83bfccfd4665d9c6c4489dc3ea430f6111668bb3"
+      },
+      ".proto-ui/migration-inputs/new-text.json": {
+        "bytes": 1453,
+        "sha256": "3cb13c24ed226d8b0a6d724e8f5823b3631c850d4d8dd22e91754e183dcc276c"
+      },
+      ".proto-ui/migration-inputs/new-trigger.json": {
+        "bytes": 1728,
+        "sha256": "55a2d569f16c30c590017a83885e82dcc01e07e14c6a05bd72390d60e5d363a9"
+      },
+      ".proto-ui/migration-inputs/old-boundary.json": {
+        "bytes": 1555,
+        "sha256": "8726cbe7b0bdd58e0d6b0bab90208aa539bffd497026adea920daf322afeb7ac"
+      },
+      ".proto-ui/migration-inputs/old-modal.json": {
+        "bytes": 1549,
+        "sha256": "86d5c12255138c41360830cbaecf3d735628a39b74a9c0b0caed6dc610b6ee5a"
+      },
+      ".proto-ui/migration-inputs/old-text.json": {
+        "bytes": 1547,
+        "sha256": "554e3763d3b73260bd405eb8bc3c8618883b65548cc4a961b191b525b7474264"
+      },
+      ".proto-ui/migration-inputs/old-trigger.json": {
+        "bytes": 1553,
+        "sha256": "ad08f3ae5d9f9ae98c6fec357fac5442a8ed0babcea7d8bd15e06abef03cf664"
+      },
+      ".proto-ui/shared/context/scope-v1.ts": {
+        "bytes": 8797,
+        "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+      },
+      ".proto-ui/shared/interaction/adapter-modules-v1.ts": {
+        "bytes": 129577,
+        "sha256": "9d00cc2779c48537e12ef0faf618eb5fee4f8adc7c06ceb571a7c51c5c985c08"
+      },
+      ".proto-ui/shared/interaction/native-v1.ts": {
+        "bytes": 38998,
+        "sha256": "7f4cf3a193abca699243c964880fc2843ffa51e6ec792113f208ee86cdc4ac07"
+      },
+      ".proto-ui/shared/interaction/ownership-v1.ts": {
+        "bytes": 4229,
+        "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44"
+      },
+      ".proto-ui/shared/interaction/text-multiline-v1.ts": {
+        "bytes": 15007,
+        "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727"
+      },
+      "new-boundary/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "new-boundary/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "new-boundary/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "new-boundary/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "new-boundary/Component.js": {
+        "bytes": 42185,
+        "sha256": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f"
+      },
+      "new-boundary/Component.js.map": {
+        "bytes": 1439,
+        "sha256": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342"
+      },
+      "new-boundary/provenance.json": {
+        "bytes": 1906,
+        "sha256": "301bc61de370e4932352562a61f2c98ae6c9921422120ad412a0f5b233d1a3d4"
+      },
+      "new-modal/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "new-modal/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "new-modal/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "new-modal/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "new-modal/Component.js": {
+        "bytes": 42154,
+        "sha256": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5"
+      },
+      "new-modal/Component.js.map": {
+        "bytes": 1435,
+        "sha256": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92"
+      },
+      "new-modal/provenance.json": {
+        "bytes": 1900,
+        "sha256": "714f883b90e5bb27fbcdff8701b1671bd19953b08b59e2ce151aa548c3fe1f9d"
+      },
+      "new-text/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "new-text/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "new-text/.proto-ui/interaction/text-multiline-v1.ts": {
+        "bytes": 143,
+        "sha256": "64905e260411d1a88698fc6d2b76086836a5038c986a8636b9016863d6a4cb16"
+      },
+      "new-text/Component.js": {
+        "bytes": 31560,
+        "sha256": "5342d7c7fc938741a2b179351d0397ce9535c8f327243e7ad76f9305ecbedb98"
+      },
+      "new-text/Component.js.map": {
+        "bytes": 1399,
+        "sha256": "5bc8533cfef06096acd3efad4e54285fbd96bbc82dfa7d227a1edf4a12036543"
+      },
+      "new-text/provenance.json": {
+        "bytes": 1629,
+        "sha256": "4e7da6a44a698938accd23badc737577619f0c422387e45b75559200da27e8d7"
+      },
+      "new-trigger/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "new-trigger/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "new-trigger/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "new-trigger/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "new-trigger/Component.js": {
+        "bytes": 40217,
+        "sha256": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb"
+      },
+      "new-trigger/Component.js.map": {
+        "bytes": 1168,
+        "sha256": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242"
+      },
+      "new-trigger/provenance.json": {
+        "bytes": 1904,
+        "sha256": "e06b8269c937a99653762cb8f6a1c55c97bfa8b84392ed16b8283afd96cc722f"
+      },
+      "old-boundary/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "old-boundary/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "old-boundary/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "old-boundary/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "old-boundary/Component.js": {
+        "bytes": 42185,
+        "sha256": "bc02710c53708e04de5479554b541b6e259542b023d4a6a440650fdeda35e60f"
+      },
+      "old-boundary/Component.js.map": {
+        "bytes": 1439,
+        "sha256": "aed01be1ea859aff6dfb63f05cb1c19641e8f53b45a62ce2eadf3cdc52271342"
+      },
+      "old-boundary/provenance.json": {
+        "bytes": 1906,
+        "sha256": "34a768e0427f69fba501e6ca5c1de615ee3e1617939ed2ceea47d08296888d2c"
+      },
+      "old-modal/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "old-modal/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "old-modal/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "old-modal/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "old-modal/Component.js": {
+        "bytes": 42154,
+        "sha256": "9bfb7f40f654d10421fc03b710f5558659353064a444c0693ac0d6626e7ee2d5"
+      },
+      "old-modal/Component.js.map": {
+        "bytes": 1435,
+        "sha256": "4fe751bf50781b901b506d203b67fa571bd01d03b538254b5bdcf051f8bf7c92"
+      },
+      "old-modal/provenance.json": {
+        "bytes": 1900,
+        "sha256": "0d75cb40502af469b2a6e4e950bee47ffa27ae2c42e4b1b48884b2a6c34c29d4"
+      },
+      "old-text/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "old-text/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "old-text/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "old-text/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "old-text/Component.js": {
+        "bytes": 39546,
+        "sha256": "68ce2d8743bef7639c8d7902ad6c18ff050558e408d884ea8ddf8b1582878288"
+      },
+      "old-text/Component.js.map": {
+        "bytes": 1526,
+        "sha256": "a354875deb96a61182a006b143e804c8feb5ed8e6da37f6727ef8d5dda032dcc"
+      },
+      "old-text/provenance.json": {
+        "bytes": 1898,
+        "sha256": "6626ea35be2d2063f6a692c1febfd72be439eec62447dd62aef80d87e2831047"
+      },
+      "old-trigger/.proto-ui/context/scope-v1.ts": {
+        "bytes": 130,
+        "sha256": "8caee410215ac42a353fd2fe3848f8e2259f9541d857ac5ffb106821acd7908b"
+      },
+      "old-trigger/.proto-ui/interaction/adapter-modules-v1.ts": {
+        "bytes": 144,
+        "sha256": "9232fb97c7e60e5108ba6880593530e231ba7a944d4bbf6285ee7271f885d90f"
+      },
+      "old-trigger/.proto-ui/interaction/native-v1.ts": {
+        "bytes": 135,
+        "sha256": "791cfdb9e16963bb474cde478f9176e68cc17b9c17fd8fda7914e2ff2258524d"
+      },
+      "old-trigger/.proto-ui/interaction/ownership-v1.ts": {
+        "bytes": 138,
+        "sha256": "daef948e5bf3f1267b3cdadadd7b51212a51c4df92085271d744429384129ed2"
+      },
+      "old-trigger/Component.js": {
+        "bytes": 40217,
+        "sha256": "956cae795c00ed66a54689ff8c094094d3814fa8c3566e7fd1e86c94a17d0cdb"
+      },
+      "old-trigger/Component.js.map": {
+        "bytes": 1168,
+        "sha256": "f196a07e94b30e151f28934ed38e0773500b987fc4f5fbc189d1f94443620242"
+      },
+      "old-trigger/provenance.json": {
+        "bytes": 1904,
+        "sha256": "67b2c213dd9e114546cdc5963e33531deff7344992ec2671b9de01ca7fd4a25b"
+      },
+      "provenance.json": {
+        "bytes": 26742,
+        "sha256": "4f06d0508746b8cb6c57b0124743bfd27cb88b0cede6d77a2e9a8370695eedb9"
+      }
+    },
+    "completeOutputMatchesPriorHandler": true,
+    "originalInputsUnchanged": true,
+    "componentAndMapBytesUnchanged": true,
+    "wrongAnchorNoOutput": true,
+    "missingOutputUsageExit": 2
+  }
+}

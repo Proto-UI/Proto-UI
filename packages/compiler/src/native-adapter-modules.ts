@@ -1446,3 +1446,316 @@ export function createNativeAdapterModules<Run>(options: NativeAdapterModuleOpti
 }
 `,
 };
+
+/** Compiler-only assembly of existing host fragments, never authored syntax. */
+export function nativeSourceSection(source: string, start: string, end: string): string {
+  const first = source.indexOf(start);
+  const last = source.indexOf(end, first + start.length);
+  if (first < 0 || last < 0 || source.indexOf(start, first + start.length) >= 0)
+    throw new Error('Native support source boundary is missing or ambiguous: ' + start);
+  return source.slice(first, last);
+}
+export function replaceNativeSource(source: string, before: string, after: string): string {
+  const first = source.indexOf(before);
+  if (first < 0 || source.indexOf(before, first + before.length) >= 0)
+    throw new Error('Native support replacement is missing or ambiguous.');
+  return source.slice(0, first) + after + source.slice(first + before.length);
+}
+function nativeSourceLine(source: string, start: string): string {
+  return nativeSourceSection(source, start, '\n') + '\n';
+}
+export function nativeOwnershipArtifact(interactionSource: string) {
+  const source = nativeAdapterModulesArtifact.contents;
+  const moduleTypes = [
+    'export type NativeFocusRequest =',
+    'export type NativeAnatomyFamily =',
+    'export interface NativeAnatomyPart ',
+    'type Claim =',
+    'type Owner =',
+  ]
+    .map((start) => {
+      const line = nativeSourceLine(source, start);
+      return line.startsWith('export ') ? line : 'export ' + line;
+    })
+    .join('');
+  const moduleMaps = [
+    'const owners =',
+    'const activeScopes:',
+    'const parts =',
+    'const targets =',
+    'const hostIds =',
+  ]
+    .map((start) => 'export ' + nativeSourceLine(source, start))
+    .join('');
+  const ancestry = nativeSourceSection(
+    source,
+    'function logicalRoot(',
+    'export function createNativeAdapterModules'
+  ).replace(/^function /gm, 'export function ');
+  const roots = nativeSourceSection(interactionSource, 'type RootOwner =', '/** Mark ONLY')
+    .replace(/^type RootOwner /m, 'export type RootOwner ')
+    .replace(/^const /gm, 'export const ');
+  return {
+    path: '.proto-ui/interaction/ownership-v1.ts',
+    kind: 'source' as const,
+    contents:
+      '// Native logical identity and physical-root ownership. No capability factory.\n' +
+      moduleTypes +
+      moduleMaps +
+      ancestry +
+      roots,
+  };
+}
+export function nativeAdapterModulesWithOwnership() {
+  let source: string = nativeAdapterModulesArtifact.contents;
+  for (const start of [
+    'type Claim =',
+    'type Owner =',
+    'const owners =',
+    'const activeScopes:',
+    'const parts =',
+    'const targets =',
+    'const hostIds =',
+  ])
+    source = replaceNativeSource(source, nativeSourceLine(source, start), '');
+  source = replaceNativeSource(
+    source,
+    nativeSourceSection(
+      source,
+      'function logicalRoot(',
+      'export function createNativeAdapterModules'
+    ),
+    ''
+  );
+  return {
+    path: '.proto-ui/interaction/adapter-modules-v1.ts',
+    kind: 'source' as const,
+    contents:
+      "import { owners, activeScopes, parts, targets, hostIds, logicalRoot, ancestor, descends, hostOrder, isElement, targetOf, contains, type Claim, type Owner } from './ownership-v1';\n" +
+      source,
+  };
+}
+export function nativeTextControlArtifact(singleLine: boolean) {
+  const source = nativeAdapterModulesArtifact.contents;
+  const types = [
+    'export type NativeConfig =',
+    'export type NativeTextEvent =',
+    'export interface NativeTextControl<',
+  ]
+    .map((start) => nativeSourceLine(source, start))
+    .join('');
+  let textBody = nativeSourceSection(
+    source,
+    '  const textDeclaration =',
+    '  const imageListeners ='
+  );
+  textBody = replaceNativeSource(
+    textBody,
+    nativeSourceLine(textBody, '  const imageDeclaration ='),
+    ''
+  );
+  textBody = replaceNativeSource(
+    textBody,
+    nativeSourceLine(textBody, '  if (textDeclaration && imageDeclaration)'),
+    ''
+  );
+  let properties = nativeSourceSection(
+    source,
+    '  function rootProperties()',
+    '  function projectAttributes()'
+  );
+  properties = replaceNativeSource(
+    properties,
+    nativeSourceLine(properties, '    if (imageDeclaration) { result.src'),
+    ''
+  );
+  const listen = nativeSourceSection(
+    source,
+    '  function listen(target: EventTarget',
+    '  function styleProperty('
+  );
+  const requestPresentation = replaceNativeSource(
+    nativeSourceSection(source, '  function requestPresentation()', '  function ready()'),
+    'portalTarget()',
+    'null'
+  );
+  // These are checked compile-time physical facts, not a runtime declaration.
+  textBody = replaceNativeSource(
+    textBody,
+    nativeSourceSection(textBody, '  const textDeclaration =', '  const textListeners ='),
+    ''
+  );
+  textBody = replaceNativeSource(
+    textBody,
+    "textDeclaration?.config.lineMode === 'single' ? normalized.replace(/\\n/g, '') : normalized",
+    singleLine ? "normalized.replace(/\\n/g, '')" : 'normalized'
+  );
+  textBody = replaceNativeSource(
+    textBody,
+    nativeSourceLine(textBody, "      if (textDeclaration?.config.lineMode === 'single'"),
+    singleLine
+      ? "      if (patch.rows !== undefined || patch.wrap !== undefined) throw new Error('[TextControl] rows/wrap require multiline declaration.');\n"
+      : ''
+  );
+  properties = replaceNativeSource(properties, '    if (textDeclaration) {', '    {');
+  properties = replaceNativeSource(
+    properties,
+    nativeSourceLine(properties, "      if (textDeclaration.config.lineMode === 'single')"),
+    singleLine ? "      result.type = 'text';\n" : ''
+  );
+  const asTextControl = replaceNativeSource(
+    nativeSourceLine(source, '    asTextControl() {'),
+    "if (!textDeclaration) throw new Error('[TextControl] asTextControl requires its static physical declaration.'); ",
+    ''
+  );
+  return {
+    path: '.proto-ui/interaction/' + (singleLine ? 'text-single' : 'text-multiline') + '-v1.ts',
+    kind: 'source' as const,
+    contents: String.raw`// Reached Text Control native host operations and shared ownership.
+import { owners, targets, hostIds, activeScopes, logicalRoot, descends, rootOwners, logicalOwners, type Owner, type Claim, type NativeFocusRequest } from './ownership-v1';
+${types}
+export type NativeInteraction<Run> = {
+  asTextControl(): NativeTextControl<Run>;
+  rootTag(): string | null;
+  rootProperties(): Readonly<Record<string, string | number | boolean | null>>;
+  projectAttributes(): Readonly<Record<string, string | null>>;
+  refresh(): void; mount(): void; unmount(): void; dispose(): void;
+};
+export interface NativeTextOptions<Run> {
+  ensureSetup(operation: string): void; ensureRuntime(operation: string): void;
+  isAlive(): boolean; isReady?(): boolean; invoke<T>(callback: () => T): T;
+  getRun(): Run; getRoot(): HTMLElement | null; getHost?(): HTMLElement | null;
+  identity: object; getLogicalParent(): object | null;
+  getExposes?(): Readonly<Record<string, unknown>>;
+  requestHostUpdate?(): void;
+}
+export function createNativeInteraction<Run>(options: NativeTextOptions<Run>): NativeInteraction<Run> {
+  let disposed = false, root: HTMLElement | null = null, host: HTMLElement | null = null, generation = 0;
+  let hostProperties: Readonly<Record<string, string | number | boolean | null>> | null = null, hostPortal: HTMLElement | null = null;
+  const cleanups: (() => void)[] = [];
+  const hooks = new Set<string>(), claims = new Map<object, Claim>();
+  const focusConfig: Record<string, unknown> = { disabled: false, navParticipation: 'auto' };
+  const scopeConfig: Record<string, unknown> = {}, rovingConfig: Record<string, unknown> = {};
+  let pendingFocus: NativeFocusRequest | null = null;
+  const owner: Owner = {
+    identity: options.identity, parent: options.getLogicalParent, target: () => root,
+    host: () => root ? options.getHost?.() ?? root : null,
+    alive: () => !disposed && options.isAlive(), hooks, claims,
+    exposes: () => options.getExposes?.() ?? {}, focusConfig, scopeConfig, rovingConfig,
+    selected: false, active: false, scopeDeclared: false, rovingDeclared: false,
+    focusDeclared: false, entryDeclared: false, scopeActive: false,
+    focus: request => requestFocus(request), changed: () => refresh(),
+  };
+  if (owners.has(options.identity)) throw new Error('[Modules] duplicate live owner identity.');
+  function alive() { if (disposed || !options.isAlive()) throw new Error('[Modules] owner is terminally disposed.'); }
+  function setup(operation: string) { alive(); options.ensureSetup(operation); }
+  function runtime(operation: string) { alive(); options.ensureRuntime(operation); }
+  function ready() { return !disposed && options.isAlive() && !!root && root === options.getRoot() && root.isConnected; }
+  function declare(name: string) { setup('hook.' + name); hooks.add(name); }
+  function announceTopology(rootOwner = logicalRoot(owner)) {
+    for (const participant of [...owners.values()])
+      if (participant.alive() && logicalRoot(participant) === rootOwner) participant.changed();
+  }
+  function requestFocus(request?: NativeFocusRequest) {
+    alive();
+    for (let index = activeScopes.length - 1; index >= 0; index--) {
+      const scope = activeScopes[index];
+      if (!scope.alive()) { activeScopes.splice(index, 1); continue; }
+      if (scope.target()?.isConnected) { if (!descends(owner, scope)) return; break; }
+    }
+    if (!ready() || root!.closest('[hidden],[inert],[data-pui-view-detached]')) { pendingFocus = request ?? {}; return; }
+    options.invoke(() => { runtime('focus.focusSelf'); root!.focus({ preventScroll: request?.preventScroll }); });
+  }
+${requestPresentation}${listen}${textBody}
+  function rootTag(): string | null {
+    alive(); return '${singleLine ? 'input' : 'textarea'}';
+  }
+${properties}
+  const attributes = new Map<string, { baseline: string | null; projected: string | null }>();
+  function projectAttributes(): Readonly<Record<string, string | null>> {
+    alive();
+    const result: Record<string, string | null> = Object.create(null);
+    if (hostIds.has(options.identity)) {
+      const existing = owners.get(options.identity)?.target()?.id;
+      if (existing) hostIds.set(options.identity, existing);
+      result.id = hostIds.get(options.identity)!;
+    }
+    return result;
+  }
+  function refresh() {
+    if (disposed || !options.isAlive()) return;
+    if (!ready()) { requestPresentation(); return; }
+    const next = projectAttributes();
+    for (const [name, ownership] of attributes) if (!Object.hasOwn(next, name)) {
+      if (root!.getAttribute(name) === ownership.projected) {
+        if (ownership.baseline === null) root!.removeAttribute(name);
+        else root!.setAttribute(name, ownership.baseline);
+      }
+      attributes.delete(name);
+    }
+    for (const [name, value] of Object.entries(next)) {
+      const current = root!.getAttribute(name);
+      let ownership = attributes.get(name);
+      if (!ownership) { ownership = { baseline: current, projected: current }; attributes.set(name, ownership); }
+      else if (current !== ownership.projected) ownership.baseline = current;
+      if (current !== value) { if (value === null) root!.removeAttribute(name); else root!.setAttribute(name, value); }
+      ownership.projected = value;
+    }
+    applyText();
+    if (pendingFocus) { const request = pendingFocus; pendingFocus = null; requestFocus(request); }
+    requestPresentation();
+  }
+  function unmount() {
+    const previous = root, previousHost = host;
+    ++generation; root = host = null;
+    if (previous && targets.get(previous) === owner) targets.delete(previous);
+    const failures: unknown[] = [];
+    for (const off of cleanups.splice(0)) try { off(); } catch (error) { failures.push(error); }
+    textComposing = false;
+    if (previous) {
+      try { announceTopology(); } catch (error) { failures.push(error); }
+      for (const [name, ownership] of attributes) if (previous.getAttribute(name) === ownership.projected) {
+        if (ownership.baseline === null) previous.removeAttribute(name);
+        else previous.setAttribute(name, ownership.baseline);
+      }
+    }
+    attributes.clear();
+    if (previous && rootOwners.get(previous)?.identity === options.identity) rootOwners.delete(previous);
+    if (previousHost && rootOwners.get(previousHost)?.identity === options.identity) rootOwners.delete(previousHost);
+    logicalOwners.delete(options.identity);
+    if (failures.length) throw new AggregateError(failures, '[Modules] view cleanup failed.');
+  }
+  function mount() {
+    alive(); const candidate = options.getRoot();
+    if (root === candidate && ready()) { refresh(); return; }
+    unmount(); alive(); root = candidate;
+    if (!root) return;
+    host = options.getHost?.() ?? root;
+    const routeOwner = { identity: options.identity, parent: options.getLogicalParent, trigger: () => false, target: root };
+    rootOwners.set(root, routeOwner); rootOwners.set(host, routeOwner); logicalOwners.set(options.identity, routeOwner);
+    targets.set(root, owner);
+    if (root.id) hostIds.set(options.identity, root.id);
+    try { attachText(); refresh(); announceTopology(); }
+    catch (error) {
+      try { unmount(); } catch (cleanup) { throw new AggregateError([error, cleanup], '[Modules] mount and cleanup failed.'); }
+      throw error;
+    }
+  }
+  owners.set(options.identity, owner);
+  return {
+${asTextControl}
+    rootTag, rootProperties, projectAttributes, refresh, mount, unmount,
+    dispose() {
+      if (disposed) return;
+      const rootOwner = logicalRoot(owner), failures: unknown[] = [];
+      disposed = true;
+      try { unmount(); } catch (error) { failures.push(error); }
+      owners.delete(options.identity); claims.clear(); hooks.clear(); textListeners.clear();
+      try { announceTopology(rootOwner); } catch (error) { failures.push(error); }
+      if (failures.length) throw new AggregateError(failures, '[Modules] terminal cleanup failed.');
+    },
+  };
+}
+`,
+  };
+}

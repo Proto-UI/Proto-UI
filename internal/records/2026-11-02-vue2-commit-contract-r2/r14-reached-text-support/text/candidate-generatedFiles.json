@@ -1,0 +1,22 @@
+[
+  {
+    "file": "<generated>/Component.js",
+    "sha256": "dd38eb4a5933586bc7153cea477d9fdab67359a3bc2ff0cbdd88364ffbeeb8b2"
+  },
+  {
+    "file": "<generated>/.proto-ui/context/scope-v1.ts",
+    "sha256": "12c3e9b2a09ff8daaa7d913aec21300052b66378723495b93dc3fad323ec1794"
+  },
+  {
+    "file": "<generated>/.proto-ui/interaction/ownership-v1.ts",
+    "sha256": "28cce2c6d56271789ae17674eb41b84e9023f47cd0aa246ca50634b7a78e8b44"
+  },
+  {
+    "file": "<generated>/.proto-ui/interaction/text-multiline-v1.ts",
+    "sha256": "e960e320ac4760f87979396a555f43331231ccf27df124b056dbec06560fc727"
+  },
+  {
+    "file": "<generated>/Consumer.ts",
+    "sha256": "b01de58ea9e8ff4bcc3f2525775bf897b96077826b317844d1a86314551ab99f"
+  }
+]

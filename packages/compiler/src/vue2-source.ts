@@ -7,7 +7,11 @@ import { unsupportedPointerFacts } from './pointer-facts-admission';
 import { formatDataType } from './data-types';
 import { validateIR, validIdentifier } from './ir-validation';
 import { buildNativeContextArtifacts } from './native-context';
-import { nativeInteractionArtifact } from './native-interaction';
+import {
+  nativeInteractionArtifact,
+  nativeInteractionArtifacts,
+  selectNativeSupport,
+} from './native-interaction';
 import { nativeAdapterModulesArtifact } from './native-adapter-modules';
 import { buildNativeStaticDeclarations } from './native-static-declarations';
 import { emitNativeRule, emitNativeStyleHandle, nativeStyleArtifact } from './native-style';
@@ -67,6 +71,13 @@ export function emitVue2Source(
     admitted.value.sites.some((site) =>
       /^(hook\.|event\.|eventControl\.|focus\.|accessible\.|anatomy\.)/.test(site.operation)
     );
+  const interactionSelection = selectNativeSupport(ir, admitted.value);
+  const textInteraction = usesInteraction && !options.ssr && interactionSelection !== 'full';
+  const interactionPath = options.ssr
+    ? './.proto-ui/interaction/native-v1'
+    : textInteraction
+      ? './.proto-ui/interaction/' + interactionSelection + '-v1'
+      : './.proto-ui/interaction/native-v1';
   // Admission follows referenced functions/aliases, closures and authored hooks.
   // Interaction supplies createOwnedState and observed-state subscription cleanup.
   // Only admitted Overlay capability can produce a non-null portal target.
@@ -81,7 +92,7 @@ export function emitVue2Source(
     'state.numberRange',
   ]);
   const usesState =
-    usesInteraction ||
+    (usesInteraction && !textInteraction) ||
     admitted.value.operations.some((operation) => stateDeclarations.has(operation));
   if (
     !validIdentifier(componentName) ||
@@ -413,14 +424,18 @@ export function emitVue2Source(
     ? `import { createNativeStyle as ${prefix}CreateNativeStyle, templateStyleTokens as ${prefix}TemplateStyleTokens } from './.proto-ui/style/native-v1';\n`
     : '';
   const interactionImport = usesInteraction
-    ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from './.proto-ui/interaction/native-v1';
-/** @template Run @typedef {import('./.proto-ui/interaction/native-v1').NativeInteraction<Run>} ${prefix}NativeInteraction */
-/** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocus} ${prefix}NativeFocus */
-/** @typedef {import('./.proto-ui/interaction/native-v1').NativeAccessible} ${prefix}NativeAccessible */
-/** @template T @typedef {import('./.proto-ui/interaction/native-v1').NativeObservedState<T>} ${prefix}NativeObservedState */
-/** @typedef {import('./.proto-ui/interaction/native-v1').NativeInput} ${prefix}NativeInput */
-/** @typedef {import('./.proto-ui/interaction/native-v1').NativeFocusOptions} ${prefix}NativeFocusOptions */
+    ? `import { createNativeInteraction as ${prefix}CreateNativeInteraction } from '${interactionPath}';
+/** @template Run @typedef {import('${interactionPath}').NativeInteraction<Run>} ${prefix}NativeInteraction */
+${
+  textInteraction
+    ? ''
+    : `/** @typedef {import('${interactionPath}').NativeFocus} ${prefix}NativeFocus */
+/** @typedef {import('${interactionPath}').NativeAccessible} ${prefix}NativeAccessible */
+/** @template T @typedef {import('${interactionPath}').NativeObservedState<T>} ${prefix}NativeObservedState */
+/** @typedef {import('${interactionPath}').NativeInput} ${prefix}NativeInput */
+/** @typedef {import('${interactionPath}').NativeFocusOptions} ${prefix}NativeFocusOptions */
 `
+}`
     : '';
   const contextImports =
     styleImport +
@@ -464,7 +479,8 @@ ${ir.contextKeys.map((key) => `    [${contextNames.get(key.id)}, (value) => ${pr
     usesPortal,
     options.ssr === true,
     JSON.stringify(ir.moduleDeclarations.map(({ id, config }) => ({ id, config }))),
-    staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined'
+    staticNames.get('@proto.ui/module-table-structure#TABLE_STRUCTURE_FAMILY') ?? 'undefined',
+    textInteraction
   ).replace(/\bPUI/g, prefix);
   const ownerKey = JSON.stringify(`${prefix}Owner`);
   const propDeclarations = ir.props.map((prop) => `[${JSON.stringify(prop.name)}]: {}`).join(', ');
@@ -575,11 +591,18 @@ ${options.ssr ? vue2SsrEntrypoints(prefix, componentName, ir.source.sha256) : ''
         ...(contextArtifacts?.files ?? []),
         ...staticDeclarations.files,
         ...(usesStyle ? [nativeStyleArtifact] : []),
-        ...(usesInteraction ? [nativeInteractionArtifact, nativeAdapterModulesArtifact] : []),
+        ...(usesInteraction
+          ? options.ssr
+            ? [nativeInteractionArtifact, nativeAdapterModulesArtifact]
+            : nativeInteractionArtifacts(interactionSelection)
+          : []),
       ],
       dependencies: [
         ...selected.value.dependencies
-          .filter((dependency) => usesInteraction || dependency.name !== '@floating-ui/dom')
+          .filter(
+            (dependency) =>
+              (usesInteraction && !textInteraction) || dependency.name !== '@floating-ui/dom'
+          )
           .map((dependency) => ({ ...dependency })),
         ...(options.ssr
           ? [{ name: 'vue-server-renderer', version: '2.6.14', role: 'target' as const }]
@@ -607,7 +630,8 @@ function nativeHelpers(
   portal: boolean,
   ssr: boolean,
   declarations: string,
-  tableFamily: string
+  tableFamily: string,
+  textInteractive: boolean
 ): string {
   const refresh = `${styled ? 'style.refresh();' : ''}${interactive ? ' interaction.refresh();' : ''}`;
   // Derive the generated finite registry and its key enumeration from the same
@@ -983,7 +1007,19 @@ ${context.owner}
   };
   ${
     interactive
-      ? `/** @type {PUINativeInteraction<typeof run>} */
+      ? textInteractive
+        ? `/** @type {PUINativeInteraction<typeof run>} */
+  const interaction = PUICreateNativeInteraction({
+    ensureSetup: setupOnly, ensureRuntime: callback,
+    isAlive: () => !terminal && !disposed,
+    isReady: () => phase !== 'setup' && viewActive && present && hostActive && !terminal,
+    invoke: (fn) => invoke(fn), getRun: () => run,
+    getRoot: () => viewActive && present && hostActive && activeEpoch === epoch ? activeRoot : null,
+    identity: contextScope, getLogicalParent: () => vm[${JSON.stringify('PUIParentScope')}] || null,
+    getExposes: () => exposed,
+    requestHostUpdate: force,
+  });`
+        : `/** @type {PUINativeInteraction<typeof run>} */
   const interaction = PUICreateNativeInteraction({
     ensureSetup: setupOnly,
     ensureRuntime: callback,
@@ -1154,7 +1190,7 @@ ${
   const def = {
     ${context.def}
     ${styled ? 'feedback: { style },' : ''}
-    ${interactive ? 'event: interaction.event,' : ''}
+    ${interactive && !textInteractive ? 'event: interaction.event,' : ''}
     props: {
       define: defineProps,
       setDefaults: (layer) => {
@@ -1320,7 +1356,7 @@ ${
         throw error;`
             : `
         terminal = true;
-        ${interactive ? 'try { interaction.dispose(); } catch {}\n        for (const state of states) { try { state.dispose(); } catch {} }' : ''}
+        ${interactive ? 'try { interaction.dispose(); } catch {}' + (stateful ? '\n        for (const state of states) { try { state.dispose(); } catch {} }' : '') : ''}
         ${styled ? 'try { style.dispose(); } catch {}' : ''}
         ${context.setupFailure ? `try { ${context.setupFailure} } catch {}` : ''}
         disposed = true;
