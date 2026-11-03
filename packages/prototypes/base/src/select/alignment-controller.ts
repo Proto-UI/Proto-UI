@@ -21,11 +21,11 @@ export type SelectPresentationPhase =
 
 /** Private semantic controller; Content alone applies presence, gate and focus effects. */
 export function createSelectAlignmentController(options: {
-  overlay: Pick<OverlayHandle<SelectContentProps>, 'registerTargetAlignment'>;
+  overlay: Pick<OverlayHandle<SelectContentProps>, 'registerTargetAlignment' | 'registerSizeMatch'>;
   changed(run: Run): void;
   applied(
     run: Run,
-    row: AnatomyPartView,
+    row: AnatomyPartView | null,
     current: () => boolean,
     admission: {
       preserveFocus: boolean;
@@ -53,12 +53,13 @@ export function createSelectAlignmentController(options: {
   type FocusShape = string;
   let lastAcceptedFocusShape: FocusShape | null = null;
   let lastObservedFocusValue: string | null = null;
+  let lastObservedFocusMode: string | null = null;
   type InitialFallback = { rootValue: string; candidateValue: string; structureVersion: number };
   let initialFallback: InitialFallback | null = null;
   let applied: {
     id: number;
     run: Run;
-    row: AnatomyPartView;
+    row: AnatomyPartView | null;
     fallback: InitialFallback | null;
     focusShape: FocusShape;
     preserveFocus: boolean;
@@ -84,6 +85,7 @@ export function createSelectAlignmentController(options: {
     const id = ++request;
     applied = null;
     options.overlay.registerTargetAlignment(null);
+    options.overlay.registerSizeMatch(null);
     return id;
   };
   let delivering = false;
@@ -124,9 +126,10 @@ export function createSelectAlignmentController(options: {
     // A semantic excursion retires the old focus exemption immediately, even
     // when its request stays pending or cannot be admitted. Returning to an old
     // value later is a genuine value replacement, not a sizing-only refresh.
-    if (ctx.value !== lastObservedFocusValue || mode !== 'item-aligned')
+    if (ctx.value !== lastObservedFocusValue || mode !== lastObservedFocusMode)
       lastAcceptedFocusShape = null;
     lastObservedFocusValue = ctx.value;
+    lastObservedFocusMode = mode;
     const revision = ctx.collectionRevision ?? 0;
     const itemSizing = normalizeSelectRootItemSizing(ctx.itemSizing);
     if (
@@ -193,19 +196,20 @@ export function createSelectAlignmentController(options: {
     if (!current()) return;
     const parts = run.anatomy.parts(SELECT_FAMILY);
     const role = (name: string) => parts.filter((part) => part.role === name);
+    const triggers = role('trigger');
     const surfaces = role('surface'),
       viewports = role('viewport'),
       texts = role('item-text');
     surfacePaint = surfaces.length === 1;
-    if (mode === 'popper') {
-      if (itemSizing === 'match-trigger') {
-        notify(run, 'geometry-unavailable', 'select.geometry.unsupported-size-mode');
-      } else {
-        notify(run, 'popper');
-      }
+    if (mode === 'popper' && (surfaces.length !== 1 || triggers.length !== 1)) {
+      notify(
+        run,
+        itemSizing === 'match-trigger' ? 'structure-invalid' : 'popper',
+        itemSizing === 'match-trigger' ? 'select.structure.missing-size-parts' : ''
+      );
       return;
     }
-    if (!surfaces.length && !viewports.length && !texts.length) {
+    if (mode !== 'popper' && !surfaces.length && !viewports.length && !texts.length) {
       if (itemSizing === 'match-trigger') {
         notify(run, 'structure-invalid', 'select.structure.missing-size-parts');
       } else {
@@ -213,13 +217,13 @@ export function createSelectAlignmentController(options: {
       }
       return;
     }
-    const triggers = role('trigger'),
-      values = role('value');
+    const values = role('value');
     if (
-      surfaces.length !== 1 ||
-      viewports.length !== 1 ||
-      triggers.length !== 1 ||
-      values.length !== 1
+      mode !== 'popper' &&
+      (surfaces.length !== 1 ||
+        viewports.length !== 1 ||
+        triggers.length !== 1 ||
+        values.length !== 1)
     ) {
       notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-parts');
       return;
@@ -249,11 +253,55 @@ export function createSelectAlignmentController(options: {
       structureVersion,
       ctx.rootId,
       ctx.value,
+      mode,
       records.map(({ value, textValue, disabled }) => [value, textValue, disabled]),
     ]);
     if (lastAcceptedFocusShape !== focusShape) lastAcceptedFocusShape = null;
-    if (records.some((record) => !record.text)) {
+    if (mode !== 'popper' && records.some((record) => !record.text)) {
       notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-item-text');
+      return;
+    }
+    if (mode === 'popper') {
+      const preserveFocus = !initial && lastAcceptedFocusShape === focusShape;
+      const complete = () => {
+        if (!current() || phase === 'valid') return;
+        notify(run, 'valid');
+        if (!current()) return;
+        applied = { id, run, row: null, fallback: null, focusShape, preserveFocus, current };
+        deliver();
+      };
+      const targets =
+        itemSizing === 'match-trigger'
+          ? records.filter((record) => record.itemSizing === 'inherit').map((record) => record.row)
+          : [];
+      notify(run, 'full-pending');
+      if (!current()) return;
+      if (!targets.length) {
+        // Semantic readiness only: no invented physical size result.
+        complete();
+        return;
+      }
+      options.overlay.registerSizeMatch({
+        family: SELECT_FAMILY,
+        surface: surfaces[0],
+        reference: triggers[0],
+        targets,
+        onSizeMatch(status) {
+          if (!current() || status.status === 'pending-target') return;
+          if (status.status === 'unavailable') {
+            clear();
+            notify(
+              run,
+              status.reason === 'invalid-association'
+                ? 'structure-invalid'
+                : 'geometry-unavailable',
+              `select.${status.reason === 'invalid-association' ? 'structure' : 'geometry'}.${status.reason}`
+            );
+            return;
+          }
+          complete();
+        },
+      });
       return;
     }
     const retainedFallback =

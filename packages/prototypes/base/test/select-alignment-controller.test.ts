@@ -1,6 +1,7 @@
 import {
   definePrototype,
   type OverlayTargetAlignmentBinding,
+  type OverlaySizeMatchBinding,
   type RunHandle,
 } from '@proto.ui/core';
 import { AdaptToWebComponent, setElementProps } from '@proto.ui/adapter-web-component';
@@ -32,6 +33,7 @@ const owner = definePrototype<SelectContentProps>({
     def.anatomy.claim(SELECT_FAMILY, { role: 'content' });
     const controller = createSelectAlignmentController({
       overlay: {
+        registerSizeMatch() {},
         registerTargetAlignment(binding) {
           if (binding) bindings.push(binding);
         },
@@ -175,6 +177,7 @@ const policyOwner = definePrototype<SelectContentProps>({
   setup(def) {
     let run!: RunHandle<SelectContentProps>;
     const requests: Array<OverlayTargetAlignmentBinding | null> = [];
+    const sizeRequests: Array<OverlaySizeMatchBinding | null> = [];
     let deliveries = 0;
     def.props.define({
       position: { type: 'enum', options: ['item-aligned', 'popper'], empty: 'fallback' },
@@ -182,7 +185,10 @@ const policyOwner = definePrototype<SelectContentProps>({
     def.props.setDefaults({ position: 'item-aligned' });
     def.anatomy.claim(SELECT_FAMILY, { role: 'content' });
     const controller = createSelectAlignmentController({
-      overlay: { registerTargetAlignment: (request) => requests.push(request) },
+      overlay: {
+        registerTargetAlignment: (request) => requests.push(request),
+        registerSizeMatch: (request) => sizeRequests.push(request),
+      },
       changed() {},
       applied(_run, _row, _current, admission) {
         // The old-product control has no private acknowledgement argument.
@@ -209,6 +215,7 @@ const policyOwner = definePrototype<SelectContentProps>({
       diagnostic: controller.diagnostic,
       context: run.context.read(SELECT_CONTEXT),
       requests: [...requests],
+      sizeRequests: [...sizeRequests],
       deliveries,
     }));
     return (r) => [r.r.slot()];
@@ -221,6 +228,7 @@ type PolicySnapshot = {
   diagnostic: string;
   context: import('../src/select').SelectContextValue;
   requests: Array<OverlayTargetAlignmentBinding | null>;
+  sizeRequests: Array<OverlaySizeMatchBinding | null>;
   deliveries: number;
 };
 async function policyFixture(
@@ -277,7 +285,24 @@ async function policyFixture(
     expect(request).toBeTruthy();
     return request!;
   };
-  return { root, trigger, value, content, surface, viewport, items, events, snapshot, binding };
+  const sizeBinding = () => {
+    const request = snapshot().sizeRequests.at(-1);
+    expect(request).toBeTruthy();
+    return request!;
+  };
+  return {
+    root,
+    trigger,
+    value,
+    content,
+    surface,
+    viewport,
+    items,
+    events,
+    snapshot,
+    binding,
+    sizeBinding,
+  };
 }
 const requestedValues = (binding: OverlayTargetAlignmentBinding) =>
   binding.sizeMatch?.targets.map(
@@ -449,21 +474,37 @@ it('does not deliver a matched size request after view withdrawal and remount', 
 });
 
 it.each([false, true])(
-  'rejects explicit Popper matching before full-parts admission (legacy=%s)',
+  'requires safe Popper size parts and admits only the current size result (legacy=%s)',
   async (legacy) => {
     const f = await policyFixture({
       root: { itemSizing: 'match-trigger' },
       position: 'popper',
       legacy,
     });
-    expect(f.snapshot().phase).toBe('geometry-unavailable');
-    expect(f.snapshot().diagnostic).toBe('select.geometry.unsupported-size-mode');
+    expect(f.snapshot().phase).toBe(legacy ? 'structure-invalid' : 'full-pending');
+    expect(f.snapshot().diagnostic).toBe(legacy ? 'select.structure.missing-size-parts' : '');
+    if (legacy) {
+      expect(f.snapshot().sizeRequests.every((request) => request === null)).toBe(true);
+    } else {
+      const size = f.sizeBinding();
+      expect(size.reference.role).toBe('trigger');
+      expect(size.surface.role).toBe('surface');
+      expect(
+        size.targets.map(
+          (row) => (row.getExpose('getCollectionItem') as () => { value: string })().value
+        )
+      ).toEqual(['alpha', 'beta', 'gamma']);
+      expect(f.snapshot().deliveries).toBe(0);
+      size.onSizeMatch({ status: 'applied' });
+      expect(f.snapshot().phase).toBe('valid');
+      expect(f.snapshot().deliveries).toBe(1);
+    }
     expect(f.snapshot().requests.every((request) => request === null)).toBe(true);
     expect(f.snapshot().context.open).toBe(true);
     expect(f.snapshot().context.value).toBe('beta');
     updatePolicyFixtureProps(f.root, { itemSizing: 'intrinsic' });
     await flush();
-    expect(f.snapshot().phase).toBe('popper');
+    expect(f.snapshot().phase).toBe(legacy ? 'popper' : 'valid');
     expect(f.snapshot().diagnostic).toBe('');
     expect(f.events).toEqual([]);
   }
@@ -546,13 +587,20 @@ it('preserves focused ownership through sizing metadata and a repeated open requ
   expect(f.events).toEqual(['openChange']);
 });
 
-it('repairs only an unsupported size mode by switching back to item alignment', async () => {
+it('switches admitted Popper sizing back to item alignment without reopening size conflicts', async () => {
   const f = await policyFixture({ root: { itemSizing: 'match-trigger' }, position: 'popper' });
-  expect(f.snapshot().diagnostic).toBe('select.geometry.unsupported-size-mode');
+  expect(f.snapshot().phase).toBe('full-pending');
+  const oldSize = f.sizeBinding();
+  oldSize.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().phase).toBe('valid');
+  expect(f.snapshot().diagnostic).toBe('');
   updatePolicyFixtureProps(f.content, { position: 'item-aligned' });
   await flush();
   expect(f.snapshot().phase).toBe('full-pending');
   const repaired = f.binding();
+  const accepted = f.snapshot().deliveries;
+  oldSize.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(accepted);
   expect(requestedValues(repaired)).toEqual(['alpha', 'beta', 'gamma']);
   repaired.onAlignment({ status: 'unavailable', reason: 'size-conflict' });
   expect(f.snapshot().diagnostic).toBe('select.geometry.size-conflict');
@@ -561,5 +609,42 @@ it('repairs only an unsupported size mode by switching back to item alignment', 
   await flush();
   expect(f.snapshot().requests.length).toBe(before);
   expect(f.snapshot().phase).toBe('geometry-unavailable');
+  expect(f.events).toEqual([]);
+});
+
+it('rejects a retired Popper size callback across close and reopen while admitting the current binding', async () => {
+  const f = await policyFixture({ root: { itemSizing: 'match-trigger' }, position: 'popper' });
+  const retired = f.sizeBinding();
+  retired.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(1);
+  updatePolicyFixtureProps(f.root, { open: false });
+  await flush();
+  retired.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(1);
+  updatePolicyFixtureProps(f.root, { open: true });
+  await flush();
+  const current = f.sizeBinding();
+  expect(current).not.toBe(retired);
+  retired.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(1);
+  current.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(2);
+  expect(f.snapshot().context.value).toBe('beta');
+  expect(f.events).toEqual([]);
+});
+
+it('rejects superseded Popper size callbacks after current semantic records change', async () => {
+  const f = await policyFixture({ root: { itemSizing: 'match-trigger' }, position: 'popper' });
+  const retired = f.sizeBinding();
+  updatePolicyFixtureProps(f.items[1], { textValue: 'Renamed Beta' });
+  await flush();
+  const current = f.sizeBinding();
+  expect(current).not.toBe(retired);
+  retired.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(0);
+  expect(f.snapshot().phase).toBe('full-pending');
+  current.onSizeMatch({ status: 'applied' });
+  expect(f.snapshot().deliveries).toBe(1);
+  expect(f.snapshot().context.value).toBe('beta');
   expect(f.events).toEqual([]);
 });

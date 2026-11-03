@@ -195,9 +195,9 @@ function setupSelectContent(
     return true;
   };
 
-  const resolveOpenFocusAction = (run: any, ctx: SelectContextValue) => {
+  const resolveOpenFocusAction = (run: any, ctx: SelectContextValue, defer = true) => {
     const options = {
-      defer: true,
+      defer,
       preventScroll: true,
       reason: ctx.requestFocusReason ?? ('programmatic' as const),
     };
@@ -398,6 +398,14 @@ function setupSelectContent(
       // Readiness and focus admission are separate: a sizing-only refresh must
       // not replace a newer Item or external Focus owner after entry completed.
       if (entryCancelled || admission.preserveFocus) return true;
+      if (!row) {
+        // Popper preserves its own selected-or-boundary entry policy. The
+        // current size request admitted readiness; no deferred stale task.
+        const ctx = readContext(_run);
+        if (!ctx || !current()) return false;
+        resolveOpenFocusAction(_run, ctx, false);
+        return true;
+      }
       const focus = row.getExpose('focusSelf') as
         | ((options: { preventScroll: boolean; defer: boolean; reason: 'programmatic' }) => void)
         | null;
