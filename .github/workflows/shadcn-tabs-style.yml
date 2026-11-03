@@ -1,14 +1,7 @@
 name: Shadcn Tabs text default style evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/prototypes/shadcn/src/tabs/**'
-      - 'packages/prototypes/shadcn/src/style-scope/**'
-      - 'packages/prototypes/shadcn/test/tabs*.test.ts'
-      - 'internal/fixtures/shadcn-tabs-style/**'
-      - 'scripts/prototypes/shadcn-tabs-evidence*'
-      - '.github/workflows/shadcn-tabs-style.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

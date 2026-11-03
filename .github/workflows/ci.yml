@@ -1,18 +1,112 @@
 name: CI
+# A scheduled cycle is named after the cron it declares, so the run title is
+# the authoritative record of which slot a cycle belongs to even when GitHub
+# creates it late. Every other event keeps the plain workflow name.
+run-name: ${{ github.event_name == 'schedule' && format('regression-cycle:{0}', github.event.schedule) || github.workflow }}
 
 on:
   pull_request:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+  # Single coordinated regression entry on the default-branch head. There is
+  # exactly one schedule owner in this repository; the three slots are:
+  #   '0 0 * * *'  -> 00:00 UTC -> 08:00 Asia/Shanghai
+  #   '0 8 * * *'  -> 08:00 UTC -> 16:00 Asia/Shanghai
+  #   '0 16 * * *' -> 16:00 UTC -> 00:00 Asia/Shanghai
+  # GitHub cron is best-effort: each cycle records its scheduled slot, actual
+  # start and queue delay in the cycle-report receipt instead of promising a
+  # wall-clock start.
+  schedule:
+    - cron: '0 0 * * *'
+    - cron: '0 8 * * *'
+    - cron: '0 16 * * *'
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: false
-  queue: max
+  # PR lanes supersede their own stale runs per pull-request merge ref.
+  # Scheduled and dispatched cycles share one serialized lane per ref: an
+  # active evidence-producing run is never cancelled, and duplicate queued
+  # cycles coalesce into the newest pending run for the same source line.
+  group: ci-${{ github.ref }}-${{ github.event_name == 'pull_request' && 'pr' || 'cycle' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  ci-config-audit:
+    # Config-parse gate: fails closed when a workflow regains a push trigger,
+    # uses pull_request context under a non-PR event without a fallback, or
+    # when the single regression schedule drifts.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install the policy parser from the locked root dependency graph
+        run: corepack pnpm@10.32.1 install --frozen-lockfile --ignore-scripts --filter proto-ui
+
+      - name: Audit workflow event and schedule inventory
+        run: |
+          node --test scripts/ci/test/ci-scheduling-policy.test.mjs
+          node scripts/ci/check-ci-schedule.mjs
+
+  # Expensive checks run once per cycle or explicit exact-ref dispatch, not
+  # once per PR update. A skipped PR check is not successful full validation;
+  # existing integration requirements still need exact-head evidence.
+  coverage-governance:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/coverage-governance.yml
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+
+  agent-operations-fixtures:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/agent-operations-fixtures.yml
+
+  # The complete production-browser suite coverage. Dedicated evidence lanes
+  # keep their own workflow_dispatch for targeted diagnosis; this aggregator
+  # makes them part of every scheduled/dispatched regression cycle instead of
+  # letting them go silent after the pull-request triggers were removed.
+  # Skipped on pull_request: PR lanes only carry the lightweight gate, and the
+  # individual evidence workflows remain manually dispatchable for a PR.
+  production-suites:
+    if: ${{ github.event_name != 'pull_request' }}
+    uses: ./.github/workflows/ci-production-suites.yml
+
+  cycle-plan:
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      spec_base: ${{ steps.base.outputs.spec_base }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: base
+        name: Cover every spec change since the last green scheduled source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CYCLE_SHA: ${{ github.sha }}
+          CYCLE_BRANCH: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          BASE="$(gh api 'repos/${{ github.repository }}/actions/workflows/ci.yml/runs?event=schedule&status=success&per_page=100' \
+            --jq '[.workflow_runs[] | select(.head_branch == env.CYCLE_BRANCH and .head_sha != env.CYCLE_SHA)] | .[0].head_sha // empty')"
+          if [[ -z "$BASE" ]]; then
+            INTRO="$(git log --first-parent --diff-filter=A --format=%H -- scripts/ci/cycle-report.mjs)"
+            [[ "$INTRO" =~ ^[0-9a-f]{40}$ ]]
+            BASE="$(git rev-parse "${INTRO}^1")"
+          fi
+          [[ "$BASE" =~ ^[0-9a-f]{40}$ ]]
+          git merge-base --is-ancestor "$BASE" "$CYCLE_SHA"
+          echo "spec_base=$BASE" >> "$GITHUB_OUTPUT"
+
   lockstep-check:
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -39,7 +133,7 @@ jobs:
       - id: plan
         name: Plan affected public package graph
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
@@ -53,7 +147,7 @@ jobs:
 
   public_package_build:
     needs: public_package_plan
-    if: needs.public_package_plan.outputs.affected_count != '0'
+    if: github.event_name != 'pull_request' && needs.public_package_plan.outputs.affected_count != '0'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -75,7 +169,7 @@ jobs:
 
       - name: Build affected publish graph
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             corepack pnpm@10.32.1 build:packages --changed-from "${BASE_SHA}"
@@ -90,6 +184,7 @@ jobs:
           corepack pnpm@10.32.1 check:package-budgets
 
   type-check:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -138,6 +233,7 @@ jobs:
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:types
 
   rust:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -196,6 +292,7 @@ jobs:
         run: cargo test -p proto-ui-host-protocol -p proto-ui-style
 
   rust-macos:
+    if: ${{ github.event_name != 'pull_request' }}
     # Covers the GPUI translation layer on the platform the first fixture pins.
     runs-on: macos-latest
     timeout-minutes: 30
@@ -256,6 +353,7 @@ jobs:
           if-no-files-found: ignore
 
   rust-interop:
+    if: ${{ github.event_name != 'pull_request' }}
     # The real Rust host against the real Node peer. These tests are ignored
     # in the other Rust jobs because they need the repository's node_modules,
     # so this job installs both toolchains and runs them explicitly.
@@ -392,7 +490,8 @@ jobs:
           retention-days: 14
 
   test-general:
-    needs: test-plan
+    needs: [test-plan, cycle-plan]
+    if: ${{ github.event_name != 'pull_request' }}
     env:
       PROTO_UI_RUNTIME_PHASE: general
       PROTO_UI_RUNTIME_SLOT: general
@@ -475,7 +574,7 @@ jobs:
 
       - name: Public documentation gate and repository tests
         env:
-          SPEC_AUTHORING_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          SPEC_AUTHORING_BASE: ${{ needs.cycle-plan.outputs.spec_base }}
         run: |
           set -euo pipefail
           export PROTO_UI_RUNTIME_EVIDENCE_DIR="$RUNNER_TEMP/runtime-ci"
@@ -483,9 +582,8 @@ jobs:
           git rev-parse HEAD | tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/source-sha.txt"
           # Keep the complete repository preflight chain; only its runtime phase is split.
           exec > >(tee "$PROTO_UI_RUNTIME_EVIDENCE_DIR/general.log") 2>&1
-          if [[ -n "${SPEC_AUTHORING_BASE}" && "${SPEC_AUTHORING_BASE}" != "0000000000000000000000000000000000000000" ]]; then
-            corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:spec-authoring -- --base "${SPEC_AUTHORING_BASE}"
-          fi
+          BASE="${SPEC_AUTHORING_BASE:?cycle-plan must provide the full spec delta base}"
+          corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:spec-authoring -- --base "${BASE}"
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s check:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test:public-docs
           corepack pnpm@"${PROTO_PNPM_VERSION}" -s test
@@ -506,6 +604,7 @@ jobs:
 
   test-browser:
     needs: test-plan
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -571,7 +670,7 @@ jobs:
   # Preserve the existing required check name. Missing, skipped, failed, cancelled
   # or zero-test workers cannot turn this aggregate green.
   test:
-    if: always()
+    if: always() && github.event_name != 'pull_request'
     needs: [test-plan, test-general, test-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -594,6 +693,7 @@ jobs:
         run: node scripts/test/runtime-ci.mjs gate "$RUNNER_TEMP/runtime-ci-gate"
 
   release-scan:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -672,7 +772,7 @@ jobs:
 
   release-stage:
     needs: public_package_plan
-    if: github.event_name != 'pull_request' || needs.public_package_plan.outputs.affected_count != '0'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -722,7 +822,7 @@ jobs:
 
   release-consumer-react:
     needs: public_package_plan
-    if: github.event_name != 'pull_request' || needs.public_package_plan.outputs.affected_count != '0'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -758,7 +858,7 @@ jobs:
 
   cli-smoke:
     needs: public_package_plan
-    if: github.event_name != 'pull_request' || needs.public_package_plan.outputs.affected_count != '0'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -791,3 +891,88 @@ jobs:
 
       - name: Smoke exact release tarballs through CLI in isolated multi-host consumer
         run: corepack pnpm@"${PROTO_PNPM_VERSION}" -s release:smoke:cli
+
+  cycle-report:
+    # Terminal receipt for the coordinated regression cycle. It always runs so
+    # the exact source revision, complete job inventory and queue-delay facts
+    # are preserved even when upstream lanes fail or never started. The job
+    # fails closed when any lane's outcome is not success (a lane that never
+    # started is unknown, and unknown is not passing).
+    if: ${{ always() && github.event_name != 'pull_request' }}
+    needs:
+      [
+        ci-config-audit,
+        cycle-plan,
+        coverage-governance,
+        agent-operations-fixtures,
+        lockstep-check,
+        public_package_plan,
+        public_package_build,
+        type-check,
+        rust,
+        rust-macos,
+        rust-interop,
+        test-plan,
+        test-general,
+        test-browser,
+        test,
+        release-scan,
+        release-stage,
+        release-consumer-react,
+        cli-smoke,
+        production-suites,
+      ]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Job-scoped grants only: read the run history for the queue/missed-slot
+    # audit. Other jobs keep their existing default token scope.
+    permissions:
+      contents: read
+      actions: read
+    env:
+      CYCLE_NEEDS: ${{ toJSON(needs) }}
+      CYCLE_EVENT: ${{ github.event_name }}
+      CYCLE_SCHEDULE: ${{ github.event.schedule || '' }}
+      CYCLE_SHA: ${{ github.sha }}
+      CYCLE_REF: ${{ github.ref }}
+      CYCLE_RUN_ID: ${{ github.run_id }}
+      CYCLE_ATTEMPT: ${{ github.run_attempt }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Collect exact run metadata and write the cycle receipt
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cycle"
+          # On the default branch this is the actual first-parent integration
+          # that introduced the policy, not a hard-coded planning date.
+          export CYCLE_POLICY_ACTIVATED_AT="$(git log --first-parent --diff-filter=A --format=%cI -- scripts/ci/cycle-report.mjs)"
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            > "$RUNNER_TEMP/cycle/current-run.json"
+          # The scheduled history of this branch is collected on its own: the
+          # unfiltered window was crowded out by pull-request and manual runs
+          # and no longer carried the green baseline. The collector fails
+          # closed when it cannot prove the window complete.
+          node scripts/ci/collect-cycle-history.mjs \
+            --current-run "$RUNNER_TEMP/cycle/current-run.json" \
+            --policy-activated-at "$CYCLE_POLICY_ACTIVATED_AT" \
+            --repo "${{ github.repository }}" \
+            --out "$RUNNER_TEMP/cycle/recent-runs.json"
+          node scripts/ci/cycle-report.mjs \
+            --current-run "$RUNNER_TEMP/cycle/current-run.json" \
+            --recent-runs "$RUNNER_TEMP/cycle/recent-runs.json" \
+            --needs "$CYCLE_NEEDS" \
+            --out "$RUNNER_TEMP/cycle/regression-cycle.json"
+      - name: Preserve the regression cycle receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-cycle-${{ github.sha }}-${{ github.run_id }}-attempt-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/cycle/regression-cycle.json
+          if-no-files-found: error
+          retention-days: 30

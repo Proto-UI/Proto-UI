@@ -1,35 +1,7 @@
 name: Draft caller relocation native evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/core/src/handles.ts'
-      - 'packages/runtime/src/**'
-      - 'packages/runtime/test/contract/lifecycle*.test.ts'
-      - 'packages/adapters/base/src/host/**'
-      - 'packages/adapters/base/test/view-*.test.ts'
-      - 'packages/adapters/*/test/view-operation-withdrawal.test.ts'
-      - 'packages/adapters/web-component/test/view-operation-withdrawal.browser.test.ts'
-      - 'packages/adapters/web-component/test/view-operation-receipt.test.ts'
-      - 'scripts/feedback/view-operation-receipt.mjs'
-      - 'spec/contracts/C-LIFECYCLE-VIEW-OPERATION-0001.yaml'
-      - 'spec/host-caps/HC-VIEW-OPERATION-0001.yaml'
-      - 'spec/tests/T-LIFECYCLE-VIEW-OPERATION-0001.yaml'
-      - 'packages/core/src/spec/template.ts'
-      - 'packages/modules/feedback/**'
-      - 'packages/modules/rule/**'
-      - 'packages/modules/rule-expose-state-web/**'
-      - 'packages/adapters/web-component/src/**'
-      - 'packages/adapters/base/src/platform/web-owned-decoration*.ts'
-      - 'packages/adapters/base/src/platform/portal-destination.ts'
-      - 'packages/adapters/react/src/**'
-      - 'packages/adapters/web-component/test/fixtures/owned-caller-relocation-evidence-app.ts'
-      - 'packages/adapters/vue/src/**'
-      - 'packages/adapters/vue2/src/**'
-      - 'scripts/feedback/owned-caller-relocation-evidence*'
-      - 'scripts/feedback/view-operation-evidence.mjs'
-      - 'packages/adapters/web-component/test/fixtures/view-operation-evidence-app.ts'
-      - '.github/workflows/owned-caller-relocation-evidence.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

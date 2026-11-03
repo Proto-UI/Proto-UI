@@ -5,6 +5,8 @@ description: Maintain an existing Proto UI Prototype or implement a governed Bas
 
 # Work on a Prototype or component slice
 
+Apply `pui-dev`'s bounded-completion loop and the [current release stages](../../../internal/governance/release-0.3-plan.md). Prioritize admitted 0.3 behavior and interaction repairs; keep other-family experiments separately tracked. Map each completed child criterion to its real consumer evidence and continue through review/integration/tracking, without claiming an unfinished family or lifecycle promotion.
+
 1. Require `pui-orient`, `pui-trace`, and implementation authorization from the current bounded request, governed work item, or active standing scope.
 2. Classify the work as maintenance, governed Base implementation, or governed design-language projection.
 3. For maintenance, preserve existing criteria and add failing-before evidence at the owning layer.
