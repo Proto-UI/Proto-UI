@@ -150,7 +150,7 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
     ? createBorderBoxSizeLease(reference, targets as HTMLElement[], current)
     : null;
   const frameStyle = valid ? ownStyles(frame) : null;
-  let wroteMinimum = false;
+  let wroteWidth = false;
   let minimum = 0;
   const fail = (
     reason: 'invalid-geometry' | 'ownership-lost' | 'size-conflict'
@@ -187,15 +187,28 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
       if (!current()) return { status: 'pending-target', reason: 'detached-target' };
       const frameWidth = frame.offsetWidth;
       if (!current()) return { status: 'pending-target', reason: 'detached-target' };
-      if (wroteMinimum || frameWidth < minimum) {
+      if (wroteWidth || frameWidth < minimum) {
+        // Preserve authored sizing. CSS resolves min/max constraints; verify()
+        // certifies the used box instead of a minimum overriding an author cap.
         if (
-          !wroteMinimum &&
-          frame.style.getPropertyValue('min-width') &&
-          !hasOwnedStyle(frame, 'min-width')
+          !wroteWidth &&
+          ((frame.style.getPropertyValue('width') && !hasOwnedStyle(frame, 'width')) ||
+            (frame.style.getPropertyValue('inline-size') && !hasOwnedStyle(frame, 'inline-size')))
         )
           return fail('size-conflict');
-        if (!frameStyle.write('min-width', `${minimum}px`)) return fail('ownership-lost');
-        wroteMinimum = true;
+        const style = frame.ownerDocument.defaultView?.getComputedStyle(frame);
+        if (!style) return fail('invalid-geometry');
+        const chrome =
+          style.boxSizing === 'border-box'
+            ? 0
+            : Number.parseFloat(style.paddingLeft) +
+              Number.parseFloat(style.paddingRight) +
+              Number.parseFloat(style.borderLeftWidth) +
+              Number.parseFloat(style.borderRightWidth);
+        const width = minimum - chrome;
+        if (!Number.isFinite(width) || chrome < 0 || width <= 0) return fail('invalid-geometry');
+        if (!frameStyle.write('width', `${width}px`)) return fail('ownership-lost');
+        wroteWidth = true;
       }
       return { width: prepared.width, height: prepared.height };
     },

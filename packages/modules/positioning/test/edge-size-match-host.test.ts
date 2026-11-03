@@ -49,7 +49,15 @@ it('edge sizing matches actual declared used boxes before reporting success with
     const rowHeight = () => number(row.style.height, 12);
     // This controlled layout derives every matched dimension from actual owned
     // style writes. The legacy product therefore still reads its intrinsic box.
-    const frameWidth = () => Math.max(rowWidth() + 14, number(floating.style.minWidth, 0));
+    // Controlled used-layout inputs, not a native CSS conformance claim.
+    const frameWidth = () =>
+      Math.max(
+        number(floating.style.minWidth, 0),
+        Math.min(
+          floating.style.width ? number(floating.style.width, 0) : rowWidth() + 14,
+          number(floating.style.maxWidth, Infinity)
+        )
+      );
     Object.defineProperties(anchor, {
       offsetWidth: { configurable: true, get: () => 180 },
       offsetHeight: { configurable: true, get: () => 36 },
@@ -147,7 +155,19 @@ it('edge sizing matches actual declared used boxes before reporting success with
   expect(floating.style.padding).toBe('5px');
 });
 
-function edgeFixture(options: { rejectWrites?: boolean; authoredWidth?: string } = {}) {
+function edgeFixture(
+  options: {
+    rejectWrites?: boolean;
+    authoredWidth?: string;
+    frame?: {
+      boxSizing?: 'border-box' | 'content-box';
+      stylesheetWidth?: number;
+      width?: { declared: string; used: number };
+      minWidth?: { declared: string; used: number };
+      maxWidth?: { declared: string; used: number };
+    };
+  } = {}
+) {
   const root = document.documentElement;
   const priorWidth = Object.getOwnPropertyDescriptor(root, 'clientWidth');
   const priorHeight = Object.getOwnPropertyDescriptor(root, 'clientHeight');
@@ -170,14 +190,36 @@ function edgeFixture(options: { rejectWrites?: boolean; authoredWidth?: string }
       clientHeight: { configurable: true, get: () => window.innerHeight },
     });
     floating.style.cssText = 'box-sizing:border-box;padding:5px;border:2px solid black';
+    if (options.frame?.boxSizing) floating.style.boxSizing = options.frame.boxSizing;
     row.style.margin = '0';
     if (options.authoredWidth) row.style.setProperty('width', options.authoredWidth, 'important');
+    if (options.frame?.width) floating.style.setProperty('width', options.frame.width.declared);
+    if (options.frame?.minWidth)
+      floating.style.setProperty('min-width', options.frame.minWidth.declared);
+    if (options.frame?.maxWidth)
+      floating.style.setProperty('max-width', options.frame.maxWidth.declared);
     floating.append(row);
     document.body.append(anchor, floating);
     const n = (value: string, fallback: number) => (value ? Number.parseFloat(value) : fallback);
     const width = () => (options.rejectWrites ? 40 : n(row.style.width, 40));
     const height = () => (options.rejectWrites ? 12 : n(row.style.height, 12));
-    const frameWidth = () => Math.max(width() + 14, n(floating.style.minWidth, 0));
+    // Controlled resolved geometry keeps native CSS resolution separate from
+    // host ownership. A stylesheet width can require real frame growth even
+    // after the target row receives its own size; intrinsic growth alone would
+    // never exercise the authored-minimum conflict path.
+    const frameWidth = () =>
+      Math.max(
+        options.frame?.minWidth ? options.frame.minWidth.used : n(floating.style.minWidth, 0),
+        Math.min(
+          floating.style.width
+            ? options.frame?.width
+              ? options.frame.width.used
+              : n(floating.style.width, 0)
+            : (options.frame?.stylesheetWidth ??
+                width() + (options.frame?.boxSizing === 'content-box' ? 0 : 14)),
+          options.frame?.maxWidth?.used ?? Infinity
+        )
+      ) + (options.frame?.boxSizing === 'content-box' ? 14 : 0);
     Object.defineProperties(anchor, {
       offsetWidth: { configurable: true, get: () => reference.width },
       offsetHeight: { configurable: true, get: () => reference.height },
@@ -259,6 +301,7 @@ it('edge sizing rejects a real used-box mismatch and restores partial style writ
     expect(f.row.style.width).toBe('');
     expect(f.row.style.height).toBe('');
     expect(f.floating.style.minWidth).toBe('');
+    expect(f.floating.style.width).toBe('');
   } finally {
     f.dispose();
   }
@@ -279,6 +322,119 @@ it('edge sizing preserves authored important width rather than silently taking o
   }
   expect(f.row.style.width).toBe('70px');
   expect(f.row.style.getPropertyPriority('width')).toBe('important');
+});
+
+it('edge sizing admits an authored smaller frame minimum without replacing it', async () => {
+  const f = edgeFixture({
+    frame: { stylesheetWidth: 100, minWidth: { declared: '60px', used: 60 } },
+  });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'applied' });
+    expect([f.row.offsetWidth, f.row.offsetHeight]).toEqual([180, 36]);
+    expect(f.floating.offsetWidth).toBe(194);
+    expect(f.floating.style.minWidth).toBe('60px');
+  } finally {
+    f.dispose();
+  }
+  // Restore erases only the owned width write; the authored minimum stays.
+  expect(f.floating.style.width).toBe('');
+  expect(f.floating.style.minWidth).toBe('60px');
+  expect(f.floating.offsetWidth).toBe(100);
+});
+
+it('edge sizing honors a resolved non-pixel minimum without editing its declaration', async () => {
+  const f = edgeFixture({
+    frame: { stylesheetWidth: 100, minWidth: { declared: '6em', used: 96 } },
+  });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'applied' });
+    expect([f.row.offsetWidth, f.row.offsetHeight]).toEqual([180, 36]);
+    expect(f.floating.offsetWidth).toBe(194);
+    expect(f.floating.style.minWidth).toBe('6em');
+  } finally {
+    f.dispose();
+  }
+  expect(f.floating.style.width).toBe('');
+  expect(f.floating.style.minWidth).toBe('6em');
+});
+
+it('edge frame growth accounts for content-box chrome without replacing authored sizing', async () => {
+  const f = edgeFixture({
+    frame: {
+      boxSizing: 'content-box',
+      stylesheetWidth: 100,
+      minWidth: { declared: '60px', used: 60 },
+    },
+  });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'applied' });
+    expect([f.row.offsetWidth, f.row.offsetHeight]).toEqual([180, 36]);
+    expect(f.floating.offsetWidth).toBe(194);
+    expect(f.floating.style.boxSizing).toBe('content-box');
+    expect(f.floating.style.minWidth).toBe('60px');
+  } finally {
+    f.dispose();
+  }
+  expect(f.floating.offsetWidth).toBe(114);
+  expect(f.floating.style.width).toBe('');
+  expect(f.floating.style.boxSizing).toBe('content-box');
+  expect(f.floating.style.minWidth).toBe('60px');
+});
+
+it('edge sizing reports conflict when an authored larger minimum defeats the placement', async () => {
+  const f = edgeFixture({ frame: { minWidth: { declared: '9999px', used: 9999 } } });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'unavailable', reason: 'size-conflict' });
+    expect(f.floating.style.minWidth).toBe('9999px');
+    expect(f.floating.style.width).toBe('');
+    expect(f.row.style.width).toBe('');
+    expect(f.row.style.height).toBe('');
+  } finally {
+    f.dispose();
+  }
+});
+
+it('edge sizing rejects authored frame width instead of replacing it', async () => {
+  const f = edgeFixture({ frame: { width: { declared: 'calc(20px + 5px)', used: 25 } } });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'unavailable', reason: 'size-conflict' });
+    expect(f.floating.style.width).toBe('calc(20px + 5px)');
+    expect(f.row.style.width).toBe('');
+    expect(f.row.style.height).toBe('');
+  } finally {
+    f.dispose();
+  }
+});
+
+it('edge sizing reports conflict when an authored maximum defeats the required width', async () => {
+  const f = edgeFixture({ frame: { maxWidth: { declared: '120px', used: 120 } } });
+  const statuses: unknown[] = [];
+  try {
+    f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'unavailable', reason: 'size-conflict' });
+    expect(f.floating.style.maxWidth).toBe('120px');
+    expect(f.floating.style.width).toBe('');
+    expect(f.row.style.width).toBe('');
+    expect(f.row.style.height).toBe('');
+  } finally {
+    f.dispose();
+  }
 });
 
 it('edge zero-layout pending resumes with actual positive used boxes on the same connection', async () => {

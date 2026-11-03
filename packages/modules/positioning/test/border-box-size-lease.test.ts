@@ -215,6 +215,33 @@ describe('neutral used-border-box matching lease', () => {
     expect(f.rows[0].style.width).toBe('');
   });
 
+  it.each(['', 'important'])(
+    'preserves initial authored box-sizing with %s priority',
+    (priority) => {
+      const f = fixture();
+      f.rows[0].style.setProperty('box-sizing', 'content-box', priority);
+      const before = f.rows.map((row) => row.style.cssText);
+      const lease = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+      expect(lease.apply()).toEqual({ kind: 'unavailable', reason: 'size-conflict' });
+      expect(f.rows.map((row) => row.style.cssText)).toEqual(before);
+      lease.restore();
+      expect(f.rows[0].style.getPropertyValue('box-sizing')).toBe('content-box');
+      expect(f.rows[0].style.getPropertyPriority('box-sizing')).toBe(priority);
+    }
+  );
+
+  it('preserves an authored box-sizing inserted during the initial pending interval', () => {
+    const f = fixture();
+    f.resize(0, 0);
+    const lease = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(lease.apply().kind).toBe('pending');
+    f.rows[0].style.setProperty('box-sizing', 'content-box');
+    f.resize(192, 44);
+    expect(lease.apply()).toEqual({ kind: 'unavailable', reason: 'ownership-lost' });
+    expect(f.rows[0].style.getPropertyValue('box-sizing')).toBe('content-box');
+    for (const row of f.rows) expect([row.style.width, row.style.height]).toEqual(['', '']);
+  });
+
   it('does not reclaim same-valued successor fields after a pending interval', () => {
     const f = fixture();
     const previous = createBorderBoxSizeLease(f.reference, f.rows, f.current);
@@ -226,6 +253,35 @@ describe('neutral used-border-box matching lease', () => {
     expect(next.apply().kind).toBe('matched');
     expect(previous.apply()).toEqual({ kind: 'unavailable', reason: 'ownership-lost' });
     previous.restore();
+    expect([f.rows[0].style.width, f.rows[0].style.height]).toEqual(['192px', '44px']);
+    next.restore();
+    for (const row of f.rows) expect(row.style.cssText).toBe('');
+  });
+
+  it('keeps repeated verification pending until positive layout prepares and certifies', () => {
+    const f = fixture();
+    f.resize(0, 0);
+    const lease = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(lease.apply()).toEqual({ kind: 'pending', reason: 'missing-layout' });
+    expect(lease.verify()).toEqual({ kind: 'pending', reason: 'missing-layout' });
+    expect(lease.verify()).toEqual({ kind: 'pending', reason: 'missing-layout' });
+    f.resize(192, 44);
+    expect(lease.prepare()).toEqual({ kind: 'prepared', width: 192, height: 44 });
+    expect(lease.verify()).toEqual({ kind: 'matched', width: 192, height: 44 });
+    lease.restore();
+    for (const row of f.rows) expect(row.style.cssText).toBe('');
+  });
+
+  it('keeps a pending-only lease fenced from a same-valued admitted successor', () => {
+    const f = fixture();
+    f.resize(0, 0);
+    const previous = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(previous.apply()).toEqual({ kind: 'pending', reason: 'missing-layout' });
+    expect(previous.verify()).toEqual({ kind: 'pending', reason: 'missing-layout' });
+    f.resize(192, 44);
+    const next = createBorderBoxSizeLease(f.reference, f.rows, f.current);
+    expect(next.apply().kind).toBe('matched');
+    expect(previous.verify()).toEqual({ kind: 'unavailable', reason: 'ownership-lost' });
     expect([f.rows[0].style.width, f.rows[0].style.height]).toEqual(['192px', '44px']);
     next.restore();
     for (const row of f.rows) expect(row.style.cssText).toBe('');

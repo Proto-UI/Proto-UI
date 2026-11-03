@@ -29,12 +29,14 @@ export function createBorderBoxSizeLease(
   const generation = ++nextSizeLeaseGeneration;
   const ownerDocument = reference.ownerDocument;
   const sizeFields = ['width', 'height', 'inline-size', 'block-size'];
-  const authoredConflict = targets.some(
-    (target) =>
-      sizeFields.some(
-        (name) => !!target.style.getPropertyValue(name) && !hasOwnedStyle(target, name)
-      ) || !!target.style.getPropertyPriority('box-sizing')
-  );
+  // box-sizing is authored sizing by value, not only by important priority;
+  // a still-owned internal claim may transfer by identity either way.
+  const hasAuthoredSizing = (target: HTMLElement) =>
+    sizeFields.some(
+      (name) => !!target.style.getPropertyValue(name) && !hasOwnedStyle(target, name)
+    ) ||
+    (!!target.style.getPropertyValue('box-sizing') && !hasOwnedStyle(target, 'box-sizing'));
+  const authoredConflict = targets.some(hasAuthoredSizing);
   const owners = targets.map((target) => ({ target, styles: ownStyles(target) }));
   type Reason = Extract<BorderBoxSizeResult, { kind: 'unavailable' }>['reason'];
   let terminal: Reason | null = authoredConflict ? 'size-conflict' : null;
@@ -58,13 +60,7 @@ export function createBorderBoxSizeLease(
       ({ target, styles }) =>
         (admittedSizeGenerations.get(target) ?? 0) <= generation && styles.isCurrent()
     );
-  const hasNewAuthoredSizing = () =>
-    owners.some(
-      ({ target }) =>
-        sizeFields.some(
-          (name) => !!target.style.getPropertyValue(name) && !hasOwnedStyle(target, name)
-        ) || !!target.style.getPropertyPriority('box-sizing')
-    );
+  const hasNewAuthoredSizing = () => owners.some(({ target }) => hasAuthoredSizing(target));
   const connectedToOwner = () =>
     current() &&
     reference.isConnected &&
@@ -107,8 +103,11 @@ export function createBorderBoxSizeLease(
   const verify = (): BorderBoxSizeResult | Readonly<{ kind: 'reference-changed' }> => {
     if (terminal) return { kind: 'unavailable', reason: terminal };
     if (!connectedToOwner()) return unavailable('detached-target');
-    if (!preparedSize) return unavailable('invalid-geometry');
     if (!ownsCurrentFields() || hasNewAuthoredSizing()) return unavailable('ownership-lost');
+    // A lease that only ever saw missing layout has nothing to certify, but a
+    // repeated verification must stay recoverable, not turn terminal. Real
+    // terminal and ownership failures above still win over pending.
+    if (!preparedSize) return pending();
     const prepared = preparedSize;
     const { width, height } = prepared;
     // Verification never rewrites dimensions after the caller solved layout.
