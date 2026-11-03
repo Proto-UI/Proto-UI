@@ -197,7 +197,6 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
         expect(native.role).toBeNull();
       } else expect(native.role).toBe('combobox');
       const expectedEnds = new Map<string, string>();
-      let rest: MotionFrame | undefined;
       const step = await page.evaluate(
         () => parseFloat(getComputedStyle(document.documentElement).fontSize) / 4
       );
@@ -213,6 +212,11 @@ for (const subject of ['community-anchor', 'elevated-select'] as const) {
           if (!box) throw new Error('No native hit box');
           const enter = () => page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
           const leave = () => page.mouse.move(1400, 950);
+          // A preference change can move the containing surface, so every
+          // preference measures its own rest frame instead of reusing the
+          // previous one. Geometry and the returned shadow stay relative to
+          // this stage's rest.
+          let rest: MotionFrame | undefined;
           for (const phase of ['entry', 'exit', 'interrupted'] as const) {
             const captured = await capture(page, paint, async () => {
               if (phase === 'exit') await leave();
