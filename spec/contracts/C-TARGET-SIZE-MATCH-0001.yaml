@@ -22,9 +22,15 @@ criteria:
   - id: C-TARGET-SIZE-MATCH-0001-PENDING
     text:
       en: A connected reference or target with a finite zero used-layout extent has no certifiable layout yet. It returns recoverable pending rather than a terminal invalid-geometry failure; the same current lease can prepare and verify once positive layout returns. Pending does not certify stored dimensions or release identity claims for a stale owner to reclaim. Nonfinite or negative extents, ownership loss and genuine size or content conflicts remain explicit failures. A resumed host reports its current applied status without repeating first-entry scheduling; disposal and successor ownership prohibit recovery by the old lease.
+  - id: C-TARGET-SIZE-MATCH-0001-EDGE
+    text:
+      en: An edge-positioned connection may explicitly request the same neutral size lease without selecting target-alignment geometry. The reference is its live element anchor and the unique targets are contained by its floating frame in the same document. A Host must declare size support before the module admits this request. Omission preserves ordinary edge behavior; unsupported, invalid or conflicting requests report a named failure rather than silently ignoring the size policy. Existing side, alignment, offsets, collision and rendered-anchor placement semantics remain authoritative.
+  - id: C-TARGET-SIZE-MATCH-0001-EDGE-LIFETIME
+    text:
+      en: Edge sizing prepares used boxes and accounts for outer frame chrome before solving placement. It reports applied only after the current asynchronous solve and actual size readback both succeed. Every middleware write and delivery is bounded by the current connection generation; reconfiguration, target replacement, withdrawal and disposal invalidate older work. Missing layout remains recoverable under the current identity, while partial failure restores only still-owned sizing. A stable current size result does not itself schedule or repeat semantic focus entry.
   - id: C-TARGET-SIZE-MATCH-0001-SCOPE
     text:
-      en: This bounded implementation adds neutral size association to target-alignment geometry only. It does not implement a public Select consumer or change selection, hover, keyboard focus, material rendering or popup ownership. Popper support and public composition defaults are separately tracked integration dependencies, not inferred from a passing host lease. Public defaults belong to their consumer recipe, never to host component-name dispatch.
+      en: The target-alignment and edge implementations share neutral size ownership; isolated source execution is not native or public-consumer acceptance. It does not implement a public Select consumer or change selection, hover, keyboard focus, material rendering or popup ownership. Safe public edge-part association, Select Popper integration and public composition defaults are separately tracked integration dependencies, not inferred from a passing host lease. Public defaults belong to their consumer recipe, never to host component-name dispatch.
 dependsOn:
   contracts: [C-TARGET-ALIGNMENT-BINDING-0001, C-TARGET-ALIGNMENT-PLAN-0001]
 verifies:
@@ -33,6 +39,8 @@ sources:
   - path: packages/modules/positioning/src/web/border-box-size-lease.ts
   - path: packages/modules/positioning/src/web/owned-style-lease.ts
   - path: packages/modules/positioning/src/web/target-alignment-host.ts
+  - path: packages/modules/positioning/src/web/floating-ui-host.ts
+  - path: packages/modules/positioning/src/impl.ts
   - path: packages/modules/overlay/src/target-alignment-binding.ts
 revisions:
   - version: 0.3.0-alpha.1

@@ -72,6 +72,9 @@ export type AnchoredPositionConnection = Readonly<{
   floating: unknown;
   config: AnchoredPositionConfig;
   onResolved?(snapshot: AnchoredPositionSnapshot): void;
+  /** Neutral edge-only used-box request. Safe parts resolve behind Overlay. */
+  sizeMatch?: Readonly<{ reference: unknown; targets: readonly unknown[] }>;
+  onSizeMatch?(status: TargetAlignmentStatus): void;
   targetAlignment?: TargetAlignmentConnection;
   onAlignment?(status: TargetAlignmentStatus): void;
 }>;
