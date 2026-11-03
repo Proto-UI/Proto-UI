@@ -647,11 +647,16 @@ try {
       let upPending = false,
         armError;
       const action = async (name, run) => {
-        const operation = { name, startedAt: performance.now(), completedAt: null, error: null };
+        const operation = {
+          name,
+          startedAt: globalThis.performance.now(),
+          completedAt: null,
+          error: null,
+        };
         focusEvidence.operations.push(operation);
         try {
           const result = await run();
-          operation.completedAt = performance.now();
+          operation.completedAt = globalThis.performance.now();
           return result;
         } catch (error) {
           operation.error = String(error?.stack ?? error);
@@ -766,7 +771,7 @@ try {
           if (target.isClosed()) {
             focusEvidence.operations.push({
               name: `${name}.restore-skipped-closed`,
-              at: performance.now(),
+              at: globalThis.performance.now(),
             });
           } else {
             await cleanup(`${name}.focusEmulation(true)-restore`, () =>
@@ -778,7 +783,7 @@ try {
           if (other.isClosed()) {
             focusEvidence.operations.push({
               name: 'other.detach-skipped-target-closed',
-              at: performance.now(),
+              at: globalThis.performance.now(),
             });
           } else {
             await cleanup('other.cdp.detach', () => otherCdp.detach());
