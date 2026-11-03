@@ -111,6 +111,8 @@ Config-parse verification (runs in the `ci-config-audit` job on every CI lane):
 
 Obsolete source-text tests that pin per-PR evidence triggers, unconditional aggregate execution or cancelling shared evidence are removed, not re-pinned to new YAML strings. The scheduling audit exercises the replacement policy with positive and negative workflow inventories; the surviving contrast, homepage, startup, Dropdown, Code Scroll and Quickstart behavior checks and native evidence suites retain their existing assertions. Code Scroll executes its actual observer through syntax-bound extraction rather than whitespace-sensitive source delimiters; the native wheel oracle is unchanged.
 
+Search startup profiling remains bound to its original failed application SHAs. Its unit runner inputs retain those checkouts' inert warmup list rather than reading the current runner's imported plan; the production parser, readiness deadline, capture verdicts, sanitization and cleanup checks are unchanged.
+
 Behavioral verification (performed by the parent on the first post-merge cycles):
 
 - On the first scheduled slot, confirm a `ci.yml` run with `event=schedule` produces a `regression-cycle-<sha>` artifact whose `sourceRevision` equals the default-branch head at trigger time, whose lane inventory covers every `cycle-report.needs` entry including production suites, and whose receipt reports the cron slot, actual start and queue delay.
