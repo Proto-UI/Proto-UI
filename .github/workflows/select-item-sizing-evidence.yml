@@ -1,37 +1,21 @@
 name: Select website item sizing evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/select-item-sizing-evidence.yml'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts'
-      - 'apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts'
-      - 'apps/www/src/content/docs/en/ui-libraries/shadcn/select.mdx'
-      - 'apps/www/src/content/docs/zh-cn/ui-libraries/shadcn/select.mdx'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'packages/core/src/**'
-      - 'packages/hooks/src/**'
-      - 'packages/modules/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/base/src/select/**'
-      - 'packages/prototypes/shadcn/src/select/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+  workflow_call:
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: select-website-item-sizing-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  group: select-website-item-sizing-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   styled-demo-eight:
-    if: github.repository == 'Proto-UI/Proto-UI' && github.event.pull_request.number == 1229
+    if: github.repository == 'Proto-UI/Proto-UI'
     runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -45,7 +29,7 @@ jobs:
       - name: Bind checkout and execute the eight styled website cases
         env:
           PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE: ${{ runner.temp }}/select-website-item-sizing
-          EXPECTED_HEAD: ${{ github.event.pull_request.head.sha }}
+          EXPECTED_HEAD: ${{ github.sha }}
         run: |
           set -euo pipefail
           mkdir -p "$PROTO_UI_SELECT_ITEM_SIZING_EVIDENCE"
@@ -77,7 +61,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: select-website-item-sizing-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: select-website-item-sizing-${{ github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/select-website-item-sizing
           if-no-files-found: warn
           retention-days: 30
