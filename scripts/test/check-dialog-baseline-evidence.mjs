@@ -19,7 +19,7 @@ export const PROBE_HASHES = {
 // must continue rejecting it until its actual evidence is independently reviewed.
 export const CURRENT_PROBE_HASHES = {
   'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts':
-    '181f88d9a711103f00437fd1866a30e5a383612c14aad8b0a63c46a043b5df88',
+    '50f13884d5081c13d126f06c5297a6b98c1c185ea2f8b5e0af46187bacd35b0e',
   'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts':
     '0f150fc216d71dbd02abe14da46d38713c318a10668f7c8737cc16f7d6c52a23',
   'subject/scripts/test/server-readiness.mjs':
