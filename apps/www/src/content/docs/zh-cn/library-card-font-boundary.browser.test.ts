@@ -519,3 +519,534 @@ describe('real gallery author font boundary, additional diagnosis', () => {
       }, 90_000);
     }
 });
+
+// Independent causal diagnosis. It does not change Card9 or the preceding eight
+// font cases, and a captured intervention is not a product/layout acceptance.
+function readSharedLayoutState() {
+  const selectors = {
+    frame: '.site-page-frame',
+    header: '.site-page-frame > header',
+    contentsMount: '[data-site-contents-panel-mount]',
+    shell: '.site-page-frame > .docs-shell',
+    title: '#_top',
+    gallery: '.library-gallery',
+  };
+  const elementState = (node: Element) => {
+    const css = getComputedStyle(node),
+      rect = node.getBoundingClientRect();
+    return {
+      tag: node.localName,
+      id: node.id,
+      classes: node.getAttribute('class'),
+      style: node.getAttribute('style'),
+      hidden: node.getAttribute('hidden'),
+      connected: node.isConnected,
+      ownerDocumentMatches: node.ownerDocument === document,
+      viewport: { x: rect.x, y: rect.y, width: rect.width, height: rect.height },
+      document: { x: rect.x + scrollX, y: rect.y + scrollY },
+      display: css.display,
+      position: css.position,
+      lineHeight: css.lineHeight,
+      font: css.fontFamily,
+      fontSize: css.fontSize,
+      margin: css.margin,
+      padding: css.padding,
+      border: css.borderWidth,
+      visibility: css.visibility,
+      transform: css.transform,
+    };
+  };
+  const targets = Object.fromEntries(
+    Object.entries(selectors).map(([name, selector]) => {
+      const matches = document.querySelectorAll(selector);
+      if (matches.length !== 1)
+        throw new Error(`Shared layout ${name}: expected one node, got ${matches.length}`);
+      const node = matches[0];
+      const ancestors = [];
+      for (let parent = node.parentElement; parent; parent = parent.parentElement) {
+        if (ancestors.length >= 32) throw new Error('Shared layout ancestry exceeds32');
+        ancestors.push(elementState(parent));
+      }
+      return [
+        name,
+        {
+          selector,
+          ...elementState(node),
+          ancestors,
+          children: [...node.children].slice(0, 32).map(elementState),
+          childCount: node.children.length,
+        },
+      ];
+    })
+  );
+  const mount = document.querySelector('[data-site-contents-panel-mount]')!;
+  return {
+    now: performance.now(),
+    viewport: { width: innerWidth, height: innerHeight },
+    scroll: { x: scrollX, y: scrollY },
+    targets,
+    contents: {
+      generation: mount.getAttribute('data-contents-panel-generation'),
+      runtime: mount.getAttribute('data-contents-panel-runtime'),
+      family: mount.getAttribute('data-contents-panel-family'),
+      bodyDialog: document.body.getAttribute('data-site-contents-dialog'),
+      bodyExpanded: document.body.getAttribute('data-mobile-menu-expanded'),
+      commands: [...document.querySelectorAll('[data-site-contents-command]')].map((node) => ({
+        expanded: node.getAttribute('aria-expanded'),
+        controls: node.getAttribute('aria-controls'),
+      })),
+      activeHosts: [...mount.querySelectorAll('[data-projection-generation-state="active"]')].map(
+        elementState
+      ),
+    },
+    galleryHosts: [...document.querySelectorAll('.library-gallery [data-library-part]')].map(
+      (node) => ({
+        tag: node.localName,
+        part: node.getAttribute('data-library-part'),
+        registered: typeof customElements.get(node.localName) === 'function',
+        exactConstructor: node.constructor === customElements.get(node.localName),
+      })
+    ),
+    faces: [...document.fonts].map((face) => ({ family: face.family, status: face.status })),
+  };
+}
+
+it('shared page layout diagnosis preserves original endpoints and isolates closed contents mount', async () => {
+  const context = await browser.newContext({
+    viewport: { width: 1280, height: 900 },
+    colorScheme: 'light',
+  });
+  const record: Record<string, unknown> = {
+    source,
+    requestedSitePreference: 'wc',
+    hostCoverage:
+      'This independent layout case records actual tags/counts; the unchanged eight-case suite owns WC constructor acceptance.',
+    role: 'single-page reversible DOM intervention; not source revert, product fix, CLS acceptance or historical sole-cause proof',
+    startedAt: new Date().toISOString(),
+  };
+  const forbidden: string[] = [],
+    pageErrors: string[] = [],
+    cleanup: CleanupIssue[] = [];
+  const reportCleanup = (issue: CleanupIssue) => {
+    cleanup.push(issue);
+  };
+  let release!: () => void,
+    released = false,
+    primaryError = false,
+    stopped = false;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const heldRequests: Array<{ url: string; type: string }> = [];
+  let page: Page | undefined;
+  type HeldLayoutValue = {
+    nodes: Array<{ selector: string; node: HTMLElement }>;
+    originalStyle: string | null;
+    originalHidden: string | null;
+    control: HTMLDivElement | null;
+    mountTouched: boolean;
+    stopped: boolean;
+  };
+  let handles: import('playwright-core').JSHandle<HeldLayoutValue> | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const stages: Array<{ name: string; state: ReturnType<typeof readSharedLayoutState> }> = [];
+  record.stages = stages;
+  async function live<T>(work: () => Promise<T>) {
+    if (stopped) throw new Error('Shared layout diagnostic stopped before next operation');
+    const value = await work();
+    if (stopped) throw new Error('Shared layout diagnostic stopped during operation');
+    return value;
+  }
+  async function bounded<T>(work: () => Promise<T>, milliseconds: number, label: string) {
+    let deadline: ReturnType<typeof setTimeout> | undefined;
+    try {
+      return await Promise.race([
+        work(),
+        new Promise<never>((_, reject) => {
+          deadline = setTimeout(() => reject(new Error(label)), milliseconds);
+        }),
+      ]);
+    } finally {
+      if (deadline) clearTimeout(deadline);
+    }
+  }
+  try {
+    await Promise.race([
+      (async () => {
+        await live(() =>
+          context.addInitScript(
+            ({ key }) => {
+              localStorage.setItem(key, 'wc');
+              localStorage.setItem('starlight-theme', 'light');
+            },
+            { key: PREFERRED_ADAPTER_KEY }
+          )
+        );
+        page = await live(() => context.newPage());
+        page.setDefaultTimeout(10_000);
+        page.on('pageerror', (error) => pageErrors.push(error.message));
+        await live(() =>
+          page!.route('**/*', async (request) => {
+            const url = new URL(request.request().url());
+            if (url.origin !== new URL(baseUrl).origin) {
+              forbidden.push(url.href);
+              await request.abort();
+              return;
+            }
+            if (!released && ['font', 'script'].includes(request.request().resourceType())) {
+              heldRequests.push({ url: url.href, type: request.request().resourceType() });
+              await gate;
+            }
+            if (stopped) {
+              await request.abort();
+              return;
+            }
+            await request.continue();
+          })
+        );
+        await live(() => page!.goto(baseUrl + route, { waitUntil: 'commit' }));
+        await live(() =>
+          page!
+            .locator('.library-gallery [data-library="brutalist"] h2')
+            .waitFor({ state: 'attached' })
+        );
+        // First raw geometry before any handles, screenshots, font waits or intervention.
+        const held = await live(() => page!.evaluate(readSharedLayoutState));
+        stages.push({ name: 'held-original', state: held });
+        record.heldRequests = heldRequests;
+        handles = await live(() =>
+          page!.evaluateHandle(() => {
+            const selectors = [
+              '.site-page-frame',
+              '.site-page-frame > header',
+              '[data-site-contents-panel-mount]',
+              '.site-page-frame > .docs-shell',
+              '#_top',
+              '.library-gallery',
+            ];
+            return {
+              nodes: selectors.map((selector) => {
+                const matches = document.querySelectorAll<HTMLElement>(selector);
+                if (matches.length !== 1)
+                  throw new Error(`Ambiguous held layout node: ${selector}`);
+                return { selector, node: matches[0] };
+              }),
+              originalStyle: document
+                .querySelector('[data-site-contents-panel-mount]')!
+                .getAttribute('style'),
+              originalHidden: document
+                .querySelector('[data-site-contents-panel-mount]')!
+                .getAttribute('hidden'),
+              control: null as HTMLDivElement | null,
+              mountTouched: false,
+              stopped: false,
+            };
+          })
+        );
+        record.heldImage = await live(() =>
+          captureCurrentViewport(
+            page!,
+            path.join(directory, 'shared-layout-held.png'),
+            undefined,
+            reportCleanup
+          )
+        );
+        released = true;
+        release();
+        await live(() =>
+          page!.waitForFunction(
+            () => {
+              const mount = document.querySelector('[data-site-contents-panel-mount]');
+              return (
+                mount?.hasAttribute('data-contents-panel-generation') &&
+                !!mount.querySelector('[data-projection-generation-state="active"]') &&
+                document.querySelectorAll('.library-gallery [data-library-part]').length > 0 &&
+                [...document.querySelectorAll('.library-gallery [data-library-part]')].every(
+                  (node) => customElements.get(node.localName)
+                )
+              );
+            },
+            undefined,
+            { timeout: 15_000 }
+          )
+        );
+        await live(() =>
+          page!.waitForFunction(() => document.fonts.status === 'loaded', undefined, {
+            timeout: 15_000,
+          })
+        );
+        await live(() =>
+          page!.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+              )
+          )
+        );
+        const settled = await live(() => page!.evaluate(readSharedLayoutState));
+        stages.push({ name: 'settled-original', state: settled });
+        record.settledImage = await live(() =>
+          captureCurrentViewport(
+            page!,
+            path.join(directory, 'shared-layout-settled.png'),
+            undefined,
+            reportCleanup
+          )
+        );
+        expect(settled.contents.bodyExpanded).toBeNull();
+        expect(settled.contents.commands.length).toBeGreaterThan(0);
+        expect(settled.contents.commands.every((command) => command.expanded === 'false')).toBe(
+          true
+        );
+        expect(settled.contents.activeHosts).toHaveLength(1);
+        // Keep the original settled style, not a guessed empty inline declaration.
+        const originalAttributes = await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as {
+              nodes: Array<{ selector: string; node: HTMLElement }>;
+              originalStyle: string | null;
+              originalHidden: string | null;
+              stopped: boolean;
+            };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            for (const item of held.nodes)
+              if (
+                !item.node.isConnected ||
+                item.node.ownerDocument !== document ||
+                document.querySelectorAll(item.selector).length !== 1 ||
+                document.querySelector(item.selector) !== item.node
+              )
+                throw new Error('Held shared layout node identity changed');
+            const mount = held.nodes[2].node;
+            held.originalStyle = mount.getAttribute('style');
+            held.originalHidden = mount.getAttribute('hidden');
+            return {
+              style: held.originalStyle,
+              hidden: held.originalHidden,
+              heldIdentities: held.nodes.map((item) => ({
+                selector: item.selector,
+                tag: item.node.localName,
+                sameNode: document.querySelector(item.selector) === item.node,
+                connected: item.node.isConnected,
+                ownerDocumentMatches: item.node.ownerDocument === document,
+              })),
+            };
+          })
+        );
+        record.interventionOriginalAttributes = originalAttributes;
+        // Unrelated out-of-flow empty element: same display:none/restore operation,
+        // with insertion separately observed so it cannot silently alter the baseline.
+        await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as { control: HTMLDivElement | null; stopped: boolean };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            const control = document.createElement('div');
+            control.setAttribute('aria-hidden', 'true');
+            control.style.cssText =
+              'position:fixed;left:-10000px;top:-10000px;width:1px;height:1px;pointer-events:none';
+            document.body.append(control);
+            held.control = control;
+          })
+        );
+        stages.push({
+          name: 'control-inserted',
+          state: await live(() => page!.evaluate(readSharedLayoutState)),
+        });
+        await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as { control: HTMLDivElement; stopped: boolean };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            held.control.style.setProperty('display', 'none', 'important');
+          })
+        );
+        stages.push({
+          name: 'unrelated-hidden',
+          state: await live(() => page!.evaluate(readSharedLayoutState)),
+        });
+        await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as { control: HTMLDivElement; stopped: boolean };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            held.control.style.removeProperty('display');
+          })
+        );
+        stages.push({
+          name: 'unrelated-restored',
+          state: await live(() => page!.evaluate(readSharedLayoutState)),
+        });
+        await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as {
+              nodes: Array<{ node: HTMLElement }>;
+              mountTouched: boolean;
+              stopped: boolean;
+            };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            held.mountTouched = true;
+            held.nodes[2].node.style.setProperty('display', 'none', 'important');
+          })
+        );
+        stages.push({
+          name: 'closed-mount-hidden',
+          state: await live(() => page!.evaluate(readSharedLayoutState)),
+        });
+        record.interventionImage = await live(() =>
+          captureCurrentViewport(
+            page!,
+            path.join(directory, 'shared-layout-intervention.png'),
+            undefined,
+            reportCleanup
+          )
+        );
+        await live(() =>
+          handles!.evaluate((value) => {
+            const held = value as {
+              nodes: Array<{ node: HTMLElement }>;
+              originalStyle: string | null;
+              stopped: boolean;
+            };
+            if (held.stopped) throw new Error('Stopped shared layout operation');
+            const mount = held.nodes[2].node;
+            if (held.originalStyle === null) mount.removeAttribute('style');
+            else mount.setAttribute('style', held.originalStyle);
+          })
+        );
+        stages.push({
+          name: 'closed-mount-restored',
+          state: await live(() => page!.evaluate(readSharedLayoutState)),
+        });
+        const targetNames = ['header', 'shell', 'title', 'gallery'];
+        const geometry = (state: ReturnType<typeof readSharedLayoutState>) =>
+          targetNames.map((name) => ({
+            name,
+            viewport: state.targets[name].viewport,
+            document: state.targets[name].document,
+          }));
+        for (const stage of stages.filter((row) =>
+          [
+            'control-inserted',
+            'unrelated-hidden',
+            'unrelated-restored',
+            'closed-mount-restored',
+          ].includes(row.name)
+        ))
+          expect(geometry(stage.state), stage.name).toEqual(geometry(settled));
+        const hidden = stages.find((row) => row.name === 'closed-mount-hidden')!.state;
+        const deltas = targetNames.map((name) => ({
+          name,
+          originalY: settled.targets[name].document.y - held.targets[name].document.y,
+          interventionY: hidden.targets[name].document.y - settled.targets[name].document.y,
+          restoredY:
+            stages.at(-1)!.state.targets[name].document.y - settled.targets[name].document.y,
+        }));
+        record.deltas = deltas;
+        record.hypothesisSupportedAtTheseEndpoints =
+          deltas
+            .filter((row) => row.name !== 'header')
+            .every((row) => row.originalY !== 0 && row.originalY + row.interventionY === 0) &&
+          deltas[0].originalY === 0 &&
+          deltas[0].interventionY === 0;
+        record.interpretation =
+          'The boolean only reports this isolated intervention. False retains the hypothesis as unproven; true still does not prove the historical sole cause or repair the page.';
+        expect(heldRequests.some((row) => row.type === 'script')).toBe(true);
+        expect(heldRequests.some((row) => row.type === 'font')).toBe(true);
+        expect(forbidden).toEqual([]);
+        expect(pageErrors).toEqual([]);
+        expect(cleanup).toEqual([]);
+        record.outcome = 'diagnostic-complete-not-product-acceptance';
+      })(),
+      new Promise<never>((_, reject) => {
+        timer = setTimeout(() => {
+          stopped = true;
+          reject(new Error('Shared layout diagnostic exceeded75s'));
+        }, 75_000);
+      }),
+    ]);
+  } catch (error) {
+    stopped = true;
+    primaryError = true;
+    record.outcome = 'failed';
+    record.error = String(error);
+    throw error;
+  } finally {
+    stopped = true;
+    if (timer) clearTimeout(timer);
+    released = true;
+    release();
+    if (handles) {
+      try {
+        record.restoration = await bounded(
+          () =>
+            handles!.evaluate((value) => {
+              const held = value as {
+                nodes: Array<{ selector: string; node: HTMLElement }>;
+                originalStyle: string | null;
+                originalHidden: string | null;
+                control: HTMLDivElement | null;
+                mountTouched: boolean;
+                stopped: boolean;
+              };
+              held.stopped = true;
+              const mount = held.nodes[2].node;
+              if (held.mountTouched) {
+                if (held.originalStyle === null) mount.removeAttribute('style');
+                else mount.setAttribute('style', held.originalStyle);
+                if (held.originalHidden === null) mount.removeAttribute('hidden');
+                else mount.setAttribute('hidden', held.originalHidden);
+              }
+              held.control?.remove();
+              return {
+                sameNode: document.querySelector('[data-site-contents-panel-mount]') === mount,
+                connected: mount.isConnected,
+                allHeldIdentities: held.nodes.every(
+                  (item) =>
+                    document.querySelectorAll(item.selector).length === 1 &&
+                    document.querySelector(item.selector) === item.node &&
+                    item.node.isConnected &&
+                    item.node.ownerDocument === document
+                ),
+                style: mount.getAttribute('style'),
+                hidden: mount.getAttribute('hidden'),
+                controlConnected: held.control?.isConnected ?? false,
+                attributesRestored:
+                  !held.mountTouched ||
+                  (mount.getAttribute('style') === held.originalStyle &&
+                    mount.getAttribute('hidden') === held.originalHidden),
+              };
+            }),
+          3000,
+          'Shared layout restoration exceeded3s'
+        );
+        const restoration = record.restoration as {
+          sameNode: boolean;
+          connected: boolean;
+          allHeldIdentities: boolean;
+          controlConnected: boolean;
+          attributesRestored: boolean;
+        };
+        if (
+          !restoration.sameNode ||
+          !restoration.connected ||
+          !restoration.allHeldIdentities ||
+          restoration.controlConnected ||
+          !restoration.attributesRestored
+        )
+          throw new Error('Shared layout restoration verification failed');
+        await bounded(() => handles!.dispose(), 1000, 'Shared layout handle disposal exceeded1s');
+      } catch (error) {
+        reportCleanup({ operation: 'shared-layout.restore', error: String(error) });
+      }
+    }
+    record.forbiddenRequests = forbidden;
+    record.pageErrors = pageErrors;
+    await closeEvidenceContext(context, true, reportCleanup);
+    record.cleanup = cleanup;
+    if (primaryError)
+      await writeFailureRecord(path.join(directory, 'shared-layout.json'), record, reportCleanup);
+    else {
+      if (cleanup.length) record.outcome = 'failed-cleanup';
+      await writeFile(path.join(directory, 'shared-layout.json'), JSON.stringify(record, null, 2));
+      expect(cleanup).toEqual([]);
+    }
+  }
+}, 90_000);
