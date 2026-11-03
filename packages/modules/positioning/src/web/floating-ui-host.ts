@@ -206,7 +206,8 @@ function createEdgeSizeLease(connection: AnchoredPositionConnection, current: ()
               Number.parseFloat(style.borderLeftWidth) +
               Number.parseFloat(style.borderRightWidth);
         const width = minimum - chrome;
-        if (!Number.isFinite(width) || chrome < 0 || width <= 0) return fail('invalid-geometry');
+        if (!Number.isFinite(width) || chrome < 0) return fail('invalid-geometry');
+        if (width <= 0) return fail('size-conflict');
         if (!frameStyle.write('width', `${width}px`)) return fail('ownership-lost');
         wroteWidth = true;
       }

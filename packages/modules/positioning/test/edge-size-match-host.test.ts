@@ -390,6 +390,40 @@ it('edge frame growth accounts for content-box chrome without replacing authored
   expect(f.floating.style.minWidth).toBe('60px');
 });
 
+it('edge sizing reports authored frame chrome conflicts after an owned width write', async () => {
+  const f = edgeFixture({ frame: { boxSizing: 'content-box', stylesheetWidth: 100 } });
+  const statuses: unknown[] = [];
+  try {
+    const lease = f.attach(f.connection((status) => statuses.push(status)));
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'applied' });
+    expect(f.floating.style.width).toBe('180px');
+
+    // Valid authored padding and a negative child margin can make the desired
+    // frame border box narrower than its chrome, without invalid geometry.
+    f.floating.style.paddingLeft = '225px';
+    f.row.style.marginLeft = '-220px';
+    const frameWidth = () => (Number.parseFloat(f.floating.style.width) || 100) + 234;
+    Object.defineProperties(f.floating, {
+      offsetWidth: { configurable: true, get: frameWidth },
+      clientWidth: { configurable: true, get: () => frameWidth() - 4 },
+      getBoundingClientRect: {
+        configurable: true,
+        value: () => rect(0, 0, frameWidth(), f.floating.offsetHeight),
+      },
+    });
+    lease.requestUpdate();
+    await flush();
+    expect(statuses.at(-1)).toEqual({ status: 'unavailable', reason: 'size-conflict' });
+    expect(f.floating.style.width).toBe('');
+    expect(f.floating.style.paddingLeft).toBe('225px');
+    expect(f.row.style.marginLeft).toBe('-220px');
+    expect([f.row.style.width, f.row.style.height]).toEqual(['', '']);
+  } finally {
+    f.dispose();
+  }
+});
+
 it('edge sizing reports conflict when an authored larger minimum defeats the placement', async () => {
   const f = edgeFixture({ frame: { minWidth: { declared: '9999px', used: 9999 } } });
   const statuses: unknown[] = [];
