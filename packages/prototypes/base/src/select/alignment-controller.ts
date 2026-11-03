@@ -1,6 +1,11 @@
 import type { AnatomyPartView, OverlayHandle, RunHandle } from '@proto.ui/core';
 import type { SelectContentProps } from './types';
-import { SELECT_CONTEXT, SELECT_FAMILY } from './shared';
+import {
+  SELECT_CONTEXT,
+  SELECT_FAMILY,
+  normalizeSelectRootItemSizing,
+  normalizeSelectItemSizing,
+} from './shared';
 import { resolveCurrentSelectAlignment, resolveInitialSelectAlignment } from './alignment-intent';
 
 type Run = RunHandle<SelectContentProps>;
@@ -18,7 +23,15 @@ export type SelectPresentationPhase =
 export function createSelectAlignmentController(options: {
   overlay: Pick<OverlayHandle<SelectContentProps>, 'registerTargetAlignment'>;
   changed(run: Run): void;
-  applied(run: Run, row: AnatomyPartView, current: () => boolean): boolean;
+  applied(
+    run: Run,
+    row: AnatomyPartView,
+    current: () => boolean,
+    admission: {
+      preserveFocus: boolean;
+      accept(): boolean;
+    }
+  ): void;
 }) {
   let phase: SelectPresentationPhase = 'unsettled';
   let diagnostic = '';
@@ -31,9 +44,15 @@ export function createSelectAlignmentController(options: {
   let request = 0;
   let lastKey = '';
   let lastRevision = -1;
+  let lastSizing: 'intrinsic' | 'match-trigger' = 'intrinsic';
   let cycle = 0;
   let wasOpen = false;
   let initial = true;
+  // A policy-only remeasurement confirms layout without acquiring a new entry-focus right.
+  // Retain only semantic scalars and structural generation, never DOM targets or measurements.
+  type FocusShape = string;
+  let lastAcceptedFocusShape: FocusShape | null = null;
+  let lastObservedFocusValue: string | null = null;
   type InitialFallback = { rootValue: string; candidateValue: string; structureVersion: number };
   let initialFallback: InitialFallback | null = null;
   let applied: {
@@ -41,6 +60,8 @@ export function createSelectAlignmentController(options: {
     run: Run;
     row: AnatomyPartView;
     fallback: InitialFallback | null;
+    focusShape: FocusShape;
+    preserveFocus: boolean;
     current(): boolean;
   } | null = null;
 
@@ -53,6 +74,8 @@ export function createSelectAlignmentController(options: {
     }
   };
   const notify = (run: Run, next: SelectPresentationPhase, reason = '') => {
+    // An aborted presentation cannot lend its old entry rights to a later repair.
+    if (next !== 'valid' && next !== 'full-pending') lastAcceptedFocusShape = null;
     phase = next;
     diagnostic = reason;
     options.changed(run);
@@ -68,15 +91,29 @@ export function createSelectAlignmentController(options: {
     const next = applied;
     if (delivering || !mounted || !next || !next.current()) return;
     delivering = true;
+    let completedNormally = false;
     try {
-      const accepted = options.applied(next.run, next.row, () => mounted && next.current());
-      if (accepted && next.current()) {
-        if (initial) initialFallback = next.fallback;
-        initial = false;
-        if (applied === next) applied = null;
-      }
+      let accepted = false;
+      options.applied(next.run, next.row, () => mounted && next.current(), {
+        preserveFocus: next.preserveFocus,
+        accept() {
+          if (!mounted || !next.current()) return false;
+          if (accepted) return true;
+          accepted = true;
+          // Content confirms readiness before any focus callback can reenter.
+          lastAcceptedFocusShape = next.focusShape;
+          if (initial) initialFallback = next.fallback;
+          initial = false;
+          if (applied === next) applied = null;
+          return true;
+        },
+      });
+      completedNormally = true;
     } finally {
       delivering = false;
+      // A focus callback may synchronously complete a newer request. Drain only
+      // that successor, never spin the same rejected admission or replace an error.
+      if (completedNormally && applied && applied !== next) deliver();
     }
   };
   const reconcile = (run: Run, structural = false) => {
@@ -84,7 +121,14 @@ export function createSelectAlignmentController(options: {
     const ctx = readContext(run);
     if (!ctx) return;
     const mode = run.props.get().position ?? 'popper';
+    // A semantic excursion retires the old focus exemption immediately, even
+    // when its request stays pending or cannot be admitted. Returning to an old
+    // value later is a genuine value replacement, not a sizing-only refresh.
+    if (ctx.value !== lastObservedFocusValue || mode !== 'item-aligned')
+      lastAcceptedFocusShape = null;
+    lastObservedFocusValue = ctx.value;
     const revision = ctx.collectionRevision ?? 0;
+    const itemSizing = normalizeSelectRootItemSizing(ctx.itemSizing);
     if (
       initialFallback &&
       (mode !== 'item-aligned' ||
@@ -98,6 +142,7 @@ export function createSelectAlignmentController(options: {
       wasOpen = false;
       initial = true;
       initialFallback = null;
+      lastAcceptedFocusShape = null;
       lastKey = '';
       return;
     }
@@ -108,19 +153,30 @@ export function createSelectAlignmentController(options: {
       initial = true;
     }
     if (!settled) return;
-    if (phase === 'structure-invalid' && !structural && mode !== 'popper') return;
+    const restoresIntrinsicLegacy =
+      diagnostic === 'select.structure.missing-size-parts' && itemSizing === 'intrinsic';
+    if (
+      phase === 'structure-invalid' &&
+      !structural &&
+      mode !== 'popper' &&
+      !restoresIntrinsicLegacy
+    )
+      return;
     if (
       phase === 'geometry-unavailable' &&
+      !(diagnostic === 'select.geometry.unsupported-size-mode' && mode === 'item-aligned') &&
       !structural &&
       !reopened &&
       revision === lastRevision &&
+      itemSizing === lastSizing &&
       mode !== 'popper'
     )
       return;
-    const key = `${cycle}:${structureVersion}:${revision}:${mode}:${ctx.value}`;
+    const key = `${cycle}:${structureVersion}:${revision}:${mode}:${itemSizing}:${ctx.value}`;
     if (key === lastKey) return;
     lastKey = key;
     lastRevision = revision;
+    lastSizing = itemSizing;
     const id = clear();
     const current = () => {
       if (disposed || id !== request) return false;
@@ -130,6 +186,7 @@ export function createSelectAlignmentController(options: {
         latest.open &&
         latest.value === ctx.value &&
         (latest.collectionRevision ?? 0) === revision &&
+        normalizeSelectRootItemSizing(latest.itemSizing) === itemSizing &&
         (run.props.get().position ?? 'popper') === mode
       );
     };
@@ -141,11 +198,19 @@ export function createSelectAlignmentController(options: {
       texts = role('item-text');
     surfacePaint = surfaces.length === 1;
     if (mode === 'popper') {
-      notify(run, 'popper');
+      if (itemSizing === 'match-trigger') {
+        notify(run, 'geometry-unavailable', 'select.geometry.unsupported-size-mode');
+      } else {
+        notify(run, 'popper');
+      }
       return;
     }
     if (!surfaces.length && !viewports.length && !texts.length) {
-      notify(run, 'legacy');
+      if (itemSizing === 'match-trigger') {
+        notify(run, 'structure-invalid', 'select.structure.missing-size-parts');
+      } else {
+        notify(run, 'legacy');
+      }
       return;
     }
     const triggers = role('trigger'),
@@ -162,17 +227,31 @@ export function createSelectAlignmentController(options: {
     const rows = run.anatomy.order.partsOf(SELECT_FAMILY, 'item');
     const records = rows.map((row) => {
       const snapshot = (
-        row.getExpose('getCollectionItem') as (() => { value: string; disabled: boolean }) | null
+        row.getExpose('getCollectionItem') as
+          | (() => { value: string; textValue?: unknown; disabled: boolean; itemSizing?: unknown })
+          | null
       )?.();
       const text = run.anatomy.descendantsOf(SELECT_FAMILY, row, 'item-text');
       return {
         value: snapshot?.value ?? '',
+        textValue: String(snapshot?.textValue ?? ''),
         disabled: snapshot?.disabled ?? true,
+        itemSizing: normalizeSelectItemSizing(snapshot?.itemSizing),
         row,
         text: text.length === 1 ? text[0] : null,
       };
     });
     if (!current()) return;
+    // Anatomy wrappers are fresh views, not identities. Structural generation
+    // and ordered non-sizing scalars must remain continuously unchanged.
+    const focusShape: FocusShape = JSON.stringify([
+      cycle,
+      structureVersion,
+      ctx.rootId,
+      ctx.value,
+      records.map(({ value, textValue, disabled }) => [value, textValue, disabled]),
+    ]);
+    if (lastAcceptedFocusShape !== focusShape) lastAcceptedFocusShape = null;
     if (records.some((record) => !record.text)) {
       notify(run, 'structure-invalid', 'select.structure.missing-or-ambiguous-item-text');
       return;
@@ -227,18 +306,27 @@ export function createSelectAlignmentController(options: {
       firstEnabled
         ? { rootValue: ctx.value, candidateValue: firstEnabled.value, structureVersion }
         : null;
+    const preserveFocus = !initial && lastAcceptedFocusShape === focusShape;
     notify(run, 'full-pending');
     if (!current()) return;
+    const sizeTargets =
+      itemSizing === 'match-trigger'
+        ? records.filter((record) => record.itemSizing === 'inherit').map((record) => record.row)
+        : [];
+    const selectedMatches = sizeTargets.includes(intent.floating.block);
     options.overlay.registerTargetAlignment({
       family: SELECT_FAMILY,
       surface: surfaces[0],
       scrollport: viewports[0],
       blockReference: intent.reference.block,
-      inlineReference: intent.reference.inline,
+      inlineReference: selectedMatches ? triggers[0] : intent.reference.inline,
       blockTarget: intent.floating.block,
-      inlineTarget: intent.floating.inline,
+      inlineTarget: selectedMatches ? intent.floating.block : intent.floating.inline,
       ...intent.contentEdges,
       constraints: intent.constraints,
+      ...(sizeTargets.length
+        ? { sizeMatch: { reference: triggers[0], targets: sizeTargets } }
+        : {}),
       onAlignment(status) {
         if (!current()) return;
         if (status.status === 'pending-target') return;
@@ -254,7 +342,15 @@ export function createSelectAlignmentController(options: {
         if (phase === 'valid') return;
         notify(run, 'valid');
         if (!current()) return;
-        applied = { id, run, row: intent.floating.block, fallback, current };
+        applied = {
+          id,
+          run,
+          row: intent.floating.block,
+          fallback,
+          focusShape,
+          preserveFocus,
+          current,
+        };
         deliver();
       },
     });
@@ -269,10 +365,16 @@ export function createSelectAlignmentController(options: {
     get diagnostic() {
       return diagnostic;
     },
+    get retainsPendingFocusScope() {
+      // Before full-pending, reconcile checked the current ordered non-sizing
+      // shape against the last accepted entry. No new focus request is granted.
+      return phase === 'full-pending' && lastAcceptedFocusShape !== null;
+    },
     reconcile,
     deliver,
     structureChanged(run: Run) {
       ++structureVersion;
+      lastAcceptedFocusShape = null;
       structureDirty = true;
       reconcile(run, true);
     },
@@ -297,9 +399,11 @@ export function createSelectAlignmentController(options: {
       ++request;
       lastKey = '';
       applied = null;
+      lastAcceptedFocusShape = null;
     },
     dispose() {
       disposed = true;
+      lastAcceptedFocusShape = null;
       clear();
     },
   };

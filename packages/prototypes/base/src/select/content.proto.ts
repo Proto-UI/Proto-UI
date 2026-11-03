@@ -295,8 +295,13 @@ function setupSelectContent(
       } else if (!ready) {
         entryTask?.cancel();
         entryTask = null;
-        if (entryActive) focusScope.deactivate({ reason: 'programmatic' });
-        entryActive = false;
+        // Size remeasurement is not withdrawal of an already accepted entry.
+        // Deactivating here clears the shared focused/active owner even when
+        // native focus never moved; activating a manual scope cannot restore it.
+        if (!alignment?.retainsPendingFocusScope) {
+          if (entryActive) focusScope.deactivate({ reason: 'programmatic' });
+          entryActive = false;
+        }
       }
       return;
     }
@@ -382,16 +387,21 @@ function setupSelectContent(
       if ((phase === 'legacy' || phase === 'popper') && ctx.open)
         transition.controls.capturePreparation()?.();
     },
-    applied(_run, row, current) {
+    applied(_run, row, current, admission) {
       if (!current()) return false;
       transition.controls.capturePreparation()?.();
       if (!current()) return false;
       const phase = transition.transitionState.get();
       if (phase !== 'entering' && phase !== 'entered') return false;
-      if (entryCancelled) return true;
+      // Commit only current, usable readiness before a focus callback can reenter.
+      if (!admission.accept()) return false;
+      // Readiness and focus admission are separate: a sizing-only refresh must
+      // not replace a newer Item or external Focus owner after entry completed.
+      if (entryCancelled || admission.preserveFocus) return true;
       const focus = row.getExpose('focusSelf') as
         | ((options: { preventScroll: boolean; defer: boolean; reason: 'programmatic' }) => void)
         | null;
+      if (!current()) return false;
       focus?.({ preventScroll: true, defer: false, reason: 'programmatic' });
       return true;
     },

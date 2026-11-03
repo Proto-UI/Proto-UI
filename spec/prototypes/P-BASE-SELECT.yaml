@@ -39,6 +39,14 @@ anatomy:
     - { kind: contains, parent: group, child: label }
     - { kind: contains, parent: content, child: separator }
 criteria:
+  - id: P-BASE-SELECT-ITEM-SIZING-POLICY
+    text:
+      en: Root accepts itemSizing intrinsic or match-trigger. Omission and unknown runtime strings normalize to intrinsic; Base does not impose a family default. The normalized scalar policy is a fact in Context, never a host size or versioned command. In complete item-aligned anatomy, match-trigger requests each inheriting row's used-layout border-box width and height from its own same-domain Trigger through the neutral safe-part sizeMatch association. Disabled rows still inherit sizing; an Item can opt out with intrinsic. Frame chrome may exceed row width. This request neither chooses the selected option nor writes open, value, active or focus facts; actual feasibility and author/successor/geometry ownership remain the neutral host's responsibility. Explicit match-trigger in a mode without that capability is named unavailable, not silent intrinsic or an implicit position change. This intermediate draft does not claim neutral Popper support, family defaults or native geometry acceptance.
+    dependsOn:
+      contracts: [{ id: C-TARGET-SIZE-MATCH-0001, since: 0.3.0-alpha.1 }]
+  - id: P-BASE-SELECT-ITEM-SIZING-REVISION
+    text:
+      en: Changing normalized Root itemSizing retires the previous alignment request even with unchanged committed value. Ordered Item scalar snapshots include normalized itemSizing as well as value, textValue and disabled; an Item's policy change increments the existing collectionRevision before publishing, including when value and text are unchanged. Repeated equivalent policies do not increment it. Old pending/status/applied callbacks cannot recover a retired policy, close cycle or view. A legitimate policy repair may retry geometry-unavailable but cannot unlock an unchanged structural failure independent of the sizing policy or restart initial selection fallback. Sizing policy changes do not emit selection/open requests or mutate controlled owner truth, disabled/readOnly policy or focus ownership.
   - id: P-BASE-SELECT-OPTIONAL-FIELD-COMPOSITION
     text:
       en: The explicit FieldSelectTrigger composition reuses the same setup and existing Field validator. Root observes optional Field disabled/readOnly policy and gates selection; the ordinary Trigger keeps content-derived naming while the Field entry uses Field label/description/error relations. Raw Root policy is kept separate from inherited Field policy to prevent feedback latching. This extends the earlier content-only Trigger surface without replacing selection, popup or focus protocols.
@@ -88,6 +96,7 @@ criteria:
     text:
       en: Surface, Viewport and ItemText follow P-BASE-SELECT-ALIGNMENT-PARTS. Group, Label and decorative Separator follow P-BASE-SELECT-STRUCTURAL-PARTS; SelectRoot installs only that naming-scope boundary, not an accessible group or naming relation. These optional parts do not replace Root ownership.
 sources:
+  - path: packages/prototypes/base/test/select-alignment-controller.test.ts
   - path: packages/prototypes/base/src/select/root.proto.ts
   - path: packages/prototypes/base/src/select/shared.ts
   - path: packages/prototypes/base/test/select.test.ts
@@ -99,8 +108,15 @@ dependsOn:
   contracts:
     [C-ANATOMY-0002, C-AS-COLLECTION-0001, C-CONTEXT-0001, C-EXPOSE-STATE-0001, C-EXPOSE-EVENT-0001]
   decisions: [D-PROTOTYPE-ENTITY-NAMING-0001, D-BASE-PROTOTYPE-INDEPENDENCE-0001]
-verifies: { tests: [T-BASE-SELECT-0001] }
+verifies:
+  tests:
+    - T-BASE-SELECT-0001
+    - id: T-BASE-SELECT-SIZE-POLICY-0001
+      since: 0.3.0-alpha.1
 revisions:
+  - version: 0.3.0-alpha.1
+    change: extended
+    summary: Defined explicit intrinsic or match-trigger author policy through neutral size associations and scalar revision invalidation; native and edge support remain unverified dependencies.
   - version: 0.3.0-alpha.1
     change: revised
     summary: Reconciled optional structural anatomy and narrowed deferred parts to the actual remaining gaps.
