@@ -863,7 +863,12 @@ type ItemPaint = {
   rect: number[];
   transitions: string[];
 };
-type ItemPairFrame = { at: number; reducedMotion: boolean; items: ItemPaint[] };
+type ItemPairFrame = {
+  at: number;
+  reducedMotion: boolean;
+  items: ItemPaint[];
+  geometry?: unknown;
+};
 type ItemPairProbe = {
   frames: ItemPairFrame[];
   events: Array<{ index: number; type: string; at: number }>;
@@ -911,6 +916,113 @@ async function captureItemPair(
         const original = fixedRects?.[index] ?? [rect.x, rect.y, rect.width, rect.height];
         return [original[0] + original[2] / 2, original[1] + original[3] / 2];
       });
+      // Diagnostic IDs are local to this unchanged capture, not cross-runtime identities.
+      const geometryIds = new Map<Element, number>();
+      const geometryId = (node: Element) => {
+        if (!geometryIds.has(node)) geometryIds.set(node, geometryIds.size + 1);
+        return geometryIds.get(node)!;
+      };
+      const composedParent = (node: Element): Element | null => {
+        const root = node.getRootNode();
+        return node.parentElement ?? (root instanceof ShadowRoot ? root.host : null);
+      };
+      const captureGeometry = () => {
+        const observed = new Set<Element>();
+        const chain = (node: Element | null) => {
+          const ids: number[] = [];
+          let current = node;
+          while (current && ids.length < 64) {
+            observed.add(current);
+            ids.push(geometryId(current));
+            current = composedParent(current);
+          }
+          return { ids, truncated: current !== null };
+        };
+        const itemChains = nodes.map((node) => chain(node));
+        const closestListbox = (node: Element) => {
+          for (let current: Element | null = node; current; current = composedParent(current))
+            if (current.getAttribute('role') === 'listbox') return current;
+          return null;
+        };
+        const listboxes = [...new Set(nodes.map(closestListbox).filter((node) => node !== null))];
+        const listboxIds = listboxes.map((node) => node.id).filter(Boolean);
+        const triggers = [...document.querySelectorAll('[aria-controls]')].filter((node) =>
+          (node.getAttribute('aria-controls') ?? '')
+            .split(/\s+/)
+            .some((id) => listboxIds.includes(id))
+        );
+        const owners = {
+          items: itemChains,
+          listboxes: listboxes.map((node) => ({ id: geometryId(node), chain: chain(node) })),
+          triggers: triggers.map((node) => ({ id: geometryId(node), chain: chain(node) })),
+        };
+        const triggerPaint = triggers.map((node) => {
+          const children = [...node.querySelectorAll('*')];
+          for (const child of children.slice(0, 64)) observed.add(child);
+          return {
+            owner: geometryId(node),
+            descendants: children.slice(0, 64).map(geometryId),
+            truncated: children.length > 64,
+          };
+        });
+        return {
+          at: performance.now() - probe.started,
+          viewport: [innerWidth, innerHeight, scrollX, scrollY],
+          visualViewport: visualViewport
+            ? [
+                visualViewport.offsetLeft,
+                visualViewport.offsetTop,
+                visualViewport.width,
+                visualViewport.height,
+                visualViewport.scale,
+              ]
+            : null,
+          owners,
+          triggerPaint,
+          elements: [...observed].map((node) => {
+            const rect = node.getBoundingClientRect();
+            const css = getComputedStyle(node);
+            return {
+              id: geometryId(node),
+              tag: node.localName,
+              parent: composedParent(node) ? geometryId(composedParent(node)!) : null,
+              root: node.getRootNode() instanceof ShadowRoot ? 'shadow' : 'document',
+              attributes: Object.fromEntries(
+                [
+                  'id',
+                  'role',
+                  'aria-controls',
+                  'aria-expanded',
+                  'data-demo-ref',
+                  'data-pui-style',
+                  'data-pui-part',
+                  'data-overlay-part',
+                  'data-state',
+                ].map((name) => [name, node.getAttribute(name)])
+              ),
+              connected: node.isConnected,
+              rect: [rect.x, rect.y, rect.width, rect.height],
+              transform: css.transform,
+              translate: css.translate,
+              scale: css.scale,
+              transformOrigin: css.transformOrigin,
+              position: css.position,
+              transitionProperty: css.transitionProperty,
+              transitionDuration: css.transitionDuration,
+              transitionDelay: css.transitionDelay,
+              animations: node.getAnimations().map((animation) => ({
+                type: animation.constructor.name,
+                property: animation instanceof CSSTransition ? animation.transitionProperty : null,
+                currentTime:
+                  typeof animation.currentTime === 'number'
+                    ? animation.currentTime
+                    : String(animation.currentTime),
+                playState: animation.playState,
+              })),
+            };
+          }),
+        };
+      };
       const rgba = (css: string): number[] => {
         const match = css.match(/^rgba?\(([^)]+)\)$/);
         if (!match || match[1].includes('%')) throw new Error(`Unsupported measured color ${css}`);
@@ -1034,6 +1146,13 @@ async function captureItemPair(
               };
             }),
           });
+          // Read after the original Item frame on the same clock. Diagnostic failure
+          // is retained as data and must not replace the original sampling/assertion error.
+          try {
+            probe.frames[probe.frames.length - 1].geometry = captureGeometry();
+          } catch (error) {
+            probe.frames[probe.frames.length - 1].geometry = { error: String(error) };
+          }
           if (!nodes.every((node) => node.isConnected))
             throw new Error('Observed Item disconnected');
           if (performance.now() - probe.started < 650) raf = requestAnimationFrame(sample);
