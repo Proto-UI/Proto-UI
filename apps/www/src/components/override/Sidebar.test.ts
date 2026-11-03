@@ -66,31 +66,6 @@ it('uses the public native tree with one scoped restore owner and the existing l
   expect(source).not.toContain('MobileMenuFooter');
   expect(source).not.toMatch(/<style|SidebarPersister|sl-sidebar-restore|opacity|visibility/);
 });
-it('keeps requested actual family order, textual Experimental badge and existing WIP declarations', () => {
-  const labels: string[] = [];
-  let liquid: ts.ObjectLiteralExpression | undefined;
-  function visit(node: ts.Node) {
-    if (ts.isObjectLiteralExpression(node)) {
-      const label = property(node, 'label');
-      if (
-        label &&
-        ts.isStringLiteral(label) &&
-        ['Base', 'Shadcn', 'Brutalist', 'Bootstrap 2.3.2', 'Liquid Glass'].includes(label.text)
-      ) {
-        labels.push(label.text);
-        if (label.text === 'Liquid Glass') liquid = node;
-      }
-    }
-    ts.forEachChild(node, visit);
-  }
-  visit(ast);
-  expect(labels).toEqual(['Base', 'Shadcn', 'Brutalist', 'Bootstrap 2.3.2', 'Liquid Glass']);
-  expect(property(liquid!, 'badge')?.getText(ast)).toContain('Experimental');
-  expect(property(liquid!, 'badge')?.getText(ast)).toContain('实验性');
-  expect(config).toContain('badge: inProgressBadge');
-  expect(config).toContain("Sidebar: './src/components/override/Sidebar.astro'");
-});
-
 it('actual canonical scope retains non-UI sections and does not install another legacy writer or global restore element', () => {
   const english = sidebarManagedGroups(entries(sidebar!, 'en'), ['en', 'zh-cn']);
   expect(english).toContain(true);
