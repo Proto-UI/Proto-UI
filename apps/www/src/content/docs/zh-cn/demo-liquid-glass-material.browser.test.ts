@@ -747,6 +747,16 @@ async function sampleWindow(
       traceSession.on('Tracing.tracingComplete', onComplete);
       const categories = ['devtools.timeline', 'blink.user_timing', 'v8', 'cc', 'gpu'];
       const available = await traceSession.send('Tracing.getCategories');
+      result.traceAdmission = {
+        browser: browser.version(),
+        requested: categories,
+        response: available,
+      };
+      await mkdir(evidence, { recursive: true });
+      await writeFile(
+        path.join(evidence, `performance-${name}-trace-admission.json`),
+        JSON.stringify(result.traceAdmission, null, 2)
+      );
       const missing = categories.filter((category) => !available.categories.includes(category));
       if (missing.length)
         throw new Error(`Requested trace categories unavailable: ${missing.join(',')}`);
@@ -1008,6 +1018,7 @@ describe('bounded public Liquid live-canvas diagnostics', () => {
       started: new Date().toISOString(),
       windows: [],
       resourceObservations: [],
+      gpuObservations: [],
       captureComplete: false,
       productOptimizationAccepted: false,
       hardwareUserLagAccepted: false,
@@ -1158,6 +1169,12 @@ describe('bounded public Liquid live-canvas diagnostics', () => {
           return { runtime, target, canvases, scene, pool };
         };
         const gpu = await ownBrowserGpu(browser, page);
+        (summary.gpuObservations as unknown[]).push({ runtime, gpu });
+        await mkdir(evidence, { recursive: true });
+        await writeFile(
+          path.join(evidence, `performance-${runtime}-gpu.json`),
+          JSON.stringify({ runtime, gpu }, null, 2)
+        );
         if (
           !gpu.contexts.actualCount ||
           gpu.contexts.truncated ||
