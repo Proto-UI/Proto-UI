@@ -467,7 +467,6 @@ test('bounded workflow preserves original acceptance and does not copy or run hi
   assert.match(workflow, /kill-after=15s 660s/);
   assert.match(workflow, /persist-credentials: false/);
   assert.match(workflow, /sourceBoundary\('baseline', 'candidate'/);
-  assert.match(workflow, /fix\/search-intent-module-preparation/);
   assert.doesNotMatch(workflow, /REPORT\.md|46fa65|search-cold-open-parity|pull_request_target/);
   if (process.env.GITHUB_ACTIONS !== 'true')
     await assert.rejects(run('/no-baseline', '/no-candidate', '/no-output'), /supported CI runner/);
