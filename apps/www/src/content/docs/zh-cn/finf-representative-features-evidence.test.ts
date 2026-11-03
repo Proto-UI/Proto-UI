@@ -515,3 +515,43 @@ describe.each(['fixed-family', 'generic'] as const)(
     });
   }
 );
+
+describe('Finf acceptance concurrency policy, configuration only', () => {
+  it('retains queued evidence without increasing simultaneous work', () => {
+    // This validates repository policy, not the hosted queue or retention of a legacy run.
+    const check = (actual: typeof workflow) => {
+      expect(actual.concurrency).toEqual({
+        group: 'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}',
+        'cancel-in-progress': false,
+        queue: 'max',
+      });
+      expect(actual.permissions).toEqual({ contents: 'read' });
+      expect(actual.jobs['representative-features'].strategy['max-parallel']).toBe(4);
+      expect(actual.jobs['representative-features'].strategy['fail-fast']).toBe(false);
+      expect(actual.jobs['representative-features']['timeout-minutes']).toBe(35);
+    };
+    check(workflow);
+    const faults = [
+      (value: typeof workflow) => {
+        delete value.concurrency.queue;
+      },
+      (value: typeof workflow) => {
+        value.concurrency.queue = 'single';
+      },
+      (value: typeof workflow) => {
+        value.concurrency['cancel-in-progress'] = true;
+      },
+      (value: typeof workflow) => {
+        value.concurrency.group = '${{ github.run_id }}';
+      },
+      (value: typeof workflow) => {
+        value.jobs['representative-features'].strategy['max-parallel'] = 5;
+      },
+    ];
+    for (const fault of faults) {
+      const changed = structuredClone(workflow);
+      fault(changed);
+      expect(() => check(changed)).toThrow();
+    }
+  });
+});
