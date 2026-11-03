@@ -21,7 +21,7 @@ export const CURRENT_PROBE_HASHES = {
   'subject/apps/www/src/content/docs/zh-cn/dialog-available-space.browser.test.ts':
     '50f13884d5081c13d126f06c5297a6b98c1c185ea2f8b5e0af46187bacd35b0e',
   'subject/apps/www/src/content/docs/zh-cn/browser-harness.ts':
-    '0f150fc216d71dbd02abe14da46d38713c318a10668f7c8737cc16f7d6c52a23',
+    '3b425734cfb00602354bdc2b086e70a0434863f7cc3040415631be1627e0c9b6',
   'subject/scripts/test/server-readiness.mjs':
     '4bbc332f34ebf8a9c24f0ccc01d53438dd7146e86118a932eacc63d819105fda',
 };

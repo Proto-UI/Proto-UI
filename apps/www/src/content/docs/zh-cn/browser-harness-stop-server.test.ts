@@ -12,11 +12,14 @@ type OwnedChild = {
 const state = vi.hoisted(() => ({
   mode: 'graceful' as Mode,
   owned: [] as OwnedChild[],
+  generationOwned: [] as OwnedChild[],
 }));
 const nativeKill = process.kill.bind(process);
 
 // The real harness still owns startServer/stopServer. Only its port/readiness
-// and app launch boundaries are replaced: no port, HTTP, app or browser starts.
+// and generation/app launch boundaries are replaced: no port, HTTP, app or browser starts.
+// The generation substitute only emits the fixed successful IPC lifecycle; the
+// upstream startup suite separately covers the actual supervisor implementation.
 vi.mock('node:net', () => ({
   createServer: () => ({
     unref() {},
@@ -49,11 +52,64 @@ vi.mock('node:child_process', async (importOriginal) => {
   return {
     ...actual,
     spawn: (command: string, args: string[]) => {
+      if (args.includes('--style-generation-supervisor')) {
+        expect(command).toBe(process.execPath);
+        expect(args).toEqual([
+          '--eval',
+          expect.any(String),
+          '--',
+          '--style-generation-supervisor',
+          'corepack',
+        ]);
+        expect(state.generationOwned).toHaveLength(0);
+        // Owned literal IPC substitute only: do not evaluate the received
+        // supervisor source or invoke Corepack/the application.
+        const child = actual.spawn(
+          process.execPath,
+          [
+            '-e',
+            [
+              "process.on('message', (message) => {",
+              "  if (message?.kind === 'release') process.disconnect();",
+              '});',
+              "process.send({ kind: 'spawn', pid: process.pid });",
+              "process.send({ kind: 'exit', code: 0, signal: null });",
+              "process.send({ kind: 'closed' });",
+            ].join('\n'),
+          ],
+          {
+            detached: true,
+            env: {},
+            stdio: ['ignore', 'pipe', 'pipe', 'ipc'],
+          }
+        );
+        let finish!: (value: { code: number | null; signal: NodeJS.Signals | null }) => void;
+        const closed = new Promise<{ code: number | null; signal: NodeJS.Signals | null }>(
+          (resolve) => {
+            finish = resolve;
+          }
+        );
+        const owned: OwnedChild = { child, ready: Promise.resolve(), closed, finished: false };
+        child.once('close', (code, signal) => {
+          owned.finished = true;
+          finish({ code, signal });
+        });
+        state.generationOwned.push(owned);
+        console.info(
+          '[stop-server-generation-substitute]',
+          JSON.stringify({ pid: child.pid ?? null })
+        );
+        return child;
+      }
+      expect(state.generationOwned).toHaveLength(1);
+      expect(state.generationOwned[0]!.finished).toBe(true);
       expect(command).toBe('corepack');
       expect(args).toEqual([
         'pnpm@10.32.1',
         '--filter',
         'apps-www',
+        'exec',
+        'astro',
         'dev',
         '--host',
         '127.0.0.1',
@@ -117,6 +173,7 @@ beforeEach(() => {
   vi.stubEnv('PROTO_UI_BROWSER_BASE_URL', '');
   state.mode = 'graceful';
   state.owned = [];
+  state.generationOwned = [];
 });
 
 afterEach(async () => {
@@ -125,7 +182,7 @@ afterEach(async () => {
   vi.unstubAllEnvs();
   // Cleanup is confined to recorded children of this test. No broad pkill or
   // parent/sibling signal, and no timeout/budget relaxation.
-  for (const owned of state.owned) {
+  for (const owned of [...state.generationOwned, ...state.owned]) {
     const { child } = owned;
     if (!owned.finished && child.exitCode === null && child.signalCode === null && child.pid) {
       try {
@@ -138,11 +195,13 @@ afterEach(async () => {
   }
 });
 
-function observeOwnedSignals() {
+function observeOwnedSignals(onSignal?: (signal: string | number | undefined) => void) {
   return vi.spyOn(process, 'kill').mockImplementation((pid, signal) => {
     const owned = state.owned.find(({ child }) => child.pid && pid === -child.pid);
     if (!owned) throw new Error('A signal outside this test owned process group was attempted.');
-    return nativeKill(pid, signal);
+    const result = nativeKill(pid, signal);
+    onSignal?.(signal);
+    return result;
   });
 }
 
@@ -176,9 +235,18 @@ describe.skipIf(process.platform === 'win32')('shared browser stopServer timer o
     const { startServer, stopServer } = await import('./browser-harness');
     await startServer('/');
     const owned = state.owned[0]!;
-    const signals = observeOwnedSignals();
+    let observedTerm!: () => void;
+    const term = new Promise<void>((resolve) => {
+      observedTerm = resolve;
+    });
+    const signals = observeOwnedSignals((signal) => {
+      if (signal === 'SIGTERM') observedTerm();
+    });
     vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
     const stopping = stopServer();
+    // main awaits generation teardown before sending TERM. Observe that real
+    // owned signal request before starting the unchanged 4999 + 1ms deadline.
+    await term;
     expect(signals.mock.calls).toEqual([[-owned.child.pid!, 'SIGTERM']]);
     await vi.advanceTimersByTimeAsync(4_999);
     expect(signals.mock.calls).toEqual([[-owned.child.pid!, 'SIGTERM']]);

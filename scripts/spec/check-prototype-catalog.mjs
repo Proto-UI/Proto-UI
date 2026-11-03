@@ -5,6 +5,8 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { parse as parseYaml } from 'yaml';
 
+import { mapWithConcurrency } from './bounded-map.mjs';
+
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PROTOTYPES_ROOT = path.join(REPO_ROOT, 'packages/prototypes');
 const SPEC_PROTOTYPES_ROOT = path.join(REPO_ROOT, 'spec/prototypes');
@@ -187,7 +189,7 @@ const sourceFiles = (
     )
   )
 ).flat();
-const inspections = await Promise.all(sourceFiles.map(inspectSource));
+const inspections = await mapWithConcurrency(sourceFiles, 8, inspectSource);
 const concreteFiles = inspections.filter((inspection) => inspection.concrete.length > 0);
 const protoFiles = inspections.filter((inspection) => PROTO_SOURCE_EXTENSION.test(inspection.file));
 const errors = [];
