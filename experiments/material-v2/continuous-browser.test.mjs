@@ -635,6 +635,8 @@ try {
         native: [],
         nativeBlur: null,
         trustedWindowBlurBeforeUp: null,
+        activationCountBefore: null,
+        activationCountAfter: null,
         error: null,
         timingScope: 'Node operation times and browser event times are separate clocks',
         stimulusScope: 'Includes new-page creation and protocol round trips, not only bringToFront',
@@ -673,6 +675,7 @@ try {
         await page.bringToFront();
         const nativeBeforeBlur = await page.evaluate(() => window.__native.length);
         const beforeBlur = Number(await page.locator(`[data-count="${runtime}"]`).textContent());
+        focusEvidence.activationCountBefore = beforeBlur;
         await page.mouse.move(p.x, p.y);
         upPending = true;
         await action('main.mouse.down', () => page.mouse.down());
@@ -745,7 +748,6 @@ try {
           );
           assert.equal(await wc.getAttribute('data-material-contact'), 'rest');
         }
-        focusEvidence.activationCountBefore = beforeBlur;
         focusEvidence.activationCountAfter = Number(
           await page.locator(`[data-count="${runtime}"]`).textContent()
         );
