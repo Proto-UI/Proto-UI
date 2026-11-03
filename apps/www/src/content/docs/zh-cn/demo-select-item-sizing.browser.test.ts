@@ -6,6 +6,12 @@ import path from 'node:path';
 import { chromium, type Browser, type Locator } from 'playwright-core';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
+  installSizingMotionTrace,
+  sizingMotionIssues,
+  type SizingMotionTrigger,
+  type SizingMotionResult,
+} from './demo-select-item-sizing-motion';
+import {
   RUNTIMES,
   choosePreviewRuntime,
   chromeExecutable,
@@ -41,6 +47,7 @@ beforeAll(async () => {
     const files = [
       'apps/www/src/content/docs/zh-cn/demo-shadcn-select.demo.ts',
       'apps/www/src/content/docs/zh-cn/demo-select-item-sizing.browser.test.ts',
+      'apps/www/src/content/docs/zh-cn/demo-select-item-sizing-motion.ts',
     ];
     await writeFile(
       path.join(output, 'source.json'),
@@ -227,6 +234,16 @@ for (const locale of ['en', 'zh-cn'])
           height: 900,
         });
         const observations: Array<{ phase: string; value: Facts }> = [];
+        const motion: Array<{ phase: string; value: SizingMotionResult }> = [];
+        const finishMotion = async (trigger: Locator, phase: string) => {
+          const value = await trigger.evaluate(async (element) => {
+            const handle = (element as SizingMotionTrigger).__puiSizingMotion;
+            if (!handle) throw new Error('Motion trace was not installed before action');
+            return handle.done;
+          });
+          motion.push({ phase, value });
+          expect(sizingMotionIssues(value, runtime), `${phase} full motion trajectory`).toEqual([]);
+        };
         const name = `${locale}-${runtime}`;
         let testFailed = false;
         let testError: unknown;
@@ -238,12 +255,14 @@ for (const locale of ['en', 'zh-cn'])
             exact: true,
           });
           expect(await trigger.getAttribute('aria-expanded')).toBe('false');
+          await trigger.evaluate(installSizingMotionTrace);
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
               (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
             )
             .toEqual(['React']);
+          await finishMotion(trigger, 'first-entry');
           const first = await facts(trigger);
           observations.push({ phase: 'first-entry', value: first });
           assertGeometry(first, runtime);
@@ -257,12 +276,14 @@ for (const locale of ['en', 'zh-cn'])
           await page.keyboard.press('Enter');
           await expect.poll(() => trigger.getAttribute('aria-expanded')).toBe('false');
           await expect.poll(() => trigger.innerText()).toContain('Web Components');
+          await trigger.evaluate(installSizingMotionTrace);
           await trigger.press('Enter');
           await expect
             .poll(async () =>
               (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
             )
             .toEqual(['Web Components']);
+          await finishMotion(trigger, 'selected-reopen');
           const reopen = await facts(trigger);
           observations.push({ phase: 'selected-reopen', value: reopen });
           assertGeometry(reopen, runtime);
@@ -280,12 +301,14 @@ for (const locale of ['en', 'zh-cn'])
             .toBe(true);
           await page.setViewportSize({ width: 390, height: 900 });
           await trigger.scrollIntoViewIfNeeded();
+          await trigger.evaluate(installSizingMotionTrace);
           await trigger.press('ArrowDown');
           await expect
             .poll(async () =>
               (await facts(trigger)).items.filter((item) => item.focused).map((item) => item.text)
             )
             .toEqual(['Web Components']);
+          await finishMotion(trigger, 'narrow-reopen');
           const narrow = await facts(trigger);
           observations.push({ phase: 'narrow-reopen', value: narrow });
           assertGeometry(narrow, runtime);
@@ -313,6 +336,25 @@ for (const locale of ['en', 'zh-cn'])
           }
         } finally {
           try {
+            const trigger = previewer.getByRole('combobox', {
+              name: 'Adapter selector',
+              exact: true,
+            });
+            const unfinished = await trigger.evaluate(async (element) => {
+              const handle = (element as SizingMotionTrigger).__puiSizingMotion;
+              if (!handle) return null;
+              handle.stop();
+              return handle.done;
+            });
+            if (
+              unfinished &&
+              !motion.some((entry) => entry.value.startedAt === unfinished.startedAt)
+            )
+              motion.push({ phase: 'interrupted', value: unfinished });
+          } catch (error) {
+            secondaryErrors.push({ phase: 'motion-cleanup', error });
+          }
+          try {
             if (output)
               await writeFile(
                 path.join(output, `${name}.json`),
@@ -323,12 +365,14 @@ for (const locale of ['en', 'zh-cn'])
                     runtime,
                     locale,
                     observations,
+                    motion,
                     failure: testFailed ? String(testError) : null,
                     secondaryErrors: secondaryErrors.map(({ phase, error }) => ({
                       phase,
                       error: String(error),
                     })),
-                    firstVisibleFrames: 'not sampled; settled entry only',
+                    firstVisibleFrames:
+                      'pre-action bounded rAF trace; early frames retained separately from settled assertions',
                     remaining: [
                       'first-visible frame capture',
                       '200% text/RTL',
