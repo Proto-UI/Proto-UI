@@ -16,7 +16,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import {
   RUNTIMES as EVERY_RUNTIME,
-  runStyleGeneration,
+  createStyleGenerationOwner,
   runtimeSelectTrigger,
   selectRuntime as selectPreviewRuntime,
 } from './browser-harness';
@@ -58,6 +58,7 @@ let browser: Browser;
 let devServer: ChildProcess | null = null;
 let baseUrl = '';
 let serverOutput = '';
+let styleGeneration: ReturnType<typeof createStyleGenerationOwner> | null = null;
 
 async function availablePort(): Promise<number> {
   return new Promise((resolve, reject) => {
@@ -130,9 +131,12 @@ async function startServer(): Promise<string> {
     return externalBaseUrl;
   }
 
+  const generation = createStyleGenerationOwner();
+  styleGeneration = generation;
   const port = await availablePort();
   const executable = process.platform === 'win32' ? 'corepack.cmd' : 'corepack';
-  await runStyleGeneration(executable);
+  await generation.run(executable);
+  if (generation.stopped) throw new Error('Documentation server startup was cancelled.');
   devServer = spawn(
     executable,
     [
@@ -165,7 +169,16 @@ async function startServer(): Promise<string> {
 }
 
 async function stopServer(): Promise<void> {
-  if (!devServer || devServer.exitCode !== null || !devServer.pid) return;
+  try {
+    await styleGeneration?.stop();
+  } finally {
+    await stopDevServer();
+  }
+}
+
+async function stopDevServer(): Promise<void> {
+  if (!devServer || devServer.exitCode !== null || devServer.signalCode !== null || !devServer.pid)
+    return;
   const pid = devServer.pid;
   if (process.platform === 'win32') {
     await new Promise<void>((resolve) => {
@@ -180,13 +193,19 @@ async function stopServer(): Promise<void> {
   }
 
   const signalTarget = -pid;
-  process.kill(signalTarget, 'SIGTERM');
+  try {
+    process.kill(signalTarget, 'SIGTERM');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') throw error;
+    return;
+  }
 
   const exited = await Promise.race([
     new Promise<boolean>((resolve) => devServer?.once('exit', () => resolve(true))),
     new Promise<boolean>((resolve) => setTimeout(() => resolve(false), 5_000)),
   ]);
-  if (!exited && devServer.exitCode === null) process.kill(signalTarget, 'SIGKILL');
+  if (!exited && devServer.exitCode === null && devServer.signalCode === null)
+    process.kill(signalTarget, 'SIGKILL');
 }
 
 async function openRoute(
