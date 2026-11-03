@@ -211,9 +211,19 @@ export function auditCycle({ now, cron, laneResults, currentRun, recentRuns, pol
       ? entry.cycleTimeMs <= priorBoundMs
       : Date.parse(entry.run.created_at) <= createdMs
   );
-  const scheduledVerdicts = priorRuns.map(
-    (entry) => entry.slotMs !== null && runIsBaseline(entry.run)
-  );
+  // Missing elapsed slots are planned cycles too: absence must interrupt
+  // recovery and join the non-green chain, not merely emit an annotation.
+  // Keep the existing current-cycle bound and the missing-slot grace period.
+  const counterCycles = priorRuns.map((entry) => ({
+    time: entry.cycleTimeMs,
+    created: Date.parse(entry.run.created_at),
+    green: entry.slotMs !== null && runIsBaseline(entry.run),
+  }));
+  for (const slot of missedSlots) {
+    if (slot <= priorBoundMs) counterCycles.push({ time: slot, created: slot, green: false });
+  }
+  counterCycles.sort((a, b) => a.time - b.time || a.created - b.created);
+  const scheduledVerdicts = counterCycles.map((entry) => entry.green);
   if (currentRun.event === 'schedule') scheduledVerdicts.push(verdict === 'pass');
   const latestGreen = scheduledVerdicts.at(-1);
   for (const green of scheduledVerdicts.reverse()) {

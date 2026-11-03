@@ -155,6 +155,60 @@ test('two successive non-green cycles signal the repair-only condition', () => {
   assert.ok(incidents.some((incident) => incident.type === 'consecutive-failures'));
 });
 
+test('a missed planned cycle breaks recovery and counts unknown before a failed current cycle', () => {
+  for (const result of ['success', 'failure']) {
+    const { receipt, incidents } = auditCycle({
+      now: '2026-11-04T17:00:00Z',
+      cron: '0 16 * * *',
+      laneResults: { build: result },
+      currentRun: run(9, { created_at: '2026-11-04T16:00:00Z' }),
+      recentRuns: [run(1, { created_at: '2026-11-04T00:00:00Z' })],
+    });
+    assert.equal(receipt.consecutiveGreenCycles, result === 'success' ? 1 : 0);
+    assert.equal(receipt.consecutiveFailedCycles, result === 'failure' ? 2 : 0);
+    assert.equal(
+      incidents.some((incident) => incident.type === 'consecutive-failures'),
+      result === 'failure'
+    );
+  }
+});
+
+test('two elapsed missing slots remain red through a successful manual diagnosis', () => {
+  const { receipt, incidents } = auditCycle({
+    now: '2026-11-05T00:30:00Z',
+    cron: null,
+    laneResults: { build: 'success' },
+    currentRun: run(9, {
+      event: 'workflow_dispatch',
+      created_at: '2026-11-05T00:00:00Z',
+    }),
+    recentRuns: [run(1, { created_at: '2026-11-04T00:00:00Z' })],
+  });
+  assert.equal(receipt.consecutiveFailedCycles, 2);
+  assert.equal(receipt.consecutiveGreenCycles, 0);
+  assert.ok(incidents.some((incident) => incident.type === 'consecutive-failures'));
+});
+
+test('a missing slot interrupts recovery only after its existing grace period elapses', () => {
+  for (const [now, elapsed] of [
+    ['2026-11-04T09:29:59Z', false],
+    ['2026-11-04T09:30:00Z', true],
+  ]) {
+    const { receipt } = auditCycle({
+      now,
+      cron: null,
+      laneResults: { build: 'success' },
+      currentRun: run(9, {
+        event: 'workflow_dispatch',
+        created_at: '2026-11-04T09:00:00Z',
+      }),
+      recentRuns: [run(1, { created_at: '2026-11-04T00:00:00Z' })],
+    });
+    assert.equal(receipt.consecutiveGreenCycles, elapsed ? 0 : 1);
+    assert.equal(receipt.consecutiveFailedCycles, elapsed ? 1 : 0);
+  }
+});
+
 test('a queued or unfinished cycle counts as non-green and the current cycle joins the chain', () => {
   const { receipt } = auditCycle({
     now: '2026-11-04T17:00:00Z',

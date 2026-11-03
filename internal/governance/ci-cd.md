@@ -53,6 +53,8 @@ The release-level cadence policy — red-light rules, repair-only mode and resum
 
 `cycle-report` fails closed whenever any lane outcome is not `success`. Queue delays beyond 60 minutes and missed slots surface as workflow annotations and receipt incidents, not as fabricated greens. Only a completed green cycle forms a baseline; queued, unfinished, cancelled or failed cycles count as non-green (including the current cycle itself), and slot/miss analysis starts at the policy activation instant so early history can never fabricate a missed slot.
 
+An elapsed missing planned slot also joins the non-green consecutive-cycle sequence after the existing missed-slot grace period. It interrupts scheduled recovery and can combine with another red/unknown planned cycle to require repair-only mode; a successful manual diagnosis does not erase that scheduled sequence. This is an unknown planned outcome, not an invented native workflow run.
+
 Manual `workflow_dispatch` runs the same complete lane set for targeted diagnosis and produces the same receipt with `scheduledSlot: null`; it does not create cycles on behalf of the schedule.
 
 Scheduled runs publish their triggering cron in the native `display_title` as `regression-cycle:<cron>`. Historical slot attribution uses that declared cron, not the closest slot to `created_at`: an 08:00 cycle created at 16:30 still covers 08:00 and cannot hide a missing 16:00 cycle. A missing or unrecognized declaration is explicit unknown attribution; it occupies no slot, cannot form a scheduled baseline or recovery green, and still interrupts the recovery chain when observed before the current run was created.
