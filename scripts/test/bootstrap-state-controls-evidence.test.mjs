@@ -75,33 +75,6 @@ test('browser suite is Actions-only and exact-head guarded before starting any s
   assert.match(browser, /bootstrapStateControlsFixture\.dispose\(\)/);
 });
 
-test('workflow is bounded read-only PR-head evidence with persistent failure metadata', () => {
-  assert.deepEqual(Object.keys(workflow.on), ['pull_request']);
-  assert.deepEqual(workflow.permissions, { contents: 'read' });
-  assert.ok(workflow.on.pull_request.paths.includes(fixturePath));
-  assert.ok(workflow.on.pull_request.paths.includes(browserPath));
-  const job = workflow.jobs['browser-evidence'];
-  assert.equal(job['timeout-minutes'], 20);
-  assert.equal(job.env.PROTO_UI_EXPECTED_HEAD_SHA, '${{ github.event.pull_request.head.sha }}');
-  const checkout = job.steps.find((step) => step.uses?.startsWith('actions/checkout@'));
-  assert.equal(checkout.with.ref, '${{ github.event.pull_request.head.sha }}');
-  assert.equal(checkout.with['persist-credentials'], false);
-  const execution = job.steps.find((step) => step.env?.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE);
-  assert.equal(execution.env.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE, '1');
-  assert.match(execution.run, /--maxWorkers=1 --minWorkers=1/);
-  const upload = job.steps.find((step) => step.uses?.startsWith('actions/upload-artifact@'));
-  assert.equal(upload.if, 'always()');
-  assert.match(upload.with.name, /github.event.pull_request.head.sha/);
-  assert.equal(upload.with['if-no-files-found'], 'error');
-  assert.ok(
-    job.steps.some((step) => step.if === 'always()' && step.run?.includes('workflowStatus'))
-  );
-  assert.doesNotMatch(
-    JSON.stringify(workflow),
-    /pull_request_target|workflow_dispatch|deploy|secrets\./i
-  );
-});
-
 test('browser test and fixture script have no TypeScript syntax diagnostics', () => {
   for (const [fileName, source] of [
     [browserPath, browser],
@@ -161,7 +134,6 @@ test('runner-dependent evidence paths are evaluated only in supported step env c
 test('native-sequence oracle remains discriminating and runs with the browser evidence', () => {
   const helper = 'apps/www/src/content/docs/zh-cn/native-editor-evidence.ts';
   const tests = 'apps/www/src/content/docs/zh-cn/native-editor-evidence.test.ts';
-  for (const file of [helper, tests]) assert.ok(workflow.on.pull_request.paths.includes(file));
   const execution = workflow.jobs['browser-evidence'].steps.find(
     (step) => step.env?.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE
   );
@@ -176,35 +148,9 @@ test('native-sequence oracle remains discriminating and runs with the browser ev
   assert.match(readFileSync(helper, 'utf8'), /assert\.deepEqual/);
 });
 
-test('opt-in browser evidence follows its shared renderer and execution dependencies', () => {
-  const paths = workflow.on.pull_request.paths;
-  for (const dependency of [
-    'packages/adapters/base/**',
-    'packages/adapters/web-component/**',
-    'packages/adapters/react/**',
-    'packages/adapters/vue/**',
-    'packages/adapters/vue2/**',
-    'packages/core/**',
-    'packages/hooks/**',
-    'packages/runtime/**',
-    'packages/modules/**',
-    'packages/prototypes/base/**',
-    'packages/cli/src/services/prototype-style-tokens.ts',
-    'apps/www/src/components/PrototypePreviewer/**',
-    'apps/www/astro.config.mjs',
-    'apps/www/package.json',
-    'package.json',
-    'pnpm-lock.yaml',
-  ]) {
-    assert.ok(paths.includes(dependency), `${dependency} must wake the opt-in fixture`);
-  }
-});
-
 test('disabled-paint oracle and its negative controls run in exact-head browser evidence', () => {
   const helper = 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.ts';
   const tests = 'apps/www/src/content/docs/zh-cn/bootstrap-disabled-paint.test.ts';
-  for (const file of [helper, tests])
-    assert.ok(workflow.on.pull_request.paths.includes(file), `${file} must wake the fixture`);
   const execution = workflow.jobs['browser-evidence'].steps.find(
     (step) => step.env?.PROTO_UI_BOOTSTRAP_BROWSER_EVIDENCE
   );

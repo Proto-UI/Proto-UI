@@ -1,18 +1,7 @@
 name: Ordinary compiler WC native browser evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/compiler-wc-native-evidence.yml'
-      - 'packages/**'
-      - 'apps/www/src/content/docs/zh-cn/browser-harness.ts'
-      - 'apps/www/package.json'
-      - 'scripts/test/server-readiness.mjs'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'vitest.config.ts'
-      - 'scripts/test/runtime-test-plan.mjs'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

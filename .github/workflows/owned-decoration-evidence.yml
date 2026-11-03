@@ -1,16 +1,7 @@
 name: Draft owned decoration native evidence
 on:
-  pull_request:
-    paths:
-      - 'packages/core/src/handles.ts'
-      - 'packages/core/src/spec/template.ts'
-      - 'packages/modules/feedback/**'
-      - 'packages/modules/rule/**'
-      - 'packages/modules/rule-expose-state-web/**'
-      - 'packages/adapters/web-component/src/**'
-      - 'scripts/feedback/owned-decoration-evidence*'
-      - '.github/workflows/owned-decoration-evidence.yml'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:

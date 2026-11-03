@@ -1,29 +1,12 @@
 name: Website startup and theme evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/site-startup-theme-evidence.yml'
-      - 'apps/www/**'
-      - 'packages/adapters/**'
-      - 'packages/prototypes/**'
-      - 'packages/modules/**'
-      - 'packages/runtime/**'
-      - 'packages/cli/**'
-      - 'packages/core/**'
-      - 'packages/hooks/**'
-      - 'packages/types/**'
-      - 'scripts/styles/**'
-      - 'scripts/build/**'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'scripts/test/server-readiness*'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
   workflow_dispatch:
     inputs:
       baseline_sha:
         description: 'Optional exact historical subject SHA for diagnostic capture; candidate/probe remain this ref'
         required: false
         type: string
+  workflow_call:
 permissions:
   contents: read
 concurrency:

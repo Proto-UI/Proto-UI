@@ -1,14 +1,8 @@
 name: Bounded Search intent same-tree A/B
 
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/search-intent-ab.yml'
-      - 'scripts/test/search-intent-ab*.mjs'
-      - 'scripts/test/search-intent-index*.mjs'
-      - 'apps/www/src/components/override/Search.astro'
-      - 'apps/www/src/components/site-search-commands.ts'
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -19,7 +13,6 @@ jobs:
   measure:
     # Temporary candidate diagnostic, not a replacement for current Search CI.
     # Keep the original 1000 ms opener acceptance and main browser suite intact.
-    if: github.event_name == 'workflow_dispatch' || (github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'fix/search-intent-module-preparation')
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:

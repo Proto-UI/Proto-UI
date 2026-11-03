@@ -1,25 +1,7 @@
 name: Select target alignment evidence
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/select-target-alignment-evidence.yml'
-      - 'packages/core/src/**'
-      - 'packages/hooks/src/**'
-      - 'packages/modules/**'
-      - 'packages/prototypes/base/src/select/**'
-      - 'packages/prototypes/shadcn/src/select/**'
-      - 'packages/adapters/react/src/**'
-      - 'packages/cli/src/services/proto-style-css.ts'
-      - 'packages/cli/src/services/prototype-style-tokens.ts'
-      - 'packages/cli/src/legacy/type.ts'
-      - 'packages/prototypes/base/src/transition/**'
-      - 'packages/web-conformance/package.json'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'packages/web-conformance/test/fixtures/select-target-alignment-native.ts'
-      - 'packages/web-conformance/test/select-target-alignment.browser.test.ts'
-      - 'packages/web-conformance/test/fixtures/select-group-native.ts'
-      - 'packages/web-conformance/test/select-group.browser.test.ts'
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:
@@ -32,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
@@ -49,7 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE"
-          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha || github.sha }}"
           git rev-parse HEAD > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/source-sha.txt"
           git rev-parse HEAD^{tree} > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/source-tree.txt"
           sha256sum packages/web-conformance/test/fixtures/select-group-native.ts packages/web-conformance/test/select-group.browser.test.ts > "$PROTO_UI_TARGET_ALIGNMENT_EVIDENCE/grouped-fixture-sha256.txt"
@@ -58,7 +40,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: select-target-alignment-${{ github.event.pull_request.head.sha }}-${{ github.run_id }}
+          name: select-target-alignment-${{ github.event.pull_request.head.sha || github.sha }}-${{ github.run_id }}
           path: ${{ runner.temp }}/select-target-alignment
           if-no-files-found: warn
           retention-days: 30

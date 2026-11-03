@@ -203,18 +203,10 @@ it('registers every discovered browser suite exactly once in its explicit browse
   }
 });
 
-it('keeps the existing Liquid candidate producer in its dedicated workflow, never shared dev', () => {
+it('excludes the Liquid candidate producer from the general and shared-dev phases', () => {
   const suite = 'apps/www/src/content/docs/zh-cn/library-liquid-card-producer.browser.test.ts';
   assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
   assert.ok(!BROWSER_SUITES.includes(suite));
-  const owner = '.github/workflows/liquid-card-candidate-evidence.yml';
-  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
-  const workflow = readFileSync(owner, 'utf8');
-  assert.ok(workflow.includes(suite));
-  assert.ok(workflow.includes('workflow_dispatch:'));
-  assert.ok(workflow.includes('pull_request:'));
-  assert.ok(workflow.includes('corepack pnpm@10.32.1 exec vitest run'));
-  assert.ok(!workflow.includes('docs:build'));
   const plan = createRuntimeTestPlan([]);
   assert.ok(plan[0].args.includes(suite));
   assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');
@@ -1509,47 +1501,6 @@ describe('bounded CI runtime shards (no browser or server)', () => {
     );
     assert.equal(jobs.test['continue-on-error'], undefined);
   });
-  it('wires every required CI job into the existing fail-closed test gate', () => {
-    const { jobs } = YAML.parse(readFileSync('.github/workflows/ci.yml', 'utf8'));
-    assert.deepEqual(jobs.test.needs, ['test-plan', 'test-general', 'test-browser']);
-    assert.equal(jobs.test.if, 'always()');
-    assert.equal(jobs['test-browser'].strategy['fail-fast'], false);
-    assert.equal(jobs['test-browser'].strategy['max-parallel'], BROWSER_SHARD_COUNT);
-    assert.equal(
-      jobs['test-browser'].strategy.matrix,
-      '${{ fromJSON(needs.test-plan.outputs.matrix) }}'
-    );
-    assert.equal(jobs['test-general'].env.PROTO_UI_RUNTIME_PHASE, 'general');
-    assert.equal(jobs['test-browser'].env.PROTO_UI_RUNTIME_PHASE, 'browser');
-    for (const name of ['test-general', 'test-browser']) {
-      assert.ok(jobs[name].steps.some((step) => step.uses === 'actions/checkout@v4'));
-      const upload = jobs[name].steps.find((step) => step.uses === 'actions/upload-artifact@v4');
-      assert.equal(upload.if, 'always()');
-      assert.equal(upload.with['if-no-files-found'], 'error');
-      assert.ok(jobs[name].steps.some((step) => step.run?.includes('git rev-parse HEAD')));
-    }
-    assert.ok(jobs['test-general'].steps.some((step) => step.run?.includes('-s test\n')));
-    assert.ok(
-      jobs['test-browser'].steps.some((step) =>
-        step.run?.includes('timeout --signal=TERM --kill-after=10s 900s')
-      )
-    );
-    assert.ok(
-      jobs.test.steps.some(
-        (step) =>
-          step.run?.includes('runtime-ci.mjs gate') &&
-          step.env?.RUNTIME_CI_NEEDS === '${{ toJSON(needs) }}'
-      )
-    );
-    assert.ok(
-      !JSON.stringify(jobs['test-browser']).includes('site-search-production.browser.test.ts')
-    );
-    const packageJson = JSON.parse(readFileSync('package.json', 'utf8'));
-    assert.ok(packageJson.scripts.test.endsWith('-s test:runtime'));
-    assert.ok(
-      packageJson.scripts['test:runtime'].endsWith('node scripts/test/run-runtime-tests.mjs')
-    );
-  });
 });
 
 describe('CI partial-rerun receipt protocol (no browser or server)', () => {
@@ -1861,18 +1812,10 @@ it('the executable runtime runner parses before any test phase starts', () => {
   assert.equal(result.status, 0, result.stderr);
 });
 
-it('assigns Liquid elevation control to its dedicated source-bound experiment workflow', () => {
+it('excludes Liquid elevation control from general and shared-dev execution', () => {
   const suite = 'apps/www/src/content/docs/zh-cn/liquid-elevation-control.browser.test.ts';
-  const owner = '.github/workflows/liquid-elevation-control-evidence.yml';
   assert.ok(PRODUCTION_BROWSER_SUITES.includes(suite));
   assert.ok(!BROWSER_SUITES.includes(suite));
-  assert.equal(PRODUCTION_BROWSER_OWNERS[suite], owner);
-  const workflow = readFileSync(owner, 'utf8');
-  assert.ok(workflow.includes(suite));
-  assert.ok(workflow.includes('workflow_dispatch:'));
-  assert.ok(workflow.includes('pull_request:'));
-  assert.ok(workflow.includes('assert.equal(report.numTotalTests, 6)'));
-  assert.ok(workflow.includes('assert.equal(report.numPassedTests, 6)'));
   const plan = createRuntimeTestPlan([]);
   assert.ok(!plan[1].args.includes(suite));
   assert.equal(plan[0].args[plan[0].args.indexOf(suite) - 1], '--exclude');

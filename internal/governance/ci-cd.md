@@ -8,7 +8,7 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 
 | Workflow | File | Purpose |
 | --- | --- | --- |
-| CI | `.github/workflows/ci.yml` | Type, test, spec, and global-version gates for pull requests and `main` |
+| CI | `.github/workflows/ci.yml` | Type, test, spec, and global-version gates for pull requests, plus the single scheduled regression cycle |
 | Release Packages | `.github/workflows/release-packages.yml` | Manual release scan, stage rehearsal, or full-set publication |
 | Release Cadence | `.github/workflows/release-cadence.yml` | Periodic reminder based on the latest `v*` release tag |
 | Agent Operations Shadow | `.github/workflows/agent-operations-shadow.yml` | Read-only Issue and pull-request intake/reconciliation lane |
@@ -16,9 +16,11 @@ Release identity comes from the applicable `V-*` entity and immutable release ev
 | Intranet preview build | `.github/workflows/intranet-preview-build.yml` | Secret-free exact-PR-head documentation artifact build |
 | Intranet preview checks | `.github/workflows/intranet-preview-checks.yml` | Focused artifact admission, publication and static-serving checks |
 
+The remaining per-file event inventory is audited in [Regression cadence and event inventory](#regression-cadence-and-event-inventory) below.
+
 ## CI workflow (`ci.yml`)
 
-CI runs for pull requests, pushes to `main`, and manual dispatch. In addition to type and test checks, `check-version-governance` verifies that:
+CI runs for pull requests, manual dispatch, and three scheduled regression cycles per day against the default-branch head. No workflow in the repository triggers on `push`; the scheduled cycle is the main-line regression entry point. In addition to type and test checks, `check-version-governance` verifies that:
 
 - root `VERSION` exactly matches every public `@proto.ui/*` package
 - exactly one V entity declares the current version
@@ -29,9 +31,82 @@ Every new numeric version must therefore be a reviewed release train; a package-
 
 Repository policy requires the relevant CI evidence before merge. GitHub rulesets and required-check configuration are external controls and must be audited separately. A green convention is not the same as a platform-enforced merge gate. The dated collaboration forensics record documents the observed configuration and known gaps.
 
-`public_package_plan` derives the affected public package graph from the pull request diff. Package changes select the changed package, its reverse consumers, and every upstream public dependency required to build that set. Repository-wide build, release, budget, lockfile, manifest, or workflow changes select all public packages. The resulting build job validates the generated manifests, produces JavaScript plus declaration artifacts, runs native ESM import smokes, and enforces representative gzip budgets. Release-stage and isolated-consumer jobs may skip a pull request whose affected public package graph is empty; the full set still runs on `main` and manual dispatch.
+`public_package_plan` derives the affected public package graph from the pull request diff without building it. Package changes select the changed package, its reverse consumers, and every upstream public dependency required to build that set. Repository-wide build, release, budget, lockfile, manifest, or workflow changes select all public packages. The full-cycle build validates generated manifests, produces JavaScript plus declaration artifacts, runs native ESM import smokes, and enforces representative gzip budgets.
 
 `release-consumer-react` additionally builds tarballs for every public package and installs the current declared release closure in a temporary React + Vite project outside the monorepo. The gate prevents `@proto.ui/*` from falling back to the npm registry or workspace sources, validates every non-wildcard export target in staged manifests, then verifies CLI facade generation, TypeScript, a production build, and baseline runtime behavior. Before expanding the full fixture, it generates only Shadcn Button and checks that the final Rollup module graph contains no other Base/Shadcn prototype family. This is a family-boundary assertion rather than a fixed bundle-size budget.
+
+Automatic PR updates run policy parsing, exact-version checks, package planning and browser-inventory planning, not full builds, types, Rust, browser execution or package consumers. Full checks run on schedule or explicit exact-ref dispatch. A skipped PR check is not successful full validation: trusted CI/DCO and independent exact-head review remain required for integration, and an older main baseline cannot supply missing exact-head checks. Dispatch a completed reviewed branch once when those checks are needed, rather than on each development push.
+
+## Regression cadence and event inventory
+
+The release-level cadence policy — red-light rules, repair-only mode and resume conditions — is owned by [release-0.3-plan.md](release-0.3-plan.md); this section records only the workflow implementation and trigger facts, and intentionally does not restate that policy.
+
+### Scheduled regression cycle
+
+`ci.yml` is the only workflow that owns the regression schedule. It runs the complete CI lane set — lockstep, package plan/build, types, Rust, the full `runtime-ci.mjs` suite plan (the complete registered browser-suite inventory; the plan fails closed on any unregistered or unassigned suite), release scan/stage, isolated consumers, and the coverage-governance and agent-operations fixture checks invoked as reusable jobs — against the default-branch head in three stable slots:
+
+| Cron         | Scheduled time (UTC) | Asia/Shanghai equivalent |
+| ------------ | -------------------- | ------------------------ |
+| `0 0 * * *`  | 00:00                | 08:00                    |
+| `0 8 * * *`  | 08:00                | 16:00                    |
+| `0 16 * * *` | 16:00                | 00:00 (next day)         |
+
+`cycle-report` fails closed whenever any lane outcome is not `success`. Queue delays beyond 60 minutes and missed slots surface as workflow annotations and receipt incidents, not as fabricated greens. Only a completed green cycle forms a baseline; queued, unfinished, cancelled or failed cycles count as non-green (including the current cycle itself), and slot/miss analysis starts at the policy activation instant so early history can never fabricate a missed slot.
+
+Manual `workflow_dispatch` runs the same complete lane set for targeted diagnosis and produces the same receipt with `scheduledSlot: null`; it does not create cycles on behalf of the schedule.
+
+`ci-production-suites.yml` includes the dedicated owners of all 29 registered production browser suites, including production Search through `homepage-visual-evidence.yml`; they are not silently excluded by the shared development shards. Two independent dependency chains bound heavyweight workflow fan-out, retain each lane's artifacts, and continue after predecessor failures unless the cycle is cancelled. The four former push-only source-check lanes are also called once per cycle. Experimental suites retain their real failures; their execution does not promote another family into 0.3.
+
+Activation is the first-parent integration timestamp that introduced `scripts/ci/cycle-report.mjs`, read from full source history, not the planning date. A successful current cycle resets the red chain; two successive scheduled green cycles are separately counted for recovery. With no green baseline, the 24-hour timer starts at activation. Manual runs cannot manufacture scheduled recovery cycles.
+
+### Concurrency and cancellation
+
+- Pull-request lanes group by `ci-<ref>-pr` with `cancel-in-progress: true`: a newer push to the same PR supersedes its own stale run only.
+- Scheduled and dispatched cycles group by `ci-<ref>-cycle` with `cancel-in-progress: false`: an active evidence-producing cycle is never cancelled, and duplicate queued cycles on the same source line coalesce into the newest pending run.
+- No other workflow carries a regression schedule, so the cycle is the single coordinated entry; dedicated evidence lanes no longer fire automatically on pull requests (they stay manual/callable for exact-ref diagnosis) and are not duplicated on a timer.
+
+### Event inventory audit
+
+Every workflow's event triggers were audited under the no-push policy. Retained triggers and their justification:
+
+| Files | Triggers after change | Rationale |
+| --- | --- | --- |
+| `ci.yml` | `pull_request`, `workflow_dispatch`, `schedule` (3 slots) | Lightweight PR metadata; complete regression only on schedule or explicit exact-ref dispatch. Required check names and merge requirements are unchanged; skipped checks do not grant integration clearance |
+| `effect-graph-model.yml`, `shadcn-style-source.yml`, `intranet-preview-checks.yml`, `compiler-isolated-static-smoke.yml`, `compiler-wc-runner-preflight.yml` | `pull_request` (+ paths), `workflow_dispatch`, `workflow_call` | The lightweight platform-check allowlist: bounded node runs with no browser, no doc/package build, and no full workspace install. These are the only automatic PR triggers outside ci.yml |
+| `coverage-governance.yml`, `agent-operations-fixtures.yml`, `ci-production-suites.yml` | `workflow_dispatch`, `workflow_call` | Included by ci.yml on full cycles; cycle-report consumes their terminal outcomes |
+| `agent-operations-shadow.yml` | `schedule` (`17 * * * *`), `workflow_dispatch` | Read-only intake/reconciliation lane on an hourly timer; unrelated to regression execution |
+| `release-cadence.yml` | `schedule` (`7 10 * * 4`), `workflow_dispatch` | Weekly release reminder only |
+| `release-packages.yml`, `reposteward-portfolio-shadow.yml` | `workflow_dispatch` | Manual-only publication rehearsal/publication and read-only portfolio experiment; unchanged |
+| `intranet-preview-build.yml` | `workflow_dispatch` (+ required `pr_number`/`expected_head_sha` inputs), `workflow_call` | PR preview builds are manual-on-demand now: the 30-minute builder no longer fires per synchronize. Dispatching posts the preview onto the stated PR exactly as before |
+| All other evidence/diagnostic lanes | `workflow_dispatch`, `workflow_call` (+ guarded ref bindings) | Per-change evidence fan-out is off: shared suites are covered by the ci.yml cycle, and every dedicated lane stays callable for exact-ref diagnosis; no heavy lane owns an automatic trigger |
+
+The `pull_request` allowlist above is enforced by `scripts/ci/check-ci-schedule.mjs` (`pull-request-not-allowed`): adding an automatic PR trigger to any other file fails the `ci-config-audit` lane. The manual/callable lanes carry `github.event.pull_request.*` only behind `|| github.sha`-style fallbacks so they can never render empty refs.
+
+### Event-context and provenance rules
+
+- Workflows that can run without a pull-request event must not read `github.event.pull_request.*` without a fallback; the source audit in `scripts/ci/check-ci-schedule.mjs` enforces this and is itself executed by the `ci-config-audit` job on every lane.
+- Scheduled and dispatched cycles check out `github.sha` exactly. `cycle-plan` binds the spec-authoring delta to the last successful scheduled source on the same branch, or to the policy-introduction parent before the first green cycle. It verifies that base is an ancestor. Checking only `HEAD^1` would miss earlier commits between daily cycles and is deliberately not used.
+- The trusted CI evidence contract (`workflowNames: [CI]`, `workflowPaths: [.github/workflows/ci.yml]`, check names `lockstep-check`, `public_package_plan`, `type-check`, `test`, `release-scan` in `internal/agent-operations/capability-policy.yaml`) is unchanged; the DCO attribution gate is the external probot app configured in `.github/dco.yml` and is unchanged.
+
+### Protected lanes
+
+- Publication and release are unaffected: `release-packages.yml` remains manual-only with its existing environment/OIDC protections; `release-cadence.yml` remains a weekly reminder. The regression cycle never publishes, deploys, or mutates access, secrets, rulesets or branch protections.
+- Queue recovery operates only on identified regression runs; the cycle never cancels a release or another owner's diagnostic.
+
+### Verification plan
+
+Config-parse verification (runs in the `ci-config-audit` job on every CI lane):
+
+- `node scripts/ci/check-ci-schedule.mjs` audits every workflow file: no `push`/`merge_group`/`pull_request_target` triggers, exactly one regression-schedule owner with the three slots, no duplicate schedules, guarded `pull_request` context under non-PR events, declared permissions, trusted job names present in `ci.yml`, and reusable lanes intact.
+- `ci.yml` has no workflow-level token grant. The history-reading `cycle-plan` and `cycle-report` jobs carry explicit `contents: read` and `actions: read`; the callable coverage-governance job retains its declared read-only Issue/PR permissions. No cycle job receives a write grant.
+- `node --test scripts/ci/test/ci-scheduling-policy.test.mjs` covers the same rules against positive and negative fixture inventories plus the live tree.
+
+Behavioral verification (performed by the parent on the first post-merge cycles):
+
+- On the first scheduled slot, confirm a `ci.yml` run with `event=schedule` produces a `regression-cycle-<sha>` artifact whose `sourceRevision` equals the default-branch head at trigger time, whose lane inventory covers every `cycle-report.needs` entry including production suites, and whose receipt reports the cron slot, actual start and queue delay.
+- Confirm a `workflow_dispatch` run produces the same receipt with `scheduledSlot: null` and that a queued duplicate cycle coalesces rather than cancelling the active run.
+- Confirm one `workflow_dispatch` invocation of a former push lane (e.g. `shadcn-style-source.yml`) completes without pull_request-context errors.
+- Confirm PR updates run only metadata lanes and DCO, with full checks explicitly skipped rather than reported successful; verify exact-ref dispatch supplies real full check outcomes before integration. `cycle-report` does not run on the PR lane.
 
 ## Agent Operations Shadow workflow (`agent-operations-shadow.yml`)
 

@@ -1,19 +1,7 @@
 name: Finf representative feature screenshots
 on:
-  pull_request:
-    paths:
-      - '.github/workflows/finf-representative-features-evidence.yml'
-      - 'packages/**'
-      - 'apps/www/src/components/PrototypePreviewer/**'
-      - 'apps/www/src/content/docs/**'
-      - 'apps/www/src/styles/**'
-      - 'apps/www/astro.config.mjs'
-      - 'scripts/styles/**'
-      - 'scripts/test/server-readiness.mjs'
-      - 'scripts/test/runtime-test-plan.mjs'
-      - 'pnpm-lock.yaml'
-      - 'vitest.config.ts'
   workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 concurrency:

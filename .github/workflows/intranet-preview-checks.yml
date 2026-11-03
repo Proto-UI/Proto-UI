@@ -5,11 +5,10 @@ on:
     paths:
       - .github/workflows/intranet-preview-*.yml
       - scripts/preview/**
-  push:
-    branches: [main]
-    paths:
-      - .github/workflows/intranet-preview-*.yml
-      - scripts/preview/**
+  # Main-head coverage is provided by the daily ci.yml regression cycle; this
+  # lane stays callable for an exact-ref diagnosis without its own schedule.
+  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
