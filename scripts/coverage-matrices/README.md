@@ -4,6 +4,8 @@ The independent prototype/projection portfolio is [documented here](../../intern
 
 `node scripts/coverage-matrices/check-coverage-matrices.mjs` validates the retained matrices. `node --test scripts/coverage-matrices/test/*.test.mjs` exercises the negative controls. Source scanning is deliberately bounded static analysis, not an arbitrary runtime/data-flow proof; ordinary PR checks still need independent review when their checker, inputs or workflow change.
 
+Explicit repository source paths are literal identities, including bracketed Astro route names such as `[runtime].astro`; they are never glob-expanded. Wildcard operators (`*`, `?`, `{`, `}`) and parent traversal remain inadmissible. A Source-scan binding for a literal route still requires an existing file, its reviewed SHA-256 and a unique binding; brackets do not waive those checks.
+
 ## Verified GPUI rows and portable native source proofs
 
 A GPUI row may be `verified` only when every mapped projection has a passing implementation receipt at that row's main/candidate snapshot revision, with no unresolved blockers, and the row has a passing HTTPS-linked native receipt at the same revision. Delivery-item completion reuses these gates; leaving the item unchecked does not relax row verification. Native and implementation receipt links must be strings with a parseable HTTPS URL, a nonempty host and no credentials; malformed authorities, whitespace/control characters and backslash normalization are rejected. This is URL syntax validation, not authentication of the linked native execution.
