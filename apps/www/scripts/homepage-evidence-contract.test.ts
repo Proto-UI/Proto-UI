@@ -885,8 +885,9 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
   assert.equal(job.needs, undefined);
   assert.equal(job['timeout-minutes'], 15);
   assert.equal(job.strategy['fail-fast'], false);
-  assert.deepEqual(job.strategy.matrix.include, [
+  const expectedScopes = [
     { name: 'native-links', suite: 'site-native-links' },
+    { name: 'brutalist-action-motion', suite: 'brutalist-action-motion' },
     { name: 'code-surfaces', suite: 'code-surfaces' },
     { name: 'code-surface-grammar', suite: 'code-surface-grammar' },
     { name: 'docs-content-flow', suite: 'docs-content-flow' },
@@ -895,7 +896,16 @@ test('native and Copy browser scopes have independent bounded jobs and small evi
     { name: 'copy-commands', suite: 'site-copy-commands' },
     { name: 'runtime-box', suite: 'runtime-preview-surface', contract: 'runtime-preview-evidence' },
     { name: 'search-commands', suite: 'site-search-commands' },
-  ]);
+  ];
+  assert.deepEqual(job.strategy.matrix.include, expectedScopes);
+  assert.throws(
+    () =>
+      assert.deepEqual(
+        [...job.strategy.matrix.include, { name: 'unknown-scope', suite: 'unknown-scope' }],
+        expectedScopes
+      ),
+    { code: 'ERR_ASSERTION' }
+  );
   const run = job.steps.find(
     (step: { name?: string }) => step.name === 'Execute the exact isolated browser suite'
   );

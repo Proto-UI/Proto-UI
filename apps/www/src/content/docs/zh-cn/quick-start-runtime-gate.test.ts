@@ -1,6 +1,4 @@
 import { readFileSync } from 'node:fs';
-import { matchesGlob } from 'node:path';
-import { parse } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import {
   earlyOwnershipBoundaryIsNative,
