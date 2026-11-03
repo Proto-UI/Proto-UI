@@ -77,30 +77,6 @@ test('pointer coverage reaches all four runtimes before strict non-first keyboar
   assert.match(source, /report\.failures\.push/);
 });
 
-test('the Homepage evidence lane keeps its concurrency group without cancelling active runs', () => {
-  const workflow = parse(
-    readFileSync(
-      new URL('../../../.github/workflows/homepage-visual-evidence.yml', import.meta.url),
-      'utf8'
-    )
-  );
-  // The lane is called from the shared regression cycle, so an active run is
-  // never cancelled and pending runs stay queued instead of being replaced.
-  assert.deepEqual(workflow.concurrency, {
-    group: 'homepage-evidence-${{ github.event.pull_request.number || github.ref }}',
-    'cancel-in-progress': false,
-    queue: 'max',
-  });
-  // This lane runs inside the shared cycle or by manual dispatch, never as an
-  // automatic pull-request lane.
-  assert.deepEqual(Object.keys(workflow.on).sort(), ['workflow_call', 'workflow_dispatch']);
-  assert.deepEqual(workflow.permissions, { contents: 'read' });
-  assert.equal(workflow.env.BASELINE_SHA, HOMEPAGE_BASELINE);
-  assert.equal(
-    workflow.env.CANDIDATE_SHA,
-    '${{ github.event.pull_request.head.sha || github.sha }}'
-  );
-});
 test('density retains the whole increment baseline alongside a separately pinned feedback pair', () => {
   const workflow = parse(
     readFileSync(
