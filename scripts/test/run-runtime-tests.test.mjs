@@ -3,7 +3,7 @@ import fs, { globSync, mkdtempSync, rmSync, mkdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { describe, it } from 'node:test';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { EventEmitter, getEventListeners } from 'node:events';
 import { runInNewContext } from 'node:vm';
@@ -476,8 +476,29 @@ describe('bounded documentation readiness', () => {
       // owner folds the generation back into the dev-server spawn, so the
       // readiness budget never pays for build tooling it does not measure.
       assert.match(source, /createStyleGenerationOwner/);
-      assert.doesNotMatch(source, /'apps-www',\s*\n\s*'dev',\s*\n/);
+      assert.match(source, /await generation\.run\(/);
+      // A folded spawn must be rejected however its arguments are laid out.
+      assert.doesNotMatch(source, /'apps-www',\s*'dev',/);
     }
+  });
+
+  it('runs the startup ownership suite in the general phase', () => {
+    const plan = createRuntimeTestPlan([]);
+    const general = plan[0];
+    // The general phase excludes the browser suites instead of naming files,
+    // so every configured non-browser test file is collected by that phase.
+    const positional = general.args.filter(
+      (argument, index) => !argument.startsWith('--') && general.args[index - 1] !== '--exclude'
+    );
+    assert.deepEqual(positional, [], 'The general phase must not name test files.');
+    const excluded = general.args.filter(
+      (argument, index) => general.args[index - 1] === '--exclude'
+    );
+    const suite = 'apps/www/src/content/docs/zh-cn/browser-harness-startup.test.ts';
+    assert.ok(!excluded.includes(suite));
+    assert.ok(existsSync(suite), 'The startup ownership suite must exist.');
+    const config = readFileSync('vitest.config.ts', 'utf8');
+    assert.match(config, /apps\/www\/src\/\*\*\/\*\.test\.ts/);
   });
 
   // Execute the production helper with a deterministic clock and HTTP
