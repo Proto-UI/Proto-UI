@@ -10,7 +10,8 @@ permissions:
 
 concurrency:
   group: brutalist-contrast-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   family-audit-evidence:

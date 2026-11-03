@@ -21,7 +21,8 @@ permissions:
   contents: read
 concurrency:
   group: finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 env:
   CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
 jobs:

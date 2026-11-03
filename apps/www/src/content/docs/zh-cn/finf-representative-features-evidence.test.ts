@@ -168,6 +168,11 @@ describe('Finf representative evidence harness, no native browser', () => {
       'popover-title': 0,
       'resident-motion-capability': 0,
       'shadcn-card': 0,
+      'liquid-dropdown': 0,
+      'shadcn-toggle': 0,
+      'shadcn-switch-consumer': 0,
+      'shadcn-drawer-presence': 0,
+      'brutalist-switch-consumer': 0,
     });
     expect(workflow.jobs['representative-features'].strategy['fail-fast']).toBe(false);
     expect(workflow.jobs['representative-features'].strategy['max-parallel']).toBe(4);
@@ -661,5 +666,69 @@ describe('Shadcn Card official evidence carrier, no native browser', () => {
     pending.testResults[0]!.assertionResults[0]!.status = 'pending';
     expect(() => validate(pending)).toThrow();
     expect(() => validate({ ...valid, success: false })).toThrow();
+  });
+});
+
+// The service behavior of already queued runs is observed separately by exact run/job ID.
+// These source contracts do not claim hosted FIFO or completed native acceptance.
+describe('Existing acceptance queue policy', () => {
+  function checkPolicy(workflowPath: string, group: string) {
+    const actual = parse(readFileSync(workflowPath, 'utf8'));
+    const check = (value: typeof actual) => {
+      expect(value.concurrency).toEqual({
+        group,
+        'cancel-in-progress': false,
+        queue: 'max',
+      });
+      if (workflowPath === workflowFile) {
+        expect(value.permissions).toEqual({ contents: 'read' });
+        expect(value.jobs['representative-features'].strategy['max-parallel']).toBe(4);
+        expect(value.jobs['representative-features'].strategy['fail-fast']).toBe(false);
+        expect(value.jobs['representative-features']['timeout-minutes']).toBe(35);
+      }
+    };
+    check(actual);
+    const faults = [
+      (value: typeof actual) => {
+        delete value.concurrency.queue;
+      },
+      (value: typeof actual) => {
+        value.concurrency.queue = 'single';
+      },
+      (value: typeof actual) => {
+        value.concurrency['cancel-in-progress'] = true;
+      },
+      (value: typeof actual) => {
+        value.concurrency.group = '${{ github.run_id }}';
+      },
+    ];
+    if (workflowPath === workflowFile) {
+      faults.push((value: typeof actual) => {
+        value.jobs['representative-features'].strategy['max-parallel'] = 5;
+      });
+    }
+    for (const fault of faults) {
+      const changed = structuredClone(actual);
+      fault(changed);
+      expect(() => check(changed)).toThrow();
+    }
+  }
+
+  it('retains Finf queued evidence without increasing simultaneous work', () => {
+    checkPolicy(
+      workflowFile,
+      'finf-feature-evidence-${{ github.event.pull_request.number || github.ref }}'
+    );
+  });
+
+  it('retains CI queued evidence without increasing simultaneous work', () => {
+    checkPolicy('.github/workflows/ci.yml', 'ci-${{ github.workflow }}-${{ github.ref }}');
+  });
+
+  it('retains contrast queued evidence without increasing simultaneous work', () => {
+    checkPolicy(
+      '.github/workflows/brutalist-contrast-evidence.yml',
+      'brutalist-contrast-${{ github.ref }}'
+    );
   });
 });
